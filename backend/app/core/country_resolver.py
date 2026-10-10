@@ -298,6 +298,34 @@ _RAW_NAME_TO_CODE: dict[str, str] = {
     "al-urdun": "JO",
     "al-iraq": "IQ",
     "turkiye": "TR",
+    # ── Hungary, Spain and Türkiye as their own speakers write them ─────
+    # The lookup lowers a name and does nothing else, so the unaccented keys
+    # above ("magyarorszag", "espana", "turkiye") never matched the spelling
+    # with its accents, which is the one an address is actually written in.
+    # Each country is given under its own name and under the name the other
+    # two languages use for it, since one contractor can work in all three.
+    "Magyarország": "HU",
+    "Hungría": "HU",  # Spanish
+    "Hungria": "HU",  # Spanish without the accent, and Portuguese
+    "Macaristan": "HU",  # Turkish
+    "Hongrie": "HU",  # French
+    "España": "ES",
+    "Reino de España": "ES",
+    "Spanyolország": "ES",  # Hungarian
+    "Spanyolorszag": "ES",
+    "İspanya": "ES",  # Turkish
+    "Ispanya": "ES",
+    "Türkiye": "TR",
+    # Turkish capitalises "i" to a dotted "İ", and Python lowers that to "i"
+    # followed by a combining dot, which is not the "i" of the key above.
+    "TÜRKİYE": "TR",
+    "Türkiye Cumhuriyeti": "TR",
+    "TÜRKİYE CUMHURİYETİ": "TR",
+    "Törökország": "TR",  # Hungarian
+    "Torokorszag": "TR",
+    "Turquía": "TR",  # Spanish
+    "Turquia": "TR",  # Spanish without the accent, and Portuguese
+    "Türkei": "TR",  # German, beside the transliterated forms above
     # ── Russian names ───────────────────────────────────────────────────
     "\u0413\u0435\u0440\u043c\u0430\u043d\u0438\u044f": "DE",  # Германия
     "\u0424\u0440\u0430\u043d\u0446\u0438\u044f": "FR",  # Франция

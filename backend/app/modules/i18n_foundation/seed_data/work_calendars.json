@@ -927,5 +927,29 @@
       {"date": "2026-12-08", "name": {"en": "Immaculate Conception", "pt": "Imaculada Conceição"}, "type": "public_holiday"},
       {"date": "2026-12-25", "name": {"en": "Christmas Day", "pt": "Natal"}, "type": "public_holiday"}
     ]
+  },
+  {
+    "country_code": "HU",
+    "name": "Hungary Public Holidays 2026 (Mon-Fri, decreed working-day swaps not included)",
+    "name_translations": {
+      "en": "Hungary Public Holidays 2026 (Mon-Fri, decreed working-day swaps not included)",
+      "hu": "Magyarországi munkaszüneti napok 2026 (hétfőtől péntekig, az áthelyezett munkanapok nélkül)"
+    },
+    "year": "2026",
+    "work_hours_per_day": "8",
+    "work_days": [1, 2, 3, 4, 5],
+    "exceptions": [
+      {"date": "2026-01-01", "name": {"en": "New Year's Day", "hu": "Újév"}, "type": "public_holiday"},
+      {"date": "2026-03-15", "name": {"en": "National Day (1848 Revolution)", "hu": "Nemzeti ünnep (1848-as forradalom)"}, "type": "public_holiday"},
+      {"date": "2026-04-03", "name": {"en": "Good Friday", "hu": "Nagypéntek"}, "type": "public_holiday"},
+      {"date": "2026-04-06", "name": {"en": "Easter Monday", "hu": "Húsvéthétfő"}, "type": "public_holiday"},
+      {"date": "2026-05-01", "name": {"en": "Labour Day", "hu": "A munka ünnepe"}, "type": "public_holiday"},
+      {"date": "2026-05-25", "name": {"en": "Whit Monday", "hu": "Pünkösdhétfő"}, "type": "public_holiday"},
+      {"date": "2026-08-20", "name": {"en": "State Foundation Day", "hu": "Az államalapítás ünnepe"}, "type": "public_holiday"},
+      {"date": "2026-10-23", "name": {"en": "National Day (1956 Revolution)", "hu": "Nemzeti ünnep (1956-os forradalom)"}, "type": "public_holiday"},
+      {"date": "2026-11-01", "name": {"en": "All Saints' Day", "hu": "Mindenszentek"}, "type": "public_holiday"},
+      {"date": "2026-12-25", "name": {"en": "Christmas Day", "hu": "Karácsony"}, "type": "public_holiday"},
+      {"date": "2026-12-26", "name": {"en": "Second Day of Christmas", "hu": "Karácsony másnapja"}, "type": "public_holiday"}
+    ]
   }
 ]

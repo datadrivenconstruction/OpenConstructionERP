@@ -46,6 +46,14 @@ Sources:
   the days; the Diyanet İşleri Başkanlığı yearly "Resmi Tatiller" pages for the
   dates of Ramazan Bayramı and Kurban Bayramı. Half days are not modelled (see
   _holidays_tr).
+- HU: Labour Code (2012. évi I. törvény a munka törvénykönyvéről), 102. § (1)
+  for the days and 97. § (2) for the week. The working-day rearrangement the
+  minister decrees each year under 102. § (5) is not modelled (see
+  _holidays_hu).
+- ES: Real Decreto 2001/1983, art. 45, and Estatuto de los Trabajadores, art.
+  37.2: the national days no autonomous community may replace. The days a
+  community may replace, the community's own days and the two local days are
+  not modelled (see _holidays_es).
 """
 
 from __future__ import annotations
@@ -995,6 +1003,130 @@ def _holidays_tr(year: int) -> set[date]:
     return {d for d in holidays if d.year == year}
 
 
+# Hungary: Good Friday became a public holiday by 2017. évi XIII. törvény 4. §,
+# in force from 24 March 2017, so 14 April 2017 was the first one observed.
+_HU_GOOD_FRIDAY_FIRST_YEAR = 2017
+
+
+def _holidays_hu(year: int) -> set[date]:
+    """Hungarian public holidays (Labour Code, 2012. évi I. törvény, 102. § (1)).
+
+    The eleven days the section names: 1 January, 15 March, Good Friday, Easter
+    Monday, 1 May, Whit Monday, 20 August, 23 October, 1 November and 25 and 26
+    December. Good Friday is returned from 2017, the year it was added; the
+    rest of the roster is the one in force today, applied whole to whatever
+    year is asked for, not the roster as the law stood in an earlier year.
+
+    Easter Sunday and Whit Sunday are not in the set. 102. § (4) applies the
+    rostering rules of a public holiday to them, and they are Sundays, so
+    leaving them out moves no working day on a Monday to Friday week.
+
+    A holiday that falls on a Saturday or Sunday is not moved to a weekday.
+    Hungarian law has no substitute day.
+
+    Known limitation, and the reason this set is not enough to schedule on:
+    Hungary moves working days. Under 102. § (5) the minister decrees each
+    year, by 31 October of the year before, a rearrangement around the public
+    holidays for employers on the general work schedule: a Friday or Monday
+    beside a holiday becomes a rest day and a named Saturday of the same month
+    becomes a working day. For 2025 the decree made 17 May, 18 October and 13
+    December working Saturdays and 2 May, 24 October and 24 December rest
+    days; for 2026 it made 10 January, 8 August and 12 December working
+    Saturdays and 2 January, 21 August and 24 December rest days. It is not
+    derivable, and it is not modelled here.
+
+    It cannot be modelled in this engine as it stands. :func:`is_working_day`
+    subtracts: a day is worked when its weekday is in the week and it is not
+    in this set. A rest day could be added to the set, but nothing can turn a
+    Saturday into a working day, and adding one half of a swap without the
+    other would count three working days a year fewer than there are. So
+    neither half is here, the same choice ``_holidays_cn`` makes, and the
+    omission has no safe direction for the same reason: a span that covers
+    the rest day and not its Saturday overcounts working days and lands a
+    deadline early, a span that covers the Saturday alone undercounts. Over a
+    month the two cancel, since the law keeps a swap inside one calendar
+    month.
+
+    Sources, read 2026-10-10 in the text consolidated to 2026-10-01:
+    https://njt.jog.gov.hu/jogszabaly/2012-1-00-00 (102. §)
+    https://njt.jog.gov.hu/jogszabaly/2024-11-20-2X (11/2024. (IV. 8.) NGM
+    rendelet, the 2025 rearrangement)
+    https://njt.jog.gov.hu/jogszabaly/2025-10-20-2X (10/2025. (IV. 30.) NGM
+    rendelet, the 2026 rearrangement)
+    No decree for 2027 was found on that date.
+    """
+    e = easter(year)
+    holidays: set[date] = {
+        date(year, 1, 1),  # Újév
+        date(year, 3, 15),  # Nemzeti ünnep, az 1848-as forradalom
+        e + timedelta(days=1),  # Húsvéthétfő
+        date(year, 5, 1),  # A munka ünnepe
+        e + timedelta(days=50),  # Pünkösdhétfő
+        date(year, 8, 20),  # Az államalapítás ünnepe
+        date(year, 10, 23),  # Nemzeti ünnep, az 1956-os forradalom
+        date(year, 11, 1),  # Mindenszentek
+        date(year, 12, 25),  # Karácsony
+        date(year, 12, 26),  # Karácsony másnapja
+    }
+    if year >= _HU_GOOD_FRIDAY_FIRST_YEAR:
+        holidays.add(e - timedelta(days=2))  # Nagypéntek
+    return holidays
+
+
+def _holidays_es(year: int) -> set[date]:
+    """Spain's national holidays that no autonomous community may replace.
+
+    Nine days, from Real Decreto 2001/1983, art. 45.1 (a), (b) and (c): 12
+    October and 6 December (civic); 1 January, 1 May and 25 December (Estatuto
+    de los Trabajadores, art. 37.2); 15 August, 1 November, 8 December and
+    Good Friday (the 1979 agreement with the Holy See).
+
+    This is NOT the calendar of any place in Spain, and it is short on
+    purpose. A Spanish worker has up to fourteen holidays a year (Estatuto,
+    art. 37.2), and this function returns the nine that are the same
+    everywhere. Left out, because each depends on where the site is:
+
+    * Art. 45.1 (d): Holy Thursday, 6 January, and 19 March or 25 July. They
+      are national days, but art. 45.3 lets each community replace them with
+      days of its own, and several do.
+    * The Monday after a national holiday that falls on a Sunday. Art. 45.2
+      moves the rest to that Monday, and art. 45.3 lets a community put a
+      traditional day of its own in its place. The Sunday itself stays in the
+      set, where it changes nothing on a Monday to Friday week; the Monday is
+      not added. In 2026 that is 2 November and 7 December.
+    * The days each community declares for itself, and the two local days
+      each municipality sets, published in regional and provincial bulletins.
+
+    So the set errs one way: a day that is a holiday on site can be counted as
+    worked, and a derived deadline can land earlier than the real one, never
+    later. A project needing the true calendar of its site sets its own.
+
+    The yearly resolution of the Dirección General de Trabajo lists every
+    community's days and marks these nine as "Fiesta Nacional no sustituible"
+    in the years they fall on a weekday: eight in 2025 (12 October was a
+    Sunday) and seven in 2026 (1 November and 6 December are Sundays).
+
+    Sources, read 2026-10-10:
+    https://www.boe.es/buscar/act.php?id=BOE-A-1983-20906 (art. 45)
+    https://www.boe.es/buscar/act.php?id=BOE-A-2015-11430 (art. 37.2)
+    https://www.boe.es/diario_boe/txt.php?id=BOE-A-2024-21316 (2025)
+    https://www.boe.es/diario_boe/txt.php?id=BOE-A-2025-21667 (2026)
+    The resolution for 2027 was not yet published on that date.
+    """
+    e = easter(year)
+    return {
+        date(year, 1, 1),  # Año Nuevo
+        e - timedelta(days=2),  # Viernes Santo
+        date(year, 5, 1),  # Fiesta del Trabajo
+        date(year, 8, 15),  # Asunción de la Virgen
+        date(year, 10, 12),  # Fiesta Nacional de España
+        date(year, 11, 1),  # Todos los Santos
+        date(year, 12, 6),  # Día de la Constitución Española
+        date(year, 12, 8),  # Inmaculada Concepción
+        date(year, 12, 25),  # Natividad del Señor
+    }
+
+
 def _holidays_ng(year: int) -> set[date]:
     """Nigerian federal public holidays (Public Holidays Act, Cap. P40, LFN 2004).
 
@@ -1173,6 +1305,21 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     # uses; a site that works Saturdays sets its own calendar.
     # https://www.mevzuat.gov.tr/MevzuatMetin/1.5.4857.pdf
     "TR": frozenset({0, 1, 2, 3, 4}),
+    # Hungary: the Labour Code names the days. 97. § (2) defines the general
+    # work schedule as five days a week, Monday to Friday, and 92. § (1) sets
+    # the full day at eight hours. The yearly decree that turns a named
+    # Saturday into a working day is not expressible here (see _holidays_hu).
+    # https://njt.jog.gov.hu/jogszabaly/2012-1-00-00
+    "HU": frozenset({0, 1, 2, 3, 4}),
+    # Spain: Estatuto de los Trabajadores art. 34.1 caps the week at 40 hours
+    # averaged over the year and art. 37.1 gives a rest of a day and a half,
+    # as a general rule Saturday afternoon or Monday morning and the whole of
+    # Sunday. So the statute names Sunday and half of Saturday, not a five-day
+    # week. Monday to Friday is the convention, the one the shipped Spanish
+    # calendar and the planning table use; a site that works Saturday morning
+    # sets its own calendar.
+    # https://www.boe.es/buscar/act.php?id=BOE-A-2015-11430
+    "ES": frozenset({0, 1, 2, 3, 4}),
 }
 
 _DEFAULT_WORKING_WEEK: frozenset[int] = frozenset({0, 1, 2, 3, 4})
@@ -1199,6 +1346,8 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "NG": _holidays_ng,
     "BG": _holidays_bg,
     "TR": _holidays_tr,
+    "HU": _holidays_hu,
+    "ES": _holidays_es,
 }
 
 

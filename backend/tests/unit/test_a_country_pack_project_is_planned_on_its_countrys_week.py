@@ -64,7 +64,6 @@ COUNTRIES_WITHOUT_A_HOLIDAY_SOURCE: dict[str, str] = {
     "BE": "the ten Belgian legal holidays, three of them movable with Easter",
     "GR": "the Greek public holidays, four of them movable with Orthodox Easter",
     "HR": "the Croatian holidays under the 2019 Holidays Act",
-    "HU": "the Hungarian holidays plus the bridge-day swaps the ministry decrees each year",
     "ID": "the Indonesian national holidays and cuti bersama, set by joint ministerial decree each year",
     "IE": "the ten Irish public holidays, four of them first-Monday rules",
     "RO": "the Romanian legal holidays under Labour Code art. 139, Orthodox Easter based",

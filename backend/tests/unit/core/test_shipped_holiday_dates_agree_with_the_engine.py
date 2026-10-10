@@ -1,7 +1,7 @@
 """Every shipped calendar is compared against the engine that computes it.
 
 We ship holiday dates twice. ``app/core/calendar.py`` computes them, and
-``i18n_foundation/seed_data/work_calendars.json`` states them as data for 37
+``i18n_foundation/seed_data/work_calendars.json`` states them as data for 38
 countries. Until this file existed, nothing put the two side by side, and the
 suite was green while they disagreed.
 
@@ -35,8 +35,8 @@ deliberately does not adjudicate, because fixing them changes date arithmetic
 for real users and that is a decision to take explicitly rather than as a side
 effect of writing a test.
 
-**The denominator is printed.** 37 countries are seeded, 20 have a runtime
-binding for the seed year, 17 are unbound. A gate whose population is invisible can be
+**The denominator is printed.** 38 countries are seeded, 23 have a runtime
+binding for the seed year, 15 are unbound. A gate whose population is invisible can be
 satisfied by narrowing it, so the unbound countries are named in the output
 rather than silently absent from it, and floors below stop the bound set from
 being trimmed to make a failure go away.
@@ -178,6 +178,21 @@ _DIVERGENCES: dict[str, Divergence] = {
         seed_only=frozenset({"2026-02-20", "2026-02-21", "2026-02-22", "2026-02-23"}),
         engine_only=frozenset({"2026-05-02"}),
     ),
+    "ES": Divergence(
+        side=SEED_IS_RIGHT,
+        why=(
+            "_holidays_es returns only the nine national days no autonomous community may replace, "
+            "Real Decreto 2001/1983 art. 45.1 (a) to (c), and says so. The seed also carries Epiphany "
+            "and Holy Thursday, which are national days under art. 45.1 (d) that a community may "
+            "replace with days of its own: the Dirección General de Trabajo resolution for 2026 "
+            "(BOE-A-2025-21667) marks both as national days where the power to replace them was not "
+            "used, not as days common to every community. The seed is the fuller answer where they "
+            "are kept and one day too many where a community replaced one; the engine's narrower "
+            "set is deliberate. Neither carries the Mondays of 2 November and 7 December, which "
+            "follow the two national days that fall on a Sunday in 2026 and are also per community."
+        ),
+        seed_only=frozenset({"2026-01-06", "2026-04-02"}),
+    ),
     "GB": Divergence(
         side=UNADJUDICATED,
         why=(
@@ -286,7 +301,6 @@ _EXPECTED_UNBOUND: tuple[str, ...] = (
     "AU",
     "CZ",
     "DK",
-    "ES",
     "FI",
     "FR",
     "IT",
@@ -401,7 +415,7 @@ def test_the_countries_that_agree_are_named() -> None:
     """
     agreeing = sorted(c for c in BOUND if c not in _DIVERGENCES)
     print(f"seed equals engine exactly for {len(agreeing)} of {len(BOUND)} bound countries: {agreeing}")
-    assert agreeing == ["BG", "DE", "NG", "PT", "TR", "US"], (
+    assert agreeing == ["BG", "DE", "HU", "NG", "PT", "TR", "US"], (
         f"the set of countries whose two sources agree exactly has changed, now {agreeing}. "
         f"A country that LEFT this list started disagreeing with the engine, and belongs in "
         f"_DIVERGENCES only with a reason. A country that JOINED it either had its divergence "

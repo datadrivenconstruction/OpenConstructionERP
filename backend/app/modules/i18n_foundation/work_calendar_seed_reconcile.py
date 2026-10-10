@@ -124,6 +124,9 @@ CALENDAR_FIRST_SHIPPED: Final[dict[CalendarSlot, str]] = {
     ("OM", "2026"): "2026-08-29",
     # Portugal national holidays, 2026-only planning calendar (JUR-03).
     ("PT", "2026"): "2026-10-07",
+    # Hungary, the eleven days of Labour Code 102. § (1), with the engine's
+    # Hungarian holiday function.
+    ("HU", "2026"): "2026-10-10",
 }
 
 

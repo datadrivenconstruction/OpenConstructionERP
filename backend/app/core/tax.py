@@ -84,6 +84,12 @@ Sources (cited in commit message, summarised here for reference):
   publication portal's index record and not from the law text, which did not
   load. The figure remains pending review by a Russian cost engineer, the same
   standing caveat packs/russia-gesn records in its manifest ``review_status``.)
+- HU: 2007. évi CXXVII. törvény (Áfa tv.) 82. § - standard 27 %. Two reduced
+  rates, 5 % and 18 %, and a 0 % rate exist and are not in this table; see
+  the comment at the entry. (Nemzeti Jogszabálytár, read 2026-10-10)
+- ES: Ley 37/1992 art. 90 and 91 - standard 21 %, reduced 10 %, effective
+  1 Sep 2012. The 4 % super-reduced rate is not in this table; see the comment
+  at the entry. (BOE consolidated text, read 2026-10-10)
 - ZA: Value-Added Tax Act 89 of 1991 - standard 15 %, zero-rated 0 %
   (SARS South Africa; standard rate raised from 14 % to 15 % on 1 Apr 2018.
   Note: ISO code ZA is South Africa, distinct from SA = Saudi Arabia above.)
@@ -183,6 +189,38 @@ _RAW: dict[str, dict[str, str]] = {
     # Like RO above, the entry has no consumer today; the dated rates live in
     # the tax seed and the rate a bill charges comes from the TR markup stack.
     "TR": {"standard": "0.20", "reduced": "0.10"},
+    # ── Hungary ───────────────────────────────────────────────────────────
+    # ÁFA, 2007. évi CXXVII. törvény 82. § (1): 27 percent of the tax base,
+    # the wording set by 2011. évi CLVI. törvény 118. §.
+    # https://njt.jog.gov.hu/jogszabaly/2007-127-00-00 (read 2026-10-10 in the
+    # text consolidated to 2026-09-15)
+    # There is no "reduced" key on purpose. 82. § (2) and (3) set two reduced
+    # rates of equal standing, 5 percent on annex 3 and 18 percent on annex
+    # 3/A, and (4) a 0 percent rate on annex 3/B. This table has one "reduced"
+    # slot per country, and choosing one of the two would state as Hungary's
+    # reduced rate a figure that is wrong for the other annex, so asking for
+    # it raises VATNotApplicable. The tax seed carries both as AFA_5 and
+    # AFA_18. Construction services between Hungarian taxable persons mostly
+    # carry no VAT on the invoice at all: 142. § (1) b) puts the tax on the
+    # customer (see HU_FORDITOTT_ADOZAS_EPITES in tax_withholding).
+    # Like RO and TR, the entry has no consumer today.
+    "HU": {"standard": "0.27"},
+    # ── Spain ─────────────────────────────────────────────────────────────
+    # IVA, Ley 37/1992: art. 90.Uno, general rate 21 percent, and art. 91.Uno,
+    # reduced rate 10 percent, both since 1 September 2012 (Real Decreto-ley
+    # 20/2012, art. 23).
+    # https://www.boe.es/buscar/act.php?id=BOE-A-1992-28740 (read 2026-10-10)
+    # Spain has a second reduced rate, the 4 percent of art. 91.Dos, and this
+    # table has one "reduced" slot per country, so the 4 percent is not here.
+    # The 10 percent is the one construction meets: art. 91.Uno.3.1 applies it
+    # to works under a contract made directly between developer and contractor
+    # for building or rehabilitating dwellings, and art. 91.Uno.2.10 to
+    # renovation and repair of dwellings on its conditions.
+    # These are the rates of the IVA territory, which is the peninsula and the
+    # Balearic Islands. The Canary Islands charge IGIC and Ceuta and Melilla
+    # charge IPSI, neither of which is in this table.
+    # Like RO and TR, the entry has no consumer today.
+    "ES": {"standard": "0.21", "reduced": "0.10"},
     # ── Russia / CIS ──────────────────────────────────────────────────────
     # Standard rate 22 % since 2026-01-01, up from 20 %. This table carries no
     # effective dates, so it states only what is in force now; the dated
