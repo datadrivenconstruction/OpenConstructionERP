@@ -3048,6 +3048,8 @@ def _make_resources(
     unit: str,
     cwicr_ref: str,
     specs: list[tuple[str, str, float, float | None]],
+    *,
+    currency: str | None = None,
 ) -> list[dict]:
     """Build a PositionResource array whose leaves sum to exactly ``unit_rate``.
 
@@ -3059,6 +3061,11 @@ def _make_resources(
       divided by it.
     - For material: ``hourly_rate`` is None, so ``quantity`` is 1.0 and the leaf
       carries its money in ``unit_rate``.
+    - The hourly rates are euro literals while ``unit_rate`` is in the
+      template's own currency. With ``currency`` they are levelled into it by
+      ``_demo_rate`` first. Dividing a forint or rupee share by a euro rate made
+      the hours 140 and 8 times too many, and a curtain wall in the Debrecen
+      demo was scheduled for 170 years.
 
     Each leaf's ``total`` is the money that leaf actually carries, meaning
     ``quantity * unit_rate``. The two consumers therefore read the same number
@@ -3098,6 +3105,8 @@ def _make_resources(
             },
         }
         if hourly_rate and hourly_rate > 0:
+            if currency:
+                hourly_rate = _demo_rate(hourly_rate, currency, res_type)
             hourly = Decimal(str(hourly_rate))
             qty = (share / hourly).quantize(_HOURLY_QUANTITY_PLACES, rounding=ROUND_HALF_UP)
             money = qty * hourly
@@ -3442,6 +3451,7 @@ def _enrich_position_metadata(
     *,
     locale: str | None = None,
     explicit_resources: list[ResourceRowDef] | None = None,
+    currency: str | None = None,
 ) -> dict:
     """Generate realistic CWICR resource breakdown metadata for a demo position.
 
@@ -3452,6 +3462,8 @@ def _enrich_position_metadata(
     language (English when it has none). ``explicit_resources`` is the
     template's hand-written build-up for this position, if any, and replaces
     the generated split when it adds up (see ``_explicit_resources``).
+    ``currency`` is the template's currency, which the euro hourly rates of the
+    labour and plant leaves are levelled into (see ``_make_resources``).
     """
     meta: dict = {}
     desc_lower = description.lower()
@@ -3484,6 +3496,7 @@ def _enrich_position_metadata(
                 ("concrete_crew_pouring_vibrating", "labor", 0.35, 45.0),
                 ("concrete_pump_and_vibrator", "equipment", 0.15, 85.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "c30-37"
         meta["gwp_kgco2e_per_unit"] = 280.0 if unit == "m3" else 12.0
@@ -3498,6 +3511,7 @@ def _enrich_position_metadata(
                 ("rebar_fitters", "labor", 0.30, 50.0),
                 ("crane_tools", "equipment", 0.05, 120.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "steel-rebar"
         meta["gwp_kgco2e_per_unit"] = 1.2 if unit == "kg" else 1200.0
@@ -3512,6 +3526,7 @@ def _enrich_position_metadata(
                 ("formwork_carpenters", "labor", 0.60, 48.0),
                 ("tools_accessories", "equipment", 0.10, 35.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["steel", "stahl", "acier", "structural steel", "w-shape", "edelstahl"]):
         meta["cwicr_ref"] = "CWICR-STL-002"
@@ -3524,6 +3539,7 @@ def _enrich_position_metadata(
                 ("steel_erectors", "labor", 0.30, 55.0),
                 ("crane", "equipment", 0.15, 130.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "steel-structural"
         meta["gwp_kgco2e_per_unit"] = 1.5 if unit == "kg" else 45.0
@@ -3538,6 +3554,7 @@ def _enrich_position_metadata(
                 ("bricklayers", "labor", 0.45, 48.0),
                 ("scaffolding", "equipment", 0.05, 40.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["insulation", "dämmung", "dämmung", "isolation", "thermal"]):
         meta["cwicr_ref"] = "CWICR-INS-001"
@@ -3550,6 +3567,7 @@ def _enrich_position_metadata(
                 ("insulation_fitters", "labor", 0.40, 42.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "insulation-mineral-wool"
         meta["gwp_kgco2e_per_unit"] = 3.5
@@ -3564,6 +3582,7 @@ def _enrich_position_metadata(
                 ("waterproofing_crew", "labor", 0.50, 46.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3591,6 +3610,7 @@ def _enrich_position_metadata(
                 ("electricians", "labor", 0.50, 52.0),
                 ("test_equipment", "equipment", 0.10, 40.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3619,6 +3639,7 @@ def _enrich_position_metadata(
                 ("hvac_technicians", "labor", 0.40, 52.0),
                 ("tools_testing", "equipment", 0.10, 45.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3644,6 +3665,7 @@ def _enrich_position_metadata(
                 ("plumbers", "labor", 0.50, 52.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["excavat", "aushub", "earthwork", "grading", "terrassement"]):
         meta["cwicr_ref"] = "CWICR-ERT-001"
@@ -3656,6 +3678,7 @@ def _enrich_position_metadata(
                 ("machine_operators", "labor", 0.25, 60.0),
                 ("excavator_trucks", "equipment", 0.60, 95.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["paint", "anstrich", "peinture", "coating", "farbe"]):
         meta["cwicr_ref"] = "CWICR-PNT-001"
@@ -3668,6 +3691,7 @@ def _enrich_position_metadata(
                 ("painters", "labor", 0.65, 42.0),
                 ("sprayers_tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["roof", "dach", "toiture"]):
         meta["cwicr_ref"] = "CWICR-ROF-001"
@@ -3680,6 +3704,7 @@ def _enrich_position_metadata(
                 ("roofers", "labor", 0.45, 48.0),
                 ("access_equipment", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["window", "fenster", "glazing", "curtain wall", "vitrage", "fenêtre"]):
         meta["cwicr_ref"] = "CWICR-WIN-001"
@@ -3692,6 +3717,7 @@ def _enrich_position_metadata(
                 ("glaziers", "labor", 0.35, 50.0),
                 ("crane_suction_cups", "equipment", 0.05, 120.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["elevator", "aufzug", "lift", "ascenseur"]):
         meta["cwicr_ref"] = "CWICR-ELV-001"
@@ -3704,6 +3730,7 @@ def _enrich_position_metadata(
                 ("elevator_technicians", "labor", 0.30, 55.0),
                 ("crane", "equipment", 0.05, 130.0),
             ],
+            currency=currency,
         )
     elif re.search(r"\btiles?\b", desc_lower) or any(k in desc_lower for k in ["fliese", "carrelage", "ceramic"]):
         meta["cwicr_ref"] = "CWICR-TIL-001"
@@ -3716,6 +3743,7 @@ def _enrich_position_metadata(
                 ("tilers", "labor", 0.55, 46.0),
                 ("cutting_tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["door", "tür", "tür", "porte"]):
         meta["cwicr_ref"] = "CWICR-DOR-001"
@@ -3728,6 +3756,7 @@ def _enrich_position_metadata(
                 ("joiners", "labor", 0.40, 48.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["fire", "brand", "sprinkler", "incendie"]):
         meta["cwicr_ref"] = "CWICR-FPR-001"
@@ -3740,6 +3769,7 @@ def _enrich_position_metadata(
                 ("fire_protection_crew", "labor", 0.45, 50.0),
                 ("testing_equipment", "equipment", 0.10, 45.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["pile", "pfahl", "pieux", "bohrpfähle"]):
         meta["cwicr_ref"] = "CWICR-PIL-001"
@@ -3752,6 +3782,7 @@ def _enrich_position_metadata(
                 ("piling_crew", "labor", 0.25, 55.0),
                 ("piling_rig", "equipment", 0.40, 150.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["parquet", "flooring", "bodenbelag"]):
         meta["cwicr_ref"] = "CWICR-FLR-001"
@@ -3764,6 +3795,7 @@ def _enrich_position_metadata(
                 ("floor_layers", "labor", 0.45, 44.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["estrich", "screed"]):
         meta["cwicr_ref"] = "CWICR-SCR-001"
@@ -3776,6 +3808,7 @@ def _enrich_position_metadata(
                 ("screed_layers", "labor", 0.45, 44.0),
                 ("screed_pump_tools", "equipment", 0.15, 70.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["drywall", "trockenbau", "gipskarton", "plasterboard"]):
         meta["cwicr_ref"] = "CWICR-DRY-001"
@@ -3788,6 +3821,7 @@ def _enrich_position_metadata(
                 ("drywall_installers", "labor", 0.55, 44.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["asphalt", "paving", "pflaster"]):
         meta["cwicr_ref"] = "CWICR-PAV-001"
@@ -3800,6 +3834,7 @@ def _enrich_position_metadata(
                 ("pavers", "labor", 0.35, 42.0),
                 ("paving_equipment", "equipment", 0.20, 80.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["landscap", "bepflanzung", "rasen", "paysag"]):
         meta["cwicr_ref"] = "CWICR-LAN-001"
@@ -3812,6 +3847,7 @@ def _enrich_position_metadata(
                 ("landscapers", "labor", 0.45, 38.0),
                 ("tools", "equipment", 0.10, 40.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3848,6 +3884,7 @@ def _enrich_position_metadata(
                 ("machine_operators_laborers", "labor", 0.30, 60.0),
                 ("earthmoving_plant", "equipment", 0.50, 95.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3872,6 +3909,7 @@ def _enrich_position_metadata(
                 ("plasterers", "labor", 0.60, 46.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3898,6 +3936,7 @@ def _enrich_position_metadata(
                 ("electricians", "labor", 0.40, 52.0),
                 ("test_equipment", "equipment", 0.10, 40.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3928,6 +3967,7 @@ def _enrich_position_metadata(
                 ("plumbers", "labor", 0.45, 52.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3956,6 +3996,7 @@ def _enrich_position_metadata(
                 ("mechanical_technicians", "labor", 0.35, 52.0),
                 ("tools", "equipment", 0.10, 40.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -3979,6 +4020,7 @@ def _enrich_position_metadata(
                 ("structural_crew", "labor", 0.40, 50.0),
                 ("crane_tools", "equipment", 0.15, 120.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4007,6 +4049,7 @@ def _enrich_position_metadata(
                 ("structural_fitters", "labor", 0.40, 50.0),
                 ("crane_tools", "equipment", 0.10, 120.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4031,6 +4074,7 @@ def _enrich_position_metadata(
                 ("finishing_crew", "labor", 0.50, 44.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4054,6 +4098,7 @@ def _enrich_position_metadata(
                 ("cladding_installers", "labor", 0.40, 48.0),
                 ("access_equipment", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["acoustic", "schallschutz", "schalldae", "acoustique"]):
         meta["cwicr_ref"] = "CWICR-ACO-001"
@@ -4066,6 +4111,7 @@ def _enrich_position_metadata(
                 ("acoustic_installers", "labor", 0.50, 46.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4087,6 +4133,7 @@ def _enrich_position_metadata(
                 ("specialist_installers", "labor", 0.45, 50.0),
                 ("access_equipment", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4113,6 +4160,7 @@ def _enrich_position_metadata(
                 ("roofers", "labor", 0.40, 48.0),
                 ("access_equipment", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4148,6 +4196,7 @@ def _enrich_position_metadata(
                 ("external_works_crew", "labor", 0.40, 40.0),
                 ("tools_plant", "equipment", 0.10, 50.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4172,6 +4221,7 @@ def _enrich_position_metadata(
                 ("finishing_tradesmen", "labor", 0.45, 44.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4195,6 +4245,7 @@ def _enrich_position_metadata(
                 ("carpenters", "labor", 0.45, 48.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "timber-softwood"
         meta["gwp_kgco2e_per_unit"] = -16.0 if unit == "m3" else 5.0
@@ -4219,6 +4270,7 @@ def _enrich_position_metadata(
                 ("solar_installers", "labor", 0.30, 50.0),
                 ("access_equipment", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "pv-monocrystalline"
         meta["gwp_kgco2e_per_unit"] = 25.0
@@ -4245,6 +4297,7 @@ def _enrich_position_metadata(
                 ("roofers_plumbers", "labor", 0.40, 48.0),
                 ("access_equipment", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4268,6 +4321,7 @@ def _enrich_position_metadata(
                 ("installation_crew", "labor", 0.35, 50.0),
                 ("heavy_plant", "equipment", 0.10, 95.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4289,6 +4343,7 @@ def _enrich_position_metadata(
                 ("refrigeration_engineers", "labor", 0.35, 55.0),
                 ("test_equipment", "equipment", 0.10, 45.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4309,6 +4364,7 @@ def _enrich_position_metadata(
                 ("lift_technicians", "labor", 0.35, 55.0),
                 ("crane", "equipment", 0.10, 130.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4332,6 +4388,7 @@ def _enrich_position_metadata(
                 ("general_laborers", "labor", 0.35, 36.0),
                 ("plant_skips", "equipment", 0.45, 80.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4357,6 +4414,7 @@ def _enrich_position_metadata(
                 ("steel_fitters", "labor", 0.35, 52.0),
                 ("crane_tools", "equipment", 0.10, 120.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4382,6 +4440,7 @@ def _enrich_position_metadata(
                 ("fitout_crew", "labor", 0.50, 44.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4406,6 +4465,7 @@ def _enrich_position_metadata(
                 ("m_and_e_engineers", "labor", 0.30, 55.0),
                 ("crane_test_equipment", "equipment", 0.10, 120.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4431,6 +4491,7 @@ def _enrich_position_metadata(
                 ("groundworkers", "labor", 0.35, 40.0),
                 ("excavation_plant", "equipment", 0.25, 85.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4459,6 +4520,7 @@ def _enrich_position_metadata(
                 ("specialist_installers", "labor", 0.40, 50.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4493,6 +4555,7 @@ def _enrich_position_metadata(
                 ("hvac_technicians", "labor", 0.40, 52.0),
                 ("test_equipment", "equipment", 0.10, 45.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4532,6 +4595,7 @@ def _enrich_position_metadata(
                 ("electricians_it_technicians", "labor", 0.40, 52.0),
                 ("test_equipment", "equipment", 0.10, 45.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4567,6 +4631,7 @@ def _enrich_position_metadata(
                 ("specialist_installers", "labor", 0.35, 50.0),
                 ("tools_plant", "equipment", 0.10, 50.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4587,6 +4652,7 @@ def _enrich_position_metadata(
                 ("m_and_e_engineers", "labor", 0.40, 55.0),
                 ("crane_tools", "equipment", 0.10, 120.0),
             ],
+            currency=currency,
         )
     elif any(k in desc_lower for k in ["plantation", "arbre", "tree planting"]):
         meta["cwicr_ref"] = "CWICR-LAN-002"
@@ -4599,6 +4665,7 @@ def _enrich_position_metadata(
                 ("landscapers", "labor", 0.40, 38.0),
                 ("mini_excavator", "equipment", 0.10, 65.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4617,6 +4684,7 @@ def _enrich_position_metadata(
                 ("geotechnical_engineers", "labor", 0.40, 65.0),
                 ("drilling_rig", "equipment", 0.50, 150.0),
             ],
+            currency=currency,
         )
     # DACH retail-trade recipes. These German keyword groups are deliberately
     # placed at the end of the chain so they only catch positions the trade
@@ -4644,6 +4712,7 @@ def _enrich_position_metadata(
                 ("precast_erectors", "labor", 0.30, 54.0),
                 ("mobile_crane", "equipment", 0.15, 135.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "concrete-precast"
         meta["gwp_kgco2e_per_unit"] = 220.0 if unit == "m3" else 60.0
@@ -4666,6 +4735,7 @@ def _enrich_position_metadata(
                 ("timber_erectors", "labor", 0.30, 54.0),
                 ("mobile_crane", "equipment", 0.15, 135.0),
             ],
+            currency=currency,
         )
         meta["epd_id"] = "timber-glulam"
         meta["gwp_kgco2e_per_unit"] = -650.0 if unit == "m3" else 8.0
@@ -4694,6 +4764,7 @@ def _enrich_position_metadata(
                 ("refrigeration_engineers", "labor", 0.35, 68.0),
                 ("charging_test_equipment", "equipment", 0.10, 55.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4725,6 +4796,7 @@ def _enrich_position_metadata(
                 ("electricians", "labor", 0.40, 56.0),
                 ("test_equipment", "equipment", 0.10, 45.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4745,6 +4817,7 @@ def _enrich_position_metadata(
                 ("hvac_technicians", "labor", 0.40, 56.0),
                 ("tools_testing", "equipment", 0.10, 45.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4768,6 +4841,7 @@ def _enrich_position_metadata(
                 ("plumbers", "labor", 0.45, 56.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4793,6 +4867,7 @@ def _enrich_position_metadata(
                 ("commissioning_technicians", "labor", 0.22, 58.0),
                 ("lifting_handling", "equipment", 0.08, 80.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4826,6 +4901,7 @@ def _enrich_position_metadata(
                 ("shopfitters", "labor", 0.30, 52.0),
                 ("tools_handling", "equipment", 0.05, 45.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4845,6 +4921,7 @@ def _enrich_position_metadata(
                 ("steel_fitters", "labor", 0.35, 54.0),
                 ("crane_tools", "equipment", 0.10, 120.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4864,6 +4941,7 @@ def _enrich_position_metadata(
                 ("ceiling_fitters", "labor", 0.55, 50.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4888,6 +4966,7 @@ def _enrich_position_metadata(
                 ("door_gate_fitters", "labor", 0.35, 50.0),
                 ("tools", "equipment", 0.05, 30.0),
             ],
+            currency=currency,
         )
     elif "attika-abdeckung" in desc_lower:
         meta["cwicr_ref"] = "CWICR-ROF-004"
@@ -4900,6 +4979,7 @@ def _enrich_position_metadata(
                 ("roofers_metalworkers", "labor", 0.40, 50.0),
                 ("access_equipment", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4924,6 +5004,7 @@ def _enrich_position_metadata(
                 ("machine_operators_laborers", "labor", 0.30, 42.0),
                 ("earthmoving_plant", "equipment", 0.50, 95.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4947,6 +5028,7 @@ def _enrich_position_metadata(
                 ("concrete_finishers", "labor", 0.45, 50.0),
                 ("tools_plant", "equipment", 0.10, 60.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4966,6 +5048,7 @@ def _enrich_position_metadata(
                 ("pavers_groundworkers", "labor", 0.40, 42.0),
                 ("paving_plant", "equipment", 0.15, 80.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -4992,6 +5075,7 @@ def _enrich_position_metadata(
                 ("landscapers", "labor", 0.45, 38.0),
                 ("tools_mini_plant", "equipment", 0.10, 55.0),
             ],
+            currency=currency,
         )
     elif any(
         k in desc_lower
@@ -5021,6 +5105,7 @@ def _enrich_position_metadata(
                 ("site_team_general_laborers", "labor", 0.45, 38.0),
                 ("site_plant_facilities", "equipment", 0.35, 70.0),
             ],
+            currency=currency,
         )
     else:
         # Generic fallback
@@ -5034,6 +5119,7 @@ def _enrich_position_metadata(
                 ("general_labor", "labor", 0.45, 42.0),
                 ("tools_equipment", "equipment", 0.10, 40.0),
             ],
+            currency=currency,
         )
 
     if explicit_resources:
@@ -12253,6 +12339,7 @@ async def install_demo_project(
                 classification=cls,
                 locale=template.locale,
                 explicit_resources=template.position_resources.get(sub_ordinal),
+                currency=template.currency,
             )
             pos_meta.update(copy.deepcopy(template.position_metadata))
             # Every 8th position gets a warning status for visual variety
