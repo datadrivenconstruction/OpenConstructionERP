@@ -35,6 +35,7 @@ from collections.abc import Iterable
 from decimal import Decimal
 
 from app.core.currency_registry import minor_units, money_quantum
+from app.modules.einvoice import tr_ids
 from app.modules.einvoice.rules import FATAL, WARNING, RuleViolation
 from app.modules.einvoice.tr_ids import (
     classify_tax_number,
@@ -54,6 +55,10 @@ from app.modules.einvoice.ubl_tr import (
     tr_unit_code,
     withholding_percent,
 )
+
+# Information level: shown to the accountant, never blocks and never counts as
+# a warning. ``rules`` defines only fatal and warning.
+INFO = "info"
 
 # ── code lists (UBL-TR_Codelist.xml, revision 2026-07-01) ────────────────────
 
@@ -491,14 +496,19 @@ def _check_party(party: TrParty, role: str, home: str, wrapper: str) -> list[Rul
                 tax_number=party.tax_number,
             )
         )
-    # TR-PARTY-02: ours. The Schematron tests the length only.
+    # TR-PARTY-02: ours. The Schematron tests the length only. No official
+    # text describes the check digit algorithm, so while its review status is
+    # not "confirmed" a failure only warns: a false rejection would stop a
+    # real invoice, and integrator test environments use filler numbers. The
+    # status is read on every call, so confirming it needs no change here.
     elif not is_valid_tax_number(party.tax_number):
+        confirmed = tr_ids.CHECK_DIGIT_REVIEW_STATUS == "confirmed"
         out.append(
             _v(
                 "TR-PARTY-02",
-                FATAL,
+                FATAL if confirmed else WARNING,
                 f"The {role}'s {kind} {party.tax_number} fails its check digit, so it is most likely "
-                f"mistyped. Correct it {home}.",
+                f"mistyped. Check it {home}.",
                 f"{wrapper}/PartyIdentification/ID",
                 role=role,
                 kind=kind,
@@ -746,11 +756,34 @@ def _check_payment(inv: TrInvoice) -> list[RuleViolation]:
 
 
 def _check_held(inv: TrInvoice) -> list[RuleViolation]:
-    """TR-HELD-01 and OCE-TR-01: what the shared calculation could not, or not safely, decide."""
+    """TR-HELD-01, OCE-TR-01 and OCE-TR-02: what the shared calculation could not, or not safely, decide.
+
+    Only a figure the document states can block it. An invoice prints the
+    computed VAT, the payable VAT and, on a type that carries withholding, the
+    withheld VAT. Income tax withholding and stamp duty belong to the payment
+    certificate behind the invoice, so a held one is reported for information.
+    """
     out: list[RuleViolation] = []
+    printed = {"vat_computed", "vat_payable"}
+    if inv.invoice_type in _WITHHOLDING_TYPES:
+        printed.add("vat_withheld")
     for group in inv.tax_groups:
         for figure in group.taxes.figures():
-            if figure.status == "held":
+            if figure.status == "held" and figure.kind not in printed:
+                out.append(
+                    _v(
+                        "OCE-TR-02",
+                        INFO,
+                        f"The tax figure {figure.kind} of the {group.vat_rate_pct}% VAT group is not decided "
+                        f"yet ({figure.reason_key or 'no reason given'}). It is not printed on the invoice, so "
+                        "the file can be generated, but the payment certificate behind it is incomplete.",
+                        f"TaxSubtotal[{group.key}]",
+                        group=group.key,
+                        figure=figure.kind,
+                        reason=figure.reason_key,
+                    )
+                )
+            elif figure.status == "held":
                 out.append(
                     _v(
                         "TR-HELD-01",

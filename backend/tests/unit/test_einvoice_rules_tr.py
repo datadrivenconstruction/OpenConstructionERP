@@ -17,10 +17,12 @@ from decimal import Decimal
 
 import pytest
 
-from app.modules.einvoice import rules_tr
+from app.modules.einvoice import rules_tr, tr_ids
+from app.modules.einvoice.cii import EInvoiceError
 from app.modules.einvoice.rules import FATAL, WARNING
 from app.modules.einvoice.rules_tr import (
     EXEMPTION_REASON_CODES,
+    INFO,
     ISTISNA_REASON_CODES,
     KNOWN_INVOICE_TYPES,
     KNOWN_PROFILES,
@@ -36,6 +38,7 @@ from app.modules.einvoice.ubl_tr import (
     TrDocumentRef,
     TrInvoice,
     TrPaymentMeans,
+    build_ubl_tr_xml,
 )
 from tests.unit.test_einvoice_ubl_tr import (
     SCENARIOS,
@@ -151,10 +154,10 @@ FAILING: dict[str, tuple[str, str, Mutation]] = {
     "tax number nine digits": ("TR-PARTY-01", FATAL, lambda: with_supplier(S(), tax_number="111222333")),
     "tax number with prefix": ("TR-PARTY-01", FATAL, lambda: with_customer(S(), tax_number="TR9876543217")),
     "tax number empty": ("TR-PARTY-01", FATAL, lambda: with_customer(S(), tax_number="")),
-    "vkn check digit": ("TR-PARTY-02", FATAL, lambda: with_supplier(S(), tax_number="1112223338")),
+    "vkn check digit": ("TR-PARTY-02", WARNING, lambda: with_supplier(S(), tax_number="1112223338")),
     "tckn check digit": (
         "TR-PARTY-02",
-        FATAL,
+        WARNING,
         lambda: with_customer(SCENARIOS["person"](), tax_number="10000000147"),
     ),
     "vkn without name": ("TR-PARTY-03", FATAL, lambda: with_customer(S(), name="  ")),
@@ -224,7 +227,12 @@ FAILING: dict[str, tuple[str, str, Mutation]] = {
             vat_payable=held("vat_payable", "vat_rate_unknown"),
         ),
     ),
-    "stamp duty undecided": ("TR-HELD-01", FATAL, lambda: with_taxes(S(), stamp_duty=held("stamp_duty"))),
+    "stamp duty undecided": ("OCE-TR-02", INFO, lambda: with_taxes(S(), stamp_duty=held("stamp_duty"))),
+    "income withholding undecided": (
+        "OCE-TR-02",
+        INFO,
+        lambda: with_taxes(T(), income_withheld=held("income_withheld")),
+    ),
     "unconfirmed rate": (
         "OCE-TR-01",
         WARNING,
@@ -342,7 +350,7 @@ def test_every_rule_id_has_a_failing_case() -> None:
     designed = {
         "TR-ID-01", "TR-ID-02", "TR-PARTY-01", "TR-PARTY-02", "TR-PARTY-03", "TR-PARTY-04", "TR-PARTY-05",
         "TR-PROFILE-01", "TR-TYPE-01", "TR-WH-01", "TR-WH-02", "TR-WH-03", "TR-WH-04", "TR-SUM-01",
-        "TR-SUM-02", "TR-SUM-03", "TR-CUR-01", "TR-DATE-01", "TR-HELD-01", "OCE-TR-01",
+        "TR-SUM-02", "TR-SUM-03", "TR-CUR-01", "TR-DATE-01", "TR-HELD-01", "OCE-TR-01", "OCE-TR-02",
     }  # fmt: skip
     assert designed <= declared
 
@@ -360,7 +368,6 @@ def test_every_rule_id_has_a_failing_case() -> None:
         "issue date tomorrow",
         "foreign currency without rate",
         "tax number nine digits",
-        "vkn check digit",
         "vkn without name",
         "address without district",
         "unit unknown",
@@ -408,6 +415,52 @@ def test_held_figure_names_the_figure_and_the_reason() -> None:
     ]
     # A held figure is the whole story: no sum rule piles on with a number it cannot know.
     assert ids(inv, FATAL) == ["TR-HELD-01", "TR-HELD-01"]
+
+
+def test_held_figure_the_invoice_does_not_print_never_blocks() -> None:
+    inv = with_taxes(T(), income_withheld=held("income_withheld"), stamp_duty=held("stamp_duty"))
+    found = check_tr(inv, today=TODAY)
+    assert [(v.rule_id, v.severity, v.params["figure"]) for v in found] == [
+        ("OCE-TR-02", INFO, "income_withheld"),
+        ("OCE-TR-02", INFO, "stamp_duty"),
+    ]
+    # The file is written, and it is the same file as without the open questions.
+    assert build_ubl_tr_xml(inv, today=TODAY) == build_ubl_tr_xml(T(), today=TODAY)
+
+
+def test_held_vat_figures_block_and_the_others_do_not_dilute_them() -> None:
+    for kind in ("vat_computed", "vat_payable"):
+        inv = with_taxes(S(), **{kind: held(kind)})
+        assert "TR-HELD-01" in ids(inv, FATAL), kind
+    # Withheld VAT is printed on a TEVKIFAT invoice, so there it blocks.
+    assert "TR-HELD-01" in ids(with_taxes(T(), vat_withheld=held("vat_withheld")), FATAL)
+    # On a plain sale it is not printed; the payable VAT still stands.
+    plain = with_taxes(S(), vat_withheld=held("vat_withheld"))
+    assert [(v.rule_id, v.severity) for v in check_tr(plain, today=TODAY)] == [("OCE-TR-02", INFO)]
+    with pytest.raises(EInvoiceError, match="TR-HELD-01"):
+        build_ubl_tr_xml(with_taxes(T(), vat_withheld=held("vat_withheld")), today=TODAY)
+
+
+def test_check_digit_failure_warns_while_the_algorithm_is_unconfirmed() -> None:
+    assert tr_ids.CHECK_DIGIT_REVIEW_STATUS == "unconfirmed"
+    inv = with_supplier(S(), tax_number="1112223338")
+    assert [(v.rule_id, v.severity) for v in check_tr(inv, today=TODAY)] == [("TR-PARTY-02", WARNING)]
+    # A filler number of the kind test environments use still exports.
+    assert build_ubl_tr_xml(with_customer(S(), tax_number="1111111111"), today=TODAY)
+    # Length and digits-only stay errors whatever the status.
+    assert ids(with_supplier(S(), tax_number="111222333"), FATAL) == ["TR-PARTY-01"]
+    assert ids(with_supplier(S(), tax_number="111222333A"), FATAL) == ["TR-PARTY-01"]
+
+
+def test_check_digit_failure_is_an_error_once_the_algorithm_is_confirmed(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(tr_ids, "CHECK_DIGIT_REVIEW_STATUS", "confirmed")
+    inv = with_supplier(S(), tax_number="1112223338")
+    assert [(v.rule_id, v.severity) for v in check_tr(inv, today=TODAY)] == [("TR-PARTY-02", FATAL)]
+    with pytest.raises(EInvoiceError, match="TR-PARTY-02"):
+        build_ubl_tr_xml(inv, today=TODAY)
+    person = with_customer(SCENARIOS["person"](), tax_number="10000000147")
+    assert ids(person, FATAL) == ["TR-PARTY-02"]
+    assert ids(S()) == []
 
 
 def test_issue_date_today_is_accepted_and_the_default_clock_is_turkiye() -> None:
