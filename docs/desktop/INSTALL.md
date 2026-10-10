@@ -2,7 +2,7 @@
 
 OpenConstructionERP by DataDrivenConstruction is an open-source platform for construction cost estimation, bills of quantities, and data validation, with CAD and BIM quantity takeoff and multi-currency support. The desktop app puts the whole thing on your computer. You download one installer and run it. There is no Python, no pip, no Docker, and no database to set up. Everything it needs is already inside.
 
-This guide walks you through installing it and signing in for the first time.
+This guide walks you through installing it and signing in for the first time. If a warning or an error shows up along the way, [Installation help](../INSTALL_TROUBLESHOOTING.md) says what it means and what to do (also [online](https://openconstructionerp.com/install-help), in [Deutsch](../INSTALL_TROUBLESHOOTING.de.md) and [Русский](../INSTALL_TROUBLESHOOTING.ru.md)).
 
 ## Where to download
 

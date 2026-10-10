@@ -35,7 +35,7 @@ Professional BOQ, CAD and BIM takeoff, 4D scheduling, 5D cost model, and tenderi
 
 <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest"><img src="https://img.shields.io/badge/Windows-Download%20.exe-0078D6?style=for-the-badge&logo=windows11&logoColor=white" alt="Download OpenConstructionERP for Windows" height="46"></a> &nbsp;&nbsp; <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest"><img src="https://img.shields.io/badge/macOS-Apple%20Silicon%20.dmg-111111?style=for-the-badge&logo=apple&logoColor=white" alt="Download OpenConstructionERP for macOS on Apple Silicon" height="46"></a> &nbsp;&nbsp; <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest"><img src="https://img.shields.io/badge/Linux-.deb%20%2F%20.AppImage-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download OpenConstructionERP for Linux" height="46"></a>
 
-<sub>Not sure which file? <a href="https://openconstructionerp.com/download"><b>openconstructionerp.com/download</b></a> picks the right one for you automatically. Prefer the terminal? <code>pip install openconstructionerp</code> or Docker, see <a href="#quick-start">Quick Start</a> below.</sub>
+<sub>Not sure which file? <a href="https://openconstructionerp.com/download"><b>openconstructionerp.com/download</b></a> picks the right one for you automatically. Prefer the terminal? <code>pip install openconstructionerp</code> or Docker, see <a href="#quick-start">Quick Start</a> below. Stuck while installing? <a href="https://openconstructionerp.com/install-help"><b>Installation help</b></a>.</sub>
 
 <br/>
 
@@ -403,6 +403,8 @@ Get productive in under 10 minutes:
 
 ## Quick Start
 
+> **Problem while installing or starting?** See the **[installation help page](https://openconstructionerp.com/install-help)** or the same guide in the repo: [English](docs/INSTALL_TROUBLESHOOTING.md), [Deutsch](docs/INSTALL_TROUBLESHOOTING.de.md), [Русский](docs/INSTALL_TROUBLESHOOTING.ru.md).
+
 ### Easiest: download the desktop app (no Python, no setup)
 
 Download the installer for your operating system, run it, and OpenConstructionERP opens as a native desktop app. No Python, no pip, no Docker, and no database to set up. Everything runs locally on your machine.
@@ -414,7 +416,7 @@ Download the installer for your operating system, run it, and OpenConstructionER
 
 There is no Intel macOS build at the moment. On an Intel Mac, use the pip or Docker route below.
 
-Seeing a warning or an error while installing or starting? **[Installation help](docs/INSTALL_TROUBLESHOOTING.md)** lists each message with what it means and what to do ([Deutsch](docs/INSTALL_TROUBLESHOOTING.de.md), [Русский](docs/INSTALL_TROUBLESHOOTING.ru.md)).
+Seeing a warning or an error while installing or starting? **[Installation help](docs/INSTALL_TROUBLESHOOTING.md)** (also online at [openconstructionerp.com/install-help](https://openconstructionerp.com/install-help)) lists each message with what it means and what to do ([Deutsch](docs/INSTALL_TROUBLESHOOTING.de.md), [Русский](docs/INSTALL_TROUBLESHOOTING.ru.md)).
 
 The first launch takes about a minute while it sets up your local database, then every launch after that is fast. Open source under AGPL-3.0.
 
