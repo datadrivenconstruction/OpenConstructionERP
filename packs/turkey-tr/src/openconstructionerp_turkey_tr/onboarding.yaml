@@ -41,3 +41,4 @@ steps:
         - set_tax_template: tr_kdv_20
         - preload_cwicr_regions:
             - cwicr-tr-istanbul
+            - cwicr-tr-national

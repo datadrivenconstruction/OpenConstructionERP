@@ -29,8 +29,10 @@ Withholding provisions apply on payments to subcontractors.
 
 - **Currency TRY**, the `tr_kdv_20` tax template and the `turkey` estimating
   methodology, with a Turkish interface.
-- **One cost catalogue**, `cwicr-tr-istanbul`, resolving to TR_NATIONAL via
-  the alias or city index.
+- **Two cost bases**: `cwicr-tr-istanbul`, the global-market catalogue priced
+  for Istanbul (TR_ISTANBUL), and `cwicr-tr-national`, the base built from the
+  national Birim Fiyat unit-price analyses (TR_NATIONAL). The activation dialog
+  offers both.
 - **A three-step onboarding wizard** that collects the company profile and
   tax ID, the specification and price base, and confirms the setup, in Turkish
   and English.

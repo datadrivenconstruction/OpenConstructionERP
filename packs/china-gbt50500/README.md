@@ -110,7 +110,7 @@ the work, and a contractor can be running both at once on different jobs.
 | Currency | CNY |
 | Tax template | `cn_vat_9` |
 | Methodology | `china`, derived from the regional markup table |
-| Cost data | `cwicr-zh-shanghai`; Beijing, Shenzhen, Guangzhou and Chengdu are listed as preferred metros and arrive in marketplace updates |
+| Cost data | `cwicr-zh-shanghai` (global-market catalogue, Shanghai prices) and `cwicr-zh-china` (national Dinge base); Beijing, Shenzhen, Guangzhou and Chengdu are listed as preferred metros and arrive in marketplace updates |
 | Demo project | `office-shanghai`, a 32-storey Grade A tower in Lujiazui, measured works approx. CNY 690 million |
 | Engine rules | `gbt50500`: item code present, and 9 or 12 numeric digits |
 | Reference documents | seven, listed below |

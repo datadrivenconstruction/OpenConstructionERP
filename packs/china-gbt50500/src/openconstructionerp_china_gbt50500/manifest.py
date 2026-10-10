@@ -96,10 +96,13 @@ MANIFEST = PartnerPackManifest(
     # that. Put the entry back on the day the file lands, not before.
     additional_locales={},
     cwicr_regions=[
-        # Only one Chinese CWICR region is wired in for the demo today.
-        # Additional metros are recorded in metadata.preferred_metros for
-        # the onboarding UI.
+        # Two different bases, not two names for one. ZH_SHANGHAI is the
+        # global-market catalogue priced for Shanghai; ZH_CHINA is the
+        # national Dinge base. The activation dialog offers both. Additional
+        # metros are recorded in metadata.preferred_metros for the onboarding
+        # UI.
         "cwicr-zh-shanghai",
+        "cwicr-zh-china",
     ],
     default_currency="CNY",
     default_tax_template="cn_vat_9",

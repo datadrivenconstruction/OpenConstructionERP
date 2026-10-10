@@ -687,6 +687,41 @@ def test_a_country_with_a_published_base_declares_one(slug: str) -> None:
     assert declared & set(published), f"{slug} declares no cost region although {published} are published for {country}"
 
 
+#: Country packs that leave a published national base of their country
+#: undeclared, each with the reason. Recorded rather than tolerated: a pack that
+#: starts declaring its base fails here until its entry is deleted.
+PACKS_WITHOUT_THEIR_NATIONAL_BASE: dict[str, str] = {
+    "brazil-sinapi": "BR_NATIONAL not yet offered by the pack; open, not decided in the Turkey change",
+    "spain-es": "ES_ANDALUCIA is one region's price base, not a national one for every Spanish project",
+}
+
+
+@pytest.mark.parametrize("slug", COUNTRY_SLUGS)
+def test_a_country_pack_offers_its_countrys_national_base(slug: str) -> None:
+    """The Turkish pack described Birim Fiyat and installed only the Istanbul catalogue.
+
+    Its manifest said the Istanbul slug resolved to TR_NATIONAL through an
+    alias. It resolves to TR_ISTANBUL, the global-market catalogue, so the
+    national base the pack is named for was never offered. China had the same
+    gap with its Dinge base.
+    """
+    from app.core.partner_pack.full_install import resolve_cwicr_db_id
+    from app.modules.costs import base_registry
+    from app.modules.costs.router import _GITHUB_CWICR_FILES
+
+    manifest = _manifests()[slug]
+    country = _country(manifest)
+    national = sorted(
+        db for db in _GITHUB_CWICR_FILES if base_registry.is_national_region(db) and _base_country(db) == country
+    )
+    declared = {resolve_cwicr_db_id(s) for s in manifest.cwicr_regions}
+    missing = [db for db in national if db not in declared]
+    if slug in PACKS_WITHOUT_THEIR_NATIONAL_BASE:
+        assert missing, f"{slug} now declares {national}; delete its PACKS_WITHOUT_THEIR_NATIONAL_BASE entry"
+        return
+    assert not missing, f"{slug} ({country}) does not offer its national base {missing}"
+
+
 @pytest.mark.parametrize("db_id", ["BR_NATIONAL", "GR_NATIONAL", "TR_NATIONAL", "ID_NATIONAL"])
 def test_every_national_base_is_reachable_by_its_own_countrys_slug(db_id: str) -> None:
     from app.core.partner_pack.full_install import resolve_cwicr_db_id

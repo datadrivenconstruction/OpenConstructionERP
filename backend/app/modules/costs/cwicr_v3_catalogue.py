@@ -706,6 +706,14 @@ def _apply_hf_overrides(
 CWICR_V3_CATALOGUES = _apply_hf_overrides(CWICR_V3_CATALOGUES)
 
 
+# ZH_SHANGHAI and TR_ISTANBUL are not old names of ZH_CHINA and TR_NATIONAL;
+# they are the global-market bases, and the national ones are separate bases
+# (see 9bcc6bc03). They point here because the only v3 vector snapshots DDC
+# published for China and Turkey are the global-market ones, which
+# _HF_PUBLISHED files under the national rows, and the collection is chosen
+# by language, so both bases of a country restore into the same one. Dropping
+# these two lines would make the install endpoint answer 404 for the region
+# the onboarding presets install. No national base has a snapshot of its own.
 _REGION_ALIASES: dict[str, str] = {
     "CN_SHANGHAI": "ZH_CHINA",
     "ZH_SHANGHAI": "ZH_CHINA",

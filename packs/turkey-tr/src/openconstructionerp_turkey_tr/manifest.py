@@ -24,11 +24,13 @@ MANIFEST = PartnerPackManifest(
     default_locale="tr",
     additional_locales={},
     cwicr_regions=[
-        # One Turkish catalogue exists under this marketplace slug. It
-        # resolves to TR_NATIONAL via the alias or city index. Additional
-        # cities (Ankara, Izmir, Antalya) are planned but no catalogue is
-        # published for them yet.
+        # Two different bases, not two names for one. TR_ISTANBUL is the
+        # global-market catalogue priced for Istanbul; TR_NATIONAL is built
+        # from the national Birim Fiyat unit-price analyses this pack is about.
+        # The activation dialog offers both and the user can untick either.
+        # No catalogue is published for other cities (Ankara, Izmir, Antalya).
         "cwicr-tr-istanbul",
+        "cwicr-tr-national",
     ],
     default_currency="TRY",
     default_tax_template="tr_kdv_20",

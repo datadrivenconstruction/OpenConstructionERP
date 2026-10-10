@@ -165,8 +165,10 @@ _ALIASES: dict[str, str] = {
     "SP_BARCELONA": "ES_MADRID",  # ES is the ISO code; SP was a typo
     "CS_PRAGUE": "CZ_PRAGUE",  # CS is the language code, not country
     "CN_SHANGHAI": "ZH_CHINA",  # old v3 China id
-    "ZH_SHANGHAI": "ZH_CHINA",  # language-prefixed catalogue id
-    "TR_ISTANBUL": "TR_NATIONAL",  # old metro id
+    # Language only: the global-market base and the national base of each
+    # country are separate bases that share a language, not one base renamed.
+    "ZH_SHANGHAI": "ZH_CHINA",
+    "TR_ISTANBUL": "TR_NATIONAL",
     "JA_TOKYO": "JP_TOKYO",
     "KO_SEOUL": "KR_SEOUL",
     "VI_HANOI": "VN_HANOI",
