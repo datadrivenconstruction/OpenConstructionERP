@@ -204,8 +204,10 @@ def test_the_mail_carries_no_english_footer_about_notification_preferences():
 
 
 def test_other_mail_keeps_its_footer():
-    from app.core.email.templates import wrap
+    from app.core.email.templates import template_task_assigned, wrap
 
-    assert "notification preferences" in wrap("Task Assigned", "<p>x</p>")
-    assert "<hr" not in wrap("Hi", "<p>x</p>", footer="")
+    # Only mail someone subscribed to says so; every mail closes with the brand.
+    assert "notification preferences" in template_task_assigned("T", "Ann", "P")[1]
+    assert "notification preferences" not in wrap("Hi", "<p>x</p>")
+    assert "OpenConstructionERP</p></body>" in wrap("Hi", "<p>x</p>", footer="")
     assert "Sent on behalf of A &amp; B" in wrap("Hi", "<p>x</p>", footer="Sent on behalf of A &amp; B")

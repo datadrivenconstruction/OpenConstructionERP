@@ -50,7 +50,7 @@ In development the FastAPI app serves live, browsable documentation generated fr
 
 For example, open `http://localhost:8000/api/docs`.
 
-These three routes are intentionally disabled in production so the full endpoint map is not exposed publicly. If you need the schema in a locked-down environment, generate it from a development or staging instance.
+These three routes are intentionally disabled in production (`APP_ENV=production`, as in `docker-compose.prod.yml`) so the full endpoint map is not exposed publicly; there they answer 404. The pip install (`openconstructionerp`) and the Docker quickstart run with `APP_ENV=development`, so the docs are on by default there, for example at `http://127.0.0.1:8080/api/docs`. To get the schema for a production server, run the same version locally (`pip install openconstructionerp==<version>`, then `openconstructionerp`) and download `http://127.0.0.1:8080/api/openapi.json`, or read it from a staging instance that is not set to production.
 
 ## Health check
 
@@ -174,11 +174,23 @@ The current user profile and effective permissions are available at `GET /api/v1
 
 For scripts, integrations, and scheduled jobs that should not hold a user password, create an API key at `POST /api/v1/users/me/api-keys/` (you must be logged in to create one). The full key value is shown only once, in that creation response, so store it safely. List and revoke keys at `GET` and `DELETE /api/v1/users/me/api-keys/{id}`.
 
-Send the key on endpoints that accept key auth using the `X-API-Key` header:
+Send the key in the `X-API-Key` header:
 
 ```
 X-API-Key: <your_api_key>
 ```
+
+**An API key does not open the whole API.** Almost every endpoint accepts only a bearer token and rejects a request that carries just a key. A key is accepted on these routes only:
+
+| Route | Permission the key's owner needs |
+|---|---|
+| `GET /api/v1/geo-hub/ogc/` and everything below it (OGC API - Features: landing page, `conformance`, `collections`, `collections/{collection_id}`, `collections/{collection_id}/items`, `collections/{collection_id}/items/{feature_id}`) | `geo_hub.read` |
+| `POST /api/v1/inbound-capture/email` and `POST /api/v1/inbound-capture/{provider}/webhook` | `inbound.write` |
+| `GET /api/v1/integrations/calendar/{project_id}.ics/?token=<your_api_key>` (the key goes in the `token` query parameter, not the header) | `integrations.calendar_feed`, which must also be listed in the key's own `permissions` |
+
+A key acts as its owner, and the `permissions` list you give when you create it can only narrow that: the request is allowed when the owner's role grants the permission and the list either is empty or contains it. The calendar feed is stricter and needs the permission listed explicitly. For everything else, sign in and use a bearer token as shown below.
+
+Webhook lead capture configured with `api_key` auth also reads an `X-Api-Key` header, but that is the secret of that one webhook, not a user API key.
 
 ## Two worked examples with curl
 
@@ -210,10 +222,10 @@ curl -s "$BASE/api/v1/projects/" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-The same call with an API key instead of a bearer token looks like this:
+This endpoint does not accept an API key. A route that does, such as the OGC feature collections, is called with the key like this:
 
 ```bash
-curl -s "$BASE/api/v1/projects/" \
+curl -s "$BASE/api/v1/geo-hub/ogc/collections" \
   -H "X-API-Key: $OCE_API_KEY"
 ```
 

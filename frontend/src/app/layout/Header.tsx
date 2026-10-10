@@ -21,6 +21,7 @@ import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
 import { ModuleBuilderButton } from '@/features/module-builder';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { copyToClipboard } from '@/shared/lib/browser';
+import { triggerDownload } from '@/shared/lib/api';
 import {
   exportErrorReport,
   getErrorCount,
@@ -238,6 +239,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Progress Claim': 'contracts.claim',
   'Withholding Tax': 'nav.tax_withholding',
   'Tax Rates': 'nav.tax_rates',
+  'Legal Entities': 'nav.legal_entities',
   'Authority Submissions': 'authority_submission.title',
   'Review Authority': 'review_authority.title',
   'Interface Register': 'interface_management.title',
@@ -641,6 +643,11 @@ function ThemeToggle() {
  */
 export const MIN_DESCRIPTION_LENGTH = 20;
 
+/** File name for the session error log both menus offer for download. */
+function errorLogFilename(): string {
+  return `openconstructionerp-log-${new Date().toISOString().slice(0, 10)}.json`;
+}
+
 export function BugReportMenu() {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
@@ -738,20 +745,18 @@ export function BugReportMenu() {
     // mailto bodies are also length-limited (~2000 chars in Chrome),
     // so we trim aggressively. The downloaded log JSON is the long form.
     const safeBody = body.length > 1500 ? `${body.slice(0, 1500)}\n\n_[truncated - attach the JSON log if needed]_` : body;
-    const href = `mailto:info@datadrivenconstruction.io?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(safeBody)}`;
-    window.location.href = href;
+    // Through openLink, not `window.location.href`: the desktop webview does
+    // not hand a navigation to mailto: to the mail client, so assigning it
+    // there did nothing at all. openLink sends it to the OS opener instead.
+    openLink(
+      `mailto:info@datadrivenconstruction.io?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(safeBody)}`,
+    );
   };
 
   const handleFeedbackForm = () => {
     setOpen(false);
     if (errorCount > 0) {
-      const blob = exportErrorReport();
-      const blobUrl = URL.createObjectURL(blob);
-      const dl = document.createElement('a');
-      dl.href = blobUrl;
-      dl.download = `openconstructionerp-log-${new Date().toISOString().slice(0, 10)}.json`;
-      dl.click();
-      URL.revokeObjectURL(blobUrl);
+      triggerDownload(exportErrorReport(), errorLogFilename());
     }
     const params = new URLSearchParams({
       report: 'true',
@@ -763,13 +768,7 @@ export function BugReportMenu() {
 
   const handleDownloadLog = () => {
     setOpen(false);
-    const blob = exportErrorReport();
-    const blobUrl = URL.createObjectURL(blob);
-    const dl = document.createElement('a');
-    dl.href = blobUrl;
-    dl.download = `openconstructionerp-log-${new Date().toISOString().slice(0, 10)}.json`;
-    dl.click();
-    URL.revokeObjectURL(blobUrl);
+    triggerDownload(exportErrorReport(), errorLogFilename());
     addToast({
       type: 'success',
       title: t('app.bug_log_downloaded', { defaultValue: 'Log downloaded' }),
@@ -959,12 +958,17 @@ export function BugReportMenu() {
             </div>
           )}
 
-          <div className={clsx('py-1', networkOnly && 'opacity-40 pointer-events-none')}>
+          {/* The network banner above is advice, not a lock. These channels
+              used to sit under `opacity-40 pointer-events-none` while it
+              showed, and the desktop app logs a few transport errors on every
+              start while its server comes up, so the whole menu read as dead
+              links until somebody found "report anyway". */}
+          <div className="py-1">
             {channels.map((ch, idx) => {
               const Icon = ch.icon;
               // Disabled for real, not dimmed: a `pointer-events-none` wrapper
-              // (the trick used for the network banner above) still lets a
-              // keyboard reach the control, and tells nobody why it is grey.
+              // still lets a keyboard reach the control, and tells nobody why
+              // it is grey.
               const blocked = ch.requiresDescription && descriptionTooShort;
               return (
                 <button
@@ -1045,13 +1049,7 @@ function HelpMenu() {
   const handleFeedback = () => {
     setOpen(false);
     if (getErrorCount() > 0) {
-      const blob = exportErrorReport();
-      const blobUrl = URL.createObjectURL(blob);
-      const dl = document.createElement('a');
-      dl.href = blobUrl;
-      dl.download = `openconstructionerp-log-${new Date().toISOString().slice(0, 10)}.json`;
-      dl.click();
-      URL.revokeObjectURL(blobUrl);
+      triggerDownload(exportErrorReport(), errorLogFilename());
     }
     const params = new URLSearchParams({
       feedback: 'true',

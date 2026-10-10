@@ -461,7 +461,7 @@ class TestInvitationEmailRender:
             invitee_company_name="ACME Construction",
             sender_name="John Doe",
             deadline="2026-02-01",
-            action_url="/bid-management/packages/abc",
+            action_url="/bid-management?highlight=abc",
         )
         assert subj == "Invitation to bid: BP-001"
         assert "ACME Construction" in body

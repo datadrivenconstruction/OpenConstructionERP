@@ -50,6 +50,19 @@ docker compose pull app
 docker compose up -d
 ```
 
+On Windows, run the same steps in PowerShell. Use `curl.exe`, because `curl` in Windows PowerShell is a different command, and write `.env` with `Set-Content -Encoding ascii`, because a plain `>` writes UTF-16, which Compose cannot read:
+
+```powershell
+curl.exe -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/docker-compose.quickstart.yml -o docker-compose.yml
+curl.exe -fsSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/docker-compose.quickstart.image.yml -o docker-compose.override.yml
+$rng = [Security.Cryptography.RandomNumberGenerator]::Create()
+$pw = New-Object byte[] 24; $rng.GetBytes($pw)
+$jwt = New-Object byte[] 32; $rng.GetBytes($jwt)
+Set-Content -Path .env -Encoding ascii -Value "POSTGRES_PASSWORD=$([Convert]::ToBase64String($pw))", "JWT_SECRET=$(-join ($jwt | ForEach-Object { $_.ToString('x2') }))"
+docker compose pull app
+docker compose up -d
+```
+
 The app runs at [localhost:8080](http://localhost:8080).
 
 **Demo login:** `demo@openconstructionerp.com` / `DemoPass1234!`

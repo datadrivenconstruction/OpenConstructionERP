@@ -671,6 +671,8 @@ class ProjectResponse(BaseModel):
     address: dict[str, Any] | None = None
     country_code: str | None = None
     subdivision_code: str | None = None
+    # Set through the legal entities module, read-only here.
+    legal_entity_id: UUID | None = None
     contract_value: str | None = None
     planned_start_date: str | None = None
     planned_end_date: str | None = None

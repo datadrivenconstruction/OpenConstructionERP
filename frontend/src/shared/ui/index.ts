@@ -252,6 +252,7 @@ export { KvList, Kv } from './KvList';
 export { QtyTile } from './QtyTile';
 
 export { OfflineBanner } from './OfflineBanner';
+export { DesktopPortBanner } from './DesktopPortBanner';
 
 export { PWAInstallPrompt } from './PWAInstallPrompt';
 

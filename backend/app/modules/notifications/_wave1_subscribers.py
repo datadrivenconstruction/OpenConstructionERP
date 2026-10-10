@@ -61,7 +61,7 @@ async def _on_service_ticket_dispatched(event: Event) -> None:
                 },
                 entity_type="service_ticket",
                 entity_id=str(ticket_id),
-                action_url=f"/service/tickets/{ticket_id}",
+                action_url="/service",
             )
             await session.commit()
     except Exception:
@@ -88,7 +88,7 @@ async def _on_service_ticket_resolved(event: Event) -> None:
                 body_context={"ticket_number": str(data.get("ticket_number") or "")},
                 entity_type="service_ticket",
                 entity_id=str(ticket_id),
-                action_url=f"/service/tickets/{ticket_id}",
+                action_url="/service",
             )
             await session.commit()
     except Exception:
@@ -119,7 +119,7 @@ async def _on_service_work_order_billed(event: Event) -> None:
                 },
                 entity_type="service_work_order",
                 entity_id=str(wo_id),
-                action_url=f"/service/work-orders/{wo_id}",
+                action_url="/service",
             )
             await session.commit()
     except Exception:
@@ -127,6 +127,14 @@ async def _on_service_work_order_billed(event: Event) -> None:
 
 
 # ── Subcontractor Management subscribers ──────────────────────────────────
+
+
+def _subcontractor_url(data: dict, subtab: str) -> str:
+    """Open the subcontractor's drawer on ``subtab``, or the register without an id."""
+    sub_id = data.get("subcontractor_id")
+    if not sub_id:
+        return "/subcontractors"
+    return f"/subcontractors?sub={sub_id}&subtab={subtab}"
 
 
 async def _on_subcontractor_prequalification_submitted(event: Event) -> None:
@@ -149,7 +157,7 @@ async def _on_subcontractor_prequalification_submitted(event: Event) -> None:
                 body_context={"subcontractor_name": str(data.get("subcontractor_name") or "")},
                 entity_type="prequalification",
                 entity_id=str(application_id),
-                action_url=f"/subcontractors/prequalifications/{application_id}",
+                action_url=_subcontractor_url(data, "scope"),
             )
             await session.commit()
     except Exception:
@@ -183,7 +191,7 @@ async def _on_subcontractor_payment_app_submitted(event: Event) -> None:
                 },
                 entity_type="payment_application",
                 entity_id=str(pa_id),
-                action_url=f"/subcontractors/payment-applications/{pa_id}",
+                action_url=_subcontractor_url(data, "payments"),
             )
             await session.commit()
     except Exception:
@@ -216,7 +224,7 @@ async def _on_subcontractor_retention_released(event: Event) -> None:
                 },
                 entity_type="retention_release",
                 entity_id=str(release_id),
-                action_url=f"/subcontractors/retention/{release_id}",
+                action_url=_subcontractor_url(data, "retention"),
             )
             await session.commit()
     except Exception:
@@ -252,7 +260,7 @@ async def _on_equipment_assigned(event: Event) -> None:
                 },
                 entity_type="equipment",
                 entity_id=str(equipment_id),
-                action_url=f"/equipment/{equipment_id}",
+                action_url="/equipment",
             )
             await session.commit()
     except Exception:
@@ -282,7 +290,7 @@ async def _on_equipment_damage_reported(event: Event) -> None:
                 },
                 entity_type="equipment_damage",
                 entity_id=str(damage_id),
-                action_url=f"/equipment/damage/{damage_id}",
+                action_url="/equipment",
             )
             await session.commit()
     except Exception:

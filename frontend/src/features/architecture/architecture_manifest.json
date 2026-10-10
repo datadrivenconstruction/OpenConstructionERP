@@ -107946,6 +107946,7 @@
         "einvoice",
         "file_search",
         "i18n_foundation",
+        "legal_entities",
         "procurement",
         "projects",
         "subcontractors",
@@ -127581,6 +127582,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "lookup.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -127788,6 +127790,19 @@
           "method": "DELETE",
           "path": "/entities/{entity_id}/branches/{branch_id}",
           "handler": "delete_branch"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/entity",
+          "handler": "get_project_entity",
+          "response_model": "ProjectEntityResponse"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/entity",
+          "handler": "assign_project_entity",
+          "response_model": "ProjectEntityResponse",
+          "request_schema": "ProjectEntityAssign"
         }
       ],
       "schemas": [
@@ -128117,9 +128132,46 @@
               "type": "int"
             }
           ]
+        },
+        {
+          "class_name": "ProjectEntityAssign",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Name the entity that owns a project; null clears it back to the default.",
+          "fields": [
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectEntityResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The entity a project's documents belong to, and why.\n\n``source`` is ``assigned`` when the project names the entity, ``default``\nwhen it names none and the default entity answers, and ``none`` when there\nis neither, so a caller never mistakes the fallback for a choice.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "legal_entity",
+              "type": "LegalEntityResponse | None"
+            },
+            {
+              "name": "source",
+              "type": "Literal['assigned', 'default', 'none']"
+            }
+          ]
         }
       ],
-      "import_dependencies": []
+      "import_dependencies": [
+        "projects"
+      ]
     },
     {
       "module_id": "markups",
@@ -137958,6 +138010,7 @@
         "_wave4_subscribers.py",
         "_wave5_cross_module_subscribers.py",
         "dispatcher.py",
+        "email_render.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -153477,6 +153530,12 @@
               "nullable": true
             },
             {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "project_code",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -154862,6 +154921,11 @@
             {
               "name": "subdivision_code",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
               "default": "None"
             },
             {
@@ -236247,10 +236311,10 @@
     },
     {
       "name": "finance",
-      "ts_files": 31,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 31
+      "test_files": 14,
+      "total_files": 34
     },
     {
       "name": "forms",
@@ -236394,6 +236458,13 @@
     },
     {
       "name": "labor-rates",
+      "ts_files": 4,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 4
+    },
+    {
+      "name": "legal-entities",
       "ts_files": 4,
       "css_files": 0,
       "test_files": 1,
@@ -237652,6 +237723,7 @@
       "einvoice",
       "file_search",
       "i18n_foundation",
+      "legal_entities",
       "procurement",
       "projects",
       "subcontractors",
@@ -237743,7 +237815,9 @@
       "users"
     ],
     "latam_pack": [],
-    "legal_entities": [],
+    "legal_entities": [
+      "projects"
+    ],
     "markups": [
       "documents",
       "file_versions",
@@ -238321,14 +238395,14 @@
     "backend_modules": 197,
     "modules_with_manifests": 195,
     "total_models": 626,
-    "total_columns": 7183,
+    "total_columns": 7184,
     "total_relationships": 236,
-    "total_routes": 3773,
-    "total_schemas": 3579,
-    "total_python_files": 2305,
-    "frontend_features": 193,
-    "frontend_ts_files": 3018,
-    "frontend_backend_mapped": 171
+    "total_routes": 3775,
+    "total_schemas": 3581,
+    "total_python_files": 2307,
+    "frontend_features": 194,
+    "frontend_ts_files": 3025,
+    "frontend_backend_mapped": 172
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -238438,6 +238512,7 @@
     "issues": null,
     "jobs": "jobs",
     "labor-rates": "labor_rates",
+    "legal-entities": "legal_entities",
     "markups": "markups",
     "match": "match",
     "match-elements": "match_elements",

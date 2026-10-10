@@ -108,6 +108,19 @@ export default {
           'info-vivid': 'var(--oe-info-vivid)',
         },
       },
+      // Tailwind paints the gap of every `ring-offset-*` with white unless told
+      // otherwise, so in dark mode each focused Button carried a bright white
+      // band between its edge and its blue ring. The page background token is
+      // #ffffff in light mode, so light mode renders exactly as before.
+      ringOffsetColor: {
+        DEFAULT: 'var(--oe-bg)',
+      },
+      // The colour preflight gives every border whose class names no colour
+      // that exists. Tailwind's own default is gray-200, a near white line on
+      // a dark surface; see `--oe-border-default` in index.css.
+      borderColor: {
+        DEFAULT: 'var(--oe-border-default)',
+      },
       fontFamily: {
         sans: ['var(--oe-font-sans)'],
         mono: ['var(--oe-font-mono)'],

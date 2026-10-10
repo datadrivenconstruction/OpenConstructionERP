@@ -14,8 +14,9 @@ Wenn etwas schiefgeht, schreibt die App auf, was passiert ist. Wenn Sie uns schr
 
 | Datei | Wo sie liegt | Was sie enthält |
 |---|---|---|
-| `desktop-launcher.log` | Windows: `C:\Users\<Ihr Name>\.openestimate\`<br>macOS und Linux: `~/.openestimate/` | Alles, was die Desktop-App beim Start getan hat |
-| `backend-crash.log` | im Ordner `logs` Ihres Datenordners, also im selben `.openestimate`, sofern Sie `OE_DATA_DIR` nicht gesetzt haben | Details zu einem unerwarteten Stopp |
+| `desktop-launcher.log` | Windows: `C:\Users\<Ihr Name>\.openestimate\`<br>macOS und Linux: `~/.openestimate/` | Alles, was die Desktop-App beim Start getan hat. Sie bleibt in Ihrem Benutzerordner, auch wenn `OE_DATA_DIR` die Daten verlegt |
+| `backend-crash.log` | im Ordner `logs` Ihres Datenordners, also im selben `.openestimate`, sofern Sie `OE_DATA_DIR` nicht gesetzt haben | Details zu einem unerwarteten Stopp. Sie zieht mit `OE_DATA_DIR` um |
+| Ordner `log` der Datenbank | `pgdata\log` in Ihrem Datenordner, standardmäßig also `.openestimate\pgdata\log`. Liegt in `.openestimate` eine Datei `pgdata.location`, der Ordner `log` in dem dort genannten Ordner | Warum die eingebaute Datenbank nicht gestartet ist |
 | `OpenConstructionERP-install-error.log` | Windows: `%TEMP%` (in die Adressleiste des Explorers eingeben) | Warum das Installationsprogramm abgebrochen hat |
 
 Auf macOS und Linux ist `.openestimate` ein versteckter Ordner. Im Finder blenden Sie versteckte Ordner mit Cmd+Umschalt+. ein.
@@ -37,8 +38,8 @@ Wenn Sie mit pip installiert haben, führen Sie im Terminal `openconstructionerp
 **Was tun:** Behalten Sie den vorgeschlagenen Ordner `C:\Program Files\OpenConstructionERP` oder wählen Sie einen wie `C:\OpenConstructionERP`. Bei einer stillen Installation (`/S`) zeigt das Programm dieselbe Meldung, endet mit Code 3 und schreibt den Grund nach `%TEMP%\OpenConstructionERP-install-error.log`.
 
 **Sie sehen:** Die Installation bricht mit einem Fehler zu WebView2 ab.
-**Das heißt:** Windows konnte Microsoft WebView2 nicht installieren, die Komponente, die das App-Fenster zeichnet. Das Installationsprogramm bringt sie mit, aber Windows muss sie annehmen.
-**Was tun:** Starten Sie die Installation erneut. Scheitert sie wieder, installieren Sie "Microsoft Edge WebView2 Runtime" von der Microsoft-Website und starten Sie unser Installationsprogramm noch einmal.
+**Das heißt:** Windows konnte Microsoft WebView2 nicht installieren, die Komponente, die das App-Fenster zeichnet. Das Installationsprogramm bringt sie mit, eine Internetverbindung ist also nicht nötig; der Fehler kommt von Windows selbst, etwa durch eine Richtlinie, ein ausstehendes Update oder ein beschädigtes früheres WebView2.
+**Was tun:** Starten Sie den Rechner neu und dann die Installation erneut. Scheitert sie wieder, installieren Sie "Microsoft Edge WebView2 Runtime" von der Microsoft-Website und starten Sie unser Installationsprogramm noch einmal.
 
 **Sie sehen:** Ihr Virenschutz löscht eine Datei oder verschiebt sie während der Installation in die Quarantäne.
 **Das heißt:** Das Programm ist neu und unsigniert, manche Virenschutzprogramme behandeln es deshalb misstrauisch.
@@ -51,17 +52,17 @@ Wenn Sie mit pip installiert haben, führen Sie im Terminal `openconstructionerp
 **Was tun:** Lassen Sie die bereits ausgewählte Option (überschreiben) stehen. Das Installationsprogramm schließt die laufende App selbst und behält alle Ihre Projekte. Der erste Start nach einem Update kann länger dauern, während sich die Datenbank aktualisiert.
 
 **Sie sehen:** Sie betreiben OpenConstructionERP auf demselben Rechner auch mit pip oder aus einem Terminal.
-**Das heißt:** Beide nutzen denselben Ordner `.openestimate` und dieselbe Datenbank. Das Installationsprogramm hält diese Datenbank an, um die Programmdateien zu ersetzen, und damit fällt die Terminal-Version aus.
+**Das heißt:** Beide nutzen denselben Ordner `.openestimate` und dieselbe Datenbank. Das Installationsprogramm hält diese Datenbank an, um die Programmdateien zu ersetzen, und damit fällt die Terminal-Version aus. Beim Update von 18.4.0 schließt das alte Deinstallationsprogramm außerdem jedes Programm namens `openconstructionerp.exe`, also auch eine mit pip gestartete Terminal-Version.
 **Was tun:** Beenden Sie die Terminal-Version (Strg+C in ihrem Fenster) vor der Installation und starten Sie sie danach wieder.
 
 **Sie sehen:** Mitten im Update erscheint das Deinstallationsfenster der alten Version.
 **Das heißt:** Sie haben gewählt, die alte Version zuerst zu entfernen. Das funktioniert, dauert nur länger.
-**Was tun:** Lassen Sie es durchlaufen. Das Kästchen "Delete the application data" können Sie leer lassen. Ihre Projekte entfernt es so oder so nicht.
+**Was tun:** Lassen Sie es durchlaufen. Das Kästchen "Delete the application data" können Sie leer lassen. Es entfernt nur, was das App-Fenster speichert, Ihre Anmeldung und die gewählte Sprache (in `%APPDATA%` und `%LOCALAPPDATA%\io.openconstructionerp.desktop`), niemals Ihre Projekte.
 
-## Windows: beim Start
+## Desktop-App: beim Start
 
 **Sie sehen:** beim allerersten Start eine Minute oder länger den Ladebildschirm.
-**Das heißt:** Die App legt ihre lokale Datenbank an. Das dauert einmalig etwa 40 bis 90 Sekunden, auf einer langsamen Festplatte länger.
+**Das heißt:** Die App legt ihre lokale Datenbank an. Das dauert einmalig ein bis zwei Minuten, auf einer langsamen Festplatte länger.
 **Was tun:** Warten Sie und schließen Sie das Fenster nicht. Spätere Starts sind schnell.
 
 **Sie sehen:** ein Fenster "OpenConstructionERP failed to start", das eine Protokolldatei nennt.
@@ -96,17 +97,21 @@ Wenn Sie mit pip installiert haben, führen Sie im Terminal `openconstructionerp
 **Das heißt:** Der Hintergrundteil der App hat unerwartet angehalten, und die App hat ihn neu gestartet. Ihre gespeicherte Arbeit bleibt erhalten. Das geschieht höchstens zweimal in 30 Minuten.
 **Was tun:** Arbeiten Sie weiter. Passiert es immer wieder, oder sehen Sie danach "The application backend has stopped", senden Sie uns `desktop-launcher.log` und `logs\backend-crash.log`.
 
-**Sie sehen:** Nach einem Neustart sind Sie abgemeldet und die Sprache steht wieder auf Englisch.
-**Das heißt:** Ein anderes Programm belegte den üblichen Port 8732 der App, also hat sie einen anderen gewählt. Die Fensteransicht behandelt einen anderen Port wie eine andere Website.
-**Was tun:** Melden Sie sich erneut an. Damit es nicht wieder passiert, schließen Sie das andere Programm, das Port 8732 nutzt.
+**Sie sehen:** Bei jedem Start der App sind Sie abgemeldet und die Sprache steht wieder auf Englisch.
+**Das heißt:** Ein anderes Programm belegt Port 8732, den Port, den die App normalerweise nutzt. Version 18.5.0 wählt dann bei jedem Start einen zufälligen freien Port, und das App-Fenster behandelt jeden neuen Port wie eine neue Website, findet also Ihre Anmeldung und Sprache nicht. Ihre Projekte sind nicht betroffen.
+**Was tun:** Schließen Sie das andere Programm, das Port 8732 nutzt, oder stellen Sie es um. Unter Windows zeigt `netstat -ano | findstr :8732` im Terminal seine Prozess-ID, und der Task-Manager listet diese ID unter Details.
 
-**Sie sehen:** "The application could not unpack itself into the temporary folder it uses."
-**Das heißt:** Der Virenschutz hat Dateien beim Entpacken entfernt oder gesperrt, oder das Laufwerk mit dem temporären Ordner ist voll. Unter Windows betrifft das Versionen bis 18.4; ab 18.5 entpackt sich die Windows-App nicht mehr bei jedem Start.
+**Sie sehen:** "The application never finished unpacking itself, so its backend never started." oder "The application could not unpack itself into the temporary folder it uses."
+**Das heißt:** Unter macOS und Linux entpackt die App ihr Backend bei jedem Start in einen temporären Ordner, wie es die Windows-App bis 18.4 tat. Ein langsames oder volles Laufwerk oder ein Virenschutz, der die Dateien entfernt oder sperrt, verhindert das. Ab 18.5 entpackt sich die Windows-App nicht mehr.
 **Was tun:** Schaffen Sie Platz auf diesem Laufwerk oder erlauben Sie die App im Virenschutz und starten Sie erneut.
+
+**Sie sehen:** Sie betreiben bereits PostgreSQL auf Port 5432 und befürchten einen Konflikt mit der App.
+**Das heißt:** Es gibt keinen. Die eingebaute Datenbank nimmt unter Windows einen zufälligen freien lokalen Port und lauscht unter macOS und Linux nur auf einem lokalen Socket.
+**Was tun:** Nichts.
 
 ## macOS
 
-**Sie sehen:** Die `.dmg` lässt sich auf Ihrem Mac gar nicht öffnen.
+**Sie sehen:** Die App läuft auf Ihrem Mac gar nicht.
 **Das heißt:** Die Mac-Version ist nur für Apple Silicon (M1 und neuer). Für Intel-Macs gibt es keine.
 **Was tun:** Auf einem Intel-Mac nutzen Sie pip oder Docker wie im README beschrieben.
 
@@ -124,7 +129,11 @@ Oder klicken Sie die App in "Programme" mit der rechten Maustaste an und wählen
 
 **Sie sehen:** Die `.deb` verlangt `libwebkit2gtk-4.1-0` oder lässt sich nicht installieren.
 **Das heißt:** Die App braucht die Bibliothek WebKitGTK 4.1, um ihr Fenster zu zeichnen.
-**Was tun:** Installieren Sie mit `sudo apt install ./OpenConstructionERP_*_amd64.deb`, das zieht die Bibliothek mit. Auf älteren Distributionen ohne Version 4.1 nutzen Sie das AppImage oder pip.
+**Was tun:** Installieren Sie mit `sudo apt install ./OpenConstructionERP_*_amd64.deb`, das zieht die Bibliothek mit. Bietet Ihre Distribution kein `libwebkit2gtk-4.1-0` (Ubuntu älter als 22.04, Debian älter als 12), nutzen Sie pip.
+
+**Sie sehen:** Die `.rpm` lässt sich nicht installieren oder meldet fehlende Abhängigkeiten.
+**Das heißt:** `rpm -i` installiert die Bibliotheken nicht, die die App braucht.
+**Was tun:** Installieren Sie mit `sudo dnf install ./OpenConstructionERP-*.x86_64.rpm`, das zieht sie mit.
 
 **Sie sehen:** Das AppImage tut beim Doppelklick nichts.
 **Das heißt:** Die Datei ist noch nicht als Programm markiert.
@@ -144,9 +153,21 @@ Oder klicken Sie die App in "Programme" mit der rechten Maustaste an und wählen
 **Das heißt:** OpenConstructionERP braucht Python 3.12 oder neuer.
 **Was tun:** Installieren Sie Python 3.12 oder neuer und führen Sie `python3.12 -m pip install --upgrade openconstructionerp` aus (unter Windows `py -3.12 -m pip ...`).
 
+**Sie sehen:** `error: externally-managed-environment` (Ubuntu ab 23.04, Debian ab 12).
+**Das heißt:** Das System-Python lässt pip nicht hineininstallieren.
+**Was tun:** Nutzen Sie `pipx install openconstructionerp` oder legen Sie zuerst eine virtuelle Umgebung an: `python3 -m venv ~/oe && ~/oe/bin/pip install openconstructionerp`. Details stehen in [Installing on Linux](INSTALL_LINUX.md).
+
+**Sie sehen:** `openconstructionerp` wird nicht erkannt, oder command not found.
+**Das heißt:** Der Ordner, in den pip Befehle legt, steht nicht im PATH, was unter Windows häufig ist.
+**Was tun:** Führen Sie stattdessen `python -m openconstructionerp` aus. Das funktioniert auf jedem System, ohne PATH anzufassen.
+
 **Sie sehen:** "Port 8080 is already in use. Try: openconstructionerp serve --port 8081".
 **Das heißt:** Ein anderes Programm nutzt Port 8080.
 **Was tun:** Führen Sie den vorgeschlagenen Befehl aus und öffnen Sie die Adresse, die er ausgibt.
+
+**Sie sehen:** "Embedded PostgreSQL could not start".
+**Das heißt:** Die eingebaute Datenbank ist nicht gestartet. Die Meldung nennt den Ordner mit ihrem Protokoll.
+**Was tun:** Führen Sie `openconstructionerp doctor` aus. Hilft das nicht, installieren Sie mit `pip install --upgrade --force-reinstall openconstructionerp` neu und senden Sie uns das genannte Protokoll.
 
 **Sie sehen:** Sie wissen nicht, wo Ihre Daten liegen.
 **Das heißt:** pip legt alles in `.openestimate` in Ihrem Benutzerordner ab, demselben Ordner wie die Desktop-App.
@@ -154,9 +175,17 @@ Oder klicken Sie die App in "Programme" mit der rechten Maustaste an und wählen
 
 ## Docker
 
+**Sie sehen:** Compose bricht mit "POSTGRES_PASSWORD must be set" oder "JWT_SECRET must be set" ab.
+**Das heißt:** Die Datei `.env` mit den beiden Schlüsseln fehlt oder liegt nicht im Ordner mit `docker-compose.yml`.
+**Was tun:** Legen Sie sie in diesem Ordner an, wie in [Getting started](getting-started.md#path-c-docker) gezeigt. Unter Windows nutzen Sie die PowerShell-Befehle von dort, denn ein einfaches `>` in Windows PowerShell schreibt eine Datei, die Compose nicht lesen kann.
+
 **Sie sehen:** http://localhost:8080 öffnet sich nicht.
 **Das heißt:** Der Container läuft nicht, oder ein anderes Programm nutzt Port 8080.
-**Was tun:** Führen Sie im Ordner mit `docker-compose.yml` `docker compose ps` und `docker compose logs app` aus, um den Grund zu sehen. Bewahren Sie die Datei `.env` in diesem Ordner gut auf: Sie enthält das Datenbankpasswort und den Anmeldeschlüssel.
+**Was tun:** Führen Sie im Ordner mit `docker-compose.yml` `docker compose ps` und `docker compose logs app` aus, um den Grund zu sehen. Für einen anderen Port starten Sie mit `OE_PORT=8081 OE_ALLOWED_ORIGINS=http://localhost:8081 docker compose up -d` und öffnen http://localhost:8081. Bewahren Sie die Datei `.env` in diesem Ordner gut auf: Sie enthält das Datenbankpasswort und den Anmeldeschlüssel.
+
+**Sie sehen:** Auf einem Mac mit Apple Silicon oder einem anderen ARM-Rechner warnt Docker, dass die Image-Plattform `linux/amd64` nicht passt, oder die App ist sehr langsam.
+**Das heißt:** Das veröffentlichte Image ist nur für x86-64 gebaut.
+**Was tun:** Bauen Sie aus dem Quellcode mit `make quickstart`, oder nutzen Sie pip.
 
 ## Deinstallieren und Ihre Daten
 

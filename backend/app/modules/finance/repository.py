@@ -130,8 +130,21 @@ class InvoiceRepository:
         constraint on the column, which cannot be added until existing data is
         swept for duplicates. Until then this is best effort, and callers must
         not treat the result as guaranteed unique.
+
+        A project that names its legal entity numbers under the entity's code,
+        ``DE01-INV-R-001``, so the companies of a group never issue the same
+        number. A project that names none keeps the plain prefix, and numbers
+        already issued are never rewritten.
         """
         prefix = "INV-P" if direction == "payable" else "INV-R"
+        try:
+            from app.modules.legal_entities.lookup import assigned_entity_code
+
+            entity_code = await assigned_entity_code(self.session, project_id)
+        except ImportError:
+            entity_code = None
+        if entity_code:
+            prefix = f"{entity_code}-{prefix}"
         stmt = (
             select(func.max(Invoice.invoice_number))
             .where(Invoice.project_id == project_id)

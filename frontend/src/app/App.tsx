@@ -24,7 +24,7 @@ import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
 import { ModuleVideosSlot } from '@/features/videos/ModuleVideosSlot';
-import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, PWAInstallPrompt } from '@/shared/ui';
+import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
 import { AdminOnly } from '@/shared/auth/AdminOnly';
 import GlobalSearchModal from '@/features/search/GlobalSearchModal';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
@@ -418,6 +418,9 @@ const PaymentClockPage = lazy(() =>
 );
 const TaxWithholdingPage = lazy(() =>
   import('@/features/tax-withholding').then((m) => ({ default: m.TaxWithholdingPage }))
+);
+const LegalEntitiesPage = lazy(() =>
+  import('@/features/legal-entities').then((m) => ({ default: m.LegalEntitiesPage }))
 );
 const TaxRatesPage = lazy(() =>
   import('@/features/tax-rates').then((m) => ({ default: m.TaxRatesPage }))
@@ -1118,6 +1121,7 @@ export default function App() {
           between history push and location commit (navigationProgress.ts). */}
       <NavigationProgress />
       <OfflineBanner />
+      <DesktopPortBanner />
       {isAuthenticated && <GlobalShortcuts />}
       {/* First-run product tour — 8-step spotlight walk-through. Always
           mounted (for authenticated users) but renders nothing unless
@@ -1594,6 +1598,7 @@ export default function App() {
         <Route path="/payment-clock" element={<P title="Payment Clock"><PaymentClockPage /></P>} />
         <Route path="/tax-withholding" element={<P title="Withholding Tax"><TaxWithholdingPage /></P>} />
         <Route path="/tax-rates" element={<P title="Tax Rates"><TaxRatesPage /></P>} />
+        <Route path="/admin/legal-entities" element={<P title="Legal Entities"><LegalEntitiesPage /></P>} />
         <Route path="/einvoice-clearance" element={<P title="E-invoice Clearance"><EInvoiceClearancePage /></P>} />
         <Route path="/cost-match" element={<P title="Cost Match"><CostMatchPage /></P>} />
         <Route path="/full-evm" element={<P title="Earned Value"><FullEvmPage /></P>} />

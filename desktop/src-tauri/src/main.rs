@@ -1259,17 +1259,109 @@ const DEFAULT_BACKEND_PORT: u16 = 8732;
 /// user's own translation overrides. Picking a fresh random port on every run
 /// therefore signed the user out and reset their language on every restart,
 /// with nothing on screen to connect the two. Take the default port whenever it
-/// is free and only fall back to a picked one when something else holds it.
+/// is free and only fall back to another one when something else holds it.
+///
+/// The fallback is stable too. A random port on every run moved the origin
+/// again on every start for as long as another program kept the default, so
+/// the session and the language were lost on each one. The port this install
+/// served on last time comes first, then a short fixed range, and a random one
+/// only when all of those are taken; a fallback that is chosen is written down
+/// for the next start. Another program holding the default for good then costs the
+/// user one move, not one per start.
 ///
 /// Binding and dropping a listener is the only honest way to ask: the bind
 /// releases the port at the end of the expression, which leaves the usual tiny
 /// race between the check and the sidecar's own bind. That race is what the
 /// picker has always had, so this is no weaker than what it replaces.
 fn find_available_port() -> u16 {
-    if std::net::TcpListener::bind(("127.0.0.1", DEFAULT_BACKEND_PORT)).is_ok() {
-        return DEFAULT_BACKEND_PORT;
+    let last = read_last_port();
+    let port = choose_backend_port(
+        last,
+        |port| std::net::TcpListener::bind(("127.0.0.1", port)).is_ok(),
+        portpicker::pick_unused_port,
+    );
+    if port != DEFAULT_BACKEND_PORT {
+        log_line(&format!(
+            "port {DEFAULT_BACKEND_PORT} is taken by another program; serving on {port}, \
+so this window keeps a separate sign-in and language until {DEFAULT_BACKEND_PORT} is free again"
+        ));
     }
-    portpicker::pick_unused_port().unwrap_or(DEFAULT_BACKEND_PORT)
+    port
+}
+
+/// Remember a fallback port once our own backend is going to serve on it.
+///
+/// Not at the moment the port is picked: the default can be taken by a backend
+/// of our own left over from the last run, which is then attached to and
+/// nothing serves on the picked port at all. Only a fallback is remembered; the
+/// default needs no memory, and writing it would forget the fallback the user's
+/// other origin is on.
+fn remember_serving_port(port: u16) {
+    if port != DEFAULT_BACKEND_PORT && read_last_port() != Some(port) {
+        write_last_port(port);
+    }
+}
+
+/// The ports probed for a backend of our own, the last fallback included.
+///
+/// A backend left running on a remembered fallback port would otherwise be
+/// missed, and a second one started on the same database.
+fn attach_candidates(last: Option<u16>) -> Vec<u16> {
+    let mut ports = ATTACH_CANDIDATE_PORTS.to_vec();
+    if let Some(port) = last {
+        if !ports.contains(&port) {
+            ports.push(port);
+        }
+    }
+    ports
+}
+
+/// Ports tried, in order, when the default is taken and the last one is too.
+const FALLBACK_BACKEND_PORTS: std::ops::RangeInclusive<u16> = 8733..=8741;
+
+/// The file in the data directory that remembers the port served on last.
+const LAST_PORT_FILENAME: &str = "desktop-port.txt";
+
+/// The order the backend port is chosen in, without touching the network.
+///
+/// `is_free` answers for one port and `pick_random` is the last resort. Kept
+/// apart from the binds so the order itself can be tested.
+fn choose_backend_port(
+    last: Option<u16>,
+    is_free: impl Fn(u16) -> bool,
+    pick_random: impl FnOnce() -> Option<u16>,
+) -> u16 {
+    let ordered = std::iter::once(DEFAULT_BACKEND_PORT)
+        .chain(last.filter(|port| *port != DEFAULT_BACKEND_PORT))
+        .chain(FALLBACK_BACKEND_PORTS.filter(move |port| Some(*port) != last));
+    for port in ordered {
+        if is_free(port) {
+            return port;
+        }
+    }
+    pick_random().unwrap_or(DEFAULT_BACKEND_PORT)
+}
+
+/// The fallback port this install served on last time, if it wrote one down.
+fn read_last_port() -> Option<u16> {
+    let path = workspace_data_dir()?.join(LAST_PORT_FILENAME);
+    parse_last_port(&std::fs::read_to_string(path).ok()?)
+}
+
+/// A remembered port, or nothing for an empty, foreign or out-of-range value.
+fn parse_last_port(text: &str) -> Option<u16> {
+    text.trim().parse::<u16>().ok().filter(|port| *port >= 1024)
+}
+
+/// Remember the port for the next start. Failing to is not worth a word to the
+/// user: the next start simply tries the fixed range again.
+fn write_last_port(port: u16) {
+    let Some(dir) = workspace_data_dir() else {
+        return;
+    };
+    if std::fs::create_dir_all(&dir).is_ok() {
+        let _ = std::fs::write(dir.join(LAST_PORT_FILENAME), format!("{port}\n"));
+    }
 }
 
 /// Resolve the bundled read-only converters directory shipped as an app
@@ -1672,7 +1764,7 @@ workspace it belongs to"
 /// that a launcher which cannot establish an identity at all never reaches this
 /// function: with nothing to compare against there is no port it may attach to.
 async fn find_existing_backend(client: &reqwest::Client, our_workspace: &str) -> Option<u16> {
-    for port in ATTACH_CANDIDATE_PORTS {
+    for port in attach_candidates(read_last_port()) {
         if is_our_backend_healthy(client, port, our_workspace).await {
             return Some(port);
         }
@@ -1829,6 +1921,7 @@ recognised as its own; starting a server instead",
         }
         None => {
             log_line("no existing backend found; starting our own sidecar");
+            remember_serving_port(local_port);
             BackendSource::StartLocally {
                 base_url: format!("http://127.0.0.1:{local_port}/"),
                 port: local_port,
@@ -5110,6 +5203,55 @@ b
 c", 2), "b
 c");
         assert_eq!(super::tail_lines("a", 5), "a");
+    }
+
+    #[test]
+    fn the_default_port_wins_whenever_it_is_free() {
+        let port = super::choose_backend_port(Some(8736), |_| true, || panic!("no random pick"));
+        assert_eq!(port, super::DEFAULT_BACKEND_PORT);
+    }
+
+    #[test]
+    fn a_taken_default_falls_back_to_the_last_port_then_the_fixed_range() {
+        let taken = |busy: Vec<u16>| move |port: u16| !busy.contains(&port);
+        // The remembered fallback first, so the user lands where they were.
+        assert_eq!(
+            super::choose_backend_port(Some(8736), taken(vec![8732]), || None),
+            8736
+        );
+        // Without one, the first free port of the range, the same on every start.
+        assert_eq!(
+            super::choose_backend_port(None, taken(vec![8732, 8733]), || None),
+            8734
+        );
+        // A remembered port that is taken now is skipped, not retried twice.
+        assert_eq!(
+            super::choose_backend_port(Some(8733), taken(vec![8732, 8733]), || None),
+            8734
+        );
+    }
+
+    #[test]
+    fn random_is_the_last_resort() {
+        let port = super::choose_backend_port(None, |port| !(8732..=8741).contains(&port), || Some(50_123));
+        assert_eq!(port, 50_123);
+    }
+
+    #[test]
+    fn a_remembered_port_is_read_only_when_it_is_a_plausible_port() {
+        assert_eq!(super::parse_last_port("8735\n"), Some(8735));
+        assert_eq!(super::parse_last_port(""), None);
+        assert_eq!(super::parse_last_port("80"), None);
+        assert_eq!(super::parse_last_port("not a port"), None);
+    }
+
+    #[test]
+    fn a_backend_on_the_remembered_port_is_probed_too() {
+        assert!(super::attach_candidates(Some(8736)).contains(&8736));
+        assert_eq!(
+            super::attach_candidates(Some(8732)),
+            super::ATTACH_CANDIDATE_PORTS.to_vec()
+        );
     }
 
     use super::*;

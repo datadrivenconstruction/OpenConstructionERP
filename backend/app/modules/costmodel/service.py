@@ -3937,7 +3937,7 @@ class CostOverrunAlertService:
             },
             entity_type="budget_line",
             entity_id=str(line_id),
-            action_url=f"/costmodel?line={line_id}",
+            action_url="/5d",
         )
 
         # Stamp the cooldown anchor so a second event inside 24h is a no-op.

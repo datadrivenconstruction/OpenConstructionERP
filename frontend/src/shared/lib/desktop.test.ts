@@ -288,3 +288,84 @@ describe('revealing a file in the OS file manager', () => {
     expect(await toastsRaised()).toHaveLength(0);
   });
 });
+
+/**
+ * Every outbound link in the header menus, on both builds.
+ *
+ * The bug menu was reported with all of its links dead on the desktop app. The
+ * menus reach the outside world two ways: buttons that call `openLink`, and
+ * plain anchors that rely on the capture-phase handler from
+ * `installDesktopExternalLinks`. Both are pinned here, because the handler had
+ * no test at all and a regression in it would silence every anchor at once.
+ */
+describe('outbound links from the header menus', () => {
+  const MAIL =
+    'mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue&body=I%20clicked%20Install';
+  const FORM = 'https://openconstructionerp.com/contact.html?report=true&app_version=18.5.0';
+  const ISSUE = 'https://github.com/datadrivenconstruction/OpenConstructionERP/issues/new?title=x&body=y';
+
+  it('hands every external link and mail link to the OS opener on desktop', async () => {
+    const invoke = vi.fn().mockResolvedValue(undefined);
+    const { openLink } = await loadDesktop({ core: { invoke } });
+
+    for (const url of [MAIL, FORM, ISSUE]) openLink(url);
+    await settle();
+
+    expect(invoke.mock.calls).toEqual([
+      ['open_external_url', { url: MAIL }],
+      ['open_external_url', { url: FORM }],
+      ['open_external_url', { url: ISSUE }],
+    ]);
+  });
+
+  it('opens a real tab in the web build and never asks a bridge that is not there', async () => {
+    const { openLink } = await loadDesktop(undefined);
+    const clicked: string[] = [];
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      clicked.push(`${this.target} ${this.href}`);
+    });
+
+    openLink(FORM);
+
+    expect(clicked).toEqual([`_blank ${FORM}`]);
+  });
+
+  it('routes plain anchors through the opener on desktop and leaves app routes alone', async () => {
+    const invoke = vi.fn().mockResolvedValue(undefined);
+    const { installDesktopExternalLinks } = await loadDesktop({ core: { invoke } });
+    delete (window as { __oeExternalLinks?: boolean }).__oeExternalLinks;
+    installDesktopExternalLinks();
+
+    const links: Array<[string, string]> = [
+      ['https://openconstructionerp.com/docs', '_blank'],
+      ['https://github.com/datadrivenconstruction/OpenConstructionERP', '_blank'],
+      ['mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report', ''],
+      ['/how-it-works', ''],
+    ];
+    const anchors = links.map(([href, target]) => {
+      const a = document.createElement('a');
+      a.href = href;
+      if (target) a.target = target;
+      // Clicks land on the icon or the label inside the anchor, not on it.
+      const label = document.createElement('span');
+      a.appendChild(label);
+      document.body.appendChild(a);
+      return label;
+    });
+
+    const prevented = anchors.map((label) => {
+      const event = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+      label.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    await settle();
+
+    expect(prevented).toEqual([true, true, true, false]);
+    expect(invoke.mock.calls.map((call) => (call[1] as { url: string }).url)).toEqual([
+      'https://openconstructionerp.com/docs',
+      'https://github.com/datadrivenconstruction/OpenConstructionERP',
+      'mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report',
+    ]);
+    anchors.forEach((label) => label.parentElement?.remove());
+  });
+});

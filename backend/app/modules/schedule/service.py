@@ -181,9 +181,12 @@ _FALLBACK_PRICE_SHARE_CAP = 3.0
 # gives hours but no crew. A person may ask for any number in the same range.
 MAX_ASSUMED_WORKERS = 20
 
-# The longest one generated position may run, in working days: about a
-# century, far past any real window and far short of the last calendar date.
-_MAX_TASK_WORKING_DAYS = 26_000
+# The longest one generated position may run, in working days: about four
+# centuries, far short of the last calendar date. It only stops a date overflow
+# and must not trim a merely absurd duration: several demo bills ask for more
+# than a century on one position, and the duration diagnostics have to see the
+# real figure to name that bottleneck.
+_MAX_TASK_WORKING_DAYS = 100_000
 
 # Lump-sum positions get a flat labor-hour allowance regardless of quantity.
 _FALLBACK_LUMP_SUM_HOURS = 8.0

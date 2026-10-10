@@ -70,7 +70,7 @@ async def _on_bi_alert_triggered(event: Event) -> None:
                     body_context=body_context,
                     entity_type="bi_alert",
                     entity_id=str(data.get("alert_id", "")),
-                    action_url="/bi-dashboards/alerts",
+                    action_url="/bi-dashboards",
                 )
             await session.commit()
     except Exception:
@@ -107,7 +107,9 @@ async def _on_bi_report_generated(event: Event) -> None:
                     },
                     entity_type="bi_report",
                     entity_id=str(data.get("report_id", "")),
-                    action_url=(file_url or "/bi-dashboards/reports"),
+                    # ``file_url`` is an API download path, not a page; it
+                    # stays in ``body_context`` and the link opens the module.
+                    action_url="/bi-dashboards",
                 )
             await session.commit()
     except Exception:
@@ -157,7 +159,7 @@ async def _on_supplier_po_sent(event: Event) -> None:
                 },
                 entity_type="supplier_catalogs_po",
                 entity_id=str(po_id),
-                action_url=f"/procurement/po/{po_id}",
+                action_url="/supplier-catalogs",
             )
             await session.commit()
     except Exception:
@@ -189,7 +191,7 @@ async def _on_supplier_invoice_exception(event: Event) -> None:
                 },
                 entity_type="supplier_catalogs_invoice",
                 entity_id=str(invoice_id),
-                action_url=f"/finance/invoices/{invoice_id}",
+                action_url="/supplier-catalogs",
             )
             await session.commit()
     except Exception:
@@ -234,7 +236,7 @@ async def _on_supplier_invoice_currency_mismatch(event: Event) -> None:
                 },
                 entity_type="supplier_catalogs_invoice",
                 entity_id=str(invoice_id),
-                action_url=f"/finance/invoices/{invoice_id}",
+                action_url="/supplier-catalogs",
             )
             await session.commit()
     except Exception:
@@ -290,7 +292,7 @@ async def _on_supplier_stock_low(event: Event) -> None:
                     },
                     entity_type="supplier_catalogs_stock",
                     entity_id=str(data.get("catalog_item_id") or ""),
-                    action_url=f"/warehouses/{warehouse_id}",
+                    action_url="/supplier-catalogs",
                 )
             await session.commit()
     except Exception:
@@ -320,7 +322,7 @@ async def _on_supplier_vendor_blacklisted(event: Event) -> None:
                 },
                 entity_type="supplier_catalogs_vendor",
                 entity_id=str(vendor_id),
-                action_url=f"/procurement/vendors/{vendor_id}",
+                action_url="/supplier-catalogs",
             )
             await session.commit()
     except Exception:
@@ -381,7 +383,7 @@ async def _on_supplier_kyc_expiring(event: Event) -> None:
                 },
                 entity_type="supplier_catalogs_kyc",
                 entity_id=str(data.get("doc_id", "")),
-                action_url=f"/procurement/vendors/{vendor_id}",
+                action_url="/supplier-catalogs",
             )
             await session.commit()
     except Exception:

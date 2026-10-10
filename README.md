@@ -483,7 +483,7 @@ echo "JWT_SECRET=$(openssl rand -hex 32)"           >> .env
 make quickstart
 ```
 
-Open **http://localhost:8080**. See [docs/getting-started.md](docs/getting-started.md) for Windows PowerShell commands and the full compose file reference.
+Open **http://localhost:8080**. On Windows PowerShell, see [docs/getting-started.md](docs/getting-started.md#path-c-docker) for the same steps in PowerShell (a plain `>` there writes a `.env` that Compose cannot read).
 
 ### Alternative 3: Local development (clone + npm + uvicorn)
 

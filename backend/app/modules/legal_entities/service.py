@@ -21,11 +21,13 @@ import uuid
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.legal_entities.models import Branch, LegalEntity
 from app.modules.legal_entities.repository import BranchRepository, LegalEntityRepository
 from app.modules.legal_entities.validators import Issue, errors, validate_branch, validate_entity
+from app.modules.projects.models import Project
 
 
 def _raise_on_errors(issues: list[Issue]) -> list[Issue]:
@@ -118,7 +120,47 @@ class LegalEntityService:
         return entity
 
     async def delete_entity(self, entity_id: uuid.UUID) -> None:
-        await self.entities.delete(await self.get_entity(entity_id))
+        entity = await self.get_entity(entity_id)
+        in_use = await self.session.scalar(
+            select(func.count()).select_from(Project).where(Project.legal_entity_id == entity.id)
+        )
+        if in_use:
+            raise _conflict(f"Legal entity {entity.code} owns {in_use} project(s); move them first.")
+        await self.entities.delete(entity)
+
+    # ── Projects ──────────────────────────────────────────────────────────
+
+    async def _project(self, project_id: uuid.UUID) -> Project:
+        project = await self.session.get(Project, project_id)
+        if project is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+        return project
+
+    async def project_entity(self, project_id: uuid.UUID) -> tuple[LegalEntity | None, str]:
+        """The entity that owns the project and whether it was named or fell back."""
+        project = await self._project(project_id)
+        if project.legal_entity_id is not None:
+            entity = await self.entities.get(project.legal_entity_id)
+            if entity is not None:
+                return entity, "assigned"
+        default = await self.default_entity()
+        return default, "default" if default is not None else "none"
+
+    async def assign_project(
+        self, project_id: uuid.UUID, entity_id: uuid.UUID | None
+    ) -> tuple[LegalEntity | None, str]:
+        """Name the entity that owns a project, or clear it with None."""
+        project = await self._project(project_id)
+        if entity_id is not None:
+            entity = await self.get_entity(entity_id)
+            if not entity.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"Legal entity {entity.code} is inactive and cannot take new projects.",
+                )
+        project.legal_entity_id = entity_id
+        await self.session.flush()
+        return await self.project_entity(project_id)
 
     # ── Branches ──────────────────────────────────────────────────────────
 

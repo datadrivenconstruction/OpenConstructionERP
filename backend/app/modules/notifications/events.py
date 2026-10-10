@@ -546,9 +546,14 @@ async def _on_file_comment_mention(event: Event) -> None:
             file_kind = data.get("file_kind") or "document"
             file_id = data.get("file_id") or ""
             project_id = data.get("project_id") or ""
-            action_url = (
-                f"/files/{file_kind}/{file_id}?comment={comment_id}" if file_id else f"/projects/{project_id}/files"
-            )
+            # The file manager opens a file in its preview pane, comment
+            # thread included, from ``?kind=&file=``; it has no per-file route.
+            if file_id and project_id:
+                action_url = f"/projects/{project_id}/files?kind={file_kind}&file={file_id}&comment={comment_id}"
+            elif file_id:
+                action_url = f"/files?kind={file_kind}&file={file_id}&comment={comment_id}"
+            else:
+                action_url = f"/projects/{project_id}/files" if project_id else "/files"
             await svc.create(
                 user_id=mentioned_user_id,
                 notification_type="file_comment_mention",

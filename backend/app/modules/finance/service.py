@@ -1229,6 +1229,16 @@ class FinanceService:
 
             project = await ProjectRepository(self.session).get_by_id(project_id)
             country = (getattr(project, "country_code", None) or "").strip().upper() if project else ""
+            if not country and project is not None:
+                # The place of supply decides the rate, and that is the
+                # project's country. Only when the project records none does
+                # the owning company's country stand in for it.
+                try:
+                    from app.modules.legal_entities.lookup import entity_country
+
+                    country = (await entity_country(self.session, project_id) or "").strip().upper()
+                except ImportError:
+                    country = ""
             if not country:
                 return None
             on_date = str(invoice_date or "")[:10] or None
