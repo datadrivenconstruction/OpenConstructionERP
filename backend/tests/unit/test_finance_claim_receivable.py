@@ -442,6 +442,66 @@ async def test_claim_certified_event_triggers_invoice_creation(session, monkeypa
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("direction", ["receivable", "payable"])
+async def test_cent_withholding_conserves_persisted_gross_and_replay(session, monkeypatch, direction: str) -> None:
+    calls = _patch_spine(monkeypatch)
+    project = await _make_project(session, currency="EUR")
+    project_id = project.id
+    invoice = Invoice(
+        id=uuid.uuid4(),
+        project_id=project_id,
+        invoice_direction=direction,
+        invoice_number=f"CENT-{uuid.uuid4().hex[:8]}",
+        invoice_date="2026-06-01",
+        currency_code="EUR",
+        amount_subtotal=Decimal("1.01"),
+        tax_amount=Decimal("0"),
+        retention_amount=Decimal("0"),
+        amount_total=Decimal("1.01"),
+        status="draft",
+        metadata_={},
+    )
+    session.add(invoice)
+    await session.flush()
+    invoice_id = invoice.id
+    svc = FinanceService(session)
+    budget_syncs = []
+
+    async def record_budget_sync(synced_project_id):
+        budget_syncs.append(synced_project_id)
+
+    monkeypatch.setattr(svc, "_sync_budget_quietly", record_budget_sync)
+    request = RecordClaimPaymentRequest(
+        payment_date="2026-06-10",
+        withholding_amount="0.005",
+        idempotency_key=f"cent-conservation-{uuid.uuid4().hex}",
+    )
+    payment = await svc.record_payment_with_withholding(invoice_id, request)
+    payment_id = payment.id
+
+    # Read physical columns, then discard the identity map: flush alone can
+    # leave the submitted values in memory even if SQL rounded differently.
+    rows = (await session.execute(Payment.__table__.select().where(Payment.invoice_id == invoice_id))).mappings().all()
+    assert len(rows) == 1
+    assert rows[0]["amount"] == Decimal("1.00")
+    assert rows[0]["withholding_amount"] == Decimal("0.01")
+    assert rows[0]["amount"] + rows[0]["withholding_amount"] == Decimal("1.01")
+    session.expunge_all()
+    reloaded = await session.get(Payment, payment_id)
+    assert reloaded.amount == Decimal("1.00")
+    assert reloaded.withholding_amount == Decimal("0.01")
+    assert reloaded.currency_code == "EUR"
+
+    replay = await svc.record_payment_with_withholding(invoice_id, request)
+    assert replay.id == payment_id
+    assert replay.amount + replay.withholding_amount == Decimal("1.01")
+    rows = (await session.execute(Payment.__table__.select().where(Payment.invoice_id == invoice_id))).all()
+    assert len(rows) == 1
+    assert budget_syncs == ([project_id] if direction == "payable" else [])
+    assert calls == []
+
+
+@pytest.mark.asyncio
 async def test_payment_with_withholding_derives_from_invoice(session, monkeypatch) -> None:
     calls = _patch_spine(monkeypatch)
     project = await _make_project(session)

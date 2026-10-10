@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+import pytest
+
 from app.modules.finance.service import (
     _convert_to_base,
     _project_fx_map,
@@ -52,6 +54,50 @@ def test_compute_payment_withholding_rounds_half_up() -> None:
     pay, held = compute_payment_withholding(Decimal("33333.33"), retention_pct=Decimal("5"))
     assert held == Decimal("1666.67")
     assert pay == Decimal("31666.66")
+
+
+@pytest.mark.parametrize(
+    ("gross", "expected_cash", "expected_held"),
+    [
+        ("0.01", "0.00", "0.01"),
+        ("1.01", "0.50", "0.51"),
+        ("1.03", "0.51", "0.52"),
+        ("1001.01", "500.50", "500.51"),
+    ],
+)
+def test_percentage_withholding_conserves_cent_precision_gross(
+    gross: str, expected_cash: str, expected_held: str
+) -> None:
+    """EUR-style cents: half-up retention owns the half-cent, cash is residual."""
+    cash, held = compute_payment_withholding(gross, retention_pct="50")
+
+    assert held == Decimal(expected_held)
+    assert cash == Decimal(expected_cash)
+    assert cash + held == Decimal(gross)
+    assert cash.as_tuple().exponent == held.as_tuple().exponent == -2
+
+
+@pytest.mark.parametrize(
+    ("explicit_held", "expected_cash", "expected_held"),
+    [("0.005", "1.00", "0.01"), ("0.015", "0.99", "0.02")],
+)
+def test_explicit_withholding_conserves_cent_precision_gross(
+    explicit_held: str, expected_cash: str, expected_held: str
+) -> None:
+    """The accepted explicit amount keeps half-up rounding and precedence."""
+    cash, held = compute_payment_withholding("1.01", retention_pct="100", withholding_amount=explicit_held)
+
+    assert held == Decimal(expected_held)
+    assert cash == Decimal(expected_cash)
+    assert cash + held == Decimal("1.01")
+    assert cash.as_tuple().exponent == held.as_tuple().exponent == -2
+
+
+def test_percentage_uses_raw_gross_before_rounding_the_payment_split() -> None:
+    cash, held = compute_payment_withholding("1.005", retention_pct="50")
+    assert held == Decimal("0.50")
+    assert cash == Decimal("0.51")
+    assert cash + held == Decimal("1.01")
 
 
 # ── compute_payment_withholding: explicit-amount split ───────────────────────
