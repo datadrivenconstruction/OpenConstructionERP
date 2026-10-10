@@ -184,7 +184,9 @@ DEFAULT_PORT = 8080
 MIN_PYTHON = (3, 12)
 
 DOCS_URL = "https://openconstructionerp.com/docs"
-TROUBLESHOOTING_URL = "https://openconstructionerp.com/docs#troubleshooting"
+# Install and startup messages with what each means and what to do, kept
+# in step with docs/INSTALL_TROUBLESHOOTING.md.
+TROUBLESHOOTING_URL = "https://openconstructionerp.com/install-help"
 ISSUES_URL = "https://github.com/datadrivenconstruction/OpenConstructionERP/issues"
 COMMUNITY_URL = "https://t.me/datadrivenconstruction"
 GITHUB_URL = "https://github.com/datadrivenconstruction/OpenConstructionERP"
@@ -429,6 +431,7 @@ def _setup_env(data_dir: Path, host: str, port: int) -> None:
                     + "). If it keeps happening, send those logs to info@datadrivenconstruction.io."
                 )
             )
+            print(_dim(f"  Installation help: {TROUBLESHOOTING_URL}"))
             raise SystemExit(1)
 
     os.environ.setdefault("VECTOR_BACKEND", "lancedb")
@@ -1463,8 +1466,7 @@ def cmd_serve(args: argparse.Namespace) -> None:
                     f"  {arrow} Port {args.port} is already in use. Try: openconstructionerp serve --port {args.port + 1}"
                 )
             )
-        else:
-            print(_dim(f"  {arrow} See: {TROUBLESHOOTING_URL}"))
+        print(_dim(f"  {arrow} Installation help: {TROUBLESHOOTING_URL}"))
         sys.exit(1)
     except Exception as exc:  # noqa: BLE001
         _emit_server_fail(exc)
@@ -1472,6 +1474,7 @@ def cmd_serve(args: argparse.Namespace) -> None:
         print()
         print(_red(_bold("Unexpected startup error:")) + f" {type(exc).__name__}: {exc}")
         print(_dim(f"  {arrow} Run 'openconstructionerp doctor' to diagnose."))
+        print(_dim(f"  {arrow} Installation help: {TROUBLESHOOTING_URL}"))
         print(_dim(f"  {arrow} Report this at: {ISSUES_URL}"))
         sys.exit(1)
 
