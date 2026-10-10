@@ -58,7 +58,7 @@ const UNRELEASED: ChangelogEntry | null = {
   date: '2026-10-10',
   tag: 'FIX',
   summary:
-    'Generate from BoQ no longer fails on a huge quantity in a unit it cannot size, and a price list saved as .pwe is read like any XPWE file. Italian price lists in Excel map their usual columns on their own, an XPWE bill import offers to keep its price list as a cost database, and property search in the BIM viewer can open a quantity rule filled in from the search.',
+    'Generate from BoQ no longer fails on a huge quantity in a unit it cannot size, and a price list saved as .pwe is read like any XPWE file. Italian price lists in Excel map their usual columns on their own, an XPWE bill import offers to keep its price list as a cost database, and property search in the BIM viewer can open a quantity rule filled in from the search. Payments and purchase order links keep every amount exactly as entered, and a withholding the browser cannot read no longer posts as zero. Notification links open a page that exists, notification email buttons open the app and speak the reader\'s language, and every email carries the OpenConstructionERP name.',
 };
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
