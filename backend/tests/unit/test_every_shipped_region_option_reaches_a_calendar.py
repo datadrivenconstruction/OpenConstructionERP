@@ -103,7 +103,6 @@ PICKER_REGIONS_THAT_ARE_MONDAY_TO_FRIDAY: dict[str, str] = {
     ),
     "Poland": "Saturday-Sunday weekend.",
     "SouthAfrica": "Saturday-Sunday weekend.",
-    "Turkey": "Saturday-Sunday weekend; Turkey has never used a Friday rest day.",
     "UA": "Existing i18n_foundation work_calendars.json UA seed declares ISO weekdays 1-5; holidays are separate.",
 }
 

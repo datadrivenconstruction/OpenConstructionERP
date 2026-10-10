@@ -576,6 +576,15 @@ WORK_CALENDARS: dict[str, dict] = {
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
         "label": "Russia (Mon-Fri, 8h)",
     },
+    # Turkey - TR_ISTANBUL / TR_NATIONAL. Labour Law 4857 Art. 63 caps the week
+    # at 45 hours without fixing the days and Law 2429 Art. 3 makes Sunday the
+    # rest day; Monday-Friday at 8 hours is the common convention and what the
+    # shipped Turkish work calendar states, not a statute.
+    "TURKEY": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "Turkey (Mon-Fri, 8h)",
+    },
     # Gulf states that work Sunday to Thursday: SA, QA, KW, BH and OM.
     #
     # Friday is the statutory weekly rest day, not merely the customary one:
@@ -674,6 +683,7 @@ _CALENDAR_BY_COUNTRY: dict[str, str] = {
     "QA": "GULF",
     "RU": "RU",
     "SA": "GULF",
+    "TR": "TURKEY",
     "US": "US",
 }
 

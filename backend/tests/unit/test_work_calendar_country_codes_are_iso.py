@@ -321,6 +321,7 @@ EXPECTED_CALENDAR_BY_COUNTRY = {
     "ES": "SPAIN",
     "BR": "BRAZIL",
     "RU": "RU",
+    "TR": "TURKEY",
     # The Gulf is two calendars, not one. Five of the six GCC states work Sunday
     # to Thursday; the UAE moved to a Monday-Friday week on 1 January 2022 and is
     # the only one that did, so it cannot share an entry with its neighbours.

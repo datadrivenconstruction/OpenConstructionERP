@@ -154,7 +154,7 @@ def test_reading_the_region_alone_is_what_planned_the_saudi_pack_on_the_wrong_we
         ("PL_WARSAW", "SA", "DEFAULT"),
         ("PL", "IN", "DEFAULT"),
         ("IT_MILAN", "CN", "DEFAULT"),
-        ("TR_ISTANBUL", "SA", "DEFAULT"),
+        ("TR_ISTANBUL", "SA", "TURKEY"),
         ("JP", "IN", "DEFAULT"),
         # A spelling only the registry reads names its country's week.
         ("UNITED_STATES", "SA", "US"),
