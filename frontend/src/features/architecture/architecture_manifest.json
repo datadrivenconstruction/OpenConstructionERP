@@ -235799,10 +235799,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 186,
+      "ts_files": 188,
       "css_files": 0,
-      "test_files": 101,
-      "total_files": 186
+      "test_files": 102,
+      "total_files": 188
     },
     {
       "name": "buyer-portal",
@@ -235995,10 +235995,10 @@
     },
     {
       "name": "costs",
-      "ts_files": 46,
+      "ts_files": 48,
       "css_files": 0,
-      "test_files": 20,
-      "total_files": 46
+      "test_files": 21,
+      "total_files": 48
     },
     {
       "name": "credentials",
@@ -238327,7 +238327,7 @@
     "total_schemas": 3579,
     "total_python_files": 2305,
     "frontend_features": 193,
-    "frontend_ts_files": 3020,
+    "frontend_ts_files": 3024,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

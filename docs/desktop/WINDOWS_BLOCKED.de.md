@@ -2,6 +2,8 @@
 
 Auch auf [English](WINDOWS_BLOCKED.md) und [Русский](WINDOWS_BLOCKED.ru.md).
 
+Bei anderen Warnungen oder Fehlern während Installation oder Start hilft die [Installationshilfe](../INSTALL_TROUBLESHOOTING.de.md) (auch [online](https://openconstructionerp.com/install-help)).
+
 Diese Seite ist für Sie, wenn Windows OpenConstructionERP nicht starten lässt, die App als Programm eines unbekannten oder nicht verifizierten Herausgebers bezeichnet, oder sie einmal laufen ließ und seitdem bei jedem Start blockiert.
 
 Die Bezeichnungen der Windows-Oberfläche stehen hier so, wie ein deutsches Windows 11 sie zeigt, mit dem englischen Namen in Klammern. Je nach Windows-Version kann der deutsche Wortlaut leicht abweichen.
