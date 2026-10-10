@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Property search in the BIM viewer can open a quantity rule already filled in with the property and value you searched for, so the filter that found the elements is the one that prices them into the bill.
+- An Italian price list in Excel or CSV maps its usual columns (Tariffa, Descrizione estesa, U.M., Unità di misura, Prezzo €) to code, description, unit and price without a manual step. A column mapping you set is remembered in this browser for files with the same headers, so next year's edition of the same list opens already mapped.
+- After an XPWE bill import, a message offers to save the price list inside the same file as a cost database, so it no longer has to be uploaded a second time.
+- The schedule page says how to link two bars by dragging, and the archive filter says that a schedule is deleted from its archived list.
+
+### Fixed
+
+- Generate from BoQ no longer fails on a bill with a huge quantity in a unit it cannot size, such as an XPWE line "a misura" with 10 billion units. Such a position now runs at most about a century and the preview says the plan overruns the window.
+- A regional price list saved as .pwe is read like any XPWE file instead of being refused as an unknown format, and the estimating program's own binary project file gets the advice to export it as XPWE.
+- Quantity rules ignore spaces around a value, as property search already did, and the Smart View builder shows the property names Revit wrote instead of lower-cased keys.
+
 ## [18.5.0] - 2026-10-10
 
 This release makes the platform lighter to run and easier to understand. A Background services button in the top bar lists every service the platform keeps loaded, what it is for, which modules need it and roughly how much memory it takes, and an administrator can switch each one on or off without a restart. On a fresh server the administrator is asked once which modules they will use before anything heavy starts, semantic search stays off until someone turns it on, and the demo projects are set up in the background. The Windows desktop app installs its backend once instead of unpacking it on every start and now starts for users whose account name has non-ASCII letters. Procurement, the client portal, payment plans, schedules and the Italian workflow all grow, as listed below.

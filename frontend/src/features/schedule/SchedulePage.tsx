@@ -2146,6 +2146,14 @@ export function ScheduleDetail({
               <SkeletonTable rows={4} columns={4} />
             ) : ganttData ? (
               viewMode === 'gantt' ? (
+                <>
+                {canEditSchedule && svgGanttActivities.length > 1 && (
+                  <p className="mb-2 text-xs text-content-tertiary" data-testid="gantt-link-hint">
+                    {t('gantt.link_hint', {
+                      defaultValue: 'To link two activities, hover a bar, then drag the dot at its end onto the bar that follows it.',
+                    })}
+                  </p>
+                )}
                 <SVGGanttChart
                   activities={svgGanttActivities}
                   viewMode={zoomLevel as GanttViewMode}
@@ -2158,6 +2166,7 @@ export function ScheduleDetail({
                   onDeleteLink={ganttLinking.onDeleteLink}
                   onActivityClick={(id) => setSelectedActivityId(id)}
                 />
+                </>
               ) : viewMode === 'table' ? (
                 <ActivityGrid
                   scheduleId={schedule.id}
@@ -2898,6 +2907,11 @@ export function ProjectSchedules({
           <option value="archived">{t('schedule.status_archived')}</option>
           <option value="all">{t('common.all')}</option>
         </select>
+        <span className="text-xs text-content-tertiary" data-testid="schedule-archive-delete-hint">
+          {t('schedule.archive_filter_delete_hint', {
+            defaultValue: 'To delete a schedule, archive it first. Archived schedules are listed under Archived, where the project owner can delete them.',
+          })}
+        </span>
       </label>
       {/* Schedule list */}
       {isLoading ? (
