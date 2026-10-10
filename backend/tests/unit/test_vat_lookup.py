@@ -141,6 +141,22 @@ class TestGetVatRateRussia:
         assert get_vat_rate("RU", "zero") == Decimal("0.00")
 
 
+class TestGetVatRateTurkey:
+    """Turkey KDV, 20 and 10 percent since 2023-07-10."""
+
+    def test_tr_standard(self) -> None:
+        assert get_vat_rate("TR", "standard") == Decimal("0.20")
+
+    def test_tr_reduced(self) -> None:
+        assert get_vat_rate("TR", "reduced") == Decimal("0.10")
+
+    def test_tr_has_no_zero_kind(self) -> None:
+        # An export is exempt (istisna) under KDV Kanunu art. 11, which is not
+        # a zero rate, so the table does not invent one.
+        with pytest.raises(VATNotApplicable):
+            get_vat_rate("TR", "zero")
+
+
 class TestGetVatRateSouthAfrica:
     """South Africa VAT - SARS, VAT Act 89 of 1991. ZA (South Africa) is
     distinct from SA (Saudi Arabia), which also stands at 15 percent."""

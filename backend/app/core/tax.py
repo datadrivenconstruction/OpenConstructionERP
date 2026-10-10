@@ -84,6 +84,13 @@ Sources (cited in commit message, summarised here for reference):
   publication portal's index record and not from the law text, which did not
   load. The figure remains pending review by a Russian cost engineer, the same
   standing caveat packs/russia-gesn records in its manifest ``review_status``.)
+- TR: Katma Değer Vergisi Kanunu (3065) art. 28 - standard 20 %, reduced 10 %,
+  in force 10 Jul 2023 under Cumhurbaşkanı Kararı 7346 (Resmî Gazete
+  7.7.2023, no. 32241), which raised 18 to 20 and 8 to 10 and kept 1 %.
+  The decision's title is confirmed on the Resmî Gazete index; its body is a
+  scanned image, so the two figures were read from secondary summaries and
+  agree with the dated KDV rows in the tax seed. Pending review by a Turkish
+  quantity surveyor, as the turkey-tr pack's ``review_status`` says.
 - ZA: Value-Added Tax Act 89 of 1991 - standard 15 %, zero-rated 0 %
   (SARS South Africa; standard rate raised from 14 % to 15 % on 1 Apr 2018.
   Note: ISO code ZA is South Africa, distinct from SA = Saudi Arabia above.)
@@ -178,6 +185,11 @@ _RAW: dict[str, dict[str, str]] = {
     # effective dates, so it states only what is in force now; the dated
     # history lives in the tax seed and in property_dev/data/tax_rates.yaml.
     "RU": {"standard": "0.22", "reduced": "0.10", "zero": "0.00"},
+    # ── Türkiye ───────────────────────────────────────────────────────────
+    # KDV 20 % and 10 % since 2023-07-10. The 1 % band has no kind to sit
+    # under, and an export is an exemption (istisna) rather than a zero rate,
+    # so neither is carried. The dated rows are in the tax seed.
+    "TR": {"standard": "0.20", "reduced": "0.10"},
     # ── Africa ────────────────────────────────────────────────────────────
     # ZA = South Africa (VAT Act 89 of 1991, SARS). Standard 15 % since
     # 1 Apr 2018. No reduced tier; basic foodstuffs and exports are zero-rated.
