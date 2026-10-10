@@ -2163,6 +2163,7 @@ class AiEstimatorService:
         in-memory preview positions, returning the report, completeness, missing.
         """
         from app.core.validation.engine import validation_engine
+        from app.core.validation.poz_catalogue import with_poz_catalogue_for_rule_sets
         from app.core.validation.project_context import with_project_context
         from app.modules.costs.cwicr_v3_catalogue import get_catalogue
 
@@ -2198,7 +2199,11 @@ class AiEstimatorService:
             logger.warning("ai_estimator could not count unreviewed takeoff proposals: %s", exc)
         try:
             report = await validation_engine.validate(
-                data=await with_project_context(self.session, run.project_id, {"positions": positions}),
+                data=await with_poz_catalogue_for_rule_sets(
+                    self.session,
+                    await with_project_context(self.session, run.project_id, {"positions": positions}),
+                    rule_sets,
+                ),
                 rule_sets=rule_sets,
                 target_type="boq",
                 target_id=str(run.id),

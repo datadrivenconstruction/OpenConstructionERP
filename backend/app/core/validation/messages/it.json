@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Utile d'impresa e spese generali sono applicati su {count} righe, {total} per cento in totale, oltre l'unico {limit} per cento",
       "suggestion": "Il 25 per cento si aggiunge una sola volta. Tenere una sola riga, e toglierla del tutto quando i prezzi sono prezzi unitari pubblicati, che lo contengono già"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Il poz '{code}' della voce {ordinal} è misurato in '{unit}', ma il listino prezzi unitari installato lo definisce in '{book_unit}'",
+      "suggestion": "Un numero di poz è definito in una sola unità. Misuri la riga nell'unità del listino, oppure numeri il lavoro diverso come voce propria (ÖZEL-1)",
+      "not_installed": "La base nazionale dei prezzi unitari ({region}) non è installata, quindi unità e prezzi di {count} numeri di poz non sono stati confrontati con il listino pubblicato. La carichi dalla pagina di importazione del database dei costi",
+      "unavailable": "La base nazionale dei prezzi unitari ({region}) non è stata leggibile, quindi unità e prezzi di {count} numeri di poz non sono stati confrontati con il listino pubblicato"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' della voce {ordinal}: il prezzo {rate} è inferiore del {percent} per cento al prezzo pubblicato di {published} nel listino prezzi unitari installato",
+      "above": "Poz '{code}' della voce {ordinal}: il prezzo {rate} è superiore del {percent} per cento al prezzo pubblicato di {published} nel listino prezzi unitari installato",
+      "fail": "Supera il {limit} per cento impostato per questo controllo",
+      "suggestion": "Il confronto usa la base di prezzi unitari installata qui, che non registra l'anno del proprio listino. I prezzi pubblicati dei capitoli edili, meccanici ed elettrici contengono già il {markup} per cento di utile d'impresa e spese generali. Un prezzo inferiore a quello pubblicato è consueto dopo un ribasso di gara; verifichi che la differenza sia voluta",
+      "repriced": "La base nazionale dei prezzi unitari ({region}) è stata convertita a un altro mercato o a un'altra valuta, quindi i prezzi non sono stati confrontati con quelli pubblicati. Riporti la base al suo mercato d'origine per eseguire questo controllo",
+      "currency_differs": "I prezzi di {count} righe sono in {currency} mentre il listino prezzi unitari è in {book_currency}, quindi non sono stati confrontati con i prezzi pubblicati",
+      "currency_unknown": "La valuta di {count} righe non è registrata, quindi i loro prezzi non sono stati confrontati con i prezzi pubblicati in {book_currency}"
     }
   },
   "sekisan": {

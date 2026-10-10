@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Keuntungan dan biaya umum kontraktor diterapkan pada {count} baris, total {total} persen, melebihi satu kali {limit} persen",
       "suggestion": "Angka 25 persen ditambahkan sekali. Pertahankan satu baris, dan hapus seluruhnya bila harganya adalah harga satuan terbit yang sudah memuatnya"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' pada item {ordinal} diukur dalam '{unit}', tetapi buku harga satuan yang terpasang mendefinisikannya dalam '{book_unit}'",
+      "suggestion": "Satu nomor poz didefinisikan dalam satu satuan. Ukur baris dalam satuan buku, atau beri nomor tersendiri pada pekerjaan yang berbeda sebagai item Anda sendiri (ÖZEL-1)",
+      "not_installed": "Basis harga satuan nasional ({region}) belum terpasang, sehingga satuan dan harga {count} nomor poz tidak dicocokkan dengan buku terbitan. Muat dari halaman impor basis data biaya",
+      "unavailable": "Basis harga satuan nasional ({region}) tidak dapat dibaca, sehingga satuan dan harga {count} nomor poz tidak dicocokkan dengan buku terbitan"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' pada item {ordinal}: harga {rate} lebih rendah {percent} persen dari harga terbitan {published} di buku harga satuan yang terpasang",
+      "above": "Poz '{code}' pada item {ordinal}: harga {rate} lebih tinggi {percent} persen dari harga terbitan {published} di buku harga satuan yang terpasang",
+      "fail": "Selisih itu melebihi batas {limit} persen yang ditetapkan untuk pemeriksaan ini",
+      "suggestion": "Perbandingan memakai basis harga satuan yang terpasang di sini, yang tidak mencatat tahun bukunya. Harga terbitan bab bangunan, mekanikal, dan elektrikal sudah memuat {markup} persen keuntungan kontraktor dan biaya umum. Harga di bawah harga terbitan lazim setelah diskon tender; pastikan selisihnya disengaja",
+      "repriced": "Basis harga satuan nasional ({region}) dialihkan ke pasar atau mata uang lain, sehingga harga tidak dibandingkan dengan harga terbitan. Kembalikan basis ke pasar asalnya untuk menjalankan pemeriksaan ini",
+      "currency_differs": "Harga pada {count} baris dalam {currency} sedangkan buku harga satuan dalam {book_currency}, sehingga tidak dibandingkan dengan harga terbitan",
+      "currency_unknown": "Mata uang {count} baris tidak tercatat, sehingga harganya tidak dibandingkan dengan harga terbitan dalam {book_currency}"
     }
   },
   "sekisan": {

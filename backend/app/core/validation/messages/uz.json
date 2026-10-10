@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Pudratchining foydasi va umumiy xarajatlari {count} qatorga qo'llangan, jami {total} foiz, yagona {limit} foizdan yuqori",
       "suggestion": "Bu 25 foiz bir marta qo'shiladi. Bitta qatorni qoldiring, narxlar uni o'z ichiga olgan e'lon qilingan birlik narxlar bo'lsa, uni butunlay olib tashlang"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "{ordinal}-pozitsiyadagi '{code}' poz '{unit}' birligida oʻlchangan, lekin oʻrnatilgan birlik narxlari kitobi uni '{book_unit}' birligida belgilaydi",
+      "suggestion": "Poz raqami bitta oʻlchov birligida belgilanadi. Qatorni kitobning birligida oʻlchang yoki boshqacha ishni oʻzingizning pozitsiyangiz (ÖZEL-1) sifatida raqamlang",
+      "not_installed": "Birlik narxlarining milliy bazasi ({region}) oʻrnatilmagan, shuning uchun {count} ta poz raqamining birliklari va narxlari nashr etilgan kitob bilan solishtirilmadi. Uni xarajatlar maʼlumotlar bazasini import qilish sahifasidan yuklang",
+      "unavailable": "Birlik narxlarining milliy bazasini ({region}) oʻqib boʻlmadi, shuning uchun {count} ta poz raqamining birliklari va narxlari nashr etilgan kitob bilan solishtirilmadi"
+    },
+    "unit_rate_within_published_price": {
+      "below": "{ordinal}-pozitsiyadagi '{code}' poz: {rate} narxi oʻrnatilgan birlik narxlari kitobidagi nashr etilgan {published} narxdan {percent} foiz past",
+      "above": "{ordinal}-pozitsiyadagi '{code}' poz: {rate} narxi oʻrnatilgan birlik narxlari kitobidagi nashr etilgan {published} narxdan {percent} foiz yuqori",
+      "fail": "Bu ushbu tekshiruv uchun belgilangan {limit} foizdan oshadi",
+      "suggestion": "Solishtirish shu yerda oʻrnatilgan birlik narxlari bazasi boʻyicha olib boriladi, u kitobining yilini yozmaydi. Qurilish, mexanik va elektr boblarining nashr etilgan narxlari pudratchining {markup} foiz foydasi va umumiy xarajatlarini allaqachon oʻz ichiga oladi. Tender chegirmasidan keyin nashr etilgan narxdan past narx odatiy holat; farq ataylab ekanini tekshiring",
+      "repriced": "Birlik narxlarining milliy bazasi ({region}) boshqa bozorga yoki valyutaga oʻtkazilgan, shuning uchun narxlar nashr etilgan narxlar bilan solishtirilmadi. Bu tekshiruvni ishga tushirish uchun bazani oʻz bozoriga qaytaring",
+      "currency_differs": "{count} ta qatorning narxlari {currency} valyutasida, birlik narxlari kitobi esa {book_currency} valyutasida, shuning uchun ular nashr etilgan narxlar bilan solishtirilmadi",
+      "currency_unknown": "{count} ta qatorning valyutasi yozilmagan, shuning uchun ularning narxlari {book_currency} valyutasidagi nashr etilgan narxlar bilan solishtirilmadi"
     }
   },
   "sekisan": {

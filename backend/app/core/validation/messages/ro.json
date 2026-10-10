@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Profitul și cheltuielile generale ale constructorului sunt aplicate pe {count} linii, {total} la sută în total, peste cele {limit} la sută unice",
       "suggestion": "Cele 25 la sută se adaugă o singură dată. Păstrați o linie și eliminați-o complet când tarifele sunt prețuri unitare publicate, care le conțin deja"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' de la poziția {ordinal} este măsurat în '{unit}', dar cartea de prețuri unitare instalată îl definește în '{book_unit}'",
+      "suggestion": "Un număr poz este definit într-o singură unitate. Măsurați linia în unitatea cărții sau numerotați lucrarea diferită ca articol propriu (ÖZEL-1)",
+      "not_installed": "Baza națională de prețuri unitare ({region}) nu este instalată, deci unitățile și prețurile a {count} numere poz nu au fost verificate față de cartea publicată. Încărcați-o din pagina de import a bazei de date de costuri",
+      "unavailable": "Baza națională de prețuri unitare ({region}) nu a putut fi citită, deci unitățile și prețurile a {count} numere poz nu au fost verificate față de cartea publicată"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' de la poziția {ordinal}: prețul {rate} este cu {percent} la sută sub prețul publicat de {published} din cartea de prețuri unitare instalată",
+      "above": "Poz '{code}' de la poziția {ordinal}: prețul {rate} este cu {percent} la sută peste prețul publicat de {published} din cartea de prețuri unitare instalată",
+      "fail": "Aceasta depășește cele {limit} la sută stabilite pentru această verificare",
+      "suggestion": "Comparația folosește baza de prețuri unitare instalată aici, care nu înregistrează anul cărții sale. Prețurile publicate ale capitolelor de construcții, mecanice și electrice conțin deja {markup} la sută profit al constructorului și cheltuieli generale. Un preț sub cel publicat este obișnuit după o reducere de licitație; verificați că diferența este intenționată",
+      "repriced": "Baza națională de prețuri unitare ({region}) a fost trecută pe altă piață sau altă monedă, deci prețurile nu au fost comparate cu cele publicate. Readuceți baza pe piața ei de origine pentru a rula această verificare",
+      "currency_differs": "Prețurile a {count} linii sunt în {currency}, iar cartea de prețuri unitare este în {book_currency}, deci nu au fost comparate cu prețurile publicate",
+      "currency_unknown": "Moneda a {count} linii nu este înregistrată, deci prețurile lor nu au fost comparate cu prețurile publicate în {book_currency}"
     }
   },
   "sekisan": {

@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Ang tubo at pangkalahatang gastos ng kontratista ay inilapat sa {count} linya, {total} porsyento sa kabuuan, higit sa iisang {limit} porsyento",
       "suggestion": "Ang 25 porsyento ay idinadagdag nang isang beses. Magtira ng isang linya, at alisin ito nang buo kapag ang mga rate ay nailathalang presyo kada yunit na naglalaman na nito"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Ang poz '{code}' sa posisyong {ordinal} ay sinukat sa '{unit}', pero ang naka-install na unit-price book ay nagtatakda nito sa '{book_unit}'",
+      "suggestion": "Isang unit lang ang itinatakda sa isang poz number. Sukatin ang linya sa unit ng book, o bigyan ng sariling numero ang naiibang gawain bilang sarili mong item (ÖZEL-1)",
+      "not_installed": "Hindi naka-install ang pambansang unit-price base ({region}), kaya hindi naikumpara ang mga unit at rate ng {count} poz number sa nalathalang book. I-load ito mula sa import page ng cost database",
+      "unavailable": "Hindi mabasa ang pambansang unit-price base ({region}), kaya hindi naikumpara ang mga unit at rate ng {count} poz number sa nalathalang book"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' sa posisyong {ordinal}: ang rate na {rate} ay {percent} porsiyentong mas mababa sa nalathalang presyong {published} sa naka-install na unit-price book",
+      "above": "Poz '{code}' sa posisyong {ordinal}: ang rate na {rate} ay {percent} porsiyentong mas mataas sa nalathalang presyong {published} sa naka-install na unit-price book",
+      "fail": "Lampas ito sa {limit} porsiyentong itinakda para sa pagsusuring ito",
+      "suggestion": "Ginagamit sa paghahambing ang unit-price base na naka-install dito, na hindi nagtatala ng taon ng book nito. Kasama na sa mga nalathalang presyo ng mga kabanata ng gusali, mekanikal at elektrikal ang {markup} porsiyentong tubo ng kontratista at general expenses. Karaniwan ang rate na mas mababa sa nalathalang presyo pagkatapos ng tender discount; tiyaking sinadya ang pagkakaiba",
+      "repriced": "Ang pambansang unit-price base ({region}) ay inilipat sa ibang merkado o currency, kaya hindi naikumpara ang mga rate sa mga nalathalang presyo. Ibalik ang base sa orihinal nitong merkado para patakbuhin ang pagsusuring ito",
+      "currency_differs": "Ang mga rate ng {count} linya ay nasa {currency} habang ang unit-price book ay nasa {book_currency}, kaya hindi naikumpara ang mga ito sa mga nalathalang presyo",
+      "currency_unknown": "Hindi nakatala ang currency ng {count} linya, kaya hindi naikumpara ang mga rate nila sa mga nalathalang presyo sa {book_currency}"
     }
   },
   "sekisan": {

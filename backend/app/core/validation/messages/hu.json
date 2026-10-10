@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "A vállalkozói nyereséget és az általános költséget {count} soron alkalmazták, összesen {total} százalékot, az egyszeri {limit} százalék fölött",
       "suggestion": "A 25 százalék egyszer adódik hozzá. Tartson meg egy sort, és teljesen távolítsa el, ha az árak közzétett egységárak, amelyek ezt már tartalmazzák"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "A(z) {ordinal}. tétel „{code}” poz száma „{unit}” mértékegységben van mérve, de a telepített egységárjegyzék „{book_unit}” egységben határozza meg",
+      "suggestion": "Egy poz szám egyetlen mértékegységben van meghatározva. Mérje a sort a jegyzék mértékegységében, vagy számozza az eltérő munkát saját tételként (ÖZEL-1)",
+      "not_installed": "A nemzeti egységárbázis ({region}) nincs telepítve, ezért {count} poz szám mértékegységét és árát nem vetettük össze a kiadott jegyzékkel. Töltse be a költségadatbázis importoldaláról",
+      "unavailable": "A nemzeti egységárbázist ({region}) nem sikerült beolvasni, ezért {count} poz szám mértékegységét és árát nem vetettük össze a kiadott jegyzékkel"
+    },
+    "unit_rate_within_published_price": {
+      "below": "A(z) {ordinal}. tétel „{code}” poz száma: a(z) {rate} egységár {percent} százalékkal alacsonyabb a telepített egységárjegyzékben kiadott {published} árnál",
+      "above": "A(z) {ordinal}. tétel „{code}” poz száma: a(z) {rate} egységár {percent} százalékkal magasabb a telepített egységárjegyzékben kiadott {published} árnál",
+      "fail": "Ez meghaladja az ehhez az ellenőrzéshez beállított {limit} százalékot",
+      "suggestion": "Az összehasonlítás a itt telepített egységárbázist használja, amely nem rögzíti a jegyzék évét. Az építőipari, gépészeti és villamos fejezetek kiadott árai már tartalmazzák a vállalkozói nyereség és az általános költségek {markup} százalékát. A kiadott ár alatti egységár ajánlati engedmény után szokásos; ellenőrizze, hogy a különbség szándékos-e",
+      "repriced": "A nemzeti egységárbázis ({region}) át lett állítva másik piacra vagy pénznemre, ezért az árakat nem vetettük össze a kiadott árakkal. A vizsgálat futtatásához állítsa vissza a bázist a saját piacára",
+      "currency_differs": "{count} sor ára {currency} pénznemben van, míg az egységárjegyzék {book_currency} pénznemű, ezért nem vetettük össze őket a kiadott árakkal",
+      "currency_unknown": "{count} sor pénzneme nincs rögzítve, ezért áraikat nem vetettük össze a {book_currency} pénznemű kiadott árakkal"
     }
   },
   "sekisan": {

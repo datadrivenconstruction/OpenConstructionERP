@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Le bénéfice et les frais généraux de l'entreprise sont appliqués sur {count} lignes, {total} pour cent au total, au-dessus des {limit} pour cent uniques",
       "suggestion": "Les 25 pour cent ne s'ajoutent qu'une fois. Garder une seule ligne, et la supprimer entièrement quand les prix sont des prix unitaires publiés, qui les contiennent déjà"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Le poz « {code} » du poste {ordinal} est métré en « {unit} », mais le recueil de prix unitaires installé le définit en « {book_unit} »",
+      "suggestion": "Un numéro de poz est défini dans une seule unité. Métrez la ligne dans l'unité du recueil, ou numérotez le travail différent comme un article propre (ÖZEL-1)",
+      "not_installed": "La base nationale de prix unitaires ({region}) n'est pas installée, donc les unités et les prix de {count} numéros de poz n'ont pas été comparés au recueil publié. Chargez-la depuis la page d'import de la base de coûts",
+      "unavailable": "La base nationale de prix unitaires ({region}) n'a pas pu être lue, donc les unités et les prix de {count} numéros de poz n'ont pas été comparés au recueil publié"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz « {code} » du poste {ordinal} : le prix {rate} est inférieur de {percent} pour cent au prix publié de {published} dans le recueil de prix unitaires installé",
+      "above": "Poz « {code} » du poste {ordinal} : le prix {rate} est supérieur de {percent} pour cent au prix publié de {published} dans le recueil de prix unitaires installé",
+      "fail": "Cet écart dépasse les {limit} pour cent fixés pour ce contrôle",
+      "suggestion": "La comparaison utilise la base de prix unitaires installée ici, qui n'enregistre pas l'année de son recueil. Les prix publiés des chapitres bâtiment, mécanique et électricité contiennent déjà {markup} pour cent de bénéfice de l'entreprise et de frais généraux. Un prix inférieur au prix publié est courant après un rabais d'appel d'offres ; vérifiez que l'écart est voulu",
+      "repriced": "La base nationale de prix unitaires ({region}) a été basculée vers un autre marché ou une autre devise, donc les prix n'ont pas été comparés aux prix publiés. Remettez la base sur son marché d'origine pour lancer ce contrôle",
+      "currency_differs": "Les prix de {count} lignes sont en {currency} alors que le recueil de prix unitaires est en {book_currency}, donc ils n'ont pas été comparés aux prix publiés",
+      "currency_unknown": "La devise de {count} lignes n'est pas enregistrée, donc leurs prix n'ont pas été comparés aux prix publiés en {book_currency}"
     }
   },
   "sekisan": {

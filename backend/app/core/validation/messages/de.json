@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Unternehmergewinn und allgemeine Geschäftskosten werden auf {count} Zeilen angesetzt, zusammen {total} Prozent, über den einmaligen {limit} Prozent",
       "suggestion": "Die 25 Prozent werden einmal aufgeschlagen. Eine Zeile behalten und ganz entfernen, wenn die Preise veröffentlichte Einheitspreise sind, die ihn bereits enthalten"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' an Position {ordinal} ist in '{unit}' gemessen, das installierte Einheitspreisbuch definiert sie aber in '{book_unit}'",
+      "suggestion": "Eine poz-Nummer ist in genau einer Einheit definiert. Messen Sie die Zeile in der Einheit des Buchs oder nummerieren Sie die abweichende Leistung als eigene Position (ÖZEL-1)",
+      "not_installed": "Die nationale Einheitspreisbasis ({region}) ist nicht installiert, daher wurden Einheiten und Preise von {count} poz-Nummern nicht mit dem veröffentlichten Buch abgeglichen. Laden Sie sie über die Importseite der Kostendatenbank",
+      "unavailable": "Die nationale Einheitspreisbasis ({region}) konnte nicht gelesen werden, daher wurden Einheiten und Preise von {count} poz-Nummern nicht mit dem veröffentlichten Buch abgeglichen"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' an Position {ordinal}: Der Preis {rate} liegt {percent} Prozent unter dem veröffentlichten Preis von {published} im installierten Einheitspreisbuch",
+      "above": "Poz '{code}' an Position {ordinal}: Der Preis {rate} liegt {percent} Prozent über dem veröffentlichten Preis von {published} im installierten Einheitspreisbuch",
+      "fail": "Das übersteigt die für diese Prüfung eingestellten {limit} Prozent",
+      "suggestion": "Der Vergleich nutzt die hier installierte Einheitspreisbasis, die das Jahr ihres Buchs nicht erfasst. Die veröffentlichten Preise der Kapitel Hochbau, Maschinentechnik und Elektrotechnik enthalten bereits {markup} Prozent Unternehmergewinn und Gemeinkosten. Ein Preis unter dem veröffentlichten Preis ist nach einem Ausschreibungsnachlass üblich; prüfen Sie, ob die Abweichung beabsichtigt ist",
+      "repriced": "Die nationale Einheitspreisbasis ({region}) wurde auf einen anderen Markt oder eine andere Währung umgestellt, daher wurden die Preise nicht mit den veröffentlichten Preisen verglichen. Setzen Sie die Basis auf ihren Heimatmarkt zurück, um diese Prüfung auszuführen",
+      "currency_differs": "Die Preise von {count} Zeilen sind in {currency}, das Einheitspreisbuch ist aber in {book_currency}, daher wurden sie nicht mit den veröffentlichten Preisen verglichen",
+      "currency_unknown": "Die Währung von {count} Zeilen ist nicht erfasst, daher wurden ihre Preise nicht mit den veröffentlichten Preisen in {book_currency} verglichen"
     }
   },
   "sekisan": {

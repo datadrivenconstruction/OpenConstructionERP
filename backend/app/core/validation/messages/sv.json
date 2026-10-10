@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Entreprenörens vinst och allmänna omkostnader läggs på {count} rader, {total} procent tillsammans, över de enkla {limit} procenten",
       "suggestion": "De 25 procenten läggs på en gång. Behåll en rad, och ta bort den helt när priserna är publicerade enhetspriser, som redan innehåller dem"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' på post {ordinal} är mätt i '{unit}', men den installerade enhetsprisboken definierar den i '{book_unit}'",
+      "suggestion": "Ett poz-nummer är definierat i en enhet. Mät raden i bokens enhet, eller numrera det avvikande arbetet som en egen post (ÖZEL-1)",
+      "not_installed": "Den nationella enhetsprisbasen ({region}) är inte installerad, så enheter och priser för {count} poz-nummer jämfördes inte med den utgivna boken. Ladda den från importsidan för kostnadsdatabasen",
+      "unavailable": "Den nationella enhetsprisbasen ({region}) kunde inte läsas, så enheter och priser för {count} poz-nummer jämfördes inte med den utgivna boken"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' på post {ordinal}: priset {rate} ligger {percent} procent under det utgivna priset {published} i den installerade enhetsprisboken",
+      "above": "Poz '{code}' på post {ordinal}: priset {rate} ligger {percent} procent över det utgivna priset {published} i den installerade enhetsprisboken",
+      "fail": "Det är mer än de {limit} procent som är inställda för den här kontrollen",
+      "suggestion": "Jämförelsen använder den enhetsprisbas som är installerad här, och den registrerar inte årtalet för sin bok. De utgivna priserna för bygg-, maskin- och elkapitlen innehåller redan {markup} procent för entreprenörens vinst och allmänna kostnader. Ett pris under det utgivna priset är vanligt efter en anbudsrabatt; kontrollera att skillnaden är avsiktlig",
+      "repriced": "Den nationella enhetsprisbasen ({region}) har ställts om till en annan marknad eller valuta, så priserna jämfördes inte med de utgivna priserna. Återställ basen till sin hemmamarknad för att köra den här kontrollen",
+      "currency_differs": "Priserna på {count} rader är i {currency} medan enhetsprisboken är i {book_currency}, så de jämfördes inte med de utgivna priserna",
+      "currency_unknown": "Valutan för {count} rader är inte registrerad, så deras priser jämfördes inte med de utgivna priserna i {book_currency}"
     }
   },
   "sekisan": {

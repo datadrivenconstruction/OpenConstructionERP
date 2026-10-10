@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "시공자의 이윤과 일반관리비가 {count}개 행에 적용되었으며, 합계 {total} 퍼센트로 단일 {limit} 퍼센트를 초과합니다",
       "suggestion": "이 25퍼센트는 한 번만 가산됩니다. 한 행만 남기고, 단가가 이미 이를 포함한 공표 단가이면 완전히 삭제하세요"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "항목 {ordinal}의 poz '{code}'는 '{unit}' 단위로 산출되었지만, 설치된 단가집은 '{book_unit}' 단위로 정의합니다",
+      "suggestion": "poz 번호는 하나의 단위로 정의됩니다. 해당 줄을 단가집의 단위로 산출하거나, 다른 공종을 자체 항목(ÖZEL-1)으로 번호를 매기세요",
+      "not_installed": "국가 단가 기반({region})이 설치되지 않아 poz 번호 {count}건의 단위와 단가를 공표된 단가집과 대조하지 못했습니다. 비용 데이터베이스 가져오기 페이지에서 불러오세요",
+      "unavailable": "국가 단가 기반({region})을 읽을 수 없어 poz 번호 {count}건의 단위와 단가를 공표된 단가집과 대조하지 못했습니다"
+    },
+    "unit_rate_within_published_price": {
+      "below": "항목 {ordinal}의 poz '{code}': 단가 {rate}이(가) 설치된 단가집의 공표 가격 {published}보다 {percent}퍼센트 낮습니다",
+      "above": "항목 {ordinal}의 poz '{code}': 단가 {rate}이(가) 설치된 단가집의 공표 가격 {published}보다 {percent}퍼센트 높습니다",
+      "fail": "이 차이는 이 검사에 설정된 {limit}퍼센트를 초과합니다",
+      "suggestion": "비교는 여기에 설치된 단가 기반을 사용하며, 이 기반은 단가집의 연도를 기록하지 않습니다. 건축, 기계, 전기 장의 공표 가격에는 시공사 이윤과 일반관리비 {markup}퍼센트가 이미 포함되어 있습니다. 입찰 할인 후에는 공표 가격보다 낮은 단가가 일반적이니, 차이가 의도한 것인지 확인하세요",
+      "repriced": "국가 단가 기반({region})이 다른 시장 또는 통화로 전환되어 단가를 공표 가격과 비교하지 않았습니다. 이 검사를 실행하려면 기반을 원래 시장으로 되돌리세요",
+      "currency_differs": "{count}개 줄의 단가는 {currency}인데 단가집은 {book_currency}이므로 공표 가격과 비교하지 않았습니다",
+      "currency_unknown": "{count}개 줄의 통화가 기록되지 않아 해당 단가를 {book_currency} 공표 가격과 비교하지 않았습니다"
     }
   },
   "sekisan": {

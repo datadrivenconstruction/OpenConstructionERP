@@ -100,14 +100,22 @@
     "birimfiyat.poz_unit_consistent",
     "birimfiyat.poz_rate_consistent",
     "birimfiyat.own_item_analysed",
-    "birimfiyat.profit_overhead_once"
-  ],
-  "planned_not_built_rule_ids": [
+    "birimfiyat.profit_overhead_once",
     "birimfiyat.unit_matches_poz_definition",
-    "birimfiyat.unit_rate_within_published_price",
+    "birimfiyat.unit_rate_within_published_price"
+  ],
+  "published_price_comparison": {
+    "applies_to_rule_id": "birimfiyat.unit_rate_within_published_price",
+    "review_status": "unconfirmed",
+    "default": "report_only",
+    "warn_above_percent": null,
+    "warn_below_percent": null,
+    "note": "How far a line's rate may sit from the published unit price before the difference is a warning, as a percentage of the published price, one figure for each direction. Both ship unset. Unset means the check states the difference as information and never escalates it; it does not mean zero. No figure is proposed here because none is known: a tender discount below the published price is ordinary, a private contract may agree any rate, and what a public employer accepts above the published price is a matter for the contract and a Turkish quantity surveyor. Set a number, for example 15, to have a larger difference in that direction raised as a warning. The comparison is made with the price in the installed national cost base, which includes the 25 percent for the building, mechanical and electrical chapters, in the base's own currency only, and without knowing which year's book the base holds."
+  },
+  "planned_not_built_rule_ids": [
     "birimfiyat.profit_included_in_book_rate",
     "birimfiyat.edition_year_current",
     "birimfiyat.price_difference_documented"
   ],
-  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. The first four need a lookup into the loaded price base, which no rule can make today: the unit a poz is defined in, its published price, whether a line's rate is the published price (profit included) or the analysis cost (profit excluded), and the edition a number belongs to cannot be read from a bill line alone. A line priced from the base carries the id of its cost item and nothing about the base it came from, so the third check is one carried flag away: the day a line keeps which list its rate is from and whether that rate includes profit, the double count can be reported without a lookup. The fifth, the fiyat farkı record, needs the contract's price-adjustment clause, which a bill does not carry. Move an id to enables_rule_ids on the day its rule lands, not before."
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. Two checks that were on this list are built and now look the bill's poz numbers up in the installed national cost base: the unit a poz is defined in, and the line's rate beside the published price. The first two that remain need facts that base does not hold. Whether a line's rate is the published price (profit included) or the analysis cost (profit excluded) cannot be read from a bill line: a line priced from the base carries the id of its cost item and nothing about the base it came from, so that check is one carried flag away. The edition a number belongs to is not stored either: the cost import keeps neither the year of a price nor the institution that published it, so no check can say a bill uses last year's book until the import records them. The third, the fiyat farkı record, needs the contract's price-adjustment clause, which a bill does not carry. Move an id to enables_rule_ids on the day its rule lands, not before."
 }

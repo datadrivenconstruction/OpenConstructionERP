@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Zysk i koszty ogólne wykonawcy naliczono w {count} wierszach, łącznie {total} procent, ponad jednorazowe {limit} procent",
       "suggestion": "Te 25 procent dolicza się raz. Zostaw jeden wiersz i usuń go całkiem, gdy stawki są opublikowanymi cenami jednostkowymi, które już go zawierają"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Numer poz '{code}' w pozycji {ordinal} jest obmierzony w '{unit}', ale zainstalowany katalog cen jednostkowych definiuje go w '{book_unit}'",
+      "suggestion": "Numer poz jest zdefiniowany w jednej jednostce. Obmierz wiersz w jednostce katalogu albo ponumeruj odmienną robotę jako własną pozycję (ÖZEL-1)",
+      "not_installed": "Krajowa baza cen jednostkowych ({region}) nie jest zainstalowana, więc jednostki i ceny {count} numerów poz nie zostały porównane z opublikowanym katalogiem. Wczytaj ją ze strony importu bazy kosztów",
+      "unavailable": "Nie udało się odczytać krajowej bazy cen jednostkowych ({region}), więc jednostki i ceny {count} numerów poz nie zostały porównane z opublikowanym katalogiem"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Numer poz '{code}' w pozycji {ordinal}: cena {rate} jest o {percent} procent niższa od opublikowanej ceny {published} w zainstalowanym katalogu cen jednostkowych",
+      "above": "Numer poz '{code}' w pozycji {ordinal}: cena {rate} jest o {percent} procent wyższa od opublikowanej ceny {published} w zainstalowanym katalogu cen jednostkowych",
+      "fail": "To więcej niż {limit} procent ustawione dla tej kontroli",
+      "suggestion": "Porównanie korzysta z zainstalowanej tutaj bazy cen jednostkowych, która nie zapisuje roku swojego katalogu. Opublikowane ceny rozdziałów budowlanych, mechanicznych i elektrycznych zawierają już {markup} procent zysku wykonawcy i kosztów ogólnych. Cena niższa od opublikowanej jest zwykła po rabacie przetargowym; sprawdź, czy różnica jest zamierzona",
+      "repriced": "Krajowa baza cen jednostkowych ({region}) została przełączona na inny rynek lub walutę, więc ceny nie zostały porównane z opublikowanymi. Przywróć bazę na jej rodzimy rynek, aby uruchomić tę kontrolę",
+      "currency_differs": "Ceny w {count} wierszach są w {currency}, a katalog cen jednostkowych jest w {book_currency}, więc nie zostały porównane z opublikowanymi cenami",
+      "currency_unknown": "Waluta {count} wierszy nie jest zapisana, więc ich ceny nie zostały porównane z opublikowanymi cenami w {book_currency}"
     }
   },
   "sekisan": {

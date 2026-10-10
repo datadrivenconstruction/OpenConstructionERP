@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Töövõtja kasum ja üldkulud on rakendatud {count} real, kokku {total} protsenti, üle ühekordse {limit} protsendi",
       "suggestion": "25 protsenti lisatakse üks kord. Jäta üks rida ja eemalda see täielikult, kui hinnad on avaldatud ühikuhinnad, mis seda juba sisaldavad"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' real {ordinal} on mõõdetud ühikus '{unit}', kuid paigaldatud ühikuhinnaraamat määratleb selle ühikus '{book_unit}'",
+      "suggestion": "Poz-number on määratletud ühes ühikus. Mõõtke rida raamatu ühikus või nummerdage erinev töö oma kirjena (ÖZEL-1)",
+      "not_installed": "Riiklik ühikuhindade baas ({region}) ei ole paigaldatud, seega ei võrreldud {count} poz-numbri ühikuid ja hindu avaldatud raamatuga. Laadige see kuluandmebaasi impordilehelt",
+      "unavailable": "Riiklikku ühikuhindade baasi ({region}) ei õnnestunud lugeda, seega ei võrreldud {count} poz-numbri ühikuid ja hindu avaldatud raamatuga"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' real {ordinal}: hind {rate} on {percent} protsenti madalam kui paigaldatud ühikuhinnaraamatu avaldatud hind {published}",
+      "above": "Poz '{code}' real {ordinal}: hind {rate} on {percent} protsenti kõrgem kui paigaldatud ühikuhinnaraamatu avaldatud hind {published}",
+      "fail": "See ületab selle kontrolli jaoks seatud {limit} protsenti",
+      "suggestion": "Võrdlus kasutab siin paigaldatud ühikuhindade baasi, mis ei salvesta oma raamatu aastat. Hoone-, mehaanika- ja elektripeatükkide avaldatud hinnad sisaldavad juba {markup} protsenti töövõtja kasumit ja üldkulusid. Avaldatud hinnast madalam hind on pärast hankeallahindlust tavaline; kontrollige, et erinevus on tahtlik",
+      "repriced": "Riiklik ühikuhindade baas ({region}) on viidud teisele turule või valuutale, seega ei võrreldud hindu avaldatud hindadega. Selle kontrolli käivitamiseks viige baas tagasi koduturule",
+      "currency_differs": "{count} rea hinnad on valuutas {currency}, ühikuhinnaraamat aga valuutas {book_currency}, seega ei võrreldud neid avaldatud hindadega",
+      "currency_unknown": "{count} rea valuutat ei ole salvestatud, seega ei võrreldud nende hindu avaldatud hindadega valuutas {book_currency}"
     }
   },
   "sekisan": {

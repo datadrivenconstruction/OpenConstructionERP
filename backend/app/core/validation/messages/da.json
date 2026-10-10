@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Entreprenørens fortjeneste og generalomkostninger er anvendt på {count} linjer, {total} procent tilsammen, over de enkelte {limit} procent",
       "suggestion": "De 25 procent lægges på én gang. Behold én linje, og fjern den helt, når priserne er offentliggjorte enhedspriser, som allerede indeholder dem"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' på post {ordinal} er målt i '{unit}', men den installerede enhedsprisbog definerer den i '{book_unit}'",
+      "suggestion": "Et poz-nummer er defineret i én enhed. Mål linjen i bogens enhed, eller nummerer det afvigende arbejde som din egen post (ÖZEL-1)",
+      "not_installed": "Den nationale enhedsprisbase ({region}) er ikke installeret, så enheder og priser for {count} poz-numre blev ikke kontrolleret mod den udgivne bog. Indlæs den fra importsiden for omkostningsdatabasen",
+      "unavailable": "Den nationale enhedsprisbase ({region}) kunne ikke læses, så enheder og priser for {count} poz-numre blev ikke kontrolleret mod den udgivne bog"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' på post {ordinal}: prisen {rate} er {percent} procent under den udgivne pris på {published} i den installerede enhedsprisbog",
+      "above": "Poz '{code}' på post {ordinal}: prisen {rate} er {percent} procent over den udgivne pris på {published} i den installerede enhedsprisbog",
+      "fail": "Det er mere end de {limit} procent, der er sat for denne kontrol",
+      "suggestion": "Sammenligningen bruger den enhedsprisbase, der er installeret her, og som ikke registrerer bogens år. De udgivne priser for bygnings-, mekanik- og elkapitlerne indeholder allerede {markup} procent til entreprenørens fortjeneste og generelle omkostninger. En pris under den udgivne pris er almindelig efter en udbudsrabat; kontrollér, at forskellen er tilsigtet",
+      "repriced": "Den nationale enhedsprisbase ({region}) er omstillet til et andet marked eller en anden valuta, så priserne blev ikke sammenlignet med de udgivne priser. Sæt basen tilbage til sit hjemmemarked for at køre denne kontrol",
+      "currency_differs": "Priser på {count} linjer er i {currency}, mens enhedsprisbogen er i {book_currency}, så de blev ikke sammenlignet med de udgivne priser",
+      "currency_unknown": "Valutaen på {count} linjer er ikke registreret, så deres priser blev ikke sammenlignet med de udgivne priser i {book_currency}"
     }
   },
   "sekisan": {

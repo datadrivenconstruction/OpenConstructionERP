@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Zisk a režie zhotovitele jsou uplatněny na {count} řádcích, dohromady {total} procent, nad jednorázových {limit} procent",
       "suggestion": "Těch 25 procent se přičítá jednou. Ponechte jeden řádek a zcela jej odstraňte, jsou-li sazby zveřejněné jednotkové ceny, které je již obsahují"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' na položce {ordinal} je měřen v '{unit}', ale nainstalovaný jednotkový ceník jej definuje v '{book_unit}'",
+      "suggestion": "Číslo poz je definováno v jedné jednotce. Změřte řádek v jednotce ceníku, nebo odlišnou práci očíslujte jako vlastní položku (ÖZEL-1)",
+      "not_installed": "Národní báze jednotkových cen ({region}) není nainstalována, a proto nebyly jednotky a ceny {count} čísel poz porovnány s vydaným ceníkem. Načtěte ji ze stránky importu nákladové databáze",
+      "unavailable": "Národní bázi jednotkových cen ({region}) se nepodařilo přečíst, a proto nebyly jednotky a ceny {count} čísel poz porovnány s vydaným ceníkem"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' na položce {ordinal}: cena {rate} je o {percent} procent nižší než vydaná cena {published} v nainstalovaném jednotkovém ceníku",
+      "above": "Poz '{code}' na položce {ordinal}: cena {rate} je o {percent} procent vyšší než vydaná cena {published} v nainstalovaném jednotkovém ceníku",
+      "fail": "To je více než {limit} procent nastavených pro tuto kontrolu",
+      "suggestion": "Porovnání používá zde nainstalovanou bázi jednotkových cen, která neeviduje rok svého ceníku. Vydané ceny stavebních, strojních a elektrických oddílů již obsahují {markup} procent zisku zhotovitele a režie. Cena pod vydanou cenou je po slevě z výběrového řízení obvyklá; ověřte, zda je rozdíl záměrný",
+      "repriced": "Národní báze jednotkových cen ({region}) je převedena na jiný trh nebo měnu, a proto nebyly ceny porovnány s vydanými cenami. Pro spuštění této kontroly vraťte bázi na její domácí trh",
+      "currency_differs": "Ceny na {count} řádcích jsou v {currency}, zatímco jednotkový ceník je v {book_currency}, a proto nebyly porovnány s vydanými cenami",
+      "currency_unknown": "Měna {count} řádků není zaznamenána, a proto jejich ceny nebyly porovnány s vydanými cenami v {book_currency}"
     }
   },
   "sekisan": {

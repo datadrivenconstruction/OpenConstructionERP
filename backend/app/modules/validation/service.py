@@ -224,9 +224,10 @@ class ValidationModuleService:
         #    are otherwise unreachable - rules default to "en" when no locale
         #    is in metadata).
         from app.core.i18n import get_locale
+        from app.core.validation.poz_catalogue import with_poz_catalogue_for_rule_sets
 
         engine_report: EngineReport = await validation_engine.validate(
-            data=payload,
+            data=await with_poz_catalogue_for_rule_sets(self.session, payload, rule_sets),
             rule_sets=rule_sets,
             target_type="boq",
             target_id=str(boq_id),

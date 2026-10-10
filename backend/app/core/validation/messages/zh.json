@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "承包商利润和管理费已用于 {count} 行，合计 {total} 个百分点，超过唯一的 {limit} 个百分点",
       "suggestion": "这 25% 只加一次。请保留一行；若单价为已公布的单价，其中已含此项，则应全部删除"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "第 {ordinal} 项的 poz“{code}”按“{unit}”计量，但已安装的单价册将其定义为“{book_unit}”",
+      "suggestion": "一个 poz 编号只定义一种单位。请按单价册的单位计量该行，或把不同的工作作为自建条目（ÖZEL-1）编号",
+      "not_installed": "国家单价库（{region}）未安装，因此 {count} 个 poz 编号的单位和单价未与已发布的单价册核对。请从成本数据库导入页面加载",
+      "unavailable": "无法读取国家单价库（{region}），因此 {count} 个 poz 编号的单位和单价未与已发布的单价册核对"
+    },
+    "unit_rate_within_published_price": {
+      "below": "第 {ordinal} 项的 poz“{code}”：单价 {rate} 比已安装单价册中的发布价 {published} 低 {percent}%",
+      "above": "第 {ordinal} 项的 poz“{code}”：单价 {rate} 比已安装单价册中的发布价 {published} 高 {percent}%",
+      "fail": "这超出了本检查设定的 {limit}%",
+      "suggestion": "比较使用此处已安装的单价库，该库不记录单价册的年份。建筑、机械和电气各章的发布价已包含 {markup}% 的承包商利润和综合管理费。投标让利后单价低于发布价属常见情况，请确认该差异是有意为之",
+      "repriced": "国家单价库（{region}）已切换到其他市场或币种，因此单价未与发布价比较。请将该库恢复到其原属市场后再运行本检查",
+      "currency_differs": "{count} 行的单价币种为 {currency}，而单价册币种为 {book_currency}，因此未与发布价比较",
+      "currency_unknown": "{count} 行的币种未记录，因此其单价未与 {book_currency} 的发布价比较"
     }
   },
   "sekisan": {

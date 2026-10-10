@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Winst en algemene kosten van de aannemer zijn op {count} regels toegepast, samen {total} procent, boven de enkele {limit} procent",
       "suggestion": "De 25 procent wordt één keer opgeteld. Houd één regel aan, en verwijder die helemaal wanneer de tarieven gepubliceerde eenheidsprijzen zijn, die het al bevatten"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' op post {ordinal} is gemeten in '{unit}', maar het geïnstalleerde eenheidsprijzenboek definieert het in '{book_unit}'",
+      "suggestion": "Een poz-nummer is in één eenheid gedefinieerd. Meet de regel in de eenheid van het boek, of nummer het afwijkende werk als eigen post (ÖZEL-1)",
+      "not_installed": "De nationale eenheidsprijzenbasis ({region}) is niet geïnstalleerd, dus de eenheden en prijzen van {count} poz-nummers zijn niet vergeleken met het gepubliceerde boek. Laad de basis via de importpagina van de kostendatabase",
+      "unavailable": "De nationale eenheidsprijzenbasis ({region}) kon niet worden gelezen, dus de eenheden en prijzen van {count} poz-nummers zijn niet vergeleken met het gepubliceerde boek"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' op post {ordinal}: de prijs {rate} ligt {percent} procent onder de gepubliceerde prijs van {published} in het geïnstalleerde eenheidsprijzenboek",
+      "above": "Poz '{code}' op post {ordinal}: de prijs {rate} ligt {percent} procent boven de gepubliceerde prijs van {published} in het geïnstalleerde eenheidsprijzenboek",
+      "fail": "Dat is meer dan de {limit} procent die voor deze controle is ingesteld",
+      "suggestion": "De vergelijking gebruikt de hier geïnstalleerde eenheidsprijzenbasis, die het jaar van haar boek niet vastlegt. De gepubliceerde prijzen van de hoofdstukken bouw, werktuigbouw en elektrotechniek bevatten al {markup} procent winst en algemene kosten van de aannemer. Een prijs onder de gepubliceerde prijs is gebruikelijk na een aanbestedingskorting; controleer of het verschil bedoeld is",
+      "repriced": "De nationale eenheidsprijzenbasis ({region}) is omgezet naar een andere markt of valuta, dus de prijzen zijn niet vergeleken met de gepubliceerde prijzen. Zet de basis terug naar haar eigen markt om deze controle uit te voeren",
+      "currency_differs": "De prijzen op {count} regels staan in {currency} terwijl het eenheidsprijzenboek in {book_currency} staat, dus ze zijn niet vergeleken met de gepubliceerde prijzen",
+      "currency_unknown": "De valuta van {count} regels is niet vastgelegd, dus hun prijzen zijn niet vergeleken met de gepubliceerde prijzen in {book_currency}"
     }
   },
   "sekisan": {

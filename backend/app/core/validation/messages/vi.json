@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Lợi nhuận và chi phí chung của nhà thầu được áp dụng trên {count} dòng, tổng cộng {total} phần trăm, vượt mức {limit} phần trăm duy nhất",
       "suggestion": "Mức 25 phần trăm chỉ cộng một lần. Giữ lại một dòng, và bỏ hẳn khi đơn giá là đơn giá đã công bố, vốn đã bao gồm khoản này"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' ở công tác {ordinal} được đo bằng '{unit}', nhưng sách đơn giá đã cài đặt định nghĩa nó bằng '{book_unit}'",
+      "suggestion": "Một số poz chỉ được định nghĩa bằng một đơn vị. Hãy đo dòng này theo đơn vị của sách, hoặc đánh số công việc khác biệt thành công tác riêng của bạn (ÖZEL-1)",
+      "not_installed": "Cơ sở đơn giá quốc gia ({region}) chưa được cài đặt, nên đơn vị và đơn giá của {count} số poz chưa được đối chiếu với sách đã công bố. Hãy tải nó từ trang nhập cơ sở dữ liệu chi phí",
+      "unavailable": "Không đọc được cơ sở đơn giá quốc gia ({region}), nên đơn vị và đơn giá của {count} số poz chưa được đối chiếu với sách đã công bố"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' ở công tác {ordinal}: đơn giá {rate} thấp hơn {percent} phần trăm so với giá công bố {published} trong sách đơn giá đã cài đặt",
+      "above": "Poz '{code}' ở công tác {ordinal}: đơn giá {rate} cao hơn {percent} phần trăm so với giá công bố {published} trong sách đơn giá đã cài đặt",
+      "fail": "Mức chênh này vượt quá {limit} phần trăm đặt cho lần kiểm tra này",
+      "suggestion": "Việc so sánh dùng cơ sở đơn giá cài đặt tại đây, vốn không ghi năm của sách. Giá công bố của các chương xây dựng, cơ khí và điện đã bao gồm {markup} phần trăm lợi nhuận nhà thầu và chi phí chung. Đơn giá thấp hơn giá công bố là bình thường sau khi giảm giá đấu thầu; hãy kiểm tra xem chênh lệch có chủ ý không",
+      "repriced": "Cơ sở đơn giá quốc gia ({region}) đã được chuyển sang thị trường hoặc tiền tệ khác, nên đơn giá không được so với giá công bố. Hãy đưa cơ sở về thị trường gốc để chạy kiểm tra này",
+      "currency_differs": "Đơn giá của {count} dòng tính bằng {currency} trong khi sách đơn giá tính bằng {book_currency}, nên không được so với giá công bố",
+      "currency_unknown": "Tiền tệ của {count} dòng chưa được ghi, nên đơn giá của chúng không được so với giá công bố bằng {book_currency}"
     }
   },
   "sekisan": {

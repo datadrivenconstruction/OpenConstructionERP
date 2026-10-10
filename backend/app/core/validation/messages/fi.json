@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Urakoitsijan voitto ja yleiskustannukset on lisätty {count} riville, yhteensä {total} prosenttia, yli yksittäisen {limit} prosentin",
       "suggestion": "25 prosenttia lisätään vain kerran. Jätä yksi rivi ja poista se kokonaan, kun hinnat ovat julkaistuja yksikköhintoja, jotka sisältävät sen jo"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' nimikkeellä {ordinal} on mitattu yksiköllä '{unit}', mutta asennettu yksikköhintakirja määrittelee sen yksiköllä '{book_unit}'",
+      "suggestion": "Poz-numero määritellään yhdellä yksiköllä. Mittaa rivi kirjan yksiköllä tai numeroi poikkeava työ omaksi nimikkeeksi (ÖZEL-1)",
+      "not_installed": "Kansallista yksikköhintatietokantaa ({region}) ei ole asennettu, joten {count} poz-numeron yksiköitä ja hintoja ei verrattu julkaistuun kirjaan. Lataa se kustannustietokannan tuontisivulta",
+      "unavailable": "Kansallista yksikköhintatietokantaa ({region}) ei voitu lukea, joten {count} poz-numeron yksiköitä ja hintoja ei verrattu julkaistuun kirjaan"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' nimikkeellä {ordinal}: hinta {rate} on {percent} prosenttia alle asennetun yksikköhintakirjan julkaistun hinnan {published}",
+      "above": "Poz '{code}' nimikkeellä {ordinal}: hinta {rate} on {percent} prosenttia yli asennetun yksikköhintakirjan julkaistun hinnan {published}",
+      "fail": "Se ylittää tälle tarkistukselle asetetun {limit} prosentin rajan",
+      "suggestion": "Vertailu käyttää tähän asennettua yksikköhintatietokantaa, joka ei tallenna kirjansa vuotta. Rakennus-, koneistus- ja sähköosien julkaistut hinnat sisältävät jo {markup} prosenttia urakoitsijan voittoa ja yleiskustannuksia. Julkaistua hintaa alempi hinta on tavallinen tarjousalennuksen jälkeen; tarkista, että ero on tarkoituksellinen",
+      "repriced": "Kansallinen yksikköhintatietokanta ({region}) on muunnettu toiselle markkinalle tai valuutalle, joten hintoja ei verrattu julkaistuihin hintoihin. Palauta tietokanta omalle markkinalleen ajaaksesi tämän tarkistuksen",
+      "currency_differs": "{count} rivin hinnat ovat valuutassa {currency}, mutta yksikköhintakirja on valuutassa {book_currency}, joten niitä ei verrattu julkaistuihin hintoihin",
+      "currency_unknown": "{count} rivin valuuttaa ei ole tallennettu, joten niiden hintoja ei verrattu julkaistuihin hintoihin valuutassa {book_currency}"
     }
   },
   "sekisan": {

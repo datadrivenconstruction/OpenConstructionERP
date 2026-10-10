@@ -48,11 +48,20 @@ encoded here.
 - Currency TRY at two decimals, a Turkish interface and the `turkey`
   estimating method: 25 percent profit and general expenses, then KDV.
 - The `birimfiyat` classification, so a line is coded with its poz number.
-- Eight validation rules under the `birimfiyat` rule set: a poz number is
+- Ten validation rules under the `birimfiyat` rule set: a poz number is
   present, it is well formed, its chapter is one a publisher uses, the unit is
   one the book measures in, one poz number is not measured in two units or
   priced at two rates within a bill, an own item carries its analysis, and the
-  25 percent is not applied twice.
+  25 percent is not applied twice. The last two look each Ministry poz up in
+  the installed national cost base: the line is measured in the unit the book
+  defines the poz in, and the line's rate is set beside the published price.
+  The rate check only states the difference, because a tender discount below
+  the published price is ordinary; it raises a warning only past a percentage
+  set in `rule_packs/bayindirlik_unit_prices.json`, which ships unset. It does
+  not know which year's book the base holds, compares in TRY only, and says so
+  once, instead of passing, when the base is not installed or is switched to
+  another market. Three further checks stay planned, not built: the document
+  lists them and why.
 - Five reference documents: the unit-price book, the mechanical and electrical
   general technical specifications with the fire regulation, the public
   procurement law, the earthquake code and the Turkish standards. Only the
@@ -65,6 +74,37 @@ encoded here.
   documents the choices a Turkish setup involves and changes no setting.
 
 The pack hides no module. Every module stays visible to every user.
+
+## What the platform provides, outside this pack
+
+Tevkifat, stopaj, the e-Fatura file and the hakediş are features of
+OpenConstructionERP itself. The pack configures none of them and they work
+with or without it.
+
+- Withheld VAT (KDV tevkifatı), income tax withholding (stopaj) and stamp duty
+  (damga vergisi) are computed from dated rate tables and shown with their
+  basis, rate and legal reference. A person chooses the category on the
+  document and the figures are confirmed by a person before they count; a
+  figure whose input is missing is held, never printed as zero.
+- The hakediş progress payment certificate is computed for unit price and
+  lump sum contracts and printed in Turkish, English or both.
+- A UBL-TR e-Fatura file is written unsigned, with a validation report, for a
+  licensed integrator to sign and submit. Signing, submission and any
+  connection to an integrator or to the revenue administration are not built,
+  and acceptance of the file by an integrator has not been confirmed.
+- The site registers and the daily diary export as a PDF or a workbook in
+  Turkish or English.
+
+The rates, fractions and thresholds behind the first item are under the same
+review as this pack, stated below, and some are still marked unconfirmed in
+the data.
+
+## A variant for one trade
+
+`turkey-tr-mep` is this pack with the menu and module set of a mechanical,
+electrical and plumbing contractor laid over it. It is built from this pack's
+manifest when it is loaded, so a correction made here reaches it, and it
+cannot be installed without this pack. An installation runs one of the two.
 
 ## Who the reference documents are for
 

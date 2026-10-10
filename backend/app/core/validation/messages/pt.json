@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "O lucro e as despesas gerais do empreiteiro são aplicados em {count} linhas, {total} por cento no conjunto, acima do {limit} por cento único",
       "suggestion": "Os 25 por cento são acrescentados uma só vez. Mantenha uma linha, e retire-a por completo quando os preços forem preços unitários publicados, que já o incluem"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "O poz '{code}' do item {ordinal} está medido em '{unit}', mas o livro de preços unitários instalado o define em '{book_unit}'",
+      "suggestion": "Um número de poz é definido numa só unidade. Meça a linha na unidade do livro, ou numere o trabalho diferente como item próprio (ÖZEL-1)",
+      "not_installed": "A base nacional de preços unitários ({region}) não está instalada, por isso as unidades e os preços de {count} números de poz não foram comparados com o livro publicado. Carregue-a na página de importação da base de dados de custos",
+      "unavailable": "Não foi possível ler a base nacional de preços unitários ({region}), por isso as unidades e os preços de {count} números de poz não foram comparados com o livro publicado"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' do item {ordinal}: o preço {rate} está {percent} por cento abaixo do preço publicado de {published} no livro de preços unitários instalado",
+      "above": "Poz '{code}' do item {ordinal}: o preço {rate} está {percent} por cento acima do preço publicado de {published} no livro de preços unitários instalado",
+      "fail": "Isso excede os {limit} por cento definidos para esta verificação",
+      "suggestion": "A comparação usa a base de preços unitários instalada aqui, que não regista o ano do seu livro. Os preços publicados dos capítulos de edificação, mecânica e eletricidade já incluem {markup} por cento de lucro do empreiteiro e despesas gerais. Um preço abaixo do publicado é habitual após um desconto de concurso; verifique se a diferença é intencional",
+      "repriced": "A base nacional de preços unitários ({region}) foi convertida para outro mercado ou moeda, por isso os preços não foram comparados com os publicados. Devolva a base ao seu mercado de origem para executar esta verificação",
+      "currency_differs": "Os preços de {count} linhas estão em {currency} enquanto o livro de preços unitários está em {book_currency}, por isso não foram comparados com os preços publicados",
+      "currency_unknown": "A moeda de {count} linhas não está registada, por isso os seus preços não foram comparados com os preços publicados em {book_currency}"
     }
   },
   "sekisan": {

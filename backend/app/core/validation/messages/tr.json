@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Yüklenici kârı ve genel giderler {count} satırda uygulanmış; toplam yüzde {total}, tek seferlik yüzde {limit} oranının üzerinde",
       "suggestion": "Yüzde 25 bir kez eklenir. Tek satır bırakın; fiyatlar yayımlanmış kârlı birim fiyatlarsa bu satırı tümüyle kaldırın, çünkü o fiyatlar bu payı zaten içerir"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "{ordinal} pozundaki '{code}' numarası '{unit}' birimiyle ölçülmüş; yüklü birim fiyat kitabı bu pozu '{book_unit}' birimiyle tanımlıyor",
+      "suggestion": "Bir poz numarası tek bir birimle tanımlanır. Kalemi kitaptaki birimle ölçün veya farklı işi özel poz (ÖZEL-1) olarak numaralandırın",
+      "not_installed": "Ulusal birim fiyat veri tabanı ({region}) yüklü değil; bu nedenle {count} poz numarasının birimi ve fiyatı yayımlanmış kitapla karşılaştırılmadı. Veri tabanını maliyet veri tabanı içe aktarma sayfasından yükleyin",
+      "unavailable": "Ulusal birim fiyat veri tabanı ({region}) okunamadı; bu nedenle {count} poz numarasının birimi ve fiyatı yayımlanmış kitapla karşılaştırılmadı"
+    },
+    "unit_rate_within_published_price": {
+      "below": "{ordinal} pozundaki '{code}' numarası: {rate} birim fiyatı, yüklü birim fiyat kitabında yayımlanan {published} fiyatının yüzde {percent} altında",
+      "above": "{ordinal} pozundaki '{code}' numarası: {rate} birim fiyatı, yüklü birim fiyat kitabında yayımlanan {published} fiyatının yüzde {percent} üzerinde",
+      "fail": "Bu fark, bu denetim için belirlenen yüzde {limit} sınırını aşıyor",
+      "suggestion": "Karşılaştırma burada yüklü birim fiyat veri tabanıyla yapılır; veri tabanı kitabın yılını kaydetmez. İnşaat, mekanik tesisat ve elektrik tesisatı bölümlerinin yayımlanmış fiyatları yüzde {markup} yüklenici kârı ve genel giderleri zaten içerir. İhale indiriminden sonra yayımlanmış fiyatın altında bir fiyat olağandır; farkın bilinçli olduğunu doğrulayın",
+      "repriced": "Ulusal birim fiyat veri tabanı ({region}) başka bir pazara veya para birimine çevrilmiş; bu nedenle fiyatlar yayımlanmış fiyatlarla karşılaştırılmadı. Bu denetimi çalıştırmak için veri tabanını kendi pazarına döndürün",
+      "currency_differs": "{count} kalemin fiyatı {currency} cinsinden, birim fiyat kitabı ise {book_currency} cinsinden; bu nedenle yayımlanmış fiyatlarla karşılaştırılmadı",
+      "currency_unknown": "{count} kalemin para birimi kayıtlı değil; bu nedenle fiyatları {book_currency} cinsinden yayımlanmış fiyatlarla karşılaştırılmadı"
     }
   },
   "sekisan": {

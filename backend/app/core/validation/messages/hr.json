@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Dobit i opći troškovi izvođača primijenjeni su na {count} redaka, ukupno {total} posto, iznad jednokratnih {limit} posto",
       "suggestion": "Tih 25 posto dodaje se jednom. Zadržite jedan redak i potpuno ga uklonite kad su cijene objavljene jedinične cijene koje ga već sadrže"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' na stavci {ordinal} mjeren je u '{unit}', ali instalirana knjiga jediničnih cijena definira ga u '{book_unit}'",
+      "suggestion": "Broj poz definiran je u jednoj jedinici. Izmjerite redak u jedinici iz knjige ili označite drukčiji rad kao vlastitu stavku (ÖZEL-1)",
+      "not_installed": "Nacionalna baza jediničnih cijena ({region}) nije instalirana, pa jedinice i cijene {count} brojeva poz nisu provjerene prema objavljenoj knjizi. Učitajte je sa stranice za uvoz baze troškova",
+      "unavailable": "Nacionalnu bazu jediničnih cijena ({region}) nije bilo moguće pročitati, pa jedinice i cijene {count} brojeva poz nisu provjerene prema objavljenoj knjizi"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' na stavci {ordinal}: cijena {rate} je {percent} posto ispod objavljene cijene {published} u instaliranoj knjizi jediničnih cijena",
+      "above": "Poz '{code}' na stavci {ordinal}: cijena {rate} je {percent} posto iznad objavljene cijene {published} u instaliranoj knjizi jediničnih cijena",
+      "fail": "To je više od {limit} posto postavljenih za ovu provjeru",
+      "suggestion": "Usporedba koristi ovdje instaliranu bazu jediničnih cijena, koja ne bilježi godinu svoje knjige. Objavljene cijene građevinskih, strojarskih i elektro poglavlja već sadrže {markup} posto dobiti izvođača i općih troškova. Cijena ispod objavljene uobičajena je nakon popusta na natječaju; provjerite je li razlika namjerna",
+      "repriced": "Nacionalna baza jediničnih cijena ({region}) prebačena je na drugo tržište ili valutu, pa cijene nisu uspoređene s objavljenima. Vratite bazu na njezino domaće tržište da biste pokrenuli ovu provjeru",
+      "currency_differs": "Cijene u {count} redaka su u {currency}, a knjiga jediničnih cijena je u {book_currency}, pa nisu uspoređene s objavljenim cijenama",
+      "currency_unknown": "Valuta {count} redaka nije zabilježena, pa njihove cijene nisu uspoređene s objavljenim cijenama u {book_currency}"
     }
   },
   "sekisan": {

@@ -418,6 +418,21 @@
     "profit_overhead_once": {
       "fail": "Contractor profit and general expenses are applied on {count} lines, {total} percent together, above the single {limit} percent",
       "suggestion": "The 25 percent is added once. Keep one line, and remove it altogether when the rates are published unit prices, which already contain it"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' on position {ordinal} is measured in '{unit}', but the installed unit-price book defines it in '{book_unit}'",
+      "suggestion": "A poz number is defined in one unit. Measure the line in the book's unit, or number the differing work as your own item (ÖZEL-1)",
+      "not_installed": "The national unit-price base ({region}) is not installed, so the units and rates of {count} poz numbers were not checked against the published book. Load it from the cost database import page",
+      "unavailable": "The national unit-price base ({region}) could not be read, so the units and rates of {count} poz numbers were not checked against the published book"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' on position {ordinal}: rate {rate} is {percent} percent below the published price of {published} in the installed unit-price book",
+      "above": "Poz '{code}' on position {ordinal}: rate {rate} is {percent} percent above the published price of {published} in the installed unit-price book",
+      "fail": "That is more than the {limit} percent set for this check",
+      "suggestion": "The comparison uses the unit-price base installed here, which does not record the year of its book. Published prices of the building, mechanical and electrical chapters already contain the {markup} percent contractor profit and general expenses. A rate below the published price is usual after a tender discount; check that the difference is intended",
+      "repriced": "The national unit-price base ({region}) is switched to another market or currency, so rates were not compared with the published prices. Return the base to its home market to run this check",
+      "currency_differs": "Rates on {count} lines are in {currency} while the unit-price book is in {book_currency}, so they were not compared with the published prices",
+      "currency_unknown": "The currency of {count} lines is not recorded, so their rates were not compared with the published prices in {book_currency}"
     }
   },
   "sekisan": {
