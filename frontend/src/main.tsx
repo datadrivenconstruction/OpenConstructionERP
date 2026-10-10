@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider, MutationCache, QueryCache } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import App from './app/App';
-import { useToastStore } from '@/stores/useToastStore';
 import { notifyQueryError } from '@/shared/lib/queryErrorToast';
+import { notifyMutationError } from '@/shared/lib/mutationErrorToast';
 import { initialLocaleReady } from './app/i18n';
 import { startAccountLanguageSync } from './app/accountLanguage';
 import { applyStoredUiScale } from '@/shared/lib/uiScale';
@@ -67,23 +67,9 @@ const queryClient = new QueryClient({
         queryClient.invalidateQueries({ queryKey: [key[0]] });
       }
     },
-    onError: (error, _variables, _context, mutation) => {
-      const message = error instanceof Error ? error.message : 'Operation failed';
-      const status = (error as { status?: number } | null)?.status;
-      const isAuthFailure = status === 401 || status === 403 || message.includes('401');
-      const suppress = Boolean(
-        (mutation?.meta as { suppressGlobalErrorToast?: boolean } | undefined)
-          ?.suppressGlobalErrorToast,
-      );
-      if (!isAuthFailure && !suppress) {
-        if (import.meta.env.DEV) console.warn('Mutation error:', message);
-        useToastStore.getState().addToast({
-          type: 'error',
-          title: 'Operation failed',
-          message,
-        });
-      }
-    },
+    // Stays quiet when the screen reports the failure itself; see
+    // `mutationErrorToast.ts`.
+    onError: (error, _variables, _context, mutation) => notifyMutationError(error, mutation),
   }),
 });
 
