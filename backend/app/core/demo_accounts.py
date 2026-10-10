@@ -72,6 +72,30 @@ SEEDED_ADMIN_EMAILS: frozenset[str] = frozenset(
 NON_MAILBOX_LOGINS: frozenset[str] = DEMO_ACCOUNT_EMAILS | SEEDED_ADMIN_EMAILS
 
 
+#: Top-level names that can never hold a mailbox (RFC 2606, RFC 6761).
+RESERVED_MAIL_TLDS: frozenset[str] = frozenset({"invalid", "test", "example", "localhost"})
+
+#: Second-level names reserved for documentation (RFC 2606), any subdomain too.
+RESERVED_MAIL_DOMAINS: frozenset[str] = frozenset({"example.com", "example.net", "example.org"})
+
+
+def is_reserved_mail_domain(email: str | None) -> bool:
+    """True when ``email`` sits on a domain that cannot receive mail.
+
+    Fixtures, demo installs and placeholder form input use these names, and
+    a message to one is a bounce or deferral on our relay account. Matching
+    is by label, so ``example-contractor.com`` or ``test.de`` are not caught.
+    """
+    if not email or "@" not in email:
+        return False
+    domain = email.strip().rsplit("@", 1)[1].lower().rstrip(".")
+    if not domain:
+        return False
+    if domain.rsplit(".", 1)[-1] in RESERVED_MAIL_TLDS:
+        return True
+    return any(domain == d or domain.endswith("." + d) for d in RESERVED_MAIL_DOMAINS)
+
+
 def is_demo_account(email: str | None) -> bool:
     """True when ``email`` is one of the seeded demo logins.
 

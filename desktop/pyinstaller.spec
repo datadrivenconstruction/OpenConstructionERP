@@ -529,32 +529,71 @@ codesign_identity = None
 # and a test in main.rs reads this file and fails if the two stop matching.
 _WINDOWS_RUNTIME_TMPDIR = r"%LOCALAPPDATA%\OpenConstructionERP\extract"
 
-# Build a SINGLE self-contained executable (onefile), not a onedir folder.
-# Tauri ships the sidecar as an externalBin, which must be one standalone file;
-# a onedir build (exe + a separate _internal/ folder) cannot be used that way,
-# because Tauri copies only the named binary and the sidecar would then fail to
-# find its bundled Python runtime and PostgreSQL binaries. Folding a.binaries /
-# a.datas / a.zipfiles into EXE produces the single file.
+# Windows builds a onedir folder; macOS and Linux build a single onefile
+# executable.
+#
+# Windows: the onefile bootloader unpacked about 1.4 GB into
+# _WINDOWS_RUNTIME_TMPDIR on every start, which made every start slow, left
+# abandoned extractions behind after crashes and made antivirus scanners
+# inspect several hundred freshly written DLLs each time. The onedir folder
+# (openconstructionerp-server.exe plus _internal/) is installed once under
+# Program Files as a Tauri resource (tauri.windows.conf.json), and the launcher
+# starts the exe from the resource directory rather than as an externalBin,
+# because externalBin ships exactly one file. _WINDOWS_RUNTIME_TMPDIR stays
+# defined: the launcher still sweeps extractions left there by onefile builds.
+#
+# macOS and Linux keep onefile. Tauri ships the sidecar there as an externalBin,
+# which must be one standalone file, and a onedir tree inside a .app would need
+# its own signing and notarisation story.
 #
 # UPX is deliberately off. Compressing the embedded PostgreSQL executables and
 # their DLLs risks corrupting them, and UPX-packed binaries frequently trip
 # antivirus heuristics, which is the last thing a downloadable installer needs.
-exe = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.datas,
-    [],
-    name="openconstructionerp-server",
-    debug=False,
-    bootloader_ignore_signals=False,
-    strip=False,
-    upx=False,
-    runtime_tmpdir=(_WINDOWS_RUNTIME_TMPDIR if sys.platform == "win32" else None),
-    console=True,  # Keep console for server logging
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=codesign_identity,
-    entitlements_file=None,
-)
+_ONEDIR = sys.platform == "win32"
+
+if _ONEDIR:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        [],
+        exclude_binaries=True,
+        name="openconstructionerp-server",
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=False,
+        console=True,  # Keep console for server logging
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=codesign_identity,
+        entitlements_file=None,
+    )
+    coll = COLLECT(
+        exe,
+        a.binaries,
+        a.datas,
+        strip=False,
+        upx=False,
+        name="openconstructionerp-server",
+    )
+else:
+    exe = EXE(
+        pyz,
+        a.scripts,
+        a.binaries,
+        a.datas,
+        [],
+        name="openconstructionerp-server",
+        debug=False,
+        bootloader_ignore_signals=False,
+        strip=False,
+        upx=False,
+        runtime_tmpdir=None,
+        console=True,  # Keep console for server logging
+        disable_windowed_traceback=False,
+        argv_emulation=False,
+        target_arch=None,
+        codesign_identity=codesign_identity,
+        entitlements_file=None,
+    )

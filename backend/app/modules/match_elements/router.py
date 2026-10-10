@@ -224,6 +224,13 @@ async def create_session(
     current_user_id: CurrentUserId,
 ) -> schemas.SessionRead:
     await verify_project_access(spec.project_id, current_user_id, session)
+    if spec.source == "bim" and spec.bim_model_id is None:
+        # A model session without a model groups nothing and then matches
+        # nothing, which the page could only show as an empty result.
+        raise HTTPException(
+            status_code=422,
+            detail="Pick the BIM model to match: a session on a model needs bim_model_id.",
+        )
     try:
         return await get_service().create_session(
             session,

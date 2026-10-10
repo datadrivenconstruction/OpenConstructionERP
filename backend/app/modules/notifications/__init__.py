@@ -17,24 +17,17 @@ async def on_startup() -> None:
        ``notifications.dispatch.webhook`` - pre-Epic-B these channels
        silently dropped because nothing subscribed.
 
-    3. ``start_scheduler()`` (Epic B / B4-B5) starts the in-process
-       periodic worker that flushes the digest queue every 5 minutes
-       and cleans up aged notifications every 24 hours.
+    3. Declares the in-process worker (digest flush every 5 minutes,
+       cleanup every 24 hours) as the ``notification_worker`` registry
+       process; startup boots it.
     """
+    from app.core.processes import process_registry
+    from app.core.processes.builtin import register_notification_worker
     from app.modules.notifications.dispatcher import register_dispatchers
     from app.modules.notifications.events import register_notification_subscribers
-    from app.modules.notifications.notification_worker import start_scheduler
     from app.modules.notifications.permissions import register_notification_permissions
 
     register_notification_permissions()
     register_notification_subscribers()
     register_dispatchers()
-    try:
-        start_scheduler()
-    except Exception:  # noqa: BLE001 - worker is best-effort
-        import logging
-
-        logging.getLogger(__name__).debug(
-            "notifications: scheduler failed to start",
-            exc_info=True,
-        )
+    register_notification_worker(process_registry)

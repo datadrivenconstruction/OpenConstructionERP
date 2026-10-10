@@ -1,12 +1,14 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { lazy, Suspense, useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Package,
+  Truck,
+  Boxes,
   ClipboardCheck,
   Search,
   FileText,
@@ -54,6 +56,7 @@ import { buildProcurementInsights } from './procurementInsights';
 import { VendorPrequalBadge } from './VendorPrequalBadge';
 import { BillPositionPicker } from './BillPositionPicker';
 import { RetainagePanel, RetainageBadge } from './RetainagePanel';
+import { SupplierConfirmationModal } from './SupplierConfirmationModal';
 import { POStatusPipeline } from './POStatusPipeline';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
@@ -80,6 +83,10 @@ interface PurchaseOrder {
   vendor_contact_id?: string | null;
   issue_date: string;
   delivery_date: string | null;
+  // The supplier's order confirmation, null until the buyer records it.
+  supplier_acknowledged_at?: string | null;
+  supplier_reference?: string | null;
+  supplier_confirmed_delivery_date?: string | null;
   // Money bug fix: the list endpoint (POResponse in backend/.../schemas.py)
   // returns `amount_total` + `currency_code` (amount is a Decimal-serialized
   // STRING), NOT `total_amount`/`currency`. The old field names were always
@@ -171,6 +178,8 @@ interface POResponse {
   status: string;
   payment_terms: string | null;
   notes: string | null;
+  invoice_tolerance_pct?: string | null;
+  invoice_tolerance_abs?: string | null;
   items: POItemResponse[];
 }
 
@@ -217,6 +226,10 @@ interface POFormState {
   currency: string;
   payment_terms: string;
   notes: string;
+  // How far a supplier invoice may run past the order before the match warns.
+  // Empty means no allowance beyond rounding.
+  invoice_tolerance_pct: string;
+  invoice_tolerance_abs: string;
   items: POLineItemForm[];
 }
 
@@ -244,6 +257,8 @@ function poFormFromResponse(po: POResponse, projectCurrency: string): POFormStat
     currency: po.currency_code || projectCurrency || '',
     payment_terms: payTermMatch?.[1] ?? '30',
     notes: po.notes ?? '',
+    invoice_tolerance_pct: po.invoice_tolerance_pct ?? '',
+    invoice_tolerance_abs: po.invoice_tolerance_abs ?? '',
     items:
       po.items && po.items.length > 0
         ? po.items.map((it) => ({
@@ -335,7 +350,15 @@ function currencyOptions(active: string): string[] {
   return [...COMMON_CURRENCIES];
 }
 
-type ProcurementTab = 'purchase-orders' | 'goods-receipts';
+type ProcurementTab = 'purchase-orders' | 'goods-receipts' | 'vendors' | 'catalog';
+
+// The vendor and catalog reference library, shown here as two tabs so a buyer
+// does not leave Procurement to find a supplier or a catalog price. It is the
+// same component the standalone /supplier-catalogs page renders, loaded on
+// first open; that page keeps all of its tabs.
+const SupplierCatalogsPage = lazy(() =>
+  import('@/features/supplier-catalogs').then((m) => ({ default: m.SupplierCatalogsPage })),
+);
 
 const PO_STATUS_COLORS: Record<
   string,
@@ -448,6 +471,16 @@ export function ProcurementPage() {
       label: t('procurement.goods_receipts', { defaultValue: 'Goods Receipts' }),
       icon: <ClipboardCheck size={15} />,
     },
+    {
+      key: 'vendors',
+      label: t('supplier_catalogs.tab_vendors', { defaultValue: 'Vendors' }),
+      icon: <Truck size={15} />,
+    },
+    {
+      key: 'catalog',
+      label: t('supplier_catalogs.tab_catalog', { defaultValue: 'Catalog' }),
+      icon: <Boxes size={15} />,
+    },
   ];
 
   return (
@@ -559,8 +592,13 @@ export function ProcurementPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
-      {!projectId ? (
+      {/* Tab Content. Vendors and the catalog belong to the company, not a
+          project, so they open without one. */}
+      {activeTab === 'vendors' || activeTab === 'catalog' ? (
+        <Suspense fallback={<Loader2 size={18} className="animate-spin text-content-tertiary" />}>
+          <SupplierCatalogsPage embeddedTab={activeTab} />
+        </Suspense>
+      ) : !projectId ? (
         <RequiresProject
           emptyHint={t('procurement.select_project', {
             defaultValue:
@@ -618,6 +656,7 @@ function PurchaseOrdersTab({
   >(null);
   // Retainage panel (Gap F) - opened from a PO row's "Retainage" action.
   const [retainagePO, setRetainagePO] = useState<PurchaseOrder | null>(null);
+  const [confirmingPO, setConfirmingPO] = useState<PurchaseOrder | null>(null);
   // Removal confirm - opened from a PO row's delete / cancel action. Which of
   // the two verbs it offers is decided from the row's status by
   // `removalVerbFor`; the backend has the final say and refuses with a 409
@@ -665,6 +704,8 @@ function PurchaseOrdersTab({
     currency: '',
     payment_terms: '30',
     notes: '',
+    invoice_tolerance_pct: '',
+    invoice_tolerance_abs: '',
     items: [{ ...emptyLine }] as POLineItemForm[],
   });
   // The state an edit prefill left the form in, so the save can send only what
@@ -678,7 +719,8 @@ function PurchaseOrdersTab({
   const emptyPoForm = {
     vendor_contact_id: '', vendor_display: '', po_type: 'standard' as 'standard' | 'blanket' | 'service',
     delivery_date: '', currency: '', payment_terms: '30',
-    notes: '', items: [{ ...emptyLine }] as POLineItemForm[],
+    notes: '', invoice_tolerance_pct: '', invoice_tolerance_abs: '',
+    items: [{ ...emptyLine }] as POLineItemForm[],
   };
 
   // Seed the currency from the resolved project currency when the create
@@ -815,6 +857,8 @@ function PurchaseOrdersTab({
         amount_total: String(poTotal.toFixed(2)),
         payment_terms: `Net ${data.payment_terms}`,
         notes: data.notes || undefined,
+        invoice_tolerance_pct: data.invoice_tolerance_pct.trim() || undefined,
+        invoice_tolerance_abs: data.invoice_tolerance_abs.trim() || undefined,
         status: 'draft',
         items: data.items
           .filter((li) => li.description.trim())
@@ -872,6 +916,13 @@ function PurchaseOrdersTab({
         body.payment_terms = `Net ${data.payment_terms}`;
       }
       if (data.notes !== base.notes) body.notes = data.notes || undefined;
+      // An emptied allowance is sent as '' so the server clears it.
+      if (data.invoice_tolerance_pct !== base.invoice_tolerance_pct) {
+        body.invoice_tolerance_pct = data.invoice_tolerance_pct.trim();
+      }
+      if (data.invoice_tolerance_abs !== base.invoice_tolerance_abs) {
+        body.invoice_tolerance_abs = data.invoice_tolerance_abs.trim();
+      }
       if (itemsChanged) {
         body.items = data.items
           .filter((li) => li.description.trim())
@@ -1424,6 +1475,41 @@ function PurchaseOrdersTab({
                       <option value="90">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 90 })}</option>
                     </select>
                   </div>
+                  {/* Invoice allowance: how far a supplier invoice may run past
+                      this order before the invoice match warns. */}
+                  <div>
+                    <label htmlFor="po-tolerance-pct" className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('procurement.invoice_tolerance_pct', { defaultValue: 'Invoice allowance, %' })}
+                    </label>
+                    <input
+                      id="po-tolerance-pct"
+                      inputMode="decimal"
+                      value={poForm.invoice_tolerance_pct}
+                      onChange={(e) => setPoForm((f) => ({ ...f, invoice_tolerance_pct: e.target.value }))}
+                      placeholder={t('procurement.invoice_tolerance_none', { defaultValue: 'None' })}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="po-tolerance-abs" className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('procurement.invoice_tolerance_abs', {
+                        defaultValue: 'Invoice allowance, {{currency}}',
+                        currency: poForm.currency || '',
+                      })}
+                    </label>
+                    <input
+                      id="po-tolerance-abs"
+                      inputMode="decimal"
+                      value={poForm.invoice_tolerance_abs}
+                      onChange={(e) => setPoForm((f) => ({ ...f, invoice_tolerance_abs: e.target.value }))}
+                      placeholder={t('procurement.invoice_tolerance_none', { defaultValue: 'None' })}
+                      title={t('procurement.invoice_tolerance_hint', {
+                        defaultValue:
+                          'A supplier invoice may exceed the order by this much before a warning. With both set, the smaller one applies.',
+                      })}
+                      className={inputCls}
+                    />
+                  </div>
                 </div>
                 {/* Notes */}
                 <div>
@@ -1767,6 +1853,31 @@ function PurchaseOrdersTab({
                         {t('procurement.action_issue_short', { defaultValue: 'Issue' })}
                       </Button>
                     )}
+                    {['issued', 'partially_received'].includes(po.status) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmingPO(po)}
+                        title={
+                          po.supplier_acknowledged_at
+                            ? t('procurement.supplier_confirmed_title', {
+                                defaultValue: 'Confirmed by the supplier ({{ref}}). Click to revise.',
+                                ref: po.supplier_reference || '-',
+                              })
+                            : t('procurement.supplier_confirmation_record', {
+                                defaultValue: 'Record the supplier confirmation',
+                              })
+                        }
+                      >
+                        <CheckCircle2
+                          size={14}
+                          className={po.supplier_acknowledged_at ? 'mr-1 text-semantic-success' : 'mr-1'}
+                        />
+                        {po.supplier_acknowledged_at
+                          ? t('procurement.supplier_confirmed_short', { defaultValue: 'Confirmed' })
+                          : t('procurement.supplier_confirm_short', { defaultValue: 'Confirm' })}
+                      </Button>
+                    )}
                     {/* Invoicing is only valid once the PO has been issued -
                         a draft/cancelled PO must never become a payable
                         (mirrors the backend status guard). Keep the control
@@ -1870,6 +1981,8 @@ function PurchaseOrdersTab({
         projectId={projectId}
       />
     )}
+
+    <SupplierConfirmationModal po={confirmingPO} projectId={projectId} onClose={() => setConfirmingPO(null)} />
 
     {/* Retainage panel (Gap F) - release withheld retention + audit log */}
     {retainagePO && (

@@ -630,9 +630,17 @@ async def test_every_get_route_answers_the_demo_admin_on_a_fresh_install() -> No
                 walker = _Walker(client, routes, "", capture)
                 assert await walker.login(), "the demo admin could not sign in through /auth/demo-login/"
 
-                projects, _elapsed, _err = await walker.get("/api/v1/projects/")
-                assert projects is not None and projects.status_code == 200, "the project list itself failed"
-                rows = _items(projects.json())
+                # The demo projects seed in the background once the server is up
+                # (the ``demo_data_seed`` process), so the first sign-in can
+                # beat them. Poll the list the walk needs, bounded.
+                seed_deadline = time.perf_counter() + 600
+                while True:
+                    projects, _elapsed, _err = await walker.get("/api/v1/projects/")
+                    assert projects is not None and projects.status_code == 200, "the project list itself failed"
+                    rows = _items(projects.json())
+                    if rows or time.perf_counter() > seed_deadline:
+                        break
+                    await asyncio.sleep(2)
                 assert rows, "a fresh install with the demo seed on has no project for the demo admin"
                 walker.project_id = report.project_id = str(rows[0]["id"])
 

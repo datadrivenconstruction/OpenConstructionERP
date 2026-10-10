@@ -15,6 +15,21 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 
+@pytest.fixture(autouse=True)
+def _geocoding_already_allowed(monkeypatch: pytest.MonkeyPatch) -> None:
+    """These suites test geocoding itself, so the installation has said yes.
+
+    The one-time question and its "nothing leaves before an answer" rule are
+    covered in tests/unit/test_an_address_stays_home_until_someone_agrees_to_send_it.py.
+    """
+    from app.modules.geo_hub import consent
+
+    async def _allowed(_session: object) -> tuple[str, None]:
+        return ("allow", None)
+
+    monkeypatch.setattr(consent, "_read_choice", _allowed)
+
+
 def make_tiny_pdf_bytes(text: str = "Site plan") -> bytes:
     """Return a single-page PDF with a rectangle + caption via PyMuPDF."""
     import fitz

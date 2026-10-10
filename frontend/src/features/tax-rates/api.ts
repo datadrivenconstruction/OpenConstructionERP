@@ -10,7 +10,7 @@
  * be filled in with something more presentable on the way to the screen.
  */
 
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
 
 const BASE = '/v1/i18n-foundation';
 
@@ -38,7 +38,8 @@ export type TaxResolutionStatus =
   | 'subdivision_unknown'
   | 'no_configuration'
   | 'default_rate_ambiguous'
-  | 'default_rate_not_in_force';
+  | 'default_rate_not_in_force'
+  | 'awaiting_confirmation';
 
 export interface TaxRateComponent {
   tax_code: string | null;
@@ -113,6 +114,17 @@ export interface TaxConfigRow {
   effective_from: string | null;
   effective_to: string | null;
   is_default: boolean;
+  /** `local_confirmation` is set on a rate that a local specialist must confirm before it is used. */
+  metadata?: { local_confirmation?: LocalConfirmation } & Record<string, unknown>;
+}
+
+/** A rate's local confirmation, as `tax_rules.LOCAL_CONFIRMATION_KEY` stores it. */
+export interface LocalConfirmation {
+  required: boolean;
+  status: 'pending' | 'confirmed';
+  accountant_name?: string;
+  source_reference?: string;
+  confirmed_at?: string;
 }
 
 export interface TaxConfigListResponse {
@@ -141,6 +153,21 @@ export function listTaxConfigsByCountry(countryCode: string): Promise<TaxConfigL
   return apiGet<TaxConfigListResponse>(
     `${BASE}/tax-configs/by-country/${encodeURIComponent(countryCode)}`,
   );
+}
+
+/** Every rate on file for a country, unconfirmed ones included. */
+export function listTaxConfigs(countryCode: string): Promise<TaxConfigListResponse> {
+  return apiGet<TaxConfigListResponse>(
+    `${BASE}/tax-configs/?country_code=${encodeURIComponent(countryCode)}`,
+  );
+}
+
+/** Record that a local specialist confirmed a rate. Admin only; the server audits it. */
+export function confirmTaxConfig(
+  id: string,
+  body: { accountant_name: string; source_reference: string },
+): Promise<TaxConfigRow> {
+  return apiPost<TaxConfigRow>(`${BASE}/tax-configs/${encodeURIComponent(id)}/confirm`, body);
 }
 
 export function resolveTaxRate(

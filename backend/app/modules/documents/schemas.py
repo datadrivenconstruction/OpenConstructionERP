@@ -275,6 +275,41 @@ class SheetUpdate(BaseModel):
         return value
 
 
+class SheetBulkUpdate(BaseModel):
+    """The same correction applied to several sheets of one project at once.
+
+    Only the fields a drawing set shares are offered: a discipline, a revision
+    and its date, a scale. Number and title name one drawing each and are
+    corrected one sheet at a time.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    sheet_ids: list[UUID] = Field(min_length=1, max_length=500)
+    discipline: str | None = Field(default=None, max_length=100)
+    revision: str | None = Field(default=None, max_length=50)
+    revision_date: datetime | None = None
+    scale: str | None = Field(default=None, max_length=50)
+
+    @field_validator("revision_date", mode="after")
+    @classmethod
+    def _date_is_utc(cls, value: datetime | None) -> datetime | None:
+        """A bare date ("2025-03-12") is that day at midnight UTC, as in a single edit."""
+        if value is not None and value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value
+
+    def changes(self) -> SheetUpdate:
+        """The per-sheet update this request stands for, with blank fields left out."""
+        fields = {
+            name: value
+            for name, value in self.model_dump(include={"discipline", "revision", "revision_date", "scale"}).items()
+            if value not in (None, "")
+        }
+        return SheetUpdate(**fields)
+
+
 class SheetRereadSummary(BaseModel):
     """What re-reading a project's title blocks from the stored drawings changed."""
 

@@ -4,7 +4,8 @@
   "standard": "IEC 61400-1:2019 (Design requirements) + IEC 61400-3-1:2019 (Offshore) + IEC 61400-12-1:2022 (Power performance) + IEC 61400-13:2015 (Mechanical loads) + IEC 61400-21-1:2019 (Grid power quality) + IEC 61400-22:2010 (Conformity testing & certification) + MEASNET / IECRE OD-501",
   "jurisdiction": "INTL",
   "description": "Deep rule pack covering the full IEC 61400 family for utility-scale wind EPC: turbine class (IEC class I / II / III / S — V_ref of 50 / 42.5 / 37.5 m/s respectively; class S = site-specific), turbulence category (A+ / A / B / C — I_ref 0.18 / 0.16 / 0.14 / 0.12 at 15 m/s), site wind resource assessment (min 12-month on-site met mast at hub height per IEC 61400-12-1, or remote-sensing LiDAR per IEC 61400-12-1 Annex L), micrositing wake loss budget (< 8 % typical, Jensen / Park / DWM model), turbine type certificate per IEC 61400-22, project certificate per IECRE OD-501, foundation load envelope from DLB (Design Load Basis), lightning protection class LPL I or II per IEC 61400-24, planning ZVI (Zone of Visual Influence) analysis, residential dB(A) impact study, shadow-flicker hours/year < 30 h per residence (German standard).",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "iec61400_1.turbine_class_assigned",
     "iec61400_1.turbulence_category_assigned",
     "iec61400_1.design_load_basis_dlb_documented",
@@ -28,5 +29,6 @@
     "wind.bird_bat_collision_risk_assessment_attached",
     "wind.crane_pad_and_access_road_design_attached",
     "wind.scada_oss_handover_to_o_and_m_planned"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -395,6 +395,51 @@ def _ensure_photo_within_pixel_cap(source_bytes: bytes) -> None:
         )
 
 
+#: EXIF tag of the GPS IFD (location where the photo was taken).
+_EXIF_GPS_IFD_TAG = 0x8825
+
+
+def _keep_photo_gps() -> bool:
+    """Whether the deployer opted to keep GPS tags inside stored photo files.
+
+    Off by default: a site photo's GPS block says where a person stood, and
+    the file travels on every download and share. The coordinates read from
+    it are still kept on the photo record, so the map pin survives. Set
+    ``OE_PHOTO_KEEP_EXIF_GPS=true`` to store files untouched.
+    """
+    return os.environ.get("OE_PHOTO_KEEP_EXIF_GPS", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _strip_exif_gps(source_bytes: bytes) -> bytes:
+    """Return the image without its EXIF GPS block, or unchanged if it has none.
+
+    Only the GPS IFD is removed; orientation, capture time and camera tags stay.
+    JPEG is re-saved with ``quality="keep"`` so its quantisation tables are
+    reused. Any failure returns the original bytes: stripping is a privacy
+    default, not a reason to refuse an upload.
+    """
+    try:
+        from io import BytesIO
+
+        from PIL import Image
+
+        with Image.open(BytesIO(source_bytes)) as img:
+            exif = img.getexif()
+            if _EXIF_GPS_IFD_TAG not in exif:
+                return source_bytes
+            del exif[_EXIF_GPS_IFD_TAG]
+            fmt = img.format
+            out = BytesIO()
+            kwargs: dict[str, Any] = {"exif": exif.tobytes()}
+            if fmt == "JPEG":
+                kwargs["quality"] = "keep"
+            img.save(out, format=fmt, **kwargs)
+            return out.getvalue()
+    except Exception:  # noqa: BLE001 - keep the upload working on any decoder issue
+        logger.warning("Could not strip EXIF GPS from photo; storing it unchanged")
+        return source_bytes
+
+
 def _generate_photo_thumbnail(
     source_bytes: bytes,
     dest_path: Path,
@@ -1689,6 +1734,15 @@ class PhotoService:
         if suggestion is not None:
             ai_meta["category_suggestion"] = suggestion
 
+        # 3) Drop the GPS block from the stored file unless the deployer opted
+        #    to keep it. Runs after the reads above, so the coordinates still
+        #    land on the photo record.
+        if not _keep_photo_gps():
+            stripped = await asyncio.to_thread(_strip_exif_gps, content)
+            if stripped is not content:
+                content = stripped
+                ai_meta["exif_gps_stripped"] = True
+
         # Build storage path
         file_uuid = uuid.uuid4().hex[:12]
         storage_name = f"{file_uuid}_{safe_name}"
@@ -2429,6 +2483,27 @@ class SheetService:
 
         logger.info("Sheet updated: %s (fields=%s, restacked=%s)", sheet_id, list(fields.keys()), moved)
         return sheet
+
+    async def bulk_update_sheets(
+        self,
+        project_id: uuid.UUID,
+        sheet_ids: list[uuid.UUID],
+        data: SheetUpdate,
+    ) -> list[Sheet]:
+        """Apply one correction to several sheets of a project.
+
+        Each sheet goes through :meth:`update_sheet`, so a bulk edit is recorded
+        as a hand edit and restacks exactly as the same edit made one sheet at a
+        time would. Every id is checked before anything is written: a sheet of
+        another project, or one that does not exist, fails the whole request
+        with 404 and leaves the rest untouched.
+        """
+        unique_ids = list(dict.fromkeys(sheet_ids))
+        for sheet_id in unique_ids:
+            sheet = await self.repo.get_by_id(sheet_id)
+            if sheet is None or sheet.project_id != project_id:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet not found")
+        return [await self.update_sheet(sheet_id, data) for sheet_id in unique_ids]
 
     @staticmethod
     def _moved_in_stack(sheet: Sheet, old_key: str, old_revision: str | None, old_title: str) -> bool:

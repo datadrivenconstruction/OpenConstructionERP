@@ -4,7 +4,8 @@
   "standard": "NFPA 855:2023 (Installation of Stationary Energy Storage Systems) + IEC 62619:2022 (Safety requirements — secondary lithium cells & batteries — industrial application) + IEC 62620:2014 (Performance requirements — lithium cells & batteries) + UL 9540:2023 + UL 9540A:2024 (Test method — fire propagation) + IEEE 2030.2 / IEEE 2030.3 (BESS interconnection) + NERC PRC-024 (US frequency / voltage ride-through)",
   "jurisdiction": "INTL",
   "description": "Battery Energy Storage System rule pack. BESS is increasingly integrated into utility-scale renewables EPC scope (PV+BESS hybrid, standalone grid-services, ancillary frequency response). Validates: cell + system safety qualification (IEC 62619 / UL 9540 / UL 9540A unit-level fire propagation test), site layout per NFPA 855 (3 m separation between enclosures default, deflagration ventilation, exhaust ventilation, gas detection — H2 + CO + VOC, explosion control, fire access on at least 2 sides for utility-scale, hazard mitigation analysis HMA per NFPA 855 §4.1.4), thermal-runaway risk ALARP (As Low As Reasonably Practicable) assessment with emergency response plan, NFPA 855 deflagration testing UL 9540A 4-level (cell / module / unit / installation), augmentation strategy over 20-year design life (typical replacement at 65 – 70 % SoH; 1.5 – 2x oversizing or staged top-up), round-trip efficiency target ≥ 85 % AC-AC, depth-of-discharge management, cycle life vs warranty (typical 6 000 cycles @ 80 % DoD for LFP).",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "bess.cell_iec_62619_certified",
     "bess.cell_iec_62620_certified",
     "bess.system_ul_9540_certified",
@@ -30,5 +31,6 @@
     "bess.ieee_2030_2_interconnection_compliance",
     "bess.nerc_prc_024_ride_through_compliance_us",
     "bess.acoustic_noise_assessment_attached"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -5,7 +5,8 @@
   "jurisdiction": "TR",
   "description": "Validates structural project documentation against the Turkish Building Seismic Code (TBDY 2018, Deprem Yonetmeligi). Checks seismic hazard zone designation using the Turkey Earthquake Hazard Map (AFAD), site class classification (ZA through ZF), building importance class, structural system type, and that the deprem performans raporu (seismic performance report) covers the required analysis methods for the building height and importance category.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "tbdy.deprem_tehlike_haritasi_referenced",
     "tbdy.zemin_sinifi_classified",
     "tbdy.bina_kullanim_sinifi_set",
@@ -19,6 +20,7 @@
     "tbdy.mevcut_bina_degerlendirme_if_retrofit",
     "tbdy.deprem_performans_raporu_present"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "AFAD (Afet ve Acil Durum Yonetimi Baskanligi)",
   "publication_year": 2018
 }

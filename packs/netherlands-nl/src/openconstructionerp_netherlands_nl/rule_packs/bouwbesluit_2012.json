@@ -5,7 +5,8 @@
   "jurisdiction": "NL",
   "description": "Validates project documentation against the Bouwbesluit 2012 (Building Decree), transitioning to Besluit bouwwerken leefomgeving (Bbl) under the Omgevingswet. Checks structural safety requirements, fire safety provisions (brandveiligheid), energy performance (BENG, EPC), building physics (acoustics, daylight), health and usability requirements, and vergunning (permit) documentation.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "bouwbesluit.gebruiksfunctie_classified",
     "bouwbesluit.constructieve_veiligheid_documented",
     "bouwbesluit.brandveiligheid_class_set",
@@ -19,6 +20,7 @@
     "bouwbesluit.omgevingsvergunning_referenced",
     "bouwbesluit.toegankelijkheid_provisions_present"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Ministerie van Binnenlandse Zaken en Koninkrijksrelaties (BZK)",
   "publication_year": 2024
 }

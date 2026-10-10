@@ -23,9 +23,11 @@
   "price_points_formula": "Ps = W * (1 - (Pt - P_min) / P_min)  where W is 80 or 90, Pt is the tender price under consideration and P_min is the lowest acceptable tender price",
   "preference_points_basis": "Up to 20 (or 10) points awarded for the procuring entity's specific goals, commonly the bidder's B-BBEE status level. Award goes to the highest total of price points plus preference points.",
   "threshold_zar": "50000000",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "boq_quality.no_zero_unit_rate",
     "pppfa.system_selected_by_value",
     "pppfa.preference_points_within_cap"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

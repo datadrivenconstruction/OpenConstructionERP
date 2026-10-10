@@ -16,7 +16,8 @@
     "projetos_padrao_comercial": ["CSL-8", "CSL-16", "CAL-8"],
     "cub_reference_source": "Sinduscon estadual"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nbr12721.cub_reference_present",
     "nbr12721.cub_reference_sinduscon_uf_match",
     "nbr12721.area_equivalente_calculated",
@@ -25,5 +26,6 @@
     "nbr12721.fracao_ideal_consistent",
     "nbr12721.memorial_descritivo_attached",
     "nbr12721.quadro_qci_required"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

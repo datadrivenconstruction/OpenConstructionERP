@@ -713,3 +713,41 @@ async def test_a_project_id_with_no_row_still_creates_on_the_fallback(pg_session
     project = SimpleNamespace(id=uuid.uuid4())
     svc = ContractsService(pg_session)
     assert await svc.project_country(project.id) is None
+
+
+# ── A province reaches the services, not only the resolver ───────────
+
+
+async def _manitoba_project(session) -> Project:
+    project = await _project(session, "CA")
+    project.subdivision_code = "CA-MB"
+    await session.flush()
+    return project
+
+
+async def test_a_manitoba_contract_starts_from_the_provincial_holdback(pg_session) -> None:
+    """The resolver knows Manitoba; the contract only does if the service passes the province on."""
+    svc = ContractsService(pg_session)
+    contract = await _create(svc, await _manitoba_project(pg_session))
+    assert contract.retention_percent == Decimal("7.5")
+    stamp = contract.metadata_["country_defaults"]
+    assert "retention_percent" in stamp["applied"]
+    assert "Manitoba" in stamp["sources"]["retention_percent"]["note"]
+
+
+async def test_the_contract_form_offers_the_provincial_rate(pg_session) -> None:
+    svc = ContractsService(pg_session)
+    answer = await svc.country_defaults_for_project((await _manitoba_project(pg_session)).id)
+    assert answer["subdivision_code"] == "CA-MB"
+    assert Decimal(str(answer["values"]["retention_percent"])) == Decimal("7.5")
+
+
+async def test_a_manitoba_subcontract_starts_from_the_provincial_holdback(pg_session) -> None:
+    agreement = await _agreement(pg_session, await _manitoba_project(pg_session))
+    assert agreement.retention_percent == Decimal("7.5")
+
+
+async def test_a_canadian_project_without_a_province_keeps_the_national_row(pg_session) -> None:
+    """The control: the same create without a province reads ten, so 7.5 above came from the province."""
+    contract = await _create(ContractsService(pg_session), await _project(pg_session, "CA"))
+    assert contract.retention_percent == Decimal("10")

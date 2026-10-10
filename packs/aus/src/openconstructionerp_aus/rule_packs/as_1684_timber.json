@@ -28,7 +28,8 @@
   "wind_classifications": ["N1", "N2", "N3", "N4", "C1", "C2", "C3"],
   "bushfire_attack_levels": ["BAL-LOW", "BAL-12.5", "BAL-19", "BAL-29", "BAL-40", "BAL-FZ"],
   "applies_to": ["projects", "boq", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "as1684.part_selected",
     "as1684.wind_classification_set",
     "as1684.cyclonic_part_3_for_c_regions",
@@ -47,5 +48,6 @@
     "as1684.bushfire_attack_level_set",
     "as1684.bal_fz_external_cladding_compliant",
     "as1684.subfloor_clearance_minimum"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

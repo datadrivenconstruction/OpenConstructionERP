@@ -5,7 +5,8 @@
   "jurisdiction": "AE",
   "description": "Validates fire and life safety documentation against UAE Civil Defense regulations. Each emirate (Abu Dhabi, Dubai, Sharjah, etc.) has its own Civil Defense authority, but the core requirements cover fire alarm and detection systems, sprinkler systems, fire-fighting access, smoke management, emergency lighting, means of egress, fire-rated construction, and the Civil Defense NOC (No Objection Certificate) process. Checks that the fire strategy report addresses all applicable provisions.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "civildef.fire_strategy_report_present",
     "civildef.building_risk_classification_set",
     "civildef.fire_alarm_system_specified",
@@ -19,6 +20,7 @@
     "civildef.noc_civil_defense_referenced",
     "civildef.fire_warden_provisions_if_applicable"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "General Directorate of Civil Defense (per emirate)",
   "publication_year": 2023
 }

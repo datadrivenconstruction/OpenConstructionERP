@@ -23,6 +23,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_settings
 from app.core.events import event_bus
 from app.core.i18n import get_locale
+from app.core.jwt_keys import ring_secrets
 from app.core.validation.messages import translate
 from app.modules.bim_hub.models import BIMFederation, BIMModel
 from app.modules.projects.models import Project
@@ -79,7 +80,10 @@ class SmartViewService:
         cached = getattr(self, "_share_signer_cache", None)
         if cached is None:
             settings = get_settings()
-            cached = URLSafeSerializer(settings.jwt_secret, salt=_SHARE_SIGNER_SALT)
+            # itsdangerous signs with the LAST key and verifies with all of
+            # them, so the ring goes in oldest first.
+            ring = list(reversed(ring_secrets(settings))) or [settings.jwt_secret]
+            cached = URLSafeSerializer(ring, salt=_SHARE_SIGNER_SALT)
             self._share_signer_cache = cached  # type: ignore[attr-defined]
         return cached
 

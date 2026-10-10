@@ -5,7 +5,7 @@
  * Backed by /api/v1/geo-hub/ — see backend/app/modules/geo_hub/router.py
  */
 
-import { apiDelete, apiGet, apiPatch, apiPost, ApiError } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut, ApiError } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 import type {
@@ -601,6 +601,34 @@ export async function geocodeSuggest(
 }
 
 /** Admin — geocode cache statistics for the Geo Hub admin panel. */
+/** Where project addresses may go for geocoding; asked once per installation. */
+export type GeocodingConsentState =
+  | 'unanswered'
+  | 'allow'
+  | 'deny'
+  | 'mirror'
+  | 'env_disabled'
+  | 'env_mirror';
+
+export interface GeocodingConsent {
+  state: GeocodingConsentState;
+  mirror_url: string | null;
+  nominatim_url: string | null;
+  photon_url: string | null;
+  can_decide: boolean;
+}
+
+export function getGeocodingConsent(): Promise<GeocodingConsent> {
+  return apiGet<GeocodingConsent>(`${BASE}/geocoding-consent`);
+}
+
+export function setGeocodingConsent(body: {
+  choice: 'allow' | 'deny' | 'mirror';
+  mirror_url?: string | null;
+}): Promise<GeocodingConsent> {
+  return apiPut<GeocodingConsent>(`${BASE}/geocoding-consent`, body);
+}
+
 export function getGeocodeCacheStats(): Promise<GeocodeCacheStats> {
   return apiGet<GeocodeCacheStats>(`${BASE}/geocode/cache/stats`);
 }

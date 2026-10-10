@@ -60,6 +60,7 @@ from app.core.match_service.envelope import (
     confidence_band_for,
 )
 from app.core.match_service.region_language import language_for as _language_for_catalog
+from app.core.processes.matching import disabled_matching_models
 from app.core.translation import TranslationResult, translate
 from app.modules.costs.qdrant_adapter import (
     QdrantHit,
@@ -1484,6 +1485,7 @@ async def rank(
         catalog_id=catalog_id,
         catalog_count=catalog_count,
         catalog_vectorized_count=catalog_vec,
+        models_disabled=disabled_matching_models(),
     )
 
 

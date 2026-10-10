@@ -5,7 +5,8 @@
   "jurisdiction": "NL",
   "description": "Validates specifications and BOQ items for building works (B&U) against the STABU besteksystematiek. Checks that specification chapters follow the STABU Standaard coding structure, that items reference valid STABU2 catalogus entries, that measurement rules match the STABU definition, and that the NL/SfB or NEN 2699 cost classification is applied consistently.",
   "applies_to": ["boq", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "stabu.bestek_structure_valid",
     "stabu.chapter_code_format_valid",
     "stabu.catalogus_reference_present",
@@ -16,6 +17,7 @@
     "stabu.bestekstekst_not_empty",
     "stabu.edition_year_current"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "STABU (Stichting Standaardbesteksystematiek voor de Bouw)",
   "publication_year": 2024
 }

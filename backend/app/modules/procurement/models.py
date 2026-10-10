@@ -101,6 +101,19 @@ class PurchaseOrder(Base):
         doc="Cumulative retainage released (Decimal string)",
     )
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
+    # The supplier's order confirmation, recorded by the buyer once an issued
+    # order is answered. Null until then, which is how the register finds the
+    # orders nobody has confirmed. The confirmed date sits beside
+    # ``delivery_date`` instead of overwriting it: the gap is the point.
+    supplier_acknowledged_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    supplier_acknowledged_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    supplier_reference: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    supplier_confirmed_delivery_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # The overrun a supplier invoice may carry before the invoice match warns,
+    # as a percentage of the order and/or an amount in its currency. Decimal
+    # strings; null keeps the one-cent rounding band.
+    invoice_tolerance_pct: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    invoice_tolerance_abs: Mapped[str | None] = mapped_column(String(50), nullable=True)
     payment_terms: Mapped[str | None] = mapped_column(String(100), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -282,6 +295,11 @@ class GoodsReceiptItem(Base):
     quantity_received: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     quantity_rejected: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Traceability carried over from the supplier catalogue receipt line when
+    # procurement became the one purchasing flow: the supplier's batch or lot
+    # and the serial numbers of the units received on this line.
+    batch_lot: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    serial_numbers: Mapped[list | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
 
     # Relationship
     goods_receipt: Mapped["GoodsReceipt"] = relationship(back_populates="items")

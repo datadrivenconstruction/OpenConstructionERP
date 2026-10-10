@@ -222,3 +222,22 @@ describe('SupplierCatalogsPage deletion', () => {
     expect(toast.title).toContain('Suspend the vendor');
   });
 });
+
+describe('SupplierCatalogsPage embedded in Procurement', () => {
+  it('shows the one tab it was given, without the page header or the other tabs', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={['/procurement']}>
+          <SupplierCatalogsPage embeddedTab="vendors" />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText('Acme Building Supplies')).toBeInTheDocument();
+    // The standalone page keeps these; inside Procurement they would be a
+    // second tab bar and a second guide on one screen.
+    expect(screen.queryByRole('button', { name: /Warehouses/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Catalog$/ })).not.toBeInTheDocument();
+  });
+});

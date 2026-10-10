@@ -19,9 +19,11 @@
     {"stage": 9, "name": "Close-out", "gate_deliverable": "Close-out report"}
   ],
   "note": "Stage names follow the National Treasury infrastructure delivery management stages. Confirm exact gate deliverables against the current FIDPM instruction note for your institution.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "project_completeness.all_trades_covered",
     "ipdm.stage_set",
     "ipdm.gate_deliverable_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

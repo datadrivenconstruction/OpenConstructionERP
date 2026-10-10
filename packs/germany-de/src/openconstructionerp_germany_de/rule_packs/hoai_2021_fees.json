@@ -5,7 +5,8 @@
   "jurisdiction": "DE",
   "description": "Validates project fee documentation against the Honorarordnung fuer Architekten und Ingenieure (HOAI) 2021. Checks that service phases (Leistungsphasen LP1-LP9) are documented and ordered, Honorarzone (HZ I-V) is assigned, anrechenbare Kosten (chargeable construction costs per paragraph 4) are stated, and the fee calculation references the applicable Honorartafel.",
   "applies_to": ["estimate", "contracts", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "hoai.leistungsphasen_documented",
     "hoai.leistungsphasen_order_valid",
     "hoai.leistungsphasen_percentages_sum_check",
@@ -19,6 +20,7 @@
     "hoai.honorarvereinbarung_schriftform",
     "hoai.besondere_leistungen_separately_listed"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Bundesministerium fuer Wohnen, Stadtentwicklung und Bauwesen",
   "publication_year": 2021
 }

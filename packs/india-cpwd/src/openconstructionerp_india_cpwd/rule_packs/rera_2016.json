@@ -18,7 +18,8 @@
   },
   "description": "Enables OCERP built-in validation rules that check private real-estate project workflows against RERA Act 2016 — project registration certificate present, 70% escrow account configured, carpet-area quoting (not super-built-up) in agreements & marketing, Quarterly Progress Report (QPR) generation schedule, and delay-penalty interest accrual at SBI MCLR + 2% on receipts.",
   "description_hi": "रेरा अधिनियम 2016 के अनुसार निजी रियल एस्टेट परियोजनाओं की जाँच — परियोजना पंजीकरण, 70% एस्क्रो खाता, कारपेट क्षेत्र, त्रैमासिक प्रगति रिपोर्ट, विलंब पर ब्याज।",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "rera.project_registration_certificate_present",
     "rera.registration_state_authority_matches_project_state",
     "rera.escrow_account_configured_70pct",
@@ -32,5 +33,6 @@
     "rera.delay_penalty_sbi_mclr_plus_2pct",
     "rera.agreement_for_sale_template_compliant",
     "rera.allottee_grievance_redressal_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -37,6 +37,10 @@ EXPRESSION = re.compile(r"\$\{\{(.*?)\}\}", re.S)
 # of "runner.temp". A name after a dot is a property, not another context:
 # github.event.workflow_run.head_branch names only the github context.
 CONTEXT = re.compile(r"\b([a-z_][a-z0-9_]*)(?:\s*\.\s*[a-z_][a-z0-9_-]*)+")
+# A string literal inside an expression is data, not a context reference: the
+# "server" in 'dist/openconstructionerp-server.exe' is part of a file name.
+# GitHub quotes literals with single quotes and escapes a quote by doubling it.
+STRING_LITERAL = re.compile(r"'(?:[^']|'')*'")
 
 # Available before a runner exists, i.e. everywhere a job-level key is
 # evaluated. Anything outside this set is a rejection, not a warning.
@@ -72,7 +76,7 @@ def _illegal_contexts(value: object, allowed: frozenset[str] = JOB_LEVEL_CONTEXT
             found.extend(_illegal_contexts(item, allowed))
     elif isinstance(value, str):
         for expression in EXPRESSION.findall(value):
-            for context in CONTEXT.findall(expression):
+            for context in CONTEXT.findall(STRING_LITERAL.sub("''", expression)):
                 if context not in allowed:
                     found.append(context)
     return found
@@ -135,6 +139,14 @@ def test_a_step_may_still_name_the_runner() -> None:
         "jobs:\n  upgrade:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ runner.temp }}\n"
     )
     assert _offences(stepwise) == []
+
+
+def test_a_name_inside_a_string_literal_is_not_a_context() -> None:
+    """A quoted path such as 'dist/app-server.exe' reads as server.exe to a bare regex."""
+    quoted = "${{ matrix.os == 'windows-latest' && 'dist/app-server.exe' || 'dist/app-server' }}"
+    assert _offences({"jobs": {"build": {"env": {"BIN": quoted}}}}) == []
+    unquoted = "${{ matrix.os == 'windows-latest' && runner.temp || 'dist/app-server' }}"
+    assert len(_offences({"jobs": {"build": {"env": {"BIN": unquoted}}}})) == 1
 
 
 @pytest.mark.parametrize("context", ["runner", "needs", "matrix", "strategy", "secrets", "steps", "env"])

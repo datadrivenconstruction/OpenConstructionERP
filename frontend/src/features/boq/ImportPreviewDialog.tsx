@@ -91,7 +91,7 @@ const FORMAT_EXTS: Record<string, string[]> = {
   Excel: ['xlsx', 'xls'],
   CSV: ['csv'],
   PDF: ['pdf'],
-  XPWE: ['xpwe'],
+  XPWE: ['xpwe', 'pwe'],
 };
 
 function detectFormat(filename: string): string {
@@ -483,7 +483,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xlsx,.xls,.csv,.pdf,.x81,.x83,.x84,.xml,.xpwe"
+                accept=".xlsx,.xls,.csv,.pdf,.x81,.x83,.x84,.xml,.xpwe,.pwe,.dcf"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];

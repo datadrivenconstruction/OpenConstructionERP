@@ -329,6 +329,7 @@ const standardLabels: Record<string, string> = {
   gesn: 'GESN / FER',
   bc3: 'BC3',
   untec: 'UNTEC',
+  dpgf: 'DPGF',
   voci: 'VOCI',
   onorm: 'ÖNORM',
   gaeb: 'GAEB',

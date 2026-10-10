@@ -39,6 +39,7 @@ TEMPLATE = DemoTemplate(
         "niveau de prix Montréal 2026, hors taxes)."
     ),
     region="CA",
+    subdivision_code="CA-QC",
     classification_standard="masterformat",
     currency="CAD",
     locale="fr-CA",

@@ -30,6 +30,7 @@ from app.modules.contracts.country_defaults import (
     CONTRACT_DEFAULT_FIELDS,
     COUNTRY_CONTRACT_DEFAULTS,
     NOTE_KEY_PREFIX,
+    SUBDIVISION_CONTRACT_DEFAULTS,
     note_key,
     resolve_contract_defaults,
 )
@@ -50,11 +51,19 @@ def _en_notes() -> dict[str, str]:
 
 
 def _table_notes() -> dict[str, str]:
-    return {
+    notes = {
         note_key(country, field): row[field]["note"]
         for country, row in COUNTRY_CONTRACT_DEFAULTS.items()
         for field in CONTRACT_DEFAULT_FIELDS
     }
+    notes.update(
+        {
+            note_key(code, field): figure["note"]
+            for code, row in SUBDIVISION_CONTRACT_DEFAULTS.items()
+            for field, figure in row.items()
+        }
+    )
+    return notes
 
 
 def test_every_note_is_in_en_ts_word_for_word() -> None:
@@ -73,7 +82,8 @@ def test_no_en_ts_note_outlives_its_figure() -> None:
 
 def test_the_parser_reads_the_file_rather_than_nothing() -> None:
     # A regex that matched no line would pass the stale-key test vacuously.
-    assert len(_en_notes()) == len(COUNTRY_CONTRACT_DEFAULTS) * len(CONTRACT_DEFAULT_FIELDS)
+    subdivision_notes = sum(len(row) for row in SUBDIVISION_CONTRACT_DEFAULTS.values())
+    assert len(_en_notes()) == len(COUNTRY_CONTRACT_DEFAULTS) * len(CONTRACT_DEFAULT_FIELDS) + subdivision_notes
 
 
 @pytest.mark.parametrize("country", sorted(COUNTRY_CONTRACT_DEFAULTS))

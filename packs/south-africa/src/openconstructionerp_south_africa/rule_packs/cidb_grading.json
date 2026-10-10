@@ -26,10 +26,12 @@
     {"grade": 9, "tender_value_ceiling": "no upper limit"}
   ],
   "note": "Tender value ceilings are indicative (ZAR) and reflect the schedule revised by the CIDB on 7 October 2019. They are periodically updated; confirm a contractor's current standing against the CIDB Register of Contractors before relying on these figures.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "boq_quality.no_zero_unit_rate",
     "boq_quality.no_missing_quantity",
     "cidb.grade_designation_set",
     "cidb.grade_covers_tender_value"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

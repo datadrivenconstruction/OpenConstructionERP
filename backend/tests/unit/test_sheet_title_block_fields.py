@@ -20,7 +20,7 @@ from __future__ import annotations
 import pytest
 
 from app.modules.documents.service import detect_discipline_from_sheet_number, detect_sheet_info
-from app.modules.documents.sheet_fields import sheet_chain_key
+from app.modules.documents.sheet_fields import fields_from_filename, sheet_chain_key
 
 # ── Revision ──────────────────────────────────────────────────────────────
 
@@ -302,3 +302,26 @@ def test_the_page_wins_over_the_file_name() -> None:
 def test_discipline_reads_italian_codes_as_well_as_the_first_letter(number: str, expected: str | None) -> None:
     """A three-letter Italian code names its discipline; an unknown word does not fall back to its first letter."""
     assert detect_discipline_from_sheet_number(number) == expected
+
+
+# ── File name ─────────────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    ("filename", "number", "revision"),
+    [
+        ("TAV_01_Pianta piano terra_REV_A.pdf", "TAV_01", "A"),
+        ("Elaborato_05_Prospetti-Rev.2.pdf", "Elaborato_05", "2"),
+        ("STR-02 Fondazioni Revisione 1.pdf", "STR-02", "1"),
+        ("A-101 rev b.pdf", "A-101", "B"),
+        ("TAV 03 Sezioni rev ol.pdf", "TAV 03", None),
+        ("Pianta porta scorrevole.pdf", None, None),
+    ],
+)
+def test_file_name_reads_italian_words_and_ignores_lower_case_word_fragments(
+    filename: str, number: str | None, revision: str | None
+) -> None:
+    """A spelled-out "Elaborato" prefix is a sheet number; two lower-case letters after "rev" are a word, not a revision."""
+    fields = fields_from_filename(filename)
+    assert fields["sheet_number"] == number
+    assert fields["revision"] == revision

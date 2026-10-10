@@ -77,6 +77,22 @@ describe('useGanttLinking', () => {
     expect(result.current.onDeleteLink).toBeUndefined();
   });
 
+  it('offers Undo on a new link, which removes that pair and reschedules', async () => {
+    const result = setup();
+    await act(() => result.current.onCreateLink!('a', 'b', 'FS'));
+    const added = toasts().find((x) => x.title === 'Dependency added');
+    expect(added?.action?.label).toBe('Undo');
+
+    api.reschedule.mockClear();
+    await act(async () => {
+      added!.action!.onClick();
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    expect(api.deleteRelationshipBetween).toHaveBeenCalledWith('sch', 'a', 'b');
+    expect(api.reschedule).toHaveBeenCalledWith('sch');
+    expect(toasts().some((x) => x.title === 'Link removed again')).toBe(true);
+  });
+
   it('creates the link, reschedules and refetches edges and bars', async () => {
     const result = setup();
     await act(() => result.current.onCreateLink!('a', 'b', 'FF'));

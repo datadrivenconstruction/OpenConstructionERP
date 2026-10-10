@@ -38,7 +38,8 @@
     "bdi_max_buildings_pct": 27.07,
     "bdi_max_infrastructure_pct": 27.86
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "lei14133.modalidade_declared",
     "lei14133.criterio_julgamento_declared",
     "lei14133.habilitacao_juridica_documented",
@@ -50,5 +51,6 @@
     "lei14133.matriz_de_riscos_attached",
     "lei14133.bdi_within_tcu_2622_ceiling",
     "lei14133.composicao_bdi_publicada"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

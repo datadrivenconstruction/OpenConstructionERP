@@ -65,6 +65,7 @@ from app.modules.documents.schemas import (
     ShareLinkListItem,
     ShareLinkPublicInfo,
     ShareLinkResponse,
+    SheetBulkUpdate,
     SheetCompletenessRequest,
     SheetCompletenessResponse,
     SheetListResponse,
@@ -1155,6 +1156,27 @@ async def update_sheet(
     await verify_project_access(sheet.project_id, user_id, session)
     sheet = await service.update_sheet(sheet_id, data)
     return _sheet_to_response(sheet)
+
+
+@router.post("/sheets/bulk-update/", response_model=list[SheetResponse])
+async def bulk_update_sheets(
+    data: SheetBulkUpdate,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> list[SheetResponse]:
+    """Set the same discipline, revision, date or scale on several sheets at once.
+
+    Access is checked on the project the request names, and the service refuses
+    any sheet that does not belong to it.
+    """
+    await verify_project_access(data.project_id, user_id, session)
+    changes = data.changes()
+    if not changes.model_fields_set:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="No field to change")
+    sheets = await service.bulk_update_sheets(data.project_id, data.sheet_ids, changes)
+    return [_sheet_to_response(sheet) for sheet in sheets]
 
 
 # ── Delete sheet ───────────────────────────────────────────────────────

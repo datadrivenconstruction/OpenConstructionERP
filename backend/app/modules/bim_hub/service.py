@@ -33,6 +33,7 @@ from app.core.boq_target import BOQTargetRefused, require_project_boq
 from app.core.events import event_bus
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.dataframe_store import sidecar_state
+from app.modules.bim_hub.glb_cache import convert_dae_once
 from app.modules.bim_hub.models import (
     BIMElement,
     BIMElementGroup,
@@ -1099,7 +1100,9 @@ class BIMHubService:
 
         try:
             # CPU/memory-bound (trimesh loads the whole mesh graph): off the loop.
-            glb_bytes = await asyncio.to_thread(_convert, dae_bytes)
+            # Keyed by content, so the demo seed's copies of the same model in
+            # every showcase project convert once instead of once per project.
+            glb_bytes = await convert_dae_once(dae_bytes, _convert)
         except Exception:  # noqa: BLE001 - conversion is best-effort
             logger.exception("ensure_glb: DAE->GLB conversion crashed for model %s", model_id)
             return False
@@ -1152,6 +1155,12 @@ class BIMHubService:
         elements = list(result.scalars().all())
         if not elements:
             return False
+        # The import keeps the original header text beside the lowercased keys;
+        # without it the rebuilt sidecar would list "phase created".
+        model = await self.session.get(BIMModel, model_uuid)
+        labels = (model.metadata_ or {}).get("column_labels") if model is not None else None
+        if not isinstance(labels, dict):
+            labels = None
 
         rows: list[dict[str, Any]] = []
         for el in elements:
@@ -1180,6 +1189,7 @@ class BIMHubService:
                 project_id=project_id,
                 model_id=model_id,
                 rows=rows,
+                labels=labels,
                 source=dataframe_store.SOURCE_DATABASE,
             )
         except Exception:  # noqa: BLE001 - the property panel is best-effort

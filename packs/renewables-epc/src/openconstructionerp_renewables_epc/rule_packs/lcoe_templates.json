@@ -4,7 +4,8 @@
   "standard": "NREL Annual Technology Baseline (ATB) methodology + LBNL Tracking the Sun / Utility-Scale Solar methodology + BloombergNEF LCOE methodology + IEA / IRENA Renewable Power Generation Costs methodology + ISO 50001 (Energy management)",
   "jurisdiction": "INTL",
   "description": "LCOE rule pack ensuring financial models attached to a renewables EPC project compute a defensible Levelised Cost of Energy figure. LCOE = (CAPEX + Σ(OPEX_t + Fuel_t − Tax_credits_t) / (1+r)^t) / Σ(E_t × (1−d)^t / (1+r)^t) where r = WACC, d = degradation, E_t = first-year energy yield. Components required: CAPEX breakdown by EPC bucket (modules / inverters / mounting / BoS-electrical / BoS-civil / interconnection / soft-costs developer fee, contingency) — NREL ATB scope; OPEX breakdown per year (fixed O&M €/kW/yr + variable €/MWh — typical utility-scale PV 8 – 15 €/kW/yr, onshore wind 35 – 50 €/kW/yr, offshore wind 80 – 130 €/kW/yr per IRENA 2024); net capacity factor (NCF — typical utility-scale PV 18 – 28 %, onshore wind 25 – 45 %, offshore wind 40 – 55 %); design lifetime (25 yr PV, 25 – 30 yr onshore wind, 25 – 30 yr offshore wind, 15 – 20 yr BESS); WACC nominal vs real disclosed; degradation rate (PV 0.5 %/yr crystalline, 0.7 %/yr thin-film, wind ~0 % / Component replacement schedule); residual value at year N; tax credits (US ITC — current 30 % base + bonus adders for domestic content / energy community / low-income; US PTC ~$0.0275/kWh inflation-adjusted 2025; EU CfD / FiP / FiT schemes documented); sensitivity analysis (tornado on WACC ±200 bps, CAPEX ±10 %, NCF ±10 %, degradation ±0.2 pp).",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "lcoe.capex_breakdown_present",
     "lcoe.capex_modules_bucket_documented",
     "lcoe.capex_inverters_bucket_documented",
@@ -36,5 +37,6 @@
     "lcoe.sensitivity_analysis_attached",
     "lcoe.tornado_chart_attached",
     "lcoe.iso_50001_energy_management_alignment_documented_if_utility_scale"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

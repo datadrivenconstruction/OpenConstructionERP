@@ -48,6 +48,7 @@ def register_i18n_foundation_permissions() -> None:
             "i18n_foundation.work_calendars.update": Role.ADMIN,
             "i18n_foundation.tax_configs.create": Role.ADMIN,
             "i18n_foundation.tax_configs.update": Role.ADMIN,
+            "i18n_foundation.tax_configs.confirm": Role.ADMIN,
             "i18n_foundation.reference_data.preview": Role.ADMIN,
             "i18n_foundation.reference_data.apply": Role.ADMIN,
         },

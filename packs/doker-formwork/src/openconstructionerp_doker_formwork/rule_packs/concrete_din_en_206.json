@@ -7,20 +7,7 @@
   "severity_default": "error",
   "category": "compliance",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "concrete.din_en_206.strength_class_required",
-    "concrete.din_en_206.strength_class_format",
-    "concrete.din_en_206.strength_class_lightweight_format",
-    "concrete.din_en_206.exposure_classes_required",
-    "concrete.din_en_206.exposure_classes_consistent",
-    "concrete.din_en_206.exposure_class_min_strength_met",
-    "concrete.din_en_206.consistency_class_required",
-    "concrete.din_en_206.max_aggregate_size_set",
-    "concrete.din_en_206.chloride_class_set",
-    "concrete.din_en_206.min_cement_content_for_exposure",
-    "concrete.din_en_206.max_w_c_ratio_for_exposure",
-    "concrete.din_en_206.conformity_certificate_referenced"
-  ],
+  "enables_rule_ids": [],
   "parameters": {
     "strength_class_pattern": "^C\\d{2}/\\d{2}$",
     "lightweight_strength_class_pattern": "^LC\\d{2}/\\d{2}$",

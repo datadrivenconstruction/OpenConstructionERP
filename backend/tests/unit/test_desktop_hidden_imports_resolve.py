@@ -174,6 +174,7 @@ def _run_spec() -> tuple[dict, dict]:
             "Analysis": _analysis,
             "PYZ": lambda *_a, **_k: _Opaque(),
             "EXE": lambda *_a, **_k: _Opaque(),
+            "COLLECT": lambda *_a, **_k: _Opaque(),
         }
         exec(compile(_SPEC.read_text(encoding="utf-8"), str(_SPEC), "exec"), namespace)  # noqa: S102
     finally:

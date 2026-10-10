@@ -36,7 +36,14 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { rereadTitleBlocks, splitPdfIntoSheets, type SheetRereadSummary } from './api';
+import {
+  bulkUpdateSheets,
+  rereadTitleBlocks,
+  splitPdfIntoSheets,
+  type SheetBulkPatch,
+  type SheetRereadSummary,
+} from './api';
+import { SheetsBulkEditBar } from './SheetsBulkEditBar';
 import { SheetDetailDrawer } from './SheetDetailDrawer';
 import { buildSheetsInsights } from './sheetsInsights';
 import { earlierRevisionCounts, revisionOrderUnclear } from './sheetStack';
@@ -230,6 +237,8 @@ export function SheetsIndexPage() {
   const [rereadResult, setRereadResult] = useState<SheetRereadSummary | null>(null);
   const [rereadError, setRereadError] = useState<string | null>(null);
   const canEdit = useHasPermission('documents.update');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkError, setBulkError] = useState<string | null>(null);
   // One input for the whole page - both triggers open it. A second one would
   // duplicate the accessible name and give the register two half-states.
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -285,6 +294,29 @@ export function SheetsIndexPage() {
       setSplitError(err instanceof Error ? err.message : String(err));
     },
   });
+
+  // A successful apply clears the selection, which unmounts the bar, so its
+  // inputs start empty the next time sheets are ticked.
+  const bulkMutation = useMutation({
+    mutationFn: ({ ids, patch }: { ids: string[]; patch: SheetBulkPatch }) =>
+      bulkUpdateSheets(projectId, ids, patch),
+    onSuccess: () => {
+      setBulkError(null);
+      setSelectedIds(new Set());
+      queryClient.invalidateQueries({ queryKey: ['sheets', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['sheet-disciplines', projectId] });
+    },
+    onError: (err: unknown) => setBulkError(err instanceof Error ? err.message : String(err)),
+  });
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   /* For a register imported before the title block reader was fixed: every
      sheet is read again from the PDF already stored, so a revision read as
@@ -357,6 +389,12 @@ export function SheetsIndexPage() {
       return hay.includes(q);
     });
   }, [sheets, disciplineFilter, currentOnly, searchQuery]);
+  // A bulk edit changes only the ticked sheets the filters still show, so a
+  // sheet ticked and then filtered away is never changed out of sight.
+  const selectedShown = useMemo(
+    () => filtered.filter((s) => selectedIds.has(s.id)).map((s) => s.id),
+    [filtered, selectedIds],
+  );
 
   /* How many revisions each row stands on, read off the loaded rows' links, so
      a current sheet can say it is the top of a stack and not a lone upload. */
@@ -662,11 +700,45 @@ export function SheetsIndexPage() {
                   This one is about the register behind them, so it is fed the
                   server page and never the filtered array. */}
               {sheetPage ? <TruncationNotice page={sheetPage} className="-mt-2 mb-3" /> : null}
+              {canEdit && (
+                <p className="-mt-2 mb-3 text-2xs text-content-tertiary">
+                  {t('sheets.row_edit_hint', {
+                    defaultValue:
+                      'Click a sheet to correct its number, title, revision, discipline or date and to see its earlier revisions. Tick several to change them together.',
+                  })}
+                </p>
+              )}
+              {canEdit && selectedShown.length > 0 && (
+                <SheetsBulkEditBar
+                  selectedCount={selectedShown.length}
+                  disciplines={disciplines}
+                  saving={bulkMutation.isPending}
+                  error={bulkError}
+                  onApply={(patch) => bulkMutation.mutate({ ids: selectedShown, patch })}
+                  onClear={() => {
+                    setSelectedIds(new Set());
+                    setBulkError(null);
+                  }}
+                />
+              )}
 
               <Card padding="none" className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
                   <thead className="sticky top-0 z-10 bg-surface-secondary/95 backdrop-blur-sm">
                     <tr className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
+                      {canEdit && (
+                        <th className="w-10 px-3 py-2.5 border-b border-border-light">
+                          <input
+                            type="checkbox"
+                            aria-label={t('sheets.select_all', { defaultValue: 'Select all sheets shown' })}
+                            checked={filtered.length > 0 && filtered.every((s) => selectedIds.has(s.id))}
+                            onChange={(e) =>
+                              setSelectedIds(e.target.checked ? new Set(filtered.map((s) => s.id)) : new Set())
+                            }
+                            className="h-4 w-4 rounded border-border accent-oe-blue"
+                          />
+                        </th>
+                      )}
                       <th className="text-start px-4 py-2.5 border-b border-border-light font-medium">
                         {t('sheets.col_number', { defaultValue: 'Sheet #' })}
                       </th>
@@ -698,8 +770,25 @@ export function SheetsIndexPage() {
                         // carries a real button so the same action has a tab
                         // stop and a name for assistive tech.
                         onClick={() => setOpenSheet(s)}
-                        className="cursor-pointer hover:bg-surface-secondary/50 transition-colors border-b border-border-light last:border-b-0"
+                        className={clsx(
+                          'cursor-pointer hover:bg-surface-secondary/50 transition-colors border-b border-border-light last:border-b-0',
+                          selectedIds.has(s.id) && 'bg-oe-blue/5',
+                        )}
                       >
+                        {canEdit && (
+                          <td className="w-10 px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              aria-label={t('sheets.select_row', {
+                                defaultValue: 'Select sheet {{number}}',
+                                number: s.sheet_number ?? `p.${s.page_number}`,
+                              })}
+                              checked={selectedIds.has(s.id)}
+                              onChange={() => toggleSelected(s.id)}
+                              className="h-4 w-4 rounded border-border accent-oe-blue"
+                            />
+                          </td>
+                        )}
                         <td className="px-4 py-3 font-mono text-content-primary whitespace-nowrap">
                           <button
                             type="button"

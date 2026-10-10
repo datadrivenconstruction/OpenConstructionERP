@@ -1978,7 +1978,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev,server]"
       - name: Restore the downloaded cost bases
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.openestimator/cache
           key: cwicr-parquet-${{ matrix.shard }}-${{ hashFiles('backend/app/modules/costs/base_registry.py') }}

@@ -4,7 +4,8 @@
   "standard": "ISO 9001 / ISO 3834",
   "jurisdiction": "INTL",
   "description": "Enables OCERP built-in validation rules that ensure every module leaving the factory line has the required QC checkpoints recorded: framing, MEP rough-in, weather seal, finishes, pre-shipment inspection.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "qc.framing_inspection_signed",
     "qc.mep_rough_in_inspection_signed",
     "qc.weather_seal_inspection_signed",
@@ -12,5 +13,6 @@
     "qc.pre_shipment_inspection_signed",
     "qc.non_conformance_register_attached",
     "qc.iso_9001_audit_trail_intact"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -28,6 +28,7 @@ import {
 import { useToastStore } from '@/stores/useToastStore';
 import { ApiError } from '@/shared/lib/api';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 
 import {
   allowedBuyerTransitions,
@@ -357,7 +358,7 @@ export function EditBuyerModal({
             onChange={(e) => setForm({ ...form, language: e.target.value })}
             data-testid="edit-buyer-language"
           >
-            {SUPPORTED_LANGUAGES.map((lang) => (
+            {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => (
               <option key={lang.code} value={lang.code}>
                 {lang.name}
                 {lang.english ? ` (${lang.english})` : ''}

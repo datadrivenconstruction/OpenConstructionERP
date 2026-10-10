@@ -35,6 +35,7 @@ import {
   type TaxRateComponent,
   type TaxResolution,
 } from './api';
+import { PendingConfirmations } from './PendingConfirmations';
 import { classifyResolution, offerableSubdivisions, type Classification } from './resolution';
 
 const STALE = 5 * 60 * 1000;
@@ -267,6 +268,7 @@ function Result({
       regionLabel={regionLabel}
       asOf={query.data.as_of}
       onChooseRegion={onChooseRegion}
+      country={country}
     />
   );
 }
@@ -396,6 +398,10 @@ const UNANSWERED_TONE: Record<
     variant: 'warning',
     border: 'border-semantic-warning/40 bg-semantic-warning/5',
   },
+  awaiting_local_confirmation: {
+    variant: 'warning',
+    border: 'border-semantic-warning/40 bg-semantic-warning/5',
+  },
 };
 
 function Unanswered({
@@ -405,7 +411,9 @@ function Unanswered({
   regionLabel,
   asOf,
   onChooseRegion,
+  country,
 }: {
+  country: string;
   kind: Exclude<Classification['kind'], 'answered'>;
   jurisdiction: string;
   countryLabel: string;
@@ -492,6 +500,18 @@ function Unanswered({
         date: asOf,
       });
       break;
+    case 'awaiting_local_confirmation':
+      icon = <FileWarning className="h-5 w-5 shrink-0 text-semantic-warning" />;
+      title = t('tax_rates.awaiting_confirmation_title', {
+        defaultValue: 'Not yet confirmed by a local specialist',
+      });
+      body = t('tax_rates.awaiting_confirmation_body', {
+        defaultValue:
+          'A rate in force for {{jurisdiction}} on {{date}} has to be confirmed by a local specialist, usually your accountant, against the tax authority\'s own publication. It is not used until then.',
+        jurisdiction,
+        date: asOf,
+      });
+      break;
   }
 
   return (
@@ -511,6 +531,7 @@ function Unanswered({
             'No figure is shown here on purpose. A plausible rate is worse than none: it reads exactly like a correct one and travels into a tender.',
         })}
       </p>
+      {kind === 'awaiting_local_confirmation' && <PendingConfirmations country={country} />}
       {kind === 'needs_subdivision' && (
         <div className="mt-3">
           <Button variant="primary" onClick={onChooseRegion}>

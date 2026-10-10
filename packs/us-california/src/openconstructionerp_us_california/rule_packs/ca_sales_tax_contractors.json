@@ -7,7 +7,8 @@
   "description": "Enables the checks that keep a California estimate honest about the two tax treatments inside one invoice. The contractor is the consumer of the materials it furnishes and installs, owing tax on its own purchase price and charging the customer none, but is the retailer of the fixtures it furnishes and installs, owing tax on the retail selling price, which under a lump sum contract is the contractor's cost price of the fixture. Construction labor is outside the tax base. Separately, the rate is a property of the jobsite address and the billing quarter: district taxes stack on the 7.25 percent statewide base and the rate tables are republished on 1 January, 1 April, 1 July and 1 October. The rules check that every installed item is classified as material or fixture, that the measure of tax matches that classification, and that the rate applied was resolved for the site rather than taken as the statewide base. No district rate table ships with this pack.",
   "issuer": "California Department of Tax and Fee Administration",
   "rates_referenced": "Statewide base 7.25 percent (6.00 state, 1.00 local jurisdiction, 0.25 local transportation fund), plus stacked district taxes",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ca_tax.installed_item_classified_material_or_fixture",
     "ca_tax.material_taxed_on_contractor_purchase_price",
     "ca_tax.fixture_taxed_on_retail_selling_price",
@@ -19,5 +20,6 @@
     "ca_tax.statewide_base_not_quoted_as_final_rate",
     "ca_tax.machinery_and_equipment_treated_as_sale",
     "ca_tax.use_tax_on_out_of_state_purchases"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -1,0 +1,9 @@
+{
+  "bundle": {
+    "externalBin": [],
+    "resources": {
+      "resources/converters": "converters",
+      "binaries/server": "server"
+    }
+  }
+}

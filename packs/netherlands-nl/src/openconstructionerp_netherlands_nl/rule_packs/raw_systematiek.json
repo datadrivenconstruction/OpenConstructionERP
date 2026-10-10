@@ -5,7 +5,8 @@
   "jurisdiction": "NL",
   "description": "Validates BOQ items and specifications for civil engineering (grond-, water- en wegenbouw, GWW) against the RAW systematiek published by CROW. Checks that RAW bestekssystematiek is followed, that catalogus entries reference valid RAW chapter codes, that measurement and payment rules (verrekenartikelen) follow RAW conventions, and that the RAW edition year is current.",
   "applies_to": ["boq", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "raw.bestek_structure_valid",
     "raw.chapter_code_format_valid",
     "raw.catalogus_reference_present",
@@ -17,6 +18,7 @@
     "raw.uav_gc_2005_if_design_construct",
     "raw.edition_year_current"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "CROW (kennisorganisatie voor infrastructuur, verkeer en openbare ruimte)",
   "publication_year": 2023
 }

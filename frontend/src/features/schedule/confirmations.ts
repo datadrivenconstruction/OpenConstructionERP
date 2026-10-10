@@ -62,7 +62,7 @@ export function replaceInstalmentSentences(t: TFunction, relinked = 0, unlinked 
 /**
  * Why this caller cannot permanently delete the archive, or null when they can.
  *
- * Read before confirmation; permanent deletion requires an admin and an archive.
+ * Read before confirmation; permanent deletion requires an archive and the project owner or an admin.
  */
 export function scheduleDeleteBlocked(
   t: TFunction,

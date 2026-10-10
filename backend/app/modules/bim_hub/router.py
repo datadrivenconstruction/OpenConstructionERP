@@ -1568,13 +1568,14 @@ async def _process_cad_in_background(
             if geo_local:
                 _geo_path = _Path(geo_local)
                 if _geo_path.is_file():
-                    _geo_bytes = await asyncio.to_thread(_geo_path.read_bytes)
+                    # Stream from the converter's temp dir: a multi-hundred-MB
+                    # DAE never has to sit in RAM on its way to storage.
                     _geo_ext = _geo_path.suffix or ".dae"
-                    geo_key = await bim_file_storage.save_geometry(
+                    geo_key = await bim_file_storage.save_geometry_from_path(
                         project_id=project_id,
                         model_id=model_id,
                         ext=_geo_ext,
-                        content=_geo_bytes,
+                        src_path=_geo_path,
                     )
 
             glb_key: str | None = None
@@ -1582,14 +1583,15 @@ async def _process_cad_in_background(
             if glb_local:
                 _glb_path = _Path(glb_local)
                 if _glb_path.is_file():
-                    _glb_bytes = await asyncio.to_thread(_glb_path.read_bytes)
-                    glb_key = await bim_file_storage.save_geometry(
+                    _glb_size = _glb_path.stat().st_size
+                    glb_key = await bim_file_storage.save_geometry_from_path(
                         project_id=project_id,
                         model_id=model_id,
                         ext=".glb",
-                        content=_glb_bytes,
+                        src_path=_glb_path,
+                        size=_glb_size,
                     )
-                    logger.info("GLB geometry saved: %s (%d bytes)", glb_key, len(_glb_bytes))
+                    logger.info("GLB geometry saved: %s (%d bytes)", glb_key, _glb_size)
 
             raw_elements = result.get("raw_elements", [])
             parquet_status, parquet_error = _record_parquet_attempt_init()
@@ -1729,6 +1731,10 @@ async def _process_cad_in_background(
                     "parquet_status": parquet_status,
                     "parquet_error": parquet_error,
                     "parquet_attempted_at": _dt.now(_UTC).isoformat(),
+                    # Header text as the converter wrote it ("Phase Created")
+                    # for the lowercased property keys. Kept here so a sidecar
+                    # rebuilt from the database still shows the original names.
+                    **({"column_labels": result["raw_element_labels"]} if result.get("raw_element_labels") else {}),
                 }
 
                 # BUG-V320-DDC-01 / D-TKC-NEW-01 - non-destructive honesty
@@ -2632,17 +2638,19 @@ async def create_model_from_document(
             ),
         )
 
-    # Read the stored document. The Documents hub writes uploads to a local
-    # path and already buffers the whole file on upload, so reading it back
-    # here is consistent with that module's own memory model.
+    # Probe the stored document without reading it: a CAD file can be hundreds
+    # of MB, and it is only ever copied to BIM storage, never parsed here.
+    doc_path = _Path(doc.file_path)
     try:
-        content = _Path(doc.file_path).read_bytes()
-    except OSError as exc:
+        doc_size = doc_path.stat().st_size if doc_path.is_file() else None
+    except OSError:
+        doc_size = None
+    if doc_size is None:
         raise HTTPException(
             status_code=status.HTTP_410_GONE,
             detail="The stored document file is no longer available.",
-        ) from exc
-    if not content:
+        )
+    if not doc_size:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The document file is empty.",
@@ -2662,7 +2670,7 @@ async def create_model_from_document(
         user_id=user_id,
     )
 
-    saved_cad_key = await bim_file_storage.save_original_cad(doc.project_id, model.id, ext, content)
+    saved_cad_key = await _copy_document_to_original_cad(doc_path, doc.project_id, model.id, ext, doc_size)
 
     # Link the document to the new model so a later "Open in BIM viewer"
     # returns this model rather than converting again. Assigning a fresh dict
@@ -2973,6 +2981,7 @@ async def retry_parquet_write(
             project_id=str(model.project_id),
             model_id=str(model_id),
             rows=rows,
+            labels=(model.metadata_ or {}).get("column_labels"),
             # The rows hold at most 30 properties per element: the sidecar says
             # so, and the rule test tells the user a re-import brings the rest.
             source=SOURCE_DATABASE,
@@ -5088,13 +5097,53 @@ async def export_boq_xlsx(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+async def _stored_blob_response(backend_store: Any, key: str, media_type: str, filename: str) -> Response:
+    """Serve a stored blob without materialising it in memory.
+
+    A local-disk backend hands back a path, served by ``FileResponse`` (chunked
+    reads, Range support). Any other backend streams through ``open_stream`` in
+    chunks, with ``Content-Length`` taken from ``size()``. Either way peak RAM
+    stays at one chunk instead of the whole (up to 500 MB) model.
+    """
+    headers = {"Content-Disposition": attachment_disposition(filename)}
+    disk_path = None
+    with contextlib.suppress(Exception):
+        disk_path = backend_store.local_path(key)
+    if disk_path is not None and pathlib.Path(disk_path).is_file():
+        from fastapi.responses import FileResponse
+
+        return FileResponse(disk_path, media_type=media_type, headers=headers)
+    with contextlib.suppress(Exception):
+        headers["Content-Length"] = str(await backend_store.size(key))
+    return StreamingResponse(backend_store.open_stream(key), media_type=media_type, headers=headers)
+
+
+async def _copy_document_to_original_cad(
+    doc_path: pathlib.Path, project_id: Any, model_id: Any, ext: str, size: int
+) -> str:
+    """Copy a Documents-hub file into BIM storage via disk, never via RAM.
+
+    ``put_stream`` on the local backend MOVES its source, so the document file
+    is first copied (chunked, ``shutil.copyfile``) into a private temp dir and
+    that copy is handed over; the document itself is never consumed.
+    """
+    import asyncio
+    import shutil
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="oe-bim-doc-") as tmp:
+        tmp_path = pathlib.Path(tmp) / f"original{ext}"
+        await asyncio.to_thread(shutil.copyfile, doc_path, tmp_path)
+        return await bim_file_storage.save_original_cad_from_path(project_id, model_id, ext, tmp_path, size=size)
+
+
 @router.get("/models/{model_id}/download/")
 async def download_model(
     model_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
-) -> StreamingResponse:
+) -> Response:
     """Download the source/canonical file backing a BIM model.
 
     Resolution order, all gated by project access (``_verify_model_access``
@@ -5124,32 +5173,16 @@ async def download_model(
         except Exception:  # noqa: BLE001 - probing storage must never raise to the client
             has_cad = False
         if has_cad:
-            blob = await backend_store.get(cad_key)
             filename = f"{model.name or 'model'}{ext}"
-            return StreamingResponse(
-                io.BytesIO(blob),
-                media_type="application/octet-stream",
-                headers={
-                    "Content-Disposition": attachment_disposition(filename),
-                    "Content-Length": str(len(blob)),
-                },
-            )
+            return await _stored_blob_response(backend_store, cad_key, "application/octet-stream", filename)
 
     # 2. Converted geometry artifact (GLB/DAE/glTF).
     found = await bim_file_storage.find_geometry_key(project_id, model_id)
     if found is not None:
         key, geo_ext = found
-        blob = await backend_store.get(key)
         media_type = bim_file_storage.GEOMETRY_MEDIA_TYPES.get(geo_ext, "application/octet-stream")
         filename = f"{model.name or 'model'}{geo_ext}"
-        return StreamingResponse(
-            io.BytesIO(blob),
-            media_type=media_type,
-            headers={
-                "Content-Disposition": attachment_disposition(filename),
-                "Content-Length": str(len(blob)),
-            },
-        )
+        return await _stored_blob_response(backend_store, key, media_type, filename)
 
     # 3. Nothing on disk: materialize a typed stub so the /files row still
     #    downloads a valid file. ifc-family -> IFC/STEP text, else a text note.

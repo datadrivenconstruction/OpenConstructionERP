@@ -7,7 +7,8 @@
   "description": "Enables OCERP built-in validation rules that check tender packs and contract documents for the mandatory AIA A201-2017 General Conditions — all 15 articles plus the supporting progress payment application and continuation sheet schedule.",
   "issuer": "American Institute of Architects (AIA)",
   "article_count": 15,
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "aia.a201.article_1_general_provisions",
     "aia.a201.article_2_owner",
     "aia.a201.article_3_contractor_present",
@@ -29,5 +30,6 @@
     "aia.g702_g703_schedule_of_values_balanced",
     "aia.g702_retainage_field_present",
     "aia.g703_continuation_sheet_referenced"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

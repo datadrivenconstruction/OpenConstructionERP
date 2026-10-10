@@ -94,7 +94,7 @@ class TestPasswordResetIsUsableInPlainText:
             server = smtp_cls.return_value
             result = await backend.send(
                 EmailMessage(
-                    to="ivan@example.com",
+                    to="ivan@site-contractor.de",
                     subject="Reset your password",
                     html_body=html,
                     tags=["password_reset"],

@@ -10,7 +10,8 @@
   "steel_grades": ["300", "350", "400", "450"],
   "fabrication_construction_categories": ["CC1", "CC2", "CC3", "CC4"],
   "applies_to": ["projects", "boq", "validation", "bim"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "as4100.steel_grade_specified",
     "as4100.section_classification_compact_noncompact_slender",
     "as4100.member_capacity_within_table",
@@ -22,5 +23,6 @@
     "as4100.corrosion_protection_as_nzs_2312",
     "as4100.fabrication_category_as_nzs_5131",
     "as4100.inspection_test_plan_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

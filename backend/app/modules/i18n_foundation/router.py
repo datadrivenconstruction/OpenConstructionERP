@@ -31,6 +31,7 @@ Endpoints:
     POST   /tax-configs                  - Create config (admin)
     GET    /tax-configs/{config_id}      - Get single config (public)
     PATCH  /tax-configs/{config_id}      - Update config (admin)
+    POST   /tax-configs/{config_id}/confirm - Record local confirmation (admin)
 """
 
 import logging
@@ -59,6 +60,7 @@ from app.modules.i18n_foundation.schemas import (
     ReferenceFieldChange,
     SubdivisionListResponse,
     SubdivisionResponse,
+    TaxConfigConfirm,
     TaxConfigCreate,
     TaxConfigListResponse,
     TaxConfigResponse,
@@ -442,6 +444,24 @@ async def get_tax_config(
 ) -> TaxConfigResponse:
     """Get a tax configuration by ID."""
     config = await service.get_tax_config(config_id)
+    return TaxConfigResponse.model_validate(config)
+
+
+@router.post("/tax-configs/{config_id}/confirm", response_model=TaxConfigResponse)
+async def confirm_tax_config(
+    config_id: uuid.UUID,
+    data: TaxConfigConfirm,
+    user_id: CurrentUserId,
+    _admin: None = Depends(RequirePermission("i18n_foundation.tax_configs.confirm")),
+    service: I18nFoundationService = Depends(_get_service),
+) -> TaxConfigResponse:
+    """Record that a local specialist confirmed a rate marked as needing it (admin only)."""
+    config = await service.confirm_tax_config(
+        config_id,
+        user_id=str(user_id),
+        accountant_name=data.accountant_name,
+        source_reference=data.source_reference,
+    )
     return TaxConfigResponse.model_validate(config)
 
 

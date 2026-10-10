@@ -12,7 +12,8 @@
   ],
   "elemental_breakdown": "AIQS Australian Cost Management Manual / NATSPEC elemental codes",
   "applies_to": ["projects", "boq", "validation", "reporting"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "rawlinsons.edition_year_current",
     "rawlinsons.cost_per_m2_within_band",
     "rawlinsons.element_ratio_within_band",
@@ -23,5 +24,6 @@
     "rawlinsons.gst_handling_explicit",
     "rawlinsons.preliminaries_pct_within_band",
     "rawlinsons.contingency_pct_within_band"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -712,6 +712,23 @@ export function logError(
   pagesVisited.add(cleanUrl());
 }
 
+const CLAIM_INVOICE_LOOKUP_PATH = new RegExp(
+  '^(?:/api)?/v1/finance/claims/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}' +
+  '-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/receivable-invoice/?(?:\\?[^#]*)?$',
+);
+
+/** The invoice lookup documents this precise response as ordinary absence. */
+function isExpectedMissingClaimInvoice(url: string, status: number, message: string): boolean {
+  if (status !== 404 || !CLAIM_INVOICE_LOOKUP_PATH.test(url)) return false;
+  try {
+    const body: unknown = JSON.parse(message);
+    return typeof body === 'object' && body !== null && !Array.isArray(body) &&
+      'detail' in body && body.detail === 'No receivable invoice exists for this claim';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Log an API error (4xx / 5xx responses).
  */
@@ -724,7 +741,9 @@ export function logApiError(
   // that would otherwise spam the bug-report buffer). Whitelist runs on
   // the *raw* URL because anonymisation collapses UUIDs and other tokens
   // a path regex may want to see.
-  if (shouldSuppress({ path: url, status })) {
+  // An absent claim invoice is handled by its preview. Require the documented
+  // JSON detail too: a generic routing 404 on this path remains a real error.
+  if (isExpectedMissingClaimInvoice(url, status, message) || shouldSuppress({ path: url, status })) {
     return;
   }
 

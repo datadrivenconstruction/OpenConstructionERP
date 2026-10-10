@@ -1636,6 +1636,19 @@ def _without_unresolved_escalation(markups: list[BOQMarkup], unresolved: Mapping
     return [m for m in markups if m.id is None or m.id not in unresolved]
 
 
+#: ``metadata.role`` of the one fixed line an import writes to take the bill's
+#: deduction items (negative amounts) off its total. Shared with the router,
+#: which writes the line, and :meth:`BOQService.apply_default_markups`, which
+#: must keep it.
+IMPORT_DEDUCTIONS_ROLE = "import_deductions"
+
+
+def _is_import_deductions_line(markup: BOQMarkup) -> bool:
+    """Whether a markup is the bill-wide deductions line an import wrote."""
+    meta = markup.metadata_
+    return isinstance(meta, dict) and meta.get("role") == IMPORT_DEDUCTIONS_ROLE and markup.scope_position_id is None
+
+
 def _calculate_markup_amounts(
     direct_cost: Decimal,
     markups: list[BOQMarkup],
@@ -6834,8 +6847,12 @@ class BOQService:
         if vat_rate is None:
             rate_source = "region_template"
 
-        # Remove existing markups
-        await self.markup_repo.delete_all_for_boq(boq_id)
+        # Remove existing markups, except the deductions line an import wrote.
+        # It is not a markup anybody chose but the bill's own negative items
+        # (detrazioni) moved off the positions, so a template replacing the
+        # stack must not silently add those deductions back to the total.
+        kept = [m for m in await self.markup_repo.list_for_boq(boq_id) if _is_import_deductions_line(m)]
+        await self.markup_repo.delete_all_for_boq(boq_id, keep=[m.id for m in kept])
 
         # Create new markups from the template. The tax swap and the seeding
         # order both come from ``resolve_region_lines`` rather than being spelled
@@ -6874,6 +6891,9 @@ class BOQService:
             new_markups.append(markup)
 
         created = await self.markup_repo.bulk_create(new_markups)
+        if kept:
+            await self.seat_import_deductions_first(boq_id)
+            created = await self.markup_repo.list_for_boq(boq_id)
 
         await _safe_publish(
             "boq.markups.defaults_applied",
@@ -6889,6 +6909,43 @@ class BOQService:
             boq_id,
         )
         return created
+
+    async def seat_import_deductions_first(self, boq_id: uuid.UUID) -> None:
+        """Put the import's deductions line first, so the markups after it see the net amount.
+
+        An Italian bill (XPWE) can carry deductions (detrazioni, minori
+        lavori), items with a negative amount. Positions cannot be negative, so
+        the import keeps those items without a price and takes their sum off
+        with one fixed line (see ``_persist_import_deductions`` in the router).
+        Percentage markups belong on the net amount, works less deductions.
+        The cascade is not changed for that: ``subtotal`` and ``cumulative``
+        already mean direct cost plus every preceding line, so with the
+        deductions line first they are taken on the net amount.
+
+        ``direct_cost`` is the one base that cannot see the deductions line.
+        The first bill-wide line after it, when it is a percentage on
+        ``direct_cost``, is moved to ``subtotal``: with nothing but the
+        deductions in front of it the two bases differ by exactly the
+        deductions, so the change gives the net base and nothing else. A
+        ``direct_cost`` line further down is left alone, because ``subtotal``
+        there would also take in the lines above it; the markup panel tells the
+        user about those instead of rewriting them.
+        """
+        markups = await self.markup_repo.list_for_boq(boq_id)
+        deductions = next((m for m in markups if _is_import_deductions_line(m)), None)
+        if deductions is None:
+            return
+        ordered = [deductions, *(m for m in markups if m.id != deductions.id)]
+        for index, markup in enumerate(ordered):
+            if markup.sort_order != index:
+                await self.markup_repo.update_fields(markup.id, sort_order=index)
+        following = next((m for m in ordered[1:] if m.scope_position_id is None), None)
+        if (
+            following is not None
+            and (following.markup_type or "percentage").lower() == "percentage"
+            and (following.apply_to or "direct_cost").lower() == "direct_cost"
+        ):
+            await self.markup_repo.update_fields(following.id, apply_to="subtotal")
 
     # ── Recalculate rates ─────────────────────────────────────────────────
 

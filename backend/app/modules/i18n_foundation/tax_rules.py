@@ -109,6 +109,13 @@ from app.modules.i18n_foundation.subdivisions import (
 #:     It is not ``default_rate_ambiguous``: there the data cannot say which
 #:     of the rates in force is the standard one, here it says so plainly and
 #:     the answer is that the standard rate had not started yet.
+#: ``awaiting_confirmation``
+#:     A rate in force for this jurisdiction was marked as needing a local
+#:     specialist's confirmation, typically the client's accountant checking
+#:     it against the tax authority's own publication, and nobody has
+#:     confirmed it yet. **No rate is returned**, and none of the other rows
+#:     stands in for it: the unconfirmed figure is the one in doubt, so a
+#:     neighbour on file is not an answer either.
 ResolutionStatus = Literal[
     "harmonised",
     "stacked",
@@ -119,6 +126,7 @@ ResolutionStatus = Literal[
     "no_configuration",
     "default_rate_ambiguous",
     "default_rate_not_in_force",
+    "awaiting_confirmation",
 ]
 
 #: Statuses that carry a rate a caller may price work with. Every status not
@@ -172,6 +180,24 @@ class TaxRateRow(NamedTuple):
     effective_from: str | None
     effective_to: str | None
     is_default: bool = False
+    #: True while the row waits for the local confirmation it was marked as
+    #: needing. Such a row resolves to nothing; see ``awaiting_confirmation``.
+    awaiting_confirmation: bool = False
+
+
+#: Where a tax row keeps its local confirmation, inside ``metadata``. Shape:
+#: ``{"required": True, "status": "pending" | "confirmed", "accountant_name",
+#: "source_reference", "confirmed_by", "confirmed_at"}``. A row without the key
+#: needs no confirmation, which is every row shipped before the key existed.
+LOCAL_CONFIRMATION_KEY = "local_confirmation"
+
+
+def is_awaiting_confirmation(metadata: Mapping[str, Any] | None) -> bool:
+    """Whether a row's metadata says it is marked for confirmation and not yet confirmed."""
+    block = (metadata or {}).get(LOCAL_CONFIRMATION_KEY)
+    if not isinstance(block, Mapping) or not block.get("required"):
+        return False
+    return block.get("status") != "confirmed"
 
 
 @dataclass(frozen=True)
@@ -245,6 +271,7 @@ def row_from_orm(config: Any) -> TaxRateRow:
         effective_from=config.effective_from,
         effective_to=config.effective_to,
         is_default=bool(config.is_default),
+        awaiting_confirmation=is_awaiting_confirmation(getattr(config, "metadata_", None)),
     )
 
 
@@ -440,6 +467,35 @@ def resolve(
             federal_rate_pct=None,
             as_of=as_of,
             reason=f"No tax rate is on file for country {country} on {as_of}.",
+        )
+
+    # A row in force that still waits for its local confirmation stops the
+    # answer for every jurisdiction it takes part in: a country-wide row for
+    # all of them, a sub-national one for its own subdivision and for a
+    # caller who named none.
+    unconfirmed = [
+        r
+        for r in active
+        if r.awaiting_confirmation
+        and (
+            subdivision is None
+            or r.subdivision_code is None
+            or normalize_subdivision(r.subdivision_code) == subdivision
+        )
+    ]
+    if unconfirmed:
+        return TaxResolution(
+            country_code=country,
+            subdivision_code=subdivision,
+            subdivision_name=name,
+            status="awaiting_confirmation",
+            combined_rate_pct=None,
+            federal_rate_pct=None,
+            as_of=as_of,
+            reason=(
+                f"A rate in force for {subdivision or country} on {as_of} is waiting for confirmation by a local "
+                "specialist and is not used until it is confirmed."
+            ),
         )
 
     federal = [r for r in active if r.combination == "federal"]

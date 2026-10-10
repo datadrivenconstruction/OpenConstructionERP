@@ -7,7 +7,8 @@
   "description": "Enables the checks for Texas public work, where the prevailing wage duty attaches to any public work paid for wholly or partly from public funds and the chapter sets no minimum contract value. Texas publishes no state wage schedule: the awarding public body determines the rate itself, either by surveying wages paid on similar projects in its own political subdivision or by adopting the federal determination for the locality. The rules therefore check that a public project records which method its awarding body used and which determination it adopted, that every labor line prices at or above the stipulated rate, and that the record would support the 60 dollar per worker per calendar day exposure if it did not.",
   "issuer": "The public body awarding the contract",
   "penalty_referenced": "60 US dollars per worker per calendar day underpaid, Government Code § 2258.023(b)",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "tx_wage.public_work_flagged",
     "tx_wage.determination_method_recorded",
     "tx_wage.awarding_body_determination_attached",
@@ -18,5 +19,6 @@
     "tx_wage.no_dollar_threshold_assumed",
     "tx_wage.payroll_records_retained",
     "tx_wage.underpayment_penalty_exposure_reported"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

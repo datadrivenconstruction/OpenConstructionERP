@@ -27,6 +27,32 @@ interface SupplierScorecardModalProps {
 
 type TileTone = 'success' | 'warning' | 'error' | 'neutral';
 
+type QualificationState = 'expired' | 'expiring' | 'valid' | 'not_stated';
+
+const QUALIFICATION_TONE: Record<QualificationState, 'error' | 'warning' | 'success' | 'neutral'> = {
+  expired: 'error',
+  expiring: 'warning',
+  valid: 'success',
+  not_stated: 'neutral',
+};
+
+function qualificationLabel(
+  state: QualificationState,
+  until: string | null | undefined,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string {
+  switch (state) {
+    case 'expired':
+      return t('procurement.qualification_expired', { defaultValue: 'Expired on {{date}}', date: until ?? '' });
+    case 'expiring':
+      return t('procurement.qualification_expiring', { defaultValue: 'Ends on {{date}}', date: until ?? '' });
+    case 'valid':
+      return t('procurement.qualification_valid', { defaultValue: 'Valid until {{date}}', date: until ?? '' });
+    default:
+      return t('procurement.qualification_not_stated', { defaultValue: 'No end date recorded' });
+  }
+}
+
 function pctTone(
   value: number,
   thresholds: { good: number; warn: number },
@@ -259,6 +285,36 @@ export function SupplierScorecardModal({
               )}
             />
           </div>
+
+          {/* ── Still qualified to buy from? ───────────────────────────── */}
+          {scorecard.total_po_count > 0 && (
+            <div className="space-y-1 rounded-lg border border-border-light px-4 py-3 text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-content-secondary">
+                  {t('procurement.scorecard_qualification', { defaultValue: 'Qualification' })}
+                </span>
+                <Badge variant={QUALIFICATION_TONE[scorecard.qualification_state ?? 'not_stated']}>
+                  {qualificationLabel(scorecard.qualification_state ?? 'not_stated', scorecard.qualified_until, t)}
+                </Badge>
+              </div>
+              {(scorecard.compliance_reasons?.length ?? 0) > 0 && (
+                <p className="text-semantic-warning">
+                  {t('procurement.scorecard_compliance_issues', {
+                    defaultValue: 'Open compliance issues on the subcontractor record: {{count}}',
+                    count: scorecard.compliance_reasons!.length,
+                  })}
+                </p>
+              )}
+              {(scorecard.unconfirmed_po_count ?? 0) > 0 && (
+                <p className="text-content-secondary">
+                  {t('procurement.scorecard_unconfirmed_orders', {
+                    defaultValue: 'Issued orders not yet confirmed by the supplier: {{count}}',
+                    count: scorecard.unconfirmed_po_count,
+                  })}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* ── Empty-state hint when there is no data ─────────────────── */}
           {scorecard.total_po_count === 0 && (

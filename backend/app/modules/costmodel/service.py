@@ -3156,8 +3156,17 @@ class LabourActualsService:
         then converted to base via ``_amount_in_base``. A row with neither an
         explicit ``cost_rate`` nor a resolvable resource rate contributes 0.
         """
+        return sum((amount for _row, amount in await self._row_costs(project_id, rows)), Decimal("0"))
+
+    async def _row_costs(self, project_id: uuid.UUID, rows: list[dict]) -> list[tuple[dict, Decimal]]:
+        """Each costable row with its own base-currency cost.
+
+        The per-row form of :meth:`compute_labour_cost`. Payroll superseding a
+        field estimate has to take back one worker's day, not a whole report, so
+        what each row put on the line is kept beside the report's total.
+        """
         base, fx = await self.budget_repo._project_fx_context(project_id)
-        total = Decimal("0")
+        costs: list[tuple[dict, Decimal]] = []
         for row in rows:
             if not isinstance(row, dict):
                 continue
@@ -3175,8 +3184,8 @@ class LabourActualsService:
                 continue
 
             amount_native = hours * rate
-            total += _amount_in_base(str(amount_native), row_ccy, base, fx)
-        return total
+            costs.append((row, _amount_in_base(str(amount_native), row_ccy, base, fx)))
+        return costs
 
     async def _find_labour_line(self, project_id: uuid.UUID) -> BudgetLine | None:
         """The auto-maintained labour budget line, or ``None`` if there is none.
@@ -3540,8 +3549,8 @@ class LabourActualsService:
                 work_date,
                 ", ".join(sorted(set(skipped))),
             )
-        if len(countable) != len(rows):
-            amount = await self.compute_labour_cost(project_id, countable)
+        row_costs = await self._row_costs(project_id, countable)
+        amount = sum((cost for _row, cost in row_costs), Decimal("0"))
 
         prior = self._to_decimal(line.actual_amount)
         new_actual = (prior + amount).quantize(Decimal("0.01"))
@@ -3555,6 +3564,23 @@ class LabourActualsService:
         if not isinstance(posted, dict):
             posted = {}
         md["applied_amounts"] = {**posted, event_key: str(amount)}
+        # The same figure split by worker, so an approved payroll batch can take
+        # back exactly the days it pays for (see supersede_with_payroll).
+        workers: dict[str, str] = {}
+        unnamed = Decimal("0")
+        for row, cost in row_costs:
+            resource_id = str(row.get("resource_id") or "").strip()
+            if resource_id:
+                workers[resource_id] = str(self._to_decimal(workers.get(resource_id)) + cost)
+            else:
+                unnamed += cost
+        breakdown = md.get("applied_rows")
+        if not isinstance(breakdown, dict):
+            breakdown = {}
+        md["applied_rows"] = {
+            **breakdown,
+            event_key: {"date": work_date, "workers": workers, "unnamed": str(unnamed)},
+        }
 
         await self.budget_repo.update_fields(
             line.id,
@@ -3570,6 +3596,147 @@ class LabourActualsService:
             new_actual,
         )
         return amount
+
+    async def supersede_with_payroll(
+        self,
+        *,
+        project_id: uuid.UUID,
+        batch_id: str,
+        entries: list[dict],
+    ) -> Decimal:
+        """Take the field estimate off the budget for the days a payroll batch pays.
+
+        Field labour is costed as it is logged, at the resource's rate. A payroll
+        batch is built from those same field records and, once approved, posts
+        what the people are actually paid. Without this both stay on the budget
+        and the project reads as having paid each covered day twice. Payroll is
+        the better figure for a day it covers, so the estimate for that day comes
+        off and payroll's posting is the only one left.
+
+        A named entry ``(resource_id, work_date)`` takes the worker-day claim over
+        from whichever field document held it, so a field record arriving later
+        for that day is skipped exactly like a second field source, and a later
+        reversal of the field document does not refund money payroll now owns.
+        An unnamed entry (headcount only) has no worker to match, so it covers
+        the unnamed field cost recorded for its date.
+
+        Idempotent on the batch id. Returns the amount taken off the field line.
+
+        Args:
+            project_id: The project the batch belongs to.
+            batch_id: The approved batch, recorded on each claim it takes over.
+            entries: The batch entries as ``{"resource_id", "work_date", "hours"}``.
+        """
+        from sqlalchemy import select
+
+        line = await self._find_labour_line(project_id)
+        md = dict(line.metadata_) if line is not None and isinstance(line.metadata_, dict) else {}
+        applied = md.get("applied_events")
+        if not isinstance(applied, list):
+            applied = []
+        event_key = f"payroll:{batch_id}"
+        if event_key in applied:
+            return Decimal("0")
+
+        posted = md.get("applied_amounts")
+        posted = dict(posted) if isinstance(posted, dict) else {}
+        breakdown = md.get("applied_rows")
+        breakdown = (
+            {k: dict(v) for k, v in breakdown.items() if isinstance(v, dict)} if isinstance(breakdown, dict) else {}
+        )
+
+        def _take(key: str, amount: Decimal) -> None:
+            remaining = self._to_decimal(posted.get(key)) - amount
+            posted[key] = str(max(remaining, Decimal("0")))
+
+        credit = Decimal("0")
+        unnamed_dates: set[str] = set()
+        for entry in entries:
+            work_date = str(entry.get("work_date") or "").strip()
+            resource_id = str(entry.get("resource_id") or "").strip()
+            if not work_date:
+                continue
+            if not resource_id:
+                unnamed_dates.add(work_date)
+                continue
+
+            claim = (
+                await self.session.execute(
+                    select(LabourWorkerDay).where(
+                        LabourWorkerDay.project_id == project_id,
+                        LabourWorkerDay.work_date == work_date,
+                        LabourWorkerDay.resource_id == resource_id,
+                    )
+                )
+            ).scalar_one_or_none()
+            if claim is None:
+                self.session.add(
+                    LabourWorkerDay(
+                        project_id=project_id,
+                        work_date=work_date,
+                        resource_id=resource_id,
+                        source_module="payroll",
+                        source_ref=batch_id,
+                        hours=self._to_decimal(entry.get("hours")),
+                    )
+                )
+                continue
+            if claim.source_module == "payroll":
+                continue
+
+            # The field document that costed this day, and what it put on the
+            # line for this worker. Older postings carry no split, so their
+            # share is recomputed from the claimed hours at today's rate.
+            found = False
+            for key, row in breakdown.items():
+                if not key.startswith(f"{claim.source_ref}:") or row.get("date") != work_date:
+                    continue
+                workers = row.get("workers") if isinstance(row.get("workers"), dict) else {}
+                share = self._to_decimal(workers.get(resource_id))
+                if share > 0:
+                    credit += share
+                    _take(key, share)
+                    row["workers"] = {**workers, resource_id: "0"}
+                    found = True
+            if not found:
+                share = await self.compute_labour_cost(project_id, [{"resource_id": resource_id, "hours": claim.hours}])
+                credit += share
+                for key in [k for k in posted if k.startswith(f"{claim.source_ref}:")]:
+                    _take(key, share)
+            claim.source_module = "payroll"
+            claim.source_ref = batch_id
+            claim.hours = self._to_decimal(entry.get("hours")) or claim.hours
+
+        for key, row in breakdown.items():
+            if row.get("date") not in unnamed_dates:
+                continue
+            share = self._to_decimal(row.get("unnamed"))
+            if share > 0:
+                credit += share
+                _take(key, share)
+                row["unnamed"] = "0"
+
+        await self.session.flush()
+        if line is None:
+            return Decimal("0")
+
+        prior = self._to_decimal(line.actual_amount)
+        credit = min(credit, prior)
+        md["applied_events"] = [*applied, event_key]
+        md["applied_amounts"] = posted
+        md["applied_rows"] = breakdown
+        await self.budget_repo.update_fields(
+            line.id,
+            actual_amount=str((prior - credit).quantize(Decimal("0.01"))),
+            metadata_=md,
+        )
+        logger.info(
+            "Labour actuals: project=%s payroll batch=%s superseded field estimate -%s",
+            project_id,
+            batch_id,
+            credit,
+        )
+        return credit
 
 
 async def _on_labour_logged(event: object) -> None:

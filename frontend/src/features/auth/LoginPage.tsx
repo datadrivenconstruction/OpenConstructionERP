@@ -29,6 +29,7 @@ import {
 } from './desktopBootstrap';
 import { safeNextPath } from './nextPath';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useThemeStore } from '@/stores/useThemeStore';
 
 /* Segmented theme switch (Light / Dark / System) for the login page. */
@@ -485,7 +486,7 @@ export function LoginPage() {
         </button>
         {langOpen && (
           <div className="absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto rounded-xl border border-border-light bg-surface-elevated shadow-xl py-1 animate-stagger-in">
-            {SUPPORTED_LANGUAGES.map((lang) => {
+            {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
               const isActive = i18n.language === lang.code;
               const english = 'english' in lang ? (lang as { english?: string }).english : undefined;
               return (

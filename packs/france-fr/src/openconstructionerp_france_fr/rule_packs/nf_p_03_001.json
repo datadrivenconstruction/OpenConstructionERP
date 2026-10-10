@@ -5,7 +5,8 @@
   "jurisdiction": "FR",
   "description": "Validates tender and contract documents against NF P 03-001 (Cahier des clauses administratives applicable aux travaux de batiment faisant l'objet de marches prives). Checks that the CCAP covers essential clauses: price structure, payment terms, acceptance, defects liability (garantie de parfait achevement), retention, insurance, and dispute resolution. Applicable to private-sector building contracts in France.",
   "applies_to": ["tender", "contracts", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nfp03.contract_type_specified",
     "nfp03.ccap_present",
     "nfp03.price_structure_defined",
@@ -22,6 +23,7 @@
     "nfp03.reglement_differends_clause_present",
     "nfp03.sous_traitance_clause_present"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "AFNOR",
   "publication_year": 2017
 }

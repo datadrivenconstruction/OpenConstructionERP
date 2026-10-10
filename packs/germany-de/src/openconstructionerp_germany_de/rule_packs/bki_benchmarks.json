@@ -5,7 +5,8 @@
   "jurisdiction": "DE",
   "description": "Validates cost estimates against BKI (Baukosteninformationszentrum) benchmark values (EUR/m2 BGF and EUR/m3 BRI) by building type, region and construction year. Flags outliers above the 95th or below the 5th percentile, checks typical cost group shares (KG 300/400/500/700) and verifies that regional and construction price indices are applied.",
   "applies_to": ["estimate", "boq", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "bki.cost_per_m2_bgf_within_range",
     "bki.cost_per_m3_bri_within_range",
     "bki.kg300_share_within_typical_range",
@@ -20,6 +21,7 @@
     "bki.outlier_flag_percentile_5",
     "bki.benchmark_source_referenced"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "BKI (Baukosteninformationszentrum Deutscher Architektenkammern)",
   "publication_year": 2024
 }

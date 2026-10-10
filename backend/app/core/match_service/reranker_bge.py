@@ -112,6 +112,10 @@ def _get_reranker() -> Any:
         return None
     if _RERANKER is not None:
         return _RERANKER
+    from app.core.processes.matching import matching_model_allowed
+
+    if not matching_model_allowed("bge_reranker"):
+        return None
 
     try:
         from FlagEmbedding import FlagReranker  # type: ignore[import-not-found]
