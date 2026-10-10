@@ -336,12 +336,13 @@ describe('outbound links from the header menus', () => {
     delete (window as { __oeExternalLinks?: boolean }).__oeExternalLinks;
     installDesktopExternalLinks();
 
-    const anchors = [
+    const links: Array<[string, string]> = [
       ['https://openconstructionerp.com/docs', '_blank'],
       ['https://github.com/datadrivenconstruction/OpenConstructionERP', '_blank'],
       ['mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Issue%20Report', ''],
       ['/how-it-works', ''],
-    ].map(([href, target]) => {
+    ];
+    const anchors = links.map(([href, target]) => {
       const a = document.createElement('a');
       a.href = href;
       if (target) a.target = target;
