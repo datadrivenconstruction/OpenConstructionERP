@@ -513,6 +513,12 @@ export interface CountryDefaultSource {
 export interface ContractCountryDefaults {
   project_id: string;
   country_code: string | null;
+  /** The ISO 3166-2 row read over the country's, e.g. `CA-MB`, when the project records one. */
+  subdivision_code?: string | null;
+  /** How long that row keeps the holdback after the release event, with its source. */
+  release_period?: (CountryDefaultSource & { value: number | null }) | null;
+  /** The figures differ by province and the project records none. */
+  subdivision_missing?: boolean;
   has_defaults: boolean;
   standard_form: string | null;
   values: Partial<{

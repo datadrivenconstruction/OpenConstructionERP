@@ -5,7 +5,8 @@
   "jurisdiction": "ES",
   "description": "Validates BOQ items and cost data exchanged in BC3 (FIEBDC-3) format. Checks file structure compliance, that capitulo (chapter) numbering is consistent, that unit descriptions and measurement rules follow the BC3 coding conventions, that decomposed prices (precios descompuestos) have labour, material and equipment components, and that the base de precios source is declared.",
   "applies_to": ["boq", "estimate", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "bc3.file_structure_valid",
     "bc3.capitulo_numbering_consistent",
     "bc3.unidad_obra_code_format_valid",
@@ -19,6 +20,7 @@
     "bc3.mediciones_present",
     "bc3.resumen_presupuesto_consistent"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "FIEBDC (Formato de Intercambio Estandar de Bases de Datos de Construccion)",
   "publication_year": 2020
 }

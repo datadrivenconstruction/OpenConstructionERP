@@ -97,6 +97,8 @@ const REQUESTS = {
 
 class NotFound extends Error {}
 
+const ENTITY_TYPES = ['boq', 'change_order', 'contract', 'invoice', 'purchase_order'];
+
 function routeGet(path: string): unknown {
   const [route] = path.split('?');
   if (route === '/v1/enterprise-workflows/') {
@@ -108,6 +110,10 @@ function routeGet(path: string): unknown {
       return { items: REQUESTS.items.slice(0, 1), total: 73, offset: 0, limit: 1 };
     }
     return REQUESTS;
+  }
+  if (route === '/v1/enterprise-workflows/entity-types/') {
+    // The registry the approval engine resolves records through.
+    return ENTITY_TYPES;
   }
   throw new NotFound(`404 GET ${path}`);
 }
@@ -195,7 +201,9 @@ describe('WorkflowsPage with the backend response shapes', () => {
     fireEvent.click((await screen.findAllByRole('button', { name: /New Workflow/ }))[0]!);
 
     fireEvent.change(screen.getByLabelText('Workflow Name'), { target: { value: 'Variation sign-off' } });
-    fireEvent.change(screen.getByLabelText('Entity Type'), { target: { value: 'variation' } });
+    // Only types the registry serves are offered; a free-typed one never saved.
+    await screen.findByRole('option', { name: /change.order/i });
+    fireEvent.change(screen.getByLabelText('Entity Type'), { target: { value: 'change_order' } });
     // Step 1: a manager approves. Step 2: a final sign-off by an admin.
     fireEvent.change(screen.getByLabelText('Step 1 Required role'), { target: { value: 'manager' } });
     fireEvent.click(screen.getByRole('button', { name: /Add step/ }));

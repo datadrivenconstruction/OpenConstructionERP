@@ -209,7 +209,9 @@ export function sourceTitle(
     defaultValue: SOURCE_LABELS[source.source] ?? source.source,
   });
   const note = source.note
-    ? t(`contracts.country_defaults.${country}.${field}.note`, { defaultValue: source.note })
+    ? t(source.note_key ?? `contracts.country_defaults.${country}.${field}.note`, {
+        defaultValue: source.note,
+      })
     : '';
   return [kind, source.reference, note].filter(Boolean).join(' · ');
 }

@@ -753,6 +753,14 @@ const MAY_READ_THE_PREFERENCE = [
  */
 const HARDCODED_LOCALE_ALLOWED: readonly { file: string; snippet: string; why: string }[] = [
   {
+    file: 'shared/ui/MoneyDisplay.tsx',
+    snippet: "const probe = new Intl.NumberFormat('en-US', { useGrouping: false, maximumFractionDigits: 2 });",
+    why:
+      'A non-display capability probe compares an exact decimal string with a known ASCII result. ' +
+      'The fixed locale makes the check independent of reader preferences. Its output is never shown; ' +
+      'display formatters still receive the resolved numberLocale.',
+  },
+  {
     file: 'shared/lib/money.ts',
     snippet: "const resolved = new Intl.NumberFormat('en-US', {",
     why:
@@ -763,7 +771,24 @@ const HARDCODED_LOCALE_ALLOWED: readonly { file: string; snippet: string; why: s
   },
 ];
 
+function isAllowedLocaleProbe(file: string, source: string, index: number): boolean {
+  const lineStart = source.lastIndexOf('\n', index - 1) + 1;
+  const nextLine = source.indexOf('\n', index);
+  const line = source.slice(lineStart, nextLine < 0 ? undefined : nextLine).trim();
+  return HARDCODED_LOCALE_ALLOWED.some((a) => a.file === file && line === a.snippet);
+}
+
 describe('there is one place the number locale comes from', () => {
+  it('a capability probe does not exempt another hardcoded display formatter in its file', () => {
+    const probe = HARDCODED_LOCALE_ALLOWED.find((a) => a.file === 'shared/ui/MoneyDisplay.tsx')!;
+    const display = "const shown = new Intl.NumberFormat('de-DE').format(amount);";
+    const source = `${probe.snippet}\n${display}`;
+    expect(isAllowedLocaleProbe(probe.file, source, source.indexOf('new Intl'))).toBe(true);
+    expect(isAllowedLocaleProbe(probe.file, source, source.lastIndexOf('new Intl'))).toBe(false);
+    const sameLine = `${probe.snippet} ${display}`;
+    expect(isAllowedLocaleProbe(probe.file, sameLine, sameLine.lastIndexOf('new Intl'))).toBe(false);
+  });
+
   it('no surface reads the raw preference behind the resolver', () => {
     const offenders = PRODUCT_FILES.filter(
       (f) => !MAY_READ_THE_PREFERENCE.includes(f) && /\bs\.numberLocale\b/.test(read(f)),
@@ -782,9 +807,7 @@ describe('there is one place the number locale comes from', () => {
       const source = read(file);
       for (const match of source.matchAll(pattern)) {
         const line = source.slice(0, match.index).split('\n').length;
-        const argued = HARDCODED_LOCALE_ALLOWED.some(
-          (a) => a.file === file && source.includes(a.snippet),
-        );
+        const argued = isAllowedLocaleProbe(file, source, match.index);
         if (!argued) offenders.push(`${file}:${line} ${match[0]}`);
       }
     }
@@ -816,9 +839,7 @@ describe('there is one place the number locale comes from', () => {
         const arg = rest.slice(0, end);
         const found = tag.exec(arg);
         if (!found) continue;
-        const argued = HARDCODED_LOCALE_ALLOWED.some(
-          (a) => a.file === file && source.includes(a.snippet),
-        );
+        const argued = isAllowedLocaleProbe(file, source, match.index);
         if (!argued) {
           offenders.push(`${file}:${source.slice(0, match.index).split('\n').length} ${match[0]}${arg.trim()}`);
         }

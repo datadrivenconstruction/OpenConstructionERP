@@ -23,7 +23,8 @@
     "extra_item_breakup": "Extra / substituted items must carry labour + material + P&T (Petty Tools & Plant) component-wise analysis",
     "cost_index": "DSR base + current CPWD quarterly Cost Index multiplier"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "cpwd.subhead_structure_valid",
     "cpwd.item_nomenclature_matches_2019",
     "cpwd.unit_of_measurement_allowed",
@@ -38,5 +39,6 @@
     "cpwd.works_manual_2019_procedural_compliance",
     "cpwd.yardstick_per_sqm_benchmark_within_band",
     "cpwd.pamphlet_of_rates_analysis_attached"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -18,6 +18,7 @@ import { Breadcrumb, Button } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 
 import { GeocodeCacheAdminPanel } from './GeocodeCacheAdminPanel';
+import { GeocodingConsentPanel } from './GeocodingConsent';
 
 export function GeoHubAdminPage() {
   const { t } = useTranslation();
@@ -47,6 +48,7 @@ export function GeoHubAdminPage() {
             </Button>
           }
         />
+        <GeocodingConsentPanel />
         <GeocodeCacheAdminPanel />
       </div>
     </AdminOnly>

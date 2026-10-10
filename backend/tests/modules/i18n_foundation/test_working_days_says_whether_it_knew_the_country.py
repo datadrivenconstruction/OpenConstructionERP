@@ -35,7 +35,7 @@ SEEDED_YEAR = 2026
 #: A real country the shipped seed does not carry. Asserted rather than assumed
 #: below, because the finding is about coverage and a test that quietly stopped
 #: describing an uncovered country would still pass.
-UNSEEDED = "PT"
+UNSEEDED = "MN"
 
 
 async def _seeded_service(session: AsyncSession) -> I18nFoundationService:

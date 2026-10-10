@@ -24,7 +24,8 @@
     },
     "rebar_grades": ["CA-25", "CA-50", "CA-60"]
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "abnt.concrete_class_min_per_caa",
     "abnt.cover_meets_environmental_class",
     "abnt.durability_class_assigned",
@@ -32,5 +33,6 @@
     "abnt.rebar_specification_compliant",
     "abnt.slump_target_documented",
     "abnt.concrete_traceability_documented"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

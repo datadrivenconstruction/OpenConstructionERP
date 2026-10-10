@@ -10,6 +10,7 @@ Endpoints:
     DELETE /{id}                     - Delete workflow (auth required)
     GET    /requests                 - List approval requests
     POST   /requests                 - Submit approval request (auth required)
+    GET    /entity-types/            - Record types a route may target
     GET    /requests/{id}            - Get single approval request
     POST   /requests/{id}/approve    - Approve request (auth required)
     POST   /requests/{id}/reject     - Reject request (auth required)
@@ -20,6 +21,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.enterprise_workflows.entities import APPROVABLE_ENTITIES
 from app.modules.enterprise_workflows.schemas import (
     ApprovalDecision,
     ApprovalRequestCreate,
@@ -179,6 +181,14 @@ async def cancel_request(
     """
     request = await service.cancel_request(request_id, user_id=user_id)
     return ApprovalRequestResponse.model_validate(request)
+
+
+@router.get("/entity-types/", response_model=list[str])
+async def list_entity_types(
+    _perm: None = Depends(RequirePermission("enterprise_workflows.read")),
+) -> list[str]:
+    """Record types an approval route may target, straight from the registry."""
+    return sorted(APPROVABLE_ENTITIES)
 
 
 # ── Workflow by ID (after /requests/ to avoid route shadowing) ─────────────

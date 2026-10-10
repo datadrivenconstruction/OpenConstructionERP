@@ -15,7 +15,8 @@
     "Subpart R": "1926.750-1926.761 Steel Erection",
     "Subpart X": "1926.1050-1926.1060 Stairways and Ladders"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "osha.1926.sssp_present",
     "osha.1926.osha_10_card_workers_present",
     "osha.1926.osha_30_card_supervisors_present",
@@ -35,5 +36,6 @@
     "osha.1926.heat_illness_prevention_plan_in_high_heat_states",
     "osha.1926.injury_log_300_300A_present",
     "osha.1926.state_plan_addendum_when_state_plan_state"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -32,6 +32,8 @@ export interface Subcontractor {
   contact_id?: string | null;
   legal_name: string;
   trade_name?: string | null;
+  /** natural_person (a sole trader) or legal_entity; null when not stated. */
+  party_kind?: 'natural_person' | 'legal_entity' | null;
   tax_id?: string | null;
   trade_categories: string[];
   prequalification_status: PrequalStatus;
@@ -235,6 +237,7 @@ export interface SubcontractorDashboard {
 export interface CreateSubcontractorPayload {
   legal_name: string;
   trade_name?: string;
+  party_kind?: 'natural_person' | 'legal_entity' | null;
   tax_id?: string;
   trade_categories?: string[];
   country?: string;

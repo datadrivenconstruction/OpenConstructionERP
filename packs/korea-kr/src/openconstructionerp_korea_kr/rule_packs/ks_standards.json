@@ -5,7 +5,8 @@
   "jurisdiction": "KR",
   "description": "Validates BOQ items and specifications against key KS (Korean Standards) for construction materials and methods published by KATS. Covers KS F 4009 (ready-mixed concrete), KS D 3504 (reinforcing steel bars), KS F 2526 (aggregates for concrete), KS F 4021 (insulation materials), and related material standards. Checks that specification clauses cite the applicable KS standard number and that material grades match the KS classification.",
   "applies_to": ["boq", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ks.standard_reference_present",
     "ks.standard_version_current",
     "ks.f4009_concrete_grade_specified",
@@ -16,6 +17,7 @@
     "ks.test_certificate_requirement_noted",
     "ks.kc_mark_required_items_flagged"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "KATS (Korean Agency for Technology and Standards)",
   "publication_year": 2024
 }

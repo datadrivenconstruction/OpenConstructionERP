@@ -5,7 +5,8 @@
   "jurisdiction": "FR",
   "description": "Validates project organisation and documentation against the Loi relative a la maitrise d'ouvrage publique (Loi MOP), now codified in the Code de la commande publique. Checks that the roles of maitre d'ouvrage, maitre d'oeuvre and entrepreneur are defined, that mission phases (ESQ, APS, APD, PRO, ACT, VISA, DET, AOR) are documented and ordered, and that cost estimates exist at the required project phases.",
   "applies_to": ["estimate", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "mop.maitre_ouvrage_defined",
     "mop.maitre_oeuvre_defined",
     "mop.mission_phases_documented",
@@ -22,6 +23,7 @@
     "mop.cost_estimate_at_apd",
     "mop.mission_phases_order_valid"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Direction des Affaires Juridiques (DAJ), Ministere de l'Economie",
   "publication_year": 2019
 }

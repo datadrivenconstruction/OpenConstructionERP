@@ -204,10 +204,10 @@ MACRO_OPTION_ANCHORS: dict[str, tuple[str, str]] = {
     "WestAfrica": (
         "NG",
         "A genuine split, and the anchor is a decision. Nigeria and Ghana read NRM while Senegal, "
-        "Ivory Coast and Cameroon read UNTEC on the DTU lineage. Nigeria is the larger market and "
+        "Ivory Coast and Cameroon read DPGF on the DTU lineage. Nigeria is the larger market and "
         "the one the country programme ships. The alternative is not neutrality but DIN 276, which "
         "is wrong for every member, so anchoring is strictly better than leaving it unresolved. A "
-        "Francophone project names UNTEC explicitly, which beats the region.",
+        "Francophone project resolves to DPGF on its own country, which beats the region.",
     ),
     "SoutheastAsia": (
         "ID",
@@ -781,7 +781,7 @@ STANDARD_PICKERS: dict[str, tuple[Path, str]] = {
 #: catches one that reads the wrong literal entirely and still finds a coherent
 #: handful. Changing a picker means changing the number here, deliberately.
 STANDARD_PICKER_OPTION_COUNTS: dict[str, int] = {
-    "CreateProjectPage.STANDARD_GROUPS": 14,
+    "CreateProjectPage.STANDARD_GROUPS": 15,
     "QuickEstimatePage.STANDARDS": 4,
     "CreateAssemblyPage.STANDARDS": 3,
 }

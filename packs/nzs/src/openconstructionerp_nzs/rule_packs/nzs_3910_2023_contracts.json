@@ -21,7 +21,8 @@
     "NZS 3917:2013": "Conditions of Contract — Fixed Term"
   },
   "applies_to": ["tendering", "contracts", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nzs3910.contract_variant_2023_edition",
     "nzs3910.contract_administrator_named",
     "nzs3910.independent_certifier_named",
@@ -37,5 +38,6 @@
     "nzs3910.liquidated_damages_rate_set",
     "nzs3910.defects_notification_period_set",
     "nzs3910.bond_or_retention_specified"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -5,7 +5,8 @@
   "jurisdiction": "KR",
   "description": "Validates project documentation against the Korean Building Code (KBC) and the Building Act (Geonchukbeop). Checks building use classification (yongdo), floor area ratio (yongjeogyul), building coverage ratio (geonperyul), fire resistance ratings, seismic design category, structural system classification, and building permit (geonchuk heoga) documentation requirements.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "kbc.building_use_classified",
     "kbc.yongjeogyul_floor_area_ratio_set",
     "kbc.geonperyul_building_coverage_set",
@@ -19,6 +20,7 @@
     "kbc.green_building_certification_if_applicable",
     "kbc.energy_performance_rating_set"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "MOLIT (Ministry of Land, Infrastructure and Transport)",
   "publication_year": 2016
 }

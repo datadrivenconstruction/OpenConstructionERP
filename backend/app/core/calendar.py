@@ -54,6 +54,7 @@ from dateutil.easter import easter  # type: ignore[import]
 from hijridate import Gregorian, Hijri  # type: ignore[import]
 
 from app.core.provenance import Provenance, declared, fell_back, unavailable, weakest
+from app.core.seeded_holidays import seeded_holiday_dates
 
 logger = logging.getLogger(__name__)
 
@@ -433,6 +434,96 @@ def _holidays_ca(year: int) -> set[date]:
         days.add(observed)
 
     return days
+
+
+# ── Canadian provinces ────────────────────────────────────────────────────────
+#
+# Holidays are provincial law in Canada, and the federal list above is wrong for
+# every province in at least one day: Ontario keeps Family Day and does not keep
+# Remembrance Day or 30 September, Quebec keeps 24 June and not Boxing Day. A
+# project that records its province reads the province's own list instead of the
+# federal one, by asking for the ISO 3166-2 code ("CA-ON") where it would ask for
+# "CA". Each list is the province's general or statutory holidays as its
+# employment standards law names them; days a province leaves optional (Ontario's
+# Civic Holiday, Alberta's Heritage Day, Quebec's Easter Monday as the alternative
+# to Good Friday) are left out. Fixed dates that fall on a weekend move forward to
+# the next free weekday, the same rule the federal list uses.
+
+
+def _ca_province(year: int, *, family_day: bool, extra_fixed: tuple[date, ...], **flags: bool) -> set[date]:
+    e = easter(year)
+    may_24 = date(year, 5, 24)
+    days = {
+        e - timedelta(days=2),  # Good Friday
+        may_24 - timedelta(days=may_24.weekday()),  # Victoria Day / National Patriots' Day
+        _nth_weekday(year, 9, 0, 1),  # Labour Day
+        _nth_weekday(year, 10, 0, 2),  # Thanksgiving
+    }
+    if family_day:
+        days.add(_nth_weekday(year, 2, 0, 3))  # Family Day / Louis Riel Day - 3rd Monday February
+    if flags.get("august_civic"):
+        days.add(_nth_weekday(year, 8, 0, 1))  # BC Day - 1st Monday August
+    fixed = [date(year, 1, 1), date(year, 7, 1), *extra_fixed, date(year, 12, 25)]
+    if flags.get("truth_and_reconciliation"):
+        fixed.append(date(year, 9, 30))
+    if flags.get("remembrance"):
+        fixed.append(date(year, 11, 11))
+    if flags.get("boxing_day"):
+        fixed.append(date(year, 12, 26))
+    for day in sorted(fixed):
+        observed = day
+        while observed.weekday() >= _SATURDAY_INDEX or observed in days:
+            observed += timedelta(days=1)
+        days.add(observed)
+    return days
+
+
+def _holidays_ca_on(year: int) -> set[date]:
+    """Ontario public holidays (Employment Standards Act, 2000)."""
+    return _ca_province(year, family_day=True, extra_fixed=(), boxing_day=True)
+
+
+def _holidays_ca_qc(year: int) -> set[date]:
+    """Quebec statutory holidays (Act respecting labour standards; National Holiday Act)."""
+    return _ca_province(year, family_day=False, extra_fixed=(date(year, 6, 24),))
+
+
+def _holidays_ca_bc(year: int) -> set[date]:
+    """British Columbia statutory holidays (Employment Standards Act)."""
+    return _ca_province(
+        year,
+        family_day=True,
+        extra_fixed=(),
+        august_civic=True,
+        truth_and_reconciliation=year >= 2023,
+        remembrance=True,
+    )
+
+
+def _holidays_ca_ab(year: int) -> set[date]:
+    """Alberta general holidays (Employment Standards Code)."""
+    return _ca_province(year, family_day=True, extra_fixed=(), remembrance=True)
+
+
+def _holidays_ca_mb(year: int) -> set[date]:
+    """Manitoba general holidays (The Employment Standards Code)."""
+    return _ca_province(year, family_day=True, extra_fixed=(), truth_and_reconciliation=year >= 2023)
+
+
+#: ISO 3166-2 subdivisions with a holiday list of their own, which replaces the
+#: country's when a caller names the subdivision.
+_SUBDIVISION_HOLIDAY_FUNCS: dict[str, Any] = {
+    "CA-ON": _holidays_ca_on,
+    "CA-QC": _holidays_ca_qc,
+    "CA-BC": _holidays_ca_bc,
+    "CA-AB": _holidays_ca_ab,
+    "CA-MB": _holidays_ca_mb,
+}
+
+
+def has_subdivision_holidays(code: str | None) -> bool:
+    """Whether ``code`` (ISO 3166-2) has a holiday list of its own."""
+    return (code or "").upper().strip() in _SUBDIVISION_HOLIDAY_FUNCS
 
 
 # Islamic observances that are a single day, given as (Hijri month, day). Only the
@@ -1325,8 +1416,21 @@ def resolve_holidays(country_code: str, year: int) -> dict[str, Any]:
     if cached is not None:
         return cached
 
+    if "-" in cc:
+        return _resolve_subdivision_holidays(cc, year)
+
     func = _HOLIDAY_FUNCS.get(cc)
-    if func is None:
+    try:
+        # Existing computed rules keep precedence. Only explicitly reviewed
+        # country/year seed bindings may fill an otherwise uncovered calendar.
+        dates = frozenset(func(year)) if func is not None else seeded_holiday_dates(cc, year)
+    except Exception as exc:
+        # Never cache a failed calculation or unreadable shipped roster as an
+        # empty answer: that would silently turn holidays into working days.
+        logger.exception("Holiday calculation failed for %s/%d", cc, year)
+        raise HolidayCalculationError(cc, year) from exc
+
+    if dates is None:
         result: dict[str, Any] = {
             "dates": frozenset(),
             "jurisdiction": fell_back(
@@ -1343,15 +1447,6 @@ def resolve_holidays(country_code: str, year: int) -> dict[str, Any]:
         }
         _holiday_cache[key] = result
         return result
-
-    try:
-        dates = frozenset(func(year))
-    except Exception as exc:
-        # Deliberately not cached. Memoising a failure would make the first call
-        # raise and every later one hand back a plausible empty set, so the
-        # defect would present as a holiday-free year to everything downstream.
-        logger.exception("Holiday calculation failed for %s/%d", cc, year)
-        raise HolidayCalculationError(cc, year) from exc
 
     resolved = _canonical_holiday_country(cc)
     table, omitted_names = _CURATED_TABLES.get(resolved, (None, ()))
@@ -1400,6 +1495,45 @@ def resolve_holidays(country_code: str, year: int) -> dict[str, Any]:
         "year": year,
     }
     _holiday_cache[key] = result
+    return result
+
+
+def _resolve_subdivision_holidays(code: str, year: int) -> dict[str, Any]:
+    """:func:`resolve_holidays` for an ISO 3166-2 code.
+
+    A subdivision with a list of its own answers with it, declared for the
+    subdivision. One without answers with its country's list, and the
+    jurisdiction axis says the country answered, so a caller can tell the two.
+    """
+    country = code.split("-", 1)[0]
+    func = _SUBDIVISION_HOLIDAY_FUNCS.get(code)
+    if func is None:
+        base = resolve_holidays(country, year)
+        result = {
+            **base,
+            "jurisdiction": fell_back(
+                AXIS_JURISDICTION,
+                code,
+                country,
+                detail=f"no holiday table for {code}; {country}'s table answered",
+            ),
+        }
+    else:
+        try:
+            dates = frozenset(func(year))
+        except Exception as exc:
+            logger.exception("Holiday calculation failed for %s/%d", code, year)
+            raise HolidayCalculationError(code, year) from exc
+        result = {
+            "dates": dates,
+            "jurisdiction": declared(AXIS_JURISDICTION, code),
+            "effective_year": declared(AXIS_EFFECTIVE_YEAR, str(year)),
+            "holiday_extent": declared(AXIS_HOLIDAY_EXTENT, code),
+            "omitted": (),
+            "placeholder_spans": (),
+            "year": year,
+        }
+    _holiday_cache[(code, year)] = result
     return result
 
 
@@ -1474,7 +1608,8 @@ def is_working_day(d: date, country_code: str) -> bool:
         assert is_working_day(date(2026, 1,  4), "AE") is False   # Sunday (weekend)
     """
     cc = (country_code or "").upper().strip()
-    working_week = _WORKING_WEEK.get(cc, _DEFAULT_WORKING_WEEK)
+    # An ISO 3166-2 code ("CA-ON") works its country's week and its own holidays.
+    working_week = _WORKING_WEEK.get(cc.split("-", 1)[0], _DEFAULT_WORKING_WEEK)
     if d.weekday() not in working_week:
         return False
     holidays = _get_holidays(cc, d.year)

@@ -303,6 +303,11 @@ export function VoiceEntry({
               'Say what happened in your own words and we will draft a structured entry for you to check. AI suggests, you confirm.',
           })}
         </p>
+        <p className="text-xs text-content-tertiary">
+          {t('voice.transcription_goes_to_openai', {
+            defaultValue: 'Speech is transcribed by OpenAI with your OpenAI key, whatever AI provider you selected in Settings.',
+          })}
+        </p>
 
         {capture.micSupported ? (
           <button

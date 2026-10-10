@@ -19,13 +19,14 @@ async def on_startup() -> None:
 
     * Subscribes the broadcast bridge so lock events fan out over
       the presence WebSocket.
-    * Spawns the sweeper background task.
+    * Declares the sweeper as a registry process; startup boots it.
     """
+    from app.core.processes import process_registry
+    from app.core.processes.builtin import register_collab_lock_sweeper
     from app.modules.collaboration_locks.router import (
         register_broadcast_subscribers,
     )
-    from app.modules.collaboration_locks.sweeper import start_sweeper
 
     register_broadcast_subscribers()
-    start_sweeper()
+    register_collab_lock_sweeper(process_registry)
     logger.info("collaboration_locks: startup complete")

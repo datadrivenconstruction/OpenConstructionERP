@@ -7,7 +7,8 @@
   "description": "Enables OCERP built-in validation rules that enforce the ASTM E1557 UniFormat II elemental hierarchy used for early-stage conceptual estimating (A Substructure → G Building Sitework, three levels deep: Major Group / Group / Individual Element). Complements MasterFormat — UniFormat for early design phases, MasterFormat for spec-driven detailed estimating.",
   "issuer": "ASTM International (Subcommittee E06.81)",
   "covers_elements": "A10 Foundations, A20 Basement Construction, B10 Superstructure, B20 Exterior Enclosure, B30 Roofing, C10 Interior Construction, C20 Stairs, C30 Interior Finishes, D10 Conveying, D20 Plumbing, D30 HVAC, D40 Fire Protection, D50 Electrical, E10 Equipment, E20 Furnishings, F10 Special Construction, F20 Selective Building Demolition, G10 Site Preparation, G20 Site Improvements, G30 Site Mechanical Utilities, G40 Site Electrical Utilities, G50 Other Site Construction",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "uniformat.element_code_format_valid",
     "uniformat.major_group_present",
     "uniformat.group_element_required",
@@ -20,5 +21,6 @@
     "uniformat.G_sitework_present_when_site_scope",
     "uniformat.cost_per_sqft_within_band",
     "uniformat.early_estimate_contingency_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -67,6 +67,11 @@ def _safe_document_url(value: str | None) -> str | None:
 # ── Subcontractor ────────────────────────────────────────────────────────
 
 
+# Whether the firm is one person (a sole trader) or a company; the same
+# vocabulary as a contact's ``party_kind``.
+PartyKind = Literal["natural_person", "legal_entity"]
+
+
 class SubcontractorBase(BaseModel):
     """Shared subcontractor fields."""
 
@@ -74,6 +79,7 @@ class SubcontractorBase(BaseModel):
 
     legal_name: str = Field(..., min_length=1, max_length=255)
     trade_name: str | None = Field(default=None, max_length=255)
+    party_kind: PartyKind | None = None
     tax_id: str | None = Field(default=None, max_length=64)
     trade_categories: list[str] = Field(default_factory=list)
     country: str | None = Field(default=None, max_length=2)
@@ -106,6 +112,7 @@ class SubcontractorUpdate(BaseModel):
 
     legal_name: str | None = Field(default=None, min_length=1, max_length=255)
     trade_name: str | None = Field(default=None, max_length=255)
+    party_kind: PartyKind | None = None
     tax_id: str | None = Field(default=None, max_length=64)
     trade_categories: list[str] | None = None
     prequalification_status: str | None = Field(
@@ -129,6 +136,7 @@ class SubcontractorResponse(BaseModel):
     contact_id: UUID | None = None
     legal_name: str
     trade_name: str | None = None
+    party_kind: str | None = None
     tax_id: str | None = None
     trade_categories: list[str] = Field(default_factory=list)
     prequalification_status: str = "pending"

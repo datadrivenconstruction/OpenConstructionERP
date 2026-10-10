@@ -575,3 +575,73 @@ describe('SheetsIndexPage - re-reading title blocks', () => {
     expect(screen.queryByRole('button', { name: /Re-read title blocks/ })).not.toBeInTheDocument();
   });
 });
+
+describe('SheetsIndexPage - bulk edit', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useProjectContextStore.getState().clearProject();
+    useProjectContextStore.getState().setActiveProject('proj-1', 'Riverside HQ');
+    useAuthStore.setState({ userRole: 'editor' });
+  });
+
+  afterEach(() => {
+    useAuthStore.setState({ userRole: null });
+  });
+
+  it('sets only the filled fields on the ticked sheets', async () => {
+    routeApi();
+    (apiPost as any).mockResolvedValue([]);
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('checkbox', { name: /Select all sheets shown/ }));
+    const bar = await screen.findByRole('form', { name: /Edit selected sheets/ });
+    const apply = within(bar).getByRole('button', { name: /Apply to/ });
+    // Nothing filled in, nothing to send.
+    expect(apply).toBeDisabled();
+
+    fireEvent.change(within(bar).getByLabelText('Discipline'), { target: { value: 'Structural' } });
+    fireEvent.change(within(bar).getByLabelText('Issue Date'), { target: { value: '2026-03-12' } });
+    fireEvent.click(apply);
+
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/v1/documents/sheets/bulk-update/', {
+        project_id: 'proj-1',
+        sheet_ids: ['sheet-1', 'sheet-2'],
+        discipline: 'Structural',
+        revision_date: '2026-03-12',
+      }),
+    );
+    await waitFor(() => expect(screen.queryByRole('form', { name: /Edit selected sheets/ })).not.toBeInTheDocument());
+  });
+
+  it('leaves a ticked sheet the filter hides out of the edit', async () => {
+    routeApi();
+    (apiPost as any).mockResolvedValue([]);
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Select sheet A-101' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select sheet S-201' }));
+    fireEvent.change(screen.getByPlaceholderText(/search/i), { target: { value: 'Foundation' } });
+
+    const bar = await screen.findByRole('form', { name: /Edit selected sheets/ });
+    fireEvent.change(within(bar).getByLabelText('Scale'), { target: { value: '1:20' } });
+    fireEvent.click(within(bar).getByRole('button', { name: /Apply to/ }));
+
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/v1/documents/sheets/bulk-update/', {
+        project_id: 'proj-1',
+        sheet_ids: ['sheet-2'],
+        scale: '1:20',
+      }),
+    );
+  });
+
+  it('offers no selection to a viewer', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    routeApi();
+    renderPage();
+
+    expect(await screen.findByText('A-101')).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /Select (all sheets|sheet)/ })).not.toBeInTheDocument();
+  });
+});

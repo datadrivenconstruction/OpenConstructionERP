@@ -43,6 +43,8 @@ from app.modules.geo_hub.schemas import (
     GeocodeCacheStatsResponse,
     GeocodeSuggestionResponse,
     GeocodeSuggestResponse,
+    GeocodingConsentResponse,
+    GeocodingConsentUpdate,
     GeoJSONImportRequest,
     GeoOverlayCreate,
     GeoOverlayResponse,
@@ -942,9 +944,10 @@ async def geocode_suggest(
     # to match the convention used by every other read endpoint in this
     # module so security audits can grep for it uniformly.
     _ = payload
-    from app.modules.geo_hub.geocoder import _disabled, suggest_addresses
+    from app.modules.geo_hub.consent import resolve_outbound
+    from app.modules.geo_hub.geocoder import suggest_addresses
 
-    disabled = _disabled()
+    disabled = not (await resolve_outbound()).allowed
     results = [] if disabled else await suggest_addresses(q, limit=limit)
     return GeocodeSuggestResponse(
         query=q,
@@ -1010,6 +1013,62 @@ async def geocode_cache_purge(
         deleted=deleted,
         older_than_days=older_than_days,
     )
+
+
+# ── Geocoding consent (asked once per installation) ────────────────────
+
+
+async def _consent_response(session: Any, payload: Any) -> GeocodingConsentResponse:
+    from app.core.permissions import permission_registry
+    from app.modules.geo_hub.consent import _read_choice, decide
+
+    try:
+        answer = await _read_choice(session)
+    except Exception:  # noqa: BLE001 - unreadable answer reads as "not asked"
+        answer = None
+    out = decide(answer)
+    role = (payload or {}).get("role", "") if isinstance(payload, dict) else ""
+    can_decide = out.state not in ("env_disabled", "env_mirror") and permission_registry.role_has_permission(
+        role, "geo_hub.admin"
+    )
+    return GeocodingConsentResponse(
+        state=out.state,
+        mirror_url=answer[1] if answer and out.state == "mirror" else None,
+        nominatim_url=out.nominatim_url,
+        photon_url=out.photon_url,
+        can_decide=can_decide,
+    )
+
+
+@router.get("/geocoding-consent", response_model=GeocodingConsentResponse)
+async def get_geocoding_consent(
+    session: SessionDep,
+    payload: CurrentUserPayload = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("geo_hub.read")),
+) -> GeocodingConsentResponse:
+    """Whether addresses may be sent to a geocoder, so the UI knows to ask."""
+    return await _consent_response(session, payload)
+
+
+@router.put("/geocoding-consent", response_model=GeocodingConsentResponse)
+async def put_geocoding_consent(
+    body: GeocodingConsentUpdate,
+    session: SessionDep,
+    payload: CurrentUserPayload = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("geo_hub.admin")),
+) -> GeocodingConsentResponse:
+    """Record the installation's answer: allow, deny, or use an own mirror."""
+    from fastapi import HTTPException
+
+    from app.modules.geo_hub.consent import invalidate_cache, save_choice
+
+    if body.choice == "mirror" and not body.mirror_url:
+        raise HTTPException(status_code=422, detail="mirror_url is required for the mirror choice")
+    user_id = (payload or {}).get("sub") if isinstance(payload, dict) else None
+    await save_choice(session, body.choice, body.mirror_url, str(user_id) if user_id else None)  # type: ignore[arg-type]
+    await session.commit()
+    invalidate_cache()
+    return await _consent_response(session, payload)
 
 
 @router.delete("/anchors/{anchor_id}", status_code=204)

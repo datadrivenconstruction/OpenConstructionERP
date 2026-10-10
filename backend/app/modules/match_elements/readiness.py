@@ -268,6 +268,13 @@ async def can_change_catalogue(
 
 
 def _check_store() -> tuple[bool, StoreProbe]:
+    # Without the client library nothing can reach the store, and starting
+    # the local server first only spends the probe budget: past it the card
+    # read "unreachable" and told the user to restart a service, when the
+    # fix is installing the library. ``True`` for the binary keeps the
+    # install button away, since installing the server would not help.
+    if not _client_available():
+        return True, probe_store()
     return ensure_local_server(), probe_store()
 
 

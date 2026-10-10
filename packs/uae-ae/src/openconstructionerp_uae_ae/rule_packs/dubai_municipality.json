@@ -5,7 +5,8 @@
   "jurisdiction": "AE",
   "description": "Validates project documentation against Dubai Municipality (DM) building regulations, Al Sa'fat Green Building Rating System, and DM technical guidelines. Checks that the building permit (Rakhsa) process is referenced, that Al Sa'fat rating requirements (Bronze/Silver/Gold/Platinum) are addressed for applicable building types, that DM structural and MEP guidelines are followed, and that DM-specific requirements for deep foundations, high-rise buildings and mixed-use developments are documented.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "dm.building_permit_rakhsa_referenced",
     "dm.building_classification_set",
     "dm.al_safat_rating_if_applicable",
@@ -19,6 +20,7 @@
     "dm.noc_from_dm_referenced",
     "dm.completion_certificate_provisions"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Dubai Municipality (DM)",
   "publication_year": 2023
 }

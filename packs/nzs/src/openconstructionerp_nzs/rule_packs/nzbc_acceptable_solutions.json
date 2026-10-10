@@ -22,7 +22,8 @@
     "H1": "Energy efficiency (H1/AS1 — updated 2022 thermal envelope uplift)"
   },
   "applies_to": ["projects", "boq", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nzbc.compliance_path_documented",
     "nzbc.clause_b1_structure_addressed",
     "nzbc.clause_b2_durability_50_years_min",
@@ -37,5 +38,6 @@
     "nzbc.alternative_solution_evidence_attached",
     "nzbc.bcAuthority_consent_attached",
     "nzbc.producer_statements_ps1_ps3_ps4_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

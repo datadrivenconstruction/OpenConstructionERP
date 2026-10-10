@@ -12,7 +12,8 @@
   "exposure_zones": ["Zone B (low)", "Zone C (medium)", "Zone D (high)", "Sea Spray Zone"],
   "snow_load_zones": ["N0", "N1", "N2", "N3", "N4 (alpine)"],
   "applies_to": ["projects", "boq", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nzs3604.wind_zone_set",
     "nzs3604.wind_zone_sed_requires_engineer",
     "nzs3604.earthquake_zone_set",
@@ -30,5 +31,6 @@
     "nzs3604.durability_class_specified",
     "nzs3604.snow_load_zone_applied",
     "nzs3604.fixings_galv_or_stainless_for_exposure"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

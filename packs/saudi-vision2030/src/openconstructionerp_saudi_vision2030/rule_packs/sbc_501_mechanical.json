@@ -11,7 +11,8 @@
   "description": "Enables OCERP built-in validation rules that enforce SBC 501 (Mechanical) and SBC 701 (Plumbing) — HVAC sizing for 45-50 degC outdoor design, MEPS-compliant chillers and split units, district cooling integration for large NEOM/Diriyah/Qiddiya developments, fresh-air ventilation per ASHRAE 62.1, plumbing fixture units, greywater reuse (Vision 2030 water target: 50% non-potable substitution), and Hajj-period water demand surcharges.",
   "description_ar": "تفعيل قواعد التحقق لإنفاذ الكود الميكانيكي SBC 501 والكود الصحي SBC 701 — تصميم التكييف لدرجات الحرارة العالية، التبريد المركزي، التهوية، وإعادة استخدام المياه الرمادية.",
   "severity_overrides": {},
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sbc501.outdoor_design_temperature_documented",
     "sbc501.hvac_load_calculation_present",
     "sbc501.chiller_efficiency_meps_compliant",
@@ -23,5 +24,6 @@
     "sbc501.duct_insulation_thickness_min",
     "sbc501.refrigerant_low_gwp_required",
     "sbc501.economiser_for_large_ahu"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

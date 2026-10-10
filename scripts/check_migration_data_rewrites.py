@@ -29,7 +29,7 @@ does, so paths below _MIN_EXPECTED_REVISIONS fails loud in main() instead.
 That check exists because of a sibling instrument making the opposite
 mistake: .github/workflows/desktop-release.yml's Windows signing job
 exits 0 and writes a $GITHUB_STEP_SUMMARY line plus a ::warning when
-AZURE_KV_CLIENT_SECRET is unset, so every release so far has shipped
+its signing secrets are unset, so every release so far has shipped
 unsigned installers under a job the run's conclusion field reports as
 success, indistinguishable there from a job that signed anything. This
 script's own summary line is read by whatever reads a conclusion field,

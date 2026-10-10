@@ -121,13 +121,18 @@ _INT32_LAST = 2**31 - 1
 
 
 def _str_to_float(value: str | None) -> float:
-    """Convert a string-stored numeric value to float, defaulting to 0.0."""
+    """Convert a string-stored numeric value to float, defaulting to 0.0.
+
+    "NaN" and "Infinity" parse without error and then overflow the duration
+    maths, so a non-finite value counts as no value at all.
+    """
     if value is None:
         return 0.0
     try:
-        return float(value)
+        number = float(value)
     except (ValueError, TypeError):
         return 0.0
+    return number if math.isfinite(number) else 0.0
 
 
 # ── Fallback production rates for generate-from-BOQ durations ─────────────
@@ -798,16 +803,22 @@ def _get_work_week(region: str | None = None) -> dict:
     return WORK_CALENDARS["DEFAULT"]
 
 
-def get_work_calendar(region: str | None = None) -> dict:
+def get_work_calendar(region: str | None = None, subdivision_code: str | None = None) -> dict:
     """Resolve the planning week and the holiday country independently.
 
     A macro-region never supplies a neighbouring country's public holidays.
     Holiday coverage remains explicit, including partial tables and years.
+    A project subdivision with a holiday list of its own (``CA-ON``) replaces
+    its country's list; the week stays the country's.
     """
+    from app.core.calendar import has_subdivision_holidays
     from app.core.classification_registry import is_macro_region, normalise_region
 
     week = _get_work_week(region)
     country = None if is_macro_region(region) else normalise_region(region)
+    sub = (subdivision_code or "").upper().strip()
+    if country and sub.startswith(f"{country}-") and has_subdivision_holidays(sub):
+        country = sub
     calendar = {**week, "holiday_country": country, "week_fallback": week is WORK_CALENDARS["DEFAULT"]}
     calendar.pop("holidays", None)
     if country:
@@ -1239,6 +1250,15 @@ class ScheduleService:
             return None
         return calendar_region_for(project.region, getattr(project, "country_code", None))
 
+    async def resolve_project_subdivision(self, project_id: uuid.UUID | None) -> str | None:
+        """The project's ISO 3166-2 subdivision, which may carry its own holidays."""
+        if project_id is None:
+            return None
+        from app.modules.projects.repository import ProjectRepository
+
+        project = await ProjectRepository(self.session).get_by_id(project_id)
+        return getattr(project, "subdivision_code", None) if project is not None else None
+
     # ── Schedule operations ────────────────────────────────────────────────
 
     async def create_schedule(self, data: ScheduleCreate) -> Schedule:
@@ -1360,7 +1380,7 @@ class ScheduleService:
                 # generated marker would let regeneration discard site closures.
                 edited_calendar = fields["metadata_"].get("calendar")
                 if isinstance(edited_calendar, dict):
-                    for key in ("regional_holiday_country", "holiday_coverage"):
+                    for key in ("regional_holiday_country", "holiday_coverage", "week_fallback"):
                         edited_calendar.pop(key, None)
 
         if target_status == "archived" and schedule.status != "archived":
@@ -1445,19 +1465,70 @@ class ScheduleService:
         """Restore the recorded status, or explicitly draft for legacy archives."""
         return await self.update_schedule(schedule_id, ScheduleUpdate(), actor_payload=actor_payload, restore=True)
 
-    async def purge_schedule(self, schedule_id: uuid.UUID, *, actor_payload: dict[str, Any]) -> None:
-        """Permanently delete an archived schedule; administrator only.
-
-        Raises HTTPException 404 if not found.
-        """
+    @staticmethod
+    async def is_purge_admin(actor_payload: dict[str, Any]) -> bool:
+        """Whether the caller is an administrator holding ``schedule.purge``."""
         from app.dependencies import RequirePermission, RequireRole
 
-        await RequireRole("admin")(actor_payload)
-        await RequirePermission("schedule.purge")(actor_payload)
+        try:
+            await RequireRole("admin")(actor_payload)
+            await RequirePermission("schedule.purge")(actor_payload)
+        except HTTPException:
+            return False
+        return True
+
+    async def is_project_owner(self, schedule: Schedule, user_id: str | None) -> bool:
+        """Whether ``user_id`` owns the project the schedule belongs to."""
+        from app.modules.projects.models import Project
+
+        if not user_id:
+            return False
+        owner_id = (
+            await self.session.execute(select(Project.owner_id).where(Project.id == schedule.project_id))
+        ).scalar_one_or_none()
+        return owner_id is not None and str(owner_id) == str(user_id)
+
+    async def purge_blocked_reason(self, schedule: Schedule, actor_payload: dict[str, Any]) -> str | None:
+        """Why this caller may not permanently delete the schedule, or None.
+
+        An administrator may delete any archived schedule. The owner of its
+        project may too, unless baselines hang off it: deleting those stays
+        an administrator's call, as on the baseline endpoint.
+        """
+        if not await self.is_purge_admin(actor_payload):
+            from app.dependencies import RequirePermission
+
+            try:
+                await RequirePermission("schedule.delete")(actor_payload)
+            except HTTPException:
+                return "permission_denied"
+            if not await self.is_project_owner(schedule, actor_payload.get("sub")):
+                return "permission_denied"
+            if await self.schedule_repo.count_baselines(schedule.id):
+                return "schedule_has_baselines"
+        if schedule.status != "archived":
+            return "schedule_not_archived"
+        return None
+
+    async def purge_schedule(self, schedule_id: uuid.UUID, *, actor_payload: dict[str, Any]) -> None:
+        """Permanently delete an archived schedule; administrator or project owner.
+
+        Raises HTTPException 404 if not found, 403 for anyone else, 409 when
+        the schedule is not archived or an owner meets baselines.
+        """
         schedule = await self.schedule_repo.get_for_update(schedule_id)
         if schedule is None:
             raise HTTPException(status_code=404, detail="Schedule not found")
-        if schedule.status != "archived":
+        blocked = await self.purge_blocked_reason(schedule, actor_payload)
+        if blocked == "permission_denied":
+            raise coded_http_error(
+                403, "permission_denied", "Only the project owner or an administrator can delete a schedule."
+            )
+        if blocked == "schedule_has_baselines":
+            raise coded_http_error(
+                409, "schedule_has_baselines", "Only an administrator can delete a schedule that has baselines."
+            )
+        if blocked == "schedule_not_archived":
             raise coded_http_error(409, "schedule_not_archived", "Archive the schedule before permanently deleting it.")
         project_id = str(schedule.project_id)
 
@@ -3092,16 +3163,21 @@ class ScheduleService:
         return {"work_days": work_days or [0, 1, 2, 3, 4], "exceptions": exceptions}
 
     async def _generation_calendar(
-        self, schedule: Schedule, region_week: set[int], holiday_country: str | None = None
+        self,
+        schedule: Schedule,
+        region_week: set[int],
+        holiday_country: str | None = None,
+        *,
+        week_fallback: bool | None = None,
     ) -> tuple[dict, dict | None]:
         """The calendar a generated plan is drawn on, and the one to record on the schedule.
 
         The plan is drawn on the calendar :meth:`reschedule` will recount it
         on, holidays included, so the first reschedule moves no bar: the
         schedule's own calendar, else the project's default calendar. Without
-        either, the project region's week is used, and recorded on the
-        schedule when it is not Monday to Friday, which is what reschedule
-        would otherwise fall back to.
+        either, the project region's week and holiday coverage are recorded
+        on the schedule. Record a known fallback flag with that snapshot;
+        absence means unknown, not a confirmed regional week.
 
         Returns:
             ``(calendar, calendar_to_record)``; the second is ``None`` when
@@ -3120,6 +3196,8 @@ class ScheduleService:
             "regional_holiday_country": holiday_country,
             "holiday_coverage": [],
         }
+        if week_fallback is not None:
+            week["week_fallback"] = week_fallback
         return week, week
 
     async def reschedule(self, schedule_id: uuid.UUID) -> list[Activity]:
@@ -3341,10 +3419,10 @@ class ScheduleService:
         # The same resolver compute_duration's callers use, so the week the
         # dates are drawn on here is the week they are recounted on later.
         project_region = await self.resolve_project_region(schedule_project_id)
-        cal = get_work_calendar(project_region)
+        cal = get_work_calendar(project_region, await self.resolve_project_subdivision(schedule_project_id))
         hours_per_day = cal["hours_per_day"]
         plan_calendar, calendar_to_record = await self._generation_calendar(
-            schedule, set(cal["work_days"]), cal.get("holiday_country")
+            schedule, set(cal["work_days"]), cal.get("holiday_country"), week_fallback=cal.get("week_fallback")
         )
         work_days_set = set(plan_calendar["work_days"])
         holidays = {d for d in (normalise_exception_date(e) for e in plan_calendar.get("exceptions") or []) if d}

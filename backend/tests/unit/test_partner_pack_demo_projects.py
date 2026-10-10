@@ -274,23 +274,13 @@ def test_pack_template_is_substantial_and_valid(template) -> None:  # noqa: ANN0
 
 #: Demos whose declared standard the registry does not know.
 #:
-#: ``hospital-lyon`` declares ``dpgf`` and is stored as ``untec``, because
-#: ``COUNTRY_TO_STANDARD`` maps FR to untec and dpgf is in neither
-#: ``KNOWN_CLASSIFICATION_STANDARDS`` (13 names) nor
-#: ``CLASSIFICATION_STANDARD_LABELS`` (18 names).
-#:
-#: Everything else about that demo is dpgf and is coherent: its 119 priced
-#: lines are keyed ``classification["dpgf"]``, its rule set is ``dpgf``, and
-#: ``dpgf.lot_required`` reads that exact key. The standard it is stored under,
-#: untec, has no rules in the engine at all. So the question this entry holds
-#: open is which of the two France should classify to, and that is a product
-#: decision rather than something a test may settle.
+#: ``hospital-lyon`` used to sit here, declaring ``dpgf`` while FR mapped to
+#: ``untec``. The registry learned dpgf in 2026-10 and the entry left.
 #:
 #: Named rather than skipped by a wildcard, so a second demo cannot join the
 #: same silence, and ``test_the_standard_allowlist_still_describes_the_tree``
-#: fails the day the registry learns dpgf.
+#: fails the day the registry learns one of these.
 _DEMOS_WHOSE_STANDARD_DOES_NOT_RESOLVE = {
-    "hospital-lyon",
     # Nordics and Alpine demos declare native classification standards that
     # the product does not yet register in COUNTRY_TO_STANDARD. The resolver
     # falls back to the nearest common standard (din276 for all of these via

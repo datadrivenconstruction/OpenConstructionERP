@@ -21,7 +21,8 @@
     "boq_quality.no_zero_unit_rate": "ERROR",
     "project_completeness.fire_protection_present": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ncc2022.volume_selected",
     "ncc2022.building_class_set",
     "ncc2022.rise_in_storeys_set",
@@ -43,5 +44,6 @@
     "boq_quality.no_missing_quantity",
     "project_completeness.fire_protection_present",
     "project_completeness.accessibility_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

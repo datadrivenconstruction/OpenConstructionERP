@@ -278,6 +278,54 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The contractor's application with its continuation sheet, certified by the architect.",
         ),
     },
+    "CA": {
+        # Holdback is provincial law. This row is what a Canadian project with
+        # no province recorded starts from, and it states the Ontario
+        # Construction Act. A project that names its province reads the
+        # province's own rate and release period from
+        # SUBDIVISION_CONTRACT_DEFAULTS.
+        "standard_form": "CCDC 2-2020",
+        "retention_percent": _figure(
+            "10",
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 22; Builders Lien Act (BC), s. 4; "
+            "Prompt Payment and Construction Lien Act (AB), s. 18",
+            "The owner holds back ten percent of the value of work done under Ontario's Construction Act, and "
+            "British Columbia and Alberta hold the same. Manitoba holds 7.5 percent; change the rate there.",
+        ),
+        "retention_cap_percent": _figure(
+            None,
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 22",
+            "No ceiling. The holdback is a fixed share of every payment until it is released.",
+        ),
+        "retention_release_split": _figure(
+            _split(("substantial_completion", "100"), ("final_completion", "100")),
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, ss. 26, 31 and 32",
+            "Paid once the lien period after the published certificate of substantial performance expires "
+            "with no lien preserved; holdback on work done after that is paid when the contract is "
+            "completed. Ontario also releases holdback each contract year from 2026.",
+        ),
+        "payment_period_days": _figure(
+            28,
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 6.4; Federal Prompt Payment for Construction Work Act",
+            "The owner pays a proper invoice within 28 days of receiving it, unless it gives a notice of non-payment.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 6.3",
+            "The contractor gives a proper invoice every month, unless the contract sets another interval.",
+        ),
+        "certificate_name": _figure(
+            "Certificate for Payment",
+            "standard_form",
+            "CCDC 2-2020, GC 5.2 and GC 5.3",
+            "The Consultant certifies the contractor's monthly application for payment.",
+        ),
+    },
     "FR": {
         "standard_form": "NF P03-001 / CCAG-Travaux",
         "retention_percent": _figure(
@@ -527,7 +575,127 @@ def validate_release_split(split: Any, where: str = "retention_release_split") -
     return steps
 
 
+# ── Below the country ────────────────────────────────────────────────────
+#
+# Where the law that sets a figure is provincial or state law, a project that
+# records its ISO 3166-2 subdivision reads the subdivision's row over the
+# country's. A subdivision row names only the fields that differ; the rest
+# come from the country. ``release_period_days`` is how long the holdback is
+# kept after the release event before it may be paid, the period lien rights
+# run for. It is served with its source and never written onto a contract,
+# because the release rule pays at the event and a person reads the period
+# beside it.
+SUBDIVISION_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
+    "CA-ON": {
+        "retention_percent": _figure(
+            "10",
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 22",
+            "Ontario holds back ten percent of the value of work done.",
+        ),
+        "release_period_days": _figure(
+            60,
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30",
+            "Paid once 60 days pass after the certificate of substantial performance is published with no "
+            "lien preserved. Ontario also releases holdback each contract year from 2026.",
+        ),
+    },
+    "CA-BC": {
+        "retention_percent": _figure(
+            "10",
+            "statute",
+            "Builders Lien Act, S.B.C. 1997, c. 45",
+            "British Columbia holds back ten percent of the value of work done, kept in a holdback account "
+            "on larger contracts.",
+        ),
+        # The Construction Prompt Payment Act (BC, 2025) would cut this to 46
+        # days. It comes into force on a date set by regulation, and none was
+        # set as of 2026-10; move the figure when it is.
+        "release_period_days": _figure(
+            55,
+            "statute",
+            "Builders Lien Act, S.B.C. 1997, c. 45",
+            "Paid once 55 days pass after the certificate of completion with no lien filed.",
+        ),
+    },
+    "CA-AB": {
+        "retention_percent": _figure(
+            "10",
+            "statute",
+            "Prompt Payment and Construction Lien Act, R.S.A. 2000, c. P-26.4",
+            "Alberta holds back ten percent of the value of work done.",
+        ),
+        "release_period_days": _figure(
+            60,
+            "statute",
+            "Prompt Payment and Construction Lien Act, R.S.A. 2000, c. P-26.4",
+            "Paid once 60 days pass after the certificate of substantial performance, or 90 days for "
+            "concrete supply and oil and gas well work.",
+        ),
+    },
+    "CA-MB": {
+        "retention_percent": _figure(
+            "7.5",
+            "statute",
+            "The Builders' Liens Act, C.C.S.M. c. B91, s. 25",
+            "Manitoba holds back 7.5 percent of each payment, not ten.",
+        ),
+        "release_period_days": _figure(
+            60,
+            "statute",
+            "The Builders' Liens Act, C.C.S.M. c. B91, s. 25",
+            "Paid once 60 days pass with no lien registered. The period was 40 days before 1 April 2024.",
+        ),
+    },
+    "CA-QC": {
+        "retention_percent": _figure(
+            "10",
+            "industry_practice",
+            "Contract terms",
+            "Quebec has no statutory holdback. Ten percent is the usual contractual retention; the contract sets it.",
+        ),
+        "payment_period_days": _figure(
+            None,
+            "industry_practice",
+            "Contract terms",
+            "No provincial prompt payment period applies to private work; the contract states it.",
+        ),
+        "release_period_days": _figure(
+            None,
+            "industry_practice",
+            "Contract terms",
+            "The contract sets when the retention is paid, usually after acceptance of the work.",
+        ),
+    },
+}
+
+#: Fields a subdivision row may name: the country fields plus the release period.
+SUBDIVISION_FIELDS: tuple[str, ...] = (*CONTRACT_DEFAULT_FIELDS, "release_period_days")
+
+
 def _validate_table() -> None:
+    for code, sub_row in SUBDIVISION_CONTRACT_DEFAULTS.items():
+        country, _, sub = code.partition("-")
+        if country not in COUNTRY_CONTRACT_DEFAULTS or not sub or code != code.upper():
+            raise ValueError(f"subdivision key {code!r} is not ISO 3166-2 under a country the table has")
+        for field, figure in sub_row.items():
+            where = f"{code}.{field}"
+            if field not in SUBDIVISION_FIELDS:
+                raise ValueError(f"{where} is not a field a subdivision can set")
+            if not isinstance(figure, dict) or set(figure) != {"value", "source", "reference", "note"}:
+                raise ValueError(f"{where} must be a figure with value, source, reference and note")
+            if figure["source"] not in SOURCES or not figure["note"] or not figure["reference"]:
+                raise ValueError(f"{where} must name its source, reference and note")
+            value = figure["value"]
+            if value is None:
+                continue
+            if field == "retention_percent":
+                _check_percent(value, where)
+            elif field in ("payment_period_days", "release_period_days") and (
+                not isinstance(value, int) or isinstance(value, bool) or not 0 < value <= 365
+            ):
+                raise ValueError(f"{where} must be a whole number of days between 1 and 365")
     for country, row in COUNTRY_CONTRACT_DEFAULTS.items():
         if len(country) != 2 or not country.isupper():
             raise ValueError(f"country key {country!r} is not ISO 3166-1 alpha-2")
@@ -601,7 +769,23 @@ def note_key(country: str, field: str) -> str:
     return f"{NOTE_KEY_PREFIX}{country}.{field}.note"
 
 
-def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None:
+def has_subdivision_rows(country_code: str | None) -> bool:
+    """Whether the country's figures change with the province or state, so one should be recorded."""
+    prefix = f"{normalise_country(country_code)}-"
+    return prefix != "-" and any(code.startswith(prefix) for code in SUBDIVISION_CONTRACT_DEFAULTS)
+
+
+def normalise_subdivision(country: str, subdivision_code: str | None) -> str:
+    """``"CA-MB"`` from ``"CA-MB"``, ``"ca-mb"`` or ``"MB"``; ``""`` when blank or in another country."""
+    code = (subdivision_code or "").strip().upper()
+    if not code or not country:
+        return ""
+    if "-" not in code:
+        code = f"{country}-{code}"
+    return code if code.partition("-")[0] == country else ""
+
+
+def resolve_contract_defaults(country_code: str | None, subdivision_code: str | None = None) -> dict[str, Any] | None:
     """The usual payment terms of ``country_code``, or ``None`` when the table has no row.
 
     Returns:
@@ -612,12 +796,21 @@ def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None
         ``reference``, ``note`` in English and ``note_key``, the i18n key the
         note is translated under) and ``release_split_source``, which is
         ``"regional_pack"`` when the split was read from the pack and
-        ``"table"`` otherwise.
+        ``"table"`` otherwise. ``subdivision_code`` is the ISO 3166-2 row
+        read over the country's, or ``None``; ``release_period`` is that
+        row's release period (value, source, reference, note, note_key), or
+        ``None``.
     """
     country = normalise_country(country_code)
     row = COUNTRY_CONTRACT_DEFAULTS.get(country)
     if row is None:
         return None
+    subdivision = normalise_subdivision(country, subdivision_code)
+    sub_row = SUBDIVISION_CONTRACT_DEFAULTS.get(subdivision)
+    if sub_row is None:
+        subdivision = ""
+    else:
+        row = {**row, **sub_row}
     values: dict[str, Any] = {}
     sources: dict[str, dict[str, Any]] = {}
     split_source = "table"
@@ -632,14 +825,19 @@ def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None
             "source": figure["source"],
             "reference": figure["reference"],
             "note": figure["note"],
-            "note_key": note_key(country, field),
+            "note_key": note_key(subdivision if sub_row and field in sub_row else country, field),
         }
+    period = (sub_row or {}).get("release_period_days")
     return {
         "country_code": country,
+        "subdivision_code": subdivision or None,
         "standard_form": row.get("standard_form"),
         "values": values,
         "sources": sources,
         "release_split_source": split_source,
+        "release_period": (
+            {**copy.deepcopy(period), "note_key": note_key(subdivision, "release_period_days")} if period else None
+        ),
     }
 
 
@@ -767,10 +965,13 @@ __all__ = [
     "PAYMENT_TERMS_KEY",
     "PAYMENT_TERM_FIELDS",
     "PLATFORM_FALLBACK",
+    "SUBDIVISION_CONTRACT_DEFAULTS",
     "VALUATION_INTERVALS",
     "apply_contract_defaults",
     "forget_overridden",
     "normalise_country",
+    "has_subdivision_rows",
+    "normalise_subdivision",
     "note_key",
     "resolve_contract_defaults",
     "subcontract_retention_default",

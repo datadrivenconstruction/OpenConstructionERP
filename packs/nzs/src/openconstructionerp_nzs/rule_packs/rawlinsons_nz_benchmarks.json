@@ -10,7 +10,8 @@
     "Hamilton", "Tauranga", "Dunedin", "Queenstown"
   ],
   "applies_to": ["projects", "boq", "validation", "reporting"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "rawlinsons_nz.edition_year_current",
     "rawlinsons_nz.cost_per_m2_within_band",
     "rawlinsons_nz.element_ratio_within_band",
@@ -20,5 +21,6 @@
     "rawlinsons_nz.preliminaries_pct_within_band",
     "rawlinsons_nz.contingency_pct_within_band",
     "rawlinsons_nz.gfa_method_consistent"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -4,7 +4,8 @@
   "standard": "ICC/MBI 1205-2021 (US, Inspection of off-site construction) / Buildoffsite DfMA Handover Guide (UK) / CSA A277 (Canada)",
   "jurisdiction": "INTL",
   "description": "Enables OCERP built-in validation rules that enforce a complete handover dossier covering every stage of a modular project: factory exit (as-built drawings, QC certificates, dimensional survey, weather-tight test), in-transit (escort log, damage inspection on arrival), site arrival (offload inspection, set-down survey, protection in place), crane lift (lift plan, rigging cert, lift supervisor sign-off, exclusion zone), inter-module assembly (alignment within ±10 mm at building face, connections torqued/welded/bolted per spec, fire-stopping installed), commissioning (MEP services connected, pressure-test, energise, witness test), snag list closure with categorised defects (A = safety/structural — block PC, B = function — fix before handover, C = cosmetic — punch list), and client acceptance with warranty registration.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "handover.as_built_attached",
     "handover.qc_certificates_attached",
     "handover.dimensional_survey_attached",
@@ -33,5 +34,6 @@
     "handover.client_acceptance_signed",
     "handover.snagging_window_logged",
     "handover.o_and_m_manual_delivered"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

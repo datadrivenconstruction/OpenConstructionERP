@@ -73,6 +73,12 @@ DEFAULT_CLASSIFICATION_STANDARD = "din276"
 # so a CostItem encoded against any of them still produces a path.
 LEGACY_STANDARDS: tuple[str, ...] = ("din276", "masterformat", "nrm")
 
+# Standards no country resolves to any more but that stored rows still
+# carry. UNTEC was the French default until 2026-10 and the Francophone
+# West African one after that; projects saved under it keep it, so it
+# must stay storable and selectable even though no region picks it.
+RETAINED_STANDARDS: tuple[str, ...] = ("untec",)
+
 # Display labels, one place, so section paths, BOQ exports and the
 # validation messages cannot drift apart on capitalisation.
 CLASSIFICATION_STANDARD_LABELS: Mapping[str, str] = MappingProxyType(
@@ -81,6 +87,7 @@ CLASSIFICATION_STANDARD_LABELS: Mapping[str, str] = MappingProxyType(
         "masterformat": "MasterFormat",
         "nrm": "NRM",
         "untec": "UNTEC",
+        "dpgf": "DPGF",
         "voci": "VOCI",
         "bc3": "BC3",
         "gb50500": "GB50500",
@@ -208,12 +215,21 @@ COUNTRY_TO_STANDARD: Mapping[str, str] = MappingProxyType(
         "VN": "masterformat",
         "PH": "masterformat",
         # ── Native systems ───────────────────────────────────────────
-        # France and the Francophone West African markets that tender
-        # against the same DTU lineage.
-        "FR": "untec",
-        "SN": "untec",
-        "CI": "untec",
-        "CM": "untec",
+        # France reads DPGF, the lot-by-lot price breakdown a French bill
+        # is tendered in. Every French line the product ships is keyed
+        # ``dpgf`` and the French rule set reads that key. This read untec
+        # until 2026-10, a standard with no rules in the engine; projects
+        # already stored under untec keep it, because an explicit standard
+        # wins over the region, and the French rule row still applies.
+        "FR": "dpgf",
+        # The Francophone West African markets that tender against the
+        # same DTU lineage and break a bill down lot by lot the French
+        # way. They read UNTEC until 2026-10, a standard with no rules in
+        # the engine, so their estimates were checked by nothing. UNTEC
+        # stays storable through RETAINED_STANDARDS.
+        "SN": "dpgf",
+        "CI": "dpgf",
+        "CM": "dpgf",
         "IT": "voci",
         "ES": "bc3",
         "BR": "sinapi",
@@ -340,7 +356,7 @@ REGION_ALIAS_TO_COUNTRY: Mapping[str, str] = MappingProxyType(
         # their reason in
         # ``test_every_shipped_picker_option_reaches_the_registry.py`` so
         # the decision stays readable: WestAfrica anchors on Nigeria (NRM)
-        # while Senegal, Ivory Coast and Cameroon read UNTEC, and
+        # while Senegal, Ivory Coast and Cameroon read DPGF, and
         # SoutheastAsia anchors on Indonesia (MasterFormat) while Malaysia
         # and Singapore read NRM. Anchoring is still strictly better than
         # the alternative, which is not neutrality but DIN 276: a Lagos or
@@ -600,7 +616,7 @@ def _build_known_standards() -> tuple[str, ...]:
     """Every standard the product can render, legacy three first."""
     ordered = list(LEGACY_STANDARDS)
     seen = set(ordered)
-    for standard in COUNTRY_TO_STANDARD.values():
+    for standard in (*COUNTRY_TO_STANDARD.values(), *RETAINED_STANDARDS):
         if standard not in seen:
             ordered.append(standard)
             seen.add(standard)

@@ -27,6 +27,10 @@ Honoured environment variables:
   appended to the User-Agent header. The bundled default already satisfies
   Nominatim's UA policy with our project contact email.
 
+No address leaves the server until the installation has answered the
+one-time question in ``consent.py`` (allow, deny or own mirror). The
+variables above take precedence over that answer.
+
 Operators read ``deploy/docker/.env.example`` rather than this docstring,
 so the same five are documented there. Keep the two in step: this list was
 short by the two Photon variables for as long as it existed, which is how
@@ -60,6 +64,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import async_session_factory
+from app.modules.geo_hub.consent import resolve_outbound
 from app.modules.geo_hub.models import GeocodeCache
 
 logger = logging.getLogger(__name__)
@@ -419,6 +424,7 @@ async def _write_cache(
 async def _fetch_nominatim(
     normalised_query: str,
     *,
+    base_url: str | None = None,
     http_client: httpx.AsyncClient | None = None,
 ) -> dict[str, Any] | None:
     """Hit Nominatim, returning the first result or ``None`` on any failure.
@@ -433,7 +439,7 @@ async def _fetch_nominatim(
         return None
 
     global _last_request_monotonic
-    base = _base_url()
+    base = base_url or _base_url()
     url = f"{base}/search"
     params = {
         "q": normalised_query,
@@ -579,7 +585,11 @@ async def geocode_address(
                     await sess.commit()
                 return cached
 
-        payload = await _fetch_nominatim(query_text, http_client=http_client)
+        outbound = await resolve_outbound(sess)
+        if not outbound.allowed:
+            # Nobody has agreed to send addresses out yet, or it was refused.
+            return None
+        payload = await _fetch_nominatim(query_text, base_url=outbound.nominatim_url, http_client=http_client)
         if payload is None:
             # Fall back to a stale cache entry if one exists - better an
             # old pin than a 502 on a transient Nominatim hiccup.
@@ -827,6 +837,7 @@ async def _photon_suggest(
     *,
     limit: int,
     http_client: httpx.AsyncClient | None,
+    base_url: str | None = None,
 ) -> list[SuggestionResult]:
     """Photon (Komoot) autocomplete - fast first-line provider.
 
@@ -835,7 +846,7 @@ async def _photon_suggest(
     (``{features: [...]}``) and has no documented rate limit, so we skip
     the semaphore + sleep that protects Nominatim.
     """
-    url = f"{_photon_url()}/api/"
+    url = f"{base_url or _photon_url()}/api/"
     params = {"q": query, "limit": str(limit)}
     headers = {"User-Agent": _user_agent(), "Accept": "application/json"}
     own_client = http_client is None
@@ -893,22 +904,26 @@ async def suggest_addresses(
         # so we don't burn rate-limit budget on noise.
         return []
     capped = max(1, min(int(limit or 5), 10))
+    outbound = await resolve_outbound()
+    if not outbound.allowed:
+        return []
 
     # ── Provider 1: Photon ────────────────────────────────────────────
     # Generous CORS, no rate limit, sub-second response on warm cache.
     # Skip silently if disabled by env or if it returns no hits - we
     # don't want a flaky Photon to hide a useful Nominatim result.
-    if not _photon_disabled():
+    if outbound.photon_url is not None:
         photon_hits = await _photon_suggest(
             query_clean,
             limit=capped,
             http_client=http_client,
+            base_url=outbound.photon_url,
         )
         if photon_hits:
             return photon_hits
 
     global _last_request_monotonic
-    base = _base_url()
+    base = outbound.nominatim_url
     url = f"{base}/search"
     params = {
         "q": query_clean,

@@ -27,10 +27,12 @@ if TYPE_CHECKING:
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
+from jose import JWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import HTTPConnection
+
+from app.core.jwt_keys import decode_jwt
 
 # Stable DI container revision tag - fixed at design time so the
 # rate-limiter and the auth middleware can detect a binary skew
@@ -93,11 +95,7 @@ def decode_access_token(
         HTTPException 401 if token is invalid, expired, or of the wrong type.
     """
     try:
-        payload = jwt.decode(
-            token,
-            settings.jwt_secret,
-            algorithms=[settings.jwt_algorithm],
-        )
+        payload = decode_jwt(token, settings)
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise HTTPException(
@@ -1058,7 +1056,13 @@ LangDep = Annotated[str, Depends(get_lang)]
 
 # ── Convenience type aliases ───────────────────────────────────────────────
 
-SessionDep = Annotated[AsyncSession, Depends(get_session)]
+# ``scope="function"`` commits the session when the path operation returns and
+# before the response goes out. The default request scope (FastAPI >= 0.118)
+# commits only after the response is sent, so a client could get its 201 and
+# send a follow-up request that reads the row before it was committed, and a
+# failed commit still reached the client as a success. A streaming body or a
+# background task therefore cannot use this session; open its own instead.
+SessionDep = Annotated[AsyncSession, Depends(get_session, scope="function")]
 CurrentUserPayload = Annotated[dict[str, Any], Depends(get_current_user_payload)]
 CurrentUserId = Annotated[str, Depends(get_current_user_id)]
 OptionalUserPayload = Annotated[dict[str, Any] | None, Depends(get_optional_user_payload)]

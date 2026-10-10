@@ -102,6 +102,9 @@ export interface MatchResponse {
   readonly catalog_id?: string | null;
   readonly catalog_count?: number;
   readonly catalog_vectorized_count?: number;
+  /** Matching models switched off in Background services: candidates then
+   *  come from the reduced metadata path. */
+  readonly models_disabled?: ReadonlyArray<string>;
 }
 
 /** Single entry in `GET /api/v1/costs/loaded-databases/`. */

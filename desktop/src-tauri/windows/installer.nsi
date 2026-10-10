@@ -10,7 +10,11 @@ ManifestDPIAwareness PerMonitorV2
   SetCompress off
 !else
   ; Set the compression algorithm. We default to LZMA.
-  SetCompressor /SOLID "{{compression}}"
+  ; Not /SOLID: a solid block holds the whole uncompressed payload, and the
+  ; Windows backend is a onedir folder of about 1.6 GB, which with the
+  ; converters and the offline WebView2 installer passes the 2 GB makensis
+  ; can map ("error mmapping datablock"). Per-file compression stays under it.
+  SetCompressor "{{compression}}"
 !endif
 
 ; Keep above !include to stay ahead of any plugin command
@@ -556,6 +560,9 @@ FunctionEnd
 
 ; 5. Choose install directory page
 !define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive
+; OpenConstructionERP fork: refuse a non-ASCII folder on the page itself, see
+; OE_CheckInstallDirectory in windows/hooks.nsh.
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE OE_CheckInstallDirectory
 !insertmacro MUI_PAGE_DIRECTORY
 
 ; 6. Start menu shortcut page
@@ -695,6 +702,11 @@ FunctionEnd
 
 
 Section EarlyChecks
+  ; OpenConstructionERP fork: a silent or passive install never shows the
+  ; directory page, so the ASCII check from windows/hooks.nsh runs here too,
+  ; before any section writes a file.
+  !insertmacro OE_REFUSE_NON_ASCII_INSTDIR
+
   ; Abort silent installer if downgrades is disabled
   !if "${ALLOWDOWNGRADES}" == "false"
   ${If} ${Silent}
@@ -812,7 +824,17 @@ Section Install
     !insertmacro NSIS_HOOK_PREINSTALL
   !endif
 
-  !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
+  ; OpenConstructionERP fork: no CheckIfAppIsRunning here or in the Uninstall
+  ; section. Upstream calls it with the main binary name, and in perMachine mode
+  ; that is nsis_tauri_utils::FindProcess plus KillProcess: every process on the
+  ; machine with that image name, compared case-insensitively, in every session,
+  ; and without asking when the installer runs silently. The pip package's own
+  ; console script is openconstructionerp.exe, so an upgrade of the desktop app
+  ; killed any backend a user was serving from a Python install, which is not
+  ; ours to stop. NSIS_HOOK_PREINSTALL above (windows/hooks.nsh) already closes
+  ; whatever runs from $INSTDIR, matched by path, and NSIS_HOOK_PREUNINSTALL
+  ; does the same before the uninstall, so nothing that holds our files is left
+  ; running by the time they are written or removed.
 
   ; Copy main executable
   File "${MAINBINARYSRCPATH}"
@@ -949,7 +971,7 @@ Section Uninstall
     !insertmacro NSIS_HOOK_PREUNINSTALL
   !endif
 
-  !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
+  ; No CheckIfAppIsRunning, see the note in the Install section.
 
   ; Delete the app directory and its content from disk.
   ; /REBOOTOK: if the executable is still locked (antivirus, indexer), Windows

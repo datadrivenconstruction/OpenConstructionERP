@@ -5,7 +5,8 @@
   "jurisdiction": "TR",
   "description": "Validates BOQ items and specifications against key TSE (Turk Standartlari Enstitusu) construction standards. Covers TS EN 206 (concrete), TS 500 (reinforced concrete design), TS 648 (steel structures), TS 825 (thermal insulation), TS EN 1990-1999 (Eurocodes with Turkish National Annexes), and material testing standards. Checks that specification clauses cite the applicable TS standard and that material grades match TSE classifications.",
   "applies_to": ["boq", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "tse.standard_reference_present",
     "tse.standard_version_current",
     "tse.en_206_concrete_class_specified",
@@ -17,6 +18,7 @@
     "tse.g_mark_conformity_if_required",
     "tse.test_certificate_requirement_noted"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "TSE (Turk Standartlari Enstitusu)",
   "publication_year": 2024
 }

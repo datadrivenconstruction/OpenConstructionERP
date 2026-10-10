@@ -46,10 +46,20 @@ REQUIRED_PG_BINARIES = ("initdb", "postgres", "pg_ctl")
 
 
 def _archive_names(executable: Path) -> set[str]:
-    """Every entry name inside the onefile archive appended to `executable`."""
+    """Every file the sidecar carries, by its path relative to the bundle root.
+
+    A onefile build (macOS, Linux) carries them in the archive appended to
+    `executable`. A onedir build (Windows) leaves only the Python scripts in
+    that archive and writes binaries and data beside it under `_internal/`,
+    which is the same tree a onefile build unpacks to, so both are read.
+    """
     from PyInstaller.archive.readers import CArchiveReader
 
-    return set(CArchiveReader(str(executable)).toc)
+    names = set(CArchiveReader(str(executable)).toc)
+    internal = executable.parent / "_internal"
+    if internal.is_dir():
+        names.update(p.relative_to(internal).as_posix() for p in internal.rglob("*") if p.is_file())
+    return names
 
 
 def _split(name: str) -> tuple[str, str]:
@@ -84,7 +94,9 @@ def _is_bin_dir(parent: str) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("executable", type=Path, help="the built onefile sidecar")
+    parser.add_argument(
+        "executable", type=Path, help="the built sidecar executable (onefile, or the exe of a onedir folder)"
+    )
     args = parser.parse_args()
 
     if not args.executable.is_file():

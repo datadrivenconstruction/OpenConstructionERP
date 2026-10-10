@@ -15,7 +15,8 @@
     "iss_band_basis": "LC 116/2003 Art. 8-A",
     "retencoes_federais": ["PIS", "COFINS", "IRPJ", "CSLL", "INSS"]
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "rps.serie_numero_sequencial",
     "rps.prestador_cnpj_valid",
     "rps.prestador_inscricao_municipal_present",
@@ -26,5 +27,6 @@
     "rps.iss_collected_by_municipio",
     "rps.retencoes_federais_documented",
     "rps.simples_nacional_anexo_set_when_optante"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

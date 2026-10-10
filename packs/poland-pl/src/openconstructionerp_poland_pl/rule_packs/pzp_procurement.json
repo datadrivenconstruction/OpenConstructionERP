@@ -5,7 +5,8 @@
   "jurisdiction": "PL",
   "description": "Validates public tender documents against the Polish Public Procurement Law (Prawo zamowien publicznych, PZP). Checks procedure type classification, threshold compliance (EU and national), SWZ (Specyfikacja Warunkow Zamowienia) completeness, kosztorys inwestorski (investor estimate) as the basis for szacunkowa wartosc zamowienia (estimated contract value), wadium (bid bond) requirements, and criteria for contract award.",
   "applies_to": ["tender", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "pzp.procedure_type_defined",
     "pzp.threshold_eu_check",
     "pzp.threshold_national_check",
@@ -20,6 +21,7 @@
     "pzp.zabezpieczenie_nalezytego_wykonania_set",
     "pzp.podwykonawstwo_clause_present"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "UZP (Urzad Zamowien Publicznych)",
   "publication_year": 2021
 }

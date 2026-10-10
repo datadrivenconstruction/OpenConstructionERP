@@ -1,9 +1,9 @@
-"""The encoder download is on by default locally, off on a server, never fatal.
+"""The encoder download happens only when asked, and is never fatal.
 
 Three properties are being pinned here, and the third is the one that is easy to
 lose while building the first two:
 
-1. A local install fetches the encoder weights; a server deploy does not.
+1. Nothing fetches the weights unasked, the desktop included; a click does.
 2. The fetch happens in the background and blocks nothing.
 3. Nothing breaks while the weights are missing, failed, or half-arrived.
 
@@ -159,15 +159,45 @@ def test_a_server_deploy_does_not_start_a_download(monkeypatch: pytest.MonkeyPat
     assert _FakeHub.requested == []
 
 
-def test_a_desktop_install_starts_the_download(monkeypatch: pytest.MonkeyPatch, hub) -> None:
+def test_a_desktop_install_does_not_download_until_asked(monkeypatch: pytest.MonkeyPatch, hub) -> None:
+    """Windows-trust rule: no network fetch on the desktop without a user action.
+
+    The desktop used to start a ~470 MB transfer on first boot. The same boot
+    now does nothing, and the click (wizard tick or settings card) does it.
+    """
     monkeypatch.setenv("OE_DESKTOP", "1")
     monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
 
-    assert installer.download_enabled() is True
-    assert installer.start_background_download() is True
+    assert installer.download_enabled() is False
+    assert installer.start_background_download() is False
+    assert _FakeHub.requested == []
+    status = installer.download_status()
+    assert status["enabled"] is False
+    assert status["locked"] is False
+    assert "470 MB" in status["message"]
 
+    assert installer.start_background_download(requested=True) is True
     _await_state(installer.STATE_READY)
     assert installer.find_installed_model(REPO) is not None
+
+
+def test_the_desktop_loader_does_not_reach_the_hub_unasked(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A lazy first embed must not become the download the boot no longer makes."""
+    monkeypatch.setattr(installer, "find_installed_model", lambda name: None)
+    monkeypatch.setenv("OE_DESKTOP", "1")
+    monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
+    assert vector._candidate_sources(REPO) == []
+
+    # An operator who opts in gets the hub back.
+    monkeypatch.setenv(installer.ENV_DOWNLOAD, "1")
+    assert vector._candidate_sources(REPO) == [REPO]
+
+    # Once the click has installed it, the local copy loads with no network.
+    monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
+    local = tmp_path / "weights"
+    local.mkdir()
+    monkeypatch.setattr(installer, "find_installed_model", lambda name: local)
+    assert vector._candidate_sources(REPO) == [str(local)]
 
 
 def test_one_variable_overrides_the_default_in_both_directions(monkeypatch: pytest.MonkeyPatch, hub) -> None:
@@ -711,3 +741,35 @@ def test_the_lock_keeps_the_loader_off_the_hub_as_well(monkeypatch: pytest.Monke
     # Unlocked with a local copy: the copy first, the hub still available.
     monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
     assert vector._candidate_sources(REPO) == [str(local), REPO]
+
+
+def test_the_hub_id_is_withheld_while_the_install_is_in_flight(hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A second loader fetching the bare hub id races the installer for memory and disk."""
+    monkeypatch.setenv(installer.ENV_DOWNLOAD, "1")
+    gate = threading.Event()
+    _FakeHub.stall_on = "model.safetensors"
+    _FakeHub.stall_gate = gate
+
+    first = threading.Thread(target=lambda: installer.install_embedding_model(repo_id=REPO), daemon=True)
+    first.start()
+    _await_state(installer.STATE_DOWNLOADING)
+    assert installer.hub_fetch_allowed() is False
+
+    gate.set()
+    first.join(timeout=30)
+    assert installer.hub_fetch_allowed() is True
+
+
+def test_the_hub_id_comes_back_after_a_failed_install(hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(installer.ENV_DOWNLOAD, "1")
+
+    def _boom(*_a: object, **_k: object) -> None:
+        raise OSError("disk full")
+
+    monkeypatch.setattr(installer, "_download_one", _boom)
+    try:
+        installer.install_embedding_model(repo_id=REPO, force=True)
+    except Exception:  # noqa: BLE001, S110 - the outcome under test is the flag, not the error
+        pass
+    assert installer.is_downloading() is False
+    assert installer.hub_fetch_allowed() is True

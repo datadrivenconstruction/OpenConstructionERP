@@ -98,8 +98,9 @@ type Tab = 'progress' | 'change_orders' | 'invoices' | 'tickets' | 'model' | 'do
 
 // Roles that see executed change orders on their landing.
 const CHANGE_ORDER_ROLES = new Set(['client', 'investor', 'consultant']);
-// Roles that see issued invoices on their landing.
-const INVOICE_ROLES = new Set(['client', 'investor', 'consultant']);
+// Roles that see issued invoices on their landing. Client side only, matching
+// the server: a project grant shows the client's invoices to these roles alone.
+const INVOICE_ROLES = new Set(['client', 'investor']);
 // Roles that see the tickets they filed on their landing.
 const TICKET_ROLES = new Set(['client', 'building_user']);
 // Roles that see shared BIM/CAD models (view-only 3D viewer) on their landing.

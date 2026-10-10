@@ -51,6 +51,7 @@ import {
 } from '@/shared/lib/api';
 import { projectsApi, type Project } from '@/features/projects/api';
 import { fmtPercent, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
+import { ModuleProcessesNotice } from '@/features/processes';
 
 // Roles allowed to trigger the portfolio-wide KPI recompute. The backend
 // gates /kpi/recalculate-all/ behind reporting.distribute (MANAGER), so
@@ -590,6 +591,8 @@ export function ReportingPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      {/* Says so when a background service this page leans on is off. */}
+      <ModuleProcessesNotice moduleId="reporting" />
       <Breadcrumb
         items={[
           ...(activeProjectName

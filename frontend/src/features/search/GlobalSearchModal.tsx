@@ -49,6 +49,7 @@ import {
   hitToHref,
   type UnifiedSearchHit,
 } from './api';
+import { SemanticSearchOffHint } from '@/features/settings/SemanticSearchOffHint';
 
 const FACET_COLOR: Record<string, string> = {
   oe_boq_positions: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -456,6 +457,8 @@ export default function GlobalSearchModal() {
             </div>
           )}
         </div>
+
+        <SemanticSearchOffHint className="mx-4 mb-2 shrink-0" />
 
         {/* Footer hint */}
         <div className="px-4 py-2 border-t border-border-light shrink-0 flex items-center justify-between text-[10px] text-content-quaternary">

@@ -191,6 +191,68 @@ def test_both_install_and_uninstall_stop_the_cluster(hook_text: str) -> None:
     )
 
 
+def test_the_installer_template_kills_nothing_by_image_name() -> None:
+    """The vendored template may not call the bundler's name-based process kill.
+
+    Upstream's ``CheckIfAppIsRunning`` on the main binary is ``FindProcess`` plus
+    ``KillProcess``: in perMachine mode every process on the machine with that
+    image name, compared case-insensitively, and no prompt in silent mode. The
+    pip package's console script is ``openconstructionerp.exe``, so an upgrade
+    of the desktop app killed a backend served from a Python install. Our hooks
+    close what runs from ``$INSTDIR`` by path, which is all the files need.
+    """
+    template = HOOK.parent / "installer.nsi"
+    assert template.is_file(), f"the vendored installer template is not at {template}"
+    executed = [
+        line.strip()
+        for line in template.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.strip().startswith(";")
+    ]
+    print(f"\nread {template.name}: {len(executed)} executed lines")
+    assert any("NSIS_HOOK_PREINSTALL" in line for line in executed), "the template no longer runs the install hook"
+    assert any("NSIS_HOOK_PREUNINSTALL" in line for line in executed), "the template no longer runs the uninstall hook"
+    offenders = [
+        line for line in executed if re.search(r"CheckIfAppIsRunning|nsis_tauri_utils::(FindProcess|KillProcess)", line)
+    ]
+    assert not offenders, f"the installer kills processes by image name again: {offenders}"
+
+
+def test_the_installer_refuses_a_non_ascii_install_directory(hook_text: str) -> None:
+    """A non-ASCII ``$INSTDIR`` must be refused on the page and in silent mode.
+
+    The onedir backend runs the bundled PostgreSQL from the install directory,
+    and its initdb cannot start from a path outside the ANSI code page, so an
+    install into such a folder never starts. Measured on a hosted runner: a
+    Cyrillic install folder gave "program postgres is needed by initdb but was
+    not found" and no healthy backend in 25 minutes. The page check covers the
+    wizard, the section check covers ``/S /D=...`` and passive mode, which never
+    show the page.
+    """
+    check = re.search(r"Function OE_InstDirIsAscii(.*?)FunctionEnd", hook_text, re.S)
+    assert check is not None, "the hook no longer defines the ASCII check"
+    assert "WideCharToMultiByte(i 20127" in check.group(1), "the check no longer round-trips through US-ASCII"
+    assert "StrCmpS" in check.group(1), "StrCmp ignores case, the comparison must be StrCmpS"
+
+    refuse = re.search(r"!macro OE_REFUSE_NON_ASCII_INSTDIR(.*?)!macroend", hook_text, re.S)
+    assert refuse is not None, "the hook no longer defines the silent-mode refusal"
+    level = re.search(r"SetErrorLevel\s+(\d+)", refuse.group(1))
+    assert level is not None and int(level.group(1)) != 0, "a refused silent install must exit non-zero"
+    assert re.search(r"^\s*(Quit|Abort)\b", refuse.group(1), re.M), "the refusal does not stop the install"
+
+    template = (HOOK.parent / "installer.nsi").read_text(encoding="utf-8")
+    executed = "\n".join(
+        line.strip() for line in template.splitlines() if line.strip() and not line.strip().startswith(";")
+    )
+    assert re.search(
+        r"!define MUI_PAGE_CUSTOMFUNCTION_LEAVE OE_CheckInstallDirectory\n!insertmacro MUI_PAGE_DIRECTORY\b", executed
+    ), "the directory page no longer runs the ASCII check when the user leaves it"
+    early = re.search(r"Section EarlyChecks\n(.*?)\nSectionEnd", executed, re.S)
+    assert early is not None, "the template no longer has an EarlyChecks section"
+    assert early.group(1).splitlines()[0] == "!insertmacro OE_REFUSE_NON_ASCII_INSTDIR", (
+        "a silent install no longer checks the install directory before anything else runs"
+    )
+
+
 def test_every_command_line_survives_nsis_string_truncation(hook_text: str) -> None:
     """A command longer than NSIS can hold is truncated, not rejected.
 
@@ -368,6 +430,35 @@ def test_it_leaves_a_recycled_pid_alone(postmaster_command: str, impostor_postgr
                 "the hook stopped a process whose start time did not match the pid "
                 "file, which is another PostgreSQL that inherited the pid"
             )
+        finally:
+            if proc.poll() is None:
+                proc.kill()
+
+
+@pytestmark_windows
+def test_it_follows_the_pointer_to_a_relocated_cluster(postmaster_command: str, impostor_postgres: Path) -> None:
+    """A data directory PostgreSQL cannot use keeps its cluster elsewhere.
+
+    The backend then writes the cluster's path into ``pgdata.location`` and
+    leaves ``<data dir>/pgdata`` absent. A hook that only looks in the default
+    place finds no pid file and stops nothing, which is the same quiet no-op
+    the positive control above exists to rule out, so the relocated layout gets
+    its own positive control, under a data directory named the way the
+    affected accounts are.
+    """
+    with tempfile.TemporaryDirectory() as directory:
+        data_dir = Path(directory) / "田田" / ".openestimate"
+        data_dir.mkdir(parents=True)
+        cluster_home = Path(directory) / "clusters" / "0123456789abcdef"
+        proc = _spawn(impostor_postgres)
+        try:
+            _write_pid_file(cluster_home, proc.pid, int(time.time()))
+            (data_dir / "pgdata.location").write_text(str(cluster_home / "pgdata"), encoding="utf-8")
+            assert not (data_dir / "pgdata").exists()
+            _run(postmaster_command, data_dir)
+            stopped = _stopped_within(proc)
+            print(f"relocated postmaster pid {proc.pid}: stopped={stopped}")
+            assert stopped, "the hook did not follow pgdata.location to the cluster the backend placed elsewhere"
         finally:
             if proc.poll() is None:
                 proc.kill()

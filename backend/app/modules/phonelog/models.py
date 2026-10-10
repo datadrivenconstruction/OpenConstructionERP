@@ -61,9 +61,10 @@ class PhoneLog(Base):
     # "phonelog/<project_id>/<uuid>[.<ext>]", and populated whether or not
     # transcription succeeds: a row with an empty transcript still has audio
     # behind it. Empty only for rows captured by typing a transcript in.
-    # There is no time-based retention. service.delete_phone_log is the only
-    # thing that removes the object, and it does so with the record, so the
-    # recording lives exactly as long as this row. That delete is best-effort
+    # Recordings expire: retention.prune_expired_recordings deletes the object
+    # once it is older than OE_PHONELOG_AUDIO_RETENTION_DAYS (default 90, 0 =
+    # keep) and clears this key, leaving the row and transcript in place.
+    # service.delete_phone_log also removes the object with the record. That delete is best-effort
     # and swallows its failure at debug level, so an object can outlive its row
     # unnoticed. Archiving a project does not reach either: PhoneLog is not in
     # the cascade list in projects.service.delete_project.

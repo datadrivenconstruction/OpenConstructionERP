@@ -133,6 +133,7 @@ class ContactService:
             last_name=data.last_name,
             company_name=data.company_name,
             legal_name=data.legal_name,
+            party_kind=data.party_kind,
             vat_number=data.vat_number,
             country_code=data.country_code,
             address=data.address,

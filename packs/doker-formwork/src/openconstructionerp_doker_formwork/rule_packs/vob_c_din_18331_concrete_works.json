@@ -7,16 +7,7 @@
   "severity_default": "warning",
   "category": "compliance",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "vob.din18331.abrechnungseinheit_correct",
-    "vob.din18331.nebenleistungen_not_separately_billed",
-    "vob.din18331.besondere_leistung_flagged",
-    "vob.din18331.formwork_separately_billed_m2",
-    "vob.din18331.rebar_separately_billed_kg",
-    "vob.din18331.concrete_billed_m3",
-    "vob.din18331.opening_deduction_threshold_2_5m2",
-    "vob.din18331.exposed_concrete_class_specified"
-  ],
+  "enables_rule_ids": [],
   "parameters": {
     "concrete_unit": "m3",
     "formwork_unit": "m2",

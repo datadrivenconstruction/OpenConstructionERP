@@ -5,7 +5,8 @@
   "jurisdiction": "TR",
   "description": "Validates cost estimates against the Bayindirlik Bakanligi (now Cevre, Sehircilik ve Iklim Degisikligi Bakanligi) unit price framework. Checks that BOQ items reference valid poz (unit price item) numbers, that unit rates do not exceed the published birim fiyat without justification (yeni fiyat analizi), that measurement units match the poz definition, and that the correct fiscal year edition is referenced.",
   "applies_to": ["estimate", "boq", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "birimfiyat.poz_number_format_valid",
     "birimfiyat.poz_reference_present",
     "birimfiyat.unit_matches_poz_definition",
@@ -18,6 +19,7 @@
     "birimfiyat.yil_edition_year_current",
     "birimfiyat.fiyat_farki_escalation_documented"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Cevre, Sehircilik ve Iklim Degisikligi Bakanligi",
   "publication_year": 2024
 }

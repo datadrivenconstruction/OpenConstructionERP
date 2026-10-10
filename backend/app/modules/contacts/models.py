@@ -35,6 +35,11 @@ class Contact(Base):
     # Company
     company_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     legal_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # ``natural_person`` (a human, a sole trader) or ``legal_entity`` (a
+    # company). Scores about a supplier are personal data when the supplier
+    # is a person, so the distinction has to be recorded, not guessed.
+    # NULL means not stated yet.
+    party_kind: Mapped[str | None] = mapped_column(String(20), nullable=True)
     vat_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     # Location

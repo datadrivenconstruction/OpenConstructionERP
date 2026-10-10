@@ -194,7 +194,21 @@ TaxResolutionStatus = Literal[
     "no_configuration",
     "default_rate_ambiguous",
     "default_rate_not_in_force",
+    "awaiting_confirmation",
 ]
+
+
+class TaxConfigConfirm(BaseModel):
+    """A local specialist's confirmation of one tax row, recorded by an admin.
+
+    ``accountant_name`` is who confirmed it, usually the client's accountant,
+    and ``source_reference`` the official publication they checked it against.
+    Both are required: a confirmation that cannot say who or against what is
+    not one.
+    """
+
+    accountant_name: str = Field(..., min_length=1, max_length=255)
+    source_reference: str = Field(..., min_length=1, max_length=1000)
 
 
 class TaxConfigCreate(BaseModel):

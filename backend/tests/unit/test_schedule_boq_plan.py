@@ -449,15 +449,28 @@ def test_deep_and_flat_bills_of_the_same_work_take_comparable_time() -> None:
     assert flat_fit.layout.span <= deep_fit.layout.span <= 2 * flat_fit.layout.span
 
 
-def test_ten_thousand_positions_lay_out_in_well_under_a_second_each() -> None:
-    rows = [_row("S", section=True)] + [_row(f"p{i}", "S") for i in range(10_000)] + [_row("T", section=True)]
+def _layout_seconds(positions: int, repeats: int) -> float:
+    """Best of ``repeats`` wall-clock runs of one fit over a flat bill of ``positions`` items."""
+    rows = [_row("S", section=True)] + [_row(f"p{i}", "S") for i in range(positions)] + [_row("T", section=True)]
     rows.append(_row("x", "T"))
     roots = build_plan_tree(rows).roots
-    durations = {f"p{i}": 5 + i % 30 for i in range(10_000)} | {"x": 5}
-    started = time.perf_counter()
-    fit_plan(roots, durations, budget=365, allow_compress=True)
-    # The overlap sweep was quadratic: 26 to 62 s here, paid on every layout.
-    assert time.perf_counter() - started < 10
+    durations = {f"p{i}": 5 + i % 30 for i in range(positions)} | {"x": 5}
+    best = float("inf")
+    for _ in range(repeats):
+        started = time.perf_counter()
+        fit_plan(roots, durations, budget=365, allow_compress=True)
+        best = min(best, time.perf_counter() - started)
+    return best
+
+
+def test_ten_thousand_positions_lay_out_in_near_linear_time() -> None:
+    # The overlap sweep was quadratic: 26 to 62 s at 10 000 positions, paid on
+    # every layout. A wall-clock ceiling flakes on a loaded runner, so the bill
+    # is measured against a fifth of itself on the same machine: near-linear
+    # work grows about 5x, the quadratic sweep grew 25x.
+    small = _layout_seconds(2_000, repeats=3)
+    large = _layout_seconds(10_000, repeats=2)
+    assert large < 15 * max(small, 0.005), f"10 000 positions took {large:.2f}s, 2 000 took {small:.2f}s"
 
 
 @pytest.mark.parametrize("budget", [0, -5])

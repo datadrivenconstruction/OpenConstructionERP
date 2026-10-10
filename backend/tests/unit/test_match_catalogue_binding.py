@@ -345,6 +345,7 @@ def _store(
     from app.modules.match_elements import readiness
 
     probe = readiness.StoreProbe(mode, status, frozenset(collections), location)
+    monkeypatch.setattr(readiness, "_client_available", lambda: status != "client_missing")
     monkeypatch.setattr(readiness, "ensure_local_server", lambda: binary)
     monkeypatch.setattr(readiness, "probe_store", lambda: probe)
     monkeypatch.setattr(readiness, "demo_mode", lambda: demo)
@@ -553,6 +554,7 @@ async def test_readiness_starts_the_local_server_before_probing(session, monkeyp
     from app.modules.match_elements import readiness
 
     order: list[str] = []
+    monkeypatch.setattr(readiness, "_client_available", lambda: True)
     monkeypatch.setattr(readiness, "ensure_local_server", lambda: order.append("start") or True)
     monkeypatch.setattr(
         readiness,
@@ -565,6 +567,22 @@ async def test_readiness_starts_the_local_server_before_probing(session, monkeyp
     out = await _readiness(session, pid)
     assert order == ["start", "probe"]
     assert out.can_match is True
+
+
+@pytest.mark.asyncio
+async def test_readiness_without_the_client_library_says_so_and_starts_nothing(session, monkeypatch) -> None:
+    """A missing library is named as such, not as a search service that stopped answering."""
+    from app.modules.match_elements import readiness
+
+    started: list[bool] = []
+    monkeypatch.setattr(readiness, "_client_available", lambda: False)
+    monkeypatch.setattr(readiness, "ensure_local_server", lambda: started.append(True) or False)
+    monkeypatch.setattr(readiness, "demo_mode", lambda: False)
+    monkeypatch.setattr(readiness, "embedder_installed", lambda: True)
+    pid = await _make_project(session, region="Italy")
+    out = await _readiness(session, pid)
+    assert _codes(out.blockers) == ["search_client_missing"]
+    assert started == []
 
 
 def _supervisor_spy(monkeypatch, *, binary, reachable=True, spawned=True):
@@ -710,6 +728,7 @@ async def test_readiness_does_not_wait_for_a_hanging_store(session, monkeypatch)
         time.sleep(2.0)
         return readiness.StoreProbe("server", "ok", frozenset({"cwicr_it_v3"}))
 
+    monkeypatch.setattr(readiness, "_client_available", lambda: True)
     monkeypatch.setattr(readiness, "ensure_local_server", lambda: False)
     monkeypatch.setattr(readiness, "probe_store", _hang)
     monkeypatch.setattr(readiness, "demo_mode", lambda: False)

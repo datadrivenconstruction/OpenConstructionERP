@@ -70,7 +70,8 @@ Duplicate the following block for each activity.
 | Project content | Until deletion; backups purged within 35 days | User action | Contract |
 | Telemetry | 90 days | Time-based | Legitimate interest |
 | Support correspondence | 24 months | Time-based | Legitimate interest |
-| AI logs | 30 days | Time-based | Consent |
+| AI results stored with a record | Until the record or project is deleted (no automatic expiry in the Software) | User action | Consent |
+| Call recordings (phone log) | 90 days by default (`OE_PHONELOG_AUDIO_RETENTION_DAYS`), transcript kept | Time-based | Contract |
 | Tax-relevant accounting extracts (DATEV) | 10 years | Year-end | German HGB § 257 / AO § 147 |
 
 ### A.4 Processors used (Art. 28)

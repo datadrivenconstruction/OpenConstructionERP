@@ -60,7 +60,7 @@ Sign in with those and you are in. You can create your own account and projects 
 
 Everything you do stays on your own machine. The app runs its own database locally and does not send your projects anywhere. It works offline, and your data is yours.
 
-All of it lives in a single folder in your home directory, named `.openestimate`. On Windows that is `C:\Users\<your name>\.openestimate`, and on macOS and Linux it is `~/.openestimate`. That folder holds the local PostgreSQL database, every file you have uploaded, and your settings. It sits outside the program folder on purpose, so that installing, upgrading and removing the app never touch your work. To make a backup, close the app and copy that folder somewhere safe.
+All of it lives in a single folder in your home directory, named `.openestimate`. On Windows that is `C:\Users\<your name>\.openestimate`, and on macOS and Linux it is `~/.openestimate`. That folder holds the local PostgreSQL database, every file you have uploaded, and your settings. It sits outside the program folder on purpose, so that installing, upgrading and removing the app never touch your work. To make a backup, close the app and copy that folder somewhere safe. One exception on Windows: if your user folder name contains non-Latin characters (for example Chinese or Cyrillic), the database itself is kept in `C:\ProgramData\OpenConstructionERP\clusters\<id>\pgdata` instead, because PostgreSQL cannot work from such a path, and the file `pgdata.location` inside `.openestimate` names the exact folder, so back up that folder too.
 
 ## Removing the demo projects
 

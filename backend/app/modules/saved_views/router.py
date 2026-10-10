@@ -19,6 +19,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
+from app.database import async_session_factory
 from app.dependencies import (
     CurrentUserPayload,
     RequirePermission,
@@ -344,27 +345,30 @@ async def view_run_stats(
 )
 async def export_view(
     view_id: uuid.UUID,
-    session: SessionDep,
     user_payload: CurrentUserPayload,
     project_id: Annotated[uuid.UUID, Query()],
     fmt: Annotated[str, Query()] = "csv",
 ) -> StreamingResponse:
     """Stream a capped CSV export of a saved view."""
     ctx = _scope_ctx(user_payload, project_id)
-    service = SavedViewService(session)
     if fmt not in ("csv", "parquet"):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="fmt must be 'csv' or 'parquet'",
         )
 
+    # The body is read after this function returns, and by then the request
+    # session (SessionDep, function scope) is committed and closed, so the
+    # stream reads on a session of its own that lives as long as the stream.
     async def _stream() -> Any:
-        try:
-            async for chunk in service.to_export(view_id, ctx, fmt):
-                yield chunk
-        except _HANDLED as exc:
-            logger.warning("saved-view export refused: %s", exc)
-            return
+        async with async_session_factory() as stream_session:
+            service = SavedViewService(stream_session)
+            try:
+                async for chunk in service.to_export(view_id, ctx, fmt):
+                    yield chunk
+            except _HANDLED as exc:
+                logger.warning("saved-view export refused: %s", exc)
+                return
 
     media = "text/csv"
     filename = f"saved_view_{view_id}.csv"

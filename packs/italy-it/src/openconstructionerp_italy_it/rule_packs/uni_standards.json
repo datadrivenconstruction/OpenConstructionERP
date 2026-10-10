@@ -5,7 +5,8 @@
   "jurisdiction": "IT",
   "description": "Validates specifications and BOQ items against key UNI (Ente Italiano di Normazione) construction standards. Covers UNI EN 1990-1999 Eurocodes (structural), UNI 10349 (climatic data for energy), UNI 11337 (BIM and construction information management), and material testing references. Checks that specification clauses cite the applicable UNI standard and version.",
   "applies_to": ["boq", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "uni.standard_reference_present",
     "uni.standard_version_current",
     "uni.en_1990_eurocode_basis_referenced",
@@ -17,6 +18,7 @@
     "uni.material_test_standard_cited",
     "uni.cam_criteri_ambientali_minimi_referenced"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "UNI (Ente Italiano di Normazione)",
   "publication_year": 2024
 }

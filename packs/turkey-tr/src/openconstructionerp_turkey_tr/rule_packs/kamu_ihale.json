@@ -5,7 +5,8 @@
   "jurisdiction": "TR",
   "description": "Validates public tender documents against the Turkish Public Procurement Law (Kamu Ihale Kanunu, No. 4734) and the Public Procurement Contracts Law (No. 4735). Checks ihale usulu (procurement method) classification, yaklasilk maliyet (estimated cost) documentation, idari sartname (administrative specification) completeness, teklif mektubu (bid letter) requirements, gecici teminat (bid bond) rate, kesin teminat (performance bond) rate, and fiyat farki (price adjustment) clause.",
   "applies_to": ["tender", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "kik.ihale_usulu_defined",
     "kik.yaklasik_maliyet_documented",
     "kik.idari_sartname_complete",
@@ -19,6 +20,7 @@
     "kik.alt_yuklenici_clause_if_applicable",
     "kik.ihalelere_katilma_yasaklari_check"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "KIK (Kamu Ihale Kurumu)",
   "publication_year": 2024
 }

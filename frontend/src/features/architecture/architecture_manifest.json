@@ -4276,6 +4276,12 @@
           "method": "POST",
           "path": "/embedding-model/install",
           "handler": "embedding_model_install"
+        },
+        {
+          "method": "PUT",
+          "path": "/embedding-model/enabled",
+          "handler": "embedding_model_set_enabled",
+          "request_schema": "schemas.SemanticSearchSwitch"
         }
       ],
       "schemas": [
@@ -6162,6 +6168,19 @@
               "name": "default_unit_system",
               "type": "str",
               "default": "'metric'"
+            }
+          ]
+        },
+        {
+          "class_name": "SemanticSearchSwitch",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Body of ``PUT /embedding-model/enabled``.",
+          "fields": [
+            {
+              "name": "enabled",
+              "type": "bool"
             }
           ]
         }
@@ -18326,6 +18345,7 @@
         "exporters/boq_xlsx.py",
         "exporters/cobie.py",
         "file_storage.py",
+        "glb_cache.py",
         "ifc_processor.py",
         "manifest.py",
         "mesh_formats.py",
@@ -22814,6 +22834,7 @@
         "__init__.py",
         "activity_text.py",
         "ai_prompts.py",
+        "ai_provenance.py",
         "base_date.py",
         "cad_import.py",
         "change_review.py",
@@ -22854,6 +22875,7 @@
         "price_list_carry.py",
         "quantity_baseline.py",
         "quantity_formula.py",
+        "repairs.py",
         "repository.py",
         "resource_norms.py",
         "resource_review.py",
@@ -52107,6 +52129,12 @@
               "nullable": true
             },
             {
+              "name": "party_kind",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "vat_number",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -52372,6 +52400,11 @@
               "description": "Registered legal entity name"
             },
             {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "description": "natural_person (a human or sole trader) or legal_entity (a company); null when not stated"
+            },
+            {
               "name": "vat_number",
               "type": "str | None",
               "description": "VAT registration number"
@@ -52475,6 +52508,11 @@
             {
               "name": "legal_name",
               "type": "str | None"
+            },
+            {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "default": "None"
             },
             {
               "name": "vat_number",
@@ -52585,6 +52623,11 @@
             },
             {
               "name": "legal_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "party_kind",
               "type": "str | None",
               "default": "None"
             },
@@ -55675,6 +55718,21 @@
               "name": "country_code",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "release_period",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "subdivision_missing",
+              "type": "bool",
+              "default": "False"
             },
             {
               "name": "has_defaults",
@@ -82708,6 +82766,13 @@
           "request_schema": "SheetUpdate"
         },
         {
+          "method": "POST",
+          "path": "/sheets/bulk-update/",
+          "handler": "bulk_update_sheets",
+          "response_model": "list[SheetResponse]",
+          "request_schema": "SheetBulkUpdate"
+        },
+        {
           "method": "DELETE",
           "path": "/sheets/{sheet_id}",
           "handler": "delete_sheet",
@@ -83325,6 +83390,40 @@
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SheetBulkUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The same correction applied to several sheets of one project at once.\n\nOnly the fields a drawing set shares are offered: a discipline, a revision\nand its date, a scale. Number and title name one drawing each and are\ncorrected one sheet at a time.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "sheet_ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "discipline",
+              "type": "str | None"
+            },
+            {
+              "name": "revision",
+              "type": "str | None"
+            },
+            {
+              "name": "revision_date",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "scale",
+              "type": "str | None"
             }
           ]
         },
@@ -89573,6 +89672,7 @@
       "module_category": "enterprise",
       "files": [
         "__init__.py",
+        "entities.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -89787,6 +89887,13 @@
           "path": "/requests/{request_id}/cancel/",
           "handler": "cancel_request",
           "response_model": "ApprovalRequestResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/entity-types/",
+          "handler": "list_entity_types",
+          "response_model": "list[str]",
           "request_schema": "None"
         },
         {
@@ -115466,6 +115573,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "consent.py",
         "coord_transforms.py",
         "events.py",
         "geocoder.py",
@@ -116199,6 +116307,38 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "GeocodingConsent",
+          "tablename": "oe_geo_hub_geocoding_consent",
+          "docstring": "The installation's answer to \"may project addresses go to a geocoder\".\n\nOne row per installation (``scope = \"installation\"``). Until a manager\nanswers, no address leaves the server, neither for the automatic map pin\nnor for address suggestions. ``choice`` is ``allow`` (public\nOpenStreetMap services), ``deny`` or ``mirror`` (the deployer's own\nNominatim at ``mirror_url``). Environment switches take precedence, see\n``geo_hub/consent.py``.",
+          "columns": [
+            {
+              "name": "scope",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "choice",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "mirror_url",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "decided_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -116312,6 +116452,20 @@
           "handler": "geocode_cache_purge",
           "response_model": "GeocodeCachePurgeResponse",
           "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/geocoding-consent",
+          "handler": "get_geocoding_consent",
+          "response_model": "GeocodingConsentResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/geocoding-consent",
+          "handler": "put_geocoding_consent",
+          "response_model": "GeocodingConsentResponse",
+          "request_schema": "GeocodingConsentUpdate"
         },
         {
           "method": "DELETE",
@@ -118539,6 +118693,56 @@
               "name": "streets",
               "type": "GlobeStreetsSource | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "GeocodingConsentResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Where project addresses may go for geocoding, and who decides it.\n\n``state`` is ``unanswered`` until a manager answers; ``env_disabled`` and\n``env_mirror`` mean the deployer fixed it in the environment and the\nanswer cannot be changed from the application.",
+          "fields": [
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "mirror_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "nominatim_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "photon_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "can_decide",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "GeocodingConsentUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A manager's answer to the one-time geocoding question.",
+          "fields": [
+            {
+              "name": "choice",
+              "type": "str"
+            },
+            {
+              "name": "mirror_url",
+              "type": "str | None"
             }
           ]
         }
@@ -122872,6 +123076,13 @@
           "request_schema": "I18nFoundationService"
         },
         {
+          "method": "POST",
+          "path": "/tax-configs/{config_id}/confirm",
+          "handler": "confirm_tax_config",
+          "response_model": "TaxConfigResponse",
+          "request_schema": "TaxConfigConfirm"
+        },
+        {
           "method": "PATCH",
           "path": "/tax-configs/{config_id}",
           "handler": "update_tax_config",
@@ -123268,6 +123479,23 @@
             {
               "name": "total",
               "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "TaxConfigConfirm",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A local specialist's confirmation of one tax row, recorded by an admin.\n\n``accountant_name`` is who confirmed it, usually the client's accountant,\nand ``source_reference`` the official publication they checked it against.\nBoth are required: a confirmation that cannot say who or against what is\nnot one.",
+          "fields": [
+            {
+              "name": "accountant_name",
+              "type": "str"
+            },
+            {
+              "name": "source_reference",
+              "type": "str"
             }
           ]
         },
@@ -127345,6 +127573,552 @@
         }
       ],
       "schemas": [],
+      "import_dependencies": []
+    },
+    {
+      "module_id": "legal_entities",
+      "module_label": "Legal Entities",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_legal_entities",
+        "version": "0.1.0",
+        "display_name": "Legal Entities",
+        "description": "Companies of the group and their branches, each with its country and functional currency",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "LegalEntity",
+          "tablename": "oe_legal_entities_entity",
+          "docstring": "A company of the group, with the country and currency its books follow.",
+          "columns": [
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "subdivision_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "functional_currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "registration_number",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "tax_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "is_default",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "is_active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "branches",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[Branch]]",
+              "back_populates": "legal_entity"
+            }
+          ]
+        },
+        {
+          "class_name": "Branch",
+          "tablename": "oe_legal_entities_branch",
+          "docstring": "An establishment of one legal entity: a regional office, a site office, a foreign branch.",
+          "columns": [
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_legal_entities_entity.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "subdivision_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "is_active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "legal_entity",
+              "type": "many-to-one",
+              "annotation": "Mapped[LegalEntity]",
+              "target_model": "LegalEntity",
+              "back_populates": "branches"
+            }
+          ]
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/entities/",
+          "handler": "list_entities",
+          "response_model": "LegalEntityListResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/entities/default",
+          "handler": "get_default_entity",
+          "response_model": "LegalEntityResponse | None"
+        },
+        {
+          "method": "POST",
+          "path": "/entities/",
+          "handler": "create_entity",
+          "response_model": "LegalEntityResponse",
+          "request_schema": "LegalEntityCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/entities/{entity_id}",
+          "handler": "get_entity",
+          "response_model": "LegalEntityResponse"
+        },
+        {
+          "method": "PATCH",
+          "path": "/entities/{entity_id}",
+          "handler": "update_entity",
+          "response_model": "LegalEntityResponse",
+          "request_schema": "LegalEntityUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/entities/{entity_id}",
+          "handler": "delete_entity"
+        },
+        {
+          "method": "POST",
+          "path": "/entities/{entity_id}/branches/",
+          "handler": "create_branch",
+          "response_model": "BranchResponse",
+          "request_schema": "BranchCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/entities/{entity_id}/branches/{branch_id}",
+          "handler": "update_branch",
+          "response_model": "BranchResponse",
+          "request_schema": "BranchUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/entities/{entity_id}/branches/{branch_id}",
+          "handler": "delete_branch"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "_CodesMixin",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": []
+        },
+        {
+          "class_name": "LegalEntityCreate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "functional_currency",
+              "type": "str"
+            },
+            {
+              "name": "registration_number",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_id",
+              "type": "str | None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "is_active",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "LegalEntityUpdate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str | None"
+            },
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "functional_currency",
+              "type": "str | None"
+            },
+            {
+              "name": "registration_number",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_id",
+              "type": "str | None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BranchCreate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "BranchUpdate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str | None"
+            },
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "IssueResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "field",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "BranchResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[IssueResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "LegalEntityResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "functional_currency",
+              "type": "str"
+            },
+            {
+              "name": "registration_number",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_id",
+              "type": "str | None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool"
+            },
+            {
+              "name": "is_active",
+              "type": "bool"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "branches",
+              "type": "list[BranchResponse]"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "LegalEntityListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[LegalEntityResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            }
+          ]
+        }
+      ],
       "import_dependencies": []
     },
     {
@@ -140948,6 +141722,7 @@
         "manifest.py",
         "models.py",
         "normalize.py",
+        "retention.py",
         "router.py",
         "schemas.py",
         "service.py",
@@ -148142,6 +148917,42 @@
               "nullable": false
             },
             {
+              "name": "supplier_acknowledged_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "supplier_acknowledged_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "supplier_reference",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "supplier_confirmed_delivery_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "payment_terms",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -148412,6 +149223,18 @@
               "name": "rejection_reason",
               "annotation": "Mapped[str | None]",
               "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "batch_lot",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "serial_numbers",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
               "nullable": true
             }
           ],
@@ -148716,6 +149539,13 @@
         },
         {
           "method": "POST",
+          "path": "/{po_id}/acknowledge/",
+          "handler": "acknowledge_purchase_order",
+          "response_model": "POResponse",
+          "request_schema": "POAcknowledgeRequest"
+        },
+        {
+          "method": "POST",
           "path": "/{po_id}/cancel/",
           "handler": "cancel_purchase_order",
           "response_model": "POResponse",
@@ -148867,6 +149697,14 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "type": "str | None"
             }
           ]
         },
@@ -148973,6 +149811,14 @@
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "type": "str | None"
             }
           ]
         },
@@ -149064,6 +149910,24 @@
           ]
         },
         {
+          "class_name": "POAcknowledgeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The supplier's confirmation of an issued order, as the buyer received it.",
+          "fields": [
+            {
+              "name": "supplier_reference",
+              "type": "str | None"
+            },
+            {
+              "name": "confirmed_delivery_date",
+              "type": "date | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "POResponse",
           "bases": [
             "BaseModel"
@@ -149131,6 +149995,36 @@
               "name": "status",
               "type": "str",
               "default": "'draft'"
+            },
+            {
+              "name": "supplier_acknowledged_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_acknowledged_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_reference",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_confirmed_delivery_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "payment_terms",
@@ -149365,6 +150259,14 @@
               "name": "rejection_reason",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "batch_lot",
+              "type": "str | None"
+            },
+            {
+              "name": "serial_numbers",
+              "type": "list[str] | None"
             }
           ]
         },
@@ -149448,6 +150350,16 @@
             {
               "name": "rejection_reason",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "batch_lot",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "serial_numbers",
+              "type": "list[str] | None",
               "default": "None"
             },
             {
@@ -149736,6 +150648,30 @@
             },
             {
               "name": "unscheduled_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "prequalification_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "qualified_until",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "qualification_state",
+              "type": "str",
+              "default": "'not_stated'"
+            },
+            {
+              "name": "compliance_reasons",
+              "type": "list[str]"
+            },
+            {
+              "name": "unconfirmed_po_count",
               "type": "int",
               "default": "0"
             }
@@ -191623,7 +192559,7 @@
             {
               "name": "blocked_reason",
               "type": "str | None",
-              "description": "Why not: permission_denied or schedule_not_archived. Permanent deletion is admin-only."
+              "description": "Why not: permission_denied, schedule_has_baselines or schedule_not_archived. The project owner or an admin may delete."
             }
           ]
         },
@@ -207183,6 +208119,12 @@
               "nullable": true
             },
             {
+              "name": "party_kind",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "tax_id",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -208491,6 +209433,11 @@
               "type": "str | None"
             },
             {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "default": "None"
+            },
+            {
               "name": "tax_id",
               "type": "str | None"
             },
@@ -208550,6 +209497,11 @@
             {
               "name": "trade_name",
               "type": "str | None"
+            },
+            {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "default": "None"
             },
             {
               "name": "tax_id",
@@ -208616,6 +209568,11 @@
             },
             {
               "name": "trade_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "party_kind",
               "type": "str | None",
               "default": "None"
             },
@@ -234828,10 +235785,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 113,
+      "ts_files": 115,
       "css_files": 0,
-      "test_files": 38,
-      "total_files": 114
+      "test_files": 39,
+      "total_files": 116
     },
     {
       "name": "bim_requirements",
@@ -234842,10 +235799,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 183,
+      "ts_files": 186,
       "css_files": 0,
-      "test_files": 98,
-      "total_files": 183
+      "test_files": 101,
+      "total_files": 186
     },
     {
       "name": "buyer-portal",
@@ -235234,10 +236191,10 @@
     },
     {
       "name": "file-manager",
-      "ts_files": 51,
+      "ts_files": 52,
       "css_files": 0,
       "test_files": 12,
-      "total_files": 51
+      "total_files": 52
     },
     {
       "name": "file-references",
@@ -235332,10 +236289,10 @@
     },
     {
       "name": "geo-hub",
-      "ts_files": 45,
+      "ts_files": 46,
       "css_files": 0,
       "test_files": 11,
-      "total_files": 45
+      "total_files": 46
     },
     {
       "name": "global_presence",
@@ -235611,11 +236568,18 @@
       "total_files": 9
     },
     {
+      "name": "processes",
+      "ts_files": 10,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 10
+    },
+    {
       "name": "procurement",
-      "ts_files": 26,
+      "ts_files": 27,
       "css_files": 0,
       "test_files": 11,
-      "total_files": 26
+      "total_files": 27
     },
     {
       "name": "progress",
@@ -235794,10 +236758,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 69,
+      "ts_files": 71,
       "css_files": 0,
-      "test_files": 29,
-      "total_files": 69
+      "test_files": 30,
+      "total_files": 71
     },
     {
       "name": "schedule-advanced",
@@ -235822,10 +236786,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 31,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 31
+      "test_files": 12,
+      "total_files": 34
     },
     {
       "name": "setup",
@@ -235934,10 +236898,10 @@
     },
     {
       "name": "tax-rates",
-      "ts_files": 7,
+      "ts_files": 8,
       "css_files": 0,
       "test_files": 2,
-      "total_files": 7
+      "total_files": 8
     },
     {
       "name": "tax-withholding",
@@ -236779,6 +237743,7 @@
       "users"
     ],
     "latam_pack": [],
+    "legal_entities": [],
     "markups": [
       "documents",
       "file_versions",
@@ -237353,16 +238318,16 @@
     ]
   },
   "statistics": {
-    "backend_modules": 196,
-    "modules_with_manifests": 194,
-    "total_models": 623,
-    "total_columns": 7153,
-    "total_relationships": 234,
-    "total_routes": 3757,
-    "total_schemas": 3564,
-    "total_python_files": 2290,
-    "frontend_features": 192,
-    "frontend_ts_files": 2990,
+    "backend_modules": 197,
+    "modules_with_manifests": 195,
+    "total_models": 626,
+    "total_columns": 7183,
+    "total_relationships": 236,
+    "total_routes": 3773,
+    "total_schemas": 3579,
+    "total_python_files": 2305,
+    "frontend_features": 193,
+    "frontend_ts_files": 3014,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
@@ -237497,6 +238462,7 @@
     "prefab": "prefab",
     "preliminaries": "preliminaries",
     "price-index": "price_index",
+    "processes": null,
     "procurement": "procurement",
     "progress": "progress",
     "project-controls": "project_controls",

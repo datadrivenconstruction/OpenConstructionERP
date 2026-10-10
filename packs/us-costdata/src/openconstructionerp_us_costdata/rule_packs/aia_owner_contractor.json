@@ -13,7 +13,8 @@
     "A104-2017": "Owner-Contractor, Abbreviated form for small projects",
     "A141-2014": "Owner-Design-Builder Agreement (with Exhibit A — Terms & Conditions)"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "aia.owner_contractor.variant_selected",
     "aia.a101.contract_sum_present",
     "aia.a101.unit_prices_attachment_if_applicable",
@@ -30,5 +31,6 @@
     "aia.owner_contractor.a201_general_conditions_referenced",
     "aia.owner_contractor.exhibits_complete",
     "aia.owner_contractor.signatures_witnessed_notarised"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

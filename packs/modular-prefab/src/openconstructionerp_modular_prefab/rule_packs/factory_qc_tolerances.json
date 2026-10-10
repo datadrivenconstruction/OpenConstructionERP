@@ -4,7 +4,8 @@
   "standard": "ICC/MBI 1200-2021 / EN 13670 / ISO 22156 / AS 5104",
   "jurisdiction": "INTL",
   "description": "Enables OCERP built-in validation rules that enforce the tighter dimensional and geometric tolerances required for off-site / modular construction. Module-level checks (±3 mm typical), assembly-level (±10 mm at building face), structural plumb (< L/1000), squareness (diagonal-diff < 5 mm per 3 m), opening dimensions (±2 mm for joinery), connection bolt-hole tolerances per EN 1090-2 (±2 mm). References ICC/MBI 1200 Off-site construction — Manufactured commercial modules (US), EN 13670 Execution of concrete structures (when modules contain structural concrete), and AS 5104 reliability targets.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "tol.module_length_within_3mm",
     "tol.module_width_within_3mm",
     "tol.module_height_within_3mm",
@@ -21,5 +22,6 @@
     "tol.tolerance_chain_analysis_attached",
     "tol.first_off_inspection_signed",
     "tol.dimensional_survey_report_attached"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

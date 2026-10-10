@@ -44,11 +44,12 @@ import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from jose import JWTError, jwt
+from jose import JWTError
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
+from app.core.jwt_keys import decode_jwt, encode_jwt
 from app.modules.property_dev.models import (
     Buyer,
     PortalToken,
@@ -158,11 +159,7 @@ class PortalLinkService:
         if sales_contract_id is not None:
             payload["spa"] = str(sales_contract_id)
 
-        token = jwt.encode(
-            payload,
-            self.settings.jwt_secret,
-            algorithm=self.settings.jwt_algorithm,
-        )
+        token = encode_jwt(payload, self.settings)
 
         row = PortalToken(
             buyer_id=buyer_id,
@@ -246,11 +243,7 @@ class PortalLinkService:
             raise PortalTokenError()
 
         try:
-            payload = jwt.decode(
-                token,
-                self.settings.jwt_secret,
-                algorithms=[self.settings.jwt_algorithm],
-            )
+            payload = decode_jwt(token, self.settings)
         except JWTError:
             raise PortalTokenError() from None
 

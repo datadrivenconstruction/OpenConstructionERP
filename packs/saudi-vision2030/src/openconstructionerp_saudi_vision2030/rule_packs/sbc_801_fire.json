@@ -13,7 +13,8 @@
   "severity_overrides": {
     "sbc801.civil_defense_approval_referenced": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sbc801.occupancy_classification_assigned",
     "sbc801.means_of_egress_capacity_compliant",
     "sbc801.travel_distance_max_documented",
@@ -27,5 +28,6 @@
     "sbc801.fire_command_center_for_highrise",
     "sbc801.standpipe_class_assigned",
     "sbc801.emergency_lighting_egress_signs_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }
