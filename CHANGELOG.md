@@ -33,7 +33,7 @@ This release makes the platform lighter to run and easier to understand. A Backg
 - The supplier card shows whether the supplier is still prequalified, with the end date, the compliance reasons the order gate already applies and how many issued orders still wait for confirmation.
 - Vendors and Catalog open as tabs inside Procurement, so a buyer no longer leaves the order to look up a supplier or a catalogue price.
 - Goods receipt lines carry batch or lot and serial numbers.
-- Legal entities and branches are part of the core in every edition: each group company has its own code, registered name, country, functional currency, register number and tax id, and one can be the default that documents fall back to.
+- The core in every edition can hold the companies of a group and their branches, each company with its own code, registered name, country, functional currency, register number and tax id, and one of them the default that documents fall back to. Administrators write them through the API; a settings screen, numbering and tax per company come in a later release.
 - Contacts and subcontractors can be marked as a person or a company.
 - Canadian contracts take the statutory holdback of their province, Canadian provincial holidays are read into calendars, and Canadian demo projects carry their province.
 - Portugal national holidays for 2026 are shipped.
@@ -42,7 +42,7 @@ This release makes the platform lighter to run and easier to understand. A Backg
 - Drawing sheets can be edited in bulk, and Italian file names are read into sheet numbers and titles.
 - A dependency drawn on the Gantt chart can be undone from the confirmation toast, and the project owner can delete an archived schedule that has no baselines.
 - Bill exports to PDF, XLSX and GAEB mark the rows that AI produced.
-- Validation messages are translated into every shipped language.
+- Validation messages come in 38 languages, up from 4.
 - The schedule detail view warns when public-holiday coverage is missing or incomplete, using the saved calendar and years of generated plans. New generated calendars also retain whether their working week used a fallback, so that warning survives reopening the schedule. Regional calendar loading and failures are shown explicitly; manually configured calendars keep their own rules, and historical plans without a saved fallback flag are not reclassified.
 - New eligible outside-SOV progress claims use the retention ladder rate selected by prior SOV work, with existing caps and currency precision. Claims created before this change keep their flat-rate calculation, and issued certificates are not recalculated. Milestone, cost-plus and time-and-materials claims retain their existing rules.
 - Progress claims expose country-independent payment-application figures through `/progress-claims/{id}/payment-application`, using the same calculations and project access checks as the existing regional AIA view. The AIA JSON and PDF endpoints retain their country restrictions.
