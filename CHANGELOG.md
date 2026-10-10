@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Generate from BoQ no longer fails on a bill with a huge quantity in a unit it cannot size, such as an XPWE line "a misura" with 10 billion units. Such a position now runs at most about a century and the preview says the plan overruns the window.
+- Generate from BoQ no longer fails on a bill with a huge quantity in a unit it cannot size, such as an XPWE line "a misura" with 10 billion units. Such a position now runs at most about four centuries and the preview says the plan overruns the window.
 - A regional price list saved as .pwe is read like any XPWE file instead of being refused as an unknown format, and the estimating program's own binary project file gets the advice to export it as XPWE.
 - Quantity rules ignore spaces around a value, as property search already did, and the Smart View builder shows the property names Revit wrote instead of lower-cased keys.
 - Recording a payment and linking an invoice to a purchase order keep every amount exactly as entered. The withheld amount, the cash paid and the amount still open on the order are no longer rounded through floating point, and a withholding the browser cannot read disables Record payment instead of quietly posting zero.
