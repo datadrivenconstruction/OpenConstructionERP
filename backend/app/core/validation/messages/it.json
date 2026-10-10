@@ -396,6 +396,13 @@
       "suggestion": "Usare il numero del listino, ad es. 15.140.1002, oppure 04.013/1 su un contratto precedente; numerare le proprie voci analizzate come ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "La riga fiscale '{line}' applica la KDV al {rate} per cento, un'aliquota che la legge turca non prevede; la KDV è del 20, 10 o 1 per cento",
+      "fail_superseded": "La riga fiscale '{line}' applica la KDV al {rate} per cento, un'aliquota sostituita il 10 luglio 2023; la KDV ora è del 20, 10 o 1 per cento",
+      "suggestion": "Imposti la riga KDV al 20 per cento, o al 10 o 1 per cento quando la fornitura ne ha diritto, o a 0 per una fornitura esente"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Alla voce {ordinal} manca il codice 積算",

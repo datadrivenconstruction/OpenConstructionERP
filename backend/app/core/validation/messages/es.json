@@ -396,6 +396,13 @@
       "suggestion": "Use el número del libro, p. ej. 15.140.1002, o 04.013/1 en un contrato antiguo; numere sus partidas analizadas como ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "La línea de impuesto '{line}' aplica KDV al {rate} por ciento, que no es una tasa fijada por la ley turca; el KDV es del 20, 10 o 1 por ciento",
+      "fail_superseded": "La línea de impuesto '{line}' aplica KDV al {rate} por ciento, una tasa sustituida el 10 de julio de 2023; el KDV ahora es del 20, 10 o 1 por ciento",
+      "suggestion": "Fije la línea de KDV en 20 por ciento, o en 10 o 1 por ciento cuando el suministro lo permita, o en 0 para un suministro exento"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "A la posición {ordinal} le falta el código 積算",

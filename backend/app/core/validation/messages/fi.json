@@ -396,6 +396,13 @@
       "suggestion": "Käytä kirjan numeroa, esim. 15.140.1002 tai vanhassa sopimuksessa 04.013/1; numeroi omat analysoidut nimikkeet muodossa ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Veroriville '{line}' laskee KDV:n {rate} prosentilla, mikä ei ole Turkin lain mukainen verokanta; KDV on 20, 10 tai 1 prosenttia",
+      "fail_superseded": "Veroriville '{line}' laskee KDV:n {rate} prosentilla, joka on korvattu verokanta 10. heinäkuuta 2023 alkaen; KDV on nyt 20, 10 tai 1 prosenttia",
+      "suggestion": "Aseta KDV-rivi 20 prosenttiin tai 10 tai 1 prosenttiin, jos toimitus siihen oikeuttaa, tai 0:aan verovapaassa toimituksessa"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Nimikkeeltä {ordinal} puuttuu 積算-koodi",

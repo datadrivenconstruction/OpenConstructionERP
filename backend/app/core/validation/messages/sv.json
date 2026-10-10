@@ -396,6 +396,13 @@
       "suggestion": "Använd bokens nummer, t.ex. 15.140.1002, eller 04.013/1 för ett äldre avtal; numrera egna analyserade poster som ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Skatteraden '{line}' tar ut KDV med {rate} procent, vilket inte är en sats som turkisk lag fastställer; KDV är 20, 10 eller 1 procent",
+      "fail_superseded": "Skatteraden '{line}' tar ut KDV med {rate} procent, en sats som ersattes den 10 juli 2023; KDV är nu 20, 10 eller 1 procent",
+      "suggestion": "Sätt KDV-raden till 20 procent, eller till 10 eller 1 procent där leveransen kvalificerar, eller till 0 för en undantagen leverans"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Post {ordinal} saknar 積算-kod",

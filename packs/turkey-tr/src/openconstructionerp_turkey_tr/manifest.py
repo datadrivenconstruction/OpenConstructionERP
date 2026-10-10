@@ -16,7 +16,8 @@ MANIFEST = PartnerPackManifest(
     pack_type="country",
     description=(
         "Pre-configured for Turkish contractors, designers and public "
-        "clients: Bayindirlik Bakanligi Birim Fiyat unit-price methodology, "
+        "clients: the unit prices of the Ministry of Environment, Urbanisation "
+        "and Climate Change (formerly Bayindirlik), "
         "Deprem Yonetmeligi 2018 (TBDY) seismic code, Imar Kanunu zoning "
         "compliance, TSE construction standards, KDV at 20 percent, Turkish "
         "lira at two decimals."
@@ -39,12 +40,12 @@ MANIFEST = PartnerPackManifest(
         "bayindirlik_unit_prices",
         "kamu_ihale",
     ],
-    # The engine rule set that reads the poz number every Turkish line is
-    # priced from. It shares its name with the classification key it reads,
-    # unlike Hungary, where the classification is tetelrend and the rule set
-    # is hungary, so the name is checked against the registry by test rather
-    # than assumed.
-    validation_rule_sets=["birimfiyat"],
+    # birimfiyat reads the poz number every Turkish line is priced from. It
+    # shares its name with the classification key it reads, unlike Hungary,
+    # where the classification is tetelrend and the rule set is hungary, so
+    # the name is checked against the registry by test rather than assumed.
+    # turkey is the country's statute, starting with the KDV rate in force.
+    validation_rule_sets=["birimfiyat", "turkey"],
     default_modules=[],  # empty = show all
     hidden_modules=[],
     demo_template_ids=["mixed-use-istanbul"],
@@ -62,7 +63,7 @@ MANIFEST = PartnerPackManifest(
         "country_name_tr": "Turkiye",
         "classification_standard": "birimfiyat",
         "regulator_refs": [
-            "Bayindirlik Bakanligi Birim Fiyat (Ministry of Public Works unit prices)",
+            "Cevre, Sehircilik ve Iklim Degisikligi Bakanligi birim fiyatlari (Ministry unit prices, formerly Bayindirlik)",
             "Imar Kanunu (Zoning Law No. 3194)",
             "Deprem Yonetmeligi 2018 / TBDY (Turkish Building Seismic Code 2018)",
             "TSE (Turkish Standards Institution) construction standards",

@@ -251,10 +251,11 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "id": "tr_compliance",
         "name": "Turkey Compliance",
         "description": "Birim fiyat poz numbers on every priced line, in the published "
-        "unit-price format, plus the universal quality baseline.",
+        "unit-price format, a KDV rate in force on the tax line, plus the universal "
+        "quality baseline.",
         "jurisdiction": "TR",
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
-        "rule_sets": ["boq_quality", "birimfiyat"],
+        "rule_sets": ["boq_quality", "birimfiyat", "turkey"],
     },
     # The three country packs of 2026-09. Each classifies against DIN 276, the
     # nearest hierarchy the product renders, and files every line under its own

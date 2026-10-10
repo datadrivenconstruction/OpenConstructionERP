@@ -63,7 +63,7 @@ EXPECTED: dict[str, list[str]] = {
     "aus": ["nrm"],
     "nzs": ["nrm"],
     "saudi-vision2030": ["masterformat"],
-    "turkey-tr": ["birimfiyat"],
+    "turkey-tr": ["birimfiyat", "turkey"],
     "batimatech-ca": ["masterformat"],
     "doker-formwork": ["formwork"],
     "austria-at": ["gaeb", "onorm"],

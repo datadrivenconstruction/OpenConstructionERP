@@ -396,6 +396,13 @@
       "suggestion": "Użyj numeru z katalogu, np. 15.140.1002, lub 04.013/1 w starszej umowie; pozycje z kalkulacją własną numeruj jako ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Wiersz podatku '{line}' nalicza KDV według stawki {rate} procent, która nie jest stawką ustaloną w prawie tureckim; KDV wynosi 20, 10 lub 1 procent",
+      "fail_superseded": "Wiersz podatku '{line}' nalicza KDV według stawki {rate} procent, którą zastąpiono 10 lipca 2023 r.; KDV wynosi teraz 20, 10 lub 1 procent",
+      "suggestion": "Ustaw wiersz KDV na 20 procent, na 10 lub 1 procent, gdy dostawa się kwalifikuje, albo na 0 dla dostawy zwolnionej"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Pozycja {ordinal} nie ma kodu 積算",

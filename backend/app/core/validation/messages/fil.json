@@ -396,6 +396,13 @@
       "suggestion": "Gamitin ang numero sa aklat, halimbawa 15.140.1002, o 04.013/1 sa lumang kontrata; bilangin ang sariling analysed item bilang ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Ang linya ng buwis na '{line}' ay naniningil ng KDV sa {rate} porsiyento, na hindi rate na itinakda ng batas ng Turkey; ang KDV ay 20, 10 o 1 porsiyento",
+      "fail_superseded": "Ang linya ng buwis na '{line}' ay naniningil ng KDV sa {rate} porsiyento, isang rate na pinalitan noong 10 Hulyo 2023; ang KDV ay 20, 10 o 1 porsiyento na ngayon",
+      "suggestion": "Itakda ang linya ng KDV sa 20 porsiyento, o sa 10 o 1 porsiyento kung kwalipikado ang suplay, o sa 0 para sa suplay na exempt"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Walang 積算 code ang posisyong {ordinal}",

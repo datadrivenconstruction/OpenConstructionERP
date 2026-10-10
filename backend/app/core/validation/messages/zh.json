@@ -396,6 +396,13 @@
       "suggestion": "请使用单价册编号，例如 15.140.1002；旧合同可使用 04.013/1。自行分析组价的项目请编号为 ÖZEL-1。"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "税务行“{line}”按百分之 {rate} 计征 KDV，这不是土耳其法律规定的税率；KDV 税率为百分之 20、10 或 1",
+      "fail_superseded": "税务行“{line}”按百分之 {rate} 计征 KDV，该税率已于 2023 年 7 月 10 日被取代；KDV 现为百分之 20、10 或 1",
+      "suggestion": "请将 KDV 行设为百分之 20；符合条件的供应可设为百分之 10 或 1，免税供应设为 0"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "清单项 {ordinal} 缺少日本積算编码。",

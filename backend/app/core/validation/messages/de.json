@@ -396,6 +396,13 @@
       "suggestion": "Die Nummer aus dem Buch verwenden, z. B. 15.140.1002, oder 04.013/1 bei älteren Verträgen; eigene kalkulierte Positionen als ÖZEL-1 nummerieren"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Steuerzeile '{line}' berechnet KDV mit {rate} Prozent; das ist kein Satz des türkischen Rechts, KDV beträgt 20, 10 oder 1 Prozent",
+      "fail_superseded": "Steuerzeile '{line}' berechnet KDV mit {rate} Prozent; dieser Satz wurde am 10. Juli 2023 ersetzt, KDV beträgt jetzt 20, 10 oder 1 Prozent",
+      "suggestion": "Setzen Sie die KDV-Zeile auf 20 Prozent, bei begünstigten Lieferungen auf 10 oder 1 Prozent, bei steuerfreien Lieferungen auf 0"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Position {ordinal} hat keinen 積算-Code",

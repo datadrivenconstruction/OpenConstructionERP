@@ -396,6 +396,13 @@
       "suggestion": "Utilize o número do catálogo, por exemplo, 15.140.1002, ou 04.013/1 em um contrato antigo; numere os itens de composição própria como ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "A linha de imposto '{line}' aplica KDV a {rate} por cento, uma taxa que a lei turca não prevê; o KDV é de 20, 10 ou 1 por cento",
+      "fail_superseded": "A linha de imposto '{line}' aplica KDV a {rate} por cento, uma taxa substituída em 10 de julho de 2023; o KDV agora é de 20, 10 ou 1 por cento",
+      "suggestion": "Defina a linha de KDV em 20 por cento, ou em 10 ou 1 por cento quando o fornecimento se qualificar, ou em 0 para um fornecimento isento"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "O item {ordinal} não tem código 積算",

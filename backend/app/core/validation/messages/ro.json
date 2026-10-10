@@ -396,6 +396,13 @@
       "suggestion": "Folosiți numărul din carte, de exemplu 15.140.1002, sau 04.013/1 pentru un contract mai vechi; numerotați articolele analizate propriu ca ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Linia de taxă '{line}' aplică KDV la {rate} la sută, o cotă care nu este stabilită de legea turcă; KDV este de 20, 10 sau 1 la sută",
+      "fail_superseded": "Linia de taxă '{line}' aplică KDV la {rate} la sută, o cotă înlocuită la 10 iulie 2023; KDV este acum de 20, 10 sau 1 la sută",
+      "suggestion": "Setați linia KDV la 20 la sută, sau la 10 ori 1 la sută când livrarea se califică, sau la 0 pentru o livrare scutită"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Poziției {ordinal} îi lipsește codul 積算",

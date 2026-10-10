@@ -396,6 +396,13 @@
       "suggestion": "Gunakan nomor dalam buku, misalnya 15.140.1002, atau 04.013/1 pada kontrak lama; beri nomor item hasil analisis sendiri sebagai ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Baris pajak '{line}' mengenakan KDV sebesar {rate} persen, yang bukan tarif yang ditetapkan hukum Turki; KDV adalah 20, 10 atau 1 persen",
+      "fail_superseded": "Baris pajak '{line}' mengenakan KDV sebesar {rate} persen, tarif yang telah diganti pada 10 Juli 2023; KDV kini 20, 10 atau 1 persen",
+      "suggestion": "Atur baris KDV ke 20 persen, atau ke 10 atau 1 persen bila pasokan memenuhi syarat, atau ke 0 untuk pasokan yang dibebaskan"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Item {ordinal} belum memiliki kode 積算",

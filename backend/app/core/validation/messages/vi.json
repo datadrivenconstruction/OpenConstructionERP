@@ -396,6 +396,13 @@
       "suggestion": "Sử dụng số trong sách, ví dụ 15.140.1002 hoặc 04.013/1 cho hợp đồng cũ; đánh số công tác tự phân tích là ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Dòng thuế '{line}' tính KDV ở mức {rate} phần trăm, đây không phải mức do luật Thổ Nhĩ Kỳ quy định; KDV là 20, 10 hoặc 1 phần trăm",
+      "fail_superseded": "Dòng thuế '{line}' tính KDV ở mức {rate} phần trăm, mức này đã được thay thế vào ngày 10 tháng 7 năm 2023; hiện KDV là 20, 10 hoặc 1 phần trăm",
+      "suggestion": "Đặt dòng KDV ở mức 20 phần trăm, hoặc 10 hay 1 phần trăm nếu hàng hóa, dịch vụ đủ điều kiện, hoặc 0 cho trường hợp được miễn"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Công tác {ordinal} thiếu mã 積算",

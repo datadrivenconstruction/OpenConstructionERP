@@ -396,6 +396,13 @@
       "suggestion": "Gebruik het nummer uit het prijzenboek, bijvoorbeeld 15.140.1002, of 04.013/1 bij een ouder contract; nummer eigen geanalyseerde posten als ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Belastingregel '{line}' berekent KDV tegen {rate} procent, wat geen tarief is dat de Turkse wet kent; KDV is 20, 10 of 1 procent",
+      "fail_superseded": "Belastingregel '{line}' berekent KDV tegen {rate} procent, een tarief dat op 10 juli 2023 is vervangen; KDV is nu 20, 10 of 1 procent",
+      "suggestion": "Zet de KDV-regel op 20 procent, of op 10 of 1 procent als de levering daarvoor in aanmerking komt, of op 0 voor een vrijgestelde levering"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Post {ordinal} mist een 積算-code",

@@ -396,6 +396,13 @@
       "suggestion": "Utilisez le numéro du recueil, par exemple 15.140.1002, ou 04.013/1 pour un ancien contrat ; numérotez vos propres prix analysés sous la forme ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "La ligne de taxe '{line}' applique la KDV à {rate} pour cent, un taux que la loi turque ne prévoit pas ; la KDV est de 20, 10 ou 1 pour cent",
+      "fail_superseded": "La ligne de taxe '{line}' applique la KDV à {rate} pour cent, un taux remplacé le 10 juillet 2023 ; la KDV est désormais de 20, 10 ou 1 pour cent",
+      "suggestion": "Réglez la ligne KDV sur 20 pour cent, ou sur 10 ou 1 pour cent lorsque la fourniture y est éligible, ou sur 0 pour une fourniture exonérée"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Le poste {ordinal} n'a pas de code 積算",

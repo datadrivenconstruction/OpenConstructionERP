@@ -396,6 +396,13 @@
       "suggestion": "Použijte číslo z ceníku, např. 15.140.1002, nebo 04.013/1 u starší smlouvy; vlastní kalkulované položky číslujte jako ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Daňový řádek '{line}' účtuje KDV sazbou {rate} procent, což není sazba stanovená tureckým právem; KDV činí 20, 10 nebo 1 procento",
+      "fail_superseded": "Daňový řádek '{line}' účtuje KDV sazbou {rate} procent, která byla nahrazena 10. července 2023; KDV nyní činí 20, 10 nebo 1 procento",
+      "suggestion": "Nastavte řádek KDV na 20 procent, případně na 10 nebo 1 procento, pokud dodávka splňuje podmínky, nebo na 0 u osvobozené dodávky"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Položce {ordinal} chybí kód 積算",

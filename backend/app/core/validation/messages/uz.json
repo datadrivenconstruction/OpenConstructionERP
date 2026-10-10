@@ -396,6 +396,13 @@
       "suggestion": "Kitobdagi raqamdan foydalaning, masalan 15.140.1002 yoki eski shartnomada 04.013/1; oʻz tahlilingizdagi pozitsiyalarni ÖZEL-1 deb raqamlang"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "'{line}' soliq qatori KDV ni {rate} foiz stavkada hisoblagan, bu Turkiya qonunchiligida belgilangan stavka emas; KDV 20, 10 yoki 1 foiz",
+      "fail_superseded": "'{line}' soliq qatori KDV ni {rate} foiz stavkada hisoblagan, bu stavka 2023-yil 10-iyulda almashtirilgan; hozir KDV 20, 10 yoki 1 foiz",
+      "suggestion": "KDV qatorini 20 foizga, yetkazib berish shartga mos kelsa 10 yoki 1 foizga, ozod qilingan yetkazib berish uchun esa 0 ga o'rnating"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "{ordinal} pozitsiyasida 積算 kodi yoʻq",

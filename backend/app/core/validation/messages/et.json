@@ -396,6 +396,13 @@
       "suggestion": "Kasutage raamatu numbrit, nt 15.140.1002 või vanema lepingu puhul 04.013/1; nummerdage oma analüüsitud read kujul ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Maksuread '{line}' arvestab KDV-d {rate} protsenti, mis ei ole Türgi õiguses sätestatud määr; KDV on 20, 10 või 1 protsenti",
+      "fail_superseded": "Maksuread '{line}' arvestab KDV-d {rate} protsenti, mis asendati 10. juulil 2023; KDV on nüüd 20, 10 või 1 protsenti",
+      "suggestion": "Määrake KDV rea väärtuseks 20 protsenti või 10 või 1 protsenti, kui tarne selleks kvalifitseerub, või 0 maksuvaba tarne puhul"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Real {ordinal} puudub 積算 kood",

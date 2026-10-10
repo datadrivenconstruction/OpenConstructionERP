@@ -396,6 +396,13 @@
       "suggestion": "Koristite broj iz knjige, npr. 15.140.1002 ili 04.013/1 za stariji ugovor; vlastite analizirane stavke označite ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Porezni redak '{line}' obračunava KDV po stopi od {rate} posto, što nije stopa propisana turskim pravom; KDV iznosi 20, 10 ili 1 posto",
+      "fail_superseded": "Porezni redak '{line}' obračunava KDV po stopi od {rate} posto, koja je zamijenjena 10. srpnja 2023.; KDV sada iznosi 20, 10 ili 1 posto",
+      "suggestion": "Postavite redak KDV na 20 posto, ili na 10 ili 1 posto ako isporuka ispunjava uvjete, ili na 0 za oslobođenu isporuku"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Stavci {ordinal} nedostaje šifra 積算",

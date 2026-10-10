@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Turkey has two statutory payment clocks: a public works progress payment (hakediş) is approved within 30 days, accrued within 30 more and paid within 15, and a commercial invoice falls due after 30 days under the Turkish Commercial Code.
 - A contract on a Turkish project starts from the public works terms: three percent held from each progress payment until the final account is approved, at most 75 days to pay, a monthly Hakediş Raporu, each figure with the clause it comes from.
 - Withholding tax schemes include the Turkish stopaj on progress payments for construction that runs over more than one calendar year: 5 percent of the progress payment before KDV, 1 percent for railway, metro and ship works.
+- A Turkish bill is checked for its KDV rate: a tax line at 18 or 8 percent, the rates replaced on 10 July 2023, or at any rate Turkish law does not set, is flagged with the rates in force, 20, 10 and 1 percent. The check runs on every project in Turkey and is translated into all 38 validation languages.
 
 ### Fixed
 

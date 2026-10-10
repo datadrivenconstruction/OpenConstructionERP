@@ -396,6 +396,13 @@
       "suggestion": "Use the book's number, e.g. 15.140.1002, or 04.013/1 on an older contract; number your own analysed items as ÖZEL-1"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Tax line '{line}' charges KDV at {rate} percent, which is not a rate Turkish law sets; KDV is 20, 10 or 1 percent",
+      "fail_superseded": "Tax line '{line}' charges KDV at {rate} percent, a rate replaced on 10 July 2023; KDV is now 20, 10 or 1 percent",
+      "suggestion": "Set the KDV line to 20 percent, or to 10 or 1 percent where the supply qualifies, or to 0 for an exempt supply"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "Position {ordinal} missing 積算 code",

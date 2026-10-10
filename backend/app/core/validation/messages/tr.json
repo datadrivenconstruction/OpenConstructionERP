@@ -396,6 +396,13 @@
       "suggestion": "Kitaptaki numarayı kullanın; ör. 15.140.1002 veya eski sözleşmelerde 04.013/1; kendi analiz pozlarınızı ÖZEL-1 olarak numaralandırın"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Vergi satırı '{line}' KDV'yi yüzde {rate} oranında uyguluyor; bu, Türk mevzuatının belirlediği bir oran değildir. KDV oranları yüzde 20, 10 veya 1'dir",
+      "fail_superseded": "Vergi satırı '{line}' KDV'yi yüzde {rate} oranında uyguluyor; bu oran 10 Temmuz 2023 tarihinde değiştirildi. KDV oranları artık yüzde 20, 10 veya 1'dir",
+      "suggestion": "KDV satırını yüzde 20 olarak ayarlayın; teslim ya da hizmet uygunsa yüzde 10 veya 1, istisna kapsamındaysa 0 olarak girin"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "{ordinal} pozunda 積算 kodu eksik",

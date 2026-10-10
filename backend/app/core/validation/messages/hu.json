@@ -396,6 +396,13 @@
       "suggestion": "Használja az árjegyzék tételszámát, például 15.140.1002, vagy régebbi szerződésnél 04.013/1; saját árelemzésű tételeit ÖZEL-1 formában számozza"
     }
   },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "A(z) '{line}' adósor {rate} százalékos KDV-t számít fel, amely nem szerepel a török jogban; a KDV 20, 10 vagy 1 százalék",
+      "fail_superseded": "A(z) '{line}' adósor {rate} százalékos KDV-t számít fel, ezt a kulcsot 2023. július 10-én felváltották; a KDV most 20, 10 vagy 1 százalék",
+      "suggestion": "Állítsa a KDV-sort 20 százalékra, jogosult szállításnál 10 vagy 1 százalékra, adómentes szállításnál 0-ra"
+    }
+  },
   "sekisan": {
     "code_required": {
       "fail": "A(z) {ordinal}. tételből hiányzik a 積算 kód",

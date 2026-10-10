@@ -3553,7 +3553,8 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     "RU": ["gesn"],
     "CN": ["gbt50500"],
     "IN": ["cpwd"],
-    "TR": ["birimfiyat"],
+    # Turkey runs its poz numbering and its statute, the KDV rate in force.
+    "TR": ["birimfiyat", "turkey"],
     "JP": ["sekisan"],
     # The Gulf tenders against MasterFormat, which is what the registry, the
     # UAE and Saudi packs and every Gulf demo say. The row said NRM for the
