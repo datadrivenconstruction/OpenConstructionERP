@@ -27403,6 +27403,7 @@ const resource = {
     "common.not_set": "Nincs beállítva",
     "common.offline_banner": "Nincs internetkapcsolat - a módosítások nem szinkronizálódnak.",
     "common.offline_banner_desktop": "Nincs internetkapcsolat. A munkája ezen a számítógépen mentve van - csak az élő, több felhasználós együttműködés szünetel, amíg újra nem csatlakozik.",
+    "common.desktop_port_moved": "A(z) {{defaultPort}} portot egy másik program használja, ezért az alkalmazás a(z) {{port}} porton nyílt meg. A bejelentkezés és a nyelv portonként tárolódik, ezért lehet, hogy egyszer újra be kell jelentkeznie vagy ki kell választania a nyelvet. A projektjeit és adatait ez nem érinti.",
     "common.optional": "opcionális",
     "common.prev": "Előző oldal",
     "common.rename": "Átnevezés",

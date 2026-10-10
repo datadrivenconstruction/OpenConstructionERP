@@ -27581,6 +27581,7 @@ const resource = {
     "common.not_set": "Inte inställd",
     "common.offline_banner": "Du är offline - ändringar synkroniseras inte.",
     "common.offline_banner_desktop": "Du är offline. Ditt arbete sparas på den här datorn - endast realtidssamarbete mellan flera användare pausas tills du återansluter.",
+    "common.desktop_port_moved": "Ett annat program använder port {{defaultPort}}, så appen öppnades på port {{port}}. Inloggning och språk sparas per port, så du kan behöva logga in eller välja språk igen en gång. Dina projekt och data påverkas inte.",
     "common.optional": "valfritt",
     "common.prev": "Föregående sida",
     "common.rename": "Byt namn",

@@ -28250,6 +28250,7 @@ const resource = {
     "common.not_set": "Nie ustawione",
     "common.offline_banner": "Jesteś w trybie offline - zmiany nie będą synchronizowane.",
     "common.offline_banner_desktop": "Jesteś w trybie offline. Twoja praca jest zapisywana na tym komputerze - tylko współpraca wielu użytkowników w czasie rzeczywistym jest wstrzymana do momentu ponownego połączenia.",
+    "common.desktop_port_moved": "Port {{defaultPort}} jest zajęty przez inny program, więc aplikacja otworzyła się na porcie {{port}}. Logowanie i język są zapisywane osobno dla każdego portu, więc może być konieczne jednorazowe ponowne zalogowanie lub wybranie języka. Twoje projekty i dane nie zostały naruszone.",
     "common.optional": "opcjonalnie",
     "common.prev": "Poprzednia strona",
     "common.rename": "Zmień nazwę",

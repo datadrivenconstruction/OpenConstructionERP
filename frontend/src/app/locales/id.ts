@@ -27274,6 +27274,7 @@ const resource = {
     "common.not_set": "Tidak diatur",
     "common.offline_banner": "Anda offline - perubahan tidak akan tersinkronisasi.",
     "common.offline_banner_desktop": "Anda sedang offline. Pekerjaan Anda tersimpan di komputer ini - hanya kolaborasi multi-pengguna secara real-time yang dijeda hingga Anda terhubung kembali.",
+    "common.desktop_port_moved": "Program lain sedang menggunakan port {{defaultPort}}, jadi aplikasi dibuka di port {{port}}. Login dan bahasa disimpan per port, jadi Anda mungkin perlu login atau memilih bahasa lagi satu kali. Proyek dan data Anda tidak terpengaruh.",
     "common.optional": "opsional",
     "common.prev": "Halaman sebelumnya",
     "common.rename": "Ubah nama",

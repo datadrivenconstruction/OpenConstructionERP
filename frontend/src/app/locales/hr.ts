@@ -27648,6 +27648,7 @@ const resource = {
     "common.not_set": "Nije postavljeno",
     "common.offline_banner": "Ste offline - promjene se neće sinhronizirati.",
     "common.offline_banner_desktop": "Offline ste. Vaš rad sprema se na ovom računalu - samo se suradnja više korisnika u stvarnom vremenu pauzira dok se ponovno ne povežete.",
+    "common.desktop_port_moved": "Drugi program koristi port {{defaultPort}}, pa se aplikacija otvorila na portu {{port}}. Prijava i jezik spremaju se zasebno za svaki port, pa ćete se možda morati jednom ponovno prijaviti ili odabrati jezik. Vaši projekti i podaci nisu pogođeni.",
     "common.optional": "nije obavezno",
     "common.prev": "Prethodna stranica",
     "common.rename": "Preimenuj",

@@ -26775,6 +26775,7 @@ const resource = {
     "common.not_set": "Hindi Naitakda",
     "common.offline_banner": "Offline ka - hindi magsi-sync ang mga pagbabago.",
     "common.offline_banner_desktop": "Offline ka. Naka-save ang trabaho mo sa computer na ito - ang live na multi-user na collaboration lang ang huminto hanggang muli kang kumonekta.",
+    "common.desktop_port_moved": "May ibang program na gumagamit ng port {{defaultPort}}, kaya bumukas ang app sa port {{port}}. Ang pag-sign in at wika ay naka-save bawat port, kaya baka kailangan mong mag-sign in o pumili ng wika muli nang isang beses. Hindi apektado ang iyong mga proyekto at data.",
     "common.optional": "opsyonal",
     "common.prev": "Nakaraang pahina",
     "common.rename": "Palitan ang pangalan",

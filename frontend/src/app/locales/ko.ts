@@ -27372,6 +27372,7 @@ const resource = {
     "common.not_set": "설정되지 않음",
     "common.offline_banner": "오프라인 상태입니다 - 변경 사항이 동기화되지 않습니다.",
     "common.offline_banner_desktop": "오프라인 상태입니다. 작업 내용은 이 컴퓨터에 저장됩니다 - 다시 연결될 때까지 여러 사용자의 실시간 공동 작업만 일시 중지됩니다.",
+    "common.desktop_port_moved": "다른 프로그램이 포트 {{defaultPort}}을(를) 사용 중이어서 앱이 포트 {{port}}에서 열렸습니다. 로그인과 언어는 포트별로 저장되므로 한 번 다시 로그인하거나 언어를 선택해야 할 수 있습니다. 프로젝트와 데이터에는 영향이 없습니다.",
     "common.optional": "선택 사항",
     "common.prev": "이전 페이지",
     "common.rename": "이름 바꾸기",

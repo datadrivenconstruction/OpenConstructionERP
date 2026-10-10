@@ -27559,6 +27559,7 @@ const resource = {
     "common.not_set": "Niet ingesteld",
     "common.offline_banner": "U bent offline - wijzigingen worden niet gesynchroniseerd.",
     "common.offline_banner_desktop": "U bent offline. Uw werk wordt op deze computer opgeslagen - alleen realtime samenwerking met meerdere gebruikers pauzeert totdat u opnieuw verbinding maakt.",
+    "common.desktop_port_moved": "Een ander programma gebruikt poort {{defaultPort}}, daarom is de app geopend op poort {{port}}. Aanmelding en taal worden per poort bewaard, dus u moet zich mogelijk één keer opnieuw aanmelden of uw taal opnieuw kiezen. Uw projecten en gegevens worden niet beïnvloed.",
     "common.optional": "optioneel",
     "common.prev": "Vorige pagina",
     "common.rename": "Hernoemen",

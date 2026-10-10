@@ -27367,6 +27367,7 @@ const resource = {
     "common.not_set": "未設定",
     "common.offline_banner": "オフラインです - 変更は同期されません。",
     "common.offline_banner_desktop": "オフラインです。作業内容はこのコンピューターに保存されています - 再接続するまで、複数ユーザーによるリアルタイムの共同作業のみが一時停止します。",
+    "common.desktop_port_moved": "ポート {{defaultPort}} が別のプログラムで使用されているため、アプリはポート {{port}} で開きました。サインインと言語はポートごとに保存されるため、一度だけ再度サインインするか言語を選び直す必要がある場合があります。プロジェクトとデータには影響ありません。",
     "common.optional": "オプション",
     "common.prev": "前のページ",
     "common.rename": "名前変更",

@@ -27446,6 +27446,7 @@ const resource = {
     "common.not_set": "Määramata",
     "common.offline_banner": "Olete võrguühenduseta - muudatusi ei sünkroonita.",
     "common.offline_banner_desktop": "Olete võrguühenduseta. Teie töö on salvestatud sellesse arvutisse - ainult reaalajas mitmekasutaja koostöö peatub, kuni ühendus taastub.",
+    "common.desktop_port_moved": "Pordi {{defaultPort}} kasutab teine programm, seega avanes rakendus pordil {{port}}. Sisselogimine ja keel salvestatakse iga pordi kohta eraldi, nii et võib-olla peate ühe korra uuesti sisse logima või keele valima. Teie projektid ja andmed ei muutu.",
     "common.optional": "valikuline",
     "common.prev": "Eelmine lehekülg",
     "common.rename": "Nimeta ümber",

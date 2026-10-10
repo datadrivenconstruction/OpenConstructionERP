@@ -24,7 +24,7 @@ import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
 import { ModuleVideosSlot } from '@/features/videos/ModuleVideosSlot';
-import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, PWAInstallPrompt } from '@/shared/ui';
+import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
 import { AdminOnly } from '@/shared/auth/AdminOnly';
 import GlobalSearchModal from '@/features/search/GlobalSearchModal';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
@@ -1118,6 +1118,7 @@ export default function App() {
           between history push and location commit (navigationProgress.ts). */}
       <NavigationProgress />
       <OfflineBanner />
+      <DesktopPortBanner />
       {isAuthenticated && <GlobalShortcuts />}
       {/* First-run product tour — 8-step spotlight walk-through. Always
           mounted (for authenticated users) but renders nothing unless

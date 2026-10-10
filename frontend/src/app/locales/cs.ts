@@ -27908,6 +27908,7 @@ const resource = {
     "common.not_set": "Nenastaveno",
     "common.offline_banner": "Jste offline - změny se nebudou synchronizovat.",
     "common.offline_banner_desktop": "Jste offline. Vaše práce se ukládá do tohoto počítače - pozastaví se pouze spolupráce více uživatelů v reálném čase, dokud se znovu nepřipojíte.",
+    "common.desktop_port_moved": "Port {{defaultPort}} používá jiný program, proto se aplikace otevřela na portu {{port}}. Přihlášení a jazyk se ukládají pro každý port zvlášť, takže se možná budete muset jednou znovu přihlásit nebo vybrat jazyk. Vaše projekty a data nejsou dotčeny.",
     "common.optional": "volitelné",
     "common.prev": "Předchozí strana",
     "common.rename": "Přejmenovat",
