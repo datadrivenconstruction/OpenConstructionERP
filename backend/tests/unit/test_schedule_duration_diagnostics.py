@@ -26,6 +26,7 @@ from sqlalchemy import func, select
 
 from app.core.demo_projects import (
     DEMO_TEMPLATES,
+    _cost_level,
     _country_code_for,
     _demo_rate,
     _enrich_position_metadata,
@@ -92,6 +93,7 @@ async def _projected_bill(session, demo_id):
                 codes,
                 locale=template.locale,
                 explicit_resources=template.position_resources.get(subordinal),
+                currency=template.currency,
             )
             metadata.update(copy.deepcopy(template.position_metadata))
             position = _make_position(
@@ -248,6 +250,30 @@ def test_seeded_hour_quantities_are_inferred_from_price_not_independent_producti
     expensive = _enrich_position_metadata("Concrete", "m3", 10000, {})
     assert _resource_hours(expensive) == pytest.approx(_resource_hours(cheap) * 100, rel=0.001)
     assert expensive["resources"][1]["unit_rate"] == cheap["resources"][1]["unit_rate"] == 45
+
+
+@pytest.mark.parametrize("demo_id", DEMOS)
+def test_seeded_hourly_rates_are_in_the_bill_currency(demo_id):
+    # A forint or rupee labour share divided by a euro hourly rate made the
+    # hours 140 and 8 times too many: one Debrecen curtain wall ran 43,852
+    # working days. Every hourly leaf must carry the levelled rate, and the
+    # leaves must still add up to the position rate.
+    template = DEMO_TEMPLATES[demo_id]
+    checked = 0
+    for _ordinal, _title, _classification, items in template.sections:
+        for _sub, description, unit, _quantity, rate, codes in items:
+            metadata = _enrich_position_metadata(description, unit, rate, codes, currency=template.currency)
+            leaves = metadata.get("resources", [])
+            for leaf in leaves:
+                if (
+                    leaf.get("unit") == "hr"
+                    and leaf.get("demo_provenance", {}).get("source") == "synthetic_cost_allocation"
+                ):
+                    assert 20 <= leaf["unit_rate"] / _cost_level(template.currency, leaf["type"]) <= 200
+                    checked += 1
+            if leaves and rate:
+                assert sum(leaf["total"] for leaf in leaves) == pytest.approx(rate, abs=0.01)
+    assert checked > 0
 
 
 def test_a_monetary_allowance_is_not_a_time_norm():
