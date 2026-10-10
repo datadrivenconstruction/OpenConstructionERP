@@ -2569,8 +2569,8 @@ export function ContractDetailDrawer({
               </p>
             ) : retentionQ.data.totals.length === 0 ? (
               <p className="py-2 text-sm text-content-tertiary">
-                {t('contracts.retention_ledger_empty', {
-                  defaultValue: 'No retention held or scheduled yet.',
+                {t('finance.retention_empty_desc', {
+                  defaultValue: 'No invoice retention or payment withholding has been recorded on this project yet. Retainage appears here once invoices carry a retention amount or payments hold back a withholding.',
                 })}
               </p>
             ) : (
