@@ -3443,6 +3443,23 @@ def _explicit_resources(
     return leaves
 
 
+# Description words of equipment supplied and installed by its maker, whose
+# price is the machine rather than the work of fitting it. The radiation
+# shielding of an X-ray or scanner room is building work and stays out.
+_SUPPLIED_PLANT_KEYWORDS = (
+    "scanner",
+    "x-ray",
+    "catheterisation",
+    "catheterization",
+    "cath lab",
+    "operating theatre",
+    "operating theater",
+    "linear accelerator",
+    "angiograph",
+    "mammograph",
+)
+
+
 def _enrich_position_metadata(
     description: str,
     unit: str,
@@ -5104,6 +5121,24 @@ def _enrich_position_metadata(
                 ("site_facilities_consumables", "material", 0.20, None),
                 ("site_team_general_laborers", "labor", 0.45, 38.0),
                 ("site_plant_facilities", "equipment", 0.35, 70.0),
+            ],
+            currency=currency,
+        )
+    elif any(k in desc_lower for k in _SUPPLIED_PLANT_KEYWORDS) and "shield" not in desc_lower:
+        # Equipment bought in and installed by its maker: a scanner or a
+        # prefabricated theatre is priced in millions per piece, almost all of
+        # it the machine. The generic split read 45 % of an MRI scanner as
+        # labour and turned it into 178,571 hours, years on one position. The
+        # installation crew is the small share it is on such a quote.
+        meta["cwicr_ref"] = "CWICR-SPE-003"
+        meta["resources"] = _make_resources(
+            unit_rate,
+            unit,
+            "CWICR-SPE-003",
+            [
+                ("specialist_equipment", "material", 0.97, None),
+                ("specialist_installers", "labor", 0.01, 55.0),
+                ("testing_equipment", "equipment", 0.02, None),
             ],
             currency=currency,
         )
