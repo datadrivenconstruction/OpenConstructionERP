@@ -5041,11 +5041,14 @@ export function BOQEditorPage() {
             </Badge>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        {/* The action row wraps instead of holding one line: with every
+            button shown it is wider than a 1440 px window in German or
+            Russian, and pushed the whole page sideways on a phone. */}
+        <div className="flex flex-wrap items-center gap-2">
           {boq.description && (
-            <p className="text-sm text-content-secondary truncate flex-1">{boq.description}</p>
+            <p className="text-sm text-content-secondary truncate flex-1 min-w-[12rem]">{boq.description}</p>
           )}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
             {!boq.is_locked && boq.status === 'draft' && (
               <Button
                 variant="secondary"
