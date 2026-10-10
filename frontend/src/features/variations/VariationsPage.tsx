@@ -70,6 +70,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import {
   listNotices,
   listVariationRequests,
@@ -668,53 +669,31 @@ export function VariationsPage() {
   const filteredNotices = useMemo(() => {
     const items = noticesQ.data?.items ?? [];
     if (!search.trim()) return items;
-    const s = search.toLowerCase();
-    return items.filter(
-      (n) =>
-        n.code.toLowerCase().includes(s) ||
-        (n.title || '').toLowerCase().includes(s) ||
-        (n.description || '').toLowerCase().includes(s),
-    );
+    return items.filter((n) => matchesSearch(search, n.code, n.title, n.description));
   }, [noticesQ.data, search]);
 
   const filteredRequests = useMemo(() => {
     const items = requestsQ.data?.items ?? [];
     if (!search.trim()) return items;
-    const s = search.toLowerCase();
-    return items.filter(
-      (r) =>
-        r.code.toLowerCase().includes(s) ||
-        (r.title || '').toLowerCase().includes(s) ||
-        (r.description || '').toLowerCase().includes(s),
-    );
+    return items.filter((r) => matchesSearch(search, r.code, r.title, r.description));
   }, [requestsQ.data, search]);
 
   const filteredOrders = useMemo(() => {
     const items = ordersQ.data?.items ?? [];
     if (!search.trim()) return items;
-    const s = search.toLowerCase();
-    return items.filter(
-      (o) =>
-        o.code.toLowerCase().includes(s) || (o.title || '').toLowerCase().includes(s),
-    );
+    return items.filter((o) => matchesSearch(search, o.code, o.title));
   }, [ordersQ.data, search]);
 
   const filteredDaywork = useMemo(() => {
     const items = dayworkQ.data?.items ?? [];
     if (!search.trim()) return items;
-    const s = search.toLowerCase();
-    return items.filter(
-      (d) =>
-        d.sheet_number.toLowerCase().includes(s) ||
-        (d.description || '').toLowerCase().includes(s),
-    );
+    return items.filter((d) => matchesSearch(search, d.sheet_number, d.description));
   }, [dayworkQ.data, search]);
 
   const filteredEot = useMemo(() => {
     const items = eotQ.data?.items ?? [];
     if (!search.trim()) return items;
-    const s = search.toLowerCase();
-    return items.filter((e) => (e.description || '').toLowerCase().includes(s));
+    return items.filter((e) => matchesSearch(search, e.description));
   }, [eotQ.data, search]);
 
   // Module Insights - the toggleable visualization panel for this module. It
@@ -2765,7 +2744,14 @@ export function DetailDrawer({
     request?.code ||
     order?.code ||
     sheet?.sheet_number ||
-    (claim ? `EoT ${claim.id.slice(0, 8)}` : '');
+    // An extension of time claim has no stored code, unlike the four records
+    // above, so the word in front of its id is a label and is translated.
+    (claim
+      ? t('variations.eot_heading', {
+          defaultValue: 'EoT claim {{ref}}',
+          ref: claim.id.slice(0, 8),
+        })
+      : '');
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

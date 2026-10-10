@@ -124,6 +124,7 @@ import {
   type ValuationInterval,
 } from './api';
 import { ContractPaymentTermsCard } from './ContractPaymentTermsEditor';
+import { HakedisTermsCard } from './hakedis';
 import {
   DefaultHint,
   RELEASE_SPLIT_PRESETS,
@@ -139,6 +140,7 @@ import { buildContractsInsights } from './contractsInsights';
 import { DEFAULT_CONTRACTS_TAB, isContractsTab, type ContractsTab } from './contractsTabs';
 import { ClaimPeriod } from './ClaimPeriod';
 import { fmtList, fmtPercent } from '@/shared/lib/formatters';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 // English fallbacks for the computed `contracts.type_*` keys. The default used to be
@@ -650,28 +652,21 @@ export function ContractsPage() {
   });
 
   const filteredContracts = useMemo(() => {
-    const s = search.toLowerCase();
     return contracts.filter((c) => {
       if (counterpartyFilter && c.counterparty_id !== counterpartyFilter) {
         return false;
       }
       if (typeFilter && c.contract_type !== typeFilter) return false;
       if (statusFilter && c.status !== statusFilter) return false;
-      if (!s) return true;
-      return (
-        c.code.toLowerCase().includes(s) ||
-        c.title.toLowerCase().includes(s)
-      );
+      return matchesSearch(search, c.code, c.title);
     });
   }, [contracts, search, typeFilter, statusFilter, counterpartyFilter]);
 
   const filteredClaims = useMemo(() => {
     const items = claimsQ.data?.items ?? [];
-    const s = search.toLowerCase();
     return items.filter((c) => {
       if (statusFilter && c.status !== statusFilter) return false;
-      if (!s) return true;
-      return c.claim_number.toLowerCase().includes(s);
+      return matchesSearch(search, c.claim_number);
     });
   }, [claimsQ.data, search, statusFilter]);
 
@@ -679,14 +674,10 @@ export function ContractsPage() {
   // The status filter and search box both narrow this list so the dropdown is
   // a live control rather than dead UI.
   const finalAccountContracts = useMemo(() => {
-    const s = search.toLowerCase();
     return contracts.filter((c) => {
       if (c.status !== 'completed' && c.status !== 'terminated') return false;
       if (statusFilter && c.status !== statusFilter) return false;
-      if (!s) return true;
-      return (
-        c.code.toLowerCase().includes(s) || c.title.toLowerCase().includes(s)
-      );
+      return matchesSearch(search, c.code, c.title);
     });
   }, [contracts, search, statusFilter]);
 
@@ -2392,6 +2383,10 @@ export function ContractDetailDrawer({
             </p>
             <ContractPaymentTermsCard contract={contract} />
           </Card>
+
+          {/* Payment certificate settings. Renders nothing unless the project's
+              country has a certificate layout or the contract configures one. */}
+          <HakedisTermsCard contract={contract} />
 
           {/* Who the contract is between. Directly under the header because the
               header's counterparty field is one side and a category, and this

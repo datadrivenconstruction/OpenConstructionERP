@@ -129,6 +129,7 @@ import { PublishRecordModal } from '@/features/record-publishing/PublishRecordMo
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildDailyDiaryInsights } from './dailyDiaryInsights';
 import { fmtList } from '@/shared/lib/formatters';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 
 type Tab = 'diaries' | 'today' | 'archive';
 
@@ -3165,9 +3166,8 @@ function ExistingFilePicker({
   }, [photosQ.data, docsQ.data]);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return assets;
-    return assets.filter((a) => a.label.toLowerCase().includes(q));
+    if (!search.trim()) return assets;
+    return assets.filter((a) => matchesSearch(search, a.label));
   }, [assets, search]);
 
   // The picker draws from two registers, photos and documents, and offers a

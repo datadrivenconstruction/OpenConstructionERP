@@ -54,6 +54,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { listContracts } from '@/features/contracts/api';
 import { contractDeepLink, linkedVariationDeepLink } from '@/shared/lib/changeChainLinks';
 import { boqDeepLink, changeOrderWriteback, FINANCE_BUDGETS_LINK } from '@/shared/lib/awardChainLinks';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { ProvabilityGauge, EvidenceThreadPanel } from '@/features/claims-evidence';
 import { ApprovalTimeline } from './ApprovalTimeline';
 import { ImpactSimulator, type SavedScenario } from './ImpactSimulator';
@@ -814,13 +815,8 @@ function BoqPositionPickerDialog({
 
   const positions = useMemo(() => {
     const rows = boqDetail?.positions ?? [];
-    const q = search.trim().toLowerCase();
-    const filtered = q
-      ? rows.filter(
-          (p) =>
-            (p.description || '').toLowerCase().includes(q) ||
-            (p.ordinal || '').toLowerCase().includes(q),
-        )
+    const filtered = search.trim()
+      ? rows.filter((p) => matchesSearch(search, p.description, p.ordinal))
       : rows;
     return filtered.slice(0, 300);
   }, [boqDetail, search]);
@@ -1005,16 +1001,10 @@ function ApprovalChainBuilderDialog({
 
   const chosenIds = useMemo(() => new Set(chosen.map((u) => u.id)), [chosen]);
   const matches = useMemo(() => {
-    const q = search.trim().toLowerCase();
     const pool = users.filter((u) => !chosenIds.has(u.id));
-    if (!q) return pool.slice(0, 8);
+    if (!search.trim()) return pool.slice(0, 8);
     return pool
-      .filter(
-        (u) =>
-          userLabel(u).toLowerCase().includes(q) ||
-          (u.email || '').toLowerCase().includes(q) ||
-          (u.role || '').toLowerCase().includes(q),
-      )
+      .filter((u) => matchesSearch(search, userLabel(u), u.email, u.role))
       .slice(0, 8);
   }, [users, chosenIds, search]);
 
@@ -1611,6 +1601,11 @@ function DetailView({
             variation_request_id?: string;
           };
           if (meta.origin !== 'variations.convert_vr_to_vo') return null;
+          // "VO-" and "VR-" stay untranslated on purpose. They are the series
+          // prefixes the variations module stores in a record's code
+          // (`VO-0001`, `VR-0001`), so a reader matches this reference to the
+          // register by them in any language. The words that say what the
+          // reference is are the translated labels rendered beside it.
           const voRef = meta.variation_order_id
             ? `VO-${meta.variation_order_id.slice(0, 8)}`
             : null;

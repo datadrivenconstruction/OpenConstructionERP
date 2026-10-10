@@ -29,6 +29,7 @@ import { useFileList } from '@/features/file-manager/hooks';
 import { UploadDialog } from '@/features/file-manager/components/UploadDialog';
 import type { FileRow } from '@/features/file-manager/types';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -115,9 +116,8 @@ export function PhotosTab({ projectId }: PhotosTabProps): React.ReactElement {
   const photos: FileRow[] = useMemo(() => list.data?.items ?? [], [list.data]);
 
   const filtered: FileRow[] = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const matched = q
-      ? photos.filter((r) => r.name?.toLowerCase().includes(q))
+    const matched = search.trim()
+      ? photos.filter((r) => matchesSearch(search, r.name))
       : photos;
     return sortRows(matched, sort);
   }, [photos, search, sort]);

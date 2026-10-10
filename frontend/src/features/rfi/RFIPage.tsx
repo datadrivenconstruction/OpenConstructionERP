@@ -76,6 +76,7 @@ import { CreateTaskFromSourceDialog } from '@/features/tasks';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildRFIInsights } from './rfiInsights';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 
 // English fallbacks for the computed `rfi.status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -83,6 +84,26 @@ import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 // through to the previous default.
 const RFI_STATUS_LABELS: Record<string, string> = {
   draft: 'Draft', open: 'Open', answered: 'Answered', closed: 'Closed', void: 'Void'
+};
+
+// English fallbacks for the computed `rfi.priority_*` and `rfi.discipline_*`
+// keys, one entry per value the backend accepts (priority is a closed pattern
+// in `rfi/schemas.py`) or the picker offers (`RFI_DISCIPLINES`). The default
+// used to be the token with its first letter capitalised, which printed an
+// English word on every screen in every language and "Mep" for MEP. The
+// discipline column is free text, so a value outside this table is somebody's
+// own wording and is shown exactly as stored.
+const RFI_PRIORITY_LABELS: Record<string, string> = {
+  low: 'Low', normal: 'Normal', high: 'High', critical: 'Critical'
+};
+const RFI_DISCIPLINE_LABELS: Record<string, string> = {
+  architectural: 'Architectural',
+  structural: 'Structural',
+  mep: 'MEP',
+  electrical: 'Electrical',
+  plumbing: 'Plumbing',
+  civil: 'Civil',
+  landscape: 'Landscape',
 };
 
 
@@ -468,12 +489,8 @@ function DocumentPickerModal({
   }, [onClose]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return documents;
-    return documents.filter(
-      (d) =>
-        d.filename.toLowerCase().includes(q) || d.category.toLowerCase().includes(q),
-    );
+    if (!query.trim()) return documents;
+    return documents.filter((d) => matchesSearch(query, d.filename, d.category));
   }, [documents, query]);
 
   const togglePick = (id: string) => {
@@ -921,7 +938,7 @@ export function CreateRFIModal({
                     className={clsx('inline-block h-2 w-2 rounded-full', PRIORITY_DOT[p])}
                   />
                   {t(`rfi.priority_${p}`, {
-                    defaultValue: p.charAt(0).toUpperCase() + p.slice(1),
+                    defaultValue: RFI_PRIORITY_LABELS[p] ?? p,
                   })}
                 </button>
               );
@@ -946,7 +963,7 @@ export function CreateRFIModal({
               {RFI_DISCIPLINES.map((d) => (
                 <option key={d} value={d}>
                   {t(`rfi.discipline_${d}`, {
-                    defaultValue: d.charAt(0).toUpperCase() + d.slice(1),
+                    defaultValue: RFI_DISCIPLINE_LABELS[d] ?? d,
                   })}
                 </option>
               ))}
@@ -1399,7 +1416,7 @@ const RFIRow = React.memo(function RFIRow({
                   defaultValue: 'Priority: {{p}}',
                   p: t(`rfi.priority_${rfi.priority}`, {
                     defaultValue:
-                      rfi.priority.charAt(0).toUpperCase() + rfi.priority.slice(1),
+                      RFI_PRIORITY_LABELS[rfi.priority] ?? rfi.priority,
                   }),
                 })
               : t('rfi.priority_none_aria', { defaultValue: 'No priority' })
@@ -1408,7 +1425,7 @@ const RFIRow = React.memo(function RFIRow({
             rfi.priority
               ? t(`rfi.priority_${rfi.priority}`, {
                   defaultValue:
-                    rfi.priority.charAt(0).toUpperCase() + rfi.priority.slice(1),
+                    RFI_PRIORITY_LABELS[rfi.priority] ?? rfi.priority,
                 })
               : '—'
           }
@@ -1439,7 +1456,7 @@ const RFIRow = React.memo(function RFIRow({
         {/* Status badge */}
         <Badge variant={statusCfg.variant} size="sm" className={statusCfg.cls}>
           {t(`rfi.status_${rfi.status}`, {
-            defaultValue: RFI_STATUS_LABELS[rfi.status] ?? rfi.status.charAt(0).toUpperCase() + rfi.status.slice(1),
+            defaultValue: RFI_STATUS_LABELS[rfi.status] ?? rfi.status,
           })}
         </Badge>
 
@@ -1455,7 +1472,7 @@ const RFIRow = React.memo(function RFIRow({
           >
             {t(`rfi.discipline_${rfi.discipline}`, {
               defaultValue:
-                rfi.discipline.charAt(0).toUpperCase() + rfi.discipline.slice(1),
+                RFI_DISCIPLINE_LABELS[rfi.discipline] ?? rfi.discipline,
             })}
           </span>
         )}
@@ -2383,7 +2400,7 @@ export function RFIPage() {
             {(['draft', 'open', 'answered', 'closed', 'void'] as RFIStatus[]).map((s) => (
               <option key={s} value={s}>
                 {t(`rfi.status_${s}`, {
-                  defaultValue: RFI_STATUS_LABELS[s] ?? s.charAt(0).toUpperCase() + s.slice(1),
+                  defaultValue: RFI_STATUS_LABELS[s] ?? s,
                 })}
               </option>
             ))}
@@ -2407,7 +2424,7 @@ export function RFIPage() {
             {PRIORITY_VALUES.map((p) => (
               <option key={p} value={p}>
                 {t(`rfi.priority_${p}`, {
-                  defaultValue: p.charAt(0).toUpperCase() + p.slice(1),
+                  defaultValue: RFI_PRIORITY_LABELS[p] ?? p,
                 })}
               </option>
             ))}
@@ -2433,7 +2450,7 @@ export function RFIPage() {
             {RFI_DISCIPLINES.map((d) => (
               <option key={d} value={d}>
                 {t(`rfi.discipline_${d}`, {
-                  defaultValue: d.charAt(0).toUpperCase() + d.slice(1),
+                  defaultValue: RFI_DISCIPLINE_LABELS[d] ?? d,
                 })}
               </option>
             ))}
@@ -2581,7 +2598,7 @@ export function RFIPage() {
                         <h4 className="text-sm font-semibold text-content-primary truncate">{rfi.subject}</h4>
                       </div>
                       <Badge variant={statusCfg.variant} size="sm" className={statusCfg.cls}>
-                        {t(`rfi.status_${rfi.status}`, { defaultValue: RFI_STATUS_LABELS[rfi.status] ?? rfi.status.charAt(0).toUpperCase() + rfi.status.slice(1) })}
+                        {t(`rfi.status_${rfi.status}`, { defaultValue: RFI_STATUS_LABELS[rfi.status] ?? rfi.status })}
                       </Badge>
                     </div>
                     <div className="mb-2">

@@ -58,6 +58,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -1627,13 +1628,8 @@ export function ContactsPage() {
   const filtered = useMemo(() => {
     let list = contacts;
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (c) =>
-          (c.company_name || '').toLowerCase().includes(q) ||
-          (c.first_name || '').toLowerCase().includes(q) ||
-          (c.last_name || '').toLowerCase().includes(q) ||
-          (c.primary_email || '').toLowerCase().includes(q),
+      list = list.filter((c) =>
+        matchesSearch(searchQuery, c.company_name, c.first_name, c.last_name, c.primary_email),
       );
     }
     if (countryFilter.trim()) {

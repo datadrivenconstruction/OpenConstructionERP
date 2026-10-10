@@ -29,6 +29,32 @@ import type { ReactNode } from 'react';
 // strips cannot be mangled by an editor or a diff that normalises the file.
 const COMBINING_MARKS = new RegExp('[\\u0300-\\u036f]', 'g');
 
+// Letters that case and diacritic folding leave apart although a reader
+// searching for one expects the other. Written as escapes for the same reason
+// as the marks above.
+//
+// U+0131, the Turkish dotless i, has no decomposition, so stripping marks
+// never reaches it, and lower-casing "I" gives "i", never the dotless letter.
+// Without this entry "ISITMA" does not find the same word in lower case and
+// "sinir" does not find the word spelt with the dotless letter. Its capital
+// partner U+0130 needs no entry: it decomposes to "I" plus a combining dot,
+// the dot is stripped and the rest lower-cases to "i".
+//
+// U+03C2, the Greek word-final sigma, is what a typed lower-case word ends in,
+// while a capital sigma lower-cases to the medial form one character at a
+// time, so a word in capitals would not find itself in lower case.
+//
+// The fold is deliberately the same for every interface language. A locale
+// lower-casing (`toLocaleLowerCase('tr')`) would be right for a Turkish reader
+// and wrong for the English-interface colleague searching the same Turkish
+// names, and a search box has to work for both. The price is that a query
+// also finds the words that differ only by these letters; in a filter over a
+// register a few extra rows cost a glance, a missing row costs the record.
+const FOLD_EQUIVALENTS: Record<string, string> = {
+  'ı': 'i',
+  'ς': 'σ',
+};
+
 /** Fold one character for comparison, or return it unchanged if folding it
  *  would change how many characters it occupies. */
 function foldChar(ch: string): string {
@@ -36,13 +62,31 @@ function foldChar(ch: string): string {
     .normalize('NFD')
     .replace(COMBINING_MARKS, '')
     .toLowerCase();
-  return Array.from(folded).length === 1 ? folded : ch.toLowerCase();
+  const one = Array.from(folded).length === 1 ? folded : ch.toLowerCase();
+  return FOLD_EQUIVALENTS[one] ?? one;
 }
 
 /** Fold a whole string with the same rule `highlightMatch` compares by, so a
  *  filter built on this marks every row it lets through. */
 export function foldForSearch(text: string): string {
   return Array.from(text).map(foldChar).join('');
+}
+
+/**
+ * True when the typed `query` occurs in any of `fields`, compared folded.
+ *
+ * This is the drop-in for the `a.toLowerCase().includes(q) || ...` chain a
+ * list page filters by. Null and undefined fields are skipped, so an optional
+ * column needs no guard at the call site. An empty or blank query matches
+ * everything, which is what an empty search box means.
+ */
+export function matchesSearch(
+  query: string,
+  ...fields: Array<string | null | undefined>
+): boolean {
+  const q = foldForSearch(query.trim());
+  if (!q) return true;
+  return fields.some((f) => !!f && foldForSearch(f).includes(q));
 }
 
 /** Index of `needle` in `hay` at or after `from`, both arrays of folded

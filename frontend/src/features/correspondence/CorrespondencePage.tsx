@@ -81,6 +81,7 @@ import { CreateTaskFromSourceDialog } from '@/features/tasks';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildCorrespondenceInsights } from './correspondenceInsights';
 import { fmtList } from '@/shared/lib/formatters';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -1622,13 +1623,14 @@ export function CorrespondencePage() {
   // Client-side search
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return items;
-    const q = searchQuery.toLowerCase();
-    return items.filter(
-      (c) =>
-        c.subject.toLowerCase().includes(q) ||
-        c.reference_number.toLowerCase().includes(q) ||
-        (c.from_contact_id || '').toLowerCase().includes(q) ||
-        (c.to_contact_ids ?? []).some((tc) => tc.toLowerCase().includes(q)),
+    return items.filter((c) =>
+      matchesSearch(
+        searchQuery,
+        c.subject,
+        c.reference_number,
+        c.from_contact_id,
+        ...(c.to_contact_ids ?? []),
+      ),
     );
   }, [items, searchQuery]);
 

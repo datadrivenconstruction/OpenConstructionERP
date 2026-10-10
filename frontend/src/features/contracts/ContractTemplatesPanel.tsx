@@ -41,6 +41,7 @@ import {
 } from '@/shared/ui/WideModal';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import {
   listClauseTemplates,
   getClauseTemplate,
@@ -122,15 +123,9 @@ export function ContractTemplatesPanel({ search }: { search: string }) {
   });
 
   const rows = useMemo(() => {
-    const needle = search.trim().toLowerCase();
     const all = catalogueQ.data ?? [];
-    if (!needle) return all;
-    return all.filter(
-      (row) =>
-        row.code.toLowerCase().includes(needle) ||
-        row.name.toLowerCase().includes(needle) ||
-        row.family.toLowerCase().includes(needle),
-    );
+    if (!search.trim()) return all;
+    return all.filter((row) => matchesSearch(search, row.code, row.name, row.family));
   }, [catalogueQ.data, search]);
 
   if (catalogueQ.isLoading) {

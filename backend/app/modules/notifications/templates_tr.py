@@ -59,11 +59,11 @@ TEMPLATES_TR: dict[str, str] = {
     "notifications.submittal.approved_as_noted.title": "Onay Belgesi notlu onaylandı",
     "notifications.submittal.approved_as_noted.body": "{code} - {title}",
     # Transmittals
-    "notifications.transmittal.issued.title": "Size bir evrak sevk yazısı gönderildi",
+    "notifications.transmittal.issued.title": "Size bir İletim Yazısı gönderildi",
     "notifications.transmittal.issued.body": "{code} - {title}",
-    "notifications.transmittal.acknowledged.title": "Evrak sevk yazısı teslim alındı",
+    "notifications.transmittal.acknowledged.title": "İletim Yazısı teslim alındı",
     "notifications.transmittal.acknowledged.body": "Alıcı {code} ({title}) kaydını teslim aldığını onayladı.",
-    "notifications.transmittal.responded.title": "Evrak sevk yazısı yanıtlandı",
+    "notifications.transmittal.responded.title": "İletim Yazısı yanıtlandı",
     "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
     # Singular-namespace keys
     "notification.rfi_assigned_title": "Size bir Bilgi Talebi (RFI) atandı",

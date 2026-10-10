@@ -44,6 +44,7 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { fetchProjectList } from '@/shared/lib/projectList';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -1131,11 +1132,8 @@ export function TransmittalsPage() {
   // Client-side search
   const filtered = useMemo(() => {
     if (!searchQuery.trim()) return transmittals;
-    const q = searchQuery.toLowerCase();
-    return transmittals.filter(
-      (tr) =>
-        tr.subject.toLowerCase().includes(q) ||
-        tr.transmittal_number.toLowerCase().includes(q),
+    return transmittals.filter((tr) =>
+      matchesSearch(searchQuery, tr.subject, tr.transmittal_number),
     );
   }, [transmittals, searchQuery]);
 

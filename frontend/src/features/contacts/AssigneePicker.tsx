@@ -23,6 +23,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BookUser, User, X } from 'lucide-react';
 import { apiGet, type Page } from '@/shared/lib/api';
 import { normalizeRole, ROLE_RANK } from '@/shared/lib/roles';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { fetchContacts, type Contact } from './api';
 
@@ -142,10 +143,7 @@ export function AssigneePicker({
         detail: c.company_name && (c.first_name || c.last_name) ? c.company_name : c.primary_email ?? '',
       })),
     ];
-    const q = query.toLowerCase();
-    const hits = q
-      ? all.filter((o) => o.label.toLowerCase().includes(q) || o.detail.toLowerCase().includes(q))
-      : all;
+    const hits = query ? all.filter((o) => matchesSearch(query, o.label, o.detail)) : all;
     return hits.slice(0, MAX_OPTIONS);
   }, [users, mayListUsers, contactsPage, searchPage, query]);
 

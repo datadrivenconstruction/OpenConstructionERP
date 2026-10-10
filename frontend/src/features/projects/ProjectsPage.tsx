@@ -23,6 +23,7 @@ import { apiGet, apiPatch, apiPost, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { CreateProjectModal } from './CreateProjectPage';
 import { projectsGuide } from './projectsGuide';
 import { ProjectStatusBadge, CURATED_PROJECT_STATUSES, useProjectStatusLabel } from './ProjectStatusBadge';
@@ -342,12 +343,7 @@ export function ProjectsPage() {
 
     // Search by name and description
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.description && p.description.toLowerCase().includes(q)),
-      );
+      list = list.filter((p) => matchesSearch(searchQuery, p.name, p.description));
     }
 
     // Status filter. 'active' shows every working (non-archived) project so
