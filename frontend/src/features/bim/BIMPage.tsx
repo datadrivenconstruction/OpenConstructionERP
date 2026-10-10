@@ -4040,6 +4040,9 @@ export function BIMPage() {
             elements={elements}
             onIsolate={(ids) => setIsolatedIds(ids.length > 0 ? ids : null)}
             onClear={() => setIsolatedIds(null)}
+            onCreateRule={(propKey, propValue) =>
+              navigate(buildQuantityRulesUrl({ projectId, modelId: activeModelId, newRule: { propKey, propValue } }))
+            }
           />
         </div>
       )}

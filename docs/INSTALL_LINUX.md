@@ -4,6 +4,8 @@ This page covers the Linux-specific gotchas that the generic `pip install openco
 
 Tested on Ubuntu 22.04, 24.04, 26.04 and Debian 12.
 
+A message during install or start that this page does not cover? See [Installation help](INSTALL_TROUBLESHOOTING.md) (also [online](https://openconstructionerp.com/install-help)).
+
 ---
 
 ## TL;DR

@@ -2,6 +2,8 @@
 
 Three ways to run OpenConstructionERP. Pick whichever fits your setup.
 
+If a warning or an error shows up on the way, [Installation help](INSTALL_TROUBLESHOOTING.md) explains each one (also [online](https://openconstructionerp.com/install-help), in [Deutsch](INSTALL_TROUBLESHOOTING.de.md) and [Русский](INSTALL_TROUBLESHOOTING.ru.md)).
+
 ## Path A: Desktop App (easiest)
 
 Download the installer for your platform:
