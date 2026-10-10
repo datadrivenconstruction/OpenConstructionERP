@@ -195,6 +195,45 @@ class TestWorkedExamples:
         assert "0 days" not in " ".join(schedule.derivation)
 
 
+class TestTurkey:
+    """Public hakediş and private commercial invoices run on different clocks."""
+
+    def test_a_public_hakedis_is_approved_accrued_then_paid(self):
+        # YİGŞ art. 39(4)(f): approval within 30 days of submission, accrual
+        # (tahakkuk) within 30 days of approval, payment within 15 days of
+        # accrual. Counted from the last day approval may take, so the final
+        # date is the latest the statute allows, 75 calendar days on.
+        schedule = clock.compute_schedule(regime_by_code("tr_yigs_hakedis"), application_date=date(2026, 3, 2))
+        assert schedule.payment_notice_deadline == date(2026, 4, 1)  # approval
+        assert schedule.due_date == date(2026, 5, 1)  # tahakkuk
+        assert schedule.final_date == date(2026, 5, 16)  # payment
+        # There is no pay-less notice; the administration corrects the report
+        # before accrual instead.
+        assert schedule.pay_less_deadline is None
+
+    def test_a_private_invoice_falls_into_default_after_thirty_days(self):
+        schedule = clock.compute_schedule(regime_by_code("tr_ttk_1530"), application_date=date(2026, 3, 2))
+        assert schedule.final_date == date(2026, 4, 1)
+        assert schedule.payment_notice_deadline is None
+        assert schedule.pay_less_deadline is None
+
+    def test_both_rows_name_the_country_and_never_claim_a_notice_effect(self):
+        for code in ("tr_yigs_hakedis", "tr_ttk_1530"):
+            regime = regime_by_code(code)
+            assert regime is not None, code
+            assert regime["country_code"] == "TR"
+            assert regime["no_notice_effect"] == "none"
+
+    def test_public_works_carry_no_statutory_interest(self):
+        # Neither 4734, 4735 nor the YİGŞ sets an interest rate on a late
+        # hakediş, so the row must not borrow the commercial rate.
+        regime = regime_by_code("tr_yigs_hakedis")
+        assert regime["interest_basis"] == "contract"
+        assert regime["interest_margin_percent"] is None
+        assert regime["interest_fixed_percent"] is None
+        assert "TCMB" in regime_by_code("tr_ttk_1530")["interest_reference_rate"]
+
+
 class TestNoticeDeadlinesAndInterest:
     def test_each_notice_type_is_measured_against_its_own_deadline(self):
         schedule = clock.ClockSchedule(
