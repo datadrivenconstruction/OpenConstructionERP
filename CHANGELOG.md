@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - When `openconstructionerp` cannot start, because the port is busy, the embedded database will not come up or a check fails, it now points to the installation help page at https://openconstructionerp.com/install-help. The old troubleshooting link led to a section that no longer exists.
 - The desktop app no longer signs you out and resets your language on every start when another program holds port 8732. It falls back to the port it used last time, then to 8733 to 8741, and only then to a random one, so a busy default costs one move instead of one per start. The first time the window opens on another port it says so in plain words.
 - Your interface language is now kept with your account. A language you pick while signed in is saved to it, and after you sign in on a new browser or a new desktop port that has no language of its own, your language comes back instead of the browser's.
+- The Chinese interface no longer shows a garbled "What's new" card on the dashboard, names the sale and purchase agreement in property development as a sales contract instead of a spa, and translates Cost Explorer, as do Danish, Finnish, Hindi, Indonesian, Japanese, Korean, Mongolian, Norwegian, Swedish, Thai, Turkish and Vietnamese.
 
 ## [18.5.0] - 2026-10-10
 
