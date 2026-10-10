@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "'{code}' poz kodi hozirgi birlik narxlari kitobi raqami (XX.XXX.XXXX) ham, eski raqam (XX.XXX/X) ham emas",
       "suggestion": "Kitobdagi raqamdan foydalaning, masalan 15.140.1002 yoki eski shartnomada 04.013/1; oʻz tahlilingizdagi pozitsiyalarni ÖZEL-1 deb raqamlang"
+    },
+    "chapter_recognised": {
+      "fail": "{ordinal}-pozitsiyadagi '{code}' poz {chapter} bilan boshlanadi, bu esa ushbu tekshiruv biladigan birlik narxlar to'plamlarining birorta bobi emas",
+      "suggestion": "Vazirlik kitobi qurilish ishlarini 15, mexanik montajni 25 va elektr montajini 35 deb raqamlaydi, resurs narxlari 10 dan past, mashina tahlillari 19 dan past. Raqamni olingan to'plam bilan solishtiring yoki o'z pozitsiyangizni ÖZEL-1 deb raqamlang"
+    },
+    "unit_recognised": {
+      "fail": "{ordinal}-pozitsiyadagi '{unit}' birligi birlik narxlar to'plamlari o'lchaydigan birliklardan biri emas",
+      "suggestion": "To'plam pozitsiya uchun bergan birlikdan foydalaning, masalan m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "'{code}' poz ushbu smetada {count} xil birlikda o'lchanadi ({units})",
+      "suggestion": "Poz raqami bitta birlikda belgilangan. Qatorlarni to'plam birligiga keltiring yoki farq qiluvchi ishga o'z raqamini bering"
+    },
+    "poz_rate_consistent": {
+      "fail": "'{code}' poz ushbu smetada {count} xil birlik narxda baholangan ({rates})",
+      "suggestion": "Bitta poz raqamining smetada bitta birlik narxi bor. Bitta narxdan foydalaning yoki farq qiluvchi pozitsiyani alohida o'z pozitsiyasi sifatida raqamlang"
+    },
+    "own_item_analysed": {
+      "fail": "{ordinal}-pozitsiyadagi '{code}' o'z pozitsiyasida narx tahlili yo'q",
+      "suggestion": "To'plamda yo'q pozitsiya o'z tahlili bilan baholanadi. Qator ostiga mehnat, material va mashina resurslarini qo'shing yoki tahlilni izohga yozing"
+    },
+    "profit_overhead_once": {
+      "fail": "Pudratchining foydasi va umumiy xarajatlari {count} qatorga qo'llangan, jami {total} foiz, yagona {limit} foizdan yuqori",
+      "suggestion": "Bu 25 foiz bir marta qo'shiladi. Bitta qatorni qoldiring, narxlar uni o'z ichiga olgan e'lon qilingan birlik narxlar bo'lsa, uni butunlay olib tashlang"
     }
   },
   "sekisan": {

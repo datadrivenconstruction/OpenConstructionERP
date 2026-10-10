@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' er verken et nåværende nummer i enhetsprisboken (XX.XXX.XXXX) eller et eldre nummer (XX.XXX/X)",
       "suggestion": "Bruk nummeret fra boken, f.eks. 15.140.1002, eller 04.013/1 for en eldre kontrakt; nummerer egne analyserte poster som ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' på post {ordinal} begynner med {chapter}, som ikke er et kapittel i en enhetsprisliste kontrollen kjenner",
+      "suggestion": "Ministeriets bok nummererer bygningsarbeider 15, mekanisk installasjon 25 og elektrisk installasjon 35, ressurspriser under 10 og maskinanalyser under 19. Kontroller nummeret mot listen det er hentet fra, eller nummerer din egen post ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Enhet '{unit}' på post {ordinal} er ikke en som enhetsprislistene måler i",
+      "suggestion": "Bruk enheten listen oppgir for posten, for eksempel m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' måles i {count} ulike enheter i dette overslaget ({units})",
+      "suggestion": "Et poz-nummer er definert i én enhet. Før linjene til listens enhet, eller gi det avvikende arbeidet et eget nummer"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' er priset med {count} ulike enhetspriser i dette overslaget ({rates})",
+      "suggestion": "Et poz-nummer har én enhetspris i et overslag. Bruk én pris, eller nummerer den avvikende posten separat som egen post"
+    },
+    "own_item_analysed": {
+      "fail": "Egen post '{code}' på post {ordinal} har ingen priskalkyle",
+      "suggestion": "En post som listen ikke har, prises med en egen kalkyle. Legg til arbeids-, material- og maskinressursene under linjen, eller skriv kalkylen i merknaden"
+    },
+    "profit_overhead_once": {
+      "fail": "Entreprenørens fortjeneste og generelle kostnader er brukt på {count} linjer, {total} prosent til sammen, over de enkle {limit} prosentene",
+      "suggestion": "De 25 prosentene legges på én gang. Behold én linje, og fjern den helt når prisene er publiserte enhetspriser, som allerede inneholder dem"
     }
   },
   "sekisan": {

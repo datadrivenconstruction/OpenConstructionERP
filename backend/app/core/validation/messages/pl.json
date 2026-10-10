@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Numer poz „{code}” nie odpowiada ani aktualnemu formatowi katalogu cen jednostkowych (XX.XXX.XXXX), ani starszemu (XX.XXX/X)",
       "suggestion": "Użyj numeru z katalogu, np. 15.140.1002, lub 04.013/1 w starszej umowie; pozycje z kalkulacją własną numeruj jako ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' w pozycji {ordinal} zaczyna się od {chapter}, co nie jest działem żadnego cennika cen jednostkowych znanego tej kontroli",
+      "suggestion": "Księga Ministerstwa numeruje roboty budowlane 15, instalacje mechaniczne 25 i instalacje elektryczne 35, ceny zasobów poniżej 10 i analizy sprzętu poniżej 19. Sprawdź numer z cennikiem, z którego został wzięty, lub ponumeruj własną pozycję ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Jednostka '{unit}' w pozycji {ordinal} nie jest jednostką, w której mierzą cenniki cen jednostkowych",
+      "suggestion": "Użyj jednostki, którą cennik podaje dla pozycji, na przykład m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' jest mierzony w {count} różnych jednostkach w tym kosztorysie ({units})",
+      "suggestion": "Numer poz jest zdefiniowany w jednej jednostce. Sprowadź wiersze do jednostki z cennika albo nadaj odmiennej robocie własny numer"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' ma w tym kosztorysie {count} różnych cen jednostkowych ({rates})",
+      "suggestion": "Jeden numer poz ma w kosztorysie jedną cenę jednostkową. Użyj jednej ceny albo ponumeruj odmienną pozycję osobno jako pozycję własną"
+    },
+    "own_item_analysed": {
+      "fail": "Pozycja własna '{code}' w pozycji {ordinal} nie ma analizy cenowej",
+      "suggestion": "Pozycję, której cennik nie ma, wycenia się własną analizą. Dodaj pod wierszem zasoby robocizny, materiałów i sprzętu albo wpisz analizę w uwagę"
+    },
+    "profit_overhead_once": {
+      "fail": "Zysk i koszty ogólne wykonawcy naliczono w {count} wierszach, łącznie {total} procent, ponad jednorazowe {limit} procent",
+      "suggestion": "Te 25 procent dolicza się raz. Zostaw jeden wiersz i usuń go całkiem, gdy stawki są opublikowanymi cenami jednostkowymi, które już go zawierają"
     }
   },
   "sekisan": {

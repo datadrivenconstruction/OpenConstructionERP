@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' không phải số trong sách đơn giá hiện hành (XX.XXX.XXXX) hoặc sách cũ (XX.XXX/X)",
       "suggestion": "Sử dụng số trong sách, ví dụ 15.140.1002 hoặc 04.013/1 cho hợp đồng cũ; đánh số công tác tự phân tích là ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' ở dòng {ordinal} bắt đầu bằng {chapter}, không phải chương của bảng đơn giá nào mà phép kiểm tra này biết",
+      "suggestion": "Sách của Bộ đánh số công tác xây dựng là 15, lắp đặt cơ khí là 25 và lắp đặt điện là 35, giá tài nguyên dưới 10 và phân tích máy thi công dưới 19. Hãy đối chiếu số với bảng đơn giá nơi lấy ra, hoặc đánh số hạng mục riêng của bạn là ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Đơn vị '{unit}' ở dòng {ordinal} không phải đơn vị mà các bảng đơn giá dùng để đo",
+      "suggestion": "Dùng đơn vị mà bảng đơn giá nêu cho hạng mục, ví dụ m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' được đo bằng {count} đơn vị khác nhau trong dự toán này ({units})",
+      "suggestion": "Một số poz được định nghĩa trong một đơn vị. Đưa các dòng về đơn vị của bảng đơn giá, hoặc cho công việc khác biệt một số riêng"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' được định giá với {count} đơn giá khác nhau trong dự toán này ({rates})",
+      "suggestion": "Một số poz chỉ có một đơn giá trong dự toán. Dùng một đơn giá, hoặc đánh số riêng hạng mục khác biệt thành hạng mục riêng"
+    },
+    "own_item_analysed": {
+      "fail": "Hạng mục riêng '{code}' ở dòng {ordinal} không có phân tích đơn giá",
+      "suggestion": "Hạng mục không có trong bảng đơn giá được định giá bằng phân tích riêng. Thêm tài nguyên nhân công, vật liệu và máy thi công dưới dòng, hoặc ghi phân tích vào ghi chú"
+    },
+    "profit_overhead_once": {
+      "fail": "Lợi nhuận và chi phí chung của nhà thầu được áp dụng trên {count} dòng, tổng cộng {total} phần trăm, vượt mức {limit} phần trăm duy nhất",
+      "suggestion": "Mức 25 phần trăm chỉ cộng một lần. Giữ lại một dòng, và bỏ hẳn khi đơn giá là đơn giá đã công bố, vốn đã bao gồm khoản này"
     }
   },
   "sekisan": {

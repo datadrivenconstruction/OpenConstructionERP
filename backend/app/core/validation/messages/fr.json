@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "La position « {code} » ne correspond ni au format actuel du recueil de prix unitaires (XX.XXX.XXXX) ni à l'ancien format (XX.XXX/X)",
       "suggestion": "Utilisez le numéro du recueil, par exemple 15.140.1002, ou 04.013/1 pour un ancien contrat ; numérotez vos propres prix analysés sous la forme ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Le poz '{code}' de la position {ordinal} commence par {chapter}, qui n'est pas un chapitre d'un bordereau de prix unitaires connu de ce contrôle",
+      "suggestion": "Le recueil du Ministère numérote les travaux de bâtiment 15, les installations mécaniques 25 et les installations électriques 35, les prix de ressources sous 10 et les analyses de matériel sous 19. Vérifier le numéro par rapport au bordereau d'origine, ou numéroter son propre article ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "L'unité '{unit}' de la position {ordinal} n'est pas une unité de mesure des bordereaux de prix unitaires",
+      "suggestion": "Utiliser l'unité donnée par le bordereau pour l'article, par exemple m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Le poz '{code}' est mesuré dans {count} unités différentes dans ce bordereau ({units})",
+      "suggestion": "Un numéro poz est défini dans une seule unité. Ramener les lignes à l'unité du bordereau, ou donner un numéro propre à l'ouvrage différent"
+    },
+    "poz_rate_consistent": {
+      "fail": "Le poz '{code}' est chiffré à {count} prix unitaires différents dans ce bordereau ({rates})",
+      "suggestion": "Un numéro poz a un seul prix unitaire dans un bordereau. Utiliser un seul prix, ou numéroter l'article différent à part comme article propre"
+    },
+    "own_item_analysed": {
+      "fail": "L'article propre '{code}' de la position {ordinal} n'a pas de sous-détail de prix",
+      "suggestion": "Un article absent du bordereau est chiffré par son propre sous-détail de prix. Ajouter les ressources main-d'œuvre, matériaux et matériel sous la ligne, ou écrire le sous-détail dans sa note"
+    },
+    "profit_overhead_once": {
+      "fail": "Le bénéfice et les frais généraux de l'entreprise sont appliqués sur {count} lignes, {total} pour cent au total, au-dessus des {limit} pour cent uniques",
+      "suggestion": "Les 25 pour cent ne s'ajoutent qu'une fois. Garder une seule ligne, et la supprimer entièrement quand les prix sont des prix unitaires publiés, qui les contiennent déjà"
     }
   },
   "sekisan": {

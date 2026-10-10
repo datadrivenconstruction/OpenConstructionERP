@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Il poz '{code}' non è né un numero attuale del listino prezzi unitari (XX.XXX.XXXX) né uno dei precedenti (XX.XXX/X)",
       "suggestion": "Usare il numero del listino, ad es. 15.140.1002, oppure 04.013/1 su un contratto precedente; numerare le proprie voci analizzate come ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Il poz '{code}' della voce {ordinal} inizia con {chapter}, che non è un capitolo di un elenco prezzi unitari noto a questo controllo",
+      "suggestion": "Il libro del Ministero numera le opere edili con 15, gli impianti meccanici con 25 e gli impianti elettrici con 35, i prezzi delle risorse sotto 10 e le analisi dei mezzi d'opera sotto 19. Verificare il numero rispetto all'elenco da cui è stato preso, oppure numerare la propria voce ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "L'unità '{unit}' della voce {ordinal} non è una di quelle in cui misurano gli elenchi prezzi unitari",
+      "suggestion": "Usare l'unità indicata dall'elenco per la voce, ad esempio m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Il poz '{code}' è misurato in {count} unità diverse in questo computo ({units})",
+      "suggestion": "Un numero poz è definito in una sola unità. Portare le righe all'unità dell'elenco, oppure dare un numero proprio alla lavorazione diversa"
+    },
+    "poz_rate_consistent": {
+      "fail": "Il poz '{code}' è valorizzato con {count} prezzi unitari diversi in questo computo ({rates})",
+      "suggestion": "Un numero poz ha un solo prezzo unitario in un computo. Usare un solo prezzo, oppure numerare a parte la voce diversa come voce propria"
+    },
+    "own_item_analysed": {
+      "fail": "La voce propria '{code}' della voce {ordinal} non ha un'analisi dei prezzi",
+      "suggestion": "Una voce che l'elenco non ha si valorizza con una propria analisi dei prezzi. Aggiungere sotto la riga le risorse di manodopera, materiali e mezzi d'opera, oppure scrivere l'analisi nella nota"
+    },
+    "profit_overhead_once": {
+      "fail": "Utile d'impresa e spese generali sono applicati su {count} righe, {total} per cento in totale, oltre l'unico {limit} per cento",
+      "suggestion": "Il 25 per cento si aggiunge una sola volta. Tenere una sola riga, e toglierla del tutto quando i prezzi sono prezzi unitari pubblicati, che lo contengono già"
     }
   },
   "sekisan": {

@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' bukan nomor buku harga satuan saat ini (XX.XXX.XXXX) maupun nomor lama (XX.XXX/X)",
       "suggestion": "Gunakan nomor dalam buku, misalnya 15.140.1002, atau 04.013/1 pada kontrak lama; beri nomor item hasil analisis sendiri sebagai ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' pada posisi {ordinal} diawali {chapter}, yang bukan bab dari daftar harga satuan mana pun yang dikenal pemeriksaan ini",
+      "suggestion": "Buku Kementerian menomori pekerjaan bangunan 15, instalasi mekanikal 25 dan instalasi elektrikal 35, harga sumber daya di bawah 10 dan analisis alat di bawah 19. Periksa nomor terhadap daftar asalnya, atau beri nomor ÖZEL-1 pada item Anda sendiri"
+    },
+    "unit_recognised": {
+      "fail": "Satuan '{unit}' pada posisi {ordinal} bukan satuan yang dipakai daftar harga satuan untuk mengukur",
+      "suggestion": "Gunakan satuan yang diberikan daftar untuk item tersebut, misalnya m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' diukur dalam {count} satuan berbeda pada RAB ini ({units})",
+      "suggestion": "Nomor poz didefinisikan dalam satu satuan. Samakan baris ke satuan daftar, atau beri pekerjaan yang berbeda nomornya sendiri"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' dihargai dengan {count} harga satuan berbeda pada RAB ini ({rates})",
+      "suggestion": "Satu nomor poz memiliki satu harga satuan dalam RAB. Gunakan satu harga, atau beri nomor terpisah pada item yang berbeda sebagai item sendiri"
+    },
+    "own_item_analysed": {
+      "fail": "Item sendiri '{code}' pada posisi {ordinal} tidak memiliki analisis harga",
+      "suggestion": "Item yang tidak ada dalam daftar dihargai dengan analisisnya sendiri. Tambahkan sumber daya tenaga kerja, bahan dan alat di bawah baris, atau tulis analisis pada catatan"
+    },
+    "profit_overhead_once": {
+      "fail": "Keuntungan dan biaya umum kontraktor diterapkan pada {count} baris, total {total} persen, melebihi satu kali {limit} persen",
+      "suggestion": "Angka 25 persen ditambahkan sekali. Pertahankan satu baris, dan hapus seluruhnya bila harganya adalah harga satuan terbit yang sudah memuatnya"
     }
   },
   "sekisan": {

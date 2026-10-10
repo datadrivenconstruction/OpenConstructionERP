@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' is noch een huidig nummer uit het eenheidsprijzenboek (XX.XXX.XXXX), noch een ouder nummer (XX.XXX/X)",
       "suggestion": "Gebruik het nummer uit het prijzenboek, bijvoorbeeld 15.140.1002, of 04.013/1 bij een ouder contract; nummer eigen geanalyseerde posten als ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' op positie {ordinal} begint met {chapter}, dat geen hoofdstuk is van een eenheidsprijslijst die deze controle kent",
+      "suggestion": "Het boek van het Ministerie nummert bouwkundig werk 15, werktuigbouwkundige installaties 25 en elektrotechnische installaties 35, middelenprijzen onder 10 en materieelanalyses onder 19. Controleer het nummer aan de lijst waaruit het komt, of nummer uw eigen post ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Eenheid '{unit}' op positie {ordinal} is geen eenheid waarin de eenheidsprijslijsten meten",
+      "suggestion": "Gebruik de eenheid die de lijst voor de post geeft, bijvoorbeeld m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' wordt in deze begroting in {count} verschillende eenheden gemeten ({units})",
+      "suggestion": "Een poz-nummer is in één eenheid gedefinieerd. Breng de regels naar de eenheid van de lijst, of geef het afwijkende werk een eigen nummer"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' is in deze begroting tegen {count} verschillende eenheidsprijzen geprijsd ({rates})",
+      "suggestion": "Eén poz-nummer heeft in een begroting één eenheidsprijs. Gebruik één prijs, of nummer de afwijkende post apart als eigen post"
+    },
+    "own_item_analysed": {
+      "fail": "Eigen post '{code}' op positie {ordinal} heeft geen prijsanalyse",
+      "suggestion": "Een post die de lijst niet heeft, wordt geprijsd met een eigen analyse. Voeg de arbeids-, materiaal- en materieelmiddelen onder de regel toe, of schrijf de analyse in de notitie"
+    },
+    "profit_overhead_once": {
+      "fail": "Winst en algemene kosten van de aannemer zijn op {count} regels toegepast, samen {total} procent, boven de enkele {limit} procent",
+      "suggestion": "De 25 procent wordt één keer opgeteld. Houd één regel aan, en verwijder die helemaal wanneer de tarieven gepubliceerde eenheidsprijzen zijn, die het al bevatten"
     }
   },
   "sekisan": {

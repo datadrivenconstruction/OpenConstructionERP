@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "El poz '{code}' no es un número actual del libro de precios unitarios (XX.XXX.XXXX) ni uno antiguo (XX.XXX/X)",
       "suggestion": "Use el número del libro, p. ej. 15.140.1002, o 04.013/1 en un contrato antiguo; numere sus partidas analizadas como ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "El poz '{code}' de la partida {ordinal} empieza por {chapter}, que no es un capítulo de ningún cuadro de precios unitarios que esta comprobación conozca",
+      "suggestion": "El libro del Ministerio numera las obras de edificación con 15, las instalaciones mecánicas con 25 y las eléctricas con 35, los precios de recursos por debajo de 10 y los análisis de maquinaria por debajo de 19. Compruebe el número con el cuadro del que se tomó, o numere su propia partida ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "La unidad '{unit}' de la partida {ordinal} no es una en la que midan los cuadros de precios unitarios",
+      "suggestion": "Use la unidad que el cuadro da para la partida, por ejemplo m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "El poz '{code}' se mide en {count} unidades distintas en este presupuesto ({units})",
+      "suggestion": "Un número poz se define en una sola unidad. Lleve las líneas a la unidad del cuadro, o dé un número propio a la obra distinta"
+    },
+    "poz_rate_consistent": {
+      "fail": "El poz '{code}' está valorado a {count} precios unitarios distintos en este presupuesto ({rates})",
+      "suggestion": "Un número poz tiene un solo precio unitario en un presupuesto. Use un solo precio, o numere aparte la partida distinta como partida propia"
+    },
+    "own_item_analysed": {
+      "fail": "La partida propia '{code}' de la partida {ordinal} no lleva descompuesto de precio",
+      "suggestion": "Una partida que el cuadro no tiene se valora con su propio descompuesto. Añada los recursos de mano de obra, materiales y maquinaria bajo la línea, o escriba el descompuesto en su nota"
+    },
+    "profit_overhead_once": {
+      "fail": "El beneficio industrial y los gastos generales del contratista se aplican en {count} líneas, {total} por ciento en conjunto, por encima del {limit} por ciento único",
+      "suggestion": "El 25 por ciento se añade una sola vez. Conserve una línea, y quítela del todo cuando los precios sean precios unitarios publicados, que ya lo incluyen"
     }
   },
   "sekisan": {

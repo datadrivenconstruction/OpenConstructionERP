@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' är varken ett aktuellt nummer i enhetsprisboken (XX.XXX.XXXX) eller ett äldre nummer (XX.XXX/X)",
       "suggestion": "Använd bokens nummer, t.ex. 15.140.1002, eller 04.013/1 för ett äldre avtal; numrera egna analyserade poster som ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' på post {ordinal} börjar med {chapter}, som inte är ett kapitel i någon prislista med enhetspriser som kontrollen känner till",
+      "suggestion": "Ministeriets bok numrerar byggarbeten 15, mekanisk installation 25 och elinstallation 35, resurspriser under 10 och maskinkalkyler under 19. Kontrollera numret mot listan det hämtats från, eller numrera din egen post ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Enhet '{unit}' på post {ordinal} är inte en som enhetsprislistorna mäter i",
+      "suggestion": "Använd den enhet som listan anger för posten, till exempel m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' mäts i {count} olika enheter i denna kalkyl ({units})",
+      "suggestion": "Ett poz-nummer är definierat i en enhet. För raderna till listans enhet, eller ge det avvikande arbetet ett eget nummer"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' är prissatt med {count} olika enhetspriser i denna kalkyl ({rates})",
+      "suggestion": "Ett poz-nummer har ett enhetspris i en kalkyl. Använd ett pris, eller numrera den avvikande posten separat som egen post"
+    },
+    "own_item_analysed": {
+      "fail": "Egen post '{code}' på post {ordinal} saknar priskalkyl",
+      "suggestion": "En post som listan inte har prissätts med en egen kalkyl. Lägg till arbets-, material- och maskinresurserna under raden, eller skriv kalkylen i anmärkningen"
+    },
+    "profit_overhead_once": {
+      "fail": "Entreprenörens vinst och allmänna omkostnader läggs på {count} rader, {total} procent tillsammans, över de enkla {limit} procenten",
+      "suggestion": "De 25 procenten läggs på en gång. Behåll en rad, och ta bort den helt när priserna är publicerade enhetspriser, som redan innehåller dem"
     }
   },
   "sekisan": {

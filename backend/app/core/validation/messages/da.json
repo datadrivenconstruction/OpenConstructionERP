@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' er hverken et aktuelt nummer i enhedsprisbogen (XX.XXX.XXXX) eller et ældre nummer (XX.XXX/X)",
       "suggestion": "Brug bogens nummer, f.eks. 15.140.1002, eller 04.013/1 på en ældre kontrakt; nummerér egne analyserede poster som ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' på position {ordinal} begynder med {chapter}, som ikke er et kapitel i en enhedsprisliste, som kontrollen kender",
+      "suggestion": "Ministeriets bog nummererer bygningsarbejder 15, mekanisk installation 25 og elinstallation 35, ressourcepriser under 10 og materielanalyser under 19. Kontroller nummeret mod den liste, det er taget fra, eller nummerer din egen post ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Enhed '{unit}' på position {ordinal} er ikke en, som enhedsprislisterne måler i",
+      "suggestion": "Brug den enhed, listen angiver for posten, for eksempel m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' måles i {count} forskellige enheder i dette overslag ({units})",
+      "suggestion": "Et poz-nummer er defineret i én enhed. Før linjerne til listens enhed, eller giv det afvigende arbejde et eget nummer"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' er prissat med {count} forskellige enhedspriser i dette overslag ({rates})",
+      "suggestion": "Et poz-nummer har én enhedspris i et overslag. Brug én pris, eller nummerer den afvigende post særskilt som egen post"
+    },
+    "own_item_analysed": {
+      "fail": "Egen post '{code}' på position {ordinal} har ingen prisanalyse",
+      "suggestion": "En post, som listen ikke har, prissættes med en egen analyse. Tilføj arbejds-, materiale- og materielressourcerne under linjen, eller skriv analysen i noten"
+    },
+    "profit_overhead_once": {
+      "fail": "Entreprenørens fortjeneste og generalomkostninger er anvendt på {count} linjer, {total} procent tilsammen, over de enkelte {limit} procent",
+      "suggestion": "De 25 procent lægges på én gang. Behold én linje, og fjern den helt, når priserne er offentliggjorte enhedspriser, som allerede indeholder dem"
     }
   },
   "sekisan": {

@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "A(z) „{code}” poz kód sem a jelenlegi egységárjegyzék számozásának (XX.XXX.XXXX), sem a régebbinek (XX.XXX/X) nem felel meg",
       "suggestion": "Használja az árjegyzék tételszámát, például 15.140.1002, vagy régebbi szerződésnél 04.013/1; saját árelemzésű tételeit ÖZEL-1 formában számozza"
+    },
+    "chapter_recognised": {
+      "fail": "A(z) {ordinal}. tétel '{code}' poz száma {chapter} számmal kezdődik, ami nem fejezete egyetlen, ez az ellenőrzés által ismert egységárjegyzéknek sem",
+      "suggestion": "A Minisztérium könyve az építési munkákat 15-tel, a gépészeti szerelést 25-tel, a villamos szerelést 35-tel, az erőforrásárakat 10 alatt, a gépelemzéseket 19 alatt számozza. Ellenőrizze a számot abban a jegyzékben, ahonnan vették, vagy számozza saját tételét ÖZEL-1-nek"
+    },
+    "unit_recognised": {
+      "fail": "A(z) {ordinal}. tétel '{unit}' mértékegysége nem olyan, amelyben az egységárjegyzékek mérnek",
+      "suggestion": "Használja a jegyzék által a tételhez megadott mértékegységet, például m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "A(z) '{code}' poz ebben a költségvetésben {count} különböző mértékegységben szerepel ({units})",
+      "suggestion": "Egy poz szám egy mértékegységben van meghatározva. Vigye a sorokat a jegyzék mértékegységére, vagy adjon a különböző munkának saját számot"
+    },
+    "poz_rate_consistent": {
+      "fail": "A(z) '{code}' poz ebben a költségvetésben {count} különböző egységáron szerepel ({rates})",
+      "suggestion": "Egy poz számnak egy költségvetésben egy egységára van. Használjon egy árat, vagy számozza a különböző tételt külön saját tételként"
+    },
+    "own_item_analysed": {
+      "fail": "A(z) {ordinal}. tétel '{code}' saját tételének nincs ár-elemzése",
+      "suggestion": "A jegyzékben nem szereplő tételt saját elemzéssel kell árazni. Adja hozzá a sor alá a munka-, anyag- és gépi erőforrásokat, vagy írja az elemzést a megjegyzésbe"
+    },
+    "profit_overhead_once": {
+      "fail": "A vállalkozói nyereséget és az általános költséget {count} soron alkalmazták, összesen {total} százalékot, az egyszeri {limit} százalék fölött",
+      "suggestion": "A 25 százalék egyszer adódik hozzá. Tartson meg egy sort, és teljesen távolítsa el, ha az árak közzétett egységárak, amelyek ezt már tartalmazzák"
     }
   },
   "sekisan": {

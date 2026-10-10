@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz 编码“{code}”既不符合现行单价册编号格式（XX.XXX.XXXX），也不符合旧版格式（XX.XXX/X）。",
       "suggestion": "请使用单价册编号，例如 15.140.1002；旧合同可使用 04.013/1。自行分析组价的项目请编号为 ÖZEL-1。"
+    },
+    "chapter_recognised": {
+      "fail": "清单项 {ordinal} 的 poz '{code}' 以 {chapter} 开头，它不是本检查所知任何单价表的章",
+      "suggestion": "部委手册将建筑工程编为 15，机械安装编为 25，电气安装编为 35，资源价格编在 10 以下，机械分析编在 19 以下。请对照取号的单价表核对编号，或将自有项目编为 ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "清单项 {ordinal} 的单位 '{unit}' 不是单价表所用的计量单位",
+      "suggestion": "请使用单价表为该项目给出的单位，例如 m、m²、m³、Ad、Tk、Kg、Ton、Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "poz '{code}' 在本工程量清单中以 {count} 种不同单位计量 ({units})",
+      "suggestion": "一个 poz 编号只定义一种单位。请将各行统一为单价表的单位，或给不同的工作另编独立编号"
+    },
+    "poz_rate_consistent": {
+      "fail": "poz '{code}' 在本工程量清单中按 {count} 种不同单价计价 ({rates})",
+      "suggestion": "一个 poz 编号在清单中只有一个单价。请统一为一个单价，或将不同的项目另编为自有项目"
+    },
+    "own_item_analysed": {
+      "fail": "清单项 {ordinal} 的自有项目 '{code}' 没有单价分析",
+      "suggestion": "单价表中没有的项目按自身分析计价。请在该行下补充人工、材料和机械资源，或把分析写入备注"
+    },
+    "profit_overhead_once": {
+      "fail": "承包商利润和管理费已用于 {count} 行，合计 {total} 个百分点，超过唯一的 {limit} 个百分点",
+      "suggestion": "这 25% 只加一次。请保留一行；若单价为已公布的单价，其中已含此项，则应全部删除"
     }
   },
   "sekisan": {

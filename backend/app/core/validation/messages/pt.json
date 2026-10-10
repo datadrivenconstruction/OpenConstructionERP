@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "A posição «{code}» não corresponde ao formato atual do catálogo de preços unitários (XX.XXX.XXXX) nem ao antigo (XX.XXX/X)",
       "suggestion": "Utilize o número do catálogo, por exemplo, 15.140.1002, ou 04.013/1 em um contrato antigo; numere os itens de composição própria como ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "O poz '{code}' da posição {ordinal} começa por {chapter}, que não é um capítulo de nenhuma tabela de preços unitários conhecida desta verificação",
+      "suggestion": "O livro do Ministério numera as obras de edificação com 15, as instalações mecânicas com 25 e as elétricas com 35, os preços de recursos abaixo de 10 e as análises de equipamento abaixo de 19. Confira o número com a tabela de onde foi tirado, ou numere o seu próprio item ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "A unidade '{unit}' da posição {ordinal} não é uma em que as tabelas de preços unitários medem",
+      "suggestion": "Use a unidade que a tabela indica para o item, por exemplo m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "O poz '{code}' é medido em {count} unidades diferentes neste orçamento ({units})",
+      "suggestion": "Um número poz é definido em uma só unidade. Leve as linhas à unidade da tabela, ou dê um número próprio ao serviço diferente"
+    },
+    "poz_rate_consistent": {
+      "fail": "O poz '{code}' está orçado com {count} preços unitários diferentes neste orçamento ({rates})",
+      "suggestion": "Um número poz tem um só preço unitário em um orçamento. Use um só preço, ou numere à parte o item diferente como item próprio"
+    },
+    "own_item_analysed": {
+      "fail": "O item próprio '{code}' da posição {ordinal} não tem composição de preço",
+      "suggestion": "Um item que a tabela não tem é orçado por composição própria. Acrescente os recursos de mão de obra, material e equipamento sob a linha, ou escreva a composição na nota"
+    },
+    "profit_overhead_once": {
+      "fail": "O lucro e as despesas gerais do empreiteiro são aplicados em {count} linhas, {total} por cento no conjunto, acima do {limit} por cento único",
+      "suggestion": "Os 25 por cento são acrescentados uma só vez. Mantenha uma linha, e retire-a por completo quando os preços forem preços unitários publicados, que já o incluem"
     }
   },
   "sekisan": {

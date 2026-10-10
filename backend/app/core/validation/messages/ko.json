@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}'는 현행 단가집 번호(XX.XXX.XXXX)나 구형 번호(XX.XXX/X)에 해당하지 않습니다",
       "suggestion": "단가집 번호(예: 15.140.1002)를 사용하세요. 구형 계약에는 04.013/1 등을 사용하고 자체 분석 항목은 ÖZEL-1과 같이 번호를 지정하세요"
+    },
+    "chapter_recognised": {
+      "fail": "항목 {ordinal}의 poz '{code}'는 {chapter}(으)로 시작하는데, 이는 이 검사가 아는 어떤 단가표의 장도 아닙니다",
+      "suggestion": "장관 고시 도서는 건축 공사를 15, 기계 설비를 25, 전기 설비를 35, 자원 단가를 10 미만, 장비 분석을 19 미만으로 번호를 매깁니다. 번호를 가져온 단가표와 대조하거나 자체 항목을 ÖZEL-1로 번호를 매기세요"
+    },
+    "unit_recognised": {
+      "fail": "항목 {ordinal}의 단위 '{unit}'는 단가표가 측정에 쓰는 단위가 아닙니다",
+      "suggestion": "단가표가 해당 항목에 정한 단위를 사용하세요. 예: m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "poz '{code}'는 이 내역서에서 {count}가지 서로 다른 단위로 측정됩니다 ({units})",
+      "suggestion": "poz 번호는 하나의 단위로 정의됩니다. 행을 단가표의 단위로 맞추거나, 다른 공종에 자체 번호를 부여하세요"
+    },
+    "poz_rate_consistent": {
+      "fail": "poz '{code}'는 이 내역서에서 {count}가지 서로 다른 단가로 산정되었습니다 ({rates})",
+      "suggestion": "하나의 poz 번호는 내역서에서 하나의 단가를 가집니다. 단가를 하나로 맞추거나, 다른 항목을 별도의 자체 항목으로 번호를 매기세요"
+    },
+    "own_item_analysed": {
+      "fail": "항목 {ordinal}의 자체 항목 '{code}'에 단가 분석이 없습니다",
+      "suggestion": "단가표에 없는 항목은 자체 분석으로 단가를 산정합니다. 행 아래에 노무, 재료, 장비 자원을 추가하거나 분석을 비고에 적으세요"
+    },
+    "profit_overhead_once": {
+      "fail": "시공자의 이윤과 일반관리비가 {count}개 행에 적용되었으며, 합계 {total} 퍼센트로 단일 {limit} 퍼센트를 초과합니다",
+      "suggestion": "이 25퍼센트는 한 번만 가산됩니다. 한 행만 남기고, 단가가 이미 이를 포함한 공표 단가이면 완전히 삭제하세요"
     }
   },
   "sekisan": {

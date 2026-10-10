@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' nu este nici un număr actual din cartea de prețuri unitare (XX.XXX.XXXX), nici unul vechi (XX.XXX/X)",
       "suggestion": "Folosiți numărul din carte, de exemplu 15.140.1002, sau 04.013/1 pentru un contract mai vechi; numerotați articolele analizate propriu ca ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' de la poziția {ordinal} începe cu {chapter}, care nu este un capitol al niciunui indicator de prețuri unitare cunoscut de această verificare",
+      "suggestion": "Cartea Ministerului numerotează lucrările de construcții 15, instalațiile mecanice 25 și instalațiile electrice 35, prețurile resurselor sub 10 și analizele utilajelor sub 19. Verificați numărul față de indicatorul din care a fost luat sau numerotați-vă propria poziție ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Unitatea '{unit}' de la poziția {ordinal} nu este una în care măsoară indicatoarele de prețuri unitare",
+      "suggestion": "Folosiți unitatea pe care indicatorul o dă pentru poziție, de exemplu m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' este măsurat în {count} unități diferite în acest deviz ({units})",
+      "suggestion": "Un număr poz este definit într-o singură unitate. Aduceți liniile la unitatea din indicator sau dați lucrării diferite un număr propriu"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' este evaluat cu {count} prețuri unitare diferite în acest deviz ({rates})",
+      "suggestion": "Un număr poz are un singur preț unitar într-un deviz. Folosiți un singur preț sau numerotați separat poziția diferită ca poziție proprie"
+    },
+    "own_item_analysed": {
+      "fail": "Poziția proprie '{code}' de la poziția {ordinal} nu are analiză de preț",
+      "suggestion": "O poziție pe care indicatorul nu o are se evaluează prin analiză proprie. Adăugați resursele de manoperă, materiale și utilaje sub linie sau scrieți analiza în notă"
+    },
+    "profit_overhead_once": {
+      "fail": "Profitul și cheltuielile generale ale constructorului sunt aplicate pe {count} linii, {total} la sută în total, peste cele {limit} la sută unice",
+      "suggestion": "Cele 25 la sută se adaugă o singură dată. Păstrați o linie și eliminați-o complet când tarifele sunt prețuri unitare publicate, care le conțin deja"
     }
   },
   "sekisan": {

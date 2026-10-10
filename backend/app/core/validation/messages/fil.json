@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Ang poz na '{code}' ay hindi numero mula sa kasalukuyang unit-price book (XX.XXX.XXXX) o sa mas lumang bersiyon (XX.XXX/X)",
       "suggestion": "Gamitin ang numero sa aklat, halimbawa 15.140.1002, o 04.013/1 sa lumang kontrata; bilangin ang sariling analysed item bilang ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Ang poz '{code}' sa posisyon {ordinal} ay nagsisimula sa {chapter}, na hindi kabanata ng anumang listahan ng presyo kada yunit na kilala ng pagsusuring ito",
+      "suggestion": "Binibilang ng aklat ng Ministri ang gawaing gusali bilang 15, mekanikal na instalasyon bilang 25 at elektrikal na instalasyon bilang 35, ang presyo ng resource sa ibaba ng 10 at ang pagsusuri ng makinarya sa ibaba ng 19. Suriin ang numero sa listahang pinagkunan nito, o bilangin ang sarili mong aytem bilang ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Ang yunit na '{unit}' sa posisyon {ordinal} ay hindi yunit na ginagamit ng mga listahan ng presyo kada yunit sa pagsukat",
+      "suggestion": "Gamitin ang yunit na ibinibigay ng listahan para sa aytem, halimbawa m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Ang poz '{code}' ay sinusukat sa {count} magkakaibang yunit sa BOQ na ito ({units})",
+      "suggestion": "Ang numero ng poz ay tinutukoy sa iisang yunit. Ibalik ang mga linya sa yunit ng listahan, o bigyan ng sariling numero ang naiibang gawain"
+    },
+    "poz_rate_consistent": {
+      "fail": "Ang poz '{code}' ay may presyong {count} magkakaibang rate kada yunit sa BOQ na ito ({rates})",
+      "suggestion": "Ang isang numero ng poz ay may isang presyo kada yunit sa BOQ. Gumamit ng isang rate, o bilangin nang hiwalay ang naiibang aytem bilang sariling aytem"
+    },
+    "own_item_analysed": {
+      "fail": "Ang sariling aytem na '{code}' sa posisyon {ordinal} ay walang pagsusuri ng presyo",
+      "suggestion": "Ang aytem na wala sa listahan ay pinepresyuhan ng sarili nitong pagsusuri. Idagdag ang resource ng paggawa, materyales at makinarya sa ilalim ng linya, o isulat ang pagsusuri sa tala"
+    },
+    "profit_overhead_once": {
+      "fail": "Ang tubo at pangkalahatang gastos ng kontratista ay inilapat sa {count} linya, {total} porsyento sa kabuuan, higit sa iisang {limit} porsyento",
+      "suggestion": "Ang 25 porsyento ay idinadagdag nang isang beses. Magtira ng isang linya, at alisin ito nang buo kapag ang mga rate ay nailathalang presyo kada yunit na naglalaman na nito"
     }
   },
   "sekisan": {

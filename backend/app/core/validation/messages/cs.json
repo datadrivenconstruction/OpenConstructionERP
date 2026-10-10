@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' není ani aktuálním číslem jednotkového ceníku (XX.XXX.XXXX), ani starším číslem (XX.XXX/X)",
       "suggestion": "Použijte číslo z ceníku, např. 15.140.1002, nebo 04.013/1 u starší smlouvy; vlastní kalkulované položky číslujte jako ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' na položce {ordinal} začíná číslem {chapter}, které není kapitolou žádného ceníku jednotkových cen, který tato kontrola zná",
+      "suggestion": "Kniha ministerstva čísluje pozemní stavby 15, strojní instalace 25 a elektroinstalace 35, ceny zdrojů pod 10 a analýzy strojů pod 19. Ověřte číslo podle ceníku, ze kterého bylo převzato, nebo očíslujte vlastní položku ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Jednotka '{unit}' na položce {ordinal} není jednotkou, ve které ceníky jednotkových cen měří",
+      "suggestion": "Použijte jednotku, kterou ceník u položky uvádí, například m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' se v tomto rozpočtu měří v {count} různých jednotkách ({units})",
+      "suggestion": "Číslo poz je definováno v jedné jednotce. Převeďte řádky na jednotku ceníku nebo dejte odlišné práci vlastní číslo"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' je v tomto rozpočtu oceněno {count} různými jednotkovými cenami ({rates})",
+      "suggestion": "Jedno číslo poz má v rozpočtu jednu jednotkovou cenu. Použijte jednu cenu nebo odlišnou položku očíslujte zvlášť jako vlastní položku"
+    },
+    "own_item_analysed": {
+      "fail": "Vlastní položka '{code}' na položce {ordinal} nemá kalkulaci ceny",
+      "suggestion": "Položka, kterou ceník nemá, se oceňuje vlastní kalkulací. Přidejte pod řádek zdroje práce, materiálu a strojů nebo napište kalkulaci do poznámky"
+    },
+    "profit_overhead_once": {
+      "fail": "Zisk a režie zhotovitele jsou uplatněny na {count} řádcích, dohromady {total} procent, nad jednorázových {limit} procent",
+      "suggestion": "Těch 25 procent se přičítá jednou. Ponechte jeden řádek a zcela jej odstraňte, jsou-li sazby zveřejněné jednotkové ceny, které je již obsahují"
     }
   },
   "sekisan": {

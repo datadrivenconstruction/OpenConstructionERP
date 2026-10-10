@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' ei ole nykyisen yksikköhintakirjan numero (XX.XXX.XXXX) eikä vanhan muodon numero (XX.XXX/X)",
       "suggestion": "Käytä kirjan numeroa, esim. 15.140.1002 tai vanhassa sopimuksessa 04.013/1; numeroi omat analysoidut nimikkeet muodossa ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' rivillä {ordinal} alkaa numerolla {chapter}, joka ei ole tämän tarkistuksen tuntemassa yksikköhintaluettelossa oleva luku",
+      "suggestion": "Ministeriön kirja numeroi rakennustyöt 15, LVI-asennukset 25 ja sähköasennukset 35, resurssihinnat alle 10 ja kalustoanalyysit alle 19. Tarkista numero luettelosta, josta se on otettu, tai numeroi oma nimike ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Yksikkö '{unit}' rivillä {ordinal} ei ole yksikkö, jolla yksikköhintaluettelot mittaavat",
+      "suggestion": "Käytä yksikköä, jonka luettelo antaa nimikkeelle, esimerkiksi m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' mitataan tässä kustannusarviossa {count} eri yksiköllä ({units})",
+      "suggestion": "Poz-numero on määritelty yhdelle yksikölle. Tuo rivit luettelon yksikköön tai anna poikkeavalle työlle oma numero"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' on hinnoiteltu tässä kustannusarviossa {count} eri yksikköhinnalla ({rates})",
+      "suggestion": "Yhdellä poz-numerolla on yksi yksikköhinta kustannusarviossa. Käytä yhtä hintaa tai numeroi poikkeava nimike erikseen omaksi nimikkeeksi"
+    },
+    "own_item_analysed": {
+      "fail": "Omalla nimikkeellä '{code}' rivillä {ordinal} ei ole hinta-analyysia",
+      "suggestion": "Nimike, jota luettelossa ei ole, hinnoitellaan oman analyysin mukaan. Lisää työ-, materiaali- ja kalustoresurssit rivin alle tai kirjoita analyysi huomautukseen"
+    },
+    "profit_overhead_once": {
+      "fail": "Urakoitsijan voitto ja yleiskustannukset on lisätty {count} riville, yhteensä {total} prosenttia, yli yksittäisen {limit} prosentin",
+      "suggestion": "25 prosenttia lisätään vain kerran. Jätä yksi rivi ja poista se kokonaan, kun hinnat ovat julkaistuja yksikköhintoja, jotka sisältävät sen jo"
     }
   },
   "sekisan": {

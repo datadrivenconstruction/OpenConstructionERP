@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' ei ole ei praeguse ühikuhinnaraamatu number (XX.XXX.XXXX) ega vanem number (XX.XXX/X)",
       "suggestion": "Kasutage raamatu numbrit, nt 15.140.1002 või vanema lepingu puhul 04.013/1; nummerdage oma analüüsitud read kujul ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' real {ordinal} algab numbriga {chapter}, mis ei ole selle kontrolli tuntud ühikuhinnakirja peatükk",
+      "suggestion": "Ministeeriumi raamat nummerdab ehitustööd 15, mehaanilised paigaldustööd 25 ja elektripaigaldustööd 35, ressursihinnad alla 10 ja masinaanalüüsid alla 19. Kontrolli numbrit loendi vastu, kust see võeti, või nummerda oma kirje ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Ühik '{unit}' real {ordinal} ei ole ühik, milles ühikuhinnakirjad mõõdavad",
+      "suggestion": "Kasuta ühikut, mille loend kirje jaoks annab, näiteks m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' mõõdetakse selles eelarves {count} erineva ühikuga ({units})",
+      "suggestion": "Poz-number on defineeritud ühes ühikus. Vii read loendi ühikusse või anna erinevale tööle oma number"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' on selles eelarves hinnastatud {count} erineva ühikuhinnaga ({rates})",
+      "suggestion": "Ühel poz-numbril on eelarves üks ühikuhind. Kasuta ühte hinda või nummerda erinev kirje eraldi oma kirjeks"
+    },
+    "own_item_analysed": {
+      "fail": "Oma kirjel '{code}' real {ordinal} puudub hinnaanalüüs",
+      "suggestion": "Kirje, mida loendis pole, hinnastatakse oma analüüsiga. Lisa töö-, materjali- ja masinaressursid rea alla või kirjuta analüüs märkusesse"
+    },
+    "profit_overhead_once": {
+      "fail": "Töövõtja kasum ja üldkulud on rakendatud {count} real, kokku {total} protsenti, üle ühekordse {limit} protsendi",
+      "suggestion": "25 protsenti lisatakse üks kord. Jäta üks rida ja eemalda see täielikult, kui hinnad on avaldatud ühikuhinnad, mis seda juba sisaldavad"
     }
   },
   "sekisan": {

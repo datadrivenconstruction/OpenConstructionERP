@@ -394,6 +394,30 @@
     "valid_poz": {
       "fail": "Poz '{code}' nije broj iz važeće knjige jediničnih cijena (XX.XXX.XXXX) ni iz starije (XX.XXX/X)",
       "suggestion": "Koristite broj iz knjige, npr. 15.140.1002 ili 04.013/1 za stariji ugovor; vlastite analizirane stavke označite ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' na stavci {ordinal} počinje s {chapter}, što nije poglavlje nijednog cjenika jediničnih cijena koji ova provjera poznaje",
+      "suggestion": "Knjiga Ministarstva numerira građevinske radove 15, strojarske instalacije 25 i elektroinstalacije 35, cijene resursa ispod 10 i analize strojeva ispod 19. Provjerite broj prema cjeniku iz kojeg je preuzet ili numerirajte vlastitu stavku ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Jedinica '{unit}' na stavci {ordinal} nije jedinica u kojoj cjenici jediničnih cijena mjere",
+      "suggestion": "Upotrijebite jedinicu koju cjenik navodi za stavku, na primjer m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' se u ovom troškovniku mjeri u {count} različitih jedinica ({units})",
+      "suggestion": "Broj poz definiran je u jednoj jedinici. Svedite retke na jedinicu iz cjenika ili dajte drukčijem radu vlastiti broj"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' je u ovom troškovniku obračunat po {count} različitih jediničnih cijena ({rates})",
+      "suggestion": "Jedan broj poz ima u troškovniku jednu jediničnu cijenu. Upotrijebite jednu cijenu ili drukčiju stavku numerirajte zasebno kao vlastitu stavku"
+    },
+    "own_item_analysed": {
+      "fail": "Vlastita stavka '{code}' na stavci {ordinal} nema analizu cijene",
+      "suggestion": "Stavka koje nema u cjeniku cijeni se vlastitom analizom. Dodajte resurse rada, materijala i strojeva ispod retka ili upišite analizu u napomenu"
+    },
+    "profit_overhead_once": {
+      "fail": "Dobit i opći troškovi izvođača primijenjeni su na {count} redaka, ukupno {total} posto, iznad jednokratnih {limit} posto",
+      "suggestion": "Tih 25 posto dodaje se jednom. Zadržite jedan redak i potpuno ga uklonite kad su cijene objavljene jedinične cijene koje ga već sadrže"
     }
   },
   "sekisan": {
