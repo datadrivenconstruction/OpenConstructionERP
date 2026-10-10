@@ -76,6 +76,13 @@
   --oe-border: #d2d2d7;
   --oe-border-light: #e8e8ed;
   --oe-border-focus: var(--oe-blue);
+  /* What a border gets when its class names no colour that exists: a bare
+     `border`, an alpha-modified token such as `border-border-light/60` (the
+     border tokens are plain var() strings, so Tailwind emits nothing for the
+     modifier) or a name the palette never defined such as
+     `border-border-medium`. Tailwind's preflight paints all of those with
+     gray-200, which is this exact value, so light mode is unchanged. */
+  --oe-border-default: #e5e7eb;
 
   /* Text — WCAG AA compliant against every light surface we render on.
      Picked 2026-05-25 to clear axe-core color-contrast wherever the
@@ -259,6 +266,10 @@
   --oe-border: #2a2d3e;
   --oe-border-light: #232638;
   --oe-border-focus: var(--oe-blue);
+  /* Over 300 class uses across the app fall through to the default border
+     colour (see the light-mode comment). Left at gray-200 they drew a near
+     white outline round sidebar buttons, cards and menu items in dark mode. */
+  --oe-border-default: var(--oe-border);
 
   /* Text — high contrast on dark, WCAG AA compliant against every
      surface (bg, bg-secondary, bg-tertiary, bg-elevated #1e2130).
