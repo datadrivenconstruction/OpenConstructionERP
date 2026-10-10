@@ -25,7 +25,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
 
 # Mirrors backend/app/modules/boq/schemas.py::_serialise_money - money fields
@@ -478,6 +478,287 @@ class ReverseChargeSaveResponse(BaseModel):
     findings: list[WithholdingFinding] = Field(default_factory=list)
 
 
+# ── Statutory tax lines ──────────────────────────────────────────────────────
+#
+# Amounts and rates are nullable all the way through. ``null`` is how a held or
+# not applicable figure travels, and it is never replaced by ``"0"``: the
+# serialiser below refuses a value it cannot print instead of printing zero,
+# which is where it differs from ``_serialise_money`` above.
+
+StatutorySourceKindLiteral = Literal["progress_claim", "sub_payment_application", "invoice"]
+StatutoryDirectionLiteral = Literal["borne_by_us", "withheld_by_us"]
+StatutoryChoiceStateLiteral = Literal["selected", "not_applicable", "unset"]
+StatutoryRowKindLiteral = Literal["vat_withholding", "income_withholding", "stamp_duty"]
+StatutoryOverridableLiteral = Literal["vat_computed", "vat_withheld", "income_withheld", "stamp_duty"]
+
+
+def _serialise_exact(value: Decimal | None) -> str | None:
+    """A decimal as a plain string, ``None`` as ``None``, anything else refused."""
+    if value is None:
+        return None
+    if not isinstance(value, Decimal) or not value.is_finite():
+        raise ValueError(f"cannot serialise {value!r} as an amount")
+    return format(value, "f")
+
+
+class StatutoryChoice(BaseModel):
+    """What a person decided about one tax on one document.
+
+    ``unset`` is a real answer: nobody has decided, and the figure is held.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    state: StatutoryChoiceStateLiteral = "unset"
+    code: str = Field(default="", max_length=32)
+    reason: str = Field(default="", max_length=1000)
+
+    @model_validator(mode="after")
+    def _state_has_what_it_needs(self) -> StatutoryChoice:
+        if self.state == "selected" and not self.code:
+            raise ValueError("a selected tax needs the category code that was chosen")
+        if self.state == "not_applicable" and not self.reason:
+            raise ValueError("a tax marked not applicable needs the reason")
+        return self
+
+
+class StatutoryInputsBody(BaseModel):
+    """The document and the person's choices: everything a calculation reads.
+
+    ``vat_rate_pct`` has no default on purpose. The caller resolves the rate
+    from the platform's single source of VAT rates and states it, or states
+    ``null`` because it could not be resolved. Leaving the key out is a 422,
+    so "unknown" is always something the caller said and never something this
+    schema assumed.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    country_code: str = Field(min_length=2, max_length=2)
+    currency_code: str = Field(min_length=3, max_length=3)
+    document_date: date
+    # May be negative: a credit note mirrors the document it corrects.
+    net_amount: Decimal
+    vat_rate_pct: Decimal | None = Field(ge=Decimal("0"), le=Decimal("100"))
+    # ``null`` means nobody has said, which holds a withholding that depends
+    # on it. It is not "no".
+    buyer_is_designated: bool | None = None
+    work_value_incl_vat: Decimal | None = Field(default=None, ge=Decimal("0"))
+    # The person's own words for what that value is the value of (this
+    # subcontract, or the main work). Stored beside the figure, never read.
+    work_value_note: str = Field(default="", max_length=500)
+    # Stamp duty is charged on its own base. Either the base is entered, or a
+    # person states that it is the net amount. With neither, a selected stamp
+    # duty is held for ``stamp_duty_base_unknown``.
+    stamp_duty_base: Decimal | None = None
+    stamp_duty_base_same_as_net: bool = False
+    vat_withholding: StatutoryChoice = Field(default_factory=StatutoryChoice)
+    income_withholding: StatutoryChoice = Field(default_factory=StatutoryChoice)
+    stamp_duty: StatutoryChoice = Field(default_factory=StatutoryChoice)
+
+    @field_validator("country_code")
+    @classmethod
+    def _upper_country(cls, value: str) -> str:
+        return value.upper()
+
+    @field_validator("currency_code")
+    @classmethod
+    def _upper_currency(cls, value: str) -> str:
+        return value.upper()
+
+    @field_validator("net_amount", "vat_rate_pct", "work_value_incl_vat", "stamp_duty_base")
+    @classmethod
+    def _finite(cls, value: Decimal | None) -> Decimal | None:
+        if value is not None and not value.is_finite():
+            raise ValueError("must be a finite number")
+        return value
+
+    @model_validator(mode="after")
+    def _one_statement_about_the_stamp_duty_base(self) -> StatutoryInputsBody:
+        if self.stamp_duty_base is not None and self.stamp_duty_base_same_as_net:
+            raise ValueError("enter a stamp duty base or state that it is the net amount, not both")
+        return self
+
+    @field_serializer("net_amount", "vat_rate_pct", "work_value_incl_vat", "stamp_duty_base", when_used="json")
+    def _ser_exact(self, value: Decimal | None) -> str | None:
+        return _serialise_exact(value)
+
+
+class StatutoryPreviewRequest(StatutoryInputsBody):
+    """Compute the five figures without storing anything."""
+
+
+class StatutoryUpsertRequest(StatutoryInputsBody):
+    """Compute the five figures of one source document and store them as a draft."""
+
+    project_id: UUID
+    direction: StatutoryDirectionLiteral
+    source_reference: str = Field(default="", max_length=128)
+
+
+class StatutoryOverrideRequest(BaseModel):
+    """Replace the computed amount of one figure with a person's own."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    kind: StatutoryOverridableLiteral
+    amount: Decimal
+    reason: str = Field(min_length=1, max_length=1000)
+
+    @field_validator("kind", mode="before")
+    @classmethod
+    def _figure_kind(cls, value: object) -> object:
+        # The shared calculation accepts the row kind as a name for the figure
+        # computed from it, and so does this request.
+        aliases = {"vat_withholding": "vat_withheld", "income_withholding": "income_withheld"}
+        return aliases.get(value, value) if isinstance(value, str) else value
+
+    @field_validator("amount")
+    @classmethod
+    def _finite(cls, value: Decimal) -> Decimal:
+        if not value.is_finite():
+            raise ValueError("must be a finite number")
+        return value
+
+
+class StatutoryConfirmRequest(BaseModel):
+    """Confirm the stored figures.
+
+    ``acknowledge_unconfirmed_rates`` is the statement "I have checked by hand
+    the rates this platform has not confirmed against their source". It is
+    stored with the user and the time, and it defaults to false.
+    """
+
+    project_id: UUID
+    acknowledge_unconfirmed_rates: bool = False
+
+
+class StatutoryReasonRequest(BaseModel):
+    """Reopen or void a set of figures, with the reason."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    reason: str = Field(min_length=1, max_length=1000)
+
+
+class StatutoryFigureResponse(BaseModel):
+    """One tax figure with everything needed to check it.
+
+    ``amount`` is ``null`` unless ``status`` is ``value``. ``reason_key`` and
+    ``reason_params`` are what the screen translates; this API sends no
+    sentence about a figure.
+    """
+
+    kind: str
+    status: str
+    amount: Decimal | None
+    base: Decimal | None
+    rate_pct: Decimal | None
+    numerator: int | None
+    denominator: int | None
+    code: str
+    currency_code: str
+    legal_reference: str
+    source_url: str = ""
+    effective_from: date | None
+    effective_to: date | None = None
+    review_status: str
+    overridden: bool
+    reason_key: str
+    reason_params: dict[str, str] = Field(default_factory=dict)
+    # The person's decision, on the three figures that have one.
+    choice_state: str = ""
+    choice_code: str = ""
+    choice_reason: str = ""
+    override_amount: Decimal | None = None
+    override_reason: str = ""
+    overridden_by: UUID | None = None
+    overridden_at: datetime | None = None
+
+    @field_serializer("amount", "base", "rate_pct", "override_amount", when_used="json")
+    def _ser_exact(self, value: Decimal | None) -> str | None:
+        return _serialise_exact(value)
+
+
+class StatutoryPreviewResponse(BaseModel):
+    """The five figures of a preview, in printed order."""
+
+    inputs: StatutoryInputsBody
+    figures: list[StatutoryFigureResponse]
+    # False while any figure is held. A total drawn from an incomplete set is
+    # itself unknown.
+    complete: bool
+    uses_unconfirmed_rates: bool
+    findings: list[WithholdingFinding] = Field(default_factory=list)
+
+
+class StatutoryCalcResponse(BaseModel):
+    """The stored statutory taxes of one source document."""
+
+    id: UUID
+    project_id: UUID
+    source_kind: str
+    source_id: UUID
+    source_reference: str
+    direction: str
+    status: str
+    inputs: StatutoryInputsBody
+    figures: list[StatutoryFigureResponse]
+    complete: bool
+    uses_unconfirmed_rates: bool
+    confirmed_by: UUID | None
+    confirmed_at: datetime | None
+    unconfirmed_rates_acknowledged_by: UUID | None
+    unconfirmed_rates_acknowledged_at: datetime | None
+    reopened_by: UUID | None
+    reopened_at: datetime | None
+    reopen_reason: str
+    voided_by: UUID | None
+    voided_at: datetime | None
+    void_reason: str
+    created_at: datetime
+    updated_at: datetime
+    findings: list[WithholdingFinding] = Field(default_factory=list)
+
+
+class StatutoryCategoryResponse(BaseModel):
+    """One category a person can choose for a tax, with its legal basis.
+
+    ``review_status`` is shown beside the category: an ``unconfirmed`` row
+    computes, and the person choosing it should know it has not been checked
+    against the primary source.
+    """
+
+    country_code: str
+    kind: str
+    code: str
+    labels: dict[str, str]
+    base: str
+    rate_pct: Decimal | None
+    numerator: int | None
+    denominator: int | None
+    threshold_amount: Decimal | None
+    threshold_currency: str
+    threshold_scope: str
+    threshold_measure: str
+    cap_amount: Decimal | None
+    buyer_scope: str
+    work_value_threshold: Decimal | None
+    conditions: dict[str, str]
+    effective_from: date
+    effective_to: date | None
+    legal_reference: str
+    source_url: str
+    read_date: str
+    review_status: str
+
+    @field_serializer("rate_pct", "threshold_amount", "cap_amount", "work_value_threshold", when_used="json")
+    def _ser_exact(self, value: Decimal | None) -> str | None:
+        return _serialise_exact(value)
+
+
 __all__ = [
     "MAX_BANDS",
     "DeductionCreateRequest",
@@ -499,5 +780,16 @@ __all__ = [
     "ReverseChargeRuleResponse",
     "ReverseChargeSaveResponse",
     "ReverseChargeUpdateRequest",
+    "StatutoryCalcResponse",
+    "StatutoryCategoryResponse",
+    "StatutoryChoice",
+    "StatutoryConfirmRequest",
+    "StatutoryFigureResponse",
+    "StatutoryInputsBody",
+    "StatutoryOverrideRequest",
+    "StatutoryPreviewRequest",
+    "StatutoryPreviewResponse",
+    "StatutoryReasonRequest",
+    "StatutoryUpsertRequest",
     "WithholdingFinding",
 ]

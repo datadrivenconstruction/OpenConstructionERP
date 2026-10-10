@@ -24,6 +24,29 @@ Rules, all registered under the ``tax_withholding`` rule set:
 * ``tax_withholding.rate_matches_band``     - WARNING. The rate applied should
                                                be the band's rate.
 
+And for the statutory tax lines of one payment document:
+
+* ``tax_withholding.statutory_vat_identity``          - ERROR.   Computed VAT is
+                                                         withheld plus payable.
+* ``tax_withholding.statutory_override_reason``       - ERROR.   An amount entered
+                                                         by hand says why.
+* ``tax_withholding.statutory_rate_not_effective``    - ERROR.   The stored rate
+                                                         row is in force on the
+                                                         document date.
+* ``tax_withholding.statutory_rate_unconfirmed``      - WARNING, ERROR at an
+                                                         unacknowledged
+                                                         confirmation.
+* ``tax_withholding.statutory_line_held``             - WARNING, ERROR at
+                                                         confirmation.
+* ``tax_withholding.statutory_threshold_unevaluated`` - WARNING. A limit that one
+                                                         document cannot judge.
+
+The two rules whose severity depends on the action are a warning while the
+figures are a draft, because a draft is allowed to be unfinished, and an error
+at the moment a person confirms. The service refuses that confirmation on its
+own as well: ``evaluate_record`` below degrades to "no findings" when a rule
+breaks, and a signature must not depend on a rule having run.
+
 **The payload.** Rules read a plain dict, built by
 :mod:`app.modules.tax_withholding.service`, so a figure arriving from an import
 can be checked before anything is stored. ``record_type`` says which shape it
@@ -42,6 +65,14 @@ is and every rule ignores the other one::
      "buyer_accounts_for_vat", "invoice_wording", "legal_reference",
      "vat_amount", "net_amount", "currency_code", "invoice_reference"}
 
+    {"record_type": "statutory_taxes",
+     "action": "save" | "confirm", "acknowledged_unconfirmed_rates",
+     "currency_code", "document_date", "source_reference",
+     "lines": [{"kind", "calc_status", "tax_amount", "base_amount", "code",
+                "review_status", "reason_key", "reason_params",
+                "rate_effective_from", "rate_effective_to",
+                "overridden", "override_amount", "override_reason"}]}
+
 **Which date a verification is judged on.** ``period_start``, not
 ``period_end``. A payment is made during the period, so a verification that was
 valid when the period opened covers it; one that lapses before the period
@@ -59,7 +90,7 @@ from __future__ import annotations
 
 import logging
 from datetime import date, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.core.validation.engine import (
@@ -77,7 +108,13 @@ from app.core.validation.engine import (
 # rather than rewritten here, so two findings on one screen cannot disagree
 # about what an amount looks like. Importing it registers nothing.
 from app.core.validation.rules import _fmt_money
-from app.modules.tax_withholding.service import ZERO, compute_taxable_base, quantise, to_decimal
+from app.modules.tax_withholding.service import (
+    THRESHOLD_UNEVALUATED_REASONS,
+    ZERO,
+    compute_taxable_base,
+    quantise,
+    to_decimal,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +122,7 @@ TAX_WITHHOLDING_RULE_SET = "tax_withholding"
 
 RECORD_DEDUCTION = "deduction"
 RECORD_REVERSE_CHARGE = "reverse_charge"
+RECORD_STATUTORY = "statutory_taxes"
 
 
 def _record(context: ValidationContext) -> dict[str, Any]:
@@ -163,12 +201,17 @@ def _result(
     element_ref: str | None = None,
     suggestion: str | None = None,
     details: dict[str, Any] | None = None,
+    severity: Severity | None = None,
 ) -> RuleResult:
-    """Build a RuleResult carrying the rule's own id / name / severity / category."""
+    """Build a RuleResult carrying the rule's own id / name / severity / category.
+
+    ``severity`` replaces the rule's own for the two statutory rules that are
+    a warning on a draft and an error at confirmation.
+    """
     return RuleResult(
         rule_id=rule.rule_id,
         rule_name=rule.name,
-        severity=rule.severity,
+        severity=severity or rule.severity,
         category=rule.category,
         passed=passed,
         message=message,
@@ -580,6 +623,339 @@ class ReverseChargeInvoiceIsWellFormed(ValidationRule):
         return [_result(self, True, "OK", details=details)]
 
 
+# ── Statutory tax lines ──────────────────────────────────────────────────────
+#
+# These rules read the five figures of one payment document. They never fill a
+# gap: an amount that is missing is reported as missing, and a comparison that
+# needs a held figure is skipped instead of being run against zero.
+
+
+def _lines(context: ValidationContext) -> list[dict[str, Any]]:
+    raw = _record(context).get("lines")
+    if not isinstance(raw, list):
+        return []
+    return [line for line in raw if isinstance(line, dict)]
+
+
+def _line(context: ValidationContext, kind: str) -> dict[str, Any] | None:
+    for line in _lines(context):
+        if _text(line.get("kind")) == kind:
+            return line
+    return None
+
+
+def _amount(value: Any) -> Decimal | None:
+    """Read an amount, keeping "not there" apart from zero.
+
+    ``_dec`` above answers zero for anything it cannot read, which is right
+    for a scheme deduction and wrong here: a held figure has no amount, and
+    comparing it as zero would report an arithmetic error that is not one, or
+    hide one that is.
+    """
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, Decimal):
+        return value if value.is_finite() else None
+    try:
+        parsed = Decimal(str(value))
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+    return parsed if parsed.is_finite() else None
+
+
+def _confirming(context: ValidationContext) -> bool:
+    return _text(_record(context).get("action")) == "confirm"
+
+
+class StatutoryRateIsConfirmed(ValidationRule):
+    rule_id = "tax_withholding.statutory_rate_unconfirmed"
+    name = "Rate Row Has Been Confirmed Against Its Source"
+    standard = "tax_withholding"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "A figure computed from a rate that nobody has confirmed against the primary source may be "
+        "confirmed only by a person who states that they have checked it."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is(context, RECORD_STATUTORY):
+            return []
+        record = _record(context)
+        acknowledged = bool(record.get("acknowledged_unconfirmed_rates"))
+        blocking = _confirming(context) and not acknowledged
+        failures: list[RuleResult] = []
+        seen: set[str] = set()
+        for line in _lines(context):
+            code = _text(line.get("code"))
+            if _text(line.get("review_status")) != "unconfirmed" or code in seen:
+                continue
+            seen.add(code)
+            details = {
+                "kind": _text(line.get("kind")),
+                "code": code,
+                "legal_reference": _text(line.get("legal_reference")),
+                "source_url": _text(line.get("source_url")),
+                "acknowledged": acknowledged,
+            }
+            failures.append(
+                _result(
+                    self,
+                    False,
+                    (
+                        f"The rate for category '{code}' has not been confirmed against its primary source. "
+                        "The figure is computed from it all the same."
+                    ),
+                    severity=Severity.ERROR if blocking else Severity.WARNING,
+                    element_ref=_text(line.get("kind")) or None,
+                    suggestion=(
+                        "Check the rate against the cited source. Confirm the figures only with the "
+                        "acknowledgement that you have done so."
+                    ),
+                    details=details,
+                )
+            )
+        return failures or [_result(self, True, "OK")]
+
+
+class StatutoryLineIsNotHeld(ValidationRule):
+    rule_id = "tax_withholding.statutory_line_held"
+    name = "No Figure Is Held At Confirmation"
+    standard = "tax_withholding"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "A figure that cannot be known yet has no amount, and a document with one cannot be confirmed."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is(context, RECORD_STATUTORY):
+            return []
+        blocking = _confirming(context)
+        failures: list[RuleResult] = []
+        for line in _lines(context):
+            if _text(line.get("calc_status")) != "held":
+                continue
+            kind = _text(line.get("kind"))
+            reason_key = _text(line.get("reason_key"))
+            failures.append(
+                _result(
+                    self,
+                    False,
+                    (
+                        f"The figure '{kind}' is held ({reason_key or 'no reason recorded'}). It has no amount, "
+                        "and it is not zero."
+                    ),
+                    severity=Severity.ERROR if blocking else Severity.WARNING,
+                    element_ref=kind or None,
+                    suggestion="Supply what the figure is waiting for, or mark the tax as not applicable with a reason.",
+                    details={"kind": kind, "reason_key": reason_key, "reason_params": line.get("reason_params") or {}},
+                )
+            )
+        return failures or [_result(self, True, "OK")]
+
+
+class StatutoryVatAddsUp(ValidationRule):
+    rule_id = "tax_withholding.statutory_vat_identity"
+    name = "Computed VAT Equals Withheld Plus Payable"
+    standard = "tax_withholding"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "The VAT computed on a document is declared in two parts, by the buyer and by the seller, "
+        "and the two parts must add up to it exactly."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is(context, RECORD_STATUTORY):
+            return []
+        computed = _line(context, "vat_computed")
+        withheld = _line(context, "vat_withheld")
+        payable = _line(context, "vat_payable")
+        if computed is None or withheld is None or payable is None:
+            return []
+        statuses = {
+            "vat_computed": _text(computed.get("calc_status")),
+            "vat_withheld": _text(withheld.get("calc_status")),
+            "vat_payable": _text(payable.get("calc_status")),
+        }
+        # A held figure has no amount to add. The held rule reports it; this
+        # one has nothing to compare until all three are known.
+        if "held" in statuses.values():
+            return [_result(self, True, "OK", details=statuses)]
+        if statuses["vat_computed"] != "value" or statuses["vat_payable"] != "value":
+            return [_result(self, True, "OK", details=statuses)]
+
+        currency = _currency(_record(context))
+        computed_amount = _amount(computed.get("tax_amount"))
+        payable_amount = _amount(payable.get("tax_amount"))
+        # "Not applicable" is a decision that nothing is withheld, so the
+        # whole VAT is payable. It is the only case with no withheld amount.
+        nothing_withheld = statuses["vat_withheld"] == "not_applicable"
+        withheld_amount = None if nothing_withheld else _amount(withheld.get("tax_amount"))
+        details: dict[str, Any] = {
+            **statuses,
+            "computed": str(computed_amount) if computed_amount is not None else None,
+            "withheld": str(withheld_amount) if withheld_amount is not None else None,
+            "payable": str(payable_amount) if payable_amount is not None else None,
+            "currency_code": currency,
+        }
+        if computed_amount is None or payable_amount is None or (withheld_amount is None and not nothing_withheld):
+            return [
+                _result(
+                    self,
+                    False,
+                    "A VAT figure is recorded as a value but carries no readable amount, so the three cannot be added up.",
+                    suggestion="Recalculate the document's taxes.",
+                    details=details,
+                )
+            ]
+        parts = payable_amount if withheld_amount is None else withheld_amount + payable_amount
+        if parts == computed_amount:
+            return [_result(self, True, "OK", details=details)]
+        if withheld_amount is None:
+            message = (
+                f"No VAT is withheld, yet the payable VAT is {_fmt_money(payable_amount, currency)} "
+                f"and the computed VAT is {_fmt_money(computed_amount, currency)}."
+            )
+        else:
+            message = (
+                f"The computed VAT is {_fmt_money(computed_amount, currency)}, but the withheld "
+                f"{_fmt_money(withheld_amount, currency)} and the payable {_fmt_money(payable_amount, currency)} "
+                f"add up to {_fmt_money(withheld_amount + payable_amount, currency)}."
+            )
+        return [
+            _result(
+                self,
+                False,
+                message + " The buyer's return and the seller's return would not add up to the document.",
+                suggestion="Recalculate the document's taxes; the payable VAT is always the computed VAT less the withheld VAT.",
+                details=details,
+            )
+        ]
+
+
+class StatutoryOverrideHasReason(ValidationRule):
+    rule_id = "tax_withholding.statutory_override_reason"
+    name = "Overridden Amount Carries A Reason"
+    standard = "tax_withholding"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "An amount a person entered in place of the computed one must say why."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is(context, RECORD_STATUTORY):
+            return []
+        failures: list[RuleResult] = []
+        for line in _lines(context):
+            has_override = bool(line.get("overridden")) or line.get("override_amount") is not None
+            if not has_override or _text(line.get("override_reason")):
+                continue
+            kind = _text(line.get("kind"))
+            failures.append(
+                _result(
+                    self,
+                    False,
+                    (
+                        f"The amount of '{kind}' was entered by hand with no reason. An unexplained number "
+                        "on a tax line cannot be audited."
+                    ),
+                    element_ref=kind or None,
+                    suggestion="Record why the computed amount was replaced, or remove the override.",
+                    details={"kind": kind},
+                )
+            )
+        return failures or [_result(self, True, "OK")]
+
+
+class StatutoryRateIsEffective(ValidationRule):
+    rule_id = "tax_withholding.statutory_rate_not_effective"
+    name = "Stored Rate Row Is In Force On The Document Date"
+    standard = "tax_withholding"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "A figure must be computed from the rate row in force on the date the document is taxed on."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is(context, RECORD_STATUTORY):
+            return []
+        on_date = _as_date(_record(context).get("document_date"))
+        if on_date is None:
+            return []
+        failures: list[RuleResult] = []
+        for line in _lines(context):
+            starts = _as_date(line.get("rate_effective_from"))
+            ends = _as_date(line.get("rate_effective_to"))
+            if starts is None:
+                # No rate row stands behind this figure.
+                continue
+            if starts <= on_date and (ends is None or on_date <= ends):
+                continue
+            kind = _text(line.get("kind"))
+            code = _text(line.get("code"))
+            window = f"from {starts.isoformat()}" + (f" to {ends.isoformat()}" if ends else "")
+            failures.append(
+                _result(
+                    self,
+                    False,
+                    (
+                        f"The figure '{kind}' was computed from the rate for category '{code}', which is in "
+                        f"force {window}. The document is dated {on_date.isoformat()}."
+                    ),
+                    element_ref=kind or None,
+                    suggestion="Recalculate the document's taxes so the rate in force on its date is used.",
+                    details={
+                        "kind": kind,
+                        "code": code,
+                        "document_date": on_date.isoformat(),
+                        "rate_effective_from": starts.isoformat(),
+                        "rate_effective_to": ends.isoformat() if ends else "",
+                    },
+                )
+            )
+        return failures or [_result(self, True, "OK")]
+
+
+class StatutoryThresholdWasEvaluated(ValidationRule):
+    rule_id = "tax_withholding.statutory_threshold_unevaluated"
+    name = "Threshold Could Be Judged From This Document"
+    standard = "tax_withholding"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = (
+        "A threshold stated in another currency, or one that applies to a payee's whole year, "
+        "cannot be judged from one document."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is(context, RECORD_STATUTORY):
+            return []
+        failures: list[RuleResult] = []
+        for line in _lines(context):
+            reason_key = _text(line.get("reason_key"))
+            if reason_key not in THRESHOLD_UNEVALUATED_REASONS:
+                continue
+            kind = _text(line.get("kind"))
+            if kind == "vat_payable":
+                # Repeats the reason of the withheld VAT it is derived from.
+                continue
+            if reason_key == "threshold_needs_year_total":
+                why = "the limit applies to the payee's total for the year, which one document cannot show"
+                advice = "Check the payee's year to date, then enter the amount with a reason or mark the tax as not applicable."
+            else:
+                why = "the limit is stated in a currency other than the document's"
+                advice = "Convert at the rate for the document date, then enter the amount with a reason or mark the tax as not applicable."
+            failures.append(
+                _result(
+                    self,
+                    False,
+                    f"The limit for '{kind}' has not been applied: {why}.",
+                    element_ref=kind or None,
+                    suggestion=advice,
+                    details={"kind": kind, "reason_key": reason_key, "reason_params": line.get("reason_params") or {}},
+                )
+            )
+        return failures or [_result(self, True, "OK")]
+
+
 _TAX_WITHHOLDING_RULES: tuple[ValidationRule, ...] = (
     TaxableBaseIsCorrect(),
     WithheldWithinBase(),
@@ -587,6 +963,12 @@ _TAX_WITHHOLDING_RULES: tuple[ValidationRule, ...] = (
     VerificationExpiringInPeriod(),
     RateMatchesBand(),
     ReverseChargeInvoiceIsWellFormed(),
+    StatutoryRateIsConfirmed(),
+    StatutoryLineIsNotHeld(),
+    StatutoryVatAddsUp(),
+    StatutoryOverrideHasReason(),
+    StatutoryRateIsEffective(),
+    StatutoryThresholdWasEvaluated(),
 )
 
 
@@ -629,6 +1011,7 @@ def blocking_findings(results: list[RuleResult]) -> list[RuleResult]:
 __all__ = [
     "RECORD_DEDUCTION",
     "RECORD_REVERSE_CHARGE",
+    "RECORD_STATUTORY",
     "TAX_WITHHOLDING_RULE_SET",
     "blocking_findings",
     "evaluate_record",

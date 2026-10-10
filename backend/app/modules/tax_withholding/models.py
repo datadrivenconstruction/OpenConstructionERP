@@ -7,6 +7,8 @@ Tables:
     oe_tax_withholding_party          - one party's standing under a scheme
     oe_tax_withholding_deduction      - tax withheld from one payment
     oe_tax_withholding_reverse_charge - who accounts for the VAT on one invoice
+    oe_tax_withholding_statutory_calc - the inputs and sign-off of one document's payment taxes
+    oe_tax_withholding_statutory_line - one statutory tax figure on that document
 
 **The word "withholding" already means something else in this codebase, twice,
 and neither of them is a tax.** ``finance.Payment.withholding_amount`` and
@@ -43,13 +45,14 @@ containment, so a filter written that way would silently mean something else.
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
     JSON,
     Boolean,
     Date,
+    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -330,3 +333,209 @@ class ReverseChargeDetermination(Base):
     def __repr__(self) -> str:
         who = "buyer" if self.buyer_accounts_for_vat else "seller"
         return f"<ReverseChargeDetermination {self.invoice_reference} {self.country_code} vat_by={who}>"
+
+
+# ── Statutory tax lines on a payment document ────────────────────────────────
+
+# The documents a set of statutory tax lines can sit on. No cross-module
+# foreign key, for the reason given on ``PARTY_TYPES``: a progress claim lives
+# in ``contracts``, a subcontractor payment application in ``subcontractors``
+# and an invoice in ``finance``, and this module must load without any of them.
+STATUTORY_SOURCE_KINDS: tuple[str, ...] = ("progress_claim", "sub_payment_application", "invoice")
+
+# Which side of the payment we are on. ``borne_by_us``: the tax is withheld
+# from what we are paid, and we reclaim it through our own return.
+# ``withheld_by_us``: we withhold from a subcontractor and remit to the state.
+# The arithmetic is identical; the ledger the figure belongs in is not.
+STATUTORY_DIRECTIONS: tuple[str, ...] = ("borne_by_us", "withheld_by_us")
+
+# ``confirmed`` is a person's signature under the figures: from there on the
+# rows are frozen and no change to a rate table rewrites them. ``void`` keeps
+# the rows as evidence of what was once computed and takes them out of use.
+STATUTORY_STATUSES: tuple[str, ...] = ("draft", "confirmed", "void")
+
+# The five figures of one calculation, in their printed order. These are the
+# ``kind`` values of :class:`app.core.payment_taxes.Figure`.
+STATUTORY_LINE_KINDS: tuple[str, ...] = (
+    "vat_computed",
+    "vat_withheld",
+    "vat_payable",
+    "income_withheld",
+    "stamp_duty",
+)
+
+# Value, not applicable, held. Held is "we cannot say yet", and it is stored
+# as a NULL amount, never as zero: a zero prints as a figure somebody decided.
+STATUTORY_CALC_STATUSES: tuple[str, ...] = ("value", "not_applicable", "held")
+
+# What a person decided about one tax. The empty string marks the two derived
+# figures (computed VAT and payable VAT), which carry no decision of their own.
+STATUTORY_CHOICE_STATES: tuple[str, ...] = ("selected", "not_applicable", "unset")
+
+
+class StatutoryTaxCalc(Base):
+    """The inputs and the sign-off behind one document's statutory tax lines.
+
+    One row per source document. It holds what the five figures were computed
+    from, so the calculation can be reproduced, and it holds the whole
+    lifecycle, so there is exactly one place that says whether the figures are
+    a draft, confirmed or void. The lines carry no status of their own: two
+    writable copies of one status disagree sooner or later.
+
+    ``vat_rate_pct`` is an input here, not something this module resolves. The
+    platform has one source for a VAT rate and the caller reads it there. NULL
+    means the rate was not known when the figures were computed, and it is
+    never read as zero.
+
+    ``buyer_is_designated`` and ``work_value_incl_vat`` are nullable for the
+    same reason: "not stated" has to stay distinguishable from "no" and from
+    "nothing", because a withholding that depends on who the buyer is, or on
+    the value of the whole work, is held until somebody answers.
+
+    Amounts are stored at four decimal places so a three-decimal currency
+    keeps its last digit. They are read back at the currency's own precision.
+    """
+
+    __tablename__ = "oe_tax_withholding_statutory_calc"
+    __table_args__ = (
+        UniqueConstraint("source_kind", "source_id", name="uq_tax_wh_stat_calc_source"),
+        Index("ix_tax_wh_stat_calc_source_id", "source_id"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE", name="fk_tax_wh_stat_calc_project"),
+        nullable=False,
+    )
+    source_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    # Plain GUID, deliberately not a foreign key - see ``STATUTORY_SOURCE_KINDS``.
+    source_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    # The number printed on the document, so the row reads without a join.
+    source_reference: Mapped[str] = mapped_column(String(128), nullable=False, default="", server_default="")
+    direction: Mapped[str] = mapped_column(String(24), nullable=False)
+    country_code: Mapped[str] = mapped_column(String(2), nullable=False)
+    currency_code: Mapped[str] = mapped_column(String(3), nullable=False)
+    # The date the document is taxed on: the rate rows are looked up for it.
+    document_date: Mapped[date] = mapped_column(Date(), nullable=False)
+    net_amount: Mapped[Decimal] = mapped_column(MoneyType(precision=18, scale=4), nullable=False)
+    vat_rate_pct: Mapped[Decimal | None] = mapped_column(MoneyType(precision=12, scale=6), nullable=True)
+    buyer_is_designated: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    work_value_incl_vat: Mapped[Decimal | None] = mapped_column(MoneyType(precision=18, scale=4), nullable=True)
+    # What the person says the work value is the value of: this subcontract,
+    # or the main work it is part of. Which of the two the law tests is a
+    # question for an accountant, so the figure is stored as entered together
+    # with their description of it, and is never derived.
+    work_value_note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    # Stamp duty is charged on a base of its own, which is not the VAT base
+    # (an advance already taxed comes off it). NULL with the flag unset means
+    # nobody has stated the base, and the stamp duty figure is held. The flag
+    # is a person's statement that the base is the net amount; it is never
+    # assumed.
+    stamp_duty_base: Mapped[Decimal | None] = mapped_column(MoneyType(precision=18, scale=4), nullable=True)
+    stamp_duty_base_same_as_net: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    status: Mapped[str] = mapped_column(String(24), nullable=False, default="draft", server_default="draft")
+    # Users are referenced by plain GUID: the sign-off has to outlive the
+    # account that gave it.
+    confirmed_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Set when the figures were confirmed although a rate row behind them had
+    # not been confirmed against its primary source. Who accepted that, and
+    # when, is the difference between a decision and a silent default.
+    unconfirmed_rates_acknowledged_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    unconfirmed_rates_acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # The last reopening. Every reopening is also written to the audit log,
+    # which keeps the earlier ones.
+    reopened_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    reopened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reopen_reason: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    voided_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    voided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    void_reason: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+
+    def __repr__(self) -> str:
+        return f"<StatutoryTaxCalc {self.source_kind}:{self.source_id} {self.status}>"
+
+
+class StatutoryTaxLine(Base):
+    """One statutory tax figure on one payment document.
+
+    A row is a stored :class:`app.core.payment_taxes.Figure`: every field of
+    the figure has a column, so the result of a calculation can be rebuilt
+    from the rows exactly, without running the calculation again. That is what
+    freezing means here. A confirmed document answers from these rows whatever
+    the rate tables say afterwards.
+
+    ``tax_amount`` and ``base_amount`` are NULL for a figure that is held or
+    not applicable. NULL is not zero: a real zero is a ``value`` row holding
+    ``0``, and it is the only way a zero gets into this table.
+
+    The three lines that belong to a tax a person decides on (``vat_withheld``,
+    ``income_withheld``, ``stamp_duty``) also carry that decision in the
+    ``choice_*`` columns. ``code`` is the rate row the figure was computed
+    from; ``choice_code`` is what the person picked. They are kept apart so a
+    picked code that had no row on the document date still shows what was
+    asked for.
+
+    ``project_id``, ``source_kind`` and ``source_id`` repeat the parent's so
+    the unique key can be stated on this table and a line can be found without
+    the parent.
+    """
+
+    __tablename__ = "oe_tax_withholding_statutory_line"
+    __table_args__ = (
+        UniqueConstraint("source_kind", "source_id", "kind", name="uq_tax_wh_stat_line_source_kind"),
+        Index("ix_tax_wh_stat_line_source_id", "source_id"),
+    )
+
+    calc_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tax_withholding_statutory_calc.id", ondelete="CASCADE", name="fk_tax_wh_stat_line_calc"),
+        nullable=False,
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE", name="fk_tax_wh_stat_line_project"),
+        nullable=False,
+    )
+    source_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    source_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    calc_status: Mapped[str] = mapped_column(String(24), nullable=False)
+    # Never ``withholding_amount``: that name is taken by retainage in
+    # ``finance``. NULL unless ``calc_status`` is ``value``.
+    tax_amount: Mapped[Decimal | None] = mapped_column(MoneyType(precision=18, scale=4), nullable=True)
+    base_amount: Mapped[Decimal | None] = mapped_column(MoneyType(precision=18, scale=4), nullable=True)
+    # Percent. A per-mille duty is written as a percent, hence six decimals.
+    rate_pct: Mapped[Decimal | None] = mapped_column(MoneyType(precision=12, scale=6), nullable=True)
+    # The fraction of the VAT that changes hands, for a VAT withholding.
+    numerator: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    denominator: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    code: Mapped[str] = mapped_column(String(32), nullable=False, default="", server_default="")
+    currency_code: Mapped[str] = mapped_column(String(3), nullable=False)
+    # Text, not a sized string: both are copied from the rate row as they are,
+    # and a reference cut short to fit a column would quote the wrong article.
+    legal_reference: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    source_url: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    rate_effective_from: Mapped[date | None] = mapped_column(Date(), nullable=True)
+    rate_effective_to: Mapped[date | None] = mapped_column(Date(), nullable=True)
+    review_status: Mapped[str] = mapped_column(String(16), nullable=False, default="", server_default="")
+    reason_key: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="")
+    reason_params: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}"
+    )
+    choice_state: Mapped[str] = mapped_column(String(24), nullable=False, default="", server_default="")
+    choice_code: Mapped[str] = mapped_column(String(32), nullable=False, default="", server_default="")
+    choice_reason: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    overridden: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    # The amount a person entered in place of the computed one. Kept apart
+    # from ``tax_amount`` so a recalculation can apply the same override again
+    # instead of guessing it back out of the result.
+    override_amount: Mapped[Decimal | None] = mapped_column(MoneyType(precision=18, scale=4), nullable=True)
+    override_reason: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    overridden_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    overridden_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<StatutoryTaxLine {self.kind} {self.calc_status} {self.tax_amount} {self.currency_code}>"

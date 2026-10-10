@@ -32,20 +32,26 @@ government platform is an adapter behind that, not a dependency of the core.
 async def on_startup() -> None:
     """Module startup hook (called by the module loader after mount).
 
-    Registers two things, both load-bearing:
+    Registers three things, all load-bearing:
 
     * the module's permissions, without which ``RequirePermission`` denies an
       unregistered key and every endpoint here is admin-only in production
       while every admin-authenticated test keeps passing;
     * the ``tax_withholding`` validation rule set, which the deduction and
       reverse-charge endpoints run on every save and which gates taking a
-      record out of draft.
+      record out of draft;
+    * the provider that hands a payment certificate the statutory tax figures
+      stored for its document. The registry belongs to ``contracts`` and is
+      looked up at startup rather than imported at the top, so this module
+      still loads on an install without it.
 
-    Idempotent - both registries overwrite by key, so a hot reload
+    Idempotent - every registry overwrites by key, so a hot reload
     re-registers cleanly.
     """
     from app.modules.tax_withholding.permissions import register_tax_withholding_permissions
+    from app.modules.tax_withholding.service import register_certificate_tax_provider
     from app.modules.tax_withholding.validators import register_tax_withholding_rules
 
     register_tax_withholding_permissions()
     register_tax_withholding_rules()
+    register_certificate_tax_provider()

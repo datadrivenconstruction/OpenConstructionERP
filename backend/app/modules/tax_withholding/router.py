@@ -35,6 +35,16 @@ is deliberately absent from the schema.
     PUT    /reverse-charge/{id}       - replace a determination
     DELETE /reverse-charge/{id}       - remove a determination
 
+    POST   /statutory/preview                          - compute a document's taxes, store nothing
+    GET    /statutory/categories                       - the categories a person can choose from
+    GET    /statutory/{source_kind}/{source_id}        - the stored taxes of one document
+    PUT    /statutory/{source_kind}/{source_id}        - compute and store them as a draft
+    POST   /statutory/{source_kind}/{source_id}/override        - enter an amount with a reason
+    DELETE /statutory/{source_kind}/{source_id}/override/{kind} - go back to the computed amount
+    POST   /statutory/{source_kind}/{source_id}/confirm         - a person confirms; figures freeze
+    POST   /statutory/{source_kind}/{source_id}/reopen          - back to draft, audited
+    POST   /statutory/{source_kind}/{source_id}/void            - out of use, rows kept
+
 ``/regimes/seed``, ``/party-status/expiring``, ``/deductions/preview`` and
 ``/reverse-charge/rules`` are each declared before the ``/{id}`` route that
 would otherwise swallow them. Declared the other way round the literal path is
@@ -59,10 +69,13 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, timedelta
+from typing import Annotated, get_args
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.payment_taxes import Choice, categories
+from app.core.payment_taxes.tables import OverlappingRowsError
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -74,6 +87,8 @@ from app.modules.tax_withholding.data import REVERSE_CHARGE_RULES
 from app.modules.tax_withholding.models import (
     PartyTaxStatus,
     ReverseChargeDetermination,
+    StatutoryTaxCalc,
+    StatutoryTaxLine,
     WithholdingDeduction,
     WithholdingRegime,
 )
@@ -96,6 +111,20 @@ from app.modules.tax_withholding.schemas import (
     ReverseChargeRuleResponse,
     ReverseChargeSaveResponse,
     ReverseChargeUpdateRequest,
+    StatutoryCalcResponse,
+    StatutoryCategoryResponse,
+    StatutoryChoice,
+    StatutoryConfirmRequest,
+    StatutoryFigureResponse,
+    StatutoryInputsBody,
+    StatutoryOverridableLiteral,
+    StatutoryOverrideRequest,
+    StatutoryPreviewRequest,
+    StatutoryPreviewResponse,
+    StatutoryReasonRequest,
+    StatutoryRowKindLiteral,
+    StatutorySourceKindLiteral,
+    StatutoryUpsertRequest,
     WithholdingFinding,
 )
 from app.modules.tax_withholding.validators import blocking_findings, evaluate_record
@@ -739,3 +768,478 @@ async def _save_determination(
     else:
         await session.flush()
     return row, findings
+
+
+# ── Statutory tax lines on a payment document ────────────────────────────────
+#
+# The source document (a progress claim, a subcontractor payment application,
+# an invoice) lives in another module and is named by kind and id. It belongs
+# to a project, the caller states which, and two checks follow from that on
+# every route: the caller may reach that project, and the stored set is filed
+# under that same project. A set filed under another project answers exactly
+# like a document with nothing stored, so the answer never tells a caller that
+# somebody else's document exists.
+
+
+def statutory_row_source() -> service.RowSource:
+    """Where the statutory rate rows come from. Overridden in tests."""
+    return service.shipped_rows
+
+
+RowSourceDep = Annotated[service.RowSource, Depends(statutory_row_source)]
+
+_STATUTORY_NOT_FOUND = "Statutory tax lines not found"
+
+
+def _refused(refusal: service.StatutoryRefusal) -> HTTPException:
+    """Turn a service refusal into the response the screen translates."""
+    if refusal.http_status == status.HTTP_404_NOT_FOUND:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=refusal.message)
+    return HTTPException(
+        status_code=refusal.http_status,
+        detail={
+            "key": f"taxWithholding.statutory.error.{refusal.code}",
+            "code": refusal.code,
+            "message": refusal.message,
+            "details": refusal.details,
+            "findings": [finding.model_dump() for finding in _to_findings(refusal.findings)],
+        },
+    )
+
+
+def _statutory_inputs(payload: StatutoryInputsBody) -> service.StatutoryInputs:
+    """A validated request as the plain values the service computes from."""
+
+    def choice(body: StatutoryChoice) -> Choice:
+        return Choice(state=body.state, code=body.code, reason=body.reason)
+
+    return service.StatutoryInputs(
+        country_code=payload.country_code,
+        currency_code=payload.currency_code,
+        document_date=payload.document_date,
+        net_amount=payload.net_amount,
+        vat_rate_pct=payload.vat_rate_pct,
+        buyer_is_designated=payload.buyer_is_designated,
+        work_value_incl_vat=payload.work_value_incl_vat,
+        work_value_note=payload.work_value_note,
+        stamp_duty_base=payload.stamp_duty_base,
+        stamp_duty_base_same_as_net=payload.stamp_duty_base_same_as_net,
+        vat_withholding=choice(payload.vat_withholding),
+        income_withholding=choice(payload.income_withholding),
+        stamp_duty=choice(payload.stamp_duty),
+    )
+
+
+def _inputs_body(inputs: service.StatutoryInputs) -> StatutoryInputsBody:
+    def choice(value: Choice) -> StatutoryChoice:
+        return StatutoryChoice(state=value.state, code=value.code, reason=value.reason)
+
+    return StatutoryInputsBody(
+        country_code=inputs.country_code,
+        currency_code=inputs.currency_code,
+        document_date=inputs.document_date,
+        net_amount=inputs.net_amount,
+        vat_rate_pct=inputs.vat_rate_pct,
+        buyer_is_designated=inputs.buyer_is_designated,
+        work_value_incl_vat=inputs.work_value_incl_vat,
+        work_value_note=inputs.work_value_note,
+        stamp_duty_base=inputs.stamp_duty_base,
+        stamp_duty_base_same_as_net=inputs.stamp_duty_base_same_as_net,
+        vat_withholding=choice(inputs.vat_withholding),
+        income_withholding=choice(inputs.income_withholding),
+        stamp_duty=choice(inputs.stamp_duty),
+    )
+
+
+def _figure_response(values: dict) -> StatutoryFigureResponse:
+    """One line's values as the figure the reader receives."""
+    currency = values["currency_code"]
+    rate = values["rate_pct"]
+    return StatutoryFigureResponse(
+        kind=values["kind"],
+        status=values["calc_status"],
+        amount=service.money_as_stored(values["tax_amount"], currency),
+        base=service.money_as_stored(values["base_amount"], currency),
+        rate_pct=service.plain_decimal(rate) if rate is not None else None,
+        numerator=values["numerator"],
+        denominator=values["denominator"],
+        code=values["code"],
+        currency_code=currency,
+        legal_reference=values["legal_reference"],
+        source_url=values["source_url"],
+        effective_from=values["rate_effective_from"],
+        effective_to=values["rate_effective_to"],
+        review_status=values["review_status"],
+        overridden=values["overridden"],
+        reason_key=values["reason_key"],
+        reason_params=values["reason_params"],
+        choice_state=values.get("choice_state", ""),
+        choice_code=values.get("choice_code", ""),
+        choice_reason=values.get("choice_reason", ""),
+        override_amount=values.get("override_amount"),
+        override_reason=values.get("override_reason", ""),
+        overridden_by=values.get("overridden_by"),
+        overridden_at=values.get("overridden_at"),
+    )
+
+
+async def _statutory_response(
+    calc: StatutoryTaxCalc,
+    lines: list[StatutoryTaxLine],
+    findings: list | None = None,
+) -> StatutoryCalcResponse:
+    """A stored set as the reader receives it, with what validation makes of it."""
+    try:
+        values = [service.stored_line_values(line) for line in lines]
+        inputs = service.inputs_from_stored(calc, lines)
+    except service.StatutoryDataError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "key": "taxWithholding.statutory.error.statutory_data_unreadable",
+                "code": "statutory_data_unreadable",
+                "message": str(exc),
+            },
+        ) from exc
+    if findings is None:
+        findings = await evaluate_record(
+            service.statutory_payload(
+                values,
+                currency_code=calc.currency_code,
+                document_date=calc.document_date,
+                source_reference=calc.source_reference,
+            ),
+            record_id=str(calc.id),
+        )
+    return StatutoryCalcResponse(
+        id=calc.id,
+        project_id=calc.project_id,
+        source_kind=calc.source_kind,
+        source_id=calc.source_id,
+        source_reference=calc.source_reference,
+        direction=calc.direction,
+        status=calc.status,
+        inputs=_inputs_body(inputs),
+        figures=[_figure_response(line) for line in values],
+        complete=not service.held_kinds(values),
+        uses_unconfirmed_rates=bool(service.unconfirmed_codes(values)),
+        confirmed_by=calc.confirmed_by,
+        confirmed_at=calc.confirmed_at,
+        unconfirmed_rates_acknowledged_by=calc.unconfirmed_rates_acknowledged_by,
+        unconfirmed_rates_acknowledged_at=calc.unconfirmed_rates_acknowledged_at,
+        reopened_by=calc.reopened_by,
+        reopened_at=calc.reopened_at,
+        reopen_reason=calc.reopen_reason,
+        voided_by=calc.voided_by,
+        voided_at=calc.voided_at,
+        void_reason=calc.void_reason,
+        created_at=calc.created_at,
+        updated_at=calc.updated_at,
+        findings=_to_findings(findings),
+    )
+
+
+async def _statutory_or_404(
+    session: AsyncSession,
+    *,
+    source_kind: str,
+    source_id: uuid.UUID,
+    project_id: uuid.UUID,
+    user_id: str,
+) -> tuple[StatutoryTaxCalc, list[StatutoryTaxLine]]:
+    """The stored set of one document, for a caller who may reach its project.
+
+    Two refusals, both 404. The caller cannot reach the project they named, or
+    the set is filed under a different project than the one they named.
+    """
+    await verify_project_access(project_id, user_id, session)
+    stored = await service.get_statutory(session, source_kind=source_kind, source_id=source_id)
+    if stored is None or stored[0].project_id != project_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_STATUTORY_NOT_FOUND)
+    return stored
+
+
+@router.post(
+    "/statutory/preview",
+    response_model=StatutoryPreviewResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_view"))],
+)
+async def preview_statutory_taxes(
+    payload: StatutoryPreviewRequest,
+    row_source: RowSourceDep,
+) -> StatutoryPreviewResponse:
+    """What the five figures would be for these inputs. Nothing is stored."""
+    inputs = _statutory_inputs(payload)
+    rows = row_source(inputs.country_code)
+    try:
+        result = service.preview_statutory(inputs, rows)
+        values = service.result_line_values(result, inputs, rows)
+    except service.StatutoryRefusal as refusal:
+        raise _refused(refusal) from refusal
+    findings = await evaluate_record(
+        service.statutory_payload(
+            values,
+            currency_code=inputs.currency_code,
+            document_date=inputs.document_date,
+        )
+    )
+    return StatutoryPreviewResponse(
+        inputs=_inputs_body(inputs),
+        figures=[_figure_response(line) for line in values],
+        complete=result.complete,
+        uses_unconfirmed_rates=bool(service.unconfirmed_codes(values)),
+        findings=_to_findings(findings),
+    )
+
+
+@router.get(
+    "/statutory/categories",
+    response_model=list[StatutoryCategoryResponse],
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_view"))],
+)
+async def list_statutory_categories(
+    row_source: RowSourceDep,
+    country: str = Query(..., min_length=2, max_length=2),
+    on: date = Query(...),
+    kind: StatutoryRowKindLiteral | None = Query(None),
+) -> list[StatutoryCategoryResponse]:
+    """The categories a person can choose from on one date, with their legal basis.
+
+    The date is required. A picker filled for today would offer this year's
+    fraction for last year's document.
+    """
+    rows = row_source(country)
+    wanted = (kind,) if kind else get_args(StatutoryRowKindLiteral)
+    found = []
+    try:
+        for row_kind in wanted:
+            found.extend(categories(rows, country=country, kind=row_kind, on=on))
+    except OverlappingRowsError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "key": "taxWithholding.statutory.error.rate_table_ambiguous",
+                "code": "rate_table_ambiguous",
+                "message": str(exc),
+            },
+        ) from exc
+    return [
+        StatutoryCategoryResponse(
+            country_code=row.country_code,
+            kind=row.kind,
+            code=row.code,
+            labels=dict(row.labels),
+            base=row.base,
+            rate_pct=row.rate_pct,
+            numerator=row.numerator,
+            denominator=row.denominator,
+            threshold_amount=row.threshold_amount,
+            threshold_currency=row.threshold_currency,
+            threshold_scope=row.threshold_scope,
+            threshold_measure=row.threshold_measure,
+            cap_amount=row.cap_amount,
+            buyer_scope=row.buyer_scope,
+            work_value_threshold=row.work_value_threshold,
+            conditions=dict(row.conditions),
+            effective_from=row.effective_from,
+            effective_to=row.effective_to,
+            legal_reference=row.legal_reference,
+            source_url=row.source_url,
+            read_date=row.read_date,
+            review_status=row.review_status,
+        )
+        for row in found
+    ]
+
+
+@router.get(
+    "/statutory/{source_kind}/{source_id}",
+    response_model=StatutoryCalcResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_view"))],
+)
+async def read_statutory_taxes(
+    source_kind: StatutorySourceKindLiteral,
+    source_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+) -> StatutoryCalcResponse:
+    """The stored statutory taxes of one source document."""
+    calc, lines = await _statutory_or_404(
+        session, source_kind=source_kind, source_id=source_id, project_id=project_id, user_id=user_id
+    )
+    return await _statutory_response(calc, lines)
+
+
+@router.put(
+    "/statutory/{source_kind}/{source_id}",
+    response_model=StatutoryCalcResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_edit"))],
+)
+async def save_statutory_taxes(
+    source_kind: StatutorySourceKindLiteral,
+    source_id: uuid.UUID,
+    payload: StatutoryUpsertRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    row_source: RowSourceDep,
+) -> StatutoryCalcResponse:
+    """Compute a document's statutory taxes and store them as a draft.
+
+    Saving the same body twice stores the same rows. A confirmed set is not
+    recalculated: reopen it with a reason first.
+    """
+    await verify_project_access(payload.project_id, user_id, session)
+    try:
+        calc, lines = await service.upsert_statutory(
+            session,
+            project_id=payload.project_id,
+            source_kind=source_kind,
+            source_id=source_id,
+            inputs=_statutory_inputs(payload),
+            direction=payload.direction,
+            user_id=user_id,
+            source_reference=payload.source_reference,
+            row_source=row_source,
+        )
+    except service.StatutoryRefusal as refusal:
+        raise _refused(refusal) from refusal
+    return await _statutory_response(calc, lines)
+
+
+@router.post(
+    "/statutory/{source_kind}/{source_id}/override",
+    response_model=StatutoryCalcResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_edit"))],
+)
+async def override_statutory_tax(
+    source_kind: StatutorySourceKindLiteral,
+    source_id: uuid.UUID,
+    payload: StatutoryOverrideRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    row_source: RowSourceDep,
+) -> StatutoryCalcResponse:
+    """Enter an amount in place of one computed figure, with the reason."""
+    calc, _ = await _statutory_or_404(
+        session, source_kind=source_kind, source_id=source_id, project_id=payload.project_id, user_id=user_id
+    )
+    try:
+        lines = await service.override_statutory(
+            session,
+            calc=calc,
+            kind=payload.kind,
+            amount=payload.amount,
+            reason=payload.reason,
+            user_id=user_id,
+            row_source=row_source,
+        )
+    except service.StatutoryRefusal as refusal:
+        raise _refused(refusal) from refusal
+    return await _statutory_response(calc, lines)
+
+
+@router.delete(
+    "/statutory/{source_kind}/{source_id}/override/{kind}",
+    response_model=StatutoryCalcResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_edit"))],
+)
+async def clear_statutory_tax_override(
+    source_kind: StatutorySourceKindLiteral,
+    source_id: uuid.UUID,
+    kind: StatutoryOverridableLiteral,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    row_source: RowSourceDep,
+    project_id: uuid.UUID = Query(...),
+) -> StatutoryCalcResponse:
+    """Remove an entered amount and go back to the computed figure."""
+    calc, _ = await _statutory_or_404(
+        session, source_kind=source_kind, source_id=source_id, project_id=project_id, user_id=user_id
+    )
+    try:
+        lines = await service.clear_statutory_override(
+            session, calc=calc, kind=kind, user_id=user_id, row_source=row_source
+        )
+    except service.StatutoryRefusal as refusal:
+        raise _refused(refusal) from refusal
+    return await _statutory_response(calc, lines)
+
+
+@router.post(
+    "/statutory/{source_kind}/{source_id}/confirm",
+    response_model=StatutoryCalcResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_confirm"))],
+)
+async def confirm_statutory_taxes(
+    source_kind: StatutorySourceKindLiteral,
+    source_id: uuid.UUID,
+    payload: StatutoryConfirmRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> StatutoryCalcResponse:
+    """Confirm the stored figures. From here on they are frozen.
+
+    Refused while a figure is held, and while a rate behind a figure has not
+    been confirmed against its source unless the caller acknowledges having
+    checked it. The acknowledgement is stored with the user and the time.
+    """
+    calc, _ = await _statutory_or_404(
+        session, source_kind=source_kind, source_id=source_id, project_id=payload.project_id, user_id=user_id
+    )
+    try:
+        lines, findings = await service.confirm_statutory(
+            session,
+            calc=calc,
+            user_id=user_id,
+            acknowledge_unconfirmed_rates=payload.acknowledge_unconfirmed_rates,
+        )
+    except service.StatutoryRefusal as refusal:
+        raise _refused(refusal) from refusal
+    return await _statutory_response(calc, lines, findings)
+
+
+@router.post(
+    "/statutory/{source_kind}/{source_id}/reopen",
+    response_model=StatutoryCalcResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_confirm"))],
+)
+async def reopen_statutory_taxes(
+    source_kind: StatutorySourceKindLiteral,
+    source_id: uuid.UUID,
+    payload: StatutoryReasonRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> StatutoryCalcResponse:
+    """Take confirmed or void figures back to draft. Written to the audit log."""
+    calc, _ = await _statutory_or_404(
+        session, source_kind=source_kind, source_id=source_id, project_id=payload.project_id, user_id=user_id
+    )
+    try:
+        lines = await service.reopen_statutory(session, calc=calc, user_id=user_id, reason=payload.reason)
+    except service.StatutoryRefusal as refusal:
+        raise _refused(refusal) from refusal
+    return await _statutory_response(calc, lines)
+
+
+@router.post(
+    "/statutory/{source_kind}/{source_id}/void",
+    response_model=StatutoryCalcResponse,
+    dependencies=[Depends(RequirePermission("tax_withholding.statutory_confirm"))],
+)
+async def void_statutory_taxes(
+    source_kind: StatutorySourceKindLiteral,
+    source_id: uuid.UUID,
+    payload: StatutoryReasonRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> StatutoryCalcResponse:
+    """Take a set of figures out of use, keeping its rows as evidence."""
+    calc, _ = await _statutory_or_404(
+        session, source_kind=source_kind, source_id=source_id, project_id=payload.project_id, user_id=user_id
+    )
+    try:
+        lines = await service.void_statutory(session, calc=calc, user_id=user_id, reason=payload.reason)
+    except service.StatutoryRefusal as refusal:
+        raise _refused(refusal) from refusal
+    return await _statutory_response(calc, lines)

@@ -9,7 +9,8 @@ much money leaves the business can be tested without a database.
 
 No ``relationship()`` is declared in this module's models, so nothing here has
 a lazy-loading strategy to choose: a deduction points at its regime and its
-party standing by id and the service fetches what it needs. Filtering is on
+party standing by id and the service fetches what it needs. A statutory tax
+line points at its header the same way. Filtering is on
 real columns only - a ``.contains()`` against the JSON ``bands`` column would
 compile to a string LIKE on PostgreSQL rather than to JSONB containment, so
 bands are read whole and matched in Python.
@@ -21,11 +22,15 @@ import uuid
 from datetime import date
 
 from sqlalchemy import and_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.tax_withholding.models import (
+    STATUTORY_LINE_KINDS,
     PartyTaxStatus,
     ReverseChargeDetermination,
+    StatutoryTaxCalc,
+    StatutoryTaxLine,
     WithholdingDeduction,
     WithholdingRegime,
 )
@@ -293,11 +298,69 @@ async def delete_determination(session: AsyncSession, row: ReverseChargeDetermin
     await session.flush()
 
 
+# ── Statutory tax lines ──────────────────────────────────────────────────────
+
+
+async def get_statutory_calc(
+    session: AsyncSession,
+    *,
+    source_kind: str,
+    source_id: uuid.UUID,
+) -> StatutoryTaxCalc | None:
+    """The statutory tax header of one source document, if one is stored.
+
+    Matched on the kind and the id together. Two modules hand out their ids
+    independently, so the same GUID under two kinds is two documents.
+    """
+    stmt = select(StatutoryTaxCalc).where(
+        and_(
+            StatutoryTaxCalc.source_kind == source_kind,
+            StatutoryTaxCalc.source_id == source_id,
+        )
+    )
+    return (await session.execute(stmt)).scalar_one_or_none()
+
+
+async def add_statutory_calc(session: AsyncSession, row: StatutoryTaxCalc) -> StatutoryTaxCalc | None:
+    """Store a header, or return ``None`` when another request stored it first.
+
+    The insert runs inside a savepoint. Two saves of the same new document can
+    both find nothing and both insert; the unique key lets one through, and the
+    loser's savepoint is rolled back without taking the caller's transaction
+    with it. The caller then reads the winner's row and carries on as an
+    update, which is what makes the save idempotent under a double click.
+    """
+    try:
+        async with session.begin_nested():
+            session.add(row)
+            await session.flush()
+    except IntegrityError:
+        return None
+    return row
+
+
+async def list_statutory_lines(session: AsyncSession, calc_id: uuid.UUID) -> list[StatutoryTaxLine]:
+    """The lines of one header, in the order a document prints them."""
+    stmt = select(StatutoryTaxLine).where(StatutoryTaxLine.calc_id == calc_id)
+    rows = list((await session.execute(stmt)).scalars().all())
+    order = {kind: position for position, kind in enumerate(STATUTORY_LINE_KINDS)}
+    return sorted(rows, key=lambda line: order.get(line.kind, len(order)))
+
+
+async def add_statutory_line(session: AsyncSession, row: StatutoryTaxLine) -> StatutoryTaxLine:
+    """Store one line."""
+    session.add(row)
+    await session.flush()
+    return row
+
+
 __all__ = [
     "add_deduction",
     "add_determination",
     "add_party_status",
     "add_regime",
+    "add_statutory_calc",
+    "add_statutory_line",
     "current_party_status",
     "delete_deduction",
     "delete_determination",
@@ -310,8 +373,10 @@ __all__ = [
     "get_party_status",
     "get_regime",
     "get_regime_by_scheme",
+    "get_statutory_calc",
     "list_deductions",
     "list_determinations",
     "list_party_statuses",
     "list_regimes",
+    "list_statutory_lines",
 ]
