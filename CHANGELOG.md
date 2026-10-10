@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Progress claims offer a read-only draft lender-preparation preview and JSON download, preserving canonical payment figures and marking unavailable evidence; it does not submit to a lender, approve funding or disburse money, and excludes loan facilities, stored-material evidence and the contract-specific change-order log.
+
 ## [18.5.0] - 2026-10-10
 
 This release makes the platform lighter to run and easier to understand. A Background services button in the top bar lists every service the platform keeps loaded, what it is for, which modules need it and roughly how much memory it takes, and an administrator can switch each one on or off without a restart. On a fresh server the administrator is asked once which modules they will use before anything heavy starts, semantic search stays off until someone turns it on, and the demo projects are set up in the background. The Windows desktop app installs its backend once instead of unpacking it on every start and now starts for users whose account name has non-ASCII letters. Procurement, the client portal, payment plans, schedules and the Italian workflow all grow, as listed below.
@@ -44,7 +47,6 @@ This release makes the platform lighter to run and easier to understand. A Backg
 - Bill exports to PDF, XLSX and GAEB mark the rows that AI produced.
 - Validation messages come in 38 languages, up from 4.
 - The schedule detail view warns when public-holiday coverage is missing or incomplete, using the saved calendar and years of generated plans. New generated calendars also retain whether their working week used a fallback, so that warning survives reopening the schedule. Regional calendar loading and failures are shown explicitly; manually configured calendars keep their own rules, and historical plans without a saved fallback flag are not reclassified.
-- Progress claims offer a read-only draft lender-preparation preview and JSON download, preserving canonical payment figures and marking unavailable evidence; it does not submit to a lender, approve funding or disburse money, and excludes loan facilities, stored-material evidence and the contract-specific change-order log.
 - New eligible outside-SOV progress claims use the retention ladder rate selected by prior SOV work, with existing caps and currency precision. Claims created before this change keep their flat-rate calculation, and issued certificates are not recalculated. Milestone, cost-plus and time-and-materials claims retain their existing rules.
 - Progress claims expose country-independent payment-application figures through `/progress-claims/{id}/payment-application`, using the same calculations and project access checks as the existing regional AIA view. The AIA JSON and PDF endpoints retain their country restrictions.
 - Bills can keep a tax date separately from the date their prices refer to. VAT uses the tax date when one is supplied, and otherwise keeps using the price reference date. Both dates survive copying a bill or creating a revision; impossible calendar dates are refused in the form.
