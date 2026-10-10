@@ -22,7 +22,7 @@
 import type { TFunction } from 'i18next';
 
 import { isDecimalString } from '@/shared/lib/exactDecimal';
-import { fmtDate } from '@/shared/lib/formatters';
+import { fmtDate, fmtList } from '@/shared/lib/formatters';
 import { currencyFractionDigits } from '@/shared/lib/money';
 
 let exactStrings: boolean | null = null;
@@ -36,8 +36,14 @@ function formatExact(formatter: Intl.NumberFormat, value: string): string {
 function supportsExactStrings(): boolean {
   if (exactStrings !== null) return exactStrings;
   try {
-    const probe = new Intl.NumberFormat('en-US', { useGrouping: false, maximumFractionDigits: 2 });
-    exactStrings = formatExact(probe, '9007199254740993.01') === '9007199254740993.01';
+    // Asked in the reader's own locale with Latin digits: only the digits are
+    // compared, so the decimal mark of the locale does not matter.
+    const probe = new Intl.NumberFormat(undefined, {
+      useGrouping: false,
+      maximumFractionDigits: 2,
+      numberingSystem: 'latn',
+    });
+    exactStrings = formatExact(probe, '9007199254740993.01').replace(/\D/g, '') === '900719925474099301';
   } catch {
     exactStrings = false;
   }
@@ -150,12 +156,13 @@ export function reasonSentence(
   const operands = shown.operands;
   if (operands !== undefined && context.lineName) {
     const name = context.lineName;
-    shown.operands = operands
-      .split(',')
-      .map((part) => part.trim())
-      .filter((part) => part !== '')
-      .map((part) => name(part))
-      .join(', ');
+    shown.operands = fmtList(
+      operands
+        .split(',')
+        .map((part) => part.trim())
+        .filter((part) => part !== '')
+        .map((part) => name(part)),
+    );
   }
   const fallback =
     serverText ||

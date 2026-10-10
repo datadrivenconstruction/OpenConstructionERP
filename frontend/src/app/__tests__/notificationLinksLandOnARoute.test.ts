@@ -181,6 +181,8 @@ const REVIEWED_OPAQUE: string[] = [
   'backend/app/modules/integrations/router.py: None',
   'backend/app/modules/integrations/router.py: action_url',
   'backend/app/modules/notifications/_collaboration_subscribers.py: action_url',
+  // One sender shared by the register events; every caller passes a literal route.
+  'backend/app/modules/notifications/_site_register_subscribers.py: action_url',
   'backend/app/modules/notifications/_wave23_subscribers.py: action_url',
   // The email renderer, which resolves whatever it is given or drops it.
   'backend/app/modules/notifications/dispatcher.py: payload.get("action_url")',

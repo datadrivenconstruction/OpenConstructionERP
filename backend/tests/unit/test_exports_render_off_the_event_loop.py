@@ -308,6 +308,7 @@ async def test_daily_diary_pdf_is_rendered_off_the_loop(monkeypatch: pytest.Monk
     monkeypatch.setattr(service, "_project_name", AsyncMock(return_value="Riverside Block C"))
     monkeypatch.setattr(service, "_user_display_name", AsyncMock(return_value=""))
     service.entry_repo = SimpleNamespace(list_for_diary=AsyncMock(return_value=[]))
+    service.signature_repo = SimpleNamespace(signatures_for_diary=AsyncMock(return_value=[]))
 
     pdf, _date = await service.generate_diary_pdf(diary.id)
 

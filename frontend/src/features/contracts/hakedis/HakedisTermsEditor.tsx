@@ -24,6 +24,7 @@ import clsx from 'clsx';
 import { ArrowUp, PenLine, X } from 'lucide-react';
 
 import { Button, Card } from '@/shared/ui';
+import { fmtList } from '@/shared/lib/formatters';
 import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi } from '@/features/projects/api';
@@ -334,7 +335,7 @@ function TermsSummary({ form }: { form: HakedisTermsForm }) {
     {
       key: 'roles',
       label: t('hakedis.terms.signature_roles', { defaultValue: 'Signed by' }),
-      value: form.roles ? form.roles.map((role) => signatureRoleLabel(t, role)).join(', ') : standard,
+      value: form.roles ? fmtList(form.roles.map((role) => signatureRoleLabel(t, role))) : standard,
     },
   ];
   return (
