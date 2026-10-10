@@ -478,6 +478,7 @@ teach identifiers that were never rule sets at all.
 | `gbt50500` | GB/T 50500 (CN) |
 | `sekisan` | Sekisan (JP) |
 | `birimfiyat` | Birim Fiyat (TR) |
+| `turkey` | Turkish statute, KDV rate in force (TR) |
 | `gesn` | GESN (RU) |
 | `hungary` | Hungarian item orders, material and fee split (HU) |
 | `romania` | Deviz general chapters, HG 907/2016 (RO) |
