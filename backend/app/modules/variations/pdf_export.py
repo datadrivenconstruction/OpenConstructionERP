@@ -23,6 +23,7 @@ the shared one in :mod:`app.core.register_export`.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.core.register_export import (
@@ -35,6 +36,7 @@ from app.core.register_export import (
     caps,
     format_amount,
     format_stored_date,
+    grid_rows,
     person_name,
 )
 from app.modules.variations.pdf_translations import CATALOGUE, DEFAULT_PDF_LOCALE, normalize_pdf_locale, tr
@@ -53,6 +55,23 @@ def _currency(row: Any, project: ProjectHeader) -> str:
     return (str(getattr(row, "currency", "") or "").strip().upper()) or project.currency
 
 
+def _is_credit(request: Any) -> bool:
+    """Whether the request takes money out of the contract.
+
+    A request with a negative claimed amount is an omission. Headed "request
+    for additional work" it contradicts its own figure, so the form is
+    titled for what it is.
+    """
+    value = getattr(request, "estimated_cost_impact", None)
+    if value is None or isinstance(value, bool):
+        return False
+    try:
+        amount = Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return False
+    return amount.is_finite() and amount < 0
+
+
 def _register(
     title_key: str,
     columns: list[RegisterColumn],
@@ -63,6 +82,7 @@ def _register(
     generated: str,
     with_currency: bool = False,
 ) -> RegisterDocument:
+    currency_column = next((index for index, column in enumerate(columns) if column.kind == "currency"), None)
     return RegisterDocument(
         title=tr(locale, title_key),
         columns=columns,
@@ -72,7 +92,8 @@ def _register(
         number_style=project.number_style,
         generated=generated,
         empty_text=tr(locale, "empty_register"),
-        **CATALOGUE.furniture(locale),
+        currency_column=currency_column,
+        **CATALOGUE.furniture(locale, project),
     )
 
 
@@ -94,15 +115,15 @@ def variation_register(
     """
     locale = normalize_pdf_locale(locale)
     columns = [
-        RegisterColumn(tr(locale, "col_code"), weight=1.1, xlsx_width=13),
+        RegisterColumn(tr(locale, "col_code"), weight=1.1, xlsx_width=13, nobreak=True),
         RegisterColumn(tr(locale, "col_title"), weight=3.0, xlsx_width=42, wrap=True),
         RegisterColumn(tr(locale, "col_classification"), weight=1.5, xlsx_width=22),
         RegisterColumn(tr(locale, "col_urgency"), weight=0.9, xlsx_width=11),
         RegisterColumn(tr(locale, "status"), weight=1.3, xlsx_width=18),
         RegisterColumn(tr(locale, "col_requested"), kind="date", weight=1.3, xlsx_width=14),
-        RegisterColumn(tr(locale, "col_claimed_amount"), kind="money", weight=1.6, xlsx_width=18),
-        RegisterColumn(tr(locale, "col_agreed_amount"), kind="money", weight=1.6, xlsx_width=18),
-        RegisterColumn(tr(locale, "currency"), weight=0.8, xlsx_width=10),
+        RegisterColumn(tr(locale, "col_claimed_amount"), kind="money", weight=1.6, xlsx_width=18, total=True),
+        RegisterColumn(tr(locale, "col_agreed_amount"), kind="money", weight=1.6, xlsx_width=18, total=True),
+        RegisterColumn(tr(locale, "currency"), kind="currency", weight=0.8, xlsx_width=10),
         RegisterColumn(tr(locale, "col_time_impact"), kind="count", weight=0.9, xlsx_width=12),
         RegisterColumn(tr(locale, "col_response_due"), kind="date", weight=1.3, xlsx_width=14),
         RegisterColumn(tr(locale, "col_clause"), weight=1.2, xlsx_width=18),
@@ -163,9 +184,9 @@ def claim_register(
         RegisterColumn(tr(locale, "col_period_end"), kind="date", weight=1.3, xlsx_width=14),
         RegisterColumn(tr(locale, "col_description"), weight=3.4, xlsx_width=48, wrap=True),
         RegisterColumn(tr(locale, "status"), weight=1.3, xlsx_width=16),
-        RegisterColumn(tr(locale, "col_claimed_amount"), kind="money", weight=1.5, xlsx_width=18),
-        RegisterColumn(tr(locale, "col_decided_amount"), kind="money", weight=1.5, xlsx_width=18),
-        RegisterColumn(tr(locale, "currency"), weight=0.8, xlsx_width=10),
+        RegisterColumn(tr(locale, "col_claimed_amount"), kind="money", weight=1.5, xlsx_width=18, total=True),
+        RegisterColumn(tr(locale, "col_decided_amount"), kind="money", weight=1.5, xlsx_width=18, total=True),
+        RegisterColumn(tr(locale, "currency"), kind="currency", weight=0.8, xlsx_width=10),
         RegisterColumn(tr(locale, "col_days_requested"), kind="count", weight=0.9, xlsx_width=12),
         RegisterColumn(tr(locale, "col_days_granted"), kind="count", weight=0.9, xlsx_width=12),
     ]
@@ -191,7 +212,15 @@ def claim_register(
                 None if is_disruption else getattr(claim, "granted_days", None),
             ]
         )
-    return _register("claim_register_title", columns, rows, project=project, locale=locale, generated=generated)
+    return _register(
+        "claim_register_title",
+        columns,
+        rows,
+        project=project,
+        locale=locale,
+        generated=generated,
+        with_currency=True,
+    )
 
 
 def notice_register(
@@ -212,7 +241,7 @@ def notice_register(
     """
     locale = normalize_pdf_locale(locale)
     columns = [
-        RegisterColumn(tr(locale, "col_code"), weight=1.1, xlsx_width=13),
+        RegisterColumn(tr(locale, "col_code"), weight=1.1, xlsx_width=13, nobreak=True),
         RegisterColumn(tr(locale, "col_title"), weight=3.4, xlsx_width=46, wrap=True),
         RegisterColumn(tr(locale, "col_recipient_type"), weight=1.2, xlsx_width=14),
         RegisterColumn(tr(locale, "col_recipient"), weight=2.0, xlsx_width=26),
@@ -255,47 +284,42 @@ def variation_record(
         generated: The timestamp printed in the footer.
     """
     locale = normalize_pdf_locale(locale)
-    date_format = tr(locale, "date_format")
+    date_format = CATALOGUE.date_format(locale, project)
     style = project.number_style
     currency = _currency(request, project)
 
     def _date(name: str) -> str:
         return format_stored_date(getattr(request, name, None), date_format)
 
+    def _money(name: str) -> str:
+        return format_amount(getattr(request, name, None), style, currency, locale=locale)
+
     requester = person_name(getattr(request, "requested_by", None), people)
     decider = person_name(getattr(request, "decided_by", None), people)
-    grid = [
+    # The project is in the line under the title, with the request's code.
+    grid = grid_rows(
         [
-            tr(locale, "project"),
-            project.label,
-            tr(locale, "col_classification"),
-            CATALOGUE.label("classification", getattr(request, "classification", None), locale),
-        ],
-        [
-            tr(locale, "col_urgency"),
-            CATALOGUE.label("urgency", getattr(request, "urgency", None), locale),
-            tr(locale, "col_clause"),
-            str(getattr(request, "contract_clause_ref", None) or "-"),
-        ],
-        [
-            tr(locale, "col_claimed_amount"),
-            format_amount(getattr(request, "estimated_cost_impact", None), style, currency),
-            tr(locale, "col_agreed_amount"),
-            format_amount(getattr(request, "agreed_cost_impact", None), style, currency),
-        ],
-        [
-            tr(locale, "col_time_impact"),
-            CATALOGUE.days(getattr(request, "estimated_schedule_days", None), locale),
-            tr(locale, "col_response_due"),
-            _date("response_due_date"),
-        ],
-        [tr(locale, "requested_by"), requester, tr(locale, "col_requested"), _date("requested_at")],
-        [tr(locale, "date_submitted"), _date("submitted_at"), tr(locale, "date_decided"), _date("decision_at")],
-        [tr(locale, "decided_by"), decider, "", ""],
-    ]
+            (
+                tr(locale, "col_classification"),
+                CATALOGUE.label("classification", getattr(request, "classification", None), locale),
+            ),
+            (tr(locale, "col_urgency"), CATALOGUE.label("urgency", getattr(request, "urgency", None), locale)),
+            (tr(locale, "col_claimed_amount"), _money("estimated_cost_impact")),
+            (tr(locale, "col_agreed_amount"), _money("agreed_cost_impact")),
+            # The value carries its own unit ("5 days"), so the label does not.
+            (tr(locale, "time_impact"), CATALOGUE.days(getattr(request, "estimated_schedule_days", None), locale)),
+            (tr(locale, "col_clause"), str(getattr(request, "contract_clause_ref", None) or "-")),
+            (tr(locale, "requested_by"), requester),
+            (tr(locale, "col_requested"), _date("requested_at")),
+            (tr(locale, "date_submitted"), _date("submitted_at")),
+            (tr(locale, "col_response_due"), _date("response_due_date")),
+            (tr(locale, "decided_by"), decider),
+            (tr(locale, "date_decided"), _date("decision_at")),
+        ]
+    )
     status = CATALOGUE.label("request_status", getattr(request, "status", None) or "draft", locale)
     return RecordDocument(
-        title=tr(locale, "doc_title"),
+        title=tr(locale, "doc_title_credit" if _is_credit(request) else "doc_title"),
         number=str(getattr(request, "code", "") or ""),
         project_label=project.label,
         status_text=caps(status, locale),
@@ -315,11 +339,9 @@ def variation_record(
             RecordBlock(
                 tr(locale, "signatures"),
                 kind="signatures",
-                rows=[
-                    ["", tr(locale, "name"), tr(locale, "signature"), tr(locale, "date")],
-                    [tr(locale, "requested_by"), "" if requester == "-" else requester, "", ""],
-                    [tr(locale, "decided_by"), "" if decider == "-" else decider, "", ""],
-                ],
+                rows=CATALOGUE.signature_rows(
+                    locale, [(tr(locale, "requested_by"), requester), (tr(locale, "decided_by"), decider)]
+                ),
             ),
         ],
         page_label=tr(locale, "footer_page"),

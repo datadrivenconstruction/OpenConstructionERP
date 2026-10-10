@@ -167,11 +167,12 @@ def test_a_short_rfi_prints_on_one_page() -> None:
     assert len(_pages(_render(documents=["A-201.pdf", "S-110.pdf"], variation="CO-003"))) == 1
 
 
-def test_people_print_by_name_and_an_unknown_id_is_shortened() -> None:
+def test_people_print_by_name_and_an_unknown_id_is_a_dash() -> None:
     stranger = uuid.UUID("11111111-2222-4333-8444-555555555555")
     text = _text(_render(_rfi(assigned_to=stranger, ball_in_court=None)))
     assert "Maria Keller" in text
-    assert "11111111" in text
+    # No part of a UUID is printed on a document meant for people.
+    assert "11111111" not in text
     assert str(stranger) not in text
     assert str(RAISER) not in text
 
@@ -634,3 +635,49 @@ async def test_route_404s_an_unknown_rfi() -> None:
             service=_service(row),
         )
     assert missing.value.status_code == 404
+
+
+# ── Page total, continuation header, the set's conventions ────────────────
+
+
+def test_every_page_says_page_x_of_y_and_later_pages_name_the_rfi() -> None:
+    long_question = ("Please confirm the lintel detail at every opening on the east elevation. " * 12 + "\n") * 40
+    pages = [" ".join(page.replace("\u00a0", " ").split()) for page in _pages(_render(_rfi(question=long_question)))]
+    assert len(pages) >= 3
+    for number, page in enumerate(pages, 1):
+        assert f"Page {number} of {len(pages)}" in page
+        if number > 1:
+            assert "RFI-007 · Residential House (RH-01)" in page, number
+            assert tr("en", "doc_title") in page, number
+
+
+def test_other_languages_keep_their_page_phrase_and_gain_the_total() -> None:
+    assert catalogue.page_of_total(2, 5, "tr") == "Sayfa 2 / 5"
+    assert catalogue.page_of_total(2, 5, "en") == "Page 2 of 5"
+    assert catalogue.page_of_total(2, 5, "de") == "Seite 2 / 5"
+    assert "Seite 1 / 1" in _text(_render(locale="de"))
+
+
+def test_a_turkish_form_uses_the_sets_terms_currency_and_dates() -> None:
+    text = " ".join(_text(_render(currency="TRY", country="TR", locale="tr")).split())
+    for expected in (
+        "Süre etkisi",
+        "Adı Soyadı",
+        "İhtiyaç tarihi",
+        "Yanıt son tarihi",
+        "Evet, 12.000,00 TL",
+        "20.09.2026",
+        "Sayfa 1 / 1",
+    ):
+        assert expected in text, expected
+    for gone in ("Takvim etkisi", "Ad soyad", "TRY", "2026-09-20"):
+        assert gone not in text, gone
+
+
+def test_dates_follow_the_projects_country_in_english_and_only_then() -> None:
+    assert "20.09.2026" in _text(_render(currency="TRY", country="TR"))
+    # No country on file, or one the regional table does not know: the language decides.
+    assert "2026-09-20" in _text(_render())
+    assert "2026-09-20" in _text(_render(country="ZZ"))
+    # A language the registers do not print in keeps its own way of writing a date.
+    assert format_date("2026-09-20", "de") in _text(_render(country="US", locale="de"))

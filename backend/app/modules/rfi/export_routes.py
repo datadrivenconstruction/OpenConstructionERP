@@ -77,14 +77,15 @@ async def export_rfi_register(
     people = await RFIService(session).user_display_names(
         [value for item in items for value in (item.raised_by, item.assigned_to, item.ball_in_court)]
     )
+    project = await load_project_header(session, project_id)
     document = rfi_register(
         items,
-        project=await load_project_header(session, project_id),
+        project=project,
         people=people,
         # The canonical helper, so the log agrees with the list and detail figure.
         days_open={item.id: _compute_rfi_fields(item)[1] for item in items},
         locale=doc_locale,
-        generated=generated_now(CATALOGUE.tr(doc_locale, "datetime_format")),
+        generated=generated_now(CATALOGUE.tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: rfi_register_filename(doc_locale, extension)

@@ -78,12 +78,13 @@ async def export_transmittal_register(
         .scalars()
         .all()
     )
+    project = await load_project_header(session, project_id)
     document = transmittal_register(
         items,
-        project=await load_project_header(session, project_id),
+        project=project,
         people=await resolve_party_names(session, [value for item in items for value in _named(item)]),
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: transmittal_register_filename(doc_locale, extension)
@@ -110,11 +111,12 @@ async def export_transmittal_pdf(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transmittal not found")
     await verify_project_access(transmittal.project_id, str(user_id), session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    project = await load_project_header(session, transmittal.project_id)
     document = transmittal_record(
         transmittal,
-        project=await load_project_header(session, transmittal.project_id),
+        project=project,
         people=await resolve_party_names(session, _named(transmittal)),
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await record_download(document, transmittal_pdf_filename(transmittal.transmittal_number), doc_locale)

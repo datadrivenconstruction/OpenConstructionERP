@@ -32,6 +32,7 @@ from app.core.register_export import (
     build_record_pdf,
     build_register_pdf,
     build_register_xlsx,
+    country_date_format,
 )
 
 __all__ = [
@@ -94,8 +95,16 @@ async def load_project_header(session: AsyncSession, project_id: uuid.UUID) -> P
     )
 
 
-def generated_now(datetime_format: str) -> str:
-    """The current UTC time in a catalogue's ``datetime_format``."""
+def generated_now(datetime_format: str, project: ProjectHeader | None = None) -> str:
+    """The current UTC time in a catalogue's ``datetime_format``.
+
+    With ``project``, the date part is written the way the project's country
+    writes dates, like every other date on the document; the time stays UTC
+    and says so, because a project header carries no time zone.
+    """
+    country_format = country_date_format(project.country) if project is not None else None
+    if country_format and "%Y-%m-%d" in datetime_format:
+        datetime_format = datetime_format.replace("%Y-%m-%d", country_format)
     return datetime.now(tz=UTC).strftime(datetime_format)
 
 

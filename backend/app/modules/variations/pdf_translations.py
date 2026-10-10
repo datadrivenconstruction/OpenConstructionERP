@@ -41,6 +41,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "claim_register_title": "Claims Register",
         "notice_register_title": "Notice Register",
         "doc_title": "Variation Request",
+        "doc_title_credit": "Variation Request (omission)",
+        "time_impact": "Time impact",
         "col_code": "Code",
         "col_title": "Title",
         "col_classification": "Type",
@@ -81,6 +83,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "claim_register_title": "Hak Talepleri Kayıt Listesi",
         "notice_register_title": "Bildirimler Kayıt Listesi",
         "doc_title": "İlave İş Talebi",
+        "doc_title_credit": "İş Eksilişi Talebi",
+        "time_impact": "Süre etkisi",
         "col_code": "Kod",
         "col_title": "Başlık",
         "col_classification": "Tür",
@@ -102,7 +106,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "col_days_granted": "Verilen gün",
         "col_recipient_type": "Muhatap",
         "col_recipient": "Alıcı",
-        "col_target_response": "Beklenen yanıt tarihi",
+        "col_target_response": "Yanıt son tarihi",
         "col_response_received": "Yanıtın alındığı tarih",
         "requested_by": "Talep eden",
         "decided_by": "Karar veren",
@@ -191,7 +195,7 @@ _LABELS: dict[str, dict[str, dict[str, str]]] = {
     },
     "claim_type": {
         "en": {"disruption": "Disruption", "eot": "Extension of time"},
-        "tr": {"disruption": "Aksama", "eot": "Süre uzatımı"},
+        "tr": {"disruption": "İş aksaması", "eot": "Süre uzatımı"},
     },
     "recipient_type": {
         "en": {

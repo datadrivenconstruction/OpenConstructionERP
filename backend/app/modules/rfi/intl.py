@@ -427,7 +427,7 @@ _DISCIPLINE_LABELS: dict[str, dict[str, str]] = {
         "mep": "Elektromekanik tesisat",
         "electrical": "Elektrik",
         "plumbing": "Sıhhi tesisat",
-        "civil": "Altyapı",
+        "civil": "İnşaat",
         "landscape": "Peyzaj",
     },
     "uk": {
@@ -466,6 +466,40 @@ _DISCIPLINE_LABELS: dict[str, dict[str, str]] = {
         "civil": "土木",
         "landscape": "景观",
     },
+}
+
+# The trades a building services contractor routes an RFI by. The discipline
+# column is free text, so these codes are stored even though the picker above
+# does not offer them, and without a word of their own they printed in English
+# on a Turkish form. Kept apart from ``_DISCIPLINE_LABELS`` because that table
+# is the picker's set in every supported language; this one exists in the
+# languages it has been written in and any other reads English. The codes and
+# the Turkish words are the ones the submittal register uses
+# (``submittals.tracking.DISCIPLINES``), so one project prints one vocabulary.
+_TRADE_DISCIPLINE_LABELS: dict[str, dict[str, str]] = {
+    "en": {
+        "mechanical": "Mechanical",
+        "hvac": "HVAC",
+        "fire_protection": "Fire protection",
+        "lighting": "Lighting",
+        "elv": "Low current",
+        "bms": "Building automation",
+    },
+    "tr": {
+        "mechanical": "Mekanik",
+        "hvac": "İklimlendirme",
+        "fire_protection": "Yangın tesisatı",
+        "lighting": "Aydınlatma",
+        "elv": "Zayıf akım",
+        "bms": "Bina otomasyonu",
+    },
+}
+
+# Other spellings of a trade code that reach the free-text column.
+_DISCIPLINE_ALIASES: dict[str, str] = {
+    "low_current": "elv",
+    "building_automation": "bms",
+    "fire": "fire_protection",
 }
 
 #: Languages the status and discipline words exist in; anything else reads
@@ -599,14 +633,28 @@ def localize_discipline(discipline: str, locale: str | None = "en") -> str:
     """Return the human label for an RFI discipline in the requested language.
 
     Same fallback contract as :func:`localize_status`: unsupported locale falls
-    back to English, unknown discipline falls back to a humanised code.
+    back to English, unknown discipline falls back to a humanised code. The
+    building services trades (mechanical, HVAC, fire protection and the rest
+    of ``_TRADE_DISCIPLINE_LABELS``) are recognised as well, however the code
+    was typed ("Fire protection", "fire-protection").
     """
     key = (discipline or "").strip().lower()
-    table = _DISCIPLINE_LABELS[_normalise_locale(locale)]
+    language = _normalise_locale(locale)
+    table = _DISCIPLINE_LABELS[language]
     if key in table:
         return table[key]
-    english = _DISCIPLINE_LABELS["en"]
-    return english.get(key, _humanise_token(discipline or ""))
+    trade = "_".join(key.replace("-", " ").split())
+    trade = _DISCIPLINE_ALIASES.get(trade, trade)
+    for labels in (
+        _TRADE_DISCIPLINE_LABELS.get(language, {}),
+        _DISCIPLINE_LABELS["en"],
+        _TRADE_DISCIPLINE_LABELS["en"],
+    ):
+        if key in labels:
+            return labels[key]
+        if trade in labels:
+            return labels[trade]
+    return _humanise_token(discipline or "")
 
 
 def explain(topic: str, locale: str | None = "en") -> str:

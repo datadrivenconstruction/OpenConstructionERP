@@ -360,7 +360,7 @@ CASES = [
         SUBMITTALS,
         lambda locale: [submittals_export.submittal_register(_submittals(), **_context(locale, people=PEOPLE))],
         lambda locale: [submittals_export.submittal_record(_submittals()[0], **_context(locale, people=PEOPLE))],
-        turkish=("Onay Belgeleri Takip Listesi",),
+        turkish=("Onay Belgeleri Kayıt Listesi",),
     ),
     Case(
         "correspondence",
@@ -418,7 +418,7 @@ CASES = [
                 _rfis(), **_context(locale, people=PEOPLE, days_open={item.id: 4 for item in _rfis()})
             )
         ],
-        turkish=("Bilgi Talepleri Kayıt Listesi (RFI)", "Sıradaki sorumlu", "Evet (1.234,56 TRY)", "Evet (3 gün)"),
+        turkish=("Bilgi Talepleri Kayıt Listesi (RFI)", "Sıradaki sorumlu", "Evet (1.234,56 TL)", "Evet (3 gün)"),
         extra_english=tuple(localize_status(status, "en") for status in RFI_STATUSES),
     ),
 ]
@@ -575,7 +575,9 @@ def test_dates_and_amounts_are_written_the_turkish_way(case: Case) -> None:
         assert amounts
         assert all(isinstance(value, (int, float)) for value in amounts if value is not None)
         for record in case.records("tr"):
-            assert "1.234,56 TRY" in _pdf_text(build_record_pdf(record))
+            # A Turkish form writes the lira as TL; TRY is the banking code.
+            assert "1.234,56 TL" in _pdf_text(build_record_pdf(record))
+            assert "TRY" not in _pdf_text(build_record_pdf(record))
 
 
 @pytest.mark.parametrize("case", CASES, ids=CASE_IDS)
@@ -626,8 +628,9 @@ def test_the_claims_register_numbers_rows_and_keeps_money_off_time_claims() -> N
     assert rows[0][:2] == ["Sıra no.", "Talep türü"]
     assert [row[0] for row in rows[1:]] == [str(number) for number in range(1, 11)]
     by_type = {row[1]: row for row in rows[1:]}
-    assert by_type["Aksama"][7] == "1.234,56"
-    assert by_type["Aksama"][9] == "TRY"
+    assert by_type["İş aksaması"][7] == "1.234,56"
+    # A Turkish form writes the lira as TL; the workbook keeps the ISO code.
+    assert by_type["İş aksaması"][9] == "TL"
     # An extension of time claim asks for days, not money.
     assert by_type["Süre uzatımı"][7:10] == ["-", "-", "-"]
     assert by_type["Süre uzatımı"][10] == "12"

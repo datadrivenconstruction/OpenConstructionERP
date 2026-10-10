@@ -81,13 +81,14 @@ from app.core.pdf_fonts import (
     register_pdf_fonts,
 )
 from app.core.regional_format import number_style
-from app.core.register_export import format_amount
+from app.core.register_export import FURNITURE, country_date_format, format_amount, printed_currency
 from app.modules.rfi.intl import localize_discipline, localize_status
 from app.modules.rfi.pdf_translations import (
     DEFAULT_PDF_LOCALE,
     days_text,
     format_date,
     normalize_pdf_locale,
+    page_of_total,
     priority_label,
     status_caps,
     tr,
@@ -205,14 +206,14 @@ def _section(
 def _person(value: Any, people: Mapping[str, str]) -> str:
     """Display name for a stored user id.
 
-    An id the lookup could not resolve (a deleted account) is shortened to its
-    first eight characters, the way the approval ladder shows one, rather than
-    printing all 36 characters of a UUID on a document meant for people.
+    An id the lookup could not resolve (a deleted account) prints a dash, as
+    it does on the registers: any part of a UUID is a machine identifier, and
+    on a document meant for people it reads as a broken export.
     """
     if value is None or str(value).strip() == "":
         return "-"
     key = str(value)
-    return people.get(key) or key[:8]
+    return people.get(key) or "-"
 
 
 def _boxed(flowables: list[Any], *, min_height: float | None = None) -> Table:
@@ -230,6 +231,11 @@ def _boxed(flowables: list[Any], *, min_height: float | None = None) -> Table:
         TableStyle(
             [
                 ("BOX", (0, 0), (-1, -1), 0.6, _RULE),
+                # A box cut by a page break is closed at the cut and opened
+                # again on the next page, so neither half reads as running
+                # off the sheet.
+                ("LINEBELOW", (0, "splitlast"), (-1, "splitlast"), 0.6, _RULE),
+                ("LINEABOVE", (0, "splitfirst"), (-1, "splitfirst"), 0.6, _RULE),
                 ("VALIGN", (0, 0), (-1, -1), "TOP"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 4 * mm),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 4 * mm),
@@ -277,6 +283,8 @@ def _make_page_callback(
     *,
     appearance: Mapping[str, Any] | None = None,
     letterhead_on_first_page: bool = False,
+    total_pages: int = 0,
+    running_title: str = "",
 ) -> Any:
     """``onPage`` callback: footer on every page, workspace logo top right.
 
@@ -292,8 +300,13 @@ def _make_page_callback(
         letterhead_on_first_page: Whether page one opens with the letterhead,
             decided once by the caller. The letterhead already carries the
             logo, so the small header logo is left off that page.
+        total_pages: The page count from the first build pass, printed as
+            "page x of y" like every other document of the set.
+        running_title: The form's title and RFI number, printed top left on
+            every page after the first so a loose sheet can be put back.
     """
     look = appearance or {}
+    running_style = ParagraphStyle("RfiRunningTitle", fontName=BOLD_FONT, fontSize=8, leading=10, textColor=_MUTED)
     footer_left = ParagraphStyle(
         "RfiFooter",
         fontName=BODY_FONT,
@@ -327,10 +340,17 @@ def _make_page_callback(
         _, left_h = left.wrapOn(canvas, USABLE_WIDTH - page_box - 2 * mm, 20)
         left.drawOn(canvas, MARGIN_LEFT, 9 * mm - left_h + 2)
         if show_page_numbers:
-            page_text = tr(locale, "footer_page", page=doc.page)
+            page_text = page_of_total(doc.page, max(total_pages, doc.page), locale)
             right = Paragraph(html.escape(page_text, quote=True), pdf_style_for_text(footer_right, page_text))
             _, right_h = right.wrapOn(canvas, page_box, 20)
             right.drawOn(canvas, PAGE_WIDTH - MARGIN_RIGHT - page_box, 9 * mm - right_h + 2)
+        if running_title and doc.page > 1:
+            head_text, _head_face, head_size = pdf_fit_line(
+                running_title, USABLE_WIDTH - 50 * mm, size=8.0, bold=True, base=BOLD_FONT
+            )
+            head = Paragraph(html.escape(head_text, quote=True), pdf_fitted_style(running_style, head_text, head_size))
+            _, head_h = head.wrapOn(canvas, USABLE_WIDTH, 20)
+            head.drawOn(canvas, MARGIN_LEFT, PAGE_HEIGHT - 9 * mm - head_h)
         canvas.restoreState()
         if not (letterhead_on_first_page and doc.page == 1):
             branded_header_logo(canvas, doc)
@@ -374,8 +394,101 @@ def build_rfi_pdf(
         The PDF as bytes, starting with ``b"%PDF"``.
     """
     locale = normalize_pdf_locale(locale)
+    context = {
+        "project_name": project_name,
+        "project_code": project_code,
+        "currency": currency,
+        "country": country,
+        "people": people,
+        "documents": documents,
+        "unavailable_documents": unavailable_documents,
+        "variation": variation,
+        "locale": locale,
+    }
+    # The footer stamp writes its date like every other date on the form.
+    stamp_format = tr(locale, "datetime_format")
+    country_format = country_date_format(country) if locale in FURNITURE else None
+    if country_format:
+        stamp_format = stamp_format.replace("%Y-%m-%d", country_format)
+    generated = datetime.now(tz=UTC).strftime(stamp_format)
+    meta = branded_doc_metadata()
+    appearance = branded_appearance(doc_type="rfi")
+    # Built twice, like the registers: the first pass counts the pages, the
+    # second prints "page x of y" with the real total.
+    total_pages = 0
+    output = b""
+    for _pass in range(2):
+        flow, has_letterhead, rfi_number, subject, project_label = _rfi_flow(rfi, **context)
+        title = f"{tr(locale, 'doc_title')} {rfi_number}".strip()
+        buffer = io.BytesIO()
+        doc = BaseDocTemplate(
+            buffer,
+            pagesize=A4,
+            leftMargin=MARGIN_LEFT,
+            rightMargin=MARGIN_RIGHT,
+            topMargin=MARGIN_TOP,
+            bottomMargin=MARGIN_BOTTOM,
+            title=title,
+            author=meta["author"],
+            subject=subject,
+            creator=meta["creator"],
+            producer=meta["producer"],
+            keywords=meta["keywords"],
+        )
+        # No inner padding: a Frame pads by 6 pt by default, which set every
+        # paragraph 6 pt to the right of the full-width tables under it.
+        frame = Frame(
+            MARGIN_LEFT,
+            MARGIN_BOTTOM,
+            USABLE_WIDTH,
+            PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM,
+            leftPadding=0,
+            rightPadding=0,
+            topPadding=0,
+            bottomPadding=0,
+            id="body",
+        )
+        on_page = _make_page_callback(
+            generated,
+            locale,
+            appearance=appearance,
+            letterhead_on_first_page=has_letterhead,
+            total_pages=total_pages,
+            running_title=" · ".join(part for part in (title, project_label) if part and part != "-"),
+        )
+        doc.addPageTemplates([PageTemplate(id="body", frames=[frame], onPage=on_page)])
+        doc.build(flow)
+        total_pages = doc.page
+        output = buffer.getvalue()
+    return output
+
+
+def _rfi_flow(
+    rfi: Any,
+    *,
+    project_name: str,
+    project_code: str | None,
+    currency: str,
+    country: str | None,
+    people: Mapping[str, str] | None,
+    documents: Sequence[str],
+    unavailable_documents: int,
+    variation: str | None,
+    locale: str,
+) -> tuple[list[Any], bool, str, str, str]:
+    """The form's flowables for one build pass; see :func:`build_rfi_pdf` for the arguments.
+
+    Returns:
+        The story, whether it opens with the letterhead, the RFI number, the
+        subject and the project label.
+    """
     people = people or {}
     styles = _styles()
+    # Figures follow the project's market, words follow the language: with a
+    # country on file the dates are written its way, as the registers do.
+    # Only in the languages the registers print in: the other thirty-one
+    # write a date in their own script, which a numeric pattern would undo.
+    date_format = country_date_format(country) if locale in FURNITURE else None
 
     rfi_number = str(getattr(rfi, "rfi_number", "") or "")
     subject = str(getattr(rfi, "subject", "") or "")
@@ -432,13 +545,13 @@ def build_rfi_pdf(
         ],
         [
             tr(locale, "date_raised"),
-            format_date(getattr(rfi, "created_at", None), locale),
+            format_date(getattr(rfi, "created_at", None), locale, date_format),
             tr(locale, "response_due"),
-            format_date(getattr(rfi, "response_due_date", None), locale),
+            format_date(getattr(rfi, "response_due_date", None), locale, date_format),
         ],
         [
             tr(locale, "date_required"),
-            format_date(getattr(rfi, "date_required", None), locale),
+            format_date(getattr(rfi, "date_required", None), locale, date_format),
             tr(locale, "ball_in_court"),
             _person(getattr(rfi, "ball_in_court", None), people),
         ],
@@ -478,9 +591,9 @@ def build_rfi_pdf(
         # Written the way the project's market writes an amount (1.234,56 for
         # a lira or a euro). The column is free text, so a value that is not a
         # number is printed as it was typed.
-        cost_detail = format_amount(cost_value, number_style(country, currency), currency)
+        cost_detail = format_amount(cost_value, number_style(country, currency), currency, locale=locale)
         if cost_detail == "-":
-            cost_detail = f"{cost_value} {currency}".strip()
+            cost_detail = f"{cost_value} {printed_currency(currency, locale)}".strip()
     schedule_days = getattr(rfi, "schedule_impact_days", None)
     schedule_detail = days_text(int(schedule_days), locale) if isinstance(schedule_days, int) else None
     impact_rows = [
@@ -508,7 +621,7 @@ def build_rfi_pdf(
                         tr(locale, "answered_by"),
                         _person(responded_by, people),
                         tr(locale, "answer_date"),
-                        format_date(responded_at, locale),
+                        format_date(responded_at, locale, date_format),
                     ]
                 ],
                 styles,
@@ -550,43 +663,4 @@ def build_rfi_pdf(
         )
     )
     flow.extend(_section(tr(locale, "signatures"), [signatures], styles))
-
-    generated = datetime.now(tz=UTC).strftime(tr(locale, "datetime_format"))
-    meta = branded_doc_metadata()
-    buffer = io.BytesIO()
-    doc = BaseDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=MARGIN_LEFT,
-        rightMargin=MARGIN_RIGHT,
-        topMargin=MARGIN_TOP,
-        bottomMargin=MARGIN_BOTTOM,
-        title=f"{tr(locale, 'doc_title')} {rfi_number}".strip(),
-        author=meta["author"],
-        subject=subject,
-        creator=meta["creator"],
-        producer=meta["producer"],
-        keywords=meta["keywords"],
-    )
-    # No inner padding: a Frame pads by 6 pt by default, which set every
-    # paragraph 6 pt to the right of the full-width tables under it.
-    frame = Frame(
-        MARGIN_LEFT,
-        MARGIN_BOTTOM,
-        USABLE_WIDTH,
-        PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM,
-        leftPadding=0,
-        rightPadding=0,
-        topPadding=0,
-        bottomPadding=0,
-        id="body",
-    )
-    on_page = _make_page_callback(
-        generated,
-        locale,
-        appearance=branded_appearance(doc_type="rfi"),
-        letterhead_on_first_page=letterhead is not None,
-    )
-    doc.addPageTemplates([PageTemplate(id="body", frames=[frame], onPage=on_page)])
-    doc.build(flow)
-    return buffer.getvalue()
+    return flow, letterhead is not None, rfi_number, subject, project_label

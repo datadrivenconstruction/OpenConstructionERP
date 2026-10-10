@@ -15,6 +15,7 @@ two lookups that need one (project access, project header) are replaced.
 from __future__ import annotations
 
 import io
+import re
 import uuid
 from types import SimpleNamespace
 from typing import Any
@@ -78,7 +79,12 @@ def _no_database(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(export_routes, "verify_project_access", _allowed)
     monkeypatch.setattr(export_routes, "load_project_header", _header)
     monkeypatch.setattr(export_routes, "resolve_party_names", _names)
+
+    async def _listed(_self: Any, _project_id: uuid.UUID, **_filters: Any) -> tuple[list[Any], int]:
+        return [_submittal()], 1
+
     monkeypatch.setattr(export_routes.SubmittalService, "get_submittal", _one)
+    monkeypatch.setattr(export_routes.SubmittalService, "list_submittals", _listed)
     monkeypatch.setattr("app.core.company_profile.read_company_profile", lambda: {})
 
 
@@ -88,8 +94,22 @@ async def _body(response: Any) -> bytes:
 
 
 async def _register(**params: Any) -> Any:
+    # Called outside FastAPI, so the filter parameters are given as the
+    # values an unfiltered request resolves them to, not left as Query objects.
+    unfiltered = dict.fromkeys(
+        (
+            "status_filter",
+            "type_filter",
+            "discipline",
+            "outcome",
+            "review_code",
+            "long_lead",
+            "review_overdue",
+            "approval_late",
+        )
+    )
     return await export_routes.export_submittal_register(
-        user_id="user", session=_Session([_submittal()]), project_id=PROJECT_ID, **params
+        user_id="user", session=_Session([_submittal()]), project_id=PROJECT_ID, **{**unfiltered, **params}
     )
 
 
@@ -98,10 +118,10 @@ async def test_register_defaults_to_a_workbook_in_the_language_asked_for() -> No
     response = await _register(export_format="xlsx", locale="tr", accept_language="en-US,en;q=0.9")
     assert response.headers["content-language"] == "tr"
     assert response.media_type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    assert 'filename="onay-belgeleri-takip-listesi.xlsx"' in response.headers["content-disposition"]
+    assert 'filename="onay-belgeleri-kayit-listesi.xlsx"' in response.headers["content-disposition"]
     sheet = load_workbook(io.BytesIO(await _body(response))).active
     cells = [cell for row in sheet.iter_rows(values_only=True) for cell in row if isinstance(cell, str)]
-    assert "Onay Belgeleri Takip Listesi" in cells
+    assert "Onay Belgeleri Kayıt Listesi" in cells
     assert "İnceleniyor" in cells or "İncelemede" in cells
     assert "SUB-012" in cells
 
@@ -111,7 +131,7 @@ async def test_register_as_a_pdf_follows_accept_language() -> None:
     response = await _register(export_format="pdf", locale=None, accept_language="tr-TR,tr;q=0.9,en;q=0.8")
     assert response.headers["content-language"] == "tr"
     assert response.media_type == "application/pdf"
-    assert 'filename="onay-belgeleri-takip-listesi.pdf"' in response.headers["content-disposition"]
+    assert 'filename="onay-belgeleri-kayit-listesi.pdf"' in response.headers["content-disposition"]
     body = await _body(response)
     assert body.startswith(b"%PDF")
     text = " ".join((page.extract_text() or "") for page in PdfReader(io.BytesIO(body)).pages)
@@ -124,6 +144,17 @@ async def test_a_language_the_catalogue_lacks_is_answered_in_english_and_says_so
     assert response.headers["content-language"] == "en"
     text = " ".join((page.extract_text() or "") for page in PdfReader(io.BytesIO(await _body(response))).pages)
     assert "Page 1 of 1" in " ".join(text.split())
+
+
+@pytest.mark.asyncio
+async def test_the_footer_stamp_writes_its_date_the_way_the_body_does() -> None:
+    """An English register of a project in Türkiye prints DD.MM.YYYY in the body, so the footer does too."""
+    response = await _register(export_format="pdf", locale="en", accept_language=None)
+    text = " ".join((page.extract_text() or "") for page in PdfReader(io.BytesIO(await _body(response))).pages)
+    stamp = re.search(r"Generated (\S+) \d\d:\d\d UTC", " ".join(text.split()))
+    assert stamp, text
+    assert re.fullmatch(r"\d\d\.\d\d\.\d{4}", stamp.group(1)), stamp.group(1)
+    assert "01.10.2026" in text
 
 
 @pytest.mark.asyncio

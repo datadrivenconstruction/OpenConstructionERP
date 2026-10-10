@@ -30,6 +30,7 @@ from app.core.register_export import (
     build_register_xlsx,
     caps,
     format_stored_date,
+    grid_rows,
     person_name,
 )
 from app.modules.correspondence.pdf_translations import CATALOGUE, DEFAULT_PDF_LOCALE, normalize_pdf_locale, tr
@@ -72,7 +73,7 @@ def correspondence_register(
     """
     locale = normalize_pdf_locale(locale)
     columns = [
-        RegisterColumn(tr(locale, "col_reference"), weight=1.3, xlsx_width=16),
+        RegisterColumn(tr(locale, "col_reference"), weight=1.3, xlsx_width=16, nobreak=True),
         RegisterColumn(tr(locale, "col_direction"), weight=0.9, xlsx_width=11),
         RegisterColumn(tr(locale, "col_type"), weight=0.9, xlsx_width=12),
         RegisterColumn(tr(locale, "col_subject"), weight=3.0, xlsx_width=44, wrap=True),
@@ -109,7 +110,7 @@ def correspondence_register(
         number_style=project.number_style,
         generated=generated,
         empty_text=tr(locale, "empty_register"),
-        **CATALOGUE.furniture(locale),
+        **CATALOGUE.furniture(locale, project),
     )
 
 
@@ -144,44 +145,36 @@ def correspondence_record(
         The record, ready for the PDF renderer.
     """
     locale = normalize_pdf_locale(locale)
-    date_format = tr(locale, "date_format")
+    date_format = CATALOGUE.date_format(locale, project)
 
     def _date(name: str) -> str:
         return format_stored_date(getattr(item, name, None), date_format)
 
-    grid = [
+    def _count(label_key: str, values: Any) -> tuple[str, str] | None:
+        # "Attachments: 0" tells the reader nothing; the line is printed only
+        # when there is something to count.
+        number = len(values or [])
+        return (tr(locale, label_key), str(number)) if number else None
+
+    # The project is in the line under the title, with the reference number,
+    # so the grid does not repeat it.
+    grid = grid_rows(
         [
-            tr(locale, "project"),
-            project.label,
-            tr(locale, "col_direction"),
-            CATALOGUE.label("direction", getattr(item, "direction", None), locale),
-        ],
-        [
-            tr(locale, "col_from"),
-            person_name(getattr(item, "from_contact_id", None), people),
-            tr(locale, "col_to"),
-            _recipients(item, people),
-        ],
-        [tr(locale, "col_date_sent"), _date("date_sent"), tr(locale, "col_date_received"), _date("date_received")],
-        [
-            tr(locale, "col_type"),
-            CATALOGUE.label("type", getattr(item, "correspondence_type", None), locale),
-            tr(locale, "col_response_due"),
-            _date("response_required_by"),
-        ],
-        [
-            tr(locale, "col_clause"),
-            str(getattr(item, "contract_clause_ref", None) or EMPTY),
-            tr(locale, "attachments"),
-            str(len(getattr(item, "attachments", None) or [])),
-        ],
-        [tr(locale, "linked_documents"), str(len(getattr(item, "linked_document_ids", None) or [])), "", ""],
-    ]
-    signatures = [
-        ["", tr(locale, "name"), tr(locale, "signature"), tr(locale, "date")],
-        [tr(locale, "sig_prepared"), "", "", ""],
-        [tr(locale, "sig_received"), "", "", ""],
-    ]
+            (tr(locale, "col_direction"), CATALOGUE.label("direction", getattr(item, "direction", None), locale)),
+            (tr(locale, "col_type"), CATALOGUE.label("type", getattr(item, "correspondence_type", None), locale)),
+            (tr(locale, "col_from"), person_name(getattr(item, "from_contact_id", None), people)),
+            (tr(locale, "col_to"), _recipients(item, people)),
+            (tr(locale, "col_date_sent"), _date("date_sent")),
+            (tr(locale, "col_date_received"), _date("date_received")),
+            (tr(locale, "col_response_due"), _date("response_required_by")),
+            (tr(locale, "col_clause"), str(getattr(item, "contract_clause_ref", None) or EMPTY)),
+            _count("attachments", getattr(item, "attachments", None)),
+            _count("linked_documents", getattr(item, "linked_document_ids", None)),
+        ]
+    )
+    signatures = CATALOGUE.signature_rows(
+        locale, [(tr(locale, "sig_prepared"), EMPTY), (tr(locale, "sig_received"), EMPTY)]
+    )
     status = CATALOGUE.label("status", getattr(item, "status", None) or "open", locale)
     return RecordDocument(
         title=tr(locale, "doc_title"),

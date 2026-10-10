@@ -14,9 +14,13 @@ conventions). The layout is:
   when no granular records exist.
 - Work performed / events: diary entries grouped by type (work,
   deliveries, inspections, incidents, visitors, general notes).
+- Workforce by company, when the day's entries carry head counts.
 - Notes: the free-text diary notes block.
-- Footer: author / supervisor line plus a generated-at timestamp and a
-  page number on every page.
+- Signatures: prepared by and approved by, with name, title, date and
+  signature, and who signed in the system when the caller knows.
+- Footer: author / supervisor line plus a generated-at timestamp and
+  "page x of y" on every page. Pages after the first carry the report's
+  title, date and project top left.
 
 Localization: every fixed string comes from the module-local catalog in
 :mod:`app.modules.daily_diary.pdf_translations` (English default plus
@@ -38,6 +42,7 @@ from __future__ import annotations
 
 import html
 import io
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
@@ -49,6 +54,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     BaseDocTemplate,
+    CondPageBreak,
     Frame,
     KeepTogether,
     PageTemplate,
@@ -74,6 +80,8 @@ from app.core.pdf_fonts import (
     pdf_style_for_text,
     register_pdf_fonts,
 )
+from app.core.regional_format import number_style
+from app.core.register_export import country_date_format
 from app.modules.daily_diary.pdf_translations import (
     DEFAULT_PDF_LOCALE,
     entry_type_label,
@@ -82,6 +90,7 @@ from app.modules.daily_diary.pdf_translations import (
     status_caps,
     status_label,
     tr,
+    weather_source_label,
     weather_summary_text,
 )
 from app.modules.daily_diary.pdf_translations import (
@@ -151,6 +160,19 @@ def _build_styles() -> dict[str, ParagraphStyle]:
             parent=base["Normal"],
             fontName=BOLD_FONT,
             fontSize=16,
+            # Without a leading of its own the style inherits 12 pt from
+            # "Normal", less than its own size, and a project name that
+            # wraps prints its lines on top of each other.
+            leading=20,
+            textColor=colors.white,
+            alignment=TA_LEFT,
+        ),
+        "brand_long": ParagraphStyle(
+            "BrandLong",
+            parent=base["Normal"],
+            fontName=BOLD_FONT,
+            fontSize=13,
+            leading=16.5,
             textColor=colors.white,
             alignment=TA_LEFT,
         ),
@@ -159,6 +181,8 @@ def _build_styles() -> dict[str, ParagraphStyle]:
             parent=base["Normal"],
             fontName=BODY_FONT,
             fontSize=11,
+            leading=14,
+            spaceBefore=1.5 * mm,
             textColor=colors.HexColor("#e8e8ee"),
             alignment=TA_LEFT,
         ),
@@ -167,6 +191,7 @@ def _build_styles() -> dict[str, ParagraphStyle]:
             parent=base["Normal"],
             fontName=BOLD_FONT,
             fontSize=11,
+            leading=14,
             textColor=colors.white,
             alignment=TA_RIGHT,
         ),
@@ -208,6 +233,31 @@ def _build_styles() -> dict[str, ParagraphStyle]:
             fontSize=8,
             textColor=colors.white,
         ),
+        "cell_right": ParagraphStyle(
+            "CellRight",
+            parent=base["Normal"],
+            fontName=BODY_FONT,
+            fontSize=8,
+            textColor=colors.HexColor("#333333"),
+            leading=11,
+            alignment=TA_RIGHT,
+        ),
+        "cell_head_right": ParagraphStyle(
+            "CellHeadRight",
+            parent=base["Normal"],
+            fontName=BOLD_FONT,
+            fontSize=8,
+            textColor=colors.white,
+            alignment=TA_RIGHT,
+        ),
+        "sig_head": ParagraphStyle(
+            "SigHead",
+            parent=base["Normal"],
+            fontName=BOLD_FONT,
+            fontSize=8,
+            leading=10,
+            textColor=colors.HexColor("#16213e"),
+        ),
         "body": ParagraphStyle(
             "Body",
             parent=base["Normal"],
@@ -233,6 +283,8 @@ def _make_footer(
     *,
     letterhead_on_first_page: bool = False,
     appearance: dict[str, Any] | None = None,
+    total_pages: int = 0,
+    running_title: str = "",
 ) -> Any:
     """Return an ``onPage`` callback drawing the footer on every page.
 
@@ -248,6 +300,10 @@ def _make_footer(
             decided once by the caller. The letterhead already carries the
             logo, so the small header logo is left off that page.
         appearance: The document appearance, read once for the whole document.
+        total_pages: The page count from the first build pass; the footer
+            prints "page x of y" with it, like every other document of the set.
+        running_title: Printed top left on every page after the first, so a
+            loose continuation sheet says which day's report it belongs to.
 
     Returns:
         A ``func(canvas, doc)`` callable for a reportlab PageTemplate.
@@ -280,7 +336,9 @@ def _make_footer(
         # line and the brand line off the bottom edge. Each is fitted onto a
         # single line instead, the author line into the room beside the page
         # number it shares a baseline with.
-        page_line = tr(locale, "footer_page", page=doc.page) if show_page_numbers else ""
+        page_line = (
+            tr(locale, "footer_page", page=doc.page, total=max(total_pages, doc.page)) if show_page_numbers else ""
+        )
         full_width = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT
         # Supervisor / author line (user data, could be non-Latin).
         left_text, _left_face, left_size = pdf_fit_line(
@@ -310,6 +368,17 @@ def _make_footer(
             p3 = Paragraph(html.escape(page_line, quote=True), pdf_style_for_text(page_style, page_line))
             pw3, ph3 = p3.wrapOn(canvas, PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT, 20)
             p3.drawOn(canvas, MARGIN_LEFT, 9 * mm - ph3 + 7 * 0.22)
+        if running_title and doc.page > 1:
+            head_style = ParagraphStyle(
+                "_diaryRunningTitle", fontName=BOLD_FONT, fontSize=8, leading=10, textColor=colors.HexColor("#666666")
+            )
+            # One fitted line, clear of the logo's corner on the right.
+            head_text, _head_face, head_size = pdf_fit_line(
+                running_title, full_width - 50 * mm, size=8.0, bold=True, base=BOLD_FONT
+            )
+            head = Paragraph(html.escape(head_text, quote=True), pdf_fitted_style(head_style, head_text, head_size))
+            _hw, hh = head.wrapOn(canvas, full_width, 20)
+            head.drawOn(canvas, MARGIN_LEFT, PAGE_HEIGHT - 9 * mm - hh)
         canvas.restoreState()
         # The uploaded white-label logo (if any) appears top-right in the header
         # margin on every page; the dark title band stays inside the content
@@ -329,11 +398,24 @@ def _build_header(
 ) -> list[Any]:
     """Build the dark header band with project, date and status."""
     doc_title = tr(locale, "doc_title")
-    status_text = status_caps(status_label(status, locale), locale)
+    label = status_label(status, locale)
+    # A status outside the module's own set has no word in any language and
+    # comes back as stored. A machine code in capitals ("DRAFT" on a Turkish
+    # report) is not a status a reader can act on, so the chip is left empty.
+    # Passed through means: returned as given in both letter cases, which a
+    # known status never is (its label is the same word however it was typed).
+    flipped = (status or "").swapcase()
+    passed_through = label == status and status_label(flipped, locale) == flipped
+    status_text = "" if passed_through else status_caps(label, locale)
     header = Table(
         [
             [
-                _safe_para(project_name or doc_title, styles["brand"]),
+                # A long project name is set smaller, so the band stays a
+                # heading and does not take a third of the page.
+                _safe_para(
+                    project_name or doc_title,
+                    styles["brand_long" if len(project_name or "") > 60 else "brand"],
+                ),
                 Paragraph(html.escape(status_text, quote=True), pdf_style_for_text(styles["status"], status_text)),
             ],
             [
@@ -362,12 +444,201 @@ def _build_header(
     return [header, Spacer(1, 5 * mm)]
 
 
+def _count(value: Any) -> int:
+    """A head count out of free-form entry metadata; anything unreadable is zero."""
+    try:
+        return int(float(value)) if value not in (None, "") else 0
+    except (TypeError, ValueError):
+        return 0
+
+
+def _workforce(diary: Any, entries: Sequence[Any]) -> tuple[int, int, dict[str, int]]:
+    """Labour, equipment and labour by company for the day.
+
+    The same sum :meth:`DailyDiaryService.workforce_summary_for_diary`
+    makes: the counts on the diary header plus what each entry's metadata
+    adds (``labour_count``, ``equipment_count``, ``company``), so the page
+    and the workforce summary the other modules receive never disagree.
+    """
+    labour = _count(getattr(diary, "labour_count", 0))
+    equipment = _count(getattr(diary, "equipment_count", 0))
+    by_company: dict[str, int] = {}
+    for entry in entries:
+        meta = getattr(entry, "metadata_", None)
+        if not isinstance(meta, dict):
+            continue
+        entry_labour = _count(meta.get("labour_count", 0))
+        labour += entry_labour
+        equipment += _count(meta.get("equipment_count", 0))
+        company = meta.get("company")
+        if company and entry_labour:
+            by_company[str(company)] = by_company.get(str(company), 0) + entry_labour
+    return labour, equipment, by_company
+
+
+def _build_workforce(
+    labour: int,
+    by_company: dict[str, int],
+    styles: dict[str, ParagraphStyle],
+    locale: str,
+) -> list[Any]:
+    """Build the workforce table: one row per company, the rest, and the total.
+
+    Printed only when at least one entry names a company with a head count.
+    The module stores no trade and no list of machines, so neither is
+    printed: a column of dashes would claim a record that was never kept.
+    """
+    if not by_company:
+        return []
+    rows: list[list[Any]] = [
+        [
+            Paragraph(tr(locale, "workforce_company"), styles["cell_head"]),
+            Paragraph(tr(locale, "workforce_count"), styles["cell_head_right"]),
+        ]
+    ]
+    for company, count in sorted(by_company.items(), key=lambda pair: (-pair[1], pair[0])):
+        rows.append([_safe_para(company, styles["cell"]), Paragraph(str(count), styles["cell_right"])])
+    unassigned = labour - sum(by_company.values())
+    if unassigned > 0:
+        rows.append(
+            [
+                Paragraph(tr(locale, "workforce_unassigned"), styles["cell"]),
+                Paragraph(str(unassigned), styles["cell_right"]),
+            ]
+        )
+    rows.append(
+        [
+            Paragraph(f"<b>{html.escape(tr(locale, 'workforce_total'))}</b>", styles["cell"]),
+            Paragraph(f"<b>{labour}</b>", styles["cell_right"]),
+        ]
+    )
+    table = Table(rows, colWidths=[USABLE_WIDTH * 0.74, USABLE_WIDTH * 0.2], repeatRows=1, hAlign="LEFT")
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#16213e")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("TOPPADDING", (0, 0), (-1, -1), 1.5 * mm),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5 * mm),
+                ("LEFTPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f6f6fa")]),
+                ("LINEABOVE", (0, -1), (-1, -1), 0.75, colors.HexColor("#16213e")),
+                ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#dddddd")),
+            ]
+        )
+    )
+    return [KeepTogether([Paragraph(tr(locale, "workforce"), styles["section"]), table])]
+
+
+def _looks_like_a_name(value: Any) -> bool:
+    """Whether a stored signature reference is a name rather than a hash.
+
+    ``sign_diary`` stores the signer's name in ``*_signature_ref`` when one
+    was given and the first 32 characters of the content hash otherwise. A
+    hash is not printed where a name belongs.
+    """
+    text = str(value or "").strip()
+    if not text:
+        return False
+    return not (len(text) >= 16 and all(ch in "0123456789abcdefABCDEF" for ch in text))
+
+
+def _build_signatures(
+    diary: Any,
+    supervisor_name: str | None,
+    signatures: Sequence[Any],
+    styles: dict[str, ParagraphStyle],
+    locale: str,
+    date_format: str,
+) -> list[Any]:
+    """Build the signature block: prepared by and approved by.
+
+    A daily report is a contemporary record two parties sign, so the block
+    is always printed, with or without a status of "signed": a printed copy
+    is signed with a pen. What the module already knows is filled in: the
+    site supervisor's name, a name stored as a signature reference, and,
+    from the archive signatures the caller passes, who signed in the system
+    and when. Nothing here invents a signature.
+    """
+
+    def _signed(role: str) -> tuple[str, str]:
+        """Name and date of the latest system signature for ``role``."""
+        for signature in reversed(list(signatures)):
+            payload = getattr(signature, "signature_payload", None) or {}
+            if not isinstance(payload, dict) or str(payload.get("signer_role") or "") != role:
+                continue
+            when = getattr(signature, "signed_at", None)
+            stamp = when.strftime(date_format) if isinstance(when, datetime) else ""
+            return str(payload.get("signer_name") or "").strip(), stamp
+        return "", ""
+
+    supervisor_signed, supervisor_date = _signed("supervisor")
+    owner_signed, owner_date = _signed("owner")
+    supervisor_ref = getattr(diary, "supervisor_signature_ref", None)
+    owner_ref = getattr(diary, "owner_signature_ref", None)
+    prepared = (
+        supervisor_signed
+        or (str(supervisor_ref).strip() if _looks_like_a_name(supervisor_ref) else "")
+        or supervisor_name
+        or ""
+    )
+    approved = owner_signed or (str(owner_ref).strip() if _looks_like_a_name(owner_ref) else "")
+
+    head = [
+        "",
+        tr(locale, "sig_name"),
+        tr(locale, "sig_title"),
+        tr(locale, "sig_date"),
+        tr(locale, "sig_signature"),
+    ]
+    body = [
+        [tr(locale, "sig_prepared"), prepared, "", supervisor_date, ""],
+        [tr(locale, "sig_approved"), approved, "", owner_date, ""],
+    ]
+    rows: list[list[Any]] = [[Paragraph(html.escape(text), styles["sig_head"]) for text in head]]
+    for line in body:
+        rows.append(
+            [Paragraph(html.escape(line[0]), styles["label"])] + [_safe_para(text, styles["cell"]) for text in line[1:]]
+        )
+    table = Table(
+        rows,
+        colWidths=[USABLE_WIDTH * share for share in (0.24, 0.24, 0.18, 0.14, 0.2)],
+        rowHeights=[None, 11 * mm, 11 * mm],
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cccccc")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f4f5f7")),
+                ("BACKGROUND", (0, 1), (0, -1), colors.HexColor("#f4f5f7")),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 2 * mm),
+            ]
+        )
+    )
+    block: list[Any] = [Paragraph(tr(locale, "signatures"), styles["section"]), table]
+    signers = [
+        f"{name}, {stamp}" if stamp else name
+        for name, stamp in ((supervisor_signed, supervisor_date), (owner_signed, owner_date))
+        if name
+    ]
+    if signers:
+        note = tr(locale, "signed_note", signers="; ".join(signers))
+        block.append(Spacer(1, 1.5 * mm))
+        block.append(Paragraph(html.escape(note, quote=True), pdf_style_for_text(styles["empty"], note)))
+    return [KeepTogether(block)]
+
+
 def _build_overview(
     diary: Any,
     supervisor_name: str | None,
     completeness: Decimal | float | None,
     styles: dict[str, ParagraphStyle],
     locale: str,
+    labour: int = 0,
+    equipment: int = 0,
 ) -> list[Any]:
     """Build the overview block (supervisor, labour, equipment, score)."""
     completeness_text = "-"
@@ -382,13 +653,13 @@ def _build_overview(
             Paragraph(tr(locale, "site_supervisor"), styles["label"]),
             _safe_para(supervisor_name or tr(locale, "not_recorded"), styles["value"]),
             Paragraph(tr(locale, "labour_on_site"), styles["label"]),
-            Paragraph(str(getattr(diary, "labour_count", 0) or 0), styles["value"]),
+            Paragraph(str(labour), styles["value"]),
         ],
         [
             Paragraph(tr(locale, "completeness"), styles["label"]),
             Paragraph(completeness_text, styles["value"]),
             Paragraph(tr(locale, "equipment_on_site"), styles["label"]),
-            Paragraph(str(getattr(diary, "equipment_count", 0) or 0), styles["value"]),
+            Paragraph(str(equipment), styles["value"]),
         ],
     ]
     table = Table(
@@ -415,6 +686,7 @@ def _build_weather(
     weather_records: list[Any],
     styles: dict[str, ParagraphStyle],
     locale: str,
+    decimal_mark: str | None = None,
 ) -> list[Any]:
     """Build the weather section.
 
@@ -424,6 +696,9 @@ def _build_weather(
     empty-state line.
     """
     flow: list[Any] = [Paragraph(tr(locale, "weather"), styles["section"])]
+
+    def _number(value: Any) -> str:
+        return _fmt_number(value, locale=locale, decimal_mark=decimal_mark)
 
     if weather_records:
         header = [
@@ -441,10 +716,10 @@ def _build_weather(
             data.append(
                 [
                     Paragraph(time_text, styles["cell"]),
-                    _safe_para(getattr(rec, "source", "") or "-", styles["cell"]),
-                    Paragraph(_fmt_number(getattr(rec, "temperature_c", None), locale=locale), styles["cell"]),
-                    Paragraph(_fmt_number(getattr(rec, "wind_speed_kmh", None), locale=locale), styles["cell"]),
-                    Paragraph(_fmt_number(getattr(rec, "precipitation_mm", None), locale=locale), styles["cell"]),
+                    _safe_para(weather_source_label(getattr(rec, "source", None), locale), styles["cell"]),
+                    Paragraph(_number(getattr(rec, "temperature_c", None)), styles["cell"]),
+                    Paragraph(_number(getattr(rec, "wind_speed_kmh", None)), styles["cell"]),
+                    Paragraph(_number(getattr(rec, "precipitation_mm", None)), styles["cell"]),
                     _safe_para(getattr(rec, "conditions_text", None) or "-", styles["cell"]),
                 ]
             )
@@ -492,11 +767,12 @@ def _build_entries(
     locale: str,
 ) -> list[Any]:
     """Build the grouped diary-entry sections (work, deliveries, etc.)."""
-    flow: list[Any] = [Paragraph(tr(locale, "site_record"), styles["section"])]
-
+    heading = Paragraph(tr(locale, "site_record"), styles["section"])
     if not entries:
-        flow.append(Paragraph(tr(locale, "entries_empty"), styles["empty"]))
-        return flow
+        return [heading, Paragraph(tr(locale, "entries_empty"), styles["empty"])]
+    # The section heading travels with the first group: on its own it was left
+    # as the last line of a page with every entry on the next one.
+    flow: list[Any] = []
 
     grouped: dict[str, list[Any]] = {}
     for entry in entries:
@@ -512,12 +788,13 @@ def _build_entries(
             key=lambda e: getattr(e, "entry_time", None) or datetime.min.replace(tzinfo=UTC),
         )
         label = entry_type_label(entry_type, locale)
-        block: list[Any] = [
+        block: list[Any] = [] if flow else [heading]
+        block.append(
             Paragraph(
                 f"<b>{html.escape(label)}</b> ({len(bucket)})",
                 styles["body"],
             )
-        ]
+        )
         rows: list[list[Any]] = []
         for entry in bucket:
             etime = getattr(entry, "entry_time", None)
@@ -581,6 +858,8 @@ def generate_diary_pdf(
     supervisor_name: str | None = None,
     completeness: Decimal | float | None = None,
     locale: str = DEFAULT_PDF_LOCALE,
+    country: str | None = None,
+    signatures: Sequence[Any] | None = None,
 ) -> bytes:
     """Render a single daily site diary into PDF bytes.
 
@@ -595,8 +874,15 @@ def generate_diary_pdf(
         supervisor_name: Display name of the site supervisor. Optional.
         completeness: Completeness score in the range ``0.0`` to ``1.0``.
         locale: Language for the document's fixed strings and date
-            formats (``"en"`` / ``"de"``); region subtags are stripped
-            and unsupported values fall back to English.
+            formats (``"en"`` / ``"de"`` / ``"tr"``); region subtags are
+            stripped and unsupported values fall back to English.
+        country: ISO 3166-1 alpha-2 of the project's country. With it,
+            dates and decimal marks are written the way that country writes
+            them whatever the language, as the registers of the same project
+            do; without it the language decides.
+        signatures: The diary's archive signature rows
+            (:class:`DiaryArchiveSignature`), oldest first. With them the
+            signature block names who signed in the system and when.
 
     Returns:
         The rendered PDF document as bytes (starts with ``b"%PDF"``).
@@ -606,9 +892,18 @@ def generate_diary_pdf(
     styles = _build_styles()
     locale = normalize_pdf_locale(locale)
 
-    diary_date = format_iso_date(str(getattr(diary, "diary_date", "") or ""), locale)
+    # Figures follow the project's market, words follow the language.
+    country_format = country_date_format(country)
+    date_format = country_format or tr(locale, "date_format")
+    decimal_mark = number_style(country).decimal if country_format else None
+    diary_date = format_iso_date(str(getattr(diary, "diary_date", "") or ""), locale, date_format)
     status_text = str(getattr(diary, "status", "open") or "open")
-    generated_date = datetime.now(tz=UTC).strftime(tr(locale, "datetime_format"))
+    # The footer stamp writes its date like every other date on the page.
+    stamp_format = tr(locale, "datetime_format")
+    if country_format:
+        stamp_format = stamp_format.replace("%Y-%m-%d", country_format)
+    generated_date = datetime.now(tz=UTC).strftime(stamp_format)
+    labour, equipment, by_company = _workforce(diary, entries)
 
     author_line = (
         tr(locale, "footer_supervisor", name=supervisor_name)
@@ -621,51 +916,73 @@ def generate_diary_pdf(
     # The frame pads 6pt on each side, so this is the width a flowable can use.
     letterhead = branded_letterhead(USABLE_WIDTH - 12, doc_type="daily_report")
 
-    buffer = io.BytesIO()
-    frame = Frame(
-        MARGIN_LEFT,
-        MARGIN_BOTTOM,
-        USABLE_WIDTH,
-        PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM,
-        id="body",
-    )
-    template = PageTemplate(
-        id="body",
-        frames=[frame],
-        onPage=_make_footer(
-            author_line,
-            generated_date,
-            locale,
-            letterhead_on_first_page=letterhead is not None,
-            appearance=branded_appearance(doc_type="daily_report"),
-        ),
-    )
-    doc = BaseDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=MARGIN_LEFT,
-        rightMargin=MARGIN_RIGHT,
-        topMargin=MARGIN_TOP,
-        bottomMargin=MARGIN_BOTTOM,
-        title=f"{tr(locale, 'doc_title')} - {diary_date}",
-        author=branded_doc_metadata()["author"],
-        subject=tr(locale, "doc_title"),
-        creator=branded_doc_metadata()["creator"],
-        producer=branded_doc_metadata()["producer"],
-        keywords=branded_doc_metadata()["keywords"],
-    )
-    doc.addPageTemplates([template])
+    running_title = tr(
+        locale, "running_title", title=tr(locale, "doc_title"), date=diary_date, project=project_name
+    ).rstrip(" ·")
+    appearance = branded_appearance(doc_type="daily_report")
+    metadata = branded_doc_metadata()
 
-    flowables: list[Any] = []
-    if letterhead is not None:
-        flowables.append(letterhead)
-    flowables.extend(_build_header(project_name, diary_date, status_text, styles, locale))
-    flowables.extend(_build_overview(diary, supervisor_name, completeness, styles, locale))
-    flowables.extend(_build_weather(diary, weather_records, styles, locale))
-    flowables.extend(_build_entries(entries, styles, locale))
-    flowables.extend(_build_notes(diary, styles, locale))
+    def _story() -> list[Any]:
+        # Flowables are consumed by a build, so each pass gets its own.
+        flowables: list[Any] = []
+        head = branded_letterhead(USABLE_WIDTH - 12, doc_type="daily_report") if letterhead is not None else None
+        if head is not None:
+            flowables.append(head)
+        flowables.extend(_build_header(project_name, diary_date, status_text, styles, locale))
+        flowables.extend(_build_overview(diary, supervisor_name, completeness, styles, locale, labour, equipment))
+        flowables.extend(_build_workforce(labour, by_company, styles, locale))
+        flowables.extend(_build_weather(diary, weather_records, styles, locale, decimal_mark))
+        flowables.extend(_build_entries(entries, styles, locale))
+        flowables.extend(_build_notes(diary, styles, locale))
+        # The signatures stay with something above them: a page holding
+        # nothing but a signature block certifies nothing.
+        flowables.append(CondPageBreak(45 * mm))
+        flowables.extend(_build_signatures(diary, supervisor_name, signatures or (), styles, locale, date_format))
+        return flowables
 
-    doc.build(flowables)
-    pdf_bytes = buffer.getvalue()
-    buffer.close()
+    # Built twice, like the registers: the first pass counts the pages, the
+    # second prints "page x of y" with the real total.
+    total_pages = 0
+    pdf_bytes = b""
+    for _pass in range(2):
+        buffer = io.BytesIO()
+        frame = Frame(
+            MARGIN_LEFT,
+            MARGIN_BOTTOM,
+            USABLE_WIDTH,
+            PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM,
+            id="body",
+        )
+        template = PageTemplate(
+            id="body",
+            frames=[frame],
+            onPage=_make_footer(
+                author_line,
+                generated_date,
+                locale,
+                letterhead_on_first_page=letterhead is not None,
+                appearance=appearance,
+                total_pages=total_pages,
+                running_title=running_title,
+            ),
+        )
+        doc = BaseDocTemplate(
+            buffer,
+            pagesize=A4,
+            leftMargin=MARGIN_LEFT,
+            rightMargin=MARGIN_RIGHT,
+            topMargin=MARGIN_TOP,
+            bottomMargin=MARGIN_BOTTOM,
+            title=f"{tr(locale, 'doc_title')} - {diary_date}",
+            author=metadata["author"],
+            subject=tr(locale, "doc_title"),
+            creator=metadata["creator"],
+            producer=metadata["producer"],
+            keywords=metadata["keywords"],
+        )
+        doc.addPageTemplates([template])
+        doc.build(_story())
+        total_pages = doc.page
+        pdf_bytes = buffer.getvalue()
+        buffer.close()
     return pdf_bytes

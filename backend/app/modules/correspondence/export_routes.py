@@ -74,12 +74,13 @@ async def export_correspondence_register(
         .scalars()
         .all()
     )
+    project = await load_project_header(session, project_id)
     document = correspondence_register(
         items,
-        project=await load_project_header(session, project_id),
+        project=project,
         people=await resolve_party_names(session, [value for item in items for value in _named(item)]),
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: correspondence_register_filename(doc_locale, extension)
@@ -98,11 +99,12 @@ async def export_correspondence_pdf(
     item = await CorrespondenceService(session).get_correspondence(correspondence_id)
     await verify_project_access(item.project_id, str(user_id), session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    project = await load_project_header(session, item.project_id)
     document = correspondence_record(
         item,
-        project=await load_project_header(session, item.project_id),
+        project=project,
         people=await resolve_party_names(session, _named(item)),
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await record_download(document, correspondence_pdf_filename(item.reference_number), doc_locale)

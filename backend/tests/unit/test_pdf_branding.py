@@ -17,6 +17,7 @@ nothing touches the persisted file or the data dir.
 from __future__ import annotations
 
 from io import BytesIO
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -328,6 +329,39 @@ def test_branded_header_logo_never_raises_when_branding_read_fails(monkeypatch):
     monkeypatch.setattr("app.core.app_branding.read_branding", _boom)
     canvas = _RecordingCanvas()
     assert branded_header_logo(canvas, _FakeDoc()) is False
+
+
+class _LandscapeCanvas(_RecordingCanvas):
+    """A canvas on a landscape sheet of a document that was opened in portrait."""
+
+    _pagesize = (842.0, 595.0)
+
+
+def test_page_size_asks_the_canvas_before_the_document():
+    """A landscape template inside a portrait document reports the sheet in hand."""
+    assert pdf_branding._page_size(_FakeDoc(), _LandscapeCanvas()) == (842.0, 595.0)
+    assert pdf_branding._page_size(_FakeDoc()) == (595.0, 842.0)
+    # A stand-in canvas with no real page size falls through to the document.
+    assert pdf_branding._page_size(_FakeDoc(), _RecordingCanvas()) == (595.0, 842.0)
+    assert pdf_branding._page_size(_FakeDoc(), MagicMock()) == (595.0, 842.0)
+    assert pdf_branding._page_size(object(), None) == pytest.approx((595.28, 841.89), abs=0.01)
+
+
+def test_header_logo_lands_inside_a_landscape_template_page(monkeypatch):
+    """Positioned from the portrait size, the logo was drawn above a landscape sheet."""
+    _set_branding(
+        monkeypatch,
+        {"mode": "logo", "logo_data_url": f"data:image/png;base64,{_PNG_1PX}", "company_name": ""},
+    )
+    canvas = _LandscapeCanvas()
+    assert branded_header_logo(canvas, _FakeDoc()) is True
+    assert len(canvas.images) == 1
+    image = canvas.images[0]
+    assert 0 <= image["y"] < 595.0
+    assert image["y"] + image["height"] <= 595.0
+    assert image["x"] + image["width"] <= 842.0 - 56.0 + 0.01
+    # Right of where a portrait sheet ends: the corner of the landscape one.
+    assert image["x"] > 595.0
 
 
 if __name__ == "__main__":  # pragma: no cover

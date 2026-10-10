@@ -49,6 +49,7 @@ from collections.abc import Callable
 from datetime import date, datetime
 from typing import Any
 
+from app.core import register_export
 from app.core.document_locale import (
     normalize_document_locale,
     resolve_document_locale,
@@ -1109,7 +1110,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "ball_in_court": "Sıradaki sorumlu",
         "date_raised": "Oluşturma tarihi",
         "response_due": "Yanıt son tarihi",
-        "date_required": "Gerekli tarih",
+        "date_required": "İhtiyaç tarihi",
         "priority": "Öncelik",
         "discipline": "Disiplin",
         "question": "Soru",
@@ -1118,7 +1119,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "attachments": "Ekli dosyalar",
         "impact": "Etki",
         "cost_impact": "Maliyet etkisi",
-        "schedule_impact": "Takvim etkisi",
+        "schedule_impact": "Süre etkisi",
         "yes": "Evet",
         "yes_with": "Evet, {detail}",
         "no": "Hayır",
@@ -1128,7 +1129,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "answer_date": "Yanıt tarihi",
         "variation": "Bağlantılı değişiklik emri",
         "signatures": "İmzalar",
-        "name": "Ad soyad",
+        "name": "Adı Soyadı",
         "signature": "İmza",
         "date": "Tarih",
         "footer_generated": "Oluşturulma: {timestamp}",
@@ -1550,7 +1551,23 @@ def days_text(count: int, locale: str) -> str:
     return template.format(n=count)
 
 
-def format_date(value: date | datetime | str | None, locale: str) -> str:
+def page_of_total(page: int, total: int, locale: str) -> str:
+    """ "Page 2 of 5" for the footer, in the document language.
+
+    The form is translated into thirty-three languages and each has its own
+    "Page {page}" phrase. English and Turkish, the two languages the site
+    registers print in, use the registers' own phrase so the whole set of a
+    project carries one footer. Every other language keeps its phrase and
+    gets the total after a slash, which reads the same in all of them and
+    needs no thirty-three new translations.
+    """
+    shared = register_export.FURNITURE.get(normalize_pdf_locale(locale))
+    if shared is not None:
+        return shared["footer_page"].format(page=page, total=total)
+    return f"{tr(locale, 'footer_page', page=page)} / {total}"
+
+
+def format_date(value: date | datetime | str | None, locale: str, date_format: str | None = None) -> str:
     """Render a stored date in the locale's format, or a dash when absent.
 
     The RFI keeps its dates in three shapes: ``created_at`` is a timestamp,
@@ -1562,6 +1579,8 @@ def format_date(value: date | datetime | str | None, locale: str) -> str:
     Args:
         value: The stored value.
         locale: A supported PDF locale.
+        date_format: A ``strftime`` pattern that overrides the language's
+            own, for a caller that knows the project's country.
 
     Returns:
         The formatted date, the raw value when unparseable, or ``"-"``.
@@ -1581,7 +1600,7 @@ def format_date(value: date | datetime | str | None, locale: str) -> str:
                 parsed = date.fromisoformat(text[:10])
             except ValueError:
                 return text
-    return parsed.strftime(tr(locale, "date_format"))
+    return parsed.strftime(date_format or tr(locale, "date_format"))
 
 
 def rfi_pdf_filename(rfi_number: str | None) -> str:

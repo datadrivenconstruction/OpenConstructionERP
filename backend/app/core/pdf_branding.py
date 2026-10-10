@@ -539,7 +539,7 @@ def _draw_page_furniture(
         branding = _read_branding()
         appearance = _read_appearance(doc_type)
 
-        page_w, page_h = _page_size(doc)
+        page_w, page_h = _page_size(doc, canvas)
         left = float(getattr(doc, "leftMargin", 56.0) or 56.0)
         right_margin = float(getattr(doc, "rightMargin", 56.0) or 56.0)
         right_x = page_w - right_margin
@@ -656,14 +656,24 @@ def _draw_header_band(
 MM = 72.0 / 25.4
 
 
-def _page_size(doc: Any) -> tuple[float, float]:
-    """Return the (width, height) of the doc's page in points, A4 as fallback."""
-    size = getattr(doc, "pagesize", None)
-    try:
-        if size is not None:
-            return float(size[0]), float(size[1])
-    except (TypeError, ValueError, IndexError):
-        pass
+def _page_size(doc: Any, canvas: Any = None) -> tuple[float, float]:
+    """Return the (width, height) of the page being drawn, in points, A4 as fallback.
+
+    The canvas is asked first. A document can change sheet from one page
+    template to the next (a portrait summary followed by landscape lists),
+    and ``doc.pagesize`` keeps the size the document was opened with, so
+    furniture positioned from it lands above a landscape sheet, off the
+    paper, with nothing raised. reportlab sets the canvas to the template's
+    size before it calls ``onPage``, so the canvas is the page in hand.
+    """
+    for size in (getattr(canvas, "_pagesize", None), getattr(doc, "pagesize", None)):
+        try:
+            # A real page size only: a stand-in canvas answers any attribute
+            # with something that is not one.
+            if isinstance(size, (tuple, list)) and len(size) >= 2:
+                return float(size[0]), float(size[1])
+        except (TypeError, ValueError, IndexError):
+            continue
     # A4 in points.
     return 595.2755905511812, 841.8897637795277
 
@@ -685,7 +695,7 @@ def branded_header_logo(canvas: Any, doc: Any, *, align: str = "right") -> bool:
         profile = _read_company_profile()
         if not _logo_candidates(branding, profile):
             return False
-        page_w, page_h = _page_size(doc)
+        page_w, page_h = _page_size(doc, canvas)
         top_y = page_h - 8.0 * MM
         if align == "left":
             left = float(getattr(doc, "leftMargin", 56.0) or 56.0)

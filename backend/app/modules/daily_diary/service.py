@@ -1341,6 +1341,18 @@ class DailyDiaryService:
         # renderer falls back to neutral placeholders).
         project_name = await self._project_name(diary.project_id)
         supervisor_name = await self._user_display_name(diary.site_supervisor_id)
+        # The project's country decides how dates and decimals are written,
+        # and the archive signatures say who signed in the system and when.
+        # The country is best-effort like the names above: without it the
+        # report still prints, in the language's own date format.
+        country: str | None = None
+        signatures = await self.signature_repo.signatures_for_diary(diary_id)
+        try:
+            from app.core.register_context import load_project_header
+
+            country = (await load_project_header(self.session, diary.project_id)).country
+        except Exception:  # pragma: no cover - defensive cross-module guard
+            logger.debug("Diary PDF: project country unavailable for %s", diary_id, exc_info=True)
 
         # ReportLab layout of every entry runs off the event loop. The rows are
         # already loaded and the renderer only reads plain attributes.
@@ -1353,6 +1365,8 @@ class DailyDiaryService:
             supervisor_name=supervisor_name,
             completeness=completeness,
             locale=locale,
+            country=country,
+            signatures=list(signatures),
         )
         return pdf_bytes, diary.diary_date
 

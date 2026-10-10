@@ -58,7 +58,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "register_filename": "correspondence-log",
     },
     "tr": {
-        "register_title": "Yazışma Günlüğü",
+        "register_title": "Yazışmalar Kayıt Listesi",
         "doc_title": "Yazışma",
         "col_reference": "Referans no.",
         "col_direction": "Yön",
@@ -68,7 +68,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "col_to": "Alıcı",
         "col_date_sent": "Gönderilme tarihi",
         "col_date_received": "Alınma tarihi",
-        "col_response_due": "Yanıt için son tarih",
+        "col_response_due": "Yanıt son tarihi",
         "col_clause": "Sözleşme maddesi",
         "notes": "Notlar",
         "no_notes": "Not kaydedilmedi.",
@@ -76,7 +76,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "linked_documents": "Bağlantılı belgeler",
         "sig_prepared": "Hazırlayan",
         "sig_received": "Teslim alan",
-        "register_filename": "yazisma-gunlugu",
+        "register_filename": "yazismalar-kayit-listesi",
     },
 }
 

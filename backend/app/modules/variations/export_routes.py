@@ -69,11 +69,12 @@ async def export_variation_register(
     """Download the variation register of a project as a workbook or a PDF."""
     await verify_project_access(project_id, user_id, session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    project = await load_project_header(session, project_id)
     document = variation_register(
         await _rows(session, VariationRequest, project_id, VariationRequest.code),
-        project=await load_project_header(session, project_id),
+        project=project,
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: register_filename("variation", doc_locale, extension)
@@ -92,12 +93,13 @@ async def export_claim_register(
     """Download the claims register of a project: disruption and extension of time claims in one list."""
     await verify_project_access(project_id, user_id, session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    project = await load_project_header(session, project_id)
     document = claim_register(
         await _rows(session, DisruptionClaim, project_id, DisruptionClaim.raised_at),
         await _rows(session, ExtensionOfTimeClaim, project_id, ExtensionOfTimeClaim.raised_at),
-        project=await load_project_header(session, project_id),
+        project=project,
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: register_filename("claim", doc_locale, extension)
@@ -116,11 +118,12 @@ async def export_notice_register(
     """Download the notice register of a project as a workbook or a PDF."""
     await verify_project_access(project_id, user_id, session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    project = await load_project_header(session, project_id)
     document = notice_register(
         await _rows(session, Notice, project_id, Notice.code),
-        project=await load_project_header(session, project_id),
+        project=project,
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: register_filename("notice", doc_locale, extension)
@@ -141,11 +144,12 @@ async def export_variation_pdf(
     request = await VariationsService(session).get_request(vr_id)
     await verify_project_access(request.project_id, str(user_id), session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    project = await load_project_header(session, request.project_id)
     document = variation_record(
         request,
-        project=await load_project_header(session, request.project_id),
+        project=project,
         people=await resolve_party_names(session, [request.requested_by, request.decided_by]),
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await record_download(document, variation_pdf_filename(request.code), doc_locale)

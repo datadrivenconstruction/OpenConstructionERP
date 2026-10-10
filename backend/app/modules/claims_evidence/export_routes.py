@@ -62,11 +62,12 @@ async def export_evidence_pack(
     pack = await assemble_evidence(
         session, project_id=project_id, subject_ref=subject_ref, basis=basis, activity_limit=limit
     )
+    project = await load_project_header(session, project_id)
     document = evidence_pack_register(
         pack,
-        project=await load_project_header(session, project_id),
+        project=project,
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: evidence_pack_filename(doc_locale, extension)
@@ -99,11 +100,12 @@ async def export_reconstructed_pack_document(
     pack = await reconstruct_subject(
         session, project_id=project_id, subject_type=subject_type, subject_id=subject_id, basis=basis
     )
+    project = await load_project_header(session, project_id)
     document = evidence_pack_register(
         pack,
-        project=await load_project_header(session, project_id),
+        project=project,
         locale=doc_locale,
-        generated=generated_now(tr(doc_locale, "datetime_format")),
+        generated=generated_now(tr(doc_locale, "datetime_format"), project),
     )
     return await register_download(
         document, export_format, lambda extension: evidence_pack_filename(doc_locale, extension)

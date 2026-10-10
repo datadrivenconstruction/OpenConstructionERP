@@ -267,6 +267,33 @@ def test_localize_discipline(discipline: str, locale: str, expected: str) -> Non
     assert intl.localize_discipline(discipline, locale) == expected
 
 
+@pytest.mark.parametrize(
+    ("stored", "locale", "expected"),
+    [
+        ("mechanical", "tr", "Mekanik"),
+        ("Mechanical", "tr", "Mekanik"),
+        ("hvac", "tr", "İklimlendirme"),
+        ("Fire protection", "tr", "Yangın tesisatı"),
+        ("low_current", "tr", "Zayıf akım"),
+        ("bms", "tr", "Bina otomasyonu"),
+        ("civil", "tr", "İnşaat"),
+        ("hvac", "en", "HVAC"),
+        ("mechanical", "de", "Mechanical"),
+    ],
+)
+def test_building_services_trades_have_a_word(stored: str, locale: str, expected: str) -> None:
+    """The column is free text: a trade the picker does not offer still prints in the form's language."""
+    assert intl.localize_discipline(stored, locale) == expected
+
+
+def test_the_turkish_trade_words_are_the_submittal_register_s() -> None:
+    """One project prints one vocabulary: an RFI and a submittal name a discipline with the same word."""
+    from app.modules.submittals.tracking import DISCIPLINES
+
+    for item in DISCIPLINES:
+        assert intl.localize_discipline(item.code, "tr") == item.labels["tr"], item.code
+
+
 def test_localize_discipline_unknown_falls_back() -> None:
     assert intl.localize_discipline("acoustic") == "Acoustic"
 

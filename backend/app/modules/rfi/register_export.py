@@ -26,6 +26,7 @@ from collections.abc import Mapping, Sequence
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from app.core.regional_format import NBSP
 from app.core.register_export import (
     DocumentCatalogue,
     ProjectHeader,
@@ -34,6 +35,7 @@ from app.core.register_export import (
     export_filename,
     format_amount,
     person_name,
+    printed_currency,
 )
 from app.modules.rfi.intl import localize_status
 
@@ -45,6 +47,8 @@ __all__ = [
     "rfi_register_filename",
 ]
 
+# "Yes" and the amount or the days in brackets are one fact: the space between
+# them does not break, so the bracket never starts a line of its own.
 _STRINGS: dict[str, dict[str, str]] = {
     "en": {
         "register_title": "RFI Log",
@@ -59,7 +63,7 @@ _STRINGS: dict[str, dict[str, str]] = {
         "col_cost_impact": "Cost Impact",
         "col_schedule_impact": "Schedule Impact",
         "col_response": "Response",
-        "yes_with": "Yes ({detail})",
+        "yes_with": f"Yes{NBSP}({{detail}})",
         "register_filename": "rfi_log",
     },
     "tr": {
@@ -69,13 +73,13 @@ _STRINGS: dict[str, dict[str, str]] = {
         "col_raised_by": "Oluşturan",
         "col_assigned_to": "Atanan",
         "col_ball_in_court": "Sıradaki sorumlu",
-        "col_date_required": "Gerekli tarih",
+        "col_date_required": "İhtiyaç tarihi",
         "col_response_due": "Yanıt son tarihi",
         "col_days_open": "Açık gün sayısı",
         "col_cost_impact": "Maliyet etkisi",
-        "col_schedule_impact": "Takvim etkisi",
+        "col_schedule_impact": "Süre etkisi",
         "col_response": "Yanıt",
-        "yes_with": "Evet ({detail})",
+        "yes_with": f"Evet{NBSP}({{detail}})",
         "register_filename": "bilgi-talepleri-kayit-listesi",
     },
 }
@@ -102,7 +106,7 @@ def _impact(flag: Any, detail: str | None, locale: str) -> str:
     return CATALOGUE.tr(locale, "yes_with", detail=detail) if detail else CATALOGUE.tr(locale, "yes")
 
 
-def _cost_detail(value: Any, project: ProjectHeader) -> str | None:
+def _cost_detail(value: Any, project: ProjectHeader, locale: str) -> str | None:
     """The cost impact amount in the project's separators, or as typed when it is not a number."""
     text = str(value if value is not None else "").strip()
     if not text:
@@ -110,10 +114,10 @@ def _cost_detail(value: Any, project: ProjectHeader) -> str | None:
     try:
         amount = Decimal(text)
     except (InvalidOperation, ValueError):
-        return f"{text} {project.currency}".strip()
+        return f"{text} {printed_currency(project.currency, locale)}".strip()
     if not amount.is_finite():
-        return f"{text} {project.currency}".strip()
-    return format_amount(amount, project.number_style, project.currency)
+        return f"{text} {printed_currency(project.currency, locale)}".strip()
+    return format_amount(amount, project.number_style, project.currency, locale=locale)
 
 
 def rfi_register(
@@ -144,18 +148,23 @@ def rfi_register(
     locale = CATALOGUE.normalize(locale)
     tr = CATALOGUE.tr
     columns = [
-        RegisterColumn(tr(locale, "col_number"), weight=1.0, xlsx_width=10),
-        RegisterColumn(tr(locale, "col_subject"), weight=3.0, xlsx_width=45, wrap=True),
+        RegisterColumn(tr(locale, "col_number"), weight=1.0, xlsx_width=10, nobreak=True),
+        RegisterColumn(tr(locale, "col_subject"), weight=3.4, xlsx_width=45, wrap=True),
         RegisterColumn(tr(locale, "status"), weight=1.0, xlsx_width=12),
-        RegisterColumn(tr(locale, "col_raised_by"), weight=1.4, xlsx_width=22),
-        RegisterColumn(tr(locale, "col_assigned_to"), weight=1.4, xlsx_width=22),
+        # Who raised an RFI and who it was assigned to are workbook only. On
+        # paper the log names who has to act next (ball in court); three
+        # columns of names took the width the subject and the response need,
+        # and every row ran to four lines or more because of it. Both names
+        # are on the form of each RFI.
+        RegisterColumn(tr(locale, "col_raised_by"), weight=1.4, xlsx_width=22, pdf=False),
+        RegisterColumn(tr(locale, "col_assigned_to"), weight=1.4, xlsx_width=22, pdf=False),
         RegisterColumn(tr(locale, "col_ball_in_court"), weight=1.4, xlsx_width=22),
         RegisterColumn(tr(locale, "col_date_required"), kind="date", weight=1.3, xlsx_width=14),
         RegisterColumn(tr(locale, "col_response_due"), kind="date", weight=1.3, xlsx_width=14),
         RegisterColumn(tr(locale, "col_days_open"), kind="count", weight=0.8, xlsx_width=10),
         RegisterColumn(tr(locale, "col_cost_impact"), weight=1.6, xlsx_width=22),
         RegisterColumn(tr(locale, "col_schedule_impact"), weight=1.3, xlsx_width=16),
-        RegisterColumn(tr(locale, "col_response"), weight=3.2, xlsx_width=60, wrap=True),
+        RegisterColumn(tr(locale, "col_response"), weight=4.2, xlsx_width=60, wrap=True),
     ]
     open_days = days_open or {}
     rows = []
@@ -174,12 +183,16 @@ def rfi_register(
                 open_days.get(getattr(item, "id", None)),
                 _impact(
                     getattr(item, "cost_impact", False),
-                    _cost_detail(getattr(item, "cost_impact_value", None), project),
+                    _cost_detail(getattr(item, "cost_impact_value", None), project, locale),
                     locale,
                 ),
                 _impact(
                     getattr(item, "schedule_impact", False),
-                    CATALOGUE.days(schedule_days, locale) if isinstance(schedule_days, int) else None,
+                    # The count stays with its unit: "3" at the end of a line and
+                    # "days" on the next reads as two facts.
+                    CATALOGUE.days(schedule_days, locale).replace(" ", NBSP)
+                    if isinstance(schedule_days, int)
+                    else None,
                     locale,
                 ),
                 getattr(item, "official_response", None),
@@ -196,5 +209,5 @@ def rfi_register(
         empty_text=tr(locale, "empty_register"),
         sheet_title="RFI Log" if locale == "en" else tr(locale, "register_title"),
         doc_type="rfi",
-        **CATALOGUE.furniture(locale),
+        **CATALOGUE.furniture(locale, project),
     )

@@ -58,6 +58,7 @@ __all__ = [
     "status_caps",
     "status_label",
     "tr",
+    "weather_source_label",
     "weather_summary_text",
 ]
 
@@ -95,7 +96,21 @@ _STRINGS: dict[str, dict[str, str]] = {
         "footer_supervisor": "Supervisor: {name}",
         "footer_supervisor_missing": "Site supervisor: not recorded",
         "footer_generated": "Generated: {timestamp}",
-        "footer_page": "Page {page}",
+        "footer_page": "Page {page} of {total}",
+        "workforce": "Workforce by company",
+        "workforce_company": "Company",
+        "workforce_count": "People",
+        "workforce_unassigned": "Not assigned to a company",
+        "workforce_total": "Total",
+        "signatures": "Signatures",
+        "sig_prepared": "Prepared by (site manager)",
+        "sig_approved": "Approved by (employer's representative)",
+        "sig_name": "Name",
+        "sig_title": "Title",
+        "sig_date": "Date",
+        "sig_signature": "Signature",
+        "signed_note": "Signed in the system: {signers}",
+        "running_title": "{title} · {date} · {project}",
         "filename_prefix": "diary",
         "date_format": "%Y-%m-%d",
         "datetime_format": "%Y-%m-%d %H:%M UTC",
@@ -128,7 +143,21 @@ _STRINGS: dict[str, dict[str, str]] = {
         "footer_supervisor": "Bauleiter: {name}",
         "footer_supervisor_missing": "Bauleiter: nicht erfasst",
         "footer_generated": "Erstellt: {timestamp}",
-        "footer_page": "Seite {page}",
+        "footer_page": "Seite {page} von {total}",
+        "workforce": "Personal nach Firma",
+        "workforce_company": "Firma",
+        "workforce_count": "Personen",
+        "workforce_unassigned": "Keiner Firma zugeordnet",
+        "workforce_total": "Gesamt",
+        "signatures": "Unterschriften",
+        "sig_prepared": "Aufgestellt (Bauleiter)",
+        "sig_approved": "Anerkannt (Vertreter des Auftraggebers)",
+        "sig_name": "Name",
+        "sig_title": "Funktion",
+        "sig_date": "Datum",
+        "sig_signature": "Unterschrift",
+        "signed_note": "Im System unterzeichnet: {signers}",
+        "running_title": "{title} · {date} · {project}",
         "filename_prefix": "bautagebuch",
         "date_format": "%d.%m.%Y",
         "datetime_format": "%d.%m.%Y %H:%M UTC",
@@ -141,11 +170,11 @@ _STRINGS: dict[str, dict[str, str]] = {
     "tr": {
         "doc_title": "Şantiye Günlük Raporu",
         "overview": "Genel bilgiler",
-        "site_supervisor": "Saha amiri",
+        "site_supervisor": "Şantiye şefi",
         "not_recorded": "Kaydedilmedi",
         "labour_on_site": "Sahadaki iş gücü",
         "equipment_on_site": "Sahadaki ekipman",
-        "completeness": "Tamlık oranı",
+        "completeness": "Rapor tamamlanma oranı",
         "weather": "Hava durumu",
         "weather_time": "Saat",
         "weather_source": "Kaynak",
@@ -158,10 +187,24 @@ _STRINGS: dict[str, dict[str, str]] = {
         "entries_empty": "Bu rapor için kayıt girilmedi.",
         "notes": "Notlar",
         "notes_empty": "Ek not yok.",
-        "footer_supervisor": "Saha amiri: {name}",
-        "footer_supervisor_missing": "Saha amiri: kaydedilmedi",
+        "footer_supervisor": "Şantiye şefi: {name}",
+        "footer_supervisor_missing": "Şantiye şefi: kaydedilmedi",
         "footer_generated": "Oluşturulma: {timestamp}",
-        "footer_page": "Sayfa {page}",
+        "footer_page": "Sayfa {page} / {total}",
+        "workforce": "Firmalara göre iş gücü",
+        "workforce_company": "Firma",
+        "workforce_count": "Kişi sayısı",
+        "workforce_unassigned": "Firmaya atanmamış",
+        "workforce_total": "Toplam",
+        "signatures": "İmzalar",
+        "sig_prepared": "Hazırlayan (şantiye şefi)",
+        "sig_approved": "Onaylayan (işveren temsilcisi)",
+        "sig_name": "Adı Soyadı",
+        "sig_title": "Görevi",
+        "sig_date": "Tarih",
+        "sig_signature": "İmza",
+        "signed_note": "Sistemde imzalandı: {signers}",
+        "running_title": "{title} · {date} · {project}",
         "filename_prefix": "santiye-gunluk-raporu",
         "date_format": "%d.%m.%Y",
         "datetime_format": "%d.%m.%Y %H:%M UTC",
@@ -394,6 +437,25 @@ def entry_type_label(entry_type: str, locale: str) -> str:
     return label or entry_type.replace("_", " ").title()
 
 
+# Where a weather reading came from, for the values ``WeatherRecord.source``
+# stores. A reading typed in on site and one fetched from a weather service
+# are told apart on the page in words, not by the stored code.
+_SOURCE_LABELS: dict[str, dict[str, str]] = {
+    "en": {"manual": "Manual entry", "open_meteo": "Weather service", "sensor": "Site sensor"},
+    "de": {"manual": "Manuelle Eingabe", "open_meteo": "Wetterdienst", "sensor": "Baustellensensor"},
+    "tr": {"manual": "Elle giriş", "open_meteo": "Meteoroloji servisi", "sensor": "Şantiye sensörü"},
+}
+
+
+def weather_source_label(source: str | None, locale: str) -> str:
+    """The word for a stored weather source; an unknown source prints as stored, none as a dash."""
+    code = (source or "").strip()
+    if not code:
+        return "-"
+    table = _SOURCE_LABELS.get(normalize_pdf_locale(locale)) or {}
+    return table.get(code.lower()) or _SOURCE_LABELS[DEFAULT_PDF_LOCALE].get(code.lower()) or code
+
+
 def status_label(status: str | None, locale: str) -> str:
     """Status chip label; unknown statuses pass through as stored."""
     normalized = (status or "open").strip().lower()
@@ -420,7 +482,7 @@ def diary_pdf_filename(stem: str, locale: str) -> str:
 # ── Value formatting ─────────────────────────────────────────────────────
 
 
-def fmt_number(value: Any, decimals: int = 1, locale: str | None = None) -> str:
+def fmt_number(value: Any, decimals: int = 1, locale: str | None = None, *, decimal_mark: str | None = None) -> str:
     """Format a numeric value (int / float / Decimal) for display.
 
     Args:
@@ -428,6 +490,10 @@ def fmt_number(value: Any, decimals: int = 1, locale: str | None = None) -> str:
         decimals: Number of decimal places to keep.
         locale: Document language, for the decimal mark (German and Turkish
             write ``12,5``). ``None`` keeps the full stop.
+        decimal_mark: The mark of the project's market, when the caller
+            knows the project's country. It wins over the language's, so an
+            English report of a project in Türkiye writes ``12,5`` like the
+            registers of the same project do.
 
     Returns:
         A formatted string, or ``"-"`` when the value is missing or not
@@ -442,11 +508,16 @@ def fmt_number(value: Any, decimals: int = 1, locale: str | None = None) -> str:
     if number == int(number):
         return str(int(number))
     text = f"{number:.{decimals}f}"
+    if decimal_mark:
+        return text.replace(".", decimal_mark)
     return text.replace(".", tr(locale, "decimal_mark")) if locale else text
 
 
-def format_iso_date(value: str, locale: str) -> str:
+def format_iso_date(value: str, locale: str, date_format: str | None = None) -> str:
     """Render an ISO ``YYYY-MM-DD`` string in the locale's date format.
+
+    ``date_format`` (a ``strftime`` pattern) overrides the language's own
+    when the caller knows the project's country.
 
     The English format is ISO itself, so English output is unchanged.
     Non-ISO input is returned as-is - the diary stores dates as ISO
@@ -463,7 +534,7 @@ def format_iso_date(value: str, locale: str) -> str:
         parsed = date.fromisoformat((value or "").strip())
     except ValueError:
         return value
-    return parsed.strftime(tr(locale, "date_format"))
+    return parsed.strftime(date_format or tr(locale, "date_format"))
 
 
 # ── Weather summary ──────────────────────────────────────────────────────

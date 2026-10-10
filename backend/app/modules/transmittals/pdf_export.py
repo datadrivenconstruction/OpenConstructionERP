@@ -30,6 +30,7 @@ from app.core.register_export import (
     build_register_xlsx,
     caps,
     format_stored_date,
+    grid_rows,
     person_name,
 )
 from app.modules.transmittals.pdf_translations import CATALOGUE, DEFAULT_PDF_LOCALE, normalize_pdf_locale, tr
@@ -84,7 +85,7 @@ def transmittal_register(
     """
     locale = normalize_pdf_locale(locale)
     columns = [
-        RegisterColumn(tr(locale, "col_number"), weight=1.3, xlsx_width=16),
+        RegisterColumn(tr(locale, "col_number"), weight=1.3, xlsx_width=16, nobreak=True),
         RegisterColumn(tr(locale, "col_subject"), weight=3.4, xlsx_width=46, wrap=True),
         RegisterColumn(tr(locale, "col_purpose"), weight=1.3, xlsx_width=18),
         RegisterColumn(tr(locale, "status"), weight=1.1, xlsx_width=14),
@@ -115,7 +116,7 @@ def transmittal_register(
         number_style=project.number_style,
         generated=generated,
         empty_text=tr(locale, "empty_register"),
-        **CATALOGUE.furniture(locale),
+        **CATALOGUE.furniture(locale, project),
     )
 
 
@@ -151,26 +152,20 @@ def transmittal_record(
         The cover sheet, ready for the PDF renderer.
     """
     locale = normalize_pdf_locale(locale)
-    date_format = tr(locale, "date_format")
+    date_format = CATALOGUE.date_format(locale, project)
 
     def _date(value: Any) -> str:
         return format_stored_date(value, date_format)
 
-    grid = [
+    # The project is in the line under the title, with the transmittal number.
+    grid = grid_rows(
         [
-            tr(locale, "project"),
-            project.label,
-            tr(locale, "col_purpose"),
-            CATALOGUE.label("purpose", getattr(transmittal, "purpose_code", None), locale),
-        ],
-        [
-            tr(locale, "sender"),
-            person_name(getattr(transmittal, "sender_org_id", None), people),
-            tr(locale, "col_issued"),
-            _date(getattr(transmittal, "issued_date", None)),
-        ],
-        [tr(locale, "col_response_due"), _date(getattr(transmittal, "response_due_date", None)), "", ""],
-    ]
+            (tr(locale, "sender"), person_name(getattr(transmittal, "sender_org_id", None), people)),
+            (tr(locale, "col_purpose"), CATALOGUE.label("purpose", getattr(transmittal, "purpose_code", None), locale)),
+            (tr(locale, "col_issued"), _date(getattr(transmittal, "issued_date", None))),
+            (tr(locale, "col_response_due"), _date(getattr(transmittal, "response_due_date", None))),
+        ]
+    )
     blocks = [
         RecordBlock(
             tr(locale, "cover_note"),
@@ -197,7 +192,15 @@ def transmittal_record(
                     _date(getattr(recipient, "responded_at", None)),
                 ]
             )
-        blocks.append(RecordBlock(tr(locale, "recipients"), kind="table", rows=rows, weights=[2.4, 2.2, 1.4, 1.4]))
+        blocks.append(
+            RecordBlock(
+                tr(locale, "recipients"),
+                kind="table",
+                rows=rows,
+                weights=[2.4, 2.2, 1.4, 1.4],
+                keep_together=[False, False, True, True],
+            )
+        )
     items = sorted(getattr(transmittal, "items", None) or [], key=lambda item: getattr(item, "item_number", 0) or 0)
     if items:
         rows = [[tr(locale, "item_no"), tr(locale, "item_description"), tr(locale, "item_notes")]]
@@ -209,16 +212,22 @@ def transmittal_record(
                     str(getattr(item, "notes", None) or EMPTY),
                 ]
             )
-        blocks.append(RecordBlock(tr(locale, "items"), kind="table", rows=rows, weights=[0.8, 3.6, 2.6]))
+        blocks.append(
+            RecordBlock(
+                tr(locale, "items"),
+                kind="table",
+                rows=rows,
+                weights=[0.8, 3.6, 2.6],
+                keep_together=[True, False, False],
+            )
+        )
     blocks.append(
         RecordBlock(
             tr(locale, "signatures"),
             kind="signatures",
-            rows=[
-                ["", tr(locale, "name"), tr(locale, "signature"), tr(locale, "date")],
-                [tr(locale, "sig_issued"), "", "", ""],
-                [tr(locale, "sig_received"), "", "", ""],
-            ],
+            rows=CATALOGUE.signature_rows(
+                locale, [(tr(locale, "sig_issued"), EMPTY), (tr(locale, "sig_received"), EMPTY)]
+            ),
         )
     )
     status = CATALOGUE.label("status", getattr(transmittal, "status", None) or "draft", locale)

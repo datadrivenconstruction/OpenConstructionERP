@@ -45,6 +45,7 @@ from app.modules.daily_diary.pdf_translations import (
     status_caps,
     status_label,
     tr,
+    weather_source_label,
     weather_summary_text,
 )
 
@@ -212,11 +213,11 @@ def test_turkish_diary_has_turkish_labels_dates_and_numbers() -> None:
         "İMZALANDI",
         "10.10.2026",
         "Genel bilgiler",
-        "Saha amiri",
+        "Şantiye şefi",
         "Şükrü Iğdır",
         "Sahadaki iş gücü",
         "Sahadaki ekipman",
-        "Tamlık oranı",
+        "Rapor tamamlanma oranı",
         "%85",
         "Hava durumu",
         "Sıcaklık (°C)",
@@ -230,7 +231,7 @@ def test_turkish_diary_has_turkish_labels_dates_and_numbers() -> None:
         "Denetimler",
         "Notlar",
         "Oluşturulma:",
-        "Sayfa 1",
+        "Sayfa 1 / ",
         # Row text, with every letter Turkish adds.
         "Üçüncü kat yangın tesisatı boruları döşendi",
         "Iskarta malzeme ayrıldı, kaza yok",
@@ -285,3 +286,138 @@ def test_an_empty_turkish_diary_says_so_in_turkish() -> None:
     text = _turkish_text(entries=[], weather_records=[], supervisor_name=None, completeness=None)
     assert "Bu rapor için kayıt girilmedi." in text
     assert "Kaydedilmedi" in text
+
+
+# ── Signatures, workforce, continuation pages ─────────────────────────────
+
+
+def _page_texts(pdf: bytes) -> list[str]:
+    return [
+        " ".join(unicodedata.normalize("NFC", page.extract_text() or "").replace(" ", " ").split())
+        for page in PdfReader(io.BytesIO(pdf)).pages
+    ]
+
+
+def test_the_report_ends_with_a_signature_block_for_both_parties() -> None:
+    text = _turkish_text()
+    for expected in (
+        "İmzalar",
+        "Hazırlayan (şantiye şefi)",
+        "Onaylayan (işveren temsilcisi)",
+        "Adı Soyadı",
+        "Görevi",
+        "İmza",
+    ):
+        assert expected in text, expected
+    # Nobody signed in the system, so the page does not say anybody did.
+    assert "Sistemde imzalandı" not in text
+
+
+def test_system_signatures_are_named_with_their_date_and_a_hash_is_never_a_name() -> None:
+    signatures = [
+        SimpleNamespace(
+            signed_at=datetime(2026, 10, 10, 17, 5, tzinfo=UTC),
+            signature_payload={"signer_role": "supervisor", "signer_name": "Şükrü Iğdır"},
+        ),
+        SimpleNamespace(
+            signed_at=datetime(2026, 10, 11, 9, 0, tzinfo=UTC),
+            signature_payload={"signer_role": "owner", "signer_name": "Çağrı Öztürk"},
+        ),
+    ]
+    text = _turkish_text(signatures=signatures)
+    assert "Sistemde imzalandı: Şükrü Iğdır, 10.10.2026; Çağrı Öztürk, 11.10.2026" in text
+
+    digest = "9f86d081884c7d659a2feaa0c55ad015"
+    pdf = generate_diary_pdf(
+        _diary(supervisor_signature_ref=digest, owner_signature_ref="Gül Özışık"),
+        project_name="Işıklı Veri Merkezi",
+        entries=[],
+        weather_records=[],
+        supervisor_name="Şükrü Iğdır",
+        locale="tr",
+    )
+    signed = _text(pdf)
+    assert digest not in signed
+    assert "Gül Özışık" in signed
+
+
+def test_workforce_is_printed_by_company_and_adds_up() -> None:
+    entries = _entries()
+    entries[0].metadata_ = {"labour_count": 12, "equipment_count": 2, "company": "Örnek Mekanik Tesisat"}
+    entries[1].metadata_ = {"labour_count": "8", "company": "Işık Elektrik"}
+    entries[2].metadata_ = {"labour_count": "çok"}
+    text = _turkish_text(entries=entries)
+    for expected in (
+        "Firmalara göre iş gücü",
+        "Örnek Mekanik Tesisat 12",
+        "Işık Elektrik 8",
+        "Firmaya atanmamış 42",
+        "Toplam 62",
+    ):
+        assert expected in text, expected
+    # No entry names a company: the block is left out, not printed empty.
+    assert "Firmalara göre iş gücü" not in _turkish_text()
+
+
+def test_a_weather_source_is_a_word_not_a_stored_code() -> None:
+    text = _turkish_text()
+    assert "Elle giriş" in text
+    assert "manual" not in text
+    assert weather_source_label("open_meteo", "tr") == "Meteoroloji servisi"
+    assert weather_source_label("open_meteo", "de") == "Wetterdienst"
+    assert weather_source_label("drone", "tr") == "drone"
+    assert weather_source_label(None, "tr") == "-"
+
+
+def test_a_long_report_numbers_its_pages_and_heads_the_continuation_sheets() -> None:
+    entries = [
+        SimpleNamespace(
+            entry_type="completion",
+            entry_time=datetime(2026, 10, 10, 8, 0, tzinfo=UTC),
+            title=f"Kayıt {index}: üçüncü kat yangın tesisatı boruları döşendi",
+            description="Şaft içi çalışmada iş güvenliği önlemleri gözden geçirildi. " * 6,
+        )
+        for index in range(1, 61)
+    ]
+    long_name = (
+        "IŞIK İNŞAAT - İstanbul Çağlayan Veri Merkezi ve Isıtma, Soğutma Tesisleri İnşaatı (Faz 2, Şişli Ek Binası)"
+    )
+    pdf = generate_diary_pdf(
+        _diary(),
+        project_name=long_name,
+        entries=entries,
+        weather_records=_weather(),
+        supervisor_name="Şükrü Iğdır",
+        locale="tr",
+    )
+    pages = _page_texts(pdf)
+    assert len(pages) >= 3
+    for number, page in enumerate(pages, 1):
+        assert f"Sayfa {number} / {len(pages)}" in page
+        if number > 1:
+            assert "Şantiye Günlük Raporu · 10.10.2026 ·" in page, number
+    assert "İmzalar" in pages[-1]
+    # The whole project name is on page one, each word once: lines printed on
+    # top of each other come out of the extraction interleaved.
+    for word in ("Çağlayan", "Tesisleri", "Binası)"):
+        assert word in pages[0], word
+
+
+def test_figures_follow_the_projects_country_in_an_english_report() -> None:
+    pdf = generate_diary_pdf(
+        _diary(diary_date="2025-03-14"),
+        project_name="Işıklı Veri Merkezi",
+        entries=_entries(),
+        weather_records=_weather(),
+        supervisor_name="Şükrü Iğdır",
+        locale="en",
+        country="TR",
+    )
+    text = _text(pdf)
+    assert "14.03.2025" in text
+    assert "2025-03-14" not in text
+    # The footer stamp is a date too: no ISO date is left anywhere on the page.
+    assert re.search(r"\d{4}-\d{2}-\d{2}", text) is None
+    assert "18,5" in text
+    assert "Page 1 of" in text
+    assert "Signatures" in text
