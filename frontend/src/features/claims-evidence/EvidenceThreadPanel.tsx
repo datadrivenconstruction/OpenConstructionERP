@@ -15,14 +15,20 @@
 // it wherever a single change is on screen and pass the project id, the reconciled
 // subject type and the subject id.
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Download, FileStack, Layers } from 'lucide-react';
+import { AlertTriangle, FileStack, Layers } from 'lucide-react';
 import { Card, Badge, EmptyState, SkeletonTable } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
+import { DocumentExportMenu, type DocumentExportItem } from '@/shared/ui/DocumentExportMenu';
 import { fmtDate } from '@/shared/lib/formatters';
-import { exportReconstructedPack, reconstructChange, type ReconstructSubjectType } from './api';
+import {
+  downloadReconstructedPack,
+  exportReconstructedPack,
+  reconstructChange,
+  type ReconstructSubjectType,
+} from './api';
 import type { EvidencePack } from './types';
 
 /** Best-effort title-case of a token like "variation_order". */
@@ -91,6 +97,43 @@ export function EvidenceThreadPanel({ projectId, subjectType, subjectId, classNa
   });
   const pack = q.data;
 
+  // The thread as a document for the claim file, or as data. Whichever is
+  // taken, recording the export is the "assemble an evidence pack" adoption
+  // action and lands it in the audit trail. It is best-effort and must never
+  // block taking the pack off-platform, so it is fired and not awaited.
+  const exportItems = useMemo<DocumentExportItem[]>(() => {
+    const record = () => void exportReconstructedPack(projectId, subjectType, subjectId).catch(() => {});
+    return [
+      {
+        id: 'pdf',
+        label: t('doc_export.as_pdf', { defaultValue: 'PDF document' }),
+        kind: 'pdf',
+        run: (locale) => {
+          record();
+          return downloadReconstructedPack(projectId, subjectType, subjectId, 'pdf', locale);
+        },
+      },
+      {
+        id: 'xlsx',
+        label: t('doc_export.as_xlsx', { defaultValue: 'Excel workbook (.xlsx)' }),
+        kind: 'xlsx',
+        run: (locale) => {
+          record();
+          return downloadReconstructedPack(projectId, subjectType, subjectId, 'xlsx', locale);
+        },
+      },
+      {
+        id: 'json',
+        label: t('claims_evidence.export_json', { defaultValue: 'JSON data file' }),
+        kind: 'other',
+        run: () => {
+          record();
+          if (pack) downloadPack(pack, subjectType, subjectId);
+        },
+      },
+    ];
+  }, [projectId, subjectType, subjectId, pack, t]);
+
   return (
     <Card className={`space-y-3 p-4 ${className ?? ''}`}>
       <div className="flex items-center gap-2">
@@ -108,21 +151,12 @@ export function EvidenceThreadPanel({ projectId, subjectType, subjectId, classNa
           </p>
         </div>
         {pack && pack.entry_count > 0 ? (
-          <button
-            type="button"
-            onClick={() => {
-              // Recording the export is the "assemble an evidence pack" adoption
-              // action and lands it in the audit trail. It is best-effort and must
-              // never block taking the pack off-platform, so fire it and download
-              // the already-loaded (deterministic) pack regardless of the result.
-              void exportReconstructedPack(projectId, subjectType, subjectId).catch(() => {});
-              downloadPack(pack, subjectType, subjectId);
-            }}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {t('reconstruct.export', { defaultValue: 'Export' })}
-          </button>
+          <DocumentExportMenu
+            label={t('reconstruct.export', { defaultValue: 'Export' })}
+            items={exportItems}
+            className="ml-auto"
+            testId="evidence-thread-export"
+          />
         ) : null}
       </div>
 

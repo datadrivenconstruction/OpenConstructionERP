@@ -464,7 +464,7 @@ describe('on an installation whose pack names a company profile', () => {
     const workspace = await screen.findByTestId('sidebar-workspace');
     const hrefs = menuHrefs(workspace);
     expect(hrefs.slice(0, 5)).toEqual(['/', '/inbox', '/projects', '/daily-diary', '/correspondence']);
-    expect(hrefs).toHaveLength(35);
+    expect(hrefs).toHaveLength(36);
     expect(hrefs).toContain('/contracts?tab=claims');
     expect(hrefs[hrefs.length - 1]).toBe('/defects-liability');
 
@@ -492,6 +492,7 @@ describe('on an installation whose pack names a company profile', () => {
         '/rfi',
         '/submittals',
         '/variations',
+        '/variations?tab=eot',
         '/files',
         '/contacts',
       ]),

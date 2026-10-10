@@ -47,6 +47,7 @@ import {
   closeRFI,
   createVariationFromRFI,
   downloadRFIPdf,
+  downloadRFIRegister,
 } from '../api';
 
 beforeEach(() => {
@@ -110,6 +111,23 @@ describe('downloadRFIPdf', () => {
     await downloadRFIPdf('abc-123', '');
     expect(nthArg(downloadWithAuth, 0, 0)).toBe('/api/v1/rfi/abc-123/export/pdf/');
     expect(nthArg(downloadWithAuth, 0, 1)).toBe('rfi.pdf');
+  });
+
+  it('prints the form in the language the caller names, over the UI language', async () => {
+    // The form is sent to people who do not read the sender's language.
+    uiLanguage = 'tr';
+    await downloadRFIPdf('abc-123', 'RFI-007', 'en');
+    expect(nthArg(downloadWithAuth, 0, 0)).toBe('/api/v1/rfi/abc-123/export/pdf/?locale=en');
+  });
+});
+
+describe('downloadRFIRegister', () => {
+  it('GETs the localized register route, not the English-only /export/', async () => {
+    await downloadRFIRegister('p 1', 'xlsx', 'tr');
+    expect(downloadWithAuth).toHaveBeenCalledTimes(1);
+    expect(nthArg(downloadWithAuth, 0, 0)).toBe(
+      '/api/v1/rfi/export/register/?project_id=p+1&format=xlsx&locale=tr',
+    );
   });
 });
 

@@ -8,6 +8,7 @@
  */
 
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
+import { downloadRecordPdf, downloadRegister, type DocumentFormat } from '@/shared/lib/documentExport';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -789,4 +790,46 @@ export function deleteEoT(id: string): Promise<void> {
 
 export function projectDashboard(projectId: string): Promise<VariationDashboard> {
   return apiGet<VariationDashboard>(`/v1/variations/dashboard/project/${projectId}`);
+}
+
+/* ── Printed documents ─────────────────────────────────────────────────── */
+
+/**
+ * The three registers the module prints. `claim` is one list of the
+ * disruption claims and the extension of time claims together; variation
+ * orders and daywork sheets have no register of their own.
+ */
+export type VariationRegisterKind = 'variation' | 'claim' | 'notice';
+
+const REGISTER_ROUTES: Record<VariationRegisterKind, { path: string; fallback: string }> = {
+  variation: { path: '/v1/variations/variation-requests/export/', fallback: 'variation-register' },
+  claim: { path: '/v1/variations/claims/export/', fallback: 'claims-register' },
+  notice: { path: '/v1/variations/notices/export/', fallback: 'notice-register' },
+};
+
+/**
+ * Download one of the variation registers of a project. The routes take no
+ * filter: a register is exported whole.
+ */
+export function downloadVariationRegister(
+  kind: VariationRegisterKind,
+  projectId: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  const route = REGISTER_ROUTES[kind];
+  return downloadRegister(route.path, projectId, format, locale, route.fallback);
+}
+
+/**
+ * Download the printable form of one variation request
+ * (GET /variation-requests/{id}/export/pdf/). Notices, orders, daywork
+ * sheets and claims have no single-record form.
+ */
+export function downloadVariationRequestPdf(id: string, locale: string, code?: string): Promise<void> {
+  return downloadRecordPdf(
+    `/v1/variations/variation-requests/${encodeURIComponent(id)}/export/pdf/`,
+    locale,
+    code || 'variation-request',
+  );
 }

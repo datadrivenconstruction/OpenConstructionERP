@@ -27,7 +27,6 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
-  FileDown,
   FileText,
   History,
   Loader2,
@@ -48,6 +47,7 @@ import {
 } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
+import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, type Page } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -260,7 +260,7 @@ function ActivityStatusToken({ status }: { status: string | null }) {
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function RFIDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -484,17 +484,17 @@ export function RFIDetailPage() {
       }),
   });
 
-  // The printable RFI form. The server renders it in the reader's language
-  // and names the file after the RFI number; any status can be printed.
-  const pdfMut = useMutation({
-    mutationFn: () => downloadRFIPdf(rfiId as string, rfi?.rfi_number ?? ''),
-    onError: (e: Error) =>
-      addToast({
-        type: 'error',
-        title: t('common.export_failed', { defaultValue: 'Export failed' }),
-        message: e.message,
-      }),
-  });
+  // The printable RFI form. The server names the file after the RFI number;
+  // any status can be printed. The form exists in every interface language,
+  // so the choice offered is the reader's own language and English, the one
+  // an RFI most often has to be sent in.
+  const rfiNumber = rfi?.rfi_number ?? '';
+  const downloadPdf = useCallback(
+    (locale: string) => downloadRFIPdf(rfiId as string, rfiNumber, locale),
+    [rfiId, rfiNumber],
+  );
+  const uiLanguage = (i18n.language || 'en').split('-')[0] || 'en';
+  const pdfLocales = useMemo(() => (uiLanguage === 'en' ? ['en'] : [uiLanguage, 'en']), [uiLanguage]);
 
   const { confirm, ...confirmProps } = useConfirm();
 
@@ -682,22 +682,12 @@ export function RFIDetailPage() {
               {t('rfi.action_edit', { defaultValue: 'Edit' })}
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => pdfMut.mutate()}
-            disabled={pdfMut.isPending}
-            data-testid="rfi-export-pdf"
-            icon={
-              pdfMut.isPending ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <FileDown size={14} />
-              )
-            }
-          >
-            {t('rfi.export_pdf', { defaultValue: 'Export PDF' })}
-          </Button>
+          <RecordPdfButton
+            label={t('rfi.export_pdf', { defaultValue: 'Export PDF' })}
+            download={downloadPdf}
+            locales={pdfLocales}
+            testId="rfi-export-pdf"
+          />
           {letterheadMissing && (
             <Link
               to="/settings?tab=company"

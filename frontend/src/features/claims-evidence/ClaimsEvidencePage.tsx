@@ -15,14 +15,15 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { AlertTriangle, Download, Layers, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Layers, ShieldCheck } from 'lucide-react';
 import { Card, Badge, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { DocumentExportMenu, type DocumentExportItem } from '@/shared/ui/DocumentExportMenu';
 import { getErrorMessage } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate } from '@/shared/lib/formatters';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { getEvidencePack } from './api';
+import { downloadEvidencePack, getEvidencePack } from './api';
 import type { EvidencePack } from './types';
 
 interface ProjectLite {
@@ -103,6 +104,34 @@ export function ClaimsEvidencePage() {
   const pack = q.data;
   const hasEntries = !!pack && pack.entry_count > 0;
 
+  // The pack as a document for the claim file, filed under the same label and
+  // basis as the pack on screen, and the same pack as data.
+  const exportItems = useMemo<DocumentExportItem[]>(
+    () => [
+      {
+        id: 'pdf',
+        label: t('doc_export.as_pdf', { defaultValue: 'PDF document' }),
+        kind: 'pdf',
+        run: (locale) => downloadEvidencePack(projectId, projectName || 'project', basis, 'pdf', locale),
+      },
+      {
+        id: 'xlsx',
+        label: t('doc_export.as_xlsx', { defaultValue: 'Excel workbook (.xlsx)' }),
+        kind: 'xlsx',
+        run: (locale) => downloadEvidencePack(projectId, projectName || 'project', basis, 'xlsx', locale),
+      },
+      {
+        id: 'json',
+        label: t('claims_evidence.export_json', { defaultValue: 'JSON data file' }),
+        kind: 'other',
+        run: () => {
+          if (pack) downloadPack(pack, projectName);
+        },
+      },
+    ],
+    [projectId, projectName, basis, pack, t],
+  );
+
   return (
     <div className="space-y-5 animate-fade-in">
       <PageHeader
@@ -112,15 +141,19 @@ export function ClaimsEvidencePage() {
             'Assemble a reproducible evidence pack for a claim or dispute from the whole project record',
         })}
         actions={
-          <button
-            type="button"
-            onClick={() => pack && downloadPack(pack, projectName)}
-            disabled={!hasEntries}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border-light px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Download className="h-4 w-4" />
-            {t('claims_evidence.export', { defaultValue: 'Export pack' })}
-          </button>
+          <DocumentExportMenu
+            label={t('claims_evidence.export', { defaultValue: 'Export pack' })}
+            items={exportItems}
+            disabledReason={
+              !projectId
+                ? t('common.select_project_first', { defaultValue: 'Please select a project first' })
+                : !hasEntries
+                  ? t('doc_export.empty', { defaultValue: 'There are no records to export yet' })
+                  : undefined
+            }
+            size="md"
+            testId="claims-evidence-export"
+          />
         }
       />
 

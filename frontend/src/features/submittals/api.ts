@@ -7,6 +7,7 @@
  */
 
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { downloadRecordPdf, downloadRegister, type DocumentFormat } from '@/shared/lib/documentExport';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -204,4 +205,28 @@ export async function submitReviewDecision(
     return approveSubmittal(id, data.comments);
   }
   return reviewSubmittal(id, { status: data.status, notes: data.comments });
+}
+
+/* ── Printed documents ─────────────────────────────────────────────────── */
+
+/**
+ * Download the submittal register of a project (GET /export/, trailing slash
+ * as the route declares it). The route takes no filter: the register is
+ * exported whole.
+ */
+export function downloadSubmittalRegister(
+  projectId: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  return downloadRegister('/v1/submittals/export/', projectId, format, locale, 'submittal-register');
+}
+
+/** Download the printable form of one submittal (GET /{id}/export/pdf/). */
+export function downloadSubmittalPdf(id: string, locale: string, submittalNumber?: string): Promise<void> {
+  return downloadRecordPdf(
+    `/v1/submittals/${encodeURIComponent(id)}/export/pdf/`,
+    locale,
+    submittalNumber || 'submittal',
+  );
 }

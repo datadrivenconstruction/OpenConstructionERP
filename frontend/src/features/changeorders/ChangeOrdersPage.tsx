@@ -22,7 +22,6 @@ import {
   Clock,
   AlertTriangle,
   Trash2,
-  Download,
   Sparkles,
   ShoppingCart,
   HelpCircle,
@@ -35,6 +34,8 @@ import {
 import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint, DismissibleInfo, IntroRichText, ConfirmDialog, RecoveryCard, SkeletonTable, SkeletonCard, ModuleGuideButton } from '@/shared/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
+import type { DocumentExportItem } from '@/shared/ui/DocumentExportMenu';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import {
@@ -61,6 +62,8 @@ import { AIDraftModal } from './AIDraftModal';
 import { changeordersGuide } from './changeordersGuide';
 import {
   advanceApproval,
+  downloadChangeOrderPdf,
+  downloadChangeOrderRegister,
   getApprovals,
   isWritebackRefusal,
   startApprovalChain,
@@ -1737,6 +1740,12 @@ function DetailView({
           </div>
 
           <div className="flex gap-2 items-center">
+            {/* The printed form with its line items, in any status. Open to
+                every reader, unlike the workflow actions beside it. */}
+            <RecordPdfButton
+              download={(locale) => downloadChangeOrderPdf(order.id, locale, order.code)}
+              testId="changeorder-pdf"
+            />
             {order.status === 'draft' && (
               <Button variant="primary" size="sm" onClick={async () => {
                 const ok = await confirm({
@@ -2459,6 +2468,31 @@ export function ChangeOrdersPage() {
     }
   }, [filteredOrders, project, t, addToast]);
 
+  // The register as a document. It is exported whole (the route takes no
+  // filter); the CSV kept under it is the other thing, the rows on screen.
+  const exportTargets = useMemo(
+    () => [
+      {
+        id: 'register',
+        download: (format: 'pdf' | 'xlsx', locale: string) =>
+          downloadChangeOrderRegister(projectId, format, locale),
+      },
+    ],
+    [projectId],
+  );
+  const exportExtras = useMemo<DocumentExportItem[]>(
+    () => [
+      {
+        id: 'csv-view',
+        label: t('changeorders.export_csv_view', { defaultValue: 'CSV of the rows shown' }),
+        kind: 'other',
+        disabled: filteredOrders.length === 0,
+        run: () => handleExportCSV(),
+      },
+    ],
+    [filteredOrders.length, handleExportCSV, t],
+  );
+
   // Detail view
   if (selectedOrderId) {
     return (
@@ -2491,9 +2525,15 @@ export function ChangeOrdersPage() {
           <>
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
             <ModuleGuideButton content={changeordersGuide} />
-            <Button variant="secondary" icon={<Download size={14} />} onClick={handleExportCSV} disabled={!filteredOrders || filteredOrders.length === 0}>
-              {t('changeorders.export_csv', { defaultValue: 'Export CSV' })}
-            </Button>
+            <RegisterExportButton
+              label={t('changeorders.export_register', { defaultValue: 'Export register' })}
+              projectId={projectId}
+              empty={!isLoading && !isError && orders.length === 0}
+              targets={exportTargets}
+              extraItems={exportExtras}
+              size="md"
+              testId="changeorders-export"
+            />
             <Button variant="secondary" onClick={() => setShowAIDraft(true)} disabled={!projectId}>
               <Sparkles size={16} className="mr-1.5" />
               {t('changeorders.ai_draft', { defaultValue: 'AI Draft' })}

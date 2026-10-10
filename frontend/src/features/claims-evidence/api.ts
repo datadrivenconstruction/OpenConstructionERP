@@ -6,7 +6,8 @@
 // returns the 0-100 score, its band and the per-signal breakdown plus the cure
 // list. Read-only; nothing is persisted server-side.
 
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost, downloadWithAuth } from '@/shared/lib/api';
+import { documentExportUrl, type DocumentFormat } from '@/shared/lib/documentExport';
 import type { EvidencePack, ProvabilityScore } from './types';
 
 const BASE = '/v1/claims-evidence';
@@ -115,5 +116,54 @@ export function exportReconstructedPack(
       subjectType,
     )}/${encodeURIComponent(subjectId)}/export`,
     {},
+  );
+}
+
+/* -- Printed documents ---------------------------------------------------- */
+
+/**
+ * Download the project-wide evidence pack as a printable PDF or a workbook
+ * (GET /projects/{id}/pack/export/, trailing slash as the route declares it).
+ * `subjectRef` and `basis` mean what they mean for `getEvidencePack`, so the
+ * document is the pack the screen is showing.
+ */
+export function downloadEvidencePack(
+  projectId: string,
+  subjectRef: string,
+  basis: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  return downloadWithAuth(
+    documentExportUrl(`${BASE}/projects/${encodeURIComponent(projectId)}/pack/export/`, {
+      subject_ref: subjectRef || 'project',
+      basis,
+      format,
+      locale,
+    }),
+    `evidence-pack.${format}`,
+  );
+}
+
+/**
+ * Download one change's reconstructed evidence pack as a printable PDF or a
+ * workbook (GET /projects/{id}/reconstruct/{type}/{id}/export/). A read: unlike
+ * `exportReconstructedPack` it records nothing in the activity log.
+ */
+export function downloadReconstructedPack(
+  projectId: string,
+  subjectType: ReconstructSubjectType,
+  subjectId: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  return downloadWithAuth(
+    documentExportUrl(
+      `${BASE}/projects/${encodeURIComponent(projectId)}/reconstruct/${encodeURIComponent(
+        subjectType,
+      )}/${encodeURIComponent(subjectId)}/export/`,
+      { format, locale },
+    ),
+    `evidence-pack.${format}`,
   );
 }

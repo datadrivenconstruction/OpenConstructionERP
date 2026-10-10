@@ -15,7 +15,6 @@ import {
   DollarSign,
   Clock,
   FileText,
-  Download,
   Loader2,
   CalendarClock,
   Paperclip,
@@ -44,10 +43,11 @@ import {
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { RegisterExportButton } from '@/shared/ui/RegisterExport';
 import { ProjectPeopleSelect } from '@/shared/ui/ProjectPeopleSelect';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
-import { apiGet, triggerDownload, extractErrorMessageFromBody, type Page } from '@/shared/lib/api';
+import { apiGet, type Page } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
@@ -61,6 +61,7 @@ import {
   respondToRFI,
   closeRFI,
   createVariationFromRFI,
+  downloadRFIRegister,
   RFI_DISCIPLINES,
   type RFI,
   type RFIStatus,
@@ -1664,33 +1665,6 @@ const RFIRow = React.memo(function RFIRow({
   );
 });
 
-/* ── Export helper ─────────────────────────────────────────────────────── */
-
-async function downloadExcelExport(url: string, fallbackFilename: string): Promise<void> {
-  const token = useAuthStore.getState().accessToken;
-  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`/api${url}`, { method: 'GET', headers });
-  if (!response.ok) {
-    let detail = `Export failed (HTTP ${response.status})`;
-    try {
-      const body = await response.json();
-      detail = extractErrorMessageFromBody(body) ?? detail;
-    } catch {
-      // ignore parse error
-    }
-    throw new Error(detail);
-  }
-
-  const blob = await response.blob();
-  const disposition = response.headers.get('Content-Disposition');
-  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || fallbackFilename;
-  triggerDownload(blob, filename);
-}
-
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 /** Compact inline link to a sibling module (keeps the connects row readable). */
@@ -2050,24 +2024,17 @@ export function RFIPage() {
       }),
   });
 
-  const exportMut = useMutation({
-    mutationFn: () =>
-      downloadExcelExport(
-        `/v1/rfi/export/?project_id=${projectId}`,
-        'rfi_log.xlsx',
-      ),
-    onSuccess: () =>
-      addToast({
-        type: 'success',
-        title: t('rfi.export_success', { defaultValue: 'RFI log exported successfully' }),
-      }),
-    onError: (e: Error) =>
-      addToast({
-        type: 'error',
-        title: t('rfi.export_failed', { defaultValue: 'Failed to export RFI log' }),
-        message: e.message,
-      }),
-  });
+  // The log as a document, in the reader's language or the recipient's. It
+  // is exported whole: the route takes no filter.
+  const exportTargets = useMemo(
+    () => [
+      {
+        id: 'register',
+        download: (format: 'pdf' | 'xlsx', locale: string) => downloadRFIRegister(projectId, format, locale),
+      },
+    ],
+    [projectId],
+  );
 
   const handleCreateSubmit = useCallback(
     (formData: RFIFormData) => {
@@ -2216,22 +2183,16 @@ export function RFIPage() {
               content={rfiGuide}
               onCta={() => setShowCreateModal(true)}
             />
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={
-                exportMut.isPending ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Download size={14} />
-                )
-              }
-              onClick={() => exportMut.mutate()}
-              disabled={exportMut.isPending || !projectId}
-              data-guide="rfi-export"
-            >
-              {t('rfi.export_rfi_log', { defaultValue: 'Export RFI Log' })}
-            </Button>
+            <RegisterExportButton
+              label={t('rfi.export_rfi_log', { defaultValue: 'Export RFI Log' })}
+              projectId={projectId}
+              empty={!registerMayHold && !isLoading && !isError}
+              targets={exportTargets}
+              successTitle={t('rfi.export_success', { defaultValue: 'RFI log exported successfully' })}
+              failedTitle={t('rfi.export_failed', { defaultValue: 'Failed to export RFI log' })}
+              testId="rfi-export"
+              guide="rfi-export"
+            />
             <Button
               variant="primary"
               size="sm"

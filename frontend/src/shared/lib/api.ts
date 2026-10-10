@@ -906,9 +906,19 @@ export async function downloadWithAuth(url: string, fallbackFilename: string): P
   // when both forms were present, producing artifact names like
   // "filename*=UTF-8''report.md".
   let filename = fallbackFilename;
+  let decoded: string | null = null;
   const starMatch = disposition?.match(/filename\*=UTF-8''(.+?)(?:;|$)/i);
   if (starMatch?.[1]) {
-    filename = decodeURIComponent(starMatch[1].replace(/^"/, '').replace(/"$/, ''));
+    try {
+      decoded = decodeURIComponent(starMatch[1].replace(/^"/, '').replace(/"$/, ''));
+    } catch {
+      // A malformed percent sequence throws. The blob is already here, so
+      // losing the download over its name would be the worse outcome: take
+      // the plain name below instead.
+    }
+  }
+  if (decoded) {
+    filename = decoded;
   } else {
     const plainMatch = disposition?.match(/filename="?([^";]+)"?/);
     if (plainMatch?.[1]) filename = plainMatch[1];

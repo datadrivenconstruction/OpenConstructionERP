@@ -34,9 +34,14 @@
 // from `backend/app/core/onboarding_presets.py`. Nothing else changes.
 
 import type { LucideIcon } from 'lucide-react';
-import { Banknote, FileText, Lock, PiggyBank, Receipt } from 'lucide-react';
+import { Banknote, Clock, FileText, Lock, PiggyBank, Receipt } from 'lucide-react';
 import { CONTRACTS_TABS, DEFAULT_CONTRACTS_TAB } from '@/features/contracts/contractsTabs';
 import { DEFAULT_FINANCE_TAB, FINANCE_TABS } from '@/features/finance/financeTabs';
+import {
+  DEFAULT_VARIATIONS_TAB,
+  VARIATIONS_EOT_TAB,
+  VARIATIONS_TABS,
+} from '@/features/variations/variationsTabs';
 import { navGroups, type NavItem } from './navCatalog';
 
 export interface WorkspaceRow {
@@ -198,6 +203,12 @@ const MEP_SECTIONS: readonly WorkspaceSection[] = [
         icon: Receipt,
       },
       { to: '/variations' },
+      {
+        to: `/variations?tab=${VARIATIONS_EOT_TAB}`,
+        labelKey: 'variations.tab_eot',
+        defaultLabel: 'EoT Claims',
+        icon: Clock,
+      },
       { to: '/finance?tab=invoices', labelKey: 'finance.invoices', defaultLabel: 'Invoices', icon: FileText },
       { to: '/finance?tab=payments', labelKey: 'finance.payments', defaultLabel: 'Payments', icon: Banknote },
       { to: '/tax-rates' },
@@ -286,6 +297,12 @@ const SITE_RECORDS: Workspace = {
     { to: '/rfi' },
     { to: '/submittals' },
     { to: '/variations' },
+    {
+      to: `/variations?tab=${VARIATIONS_EOT_TAB}`,
+      labelKey: 'variations.tab_eot',
+      defaultLabel: 'EoT Claims',
+      icon: Clock,
+    },
     { to: '/files' },
     { to: '/contacts' },
   ],
@@ -381,6 +398,7 @@ export function resolveWorkspace(workspace: Workspace): NavItem[] {
 export const PAGE_TABS: ReadonlyMap<string, { tabs: readonly string[]; defaultTab: string }> = new Map([
   ['/contracts', { tabs: CONTRACTS_TABS, defaultTab: DEFAULT_CONTRACTS_TAB }],
   ['/finance', { tabs: FINANCE_TABS, defaultTab: DEFAULT_FINANCE_TAB }],
+  ['/variations', { tabs: VARIATIONS_TABS, defaultTab: DEFAULT_VARIATIONS_TAB }],
 ]);
 
 /** The tab a page shows for this address, which is what the sidebar should

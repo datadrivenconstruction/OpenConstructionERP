@@ -39,6 +39,7 @@ import {
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
@@ -49,6 +50,8 @@ import {
   updateSubmittal,
   submitSubmittal,
   submitReviewDecision,
+  downloadSubmittalRegister,
+  downloadSubmittalPdf,
   type Submittal,
   type SubmittalStatus,
   SUBMITTAL_TYPES,
@@ -551,6 +554,10 @@ const SubmittalRow = React.memo(function SubmittalRow({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const statusCfg = STATUS_CONFIG[submittal.status] ?? STATUS_CONFIG.draft;
+  const downloadPdf = useCallback(
+    (locale: string) => downloadSubmittalPdf(submittal.id, locale, submittal.submittal_number),
+    [submittal.id, submittal.submittal_number],
+  );
 
   return (
     <div className="border-b border-border-light last:border-b-0">
@@ -790,6 +797,9 @@ const SubmittalRow = React.memo(function SubmittalRow({
             >
               {t('common.edit', { defaultValue: 'Edit' })}
             </Button>
+            {/* The printed form, for any status: a reviewer prints a draft
+                as readily as an approved one. Open to every reader. */}
+            <RecordPdfButton download={downloadPdf} testId={`submittal-pdf-${submittal.id}`} />
           </div>
         </div>
       )}
@@ -968,6 +978,21 @@ export function SubmittalsPage() {
     enabled: !!projectId,
     refetchOnWindowFocus: true,
   });
+
+  // The register is exported whole (the route takes no filter), so "empty"
+  // means the unfiltered list came back empty, not that a status filter
+  // matched nothing.
+  const registerEmpty = !statusFilter && !isLoading && !isError && submittals.length === 0;
+  const exportTargets = useMemo(
+    () => [
+      {
+        id: 'register',
+        download: (format: 'pdf' | 'xlsx', locale: string) =>
+          downloadSubmittalRegister(projectId, format, locale),
+      },
+    ],
+    [projectId],
+  );
 
   // Client-side search
   const filtered = useMemo(() => {
@@ -1208,6 +1233,13 @@ export function SubmittalsPage() {
           <>
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
             <ModuleGuideButton content={submittalsGuide} />
+            <RegisterExportButton
+              label={t('submittals.export_register', { defaultValue: 'Export register' })}
+              projectId={projectId}
+              empty={registerEmpty}
+              targets={exportTargets}
+              testId="submittals-export"
+            />
             <Button
               variant="primary"
               size="sm"

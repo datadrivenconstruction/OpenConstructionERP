@@ -15,6 +15,7 @@
  */
 
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { downloadRecordPdf, downloadRegister, type DocumentFormat } from '@/shared/lib/documentExport';
 
 /** One row in a change order's approval chain (mirrors backend `ApprovalRow`). */
 export interface ApprovalRow {
@@ -249,4 +250,24 @@ export interface AIDraftResponse {
 export function aiDraftChangeOrder(body: AIDraftBody): Promise<AIDraftResponse> {
   // longRunning: the call waits for an AI provider (issue #499).
   return apiPost<AIDraftResponse, AIDraftBody>(`/v1/changeorders/ai-draft/`, body, { longRunning: true });
+}
+
+/* ── Printed documents ─────────────────────────────────────────────────── */
+
+/**
+ * Download the change order register of a project (GET /export/, trailing
+ * slash as the route declares it). The route takes no filter: the register
+ * is exported whole.
+ */
+export function downloadChangeOrderRegister(
+  projectId: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  return downloadRegister('/v1/changeorders/export/', projectId, format, locale, 'change-order-register');
+}
+
+/** Download the printable form of one change order with its items (GET /{id}/export/pdf/). */
+export function downloadChangeOrderPdf(id: string, locale: string, code?: string): Promise<void> {
+  return downloadRecordPdf(`/v1/changeorders/${encodeURIComponent(id)}/export/pdf/`, locale, code || 'change-order');
 }

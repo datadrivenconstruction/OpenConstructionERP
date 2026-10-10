@@ -7,6 +7,7 @@
  */
 
 import { apiDelete, apiGet, apiPatch, apiPost, type Page } from '@/shared/lib/api';
+import { downloadRecordPdf, downloadRegister, type DocumentFormat } from '@/shared/lib/documentExport';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -272,4 +273,28 @@ export async function addRecipient(
 
 export async function deleteRecipient(transmittalId: string, recipientId: string): Promise<void> {
   await apiDelete(`/v1/transmittals/${transmittalId}/recipients/${recipientId}`);
+}
+
+/* ── Printed documents ─────────────────────────────────────────────────── */
+
+/**
+ * Download the transmittal register of a project (GET /export/, trailing
+ * slash as the route declares it). The route takes no filter: the register
+ * is exported whole.
+ */
+export function downloadTransmittalRegister(
+  projectId: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  return downloadRegister('/v1/transmittals/export/', projectId, format, locale, 'transmittal-register');
+}
+
+/** Download the cover sheet of one transmittal (GET /{id}/export/pdf/). */
+export function downloadTransmittalPdf(id: string, locale: string, transmittalNumber?: string): Promise<void> {
+  return downloadRecordPdf(
+    `/v1/transmittals/${encodeURIComponent(id)}/export/pdf/`,
+    locale,
+    transmittalNumber || 'transmittal',
+  );
 }

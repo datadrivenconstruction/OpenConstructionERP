@@ -15,6 +15,7 @@ import {
   downloadWithAuth,
   type Page,
 } from '@/shared/lib/api';
+import { downloadRegister, type DocumentFormat } from '@/shared/lib/documentExport';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -234,17 +235,35 @@ export async function closeRFI(id: string): Promise<RFI> {
   return apiPost<RFI>(`/v1/rfi/${id}/close/`);
 }
 
-export async function downloadRFIPdf(id: string, rfiNumber: string): Promise<void> {
+export async function downloadRFIPdf(id: string, rfiNumber: string, locale?: string): Promise<void> {
   // Route is GET /{rfi_id}/export/pdf/ WITH a trailing slash (router.py).
   // The download skips apiGet and the Accept-Language header it attaches,
   // so the UI language travels as ?locale= or the form would follow the
-  // browser's language instead of the one the reader picked.
-  const lang = activeLanguageTag();
+  // browser's language instead of the one the reader picked. A caller may
+  // name another language: the form is sent to people who do not read the
+  // sender's.
+  const lang = locale || activeLanguageTag();
   const query = lang ? `?locale=${encodeURIComponent(lang)}` : '';
   await downloadWithAuth(
     `${API_BASE}/v1/rfi/${encodeURIComponent(id)}/export/pdf/${query}`,
     `${rfiNumber || 'rfi'}.pdf`,
   );
+}
+
+/**
+ * Download the RFI log of a project in the document language asked for.
+ *
+ * Route is GET /export/register/ (trailing slash, export_routes.py). The older
+ * GET /export/ is still served and prints English only, whatever the reader's
+ * language, so the screen no longer calls it. The route takes no filter: the
+ * log is exported whole.
+ */
+export function downloadRFIRegister(
+  projectId: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  return downloadRegister('/v1/rfi/export/register/', projectId, format, locale, 'rfi_log');
 }
 
 export async function createVariationFromRFI(id: string): Promise<CreateVariationResponse> {

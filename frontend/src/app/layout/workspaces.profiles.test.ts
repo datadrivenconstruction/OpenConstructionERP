@@ -56,6 +56,7 @@ const SITE_RECORDS_ROWS = [
   ['/rfi', 'rfi.title'],
   ['/submittals', 'submittals.title'],
   ['/variations', 'nav.variations'],
+  ['/variations?tab=eot', 'variations.tab_eot'],
   ['/files', 'nav.documents'],
   ['/contacts', 'contacts.title'],
 ];
@@ -75,6 +76,7 @@ const MEP_SECTIONS: Array<[string, string[]]> = [
       '/progress',
       '/contracts?tab=claims',
       '/variations',
+      '/variations?tab=eot',
       '/finance?tab=invoices',
       '/finance?tab=payments',
       '/tax-rates',

@@ -11,10 +11,11 @@ import {
   apiPost,
   apiPatch,
   apiDelete,
-  getAuthToken,
-  triggerDownload,
+  activeLanguageTag,
+  downloadWithAuth,
   type Page,
 } from '@/shared/lib/api';
+import { documentExportUrl } from '@/shared/lib/documentExport';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -330,33 +331,30 @@ export function exportSclBundle(data: {
  * Download a diary as a PDF document.
  *
  * Hits GET /api/v1/daily-diary/diaries/{id}/pdf (returns application/pdf,
- * gated by the `daily_diary.read` permission) with the stored bearer token,
- * then streams the response to the browser as a file download. Mirrors the
- * blob-download pattern used by the BOQ export.
+ * gated by the `daily_diary.read` permission) with the stored bearer token
+ * and hands the response to the browser as a file download.
  *
- * @throws Error when the request fails so the caller can surface a toast.
+ * The download does not go through `apiGet`, so it carries no
+ * `Accept-Language`: the document language travels as `?locale=`, or a
+ * Turkish reader would get the English form. The server reduces the tag to a
+ * language the diary is printed in (see DIARY_DOCUMENT_LOCALES) and names the
+ * file in that language, so the name it sends is the one that is kept.
+ *
+ * @param locale - Document language; the interface language when omitted.
+ * @throws Error with the server's message when the request fails, so the
+ *   caller can surface a toast.
  */
 export async function downloadDiaryPdf(
   diaryId: string,
   diaryDate?: string,
+  locale?: string,
 ): Promise<void> {
-  const token = getAuthToken();
-  const res = await fetch(
-    `/api/v1/daily-diary/diaries/${encodeURIComponent(diaryId)}/pdf`,
-    { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+  await downloadWithAuth(
+    documentExportUrl(`/v1/daily-diary/diaries/${encodeURIComponent(diaryId)}/pdf`, {
+      locale: locale || activeLanguageTag() || undefined,
+    }),
+    `diary-${diaryDate || diaryId}.pdf`,
   );
-  if (!res.ok) {
-    let message = `Export failed (${res.status})`;
-    try {
-      const body = await res.json();
-      if (body?.detail) message = String(body.detail);
-    } catch {
-      // Non-JSON error body — keep the status-code message.
-    }
-    throw new Error(message);
-  }
-  const blob = await res.blob();
-  triggerDownload(blob, `diary-${diaryDate || diaryId}.pdf`);
 }
 
 /* ── Weather ───────────────────────────────────────────────────────────── */

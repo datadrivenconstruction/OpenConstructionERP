@@ -8,6 +8,7 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost, triggerDownload, type Page } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { downloadRecordPdf, downloadRegister, type DocumentFormat } from '@/shared/lib/documentExport';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -281,4 +282,28 @@ export async function downloadCorrespondenceAttachment(
 export function attachmentDisplayName(path: string): string {
   const parts = path.split('/');
   return parts[parts.length - 1] || path;
+}
+
+/* ── Printed documents ─────────────────────────────────────────────────── */
+
+/**
+ * Download the correspondence log of a project (GET /export/, trailing slash
+ * as the route declares it). The route takes no filter: the log is exported
+ * whole.
+ */
+export function downloadCorrespondenceLog(
+  projectId: string,
+  format: DocumentFormat,
+  locale: string,
+): Promise<void> {
+  return downloadRegister('/v1/correspondence/export/', projectId, format, locale, 'correspondence-log');
+}
+
+/** Download the printable form of one entry (GET /{id}/export/pdf/). */
+export function downloadCorrespondencePdf(id: string, locale: string, referenceNumber?: string): Promise<void> {
+  return downloadRecordPdf(
+    `/v1/correspondence/${encodeURIComponent(id)}/export/pdf/`,
+    locale,
+    referenceNumber || 'correspondence',
+  );
 }
