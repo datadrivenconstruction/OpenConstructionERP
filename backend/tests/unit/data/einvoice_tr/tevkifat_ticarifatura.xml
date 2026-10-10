@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:oce="urn:datadrivenconstruction:ubl-tr:unsigned">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <oce:SignaturePlaceholder />
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>TR1.2</cbc:CustomizationID>
+  <cbc:ProfileID>TICARIFATURA</cbc:ProfileID>
+  <cbc:ID>OMT2026000000002</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:UUID>0a1b2c3d-4e5f-4a6b-9c7d-8e9f00112233</cbc:UUID>
+  <cbc:IssueDate>2026-09-30</cbc:IssueDate>
+  <cbc:IssueTime>10:30:00</cbc:IssueTime>
+  <cbc:InvoiceTypeCode>TEVKIFAT</cbc:InvoiceTypeCode>
+  <cbc:Note>Hakediş No: 3 - Mekanik tesisat yapım işi</cbc:Note>
+  <cbc:Note>Yalnız YüzOnİkiBin Türk Lirası</cbc:Note>
+  <cbc:DocumentCurrencyCode>TRY</cbc:DocumentCurrencyCode>
+  <cbc:LineCountNumeric>2</cbc:LineCountNumeric>
+  <cac:InvoicePeriod>
+    <cbc:StartDate>2026-09-01</cbc:StartDate>
+    <cbc:EndDate>2026-09-30</cbc:EndDate>
+  </cac:InvoicePeriod>
+  <cac:ContractDocumentReference>
+    <cbc:ID>SZL-2026-014</cbc:ID>
+    <cbc:IssueDate>2026-03-02</cbc:IssueDate>
+  </cac:ContractDocumentReference>
+  <cac:Signature>
+    <cbc:ID schemeID="VKN_TCKN">1112223339</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">1112223339</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Şehit Öğretmen Caddesi</cbc:StreetName>
+        <cbc:BuildingNumber>12/A</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+        <cbc:CityName>Ankara</cbc:CityName>
+        <cbc:PostalZone>06690</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#Signature_OMT2026000000002</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">1112223339</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="MERSISNO">0111222333900017</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Örnek Mekanik Tesisat Taahhüt A.Ş.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Şehit Öğretmen Caddesi</cbc:StreetName>
+        <cbc:BuildingNumber>12/A</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Çankaya</cbc:CitySubdivisionName>
+        <cbc:CityName>Ankara</cbc:CityName>
+        <cbc:PostalZone>06690</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>TR</cbc:IdentificationCode>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Çankaya</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:Contact>
+        <cbc:Telephone>+90 312 000 00 00</cbc:Telephone>
+        <cbc:ElectronicMail>info@datadrivenconstruction.io</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID schemeID="VKN">9876543217</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Güneş Yapı İnşaat Sanayi ve Ticaret Ltd. Şti.</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Büyükdere Caddesi</cbc:StreetName>
+        <cbc:BuildingNumber>100</cbc:BuildingNumber>
+        <cbc:CitySubdivisionName>Şişli</cbc:CitySubdivisionName>
+        <cbc:CityName>İstanbul</cbc:CityName>
+        <cbc:PostalZone>34394</cbc:PostalZone>
+        <cac:Country>
+          <cbc:Name>Türkiye</cbc:Name>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cac:TaxScheme>
+          <cbc:Name>Zincirlikuyu</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="TRY">12000.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">100000.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">20000.00</cbc:TaxAmount>
+      <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+      <cbc:Percent>20</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>KDV</cbc:Name>
+          <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:WithholdingTaxTotal>
+    <cbc:TaxAmount currencyID="TRY">8000.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="TRY">20000.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="TRY">8000.00</cbc:TaxAmount>
+      <cbc:Percent>40</cbc:Percent>
+      <cac:TaxCategory>
+        <cac:TaxScheme>
+          <cbc:Name>Yapım işleri ile bu işlerle birlikte ifa edilen mühendislik-mimarlık ve etüt-proje hizmetleri</cbc:Name>
+          <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:WithholdingTaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="TRY">100000.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="TRY">100000.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="TRY">120000.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="TRY">112000.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="LS">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">60000.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">7200.00</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">60000.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">12000.00</cbc:TaxAmount>
+        <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+      <cbc:TaxAmount currencyID="TRY">4800.00</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">12000.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">4800.00</cbc:TaxAmount>
+        <cbc:Percent>40</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>Yapım işleri ile bu işlerle birlikte ifa edilen mühendislik-mimarlık ve etüt-proje hizmetleri</cbc:Name>
+            <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:Item>
+      <cbc:Name>Isıtma ve soğutma tesisatı imalatı</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">60000</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="LS">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="TRY">40000.00</cbc:LineExtensionAmount>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="TRY">4800.00</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">40000.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">8000.00</cbc:TaxAmount>
+        <cbc:CalculationSequenceNumeric>1</cbc:CalculationSequenceNumeric>
+        <cbc:Percent>20</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>KDV</cbc:Name>
+            <cbc:TaxTypeCode>0015</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
+    <cac:WithholdingTaxTotal>
+      <cbc:TaxAmount currencyID="TRY">3200.00</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="TRY">8000.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="TRY">3200.00</cbc:TaxAmount>
+        <cbc:Percent>40</cbc:Percent>
+        <cac:TaxCategory>
+          <cac:TaxScheme>
+            <cbc:Name>Yapım işleri ile bu işlerle birlikte ifa edilen mühendislik-mimarlık ve etüt-proje hizmetleri</cbc:Name>
+            <cbc:TaxTypeCode>601</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:WithholdingTaxTotal>
+    <cac:Item>
+      <cbc:Name>Yangın söndürme tesisatı imalatı</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="TRY">40000</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>
