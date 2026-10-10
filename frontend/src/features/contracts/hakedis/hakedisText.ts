@@ -33,12 +33,12 @@ function formatExact(formatter: Intl.NumberFormat, value: string): string {
 }
 
 /** Whether `Intl.NumberFormat` keeps the digits of a decimal string. Older engines go through a float. */
-function supportsExactStrings(): boolean {
+function supportsExactStrings(locale: string): boolean {
   if (exactStrings !== null) return exactStrings;
   try {
-    // Asked in the reader's own locale with Latin digits: only the digits are
+    // Asked in the caller's number locale with Latin digits: only the digits are
     // compared, so the decimal mark of the locale does not matter.
-    const probe = new Intl.NumberFormat(undefined, {
+    const probe = new Intl.NumberFormat(locale, {
       useGrouping: false,
       maximumFractionDigits: 2,
       numberingSystem: 'latn',
@@ -65,7 +65,7 @@ function significantDecimals(value: string): number {
  */
 export function formatDecimalText(value: string | null | undefined, locale: string, minDecimals = 0): string {
   if (value === null || value === undefined) return '';
-  if (!isDecimalString(value) || !supportsExactStrings()) return value;
+  if (!isDecimalString(value) || !supportsExactStrings(locale)) return value;
   const digits = Math.min(20, Math.max(minDecimals, significantDecimals(value)));
   try {
     const formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits });
