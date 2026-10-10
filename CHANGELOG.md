@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An Italian price list in Excel or CSV maps its usual columns (Tariffa, Descrizione estesa, U.M., Unità di misura, Prezzo €) to code, description, unit and price without a manual step. A column mapping you set is remembered in this browser for files with the same headers, so next year's edition of the same list opens already mapped.
 - After an XPWE bill import, a message offers to save the price list inside the same file as a cost database, so it no longer has to be uploaded a second time.
 - The schedule page says how to link two bars by dragging, and the archive filter says that a schedule is deleted from its archived list.
+- Administrators can now manage the companies of a group under Admin, Legal entities: add a company, mark it as the default, delete it, and add or remove its branches. A branch in another country than its company gets a warning that it may need its own registration there. A company that still owns projects cannot be deleted.
+- A project can name the company that owns it. Invoices on that project are then numbered under the company code, for example `DE01-INV-R-001`, so two companies of a group never issue the same number, and a project with no country of its own takes the VAT rate of its company's country, or of the default company's when it names none. Projects that name no company keep their numbering, and numbers already issued are never changed. For now the owning company is set through the API (`PUT /api/v1/legal_entities/projects/{id}/entity`); the project settings do not offer it yet.
 
 ### Fixed
 
