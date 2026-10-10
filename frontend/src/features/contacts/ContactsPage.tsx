@@ -75,6 +75,7 @@ import {
   fetchContactModuleRows,
   type Contact,
   type ContactType,
+  type PartyKind,
   type PrequalificationStatus,
   type CreateContactPayload,
   type UpdateContactPayload,
@@ -215,6 +216,7 @@ const TYPE_CARD_CONFIG: Record<ContactType, { icon: React.ElementType; color: st
 interface ContactFormData {
   company_name: string;
   legal_name: string;
+  party_kind: PartyKind | '';
   vat_number: string;
   first_name: string;
   last_name: string;
@@ -234,6 +236,7 @@ interface ContactFormData {
 const EMPTY_FORM: ContactFormData = {
   company_name: '',
   legal_name: '',
+  party_kind: '',
   vat_number: '',
   first_name: '',
   last_name: '',
@@ -304,6 +307,7 @@ export function contactFormData(contact?: Contact): ContactFormData {
   return {
     company_name: contact.company_name || '',
     legal_name: contact.legal_name || '',
+    party_kind: contact.party_kind ?? '',
     vat_number: contact.vat_number || '',
     first_name: contact.first_name || '',
     last_name: contact.last_name || '',
@@ -343,6 +347,7 @@ export function buildContactPatch(
   if (form.last_name !== base.last_name) data.last_name = form.last_name || null;
   if (form.company_name !== base.company_name) data.company_name = form.company_name || null;
   if (form.legal_name !== base.legal_name) data.legal_name = form.legal_name || null;
+  if (form.party_kind !== base.party_kind) data.party_kind = form.party_kind || null;
   if (form.vat_number !== base.vat_number) data.vat_number = form.vat_number || null;
   if (form.email !== base.email) data.primary_email = form.email || null;
   if (form.phone !== base.phone) data.primary_phone = form.phone || null;
@@ -505,6 +510,22 @@ function AddContactModal({
             className={inputCls}
             placeholder={t('contacts.legal_name_placeholder', { defaultValue: 'Registered legal entity name' })}
           />
+        </WideModalField>
+
+        <WideModalField label={t('contacts.field_party_kind', { defaultValue: 'Person or company' })}>
+          <select
+            value={form.party_kind}
+            onChange={(e) => set('party_kind', e.target.value as PartyKind | '')}
+            className={inputCls}
+          >
+            <option value="">{t('contacts.party_kind_unset', { defaultValue: 'Not stated' })}</option>
+            <option value="natural_person">
+              {t('contacts.party_kind_natural_person', { defaultValue: 'Natural person or sole trader' })}
+            </option>
+            <option value="legal_entity">
+              {t('contacts.party_kind_legal_entity', { defaultValue: 'Company or other legal entity' })}
+            </option>
+          </select>
         </WideModalField>
 
         <WideModalField label={t('contacts.field_vat', { defaultValue: 'VAT / Tax ID' })}>
@@ -1738,6 +1759,7 @@ export function ContactsPage() {
         last_name: formData.last_name || undefined,
         company_name: formData.company_name || undefined,
         legal_name: formData.legal_name || undefined,
+        party_kind: formData.party_kind || undefined,
         vat_number: formData.vat_number || undefined,
         primary_email: formData.email || undefined,
         primary_phone: formData.phone || undefined,

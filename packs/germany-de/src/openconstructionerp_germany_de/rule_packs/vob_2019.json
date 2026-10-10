@@ -5,7 +5,8 @@
   "jurisdiction": "DE",
   "description": "Validates tender and contract documents against the Vergabe- und Vertragsordnung fuer Bauleistungen (VOB) 2019 edition. Covers Part A (procurement for public contracts), Part B (general contract conditions) and Part C (technical specifications per DIN 18299 ff.). Checks mandatory clauses, deadlines, ATV trade references, measurement rules and LV description rules per VOB/A paragraph 7.",
   "applies_to": ["tender", "contracts", "boq", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "vob.a_vergabeart_documented",
     "vob.a_leistungsbeschreibung_eindeutig",
     "vob.a_no_proprietary_product_names",
@@ -21,6 +22,7 @@
     "vob.c_atv_referenced_per_trade",
     "vob.c_measurement_rules_per_atv"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "DVA (Deutscher Vergabe- und Vertragsausschuss fuer Bauleistungen)",
   "publication_year": 2019
 }

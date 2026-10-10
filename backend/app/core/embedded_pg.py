@@ -35,11 +35,11 @@ import struct
 import subprocess
 import threading
 import time
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from types import ModuleType
-from typing import NamedTuple
+from typing import Any, NamedTuple
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ def cluster_postmaster_pid(data_dir: Path | str) -> int | None:
     exactly the machines most in need of one.
     """
     try:
-        pgdata = Path(data_dir) / "pgdata"
+        pgdata = resolve_pgdata(data_dir)
         pid = _read_pidfile_pid(pgdata)
         if pid is None or not _pidfile_owner_is_live(pgdata, pid):
             return None
@@ -247,7 +247,16 @@ def boot(data_dir: Path | str) -> bool:
         )
         return False
 
-    pgdata = Path(data_dir).expanduser() / "pgdata"
+    _install_safe_pgexec()
+    pgdata = resolve_pgdata(data_dir)
+    if pgdata != Path(data_dir).expanduser() / "pgdata":
+        logger.info(
+            "the data directory %s is not an ASCII path, which the bundled PostgreSQL cannot rely on "
+            "on Windows; keeping the database cluster at %s instead",
+            data_dir,
+            pgdata,
+        )
+        _prepare_relocated_pgdata(Path(data_dir).expanduser(), pgdata)
 
     # Windows only: refuse a first initdb whose files Windows will not let it
     # open, and say so with the number in it. See windows_path_limit_problem for
@@ -1223,7 +1232,6 @@ def _stop_mute_postmaster(pgdata: Path) -> bool:
                 subprocess.run(  # noqa: S603
                     [str(pg_ctl), "-D", str(pgdata), "-m", mode, "-w", "-t", str(wait), "stop"],
                     capture_output=True,
-                    text=True,
                     timeout=wait + 10,
                     check=False,
                 )
@@ -1300,6 +1308,229 @@ def _apply_ascii_locale_env() -> None:
     """
     for key, value in _ASCII_LOCALE_ENV.items():
         os.environ[key] = value
+
+
+def _windows_ansi_encoding() -> str | None:
+    """The codec for the Windows ANSI code page, or ``None`` off Windows.
+
+    The bundled PostgreSQL binaries are narrow-character programs, so what they
+    print reaches us in the system ANSI code page (cp936 on a Chinese install,
+    cp1251 on a Russian one), not UTF-8. ``locale.getpreferredencoding`` is the
+    wrong question here: it answers for this interpreter, which may run in UTF-8
+    mode.
+    """
+    if os.name != "nt":
+        return None
+    try:
+        import ctypes
+
+        return f"cp{ctypes.windll.kernel32.GetACP()}"
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def decode_child_output(raw: bytes) -> str:
+    """Decode what a native child process printed, never raising.
+
+    UTF-8 is tried first because it is what every POSIX build and every ASCII
+    message is. When that fails the bytes are read in the Windows ANSI code page,
+    with replacement characters as the last resort. initdb prints the
+    operating-system user name and the data directory, so for a Windows account
+    named ``田田`` its output is not UTF-8 even under ``LC_ALL=C``, and a strict
+    decode used to turn a successful initdb into a failed one.
+    """
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        pass
+    encoding = _windows_ansi_encoding() or locale.getpreferredencoding(False) or "latin-1"
+    try:
+        return raw.decode(encoding, errors="replace")
+    except LookupError:
+        return raw.decode("utf-8", errors="replace")
+
+
+def _safe_pgexec(command: str, args: Sequence[str], **subprocess_kwargs: Any) -> str:
+    """Run a bundled PostgreSQL program and return its stdout as text.
+
+    Takes the place of ``pixeltable_pgserver.pgexec.pgexec``, which reads the
+    child's output back through a strict UTF-8 text file. On Windows that output
+    is in the ANSI code page, so the read raised ``UnicodeDecodeError`` for any
+    non-ASCII user name or path, and the decode error replaced the real result:
+    a cluster initdb had created was reported as a failure, and a genuine failure
+    lost its message. Here the output is captured as bytes and decoded by
+    :func:`decode_child_output`, and a failure carries both streams.
+
+    Output goes to temporary files rather than pipes for the reason the library
+    gives: ``pg_ctl start`` leaves a postmaster holding inherited handles, and a
+    pipe that never closes hangs ``subprocess.run``.
+    """
+    import tempfile
+
+    from pixeltable_pgserver.utils import POSTGRES_BIN_PATH
+
+    if os.name == "nt":
+        command += ".exe"
+    cmdline = (str(Path(POSTGRES_BIN_PATH) / command), *args)
+    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+        try:
+            subprocess.run(cmdline, check=True, stdout=out, stderr=err, **subprocess_kwargs)  # noqa: S603
+        except subprocess.CalledProcessError as exc:
+            out.seek(0)
+            err.seek(0)
+            raise subprocess.CalledProcessError(
+                exc.returncode,
+                exc.cmd,
+                output=decode_child_output(out.read()),
+                stderr=decode_child_output(err.read()),
+            ) from None
+        out.seek(0)
+        return decode_child_output(out.read())
+
+
+def _install_safe_pgexec() -> None:
+    """Point pixeltable-pgserver at :func:`_safe_pgexec`, at both of its bindings.
+
+    ``postgres_server`` imports the function by name, so replacing it on the
+    ``pgexec`` module alone would leave pixeltable's own initdb, ``pg_ctl start``
+    and ``pg_ctl stop`` on the strict decoder. Idempotent.
+    """
+    try:
+        import pixeltable_pgserver.pgexec as pgexec_module
+        import pixeltable_pgserver.postgres_server as server_module
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("pixeltable-pgserver not importable, pgexec left as is: %r", exc)
+        return
+    pgexec_module.pgexec = _safe_pgexec  # type: ignore[assignment]
+    server_module.pgexec = _safe_pgexec  # type: ignore[attr-defined]
+
+
+def _child_failure_text(exc: BaseException) -> str:
+    """The stderr (or stdout) a failed PostgreSQL program left, trimmed, or ``""``."""
+    for stream in (getattr(exc, "stderr", None), getattr(exc, "output", None)):
+        text = decode_child_output(stream) if isinstance(stream, bytes) else stream
+        if isinstance(text, str) and text.strip():
+            return text.strip()[-600:]
+    return ""
+
+
+#: Written into the data directory when the cluster has been placed elsewhere.
+#:
+#: Holds the absolute path of the cluster as UTF-8 text, so the desktop launcher,
+#: which looks for ``postmaster.pid`` before it tidies old extractions, finds the
+#: cluster where it actually is.
+PGDATA_POINTER_NAME = "pgdata.location"
+
+
+def _relocated_pgdata(default: Path) -> Path | None:
+    r"""Where a cluster goes when its natural home is not an ASCII path, if anywhere.
+
+    ``%ProgramData%\OpenConstructionERP\clusters\<key>\pgdata``, where the key is
+    a hash of the data directory, so it is the same answer on every call and for
+    every caller without anything having to exist first. The 8.3 short name of
+    the data directory was considered and not used: it exists only after the
+    directory does, can be switched off per volume, and is generated in the OEM
+    code page, so on a Chinese install a short name can itself be ``田田``.
+    """
+    import hashlib
+
+    base = os.environ.get("PROGRAMDATA") or os.environ.get("ALLUSERSPROFILE") or r"C:\ProgramData"
+    if not base.isascii():
+        return None
+    key_source = os.path.normcase(os.path.abspath(str(default.parent)))
+    key = hashlib.sha256(key_source.encode("utf-8")).hexdigest()[:16]
+    return Path(base) / "OpenConstructionERP" / "clusters" / key / "pgdata"
+
+
+def _cluster_has_run(pgdata: Path) -> bool:
+    """Whether a postmaster has ever started on ``pgdata``.
+
+    ``postmaster.opts`` is written by the postmaster when it starts and never by
+    initdb's single-user bootstrap. ``PG_VERSION`` and ``global/pg_control`` do
+    not answer this: both exist after an initdb that died in post-bootstrap,
+    which is the debris the reporting machine was left with.
+    """
+    return (pgdata / "postmaster.opts").is_file()
+
+
+def cluster_path_must_be_ascii() -> bool:
+    """Whether the bundled PostgreSQL needs its cluster on an ASCII path here.
+
+    True on Windows only. A function for the reason :func:`path_limit_applies`
+    gives: it is the seam the tests patch, because patching ``os.name`` makes
+    ``pathlib`` build a ``WindowsPath`` on Linux and macOS, which raises.
+    """
+    return os.name == "nt"
+
+
+def resolve_pgdata(data_dir: Path | str) -> Path:
+    """The cluster directory for ``data_dir``: ``<data_dir>/pgdata`` unless Windows cannot use it.
+
+    PostgreSQL on Windows is a narrow-character program. A data directory whose
+    path is not ASCII either cannot be represented in the ANSI code page at all
+    (initdb fails with ``could not create directory ".../??"``) or, where it can,
+    as in GBK, is fragile enough to end initdb in post-bootstrap. A Windows
+    account named ``田田`` has such a path by default, so on Windows a non-ASCII
+    ``<data_dir>/pgdata`` moves to the ASCII location from
+    :func:`_relocated_pgdata`.
+
+    A cluster that has already run where it is stays there: it is somebody's
+    data and it demonstrably works. Anything else on that path, an empty
+    directory or initdb debris, is left alone and simply no longer used.
+    """
+    default = Path(data_dir).expanduser() / "pgdata"
+    if not cluster_path_must_be_ascii() or str(default.absolute()).isascii():
+        return default
+    if _cluster_has_run(default):
+        return default
+    relocated = _relocated_pgdata(default)
+    return default if relocated is None else relocated
+
+
+def _restrict_to_current_user(directory: Path) -> None:
+    """Best effort: make a directory under ProgramData private to its owner.
+
+    ProgramData children inherit read access for every local user, and the
+    cluster holds the user's cost data. Grants full control to the current user
+    by SID, so a non-ASCII account name never has to survive a command line,
+    plus SYSTEM and Administrators, and drops the inherited entries.
+    """
+    import re
+
+    try:
+        who = subprocess.run(
+            ["whoami", "/user", "/fo", "csv", "/nh"],  # noqa: S607
+            capture_output=True,
+            timeout=15,
+            check=True,
+        )
+        match = re.search(r"S-1-[0-9-]+", decode_child_output(who.stdout))
+        if match is None:
+            return
+        grants: list[str] = []
+        for sid in (match.group(0), "S-1-5-18", "S-1-5-32-544"):
+            grants += ["/grant:r", f"*{sid}:(OI)(CI)F"]
+        subprocess.run(  # noqa: S603
+            ["icacls", str(directory), "/inheritance:r", *grants],  # noqa: S607
+            capture_output=True,
+            timeout=30,
+            check=True,
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("could not restrict access to %s: %r", directory, exc)
+
+
+def _prepare_relocated_pgdata(data_dir: Path, pgdata: Path) -> None:
+    """Create the relocated cluster's parent once, lock it down, and leave a pointer."""
+    parent = pgdata.parent
+    try:
+        if not parent.exists():
+            parent.mkdir(parents=True, exist_ok=True)
+            _restrict_to_current_user(parent)
+        data_dir.mkdir(parents=True, exist_ok=True)
+        (data_dir / PGDATA_POINTER_NAME).write_text(str(pgdata), encoding="utf-8")
+    except OSError as exc:
+        logger.warning("could not prepare the cluster location %s: %r", pgdata, exc)
 
 
 #: Longest fully qualified path a program without long-path support can open.
@@ -1602,14 +1833,13 @@ def _bundled_major() -> str | None:
         completed = subprocess.run(  # noqa: S603
             [str(exe), "--version"],
             capture_output=True,
-            text=True,
             timeout=15,
             check=True,
         )
     except Exception as exc:  # noqa: BLE001
         logger.debug("could not read the bundled PostgreSQL version from %s: %r", exe, exc)
         return None
-    tokens = completed.stdout.strip().split()
+    tokens = decode_child_output(completed.stdout).strip().split()
     if not tokens:
         return None
     return _postgres_major(tokens[-1])
@@ -1842,11 +2072,7 @@ def _pre_initialize_cluster(pgdata: Path) -> bool:
     except OSError:
         pass  # Cannot measure — proceed and let initdb fail if the disk is full.
 
-    try:
-        from pixeltable_pgserver.pgexec import pgexec
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("could not import pixeltable pgexec for pre-init: %r", exc)
-        return False
+    pgexec = _safe_pgexec
 
     # Pre-flight probe: run ``initdb --version`` before the real initdb. This
     # catches the case where the binary is quarantined by antivirus, deleted, or
@@ -1882,8 +2108,10 @@ def _pre_initialize_cluster(pgdata: Path) -> bool:
         pgexec("initdb", _initdb_args(pgdata))
     except Exception as exc:  # noqa: BLE001
         logger.warning(
-            "pre-initialising embedded PostgreSQL with --locale=C failed; falling back to pixeltable's own initdb: %r",
+            "pre-initialising embedded PostgreSQL with --locale=C failed; falling back to pixeltable's own "
+            "initdb: %r; initdb said: %s",
             exc,
+            _child_failure_text(exc) or "(nothing)",
         )
         return False
     logger.info("pre-initialised embedded PostgreSQL cluster (locale=C) at %s", pgdata)

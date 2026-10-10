@@ -958,3 +958,9 @@ class ProjectTypeOut(BaseModel):
     params: list[ProjectParamOut] = Field(default_factory=list)
     packages: list[WorkPackageOut] = Field(default_factory=list)
     default_unit_system: str = "metric"
+
+
+class SemanticSearchSwitch(BaseModel):
+    """Body of ``PUT /embedding-model/enabled``."""
+
+    enabled: bool

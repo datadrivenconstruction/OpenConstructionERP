@@ -463,10 +463,12 @@ def _date_from(text: str) -> str | None:
 # ── File name ─────────────────────────────────────────────────────────────
 
 _FILE_REVISION = re.compile(
-    r"(?:^|[_\-\s.])(?i:REV(?:ISIONE|ISION)?[_\-\s.]?(?P<rev>[A-Z]?\d{1,3}|[A-Z]{1,2})|R(?P<r>\d{1,3}))(?=$|[_\-\s.])"
+    r"(?:^|[_\-\s.])(?i:REV(?:ISIONE|ISION)?[_\-\s.]?(?P<rev>[A-Z]?\d{1,3}|(?-i:[A-Z]{1,2}|[a-z]))|R(?P<r>\d{1,3}))"
+    r"(?=$|[_\-\s.])"
 )
 _FILE_NUMBER = re.compile(
-    r"^(?P<number>[A-Za-z]{1,4}(?:[_\-.][A-Za-z]{1,4})*[_\-.]?\d{1,4}(?:[_\-.]\d{1,4})?|\d{1,4})(?=$|[_\-\s])"
+    r"^(?P<number>(?i:TAVOLA|ELABORATO|DISEGNO|BLATT|PLANO|PLANCHE)[_\-.]\d{1,4}(?:[_\-.]\d{1,4})?"
+    r"|[A-Za-z]{1,4}(?:[_\-.][A-Za-z]{1,4})*[_\-.]?\d{1,4}(?:[_\-.]\d{1,4})?|\d{1,4})(?=$|[_\-\s])"
 )
 # "ARC PT 01 Pianta": the same code with spaces for separators, as Italian and
 # German offices name files. Spaces also separate ordinary words, so this one

@@ -15,6 +15,7 @@ import { WebhookLeads } from './WebhookLeads';
 import { DesktopServerCard } from './DesktopServerCard';
 import { TextSizeSetting } from './TextSizeSetting';
 import VectorStatusCard from './VectorStatusCard';
+import SemanticModelSettings from './SemanticModelSettings';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Eye,
@@ -58,6 +59,7 @@ import { DashboardLayoutManager } from '@/features/dashboard/DashboardLayoutMana
 import { UpdateInlineNotice } from '@/shared/ui/UpdateChecker';
 import { apiGet, apiPatch, apiPost, apiPut, apiDelete } from '@/shared/lib/api';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -786,10 +788,19 @@ export function AIConfigurationCard() {
                     defaultValue:
                       'Only needed when your endpoint asks for a bearer token. It is encrypted and stored securely. Clear the field and save to remove it.',
                   })
-                : t('settings.ai_key_hint', {
-                    defaultValue: 'Your API key is encrypted and stored securely. It is never shared.',
+                : t('settings.ai_key_hint_provider', {
+                    defaultValue:
+                      'Your key is stored encrypted on your server. When you use an AI feature, the text of that request goes to this provider and its own terms apply.',
                   })}
             </p>
+            {selectedProvider === 'openrouter' && (
+              <p className="mt-1 text-xs text-content-tertiary">
+                {t('settings.ai_openrouter_attribution', {
+                  defaultValue:
+                    'Requests to OpenRouter carry a header that attributes the usage to this application. Your key, your account and the OpenRouter terms still apply.',
+                })}
+              </p>
+            )}
           </div>
           )}
 
@@ -2033,7 +2044,7 @@ export function SettingsPage() {
                 />
                 <CardContent>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-                    {SUPPORTED_LANGUAGES.map((lang) => {
+                    {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
                       const isActive = i18n.language === lang.code;
                       return (
                         <button
@@ -2095,12 +2106,15 @@ export function SettingsPage() {
             <>
               <div className="lg:col-span-2">
                 <InfoHint
-                  text={t('settings.ai_guidance', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) require an API key. Anthropic Claude is recommended for best accuracy. Keys are stored encrypted and never leave your server.' })}
+                  text={t('settings.ai_guidance_provider', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) need an AI provider. Keys are stored encrypted on your server, and the text of each AI request goes to the provider you choose. Choose a local model to keep that text on your own network.' })}
                 />
               </div>
               <AIConfigurationCard />
               <div className="lg:col-span-2">
                 <VectorStatusCard />
+              </div>
+              <div className="lg:col-span-2">
+                <SemanticModelSettings />
               </div>
             </>
           )}

@@ -22,13 +22,13 @@ from pathlib import Path
 
 import pytest
 import pytest_asyncio
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.documents import service as documents_service
 from app.modules.documents.models import Document, Sheet
-from app.modules.documents.schemas import SheetUpdate
+from app.modules.documents.schemas import SheetBulkUpdate, SheetUpdate
 from app.modules.documents.service import SheetService
 from app.modules.projects.models import Project
 from app.modules.users.models import User
@@ -283,3 +283,36 @@ async def test_a_current_state_set_by_hand_that_the_restack_agrees_with_is_no_co
     assert (await _reload(session, older.id)).is_current is False
     assert (await _reload(session, newer.id)).is_current is True
     assert summary["current_conflicts"] == []
+
+
+async def test_a_bulk_edit_sets_the_shared_fields_on_every_sheet_as_hand_edits(session: AsyncSession) -> None:
+    """One discipline and issue date for a whole set, recorded so a re-read keeps them."""
+    project_id, user_id = await _seed_project(session)
+    first = await _split(session, project_id, user_id, ["SHEET NO: A-101", "REV A"])
+    second = await _split(session, project_id, user_id, ["SHEET NO: A-102", "REV A"])
+
+    request = SheetBulkUpdate(
+        project_id=project_id, sheet_ids=[first.id, second.id], discipline="Structural", revision_date="2026-03-12"
+    )
+    rows = await SheetService(session).bulk_update_sheets(project_id, request.sheet_ids, request.changes())
+
+    assert [row.discipline for row in rows] == ["Structural", "Structural"]
+    assert all(row.revision_date is not None and row.revision_date.date().isoformat() == "2026-03-12" for row in rows)
+    assert all(row.metadata_["manually_edited"] == ["discipline", "revision_date"] for row in rows)
+    assert [row.sheet_number for row in rows] == ["A-101", "A-102"]
+
+
+async def test_a_bulk_edit_naming_a_sheet_of_another_project_changes_nothing(session: AsyncSession) -> None:
+    """A foreign id fails the whole request before any sheet is written."""
+    project_id, user_id = await _seed_project(session)
+    other_project_id, other_user_id = await _seed_project(session)
+    own = await _split(session, project_id, user_id, ["SHEET NO: A-101", "REV A"])
+    foreign = await _split(session, other_project_id, other_user_id, ["SHEET NO: A-101", "REV A"])
+
+    with pytest.raises(HTTPException) as caught:
+        await SheetService(session).bulk_update_sheets(
+            project_id, [own.id, foreign.id], SheetUpdate(discipline="Structural")
+        )
+
+    assert caught.value.status_code == 404
+    assert (await _reload(session, own.id)).discipline != "Structural"

@@ -13,7 +13,8 @@
     "momrah.zoning_classification_assigned": "ERROR",
     "momrah.balady_permit_attachments_complete": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "momrah.zoning_classification_assigned",
     "momrah.setback_front_compliant",
     "momrah.setback_side_compliant",
@@ -29,5 +30,6 @@
     "momrah.contractor_grade_meets_contract_value_threshold",
     "momrah.soil_investigation_report_attached",
     "momrah.amanah_master_plan_reference_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

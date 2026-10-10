@@ -277,6 +277,12 @@ export function RecordingProtocolCard({ projectId }: { projectId: string }) {
                 'Upload an audio or video recording of a call, meeting, or site conversation. We draft a full protocol you review before saving.',
             })}
           </p>
+          <p className="mt-1 text-xs text-content-tertiary">
+            {t('ai.transcription_goes_to_openai', {
+              defaultValue:
+                'Audio is transcribed by OpenAI with your OpenAI key, whatever AI provider you selected in Settings. Recordings are kept for 90 days by default.',
+            })}
+          </p>
         </div>
 
         <input

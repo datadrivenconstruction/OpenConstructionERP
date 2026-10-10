@@ -5,7 +5,8 @@
   "jurisdiction": "ES",
   "description": "Validates structural concrete specifications against the Instruccion de Hormigon Estructural (EHE-08). Checks exposure class (I, IIa/b, IIIa/b/c, IV, Qa/b/c), minimum concrete strength for durability, cover requirements, reinforcement steel type (B 400 S / B 500 S / B 500 SD), execution control level (normal / intenso / estadistico), and that the plan de control de calidad (quality control plan) is referenced.",
   "applies_to": ["boq", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ehe.clase_exposicion_set",
     "ehe.resistencia_caracteristica_specified",
     "ehe.resistencia_minima_for_durability",
@@ -18,6 +19,7 @@
     "ehe.hormigon_autocompactante_if_applicable",
     "ehe.prefabricados_marcado_ce_if_applicable"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Ministerio de Transportes y Movilidad Sostenible",
   "publication_year": 2008
 }

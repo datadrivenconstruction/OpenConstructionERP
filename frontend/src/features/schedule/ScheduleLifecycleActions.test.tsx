@@ -103,12 +103,27 @@ describe('reversible archive actions', () => {
   });
 });
 
-describe('permanent deletion is a separate administrator action', () => {
-  it.each(['editor', 'manager', 'viewer'])('never offers purge to %s', (role) => {
+describe('permanent deletion is for an administrator or the project owner', () => {
+  it.each(['editor', 'manager', 'viewer'])('never offers purge to a %s the server refuses', async (role) => {
     useAuthStore.setState({ userRole: role });
+    vi.mocked(scheduleApi.getDeleteImpact).mockResolvedValue({ activity_count: 3, baseline_count: 0,
+      payment_milestone_count: 0, can_delete: false, blocked_reason: 'permission_denied' });
     view({ status: 'archived' });
+    await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.queryByRole('button', { name: /Permanently delete/ })).toBeNull();
     if (role === 'viewer') expect(screen.queryByRole('button', { name: /Restore/ })).toBeNull();
+  });
+
+  it('offers purge to an editor who owns the project, once the server says so', async () => {
+    useAuthStore.setState({ userRole: 'editor' });
+    view({ status: 'archived' });
+    expect(await screen.findByRole('button', { name: 'Permanently delete Contract plan' })).toBeInTheDocument();
+  });
+
+  it('tells on the archive button that the owner can delete after archiving', () => {
+    view();
+    expect(screen.getByRole('button', { name: 'Archive Contract plan' }).getAttribute('title'))
+      .toMatch(/project owner can delete it permanently/);
   });
 
   it('does not offer an administrator purge on a non-archived schedule', () => {

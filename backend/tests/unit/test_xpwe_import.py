@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import tracemalloc
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from decimal import Decimal
 
 import pytest
@@ -752,7 +752,7 @@ def test_parsing_does_not_hold_the_event_loop() -> None:
     """The single worker keeps answering other requests while a large bill is read."""
     content = fx.large_bill(8 * 1024 * 1024)
 
-    async def run() -> tuple[float, float]:
+    async def watch(work: Awaitable[object]) -> tuple[float, float]:
         loop = asyncio.get_running_loop()
         gaps: list[float] = []
         done = asyncio.Event()
@@ -767,11 +767,20 @@ def test_parsing_does_not_hold_the_event_loop() -> None:
 
         tick = asyncio.create_task(ticker())
         started = loop.time()
-        await XpweImporter.parse(content, locale="en")
+        await work
         elapsed = loop.time() - started
         done.set()
         await tick
         return elapsed, max(gaps, default=elapsed)
 
-    elapsed, worst_gap = asyncio.run(run())
-    assert worst_gap < max(0.25, elapsed / 4), f"loop held for {worst_gap:.2f}s of a {elapsed:.2f}s parse"
+    async def run() -> tuple[float, float, float]:
+        elapsed, worst_gap = await watch(XpweImporter.parse(content, locale="en"))
+        # The same ticker over an idle loop for as long, so a loaded runner's
+        # own scheduling jitter is not read as the parser holding the loop.
+        _, idle_gap = await watch(asyncio.sleep(min(elapsed, 2.0)))
+        return elapsed, worst_gap, idle_gap
+
+    elapsed, worst_gap, idle_gap = asyncio.run(run())
+    assert worst_gap < max(0.25, elapsed / 4, 5 * idle_gap), (
+        f"loop held for {worst_gap:.2f}s of a {elapsed:.2f}s parse, idle jitter {idle_gap:.2f}s"
+    )

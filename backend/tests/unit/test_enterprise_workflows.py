@@ -66,6 +66,20 @@ async def _make_user(session: AsyncSession, *, role: str = "admin") -> uuid.UUID
     return uid
 
 
+async def _boq_id(session: AsyncSession, owner_id: uuid.UUID) -> uuid.UUID:
+    """A real bill in a fresh project, so a request has a record to target."""
+    from app.modules.boq.models import BOQ
+    from app.modules.projects.models import Project
+
+    project = Project(name="Approvals", owner_id=owner_id)
+    session.add(project)
+    await session.flush()
+    boq = BOQ(project_id=project.id, name="Bill")
+    session.add(boq)
+    await session.flush()
+    return boq.id
+
+
 # ── EW-001 — step-count cap ──────────────────────────────────────────────
 
 
@@ -149,7 +163,7 @@ async def test_two_step_workflow_approve_flow(session: AsyncSession) -> None:
 
     wf = await service.create_workflow(
         WorkflowCreate(
-            entity_type="invoice",
+            entity_type="boq",
             name="two-step",
             steps=[
                 {"name": "review", "action_type": "review", "role": "manager"},
@@ -162,8 +176,8 @@ async def test_two_step_workflow_approve_flow(session: AsyncSession) -> None:
     req = await service.submit_request(
         ApprovalRequestCreate(
             workflow_id=wf.id,
-            entity_type="invoice",
-            entity_id=str(uuid.uuid4()),
+            entity_type="boq",
+            entity_id=str(await _boq_id(session, admin_id)),
         ),
         user_id=str(admin_id),
     )
@@ -206,7 +220,7 @@ async def test_runtime_step_overflow_rejected(session: AsyncSession) -> None:
 
     wf = await service.create_workflow(
         WorkflowCreate(
-            entity_type="invoice",
+            entity_type="boq",
             name="loop-guard",
             steps=[{"name": "s1", "action_type": "approve", "role": "admin"}],
         ),
@@ -215,8 +229,8 @@ async def test_runtime_step_overflow_rejected(session: AsyncSession) -> None:
     req = await service.submit_request(
         ApprovalRequestCreate(
             workflow_id=wf.id,
-            entity_type="invoice",
-            entity_id=str(uuid.uuid4()),
+            entity_type="boq",
+            entity_id=str(await _boq_id(session, admin_id)),
         ),
         user_id=str(admin_id),
     )

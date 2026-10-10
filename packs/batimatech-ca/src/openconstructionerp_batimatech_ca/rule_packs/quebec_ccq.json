@@ -13,13 +13,5 @@
     "quebec_ccq.rbq_licence_required": "ERROR",
     "quebec_ccq.ccq_competency_card_required": "ERROR"
   },
-  "enables_rule_ids": [
-    "quebec_ccq.rbq_licence_required",
-    "quebec_ccq.rbq_subcategory_matches_scope",
-    "quebec_ccq.ccq_competency_card_required",
-    "quebec_ccq.collective_agreement_wage_rate_applied",
-    "quebec_ccq.contract_drafted_in_french",
-    "quebec_ccq.gst_qst_registration_present",
-    "quebec_ccq.cnesst_employer_account_present"
-  ]
+  "enables_rule_ids": []
 }

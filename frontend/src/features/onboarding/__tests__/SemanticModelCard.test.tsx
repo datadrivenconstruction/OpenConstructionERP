@@ -63,6 +63,14 @@ describe('SemanticModelCard', () => {
     expect(screen.getByText(/Search works without it/i)).toBeTruthy();
   });
 
+  it('states the size and purpose before anything is downloaded', async () => {
+    renderCard({ enabled: false });
+
+    await screen.findByRole('switch');
+    expect(screen.getByText(/470 MB/)).toBeTruthy();
+    expect(screen.getByText(/only when you switch this on/i)).toBeTruthy();
+  });
+
   it('hides the toggle where an operator has switched the download off', async () => {
     // The production unit sets OE_DOWNLOAD_EMBEDDING_MODEL=0, which refuses a
     // click too. Leaving the switch on screen there would take the tick and

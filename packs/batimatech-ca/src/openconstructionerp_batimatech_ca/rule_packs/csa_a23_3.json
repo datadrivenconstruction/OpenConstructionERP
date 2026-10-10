@@ -10,14 +10,5 @@
   "description": "Validates that the structural concrete design package referenced by the project conforms to CSA A23.3 limit-states design: load combinations consistent with NBC 2020 Part 4, importance factor I assigned, material resistance factors applied, minimum concrete cover per exposure class, seismic detailing category, two-way slab punching shear and deflection serviceability checks are all documented.",
   "description_fr-CA": "Vérifie que le calcul structural du béton référencé par le projet est conforme au calcul aux états limites CSA A23.3 : combinaisons de charges cohérentes avec la Partie 4 du CNB 2020, coefficient d'importance I attribué, coefficients de tenue des matériaux appliqués, enrobage minimal du béton selon la classe d'exposition, catégorie de dimensionnement sismique, vérifications du poinçonnement et de la déflexion en service des dalles bidirectionnelles sont tous documentés.",
   "severity_overrides": {},
-  "enables_rule_ids": [
-    "csa_a23_3.load_combinations_consistent_with_nbc2020_part4",
-    "csa_a23_3.importance_factor_i_assigned",
-    "csa_a23_3.material_resistance_factors_applied",
-    "csa_a23_3.minimum_cover_per_exposure_class",
-    "csa_a23_3.seismic_detailing_category_assigned",
-    "csa_a23_3.punching_shear_check_documented",
-    "csa_a23_3.deflection_serviceability_check_documented",
-    "csa_a23_3.development_length_check_documented"
-  ]
+  "enables_rule_ids": []
 }

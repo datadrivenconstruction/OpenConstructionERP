@@ -8,7 +8,7 @@ No business logic - pure data access.
 
 import json
 import uuid
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
 from sqlalchemy import Row, RowMapping, Text, any_, cast, delete, func, select, update
 from sqlalchemy.dialects.postgresql import array as pg_array
@@ -910,9 +910,11 @@ class MarkupRepository:
         stmt = delete(BOQMarkup).where(BOQMarkup.id == markup_id)
         await self.session.execute(stmt)
 
-    async def delete_all_for_boq(self, boq_id: uuid.UUID) -> None:
-        """Delete all markups for a BOQ (used before applying defaults)."""
+    async def delete_all_for_boq(self, boq_id: uuid.UUID, *, keep: Sequence[uuid.UUID] = ()) -> None:
+        """Delete all markups for a BOQ (used before applying defaults), except the ids in ``keep``."""
         stmt = delete(BOQMarkup).where(BOQMarkup.boq_id == boq_id)
+        if keep:
+            stmt = stmt.where(BOQMarkup.id.not_in(list(keep)))
         await self.session.execute(stmt)
 
     async def get_max_sort_order(self, boq_id: uuid.UUID) -> int:

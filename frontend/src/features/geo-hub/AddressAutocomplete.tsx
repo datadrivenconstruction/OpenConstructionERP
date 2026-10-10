@@ -34,6 +34,7 @@ import { ApiError } from '@/shared/lib/api';
 
 import { geocodeSuggest } from './api';
 import type { GeocodeSuggestion } from './types';
+import { GeocodingConsentPrompt } from './GeocodingConsent';
 
 export interface AddressAutocompleteSelection {
   display_name: string;
@@ -354,6 +355,7 @@ export function AddressAutocomplete({
 
   return (
     <div className="relative w-full">
+      <GeocodingConsentPrompt />
       <div className="relative">
         <Search
           size={14}

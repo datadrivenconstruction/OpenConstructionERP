@@ -182,6 +182,40 @@ def ensure_wide_version_table(connection: Connection) -> bool:
         return False
 
 
+def _alembic_ini() -> Path:
+    """Where ``alembic.ini`` sits when the install carries the migration tree.
+
+    ``app/core/x.py`` -> ``app/core`` -> ``app`` -> the directory holding
+    ``alembic.ini`` (the repo's ``backend/``, or the wheel's install root).
+    """
+    return Path(__file__).resolve().parent.parent.parent / "alembic.ini"
+
+
+def migration_tree_shipped() -> bool:
+    """Whether this install carries ``alembic.ini`` and so can ever stamp a revision.
+
+    The desktop bundle does not, on purpose (see
+    ``tests/unit/test_desktop_spec_ships_wheel_data.py``). There every database
+    is unstamped whatever its history, because nothing in that bundle can write
+    a revision.
+    """
+    return _alembic_ini().is_file()
+
+
+def arrived_populated_unstamped_answer(sync_connection: Connection) -> bool | None:
+    """:func:`database_is_populated_but_unstamped`, or ``None`` where it tells nothing.
+
+    On an install that ships no migration tree every populated database is
+    unstamped, so a True there says nothing about this database's history, and
+    the remedy it asks for, running the migrations, does not exist in that
+    install. ``None`` is the answer for a question that could not be put, which
+    is what ``/api/health`` already reads as not degraded.
+    """
+    if not migration_tree_shipped():
+        return None
+    return database_is_populated_but_unstamped(sync_connection)
+
+
 def database_is_populated_but_unstamped(sync_connection: Connection) -> bool:
     """Did this database arrive holding application tables with no revision recorded?
 
@@ -281,11 +315,9 @@ def stamp_head_if_unstamped(sync_connection: Connection, *, refuse_when_populate
             "stamping it."
         )
         return None
-    # ``app/core/x.py`` -> ``app/core`` -> ``app`` -> the directory holding
-    # ``alembic.ini`` (the repo's ``backend/``, or the wheel's install root).
-    ini = Path(__file__).resolve().parent.parent.parent / "alembic.ini"
-    if not ini.is_file():
+    if not migration_tree_shipped():
         return None
+    ini = _alembic_ini()
     script = ScriptDirectory.from_config(Config(str(ini)))
     mig_ctx.stamp(script, "heads")
     # ``get_heads`` and not ``get_current_head``. The stamp above is already

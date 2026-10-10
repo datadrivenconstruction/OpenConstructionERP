@@ -771,6 +771,14 @@ export const aiEstimatorApi = {
    *  the background on the server and this never waits for it. */
   installEmbeddingModel: () =>
     call<EmbeddingModelStatus>('/embedding-model/install', { method: 'POST' }),
+
+  /** Turn semantic search on or off for the whole installation (admin only).
+   *  Turning it on also starts the model download when it is missing. */
+  setSemanticSearchEnabled: (enabled: boolean) =>
+    call<EmbeddingModelStatus>('/embedding-model/enabled', {
+      method: 'PUT',
+      body: JSON.stringify({ enabled }),
+    }),
 };
 
 // ── Semantic-search encoder ───────────────────────────────────────────
@@ -785,7 +793,9 @@ export type EmbeddingModelState =
   | 'downloading'
   | 'failed'
   | 'ready'
-  | 'not_requested';
+  | 'not_requested'
+  /** Semantic search is switched off for this installation (the default). */
+  | 'disabled';
 
 export interface EmbeddingModelStatus {
   state: EmbeddingModelState;
@@ -809,6 +819,15 @@ export interface EmbeddingModelStatus {
    */
   locked: boolean;
   message: string;
+  /** The installation-wide semantic search switch. Off by default. */
+  semantic_enabled?: boolean;
+  /** The switch is fixed by OE_SEMANTIC_SEARCH and cannot be changed here. */
+  semantic_locked?: boolean;
+  /** Free memory (RAM plus page file) right now; null when unknown. */
+  available_memory_mb?: number | null;
+  /** Free memory the model needs before it is allowed to load. */
+  required_memory_mb?: number;
+  memory_low?: boolean;
   /** True when this call started a transfer (install endpoint only). */
   started?: boolean;
   [k: string]: unknown;

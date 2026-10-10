@@ -4,7 +4,8 @@
   "standard": "IEC 61400-1:2019 (Design requirements for wind turbines) + IEC 61400-22:2010 (Conformity testing & certification) + IEC 61400-24:2019 (Lightning protection)",
   "jurisdiction": "INTL",
   "description": "Baseline wind-energy EPC rule pack. Validates the minimum dossier items expected on any wind project: turbine class assigned (IEC class I / II / III / S), site wind resource assessment present, design load case documented, foundation load envelope set, lightning protection class set, grid-code compliance documented, commissioning protocol attached. For the deep IEC 61400 family rules (turbulence category, 12-month met mast, micrositing wake loss, type / project certificate, ZVI, shadow flicker, etc.) enable the iec_61400_wind_full rule pack alongside.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "iec61400.turbine_class_assigned",
     "iec61400.site_wind_assessment_complete",
     "iec61400.design_load_case_documented",
@@ -12,5 +13,6 @@
     "iec61400.lightning_protection_class_set",
     "iec61400.grid_code_compliance_documented",
     "iec61400.commissioning_protocol_attached"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

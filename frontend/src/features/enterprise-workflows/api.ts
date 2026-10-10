@@ -127,6 +127,11 @@ export async function fetchWorkflows(params?: {
   return page.items;
 }
 
+/** Record types a route may target, read from the server's approval registry. */
+export async function fetchEntityTypes(): Promise<string[]> {
+  return apiGet<string[]>('/v1/enterprise-workflows/entity-types/');
+}
+
 export async function fetchWorkflow(id: string): Promise<Workflow> {
   return apiGet<Workflow>(`/v1/enterprise-workflows/${id}`);
 }

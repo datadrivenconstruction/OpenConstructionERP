@@ -7,20 +7,7 @@
   "severity_default": "error",
   "category": "compliance",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "formwork.din18218.max_pressure_check",
-    "formwork.din18218.pour_rate_within_bounds",
-    "formwork.din18218.consistency_class_required",
-    "formwork.din18218.consistency_class_valid",
-    "formwork.din18218.element_height_vs_pressure",
-    "formwork.din18218.temperature_factor_applied",
-    "formwork.din18218.retarder_factor_applied",
-    "formwork.din18218.scc_self_compacting_full_hydrostatic",
-    "formwork.din18218.pour_speed_h_within_5m_per_hour",
-    "formwork.din18218.formwork_system_capacity_match",
-    "formwork.din18218.pressure_curve_documented",
-    "formwork.din18218.hardening_time_t_E_logged"
-  ],
+  "enables_rule_ids": [],
   "parameters": {
     "consistency_classes": ["F1", "F2", "F3", "F4", "F5", "F6", "SCC"],
     "max_pour_speed_m_per_h": {

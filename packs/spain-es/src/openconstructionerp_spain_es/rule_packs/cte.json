@@ -5,7 +5,8 @@
   "jurisdiction": "ES",
   "description": "Validates project documentation against the Codigo Tecnico de la Edificacion (CTE). Checks compliance documentation for DB-SE (structural safety), DB-SI (fire safety), DB-SUA (safety of use and accessibility), DB-HS (health / hygiene), DB-HR (noise protection), and DB-HE (energy saving). Verifies that the declared climate zone and building use are consistent with the applicable CTE requirements.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "cte.building_use_classified",
     "cte.climate_zone_declared",
     "cte.db_se_structural_safety_documented",
@@ -21,6 +22,7 @@
     "cte.db_he1_demanda_energetica_limit",
     "cte.certificado_energetico_referenced"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Ministerio de Transportes y Movilidad Sostenible",
   "publication_year": 2019
 }

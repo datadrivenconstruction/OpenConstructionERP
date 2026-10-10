@@ -7,7 +7,8 @@
   "description": "Enables the checks on retention held by a governmental entity. One contract-value threshold governs: below a 5 million dollar contract price the entity may not withhold more than 10 percent, and at or above it the cap falls to 5 percent, with no line of a schedule of values carrying a higher rate than the contract cap. Work related to a dam stays at 10 percent whatever the price. Retainage exceeding 5 percent of the periodic payments must be deposited in an interest-bearing account. The subchapter does not reach a contract whose total price estimate at execution is under 400 thousand dollars, contracts of the state transportation department, or contracts executed before 31 August 1981, so the rules check that a project below the floor is not silently assumed to be capped.",
   "issuer": "Texas Legislature",
   "thresholds_referenced": "Contract price 5,000,000 US dollars switches the cap from 10 to 5 percent; the subchapter floor is 400,000 US dollars",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "tx_retainage.contract_value_recorded",
     "tx_retainage.cap_matches_contract_value_band",
     "tx_retainage.no_schedule_line_above_contract_cap",
@@ -17,5 +18,6 @@
     "tx_retainage.transportation_department_exemption_flagged",
     "tx_retainage.subcontractor_retainage_not_exceeding_prime_rate",
     "tx_retainage.release_recorded_against_completion"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

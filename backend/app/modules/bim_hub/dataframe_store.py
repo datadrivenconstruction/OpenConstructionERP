@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+import os
 import re
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -250,7 +251,7 @@ def write_dataframe(
     # but the literal string "None" for materials).
     schema = pa.schema([(k, pa.string()) for k in all_keys])
     metadata: dict[bytes, bytes] = {}
-    if labels:
+    if isinstance(labels, dict) and labels:
         kept = {k: str(labels[k]) for k in all_keys if labels.get(k)}
         if kept:
             metadata[_LABELS_METADATA_KEY] = json.dumps(kept, ensure_ascii=False).encode("utf-8")
@@ -575,6 +576,31 @@ def _duckdb_error_message(exc: Exception) -> str:
     return f"The property search could not run: {first}"
 
 
+# DuckDB defaults to 80% of system RAM and one thread per core. On the 3 GB
+# floor that lets one property search starve PostgreSQL, so every connection
+# here is capped. Override with OE_BIM_DUCKDB_MEMORY_LIMIT / OE_BIM_DUCKDB_THREADS.
+DEFAULT_DUCKDB_MEMORY_LIMIT = "256MB"
+DEFAULT_DUCKDB_THREADS = 2
+# Rows per Arrow batch on the pyarrow paths, so a 1000-column sidecar is
+# walked in slices instead of materialised as one Python list.
+_ARROW_BATCH_ROWS = 8192
+
+
+def _duckdb_config() -> dict[str, Any]:
+    """Memory and thread caps applied to every DuckDB connection in this module."""
+    memory_limit = os.environ.get("OE_BIM_DUCKDB_MEMORY_LIMIT", "").strip() or DEFAULT_DUCKDB_MEMORY_LIMIT
+    try:
+        threads = int(os.environ.get("OE_BIM_DUCKDB_THREADS", "") or DEFAULT_DUCKDB_THREADS)
+    except ValueError:
+        threads = DEFAULT_DUCKDB_THREADS
+    return {"memory_limit": memory_limit, "threads": max(1, threads)}
+
+
+def _duckdb_connect(duckdb: Any) -> Any:
+    """Open an in-memory DuckDB connection with the module's resource caps."""
+    return duckdb.connect(config=_duckdb_config())
+
+
 def _duckdb_query(
     duckdb: Any,
     parquet_path: Path,
@@ -588,7 +614,7 @@ def _duckdb_query(
     where = " AND ".join(where_clauses) if where_clauses else "1=1"
     sql = f"SELECT {select_clause} FROM read_parquet(?) WHERE {where} LIMIT ?"
 
-    conn = duckdb.connect()
+    conn = _duckdb_connect(duckdb)
     try:
         try:
             result = conn.execute(sql, [str(parquet_path), *params, limit]).fetchall()
@@ -654,14 +680,14 @@ def _fallback_pyarrow_query(
     read_cols: list[str] | None = None
     if columns:
         read_cols = list(dict.fromkeys([*columns, *(col for col, _op, _val in filters)]))
-    rows = pq.read_table(parquet_path, columns=read_cols).to_pylist()
-
     out: list[dict[str, Any]] = []
-    for row in rows:
-        if all(_row_matches(row.get(col), op, val) for col, op, val in filters):
-            out.append({c: row.get(c) for c in columns} if columns else row)
-            if len(out) >= limit:
-                break
+    # Batch-wise, stopping at ``limit``: the whole sidecar never becomes one list.
+    for batch in pq.ParquetFile(parquet_path).iter_batches(batch_size=_ARROW_BATCH_ROWS, columns=read_cols):
+        for row in batch.to_pylist():
+            if all(_row_matches(row.get(col), op, val) for col, op, val in filters):
+                out.append({c: row.get(c) for c in columns} if columns else row)
+                if len(out) >= limit:
+                    return [_json_safe(r) for r in out]
     return [_json_safe(r) for r in out]
 
 
@@ -771,7 +797,7 @@ def column_value_counts_page(
         duckdb = None
 
     if duckdb is not None and column not in _duckdb_unaddressable(known):
-        conn = duckdb.connect()
+        conn = _duckdb_connect(duckdb)
         try:
             sql = (
                 f"SELECT CAST({_quote_ident(column)} AS VARCHAR) AS value, COUNT(*) AS count "
@@ -791,11 +817,12 @@ def column_value_counts_page(
 
     # Fallback: read just the one column via pyarrow.
     counts: dict[str, int] = {}
-    for cell in pq.read_table(parquet_path, columns=[column]).column(column).to_pylist():
-        if _as_text(cell) is None:
-            continue
-        key = str(cell)
-        counts[key] = counts.get(key, 0) + 1
+    for batch in pq.ParquetFile(parquet_path).iter_batches(batch_size=_ARROW_BATCH_ROWS, columns=[column]):
+        for cell in batch.column(0).to_pylist():
+            if _as_text(cell) is None:
+                continue
+            key = str(cell)
+            counts[key] = counts.get(key, 0) + 1
     ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
     return page([{"value": v, "count": c} for v, c in ordered[offset : offset + limit]], len(ordered))
 
@@ -884,10 +911,15 @@ def read_element_cells(
         if not columns:
             return {}, {}
         read = list(dict.fromkeys(columns.values()))
-        table = pq.read_table(parquet_path, columns=[id_column, *read])
-        row_ids = pc.utf8_trim_whitespace(pc.cast(table.column(id_column), pa.string()))
         wanted = pa.array(sorted({str(i).strip() for i in ids}), type=pa.string())
-        rows = table.filter(pc.is_in(row_ids, value_set=wanted)).to_pylist()
+        rows: list[dict[str, Any]] = []
+        # Filter each batch before converting, so only the wanted rows ever
+        # become Python objects.
+        for batch in pq.ParquetFile(parquet_path).iter_batches(
+            batch_size=_ARROW_BATCH_ROWS, columns=[id_column, *read]
+        ):
+            row_ids = pc.utf8_trim_whitespace(pc.cast(batch.column(0), pa.string()))
+            rows.extend(batch.filter(pc.is_in(row_ids, value_set=wanted)).to_pylist())
     except (OSError, pa.ArrowException) as exc:
         logger.warning("bim parquet: could not read cells from %s: %s", parquet_path, exc)
         return {}, {}

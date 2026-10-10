@@ -28,6 +28,13 @@ export interface MarkupRegion {
   /** Locale key and English default for a template with no fixed countries. */
   labelKey?: string;
   labelDefault?: string;
+  /**
+   * Locale key and English default for a one-line note on when to pick this
+   * template, shown under its name. Used where one market offers two stacks
+   * and the right one depends on where the bill's rates came from.
+   */
+  hintKey?: string;
+  hintDefault?: string;
 }
 
 const listsByLang = new Map<string, Intl.ListFormat | null>();

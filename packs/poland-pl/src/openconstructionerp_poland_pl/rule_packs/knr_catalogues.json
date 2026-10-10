@@ -5,7 +5,8 @@
   "jurisdiction": "PL",
   "description": "Validates cost estimates against the KNR (Katalog Nakladow Rzeczowych) and KNNR (Kosztorysowe Normy Nakladow Rzeczowych) norm catalogues. Checks that BOQ items reference valid KNR/KNNR catalogue entries, that labour norms (roboczogodziny, r-g), material consumption norms, and equipment norms follow the catalogue tables, and that the kosztorys (estimate) structure conforms to the investor estimate regulation.",
   "applies_to": ["estimate", "boq", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "knr.catalogue_reference_present",
     "knr.catalogue_entry_format_valid",
     "knr.labour_norm_rg_documented",
@@ -19,6 +20,7 @@
     "knr.analiza_cen_for_non_catalogue_items",
     "knr.edition_year_documented"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Ministerstwo Rozwoju i Technologii",
   "publication_year": 2024
 }

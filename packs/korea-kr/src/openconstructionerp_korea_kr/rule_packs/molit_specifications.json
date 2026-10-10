@@ -5,7 +5,8 @@
   "jurisdiction": "KR",
   "description": "Validates specifications and BOQ items against the MOLIT Standard Specifications for construction works. Checks that specification chapters reference the applicable standard sections for each trade, that measurement and payment rules follow MOLIT conventions, and that quality control provisions (pumjil gwalli) are documented per the standard framework.",
   "applies_to": ["boq", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "molit.specification_chapter_referenced",
     "molit.measurement_rules_per_trade",
     "molit.payment_rules_per_trade",
@@ -17,6 +18,7 @@
     "molit.quality_control_plan_present",
     "molit.safety_management_plan_present"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "MOLIT (Ministry of Land, Infrastructure and Transport)",
   "publication_year": 2024
 }

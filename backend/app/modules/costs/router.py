@@ -1708,13 +1708,7 @@ async def vector_region_stats() -> list[dict]:
             except Exception:
                 logger.debug("LanceDB table %s not found", COST_TABLE)
                 return []
-            df = tbl.to_pandas()
-            if "region" not in df.columns:
-                return []
-            counts = df.groupby("region").size().reset_index(name="count")
-            return [
-                {"region": r, "count": int(c)} for r, c in zip(counts["region"], counts["count"], strict=False) if r
-            ]
+            return _lancedb_region_counts(tbl)
         else:
             # For Qdrant, return total count only (per-region requires scroll)
             col = status.get("cost_collection")
@@ -1724,6 +1718,27 @@ async def vector_region_stats() -> list[dict]:
     except Exception:
         logger.debug("Vector stats query failed", exc_info=True)
         return []
+
+
+def _lancedb_region_counts(tbl: Any) -> list[dict[str, Any]]:
+    """Per-region row counts of a LanceDB cost table, without its vectors.
+
+    ``tbl.to_pandas()`` would materialise every row WITH its embedding (55k+
+    rows x 384+ floats per region pack) just to count a string column. This
+    projects the scan to ``region`` alone and counts in Arrow, so peak memory
+    is one string column. Output is sorted by region, empty regions dropped.
+    """
+    import pyarrow.compute as pc
+
+    if "region" not in tbl.schema.names:
+        return []
+    total = int(tbl.count_rows())
+    if total <= 0:
+        return []
+    regions = tbl.search().select(["region"]).limit(total).to_arrow().column("region")
+    counted = pc.value_counts(regions)
+    pairs = zip(counted.field("values").to_pylist(), counted.field("counts").to_pylist(), strict=True)
+    return [{"region": r, "count": int(c)} for r, c in sorted((r, c) for r, c in pairs if r)]
 
 
 @router.get("/vector/v3-status/")

@@ -35,6 +35,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from app.config import Settings
+from app.core.demo_accounts import is_reserved_mail_domain
 
 from .base import BackendName, DeliveryResult, EmailBackend, EmailMessage
 from .html_text import html_to_text as _html_to_text
@@ -86,6 +87,12 @@ class SmtpEmailBackend(EmailBackend):
                 message.to,
             )
             return DeliveryResult.failure(self.name, reason="smtp not configured")
+
+        if is_reserved_mail_domain(message.to):
+            # .invalid, .test, example.com and the like hold no mailbox, so the
+            # relay could only bounce or defer it against our sending account.
+            logger.warning("[email:smtp] not sending to %s - recipient domain is reserved", message.to)
+            return DeliveryResult.failure(self.name, reason="recipient domain is reserved, not deliverable")
 
         try:
             return await asyncio.to_thread(self._send_sync, message)

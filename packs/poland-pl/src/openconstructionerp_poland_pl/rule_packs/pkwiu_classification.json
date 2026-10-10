@@ -5,7 +5,8 @@
   "jurisdiction": "PL",
   "description": "Validates BOQ items against the PKWiU (Polska Klasyfikacja Wyrobow i Uslug) classification used in Polish public procurement and VAT determination. Checks that construction works items carry a valid PKWiU section F (Budownictwo) code, that the code format matches the PKWiU hierarchy, and that the VAT rate applied is consistent with the PKWiU classification (8% for residential construction services under certain conditions, 23% standard).",
   "applies_to": ["boq", "estimate", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "pkwiu.code_present_per_item",
     "pkwiu.code_format_valid",
     "pkwiu.section_f_construction_classification",
@@ -14,6 +15,7 @@
     "pkwiu.standard_vat_23_pct_default",
     "pkwiu.pkwiu_version_2015_or_later"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "GUS (Glowny Urzad Statystyczny)",
   "publication_year": 2015
 }

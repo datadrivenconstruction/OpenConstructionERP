@@ -5,7 +5,8 @@
   "jurisdiction": "JP",
   "description": "Validates cost estimates against the Sekisan Kijun (Public Works Estimation Standards) issued by MLIT. Checks that the direct construction cost, common temporary works, site overhead, general overhead and profit are structured according to the standard framework, that unit rates reference the published MLIT unit price tables, and that regional adjustment factors (chiiki hosei) are applied correctly.",
   "applies_to": ["estimate", "boq", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sekisan.cost_structure_framework_valid",
     "sekisan.chokusetsu_koji_hi_direct_cost_present",
     "sekisan.kyotsu_kari_setsubi_common_temp_present",
@@ -19,6 +20,7 @@
     "sekisan.kikai_keisan_equipment_rate_referenced",
     "sekisan.fiscal_year_edition_current"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "MLIT (Ministry of Land, Infrastructure, Transport and Tourism)",
   "publication_year": 2024
 }

@@ -10,7 +10,8 @@
   "severity_default": "warning",
   "category": "consistency",
   "locale_default": "de",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "bki.cost_per_m2_bgf_within_range",
     "bki.cost_per_m3_bri_within_range",
     "bki.kg300_share_within_typical_range",
@@ -27,6 +28,7 @@
     "bki.benchmark_source_referenced",
     "bki.kostenstand_documented"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "metadata": {
     "default_indices": {
       "kostenstand": "BKI 2024-IV",

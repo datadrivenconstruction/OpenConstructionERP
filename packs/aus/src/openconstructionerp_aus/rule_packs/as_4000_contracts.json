@@ -19,7 +19,8 @@
     "part_b": "Contractor-completed amendments and special conditions"
   },
   "applies_to": ["tendering", "contracts", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "as4000.contract_variant_selected",
     "as4000.formal_agreement_present",
     "as4000.annexure_part_a_complete",
@@ -41,5 +42,6 @@
     "as4000.termination_clause_39_compliant",
     "as4902.design_obligations_clause_2_set",
     "as4902.principals_project_requirements_attached"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

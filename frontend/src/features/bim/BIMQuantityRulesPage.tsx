@@ -147,6 +147,7 @@ import {
   type ValidateBIMResult,
 } from '@/features/requirements/api';
 import { fmtFixed, fmtList, getIntlLocale } from '@/shared/lib/formatters';
+import { TakeoffFlowSteps } from './TakeoffFlowSteps';
 
 // English fallbacks for the computed `bim_rules.confidence_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -4203,6 +4204,7 @@ export function BIMQuantityRulesPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
+        {activeTab === 'quantity_rules' && activeProjectId && <TakeoffFlowSteps />}
         {activeTab === 'rule_library' ? (
           /* Rule Library tab - works without an active project too
              because the seed packs are inlined; install button stays
@@ -4498,3 +4500,4 @@ export function BIMQuantityRulesPage() {
 }
 
 export default BIMQuantityRulesPage;
+

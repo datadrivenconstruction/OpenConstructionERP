@@ -7,7 +7,8 @@
   "description": "Enables the checks on retention held in California, which is now capped on both sides of the public and private line. On public work retention may not exceed 5 percent of the payment, and may exceed it only where the governing body, or the department director for a state entity, made a finding before the bid that the project is substantially complex, with the basis and the actual amount set out in the bid documents. On private work retention may not exceed 5 percent of each individual payment nor 5 percent of the total contract price in aggregate, for construction agreements entered into on or after 1 January 2026, running the whole chain from owner down to lower-tier subcontractor; it does not reach a purely residential building of four storeys or fewer, nor a downstream contract where bond requirements were noticed before bidding and the subcontractor then failed to furnish bonds from an admitted surety. Public retention is released within 60 days of completion with a 7 day pass-through at 2 percent a month, and private retention within 45 days. Because the private cap turns on the agreement date, the rules check that date before applying it.",
   "issuer": "California Legislature",
   "thresholds_referenced": "5 percent public and private; four storeys for the residential exclusion",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ca_retention.public_or_private_declared",
     "ca_retention.public_cap_five_percent_applied",
     "ca_retention.substantially_complex_finding_evidenced",
@@ -23,5 +24,6 @@
     "ca_retention.public_release_within_sixty_days",
     "ca_retention.subcontractor_share_passed_within_seven_days",
     "ca_retention.private_release_within_forty_five_days"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

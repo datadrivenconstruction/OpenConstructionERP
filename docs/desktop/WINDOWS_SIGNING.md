@@ -1,6 +1,6 @@
 # Windows code signing for the desktop app
 
-This guide explains how to turn on Authenticode code signing for the OpenConstructionERP Windows installers. Today the `.exe` ships unsigned, and Windows SmartScreen warns every person who runs it. The pipeline for signing is already written and already in the release workflow. Nothing in this document is active yet, because none of the credentials it needs exist. The only remaining step is a human creating one certificate and pasting five secrets and one variable into the repository settings. There is no code change to make afterwards.
+This guide explains how to turn on Authenticode code signing for the OpenConstructionERP Windows installers. Today the `.exe` ships unsigned, and Windows SmartScreen warns every person who runs it. The pipeline for signing is already written and already in the release workflow. Nothing in this document is active yet, because none of the credentials it needs exist. The only remaining step is a human opening an Artifact Signing account and pasting six secrets and one variable into the repository settings. There is no code change to make afterwards.
 
 This is a developer and maintainer document. If you are a user trying to install the app, read `docs/desktop/INSTALL.md` instead.
 
@@ -12,7 +12,7 @@ For where every published release actually stands across all four signature mech
 
 Windows 11 Smart App Control checks every executable file as the loader maps it, not only the file that was downloaded, and it offers no per-app exception. A file runs when Microsoft's cloud reputation service knows it, or when it carries a valid signature that chains to a CA in the Microsoft Trusted Root Program. Everything else is blocked. Smart App Control starts in an evaluation mode after a clean Windows install and later switches itself on, which is how a tester can run the app once and find it blocked on later starts with nothing changed on our side.
 
-The desktop sidecar is a PyInstaller onefile build that unpacks about 490 `.exe`, `.dll` and `.pyd` files at every start and runs them from `%LOCALAPPDATA%\OpenConstructionERP\extract`. Measured on a 17.x install, 409 of those 492 files carried no signature: every PostgreSQL program (`postgres.exe`, `initdb.exe`, `pg_ctl.exe` and the rest), and most of the native modules of scipy, scikit-learn, pandas, pyarrow and numpy. The launcher, the sidecar and the uninstaller were unsigned too. Signing only the installer, which is all the Key Vault job further down does, leaves every one of them blocked.
+The desktop sidecar is a PyInstaller onefile build that unpacks about 490 `.exe`, `.dll` and `.pyd` files at every start and runs them from `%LOCALAPPDATA%\OpenConstructionERP\extract`. Measured on a 17.x install, 409 of those 492 files carried no signature: every PostgreSQL program (`postgres.exe`, `initdb.exe`, `pg_ctl.exe` and the rest), and most of the native modules of scipy, scikit-learn, pandas, pyarrow and numpy. The launcher, the sidecar and the uninstaller were unsigned too. Signing only the installer would leave every one of them blocked.
 
 So the release workflow signs from the inside out, in three places, all skipped unless the Artifact Signing secrets below are set:
 
@@ -40,125 +40,59 @@ The timestamp authority is `http://timestamp.acs.microsoft.com`. Do not remove i
 
 To check a release, install it on a test machine and run, in PowerShell, `Get-ChildItem "$env:LOCALAPPDATA\OpenConstructionERP\extract" -Recurse -Include *.exe,*.dll,*.pyd | Get-AuthenticodeSignature | Group-Object Status`. Every file should report `Valid`.
 
-The Key Vault path described in the rest of this document signs only the installers after they are published. It is kept for a certificate bought from a CA, but on its own it does not satisfy Smart App Control.
+After the build, the `sign-windows` job (named "Verify Windows installer signatures") does not sign anything. It downloads the published installer and runs `signtool verify /pa` on it. Right after PyInstaller, the sidecar step also opens the onefile archive and verifies every PE member inside it, so a signature lost during packing fails the run instead of shipping.
 
-When the Artifact Signing secrets are set, that job does not sign again. It downloads the published installer and runs `signtool verify /pa` on it, so `WINDOWS_SIGNING_REQUIRED` can be set to `true` with either path. Right after PyInstaller, the sidecar step also opens the onefile archive and verifies every PE member inside it, so a signature lost during packing fails the run instead of shipping.
+An earlier second path, which re-signed only the published installer through Azure Key Vault and AzureSignTool, has been removed. It could not satisfy Smart App Control on its own, and managed cloud signing was chosen instead.
 
 ## What is unsigned today, and how you can tell
 
-Every Windows installer this project has published is unsigned. There is no partial state and no historical exception.
-
-The release workflow's `sign-windows` job runs on every tag, discovers that no signing secrets are set, and stops. As of the change that added this document, it says so out loud: the run page carries a warning annotation titled "Windows installers are not code signed", and the job summary carries a block headed "Windows code signing: SKIPPED". Before that change it also skipped, but it did so with a plain log line inside a green job, which nobody reads. If you look at a release and want to know whether its installers were signed, open the Desktop Release run for that tag and look for that block.
+Every Windows installer this project has published so far is unsigned. Until the six secrets exist, the verification job annotates the run with "The Windows installer is not code signed" and writes a block headed "WINDOWS INSTALLERS ON THIS RELEASE ARE NOT CODE SIGNED" into the job summary.
 
 You can also check a downloaded file directly. Right-click the `.exe`, choose Properties, and look for a Digital Signatures tab. On an unsigned file there is no such tab.
 
 ## Why it matters
 
-Windows SmartScreen inspects executables downloaded from the internet. An unsigned installer trips the "Windows protected your PC" dialog, which offers no obvious way forward: the user has to click "More info" and then "Run anyway", and most people do not. Some corporate environments block unsigned installers outright and the user never sees a choice at all.
-
-A signed installer carries a verifiable statement of who published it. SmartScreen still warns on the first downloads, with an Organization Validation and an Extended Validation certificate alike, but it names the publisher, and the warning fades as the certificate builds reputation over the first weeks of downloads. Either way the file stops being anonymous.
+Windows SmartScreen inspects executables downloaded from the internet. An unsigned installer trips the "Windows protected your PC" dialog, and Smart App Control blocks it outright. A signed installer carries a verifiable statement of who published it, and SmartScreen names the publisher while reputation builds.
 
 Signing does not change what the app does, what it installs, or where its data lives.
 
-## What the founder must obtain
+## The repository variable
 
-### A code signing certificate
+After the six secrets, create one repository variable under Settings, Secrets and variables, Actions, Variables: `WINDOWS_SIGNING_REQUIRED` set to `true`.
 
-Buy one from a public certificate authority. GlobalSign, DigiCert, Sectigo and SSL.com all issue them. Expect identity verification of the company, which takes days rather than minutes, so start early.
+With it set, a release where the secrets are missing or empty fails instead of shipping unsigned installers with a warning. The most likely future failure is an expired client secret, and without the variable that would put the pipeline back into a quiet skip on a green run. Set the secrets first and the variable last.
 
-Choose between Organization Validation and Extended Validation. For SmartScreen they now behave the same: both start without reputation and earn it through clean downloads over weeks. EV used to grant reputation from the first signature, and Microsoft's page "SmartScreen reputation for Windows app developers" (May 2026) says that no longer holds and that paying for EV only to avoid the warning is not justified. Take OV unless an enterprise buyer asks for EV.
+## What the verification job does
 
-### Why the certificate cannot simply be a file
+The job begins with a preflight that reads only whether each of the six `ARTIFACT_SIGNING_*` secrets is non-empty.
 
-This is the part that surprises people, and it is the reason this pipeline is shaped the way it is.
+None set, and `WINDOWS_SIGNING_REQUIRED` is not `true`: the job annotates the run, writes the unsigned block into the summary, and finishes green.
 
-Since June 2023 the CA/Browser Forum baseline requirements have required the private key of a code signing certificate to be generated and held in hardware that meets FIPS 140-2 Level 2 or Common Criteria EAL4+. Public CAs therefore no longer issue a downloadable `.pfx` file that you can hand to a build server. You get either a physical USB token posted to you, or a key generated inside a cloud HSM.
+None set, and `WINDOWS_SIGNING_REQUIRED` is `true`: the job fails.
 
-A USB token cannot be plugged into a GitHub-hosted runner, so the cloud HSM route is the one that works for CI. That is why the workflow signs through Azure Key Vault with AzureSignTool rather than with a certificate file: the private key stays inside the vault and never reaches the runner. The runner sends a hash to Azure and gets a signature back.
+Some but not all set: the job fails and names the missing ones.
 
-Any CA that supports key generation in Azure Key Vault will work. Tell the CA during ordering that the key will live in an Azure Key Vault Premium or Managed HSM, and follow their instructions for generating the certificate signing request from the vault.
-
-### The Azure side
-
-You need an Azure subscription, and inside it:
-
-A Key Vault, on the Premium tier or a Managed HSM. The Standard tier is software-backed and does not satisfy the hardware requirement, so a CA will not issue against it.
-
-The certificate imported into that vault, under a name you choose. That name is what `AZURE_KV_CERT_NAME` holds. It is the certificate's name in the vault, not the subject line of the certificate and not the file name.
-
-An Entra ID (Azure AD) app registration with a client secret. This is the identity GitHub Actions authenticates as. Its application ID is `AZURE_KV_CLIENT_ID`, its client secret is `AZURE_KV_CLIENT_SECRET`, and the directory it lives in is `AZURE_KV_TENANT_ID`.
-
-Permission for that app registration on the vault. Under Azure RBAC, grant it the "Key Vault Certificate User" role so it can read the certificate and the "Key Vault Crypto User" role so it can sign with the key. If the vault still uses the older access policy model instead, grant Get on certificates, and Get and Sign on keys. Signing fails with an authorisation error if either half is missing, so grant both and confirm the role assignments landed on the vault itself rather than on the resource group only.
-
-Client secrets in Entra ID expire, at most two years out and often sooner. Put the expiry date in a calendar. When it passes, signing starts failing, which is by design: see the `WINDOWS_SIGNING_REQUIRED` variable below for how to make sure that failure is loud rather than a silent return to unsigned installers.
-
-## The exact secrets to create, and where
-
-Go to the repository on GitHub, then Settings, then Secrets and variables, then Actions. Everything below is created on that one page. Nothing here belongs in a file in the repository, and no value from this list should ever appear in a commit, a log, or an issue.
-
-Under the Secrets tab, use "New repository secret" five times. The names must match exactly, because the workflow reads them by name.
-
-`AZURE_KV_URL` is the vault URL, in the form `https://yourvaultname.vault.azure.net`. Copy it from the vault's Overview page.
-
-`AZURE_KV_CERT_NAME` is the name of the certificate inside the vault.
-
-`AZURE_KV_CLIENT_ID` is the application (client) ID of the Entra ID app registration.
-
-`AZURE_KV_CLIENT_SECRET` is the client secret value for that app registration. Azure shows this value once, at creation. If you did not copy it, create a new one rather than trying to recover the old one, and use a freshly rotated secret rather than one that has been pasted somewhere else.
-
-`AZURE_KV_TENANT_ID` is the directory (tenant) ID of the Entra ID tenant.
-
-Then switch to the Variables tab on the same page and use "New repository variable" once.
-
-`WINDOWS_SIGNING_REQUIRED` set to `true`. This is a variable and not a secret, because it holds no confidential value and it is useful to see it plainly in the settings UI.
-
-The variable is what stops signing from silently switching itself off later. With it set, a release where the secrets are missing or empty fails the build instead of shipping unsigned installers with a warning. That is the state you want once signing works, because the most likely future failure is not a broken certificate but an expired client secret, and an expired secret would otherwise put the pipeline straight back into the quiet skip it is in today, on a green run, indistinguishable from a healthy one.
-
-Set the five secrets first and the variable last. Between the two the build still fails, loudly and correctly, because a half-configured vault cannot sign anything.
-
-## What the workflow does with them
-
-The `sign-windows` job in `.github/workflows/desktop-release.yml` begins with a preflight step that reads whether each of the five secrets is non-empty. It never reads or prints a value. There are three outcomes and they are deliberately three different colours.
-
-None of the five set, and `WINDOWS_SIGNING_REQUIRED` is not `true`: the job annotates the run, writes a SKIPPED block into the job summary, and finishes green with unsigned installers. This is the state the project is in today.
-
-None of the five set, and `WINDOWS_SIGNING_REQUIRED` is `true`: the job fails. The repository has declared that it signs, so shipping unsigned is a defect and not a default.
-
-Some but not all five set: the job fails and names the missing ones. AzureSignTool needs all five, and invoking it with some of them empty produces an error about the vault rather than about the secret nobody set.
-
-Only when all five are present does the job install .NET and AzureSignTool, download the installers from the tag's release, sign each one, verify each signature with `signtool verify /pa`, and re-upload the signed files over the unsigned ones. Every one of those steps can fail the job. In particular, a download that returns no installers is a failure rather than a quiet "nothing to sign", verification failing is a failure, and `signtool` being absent from the runner is a failure, because "nothing checked these signatures" and "these signatures are good" must not look the same from the run page.
-
-The release is already published while this runs, since release.yml publishes it before any installer is built, so the unsigned installer is downloadable until the signed one replaces it.
-
-One value in the workflow may need changing when the certificate arrives. The timestamp authority is currently the literal `http://timestamp.globalsign.com/tsa/r6advanced1`, on the `-tr` flag of the `azuresigntool sign` call. If the certificate comes from a CA other than GlobalSign, point that at the issuing CA's RFC 3161 timestamp server instead. A timestamp is what keeps signatures valid after the certificate expires, so do not remove the flag.
+All six set: the job downloads the `.exe` from the release and verifies it with `signtool verify /pa`. A download with no installer, a missing `signtool` and a failed verification each fail the job.
 
 ## Confirming it worked
 
-After the first release with the secrets in place, open the Desktop Release run for that tag. The job summary should read "Windows code signing: running against Azure Key Vault" followed by a line reporting how many installers were signed and verified. If it reads SKIPPED, the secrets are not being seen.
-
-Then download the published `.exe` and check it on a Windows machine. Right-click, Properties, Digital Signatures tab. The tab now exists, the signer name is the organisation on the certificate, and opening the entry shows a countersignature timestamp. The first downloads may still show a SmartScreen prompt, now naming the organisation as publisher. It stops once the certificate has earned reputation through download volume, with an OV and an EV certificate alike.
-
-From a command line, `signtool verify /pa /v installer.exe` prints the chain and reports success. `signtool` ships with the Windows SDK.
+After the first release with the secrets in place, open the Desktop Release run for that tag. The verification job summary reports how many installers were verified. Then install the release on a Windows machine and run the PowerShell check above over the extraction folder; every file should report `Valid`. `signtool verify /pa /v installer.exe` prints the chain of the installer itself.
 
 ## What this does not do
 
-It does not sign anything already published. Every release before the first signed one keeps unsigned installers, and re-signing them would mean replacing the bytes under releases that people have already downloaded and checksummed. The SHA-256 manifest attached to recent releases is computed over the assets as published, so silently swapping a file would invalidate it.
+It does not sign anything already published. Re-signing old releases would replace bytes people have already downloaded and checksummed, and invalidate the SHA-256 manifest attached to them.
 
-It does not affect macOS or Linux. The `.dmg` is a separate mechanism covered by `docs/desktop/MACOS_NOTARIZATION.md`, and the Linux packages are unsigned by a different convention.
+It does not affect macOS or Linux. The `.dmg` is covered by `docs/desktop/MACOS_NOTARIZATION.md`.
 
-It is not the same thing as the Sigstore manifest. `SHA256SUMS`, `SHA256SUMS.sig` and `SHA256SUMS.pem` on a release prove the assets are the ones our CI produced. An Authenticode signature is what Windows itself checks before running a file. A release can have either, both or neither, and they answer different questions.
+It is not the same thing as the Sigstore manifest. `SHA256SUMS`, `SHA256SUMS.sig` and `SHA256SUMS.pem` prove the assets are the ones our CI produced. An Authenticode signature is what Windows itself checks before running a file.
 
 ## References
 
-AzureSignTool, the tool the workflow calls: https://github.com/vcsjones/AzureSignTool
-
-CA/Browser Forum baseline requirements for code signing, the source of the hardware key storage rule: https://cabforum.org/working-groups/code-signing/requirements/
+Azure Artifact Signing: https://learn.microsoft.com/en-us/azure/artifact-signing/
 
 Microsoft, SmartScreen and application reputation: https://learn.microsoft.com/en-us/windows/security/operating-system-security/virus-and-threat-protection/microsoft-defender-smartscreen/
 
 Microsoft, SmartScreen reputation for Windows app developers, the source for EV no longer bypassing SmartScreen and for Smart App Control checking every executable: https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation
-
-Azure Key Vault certificates: https://learn.microsoft.com/en-us/azure/key-vault/certificates/
 
 Microsoft, signtool: https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool
 

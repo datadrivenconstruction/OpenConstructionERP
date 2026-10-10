@@ -147,6 +147,13 @@ export interface SupplierScorecardResponse {
   // denominator. Without surfacing this, a supplier whose deliveries are all
   // unscheduled shows a misleading 0% on-time figure (see SupplierScorecardModal).
   unscheduled_count: number;
+  // Whether the supplier is still qualified to buy from. Empty when the
+  // caller sees none of this supplier's orders.
+  prequalification_status?: string | null;
+  qualified_until?: string | null;
+  qualification_state?: 'expired' | 'expiring' | 'valid' | 'not_stated';
+  compliance_reasons?: string[];
+  unconfirmed_po_count?: number;
 }
 
 export function getSupplierScorecard(

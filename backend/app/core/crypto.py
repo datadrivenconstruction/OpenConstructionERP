@@ -4,24 +4,35 @@
 
 Uses Fernet (cryptography lib, already in deps via python-jose). The key
 is derived from settings.jwt_secret + a fixed app salt so existing
-deployments do not need a new env var. If JWT_SECRET rotates, all
-encrypted secrets become unreadable - same threat model as JWTs.
+deployments do not need a new env var. New values are always encrypted
+with the current JWT_SECRET; decryption also tries every secret listed in
+JWT_PREVIOUS_SECRETS, so a rotation does not make stored secrets unreadable
+(see docs/jwt-key-rotation.md).
 """
 
 import base64
 import hashlib
 
-from cryptography.fernet import Fernet, InvalidToken
+from cryptography.fernet import Fernet, InvalidToken, MultiFernet
 
 from app.config import get_settings
 
 _SALT = b"oe-ai-keys-v1"
 
 
-def _key() -> bytes:
-    secret = get_settings().jwt_secret.encode("utf-8")
-    digest = hashlib.sha256(secret + _SALT).digest()
+def _key_for(secret: str) -> bytes:
+    digest = hashlib.sha256(secret.encode("utf-8") + _SALT).digest()
     return base64.urlsafe_b64encode(digest)
+
+
+def _key() -> bytes:
+    return _key_for(get_settings().jwt_secret)
+
+
+def _decrypting_fernet() -> MultiFernet:
+    settings = get_settings()
+    previous = [p.strip() for p in (getattr(settings, "jwt_previous_secrets", "") or "").split(",") if p.strip()]
+    return MultiFernet([Fernet(_key_for(s)) for s in [settings.jwt_secret, *previous]])
 
 
 def encrypt_secret(plaintext: str | None) -> str | None:
@@ -34,7 +45,7 @@ def decrypt_secret(ciphertext: str | None) -> str | None:
     if not ciphertext:
         return ciphertext
     try:
-        return Fernet(_key()).decrypt(ciphertext.encode("ascii")).decode("utf-8")
+        return _decrypting_fernet().decrypt(ciphertext.encode("ascii")).decode("utf-8")
     except (InvalidToken, ValueError):
         # If the value looks like a Fernet token (``gAAAAA…``) but the
         # current key can't open it, the encryption key has rotated -

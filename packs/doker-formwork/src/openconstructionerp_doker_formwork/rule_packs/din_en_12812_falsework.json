@@ -7,17 +7,7 @@
   "severity_default": "error",
   "category": "compliance",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "falsework.din_en_12812.load_class_required",
-    "falsework.din_en_12812.load_class_valid",
-    "falsework.din_en_12812.deflection_limit_l_over_500",
-    "falsework.din_en_12812.geometric_tolerance_within_h_over_500",
-    "falsework.din_en_12812.safety_factor_gamma_F_min_1_5",
-    "falsework.din_en_12812.live_load_workers_kN_per_m2",
-    "falsework.din_en_12812.lateral_stability_braced",
-    "falsework.din_en_12812.foundation_capacity_documented",
-    "falsework.din_en_12812.design_by_class_b_calculation_referenced"
-  ],
+  "enables_rule_ids": [],
   "parameters": {
     "load_classes": ["A", "B1", "B2"],
     "deflection_limit_ratio": 500,

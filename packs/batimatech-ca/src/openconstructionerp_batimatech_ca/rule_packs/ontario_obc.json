@@ -12,13 +12,5 @@
   "severity_overrides": {
     "ontario_obc.wsib_clearance_required": "ERROR"
   },
-  "enables_rule_ids": [
-    "ontario_obc.building_permit_referenced",
-    "ontario_obc.bcin_designer_on_file",
-    "ontario_obc.wsib_clearance_required",
-    "ontario_obc.construction_act_prompt_payment_configured",
-    "ontario_obc.tarion_enrolment_recorded",
-    "ontario_obc.electrical_safety_authority_permit_present",
-    "ontario_obc.tssa_permit_present_for_fuel_or_elevator_work"
-  ]
+  "enables_rule_ids": []
 }

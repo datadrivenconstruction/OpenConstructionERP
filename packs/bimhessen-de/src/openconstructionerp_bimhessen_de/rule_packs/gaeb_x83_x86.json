@@ -15,26 +15,7 @@
     "gaeb.lv_structure",
     "gaeb.einheitspreis_sanity",
     "gaeb.trade_section_code",
-    "gaeb.quantity_decimals",
-    "gaeb.xml_schema_valid",
-    "gaeb.x83_award_phase_present",
-    "gaeb.x84_alternate_offer_structure",
-    "gaeb.x86_award_phase_present",
-    "gaeb.lv_hierarchy_well_formed",
-    "gaeb.oz_format_valid",
-    "gaeb.oz_unique_within_lv",
-    "gaeb.unit_code_iso",
-    "gaeb.einheitspreis_present",
-    "gaeb.einheitspreis_positive",
-    "gaeb.einheitspreis_in_eur",
-    "gaeb.gesamtbetrag_consistency",
-    "gaeb.langtext_present_for_priced_positions",
-    "gaeb.kurztext_max_length",
-    "gaeb.no_orphan_unterleistungspositionen",
-    "gaeb.bedarfsposition_marked",
-    "gaeb.eventualposition_marked",
-    "gaeb.stundenlohnarbeiten_marked",
-    "gaeb.nachlass_within_legal_range"
+    "gaeb.quantity_decimals"
   ],
   "metadata": {
     "supported_phases": [

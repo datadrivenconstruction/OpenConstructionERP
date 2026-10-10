@@ -5,7 +5,8 @@
   "jurisdiction": "DE",
   "description": "Validates GAEB data exchange files across the four principal phases: X81 (cost estimate / Kostenberechnung), X83 (tender / Angebotsaufforderung), X84 (bid / Angebotsabgabe), and X86 (award / Auftragserteilung). Checks XML structure compliance, mandatory GAEB elements, LV numbering consistency, unit and quantity integrity, and price completeness per phase.",
   "applies_to": ["boq", "tender", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "gaeb.xml_schema_valid",
     "gaeb.phase_x81_structure_valid",
     "gaeb.phase_x83_structure_valid",
@@ -21,6 +22,7 @@
     "gaeb.currency_element_present",
     "gaeb.bidder_info_present_x84"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "GAEB (Gemeinsamer Ausschuss Elektronik im Bauwesen)",
   "publication_year": 2023
 }

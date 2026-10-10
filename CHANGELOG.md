@@ -9,12 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [18.5.0] - 2026-10-10
+
+This release makes the platform lighter to run and easier to understand. A Background services button in the top bar lists every service the platform keeps loaded, what it is for, which modules need it and roughly how much memory it takes, and an administrator can switch each one on or off without a restart. On a fresh server the administrator is asked once which modules they will use before anything heavy starts, semantic search stays off until someone turns it on, and the demo projects are set up in the background. The Windows desktop app installs its backend once instead of unpacking it on every start and now starts for users whose account name has non-ASCII letters. Procurement, the client portal, payment plans, schedules and the Italian workflow all grow, as listed below.
+
 ### Changed
 
+- The desktop app on Windows installs its backend once as a folder instead of unpacking about 1.4 GB on every start, so it starts faster and antivirus scanners no longer inspect a fresh copy each time. A backend that crashes after it was healthy is restarted automatically, at most twice in 30 minutes, and its crash log is kept.
+- No project address is sent to a public geocoder until a manager has answered a one-time question: send to OpenStreetMap, do not send, or use your own Nominatim.
+- The semantic search model on the desktop is downloaded only when someone asks for it.
+- On a fresh install the demo projects are created in the background right after the server answers, instead of holding up the first start for about a minute, and they appear while you sign in. A demo setup cut short, for example by closing the desktop app in its first minute, is finished on the next start. While they are being installed, the empty project list says they are on their way.
+- Every language picker lists the languages alphabetically by the name each one is shown under, so a newly added language no longer turns up at the end.
+- Semantic search is now off by default on every installation, because loading its language model is what exhausted memory on low-headroom machines. Nothing loads the model, opens the vector store or runs the startup backfill until an administrator turns it on in Settings, AI, which shows the free memory it needs (about 1 GB) against what the machine has. **After upgrading, semantic matching against cost databases (including CWICR) and semantic search stop until semantic search is switched on again**; text search keeps working, and cost search, the match wizard and global search say so with a link to the switch. Server operators can set `OE_SEMANTIC_SEARCH=1` (or `0`) to fix the switch for the whole installation.
+- Project file share links, saved-view share links, local upload URLs and module builder review tokens are verified against the JWT key ring, so rotating `JWT_SECRET` no longer breaks links already sent while the old secret stays in `JWT_PREVIOUS_SECRETS`.
 - Schedule durations and newly generated BOQ plans now use the project's country holiday data wherever available. Regeneration can move dates that previously treated holidays as working days. Generated calendars retain the holiday dates and coverage for every year used by the plan, so the first CPM recalculation agrees with generation; regenerate when extending a plan into an uncovered year. Explicit site calendars remain authoritative. Unknown countries and partial holiday tables expose coverage, and macro-regions no longer supply a neighbouring country's holidays. New ORM-created projects no longer default to DACH.
 
 ### Added
 
+- A Background services button in the top bar shows every service the platform keeps loaded, such as cost matching models, schedulers and warm-ups, grouped by kind, with what each is for, which modules use it, roughly how much memory it takes, its health and its recent log lines. An administrator can switch each one on or off or restart it without restarting the platform, or drop to a minimal preset. On a fresh server the administrator is asked once which modules they will use and sees the memory those need before anything starts, and a module whose service is off says so in a banner when it opens.
+- In the first-run choice a module that loads a model is offered as AI for that module, with a note that the module itself works without it, so leaving it unticked no longer looks like switching the module off. The Background services panel writes memory figures, lists of services and module names in the reader's language and order.
+- Procurement records the supplier's confirmation of an issued order, with its own reference and confirmed delivery date kept beside the requested one, and lists the orders nobody has confirmed yet.
+- A purchase order can allow its invoices a stated overrun, as a percentage, an amount or both, for freight, weighed deliveries or index clauses. The invoice match warns only past that band and names the band it used. Orders without an allowance keep the one cent rounding band.
+- The supplier card shows whether the supplier is still prequalified, with the end date, the compliance reasons the order gate already applies and how many issued orders still wait for confirmation.
+- Vendors and Catalog open as tabs inside Procurement, so a buyer no longer leaves the order to look up a supplier or a catalogue price.
+- Goods receipt lines carry batch or lot and serial numbers.
+- The core in every edition can hold the companies of a group and their branches, each company with its own code, registered name, country, functional currency, register number and tax id, and one of them the default that documents fall back to. Administrators write them through the API; a settings screen, numbering and tax per company come in a later release.
+- Contacts and subcontractors can be marked as a person or a company.
+- Canadian contracts take the statutory holdback of their province, Canadian provincial holidays are read into calendars, and Canadian demo projects carry their province.
+- Portugal national holidays for 2026 are shipped.
+- DPGF is registered as a classification and is the French default; Senegal, Ivory Coast and Cameroon use it as well.
+- Italian markup templates are offered per price list and per price analysis.
+- Drawing sheets can be edited in bulk, and Italian file names are read into sheet numbers and titles.
+- A dependency drawn on the Gantt chart can be undone from the confirmation toast, and the project owner can delete an archived schedule that has no baselines.
+- Bill exports to PDF, XLSX and GAEB mark the rows that AI produced.
+- Validation messages come in 38 languages, up from 4.
+- The schedule detail view warns when public-holiday coverage is missing or incomplete, using the saved calendar and years of generated plans. New generated calendars also retain whether their working week used a fallback, so that warning survives reopening the schedule. Regional calendar loading and failures are shown explicitly; manually configured calendars keep their own rules, and historical plans without a saved fallback flag are not reclassified.
 - New eligible outside-SOV progress claims use the retention ladder rate selected by prior SOV work, with existing caps and currency precision. Claims created before this change keep their flat-rate calculation, and issued certificates are not recalculated. Milestone, cost-plus and time-and-materials claims retain their existing rules.
 - Progress claims expose country-independent payment-application figures through `/progress-claims/{id}/payment-application`, using the same calculations and project access checks as the existing regional AIA view. The AIA JSON and PDF endpoints retain their country restrictions.
 - Bills can keep a tax date separately from the date their prices refer to. VAT uses the tax date when one is supplied, and otherwise keeps using the price reference date. Both dates survive copying a bill or creating a revision; impossible calendar dates are refused in the form.
@@ -47,6 +76,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- A record you have just created, such as a project, a bill or a position, is saved before the app confirms it, so opening it or adding to it right away no longer answers "not found", and a save that fails is no longer reported as a success. FastAPI 0.121.1 is now the minimum version.
+- Adding a top-level section to a bill after deleting one no longer fails with "already exists". A new section takes the next free number instead of one already in use.
+- The desktop app no longer reports its health as degraded on every start after the first.
+- The desktop app now starts on Windows accounts whose user name contains non-ASCII characters, such as Cyrillic, Chinese or accented letters. When the data folder path is not ASCII, the database cluster lives under %ProgramData%\OpenConstructionERP\clusters\ with access for the owner only. The installer and uninstaller follow that location too, so they stop the database before replacing files.
+- The Windows installer refuses an install folder whose path has non-ASCII characters, such as Cyrillic or accented letters, with a clear message instead of installing an app whose database cannot start. A silent install stops with exit code 3 and writes the reason to %TEMP%\OpenConstructionERP-install-error.log. The default folder under Program Files and non-ASCII user names are not affected.
+- The Windows installer and uninstaller no longer close every program on the machine named openconstructionerp.exe, such as a backend served from a pip install; they close only what runs from the install folder. An upgrade from 18.4.0 or earlier still runs the previous uninstaller first, which does close them, so stop such a backend before you upgrade.
+- Approving a payroll batch no longer counts labour twice in the cost model.
+- Percentage markups on a bill with deductions are taken on the net amount.
+- Legacy copilot lines no longer claim they were typed by hand.
+- A persisted JWT secret that cannot be read is never overwritten, so a passing permission problem no longer turns into a lost key that signs every user out on each later start.
+- Element matching explains what it needs and waits until it can run, instead of failing on a missing model or search library.
+- Claim invoice previews distinguish unavailable data from an invoice that has not been raised and offer retry on lookup errors. Net amounts use exact decimal subtraction, and money displays preserve large decimal-string values instead of first converting them to floating-point numbers.
 - Payment-application figures use the contract currency's minor unit, including zero- and three-decimal currencies, with displayed rows and totals kept consistent. Claims outside AIA countries now also show when prior certified amounts were reconstructed instead of read from stored certification totals.
 - Application startup no longer waits for the embedding worker pool to load or warm its model. A slow or unavailable encoder can prepare in the background while the server becomes available; shutting down does not let a delayed warm-up revive the executor.
 - Bill totals, resource summaries and ABC analysis exclude amounts without a usable positive exchange rate and show those amounts separately in their original currency. Resource summaries scale norms by the position quantity and retain legitimate negative credits. Tender packages require a currency before publishing, opening or awarding.

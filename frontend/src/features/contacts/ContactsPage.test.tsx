@@ -93,3 +93,23 @@ describe('buildContactPatch', () => {
     expect(patch.address).toEqual({ text: 'Werftstrasse 14', city: 'Kiel' });
   });
 });
+
+describe('party kind', () => {
+  // Whether a contact is a person or a company decides whether a rating about
+  // it is personal data, so "not stated" must stay distinct from either answer.
+  const base = contactFormData(contact(null));
+
+  it('reads a contact without the field as not stated', () => {
+    expect(base.party_kind).toBe('');
+  });
+
+  it('sends the chosen kind and clears it back to null', () => {
+    expect(buildContactPatch({ ...base, party_kind: 'natural_person' }, base).party_kind).toBe('natural_person');
+    const company = { ...base, party_kind: 'legal_entity' as const };
+    expect(buildContactPatch({ ...company, party_kind: '' }, company).party_kind).toBeNull();
+  });
+
+  it('leaves the field out when it did not change', () => {
+    expect('party_kind' in buildContactPatch({ ...base }, base)).toBe(false);
+  });
+});

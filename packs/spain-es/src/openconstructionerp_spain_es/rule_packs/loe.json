@@ -5,7 +5,8 @@
   "jurisdiction": "ES",
   "description": "Validates project and contract documentation against the Ley de Ordenacion de la Edificacion (LOE). Checks that the roles of promotor, proyectista, director de obra, director de ejecucion de obra and constructor are defined, that the Libro del Edificio is referenced, that warranty periods (1 year acabado, 3 years habitabilidad, 10 years estructura) are documented, and that the seguro decenal (10-year structural insurance) obligation is noted for residential buildings.",
   "applies_to": ["tender", "contracts", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "loe.promotor_defined",
     "loe.proyectista_defined",
     "loe.director_obra_defined",
@@ -19,6 +20,7 @@
     "loe.acta_recepcion_clause_present",
     "loe.licencia_obras_referenced"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Ministerio de Transportes y Movilidad Sostenible",
   "publication_year": 1999
 }

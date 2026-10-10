@@ -36,6 +36,7 @@ import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { loginFailureKindFromResponse } from './loginError';
 import { AuthBackground } from './AuthBackground';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 
 interface ModuleTile {
   icon: LucideIcon;
@@ -478,7 +479,7 @@ export function LoginPageNext() {
         </button>
         {langOpen && (
           <div className="absolute right-0 mt-2 w-56 max-h-80 overflow-y-auto rounded-xl border border-border-light bg-surface-elevated shadow-xl py-1 animate-stagger-in">
-            {SUPPORTED_LANGUAGES.map((lang) => {
+            {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
               const isActive = i18n.language === lang.code;
               return (
                 <button

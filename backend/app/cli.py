@@ -423,7 +423,7 @@ def _setup_env(data_dir: Path, host: str, port: int) -> None:
             print(
                 _dim(
                     "  The underlying error is in the log at "
-                    + str(data_dir / "pgdata" / "log")
+                    + str(embedded_pg.resolve_pgdata(data_dir) / "log")
                     + " (and "
                     + str(Path.home() / ".openestimate" / "desktop-launcher.log")
                     + "). If it keeps happening, send those logs to info@datadrivenconstruction.io."
@@ -578,12 +578,12 @@ def check_path_length(data_dir: Path) -> Check | None:
     Imported inside the function because this file keeps its top-level imports to
     the standard library so the CLI starts fast.
     """
-    from app.core.embedded_pg import path_limit_applies, windows_path_limit_problem
+    from app.core.embedded_pg import path_limit_applies, resolve_pgdata, windows_path_limit_problem
 
     if not path_limit_applies():
         return None
 
-    problem = windows_path_limit_problem(data_dir / "pgdata")
+    problem = windows_path_limit_problem(resolve_pgdata(data_dir))
     if problem is None:
         return Check("Path length", "ok", "Windows can open the bundled PostgreSQL files")
     return Check(
@@ -1296,6 +1296,13 @@ def cmd_serve(args: argparse.Namespace) -> None:
     """Start the OpenConstructionERP server."""
     data_dir = _data_dir_from_args(args)
 
+    # First, before anything native is imported: a crash inside torch, Arrow or
+    # the PostgreSQL driver leaves no Python traceback, and this file is the
+    # only place its stack can land. The desktop launcher reads its tail.
+    from app.core.crash_diagnostics import enable_crash_log
+
+    enable_crash_log(data_dir)
+
     # ``serve --no-demo``: skip demo accounts / showcase projects for this
     # start AND remember the choice in the data dir so subsequent bare
     # starts honour it too (read by app.main's demo seeder when SEED_DEMO
@@ -1537,7 +1544,7 @@ def cmd_init_db(args: argparse.Namespace) -> None:
     # PostgreSQL comes up against a clean data directory. An external
     # DATABASE_URL is left untouched: the operator manages remote resets.
     if reset and embedded_pg.is_requested():
-        pgdata = data_dir / "pgdata"
+        pgdata = embedded_pg.resolve_pgdata(data_dir)
         if pgdata.exists():
             import shutil
 
@@ -1677,7 +1684,7 @@ def cmd_init_db(args: argparse.Namespace) -> None:
     print()
     print(_green(_bold("Ready.")))
     if embedded_pg.is_running():
-        print(f"  {_dim('Database:')} embedded PostgreSQL at {data_dir / 'pgdata'}")
+        print(f"  {_dim('Database:')} embedded PostgreSQL at {embedded_pg.resolve_pgdata(data_dir)}")
     else:
         print(f"  {_dim('Database:')} external PostgreSQL (DATABASE_URL)")
     print(f"  {_dim('Vectors:')}  {data_dir / 'vectors'}")
@@ -1797,7 +1804,9 @@ def cmd_upgrade(args: argparse.Namespace) -> None:
         print()
         print(_red(_bold("  The application is still running.")))
         print(_dim(f"The local database is being served by process {live_pid} from:"))
-        print(_dim(f"  {data_dir / 'pgdata'}"))
+        from app.core.embedded_pg import resolve_pgdata
+
+        print(_dim(f"  {resolve_pgdata(data_dir)}"))
         print()
         print(_dim("Upgrading now would replace files that process is executing from."))
         print(_dim("Close the app (or stop `openconstructionerp serve`), then run this again."))
@@ -3009,6 +3018,8 @@ def main() -> None:
         # The bare command declares no flags, so this reads the same default
         # every subcommand reads, through the same resolver.
         data_dir = _data_dir_from_args(args)
+        from app.core.embedded_pg import resolve_pgdata as _resolve_pgdata
+
         # A first run is a data directory with no database behind it. This asked
         # only whether the legacy SQLite file was missing, and embedded
         # PostgreSQL replaced that file as the default in v6.0.0, so it is
@@ -3020,7 +3031,7 @@ def main() -> None:
         # few lines below already used; keeping both meant one question asked
         # two ways, and the way that decided the greeting was the wrong one.
         first_run = not data_dir.exists() or (
-            not (data_dir / "pgdata" / "PG_VERSION").exists() and not (data_dir / "openestimate.db").exists()
+            not (_resolve_pgdata(data_dir) / "PG_VERSION").exists() and not (data_dir / "openestimate.db").exists()
         )
 
         if first_run:

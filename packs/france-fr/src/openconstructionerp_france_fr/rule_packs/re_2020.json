@@ -5,7 +5,8 @@
   "jurisdiction": "FR",
   "description": "Validates project documentation against RE 2020 (Reglementation Environnementale 2020) requirements for new buildings. Checks that the energy performance indicators (Bbio, Cep, Cep_nr), carbon footprint thresholds (Ic_construction, Ic_energie), and summer comfort (DH degree-hours) are documented and within the regulatory limits for the declared building type and climate zone.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "re2020.building_type_declared",
     "re2020.climate_zone_set",
     "re2020.bbio_max_documented",
@@ -20,6 +21,7 @@
     "re2020.fdes_inies_references_present",
     "re2020.attestation_re2020_at_permit"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Ministere de la Transition ecologique",
   "publication_year": 2021
 }

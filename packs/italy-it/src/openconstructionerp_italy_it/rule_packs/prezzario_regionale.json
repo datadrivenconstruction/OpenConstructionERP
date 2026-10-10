@@ -6,19 +6,22 @@
   "description": "Validates BOQ items and unit rates against the prezzario regionale (regional price list) framework used across Italian regions. Checks that each voce (item) references a valid prezzario code, that unit rates do not exceed the regional benchmark without justification (analisi prezzi), that measurement units match the prezzario definition, and that the correct regional edition year is referenced.",
   "applies_to": ["boq", "estimate", "validation"],
   "enables_rule_ids": [
-    "prezzario.regione_selected",
-    "prezzario.edition_year_current",
     "prezzario.voce_code_format_valid",
     "prezzario.voce_reference_present",
+    "prezzario.incidenza_manodopera_documented",
+    "prezzario.costi_sicurezza_separated",
+    "prezzario.overheads_not_applied_twice"
+  ],
+  "planned_not_built_rule_ids": [
+    "prezzario.regione_selected",
+    "prezzario.edition_year_current",
     "prezzario.unit_matches_prezzario_definition",
     "prezzario.unit_rate_within_prezzario_range",
     "prezzario.analisi_prezzi_for_new_items",
     "prezzario.analisi_prezzi_for_rate_deviation",
-    "prezzario.incidenza_manodopera_documented",
-    "prezzario.costi_sicurezza_separated",
-    "prezzario.overheads_not_applied_twice",
     "prezzario.aggiornamento_istat_applied"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Regioni (regional governments) / DEI (Tipografia del Genio Civile)",
   "publication_year": 2024
 }

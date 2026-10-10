@@ -838,15 +838,24 @@ async def portal_list_invoices(
     for specific invoices, or a ``project`` grant that exposes every issued
     invoice under that project. Only issued, client-facing (receivable)
     invoices are returned - drafts and payable/vendor invoices stay invisible.
+
+    The project grant counts only for the client side (``INVOICE_PROJECT_ROLES``,
+    client and investor), the same rule as the payment plan. A subcontractor,
+    supplier, consultant or building user let into a project for its documents
+    sees only invoices granted to them one by one, never everything the client
+    is billed.
     """
     from sqlalchemy import func as _func
     from sqlalchemy import or_
     from sqlalchemy import select as _select
 
     from app.modules.finance.models import Invoice as _Invoice
+    from app.modules.portal.service import INVOICE_PROJECT_ROLES
 
     accessible_invoices = await service.list_accessible_resources(user.id, "invoice")
-    accessible_projects = await service.list_accessible_resources(user.id, "project")
+    accessible_projects = (
+        await service.list_accessible_resources(user.id, "project") if user.portal_role in INVOICE_PROJECT_ROLES else []
+    )
     if not accessible_invoices and not accessible_projects:
         return PortalInvoiceList(items=[], total=0)
 

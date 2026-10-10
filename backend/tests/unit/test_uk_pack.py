@@ -40,37 +40,14 @@ PACKS = REPO_ROOT / "packs"
 PACK = PACKS / "uk-jct" / "src" / "openconstructionerp_uk_jct"
 RULES_SOURCE = REPO_ROOT / "backend" / "app" / "core" / "validation" / "rules" / "__init__.py"
 
-#: Packs whose documents still name rule ids the engine does not define, with
-#: the count as measured. Each entry is a debt, not a permission: fix the pack
-#: and delete its line. The numbers are pinned so a pack that gets worse is
-#: reported as loudly as one that starts fresh.
-KNOWN_UNBACKED_RULE_IDS = {
-    "aus": 92,
-    "batimatech-ca": 75,
-    "bimhessen-de": 138,
-    "brazil-sinapi": 67,
-    "doker-formwork": 87,
-    "france-fr": 71,
-    "germany-de": 67,
-    "india-cpwd": 119,
-    "italy-it": 44,
-    "japan-jp": 46,
-    "korea-kr": 43,
-    "modular-prefab": 111,
-    "netherlands-nl": 42,
-    "nzs": 55,
-    "poland-pl": 44,
-    "renewables-epc": 173,
-    "retail-grocery-dach": 69,
-    "saudi-vision2030": 168,
-    "south-africa": 20,
-    "spain-es": 49,
-    "turkey-tr": 45,
-    "uae-ae": 48,
-    "us-california": 54,
-    "us-costdata": 97,
-    "us-texas": 45,
-}
+#: Shipped packs (the wheel's force-include map) keep rule ids the engine does
+#: not define under ``planned_not_built_rule_ids``, never under
+#: ``enables_rule_ids``. Packs that do not ship are speculative and carry no
+#: such ids at all. Decided 08.10 (JUR-01): 1869 ids were moved out of
+#: ``enables_rule_ids`` in 25 packs, 300 of them dropped from the three
+#: unshipped partner packs.
+PLANNED_KEY = "planned_not_built_rule_ids"
+PYPROJECT = REPO_ROOT / "backend" / "pyproject.toml"
 
 
 @pytest.fixture(scope="module")
@@ -114,32 +91,46 @@ def test_every_rule_id_the_uk_pack_declares_exists(engine_rule_ids: set[str]) ->
     assert not missing, f"the UK pack promises checks the engine does not define: {missing}"
 
 
-def test_the_packs_still_promising_checks_they_do_not_have_are_the_ones_listed(
-    engine_rule_ids: set[str],
-) -> None:
-    """The same property across every pack, with the debt written down.
+def _shipped_slugs() -> set[str]:
+    """Pack slugs the wheel carries, read from the force-include map."""
+    return set(re.findall(r'^"\.\./packs/([^/]+)/src"', PYPROJECT.read_text(encoding="utf-8"), re.M))
 
-    Two directions matter. A pack absent from the list must be clean, which is
-    what stops a new pack shipping the defect. And a pack on the list must
-    still be dirty by the same amount, which is what stops the list becoming a
-    permanent excuse nobody revisits.
-    """
-    measured: dict[str, int] = {}
+
+def test_no_pack_switches_on_a_check_the_engine_does_not_have(engine_rule_ids: set[str]) -> None:
+    """``enables_rule_ids`` is a promise, so every id in it must resolve, in every pack."""
+    measured: dict[str, list[str]] = {}
     for pack_dir in _pack_dirs():
-        unbacked = sum(
-            1
-            for document in _documents(pack_dir).values()
-            for rule_id in document.get("enables_rule_ids") or []
-            if rule_id not in engine_rule_ids
-        )
-        if unbacked:
-            measured[pack_dir.parents[1].name] = unbacked
-    assert measured == KNOWN_UNBACKED_RULE_IDS, (
-        "the unbacked rule id debt moved. Newly dirty: "
-        f"{ {k: v for k, v in measured.items() if k not in KNOWN_UNBACKED_RULE_IDS} }. "
-        f"Now clean, delete their lines: {sorted(set(KNOWN_UNBACKED_RULE_IDS) - set(measured))}. "
-        f"Changed count: { {k: (KNOWN_UNBACKED_RULE_IDS[k], v) for k, v in measured.items() if k in KNOWN_UNBACKED_RULE_IDS and v != KNOWN_UNBACKED_RULE_IDS[k]} }."
-    )
+        for stem, document in _documents(pack_dir).items():
+            bad = [rid for rid in document.get("enables_rule_ids") or [] if rid not in engine_rule_ids]
+            if bad:
+                measured[f"{pack_dir.parents[1].name}/{stem}"] = bad
+    assert not measured, f"documents switch on checks the engine does not define: {measured}"
+
+
+def test_planned_checks_are_marked_and_still_unbuilt(engine_rule_ids: set[str]) -> None:
+    """The planned list says what is not built, so it goes red when it stops being true.
+
+    A planned id that the engine now defines belongs back in ``enables_rule_ids``;
+    a document carrying planned ids says so in plain words; and a pack that
+    does not ship carries no plan at all.
+    """
+    shipped = _shipped_slugs()
+    assert shipped, "the force-include map was not found, the shipped set cannot be read"
+    built_now: dict[str, list[str]] = {}
+    for pack_dir in _pack_dirs():
+        slug = pack_dir.parents[1].name
+        for stem, document in _documents(pack_dir).items():
+            planned = document.get(PLANNED_KEY)
+            if planned is None:
+                continue
+            where = f"{slug}/{stem}"
+            assert slug in shipped, f"{where}: a pack that does not ship keeps a plan, drop the ids instead"
+            assert planned, f"{where}: an empty planned list, delete the key"
+            assert "planned, not built" in document.get("planned_not_built_note", "").lower(), where
+            done = [rid for rid in planned if rid in engine_rule_ids]
+            if done:
+                built_now[where] = done
+    assert not built_now, f"planned checks the engine now defines, move them to enables_rule_ids: {built_now}"
 
 
 def test_a_document_that_enables_nothing_says_why(engine_rule_ids: set[str]) -> None:

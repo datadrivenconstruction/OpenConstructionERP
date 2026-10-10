@@ -9,11 +9,13 @@
   "description": "Enforces ABNT NBR 8800:2008 for steel and steel-concrete composite building structures: steel grade per ASTM/NBR table, connection class declared, fire-protection coating specified per NBR 14323, corrosion-protection scheme per NBR 14643, and welding procedure documented (AWS D1.1 / NBR 8800 Annex M).",
   "description_pt": "Aplica a NBR 8800:2008 para estruturas de aco e mistas aco-concreto: grau de aco conforme tabela ASTM/NBR, classe de ligacao declarada, protecao contra incendio conforme NBR 14323, esquema de protecao contra corrosao conforme NBR 14643 e procedimento de soldagem documentado (AWS D1.1 / NBR 8800 Anexo M).",
   "applies_to": ["projects", "boq", "cad", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "abnt.steel_grade_specified",
     "abnt.connection_class_declared",
     "abnt.fire_protection_nbr14323_specified",
     "abnt.corrosion_protection_nbr14643_specified",
     "abnt.welding_procedure_documented"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

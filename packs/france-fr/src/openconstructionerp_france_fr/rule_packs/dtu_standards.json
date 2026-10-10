@@ -5,7 +5,8 @@
   "jurisdiction": "FR",
   "description": "Validates BOQ items and specifications against NF DTU (Documents Techniques Unifies) measurement and workmanship rules published by AFNOR and maintained by CSTB. Covers the main DTU families for structural works, waterproofing, facades, roofing, HVAC and electrical installations, ensuring that specification clauses reference the applicable DTU and that measurement conventions match the DTU scope.",
   "applies_to": ["boq", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "dtu.dtu_reference_present_per_trade",
     "dtu.dtu_version_current",
     "dtu.dtu_13_1_fondations_superficielles_referenced",
@@ -21,6 +22,7 @@
     "dtu.dtu_68_series_ventilation_referenced",
     "dtu.measurement_rules_per_dtu"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "AFNOR / CSTB",
   "publication_year": 2024
 }

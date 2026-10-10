@@ -158,4 +158,20 @@ describe('StepDataSetup, the semantic model wiring', () => {
     await waitFor(() => expect(onNext).toHaveBeenCalled());
     expect(installEmbeddingModel).toHaveBeenCalled();
   });
+
+  it('leaves the model unticked when the status cannot be read, so Continue downloads nothing', async () => {
+    // The tick is consent to a ~470 MB download. An unknown deployment must not
+    // be treated as a yes, which is what the old `?? true` fallback did.
+    embeddingModelStatus.mockRejectedValue(new Error('unreachable'));
+
+    const { onNext } = renderStep();
+    await waitFor(async () =>
+      expect((await encoderSwitch()).getAttribute('aria-checked')).toBe('false'),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Continue/i }));
+
+    await waitFor(() => expect(onNext).toHaveBeenCalled());
+    expect(installEmbeddingModel).not.toHaveBeenCalled();
+  });
 });

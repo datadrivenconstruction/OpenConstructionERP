@@ -919,3 +919,35 @@ __all__ = [
     "ViewpointResponse",
     "ViewpointUpdate",
 ]
+
+
+class GeocodingConsentResponse(BaseModel):
+    """Where project addresses may go for geocoding, and who decides it.
+
+    ``state`` is ``unanswered`` until a manager answers; ``env_disabled`` and
+    ``env_mirror`` mean the deployer fixed it in the environment and the
+    answer cannot be changed from the application.
+    """
+
+    state: str
+    mirror_url: str | None = None
+    nominatim_url: str | None = None
+    photon_url: str | None = None
+    can_decide: bool = False
+
+
+class GeocodingConsentUpdate(BaseModel):
+    """A manager's answer to the one-time geocoding question."""
+
+    choice: str = Field(pattern="^(allow|deny|mirror)$")
+    mirror_url: str | None = Field(default=None, max_length=500)
+
+    @field_validator("mirror_url")
+    @classmethod
+    def _http_url(cls, v: str | None) -> str | None:
+        if v is None or not v.strip():
+            return None
+        v = v.strip()
+        if not v.lower().startswith(("http://", "https://")):
+            raise ValueError("mirror_url must start with http:// or https://")
+        return v

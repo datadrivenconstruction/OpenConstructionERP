@@ -531,6 +531,21 @@ async def test_a_deposit_holds_no_retention(session) -> None:
     assert claim.net_due == Decimal("5000")
 
 
+async def test_a_deposit_still_holds_no_retention_when_its_retention_is_rolled_again(session) -> None:
+    # Confirmed product rule: an advance is paid before there is work for
+    # retention to secure, so it holds none on every later re-roll too, not
+    # only when the claim is raised. The contract rate here is 10 percent.
+    svc = ContractsService(session)
+    contract = await _contract(session)
+    deposit = await _milestone(session, contract, kind="deposit", value=Decimal("5000"))
+    claim = await svc.raise_claim_for_milestone(deposit.id)
+
+    rolled = await svc.roll_claim_retention(claim.id)
+
+    assert rolled.retention_amount == Decimal("0")
+    assert rolled.net_due == Decimal("5000")
+
+
 @pytest.mark.parametrize("kind", ["progress", "final"])
 async def test_a_progress_or_final_instalment_holds_the_flat_rate(session, kind) -> None:
     svc = ContractsService(session)

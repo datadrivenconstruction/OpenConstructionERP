@@ -271,13 +271,13 @@ def test_element_cells_resolve_keys_like_the_rule_engine(tmp_path: Path) -> None
 def test_element_cells_read_only_the_columns_asked_for(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     root = _write(tmp_path, [{"id": "1", "a": "x", **{f"c{i}": "v" for i in range(50)}}])
     seen: list[list[str] | None] = []
-    real = ds.pq.read_table
+    real = ds.pq.ParquetFile.iter_batches
 
-    def spy(path: Any, columns: list[str] | None = None, **kw: Any) -> Any:
+    def spy(self: Any, *args: Any, columns: list[str] | None = None, **kw: Any) -> Any:
         seen.append(columns)
-        return real(path, columns=columns, **kw)
+        return real(self, *args, columns=columns, **kw)
 
-    monkeypatch.setattr(ds.pq, "read_table", spy)
+    monkeypatch.setattr(ds.pq.ParquetFile, "iter_batches", spy)
     ds.read_element_cells("p", "m", keys=["A"], ids=["1"], data_root=root)
     assert seen == [["id", "a"]]
 

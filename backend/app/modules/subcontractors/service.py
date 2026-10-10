@@ -784,6 +784,7 @@ class SubcontractorService:
             contact_id=data.contact_id,
             legal_name=data.legal_name,
             trade_name=data.trade_name,
+            party_kind=data.party_kind,
             tax_id=data.tax_id,
             trade_categories=data.trade_categories,
             prequalification_status=data.prequalification_status,
@@ -1242,7 +1243,7 @@ class SubcontractorService:
 
         project = await self.session.get(Project, data.project_id)
         country = normalise_country(getattr(project, "country_code", None)) or None
-        defaults = resolve_contract_defaults(country)
+        defaults = resolve_contract_defaults(country, getattr(project, "subdivision_code", None))
         _values, stamp = apply_contract_defaults({}, defaults, country_code=country)
         # An agreement states a rate and one release event; the ceiling, the
         # split and the payment period belong to the contract it sits under.

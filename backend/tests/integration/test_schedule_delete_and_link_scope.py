@@ -109,7 +109,7 @@ async def _count(session, model, schedule_id: uuid.UUID) -> int:  # noqa: ANN001
 
 
 @pytest.mark.asyncio
-async def test_an_editor_archives_baselines_but_only_an_admin_can_purge(no_owner_check: None) -> None:
+async def test_an_editor_archives_baselines_but_a_non_owner_cannot_purge(no_owner_check: None) -> None:
     """Archive is reversible; baselines cannot be destroyed through its endpoint."""
     from app.modules.schedule.models import Schedule
 
@@ -454,3 +454,69 @@ def test_generate_request_accepts_replace() -> None:
     body = GenerateFromBOQRequest(boq_id=uuid.uuid4(), replace=True)
     assert body.replace is True
     assert GenerateFromBOQRequest(boq_id=uuid.uuid4()).replace is False
+
+
+async def _owner_payload(service: ScheduleService, schedule_id: uuid.UUID) -> dict:
+    from app.modules.projects.models import Project
+
+    schedule = await service.get_schedule(schedule_id)
+    owner_id = (
+        await service.session.execute(select(Project.owner_id).where(Project.id == schedule.project_id))
+    ).scalar_one()
+    return {"sub": str(owner_id), "role": "editor", "permissions": ["schedule.delete"]}
+
+
+@pytest.mark.asyncio
+async def test_the_project_owner_deletes_an_archived_schedule(no_owner_check: None) -> None:
+    """A tester could not delete their own schedule: only an admin could. The
+    owner of the project may now, once it is archived; anyone else still only
+    archives."""
+    from app.modules.schedule.models import Schedule
+
+    async with transactional_session(disable_fks=True) as session:
+        service = ScheduleService(session)
+        schedule_id = await _schedule(service)
+        await _activity(service, schedule_id, "A")
+        owner = await _owner_payload(service, schedule_id)
+        stranger = {"sub": str(uuid.uuid4()), "role": "editor", "permissions": ["schedule.delete"]}
+
+        with pytest.raises(HTTPException) as early:
+            await service.purge_schedule(schedule_id, actor_payload=owner)
+        assert early.value.status_code == 409
+        await service.delete_schedule(schedule_id, actor_payload=owner)
+
+        impact = await schedule_router.schedule_delete_impact(
+            schedule_id, _user_id=stranger["sub"], payload=stranger, session=session, service=service
+        )
+        assert (impact.can_delete, impact.blocked_reason) == (False, "permission_denied")
+        with pytest.raises(HTTPException) as refused:
+            await service.purge_schedule(schedule_id, actor_payload=stranger)
+        assert refused.value.status_code == 403
+
+        impact = await schedule_router.schedule_delete_impact(
+            schedule_id, _user_id=owner["sub"], payload=owner, session=session, service=service
+        )
+        assert (impact.can_delete, impact.blocked_reason) == (True, None)
+        await schedule_router.purge_schedule(
+            schedule_id, _user_id=owner["sub"], payload=owner, session=session, service=service
+        )
+        assert await _count(session, Schedule, schedule_id) == 0
+
+
+@pytest.mark.asyncio
+async def test_an_owner_leaves_a_schedule_with_baselines_to_an_admin(no_owner_check: None) -> None:
+    async with transactional_session(disable_fks=True) as session:
+        service = ScheduleService(session)
+        schedule_id = await _schedule(service)
+        session.add(_baseline(schedule_id))
+        await session.flush()
+        owner = await _owner_payload(service, schedule_id)
+        await service.delete_schedule(schedule_id, actor_payload=owner)
+
+        impact = await schedule_router.schedule_delete_impact(
+            schedule_id, _user_id=owner["sub"], payload=owner, session=session, service=service
+        )
+        assert (impact.can_delete, impact.blocked_reason) == (False, "schedule_has_baselines")
+        with pytest.raises(HTTPException) as refused:
+            await service.purge_schedule(schedule_id, actor_payload=owner)
+        assert refused.value.status_code == 409

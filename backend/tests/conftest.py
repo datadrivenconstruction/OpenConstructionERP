@@ -92,6 +92,104 @@ _PG_REAP_MIN_AGE_SECONDS = 3600
 _PG_PIDFILE_RELPATHS = ("pgdata/postmaster.pid", "postmaster.pid")
 
 
+#: Written next to ``pgdata`` once the cluster is up: which pytest process owns
+#: it. A postmaster outlives a pytest that is killed by a timeout, because
+#: ``atexit`` never runs, and its pid file then names a live process forever.
+#: Only the owner file can tell such an orphan from a cluster a running suite
+#: is still serving out of.
+_PG_OWNER_FILE = "oe-tests-owner.json"
+
+#: Slack when comparing a recorded process start time with the live one.
+_PG_OWNER_START_TOLERANCE_SECONDS = 2.0
+
+
+def _process_start_time(pid: int) -> float | None:
+    """When ``pid`` started, or None if that cannot be read."""
+    try:
+        import psutil
+
+        return float(psutil.Process(pid).create_time())
+    except Exception:  # noqa: BLE001 - unknown is an answer here
+        return None
+
+
+def _write_pg_owner(data_dir: Path) -> None:
+    """Record this pytest process as the owner of the cluster in ``data_dir``."""
+    import json
+
+    payload = {"pid": os.getpid(), "started": _process_start_time(os.getpid())}
+    try:
+        (data_dir / _PG_OWNER_FILE).write_text(json.dumps(payload), encoding="utf-8")
+    except OSError:
+        pass
+
+
+def _pg_owner_is_gone(entry: Path) -> bool:
+    """True only when the pytest that booted this cluster is definitely dead.
+
+    No owner file, an unreadable one, or any doubt answers False, so a cluster
+    from before owner files existed, or one whose owner cannot be judged, keeps
+    the old treatment and is left alone.
+    """
+    import json
+
+    from app.core import embedded_pg
+
+    try:
+        payload = json.loads((entry / _PG_OWNER_FILE).read_text(encoding="utf-8"))
+        pid = int(payload["pid"])
+        started = payload.get("started")
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+    if pid == os.getpid():
+        return False
+    if not embedded_pg._pid_alive(pid):
+        return True
+    # Alive, but possibly a recycled pid: compare start times when both are known.
+    now_started = _process_start_time(pid)
+    if started is None or now_started is None:
+        return False
+    return abs(now_started - float(started)) > _PG_OWNER_START_TOLERANCE_SECONDS
+
+
+def _stop_orphan_postmaster(pgdata: Path, pid: int) -> bool:
+    """Stop a postmaster whose owning pytest is dead. True once it is gone.
+
+    ``pg_ctl stop -m immediate`` first, as a crash PostgreSQL is built to
+    survive; then a plain terminate and kill for a postmaster that ignores it.
+    The data dir is thrown away right after, so nothing here needs to be clean.
+    """
+    import subprocess
+
+    from app.core import embedded_pg
+
+    pg_ctl = embedded_pg._pg_ctl_path()
+    if pg_ctl is not None:
+        try:
+            subprocess.run(  # noqa: S603
+                [str(pg_ctl), "-D", str(pgdata), "-m", "immediate", "-w", "-t", "15", "stop"],
+                capture_output=True,
+                timeout=30,
+                check=False,
+            )
+        except Exception:  # noqa: BLE001, S110 - the fallback below takes over
+            pass
+    if embedded_pg._pid_alive(pid):
+        try:
+            import psutil
+
+            proc = psutil.Process(pid)
+            proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except psutil.TimeoutExpired:
+                proc.kill()
+                proc.wait(timeout=10)
+        except Exception:  # noqa: BLE001, S110 - judged by the liveness check below
+            pass
+    return not embedded_pg._pid_alive(pid)
+
+
 def _pg_temp_root() -> Path:
     """Where this session's throwaway cluster lives.
 
@@ -177,6 +275,7 @@ def _reap_stale_pg_data_dirs() -> None:
     removed = 0
     unreadable = 0
     still_running = 0
+    stopped = 0
     for entry in root.glob("oe-tests-pg-*"):
         if not entry.is_dir():
             continue
@@ -189,15 +288,27 @@ def _reap_stale_pg_data_dirs() -> None:
                     unreadable += 1
                     continue
                 if embedded_pg._pidfile_owner_is_live(holder.parent, pid):
-                    still_running += 1
+                    # A live postmaster whose pytest was killed is an orphan:
+                    # stop it and take the dir. Its age does not matter, the
+                    # owner is known to be dead.
+                    if not (_pg_owner_is_gone(entry) and _stop_orphan_postmaster(holder.parent, pid)):
+                        still_running += 1
+                        continue
+                    stopped += 1
+                elif now - entry.stat().st_mtime < _PG_REAP_MIN_AGE_SECONDS:
                     continue
-            if now - entry.stat().st_mtime < _PG_REAP_MIN_AGE_SECONDS:
+            elif now - entry.stat().st_mtime < _PG_REAP_MIN_AGE_SECONDS:
                 continue
         except OSError:
             continue
         shutil.rmtree(entry, ignore_errors=True)
         if not entry.exists():
             removed += 1
+    if stopped:
+        warnings.warn(
+            f"embedded PostgreSQL: stopped {stopped} orphaned test cluster(s) whose pytest had been killed.",
+            stacklevel=2,
+        )
     if still_running or unreadable:
         parts = []
         if still_running:
@@ -244,6 +355,7 @@ if not os.environ.get("DATABASE_URL", "").strip():
     # must leave it alone: without this pin the first test that exercises the app
     # lifespan stops the postmaster and every test after it errors on connect.
     embedded_pg.retain()
+    _write_pg_owner(_PG_DATA_DIR)
 
     def _stop_and_remove_cluster() -> None:
         """Stop the postmaster, then take its data dir with it.
@@ -403,6 +515,10 @@ os.environ.setdefault("REGISTRATION_MODE", "open")
 # test_demo_login_endpoint.py sets SEED_DEMO=true inside its own fixture and
 # is unaffected. All other suites work without the demo accounts.
 os.environ.setdefault("SEED_DEMO", "false")
+# Semantic search is off by default for users. The suite keeps the switch on so
+# the vector and matcher tests exercise the real path; the switch itself is
+# tested with this variable removed (test_semantic_search_is_opt_in.py).
+os.environ.setdefault("OE_SEMANTIC_SEARCH", "1")
 
 # ── Fast app startup for tests ─────────────────────────────────────────────
 # Each integration module stands up its own FastAPI app via create_app() and

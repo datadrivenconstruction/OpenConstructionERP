@@ -55,6 +55,11 @@ MAGIC_LINK_REQUEST_INTERVAL = timedelta(seconds=60)
 SESSION_TTL = timedelta(days=7)
 #: Portal roles a project-wide rule shows every client payment plan to.
 PAYMENT_PLAN_PROJECT_ROLES = frozenset({"client", "investor"})
+#: Portal roles a project-wide rule shows the client's issued invoices to. The
+#: same client side as the payment plan, on purpose: a subcontractor, supplier,
+#: consultant or building user let into a project reads its documents, not what
+#: the client is billed, so for them only per-invoice rules count.
+INVOICE_PROJECT_ROLES = PAYMENT_PLAN_PROJECT_ROLES
 
 # Permission rank - higher number satisfies all lower-number requirements.
 _PERMISSION_RANK: dict[str, int] = {

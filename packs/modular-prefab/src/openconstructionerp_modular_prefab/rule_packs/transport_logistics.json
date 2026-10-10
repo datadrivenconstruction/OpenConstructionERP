@@ -4,7 +4,8 @@
   "standard": "Abnormal-load transport regulations / ISO 668 container / EU Directive 96/53/EC / US FHWA / STAA",
   "jurisdiction": "INTL",
   "description": "Enables OCERP built-in validation rules that check transport packages for each module before factory dispatch. Covers EU (Directive 96/53/EC: 2.55 m standard width, 4 m height, 40 t GVW, 44 t intermodal; abnormal-load thresholds vary by member state — typically >3.0 m width = escort, >4.0 m height = route survey, >44 t = permit), US (Interstate: 8'-6'' / 2.59 m width, 13'-6'' / 4.11 m height, 80 000 lb / 36 287 kg gross; non-divisible loads >12 ft / 3.66 m width need state permits, >16 ft / 4.88 m typically need pilot car + route survey, super-loads >14 ft / 4.27 m height in many states need utility coordination). Validates dimensions vs route envelope, axle weights, escort/pilot car requirement, route survey, permits per jurisdiction crossed, lashing plan, cargo insurance.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "transport.dimensions_within_legal_envelope",
     "transport.dimensions_eu_directive_96_53_ec_checked",
     "transport.dimensions_us_fhwa_staa_checked",
@@ -27,5 +28,6 @@
     "transport.lifting_lug_load_test_certificate_attached",
     "transport.weather_window_evaluated",
     "transport.iso_668_container_class_set_if_intermodal"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -289,3 +289,7 @@ class MatchResponse(BaseModel):
     catalog_id: str | None = None
     catalog_count: int = 0
     catalog_vectorized_count: int = 0
+    # Process ids of matching models switched off in the processes center
+    # (``cwicr_ranker``, ``bge_reranker``). Non-empty means candidates came
+    # from the reduced path, and the UI says so with a link to the center.
+    models_disabled: list[str] = Field(default_factory=list)
