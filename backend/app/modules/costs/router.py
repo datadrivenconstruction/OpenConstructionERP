@@ -3382,6 +3382,7 @@ async def install_v3_catalogue(
 @router.get("/vector/search/")
 async def semantic_search(
     session: SessionDep,
+    _user_id: CurrentUserId,
     q: str = Query(..., min_length=2, max_length=500, description="Natural language query"),
     region: str | None = Query(default=None, description="Filter by region"),
     limit: int = Query(default=25, ge=1, le=500),
@@ -3438,6 +3439,7 @@ async def semantic_search(
 @router.get("/categories/", response_model=list[str])
 async def list_categories(
     session: SessionDep,
+    _user_id: CurrentUserId,
     region: str | None = Query(default=None, description="Filter by region"),
 ) -> list[str]:
     """Return distinct classification.collection values. Cached for 30s."""
@@ -3485,6 +3487,7 @@ async def list_categories(
 
 @router.get("/category-tree/", response_model=list[CategoryTreeNode])
 async def get_category_tree(
+    _user_id: CurrentUserId,
     service: CostItemService = Depends(_get_service),
     region: str | None = Query(
         default=None,
