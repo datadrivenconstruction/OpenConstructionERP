@@ -41,6 +41,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import cost_scope
 from app.core.events import event_bus
 from app.modules.cost_match import events
 from app.modules.cost_match.matcher import (
@@ -103,6 +104,18 @@ ALTERNATIVES_KEPT = 5
 # Confidence is stored with the same four-decimal precision the matcher
 # produces, so a value never changes shape between scoring and reading.
 _CONFIDENCE_PLACES = Decimal("0.0001")
+
+
+class CatalogueNotFoundError(LookupError):
+    """The run names a catalogue that does not exist for this caller.
+
+    A catalogue the caller may not read and one that was never created give
+    the same answer.
+    """
+
+    def __init__(self, catalog_id: uuid.UUID) -> None:
+        super().__init__("Cost catalog not found")
+        self.catalog_id = catalog_id
 
 
 class RunClosedError(RuntimeError):
@@ -285,6 +298,8 @@ class CostMatchService:
             never through ``run.results`` - that relationship refuses lazy SQL
             by design.
         """
+        if data.catalog_id is not None and not await cost_scope.may_read_catalogue(self.session, data.catalog_id):
+            raise CatalogueNotFoundError(data.catalog_id)
         run = MatchRun(
             project_id=data.project_id,
             name=data.name,

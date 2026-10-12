@@ -283,7 +283,13 @@ async def run_node(
         )
         # Wall-clock cap so a stuck / runaway node cannot freeze the
         # worker forever. Tunable via PIPELINE_NODE_TIMEOUT_S.
-        final_output = await asyncio.wait_for(spec.runner(ctx), timeout=DEFAULT_NODE_TIMEOUT_S)
+        from app.core import cost_scope
+
+        # A run executes in a worker with no request around it, yet its
+        # output goes back to the user who started it: read cost items as
+        # that user (shared rows only when the run has no actor).
+        with cost_scope.caller_scope(actor_id):
+            final_output = await asyncio.wait_for(spec.runner(ctx), timeout=DEFAULT_NODE_TIMEOUT_S)
         if not isinstance(final_output, dict):
             final_output = {"result": final_output}
     except TimeoutError as exc:

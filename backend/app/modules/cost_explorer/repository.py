@@ -19,6 +19,7 @@ from collections.abc import AsyncIterator, Sequence
 from sqlalchemy import String, case, cast, delete, distinct, func, insert, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import cost_scope
 from app.modules.catalog.models import CatalogResource
 from app.modules.cost_explorer import search, spelling
 from app.modules.cost_explorer.models import CostItemResource
@@ -171,7 +172,7 @@ class CostExplorerRepository:
 
     async def get_item(self, item_id: uuid.UUID) -> CostItem | None:
         """Load a single cost item by id."""
-        return await self.session.get(CostItem, item_id)
+        return await cost_scope.get_cost_item(self.session, item_id)
 
     # ── Find work (text search) ──────────────────────────────────────────────
 

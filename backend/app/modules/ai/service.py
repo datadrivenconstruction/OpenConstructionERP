@@ -709,10 +709,12 @@ async def _match_cost_items(
 
     # 1. Vector similarity search (best signal when the embedder is present).
     try:
+        from app.core import cost_scope
         from app.core.vector import encode_texts, vector_search
 
         query_vec = encode_texts([description])[0]
-        for m in vector_search(query_vec, region=region or None, limit=limit):
+        hits = vector_search(query_vec, region=region or None, limit=limit)
+        for m in await cost_scope.visible_hits(session, hits):
             matches.append(
                 {
                     "code": m.get("code", ""),

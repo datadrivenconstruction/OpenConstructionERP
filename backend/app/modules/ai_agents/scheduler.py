@@ -108,13 +108,18 @@ async def _fire_due_agent(
         schedule_input.strip() if isinstance(schedule_input, str) and schedule_input.strip() else DEFAULT_SCHEDULE_INPUT
     )
 
+    from app.core import cost_scope
+
     try:
-        await service.start_run(
-            user_id=agent_user_id,
-            agent_name=agent_agent_name,
-            user_input=user_input,
-            trigger_source="schedule",
-        )
+        # The scheduler has no request around it; the run it starts belongs
+        # to the agent's owner and reads cost items as that user.
+        with cost_scope.caller_scope(agent_user_id):
+            await service.start_run(
+                user_id=agent_user_id,
+                agent_name=agent_agent_name,
+                user_input=user_input,
+                trigger_source="schedule",
+            )
     except Exception:
         # A run failure is recorded on its own AgentRun row by start_run; an
         # unexpected exception here (e.g. agent vanished) is logged and skipped

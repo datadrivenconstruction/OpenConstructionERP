@@ -38,6 +38,7 @@ from fastapi import HTTPException
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import cost_scope
 from app.core.json_merge import merge_metadata
 from app.modules.ai_estimator import benchmarks, schemas
 from app.modules.ai_estimator import events as estimator_events
@@ -1535,10 +1536,9 @@ class AiEstimatorService:
         """Read a candidate's CWICR resource components from the cost DB."""
         if not candidate_id:
             return []
-        from app.modules.costs.models import CostItem
 
         try:
-            item = await self.session.get(CostItem, uuid.UUID(str(candidate_id)))
+            item = await cost_scope.get_cost_item(self.session, candidate_id)
         except (ValueError, TypeError):
             return []
         if item is None or not isinstance(item.components, list):

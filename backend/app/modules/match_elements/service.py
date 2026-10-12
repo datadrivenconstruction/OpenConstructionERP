@@ -3750,9 +3750,18 @@ class MatchElementsService:
 
         # Upsert by (code, region): re-saving the same description in the
         # same region refreshes the rate rather than violating the unique key.
-        existing = (
-            await db.execute(select(CostItem).where(CostItem.code == code, CostItem.region == region))
-        ).scalar_one_or_none()
+        from app.core import cost_scope  # noqa: PLC0415
+
+        # The unique key is installation-wide, so look at every row; a code
+        # held by a catalogue row is someone's own and is never refreshed here.
+        with cost_scope.system_scope():
+            existing = (
+                await db.execute(select(CostItem).where(CostItem.code == code, CostItem.region == region))
+            ).scalar_one_or_none()
+        if existing is not None and existing.catalog_id is not None:
+            from fastapi import HTTPException  # noqa: PLC0415
+
+            raise HTTPException(status_code=409, detail=f"Cost item with code '{code}' already exists")
         if existing is not None:
             existing.description = description
             existing.unit = unit

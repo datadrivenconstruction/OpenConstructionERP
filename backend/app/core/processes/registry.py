@@ -430,7 +430,13 @@ class ProcessRegistry:
             process = entry.spec.factory()
             process.bind(entry.spec.id, _Reporter(self, entry, entry.generation))
             entry.process = process
-            await process.start()
+            from app.core import cost_scope
+
+            # A process outlives the request that happened to start it (a lazy
+            # start, an enable from the admin screen); it must not keep reading
+            # cost items as that one user.
+            with cost_scope.system_scope():
+                await process.start()
         except Exception as exc:
             entry.last_run_ok = False
             self._fail(entry, exc)
