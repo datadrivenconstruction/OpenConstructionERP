@@ -52,6 +52,7 @@ from app.modules.cost_match.schemas import (
     MatchRunUpdate,
 )
 from app.modules.cost_match.service import (
+    CatalogueNotFoundError,
     CostMatchService,
     DecisionPayloadError,
     NoSuggestionToConfirmError,
@@ -184,7 +185,10 @@ async def create_run(
     # never substitute a body value when authenticated scope is unavailable.
     data = data.model_copy(update={"tenant_id": _as_uuid(tenant_id)})
     service = CostMatchService(session)
-    run = await service.create_run(data, created_by=_as_uuid(user_id))
+    try:
+        run = await service.create_run(data, created_by=_as_uuid(user_id))
+    except CatalogueNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     return await service.run_response(run)
 
 

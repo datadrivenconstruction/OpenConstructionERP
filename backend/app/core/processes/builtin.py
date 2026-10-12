@@ -167,13 +167,16 @@ async def prewarm_cost_caches() -> None:
 
     from sqlalchemy import distinct, func, select
 
+    from app.core import cost_scope
     from app.database import async_session_factory
     from app.modules.costs.models import CostItem
     from app.modules.costs.router import _category_tree_cache, _region_cache
     from app.modules.costs.schemas import CategoryTreeNode
     from app.modules.costs.service import CostItemService
 
-    async with async_session_factory() as session:
+    # These caches are read by every user, so they hold shared rows only; a
+    # caller's own catalogues are merged in live by the routes that serve them.
+    async with async_session_factory() as session, cost_scope.shared_scope():
         active = (CostItem.is_active.is_(True), CostItem.region.isnot(None), CostItem.region != "")
         r = await session.execute(select(distinct(CostItem.region)).where(*active))
         regions = sorted(row[0] for row in r.all())

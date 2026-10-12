@@ -276,7 +276,12 @@ async def visible_regions(
     )
     if region is not None:
         stmt = stmt.where(CostItem.region == region)
-    rows = (await db.execute(stmt.group_by(CostItem.region))).all()
+    from app.core import cost_scope  # noqa: PLC0415
+
+    # This query does the ownership arithmetic itself and needs the rows the
+    # caller may NOT read in order to hide the region they sit in.
+    with cost_scope.system_scope():
+        rows = (await db.execute(stmt.group_by(CostItem.region))).all()
     return {
         str(r): int(n)
         for r, n, h in rows
@@ -458,6 +463,8 @@ async def _start_process() -> None:
 
 async def run_queue() -> None:
     """Index every queued catalogue, one after another. The process body."""
+    from app.core import cost_scope  # noqa: PLC0415
+
     while _queue:
         region = _queue.pop(0)
         job = _jobs.get(region)
@@ -465,7 +472,12 @@ async def run_queue() -> None:
             continue
         job.status = "running"
         try:
-            await index_catalogue(job)
+            # The request was checked against the catalogue's owner before it
+            # was queued. The indexer then reads the whole region: read as the
+            # user whose request woke it, it would see a part of a catalogue
+            # and drop the rest from the index as stale.
+            with cost_scope.system_scope():
+                await index_catalogue(job)
         except asyncio.CancelledError:
             job.status = "interrupted"
             job.finished_at = time.time()

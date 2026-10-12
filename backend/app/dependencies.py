@@ -742,6 +742,12 @@ class RequirePermissionOrApiKey:
         # propagates unchanged; a valid key resolves to its owner and scopes.
         principal = await resolve_api_key_principal(request)
         self._authorize(getattr(principal.user, "role", "") or "", None, principal.scopes)
+        # The global request dependency saw no bearer token and bound an
+        # anonymous reader; an API key reads cost items as the key's owner.
+        from app.core import cost_scope
+
+        if cost_scope.in_request():
+            cost_scope.bind_caller(principal.user.id)
         return str(principal.user.id)
 
     def _authorize(
@@ -1190,6 +1196,7 @@ AuditContextDep = Annotated[None, Depends(audit_context_dep)]
 
 async def rls_request_context(
     tenant_id: CurrentTenantId = None,
+    payload: OptionalUserPayload = None,
 ) -> AsyncGenerator[None, None]:
     """Bind the caller's tenant to the RLS context for the whole request.
 
@@ -1201,11 +1208,24 @@ async def rls_request_context(
     ``OE_RLS_ENFORCE`` is enabled. An anonymous caller resolves to ``None`` (no
     tenant); a fail-closed policy then denies tenant-scoped rows. Inert while the
     flag is off - the listener ignores the bound value.
+
+    It also binds who reads cost items for this request (see
+    :mod:`app.core.cost_scope`), which is always on: an authenticated caller
+    reads shared rows and their own catalogues, an anonymous one shared rows
+    only. Being the one global dependency, no route can skip it.
     """
-    from app.core import rls
+    from app.core import cost_scope, rls
 
     token = rls.set_request_tenant(tenant_id)
+    # Under the request middleware the binding is left for the middleware to
+    # undo, so a streamed body and the background tasks, which run after this
+    # dependency has exited, still read as the caller. Without the middleware
+    # (a bare app in a test) it is undone here.
+    owned_by_middleware = cost_scope.in_request()
+    cost_token = cost_scope.bind_caller((payload or {}).get("sub"))
     try:
         yield
     finally:
+        if not owned_by_middleware:
+            cost_scope.reset_caller(cost_token)
         rls.reset_request_tenant(token)

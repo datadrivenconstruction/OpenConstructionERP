@@ -2518,6 +2518,12 @@ def create_app() -> FastAPI:
 
     app.add_middleware(RequestIDMiddleware)
 
+    # Who reads cost items in this request: anonymous until the global request
+    # dependency names the user. See app.core.cost_scope.
+    from app.core.cost_scope import RequestScopeMiddleware
+
+    app.add_middleware(RequestScopeMiddleware)
+
     # ── Slow request logger (warns on > 500ms responses) ──────────────────
     from app.middleware.slow_request_logger import SlowRequestLoggerMiddleware
 

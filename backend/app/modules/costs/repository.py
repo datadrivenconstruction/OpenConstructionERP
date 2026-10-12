@@ -20,6 +20,7 @@ from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 from sqlalchemy.sql.expression import ColumnElement
 
+from app.core import cost_scope
 from app.modules.costs.hazards import hazard_sql_flag, query_names_a_hazard
 from app.modules.costs.models import CostItem
 from app.modules.costs.schemas import UNSPECIFIED_CATEGORY
@@ -228,7 +229,7 @@ class CostItemRepository:
 
     async def get_by_id(self, item_id: uuid.UUID) -> CostItem | None:
         """Get cost item by ID."""
-        return await self.session.get(CostItem, item_id)
+        return await cost_scope.get_cost_item(self.session, item_id)
 
     async def get_by_code(self, code: str, region: str | None = None) -> CostItem | None:
         """Get cost item by code and optional region.
@@ -244,6 +245,18 @@ class CostItemRepository:
             stmt = stmt.where(CostItem.region == region)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def code_holder(self, code: str, region: str | None = None) -> CostItem | None:
+        """The row holding ``(code, region)``, whether or not the caller may read it.
+
+        The unique key is installation-wide, so a write has to see every row
+        to answer "is this code taken": a probe scoped to the caller would let
+        the insert through and fail on the constraint instead. Use it only to
+        decide a write; never return what it finds to a caller who could not
+        have read it (check with ``cost_scope.visible_ids``).
+        """
+        with cost_scope.system_scope():
+            return await self.get_by_code(code, region=region)
 
     async def get_by_codes(self, codes: list[str]) -> list[CostItem]:
         """Get multiple cost items by their codes."""

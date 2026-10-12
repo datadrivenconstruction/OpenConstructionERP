@@ -49,6 +49,7 @@ from decimal import Decimal
 from sqlalchemy import Text, and_, cast, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import cost_scope
 from app.modules.costs.models import CostItem
 
 # The provenance tokens live in the pure pricing module so the DB layer and the
@@ -430,7 +431,7 @@ async def resolve_material_cost_item(
         item_id = _uuid.UUID(best.cost_item_id)
     except (TypeError, ValueError):
         return None
-    item = await session.get(CostItem, item_id)
+    item = await cost_scope.get_cost_item(session, item_id)
     if item is None:
         return None
     return MaterialMatch(

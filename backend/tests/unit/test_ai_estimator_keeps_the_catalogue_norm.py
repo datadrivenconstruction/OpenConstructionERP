@@ -50,6 +50,16 @@ class _FakeSession:
     async def get(self, _model: Any, _pk: Any) -> Any:
         return self._item
 
+    async def execute(self, _statement: Any) -> Any:
+        # Cost items are loaded with a select; answer it with the same item.
+        item = self._item
+
+        class _Result:
+            def scalar_one_or_none(self) -> Any:
+                return item
+
+        return _Result()
+
 
 def _breakdown(components: Any) -> list[dict[str, Any]]:
     """Run the real boundary against a stubbed session."""

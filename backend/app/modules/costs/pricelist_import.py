@@ -30,6 +30,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import cost_scope
 from app.modules.boq.importers import ImporterParseError
 from app.modules.costs.pricelists.base import REGION_NAMES, PriceListSource
 from app.modules.costs.pricelists.containers import ContainerRefused
@@ -249,11 +250,14 @@ async def insert_batch(
         return 0
     rows = [CostItemCreate(**p, region=region, catalog_id=catalog_id) for p in payloads]
     codes = [row.code for row in rows]
-    existing = set(
-        (await session.execute(select(CostItem.code).where(CostItem.region == region, CostItem.code.in_(codes))))
-        .scalars()
-        .all()
-    )
+    # Every row, not only the importer's: ``(code, region)`` is unique across
+    # the installation, so a code another user holds must be skipped as well.
+    with cost_scope.system_scope():
+        existing = set(
+            (await session.execute(select(CostItem.code).where(CostItem.region == region, CostItem.code.in_(codes))))
+            .scalars()
+            .all()
+        )
     items = [
         CostItem(
             code=row.code,
