@@ -342,6 +342,16 @@ async def test_a_streamed_body_and_a_background_task_still_read_as_the_caller(wo
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "path",
+    ["/", "/autocomplete/?q=wall", "/regions/", "/categories/", "/category-tree/", "/vector/search/?q=wall"],
+)
+async def test_browsing_the_cost_base_needs_a_signed_in_caller(world: World, client: AsyncClient, path: str) -> None:
+    world.who = None
+    assert (await client.get(f"/api/v1/costs{path}")).status_code == 401
+
+
+@pytest.mark.asyncio
 async def test_a_request_nothing_identified_reads_shared_rows_only() -> None:
     """Inside a request the default reader is anonymous, never the system."""
     app = FastAPI()
