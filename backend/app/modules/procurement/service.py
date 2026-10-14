@@ -16,7 +16,7 @@ import logging
 import uuid
 from collections.abc import Sequence
 from datetime import UTC, date, datetime, timedelta
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -308,6 +308,13 @@ def _compute_po_total(subtotal: str, tax: str) -> str:
     return str(s + t)
 
 
+def _tax_from_rate(subtotal: object, rate: object) -> str:
+    """VAT on a net at a percentage rate, rounded half-up to the cent."""
+    s = _parse_decimal(str(subtotal or "0"), "amount_subtotal")
+    r = _parse_decimal(str(rate or "0"), "tax_rate")
+    return str((s * r / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
 def _validate_3way_match(
     po: PurchaseOrder,
     invoice_lines: list[dict],
@@ -479,7 +486,7 @@ def _frozen_po_changes(
     if any(
         name in fields and _cents(fields[name]) != _cents(getattr(po, name, None))
         for name in ("amount_subtotal", "tax_amount", "amount_total")
-    ):
+    ) or ("tax_rate" in fields and _plain(fields["tax_rate"]) != _plain(po.tax_rate)):
         changed.append("amounts")
     if (
         "currency_code" in fields
@@ -763,6 +770,33 @@ class ProcurementService:
 
     # ── Purchase Orders ──────────────────────────────────────────────────────
 
+    async def _project_default_vat_rate(self, project_id: uuid.UUID) -> str | None:
+        """The project's ``default_vat_rate`` as a valid percentage, or None.
+
+        Best-effort like the currency lookup: an unreadable project or a value
+        that is not a 0-100 number means "no default", never a failed create.
+        """
+        from sqlalchemy import select
+
+        from app.modules.projects.models import Project
+
+        try:
+            raw = (
+                await self.session.execute(select(Project.default_vat_rate).where(Project.id == project_id))
+            ).scalar_one_or_none()
+        except Exception:  # noqa: BLE001 - lookup is non-critical
+            return None
+        text = str(raw or "").strip().rstrip("%").strip()
+        if not text:
+            return None
+        try:
+            rate = Decimal(text)
+        except (InvalidOperation, ValueError):
+            return None
+        if not rate.is_finite() or rate < 0 or rate > 100:
+            return None
+        return text
+
     async def create_po(
         self,
         data: POCreate,
@@ -809,6 +843,14 @@ class ProcurementService:
         if data.items:
             aggregated_subtotal = str(sum(item_amounts, Decimal("0")))
             data.amount_subtotal = aggregated_subtotal
+
+        # VAT (#515): a create that names neither a rate nor a tax amount
+        # starts at the project's default rate; a named rate derives the tax;
+        # a typed tax amount alone is kept as typed and carries no rate.
+        if data.tax_rate is None and "tax_amount" not in data.model_fields_set:
+            data.tax_rate = await self._project_default_vat_rate(data.project_id)
+        if data.tax_rate is not None:
+            data.tax_amount = _tax_from_rate(data.amount_subtotal, data.tax_rate)
 
         # Server-side total computation
         computed_total = _compute_po_total(data.amount_subtotal, data.tax_amount)
@@ -945,6 +987,7 @@ class ProcurementService:
                 currency_code=currency_code,
                 amount_subtotal=data.amount_subtotal,
                 tax_amount=data.tax_amount,
+                tax_rate=data.tax_rate,
                 amount_total=computed_total,
                 status=data.status,
                 payment_terms=data.payment_terms,
@@ -1133,6 +1176,14 @@ class ProcurementService:
                     ).strip(),
                 )
 
+        # VAT rate (#515). A typed tax amount without a rate clears the rate,
+        # since that tax is no longer derived from anything. The rate that
+        # results is applied after the lines are written, below, because the
+        # net it applies to may come from the replaced lines.
+        if "tax_amount" in fields and "tax_rate" not in fields:
+            fields["tax_rate"] = None
+        effective_rate = fields.get("tax_rate", po.tax_rate)
+
         # Recompute total if subtotal or tax changed
         new_subtotal = fields.get("amount_subtotal", po.amount_subtotal)
         new_tax = fields.get("tax_amount", po.tax_amount)
@@ -1192,6 +1243,18 @@ class ProcurementService:
                     po_id,
                     amount_subtotal=new_subtotal_from_items,
                     amount_total=recomputed_total,
+                )
+
+        if effective_rate is not None and (
+            "tax_rate" in fields or "amount_subtotal" in fields or data.items is not None
+        ):
+            current = await self.po_repo.get(po_id)
+            if current is not None:
+                derived_tax = _tax_from_rate(current.amount_subtotal, effective_rate)
+                await self.po_repo.update(
+                    po_id,
+                    tax_amount=derived_tax,
+                    amount_total=_compute_po_total(current.amount_subtotal or "0", derived_tax),
                 )
 
         updated = await self.po_repo.get(po_id)

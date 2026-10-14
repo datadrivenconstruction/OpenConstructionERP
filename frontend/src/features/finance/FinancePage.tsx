@@ -2094,7 +2094,8 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
   // with. Same key as the project pages, so this is usually a cache hit.
   const { data: invProject } = useQuery({
     queryKey: ['project', projectId],
-    queryFn: () => apiGet<{ country_code?: string | null }>(`/v1/projects/${projectId}`),
+    queryFn: () =>
+      apiGet<{ country_code?: string | null; default_vat_rate?: string | null }>(`/v1/projects/${projectId}`),
     enabled: !!projectId,
   });
   const projectCountry = (invProject?.country_code || '').trim().toUpperCase();
@@ -2107,8 +2108,9 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
     enabled: !!projectCountry,
   });
   const { options: vatOptions, defaultRate: defaultVat } = useMemo(
-    () => vatChoices(Array.isArray(countryTaxes?.items) ? countryTaxes.items : []),
-    [countryTaxes],
+    () =>
+      vatChoices(Array.isArray(countryTaxes?.items) ? countryTaxes.items : [], invProject?.default_vat_rate),
+    [countryTaxes, invProject?.default_vat_rate],
   );
 
   const [invoiceForm, setInvoiceForm] = useState({

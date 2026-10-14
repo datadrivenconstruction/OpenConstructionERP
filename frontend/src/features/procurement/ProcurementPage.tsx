@@ -61,6 +61,7 @@ import { POStatusPipeline } from './POStatusPipeline';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { initialPoTaxRate, poTaxFromRate, readPoTaxRate } from './poTax';
 import { orderSource, rfqDeepLink } from '@/shared/lib/awardChainLinks';
 import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
 
@@ -174,6 +175,7 @@ interface POResponse {
   currency_code: string;
   amount_subtotal: string | number;
   tax_amount: string | number;
+  tax_rate?: string | null;
   amount_total: string | number;
   status: string;
   payment_terms: string | null;
@@ -672,6 +674,14 @@ function PurchaseOrdersTab({
       apiGet<{ currency: string }>(`/v1/finance/dashboard/?project_id=${projectId}`),
   });
   const projectCurrency = poDashboard?.currency || '';
+  // The project's default VAT rate, which a new order starts with (#515).
+  // Same key as the project pages, so this is usually a cache hit.
+  const { data: poProject } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => apiGet<{ default_vat_rate?: string | null }>(`/v1/projects/${projectId}`),
+    enabled: !!projectId,
+  });
+  const projectVatRate = initialPoTaxRate(poProject?.default_vat_rate);
 
   /* ── PO create / edit modal state ──
      The same modal serves both flows. When `editingPO` holds a PO id the
@@ -711,9 +721,15 @@ function PurchaseOrdersTab({
   // The state an edit prefill left the form in, so the save can send only what
   // the user actually changed. `null` outside edit mode. See
   // `poFormFromResponse`.
-  const [poBase, setPoBase] = useState<{ form: POFormState; tax: string } | null>(null);
+  const [poBase, setPoBase] = useState<{ form: POFormState; tax: string; rate: string } | null>(null);
   const [poErrors, setPoErrors] = useState<Record<string, string>>({});
   const [poTaxInput, setPoTaxInput] = useState('0');
+  // VAT as a percentage of the net. While it holds a valid rate the tax is
+  // derived from it; typing the tax as an amount clears it. `poTaxRateSeeded`
+  // makes the project default a once-per-open seed, so a rate the buyer
+  // cleared is not put back.
+  const [poTaxRate, setPoTaxRate] = useState('');
+  const [poTaxRateSeeded, setPoTaxRateSeeded] = useState(false);
   const firstFieldRef = useRef<HTMLDivElement>(null);
 
   const emptyPoForm = {
@@ -732,6 +748,13 @@ function PurchaseOrdersTab({
     }
   }, [showCreate, editingPO, projectCurrency, poForm.currency]);
 
+  useEffect(() => {
+    if (showCreate && !editingPO && !poTaxRateSeeded && projectVatRate) {
+      setPoTaxRate(projectVatRate);
+      setPoTaxRateSeeded(true);
+    }
+  }, [showCreate, editingPO, poTaxRateSeeded, projectVatRate]);
+
   const closeModal = () => {
     setShowCreate(false);
     setEditingPO(null);
@@ -740,6 +763,8 @@ function PurchaseOrdersTab({
     setPoForm({ ...emptyPoForm, items: [{ ...emptyLine }] });
     setPoBase(null);
     setPoTaxInput('0');
+    setPoTaxRate('');
+    setPoTaxRateSeeded(false);
     setPoErrors({});
   };
 
@@ -808,7 +833,15 @@ function PurchaseOrdersTab({
 
   // Computed totals
   const poSubtotal = poForm.items.reduce((s, li) => s + parseFloat(li.amount || '0'), 0);
-  const poTotal = poSubtotal + parseFloat(poTaxInput || '0');
+  const poRateValid = readPoTaxRate(poTaxRate) != null;
+  const poTaxShown = poTaxFromRate(poSubtotal, poTaxRate) ?? poTaxInput;
+  const poTotal = poSubtotal + parseFloat(poTaxShown || '0');
+  const changePoTaxRate = (value: string) => {
+    // Clearing a valid rate keeps the tax it last derived, so the total does
+    // not jump; from then on the amount is the buyer's to type.
+    if (poRateValid && readPoTaxRate(value) == null) setPoTaxInput(poTaxShown);
+    setPoTaxRate(value);
+  };
   // What to show as the amount prefix in the modal - the chosen currency,
   // else the resolved project currency, else a neutral label (never EUR).
   const displayCurrency =
@@ -853,7 +886,9 @@ function PurchaseOrdersTab({
         delivery_date: data.delivery_date || undefined,
         currency_code: data.currency,
         amount_subtotal: String(poSubtotal.toFixed(2)),
-        tax_amount: poTaxInput || '0',
+        // A rate lets the server derive the tax exactly; without one the
+        // typed amount is the tax.
+        ...(poRateValid ? { tax_rate: poTaxRate.trim() } : { tax_amount: poTaxInput || '0' }),
         amount_total: String(poTotal.toFixed(2)),
         payment_terms: `Net ${data.payment_terms}`,
         notes: data.notes || undefined,
@@ -901,8 +936,10 @@ function PurchaseOrdersTab({
       // whatever somebody else did to it in the meantime survives.
       const base = poBase?.form ?? data;
       const baseTax = poBase?.tax ?? poTaxInput;
+      const baseRate = poBase?.rate ?? poTaxRate;
       const itemsChanged = JSON.stringify(data.items) !== JSON.stringify(base.items);
-      const taxChanged = poTaxInput !== baseTax;
+      const rateChanged = poTaxRate.trim() !== baseRate.trim();
+      const taxChanged = !poRateValid && poTaxInput !== baseTax;
       const body: Record<string, unknown> = {};
       if (data.vendor_contact_id !== base.vendor_contact_id) {
         body.vendor_contact_id = data.vendor_contact_id || undefined;
@@ -937,9 +974,11 @@ function PurchaseOrdersTab({
           }));
         body.amount_subtotal = String(poSubtotal.toFixed(2));
       }
+      // An emptied rate is sent as '' so the server clears it.
+      if (rateChanged) body.tax_rate = poRateValid ? poTaxRate.trim() : '';
       if (taxChanged) body.tax_amount = poTaxInput || '0';
       // The total is the sum of the two, so it moves whenever either does.
-      if (itemsChanged || taxChanged) body.amount_total = String(poTotal.toFixed(2));
+      if (itemsChanged || taxChanged || rateChanged) body.amount_total = String(poTotal.toFixed(2));
       return apiPatch<{ vendor_warnings?: string[] }>(`/v1/procurement/${id}`, body);
     },
     onSuccess: (res) => {
@@ -961,9 +1000,12 @@ function PurchaseOrdersTab({
       // can never drift apart. See `poFormFromResponse`.
       const seeded = poFormFromResponse(po, projectCurrency);
       const tax = po.tax_amount != null ? String(po.tax_amount) : '0';
+      const rate = initialPoTaxRate(po.tax_rate);
       setPoForm(seeded);
-      setPoBase({ form: seeded, tax });
+      setPoBase({ form: seeded, tax, rate });
       setPoTaxInput(tax);
+      setPoTaxRate(rate);
+      setPoTaxRateSeeded(true);
       setPoErrors({});
       setEditingPO(po.id);
       setEditingPOStatus(po.status);
@@ -1401,6 +1443,29 @@ function PurchaseOrdersTab({
                   <span className="text-content-secondary">{t('procurement.subtotal', { defaultValue: 'Subtotal' })}</span>
                   <span className="tabular-nums font-medium text-content-primary">{displayCurrency} {fmtFixed(poSubtotal, 2)}</span>
                 </div>
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-content-secondary">{t('procurement.vat_rate', { defaultValue: 'VAT %' })}</span>
+                  <div className="relative w-32">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={poTaxRate}
+                      disabled={figuresLocked}
+                      aria-label={t('procurement.vat_rate', { defaultValue: 'VAT %' })}
+                      title={t('procurement.vat_rate_hint', {
+                        defaultValue: "New orders start at the project's default VAT rate. Clear it to type the tax as an amount.",
+                      })}
+                      onChange={(e) => changePoTaxRate(e.target.value)}
+                      className={clsx(inputCls, 'h-8 text-xs pr-7 text-right')}
+                      placeholder={t('procurement.vat_rate_none', { defaultValue: 'none' })}
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-2xs text-content-tertiary font-medium">
+                      %
+                    </span>
+                  </div>
+                </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-content-secondary">{t('procurement.tax', { defaultValue: 'Tax' })}</span>
                   <div className="relative w-32">
@@ -1410,10 +1475,14 @@ function PurchaseOrdersTab({
                     <input
                       type="number"
                       step="0.01"
-                      value={poTaxInput}
+                      value={poTaxShown}
                       disabled={figuresLocked}
                       aria-label={t('procurement.tax', { defaultValue: 'Tax' })}
-                      onChange={(e) => setPoTaxInput(e.target.value)}
+                      onChange={(e) => {
+                        // A typed tax replaces the derived one, so the rate goes.
+                        setPoTaxRate('');
+                        setPoTaxInput(e.target.value);
+                      }}
                       className={clsx(inputCls, 'h-8 text-xs pl-10 text-right')}
                       placeholder="0.00"
                     />

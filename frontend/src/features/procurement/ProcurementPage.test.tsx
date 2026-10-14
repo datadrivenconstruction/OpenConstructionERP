@@ -374,3 +374,55 @@ describe('editing an order past draft', () => {
     expect(within(dialog).getByRole('button', { name: 'Add Item' })).toBeInTheDocument();
   });
 });
+
+// #515: a new order started with the tax at zero whatever the project's default
+// VAT rate said, so the buyer worked the tax out by hand.
+describe("a new order and the project's default VAT rate", () => {
+  function serveProjectRate(rate: string | null) {
+    mockGet.mockImplementation((path: string) => {
+      if (path === `/v1/projects/${PROJECT_ID}`) return Promise.resolve({ id: PROJECT_ID, default_vat_rate: rate });
+      if (path.includes('/v1/finance/dashboard/')) return Promise.resolve({ currency: 'EUR' });
+      return Promise.resolve({ items: [], total: 0 });
+    });
+  }
+
+  it('starts at the project rate, shows the derived tax and sends the rate', async () => {
+    const user = userEvent.setup();
+    serveProjectRate('5');
+    renderProcurementPage();
+
+    const dialog = await openCreateForm(user);
+    await describeFirstLine(user, 'Rebar');
+    await user.type(within(dialog).getByLabelText('Quantity for line 1'), '0');
+    await user.type(within(dialog).getByLabelText('Unit rate for line 1'), '100');
+
+    await waitFor(() => expect(within(dialog).getByLabelText('VAT %')).toHaveValue(5));
+    expect(within(dialog).getByLabelText('Tax')).toHaveValue(50);
+
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
+    const body = submittedPO().body as unknown as Record<string, unknown>;
+    expect(body.tax_rate).toBe('5');
+    expect(body).not.toHaveProperty('tax_amount');
+  });
+
+  it('drops the rate once the buyer types the tax as an amount', async () => {
+    const user = userEvent.setup();
+    serveProjectRate('5');
+    renderProcurementPage();
+
+    const dialog = await openCreateForm(user);
+    await describeFirstLine(user, 'Rebar');
+    await waitFor(() => expect(within(dialog).getByLabelText('VAT %')).toHaveValue(5));
+    const tax = within(dialog).getByLabelText('Tax');
+    await user.clear(tax);
+    await user.type(tax, '12.5');
+    expect(within(dialog).getByLabelText('VAT %')).toHaveValue(null);
+
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
+    const body = submittedPO().body as unknown as Record<string, unknown>;
+    expect(body.tax_amount).toBe('12.5');
+    expect(body).not.toHaveProperty('tax_rate');
+  });
+});

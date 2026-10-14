@@ -115,4 +115,21 @@ describe('vatChoices', () => {
     expect(vatChoices([{ rate_pct: '7' }, { rate_pct: '19' }]).defaultRate).toBe('19');
     expect(vatChoices(undefined)).toEqual({ options: [], defaultRate: null });
   });
+
+  it("starts at the project's default VAT rate over the country's (#515)", () => {
+    const rows = [{ rate_pct: '25', is_default: true }, { rate_pct: '5' }];
+    expect(vatChoices(rows, '5').defaultRate).toBe('5');
+    // A rate the country list lacks is still offered, so it can be selected.
+    const custom = vatChoices(rows, '7.5');
+    expect(custom.defaultRate).toBe('7.5');
+    expect(custom.options).toEqual(['25', '7.5', '5']);
+    expect(vatChoices([], '5')).toEqual({ options: ['5'], defaultRate: '5' });
+  });
+
+  it('ignores an empty or out-of-range project rate', () => {
+    const rows = [{ rate_pct: '19' }];
+    expect(vatChoices(rows, null).defaultRate).toBe('19');
+    expect(vatChoices(rows, '').defaultRate).toBe('19');
+    expect(vatChoices(rows, '150').defaultRate).toBe('19');
+  });
 });

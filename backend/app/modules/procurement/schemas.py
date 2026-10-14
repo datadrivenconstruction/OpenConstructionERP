@@ -105,6 +105,9 @@ class POCreate(BaseModel):
     currency_code: str = Field(default="", max_length=10)
     amount_subtotal: str = Field(default="0", max_length=50)
     tax_amount: str = Field(default="0", max_length=50)
+    # VAT percentage of the net. Unset with no ``tax_amount`` either: the
+    # project's default VAT rate applies. Set: tax = net x rate / 100.
+    tax_rate: str | None = Field(default=None, max_length=20)
     amount_total: str = Field(default="0", max_length=50)
     status: str = Field(default="draft", max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
@@ -125,6 +128,11 @@ class POCreate(BaseModel):
     @field_validator("invoice_tolerance_pct")
     @classmethod
     def _check_tolerance_pct(cls, v: str | None) -> str | None:
+        return _validate_tolerance_pct(v)
+
+    @field_validator("tax_rate")
+    @classmethod
+    def _check_tax_rate(cls, v: str | None) -> str | None:
         return _validate_tolerance_pct(v)
 
     @field_validator("invoice_tolerance_abs")
@@ -165,6 +173,8 @@ class POUpdate(BaseModel):
     currency_code: str | None = Field(default=None, max_length=10)
     amount_subtotal: str | None = Field(default=None, max_length=50)
     tax_amount: str | None = Field(default=None, max_length=50)
+    # Setting a rate re-derives the tax; sending only ``tax_amount`` clears it.
+    tax_rate: str | None = Field(default=None, max_length=20)
     amount_total: str | None = Field(default=None, max_length=50)
     status: str | None = Field(default=None, max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
@@ -187,6 +197,11 @@ class POUpdate(BaseModel):
     @field_validator("invoice_tolerance_pct")
     @classmethod
     def _check_tolerance_pct(cls, v: str | None) -> str | None:
+        return _validate_tolerance_pct(v)
+
+    @field_validator("tax_rate")
+    @classmethod
+    def _check_tax_rate(cls, v: str | None) -> str | None:
         return _validate_tolerance_pct(v)
 
     @field_validator("invoice_tolerance_abs")
@@ -288,6 +303,7 @@ class POResponse(BaseModel):
     currency_code: str = ""  # empty until set - never assume EUR (task #217)
     amount_subtotal: str = "0"
     tax_amount: str = "0"
+    tax_rate: str | None = None
     amount_total: str = "0"
     status: str = "draft"
     supplier_acknowledged_at: str | None = None
