@@ -298,7 +298,7 @@ describe('RegionalPackCard, the compact tile layout', () => {
 
     await screen.findByTestId('regional-pack-active');
     expect(tileLabels()).toEqual([
-      'Language',
+      'Document language',
       'Currency',
       'Local price databases',
       'Validation rules',
@@ -329,7 +329,7 @@ describe('RegionalPackCard, the compact tile layout', () => {
     renderApp(<RegionalPackCard />);
 
     await screen.findByTestId('regional-pack-active');
-    expect(tileLabels()).toEqual(['Language', 'Currency', 'Validation rules']);
+    expect(tileLabels()).toEqual(['Document language', 'Currency', 'Validation rules']);
     // Only the generic checks are on, so the tile says "on" with a tick that
     // carries its own spoken label rather than naming a standard.
     expect(tileValue('Validation rules').querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(

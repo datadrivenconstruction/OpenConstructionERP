@@ -34,7 +34,13 @@
  * THE PACK. A case for a market whose pack is on disk and switched off says
  * which pack it needs, in the words the catalogue's own card strip uses
  * (`cases.regional_pack_needed`), so a reader meets one sentence in both
- * places. A market with no pack in this build says nothing here; the
+ * places. The pack belongs to the MARKET, not to the case, so it is said once
+ * under the market heading: printed on every tile it read as six separate
+ * prerequisites and doubled each tile's footer.
+ *
+ * LANGUAGE. A case whose title has no translation in the UI language falls
+ * back to English; the tile then carries a small "EN" tag, so the reader knows
+ * before opening it. A market with no pack in this build says nothing here; the
  * catalogue's market panel is where that absence is explained, once, rather
  * than six times over in a grid.
  *
@@ -78,6 +84,7 @@ import { browserRegionForLanguage } from '@/app/i18n';
 import { packCountryCode } from '@/shared/lib/regionalPack';
 import { useDashboardLayoutStore } from '@/stores/useDashboardLayoutStore';
 import { DASHBOARD_WIDGET_BY_ID } from './widgetRegistry';
+import { keyLanguage, languageTag } from './contentLanguage';
 
 /** This card's id in the dashboard widget registry. */
 export const MARKET_CASES_WIDGET_ID = 'cases_market';
@@ -295,6 +302,35 @@ export function DashboardMarketCasesCard() {
           </button>
         </div>
 
+        {/* What this market's cases need installed, once for all of them. A
+            pack that is the applied one is a tick and its name; a market with
+            no pack on disk says nothing. */}
+        {offer && (
+          <p
+            data-testid="market-case-pack"
+            data-pack-state={offer.applied ? 'installed' : 'install'}
+            title={
+              offer.applied
+                ? t('cases.regional_pack_in_use', { defaultValue: 'Regional pack in use: {{name}}', name: offer.name })
+                : t('cases.regional_pack_setup_hint', {
+                    defaultValue:
+                      'This case follows the standards of its market. Opens the pack that carries them, where you can switch it on.',
+                  })
+            }
+            className={clsx(
+              'inline-flex w-fit items-center gap-1.5 rounded-full px-2 py-0.5 text-2xs font-medium ring-1 ring-inset',
+              offer.applied
+                ? 'bg-semantic-success/10 text-semantic-success ring-semantic-success/20'
+                : 'bg-oe-blue/10 text-oe-blue-text ring-oe-blue/20',
+            )}
+          >
+            {offer.applied ? <Check size={11} aria-hidden="true" /> : <Package size={11} aria-hidden="true" />}
+            {offer.applied
+              ? t('cases.regional_pack_in_use', { defaultValue: 'Regional pack in use: {{name}}', name: offer.name })
+              : t('cases.regional_pack_needed', { defaultValue: 'Needs {{name}}', name: offer.name })}
+          </p>
+        )}
+
         {/* ── The cases ────────────────────────────────────────────────── */}
         <div className={clsx('grid gap-2', shape.columns)}>
           {shown.map((pb) => {
@@ -302,6 +338,7 @@ export function DashboardMarketCasesCard() {
             const tint = tintFor(pb.category);
             const caseTitle = t(pb.titleKey, { defaultValue: pb.titleDefault });
             const caseDesc = t(pb.descKey, { defaultValue: pb.descDefault });
+            const langTag = languageTag(keyLanguage(i18n, pb.titleKey), i18n.language);
             return (
               <button
                 key={pb.id}
@@ -347,38 +384,15 @@ export function DashboardMarketCasesCard() {
                     <span className="tabular-nums">
                       {t('cases.card.steps', { defaultValue: '{{count}} steps', count: pb.steps.length })}
                     </span>
-                    {/* What the case needs installed, in the catalogue's own
-                        words. A pack that is the applied one is a tick and its
-                        name; a market with no pack on disk says nothing. */}
-                    {offer && !offer.applied && (
+                    {langTag && (
                       <span
-                        data-testid="market-case-pack"
-                        data-pack-state="install"
-                        title={t('cases.regional_pack_setup_hint', {
-                          defaultValue:
-                            'This case follows the standards of its market. Opens the pack that carries them, where you can switch it on.',
+                        data-testid="market-case-lang"
+                        title={t('dashboard.content_language_fallback', {
+                          defaultValue: 'Not yet available in your language',
                         })}
-                        className="inline-flex items-center gap-1 rounded-full bg-oe-blue/10 px-1.5 py-0.5 font-medium text-oe-blue-text ring-1 ring-inset ring-oe-blue/20"
+                        className="rounded border border-border-light px-1 font-semibold uppercase text-content-tertiary"
                       >
-                        <Package size={11} aria-hidden="true" />
-                        {t('cases.regional_pack_needed', {
-                          defaultValue: 'Needs {{name}}',
-                          name: offer.name,
-                        })}
-                      </span>
-                    )}
-                    {offer?.applied && (
-                      <span
-                        data-testid="market-case-pack"
-                        data-pack-state="installed"
-                        title={t('cases.regional_pack_in_use', {
-                          defaultValue: 'Regional pack in use: {{name}}',
-                          name: offer.name,
-                        })}
-                        className="inline-flex items-center gap-1 font-medium text-semantic-success"
-                      >
-                        <Check size={11} aria-hidden="true" />
-                        {offer.name}
+                        {langTag}
                       </span>
                     )}
                     <span className="ms-auto inline-flex items-center gap-1 font-semibold text-oe-blue">

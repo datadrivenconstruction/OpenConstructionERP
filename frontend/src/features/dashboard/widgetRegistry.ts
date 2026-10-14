@@ -76,9 +76,9 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
   // purpose: it answers "is this product configured for the country I work
   // in", which is the question a new reader has before any number on the page
   // means anything, and which nothing on the dashboard answered at all until
-  // now. Narrow, because it is a handful of short fact tiles - the dense grid
-  // flow backfills the columns beside it, and the card keeps its own height
-  // rather than the row's (WIDGET_NO_STRETCH in DashboardPage).
+  // now. A handful of short fact tiles, laid out as one row at full width,
+  // and the card keeps its own height rather than the row's
+  // (WIDGET_NO_STRETCH in DashboardPage) should a reader narrow it.
   //
   // labelKey is the card's own heading key rather than a
   // dashboard.layout.w_* of its own. The layout manager lists this widget by
@@ -92,13 +92,15 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descKey: 'dashboard.layout.w_regional_pack_desc',
     descDefault: 'Which market pack is active and what it sets up for you',
     icon: Globe,
-    defaultSpan: 2,
+    // Full width by default: a one-row strip of facts above the market
+    // cases. Side by side at a third, the pair never matched in height (a
+    // short fact card beside a tall list) whatever either card did.
+    defaultSpan: 6,
   },
   // The cases written for the reader's own market, with every other market
-  // one click away. Sits beside the regional pack card on purpose: that card
+  // one click away. Sits under the regional pack card on purpose: that card
   // says which market the product is set up for, this one shows the worked
-  // examples for it, and at two-thirds width the pair fills one row of the
-  // grid. labelKey is the card's own heading key, for the reason given above.
+  // examples for it, three across at full width. labelKey is the card's own heading key, for the reason given above.
   {
     id: 'cases_market',
     labelKey: 'dashboard.market_cases.title',
@@ -106,7 +108,7 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descKey: 'dashboard.layout.w_cases_market_desc',
     descDefault: 'Worked cases for the country you work in, with every other market one click away',
     icon: MapPin,
-    defaultSpan: 4,
+    defaultSpan: 6,
   },
   // ── Core (existing 12) ────────────────────────────────────────────────
   {

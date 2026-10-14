@@ -201,8 +201,9 @@ describe('DashboardMarketCasesCard, the market it leads with', () => {
     packs.installed = { installed: [pack('bau-de', 'de', 'Bau DE')], active_slug: null };
     await renderCard();
 
+    // Said once for the market, not repeated on every tile.
     const badges = screen.getAllByTestId('market-case-pack');
-    expect(badges.length).toBe(tileMarkets().length);
+    expect(badges.length).toBe(1);
     expect(badges[0]?.getAttribute('data-pack-state')).toBe('install');
     expect(badges[0]?.textContent).toContain('Bau DE');
   });

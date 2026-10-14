@@ -16,8 +16,10 @@ import type { AcademyVideo } from './academyTypes';
 import { VIDEOS, formatClock, recommend, startHereVideo, type RecommendationContext } from './academy';
 import { VideoCover } from './VideoCover';
 import { useVideoContext } from './useVideoContext';
+import { languageTag, preferLanguage } from '@/features/dashboard/contentLanguage';
 
-/** Start here, then the recommendations, published only, at most `count`. */
+/** Start here, then the recommendations, published only, at most `count`.
+ *  Among the recommendations, videos spoken in the UI language come first. */
 export function dashboardVideos(
   ctx: RecommendationContext,
   count: number,
@@ -26,7 +28,8 @@ export function dashboardVideos(
   const out: AcademyVideo[] = [];
   const start = startHereVideo(videos);
   if (start?.status === 'published') out.push(start);
-  for (const v of recommend(ctx, videos, count + 4)) {
+  const ranked = recommend(ctx, videos, count + 4);
+  for (const v of ctx.language ? preferLanguage(ranked, (x) => x.language, ctx.language) : ranked) {
     if (out.length >= count) break;
     if (v.status === 'published' && !out.includes(v)) out.push(v);
   }
@@ -43,7 +46,7 @@ export const STRIP_COLUMNS: Record<number, string> = {
 };
 
 export default function DashboardVideosStrip({ count }: { count: number }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const ctx = useVideoContext();
   const videos = useMemo(
@@ -104,6 +107,14 @@ export default function DashboardVideosStrip({ count }: { count: number }) {
                 ) : null}
               </span>
               <span lang={video.language} className="line-clamp-2 pt-1 text-2xs font-medium leading-snug text-content-secondary group-hover:text-content-primary">
+                {languageTag(video.language, i18n.language) && (
+                  <span
+                    data-testid="dashboard-video-lang"
+                    className="me-1 rounded border border-border-light px-1 align-[1px] text-[9px] font-semibold uppercase text-content-tertiary"
+                  >
+                    {languageTag(video.language, i18n.language)}
+                  </span>
+                )}
                 {video.title}
               </span>
             </button>
