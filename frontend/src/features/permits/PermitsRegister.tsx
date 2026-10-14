@@ -10,7 +10,7 @@ import { AlertTriangle, FileCheck2 } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
-import { fmtCurrency } from '@/shared/lib/formatters';
+import { formatCurrency } from '@/shared/lib/money';
 
 import {
   localToday,
@@ -354,7 +354,7 @@ export function PermitsRegister({
                 )}
                 {p.security_amount && (
                   <Fact label={t('permits.ui.permit.security', { defaultValue: 'Security' })} testId="permit-security">
-                    {fmtCurrency(p.security_amount, p.security_currency)}
+                    {formatCurrency(p.security_amount, p.security_currency)}
                   </Fact>
                 )}
               </dl>

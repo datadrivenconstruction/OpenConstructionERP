@@ -11,7 +11,7 @@
 // Calendar days are ISO `YYYY-MM-DD` strings. Errors arrive as
 // `detail = {code, message_key, message, violations?, info?}`.
 
-import { ApiError, apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/shared/lib/api';
+import { API_BASE, ApiError, apiDelete, apiGet, apiPatch, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
 
 export interface Page<T> {
   items: T[];
@@ -20,7 +20,7 @@ export interface Page<T> {
   limit: number;
 }
 
-export type FrameState = 'draft' | 'in_review' | 'approved';
+export type FrameState = 'draft' | 'in_review' | 'approved' | 'binding' | 'revising';
 export type ItemStatus = 'open' | 'in_progress' | 'met' | 'waived' | 'not_applicable';
 export type Audience = 'owner' | 'designer' | 'contractor' | 'coordinator' | 'operator';
 export type PlanStatus = 'not_started' | 'draft' | 'issued' | 'in_force';
@@ -245,6 +245,12 @@ export interface RoleCreate {
   qualification_valid_until?: string | null;
 }
 
+export type ExportWhat = 'register' | 'roles';
+
+export function downloadExport(projectId: string, what: ExportWhat, format: 'pdf' | 'xlsx'): Promise<void> {
+  return downloadWithAuth(`${API_BASE}/v1/hse-frame/projects/${projectId}/export?what=${what}&format=${format}`, `hse_${what}.${format}`);
+}
+
 export const getFrame = (p: string) => apiGet<FrameView>(`/v1/hse-frame/projects/${p}/frame`);
 export const createFrame = (p: string) => apiPost<Frame>(`/v1/hse-frame/projects/${p}/frame`);
 export const patchFrame = (p: string, body: FramePatch) => apiPatch<Frame, FramePatch>(`/v1/hse-frame/projects/${p}/frame`, body);
@@ -255,7 +261,7 @@ export const consolidatePermitConditions = (p: string) =>
   apiPost<{ created: number; already_linked: number }>(`/v1/hse-frame/projects/${p}/frame/consolidate-permit-conditions`);
 export const submitFrame = (p: string) => apiPost<Frame>(`/v1/hse-frame/projects/${p}/frame/submit`);
 export const approveFrame = (p: string) => apiPost<Frame>(`/v1/hse-frame/projects/${p}/frame/approve`);
-export const reopenFrame = (p: string) => apiPost<Frame>(`/v1/hse-frame/projects/${p}/frame/reopen`);
+export const reviseFrame = (p: string, note = '') => apiPost<Frame>(`/v1/hse-frame/projects/${p}/frame/revise`, { note });
 export const pinCatalogue = (p: string, body: { source: string; catalogue_id: string; version?: number }) =>
   apiPut<Frame, typeof body>(`/v1/hse-frame/projects/${p}/frame/catalogue`, body);
 

@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Settings2 } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -28,7 +27,7 @@ import {
   type Purpose,
   type SetupPatchInput,
 } from './api';
-import { PanelHeader, SUITABILITY_OPTIONS, phaseOptions, roleOptions, roleTitle, type DesignContext } from './DesignBits';
+import { InlineQueryState, PanelHeader, SUITABILITY_OPTIONS, phaseOptions, roleOptions, roleTitle, type DesignContext, WriteButton } from './DesignBits';
 import { FormDialog, flag, str, type FieldSpec, type FormValues } from './FormDialog';
 import { refusalText } from './hooks';
 import { PURPOSE, fieldLabel, labelOf, phaseName, schemeName, ui, uiCount, vocab, vocabOptions, type LabelContext, type TFn } from './labels';
@@ -74,6 +73,7 @@ export function SetupStart({ projectId, labels, onDone }: { projectId: string; l
   return (
     <div className="space-y-4" data-testid="design-setup-start">
       <EmptyState icon={<Settings2 size={28} />} title={ui(t, 'design.ui.start.title')} description={ui(t, 'design.ui.start.body')} />
+      <InlineQueryState query={schemes} />
       <div className="mx-auto max-w-2xl space-y-3 rounded-lg border border-border-light p-4">
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium text-content-primary">{ui(t, 'design.ui.start.scheme')}</legend>
@@ -112,9 +112,9 @@ export function SetupStart({ projectId, labels, onDone }: { projectId: string; l
             {refusal}
           </p>
         )}
-        <Button loading={save.isPending} onClick={() => save.mutate()} data-testid="setup-save">
+        <WriteButton need="manage" loading={save.isPending} onClick={() => save.mutate()} data-testid="setup-save">
           {ui(t, 'design.ui.start.save')}
-        </Button>
+        </WriteButton>
       </div>
     </div>
   );
@@ -185,9 +185,9 @@ export function SetupPanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.setup.title')}
         hint={ui(t, 'design.ui.setup.hint')}
         action={
-          <Button onClick={() => setDialog('settings')} data-testid="setup-edit">
+          <WriteButton need="manage" onClick={() => setDialog('settings')} data-testid="setup-edit">
             {ui(t, 'design.ui.setup.edit')}
-          </Button>
+          </WriteButton>
         }
       />
 
@@ -197,10 +197,11 @@ export function SetupPanel({ ctx }: { ctx: DesignContext }) {
             <p className="text-xs text-content-secondary">{ui(t, 'design.ui.setup.scheme')}</p>
             <h3 className="font-medium text-content-primary">{schemeName(labels, scheme)}</h3>
             {description && <p className="text-sm text-content-secondary">{description}</p>}
+            <InlineQueryState query={schemes} />
           </div>
-          <Button variant="secondary" size="sm" onClick={() => setDialog('scheme')} data-testid="scheme-change">
+          <WriteButton need="manage" variant="secondary" size="sm" onClick={() => setDialog('scheme')} data-testid="scheme-change">
             {ui(t, 'design.ui.setup.scheme_change')}
-          </Button>
+          </WriteButton>
         </div>
         <p className="text-sm text-content-secondary">{ui(t, 'design.ui.setup.parts')}</p>
         <ol className="flex flex-wrap items-center gap-1 text-xs" data-testid="scheme-parts">

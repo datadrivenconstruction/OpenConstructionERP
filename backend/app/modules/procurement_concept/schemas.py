@@ -116,6 +116,7 @@ class PackagePut(_In):
             "tender_basis",
             "framework_agreement_id",
             "need_date",
+            "need_activity_id",
             "lead_time_days",
             "procedure_days",
             "planned_start",
@@ -143,6 +144,8 @@ class PackagePut(_In):
     # Award criteria and their weights in percent, e.g. {"price": "60", "quality": "40"}; empty or summing to 100.
     evaluation_weights: dict[str, Decimal] | None = Field(default=None, max_length=20)
     need_date: date | None = None
+    # A milestone of the project's schedule (for example one of the framework schedule) that owns the need date.
+    need_activity_id: uuid.UUID | None = None
     lead_time_days: int | None = Field(default=None, ge=0, le=1500)
     procedure_days: int | None = Field(default=None, ge=0, le=1500)
     planned_start: date | None = None

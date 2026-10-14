@@ -82,6 +82,7 @@
       "package_closed": "The package is in tender, awarded or cancelled.",
       "package_has_blocking_findings": "The package has findings that must be resolved first.",
       "package_id_required": "Choose a package.",
+      "need_activity_unknown": "The schedule activity does not exist in this project or has no start date.",
       "package_kind_not_procured": "This package kind is not procured as an award package.",
       "package_not_found": "Package not found.",
       "package_not_on_hold": "The package is not on hold.",

@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Send } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
 import { fmtDate, fmtList } from '@/shared/lib/formatters';
 
 import {
@@ -48,6 +47,7 @@ import {
   StepButton,
   pickerField,
   wbsOptions,
+  WriteButton,
 } from './DesignBits';
 import { FormDialog, flag, list, str, type FieldOption, type FieldSpec, type FormValues } from './FormDialog';
 import { refusalText, useDesignAction, useDesignList, useDesignOptions } from './hooks';
@@ -215,9 +215,9 @@ export function IssuePanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.issue.title')}
         hint={ui(t, 'design.ui.issue.hint')}
         action={
-          <Button onClick={newRelease} data-testid="release-add">
+          <WriteButton onClick={newRelease} data-testid="release-add">
             {ui(t, 'design.ui.issue.release_add')}
-          </Button>
+          </WriteButton>
         }
       />
       <ListState
@@ -253,9 +253,9 @@ export function IssuePanel({ ctx }: { ctx: DesignContext }) {
                 )}
                 <span className="ml-auto flex flex-wrap gap-1">
                   {release.state === 'draft' && (
-                    <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'release', release })}>
+                    <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'release', release })}>
                       {ui(t, 'design.ui.action.edit')}
-                    </Button>
+                    </WriteButton>
                   )}
                   {offered(release.can?.transitions, ['issued']).map(({ target, flag }) => (
                     <StepButton
@@ -288,9 +288,9 @@ export function IssuePanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.issue.matrix_title')}
         hint={ui(t, 'design.ui.issue.matrix_hint')}
         action={
-          <Button variant="secondary" onClick={() => setDialog({ kind: 'rule', rule: null })} data-testid="rule-add">
+          <WriteButton need="manage" variant="secondary" onClick={() => setDialog({ kind: 'rule', rule: null })} data-testid="rule-add">
             {ui(t, 'design.ui.issue.rule_add')}
-          </Button>
+          </WriteButton>
         }
       />
       {(rules.data ?? []).length === 0 ? (
@@ -326,12 +326,12 @@ export function IssuePanel({ ctx }: { ctx: DesignContext }) {
                 {rule.ack_required && <p className="text-2xs">{ui(t, 'design.ui.issue.ack_required')}</p>}
               </td>
               <td className={`${CELL} whitespace-nowrap text-right`}>
-                <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'rule', rule })}>
+                <WriteButton need="manage" size="sm" variant="ghost" onClick={() => setDialog({ kind: 'rule', rule })}>
                   {ui(t, 'design.ui.action.edit')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'rule-delete', rule })}>
+                </WriteButton>
+                <WriteButton need="manage" size="sm" variant="ghost" onClick={() => setDialog({ kind: 'rule-delete', rule })}>
                   {ui(t, 'design.ui.action.delete')}
-                </Button>
+                </WriteButton>
               </td>
             </tr>
           ))}

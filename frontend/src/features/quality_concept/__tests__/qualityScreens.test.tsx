@@ -692,6 +692,36 @@ describe('gate, retests and names', () => {
     expect(mocked.addLink.mock.calls[0]![1]).toMatchObject({ link_id: 't3', retest_of: 'l2' });
   });
 
+  it('asks before a link is removed and removes nothing until confirmed', async () => {
+    mocked.listProofs.mockResolvedValue(page([proof()]));
+    mocked.listLinks.mockResolvedValue(
+      page([
+        {
+          id: 'l1',
+          owner_kind: 'proof',
+          owner_id: 'pr1',
+          link_kind: 'cc_test_result',
+          link_id: 't1',
+          retest_of: null,
+          note: '',
+          label: 'Pressure test 12',
+          exists: true,
+        },
+      ]),
+    );
+    mocked.listCandidates.mockResolvedValue(page([]));
+    mocked.removeLink.mockResolvedValue(undefined);
+    renderPage('proofs');
+    fireEvent.click(await screen.findByTestId('proof-links-toggle'));
+    await screen.findByText('Pressure test 12');
+    fireEvent.click(screen.getByRole('button', { name: 'Remove link' }));
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent('Remove this link?');
+    expect(mocked.removeLink).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remove link' }));
+    await waitFor(() => expect(mocked.removeLink).toHaveBeenCalledWith('p1', 'l1'));
+  });
+
   it('names who asked for a waiver', async () => {
     mocked.listProofs.mockResolvedValue(
       page([proof({ requested_by: 'u2', requested_by_name: 'Site manager one', decision_rationale: 'Out of scope' })]),

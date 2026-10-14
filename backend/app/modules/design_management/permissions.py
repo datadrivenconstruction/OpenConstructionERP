@@ -6,6 +6,8 @@
 point is named by its approval route, and the decision is taken in the
 approval screen (rule 22). ``design.release`` issues releases as transmittals;
 under ``four_eyes_release`` the person who prepared a release cannot issue it.
+That second-person rule, not the role, carries the control, which is why issuing
+stays at editor level while the other approvals sit at manager level.
 """
 
 from app.core.permissions import Role, permission_registry

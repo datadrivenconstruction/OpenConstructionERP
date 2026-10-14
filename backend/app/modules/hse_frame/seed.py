@@ -31,7 +31,7 @@ from __future__ import annotations
 import logging
 import uuid
 from collections.abc import Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -40,6 +40,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.hse_frame import schemas as s
 from app.modules.hse_frame.models import HseItem
+from app.modules.hse_frame.vocab import LATER_WORKS_STATUSES
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,12 @@ class Story:
     notes: str = ""
     # Template code -> (days until due, responsible party).
     due: dict[str, tuple[int, str]] = field(default_factory=dict)
+    reference: str = "VA-2026-0417"
+    evidence_note: str = "Nachweis liegt im Projektdokumentenordner."
+    coordination_org: str = "SiGe-Koordination"
+    owner_org: str = "Bauherr"
+    qualification: str = "Qualifiziert nach RAB 30"
+    parties: dict[str, str] = field(default_factory=lambda: dict(_PARTY))
 
 
 _STORIES: dict[str, Story] = {
@@ -159,7 +166,9 @@ async def _link_first(
     return 1
 
 
-async def _seed_project(session: AsyncSession, pid: uuid.UUID, totals: dict[str, int], today: date) -> None:
+async def _seed_project(
+    session: AsyncSession, pid: uuid.UUID, totals: dict[str, int], today: date, overlay: dict[str, Any]
+) -> None:
     from app.modules.hse_frame.service import HseFrameService
     from app.modules.projects.models import Project
 
@@ -169,7 +178,9 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID, totals: dict[str,
     svc = HseFrameService(session)
     if await svc.frame(pid) is not None:
         return
-    story = _STORIES.get(str(getattr(project, "subdivision_code", "") or "").upper(), _STORIES[_DEFAULT_STORY])
+    story = told(
+        _STORIES.get(str(getattr(project, "subdivision_code", "") or "").upper(), _STORIES[_DEFAULT_STORY]), overlay
+    )
     owner, second = await _people(session, pid, project.owner_id)
     coordinator = second or owner
 
@@ -187,7 +198,7 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID, totals: dict[str,
             advance_notice_sent_on=None
             if story.notice_sent_days_ago is None
             else today - timedelta(days=story.notice_sent_days_ago),
-            advance_notice_reference="" if story.notice_sent_days_ago is None else "VA-2026-0417",
+            advance_notice_reference="" if story.notice_sent_days_ago is None else story.reference,
             plan_status="not_started" if story.plan_issued_days_ago is None else "issued",
             plan_issued_on=None
             if story.plan_issued_days_ago is None
@@ -204,8 +215,8 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID, totals: dict[str,
     for index, item in enumerate(items):
         totals["items"] += 1
         template = item.template_code or ""
-        parties = [a for a in item.audience if a in _PARTY]
-        party = _PARTY[parties[0]] if parties else _PARTY["owner"]
+        parties = [a for a in item.audience if a in story.parties]
+        party = story.parties[parties[0]] if parties else story.parties.get("owner", "")
         due_in, party_override = story.due.get(template, (_START - 45 + index, party))
         item.responsible_party = party_override
         item.due_date = today + timedelta(days=due_in)
@@ -218,7 +229,7 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID, totals: dict[str,
             item.id,
             s.ItemMeet(
                 met_on=today - timedelta(days=20 + 3 * index),
-                evidence_note="Nachweis liegt im Projektdokumentenordner.",
+                evidence_note=story.evidence_note,
             ),
         )
         item.due_date = None
@@ -248,10 +259,10 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID, totals: dict[str,
                 role_code=code,
                 person_user_id=person,
                 person_name=await _name(session, person) if person else "",
-                organisation="" if person is None else "SiGe-Koordination" if qualified else "Bauherr",
+                organisation="" if person is None else story.coordination_org if qualified else story.owner_org,
                 status=status,
                 appointed_on=on if status == "appointed" else None,
-                qualification="Qualifiziert nach RAB 30" if qualified and status == "appointed" else "",
+                qualification=story.qualification if qualified and status == "appointed" else "",
                 qualification_valid_until=today + timedelta(days=700) if qualified and status == "appointed" else None,
             ),
             owner,
@@ -284,14 +295,68 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID, totals: dict[str,
     totals["projects"] += 1
 
 
+def _int(value: Any) -> int | None:
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+
+
+def _text(value: Any) -> str | None:
+    return value if isinstance(value, str) else None
+
+
+def told(base: Story, overlay: dict[str, Any]) -> Story:
+    """``base`` with the keys of the pack's story laid over it; a key that is absent or malformed keeps the default."""
+    changes: dict[str, Any] = {}
+    for key in ("duration_working_days", "peak_workers", "person_days", "employers"):
+        if (value := _int(overlay.get(key))) is not None:
+            changes[key] = value
+    for key in ("notice_sent_days_ago", "plan_issued_days_ago"):
+        if key in overlay and (overlay[key] is None or _int(overlay[key]) is not None):
+            changes[key] = overlay[key]
+    for key in ("reference", "evidence_note", "coordination_org", "owner_org", "qualification", "notes"):
+        if (value := _text(overlay.get(key))) is not None:
+            changes[key] = value
+    if overlay.get("later_works") in LATER_WORKS_STATUSES:
+        changes["later_works"] = overlay["later_works"]
+    if isinstance(overlay.get("execution_coordinator_appointed"), bool):
+        changes["execution_coordinator_appointed"] = overlay["execution_coordinator_appointed"]
+    for key in ("hazardous", "open_templates"):
+        value = overlay.get(key)
+        if isinstance(value, list) and all(isinstance(v, str) for v in value):
+            changes[key] = tuple(value) if key == "hazardous" else frozenset(value)
+    parties = overlay.get("parties")
+    if isinstance(parties, dict):
+        changes["parties"] = {**base.parties, **{k: v for k, v in parties.items() if isinstance(v, str)}}
+    due = overlay.get("due")
+    if isinstance(due, dict):
+        rows = {
+            code: (row["days"], row["party"])
+            for code, row in due.items()
+            if isinstance(row, dict) and isinstance(row.get("days"), int) and isinstance(row.get("party"), str)
+        }
+        changes["due"] = {**base.due, **rows}
+    return replace(base, **changes)
+
+
+async def _pack_story(session: AsyncSession, pid: uuid.UUID) -> dict[str, Any]:
+    """What the active pack tells for this demo project, or nothing for a project that is not a demo."""
+    from app.core.demo_marker import demo_id_of
+    from app.modules.project_governance.public import demo_module_story
+    from app.modules.projects.models import Project
+
+    project = await session.get(Project, pid)
+    demo_id = demo_id_of(getattr(project, "metadata_", None))
+    return demo_module_story(demo_id, "hse_frame") if demo_id else {}
+
+
 async def seed_hse_frame_demo(session: AsyncSession, project_ids: Iterable[uuid.UUID]) -> dict[str, int]:
     """Seed the demo frame of every German project in ``project_ids`` that has none yet."""
     totals = dict.fromkeys(_TOTALS, 0)
     today = datetime.now(UTC).date()
     for pid in project_ids:
         try:
+            overlay = await _pack_story(session, pid)
             async with session.begin_nested():
-                await _seed_project(session, pid, totals, today)
+                await _seed_project(session, pid, totals, today, overlay)
         except Exception:
             logger.warning("hse_frame: demo seed failed for project %s", pid, exc_info=True)
     return totals

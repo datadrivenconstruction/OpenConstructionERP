@@ -88,6 +88,25 @@ describe('engineering brief page states', () => {
     expect(screen.getByTestId('brief-setup')).toBeTruthy();
   });
 
+  it('settles on the empty state with the shipped catalogues and asks the server once', async () => {
+    mocked.getBrief.mockRejectedValue(
+      new ApiError(404, 'Not Found', { detail: { code: 'brief_missing', message: 'No brief.' } }),
+    );
+    mocked.listCatalogues.mockResolvedValue(
+      page([
+        { kind: 'engineering_brief', source: 'shipped', id: 'neutral', code: 'neutral', name: { key: 'engineering_brief.catalogue.neutral', text: null }, state: 'published', versions: [1], latest_version: 1 },
+        { kind: 'engineering_brief', source: 'shipped', id: 'de', code: 'de', name: { key: null, text: { de: 'Deutschland' } }, state: 'published', versions: [1], latest_version: 1 },
+      ]) as never,
+    );
+    renderPage();
+    expect(await screen.findByTestId('brief-setup-create')).toBeTruthy();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(mocked.getBrief).toHaveBeenCalledTimes(1);
+    expect(mocked.listCatalogues).toHaveBeenCalledTimes(1);
+    expect(mocked.getPinnedCatalogue).not.toHaveBeenCalled();
+    expect(mocked.listBriefFindings).not.toHaveBeenCalled();
+  });
+
   it('shows an error, not an empty state, when the brief cannot be loaded', async () => {
     mocked.getBrief.mockRejectedValue(new ApiError(500, 'Server Error', { detail: { code: 'boom', message: 'Server broke.' } }));
     renderPage();

@@ -26,6 +26,9 @@ import {
   type Item,
 } from './api';
 import { useCandidates, type HseWrite } from './hooks';
+import { fmtDate } from '@/shared/lib/formatters';
+import { ExportButtons } from './ExportButtons';
+import { RemoveConfirm, type RemoveTarget } from './RemoveConfirm';
 import { groupByTopic, isOpen, itemTitle, labelOf, progress } from './labels';
 
 interface Props {
@@ -88,7 +91,7 @@ function LinkPicker({ projectId, item, catalogue, write }: { projectId: string; 
   );
 }
 
-function ItemRow({ projectId, item, catalogue, write, canEdit, canManage }: Props & { item: Item }) {
+function ItemRow({ projectId, item, catalogue, write, canEdit, canManage, onRemove }: Props & { item: Item; onRemove: (target: RemoveTarget) => void }) {
   const { t, i18n } = useTranslation();
   const [panel, setPanel] = useState<'none' | 'meet' | 'waive' | 'link'>('none');
   const [note, setNote] = useState('');
@@ -103,7 +106,7 @@ function ItemRow({ projectId, item, catalogue, write, canEdit, canManage }: Prop
             {[
               item.legal_basis,
               item.responsible_party,
-              item.due_date && t('hseFrame.item.due', { defaultValue: 'due {{date}}', date: item.due_date }),
+              item.due_date && t('hseFrame.item.due', { defaultValue: 'due {{date}}', date: fmtDate(item.due_date) }),
               item.obligation === 'recommended' && t('hseFrame.item.recommended', { defaultValue: 'recommended' }),
               item.in_tender_documents && t('hseFrame.item.in_tender', { defaultValue: 'part of the tender documents' }),
             ]
@@ -126,7 +129,7 @@ function ItemRow({ projectId, item, catalogue, write, canEdit, canManage }: Prop
                 {l.fact ? `: ${[l.fact.number, l.fact.title, l.fact.status].filter(Boolean).join(' | ')}` : ''}
               </span>
               {canEdit && (
-                <button type="button" className="text-content-tertiary hover:text-semantic-error" aria-label={t('hseFrame.link.remove', { defaultValue: 'Remove link' })} onClick={() => write.send(() => removeLink(projectId, item.id, l.id))}>
+                <button type="button" className="text-content-tertiary hover:text-semantic-error" aria-label={t('hseFrame.link.remove', { defaultValue: 'Remove link' })} onClick={() => onRemove({ name: [t(`hseFrame.link_kind.${l.link_kind}`, { defaultValue: l.link_kind.replace(/_/g, ' ') }), l.fact?.number].filter(Boolean).join(' '), run: () => removeLink(projectId, item.id, l.id) })}>
                   <X size={12} />
                 </button>
               )}
@@ -134,7 +137,11 @@ function ItemRow({ projectId, item, catalogue, write, canEdit, canManage }: Prop
           ))}
         </ul>
       )}
-      {item.status === 'met' && item.evidence_note && <p className="mt-1 text-xs text-content-secondary">{item.evidence_note}</p>}
+      {item.status === 'met' && (item.evidence_note || item.met_on) && (
+        <p className="mt-1 text-xs text-content-secondary">
+          {[item.met_on && t('hseFrame.item.met_on_short', { defaultValue: 'met on {{date}}', date: fmtDate(item.met_on) }), item.evidence_note].filter(Boolean).join(' | ')}
+        </p>
+      )}
       {(item.status === 'waived' || item.status === 'not_applicable') && (
         <p className="mt-1 text-xs text-content-secondary">{item.waive_reason}</p>
       )}
@@ -159,7 +166,7 @@ function ItemRow({ projectId, item, catalogue, write, canEdit, canManage }: Prop
             {t('hseFrame.item.link', { defaultValue: 'Link a record' })}
           </Button>
           {item.source === 'manual' && (
-            <Button size="sm" variant="ghost" onClick={() => write.send(() => deleteItem(projectId, item.id))}>
+            <Button size="sm" variant="ghost" onClick={() => onRemove({ name: item.title, run: () => deleteItem(projectId, item.id) })}>
               {t('common.delete', { defaultValue: 'Delete' })}
             </Button>
           )}
@@ -233,10 +240,14 @@ function AddItem({ projectId, catalogue, write }: { projectId: string; catalogue
 
 export function RegisterPanel(props: Props) {
   const { t, i18n } = useTranslation();
+  const [removing, setRemoving] = useState<RemoveTarget | null>(null);
   const topics = props.catalogue.topics.filter((x) => x.basis !== 'roles');
   const groups = groupByTopic(props.items, topics.map((x) => x.code));
   return (
     <div className="space-y-5" data-testid="register-panel">
+      <div className="flex justify-end">
+        <ExportButtons projectId={props.projectId} what="register" />
+      </div>
       {groups.map(([code, rows]) => {
         const topic = props.catalogue.topics.find((x) => x.code === code);
         const p = progress(rows);
@@ -255,7 +266,7 @@ export function RegisterPanel(props: Props) {
             ) : (
               <ul className="space-y-2">
                 {rows.map((item) => (
-                  <ItemRow key={item.id} {...props} item={item} />
+                  <ItemRow key={item.id} {...props} item={item} onRemove={setRemoving} />
                 ))}
               </ul>
             )}
@@ -263,6 +274,7 @@ export function RegisterPanel(props: Props) {
         );
       })}
       {props.canEdit && <AddItem projectId={props.projectId} catalogue={props.catalogue} write={props.write} />}
+      <RemoveConfirm target={removing} write={props.write} onClose={() => setRemoving(null)} />
     </div>
   );
 }

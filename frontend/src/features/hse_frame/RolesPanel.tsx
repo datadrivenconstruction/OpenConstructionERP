@@ -10,10 +10,14 @@ import { useTranslation } from 'react-i18next';
 
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
+import { fmtList } from '@/shared/lib/formatters';
 import { Input } from '@/shared/ui/Input';
+import { fmtDate } from '@/shared/lib/formatters';
 
 import { createRole, deleteRole, localToday, patchRole, type Catalogue, type CatRole, type Duties, type Role } from './api';
 import type { HseWrite } from './hooks';
+import { ExportButtons } from './ExportButtons';
+import { RemoveConfirm, type RemoveTarget } from './RemoveConfirm';
 import { dutyWord, labelOf } from './labels';
 
 interface Props {
@@ -106,8 +110,12 @@ function AddRole({ projectId, kind, write }: { projectId: string; kind: CatRole;
 
 export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit }: Props) {
   const { t, i18n } = useTranslation();
+  const [removing, setRemoving] = useState<RemoveTarget | null>(null);
   return (
     <div className="space-y-4" data-testid="roles-panel">
+      <div className="flex justify-end">
+        <ExportButtons projectId={projectId} what="roles" />
+      </div>
       {catalogue.role_kinds.map((kind) => {
         const mine = roles.filter((r) => r.role_code === kind.code);
         const word = dutyWord(requiredNow(kind, duties));
@@ -135,13 +143,13 @@ export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit
                 {mine.map((r) => (
                   <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 text-sm" data-testid={`assignment-${r.id}`} data-status={r.status}>
                     <span className="text-content-primary">
-                      {[r.person_name, r.organisation].filter(Boolean).join(', ') || t('hseFrame.role.unnamed', { defaultValue: 'No person named' })}
+                      {fmtList([r.person_name, r.organisation]) || t('hseFrame.role.unnamed', { defaultValue: 'No person named' })}
                       <span className="ml-2 text-xs text-content-secondary">
                         {[
                           t(`hseFrame.role_status.${r.status}`, { defaultValue: r.status }),
-                          r.appointed_on,
+                          r.appointed_on && fmtDate(r.appointed_on),
                           r.qualification,
-                          r.qualification_valid_until && t('hseFrame.role.valid_until_short', { defaultValue: 'valid until {{date}}', date: r.qualification_valid_until }),
+                          r.qualification_valid_until && t('hseFrame.role.valid_until_short', { defaultValue: 'valid until {{date}}', date: fmtDate(r.qualification_valid_until) }),
                         ]
                           .filter(Boolean)
                           .join(' | ')}
@@ -159,7 +167,7 @@ export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit
                             {t('hseFrame.role.end', { defaultValue: 'End' })}
                           </Button>
                         )}
-                        <Button size="sm" variant="ghost" disabled={write.pending} onClick={() => write.send(() => deleteRole(projectId, r.id))}>
+                        <Button size="sm" variant="ghost" disabled={write.pending} onClick={() => setRemoving({ name: [kind.national_name || labelOf(kind, i18n.language), r.person_name].filter(Boolean).join(', '), run: () => deleteRole(projectId, r.id) })}>
                           {t('common.delete', { defaultValue: 'Delete' })}
                         </Button>
                       </span>
@@ -172,6 +180,7 @@ export function RolesPanel({ projectId, roles, catalogue, duties, write, canEdit
           </section>
         );
       })}
+      <RemoveConfirm target={removing} write={write} onClose={() => setRemoving(null)} />
     </div>
   );
 }

@@ -34,6 +34,7 @@ vi.mock('../api', async (importOriginal) => {
 import en from '@/app/locales/en';
 import de from '@/app/locales/de';
 import { ApiError } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 import * as api from '../api';
 import { DesignManagementPage } from '../DesignManagementPage';
 import { ERROR_TEXT } from '../errors';
@@ -71,6 +72,7 @@ function withSetup() {
 describe('DesignManagementPage states', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    useAuthStore.setState({ userRole: 'manager' });
     mocked.listSchemes.mockResolvedValue([
       {
         kind: 'drawing_numbering',
@@ -187,6 +189,30 @@ describe('DesignManagementPage states', () => {
     renderPage();
     expect(await screen.findByTestId('file-register')).toBeEnabled();
     expect(screen.queryByTestId('no-frame-document')).toBeNull();
+  });
+
+  it('a viewer sees the registers but no add, edit or filing buttons', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    withSetup();
+    renderPage('/projects/p1/design?tab=wbs');
+    expect(await screen.findByTestId('design-wbs-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('wbs-add')).toBeNull();
+    cleanup();
+    renderPage();
+    expect(await screen.findByTestId('export-register-pdf')).toBeEnabled();
+    expect(screen.queryByTestId('file-register')).toBeNull();
+  });
+
+  it('an editor can add but cannot change the setup, which needs a manager', async () => {
+    useAuthStore.setState({ userRole: 'editor' });
+    withSetup();
+    renderPage('/projects/p1/design?tab=wbs');
+    expect(await screen.findByTestId('wbs-add')).toBeEnabled();
+    cleanup();
+    renderPage('/projects/p1/design?tab=setup');
+    expect(await screen.findByTestId('setup-scheme')).toBeInTheDocument();
+    expect(screen.queryByTestId('setup-edit')).toBeNull();
+    expect(screen.queryByTestId('scheme-change')).toBeNull();
   });
 
   it('the tab in the URL opens that list, and a failing list is an error', async () => {

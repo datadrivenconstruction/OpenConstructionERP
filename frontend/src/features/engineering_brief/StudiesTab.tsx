@@ -32,6 +32,7 @@ import {
   type StudyKind,
 } from './api';
 import { FIELD_CLASS, FormError, useBriefAction, useSubmit } from './BriefBits';
+import { useProjectDocuments } from './hooks';
 import { keyText, type KeyText, type TFn } from './labels';
 
 export const STUDY_KIND_LABEL: Record<StudyKind, KeyText> = {
@@ -87,7 +88,6 @@ const EMPTY: StudyInput = {
 function StudyDialog({
   open,
   projectId,
-  documents,
   editing,
   defaultKind,
   onClose,
@@ -95,7 +95,6 @@ function StudyDialog({
 }: {
   open: boolean;
   projectId: string;
-  documents: DocumentItem[];
   editing: Study | null;
   defaultKind: StudyKind;
   onClose: () => void;
@@ -137,6 +136,19 @@ function StudyDialog({
     }
     void sub.run(() => (editing ? updateStudy(projectId, editing.id, form) : createStudy(projectId, form)));
   };
+  const [search, setSearch] = useState('');
+  const [wanted, setWanted] = useState(50);
+  const [term, setTerm] = useState('');
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setTerm(search);
+      setWanted(50);
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [search]);
+  const docsQ = useProjectDocuments(projectId, open, term, wanted);
+  const documents: DocumentItem[] = docsQ.data?.items ?? [];
+  const moreDocuments = (docsQ.data?.total ?? 0) > documents.length;
   // A linked document that is not in the list (another page of the register) stays selectable under its stored name.
   const linkedMissing = !!form.document_id && !documents.some((d) => d.id === form.document_id);
 
@@ -206,6 +218,15 @@ function StudyDialog({
           label={t('engineeringBrief.studies.document', { defaultValue: 'Report document' })}
           hint={t('engineeringBrief.studies.document_hint', { defaultValue: 'Pick a document of this project. Upload the report in the documents module first.' })}
         >
+          <input
+            type="search"
+            className={`${FIELD_CLASS} mb-2`}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('engineeringBrief.studies.document_search', { defaultValue: 'Search documents by name' })}
+            aria-label={t('engineeringBrief.studies.document_search', { defaultValue: 'Search documents by name' })}
+            data-testid="brief-study-document-search"
+          />
           <select className={FIELD_CLASS} value={form.document_id ?? ''} onChange={(e) => setForm({ ...form, document_id: e.target.value || null })} data-testid="brief-study-document">
             <option value="">{t('engineeringBrief.studies.no_document', { defaultValue: 'No document' })}</option>
             {documents.map((d) => (
@@ -215,6 +236,16 @@ function StudyDialog({
             ))}
             {linkedMissing && form.document_id ? <option value={form.document_id}>{editing?.document_name || form.document_id}</option> : null}
           </select>
+          {moreDocuments && (
+            <button
+              type="button"
+              className="mt-1 text-xs text-oe-blue hover:underline"
+              onClick={() => setWanted((n) => n + 50)}
+              data-testid="brief-study-document-more"
+            >
+              {t('engineeringBrief.studies.document_more', { defaultValue: 'Show more documents' })}
+            </button>
+          )}
         </WideModalField>
       </div>
     </WideModal>
@@ -249,12 +280,13 @@ function GateIndicator({ kind, gate }: { kind: StudyKind; gate: StudyGate }) {
 export function StudiesTab({
   projectId,
   studies,
-  documents,
+  canWrite,
   onChanged,
 }: {
   projectId: string;
   studies: Study[];
-  documents: DocumentItem[];
+  /** False when the caller lacks the edit permission: the tab then only reads. */
+  canWrite: boolean;
   onChanged: () => void;
 }) {
   const { t } = useTranslation();
@@ -276,9 +308,11 @@ export function StudiesTab({
                 <h3 className="text-sm font-semibold text-content-primary">{keyText(t as TFn, STUDY_KIND_LABEL[kind])}</h3>
                 <GateIndicator kind={kind} gate={studyGate(kind, studies)} />
               </div>
-              <Button size="sm" icon={<Plus size={14} />} onClick={() => setDialog({ editing: null, kind })} data-testid={`brief-study-add-${kind}`}>
-                {t('engineeringBrief.studies.add', { defaultValue: 'Add study' })}
-              </Button>
+              {canWrite ? (
+                <Button size="sm" icon={<Plus size={14} />} onClick={() => setDialog({ editing: null, kind })} data-testid={`brief-study-add-${kind}`}>
+                  {t('engineeringBrief.studies.add', { defaultValue: 'Add study' })}
+                </Button>
+              ) : null}
             </div>
             {rows.length === 0 ? (
               <EmptyState
@@ -323,10 +357,12 @@ export function StudiesTab({
                           )}
                         </td>
                         <td className="px-3 py-2">
-                          <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={14} />} onClick={() => setDialog({ editing: s, kind: s.kind })} />
-                            <Button variant="ghost" size="sm" aria-label={t('common.delete', { defaultValue: 'Delete' })} icon={<Trash2 size={14} />} onClick={() => setRemoving(s)} />
-                          </div>
+                          {canWrite ? (
+                            <div className="flex justify-end gap-1">
+                              <Button variant="ghost" size="sm" aria-label={t('common.edit', { defaultValue: 'Edit' })} icon={<Pencil size={14} />} onClick={() => setDialog({ editing: s, kind: s.kind })} />
+                              <Button variant="ghost" size="sm" aria-label={t('common.delete', { defaultValue: 'Delete' })} icon={<Trash2 size={14} />} onClick={() => setRemoving(s)} />
+                            </div>
+                          ) : null}
                         </td>
                       </tr>
                     ))}
@@ -341,7 +377,6 @@ export function StudiesTab({
       <StudyDialog
         open={dialog !== null}
         projectId={projectId}
-        documents={documents}
         editing={dialog?.editing ?? null}
         defaultKind={dialog?.kind ?? 'site_analysis'}
         onClose={() => setDialog(null)}

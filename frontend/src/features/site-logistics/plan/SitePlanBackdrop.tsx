@@ -102,7 +102,8 @@ export function PlanImageBar({
           <select
             className={selectCls}
             value={stage.plan_document_id ?? ''}
-            disabled={readOnly || busy}
+            disabled={readOnly || busy || images.isLoading}
+            aria-busy={images.isLoading}
             // A different image has a different scale, so the old one goes with it.
             onChange={(e) =>
               void write({ plan_document_id: e.target.value || null, plan_metres_per_pixel: null, plan_origin_px: null })
@@ -136,6 +137,16 @@ export function PlanImageBar({
       {!readOnly && (
         <p className="text-xs text-content-tertiary" data-testid="siteplan-image-formats">
           {tx(t, 'siteplan.image_formats')}
+        </p>
+      )}
+      {images.isLoading && (
+        <p className="text-xs text-content-tertiary" role="status" data-testid="siteplan-images-loading">
+          {tx(t, 'siteplan.images_loading')}
+        </p>
+      )}
+      {images.isError && (
+        <p role="alert" className="text-xs text-semantic-error" data-testid="siteplan-images-failed">
+          {tx(t, 'siteplan.images_failed')}
         </p>
       )}
       {images.isSuccess && choices.length === 0 && !stage.plan_document_id && (

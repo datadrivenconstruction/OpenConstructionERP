@@ -686,12 +686,34 @@ class ProcurementConceptService:
             facts.append(await self._facts_of(project_id, cp, r, gate, advance_applies=applies))
         return cps, rows, facts
 
+    async def _bind_need_date(self, project_id: uuid.UUID, activity_id: uuid.UUID) -> str:
+        """The start date of a schedule activity of this project; any other activity is refused as unknown."""
+        from app.modules.schedule.models import Activity, Schedule
+
+        row = (
+            await self.session.execute(
+                select(Activity.start_date)
+                .join(Schedule, Schedule.id == Activity.schedule_id)
+                .where(Activity.id == activity_id, Schedule.project_id == project_id)
+            )
+        ).first()
+        if row is None or not row[0]:
+            raise ProcurementError("need_activity_unknown", 422)
+        return str(row[0])[:10]
+
     async def _facts_of(
         self, project_id: uuid.UUID, cp: plan.PlanPackage, r: AwardPackage, gate: Any, *, advance_applies: bool
     ) -> ev.PackageFacts:
         released = (
             advance_applies and r.is_advance and await self.advance_release_status(project_id, r, gate) == "released"
         )
+        need_day = _day(r.need_date) or _day(cp.need_date)
+        if r.need_activity_id is not None:
+            # The schedule owns the date once the package is bound: moving the milestone moves the award schedule.
+            from app.modules.schedule.models import Activity
+
+            bound = await self.session.get(Activity, r.need_activity_id)
+            need_day = _day(bound.start_date) if bound is not None and bound.start_date else need_day
         return ev.PackageFacts(
             id=str(r.id),
             code=cp.code,
@@ -708,7 +730,7 @@ class ProcurementConceptService:
             advance_released=released,
             advance_applies=advance_applies,
             framework_agreement_id=str(r.framework_agreement_id) if r.framework_agreement_id else None,
-            need_date=_day(r.need_date) or _day(cp.need_date),
+            need_date=need_day,
             lead_time_days=r.lead_time_days,
             procedure_days=r.procedure_days,
             planned_start=_day(r.planned_start),
@@ -997,6 +1019,8 @@ class ProcurementConceptService:
                 raise ProcurementError("advance_release_other_gate", 422)
         if row.prequal_profile_id is not None:
             await self._profile(project_id, row.prequal_profile_id)
+        if "need_activity_id" in data and row.need_activity_id is not None:
+            row.need_date = await self._bind_need_date(project_id, row.need_activity_id)
         if "cost_ref_id" in data and row.cost_ref_id is not None:
             await self._require_boq_section(project_id, row.cost_ref_id)
         if row.framework_agreement_id is not None and any(

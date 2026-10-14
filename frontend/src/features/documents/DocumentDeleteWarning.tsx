@@ -50,6 +50,7 @@ const MODULE_LABEL_KEYS: Record<string, string> = {
   design_options: 'nav.design_options',
   documents: 'documents.title',
   fieldreports: 'fieldreports.title',
+  hse_frame: 'hseFrame.title',
   markups: 'markups.title',
   meetings: 'meetings.title',
   plan_room: 'plan_room.title',

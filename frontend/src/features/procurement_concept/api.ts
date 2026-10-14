@@ -273,6 +273,8 @@ export interface AwardPackage {
   framework_agreement_id: string | null;
   evaluation_method: EvaluationMethod;
   need_date: string | null;
+  /** The schedule milestone the need date is taken from, or null when it is typed. */
+  need_activity_id: string | null;
   lead_time_days: number | null;
   procedure_days: number | null;
   planned_start: string | null;
@@ -346,6 +348,7 @@ export interface PackageInput {
   tender_basis?: TenderBasis | null;
   framework_agreement_id?: string | null;
   need_date?: string | null;
+  need_activity_id?: string | null;
   lead_time_days?: number | null;
   prequal_profile_id?: string | null;
   notes?: string;

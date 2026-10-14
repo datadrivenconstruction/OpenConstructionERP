@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { Check, Circle } from 'lucide-react';
 
 import { Badge, type BadgeVariant } from '@/shared/ui/Badge';
+import { fmtDate } from '@/shared/lib/formatters';
 
 import {
   addInsurance,
@@ -336,7 +337,7 @@ function InsuranceSection({ projectId, data, canEdit, currency }: { projectId: s
 }
 
 function TaxSection({ projectId, data, canEdit }: { projectId: string; data: Registers; canEdit: boolean }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const tax = data.tax;
   const save = useEconomicsAction(projectId, (body: Record<string, unknown>) => putTax(projectId, body));
   const [vat, setVat] = useState<VatTreatment>(tax?.vat_treatment ?? 'standard');
@@ -351,7 +352,7 @@ function TaxSection({ projectId, data, canEdit }: { projectId: string; data: Reg
       : value === false
         ? t('economics.registers.deduction_no', { defaultValue: 'No input tax deduction' })
         : t('economics.registers.deduction_unknown', { defaultValue: 'Not clarified' });
-  const confirmedOn = tax?.confirmed_at ? new Date(tax.confirmed_at).toLocaleDateString(i18n.language || 'en') : '';
+  const confirmedOn = tax?.confirmed_at ? fmtDate(tax.confirmed_at) : '';
 
   return (
     <Section title={t('economics.registers.tax_title', { defaultValue: 'Tax treatment' })} testId="economics-tax">

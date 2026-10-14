@@ -11,7 +11,7 @@ import { AlertTriangle, Info, XCircle } from 'lucide-react';
 
 import { Badge, type BadgeVariant } from '@/shared/ui/Badge';
 import { Button, type ButtonProps } from '@/shared/ui/Button';
-import { fmtCurrency } from '@/shared/lib/formatters';
+import { formatCurrency } from '@/shared/lib/money';
 
 import {
   procurementErrorCode,
@@ -124,7 +124,7 @@ export function ToneBadge({ tone, children, testId }: { tone: BadgeVariant; chil
 /** An amount with its currency, or a dash when there is none. */
 export function Money({ value, currency }: { value: string | null | undefined; currency?: string | null }) {
   if (value === null || value === undefined || value === '') return <span className="text-content-tertiary">-</span>;
-  return <span className="tabular-nums">{fmtCurrency(value, currency)}</span>;
+  return <span className="tabular-nums">{formatCurrency(value, currency)}</span>;
 }
 
 /** Rule findings as a list: what blocks approval first and in red, warnings after. */

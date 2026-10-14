@@ -53,7 +53,7 @@ export const PLAN_STATUS: Record<PlanStatus, KeyText> = {
   in_review: ['staffing.plan.status.in_review', 'In review'],
   approved: ['staffing.plan.status.approved', 'Approved'],
   binding: ['staffing.plan.status.binding', 'Binding'],
-  revising: ['staffing.plan.status.revising', 'Revising'],
+  revising: ['staffing.plan.status.revising', 'Reopened'],
 };
 
 export const POSITION_STATUS: Record<PositionStatus, KeyText> = {

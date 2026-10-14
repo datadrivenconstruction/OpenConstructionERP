@@ -132,13 +132,18 @@ export function useSpecification(projectId: string, enabled: boolean) {
   });
 }
 
-/** The project's documents as a pick list: the study report and the issued specification live there. */
-export function useProjectDocuments(projectId: string, enabled: boolean) {
+/**
+ * One page of the project's documents as a pick list, searched on the server. The study
+ * report and the issued specification live there. `total` tells the picker whether more
+ * pages exist behind the rows it holds.
+ */
+export function useProjectDocuments(projectId: string, enabled: boolean, search = '', limit = 50) {
   return useQuery({
-    queryKey: ['engineering-brief', projectId, 'documents'],
-    queryFn: () => fetchDocuments(projectId).then((page) => page.items),
+    queryKey: ['engineering-brief', projectId, 'documents', search, limit],
+    queryFn: () => fetchDocuments(projectId, { search: search.trim(), limit }),
     enabled: enabled && !!projectId,
     retry: false,
+    placeholderData: (previous) => previous,
   });
 }
 

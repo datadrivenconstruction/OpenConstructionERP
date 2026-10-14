@@ -18,7 +18,9 @@ import clsx from 'clsx';
 
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { fmtDate, fmtList, fmtNumber } from '@/shared/lib/formatters';
 import { formatCurrency } from '@/shared/lib/money';
 
@@ -101,6 +103,8 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
   const [dialog, setDialog] = useState<Dialog>(null);
   const [failed, setFailed] = useState<{ where: string; error: unknown } | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const confirmState = useConfirm();
+  const { confirm } = confirmState;
   const [waiving, setWaiving] = useState<string | null>(null);
   const [waiverReason, setWaiverReason] = useState('');
 
@@ -153,6 +157,7 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
 
   return (
     <div className="space-y-4" data-testid="plant-item-panel">
+      <ConfirmDialog {...confirmState} />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-1.5">
           <Button variant="ghost" size="sm" icon={<ArrowLeft size={14} />} onClick={onBack}>
@@ -769,7 +774,18 @@ export function ItemPanel({ projectId, item, catalogue, labels, personName, onBa
                               variant="ghost"
                               icon={<Trash2 size={14} />}
                               aria-label={t('plant.spare.delete', { defaultValue: 'Delete the spare' })}
-                              onClick={() => run.mutate({ where: 'spares', call: () => deleteSpare(projectId, item.id, s.id) })}
+                              onClick={async () => {
+                                if (
+                                  await confirm({
+                                    title: t('plant.spare.delete_confirm_title', { defaultValue: 'Delete this spare?' }),
+                                    message: t('plant.spare.delete_confirm', {
+                                      defaultValue: 'The spare is removed from this item. This cannot be undone.',
+                                    }),
+                                  })
+                                ) {
+                                  run.mutate({ where: 'spares', call: () => deleteSpare(projectId, item.id, s.id) });
+                                }
+                              }}
                             />
                           </>
                         )}

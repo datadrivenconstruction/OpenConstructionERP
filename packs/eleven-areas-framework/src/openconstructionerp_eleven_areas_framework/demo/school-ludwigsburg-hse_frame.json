@@ -1,0 +1,52 @@
+{
+  "$note": "Demo story of the HSE frame for the school: under way, the execution coordinator is only proposed and the notice, the plan and one clearance are open.",
+  "duration_working_days": 450,
+  "peak_workers": 95,
+  "person_days": 21000,
+  "employers": 11,
+  "hazardous": [
+    "heavy_precast",
+    "excavation_deep"
+  ],
+  "notice_sent_days_ago": null,
+  "plan_issued_days_ago": null,
+  "later_works": "draft",
+  "execution_coordinator_appointed": false,
+  "open_templates": [
+    "de_advance_notice",
+    "de_sige_plan",
+    "archaeology_clearance",
+    "de_later_works_file"
+  ],
+  "reference": "VA-2026-0233",
+  "evidence_note": "Nachweis im Projektordner abgelegt, Prüfvermerk der Projektsteuerung liegt bei.",
+  "notes": "Die Baugrube der Sporthalle ist tiefer als 5 m und liegt neben dem Bestandsgebäude der Schule; der Verbau wird mit dem Prüfstatiker abgestimmt.",
+  "due": {
+    "de_advance_notice": {
+      "days": 162,
+      "party": "Projektsteuerung Bauherr"
+    },
+    "de_sige_plan": {
+      "days": 169,
+      "party": "SiGe-Koordination"
+    },
+    "archaeology_clearance": {
+      "days": 130,
+      "party": "Projektsteuerung Bauherr"
+    },
+    "de_later_works_file": {
+      "days": 590,
+      "party": "SiGe-Koordination"
+    }
+  },
+  "parties": {
+    "owner": "Projektsteuerung Bauherr",
+    "designer": "Generalplaner",
+    "contractor": "Generalunternehmer",
+    "coordinator": "SiGe-Koordination",
+    "operator": "Betreiber"
+  },
+  "coordination_org": "Ingenieurbüro Arbeitssicherheit",
+  "owner_org": "Bauherr",
+  "qualification": "Fachkunde nach RAB 30"
+}

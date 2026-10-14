@@ -9,8 +9,9 @@ what the code branches on.
 
 from __future__ import annotations
 
-FRAME_STATES = ("draft", "in_review", "approved")
-FRAME_EDITABLE = ("draft",)
+# draft -> in_review -> approved -> binding; a binding frame is revised (revising) and submitted again.
+FRAME_STATES = ("draft", "in_review", "approved", "binding", "revising")
+FRAME_EDITABLE = ("draft", "revising")
 ITEM_STATUSES = ("open", "in_progress", "met", "waived", "not_applicable")
 ITEM_DONE = ("met", "waived", "not_applicable")
 OBLIGATIONS = ("mandatory", "recommended")

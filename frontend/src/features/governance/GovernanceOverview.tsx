@@ -115,6 +115,7 @@ function StatButton({
   label,
   sub,
   loading,
+  failed = false,
   actionHint,
   onClick,
 }: {
@@ -124,6 +125,8 @@ function StatButton({
   label: string;
   sub: string;
   loading: boolean;
+  /** The count could not be read: the tile says so instead of showing a dash that reads as zero. */
+  failed?: boolean;
   /** Screen-reader-only action hint appended to the accessible name. */
   actionHint: string;
   onClick: () => void;
@@ -145,6 +148,15 @@ function StatButton({
               className="inline-block h-7 w-10 animate-pulse rounded bg-surface-tertiary align-middle"
               aria-hidden
             />
+          ) : failed ? (
+            <>
+              <span className="text-semantic-error" aria-hidden>
+                !
+              </span>
+              <span className="sr-only">
+                {t('governance.stat_failed', { defaultValue: 'Could not be loaded' })}
+              </span>
+            </>
           ) : value == null ? (
             <>
               <span className="text-content-quaternary" aria-hidden>
@@ -159,7 +171,12 @@ function StatButton({
           )}
         </span>
         <span className="block truncate text-sm font-medium text-content-primary">{label}</span>
-        <span className="block truncate text-xs text-content-tertiary">{sub}</span>
+        <span
+          className={failed ? 'block truncate text-xs text-semantic-error' : 'block truncate text-xs text-content-tertiary'}
+          role={failed ? 'alert' : undefined}
+        >
+          {failed ? t('governance.stat_failed', { defaultValue: 'Could not be loaded' }) : sub}
+        </span>
       </span>
       <span className="sr-only">{actionHint}</span>
     </button>
@@ -209,6 +226,7 @@ function SummaryStats({ onJump }: { onJump: (tab: GovernanceTabId) => void }) {
         label={t('governance.stat_roles', { defaultValue: 'Roles' })}
         sub={t('governance.stat_roles_sub', { defaultValue: 'Permissions per role' })}
         loading={permQuery.isLoading}
+        failed={permQuery.isError}
         actionHint={t('governance.stat_roles_aria', {
           defaultValue: 'Open the Permissions tab',
         })}
@@ -220,6 +238,7 @@ function SummaryStats({ onJump }: { onJump: (tab: GovernanceTabId) => void }) {
         label={t('governance.stat_routes', { defaultValue: 'Active routes' })}
         sub={t('governance.stat_routes_sub', { defaultValue: 'Approval sign-off' })}
         loading={routesQuery.isLoading}
+        failed={routesQuery.isError}
         actionHint={t('governance.stat_routes_aria', {
           defaultValue: 'Open the Approval Routes tab',
         })}
@@ -238,6 +257,7 @@ function SummaryStats({ onJump }: { onJump: (tab: GovernanceTabId) => void }) {
               })
         }
         loading={ruleSetsQuery.isLoading}
+        failed={ruleSetsQuery.isError}
         actionHint={t('governance.stat_rulesets_aria', {
           defaultValue: 'Open the Validation Rules tab',
         })}

@@ -82,6 +82,7 @@
       "package_closed": "Das Paket ist in Ausschreibung, vergeben oder storniert.",
       "package_has_blocking_findings": "Das Paket hat Befunde, die zuerst zu klären sind.",
       "package_id_required": "Wählen Sie ein Paket.",
+      "need_activity_unknown": "Der Terminplan-Vorgang existiert in diesem Projekt nicht oder hat kein Startdatum.",
       "package_kind_not_procured": "Diese Paketart wird nicht als Vergabepaket beschafft.",
       "package_not_found": "Paket nicht gefunden.",
       "package_not_on_hold": "Das Paket ist nicht zurückgestellt.",

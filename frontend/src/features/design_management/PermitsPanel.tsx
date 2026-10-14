@@ -12,8 +12,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2, CircleAlert, Landmark } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { fmtDate } from '@/shared/lib/formatters';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 
 import {
   addPermitItem,
@@ -31,7 +32,7 @@ import {
   type PermitItem,
   type PermitItemKind,
 } from './api';
-import { ListState, PERMIT_TONE, PanelHeader, StepButton, ToneBadge, hasRows, pickerField, type DesignContext } from './DesignBits';
+import { ListState, PERMIT_TONE, PanelHeader, StepButton, ToneBadge, hasRows, pickerField, type DesignContext, WriteButton } from './DesignBits';
 import { FormDialog, flag, str, type FieldSpec, type FormValues } from './FormDialog';
 import { useDesignAction, useDesignList, useDesignOptions } from './hooks';
 import { CONDITION_STATE, PERMIT_ITEM, PERMIT_STATE, permitProfileName, reportKindName, ui, uiCount, vocab, vocabOptions, type TFn } from './labels';
@@ -64,6 +65,7 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
   const t = rawT as TFn;
   const [dialog, setDialog] = useState<Dialog>(null);
   const action = useDesignAction(ctx.onChanged);
+  const confirmState = useConfirm();
   const permits = useDesignList(ctx.projectId, 'permits', listPermits);
   const reports = useDesignList(ctx.projectId, 'reports', listReports);
   const submissions = useDesignOptions(ctx.projectId, 'authority_submissions', ctx.labels);
@@ -137,13 +139,14 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
 
   return (
     <div className="space-y-4" data-testid="design-permit-panel">
+      <ConfirmDialog {...confirmState} />
       <PanelHeader
         title={ui(t, 'design.ui.permit.title')}
         hint={ui(t, 'design.ui.permit.hint')}
         action={
-          <Button onClick={add} data-testid="permit-add">
+          <WriteButton onClick={add} data-testid="permit-add">
             {ui(t, 'design.ui.permit.add')}
-          </Button>
+          </WriteButton>
         }
       />
       <ListState
@@ -174,14 +177,14 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
                 )}
                 <span className="ml-auto flex flex-wrap gap-1">
                   {assembling && (
-                    <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'permit', permit })}>
+                    <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'permit', permit })}>
                       {ui(t, 'design.ui.action.edit')}
-                    </Button>
+                    </WriteButton>
                   )}
                   {permit.review_cycle_id && (
-                    <Button size="sm" variant="ghost" disabled={action.pending} onClick={() => action.run(() => syncPermit(ctx.projectId, permit.id))} data-testid="permit-sync">
+                    <WriteButton size="sm" variant="ghost" disabled={action.pending} onClick={() => action.run(() => syncPermit(ctx.projectId, permit.id))} data-testid="permit-sync">
                       {ui(t, 'design.ui.permit.sync')}
-                    </Button>
+                    </WriteButton>
                   )}
                   {offered(permit.can?.transitions).map(({ target, flag }) => (
                     <StepButton
@@ -232,14 +235,24 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
                               : ui(t, 'design.ui.permit.item_missing')}
                         </span>
                         {assembling && (
-                          <Button
+                          <WriteButton
                             size="sm"
                             variant="ghost"
                             disabled={action.pending}
-                            onClick={() => action.run(() => removePermitItem(ctx.projectId, permit.id, item.id))}
+                            onClick={async () => {
+                              if (
+                                await confirmState.confirm({
+                                  title: ui(t, 'design.ui.permit.item_remove_title'),
+                                  message: ui(t, 'design.ui.permit.item_remove_body'),
+                                  confirmLabel: ui(t, 'design.ui.permit.item_remove'),
+                                })
+                              ) {
+                                action.run(() => removePermitItem(ctx.projectId, permit.id, item.id));
+                              }
+                            }}
                           >
                             {ui(t, 'design.ui.permit.item_remove')}
-                          </Button>
+                          </WriteButton>
                         )}
                       </li>
                     );
@@ -247,9 +260,9 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
                 </ul>
               )}
               {assembling && (
-                <Button size="sm" variant="secondary" onClick={() => setDialog({ kind: 'item', permit })} data-testid="permit-item-add">
+                <WriteButton size="sm" variant="secondary" onClick={() => setDialog({ kind: 'item', permit })} data-testid="permit-item-add">
                   {ui(t, 'design.ui.permit.item_add')}
-                </Button>
+                </WriteButton>
               )}
 
               {(approved || permit.conditions.length > 0) && (
@@ -257,9 +270,9 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h4 className="text-sm font-medium text-content-primary">{ui(t, 'design.ui.permit.conditions_title')}</h4>
                     {approved && (
-                      <Button size="sm" variant="secondary" onClick={() => setDialog({ kind: 'condition', permit })} data-testid="condition-add">
+                      <WriteButton size="sm" variant="secondary" onClick={() => setDialog({ kind: 'condition', permit })} data-testid="condition-add">
                         {ui(t, 'design.ui.permit.condition_add')}
-                      </Button>
+                      </WriteButton>
                     )}
                   </div>
                   {permit.conditions.length === 0 && <p className="text-sm text-content-tertiary">{ui(t, 'design.ui.permit.conditions_empty')}</p>}
@@ -277,7 +290,7 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
                         )}
                         {condition.state === 'proposed' && (
                           <span className="ml-auto flex gap-1">
-                            <Button
+                            <WriteButton need="manage"
                               size="sm"
                               variant="secondary"
                               disabled={action.pending}
@@ -285,15 +298,15 @@ export function PermitsPanel({ ctx }: { ctx: DesignContext }) {
                               data-testid="condition-confirm"
                             >
                               {ui(t, 'design.ui.permit.condition_confirm')}
-                            </Button>
-                            <Button
+                            </WriteButton>
+                            <WriteButton need="manage"
                               size="sm"
                               variant="ghost"
                               disabled={action.pending}
                               onClick={() => action.run(() => decidePermitCondition(ctx.projectId, permit.id, condition.id, false))}
                             >
                               {ui(t, 'design.ui.permit.condition_dismiss')}
-                            </Button>
+                            </WriteButton>
                           </span>
                         )}
                       </div>

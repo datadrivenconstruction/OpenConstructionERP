@@ -17,7 +17,8 @@ import { ArrowLeft, Pencil, Plus, ShieldAlert, Trash2 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
-import { fmtCurrency, fmtDate, fmtList, formatDateValue } from '@/shared/lib/formatters';
+import { fmtDate, fmtList, formatDateValue } from '@/shared/lib/formatters';
+import { formatCurrency } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 
 import {
@@ -440,7 +441,7 @@ export function PersonnelFilePanel({ projectId, fileId, catalogue, labels, perso
                           : tr.from_place || tr.to_place}
                       </span>
                     )}
-                    {tr.cost && <span className="tabular-nums text-content-secondary" data-testid="travel-cost-shown">{fmtCurrency(tr.cost, tr.currency)}</span>}
+                    {tr.cost && <span className="tabular-nums text-content-secondary" data-testid="travel-cost-shown">{formatCurrency(tr.cost, tr.currency)}</span>}
                     {editable && (
                       <span className="ml-auto flex flex-wrap gap-1">
                         {nextTravelStatuses(tr.status).map((s) => (

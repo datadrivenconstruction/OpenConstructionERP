@@ -1,0 +1,122 @@
+{
+  "title": "Anforderungsheft Grundschule Ludwigsburg Neckarweihingen",
+  "summary": "Lastenheft für eine vierzügige Ganztagsgrundschule mit Mensa und Einfeld-Sporthalle, Wärmepumpe, Photovoltaik und Lüftung mit Wärmerueckgewinnung.",
+  "operation_proof_days": 760,
+  "format": {
+    "bgf": "10500",
+    "live": "3,0",
+    "gk": "3",
+    "lbo": "LBO BW",
+    "energy": "Effizienzhaus 40 (Nichtwohngebäude)"
+  },
+  "requirements": [
+    {
+      "category": "performance",
+      "entity": "Klassenräume",
+      "attribute": "Anzahl Klassenräume",
+      "constraint_type": "equals",
+      "constraint_value": "16",
+      "unit": "",
+      "priority": "must",
+      "verification_method": "inspection",
+      "originator": "Stadt Ludwigsburg",
+      "originator_role": "client",
+      "source_ref": "Schulbauprogramm"
+    },
+    {
+      "category": "performance",
+      "entity": "Unterrichtsräume",
+      "attribute": "Nachhallzeit",
+      "constraint_type": "max",
+      "constraint_value": "0,6",
+      "unit": "s",
+      "priority": "must",
+      "verification_method": "test",
+      "originator": "Bauakustik",
+      "originator_role": "designer",
+      "source_ref": "DIN 18041"
+    },
+    {
+      "category": "operation_maintenance",
+      "entity": "Lüftung",
+      "attribute": "CO2-Konzentration Klassenraum",
+      "constraint_type": "max",
+      "constraint_value": "1000",
+      "unit": "ppm",
+      "priority": "should",
+      "verification_method": "test",
+      "originator": "Stadt Ludwigsburg",
+      "originator_role": "client",
+      "source_ref": "Schulbauprogramm"
+    }
+  ],
+  "programme": [
+    {
+      "kind_code": "gross_floor_area",
+      "label": "Brutto-Grundfläche Schulgebäude, Mensa, Sporthalle",
+      "unit": "m2",
+      "quantity": "10500",
+      "basis": "Raumprogramm Stadt Ludwigsburg"
+    },
+    {
+      "kind_code": "plot_area",
+      "label": "Grundstück",
+      "unit": "m2",
+      "quantity": "22000",
+      "basis": "Liegenschaftskataster"
+    },
+    {
+      "kind_code": "units",
+      "label": "Klassenräume",
+      "unit": "Stk",
+      "quantity": "16",
+      "basis": "Vierzügigkeit, Ganztag"
+    }
+  ],
+  "topics": {
+    "supply": "Luft-Wasser-Wärmepumpe mit Flächenheizung, Photovoltaik auf allen Dächern.",
+    "building_structure": "Stahlbeton-Skelett mit Holzrahmenbau-Fassaden, Sporthalle in Stahl-Holz-Bauweise.",
+    "construction_method": "Skelettbau in Ortbeton, Fassadenelemente vorgefertigt, Sporthalle parallel.",
+    "commissioning_sequence": "Einregulierung der Lüftung in den Sommerferien, Bezug zum Schuljahresbeginn.",
+    "site_analysis": "Schulbetrieb der Nachbarschule bleibt während der Bauzeit bestehen, getrennte Zufahrt."
+  },
+  "studies": [
+    {
+      "kind": "site_analysis",
+      "title": "Standortanalyse Neckarweihingen",
+      "scope": "Lage im Stadtteil, Schulwege, Erschließung, Nachbarschule, Lärm und Besonnung.",
+      "author": "Stadtplanungsamt Ludwigsburg mit Architekturbüro Kaiser",
+      "days": -200,
+      "result": "Das Grundstück liegt am Ortsrand mit sicherer Schulwegführung über die Neckarstraße. Die Zufahrt für Anlieferung und Rettung ist über den Bauhofweg getrennt vom Schulhof möglich.",
+      "conclusion": "suitable"
+    },
+    {
+      "kind": "site_analysis",
+      "title": "Baugrund und Altlastenverdacht",
+      "scope": "Baugrunderkundung, orientierende Untersuchung des ehemaligen Gartenbaubetriebs.",
+      "author": "Geotechnisches Büro Neckar",
+      "days": -175,
+      "result": "Tragfähiger Keuperverwitterungsboden ab 2,5 m. Im Nordteil leicht erhöhte Schwermetallwerte, Aushub ist nach Deponieklasse DK0 zu entsorgen.",
+      "conclusion": "conditional"
+    },
+    {
+      "kind": "suitability",
+      "title": "Eignung Wärmepumpe und Photovoltaik",
+      "scope": "Erdsondenfeld oder Luft-Wasser-Wärmepumpe, Dachflächen für Photovoltaik.",
+      "author": "Ingenieurbüro Haustechnik Stuttgart",
+      "days": -155,
+      "result": "Erdsonden sind im Wasserschutzgebiet Zone III nicht genehmigungsfähig. Luft-Wasser-Wärmepumpen mit Schallschutz sind geeignet, 420 kWp Photovoltaik auf Schul- und Mensadach sind belegbar.",
+      "conclusion": "suitable"
+    },
+    {
+      "kind": "suitability",
+      "title": "Eignung Mensa und Produktionsküche",
+      "scope": "Anlieferung, Hygienezonen, Abluftführung und Brandschutz der Küche.",
+      "author": "Fachplanung Großküche Weiss",
+      "days": -130,
+      "result": "Die Produktionsküche ist mit getrennter Anlieferung und Fettabscheider betreibbar. Die Abluftführung über Dach erfordert eine Abstimmung mit der Brandschutzdienststelle.",
+      "conclusion": "conditional"
+    }
+  ],
+  "issue_note": "Erste Fassung zur Abstimmung mit dem Bauherrn."
+}

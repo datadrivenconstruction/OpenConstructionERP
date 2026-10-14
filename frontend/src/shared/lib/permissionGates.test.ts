@@ -40,6 +40,13 @@ describe('roleHasPermission', () => {
     expect(roleHasPermission('manager', 'contracts.delete')).toBe(true);
   });
 
+  it('lets an editor work in design management and keeps setup and approvals at manager', () => {
+    // Mirrors design_management/permissions.py: edit is EDITOR, manage is MANAGER.
+    expect(roleHasPermission('editor', 'design.edit')).toBe(true);
+    expect(roleHasPermission('editor', 'design.manage')).toBe(false);
+    expect(roleHasPermission('manager', 'design.manage')).toBe(true);
+  });
+
   it('never lets a field role through, those rank below the viewer', () => {
     expect(roleHasPermission('site_foreman', 'takeoff.update')).toBe(false);
     expect(roleHasPermission('field_worker', 'takeoff.update')).toBe(false);

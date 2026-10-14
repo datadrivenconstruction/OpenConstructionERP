@@ -5,11 +5,11 @@
 // colour of each state, a section heading with its one action, a plain table
 // and the three states a list can be in before it has rows.
 
-import type { ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Badge, type BadgeVariant } from '@/shared/ui/Badge';
-import { Button } from '@/shared/ui/Button';
+import { Button, type ButtonProps } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { ErrorState } from '@/shared/ui/ErrorState';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
@@ -37,6 +37,20 @@ import type { FieldOption, FieldSpec } from './FormDialog';
 import { errorText, phaseName, ui, type LabelContext, type TFn } from './labels';
 import { applies } from './rules';
 import type { UiKey } from './text';
+
+/**
+ * What the signed-in role may be offered. The server still refuses; this keeps
+ * a viewer from being shown add, edit, delete and approve buttons that would
+ * end in a refusal. `edit` is the editor level, `manage` the manager level.
+ */
+export const DesignAccessContext = createContext<{ canEdit: boolean; canManage: boolean }>({ canEdit: true, canManage: true });
+
+/** A button that writes. It is absent for a role below the level the API asks for. */
+export function WriteButton({ need = 'edit', ...rest }: ButtonProps & { need?: 'edit' | 'manage' }) {
+  const access = useContext(DesignAccessContext);
+  if (!(need === 'manage' ? access.canManage : access.canEdit)) return null;
+  return <Button {...rest} />;
+}
 
 /** What the page loads once and every panel reads. */
 export interface DesignContext {
@@ -218,6 +232,31 @@ export function StepButton({
   );
 }
 
+/**
+ * The loading line or the retry notice of a small query inside a panel (a
+ * comment list, a catalogue, a preview). Nothing when the query has settled.
+ */
+export function InlineQueryState({
+  query,
+  failedKey = 'design.ui.load_failed',
+}: {
+  query: { isLoading: boolean; isError: boolean; error: unknown; refetch: () => unknown };
+  failedKey?: UiKey;
+}) {
+  const { t } = useTranslation();
+  if (query.isLoading) {
+    return (
+      <p className="text-sm text-content-tertiary" role="status" data-testid="inline-loading">
+        {ui(t as TFn, 'design.ui.loading')}
+      </p>
+    );
+  }
+  if (query.isError) {
+    return <ErrorState compact title={ui(t as TFn, failedKey)} hint={getErrorMessage(query.error)} onRetry={() => query.refetch()} />;
+  }
+  return null;
+}
+
 /** One optional select fed by another module; no field when that source has nothing to offer. */
 export function pickerField(name: string, label: string, options: FieldOption[] | null): FieldSpec[] {
   return options ? [{ name, label, type: 'select', options }] : [];
@@ -279,12 +318,13 @@ export function ListState({
   emptyAction?: { label: string; onClick: () => void };
 }) {
   const { t } = useTranslation();
+  const { canEdit } = useContext(DesignAccessContext);
   if (query.isLoading) return <SkeletonTable rows={4} columns={5} />;
   if (query.isError) {
     return <ErrorState title={ui(t as TFn, failedKey)} hint={getErrorMessage(query.error)} onRetry={() => query.refetch()} />;
   }
   if ((query.data ?? []).length === 0) {
-    return <EmptyState icon={emptyIcon} title={emptyTitle} description={emptyBody} action={emptyAction} />;
+    return <EmptyState icon={emptyIcon} title={emptyTitle} description={emptyBody} action={canEdit ? emptyAction : undefined} />;
   }
   return null;
 }

@@ -15,7 +15,7 @@ const DYNAMIC: Record<string, string[]> = {
   'hseFrame.plan': ['not_started', 'draft', 'issued', 'in_force'],
   'hseFrame.later': ['not_started', 'draft', 'complete'],
   'hseFrame.duty': ['yes', 'no', 'unknown'],
-  'hseFrame.state': ['draft', 'in_review', 'approved'],
+  'hseFrame.state': ['draft', 'in_review', 'approved', 'binding', 'revising'],
   'hseFrame.item_status': ['open', 'in_progress', 'met', 'waived', 'not_applicable'],
   'hseFrame.link_kind': [
     'permit_condition',

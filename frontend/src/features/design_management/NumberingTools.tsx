@@ -27,7 +27,7 @@ import {
   type NumberIssue,
   type RenumberRow,
 } from './api';
-import { PanelHeader, phaseField, roleOptions, wbsOptions, type DesignContext } from './DesignBits';
+import { PanelHeader, phaseField, roleOptions, wbsOptions, type DesignContext, WriteButton } from './DesignBits';
 import { NumberPreviewBox, numberPartFields, numberRequest } from './NumberForm';
 import { FormDialog, type FieldSpec } from './FormDialog';
 import { refusalText } from './hooks';
@@ -92,9 +92,9 @@ export function NumberingTools({ ctx }: { ctx: DesignContext }) {
             <Button variant="secondary" size="sm" loading={all.isPending} onClick={() => all.mutate()} data-testid="numbers-check-all">
               {ui(t, 'design.ui.numbering.check_all')}
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => setReserving(true)} data-testid="number-reserve">
+            <WriteButton variant="secondary" size="sm" onClick={() => setReserving(true)} data-testid="number-reserve">
               {ui(t, 'design.ui.numbering.reserve')}
-            </Button>
+            </WriteButton>
           </>
         }
       />
@@ -155,9 +155,9 @@ export function NumberingTools({ ctx }: { ctx: DesignContext }) {
       {legacy > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-semantic-warning/40 bg-semantic-warning-bg p-3 text-sm" data-testid="legacy-numbers">
           <p className="text-content-primary">{uiCount(t, 'design.ui.numbering.legacy', legacy)}</p>
-          <Button variant="secondary" size="sm" loading={propose.isPending} onClick={() => propose.mutate()} data-testid="renumber-propose">
+          <WriteButton need="manage" variant="secondary" size="sm" loading={propose.isPending} onClick={() => propose.mutate()} data-testid="renumber-propose">
             {ui(t, 'design.ui.numbering.propose')}
-          </Button>
+          </WriteButton>
         </div>
       )}
 
@@ -175,9 +175,9 @@ export function NumberingTools({ ctx }: { ctx: DesignContext }) {
               <Button variant="ghost" onClick={() => setProposal(null)} disabled={apply.isPending}>
                 {ui(t, 'design.ui.form.cancel')}
               </Button>
-              <Button disabled={usable.length === 0} loading={apply.isPending} onClick={() => apply.mutate(usable)} data-testid="renumber-apply">
+              <WriteButton need="manage" disabled={usable.length === 0} loading={apply.isPending} onClick={() => apply.mutate(usable)} data-testid="renumber-apply">
                 {uiCount(t, 'design.ui.numbering.apply', usable.length)}
-              </Button>
+              </WriteButton>
             </div>
           }
         >

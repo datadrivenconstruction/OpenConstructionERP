@@ -45,7 +45,7 @@ class HseFrame(Base):
     catalogue_source: Mapped[str] = mapped_column(String(20), nullable=False, default="shipped")
     catalogue_id: Mapped[str] = mapped_column(String(64), nullable=False, default="neutral")
     catalogue_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    # draft | in_review | approved
+    # draft | in_review | approved | binding | revising
     state: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
     governance_doc_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     # Facts that decide which duties apply; null = not known yet, which no rule reads as "no duty".

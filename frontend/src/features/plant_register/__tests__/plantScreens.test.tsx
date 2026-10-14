@@ -26,6 +26,7 @@ vi.mock('../api', async (importOriginal) => {
     listSpares: vi.fn(),
     transitionItem: vi.fn(),
     transitionSpare: vi.fn(),
+    deleteSpare: vi.fn(),
     transitionSlot: vi.fn(),
     submitPaper: vi.fn(),
     withdrawPaper: vi.fn(),
@@ -369,6 +370,21 @@ describe('ItemPanel', () => {
     expect(await screen.findByTestId('paper-state')).toHaveTextContent('Approved');
     expect(screen.queryByTestId('paper-submit')).toBeNull();
     expect(screen.queryByText('Write decision paper')).toBeNull();
+  });
+
+  it('deleting a spare asks first and sends nothing until the reader confirms', async () => {
+    mocked.listSpares.mockResolvedValue(page([spare()]));
+    mocked.deleteSpare.mockResolvedValue(undefined);
+    const onChanged = panel();
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete the spare' }));
+    expect(await screen.findByText('Delete this spare?')).toBeInTheDocument();
+    expect(mocked.deleteSpare).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(mocked.deleteSpare).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Delete the spare' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(mocked.deleteSpare).toHaveBeenCalledWith('p1', 'i1', 'sp1'));
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
   });
 
   it('waiving a spare sends the reason the reader wrote', async () => {

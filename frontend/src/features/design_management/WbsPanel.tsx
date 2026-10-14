@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ListTree } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 
 import {
@@ -25,7 +24,7 @@ import {
   type WbsInput,
   type WbsNode,
 } from './api';
-import { CELL, CELL_MUTED, PanelHeader, Table, ToneBadge, type DesignContext } from './DesignBits';
+import { CELL, CELL_MUTED, InlineQueryState, PanelHeader, Table, ToneBadge, type DesignContext, WriteButton } from './DesignBits';
 import { FormDialog, str, type FieldSpec, type FormValues } from './FormDialog';
 import { useDesignAction, useDesignList } from './hooks';
 import { WBS_KIND, humanizeCode, ui, uiCount, vocab, vocabOptions, type TFn } from './labels';
@@ -55,7 +54,9 @@ function RenumberPreview({ projectId, node, code }: { projectId: string; node: W
     retry: false,
   });
   const rows = (preview.data ?? []).filter((r) => r.id !== node.id);
-  if (!wanted || wanted === node.code || rows.length === 0) return null;
+  if (!wanted || wanted === node.code) return null;
+  if (preview.isLoading || preview.isError) return <InlineQueryState query={preview} />;
+  if (rows.length === 0) return null;
   return (
     <div className="rounded-md bg-surface-secondary p-2 text-xs text-content-secondary" data-testid="wbs-renumber-preview">
       <p className="font-medium text-content-primary">{uiCount(t, 'design.ui.wbs.renumber_title', rows.length)}</p>
@@ -105,12 +106,13 @@ export function WbsPanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.wbs.title')}
         hint={ui(t, 'design.ui.wbs.hint')}
         action={
-          <Button onClick={() => setDialog({ kind: 'create', parentId: '' })} data-testid="wbs-add">
+          <WriteButton onClick={() => setDialog({ kind: 'create', parentId: '' })} data-testid="wbs-add">
             {ui(t, 'design.ui.wbs.add')}
-          </Button>
+          </WriteButton>
         }
       />
 
+      {(unresolved.isError || unresolved.isLoading) && <InlineQueryState query={unresolved} />}
       {(unresolved.data ?? []).length > 0 && (
         <div role="status" className="rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg p-3 text-sm" data-testid="wbs-unresolved">
           <p className="flex items-center gap-2 font-medium text-content-primary">
@@ -170,23 +172,23 @@ export function WbsPanel({ ctx }: { ctx: DesignContext }) {
                 {referenceCount > 0 ? uiCount(t, 'design.ui.wbs.references', referenceCount) : ui(t, 'design.ui.wbs.unused')}
               </td>
               <td className={`${CELL} whitespace-nowrap text-right`}>
-                <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'create', parentId: node.id })}>
+                <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'create', parentId: node.id })}>
                   {ui(t, 'design.ui.wbs.add_below')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'edit', node })}>
+                </WriteButton>
+                <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'edit', node })}>
                   {ui(t, 'design.ui.action.edit')}
-                </Button>
-                <Button
+                </WriteButton>
+                <WriteButton
                   size="sm"
                   variant="ghost"
                   disabled={action.pending}
                   onClick={() => action.run(() => closeWbsNode(ctx.projectId, node.id, !node.closed))}
                 >
                   {node.closed ? ui(t, 'design.ui.wbs.reopen') : ui(t, 'design.ui.wbs.close')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'delete', node })}>
+                </WriteButton>
+                <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'delete', node })}>
                   {ui(t, 'design.ui.action.delete')}
-                </Button>
+                </WriteButton>
               </td>
             </tr>
           ))}

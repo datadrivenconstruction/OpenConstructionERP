@@ -11,7 +11,9 @@ import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { WideModal, WideModalSection } from '@/shared/ui/WideModal';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { fmtDate, fmtNumber } from '@/shared/lib/formatters';
 
 import {
@@ -165,6 +167,8 @@ export interface SiteItPanelProps {
 export function SiteItPanel({ projectId, services, sitePlant, catalogue, labels, onChanged }: SiteItPanelProps) {
   const { t } = useTranslation();
   const [dialog, setDialog] = useState<{ service: ItService | null } | null>(null);
+  const confirmState = useConfirm();
+  const { confirm } = confirmState;
   const run = useMutation({
     mutationFn: (call: () => Promise<unknown>) => call(),
     onSuccess: onChanged,
@@ -179,6 +183,7 @@ export function SiteItPanel({ projectId, services, sitePlant, catalogue, labels,
 
   return (
     <div className="space-y-4" data-testid="plant-site-it">
+      <ConfirmDialog {...confirmState} />
       <Section
         title={t('plant.it.section', { defaultValue: 'IT services during construction' })}
         hint={t('plant.it.section_hint', {
@@ -236,7 +241,18 @@ export function SiteItPanel({ projectId, services, sitePlant, catalogue, labels,
                         variant="ghost"
                         icon={<Trash2 size={14} />}
                         aria-label={t('plant.it.delete', { defaultValue: 'Delete the IT service' })}
-                        onClick={() => run.mutate(() => deleteItService(projectId, s.id))}
+                        onClick={async () => {
+                          if (
+                            await confirm({
+                              title: t('plant.it.delete_confirm_title', { defaultValue: 'Delete this IT service?' }),
+                              message: t('plant.it.delete_confirm', {
+                                defaultValue: 'The IT service is removed from the plan. This cannot be undone.',
+                              }),
+                            })
+                          ) {
+                            run.mutate(() => deleteItService(projectId, s.id));
+                          }
+                        }}
                       />
                     )}
                   </span>

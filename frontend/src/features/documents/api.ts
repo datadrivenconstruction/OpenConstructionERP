@@ -289,9 +289,17 @@ export interface DocumentItem {
  * An empty project id yields an empty page rather than a request, which is
  * what the old array-returning version did too.
  */
-export async function fetchDocuments(projectId: string): Promise<Page<DocumentItem>> {
+export async function fetchDocuments(
+  projectId: string,
+  query: { search?: string; limit?: number; offset?: number } = {},
+): Promise<Page<DocumentItem>> {
   if (!projectId) return { items: [], total: 0, offset: 0, limit: 0 };
-  return apiGet<Page<DocumentItem>>(`/v1/documents/?project_id=${projectId}`);
+  const extra = new URLSearchParams();
+  if (query.search) extra.set('search', query.search);
+  if (query.limit) extra.set('limit', String(query.limit));
+  if (query.offset) extra.set('offset', String(query.offset));
+  const tail = extra.toString();
+  return apiGet<Page<DocumentItem>>(`/v1/documents/?project_id=${projectId}${tail ? `&${tail}` : ''}`);
 }
 
 export async function uploadDocument(

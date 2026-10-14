@@ -1,0 +1,28 @@
+{
+  "$note": "Demo story of the HSE frame for the residential quarter: ready for the gate. Keys not listed keep the module default.",
+  "duration_working_days": 590,
+  "peak_workers": 140,
+  "person_days": 39000,
+  "employers": 14,
+  "hazardous": [
+    "heavy_precast"
+  ],
+  "notice_sent_days_ago": 9,
+  "plan_issued_days_ago": 12,
+  "later_works": "complete",
+  "execution_coordinator_appointed": true,
+  "open_templates": [],
+  "reference": "VA-2026-0417",
+  "evidence_note": "Nachweis im Projektordner abgelegt, Prüfvermerk der SiGe-Koordination liegt bei.",
+  "notes": "Die Balkone sind Fertigteile mit mehr als 10 t Stückgewicht; der Kranplan ist Teil des SiGe-Plans. Die Tiefgarage wird in zwei Bauabschnitten ausgehoben.",
+  "parties": {
+    "owner": "Projektsteuerung Bauherr",
+    "designer": "Generalplaner",
+    "contractor": "Generalunternehmer",
+    "coordinator": "SiGe-Koordination",
+    "operator": "Betreiber"
+  },
+  "coordination_org": "Ingenieurbüro Arbeitssicherheit",
+  "owner_org": "Bauherr",
+  "qualification": "Fachkunde nach RAB 30"
+}

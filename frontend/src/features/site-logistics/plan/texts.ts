@@ -154,6 +154,8 @@ export const EN = {
   'siteplan.image_empty':
     'No image among the project documents yet. Upload the site plan as an image under Documents, then choose it here.',
   'siteplan.image_failed': 'The plan image could not be loaded.',
+  'siteplan.images_failed': 'The list of plan images could not be loaded. Reload the page to try again.',
+  'siteplan.images_loading': 'Loading the plan images',
   'siteplan.image_formats': 'Only image files are listed. Export a plan kept as PDF to PNG or JPG and upload that.',
   'siteplan.scale_missing':
     'This plan has no scale yet, so the drawing does not match it. Set the scale before drawing.',
@@ -215,6 +217,7 @@ export const EN = {
   'concept.filed_as': 'Filed as',
   'concept.not_filed': 'Not filed yet',
   'transport.heavy': 'Heavy transport',
+  'transport.options_failed': 'The gates or customs cases could not be loaded, so their pickers are empty. Reload the page to try again.',
   'transport.window': 'Time window',
   'transport.gate_exceeded': 'Exceeds the site entrance limit',
   'transport.escort': 'Escort required',

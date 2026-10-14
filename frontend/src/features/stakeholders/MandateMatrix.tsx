@@ -13,7 +13,8 @@ import { AlertTriangle, Pencil, Search } from 'lucide-react';
 import clsx from 'clsx';
 
 import { Button } from '@/shared/ui/Button';
-import { fmtCurrency, fmtList } from '@/shared/lib/formatters';
+import { fmtList } from '@/shared/lib/formatters';
+import { formatCurrency } from '@/shared/lib/money';
 
 import {
   putMandates,
@@ -368,11 +369,11 @@ export function WhoDecidesLookup({ screen, matrix, roles, bodies }: WhoDecidesLo
               {answer.authority.escalate_outside
                 ? t('stakeholders.ui.who.authority_outside', {
                     defaultValue: '{{amount}} is above every limit in the authority schedule and goes outside the project.',
-                    amount: fmtCurrency(answer.authority.amount, answer.authority.currency),
+                    amount: formatCurrency(answer.authority.amount, answer.authority.currency),
                   })
                 : t('stakeholders.ui.who.authority', {
                     defaultValue: '{{amount}} falls under: {{names}}',
-                    amount: fmtCurrency(answer.authority.amount, answer.authority.currency),
+                    amount: formatCurrency(answer.authority.amount, answer.authority.currency),
                     names:
                       fmtList(answer.authority.approver_user_ids.map((id) => personName(id) ?? '')) ||
                       humanizeCode(answer.authority.tier_code ?? ''),

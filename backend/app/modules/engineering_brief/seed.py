@@ -11,8 +11,8 @@ rows and the checks are the real ones.
 
 The brief is submitted when the service finds nothing blocking, so the governance gate reads it as in
 review. Approval goes through the gate, never through a seeder. Only projects carrying the demo marker
-are touched; a project that already has a brief is skipped, so a re-run never duplicates. The text is
-German because the demo projects are German.
+are touched; a project that already has a brief is skipped, so a re-run never duplicates. The story of each project is a file of the pack
+(``demo/<project>-engineering_brief.json``).
 """
 
 from __future__ import annotations
@@ -164,234 +164,8 @@ _COMMON: tuple[_REQ, ...] = (
     ),
 )
 
-_PROFILES: dict[str, dict[str, Any]] = {
-    "residential-regensburg": {
-        "title": "Anforderungsheft Wohnquartier Regensburg Donaupark",
-        "summary": (
-            "Lastenheft für vier Mehrfamilienhäuser mit rund 120 Wohnungen, Tiefgarage mit 110 Stellplätzen, "
-            "KfW-Effizienzhaus 40, Fernwärme und Photovoltaik."
-        ),
-        "fmt": {"bgf": "16000", "live": "2,0", "gk": "4", "lbo": "BayBO", "energy": "KfW-Effizienzhaus 40"},
-        "extra": (
-            (
-                "performance",
-                "Wohnungen",
-                "Anzahl Wohneinheiten",
-                "equals",
-                "120",
-                "",
-                "must",
-                "inspection",
-                "Bauherr",
-                "client",
-                "Raumprogramm",
-            ),
-            (
-                "performance",
-                "Tiefgarage",
-                "Stellplätze",
-                "min",
-                "110",
-                "",
-                "must",
-                "inspection",
-                "Stadt Regensburg",
-                "authority",
-                "Stellplatzsatzung",
-            ),
-            (
-                "energy_efficiency",
-                "Dach",
-                "Photovoltaik Nennleistung",
-                "min",
-                "250",
-                "kWp",
-                "should",
-                "test",
-                "Energieplanung",
-                "designer",
-                "Energiekonzept",
-            ),
-        ),
-        "programme": (
-            ("gross_floor_area", "Brutto-Grundfläche oberirdisch", "m2", "16000", "Flächenberechnung Entwurf"),
-            ("net_usable_area", "Wohnfläche", "m2", "10800", "WoFlV, 120 Wohnungen"),
-            ("units", "Wohneinheiten", "Stk", "120", "Wohnungsmix 2 bis 4 Zimmer"),
-            ("parking_spaces", "Tiefgaragenstellplätze", "Stk", "110", "Stellplatzsatzung"),
-        ),
-        "topics": {
-            "supply": "Fernwärme mit Hausübergabestation je Haus, zentrale Photovoltaik mit Mieterstrom.",
-            "building_structure": "Stahlbeton-Massivbau mit Flachdecken, Treppenhäuser als Aussteifung.",
-            "construction_method": "Konventionelle Ortbetonbauweise, Tiefgarage zuerst, Häuser taktweise.",
-            "commissioning_sequence": "Haus für Haus, Abnahme je Haus, Mieterbezug nach Fertigstellung Außenanlagen.",
-            "site_analysis": "Hochwasserbereich Donau geprüft, Baugrube mit Verbau, Grundwasser im Baufeld.",
-        },
-    },
-    "school-ludwigsburg": {
-        "title": "Anforderungsheft Grundschule Ludwigsburg Neckarweihingen",
-        "summary": (
-            "Lastenheft für eine vierzügige Ganztagsgrundschule mit Mensa und Einfeld-Sporthalle, "
-            "Wärmepumpe, Photovoltaik und Lüftung mit Wärmerueckgewinnung."
-        ),
-        "fmt": {
-            "bgf": "10500",
-            "live": "3,0",
-            "gk": "3",
-            "lbo": "LBO BW",
-            "energy": "Effizienzhaus 40 (Nichtwohngebäude)",
-        },
-        "extra": (
-            (
-                "performance",
-                "Klassenräume",
-                "Anzahl Klassenräume",
-                "equals",
-                "16",
-                "",
-                "must",
-                "inspection",
-                "Stadt Ludwigsburg",
-                "client",
-                "Schulbauprogramm",
-            ),
-            (
-                "performance",
-                "Unterrichtsräume",
-                "Nachhallzeit",
-                "max",
-                "0,6",
-                "s",
-                "must",
-                "test",
-                "Bauakustik",
-                "designer",
-                "DIN 18041",
-            ),
-            (
-                "operation_maintenance",
-                "Lüftung",
-                "CO2-Konzentration Klassenraum",
-                "max",
-                "1000",
-                "ppm",
-                "should",
-                "test",
-                "Stadt Ludwigsburg",
-                "client",
-                "Schulbauprogramm",
-            ),
-        ),
-        "programme": (
-            (
-                "gross_floor_area",
-                "Brutto-Grundfläche Schulgebäude, Mensa, Sporthalle",
-                "m2",
-                "10500",
-                "Raumprogramm Stadt Ludwigsburg",
-            ),
-            ("plot_area", "Grundstück", "m2", "22000", "Liegenschaftskataster"),
-            ("units", "Klassenräume", "Stk", "16", "Vierzügigkeit, Ganztag"),
-        ),
-        "topics": {
-            "supply": "Luft-Wasser-Wärmepumpe mit Flächenheizung, Photovoltaik auf allen Dächern.",
-            "building_structure": "Stahlbeton-Skelett mit Holzrahmenbau-Fassaden, Sporthalle in Stahl-Holz-Bauweise.",
-            "construction_method": "Skelettbau in Ortbeton, Fassadenelemente vorgefertigt, Sporthalle parallel.",
-            "commissioning_sequence": "Einregulierung der Lüftung in den Sommerferien, Bezug zum Schuljahresbeginn.",
-            "site_analysis": "Schulbetrieb der Nachbarschule bleibt während der Bauzeit bestehen, getrennte Zufahrt.",
-        },
-    },
-}
 
-# (kind, title, scope, author, offset in days from today, result, conclusion)
-_STUDIES: dict[str, tuple[tuple[str, str, str, str, int, str, str], ...]] = {
-    "residential-regensburg": (
-        (
-            "site_analysis",
-            "Standortanalyse Donaupark",
-            "Lage, Erschließung, Nachbarbebauung, Hochwasserlage Donau, Lärmeinwirkung der Bahntrasse.",
-            "Planungsbüro Schmid und Partner, Regensburg",
-            -190,
-            "Das Grundstück ist über die Donaustaufer Straße erschlossen. Hochwassergefahrenfläche HQ100 wird "
-            "nicht berührt, ein Teil liegt im HQ-extrem-Bereich. Lärmpegelbereich III an der Bahnseite.",
-            "suitable",
-        ),
-        (
-            "site_analysis",
-            "Baugrund und Grundwasser",
-            "Baugrunderkundung mit zwölf Rammkernsondierungen und drei Grundwassermessstellen.",
-            "Ingenieurgesellschaft Geotechnik Ostbayern",
-            -170,
-            "Auffüllung über Donaukiesen, Grundwasser bei 3,2 m unter Gelände. Gründung als Bodenplatte mit "
-            "Teilunterkellerung möglich, Baugrubenverbau mit Wasserhaltung erforderlich.",
-            "conditional",
-        ),
-        (
-            "suitability",
-            "Eignung Fernwärmeanschluss",
-            "Anschlussleistung, Vorlauftemperatur und Trassenführung im Quartier.",
-            "Energieplanung Brandl",
-            -150,
-            "Der Versorger sagt eine Anschlussleistung von 1,4 MW bei 75 Grad Vorlauf zu. Der Anteil erneuerbarer "
-            "Energien nach GEG wird mit dem Fernwärmemix und der Photovoltaikanlage erreicht.",
-            "suitable",
-        ),
-        (
-            "suitability",
-            "Eignung Tiefgarage und Stellplatzschlüssel",
-            "Zufahrt, Rampengefälle, Stellplatzzahl nach Satzung, Fahrradabstellplätze.",
-            "Verkehrsplanung Huber",
-            -140,
-            "110 Stellplätze nach Stellplatzsatzung nachweisbar, Rampe mit 15 Prozent Gefälle zulässig. "
-            "Sprinklerpflicht für die Tiefgarage entfällt bei Offenheit von mehr als einem Drittel der Umfassung.",
-            "suitable",
-        ),
-    ),
-    "school-ludwigsburg": (
-        (
-            "site_analysis",
-            "Standortanalyse Neckarweihingen",
-            "Lage im Stadtteil, Schulwege, Erschließung, Nachbarschule, Lärm und Besonnung.",
-            "Stadtplanungsamt Ludwigsburg mit Architekturbüro Kaiser",
-            -200,
-            "Das Grundstück liegt am Ortsrand mit sicherer Schulwegführung über die Neckarstraße. Die Zufahrt "
-            "für Anlieferung und Rettung ist über den Bauhofweg getrennt vom Schulhof möglich.",
-            "suitable",
-        ),
-        (
-            "site_analysis",
-            "Baugrund und Altlastenverdacht",
-            "Baugrunderkundung, orientierende Untersuchung des ehemaligen Gartenbaubetriebs.",
-            "Geotechnisches Büro Neckar",
-            -175,
-            "Tragfähiger Keuperverwitterungsboden ab 2,5 m. Im Nordteil leicht erhöhte Schwermetallwerte, "
-            "Aushub ist nach Deponieklasse DK0 zu entsorgen.",
-            "conditional",
-        ),
-        (
-            "suitability",
-            "Eignung Wärmepumpe und Photovoltaik",
-            "Erdsondenfeld oder Luft-Wasser-Wärmepumpe, Dachflächen für Photovoltaik.",
-            "Ingenieurbüro Haustechnik Stuttgart",
-            -155,
-            "Erdsonden sind im Wasserschutzgebiet Zone III nicht genehmigungsfähig. Luft-Wasser-Wärmepumpen mit "
-            "Schallschutz sind geeignet, 420 kWp Photovoltaik auf Schul- und Mensadach sind belegbar.",
-            "suitable",
-        ),
-        (
-            "suitability",
-            "Eignung Mensa und Produktionsküche",
-            "Anlieferung, Hygienezonen, Abluftführung und Brandschutz der Küche.",
-            "Fachplanung Großküche Weiss",
-            -130,
-            "Die Produktionsküche ist mit getrennter Anlieferung und Fettabscheider betreibbar. Die "
-            "Abluftführung über Dach erfordert eine Abstimmung mit der Brandschutzdienststelle.",
-            "conditional",
-        ),
-    ),
-}
-
-
-async def _study_report(session: AsyncSession, project_id: uuid.UUID, actor: Any, row: tuple[Any, ...]) -> uuid.UUID:
+async def _study_report(session: AsyncSession, project_id: uuid.UUID, actor: Any, row: dict[str, Any]) -> uuid.UUID:
     """The study report as a PDF in the documents module, written through its own upload path."""
     from io import BytesIO
 
@@ -401,7 +175,8 @@ async def _study_report(session: AsyncSession, project_id: uuid.UUID, actor: Any
     from app.modules.documents.service import DocumentService
     from app.modules.engineering_brief import export as ex
 
-    kind, title, scope, author, offset, result, conclusion = row
+    title, scope, author, offset = row["title"], row["scope"], row["author"], row["days"]
+    result, conclusion = row["result"], row["conclusion"]
     labels = {"suitable": "geeignet", "conditional": "bedingt geeignet", "unsuitable": "nicht geeignet"}
     day = date.today() + timedelta(days=offset)
     doc = ex._doc(
@@ -417,18 +192,29 @@ async def _study_report(session: AsyncSession, project_id: uuid.UUID, actor: Any
     return document.id
 
 
-_FALLBACK = "residential-regensburg"
+_KEYS = (
+    "category",
+    "entity",
+    "attribute",
+    "constraint_type",
+    "constraint_value",
+    "unit",
+    "priority",
+    "verification_method",
+    "originator",
+    "originator_role",
+    "source_ref",
+)
 
 
 def _fill(row: _REQ, fmt: dict[str, str]) -> _REQ:
     return tuple(c.format(**fmt) if "{" in c else c for c in row)  # type: ignore[return-value]
 
 
-async def _seed_project(session: AsyncSession, project_id: uuid.UUID, demo_id: str) -> dict[str, int]:
+async def _seed_project(session: AsyncSession, project_id: uuid.UUID, story: dict[str, Any]) -> dict[str, int]:
     from app.modules.engineering_brief.service import EngineeringBriefService
     from app.modules.projects.models import Project
 
-    profile = _PROFILES.get(demo_id, _PROFILES[_FALLBACK])
     project = await session.get(Project, project_id)
     actor = project.owner_id
     svc = EngineeringBriefService(session)
@@ -439,6 +225,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, demo_id: s
         "milestones": 0,
         "submitted": 0,
         "gates_bound": 0,
+        "need_dates_bound": 0,
         "studies": 0,
         "issued": 0,
     }
@@ -447,14 +234,15 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, demo_id: s
         project_id,
         actor_id=actor,
         tenant_id=None,
-        title=profile["title"],
-        summary=profile["summary"],
-        operation_proof_date=date.today() + timedelta(days=760),
+        title=story["title"],
+        summary=story["summary"],
+        operation_proof_date=date.today() + timedelta(days=int(story.get("operation_proof_days") or 760)),
     )
 
     created: list[Any] = []
-    for row in (*_COMMON, *profile["extra"]):
-        cat, entity, attr, ctype, value, unit, prio, verif, orig, role, src = _fill(row, profile["fmt"])
+    extra = [tuple(r.get(k, "") for k in _KEYS) for r in story.get("requirements", [])]
+    for row in (*_COMMON, *extra):
+        cat, entity, attr, ctype, value, unit, prio, verif, orig, role, src = _fill(row, story["format"])
         data = {
             "category": cat,
             "entity": entity,
@@ -477,7 +265,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, demo_id: s
     catalogue = await svc.catalogue_for(brief)
     titles = {t.code: t for t in catalogue.concept_topics}
     first = True
-    for code, decision in profile["topics"].items():
+    for code, decision in story["topics"].items():
         if code not in titles:
             continue
         await svc.create_concept(
@@ -494,10 +282,8 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, demo_id: s
         first = False
         counts["concepts"] += 1
 
-    for kind, label, unit, qty, basis in profile["programme"]:
-        await svc.create_programme(
-            project_id, {"kind_code": kind, "label": label, "unit": unit, "quantity": qty, "basis": basis}, actor
-        )
+    for line in story["programme"]:
+        await svc.create_programme(project_id, dict(line), actor)
         counts["programme"] += 1
 
     made = await svc.milestones_from_catalogue(project_id, None, actor)
@@ -522,19 +308,19 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, demo_id: s
     if published["gates_skipped"]:
         logger.warning("engineering brief demo: gates not bound for %s: %s", project_id, published["gates_skipped"])
     counts["gates_bound"] = len(published["gates_bound"])
+    counts["need_dates_bound"] = await _bind_nearest_package(session, project_id)
 
-    for kind, title, scope, author, offset, result, conclusion in _STUDIES.get(demo_id, _STUDIES[_FALLBACK]):
-        row = (kind, title, scope, author, offset, result, conclusion)
+    for row in story.get("studies", []):
         await svc.create_study(
             project_id,
             {
-                "kind": kind,
-                "title": title,
-                "scope": scope,
-                "author": author,
-                "study_date": date.today() + timedelta(days=offset),
-                "result": result,
-                "conclusion": conclusion,
+                "kind": row["kind"],
+                "title": row["title"],
+                "scope": row["scope"],
+                "author": row["author"],
+                "study_date": date.today() + timedelta(days=row["days"]),
+                "result": row["result"],
+                "conclusion": row["conclusion"],
                 "document_id": await _study_report(session, project_id, actor, row),
             },
             actor,
@@ -548,13 +334,82 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, demo_id: s
             async with session.begin_nested():
                 await svc.submit(project_id, actor)
             counts["submitted"] = 1
-            await svc.issue_specification(
-                project_id, actor, "Erste Fassung zur Abstimmung mit dem Bauherrn.", locale="de"
-            )
+            await svc.issue_specification(project_id, actor, story.get("issue_note", ""), locale="de")
             counts["issued"] = 1
         except Exception:
             logger.info("engineering brief demo left as draft for %s", project_id, exc_info=True)
     return counts
+
+
+# How far a package's typed need date may be from a milestone for the demo to bind it without moving anything visible.
+_BIND_WINDOW_DAYS = 5
+
+
+async def _bind_nearest_package(session: AsyncSession, project_id: uuid.UUID) -> int:
+    """Bind the one package whose need date already sits at a published milestone to that milestone.
+
+    Only a package within a few days of a milestone is bound, and it takes the milestone's date, so
+    every other date of the demo stays where its story put it. Returns 1 when a package was bound.
+    """
+    from app.modules.engineering_brief.models import FrameMilestone
+    from app.modules.procurement_concept.models import AwardPackage
+    from app.modules.schedule.models import Activity
+
+    activity_ids = [
+        m.activity_id
+        for m in (
+            await session.execute(select(FrameMilestone).where(FrameMilestone.project_id == project_id))
+        ).scalars()
+        if m.activity_id is not None
+    ]
+    if not activity_ids:
+        return 0
+    starts = {
+        row.id: str(row.start_date)[:10]
+        for row in (
+            await session.execute(select(Activity.id, Activity.start_date).where(Activity.id.in_(activity_ids)))
+        )
+        if row.start_date
+    }
+    packages = (
+        (
+            await session.execute(
+                select(AwardPackage).where(
+                    AwardPackage.project_id == project_id,
+                    AwardPackage.need_date.is_not(None),
+                    AwardPackage.need_activity_id.is_(None),
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    best: tuple[int, Any, uuid.UUID, str] | None = None
+    for pkg in packages:
+        try:
+            need = date.fromisoformat(str(pkg.need_date)[:10])
+        except ValueError:
+            continue
+        for activity_id, start in starts.items():
+            gap = abs((date.fromisoformat(start) - need).days)
+            if gap <= _BIND_WINDOW_DAYS and (best is None or gap < best[0]):
+                best = (gap, pkg, activity_id, start)
+    if best is None:
+        return 0
+    _, pkg, activity_id, start = best
+    pkg.need_activity_id = activity_id
+    pkg.need_date = start
+    await session.flush()
+    return 1
+
+
+def _story_of(demo_id: str) -> dict[str, Any] | None:
+    """The pack story of this demo project, or ``None`` when the active pack has none or it is unusable."""
+    from app.modules.project_governance.public import demo_module_story
+
+    story = demo_module_story(demo_id, "engineering_brief")
+    needed = ("title", "summary", "format", "topics", "programme")
+    return story if story and all(story.get(k) for k in needed) else None
 
 
 async def seed_engineering_brief_demo(session: AsyncSession, project_ids: Iterable[uuid.UUID]) -> dict[str, int]:
@@ -571,6 +426,7 @@ async def seed_engineering_brief_demo(session: AsyncSession, project_ids: Iterab
         "milestones": 0,
         "submitted": 0,
         "gates_bound": 0,
+        "need_dates_bound": 0,
         "studies": 0,
         "issued": 0,
     }
@@ -587,14 +443,19 @@ async def seed_engineering_brief_demo(session: AsyncSession, project_ids: Iterab
         ).scalar_one_or_none()
         if has is not None:
             continue
+        story = _story_of(demo_id)
+        if story is None:
+            # A demo project the pack tells no story for gets no brief: none is invented from another project.
+            logger.info("engineering brief demo: no story for %s, skipped", demo_id)
+            continue
         try:
             async with session.begin_nested():
-                counts = await _seed_project(session, pid, demo_id)
+                counts = await _seed_project(session, pid, story)
         except Exception:
             # One project that cannot be seeded must not take the rest of the demo estate with it.
             logger.warning("engineering brief demo seed skipped for %s", pid, exc_info=True)
             continue
         totals["projects"] += 1
         for k, v in counts.items():
-            totals[k] += v
+            totals[k] = totals.get(k, 0) + v
     return totals

@@ -177,6 +177,8 @@ export interface PackageDraft {
   /** The act of the release gate that releases the advance package, as `kind:id`, or empty. */
   advance_release: string;
   need_date: string;
+  /** The schedule milestone that drives the need date, or empty. */
+  need_activity_id: string;
   lead_time_days: string;
   framework_agreement_id: string;
   prequal_profile_id: string;
@@ -208,6 +210,7 @@ export function packageDraft(view: PackageView): PackageDraft {
     advance_reason: a?.advance_reason ?? '',
     advance_release: a?.advance_release_kind && a.advance_release_id ? `${a.advance_release_kind}:${a.advance_release_id}` : '',
     need_date: a?.need_date ?? '',
+    need_activity_id: a?.need_activity_id ?? '',
     lead_time_days: a?.lead_time_days == null ? '' : String(a.lead_time_days),
     framework_agreement_id: a?.framework_agreement_id ?? '',
     prequal_profile_id: a?.prequal_profile_id ?? '',
@@ -328,7 +331,9 @@ export function toPackageInput(d: PackageDraft, original: PackageDraft): Package
     out.advance_release_id = release ? release.slice(cut + 1) : null;
   }
   if (d.advance_reason.trim() !== original.advance_reason.trim()) out.advance_reason = d.advance_reason.trim();
-  if (d.need_date !== original.need_date) out.need_date = d.need_date || null;
+  // A bound milestone owns the date, so the typed date is only sent while nothing is bound.
+  if (d.need_activity_id !== original.need_activity_id) out.need_activity_id = d.need_activity_id || null;
+  if (!d.need_activity_id && d.need_date !== original.need_date) out.need_date = d.need_date || null;
   if (d.lead_time_days.trim() !== original.lead_time_days.trim()) {
     out.lead_time_days = d.lead_time_days.trim() === '' ? null : Number(d.lead_time_days.trim());
   }

@@ -33,7 +33,7 @@ export const BRIEF_STATUS: Record<BriefStatus, KeyText> = {
   in_review: ['engineeringBrief.status.in_review', 'In review'],
   approved: ['engineeringBrief.status.approved', 'Approved'],
   binding: ['engineeringBrief.status.binding', 'Binding'],
-  revising: ['engineeringBrief.status.revising', 'Revising'],
+  revising: ['engineeringBrief.status.revising', 'Reopened'],
 };
 
 export const BRIEF_TONE: Record<BriefStatus, BadgeVariant> = {

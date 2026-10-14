@@ -1264,3 +1264,33 @@ async def test_a_released_commitment_releases_an_advance_package_before_any_gate
         assert "advance_package_not_released" in codes
     finally:
         commitments.register_commitment_checker(matrix.check)
+
+
+async def test_a_package_bound_to_a_schedule_milestone_takes_its_need_date_from_it(world: World) -> None:
+    """The framework schedule owns the date: the need date follows the milestone, and a foreign activity is refused."""
+    from app.modules.schedule.models import Activity, Schedule
+
+    await add_procurement_area(world, world.area_owner)
+    await add_contract_package(world, "S1", "supply", need_date="2027-01-01")
+    async with world.factory() as s:
+        schedule = Schedule(
+            project_id=world.project_id, name="Framework", start_date="2027-01-01", end_date="2027-12-31"
+        )
+        s.add(schedule)
+        await s.flush()
+        act = Activity(
+            schedule_id=schedule.id,
+            name="Construction start",
+            start_date="2027-03-15",
+            end_date="2027-03-15",
+            duration_days=0,
+            activity_type="milestone",
+        )
+        s.add(act)
+        await s.commit()
+        act_id = act.id
+    row = await put(world, "S1", {"need_activity_id": act_id})
+    assert row.need_activity_id == act_id and row.need_date == "2027-03-15"
+    with pytest.raises(ProcurementError) as err:
+        await put(world, "S1", {"need_activity_id": uuid.uuid4()})
+    assert err.value.code == "need_activity_unknown"

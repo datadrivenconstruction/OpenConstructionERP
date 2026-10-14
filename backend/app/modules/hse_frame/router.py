@@ -20,9 +20,9 @@ from __future__ import annotations
 import uuid
 from collections.abc import Awaitable
 from datetime import UTC, date, datetime
-from typing import Any
+from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm.exc import StaleDataError
 
 from app.core.i18n import get_locale
@@ -209,10 +209,12 @@ async def approve_frame(project_id: uuid.UUID, session: SessionDep, user_id: Cur
     return _frame_out(await _run(svc.approve(project_id, _uid(user_id))))
 
 
-@router.post(P + "/frame/reopen", dependencies=[MANAGE])
-async def reopen_frame(project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> dict[str, Any]:
+@router.post(P + "/frame/revise", dependencies=[MANAGE])
+async def revise_frame(
+    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId, body: s.ReviewDecision | None = None
+) -> dict[str, Any]:
     svc = await _svc(project_id, user_id, session)
-    return _frame_out(await _run(svc.reopen(project_id, _uid(user_id))))
+    return _frame_out(await _run(svc.revise(project_id, _uid(user_id), body.note if body else "")))
 
 
 # ── items ──────────────────────────────────────────────────────────────────
@@ -403,3 +405,30 @@ async def validation(
                 }
             )
     return _page(items)
+
+
+@router.get(P + "/export", dependencies=[READ], response_model=None)
+async def export(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    what: Literal["register", "roles"] = Query(default="register"),
+    format: Literal["pdf", "xlsx"] = Query(default="xlsx"),
+) -> Response:
+    """The requirements register or the responsibilities as a printable document."""
+    from app.modules.hse_frame.export import render, rendered_language
+
+    svc = await _svc(project_id, user_id, session)
+    locale = get_locale() or "en"
+    data = await _run(render(svc, project_id, what=what, fmt=format, locale=locale))
+    media = (
+        "application/pdf" if format == "pdf" else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    return Response(
+        content=data,
+        media_type=media,
+        headers={
+            "Content-Disposition": f'attachment; filename="hse_{what}.{format}"',
+            "Content-Language": rendered_language(locale),
+        },
+    )

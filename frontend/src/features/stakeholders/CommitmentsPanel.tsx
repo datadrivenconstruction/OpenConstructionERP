@@ -14,7 +14,8 @@ import clsx from 'clsx';
 
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
-import { fmtCurrency, fmtDate, fmtList } from '@/shared/lib/formatters';
+import { fmtDate, fmtList } from '@/shared/lib/formatters';
+import { formatCurrency } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 
 import type { Commitment, CommitmentStatus, CommitmentTarget, EngagementEvent, Stakeholder } from './api';
@@ -239,7 +240,7 @@ export function CommitmentsPanel({ screen, commitments, stakeholders, events, fo
                 <p className="text-xs text-content-secondary">
                   {t('stakeholders.ui.commitment.cost_line', {
                     defaultValue: 'Estimated cost: {{amount}}',
-                    amount: fmtCurrency(c.cost_estimate, c.currency),
+                    amount: formatCurrency(c.cost_estimate, c.currency),
                   })}
                 </p>
               )}

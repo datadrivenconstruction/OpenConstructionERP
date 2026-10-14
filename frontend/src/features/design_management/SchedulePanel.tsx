@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarCheck } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 
 import {
@@ -43,6 +42,7 @@ import {
   type DesignContext,
   StepButton,
   pickerField,
+  WriteButton,
 } from './DesignBits';
 import { FormDialog, flag, str, type FieldSpec, type FormValues } from './FormDialog';
 import { useDesignAction, useDesignList, useDesignOptions } from './hooks';
@@ -170,9 +170,9 @@ export function SchedulePanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.schedule.title')}
         hint={ui(t, 'design.ui.schedule.hint')}
         action={
-          <Button onClick={openLine} data-testid="line-add">
+          <WriteButton onClick={openLine} data-testid="line-add">
             {ui(t, 'design.ui.schedule.add')}
-          </Button>
+          </WriteButton>
         }
       />
       {ctx.deliverables.length === 0 ? (
@@ -217,12 +217,12 @@ export function SchedulePanel({ ctx }: { ctx: DesignContext }) {
                   <ToneBadge tone={DELIVERABLE_TONE[line.state]}>{vocab(t, DELIVERABLE_STATE, line.state)}</ToneBadge>
                 </td>
                 <td className={`${CELL} whitespace-nowrap text-right`}>
-                  <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'line', line })}>
+                  <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'line', line })}>
                     {ui(t, 'design.ui.action.edit')}
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'delete', line })}>
+                  </WriteButton>
+                  <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'delete', line })}>
                     {ui(t, 'design.ui.action.delete')}
-                  </Button>
+                  </WriteButton>
                 </td>
               </tr>
             );
@@ -234,9 +234,9 @@ export function SchedulePanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.schedule.points_title')}
         hint={ui(t, 'design.ui.schedule.points_hint')}
         action={
-          <Button variant="secondary" onClick={() => setDialog({ kind: 'point', point: null })} data-testid="point-add">
+          <WriteButton variant="secondary" onClick={() => setDialog({ kind: 'point', point: null })} data-testid="point-add">
             {ui(t, 'design.ui.schedule.point_add')}
-          </Button>
+          </WriteButton>
         }
       />
       {(points.data ?? []).length === 0 ? (
@@ -269,9 +269,9 @@ export function SchedulePanel({ ctx }: { ctx: DesignContext }) {
               <td className={`${CELL} whitespace-nowrap text-right`}>
                 <span className="inline-flex flex-wrap justify-end gap-1">
                   {point.state === 'open' && (
-                    <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'point', point })}>
+                    <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'point', point })}>
                       {ui(t, 'design.ui.action.edit')}
-                    </Button>
+                    </WriteButton>
                   )}
                   <StepButton
                     flag={point.can?.reopen}

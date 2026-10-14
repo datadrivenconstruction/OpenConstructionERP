@@ -99698,6 +99698,7 @@
       "import_dependencies": [
         "documents",
         "permits",
+        "procurement_concept",
         "project_governance",
         "projects",
         "requirements",
@@ -168502,6 +168503,11 @@
             {
               "name": "need_date",
               "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "need_activity_id",
+              "type": "uuid.UUID | None",
               "default": "None"
             },
             {
@@ -267313,10 +267319,10 @@
     },
     {
       "name": "project_handbook",
-      "ts_files": 8,
+      "ts_files": 9,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 8
+      "total_files": 9
     },
     {
       "name": "projects",
@@ -268307,6 +268313,7 @@
     "engineering_brief": [
       "documents",
       "permits",
+      "procurement_concept",
       "project_governance",
       "projects",
       "requirements",
@@ -269263,7 +269270,7 @@
     "total_schemas": 3961,
     "total_python_files": 2676,
     "frontend_features": 208,
-    "frontend_ts_files": 3432,
+    "frontend_ts_files": 3433,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

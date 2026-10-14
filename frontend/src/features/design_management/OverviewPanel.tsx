@@ -15,7 +15,7 @@ import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 
 import { downloadRegister, fileFrameDocument, listReadiness, listValidation, type ExportRegister } from './api';
-import { ListState, PanelHeader, ToneBadge, hasRows, type DesignContext } from './DesignBits';
+import { ListState, PanelHeader, ToneBadge, hasRows, type DesignContext, WriteButton } from './DesignBits';
 import { refusalText, useDesignList } from './hooks';
 import { labelOf, ui, uiCount, type TFn } from './labels';
 import type { UiKey } from './text';
@@ -150,9 +150,9 @@ export function OverviewPanel({ ctx, onOpenGovernance }: { ctx: DesignContext; o
                   {ui(t, 'design.ui.overview.as_sheet')}
                 </Button>
                 {!noGates && (
-                  <Button size="sm" variant="ghost" disabled={file.isPending} onClick={() => file.mutate(register)} data-testid={`file-${register}`}>
+                  <WriteButton need="manage" size="sm" variant="ghost" disabled={file.isPending} onClick={() => file.mutate(register)} data-testid={`file-${register}`}>
                     {ui(t, 'design.ui.overview.file_in_cde')}
-                  </Button>
+                  </WriteButton>
                 )}
               </span>
             </li>

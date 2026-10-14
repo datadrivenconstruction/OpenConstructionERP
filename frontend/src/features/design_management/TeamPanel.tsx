@@ -9,11 +9,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 
 import { createRole, deleteRole, updateRole, type DesignRole, type PartyKind, type RoleInput } from './api';
-import { CELL, CELL_MUTED, PanelHeader, ROLE_TONE, Table, ToneBadge, pickerField, type DesignContext } from './DesignBits';
+import { CELL, CELL_MUTED, PanelHeader, ROLE_TONE, Table, ToneBadge, pickerField, type DesignContext, WriteButton } from './DesignBits';
 import { useDesignOptions } from './hooks';
 import { FormDialog, str, type FieldSpec, type FormValues } from './FormDialog';
 import { PARTY_KIND, ROLE_STATE, ui, vocab, vocabOptions, type TFn } from './labels';
@@ -74,9 +73,9 @@ export function TeamPanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.team.title')}
         hint={ui(t, 'design.ui.team.hint')}
         action={
-          <Button onClick={() => setDialog({ kind: 'create' })} data-testid="role-add">
+          <WriteButton onClick={() => setDialog({ kind: 'create' })} data-testid="role-add">
             {ui(t, 'design.ui.team.add')}
-          </Button>
+          </WriteButton>
         }
       />
       {ctx.roles.length === 0 ? (
@@ -115,12 +114,12 @@ export function TeamPanel({ ctx }: { ctx: DesignContext }) {
                 <ToneBadge tone={ROLE_TONE[role.state]}>{vocab(t, ROLE_STATE, role.state)}</ToneBadge>
               </td>
               <td className={`${CELL} whitespace-nowrap text-right`}>
-                <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'edit', role })}>
+                <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'edit', role })}>
                   {ui(t, 'design.ui.action.edit')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'delete', role })}>
+                </WriteButton>
+                <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'delete', role })}>
                   {ui(t, 'design.ui.action.delete')}
-                </Button>
+                </WriteButton>
               </td>
             </tr>
           ))}

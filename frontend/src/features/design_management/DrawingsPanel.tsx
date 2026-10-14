@@ -11,7 +11,6 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileStack } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
 import { fmtDate, fmtList } from '@/shared/lib/formatters';
 
@@ -38,6 +37,7 @@ import {
   roleTitle,
   wbsOptions,
   type DesignContext,
+  WriteButton,
 } from './DesignBits';
 import { FormDialog, str, type FieldSpec, type FormValues } from './FormDialog';
 import { NumberPreviewBox, numberPartFields, numberRequest } from './NumberForm';
@@ -120,9 +120,9 @@ export function DrawingsPanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.drawings.title')}
         hint={ui(t, 'design.ui.drawings.hint', { scheme: schemeName(ctx.labels, scheme) })}
         action={
-          <Button onClick={() => setDialog({ kind: 'create' })} data-testid="drawing-add">
+          <WriteButton onClick={() => setDialog({ kind: 'create' })} data-testid="drawing-add">
             {ui(t, 'design.ui.drawings.add')}
-          </Button>
+          </WriteButton>
         }
       />
 
@@ -220,16 +220,16 @@ export function DrawingsPanel({ ctx }: { ctx: DesignContext }) {
                       )}
                     </td>
                     <td className={`${CELL} whitespace-nowrap text-right`}>
-                      <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'edit', drawing: d })}>
+                      <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'edit', drawing: d })}>
                         {ui(t, 'design.ui.action.edit')}
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'title-block', drawing: d })}>
+                      </WriteButton>
+                      <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'title-block', drawing: d })}>
                         {ui(t, 'design.ui.drawings.check_title_block')}
-                      </Button>
+                      </WriteButton>
                       {!d.superseded_by_container_id && (
-                        <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'supersede', drawing: d })}>
+                        <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'supersede', drawing: d })}>
                           {ui(t, 'design.ui.drawings.supersede')}
-                        </Button>
+                        </WriteButton>
                       )}
                     </td>
                   </tr>

@@ -17,7 +17,7 @@ import {
   approveFrame,
   consolidatePermitConditions,
   patchFrame,
-  reopenFrame,
+  reviseFrame,
   submitFrame,
   type Catalogue,
   type Duties,
@@ -39,6 +39,10 @@ interface Props {
   summary: Summary | undefined;
   write: HseWrite;
   canEdit: boolean;
+  /** Submit, revise: the manage permission. */
+  canManage: boolean;
+  /** Approve: the approve permission. */
+  canApprove: boolean;
 }
 
 const STATE_ICON: Record<ReadinessState, typeof CheckCircle2> = {
@@ -59,7 +63,7 @@ function numberOrNull(value: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function FactsForm({ projectId, frame, catalogue, write, canEdit }: Omit<Props, 'duties' | 'readiness' | 'summary'>) {
+function FactsForm({ projectId, frame, catalogue, write, canEdit }: Pick<Props, 'projectId' | 'frame' | 'catalogue' | 'write' | 'canEdit'>) {
   const { t, i18n } = useTranslation();
   const [draft, setDraft] = useState<FramePatch>({});
   const value = <K extends keyof FramePatch>(key: K) => (key in draft ? draft[key] : frame[key as keyof Frame]) as never;
@@ -279,12 +283,12 @@ function SummaryList({ summary }: { summary: Summary | undefined }) {
 
 export function OverviewPanel(props: Props) {
   const { t } = useTranslation();
-  const { projectId, frame, write, canEdit } = props;
+  const { projectId, frame, write, canEdit, canManage, canApprove } = props;
   const [note, setNote] = useState<string | null>(null);
   return (
     <div className="space-y-4" data-testid="overview-panel">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant={frame.state === 'approved' ? 'success' : frame.state === 'in_review' ? 'blue' : 'neutral'} dot>
+        <Badge variant={frame.state === 'binding' || frame.state === 'approved' ? 'success' : frame.state === 'in_review' ? 'blue' : frame.state === 'revising' ? 'warning' : 'neutral'} dot>
           {t(`hseFrame.state.${frame.state}`, { defaultValue: frame.state.replace('_', ' ') })}
         </Badge>
         {canEdit && (
@@ -292,7 +296,7 @@ export function OverviewPanel(props: Props) {
             <Button
               size="sm"
               variant="secondary"
-              disabled={write.pending || frame.state !== 'draft'}
+              disabled={write.pending}
               onClick={() =>
                 write.send(() => applyTemplates(projectId), (r) =>
                   setNote(t('hseFrame.actions.templates_done', { defaultValue: 'Rows created from the catalogue: {{n}}', n: r.created })),
@@ -315,22 +319,22 @@ export function OverviewPanel(props: Props) {
             >
               {t('hseFrame.actions.consolidate', { defaultValue: 'Take over permit conditions' })}
             </Button>
-            {frame.state === 'draft' && (
-              <Button size="sm" disabled={write.pending} onClick={() => write.send(() => submitFrame(projectId))} data-testid="frame-submit">
-                {t('hseFrame.actions.submit', { defaultValue: 'Submit for review' })}
-              </Button>
-            )}
-            {frame.state === 'in_review' && (
-              <Button size="sm" disabled={write.pending} onClick={() => write.send(() => approveFrame(projectId))} data-testid="frame-approve">
-                {t('hseFrame.actions.approve', { defaultValue: 'Approve' })}
-              </Button>
-            )}
-            {frame.state !== 'draft' && (
-              <Button size="sm" variant="ghost" disabled={write.pending} onClick={() => write.send(() => reopenFrame(projectId))} data-testid="frame-reopen">
-                {t('hseFrame.actions.reopen', { defaultValue: 'Reopen' })}
-              </Button>
-            )}
           </>
+        )}
+        {canManage && (frame.state === 'draft' || frame.state === 'revising') && (
+          <Button size="sm" disabled={write.pending} onClick={() => write.send(() => submitFrame(projectId))} data-testid="frame-submit">
+            {t('hseFrame.actions.submit', { defaultValue: 'Submit for review' })}
+          </Button>
+        )}
+        {canApprove && frame.state === 'in_review' && (
+          <Button size="sm" disabled={write.pending} onClick={() => write.send(() => approveFrame(projectId))} data-testid="frame-approve">
+            {t('hseFrame.actions.approve', { defaultValue: 'Approve' })}
+          </Button>
+        )}
+        {canManage && (frame.state === 'in_review' || frame.state === 'approved' || frame.state === 'binding') && (
+          <Button size="sm" variant="ghost" disabled={write.pending} onClick={() => write.send(() => reviseFrame(projectId))} data-testid="frame-revise">
+            {t('hseFrame.actions.revise', { defaultValue: 'Revise' })}
+          </Button>
         )}
       </div>
       {note && <p className="text-sm text-content-secondary" data-testid="action-note">{note}</p>}

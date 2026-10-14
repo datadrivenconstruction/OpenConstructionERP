@@ -44,9 +44,9 @@ export interface LabelContext {
 }
 
 export const MODEL_STATUS: Record<ModelStatus, KeyText> = {
-  draft: ['delivery_model.ui.model_status.draft', 'Not started'],
+  draft: ['delivery_model.ui.model_status.draft', 'Draft'],
   under_evaluation: ['delivery_model.ui.model_status.under_evaluation', 'Comparing forms'],
-  proposed: ['delivery_model.ui.model_status.proposed', 'Proposed, waiting for the gate'],
+  proposed: ['delivery_model.ui.model_status.proposed', 'In review'],
   approved: ['delivery_model.ui.model_status.approved', 'Approved'],
   binding: ['delivery_model.ui.model_status.binding', 'Binding'],
   reopened: ['delivery_model.ui.model_status.reopened', 'Reopened'],

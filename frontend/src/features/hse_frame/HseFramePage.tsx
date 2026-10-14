@@ -44,6 +44,7 @@ export function HseFramePage() {
   const [params, setParams] = useSearchParams();
   const canEdit = useHasPermission('hse_frame.edit');
   const canManage = useHasPermission('hse_frame.manage');
+  const canApprove = useHasPermission('hse_frame.approve');
 
   const frameQ = useFrame(projectId);
   const hasFrame = !!frameQ.data?.frame;
@@ -142,6 +143,8 @@ export function HseFramePage() {
     );
   }
 
+  // Rows, roles and facts change only while the frame is a draft or being revised.
+  const open = frame.state === 'draft' || frame.state === 'revising';
   const failed = (checksQ.data ?? []).filter((c) => !c.passed);
   return (
     <div className="space-y-5 animate-fade-in" data-testid="hse-frame-page">
@@ -171,7 +174,9 @@ export function HseFramePage() {
           readiness={readinessQ.data}
           summary={summaryQ.data}
           write={write}
-          canEdit={canEdit}
+          canEdit={canEdit && open}
+          canManage={canManage}
+          canApprove={canApprove}
         />
       )}
       {tab === 'register' && (
@@ -180,8 +185,8 @@ export function HseFramePage() {
           items={itemsQ.data ?? []}
           catalogue={catalogue}
           write={write}
-          canEdit={canEdit}
-          canManage={canManage}
+          canEdit={canEdit && open}
+          canManage={canManage && open}
         />
       )}
       {tab === 'roles' && (
@@ -191,7 +196,7 @@ export function HseFramePage() {
           catalogue={catalogue}
           duties={frameQ.data.duties}
           write={write}
-          canEdit={canEdit}
+          canEdit={canEdit && open}
         />
       )}
       {tab === 'checks' && (

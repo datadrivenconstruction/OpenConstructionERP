@@ -169,6 +169,12 @@ class HseFrameService:
             item["default"] = (item["source"], item["id"]) == (source, cid)
         return items
 
+    async def _open(self, project_id: uuid.UUID) -> HseFrame:
+        """The frame of a write to an existing row; refused unless it is in draft or revising."""
+        frame = await self.require_frame(project_id)
+        self._assert_draft(frame)
+        return frame
+
     def _assert_draft(self, frame: HseFrame) -> None:
         if frame.state not in FRAME_EDITABLE:
             raise conflict("frame_not_editable", detail=frame.state)
@@ -206,6 +212,7 @@ class HseFrameService:
 
     async def patch_frame(self, project_id: uuid.UUID, data: Any, actor: uuid.UUID | None) -> HseFrame:
         frame = await self.ensure_frame(project_id, actor)
+        self._assert_draft(frame)
         catalogue = await self.catalogue_for(frame)
         fields = data.model_dump(exclude_unset=True)
         codes = fields.get("hazardous_work_codes")
@@ -227,7 +234,7 @@ class HseFrameService:
 
     async def submit(self, project_id: uuid.UUID, actor: uuid.UUID, today: date | None = None) -> HseFrame:
         frame = await self.require_frame(project_id)
-        if frame.state != "draft":
+        if frame.state not in FRAME_EDITABLE:
             raise conflict("invalid_transition", detail=f"{frame.state}->submit")
         payload = await self.validation_payload(project_id, today or _today())
         blockers = [f for f in payload["findings"] if f["severity"] == "error"]
@@ -243,22 +250,32 @@ class HseFrameService:
         frame = await self.require_frame(project_id)
         if frame.state != "in_review":
             raise conflict("invalid_transition", detail=f"{frame.state}->approve")
-        if frame.submitted_by == actor:
+        if frame.submitted_by == actor and await self._four_eyes(project_id):
             raise HseFrameError("approver_is_submitter", 403)
-        frame.state, frame.approved_by, frame.approved_at = "approved", actor, _now()
+        # Approved by hand and in force at once; a revision starts from `revise`.
+        frame.state, frame.approved_by, frame.approved_at = "binding", actor, _now()
         await self._flush()
         await self._audit(project_id, actor, "frame", frame.id, "approved")
         self._publish("frame.approved", project_id)
+        self._publish("frame.binding", project_id)
         return frame
 
-    async def reopen(self, project_id: uuid.UUID, actor: uuid.UUID) -> HseFrame:
+    async def _four_eyes(self, project_id: uuid.UUID) -> bool:
+        """The project's four-eyes control as governance states it; on when the project has no model."""
+        from app.modules.project_governance import public
+
+        return (await public.project_controls(self.session, project_id)).four_eyes
+
+    async def revise(self, project_id: uuid.UUID, actor: uuid.UUID, note: str = "") -> HseFrame:
+        """Take a frame in review, approved or binding back into revision; the next submit puts it in force again."""
         frame = await self.require_frame(project_id)
-        if frame.state == "draft":
-            raise conflict("invalid_transition", detail="draft->reopen")
-        frame.state, frame.approved_by, frame.approved_at = "draft", None, None
+        if frame.state in FRAME_EDITABLE:
+            raise conflict("invalid_transition", detail=f"{frame.state}->revise")
+        before = frame.state
+        frame.state, frame.approved_by, frame.approved_at = "revising", None, None
         await self._flush()
-        await self._audit(project_id, actor, "frame", frame.id, "reopened")
-        self._publish("frame.reopened", project_id)
+        await self._audit(project_id, actor, "frame", frame.id, "revised", from_status=before, note=note)
+        self._publish("frame.revising", project_id)
         return frame
 
     def _publish(self, name: str, project_id: uuid.UUID, **data: Any) -> None:
@@ -385,6 +402,7 @@ class HseFrameService:
 
     async def create_item(self, project_id: uuid.UUID, data: Any, actor: uuid.UUID | None) -> HseItem:
         frame = await self.ensure_frame(project_id, actor)
+        self._assert_draft(frame)
         await self._check_topic(frame, data.topic)
         await self._check_user(project_id, data.responsible_user_id)
         return await self.repo.add(
@@ -392,6 +410,7 @@ class HseFrameService:
         )
 
     async def patch_item(self, project_id: uuid.UUID, item_id: uuid.UUID, data: Any) -> HseItem:
+        await self._open(project_id)
         row = await self.item(project_id, item_id)
         fields = data.model_dump(exclude_unset=True)
         if "responsible_user_id" in fields:
@@ -406,6 +425,7 @@ class HseFrameService:
         return row
 
     async def meet_item(self, project_id: uuid.UUID, item_id: uuid.UUID, data: Any) -> HseItem:
+        await self._open(project_id)
         row = await self.item(project_id, item_id)
         if row.status in ("waived", "not_applicable"):
             raise conflict("item_closed", detail=row.status)
@@ -419,6 +439,7 @@ class HseFrameService:
         return row
 
     async def waive_item(self, project_id: uuid.UUID, item_id: uuid.UUID, data: Any, actor: uuid.UUID) -> HseItem:
+        await self._open(project_id)
         row = await self.item(project_id, item_id)
         if row.status == "met":
             raise conflict("item_closed", detail=row.status)
@@ -432,12 +453,14 @@ class HseFrameService:
         return row
 
     async def reopen_item(self, project_id: uuid.UUID, item_id: uuid.UUID) -> HseItem:
+        await self._open(project_id)
         row = await self.item(project_id, item_id)
         row.status, row.met_on, row.waive_reason, row.waived_by = "open", None, "", None
         await self._flush()
         return row
 
     async def delete_item(self, project_id: uuid.UUID, item_id: uuid.UUID) -> None:
+        await self._open(project_id)
         row = await self.item(project_id, item_id)
         if row.source == "template":
             raise conflict("template_item_not_deletable")
@@ -474,6 +497,7 @@ class HseFrameService:
 
     async def create_role(self, project_id: uuid.UUID, data: Any, actor: uuid.UUID | None) -> HseRole:
         frame = await self.ensure_frame(project_id, actor)
+        self._assert_draft(frame)
         catalogue = await self.catalogue_for(frame)
         if data.role_code not in catalogue.codes("role_kinds"):
             raise HseFrameError("unknown_role", 422, detail=data.role_code)
@@ -484,6 +508,7 @@ class HseFrameService:
         )
 
     async def patch_role(self, project_id: uuid.UUID, role_id: uuid.UUID, data: Any) -> HseRole:
+        await self._open(project_id)
         row = await self.role(project_id, role_id)
         fields = data.model_dump(exclude_unset=True)
         if "person_user_id" in fields:
@@ -505,11 +530,13 @@ class HseFrameService:
         return row
 
     async def delete_role(self, project_id: uuid.UUID, role_id: uuid.UUID) -> None:
+        await self._open(project_id)
         await self.repo.remove(await self.role(project_id, role_id))
 
     # ── links ──────────────────────────────────────────────────────────────
 
     async def add_link(self, project_id: uuid.UUID, item_id: uuid.UUID, data: Any, actor: uuid.UUID | None) -> HseLink:
+        await self._open(project_id)
         row = await self.item(project_id, item_id)
         if data.link_kind not in links.known_kinds():
             raise HseFrameError("unknown_link_kind", 422, detail=data.link_kind)
@@ -533,6 +560,7 @@ class HseFrameService:
         return link
 
     async def remove_link(self, project_id: uuid.UUID, item_id: uuid.UUID, link_id: uuid.UUID) -> None:
+        await self._open(project_id)
         link = await self.repo.get(HseLink, project_id, link_id)
         if link is None or link.item_id != item_id:
             raise not_found("link_not_found")
@@ -566,6 +594,7 @@ class HseFrameService:
     async def consolidate_permit_conditions(self, project_id: uuid.UUID, actor: uuid.UUID | None) -> dict[str, int]:
         """One register row per HSE permit condition, linked to it; a condition already linked is skipped."""
         frame = await self.ensure_frame(project_id, actor)
+        self._assert_draft(frame)
         catalogue = await self.catalogue_for(frame)
         topic = next((t for t in catalogue.topics if t.basis == "permits"), None)
         if topic is None:

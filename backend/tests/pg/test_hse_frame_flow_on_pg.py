@@ -5,7 +5,7 @@
 One walk over a German project: the facts decide the duties, the register comes
 from the catalogue, nothing is "met" by silence, submitting is refused with the
 list of blockers, the coordinator roles and the notice lift them, a second
-person approves, and an approved frame is closed to edits until it is reopened.
+person approves, and a binding frame is closed to edits until it is revised.
 Each refusal is asserted with the error code the API returns.
 """
 
@@ -175,14 +175,45 @@ async def test_register_roles_review_and_the_closed_frame(pg_session) -> None:
     assert submitted.state == "in_review"
     assert (await _refused(svc.approve(pid, manager))).code == "approver_is_submitter"
     approved = await svc.approve(pid, approver)
-    assert approved.state == "approved" and approved.approved_by == approver
+    assert approved.state == "binding" and approved.approved_by == approver
 
-    # An approved frame cannot be re-pinned and only a reopen makes it a draft again.
+    # A binding frame cannot be re-pinned and only a revision opens it again.
     pinned = await _refused(svc.pin_catalogue(pid, None, "shipped", "neutral", None, manager))
     assert (pinned.code, pinned.status_code) == ("frame_not_editable", 409)
+    for closed in (
+        svc.create_item(pid, s.ItemCreate(topic="hse_requirements", title="Late row"), manager),
+        svc.meet_item(pid, template_row.id, s.ItemMeet()),
+        svc.patch_frame(pid, s.FramePatch(notes="late"), manager),
+        svc.delete_role(pid, uuid.uuid4()),
+    ):
+        assert (await _refused(closed)).code == "frame_not_editable"
     again = await _refused(svc.submit(pid, manager, today))
     assert again.code == "invalid_transition"
-    assert (await svc.reopen(pid, manager)).state == "draft"
+    revised = await svc.revise(pid, manager, "Scope of works changed")
+    assert revised.state == "revising" and revised.approved_by is None
+    assert (await _refused(svc.revise(pid, manager))).code == "invalid_transition"
+    # A revising frame is editable again and goes through review once more.
+    await svc.patch_frame(pid, s.FramePatch(notes="Second revision"), manager)
+    assert (await svc.submit(pid, manager, today)).state == "in_review"
+
+
+async def test_a_single_user_installation_can_approve_when_four_eyes_is_off(pg_session) -> None:
+    svc, pid, manager, _approver = await _frame(pg_session)
+    today = date.today()
+    await svc.patch_frame(
+        pid, s.FramePatch(employers_count=1, peak_workers=2, duration_working_days=5, person_days=10), manager
+    )
+
+    async def off(_project_id) -> bool:
+        return False
+
+    svc._four_eyes = off  # the project setting, as governance states it
+    await svc.patch_frame(pid, s.FramePatch(hazardous_works_assessed=True), manager)
+    for item in await svc.repo.list(HseItem, pid):
+        if item.obligation == "mandatory":
+            await svc.meet_item(pid, item.id, s.ItemMeet(met_on=today))
+    await svc.submit(pid, manager, today)
+    assert (await svc.approve(pid, manager)).state == "binding"
 
 
 async def test_an_item_of_another_project_is_not_found(pg_session) -> None:

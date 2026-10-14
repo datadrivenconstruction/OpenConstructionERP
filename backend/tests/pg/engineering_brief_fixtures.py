@@ -24,7 +24,11 @@ OPERATION_PROOF = date.today() + timedelta(days=800)
 
 
 async def build_world(
-    factory: async_sessionmaker[AsyncSession], *, catalogue_id: str = "neutral", governance: bool = False
+    factory: async_sessionmaker[AsyncSession],
+    *,
+    catalogue_id: str = "neutral",
+    governance: bool = False,
+    brief: bool = True,
 ) -> World:
     from app.modules.engineering_brief.catalogue import register_kinds
 
@@ -59,14 +63,15 @@ async def build_world(
             )
             for d in await GovernanceService(s).repo.list_documents(pid):
                 w.containers[d.doc_type] = await add_container(s, pid, d.doc_type)
-        await EngineeringBriefService(s).set_brief(
-            pid,
-            actor_id=manager,
-            tenant_id=str(manager),
-            catalogue_id=catalogue_id,
-            title="Brief",
-            operation_proof_date=OPERATION_PROOF,
-        )
+        if brief:
+            await EngineeringBriefService(s).set_brief(
+                pid,
+                actor_id=manager,
+                tenant_id=str(manager),
+                catalogue_id=catalogue_id,
+                title="Brief",
+                operation_proof_date=OPERATION_PROOF,
+            )
         await s.commit()
     return w
 

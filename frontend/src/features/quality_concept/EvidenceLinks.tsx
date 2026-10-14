@@ -13,6 +13,8 @@ import { Link2, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { getErrorMessage } from '@/shared/lib/api';
 
 import { addLink, removeLink, type Capable, type LinkOwnerKind } from './api';
@@ -37,6 +39,7 @@ export function EvidenceLinks({ projectId, ownerKind, ownerId, allowedKinds, row
   const { t } = useTranslation();
   const lock = gate(t as TFn, row, 'link_evidence');
   const write = useQcWrite(projectId);
+  const confirmState = useConfirm();
   const links = useEvidenceLinks(projectId, ownerKind, ownerId);
   const kinds = allowedKinds && allowedKinds.length > 0 ? allowedKinds : ALL_KINDS;
   const [pickedKind, setKind] = useState('');
@@ -55,6 +58,7 @@ export function EvidenceLinks({ projectId, ownerKind, ownerId, allowedKinds, row
 
   return (
     <div className="space-y-2 rounded-md bg-surface-secondary p-3" data-testid="evidence-links">
+      <ConfirmDialog {...confirmState} />
       <p className="text-xs font-semibold text-content-secondary">
         {t('qualityConcept.evidence.title', { defaultValue: 'Linked records' })}
       </p>
@@ -109,7 +113,19 @@ export function EvidenceLinks({ projectId, ownerKind, ownerId, allowedKinds, row
                 loading={write.pending}
                 disabled={lock.disabled}
                 title={lock.title}
-                onClick={() => write.send(() => removeLink(projectId, l.id))}
+                onClick={async () => {
+                  if (
+                    await confirmState.confirm({
+                      title: t('qualityConcept.evidence.unlink_title', { defaultValue: 'Remove this link?' }),
+                      message: t('qualityConcept.evidence.unlink_body', {
+                        defaultValue: 'The record stays where it is. It no longer counts as proof for this item.',
+                      }),
+                      confirmLabel: t('qualityConcept.evidence.unlink', { defaultValue: 'Remove link' }),
+                    })
+                  ) {
+                    write.send(() => removeLink(projectId, l.id));
+                  }
+                }}
               />
             </li>
           ))}

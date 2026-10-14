@@ -1,0 +1,129 @@
+{
+  "title": "Anforderungsheft Wohnquartier Regensburg Donaupark",
+  "summary": "Lastenheft für vier Mehrfamilienhäuser mit rund 120 Wohnungen, Tiefgarage mit 110 Stellplätzen, KfW-Effizienzhaus 40, Fernwärme und Photovoltaik.",
+  "operation_proof_days": 760,
+  "format": {
+    "bgf": "16000",
+    "live": "2,0",
+    "gk": "4",
+    "lbo": "BayBO",
+    "energy": "KfW-Effizienzhaus 40"
+  },
+  "requirements": [
+    {
+      "category": "performance",
+      "entity": "Wohnungen",
+      "attribute": "Anzahl Wohneinheiten",
+      "constraint_type": "equals",
+      "constraint_value": "120",
+      "unit": "",
+      "priority": "must",
+      "verification_method": "inspection",
+      "originator": "Bauherr",
+      "originator_role": "client",
+      "source_ref": "Raumprogramm"
+    },
+    {
+      "category": "performance",
+      "entity": "Tiefgarage",
+      "attribute": "Stellplätze",
+      "constraint_type": "min",
+      "constraint_value": "110",
+      "unit": "",
+      "priority": "must",
+      "verification_method": "inspection",
+      "originator": "Stadt Regensburg",
+      "originator_role": "authority",
+      "source_ref": "Stellplatzsatzung"
+    },
+    {
+      "category": "energy_efficiency",
+      "entity": "Dach",
+      "attribute": "Photovoltaik Nennleistung",
+      "constraint_type": "min",
+      "constraint_value": "250",
+      "unit": "kWp",
+      "priority": "should",
+      "verification_method": "test",
+      "originator": "Energieplanung",
+      "originator_role": "designer",
+      "source_ref": "Energiekonzept"
+    }
+  ],
+  "programme": [
+    {
+      "kind_code": "gross_floor_area",
+      "label": "Brutto-Grundfläche oberirdisch",
+      "unit": "m2",
+      "quantity": "16000",
+      "basis": "Flächenberechnung Entwurf"
+    },
+    {
+      "kind_code": "net_usable_area",
+      "label": "Wohnfläche",
+      "unit": "m2",
+      "quantity": "10800",
+      "basis": "WoFlV, 120 Wohnungen"
+    },
+    {
+      "kind_code": "units",
+      "label": "Wohneinheiten",
+      "unit": "Stk",
+      "quantity": "120",
+      "basis": "Wohnungsmix 2 bis 4 Zimmer"
+    },
+    {
+      "kind_code": "parking_spaces",
+      "label": "Tiefgaragenstellplätze",
+      "unit": "Stk",
+      "quantity": "110",
+      "basis": "Stellplatzsatzung"
+    }
+  ],
+  "topics": {
+    "supply": "Fernwärme mit Hausübergabestation je Haus, zentrale Photovoltaik mit Mieterstrom.",
+    "building_structure": "Stahlbeton-Massivbau mit Flachdecken, Treppenhäuser als Aussteifung.",
+    "construction_method": "Konventionelle Ortbetonbauweise, Tiefgarage zuerst, Häuser taktweise.",
+    "commissioning_sequence": "Haus für Haus, Abnahme je Haus, Mieterbezug nach Fertigstellung Außenanlagen.",
+    "site_analysis": "Hochwasserbereich Donau geprüft, Baugrube mit Verbau, Grundwasser im Baufeld."
+  },
+  "studies": [
+    {
+      "kind": "site_analysis",
+      "title": "Standortanalyse Donaupark",
+      "scope": "Lage, Erschließung, Nachbarbebauung, Hochwasserlage Donau, Lärmeinwirkung der Bahntrasse.",
+      "author": "Planungsbüro Schmid und Partner, Regensburg",
+      "days": -190,
+      "result": "Das Grundstück ist über die Donaustaufer Straße erschlossen. Hochwassergefahrenfläche HQ100 wird nicht berührt, ein Teil liegt im HQ-extrem-Bereich. Lärmpegelbereich III an der Bahnseite.",
+      "conclusion": "suitable"
+    },
+    {
+      "kind": "site_analysis",
+      "title": "Baugrund und Grundwasser",
+      "scope": "Baugrunderkundung mit zwölf Rammkernsondierungen und drei Grundwassermessstellen.",
+      "author": "Ingenieurgesellschaft Geotechnik Ostbayern",
+      "days": -170,
+      "result": "Auffüllung über Donaukiesen, Grundwasser bei 3,2 m unter Gelände. Gründung als Bodenplatte mit Teilunterkellerung möglich, Baugrubenverbau mit Wasserhaltung erforderlich.",
+      "conclusion": "conditional"
+    },
+    {
+      "kind": "suitability",
+      "title": "Eignung Fernwärmeanschluss",
+      "scope": "Anschlussleistung, Vorlauftemperatur und Trassenführung im Quartier.",
+      "author": "Energieplanung Brandl",
+      "days": -150,
+      "result": "Der Versorger sagt eine Anschlussleistung von 1,4 MW bei 75 Grad Vorlauf zu. Der Anteil erneuerbarer Energien nach GEG wird mit dem Fernwärmemix und der Photovoltaikanlage erreicht.",
+      "conclusion": "suitable"
+    },
+    {
+      "kind": "suitability",
+      "title": "Eignung Tiefgarage und Stellplatzschlüssel",
+      "scope": "Zufahrt, Rampengefälle, Stellplatzzahl nach Satzung, Fahrradabstellplätze.",
+      "author": "Verkehrsplanung Huber",
+      "days": -140,
+      "result": "110 Stellplätze nach Stellplatzsatzung nachweisbar, Rampe mit 15 Prozent Gefälle zulässig. Sprinklerpflicht für die Tiefgarage entfällt bei Offenheit von mehr als einem Drittel der Umfassung.",
+      "conclusion": "suitable"
+    }
+  ],
+  "issue_note": "Erste Fassung zur Abstimmung mit dem Bauherrn."
+}

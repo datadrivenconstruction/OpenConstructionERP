@@ -76,7 +76,7 @@ export const CHECK_STATUS: Record<CheckStatus, KeyText> = {
 export const DOCUMENT_STATUS: Record<DocumentStatus, KeyText> = {
   draft: ['governance.project.document_status.draft', 'Draft'],
   in_review: ['governance.project.document_status.in_review', 'In review'],
-  approved_at_gate: ['governance.project.document_status.approved_at_gate', 'Approved at gate'],
+  approved_at_gate: ['governance.project.document_status.approved_at_gate', 'Approved'],
   binding: ['governance.project.document_status.binding', 'Binding'],
   superseded: ['governance.project.document_status.superseded', 'Superseded'],
 };

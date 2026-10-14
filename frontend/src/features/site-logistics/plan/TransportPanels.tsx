@@ -78,6 +78,11 @@ export function TransportsPanel({ projectId, catalogue }: PanelProps) {
   return (
     <section className="space-y-3" data-testid="plan-transports">
       <PanelHead title="tab.transports" action="add_transport" may={resource.mayCreate} onAction={() => resource.open()} />
+      {(gates.isError || customs.isError) && (
+        <p role="alert" className="text-sm text-semantic-error" data-testid="plan-transport-options-failed">
+          {tx(t, 'transport.options_failed')}
+        </p>
+      )}
       <Loaded query={transports}>
         {(rows) =>
           rows.length === 0 ? (

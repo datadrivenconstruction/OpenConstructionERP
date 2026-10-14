@@ -29,7 +29,7 @@ export const CONCEPT_STATE: KeyMap = {
   in_review: ['qualityConcept.conceptState.in_review', 'In review'],
   approved: ['qualityConcept.conceptState.approved', 'Approved'],
   binding: ['qualityConcept.conceptState.binding', 'Binding'],
-  revising: ['qualityConcept.conceptState.revising', 'Under revision'],
+  revising: ['qualityConcept.conceptState.revising', 'Reopened'],
 };
 
 export const CERTIFICATION_STATE: KeyMap = {

@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileCheck2, Info } from 'lucide-react';
 
-import { Button } from '@/shared/ui/Button';
 
 import {
   createReport,
@@ -38,6 +37,7 @@ import {
   type DesignContext,
   StepButton,
   pickerField,
+  WriteButton,
 } from './DesignBits';
 import { FormDialog, str, type FieldSpec, type FormValues } from './FormDialog';
 import { useDesignAction, useDesignList, useDesignOptions } from './hooks';
@@ -120,9 +120,9 @@ export function ReportsPanel({ ctx }: { ctx: DesignContext }) {
         title={ui(t, 'design.ui.reports.title')}
         hint={ui(t, 'design.ui.reports.hint')}
         action={
-          <Button onClick={add} data-testid="report-add">
+          <WriteButton onClick={add} data-testid="report-add">
             {ui(t, 'design.ui.reports.add')}
-          </Button>
+          </WriteButton>
         }
       />
 
@@ -194,11 +194,11 @@ export function ReportsPanel({ ctx }: { ctx: DesignContext }) {
               </td>
               <td className={`${CELL} text-right`}>
                 <span className="inline-flex flex-wrap justify-end gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => setDialog({ kind: 'report', report })}>
+                  <WriteButton size="sm" variant="ghost" onClick={() => setDialog({ kind: 'report', report })}>
                     {ui(t, 'design.ui.action.edit')}
-                  </Button>
+                  </WriteButton>
                   {report.review_cycle_id ? (
-                    <Button
+                    <WriteButton
                       size="sm"
                       variant="ghost"
                       disabled={action.pending}
@@ -206,7 +206,7 @@ export function ReportsPanel({ ctx }: { ctx: DesignContext }) {
                       data-testid="report-sync"
                     >
                       {ui(t, 'design.ui.reports.sync')}
-                    </Button>
+                    </WriteButton>
                   ) : (
                     offered(report.can?.transitions).map(({ target, flag }) => (
                       <StepButton

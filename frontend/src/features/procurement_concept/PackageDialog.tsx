@@ -27,6 +27,7 @@ import {
   type SplitBasis,
   type TenderBasis,
 } from './api';
+import { useMilestones } from '@/features/engineering_brief/hooks';
 import { refusalText, useAdvanceReleases, useCostSections, useThreshold } from './hooks';
 import {
   EVALUATION_METHOD,
@@ -122,6 +123,8 @@ export function PackageDialog({
     onSuccess: () => onSaved(!view.award),
   });
 
+  const milestones = (useMilestones(projectId, true).data ?? []).filter((m) => m.activity_id && m.published);
+  const bound = milestones.find((m) => m.activity_id === draft.need_activity_id);
   const usableFrameworks = frameworks.filter((f) => f.state === 'active' || f.id === draft.framework_agreement_id);
 
   return (
@@ -539,8 +542,38 @@ export function PackageDialog({
                 defaultValue: 'The award schedule counts back from this date.',
               })}
             >
-              <input id="pk-need" type="date" className={FIELD_CLASS} value={draft.need_date} onChange={(e) => set('need_date', e.target.value)} />
+              <input
+                id="pk-need"
+                type="date"
+                className={FIELD_CLASS}
+                value={bound?.planned_date ?? draft.need_date}
+                disabled={!!draft.need_activity_id}
+                onChange={(e) => set('need_date', e.target.value)}
+              />
             </Field>
+            {milestones.length > 0 && (
+              <Field
+                label={t('procurement_concept.ui.package.need_activity', { defaultValue: 'Take the date from a schedule milestone' })}
+                htmlFor="pk-need-activity"
+                hint={t('procurement_concept.ui.package.need_activity_hint', {
+                  defaultValue: 'The need date follows the milestone when the schedule moves.',
+                })}
+              >
+                <select
+                  id="pk-need-activity"
+                  className={FIELD_CLASS}
+                  value={draft.need_activity_id}
+                  onChange={(e) => set('need_activity_id', e.target.value)}
+                >
+                  <option value="">{t('procurement_concept.ui.package.need_activity_none', { defaultValue: 'No, use the typed date' })}</option>
+                  {milestones.map((m) => (
+                    <option key={m.id} value={m.activity_id ?? ''}>
+                      {m.name}{m.planned_date ? ` (${fmtDate(m.planned_date)})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
             <Field
               label={t('procurement_concept.ui.package.lead_time', { defaultValue: 'Lead time after award, in days' })}
               htmlFor="pk-lead"

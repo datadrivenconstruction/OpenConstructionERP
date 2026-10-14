@@ -72,11 +72,14 @@ export function SpecificationPanel({
   projectId,
   status,
   spec,
+  canWrite,
   onChanged,
 }: {
   projectId: string;
   status: BriefStatus;
   spec: SpecificationState;
+  /** False when the caller lacks the edit permission: no issue button. */
+  canWrite: boolean;
   onChanged: () => void;
 }) {
   const { t } = useTranslation();
@@ -121,9 +124,11 @@ export function SpecificationPanel({
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <Button size="sm" disabled={reason !== ''} onClick={() => setIssuing(true)} title={reason || undefined} data-testid="brief-spec-issue">
-            {t('engineeringBrief.spec.issue', { defaultValue: 'Issue specification' })}
-          </Button>
+          {canWrite ? (
+            <Button size="sm" disabled={reason !== ''} onClick={() => setIssuing(true)} title={reason || undefined} data-testid="brief-spec-issue">
+              {t('engineeringBrief.spec.issue', { defaultValue: 'Issue specification' })}
+            </Button>
+          ) : null}
           {reason ? (
             <p className="text-xs text-content-tertiary" data-testid="brief-spec-reason">
               {reason}

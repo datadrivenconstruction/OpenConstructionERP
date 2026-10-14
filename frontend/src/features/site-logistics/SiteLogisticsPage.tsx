@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -45,6 +45,8 @@ import {
 } from '@/shared/ui';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
 import { LogisticsPlan, type PlanTab } from './plan/LogisticsPlan';
 import { FlowSelect } from './plan/FlowSelect';
@@ -1202,6 +1204,8 @@ function DeliveryBoard({
     },
   });
 
+  const del = useConfirmDelete();
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteDelivery(id),
     onSuccess: () => {
@@ -1233,6 +1237,7 @@ function DeliveryBoard({
 
   return (
     <div className="space-y-4">
+      {del.dialog}
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative">
@@ -1356,7 +1361,7 @@ function DeliveryBoard({
                     onReject={(x) => decisionMut.mutate({ action: 'reject', id: x.id })}
                     onAdvance={(x, status) => advanceMut.mutate({ id: x.id, status })}
                     onEdit={onEdit}
-                    onDelete={(x) => deleteMut.mutate(x.id)}
+                    onDelete={(x) => del.ask('delivery', () => deleteMut.mutate(x.id))}
                   />
                 ))}
               </Card>
@@ -1427,6 +1432,8 @@ function GatesPanel({ projectId }: { projectId: string }) {
     },
   });
 
+  const del = useConfirmDelete();
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteGate(id),
     onSuccess: () => {
@@ -1444,6 +1451,7 @@ function GatesPanel({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
+      {del.dialog}
       {canCreate && (
         <Card padding="none" className="p-4">
           <p className="text-sm font-medium text-content-primary mb-3">
@@ -1525,7 +1533,7 @@ function GatesPanel({ projectId }: { projectId: string }) {
               key={g.id}
               gate={g}
               onSave={(data) => updateMut.mutateAsync({ id: g.id, data })}
-              onDelete={() => deleteMut.mutate(g.id)}
+              onDelete={() => del.ask('gate', () => deleteMut.mutate(g.id))}
               busy={deleteMut.isPending}
               savePending={updateMut.isPending}
             />
@@ -1785,6 +1793,8 @@ function LaydownPanel({ projectId }: { projectId: string }) {
     },
   });
 
+  const del = useConfirmDelete();
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteLaydownZone(id),
     onSuccess: () => {
@@ -1802,6 +1812,7 @@ function LaydownPanel({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
+      {del.dialog}
       {canCreate && (
         <Card padding="none" className="p-4">
           <p className="text-sm font-medium text-content-primary mb-3">
@@ -1863,7 +1874,7 @@ function LaydownPanel({ projectId }: { projectId: string }) {
               key={z.id}
               zone={z}
               onSave={(data) => updateMut.mutateAsync({ id: z.id, data })}
-              onDelete={() => deleteMut.mutate(z.id)}
+              onDelete={() => del.ask('zone', () => deleteMut.mutate(z.id))}
               busy={deleteMut.isPending}
               savePending={updateMut.isPending}
             />
@@ -2723,7 +2734,44 @@ function BillCoveragePanel({ projectId }: { projectId: string }) {
   );
 }
 
+type DeleteKind = 'delivery' | 'gate' | 'zone';
+
+/**
+ * Asks before a delivery, gate or laydown zone is deleted. Nothing is removed
+ * until the person confirms; the dialog is rendered by the caller as `dialog`.
+ */
+function useConfirmDelete() {
+  const { t } = useTranslation();
+  const state = useConfirm();
+  const ask = async (kind: DeleteKind, run: () => void) => {
+    const words: Record<DeleteKind, { title: string; message: string }> = {
+      delivery: {
+        title: t('siteLogistics.confirm_delete_delivery_title', { defaultValue: 'Delete this delivery?' }),
+        message: t('siteLogistics.confirm_delete_delivery', {
+          defaultValue: 'The booking and its lines are removed. This cannot be undone.',
+        }),
+      },
+      gate: {
+        title: t('siteLogistics.confirm_delete_gate_title', { defaultValue: 'Delete this gate?' }),
+        message: t('siteLogistics.confirm_delete_gate', {
+          defaultValue: 'The gate and its opening hours are removed. This cannot be undone.',
+        }),
+      },
+      zone: {
+        title: t('siteLogistics.confirm_delete_zone_title', { defaultValue: 'Delete this laydown zone?' }),
+        message: t('siteLogistics.confirm_delete_zone', {
+          defaultValue: 'The zone is removed from the site plan. This cannot be undone.',
+        }),
+      },
+    };
+    if (await state.confirm({ ...words[kind], confirmLabel: t('common.delete', { defaultValue: 'Delete' }) })) run();
+  };
+  return { ask, dialog: <ConfirmDialog {...state} /> };
+}
+
 type TabKey = 'deliveries' | 'timeline' | 'coverage' | 'gates' | 'laydown' | 'plan';
+
+const TAB_KEYS: TabKey[] = ['deliveries', 'timeline', 'coverage', 'gates', 'laydown', 'plan'];
 
 export function SiteLogisticsPage() {
   const { t } = useTranslation();
@@ -2734,7 +2782,16 @@ export function SiteLogisticsPage() {
   // A link that names the project (a gate item, a notification) means its
   // logistics plan; the bare address opens the delivery board as before.
   const { projectId: linkedProjectId } = useParams<{ projectId?: string }>();
-  const [tab, setTab] = useState<TabKey>(linkedProjectId ? 'plan' : 'deliveries');
+  const [params, setParams] = useSearchParams();
+  const defaultTab: TabKey = linkedProjectId ? 'plan' : 'deliveries';
+  const wantedTab = params.get('tab');
+  const tab: TabKey = TAB_KEYS.includes(wantedTab as TabKey) ? (wantedTab as TabKey) : defaultTab;
+  const setTab = (next: TabKey) => {
+    const p = new URLSearchParams(params);
+    if (next === defaultTab) p.delete('tab');
+    else p.set('tab', next);
+    setParams(p, { replace: false });
+  };
   const [planTab, setPlanTab] = useState<PlanTab>('balance');
   const [showBook, setShowBook] = useState(false);
   // The delivery being edited (shared by the board and the gate timeline so a

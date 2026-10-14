@@ -344,6 +344,8 @@ export const UI = {
   'design.ui.permit.item_report': 'Report',
   'design.ui.permit.item_required': 'The authority requires this item',
   'design.ui.permit.item_remove': 'Remove',
+  'design.ui.permit.item_remove_title': 'Remove this item from the package?',
+  'design.ui.permit.item_remove_body': 'The item is taken out of the permit package. The document itself is not deleted.',
   'design.ui.permit.item_ready': 'Ready',
   'design.ui.permit.item_not_shared': 'Not shared yet',
   'design.ui.permit.item_missing': 'Document missing',

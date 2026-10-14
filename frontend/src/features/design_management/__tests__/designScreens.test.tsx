@@ -29,6 +29,7 @@ vi.mock('../api', async (importOriginal) => {
     listDistributionRules: vi.fn(),
     listReports: vi.fn(),
     movePermit: vi.fn(),
+    removePermitItem: vi.fn(),
   };
 });
 
@@ -441,6 +442,22 @@ describe('PermitsPanel', () => {
     await waitFor(() =>
       expect(useToastStore.getState().toasts.map((toast) => toast.title)).toContain('Required items are missing or not shared yet.'),
     );
+  });
+
+  it('removing an item from the package asks first and removes nothing until confirmed', async () => {
+    mocked.listPermits.mockResolvedValue([permit({ state: 'assembling', items: [permitItem()] })]);
+    mocked.removePermitItem.mockResolvedValue(undefined);
+    wrap(<PermitsPanel ctx={context()} />);
+    const card = await screen.findByTestId('permit-card');
+    fireEvent.click(within(card).getByRole('button', { name: 'Remove' }));
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent('Remove this item from the package?');
+    expect(mocked.removePermitItem).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    expect(mocked.removePermitItem).not.toHaveBeenCalled();
+    fireEvent.click(within(card).getByRole('button', { name: 'Remove' }));
+    fireEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Remove' }));
+    await waitFor(() => expect(mocked.removePermitItem).toHaveBeenCalledWith('p1', 'pm1', 'i1'));
   });
 
   it('a submitted package offers no editing and only the step a person takes', async () => {

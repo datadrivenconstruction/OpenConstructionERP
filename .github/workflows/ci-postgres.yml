@@ -1150,6 +1150,7 @@ jobs:
           tests/pg/test_stakeholders_idor.py
           tests/pg/test_staffing_idor.py
           tests/pg/test_engineering_brief_idor.py
+          tests/pg/test_engineering_brief_demo_seed_on_pg.py
           tests/pg/test_project_handbook_idor.py
           tests/pg/test_project_handbook_service_on_pg.py
           tests/pg/test_site_logistics_plan_idor.py
