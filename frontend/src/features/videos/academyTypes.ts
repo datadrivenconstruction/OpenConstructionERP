@@ -81,6 +81,11 @@ export interface AcademyVideo {
   recordedOn?: string;
   /** Running time in seconds, when known. */
   duration?: number;
+  /** ISO 639-1 languages the channel offers subtitles in, besides the spoken
+   *  `language`, manual or automatic, as the watch page lists them. */
+  subtitles?: string[];
+  /** ISO 639-1 languages of extra (dubbed) audio tracks, besides `language`. */
+  audioTracks?: string[];
   /** The channel thumbnail (i.ytimg.com) for a published video, or the
    *  public path of the local WebP for one that is not out yet. */
   cover: string;

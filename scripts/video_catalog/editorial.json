@@ -145,6 +145,34 @@
       "market": null,
       "channel": "ddc",
       "order": 90
+    },
+    "din276-de": {
+      "title": "Vom Kostenrahmen bis zur Abnahme",
+      "language": "de",
+      "market": "DE",
+      "channel": "academy",
+      "order": 15
+    },
+    "uk-commercial": {
+      "title": "EN • UK",
+      "language": "en",
+      "market": "GB",
+      "channel": "academy",
+      "order": 35
+    },
+    "hrvatska-hr": {
+      "title": "HR • Hrvatska",
+      "language": "hr",
+      "market": "HR",
+      "channel": "academy",
+      "order": 60
+    },
+    "playbook-es": {
+      "title": "Builder's Playbook en español",
+      "language": "es",
+      "market": "ES",
+      "channel": "academy",
+      "order": 70
     }
   },
   "gallery_series": {
@@ -374,6 +402,845 @@
       "cases": [],
       "result": null,
       "provenance": "videos-agent-2026-09-25, source marketing-site/uberization (PT14M22S)"
+    },
+    {
+      "id": "din276-01-kostenrahmen",
+      "youtubeId": "9qsR7e77by0",
+      "series": "din276-de",
+      "seriesOrder": 1,
+      "language": "de",
+      "title": "Kostenrahmen nach DIN 276 erstellen",
+      "description": "Wie erstellen Sie einen belastbaren Kostenrahmen nach DIN 276? In diesem Tutorial richten Sie die Plattform ein, legen das Projekt an und bauen eine nachvollziehbare Grundlage für die weitere Planung auf.",
+      "duration": 225,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Plattform einrichten"
+        },
+        {
+          "t": 61,
+          "title": "Grundlagen"
+        },
+        {
+          "t": 108,
+          "title": "Kostenrahmen erstellen"
+        },
+        {
+          "t": 189,
+          "title": "Maßstab und Budget prüfen"
+        }
+      ],
+      "stage": "define",
+      "roles": ["estimator", "project-manager"],
+      "market": "DE",
+      "cases": ["din-276-cost-plan-for-the-client", "feasibility-budget-before-design", "set-up-a-new-project"],
+      "result": "cost",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "din276-02-kostenschaetzung",
+      "youtubeId": "dbq7iB3qhF0",
+      "series": "din276-de",
+      "seriesOrder": 2,
+      "language": "de",
+      "title": "Kostenschätzung nach DIN 276 erstellen | Kostenrahmen sicher vergleichen",
+      "description": "Erstellen Sie eine Kostenschätzung nach DIN 276 und vergleichen Sie sie sauber mit dem Kostenrahmen. Das Tutorial zeigt den Weg vom Vorentwurf bis zur belastbaren Entscheidungsgrundlage.",
+      "duration": 208,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Rückblick"
+        },
+        {
+          "t": 25,
+          "title": "Kostenschätzung erstellen"
+        },
+        {
+          "t": 91,
+          "title": "Kostenrahmen vergleichen"
+        },
+        {
+          "t": 150,
+          "title": "Planungsbeschluss vorbereiten"
+        }
+      ],
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "DE",
+      "cases": ["din-276-cost-plan-for-the-client", "sense-check-an-estimate-with-benchmarks"],
+      "result": "cost",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "din276-03-kostenberechnung",
+      "youtubeId": "s876HFnwlRs",
+      "series": "din276-de",
+      "seriesOrder": 3,
+      "language": "de",
+      "title": "Kostenberechnung nach DIN 276 | Baubeschluss sicher vorbereiten",
+      "description": "So erstellen Sie eine Kostenberechnung nach DIN 276, vergleichen sie mit der Kostenschätzung und machen den Entwurf finanziell transparent.",
+      "duration": 216,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Rückblick"
+        },
+        {
+          "t": 28,
+          "title": "Kostenberechnung erstellen"
+        },
+        {
+          "t": 122,
+          "title": "Kostenschätzung vergleichen"
+        },
+        {
+          "t": 168,
+          "title": "Baubeschluss vorbereiten"
+        }
+      ],
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "DE",
+      "cases": ["din-276-cost-plan-for-the-client", "write-the-basis-of-estimate"],
+      "result": "cost",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "din276-04-kostenvoranschlag-gaeb",
+      "youtubeId": "buytHXRaav4",
+      "series": "din276-de",
+      "seriesOrder": 4,
+      "language": "de",
+      "title": "Kostenvoranschlag und GAEB | Leistungsverzeichnis bepreisen",
+      "description": "Bepreisen Sie ein Leistungsverzeichnis für den Rohbau, erstellen Sie den Kostenvoranschlag und bereiten Sie die GAEB-Datei für die Bieter vor.",
+      "duration": 220,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Rückblick"
+        },
+        {
+          "t": 35,
+          "title": "Bepreistes Leistungsverzeichnis"
+        },
+        {
+          "t": 99,
+          "title": "Kostenvoranschlag erstellen"
+        },
+        {
+          "t": 142,
+          "title": "GAEB an Bieter übergeben"
+        }
+      ],
+      "stage": "procure",
+      "roles": ["estimator", "procurement-buyer"],
+      "market": "DE",
+      "cases": ["win-a-gaeb-tender-from-lv-to-angebot", "tender-from-boq"],
+      "result": "gaeb",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "din276-05-vergabe",
+      "youtubeId": "U3YiFn9sEUs",
+      "series": "din276-de",
+      "seriesOrder": 5,
+      "language": "de",
+      "title": "Vergabe im Bauwesen | Angebote vergleichen und Auftrag vergeben",
+      "description": "Vergleichen Sie Angebote für den Rohbau im Preisspiegel, prüfen Sie auffällige Preise und bereiten Sie eine saubere Vergabeentscheidung vor.",
+      "duration": 223,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Angebote prüfen"
+        },
+        {
+          "t": 67,
+          "title": "Preisspiegel vergleichen"
+        },
+        {
+          "t": 110,
+          "title": "Aufklärung"
+        },
+        {
+          "t": 147,
+          "title": "Vergabe vorbereiten"
+        }
+      ],
+      "stage": "procure",
+      "roles": ["procurement-buyer", "project-manager"],
+      "market": "DE",
+      "cases": ["build-a-preisspiegel-and-award", "compare-bids-and-award"],
+      "result": "award",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "din276-06-baubeginn",
+      "youtubeId": "XSotB6IPhR0",
+      "series": "din276-de",
+      "seriesOrder": 6,
+      "language": "de",
+      "title": "Baubeginn organisieren | Bauzeitenplan und Bautagebuch anlegen",
+      "description": "Vom vergebenen Auftrag zur laufenden Baustelle: Legen Sie den Bauzeitenplan an und führen Sie das Bautagebuch ab dem ersten Bautag.",
+      "duration": 207,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Bauzeitenplan anlegen"
+        },
+        {
+          "t": 82,
+          "title": "Baubeginn dokumentieren"
+        },
+        {
+          "t": 93,
+          "title": "Bautagebuch führen"
+        },
+        {
+          "t": 138,
+          "title": "Nachweise sichern"
+        }
+      ],
+      "stage": "plan",
+      "roles": ["planner", "site-manager"],
+      "market": "DE",
+      "cases": ["build-the-baseline-programme", "run-the-site-day"],
+      "result": "programme",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "din276-07-nachtraege-abschlag",
+      "youtubeId": "bDLHOMF6ZoE",
+      "series": "din276-de",
+      "seriesOrder": 7,
+      "language": "de",
+      "title": "Nachträge und Abschlagsrechnungen prüfen | Baukosten sicher steuern",
+      "description": "Prüfen Sie Nachträge und Abschlagsrechnungen im Bauprojekt. Das Tutorial zeigt, wie Leistungen, Beträge und Sicherheitseinbehalt nachvollziehbar geprüft werden.",
+      "duration": 242,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Vertrag prüfen"
+        },
+        {
+          "t": 39,
+          "title": "Nachträge bewerten"
+        },
+        {
+          "t": 119,
+          "title": "Abschlagsrechnung 1"
+        },
+        {
+          "t": 168,
+          "title": "Abschlagsrechnung 2"
+        }
+      ],
+      "stage": "build",
+      "roles": ["quantity-surveyor", "commercial-manager"],
+      "market": "DE",
+      "cases": ["assess-and-price-a-variation", "prepare-an-interim-payment-application", "manage-retention-across-the-supply-chain"],
+      "result": "change",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "din276-08-abnahme-schlussrechnung",
+      "youtubeId": "yLdicouAJw0",
+      "series": "din276-de",
+      "seriesOrder": 8,
+      "language": "de",
+      "title": "Bauabnahme und Schlussrechnung | Mängel, Kosten und Abschluss im Griff",
+      "description": "Organisieren Sie die förmliche Abnahme, erfassen Sie Mängel, prüfen Sie die Schlussrechnung und schließen Sie die Kostenkette im Bauprojekt ab.",
+      "duration": 225,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Abnahme organisieren"
+        },
+        {
+          "t": 45,
+          "title": "Mängel erfassen"
+        },
+        {
+          "t": 73,
+          "title": "Schlussrechnung prüfen"
+        },
+        {
+          "t": 145,
+          "title": "Kosten feststellen"
+        }
+      ],
+      "stage": "handover",
+      "roles": ["project-manager", "site-manager", "quantity-surveyor"],
+      "market": "DE",
+      "cases": ["run-a-handover-acceptance-inspection", "clear-the-snag-list-before-handover", "control-cost-against-budget"],
+      "result": "handover",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-11"
+    },
+    {
+      "id": "uk-01-tender-nrm2",
+      "youtubeId": "_uKAddpFo9Y",
+      "series": "uk-commercial",
+      "seriesOrder": 1,
+      "language": "en",
+      "title": "How to Price a Construction Tender (NRM 2)",
+      "description": "Pricing a construction tender is not about adding a percentage at the end. It is about putting every cost in the right place and counting it once.",
+      "duration": 353,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 116,
+          "title": "Open the bill"
+        },
+        {
+          "t": 151,
+          "title": "The markups"
+        },
+        {
+          "t": 257,
+          "title": "Get it right"
+        }
+      ],
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": "GB",
+      "cases": ["cost-risk-and-contingency", "tender-from-boq"],
+      "result": "bill",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "uk-02-subcontractor-bids",
+      "youtubeId": "WA5-cVKcD-E",
+      "series": "uk-commercial",
+      "seriesOrder": 2,
+      "language": "en",
+      "title": "How to Compare Subcontractor Bids",
+      "description": "The lowest subcontractor quote is not always the lowest final cost. Missing scope, exclusions and different assumptions can change the result completely.",
+      "duration": 361,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 137,
+          "title": "Record the bids"
+        },
+        {
+          "t": 192,
+          "title": "Level and award"
+        },
+        {
+          "t": 268,
+          "title": "Get it right"
+        }
+      ],
+      "stage": "procure",
+      "roles": ["procurement-buyer", "quantity-surveyor"],
+      "market": "GB",
+      "cases": ["level-bids-to-a-common-scope", "compare-bids-and-award"],
+      "result": "award",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "uk-03-interim-payments-retention",
+      "youtubeId": "bmlDq86OSrg",
+      "series": "uk-commercial",
+      "seriesOrder": 3,
+      "language": "en",
+      "title": "JCT Interim Payments and Retention",
+      "description": "An interim payment should show what has been earned, what is being withheld and why. If the valuation and retention are unclear, disputes become much more likely.",
+      "duration": 385,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 118,
+          "title": "Start the contract"
+        },
+        {
+          "t": 193,
+          "title": "Claim and retention"
+        },
+        {
+          "t": 269,
+          "title": "Get it right"
+        }
+      ],
+      "stage": "build",
+      "roles": ["quantity-surveyor", "commercial-manager"],
+      "market": "GB",
+      "cases": ["prepare-an-interim-payment-application", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "uk-04-pay-less-notice",
+      "youtubeId": "1tstow0n_Ew",
+      "series": "uk-commercial",
+      "seriesOrder": 4,
+      "language": "en",
+      "title": "Payment Notice vs Pay Less Notice",
+      "description": "A payment notice and a pay less notice are not interchangeable. The document, amount and deadline all matter.",
+      "duration": 387,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 157,
+          "title": "Start the clock"
+        },
+        {
+          "t": 217,
+          "title": "A missed notice"
+        },
+        {
+          "t": 297,
+          "title": "Get it right"
+        }
+      ],
+      "stage": "build",
+      "roles": ["quantity-surveyor", "commercial-manager"],
+      "market": "GB",
+      "cases": ["payment-application-and-reconciliation"],
+      "result": "invoice",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "uk-05-cis-vat-reverse-charge",
+      "youtubeId": "SWwlmU4y-L4",
+      "series": "uk-commercial",
+      "seriesOrder": 5,
+      "language": "en",
+      "title": "CIS Deductions and VAT Reverse Charge",
+      "description": "CIS and the domestic VAT reverse charge can apply to the same construction payment, but they do different jobs and use different amounts.",
+      "duration": 394,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 189,
+          "title": "The scheme"
+        },
+        {
+          "t": 212,
+          "title": "Work it out"
+        },
+        {
+          "t": 302,
+          "title": "Get it right"
+        }
+      ],
+      "stage": "build",
+      "roles": ["accountant", "quantity-surveyor"],
+      "market": "GB",
+      "cases": ["run-a-three-way-match-before-paying-a-supplier", "issue-an-electronic-invoice"],
+      "result": "invoice",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "uk-06-jct-variation",
+      "youtubeId": "KV-PbKMGISk",
+      "series": "uk-commercial",
+      "seriesOrder": 6,
+      "language": "en",
+      "title": "How to Value a JCT Variation",
+      "description": "A variation becomes much easier to manage when the instruction, scope, price and approval stay connected.",
+      "duration": 354,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 134,
+          "title": "Log and price"
+        },
+        {
+          "t": 193,
+          "title": "Agree and order"
+        },
+        {
+          "t": 275,
+          "title": "Get it right"
+        }
+      ],
+      "stage": "build",
+      "roles": ["quantity-surveyor", "contract-administrator"],
+      "market": "GB",
+      "cases": ["assess-and-price-a-variation", "change-to-paid-variation"],
+      "result": "change",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "hr-01-ugovoreni-troskovnik",
+      "youtubeId": "JzMC6xKNJlg",
+      "series": "hrvatska-hr",
+      "seriesOrder": 1,
+      "language": "hr",
+      "title": "Ugovoreni troškovnik: uvoz iz Excela",
+      "description": "Ugovoreni troškovnik nije samo Excel datoteka. To je osnova za praćenje troškova, računa, situacija i promjena na projektu.",
+      "duration": 250,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Troškovnik ukratko"
+        },
+        {
+          "t": 66,
+          "title": "Projekt i uvoz"
+        },
+        {
+          "t": 121,
+          "title": "Stavka, ukupno i PDV"
+        },
+        {
+          "t": 196,
+          "title": "Ugovorena verzija"
+        },
+        {
+          "t": 215,
+          "title": "Što dalje"
+        }
+      ],
+      "stage": "estimate",
+      "roles": ["estimator"],
+      "market": "HR",
+      "cases": ["set-up-a-new-project", "validate-estimate"],
+      "result": "bill",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "hr-02-ulazni-racuni",
+      "youtubeId": "Cu21eWYzXfU",
+      "series": "hrvatska-hr",
+      "seriesOrder": 2,
+      "language": "hr",
+      "title": "Ulazni računi povezani s troškovnikom",
+      "description": "Ulazni račun daje pravu sliku projekta tek kada je povezan s radovima na koje se odnosi.",
+      "duration": 268,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Računi i PDV"
+        },
+        {
+          "t": 59,
+          "title": "Unos računa"
+        },
+        {
+          "t": 136,
+          "title": "Veza s troškovnikom"
+        },
+        {
+          "t": 190,
+          "title": "Provjera"
+        }
+      ],
+      "stage": "build",
+      "roles": ["accountant"],
+      "market": "HR",
+      "cases": ["run-a-three-way-match-before-paying-a-supplier", "control-cost-against-budget"],
+      "result": "invoice",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "hr-03-podizvodaci",
+      "youtubeId": "PZ7jEsXjr-E",
+      "series": "hrvatska-hr",
+      "seriesOrder": 3,
+      "language": "hr",
+      "title": "Podizvođači: ugovor, situacija i plaćanje",
+      "description": "Plaćanje podizvođača mora odgovarati ugovoru, stvarno izvedenim radovima i poreznom tretmanu.",
+      "duration": 290,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Odgovornost i PDV"
+        },
+        {
+          "t": 60,
+          "title": "Podizvođač i ugovor"
+        },
+        {
+          "t": 145,
+          "title": "Situacija i plaćanje"
+        },
+        {
+          "t": 226,
+          "title": "Provjera"
+        }
+      ],
+      "stage": "build",
+      "roles": ["commercial-manager", "accountant"],
+      "market": "HR",
+      "cases": ["raise-a-subcontract-order-from-the-award", "manage-retention-across-the-supply-chain"],
+      "result": "invoice",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "hr-04-privremena-situacija",
+      "youtubeId": "UeL7oAzvX6E",
+      "series": "hrvatska-hr",
+      "seriesOrder": 4,
+      "language": "hr",
+      "title": "Privremena situacija iz izvedenih radova",
+      "description": "Dobra privremena situacija počinje na gradilištu, s potvrđenim količinama i jasnim dokazima o izvedenim radovima.",
+      "duration": 285,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Plan i uloge"
+        },
+        {
+          "t": 54,
+          "title": "Gantogram"
+        },
+        {
+          "t": 95,
+          "title": "Napredak i dokaz"
+        },
+        {
+          "t": 137,
+          "title": "Situacija"
+        },
+        {
+          "t": 243,
+          "title": "Provjera"
+        }
+      ],
+      "stage": "build",
+      "roles": ["quantity-surveyor", "site-manager"],
+      "market": "HR",
+      "cases": ["prepare-an-interim-payment-application", "update-the-programme-and-reforecast"],
+      "result": "invoice",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "hr-05-financijsko-stanje",
+      "youtubeId": "WKWLfaofG94",
+      "series": "hrvatska-hr",
+      "seriesOrder": 5,
+      "language": "hr",
+      "title": "Financijsko stanje projekta i višak radova",
+      "description": "Je li projekt stvarno u plusu? Odgovor se ne vidi iz jednog računa, nego iz ugovorene vrijednosti, stvarnih troškova, naplate i odobrenih promjena.",
+      "duration": 313,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Pitanje"
+        },
+        {
+          "t": 29,
+          "title": "Tri broja"
+        },
+        {
+          "t": 113,
+          "title": "Višak radova"
+        },
+        {
+          "t": 199,
+          "title": "Završni obračun"
+        },
+        {
+          "t": 244,
+          "title": "Provjera i kraj"
+        }
+      ],
+      "stage": "build",
+      "roles": ["project-manager", "commercial-manager"],
+      "market": "HR",
+      "cases": ["control-cost-against-budget", "change-to-paid-variation"],
+      "result": "change",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-05"
+    },
+    {
+      "id": "es-02-bc3-oferta",
+      "youtubeId": "7vpNLucFvRw",
+      "series": "playbook-es",
+      "seriesOrder": 2,
+      "language": "es",
+      "title": "Importar BC3 y preparar una oferta de obra: PEM, gastos y baja",
+      "description": "¿El proyecto llega en BC3 y necesitas preparar una oferta? Importamos el presupuesto en OpenConstructionERP, revisamos el PEM y aplicamos gastos generales, beneficio industrial y una baja sin modificar el original.",
+      "duration": 160,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "El proyecto"
+        },
+        {
+          "t": 40,
+          "title": "La importación"
+        },
+        {
+          "t": 61,
+          "title": "Los recargos"
+        },
+        {
+          "t": 100,
+          "title": "La oferta"
+        }
+      ],
+      "stage": "estimate",
+      "roles": ["estimator"],
+      "market": "ES",
+      "cases": ["cost-risk-and-contingency", "tender-from-boq"],
+      "result": "bill",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-14"
+    },
+    {
+      "id": "es-06-certificacion",
+      "youtubeId": "6p-Fd4z8lJI",
+      "series": "playbook-es",
+      "seriesOrder": 6,
+      "language": "es",
+      "title": "Certificación de obra: del avance mensual al cobro",
+      "description": "¿Cuánto corresponde cobrar por la obra ejecutada este mes? En este tutorial de OpenConstructionERP registramos el avance, preparamos la certificación de obra y revisamos el importe antes de presentarla.",
+      "duration": 201,
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Qué se certifica este mes"
+        },
+        {
+          "t": 59,
+          "title": "Registrar el avance de obra"
+        },
+        {
+          "t": 100,
+          "title": "Preparar la certificación"
+        },
+        {
+          "t": 144,
+          "title": "Revisar el importe y el cobro"
+        }
+      ],
+      "stage": "build",
+      "roles": ["quantity-surveyor", "accountant"],
+      "market": "ES",
+      "cases": ["prepare-an-interim-payment-application", "payment-application-and-reconciliation"],
+      "result": "invoice",
+      "provenance": "academy-videos-2026-10-14, channel upload 2026-10-14"
     }
-  ]
+  ],
+  "tracks": {
+    "_note": "Per YouTube id: the caption languages (manual or automatic) and the extra audio tracks the watch page offers besides the spoken language, read from the public player response on 2026-10-14. Re-read them when a channel adds subtitles or dubs; the spoken language stays the video's `language`.",
+    "4LTXS0QEkzY": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "5utorRM1fhY": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "7eT4lg1ggQY": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "7u7Ur3ZFe94": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "CMuMMej0zwM": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "FRI5_7CsZT0": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "IWjtAujWPAA": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "L1DUikMF04Y": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "LejLQ4skfvM": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "R_PQQHXY-rQ": {
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "ViuB-ONl5Lk": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "WjDK-uk9b1w": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "ZXbWsG_Syuo": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "aQlkuS7ShCM": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "b-qv_emcDwc": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "fKGh2e6pJqc": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "gmg2h1JcuGI": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "kEN-F92hNZc": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "tj7McUl37X0": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "vENnh7bBVVM": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "zGgfX19b3gc": {
+      "subtitles": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"],
+      "audio": ["ar", "bn", "de", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "ml", "nl", "pa", "pl", "pt", "ru", "ta", "te", "uk"]
+    },
+    "6p-Fd4z8lJI": {
+      "subtitles": ["ar", "en", "pt"],
+      "audio": ["ar", "en", "pt"]
+    },
+    "yLdicouAJw0": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "bDLHOMF6ZoE": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "XSotB6IPhR0": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "U3YiFn9sEUs": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "buytHXRaav4": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    },
+    "dbq7iB3qhF0": {
+      "subtitles": ["en"],
+      "audio": ["en"]
+    }
+  }
 }

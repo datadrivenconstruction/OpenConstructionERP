@@ -98,9 +98,15 @@ export function VideoCard({ video, labels, onOpen, chapterHits, compact, jumpTo,
             {formatClock(video.duration)}
           </span>
         ) : null}
-        <span className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wide text-white/90">
-          {video.language}
-          {video.market ? ` · ${video.market}` : ''}
+        <span
+          title={[labels.subtitles(video), labels.audioTracks(video)].filter(Boolean).join(' · ') || undefined}
+          className="absolute bottom-2 left-2 rounded bg-black/60 px-1.5 py-0.5 text-2xs font-semibold tracking-wide text-white/90"
+        >
+          <span className="uppercase">
+            {video.language}
+            {video.market ? ` · ${video.market}` : ''}
+          </span>
+          {labels.subtitlesShort(video) ? ` · ${labels.subtitlesShort(video)}` : ''}
         </span>
       </button>
 

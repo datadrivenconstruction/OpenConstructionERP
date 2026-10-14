@@ -84,6 +84,25 @@ describe('the video catalogue', () => {
     for (const v of videos) expect(series.has(v.series), v.id).toBe(true);
   });
 
+  it('lists subtitle and audio languages apart from the spoken one, each once', () => {
+    for (const v of videos) {
+      for (const langs of [v.subtitles, v.audioTracks]) {
+        if (!langs) continue;
+        expect(langs.length, v.id).toBeGreaterThan(0);
+        expect(new Set(langs).size, v.id).toBe(langs.length);
+        expect(langs, v.id).not.toContain(v.language);
+        for (const l of langs) expect(l, v.id).toMatch(/^[a-z]{2}$/);
+      }
+    }
+  });
+
+  it('links every video of the market series to at least one module screen', () => {
+    const marketSeries = new Set(['din276-de', 'uk-commercial', 'hrvatska-hr', 'playbook-es']);
+    for (const v of videos.filter((x) => marketSeries.has(x.series))) {
+      expect(v.routes.length, v.id).toBeGreaterThan(0);
+    }
+  });
+
   it('keeps chapters inside the video and in order', () => {
     for (const v of videos) {
       v.chapters.forEach((c, i) => {

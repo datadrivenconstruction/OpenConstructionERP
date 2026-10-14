@@ -234,6 +234,12 @@ export function VideoPlayerDialog({
                 <span className="ml-auto flex flex-wrap items-center gap-1 text-2xs text-content-tertiary">
                   <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.stage(video.stage)}</span>
                   <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.language(video.language)}</span>
+                  {labels.subtitles(video) && (
+                    <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.subtitles(video)}</span>
+                  )}
+                  {labels.audioTracks(video) && (
+                    <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.audioTracks(video)}</span>
+                  )}
                   {video.market && (
                     <span className="rounded bg-surface-secondary px-1.5 py-0.5">{labels.country(video.market)}</span>
                   )}

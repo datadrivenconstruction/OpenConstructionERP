@@ -41,6 +41,9 @@ const labels = {
   language: (l: string) => l,
   series: (s: string) => s,
   example: () => null,
+  subtitles: () => null,
+  audioTracks: () => null,
+  subtitlesShort: () => null,
 } as unknown as VideoLabels;
 
 const CASE_IDS = new Set(PLAYBOOKS.map((p) => p.id));

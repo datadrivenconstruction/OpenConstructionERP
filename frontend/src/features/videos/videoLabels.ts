@@ -109,7 +109,53 @@ export function useVideoLabels() {
     [t, country],
   );
 
-  return { role, stage, stageShort, result, country, language, series, example };
+  /** "Subtitles: German, Russian", in the reader's language, or null. */
+  const subtitles = useCallback(
+    (video: AcademyVideo) =>
+      video.subtitles?.length
+        ? t('videos.subtitles', {
+            defaultValue: 'Subtitles: {{languages}}',
+            languages: video.subtitles.map(language).join(', '),
+          })
+        : null,
+    [t, language],
+  );
+  /** "Audio tracks: English", or null when only the spoken language exists. */
+  const audioTracks = useCallback(
+    (video: AcademyVideo) =>
+      video.audioTracks?.length
+        ? t('videos.audio_tracks', {
+            defaultValue: 'Audio tracks: {{languages}}',
+            languages: video.audioTracks.map(language).join(', '),
+          })
+        : null,
+    [t, language],
+  );
+  /** Compact card form, "subtitles: DE, RU +3": codes, at most three named. */
+  const subtitlesShort = useCallback(
+    (video: AcademyVideo) => {
+      const codes = video.subtitles ?? [];
+      if (!codes.length) return null;
+      const shown = codes.slice(0, 3).map((c) => c.toUpperCase()).join(', ');
+      const more = codes.length > 3 ? ` +${codes.length - 3}` : '';
+      return t('videos.subtitles_short', { defaultValue: 'subtitles: {{languages}}', languages: shown + more });
+    },
+    [t],
+  );
+
+  return {
+    role,
+    stage,
+    stageShort,
+    result,
+    country,
+    language,
+    series,
+    example,
+    subtitles,
+    audioTracks,
+    subtitlesShort,
+  };
 }
 
 export type VideoLabels = ReturnType<typeof useVideoLabels>;

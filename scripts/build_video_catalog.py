@@ -21,6 +21,8 @@ Sources, in the order they are trusted:
 4. ``scripts/video_catalog/editorial.json``: stage, roles, market, cases and
    result for the videos the registries do not classify, plus overrides. These
    links are editorial proposals.
+   ``tracks`` there carries, per YouTube id, the subtitle and extra audio
+   languages the public watch page offers.
 
 Case ids are checked against ``frontend/src/features/cases/data``. A case that
 does not exist is dropped from the output and reported; it stays in the source.
@@ -479,9 +481,11 @@ def build(args: argparse.Namespace) -> None:
                 )
                 if k in x
             }
-            | {"chapters": []}
+            | {"chapters": x.get("chapters", [])}
         )
-        covers[x["id"]] = EDITORIAL.parent / x["cover"]
+        # A published extra plays the channel thumbnail and needs no local cover.
+        if x.get("cover"):
+            covers[x["id"]] = EDITORIAL.parent / x["cover"]
 
     # Ids added in the editorial file ahead of the links document.
     by_id = {v["id"]: v for v in videos}
@@ -558,6 +562,13 @@ def build(args: argparse.Namespace) -> None:
                     routes.append(r)
         v["routes"] = routes
         v["cover"] = thumbnail_url(v["youtubeId"]) if v["youtubeId"] else f"{COVER_URL}/{cover_slug(v['id'])}.webp"
+        # Subtitle and extra audio languages the watch page offers, besides the
+        # spoken one. Read from the channel, so keyed by YouTube id.
+        tracks = editorial.get("tracks", {}).get(v["youtubeId"] or "", {})
+        for field, key in (("subtitles", "subtitles"), ("audioTracks", "audio")):
+            langs = [c for c in tracks.get(key, []) if c != v["language"]]
+            if langs:
+                v[field] = langs
 
     ids = [v["id"] for v in videos]
     if len(set(ids)) != len(ids):
@@ -611,6 +622,8 @@ def build(args: argparse.Namespace) -> None:
         "produces",
         "recordedOn",
         "duration",
+        "subtitles",
+        "audioTracks",
         "cover",
         "chapters",
     )

@@ -102,7 +102,7 @@ describe('the Videos page', () => {
   });
 
   it('shows a video that is not out yet as an outline, never a player', () => {
-    const labels = { series: () => '', role: String, stage: String, stageShort: String, result: String, country: String, language: String, example: () => null };
+    const labels = { series: () => '', role: String, stage: String, stageShort: String, result: String, country: String, language: String, example: () => null, subtitles: () => null, audioTracks: () => null, subtitlesShort: () => null };
     render(
       <MemoryRouter>
         <VideoPlayerDialog

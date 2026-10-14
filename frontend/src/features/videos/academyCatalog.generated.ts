@@ -27,6 +27,13 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "channel": "academy"
     },
     {
+      "id": "din276-de",
+      "title": "Vom Kostenrahmen bis zur Abnahme",
+      "language": "de",
+      "market": "DE",
+      "channel": "academy"
+    },
+    {
       "id": "playbook-getting-started",
       "title": "Builder's Playbook: Getting Started",
       "language": "en",
@@ -41,6 +48,13 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "channel": "academy"
     },
     {
+      "id": "uk-commercial",
+      "title": "EN • UK",
+      "language": "en",
+      "market": "GB",
+      "channel": "academy"
+    },
+    {
       "id": "playbook-quebec",
       "title": "Builder's Playbook Québec : la construction en français",
       "language": "fr",
@@ -52,6 +66,20 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "Builder's Playbook : gestion de chantier en français",
       "language": "fr",
       "market": null,
+      "channel": "academy"
+    },
+    {
+      "id": "hrvatska-hr",
+      "title": "HR • Hrvatska",
+      "language": "hr",
+      "market": "HR",
+      "channel": "academy"
+    },
+    {
+      "id": "playbook-es",
+      "title": "Builder's Playbook en español",
+      "language": "es",
+      "market": "ES",
       "channel": "academy"
     },
     {
@@ -90,6 +118,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "description": "Install OpenConstructionERP on Windows and set up your first construction project. This beginner's guide covers the desktop app, installation with Python/pip, workspace settings and team access.",
       "recordedOn": "17.7",
       "duration": 281,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/WjDK-uk9b1w/maxresdefault.jpg",
       "chapters": [
         {
@@ -1576,6 +1648,454 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ]
     },
     {
+      "id": "din276-01-kostenrahmen",
+      "youtubeId": "9qsR7e77by0",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 1,
+      "stage": "define",
+      "roles": [
+        "estimator",
+        "project-manager"
+      ],
+      "cases": [
+        "din-276-cost-plan-for-the-client",
+        "feasibility-budget-before-design",
+        "set-up-a-new-project"
+      ],
+      "routes": [
+        "/rom-estimate",
+        "/boq",
+        "/5d",
+        "/validation",
+        "/estimate-basis",
+        "/reports",
+        "/cost-explorer",
+        "/projects/new",
+        "/schedule"
+      ],
+      "result": "cost",
+      "title": "Kostenrahmen nach DIN 276 erstellen",
+      "description": "Wie erstellen Sie einen belastbaren Kostenrahmen nach DIN 276? In diesem Tutorial richten Sie die Plattform ein, legen das Projekt an und bauen eine nachvollziehbare Grundlage für die weitere Planung auf.",
+      "duration": 225,
+      "cover": "https://i.ytimg.com/vi/9qsR7e77by0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Plattform einrichten"
+        },
+        {
+          "t": 61,
+          "title": "Grundlagen"
+        },
+        {
+          "t": 108,
+          "title": "Kostenrahmen erstellen"
+        },
+        {
+          "t": 189,
+          "title": "Maßstab und Budget prüfen"
+        }
+      ]
+    },
+    {
+      "id": "din276-02-kostenschaetzung",
+      "youtubeId": "dbq7iB3qhF0",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 2,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "din-276-cost-plan-for-the-client",
+        "sense-check-an-estimate-with-benchmarks"
+      ],
+      "routes": [
+        "/rom-estimate",
+        "/boq",
+        "/5d",
+        "/validation",
+        "/estimate-basis",
+        "/reports",
+        "/cost-explorer"
+      ],
+      "result": "cost",
+      "title": "Kostenschätzung nach DIN 276 erstellen | Kostenrahmen sicher vergleichen",
+      "description": "Erstellen Sie eine Kostenschätzung nach DIN 276 und vergleichen Sie sie sauber mit dem Kostenrahmen. Das Tutorial zeigt den Weg vom Vorentwurf bis zur belastbaren Entscheidungsgrundlage.",
+      "duration": 208,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
+      "cover": "https://i.ytimg.com/vi/dbq7iB3qhF0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Rückblick"
+        },
+        {
+          "t": 25,
+          "title": "Kostenschätzung erstellen"
+        },
+        {
+          "t": 91,
+          "title": "Kostenrahmen vergleichen"
+        },
+        {
+          "t": 150,
+          "title": "Planungsbeschluss vorbereiten"
+        }
+      ]
+    },
+    {
+      "id": "din276-03-kostenberechnung",
+      "youtubeId": "s876HFnwlRs",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 3,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "din-276-cost-plan-for-the-client",
+        "write-the-basis-of-estimate"
+      ],
+      "routes": [
+        "/rom-estimate",
+        "/boq",
+        "/5d",
+        "/validation",
+        "/estimate-basis",
+        "/reports"
+      ],
+      "result": "cost",
+      "title": "Kostenberechnung nach DIN 276 | Baubeschluss sicher vorbereiten",
+      "description": "So erstellen Sie eine Kostenberechnung nach DIN 276, vergleichen sie mit der Kostenschätzung und machen den Entwurf finanziell transparent.",
+      "duration": 216,
+      "cover": "https://i.ytimg.com/vi/s876HFnwlRs/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Rückblick"
+        },
+        {
+          "t": 28,
+          "title": "Kostenberechnung erstellen"
+        },
+        {
+          "t": 122,
+          "title": "Kostenschätzung vergleichen"
+        },
+        {
+          "t": 168,
+          "title": "Baubeschluss vorbereiten"
+        }
+      ]
+    },
+    {
+      "id": "din276-04-kostenvoranschlag-gaeb",
+      "youtubeId": "buytHXRaav4",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 4,
+      "stage": "procure",
+      "roles": [
+        "estimator",
+        "procurement-buyer"
+      ],
+      "cases": [
+        "win-a-gaeb-tender-from-lv-to-angebot",
+        "tender-from-boq"
+      ],
+      "routes": [
+        "/files",
+        "/gaeb-exchange",
+        "/costs",
+        "/boq",
+        "/validation",
+        "/files/transmittals",
+        "/tendering"
+      ],
+      "result": "gaeb",
+      "title": "Kostenvoranschlag und GAEB | Leistungsverzeichnis bepreisen",
+      "description": "Bepreisen Sie ein Leistungsverzeichnis für den Rohbau, erstellen Sie den Kostenvoranschlag und bereiten Sie die GAEB-Datei für die Bieter vor.",
+      "duration": 220,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
+      "cover": "https://i.ytimg.com/vi/buytHXRaav4/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Rückblick"
+        },
+        {
+          "t": 35,
+          "title": "Bepreistes Leistungsverzeichnis"
+        },
+        {
+          "t": 99,
+          "title": "Kostenvoranschlag erstellen"
+        },
+        {
+          "t": 142,
+          "title": "GAEB an Bieter übergeben"
+        }
+      ]
+    },
+    {
+      "id": "din276-05-vergabe",
+      "youtubeId": "U3YiFn9sEUs",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 5,
+      "stage": "procure",
+      "roles": [
+        "procurement-buyer",
+        "project-manager"
+      ],
+      "cases": [
+        "build-a-preisspiegel-and-award",
+        "compare-bids-and-award"
+      ],
+      "routes": [
+        "/tendering",
+        "/subcontractors",
+        "/procurement",
+        "/reports",
+        "/bid-management"
+      ],
+      "result": "award",
+      "title": "Vergabe im Bauwesen | Angebote vergleichen und Auftrag vergeben",
+      "description": "Vergleichen Sie Angebote für den Rohbau im Preisspiegel, prüfen Sie auffällige Preise und bereiten Sie eine saubere Vergabeentscheidung vor.",
+      "duration": 223,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
+      "cover": "https://i.ytimg.com/vi/U3YiFn9sEUs/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Angebote prüfen"
+        },
+        {
+          "t": 67,
+          "title": "Preisspiegel vergleichen"
+        },
+        {
+          "t": 110,
+          "title": "Aufklärung"
+        },
+        {
+          "t": 147,
+          "title": "Vergabe vorbereiten"
+        }
+      ]
+    },
+    {
+      "id": "din276-06-baubeginn",
+      "youtubeId": "XSotB6IPhR0",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 6,
+      "stage": "plan",
+      "roles": [
+        "planner",
+        "site-manager"
+      ],
+      "cases": [
+        "build-the-baseline-programme",
+        "run-the-site-day"
+      ],
+      "routes": [
+        "/boq",
+        "/schedule",
+        "/schedule-advanced",
+        "/reports",
+        "/daily-diary",
+        "/field-time",
+        "/files",
+        "/safety"
+      ],
+      "result": "programme",
+      "title": "Baubeginn organisieren | Bauzeitenplan und Bautagebuch anlegen",
+      "description": "Vom vergebenen Auftrag zur laufenden Baustelle: Legen Sie den Bauzeitenplan an und führen Sie das Bautagebuch ab dem ersten Bautag.",
+      "duration": 207,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
+      "cover": "https://i.ytimg.com/vi/XSotB6IPhR0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Bauzeitenplan anlegen"
+        },
+        {
+          "t": 82,
+          "title": "Baubeginn dokumentieren"
+        },
+        {
+          "t": 93,
+          "title": "Bautagebuch führen"
+        },
+        {
+          "t": 138,
+          "title": "Nachweise sichern"
+        }
+      ]
+    },
+    {
+      "id": "din276-07-nachtraege-abschlag",
+      "youtubeId": "bDLHOMF6ZoE",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 7,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "commercial-manager"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "prepare-an-interim-payment-application",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports",
+        "/finance",
+        "/reconciliation",
+        "/subcontractors"
+      ],
+      "result": "change",
+      "title": "Nachträge und Abschlagsrechnungen prüfen | Baukosten sicher steuern",
+      "description": "Prüfen Sie Nachträge und Abschlagsrechnungen im Bauprojekt. Das Tutorial zeigt, wie Leistungen, Beträge und Sicherheitseinbehalt nachvollziehbar geprüft werden.",
+      "duration": 242,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
+      "cover": "https://i.ytimg.com/vi/bDLHOMF6ZoE/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Vertrag prüfen"
+        },
+        {
+          "t": 39,
+          "title": "Nachträge bewerten"
+        },
+        {
+          "t": 119,
+          "title": "Abschlagsrechnung 1"
+        },
+        {
+          "t": 168,
+          "title": "Abschlagsrechnung 2"
+        }
+      ]
+    },
+    {
+      "id": "din276-08-abnahme-schlussrechnung",
+      "youtubeId": "yLdicouAJw0",
+      "status": "published",
+      "channel": "academy",
+      "language": "de",
+      "market": "DE",
+      "series": "din276-de",
+      "seriesOrder": 8,
+      "stage": "handover",
+      "roles": [
+        "project-manager",
+        "site-manager",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "run-a-handover-acceptance-inspection",
+        "clear-the-snag-list-before-handover",
+        "control-cost-against-budget"
+      ],
+      "routes": [
+        "/inspections",
+        "/punchlist",
+        "/closeout",
+        "/boq",
+        "/finance",
+        "/reports"
+      ],
+      "result": "handover",
+      "title": "Bauabnahme und Schlussrechnung | Mängel, Kosten und Abschluss im Griff",
+      "description": "Organisieren Sie die förmliche Abnahme, erfassen Sie Mängel, prüfen Sie die Schlussrechnung und schließen Sie die Kostenkette im Bauprojekt ab.",
+      "duration": 225,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
+      "cover": "https://i.ytimg.com/vi/yLdicouAJw0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Abnahme organisieren"
+        },
+        {
+          "t": 45,
+          "title": "Mängel erfassen"
+        },
+        {
+          "t": 73,
+          "title": "Schlussrechnung prüfen"
+        },
+        {
+          "t": 145,
+          "title": "Kosten feststellen"
+        }
+      ]
+    },
+    {
       "id": "EP02_L1",
       "youtubeId": "kEN-F92hNZc",
       "status": "published",
@@ -1613,6 +2133,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Every number in an estimate comes from somewhere. Find a unit rate in a construction cost database, see what it is made of, and adjust it to your market before it goes into a bid.",
       "duration": 242,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/kEN-F92hNZc/maxresdefault.jpg",
       "chapters": [
         {
@@ -1674,6 +2238,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Build a priced construction estimate from an empty page. A Denver duplex, ten positions in five sections, and every rate traced back to where it came from.",
       "duration": 288,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/zGgfX19b3gc/maxresdefault.jpg",
       "chapters": [
         {
@@ -1724,6 +2332,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "The estimate says what the job costs. The price says what you charge. Turn a direct cost into a bid price with overhead, profit and contingency, then check it, save a version and export it.",
       "duration": 234,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/FRI5_7CsZT0/maxresdefault.jpg",
       "chapters": [
         {
@@ -1780,6 +2432,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Every bid on a Toronto job comes down to one number: your contract price, in Canadian dollars, with markups and bond, before HST. Price six stacked townhomes and turn their cost into that number.",
       "duration": 289,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/LejLQ4skfvM/maxresdefault.jpg",
       "chapters": [
         {
@@ -1845,6 +2541,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Three drywall subtrades priced your townhomes, and one came in more than a fifth lower. In Canada, carry the wrong sub's price in your bid and you may be held to it.",
       "duration": 263,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/7u7Ur3ZFe94/maxresdefault.jpg",
       "chapters": [
         {
@@ -1903,6 +2643,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Once a month on a CCDC 2 job you bill the owner for the work in place, and Ontario law makes the owner hold back 10%. Set up the contract, bill a $184,300 draw, and see what stays on your own calendar.",
       "duration": 298,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/b-qv_emcDwc/maxresdefault.jpg",
       "chapters": [
         {
@@ -1958,6 +2742,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "In Ontario, an owner has 28 days to pay a proper invoice, and a contract cannot push that back. Start the payment clock on this month's invoice and see every date that matters.",
       "duration": 275,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/aQlkuS7ShCM/maxresdefault.jpg",
       "chapters": [
         {
@@ -2015,6 +2843,50 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Your crew hits rock the soils report never showed, and the work, the price and the finish date all change. See how CCDC 2 handles it, then record the change order, price it against your estimate and get it approved.",
       "duration": 285,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/tj7McUl37X0/maxresdefault.jpg",
       "chapters": [
         {
@@ -2081,6 +2953,48 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "On an Ontario job, the day that matters most for your money is the day the work is substantially performed. Take a townhome project from the schedule to that finish line, and see how it starts the holdback clock.",
       "duration": 289,
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/fKGh2e6pJqc/maxresdefault.jpg",
       "chapters": [
         {
@@ -2098,6 +3012,295 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         {
           "t": 187,
           "title": "The finish line"
+        }
+      ]
+    },
+    {
+      "id": "uk-01-tender-nrm2",
+      "youtubeId": "_uKAddpFo9Y",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "market": "GB",
+      "series": "uk-commercial",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "cost-risk-and-contingency",
+        "tender-from-boq"
+      ],
+      "routes": [
+        "/boq",
+        "/risks",
+        "/reports",
+        "/tendering"
+      ],
+      "result": "bill",
+      "title": "How to Price a Construction Tender (NRM 2)",
+      "description": "Pricing a construction tender is not about adding a percentage at the end. It is about putting every cost in the right place and counting it once.",
+      "duration": 353,
+      "cover": "https://i.ytimg.com/vi/_uKAddpFo9Y/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 116,
+          "title": "Open the bill"
+        },
+        {
+          "t": 151,
+          "title": "The markups"
+        },
+        {
+          "t": 257,
+          "title": "Get it right"
+        }
+      ]
+    },
+    {
+      "id": "uk-02-subcontractor-bids",
+      "youtubeId": "WA5-cVKcD-E",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "market": "GB",
+      "series": "uk-commercial",
+      "seriesOrder": 2,
+      "stage": "procure",
+      "roles": [
+        "procurement-buyer",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "level-bids-to-a-common-scope",
+        "compare-bids-and-award"
+      ],
+      "routes": [
+        "/bid-management",
+        "/tendering",
+        "/reports"
+      ],
+      "result": "award",
+      "title": "How to Compare Subcontractor Bids",
+      "description": "The lowest subcontractor quote is not always the lowest final cost. Missing scope, exclusions and different assumptions can change the result completely.",
+      "duration": 361,
+      "cover": "https://i.ytimg.com/vi/WA5-cVKcD-E/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 137,
+          "title": "Record the bids"
+        },
+        {
+          "t": 192,
+          "title": "Level and award"
+        },
+        {
+          "t": 268,
+          "title": "Get it right"
+        }
+      ]
+    },
+    {
+      "id": "uk-03-interim-payments-retention",
+      "youtubeId": "bmlDq86OSrg",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "market": "GB",
+      "series": "uk-commercial",
+      "seriesOrder": 3,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "commercial-manager"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts",
+        "/subcontractors"
+      ],
+      "result": "invoice",
+      "title": "JCT Interim Payments and Retention",
+      "description": "An interim payment should show what has been earned, what is being withheld and why. If the valuation and retention are unclear, disputes become much more likely.",
+      "duration": 385,
+      "cover": "https://i.ytimg.com/vi/bmlDq86OSrg/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 118,
+          "title": "Start the contract"
+        },
+        {
+          "t": 193,
+          "title": "Claim and retention"
+        },
+        {
+          "t": 269,
+          "title": "Get it right"
+        }
+      ]
+    },
+    {
+      "id": "uk-04-pay-less-notice",
+      "youtubeId": "1tstow0n_Ew",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "market": "GB",
+      "series": "uk-commercial",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "commercial-manager"
+      ],
+      "cases": [
+        "payment-application-and-reconciliation"
+      ],
+      "routes": [
+        "/contracts",
+        "/finance",
+        "/reconciliation"
+      ],
+      "result": "invoice",
+      "title": "Payment Notice vs Pay Less Notice",
+      "description": "A payment notice and a pay less notice are not interchangeable. The document, amount and deadline all matter.",
+      "duration": 387,
+      "cover": "https://i.ytimg.com/vi/1tstow0n_Ew/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 157,
+          "title": "Start the clock"
+        },
+        {
+          "t": 217,
+          "title": "A missed notice"
+        },
+        {
+          "t": 297,
+          "title": "Get it right"
+        }
+      ]
+    },
+    {
+      "id": "uk-05-cis-vat-reverse-charge",
+      "youtubeId": "SWwlmU4y-L4",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "market": "GB",
+      "series": "uk-commercial",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": [
+        "accountant",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "run-a-three-way-match-before-paying-a-supplier",
+        "issue-an-electronic-invoice"
+      ],
+      "routes": [
+        "/procurement",
+        "/reconciliation",
+        "/finance",
+        "/contracts"
+      ],
+      "result": "invoice",
+      "title": "CIS Deductions and VAT Reverse Charge",
+      "description": "CIS and the domestic VAT reverse charge can apply to the same construction payment, but they do different jobs and use different amounts.",
+      "duration": 394,
+      "cover": "https://i.ytimg.com/vi/SWwlmU4y-L4/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 189,
+          "title": "The scheme"
+        },
+        {
+          "t": 212,
+          "title": "Work it out"
+        },
+        {
+          "t": 302,
+          "title": "Get it right"
+        }
+      ]
+    },
+    {
+      "id": "uk-06-jct-variation",
+      "youtubeId": "KV-PbKMGISk",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "market": "GB",
+      "series": "uk-commercial",
+      "seriesOrder": 6,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "contract-administrator"
+      ],
+      "cases": [
+        "assess-and-price-a-variation",
+        "change-to-paid-variation"
+      ],
+      "routes": [
+        "/changeorders",
+        "/boq",
+        "/value",
+        "/contracts",
+        "/reports"
+      ],
+      "result": "change",
+      "title": "How to Value a JCT Variation",
+      "description": "A variation becomes much easier to manage when the instruction, scope, price and approval stay connected.",
+      "duration": 354,
+      "cover": "https://i.ytimg.com/vi/KV-PbKMGISk/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The rules"
+        },
+        {
+          "t": 134,
+          "title": "Log and price"
+        },
+        {
+          "t": 193,
+          "title": "Agree and order"
+        },
+        {
+          "t": 275,
+          "title": "Get it right"
         }
       ]
     },
@@ -2138,6 +3341,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "L'application s'affiche en français, mais c'est le français de France. Passez votre logiciel de construction en français et faites le lien entre ses mots et ceux d'un chantier québécois.",
       "duration": 226,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/CMuMMej0zwM/maxresdefault.jpg",
       "chapters": [
         {
@@ -2199,6 +3408,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Toute soumission se résume à un montant : le prix du contrat, avant taxes. Estimez un immeuble locatif à Montréal, ajoutez vos majorations et établissez ce prix.",
       "duration": 258,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/7eT4lg1ggQY/maxresdefault.jpg",
       "chapters": [
         {
@@ -2257,6 +3472,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Trois sous-traitants ont soumissionné par le BSDQ, et la plus basse soumission est arrivée sans la garantie exigée. Voyez pourquoi vous ne pouvez pas l'accepter, même si l'application la recommande.",
       "duration": 271,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/gmg2h1JcuGI/maxresdefault.jpg",
       "chapters": [
         {
@@ -2322,6 +3543,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "Votre première demande de paiement s'élève à 184 300 $, avec une retenue de 10 % prévue au contrat. Préparez-la, puis voyez comment conserver votre hypothèque légale au Québec.",
       "duration": 277,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/4LTXS0QEkzY/maxresdefault.jpg",
       "chapters": [
         {
@@ -2396,6 +3623,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       },
       "description": "À la fin d'un chantier au Québec, le jour qui compte le plus pour votre argent, c'est la réception des travaux. Suivez vos déficiences jusqu'à leur vérification et voyez ce que la réception déclenche.",
       "duration": 224,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/IWjtAujWPAA/maxresdefault.jpg",
       "chapters": [
         {
@@ -2452,6 +3685,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "Budget de chantier : justifier chaque coût",
       "description": "240 000 USD de budget : pouvez-vous expliquer chaque poste ? Ce tutoriel montre comment relier les quantités, les prix et leurs sources dans OpenConstructionERP.",
       "duration": 306,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/L1DUikMF04Y/maxresdefault.jpg",
       "chapters": [
         {
@@ -2502,6 +3741,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "Achats et stock : suivre les quantités",
       "description": "1 000 sacs de ciment commandés, 600 encore en stock : comment expliquer l’écart ? Suivez une commande, une réception et une consommation dans OpenConstructionERP.",
       "duration": 277,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/ZXbWsG_Syuo/maxresdefault.jpg",
       "chapters": [
         {
@@ -2564,6 +3809,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "Chantier : suivre les heures et le matériel",
       "description": "64 heures-personnes : quel travail a été réalisé ? Ce tutoriel relie le pointage de l’équipe, un volume mesuré séparément et l’utilisation du matériel dans OpenConstructionERP.",
       "duration": 323,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/5utorRM1fhY/maxresdefault.jpg",
       "chapters": [
         {
@@ -2619,6 +3870,12 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "Facture et paiement : comprendre le solde",
       "description": "30 000 USD facturés, 18 000 USD reçus : pourquoi reste-t-il 12 000 USD à recevoir ? Suivez les étapes du contrat au règlement dans OpenConstructionERP.",
       "duration": 339,
+      "subtitles": [
+        "en"
+      ],
+      "audioTracks": [
+        "en"
+      ],
       "cover": "https://i.ytimg.com/vi/ViuB-ONl5Lk/maxresdefault.jpg",
       "chapters": [
         {
@@ -2640,6 +3897,373 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         {
           "t": 248,
           "title": "Suivre"
+        }
+      ]
+    },
+    {
+      "id": "hr-01-ugovoreni-troskovnik",
+      "youtubeId": "JzMC6xKNJlg",
+      "status": "published",
+      "channel": "academy",
+      "language": "hr",
+      "market": "HR",
+      "series": "hrvatska-hr",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator"
+      ],
+      "cases": [
+        "set-up-a-new-project",
+        "validate-estimate"
+      ],
+      "routes": [
+        "/projects/new",
+        "/boq",
+        "/schedule",
+        "/validation",
+        "/reports"
+      ],
+      "result": "bill",
+      "title": "Ugovoreni troškovnik: uvoz iz Excela",
+      "description": "Ugovoreni troškovnik nije samo Excel datoteka. To je osnova za praćenje troškova, računa, situacija i promjena na projektu.",
+      "duration": 250,
+      "cover": "https://i.ytimg.com/vi/JzMC6xKNJlg/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Troškovnik ukratko"
+        },
+        {
+          "t": 66,
+          "title": "Projekt i uvoz"
+        },
+        {
+          "t": 121,
+          "title": "Stavka, ukupno i PDV"
+        },
+        {
+          "t": 196,
+          "title": "Ugovorena verzija"
+        },
+        {
+          "t": 215,
+          "title": "Što dalje"
+        }
+      ]
+    },
+    {
+      "id": "hr-02-ulazni-racuni",
+      "youtubeId": "Cu21eWYzXfU",
+      "status": "published",
+      "channel": "academy",
+      "language": "hr",
+      "market": "HR",
+      "series": "hrvatska-hr",
+      "seriesOrder": 2,
+      "stage": "build",
+      "roles": [
+        "accountant"
+      ],
+      "cases": [
+        "run-a-three-way-match-before-paying-a-supplier",
+        "control-cost-against-budget"
+      ],
+      "routes": [
+        "/procurement",
+        "/reconciliation",
+        "/finance",
+        "/boq",
+        "/reports"
+      ],
+      "result": "invoice",
+      "title": "Ulazni računi povezani s troškovnikom",
+      "description": "Ulazni račun daje pravu sliku projekta tek kada je povezan s radovima na koje se odnosi.",
+      "duration": 268,
+      "cover": "https://i.ytimg.com/vi/Cu21eWYzXfU/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Računi i PDV"
+        },
+        {
+          "t": 59,
+          "title": "Unos računa"
+        },
+        {
+          "t": 136,
+          "title": "Veza s troškovnikom"
+        },
+        {
+          "t": 190,
+          "title": "Provjera"
+        }
+      ]
+    },
+    {
+      "id": "hr-03-podizvodaci",
+      "youtubeId": "PZ7jEsXjr-E",
+      "status": "published",
+      "channel": "academy",
+      "language": "hr",
+      "market": "HR",
+      "series": "hrvatska-hr",
+      "seriesOrder": 3,
+      "stage": "build",
+      "roles": [
+        "commercial-manager",
+        "accountant"
+      ],
+      "cases": [
+        "raise-a-subcontract-order-from-the-award",
+        "manage-retention-across-the-supply-chain"
+      ],
+      "routes": [
+        "/bid-management",
+        "/procurement",
+        "/subcontractors",
+        "/contracts",
+        "/finance",
+        "/reconciliation"
+      ],
+      "result": "invoice",
+      "title": "Podizvođači: ugovor, situacija i plaćanje",
+      "description": "Plaćanje podizvođača mora odgovarati ugovoru, stvarno izvedenim radovima i poreznom tretmanu.",
+      "duration": 290,
+      "cover": "https://i.ytimg.com/vi/PZ7jEsXjr-E/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Odgovornost i PDV"
+        },
+        {
+          "t": 60,
+          "title": "Podizvođač i ugovor"
+        },
+        {
+          "t": 145,
+          "title": "Situacija i plaćanje"
+        },
+        {
+          "t": 226,
+          "title": "Provjera"
+        }
+      ]
+    },
+    {
+      "id": "hr-04-privremena-situacija",
+      "youtubeId": "UeL7oAzvX6E",
+      "status": "published",
+      "channel": "academy",
+      "language": "hr",
+      "market": "HR",
+      "series": "hrvatska-hr",
+      "seriesOrder": 4,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "site-manager"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "update-the-programme-and-reforecast"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/field-time",
+        "/schedule",
+        "/schedule-advanced",
+        "/change-intelligence"
+      ],
+      "result": "invoice",
+      "title": "Privremena situacija iz izvedenih radova",
+      "description": "Dobra privremena situacija počinje na gradilištu, s potvrđenim količinama i jasnim dokazima o izvedenim radovima.",
+      "duration": 285,
+      "cover": "https://i.ytimg.com/vi/UeL7oAzvX6E/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Plan i uloge"
+        },
+        {
+          "t": 54,
+          "title": "Gantogram"
+        },
+        {
+          "t": 95,
+          "title": "Napredak i dokaz"
+        },
+        {
+          "t": 137,
+          "title": "Situacija"
+        },
+        {
+          "t": 243,
+          "title": "Provjera"
+        }
+      ]
+    },
+    {
+      "id": "hr-05-financijsko-stanje",
+      "youtubeId": "WKWLfaofG94",
+      "status": "published",
+      "channel": "academy",
+      "language": "hr",
+      "market": "HR",
+      "series": "hrvatska-hr",
+      "seriesOrder": 5,
+      "stage": "build",
+      "roles": [
+        "project-manager",
+        "commercial-manager"
+      ],
+      "cases": [
+        "control-cost-against-budget",
+        "change-to-paid-variation"
+      ],
+      "routes": [
+        "/boq",
+        "/finance",
+        "/reports",
+        "/changeorders",
+        "/contracts"
+      ],
+      "result": "change",
+      "title": "Financijsko stanje projekta i višak radova",
+      "description": "Je li projekt stvarno u plusu? Odgovor se ne vidi iz jednog računa, nego iz ugovorene vrijednosti, stvarnih troškova, naplate i odobrenih promjena.",
+      "duration": 313,
+      "cover": "https://i.ytimg.com/vi/WKWLfaofG94/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Pitanje"
+        },
+        {
+          "t": 29,
+          "title": "Tri broja"
+        },
+        {
+          "t": 113,
+          "title": "Višak radova"
+        },
+        {
+          "t": 199,
+          "title": "Završni obračun"
+        },
+        {
+          "t": 244,
+          "title": "Provjera i kraj"
+        }
+      ]
+    },
+    {
+      "id": "es-02-bc3-oferta",
+      "youtubeId": "7vpNLucFvRw",
+      "status": "published",
+      "channel": "academy",
+      "language": "es",
+      "market": "ES",
+      "series": "playbook-es",
+      "seriesOrder": 2,
+      "stage": "estimate",
+      "roles": [
+        "estimator"
+      ],
+      "cases": [
+        "cost-risk-and-contingency",
+        "tender-from-boq"
+      ],
+      "routes": [
+        "/boq",
+        "/risks",
+        "/reports",
+        "/tendering"
+      ],
+      "result": "bill",
+      "title": "Importar BC3 y preparar una oferta de obra: PEM, gastos y baja",
+      "description": "¿El proyecto llega en BC3 y necesitas preparar una oferta? Importamos el presupuesto en OpenConstructionERP, revisamos el PEM y aplicamos gastos generales, beneficio industrial y una baja sin modificar el original.",
+      "duration": 160,
+      "cover": "https://i.ytimg.com/vi/7vpNLucFvRw/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "El proyecto"
+        },
+        {
+          "t": 40,
+          "title": "La importación"
+        },
+        {
+          "t": 61,
+          "title": "Los recargos"
+        },
+        {
+          "t": 100,
+          "title": "La oferta"
+        }
+      ]
+    },
+    {
+      "id": "es-06-certificacion",
+      "youtubeId": "6p-Fd4z8lJI",
+      "status": "published",
+      "channel": "academy",
+      "language": "es",
+      "market": "ES",
+      "series": "playbook-es",
+      "seriesOrder": 6,
+      "stage": "build",
+      "roles": [
+        "quantity-surveyor",
+        "accountant"
+      ],
+      "cases": [
+        "prepare-an-interim-payment-application",
+        "payment-application-and-reconciliation"
+      ],
+      "routes": [
+        "/boq",
+        "/value",
+        "/finance",
+        "/reports",
+        "/reconciliation",
+        "/contracts"
+      ],
+      "result": "invoice",
+      "title": "Certificación de obra: del avance mensual al cobro",
+      "description": "¿Cuánto corresponde cobrar por la obra ejecutada este mes? En este tutorial de OpenConstructionERP registramos el avance, preparamos la certificación de obra y revisamos el importe antes de presentarla.",
+      "duration": 201,
+      "subtitles": [
+        "ar",
+        "en",
+        "pt"
+      ],
+      "audioTracks": [
+        "ar",
+        "en",
+        "pt"
+      ],
+      "cover": "https://i.ytimg.com/vi/6p-Fd4z8lJI/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Qué se certifica este mes"
+        },
+        {
+          "t": 59,
+          "title": "Registrar el avance de obra"
+        },
+        {
+          "t": 100,
+          "title": "Preparar la certificación"
+        },
+        {
+          "t": 144,
+          "title": "Revisar el importe y el cobro"
         }
       ]
     },
@@ -2666,6 +4290,28 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "From a drawing to a priced tender",
       "description": "The whole chain in one take: a drawing becomes a takeoff, the takeoff becomes a bill, the bill carries its markups and the job is inspected on site. One data model underneath all of it.",
       "recordedOn": "15.0",
+      "subtitles": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/vENnh7bBVVM/maxresdefault.jpg",
       "chapters": []
     },
@@ -2715,6 +4361,28 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "title": "The uberization of construction (ETH Zürich)",
       "description": "A talk at ETH Zürich on how drawings and models turn into quantities, why cost data stays locked up, and what open formats and AI agents change.",
       "duration": 862,
+      "audioTracks": [
+        "ar",
+        "bn",
+        "de",
+        "es",
+        "fr",
+        "he",
+        "hi",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "ml",
+        "nl",
+        "pa",
+        "pl",
+        "pt",
+        "ru",
+        "ta",
+        "te",
+        "uk"
+      ],
       "cover": "https://i.ytimg.com/vi/R_PQQHXY-rQ/maxresdefault.jpg",
       "chapters": []
     }
