@@ -12,6 +12,7 @@ import { ROLE_BY_ID } from '@/features/cases/roles';
 import { STAGE_BY_ID } from '@/features/cases/stages';
 import type { LifecycleStage, ProfessionalRole } from '@/features/cases/types';
 import type { AcademySeries, AcademyVideo, ResultFamily } from './academyTypes';
+import { fmtList } from '@/shared/lib/formatters';
 import { exampleToShow, seriesById } from './academy';
 
 const RESULT_LABELS: Record<ResultFamily, [key: string, fallback: string]> = {
@@ -115,7 +116,7 @@ export function useVideoLabels() {
       video.subtitles?.length
         ? t('videos.subtitles', {
             defaultValue: 'Subtitles: {{languages}}',
-            languages: video.subtitles.map(language).join(', '),
+            languages: fmtList(video.subtitles.map(language)),
           })
         : null,
     [t, language],
@@ -126,7 +127,7 @@ export function useVideoLabels() {
       video.audioTracks?.length
         ? t('videos.audio_tracks', {
             defaultValue: 'Audio tracks: {{languages}}',
-            languages: video.audioTracks.map(language).join(', '),
+            languages: fmtList(video.audioTracks.map(language)),
           })
         : null,
     [t, language],
@@ -136,7 +137,7 @@ export function useVideoLabels() {
     (video: AcademyVideo) => {
       const codes = video.subtitles ?? [];
       if (!codes.length) return null;
-      const shown = codes.slice(0, 3).map((c) => c.toUpperCase()).join(', ');
+      const shown = fmtList(codes.slice(0, 3).map((c) => c.toUpperCase()));
       const more = codes.length > 3 ? ` +${codes.length - 3}` : '';
       return t('videos.subtitles_short', { defaultValue: 'subtitles: {{languages}}', languages: shown + more });
     },
