@@ -1,5 +1,5 @@
 {
-  "$note": "Delivery model story of the Ludwigsburg school: a public client weighing trade lots against a general contractor and a two-stage partnering form. plant_item names the register item the city supplies itself (PL-002, Mensa kitchen). All names invented.",
+  "$note": "Delivery model story of the Ludwigsburg school: a public client weighing trade lots against a general contractor and a two-stage partnering form; scores holds the city's own assessment where it departs from the catalogue default, so trade lots lead the comparison as the story says. plant_item names the register item the city supplies itself (PL-002, Mensa kitchen). All names invented.",
   "forms": [
     "design_bid_build_split",
     "design_bid_build_single",
@@ -17,6 +17,20 @@
     "partnering_two_stage": {
       "en": "Two-stage partnering scores highest: the contractor joins during design and the summer-holiday window is planned together, but the Land funding rules and the VOB/A award need a documented price basis before the second stage.",
       "de": "Das zweistufige Partnering liegt vorn: Der Auftragnehmer steigt schon in der Planung ein und das Sommerferienfenster wird gemeinsam geplant, doch Fördervorgaben des Landes und VOB/A-Vergabe verlangen vor der zweiten Stufe eine dokumentierte Preisgrundlage."
+    }
+  },
+  "scores": {
+    "design_bid_build_split": {
+      "owner_capability_required": 4,
+      "single_point_responsibility": 2
+    },
+    "design_bid_build_single": {
+      "public_procurement_constraints": 3,
+      "market_capacity": 3
+    },
+    "partnering_two_stage": {
+      "public_procurement_constraints": 2,
+      "funding_constraints": 3
     }
   },
   "owner_capability": {

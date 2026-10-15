@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import de from '@/app/locales/de';
 import en from '@/app/locales/en';
 
-import { dutyWord, groupByTopic, isOpen, itemTitle, labelOf, progress } from '../labels';
+import { dutyWord, groupByTopic, isOpen, itemTitle, labelOf, progress, readinessDetail } from '../labels';
 
 const EN = (en as { translation: Record<string, string> }).translation;
 const DE = (de as { translation: Record<string, string> }).translation;
@@ -50,6 +50,15 @@ describe('hse_frame labels', () => {
     expect(labelOf(entry, 'fr')).toBe('Plan');
     expect(labelOf({ code: 'x', labels: {} }, 'de')).toBe('x');
     expect(labelOf(null, 'de', 'none')).toBe('none');
+  });
+
+  it('names a missing role by its label instead of its code', () => {
+    const catalogue = { role_kinds: [{ code: 'safety_coordinator_execution', labels: { en: 'Safety coordinator (execution)', de: 'SiGeKo Ausführung' } }] };
+    const t = ((key: string, options: { defaultValue: string }) => (key === 'hseFrame.readiness.no_conditions' ? 'none' : options.defaultValue)) as never;
+    expect(readinessDetail('safety_coordinator_execution', catalogue as never, 'de', t)).toBe('SiGeKo Ausführung');
+    expect(readinessDetail('safety_coordinator_execution,unknown_role', catalogue as never, 'en', t)).toBe('Safety coordinator (execution), unknown_role');
+    expect(readinessDetail('no_conditions', catalogue as never, 'de', t)).toBe('none');
+    expect(readinessDetail('3/5', catalogue as never, 'de', t)).toBe('3/5');
   });
 
   it('keeps an undecided duty apart from a duty that does not apply', () => {

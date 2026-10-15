@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -65,6 +66,8 @@ _DATA_KEYS = {
     "unit",
     "reach",
     "slot",
+    # The id of the pack catalogue a story pins, e.g. the authority schedule of the client.
+    "schedule",
     "role",
     "from",
     "to",
@@ -348,6 +351,19 @@ def test_procurement_concept() -> None:
     assert procurement_seed._story_str(notes, "de") != procurement_seed._story_str(notes, "en")
 
 
+def _units(plan: dict[str, Any], today: date = date(2026, 10, 1)) -> list[SimpleNamespace]:
+    return [SimpleNamespace(planned_date=(today + timedelta(days=u[3])).isoformat()) for u in plan["units"]]
+
+
+def test_a_unit_is_reported_complete_only_close_to_its_planned_date() -> None:
+    today = date(2026, 10, 1)
+    near = SimpleNamespace(planned_date="2026-11-15")
+    far = SimpleNamespace(planned_date="2027-08-01")
+    assert quality_seed.unit_due_for_notice([far, near], today) is near
+    assert quality_seed.unit_due_for_notice([far], today) is None
+    assert quality_seed.unit_due_for_notice([SimpleNamespace(planned_date=None)], today) is None
+
+
 def test_quality_concept() -> None:
     story = _load("quality_concept")
     catalogue = json.loads(
@@ -370,6 +386,10 @@ def test_quality_concept() -> None:
     assert all(i in (0, 1) for u in plan["units"] for i in u[4])
     assert any(u[2] == "total" for u in plan["units"])
     assert any(u[2] == "handover_to_operation" for u in plan["units"])
+    # The pit is dug until about D+42 and the shell follows: no section is ready for acceptance sooner,
+    # so the running site gives no notice of completion and nothing reads as deemed accepted.
+    assert min(u[3] for u in plan["units"]) > 180
+    assert quality_seed.unit_due_for_notice(_units(plan), date(2026, 10, 1)) is None
     assert plan["expert_reports"][0][0] != de["expert_reports"][0][0]
     # A residential quarter is handed over building by building, not through an equipment ladder.
     assert set(plan["stage_names"]) == {s["code"] for s in catalogue["commissioning_stages"]}
@@ -508,6 +528,30 @@ def test_regensburg_plant_register_fits_a_site_that_has_only_started() -> None:
     assert items["PL-010"]["reach"] == "ordered" and items["PL-010"]["need_days"] > 0
     assert items["PL-011"]["reach"] == "handed_over" and items["PL-008"]["reach"] == "delivered"
     assert not [c for c, i in items.items() if i["reach"] == "commissioned"]
+
+
+def test_regensburg_balcony_order_falls_due_with_the_commitment_decision() -> None:
+    """The precast balconies are one late order: plant item PL-013 and commitment CR-002 agree on the day.
+
+    The running commitment seed dates the facade decision five days back; the plant register's latest
+    order date for the same balconies is computed from the need date, the quoted lead and the buffers.
+    """
+    from app.modules.plant_register import calc as plant_calc
+
+    item = {i["code"]: i for i in _story("residential-regensburg", "plant_register")["items"]}["PL-013"]
+    catalogue = json.loads(
+        (_ROOT / "backend/app/modules/plant_register/catalogues/neutral.json").read_text(encoding="utf-8")
+    )
+    buffers = SimpleNamespace(**{k: v for k, v in catalogue["order_buffer_days"].items() if k.endswith("_days")})
+    today = date(2026, 10, 1)
+    quote = item["quotes"][0]
+    latest = plant_calc.latest_order_date(
+        today + timedelta(days=item["need_days"]),
+        quote[5],
+        quote[6],
+        plant_calc.Buffers.merged(buffers, None),
+    )
+    assert abs((latest - (today - timedelta(days=5))).days) <= 7
 
 
 def test_regensburg_team_is_in_place_before_the_early_start_and_the_commissioning_lead_before_its_condition() -> None:

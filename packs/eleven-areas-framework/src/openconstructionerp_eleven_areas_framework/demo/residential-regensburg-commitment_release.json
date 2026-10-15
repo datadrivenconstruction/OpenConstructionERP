@@ -1,5 +1,6 @@
 {
   "$note": "Commitment release story of the Regensburg residential quarter, told before the construction gate. The slot item (CR-002) is the supply order of the quarter transformers and links to plant item PL-001; its order_signed_days and manufacturing_started_days agree with convert_by_days and slot_from_days of the held slot in the plant register story. All names invented.",
+  "schedule": "eleven_areas_framework_private_owner",
   "works": {
     "title": {
       "en": "Lot 1 and 2: excavation pit, shoring and reinforced concrete shell",

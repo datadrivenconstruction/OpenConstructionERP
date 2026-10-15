@@ -1,6 +1,8 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
+import type { TFunction } from 'i18next';
+
 import type { Catalogue, Duty, Item, ItemStatus, Labelled } from './api';
 
 /** A catalogue entry's label in the reader's language, else English, else its code. */
@@ -44,4 +46,22 @@ export function itemTitle(item: Pick<Item, 'title' | 'template_code'>, catalogue
   const template = catalogue.templates.find((tpl) => tpl.code === item.template_code);
   if (!template || template.labels?.en !== item.title) return item.title;
   return labelOf(template, language, item.title);
+}
+
+/**
+ * The bracketed detail of a gate readiness line in the reader's language. The server sends role codes
+ * (comma separated) for a role criterion and the word ``no_conditions`` when no permit condition is
+ * on file; counts pass through as they are.
+ */
+export function readinessDetail(
+  detail: string,
+  catalogue: Pick<Catalogue, 'role_kinds'> | undefined,
+  language: string,
+  t: TFunction,
+): string {
+  if (detail === 'no_conditions') return t('hseFrame.readiness.no_conditions', { defaultValue: 'no conditions on file' });
+  return detail
+    .split(',')
+    .map((code) => labelOf(catalogue?.role_kinds.find((kind) => kind.code === code), language, code))
+    .join(', ');
 }

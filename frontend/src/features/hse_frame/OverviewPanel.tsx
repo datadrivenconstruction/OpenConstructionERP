@@ -28,7 +28,7 @@ import {
   type Summary,
 } from './api';
 import type { HseWrite } from './hooks';
-import { dutyWord, labelOf } from './labels';
+import { dutyWord, labelOf, readinessDetail } from './labels';
 
 interface Props {
   projectId: string;
@@ -226,8 +226,8 @@ function DutyList({ duties }: { duties: Duties | null }) {
   );
 }
 
-function ReadinessList({ readiness }: { readiness: Readiness | undefined }) {
-  const { t } = useTranslation();
+function ReadinessList({ readiness, catalogue }: { readiness: Readiness | undefined; catalogue: Catalogue }) {
+  const { t, i18n } = useTranslation();
   return (
     <section className="rounded-lg border border-border bg-surface-elevated shadow-sm p-4" data-testid="readiness-list">
       <h2 className="text-sm font-semibold text-content-primary">{t('hseFrame.readiness.title', { defaultValue: 'Gate readiness' })}</h2>
@@ -239,7 +239,7 @@ function ReadinessList({ readiness }: { readiness: Readiness | undefined }) {
               <Icon size={14} aria-hidden className={`mt-0.5 shrink-0 ${STATE_TONE[item.state]}`} />
               <span className="text-content-primary">
                 {t(`hse_frame.evidence.${item.code}`, { defaultValue: item.label })}
-                {item.detail && <span className="ml-1 text-content-tertiary">({item.detail})</span>}
+                {item.detail && <span className="ml-1 text-content-tertiary">({readinessDetail(item.detail, catalogue, i18n.language, t)})</span>}
               </span>
             </li>
           );
@@ -340,7 +340,7 @@ export function OverviewPanel(props: Props) {
       {note && <p className="text-sm text-content-secondary" data-testid="action-note">{note}</p>}
       <div className="grid gap-4 lg:grid-cols-2">
         <DutyList duties={props.duties} />
-        <ReadinessList readiness={props.readiness} />
+        <ReadinessList readiness={props.readiness} catalogue={props.catalogue} />
       </div>
       <FactsForm projectId={projectId} frame={frame} catalogue={props.catalogue} write={write} canEdit={canEdit} />
       <SummaryList summary={props.summary} />

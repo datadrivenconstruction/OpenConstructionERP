@@ -62,18 +62,6 @@
           "self_performs": false
         },
         {
-          "country": "GB",
-          "term": "Traditional procurement",
-          "source_url": "https://www.designingbuildings.co.uk/wiki/Common_procurement",
-          "review_status": "unconfirmed"
-        },
-        {
-          "country": "US",
-          "term": "Design-Bid-Build (DBB)",
-          "source_url": "https://www.archtoolbox.com/construction-project-delivery-methods/",
-          "review_status": "unconfirmed"
-        },
-        {
           "country": "",
           "term": "FIDIC Red Book",
           "source_url": "https://fidic.org/bookshop/about-bookshop/which-fidic-contract-should-i-use",
@@ -81,7 +69,7 @@
         },
         {
           "country": "",
-          "term": "FIDIC Emerald Book (underground works, GBR)",
+          "term": "FIDIC Emerald Book",
           "source_url": "https://cms.law/en/srb/legal-updates/introducing-the-fidic-emerald-book",
           "review_status": "unconfirmed"
         }
@@ -125,18 +113,6 @@
           "review_status": "unconfirmed"
         },
         {
-          "country": "GB",
-          "term": "Design and build",
-          "source_url": "https://www.designingbuildings.co.uk/wiki/Common_procurement",
-          "review_status": "unconfirmed"
-        },
-        {
-          "country": "US",
-          "term": "Design-Build (DB)",
-          "source_url": "https://www.archtoolbox.com/construction-project-delivery-methods/",
-          "review_status": "unconfirmed"
-        },
-        {
           "country": "",
           "term": "FIDIC Yellow Book",
           "source_url": "https://fidic.org/bookshop/about-bookshop/which-fidic-contract-should-i-use",
@@ -144,7 +120,7 @@
         },
         {
           "country": "",
-          "term": "FIDIC Emerald Book (underground works, GBR)",
+          "term": "FIDIC Emerald Book",
           "source_url": "https://cms.law/en/srb/legal-updates/introducing-the-fidic-emerald-book",
           "review_status": "unconfirmed"
         }
@@ -178,14 +154,7 @@
       "code": "partnering_two_stage",
       "name_key": "delivery_model.catalogue.neutral.form.partnering_two_stage.name",
       "description_key": "delivery_model.catalogue.neutral.form.partnering_two_stage.description",
-      "aliases": [
-        {
-          "country": "GB",
-          "term": "Two-stage tendering",
-          "source_url": "https://www.designingbuildings.co.uk/wiki/Common_procurement",
-          "review_status": "unconfirmed"
-        }
-      ],
+      "aliases": [],
       "design_responsibility": "shared",
       "owner_construction_contracts": "one",
       "contractor_role": "builder",
@@ -1627,7 +1596,7 @@
       "aliases": [
         {
           "country": "",
-          "term": "FIDIC Emerald Book (underground works, GBR)",
+          "term": "FIDIC Emerald Book",
           "source_url": "https://cms.law/en/srb/legal-updates/introducing-the-fidic-emerald-book",
           "review_status": "unconfirmed"
         }

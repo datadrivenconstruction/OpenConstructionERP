@@ -238,8 +238,9 @@ def resolve_story(story: dict[str, Any] | None, locale: str = "en") -> dict[str,
     Keys: ``forms`` (preferred form codes), ``rationales`` (form code to text, used for the form
     that leads the comparison), ``owner_capability``, ``risks`` (category codes), ``ground_rationale``,
     ``ofi_first``, ``ofi_second``, ``plant_item`` (code of the register item the owner supplies) and
-    ``award_days`` / ``start_days``. Codes of forms and risk categories are checked against the pinned
-    catalogue where they are used, not here.
+    ``award_days`` / ``start_days`` and ``scores`` (form code to criterion code to a score from 1 to 5,
+    the owner's own assessment where it departs from the catalogue default). Codes of forms, criteria and
+    risk categories are checked against the pinned catalogue where they are used, not here.
     """
     out: dict[str, Any] = {}
     if not story:
@@ -275,6 +276,23 @@ def resolve_story(story: dict[str, Any] | None, locale: str = "en") -> dict[str,
                 return None
         return {**OWNER_CAPABILITY, **out}
 
+    def scores(raw: Any) -> dict[str, dict[str, int]] | None:
+        ok = (
+            isinstance(raw, dict)
+            and raw
+            and all(
+                isinstance(form, str)
+                and isinstance(row, dict)
+                and row
+                and all(
+                    isinstance(c, str) and isinstance(v, int) and not isinstance(v, bool) and 1 <= v <= 5
+                    for c, v in row.items()
+                )
+                for form, row in raw.items()
+            )
+        )
+        return {form: dict(row) for form, row in raw.items()} if ok else None
+
     def day(raw: Any) -> int | None:
         return raw if isinstance(raw, int) and not isinstance(raw, bool) and raw >= 0 else None
 
@@ -297,10 +315,30 @@ def resolve_story(story: dict[str, Any] | None, locale: str = "en") -> dict[str,
     if "plant_item" in story:
         value = story["plant_item"]
         keep("plant_item", value if isinstance(value, str) and value.strip() else None)
+    if "scores" in story:
+        keep("scores", scores(story["scores"]))
     for key in ("award_days", "start_days"):
         if key in story:
             keep(key, day(story[key]))
     return out
+
+
+def story_score_rows(
+    options: dict[str, Any], criteria: Iterable[str], scores: dict[str, dict[str, int]]
+) -> list[dict[str, Any]]:
+    """The story's scores as rows of ``put_scores``, for the compared forms and the project's criteria only."""
+    known = set(criteria)
+    rows = []
+    for form, row in scores.items():
+        if form not in options:
+            logger.info("delivery_model demo story: form %r is not compared, its scores are dropped", form)
+            continue
+        for code, score in row.items():
+            if code not in known:
+                logger.info("delivery_model demo story: criterion %r is unknown, the score is dropped", code)
+                continue
+            rows.append({"option_id": options[form], "criterion_code": code, "score": score})
+    return rows
 
 
 def forms_to_compare(available: Iterable[str], preferred: Iterable[str] = DEMO_FORMS) -> list[str]:
@@ -515,6 +553,11 @@ async def _seed_project(
         row = await svc.add_option(project_id, code, overrides={}, notes="", actor_id=actor)
         options[code] = row.id
     await svc.prefill_scores(project_id, actor)
+    if story.get("scores"):
+        criteria = [c.code for c in await svc.repo.criteria(project_id)]
+        rows = story_score_rows(options, criteria, story["scores"])
+        if rows:
+            await svc.put_scores(project_id, rows, actor)
     await svc.patch_model(
         project_id,
         actor_id=actor,

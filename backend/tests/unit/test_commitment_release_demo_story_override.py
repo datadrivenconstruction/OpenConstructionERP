@@ -72,3 +72,39 @@ def test_slot_story_agrees_with_plant_register_story(shipped: dict) -> None:
 def test_shipped_story_text_hygiene() -> None:
     text = STORY_FILE.read_text(encoding="utf-8")
     assert "\u2014" not in text and "\u2013" not in text
+
+
+def test_the_cost_spine_exists_before_the_matrix_books_onto_it() -> None:
+    """The economics seed builds the cost lines the commitment items and their subcontract are booked onto."""
+    import inspect
+
+    from app.core import demo_enrichment
+
+    source = inspect.getsource(demo_enrichment)
+    economics = source.index('("economics", None,')
+    matrix = source.index('("commitment_release", None,')
+    assert economics < matrix
+
+
+_PRIVATE = REPO / (
+    "packs/eleven-areas-framework/src/openconstructionerp_eleven_areas_framework/catalogues/authority_schedule"
+    "/eleven_areas_framework_private_owner.json"
+)
+
+
+def test_the_private_client_decides_through_its_management_and_board() -> None:
+    """Regensburg is a private housing company: no head of authority, and the works package stays in the schedule."""
+    from decimal import Decimal
+
+    from app.modules.commitment_release.catalogue import AuthoritySchedule, validate_authority_schedule
+    from app.modules.commitment_release.evaluator import required_tier
+
+    schedule = AuthoritySchedule.model_validate(json.loads(_PRIVATE.read_text(encoding="utf-8")))
+    assert validate_authority_schedule(schedule, "pack") == []
+    assert {t.code for t in schedule.tiers} == {"project_lead", "managing_director", "supervisory_board"}
+    works = required_tier(schedule, "works", Decimal("6115237.50"))
+    assert (works.tier_code, works.escalate_outside) == ("supervisory_board", False)
+    story = json.loads((DEMO / "residential-regensburg-commitment_release.json").read_text(encoding="utf-8"))
+    assert story["schedule"] == schedule.id
+    # The school is a public owner and keeps the country default.
+    assert "schedule" not in json.loads(STORY_FILE.read_text(encoding="utf-8"))

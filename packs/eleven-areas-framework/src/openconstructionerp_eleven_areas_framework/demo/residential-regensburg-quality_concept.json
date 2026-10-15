@@ -447,7 +447,7 @@
         "de": "Tiefgarage und Rohbau"
       },
       "kind": "partial_package",
-      "days": 60,
+      "days": 300,
       "packages": [
         0
       ]
@@ -459,7 +459,7 @@
         "de": "Haustechnik und Ausbau"
       },
       "kind": "partial_package",
-      "days": 130,
+      "days": 480,
       "packages": [
         1
       ]
@@ -471,7 +471,7 @@
         "de": "Haus A, vor Einzug der ersten Mieter"
       },
       "kind": "partial_section",
-      "days": 150,
+      "days": 450,
       "packages": [
         1
       ],
@@ -487,7 +487,7 @@
         "de": "Gesamte Leistung"
       },
       "kind": "total",
-      "days": 170
+      "days": 500
     },
     {
       "code": "AU-05",
@@ -496,7 +496,7 @@
         "de": "Übergabe an die Hausverwaltung"
       },
       "kind": "handover_to_operation",
-      "days": 185
+      "days": 520
     }
   ],
   "survey_neighbour": {

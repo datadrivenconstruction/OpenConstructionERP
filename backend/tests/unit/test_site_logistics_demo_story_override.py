@@ -67,3 +67,10 @@ def test_shipped_school_story_is_well_formed() -> None:
     assert demo_plan.resolve_plan_content(story, "de")["rules_text"] != out["rules_text"]
     raw = _STORY.read_text(encoding="utf-8")
     assert "\u2013" not in raw and "\u2014" not in raw
+
+
+def test_shipped_stories_name_the_complaint_reporter_in_german() -> None:
+    for name in ("school-ludwigsburg", "residential-regensburg"):
+        story = json.loads((_STORY.parent / f"{name}-site_logistics.json").read_text(encoding="utf-8"))
+        assert demo_plan.resolve_plan_content(story, "de")["complaint_reporter"] == "Anwohner, anonym"
+    assert demo_plan.resolve_plan_content(None, "en")["complaint_reporter"] == "Neighbour, anonymous"

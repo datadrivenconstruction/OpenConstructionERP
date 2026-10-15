@@ -209,6 +209,20 @@ export function isSection(pos: Pick<PositionSummary, 'unit' | 'quantity' | 'unit
   return SECTION_UNITS.has(unit) && toNum(pos.quantity) === 0 && toNum(pos.unit_rate) === 0;
 }
 
+/**
+ * How many positions the project's estimates hold, the way the BOQ list counts
+ * them: section headers group positions and are not positions themselves.
+ */
+export function countLeafPositions(
+  details: readonly { positions: readonly Pick<PositionSummary, 'unit' | 'quantity' | 'unit_rate'>[] }[],
+): number {
+  let count = 0;
+  for (const detail of details) {
+    for (const pos of detail.positions) if (!isSection(pos)) count++;
+  }
+  return count;
+}
+
 interface ImportResult {
   imported: number;
   updated?: number;
@@ -1663,12 +1677,11 @@ export function ProjectDetailPage() {
     }
 
     const totalBudget = sumBoqGrandTotals(boqDetails);
-    let totalPositions = 0;
+    const totalPositions = countLeafPositions(boqDetails);
     let validatedCount = 0;
     let passedCount = 0;
 
     for (const detail of boqDetails) {
-      totalPositions += detail.positions.length;
       for (const pos of detail.positions) {
         if (pos.validation_status && pos.validation_status !== 'pending') {
           validatedCount++;

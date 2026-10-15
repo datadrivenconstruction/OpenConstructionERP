@@ -712,6 +712,20 @@ async def _seed_surveys_ahead(
         totals["surveys"] += 1
 
 
+# How far ahead of its planned date a section may be reported complete. A unit planned further out
+# is not finished yet, and a notice for it would make the works deemed accepted while they are being built.
+NOTICE_WINDOW_DAYS = 60
+
+
+def unit_due_for_notice(units: Iterable[Any], today: date, window: int = NOTICE_WINDOW_DAYS) -> Any | None:
+    """The earliest acceptance unit when it is planned within ``window`` days of ``today``, else ``None``."""
+    dated = [u for u in units if u.planned_date]
+    if not dated:
+        return None
+    first = min(dated, key=lambda u: u.planned_date)
+    return first if date.fromisoformat(str(first.planned_date)[:10]) <= today + timedelta(days=window) else None
+
+
 async def _seed_course(svc: Any, pid: uuid.UUID, engineer: uuid.UUID, today: date) -> None:
     """Works under way: a documentation set chosen, one acceptance on its way, the concept in review.
 
@@ -725,10 +739,9 @@ async def _seed_course(svc: Any, pid: uuid.UUID, engineer: uuid.UUID, today: dat
     cat = await svc.catalogue_for(concept)
     if cat.documentation_sets:
         await svc.patch_concept(pid, s.ConceptPatch(documentation_set_code=cat.documentation_sets[0].code))
-    units = await svc.repo.list(AcceptanceUnit, pid)
-    if units:
+    unit = unit_due_for_notice(await svc.repo.list(AcceptanceUnit, pid), today)
+    if unit is not None:
         # The contractor gave notice of completion for the first section: the deemed date starts to count.
-        unit = min(units, key=lambda u: u.planned_date or "")
         await svc.record_dates(pid, unit.id, s.AcceptanceRecordIn(completion_notice_at=today - timedelta(days=4)))
         regime = cat.regime(unit.regime_code)
         unmet = await svc.unmet_preconditions(pid, unit)

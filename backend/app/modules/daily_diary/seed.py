@@ -562,6 +562,21 @@ _DE_TRADES: tuple[str, ...] = (
     "Estrich",
 )
 
+#: The trades a showcase site has actually on it, where the generic rotation
+#: would book work the project has not reached yet. Regensburg is digging its
+#: pit: no screed and no drywall in a diary of the last six weeks.
+_SHOWCASE_TRADES: dict[str, tuple[str, ...]] = {
+    "residential-regensburg": (
+        "Baugrube",
+        "Verbau",
+        "Grundwasserhaltung",
+        "Erdarbeiten",
+        "Kampfmittelsondierung",
+        "Leitungsverlegung",
+        "Vermessung",
+    ),
+}
+
 _DE_ACTIVITIES: tuple[str, ...] = (
     "Achse C bis E ausgeführt und aufgemessen",
     "Abschnitt planmäßig fertiggestellt",
@@ -666,6 +681,20 @@ def _german_working_days(end: date, count: int, *, land: str) -> list[date]:
             days.append(cursor)
         cursor -= timedelta(days=1)
     return list(reversed(days))
+
+
+async def _before_construction(session: AsyncSession, project_id: uuid.UUID) -> bool:
+    """Whether the project's phase model has a gate into construction and none of those gates is decided.
+
+    A project without a phase model is not known to stand before construction and keeps its diary.
+    """
+    from app.modules.project_governance import public
+
+    starts = set(await public.phases_enabling(session, project_id, "construction_start"))
+    if not starts:
+        return False
+    gates = [g for g in await public.project_gates(session, project_id) if g.to_phase in starts]
+    return bool(gates) and all(g.status != "decided" for g in gates)
 
 
 async def _without_german_showcase(
@@ -789,6 +818,10 @@ async def seed_daily_diary_showcase_de(
     for project_id, demo_id, owner_id in targets:
         if project_id in already:
             continue
+        if await _before_construction(session, project_id):
+            # A site that has not started keeps no diary; thirty days of crews would be invented.
+            continue
+        trades = _SHOWCASE_TRADES.get(demo_id, _DE_TRADES)
         land = _SHOWCASE_LAND.get(demo_id, "HE")
         days = _german_working_days(today, _SHOWCASE_WORKING_DAYS, land=land)
         if not days:
@@ -804,7 +837,7 @@ async def seed_daily_diary_showcase_de(
         made: list[tuple[DailyDiary, date]] = []
         for index, day in enumerate(days):
             code, weather_label, weather_sentence = _DE_WEATHER[index % len(_DE_WEATHER)]
-            trade = _DE_TRADES[index % len(_DE_TRADES)]
+            trade = trades[index % len(trades)]
             activity = _DE_ACTIVITIES[index % len(_DE_ACTIVITIES)]
             labour = 14 + (index % 9)
             equipment = 3 + (index % 5)

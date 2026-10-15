@@ -211,6 +211,10 @@
     "en": "Water spraying twice a day, wheel wash at the gate, school windows on the site side kept shut during earthworks.",
     "de": "Wasserbedüsung zweimal täglich, Reifenwäsche am Tor, Schulfenster auf der Baustellenseite bleiben während der Erdarbeiten geschlossen."
   },
+  "complaint_reporter": {
+    "en": "Resident, anonymous",
+    "de": "Anwohner, anonym"
+  },
   "noise_description": {
     "en": "Drilling rig of the ground investigation running before school start, reported by the head teacher.",
     "de": "Bohrgerät der Baugrunduntersuchung läuft vor Unterrichtsbeginn, gemeldet von der Schulleitung."

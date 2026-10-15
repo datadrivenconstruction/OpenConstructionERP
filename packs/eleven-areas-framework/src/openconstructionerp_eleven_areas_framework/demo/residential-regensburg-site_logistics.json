@@ -166,8 +166,8 @@
     "de": "Kein Baustellenparken in den Wohnstraßen. Das Baustellenpersonal nutzt den angemieteten Parkplatz im Gewerbegebiet mit Pendelbus um 06:45 und 16:45 Uhr."
   },
   "heavy_title": {
-    "en": "Transformer for the quarter supply 18 t",
-    "de": "Transformator für die Quartiersversorgung 18 t"
+    "en": "Transformer for the quarter supply, 18 t unit on a heavy transport",
+    "de": "Transformator für die Quartiersversorgung, 18 t Stückgewicht auf dem Schwertransport"
   },
   "heavy_destination": {
     "en": "Site, Gate 1",
@@ -204,6 +204,10 @@
   "dust_response": {
     "en": "Water spraying twice a day, wheel wash at the gate, street sweeping after each heavy load.",
     "de": "Zweimal täglich Wasserberieselung, Reifenwäsche am Tor, Straßenkehrung nach jeder Schwerlast."
+  },
+  "complaint_reporter": {
+    "en": "Resident, anonymous",
+    "de": "Anwohner, anonym"
   },
   "noise_description": {
     "en": "Reversing alarms before 07:00 at the gate, reported by a resident.",

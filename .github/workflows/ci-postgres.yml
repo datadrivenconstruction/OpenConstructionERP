@@ -2131,7 +2131,7 @@ jobs:
           OE_DATA_DIR: ${{ runner.temp }}/oe-data
           OE_API_SMOKE_REPORT_DIR: ${{ runner.temp }}/api-smoke
         run: >-
-          pytest tests/pg/test_eleven_areas_api_smoke.py tests/pg/test_eleven_areas_flows_a.py tests/pg/test_eleven_areas_flows_b.py tests/pg/test_eleven_areas_flows_c.py tests/pg/test_eleven_areas_flows_d.py -v -rA
+          pytest tests/pg/test_eleven_areas_api_smoke.py tests/pg/test_eleven_areas_flows_a.py tests/pg/test_eleven_areas_flows_b.py tests/pg/test_eleven_areas_flows_c.py tests/pg/test_eleven_areas_flows_d.py tests/pg/test_eleven_areas_demo_story_reads.py -v -rA
           -p no:cacheprovider --timeout=2700 --timeout-method=thread
       - name: Upload the report
         if: ${{ !cancelled() }}

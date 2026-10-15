@@ -103,6 +103,7 @@ _PLAN_TEXT_DEFAULTS: dict[str, str] = {
     "rebar_destination": "Laydown A",
     "dust_description": "Dust on parked cars on the east side after excavation.",
     "dust_response": "Water spraying twice a day; wheel wash moved to the exit.",
+    "complaint_reporter": "Neighbour, anonymous",
     "noise_description": "Reversing alarms before 07:00 at the north gate.",
     "power_provider": "Local grid operator",
     "water_provider": "Municipal water utility",
@@ -310,7 +311,7 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID) -> int:
         pid,
         stage1.id,
         {
-            "code": "stage_1",
+            "code": "S1",
             "title": content["stage_1_title"],
             "ordinal": 1,
             "from_date": today + timedelta(days=start),
@@ -323,7 +324,7 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID) -> int:
     stage2 = await svc.create_stage(
         pid,
         {
-            "code": "stage_2",
+            "code": "S2",
             "title": content["stage_2_title"],
             "ordinal": 2,
             "from_date": today + timedelta(days=start + 57),
@@ -660,7 +661,7 @@ async def _seed_complaints(svc: Any, pid: uuid.UUID, today: Any, content: dict[s
         {
             "kind": "dust",
             "reported_on": today - timedelta(days=6),
-            "reporter": "Neighbour, anonymous",
+            "reporter": content["complaint_reporter"],
             "description": content["dust_description"],
         },
         actor,

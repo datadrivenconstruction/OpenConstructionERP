@@ -40,7 +40,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -66,7 +66,8 @@ POSITIONS: tuple[tuple[str, str, int, int | None, str], ...] = (
     ("operator_plant_manager", "operation", 330, None, "open"),
     ("operator_shift_lead", "operation", 360, None, "open"),
 )
-# One roster member per role, in roster order; the roles further down stay vacant.
+# One roster member per role, the one whose site role names it or else in roster order; the roles
+# further down stay vacant.
 FILLED = (
     "project_director",
     "project_manager",
@@ -184,6 +185,30 @@ def story_roster(story: dict[str, Any], locale: str) -> list[dict[str, Any]]:
                 "allocation": allocation if allocation is not None and 0 < allocation <= 100 else 100,
             }
         )
+    return out
+
+
+def assign_roles(roles: Sequence[str], members: Sequence[Any]) -> list[tuple[str, Any]]:
+    """Pair each role with the roster member who holds it, then the rest in roster order.
+
+    A member whose ``site_role`` names a role takes that role, so the story cast lands where the story
+    puts it however the roster rows happen to sort (rows written in one flush share ``created_at`` and
+    then sort by a random id). Roles nobody names go to the members left over, in their order.
+    """
+    taken: set[int] = set()
+    pairs: dict[str, Any] = {}
+    for role in roles:
+        for i, member in enumerate(members):
+            if i not in taken and getattr(member, "site_role", None) == role:
+                pairs[role] = member
+                taken.add(i)
+                break
+    rest = iter(m for i, m in enumerate(members) if i not in taken)
+    out: list[tuple[str, Any]] = []
+    for role in roles:
+        member = pairs.get(role) or next(rest, None)
+        if member is not None:
+            out.append((role, member))
     return out
 
 
@@ -378,7 +403,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> dict[st
 
     fills: dict[str, Any] = {}
     files: dict[str, Any] = {}
-    for role_code, member in zip([r for r in filled if r in positions], members, strict=False):
+    for role_code, member in assign_roles([r for r in filled if r in positions], members):
         position = positions[role_code]
         fill = await svc.create_fill(
             project_id,

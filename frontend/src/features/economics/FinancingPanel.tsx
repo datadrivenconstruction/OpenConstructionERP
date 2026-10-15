@@ -116,7 +116,7 @@ export function FinancingPanel({
                 {t('economics.financing.award', {
                   defaultValue: 'Application {{code}} ({{status}}): {{amount}}',
                   code: source.award.code,
-                  status: source.award.status,
+                  status: t(`funding.status.${source.award.status}`, { defaultValue: source.award.status }),
                   amount: money(source.award.amount),
                 })}
               </p>

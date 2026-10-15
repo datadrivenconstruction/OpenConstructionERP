@@ -425,6 +425,12 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # cost, and inventing one inside a live project is a data incident.
             # Self-guards per project on an existing report.
             ("cvr", None, lambda s: seed_cvr_demo(s, _demo_pids)),
+            # The business case, cost frame and financing plan are cut from the bill
+            # the estimate seeders wrote, so they run after them. Guards itself per project.
+            # It builds the cost spine of a project that has none, and the commitment
+            # matrix below books its items and their subcontract onto those cost lines,
+            # so it runs before that matrix.
+            ("economics", None, lambda s: seed_economics_demo(s, _demo_pids)),
             # The owner's commitment and release matrix links the subcontract
             # the contracts seeder wrote above, so it runs after it. Guards
             # itself per project on an existing matrix.
@@ -432,9 +438,6 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # The owner's delivery form decision links the contract the
             # contracts seeder wrote above. Guards itself per project.
             ("delivery_model", None, lambda s: seed_delivery_model_demo(s, _demo_pids)),
-            # The business case, cost frame and financing plan are cut from the bill
-            # the estimate seeders wrote, so they run after them. Guards itself per project.
-            ("economics", None, lambda s: seed_economics_demo(s, _demo_pids)),
             # The authority permit roadmap and its condition register: the
             # permits a project of its country needs, two decided with
             # conditions, one under review. Links the schedule activities the

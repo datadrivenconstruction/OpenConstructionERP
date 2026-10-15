@@ -171,6 +171,19 @@ def resolve_story(story: dict[str, Any] | None, locale: str = "en") -> dict[str,
     return out
 
 
+async def _story_schedule(session: AsyncSession, project_id: uuid.UUID) -> str | None:
+    """The id of the pack authority schedule the demo story names (``schedule``), ``None`` when it names none."""
+    from app.core.demo_marker import demo_id_of
+    from app.modules.project_governance.public import demo_module_story
+    from app.modules.projects.models import Project
+
+    project = await session.get(Project, project_id)
+    if project is None:
+        return None
+    named = (demo_module_story(demo_id_of(project.metadata_), "commitment_release") or {}).get("schedule")
+    return named if isinstance(named, str) and named.strip() else None
+
+
 async def _story_of(session: AsyncSession, project_id: uuid.UUID) -> dict[str, dict[str, Any]]:
     """The validated story of this demo project in its own language, ``{}`` when it has none."""
     from app.core.demo_marker import demo_id_of
@@ -260,7 +273,51 @@ async def _link_cost_lines(session: AsyncSession, project_id: uuid.UUID) -> int:
     for item, line in zip(items, ranked, strict=False):
         item.cost_line_id = line.id
     await session.flush()
+    await _book_linked_contracts(session, project_id)
     return min(len(items), len(ranked))
+
+
+async def _book_linked_contracts(session: AsyncSession, project_id: uuid.UUID) -> int:
+    """Put the schedule lines of each contract an item counts onto that item's cost line.
+
+    The cost frame counts what is committed per cost line, from contract lines that carry one. The demo
+    subcontracts come with a schedule of values and no cost line, so the frame read nothing committed
+    while the matrix showed the works package bound. A line that already has a cost line keeps it.
+    Returns how many contract lines were booked.
+    """
+    from app.modules.commitment_release.models import CommitmentItem, CommitmentLink
+    from app.modules.contracts.models import ContractLine
+
+    rows = (
+        await session.execute(
+            select(CommitmentLink.target_id, CommitmentItem.cost_line_id)
+            .join(CommitmentItem, CommitmentItem.id == CommitmentLink.item_id)
+            .where(
+                CommitmentLink.project_id == project_id,
+                CommitmentLink.kind == "contract",
+                CommitmentItem.cost_line_id.is_not(None),
+            )
+        )
+    ).all()
+    booked = 0
+    for contract_id, cost_line_id in rows:
+        lines = (
+            (
+                await session.execute(
+                    select(ContractLine).where(
+                        ContractLine.contract_id == contract_id, ContractLine.cost_line_id.is_(None)
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        for line in lines:
+            line.cost_line_id = cost_line_id
+            booked += 1
+    if booked:
+        await session.flush()
+    return booked
 
 
 async def _team_member(session: AsyncSession, project_id: uuid.UUID, exclude: uuid.UUID | None) -> uuid.UUID | None:
@@ -592,6 +649,7 @@ async def _seed_before_construction(
 
 async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> dict[str, int]:
     from app.modules.commitment_release.catalogue import DEFAULT_SCHEDULE_ID
+    from app.modules.commitment_release.errors import CommitmentError
     from app.modules.commitment_release.fx import FxRateMissing
     from app.modules.commitment_release.service import CommitmentService
     from app.modules.contracts.models import Contract
@@ -618,6 +676,16 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> dict[st
     today = datetime.now(UTC).date()
     svc = CommitmentService(session)
     matrix = await svc.set_matrix(project_id, actor_id=owner, tenant_id=None)
+    named = await _story_schedule(session, project_id)
+    if named:
+        # The story names the schedule of its client: the country default is the one of a public owner,
+        # and a private company decides through its own management and board.
+        try:
+            matrix = await svc.set_matrix(
+                project_id, actor_id=owner, tenant_id=None, schedule_source="pack", schedule_id=named
+            )
+        except CommitmentError:
+            logger.info("commitment_release demo story: schedule %r cannot be pinned, the default is kept", named)
     schedule = await svc.schedule_for(matrix)
     if schedule.currency and schedule.currency.strip().upper() != ccy:
         # A national schedule counts in its own currency. On a project in another one every figure

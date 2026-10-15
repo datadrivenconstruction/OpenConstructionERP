@@ -292,11 +292,15 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, story: dic
         gates = await svc.milestones_from_gates(project_id, actor, "de")
         counts["milestones"] += len(gates)
         # A gate without a target date still gets a believable one: after the previous gate and never before today.
+        # A gate already decided was decided on its day; it is not given a date ahead of it.
         previous = date.today()
+        decided = await _decided_gate_codes(svc, project_id)
         for row in await svc.milestone_views(project_id):
             if not row["gate_code"]:
                 continue
-            if row["planned_date"] is None:
+            if row["planned_date"] is None and row["gate_code"] in decided:
+                await svc.update_milestone(project_id, uuid.UUID(row["id"]), {"planned_date": previous}, actor)
+            elif row["planned_date"] is None:
                 previous = previous + timedelta(days=75)
                 await svc.update_milestone(project_id, uuid.UUID(row["id"]), {"planned_date": previous}, actor)
             else:
@@ -308,6 +312,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, story: dic
     if published["gates_skipped"]:
         logger.warning("engineering brief demo: gates not bound for %s: %s", project_id, published["gates_skipped"])
     counts["gates_bound"] = len(published["gates_bound"])
+    await _complete_decided_gate_milestones(session, svc, project_id)
     counts["need_dates_bound"] = await _bind_nearest_package(session, project_id)
 
     for row in story.get("studies", []):
@@ -459,3 +464,29 @@ async def seed_engineering_brief_demo(session: AsyncSession, project_ids: Iterab
         for k, v in counts.items():
             totals[k] = totals.get(k, 0) + v
     return totals
+
+
+async def _decided_gate_codes(svc: Any, project_id: uuid.UUID) -> set[str]:
+    return {str(g["code"]) for g in await svc._gates(project_id) if g["status"] == "decided"}
+
+
+async def _complete_decided_gate_milestones(session: AsyncSession, svc: Any, project_id: uuid.UUID) -> int:
+    """Mark the published milestone of every decided gate as reached.
+
+    The schedule reads an unfinished milestone as still ahead, so without this the project hub names a gate
+    that was decided as the next milestone. Returns how many activities were completed.
+    """
+    from app.modules.schedule.models import Activity
+
+    decided = await _decided_gate_codes(svc, project_id)
+    done = 0
+    for row in await svc.milestone_views(project_id):
+        if row["gate_code"] not in decided or row["activity_id"] is None:
+            continue
+        act = await session.get(Activity, row["activity_id"])
+        if act is not None and act.status != "completed":
+            act.status = "completed"
+            act.progress_pct = "100"
+            done += 1
+    await session.flush()
+    return done

@@ -1,0 +1,108 @@
+{
+  "id": "eleven_areas_framework_private_owner",
+  "version": 1,
+  "labels": {
+    "en": "Owner's Project Control: private housing company",
+    "de": "Bauherren-Projektsteuerung: privates Wohnungsunternehmen"
+  },
+  "review_status": "unconfirmed",
+  "jurisdiction_countries": [],
+  "currency": "EUR",
+  "basis": "net",
+  "aggregation": "item_total",
+  "commitment_types": [
+    {
+      "code": "works",
+      "name_key": "commitment.type.works"
+    },
+    {
+      "code": "services",
+      "name_key": "commitment.type.services"
+    },
+    {
+      "code": "supplies",
+      "name_key": "commitment.type.supplies"
+    },
+    {
+      "code": "design",
+      "name_key": "commitment.type.design"
+    },
+    {
+      "code": "change",
+      "name_key": "commitment.type.change"
+    },
+    {
+      "code": "contingency_drawdown",
+      "name_key": "commitment.type.contingency_drawdown"
+    },
+    {
+      "code": "claim_settlement",
+      "name_key": "commitment.type.claim_settlement"
+    },
+    {
+      "code": "termination_settlement",
+      "name_key": "commitment.type.termination_settlement"
+    }
+  ],
+  "tiers": [
+    {
+      "code": "project_lead",
+      "name_key": "commitment.tier.project_lead",
+      "approver": {
+        "kind": "project_role",
+        "ref": "owner_pm"
+      },
+      "steps_mode": "any",
+      "four_eyes": true,
+      "sla_hours": 72
+    },
+    {
+      "code": "managing_director",
+      "labels": {
+        "en": "Managing director",
+        "de": "Geschäftsführung"
+      },
+      "approver": {
+        "kind": "project_role",
+        "ref": "owner_managing_director"
+      },
+      "steps_mode": "any",
+      "four_eyes": true,
+      "sla_hours": 120
+    },
+    {
+      "code": "supervisory_board",
+      "labels": {
+        "en": "Supervisory board",
+        "de": "Aufsichtsrat"
+      },
+      "approver": {
+        "kind": "project_role",
+        "ref": "owner_supervisory_board"
+      },
+      "steps_mode": "any",
+      "four_eyes": true,
+      "sla_hours": 240
+    }
+  ],
+  "bands": [
+    {
+      "code": "any_project_lead",
+      "commitment_type": "*",
+      "tier": "project_lead",
+      "max_amount": "50000"
+    },
+    {
+      "code": "any_managing_director",
+      "commitment_type": "*",
+      "tier": "managing_director",
+      "max_amount": "1000000"
+    },
+    {
+      "code": "any_supervisory_board",
+      "commitment_type": "*",
+      "tier": "supervisory_board",
+      "max_amount": null
+    }
+  ]
+}

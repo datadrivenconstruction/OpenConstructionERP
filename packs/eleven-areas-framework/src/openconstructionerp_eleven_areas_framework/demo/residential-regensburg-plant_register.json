@@ -532,7 +532,7 @@
       "class": "facade_unit",
       "quantity": "96",
       "redundancy": "",
-      "need_days": 400,
+      "need_days": 345,
       "reach": "route_set",
       "performance": [
         {
@@ -550,8 +550,8 @@
           },
           -35,
           -24,
-          20,
-          26,
+          32,
+          39,
           "from_approved_drawings"
         ]
       ],

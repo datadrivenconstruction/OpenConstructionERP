@@ -105,3 +105,34 @@ def test_shipped_story_names_the_plant_item_the_register_story_holds(shipped: di
 def test_shipped_story_text_hygiene() -> None:
     text = STORY_FILE.read_text(encoding="utf-8")
     assert "\u2014" not in text and "\u2013" not in text
+
+
+def test_bad_scores_are_dropped_and_good_ones_kept() -> None:
+    assert "scores" not in seed.resolve_story({"scores": {"f": {"c": 6}}})
+    assert "scores" not in seed.resolve_story({"scores": {"f": {"c": True}}})
+    assert "scores" not in seed.resolve_story({"scores": []})
+    assert seed.resolve_story({"scores": {"f": {"c": 4}}})["scores"] == {"f": {"c": 4}}
+
+
+def test_story_scores_become_rows_for_compared_forms_and_known_criteria_only() -> None:
+    rows = seed.story_score_rows({"a": "id-a"}, ["c1"], {"a": {"c1": 4, "nope": 2}, "b": {"c1": 5}})
+    assert rows == [{"option_id": "id-a", "criterion_code": "c1", "score": 4}]
+
+
+def test_trade_lots_lead_the_shipped_school_comparison(shipped, catalogue) -> None:
+    """The school story is VOB/A trade lots, so the form the seeder proposes must be the split one."""
+    from decimal import Decimal
+
+    from app.modules.delivery_model.rules import weighted_totals
+
+    story = seed.resolve_story(shipped, "de")
+    weights = {c["code"]: Decimal(str(c["default_weight"])) for c in catalogue["criteria"]}
+    forms = story["forms"]
+    scores = {
+        (form, c["code"]): story["scores"].get(form, {}).get(c["code"], c["scores"][form])
+        for form in forms
+        for c in catalogue["criteria"]
+    }
+    totals = weighted_totals(weights, forms, scores)
+    assert max(forms, key=lambda f: totals[f]) == "design_bid_build_split"
+    assert "design_bid_build_split" in story["rationales"]

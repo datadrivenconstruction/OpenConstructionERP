@@ -94,3 +94,35 @@ def test_every_shipped_staffing_story_has_a_person_for_each_filled_role() -> Non
         names = [r["name"] for r in story_roster(story, "de")]
         assert len(names) >= len(story.get("filled") or FILLED), path.name
         assert len(set(names)) == len(names), path.name
+
+
+class _Member:
+    def __init__(self, name: str, site_role: str) -> None:
+        self.name = name
+        self.site_role = site_role
+
+
+def test_roles_go_to_the_member_the_story_names_whatever_the_roster_order() -> None:
+    # Rows of one flush share created_at and sort by a random id, so the roster arrives shuffled.
+    members = [
+        _Member("Hartmann", "design_manager"),
+        _Member("Pledl", "site_supervisor_mep"),
+        _Member("Lindner", "project_director"),
+    ]
+    pairs = seed.assign_roles(["project_director", "design_manager"], members)
+    assert [(r, m.name) for r, m in pairs] == [("project_director", "Lindner"), ("design_manager", "Hartmann")]
+
+
+def test_roles_nobody_names_take_the_rest_in_roster_order() -> None:
+    members = [_Member("A", "foreman"), _Member("B", "site_manager"), _Member("C", "operative")]
+    pairs = seed.assign_roles(["project_manager", "site_manager", "hse_manager", "scheduler"], members)
+    assert [(r, m.name) for r, m in pairs] == [("project_manager", "A"), ("site_manager", "B"), ("hse_manager", "C")]
+
+
+def test_shipped_stories_name_a_cast_member_for_every_filled_role() -> None:
+    for path in _STORY.parent.glob("*-staffing.json"):
+        story = json.loads(path.read_text(encoding="utf-8"))
+        cast = seed.story_roster(story, "de")
+        members = [_Member(p["name"], p["site_role"]) for p in reversed(cast)]
+        pairs = seed.assign_roles(story["filled"], members)
+        assert [(r, m.site_role) for r, m in pairs] == [(r, r) for r in story["filled"]], path.name
