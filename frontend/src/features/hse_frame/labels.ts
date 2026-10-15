@@ -3,6 +3,8 @@
 
 import type { TFunction } from 'i18next';
 
+import { fmtList } from '@/shared/lib/formatters';
+
 import type { Catalogue, Duty, Item, ItemStatus, Labelled } from './api';
 
 /** A catalogue entry's label in the reader's language, else English, else its code. */
@@ -60,8 +62,7 @@ export function readinessDetail(
   t: TFunction,
 ): string {
   if (detail === 'no_conditions') return t('hseFrame.readiness.no_conditions', { defaultValue: 'no conditions on file' });
-  return detail
-    .split(',')
-    .map((code) => labelOf(catalogue?.role_kinds.find((kind) => kind.code === code), language, code))
-    .join(', ');
+  return fmtList(
+    detail.split(',').map((code) => labelOf(catalogue?.role_kinds.find((kind) => kind.code === code), language, code)),
+  );
 }
