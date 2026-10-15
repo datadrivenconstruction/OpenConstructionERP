@@ -457,6 +457,7 @@ teach identifiers that were never rule sets at all.
 | `field_time` | Site time capture |
 | `procurement` | Purchase orders and reconciliation |
 | `invoice_po_match` | Supplier invoice against its order: net within what is still open, quantity and value within what was received |
+| `procurement_requisition` | Material requisition on submit: positive quantities, line unit equal to its BOQ source unit, needed-by date not past |
 | `rfq_issue` | Enquiry at the point of issue |
 | `rfq_award` | Enquiry at the point of award |
 | `subcontract` | Subcontract packages |
