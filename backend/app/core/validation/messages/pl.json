@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Dla zamówienia {po} faktury wyniosłyby łącznie {invoiced}, ale odebrane towary są warte tylko {received} według cen zamówienia",
       "suggestion": "Poczekaj na dokument dostawy lub potwierdź odbiór towaru przed zatwierdzeniem tej kwoty"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Pozycja {line} żąda {quantity}, ale pozycja zapotrzebowania musi mieć ilość większą od zera",
+      "suggestion": "Wpisz potrzebną ilość lub usuń pozycję"
+    },
+    "requisition_source_unit": {
+      "fail": "Pozycja {line} jest w {unit}, ale jedno z jej źródeł BOQ jest w {source_unit}",
+      "suggestion": "Użyj jednostki zasobu BOQ albo podziel pozycję, by każda jednostka miała osobny wiersz"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Termin potrzeby {date} już minął (dziś jest {today})",
+      "suggestion": "Ustaw datę, kiedy materiał jest faktycznie potrzebny na budowie"
     }
   },
   "subcontract": {

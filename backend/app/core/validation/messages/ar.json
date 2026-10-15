@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "سيصبح إجمالي فواتير الأمر {po} هو {invoiced}، لكن البضائع المستلمة لا تساوي إلا {received} بأسعار الأمر",
       "suggestion": "انتظر إذن التسليم أو أكّد استلام البضائع قبل اعتماد هذا المبلغ"
+    },
+    "requisition_quantity_positive": {
+      "fail": "السطر {line} يطلب {quantity}، لكن بند طلب المواد يجب أن تكون كميته أكبر من الصفر",
+      "suggestion": "أدخل الكمية المطلوبة أو احذف البند"
+    },
+    "requisition_source_unit": {
+      "fail": "السطر {line} بوحدة {unit} بينما أحد مصادر BOQ الخاصة به بوحدة {source_unit}",
+      "suggestion": "استخدم وحدة مورد BOQ، أو قسّم البند بحيث تكون لكل وحدة سطر مستقل"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "تاريخ الحاجة {date} مضى بالفعل (اليوم هو {today})",
+      "suggestion": "حدد التاريخ الذي تحتاج فيه المادة فعلياً في الموقع"
     }
   },
   "subcontract": {

@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "בהזמנה {po} סכום החשבוניות יגיע ל-{invoiced}, אך הסחורה שהתקבלה שווה רק {received} לפי מחירי ההזמנה",
       "suggestion": "יש להמתין לתעודת המשלוח או לאשר את קבלת הסחורה לפני אישור סכום זה"
+    },
+    "requisition_quantity_positive": {
+      "fail": "שורה {line} מבקשת {quantity}, אבל בשורת דרישת רכש הכמות חייבת להיות גדולה מאפס",
+      "suggestion": "הזינו את הכמות הנדרשת או הסירו את השורה"
+    },
+    "requisition_source_unit": {
+      "fail": "שורה {line} ביחידת {unit} אך אחד ממקורות ה-BOQ שלה ביחידת {source_unit}",
+      "suggestion": "השתמשו ביחידה של משאב ה-BOQ, או פצלו את השורה כך שלכל יחידה תהיה שורה משלה"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "תאריך הנדרש {date} כבר עבר (היום הוא {today})",
+      "suggestion": "קבעו את התאריך שבו החומר נדרש בפועל באתר"
     }
   },
   "subcontract": {

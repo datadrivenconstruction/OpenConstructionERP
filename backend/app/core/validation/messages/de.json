@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Auf Bestellung {po} ergäben die Rechnungen insgesamt {invoiced}, der Wareneingang ist zu Bestellpreisen aber nur {received} wert",
       "suggestion": "Lieferschein abwarten oder den Wareneingang bestätigen, bevor dieser Betrag freigegeben wird"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Zeile {line} fordert {quantity} an, eine Bedarfsposition braucht aber eine Menge größer als null",
+      "suggestion": "Geben Sie die benötigte Menge ein oder entfernen Sie die Zeile"
+    },
+    "requisition_source_unit": {
+      "fail": "Zeile {line} ist in {unit}, aber eine ihrer LV-Quellen ist in {source_unit}",
+      "suggestion": "Verwenden Sie die Einheit der LV-Ressource oder teilen Sie die Zeile, sodass jede Einheit für sich steht"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Der Bedarfstermin {date} liegt bereits in der Vergangenheit (heute ist {today})",
+      "suggestion": "Setzen Sie den Termin, an dem das Material tatsächlich auf der Baustelle gebraucht wird"
     }
   },
   "subcontract": {

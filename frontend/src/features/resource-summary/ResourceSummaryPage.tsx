@@ -14,8 +14,21 @@ import { useMutation, useQuery, type UseQueryResult } from '@tanstack/react-quer
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { LucideIcon } from 'lucide-react';
-import { Boxes, Download, FilePlus, HardHat, Layers, Package, ShoppingCart, Truck, Users, Wrench } from 'lucide-react';
+import {
+  Boxes,
+  ClipboardList,
+  Download,
+  FilePlus,
+  HardHat,
+  Layers,
+  Package,
+  ShoppingCart,
+  Truck,
+  Users,
+  Wrench,
+} from 'lucide-react';
 import { Button, Card, EmptyState, ErrorState, PageHeader, SkeletonTable, StatCard, TabBar, tabIds } from '@/shared/ui';
+import { CreateRequisitionModal } from './CreateRequisitionModal';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { QuantityDisplay } from '@/shared/ui/QuantityDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -232,7 +245,11 @@ export function ResourceSummaryPage() {
         aria-labelledby={TAB_IDS.tabId(activeTab)}
         className="space-y-5"
       >
-        {activeTab === 'statement' ? statementBody : <BuyListView query={buyListQuery} />}
+        {activeTab === 'statement' ? (
+          statementBody
+        ) : (
+          <BuyListView query={buyListQuery} projectId={activeProjectId ?? null} />
+        )}
       </div>
     </div>
   );
@@ -311,13 +328,17 @@ function ResourceGroupCard({ group, currency }: ResourceGroupCardProps) {
 
 interface BuyListViewProps {
   query: UseQueryResult<MaterialBuyListResponse>;
+  projectId: string | null;
 }
 
-function BuyListView({ query }: BuyListViewProps) {
+function BuyListView({ query, projectId }: BuyListViewProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const data = query.data;
   const currency = data?.currency?.trim() || undefined;
+  // Rows picked for a requisition, by index into the served list.
+  const [selected, setSelected] = useState<number[]>([]);
+  const [requisitionOpen, setRequisitionOpen] = useState(false);
 
   if (query.isLoading) {
     return (
@@ -388,6 +409,18 @@ function BuyListView({ query }: BuyListViewProps) {
             <Button
               variant="primary"
               size="sm"
+              icon={<ClipboardList size={14} />}
+              onClick={() => setRequisitionOpen(true)}
+              disabled={selected.length === 0 || !projectId}
+              title={t('resourceSummary.buyList.createRequisitionHint', {
+                defaultValue: 'Select the materials to request, then raise one requisition for them.',
+              })}
+            >
+              {t('resourceSummary.buyList.createRequisition', { defaultValue: 'Create requisition' })}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               icon={<FilePlus size={14} />}
               onClick={handleCreateDraftPo}
             >
@@ -400,6 +433,14 @@ function BuyListView({ query }: BuyListViewProps) {
           <table className="w-full min-w-[32rem] text-sm">
             <thead>
               <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                <th className="w-8 py-1.5 pr-2">
+                  <input
+                    type="checkbox"
+                    aria-label={t('resourceSummary.buyList.selectAll', { defaultValue: 'Select all materials' })}
+                    checked={selected.length === data.items.length}
+                    onChange={(e) => setSelected(e.target.checked ? data.items.map((_, i) => i) : [])}
+                  />
+                </th>
                 <th className="py-1.5 pr-3 font-medium">
                   {t('resourceSummary.buyList.col.material', { defaultValue: 'Material' })}
                 </th>
@@ -418,6 +459,19 @@ function BuyListView({ query }: BuyListViewProps) {
             <tbody>
               {data.items.map((item, idx) => (
                 <tr key={`${item.name}-${item.unit}-${idx}`} className="border-b border-border-light/60 last:border-0">
+                  <td className="py-1.5 pr-2">
+                    <input
+                      type="checkbox"
+                      aria-label={t('resourceSummary.buyList.selectRow', {
+                        defaultValue: 'Select {{name}}',
+                        name: item.name,
+                      })}
+                      checked={selected.includes(idx)}
+                      onChange={(e) =>
+                        setSelected((prev) => (e.target.checked ? [...prev, idx] : prev.filter((i) => i !== idx)))
+                      }
+                    />
+                  </td>
                   <td className="py-1.5 pr-3 text-content-primary">{item.name}</td>
                   <td className="py-1.5 pr-3 text-content-tertiary">{item.unit || '-'}</td>
                   <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
@@ -441,6 +495,20 @@ function BuyListView({ query }: BuyListViewProps) {
         {t('resourceSummary.generatedAt', { defaultValue: 'Generated' })}{' '}
         <DateDisplay value={data.generated_at} format="datetime" />
       </p>
+
+      {projectId && (
+        <CreateRequisitionModal
+          open={requisitionOpen}
+          projectId={projectId}
+          rows={selected.map((i) => data.items[i]).filter((row) => row !== undefined)}
+          onClose={() => setRequisitionOpen(false)}
+          onCreated={(id) => {
+            setRequisitionOpen(false);
+            setSelected([]);
+            navigate(`/procurement?requisition=${encodeURIComponent(id)}`);
+          }}
+        />
+      )}
     </>
   );
 }

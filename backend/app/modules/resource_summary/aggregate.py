@@ -300,14 +300,58 @@ def aggregate_resource_statement(
 
 
 @dataclass
+class BuyListSource:
+    """One BOQ resource line that contributes to a buy-list row.
+
+    ``resource_key`` names the resource within its position's split: the
+    resource's own ``id`` when it carries one, otherwise its index in the split
+    and its ``code`` (``"2:CWICR-123"``), or the index alone. ``quantity`` is
+    the gross purchase quantity this one line contributes, in ``unit`` as the
+    source states it, so a requisition raised from the row can keep both.
+    """
+
+    position_id: str
+    resource_key: str
+    quantity: Decimal
+    unit: str
+    code: str = ""
+    catalog_item_id: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "position_id": self.position_id,
+            "resource_key": self.resource_key,
+            "quantity": _q(self.quantity, _4P),
+            "unit": self.unit,
+            "code": self.code,
+            "catalog_item_id": self.catalog_item_id,
+        }
+
+
+def _resource_key(res: Mapping[str, Any], index: int) -> str:
+    """A reference to one resource within a position's resource split."""
+    own = str(res.get("id") or "").strip()
+    if own:
+        return own
+    code = str(res.get("code") or "").strip()
+    return f"{index}:{code}" if code else str(index)
+
+
+@dataclass
 class BuyListItem:
-    """One material purchase line: a distinct material to procure across the estimate."""
+    """One material purchase line: a distinct material to procure across the estimate.
+
+    ``sources`` lists every BOQ resource line folded into the row. The row
+    itself groups by name and unit, which is a reading aid and not a material
+    identity, so the sources are what a requisition raised from it must carry.
+    """
 
     name: str
     unit: str
     quantity: Decimal
     cost: Decimal
     position_count: int
+    sources: list[BuyListSource] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -316,6 +360,7 @@ class BuyListItem:
             "quantity": _q(self.quantity, _4P),
             "cost": _q(self.cost, _2P),
             "position_count": self.position_count,
+            "sources": [source.to_dict() for source in self.sources],
         }
 
 
@@ -423,7 +468,7 @@ def aggregate_material_buy_list(
             anon += 1
         contributed = False
 
-        for res in resources:
+        for res_index, res in enumerate(resources):
             if not isinstance(res, Mapping):
                 continue
             kind = coerce_kind(res.get("type") or res.get("resource_type") or res.get("kind"))
@@ -451,11 +496,28 @@ def aggregate_material_buy_list(
             key = (name.lower(), unit.lower())
             acc = groups.get(key)
             if acc is None:
-                acc = {"name": name, "unit": unit, "quantity": Decimal("0"), "cost": Decimal("0"), "positions": set()}
+                acc = {
+                    "name": name,
+                    "unit": unit,
+                    "quantity": Decimal("0"),
+                    "cost": Decimal("0"),
+                    "positions": set(),
+                    "sources": [],
+                }
                 groups[key] = acc
             acc["quantity"] += line_qty
             acc["cost"] += line_cost
             acc["positions"].add(pos_id)
+            acc["sources"].append(
+                BuyListSource(
+                    position_id=pos_id,
+                    resource_key=_resource_key(res, res_index),
+                    quantity=line_qty,
+                    unit=unit,
+                    code=str(res.get("code") or "").strip(),
+                    catalog_item_id=str(res.get("catalog_item_id") or "").strip() or None,
+                )
+            )
             contributed = True
 
         if contributed:
@@ -468,6 +530,7 @@ def aggregate_material_buy_list(
             quantity=acc["quantity"],
             cost=acc["cost"],
             position_count=len(acc["positions"]),
+            sources=acc["sources"],
         )
         for acc in groups.values()
     ]

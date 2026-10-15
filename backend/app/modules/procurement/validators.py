@@ -500,3 +500,92 @@ def check_invoice_value_received(payload: dict[str, Any]) -> list[Finding]:
             details={"invoiced_total_net": str(total), "received_net": str(received), "tolerance_net": str(band)},
         )
     ]
+
+
+# ── Material requisitions (submission gate) ──────────────────────────────────
+#
+# Payload shape, built by ``RequisitionWorkflowService.validation_payload``:
+#
+#     {"req_number": "MR-0001", "required_date": "2026-11-01" | None,
+#      "today": "2026-10-15",
+#      "items": [{"description", "unit", "quantity_requested",
+#                 "sources": [{"unit", "quantity", "resource_key"}]}]}
+#
+# ``today`` travels in the payload so the date rule answers the same thing in a
+# test as in production, and so a report re-run later says what it said then.
+
+
+def _req_ref(req: dict[str, Any]) -> str:
+    return str(req.get("req_number") or "requisition")
+
+
+def _unit_key(raw: Any) -> str:
+    return str(raw or "").strip().lower()
+
+
+def check_requisition_quantity_positive(req: dict[str, Any]) -> list[Finding]:
+    """Every requisition line must ask for a positive quantity."""
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        quantity = parse_money(item.get("quantity_requested"))
+        if quantity is None or not quantity.is_finite() or quantity <= 0:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "quantity": str(item.get("quantity_requested") or "0")},
+                    details={"quantity_requested": str(item.get("quantity_requested"))},
+                )
+            )
+    return findings
+
+
+def check_requisition_source_unit(req: dict[str, Any]) -> list[Finding]:
+    """A line's unit must equal the unit of every BOQ source it was raised from.
+
+    No conversion is attempted: a line in ``t`` fed by a source in ``kg`` would
+    otherwise sum two different things, and nothing records the factor used.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        line_unit = _unit_key(item.get("unit"))
+        sources = item.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            source_unit = _unit_key(source.get("unit"))
+            if source_unit != line_unit:
+                findings.append(
+                    Finding(
+                        element_ref=line_label(index, item),
+                        params={
+                            "line": line_label(index, item),
+                            "unit": str(item.get("unit") or "-"),
+                            "source_unit": str(source.get("unit") or "-"),
+                        },
+                        details={"resource_key": source.get("resource_key")},
+                    )
+                )
+    return findings
+
+
+def check_requisition_needed_by_not_past(req: dict[str, Any]) -> list[Finding]:
+    """The date the material is needed by must not already have passed."""
+    raw = req.get("required_date")
+    if not raw:
+        return []
+    try:
+        needed = date.fromisoformat(str(raw)[:10])
+        today = date.fromisoformat(str(req.get("today") or date.today().isoformat())[:10])
+    except ValueError:
+        return [Finding(element_ref=_req_ref(req), params={"date": str(raw), "today": "-"})]
+    if needed >= today:
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"date": needed.isoformat(), "today": today.isoformat()},
+            details={"required_date": needed.isoformat(), "today": today.isoformat()},
+        )
+    ]

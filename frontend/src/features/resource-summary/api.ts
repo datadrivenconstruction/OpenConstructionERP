@@ -56,6 +56,21 @@ export interface ResourceSnapshotSummary {
   line_count: number;
 }
 
+/**
+ * One BOQ resource line folded into a buy-list row: the position, the resource
+ * within its split, and the quantity and unit it contributes as the source
+ * states them. A requisition raised from the row carries these through.
+ */
+export interface MaterialBuyListSource {
+  position_id: string;
+  resource_key: string;
+  /** Gross quantity this resource line contributes (Decimal string, 4dp). */
+  quantity: string;
+  unit: string;
+  code: string;
+  catalog_item_id: string | null;
+}
+
 /** One material purchase line in the procurement buy-list. */
 export interface MaterialBuyListItem {
   name: string;
@@ -68,6 +83,8 @@ export interface MaterialBuyListItem {
   position_count: number;
   /** Currency of the cost, carried per line so a CSV export prints money verbatim. */
   currency: string;
+  /** Every BOQ resource line folded into this row. Absent from an older server. */
+  sources?: MaterialBuyListSource[];
 }
 
 export interface MaterialBuyListResponse {

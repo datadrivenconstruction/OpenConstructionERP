@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "{po} buyurtmasi hisoblari jami {invoiced} boʻladi, ammo qabul qilingan tovarlar buyurtma narxlarida faqat {received} turadi",
       "suggestion": "Bu summani tasdiqlashdan oldin yuk xatini kuting yoki tovar qabul qilinganini tasdiqlang"
+    },
+    "requisition_quantity_positive": {
+      "fail": "{line}-qator {quantity} so'raydi, ammo material so'rovi qatorida miqdor noldan katta bo'lishi kerak",
+      "suggestion": "Kerakli miqdorni kiriting yoki qatorni olib tashlang"
+    },
+    "requisition_source_unit": {
+      "fail": "{line}-qator {unit} birligida, ammo uning BOQ manbalaridan biri {source_unit} birligida",
+      "suggestion": "BOQ resursining birligidan foydalaning yoki qatorni har bir birlik alohida turadigan qilib bo'ling"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Kerak bo'lish sanasi {date} allaqachon o'tib ketgan (bugun {today})",
+      "suggestion": "Material qurilish maydonida haqiqatan kerak bo'ladigan sanani belgilang"
     }
   },
   "subcontract": {

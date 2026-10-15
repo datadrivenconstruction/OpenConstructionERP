@@ -10896,6 +10896,46 @@ class ProcurementInvoiceValueReceived(_ProcurementRule):
     check_name = "check_invoice_value_received"
 
 
+# ── Material requisitions (submission gate) ─────────────────────────────────
+#
+# Run by ``RequisitionWorkflowService.submit`` and by the read-only validate
+# endpoint, both of which pass the "procurement_requisition" set explicitly.
+# The payload shape is documented beside the checks in ``procurement.validators``.
+
+
+class ProcurementRequisitionQuantityPositive(_ProcurementRule):
+    """A requisition line must ask for a positive quantity."""
+
+    rule_id = "procurement.requisition_quantity_positive"
+    name = "Requisition Quantity Positive"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a requisition line whose requested quantity is zero, negative or not a number."
+    check_name = "check_requisition_quantity_positive"
+
+
+class ProcurementRequisitionSourceUnit(_ProcurementRule):
+    """A requisition line must be in the unit of the BOQ resources it came from."""
+
+    rule_id = "procurement.requisition_source_unit"
+    name = "Requisition Unit Matches Source"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition line whose unit differs from the unit of a BOQ source it was raised from."
+    check_name = "check_requisition_source_unit"
+
+
+class ProcurementRequisitionNeededByNotPast(_ProcurementRule):
+    """The needed-by date of a requisition must not already have passed."""
+
+    rule_id = "procurement.requisition_needed_by_not_past"
+    name = "Requisition Needed-By Date Not Past"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition submitted with a needed-by date earlier than today."
+    check_name = "check_requisition_needed_by_not_past"
+
+
 # ── Subcontract agreements (activation gate) ────────────────────────────────
 #
 # An agreement leaving ``draft`` for ``active`` is the moment a subcontractor
@@ -11558,6 +11598,11 @@ def register_builtin_rules() -> None:
         (ProcurementInvoiceWithinOrder(), ["invoice_po_match"]),
         (ProcurementInvoiceQuantityReceived(), ["invoice_po_match"]),
         (ProcurementInvoiceValueReceived(), ["invoice_po_match"]),
+        # Material requisitions. Registered into "procurement_requisition", which
+        # RequisitionWorkflowService passes explicitly on submit and on validate.
+        (ProcurementRequisitionQuantityPositive(), ["procurement_requisition"]),
+        (ProcurementRequisitionSourceUnit(), ["procurement_requisition"]),
+        (ProcurementRequisitionNeededByNotPast(), ["procurement_requisition"]),
         # Subcontract agreements (activation gate)
         # Registered into the "subcontract" set, which
         # SubcontractorService._validate_agreement passes on activation and on

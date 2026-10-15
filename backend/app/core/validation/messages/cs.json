@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Faktury objednávky {po} by celkem činily {invoiced}, ale přijaté zboží má v objednávkových cenách hodnotu jen {received}",
       "suggestion": "Před schválením této částky vyčkejte na dodací list nebo potvrďte příjem zboží"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Řádek {line} žádá {quantity}, ale řádek požadavku na materiál musí mít množství větší než nula",
+      "suggestion": "Zadejte potřebné množství nebo řádek odstraňte"
+    },
+    "requisition_source_unit": {
+      "fail": "Řádek {line} je v {unit}, ale jeden z jeho zdrojů BOQ je v {source_unit}",
+      "suggestion": "Použijte jednotku zdroje BOQ, nebo řádek rozdělte tak, aby každá jednotka měla vlastní řádek"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Datum potřeby {date} už uplynulo (dnes je {today})",
+      "suggestion": "Nastavte datum, kdy je materiál na stavbě skutečně potřeba"
     }
   },
   "subcontract": {

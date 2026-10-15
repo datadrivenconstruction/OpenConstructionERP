@@ -143,6 +143,26 @@ class ResourceStatementResponse(BaseModel):
         )
 
 
+class MaterialBuyListSource(BaseModel):
+    """One BOQ resource line folded into a buy-list row.
+
+    ``position_id`` is the BOQ position, ``resource_key`` the resource within
+    its split, and ``quantity``/``unit`` what this line contributes, as the
+    source states it. A requisition raised from the row carries these through.
+    """
+
+    position_id: str
+    resource_key: str
+    quantity: Decimal
+    unit: str
+    code: str = ""
+    catalog_item_id: str | None = None
+
+    @field_serializer("quantity", when_used="json")
+    def _ser_quantity(self, v: Decimal) -> str:
+        return _qty(v)
+
+
 class MaterialBuyListItem(BaseModel):
     """One material purchase line in the procurement buy-list.
 
@@ -158,6 +178,7 @@ class MaterialBuyListItem(BaseModel):
     cost: Decimal
     position_count: int
     currency: str
+    sources: list[MaterialBuyListSource] = Field(default_factory=list)
 
     @field_serializer("quantity", when_used="json")
     def _ser_quantity(self, v: Decimal) -> str:
@@ -176,6 +197,17 @@ class MaterialBuyListItem(BaseModel):
             cost=item.cost,
             position_count=item.position_count,
             currency=currency,
+            sources=[
+                MaterialBuyListSource(
+                    position_id=source.position_id,
+                    resource_key=source.resource_key,
+                    quantity=source.quantity,
+                    unit=source.unit,
+                    code=source.code,
+                    catalog_item_id=source.catalog_item_id,
+                )
+                for source in item.sources
+            ],
         )
 
 

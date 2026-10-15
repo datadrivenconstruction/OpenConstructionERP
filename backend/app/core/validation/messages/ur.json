@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "آرڈر {po} کی انوائسوں کا کل {invoiced} ہوگا، مگر آرڈر کے نرخوں پر وصول شدہ سامان کی قدر صرف {received} ہے",
       "suggestion": "یہ رقم منظور کرنے سے پہلے ترسیلی پرچی کا انتظار کریں یا سامان کی وصولی کی تصدیق کریں"
+    },
+    "requisition_quantity_positive": {
+      "fail": "لائن {line} میں {quantity} مانگا گیا ہے، لیکن مواد کی درخواست کی لائن میں مقدار صفر سے زیادہ ہونی چاہیے",
+      "suggestion": "درکار مقدار درج کریں یا لائن حذف کر دیں"
+    },
+    "requisition_source_unit": {
+      "fail": "لائن {line} یونٹ {unit} میں ہے لیکن اس کا ایک BOQ ماخذ {source_unit} میں ہے",
+      "suggestion": "BOQ وسیلے کا یونٹ استعمال کریں، یا لائن کو اس طرح تقسیم کریں کہ ہر یونٹ الگ رہے"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "درکار تاریخ {date} گزر چکی ہے (آج {today} ہے)",
+      "suggestion": "وہ تاریخ مقرر کریں جب سائٹ پر مواد واقعی درکار ہو"
     }
   },
   "subcontract": {

@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Fakturaene på ordre {po} ville utgjøre {invoiced}, men mottatte varer er bare verdt {received} til ordreprisene",
       "suggestion": "Vent på følgeseddelen, eller bekreft varemottaket før dette beløpet godkjennes"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Linje {line} ber om {quantity}, men en linje i en innkjøpsforespørsel må ha en mengde over null",
+      "suggestion": "Oppgi mengden du trenger, eller fjern linjen"
+    },
+    "requisition_source_unit": {
+      "fail": "Linje {line} er i {unit}, men en av BOQ-kildene er i {source_unit}",
+      "suggestion": "Bruk enheten til BOQ-ressursen, eller del linjen slik at hver enhet står for seg"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Behovsdatoen {date} er allerede passert (i dag er {today})",
+      "suggestion": "Angi datoen materialet faktisk trengs på byggeplassen"
     }
   },
   "subcontract": {

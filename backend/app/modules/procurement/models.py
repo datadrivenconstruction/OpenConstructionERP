@@ -9,6 +9,7 @@ Tables:
     oe_procurement_gr_item       - goods receipt line items
     oe_procurement_requisition   - material requisitions (R7 FSM)
     oe_procurement_req_item      - requisition line items
+    oe_procurement_req_item_source - BOQ provenance of a requisition line
 """
 
 import uuid
@@ -392,9 +393,53 @@ class MaterialRequisitionItem(Base):
     # Additive nullable link to the cost line this requisition item maps to.
     cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # The supplier catalogue item this line asks for, when one is known. It is
+    # the only identity two lines are merged on without a person confirming it:
+    # a shared description and unit are not proof of the same material.
+    catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     # Relationship
     requisition: Mapped["MaterialRequisition"] = relationship(back_populates="items")
+    # Where the requested quantity came from. A line raised from the buy list
+    # usually has several sources, one per contributing BOQ position.
+    sources: Mapped[list["MaterialRequisitionItemSource"]] = relationship(
+        back_populates="item",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+        order_by="MaterialRequisitionItemSource.sort_order",
+    )
 
     def __repr__(self) -> str:
         return f"<MaterialRequisitionItem {self.description[:40]}>"
+
+
+class MaterialRequisitionItemSource(Base):
+    """One BOQ resource that contributes quantity to a requisition line.
+
+    Keeps the position, the resource within the position's resource split, the
+    quantity and unit as they stood at the source, and the cost line the
+    position pointed at when the line was written. The source quantity is never
+    rewritten by a later BOQ edit, so what was asked for stays explainable.
+    """
+
+    __tablename__ = "oe_procurement_req_item_source"
+
+    item_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_procurement_req_item.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    # Plain columns rather than foreign keys: the position or cost line may be
+    # deleted later, and the requisition must still say where it came from.
+    boq_position_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    resource_key: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    item: Mapped["MaterialRequisitionItem"] = relationship(back_populates="sources", lazy="raise_on_sql")
+
+    def __repr__(self) -> str:
+        return f"<MaterialRequisitionItemSource {self.boq_position_id} {self.resource_key}>"

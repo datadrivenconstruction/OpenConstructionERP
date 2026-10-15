@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Pada pesanan {po}, total faktur akan menjadi {invoiced}, tetapi nilai barang yang diterima hanya {received} berdasarkan harga pesanan",
       "suggestion": "Tunggu surat jalan atau konfirmasikan penerimaan barang sebelum menyetujui jumlah ini"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Baris {line} meminta {quantity}, tetapi baris permintaan material harus memiliki kuantitas di atas nol",
+      "suggestion": "Masukkan kuantitas yang dibutuhkan, atau hapus barisnya"
+    },
+    "requisition_source_unit": {
+      "fail": "Baris {line} memakai satuan {unit}, tetapi salah satu sumber BOQ-nya memakai {source_unit}",
+      "suggestion": "Gunakan satuan sumber daya BOQ, atau pisahkan baris agar setiap satuan berdiri sendiri"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Tanggal dibutuhkan {date} sudah lewat (hari ini {today})",
+      "suggestion": "Tetapkan tanggal material benar-benar dibutuhkan di lokasi proyek"
     }
   },
   "subcontract": {

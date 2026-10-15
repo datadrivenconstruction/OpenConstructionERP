@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Računi po narudžbi {po} iznosili bi ukupno {invoiced}, ali primljena roba vrijedi samo {received} prema cijenama narudžbe",
       "suggestion": "Pričekajte otpremnicu ili potvrdite primitak robe prije odobrenja ovog iznosa"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Stavka {line} traži {quantity}, ali stavka zahtjeva za nabavu mora imati količinu veću od nule",
+      "suggestion": "Unesite potrebnu količinu ili uklonite stavku"
+    },
+    "requisition_source_unit": {
+      "fail": "Stavka {line} je u {unit}, ali je jedan od njezinih BOQ izvora u {source_unit}",
+      "suggestion": "Koristite jedinicu BOQ resursa ili podijelite stavku tako da svaka jedinica bude zasebno"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Datum potrebe {date} već je prošao (danas je {today})",
+      "suggestion": "Postavite datum kada je materijal stvarno potreban na gradilištu"
     }
   },
   "subcontract": {

@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Facturile comenzii {po} ar totaliza {invoiced}, dar mărfurile recepționate valorează doar {received} la prețurile comenzii",
       "suggestion": "Așteptați avizul de însoțire sau confirmați recepția mărfurilor înainte de aprobarea acestei sume"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Linia {line} cere {quantity}, dar o linie de cerere de materiale trebuie să aibă o cantitate mai mare decât zero",
+      "suggestion": "Introduceți cantitatea necesară sau eliminați linia"
+    },
+    "requisition_source_unit": {
+      "fail": "Linia {line} este în {unit}, dar una dintre sursele sale BOQ este în {source_unit}",
+      "suggestion": "Folosiți unitatea resursei BOQ sau împărțiți linia astfel încât fiecare unitate să aibă linia ei"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Data necesarului {date} a trecut deja (astăzi este {today})",
+      "suggestion": "Setați data la care materialul este necesar efectiv pe șantier"
     }
   },
   "subcontract": {

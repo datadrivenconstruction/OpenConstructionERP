@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Tellimuse {po} arved annaksid kokku {invoiced}, kuid vastuvõetud kaupade väärtus tellimuse hindades on ainult {received}",
       "suggestion": "Oodake saatelehte või kinnitage kauba vastuvõtt enne selle summa kinnitamist"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Rida {line} küsib {quantity}, kuid materjalitaotluse real peab kogus olema suurem kui null",
+      "suggestion": "Sisestage vajalik kogus või eemaldage rida"
+    },
+    "requisition_source_unit": {
+      "fail": "Rida {line} on ühikus {unit}, kuid üks selle BOQ allikatest on ühikus {source_unit}",
+      "suggestion": "Kasutage BOQ ressursi ühikut või jagage rida nii, et iga ühik oleks eraldi real"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Vajaduse kuupäev {date} on juba möödas (täna on {today})",
+      "suggestion": "Määrake kuupäev, mil materjali objektil tegelikult vaja on"
     }
   },
   "subcontract": {

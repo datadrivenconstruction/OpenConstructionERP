@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "订单 {po} 的累计发票金额将达到 {invoiced}，但按订单单价计算的已收货物价值仅为 {received}。",
       "suggestion": "批准此金额前，请等待送货单或确认收货。"
+    },
+    "requisition_quantity_positive": {
+      "fail": "第 {line} 行请购 {quantity},但请购单的行数量必须大于零",
+      "suggestion": "请填写所需数量,或删除该行"
+    },
+    "requisition_source_unit": {
+      "fail": "第 {line} 行的单位是 {unit},但其某个 BOQ 来源的单位是 {source_unit}",
+      "suggestion": "请使用 BOQ 资源的单位,或拆分该行,使每种单位各占一行"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "需求日期 {date} 已经过去(今天是 {today})",
+      "suggestion": "请设置材料在现场实际需要的日期"
     }
   },
   "subcontract": {

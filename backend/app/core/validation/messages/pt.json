@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "No pedido {po}, as faturas totalizariam {invoiced}, mas os materiais recebidos valem apenas {received} aos preços do pedido",
       "suggestion": "Aguarde o comprovante de entrega ou confirme o recebimento dos materiais antes de aprovar este valor"
+    },
+    "requisition_quantity_positive": {
+      "fail": "A linha {line} pede {quantity}, mas uma linha de requisição de materiais precisa ter quantidade maior que zero",
+      "suggestion": "Informe a quantidade necessária ou remova a linha"
+    },
+    "requisition_source_unit": {
+      "fail": "A linha {line} está em {unit}, mas uma das suas fontes de BOQ está em {source_unit}",
+      "suggestion": "Use a unidade do recurso do BOQ ou divida a linha para que cada unidade fique separada"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "A data de necessidade {date} já passou (hoje é {today})",
+      "suggestion": "Defina a data em que o material é realmente necessário na obra"
     }
   },
   "subcontract": {

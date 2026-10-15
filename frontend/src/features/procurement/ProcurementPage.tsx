@@ -58,6 +58,7 @@ import { BillPositionPicker } from './BillPositionPicker';
 import { RetainagePanel, RetainageBadge } from './RetainagePanel';
 import { SupplierConfirmationModal } from './SupplierConfirmationModal';
 import { POStatusPipeline } from './POStatusPipeline';
+import { RequisitionsTab } from './RequisitionsTab';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
 import { fmtFixed } from '@/shared/lib/formatters';
@@ -350,7 +351,7 @@ function currencyOptions(active: string): string[] {
   return [...COMMON_CURRENCIES];
 }
 
-type ProcurementTab = 'purchase-orders' | 'goods-receipts' | 'vendors' | 'catalog';
+type ProcurementTab = 'requisitions' | 'purchase-orders' | 'goods-receipts' | 'vendors' | 'catalog';
 
 // The vendor and catalog reference library, shown here as two tabs so a buyer
 // does not leave Procurement to find a supplier or a catalog price. It is the
@@ -427,6 +428,16 @@ export function ProcurementPage() {
     if (focusPoId) setActiveTab('purchase-orders');
   }, [focusPoId]);
 
+  // `?requisition=<id>` opens the Requisitions tab on one requisition. The
+  // buy-list lands here this way after it creates a requisition.
+  const focusRequisitionId = useMemo(
+    () => new URLSearchParams(location.search).get('requisition'),
+    [location.search],
+  );
+  useEffect(() => {
+    if (focusRequisitionId) setActiveTab('requisitions');
+  }, [focusRequisitionId]);
+
   // Module Insights panel. Charts the purchase orders THIS PAGE LOADED - the
   // register that carries each order's committed value, supplier and delivery
   // status - so a chart slice reads like the status badge on the row it came
@@ -461,6 +472,11 @@ export function ProcurementPage() {
   );
 
   const tabs: { key: ProcurementTab; label: string; icon: React.ReactNode }[] = [
+    {
+      key: 'requisitions',
+      label: t('procurement.requisitions.tab', { defaultValue: 'Requisitions' }),
+      icon: <FileText size={15} />,
+    },
     {
       key: 'purchase-orders',
       label: t('procurement.purchase_orders', { defaultValue: 'Purchase Orders' }),
@@ -607,6 +623,9 @@ export function ProcurementPage() {
         >{null}</RequiresProject>
       ) : (
         <>
+          {activeTab === 'requisitions' && (
+            <RequisitionsTab projectId={projectId} focusRequisitionId={focusRequisitionId} />
+          )}
           {activeTab === 'purchase-orders' && (
             <PurchaseOrdersTab
               projectId={projectId}

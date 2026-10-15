@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "{po} siparişinin faturaları toplam {invoiced} olacak, ancak teslim alınan malların sipariş fiyatlarıyla değeri yalnızca {received}",
       "suggestion": "Bu tutarı onaylamadan önce irsaliyeyi bekleyin veya mal kabulünü doğrulayın"
+    },
+    "requisition_quantity_positive": {
+      "fail": "{line}. satır {quantity} istiyor, ancak satın alma talebi satırında miktar sıfırdan büyük olmalıdır",
+      "suggestion": "İhtiyaç duyulan miktarı girin veya satırı silin"
+    },
+    "requisition_source_unit": {
+      "fail": "{line}. satır {unit} biriminde, ancak BOQ kaynaklarından biri {source_unit} biriminde",
+      "suggestion": "BOQ kaynağının birimini kullanın veya satırı her birim ayrı olacak şekilde bölün"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "İhtiyaç tarihi {date} geçmişte kaldı (bugün {today})",
+      "suggestion": "Malzemenin şantiyede gerçekten gerektiği tarihi girin"
     }
   },
   "subcontract": {

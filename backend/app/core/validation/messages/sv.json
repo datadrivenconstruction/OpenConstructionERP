@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Fakturorna för order {po} skulle uppgå till {invoiced}, men mottaget gods är bara värt {received} enligt orderpriserna",
       "suggestion": "Invänta följesedeln eller bekräfta godsmottagningen innan beloppet godkänns"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Rad {line} begär {quantity}, men en rad i en inköpsbegäran måste ha en kvantitet över noll",
+      "suggestion": "Ange den kvantitet du behöver eller ta bort raden"
+    },
+    "requisition_source_unit": {
+      "fail": "Rad {line} är i {unit}, men en av dess BOQ-källor är i {source_unit}",
+      "suggestion": "Använd enheten från BOQ-resursen, eller dela raden så att varje enhet står för sig"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Behovsdatumet {date} har redan passerat (idag är {today})",
+      "suggestion": "Ange det datum då materialet faktiskt behövs på arbetsplatsen"
     }
   },
   "subcontract": {

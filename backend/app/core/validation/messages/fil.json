@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Sa order na {po}, aabot sa {invoiced} ang mga invoice, ngunit {received} lamang ang halaga ng mga natanggap na kalakal ayon sa presyo ng order",
       "suggestion": "Hintayin ang delivery note o kumpirmahin ang pagtanggap ng mga kalakal bago aprubahan ang halagang ito"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Ang linya {line} ay humihingi ng {quantity}, pero ang linya ng requisition ng materyales ay dapat may dami na higit sa zero",
+      "suggestion": "Ilagay ang dami na kailangan mo, o alisin ang linya"
+    },
+    "requisition_source_unit": {
+      "fail": "Ang linya {line} ay nasa {unit} pero ang isa sa mga BOQ source nito ay nasa {source_unit}",
+      "suggestion": "Gamitin ang unit ng BOQ resource, o hatiin ang linya para may sariling linya ang bawat unit"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Lampas na ang petsang kailangan {date} (ngayon ay {today})",
+      "suggestion": "Itakda ang petsa kung kailan talagang kailangan ang materyales sa site"
     }
   },
   "subcontract": {

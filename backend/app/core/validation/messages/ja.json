@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "発注 {po} の請求合計は {invoiced} になりますが、発注単価での受領済み品の価額は {received} のみです",
       "suggestion": "この金額を承認する前に、納品書を待つか、受領を確認してください"
+    },
+    "requisition_quantity_positive": {
+      "fail": "明細 {line} は {quantity} を要求していますが、購買依頼の明細は数量がゼロより大きい必要があります",
+      "suggestion": "必要な数量を入力するか、明細を削除してください"
+    },
+    "requisition_source_unit": {
+      "fail": "明細 {line} の単位は {unit} ですが、内訳書の参照元の1つは {source_unit} です",
+      "suggestion": "内訳書リソースの単位を使うか、単位ごとに明細を分割してください"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "納入希望日 {date} はすでに過ぎています(本日は {today})",
+      "suggestion": "資材が現場で実際に必要になる日付を設定してください"
     }
   },
   "subcontract": {

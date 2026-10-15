@@ -90,7 +90,9 @@ def _safe_decimal_str(v: object) -> str:
 
 _MR_STATUS_TRANSITIONS: dict[str, set[str]] = {
     "draft": {"submitted", "cancelled"},
-    "submitted": {"approved", "rejected", "draft"},
+    # ``draft`` is the requester withdrawing it to edit; ``cancelled`` is the
+    # requester taking it back for good. Both leave a history entry.
+    "submitted": {"approved", "rejected", "draft", "cancelled"},
     "approved": {"ordered", "cancelled"},
     "ordered": {"received", "cancelled"},
     "received": {"consumed"},
@@ -3228,6 +3230,8 @@ class MaterialRequisitionService:
                 mr_item = MaterialRequisitionItem(
                     requisition_id=req.id,
                     description=item_data.get("description", ""),
+                    unit=item_data.get("unit"),
+                    sort_order=idx,
                     quantity_requested=qty,
                     unit_cost=Decimal(ucost) if ucost else Decimal("0"),
                     extended_cost=Decimal(extended),

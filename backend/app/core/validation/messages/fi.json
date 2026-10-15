@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Tilauksen {po} laskujen summa olisi {invoiced}, mutta vastaanotettujen tavaroiden arvo tilauksen hinnoilla on vain {received}",
       "suggestion": "Odota lähetyslistaa tai vahvista tavaran vastaanotto ennen tämän summan hyväksymistä"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Rivi {line} pyytää määrää {quantity}, mutta hankintapyynnön rivillä määrän on oltava nollaa suurempi",
+      "suggestion": "Anna tarvittava määrä tai poista rivi"
+    },
+    "requisition_source_unit": {
+      "fail": "Rivi {line} on yksikössä {unit}, mutta yksi sen BOQ-lähteistä on yksikössä {source_unit}",
+      "suggestion": "Käytä BOQ-resurssin yksikköä tai jaa rivi niin, että jokaisella yksiköllä on oma rivinsä"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Tarvepäivä {date} on jo mennyt (tänään on {today})",
+      "suggestion": "Aseta päivä, jolloin materiaalia todella tarvitaan työmaalla"
     }
   },
   "subcontract": {

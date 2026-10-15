@@ -384,8 +384,10 @@ async def test_pr_full_workflow_with_approval_chain(session, captured_events):
 
 
 @pytest.mark.asyncio
-async def test_pr_submit_without_chain_auto_approves(session):
+async def test_pr_submit_without_chain_stays_submitted(session):
+    """No approval chain is not an approval: the PR waits until someone approves it."""
     svc = SupplierCatalogsService(session)
+    vendor = await _seed_vendor(svc)
     item = await _seed_item(svc, "SKU-AUTO")
     pr = await svc.create_pr(
         PRCreate(
@@ -402,7 +404,59 @@ async def test_pr_submit_without_chain_auto_approves(session):
         )
     )
     submitted = await svc.submit_pr(pr.id)
-    assert submitted.status == "approved"
+    assert submitted.status == "submitted"
+
+    # A submitted PR is not yet a purchase: it cannot be converted to an order.
+    with pytest.raises(HTTPException) as exc:
+        await svc.convert_pr_to_po(pr.id, vendor_id=vendor.id)
+    assert exc.value.status_code == 400
+
+    # An explicit approval by a permission holder releases it.
+    approved = await svc.approve_pr(pr.id, approver_id="user-manager")
+    assert approved.status == "approved"
+
+
+@pytest.mark.asyncio
+async def test_pr_chain_only_the_next_designated_approver_may_advance(session, captured_events):
+    svc = SupplierCatalogsService(session)
+    item = await _seed_item(svc, "SKU-CHAIN")
+    pr = await svc.create_pr(
+        PRCreate(
+            project_id=uuid.uuid4(),
+            approval_chain=["user-a", "user-b"],
+            lines=[
+                PRLineCreate(
+                    catalog_item_id=item.id,
+                    description="x",
+                    quantity=Decimal("1"),
+                    estimated_unit_price=Decimal("10"),
+                )
+            ],
+        )
+    )
+    await svc.submit_pr(pr.id)
+
+    # Someone outside the chain is refused, and so is the second approver
+    # trying to go before the first.
+    for outsider in ("user-z", "user-b"):
+        with pytest.raises(HTTPException) as exc:
+            await svc.approve_pr(pr.id, approver_id=outsider)
+        assert exc.value.status_code == 403
+        with pytest.raises(HTTPException) as exc:
+            await svc.reject_pr(pr.id, approver_id=outsider)
+        assert exc.value.status_code == 403
+    still = await svc.prs.get(pr.id)
+    assert still is not None
+    assert still.status == "approval_pending"
+    assert list(still.approval_chain_json) == ["user-a", "user-b"]
+
+    step = await svc.approve_pr(pr.id, approver_id="user-a")
+    assert step.status == "approval_pending"
+    done = await svc.approve_pr(pr.id, approver_id="user-b")
+    assert done.status == "approved"
+
+    approvals = [payload for name, payload in captured_events if name == "supplier_catalogs.pr.approved"]
+    assert [p["final"] for p in approvals] == [False, True]
 
 
 @pytest.mark.asyncio
@@ -472,6 +526,7 @@ async def test_pr_cannot_convert_with_inactive_vendor(session):
         )
     )
     await svc.submit_pr(pr.id)
+    await svc.approve_pr(pr.id, approver_id="user-manager")
     with pytest.raises(HTTPException) as exc:
         await svc.convert_pr_to_po(pr.id, vendor_id=vendor.id)
     assert exc.value.status_code == 400
@@ -1842,7 +1897,7 @@ async def test_cross_project_idor_pr_approve(session, monkeypatch, _no_event_dis
     pr = await svc.create_pr(
         PRCreate(
             project_id=project_id,
-            approval_chain=["x"],
+            approval_chain=[owner],
             lines=[
                 PRLineCreate(
                     catalog_item_id=item.id,

@@ -789,3 +789,179 @@ class CommittedByPositionListResponse(BaseModel):
     total: int
     offset: int = 0
     limit: int = 100
+
+
+# ── Material requisitions ───────────────────────────────────────────────────
+
+
+#: Every status the requisition FSM in ``service._MR_STATUS_TRANSITIONS`` knows.
+RequisitionStatus = Literal[
+    "draft", "submitted", "approved", "ordered", "received", "consumed", "rejected", "cancelled"
+]
+
+
+class RequisitionItemSourceIn(BaseModel):
+    """One BOQ resource contributing quantity to a requisition line.
+
+    ``quantity`` and ``unit`` are the figures at the source. They are kept as
+    sent, so a line whose unit differs from its source is reported by the
+    ``procurement_requisition`` rules instead of being silently converted.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    boq_position_id: UUID | None = None
+    resource_key: str | None = Field(default=None, max_length=200)
+    quantity: str = Field(default="0", max_length=50)
+    unit: str | None = Field(default=None, max_length=20)
+    cost_line_id: UUID | None = None
+
+    @field_validator("quantity")
+    @classmethod
+    def _check_quantity(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
+
+class RequisitionItemIn(BaseModel):
+    """A requisition line as written by the client.
+
+    A draft may hold a zero quantity while it is being filled in; submission is
+    where the ``procurement_requisition`` rules refuse it.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    description: str = Field(..., min_length=1, max_length=500)
+    unit: str | None = Field(default=None, max_length=20)
+    quantity_requested: str = Field(default="0", max_length=50)
+    unit_cost: str = Field(default="0", max_length=50)
+    currency_code: str = Field(default="", max_length=10)
+    catalog_item_id: UUID | None = None
+    cost_line_id: UUID | None = None
+    boq_position_id: UUID | None = None
+    sources: list[RequisitionItemSourceIn] = Field(default_factory=list, max_length=1000)
+
+    @field_validator("quantity_requested", "unit_cost")
+    @classmethod
+    def _check_non_negative(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
+
+class RequisitionCreate(BaseModel):
+    """Create a material requisition in ``draft``."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    title: str | None = Field(default=None, max_length=500)
+    required_date: date | None = None
+    lead_time_days: int = Field(default=0, ge=0, le=3650)
+    notes: str | None = Field(default=None, max_length=5000)
+    items: list[RequisitionItemIn] = Field(default_factory=list, max_length=1000)
+
+
+class RequisitionUpdate(BaseModel):
+    """Edit a draft requisition. Fields left out are left alone.
+
+    ``items``, when sent, replaces the whole set of lines: the client edits the
+    draft as one document, and a partial line merge would have to guess which
+    line a source belongs to.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    title: str | None = Field(default=None, max_length=500)
+    required_date: date | None = None
+    lead_time_days: int | None = Field(default=None, ge=0, le=3650)
+    notes: str | None = Field(default=None, max_length=5000)
+    items: list[RequisitionItemIn] | None = Field(default=None, max_length=1000)
+
+
+class RequisitionCancel(BaseModel):
+    """Optional reason recorded when a requisition is cancelled."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    reason: str | None = Field(default=None, max_length=2000)
+
+
+class RequisitionItemSourceResponse(BaseModel):
+    """A stored BOQ source of a requisition line."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    boq_position_id: UUID | None = None
+    resource_key: str | None = None
+    quantity: str = "0"
+    unit: str | None = None
+    cost_line_id: UUID | None = None
+
+
+class RequisitionItemResponse(BaseModel):
+    """A requisition line with its purchasing progress.
+
+    ``quantity_outstanding`` is requested minus received and is not clamped: a
+    negative figure means more arrived than was asked for, which a buyer needs
+    to see rather than have rounded away to zero.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    description: str
+    unit: str | None = None
+    quantity_requested: str = "0"
+    quantity_ordered: str = "0"
+    quantity_received: str = "0"
+    quantity_consumed: str = "0"
+    quantity_outstanding: str = "0"
+    unit_cost: Decimal = Decimal("0")
+    extended_cost: Decimal = Decimal("0")
+    currency_code: str = ""
+    catalog_item_id: UUID | None = None
+    cost_line_id: UUID | None = None
+    sort_order: int = 0
+    sources: list[RequisitionItemSourceResponse] = Field(default_factory=list)
+
+
+class RequisitionResponse(BaseModel):
+    """A material requisition with its lines and quantity reconciliation."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    project_id: UUID
+    req_number: str | None = None
+    status: str
+    title: str | None = None
+    required_date: str | None = None
+    lead_time_days: int = 0
+    estimated_delivery_date: str | None = None
+    requester_id: str | None = None
+    approver_id: str | None = None
+    po_id: UUID | None = None
+    notes: str | None = None
+    items: list[RequisitionItemResponse] = Field(default_factory=list)
+    reconciliation: dict[str, str] = Field(default_factory=dict)
+    history: list[dict[str, Any]] = Field(default_factory=list)
+    created_at: datetime
+    updated_at: datetime
+
+
+class RequisitionListResponse(BaseModel):
+    """One page of requisitions."""
+
+    items: list[RequisitionResponse]
+    total: int
+    offset: int
+    limit: int
+
+
+class RequisitionValidationResponse(BaseModel):
+    """The ``procurement_requisition`` rule set run against one requisition."""
+
+    status: str
+    score: float | None = None
+    counts: dict[str, Any] = Field(default_factory=dict)
+    results: list[dict[str, Any]] = Field(default_factory=list)

@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Voor order {po} zouden de facturen samen {invoiced} bedragen, maar de ontvangen goederen zijn tegen de orderprijzen slechts {received} waard",
       "suggestion": "Wacht op de leverbon of bevestig de goederenontvangst voordat u dit bedrag goedkeurt"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Regel {line} vraagt {quantity}, maar een regel in een inkoopaanvraag moet een hoeveelheid boven nul hebben",
+      "suggestion": "Voer de benodigde hoeveelheid in of verwijder de regel"
+    },
+    "requisition_source_unit": {
+      "fail": "Regel {line} staat in {unit}, maar een van de BOQ-bronnen staat in {source_unit}",
+      "suggestion": "Gebruik de eenheid van de BOQ-resource, of splits de regel zodat elke eenheid apart staat"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "De benodigd-op-datum {date} is al verstreken (vandaag is {today})",
+      "suggestion": "Stel de datum in waarop het materiaal echt op de bouwplaats nodig is"
     }
   },
   "subcontract": {

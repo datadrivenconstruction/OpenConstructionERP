@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "On order {po} the invoices would total {invoiced}, but the goods received are worth only {received} at the order rates",
       "suggestion": "Wait for the delivery note or confirm the goods receipt before approving this amount"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Line {line} asks for {quantity}, but a requisition line needs a quantity above zero",
+      "suggestion": "Enter the quantity you need, or remove the line"
+    },
+    "requisition_source_unit": {
+      "fail": "Line {line} is in {unit} but one of its BOQ sources is in {source_unit}",
+      "suggestion": "Use the unit of the BOQ resource, or split the line so each unit stands on its own"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "The needed-by date {date} is already past (today is {today})",
+      "suggestion": "Set the date the material is actually needed on site"
     }
   },
   "subcontract": {

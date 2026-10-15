@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "주문 {po}의 청구 합계는 {invoiced}이 되지만 주문 단가로 평가한 수령 물품의 가치는 {received}뿐입니다",
       "suggestion": "이 금액을 승인하기 전에 납품서를 기다리거나 입고를 확인하세요"
+    },
+    "requisition_quantity_positive": {
+      "fail": "{line}행이 {quantity}을(를) 요청했지만, 구매 요청 행의 수량은 0보다 커야 합니다",
+      "suggestion": "필요한 수량을 입력하거나 해당 행을 삭제하세요"
+    },
+    "requisition_source_unit": {
+      "fail": "{line}행의 단위는 {unit}인데 내역서 출처 중 하나는 {source_unit} 단위입니다",
+      "suggestion": "내역서 자원의 단위를 사용하거나, 단위별로 행을 나누세요"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "필요일 {date}이(가) 이미 지났습니다(오늘은 {today})",
+      "suggestion": "자재가 현장에서 실제로 필요한 날짜를 지정하세요"
     }
   },
   "subcontract": {

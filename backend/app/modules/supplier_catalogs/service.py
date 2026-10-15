@@ -1027,7 +1027,12 @@ class SupplierCatalogsService:
                 status_code=400,
                 detail=f"Cannot submit PR in status '{pr.status}'",
             )
-        new_status = "approval_pending" if pr.approval_chain_json else "approved"
+        # Submitting is a request, not an approval. With an approval chain the PR
+        # waits on its first approver; without one it waits in ``submitted`` for
+        # someone holding ``pr.approve`` to approve it explicitly. It used to go
+        # straight to ``approved`` here, so a project with no chain configured
+        # turned every request into an approved purchase on submission.
+        new_status = "approval_pending" if pr.approval_chain_json else "submitted"
         await self.prs.update(pr_id, status=new_status)
         await _safe_publish(
             ev.PR_SUBMITTED,
@@ -1057,26 +1062,31 @@ class SupplierCatalogsService:
         # may approve THIS project's PR. Resolve the project from the trusted
         # row and verify access before advancing the approval chain.
         await self._guard_project(pr.project_id, approver_id)
-        if pr.status != "approval_pending":
+        if pr.status not in ("approval_pending", "submitted"):
             raise HTTPException(
                 status_code=400,
                 detail=f"Cannot approve PR in status '{pr.status}'",
             )
         chain = list(pr.approval_chain_json or [])
+        final = True
         if not chain:
+            # No chain: a submitted PR is approved by an explicit act of someone
+            # holding ``pr.approve``, which the router has already checked.
             await self.prs.update(pr_id, status="approved")
         else:
-            # Pop the next approver. If the caller is in the chain, allow them
-            # to advance regardless of position (single-stage approval per call).
-            if approver_id in chain:
-                chain.remove(approver_id)
-            else:
-                # Anyone with permission can advance, but log it
-                chain.pop(0)
-            new_status = "approved" if not chain else "approval_pending"
+            # A chain names who approves and in which order. Only the next
+            # designated approver may advance it; anyone else, permission or
+            # not, is refused rather than silently consuming someone's step.
+            if approver_id != chain[0]:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Only the next designated approver in this requisition's approval chain may approve it.",
+                )
+            chain.pop(0)
+            final = not chain
             await self.prs.update(
                 pr_id,
-                status=new_status,
+                status="approved" if final else "approval_pending",
                 approval_chain_json=chain,
             )
         await _safe_publish(
@@ -1086,6 +1096,10 @@ class SupplierCatalogsService:
                 "number": pr.number,
                 "project_id": str(pr.project_id),
                 "approver_id": approver_id,
+                # Intermediate approvals publish too, so a listener can tell a
+                # step in the chain from the approval that releases the PR.
+                "final": final,
+                "remaining_approvers": chain,
             },
         )
         refreshed = await self.prs.get(pr_id)
@@ -1105,10 +1119,16 @@ class SupplierCatalogsService:
             )
         # IDOR: resolve the project from the trusted PR row before mutating.
         await self._guard_project(pr.project_id, approver_id)
-        if pr.status not in ("approval_pending", "draft"):
+        if pr.status not in ("approval_pending", "submitted", "draft"):
             raise HTTPException(
                 status_code=400,
                 detail=f"Cannot reject PR in status '{pr.status}'",
+            )
+        chain = list(pr.approval_chain_json or [])
+        if pr.status == "approval_pending" and chain and approver_id != chain[0]:
+            raise HTTPException(
+                status_code=403,
+                detail="Only the next designated approver in this requisition's approval chain may reject it.",
             )
         await self.prs.update(pr_id, status="rejected")
         await _safe_publish(

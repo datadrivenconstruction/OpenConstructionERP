@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "Sur la commande {po}, les factures totaliseraient {invoiced}, alors que les marchandises réceptionnées ne valent que {received} aux prix de la commande",
       "suggestion": "Attendez le bon de livraison ou confirmez la réception avant d'approuver ce montant"
+    },
+    "requisition_quantity_positive": {
+      "fail": "La ligne {line} demande {quantity}, mais une ligne de demande d'achat doit avoir une quantité supérieure à zéro",
+      "suggestion": "Saisissez la quantité nécessaire ou supprimez la ligne"
+    },
+    "requisition_source_unit": {
+      "fail": "La ligne {line} est en {unit} mais l'une de ses sources BOQ est en {source_unit}",
+      "suggestion": "Utilisez l'unité de la ressource BOQ, ou scindez la ligne pour que chaque unité soit sur sa propre ligne"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "La date de besoin {date} est déjà dépassée (aujourd'hui : {today})",
+      "suggestion": "Indiquez la date à laquelle le matériau est réellement nécessaire sur le chantier"
     }
   },
   "subcontract": {

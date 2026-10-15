@@ -165558,6 +165558,8 @@
         "otif.py",
         "permissions.py",
         "repository.py",
+        "requisition_router.py",
+        "requisition_service.py",
         "rfq_award.py",
         "router.py",
         "schemas.py",
@@ -166167,6 +166169,12 @@
               "annotation": "Mapped[int]",
               "sql_type": "Integer",
               "nullable": false
+            },
+            {
+              "name": "catalog_item_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -166175,6 +166183,71 @@
               "type": "many-to-one",
               "annotation": "Mapped['MaterialRequisition']",
               "back_populates": "items"
+            },
+            {
+              "name": "sources",
+              "type": "one-to-many",
+              "annotation": "Mapped[list['MaterialRequisitionItemSource']]",
+              "back_populates": "item"
+            }
+          ]
+        },
+        {
+          "class_name": "MaterialRequisitionItemSource",
+          "tablename": "oe_procurement_req_item_source",
+          "docstring": "One BOQ resource that contributes quantity to a requisition line.\n\nKeeps the position, the resource within the position's resource split, the\nquantity and unit as they stood at the source, and the cost line the\nposition pointed at when the line was written. The source quantity is never\nrewritten by a later BOQ edit, so what was asked for stays explainable.",
+          "columns": [
+            {
+              "name": "item_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_procurement_req_item.id"
+            },
+            {
+              "name": "boq_position_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "resource_key",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "quantity",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "unit",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "cost_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "sort_order",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "item",
+              "type": "many-to-one",
+              "annotation": "Mapped['MaterialRequisitionItem']",
+              "back_populates": "sources"
             }
           ]
         }
@@ -167570,6 +167643,416 @@
               "name": "limit",
               "type": "int",
               "default": "100"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionItemSourceIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One BOQ resource contributing quantity to a requisition line.\n\n``quantity`` and ``unit`` are the figures at the source. They are kept as\nsent, so a line whose unit differs from its source is reported by the\n``procurement_requisition`` rules instead of being silently converted.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "resource_key",
+              "type": "str | None"
+            },
+            {
+              "name": "quantity",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionItemIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A requisition line as written by the client.\n\nA draft may hold a zero quantity while it is being filled in; submission is\nwhere the ``procurement_requisition`` rules refuse it.",
+          "fields": [
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
+              "name": "quantity_requested",
+              "type": "str"
+            },
+            {
+              "name": "unit_cost",
+              "type": "str"
+            },
+            {
+              "name": "currency_code",
+              "type": "str"
+            },
+            {
+              "name": "catalog_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "sources",
+              "type": "list[RequisitionItemSourceIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Create a material requisition in ``draft``.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "title",
+              "type": "str | None"
+            },
+            {
+              "name": "required_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "lead_time_days",
+              "type": "int"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            },
+            {
+              "name": "items",
+              "type": "list[RequisitionItemIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Edit a draft requisition. Fields left out are left alone.\n\n``items``, when sent, replaces the whole set of lines: the client edits the\ndraft as one document, and a partial line merge would have to guess which\nline a source belongs to.",
+          "fields": [
+            {
+              "name": "title",
+              "type": "str | None"
+            },
+            {
+              "name": "required_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "lead_time_days",
+              "type": "int | None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            },
+            {
+              "name": "items",
+              "type": "list[RequisitionItemIn] | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionCancel",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Optional reason recorded when a requisition is cancelled.",
+          "fields": [
+            {
+              "name": "reason",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionItemSourceResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A stored BOQ source of a requisition line.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "resource_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionItemResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A requisition line with its purchasing progress.\n\n``quantity_outstanding`` is requested minus received and is not clamped: a\nnegative figure means more arrived than was asked for, which a buyer needs\nto see rather than have rounded away to zero.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity_requested",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "quantity_ordered",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "quantity_received",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "quantity_consumed",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "quantity_outstanding",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "unit_cost",
+              "type": "Decimal"
+            },
+            {
+              "name": "extended_cost",
+              "type": "Decimal"
+            },
+            {
+              "name": "currency_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "catalog_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "cost_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "sort_order",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "sources",
+              "type": "list[RequisitionItemSourceResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A material requisition with its lines and quantity reconciliation.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "req_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "required_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "lead_time_days",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "estimated_delivery_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "requester_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "approver_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "po_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "items",
+              "type": "list[RequisitionItemResponse]"
+            },
+            {
+              "name": "reconciliation",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "history",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of requisitions.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[RequisitionResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionValidationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The ``procurement_requisition`` rule set run against one requisition.",
+          "fields": [
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "score",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "counts",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "results",
+              "type": "list[dict[str, Any]]"
             }
           ]
         }
@@ -202686,6 +203169,41 @@
           ]
         },
         {
+          "class_name": "MaterialBuyListSource",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One BOQ resource line folded into a buy-list row.\n\n``position_id`` is the BOQ position, ``resource_key`` the resource within\nits split, and ``quantity``/``unit`` what this line contributes, as the\nsource states it. A requisition raised from the row carries these through.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "str"
+            },
+            {
+              "name": "resource_key",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "catalog_item_id",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "MaterialBuyListItem",
           "bases": [
             "BaseModel"
@@ -202715,6 +203233,10 @@
             {
               "name": "currency",
               "type": "str"
+            },
+            {
+              "name": "sources",
+              "type": "list[MaterialBuyListSource]"
             }
           ]
         },
@@ -267557,10 +268079,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 27,
+      "ts_files": 30,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 27
+      "test_files": 12,
+      "total_files": 30
     },
     {
       "name": "procurement_concept",
@@ -267697,10 +268219,10 @@
     },
     {
       "name": "resource-summary",
-      "ts_files": 4,
+      "ts_files": 5,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 4
+      "total_files": 5
     },
     {
       "name": "resources",
@@ -269558,14 +270080,14 @@
   "statistics": {
     "backend_modules": 211,
     "modules_with_manifests": 209,
-    "total_models": 767,
-    "total_columns": 8923,
-    "total_relationships": 236,
+    "total_models": 768,
+    "total_columns": 8931,
+    "total_relationships": 238,
     "total_routes": 4530,
-    "total_schemas": 3969,
-    "total_python_files": 2682,
+    "total_schemas": 3980,
+    "total_python_files": 2684,
     "frontend_features": 208,
-    "frontend_ts_files": 3445,
+    "frontend_ts_files": 3449,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

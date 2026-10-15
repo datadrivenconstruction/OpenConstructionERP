@@ -624,6 +624,18 @@
     "invoice_value_received": {
       "fail": "A(z) {po} rendelés számlái összesen {invoiced} értéket tennének ki, de az átvett áru értéke a rendelési árakon csak {received}",
       "suggestion": "Az összeg jóváhagyása előtt várja meg a szállítólevelet, vagy igazolja az áruátvételt"
+    },
+    "requisition_quantity_positive": {
+      "fail": "A(z) {line}. sor {quantity} mennyiséget kér, de az anyagigénylés sorának mennyisége nullánál nagyobb kell legyen",
+      "suggestion": "Adja meg a szükséges mennyiséget, vagy törölje a sort"
+    },
+    "requisition_source_unit": {
+      "fail": "A(z) {line}. sor mértékegysége {unit}, de egyik BOQ forrásáé {source_unit}",
+      "suggestion": "Használja a BOQ erőforrás mértékegységét, vagy bontsa szét a sort, hogy minden mértékegység külön soron legyen"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "A szükséglet időpontja ({date}) már elmúlt (ma {today} van)",
+      "suggestion": "Adja meg azt a napot, amikor az anyagra ténylegesen szükség van az építési helyszínen"
     }
   },
   "subcontract": {
