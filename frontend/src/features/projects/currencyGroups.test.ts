@@ -94,3 +94,18 @@ describe('Bulgaria', () => {
     expect(COUNTRIES.find((country) => country.code === 'BG')?.currency).toBe('EUR');
   });
 });
+
+describe('Ukraine and Hungary', () => {
+  // Both regions are offered in the project form, so an address geocoded to
+  // either country must land on that region and its own currency rather than
+  // leave the user to pick "other".
+  it('defaults a Ukrainian project to the UA region and the hryvnia', () => {
+    expect(lookupCountryDefault('UA')).toEqual({ region: 'UA', currency: 'UAH' });
+    expect(CURRENCY_CODES.has('UAH')).toBe(true);
+  });
+
+  it('defaults a Hungarian project to the HU region and the forint', () => {
+    expect(lookupCountryDefault('hu')).toEqual({ region: 'HU', currency: 'HUF' });
+    expect(CURRENCY_CODES.has('HUF')).toBe(true);
+  });
+});

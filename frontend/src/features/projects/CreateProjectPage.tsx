@@ -34,6 +34,7 @@ import { lookupCountryDefault } from './currencyGroups';
 import { regionOptionLabel, type RegionOption } from './regionLabel';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { PROJECT_LANGUAGES } from './projectLanguages';
 
 // English fallbacks for the computed `project_wizard.activity_opt.*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -325,33 +326,7 @@ export const CURRENCY_GROUPS: OptionGroup[] = [
 
 // ── Languages ─────────────────────────────────────────────────────────────
 
-const LANGUAGES = [
-  { value: 'en', label: 'English' },
-  { value: 'de', label: 'Deutsch' },
-  { value: 'fr', label: 'Français' },
-  { value: 'es', label: 'Español' },
-  { value: 'it', label: 'Italiano' },
-  { value: 'pt', label: 'Português' },
-  { value: 'nl', label: 'Nederlands' },
-  { value: 'pl', label: 'Polski' },
-  { value: 'cs', label: 'Čeština' },
-  { value: 'hr', label: 'Hrvatski' },
-  { value: 'hu', label: 'Magyar' },
-  { value: 'ru', label: 'Русский' },
-  { value: 'tr', label: 'Türkçe' },
-  { value: 'ar', label: 'العربية' },
-  { value: 'zh', label: '中文' },
-  { value: 'ja', label: '日本語' },
-  { value: 'ko', label: '한국어' },
-  { value: 'hi', label: 'हिन्दी' },
-  { value: 'th', label: 'ไทย' },
-  { value: 'vi', label: 'Tiếng Việt' },
-  { value: 'id', label: 'Bahasa Indonesia' },
-  { value: 'sv', label: 'Svenska' },
-  { value: 'no', label: 'Norsk' },
-  { value: 'da', label: 'Dansk' },
-  { value: 'fi', label: 'Suomi' },
-];
+const LANGUAGES = PROJECT_LANGUAGES;
 
 // ── Profile scoring axes (valid values mirror the backend) ────────────────
 
