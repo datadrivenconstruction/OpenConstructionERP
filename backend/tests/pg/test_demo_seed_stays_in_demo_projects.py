@@ -243,6 +243,49 @@ async def test_a_project_made_after_the_demo_was_deleted_gets_nothing_on_restart
     assert after == before, "the restart wrote into the deleted demo project"
 
 
+async def _rows_in_every_table(factory, project_id: uuid.UUID) -> dict[str, int]:
+    """Rows carrying ``project_id`` in every table of the schema that has the column."""
+    from app.database import Base
+
+    found: dict[str, int] = {}
+    async with factory() as s:
+        for table in Base.metadata.sorted_tables:
+            column = table.c.get("project_id")
+            if column is None:
+                continue
+            n = int((await s.execute(select(func.count()).select_from(table).where(column == project_id))).scalar_one())
+            if n:
+                found[table.name] = n
+    return found
+
+
+async def test_no_table_of_any_module_gets_demo_rows_in_a_real_or_deleted_project(boot_factory) -> None:
+    """The boot seeders, all of them, through every table rather than a named list.
+
+    ``_PROJECT_SCOPED`` names the modules the report named. The boot list has
+    grown by some thirty seeders since, and a seeder added tomorrow that reads
+    its own project list instead of the one it is handed would leak into a
+    table nobody thought to name. So every table with a ``project_id`` column is
+    counted for the real project and for the demo the user deleted, and both
+    must hold nothing after two restarts.
+    """
+    from app.core.demo_enrichment import enrich_all
+
+    ids = await _estate(boot_factory)
+
+    await enrich_all()
+    await enrich_all()
+
+    assert await _rows_in_every_table(boot_factory, ids["real"]) == {}
+    assert await _rows_in_every_table(boot_factory, ids["deleted_demo"]) == {}
+
+    # The discriminating half: the same scan finds the live demo filled across
+    # many modules, so the empty answers above come from the gate and not from
+    # a scan that cannot see rows.
+    filled = await _rows_in_every_table(boot_factory, ids["demo"])
+    assert len(filled) >= 20, f"the boot filled only {sorted(filled)} in the live demo project"
+
+
 async def test_the_equipment_rentals_land_on_demo_projects_only(boot_factory) -> None:
     from app.modules.equipment.seed import seed_equipment_demo
 
