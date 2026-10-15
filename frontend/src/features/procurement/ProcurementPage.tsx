@@ -1484,9 +1484,9 @@ function PurchaseOrdersTab({
                       {poForm.currency || projectCurrency}
                     </span>
                     <input
-                      type="number"
+                      type={poRateApplies ? 'text' : 'number'}
                       step="0.01"
-                      value={poRateApplies ? poTax.toFixed(2) : poTaxInput}
+                      value={poRateApplies ? fmtFixed(poTax, 2) : poTaxInput}
                       disabled={figuresLocked || poRateApplies}
                       aria-label={t('procurement.tax', { defaultValue: 'Tax' })}
                       onChange={(e) => setPoTaxInput(e.target.value)}

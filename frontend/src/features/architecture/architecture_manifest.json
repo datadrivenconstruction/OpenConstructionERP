@@ -165392,6 +165392,12 @@
               "nullable": false
             },
             {
+              "name": "tax_rate_pct",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "retention_percent",
               "annotation": "Mapped[Decimal]",
               "sql_type": "Numeric",
@@ -166178,6 +166184,10 @@
               "type": "str"
             },
             {
+              "name": "tax_rate_pct",
+              "type": "str | None"
+            },
+            {
               "name": "status",
               "type": "str"
             },
@@ -166287,6 +166297,10 @@
             },
             {
               "name": "amount_total",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_rate_pct",
               "type": "str | None"
             },
             {
@@ -166489,6 +166503,11 @@
               "name": "amount_total",
               "type": "str",
               "default": "'0'"
+            },
+            {
+              "name": "tax_rate_pct",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "status",
@@ -175269,6 +175288,13 @@
           "request_schema": "ProjectUpdate"
         },
         {
+          "method": "POST",
+          "path": "/{project_id}/default-vat/apply-to-drafts/",
+          "handler": "apply_default_vat_to_drafts",
+          "response_model": "DefaultVatApplyResponse",
+          "request_schema": "DefaultVatApplyRequest"
+        },
+        {
           "method": "DELETE",
           "path": "/{project_id}/",
           "handler": "delete_project",
@@ -175900,6 +175926,42 @@
               "name": "rule_pack_ids",
               "type": "list[str]",
               "description": "Compliance rule-pack IDs to enforce at workflow gates. Validated against the known pack catalogue; unknown ids are rejected."
+            }
+          ]
+        },
+        {
+          "class_name": "DefaultVatApplyRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Opt-in: put the project's draft orders and invoices on its default VAT rate.\n\n``previous_rate`` is the rate the drafts were written under, so an invoice\nline still on it moves while a line at another rate stays (issue #515).",
+          "fields": [
+            {
+              "name": "previous_rate",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "DefaultVatApplyResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "How many draft documents the default VAT rate was applied to.",
+          "fields": [
+            {
+              "name": "rate",
+              "type": "str"
+            },
+            {
+              "name": "purchase_orders_updated",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "invoices_updated",
+              "type": "int",
+              "default": "0"
             }
           ]
         },
@@ -269302,10 +269364,10 @@
     "backend_modules": 211,
     "modules_with_manifests": 209,
     "total_models": 767,
-    "total_columns": 8923,
+    "total_columns": 8924,
     "total_relationships": 236,
-    "total_routes": 4528,
-    "total_schemas": 3961,
+    "total_routes": 4529,
+    "total_schemas": 3963,
     "total_python_files": 2679,
     "frontend_features": 208,
     "frontend_ts_files": 3442,
