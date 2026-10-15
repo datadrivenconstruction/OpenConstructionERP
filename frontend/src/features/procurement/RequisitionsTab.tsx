@@ -62,6 +62,23 @@ const STATUS_DEFAULT: Record<RequisitionStatus, string> = {
   cancelled: 'Cancelled',
 };
 
+/**
+ * The one unit every line of a requisition shares, or null when they differ.
+ * Header totals are only shown under a shared unit: summing tonnes and cubic
+ * metres gives a number that means nothing.
+ */
+function sharedUnit(req: Requisition): string | null {
+  const units = new Set(req.items.map((i) => (i.unit ?? '').trim()));
+  if (units.size !== 1) return null;
+  return [...units][0] ?? null;
+}
+
+function HeaderQuantity({ req, value }: { req: Requisition; value: string | undefined }) {
+  const unit = sharedUnit(req);
+  if (unit === null) return <>-</>;
+  return <QuantityDisplay value={value ?? '0'} unit={unit} precision={2} />;
+}
+
 function StatusBadge({ status }: { status: RequisitionStatus }) {
   const { t } = useTranslation();
   return (
@@ -171,13 +188,13 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums">{r.items.length}</td>
                     <td className="px-4 py-2 text-right tabular-nums">
-                      <QuantityDisplay value={r.reconciliation.requested ?? '0'} precision={2} />
+                      <HeaderQuantity req={r} value={r.reconciliation.requested} />
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums">
-                      <QuantityDisplay value={r.reconciliation.ordered ?? '0'} precision={2} />
+                      <HeaderQuantity req={r} value={r.reconciliation.ordered} />
                     </td>
                     <td className="px-4 py-2 text-right tabular-nums">
-                      <QuantityDisplay value={r.reconciliation.received ?? '0'} precision={2} />
+                      <HeaderQuantity req={r} value={r.reconciliation.received} />
                     </td>
                   </tr>
                 ))}
@@ -379,6 +396,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <StatusBadge status={req.status} />
+            {sharedUnit(req) !== null && (
             <span className="text-content-tertiary">
               {t('procurement.requisitions.progress', {
                 defaultValue: 'Requested {{requested}}, ordered {{ordered}}, received {{received}}, outstanding {{outstanding}}',
@@ -386,8 +404,10 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 ordered: req.reconciliation.ordered ?? '0',
                 received: req.reconciliation.received ?? '0',
                 outstanding: req.reconciliation.outstanding ?? '0',
-              })}
+              })}{' '}
+              {sharedUnit(req)}
             </span>
+            )}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -526,17 +546,17 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                               onChange={(e) => editLine(index, { quantity_requested: e.target.value.trim() })}
                             />
                           ) : (
-                            <QuantityDisplay value={line.quantity_requested} precision={2} />
+                            <QuantityDisplay value={line.quantity_requested} unit={line.unit ?? ''} precision={2} />
                           )}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
-                          {stored ? <QuantityDisplay value={stored.quantity_ordered} precision={2} /> : '-'}
+                          {stored ? <QuantityDisplay value={stored.quantity_ordered} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
-                          {stored ? <QuantityDisplay value={stored.quantity_received} precision={2} /> : '-'}
+                          {stored ? <QuantityDisplay value={stored.quantity_received} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
-                          {stored ? <QuantityDisplay value={stored.quantity_outstanding} precision={2} /> : '-'}
+                          {stored ? <QuantityDisplay value={stored.quantity_outstanding} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
                         <td className="py-1.5 pr-3 text-xs text-content-tertiary">
                           {line.sources.length === 0

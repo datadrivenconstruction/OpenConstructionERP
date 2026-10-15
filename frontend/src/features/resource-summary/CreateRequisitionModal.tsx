@@ -136,7 +136,7 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
                   <td className="py-1.5 pr-3 text-content-primary">{line.description}</td>
                   <td className="py-1.5 pr-3 text-content-tertiary">{line.unit || '-'}</td>
                   <td className="py-1.5 pr-3 text-right tabular-nums">
-                    <QuantityDisplay value={line.quantity_requested} precision={2} />
+                    <QuantityDisplay value={line.quantity_requested} unit={line.unit ?? ''} precision={2} />
                   </td>
                   <td className="py-1.5 text-right tabular-nums text-content-tertiary">{line.sources.length}</td>
                 </tr>
