@@ -124,12 +124,13 @@ async def test_a_rate_set_on_an_existing_draft_re_derives_its_tax(pg_session) ->
 async def test_changing_the_projects_rate_edits_no_order(pg_session) -> None:
     project = await _project(pg_session, vat="5")
     po = await ProcurementService(pg_session).create_po(_order(project))
+    po_id = po.id
 
     project.default_vat_rate = "21"
     await pg_session.flush()
     pg_session.expire_all()
 
-    stored = (await pg_session.execute(select(PurchaseOrder).where(PurchaseOrder.id == po.id))).scalar_one()
+    stored = (await pg_session.execute(select(PurchaseOrder).where(PurchaseOrder.id == po_id))).scalar_one()
     assert stored.tax_rate_pct == "5"
     assert Decimal(stored.tax_amount) == Decimal("50.00")
 
@@ -141,24 +142,25 @@ async def test_the_re_apply_moves_draft_orders_only(pg_session) -> None:
     approved = await service.create_po(_order(project))
     approved.status = "approved"
     await pg_session.flush()
+    project_id, draft_id, approved_id = project.id, draft.id, approved.id
 
-    count = await reapply_vat_rate_to_draft_pos(pg_session, project.id, "21")
+    count = await reapply_vat_rate_to_draft_pos(pg_session, project_id, "21")
 
     assert count == 1
     pg_session.expire_all()
     rows = {
         po.id: po
-        for po in (await pg_session.execute(select(PurchaseOrder).where(PurchaseOrder.project_id == project.id)))
+        for po in (await pg_session.execute(select(PurchaseOrder).where(PurchaseOrder.project_id == project_id)))
         .scalars()
         .all()
     }
-    assert rows[draft.id].tax_rate_pct == "21"
-    assert Decimal(rows[draft.id].tax_amount) == Decimal("210.00")
-    assert Decimal(rows[draft.id].amount_total) == Decimal("1209.99")
-    assert rows[approved.id].tax_rate_pct == "5"
-    assert Decimal(rows[approved.id].tax_amount) == Decimal("50.00")
+    assert rows[draft_id].tax_rate_pct == "21"
+    assert Decimal(rows[draft_id].tax_amount) == Decimal("210.00")
+    assert Decimal(rows[draft_id].amount_total) == Decimal("1209.99")
+    assert rows[approved_id].tax_rate_pct == "5"
+    assert Decimal(rows[approved_id].tax_amount) == Decimal("50.00")
     # A second run finds nothing left to change.
-    assert await reapply_vat_rate_to_draft_pos(pg_session, project.id, "21") == 0
+    assert await reapply_vat_rate_to_draft_pos(pg_session, project_id, "21") == 0
 
 
 # ── Invoices ─────────────────────────────────────────────────────────────────
@@ -219,18 +221,19 @@ async def test_the_re_apply_moves_draft_invoices_only(pg_session, status: str) -
     other = await finance.create_invoice(_invoice(project, lines(), tax_amount="54.00"))
     other.status = status
     await pg_session.flush()
+    project_id, draft_id, other_id = project.id, draft.id, other.id
 
-    count = await reapply_vat_rate_to_draft_invoices(pg_session, project.id, "21", "5")
+    count = await reapply_vat_rate_to_draft_invoices(pg_session, project_id, "21", "5")
 
     assert count == 1
     pg_session.expire_all()
-    assert await _line_rates(pg_session, draft.id) == [Decimal("21"), Decimal("2")]
-    assert await _line_rates(pg_session, other.id) == [Decimal("5"), Decimal("2")]
+    assert await _line_rates(pg_session, draft_id) == [Decimal("21"), Decimal("2")]
+    assert await _line_rates(pg_session, other_id) == [Decimal("5"), Decimal("2")]
     stored = {
         inv.id: inv
-        for inv in (await pg_session.execute(select(Invoice).where(Invoice.project_id == project.id))).scalars().all()
+        for inv in (await pg_session.execute(select(Invoice).where(Invoice.project_id == project_id))).scalars().all()
     }
     # 1000 x 21% + 200 x 2% = 210 + 4.
-    assert Decimal(stored[draft.id].tax_amount) == Decimal("214.00")
-    assert Decimal(stored[draft.id].amount_total) == Decimal("1414.00")
-    assert Decimal(stored[other.id].tax_amount) == Decimal("54.00")
+    assert Decimal(stored[draft_id].tax_amount) == Decimal("214.00")
+    assert Decimal(stored[draft_id].amount_total) == Decimal("1414.00")
+    assert Decimal(stored[other_id].tax_amount) == Decimal("54.00")
