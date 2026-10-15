@@ -2091,10 +2091,12 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
   const projectCurrency = invDashboard?.currency || '';
 
   // The VAT rates of the project's country, and the one a new line starts
-  // with. Same key as the project pages, so this is usually a cache hit.
+  // with: the project's own default rate when it sets one (issue #515), else
+  // the country's. Same key as the project pages, so usually a cache hit.
   const { data: invProject } = useQuery({
     queryKey: ['project', projectId],
-    queryFn: () => apiGet<{ country_code?: string | null }>(`/v1/projects/${projectId}`),
+    queryFn: () =>
+      apiGet<{ country_code?: string | null; default_vat_rate?: string | null }>(`/v1/projects/${projectId}`),
     enabled: !!projectId,
   });
   const projectCountry = (invProject?.country_code || '').trim().toUpperCase();
@@ -2107,8 +2109,8 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
     enabled: !!projectCountry,
   });
   const { options: vatOptions, defaultRate: defaultVat } = useMemo(
-    () => vatChoices(Array.isArray(countryTaxes?.items) ? countryTaxes.items : []),
-    [countryTaxes],
+    () => vatChoices(Array.isArray(countryTaxes?.items) ? countryTaxes.items : [], invProject?.default_vat_rate),
+    [countryTaxes, invProject?.default_vat_rate],
   );
 
   const [invoiceForm, setInvoiceForm] = useState({

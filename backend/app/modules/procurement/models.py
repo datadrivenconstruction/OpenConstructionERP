@@ -70,6 +70,11 @@ class PurchaseOrder(Base):
     amount_subtotal: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     tax_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     amount_total: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    # The VAT rate the order is taxed at, as a decimal-string percentage. Set,
+    # it drives ``tax_amount`` from the subtotal; null keeps the absolute tax
+    # the order was given, which is how every order before issue #515 reads.
+    # A new order without one takes the project's ``default_vat_rate``.
+    tax_rate_pct: Mapped[str | None] = mapped_column(String(20), nullable=True)
     # ── Retainage (Gap F, v6.x) ──────────────────────────────────────────
     # Retention withheld on a PO commitment. ``retention_percent`` is the
     # agreed retainage rate (e.g. 5.00 for 5%); ``retainage_amount`` is

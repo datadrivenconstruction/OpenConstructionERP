@@ -510,6 +510,78 @@ def _default_vat_matching_tax(
     return default_vat_rate
 
 
+def _project_vat_rate(project: object) -> Decimal | None:
+    """A project's ``default_vat_rate`` as a Decimal, or ``None`` when unset or unusable."""
+    raw = str(getattr(project, "default_vat_rate", None) or "").strip()
+    if not raw:
+        return None
+    try:
+        rate = Decimal(raw)
+    except (InvalidOperation, ValueError):
+        return None
+    if not rate.is_finite() or rate < 0 or rate > 100:
+        return None
+    return rate
+
+
+async def reapply_vat_rate_to_draft_invoices(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    rate_pct: str,
+    previous_rate_pct: str | None,
+) -> int:
+    """Move the draft invoices of a project from the old default VAT rate to ``rate_pct``.
+
+    Only drafts, for the reason issue #515 gives: a document that left draft
+    has been sent or booked, and changing it in place is a silent edit. On a
+    draft, a line moves when it carries no rate or carries the previous
+    default; a line at any other rate (reduced, zero-rated, reverse charge)
+    was set on purpose and keeps it. The header tax is then the sum of the
+    line VAT, half-up to the cent per line, the way the lines are read by the
+    e-invoice and the VAT return, and the total is subtotal plus tax.
+
+    Returns how many invoices actually changed.
+    """
+    new_rate = Decimal(rate_pct)
+    previous = _safe_decimal(previous_rate_pct, Decimal("-1")) if previous_rate_pct else None
+    invoices = (
+        (await session.execute(select(Invoice).where(Invoice.project_id == project_id, Invoice.status == "draft")))
+        .scalars()
+        .all()
+    )
+    changed = 0
+    for invoice in invoices:
+        lines = (
+            (await session.execute(select(InvoiceLineItem).where(InvoiceLineItem.invoice_id == invoice.id)))
+            .scalars()
+            .all()
+        )
+        moved = False
+        for line in lines:
+            current = None if line.vat_rate is None else _safe_decimal(line.vat_rate, Decimal("-1"))
+            if current == new_rate:
+                continue
+            if current is None or (previous is not None and current == previous):
+                line.vat_rate = new_rate
+                moved = True
+        if not moved:
+            continue
+        tax = sum(
+            (
+                _q2(_safe_decimal(line.amount) * _safe_decimal(line.vat_rate) / Decimal("100"))
+                for line in lines
+                if line.vat_rate is not None
+            ),
+            Decimal("0"),
+        )
+        invoice.tax_amount = tax
+        invoice.amount_total = _safe_decimal(invoice.amount_subtotal) + tax
+        changed += 1
+    if changed:
+        await session.flush()
+    return changed
+
+
 async def resolve_position_cost_lines(
     session: AsyncSession,
     items: Sequence[InvoiceLineItemCreate],
@@ -1234,13 +1306,16 @@ class FinanceService:
         invoice_date: object,
         items: Sequence[InvoiceLineItemCreate],
     ) -> Decimal | None:
-        """The VAT rate a line without one gets: the project country's, on the invoice date.
+        """The VAT rate a line without one gets: the project's own default, else its country's.
 
-        Read from the jurisdiction registry (``I18nFoundationService.resolve_tax_rate``)
-        only when some line actually lacks a rate. ``None`` when the project
-        has no country, the country taxes by subdivision and none is known, or
-        the registry cannot answer; the line then stays without a rate, as it
-        did before, rather than getting a guessed one.
+        The project's ``default_vat_rate`` (Project Settings) is a decision
+        somebody made for this project, so it wins (issue #515). Without one,
+        the country rate on the invoice date is read from the jurisdiction
+        registry (``I18nFoundationService.resolve_tax_rate``). Both only when
+        some line actually lacks a rate. ``None`` when the project sets no
+        rate and has no country, the country taxes by subdivision and none is
+        known, or the registry cannot answer; the line then stays without a
+        rate, as it did before, rather than getting a guessed one.
         """
         if all(item.vat_rate is not None for item in items):
             return None
@@ -1249,6 +1324,9 @@ class FinanceService:
             from app.modules.projects.repository import ProjectRepository
 
             project = await ProjectRepository(self.session).get_by_id(project_id)
+            own_rate = _project_vat_rate(project)
+            if own_rate is not None:
+                return own_rate
             country = (getattr(project, "country_code", None) or "").strip().upper() if project else ""
             if not country and project is not None:
                 # The place of supply decides the rate, and that is the

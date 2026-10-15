@@ -50,6 +50,19 @@ def _validate_tolerance_abs(v: str | None) -> str | None:
     return v
 
 
+def _validate_tax_rate_pct(v: str | None) -> str | None:
+    """A VAT rate as a percentage: 0 to 100, or unset. Empty clears it."""
+    if v is None or v == "":
+        return None
+    try:
+        d = Decimal(v)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid VAT rate: {v!r}") from exc
+    if not d.is_finite() or d < 0 or d > 100:
+        raise ValueError(f"VAT rate must be between 0 and 100, got {v!r}")
+    return v
+
+
 # ── Purchase Order ───────────────────────────────────────────────────────────
 
 
@@ -106,6 +119,11 @@ class POCreate(BaseModel):
     amount_subtotal: str = Field(default="0", max_length=50)
     tax_amount: str = Field(default="0", max_length=50)
     amount_total: str = Field(default="0", max_length=50)
+    # The VAT rate in percent. Stated, it drives ``tax_amount`` from the
+    # subtotal. Left out with no ``tax_amount`` either, the project's default
+    # VAT rate is used. Left out with a ``tax_amount``, that absolute tax is
+    # kept and the order carries no rate (issue #515).
+    tax_rate_pct: str | None = Field(default=None, max_length=20)
     status: str = Field(default="draft", max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
     notes: str | None = Field(default=None, max_length=5000)
@@ -126,6 +144,11 @@ class POCreate(BaseModel):
     @classmethod
     def _check_tolerance_pct(cls, v: str | None) -> str | None:
         return _validate_tolerance_pct(v)
+
+    @field_validator("tax_rate_pct")
+    @classmethod
+    def _check_tax_rate_pct(cls, v: str | None) -> str | None:
+        return _validate_tax_rate_pct(v)
 
     @field_validator("invoice_tolerance_abs")
     @classmethod
@@ -166,6 +189,9 @@ class POUpdate(BaseModel):
     amount_subtotal: str | None = Field(default=None, max_length=50)
     tax_amount: str | None = Field(default=None, max_length=50)
     amount_total: str | None = Field(default=None, max_length=50)
+    # A rate re-derives the tax from the subtotal; an empty string or null
+    # drops it, after which ``tax_amount`` is absolute again.
+    tax_rate_pct: str | None = Field(default=None, max_length=20)
     status: str | None = Field(default=None, max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
     notes: str | None = Field(default=None, max_length=5000)
@@ -188,6 +214,11 @@ class POUpdate(BaseModel):
     @classmethod
     def _check_tolerance_pct(cls, v: str | None) -> str | None:
         return _validate_tolerance_pct(v)
+
+    @field_validator("tax_rate_pct")
+    @classmethod
+    def _check_tax_rate_pct(cls, v: str | None) -> str | None:
+        return _validate_tax_rate_pct(v)
 
     @field_validator("invoice_tolerance_abs")
     @classmethod
@@ -289,6 +320,7 @@ class POResponse(BaseModel):
     amount_subtotal: str = "0"
     tax_amount: str = "0"
     amount_total: str = "0"
+    tax_rate_pct: str | None = None
     status: str = "draft"
     supplier_acknowledged_at: str | None = None
     supplier_acknowledged_by: str | None = None

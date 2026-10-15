@@ -650,6 +650,29 @@ class ComplianceRulePacksUpdate(BaseModel):
     )
 
 
+class DefaultVatApplyRequest(BaseModel):
+    """Opt-in: put the project's draft orders and invoices on its default VAT rate.
+
+    ``previous_rate`` is the rate the drafts were written under, so an invoice
+    line still on it moves while a line at another rate stays (issue #515).
+    """
+
+    previous_rate: str | None = Field(default=None, max_length=10)
+
+    @field_validator("previous_rate", mode="after")
+    @classmethod
+    def _check_previous_rate(cls, v: str | None) -> str | None:
+        return _validate_vat_rate(v)
+
+
+class DefaultVatApplyResponse(BaseModel):
+    """How many draft documents the default VAT rate was applied to."""
+
+    rate: str
+    purchase_orders_updated: int = 0
+    invoices_updated: int = 0
+
+
 # ── Response ──────────────────────────────────────────────────────────────
 
 

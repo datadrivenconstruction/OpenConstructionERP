@@ -242,14 +242,21 @@ export interface TaxConfigRow {
  * The VAT rates a country offers, and the one a new line starts with.
  *
  * Country-wide rates only (a subdivision's own rate is not a VAT choice for
- * the line). The default is the configuration marked default, else the
- * highest rate, which is the standard rate wherever reduced ones exist.
+ * the line). The default is the project's own default VAT rate when it sets
+ * one (Project Settings, issue #515), else the configuration marked default,
+ * else the highest rate, which is the standard rate wherever reduced ones
+ * exist. A project rate the country does not list is still offered.
  */
-export function vatChoices(rows: TaxConfigRow[] | null | undefined): { options: string[]; defaultRate: string | null } {
+export function vatChoices(
+  rows: TaxConfigRow[] | null | undefined,
+  projectRate?: string | number | null,
+): { options: string[]; defaultRate: string | null } {
   const national = (rows ?? []).filter((r) => !r.subdivision_code && readNumber(r.rate_pct) != null);
-  const options = Array.from(new Set(national.map((r) => rateText(r.rate_pct)))).sort(
-    (a, b) => Number(b) - Number(a),
-  );
+  const own = rateText(projectRate);
+  const options = Array.from(
+    new Set([...national.map((r) => rateText(r.rate_pct)), ...(own !== '' ? [own] : [])]),
+  ).sort((a, b) => Number(b) - Number(a));
+  if (own !== '') return { options, defaultRate: own };
   const marked = national.find((r) => r.is_default);
   const defaultRate = marked ? rateText(marked.rate_pct) : (options[0] ?? null);
   return { options, defaultRate };

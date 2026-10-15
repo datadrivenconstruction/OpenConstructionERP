@@ -78,6 +78,8 @@ from app.modules.projects.member_schemas import (
 from app.modules.projects.module_presence import probe_project_modules
 from app.modules.projects.schemas import (
     ComplianceRulePacksUpdate,
+    DefaultVatApplyRequest,
+    DefaultVatApplyResponse,
     FocusModePatch,
     MatchProjectSettingsRead,
     MatchProjectSettingsUpdate,
@@ -308,6 +310,60 @@ async def update_project(
     await _verify_project_owner(service, project_id, user_id, payload)
     project = await service.update_project(project_id, data, changed_by=user_id)
     return ProjectResponse.model_validate(project)
+
+
+@router.post(
+    "/{project_id}/default-vat/apply-to-drafts/",
+    response_model=DefaultVatApplyResponse,
+    summary="Apply the default VAT rate to draft orders and invoices",
+    description=(
+        "Opt-in companion to changing the project's default VAT rate. Puts every DRAFT purchase order "
+        "on the current rate and moves DRAFT invoice lines that carry no rate or the previous one, "
+        "then re-derives their tax. Documents past draft are never touched. Returns the counts."
+    ),
+)
+async def apply_default_vat_to_drafts(
+    project_id: uuid.UUID,
+    data: DefaultVatApplyRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> DefaultVatApplyResponse:
+    """Re-apply the project's default VAT rate to its draft purchase orders and invoices."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+    project = await service.get_project(project_id)
+    rate = (project.default_vat_rate or "").strip()
+    if not rate:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This project has no default VAT rate to apply. Set one first.",
+        )
+    result = DefaultVatApplyResponse(rate=rate)
+    # Each owning module writes its own rows; a module that is not installed
+    # simply has no drafts to update.
+    try:
+        from app.modules.procurement.service import reapply_vat_rate_to_draft_pos
+    except ImportError:
+        pass
+    else:
+        result.purchase_orders_updated = await reapply_vat_rate_to_draft_pos(session, project_id, rate)
+    try:
+        from app.modules.finance.service import reapply_vat_rate_to_draft_invoices
+    except ImportError:
+        pass
+    else:
+        result.invoices_updated = await reapply_vat_rate_to_draft_invoices(
+            session, project_id, rate, data.previous_rate
+        )
+    logger.info(
+        "Default VAT %s%% applied to drafts of project %s: %d orders, %d invoices",
+        rate,
+        project_id,
+        result.purchase_orders_updated,
+        result.invoices_updated,
+    )
+    return result
 
 
 # ── Delete (archive) ─────────────────────────────────────────────────────

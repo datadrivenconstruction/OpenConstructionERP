@@ -374,3 +374,54 @@ describe('editing an order past draft', () => {
     expect(within(dialog).getByRole('button', { name: 'Add Item' })).toBeInTheDocument();
   });
 });
+
+describe('the VAT rate a new order starts with (issue #515)', () => {
+  function serveProjectVat(rate: string | null) {
+    mockGet.mockImplementation((path: string) => {
+      if (path.includes('/spine/lines/')) return Promise.resolve([]);
+      if (path.includes('/v1/finance/dashboard/')) return Promise.resolve({ currency: 'EUR' });
+      if (path === `/v1/projects/${PROJECT_ID}`) return Promise.resolve({ id: PROJECT_ID, default_vat_rate: rate });
+      return Promise.resolve({ items: [], total: 0 });
+    });
+  }
+
+  it("prefills the project's default rate and lets the rate drive the tax", async () => {
+    const user = userEvent.setup();
+    serveProjectVat('5');
+    renderProcurementPage();
+
+    const dialog = await openCreateForm(user);
+    await waitFor(() => expect(within(dialog).getByLabelText('VAT %')).toHaveValue('5'));
+    expect(within(dialog).getByLabelText('Tax')).toBeDisabled();
+
+    await describeFirstLine(user, 'Rebar');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
+
+    const body = mockPost.mock.calls[0]![1] as Record<string, unknown>;
+    expect(body.tax_rate_pct).toBe('5');
+    expect(body).not.toHaveProperty('tax_amount');
+  });
+
+  it('sends a typed tax as an amount when the rate is cleared', async () => {
+    const user = userEvent.setup();
+    serveProjectVat('5');
+    renderProcurementPage();
+
+    const dialog = await openCreateForm(user);
+    const rate = within(dialog).getByLabelText('VAT %');
+    await waitFor(() => expect(rate).toHaveValue('5'));
+    await user.clear(rate);
+    const tax = within(dialog).getByLabelText('Tax');
+    await user.clear(tax);
+    await user.type(tax, '12.50');
+
+    await describeFirstLine(user, 'Rebar');
+    await user.click(screen.getByRole('button', { name: 'Create' }));
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
+
+    const body = mockPost.mock.calls[0]![1] as Record<string, unknown>;
+    expect(Number(body.tax_amount)).toBe(12.5);
+    expect(body).not.toHaveProperty('tax_rate_pct');
+  });
+});

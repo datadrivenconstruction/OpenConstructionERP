@@ -16,7 +16,7 @@ import logging
 import uuid
 from collections.abc import Sequence
 from datetime import UTC, date, datetime, timedelta
-from decimal import Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -308,6 +308,88 @@ def _compute_po_total(subtotal: str, tax: str) -> str:
     return str(s + t)
 
 
+def _po_tax_from_rate(subtotal: str, rate_pct: str) -> str:
+    """The tax an order owes at ``rate_pct`` percent of its subtotal, to the cent.
+
+    Half-up, the rounding finance applies to an invoice's VAT, so an order and
+    the invoice that bills it land on the same cent.
+    """
+    s = _parse_decimal(subtotal, "amount_subtotal")
+    r = _parse_decimal(rate_pct, "tax_rate_pct")
+    return str((s * r / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
+async def _project_default_vat_rate(session: AsyncSession, project_id: uuid.UUID) -> str | None:
+    """The project's ``default_vat_rate``, or ``None`` when it sets none or cannot be read.
+
+    Best-effort like the currency lookup in :meth:`ProcurementService.create_po`:
+    an unreadable project must never fail an order, it only leaves the order
+    without a rate, as it was before the default existed.
+    """
+    from sqlalchemy import select
+
+    from app.modules.projects.models import Project
+
+    try:
+        raw = (
+            await session.execute(select(Project.default_vat_rate).where(Project.id == project_id))
+        ).scalar_one_or_none()
+    except Exception:  # noqa: BLE001 - lookup is non-critical
+        logger.debug("default_vat_rate lookup failed for project %s", project_id, exc_info=True)
+        return None
+    cleaned = str(raw or "").strip()
+    if not cleaned:
+        return None
+    try:
+        rate = Decimal(cleaned)
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+    if not rate.is_finite() or rate < 0 or rate > 100:
+        return None
+    return cleaned
+
+
+async def reapply_vat_rate_to_draft_pos(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    rate_pct: str,
+) -> int:
+    """Put every draft order of a project on ``rate_pct`` and re-derive its tax.
+
+    Only drafts: an approved order is a commitment finance already holds for
+    its exact sum, and moving it would be the silent edit issue #515 rules
+    out. Returns how many orders actually changed.
+    """
+    from sqlalchemy import select
+
+    rows = (
+        (
+            await session.execute(
+                select(PurchaseOrder).where(
+                    PurchaseOrder.project_id == project_id,
+                    PurchaseOrder.status == "draft",
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    changed = 0
+    for po in rows:
+        tax = _po_tax_from_rate(po.amount_subtotal or "0", rate_pct)
+        total = _compute_po_total(po.amount_subtotal or "0", tax)
+        same_rate = po.tax_rate_pct is not None and _to_decimal(po.tax_rate_pct) == _to_decimal(rate_pct)
+        if same_rate and _cents(po.tax_amount) == _cents(tax) and _cents(po.amount_total) == _cents(total):
+            continue
+        po.tax_rate_pct = rate_pct
+        po.tax_amount = tax
+        po.amount_total = total
+        changed += 1
+    if changed:
+        await session.flush()
+    return changed
+
+
 def _validate_3way_match(
     po: PurchaseOrder,
     invoice_lines: list[dict],
@@ -481,6 +563,10 @@ def _frozen_po_changes(
         for name in ("amount_subtotal", "tax_amount", "amount_total")
     ):
         changed.append("amounts")
+    if "tax_rate_pct" in fields and (
+        None if fields["tax_rate_pct"] is None else _to_decimal(fields["tax_rate_pct"])
+    ) != (None if po.tax_rate_pct is None else _to_decimal(po.tax_rate_pct)):
+        changed.append("VAT rate")
     if (
         "currency_code" in fields
         and (fields["currency_code"] or "").strip().upper() != (po.currency_code or "").strip().upper()
@@ -810,6 +896,14 @@ class ProcurementService:
             aggregated_subtotal = str(sum(item_amounts, Decimal("0")))
             data.amount_subtotal = aggregated_subtotal
 
+        # The VAT rate drives the tax (issue #515). An order that states
+        # neither a rate nor an absolute tax takes the project's default rate;
+        # one that states only an absolute tax keeps it and carries no rate.
+        if data.tax_rate_pct is None and "tax_amount" not in data.model_fields_set:
+            data.tax_rate_pct = await _project_default_vat_rate(self.session, data.project_id)
+        if data.tax_rate_pct is not None:
+            data.tax_amount = _po_tax_from_rate(data.amount_subtotal, data.tax_rate_pct)
+
         # Server-side total computation
         computed_total = _compute_po_total(data.amount_subtotal, data.tax_amount)
 
@@ -945,6 +1039,7 @@ class ProcurementService:
                 currency_code=currency_code,
                 amount_subtotal=data.amount_subtotal,
                 tax_amount=data.tax_amount,
+                tax_rate_pct=data.tax_rate_pct,
                 amount_total=computed_total,
                 status=data.status,
                 payment_terms=data.payment_terms,
@@ -1114,6 +1209,21 @@ class ProcurementService:
                 [(item.cost_line_id, item.boq_position_id) for item in data.items],
             )
 
+        # The VAT rate drives the tax (issue #515). An absolute tax stated
+        # without a rate detaches the order from the rate it had; a stated
+        # rate, or a new subtotal under the rate the order already carries,
+        # re-derives the tax. A line replace without a stated subtotal is
+        # derived further down, once the new subtotal is known.
+        if "tax_amount" in fields and "tax_rate_pct" not in fields and po.tax_rate_pct is not None:
+            fields["tax_rate_pct"] = None
+        tax_rate = fields.get("tax_rate_pct", po.tax_rate_pct)
+        if tax_rate is not None and ("tax_rate_pct" in fields or "amount_subtotal" in fields):
+            if data.items is None or "amount_subtotal" in fields:
+                fields["tax_amount"] = _po_tax_from_rate(
+                    fields.get("amount_subtotal") or po.amount_subtotal or "0",
+                    tax_rate,
+                )
+
         # Once an order leaves draft its amounts, currency, vendor and lines
         # are the ones it was approved with, and finance holds a commitment for
         # exactly that sum. A PATCH may still correct them on the way back to
@@ -1186,11 +1296,16 @@ class ProcurementService:
             # amount_subtotal and amount_total stale (R8 bug).
             if "amount_subtotal" not in fields and "tax_amount" not in fields:
                 new_subtotal_from_items = str(sum(item_amounts, Decimal("0")))
-                current_tax = po.tax_amount or "0"
+                current_tax = (
+                    _po_tax_from_rate(new_subtotal_from_items, tax_rate)
+                    if tax_rate is not None
+                    else po.tax_amount or "0"
+                )
                 recomputed_total = _compute_po_total(new_subtotal_from_items, current_tax)
                 await self.po_repo.update(
                     po_id,
                     amount_subtotal=new_subtotal_from_items,
+                    tax_amount=current_tax,
                     amount_total=recomputed_total,
                 )
 

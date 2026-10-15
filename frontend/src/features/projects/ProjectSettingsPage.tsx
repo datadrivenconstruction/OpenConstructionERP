@@ -556,6 +556,9 @@ export function ProjectSettingsPage() {
   const [baseCurrencyDraft, setBaseCurrencyDraft] = useState<string>('');
   const [baseCurrencyCustom, setBaseCurrencyCustom] = useState<string>('');
   const [vatInput, setVatInput] = useState<string>('');
+  // Opt-in: also move the project's draft orders and invoices to the new rate
+  // (issue #515). Off by default, so saving a rate never edits a document.
+  const [vatApplyToDrafts, setVatApplyToDrafts] = useState(false);
   const [unitInput, setUnitInput] = useState<string>('');
   const [customUnits, setCustomUnits] = useState<string[]>([]);
   const [fxModal, setFxModal] = useState<{
@@ -617,6 +620,33 @@ export function ProjectSettingsPage() {
       addToast({
         type: 'error',
         title: t('project.settings.save_failed', { defaultValue: 'Failed to save settings' }),
+        message: err.message,
+      });
+    },
+  });
+
+  const applyVatMutation = useMutation({
+    mutationFn: (previousRate: string | null) => projectsApi.applyDefaultVatToDrafts(projectId!, previousRate),
+    onSuccess: (res) => {
+      setVatApplyToDrafts(false);
+      queryClient.invalidateQueries({ queryKey: ['procurement-po', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['finance'] });
+      addToast({
+        type: 'success',
+        title: t('project.settings.vat.applied_title', { defaultValue: 'VAT rate applied to drafts' }),
+        message: t('project.settings.vat.applied', {
+          defaultValue: 'Updated {{orders}} draft purchase orders and {{invoices}} draft invoices.',
+          orders: res.purchase_orders_updated,
+          invoices: res.invoices_updated,
+        }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('project.settings.vat.apply_failed', {
+          defaultValue: 'The rate was saved, but the drafts could not be updated',
+        }),
         message: err.message,
       });
     },
@@ -732,9 +762,29 @@ export function ProjectSettingsPage() {
       });
       return;
     }
-    updateMutation.mutate({
-      default_vat_rate: toDecimalPayloadString(trimmed),
-    } as Partial<Project>);
+    if (parsed > 100) {
+      addToast({
+        type: 'error',
+        title: t('project.settings.vat.out_of_range', {
+          defaultValue: 'VAT must be between 0 and 100.',
+        }),
+      });
+      return;
+    }
+    // The rate the drafts were written under: the project's own, else the
+    // regional one a line would have started with.
+    const previousRate = (project?.default_vat_rate ?? '').toString().trim() || String(regionalVatPct);
+    const applyToDrafts = vatApplyToDrafts;
+    updateMutation.mutate(
+      {
+        default_vat_rate: toDecimalPayloadString(trimmed),
+      } as Partial<Project>,
+      {
+        onSuccess: () => {
+          if (applyToDrafts) applyVatMutation.mutate(previousRate);
+        },
+      },
+    );
   };
 
   const handleAddUnit = (e: FormEvent) => {
@@ -1101,15 +1151,35 @@ export function ProjectSettingsPage() {
             size="sm"
             type="submit"
             icon={<Save size={14} />}
-            loading={updateMutation.isPending}
+            loading={updateMutation.isPending || applyVatMutation.isPending}
           >
             {t('common.save', { defaultValue: 'Save' })}
           </Button>
+          <label className="flex items-start gap-2 text-sm text-content-primary cursor-pointer md:basis-full md:max-w-md">
+            <input
+              type="checkbox"
+              checked={vatApplyToDrafts}
+              disabled={vatInput.trim() === ''}
+              onChange={(e) => setVatApplyToDrafts(e.target.checked)}
+              className="h-4 w-4 mt-0.5 rounded border-border accent-oe-blue"
+            />
+            <span>
+              {t('project.settings.vat.apply_to_drafts', {
+                defaultValue: 'Also apply this rate to existing draft purchase orders and invoices',
+              })}
+            </span>
+          </label>
           <p className="text-xs text-content-tertiary md:basis-full md:max-w-md md:mt-0 mt-1">
             {t('project.settings.vat.helper', {
               defaultValue:
                 'Used when seeding markups for new BOQs. Leave blank to use the regional default ({{regional}}%).',
               regional: regionalVatPct,
+            })}
+          </p>
+          <p className="text-xs text-content-tertiary md:basis-full md:max-w-md">
+            {t('project.settings.vat.documents_note', {
+              defaultValue:
+                'New purchase orders and invoices start with this rate. Saving never changes existing documents unless you tick the box above, and then only drafts.',
             })}
           </p>
         </form>

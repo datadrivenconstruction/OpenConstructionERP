@@ -273,6 +273,13 @@ export interface ProjectStatusHistoryEntry {
   created_at: string;
 }
 
+/** What applying the default VAT rate to draft documents changed. */
+export interface DefaultVatApplyResult {
+  rate: string;
+  purchase_orders_updated: number;
+  invoices_updated: number;
+}
+
 export const projectsApi = {
   // NOTE: kept as a zero-arg fn so it can be passed straight as a
   // react-query `queryFn` (callers do `queryFn: projectsApi.list`). For a
@@ -292,6 +299,16 @@ export const projectsApi = {
     apiPatch<Project>(`/v1/projects/${id}`, data),
   archive: (id: string) => apiDelete(`/v1/projects/${id}`),
   restore: (id: string) => apiPost<Project>(`/v1/projects/${id}/restore/`, {}),
+  /**
+   * Opt-in companion to changing the default VAT rate (issue #515): puts the
+   * project's DRAFT purchase orders and invoices on its current default rate.
+   * `previous_rate` is the rate they were written under, so an invoice line
+   * at another rate keeps it. Nothing past draft is touched.
+   */
+  applyDefaultVatToDrafts: (id: string, previousRate: string | null) =>
+    apiPost<DefaultVatApplyResult>(`/v1/projects/${id}/default-vat/apply-to-drafts/`, {
+      previous_rate: previousRate,
+    }),
   /**
    * Server-side deep-clone. The backend copies every column (incl.
    * WBS tree, milestones, match-settings, fx_rates, custom_units, VAT,

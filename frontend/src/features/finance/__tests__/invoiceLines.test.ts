@@ -115,4 +115,17 @@ describe('vatChoices', () => {
     expect(vatChoices([{ rate_pct: '7' }, { rate_pct: '19' }]).defaultRate).toBe('19');
     expect(vatChoices(undefined)).toEqual({ options: [], defaultRate: null });
   });
+
+  it("starts a line on the project's own default rate and offers it even when the country does not list it", () => {
+    const rows = [{ rate_pct: '19.00', is_default: true }, { rate_pct: '7.00' }];
+    expect(vatChoices(rows, '5')).toEqual({ options: ['19', '7', '5'], defaultRate: '5' });
+    expect(vatChoices(rows, '19.0')).toEqual({ options: ['19', '7'], defaultRate: '19' });
+    expect(vatChoices(undefined, '5')).toEqual({ options: ['5'], defaultRate: '5' });
+  });
+
+  it('keeps the country default when the project sets no rate', () => {
+    const rows = [{ rate_pct: '19.00', is_default: true }, { rate_pct: '7.00' }];
+    expect(vatChoices(rows, null).defaultRate).toBe('19');
+    expect(vatChoices(rows, '').defaultRate).toBe('19');
+  });
 });
