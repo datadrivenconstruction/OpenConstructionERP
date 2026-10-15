@@ -44,6 +44,10 @@ export function scheduleErrorMessage(err: unknown, t: TFunction): string {
         defaultValue: 'This schedule already has {{count}} activities.',
         count: Number(detail.activity_count ?? 0),
       });
+    case 'schedule_not_draft':
+      return t('schedule.error_schedule_not_draft', {
+        defaultValue: 'Only a draft schedule can be cleared. Once it is active, delete single activities instead.',
+      });
     case 'boq_not_found':
       return t('schedule.error_boq_not_found', {
         defaultValue: 'This BOQ was not found in this project. It may have been deleted; pick another one.',

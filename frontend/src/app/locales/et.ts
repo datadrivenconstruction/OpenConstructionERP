@@ -16064,6 +16064,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "Koos sellega kustutatavaid baasplaane: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "Verstapostidega seotud lepingumakseid: {{count}}. Need säilivad ja naasevad lepingulistele kuupäevadele.",
     "schedule.confirm_delete_payment_milestones_other": "Verstapostidega seotud lepingumakseid: {{count}}. Need säilivad ja naasevad lepingulistele kuupäevadele.",
+    "schedule.error_schedule_not_draft": "Tühjendada saab ainult mustandis ajakava. Aktiivses ajakavas kustuta tegevusi ükshaaval.",
     "schedule.error_boq_not_found": "Mahuloendit projektist ei leitud. See võib olla kustutatud; valige teine.",
     "schedule.error_boq_has_no_positions": "Mahuloendis pole veel planeeritavaid töökirjeid. Lisage kõigepealt jaotistesse kirjed.",
     "schedule.error_generation_failed": "Mahuloendist ei saanud ajakava luua. Proovige uuesti; korduva vea korral pöörduge toe poole viitega {{reference}}.",

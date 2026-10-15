@@ -11885,6 +11885,7 @@ const resource = {
     "schedule.end_date_optional": "Không có ngày kết thúc: kế hoạch kéo dài theo nhu cầu công việc, không rút ngắn. Nhập ngày để bố trí giữa hai mốc thời gian.",
     "schedule.error_activity_not_in_schedule": "Cả hai công việc phải thuộc tiến độ này.",
     "schedule.error_boq_has_no_positions": "Bảng khối lượng chưa có hạng mục công việc để lập tiến độ. Hãy thêm hạng mục vào các phần trước.",
+    "schedule.error_schedule_not_draft": "Chỉ có thể xóa trắng tiến độ ở trạng thái nháp. Khi đã kích hoạt, hãy xóa từng công việc.",
     "schedule.error_boq_not_found": "Không tìm thấy bảng khối lượng trong dự án. Có thể đã bị xóa; hãy chọn bảng khác.",
     "schedule.error_dependency_cycle": "Không thêm liên kết vì nó sẽ tạo vòng lặp phụ thuộc.",
     "schedule.error_dependency_self": "Công việc không thể phụ thuộc vào chính nó.",

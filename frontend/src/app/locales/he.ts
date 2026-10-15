@@ -15485,6 +15485,7 @@ const resource = {
     "schedule.end_date_optional": "ללא תאריך סיום, התוכנית נמשכת ככל הנדרש לעבודה ללא קיצור. הזינו תאריך כדי להתאימה בין שני התאריכים.",
     "schedule.error_activity_not_in_schedule": "שתי הפעילויות חייבות להשתייך ללוח זמנים זה.",
     "schedule.error_boq_has_no_positions": "בכתב כמויות זה עדיין אין סעיפי עבודה לתזמון. הוסיפו תחילה סעיפים לפרקים.",
+    "schedule.error_schedule_not_draft": "ניתן לנקות רק לוח זמנים בטיוטה. לאחר ההפעלה מחקו פעילויות בודדות.",
     "schedule.error_boq_not_found": "כתב הכמויות לא נמצא בפרויקט. ייתכן שנמחק; בחרו אחר.",
     "schedule.error_dependency_cycle": "הקישור לא נוסף כי הוא היה יוצר מעגל תלות בלוח הזמנים.",
     "schedule.error_dependency_self": "פעילות אינה יכולה להיות תלויה בעצמה.",

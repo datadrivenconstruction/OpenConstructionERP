@@ -13769,6 +13769,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "Grunnplaner som også slettes: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "Kontraktsbetalinger knyttet til milepælene: {{count}}. De beholdes og går tilbake til kontraktsdatoene.",
     "schedule.confirm_delete_payment_milestones_other": "Kontraktsbetalinger knyttet til milepælene: {{count}}. De beholdes og går tilbake til kontraktsdatoene.",
+    "schedule.error_schedule_not_draft": "Bare en tidsplan i utkast kan tømmes. Når den er aktiv, sletter du enkeltaktiviteter i stedet.",
     "schedule.error_boq_not_found": "Mengdebeskrivelsen finnes ikke i prosjektet. Den kan være slettet; velg en annen.",
     "schedule.error_boq_has_no_positions": "Mengdebeskrivelsen har ingen arbeidsposter å planlegge. Legg først til poster i avsnittene.",
     "schedule.error_generation_failed": "Kunne ikke generere fremdriftsplanen fra mengdebeskrivelsen. Prøv igjen; kontakt support med referanse {{reference}} hvis feilen vedvarer.",

@@ -11401,6 +11401,7 @@ const resource = {
     "schedule.end_date_optional": "不填结束日期时，计划按实际所需工期安排，不缩短工期。填写日期可将计划安排在起止日期之间。",
     "schedule.error_activity_not_in_schedule": "两个活动必须属于此进度计划。",
     "schedule.error_boq_has_no_positions": "此工程量清单尚无包含工作的项目，无法排期。请先向章节添加项目。",
+    "schedule.error_schedule_not_draft": "只有草稿状态的进度计划可以清空。激活后请逐项删除作业。",
     "schedule.error_boq_not_found": "在此项目中找不到该工程量清单，可能已被删除。请选择其他清单。",
     "schedule.error_dependency_cycle": "此关联会使进度计划形成循环，因此未添加。",
     "schedule.error_dependency_self": "活动不能依赖自身。",

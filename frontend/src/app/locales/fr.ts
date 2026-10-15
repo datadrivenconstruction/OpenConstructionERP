@@ -10272,6 +10272,7 @@ const resource = {
     "schedule.end_date_optional": "Sans date de fin, le planning dure le temps nécessaire aux travaux, sans réduction. Saisissez une date pour adapter le planning à l'intervalle demandé.",
     "schedule.error_activity_not_in_schedule": "Les deux activités doivent appartenir à ce planning.",
     "schedule.error_boq_has_no_positions": "Ce bordereau ne contient pas encore de postes de travaux à planifier. Ajoutez d'abord des postes dans ses sections.",
+    "schedule.error_schedule_not_draft": "Seul un planning en brouillon peut être vidé. Une fois actif, supprimez plutôt les activités une par une.",
     "schedule.error_boq_not_found": "Ce bordereau est introuvable dans ce projet. Il a peut-être été supprimé ; choisissez-en un autre.",
     "schedule.error_dependency_cycle": "Ce lien créerait une boucle dans le planning et n'a donc pas été ajouté.",
     "schedule.error_dependency_self": "Une activité ne peut pas dépendre d'elle-même.",

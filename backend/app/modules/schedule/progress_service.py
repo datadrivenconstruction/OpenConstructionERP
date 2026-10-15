@@ -399,7 +399,15 @@ class ScheduleProgressService:
             # Reject a calendar from another project (existence-oracle safe 404).
             if cal is None or cal.project_id != schedule.project_id:
                 raise _not_found("Calendar not found")
-        await self.base.activity_repo.update_fields(activity_id, calendar_id=calendar_id)
+        fields: dict[str, object] = {"calendar_id": calendar_id}
+        # The dates stay and the working days between them are recounted on
+        # the new week, so a calendar without days off counts the weekends
+        # between them as work. A milestone has no working days to count.
+        if activity.activity_type != "milestone" and activity.start_date and activity.end_date:
+            fields["duration_days"] = await self.base.working_duration(
+                schedule.project_id, calendar_id, activity.start_date, activity.end_date
+            )
+        await self.base.activity_repo.update_fields(activity_id, **fields)
         return await self.get_activity(activity_id)
 
     # ── Time-phased planned value (read-only preview) ────────────────────────

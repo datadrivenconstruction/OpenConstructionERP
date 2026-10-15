@@ -11906,6 +11906,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "U bilan birga o‘chadigan bazaviy rejalar: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "Uning bosqichlariga bog‘langan shartnoma to‘lovlari: {{count}}. Ular saqlanib, shartnoma sanalariga qaytadi.",
     "schedule.confirm_delete_payment_milestones_other": "Uning bosqichlariga bog‘langan shartnoma to‘lovlari: {{count}}. Ular saqlanib, shartnoma sanalariga qaytadi.",
+    "schedule.error_schedule_not_draft": "Faqat qoralama holatidagi jadvalni tozalash mumkin. Faol jadvalda ishlarni birma-bir oʻchiring.",
     "schedule.error_boq_not_found": "Bu smeta loyihada topilmadi. O‘chirilgan bo‘lishi mumkin; boshqasini tanlang.",
     "schedule.error_boq_has_no_positions": "Smetada rejalashtiriladigan ish pozitsiyalari hali yo‘q. Avval bo‘limlarga pozitsiya qo‘shing.",
     "schedule.error_generation_failed": "Bu smetadan jadval tuzib bo‘lmadi. Qayta urining; xato takrorlansa, {{reference}} kodi bilan yordam xizmatiga murojaat qiling.",

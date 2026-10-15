@@ -11547,6 +11547,7 @@ const resource = {
     "schedule.end_date_optional": "Bez data dokončení trvá plán tak dlouho, jak práce potřebují, bez zkrácení. Zadejte datum, má-li se plán vejít mezi oba termíny.",
     "schedule.error_activity_not_in_schedule": "Obě činnosti musí patřit do tohoto harmonogramu.",
     "schedule.error_boq_has_no_positions": "Tento výkaz výměr zatím neobsahuje položky s prací k naplánování. Nejprve přidejte položky do jeho sekcí.",
+    "schedule.error_schedule_not_draft": "Vyprázdnit lze jen harmonogram ve stavu konceptu. Aktivní harmonogram upravujte mazáním jednotlivých činností.",
     "schedule.error_boq_not_found": "Tento výkaz výměr nebyl v projektu nalezen. Možná byl smazán; vyberte jiný.",
     "schedule.error_dependency_cycle": "Tato vazba by vytvořila cyklus v harmonogramu, a proto nebyla přidána.",
     "schedule.error_dependency_self": "Činnost nemůže záviset sama na sobě.",

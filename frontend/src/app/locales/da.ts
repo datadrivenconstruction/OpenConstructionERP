@@ -13939,6 +13939,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "Basisplaner, der også slettes: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "Kontraktbetalinger knyttet til milepælene: {{count}}. De bevares og vender tilbage til kontraktdatoerne.",
     "schedule.confirm_delete_payment_milestones_other": "Kontraktbetalinger knyttet til milepælene: {{count}}. De bevares og vender tilbage til kontraktdatoerne.",
+    "schedule.error_schedule_not_draft": "Kun en tidsplan i kladde kan ryddes. Når den er aktiv, skal du slette enkelte aktiviteter i stedet.",
     "schedule.error_boq_not_found": "Mængdefortegnelsen blev ikke fundet i projektet. Den kan være slettet; vælg en anden.",
     "schedule.error_boq_has_no_positions": "Mængdefortegnelsen har ingen arbejdsposter at planlægge. Tilføj først poster i afsnittene.",
     "schedule.error_generation_failed": "Tidsplanen kunne ikke genereres fra mængdefortegnelsen. Prøv igen; kontakt support med reference {{reference}}, hvis fejlen fortsætter.",

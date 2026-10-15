@@ -15067,6 +15067,7 @@ const resource = {
     "schedule.end_date_optional": "Kung walang petsa ng pagtatapos, gagamitin ang oras na kailangan ng trabaho nang walang pagpapaikli. Maglagay ng petsa para magkasya sa pagitan ng dalawang petsa.",
     "schedule.error_activity_not_in_schedule": "Dapat kabilang sa iskedyul na ito ang dalawang aktibidad.",
     "schedule.error_boq_has_no_positions": "Wala pang item na may trabaho ang talaan ng dami kaya walang maiiskedyul. Magdagdag muna ng mga item sa mga seksiyon.",
+    "schedule.error_schedule_not_draft": "Ang draft na iskedyul lamang ang maaaring i-clear. Kapag aktibo na, isa-isang burahin ang mga aktibidad.",
     "schedule.error_boq_not_found": "Hindi nakita ang talaan ng dami sa proyektong ito. Maaaring nabura na; pumili ng iba.",
     "schedule.error_dependency_cycle": "Hindi idinagdag ang link dahil magdudulot ito ng paikot na dependency.",
     "schedule.error_dependency_self": "Hindi maaaring umasa ang aktibidad sa sarili nito.",

@@ -12205,6 +12205,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "Birlikte silinecek temel plan sayısı: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "Kilometre taşlarına bağlı sözleşme ödeme taksiti sayısı: {{count}}. Taksitler korunur ve sözleşme tarihlerine döner.",
     "schedule.confirm_delete_payment_milestones_other": "Kilometre taşlarına bağlı sözleşme ödeme taksiti sayısı: {{count}}. Taksitler korunur ve sözleşme tarihlerine döner.",
+    "schedule.error_schedule_not_draft": "Yalnızca taslak durumundaki bir program temizlenebilir. Etkinleştirildikten sonra faaliyetleri tek tek silin.",
     "schedule.error_boq_not_found": "Bu keşif projede bulunamadı. Silinmiş olabilir; başka bir keşif seçin.",
     "schedule.error_boq_has_no_positions": "Keşifte henüz planlanacak iş pozları yok. Önce bölümlere poz ekleyin.",
     "schedule.error_generation_failed": "Bu keşiften iş programı oluşturulamadı. Yeniden deneyin; hata sürerse {{reference}} koduyla desteğe başvurun.",

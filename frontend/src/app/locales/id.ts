@@ -11885,6 +11885,7 @@ const resource = {
     "schedule.end_date_optional": "Tanpa tanggal akhir, rencana memakai waktu yang dibutuhkan tanpa pemendekan. Isi tanggal akhir agar rencana menyesuaikan kedua tanggal.",
     "schedule.error_activity_not_in_schedule": "Kedua aktivitas harus berada dalam jadwal ini.",
     "schedule.error_boq_has_no_positions": "Daftar kuantitas ini belum memiliki item pekerjaan untuk dijadwalkan. Tambahkan item pada bagiannya dahulu.",
+    "schedule.error_schedule_not_draft": "Hanya jadwal draf yang dapat dikosongkan. Setelah aktif, hapus aktivitas satu per satu.",
     "schedule.error_boq_not_found": "Daftar kuantitas tidak ditemukan di proyek ini. Mungkin sudah dihapus; pilih yang lain.",
     "schedule.error_dependency_cycle": "Tautan tidak ditambahkan karena akan membuat siklus ketergantungan.",
     "schedule.error_dependency_self": "Aktivitas tidak dapat bergantung pada dirinya sendiri.",

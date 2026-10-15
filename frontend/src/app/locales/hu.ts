@@ -10202,6 +10202,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "Vele együtt törlődő alapváltozatok: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "A mérföldköveihez kapcsolt szerződéses fizetési részletek: {{count}}. Megmaradnak, és visszatérnek szerződéses dátumukhoz.",
     "schedule.confirm_delete_payment_milestones_other": "A mérföldköveihez kapcsolt szerződéses fizetési részletek: {{count}}. Megmaradnak, és visszatérnek szerződéses dátumukhoz.",
+    "schedule.error_schedule_not_draft": "Csak piszkozat állapotú ütemterv üríthető ki. Aktív ütemtervben egyenként törölje a tevékenységeket.",
     "schedule.error_boq_not_found": "A költségvetés nem található a projektben. Lehet, hogy törölték; válasszon másikat.",
     "schedule.error_boq_has_no_positions": "A költségvetésben még nincs ütemezhető munkatétel. Előbb adjon tételeket a szakaszokhoz.",
     "schedule.error_generation_failed": "Nem sikerült ütemtervet készíteni a költségvetésből. Próbálja újra; ismételt hiba esetén keresse az ügyfélszolgálatot ezzel a hivatkozással: {{reference}}.",

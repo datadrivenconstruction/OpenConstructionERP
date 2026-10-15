@@ -13903,6 +13903,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "Basplaner som också tas bort: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "Avtalsbetalningar kopplade till milstolparna: {{count}}. De behålls och återgår till avtalsdatumen.",
     "schedule.confirm_delete_payment_milestones_other": "Avtalsbetalningar kopplade till milstolparna: {{count}}. De behålls och återgår till avtalsdatumen.",
+    "schedule.error_schedule_not_draft": "Bara ett schema i utkast kan tömmas. När det är aktivt tar du bort enskilda aktiviteter i stället.",
     "schedule.error_boq_not_found": "Mängdförteckningen hittades inte i projektet. Den kan ha tagits bort; välj en annan.",
     "schedule.error_boq_has_no_positions": "Mängdförteckningen har inga arbetsposter att planera. Lägg först till poster i avsnitten.",
     "schedule.error_generation_failed": "Tidplanen kunde inte skapas från mängdförteckningen. Försök igen; kontakta supporten med referens {{reference}} om felet kvarstår.",

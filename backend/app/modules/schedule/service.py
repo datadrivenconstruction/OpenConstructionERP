@@ -1720,6 +1720,7 @@ class ScheduleService:
             )
             derived = await self._derive_dependencies_json(activity_id)
             await self.activity_repo.update_fields(activity_id, dependencies=derived)
+        await self.sync_schedule_end_date(data.schedule_id)
 
         await _safe_publish(
             "schedule.activity.created",
@@ -2264,19 +2265,12 @@ class ScheduleService:
         # calendar when assigned, falling back to the project's regional week.
         new_start = fields.get("start_date", activity.start_date)
         new_end = fields.get("end_date", activity.end_date)
-        if "start_date" in fields or "end_date" in fields:
+        dates_change = "start_date" in fields or "end_date" in fields
+        if dates_change:
             schedule = await self.get_schedule(schedule_id)
-            cal_id = getattr(activity, "calendar_id", None)
-            if cal_id:
-                cal_map = await self._resolve_activity_calendars([activity], schedule.project_id)
-                cal_data = cal_map.get(str(activity_id))
-            else:
-                cal_data = None
-            if cal_data:
-                fields["duration_days"] = _compute_duration_from_cal(new_start, new_end, cal_data)
-            else:
-                region = await self.resolve_project_region(schedule.project_id)
-                fields["duration_days"] = compute_duration(new_start, new_end, region)
+            fields["duration_days"] = await self.working_duration(
+                schedule.project_id, getattr(activity, "calendar_id", None), new_start, new_end
+            )
 
         # Completion guard (mirrors tasks.complete_task): reject the transition
         # to completed while any canonical predecessor is still open. Skipped
@@ -2317,6 +2311,8 @@ class ScheduleService:
         # code above still reads ``activity``.
         if reorder:
             await self.activity_repo.bulk_update_fields([{"id": aid, "sort_order": o} for aid, o in reorder.items()])
+        if dates_change:
+            await self.sync_schedule_end_date(schedule_id)
 
         # Re-fetch to return fresh data
         refreshed = await self.get_activity(activity_id)
@@ -2370,6 +2366,7 @@ class ScheduleService:
             pruned = [d for d in deps if not (isinstance(d, dict) and str(d.get("activity_id")) in doomed_str)]
             if len(pruned) != len(deps):
                 await self.activity_repo.update_fields(succ_id, dependencies=pruned)
+        await self.sync_schedule_end_date(schedule_uuid)
 
         publish_after_commit(
             self.session,
@@ -2404,9 +2401,19 @@ class ScheduleService:
             The number of activities removed.
 
         Raises:
-            HTTPException 404 if the schedule does not exist.
+            HTTPException 404 if the schedule does not exist; 409
+            ``schedule_not_draft`` once the schedule has been activated, when
+            its plan is the one the site works to and is changed activity by
+            activity instead.
         """
-        await self.get_schedule(schedule_id)
+        schedule = await self.get_schedule(schedule_id)
+        if schedule.status != "draft":
+            raise coded_http_error(
+                status.HTTP_409_CONFLICT,
+                "schedule_not_draft",
+                "Only a draft schedule can be reset. Delete single activities of an active schedule instead.",
+                schedule_status=schedule.status,
+            )
 
         deleted = await self.activity_repo.delete_for_schedule(schedule_id)
 
@@ -3191,6 +3198,50 @@ class ScheduleService:
         )
         return {"work_days": work_days or [0, 1, 2, 3, 4], "exceptions": exceptions}
 
+    async def working_duration(
+        self,
+        project_id: uuid.UUID,
+        calendar_id: uuid.UUID | None,
+        start_date: str | None,
+        end_date: str | None,
+    ) -> int:
+        """Working days from ``start_date`` to ``end_date``, inclusive, on the activity's calendar.
+
+        The activity's own calendar counts when it is one of this project's;
+        without one, or with a dangling id, the project region's week counts,
+        as it always has for a date edit.
+        """
+        if calendar_id is not None:
+            from app.modules.schedule_advanced.models import Calendar
+
+            cal = await self.session.get(Calendar, calendar_id)
+            if cal is not None and cal.project_id == project_id:
+                work_days = readable_work_days(cal.work_days, source=f"calendar {cal.id} work days")
+                exceptions = readable_exception_dates(cal.holidays, source=f"calendar {cal.id} holidays")
+                return _compute_duration_from_cal(
+                    start_date or "",
+                    end_date or "",
+                    {"work_days": work_days or [0, 1, 2, 3, 4], "exceptions": exceptions},
+                )
+        region = await self.resolve_project_region(project_id)
+        return compute_duration(start_date or "", end_date or "", region)
+
+    async def sync_schedule_end_date(self, schedule_id: uuid.UUID) -> None:
+        """Move the schedule's end date to its latest activity end.
+
+        The end date is not typed in: it is where the plan finishes, so every
+        write that moves, adds or removes an activity calls this. A schedule
+        without dated activities keeps the end it has.
+        """
+        rows = await self.session.execute(select(Activity.end_date).where(Activity.schedule_id == schedule_id))
+        ends = [day for day in (_parse_day(value) for value in rows.scalars().all()) if day is not None]
+        if not ends:
+            return
+        latest = max(ends).isoformat()
+        current = await self.session.scalar(select(Schedule.end_date).where(Schedule.id == schedule_id))
+        if _parse_day(current) != max(ends):
+            await self.schedule_repo.update_fields(schedule_id, end_date=latest)
+
     async def _generation_calendar(
         self,
         schedule: Schedule,
@@ -3345,6 +3396,7 @@ class ScheduleService:
             )
 
         await self.activity_repo.bulk_update_fields(updates)
+        await self.sync_schedule_end_date(schedule_id)
 
         publish_after_commit(
             self.session,

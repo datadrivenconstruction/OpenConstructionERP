@@ -10392,6 +10392,7 @@ const resource = {
     "schedule.end_date_optional": "Senza data finale, il piano dura quanto richiesto dai lavori e nulla viene abbreviato. Inserisci una data per adattarlo all'intervallo desiderato.",
     "schedule.error_activity_not_in_schedule": "Entrambe le attività devono appartenere a questo cronoprogramma.",
     "schedule.error_boq_has_no_positions": "Questo computo non contiene ancora voci con lavori da pianificare. Aggiungi prima le voci alle sezioni.",
+    "schedule.error_schedule_not_draft": "Solo un cronoprogramma in bozza può essere svuotato. Una volta attivo, elimina le singole attività.",
     "schedule.error_boq_not_found": "Computo non trovato nel progetto. Potrebbe essere stato eliminato; scegline un altro.",
     "schedule.error_dependency_cycle": "Il collegamento creerebbe un ciclo nel cronoprogramma e non è stato aggiunto.",
     "schedule.error_dependency_self": "Un'attività non può dipendere da sé stessa.",

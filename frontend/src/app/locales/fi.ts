@@ -11314,6 +11314,7 @@ const resource = {
     "schedule.confirm_delete_baselines_other": "Samalla poistettavia vertailusuunnitelmia: {{count}}.",
     "schedule.confirm_delete_payment_milestones_one": "Välitavoitteisiin sidottuja sopimusmaksueriä: {{count}}. Ne säilyvät ja palaavat sopimuspäiviinsä.",
     "schedule.confirm_delete_payment_milestones_other": "Välitavoitteisiin sidottuja sopimusmaksueriä: {{count}}. Ne säilyvät ja palaavat sopimuspäiviinsä.",
+    "schedule.error_schedule_not_draft": "Vain luonnostilassa olevan aikataulun voi tyhjentää. Kun se on aktiivinen, poista tehtäviä yksitellen.",
     "schedule.error_boq_not_found": "Määräluetteloa ei löytynyt projektista. Se on ehkä poistettu; valitse toinen.",
     "schedule.error_boq_has_no_positions": "Määräluettelossa ei vielä ole aikataulutettavia työnimikkeitä. Lisää ensin nimikkeet osioihin.",
     "schedule.error_generation_failed": "Aikataulua ei voitu luoda määräluettelosta. Yritä uudelleen; jos virhe toistuu, ota yhteys tukeen tunnisteella {{reference}}.",

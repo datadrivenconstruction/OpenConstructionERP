@@ -9159,6 +9159,7 @@ const resource = {
     "schedule.activity_deleted": "Activity deleted",
     "schedule.error_schedule_has_activities_one": "This schedule already has {{count}} activity.",
     "schedule.error_schedule_has_activities_other": "This schedule already has {{count}} activities.",
+    "schedule.error_schedule_not_draft": "Only a draft schedule can be cleared. Once it is active, delete single activities instead.",
     "schedule.error_boq_not_found": "This BOQ was not found in this project. It may have been deleted; pick another one.",
     "schedule.error_boq_has_no_positions": "This BOQ has no positions with work in them yet, so there is nothing to schedule. Add positions to its sections first.",
     "schedule.error_generation_failed": "The schedule could not be generated from this BOQ. Please try again; if it keeps failing, contact support and quote reference {{reference}}.",

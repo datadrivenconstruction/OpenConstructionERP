@@ -12116,6 +12116,7 @@ const resource = {
     "schedule.confirm_delete_payment_milestones_one": "Tranșe contractuale legate de jaloanele sale: {{count}}. Se păstrează și revin la datele contractuale.",
     "schedule.confirm_delete_payment_milestones_few": "Tranșe contractuale legate de jaloanele sale: {{count}}. Se păstrează și revin la datele contractuale.",
     "schedule.confirm_delete_payment_milestones_other": "Tranșe contractuale legate de jaloanele sale: {{count}}. Se păstrează și revin la datele contractuale.",
+    "schedule.error_schedule_not_draft": "Doar un grafic în ciornă poate fi golit. Odată activ, ștergeți activitățile pe rând.",
     "schedule.error_boq_not_found": "Devizul nu a fost găsit în proiect. Poate a fost șters; selectați altul.",
     "schedule.error_boq_has_no_positions": "Devizul nu conține încă poziții cu lucrări de planificat. Adăugați mai întâi poziții în secțiuni.",
     "schedule.error_generation_failed": "Graficul nu a putut fi generat din deviz. Reîncercați; dacă problema persistă, contactați asistența și indicați referința {{reference}}.",

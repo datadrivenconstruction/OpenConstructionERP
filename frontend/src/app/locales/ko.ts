@@ -11382,6 +11382,7 @@ const resource = {
     "schedule.end_date_optional": "종료일을 지정하지 않으면 필요한 작업 기간을 확보하며 단축하지 않습니다. 두 날짜 사이에 맞추려면 종료일을 입력하세요.",
     "schedule.error_activity_not_in_schedule": "두 활동 모두 이 일정에 속해야 합니다.",
     "schedule.error_boq_has_no_positions": "이 내역서에는 아직 작업이 포함된 항목이 없어 일정을 만들 수 없습니다. 먼저 구역에 항목을 추가하세요.",
+    "schedule.error_schedule_not_draft": "초안 일정만 비울 수 있습니다. 활성화된 후에는 작업을 하나씩 삭제하세요.",
     "schedule.error_boq_not_found": "이 프로젝트에서 내역서를 찾을 수 없습니다. 삭제되었을 수 있으니 다른 내역서를 선택하세요.",
     "schedule.error_dependency_cycle": "이 연결은 순환 의존성을 만들므로 추가하지 않았습니다.",
     "schedule.error_dependency_self": "활동은 자기 자신에 의존할 수 없습니다.",

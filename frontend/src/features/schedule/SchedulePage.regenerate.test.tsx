@@ -748,6 +748,13 @@ describe('deleting', () => {
     fireEvent.click(within(confirm).getByRole('button', { name: 'Clear all' }));
     await waitFor(() => expect(state.cleared).toBe(1));
   });
+
+  it('offers no reset once the schedule is active', async () => {
+    state.activities = THREE;
+    renderDetail({ schedule: { status: 'active' } });
+    expect(await screen.findByTestId('svg-gantt')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear all activities' })).toBeNull();
+  });
 });
 
 describe('schedule list', () => {

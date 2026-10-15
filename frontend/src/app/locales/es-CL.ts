@@ -9891,6 +9891,7 @@ const resource = {
     "schedule.end_date_optional": "Sin fecha final, el plan dura lo que requiera el trabajo, sin acortar nada. Introduce una fecha para ajustarlo al intervalo deseado.",
     "schedule.error_activity_not_in_schedule": "Ambas actividades deben pertenecer a este cronograma.",
     "schedule.error_boq_has_no_positions": "Este presupuesto aún no tiene partidas con trabajo que planificar. Añade primero partidas a sus secciones.",
+    "schedule.error_schedule_not_draft": "Solo se puede vaciar un cronograma en borrador. Una vez activo, elimine las actividades una a una.",
     "schedule.error_boq_not_found": "No se encontró este presupuesto en el proyecto. Puede haberse eliminado; elige otro.",
     "schedule.error_dependency_cycle": "Este vínculo crearía un ciclo en el cronograma, por lo que no se añadió.",
     "schedule.error_dependency_self": "Una actividad no puede depender de sí misma.",

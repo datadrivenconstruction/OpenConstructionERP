@@ -16702,6 +16702,7 @@ const resource = {
     "schedule.end_date_optional": "دون تاريخ انتهاء، يستغرق المخطط الوقت اللازم للعمل دون تقصير. أدخل تاريخاً لملاءمته بين التاريخين.",
     "schedule.error_activity_not_in_schedule": "يجب أن ينتمي النشاطان إلى هذا الجدول.",
     "schedule.error_boq_has_no_positions": "لا يحتوي جدول الكميات بعد على بنود عمل يمكن جدولتها. أضف بنوداً إلى أقسامه أولاً.",
+    "schedule.error_schedule_not_draft": "لا يمكن مسح الجدول الزمني إلا وهو مسودة. بعد تفعيله احذف الأنشطة واحدًا تلو الآخر.",
     "schedule.error_boq_not_found": "لم يُعثر على جدول الكميات في هذا المشروع. ربما حُذف؛ اختر غيره.",
     "schedule.error_dependency_cycle": "لم يُضف الرابط لأنه سيُنشئ دورة في الجدول.",
     "schedule.error_dependency_self": "لا يمكن أن يعتمد النشاط على نفسه.",

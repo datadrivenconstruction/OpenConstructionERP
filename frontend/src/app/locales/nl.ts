@@ -10234,6 +10234,7 @@ const resource = {
     "schedule.end_date_optional": "Zonder einddatum duurt het plan zo lang als het werk vereist, zonder verkorting. Vul een einddatum in om het plan tussen de twee datums te laten passen.",
     "schedule.error_activity_not_in_schedule": "Beide activiteiten moeten tot deze planning behoren.",
     "schedule.error_boq_has_no_positions": "Deze hoeveelhedenstaat bevat nog geen posten met planbaar werk. Voeg eerst posten aan de secties toe.",
+    "schedule.error_schedule_not_draft": "Alleen een planning in concept kan worden leeggemaakt. Is hij actief, verwijder dan losse activiteiten.",
     "schedule.error_boq_not_found": "Deze hoeveelhedenstaat is niet gevonden in dit project. Mogelijk is deze verwijderd; kies een andere.",
     "schedule.error_dependency_cycle": "Deze koppeling zou een kring in de planning veroorzaken en is daarom niet toegevoegd.",
     "schedule.error_dependency_self": "Een activiteit kan niet van zichzelf afhankelijk zijn.",

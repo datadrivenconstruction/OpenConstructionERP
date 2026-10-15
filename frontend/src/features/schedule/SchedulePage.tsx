@@ -1762,8 +1762,9 @@ export function ScheduleDetail({
                 : t('schedule.generate_from_boq', 'Generate from BOQ')}
             </Button>
           )}
-          {/* Clear all activities, next to Regenerate: the schedule itself stays */}
-          {hasActivities && canDeleteSchedule && (
+          {/* Clear all activities, next to Regenerate: the schedule itself stays.
+              Only before activation; an active plan is changed row by row. */}
+          {hasActivities && canDeleteSchedule && schedule.status === 'draft' && (
             <Button
               variant="ghost"
               size="sm"

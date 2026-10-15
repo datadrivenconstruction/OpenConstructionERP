@@ -11364,6 +11364,7 @@ const resource = {
     "schedule.end_date_optional": "終了日を指定しない場合、必要な作業期間を確保し、短縮しません。両日付の間に収めるには終了日を入力してください。",
     "schedule.error_activity_not_in_schedule": "両方の作業がこの工程表に属している必要があります。",
     "schedule.error_boq_has_no_positions": "この内訳書にはまだ作業を含む明細がないため、工程を作成できません。先に各セクションに明細を追加してください。",
+    "schedule.error_schedule_not_draft": "クリアできるのは下書きのスケジュールだけです。有効化後は作業を個別に削除してください。",
     "schedule.error_boq_not_found": "このプロジェクトに内訳書が見つかりません。削除された可能性があります。別の内訳書を選んでください。",
     "schedule.error_dependency_cycle": "このリンクを追加すると依存関係が循環するため、追加しませんでした。",
     "schedule.error_dependency_self": "作業を自身に依存させることはできません。",

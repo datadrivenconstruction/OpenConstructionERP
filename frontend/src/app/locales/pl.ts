@@ -11850,6 +11850,7 @@ const resource = {
     "schedule.end_date_optional": "Bez daty końcowej plan trwa tyle, ile wymagają roboty, bez skracania. Podaj datę, aby dopasować plan do wybranego przedziału.",
     "schedule.error_activity_not_in_schedule": "Oba działania muszą należeć do tego harmonogramu.",
     "schedule.error_boq_has_no_positions": "Ten przedmiar nie zawiera jeszcze pozycji robót do zaplanowania. Najpierw dodaj pozycje do jego sekcji.",
+    "schedule.error_schedule_not_draft": "Wyczyścić można tylko harmonogram w wersji roboczej. W aktywnym harmonogramie usuwaj pojedyncze czynności.",
     "schedule.error_boq_not_found": "Nie znaleziono tego przedmiaru w projekcie. Być może został usunięty; wybierz inny.",
     "schedule.error_dependency_cycle": "To powiązanie utworzyłoby cykl w harmonogramie, więc nie zostało dodane.",
     "schedule.error_dependency_self": "Działanie nie może zależeć od samego siebie.",

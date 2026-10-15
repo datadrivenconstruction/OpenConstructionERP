@@ -11869,6 +11869,7 @@ const resource = {
     "schedule.end_date_optional": "Bez završnog datuma plan traje koliko radovi zahtijevaju, bez skraćivanja. Unesite datum kako biste plan prilagodili željenom razdoblju.",
     "schedule.error_activity_not_in_schedule": "Obje aktivnosti moraju pripadati ovom rasporedu.",
     "schedule.error_boq_has_no_positions": "Ovaj troškovnik još nema stavke s radovima za planiranje. Najprije dodajte stavke u njegove odjeljke.",
+    "schedule.error_schedule_not_draft": "Isprazniti se može samo terminski plan u nacrtu. Kada je aktivan, brišite pojedinačne aktivnosti.",
     "schedule.error_boq_not_found": "Ovaj troškovnik nije pronađen u projektu. Možda je izbrisan; odaberite drugi.",
     "schedule.error_dependency_cycle": "Ova bi poveznica stvorila ciklus u rasporedu pa nije dodana.",
     "schedule.error_dependency_self": "Aktivnost ne može ovisiti sama o sebi.",

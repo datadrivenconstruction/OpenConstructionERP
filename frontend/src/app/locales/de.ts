@@ -11363,6 +11363,7 @@ const resource = {
     "schedule.end_date_optional": "Ohne Enddatum dauert der Plan so lange, wie die Arbeiten benötigen; nichts wird verkürzt. Geben Sie ein Enddatum ein, um den Plan zwischen die beiden Termine einzupassen.",
     "schedule.error_activity_not_in_schedule": "Beide Vorgänge müssen zu diesem Terminplan gehören.",
     "schedule.error_boq_has_no_positions": "Dieses Leistungsverzeichnis enthält noch keine Positionen mit Arbeiten. Fügen Sie zuerst Positionen zu seinen Abschnitten hinzu.",
+    "schedule.error_schedule_not_draft": "Nur ein Terminplan im Entwurf kann geleert werden. Ist er aktiv, löschen Sie stattdessen einzelne Vorgänge.",
     "schedule.error_boq_not_found": "Dieses Leistungsverzeichnis wurde im Projekt nicht gefunden. Es wurde möglicherweise gelöscht; wählen Sie ein anderes.",
     "schedule.error_dependency_cycle": "Diese Verknüpfung würde einen Zyklus im Terminplan erzeugen und wurde deshalb nicht hinzugefügt.",
     "schedule.error_dependency_self": "Ein Vorgang kann nicht von sich selbst abhängen.",

@@ -10299,6 +10299,7 @@ const resource = {
     "schedule.end_date_optional": "Sem data final, o plano dura o tempo necessário aos trabalhos, sem reduções. Introduza uma data para ajustar o plano ao intervalo pretendido.",
     "schedule.error_activity_not_in_schedule": "Ambas as atividades devem pertencer a este cronograma.",
     "schedule.error_boq_has_no_positions": "Este mapa de quantidades ainda não contém artigos com trabalhos a planear. Adicione primeiro artigos às secções.",
+    "schedule.error_schedule_not_draft": "Só um cronograma em rascunho pode ser limpo. Depois de ativo, elimine as atividades uma a uma.",
     "schedule.error_boq_not_found": "Este mapa de quantidades não foi encontrado no projeto. Pode ter sido eliminado; escolha outro.",
     "schedule.error_dependency_cycle": "Esta ligação criaria um ciclo no cronograma e não foi adicionada.",
     "schedule.error_dependency_self": "Uma atividade não pode depender de si própria.",
