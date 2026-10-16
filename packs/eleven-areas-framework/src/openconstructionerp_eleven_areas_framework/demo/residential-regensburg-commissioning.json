@@ -3,6 +3,7 @@
   "systems": [
     {
       "type": "mechanical",
+      "status": "not_started",
       "tag": "HST-01",
       "name": {
         "en": "District heating substation, house A",
@@ -15,6 +16,7 @@
     },
     {
       "type": "hvac",
+      "status": "not_started",
       "tag": "LÜ-01",
       "name": {
         "en": "Apartment ventilation, house A (DIN 1946-6)",
@@ -27,6 +29,7 @@
     },
     {
       "type": "electrical",
+      "status": "not_started",
       "tag": "NSHV-01",
       "name": {
         "en": "Main low-voltage distribution",
@@ -39,6 +42,7 @@
     },
     {
       "type": "hvac",
+      "status": "not_started",
       "tag": "LÜ-02",
       "name": {
         "en": "Car park ventilation with CO warning system",
@@ -51,6 +55,7 @@
     },
     {
       "type": "mechanical",
+      "status": "not_started",
       "tag": "HST-02",
       "name": {
         "en": "District heating substation, house B",
@@ -63,6 +68,7 @@
     },
     {
       "type": "elevator",
+      "status": "not_started",
       "tag": "AUF-01",
       "name": {
         "en": "Passenger lift, house A",
@@ -75,6 +81,7 @@
     },
     {
       "type": "fire",
+      "status": "not_started",
       "tag": "RWA-01",
       "name": {
         "en": "Smoke and heat extraction, staircases",
@@ -87,6 +94,7 @@
     },
     {
       "type": "plumbing",
+      "status": "not_started",
       "tag": "TWA-01",
       "name": {
         "en": "Drinking water installation, house A",
@@ -99,6 +107,7 @@
     },
     {
       "type": "mechanical",
+      "status": "not_started",
       "tag": "HST-03",
       "name": {
         "en": "District heating substation, house C",
@@ -111,6 +120,7 @@
     },
     {
       "type": "elevator",
+      "status": "not_started",
       "tag": "AUF-02",
       "name": {
         "en": "Passenger lift, house B",
@@ -123,6 +133,7 @@
     },
     {
       "type": "controls",
+      "status": "not_started",
       "tag": "GA-01",
       "name": {
         "en": "Building automation, heating centre",

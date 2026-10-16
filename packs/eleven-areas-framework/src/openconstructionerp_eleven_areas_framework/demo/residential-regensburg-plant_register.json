@@ -478,7 +478,7 @@
       "quantity": "2",
       "redundancy": "N+1",
       "need_days": -75,
-      "reach": "handed_over",
+      "reach": "delivered",
       "performance": [
         {
           "key": "heating_capacity",

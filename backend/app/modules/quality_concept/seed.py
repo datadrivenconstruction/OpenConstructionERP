@@ -595,6 +595,9 @@ async def _seed_stages(
     if not staged or not stages or before:
         # Before construction the stage model stands with its owners and no system has been tested.
         return
+    if all(x.status == "not_started" for x in staged):
+        # Construction runs but no system is under test yet (a site still in its pit): nothing to release.
+        return
 
     def row_of(system: Any, stage: Any) -> Any:
         return next(r for r in rows if r.system_id == system.id and r.stage_code == stage.code)

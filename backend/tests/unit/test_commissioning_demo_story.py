@@ -38,11 +38,26 @@ def test_every_story_system_is_usable_and_german_in_german(demo: str) -> None:
 
 
 @pytest.mark.parametrize("demo", _DEMOS)
-def test_the_story_register_still_shows_a_commissioned_and_a_blocked_system(demo: str) -> None:
-    plan = seed._lifecycle_plan(len(_story(demo)["systems"]))
-    assert seed._COMMISSIONED in plan
-    assert seed._TESTS_COMPLETE in plan
-    assert seed._NOT_STARTED in plan
+def test_no_story_system_is_under_test_before_the_shell_stands(demo: str) -> None:
+    # Regensburg digs its pit and Ludwigsburg has not started: no system can be tested or commissioned yet.
+    rows = seed._story_systems(_story(demo), "de")
+    assert rows and {row.get("status") for row in rows} == {seed._NOT_STARTED}
+
+
+def test_the_positional_register_still_shows_every_lifecycle() -> None:
+    plan = seed._lifecycle_plan(11)
+    assert {seed._COMMISSIONED, seed._TESTS_COMPLETE, seed._IN_PROGRESS, seed._NOT_STARTED} <= set(plan)
+
+
+def test_a_story_status_is_read_only_when_it_is_a_lifecycle() -> None:
+    story = {
+        "systems": [
+            {"type": "hvac", "name": "A", "status": "commissioned"},
+            {"type": "hvac", "name": "B", "status": "flying"},
+            {"type": "hvac", "name": "C"},
+        ]
+    }
+    assert [row.get("status") for row in seed._story_systems(story, "en")] == ["commissioned", None, None]
 
 
 def test_a_story_entry_that_cannot_be_read_is_skipped() -> None:

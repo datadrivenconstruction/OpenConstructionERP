@@ -67,6 +67,7 @@ _NOT_STARTED = "not_started"
 _IN_PROGRESS = "in_progress"
 _TESTS_COMPLETE = "tests_complete"
 _COMMISSIONED = "commissioned"
+_LIFECYCLES = frozenset({_NOT_STARTED, _IN_PROGRESS, _TESTS_COMPLETE, _COMMISSIONED})
 
 # Checklist kinds. Only ``functional`` items gate readiness.
 _PREFUNCTIONAL = "prefunctional"
@@ -525,8 +526,10 @@ def _is_german(locale: str | None) -> bool:
 def _story_systems(story: dict[str, Any], locale: str) -> list[dict[str, str]]:
     """The systems a pack story names for a project, in order; an entry that is not usable is skipped.
 
-    A story entry is ``{"type", "tag", "name", "location", "description"}`` with the texts as plain strings or
-    ``{locale: text}`` maps. Without a usable entry the project takes the built-in catalogue of systems.
+    A story entry is ``{"type", "tag", "name", "location", "description", "status"}`` with the texts as plain
+    strings or ``{locale: text}`` maps. ``status`` is optional and one of the four lifecycles: a project still
+    in its pit stage has no system under test, so its story says ``not_started``. Without it the system takes
+    the lifecycle of its position. Without a usable entry the project takes the built-in catalogue of systems.
     """
     from app.modules.project_governance.public import story_text
 
@@ -546,6 +549,11 @@ def _story_systems(story: dict[str, Any], locale: str) -> list[dict[str, str]]:
             text = story_text(value, locale) if isinstance(value, (str, dict)) else ""
             if isinstance(text, str) and text.strip():
                 entry[key] = text.strip()[:limit]
+        status = item.get("status")
+        if status in _LIFECYCLES:
+            entry["status"] = status
+        elif status is not None:
+            logger.info("Cx demo story: status %r of system %r ignored", status, entry.get("tag") or name)
         out.append(entry)
     return out
 
@@ -617,7 +625,7 @@ async def _seed_project(
         spec = dict(_SYSTEM_CATALOGUE[system_type])
         if german:
             spec["prefunctional"], spec["functional"] = de_texts.CHECKS[system_type]
-        lifecycle = lifecycles[position]
+        lifecycle = (entry or {}).get("status") or lifecycles[position]
         unit_no = position + 1
         variant = position % len(spec["names"])
         description = (

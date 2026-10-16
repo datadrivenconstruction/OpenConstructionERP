@@ -3,6 +3,7 @@
   "systems": [
     {
       "type": "mechanical",
+      "status": "not_started",
       "tag": "WP-01",
       "name": {
         "en": "Heat pump plant, geothermal probes",
@@ -15,6 +16,7 @@
     },
     {
       "type": "hvac",
+      "status": "not_started",
       "tag": "LÜ-01",
       "name": {
         "en": "CO2-controlled ventilation, classroom wing",
@@ -27,6 +29,7 @@
     },
     {
       "type": "fire",
+      "status": "not_started",
       "tag": "BMA-01",
       "name": {
         "en": "Fire detection and alarm system",
@@ -39,6 +42,7 @@
     },
     {
       "type": "electrical",
+      "status": "not_started",
       "tag": "NSHV-01",
       "name": {
         "en": "Main low-voltage distribution",
@@ -51,6 +55,7 @@
     },
     {
       "type": "hvac",
+      "status": "not_started",
       "tag": "LÜ-02",
       "name": {
         "en": "Canteen kitchen ventilation",
@@ -63,6 +68,7 @@
     },
     {
       "type": "controls",
+      "status": "not_started",
       "tag": "GLT-01",
       "name": {
         "en": "Building management system",
@@ -75,6 +81,7 @@
     },
     {
       "type": "elevator",
+      "status": "not_started",
       "tag": "AUF-01",
       "name": {
         "en": "Passenger lift, classroom wing",
@@ -87,6 +94,7 @@
     },
     {
       "type": "security",
+      "status": "not_started",
       "tag": "EMA-01",
       "name": {
         "en": "Intruder alarm system",
@@ -99,6 +107,7 @@
     },
     {
       "type": "plumbing",
+      "status": "not_started",
       "tag": "TWA-01",
       "name": {
         "en": "Drinking water installation",
@@ -111,6 +120,7 @@
     },
     {
       "type": "other",
+      "status": "not_started",
       "tag": "PV-01",
       "name": {
         "en": "Photovoltaic array, gym roof",

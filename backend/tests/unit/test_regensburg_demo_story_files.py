@@ -523,11 +523,15 @@ def test_regensburg_contracts_and_guarantees_tell_one_story() -> None:
 
 
 def test_regensburg_plant_register_fits_a_site_that_has_only_started() -> None:
-    """Nothing is commissioned before the first slab: the show apartment units are ordered for a later need date."""
+    """Nothing is commissioned before the first slab: the show apartment units are ordered for a later need date.
+
+    Commissioned and handed over both create a commissioned system on the commissioning matrix, so the mobile
+    winter heaters (temporary site plant) are delivered, not handed over to operation.
+    """
     items = {i["code"]: i for i in _story("residential-regensburg", "plant_register")["items"]}
     assert items["PL-010"]["reach"] == "ordered" and items["PL-010"]["need_days"] > 0
-    assert items["PL-011"]["reach"] == "handed_over" and items["PL-008"]["reach"] == "delivered"
-    assert not [c for c, i in items.items() if i["reach"] == "commissioned"]
+    assert items["PL-011"]["reach"] == "delivered" and items["PL-008"]["reach"] == "delivered"
+    assert not [c for c, i in items.items() if i["reach"] in ("commissioned", "handed_over")]
 
 
 def test_regensburg_balcony_order_falls_due_with_the_commitment_decision() -> None:
