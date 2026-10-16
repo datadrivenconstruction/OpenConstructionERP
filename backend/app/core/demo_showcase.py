@@ -50,4 +50,35 @@ def generic_site_rows(demo_id: str, rows: list[dict[str, Any]]) -> list[dict[str
     return [] if demo_id in NOT_STARTED_SITE_DEMO_IDS else rows
 
 
-__all__ = ["GERMAN_DIARY_DEMO_IDS", "GERMAN_SHOWCASE_DEMO_IDS", "NOT_STARTED_SITE_DEMO_IDS", "generic_site_rows"]
+#: How far the money of each cost group has gone on the install day, for demo projects whose story
+#: names a construction stage: (share bound by order, share already incurred), keyed by the DIN 276
+#: group of the bill section. A group not listed has nothing bound yet. The generic budget seed
+#: spends 80 % of the first sections whatever the project, which put a pit-stage site at half its
+#: budget spent and "over budget", and a school that has not started at a third. Both budget
+#: registers of the hub (the 5D budget lines and the finance budgets) read the same shares, so the
+#: two widgets agree.
+STAGE_SPEND: dict[str, dict[str, tuple[float, float]]] = {
+    # Running site in its pit stage: enabling works and the pit lots are under contract and partly
+    # done, the site set-up is half let, the design fees of stages 1 to 4 are mostly paid.
+    "residential-regensburg": {"210": (1.0, 0.6), "310": (1.0, 0.35), "390": (0.5, 0.15), "700": (0.6, 0.35)},
+    # School before its construction gate: the design contract runs, the ordnance survey is done.
+    "school-ludwigsburg": {"210": (0.15, 0.1), "700": (0.5, 0.2)},
+}
+
+
+def stage_spend(demo_id: str, section_code: str | None) -> tuple[float, float] | None:
+    """(bound share, incurred share) of a bill section on the install day, None for a generic demo."""
+    table = STAGE_SPEND.get(demo_id)
+    if table is None:
+        return None
+    return table.get(str(section_code or "")[:3], (0.0, 0.0))
+
+
+__all__ = [
+    "GERMAN_DIARY_DEMO_IDS",
+    "GERMAN_SHOWCASE_DEMO_IDS",
+    "NOT_STARTED_SITE_DEMO_IDS",
+    "STAGE_SPEND",
+    "generic_site_rows",
+    "stage_spend",
+]

@@ -25,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
 from app.core.demo_resource_names import resource_name
-from app.core.demo_showcase import GERMAN_DIARY_DEMO_IDS, generic_site_rows
+from app.core.demo_showcase import GERMAN_DIARY_DEMO_IDS, generic_site_rows, stage_spend
 from app.core.demo_tender_scopes import (
     OPEN_STATUSES,
     PENDING_INVITEE,
@@ -5966,6 +5966,14 @@ def _generate_module_data(
         revised = round(original * 1.02, 2)
         committed = round(original * 0.7, 2)
         actual = round(original * (0.5 if i < len(template.sections) // 2 else 0.0), 2)
+        stage = stage_spend(demo_id, wbs)
+        if stage is not None:
+            # A demo told at a construction stage: no revision yet, and committed is the open
+            # part of what is bound (finance moves it to actual as the work is incurred).
+            bound, incurred = stage
+            revised = round(original, 2)
+            actual = round(original * incurred, 2)
+            committed = round(original * (bound - incurred), 2)
         finance_budgets.append(
             {
                 "wbs_id": wbs,
@@ -12727,6 +12735,14 @@ async def install_demo_project(
         actual = round(planned * spend * (0.95 + 0.1 * (i % 3)), 2)
         committed = round(planned * min(1, spend + 0.15), 2)
         forecast = round(planned * (1.02 + 0.01 * (i % 4)), 2)
+        stage = stage_spend(demo_id, sec.ordinal)
+        if stage is not None:
+            # The same shares as the finance budgets of this demo (demo_showcase.STAGE_SPEND), so
+            # the hub's two budget widgets read one story. Committed is the open part only.
+            bound, incurred = stage
+            actual = round(planned * incurred, 2)
+            committed = round(planned * (bound - incurred), 2)
+            forecast = round(planned, 2)
 
         bl = BudgetLine(
             id=_id(),
