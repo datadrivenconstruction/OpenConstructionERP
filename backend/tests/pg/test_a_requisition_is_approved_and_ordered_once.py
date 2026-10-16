@@ -289,6 +289,7 @@ async def test_only_an_approver_who_did_not_submit_decides(world: World) -> None
     assert approved.status_code == 200, approved.text
     assert body["status"] == "approved"
     assert body["approver_id"] == str(world.manager)
+    assert body["approver_name"] == "Req manager", "the UI shows who decided, not a bare id"
     assert body["decision_comment"] == "Within budget"
     assert body["decided_at"]
     assert body["submitted_by"] == str(world.editor)
@@ -319,6 +320,7 @@ async def test_a_rejection_needs_its_reason_and_goes_back_to_draft(world: World)
     assert resubmitted.json()["status"] == "submitted"
     assert resubmitted.json()["decision_comment"] is None
     assert resubmitted.json()["approver_id"] is None
+    assert resubmitted.json()["approver_name"] is None
 
 
 async def test_a_supplier_blacklisted_after_submission_blocks_the_approval(world: World) -> None:

@@ -1043,6 +1043,7 @@ class RequisitionResponse(BaseModel):
     estimated_delivery_date: str | None = None
     requester_id: str | None = None
     approver_id: str | None = None
+    approver_name: str | None = None
     submitted_by: str | None = None
     decided_at: str | None = None
     decision_comment: str | None = None

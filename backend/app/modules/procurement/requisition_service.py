@@ -1129,14 +1129,32 @@ class ResponseContext:
         vendors: dict[uuid.UUID, VendorInfo] | None = None,
         po_numbers: dict[uuid.UUID, str] | None = None,
         po_lines: dict[uuid.UUID, list[TracePOLine]] | None = None,
+        user_names: dict[str, str] | None = None,
     ) -> None:
         self.vendors = vendors or {}
         self.po_numbers = po_numbers or {}
         self.po_lines = po_lines or {}
+        self.user_names = user_names or {}
+
+
+async def load_user_names(session: AsyncSession, raw_ids: set[str]) -> dict[str, str]:
+    """Display names keyed by the user id string the requisition stores; unknown ids are left out."""
+    from app.modules.users.models import User  # noqa: PLC0415
+
+    parsed: dict[uuid.UUID, str] = {}
+    for raw in raw_ids:
+        try:
+            parsed[uuid.UUID(str(raw))] = raw
+        except (ValueError, TypeError):
+            continue
+    if not parsed:
+        return {}
+    rows = (await session.execute(select(User.id, User.full_name).where(User.id.in_(parsed)))).all()
+    return {parsed[row.id]: row.full_name for row in rows if row.full_name}
 
 
 async def build_response_context(session: AsyncSession, reqs: list[MaterialRequisition]) -> ResponseContext:
-    """Vendor names, order numbers and converted order lines for these requisitions, in three queries."""
+    """Vendor names, order numbers, converted order lines and approver names, in four queries."""
     vendors = await load_vendors(session, {r.vendor_id for r in reqs if r.vendor_id is not None})
     po_ids = {r.po_id for r in reqs if r.po_id is not None}
     po_numbers: dict[uuid.UUID, str] = {}
@@ -1151,7 +1169,8 @@ async def build_response_context(session: AsyncSession, reqs: list[MaterialRequi
         }
     item_ids = {item.id for r in reqs for item in r.items}
     po_lines = await RequisitionWorkflowService(session)._po_lines_for_items(item_ids)
-    return ResponseContext(vendors, po_numbers, po_lines)
+    user_names = await load_user_names(session, {r.approver_id for r in reqs if r.approver_id})
+    return ResponseContext(vendors, po_numbers, po_lines, user_names)
 
 
 def requisition_to_response(req: MaterialRequisition, context: ResponseContext | None = None) -> RequisitionResponse:
@@ -1206,6 +1225,7 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
         estimated_delivery_date=req.estimated_delivery_date,
         requester_id=req.requester_id,
         approver_id=req.approver_id,
+        approver_name=ctx.user_names.get(req.approver_id) if req.approver_id else None,
         submitted_by=req.submitted_by,
         decided_at=req.decided_at,
         decision_comment=req.decision_comment,

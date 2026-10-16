@@ -168187,6 +168187,11 @@
               "default": "None"
             },
             {
+              "name": "approver_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "submitted_by",
               "type": "str | None",
               "default": "None"

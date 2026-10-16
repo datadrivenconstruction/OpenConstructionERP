@@ -157,6 +157,15 @@ describe('canOfferDecision', () => {
     expect(canOfferDecision(submitted, 'u-2', null)).toBe(false);
     expect(canOfferDecision({ ...submitted, status: 'approved' }, 'u-2', 'admin')).toBe(false);
   });
+
+  it('follows the real permission once the permission list is known', () => {
+    const granted = ['procurement.read', 'procurement.approve_requisition'];
+    expect(canOfferDecision(submitted, 'u-2', 'editor', granted)).toBe(true);
+    expect(canOfferDecision(submitted, 'u-2', 'manager', ['procurement.read'])).toBe(false);
+    expect(canOfferDecision(submitted, 'u-2', 'admin', [])).toBe(true);
+    expect(canOfferDecision(submitted, 'u-1', 'editor', granted)).toBe(false);
+    expect(canOfferDecision({ ...submitted, status: 'draft' }, 'u-2', 'editor', granted)).toBe(false);
+  });
 });
 
 describe('positionLabel', () => {

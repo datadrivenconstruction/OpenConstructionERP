@@ -24,7 +24,7 @@ import { ClipboardList, Loader2, GitMerge, Send, Undo2, Ban, Trash2, Check, X, S
 import { Badge, Button, Card, EmptyState, SkeletonTable, WideModal, type BadgeVariant } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { QuantityDisplay } from '@/shared/ui/QuantityDisplay';
-import { getErrorMessage } from '@/shared/lib/api';
+import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { listVendors } from '@/features/supplier-catalogs/api';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -185,18 +185,26 @@ function convertBlockMessage(t: Translate, reason: ConvertBlockReason): string {
   }
 }
 
+export const APPROVE_REQUISITION_PERMISSION = 'procurement.approve_requisition';
+
 /**
  * Whether to offer Approve and Reject. The server decides (it refuses the
- * submitter with a 403 and needs `procurement.approve_requisition`, a manager
- * permission); this only stops offering a button that is certain to fail.
+ * submitter with a 403 and needs `procurement.approve_requisition`); this only
+ * stops offering a button that is certain to fail. When the caller's
+ * permission list from `/v1/users/me/` is known it is the answer, otherwise
+ * the role rank stands in until it loads.
  */
 export function canOfferDecision(
   req: Pick<Requisition, 'status' | 'submitted_by'>,
   userId: string | null,
   userRole: string | null,
+  permissions?: readonly string[] | null,
 ): boolean {
   if (req.status !== 'submitted') return false;
   if (userId && req.submitted_by && req.submitted_by === userId) return false;
+  if (Array.isArray(permissions)) {
+    return normalizeRole(userRole) === 'admin' || permissions.includes(APPROVE_REQUISITION_PERMISSION);
+  }
   const rank = (ROLE_RANK as Record<string, number>)[normalizeRole(userRole)];
   return rank !== undefined && rank >= ROLE_RANK.manager;
 }
@@ -603,6 +611,11 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
   const [decision, setDecision] = useState<'approve' | 'reject' | null>(null);
   const userId = useAuthStore((s) => s.userId);
   const userRole = useAuthStore((s) => s.userRole);
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => apiGet<{ permissions?: string[] }>('/v1/users/me/'),
+    staleTime: 5 * 60_000,
+  });
   const [lines, setLines] = useState<RequisitionLineIn[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -768,7 +781,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 {t('procurement.requisitions.withdraw', { defaultValue: 'Withdraw to draft' })}
               </Button>
             )}
-            {canOfferDecision(req, userId, userRole) && (
+            {canOfferDecision(req, userId, userRole, me?.permissions) && (
               <>
                 <Button variant="danger" icon={<X size={14} />} onClick={() => setDecision('reject')} disabled={busy}>
                   {t('procurement.requisitions.reject', { defaultValue: 'Reject' })}
@@ -823,6 +836,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 {req.status === 'rejected'
                   ? t('procurement.requisitions.rejected_note', { defaultValue: 'Rejected' })
                   : t('procurement.requisitions.approved_note', { defaultValue: 'Approved' })}
+                {req.approver_name ? ` · ${req.approver_name}` : null}
                 {req.decided_at ? (
                   <>
                     {' · '}

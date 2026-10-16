@@ -103,6 +103,8 @@ export interface Requisition {
   notes: string | null;
   requester_id: string | null;
   approver_id?: string | null;
+  /** Display name of the approver, resolved by the server. */
+  approver_name?: string | null;
   po_id: string | null;
   po_number?: string | null;
   vendor_id?: string | null;
