@@ -776,7 +776,7 @@ export function WorkflowsPage() {
   const hasError = workflowsQuery.error || requestsQuery.error;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+    <div className="space-y-5">
       <PageHeader
         srTitle={t('enterprise_workflows.title', { defaultValue: 'Enterprise Workflows' })}
         subtitle={t('enterprise_workflows.subtitle', {

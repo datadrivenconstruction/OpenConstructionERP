@@ -29,7 +29,7 @@ export function TaxRatesPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5">
       <PageHeader srTitle={t('nav.tax_rates', { defaultValue: 'Tax Rates' })} />
 
       <CollapsibleSection

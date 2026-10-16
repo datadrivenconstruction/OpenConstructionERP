@@ -215,7 +215,7 @@ export function SavedViewsPage() {
   // -- No project selected ---------------------------------------------------
   if (!projectId) {
     return (
-      <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+      <div className="space-y-5">
         <PageHeader
           srTitle={t('saved_views.page_title', { defaultValue: 'Saved Views' })}
           subtitle={t('saved_views.subtitle', {
@@ -235,7 +235,7 @@ export function SavedViewsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+    <div className="space-y-5">
       <PageHeader
         srTitle={t('saved_views.page_title', { defaultValue: 'Saved Views' })}
         subtitle={t('saved_views.subtitle', {

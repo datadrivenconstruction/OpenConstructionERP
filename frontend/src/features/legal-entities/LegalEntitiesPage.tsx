@@ -262,7 +262,7 @@ export function LegalEntitiesPage() {
   const items = list.data?.items ?? [];
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5">
       <PageHeader
         srTitle={t('nav.legal_entities', { defaultValue: 'Legal Entities' })}
         subtitle={t('legal_entities.subtitle', {

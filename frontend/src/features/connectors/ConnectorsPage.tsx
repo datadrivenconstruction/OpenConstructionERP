@@ -109,7 +109,7 @@ export function ConnectorsPage() {
   };
 
   return (
-    <div className="space-y-4 p-1 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       <header className="flex flex-wrap items-center gap-3">
         <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
           <FolderSync className="h-5 w-5" />

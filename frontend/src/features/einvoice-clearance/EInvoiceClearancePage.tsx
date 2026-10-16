@@ -28,7 +28,7 @@ export function EInvoiceClearancePage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5">
       <CollapsibleSection
         storageKey="einvoice_clearance.how"
         icon={<Landmark size={15} className="text-oe-blue" />}

@@ -613,7 +613,7 @@ export function RebarSchedulePage() {
   // -- No project selected -------------------------------------------------
   if (!projectId) {
     return (
-      <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+      <div className="space-y-5">
         <PageHeader
           srTitle={t('rebar_schedule.title', { defaultValue: 'Rebar Schedule' })}
           subtitle={t('rebar_schedule.subtitle_formats', {
@@ -648,7 +648,7 @@ export function RebarSchedulePage() {
   if (view === 'preview' && previewData) {
     const hasErrors = previewData.validation.error_count > 0;
     return (
-      <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+      <div className="space-y-5">
         <PageHeader
           srTitle={t('rebar_schedule.title', { defaultValue: 'Rebar Schedule' })}
           subtitle={t('rebar_schedule.preview_subtitle', {
@@ -752,7 +752,7 @@ export function RebarSchedulePage() {
     const justImported = lastImport?.import_record.id === selectedImport.id ? lastImport : null;
     const shapesPage = shapesQuery.data;
     return (
-      <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+      <div className="space-y-5">
         <PageHeader
           srTitle={t('rebar_schedule.title', { defaultValue: 'Rebar Schedule' })}
           subtitle={selectedImport.filename}
@@ -895,7 +895,7 @@ export function RebarSchedulePage() {
 
   // -- List view (default) -------------------------------------------------
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+    <div className="space-y-5">
       <PageHeader
         srTitle={t('rebar_schedule.title', { defaultValue: 'Rebar Schedule' })}
         subtitle={t('rebar_schedule.subtitle_formats', {

@@ -322,7 +322,7 @@ export function PhoneLogPage() {
   }
 
   return (
-    <div className="space-y-4 p-1">
+    <div className="space-y-5">
       <div>
         <h1 className="flex items-center gap-2 text-xl font-semibold text-content-primary">
           <Phone className="h-5 w-5" />

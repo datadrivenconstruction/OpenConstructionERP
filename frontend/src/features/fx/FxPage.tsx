@@ -28,7 +28,7 @@ export function FxPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5">
       <CollapsibleSection
         storageKey="fx.how"
         icon={<Coins size={15} className="text-oe-blue" />}

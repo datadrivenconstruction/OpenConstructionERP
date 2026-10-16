@@ -413,7 +413,7 @@ export function RFQBiddingPage() {
 
   if (!projectId) {
     return (
-      <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+      <div className="space-y-5">
         <PageHeader
           srTitle={t('rfq_bidding.title', { defaultValue: 'RFQ Bidding' })}
           subtitle={t('rfq_bidding.subtitle', {
@@ -433,7 +433,7 @@ export function RFQBiddingPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+    <div className="space-y-5">
       <PageHeader
         srTitle={t('rfq_bidding.title', { defaultValue: 'RFQ Bidding' })}
         subtitle={t('rfq_bidding.subtitle', {

@@ -315,7 +315,7 @@ export function DeadlinesPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-4 sm:p-6">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">

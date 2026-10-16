@@ -1032,7 +1032,7 @@ export function TeamsPage() {
   ];
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5">
       <PageHeader
         srTitle={t('teams.title', 'Teams and visibility')}
         subtitle={t(

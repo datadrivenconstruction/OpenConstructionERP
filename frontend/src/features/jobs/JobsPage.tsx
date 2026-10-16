@@ -245,7 +245,7 @@ export function JobsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
+    <div className="space-y-5">
       <PageHeader
         srTitle={t('jobs.page_title', { defaultValue: 'Background Jobs' })}
         subtitle={t('jobs.subtitle', {

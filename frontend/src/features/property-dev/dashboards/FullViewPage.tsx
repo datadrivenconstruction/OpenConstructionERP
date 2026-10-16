@@ -137,7 +137,7 @@ export function FullViewPage() {
   );
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5">
       <Breadcrumb
         items={[
           {

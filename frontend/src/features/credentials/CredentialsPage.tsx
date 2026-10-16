@@ -764,7 +764,7 @@ export function CredentialsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl p-4 sm:p-6">
+    <div className="w-full">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <BadgeCheck size={22} className="mt-0.5 shrink-0 text-oe-blue" />

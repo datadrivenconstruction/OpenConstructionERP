@@ -18,7 +18,7 @@ export function InboundEmailPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-5">
       <CollapsibleSection
         storageKey="inbound_email.how"
         icon={<Inbox size={15} className="text-oe-blue" />}

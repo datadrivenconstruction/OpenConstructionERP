@@ -939,7 +939,7 @@ export function DocumentsPage() {
 
   return (
     <div
-      className="w-full px-5 py-4 space-y-4 animate-fade-in"
+      className="w-full space-y-5 animate-fade-in"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
