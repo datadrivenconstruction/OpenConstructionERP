@@ -150,8 +150,9 @@ async def test_proof_plan_coverage_decisions_and_frozen_revisions(pg_session) ->
     coverage = await svc.coverage(pid)
     row = next(r for r in coverage["packages"] if r["package_ref"] == "P-01")
     assert (row["total"], row["done"]) == (2, 1)
-    # A counted proof with no placed quantity says so; it never counts as delivered.
-    assert "placed_quantity_missing" in {f["code"] for f in coverage["findings"]}
+    # A counted proof with no result linked yet has nothing placed to count against, so it
+    # stays open without asking for the quantity (a site that has not started).
+    assert "placed_quantity_missing" not in {f["code"] for f in coverage["findings"]}
 
     # Four eyes: whoever linked the evidence does not accept it.
     err = await _refused(svc.accept_proof(pid, manual.id, p.editor))

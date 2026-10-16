@@ -276,6 +276,12 @@ def test_a_counted_proof_without_a_placed_quantity_is_not_delivered() -> None:
     assert ev.derive_delivery([], rule=rule, placed_quantity=None).state == "open"
 
 
+def test_a_counted_proof_with_no_result_yet_does_not_ask_for_the_quantity() -> None:
+    # A site that has not started has placed nothing; the proof is open and raises no warning.
+    d = ev.derive_delivery([], rule=ev.QuantityRule(Decimal("150"), "m3"), placed_quantity=None, ref="p")
+    assert (d.state, d.findings) == ("open", ())
+
+
 def test_a_counted_proof_with_its_quantity_still_counts() -> None:
     rule = ev.QuantityRule(Decimal("150"), "m3")
     assert ev.derive_delivery([_pass(1), _pass(2)], rule=rule, placed_quantity=Decimal("300")).state == "delivered"

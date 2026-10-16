@@ -235,9 +235,11 @@ def derive_delivery(
     need = required_count(rule, placed_quantity)
     if open_fails:
         return Delivery("open", passes, need, tuple(findings))
-    if rule is not None and (placed_quantity is None or placed_quantity <= 0):
+    if rule is not None and facts and (placed_quantity is None or placed_quantity <= 0):
         # The number of results a counted proof needs follows the placed quantity; without it
-        # the count is unknown, so the proof stays short of delivered and says why.
+        # the count is unknown, so the proof stays short of delivered and says why. Before any
+        # result is linked (a site that has not started) nothing is placed yet and the count
+        # does not matter, so the proof is simply open and stays quiet.
         findings.append(Finding("placed_quantity_missing", WARNING, ref))
         return Delivery("partly_delivered" if passes else "open", passes, need, tuple(findings))
     if passes >= need:
