@@ -14,6 +14,7 @@ import { cpSync, existsSync, readFileSync, readdirSync, createReadStream, statSy
 import type { Plugin } from 'vite';
 import { STATIC_ASSETS_CACHE, isStaticAssetRequest } from './src/pwa/staticAssetRoute';
 import { LOCALE_KEYS_CHUNK, isLocaleKeysId, localeKeyIndex } from './vite.locale-key-index';
+import { forwardBrowserHost } from './vite.proxy-headers';
 
 const cesiumSource = path.resolve(__dirname, 'node_modules/cesium/Build/Cesium');
 const cesiumDirs = ['Workers', 'ThirdParty', 'Assets', 'Widgets'] as const;
@@ -429,6 +430,10 @@ export default defineConfig({
           process.env.E2E_BACKEND ??
           'http://127.0.0.1:8000',
         changeOrigin: true,
+        // changeOrigin rewrites Host; keep the browser's host for the map style URLs.
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => forwardBrowserHost(proxyReq, req));
+        },
         // 30 minutes. Catalogue v3 installs (`/costs/catalogues-v3/{id}/install`)
         // download a 200–500 MB snapshot from Hugging Face, stream it
         // multipart into Qdrant, then poll Qdrant for collection
