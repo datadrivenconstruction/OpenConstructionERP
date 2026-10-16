@@ -10,6 +10,10 @@ Tables:
     oe_interface_mgmt_action    - one action needed to close an interface (who
                                   does what by when), the to-do list that drives
                                   the interface to agreement.
+    oe_interface_mgmt_history   - one entry in an interface's status history: who
+                                  moved it, when, from which status to which, with
+                                  what comment, and whether the change came from a
+                                  person or from an approval-route verdict.
 
 The register numbers are never stored: the per-status / per-priority / per-type
 counts, the overdue and disputed lists, the agreed percentage, the open action
@@ -32,9 +36,10 @@ register core.
 """
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy import (
+    DateTime,
     ForeignKey,
     Index,
     Integer,
@@ -178,3 +183,56 @@ class InterfaceAction(Base):
 
     def __repr__(self) -> str:
         return f"<InterfaceAction {self.status} interface={self.interface_id}>"
+
+
+# -- Status history ----------------------------------------------------------
+
+
+class InterfaceHistoryEntry(Base):
+    """One entry in an interface's status history.
+
+    Written by the service in the same transaction as the change it records, so
+    an interface can never move without leaving a trace. ``event`` names what
+    happened (``created``, ``status_changed``, ``approval_requested``,
+    ``approval_approved``, ``approval_rejected``, ``approval_cancelled``);
+    ``from_status`` / ``to_status`` carry the move (equal when the event did not
+    move the status, e.g. an approval that was requested or rejected).
+    ``approval_instance_id`` is a soft link to the approval-routes instance the
+    entry came from, with no foreign key, like every cross-module link here.
+
+    Foreign keys are named explicitly: the platform naming convention would spell
+    them out past PostgreSQL's 63-character identifier limit.
+    """
+
+    __tablename__ = "oe_interface_mgmt_history"
+    __table_args__ = (
+        Index("ix_interface_mgmt_history_project", "project_id"),
+        Index("ix_interface_mgmt_history_interface", "interface_id", "changed_at"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE", name="fk_interface_mgmt_history_project"),
+        nullable=False,
+    )
+    interface_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey(
+            "oe_interface_mgmt_interface.id",
+            ondelete="CASCADE",
+            name="fk_interface_mgmt_history_interface",
+        ),
+        nullable=False,
+    )
+    event: Mapped[str] = mapped_column(String(30), nullable=False)
+    from_status: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    to_status: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approval_instance_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    def __repr__(self) -> str:
+        return (
+            f"<InterfaceHistoryEntry {self.event} {self.from_status}->{self.to_status} interface={self.interface_id}>"
+        )

@@ -94,7 +94,8 @@ class InterfaceCreate(BaseModel):
     need_by_date: date | None = None
     agreed_date: date | None = None
     closed_date: date | None = None
-    rfi_id: str | None = Field(default=None, max_length=36)
+    # Must name an RFI of the same project (checked in the service, 422 otherwise).
+    rfi_id: UUID | None = None
     schedule_activity_id: UUID | None = None
     location: str | None = Field(default=None, max_length=500)
     sort_order: int = Field(default=0, ge=0)
@@ -127,9 +128,12 @@ class InterfaceUpdate(BaseModel):
     need_by_date: date | None = None
     agreed_date: date | None = None
     closed_date: date | None = None
-    rfi_id: str | None = Field(default=None, max_length=36)
+    # Must name an RFI of the same project (checked in the service, 422 otherwise).
+    rfi_id: UUID | None = None
     schedule_activity_id: UUID | None = None
     location: str | None = Field(default=None, max_length=500)
+    # Optional note recorded in the status history when this patch moves the status.
+    status_comment: str | None = Field(default=None, max_length=2000)
     sort_order: int | None = Field(default=None, ge=0)
     notes: str | None = Field(default=None, max_length=20000)
 
@@ -235,6 +239,9 @@ class InterfaceRef(BaseModel):
     need_by_date: str | None = None
     agreed_date: str | None = None
     open_action_count: int = 0
+    # Days on the register and days past need-by at the report's as-of date.
+    age_days: int | None = None
+    days_overdue: int | None = None
 
 
 class WorkPackageHealthResponse(BaseModel):
@@ -268,10 +275,64 @@ class InterfaceRegisterResponse(BaseModel):
     overdue: list[InterfaceRef] = Field(default_factory=list)
     disputed: list[InterfaceRef] = Field(default_factory=list)
     work_packages: list[WorkPackageHealthResponse] = Field(default_factory=list)
+    # Ageing: open interfaces by days on the register (bands 0_7, 8_30, 31_60,
+    # 61_90, over_90, unknown) and overdue ones by days past need-by (bands 1_7,
+    # 8_30, 31_60, over_60), plus the mean and oldest open age and the worst lateness.
+    open_count: int = 0
+    overdue_count: int = 0
+    ageing: dict[str, int] = Field(default_factory=dict)
+    overdue_ageing: dict[str, int] = Field(default_factory=dict)
+    average_open_age_days: Decimal | None = None
+    oldest_open_age_days: int | None = None
+    max_days_overdue: int | None = None
 
-    @field_serializer("agreed_pct", "overall_health_score", when_used="json")
+    @field_serializer("agreed_pct", "overall_health_score", "average_open_age_days", when_used="json")
     def _ser_pct(self, v: Decimal | None) -> str | None:
         return _serialise_pct(v)
+
+
+# -- Status history ----------------------------------------------------------
+
+
+class InterfaceHistoryResponse(BaseModel):
+    """One entry in an interface's status history."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    interface_id: UUID
+    event: str
+    from_status: str | None = None
+    to_status: str | None = None
+    actor_id: UUID | None = None
+    actor_name: str | None = None
+    comment: str | None = None
+    approval_instance_id: UUID | None = None
+    changed_at: datetime
+
+
+# -- Validation --------------------------------------------------------------
+
+
+class InterfaceValidationResult(BaseModel):
+    """One rule outcome from the ``interface_management`` rule set."""
+
+    rule_id: str
+    severity: str
+    passed: bool
+    message: str
+    element_ref: str | None = None
+
+
+class InterfaceValidationResponse(BaseModel):
+    """Traffic-light result of the ``interface_management`` rule set for one project."""
+
+    project_id: UUID
+    status: str
+    errors: int
+    warnings: int
+    passed: int
+    results: list[InterfaceValidationResult] = Field(default_factory=list)
 
 
 class WorkPackageHealthReportResponse(BaseModel):

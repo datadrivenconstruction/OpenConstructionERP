@@ -40,9 +40,11 @@ from app.modules.interface_management.schemas import (
     InterfaceActionResponse,
     InterfaceActionUpdate,
     InterfaceCreate,
+    InterfaceHistoryResponse,
     InterfaceRegisterResponse,
     InterfaceResponse,
     InterfaceUpdate,
+    InterfaceValidationResponse,
     WorkPackageHealthReportResponse,
 )
 from app.modules.interface_management.service import InterfaceManagementService
@@ -166,7 +168,7 @@ async def update_interface(
     """Patch an interface (only provided fields change)."""
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
-    return await service.update_interface(project_id, interface_id, payload)  # type: ignore[return-value]
+    return await service.update_interface(project_id, interface_id, payload, actor_id=user_id)  # type: ignore[return-value]
 
 
 @router.delete(
@@ -284,3 +286,39 @@ async def get_work_package_health(
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
     return await service.get_work_package_health(project_id, as_of=_parse_as_of(as_of))  # type: ignore[return-value]
+
+
+# -- Status history and validation ------------------------------------------
+
+
+@router.get(
+    "/projects/{project_id}/interfaces/{interface_id}/history",
+    response_model=list[InterfaceHistoryResponse],
+    dependencies=[_READ],
+)
+async def get_interface_history(
+    project_id: uuid.UUID,
+    interface_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> list[InterfaceHistoryResponse]:
+    """Full status history of one interface, oldest first: who, when, from, to, comment."""
+    await verify_project_access(project_id, user_id, session)
+    service = _get_service(session)
+    return await service.list_history(project_id, interface_id)  # type: ignore[return-value]
+
+
+@router.get(
+    "/projects/{project_id}/validation",
+    response_model=InterfaceValidationResponse,
+    dependencies=[_READ],
+)
+async def get_register_validation(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> InterfaceValidationResponse:
+    """Run the ``interface_management`` rule set over the project's register (traffic light)."""
+    await verify_project_access(project_id, user_id, session)
+    service = _get_service(session)
+    return await service.run_validation(project_id)  # type: ignore[return-value]

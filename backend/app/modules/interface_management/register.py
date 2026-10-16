@@ -126,6 +126,21 @@ _OVERDUE_EXEMPT_STATUSES: frozenset[str] = frozenset(
 )
 
 
+def transition_problem(from_status: str, to_status: str) -> str | None:
+    """Why a manual move from ``from_status`` to ``to_status`` is refused, or ``None`` when allowed.
+
+    The one hard edge of the lifecycle: an interface is closed only once its
+    handshake was agreed, so ``closed`` is reachable from ``agreed`` alone.
+    Every other move (including the side states and re-opening) stays free, as
+    a register is corrected by hand far more often than it is walked in order.
+    """
+    if to_status == from_status:
+        return None
+    if to_status == InterfaceStatus.CLOSED.value and from_status != InterfaceStatus.AGREED.value:
+        return f"An interface can only be closed once it is agreed (it is {from_status})"
+    return None
+
+
 def safe_percent(numerator: int, denominator: int) -> Decimal | None:
     """Percentage ``numerator / denominator * 100`` quantised to 2 dp.
 
@@ -189,6 +204,9 @@ class InterfaceRow:
     need_by_date: date | None = None
     agreed_date: date | None = None
     actions: list[ActionRow] = field(default_factory=list)
+    # The day the interface entered the register (its creation date). Drives the
+    # ageing view; ``None`` when unknown, which lands in the ``unknown`` bucket.
+    opened_on: date | None = None
 
     @property
     def is_resolved(self) -> bool:
@@ -211,8 +229,13 @@ class InterfaceRow:
         """True when the interface is in dispute."""
         return self.status == InterfaceStatus.DISPUTED.value
 
-    def to_ref(self) -> dict[str, Any]:
-        """JSON-ready reference to this interface (dates as ISO strings)."""
+    def to_ref(self, as_of: date | None = None) -> dict[str, Any]:
+        """JSON-ready reference to this interface (dates as ISO strings).
+
+        With ``as_of`` the reference also carries ``age_days`` (days since the
+        interface was opened) and ``days_overdue`` (days past its need-by date,
+        ``None`` when it is not overdue); without it both are ``None``.
+        """
         return {
             "interface_id": self.id,
             "reference": self.reference,
@@ -226,6 +249,8 @@ class InterfaceRow:
             "need_by_date": (self.need_by_date.isoformat() if self.need_by_date is not None else None),
             "agreed_date": (self.agreed_date.isoformat() if self.agreed_date is not None else None),
             "open_action_count": open_action_count(self),
+            "age_days": age_days(self, as_of) if as_of is not None else None,
+            "days_overdue": days_overdue(self, as_of) if as_of is not None else None,
         }
 
 
@@ -273,6 +298,13 @@ class InterfaceRegister:
     overdue: list[InterfaceRow] = field(default_factory=list)
     disputed: list[InterfaceRow] = field(default_factory=list)
     work_packages: list[WorkPackageHealth] = field(default_factory=list)
+    open_count: int = 0
+    overdue_count: int = 0
+    ageing: dict[str, int] = field(default_factory=dict)
+    overdue_ageing: dict[str, int] = field(default_factory=dict)
+    average_open_age_days: Decimal | None = None  # None when no open interface has an age
+    oldest_open_age_days: int | None = None
+    max_days_overdue: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """JSON-ready view of the whole register.
@@ -291,9 +323,16 @@ class InterfaceRegister:
             "overall_health_score": self.overall_health_score,
             "total_open_actions": self.total_open_actions,
             "is_healthy": self.is_healthy,
-            "overdue": [i.to_ref() for i in self.overdue],
-            "disputed": [i.to_ref() for i in self.disputed],
+            "overdue": [i.to_ref(self.as_of) for i in self.overdue],
+            "disputed": [i.to_ref(self.as_of) for i in self.disputed],
             "work_packages": [w.to_dict() for w in self.work_packages],
+            "open_count": self.open_count,
+            "overdue_count": self.overdue_count,
+            "ageing": dict(self.ageing),
+            "overdue_ageing": dict(self.overdue_ageing),
+            "average_open_age_days": self.average_open_age_days,
+            "oldest_open_age_days": self.oldest_open_age_days,
+            "max_days_overdue": self.max_days_overdue,
         }
 
 
@@ -325,6 +364,25 @@ def is_overdue(interface: InterfaceRow, as_of: date) -> bool:
     if not can_be_overdue(interface.status):
         return False
     return interface.need_by_date < as_of
+
+
+def age_days(interface: InterfaceRow, as_of: date) -> int | None:
+    """Whole days the interface has been on the register at ``as_of``.
+
+    ``None`` when the opening date is unknown. An opening date after ``as_of``
+    (a register read as of a day before the row existed) reads as 0, never
+    negative.
+    """
+    if interface.opened_on is None:
+        return None
+    return max((as_of - interface.opened_on).days, 0)
+
+
+def days_overdue(interface: InterfaceRow, as_of: date) -> int | None:
+    """Whole days past the need-by date, or ``None`` when the interface is not overdue."""
+    if interface.need_by_date is None or not is_overdue(interface, as_of):
+        return None
+    return (as_of - interface.need_by_date).days
 
 
 def open_action_count(interface: InterfaceRow) -> int:
@@ -507,6 +565,90 @@ def work_package_health(interfaces: Iterable[InterfaceRow], as_of: date) -> list
     ]
 
 
+# -- Ageing ------------------------------------------------------------------
+
+# Age bands for the open interfaces (days since opened) and for the overdue ones
+# (days past need-by). Each band is (label, lowest day, highest day or None for
+# open-ended); the bands of one tuple are contiguous and do not overlap, so every
+# value lands in exactly one band.
+AGEING_BUCKETS: tuple[tuple[str, int, int | None], ...] = (
+    ("0_7", 0, 7),
+    ("8_30", 8, 30),
+    ("31_60", 31, 60),
+    ("61_90", 61, 90),
+    ("over_90", 91, None),
+)
+OVERDUE_BUCKETS: tuple[tuple[str, int, int | None], ...] = (
+    ("1_7", 1, 7),
+    ("8_30", 8, 30),
+    ("31_60", 31, 60),
+    ("over_60", 61, None),
+)
+# Open interfaces whose opening date is unknown are counted here, so the ageing
+# counts always sum to the number of open interfaces.
+UNKNOWN_AGE = "unknown"
+
+
+def _bucket(value: int, buckets: tuple[tuple[str, int, int | None], ...]) -> str:
+    """The label of the band ``value`` falls in (the first band when below all of them)."""
+    for label, low, high in buckets:
+        if value >= low and (high is None or value <= high):
+            return label
+    return buckets[0][0]
+
+
+def open_ageing(interfaces: Iterable[InterfaceRow], as_of: date) -> dict[str, int]:
+    """Count the open (unsettled) interfaces by how long they have been on the register.
+
+    Zero-fills every band plus :data:`UNKNOWN_AGE`, so the result always has the
+    same keys and sums to the number of open interfaces.
+    """
+    counts: dict[str, int] = {label: 0 for label, _low, _high in AGEING_BUCKETS}
+    counts[UNKNOWN_AGE] = 0
+    for interface in interfaces:
+        if not interface.is_open:
+            continue
+        age = age_days(interface, as_of)
+        key = UNKNOWN_AGE if age is None else _bucket(age, AGEING_BUCKETS)
+        counts[key] += 1
+    return counts
+
+
+def overdue_ageing(interfaces: Iterable[InterfaceRow], as_of: date) -> dict[str, int]:
+    """Count the overdue interfaces by days past their need-by date (zero-filled)."""
+    counts: dict[str, int] = {label: 0 for label, _low, _high in OVERDUE_BUCKETS}
+    for interface in interfaces:
+        late = days_overdue(interface, as_of)
+        if late is not None:
+            counts[_bucket(late, OVERDUE_BUCKETS)] += 1
+    return counts
+
+
+def _open_ages(interfaces: Iterable[InterfaceRow], as_of: date) -> list[int]:
+    """Ages of the open interfaces whose opening date is known."""
+    return [a for a in (age_days(i, as_of) for i in interfaces if i.is_open) if a is not None]
+
+
+def average_open_age(interfaces: Iterable[InterfaceRow], as_of: date) -> Decimal | None:
+    """Mean age in days of the open interfaces with a known age, 2 dp, ``None`` when there are none."""
+    ages = _open_ages(interfaces, as_of)
+    if not ages:
+        return None
+    return (Decimal(sum(ages)) / Decimal(len(ages))).quantize(_PCT_Q, rounding=ROUND_HALF_UP)
+
+
+def oldest_open_age(interfaces: Iterable[InterfaceRow], as_of: date) -> int | None:
+    """Age in days of the oldest open interface, ``None`` when no open interface has an age."""
+    ages = _open_ages(interfaces, as_of)
+    return max(ages) if ages else None
+
+
+def max_days_overdue(interfaces: Iterable[InterfaceRow], as_of: date) -> int | None:
+    """The most days any interface is past its need-by date, ``None`` when none is overdue."""
+    late = [d for d in (days_overdue(i, as_of) for i in interfaces) if d is not None]
+    return max(late) if late else None
+
+
 # -- Report assembly ---------------------------------------------------------
 
 
@@ -515,8 +657,10 @@ def build_report(interfaces: Iterable[InterfaceRow], as_of: date) -> InterfaceRe
 
     Computes the per-status, per-priority and per-type counts, the agreed
     percentage, the overall health score, the total open action load, the
-    overdue and disputed lists, the per-work-package health view, and the single
-    ``is_healthy`` flag (nothing overdue and nothing in dispute).
+    overdue and disputed lists, the per-work-package health view, the single
+    ``is_healthy`` flag (nothing overdue and nothing in dispute), and the ageing
+    view: open interfaces by days on the register, overdue interfaces by days
+    past need-by, the mean and oldest open age and the worst lateness.
 
     Args:
         interfaces: The register interfaces with their actions.
@@ -543,4 +687,11 @@ def build_report(interfaces: Iterable[InterfaceRow], as_of: date) -> InterfaceRe
         overdue=overdue,
         disputed=disputed,
         work_packages=work_package_health(materialised, as_of),
+        open_count=sum(1 for interface in materialised if interface.is_open),
+        overdue_count=len(overdue),
+        ageing=open_ageing(materialised, as_of),
+        overdue_ageing=overdue_ageing(materialised, as_of),
+        average_open_age_days=average_open_age(materialised, as_of),
+        oldest_open_age_days=oldest_open_age(materialised, as_of),
+        max_days_overdue=max_days_overdue(materialised, as_of),
     )

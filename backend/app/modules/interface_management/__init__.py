@@ -20,9 +20,13 @@ __all__ = ["manifest", "on_startup"]
 
 
 async def on_startup() -> None:
-    """Module startup hook - register the read/write permissions."""
+    """Module startup hook - permissions, validation rules and approval-route subscribers."""
+    from app.modules.interface_management.events import register_interface_management_subscribers
     from app.modules.interface_management.permissions import (
         register_interface_management_permissions,
     )
+    from app.modules.interface_management.validators import register_interface_management_validation_rules
 
     register_interface_management_permissions()
+    register_interface_management_validation_rules()
+    register_interface_management_subscribers()
