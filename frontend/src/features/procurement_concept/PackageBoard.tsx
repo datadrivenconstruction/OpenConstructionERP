@@ -183,8 +183,9 @@ export function PackageBoard({ projectId, concept, packages, labels, onPlan, onC
                     {view.schedule?.award_date ? (
                       <>
                         {fmtDate(view.schedule.award_date)}
-                        {view.schedule.start_date && (
-                          <div className="text-xs text-content-tertiary">
+                        {/* The latest procedure start only steers a package still to be awarded. */}
+                        {view.schedule.start_date && a?.state !== 'awarded' && (
+                          <div className="text-xs text-content-tertiary" data-testid="package-start-by">
                             {t('procurement_concept.ui.package.start_by', {
                               defaultValue: 'start by {{date}}',
                               date: fmtDate(view.schedule.start_date),

@@ -170,6 +170,16 @@ describe('PackageBoard', () => {
     expect(within(row).getByTestId('package-plan')).toHaveTextContent('Change plan');
   });
 
+  it('names the latest procedure start only while the package is still to be awarded', () => {
+    board({ packages: [packageView()] });
+    expect(within(rowOf('package-row', 'data-package', 'CP-01')).getByTestId('package-start-by')).toBeInTheDocument();
+    cleanup();
+    board({ packages: [packageView({}, { state: 'awarded' })] });
+    const row = rowOf('package-row', 'data-package', 'CP-01');
+    expect(within(row).queryByTestId('package-start-by')).toBeNull();
+    expect(within(row).getByTestId('package-state')).toHaveTextContent('Awarded');
+  });
+
   it('offers the first step on a package with no award plan', () => {
     const props = board();
     const row = rowOf('package-row', 'data-package', 'CP-03');
