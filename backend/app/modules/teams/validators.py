@@ -56,6 +56,17 @@ pass over four queries rather than one query per rule.
                                       but is on no roster line, so their name
                                       lands on records with no trade or firm
                                       behind it.
+* ``teams.party_member_has_access`` - ERROR. A user bound to a project party
+                                      who can no longer reach the project. The
+                                      binding grants nothing, but it reads as a
+                                      company member nobody removed.
+* ``teams.party_record_scope``      - ERROR. A shared-register row naming a
+                                      party of another project. It reads as a
+                                      share and protects or grants nothing.
+* ``teams.party_host_defined``      - WARNING. Members are bound to parties but
+                                      the project owner is bound to none, so
+                                      every bound member is external, including
+                                      the owner's own colleagues.
 
 Every rule reads the snapshot only. None of them queries, so none of them can
 fail on a session that has already been rolled back, and the whole set is
@@ -85,7 +96,15 @@ from app.core.validation.engine import (
     validation_engine,
 )
 from app.modules.teams.entity_types import enforced_entity_type_keys, is_known_entity_type
-from app.modules.teams.models import EntityVisibility, RosterMember, Team, TeamMembership
+from app.modules.teams.models import (
+    EntityVisibility,
+    PartyRecordAccess,
+    ProjectParty,
+    ProjectPartyMember,
+    RosterMember,
+    Team,
+    TeamMembership,
+)
 from app.modules.teams.roster_vocab import supervisory_site_role_keys
 from app.modules.teams.schemas import TeamsValidationFinding, TeamsValidationReport
 
@@ -156,6 +175,15 @@ class ProjectTeamsSnapshot:
     roster: list[RosterSnapshot] = field(default_factory=list)
     #: Users holding project access who appear nowhere on the roster.
     unrostered_user_ids: list[str] = field(default_factory=list)
+    #: Number of parties on the project, and of members bound to one.
+    party_count: int = 0
+    bound_member_count: int = 0
+    #: True when the project owner is bound to a party (the host party).
+    owner_bound: bool = False
+    #: Users bound to a party who no longer reach the project.
+    bound_without_access_user_ids: list[str] = field(default_factory=list)
+    #: Shared-register rows on this project naming a party of another project.
+    foreign_party_record_count: int = 0
 
     def as_dict(self) -> dict[str, Any]:
         """The shape the rules receive as ``context.data``."""
@@ -166,6 +194,13 @@ class ProjectTeamsSnapshot:
             "restrictions": [r.__dict__ for r in self.restrictions],
             "roster": [r.__dict__ for r in self.roster],
             "unrostered_user_ids": list(self.unrostered_user_ids),
+            "parties": {
+                "party_count": self.party_count,
+                "bound_member_count": self.bound_member_count,
+                "owner_bound": self.owner_bound,
+                "bound_without_access_user_ids": list(self.bound_without_access_user_ids),
+                "foreign_party_record_count": self.foreign_party_record_count,
+            },
         }
 
 
@@ -303,7 +338,42 @@ async def collect_project_snapshot(
     project_member_ids = {str(user_id) for members in members_by_team.values() for user_id in members}
     snapshot.unrostered_user_ids = sorted(project_member_ids - rostered_user_ids)
 
+    await _collect_parties(session, project_id, snapshot, project_member_ids)
     return snapshot
+
+
+async def _collect_parties(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    snapshot: ProjectTeamsSnapshot,
+    project_member_ids: set[str],
+) -> None:
+    """Add the party configuration of one project to the snapshot."""
+    from app.modules.projects.models import Project
+
+    owner_id = (await session.execute(select(Project.owner_id).where(Project.id == project_id))).scalar_one_or_none()
+    snapshot.party_count = len(
+        (await session.execute(select(ProjectParty.id).where(ProjectParty.project_id == project_id))).all()
+    )
+    bound = [
+        str(user_id)
+        for (user_id,) in (
+            await session.execute(select(ProjectPartyMember.user_id).where(ProjectPartyMember.project_id == project_id))
+        ).all()
+    ]
+    snapshot.bound_member_count = len(bound)
+    owner = str(owner_id) if owner_id is not None else None
+    snapshot.owner_bound = owner is not None and owner in bound
+    snapshot.bound_without_access_user_ids = sorted(u for u in bound if u != owner and u not in project_member_ids)
+    snapshot.foreign_party_record_count = len(
+        (
+            await session.execute(
+                select(PartyRecordAccess.id)
+                .join(ProjectParty, ProjectParty.id == PartyRecordAccess.party_id)
+                .where(PartyRecordAccess.project_id == project_id, ProjectParty.project_id != project_id)
+            )
+        ).all()
+    )
 
 
 # ── Context helpers ──────────────────────────────────────────────────────────
@@ -345,6 +415,13 @@ def _unrostered_user_ids(context: ValidationContext) -> list[str]:
     data = context.data
     rows = data.get("unrostered_user_ids") if isinstance(data, dict) else None
     return [r for r in rows if isinstance(r, str)] if isinstance(rows, list) else []
+
+
+def _parties(context: ValidationContext) -> dict[str, Any]:
+    """The party configuration on the context (or an empty dict)."""
+    data = context.data
+    parties = data.get("parties") if isinstance(data, dict) else None
+    return parties if isinstance(parties, dict) else {}
 
 
 def _result(
@@ -761,6 +838,89 @@ class TeamsRosterCoversAccess(ValidationRule):
         ]
 
 
+class TeamsPartyMemberHasAccess(ValidationRule):
+    rule_id = "teams.party_member_has_access"
+    name = "Party Members Can Reach The Project"
+    standard = "teams"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Every user bound to a project party is still a member of the project."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if _scope(context) != "project_teams":
+            return []
+        parties = _parties(context)
+        if not parties.get("bound_member_count"):
+            return []
+        stale = [u for u in parties.get("bound_without_access_user_ids", []) if isinstance(u, str)]
+        if not stale:
+            return [_result(self, True, "OK")]
+        return [
+            _result(
+                self,
+                False,
+                f"{len(stale)} user(s) are bound to a party but are no longer members of the project.",
+                suggestion="Unbind them from their party, or add them back to a project team.",
+                details={"user_ids": stale[:50], "count": len(stale)},
+            )
+        ]
+
+
+class TeamsPartyRecordScope(ValidationRule):
+    rule_id = "teams.party_record_scope"
+    name = "Shares Name Parties Of The Same Project"
+    standard = "teams"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "A shared-register row may only name a party of the record's own project."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if _scope(context) != "project_teams":
+            return []
+        parties = _parties(context)
+        if not parties.get("party_count"):
+            return []
+        count = int(parties.get("foreign_party_record_count") or 0)
+        if count == 0:
+            return [_result(self, True, "OK")]
+        return [
+            _result(
+                self,
+                False,
+                f"{count} share(s) on this project's records name a party of another project.",
+                suggestion="Remove those shares and share the records with a party of this project.",
+                details={"count": count},
+            )
+        ]
+
+
+class TeamsPartyHostDefined(ValidationRule):
+    rule_id = "teams.party_host_defined"
+    name = "Project Owner Belongs To A Party"
+    standard = "teams"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "When members are bound to parties, the project owner is bound to the host party."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if _scope(context) != "project_teams":
+            return []
+        parties = _parties(context)
+        if not parties.get("bound_member_count"):
+            return []
+        if parties.get("owner_bound"):
+            return [_result(self, True, "OK")]
+        return [
+            _result(
+                self,
+                False,
+                "Members are bound to parties but the project owner is not, so every bound member is treated "
+                "as external, including the owner's own colleagues.",
+                suggestion="Bind the project owner to their company's party to make it the host party.",
+            )
+        ]
+
+
 _TEAMS_RULES: tuple[ValidationRule, ...] = (
     TeamsDefaultTeamPresent(),
     TeamsRestrictionHasViewer(),
@@ -772,6 +932,9 @@ _TEAMS_RULES: tuple[ValidationRule, ...] = (
     TeamsRosterWindow(),
     TeamsRosterSiteLead(),
     TeamsRosterCoversAccess(),
+    TeamsPartyMemberHasAccess(),
+    TeamsPartyRecordScope(),
+    TeamsPartyHostDefined(),
 )
 
 

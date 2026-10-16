@@ -39,6 +39,10 @@ Project roster (see :mod:`app.modules.teams.roster_router`)
     PATCH  /project/{project_id}/roster/{member_id}
     DELETE /project/{project_id}/roster/{member_id}
 
+Project parties (see :mod:`app.modules.teams.party_router`)
+    /project/{project_id}/parties...    - Companies on the project and who belongs to which
+    /project/{project_id}/records/...   - Originator and shares of a shared-register record
+
 Authorisation
 ~~~~~~~~~~~~~
 Every route resolves the caller before it touches data, and every one of them
@@ -514,3 +518,11 @@ async def validate_project_teams(
 # "roster", so none of them can be swallowed by the ``/{team_id}`` patterns
 # declared above - checked segment by segment rather than assumed.
 router.include_router(roster_router)
+
+# ── Project parties ──────────────────────────────────────────────────────
+#
+# Every party path is project-scoped or begins with the literal
+# "party-registers", so it cannot collide with the ``/{team_id}`` patterns.
+from app.modules.teams.party_router import party_router  # noqa: E402
+
+router.include_router(party_router)

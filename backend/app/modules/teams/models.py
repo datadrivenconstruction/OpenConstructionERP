@@ -7,6 +7,9 @@ Tables:
     oe_teams_membership    - user-to-team membership
     oe_teams_visibility    - entity-to-team visibility restrictions
     oe_teams_roster_member - who is on the project, and in what capacity
+    oe_teams_project_party - companies taking part in a project, by role
+    oe_teams_party_member  - which party a project member belongs to
+    oe_teams_party_record  - which parties hold a record of a shared register
 
 Membership and roster are not the same thing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -293,3 +296,123 @@ class RosterMember(Base):
 
     def __repr__(self) -> str:
         return f"<RosterMember {self.display_name} ({self.site_role or 'no role'}) project={self.project_id}>"
+
+
+# ── Project parties ─────────────────────────────────────────────────────────
+
+
+class ProjectParty(Base):
+    """A company taking part in one project, in one role.
+
+    A party is what makes a project member external. A member bound to a party
+    sees, in the shared registers, only the records that party originated or
+    received. Members bound to no party, and members of the host party (the
+    party the project owner is bound to), keep seeing everything. A project
+    with no parties therefore behaves exactly as it did before parties existed.
+    See :mod:`app.modules.teams.party_access` for the resolver.
+    """
+
+    __tablename__ = "oe_teams_project_party"
+    __table_args__ = (Index("ix_teams_project_party_project_active", "project_id", "is_active"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    role: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="subcontractor", server_default="subcontractor"
+    )
+    # Plain UUIDs, no FK: legal_entities and contacts are optional modules and
+    # this one has to keep working without them (same arrangement as
+    # ``RosterMember.contact_id``).
+    legal_entity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    contact_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    notes: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+
+    def __repr__(self) -> str:
+        return f"<ProjectParty {self.name} ({self.role}) project={self.project_id}>"
+
+
+class ProjectPartyMember(Base):
+    """Binds one platform user to one party on one project.
+
+    ``project_id`` repeats the party's project so the database itself can hold
+    "a member has at most one party per project": the unique constraint is on
+    ``(project_id, user_id)``, which a constraint on ``party_id`` could not say.
+    """
+
+    __tablename__ = "oe_teams_party_member"
+    __table_args__ = (UniqueConstraint("project_id", "user_id", name="uq_teams_party_member_project_user"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    party_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_teams_project_party.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    def __repr__(self) -> str:
+        return f"<ProjectPartyMember user={self.user_id} party={self.party_id}>"
+
+
+class PartyRecordAccess(Base):
+    """One party's hold on one record of a shared register.
+
+    ``access`` is ``originator`` for the party that created the record (at most
+    one per record) or ``shared`` for a party it was shared with. A record with
+    no rows is visible to internal members only. Unlike ``EntityVisibility``
+    these rows grant within the party scope, but the scope itself only ever
+    narrows: an external member can never reach a record that plain project
+    access would not already give them.
+    """
+
+    __tablename__ = "oe_teams_party_record"
+    __table_args__ = (
+        UniqueConstraint("entity_type", "entity_id", "party_id", name="uq_teams_party_record_entity_party"),
+        Index(
+            "uq_teams_party_record_originator",
+            "entity_type",
+            "entity_id",
+            unique=True,
+            postgresql_where=text("access = 'originator'"),
+            sqlite_where=text("access = 'originator'"),
+        ),
+        Index("ix_teams_party_record_party_type", "party_id", "entity_type"),
+        Index("ix_teams_party_record_entity", "entity_type", "entity_id"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    entity_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    entity_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    party_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_teams_project_party.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    access: Mapped[str] = mapped_column(String(16), nullable=False, default="shared", server_default="shared")
+    permission: Mapped[str] = mapped_column(String(16), nullable=False, default="view", server_default="view")
+    shared_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<PartyRecordAccess {self.entity_type}/{self.entity_id} party={self.party_id} ({self.access})>"

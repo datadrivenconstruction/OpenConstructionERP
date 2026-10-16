@@ -72,6 +72,9 @@ async def test_the_rule_set_is_registered_and_actually_runs(session) -> None:
         "teams.roster_window",
         "teams.roster_site_lead",
         "teams.roster_covers_access",
+        "teams.party_member_has_access",
+        "teams.party_record_scope",
+        "teams.party_host_defined",
     }
 
     _owner, _member, project, _team = await _clean_project(session)
