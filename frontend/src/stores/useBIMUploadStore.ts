@@ -20,6 +20,7 @@ import {
   fetchBIMModel,
   type BIMCadUploadResponse,
 } from '@/features/bim/api';
+import { bimQuantityWarningCode, type BimQuantityWarningCode } from '@/shared/lib/bimQuantityWarning';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -53,6 +54,11 @@ export interface BIMUploadJob {
 
   /** Converter id when status is 'converter_required'. */
   converterId: string | null;
+
+  /** Set when the model imported but its quantities could not be extracted
+   *  (backend status `degraded`, typically the DDC converter is missing). The
+   *  dock shows it instead of reporting a plain success. */
+  quantitiesWarning?: BimQuantityWarningCode | null;
 
   /** When true, the store will fire a background PDF-sheet generation
    *  request once the model record reaches status="ready" on the
@@ -312,12 +318,14 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
       }
 
       if (model.status === 'ready' || model.status === 'degraded') {
+        const quantitiesWarning = bimQuantityWarningCode(model);
         patchJob(jobId, {
           status: 'ready',
           progress: 100,
-          stage: 'bim_upload.stage_done',
+          stage: quantitiesWarning ? 'bim_upload.stage_done_no_quantities' : 'bim_upload.stage_done',
           modelId,
           elementCount: model.element_count ?? 0,
+          quantitiesWarning,
           completedAt: Date.now(),
         });
         if (generatePdf) void waitForReadyThenGeneratePdf(jobId, modelId);

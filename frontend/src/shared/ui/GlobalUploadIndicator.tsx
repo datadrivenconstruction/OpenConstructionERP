@@ -31,6 +31,7 @@ import {
   type BIMUploadJob,
 } from '@/stores/useBIMUploadStore';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { bimQuantityWarningText } from '@/shared/lib/bimQuantityWarning';
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -334,6 +335,22 @@ function JobRow({
               </span>
             )}
           </div>
+        )}
+
+        {/* Imported, but without quantities (converter missing) */}
+        {isDone && job.quantitiesWarning && (
+          <p
+            role="status"
+            data-testid="upload-quantities-warning"
+            className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 flex items-start gap-1"
+          >
+            <AlertTriangle size={11} className="shrink-0 mt-px" />
+            <span>
+              {t(bimQuantityWarningText(job.quantitiesWarning).key, {
+                defaultValue: bimQuantityWarningText(job.quantitiesWarning).defaultValue,
+              })}
+            </span>
+          </p>
         )}
 
         {/* Error */}

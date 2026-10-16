@@ -83,6 +83,7 @@ from app.core.validation.messages import translate
 from app.dependencies import CurrentUserId, RequirePermission, RequireRole, SessionDep, accessible_project_ids
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.mesh_formats import is_mesh_geometry_ext, mesh_upload_hint
+from app.modules.bim_hub.quantity_warning import quantity_warning
 from app.modules.bim_hub.schemas import (
     AssetInfoUpdateRequest,
     AssetListResponse,
@@ -1762,40 +1763,12 @@ async def _process_cad_in_background(
                 # state and populate a user-facing warning so the UI can show
                 # "imported, but no quantities - DDC converter required"
                 # instead of pretending the import fully succeeded.
-                if converter_absent or no_quantities:
+                warning = quantity_warning(converter_absent=converter_absent, no_quantities=no_quantities)
+                if warning is not None:
                     model.status = "degraded"
                     meta_warn = dict(model.metadata_ or {})
-                    if converter_absent and no_quantities:
-                        warn_msg = (
-                            "Geometry imported, but no quantities could be "
-                            "extracted: the DDC cad2data converter is not "
-                            "available on this server, and the file does not "
-                            "carry explicit IFC BaseQuantities. Elements were "
-                            "imported for geometry/linking only. Install the "
-                            "DDC converter (Settings → BIM Converters) and "
-                            "click Retry to recover area/volume/length "
-                            "quantities."
-                        )
-                        meta_warn["error_code"] = "no_quantities_converter_absent"
-                    elif converter_absent:
-                        warn_msg = (
-                            "Imported with placeholder geometry: the DDC "
-                            "cad2data converter is not available on this "
-                            "server, so quantities were read from the file's "
-                            "embedded IFC BaseQuantities only and may be "
-                            "incomplete. Install the DDC converter "
-                            "(Settings → BIM Converters) and click Retry for "
-                            "full geometry-derived quantities."
-                        )
-                        meta_warn["error_code"] = "converter_absent"
-                    else:
-                        warn_msg = (
-                            "Geometry imported, but no quantities "
-                            "(area/volume/length) could be extracted from "
-                            "this file. Elements were imported for "
-                            "geometry/linking only."
-                        )
-                        meta_warn["error_code"] = "no_quantities"
+                    warn_msg = warning.message
+                    meta_warn["error_code"] = warning.code
                     model.error_message = warn_msg
                     meta_warn["warning"] = warn_msg
                     meta_warn["degraded"] = True

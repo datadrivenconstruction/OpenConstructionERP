@@ -128,6 +128,7 @@ import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore
 import { useNameCollator } from '@/shared/lib/collator';
 import { isUsableModelStatus, versionParentOptions } from './modelVersions';
 import { QuantityRuleOfferBanner } from './QuantityRuleOfferBanner';
+import { QuantityWarningBanner } from './QuantityWarningBanner';
 import { useDwgUploadStore } from '@/stores/useDwgUploadStore';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -4259,6 +4260,10 @@ export function BIMPage() {
         {activeModel?.parent_model_id && isUsableModelStatus(activeModel.status) && (
           <QuantityRuleOfferBanner modelId={activeModel.id} />
         )}
+
+        {/* Imported without quantities (DDC converter missing): say so rather
+            than show a viewer that looks complete with empty quantities. */}
+        <QuantityWarningBanner model={activeModel} />
 
         {/* PDF generation indicator - shown when the upload job for the
             active model has a deferred PDF export running on the backend.
