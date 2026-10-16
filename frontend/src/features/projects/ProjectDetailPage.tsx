@@ -3180,7 +3180,7 @@ export function ProjectDetailPage() {
               <div className="divide-y divide-border-light">
                 {boqs.map((boq) => {
                   const detail = detailMap.get(boq.id);
-                  const posCount = detail?.positions.length ?? 0;
+                  const posCount = detail ? countLeafPositions([detail]) : 0;
                   const grandTotal = toNum(detail?.grand_total);
 
                   return (
