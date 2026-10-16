@@ -87,6 +87,11 @@ TARGET_KINDS: tuple[str, ...] = (
     # the pinned framework routes that decision through an approval. The
     # stakeholders module starts the instance and applies its terminal verdict.
     "stakeholder_commitment",
+    # Procurement: the site approval of a confirmed goods receipt. The person
+    # confirming the receipt chooses to start it; a payable invoice on the
+    # order is not released while the instance is still open or rejected
+    # (rule ``procurement.receipt_route_approved``).
+    "goods_receipt",
 )
 
 # Aggregation mode at a single step when the approver_role expands to

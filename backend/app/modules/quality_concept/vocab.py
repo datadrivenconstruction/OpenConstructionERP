@@ -33,6 +33,9 @@ LINK_KINDS: tuple[str, ...] = (
     "diary_photo",
     "diary_reality_capture",
     "requirement_deliverable",
+    # A delivery of material (procurement goods receipt): the proof that what
+    # was built in arrived, with its certificates.
+    "goods_receipt",
 )
 
 EVIDENCE_KINDS: tuple[str, ...] = ("test", "protocol", "record", "certificate", "report", "document", "dataset")

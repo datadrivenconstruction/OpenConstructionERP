@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Datum potřeby {date} už uplynulo (dnes je {today})",
       "suggestion": "Nastavte datum, kdy je materiál na stavbě skutečně potřeba"
+    },
+    "receipt_certificate_present": {
+      "fail": "Položka {line} byla objednána s {required}, ale dodávka obsahuje {delivered}",
+      "suggestion": "Připojte certifikát požadovaný objednávkou, nebo položku odmítněte, dokud dodavatel certifikát nepošle"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Certifikát {certificate} k položce {line} se vztahuje na šarži {certificate_batch}, ale dodána byla šarže {batch}",
+      "suggestion": "Zkontrolujte číslo šarže nebo tavby na materiálu a vyžádejte si od dodavatele certifikát pro dodanou šarži"
+    },
+    "receipt_route_approved": {
+      "fail": "Příjemka {receipt} k objednávce {po} je ve schvalovacím procesu a zatím není schválena",
+      "suggestion": "Před uvolněním platby počkejte, až schvalovací proces příjemky skončí"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Vstupní kontrola příjemky {receipt} k objednávce {po} zatím nebyla úspěšně dokončena",
+      "suggestion": "Dokončete kontrolu, nebo zaznamenejte, z jakého důvodu smí být materiál zaplacen dříve"
     }
   },
   "subcontract": {

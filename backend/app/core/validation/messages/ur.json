@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "درکار تاریخ {date} گزر چکی ہے (آج {today} ہے)",
       "suggestion": "وہ تاریخ مقرر کریں جب سائٹ پر مواد واقعی درکار ہو"
+    },
+    "receipt_certificate_present": {
+      "fail": "لائن {line} کا آرڈر {required} کے ساتھ دیا گیا تھا، لیکن ترسیل میں {delivered} آیا ہے",
+      "suggestion": "آرڈر میں مانگا گیا سرٹیفکیٹ منسلک کریں، یا سپلائر بھیجنے تک اس لائن کو مسترد کریں"
+    },
+    "receipt_certificate_batch": {
+      "fail": "لائن {line} کا سرٹیفکیٹ {certificate} بیچ {certificate_batch} کا ہے، جبکہ بیچ {batch} موصول ہوا ہے",
+      "suggestion": "مواد پر بیچ یا ہیٹ نمبر چیک کریں اور سپلائر سے موصول شدہ بیچ کا سرٹیفکیٹ مانگیں"
+    },
+    "receipt_route_approved": {
+      "fail": "آرڈر {po} کی گڈز ریسیپٹ {receipt} منظوری کے عمل میں ہے اور ابھی منظور نہیں ہوئی",
+      "suggestion": "ادائیگی جاری کرنے سے پہلے گڈز ریسیپٹ کا منظوری کا عمل مکمل ہونے کا انتظار کریں"
+    },
+    "receipt_inspection_closed": {
+      "fail": "آرڈر {po} کی گڈز ریسیپٹ {receipt} کا آمدی معائنہ ابھی پاس نہیں ہوا",
+      "suggestion": "معائنہ مکمل کریں، یا ریکارڈ کریں کہ مواد کی ادائیگی اس سے پہلے کیوں کی جا سکتی ہے"
     }
   },
   "subcontract": {

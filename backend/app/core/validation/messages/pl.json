@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Termin potrzeby {date} już minął (dziś jest {today})",
       "suggestion": "Ustaw datę, kiedy materiał jest faktycznie potrzebny na budowie"
+    },
+    "receipt_certificate_present": {
+      "fail": "Pozycja {line} zamówiona z {required}, ale dostawa zawiera {delivered}",
+      "suggestion": "Dołącz certyfikat wymagany w zamówieniu lub wstrzymaj pozycję, dopóki dostawca go nie prześle"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Certyfikat {certificate} do pozycji {line} dotyczy partii {certificate_batch}, a dostarczono partię {batch}",
+      "suggestion": "Sprawdź numer partii lub wytopu na materiale i zażądaj od dostawcy certyfikatu dla partii, która dotarła"
+    },
+    "receipt_route_approved": {
+      "fail": "Przyjęcie magazynowe {receipt} do zamówienia {po} jest w obiegu zatwierdzania i nie zostało jeszcze zatwierdzone",
+      "suggestion": "Poczekaj, aż obieg zatwierdzania przyjęcia magazynowego się zakończy, zanim zwolnisz płatność"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Kontrola przyjęciowa dostawy {receipt} do zamówienia {po} nie została jeszcze zaliczona",
+      "suggestion": "Zakończ kontrolę albo zapisz, dlaczego materiał może zostać opłacony przed jej zakończeniem"
     }
   },
   "subcontract": {

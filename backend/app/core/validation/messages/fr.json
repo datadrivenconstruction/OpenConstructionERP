@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "La date de besoin {date} est déjà dépassée (aujourd'hui : {today})",
       "suggestion": "Indiquez la date à laquelle le matériau est réellement nécessaire sur le chantier"
+    },
+    "receipt_certificate_present": {
+      "fail": "La ligne {line} a été commandée avec {required}, mais la livraison comporte {delivered}",
+      "suggestion": "Joignez le certificat exigé par la commande, ou refusez la ligne tant que le fournisseur ne l'a pas transmis"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Le certificat {certificate} de la ligne {line} concerne le lot {certificate_batch}, or c'est le lot {batch} qui a été livré",
+      "suggestion": "Vérifiez le numéro de lot ou de coulée sur le matériau et demandez au fournisseur le certificat du lot reçu"
+    },
+    "receipt_route_approved": {
+      "fail": "Le bon de réception {receipt} de la commande {po} est en circuit de validation et n'est pas encore validé",
+      "suggestion": "Attendez la fin du circuit de validation du bon de réception avant de libérer le paiement"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Le contrôle à réception du bon de réception {receipt} de la commande {po} n'est pas encore validé",
+      "suggestion": "Terminez le contrôle, ou consignez la raison pour laquelle le matériau peut être payé avant"
     }
   },
   "subcontract": {

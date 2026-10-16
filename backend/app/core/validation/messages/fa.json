@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "تاریخ نیاز {date} گذشته است (امروز {today} است)",
       "suggestion": "تاریخی را وارد کنید که مصالح واقعاً در کارگاه لازم است"
+    },
+    "receipt_certificate_present": {
+      "fail": "ردیف {line} با {required} سفارش داده شد، اما تحویل شامل {delivered} است",
+      "suggestion": "گواهی درخواستی سفارش را پیوست کنید یا تا ارسال آن توسط تأمین‌کننده، ردیف را رد کنید"
+    },
+    "receipt_certificate_batch": {
+      "fail": "گواهی {certificate} ردیف {line} مربوط به بچ {certificate_batch} است، در حالی که بچ {batch} تحویل شده است",
+      "suggestion": "شماره بچ یا شماره ذوب را روی مصالح بررسی کنید و گواهی بچ رسیده را از تأمین‌کننده بخواهید"
+    },
+    "receipt_route_approved": {
+      "fail": "رسید انبار {receipt} برای سفارش {po} در مسیر تأیید است و هنوز تأیید نشده است",
+      "suggestion": "پیش از تأیید پرداخت، صبر کنید تا مسیر تأیید رسید انبار تمام شود"
+    },
+    "receipt_inspection_closed": {
+      "fail": "بازرسی ورودی رسید انبار {receipt} برای سفارش {po} هنوز تأیید نشده است",
+      "suggestion": "بازرسی را تکمیل کنید یا ثبت کنید که چرا پرداخت مصالح پیش از آن مجاز است"
     }
   },
   "subcontract": {

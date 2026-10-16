@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "A data de necessidade {date} já passou (hoje é {today})",
       "suggestion": "Defina a data em que o material é realmente necessário na obra"
+    },
+    "receipt_certificate_present": {
+      "fail": "A linha {line} foi pedida com {required}, mas a entrega traz {delivered}",
+      "suggestion": "Anexe o certificado exigido no pedido ou recuse a linha até o fornecedor enviá-lo"
+    },
+    "receipt_certificate_batch": {
+      "fail": "O certificado {certificate} da linha {line} é do lote {certificate_batch}, mas foi entregue o lote {batch}",
+      "suggestion": "Confira o número do lote ou da corrida no material e peça ao fornecedor o certificado do lote que chegou"
+    },
+    "receipt_route_approved": {
+      "fail": "O recebimento de material {receipt} do pedido {po} está em fluxo de aprovação e ainda não foi aprovado",
+      "suggestion": "Aguarde o fim do fluxo de aprovação do recebimento antes de liberar o pagamento"
+    },
+    "receipt_inspection_closed": {
+      "fail": "A inspeção de recebimento do material {receipt} do pedido {po} ainda não foi aprovada",
+      "suggestion": "Conclua a inspeção ou registre o motivo pelo qual o material pode ser pago antes dela"
     }
   },
   "subcontract": {

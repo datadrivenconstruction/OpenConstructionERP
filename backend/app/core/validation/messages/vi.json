@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Ngày cần {date} đã qua (hôm nay là {today})",
       "suggestion": "Đặt ngày vật tư thực sự cần có tại công trường"
+    },
+    "receipt_certificate_present": {
+      "fail": "Dòng {line} được đặt với {required}, nhưng đợt giao hàng lại có {delivered}",
+      "suggestion": "Đính kèm chứng chỉ mà đơn đặt hàng yêu cầu, hoặc từ chối dòng này cho đến khi nhà cung cấp gửi chứng chỉ"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Chứng chỉ {certificate} của dòng {line} dành cho lô {certificate_batch}, nhưng lô đã giao là {batch}",
+      "suggestion": "Kiểm tra số lô hoặc số mẻ nấu trên vật tư và yêu cầu nhà cung cấp gửi chứng chỉ của lô đã nhận"
+    },
+    "receipt_route_approved": {
+      "fail": "Phiếu nhập kho {receipt} của đơn đặt hàng {po} đang trong quy trình phê duyệt và chưa được duyệt",
+      "suggestion": "Chờ quy trình phê duyệt phiếu nhập kho hoàn tất trước khi duyệt thanh toán"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Kiểm tra đầu vào của phiếu nhập kho {receipt} thuộc đơn đặt hàng {po} chưa đạt",
+      "suggestion": "Hoàn tất kiểm tra, hoặc ghi lại lý do vật tư có thể được thanh toán trước khi kiểm tra"
     }
   },
   "subcontract": {

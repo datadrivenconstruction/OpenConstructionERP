@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "A szükséglet időpontja ({date}) már elmúlt (ma {today} van)",
       "suggestion": "Adja meg azt a napot, amikor az anyagra ténylegesen szükség van az építési helyszínen"
+    },
+    "receipt_certificate_present": {
+      "fail": "A(z) {line} tétel megrendelésében {required} szerepelt, a szállítmányban viszont {delivered} van",
+      "suggestion": "Csatolja a megrendelés által kért tanúsítványt, vagy utasítsa vissza a tételt, amíg a szállító be nem küldi"
+    },
+    "receipt_certificate_batch": {
+      "fail": "A(z) {line} tételhez tartozó {certificate} tanúsítvány a(z) {certificate_batch} tételszámú gyártási tételre vonatkozik, de a(z) {batch} tétel érkezett meg",
+      "suggestion": "Ellenőrizze az anyagon a tétel- vagy öntvényszámot, és kérje a szállítótól az érkezett tétel tanúsítványát"
+    },
+    "receipt_route_approved": {
+      "fail": "A(z) {po} megrendeléshez tartozó {receipt} áruátvételi bizonylat jóváhagyási folyamatban van, és még nincs jóváhagyva",
+      "suggestion": "A kifizetés engedélyezése előtt várja meg az áruátvételi bizonylat jóváhagyási folyamatának lezárulását"
+    },
+    "receipt_inspection_closed": {
+      "fail": "A(z) {po} megrendeléshez tartozó {receipt} áruátvételi bizonylat beérkezési ellenőrzése még nem sikeres",
+      "suggestion": "Fejezze be az ellenőrzést, vagy rögzítse, miért fizethető ki az anyag annak lezárulása előtt"
     }
   },
   "subcontract": {

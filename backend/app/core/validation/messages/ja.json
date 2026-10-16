@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "納入希望日 {date} はすでに過ぎています(本日は {today})",
       "suggestion": "資材が現場で実際に必要になる日付を設定してください"
+    },
+    "receipt_certificate_present": {
+      "fail": "明細{line}は{required}付きで発注されましたが、納品には{delivered}が含まれています",
+      "suggestion": "発注で求められた証明書を添付するか、サプライヤーから届くまで該当明細を保留してください"
+    },
+    "receipt_certificate_batch": {
+      "fail": "明細{line}の証明書{certificate}はロット{certificate_batch}のものですが、納品されたのはロット{batch}です",
+      "suggestion": "資材に記載のロット番号または溶解番号を確認し、到着したロットの証明書をサプライヤーに請求してください"
+    },
+    "receipt_route_approved": {
+      "fail": "発注{po}の入荷記録{receipt}は承認ルートを通過中で、まだ承認されていません",
+      "suggestion": "支払いを承認する前に、入荷記録の承認ルートが完了するのを待ってください"
+    },
+    "receipt_inspection_closed": {
+      "fail": "発注{po}の入荷記録{receipt}の受入検査が、まだ合格していません",
+      "suggestion": "検査を完了するか、検査前に支払いが認められる理由を記録してください"
     }
   },
   "subcontract": {

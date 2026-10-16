@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "La data di fabbisogno {date} è già trascorsa (oggi è {today})",
       "suggestion": "Imposta la data in cui il materiale serve davvero in cantiere"
+    },
+    "receipt_certificate_present": {
+      "fail": "La riga {line} è stata ordinata con {required}, ma la consegna riporta {delivered}",
+      "suggestion": "Allegate il certificato richiesto dall'ordine, oppure respingete la riga finché il fornitore non lo invia"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Il certificato {certificate} della riga {line} si riferisce al lotto {certificate_batch}, ma è stato consegnato il lotto {batch}",
+      "suggestion": "Verificate il numero di lotto o di colata sul materiale e chiedete al fornitore il certificato del lotto arrivato"
+    },
+    "receipt_route_approved": {
+      "fail": "Il documento di entrata merce {receipt} sull'ordine {po} è in iter di approvazione e non è ancora approvato",
+      "suggestion": "Attendete la conclusione dell'iter di approvazione del documento di entrata merce prima di autorizzare il pagamento"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Il controllo in ingresso del documento di entrata merce {receipt} sull'ordine {po} non è ancora superato",
+      "suggestion": "Completate il controllo, oppure registrate il motivo per cui il materiale può essere pagato prima"
     }
   },
   "subcontract": {

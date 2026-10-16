@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Datum potrebe {date} već je prošao (danas je {today})",
       "suggestion": "Postavite datum kada je materijal stvarno potreban na gradilištu"
+    },
+    "receipt_certificate_present": {
+      "fail": "Stavka {line} naručena je s {required}, ali isporuka sadrži {delivered}",
+      "suggestion": "Priložite certifikat koji narudžbenica traži ili odbijte stavku dok dobavljač ne pošalje certifikat"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Certifikat {certificate} za stavku {line} odnosi se na šaržu {certificate_batch}, ali je isporučena šarža {batch}",
+      "suggestion": "Provjerite broj šarže ili taline na materijalu i zatražite od dobavljača certifikat za šaržu koja je stigla"
+    },
+    "receipt_route_approved": {
+      "fail": "Primka {receipt} za narudžbu {po} upućena je na odobrenje i još nije odobrena",
+      "suggestion": "Pričekajte da završi odobravanje primke prije nego što odobrite plaćanje"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Ulazna kontrola primke {receipt} za narudžbu {po} još nije uspješno prošla",
+      "suggestion": "Dovršite kontrolu ili zabilježite zašto se materijal smije platiti prije nje"
     }
   },
   "subcontract": {

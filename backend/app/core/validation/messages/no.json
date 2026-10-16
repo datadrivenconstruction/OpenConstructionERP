@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Behovsdatoen {date} er allerede passert (i dag er {today})",
       "suggestion": "Angi datoen materialet faktisk trengs på byggeplassen"
+    },
+    "receipt_certificate_present": {
+      "fail": "Linje {line} ble bestilt med {required}, men leveransen inneholder {delivered}",
+      "suggestion": "Legg ved sertifikatet bestillingen krever, eller avvis linjen til leverandøren sender det"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Sertifikat {certificate} på linje {line} gjelder parti {certificate_batch}, men parti {batch} er levert",
+      "suggestion": "Kontroller parti- eller smeltenummeret på materialet, og be leverandøren om sertifikat for partiet som kom"
+    },
+    "receipt_route_approved": {
+      "fail": "Varemottak {receipt} på bestilling {po} er i godkjenningsflyt og er ikke godkjent ennå",
+      "suggestion": "Vent til godkjenningsflyten for varemottaket er ferdig før betalingen frigis"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Innkommende kontroll av varemottak {receipt} på bestilling {po} er ikke bestått ennå",
+      "suggestion": "Fullfør kontrollen, eller før opp hvorfor materialet kan betales før den"
     }
   },
   "subcontract": {

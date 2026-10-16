@@ -409,7 +409,7 @@ class GoodsReceiptRepository:
 
         stmt = (
             select(GoodsReceipt)
-            .options(selectinload(GoodsReceipt.items))
+            .options(selectinload(GoodsReceipt.items).selectinload(GoodsReceiptItem.certificates))
             .where(GoodsReceipt.id == gr_id)
             .execution_options(populate_existing=True)
         )
@@ -478,7 +478,7 @@ class GoodsReceiptRepository:
         total = (await self.session.execute(count_stmt)).scalar_one()
 
         stmt = (
-            base.options(selectinload(GoodsReceipt.items))
+            base.options(selectinload(GoodsReceipt.items).selectinload(GoodsReceiptItem.certificates))
             .order_by(GoodsReceipt.created_at.desc())
             .offset(offset)
             .limit(limit)

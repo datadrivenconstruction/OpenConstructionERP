@@ -10936,6 +10936,67 @@ class ProcurementRequisitionNeededByNotPast(_ProcurementRule):
     check_name = "check_requisition_needed_by_not_past"
 
 
+# ── Goods receipts: material certificates (confirmation gate) ───────────────
+#
+# Run by ``ProcurementService.confirm_goods_receipt`` (and the read-only receipt
+# validate endpoint) with the "goods_receipt" set. A missing certificate the
+# order asked for blocks confirmation; a batch that disagrees is flagged for the
+# person confirming. Payload shape beside the checks in ``procurement.validators``.
+
+
+class ProcurementReceiptCertificatePresent(_ProcurementRule):
+    """A receipt line whose order asks for a certificate must carry one that satisfies it."""
+
+    rule_id = "procurement.receipt_certificate_present"
+    name = "Receipt Certificate Present"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a delivered line whose order requires a material certificate that was not provided."
+    check_name = "check_receipt_certificate_present"
+
+
+class ProcurementReceiptCertificateBatch(_ProcurementRule):
+    """The batch on a certificate should be the batch that was delivered."""
+
+    rule_id = "procurement.receipt_certificate_batch"
+    name = "Receipt Certificate Batch Matches"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a certificate whose batch or heat number differs from the batch recorded on the receipt line."
+    check_name = "check_receipt_certificate_batch"
+
+
+# ── Supplier invoice payment release ────────────────────────────────────────
+#
+# Run by the finance module when a payable invoice linked to a purchase order is
+# approved or paid, with the "invoice_payment_release" set. A goods receipt that
+# was routed for approval must be approved first (ERROR); an incoming inspection
+# raised from it that is still open is flagged (WARNING). A project that does
+# not want the gate disables the rule set; no code path hard-blocks.
+
+
+class ProcurementReceiptRouteApproved(_ProcurementRule):
+    """A goods receipt routed for approval must be approved before its invoice is released."""
+
+    rule_id = "procurement.receipt_route_approved"
+    name = "Goods Receipt Approval Before Payment"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Flags an invoice whose order has a confirmed goods receipt with an approval route not yet approved."
+    check_name = "check_receipt_route_approved"
+
+
+class ProcurementReceiptInspectionClosed(_ProcurementRule):
+    """An incoming inspection raised from a goods receipt should be passed before payment."""
+
+    rule_id = "procurement.receipt_inspection_closed"
+    name = "Incoming Inspection Before Payment"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Flags an invoice whose order has a goods receipt with an incoming inspection still open or failed."
+    check_name = "check_receipt_inspection_closed"
+
+
 # ── Subcontract agreements (activation gate) ────────────────────────────────
 #
 # An agreement leaving ``draft`` for ``active`` is the moment a subcontractor
@@ -11603,6 +11664,11 @@ def register_builtin_rules() -> None:
         (ProcurementRequisitionQuantityPositive(), ["procurement_requisition"]),
         (ProcurementRequisitionSourceUnit(), ["procurement_requisition"]),
         (ProcurementRequisitionNeededByNotPast(), ["procurement_requisition"]),
+        # Goods receipts (confirmation gate) and supplier invoice payment release.
+        (ProcurementReceiptCertificatePresent(), ["goods_receipt"]),
+        (ProcurementReceiptCertificateBatch(), ["goods_receipt"]),
+        (ProcurementReceiptRouteApproved(), ["invoice_payment_release"]),
+        (ProcurementReceiptInspectionClosed(), ["invoice_payment_release"]),
         # Subcontract agreements (activation gate)
         # Registered into the "subcontract" set, which
         # SubcontractorService._validate_agreement passes on activation and on

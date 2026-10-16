@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Data necesarului {date} a trecut deja (astăzi este {today})",
       "suggestion": "Setați data la care materialul este necesar efectiv pe șantier"
+    },
+    "receipt_certificate_present": {
+      "fail": "Linia {line} a fost comandată cu {required}, dar livrarea conține {delivered}",
+      "suggestion": "Atașați certificatul cerut de comandă sau refuzați linia până când furnizorul îl trimite"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Certificatul {certificate} de la linia {line} este pentru lotul {certificate_batch}, dar a fost livrat lotul {batch}",
+      "suggestion": "Verificați numărul de lot sau de topitură de pe material și cereți furnizorului certificatul lotului sosit"
+    },
+    "receipt_route_approved": {
+      "fail": "Recepția de marfă {receipt} de pe comanda {po} este în circuitul de aprobare și nu a fost aprobată încă",
+      "suggestion": "Așteptați finalizarea circuitului de aprobare al recepției înainte de a debloca plata"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Controlul de intrare al recepției de marfă {receipt} de pe comanda {po} nu a fost încă trecut",
+      "suggestion": "Finalizați controlul sau consemnați de ce materialul poate fi plătit înainte"
     }
   },
   "subcontract": {

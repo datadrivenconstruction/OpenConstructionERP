@@ -589,3 +589,149 @@ def check_requisition_needed_by_not_past(req: dict[str, Any]) -> list[Finding]:
             details={"required_date": needed.isoformat(), "today": today.isoformat()},
         )
     ]
+
+
+# ── Goods receipts: material certificates (confirmation gate, BF-01) ─────────
+#
+# Payload shape, built by ``ProcurementService.receipt_validation_payload``:
+#
+#     {"receipt_ref": "LS-4711" | "<receipt id>", "po_number": "PO-0007",
+#      "items": [{"label": "1 (Rebar B500B 12 mm)", "quantity_received": "12.5",
+#                 "batch_lot": "H-20931" | None,
+#                 "required_certificate_type": "en10204_3_1" | None,
+#                 "certificates": [{"certificate_type", "certificate_number",
+#                                   "batch_number"}]}]}
+#
+# ``required_certificate_type`` comes from the order line: the document type is
+# agreed when the material is ordered, so the order is where the requirement is
+# read from. A line that received nothing (fully rejected) needs no document.
+
+
+def _normal_batch(raw: Any) -> str:
+    """A batch or heat number compared without case or inner whitespace."""
+    return "".join(str(raw or "").split()).upper()
+
+
+def _receipt_lines(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    return [i for i in payload.get("items") or [] if isinstance(i, dict)]
+
+
+def _certs(line: dict[str, Any]) -> list[dict[str, Any]]:
+    return [c for c in line.get("certificates") or [] if isinstance(c, dict)]
+
+
+def check_receipt_certificate_present(payload: dict[str, Any]) -> list[Finding]:
+    """A line whose order asks for a certificate must carry one that satisfies it."""
+    from app.modules.procurement.certificates import get_certificate_type, satisfies
+
+    findings: list[Finding] = []
+    for line in _receipt_lines(payload):
+        required = str(line.get("required_certificate_type") or "").strip()
+        if not required:
+            continue
+        received = parse_money(line.get("quantity_received"))
+        if received is None or received <= 0:
+            continue
+        delivered = [str(c.get("certificate_type") or "") for c in _certs(line)]
+        if any(satisfies(code, required) for code in delivered):
+            continue
+        ctype = get_certificate_type(required)
+        label = str(line.get("label") or "?")
+        findings.append(
+            Finding(
+                element_ref=label,
+                params={
+                    "line": label,
+                    "required": ctype.label if ctype else required,
+                    "delivered": ", ".join(sorted(set(filter(None, delivered)))) or "-",
+                },
+                details={"required_certificate_type": required, "delivered_types": delivered},
+            )
+        )
+    return findings
+
+
+def check_receipt_certificate_batch(payload: dict[str, Any]) -> list[Finding]:
+    """The batch or heat number on a certificate should be the batch that arrived.
+
+    Compared only when both are recorded. A certificate for another heat is
+    the classic way a valid-looking document ends up beside the wrong steel.
+    """
+    findings: list[Finding] = []
+    for line in _receipt_lines(payload):
+        batch = _normal_batch(line.get("batch_lot"))
+        if not batch:
+            continue
+        label = str(line.get("label") or "?")
+        for cert in _certs(line):
+            cert_batch = _normal_batch(cert.get("batch_number"))
+            if not cert_batch or cert_batch == batch:
+                continue
+            findings.append(
+                Finding(
+                    element_ref=label,
+                    params={
+                        "line": label,
+                        "certificate": str(cert.get("certificate_number") or "-"),
+                        "certificate_batch": str(cert.get("batch_number") or ""),
+                        "batch": str(line.get("batch_lot") or ""),
+                    },
+                    details={"certificate_batch": cert_batch, "receipt_batch": batch},
+                )
+            )
+    return findings
+
+
+# ── Payment release of a supplier invoice (BF-01) ─────────────────────────────
+#
+# Payload shape, built by ``ProcurementService.payment_release_payload``:
+#
+#     {"po_number": "PO-0007", "invoice_ref": "RE-2026-118",
+#      "receipts": [{"ref": "LS-4711", "approval_status": "pending" | None,
+#                    "inspection_status": "scheduled" | None}]}
+#
+# ``approval_status`` is the latest approval instance on the receipt that was
+# not cancelled; ``None`` when the receipt was never routed. Only confirmed
+# receipts are listed.
+
+_OPEN_INSPECTION_STATUSES = frozenset({"scheduled", "in_progress", "failed"})
+
+
+def check_receipt_route_approved(payload: dict[str, Any]) -> list[Finding]:
+    """Every receipt routed for approval must be approved before its invoice is paid."""
+    findings: list[Finding] = []
+    for receipt in payload.get("receipts") or []:
+        if not isinstance(receipt, dict):
+            continue
+        status = receipt.get("approval_status")
+        if status is None or status == "approved":
+            continue
+        ref = str(receipt.get("ref") or "?")
+        findings.append(
+            Finding(
+                element_ref=ref,
+                params={"receipt": ref, "po": _po_ref(payload)},
+                details={"approval_status": status, "approval_instance_id": receipt.get("approval_instance_id")},
+            )
+        )
+    return findings
+
+
+def check_receipt_inspection_closed(payload: dict[str, Any]) -> list[Finding]:
+    """An incoming inspection raised from a receipt should be passed before payment."""
+    findings: list[Finding] = []
+    for receipt in payload.get("receipts") or []:
+        if not isinstance(receipt, dict):
+            continue
+        status = receipt.get("inspection_status")
+        if status not in _OPEN_INSPECTION_STATUSES:
+            continue
+        ref = str(receipt.get("ref") or "?")
+        findings.append(
+            Finding(
+                element_ref=ref,
+                params={"receipt": ref, "po": _po_ref(payload)},
+                details={"inspection_status": status, "inspection_id": receipt.get("inspection_id")},
+            )
+        )
+    return findings

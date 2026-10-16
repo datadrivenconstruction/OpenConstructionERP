@@ -1,0 +1,77 @@
+{
+  "id": "material_certificates",
+  "version": 1,
+  "description": "Inspection documents a delivery of material can arrive with. A type satisfies a requirement of the same family at the same or a lower rank, so a 3.1 certificate covers an order that asks for 2.2. Further types can be added by dropping another JSON file of the same shape into this folder.",
+  "types": [
+    {
+      "code": "en10204_2_1",
+      "family": "en10204",
+      "rank": 1,
+      "standard": "EN 10204",
+      "designation": "2.1",
+      "label": "EN 10204 type 2.1, declaration of compliance with the order",
+      "specific_inspection": false,
+      "validated_by": "manufacturer"
+    },
+    {
+      "code": "en10204_2_2",
+      "family": "en10204",
+      "rank": 2,
+      "standard": "EN 10204",
+      "designation": "2.2",
+      "label": "EN 10204 type 2.2, test report (non-specific inspection)",
+      "specific_inspection": false,
+      "validated_by": "manufacturer"
+    },
+    {
+      "code": "en10204_3_1",
+      "family": "en10204",
+      "rank": 3,
+      "standard": "EN 10204",
+      "designation": "3.1",
+      "label": "EN 10204 type 3.1, inspection certificate (manufacturer's inspection representative)",
+      "specific_inspection": true,
+      "validated_by": "manufacturer_inspection_representative"
+    },
+    {
+      "code": "en10204_3_2",
+      "family": "en10204",
+      "rank": 4,
+      "standard": "EN 10204",
+      "designation": "3.2",
+      "label": "EN 10204 type 3.2, inspection certificate (with the purchaser's or an independent inspector)",
+      "specific_inspection": true,
+      "validated_by": "independent_inspector"
+    },
+    {
+      "code": "declaration_of_performance",
+      "family": "product_declaration",
+      "rank": 1,
+      "standard": "",
+      "designation": "",
+      "label": "Declaration of performance or conformity for a construction product",
+      "specific_inspection": false,
+      "validated_by": "manufacturer"
+    },
+    {
+      "code": "mill_test_report",
+      "family": "test_report",
+      "rank": 1,
+      "standard": "",
+      "designation": "",
+      "label": "Mill or factory test report",
+      "specific_inspection": true,
+      "validated_by": "manufacturer"
+    },
+    {
+      "code": "third_party_test_report",
+      "family": "test_report",
+      "rank": 2,
+      "standard": "",
+      "designation": "",
+      "label": "Test report from an independent laboratory",
+      "specific_inspection": true,
+      "validated_by": "independent_inspector"
+    }
+  ]
+}

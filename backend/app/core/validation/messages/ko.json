@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "필요일 {date}이(가) 이미 지났습니다(오늘은 {today})",
       "suggestion": "자재가 현장에서 실제로 필요한 날짜를 지정하세요"
+    },
+    "receipt_certificate_present": {
+      "fail": "{line} 항목의 발주 시 요구 사항은 {required}였으나 납품 내용은 {delivered}입니다",
+      "suggestion": "발주서가 요구한 증명서를 첨부하거나, 공급업체가 보낼 때까지 해당 항목을 반려하세요"
+    },
+    "receipt_certificate_batch": {
+      "fail": "항목 {line}의 증명서 {certificate}는 배치 {certificate_batch}용이지만, 입고된 배치는 {batch}입니다",
+      "suggestion": "자재에 표시된 배치 또는 용해 번호를 확인하고, 입고된 배치의 증명서를 공급업체에 요청하세요"
+    },
+    "receipt_route_approved": {
+      "fail": "발주 {po}의 입고 기록 {receipt}는 승인 절차 중이며 아직 승인되지 않았습니다",
+      "suggestion": "지급을 승인하기 전에 입고 기록의 승인 절차가 끝날 때까지 기다리세요"
+    },
+    "receipt_inspection_closed": {
+      "fail": "발주 {po}의 입고 기록 {receipt}에 대한 수입 검사가 아직 합격하지 않았습니다",
+      "suggestion": "검사를 완료하거나, 검사 전에 자재 대금을 지급해도 되는 이유를 기록하세요"
     }
   },
   "subcontract": {

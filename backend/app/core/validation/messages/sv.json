@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Behovsdatumet {date} har redan passerat (idag är {today})",
       "suggestion": "Ange det datum då materialet faktiskt behövs på arbetsplatsen"
+    },
+    "receipt_certificate_present": {
+      "fail": "Rad {line} beställdes med {required}, men leveransen innehåller {delivered}",
+      "suggestion": "Bifoga intyget som beställningen kräver, eller underkänn raden tills leverantören skickar det"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Intyget {certificate} på rad {line} gäller parti {certificate_batch}, men parti {batch} har levererats",
+      "suggestion": "Kontrollera parti- eller smältnumret på materialet och be leverantören om intyget för partiet som kom"
+    },
+    "receipt_route_approved": {
+      "fail": "Godsmottagning {receipt} på beställning {po} är i godkännandeflödet och är ännu inte godkänd",
+      "suggestion": "Vänta tills godkännandeflödet för godsmottagningen är klart innan betalningen frigörs"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Den inkommande kontrollen av godsmottagning {receipt} på beställning {po} är ännu inte godkänd",
+      "suggestion": "Slutför kontrollen, eller dokumentera varför materialet får betalas före den"
     }
   },
   "subcontract": {

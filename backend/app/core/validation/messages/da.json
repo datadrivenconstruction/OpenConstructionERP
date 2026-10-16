@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Behovsdatoen {date} er allerede overskredet (i dag er {today})",
       "suggestion": "Angiv datoen, hvor materialet reelt skal bruges på pladsen"
+    },
+    "receipt_certificate_present": {
+      "fail": "Linje {line} er bestilt med {required}, men leveringen indeholder {delivered}",
+      "suggestion": "Vedhæft certifikatet, som bestillingen kræver, eller afvis linjen, indtil leverandøren sender det"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Certifikat {certificate} på linje {line} gælder for batch {certificate_batch}, men batch {batch} er leveret",
+      "suggestion": "Kontroller batch- eller smeltenummeret på materialet, og bed leverandøren om certifikatet for den batch, der er kommet"
+    },
+    "receipt_route_approved": {
+      "fail": "Modtagelsen {receipt} på bestilling {po} er i godkendelsesforløb og er endnu ikke godkendt",
+      "suggestion": "Vent til godkendelsesforløbet for modtagelsen er afsluttet, før betalingen frigives"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Den indgående kontrol af modtagelse {receipt} på bestilling {po} er endnu ikke bestået",
+      "suggestion": "Gennemfør kontrollen, eller notér hvorfor materialet må betales før den"
     }
   },
   "subcontract": {

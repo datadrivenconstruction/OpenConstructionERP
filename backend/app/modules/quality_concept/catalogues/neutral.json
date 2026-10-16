@@ -478,7 +478,8 @@
       "name_key": "quality_concept.catalogue.evidence_type.material_certificate_3_1",
       "kind": "certificate",
       "fulfilled_by": [
-        "cc_material_record"
+        "cc_material_record",
+        "goods_receipt"
       ],
       "default_deliverer": "supplier"
     },
@@ -488,7 +489,8 @@
       "kind": "certificate",
       "fulfilled_by": [
         "cc_material_record",
-        "submittal"
+        "submittal",
+        "goods_receipt"
       ],
       "default_deliverer": "supplier"
     },
@@ -515,7 +517,8 @@
       "name_key": "quality_concept.catalogue.evidence_type.concrete_delivery_notes",
       "kind": "record",
       "fulfilled_by": [
-        "cc_material_record"
+        "cc_material_record",
+        "goods_receipt"
       ],
       "default_deliverer": "contractor"
     },
@@ -533,7 +536,8 @@
       "name_key": "quality_concept.catalogue.evidence_type.steel_mill_certificates",
       "kind": "certificate",
       "fulfilled_by": [
-        "cc_material_record"
+        "cc_material_record",
+        "goods_receipt"
       ],
       "default_deliverer": "supplier"
     },

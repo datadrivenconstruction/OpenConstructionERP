@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "תאריך הנדרש {date} כבר עבר (היום הוא {today})",
       "suggestion": "קבעו את התאריך שבו החומר נדרש בפועל באתר"
+    },
+    "receipt_certificate_present": {
+      "fail": "שורה {line} הוזמנה עם {required}, אך המשלוח כולל {delivered}",
+      "suggestion": "צרפו את התעודה שההזמנה דורשת, או דחו את השורה עד שהספק ישלח אותה"
+    },
+    "receipt_certificate_batch": {
+      "fail": "התעודה {certificate} בשורה {line} מתייחסת למנה {certificate_batch}, אך נמסרה מנה {batch}",
+      "suggestion": "בדקו את מספר המנה או מספר ההתכה על החומר, ובקשו מהספק את התעודה של המנה שהגיעה"
+    },
+    "receipt_route_approved": {
+      "fail": "תעודת קבלת הסחורה {receipt} להזמנה {po} נמצאת במסלול אישור ועדיין לא אושרה",
+      "suggestion": "המתינו לסיום מסלול אישור קבלת הסחורה לפני שחרור התשלום"
+    },
+    "receipt_inspection_closed": {
+      "fail": "בדיקת הכניסה של תעודת קבלת הסחורה {receipt} להזמנה {po} טרם עברה בהצלחה",
+      "suggestion": "השלימו את הבדיקה, או תעדו מדוע ניתן לשלם על החומר לפניה"
     }
   },
   "subcontract": {

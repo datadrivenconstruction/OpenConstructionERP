@@ -7,7 +7,13 @@ Endpoints:
     POST   /                           - Create PO (auth required)
     GET    /goods-receipts             - List goods receipts
     POST   /goods-receipts             - Create GR (auth required)
-    POST   /goods-receipts/{id}/confirm - Confirm GR (auth required)
+    POST   /goods-receipts/{id}/confirm - Confirm GR, optionally starting its follow-ups
+    GET    /goods-receipts/{id}/readiness/ - What confirming the GR would run into
+    POST   /goods-receipts/{id}/certificates/ - Attach a material certificate to a GR line
+    DELETE /goods-receipts/{id}/certificates/{cid}/ - Remove one from a draft GR
+    GET    /certificate-types/         - The certificate-type catalogue
+    PATCH  /{id}/items/{item_id}/requirements/ - Receiving requirements of a PO line
+    GET    /{id}/payment-release/      - The payment release rules for the PO's invoices
     GET    /{id}                       - Get single PO
     PATCH  /{id}                       - Update PO (auth required)
     POST   /{id}/issue                 - Issue PO (auth required)
@@ -42,16 +48,23 @@ from app.modules.procurement.models import PurchaseOrder
 from app.modules.procurement.repository import PurchaseOrderRepository
 from app.modules.procurement.requisition_router import router as requisition_router
 from app.modules.procurement.schemas import (
+    CertificateTypeResponse,
     CommittedByPositionListResponse,
     CommittedByPositionRow,
+    GRCertificateAdd,
+    GRConfirmRequest,
     GRCreate,
     GRListResponse,
+    GRReadinessLine,
+    GRReadinessResponse,
     GRResponse,
+    GRRouteOption,
     InvoiceCheckRequest,
     POAcknowledgeRequest,
     POCancelRequest,
     POCreate,
     POInvoiceCreatedResponse,
+    POItemRequirementsUpdate,
     POListResponse,
     POMatchStatusResponse,
     POResponse,
@@ -377,14 +390,115 @@ async def confirm_goods_receipt(
     gr_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
+    data: GRConfirmRequest | None = None,
     service: ProcurementService = Depends(_get_service),
 ) -> GRResponse:
-    """Confirm a goods receipt."""
+    """Confirm a goods receipt.
+
+    The body is optional and carries what the person confirming chose to start
+    with it: the project's approval route for goods receipts and a pending
+    incoming inspection. An empty body confirms and starts nothing.
+    """
     existing_gr = await service.get_goods_receipt(gr_id)
     parent_po = await service.get_po(existing_gr.po_id)
     await verify_project_access(parent_po.project_id, str(user_id), session)
-    gr = await service.confirm_goods_receipt(gr_id)
+    gr = await service.confirm_goods_receipt(gr_id, data, actor_id=str(user_id))
     return GRResponse.model_validate(gr)
+
+
+@router.get(
+    "/goods-receipts/{gr_id}/readiness/",
+    response_model=GRReadinessResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def goods_receipt_readiness(
+    gr_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ProcurementService = Depends(_get_service),
+) -> GRReadinessResponse:
+    """The certificate checks, the routes on offer and the inspection due, without confirming."""
+    from app.modules.procurement.receiving import (
+        ReceivingService,
+        inspection_lines,
+        readiness_lines,
+        report_to_dict,
+    )
+
+    gr = await service.get_goods_receipt(gr_id)
+    po = await service.get_po(gr.po_id)
+    await verify_project_access(po.project_id, str(user_id), session)
+    receiving = ReceivingService(session)
+    report = await receiving.validate_receipt(gr, po)
+    routes = await receiving.goods_receipt_routes(po.project_id)
+    lines = inspection_lines(gr, po)
+    return GRReadinessResponse(
+        gr_id=gr.id,
+        status=gr.status,
+        validation=report_to_dict(report),
+        can_confirm=gr.status == "draft" and not report.has_errors,
+        approval_routes=[GRRouteOption(id=r.id, name=r.name) for r in routes],
+        inspection_due=bool(lines),
+        inspection_lines=lines,
+        lines=[GRReadinessLine.model_validate(line, from_attributes=True) for line in readiness_lines(gr, po)],
+    )
+
+
+@router.post(
+    "/goods-receipts/{gr_id}/certificates/",
+    response_model=GRResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("procurement.create"))],
+)
+async def add_goods_receipt_certificate(
+    gr_id: uuid.UUID,
+    data: GRCertificateAdd,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ProcurementService = Depends(_get_service),
+) -> GRResponse:
+    """Attach a material certificate to one line of a draft goods receipt."""
+    from app.modules.procurement.receiving import ReceivingService
+
+    gr = await service.get_goods_receipt(gr_id)
+    po = await service.get_po(gr.po_id)
+    await verify_project_access(po.project_id, str(user_id), session)
+    await ReceivingService(session).add_certificate(gr, po, data.gr_item_id, data, actor_id=str(user_id))
+    return GRResponse.model_validate(await service.get_goods_receipt(gr_id))
+
+
+@router.delete(
+    "/goods-receipts/{gr_id}/certificates/{certificate_id}/",
+    response_model=GRResponse,
+    dependencies=[Depends(RequirePermission("procurement.create"))],
+)
+async def delete_goods_receipt_certificate(
+    gr_id: uuid.UUID,
+    certificate_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ProcurementService = Depends(_get_service),
+) -> GRResponse:
+    """Remove a certificate from a draft goods receipt."""
+    from app.modules.procurement.receiving import ReceivingService
+
+    gr = await service.get_goods_receipt(gr_id)
+    po = await service.get_po(gr.po_id)
+    await verify_project_access(po.project_id, str(user_id), session)
+    await ReceivingService(session).delete_certificate(gr, certificate_id)
+    return GRResponse.model_validate(await service.get_goods_receipt(gr_id))
+
+
+@router.get(
+    "/certificate-types/",
+    response_model=list[CertificateTypeResponse],
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def list_certificate_types() -> list[CertificateTypeResponse]:
+    """The material certificate types an order line may require."""
+    from app.modules.procurement.certificates import certificate_types
+
+    return [CertificateTypeResponse(**t.as_dict()) for t in certificate_types()]
 
 
 # ── Supplier scorecard (fixed path - MUST be before /{po_id}) ───────────────
@@ -1053,3 +1167,42 @@ async def committed_by_position(
         offset=offset,
         limit=limit,
     )
+
+
+@router.patch(
+    "/{po_id}/items/{item_id}/requirements/",
+    response_model=POResponse,
+    dependencies=[Depends(RequirePermission("procurement.update"))],
+)
+async def update_po_item_requirements(
+    po_id: uuid.UUID,
+    item_id: uuid.UUID,
+    data: POItemRequirementsUpdate,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ProcurementService = Depends(_get_service),
+) -> POResponse:
+    """Set the certificate and inspection a delivery of this line must arrive with."""
+    po = await service.get_po(po_id)
+    await verify_project_access(po.project_id, str(user_id), session)
+    updated = await service.update_po_item_requirements(po_id, item_id, data)
+    return await _po_response(session, updated)
+
+
+@router.get(
+    "/{po_id}/payment-release/",
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def po_payment_release(
+    po_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ProcurementService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Read-only: would a payable invoice on this order pass the payment release rules now."""
+    from app.modules.procurement.receiving import ReceivingService, report_to_dict
+
+    po = await service.get_po(po_id)
+    await verify_project_access(po.project_id, str(user_id), session)
+    report = await ReceivingService(session).payment_release_report(po)
+    return {"po_id": str(po.id), "releasable": not report.has_errors, "validation": report_to_dict(report)}

@@ -308,6 +308,43 @@ async def _deliverable(session: Any, project_id: uuid.UUID, link_id: str) -> Evi
     return EvidenceFact("requirement_deliverable", str(deliverable.id), outcome)
 
 
+async def _goods_receipt_row(session: Any, project_id: uuid.UUID, link_id: str) -> tuple[Any, str] | None:
+    """A goods receipt of this project with its order number, else ``None``.
+
+    The receipt carries no project of its own; it belongs to the project of its
+    purchase order, so the order is what is checked.
+    """
+    from app.modules.procurement.models import GoodsReceipt, PurchaseOrder
+
+    rid = _uuid(link_id)
+    if rid is None:
+        return None
+    row = (
+        await session.execute(
+            select(GoodsReceipt, PurchaseOrder.project_id, PurchaseOrder.po_number)
+            .join(PurchaseOrder, PurchaseOrder.id == GoodsReceipt.po_id)
+            .where(GoodsReceipt.id == rid)
+        )
+    ).first()
+    if row is None or row[1] != project_id:
+        return None
+    return row[0], row[2]
+
+
+async def _goods_receipt(session: Any, project_id: uuid.UUID, link_id: str) -> EvidenceFact | None:
+    """A confirmed delivery passes; one with rejected quantity fails; a draft is pending."""
+    found = await _goods_receipt_row(session, project_id, link_id)
+    if found is None:
+        return None
+    gr, _po_number = found
+    if gr.status != "confirmed":
+        return EvidenceFact("goods_receipt", str(gr.id), "pending")
+    # No quantity: a receipt counts in its order's units, which a placed
+    # quantity summed across proofs cannot be mixed with.
+    rejected = any((to_decimal(item.quantity_rejected) or Decimal("0")) > 0 for item in gr.items or [])
+    return EvidenceFact("goods_receipt", str(gr.id), "fail" if rejected else "pass")
+
+
 RESOLVERS: dict[str, Resolver] = {
     "cc_test_result": _test_result,
     "cc_material_record": _material,
@@ -325,6 +362,7 @@ RESOLVERS: dict[str, Resolver] = {
     "diary_photo": _diary_photo,
     "diary_reality_capture": _reality_capture,
     "requirement_deliverable": _deliverable,
+    "goods_receipt": _goods_receipt,
 }
 assert set(RESOLVERS) == set(LINK_KINDS), "every link kind needs a resolver"
 
@@ -385,6 +423,7 @@ async def candidates(
     """Rows of ``link_kind`` in this project a user may link: ``[{id, label, outcome}]``."""
     from app.modules.closeout.models import CloseoutPackage, CloseoutSlot
     from app.modules.commissioning.models import CxChecklist, CxSystem
+    from app.modules.procurement.models import GoodsReceipt, PurchaseOrder
     from app.modules.requirements.models import Requirement, RequirementDeliverable, RequirementSet
 
     limit = max(1, min(limit, 200))
@@ -421,6 +460,20 @@ async def candidates(
             .limit(500)
         )
         rows = [(str(i), f"{d} {e}") for i, d, e in (await session.execute(stmt)).all()]
+    elif link_kind == "goods_receipt":
+        stmt = (
+            select(
+                GoodsReceipt.id, PurchaseOrder.po_number, GoodsReceipt.delivery_note_number, GoodsReceipt.receipt_date
+            )
+            .join(PurchaseOrder, PurchaseOrder.id == GoodsReceipt.po_id)
+            .where(PurchaseOrder.project_id == project_id)
+            .order_by(GoodsReceipt.created_at.desc())
+            .limit(500)
+        )
+        rows = [
+            (str(i), " ".join(str(v) for v in (po, note, day) if v))
+            for i, po, note, day in (await session.execute(stmt)).all()
+        ]
     else:
         return []
     needle = q.strip().lower()

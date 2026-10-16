@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "The needed-by date {date} is already past (today is {today})",
       "suggestion": "Set the date the material is actually needed on site"
+    },
+    "receipt_certificate_present": {
+      "fail": "Line {line} was ordered with a {required}, but the delivery carries {delivered}",
+      "suggestion": "Attach the certificate the order asks for, or reject the line until the supplier sends it"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Certificate {certificate} on line {line} is for batch {certificate_batch}, but batch {batch} was delivered",
+      "suggestion": "Check the batch or heat number on the material and ask the supplier for the certificate of the batch that arrived"
+    },
+    "receipt_route_approved": {
+      "fail": "Goods receipt {receipt} on order {po} is routed for approval and not approved yet",
+      "suggestion": "Wait for the approval route of the goods receipt to finish before releasing the payment"
+    },
+    "receipt_inspection_closed": {
+      "fail": "The incoming inspection of goods receipt {receipt} on order {po} is not passed yet",
+      "suggestion": "Complete the inspection, or record why the material may be paid before it"
     }
   },
   "subcontract": {

@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Vajaduse kuupäev {date} on juba möödas (täna on {today})",
       "suggestion": "Määrake kuupäev, mil materjali objektil tegelikult vaja on"
+    },
+    "receipt_certificate_present": {
+      "fail": "Rida {line} telliti koos {required}, kuid tarnes on {delivered}",
+      "suggestion": "Lisage tellimuses nõutud sertifikaat või lükake rida tagasi, kuni tarnija selle saadab"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Rea {line} sertifikaat {certificate} kehtib partii {certificate_batch} kohta, kuid tarniti partii {batch}",
+      "suggestion": "Kontrollige materjalil partii- või sulatinumbrit ja nõudke tarnijalt saabunud partii sertifikaati"
+    },
+    "receipt_route_approved": {
+      "fail": "Kaubasaadetise vastuvõtt {receipt} tellimusele {po} on kinnitusringis ja pole veel kinnitatud",
+      "suggestion": "Oodake, kuni vastuvõtu kinnitusring on lõppenud, enne makse vabastamist"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Kaubasaadetise vastuvõtu {receipt} sisseveakontroll tellimusel {po} pole veel läbitud",
+      "suggestion": "Viige kontroll lõpule või märkige, miks võib materjali eest enne kontrolli maksta"
     }
   },
   "subcontract": {

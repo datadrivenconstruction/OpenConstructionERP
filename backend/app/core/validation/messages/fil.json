@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Lampas na ang petsang kailangan {date} (ngayon ay {today})",
       "suggestion": "Itakda ang petsa kung kailan talagang kailangan ang materyales sa site"
+    },
+    "receipt_certificate_present": {
+      "fail": "Ang linya {line} ay in-order na may {required}, pero ang delivery ay may {delivered}",
+      "suggestion": "Ikabit ang certificate na hinihingi ng order, o tanggihan ang linya hanggang maipadala ito ng supplier"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Ang certificate {certificate} sa linya {line} ay para sa batch {certificate_batch}, pero batch {batch} ang dumating",
+      "suggestion": "Tingnan ang batch o heat number sa materyales at humingi sa supplier ng certificate ng batch na dumating"
+    },
+    "receipt_route_approved": {
+      "fail": "Ang goods receipt {receipt} sa order {po} ay nasa approval route at hindi pa naaprubahan",
+      "suggestion": "Hintayin na matapos ang approval route ng goods receipt bago i-release ang bayad"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Hindi pa pumapasa ang incoming inspection ng goods receipt {receipt} sa order {po}",
+      "suggestion": "Tapusin ang inspection, o itala kung bakit maaari nang bayaran ang materyales bago ito"
     }
   },
   "subcontract": {

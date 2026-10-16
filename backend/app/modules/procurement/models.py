@@ -7,6 +7,7 @@ Tables:
     oe_procurement_po_item       - purchase order line items
     oe_procurement_goods_receipt - goods receipts against POs
     oe_procurement_gr_item       - goods receipt line items
+    oe_procurement_gr_cert       - material certificates (e.g. EN 10204) on a receipt line
     oe_procurement_requisition   - material requisitions (R7 FSM)
     oe_procurement_req_item      - requisition line items
     oe_procurement_req_item_source - BOQ provenance of a requisition line
@@ -197,6 +198,21 @@ class PurchaseOrderItem(Base):
     # Additive nullable link to the cost line this PO item commits against.
     cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # ── Receiving requirements (BF-01) ───────────────────────────────────
+    # What the delivery of this line must arrive with. The certificate type is
+    # agreed with the supplier when the material is ordered (EN 10204 says the
+    # same: the document type is part of the order), so it lives on the order
+    # line, not on a catalogue item. A code from the certificate-type catalogue
+    # (``procurement/catalogues``); null means no certificate is required.
+    required_certificate_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # True when the site must inspect this material on arrival: confirming its
+    # receipt then offers a pending incoming inspection.
+    requires_inspection: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="false",
+    )
 
     # Relationship
     purchase_order: Mapped["PurchaseOrder"] = relationship(back_populates="items")
@@ -260,6 +276,18 @@ class GoodsReceipt(Base):
     delivery_note_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Who put the receipt on file: ``site`` (recorded by site staff) or
+    # ``supplier_portal`` (a delivery the supplier submitted through the portal).
+    # Either way it enters as a draft that site staff confirm.
+    source: Mapped[str] = mapped_column(String(30), nullable=False, default="site", server_default="site")
+    # The portal account that submitted it, for a supplier-submitted delivery.
+    portal_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Follow-ups the person confirming the receipt chose to start: the approval
+    # instance (``approval_routes``, target kind ``goods_receipt``) and the
+    # incoming inspection (``inspections``). Plain ids, no foreign keys: both
+    # live in optional modules.
+    approval_instance_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    inspection_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -309,9 +337,67 @@ class GoodsReceiptItem(Base):
 
     # Relationship
     goods_receipt: Mapped["GoodsReceipt"] = relationship(back_populates="items")
+    # The inspection documents that came with the material on this line. Read
+    # with the receipt every time, which is why they load eagerly.
+    certificates: Mapped[list["GoodsReceiptCertificate"]] = relationship(
+        back_populates="gr_item",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+        order_by="GoodsReceiptCertificate.created_at",
+    )
 
     def __repr__(self) -> str:
         return f"<GoodsReceiptItem recv={self.quantity_received} rej={self.quantity_rejected}>"
+
+
+class GoodsReceiptCertificate(Base):
+    """An inspection document delivered with the material on one receipt line.
+
+    Typically an EN 10204 certificate (2.1, 2.2, 3.1, 3.2), but the type is a
+    code from the certificate-type catalogue, which is data: a project or a
+    country pack can add its own types without a schema change. The batch or
+    heat number is what ties the document to the physical material, so the
+    receipt validation compares it with the batch recorded on the line.
+    """
+
+    __tablename__ = "oe_procurement_gr_cert"
+
+    receipt_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey(
+            "oe_procurement_goods_receipt.id",
+            ondelete="CASCADE",
+            name="fk_oe_procurement_gr_cert_receipt_id",
+        ),
+        nullable=False,
+        index=True,
+    )
+    gr_item_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey(
+            "oe_procurement_gr_item.id",
+            ondelete="CASCADE",
+            name="fk_oe_procurement_gr_cert_gr_item_id",
+        ),
+        nullable=False,
+        index=True,
+    )
+    certificate_type: Mapped[str] = mapped_column(String(40), nullable=False)
+    certificate_number: Mapped[str] = mapped_column(String(100), nullable=False, default="")
+    issuer: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    issue_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # The scanned or digital certificate in the documents module, when attached.
+    document_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Batch, lot or heat number printed on the certificate.
+    batch_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # ``site`` or ``supplier_portal``, the same vocabulary as the receipt.
+    source: Mapped[str] = mapped_column(String(30), nullable=False, default="site", server_default="site")
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    gr_item: Mapped["GoodsReceiptItem"] = relationship(back_populates="certificates", lazy="raise_on_sql")
+
+    def __repr__(self) -> str:
+        return f"<GoodsReceiptCertificate {self.certificate_type} {self.certificate_number}>"
 
 
 # ── Material Requisition (R7 FSM) ─────────────────────────────────────────────

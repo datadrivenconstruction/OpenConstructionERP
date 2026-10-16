@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Der Bedarfstermin {date} liegt bereits in der Vergangenheit (heute ist {today})",
       "suggestion": "Setzen Sie den Termin, an dem das Material tatsächlich auf der Baustelle gebraucht wird"
+    },
+    "receipt_certificate_present": {
+      "fail": "Position {line} wurde mit {required} bestellt, die Lieferung enthält aber {delivered}",
+      "suggestion": "Fügen Sie das in der Bestellung geforderte Zeugnis bei oder weisen Sie die Position zurück, bis der Lieferant es nachreicht"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Zeugnis {certificate} zu Position {line} gilt für Charge {certificate_batch}, geliefert wurde aber Charge {batch}",
+      "suggestion": "Prüfen Sie die Chargen- oder Schmelzennummer am Material und fordern Sie beim Lieferanten das Zeugnis der gelieferten Charge an"
+    },
+    "receipt_route_approved": {
+      "fail": "Wareneingang {receipt} zur Bestellung {po} ist in der Freigabe und noch nicht genehmigt",
+      "suggestion": "Warten Sie den Abschluss der Freigabe des Wareneingangs ab, bevor Sie die Zahlung freigeben"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Die Eingangsprüfung zu Wareneingang {receipt} der Bestellung {po} ist noch nicht bestanden",
+      "suggestion": "Schließen Sie die Prüfung ab oder halten Sie fest, warum das Material vorher bezahlt werden darf"
     }
   },
   "subcontract": {

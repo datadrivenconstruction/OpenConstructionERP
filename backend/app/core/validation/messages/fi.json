@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Tarvepäivä {date} on jo mennyt (tänään on {today})",
       "suggestion": "Aseta päivä, jolloin materiaalia todella tarvitaan työmaalla"
+    },
+    "receipt_certificate_present": {
+      "fail": "Rivi {line} tilattiin ehdolla {required}, mutta toimitus sisältää {delivered}",
+      "suggestion": "Liitä tilauksen vaatima todistus tai hylkää rivi, kunnes toimittaja lähettää sen"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Rivin {line} todistus {certificate} koskee erää {certificate_batch}, mutta toimitettiin erä {batch}",
+      "suggestion": "Tarkista materiaalista erä- tai valunumero ja pyydä toimittajalta saapuneen erän todistus"
+    },
+    "receipt_route_approved": {
+      "fail": "Tavaran vastaanottokirjaus {receipt} tilaukselle {po} on hyväksymiskierrossa, eikä sitä ole vielä hyväksytty",
+      "suggestion": "Odota vastaanottokirjauksen hyväksymiskierron päättymistä ennen maksun vapauttamista"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Tilauksen {po} tavaran vastaanottokirjauksen {receipt} saapumistarkastus ei ole vielä läpäisty",
+      "suggestion": "Suorita tarkastus loppuun tai kirjaa, miksi materiaali voidaan maksaa ennen sitä"
     }
   },
   "subcontract": {

@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Tanggal dibutuhkan {date} sudah lewat (hari ini {today})",
       "suggestion": "Tetapkan tanggal material benar-benar dibutuhkan di lokasi proyek"
+    },
+    "receipt_certificate_present": {
+      "fail": "Baris {line} dipesan dengan {required}, tetapi pengiriman membawa {delivered}",
+      "suggestion": "Lampirkan sertifikat yang diminta pesanan, atau tolak baris ini sampai pemasok mengirimkannya"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Sertifikat {certificate} pada baris {line} untuk batch {certificate_batch}, tetapi yang diterima batch {batch}",
+      "suggestion": "Periksa nomor batch atau heat pada material, lalu minta sertifikat batch yang diterima kepada pemasok"
+    },
+    "receipt_route_approved": {
+      "fail": "Bukti penerimaan barang {receipt} untuk pesanan {po} masih dalam alur persetujuan dan belum disetujui",
+      "suggestion": "Tunggu alur persetujuan bukti penerimaan barang selesai sebelum mencairkan pembayaran"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Inspeksi masuk untuk bukti penerimaan barang {receipt} pada pesanan {po} belum lulus",
+      "suggestion": "Selesaikan inspeksi, atau catat alasan material boleh dibayar sebelum inspeksi selesai"
     }
   },
   "subcontract": {

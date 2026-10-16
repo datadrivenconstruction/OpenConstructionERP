@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "تاريخ الحاجة {date} مضى بالفعل (اليوم هو {today})",
       "suggestion": "حدد التاريخ الذي تحتاج فيه المادة فعلياً في الموقع"
+    },
+    "receipt_certificate_present": {
+      "fail": "تم طلب البند {line} مع {required}، لكن التسليم يتضمن {delivered}",
+      "suggestion": "أرفق الشهادة التي يطلبها أمر الشراء، أو ارفض البند حتى يرسل المورد الشهادة"
+    },
+    "receipt_certificate_batch": {
+      "fail": "الشهادة {certificate} الخاصة بالبند {line} تخص الدفعة {certificate_batch}، لكن الدفعة {batch} هي التي تم تسليمها",
+      "suggestion": "تحقق من رقم الدفعة أو رقم الصهر على المادة، واطلب من المورد شهادة الدفعة التي وصلت فعلاً"
+    },
+    "receipt_route_approved": {
+      "fail": "محضر استلام البضاعة {receipt} على أمر الشراء {po} في مسار الاعتماد ولم يُعتمد بعد",
+      "suggestion": "انتظر حتى يكتمل مسار اعتماد محضر الاستلام قبل صرف الدفعة"
+    },
+    "receipt_inspection_closed": {
+      "fail": "فحص الاستلام الوارد لمحضر الاستلام {receipt} على أمر الشراء {po} لم يجتز بعد",
+      "suggestion": "أكمل الفحص، أو سجّل سبب السماح بدفع ثمن المادة قبل ذلك"
     }
   },
   "subcontract": {

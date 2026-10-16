@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "İhtiyaç tarihi {date} geçmişte kaldı (bugün {today})",
       "suggestion": "Malzemenin şantiyede gerçekten gerektiği tarihi girin"
+    },
+    "receipt_certificate_present": {
+      "fail": "{line} numaralı kalem {required} ile sipariş edildi, ancak teslimat {delivered} içeriyor",
+      "suggestion": "Siparişin istediği sertifikayı ekleyin veya tedarikçi göndermeden kalemi reddedin"
+    },
+    "receipt_certificate_batch": {
+      "fail": "{line} kalemindeki {certificate} sertifikası {certificate_batch} partisine ait, ancak teslim alınan parti {batch}",
+      "suggestion": "Malzemedeki parti veya ergitme numarasını kontrol edin ve tedarikçiden gelen partinin sertifikasını isteyin"
+    },
+    "receipt_route_approved": {
+      "fail": "{po} siparişine ait {receipt} mal kabul kaydı onay akışında ve henüz onaylanmadı",
+      "suggestion": "Ödemeyi serbest bırakmadan önce mal kabul kaydının onay akışının tamamlanmasını bekleyin"
+    },
+    "receipt_inspection_closed": {
+      "fail": "{po} siparişine ait {receipt} mal kabul kaydının giriş kontrolü henüz geçilmedi",
+      "suggestion": "Kontrolü tamamlayın veya malzemenin kontrolden önce neden ödenebileceğini kaydedin"
     }
   },
   "subcontract": {

@@ -63,6 +63,18 @@ def _validate_tax_rate_pct(v: str | None) -> str | None:
     return v
 
 
+def _validate_certificate_type(v: str | None) -> str | None:
+    """A certificate type code from the catalogue, or unset. Empty clears it."""
+    if v is None or not str(v).strip():
+        return None
+    from app.modules.procurement.certificates import is_known_type
+
+    code = str(v).strip()
+    if not is_known_type(code):
+        raise ValueError(f"Unknown certificate type: {code!r}")
+    return code
+
+
 # ── Purchase Order ───────────────────────────────────────────────────────────
 
 
@@ -95,11 +107,20 @@ class POItemCreate(BaseModel):
         description="Cost line to commit against. Takes precedence over boq_position_id.",
     )
     sort_order: int = Field(default=0, ge=0)
+    # Receiving requirements: the certificate the delivery must carry (a code
+    # from the certificate-type catalogue) and whether the site inspects it.
+    required_certificate_type: str | None = Field(default=None, max_length=40)
+    requires_inspection: bool = False
 
     @field_validator("quantity", "unit_rate", "amount")
     @classmethod
     def _check_non_negative_decimal(cls, v: str) -> str:
         return _validate_non_negative_decimal(v)
+
+    @field_validator("required_certificate_type")
+    @classmethod
+    def _check_certificate_type(cls, v: str | None) -> str | None:
+        return _validate_certificate_type(v)
 
 
 class POCreate(BaseModel):
@@ -274,8 +295,29 @@ class POItemResponse(BaseModel):
     # bill, and for one whose cost line was generated from no position.
     boq_position_id: UUID | None = None
     sort_order: int = 0
+    required_certificate_type: str | None = None
+    requires_inspection: bool = False
     created_at: datetime
     updated_at: datetime
+
+
+class POItemRequirementsUpdate(BaseModel):
+    """Change what the delivery of one order line must arrive with.
+
+    A quality requirement, not a commitment figure: it moves no money, so it
+    may be corrected after approval while the line is still being delivered.
+    Fields left out stay as they are.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    required_certificate_type: str | None = Field(default=None, max_length=40)
+    requires_inspection: bool | None = None
+
+    @field_validator("required_certificate_type")
+    @classmethod
+    def _check_certificate_type(cls, v: str | None) -> str | None:
+        return _validate_certificate_type(v)
 
 
 class POCancelRequest(BaseModel):
@@ -477,6 +519,64 @@ class POListResponse(BaseModel):
 # ── Goods Receipt ────────────────────────────────────────────────────────────
 
 
+class GRCertificateCreate(BaseModel):
+    """A material certificate delivered with one receipt line."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    certificate_type: str = Field(..., min_length=1, max_length=40)
+    certificate_number: str = Field(default="", max_length=100)
+    issuer: str | None = Field(default=None, max_length=255)
+    issue_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    document_id: UUID | None = None
+    batch_number: str | None = Field(default=None, max_length=100)
+
+    @field_validator("certificate_type")
+    @classmethod
+    def _check_certificate_type(cls, v: str) -> str:
+        code = _validate_certificate_type(v)
+        if code is None:
+            raise ValueError("certificate_type is required")
+        return code
+
+
+class GRCertificateAdd(GRCertificateCreate):
+    """Add a certificate to one line of a draft goods receipt."""
+
+    gr_item_id: UUID
+
+
+class GRCertificateResponse(BaseModel):
+    """A material certificate as stored on a receipt line."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    receipt_id: UUID
+    gr_item_id: UUID
+    certificate_type: str
+    certificate_number: str = ""
+    issuer: str | None = None
+    issue_date: str | None = None
+    document_id: UUID | None = None
+    batch_number: str | None = None
+    source: str = "site"
+    created_at: datetime
+
+
+class CertificateTypeResponse(BaseModel):
+    """One entry of the certificate-type catalogue."""
+
+    code: str
+    family: str
+    rank: int
+    label: str
+    standard: str = ""
+    designation: str = ""
+    specific_inspection: bool = False
+    validated_by: str = ""
+
+
 class GRItemCreate(BaseModel):
     """Create a goods receipt line item."""
 
@@ -489,6 +589,7 @@ class GRItemCreate(BaseModel):
     rejection_reason: str | None = None
     batch_lot: str | None = Field(default=None, max_length=100)
     serial_numbers: list[str] | None = Field(default=None, max_length=10000)
+    certificates: list[GRCertificateCreate] = Field(default_factory=list, max_length=50)
 
     @field_validator("quantity_ordered", "quantity_received", "quantity_rejected")
     @classmethod
@@ -543,6 +644,7 @@ class GRItemResponse(BaseModel):
     rejection_reason: str | None = None
     batch_lot: str | None = None
     serial_numbers: list[str] | None = None
+    certificates: list[GRCertificateResponse] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -561,6 +663,12 @@ class GRResponse(BaseModel):
     notes: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     items: list[GRItemResponse] = Field(default_factory=list)
+    # ``site`` or ``supplier_portal``; the portal account behind a supplier submission.
+    source: str = "site"
+    portal_user_id: UUID | None = None
+    # Follow-ups started when the receipt was confirmed.
+    approval_instance_id: UUID | None = None
+    inspection_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -613,6 +721,53 @@ class GRResponse(BaseModel):
             if self.ordered_qty is None:
                 self.ordered_qty = format(ordered, "f")
         return self
+
+
+class GRConfirmRequest(BaseModel):
+    """What the person confirming a receipt chooses to start with it.
+
+    Nothing starts on its own: the confirm dialog shows the configured route and
+    whether an inspection is due, and the person confirming ticks each box.
+    ``approval_route_id`` picks among several routes; with exactly one route
+    configured for goods receipts on the project it may be left out.
+    """
+
+    start_approval_route: bool = False
+    approval_route_id: UUID | None = None
+    create_inspection: bool = False
+
+
+class GRRouteOption(BaseModel):
+    """An approval route the project has configured for goods receipts."""
+
+    id: UUID
+    name: str
+
+
+class GRReadinessLine(BaseModel):
+    """One delivered line as the confirm dialog shows it: what it needs and what it brought."""
+
+    gr_item_id: UUID
+    label: str
+    unit: str = ""
+    quantity_received: str = "0"
+    batch_lot: str | None = None
+    required_certificate_type: str | None = None
+    requires_inspection: bool = False
+    certificates: list[GRCertificateResponse] = Field(default_factory=list)
+
+
+class GRReadinessResponse(BaseModel):
+    """What confirming a draft receipt would run into, read without changing it."""
+
+    gr_id: UUID
+    status: str
+    validation: dict[str, Any]
+    can_confirm: bool
+    approval_routes: list[GRRouteOption] = Field(default_factory=list)
+    inspection_due: bool = False
+    inspection_lines: list[str] = Field(default_factory=list)
+    lines: list[GRReadinessLine] = Field(default_factory=list)
 
 
 class GRListResponse(BaseModel):

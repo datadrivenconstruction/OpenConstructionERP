@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "需求日期 {date} 已经过去(今天是 {today})",
       "suggestion": "请设置材料在现场实际需要的日期"
+    },
+    "receipt_certificate_present": {
+      "fail": "第{line}行订购的是{required}，但送货内容为{delivered}",
+      "suggestion": "请附上订单要求的证书；若供应商尚未提供，请先拒收该行"
+    },
+    "receipt_certificate_batch": {
+      "fail": "第{line}行的证书{certificate}对应批次{certificate_batch}，但实际到货批次为{batch}",
+      "suggestion": "请核对材料上的批号或炉号，并向供应商索取到货批次的证书"
+    },
+    "receipt_route_approved": {
+      "fail": "订单{po}的收货单{receipt}正在审批流程中，尚未批准",
+      "suggestion": "请等收货单审批流程完成后再放行付款"
+    },
+    "receipt_inspection_closed": {
+      "fail": "订单{po}的收货单{receipt}的入库检验尚未通过",
+      "suggestion": "请完成检验，或记录为何该材料可以在检验前付款"
     }
   },
   "subcontract": {

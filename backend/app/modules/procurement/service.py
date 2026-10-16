@@ -10,6 +10,8 @@ Event publishing (slice E):
     procurement.po.issued       - PO transitioned to 'issued'
     procurement.gr.created      - new goods receipt inserted
     procurement.gr.confirmed    - goods receipt confirmed (may flip PO status)
+    procurement.gr.approval_started     - confirming started the receipt's approval route
+    procurement.gr.inspection_requested - confirming raised an incoming inspection
 """
 
 import logging
@@ -51,9 +53,11 @@ from app.modules.procurement.repository import (
     PurchaseOrderRepository,
 )
 from app.modules.procurement.schemas import (
+    GRConfirmRequest,
     GRCreate,
     POCreate,
     POItemCreate,
+    POItemRequirementsUpdate,
     POUpdate,
     ProcurementStatsResponse,
     ProjectDeliveryPerformanceResponse,
@@ -968,6 +972,8 @@ class ProcurementService:
                 cost_category=item_data.cost_category,
                 cost_line_id=item_cost_line_ids[idx],
                 sort_order=item_data.sort_order if item_data.sort_order else idx,
+                required_certificate_type=item_data.required_certificate_type,
+                requires_inspection=item_data.requires_inspection,
             )
             await self.po_item_repo.create(item)
 
@@ -1289,6 +1295,8 @@ class ProcurementService:
                     cost_category=item_data.cost_category,
                     cost_line_id=item_cost_line_ids[idx],
                     sort_order=item_data.sort_order if item_data.sort_order else idx,
+                    required_certificate_type=item_data.required_certificate_type,
+                    requires_inspection=item_data.requires_inspection,
                 )
                 await self.po_item_repo.create(item)
 
@@ -2376,6 +2384,9 @@ class ProcurementService:
         self,
         data: GRCreate,
         user_id: str | None = None,
+        *,
+        source: str = "site",
+        portal_user_id: uuid.UUID | None = None,
     ) -> GoodsReceipt:
         """Create a goods receipt against a PO.
 
@@ -2445,6 +2456,17 @@ class ProcurementService:
                         ),
                     )
 
+        # Certificates name documents by id; each must be a document of this
+        # order's project (a supplier: one it uploaded itself).
+        from app.modules.procurement.receiving import ReceivingService
+
+        receiving = ReceivingService(self.session)
+        await receiving.check_documents(
+            po.project_id,
+            [c.document_id for it in data.items for c in it.certificates if c.document_id is not None],
+            uploaded_by=str(portal_user_id) if portal_user_id is not None else None,
+        )
+
         gr = GoodsReceipt(
             po_id=data.po_id,
             receipt_date=data.receipt_date,
@@ -2452,6 +2474,8 @@ class ProcurementService:
             delivery_note_number=data.delivery_note_number,
             status=data.status,
             notes=data.notes,
+            source=source,
+            portal_user_id=portal_user_id,
             metadata_=data.metadata,
         )
         gr = await self.gr_repo.create(gr)
@@ -2469,6 +2493,18 @@ class ProcurementService:
                 serial_numbers=item_data.serial_numbers,
             )
             await self.gr_item_repo.create(item)
+            for cert_data in item_data.certificates:
+                self.session.add(
+                    receiving.certificate_row(
+                        gr.id,
+                        item.id,
+                        cert_data,
+                        source=source,
+                        created_by=user_id or (str(portal_user_id) if portal_user_id else None),
+                    )
+                )
+        if any(it.certificates for it in data.items):
+            await self.session.flush()
 
         gr_id = gr.id
         await _safe_publish(
@@ -2479,6 +2515,7 @@ class ProcurementService:
                 "project_id": str(po.project_id),
                 "status": gr.status,
                 "item_count": len(data.items),
+                "source": source,
             },
         )
 
@@ -2534,13 +2571,29 @@ class ProcurementService:
             offset=offset,
         )
 
-    async def confirm_goods_receipt(self, gr_id: uuid.UUID) -> GoodsReceipt:
+    async def confirm_goods_receipt(
+        self,
+        gr_id: uuid.UUID,
+        options: GRConfirmRequest | None = None,
+        *,
+        actor_id: str | None = None,
+    ) -> GoodsReceipt:
         """Confirm a goods receipt and update the PO status accordingly.
 
         After confirmation, checks whether ALL PO items are fully received:
         - If fully received -> PO status = 'completed'
         - If partially received -> PO status = 'partially_received'
+
+        Before the flip the ``goods_receipt`` rules run: a certificate the order
+        asks for and the delivery lacks refuses confirmation (422). ``options``
+        carries what the person confirming chose to start with it, the
+        project's approval route for goods receipts and a pending incoming
+        inspection; both are written in this same transaction.
         """
+        from app.modules.procurement.receiving import ReceivingService
+
+        options = options or GRConfirmRequest()
+        receiving = ReceivingService(self.session)
         gr = await self.get_goods_receipt(gr_id)
         if gr.status != "draft":
             raise HTTPException(
@@ -2587,6 +2640,13 @@ class ProcurementService:
                         f"({ordered}) for PO item '{po_item.description}'"
                     ),
                 )
+
+        # Certificate gate (BF-01), then the route choice: both are refused
+        # before anything is flipped.
+        await receiving.validate_receipt_or_raise(gr, po)
+        route = await receiving.resolve_route(options, po.project_id)
+        # Taken now: confirm_if_draft() below expires every instance, the route too.
+        route_id = route.id if route is not None else None
 
         # Flip draft -> confirmed atomically. The conditional UPDATE (WHERE
         # status='draft') is the idempotency guard against a double-confirm
@@ -2643,6 +2703,24 @@ class ProcurementService:
                 detail="Goods receipt not found",
             )
 
+        # Follow-ups the person confirming chose. Same transaction: a failure
+        # here rolls the confirmation back with it.
+        if route_id is not None or options.create_inspection:
+            started = await receiving.start_follow_ups(
+                updated,
+                po,
+                route_id=route_id,
+                create_inspection=options.create_inspection,
+                actor_id=actor_id,
+            )
+            changes = {k: v for k, v in started.items() if v is not None}
+            if changes:
+                await self.gr_repo.update(gr_id, **changes)
+            po = await self.get_po(po_id)
+            refreshed = await self.gr_repo.get(gr_id)
+            if refreshed is not None:
+                updated = refreshed
+
         # Compute the value of this receipt as Σ(quantity_received × po_item.unit_rate).
         # Finance subscribers need this to flip the matching slice of
         # ProjectBudget.committed → actual on each GR.
@@ -2674,6 +2752,37 @@ class ProcurementService:
 
         logger.info("GR confirmed: %s", gr_id)
         return updated
+
+    async def update_po_item_requirements(
+        self,
+        po_id: uuid.UUID,
+        item_id: uuid.UUID,
+        data: POItemRequirementsUpdate,
+    ) -> PurchaseOrder:
+        """Set what the delivery of one order line must arrive with.
+
+        Allowed in every status but ``completed`` and ``cancelled``: the
+        requirement is a quality term, not a figure the approval fixed, and a
+        site often learns which certificate a material needs only after the
+        order went out. Receipts already confirmed are not re-judged.
+        """
+        po = await self.get_po(po_id)
+        if po.status in ("completed", "cancelled"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Receiving requirements cannot change on a purchase order in status '{po.status}'.",
+            )
+        item = next((it for it in po.items or [] if it.id == item_id), None)
+        if item is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Purchase order line not found")
+        fields = data.model_dump(exclude_unset=True)
+        if "requires_inspection" in fields and fields["requires_inspection"] is None:
+            fields.pop("requires_inspection")
+        if fields:
+            from app.core.orm_write import apply_update
+
+            await apply_update(self.session, PurchaseOrderItem, item_id, **fields)
+        return await self.get_po(po_id)
 
     # ── Stats ───────────────────────────────────────────────────────────────
 

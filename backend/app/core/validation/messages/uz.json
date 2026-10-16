@@ -636,6 +636,22 @@
     "requisition_needed_by_not_past": {
       "fail": "Kerak bo'lish sanasi {date} allaqachon o'tib ketgan (bugun {today})",
       "suggestion": "Material qurilish maydonida haqiqatan kerak bo'ladigan sanani belgilang"
+    },
+    "receipt_certificate_present": {
+      "fail": "{line} pozitsiyasi {required} bilan buyurtma qilingan, ammo yetkazib berishda {delivered} bor",
+      "suggestion": "Buyurtmada talab qilingan sertifikatni biriktiring yoki yetkazib beruvchi yubormaguncha pozitsiyani rad eting"
+    },
+    "receipt_certificate_batch": {
+      "fail": "{line} pozitsiyasidagi {certificate} sertifikati {certificate_batch} partiyasiga tegishli, ammo yetkazilgan partiya {batch}",
+      "suggestion": "Materialdagi partiya yoki eritma raqamini tekshiring va yetkazib beruvchidan kelgan partiya sertifikatini so'rang"
+    },
+    "receipt_route_approved": {
+      "fail": "{po} buyurtma bo'yicha {receipt} mahsulot qabul qilish hujjati tasdiqlash bosqichida, hali tasdiqlanmagan",
+      "suggestion": "To'lovni chiqarishdan oldin mahsulot qabul qilish hujjatining tasdiqlash bosqichi tugashini kuting"
+    },
+    "receipt_inspection_closed": {
+      "fail": "{po} buyurtma bo'yicha {receipt} mahsulot qabul qilish hujjatining kirish nazorati hali o'tmagan",
+      "suggestion": "Nazoratni yakunlang yoki materialga nazoratdan oldin to'lov qilinishi mumkin bo'lgan sababni qayd eting"
     }
   },
   "subcontract": {

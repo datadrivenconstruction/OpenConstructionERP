@@ -1065,6 +1065,28 @@ class FinanceService:
         logger.info("Invoice updated: %s", invoice_id)
         return updated
 
+    async def _check_payment_release(self, invoice: Invoice) -> None:
+        """Run procurement's payment release rules before a payable invoice on an order is released.
+
+        The ``invoice_payment_release`` rule set refuses (422) while a goods
+        receipt of the order is still waiting on, or was refused by, its
+        approval route. The decision lives in the rules, not here: this only
+        asks. An invoice that names no order, a receivable, or an installation
+        without procurement is not affected.
+        """
+        if getattr(invoice, "invoice_direction", None) != "payable":
+            return
+        raw_meta = getattr(invoice, "metadata_", None)
+        meta = raw_meta if isinstance(raw_meta, dict) else {}
+        po_id = getattr(invoice, "purchase_order_id", None) or meta.get("po_id")
+        if not po_id:
+            return
+        try:
+            from app.modules.procurement.receiving import check_payment_release
+        except ImportError:  # pragma: no cover - procurement is optional for finance
+            return
+        await check_payment_release(self.session, po_id, invoice_ref=getattr(invoice, "invoice_number", "") or "")
+
     async def approve_invoice(
         self,
         invoice_id: uuid.UUID,
@@ -1090,6 +1112,7 @@ class FinanceService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Cannot approve invoice in status '{prior}'",
             )
+        await self._check_payment_release(invoice)
         await self.invoices.update(invoice_id, status="approved")
         # FSM audit row - see :mod:`app.core.fsm.registry` for the invoice
         # lifecycle. Best-effort: an audit failure must NOT roll back the
@@ -1166,6 +1189,7 @@ class FinanceService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(f"Cannot mark as paid invoice in status '{prior}'. Invoice must be approved first."),
             )
+        await self._check_payment_release(invoice)
         await self.invoices.update(invoice_id, status="paid")
         # Best-effort: an audit failure must NOT roll back the status
         # change, but it MUST surface as a warning so audit-log outages
