@@ -2,8 +2,8 @@
   "english_keys": 543,
   "locales": {
     "ar": {
-      "missing": 143,
-      "digest": "b06adcceb126a3a4"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "bg": {
       "missing": 143,
@@ -38,8 +38,8 @@
       "digest": "b06adcceb126a3a4"
     },
     "fa": {
-      "missing": 143,
-      "digest": "b06adcceb126a3a4"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "fi": {
       "missing": 143,
@@ -54,8 +54,8 @@
       "digest": "b06adcceb126a3a4"
     },
     "he": {
-      "missing": 143,
-      "digest": "b06adcceb126a3a4"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "hi": {
       "missing": 143,
@@ -134,8 +134,8 @@
       "digest": "b06adcceb126a3a4"
     },
     "ur": {
-      "missing": 143,
-      "digest": "b06adcceb126a3a4"
+      "missing": 0,
+      "digest": "e3b0c44298fc1c14"
     },
     "uz": {
       "missing": 143,
