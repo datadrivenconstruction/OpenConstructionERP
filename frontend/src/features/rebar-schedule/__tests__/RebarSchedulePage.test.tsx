@@ -193,7 +193,7 @@ afterEach(() => {
   // Here rather than at the end of a test body, so a failing assertion cannot
   // leave fetch stubbed for the tests after it.
   vi.unstubAllGlobals();
-  useProjectContextStore.setState({ activeProjectId: null });
+  useProjectContextStore.setState({ activeProjectId: null, activeProjectName: '' });
   useAuthStore.setState({ userRole: null, accessToken: null });
 });
 
@@ -265,6 +265,52 @@ describe('RebarSchedulePage with the backend response shapes', () => {
 
     expect(container.querySelector('input[type="file"]')).toBeNull();
     expect(screen.queryByRole('button', { name: /^Delete$/ })).not.toBeInTheDocument();
+  });
+
+  it('says on an empty project what to import, from where, into which project, with a sample', async () => {
+    apiMocks.apiGet.mockImplementation(async (path: string) =>
+      path.startsWith('/v1/rebar-schedule/imports/?') ? { items: [], total: 0, offset: 0, limit: 200 } : routeGet(path),
+    );
+    useProjectContextStore.setState({ activeProjectName: 'Tower B' });
+    renderPage();
+
+    expect(await screen.findByText(/Nothing has been imported into this project yet/)).toBeInTheDocument();
+    const panel = screen.getByRole('region', { name: 'Import a bar bending schedule' });
+    expect(panel).toHaveTextContent('BVBS reinforcement data exchange format');
+    expect(panel).toHaveTextContent('rebar detailing CAD software');
+    expect(panel).toHaveTextContent('Imports into: Tower B');
+    expect(within(panel).getByRole('button', { name: 'Choose .abs file' })).toBeInTheDocument();
+    const sample = within(panel).getByRole('link', { name: 'Download a sample .abs file' });
+    expect(sample).toHaveAttribute('href', '/templates/rebar-schedule-sample.abs');
+    expect(sample).toHaveAttribute('download', 'rebar-schedule-sample.abs');
+  });
+
+  it('previews the bundled sample through the same file preview a real upload gets', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('BF2D@Hj...@\r\n', { status: 200 }))
+      .mockResolvedValueOnce(json(PREVIEW));
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderPage();
+    await screen.findByText('wall_B1.abs');
+    fireEvent.click(screen.getByRole('button', { name: 'Preview the sample file' }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(String(fetchMock.mock.calls[0]![0])).toBe('/templates/rebar-schedule-sample.abs');
+    expect(String(fetchMock.mock.calls[1]![0])).toBe('/api/v1/rebar-schedule/preview/file/?locale=en');
+    const sent = (fetchMock.mock.calls[1]![1].body as FormData).get('upload') as File;
+    expect(sent.name).toBe('rebar-schedule-sample.abs');
+    expect(await screen.findByText('Review the parsed file before importing.')).toBeInTheDocument();
+  });
+
+  it('names the rejected file and says how to get an .abs one', async () => {
+    const { container } = renderPage();
+    await screen.findByText('wall_B1.abs');
+    pickFile(container, new File(['x'], 'schedule.xlsx'));
+
+    expect(await screen.findByText(/schedule\.xlsx is not an \.abs file/)).toBeInTheDocument();
+    expect(screen.getByText(/BVBS ABS format/)).toBeInTheDocument();
   });
 
   it('previews the file bytes on the import decoder and labels errors as errors', async () => {

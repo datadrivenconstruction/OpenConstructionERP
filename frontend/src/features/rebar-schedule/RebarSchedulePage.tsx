@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   Download,
   FileUp,
+  FlaskConical,
   Loader2,
   Package,
   Ruler,
@@ -46,6 +47,10 @@ import {
 } from './api';
 
 type TFn = (k: string, o?: Record<string, unknown>) => string;
+
+/** A five-shape schedule that passes every bvbs_abs rule, served from public/templates. */
+const SAMPLE_ABS_URL = '/templates/rebar-schedule-sample.abs';
+const SAMPLE_ABS_NAME = 'rebar-schedule-sample.abs';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -387,6 +392,8 @@ export function RebarSchedulePage() {
     (s: { activeProjectId: string | null }) => s.activeProjectId,
   );
   const projectId = activeProjectId;
+  const projectName = useProjectContextStore((s) => s.activeProjectName);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // The backend decides what is allowed (import needs editor, delete needs
   // manager); this only decides what to offer, so nobody meets a button that
@@ -456,8 +463,10 @@ export function RebarSchedulePage() {
     async (file: File) => {
       if (!file.name.toLowerCase().endsWith('.abs')) {
         setUploadError(
-          t('rebar_schedule.invalid_file', {
-            defaultValue: 'Only .abs files are supported.',
+          t('rebar_schedule.invalid_file_named', {
+            defaultValue:
+              '{{name}} is not an .abs file. Export the bending schedule from your rebar detailing software in the BVBS ABS format (.abs) and try again.',
+            name: file.name,
           }),
         );
         return;
@@ -496,6 +505,25 @@ export function RebarSchedulePage() {
     },
     [handleFile],
   );
+
+  // Runs the bundled sample through the same preview a real file gets, so a
+  // first-time user sees the result before they have an .abs file of their own.
+  const handleTrySample = useCallback(async () => {
+    setUploadError(null);
+    try {
+      const res = await fetch(SAMPLE_ABS_URL);
+      if (!res.ok) throw new Error(res.statusText);
+      const blob = await res.blob();
+      await handleFile(new File([blob], SAMPLE_ABS_NAME, { type: 'application/octet-stream' }));
+    } catch (err) {
+      setUploadError(
+        t('rebar_schedule.sample_load_error', {
+          defaultValue: 'Could not load the sample file. {{reason}}',
+          reason: getErrorMessage(err),
+        }),
+      );
+    }
+  }, [handleFile, t]);
 
   const handleConfirmImport = useCallback(async () => {
     if (!previewFile || !projectId) return;
@@ -588,17 +616,29 @@ export function RebarSchedulePage() {
       <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
         <PageHeader
           srTitle={t('rebar_schedule.title', { defaultValue: 'Rebar Schedule' })}
-          subtitle={t('rebar_schedule.subtitle', {
-            defaultValue: 'Import, validate and manage reinforcement bar schedules from ABS files.',
+          subtitle={t('rebar_schedule.subtitle_formats', {
+            defaultValue:
+              'Import bar bending schedules as .abs files (BVBS format) exported from your rebar detailing software, check them, and get steel weights and cutting lists.',
           })}
         />
         <RebarScheduleExplainer />
         <EmptyState
           icon={<Ruler className="h-6 w-6" />}
           title={t('rebar_schedule.no_project', { defaultValue: 'Select a project' })}
-          description={t('rebar_schedule.no_project_desc', {
-            defaultValue: 'Choose a project from the header to manage its rebar schedules.',
+          description={t('rebar_schedule.no_project_desc_import', {
+            defaultValue:
+              'A rebar schedule is imported into a project. Choose the project in the header, then import its .abs file here.',
           })}
+          action={
+            <a
+              href={SAMPLE_ABS_URL}
+              download={SAMPLE_ABS_NAME}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden />
+              {t('rebar_schedule.download_sample', { defaultValue: 'Download a sample .abs file' })}
+            </a>
+          }
         />
       </div>
     );
@@ -858,8 +898,9 @@ export function RebarSchedulePage() {
     <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
       <PageHeader
         srTitle={t('rebar_schedule.title', { defaultValue: 'Rebar Schedule' })}
-        subtitle={t('rebar_schedule.subtitle', {
-          defaultValue: 'Import, validate and manage reinforcement bar schedules from ABS files.',
+        subtitle={t('rebar_schedule.subtitle_formats', {
+          defaultValue:
+            'Import bar bending schedules as .abs files (BVBS format) exported from your rebar detailing software, check them, and get steel weights and cutting lists.',
         })}
       />
 
@@ -887,46 +928,128 @@ export function RebarSchedulePage() {
         </div>
       )}
 
-      {/* Upload area */}
-      {canImport && (
-        <div
+      {/* Import panel: what is accepted, where it comes from, where it goes */}
+      {canImport ? (
+        <section
+          aria-labelledby="rebar-import-title"
           onDragOver={(e) => {
             e.preventDefault();
             setDragOver(true);
           }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
-            dragOver
-              ? 'border-oe-blue bg-oe-blue/5'
-              : 'border-border-light bg-surface-elevated/90 hover:border-border'
+          className={`rounded-xl border-2 border-dashed p-5 transition-colors ${
+            dragOver ? 'border-oe-blue bg-oe-blue/5' : 'border-border-light bg-surface-elevated/90'
           }`}
         >
-          {uploading ? (
-            <Loader2 className="h-8 w-8 animate-spin text-oe-blue" />
-          ) : (
-            <>
-              <FileUp className="mb-3 h-8 w-8 text-content-tertiary" />
-              <p className="text-sm font-medium text-content-primary">
-                {t('rebar_schedule.drop_abs', {
-                  defaultValue: 'Drag and drop an .abs file here',
+          <div className="flex flex-col gap-5 md:flex-row md:items-start">
+            <div className="min-w-0 flex-1 space-y-2">
+              <h2 id="rebar-import-title" className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+                <FileUp className="h-4 w-4 text-oe-blue" aria-hidden />
+                {t('rebar_schedule.import_panel_title', { defaultValue: 'Import a bar bending schedule' })}
+              </h2>
+              <p className="text-xs text-content-secondary">
+                <span className="font-medium text-content-primary">
+                  {t('rebar_schedule.import_accepts_label', { defaultValue: 'Accepted file:' })}
+                </span>{' '}
+                {t('rebar_schedule.import_accepts', {
+                  defaultValue:
+                    '.abs in the BVBS reinforcement data exchange format (ABS, version 3.1), up to 16 MB. Each line of the file is one bar shape.',
                 })}
               </p>
-              <p className="mt-1 text-xs text-content-tertiary">
-                {t('rebar_schedule.or_browse', {
-                  defaultValue: 'or click to browse',
+              <p className="text-xs text-content-secondary">
+                <span className="font-medium text-content-primary">
+                  {t('rebar_schedule.import_source_label', { defaultValue: 'Where it comes from:' })}
+                </span>{' '}
+                {t('rebar_schedule.import_source', {
+                  defaultValue:
+                    'your rebar detailing CAD software exports it together with the printed bending schedule. If you only have the PDF, ask the detailer or the bending shop for the .abs export.',
                 })}
               </p>
+              <p className="text-xs text-content-secondary">
+                <span className="font-medium text-content-primary">
+                  {t('rebar_schedule.import_reads_label', { defaultValue: 'What is read:' })}
+                </span>{' '}
+                {t('rebar_schedule.import_reads', {
+                  defaultValue:
+                    'bar mark, shape type, drawing, steel grade, diameter, length, quantity and weight, plus the checksum of every line.',
+                })}
+              </p>
+              <p className="text-xs text-content-secondary">
+                <span className="font-medium text-content-primary">
+                  {t('rebar_schedule.import_target_label', { defaultValue: 'Imports into:' })}
+                </span>{' '}
+                {projectName ||
+                  t('rebar_schedule.import_target_current', { defaultValue: 'the project selected in the header' })}
+              </p>
+              <ol className="mt-3 flex flex-col gap-1.5 text-xs text-content-tertiary sm:flex-row sm:gap-4">
+                {[
+                  t('rebar_schedule.import_hint_1', { defaultValue: 'Choose or drop an .abs file' }),
+                  t('rebar_schedule.import_hint_2', { defaultValue: 'Check the preview, nothing is saved yet' }),
+                  t('rebar_schedule.import_hint_3', { defaultValue: 'Click Import to add it to the project' }),
+                ].map((hint, i) => (
+                  <li key={hint} className="flex items-center gap-1.5">
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-[10px] font-bold text-oe-blue-text">
+                      {i + 1}
+                    </span>
+                    {hint}
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="flex shrink-0 flex-col items-stretch gap-2 md:w-60">
               <input
+                ref={fileInputRef}
                 type="file"
                 accept=".abs"
                 onChange={handleFileInput}
-                className="absolute inset-0 cursor-pointer opacity-0"
+                className="sr-only"
+                tabIndex={-1}
                 aria-label={t('rebar_schedule.upload_label', { defaultValue: 'Upload ABS file' })}
               />
-            </>
-          )}
-        </div>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-oe-blue px-3 py-2 text-sm font-medium text-content-inverse hover:opacity-90 disabled:opacity-40 transition-colors"
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  <Upload className="h-4 w-4" aria-hidden />
+                )}
+                {t('rebar_schedule.choose_file', { defaultValue: 'Choose .abs file' })}
+              </button>
+              <p className="text-center text-2xs text-content-tertiary">
+                {t('rebar_schedule.or_drop_here', { defaultValue: 'or drag and drop it onto this panel' })}
+              </p>
+              <button
+                type="button"
+                onClick={() => void handleTrySample()}
+                disabled={uploading}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-border bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary disabled:opacity-40 transition-colors"
+              >
+                <FlaskConical className="h-3.5 w-3.5" aria-hidden />
+                {t('rebar_schedule.try_sample', { defaultValue: 'Preview the sample file' })}
+              </button>
+              <a
+                href={SAMPLE_ABS_URL}
+                download={SAMPLE_ABS_NAME}
+                className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-oe-blue-text hover:underline"
+              >
+                <Download className="h-3.5 w-3.5" aria-hidden />
+                {t('rebar_schedule.download_sample', { defaultValue: 'Download a sample .abs file' })}
+              </a>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <p className="rounded-lg border border-border-light bg-surface-secondary p-3 text-xs text-content-secondary">
+          {t('rebar_schedule.import_needs_editor', {
+            defaultValue: 'You can open the imports below. Importing a new .abs file needs editor access to this project.',
+          })}
+        </p>
       )}
 
       {uploadError && (
@@ -953,8 +1076,13 @@ export function RebarSchedulePage() {
           title={t('rebar_schedule.empty', { defaultValue: 'No rebar imports yet' })}
           description={
             canImport
-              ? t('rebar_schedule.empty_desc', { defaultValue: 'Upload an ABS file above to get started.' })
-              : undefined
+              ? t('rebar_schedule.empty_desc_sample', {
+                  defaultValue:
+                    'Nothing has been imported into this project yet. Choose an .abs file above, or preview the sample file to see what an import gives you.',
+                })
+              : t('rebar_schedule.empty_desc_viewer', {
+                  defaultValue: 'Nothing has been imported into this project yet. Ask an editor to import its .abs file.',
+                })
           }
         />
       )}

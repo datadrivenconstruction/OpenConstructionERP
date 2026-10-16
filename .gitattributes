@@ -15,3 +15,7 @@
 *.ttf binary
 *.otf binary
 *.zip binary
+
+# ABS rebar schedules (BVBS) terminate records with CRLF and checksum
+# every character, so a line-ending conversion would break the sample.
+*.abs -text
