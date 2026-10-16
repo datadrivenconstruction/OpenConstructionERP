@@ -59,8 +59,10 @@ import {
   formatClock,
   pathForRole,
   playlist,
+  playlistUrl,
   recommend,
   searchVideos,
+  seriesForReader,
   subscribeUrl,
   startHereVideo,
   videoById,
@@ -559,7 +561,20 @@ function LearningPath({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Aca
 function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: AcademyVideo, s?: number) => void }) {
   const { t } = useTranslation();
   const watched = useVideosStore((s) => s.watched);
-  const shelves = SERIES.map((s) => ({ series: s, videos: playlist(s.id) })).filter((x) => x.videos.length > 1);
+  const ctx = useVideoContext();
+  const [showAll, setShowAll] = useState(false);
+  // The reader's own language and market lead; the other series stay one
+  // press away, so fourteen shelves in nine languages do not bury the two a
+  // reader can actually follow.
+  const { near, rest } = useMemo(
+    () => seriesForReader({ language: ctx.language, market: ctx.market }),
+    [ctx.language, ctx.market],
+  );
+  const toShelf = (s: (typeof SERIES)[number]) => ({ series: s, videos: playlist(s.id) });
+  const nearShelves = near.map(toShelf).filter((x) => x.videos.length > 1);
+  const restShelves = rest.map(toShelf).filter((x) => x.videos.length > 1);
+  const shelves = showAll ? [...nearShelves, ...restShelves] : nearShelves;
+  const otherLanguages = [...new Set(restShelves.map((x) => x.series.language))];
 
   return (
     <section aria-labelledby="videos-series-title" className="space-y-5">
@@ -594,6 +609,18 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
                       total: videos.length,
                     })}
                   </span>
+                  {series.playlistId && (
+                    <a
+                      href={playlistUrl(series.playlistId)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid="videos-series-playlist"
+                      className="inline-flex items-center gap-1 font-medium text-oe-blue hover:underline"
+                    >
+                      · {t('videos.series_playlist', { defaultValue: 'Playlist on YouTube' })}
+                      <ExternalLink size={11} aria-hidden />
+                    </a>
+                  )}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -632,6 +659,28 @@ function SeriesShelves({ labels, onOpen }: { labels: VideoLabels; onOpen: (v: Ac
           </div>
         );
       })}
+      {restShelves.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          aria-expanded={showAll}
+          data-testid="videos-series-toggle"
+          className="flex w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-xl border border-dashed border-border-light px-4 py-3 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue"
+        >
+          <ListVideo size={14} aria-hidden />
+          {showAll
+            ? t('videos.series_fewer', { defaultValue: 'Show only the series for you' })
+            : t('videos.series_more', {
+                defaultValue: 'Show {{count}} more series in other languages',
+                count: restShelves.length,
+              })}
+          {!showAll && (
+            <span className="text-content-tertiary">
+              {otherLanguages.map((l) => labels.language(l)).join(' · ')}
+            </span>
+          )}
+        </button>
+      )}
     </section>
   );
 }

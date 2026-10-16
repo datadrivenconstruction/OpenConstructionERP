@@ -6,7 +6,7 @@
 // real catalogue that pin memberships the page relies on.
 
 import { describe, expect, it } from 'vitest';
-import type { AcademyVideo } from './academyTypes';
+import type { AcademySeries, AcademyVideo } from './academyTypes';
 import {
   NO_FILTERS,
   VIDEOS,
@@ -17,8 +17,10 @@ import {
   formatClock,
   pathForRole,
   playlist,
+  playlistUrl,
   recommend,
   searchVideos,
+  seriesForReader,
   startHereVideo,
   subscribeUrl,
   videosForCase,
@@ -133,6 +135,22 @@ describe('recommendations', () => {
     expect(ids(recommend({ role: null, market: 'CA', language: 'en' }, both))).toEqual(['en', 'fr']);
   });
 
+  it('sinks a video in neither the reader language nor English below the rest', () => {
+    const three = [
+      video({ id: 'zh', youtubeId: 'fffffffffff', language: 'zh' }),
+      video({ id: 'en', youtubeId: 'ggggggggggg' }),
+      video({ id: 'de', youtubeId: 'hhhhhhhhhhh', language: 'de' }),
+    ];
+    expect(ids(recommend({ role: null, market: null, language: 'de' }, three))).toEqual(['de', 'en', 'zh']);
+    expect(ids(recommend({ role: null, market: null, language: null }, three))).toEqual(['zh', 'en', 'de']);
+  });
+
+  it('offers an English reader with no market no lesson in a language they did not pick', () => {
+    const list = recommend({ role: 'estimator', market: null, language: 'en' });
+    expect(list.length).toBeGreaterThan(0);
+    expect(list.every((v) => v.language === 'en')).toBe(true);
+  });
+
   it('with nothing known, offers published videos first', () => {
     const list = recommend({ role: null, market: null, language: null }, FIXTURE);
     expect(list.slice(0, 3).every((v) => v.status === 'published')).toBe(true);
@@ -220,6 +238,39 @@ describe('example location', () => {
     expect(l2.market).toBeUndefined();
     expect(l2.example).toEqual({ place: 'Denver', country: 'US' });
     expect(recommend({ role: 'estimator', market: 'HR', language: 'hr' }).map((v) => v.id)).toContain('EP02_L2');
+  });
+});
+
+describe('series for the reader', () => {
+  const s = (id: string, language: string, market: string | null): AcademySeries => ({
+    id,
+    title: id,
+    language,
+    market,
+    channel: 'academy',
+  });
+  const ALL = [s('de', 'de', 'DE'), s('us', 'en', 'US'), s('uk', 'en', 'GB'), s('ca-fr', 'fr', 'CA'), s('cn', 'zh', 'CN')];
+
+  it('leads with the reader language and market, in catalogue order, and keeps the rest', () => {
+    const { near, rest } = seriesForReader({ language: 'fr', market: 'CN' }, ALL);
+    expect(near.map((x) => x.id)).toEqual(['ca-fr', 'cn']);
+    expect(rest.map((x) => x.id)).toEqual(['de', 'us', 'uk']);
+  });
+
+  it('falls back to the English series for a language the channel does not speak', () => {
+    const { near, rest } = seriesForReader({ language: 'ru', market: null }, ALL);
+    expect(near.map((x) => x.id)).toEqual(['us', 'uk']);
+    expect(rest).toHaveLength(3);
+  });
+
+  it('puts the German courses first for a German reader in the real catalogue', () => {
+    const { near } = seriesForReader({ language: 'de', market: 'DE' });
+    expect(near.map((x) => x.id)).toEqual(expect.arrayContaining(['landshut-de', 'din276-de']));
+    expect(near.every((x) => x.language === 'de' || x.market === 'DE')).toBe(true);
+  });
+
+  it('links a series to its playlist', () => {
+    expect(playlistUrl('PLKN9p-CuMMkE')).toBe('https://www.youtube.com/playlist?list=PLKN9p-CuMMkE');
   });
 });
 

@@ -21,6 +21,11 @@ Sources, in the order they are trusted:
 4. ``scripts/video_catalog/editorial.json``: stage, roles, market, cases and
    result for the videos the registries do not classify, plus overrides. These
    links are editorial proposals.
+5. ``scripts/video_catalog/channel_snapshot.json``, written from the public
+   channel by ``scripts/fetch_video_channel.py``: title, summary, chapters and
+   running time of the series published straight to the channel. The editorial
+   ``channel_videos`` section names which of them the catalogue carries and in
+   which series; the run lists every public upload that is in neither.
 
 Case ids are checked against ``frontend/src/features/cases/data``. A case that
 does not exist is dropped from the output and reported; it stays in the source.
@@ -38,7 +43,7 @@ lists the ones that will fall back.
 Usage:
     py -3.14 scripts/build_video_catalog.py [--out-root DIR] [--publish-dir DIR]
         [--links-doc FILE] [--lessons FILE] [--films FILE] [--landshut-covers DIR]
-        [--offline] [--check]
+        [--channel-snapshot FILE] [--offline] [--check]
 """
 
 from __future__ import annotations
@@ -57,6 +62,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 EDITORIAL = ROOT / "scripts" / "video_catalog" / "editorial.json"
+CHANNEL_SNAPSHOT = ROOT / "scripts" / "video_catalog" / "channel_snapshot.json"
 CASES_DIR = ROOT / "frontend" / "src" / "features" / "cases" / "data"
 DESKTOP = Path.home() / "Desktop"
 
@@ -251,7 +257,7 @@ def chapters_from_description(description: str) -> list[dict]:
 # chantier | OpenConstructionERP"). The page shows language, market and order
 # as badges of its own, so only the topic is kept.
 CHANNEL_PREFIX = re.compile(r"^(?:[^|]*•[^|]*\|\s*|\d{2}/\d{2}\s*·\s*)")
-CHANNEL_SUFFIX = re.compile(r"\s*\|\s*OpenConstructionERP\s*$")
+CHANNEL_SUFFIX = re.compile(r"\s*\|\s*(?:OpenConstructionERP(?: Tutorial)?|Builder's Playbook)\s*$")
 
 
 def clean_title(title: str) -> str:
@@ -266,9 +272,21 @@ def clean_title(title: str) -> str:
 # place ("🇺🇸 EN • DENVER • 02/03"). That is the example the video works
 # through, not the market whose rules it teaches, so it is kept apart from
 # ``market`` and shown as "Example: Denver, United States".
-FLAG_COUNTRY = {"🇺🇸": "US", "🇨🇦": "CA", "⚜️": "CA", "🇩🇪": "DE", "🇫🇷": "FR", "🇬🇧": "GB"}
+FLAG_COUNTRY = {
+    "🇺🇸": "US",
+    "🇨🇦": "CA",
+    "⚜️": "CA",
+    "🇩🇪": "DE",
+    "🇫🇷": "FR",
+    "🇬🇧": "GB",
+    "🇭🇷": "HR",
+    "🇧🇬": "BG",
+    "🇪🇸": "ES",
+    "🇮🇹": "IT",
+    "🇨🇳": "CN",
+}
 SHELF = re.compile(r"^\s*(?P<flag>\S+)\s+[A-Z]{2}\s*•\s*(?P<place>[^•|]+?)\s*•\s*\d{2}/\d{2}\s*\|")
-COUNTRY_WORDS = {"USA", "US", "CANADA", "GERMANY", "DEUTSCHLAND", "FRANCE", "UK"}
+COUNTRY_WORDS = {"USA", "US", "CANADA", "GERMANY", "DEUTSCHLAND", "FRANCE", "UK", "HRVATSKA"}
 
 
 def example_from_title(title: str) -> dict | None:
@@ -483,6 +501,42 @@ def build(args: argparse.Namespace) -> None:
         )
         covers[x["id"]] = EDITORIAL.parent / x["cover"]
 
+    # Series published straight to the channel: the text comes from the
+    # channel snapshot, the placement and classification from the editorial
+    # file. A video the snapshot does not carry is not public, so it stops the
+    # run rather than shipping as a dead player.
+    snapshot = read_json(Path(args.channel_snapshot))
+    on_channel = {v["youtubeId"]: v for v in snapshot["videos"]}
+    playlists = {p["id"]: p["videos"] for p in snapshot["playlists"]}
+    channel_overlay: dict[str, dict] = {}
+    for vid, c in editorial.get("channel_videos", {}).items():
+        if vid.startswith("_"):
+            continue
+        snap = on_channel.get(c["youtubeId"])
+        if not snap:
+            fail(f"channel_videos: {vid} ({c['youtubeId']}) is not a public video in the channel snapshot")
+        series = series_meta.get(c["series"])
+        if not series:
+            fail(f"channel_videos: {vid}: unknown series {c['series']!r}")
+        videos.append(
+            {
+                "id": vid,
+                "youtubeId": c["youtubeId"],
+                "language": series["language"],
+                "title": clean_title(snap["title"]),
+                "example": c.get("example") or example_from_title(snap["title"]),
+                "description": snap["summary"],
+                "chapters": snap["chapters"],
+                "duration": snap["duration"] or None,
+                "series": c["series"],
+                "seriesOrder": c["seriesOrder"],
+            }
+        )
+        channel_overlay[vid] = c
+    for sid, s in series_meta.items():
+        if s.get("playlist") and s["playlist"] not in playlists:
+            fail(f"series {sid}: playlist {s['playlist']} is not on the channel")
+
     # Ids added in the editorial file ahead of the links document.
     by_id = {v["id"]: v for v in videos}
     for vid, yt in editorial.get("youtube_ids", {}).items():
@@ -509,7 +563,7 @@ def build(args: argparse.Namespace) -> None:
     orphans: dict[str, list[str]] = {}
     extras_by_id = {x["id"]: x for x in editorial.get("extras", [])}
     for v in videos:
-        o = {**overlay.get(v["id"], {}), **extras_by_id.get(v["id"], {})}
+        o = {**overlay.get(v["id"], {}), **extras_by_id.get(v["id"], {}), **channel_overlay.get(v["id"], {})}
         for field in ("stage", "roles", "market", "cases", "result", "startHere"):
             if field in o:
                 v[field] = o[field]
@@ -621,6 +675,7 @@ def build(args: argparse.Namespace) -> None:
             {
                 "id": sid,
                 **{k: s[k] for k in ("title", "titleKey", "language", "market", "channel") if k in s},
+                **({"playlistId": s["playlist"]} if s.get("playlist") else {}),
             }
             for sid, s in sorted(series_meta.items(), key=lambda kv: kv[1]["order"])
         ],
@@ -684,6 +739,23 @@ def build(args: argparse.Namespace) -> None:
             "channel covers without maxresdefault (page shows hqdefault): "
             + (", ".join(fallback) if fallback else "none")
         )
+    catalogued = {v["youtubeId"] for v in videos if v["youtubeId"]}
+    missing_uploads = [f"{v['youtubeId']} {v['title']}" for v in snapshot["videos"] if v["youtubeId"] not in catalogued]
+    print(
+        "public uploads not in the catalogue: "
+        + ("none" if not missing_uploads else f"{len(missing_uploads)}\n  " + "\n  ".join(missing_uploads))
+    )
+    off_playlist = [
+        f"{v['id']} ({v['youtubeId']}) not in playlist {series_meta[v['series']]['playlist']}"
+        for v in videos
+        if v["youtubeId"]
+        and series_meta[v["series"]].get("playlist")
+        and v["youtubeId"] not in playlists[series_meta[v["series"]]["playlist"]]
+    ]
+    print(
+        "videos missing from their series playlist: "
+        + ("none" if not off_playlist else "\n  " + "\n  ".join(off_playlist))
+    )
     if orphans:
         print("orphan case ids (kept in the source, left out of the catalogue):")
         for vid, missing in orphans.items():
@@ -701,6 +773,7 @@ def main() -> None:
     parser.add_argument("--lessons", default=str(DEFAULTS["lessons"]))
     parser.add_argument("--films", default=str(DEFAULTS["films"]))
     parser.add_argument("--landshut-covers", default=str(DEFAULTS["landshut_covers"]))
+    parser.add_argument("--channel-snapshot", default=str(CHANNEL_SNAPSHOT))
     parser.add_argument(
         "--offline",
         action="store_true",

@@ -96,6 +96,8 @@ export interface AcademySeries {
   language: string;
   market: string | null;
   channel: VideoChannel;
+  /** The series' playlist on the channel, when it has one. */
+  playlistId?: string;
 }
 
 /** A case a video links to, carried with its title so the Videos page never

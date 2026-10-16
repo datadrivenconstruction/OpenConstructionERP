@@ -10,9 +10,12 @@
 // `normalizeCaseRoute` and `stageForPlaybook`. It is also the check that every
 // case a video links to exists.
 
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { matchRoutes, type RouteObject } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { getAllModuleRoutes } from '@/modules/_registry';
 import { PLAYBOOKS } from '@/features/cases/playbooks';
 import { modulesForPlaybook } from '@/features/cases/playbookModules';
 import { stageForPlaybook, STAGE_META } from '@/features/cases/stages';
@@ -21,6 +24,16 @@ import { ACADEMY_CATALOG } from './academyCatalog.generated';
 import { RESULT_FAMILIES } from './academy';
 
 const byId = new Map(PLAYBOOKS.map((pb) => [pb.id, pb]));
+
+/** The repository root, whether vitest runs from `frontend/` or from the root. */
+const ROOT = [resolve(process.cwd(), '..'), process.cwd()].find((p) => existsSync(resolve(p, 'frontend/src/app/App.tsx')))!;
+
+/** Every route path the app renders: App.tsx plus every module manifest. */
+function declaredRoutes(): RouteObject[] {
+  const app = readFileSync(resolve(ROOT, 'frontend/src/app/App.tsx'), 'utf8');
+  const fromApp = [...app.matchAll(/<Route\s+path="([^"]+)"/g)].map((m) => m[1]!);
+  return [...fromApp, ...getAllModuleRoutes().map((r) => r.path)].map((path) => ({ path }));
+}
 const videos = ACADEMY_CATALOG.videos;
 
 describe('the video catalogue', () => {
@@ -120,5 +133,41 @@ describe('the video catalogue', () => {
     const start = videos.filter((v) => v.startHere);
     expect(start).toHaveLength(1);
     expect(start[0]!.status).toBe('published');
+  });
+
+  it('speaks a language the interface offers, the same as its series', () => {
+    const offered = new Set<string>(SUPPORTED_LANGUAGES.map((l) => l.code));
+    const series = new Map(ACADEMY_CATALOG.series.map((s) => [s.id, s]));
+    for (const v of videos) {
+      expect(offered.has(v.language), `${v.id} language ${v.language}`).toBe(true);
+      expect(v.language, v.id).toBe(series.get(v.series)!.language);
+    }
+  });
+
+  it('sends every module link to a screen the app declares, scoped or not', () => {
+    const routes = declaredRoutes();
+    expect(routes.length).toBeGreaterThan(300);
+    const lands = (path: string) => {
+      const hit = matchRoutes(routes, path)?.at(-1)?.route.path;
+      return !!hit && hit !== '*';
+    };
+    const dead = [...new Set(videos.flatMap((v) => v.routes))].filter(
+      (r) => !lands(r) && !lands(`/projects/p0${r}`),
+    );
+    expect(dead).toEqual([]);
+  });
+
+  it('gives every series that is out on the channel its playlist, and no two series the same one', () => {
+    const lists = ACADEMY_CATALOG.series.map((s) => s.playlistId).filter(Boolean);
+    expect(new Set(lists).size).toBe(lists.length);
+    for (const id of lists) expect(id).toMatch(/^PL[\w-]+$/);
+  });
+
+  it('carries every public upload of the channel snapshot', () => {
+    const snapshot = JSON.parse(readFileSync(resolve(ROOT, 'scripts/video_catalog/channel_snapshot.json'), 'utf8')) as {
+      videos: { youtubeId: string }[];
+    };
+    const carried = new Set(videos.map((v) => v.youtubeId));
+    expect(snapshot.videos.filter((v) => !carried.has(v.youtubeId)).map((v) => v.youtubeId)).toEqual([]);
   });
 });

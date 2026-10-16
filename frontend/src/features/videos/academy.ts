@@ -62,6 +62,11 @@ export function subscribeUrl(channelId: string = ACADEMY_CATALOG.channelId): str
   return `${channelUrl(channelId)}?sub_confirmation=1`;
 }
 
+/** A series' playlist on the channel. */
+export function playlistUrl(playlistId: string): string {
+  return `https://www.youtube.com/playlist?list=${encodeURIComponent(playlistId)}`;
+}
+
 /** `m:ss` or `h:mm:ss`. Digits and colons only, the same in every language. */
 export function formatClock(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
@@ -88,6 +93,27 @@ export function caseRef(id: string): AcademyCaseRef | undefined {
 /** A series' videos in playing order. */
 export function playlist(seriesId: string, videos: AcademyVideo[] = VIDEOS): AcademyVideo[] {
   return videos.filter((v) => v.series === seriesId).sort((a, b) => a.seriesOrder - b.seriesOrder);
+}
+
+export interface SeriesForReader {
+  /** Series in the reader's language or for the reader's market, catalogue
+   *  order. When there is none, the English series, so the shelf is never
+   *  empty for a language the channel does not speak yet. */
+  near: AcademySeries[];
+  /** Every other series, catalogue order. */
+  rest: AcademySeries[];
+}
+
+/** Split the series into the ones for this reader and the rest, so the page
+ *  can lead with the reader's own language and fold the others away. */
+export function seriesForReader(
+  ctx: { language: string | null; market: string | null },
+  series: AcademySeries[] = SERIES,
+): SeriesForReader {
+  const fits = (s: AcademySeries) => (!!ctx.language && s.language === ctx.language) || (!!ctx.market && s.market === ctx.market);
+  let near = series.filter(fits);
+  if (near.length === 0) near = series.filter((s) => s.language === 'en');
+  return { near, rest: series.filter((s) => !near.includes(s)) };
 }
 
 /** Markets that at least one video teaches, sorted. */
@@ -233,6 +259,10 @@ export interface RecommendationContext {
  * by whether it can be played now, then by how exactly it fits: named for the
  * role over "every role", the reader's own market over "any market", spoken in
  * their language, then the series order so a course reads in sequence.
+ *
+ * A video in neither the reader's language nor English sinks below the rest:
+ * the channel dubs many of its English lessons into other languages, so English
+ * is the fallback a reader can still follow, and a Chinese lesson is not.
  */
 export function recommend(
   ctx: RecommendationContext,
@@ -247,6 +277,7 @@ export function recommend(
     if (ctx.role && video.roles.includes(ctx.role)) score += 4;
     if (ctx.market && video.market === ctx.market) score += 4;
     if (ctx.language && video.language === ctx.language) score += 3;
+    else if (ctx.language && video.language !== 'en') score -= 2;
     // A video the reader can play now outranks a closer fit they cannot.
     if (video.status === 'published') score += 5;
     if (video.channel === 'academy') score += 1;

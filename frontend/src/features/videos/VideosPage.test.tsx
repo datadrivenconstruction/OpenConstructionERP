@@ -26,7 +26,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 import { VideosPage } from './VideosPage';
-import { VIDEOS, startHereVideo } from './academy';
+import { SERIES, VIDEOS, startHereVideo } from './academy';
 import { useVideosStore } from './useVideosStore';
 import { VideoPlayerDialog } from './VideoPlayerDialog';
 import type { AcademyVideo } from './academyTypes';
@@ -185,11 +185,30 @@ describe('the Videos page', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Watched' }));
     expect(JSON.parse(localStorage.getItem('oe_videos_progress')!).watched).toEqual({ [first.id]: true });
     fireEvent.keyDown(document, { key: 'Escape' });
+    // An English reader meets the German course folded away with the other
+    // languages, one press from the shelf.
+    const shelfIds = () => screen.getAllByTestId('videos-series').map((s) => s.getAttribute('data-series-id'));
+    expect(shelfIds()).not.toContain('landshut-de');
+    fireEvent.click(screen.getByTestId('videos-series-toggle'));
+    expect(shelfIds()).toContain('landshut-de');
     const shelf = screen
       .getAllByTestId('videos-series')
       .find((s) => s.getAttribute('data-series-id') === 'landshut-de')!;
     expect(shelf.textContent).toContain('1 of 12 watched');
     expect(within(shelf).getByRole('button', { name: /Continue/ })).toBeTruthy();
+  });
+
+  it('leads with the English series for an English reader and links each to its playlist', () => {
+    renderAt('/videos');
+    const shelves = screen.getAllByTestId('videos-series');
+    expect(shelves.length).toBeGreaterThan(1);
+    const english = new Set(SERIES.filter((s) => s.language === 'en').map((s) => s.id));
+    for (const s of shelves) expect(english.has(s.getAttribute('data-series-id')!)).toBe(true);
+    const uk = shelves.find((s) => s.getAttribute('data-series-id') === 'playbook-uk')!;
+    expect(within(uk).getByTestId('videos-series-playlist').getAttribute('href')).toBe(
+      'https://www.youtube.com/playlist?list=PLTRtkYLR23qM',
+    );
+    expect(screen.getByTestId('videos-series-toggle').getAttribute('aria-expanded')).toBe('false');
   });
 
   it('still works when storage throws', () => {
