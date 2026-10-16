@@ -405,6 +405,15 @@ async def test_the_demo_seed_fills_every_list_in_a_plausible_order(world: World)
             key=lambda d: d.decision_date,
         )
         assert early.decision_date < full.decision_date
+    # A running site has its road permit for crane and hoarding: it no longer blocks the start.
+    async with world.factory() as s:
+        svc = PermitService(s)
+        types = await svc._types(await svc.get_roadmap(pid))
+        road = [r for r in reqs.values() if getattr(types.get(r.permit_type_code), "category", None) == "traffic_road"]
+        live = {p.requirement_id for p in permits}
+        assert all(r.id in live for r in road), "the road special use is granted on a running site"
+        start = await svc.readiness(pid, "start", NOW)
+        assert not [i for i in start["items"] if i["code"] == "permit_missing"], start["items"]
 
 
 async def test_before_the_construction_gate_the_seed_tells_the_pre_construction_story(

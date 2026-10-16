@@ -63,10 +63,16 @@ class _Story:
     fence_due_in: int
     # When the structural calculations of condition 1 fall due: before the start, so already past on a running site.
     calc_due_in: int
+    # The special use of the road for crane, hoarding and site access: ``None`` while it is only being prepared.
+    road_filed: int | None = None
+    road_granted: int | None = None
 
 
-# A site that has started: the early start was granted long before the building permit.
-_STARTED = _Story(330, 260, 190, 160, 141, 30, 27, 150, 128, 20, 8, 45, 20, 60, 540, -20, -35)
+# A site that has started: the early start was granted long before the building permit, and the
+# road authority granted the special use of the road before the pit was opened.
+_STARTED = _Story(
+    330, 260, 190, 160, 141, 30, 27, 150, 128, 20, 8, 45, 20, 60, 540, -20, -35, road_filed=50, road_granted=28
+)
 # Before the gate into construction: the permit is three weeks old and nothing has been built.
 _BEFORE_CONSTRUCTION = _Story(210, 150, 140, 110, 96, 20, 18, 10, None, 14, 6, 190, 175, 175, 600, 21, 21)
 
@@ -574,5 +580,25 @@ async def _seed_project(session: AsyncSession, pid: uuid.UUID) -> dict[str, int]
             },
             actor_id=owner,
         )
-        await svc.transition_application(pid, a.id, "preparing", actor_id=owner, can_manage=True, today=today)
+        if story.road_filed is None or story.road_granted is None:
+            await svc.transition_application(pid, a.id, "preparing", actor_id=owner, can_manage=True, today=today)
+        else:
+            # On a running site the crane stands and the hoarding takes the pavement: without this permit
+            # the start would not be ready, so the authority granted it before the pit was opened.
+            filed = ago(story.road_filed)
+            await svc.transition_application(pid, a.id, "preparing", actor_id=owner, can_manage=True, today=filed)
+            await svc.transition_application(
+                pid, a.id, "submitted", actor_id=owner, can_manage=True, on_date=filed, today=filed
+            )
+            await svc.record_decision(
+                pid,
+                a.id,
+                {
+                    "outcome": "granted",
+                    "decision_date": ago(story.road_granted),
+                    "reference": content["road_reference"],
+                },
+                actor_id=owner,
+                today=today,
+            )
     return {"requirements": len(made), "conditions": len(conditions)}
