@@ -623,15 +623,19 @@ export function RFIDetailPage() {
             )}
             {/* Ball-in-court hero pill — same colour system as the list
                 row badge so the contractor scans both surfaces with the
-                same eye-pattern. */}
-            <span
-              className={clsx(
-                'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
-                bicCfg.cls,
-              )}
-            >
-              {t(bicCfg.key, { defaultValue: bicCfg.fallback })}
-            </span>
+                same eye-pattern. Once answered or closed the status badge
+                already says so, and the pill would only repeat it. */}
+            {(bicSide === 'you' || bicSide === 'them') && (
+              <span
+                data-testid="rfi-detail-bic-pill"
+                className={clsx(
+                  'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                  bicCfg.cls,
+                )}
+              >
+                {t(bicCfg.key, { defaultValue: bicCfg.fallback })}
+              </span>
+            )}
           </div>
           <h1 className="text-2xl font-bold text-content-primary break-words">
             {rfi.subject}
