@@ -268215,10 +268215,10 @@
     },
     {
       "name": "projects",
-      "ts_files": 39,
+      "ts_files": 40,
       "css_files": 0,
-      "test_files": 17,
-      "total_files": 39
+      "test_files": 18,
+      "total_files": 40
     },
     {
       "name": "property-dev",
@@ -268327,10 +268327,10 @@
     },
     {
       "name": "rfi",
-      "ts_files": 11,
+      "ts_files": 12,
       "css_files": 0,
-      "test_files": 5,
-      "total_files": 11
+      "test_files": 6,
+      "total_files": 12
     },
     {
       "name": "rfq-bidding",
@@ -270168,7 +270168,7 @@
     "total_schemas": 3982,
     "total_python_files": 2689,
     "frontend_features": 208,
-    "frontend_ts_files": 3452,
+    "frontend_ts_files": 3454,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
