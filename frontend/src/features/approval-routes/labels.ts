@@ -15,7 +15,7 @@ import type { TFunction } from 'i18next';
 const APPROVALROUTES_KIND_LABELS: Record<string, string> = {
   markup: 'Markup', submittal: 'Submittal', change_order: 'Change order', rfi: 'RFI', contract: 'Contract',
   variation: 'Variation', invoice: 'Invoice', purchase_order: 'Purchase order',
-  qms_hold_point: 'QMS hold point'
+  qms_hold_point: 'QMS hold point', interface: 'Interface agreement'
 };
 
 

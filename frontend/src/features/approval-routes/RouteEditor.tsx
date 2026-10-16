@@ -72,6 +72,7 @@ const FALLBACK_TARGET_KINDS = [
   'variation',
   'invoice',
   'purchase_order',
+  'interface',
 ];
 
 const MODE_OPTIONS: RouteStepMode[] = ['all', 'any', 'majority'];

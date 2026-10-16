@@ -87,7 +87,21 @@ TARGET_KINDS: tuple[str, ...] = (
     # the pinned framework routes that decision through an approval. The
     # stakeholders module starts the instance and applies its terminal verdict.
     "stakeholder_commitment",
+    # Interface register: the agreement of an interface between two parties.
+    # Started from the interface's own screen; the interface_management module
+    # records every step in the interface's status history and moves it to
+    # agreed on approval.
+    "interface",
 )
+
+# Target kinds under segregation of duties: the person who started the approval
+# may not approve it. The engine otherwise lets an initiator who is also an
+# eligible approver (a role step their role satisfies, or a step pinned to them)
+# clear their own request; reassignment already refuses to hand a step to the
+# starter, and commitment_release enforces the same rule in its own service.
+# Kept per kind so switching it on for an existing kind is a decision made for
+# that kind, not a side effect on every workflow already in use.
+SELF_APPROVAL_FORBIDDEN_KINDS: frozenset[str] = frozenset({"interface"})
 
 # Aggregation mode at a single step when the approver_role expands to
 # multiple users.

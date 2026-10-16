@@ -41,6 +41,7 @@ from app.modules.approval_routes import analytics, delegation_engine
 from app.modules.approval_routes.delegation_engine import DelegationView
 from app.modules.approval_routes.models import (
     INSTANCE_STATUSES,
+    SELF_APPROVAL_FORBIDDEN_KINDS,
     STEP_MODES,
     TARGET_KINDS,
     Delegation,
@@ -849,6 +850,19 @@ class ApprovalRouteService:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Caller role does not satisfy the approver role for this step",
+            )
+
+        if (
+            payload.decision == "approved"
+            and instance.target_kind in SELF_APPROVAL_FORBIDDEN_KINDS
+            and instance.started_by is not None
+            and approver_id == instance.started_by
+        ):
+            # Segregation of duties: on these kinds the initiator may withdraw
+            # (cancel) or reject their own request, never approve it.
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="The person who started this approval cannot approve it",
             )
 
         state = StepState(
