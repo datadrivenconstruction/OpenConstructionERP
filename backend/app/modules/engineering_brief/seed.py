@@ -224,6 +224,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, story: dic
         "programme": 0,
         "milestones": 0,
         "submitted": 0,
+        "bound": 0,
         "gates_bound": 0,
         "need_dates_bound": 0,
         "studies": 0,
@@ -337,13 +338,45 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID, story: dic
     if not blocking:
         try:
             async with session.begin_nested():
-                await svc.submit(project_id, actor)
+                brief = await svc.submit(project_id, actor)
             counts["submitted"] = 1
+            if await _bound_by_decided_gate(session, svc, project_id, brief):
+                counts["bound"] = 1
             await svc.issue_specification(project_id, actor, story.get("issue_note", ""), locale="de")
             counts["issued"] = 1
         except Exception:
             logger.info("engineering brief demo left as draft for %s", project_id, exc_info=True)
     return counts
+
+
+async def _bound_by_decided_gate(session: AsyncSession, svc: Any, project_id: uuid.UUID, brief: Any) -> bool:
+    """A brief whose frame document a decided gate already made binding was submitted before that decision.
+
+    The seed submits on the install day, after the governance seed decided the gate, so the
+    decision would never count for this submission and the brief would stay in review for good
+    with a hint that the gate decision releases it. The story is the other way round: the brief
+    went to the gate and the decision approved it. The submission is dated the day before the
+    first go decision and the binding is mirrored the way the governance event would.
+    """
+    from app.modules.project_governance import public as governance
+
+    if brief.governance_document_id is None:
+        return False
+    documents = await governance.project_documents(session, project_id)
+    doc = next((d for d in documents if d.id == brief.governance_document_id), None)
+    if doc is None or doc.status != "binding" or doc.approved_gate_id is None:
+        return False
+    decisions = [
+        d
+        for d in await governance.project_gate_decisions(session, project_id, doc.approved_gate_id)
+        if d.outcome in ("go", "go_with_conditions")
+    ]
+    if not decisions:
+        return False
+    first = min(d.decided_at for d in decisions)
+    brief.submitted_at = first - timedelta(days=1)
+    await session.flush()
+    return await svc.mirror_binding(project_id, doc.id)
 
 
 # How far a package's typed need date may be from a milestone for the demo to bind it without moving anything visible.
@@ -430,6 +463,7 @@ async def seed_engineering_brief_demo(session: AsyncSession, project_ids: Iterab
         "programme": 0,
         "milestones": 0,
         "submitted": 0,
+        "bound": 0,
         "gates_bound": 0,
         "need_dates_bound": 0,
         "studies": 0,
