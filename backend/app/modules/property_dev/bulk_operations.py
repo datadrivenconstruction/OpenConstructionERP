@@ -136,18 +136,20 @@ async def _owner_ids_for_payload(payload: dict[str, Any]) -> tuple[bool, str | N
     return is_admin, str(user_id) if user_id is not None else None
 
 
-async def _project_owner_for_dev_id(session: AsyncSession, dev_id: uuid.UUID) -> str | None:
-    """Resolve development → project.owner_id without raising on missing."""
-    from app.modules.projects.repository import ProjectRepository
+async def _dev_reachable(session: AsyncSession, dev_id: uuid.UUID, user_id: str | None) -> bool:
+    """True when the caller may reach the development's project.
+
+    Same rule as every single-object property_dev route
+    (:mod:`app.modules.property_dev.access`): the project owner and the
+    project's team members pass. A missing development answers ``False``.
+    """
+    from app.modules.property_dev.access import can_reach_project
     from app.modules.property_dev.repository import DevelopmentRepository
 
     dev = await DevelopmentRepository(session).get_by_id(dev_id)
     if dev is None:
-        return None
-    project = await ProjectRepository(session).get_by_id(dev.project_id)
-    if project is None:
-        return None
-    return str(project.owner_id) if project.owner_id is not None else None
+        return False
+    return await can_reach_project(session, dev.project_id, user_id)
 
 
 def _safe_publish(event_name: str, payload: dict[str, Any]) -> None:
@@ -227,9 +229,9 @@ async def bulk_plot_status_change(
     # Plots that survived classification and should actually be written.
     to_write: list[tuple[Plot, str, str]] = []
     succeeded_idempotent = 0
-    # Pre-cache project ownership per development so 500 plots from
+    # Pre-cache project reach per development so 500 plots from
     # the same dev don't hit the projects table 500 times.
-    owner_cache: dict[uuid.UUID, str | None] = {}
+    reach_cache: dict[uuid.UUID, bool] = {}
 
     # ── Classification pass (READ-ONLY) ──────────────────────────────
     for pid in data.plot_ids:
@@ -246,9 +248,9 @@ async def bulk_plot_status_change(
 
         if not is_admin:
             dev_id = plot.development_id
-            if dev_id not in owner_cache:
-                owner_cache[dev_id] = await _project_owner_for_dev_id(session, dev_id)
-            if owner_cache[dev_id] != user_id:
+            if dev_id not in reach_cache:
+                reach_cache[dev_id] = await _dev_reachable(session, dev_id, user_id)
+            if not reach_cache[dev_id]:
                 skipped.append(
                     BulkSkipped(
                         entity_id=str(pid),
@@ -375,7 +377,7 @@ async def bulk_extend_reservation_expiry(
     skipped: list[BulkSkipped] = []
     failed: list[BulkFailed] = []
     to_write: list[tuple[Reservation, str | None]] = []
-    owner_cache: dict[uuid.UUID, str | None] = {}
+    reach_cache: dict[uuid.UUID, bool] = {}
 
     # Classification pass (read-only)
     for rid in data.reservation_ids:
@@ -403,9 +405,9 @@ async def bulk_extend_reservation_expiry(
                 )
                 continue
             dev_id = plot.development_id
-            if dev_id not in owner_cache:
-                owner_cache[dev_id] = await _project_owner_for_dev_id(session, dev_id)
-            if owner_cache[dev_id] != user_id:
+            if dev_id not in reach_cache:
+                reach_cache[dev_id] = await _dev_reachable(session, dev_id, user_id)
+            if not reach_cache[dev_id]:
                 skipped.append(
                     BulkSkipped(
                         entity_id=str(rid),
@@ -515,7 +517,7 @@ async def bulk_regenerate_documents(
     skipped: list[BulkSkipped] = []
     failed: list[BulkFailed] = []
     to_render: list[tuple[uuid.UUID, Any, str]] = []  # (eid, target, kind)
-    owner_cache: dict[uuid.UUID, str | None] = {}
+    reach_cache: dict[uuid.UUID, bool] = {}
 
     svc = PropertyDevService(session)
 
@@ -559,9 +561,9 @@ async def bulk_regenerate_documents(
                 )
                 continue
             dev_id = plot.development_id
-            if dev_id not in owner_cache:
-                owner_cache[dev_id] = await _project_owner_for_dev_id(session, dev_id)
-            if owner_cache[dev_id] != user_id:
+            if dev_id not in reach_cache:
+                reach_cache[dev_id] = await _dev_reachable(session, dev_id, user_id)
+            if not reach_cache[dev_id]:
                 skipped.append(
                     BulkSkipped(
                         entity_id=str(eid),
@@ -819,8 +821,7 @@ async def bulk_import_leads_csv(
     # 404 - bulk-import without a permitted dev is a config mistake worth
     # surfacing). When no dev is pinned, leads are tenant-loose by design.
     if development_id is not None and not is_admin:
-        owner = await _project_owner_for_dev_id(session, development_id)
-        if owner != user_id:
+        if not await _dev_reachable(session, development_id, user_id):
             raise HTTPException(status_code=404, detail="Development not found")
 
     skipped: list[BulkSkipped] = []
@@ -1039,8 +1040,7 @@ async def bulk_merge_buyers(
     # the merge is silently a no-op (returns 404-equivalent at the
     # request level via the same "not found" code).
     if not is_admin:
-        primary_owner = await _project_owner_for_dev_id(session, primary.development_id)
-        if primary_owner != user_id:
+        if not await _dev_reachable(session, primary.development_id, user_id):
             raise HTTPException(status_code=404, detail="Primary buyer not found")
 
     skipped: list[BulkSkipped] = []
@@ -1048,11 +1048,9 @@ async def bulk_merge_buyers(
     succeeded = 0
 
     async with session.begin_nested():
-        owner_cache: dict[uuid.UUID, str | None] = {
-            primary.development_id: (
-                user_id if is_admin else (await _project_owner_for_dev_id(session, primary.development_id))
-            )
-        }
+        # The primary's development was cleared above (or the caller is an
+        # admin, for whom the per-row check below never runs).
+        reach_cache: dict[uuid.UUID, bool] = {primary.development_id: True}
         # Contracts the primary is a party on once each accepted duplicate
         # has been repointed. Tracked here rather than re-read per duplicate,
         # so a dry run (which moves nothing) classifies the batch exactly as
@@ -1073,9 +1071,9 @@ async def bulk_merge_buyers(
 
             # IDOR check on duplicate
             if not is_admin:
-                if dup.development_id not in owner_cache:
-                    owner_cache[dup.development_id] = await _project_owner_for_dev_id(session, dup.development_id)
-                if owner_cache[dup.development_id] != user_id:
+                if dup.development_id not in reach_cache:
+                    reach_cache[dup.development_id] = await _dev_reachable(session, dup.development_id, user_id)
+                if not reach_cache[dup.development_id]:
                     skipped.append(
                         BulkSkipped(
                             entity_id=str(dup_id),

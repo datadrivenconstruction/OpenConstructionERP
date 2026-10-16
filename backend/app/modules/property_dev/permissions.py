@@ -19,8 +19,9 @@ PROPERTY_DEV_PERMISSIONS: dict[str, Role] = {
     # Deleting is guarded by two different arrangements, so it needs two
     # permissions. Measured over router.py: 24 routes were gated by
     # ``property_dev.delete``. On 19 of them the handler also calls a
-    # ``_verify_owner_via_*`` helper, and that ownership check is strict -
-    # only ``project.owner_id`` passes, the global admin role included. On
+    # ``_verify_owner_via_*`` helper, and that project-access check is strict -
+    # only the project owner or a project team member passes (see
+    # access.py), the global admin role included. On
     # the remaining 5 the permission is the only wall there is.
     #
     # No single level is correct for both halves. At MANAGER the 19 are

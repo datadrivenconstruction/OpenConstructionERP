@@ -1746,30 +1746,24 @@ class PropertyDevService:
         project_id: uuid.UUID,
         user_payload: dict[str, object] | None,
     ) -> None:
-        """Confirm the caller owns the project - collapse "not yours" to 404.
+        """Confirm the caller may reach the project - collapse "not yours" to 404.
 
-        Mirrors the cross-tenant IDOR guard used elsewhere in property_dev
-        (see :func:`router._verify_buyer_owner`). Ownership is strict: the
-        global ``admin`` role does not grant cross-tenant reach, matching
-        the rule already applied by ``router._verify_owner_via_development``.
+        Same gate as every other property_dev route (see
+        :mod:`app.modules.property_dev.access`): the project owner and the
+        project's team members pass. The global ``admin`` role does not grant
+        cross-tenant reach.
         """
         if user_payload is None:
             # Service-layer caller without payload (tests / migrations).
             return
-        user_id = user_payload.get("sub") or user_payload.get("user_id")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=translate("errors.project_not_found", locale=get_locale()),
-            )
-        from app.modules.projects.repository import ProjectRepository
+        from app.modules.property_dev.access import require_project_access
 
-        project = await ProjectRepository(self.session).get_by_id(project_id)
-        if project is None or str(project.owner_id) != str(user_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=translate("errors.project_not_found", locale=get_locale()),
-            )
+        await require_project_access(
+            self.session,
+            project_id,
+            dict(user_payload),
+            detail=translate("errors.project_not_found", locale=get_locale()),
+        )
 
     async def list_house_type_catalogue(
         self,
@@ -7916,7 +7910,7 @@ PropertyDevService.inventory_bulk_release = (  # type: ignore[attr-defined]
 )
 
 
-async def _svc_resolve_development_owner(
+async def _svc_resolve_development_project_id(
     svc: PropertyDevService,
     *,
     contract_id: uuid.UUID | None = None,
@@ -7924,11 +7918,13 @@ async def _svc_resolve_development_owner(
     handover_id: uuid.UUID | None = None,
     instalment_id: uuid.UUID | None = None,
 ) -> uuid.UUID | None:
-    """Resolve the owning ``Project.owner_id`` for the entity referenced.
+    """Resolve the owning ``Project.id`` for the entity referenced.
 
-    Used by the router for cross-tenant IDOR closure. Returns ``None``
-    when any link in the chain is missing - the router collapses that
-    into a 404 so we never leak existence of other tenants' entities.
+    Used by the router for cross-tenant IDOR closure: the router hands the
+    project id to the module access gate, which admits the owner and the
+    project's team members. Returns ``None`` when any link in the chain is
+    missing - the router collapses that into a 404 so we never leak
+    existence of other tenants' entities.
     """
     plot_id: uuid.UUID | None = None
     if contract_id is not None:
@@ -7966,17 +7962,11 @@ async def _svc_resolve_development_owner(
     development = await svc.developments.get_by_id(plot.development_id)
     if development is None:
         return None
-
-    from app.modules.projects.repository import ProjectRepository
-
-    project = await ProjectRepository(svc.session).get_by_id(development.project_id)
-    if project is None:
-        return None
-    return getattr(project, "owner_id", None)
+    return development.project_id
 
 
-PropertyDevService.resolve_development_owner = (  # type: ignore[attr-defined]
-    _svc_resolve_development_owner
+PropertyDevService.resolve_development_project_id = (  # type: ignore[attr-defined]
+    _svc_resolve_development_project_id
 )
 
 
