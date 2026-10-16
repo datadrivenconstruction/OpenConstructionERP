@@ -3,7 +3,9 @@
 """RFI ORM models.
 
 Tables:
-    oe_rfi_rfi - requests for information with response tracking and impact assessment
+    oe_rfi_rfi          - requests (RFI, TQ, Site Query, ...) with response tracking and impact assessment
+    oe_rfi_request_type - a project's catalogue of request types: name per language, numbering
+                          prefix, response SLA, required fields and default approval route
 """
 
 import uuid
@@ -38,6 +40,8 @@ class RFI(Base):
     __table_args__ = (
         UniqueConstraint("project_id", "rfi_number", name="uq_rfi_project_number"),
         Index("ix_rfi_project_created", "project_id", "created_at"),
+        # The register filters and counts by type inside one project.
+        Index("ix_rfi_project_request_type", "project_id", "request_type"),
     )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
@@ -47,6 +51,13 @@ class RFI(Base):
         index=True,
     )
     rfi_number: Mapped[str] = mapped_column(String(20), nullable=False)
+    # Code of the request type in the project's catalogue (``oe_rfi_request_type``),
+    # e.g. ``RFI``, ``TQ``, ``SQ``. A code, not a foreign key: the built-in RFI type
+    # a project has before loading a catalogue is not a row. The literal server
+    # default is the backfill - every row written before types existed was an
+    # RFI, and the boot heal can only add a NOT NULL column that has a literal
+    # default to fill the existing rows with.
+    request_type: Mapped[str] = mapped_column(String(32), nullable=False, default="RFI", server_default="RFI")
     subject: Mapped[str] = mapped_column(String(500), nullable=False)
     question: Mapped[str] = mapped_column(Text, nullable=False)
     raised_by: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
@@ -103,3 +114,53 @@ class RFI(Base):
 
     def __repr__(self) -> str:
         return f"<RFI {self.rfi_number} - {self.subject[:40]} ({self.status})>"
+
+
+class RFIRequestType(Base):
+    """One request type in a project's catalogue (see :mod:`app.modules.rfi.request_types`)."""
+
+    __tablename__ = "oe_rfi_request_type"
+    __table_args__ = (
+        UniqueConstraint("project_id", "code", name="uq_rfi_request_type_project_code"),
+        UniqueConstraint("project_id", "number_prefix", name="uq_rfi_request_type_project_prefix"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    code: Mapped[str] = mapped_column(String(32), nullable=False)
+    name_i18n: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    description_i18n: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    number_prefix: Mapped[str] = mapped_column(String(10), nullable=False)
+    number_digits: Mapped[int] = mapped_column(Integer, nullable=False, default=4, server_default="4")
+    default_response_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    required_fields: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    # An approval route with ``target_kind == "rfi"``; starting an approval on a
+    # request of this type without naming a route uses this one. No foreign key:
+    # a deleted route leaves the type usable and the start call says so.
+    default_route_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    # The shipped preset this row was loaded from, or None for a type a person wrote.
+    preset_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<RFIRequestType {self.code} prefix={self.number_prefix}>"
