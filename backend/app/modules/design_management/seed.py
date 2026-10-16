@@ -430,6 +430,45 @@ async def _construction_released(session: AsyncSession, project_id: uuid.UUID) -
     return gate is not None and gate.status == "decided"
 
 
+# A running site: the concept (LP 2) went out before the preliminary enquiry and the permit set
+# shortly before the building application (the permits seed files them 330 and 190 days back).
+_RUNNING_ISSUED_DAYS_AGO = {"REL-001": 340, "REL-002": 195}
+# Days after the issue on which every recipient of a release transmittal confirmed receipt.
+_ACK_AFTER_DAYS = 2
+
+
+async def _date_issue(session: AsyncSession, release_id: uuid.UUID, days_ago: int) -> None:
+    """Move an issued release and its transmittals to the day the story issued them, receipts included.
+
+    ``issue_release`` stamps the moment of the call, so a seeded register would show every
+    release of a project's history as sent on the install day under one subject.
+    """
+    from datetime import UTC, datetime, timedelta
+
+    from sqlalchemy import update
+
+    from app.modules.design_management.models import DesignRelease
+    from app.modules.transmittals.models import Transmittal, TransmittalRecipient
+
+    release = await session.get(DesignRelease, release_id)
+    if release is None or release.status != "issued":
+        return
+    now = datetime.now(UTC)
+    issued_at = (now - timedelta(days=days_ago)).replace(hour=9, minute=0, second=0, microsecond=0)
+    release.issued_at = issued_at
+    ids = [uuid.UUID(str(t)) for t in release.transmittal_ids or []]
+    if ids:
+        await session.execute(
+            update(Transmittal).where(Transmittal.id.in_(ids)).values(issued_date=issued_at.date().isoformat())
+        )
+        await session.execute(
+            update(TransmittalRecipient)
+            .where(TransmittalRecipient.transmittal_id.in_(ids))
+            .values(acknowledged_at=min(issued_at + timedelta(days=_ACK_AFTER_DAYS, hours=1), now))
+        )
+    await session.flush()
+
+
 async def _approve(session: AsyncSession, instance_id: uuid.UUID, approver: uuid.UUID) -> None:
     """Decide an approval instance through approval_routes, the way its own screen does."""
     from app.modules.approval_routes.models import Instance, Step
@@ -716,7 +755,7 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> dict[st
             {"code": "REL-001", "title": plan["releases"]["REL-001"], "revision_ids": shared[:3]},
             actor_id=second,
         )
-        await svc.release_transition(project_id, concept.id, "ready", actor_id=second)
+        concept = await svc.release_transition(project_id, concept.id, "ready", actor_id=second)
     else:
         # Nobody plays the second part here: four-eyes off, so the release can still be issued.
         logger.info("design_management demo seed: project %s has no second person, one-person story", project_id)
@@ -726,7 +765,14 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> dict[st
             {"code": "REL-001", "title": plan["releases"]["REL-001"], "revision_ids": shared[:3]},
             actor_id=actor,
         )
-        await svc.release_transition(project_id, concept.id, "ready", actor_id=actor)
+        concept = await svc.release_transition(project_id, concept.id, "ready", actor_id=actor)
+    if running:
+        # On a running site the concept was approved and issued long before the permit: only the
+        # execution design below still waits. It goes out first, so the register numbers run in story order.
+        if concept.approval_instance_id is not None:
+            await _approve(session, concept.approval_instance_id, actor)
+            await svc.catch_up_approvals(project_id)
+        await svc.issue_release(project_id, concept.id, actor_id=actor)
     preparer = (second or actor) if (pre or running) else actor
     permit_set = await svc.create_release(
         project_id,
@@ -740,6 +786,10 @@ async def _seed_project(session: AsyncSession, project_id: uuid.UUID) -> dict[st
             await _approve(session, ready.approval_instance_id, actor)
             await svc.catch_up_approvals(project_id)
         await svc.issue_release(project_id, permit_set.id, actor_id=actor)
+    if running:
+        # Each issue is dated where the story puts it, not on the install day.
+        await _date_issue(session, concept.id, _RUNNING_ISSUED_DAYS_AGO["REL-001"])
+        await _date_issue(session, permit_set.id, _RUNNING_ISSUED_DAYS_AGO["REL-002"])
 
     if execution is not None and execution_revisions and second is not None:
         # The execution design waits for its approval: the release is ready and nobody has signed it yet.

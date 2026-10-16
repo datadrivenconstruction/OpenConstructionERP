@@ -688,3 +688,51 @@ async def test_past_the_construction_gate_the_seed_tells_its_running_story(world
         assert states == ["accepted", "commissioned", "in_progress", "required", "required"]
         releases = {r.code: r.status for r in await svc._list(DesignRelease, pid)}
         assert releases == {"REL-001": "ready", "REL-002": "draft"}
+
+
+async def test_on_a_running_site_the_concept_and_permit_set_went_out_on_their_story_days(
+    world: DesignWorld, monkeypatch
+) -> None:
+    """Past a decided gate nothing of the design phases waits: both releases are issued, dated and received."""
+    from datetime import UTC, date, datetime, timedelta
+
+    from app.modules.design_management import seed
+    from app.modules.design_management.models import DesignRelease
+    from app.modules.transmittals.models import Transmittal, TransmittalRecipient
+
+    pid, _owner, _second = await _demo_project(world)
+
+    async def undecided(_session, _project_id):
+        return None
+
+    async def released(_session, _project_id):
+        return True
+
+    monkeypatch.setattr(seed, "_pre_construction", undecided)
+    monkeypatch.setattr(seed, "_construction_released", released)
+    async with world.factory() as s:
+        assert (await seed.seed_design_management_demo(s, [pid]))["projects"] == 1
+        await s.commit()
+    async with world.factory() as s:
+        releases = {r.code: r for r in await DesignService(s)._list(DesignRelease, pid)}
+        today = datetime.now(UTC).date()
+        for code in ("REL-001", "REL-002"):
+            row = releases[code]
+            assert row.status == "issued" and row.transmittal_ids, code
+            days = seed._RUNNING_ISSUED_DAYS_AGO[code]
+            assert row.issued_at.date() == today - timedelta(days=days), code
+            ids = [uuid.UUID(t) for t in row.transmittal_ids]
+            sent = (await s.execute(select(Transmittal).where(Transmittal.id.in_(ids)))).scalars().all()
+            assert {date.fromisoformat(t.issued_date) for t in sent} == {today - timedelta(days=days)}, code
+            acks = (
+                (
+                    await s.execute(
+                        select(TransmittalRecipient.acknowledged_at).where(TransmittalRecipient.transmittal_id.in_(ids))
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            assert acks and all(a is not None for a in acks), code
+        # The concept went out before the permit set.
+        assert releases["REL-001"].issued_at < releases["REL-002"].issued_at
