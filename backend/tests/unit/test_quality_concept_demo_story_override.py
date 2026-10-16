@@ -93,3 +93,37 @@ def test_shipped_school_story_has_no_dashes() -> None:
     text = _STORY.read_text(encoding="utf-8")
     assert "\u2014" not in text
     assert "\u2013" not in text
+
+
+def _schemes() -> list:
+    from types import SimpleNamespace
+
+    catalogue = json.loads(_CATALOGUE.read_text(encoding="utf-8"))
+    return [
+        SimpleNamespace(
+            code=x["code"], scope=x["scope"], levels=x.get("levels", []), credit_categories=x.get("credit_categories")
+        )
+        for x in catalogue["certification_schemes"]
+    ]
+
+
+def test_without_a_story_list_each_scope_gets_its_first_graded_scheme() -> None:
+    picked = seed.certification_targets(_schemes(), seed.default_plan()["certification_schemes"])
+    assert len({x.scope for x in picked}) == len(picked) >= 2
+    assert "leed_o_m" in [x.code for x in picked]
+
+
+def test_a_story_names_its_certification_schemes_and_nothing_foreign_is_added() -> None:
+    plan = _resolve({"certification_schemes": ["dgnb_new_construction", "no_such_scheme"]})
+    assert plan["certification_schemes"] == ("dgnb_new_construction", "no_such_scheme")
+    picked = seed.certification_targets(_schemes(), plan["certification_schemes"])
+    assert [x.code for x in picked] == ["dgnb_new_construction"]
+    assert seed.certification_targets(_schemes(), ()) == []
+    assert _resolve({"certification_schemes": "dgnb"})["certification_schemes"] is None
+
+
+def test_both_german_demo_stories_target_dgnb_only() -> None:
+    for name in ("residential-regensburg", "school-ludwigsburg"):
+        story = json.loads((_STORY.parent / f"{name}-quality_concept.json").read_text(encoding="utf-8"))
+        picked = seed.certification_targets(_schemes(), _resolve(story)["certification_schemes"])
+        assert [x.code for x in picked] == ["dgnb_new_construction"], name

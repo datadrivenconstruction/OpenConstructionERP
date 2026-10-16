@@ -157,6 +157,8 @@ def default_plan() -> dict[str, Any]:
         "road": {"ref": "RD-01", "address": "Access road, east side", "triggers": ["excavation"], "methods": ["photo"]},
         "waiver_reason": _WAIVER_REASON,
         "stage_names": {},
+        # None: one graded scheme per scope of the catalogue. A tuple: exactly these scheme codes.
+        "certification_schemes": None,
     }
 
 
@@ -350,7 +352,35 @@ def resolve_story(
     plan["neighbour"] = _merge_subject(plan["neighbour"], story.get("survey_neighbour"), locale)
     plan["road"] = _merge_subject(plan["road"], story.get("survey_road"), locale)
     plan["stage_names"] = _merge_stage_names(story.get("stage_names"), locale)
+    schemes = story.get("certification_schemes")
+    if isinstance(schemes, list) and all(isinstance(c, str) and c for c in schemes):
+        plan["certification_schemes"] = tuple(schemes)
+    elif schemes is not None:
+        logger.info("quality_concept demo story: certification_schemes %r ignored", schemes)
     return plan
+
+
+def certification_targets(schemes: Iterable[Any], wanted: tuple[str, ...] | None) -> list[Any]:
+    """The catalogue schemes a project targets: the story's list, else one graded scheme per scope.
+
+    A scheme needs at least two levels and credit categories to carry a target. A code the story names
+    that the catalogue does not have (or cannot grade) is skipped, so a project never gets a foreign scheme
+    by accident: a German housing project names DGNB and nothing else.
+    """
+    graded = [x for x in schemes if len(x.levels) >= 2 and x.credit_categories]
+    if wanted is not None:
+        by_code = {x.code: x for x in graded}
+        for code in wanted:
+            if code not in by_code:
+                logger.info("quality_concept demo story: certification scheme %r not in the catalogue", code)
+        return [by_code[c] for c in dict.fromkeys(wanted) if c in by_code]
+    seen: set[str] = set()
+    out = []
+    for scheme in graded:
+        if scheme.scope not in seen:
+            seen.add(scheme.scope)
+            out.append(scheme)
+    return out
 
 
 async def _before_construction(session: AsyncSession, pid: uuid.UUID) -> bool:
@@ -469,14 +499,10 @@ async def _seed_plan(
         )
         totals["requirements"] += 1
 
-    # One target per scope the catalogue offers a graded scheme for. The scheme is catalogue data.
+    # One target per scope the catalogue offers a graded scheme for, unless the story names its schemes.
     cat = await svc.catalogue_for(concept)
-    seen: set[str] = set()
-    for scheme in cat.certification_schemes:
-        if scheme.scope in seen or len(scheme.levels) < 2 or not scheme.credit_categories:
-            continue
-        seen.add(scheme.scope)
-        first = len(seen) == 1
+    for index, scheme in enumerate(certification_targets(cat.certification_schemes, plan["certification_schemes"])):
+        first = index == 0
         target = await svc.create_certification(
             pid,
             s.CertificationIn(

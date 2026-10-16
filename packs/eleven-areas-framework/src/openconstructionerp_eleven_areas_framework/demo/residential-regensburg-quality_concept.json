@@ -3,6 +3,7 @@
   "start_days": 190,
   "regime": "de_vob_b",
   "regime_before_construction": "de_vob_b",
+  "certification_schemes": ["dgnb_new_construction"],
   "packages": [
     {
       "ref": "PKG-STR",
