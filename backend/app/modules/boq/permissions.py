@@ -7,23 +7,23 @@ from app.core.permissions import Role, permission_registry
 
 def register_boq_permissions() -> None:
     """Register permissions for the BOQ module."""
-    # `boq.create` and `boq.update` are deliberately granted to VIEWER:
-    # every signed-in user (including freshly self-registered viewers and
-    # demo accounts) must be able to start AND fill an estimate. Otherwise
-    # `boq.create=VIEWER` produces empty BOQs the same user can't populate
-    # - the actual symptom reported in v2.6.23: "Failed to add positions -
-    # Missing permission: boq.update". The RBAC regression originally
-    # tracked as issue #101 only patched create; this completes that fix.
+    # `boq.update` is deliberately granted to VIEWER: a viewer invited to a
+    # project must be able to fill an estimate there (v2.6.23: "Failed to
+    # add positions - Missing permission: boq.update"). Project ownership /
+    # membership is enforced by the service layer, so a viewer can still
+    # only edit BOQs in projects they own or are invited to.
     #
-    # Project ownership / membership is enforced by the service layer, so
-    # a viewer can still only edit BOQs in projects they own or are
-    # invited to. Bulk import and delete remain editor-gated because the
-    # blast radius is much higher than a per-row edit.
+    # `boq.create` is EDITOR, the same rank as `boq.delete`. When create was
+    # VIEWER, a viewer could start estimates (new, from template, duplicate,
+    # revision) that the same viewer could never remove again, and the
+    # leftovers piled up for an admin to clean. Creating a BOQ is the same
+    # tier as creating the project it lives in (`projects.create=EDITOR`).
+    # Bulk import and delete stay editor-gated as well.
     # (internal schema lineage: ddc-lineage:a17f93c4-boq-01)
     permission_registry.register_module_permissions(
         "boq",
         {
-            "boq.create": Role.VIEWER,
+            "boq.create": Role.EDITOR,
             "boq.read": Role.VIEWER,
             "boq.update": Role.VIEWER,
             "boq.delete": Role.EDITOR,

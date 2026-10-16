@@ -4275,6 +4275,7 @@ const resource = {
     "boq.cost_risk_title": "Monte Carlo Cost Risk",
     "boq.cost_risk_variance_share": "Variance Share",
     "boq.create_boq": "Create BOQ",
+    "boq.create_needs_editor": "Creating an estimate needs the editor role.",
     "boq.create_from_template": "Create BOQ from Template",
     "boq.creating": "Creating...",
     "boq.date": "Date",

@@ -37,6 +37,10 @@ vi.mock('react-router-dom', async (importOriginal) => {
 });
 
 import { CreateBOQModal } from '../CreateBOQPage';
+import { useAuthStore } from '@/stores/useAuthStore';
+
+// Creating an estimate needs boq.create, editor and above.
+useAuthStore.setState({ userRole: 'editor' });
 
 afterEach(() => {
   cleanup();
