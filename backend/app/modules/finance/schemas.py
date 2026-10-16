@@ -1257,3 +1257,67 @@ class PayeeTotalsResponse(BaseModel):
     items: list[PayeeTotalResponse] = Field(default_factory=list)
     reportable_count: int = 0
     missing_tax_id: int = 0
+
+
+class OpenItemRowResult(BaseModel):
+    """What happened, or would happen, to one row of an open items file.
+
+    ``status`` is ``ready`` on a preview, ``imported`` once written, ``exists``
+    for an item an earlier import already carried over, and ``error`` with the
+    reason in ``message``.
+    """
+
+    row: int
+    status: str
+    message: str | None = None
+    #: Stable reason of an ``error`` or ``exists`` row, with ``params`` to fill
+    #: in, so the interface can say ``message`` in the reader's language.
+    code: str | None = None
+    params: dict[str, str] = Field(default_factory=dict)
+    direction: str | None = None
+    invoice_number: str | None = None
+    counterparty: str | None = None
+    contact_id: str | None = None
+    contact_name: str | None = None
+    invoice_date: str | None = None
+    due_date: str | None = None
+    currency_code: str | None = None
+    total: str | None = None
+    retention_held: str | None = None
+    open: str | None = None
+    paid: str | None = None
+    invoice_id: str | None = None
+
+
+class OpenItemControlTotal(BaseModel):
+    """Sum of the importable items per direction and currency.
+
+    The figures to tick against the old system's open item list before
+    importing: a receivable total that does not match means rows went missing.
+    """
+
+    direction: str
+    currency_code: str
+    count: int
+    total: str
+    retention_held: str
+    open: str
+
+
+class OpenItemsImportResponse(BaseModel):
+    """Outcome of an open items import, or of its preview.
+
+    The import is all or nothing: while any row has an error nothing is
+    written, and ``imported`` stays zero.
+    """
+
+    project_id: str
+    cutover_date: str
+    dry_run: bool
+    missing_columns: list[str] = Field(default_factory=list)
+    imported: int = 0
+    ready: int = 0
+    exists: int = 0
+    errors: int = 0
+    rows: list[OpenItemRowResult] = Field(default_factory=list)
+    control_totals: list[OpenItemControlTotal] = Field(default_factory=list)

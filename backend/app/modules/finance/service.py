@@ -39,6 +39,7 @@ from app.modules.finance.models import (
     Payment,
     ProjectBudget,
 )
+from app.modules.finance.open_items import OpenItem, RowProblem, normalise_tax_id
 from app.modules.finance.payee_totals import PayeeTotal, build_payee_totals
 from app.modules.finance.po_link import invoice_po_link
 from app.modules.finance.repository import (
@@ -330,6 +331,65 @@ def _compute_invoice_total(subtotal: str, tax: str) -> str:
 # (EN 16931 BR-CO-15), so a total that does not add up is not a preference
 # somebody expressed, it is a document that will be rejected downstream.
 INVOICE_AMOUNT_TOLERANCE = Decimal("0.02")
+
+
+def _name_key(name: object) -> str:
+    """A counterparty name folded for matching: case and spacing do not count."""
+    return " ".join(str(name or "").split()).casefold()
+
+
+def _match_contact(
+    item: OpenItem,
+    by_tax: dict[str, list[Any]],
+    by_name: dict[str, list[Any]],
+) -> tuple[Any | None, str, str, dict[str, str]]:
+    """The contact an open item names, or ``None`` with the reason.
+
+    Returns ``(contact, code, message, params)``; the last three are empty on a
+    match and say why otherwise, as :class:`RowProblem` does.
+
+    The tax number decides when the row gives one and a contact carries it. A
+    row whose tax number no contact carries falls back to the name, but not
+    onto a contact that carries a different tax number: that is another
+    company with the same name.
+    """
+    tax = normalise_tax_id(item.tax_id)
+    if tax:
+        hits = by_tax.get(tax, [])
+        if len(hits) == 1:
+            return hits[0], "", "", {}
+        if len(hits) > 1:
+            return (
+                None,
+                "contact_tax_ambiguous",
+                f"Several contacts carry the tax number {item.tax_id}; keep one of them.",
+                {"tax_id": item.tax_id},
+            )
+    if not item.counterparty:
+        return (
+            None,
+            "contact_tax_unknown",
+            f"No contact carries the tax number {item.tax_id}. Add the contact first.",
+            {"tax_id": item.tax_id},
+        )
+    hits = by_name.get(_name_key(item.counterparty), [])
+    if tax:
+        hits = [c for c in hits if not normalise_tax_id(c.vat_number)]
+    if len(hits) == 1:
+        return hits[0], "", "", {}
+    if len(hits) > 1:
+        return (
+            None,
+            "contact_name_ambiguous",
+            f"Several contacts are named {item.counterparty}; add the tax number to the row.",
+            {"name": item.counterparty},
+        )
+    return (
+        None,
+        "contact_name_unknown",
+        f"No contact named {item.counterparty}. Add or import the contacts first.",
+        {"name": item.counterparty},
+    )
 
 
 def _line_sum_tolerance(line_count: int) -> Decimal:
@@ -3156,6 +3216,204 @@ class FinanceService:
             threshold=threshold,
             threshold_currency=threshold_currency,
         )
+
+    async def import_open_items(
+        self,
+        *,
+        project_id: uuid.UUID,
+        checked: Sequence[OpenItem | RowProblem],
+        cutover_date: str,
+        dry_run: bool,
+        user_id: str | None,
+    ) -> dict[str, Any]:
+        """Carry the open receivables and payables of another system over to a project.
+
+        Each checked row is matched to a contact the caller can see, by tax
+        number first and then by name, and refused when the number is already
+        used on the project. A row an earlier import carried over is reported
+        as ``exists`` and left alone, so a corrected file can be imported again.
+
+        Nothing is written while any row has an error, or on a preview. Each
+        item becomes a posted invoice (approved when payable, sent when
+        receivable) holding its retention, and what was already paid on it
+        becomes one opening payment dated the cut-over day.
+
+        Returns:
+            The fields of :class:`OpenItemsImportResponse` except the missing
+            columns, which the router knows.
+        """
+        from app.core.tenant_scope import tenant_scope_owner
+        from app.modules.contacts.lookup import contact_display_name
+        from app.modules.contacts.models import Contact
+        from app.modules.projects.models import Project
+
+        project_currency = (
+            await self.session.execute(select(Project.currency).where(Project.id == project_id))
+        ).scalar_one_or_none() or ""
+
+        existing: dict[tuple[str, str], bool] = {}
+        for direction, number, meta in (
+            await self.session.execute(
+                select(Invoice.invoice_direction, Invoice.invoice_number, Invoice.metadata_).where(
+                    Invoice.project_id == project_id
+                )
+            )
+        ).all():
+            existing[(direction, str(number).casefold())] = isinstance(meta, dict) and bool(meta.get("opening_item"))
+
+        owner = await tenant_scope_owner(self.session, user_id)
+        stmt = select(Contact).where(Contact.is_active.is_(True))
+        if owner is not None:
+            from sqlalchemy import and_, or_
+
+            stmt = stmt.where(
+                or_(Contact.tenant_id == owner, and_(Contact.tenant_id.is_(None), Contact.created_by == owner))
+            )
+        contacts = list((await self.session.execute(stmt)).scalars().all())
+        by_tax: dict[str, list[Any]] = {}
+        by_name: dict[str, list[Any]] = {}
+        for contact in contacts:
+            tax = normalise_tax_id(contact.vat_number)
+            if tax:
+                by_tax.setdefault(tax, []).append(contact)
+            names = {_name_key(contact_display_name(contact))}
+            names.update(_name_key(getattr(contact, attr, None)) for attr in ("company_name", "legal_name"))
+            for name in names - {""}:
+                by_name.setdefault(name, []).append(contact)
+
+        rows: list[dict[str, Any]] = []
+        ready: list[tuple[OpenItem, Any, str, dict[str, Any]]] = []
+        for item in checked:
+            if isinstance(item, RowProblem):
+                rows.append(
+                    {
+                        "row": item.row,
+                        "status": "error",
+                        "message": item.message,
+                        "code": item.code,
+                        "params": item.params,
+                        "invoice_number": item.invoice_number or None,
+                    }
+                )
+                continue
+            currency = item.currency or str(project_currency).upper()
+            row: dict[str, Any] = {
+                "row": item.row,
+                "status": "ready",
+                "direction": item.direction,
+                "invoice_number": item.invoice_number,
+                "counterparty": item.counterparty or item.tax_id,
+                "invoice_date": item.invoice_date,
+                "due_date": item.due_date,
+                "currency_code": currency or None,
+                "total": str(item.total),
+                "retention_held": str(item.retention_held),
+                "open": str(item.open),
+                "paid": str(item.paid),
+            }
+            rows.append(row)
+            contact, code, why, params = _match_contact(item, by_tax, by_name)
+            if contact is None:
+                row.update(status="error", message=why, code=code, params=params)
+                continue
+            row.update(contact_id=str(contact.id), contact_name=contact_display_name(contact))
+            if not currency:
+                row.update(
+                    status="error",
+                    code="currency_missing",
+                    message="No currency: the row names none and the project has no currency set.",
+                )
+                continue
+            seen = existing.get((item.direction, item.invoice_number.casefold()))
+            if seen is True:
+                row.update(
+                    status="exists", code="already_imported", message="Already carried over by an earlier import."
+                )
+                continue
+            if seen is False:
+                row.update(
+                    status="error",
+                    code="number_used",
+                    params={"number": item.invoice_number},
+                    message=f"Invoice number {item.invoice_number} is already used on this project.",
+                )
+                continue
+            ready.append((item, contact, currency, row))
+
+        errors = sum(1 for r in rows if r["status"] == "error")
+        totals: dict[tuple[str, str], dict[str, Any]] = {}
+        for item, _contact, currency, _row in ready:
+            bucket = totals.setdefault(
+                (item.direction, currency),
+                {"count": 0, "total": Decimal("0"), "retention_held": Decimal("0"), "open": Decimal("0")},
+            )
+            bucket["count"] += 1
+            bucket["total"] += item.total
+            bucket["retention_held"] += item.retention_held
+            bucket["open"] += item.open
+        control_totals = [
+            {
+                "direction": direction,
+                "currency_code": currency,
+                "count": bucket["count"],
+                "total": str(bucket["total"]),
+                "retention_held": str(bucket["retention_held"]),
+                "open": str(bucket["open"]),
+            }
+            for (direction, currency), bucket in sorted(totals.items())
+        ]
+
+        imported = 0
+        if not dry_run and errors == 0:
+            for item, contact, currency, row in ready:
+                note = f"Carried over from the previous system at the cut-over on {cutover_date}."
+                invoice = await self.create_invoice(
+                    InvoiceCreate(
+                        project_id=project_id,
+                        contact_id=str(contact.id),
+                        invoice_direction=item.direction,
+                        invoice_number=item.invoice_number,
+                        invoice_date=item.invoice_date,
+                        due_date=item.due_date,
+                        currency_code=currency,
+                        amount_subtotal=str(item.total - item.tax),
+                        tax_amount=str(item.tax),
+                        retention_amount=str(item.retention_held),
+                        amount_total=str(item.total),
+                        status="approved" if item.direction == "payable" else "sent",
+                        notes=f"{note}\n{item.notes}" if item.notes else note,
+                        metadata={"opening_item": {"cutover_date": cutover_date, "source_row": item.row}},
+                    ),
+                    user_id,
+                )
+                if item.paid > 0:
+                    await self.create_payment(
+                        PaymentCreate(
+                            invoice_id=invoice.id,
+                            payment_date=cutover_date,
+                            amount=str(item.paid),
+                            currency_code=currency,
+                            reference="Paid before the cut-over",
+                            idempotency_key=hashlib.sha256(f"opening-item:{invoice.id}".encode()).hexdigest(),
+                            metadata={"opening_balance": True},
+                        ),
+                        actor_id=user_id,
+                    )
+                row.update(status="imported", invoice_id=str(invoice.id))
+                imported += 1
+            logger.info("Open items carried over to project %s: %d", project_id, imported)
+
+        return {
+            "project_id": str(project_id),
+            "cutover_date": cutover_date,
+            "dry_run": dry_run,
+            "imported": imported,
+            "ready": sum(1 for r in rows if r["status"] == "ready"),
+            "exists": sum(1 for r in rows if r["status"] == "exists"),
+            "errors": errors,
+            "rows": rows,
+            "control_totals": control_totals,
+        }
 
     async def _project_ids_of_entity(self, legal_entity_id: uuid.UUID) -> set[uuid.UUID]:
         """Projects the legal entity owns, with the unassigned ones when it is the default."""

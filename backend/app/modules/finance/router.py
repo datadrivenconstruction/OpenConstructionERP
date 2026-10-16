@@ -119,6 +119,7 @@ from app.modules.finance.schemas import (
     LedgerAccountUpdate,
     LedgerEntryResponse,
     LedgerTransactionResponse,
+    OpenItemsImportResponse,
     PayeeReturnInfo,
     PayeeTotalResponse,
     PayeeTotalsResponse,
@@ -1831,6 +1832,112 @@ async def get_payee_totals(
         media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": attachment_disposition(f"{form} {entity.code} {date_from} {date_to}.csv")},
     )
+
+
+# ── Open items carried over from another system (MUST be before /{invoice_id}) ──
+
+
+@router.get(
+    "/open-items/template/",
+    summary="Template for an open items import",
+    description="A CSV with the columns an open items import reads and two example rows.",
+)
+async def get_open_items_template(
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("finance.read")),
+) -> Response:
+    """Return the open items template as CSV."""
+    from app.modules.finance.open_items import template_csv
+
+    return Response(
+        content=template_csv().encode("utf-8-sig"),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": attachment_disposition("open_items_template.csv")},
+    )
+
+
+@router.post(
+    "/open-items/import/",
+    response_model=OpenItemsImportResponse,
+    summary="Carry open receivables and payables over from another system",
+    description=(
+        "Upload a CSV or Excel list of the invoices still open on the cut-over day. Each row becomes a posted "
+        "invoice on the project, matched to an existing contact by tax number or name, and what was already "
+        "paid on it becomes one opening payment dated the cut-over day. dry_run=true (the default) checks the "
+        "file and returns the rows with control totals without writing. The import is all or nothing: while "
+        "any row has an error nothing is written. Rows an earlier import carried over are skipped."
+    ),
+)
+async def import_open_items(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    cutover_date: str = Query(..., pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    dry_run: bool = Query(default=True),
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    _perm: None = Depends(RequirePermission("finance.create")),
+    service: FinanceService = Depends(_get_service),
+) -> OpenItemsImportResponse:
+    """Check, and unless it is a preview import, a file of open items."""
+    from datetime import date as _date
+
+    from app.modules.finance.open_items import check_rows, read_table
+
+    await _require_project_access(session, project_id, user_id)
+    try:
+        cutover = _date.fromisoformat(cutover_date)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="cutover_date is not a valid date.") from exc
+    if cutover > _date.today():
+        raise HTTPException(status_code=422, detail="The cut-over date cannot be in the future.")
+
+    filename = (file.filename or "").lower()
+    if not filename.endswith((".xlsx", ".csv")):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.",
+        )
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty.")
+    if filename.endswith(".xlsx"):
+        try:
+            require_signature(content[:SIGNATURE_BYTES_REQUIRED], frozenset({"zip"}), filename=file.filename)
+        except FileSignatureMismatch as exc:
+            raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=str(exc)) from exc
+        reject_if_xlsx_bomb(content)
+    try:
+        missing, rows = read_table(content, filename)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Unexpected error reading an open items file: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The file could not be read. Check the format and try again.",
+        ) from exc
+    if missing:
+        return OpenItemsImportResponse(
+            project_id=str(project_id), cutover_date=cutover_date, dry_run=dry_run, missing_columns=missing
+        )
+    if not rows:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No data rows found in file. Check that the header row names the columns.",
+        )
+    if len(rows) > 5000:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The file has more than 5000 rows. Split it, for example by direction or currency.",
+        )
+    result = await service.import_open_items(
+        project_id=project_id,
+        checked=check_rows(rows, cutover_date=cutover_date),
+        cutover_date=cutover_date,
+        dry_run=dry_run,
+        user_id=user_id,
+    )
+    return OpenItemsImportResponse(**result)
 
 
 # ── Budgets (MUST be before /{invoice_id}) ──────────────────────────────────
