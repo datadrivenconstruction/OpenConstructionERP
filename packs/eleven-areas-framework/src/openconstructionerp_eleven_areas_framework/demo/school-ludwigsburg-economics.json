@@ -5,8 +5,8 @@
   "build_years": 3,
   "approve": false,
   "proposal_note": {
-    "en": "Cost frame, business case and financing agreed with the municipal council committee and the funding bodies.",
-    "de": "Kostenrahmen, Business Case und Finanzierung mit dem Gemeinderatsausschuss und den Fördergebern abgestimmt."
+    "en": "Cost frame, business case and financing agreed with the municipal council committee and the funding bodies. The school is social infrastructure: it is assessed on its whole-life cost, not on a return, so its net present value is negative by design.",
+    "de": "Kostenrahmen, Business Case und Finanzierung mit dem Gemeinderatsausschuss und den Fördergebern abgestimmt. Die Schule ist soziale Infrastruktur: Sie wird nach ihren Lebenszykluskosten beurteilt, nicht nach einer Rendite, ihr Kapitalwert ist daher planmäßig negativ."
   },
   "investment_label": {
     "en": "Construction and project costs",

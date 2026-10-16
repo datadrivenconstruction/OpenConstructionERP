@@ -95,6 +95,14 @@ def test_each_demo_story_opens_its_economics_without_a_register_notice() -> None
         assert all(p.set_up_on for p in profile.process), demo_id
 
 
+def test_the_school_explains_its_negative_value_as_social_infrastructure() -> None:
+    # A municipal school earns no return; its business case reads on whole-life cost.
+    de = load_profile(story_for("school-ludwigsburg"), "de", TODAY).proposal_note
+    en = load_profile(story_for("school-ludwigsburg"), "en", TODAY).proposal_note
+    assert "soziale Infrastruktur" in de and "Lebenszykluskosten" in de
+    assert "social infrastructure" in en and "whole-life cost" in en
+
+
 def test_the_story_dates_are_offsets_from_the_install_day() -> None:
     later = date(2027, 1, 1)
     a = load_profile(story_for("residential-regensburg"), "de", TODAY)
