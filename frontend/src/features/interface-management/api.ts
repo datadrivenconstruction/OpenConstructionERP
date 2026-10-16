@@ -126,6 +126,10 @@ export interface InterfaceRef {
   need_by_date: string | null;
   agreed_date: string | null;
   open_action_count: number;
+  /** Days on the register at the report's as-of date. */
+  age_days?: number | null;
+  /** Days past the need-by date, ``null`` when not overdue. */
+  days_overdue?: number | null;
 }
 
 /** Health rollup for one originating work package. */
@@ -165,6 +169,54 @@ export interface InterfaceRegister {
   overdue: InterfaceRef[];
   disputed: InterfaceRef[];
   work_packages: WorkPackageHealth[];
+  open_count: number;
+  overdue_count: number;
+  /** Open interfaces by days on the register: 0_7, 8_30, 31_60, 61_90, over_90, unknown. */
+  ageing: Record<string, number>;
+  /** Overdue interfaces by days past need-by: 1_7, 8_30, 31_60, over_60. */
+  overdue_ageing: Record<string, number>;
+  /** Mean age of the open interfaces in days, as a decimal string. */
+  average_open_age_days: string | null;
+  oldest_open_age_days: number | null;
+  max_days_overdue: number | null;
+}
+
+/** Band order for the ageing views (matches the backend register core). */
+export const AGEING_BANDS = ['0_7', '8_30', '31_60', '61_90', 'over_90'] as const;
+export const OVERDUE_BANDS = ['1_7', '8_30', '31_60', 'over_60'] as const;
+
+/** One entry in an interface's status history. */
+export interface InterfaceHistoryEntry {
+  id: string;
+  interface_id: string;
+  /** created | status_changed | approval_requested | approval_approved | approval_rejected | approval_cancelled */
+  event: string;
+  from_status: string | null;
+  to_status: string | null;
+  actor_id: string | null;
+  actor_name: string | null;
+  comment: string | null;
+  approval_instance_id: string | null;
+  changed_at: string;
+}
+
+/** One rule outcome of the ``interface_management`` rule set. */
+export interface InterfaceValidationResult {
+  rule_id: string;
+  severity: string;
+  passed: boolean;
+  message: string;
+  element_ref: string | null;
+}
+
+/** Traffic-light result of the register's rule set. */
+export interface InterfaceValidationReport {
+  project_id: string;
+  status: string;
+  errors: number;
+  warnings: number;
+  passed: number;
+  results: InterfaceValidationResult[];
 }
 
 /* -- Write payloads -------------------------------------------------------- */
@@ -185,10 +237,12 @@ export interface InterfaceWritePayload {
   need_by_date?: string | null;
   location?: string | null;
   notes?: string | null;
-  /** Soft link to the RFI that resolves this interface (id string, no FK). */
+  /** The RFI that resolves this interface; must be an RFI of the same project. */
   rfi_id?: string | null;
-  /** Soft link to the programme activity this interface gates (activity id). */
+  /** The programme activity this interface gates; must be in one of the project's schedules. */
   schedule_activity_id?: string | null;
+  /** Note recorded in the status history when this write moves the status. */
+  status_comment?: string | null;
 }
 
 /** One option for the linked-reference pickers (RFI / schedule activity). */
@@ -326,6 +380,17 @@ export async function fetchWorkPackageHealth(
 
 export async function fetchRegister(projectId: string): Promise<InterfaceRegister> {
   return apiGet<InterfaceRegister>(`${BASE}/${projectId}/register`);
+}
+
+export async function fetchInterfaceHistory(
+  projectId: string,
+  interfaceId: string,
+): Promise<InterfaceHistoryEntry[]> {
+  return apiGet<InterfaceHistoryEntry[]>(`${BASE}/${projectId}/interfaces/${interfaceId}/history`);
+}
+
+export async function fetchRegisterValidation(projectId: string): Promise<InterfaceValidationReport> {
+  return apiGet<InterfaceValidationReport>(`${BASE}/${projectId}/validation`);
 }
 
 /* -- Linked-reference picker options --------------------------------------- */

@@ -137425,6 +137425,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "events.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -137432,7 +137433,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_interface_management",
@@ -137675,6 +137677,72 @@
               "back_populates": "actions"
             }
           ]
+        },
+        {
+          "class_name": "InterfaceHistoryEntry",
+          "tablename": "oe_interface_mgmt_history",
+          "docstring": "One entry in an interface's status history.\n\nWritten by the service in the same transaction as the change it records, so\nan interface can never move without leaving a trace. ``event`` names what\nhappened (``created``, ``status_changed``, ``approval_requested``,\n``approval_approved``, ``approval_rejected``, ``approval_cancelled``);\n``from_status`` / ``to_status`` carry the move (equal when the event did not\nmove the status, e.g. an approval that was requested or rejected).\n``approval_instance_id`` is a soft link to the approval-routes instance the\nentry came from, with no foreign key, like every cross-module link here.\n\nForeign keys are named explicitly: the platform naming convention would spell\nthem out past PostgreSQL's 63-character identifier limit.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "interface_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_interface_mgmt_interface.id"
+            },
+            {
+              "name": "event",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "from_status",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "to_status",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "actor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "comment",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "approval_instance_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "changed_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -137740,6 +137808,18 @@
           "path": "/projects/{project_id}/work-package-health",
           "handler": "get_work_package_health",
           "response_model": "WorkPackageHealthReportResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/interfaces/{interface_id}/history",
+          "handler": "get_interface_history",
+          "response_model": "list[InterfaceHistoryResponse]"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/validation",
+          "handler": "get_register_validation",
+          "response_model": "InterfaceValidationResponse"
         }
       ],
       "schemas": [
@@ -137828,7 +137908,8 @@
             },
             {
               "name": "rfi_id",
-              "type": "str | None"
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "schedule_activity_id",
@@ -137934,7 +138015,8 @@
             },
             {
               "name": "rfi_id",
-              "type": "str | None"
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "schedule_activity_id",
@@ -137943,6 +138025,10 @@
             },
             {
               "name": "location",
+              "type": "str | None"
+            },
+            {
+              "name": "status_comment",
               "type": "str | None"
             },
             {
@@ -138275,6 +138361,16 @@
               "name": "open_action_count",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "age_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "days_overdue",
+              "type": "int | None",
+              "default": "None"
             }
           ]
         },
@@ -138372,6 +138468,157 @@
             {
               "name": "work_packages",
               "type": "list[WorkPackageHealthResponse]"
+            },
+            {
+              "name": "open_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "overdue_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "ageing",
+              "type": "dict[str, int]"
+            },
+            {
+              "name": "overdue_ageing",
+              "type": "dict[str, int]"
+            },
+            {
+              "name": "average_open_age_days",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "oldest_open_age_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "max_days_overdue",
+              "type": "int | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "InterfaceHistoryResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One entry in an interface's status history.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "interface_id",
+              "type": "UUID"
+            },
+            {
+              "name": "event",
+              "type": "str"
+            },
+            {
+              "name": "from_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "to_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "actor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "actor_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "comment",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "approval_instance_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "changed_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "InterfaceValidationResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One rule outcome from the ``interface_management`` rule set.",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "passed",
+              "type": "bool"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "InterfaceValidationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Traffic-light result of the ``interface_management`` rule set for one project.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "errors",
+              "type": "int"
+            },
+            {
+              "name": "warnings",
+              "type": "int"
+            },
+            {
+              "name": "passed",
+              "type": "int"
+            },
+            {
+              "name": "results",
+              "type": "list[InterfaceValidationResult]"
             }
           ]
         },
@@ -138414,12 +138661,15 @@
         }
       ],
       "import_dependencies": [
+        "approval_routes",
         "bim_hub",
         "contacts",
         "project_governance",
         "projects",
         "rfi",
-        "subcontractors"
+        "schedule",
+        "subcontractors",
+        "users"
       ]
     },
     {
@@ -267935,10 +268185,10 @@
     },
     {
       "name": "interface-management",
-      "ts_files": 4,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 4
+      "test_files": 1,
+      "total_files": 7
     },
     {
       "name": "issues",
@@ -269435,12 +269685,15 @@
       "users"
     ],
     "interface_management": [
+      "approval_routes",
       "bim_hub",
       "contacts",
       "project_governance",
       "projects",
       "rfi",
-      "subcontractors"
+      "schedule",
+      "subcontractors",
+      "users"
     ],
     "jobs": [],
     "labor_rates": [
@@ -270161,14 +270414,14 @@
   "statistics": {
     "backend_modules": 211,
     "modules_with_manifests": 209,
-    "total_models": 768,
-    "total_columns": 8932,
+    "total_models": 769,
+    "total_columns": 8941,
     "total_relationships": 238,
-    "total_routes": 4533,
-    "total_schemas": 3982,
-    "total_python_files": 2689,
+    "total_routes": 4535,
+    "total_schemas": 3985,
+    "total_python_files": 2691,
     "frontend_features": 208,
-    "frontend_ts_files": 3452,
+    "frontend_ts_files": 3455,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

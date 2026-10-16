@@ -36,6 +36,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   fetchWorkPackageHealth,
+  fetchRegister,
+  fetchRegisterValidation,
   fetchInterfaces,
   fetchActions,
   createInterface,
@@ -63,7 +65,10 @@ import {
   type WorkPackageHealth,
 } from './api';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
+import { ApprovalInstanceCard } from '@/features/approval-routes';
 import { buildInterfaceManagementInsights } from './interfaceManagementInsights';
+import { InterfaceHistoryPanel } from './InterfaceHistoryPanel';
+import { RegisterAgeingPanel } from './RegisterAgeingPanel';
 
 /* -- Vocabulary display maps ---------------------------------------------- */
 
@@ -248,6 +253,7 @@ interface InterfaceFormState {
   notes: string;
   rfi_id: string;
   schedule_activity_id: string;
+  status_comment: string;
 }
 
 const EMPTY_FORM: InterfaceFormState = {
@@ -268,6 +274,7 @@ const EMPTY_FORM: InterfaceFormState = {
   notes: '',
   rfi_id: '',
   schedule_activity_id: '',
+  status_comment: '',
 };
 
 function formFromRecord(rec: InterfaceRecord): InterfaceFormState {
@@ -298,6 +305,7 @@ function formFromRecord(rec: InterfaceRecord): InterfaceFormState {
     notes: rec.notes ?? '',
     rfi_id: rec.rfi_id ?? '',
     schedule_activity_id: rec.schedule_activity_id ?? '',
+    status_comment: '',
   };
 }
 
@@ -320,6 +328,7 @@ function formToPayload(form: InterfaceFormState): InterfaceWritePayload {
     notes: orNull(form.notes),
     rfi_id: orNull(form.rfi_id),
     schedule_activity_id: orNull(form.schedule_activity_id),
+    status_comment: orNull(form.status_comment),
   };
 }
 
@@ -521,6 +530,25 @@ function InterfaceModal({
               </select>
             </div>
           </div>
+
+          {initial && form.status !== initial.status && (
+            <div>
+              <label htmlFor="if-status-comment" className="mb-1.5 block text-sm font-medium text-content-primary">
+                {t('interface_management.field_status_comment', { defaultValue: 'Comment on the status change' })}
+              </label>
+              <textarea
+                id="if-status-comment"
+                value={form.status_comment}
+                rows={2}
+                maxLength={2000}
+                onChange={(e) => set('status_comment', e.target.value)}
+                placeholder={t('interface_management.status_comment_placeholder', {
+                  defaultValue: 'Why the status changes; kept in the status history',
+                })}
+                className={textareaCls}
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -1107,6 +1135,15 @@ const InterfaceRow = React.memo(function InterfaceRow({
             </div>
           )}
 
+          <ApprovalInstanceCard
+            targetKind="interface"
+            targetId={iface.id}
+            projectId={iface.project_id}
+            showEmpty
+          />
+
+          <InterfaceHistoryPanel projectId={iface.project_id} interfaceId={iface.id} />
+
           <ActionsPanel
             interfaceId={iface.id}
             actions={actions}
@@ -1170,6 +1207,19 @@ export function InterfaceManagementPage() {
   const actionsQuery = useQuery({
     queryKey: ['interface-management', 'actions', projectId],
     queryFn: () => fetchActions(projectId),
+    enabled: !!projectId,
+  });
+
+  // Register statistics (ageing) and the register checks; both degrade to
+  // nothing on failure so the register itself always renders.
+  const registerQuery = useQuery({
+    queryKey: ['interface-management', 'register', projectId],
+    queryFn: () => fetchRegister(projectId),
+    enabled: !!projectId,
+  });
+  const validationQuery = useQuery({
+    queryKey: ['interface-management', 'validation', projectId],
+    queryFn: () => fetchRegisterValidation(projectId),
     enabled: !!projectId,
   });
 
@@ -1425,6 +1475,14 @@ export function InterfaceManagementPage() {
             </div>
           )}
         </section>
+
+        <div className="mt-5">
+          <RegisterAgeingPanel
+            register={registerQuery.data}
+            validation={validationQuery.data}
+            interfaces={interfaces}
+          />
+        </div>
 
         {/* Toolbar */}
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
