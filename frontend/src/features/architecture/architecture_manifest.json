@@ -160998,6 +160998,7 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "deliveries.py",
         "dependencies.py",
         "login_email.py",
         "manifest.py",
@@ -161612,6 +161613,32 @@
           "handler": "portal_me_payment_agreements",
           "response_model": "PortalAgreementSummaryList",
           "request_schema": "PortalService"
+        },
+        {
+          "method": "GET",
+          "path": "/me/purchase-orders",
+          "handler": "portal_me_purchase_orders",
+          "response_model": "PortalPurchaseOrderList"
+        },
+        {
+          "method": "POST",
+          "path": "/me/purchase-orders/{po_id}/documents",
+          "handler": "portal_me_upload_delivery_document",
+          "response_model": "PortalUploadedDocument",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "POST",
+          "path": "/me/deliveries",
+          "handler": "portal_me_submit_delivery",
+          "response_model": "PortalDeliveryEntry",
+          "request_schema": "PortalDeliverySubmit"
+        },
+        {
+          "method": "GET",
+          "path": "/me/deliveries",
+          "handler": "portal_me_deliveries",
+          "response_model": "PortalDeliveryList"
         }
       ],
       "schemas": [
@@ -163044,6 +163071,332 @@
               "default": "0"
             }
           ]
+        },
+        {
+          "class_name": "PortalPOLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One order line as the supplier sees it.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity_ordered",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "quantity_received",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "required_certificate_type",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "requires_inspection",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalPurchaseOrderEntry",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A purchase order shared with the supplier.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_number",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "delivery_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currency_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "can_deliver",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "lines",
+              "type": "list[PortalPOLine]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalCertificateType",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A certificate type the supplier may send, from the procurement catalogue.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalPurchaseOrderList",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Purchase orders the portal user may see, with the certificate types a line may need.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PortalPurchaseOrderEntry]"
+            },
+            {
+              "name": "total",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "certificate_types",
+              "type": "list[PortalCertificateType]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalDeliveryCertificate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A material certificate the supplier sends with a delivery line.",
+          "fields": [
+            {
+              "name": "certificate_type",
+              "type": "str"
+            },
+            {
+              "name": "certificate_number",
+              "type": "str"
+            },
+            {
+              "name": "issuer",
+              "type": "str | None"
+            },
+            {
+              "name": "issue_date",
+              "type": "str | None"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "batch_number",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalDeliveryLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The quantity of one order line in the delivery.",
+          "fields": [
+            {
+              "name": "po_item_id",
+              "type": "UUID"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal"
+            },
+            {
+              "name": "batch_lot",
+              "type": "str | None"
+            },
+            {
+              "name": "certificates",
+              "type": "list[PortalDeliveryCertificate]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalDeliverySubmit",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A delivery the supplier submits against one purchase order.",
+          "fields": [
+            {
+              "name": "po_id",
+              "type": "UUID"
+            },
+            {
+              "name": "delivery_note_number",
+              "type": "str"
+            },
+            {
+              "name": "delivery_date",
+              "type": "date"
+            },
+            {
+              "name": "delivery_note_document_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            },
+            {
+              "name": "lines",
+              "type": "list[PortalDeliveryLine]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalDeliveryLineEntry",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One line of a submitted delivery.",
+          "fields": [
+            {
+              "name": "po_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "quantity_received",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "batch_lot",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "certificate_count",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalDeliveryEntry",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A delivery the supplier submitted, with where it stands on site.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_number",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "delivery_note_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "receipt_date",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "lines",
+              "type": "list[PortalDeliveryLineEntry]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalDeliveryList",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Deliveries the portal user submitted.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PortalDeliveryEntry]"
+            },
+            {
+              "name": "total",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalUploadedDocument",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A file the supplier uploaded for a delivery.",
+          "fields": [
+            {
+              "name": "document_id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -163052,6 +163405,7 @@
         "contracts",
         "documents",
         "finance",
+        "procurement",
         "projects",
         "reporting",
         "schedule",
@@ -165565,6 +165919,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "certificates.py",
         "cost_spine.py",
         "events.py",
         "export_routes.py",
@@ -165575,6 +165930,7 @@
         "pdf_export.py",
         "pdf_translations.py",
         "permissions.py",
+        "receiving.py",
         "repository.py",
         "requisition_router.py",
         "requisition_service.py",
@@ -165837,6 +166193,18 @@
               "annotation": "Mapped[int]",
               "sql_type": "Integer",
               "nullable": false
+            },
+            {
+              "name": "required_certificate_type",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "requires_inspection",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
             }
           ],
           "relationships": [
@@ -165938,6 +166306,30 @@
               "nullable": true
             },
             {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "portal_user_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "approval_instance_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "inspection_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "metadata_",
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
@@ -166023,6 +166415,91 @@
               "type": "many-to-one",
               "annotation": "Mapped['GoodsReceipt']",
               "back_populates": "items"
+            },
+            {
+              "name": "certificates",
+              "type": "one-to-many",
+              "annotation": "Mapped[list['GoodsReceiptCertificate']]",
+              "back_populates": "gr_item"
+            }
+          ]
+        },
+        {
+          "class_name": "GoodsReceiptCertificate",
+          "tablename": "oe_procurement_gr_cert",
+          "docstring": "An inspection document delivered with the material on one receipt line.\n\nTypically an EN 10204 certificate (2.1, 2.2, 3.1, 3.2), but the type is a\ncode from the certificate-type catalogue, which is data: a project or a\ncountry pack can add its own types without a schema change. The batch or\nheat number is what ties the document to the physical material, so the\nreceipt validation compares it with the batch recorded on the line.",
+          "columns": [
+            {
+              "name": "receipt_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_procurement_goods_receipt.id"
+            },
+            {
+              "name": "gr_item_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_procurement_gr_item.id"
+            },
+            {
+              "name": "certificate_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "certificate_number",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "issuer",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "issue_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "document_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "batch_number",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": [
+            {
+              "name": "gr_item",
+              "type": "many-to-one",
+              "annotation": "Mapped['GoodsReceiptItem']",
+              "back_populates": "certificates"
             }
           ]
         },
@@ -166324,7 +166801,34 @@
           "path": "/goods-receipts/{gr_id}/confirm/",
           "handler": "confirm_goods_receipt",
           "response_model": "GRResponse",
+          "request_schema": "GRConfirmRequest | None"
+        },
+        {
+          "method": "GET",
+          "path": "/goods-receipts/{gr_id}/readiness/",
+          "handler": "goods_receipt_readiness",
+          "response_model": "GRReadinessResponse",
           "request_schema": "ProcurementService"
+        },
+        {
+          "method": "POST",
+          "path": "/goods-receipts/{gr_id}/certificates/",
+          "handler": "add_goods_receipt_certificate",
+          "response_model": "GRResponse",
+          "request_schema": "GRCertificateAdd"
+        },
+        {
+          "method": "DELETE",
+          "path": "/goods-receipts/{gr_id}/certificates/{certificate_id}/",
+          "handler": "delete_goods_receipt_certificate",
+          "response_model": "GRResponse",
+          "request_schema": "ProcurementService"
+        },
+        {
+          "method": "GET",
+          "path": "/certificate-types/",
+          "handler": "list_certificate_types",
+          "response_model": "list[CertificateTypeResponse]"
         },
         {
           "method": "GET",
@@ -166427,6 +166931,19 @@
           "handler": "committed_by_position",
           "response_model": "CommittedByPositionListResponse",
           "request_schema": "ProcurementService"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{po_id}/items/{item_id}/requirements/",
+          "handler": "update_po_item_requirements",
+          "response_model": "POResponse",
+          "request_schema": "POItemRequirementsUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/{po_id}/payment-release/",
+          "handler": "po_payment_release",
+          "request_schema": "ProcurementService"
         }
       ],
       "schemas": [
@@ -166478,6 +166995,15 @@
             {
               "name": "sort_order",
               "type": "int"
+            },
+            {
+              "name": "required_certificate_type",
+              "type": "str | None"
+            },
+            {
+              "name": "requires_inspection",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -166745,12 +167271,40 @@
               "default": "0"
             },
             {
+              "name": "required_certificate_type",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "requires_inspection",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
             {
               "name": "updated_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "POItemRequirementsUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Change what the delivery of one order line must arrive with.\n\nA quality requirement, not a commitment figure: it moves no money, so it\nmay be corrected after approval while the line is still being delivered.\nFields left out stay as they are.",
+          "fields": [
+            {
+              "name": "required_certificate_type",
+              "type": "str | None"
+            },
+            {
+              "name": "requires_inspection",
+              "type": "bool | None",
+              "default": "None"
             }
           ]
         },
@@ -167095,6 +167649,157 @@
           ]
         },
         {
+          "class_name": "GRCertificateCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A material certificate delivered with one receipt line.",
+          "fields": [
+            {
+              "name": "certificate_type",
+              "type": "str"
+            },
+            {
+              "name": "certificate_number",
+              "type": "str"
+            },
+            {
+              "name": "issuer",
+              "type": "str | None"
+            },
+            {
+              "name": "issue_date",
+              "type": "str | None"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "batch_number",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "GRCertificateAdd",
+          "bases": [
+            "GRCertificateCreate"
+          ],
+          "docstring": "Add a certificate to one line of a draft goods receipt.",
+          "fields": [
+            {
+              "name": "gr_item_id",
+              "type": "UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "GRCertificateResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A material certificate as stored on a receipt line.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "receipt_id",
+              "type": "UUID"
+            },
+            {
+              "name": "gr_item_id",
+              "type": "UUID"
+            },
+            {
+              "name": "certificate_type",
+              "type": "str"
+            },
+            {
+              "name": "certificate_number",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "issuer",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "issue_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "batch_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "source",
+              "type": "str",
+              "default": "'site'"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "CertificateTypeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One entry of the certificate-type catalogue.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "family",
+              "type": "str"
+            },
+            {
+              "name": "rank",
+              "type": "int"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "standard",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "designation",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "specific_inspection",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "validated_by",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
           "class_name": "GRItemCreate",
           "bases": [
             "BaseModel"
@@ -167130,6 +167835,10 @@
             {
               "name": "serial_numbers",
               "type": "list[str] | None"
+            },
+            {
+              "name": "certificates",
+              "type": "list[GRCertificateCreate]"
             }
           ]
         },
@@ -167226,6 +167935,10 @@
               "default": "None"
             },
             {
+              "name": "certificates",
+              "type": "list[GRCertificateResponse]"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -167283,6 +167996,26 @@
               "type": "list[GRItemResponse]"
             },
             {
+              "name": "source",
+              "type": "str",
+              "default": "'site'"
+            },
+            {
+              "name": "portal_user_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "approval_instance_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "inspection_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -167312,6 +168045,135 @@
             {
               "name": "description",
               "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "GRConfirmRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the person confirming a receipt chooses to start with it.\n\nNothing starts on its own: the confirm dialog shows the configured route and\nwhether an inspection is due, and the person confirming ticks each box.\n``approval_route_id`` picks among several routes; with exactly one route\nconfigured for goods receipts on the project it may be left out.",
+          "fields": [
+            {
+              "name": "start_approval_route",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "approval_route_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "create_inspection",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "GRRouteOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An approval route the project has configured for goods receipts.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "GRReadinessLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One delivered line as the confirm dialog shows it: what it needs and what it brought.",
+          "fields": [
+            {
+              "name": "gr_item_id",
+              "type": "UUID"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "quantity_received",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "batch_lot",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "required_certificate_type",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "requires_inspection",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "certificates",
+              "type": "list[GRCertificateResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "GRReadinessResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What confirming a draft receipt would run into, read without changing it.",
+          "fields": [
+            {
+              "name": "gr_id",
+              "type": "UUID"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "validation",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "can_confirm",
+              "type": "bool"
+            },
+            {
+              "name": "approval_routes",
+              "type": "list[GRRouteOption]"
+            },
+            {
+              "name": "inspection_due",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "inspection_lines",
+              "type": "list[str]"
+            },
+            {
+              "name": "lines",
+              "type": "list[GRReadinessLine]"
             }
           ]
         },
@@ -168095,11 +168957,14 @@
         }
       ],
       "import_dependencies": [
+        "approval_routes",
         "bid_management",
         "boq",
         "contacts",
         "costmodel",
+        "documents",
         "finance",
+        "inspections",
         "projects",
         "rfq_bidding",
         "subcontractors",
@@ -198905,6 +199770,7 @@
         "inspections",
         "ncr",
         "permits",
+        "procurement",
         "project_governance",
         "projects",
         "qms",
@@ -268110,10 +268976,10 @@
     },
     {
       "name": "portal",
-      "ts_files": 21,
+      "ts_files": 23,
       "css_files": 0,
-      "test_files": 5,
-      "total_files": 21
+      "test_files": 6,
+      "total_files": 23
     },
     {
       "name": "portfolio",
@@ -268159,10 +269025,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 30,
+      "ts_files": 33,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 30
+      "test_files": 13,
+      "total_files": 33
     },
     {
       "name": "procurement_concept",
@@ -269632,6 +270498,7 @@
       "contracts",
       "documents",
       "finance",
+      "procurement",
       "projects",
       "reporting",
       "schedule",
@@ -269674,11 +270541,14 @@
       "projects"
     ],
     "procurement": [
+      "approval_routes",
       "bid_management",
       "boq",
       "contacts",
       "costmodel",
+      "documents",
       "finance",
+      "inspections",
       "projects",
       "rfq_bidding",
       "subcontractors",
@@ -269814,6 +270684,7 @@
       "inspections",
       "ncr",
       "permits",
+      "procurement",
       "project_governance",
       "projects",
       "qms",
@@ -270161,14 +271032,14 @@
   "statistics": {
     "backend_modules": 211,
     "modules_with_manifests": 209,
-    "total_models": 768,
-    "total_columns": 8932,
-    "total_relationships": 238,
-    "total_routes": 4533,
-    "total_schemas": 3982,
-    "total_python_files": 2689,
+    "total_models": 769,
+    "total_columns": 8948,
+    "total_relationships": 240,
+    "total_routes": 4543,
+    "total_schemas": 4002,
+    "total_python_files": 2692,
     "frontend_features": 208,
-    "frontend_ts_files": 3452,
+    "frontend_ts_files": 3457,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
