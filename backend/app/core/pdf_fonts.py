@@ -109,19 +109,16 @@ face could not draw escalates whatever the reason: Cyrillic and Greek get the
 same treatment as Han, which a range test named for one script would never have
 given them.
 
-Known limitation, right-to-left scripts. Arabic and Hebrew escalate to the
-bundled Unicode face like any other script this module cannot draw in the base
-face, and that face has the glyphs, so the correct codepoints reach the content
-stream and a reader can select and copy the text. What this module does not do
-is lay them out. There is no bidirectional reordering and no contextual
-shaping, so Arabic letters are drawn in their isolated forms rather than joined
-to their neighbours, and both scripts are drawn in logical order rather than
-visual order. On the page that reads backwards. The choice is deliberate: boxes
-destroy the codepoints and cannot be recovered by anything downstream, whereas
-this keeps the data correct and gets the presentation wrong, which is the
-better failure on a document whose text has to be verifiable against the
-structured data beside it. It is still wrong, and implementing bidi and shaping
-is the fix.
+Right-to-left scripts. Arabic, Persian, Urdu and Hebrew escalate to the
+bundled Unicode face like any other script the base face cannot draw, and that
+face has their glyphs, including the Arabic presentation forms, except two
+Urdu letters (heh goal and yeh barree); an Urdu string escalates one rung
+further, to the bundled Noto Naskh Arabic, which has all of them. Shaping and
+order are handled by :mod:`app.core.pdf_rtl`, which this module installs into
+reportlab at import: letters are joined into their positional forms, each line
+is put into visual order by the Unicode Bidirectional Algorithm, and an
+Arabic or Hebrew paragraph is drawn right-aligned. The text layer then carries
+the presentation forms in visual order, which is what a reader extracts.
 
 ``register_pdf_fonts()`` is safe to call from many generators and many times;
 it registers at most once and never raises if the bundled TTFs are missing
@@ -137,6 +134,8 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from threading import Lock
 from typing import Any
+
+from app.core.pdf_rtl import install_reportlab_rtl, text_direction
 
 logger = logging.getLogger(__name__)
 
@@ -579,8 +578,27 @@ _BUNDLED_COMPLEX: dict[str, str] = {
     DEVANAGARI_FONT: "noto/NotoSansDevanagari-Regular.ttf",
 }
 
+#: The bundled Arabic-script face, for what the Unicode face cannot draw.
+#: DejaVu carries every letter and positional form Arabic and Persian need, so
+#: those stay in it; it lacks two of Urdu's commonest letters, heh goal and yeh
+#: barree, and an Urdu string reaches this rung for them. Noto Naskh Arabic
+#: carries the full presentation-form blocks, which matters because
+#: :mod:`app.core.pdf_rtl` shapes by substituting those codepoints. Unhinted,
+#: 159 KB, SIL Open Font License 1.1.
+ARABIC_FONT = "NotoNaskhArabic"
+
+_BUNDLED_RTL: dict[str, str] = {
+    ARABIC_FONT: "noto/NotoNaskhArabic-Regular.ttf",
+}
+
+#: Every bundled face :func:`register_complex_font` can register.
+_BUNDLED_FACES: dict[str, str] = {**_BUNDLED_COMPLEX, **_BUNDLED_RTL}
+
 #: Faces whose scripts are wrong without shaping rather than merely unkerned.
 #: Read by :func:`pdf_shaping_for_text` and by :func:`pdf_style_for_text`.
+#: The Arabic face is deliberately not one of them: its text arrives already
+#: shaped and in visual order from :mod:`app.core.pdf_rtl`, and running
+#: HarfBuzz over that again would reverse it a second time.
 _SHAPED_FACES = frozenset(_BUNDLED_COMPLEX)
 
 _complex_lock = Lock()
@@ -611,7 +629,7 @@ def register_complex_font(face: str) -> bool:
             from reportlab.pdfbase import pdfmetrics
             from reportlab.pdfbase.ttfonts import TTFont
 
-            path = _FONT_DIR / _BUNDLED_COMPLEX[face]
+            path = _FONT_DIR / _BUNDLED_FACES[face]
             if not path.is_file():
                 raise FileNotFoundError(f"bundled face missing: {path}")
             pdfmetrics.registerFont(TTFont(face, str(path)))
@@ -704,6 +722,12 @@ def _face_ladder(base: str | None, *, bold: bool) -> tuple[list[str], str]:
     # earlier rung can draw, so the position is what keeps a German invoice out
     # of a Thai face.
     for face in _BUNDLED_COMPLEX:
+        if register_complex_font(face):
+            rungs.append(face)
+    # The Arabic face goes last for the same reason. It carries digits and a
+    # little punctuation, so nothing an earlier rung can draw should reach it;
+    # an Urdu string mixed with Latin letters still settles for the widest face.
+    for face in _BUNDLED_RTL:
         if register_complex_font(face):
             rungs.append(face)
     return rungs, widest
@@ -976,6 +1000,12 @@ def pdf_table_font_commands(
     is legible and simply not heavier. That is the same trade
     :func:`register_cjk_font` documents.
 
+    A cell whose first strong character is right-to-left (an Arabic or Hebrew
+    name) also gets an ``ALIGN RIGHT`` command, because a bare cell is placed
+    by the table and the canvas hook in :mod:`app.core.pdf_rtl` can reorder its
+    text but cannot move it. Cells that start in a left-to-right script keep
+    the table's own alignment.
+
     Args:
         rows: The table's data, row-major, as handed to ``Table``.
         base: The face the table draws its body cells in today.
@@ -984,7 +1014,8 @@ def pdf_table_font_commands(
             Unicode face, which is what a header ``FONTNAME`` usually names.
 
     Returns:
-        A possibly empty list of ``("FONTNAME", (col, row), (col, row), face)``.
+        A possibly empty list of ``("FONTNAME", (col, row), (col, row), face)``
+        and ``("ALIGN", (col, row), (col, row), "RIGHT")`` commands.
     """
     body_base = base or BODY_FONT
     head_base = header_base or BOLD_FONT
@@ -997,6 +1028,8 @@ def pdf_table_font_commands(
             face = pdf_font_for_text(cell, base=start)
             if face != start:
                 commands.append(("FONTNAME", (col_index, row_index), (col_index, row_index), face))
+            if text_direction(cell) == "rtl":
+                commands.append(("ALIGN", (col_index, row_index), (col_index, row_index), "RIGHT"))
     return commands
 
 
@@ -1499,8 +1532,13 @@ def pdf_table_paragraph_rows(
 # the _registered gate keeps every later call a no-op.
 register_pdf_fonts()
 
+# Right-to-left shaping and reordering, installed once into reportlab and asked
+# about glyph coverage through the same probe the face ladder uses.
+install_reportlab_rtl(font_can_draw)
+
 
 __all__ = [
+    "ARABIC_FONT",
     "BODY_FONT",
     "BOLD_FONT",
     "CJK_FONT",

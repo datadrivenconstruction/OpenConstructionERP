@@ -13,6 +13,8 @@ anyio==4.13.0
     #   httpx
     #   starlette
     #   watchfiles
+arabic-reshaper==3.0.1
+    # via openconstructionerp (pyproject.toml)
 asyncpg==0.31.0
     # via openconstructionerp (pyproject.toml)
 bcrypt==5.0.0
@@ -222,6 +224,8 @@ pypdf==6.14.2
     # via openconstructionerp (pyproject.toml)
 pypdfium2==5.9.0
     # via pdfplumber
+python-bidi==0.6.11
+    # via openconstructionerp (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via
     #   openconstructionerp (pyproject.toml)

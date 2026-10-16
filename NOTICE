@@ -77,6 +77,13 @@ Backend (base install via `pip install openconstructionerp`):
                                           the same section
   * uharfbuzz ........................... Apache-2.0; statically links HarfBuzz,
                                           see the same section
+  * arabic-reshaper ..................... MIT
+  * python-bidi ......................... LGPL-3.0-or-later; see "LGPL
+                                          Components and How We Convey
+                                          Them" below. Its compiled core
+                                          links Rust crates under MIT or
+                                          Apache-2.0, listed in the
+                                          wheel's LICENSE-THIRD-PARTY.yml
   * Pillow .............................. MIT-CMU
   * PyMuPDF (pymupdf) ................... AGPL-3.0-or-later  -- see "AGPL Cascade" below
   * opencv-python-headless .............. Apache-2.0 for OpenCV itself; the
@@ -113,11 +120,13 @@ carry the package named.
 Two things about that list are worth stating rather than leaving to be
 inferred. Pillow is not confined to an extra; it arrives in every install
 through reportlab, which is why it is in the base list above as well.
-And two rows that stood here until now, python-bidi and crc32c, named
-packages that are not in this project at all. Neither resolves in any
+And two rows that once stood here, python-bidi and crc32c, named
+packages that were not in this project at all. Neither resolved in any
 closure, base or extra, on Linux, macOS or Windows, and paddleocr 2.10.0
-declares nineteen requirements with neither among them. They were
-inherited rather than measured, and the sentence they supported, that
+declares nineteen requirements with neither among them. python-bidi has
+since joined the base install in its own right, for right-to-left text in
+generated PDFs, and has its own row above; crc32c is still in no closure.
+The old rows were inherited rather than measured, and the sentence they supported, that
 [cv] is the one group adding copyleft the base install does not already
 carry, was wrong twice. It was wrong about the base, which carries LGPL
 through psycopg2-binary and AGPL through PyMuPDF with no extra selected
@@ -272,6 +281,9 @@ rather than read off this file's own lists:
   * psycopg2-binary -- LGPL-3.0-or-later with the OpenSSL exception. A base
     dependency, so it is in every artefact. We use it as an unmodified
     library through its published Python API.
+  * python-bidi -- LGPL-3.0-or-later. A base dependency since right-to-left
+    PDF text, so it is in every artefact. We use it as an unmodified
+    library through its published Python API.
   * certifi -- MPL-2.0. Reached through httpx and httpcore, so it is in
     every artefact. MPL-2.0 is file-level copyleft and attaches to that
     package's own files, which we do not modify.
@@ -286,8 +298,9 @@ rather than read off this file's own lists:
     No artefact we publish carries it. The container image resolves
     [server] and [semantic-clients], and backend/requirements-desktop.lock
     pins opencv-python-headless on its own. A bullet here used to name
-    python-bidi and crc32c instead, and neither of those packages is in
-    this project on any platform.
+    python-bidi and crc32c instead, when neither package was in this
+    project on any platform. python-bidi now is, and has its own bullet
+    above.
   * FFmpeg -- LGPL-2.1-or-later. Not a package and not in any inventory:
     it is a set of libraries redistributed inside the
     opencv-python-headless wheel, which is a base dependency, so it is in
@@ -557,13 +570,23 @@ Noto Sans Devanagari
     Open Font License, Version 1.1, on the same terms, and covered by
     the same trademark statement.
 
-    Neither Noto face declares a Reserved Font Name. The names are not
+Noto Naskh Arabic
+    backend/app/core/fonts/noto/NotoNaskhArabic-Regular.ttf
+    Licence text:
+    backend/app/core/fonts/noto/NotoNaskhArabic-OFL.txt
+
+    Copyright 2022 The Noto Project Authors
+    (https://github.com/notofonts/arabic). Licensed under the SIL Open
+    Font License, Version 1.1, on the same terms, and covered by the
+    same trademark statement. The unhinted build of release 2.021.
+
+    No Noto face here declares a Reserved Font Name. The names are not
     reserved by the licence, which is checked rather than assumed:
     clause 3 restricts only names "specified as such after the
-    copyright statement(s)", and neither copyright line specifies any.
+    copyright statement(s)", and no copyright line specifies any.
     The restraint on renaming above rests on trademark, not on clause 3.
 
-    Both faces are committed whole, as their authors published them.
+    All three faces are committed whole, as their authors published them.
     Subsetting at embed time is ordinary use and reportlab already does
     it, so a generated PDF carries only the glyphs it needs. Subsetting
     the committed file is a different act: the OFL binds "in part or in
@@ -835,6 +858,13 @@ The components:
     desktop installer. Nothing in our code imports it by name; the
     driver is resolved from the URL at connection time.
 
+    python-bidi, LGPL-3.0-or-later. The Unicode Bidirectional Algorithm
+    that puts Arabic, Persian, Urdu and Hebrew into reading order in
+    generated PDFs (app/core/pdf_rtl.py). A base dependency, so it is in
+    the Python package, the container image and every desktop installer.
+    Its wheel is a small compiled extension with no dependencies of its
+    own, and upstream publishes a source distribution for every release.
+
     FFmpeg, LGPL-2.1-or-later, redistributed inside the
     opencv-python-headless wheel. opencv-python-headless is also a base
     dependency, so FFmpeg is in the same three places. Note that the
@@ -901,7 +931,8 @@ Giving you the library's source.
     We ship these libraries unmodified at pinned versions, and every
     release carries an SBOM naming the exact version of each. The
     upstream sources are public: psycopg2 at github.com/psycopg/psycopg2
-    and on PyPI, FFmpeg at ffmpeg.org along with the build recipe at
+    and on PyPI, python-bidi at github.com/MeirKriheli/python-bidi and on
+    PyPI, FFmpeg at ffmpeg.org along with the build recipe at
     github.com/opencv/opencv-python, Qt at code.qt.io and download.qt.io
     for both the 5 and 6 series, and the Linux desktop stack in the
     source packages of the distribution the AppImage is built on.

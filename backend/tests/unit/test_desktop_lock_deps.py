@@ -98,6 +98,10 @@ _REQUIRED_BASE_DEPS = (
     # builds and starts fine and fails the first Excel 97-2003 bill imported.
     "xlrd",
     "uharfbuzz",
+    # Imported inside a function by app/core/pdf_rtl.py, which degrades to the
+    # old unjoined, backwards output when either is missing and only logs it.
+    "arabic-reshaper",
+    "python-bidi",
 )
 
 # Vector-store clients from the [semantic-clients] extra. qdrant-client opens

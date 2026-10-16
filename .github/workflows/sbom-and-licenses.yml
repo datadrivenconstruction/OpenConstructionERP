@@ -339,7 +339,7 @@ jobs:
 
           attached=0
           seen=""
-          for pkg in psycopg2-binary opencv-python-headless; do
+          for pkg in psycopg2-binary python-bidi opencv-python-headless; do
             for ver in "$(env_version "$pkg")" "$(lock_version "$pkg")"; do
               [ -n "$ver" ] || continue
               # the same version can come from both views, fetch it once

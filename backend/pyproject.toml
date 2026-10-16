@@ -131,6 +131,9 @@ dependencies = [
     # under the separate "Old MIT" licence and carries no notice of its own
     # inside the wheel, so ours is in app/core/licenses/LICENSE_HARFBUZZ.
     "uharfbuzz>=0.56.0,<1",
+    # Arabic, Persian and Urdu letter joining and bidi line order for PDFs (app/core/pdf_rtl.py); small, no deps.
+    "arabic-reshaper>=3.0.1,<4",
+    "python-bidi>=0.6.0,<0.7",
     "pdfplumber>=0.11.0,<0.12",
     # PDF page-overlay / merge: the approval stamp-burn (app/core/pdf_stamp.py,
     # used by file_approvals) merges a reportlab-drawn overlay onto every page
