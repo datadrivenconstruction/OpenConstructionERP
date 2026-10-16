@@ -1,6 +1,5 @@
 {
-  "$note": "Procurement concept of the Regensburg residential quarter as data. Applied on top of the module seeder defaults, key by key; a missing key keeps the default. Values are in the project currency (EUR). All names are invented trade descriptions, no real firms.",
-  "client_type": "sub_central",
+  "$note": "Procurement concept of the Regensburg residential quarter as data. Applied on top of the module seeder defaults, key by key; a missing key keeps the default. The client is a private housing company, so no public procurement law applies: every package names its private procedure, and the public procedure and client type keys are left out because the seed ignores them for a private client. Values are in the project currency (EUR). All names are invented trade descriptions, no real firms.",
   "advance_reason": {
     "en": "Precast balconies and stair cores: the production slot of the precast plant must be reserved before the shell tender closes, so the balconies can follow the shell without a gap.",
     "de": "Balkon-Fertigteile und Treppenkerne: Der Produktionsplatz im Fertigteilwerk muss vor Ende der Rohbauausschreibung gesichert werden, damit die Balkone dem Rohbau ohne Pause folgen können."
@@ -8,35 +7,35 @@
   "kinds": {
     "design": {
       "value": 3000000,
-      "public_procedure": "open",
+      "private_procedure": "restricted",
       "notes": {
-        "en": "Design services under VgV, open procedure with EU-wide notice. HOAI fees for buildings, technical equipment, structural design and outdoor facilities; evaluation on price and quality. Awarded after the decision of the supervisory board.",
-        "de": "Planungsleistungen nach VgV im offenen Verfahren mit EU-weiter Bekanntmachung. HOAI-Honorare für Gebäude, Technische Ausrüstung, Tragwerksplanung und Freianlagen; Wertung nach Preis und Qualität. Zuschlag nach Beschluss des Aufsichtsrats."
+        "en": "Design services awarded by the housing company after a selection round: four offices with references in subsidised housing were invited to tender. HOAI fees for buildings, technical equipment, structural design and outdoor facilities; evaluation on price and quality. Awarded after the decision of the supervisory board.",
+        "de": "Planungsleistungen nach Auswahlverfahren der Wohnungsbaugesellschaft: Vier Büros mit Referenzen im geförderten Wohnungsbau wurden zur Angebotsabgabe aufgefordert. HOAI-Honorare für Gebäude, Technische Ausrüstung, Tragwerksplanung und Freianlagen; Wertung nach Preis und Qualität. Zuschlag nach Beschluss des Aufsichtsrats."
       },
       "award_days_ago": 235
     },
     "construction": {
       "value": 26950000,
-      "public_procedure": "open",
+      "private_procedure": "restricted",
       "start_offset_days": 60,
       "notes": {
-        "en": "VOB/A lots in the order of the build: 1 excavation pit and shoring, 2 shell of the underground car park and the buildings, 3 roofing and photovoltaic, 4 heating, ventilation and sanitary, 5 electrical, 6 lifts, 7 interior fit-out, 8 external works. GAEB x83 tender documents per lot; award after the supervisory board, then the standstill period.",
-        "de": "VOB/A-Lose in der Reihenfolge des Baus: 1 Baugrube und Verbau, 2 Rohbau Tiefgarage und Gebäude, 3 Dach und Photovoltaik, 4 Heizung, Lüftung und Sanitär, 5 Elektro, 6 Aufzüge, 7 Ausbau, 8 Außenanlagen. Leistungsverzeichnisse als GAEB x83 je Los; Vergabe nach Beschluss des Aufsichtsrats, danach Wartefrist."
+        "en": "Trade lots in the order of the build, each tendered to invited contractors that passed the prequalification, contracts under VOB/B: 1 excavation pit and shoring, 2 shell of the underground car park and the buildings, 3 roofing and photovoltaic, 4 heating, ventilation and sanitary, 5 electrical, 6 lifts, 7 interior fit-out, 8 external works. GAEB x83 tender documents per lot; award after the decision of the supervisory board.",
+        "de": "Fachlose in der Reihenfolge des Baus, je Los beschränkt ausgeschrieben unter Unternehmen, die die Eignungsprüfung bestanden haben, Verträge nach VOB/B: 1 Baugrube und Verbau, 2 Rohbau Tiefgarage und Gebäude, 3 Dach und Photovoltaik, 4 Heizung, Lüftung und Sanitär, 5 Elektro, 6 Aufzüge, 7 Ausbau, 8 Außenanlagen. Leistungsverzeichnisse als GAEB x83 je Los; Vergabe nach Beschluss des Aufsichtsrats."
       }
     },
     "supply_and_install": {
       "value": 4600000,
-      "public_procedure": "restricted",
+      "private_procedure": "restricted",
       "lead_days": 150,
       "start_offset_days": 150,
       "notes": {
-        "en": "Specialist lots with a supply part: precast balconies, apartment ventilation units and lifts. Restricted procedure after a public participation round; the lifts and ventilation units are scheduled so the first building can be handed over on time.",
-        "de": "Fachlose mit Lieferanteil: Balkon-Fertigteile, Wohnungslüftungsgeräte und Aufzüge. Nichtoffenes Verfahren nach öffentlichem Teilnahmewettbewerb; Aufzüge und Lüftungsgeräte sind so terminiert, dass das erste Gebäude pünktlich übergeben werden kann."
+        "en": "Specialist lots with a supply part: precast balconies, apartment ventilation units and lifts. Tendered to invited manufacturers after a prequalification round; the lifts and ventilation units are scheduled so the first building can be handed over on time.",
+        "de": "Fachlose mit Lieferanteil: Balkon-Fertigteile, Wohnungslüftungsgeräte und Aufzüge. Beschränkte Ausschreibung unter eingeladenen Herstellern nach einer Eignungsrunde; Aufzüge und Lüftungsgeräte sind so terminiert, dass das erste Gebäude pünktlich übergeben werden kann."
       }
     },
     "supply": {
       "value": 1200000,
-      "public_procedure": "open",
+      "private_procedure": "request_for_quotation",
       "start_offset_days": 240,
       "notes": {
         "en": "Kitchens, floor coverings and sanitary fittings for the rental apartments, called off from the framework agreement of the housing company.",
@@ -45,7 +44,7 @@
     },
     "management_services": {
       "value": 780000,
-      "public_procedure": "open",
+      "private_procedure": "restricted",
       "start_offset_days": 30,
       "notes": {
         "en": "Construction management and project control for the housing company, with safety coordination (SiGeKo) for the four building sites.",
@@ -54,6 +53,7 @@
     },
     "operation": {
       "value": 220000,
+      "private_procedure": "request_for_quotation",
       "start_offset_days": 330,
       "notes": {
         "en": "Facility services for the first two years after handover: caretaker service, winter service and maintenance of the lifts and heating.",
@@ -156,8 +156,8 @@
       }
     ],
     "source_procedure_ref": {
-      "en": "Open procedure under VgV, framework award by the housing company",
-      "de": "Offenes Verfahren nach VgV, Rahmenvertragsvergabe durch die Wohnungsbaugesellschaft"
+      "en": "Competitive framework award of the housing company under its own procurement rules",
+      "de": "Wettbewerbliche Rahmenvertragsvergabe der Wohnungsbaugesellschaft nach ihrer eigenen Vergabeordnung"
     }
   },
   "soundings": [

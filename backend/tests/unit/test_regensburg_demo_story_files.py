@@ -332,8 +332,7 @@ def test_procurement_concept() -> None:
         (_ROOT / "backend/app/modules/procurement_concept/catalogues/de_national.json").read_text(encoding="utf-8")
     )
     procedures = {p["code"] for p in catalogue["procedures"]}
-    jurisdiction = next(j for j in catalogue["jurisdictions"] if j["code"] == "de_national")
-    assert story["client_type"] in jurisdiction["client_types"]
+    # A private client: the story names no public client type (see the private client test below).
     assert set(story["kinds"]) <= set(procurement_seed._DEFAULTS)
     for locale in ("en", "de"):
         for kind, entry in story["kinds"].items():
@@ -597,3 +596,25 @@ def test_the_road_application_names_its_authority_and_reference(demo: str) -> No
         assert content["road_reference"] != permits_seed._TEXT_DEFAULTS["road_reference"]
     de = permits_seed.resolve_permit_content(_story(demo, "permits"), "de")
     assert "Tiefbauamt" in de["road_authority_name"]
+
+
+def test_regensburg_procurement_reads_as_a_private_client() -> None:
+    """A private housing company buys under its own rules: no VgV, no EU notice, a procedure per package."""
+    assert _story("residential-regensburg", "delivery_model")["owner_capability"]["public_client"] is False
+    story = _story("residential-regensburg", "procurement_concept")
+    catalogue = json.loads(
+        (_ROOT / "backend/app/modules/procurement_concept/catalogues/neutral.json").read_text(encoding="utf-8")
+    )
+    procedures = {p["code"] for p in catalogue["procedures"]}
+    # The seed ignores these for a private client, so a story that sets them only misleads its reader.
+    assert "client_type" not in story
+    for kind, entry in story["kinds"].items():
+        assert "public_procedure" not in entry, kind
+        assert entry["private_procedure"] in procedures, kind
+        merged = procurement_seed.merge_package_story(procurement_seed._DEFAULTS[kind], entry, procedures, "de")
+        assert merged["private"] == entry["private_procedure"], kind
+    text = json.dumps(story, ensure_ascii=False)
+    for public_term in ("VgV", "EU-wide", "EU-weit", "VOB/A", "Teilnahmewettbewerb", "standstill", "Wartefrist"):
+        assert public_term not in text, public_term
+    assert "VgV" not in json.dumps(_story("residential-regensburg", "commitment_release"), ensure_ascii=False)
+

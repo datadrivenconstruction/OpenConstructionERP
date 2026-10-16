@@ -33,8 +33,8 @@
   },
   "design": {
     "title": {
-      "en": "Design appointment, HOAI phases 1 to 4, after the VgV procedure",
-      "de": "Planungsauftrag, HOAI Leistungsphasen 1 bis 4, nach dem VgV-Verfahren"
+      "en": "Design appointment, HOAI phases 1 to 4, after the selection round",
+      "de": "Planungsauftrag, HOAI Leistungsphasen 1 bis 4, nach dem Auswahlverfahren"
     },
     "amount": "1900000",
     "decision_days": 45,
