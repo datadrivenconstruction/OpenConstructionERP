@@ -10,18 +10,31 @@
 // submitted, a submitted one withdrawn back to draft, and either cancelled.
 // Submitting never approves: with no approval configured it waits in
 // "submitted", and the requisition rules run first.
+//
+// Approval is a separate person's act: a manager approves (comment optional)
+// or rejects (reason required), and the submitter cannot decide their own.
+// Approved requisitions are selected in the list and turned into one draft
+// purchase order at project level; each PO line remembers the requisition
+// line, and through it the BOQ positions, it came from.
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Loader2, GitMerge, Send, Undo2, Ban, Trash2 } from 'lucide-react';
+import { ClipboardList, Loader2, GitMerge, Send, Undo2, Ban, Trash2, Check, X, ShoppingCart } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, SkeletonTable, WideModal, type BadgeVariant } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { QuantityDisplay } from '@/shared/ui/QuantityDisplay';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { listVendors } from '@/features/supplier-catalogs/api';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { ROLE_RANK, normalizeRole } from '@/shared/lib/roles';
 import {
   REQUISITION_STATUSES,
+  approveRequisition,
+  canConvertTogether,
+  convertRequisitionsToPurchaseOrder,
+  rejectRequisition,
   cancelRequisition,
   getRequisition,
   lineToInput,
@@ -31,6 +44,7 @@ import {
   submitRequisition,
   updateRequisition,
   withdrawRequisition,
+  type ConvertBlockReason,
   type Requisition,
   type RequisitionLineIn,
   type RequisitionRuleError,
@@ -88,6 +102,289 @@ function StatusBadge({ status }: { status: RequisitionStatus }) {
   );
 }
 
+/** Active vendors of the directory, the only ones a requisition may name. */
+function useActiveVendors() {
+  return useQuery({
+    queryKey: ['supplier-catalogs-vendors', 'active'],
+    queryFn: () => listVendors({ status: 'active', limit: 200 }),
+    staleTime: 60_000,
+  });
+}
+
+interface VendorSelectProps {
+  value: string;
+  onChange: (id: string) => void;
+  disabled?: boolean;
+  /** Name to show for a stored vendor that is no longer active. */
+  fallbackName?: string | null;
+  id?: string;
+}
+
+function VendorSelect({ value, onChange, disabled, fallbackName, id }: VendorSelectProps) {
+  const { t } = useTranslation();
+  const { data, isLoading } = useActiveVendors();
+  const vendors = data?.items ?? [];
+  const known = !value || vendors.some((v) => v.id === value);
+  return (
+    <select
+      id={id}
+      className={fieldCls}
+      value={value}
+      disabled={disabled || isLoading}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="">{t('procurement.requisitions.vendor_none', { defaultValue: 'No vendor chosen yet' })}</option>
+      {!known && <option value={value}>{fallbackName || value}</option>}
+      {vendors.map((v) => (
+        <option key={v.id} value={v.id}>
+          {v.code ? `${v.name} (${v.code})` : v.name}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function RuleErrorList({ errors, title }: { errors: RequisitionRuleError[]; title: string }) {
+  if (!errors.length) return null;
+  return (
+    <div role="alert" className="rounded-lg border border-semantic-error/40 bg-semantic-error/5 p-3 text-sm">
+      <p className="mb-1 font-medium text-semantic-error">{title}</p>
+      <ul className="list-disc space-y-1 pl-5 text-content-secondary">
+        {errors.map((e, i) => (
+          <li key={`${e.rule_id}-${i}`}>
+            {e.message}
+            {e.suggestion ? <span className="text-content-tertiary"> - {e.suggestion}</span> : null}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+type Translate = ReturnType<typeof useTranslation>['t'];
+
+/** Why a selection cannot be ordered, each key written out so the locale gates can see it. */
+function convertBlockMessage(t: Translate, reason: ConvertBlockReason): string {
+  switch (reason) {
+    case 'empty':
+      return t('procurement.requisitions.convert_blocked_empty', {
+        defaultValue: 'Select at least one approved requisition.',
+      });
+    case 'not_approved':
+      return t('procurement.requisitions.convert_blocked_not_approved', {
+        defaultValue: 'Only approved requisitions can be ordered.',
+      });
+    case 'mixed_projects':
+      return t('procurement.requisitions.convert_blocked_mixed_projects', {
+        defaultValue: 'The selected requisitions belong to different projects.',
+      });
+    case 'vendor_conflict':
+      return t('procurement.requisitions.convert_blocked_vendor_conflict', {
+        defaultValue: 'The selected requisitions name different vendors. Order them separately.',
+      });
+  }
+}
+
+/**
+ * Whether to offer Approve and Reject. The server decides (it refuses the
+ * submitter with a 403 and needs `procurement.approve_requisition`, a manager
+ * permission); this only stops offering a button that is certain to fail.
+ */
+export function canOfferDecision(
+  req: Pick<Requisition, 'status' | 'submitted_by'>,
+  userId: string | null,
+  userRole: string | null,
+): boolean {
+  if (req.status !== 'submitted') return false;
+  if (userId && req.submitted_by && req.submitted_by === userId) return false;
+  const rank = (ROLE_RANK as Record<string, number>)[normalizeRole(userRole)];
+  return rank !== undefined && rank >= ROLE_RANK.manager;
+}
+
+interface ConvertModalProps {
+  projectId: string;
+  requisitions: Requisition[];
+  open: boolean;
+  onClose: () => void;
+  onConverted: () => void;
+}
+
+/** Turn the selected approved requisitions into one draft purchase order. */
+export function ConvertToPOModal({ projectId, requisitions, open, onClose, onConverted }: ConvertModalProps) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const check = canConvertTogether(requisitions);
+  const [vendorId, setVendorId] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [ruleErrors, setRuleErrors] = useState<RequisitionRuleError[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    setVendorId(check.vendorId ?? '');
+    setDeliveryDate('');
+    setRuleErrors([]);
+  }, [open, check.vendorId]);
+
+  const convert = useMutation({
+    mutationFn: () =>
+      convertRequisitionsToPurchaseOrder({
+        project_id: projectId,
+        requisition_ids: requisitions.map((r) => r.id),
+        vendor_id: vendorId || null,
+        delivery_date: deliveryDate || null,
+      }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['procurement-requisitions', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['procurement-requisition'] });
+      queryClient.invalidateQueries({ queryKey: ['procurement-po', projectId] });
+      addToast({
+        type: 'success',
+        title: t('procurement.requisitions.convert_done', {
+          defaultValue: 'Purchase order {{number}} created as a draft.',
+          number: res.po_number,
+        }),
+      });
+      onConverted();
+    },
+    onError: (e: unknown) => {
+      const errors = parseRequisitionRuleErrors(e);
+      setRuleErrors(errors);
+      if (!errors.length) {
+        addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: getErrorMessage(e) });
+      }
+    },
+  });
+
+  const lineCount = requisitions.reduce((n, r) => n + r.items.length, 0);
+  const blocked = !check.ok;
+  return (
+    <WideModal
+      open={open}
+      onClose={onClose}
+      busy={convert.isPending}
+      size="md"
+      title={t('procurement.requisitions.convert_title', { defaultValue: 'Create purchase order' })}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={convert.isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            icon={<ShoppingCart size={14} />}
+            onClick={() => convert.mutate()}
+            disabled={blocked || !vendorId || convert.isPending}
+          >
+            {convert.isPending && <Loader2 size={14} className="mr-1 animate-spin" />}
+            {t('procurement.requisitions.convert_confirm', { defaultValue: 'Create draft order' })}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-3 text-sm">
+        <p className="text-content-secondary">
+          {t('procurement.requisitions.convert_summary', {
+            defaultValue:
+              'Requisitions {{numbers}} become one draft purchase order (order lines: {{lines}}). Each line keeps its quantity, unit and the BOQ positions it came from.',
+            numbers: requisitions.map((r) => r.req_number ?? r.id.slice(0, 8)).join(', '),
+            lines: lineCount,
+          })}
+        </p>
+        {blocked && check.reason && (
+          <p role="alert" className="text-semantic-error">
+            {convertBlockMessage(t, check.reason)}
+          </p>
+        )}
+        <label className="block text-xs font-medium text-content-secondary" htmlFor="convert-vendor">
+          {t('procurement.requisitions.field_vendor', { defaultValue: 'Vendor' })}
+        </label>
+        <VendorSelect
+          id="convert-vendor"
+          value={vendorId}
+          onChange={setVendorId}
+          disabled={blocked}
+          fallbackName={requisitions.find((r) => r.vendor_id === vendorId)?.vendor_name}
+        />
+        <label className="block text-xs font-medium text-content-secondary">
+          {t('procurement.requisitions.convert_delivery', { defaultValue: 'Delivery date (optional)' })}
+          <input
+            type="date"
+            className={`${fieldCls} mt-1`}
+            value={deliveryDate}
+            onChange={(e) => setDeliveryDate(e.target.value)}
+          />
+        </label>
+        <RuleErrorList
+          errors={ruleErrors}
+          title={t('procurement.requisitions.convert_rules_failed', {
+            defaultValue: 'The purchase order was not created:',
+          })}
+        />
+      </div>
+    </WideModal>
+  );
+}
+
+interface DecisionModalProps {
+  mode: 'approve' | 'reject' | null;
+  busy: boolean;
+  onClose: () => void;
+  onConfirm: (comment: string) => void;
+}
+
+/** Approve with an optional comment, or reject with a required reason. */
+export function DecisionModal({ mode, busy, onClose, onConfirm }: DecisionModalProps) {
+  const { t } = useTranslation();
+  const [comment, setComment] = useState('');
+  useEffect(() => {
+    if (mode) setComment('');
+  }, [mode]);
+  const isReject = mode === 'reject';
+  const canConfirm = !busy && (!isReject || comment.trim().length > 0);
+  return (
+    <WideModal
+      open={mode !== null}
+      onClose={onClose}
+      busy={busy}
+      size="sm"
+      title={
+        isReject
+          ? t('procurement.requisitions.reject_title', { defaultValue: 'Reject requisition' })
+          : t('procurement.requisitions.approve_title', { defaultValue: 'Approve requisition' })
+      }
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} disabled={busy}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant={isReject ? 'danger' : 'primary'}
+            icon={isReject ? <X size={14} /> : <Check size={14} />}
+            onClick={() => onConfirm(comment)}
+            disabled={!canConfirm}
+          >
+            {isReject
+              ? t('procurement.requisitions.reject', { defaultValue: 'Reject' })
+              : t('procurement.requisitions.approve', { defaultValue: 'Approve' })}
+          </Button>
+        </>
+      }
+    >
+      <label className="block text-xs font-medium text-content-secondary">
+        {isReject
+          ? t('procurement.requisitions.reject_reason', { defaultValue: 'Reason (required)' })
+          : t('procurement.requisitions.approve_comment', { defaultValue: 'Comment (optional)' })}
+        <textarea
+          className="mt-1 min-h-[4rem] w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm"
+          value={comment}
+          maxLength={2000}
+          onChange={(e) => setComment(e.target.value)}
+        />
+      </label>
+    </WideModal>
+  );
+}
+
 interface RequisitionsTabProps {
   projectId: string;
   /** `?requisition=<id>` opens that requisition on arrival (the buy-list hand-off). */
@@ -98,6 +395,8 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
   const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<RequisitionStatus | ''>('');
   const [openId, setOpenId] = useState<string | null>(focusRequisitionId ?? null);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [converting, setConverting] = useState(false);
 
   useEffect(() => {
     if (focusRequisitionId) setOpenId(focusRequisitionId);
@@ -107,6 +406,12 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
     queryKey: ['procurement-requisitions', projectId, statusFilter],
     queryFn: () => listRequisitions(projectId, statusFilter),
   });
+
+  const pickedReqs = useMemo(
+    () => (data?.items ?? []).filter((r) => picked.includes(r.id) && r.status === 'approved'),
+    [data, picked],
+  );
+  const pickCheck = canConvertTogether(pickedReqs);
 
   if (isLoading) return <SkeletonTable rows={5} columns={6} />;
 
@@ -136,6 +441,27 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
         </label>
       </div>
 
+      {(data?.items ?? []).some((r) => r.status === 'approved') && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs text-content-secondary">
+          <span>
+            {t('procurement.requisitions.convert_hint', {
+              defaultValue: 'Select approved requisitions to order them together in one purchase order.',
+            })}
+          </span>
+          <Button
+            size="sm"
+            icon={<ShoppingCart size={14} />}
+            onClick={() => setConverting(true)}
+            disabled={!pickCheck.ok}
+            title={
+              pickCheck.reason ? convertBlockMessage(t, pickCheck.reason) : undefined
+            }
+          >
+            {t('procurement.requisitions.convert', { defaultValue: 'Create purchase order' })}
+          </Button>
+        </div>
+      )}
+
       {isError ? (
         <Card padding="sm">
           <div className="flex items-center justify-between gap-2 text-sm text-semantic-error">
@@ -159,8 +485,10 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                  <th className="w-8 px-2 py-2" />
                   <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_number', { defaultValue: 'Number' })}</th>
                   <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_title', { defaultValue: 'Title' })}</th>
+                  <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_vendor', { defaultValue: 'Vendor' })}</th>
                   <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_status', { defaultValue: 'Status' })}</th>
                   <th className="px-4 py-2 font-medium">{t('procurement.requisitions.col_needed_by', { defaultValue: 'Needed by' })}</th>
                   <th className="px-4 py-2 text-right font-medium">{t('procurement.requisitions.col_lines', { defaultValue: 'Lines' })}</th>
@@ -176,13 +504,34 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
                     className="cursor-pointer border-b border-border-light/60 last:border-0 hover:bg-surface-secondary"
                     onClick={() => setOpenId(r.id)}
                   >
+                    <td className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
+                      {r.status === 'approved' && (
+                        <input
+                          type="checkbox"
+                          aria-label={t('procurement.requisitions.select_for_order', {
+                            defaultValue: 'Select {{number}} for a purchase order',
+                            number: r.req_number ?? r.id.slice(0, 8),
+                          })}
+                          checked={picked.includes(r.id)}
+                          onChange={(e) =>
+                            setPicked((prev) => (e.target.checked ? [...prev, r.id] : prev.filter((id) => id !== r.id)))
+                          }
+                        />
+                      )}
+                    </td>
                     <td className="px-4 py-2 font-mono text-xs text-content-primary">
                       <button type="button" className="text-oe-blue hover:underline" onClick={() => setOpenId(r.id)}>
                         {r.req_number ?? r.id.slice(0, 8)}
                       </button>
                     </td>
                     <td className="px-4 py-2 text-content-primary">{r.title || '-'}</td>
-                    <td className="px-4 py-2"><StatusBadge status={r.status} /></td>
+                    <td className="px-4 py-2 text-content-secondary">{r.vendor_name || '-'}</td>
+                    <td className="px-4 py-2">
+                      <StatusBadge status={r.status} />
+                      {r.po_number && (
+                        <span className="ml-2 font-mono text-2xs text-content-tertiary">{r.po_number}</span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-content-secondary">
                       {r.required_date ? <DateDisplay value={r.required_date} /> : '-'}
                     </td>
@@ -214,6 +563,16 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
       )}
 
       <RequisitionDetailModal projectId={projectId} requisitionId={openId} onClose={() => setOpenId(null)} />
+      <ConvertToPOModal
+        projectId={projectId}
+        requisitions={pickedReqs}
+        open={converting}
+        onClose={() => setConverting(false)}
+        onConverted={() => {
+          setConverting(false);
+          setPicked([]);
+        }}
+      />
     </div>
   );
 }
@@ -240,6 +599,10 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
   const [title, setTitle] = useState('');
   const [neededBy, setNeededBy] = useState('');
   const [notes, setNotes] = useState('');
+  const [vendorId, setVendorId] = useState('');
+  const [decision, setDecision] = useState<'approve' | 'reject' | null>(null);
+  const userId = useAuthStore((s) => s.userId);
+  const userRole = useAuthStore((s) => s.userRole);
   const [lines, setLines] = useState<RequisitionLineIn[]>([]);
   const [selected, setSelected] = useState<number[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -250,6 +613,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
     setTitle(req.title ?? '');
     setNeededBy(req.required_date ?? '');
     setNotes(req.notes ?? '');
+    setVendorId(req.vendor_id ?? '');
     setLines(req.items.map(lineToInput));
     setSelected([]);
     setDirty(false);
@@ -279,6 +643,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
         title: title.trim() || null,
         required_date: neededBy || null,
         notes: notes.trim() || null,
+        vendor_id: vendorId || null,
         items: lines,
       }),
     onSuccess: (updated) => {
@@ -319,7 +684,35 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
     onError: onFail,
   });
 
-  const busy = save.isPending || submit.isPending || withdraw.isPending || cancel.isPending;
+  const approve = useMutation({
+    mutationFn: (comment: string) => approveRequisition(requisitionId!, comment),
+    onSuccess: (updated) => {
+      onDone(updated);
+      setDecision(null);
+      setRuleErrors([]);
+      addToast({ type: 'success', title: t('procurement.requisitions.approved_toast', { defaultValue: 'Requisition approved' }) });
+    },
+    onError: (e: unknown) => {
+      setDecision(null);
+      onFail(e);
+    },
+  });
+
+  const reject = useMutation({
+    mutationFn: (comment: string) => rejectRequisition(requisitionId!, comment),
+    onSuccess: (updated) => {
+      onDone(updated);
+      setDecision(null);
+      addToast({ type: 'success', title: t('procurement.requisitions.rejected_toast', { defaultValue: 'Requisition rejected' }) });
+    },
+    onError: (e: unknown) => {
+      setDecision(null);
+      onFail(e);
+    },
+  });
+
+  const busy =
+    save.isPending || submit.isPending || withdraw.isPending || cancel.isPending || approve.isPending || reject.isPending;
 
   const editLine = (index: number, patch: Partial<RequisitionLineIn>) => {
     setLines((prev) => prev.map((l, i) => (i === index ? { ...l, ...patch } : l)));
@@ -370,10 +763,20 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                 {t('procurement.requisitions.cancel', { defaultValue: 'Cancel requisition' })}
               </Button>
             )}
-            {req.status === 'submitted' && (
+            {(req.status === 'submitted' || req.status === 'rejected') && (
               <Button variant="secondary" icon={<Undo2 size={14} />} onClick={() => withdraw.mutate()} disabled={busy}>
                 {t('procurement.requisitions.withdraw', { defaultValue: 'Withdraw to draft' })}
               </Button>
+            )}
+            {canOfferDecision(req, userId, userRole) && (
+              <>
+                <Button variant="danger" icon={<X size={14} />} onClick={() => setDecision('reject')} disabled={busy}>
+                  {t('procurement.requisitions.reject', { defaultValue: 'Reject' })}
+                </Button>
+                <Button icon={<Check size={14} />} onClick={() => setDecision('approve')} disabled={busy}>
+                  {t('procurement.requisitions.approve', { defaultValue: 'Approve' })}
+                </Button>
+              </>
             )}
             {isDraft && (
               <>
@@ -410,7 +813,63 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
             )}
           </div>
 
+          {(req.decision_comment || req.decided_at) && (
+            <div
+              className={`rounded-lg border p-3 text-sm ${
+                req.status === 'rejected' ? 'border-semantic-error/40 bg-semantic-error/5' : 'border-border-light bg-surface-secondary/40'
+              }`}
+            >
+              <p className="text-xs font-medium text-content-secondary">
+                {req.status === 'rejected'
+                  ? t('procurement.requisitions.rejected_note', { defaultValue: 'Rejected' })
+                  : t('procurement.requisitions.approved_note', { defaultValue: 'Approved' })}
+                {req.decided_at ? (
+                  <>
+                    {' · '}
+                    <DateDisplay value={req.decided_at} />
+                  </>
+                ) : null}
+              </p>
+              {req.decision_comment && <p className="mt-1 text-content-primary">{req.decision_comment}</p>}
+            </div>
+          )}
+
+          {req.po_id && (
+            <p className="text-sm text-content-secondary">
+              {t('procurement.requisitions.ordered_on_po', {
+                defaultValue: 'Ordered on purchase order {{number}}',
+                number: req.po_number ?? req.po_id.slice(0, 8),
+              })}
+            </p>
+          )}
+
           <div className="grid gap-3 sm:grid-cols-2">
+            <div className="block text-xs font-medium text-content-secondary sm:col-span-2">
+              {t('procurement.requisitions.field_vendor', { defaultValue: 'Vendor' })}
+              <div className="mt-1">
+                {isDraft ? (
+                  <VendorSelect
+                    value={vendorId}
+                    fallbackName={req.vendor_name}
+                    onChange={(id) => {
+                      setVendorId(id);
+                      setDirty(true);
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm text-content-primary">
+                    {req.vendor_name || t('procurement.requisitions.vendor_none', { defaultValue: 'No vendor chosen yet' })}
+                    {req.vendor_status && req.vendor_status !== 'active' && (
+                      <span className="ml-2 inline-block">
+                        <Badge variant="error" size="sm">
+                          {t('procurement.requisitions.vendor_inactive', { defaultValue: 'Not active in the directory' })}
+                        </Badge>
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
+            </div>
             <label className="block text-xs font-medium text-content-secondary">
               {t('procurement.requisitions.field_title', { defaultValue: 'Title' })}
               <input
@@ -452,23 +911,12 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
             </label>
           </div>
 
-          {ruleErrors.length > 0 && (
-            <div role="alert" className="rounded-lg border border-semantic-error/40 bg-semantic-error/5 p-3 text-sm">
-              <p className="mb-1 font-medium text-semantic-error">
-                {t('procurement.requisitions.rules_failed', {
-                  defaultValue: 'Fix these before submitting:',
-                })}
-              </p>
-              <ul className="list-disc space-y-1 pl-5 text-content-secondary">
-                {ruleErrors.map((e, i) => (
-                  <li key={`${e.rule_id}-${i}`}>
-                    {e.message}
-                    {e.suggestion ? <span className="text-content-tertiary"> - {e.suggestion}</span> : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <RuleErrorList
+            errors={ruleErrors}
+            title={t('procurement.requisitions.rules_failed', {
+              defaultValue: 'Fix these before submitting:',
+            })}
+          />
 
           <div>
             <div className="mb-2 flex items-center justify-between gap-2">
@@ -565,6 +1013,16 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                                 defaultValue: 'BOQ sources: {{n}}',
                                 n: line.sources.length,
                               })}
+                          {(stored?.po_items ?? []).map((pi) => (
+                            <div key={pi.po_item_id} className="mt-0.5 text-content-secondary">
+                              {t('procurement.requisitions.po_line_ref', {
+                                defaultValue: 'PO {{number}}: {{quantity}} {{unit}}',
+                                number: pi.po_number ?? pi.po_id.slice(0, 8),
+                                quantity: pi.quantity,
+                                unit: pi.unit ?? '',
+                              })}
+                            </div>
+                          ))}
                         </td>
                         {isDraft && (
                           <td className="py-1.5">
@@ -587,6 +1045,12 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
           </div>
         </div>
       )}
+      <DecisionModal
+        mode={decision}
+        busy={approve.isPending || reject.isPending}
+        onClose={() => setDecision(null)}
+        onConfirm={(comment) => (decision === 'reject' ? reject.mutate(comment) : approve.mutate(comment))}
+      />
     </WideModal>
   );
 }

@@ -76,6 +76,7 @@ import { ResourceSummary } from './ResourceSummary';
 import { CommentDrawer, type CommentEntry } from './CommentDrawer';
 import { PriceAnalysisPanel } from './PriceAnalysisPanel';
 import { PositionActualsDrawer } from '@/features/costmodel/PositionActualsDrawer';
+import { PositionProcurementDrawer } from '@/features/procurement/PositionProcurementDrawer';
 import { MeasurementDrawer } from './MeasurementDrawer';
 import { GaebSiteExchangeDialog } from './GaebSiteExchangeDialog';
 import { VariationTraceDrawer } from './VariationTraceDrawer';
@@ -4868,6 +4869,7 @@ export function BOQEditorPage() {
    * project scoped and only this page knows the project.
    */
   const [actualsPositionId, setActualsPositionId] = useState<string | null>(null);
+  const [procurementPositionId, setProcurementPositionId] = useState<string | null>(null);
 
   /** Take-off sheet state. The panel reads and computes on its own; this
    *  page keeps the id because it owns the position mutation the sheet is
@@ -5549,6 +5551,7 @@ export function BOQEditorPage() {
           onOpenAICopilot={handleOpenAICopilot}
           onPriceAnalysis={setPriceAnalysisPositionId}
           onShowPositionActuals={setActualsPositionId}
+          onShowProcurementTrace={setProcurementPositionId}
           onShowMeasurement={setMeasurementPositionId}
           classificationStandard={project?.classification_standard}
           onTraceLine={variationRequestId ? setTracePositionId : undefined}
@@ -6205,6 +6208,23 @@ export function BOQEditorPage() {
             onClose={() => setActualsPositionId(null)}
             projectId={boq?.project_id}
             positionId={actualsPositionId}
+            positionOrdinal={pos?.ordinal ?? ''}
+            positionDescription={pos?.description ?? ''}
+          />
+        );
+      })()}
+
+      {/* Issue #516: requisitions and purchase order lines for one position. */}
+      {(() => {
+        const pos = procurementPositionId
+          ? boq?.positions.find((p) => p.id === procurementPositionId)
+          : undefined;
+        return (
+          <PositionProcurementDrawer
+            open={procurementPositionId !== null}
+            onClose={() => setProcurementPositionId(null)}
+            projectId={boq?.project_id}
+            positionId={procurementPositionId}
             positionOrdinal={pos?.ordinal ?? ''}
             positionDescription={pos?.description ?? ''}
           />

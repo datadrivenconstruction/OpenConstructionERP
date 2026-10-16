@@ -66,6 +66,7 @@ import { RetainagePanel, RetainageBadge } from './RetainagePanel';
 import { SupplierConfirmationModal } from './SupplierConfirmationModal';
 import { POStatusPipeline } from './POStatusPipeline';
 import { RequisitionsTab } from './RequisitionsTab';
+import { POSourceRequisitions } from './POSourceRequisitions';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
 import { fmtFixed } from '@/shared/lib/formatters';
@@ -166,6 +167,9 @@ interface POItemResponse {
   // the money row holds no position column. Null for a line bought outside the
   // bill, and for one whose cost line came from no position.
   boq_position_id: string | null;
+  // The requisition line this order line was raised from by a conversion,
+  // null for a line typed into the order by hand.
+  requisition_item_id?: string | null;
   sort_order: number;
 }
 
@@ -226,6 +230,12 @@ interface POLineItemForm {
    * this form. See `backend/app/modules/procurement/cost_spine.py`.
    */
   boq_position_id: string | null;
+  /**
+   * The requisition line this order line came from, carried through an edit
+   * untouched. A PATCH that replaces the lines rewrites every row, and a line
+   * sent back without it loses its link to the requisition and the BOQ.
+   */
+  requisition_item_id?: string | null;
 }
 
 /** The purchase-order fields the shared create / edit modal holds. */
@@ -282,6 +292,7 @@ function poFormFromResponse(po: POResponse, projectCurrency: string): POFormStat
             // quietly send the line back unattributed. The picker resolves the
             // id to a readable position even when it sorts past the first page.
             boq_position_id: it.boq_position_id ?? null,
+            requisition_item_id: it.requisition_item_id ?? null,
           }))
         : [{ description: '', quantity: '1', unit: '', unit_rate: '', amount: '', boq_position_id: null }],
   };
@@ -1004,6 +1015,7 @@ function PurchaseOrdersTab({
             amount: li.amount || '0',
             unit_rate: li.unit_rate || '0',
             boq_position_id: li.boq_position_id || undefined,
+            requisition_item_id: li.requisition_item_id || undefined,
             sort_order: idx,
           }));
         body.amount_subtotal = String(poSubtotal.toFixed(2));
@@ -1470,6 +1482,7 @@ function PurchaseOrdersTab({
                 )}
               </div>
               {poErrors.items && <p className="mt-1.5 text-xs text-semantic-error">{poErrors.items}</p>}
+              {editingPO && <POSourceRequisitions poId={editingPO} />}
 
               {/* Totals */}
               <div className="mt-4 space-y-2">

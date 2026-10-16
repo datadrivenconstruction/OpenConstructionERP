@@ -50,6 +50,7 @@ import {
   Calculator,
   Activity,
   Ruler,
+  ShoppingCart,
 } from 'lucide-react';
 
 import {
@@ -485,6 +486,11 @@ export interface BOQGridProps {
    */
   onShowPositionActuals?: (positionId: string) => void;
   /**
+   * Open the requisitions and purchase order lines raised for a position
+   * (issue #516). Optional and hidden when omitted, like the actuals handler.
+   */
+  onShowProcurementTrace?: (positionId: string) => void;
+  /**
    * Open the take-off sheet for a position: units, length, width, height,
    * subtotals and a total, entered by hand with no drawing and no model.
    * Optional for the same reason as the handler above, so a grid rendered
@@ -704,6 +710,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onOpenAICopilot,
   onPriceAnalysis,
   onShowPositionActuals,
+  onShowProcurementTrace,
   onShowMeasurement,
   classificationStandard,
   onTraceLine,
@@ -3269,6 +3276,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   <CtxItem icon={<Activity size={14}/>}
                     label={t('boq.position_actuals')}
                     onClick={() => { onShowPositionActuals(d.id as string); closeContextMenu(); }}
+                  />
+                )}
+                {/* Issue #516: the requisitions and order lines raised from
+                    this position, read back through the requisition sources. */}
+                {onShowProcurementTrace && (
+                  <CtxItem icon={<ShoppingCart size={14}/>}
+                    label={t('procurement.trace.position_action', { defaultValue: 'Requisitions and orders' })}
+                    onClick={() => { onShowProcurementTrace(d.id as string); closeContextMenu(); }}
                   />
                 )}
                 {/* Measure the quantity by hand: units, length, width, height,

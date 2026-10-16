@@ -165837,6 +165837,12 @@
               "annotation": "Mapped[int]",
               "sql_type": "Integer",
               "nullable": false
+            },
+            {
+              "name": "requisition_item_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -166053,6 +166059,30 @@
               "name": "approver_id",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "submitted_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "decided_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "decision_comment",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "vendor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
               "nullable": true
             },
             {
@@ -166476,6 +166506,11 @@
               "description": "Cost line to commit against. Takes precedence over boq_position_id."
             },
             {
+              "name": "requisition_item_id",
+              "type": "UUID | None",
+              "description": "Requisition line this order line came from. Set by the requisition conversion."
+            },
+            {
               "name": "sort_order",
               "type": "int"
             }
@@ -166736,6 +166771,11 @@
             },
             {
               "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "requisition_item_id",
               "type": "UUID | None",
               "default": "None"
             },
@@ -167791,6 +167831,11 @@
               "type": "str | None"
             },
             {
+              "name": "vendor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "items",
               "type": "list[RequisitionItemIn]"
             }
@@ -167821,6 +167866,11 @@
               "type": "str | None"
             },
             {
+              "name": "vendor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "items",
               "type": "list[RequisitionItemIn] | None"
             }
@@ -167836,6 +167886,128 @@
             {
               "name": "reason",
               "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionApprove",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An approval, with an optional note from the approver.",
+          "fields": [
+            {
+              "name": "comment",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionReject",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A rejection. The reason is required: the requester has to know what to change.",
+          "fields": [
+            {
+              "name": "comment",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionConvert",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Turn approved requisitions of one project into one draft purchase order.\n\n``vendor_id`` names the supplier from the Vendor directory. Left out, the\nsupplier the requisitions agree on is used; requisitions naming different\nsuppliers cannot share an order.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "requisition_ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "vendor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "delivery_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionConvertResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The draft purchase order a conversion created.",
+          "fields": [
+            {
+              "name": "po_id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_number",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "requisition_ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "line_count",
+              "type": "int"
+            },
+            {
+              "name": "vendor_warnings",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionPOItemRef",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One purchase order line that came from a requisition line.",
+          "fields": [
+            {
+              "name": "po_item_id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -167953,6 +168125,10 @@
             {
               "name": "sources",
               "type": "list[RequisitionItemSourceResponse]"
+            },
+            {
+              "name": "po_items",
+              "type": "list[RequisitionPOItemRef]"
             }
           ]
         },
@@ -168011,8 +168187,43 @@
               "default": "None"
             },
             {
+              "name": "submitted_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "decided_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "decision_comment",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "vendor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "vendor_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "vendor_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "po_id",
               "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "po_number",
+              "type": "str | None",
               "default": "None"
             },
             {
@@ -168092,6 +168303,267 @@
               "type": "list[dict[str, Any]]"
             }
           ]
+        },
+        {
+          "class_name": "TracePOLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A purchase order line reached from a requisition line.",
+          "fields": [
+            {
+              "name": "po_id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "po_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "po_item_id",
+              "type": "UUID"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PositionTraceRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One requisition line fed by a BOQ position, and the order lines it became.",
+          "fields": [
+            {
+              "name": "requisition_id",
+              "type": "UUID"
+            },
+            {
+              "name": "req_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "requisition_status",
+              "type": "str"
+            },
+            {
+              "name": "requisition_item_id",
+              "type": "UUID"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "line_unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity_requested",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "quantity_ordered",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "resource_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "source_quantity",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "source_unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "purchase_orders",
+              "type": "list[TracePOLine]"
+            }
+          ]
+        },
+        {
+          "class_name": "PositionTraceResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Everything procurement holds against one BOQ position.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "items",
+              "type": "list[PositionTraceRow]"
+            }
+          ]
+        },
+        {
+          "class_name": "TraceSource",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A BOQ source behind an order line, read through its requisition line.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "position_ordinal",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "position_description",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "resource_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "POTraceLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One order line with the requisition line and BOQ sources it came from.",
+          "fields": [
+            {
+              "name": "po_item_id",
+              "type": "UUID"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "'0'"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "requisition_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "requisition_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "req_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "sources",
+              "type": "list[TraceSource]"
+            }
+          ]
+        },
+        {
+          "class_name": "POTraceRequisition",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A requisition converted into the order.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "req_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "POTraceResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Where the lines of a purchase order came from.",
+          "fields": [
+            {
+              "name": "po_id",
+              "type": "UUID"
+            },
+            {
+              "name": "po_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "po_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "requisitions",
+              "type": "list[POTraceRequisition]"
+            },
+            {
+              "name": "lines",
+              "type": "list[POTraceLine]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -168103,6 +168575,7 @@
         "projects",
         "rfq_bidding",
         "subcontractors",
+        "supplier_catalogs",
         "tendering",
         "users"
       ]
@@ -268159,10 +268632,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 30,
+      "ts_files": 33,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 30
+      "test_files": 13,
+      "total_files": 33
     },
     {
       "name": "procurement_concept",
@@ -269682,6 +270155,7 @@
       "projects",
       "rfq_bidding",
       "subcontractors",
+      "supplier_catalogs",
       "tendering",
       "users"
     ],
@@ -270162,13 +270636,13 @@
     "backend_modules": 211,
     "modules_with_manifests": 209,
     "total_models": 768,
-    "total_columns": 8932,
+    "total_columns": 8937,
     "total_relationships": 238,
     "total_routes": 4533,
-    "total_schemas": 3982,
+    "total_schemas": 3994,
     "total_python_files": 2689,
     "frontend_features": 208,
-    "frontend_ts_files": 3452,
+    "frontend_ts_files": 3455,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

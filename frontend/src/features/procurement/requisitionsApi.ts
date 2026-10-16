@@ -45,6 +45,9 @@ export interface RequisitionLineIn {
   description: string;
   unit: string | null;
   quantity_requested: string;
+  /** Decimal string. Sent back on every edit, or the server resets it to 0. */
+  unit_cost?: string;
+  currency_code?: string;
   catalog_item_id?: string | null;
   sources: RequisitionSourceIn[];
 }
@@ -63,10 +66,23 @@ export interface RequisitionLine {
   quantity_received: string;
   quantity_consumed: string;
   quantity_outstanding: string;
+  unit_cost?: string;
+  currency_code?: string;
   catalog_item_id: string | null;
   cost_line_id: string | null;
   sort_order: number;
   sources: RequisitionSource[];
+  /** Purchase order lines raised from this line by a conversion. */
+  po_items?: RequisitionPOItemRef[];
+}
+
+/** A purchase order line that came from a requisition line. */
+export interface RequisitionPOItemRef {
+  po_item_id: string;
+  po_id: string;
+  po_number: string | null;
+  quantity: string;
+  unit: string | null;
 }
 
 export interface RequisitionHistoryEntry {
@@ -74,6 +90,7 @@ export interface RequisitionHistoryEntry {
   action: string;
   actor: string | null;
   reason?: string;
+  comment?: string;
 }
 
 export interface Requisition {
@@ -85,7 +102,15 @@ export interface Requisition {
   required_date: string | null;
   notes: string | null;
   requester_id: string | null;
+  approver_id?: string | null;
   po_id: string | null;
+  po_number?: string | null;
+  vendor_id?: string | null;
+  vendor_name?: string | null;
+  vendor_status?: string | null;
+  submitted_by?: string | null;
+  decided_at?: string | null;
+  decision_comment?: string | null;
   items: RequisitionLine[];
   reconciliation: Record<string, string>;
   history: RequisitionHistoryEntry[];
@@ -105,6 +130,7 @@ export interface RequisitionCreateBody {
   title?: string | null;
   required_date?: string | null;
   notes?: string | null;
+  vendor_id?: string | null;
   items: RequisitionLineIn[];
 }
 
@@ -112,7 +138,81 @@ export interface RequisitionUpdateBody {
   title?: string | null;
   required_date?: string | null;
   notes?: string | null;
+  vendor_id?: string | null;
   items?: RequisitionLineIn[];
+}
+
+export interface ConvertToPOBody {
+  project_id: string;
+  requisition_ids: string[];
+  vendor_id?: string | null;
+  delivery_date?: string | null;
+  notes?: string | null;
+}
+
+export interface ConvertToPOResult {
+  po_id: string;
+  po_number: string;
+  project_id: string;
+  requisition_ids: string[];
+  line_count: number;
+  vendor_warnings: string[];
+}
+
+export interface TracePOLineRef {
+  po_id: string;
+  po_number: string | null;
+  po_status: string | null;
+  po_item_id: string;
+  quantity: string;
+  unit: string | null;
+}
+
+/** One BOQ source of a requisition line, seen from the BOQ position. */
+export interface PositionTraceRow {
+  requisition_id: string;
+  req_number: string | null;
+  requisition_status: RequisitionStatus;
+  requisition_item_id: string;
+  description: string;
+  line_unit: string | null;
+  quantity_requested: string;
+  quantity_ordered: string;
+  resource_key: string | null;
+  source_quantity: string;
+  source_unit: string | null;
+  purchase_orders: TracePOLineRef[];
+}
+
+export interface PositionTrace {
+  boq_position_id: string;
+  items: PositionTraceRow[];
+}
+
+export interface POTraceLine {
+  po_item_id: string;
+  description: string;
+  quantity: string;
+  unit: string | null;
+  requisition_item_id: string | null;
+  requisition_id: string | null;
+  req_number: string | null;
+  sources: {
+    boq_position_id: string | null;
+    resource_key: string | null;
+    quantity: string;
+    unit: string | null;
+    position_ordinal?: string | null;
+    position_description?: string | null;
+  }[];
+}
+
+export interface POTrace {
+  po_id: string;
+  po_number: string | null;
+  po_status: string | null;
+  requisitions: { id: string; req_number: string | null; status: RequisitionStatus; title: string | null }[];
+  lines: POTraceLine[];
 }
 
 /** One rule failure from a refused submit (422 `detail.errors`). */
@@ -153,6 +253,57 @@ export function withdrawRequisition(id: string): Promise<Requisition> {
 
 export function cancelRequisition(id: string, reason?: string): Promise<Requisition> {
   return apiPost<Requisition>(`/v1/procurement/requisitions/${encodeURIComponent(id)}/cancel`, { reason: reason || null });
+}
+
+export function approveRequisition(id: string, comment?: string): Promise<Requisition> {
+  return apiPost<Requisition>(`/v1/procurement/requisitions/${encodeURIComponent(id)}/approve`, {
+    comment: comment?.trim() || null,
+  });
+}
+
+export function rejectRequisition(id: string, comment: string): Promise<Requisition> {
+  return apiPost<Requisition>(`/v1/procurement/requisitions/${encodeURIComponent(id)}/reject`, { comment: comment.trim() });
+}
+
+export function convertRequisitionsToPurchaseOrder(body: ConvertToPOBody): Promise<ConvertToPOResult> {
+  return apiPost<ConvertToPOResult, ConvertToPOBody>(`/v1/procurement/requisitions/convert-to-po`, body);
+}
+
+export function traceBoqPosition(positionId: string, projectId: string): Promise<PositionTrace> {
+  const qs = new URLSearchParams({ project_id: projectId });
+  return apiGet<PositionTrace>(
+    `/v1/procurement/requisitions/trace/position/${encodeURIComponent(positionId)}?${qs.toString()}`,
+  );
+}
+
+export function tracePurchaseOrder(poId: string): Promise<POTrace> {
+  return apiGet<POTrace>(`/v1/procurement/requisitions/trace/purchase-order/${encodeURIComponent(poId)}`);
+}
+
+/** Why a selection of requisitions cannot go into one purchase order. */
+export type ConvertBlockReason = 'empty' | 'not_approved' | 'mixed_projects' | 'vendor_conflict';
+
+export interface ConvertCheck {
+  ok: boolean;
+  reason: ConvertBlockReason | null;
+  /** The vendor every requisition that names one agrees on, or null. */
+  vendorId: string | null;
+}
+
+/**
+ * Whether these requisitions can be converted into one purchase order: all
+ * approved, in one project, and naming at most one vendor between them. The
+ * server checks the same and is the authority; this only says it early.
+ */
+export function canConvertTogether(
+  reqs: Pick<Requisition, 'status' | 'project_id' | 'vendor_id'>[],
+): ConvertCheck {
+  if (reqs.length === 0) return { ok: false, reason: 'empty', vendorId: null };
+  if (reqs.some((r) => r.status !== 'approved')) return { ok: false, reason: 'not_approved', vendorId: null };
+  if (new Set(reqs.map((r) => r.project_id)).size > 1) return { ok: false, reason: 'mixed_projects', vendorId: null };
+  const vendors = new Set(reqs.map((r) => r.vendor_id).filter((v): v is string => !!v));
+  if (vendors.size > 1) return { ok: false, reason: 'vendor_conflict', vendorId: null };
+  return { ok: true, reason: null, vendorId: vendors.size === 1 ? [...vendors][0]! : null };
 }
 
 /** Pull the rule failures out of a refused submit, or an empty list. */
@@ -287,6 +438,8 @@ export function lineToInput(line: RequisitionLine): RequisitionLineIn {
     description: line.description,
     unit: line.unit,
     quantity_requested: line.quantity_requested,
+    unit_cost: line.unit_cost != null ? String(line.unit_cost) : '0',
+    currency_code: line.currency_code ?? '',
     catalog_item_id: line.catalog_item_id,
     sources: line.sources.map((s) => ({
       boq_position_id: s.boq_position_id,

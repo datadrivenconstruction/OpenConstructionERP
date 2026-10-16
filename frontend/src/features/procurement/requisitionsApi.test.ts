@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 import {
   addDecimalStrings,
   buildRequisitionLinesFromBuyList,
+  canConvertTogether,
+  lineToInput,
   mergeRequisitionLines,
   parseRequisitionRuleErrors,
   type RequisitionLineIn,
@@ -90,5 +92,49 @@ describe('parseRequisitionRuleErrors', () => {
       { rule_id: 'procurement.requisition_source_unit', message: 'm', element_ref: '1', suggestion: null },
     ]);
     expect(parseRequisitionRuleErrors(new Error('x'))).toEqual([]);
+  });
+});
+
+describe('canConvertTogether', () => {
+  const base = { status: 'approved' as const, project_id: 'p1', vendor_id: null as string | null };
+
+  it('agrees on the one vendor the requisitions name, ignoring those that name none', () => {
+    expect(canConvertTogether([{ ...base, vendor_id: 'v1' }, base])).toEqual({ ok: true, reason: null, vendorId: 'v1' });
+    expect(canConvertTogether([base, base])).toEqual({ ok: true, reason: null, vendorId: null });
+  });
+
+  it('refuses an empty, unapproved, cross-project or two-vendor selection', () => {
+    expect(canConvertTogether([]).reason).toBe('empty');
+    expect(canConvertTogether([base, { ...base, status: 'submitted' }]).reason).toBe('not_approved');
+    expect(canConvertTogether([base, { ...base, project_id: 'p2' }]).reason).toBe('mixed_projects');
+    expect(canConvertTogether([{ ...base, vendor_id: 'v1' }, { ...base, vendor_id: 'v2' }]).reason).toBe(
+      'vendor_conflict',
+    );
+  });
+});
+
+describe('lineToInput', () => {
+  it('keeps the unit cost and currency, so saving a draft does not reset them', () => {
+    const input = lineToInput({
+      id: 'l1',
+      description: 'Rebar B500B',
+      unit: 't',
+      quantity_requested: '12.5',
+      quantity_ordered: '0',
+      quantity_received: '0',
+      quantity_consumed: '0',
+      quantity_outstanding: '12.5',
+      unit_cost: '845.50',
+      currency_code: 'EUR',
+      catalog_item_id: null,
+      cost_line_id: null,
+      sort_order: 0,
+      sources: [],
+    });
+    expect(input.unit_cost).toBe('845.50');
+    expect(input.currency_code).toBe('EUR');
+    const merged = mergeRequisitionLines([input, { ...input, unit_cost: '900', quantity_requested: '1' }], [0, 1]);
+    expect(merged?.[0]?.unit_cost).toBe('845.50');
+    expect(merged?.[0]?.quantity_requested).toBe('13.5');
   });
 });
