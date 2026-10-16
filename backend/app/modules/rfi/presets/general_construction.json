@@ -1,0 +1,131 @@
+{
+  "code": "general_construction",
+  "name_i18n": {
+    "en": "General construction",
+    "de": "Allgemeines Bauwesen",
+    "ru": "Общее строительство",
+    "fr": "Construction générale",
+    "es": "Construcción general",
+    "ar": "البناء العام"
+  },
+  "description_i18n": {
+    "en": "The everyday request types of a building or civil works project: information, site, design and submittal queries, clarifications and decisions.",
+    "de": "Die alltäglichen Anfragearten eines Hoch- oder Tiefbauprojekts: Informations-, Baustellen-, Planungs- und Unterlagenanfragen, Klärungen und Entscheidungen."
+  },
+  "types": [
+    {
+      "code": "RFI",
+      "number_prefix": "RFI",
+      "number_digits": 3,
+      "default_response_days": 14,
+      "required_fields": [],
+      "name_i18n": {
+        "en": "Request for Information",
+        "de": "Informationsanfrage",
+        "ru": "Запрос информации",
+        "fr": "Demande d'information",
+        "es": "Solicitud de información",
+        "ar": "طلب معلومات"
+      },
+      "description_i18n": {
+        "en": "A formal question to the designer or the client about the contract documents.",
+        "de": "Eine formelle Frage an Planer oder Bauherrn zu den Vertragsunterlagen."
+      }
+    },
+    {
+      "code": "SQ",
+      "number_prefix": "SQ",
+      "number_digits": 4,
+      "default_response_days": 3,
+      "required_fields": ["assigned_to", "response_due_date"],
+      "name_i18n": {
+        "en": "Site Query",
+        "de": "Baustellenanfrage",
+        "ru": "Запрос с площадки",
+        "fr": "Question de chantier",
+        "es": "Consulta de obra",
+        "ar": "استفسار موقع"
+      },
+      "description_i18n": {
+        "en": "A question raised on site that holds up work until it is answered.",
+        "de": "Eine Frage von der Baustelle, die die Arbeit bis zur Antwort aufhält."
+      }
+    },
+    {
+      "code": "DQ",
+      "number_prefix": "DQ",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["assigned_to", "discipline"],
+      "name_i18n": {
+        "en": "Design Query",
+        "de": "Planungsanfrage",
+        "ru": "Запрос по проекту",
+        "fr": "Question de conception",
+        "es": "Consulta de diseño",
+        "ar": "استفسار تصميم"
+      },
+      "description_i18n": {
+        "en": "A question about the design intent, addressed to one discipline.",
+        "de": "Eine Frage zur Planungsabsicht, gerichtet an ein Fachgewerk."
+      }
+    },
+    {
+      "code": "SBQ",
+      "number_prefix": "SBQ",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["assigned_to", "linked_drawing_ids"],
+      "name_i18n": {
+        "en": "Submittal Query",
+        "de": "Rückfrage zur Freigabeunterlage",
+        "ru": "Запрос по документам на согласование",
+        "fr": "Question sur une soumission",
+        "es": "Consulta sobre documentación para aprobación",
+        "ar": "استفسار حول مستندات الاعتماد"
+      },
+      "description_i18n": {
+        "en": "A question about a submittal under review, linked to the submitted documents.",
+        "de": "Eine Rückfrage zu einer Freigabeunterlage in Prüfung, verknüpft mit den eingereichten Dokumenten."
+      }
+    },
+    {
+      "code": "CLR",
+      "number_prefix": "CLR",
+      "number_digits": 4,
+      "default_response_days": 7,
+      "required_fields": ["assigned_to"],
+      "name_i18n": {
+        "en": "Clarification Request",
+        "de": "Klärungsanfrage",
+        "ru": "Запрос разъяснения",
+        "fr": "Demande de clarification",
+        "es": "Solicitud de aclaración",
+        "ar": "طلب توضيح"
+      },
+      "description_i18n": {
+        "en": "A request to resolve an ambiguity or a conflict between documents.",
+        "de": "Eine Bitte, eine Unklarheit oder einen Widerspruch zwischen Unterlagen aufzulösen."
+      }
+    },
+    {
+      "code": "DEC",
+      "number_prefix": "DEC",
+      "number_digits": 4,
+      "default_response_days": 5,
+      "required_fields": ["assigned_to", "response_due_date"],
+      "name_i18n": {
+        "en": "Decision Request",
+        "de": "Entscheidungsanfrage",
+        "ru": "Запрос решения",
+        "fr": "Demande de décision",
+        "es": "Solicitud de decisión",
+        "ar": "طلب قرار"
+      },
+      "description_i18n": {
+        "en": "A choice the client or the designer has to make by a given date.",
+        "de": "Eine Wahl, die Bauherr oder Planer bis zu einem Termin treffen muss."
+      }
+    }
+  ]
+}

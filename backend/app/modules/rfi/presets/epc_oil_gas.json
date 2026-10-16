@@ -1,0 +1,218 @@
+{
+  "code": "epc_oil_gas",
+  "name_i18n": {
+    "en": "EPC / Oil & Gas",
+    "de": "EPC / Öl und Gas",
+    "ru": "EPC / нефтегаз",
+    "fr": "EPC / pétrole et gaz",
+    "es": "EPC / petróleo y gas",
+    "ar": "EPC / النفط والغاز"
+  },
+  "description_i18n": {
+    "en": "The query and deviation types of an engineering, procurement and construction project in the process industry: technical, vendor, fabrication, site and interface queries, deviations, concessions, design change notices and safety study close-outs.",
+    "de": "Die Anfrage- und Abweichungsarten eines EPC-Projekts in der Prozessindustrie: technische, Lieferanten-, Fertigungs-, Baustellen- und Schnittstellenanfragen, Abweichungen, Sonderfreigaben, Planungsänderungen und Abschlussmaßnahmen aus Sicherheitsstudien."
+  },
+  "types": [
+    {
+      "code": "RFI",
+      "number_prefix": "RFI",
+      "number_digits": 3,
+      "default_response_days": 14,
+      "required_fields": [],
+      "name_i18n": {
+        "en": "Request for Information",
+        "de": "Informationsanfrage",
+        "ru": "Запрос информации",
+        "fr": "Demande d'information",
+        "es": "Solicitud de información",
+        "ar": "طلب معلومات"
+      }
+    },
+    {
+      "code": "TQ",
+      "number_prefix": "TQ",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["assigned_to", "discipline", "response_due_date"],
+      "name_i18n": {
+        "en": "Technical Query",
+        "de": "Technische Anfrage",
+        "ru": "Технический запрос",
+        "fr": "Question technique",
+        "es": "Consulta técnica",
+        "ar": "استفسار فني"
+      },
+      "description_i18n": {
+        "en": "A technical question between engineering parties, answered by the responsible discipline.",
+        "de": "Eine technische Frage zwischen den Engineering-Parteien, beantwortet vom zuständigen Fachbereich."
+      }
+    },
+    {
+      "code": "VQ",
+      "number_prefix": "VQ",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["assigned_to", "response_due_date"],
+      "name_i18n": {
+        "en": "Vendor Query",
+        "de": "Lieferantenanfrage",
+        "ru": "Запрос поставщику",
+        "fr": "Question fournisseur",
+        "es": "Consulta a proveedor",
+        "ar": "استفسار مورد"
+      },
+      "description_i18n": {
+        "en": "A question to or from an equipment or material vendor about the purchase order scope.",
+        "de": "Eine Frage an oder von einem Ausrüstungs- oder Materiallieferanten zum Bestellumfang."
+      }
+    },
+    {
+      "code": "FQ",
+      "number_prefix": "FQ",
+      "number_digits": 4,
+      "default_response_days": 5,
+      "required_fields": ["assigned_to", "discipline", "linked_drawing_ids"],
+      "name_i18n": {
+        "en": "Fabrication Query",
+        "de": "Fertigungsanfrage",
+        "ru": "Запрос по изготовлению",
+        "fr": "Question de fabrication",
+        "es": "Consulta de fabricación",
+        "ar": "استفسار تصنيع"
+      },
+      "description_i18n": {
+        "en": "A question from the fabrication shop, tied to the shop drawings it concerns.",
+        "de": "Eine Frage aus der Fertigung, verknüpft mit den betroffenen Werkstattzeichnungen."
+      }
+    },
+    {
+      "code": "SQ",
+      "number_prefix": "SQ",
+      "number_digits": 4,
+      "default_response_days": 3,
+      "required_fields": ["assigned_to", "response_due_date"],
+      "name_i18n": {
+        "en": "Site Query",
+        "de": "Baustellenanfrage",
+        "ru": "Запрос с площадки",
+        "fr": "Question de chantier",
+        "es": "Consulta de obra",
+        "ar": "استفسار موقع"
+      }
+    },
+    {
+      "code": "IQ",
+      "number_prefix": "IQ",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["assigned_to", "response_due_date"],
+      "name_i18n": {
+        "en": "Interface Query",
+        "de": "Schnittstellenanfrage",
+        "ru": "Запрос по интерфейсу",
+        "fr": "Question d'interface",
+        "es": "Consulta de interfaz",
+        "ar": "استفسار واجهة"
+      },
+      "description_i18n": {
+        "en": "A question between two parties whose scopes meet at an interface.",
+        "de": "Eine Frage zwischen zwei Parteien, deren Leistungen an einer Schnittstelle aufeinandertreffen."
+      }
+    },
+    {
+      "code": "TDR",
+      "number_prefix": "TDR",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["assigned_to", "discipline", "linked_drawing_ids"],
+      "name_i18n": {
+        "en": "Technical Deviation Request",
+        "de": "Antrag auf technische Abweichung",
+        "ru": "Запрос на техническое отступление",
+        "fr": "Demande de dérogation technique",
+        "es": "Solicitud de desviación técnica",
+        "ar": "طلب انحراف فني"
+      },
+      "description_i18n": {
+        "en": "A request to depart from a specification before the work is done, citing the specification it departs from.",
+        "de": "Ein Antrag, vor der Ausführung von einer Spezifikation abzuweichen, mit Verweis auf diese Spezifikation."
+      }
+    },
+    {
+      "code": "CON",
+      "number_prefix": "CON",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["assigned_to", "linked_drawing_ids"],
+      "name_i18n": {
+        "en": "Concession Request",
+        "de": "Sonderfreigabeantrag",
+        "ru": "Запрос на допуск несоответствия",
+        "fr": "Demande de concession",
+        "es": "Solicitud de concesión",
+        "ar": "طلب تنازل"
+      },
+      "description_i18n": {
+        "en": "A request to accept work or material that does not meet the specification, citing the specification and the nonconformity.",
+        "de": "Ein Antrag, nicht spezifikationsgerechte Leistung oder Ware anzunehmen, mit Verweis auf Spezifikation und Abweichung."
+      }
+    },
+    {
+      "code": "KDCN",
+      "number_prefix": "KDCN",
+      "number_digits": 4,
+      "default_response_days": 10,
+      "required_fields": ["discipline", "linked_drawing_ids"],
+      "name_i18n": {
+        "en": "Design Change Notice (KDCN)",
+        "de": "Planungsänderungsmitteilung (KDCN)",
+        "ru": "Уведомление об изменении проекта (KDCN)",
+        "fr": "Avis de modification de conception (KDCN)",
+        "es": "Aviso de cambio de diseño (KDCN)",
+        "ar": "إشعار تغيير التصميم (KDCN)"
+      },
+      "description_i18n": {
+        "en": "A notice that an issued design document changes, linked to the documents it revises.",
+        "de": "Eine Mitteilung, dass sich ein freigegebenes Planungsdokument ändert, verknüpft mit den betroffenen Dokumenten."
+      }
+    },
+    {
+      "code": "HAZ",
+      "number_prefix": "HAZ",
+      "number_digits": 4,
+      "default_response_days": 20,
+      "required_fields": ["assigned_to", "priority", "response_due_date"],
+      "name_i18n": {
+        "en": "HAZOP / Safety Study Close-out Action",
+        "de": "Abschlussmaßnahme aus HAZOP / Sicherheitsstudie",
+        "ru": "Закрытие действия по HAZOP / исследованию безопасности",
+        "fr": "Action de clôture HAZOP / étude de sécurité",
+        "es": "Acción de cierre de HAZOP / estudio de seguridad",
+        "ar": "إجراء إغلاق HAZOP / دراسة السلامة"
+      },
+      "description_i18n": {
+        "en": "An action raised by a HAZOP or another safety study, tracked until its close-out is accepted.",
+        "de": "Eine Maßnahme aus einer HAZOP- oder anderen Sicherheitsstudie, verfolgt bis zur Annahme ihres Abschlusses."
+      }
+    },
+    {
+      "code": "CIP",
+      "number_prefix": "CIP",
+      "number_digits": 4,
+      "default_response_days": 20,
+      "required_fields": [],
+      "name_i18n": {
+        "en": "Continuous Improvement Proposal",
+        "de": "Verbesserungsvorschlag",
+        "ru": "Предложение по улучшению",
+        "fr": "Proposition d'amélioration continue",
+        "es": "Propuesta de mejora continua",
+        "ar": "مقترح تحسين مستمر"
+      },
+      "description_i18n": {
+        "en": "A proposal to improve a method, a design or a process, recorded and answered like any other request.",
+        "de": "Ein Vorschlag zur Verbesserung einer Methode, Planung oder eines Ablaufs, erfasst und beantwortet wie jede andere Anfrage."
+      }
+    }
+  ]
+}
