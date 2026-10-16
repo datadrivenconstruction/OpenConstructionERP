@@ -70,6 +70,7 @@ from app.core.pdf_appearance import (
     MAX_FONT_SIZE,
     MAX_FOOTER_TEXT,
     MAX_MARGIN_MM,
+    MAX_WATERMARK_TEXT,
     MIN_FONT_SIZE,
     MIN_MARGIN_MM,
     PAGE_SIZES,
@@ -181,6 +182,7 @@ class DocumentAppearanceResponse(BaseModel):
     footer_text: str = DEFAULT_APPEARANCE["footer_text"]
     show_page_numbers: bool = DEFAULT_APPEARANCE["show_page_numbers"]
     show_letterhead: bool = DEFAULT_APPEARANCE["show_letterhead"]
+    watermark_text: str = DEFAULT_APPEARANCE["watermark_text"]
 
 
 class DocumentAppearanceOptions(BaseModel):
@@ -199,6 +201,7 @@ class DocumentAppearanceOptions(BaseModel):
     min_margin_mm: int
     max_margin_mm: int
     max_footer_text: int
+    max_watermark_text: int
     defaults: DocumentAppearanceResponse
 
 
@@ -222,6 +225,7 @@ class DocumentAppearanceUpdate(BaseModel):
     footer_text: str | None = Field(default=None, max_length=MAX_FOOTER_TEXT)
     show_page_numbers: bool | None = None
     show_letterhead: bool | None = None
+    watermark_text: str | None = Field(default=None, max_length=MAX_WATERMARK_TEXT)
 
 
 @router.get(
@@ -261,6 +265,7 @@ async def get_document_appearance_options() -> DocumentAppearanceOptions:
         min_margin_mm=MIN_MARGIN_MM,
         max_margin_mm=MAX_MARGIN_MM,
         max_footer_text=MAX_FOOTER_TEXT,
+        max_watermark_text=MAX_WATERMARK_TEXT,
         defaults=DocumentAppearanceResponse(**DEFAULT_APPEARANCE),
     )
 

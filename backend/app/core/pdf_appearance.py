@@ -28,6 +28,9 @@ wire:
 * ``footer_text`` - replaces the default "Generated ..." line when set.
 * ``show_page_numbers`` - some workspaces file these documents inside a larger
   bundle that carries its own pagination.
+* ``watermark_text`` - a word such as DRAFT or CONFIDENTIAL printed faintly
+  across every page, drawn by the same page furniture as the footer. Empty by
+  default, so nothing changes until a workspace types one.
 * ``page_size`` / ``margin_mm`` - read by the generator when it builds its
   document template.
 * ``show_letterhead`` - whether the company letterhead
@@ -137,6 +140,10 @@ MAX_MARGIN_MM = 40
 #: short enough to stay on one footer line at the smallest page size.
 MAX_FOOTER_TEXT = 120
 
+#: Watermark cap. A watermark is one or two words read across the page at a
+#: glance; a sentence there would have to be set too small to read as one.
+MAX_WATERMARK_TEXT = 40
+
 #: ``#rgb`` and ``#rrggbb``, the two forms the colour input emits.
 _HEX_COLOR = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
 
@@ -159,6 +166,7 @@ DEFAULT_APPEARANCE: dict[str, Any] = {
     "footer_text": "",
     "show_page_numbers": True,
     "show_letterhead": True,
+    "watermark_text": "",
 }
 
 
@@ -217,6 +225,10 @@ def _clean_field(field: str, value: Any) -> Any:
         return align if align in LOGO_ALIGNMENTS else None
     if field == "footer_text":
         return value.strip()[:MAX_FOOTER_TEXT] if isinstance(value, str) else None
+    if field == "watermark_text":
+        # Whitespace collapses because the mark is drawn as one line, and a
+        # newline typed into the field would otherwise print as a gap.
+        return " ".join(value.split())[:MAX_WATERMARK_TEXT] if isinstance(value, str) else None
     if field in ("show_page_numbers", "show_letterhead"):
         return value if isinstance(value, bool) else None
     return None
@@ -327,8 +339,9 @@ _LETTERHEAD_FIELDS = ("show_letterhead", "logo_align", "accent_color")
 #: Read only by a generator that draws a footer from the appearance: the RFI,
 #: the meeting minutes, the daily diary and the record forms of
 #: :func:`app.core.register_export.build_record_pdf`. The other four print no
-#: footer.
-_FOOTER_FIELDS = ("footer_text", "footer_color", "show_page_numbers")
+#: footer. The watermark belongs here because it is drawn by the same page
+#: callback as the footer, so exactly the generators with a footer carry it.
+_FOOTER_FIELDS = ("footer_text", "footer_color", "show_page_numbers", "watermark_text")
 
 #: The sheet of :func:`app.core.register_export.build_record_pdf`: portrait A4,
 #: 20 mm at the sides and 18 mm top and bottom, an unpadded frame.

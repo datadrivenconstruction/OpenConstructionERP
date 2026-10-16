@@ -68,6 +68,7 @@ OVERRIDE_VALUES: dict[str, Any] = {
     "footer_text": "Per-type footer",
     "footer_color": "#00aa44",
     "show_page_numbers": False,
+    "watermark_text": "PER-TYPE MARK",
 }
 
 CONFIGURABLE = [key for key, kind in DOCUMENT_TYPES.items() if kind.configurable]

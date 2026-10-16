@@ -105,6 +105,7 @@ const APPEARANCE: appearanceApi.DocumentAppearance = {
   footer_text: '',
   show_page_numbers: true,
   show_letterhead: true,
+  watermark_text: '',
 };
 
 function renderPanel() {

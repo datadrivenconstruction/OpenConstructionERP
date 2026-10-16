@@ -70,6 +70,7 @@ from app.core.pdf_branding import (
     branded_doc_metadata,
     branded_header_logo,
     branded_letterhead,
+    draw_watermark,
 )
 from app.core.pdf_fonts import (
     BODY_FONT,
@@ -315,6 +316,7 @@ def _make_footer(
 
     def _footer(canvas: Any, doc: Any) -> None:
         canvas.saveState()
+        draw_watermark(canvas, look, page_w=doc.pagesize[0], page_h=doc.pagesize[1])
         canvas.setStrokeColor(colors.HexColor("#cccccc"))
         canvas.setLineWidth(0.5)
         canvas.line(MARGIN_LEFT, 13 * mm, PAGE_WIDTH - MARGIN_RIGHT, 13 * mm)

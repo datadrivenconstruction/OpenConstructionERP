@@ -583,6 +583,8 @@ function FieldEditor({
         return t('property_dev.doc_appearance.footer_color', { defaultValue: 'Footer colour' });
       case 'show_page_numbers':
         return t('property_dev.doc_appearance.page_numbers', { defaultValue: 'Show page numbers' });
+      case 'watermark_text':
+        return t('property_dev.doc_appearance.watermark', { defaultValue: 'Watermark' });
     }
   })();
 
@@ -649,6 +651,19 @@ function FieldEditor({
             aria-labelledby={labelId}
           />
         );
+      case 'watermark_text':
+        return (
+          <Input
+            value={String(value ?? '')}
+            maxLength={options?.max_watermark_text}
+            disabled={controlDisabled}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={t('property_dev.doc_appearance.watermark_placeholder', {
+              defaultValue: 'Leave empty for no watermark',
+            })}
+            aria-labelledby={labelId}
+          />
+        );
     }
   })();
 
@@ -656,7 +671,7 @@ function FieldEditor({
     <div
       role="group"
       aria-labelledby={labelId}
-      className={clsx('text-xs', field === 'footer_text' && 'sm:col-span-2')}
+      className={clsx('text-xs', (field === 'footer_text' || field === 'watermark_text') && 'sm:col-span-2')}
       data-testid={`doc-type-field-${typeKey}-${field}`}
     >
       <div className="mb-1 flex items-start justify-between gap-2">

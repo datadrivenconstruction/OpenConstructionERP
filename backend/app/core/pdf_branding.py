@@ -546,6 +546,8 @@ def _draw_page_furniture(
 
         canvas.saveState()
 
+        draw_watermark(canvas, appearance, page_w=page_w, page_h=page_h)
+
         if header:
             _draw_header_band(canvas, branding, appearance, page_h=page_h, left=left, right_x=right_x)
 
@@ -649,6 +651,90 @@ def _draw_header_band(
     canvas.setLineWidth(0.5)
     line_y = page_h - 17.0 * MM
     canvas.line(left, line_y, right_x, line_y)
+
+
+#: The watermark's ink: a mid grey at low opacity, so the mark reads as a mark
+#: and the table under it stays legible on a laser print. Not the accent colour
+#: on purpose: a dark accent at the same opacity turns a page of figures grey.
+_WATERMARK_COLOR = "#6b7280"
+_WATERMARK_ALPHA = 0.14
+
+#: Watermark size bounds in points. The mark is set as large as the page
+#: diagonal allows, but no larger than reads as a stamp, and a long text stops
+#: shrinking where it would stop reading as a watermark at all.
+_WATERMARK_MAX_SIZE = 72.0
+_WATERMARK_MIN_SIZE = 18.0
+
+
+def draw_watermark(canvas: Any, appearance: dict[str, Any], *, page_w: float, page_h: float) -> bool:
+    """Print the saved watermark faintly across the page, corner to corner.
+
+    Shared by every page callback that draws the footer from the appearance, so
+    a document type offers the watermark exactly where it prints one. The text
+    is set as a paragraph rather than a canvas string because a paragraph is
+    the only route through which reportlab shapes Thai or Devanagari, and in
+    the face :func:`app.core.pdf_fonts.pdf_fit_line` picks for it, so
+    ``ENTWURF``, ``ЧЕРНОВИК`` and ``草稿`` all print as words, not boxes.
+
+    Args:
+        canvas: The page's canvas. Its state is saved and restored here.
+        appearance: The resolved appearance of the document being drawn.
+        page_w: Page width in points.
+        page_h: Page height in points.
+
+    Returns:
+        Whether a watermark was drawn. ``False`` when none is saved, or when it
+        could not be drawn: like the rest of the page furniture this never
+        raises, because a document must not be lost to its watermark.
+    """
+    text = " ".join(str(appearance.get("watermark_text") or "").split())
+    if not text:
+        return False
+    try:
+        _draw_watermark_text(canvas, text, page_w=page_w, page_h=page_h)
+    except Exception:  # noqa: BLE001 - a watermark must never break a PDF export
+        logger.debug("watermark draw failed; page left without it", exc_info=True)
+        return False
+    return True
+
+
+def _draw_watermark_text(canvas: Any, text: str, *, page_w: float, page_h: float) -> None:
+    """The body of :func:`draw_watermark`. Raises like any canvas call."""
+    import math
+
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_CENTER
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    from reportlab.platypus import Paragraph
+
+    from app.core.pdf_fonts import BOLD_FONT, pdf_fit_line, pdf_fitted_style, pdf_font_for_text
+
+    diagonal = math.hypot(page_w, page_h)
+    room = diagonal * 0.7
+    face = pdf_font_for_text(text, bold=True, base=BOLD_FONT)
+    unit = stringWidth(text, face, 1.0) or 1.0
+    wanted = max(_WATERMARK_MIN_SIZE, min(_WATERMARK_MAX_SIZE, room / unit))
+    line, _face, size = pdf_fit_line(text, room, size=wanted, bold=True, base=BOLD_FONT)
+    style = ParagraphStyle(
+        "Watermark",
+        fontName=BOLD_FONT,
+        fontSize=wanted,
+        leading=wanted * 1.2,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor(_WATERMARK_COLOR),
+    )
+    mark = Paragraph(html.escape(line, quote=True), pdf_fitted_style(style, line, size))
+    _, height = mark.wrap(room, page_h)
+
+    canvas.saveState()
+    try:
+        canvas.setFillAlpha(_WATERMARK_ALPHA)
+        canvas.translate(page_w / 2.0, page_h / 2.0)
+        canvas.rotate(math.degrees(math.atan2(page_h, page_w)))
+        mark.drawOn(canvas, -room / 2.0, -height / 2.0)
+    finally:
+        canvas.restoreState()
 
 
 # One millimetre in points - reportlab's unit, inlined so this module needs no
@@ -1122,5 +1208,6 @@ __all__ = [
     "branded_header_footer",
     "branded_header_logo",
     "branded_letterhead",
+    "draw_watermark",
     "render_sample_pdf",
 ]

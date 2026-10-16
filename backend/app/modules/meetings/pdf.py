@@ -50,9 +50,11 @@ def draw_minutes_footer(canvas_obj: Any, doc: Any, appearance: dict[str, Any], *
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
+    from app.core.pdf_branding import draw_watermark
     from app.core.pdf_fonts import BODY_FONT, pdf_fit_line, pdf_fitted_style
 
     page_width = doc.pagesize[0]
+    draw_watermark(canvas_obj, appearance, page_w=page_width, page_h=doc.pagesize[1])
     colour = appearance.get("footer_color") or _FURNITURE_GREY
     if colour != _FURNITURE_GREY:
         canvas_obj.setFillColor(colors.HexColor(colour))

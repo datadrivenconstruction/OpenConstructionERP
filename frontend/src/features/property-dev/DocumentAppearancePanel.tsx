@@ -52,6 +52,17 @@ import {
   type DocumentAppearance,
 } from './api';
 
+/**
+ * One-click watermark words. Each is inserted in the reader's language and
+ * stays editable, because the mark prints as saved, untranslated.
+ */
+export const WATERMARK_PRESETS = [
+  { key: 'draft', i18nKey: 'property_dev.doc_appearance.watermark_preset_draft', fallback: 'DRAFT' },
+  { key: 'confidential', i18nKey: 'property_dev.doc_appearance.watermark_preset_confidential', fallback: 'CONFIDENTIAL' },
+  { key: 'copy', i18nKey: 'property_dev.doc_appearance.watermark_preset_copy', fallback: 'COPY' },
+  { key: 'not_for_construction', i18nKey: 'property_dev.doc_appearance.watermark_preset_not_for_construction', fallback: 'NOT FOR CONSTRUCTION' },
+] as const;
+
 /** Aspect ratios for the preview sheet, in the same order the server offers. */
 const PAGE_RATIO: Record<string, number> = {
   A4: 210 / 297,
@@ -391,6 +402,43 @@ export function DocumentAppearancePanel({
           </div>
 
           <div className="sm:col-span-2">
+            <Input
+              label={t('property_dev.doc_appearance.watermark', { defaultValue: 'Watermark' })}
+              value={draft.watermark_text ?? ''}
+              maxLength={options?.max_watermark_text}
+              disabled={!canEdit || busy}
+              onChange={(e) => set('watermark_text', e.target.value)}
+              placeholder={t('property_dev.doc_appearance.watermark_placeholder', {
+                defaultValue: 'Leave empty for no watermark',
+              })}
+              hint={t('property_dev.doc_appearance.watermark_hint', {
+                defaultValue:
+                  'Printed faintly across every page of forms and reports. A document type below can set its own or none.',
+              })}
+              data-testid="appearance-watermark"
+            />
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {WATERMARK_PRESETS.map((preset) => {
+                const word = t(preset.i18nKey, {
+                  defaultValue: preset.fallback,
+                });
+                return (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    disabled={!canEdit || busy}
+                    onClick={() => set('watermark_text', word)}
+                    className="rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-50"
+                    data-testid={`appearance-watermark-preset-${preset.key}`}
+                  >
+                    {word}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="sm:col-span-2">
             <Toggle
               checked={draft.show_page_numbers}
               onChange={(next) => set('show_page_numbers', next)}
@@ -432,6 +480,23 @@ export function DocumentAppearancePanel({
             data-testid="appearance-preview"
             aria-hidden="true"
           >
+            {draft.watermark_text && (
+              <div
+                className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+                data-testid="appearance-preview-watermark"
+              >
+                <span
+                  className="whitespace-nowrap font-bold text-[#6b7280]"
+                  style={{
+                    opacity: 0.14,
+                    fontSize: `${Math.max(10, Math.min(28, 220 / Math.max(4, draft.watermark_text.length)))}px`,
+                    transform: `rotate(-${Math.round((Math.atan(1 / (ratio || 1)) * 180) / Math.PI)}deg)`,
+                  }}
+                >
+                  {draft.watermark_text}
+                </span>
+              </div>
+            )}
             <div
               className="flex h-full flex-col"
               style={{ padding: `${marginPct}%` }}

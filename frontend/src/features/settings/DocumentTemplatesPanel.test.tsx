@@ -70,6 +70,7 @@ const WORKSPACE: appearanceApi.DocumentAppearance = {
   footer_text: '',
   show_page_numbers: true,
   show_letterhead: true,
+  watermark_text: '',
 };
 
 const PROFILE: profileApi.CompanyProfile = {

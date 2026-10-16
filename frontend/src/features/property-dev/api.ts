@@ -3544,6 +3544,11 @@ export interface DocumentAppearance {
    * off, for a firm that prints on pre-printed letterhead paper.
    */
   show_letterhead: boolean;
+  /**
+   * Printed faintly across every page (DRAFT, CONFIDENTIAL, ...). Empty prints
+   * none. A server older than the field omits it, so readers default it to ''.
+   */
+  watermark_text: string;
 }
 
 /**
@@ -3561,6 +3566,8 @@ export interface DocumentAppearanceOptions {
   min_margin_mm: number;
   max_margin_mm: number;
   max_footer_text: number;
+  /** Older servers omit the field. */
+  max_watermark_text?: number;
   defaults: DocumentAppearance;
 }
 
