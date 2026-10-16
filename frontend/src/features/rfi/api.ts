@@ -46,6 +46,8 @@ export interface RFI {
   id: string;
   project_id: string;
   rfi_number: string;
+  /** Code of the request's type in the project's catalogue (`RFI`, `TQ`, `SQ` ...). */
+  request_type: string;
   subject: string;
   question: string;
   official_response: string | null;
@@ -89,6 +91,8 @@ export interface RFIFilters {
   project_id?: string;
   status?: RFIStatus | '';
   search?: string;
+  /** Request type code; empty means every type. */
+  request_type?: string;
   offset?: number;
   limit?: number;
 }
@@ -112,9 +116,20 @@ export interface RFIActivityEntry {
   created_at: string;
 }
 
+/** Counts for one request type inside the project's stats. */
+export interface RFITypeStats {
+  total: number;
+  open: number;
+  overdue: number;
+  answered: number;
+  closed: number;
+}
+
 export interface RFIStats {
   total: number;
   by_status: Record<string, number>;
+  /** Per request type code; a type with no requests is absent. */
+  by_type?: Record<string, RFITypeStats>;
   open: number;
   overdue: number;
   avg_days_to_response: number | null;
@@ -126,6 +141,8 @@ export interface CreateRFIPayload {
   project_id: string;
   subject: string;
   question: string;
+  /** Request type code; the backend defaults to `RFI`. */
+  request_type?: string;
   ball_in_court?: string;
   assigned_to?: string;
   response_due_date?: string;
@@ -207,6 +224,7 @@ export async function fetchRFIs(filters?: RFIFilters): Promise<Page<RFI>> {
   if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.status) params.set('status', filters.status);
   if (filters?.search && filters.search.trim()) params.set('search', filters.search.trim());
+  if (filters?.request_type) params.set('request_type', filters.request_type);
   if (typeof filters?.offset === 'number') params.set('offset', String(filters.offset));
   if (typeof filters?.limit === 'number') params.set('limit', String(filters.limit));
   const qs = params.toString();

@@ -30,6 +30,7 @@ function rfi(partial: Partial<RFI>): RFI {
     id: 'r1',
     project_id: 'p1',
     rfi_number: 'RFI-001',
+    request_type: 'RFI',
     subject: 'subject',
     question: 'question',
     official_response: null,

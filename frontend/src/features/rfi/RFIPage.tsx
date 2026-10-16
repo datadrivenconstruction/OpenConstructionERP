@@ -23,6 +23,7 @@ import {
   Pencil,
   Network,
   ListTodo,
+  Tags,
 } from 'lucide-react';
 import {
   Button,
@@ -71,6 +72,17 @@ import {
   type RespondRFIPayload,
 } from './api';
 import { rfiGuide } from './rfiGuide';
+import {
+  DEFAULT_REQUEST_TYPE,
+  fetchRequestTypes,
+  missingRequiredFields,
+  requestTypeLabel,
+  requestTypeName,
+  sampleNumber,
+  selectableTypes,
+  type RequestType,
+} from './requestTypes';
+import { RequestTypesDialog, requestTypesKey } from './RequestTypesDialog';
 import { ApprovalTargetBadge } from '@/features/approval-routes';
 import { CreateTaskFromSourceDialog } from '@/features/tasks';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
@@ -292,6 +304,17 @@ export interface RFIFormData {
    */
   linked_drawing_ids: string[];
 }
+
+/** The form field each request field a type may require is typed into. */
+const FORM_KEY_OF_REQUIRED: Record<string, keyof RFIFormData> = {
+  assigned_to: 'assigned_to',
+  response_due_date: 'due_date',
+  discipline: 'discipline',
+  priority: 'priority',
+  linked_drawing_ids: 'linked_drawing_ids',
+  cost_impact_value: 'cost_impact_value',
+  schedule_impact_days: 'schedule_impact_days',
+};
 
 const EMPTY_FORM: RFIFormData = {
   subject: '',
@@ -642,16 +665,34 @@ export function CreateRFIModal({
   projectName,
   projectId,
   editing,
+  requestTypes = [],
 }: {
   onClose: () => void;
-  onSubmit: (data: RFIFormData) => void;
+  /** `requestType` is the catalogue code picked in the form (fixed when editing). */
+  onSubmit: (data: RFIFormData, requestType: string) => void;
   isPending: boolean;
   projectName?: string;
   projectId: string;
   /** When set, the modal edits this RFI instead of creating a new one. */
   editing?: RFI;
+  /** The project's request type catalogue; empty means the built-in RFI only. */
+  requestTypes?: RequestType[];
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language || 'en';
+  const [requestType, setRequestType] = useState<string>(
+    editing?.request_type || DEFAULT_REQUEST_TYPE,
+  );
+  const typeOptions = useMemo(() => selectableTypes(requestTypes), [requestTypes]);
+  const activeType = useMemo(
+    () => requestTypes.find((rt) => rt.code === requestType),
+    [requestTypes, requestType],
+  );
+  const typeName = activeType ? requestTypeName(activeType, language) : requestType;
+  const requiredByType = useMemo(
+    () => new Set(activeType?.required_fields ?? []),
+    [activeType],
+  );
   const addToast = useToastStore((s) => s.addToast);
   const isEdit = Boolean(editing);
   const [form, setForm] = useState<RFIFormData>(() =>
@@ -793,13 +834,29 @@ export function CreateRFIModal({
     const e: Record<string, string> = {};
     if (!form.subject.trim()) e.subject = t('validation.required', { defaultValue: 'This field is required' });
     if (!form.question.trim()) e.question = t('validation.required', { defaultValue: 'This field is required' });
+    // What the request type demands before the request is issued. The form
+    // asks for it up front so the request can be issued without a detour.
+    const missing = missingRequiredFields(activeType, {
+      assigned_to: form.assigned_to,
+      response_due_date: form.due_date,
+      discipline: form.discipline,
+      priority: form.priority,
+      linked_drawing_ids: form.linked_drawing_ids,
+      cost_impact_value: form.cost_impact_value,
+      schedule_impact_days: form.schedule_impact_days,
+    });
+    const requiredMsg = t('rfi.type_field_required', {
+      defaultValue: 'Required for {{type}}',
+      type: typeName,
+    });
+    for (const field of missing) e[FORM_KEY_OF_REQUIRED[field] ?? field] = requiredMsg;
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const handleSubmit = () => {
     if (!validate()) return;
-    onSubmit(form);
+    onSubmit(form, requestType);
   };
 
   return (
@@ -814,7 +871,9 @@ export function CreateRFIModal({
               defaultValue: 'Edit RFI #{{number}}',
               number: editing?.rfi_number ?? '',
             })
-          : t('rfi.new_rfi', { defaultValue: 'New RFI' })
+          : requestType === DEFAULT_REQUEST_TYPE
+            ? t('rfi.new_rfi', { defaultValue: 'New RFI' })
+            : t('rfi.new_request_of_type', { defaultValue: 'New {{type}}', type: typeName })
       }
       subtitle={
         projectName
@@ -840,7 +899,9 @@ export function CreateRFIModal({
             <span>
               {isEdit
                 ? t('rfi.save_changes', { defaultValue: 'Save Changes' })
-                : t('rfi.create_rfi', { defaultValue: 'Create RFI' })}
+                : requestType === DEFAULT_REQUEST_TYPE
+                  ? t('rfi.create_rfi', { defaultValue: 'Create RFI' })
+                  : t('rfi.create_request', { defaultValue: 'Create request' })}
             </span>
           </Button>
         </>
@@ -866,6 +927,55 @@ export function CreateRFIModal({
         title={t('rfi.section_request', { defaultValue: 'Request Details' })}
         columns={2}
       >
+        {(typeOptions.length > 1 || requestType !== DEFAULT_REQUEST_TYPE) && (
+          <WideModalField
+            label={t('rfi.request_type', { defaultValue: 'Request type' })}
+            span={2}
+            htmlFor="rfi-request-type"
+            hint={
+              activeType
+                ? t('rfi.type_hint', {
+                    defaultValue: 'Numbered {{sample}}, answer due within {{days}} business days',
+                    sample: sampleNumber(activeType),
+                    days: activeType.response_days,
+                  })
+                : undefined
+            }
+          >
+            {isEdit ? (
+              <p id="rfi-request-type" className="text-sm font-medium text-content-primary">
+                {typeName}
+              </p>
+            ) : (
+              <div className="relative">
+                <select
+                  id="rfi-request-type"
+                  data-testid="rfi-request-type"
+                  value={requestType}
+                  onChange={(e) => {
+                    setRequestType(e.target.value);
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      for (const key of Object.values(FORM_KEY_OF_REQUIRED)) delete next[key];
+                      return next;
+                    });
+                  }}
+                  className={clsx(inputCls, 'pr-9 appearance-none')}
+                >
+                  {typeOptions.map((rt) => (
+                    <option key={rt.code} value={rt.code}>
+                      {rt.code} · {requestTypeName(rt, language)}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
+            )}
+          </WideModalField>
+        )}
+
         <WideModalField
           label={t('rfi.field_subject', { defaultValue: 'Subject' })}
           required
@@ -949,6 +1059,8 @@ export function CreateRFIModal({
         <WideModalField
           label={t('rfi.field_discipline', { defaultValue: 'Discipline' })}
           htmlFor="rfi-discipline"
+          required={requiredByType.has('discipline')}
+          error={errors.discipline}
         >
           <div className="relative">
             <select
@@ -1004,6 +1116,8 @@ export function CreateRFIModal({
         <WideModalField
           label={t('rfi.field_assigned_to', { defaultValue: 'Assigned To' })}
           htmlFor="rfi-assigned-to"
+          required={requiredByType.has('assigned_to')}
+          error={errors.assigned_to}
         >
           <ProjectPeopleSelect
             projectId={projectId}
@@ -1011,6 +1125,7 @@ export function CreateRFIModal({
             displayValue={form.assigned_to_name}
             onChange={(id, name) => {
               setForm((prev) => ({ ...prev, assigned_to: id, assigned_to_name: name }));
+              if (errors.assigned_to) setErrors((prev) => { const next = { ...prev }; delete next.assigned_to; return next; });
             }}
             placeholder={t('rfi.assigned_to_placeholder', {
               defaultValue: 'Reviewer / coordinator',
@@ -1022,9 +1137,19 @@ export function CreateRFIModal({
           label={t('rfi.field_due_date', { defaultValue: 'Response Due Date' })}
           span={2}
           htmlFor="rfi-due-date"
-          hint={t('rfi.response_due_date_hint', {
-            defaultValue: 'Typical: 14 business days from submission',
-          })}
+          required={requiredByType.has('response_due_date')}
+          error={errors.due_date}
+          hint={
+            activeType && activeType.response_days !== 14
+              ? t('rfi.type_due_hint', {
+                  defaultValue:
+                    'Left empty, the due date is set {{days}} business days after the request is issued',
+                  days: activeType.response_days,
+                })
+              : t('rfi.response_due_date_hint', {
+                  defaultValue: 'Typical: 14 business days from submission',
+                })
+          }
         >
           <input
             id="rfi-due-date"
@@ -1121,9 +1246,11 @@ export function CreateRFIModal({
           </button>
         </WideModalField>
 
-        {form.cost_impact && (
+        {(form.cost_impact || requiredByType.has('cost_impact_value')) && (
           <WideModalField
             label={t('rfi.field_cost_impact_value', { defaultValue: 'Cost exposure' })}
+            required={requiredByType.has('cost_impact_value')}
+            error={errors.cost_impact_value}
             htmlFor="rfi-cost-value"
             hint={t('rfi.cost_value_hint', {
               defaultValue: 'Estimated impact in project currency (optional)',
@@ -1134,16 +1261,21 @@ export function CreateRFIModal({
               type="text"
               inputMode="decimal"
               value={form.cost_impact_value}
-              onChange={(e) => set('cost_impact_value', e.target.value)}
+              onChange={(e) => {
+                set('cost_impact_value', e.target.value);
+                if (e.target.value.trim() && !form.cost_impact) set('cost_impact', true);
+              }}
               placeholder={t('rfi.cost_value_placeholder', { defaultValue: 'e.g. 15000' })}
               className={inputCls}
             />
           </WideModalField>
         )}
 
-        {form.schedule_impact && (
+        {(form.schedule_impact || requiredByType.has('schedule_impact_days')) && (
           <WideModalField
             label={t('rfi.field_schedule_impact_days', { defaultValue: 'Schedule slip (days)' })}
+            required={requiredByType.has('schedule_impact_days')}
+            error={errors.schedule_impact_days}
             htmlFor="rfi-schedule-days"
             hint={t('rfi.schedule_days_hint', {
               defaultValue: 'Working days the response could delay the schedule',
@@ -1155,7 +1287,10 @@ export function CreateRFIModal({
               min={0}
               step={1}
               value={form.schedule_impact_days}
-              onChange={(e) => set('schedule_impact_days', e.target.value)}
+              onChange={(e) => {
+                set('schedule_impact_days', e.target.value);
+                if (e.target.value.trim() && !form.schedule_impact) set('schedule_impact', true);
+              }}
               placeholder={t('rfi.schedule_days_placeholder', { defaultValue: 'e.g. 5' })}
               className={inputCls}
             />
@@ -1200,7 +1335,11 @@ export function CreateRFIModal({
           </WideModalField>
         )}
 
-        <WideModalField label={t('rfi.attach_drawings', { defaultValue: 'Attach drawings' })}>
+        <WideModalField
+          label={t('rfi.attach_drawings', { defaultValue: 'Attach drawings' })}
+          required={requiredByType.has('linked_drawing_ids')}
+          error={errors.linked_drawing_ids}
+        >
           <button
             type="button"
             onClick={() => setShowDocPicker(true)}
@@ -1364,9 +1503,12 @@ const RFIRow = React.memo(function RFIRow({
   onCreateVariation,
   onCreateTask,
   creatingVariation = false,
+  typeLabel,
 }: {
   rfi: RFI;
   viewerId: string | null;
+  /** The request type's name, shown when the project uses more than one type. */
+  typeLabel?: string;
   onRespond: (rfi: RFI) => void;
   onEdit: (rfi: RFI) => void;
   onClose: (id: string) => void;
@@ -1443,10 +1585,21 @@ const RFIRow = React.memo(function RFIRow({
         <Link
           to={`/rfi/${rfi.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="text-sm font-mono font-semibold text-content-secondary hover:text-oe-blue hover:underline w-16 shrink-0"
+          className="text-sm font-mono font-semibold text-content-secondary hover:text-oe-blue hover:underline min-w-[4rem] whitespace-nowrap shrink-0"
+          title={typeLabel}
         >
           #{rfi.rfi_number}
         </Link>
+
+        {typeLabel && (
+          <span
+            className="hidden md:inline-flex max-w-[11rem] truncate items-center rounded-md bg-oe-blue/5 px-1.5 py-0.5 text-2xs font-medium text-oe-blue border border-oe-blue/20 shrink-0"
+            title={typeLabel}
+            data-testid="rfi-row-type"
+          >
+            {typeLabel}
+          </span>
+        )}
 
         {/* Subject */}
         <span className="text-sm text-content-primary truncate flex-1 min-w-0">
@@ -1811,6 +1964,8 @@ export function RFIPage() {
   const [statusFilter, setStatusFilter] = useState<RFIStatus | ''>('');
   const [priorityFilter, setPriorityFilter] = useState<RFIPriority | ''>('');
   const [disciplineFilter, setDisciplineFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [showTypesDialog, setShowTypesDialog] = useState(false);
   /**
    * Saved-view chip. ``all`` is the no-op baseline; the other three are
    * the most-requested ball-in-court slices construction users mentioned
@@ -1852,6 +2007,19 @@ export function RFIPage() {
   const breadcrumbProjectName =
     projects.find((p) => p.id === selectedProjectId)?.name || '';
 
+  /* The project's request type catalogue. Type names come from here, in
+     every language the catalogue carries. */
+  const { i18n } = useTranslation();
+  const language = i18n.language || 'en';
+  const { data: typeCatalogue } = useQuery({
+    queryKey: requestTypesKey(projectId),
+    queryFn: () => fetchRequestTypes(projectId),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+  const requestTypes = useMemo(() => typeCatalogue?.items ?? [], [typeCatalogue]);
+  const showTypes = requestTypes.length > 1 || Boolean(typeFilter);
+
   const {
     data: rfiPage,
     isLoading,
@@ -1859,12 +2027,13 @@ export function RFIPage() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['rfis', projectId, statusFilter, debouncedSearch],
+    queryKey: ['rfis', projectId, statusFilter, debouncedSearch, typeFilter],
     queryFn: () =>
       fetchRFIs({
         project_id: projectId,
         status: statusFilter || undefined,
         search: debouncedSearch || undefined,
+        request_type: typeFilter || undefined,
         limit: 100,
       }),
     enabled: !!projectId,
@@ -1881,7 +2050,8 @@ export function RFIPage() {
      cannot be used to call the register empty. Priority and discipline are
      absent on purpose: they are applied here rather than by the endpoint,
      so they leave `total` alone. */
-  const registerMayHold = rfiTotal > 0 || Boolean(statusFilter) || Boolean(debouncedSearch);
+  const registerMayHold =
+    rfiTotal > 0 || Boolean(statusFilter) || Boolean(debouncedSearch) || Boolean(typeFilter);
 
   /* Server already filters by ?status= / ?search= but priority + discipline
      are filtered client-side for now — the column list endpoint does not
@@ -1963,6 +2133,7 @@ export function RFIPage() {
   const invalidateAll = useCallback(() => {
     qc.invalidateQueries({ queryKey: ['rfis'] });
     qc.invalidateQueries({ queryKey: ['rfi-stats'] });
+    qc.invalidateQueries({ queryKey: ['rfi-types'] });
   }, [qc]);
 
   // Mutations
@@ -2060,7 +2231,7 @@ export function RFIPage() {
   );
 
   const handleCreateSubmit = useCallback(
-    (formData: RFIFormData) => {
+    (formData: RFIFormData, requestType: string) => {
       if (!projectId) {
         addToast({ type: 'error', title: t('requiresProject.title'), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
@@ -2070,6 +2241,7 @@ export function RFIPage() {
         project_id: projectId,
         subject: formData.subject,
         question: formData.question,
+        request_type: requestType || DEFAULT_REQUEST_TYPE,
         ball_in_court: formData.ball_in_court || undefined,
         assigned_to: formData.assigned_to || undefined,
         response_due_date: formData.due_date || undefined,
@@ -2217,6 +2389,16 @@ export function RFIPage() {
               guide="rfi-export"
             />
             <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowTypesDialog(true)}
+              disabled={!projectId}
+              icon={<Tags size={14} />}
+              data-testid="rfi-request-types-open"
+            >
+              {t('rfi.types.button', { defaultValue: 'Request types' })}
+            </Button>
+            <Button
               variant="primary"
               size="sm"
               onClick={() => setShowCreateModal(true)}
@@ -2318,6 +2500,50 @@ export function RFIPage() {
         </div>
       </div>
 
+      {/* Requests by type - one chip per type the project uses, from the
+          server stats; a click filters the register to that type. */}
+      {showTypes && serverStats?.by_type && Object.keys(serverStats.by_type).length > 0 && (
+        <div
+          className="flex flex-wrap gap-1.5"
+          role="group"
+          aria-label={t('rfi.type_by_type_aria', { defaultValue: 'Requests by type' })}
+          data-testid="rfi-by-type"
+        >
+          {Object.entries(serverStats.by_type)
+            .sort((a, b) => b[1].total - a[1].total)
+            .map(([code, counts]) => {
+              const active = typeFilter === code;
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setTypeFilter(active ? '' : code)}
+                  title={requestTypeLabel(requestTypes, code, language)}
+                  className={clsx(
+                    'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors',
+                    active
+                      ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
+                      : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary',
+                  )}
+                >
+                  <span className="font-mono font-semibold">{code}</span>
+                  <span className="max-w-[10rem] truncate">{requestTypeLabel(requestTypes, code, language)}</span>
+                  <span className="tabular-nums font-semibold text-content-primary">{counts.total}</span>
+                  {counts.overdue > 0 && (
+                    <span
+                      className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-2xs font-semibold tabular-nums bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+                      title={t('rfi.stat_overdue', { defaultValue: 'Overdue' })}
+                    >
+                      {counts.overdue}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+        </div>
+      )}
+
       {/* Quick-view chips — saved-view shortcuts for the most common
           "what's on my plate?" slices. Mutually exclusive, kept above
           the dropdown toolbar so the eye can land on them first. */}
@@ -2391,6 +2617,29 @@ export function RFIPage() {
             className={inputCls + ' pl-9'}
           />
         </div>
+
+        {/* Request type filter - shown once the project uses more than one type */}
+        {showTypes && (
+          <div className="relative">
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              aria-label={t('rfi.filter_type_all', { defaultValue: 'All types' })}
+              data-testid="rfi-type-filter"
+              className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-48"
+            >
+              <option value="">{t('rfi.filter_type_all', { defaultValue: 'All types' })}</option>
+              {requestTypes.map((rt) => (
+                <option key={rt.code} value={rt.code}>
+                  {rt.code} · {requestTypeName(rt, language)}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-2.5 text-content-tertiary">
+              <ChevronDown size={14} />
+            </div>
+          </div>
+        )}
 
         {/* Status filter */}
         <div className="relative">
@@ -2582,6 +2831,7 @@ export function RFIPage() {
                     onCreateVariation={handleCreateVariation}
                     onCreateTask={setTaskSourceRfi}
                     creatingVariation={createVariationMut.isPending}
+                    typeLabel={showTypes ? requestTypeLabel(requestTypes, rfi.request_type, language) : undefined}
                   />
                 ))}
               </Card>
@@ -2668,6 +2918,16 @@ export function RFIPage() {
           isPending={createMut.isPending}
           projectName={projectName}
           projectId={projectId}
+          requestTypes={requestTypes}
+        />
+      )}
+
+      {/* Request type catalogue: presets, types, register check */}
+      {showTypesDialog && projectId && (
+        <RequestTypesDialog
+          projectId={projectId}
+          types={requestTypes}
+          onClose={() => setShowTypesDialog(false)}
         />
       )}
 
@@ -2683,6 +2943,7 @@ export function RFIPage() {
           isPending={updateMut.isPending}
           projectName={projectName}
           projectId={editingRfi.project_id}
+          requestTypes={requestTypes}
         />
       )}
 
