@@ -618,3 +618,12 @@ def test_regensburg_procurement_reads_as_a_private_client() -> None:
         assert public_term not in text, public_term
     assert "VgV" not in json.dumps(_story("residential-regensburg", "commitment_release"), ensure_ascii=False)
 
+
+def test_regensburg_gate_says_the_transformer_slot_binds_nothing_yet() -> None:
+    """The held slot is a plant register fact; the gate note must not read as a placed commitment."""
+    plant = {i["code"]: i for i in _story("residential-regensburg", "plant_register")["items"]}
+    assert plant["PL-001"]["slot"] == "held" and plant["PL-001"]["reach"] == "enquired"
+    project = json.loads((_DEMO / "demo_project.json").read_text(encoding="utf-8"))["projects"][0]
+    note = next(c for c in project["governance"]["gate"]["checks"] if c["area"] == "m04_equipment")["note"]
+    assert "free of charge" in note["en"] and "supervisory board" in note["en"]
+    assert "gebührenfrei" in note["de"] and "Aufsichtsrat" in note["de"]
