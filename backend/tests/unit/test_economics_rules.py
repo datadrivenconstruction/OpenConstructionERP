@@ -85,6 +85,16 @@ def test_each_demo_story_is_german_in_german_and_has_every_register() -> None:
         assert all(s.status in ("requested", "in_place", "released", "expired") for s in de.securities)
 
 
+def test_each_demo_story_opens_its_economics_without_a_register_notice() -> None:
+    # The filmed demo headers must not carry "tax not confirmed" or "process not set up".
+    for demo_id in DEMO_IDS:
+        profile = load_profile(story_for(demo_id), "de", TODAY)
+        assert profile.tax is not None and profile.tax.confirm and profile.tax.confirmed_on, demo_id
+        assert profile.tax.input_tax_deduction is not None, demo_id
+        assert {p.area: p.status for p in profile.process} == dict.fromkeys(rules.PROCESS_AREAS, "set_up"), demo_id
+        assert all(p.set_up_on for p in profile.process), demo_id
+
+
 def test_the_story_dates_are_offsets_from_the_install_day() -> None:
     later = date(2027, 1, 1)
     a = load_profile(story_for("residential-regensburg"), "de", TODAY)

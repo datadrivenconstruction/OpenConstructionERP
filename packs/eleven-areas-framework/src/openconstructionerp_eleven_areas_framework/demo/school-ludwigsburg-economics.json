@@ -235,10 +235,11 @@
     "vat_treatment": "other",
     "input_tax_deduction": false,
     "notes": {
-      "en": "The school is a sovereign task of the municipality, so there is no entrepreneurial use and no input tax deduction. The treatment of the third-party use of the hall is still to be agreed with the treasury.",
-      "de": "Die Schule ist eine hoheitliche Aufgabe der Stadt, es gibt keine unternehmerische Nutzung und keinen Vorsteuerabzug. Die Behandlung der Fremdnutzung der Halle ist mit der Kämmerei noch abzustimmen."
+      "en": "The school is a sovereign task of the municipality, so there is no entrepreneurial use and no input tax deduction. The hall is let to clubs free of charge, which creates no entrepreneurial use either; agreed with the treasury.",
+      "de": "Die Schule ist eine hoheitliche Aufgabe der Stadt, es gibt keine unternehmerische Nutzung und keinen Vorsteuerabzug. Die Halle wird Vereinen unentgeltlich überlassen, auch daraus entsteht keine unternehmerische Nutzung; mit der Kämmerei abgestimmt."
     },
-    "confirm": false
+    "confirm": true,
+    "confirmed_days": -20
   },
   "process": [
     {
@@ -270,14 +271,15 @@
     {
       "area": "administration",
       "description": {
-        "en": "The project file plan and the signing authorities are still to be agreed with the central administration.",
-        "de": "Aktenplan und Zeichnungsberechtigungen sind mit der zentralen Verwaltung noch abzustimmen."
+        "en": "The project file plan and the signing authorities are agreed with the central administration.",
+        "de": "Aktenplan und Zeichnungsberechtigungen sind mit der zentralen Verwaltung abgestimmt."
       },
       "owner": {
         "en": "Building authority",
         "de": "Hochbauamt"
       },
-      "status": "open"
+      "status": "set_up",
+      "set_up_days": -20
     }
   ]
 }
