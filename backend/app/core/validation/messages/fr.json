@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "La date de besoin {date} est déjà dépassée (aujourd'hui : {today})",
       "suggestion": "Indiquez la date à laquelle le matériau est réellement nécessaire sur le chantier"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Le fournisseur {vendor} n'est pas dans l'annuaire des fournisseurs",
+      "suggestion": "Choisissez le fournisseur dans l'annuaire des fournisseurs"
+    },
+    "requisition_vendor_active": {
+      "fail": "Le fournisseur {vendor} n'est pas actif dans l'annuaire des fournisseurs, on ne peut donc rien lui commander",
+      "suggestion": "Choisissez un fournisseur actif, ou réactivez d'abord celui-ci dans l'annuaire des fournisseurs"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "La demande de matériaux {req} ne désigne aucun fournisseur, alors qu'un bon de commande en exige un",
+      "suggestion": "Choisissez le fournisseur dans l'annuaire des fournisseurs avant de convertir"
+    },
+    "requisition_single_currency": {
+      "fail": "La demande de matériaux {req} a des lignes chiffrées en {currencies}, mais un bon de commande ne porte qu'une devise",
+      "suggestion": "Chiffrez toutes les lignes dans une seule devise, ou répartissez les lignes en demandes distinctes"
+    },
+    "requisition_line_cost_line": {
+      "fail": "La ligne {line} n'est pas liée à une ligne de coût, sa commande n'apparaîtra donc pas comme engagée sur le budget",
+      "suggestion": "Créez la ligne depuis le BOQ, ou liez-la à une ligne de coût avant de commander"
     }
   },
   "subcontract": {

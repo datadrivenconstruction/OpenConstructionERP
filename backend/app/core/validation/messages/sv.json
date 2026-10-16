@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Behovsdatumet {date} har redan passerat (idag är {today})",
       "suggestion": "Ange det datum då materialet faktiskt behövs på arbetsplatsen"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Leverantören {vendor} finns inte i leverantörsregistret",
+      "suggestion": "Välj leverantören från leverantörsregistret"
+    },
+    "requisition_vendor_active": {
+      "fail": "Leverantören {vendor} är inte aktiv i leverantörsregistret, så inget kan beställas hos den",
+      "suggestion": "Välj en aktiv leverantör, eller aktivera denna i leverantörsregistret först"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Inköpsbegäran {req} anger ingen leverantör, och en inköpsorder behöver en",
+      "suggestion": "Välj leverantören från leverantörsregistret innan du konverterar"
+    },
+    "requisition_single_currency": {
+      "fail": "Inköpsbegäran {req} har rader prissatta i {currencies}, men en inköpsorder har bara en valuta",
+      "suggestion": "Prissätt alla rader i en valuta, eller dela raderna på separata inköpsbegäranden"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Rad {line} är inte länkad till en kostnadsrad, så dess order visas inte som bunden mot budgeten",
+      "suggestion": "Skapa raden från BOQ, eller länka den till en kostnadsrad före beställning"
     }
   },
   "subcontract": {

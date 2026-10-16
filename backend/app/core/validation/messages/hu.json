@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "A szükséglet időpontja ({date}) már elmúlt (ma {today} van)",
       "suggestion": "Adja meg azt a napot, amikor az anyagra ténylegesen szükség van az építési helyszínen"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "A(z) {vendor} szállító nincs a szállítói törzsben",
+      "suggestion": "Válassza ki a szállítót a szállítói törzsből"
+    },
+    "requisition_vendor_active": {
+      "fail": "A(z) {vendor} szállító nem aktív a szállítói törzsben, ezért tőle nem lehet rendelni",
+      "suggestion": "Válasszon aktív szállítót, vagy előbb aktiválja újra ezt a szállítói törzsben"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "A(z) {req} anyagigénylés nem nevez meg szállítót, a beszerzési rendeléshez viszont kell egy",
+      "suggestion": "Átalakítás előtt válassza ki a szállítót a szállítói törzsből"
+    },
+    "requisition_single_currency": {
+      "fail": "A(z) {req} anyagigénylés soraiban {currencies} szerepel árként, de egy beszerzési rendelés egy pénznemet tartalmaz",
+      "suggestion": "Árazza az összes sort egy pénznemben, vagy bontsa a sorokat külön anyagigénylésekre"
+    },
+    "requisition_line_cost_line": {
+      "fail": "A(z) {line}. sor nincs költségsorhoz kapcsolva, így a rendelése nem jelenik meg a költségvetés terhére lekötöttként",
+      "suggestion": "Hozza létre a sort a BOQ-ból, vagy rendelés előtt kapcsolja költségsorhoz"
     }
   },
   "subcontract": {

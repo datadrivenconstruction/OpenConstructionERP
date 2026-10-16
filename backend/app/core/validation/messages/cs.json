@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Datum potřeby {date} už uplynulo (dnes je {today})",
       "suggestion": "Nastavte datum, kdy je materiál na stavbě skutečně potřeba"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Dodavatel {vendor} není v adresáři dodavatelů",
+      "suggestion": "Vyberte dodavatele z adresáře dodavatelů"
+    },
+    "requisition_vendor_active": {
+      "fail": "Dodavatel {vendor} není v adresáři dodavatelů aktivní, proto u něj nelze nic objednat",
+      "suggestion": "Vyberte aktivního dodavatele, nebo tohoto nejdřív znovu aktivujte v adresáři dodavatelů"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Požadavek na materiál {req} neuvádí dodavatele, a objednávka ho potřebuje",
+      "suggestion": "Před převodem vyberte dodavatele z adresáře dodavatelů"
+    },
+    "requisition_single_currency": {
+      "fail": "Požadavek na materiál {req} má řádky oceněné v {currencies}, ale jedna objednávka má jednu měnu",
+      "suggestion": "Oceňte všechny řádky v jedné měně, nebo řádky rozdělte do samostatných požadavků"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Řádek {line} není propojen s nákladovou položkou, takže jeho objednávka se nezobrazí jako závazek vůči rozpočtu",
+      "suggestion": "Vytvořte řádek z BOQ, nebo ho před objednáním propojte s nákladovou položkou"
     }
   },
   "subcontract": {

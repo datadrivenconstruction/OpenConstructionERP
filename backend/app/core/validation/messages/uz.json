@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Kerak bo'lish sanasi {date} allaqachon o'tib ketgan (bugun {today})",
       "suggestion": "Material qurilish maydonida haqiqatan kerak bo'ladigan sanani belgilang"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "{vendor} yetkazib beruvchisi yetkazib beruvchilar reyestrida yoʻq",
+      "suggestion": "Yetkazib beruvchini yetkazib beruvchilar reyestridan tanlang"
+    },
+    "requisition_vendor_active": {
+      "fail": "{vendor} yetkazib beruvchisi yetkazib beruvchilar reyestrida faol emas, shuning uchun undan hech narsa buyurtma qilib boʻlmaydi",
+      "suggestion": "Faol yetkazib beruvchini tanlang yoki avval buni yetkazib beruvchilar reyestrida qayta faollashtiring"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "{req} material so'rovida yetkazib beruvchi koʻrsatilmagan, xarid buyurtmasiga esa u kerak",
+      "suggestion": "Aylantirishdan oldin yetkazib beruvchini yetkazib beruvchilar reyestridan tanlang"
+    },
+    "requisition_single_currency": {
+      "fail": "{req} material so'rovida narxi {currencies} valyutasida qoʻyilgan qatorlar bor, bitta xarid buyurtmasida esa bitta valyuta boʻladi",
+      "suggestion": "Barcha qatorlar narxini bitta valyutada qoʻying yoki qatorlarni alohida so'rovlarga ajrating"
+    },
+    "requisition_line_cost_line": {
+      "fail": "{line}-qator xarajat qatori bilan bogʻlanmagan, shuning uchun uning buyurtmasi byudjetga nisbatan majburiyat sifatida koʻrinmaydi",
+      "suggestion": "Qatorni BOQ dan yarating yoki buyurtma berishdan oldin xarajat qatoriga bogʻlang"
     }
   },
   "subcontract": {

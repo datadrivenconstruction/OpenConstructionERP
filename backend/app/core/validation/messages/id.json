@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Tanggal dibutuhkan {date} sudah lewat (hari ini {today})",
       "suggestion": "Tetapkan tanggal material benar-benar dibutuhkan di lokasi proyek"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Pemasok {vendor} tidak ada di daftar pemasok",
+      "suggestion": "Pilih pemasok dari daftar pemasok"
+    },
+    "requisition_vendor_active": {
+      "fail": "Pemasok {vendor} tidak aktif di daftar pemasok, sehingga tidak ada yang bisa dipesan darinya",
+      "suggestion": "Pilih pemasok yang aktif, atau aktifkan kembali pemasok ini di daftar pemasok terlebih dahulu"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Permintaan material {req} tidak menyebut pemasok, padahal pesanan pembelian membutuhkannya",
+      "suggestion": "Pilih pemasok dari daftar pemasok sebelum mengonversi"
+    },
+    "requisition_single_currency": {
+      "fail": "Permintaan material {req} memiliki baris berharga dalam {currencies}, tetapi satu pesanan pembelian hanya memuat satu mata uang",
+      "suggestion": "Beri harga semua baris dalam satu mata uang, atau pisahkan baris ke permintaan material yang berbeda"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Baris {line} tidak terhubung ke baris biaya, sehingga pesanannya tidak akan tampil sebagai komitmen terhadap anggaran",
+      "suggestion": "Buat baris dari BOQ, atau hubungkan ke baris biaya sebelum memesan"
     }
   },
   "subcontract": {

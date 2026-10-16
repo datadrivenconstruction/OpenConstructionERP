@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "La data di fabbisogno {date} è già trascorsa (oggi è {today})",
       "suggestion": "Imposta la data in cui il materiale serve davvero in cantiere"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Il fornitore {vendor} non è nell'anagrafica fornitori",
+      "suggestion": "Scegli il fornitore dall'anagrafica fornitori"
+    },
+    "requisition_vendor_active": {
+      "fail": "Il fornitore {vendor} non è attivo nell'anagrafica fornitori, quindi non si può ordinare nulla da lui",
+      "suggestion": "Scegli un fornitore attivo, oppure riattiva prima questo nell'anagrafica fornitori"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "La richiesta di acquisto {req} non indica nessun fornitore, e un ordine di acquisto ne richiede uno",
+      "suggestion": "Scegli il fornitore dall'anagrafica fornitori prima di convertire"
+    },
+    "requisition_single_currency": {
+      "fail": "La richiesta di acquisto {req} ha righe con prezzo in {currencies}, ma un ordine di acquisto ha una sola valuta",
+      "suggestion": "Prezza tutte le righe in una sola valuta, oppure dividi le righe in richieste separate"
+    },
+    "requisition_line_cost_line": {
+      "fail": "La riga {line} non è collegata a una voce di costo, quindi il suo ordine non risulterà impegnato sul budget",
+      "suggestion": "Genera la riga dal BOQ, oppure collegala a una voce di costo prima di ordinare"
     }
   },
   "subcontract": {

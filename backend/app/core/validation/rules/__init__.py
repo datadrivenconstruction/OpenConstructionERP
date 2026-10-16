@@ -10936,6 +10936,66 @@ class ProcurementRequisitionNeededByNotPast(_ProcurementRule):
     check_name = "check_requisition_needed_by_not_past"
 
 
+# Issue #516: the supplier, the currency and the budget link, read at submit,
+# approval and conversion. ``vendor_chosen`` speaks only at conversion, where
+# an order without a supplier cannot exist.
+
+
+class ProcurementRequisitionVendorInDirectory(_ProcurementRule):
+    """A requisition's supplier must be an entry of the Vendor directory."""
+
+    rule_id = "procurement.requisition_vendor_in_directory"
+    name = "Requisition Supplier In Vendor Directory"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition whose supplier cannot be found in the Vendor directory."
+    check_name = "check_requisition_vendor_in_directory"
+
+
+class ProcurementRequisitionVendorActive(_ProcurementRule):
+    """A requisition's supplier must be active, not suspended or blacklisted."""
+
+    rule_id = "procurement.requisition_vendor_active"
+    name = "Requisition Supplier Active"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Flags a requisition whose supplier is suspended or blacklisted in the Vendor directory."
+    check_name = "check_requisition_vendor_active"
+
+
+class ProcurementRequisitionVendorChosen(_ProcurementRule):
+    """A requisition converted into an order must name its supplier."""
+
+    rule_id = "procurement.requisition_vendor_chosen"
+    name = "Requisition Supplier Chosen Before Ordering"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a conversion into a purchase order when no supplier has been chosen."
+    check_name = "check_requisition_vendor_chosen"
+
+
+class ProcurementRequisitionSingleCurrency(_ProcurementRule):
+    """The priced lines of a requisition must share one currency."""
+
+    rule_id = "procurement.requisition_single_currency"
+    name = "Requisition In One Currency"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition whose lines are priced in more than one currency."
+    check_name = "check_requisition_single_currency"
+
+
+class ProcurementRequisitionLineCostLine(_ProcurementRule):
+    """A requisition line should be linked to a cost line so its order commits budget."""
+
+    rule_id = "procurement.requisition_line_cost_line"
+    name = "Requisition Line Linked To Budget"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a requisition line with no cost line, whose order would not show as committed."
+    check_name = "check_requisition_line_cost_line"
+
+
 # ── Subcontract agreements (activation gate) ────────────────────────────────
 #
 # An agreement leaving ``draft`` for ``active`` is the moment a subcontractor
@@ -11603,6 +11663,11 @@ def register_builtin_rules() -> None:
         (ProcurementRequisitionQuantityPositive(), ["procurement_requisition"]),
         (ProcurementRequisitionSourceUnit(), ["procurement_requisition"]),
         (ProcurementRequisitionNeededByNotPast(), ["procurement_requisition"]),
+        (ProcurementRequisitionVendorInDirectory(), ["procurement_requisition"]),
+        (ProcurementRequisitionVendorActive(), ["procurement_requisition"]),
+        (ProcurementRequisitionVendorChosen(), ["procurement_requisition"]),
+        (ProcurementRequisitionSingleCurrency(), ["procurement_requisition"]),
+        (ProcurementRequisitionLineCostLine(), ["procurement_requisition"]),
         # Subcontract agreements (activation gate)
         # Registered into the "subcontract" set, which
         # SubcontractorService._validate_agreement passes on activation and on

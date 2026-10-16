@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "納入希望日 {date} はすでに過ぎています(本日は {today})",
       "suggestion": "資材が現場で実際に必要になる日付を設定してください"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "仕入先 {vendor} は仕入先台帳にありません",
+      "suggestion": "仕入先台帳から仕入先を選択してください"
+    },
+    "requisition_vendor_active": {
+      "fail": "仕入先 {vendor} は仕入先台帳で有効になっていないため、発注できません",
+      "suggestion": "有効な仕入先を選ぶか、先にこの仕入先を仕入先台帳で再度有効にしてください"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "購買依頼 {req} に仕入先が指定されていませんが、発注書には仕入先が必要です",
+      "suggestion": "変換する前に、仕入先台帳から仕入先を選択してください"
+    },
+    "requisition_single_currency": {
+      "fail": "購買依頼 {req} には {currencies} で価格設定された明細がありますが、発注書1件は1つの通貨のみ扱います",
+      "suggestion": "すべての明細を1つの通貨で価格設定するか、明細を別々の購買依頼に分けてください"
+    },
+    "requisition_line_cost_line": {
+      "fail": "明細 {line} は原価明細に紐付いていないため、その発注は予算に対する発注済み金額として表示されません",
+      "suggestion": "内訳書から明細を作成するか、発注前に原価明細に紐付けてください"
     }
   },
   "subcontract": {

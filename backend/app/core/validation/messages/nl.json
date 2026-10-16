@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "De benodigd-op-datum {date} is al verstreken (vandaag is {today})",
       "suggestion": "Stel de datum in waarop het materiaal echt op de bouwplaats nodig is"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Leverancier {vendor} staat niet in het leveranciersregister",
+      "suggestion": "Kies de leverancier uit het leveranciersregister"
+    },
+    "requisition_vendor_active": {
+      "fail": "Leverancier {vendor} is niet actief in het leveranciersregister, dus daar kan niets besteld worden",
+      "suggestion": "Kies een actieve leverancier, of activeer deze eerst opnieuw in het leveranciersregister"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Inkoopaanvraag {req} vermeldt geen leverancier, en een inkooporder heeft er een nodig",
+      "suggestion": "Kies de leverancier uit het leveranciersregister voordat u omzet"
+    },
+    "requisition_single_currency": {
+      "fail": "Inkoopaanvraag {req} heeft regels met prijzen in {currencies}, maar één inkooporder bevat één valuta",
+      "suggestion": "Prijs alle regels in één valuta, of splits de regels over aparte inkoopaanvragen"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Regel {line} is niet gekoppeld aan een kostenregel, dus de bestelling verschijnt niet als vastgelegd tegen het budget",
+      "suggestion": "Maak de regel aan vanuit de BOQ, of koppel hem vóór het bestellen aan een kostenregel"
     }
   },
   "subcontract": {

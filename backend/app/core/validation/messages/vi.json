@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Ngày cần {date} đã qua (hôm nay là {today})",
       "suggestion": "Đặt ngày vật tư thực sự cần có tại công trường"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Nhà cung cấp {vendor} không có trong danh bạ nhà cung cấp",
+      "suggestion": "Chọn nhà cung cấp từ danh bạ nhà cung cấp"
+    },
+    "requisition_vendor_active": {
+      "fail": "Nhà cung cấp {vendor} không còn hoạt động trong danh bạ nhà cung cấp nên không thể đặt hàng",
+      "suggestion": "Chọn một nhà cung cấp đang hoạt động, hoặc kích hoạt lại nhà cung cấp này trong danh bạ nhà cung cấp trước"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Phiếu yêu cầu vật tư {req} chưa nêu nhà cung cấp, mà đơn đặt hàng cần có một nhà cung cấp",
+      "suggestion": "Chọn nhà cung cấp từ danh bạ nhà cung cấp trước khi chuyển đổi"
+    },
+    "requisition_single_currency": {
+      "fail": "Phiếu yêu cầu vật tư {req} có các dòng định giá bằng {currencies}, nhưng một đơn đặt hàng chỉ chứa một loại tiền tệ",
+      "suggestion": "Định giá mọi dòng bằng một loại tiền tệ, hoặc tách các dòng sang các phiếu yêu cầu riêng"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Dòng {line} chưa liên kết với dòng chi phí nên đơn đặt hàng của nó sẽ không hiện là khoản cam kết so với ngân sách",
+      "suggestion": "Tạo dòng từ BOQ, hoặc liên kết nó với một dòng chi phí trước khi đặt hàng"
     }
   },
   "subcontract": {

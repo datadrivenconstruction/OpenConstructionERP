@@ -94,6 +94,15 @@ class POItemCreate(BaseModel):
         max_length=36,
         description="Cost line to commit against. Takes precedence over boq_position_id.",
     )
+    # Issue #516: the requisition line this order line was converted from.
+    # Only the conversion writes it on a new order; a PATCH that replaces the
+    # lines of an order sends it back so the link survives the edit, and the
+    # service refuses a link to a requisition that was not converted into
+    # this order.
+    requisition_item_id: UUID | None = Field(
+        default=None,
+        description="Requisition line this order line came from. Set by the requisition conversion.",
+    )
     sort_order: int = Field(default=0, ge=0)
 
     @field_validator("quantity", "unit_rate", "amount")
@@ -273,6 +282,8 @@ class POItemResponse(BaseModel):
     # how an edit form loses the choice the user made. Absent for a line off the
     # bill, and for one whose cost line was generated from no position.
     boq_position_id: UUID | None = None
+    # Issue #516: the requisition line this order line was converted from.
+    requisition_item_id: UUID | None = None
     sort_order: int = 0
     created_at: datetime
     updated_at: datetime
@@ -889,6 +900,8 @@ class RequisitionCreate(BaseModel):
     required_date: date | None = None
     lead_time_days: int = Field(default=0, ge=0, le=3650)
     notes: str | None = Field(default=None, max_length=5000)
+    # The supplier from the Vendor directory, when the requester already knows it.
+    vendor_id: UUID | None = None
     items: list[RequisitionItemIn] = Field(default_factory=list, max_length=1000)
 
 
@@ -906,6 +919,8 @@ class RequisitionUpdate(BaseModel):
     required_date: date | None = None
     lead_time_days: int | None = Field(default=None, ge=0, le=3650)
     notes: str | None = Field(default=None, max_length=5000)
+    # Sent as null, clears the supplier; left out, keeps it.
+    vendor_id: UUID | None = None
     items: list[RequisitionItemIn] | None = Field(default=None, max_length=1000)
 
 
@@ -915,6 +930,60 @@ class RequisitionCancel(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     reason: str | None = Field(default=None, max_length=2000)
+
+
+class RequisitionApprove(BaseModel):
+    """An approval, with an optional note from the approver."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    comment: str | None = Field(default=None, max_length=2000)
+
+
+class RequisitionReject(BaseModel):
+    """A rejection. The reason is required: the requester has to know what to change."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    comment: str = Field(..., min_length=1, max_length=2000)
+
+
+class RequisitionConvert(BaseModel):
+    """Turn approved requisitions of one project into one draft purchase order.
+
+    ``vendor_id`` names the supplier from the Vendor directory. Left out, the
+    supplier the requisitions agree on is used; requisitions naming different
+    suppliers cannot share an order.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    requisition_ids: list[UUID] = Field(..., min_length=1, max_length=50)
+    vendor_id: UUID | None = None
+    delivery_date: date | None = None
+    notes: str | None = Field(default=None, max_length=5000)
+
+
+class RequisitionConvertResponse(BaseModel):
+    """The draft purchase order a conversion created."""
+
+    po_id: UUID
+    po_number: str
+    project_id: UUID
+    requisition_ids: list[UUID]
+    line_count: int
+    vendor_warnings: list[str] = Field(default_factory=list)
+
+
+class RequisitionPOItemRef(BaseModel):
+    """One purchase order line that came from a requisition line."""
+
+    po_item_id: UUID
+    po_id: UUID
+    po_number: str | None = None
+    quantity: str = "0"
+    unit: str | None = None
 
 
 class RequisitionItemSourceResponse(BaseModel):
@@ -955,6 +1024,8 @@ class RequisitionItemResponse(BaseModel):
     cost_line_id: UUID | None = None
     sort_order: int = 0
     sources: list[RequisitionItemSourceResponse] = Field(default_factory=list)
+    # The purchase order lines converted from this line (issue #516).
+    po_items: list[RequisitionPOItemRef] = Field(default_factory=list)
 
 
 class RequisitionResponse(BaseModel):
@@ -972,7 +1043,14 @@ class RequisitionResponse(BaseModel):
     estimated_delivery_date: str | None = None
     requester_id: str | None = None
     approver_id: str | None = None
+    submitted_by: str | None = None
+    decided_at: str | None = None
+    decision_comment: str | None = None
+    vendor_id: UUID | None = None
+    vendor_name: str | None = None
+    vendor_status: str | None = None
     po_id: UUID | None = None
+    po_number: str | None = None
     notes: str | None = None
     items: list[RequisitionItemResponse] = Field(default_factory=list)
     reconciliation: dict[str, str] = Field(default_factory=dict)
@@ -997,3 +1075,86 @@ class RequisitionValidationResponse(BaseModel):
     score: float | None = None
     counts: dict[str, Any] = Field(default_factory=dict)
     results: list[dict[str, Any]] = Field(default_factory=list)
+
+
+# ── Requisition traceability (issue #516) ───────────────────────────────────
+
+
+class TracePOLine(BaseModel):
+    """A purchase order line reached from a requisition line."""
+
+    po_id: UUID
+    po_number: str | None = None
+    po_status: str | None = None
+    po_item_id: UUID
+    quantity: str = "0"
+    unit: str | None = None
+
+
+class PositionTraceRow(BaseModel):
+    """One requisition line fed by a BOQ position, and the order lines it became."""
+
+    requisition_id: UUID
+    req_number: str | None = None
+    requisition_status: str
+    requisition_item_id: UUID
+    description: str
+    line_unit: str | None = None
+    quantity_requested: str = "0"
+    quantity_ordered: str = "0"
+    resource_key: str | None = None
+    source_quantity: str = "0"
+    source_unit: str | None = None
+    purchase_orders: list[TracePOLine] = Field(default_factory=list)
+
+
+class PositionTraceResponse(BaseModel):
+    """Everything procurement holds against one BOQ position."""
+
+    boq_position_id: UUID
+    items: list[PositionTraceRow] = Field(default_factory=list)
+
+
+class TraceSource(BaseModel):
+    """A BOQ source behind an order line, read through its requisition line."""
+
+    boq_position_id: UUID | None = None
+    # The position as the bill shows it now, so a reader sees "1.2 Wall"
+    # rather than an id. Null when the position has since been deleted.
+    position_ordinal: str | None = None
+    position_description: str | None = None
+    resource_key: str | None = None
+    quantity: str = "0"
+    unit: str | None = None
+
+
+class POTraceLine(BaseModel):
+    """One order line with the requisition line and BOQ sources it came from."""
+
+    po_item_id: UUID
+    description: str
+    quantity: str = "0"
+    unit: str | None = None
+    requisition_item_id: UUID | None = None
+    requisition_id: UUID | None = None
+    req_number: str | None = None
+    sources: list[TraceSource] = Field(default_factory=list)
+
+
+class POTraceRequisition(BaseModel):
+    """A requisition converted into the order."""
+
+    id: UUID
+    req_number: str | None = None
+    status: str
+    title: str | None = None
+
+
+class POTraceResponse(BaseModel):
+    """Where the lines of a purchase order came from."""
+
+    po_id: UUID
+    po_number: str | None = None
+    po_status: str | None = None
+    requisitions: list[POTraceRequisition] = Field(default_factory=list)
+    lines: list[POTraceLine] = Field(default_factory=list)

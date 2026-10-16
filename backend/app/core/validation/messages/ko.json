@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "필요일 {date}이(가) 이미 지났습니다(오늘은 {today})",
       "suggestion": "자재가 현장에서 실제로 필요한 날짜를 지정하세요"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "공급업체 {vendor}이(가) 공급업체 목록에 없습니다",
+      "suggestion": "공급업체 목록에서 공급업체를 선택하세요"
+    },
+    "requisition_vendor_active": {
+      "fail": "공급업체 {vendor}이(가) 공급업체 목록에서 비활성 상태라 주문할 수 없습니다",
+      "suggestion": "활성 공급업체를 선택하거나, 먼저 이 업체를 공급업체 목록에서 다시 활성화하세요"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "구매 요청 {req}에 공급업체가 지정되어 있지 않은데, 구매 주문에는 공급업체가 필요합니다",
+      "suggestion": "변환하기 전에 공급업체 목록에서 공급업체를 선택하세요"
+    },
+    "requisition_single_currency": {
+      "fail": "구매 요청 {req}에 {currencies}(으)로 가격이 매겨진 행이 있지만, 구매 주문 하나에는 통화 하나만 담깁니다",
+      "suggestion": "모든 행을 한 통화로 가격을 매기거나, 행을 별도 구매 요청으로 나누세요"
+    },
+    "requisition_line_cost_line": {
+      "fail": "{line}행이 원가 항목에 연결되어 있지 않아, 해당 주문이 예산 대비 약정으로 표시되지 않습니다",
+      "suggestion": "내역서에서 행을 생성하거나, 주문 전에 원가 항목에 연결하세요"
     }
   },
   "subcontract": {

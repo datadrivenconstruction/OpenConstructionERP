@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "תאריך הנדרש {date} כבר עבר (היום הוא {today})",
       "suggestion": "קבעו את התאריך שבו החומר נדרש בפועל באתר"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "הספק {vendor} אינו נמצא במאגר הספקים",
+      "suggestion": "בחרו את הספק ממאגר הספקים"
+    },
+    "requisition_vendor_active": {
+      "fail": "הספק {vendor} אינו פעיל במאגר הספקים, ולכן אי אפשר להזמין ממנו",
+      "suggestion": "בחרו ספק פעיל, או הפעילו מחדש את הספק הזה קודם במאגר הספקים"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "דרישת הרכש {req} אינה מציינת ספק, והזמנת רכש זקוקה לאחד",
+      "suggestion": "בחרו את הספק ממאגר הספקים לפני ההמרה"
+    },
+    "requisition_single_currency": {
+      "fail": "בדרישת הרכש {req} יש שורות מתומחרות ב-{currencies}, אך הזמנת רכש אחת מחזיקה מטבע אחד",
+      "suggestion": "תמחרו את כל השורות במטבע אחד, או פצלו את השורות לדרישות רכש נפרדות"
+    },
+    "requisition_line_cost_line": {
+      "fail": "שורה {line} אינה מקושרת לשורת עלות, ולכן ההזמנה שלה לא תופיע כהתחייבות מול התקציב",
+      "suggestion": "צרו את השורה מתוך BOQ, או קשרו אותה לשורת עלות לפני ההזמנה"
     }
   },
   "subcontract": {

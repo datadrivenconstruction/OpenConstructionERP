@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Behovsdatoen {date} er allerede passert (i dag er {today})",
       "suggestion": "Angi datoen materialet faktisk trengs på byggeplassen"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Leverandøren {vendor} finnes ikke i leverandørregisteret",
+      "suggestion": "Velg leverandøren fra leverandørregisteret"
+    },
+    "requisition_vendor_active": {
+      "fail": "Leverandøren {vendor} er ikke aktiv i leverandørregisteret, så det kan ikke bestilles noe hos den",
+      "suggestion": "Velg en aktiv leverandør, eller reaktiver denne i leverandørregisteret først"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Innkjøpsforespørsel {req} angir ingen leverandør, og en innkjøpsordre trenger en",
+      "suggestion": "Velg leverandøren fra leverandørregisteret før konvertering"
+    },
+    "requisition_single_currency": {
+      "fail": "Innkjøpsforespørsel {req} har linjer priset i {currencies}, men én innkjøpsordre har bare én valuta",
+      "suggestion": "Prisset alle linjer i én valuta, eller del linjene på separate innkjøpsforespørsler"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Linje {line} er ikke koblet til en kostnadslinje, så bestillingen vises ikke som bundet mot budsjettet",
+      "suggestion": "Opprett linjen fra BOQ, eller koble den til en kostnadslinje før bestilling"
     }
   },
   "subcontract": {

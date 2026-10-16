@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Termin potrzeby {date} już minął (dziś jest {today})",
       "suggestion": "Ustaw datę, kiedy materiał jest faktycznie potrzebny na budowie"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Dostawca {vendor} nie znajduje się w rejestrze dostawców",
+      "suggestion": "Wybierz dostawcę z rejestru dostawców"
+    },
+    "requisition_vendor_active": {
+      "fail": "Dostawca {vendor} nie jest aktywny w rejestrze dostawców, więc nic u niego nie można zamówić",
+      "suggestion": "Wybierz aktywnego dostawcę albo najpierw ponownie aktywuj tego w rejestrze dostawców"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Zapotrzebowanie {req} nie wskazuje dostawcy, a zamówienie zakupu go wymaga",
+      "suggestion": "Przed konwersją wybierz dostawcę z rejestru dostawców"
+    },
+    "requisition_single_currency": {
+      "fail": "Zapotrzebowanie {req} ma pozycje wycenione w {currencies}, a jedno zamówienie zakupu ma jedną walutę",
+      "suggestion": "Wyceń wszystkie pozycje w jednej walucie albo podziel pozycje na osobne zapotrzebowania"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Pozycja {line} nie jest powiązana z pozycją kosztową, więc jej zamówienie nie pokaże się jako zobowiązanie wobec budżetu",
+      "suggestion": "Utwórz pozycję z BOQ albo przed zamówieniem powiąż ją z pozycją kosztową"
     }
   },
   "subcontract": {

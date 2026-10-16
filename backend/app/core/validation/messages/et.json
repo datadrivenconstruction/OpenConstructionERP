@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Vajaduse kuupäev {date} on juba möödas (täna on {today})",
       "suggestion": "Määrake kuupäev, mil materjali objektil tegelikult vaja on"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Tarnija {vendor} ei ole tarnijate registris",
+      "suggestion": "Valige tarnija tarnijate registrist"
+    },
+    "requisition_vendor_active": {
+      "fail": "Tarnija {vendor} ei ole tarnijate registris aktiivne, seega ei saa temalt midagi tellida",
+      "suggestion": "Valige aktiivne tarnija või aktiveerige see esmalt tarnijate registris uuesti"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Materjalitaotlus {req} ei nimeta tarnijat, ostutellimus vajab aga üht",
+      "suggestion": "Valige enne teisendamist tarnija tarnijate registrist"
+    },
+    "requisition_single_currency": {
+      "fail": "Materjalitaotluse {req} ridade hinnad on valuutas {currencies}, kuid ühel ostutellimusel on üks valuuta",
+      "suggestion": "Hinnastage kõik read ühes valuutas või jagage read eraldi taotlusteks"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Rida {line} ei ole seotud kulureaga, seega ei kuvata selle tellimust eelarve vastu kohustusena",
+      "suggestion": "Looge rida BOQ-st või siduge see enne tellimist kulureaga"
     }
   },
   "subcontract": {

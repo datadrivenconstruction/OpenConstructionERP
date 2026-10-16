@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "İhtiyaç tarihi {date} geçmişte kaldı (bugün {today})",
       "suggestion": "Malzemenin şantiyede gerçekten gerektiği tarihi girin"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "{vendor} tedarikçisi tedarikçi rehberinde yok",
+      "suggestion": "Tedarikçiyi tedarikçi rehberinden seçin"
+    },
+    "requisition_vendor_active": {
+      "fail": "{vendor} tedarikçisi tedarikçi rehberinde aktif değil, bu yüzden ondan sipariş verilemez",
+      "suggestion": "Aktif bir tedarikçi seçin veya önce bu tedarikçiyi tedarikçi rehberinde yeniden etkinleştirin"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "{req} malzeme talebinde tedarikçi belirtilmemiş, satınalma siparişi ise bir tedarikçi gerektirir",
+      "suggestion": "Dönüştürmeden önce tedarikçiyi tedarikçi rehberinden seçin"
+    },
+    "requisition_single_currency": {
+      "fail": "{req} malzeme talebinin {currencies} cinsinden fiyatlanmış satırları var, ancak bir satınalma siparişi tek para birimi taşır",
+      "suggestion": "Tüm satırları tek para biriminde fiyatlandırın veya satırları ayrı taleplere bölün"
+    },
+    "requisition_line_cost_line": {
+      "fail": "{line}. satır bir maliyet satırına bağlı değil, bu yüzden siparişi bütçeye karşı taahhüt olarak görünmez",
+      "suggestion": "Satırı BOQ'dan oluşturun veya sipariş vermeden önce bir maliyet satırına bağlayın"
     }
   },
   "subcontract": {

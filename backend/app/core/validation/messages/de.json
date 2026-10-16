@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Der Bedarfstermin {date} liegt bereits in der Vergangenheit (heute ist {today})",
       "suggestion": "Setzen Sie den Termin, an dem das Material tatsächlich auf der Baustelle gebraucht wird"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Der Lieferant {vendor} ist nicht im Lieferantenverzeichnis",
+      "suggestion": "Wählen Sie den Lieferanten aus dem Lieferantenverzeichnis"
+    },
+    "requisition_vendor_active": {
+      "fail": "Der Lieferant {vendor} ist im Lieferantenverzeichnis nicht aktiv, daher kann bei ihm nichts bestellt werden",
+      "suggestion": "Wählen Sie einen aktiven Lieferanten oder aktivieren Sie diesen zuerst im Lieferantenverzeichnis"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Die Bedarfsanforderung {req} nennt keinen Lieferanten, eine Bestellung braucht aber einen",
+      "suggestion": "Wählen Sie den Lieferanten aus dem Lieferantenverzeichnis, bevor Sie umwandeln"
+    },
+    "requisition_single_currency": {
+      "fail": "Die Bedarfsanforderung {req} hat Zeilen in {currencies}, eine Bestellung führt aber nur eine Währung",
+      "suggestion": "Bepreisen Sie alle Zeilen in einer Währung oder teilen Sie die Zeilen auf getrennte Bedarfsanforderungen auf"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Zeile {line} ist mit keiner Kostenzeile verknüpft, ihre Bestellung erscheint daher nicht als Obligo im Budget",
+      "suggestion": "Erzeugen Sie die Zeile aus dem LV oder verknüpfen Sie sie vor der Bestellung mit einer Kostenzeile"
     }
   },
   "subcontract": {

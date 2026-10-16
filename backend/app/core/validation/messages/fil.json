@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Lampas na ang petsang kailangan {date} (ngayon ay {today})",
       "suggestion": "Itakda ang petsa kung kailan talagang kailangan ang materyales sa site"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Wala sa Vendor directory ang supplier na {vendor}",
+      "suggestion": "Piliin ang supplier mula sa Vendor directory"
+    },
+    "requisition_vendor_active": {
+      "fail": "Hindi aktibo sa Vendor directory ang supplier na {vendor}, kaya walang maiuutos dito",
+      "suggestion": "Pumili ng aktibong supplier, o i-reactivate muna ito sa Vendor directory"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Walang pinangalanang supplier ang requisition ng materyales na {req}, at kailangan ng purchase order ng isa",
+      "suggestion": "Piliin ang supplier mula sa Vendor directory bago i-convert"
+    },
+    "requisition_single_currency": {
+      "fail": "May mga linya ang requisition ng materyales na {req} na may presyo sa {currencies}, pero isang currency lang ang laman ng isang purchase order",
+      "suggestion": "Pepresyuhan ang lahat ng linya sa iisang currency, o hatiin ang mga linya sa magkakahiwalay na requisition"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Hindi nakakabit ang linya {line} sa isang cost line, kaya hindi lalabas ang order nito bilang committed sa budget",
+      "suggestion": "Buuin ang linya mula sa BOQ, o ikabit ito sa isang cost line bago mag-order"
     }
   },
   "subcontract": {

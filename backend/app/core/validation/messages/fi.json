@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Tarvepäivä {date} on jo mennyt (tänään on {today})",
       "suggestion": "Aseta päivä, jolloin materiaalia todella tarvitaan työmaalla"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Toimittaja {vendor} ei ole toimittajarekisterissä",
+      "suggestion": "Valitse toimittaja toimittajarekisteristä"
+    },
+    "requisition_vendor_active": {
+      "fail": "Toimittaja {vendor} ei ole aktiivinen toimittajarekisterissä, joten häneltä ei voi tilata mitään",
+      "suggestion": "Valitse aktiivinen toimittaja tai aktivoi tämä ensin uudelleen toimittajarekisterissä"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Hankintapyyntö {req} ei nimeä toimittajaa, ja ostotilaus tarvitsee sellaisen",
+      "suggestion": "Valitse toimittaja toimittajarekisteristä ennen muuntamista"
+    },
+    "requisition_single_currency": {
+      "fail": "Hankintapyynnön {req} riveillä on hinnat valuutoissa {currencies}, mutta yhdellä ostotilauksella on yksi valuutta",
+      "suggestion": "Hinnoittele kaikki rivit yhdessä valuutassa tai jaa rivit erillisiin hankintapyyntöihin"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Rivi {line} ei ole linkitetty kustannusriviin, joten sen tilausta ei näytetä budjettiin sidottuna",
+      "suggestion": "Luo rivi BOQ:sta tai linkitä se kustannusriviin ennen tilaamista"
     }
   },
   "subcontract": {

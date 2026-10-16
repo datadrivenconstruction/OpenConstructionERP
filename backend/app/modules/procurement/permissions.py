@@ -27,6 +27,11 @@ def register_procurement_permissions() -> None:
             # TOP-30 #10: approving a PO commits budget, so it is a
             # MANAGER-level gate, the same tier as issuing it.
             "procurement.approve": Role.MANAGER,
+            # Issue #516: approving or rejecting a material requisition is
+            # the approver's decision, not the requester's. Its own key so a
+            # tenant can hand it to a site manager without the right to
+            # approve purchase orders, which commit budget.
+            "procurement.approve_requisition": Role.MANAGER,
             "procurement.issue": Role.MANAGER,
             # Voiding a purchase order withdraws a commitment a supplier has
             # already been told about, so it sits at the same tier as making

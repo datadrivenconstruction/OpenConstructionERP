@@ -94,7 +94,9 @@ _MR_STATUS_TRANSITIONS: dict[str, set[str]] = {
     # requester taking it back for good. Both leave a history entry.
     "submitted": {"approved", "rejected", "draft", "cancelled"},
     "approved": {"ordered", "cancelled"},
-    "ordered": {"received", "cancelled"},
+    # ``approved`` is the order it was converted into being cancelled or
+    # deleted (issue #516): the need is still approved and may be ordered again.
+    "ordered": {"received", "approved", "cancelled"},
     "received": {"consumed"},
     "consumed": set(),  # terminal
     "rejected": {"draft"},  # allow re-draft after rejection
@@ -855,6 +857,8 @@ class ProcurementService:
         self,
         data: POCreate,
         user_id: str | None = None,
+        *,
+        from_requisition_conversion: bool = False,
     ) -> PurchaseOrder:
         """Create a new purchase order with optional line items.
 
@@ -873,6 +877,20 @@ class ProcurementService:
                 detail=(
                     f"A purchase order must be created in 'draft' status, not '{data.status}'. "
                     "Use the approve and issue actions to advance it through the workflow."
+                ),
+            )
+
+        # Issue #516: the link from an order line to a requisition line is
+        # written by the conversion only, which also moves the requisition to
+        # ``ordered``. A plain create carrying one would claim a requisition
+        # without converting it, and the same requisition could then be
+        # ordered twice.
+        if not from_requisition_conversion and any(item.requisition_item_id for item in data.items):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "A new purchase order cannot name requisition lines. "
+                    "Convert the approved requisitions into an order instead."
                 ),
             )
 
@@ -967,6 +985,7 @@ class ProcurementService:
                 wbs_id=item_data.wbs_id,
                 cost_category=item_data.cost_category,
                 cost_line_id=item_cost_line_ids[idx],
+                requisition_item_id=item_data.requisition_item_id,
                 sort_order=item_data.sort_order if item_data.sort_order else idx,
             )
             await self.po_item_repo.create(item)
@@ -1210,6 +1229,7 @@ class ProcurementService:
                 po.project_id,
                 [(item.cost_line_id, item.boq_position_id) for item in data.items],
             )
+            await self._refuse_foreign_requisition_links(po, data.items)
 
         # The VAT rate drives the tax (issue #515). An absolute tax stated
         # without a rate detaches the order from the rate it had; a stated
@@ -1288,6 +1308,7 @@ class ProcurementService:
                     wbs_id=item_data.wbs_id,
                     cost_category=item_data.cost_category,
                     cost_line_id=item_cost_line_ids[idx],
+                    requisition_item_id=item_data.requisition_item_id,
                     sort_order=item_data.sort_order if item_data.sort_order else idx,
                 )
                 await self.po_item_repo.create(item)
@@ -1466,6 +1487,36 @@ class ProcurementService:
     # ``partially_received -> completed``, which records that the order ended
     # where it ended. Cancelling would claim it never happened.
 
+    async def _refuse_foreign_requisition_links(self, po: PurchaseOrder, items: Sequence[Any]) -> None:
+        """Refuse a line replace that links a line to a requisition not converted into this order.
+
+        Issue #516. A replace sends every line's ``requisition_item_id`` back so
+        the provenance survives the edit. A link may only point at a line of a
+        requisition whose ``po_id`` is this order; anything else would claim a
+        requisition that was never converted into it. Checked before any write.
+        """
+        wanted = {item.requisition_item_id for item in items if getattr(item, "requisition_item_id", None)}
+        if not wanted:
+            return
+        from sqlalchemy import select
+
+        rows = (
+            await self.session.execute(
+                select(MaterialRequisitionItem.id)
+                .join(MaterialRequisition, MaterialRequisitionItem.requisition_id == MaterialRequisition.id)
+                .where(MaterialRequisitionItem.id.in_(wanted), MaterialRequisition.po_id == po.id)
+            )
+        ).scalars()
+        foreign = wanted - set(rows)
+        if foreign:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "Some lines name a requisition line that was not converted into this purchase order: "
+                    f"{', '.join(sorted(str(i) for i in foreign))}."
+                ),
+            )
+
     async def _collect_po_holders(self, po: PurchaseOrder) -> dict[str, int]:
         """Count every record that points at this PO, by kind.
 
@@ -1524,6 +1575,15 @@ class ProcurementService:
                 regardless of which verb is trying to remove it.
         """
         await self.po_repo.lock_for_update(po.id)
+        # Issue #516: a requisition converted into this order and still only
+        # ``ordered`` is detached here, under the lock, and goes back to
+        # ``approved`` so the need can be ordered again. Nothing was received
+        # against it, so detaching loses nothing; one that has started
+        # receiving still holds the order. If another holder refuses the
+        # removal below, the 409 rolls the release back with it.
+        from app.modules.procurement.requisition_service import release_requisitions_for_po
+
+        await release_requisitions_for_po(self.session, po.id, actor_id=None, action=f"po_{action}")
         holders = await self._collect_po_holders(po)
         if not holders:
             return

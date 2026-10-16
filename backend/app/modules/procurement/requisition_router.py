@@ -8,9 +8,14 @@ Endpoints:
     GET    /requisitions/{id}             - Get one requisition with its lines
     PATCH  /requisitions/{id}             - Edit a draft
     POST   /requisitions/{id}/submit      - Submit (stays ``submitted``, never auto-approved)
-    POST   /requisitions/{id}/withdraw    - Take a submitted requisition back to draft
+    POST   /requisitions/{id}/withdraw    - Take a submitted or rejected requisition back to draft
     POST   /requisitions/{id}/cancel      - Cancel
+    POST   /requisitions/{id}/approve     - Approve (``procurement.approve_requisition``, not the submitter)
+    POST   /requisitions/{id}/reject      - Reject with a required comment (same gate)
     GET    /requisitions/{id}/validate    - Run the ``procurement_requisition`` rules
+    POST   /requisitions/convert-to-po    - Approved requisitions of a project -> one draft purchase order
+    GET    /requisitions/trace/position/{boq_position_id}  - Requisitions and orders behind a BOQ position
+    GET    /requisitions/trace/purchase-order/{po_id}      - Requisitions and BOQ sources behind an order
 
 Every handler resolves the project from the trusted row (or the request body on
 create) and checks the caller's access to it, the same gate the purchase order
@@ -26,12 +31,19 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.procurement.models import MaterialRequisition
 from app.modules.procurement.requisition_service import (
     RequisitionWorkflowService,
+    build_response_context,
     requisition_to_response,
 )
 from app.modules.procurement.schemas import (
+    PositionTraceResponse,
+    POTraceResponse,
+    RequisitionApprove,
     RequisitionCancel,
+    RequisitionConvert,
+    RequisitionConvertResponse,
     RequisitionCreate,
     RequisitionListResponse,
+    RequisitionReject,
     RequisitionResponse,
     RequisitionUpdate,
     RequisitionValidationResponse,
@@ -55,6 +67,11 @@ async def _load_guarded(
     return req
 
 
+async def _respond(service: RequisitionWorkflowService, req: MaterialRequisition) -> RequisitionResponse:
+    """One requisition with its vendor name, order number and converted order lines."""
+    return requisition_to_response(req, await build_response_context(service.session, [req]))
+
+
 @router.get(
     "/",
     response_model=RequisitionListResponse,
@@ -72,8 +89,9 @@ async def list_requisitions(
     """List a project's requisitions, newest first."""
     await verify_project_access(project_id, str(user_id), session)
     rows, total = await service.list_requisitions(project_id, req_status=status, offset=offset, limit=limit)
+    context = await build_response_context(session, rows)
     return RequisitionListResponse(
-        items=[requisition_to_response(r) for r in rows],
+        items=[requisition_to_response(r, context) for r in rows],
         total=total,
         offset=offset,
         limit=limit,
@@ -95,7 +113,61 @@ async def create_requisition(
     """Create a draft requisition, optionally with lines raised from the BOQ."""
     await verify_project_access(data.project_id, str(user_id), session)
     req = await service.create(data, user_id=str(user_id))
-    return requisition_to_response(req)
+    return await _respond(service, req)
+
+
+@router.post(
+    "/convert-to-po",
+    response_model=RequisitionConvertResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("procurement.create"))],
+)
+async def convert_requisitions_to_po(
+    data: RequisitionConvert,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> RequisitionConvertResponse:
+    """Turn approved requisitions of one project into one draft purchase order.
+
+    The order still goes through its own approval before it is issued.
+    """
+    await verify_project_access(data.project_id, str(user_id), session)
+    return await service.convert_to_purchase_order(data, user_id=str(user_id))
+
+
+@router.get(
+    "/trace/position/{boq_position_id}",
+    response_model=PositionTraceResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def trace_boq_position(
+    boq_position_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> PositionTraceResponse:
+    """The requisitions raised from a BOQ position and the order lines they became."""
+    await verify_project_access(project_id, str(user_id), session)
+    return await service.trace_position(project_id, boq_position_id)
+
+
+@router.get(
+    "/trace/purchase-order/{po_id}",
+    response_model=POTraceResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def trace_purchase_order(
+    po_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> POTraceResponse:
+    """The requisitions a purchase order came from, with each line's BOQ sources."""
+    po = await ProcurementService(session).get_po(po_id)
+    await verify_project_access(po.project_id, str(user_id), session)
+    return await service.trace_purchase_order(po)
 
 
 @router.get(
@@ -110,7 +182,7 @@ async def get_requisition(
 ) -> RequisitionResponse:
     """Get one requisition with its lines, sources and progress."""
     req = await _load_guarded(service, requisition_id, user_id)
-    return requisition_to_response(req)
+    return await _respond(service, req)
 
 
 @router.patch(
@@ -127,7 +199,7 @@ async def update_requisition(
     """Edit a draft requisition (409 once it has been submitted)."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.update(requisition_id, data, user_id=str(user_id))
-    return requisition_to_response(req)
+    return await _respond(service, req)
 
 
 @router.post(
@@ -143,7 +215,7 @@ async def submit_requisition(
     """Submit a draft. It stays ``submitted``; nothing here approves it."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.submit(requisition_id, user_id=str(user_id))
-    return requisition_to_response(req)
+    return await _respond(service, req)
 
 
 @router.post(
@@ -159,7 +231,7 @@ async def withdraw_requisition(
     """Take a submitted requisition back to draft."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.withdraw(requisition_id, user_id=str(user_id))
-    return requisition_to_response(req)
+    return await _respond(service, req)
 
 
 @router.post(
@@ -176,7 +248,41 @@ async def cancel_requisition(
     """Cancel a requisition. The row and its history are kept."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.cancel(requisition_id, user_id=str(user_id), reason=data.reason if data else None)
-    return requisition_to_response(req)
+    return await _respond(service, req)
+
+
+@router.post(
+    "/{requisition_id}/approve",
+    response_model=RequisitionResponse,
+    dependencies=[Depends(RequirePermission("procurement.approve_requisition"))],
+)
+async def approve_requisition(
+    requisition_id: uuid.UUID,
+    user_id: CurrentUserId,
+    data: RequisitionApprove | None = None,
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> RequisitionResponse:
+    """Approve a submitted requisition. The person who submitted it may not."""
+    await _load_guarded(service, requisition_id, user_id)
+    req = await service.approve(requisition_id, user_id=str(user_id), comment=data.comment if data else None)
+    return await _respond(service, req)
+
+
+@router.post(
+    "/{requisition_id}/reject",
+    response_model=RequisitionResponse,
+    dependencies=[Depends(RequirePermission("procurement.approve_requisition"))],
+)
+async def reject_requisition(
+    requisition_id: uuid.UUID,
+    data: RequisitionReject,
+    user_id: CurrentUserId,
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> RequisitionResponse:
+    """Reject a submitted requisition with the reason the requester needs."""
+    await _load_guarded(service, requisition_id, user_id)
+    req = await service.reject(requisition_id, user_id=str(user_id), comment=data.comment)
+    return await _respond(service, req)
 
 
 @router.get(

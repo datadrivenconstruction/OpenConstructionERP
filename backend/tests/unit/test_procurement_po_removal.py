@@ -152,6 +152,11 @@ class _EmptyResult:
     def all(self) -> list[Any]:
         return []
 
+    def scalars(self) -> _EmptyResult:
+        # The requisition release (issue #516) reads rows as scalars; the
+        # stub has none to release, so the holder counts below decide.
+        return self
+
     def scalar_one_or_none(self) -> Any:
         return None
 
@@ -330,7 +335,10 @@ async def test_delete_po_refuses_a_draft_that_was_reopened_from_cancelled() -> N
 
 @pytest.mark.asyncio
 async def test_delete_po_refuses_a_draft_with_holders_naming_them() -> None:
-    """Even a draft is held by a requisition that points at it.
+    """Even a draft is held by a requisition that points at it and is past ``ordered``.
+
+    A requisition still only ``ordered`` is released back to ``approved`` before
+    the count (issue #516); one that has started receiving stays a holder.
 
     ``MaterialRequisition.po_id`` is ``ON DELETE SET NULL``, so a raw delete
     does not fail - it silently unlinks the requisition that raised this PO.

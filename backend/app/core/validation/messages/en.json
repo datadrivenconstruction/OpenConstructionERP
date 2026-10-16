@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "The needed-by date {date} is already past (today is {today})",
       "suggestion": "Set the date the material is actually needed on site"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Supplier {vendor} is not in the Vendor directory",
+      "suggestion": "Choose the supplier from the Vendor directory"
+    },
+    "requisition_vendor_active": {
+      "fail": "Supplier {vendor} is not active in the Vendor directory, so nothing can be ordered from it",
+      "suggestion": "Choose an active supplier, or reactivate this one in the Vendor directory first"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Requisition {req} names no supplier, and a purchase order needs one",
+      "suggestion": "Choose the supplier from the Vendor directory before converting"
+    },
+    "requisition_single_currency": {
+      "fail": "Requisition {req} has lines priced in {currencies}, but one purchase order holds one currency",
+      "suggestion": "Price every line in one currency, or split the lines into separate requisitions"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Line {line} is not linked to a cost line, so its order will not show as committed against the budget",
+      "suggestion": "Raise the line from the BOQ, or link it to a cost line before ordering"
     }
   },
   "subcontract": {

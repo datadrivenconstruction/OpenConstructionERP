@@ -589,3 +589,80 @@ def check_requisition_needed_by_not_past(req: dict[str, Any]) -> list[Finding]:
             details={"required_date": needed.isoformat(), "today": today.isoformat()},
         )
     ]
+
+
+# ── Material requisitions (approval and conversion, issue #516) ─────────────
+#
+# The payload also carries ``operation`` (``submit``, ``approve`` or
+# ``convert``), ``vendor_id`` (the supplier the step uses, as text or None) and
+# ``vendor`` ({"id", "name", "status"} from the Vendor directory, or None when
+# it could not be read). Lines carry ``currency_code`` and ``cost_line_id``.
+
+
+def _vendor_label(req: dict[str, Any]) -> str:
+    vendor = req.get("vendor")
+    if isinstance(vendor, dict) and str(vendor.get("name") or "").strip():
+        return str(vendor["name"]).strip()
+    return str(req.get("vendor_id") or "-")
+
+
+def check_requisition_vendor_in_directory(req: dict[str, Any]) -> list[Finding]:
+    """A named supplier must be an entry of the Vendor directory."""
+    if not req.get("vendor_id") or isinstance(req.get("vendor"), dict):
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"vendor": str(req.get("vendor_id"))},
+            details={"vendor_id": str(req.get("vendor_id"))},
+        )
+    ]
+
+
+def check_requisition_vendor_active(req: dict[str, Any]) -> list[Finding]:
+    """A named supplier must be active: a suspended or blacklisted one is not ordered from."""
+    vendor = req.get("vendor")
+    if not isinstance(vendor, dict):
+        return []
+    state = str(vendor.get("status") or "").strip().lower()
+    if state == "active":
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"vendor": _vendor_label(req)},
+            details={"vendor_id": str(vendor.get("id") or ""), "vendor_status": state},
+        )
+    ]
+
+
+def check_requisition_vendor_chosen(req: dict[str, Any]) -> list[Finding]:
+    """An order needs a supplier, so a conversion without one is refused."""
+    if req.get("operation") != "convert" or req.get("vendor_id"):
+        return []
+    return [Finding(element_ref=_req_ref(req), params={"req": _req_ref(req)})]
+
+
+def check_requisition_single_currency(req: dict[str, Any]) -> list[Finding]:
+    """One purchase order holds one currency, so the priced lines of a requisition must share one."""
+    currencies = sorted(
+        {str(item.get("currency_code") or "").strip().upper() for item in _items(req)} - {""},
+    )
+    if len(currencies) <= 1:
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"req": _req_ref(req), "currencies": ", ".join(currencies)},
+            details={"currencies": currencies},
+        )
+    ]
+
+
+def check_requisition_line_cost_line(req: dict[str, Any]) -> list[Finding]:
+    """A line linked to no cost line will not show as committed against the budget once ordered."""
+    return [
+        Finding(element_ref=line_label(index, item), params={"line": line_label(index, item)})
+        for index, item in enumerate(_items(req))
+        if not item.get("cost_line_id")
+    ]

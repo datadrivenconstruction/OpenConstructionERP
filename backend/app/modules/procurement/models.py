@@ -197,6 +197,12 @@ class PurchaseOrderItem(Base):
     # Additive nullable link to the cost line this PO item commits against.
     cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # The requisition line this order line was converted from (issue #516).
+    # Written only by the requisition-to-order conversion and carried through
+    # a line replace, so an order line leads back to the requisition line and
+    # from there to the BOQ positions it was raised from. A plain column, like
+    # the requisition's own provenance, so a deleted line does not erase it.
+    requisition_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     # Relationship
     purchase_order: Mapped["PurchaseOrder"] = relationship(back_populates="items")
@@ -339,6 +345,18 @@ class MaterialRequisition(Base):
     req_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     requester_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     approver_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Who submitted the requisition last. The four-eyes check reads it: the
+    # person who submitted may not approve or reject the same requisition.
+    submitted_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # When the approver decided, and what they said. A rejection always
+    # carries its reason here; an approval may carry a note.
+    decided_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    decision_comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The supplier chosen from the Vendor directory
+    # (``oe_supplier_catalogs_vendor``). A plain column: procurement does not
+    # depend on the supplier catalogue module, and the choice must survive a
+    # vendor being retired.
+    vendor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     title: Mapped[str | None] = mapped_column(String(500), nullable=True)
     required_date: Mapped[str | None] = mapped_column(String(40), nullable=True)

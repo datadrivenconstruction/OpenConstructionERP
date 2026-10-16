@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Data necesarului {date} a trecut deja (astăzi este {today})",
       "suggestion": "Setați data la care materialul este necesar efectiv pe șantier"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Furnizorul {vendor} nu este în registrul de furnizori",
+      "suggestion": "Alegeți furnizorul din registrul de furnizori"
+    },
+    "requisition_vendor_active": {
+      "fail": "Furnizorul {vendor} nu este activ în registrul de furnizori, deci nu se poate comanda nimic de la el",
+      "suggestion": "Alegeți un furnizor activ sau reactivați mai întâi acest furnizor în registrul de furnizori"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Cererea de materiale {req} nu indică niciun furnizor, iar o comandă de achiziție are nevoie de unul",
+      "suggestion": "Alegeți furnizorul din registrul de furnizori înainte de conversie"
+    },
+    "requisition_single_currency": {
+      "fail": "Cererea de materiale {req} are linii cu prețuri în {currencies}, dar o comandă de achiziție are o singură monedă",
+      "suggestion": "Prețuiți toate liniile într-o singură monedă sau împărțiți liniile în cereri separate"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Linia {line} nu este legată de o linie de cost, deci comanda ei nu va apărea ca angajată față de buget",
+      "suggestion": "Creați linia din BOQ sau legați-o de o linie de cost înainte de comandă"
     }
   },
   "subcontract": {

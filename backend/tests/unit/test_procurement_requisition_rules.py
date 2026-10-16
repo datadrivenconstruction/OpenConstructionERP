@@ -20,9 +20,14 @@ from typing import Any
 from app.core.validation.engine import ValidationContext, rule_registry
 from app.core.validation.messages import available_locales, is_key_present
 from app.core.validation.rules import (
+    ProcurementRequisitionLineCostLine,
     ProcurementRequisitionNeededByNotPast,
     ProcurementRequisitionQuantityPositive,
+    ProcurementRequisitionSingleCurrency,
     ProcurementRequisitionSourceUnit,
+    ProcurementRequisitionVendorActive,
+    ProcurementRequisitionVendorChosen,
+    ProcurementRequisitionVendorInDirectory,
     register_builtin_rules,
 )
 from app.modules.procurement import validators as po_checks
@@ -38,6 +43,12 @@ RULES = [
     ProcurementRequisitionQuantityPositive,
     ProcurementRequisitionSourceUnit,
     ProcurementRequisitionNeededByNotPast,
+    # Issue #516: supplier, currency and budget link.
+    ProcurementRequisitionVendorInDirectory,
+    ProcurementRequisitionVendorActive,
+    ProcurementRequisitionVendorChosen,
+    ProcurementRequisitionSingleCurrency,
+    ProcurementRequisitionLineCostLine,
 ]
 
 

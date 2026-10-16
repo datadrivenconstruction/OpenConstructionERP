@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "需求日期 {date} 已经过去(今天是 {today})",
       "suggestion": "请设置材料在现场实际需要的日期"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "供应商 {vendor} 不在供应商名录中",
+      "suggestion": "请从供应商名录中选择供应商"
+    },
+    "requisition_vendor_active": {
+      "fail": "供应商 {vendor} 在供应商名录中未启用,因此无法向其下单",
+      "suggestion": "请选择已启用的供应商,或先在供应商名录中重新启用该供应商"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "请购单 {req} 未指定供应商,而采购订单必须有供应商",
+      "suggestion": "转换前请从供应商名录中选择供应商"
+    },
+    "requisition_single_currency": {
+      "fail": "请购单 {req} 有以 {currencies} 计价的行,但一张采购订单只能用一种币种",
+      "suggestion": "请将所有行统一为一种币种计价,或把这些行拆分到不同的请购单"
+    },
+    "requisition_line_cost_line": {
+      "fail": "第 {line} 行未关联成本行,因此其订单不会显示为对预算的已占用金额",
+      "suggestion": "请从 BOQ 生成该行,或在下单前将其关联到成本行"
     }
   },
   "subcontract": {

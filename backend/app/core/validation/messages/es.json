@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "La fecha de necesidad {date} ya pasó (hoy es {today})",
       "suggestion": "Indique la fecha en que el material se necesita realmente en obra"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "El proveedor {vendor} no está en el directorio de proveedores",
+      "suggestion": "Elija el proveedor del directorio de proveedores"
+    },
+    "requisition_vendor_active": {
+      "fail": "El proveedor {vendor} no está activo en el directorio de proveedores, así que no se le puede pedir nada",
+      "suggestion": "Elija un proveedor activo o reactive primero este en el directorio de proveedores"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "La solicitud de materiales {req} no indica proveedor, y un pedido necesita uno",
+      "suggestion": "Elija el proveedor del directorio de proveedores antes de convertir"
+    },
+    "requisition_single_currency": {
+      "fail": "La solicitud de materiales {req} tiene líneas con precio en {currencies}, pero un pedido lleva una sola moneda",
+      "suggestion": "Ponga precio a todas las líneas en una moneda o divida las líneas en solicitudes separadas"
+    },
+    "requisition_line_cost_line": {
+      "fail": "La línea {line} no está vinculada a una partida de coste, así que su pedido no aparecerá como comprometido contra el presupuesto",
+      "suggestion": "Genere la línea desde el BOQ o vincúlela a una partida de coste antes de pedir"
     }
   },
   "subcontract": {

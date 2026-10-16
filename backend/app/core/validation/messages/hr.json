@@ -636,6 +636,26 @@
     "requisition_needed_by_not_past": {
       "fail": "Datum potrebe {date} već je prošao (danas je {today})",
       "suggestion": "Postavite datum kada je materijal stvarno potreban na gradilištu"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Dobavljač {vendor} nije u imeniku dobavljača",
+      "suggestion": "Odaberite dobavljača iz imenika dobavljača"
+    },
+    "requisition_vendor_active": {
+      "fail": "Dobavljač {vendor} nije aktivan u imeniku dobavljača, pa se kod njega ne može ništa naručiti",
+      "suggestion": "Odaberite aktivnog dobavljača ili ovoga najprije ponovno aktivirajte u imeniku dobavljača"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Zahtjev za nabavu {req} ne navodi dobavljača, a narudžbenica ga traži",
+      "suggestion": "Prije pretvorbe odaberite dobavljača iz imenika dobavljača"
+    },
+    "requisition_single_currency": {
+      "fail": "Zahtjev za nabavu {req} ima stavke s cijenama u {currencies}, a jedna narudžbenica nosi jednu valutu",
+      "suggestion": "Sve stavke iskažite u jednoj valuti ili ih podijelite na zasebne zahtjeve"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Stavka {line} nije povezana s troškovnom stavkom, pa se njezina narudžba neće prikazati kao preuzeta obveza prema proračunu",
+      "suggestion": "Izradite stavku iz BOQ-a ili je prije naručivanja povežite s troškovnom stavkom"
     }
   },
   "subcontract": {
