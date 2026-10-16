@@ -68,6 +68,8 @@ import { POStatusPipeline } from './POStatusPipeline';
 import { RequisitionsTab } from './RequisitionsTab';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
+import { LineRequirements, changedRequirements } from './LineRequirements';
+import { ConfirmReceiptDialog, type ConfirmableReceipt } from './ConfirmReceiptDialog';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { orderSource, rfqDeepLink } from '@/shared/lib/awardChainLinks';
 import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
@@ -167,6 +169,8 @@ interface POItemResponse {
   // bill, and for one whose cost line came from no position.
   boq_position_id: string | null;
   sort_order: number;
+  required_certificate_type?: string | null;
+  requires_inspection?: boolean;
 }
 
 /** Full PO detail returned by GET /v1/procurement/{po_id} (includes line items
@@ -210,6 +214,8 @@ interface GoodsReceipt {
   received_qty: string | null;
   ordered_qty: string | null;
   description: string;
+  /** "site" when recorded on site, "supplier_portal" when the supplier sent it. */
+  source?: string;
   created_at: string;
 }
 
@@ -226,7 +232,18 @@ interface POLineItemForm {
    * this form. See `backend/app/modules/procurement/cost_spine.py`.
    */
   boq_position_id: string | null;
+  /** The saved line, when editing; requirement changes on a locked order go to it. */
+  id?: string;
+  /** What a delivery of the line must arrive with: a certificate type code, or ''. */
+  required_certificate_type?: string;
+  requires_inspection?: boolean;
 }
+
+/** The figures of a line, without its delivery requirements. */
+function lineFigures(items: POLineItemForm[]) {
+  return items.map((li) => [li.description, li.quantity, li.unit, li.unit_rate, li.amount, li.boq_position_id]);
+}
+
 
 /** The purchase-order fields the shared create / edit modal holds. */
 interface POFormState {
@@ -282,6 +299,9 @@ function poFormFromResponse(po: POResponse, projectCurrency: string): POFormStat
             // quietly send the line back unattributed. The picker resolves the
             // id to a readable position even when it sorts past the first page.
             boq_position_id: it.boq_position_id ?? null,
+            id: it.id,
+            required_certificate_type: it.required_certificate_type ?? '',
+            requires_inspection: Boolean(it.requires_inspection),
           }))
         : [{ description: '', quantity: '1', unit: '', unit_rate: '', amount: '', boq_position_id: null }],
   };
@@ -726,6 +746,8 @@ function PurchaseOrdersTab({
   // that cannot succeed. Notes, dates, payment terms and type stay editable.
   const [editingPOStatus, setEditingPOStatus] = useState<string | null>(null);
   const figuresLocked = editingPO !== null && editingPOStatus !== null && editingPOStatus !== 'draft';
+  // Delivery requirements stay editable while the order is still being delivered.
+  const requirementsLocked = editingPOStatus === 'completed' || editingPOStatus === 'cancelled';
   // True only while the create modal is showing lines handed over from the
   // Resource Summary buy-list (F4 interop), so we can surface a one-line hint
   // telling the buyer to add a supplier + rates. Reset whenever the modal closes.
@@ -824,6 +846,15 @@ function PurchaseOrdersTab({
   }, [incomingBuyList, onBuyListConsumed]);
 
   // Auto-calc line amounts
+  const setLineRequirements = (idx: number, cert: string, insp: boolean) => {
+    setPoForm((prev) => ({
+      ...prev,
+      items: prev.items.map((li, i) =>
+        i === idx ? { ...li, required_certificate_type: cert, requires_inspection: insp } : li,
+      ),
+    }));
+  };
+
   const updateLineItem = (idx: number, field: keyof POLineItemForm, value: string) => {
     setPoForm((prev) => {
       const items: POLineItemForm[] = prev.items.map((li, i) => (i === idx ? { ...li, [field]: value } : li));
@@ -938,6 +969,8 @@ function PurchaseOrdersTab({
             // the field is optional on POItemCreate and an absent one reads the
             // same as an unlinked line without asking the server to resolve it.
             boq_position_id: li.boq_position_id || undefined,
+            required_certificate_type: li.required_certificate_type || undefined,
+            requires_inspection: Boolean(li.requires_inspection),
             sort_order: idx,
           })),
       }),
@@ -961,14 +994,16 @@ function PurchaseOrdersTab({
      draft and cancels anything else, and both are refused with a 409 when
      another record still points at the order. */
   const editPOMut = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: POFormState }) => {
+    mutationFn: async ({ id, data }: { id: string; data: POFormState }) => {
       // Only what the user actually edited goes back. The baseline is the state
       // the prefill left the form in, so a field nobody opened is omitted and
       // whatever somebody else did to it in the meantime survives.
       const base = poBase?.form ?? data;
       const baseTax = poBase?.tax ?? poTaxInput;
       const baseRate = poBase?.taxRate ?? poTaxRateInput;
-      const itemsChanged = JSON.stringify(data.items) !== JSON.stringify(base.items);
+      const itemsChanged =
+        JSON.stringify(lineFigures(data.items)) !== JSON.stringify(lineFigures(base.items));
+      const requirementChanges = itemsChanged ? [] : changedRequirements(data.items, base.items);
       const rateChanged = poTaxRateInput.trim() !== baseRate.trim();
       // Under a rate the tax is the server's to derive; a typed amount only
       // goes back on an order without one.
@@ -1004,6 +1039,8 @@ function PurchaseOrdersTab({
             amount: li.amount || '0',
             unit_rate: li.unit_rate || '0',
             boq_position_id: li.boq_position_id || undefined,
+            required_certificate_type: li.required_certificate_type || undefined,
+            requires_inspection: Boolean(li.requires_inspection),
             sort_order: idx,
           }));
         body.amount_subtotal = String(poSubtotal.toFixed(2));
@@ -1013,7 +1050,14 @@ function PurchaseOrdersTab({
       if (amountChanged) body.tax_amount = poTaxInput || '0';
       // The total is the sum of the two, so it moves whenever either does.
       if (itemsChanged || taxChanged) body.amount_total = String(poTotal.toFixed(2));
-      return apiPatch<{ vendor_warnings?: string[] }>(`/v1/procurement/${id}`, body);
+      const res = await apiPatch<{ vendor_warnings?: string[] }>(`/v1/procurement/${id}`, body);
+      for (const change of requirementChanges) {
+        await apiPatch(`/v1/procurement/${id}/items/${change.id}/requirements/`, {
+          required_certificate_type: change.required_certificate_type,
+          requires_inspection: change.requires_inspection,
+        });
+      }
+      return res;
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['procurement-po', projectId] });
@@ -1391,6 +1435,13 @@ function PurchaseOrdersTab({
                         onChange={(boqPositionId) => setLinePosition(idx, boqPositionId)}
                         line={idx + 1}
                         disabled={figuresLocked}
+                      />
+                      <LineRequirements
+                        line={idx + 1}
+                        certificateType={li.required_certificate_type ?? ''}
+                        requiresInspection={Boolean(li.requires_inspection)}
+                        disabled={requirementsLocked}
+                        onChange={(cert, insp) => setLineRequirements(idx, cert, insp)}
                       />
                     </div>
                     <input
@@ -2177,8 +2228,6 @@ function GoodsReceiptsTab({
   onGoToPurchaseOrders: () => void;
 }) {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
   // Recording + confirming a goods receipt are EDITOR-level permissions
   // (procurement.create / procurement.confirm_receipt), so the controls are
@@ -2201,30 +2250,10 @@ function GoodsReceiptsTab({
   /* ── Confirm a draft goods receipt ──
      Confirmation is the load-bearing step: only it runs the over-receipt
      cap, rolls the PO up to partially_received/completed and fires the
-     finance event that flips committed -> actual. Refresh both the GR list
-     and the PO list (its status pipeline changes) plus the finance
-     dashboard. */
-  const confirmGRMut = useMutation({
-    mutationFn: (grId: string) =>
-      apiPost(`/v1/procurement/goods-receipts/${grId}/confirm/`, {}),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['procurement-gr', projectId] });
-      // A confirmed receipt moves committed and actual: every finance figure.
-      void invalidateFinanceFigures(queryClient);
-      addToast({
-        type: 'success',
-        title: t('procurement.gr_confirmed_toast', {
-          defaultValue: 'Goods receipt confirmed',
-        }),
-      });
-    },
-    onError: (e: Error) =>
-      addToast({
-        type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
-        message: e.message,
-      }),
-  });
+     finance event that flips committed -> actual. It goes through
+     ConfirmReceiptDialog, which shows the certificate checks first and lets
+     the person choose the approval route and the incoming inspection. */
+  const [confirming, setConfirming] = useState<ConfirmableReceipt | null>(null);
 
   const filtered = useMemo(() => {
     if (!receipts) return [];
@@ -2366,6 +2395,11 @@ function GoodsReceiptsTab({
                   {gr.gr_reference || (
                     <span className="text-content-tertiary">-</span>
                   )}
+                  {gr.source === 'supplier_portal' && (
+                    <Badge variant="blue" size="sm" className="ms-2 font-sans">
+                      {t('procurement.gr_source_supplier', { defaultValue: 'Submitted by the supplier' })}
+                    </Badge>
+                  )}
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-content-secondary">
                   {gr.po_number}
@@ -2413,8 +2447,14 @@ function GoodsReceiptsTab({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => confirmGRMut.mutate(gr.id)}
-                        disabled={confirmGRMut.isPending}
+                        onClick={() =>
+                          setConfirming({
+                            id: gr.id,
+                            gr_reference: gr.gr_reference,
+                            po_number: gr.po_number,
+                            source: gr.source,
+                          })
+                        }
                         title={t('procurement.gr_confirm', {
                           defaultValue: 'Confirm goods receipt',
                         })}
@@ -2422,11 +2462,7 @@ function GoodsReceiptsTab({
                           defaultValue: 'Confirm goods receipt',
                         })}
                       >
-                        {confirmGRMut.isPending && confirmGRMut.variables === gr.id ? (
-                          <Loader2 size={14} className="animate-spin mr-1" />
-                        ) : (
-                          <CheckCircle2 size={14} className="mr-1" />
-                        )}
+                        <CheckCircle2 size={14} className="mr-1" />
                         {t('procurement.gr_confirm_short', { defaultValue: 'Confirm' })}
                       </Button>
                     )}
@@ -2441,6 +2477,12 @@ function GoodsReceiptsTab({
           so the register has to admit when the server sent a slice. */}
       {receiptsPage && <TruncationNotice page={receiptsPage} className="mt-3" />}
     </Card>
+
+    <ConfirmReceiptDialog
+      receipt={confirming}
+      projectId={projectId}
+      onClose={() => setConfirming(null)}
+    />
 
     {/* Record-delivery modal (create a draft goods receipt) */}
     {showRecord && (

@@ -20,19 +20,20 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { Loader2, AlertCircle, KeyRound, Receipt, FileText, ArrowLeft } from 'lucide-react';
+import { Loader2, AlertCircle, KeyRound, Receipt, FileText, ArrowLeft, Truck } from 'lucide-react';
 import { Card, EmptyState } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { PaymentApplicationList } from './PaymentApplicationList';
 import { PaymentApplicationForm } from './PaymentApplicationForm';
 import { PaymentApplicationDetailModal } from './PaymentApplicationDetailModal';
 import { PortalProgressReportsTab } from './PortalProgressReportsTab';
+import { PortalDeliveriesTab } from './PortalDeliveriesTab';
 import { consumePortalMagicLink, getPortalSessionToken } from './api';
 import { PortalBrandHeader } from './PortalBrandHeader';
 import { RequestSignInLink } from './RequestSignInLink';
 
 type View = 'list' | 'form';
-type Tab = 'payments' | 'progress';
+type Tab = 'payments' | 'progress' | 'deliveries';
 
 export function PortalPaymentsPage() {
   const { t } = useTranslation();
@@ -177,6 +178,11 @@ export function PortalPaymentsPage() {
                   label: t('payportal.tab_progress', { defaultValue: 'Progress Reports' }),
                   icon: FileText,
                 },
+                {
+                  id: 'deliveries',
+                  label: t('payportal.tab_deliveries', { defaultValue: 'Deliveries' }),
+                  icon: Truck,
+                },
               ] as { id: Tab; label: string; icon: React.ElementType }[]
             ).map((it) => {
               const Icon = it.icon;
@@ -202,6 +208,8 @@ export function PortalPaymentsPage() {
 
         {tab === 'progress' ? (
           <PortalProgressReportsTab />
+        ) : tab === 'deliveries' ? (
+          <PortalDeliveriesTab />
         ) : view === 'form' ? (
           <PaymentApplicationForm
             onCancel={() => setView('list')}

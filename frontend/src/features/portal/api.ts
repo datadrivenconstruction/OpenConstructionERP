@@ -358,7 +358,8 @@ async function portalFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
   headers.set('Authorization', `Bearer ${token}`);
   headers.set('Accept', 'application/json');
-  if (init?.body && !headers.has('Content-Type')) {
+  // A file upload carries its own multipart boundary; only JSON bodies get the header.
+  if (init?.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
   const res = await fetch(path, { ...init, headers });
@@ -368,8 +369,13 @@ async function portalFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { detail?: unknown };
+    const structured = body.detail as { message?: unknown } | undefined;
     const detail =
-      typeof body.detail === 'string' ? body.detail : `Request failed (${res.status})`;
+      typeof body.detail === 'string'
+        ? body.detail
+        : typeof structured?.message === 'string'
+          ? structured.message
+          : `Request failed (${res.status})`;
     throw new PortalHttpError(detail, res.status);
   }
   return (await res.json()) as T;
@@ -904,4 +910,111 @@ export async function consumePortalMagicLink(
   const data = (await res.json()) as PortalConsumeResult;
   setPortalSessionToken(data.session_token);
   return data;
+}
+
+/* ── Supplier deliveries (session token) ──────────────────────────────────
+ * A supplier with a `po` access rule sees the orders shared with it and, with
+ * `submit`, tells the site what is on its way: delivery note, quantities per
+ * line, batch and certificates. The submission is a DRAFT goods receipt that
+ * site staff confirm; nothing here counts as received.
+ */
+
+export interface PortalPOLine {
+  id: string;
+  description: string;
+  unit: string | null;
+  quantity_ordered: string;
+  quantity_received: string;
+  required_certificate_type: string | null;
+  requires_inspection: boolean;
+}
+
+export interface PortalPurchaseOrder {
+  id: string;
+  po_number: string;
+  status: string;
+  delivery_date: string | null;
+  currency_code: string;
+  can_deliver: boolean;
+  lines: PortalPOLine[];
+}
+
+export interface PortalCertificateType {
+  code: string;
+  label: string;
+}
+
+export interface PortalPurchaseOrderList {
+  items: PortalPurchaseOrder[];
+  total: number;
+  certificate_types: PortalCertificateType[];
+}
+
+export interface PortalDeliveryCertificate {
+  certificate_type: string;
+  certificate_number: string;
+  issuer?: string | null;
+  issue_date?: string | null;
+  document_id?: string | null;
+  batch_number?: string | null;
+}
+
+export interface PortalDeliveryLine {
+  po_item_id: string;
+  quantity: string;
+  batch_lot?: string | null;
+  certificates: PortalDeliveryCertificate[];
+}
+
+export interface PortalDeliverySubmit {
+  po_id: string;
+  delivery_note_number: string;
+  delivery_date: string;
+  delivery_note_document_id?: string | null;
+  notes?: string | null;
+  lines: PortalDeliveryLine[];
+}
+
+export interface PortalDelivery {
+  id: string;
+  po_id: string;
+  po_number: string;
+  delivery_note_number: string | null;
+  receipt_date: string;
+  status: string;
+  created_at: string;
+  lines: {
+    po_item_id: string | null;
+    description: string;
+    quantity_received: string;
+    batch_lot: string | null;
+    certificate_count: number;
+  }[];
+}
+
+export function listMyPurchaseOrders(): Promise<PortalPurchaseOrderList> {
+  return portalFetch<PortalPurchaseOrderList>(`${PORTAL_ME_BASE}/purchase-orders`);
+}
+
+export function uploadMyDeliveryDocument(
+  poId: string,
+  file: File,
+): Promise<{ document_id: string; name: string }> {
+  const form = new FormData();
+  form.append('file', file);
+  return portalFetch<{ document_id: string; name: string }>(
+    `${PORTAL_ME_BASE}/purchase-orders/${encodeURIComponent(poId)}/documents`,
+    { method: 'POST', body: form },
+  );
+}
+
+export function submitMyDelivery(data: PortalDeliverySubmit): Promise<PortalDelivery> {
+  return portalFetch<PortalDelivery>(`${PORTAL_ME_BASE}/deliveries`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function listMyDeliveries(): Promise<{ items: PortalDelivery[]; total: number }> {
+  return portalFetch<{ items: PortalDelivery[]; total: number }>(`${PORTAL_ME_BASE}/deliveries`);
 }

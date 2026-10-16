@@ -302,6 +302,7 @@ export const LINK_KIND: KeyMap = {
   diary_photo: ['qualityConcept.linkKind.diary_photo', 'Site diary photo'],
   diary_reality_capture: ['qualityConcept.linkKind.diary_reality_capture', 'Reality capture from the diary'],
   requirement_deliverable: ['qualityConcept.linkKind.requirement_deliverable', 'Requirement deliverable'],
+  goods_receipt: ['qualityConcept.linkKind.goods_receipt', 'Delivery (goods receipt)'],
 };
 
 export const FACT_OUTCOME: KeyMap = {
