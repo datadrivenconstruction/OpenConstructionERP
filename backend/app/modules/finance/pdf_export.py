@@ -26,6 +26,7 @@ from collections.abc import Mapping, Sequence
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from app.core.party_names import PartyDetails, party_detail_pairs
 from app.core.register_export import (
     EMPTY,
     ProjectHeader,
@@ -75,6 +76,18 @@ def _counterparty_label(invoice: Any, locale: str) -> str:
     return tr(locale, "client" if getattr(invoice, "invoice_direction", None) == "receivable" else "supplier")
 
 
+def _counterparty_details(
+    invoice: Any, parties: Mapping[str, PartyDetails] | None, locale: str
+) -> list[tuple[str, str]]:
+    """The counterparty's tax id and address rows, where the contact has them."""
+    return party_detail_pairs(
+        getattr(invoice, "contact_id", None),
+        parties,
+        tr(locale, "counterparty_tax_id"),
+        tr(locale, "counterparty_address"),
+    )
+
+
 def _currency(record: Any, project: ProjectHeader) -> str:
     return _text(getattr(record, "currency_code", None)).upper() or project.currency
 
@@ -84,6 +97,7 @@ def invoice_record(
     *,
     project: ProjectHeader,
     people: Mapping[str, str] | None = None,
+    parties: Mapping[str, PartyDetails] | None = None,
     purchase_order_number: str | None = None,
     payments: Sequence[Any] | None = None,
     sections: Mapping[str, bool] | None = None,
@@ -98,6 +112,8 @@ def invoice_record(
         project: The owning project.
         people: Display names keyed by ``str(id)``, for the counterparty
             contact and the user who created the invoice.
+        parties: The counterparty's tax id and address keyed by ``str(id)``,
+            from :func:`app.core.party_names.resolve_party_details`.
         purchase_order_number: The number of the order the invoice bills, when
             it is linked to one.
         payments: The payments recorded against the invoice, oldest first.
@@ -127,6 +143,7 @@ def invoice_record(
                 CATALOGUE.label("direction", getattr(invoice, "invoice_direction", None), locale),
             ),
             (_counterparty_label(invoice, locale), counterparty),
+            *_counterparty_details(invoice, parties, locale),
             (tr(locale, "invoice_date"), format_stored_date(getattr(invoice, "invoice_date", None), date_format)),
             (tr(locale, "due_date"), format_stored_date(getattr(invoice, "due_date", None), date_format)),
             (tr(locale, "payment_terms"), CATALOGUE.days(terms_days, locale) if terms_days else EMPTY),
@@ -274,6 +291,7 @@ def payment_record(
     invoice: Any,
     project: ProjectHeader,
     people: Mapping[str, str] | None = None,
+    parties: Mapping[str, PartyDetails] | None = None,
     sections: Mapping[str, bool] | None = None,
     locale: str = DEFAULT_PDF_LOCALE,
     generated: str = "",
@@ -286,6 +304,7 @@ def payment_record(
         project: The owning project.
         people: Display names keyed by ``str(id)``, for the invoice's
             counterparty.
+        parties: The counterparty's tax id and address keyed by ``str(id)``.
         sections: ``{section: printed}``; ``None`` prints every section.
         locale: Document language; unsupported values fall back to English.
         generated: The timestamp printed in the footer.
@@ -329,6 +348,7 @@ def payment_record(
                             format_stored_date(getattr(invoice, "invoice_date", None), date_format),
                         ),
                         (_counterparty_label(invoice, locale), counterparty),
+                        *_counterparty_details(invoice, parties, locale),
                         (tr(locale, "invoice_total"), _money(getattr(invoice, "amount_total", None), invoice_currency)),
                     ]
                 ),

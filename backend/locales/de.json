@@ -476,5 +476,152 @@
     "role_manager_desc": "Projekt- und Teamverwaltung",
     "role_editor_desc": "Erstellen und bearbeiten",
     "role_viewer_desc": "Nur-Lese-Zugriff"
+  },
+  "document_forms": {
+    "procurement": {
+      "strings": {
+        "po_title": "Bestellung",
+        "gr_title": "Wareneingang",
+        "supplier": "Lieferant",
+        "po_type": "Bestellart",
+        "issue_date": "Bestelldatum",
+        "delivery_date": "Liefertermin",
+        "created_by": "Erstellt von",
+        "order_total": "Bestellsumme",
+        "line_items": "Positionen",
+        "col_no": "Pos.",
+        "col_description": "Beschreibung",
+        "col_quantity": "Menge",
+        "col_unit": "Einheit",
+        "col_unit_rate": "Einheitspreis",
+        "col_amount": "Betrag",
+        "no_line_items": "Keine Positionen.",
+        "totals": "Summen",
+        "subtotal": "Nettobetrag",
+        "tax": "Steuer",
+        "total_gross": "Gesamtbetrag inkl. Steuer",
+        "terms": "Konditionen",
+        "payment_terms": "Zahlungsbedingungen",
+        "retention": "Einbehalt",
+        "retention_at": "Einbehalt bei",
+        "retention_at_receipt": "Wareneingang",
+        "retention_at_invoice": "Rechnung",
+        "invoice_tolerance": "Rechnungstoleranz",
+        "supplier_confirmation": "Auftragsbestätigung",
+        "supplier_reference": "Referenz des Lieferanten",
+        "confirmed_delivery": "Bestätigter Liefertermin",
+        "acknowledged_on": "Bestätigt am",
+        "not_confirmed": "Vom Lieferanten noch nicht bestätigt.",
+        "notes": "Bemerkungen",
+        "no_notes": "Keine Bemerkungen.",
+        "sig_ordered_by": "Besteller",
+        "purchase_order": "Bestellung",
+        "receipt_date": "Eingangsdatum",
+        "received_by": "Angenommen von",
+        "delivery_note": "Lieferschein",
+        "col_ordered": "Bestellt",
+        "col_received": "Erhalten",
+        "col_rejected": "Abgelehnt",
+        "col_batch": "Charge",
+        "rejections": "Beanstandungen",
+        "col_reason": "Grund",
+        "no_rejections": "Nichts beanstandet.",
+        "sig_delivered_by": "Übergeben von",
+        "counterparty_tax_id": "Steuer-Nr. / USt-IdNr.",
+        "counterparty_address": "Anschrift"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Entwurf",
+          "approved": "Freigegeben",
+          "issued": "Bestellt",
+          "partially_received": "Teilweise geliefert",
+          "completed": "Abgeschlossen",
+          "cancelled": "Storniert"
+        },
+        "gr_status": {
+          "draft": "Entwurf",
+          "confirmed": "Bestätigt"
+        },
+        "po_type": {
+          "standard": "Standard",
+          "blanket": "Rahmenbestellung",
+          "service": "Dienstleistung"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Rechnung",
+        "payment_title": "Zahlung",
+        "direction": "Rechnungsart",
+        "supplier": "Lieferant",
+        "client": "Kunde",
+        "invoice_date": "Rechnungsdatum",
+        "due_date": "Fällig am",
+        "payment_terms": "Zahlungsziel",
+        "purchase_order": "Bestellung",
+        "invoice_total": "Rechnungsbetrag",
+        "line_items": "Positionen",
+        "col_no": "Pos.",
+        "col_description": "Beschreibung",
+        "col_quantity": "Menge",
+        "col_unit": "Einheit",
+        "col_unit_rate": "Einheitspreis",
+        "col_vat": "USt.",
+        "col_amount": "Betrag",
+        "no_line_items": "Keine Positionen.",
+        "totals": "Summen",
+        "subtotal": "Nettobetrag",
+        "tax": "Steuer",
+        "total_gross": "Gesamtbetrag inkl. Steuer",
+        "retention": "Einbehalt",
+        "amount_due": "Zahlbetrag nach Einbehalt",
+        "payments": "Zahlungen",
+        "col_date": "Datum",
+        "col_reference": "Referenz",
+        "col_paid": "Gezahlt",
+        "col_withheld": "Einbehalten",
+        "refund": "Erstattung",
+        "no_payments": "Keine Zahlungen erfasst.",
+        "notes": "Bemerkungen",
+        "no_notes": "Keine Bemerkungen.",
+        "invoice": "Rechnung",
+        "invoice_number": "Rechnungs-Nr.",
+        "payment_date": "Zahlungsdatum",
+        "reference": "Referenz",
+        "amount_paid": "Gezahlter Betrag",
+        "exchange_rate": "Wechselkurs",
+        "kind": "Art",
+        "kind_payment": "Zahlung",
+        "kind_refund": "Erstattung",
+        "withholding": "Einbehalt",
+        "withheld_amount": "Einbehaltener Betrag",
+        "release_date": "Freigabe am",
+        "gross_settled": "Abgerechneter Bruttobetrag",
+        "no_withholding": "Von dieser Zahlung wurde nichts einbehalten.",
+        "counterparty_tax_id": "Steuer-Nr. / USt-IdNr.",
+        "counterparty_address": "Anschrift"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Entwurf",
+          "pending": "Zur Freigabe",
+          "approved": "Freigegeben",
+          "sent": "Versendet",
+          "paid": "Bezahlt",
+          "cancelled": "Storniert",
+          "credit_note_issued": "Gutschrift erstellt"
+        },
+        "direction": {
+          "payable": "Eingangsrechnung",
+          "receivable": "Ausgangsrechnung"
+        },
+        "payment_status": {
+          "completed": "Ausgeführt",
+          "refunded": "Erstattet"
+        }
+      }
+    }
   }
 }

@@ -476,5 +476,152 @@
     "role_manager_desc": "Управление проектами",
     "role_editor_desc": "Создание и редактирование",
     "role_viewer_desc": "Только просмотр"
+  },
+  "document_forms": {
+    "procurement": {
+      "strings": {
+        "po_title": "Заказ на поставку",
+        "gr_title": "Приёмка поставки",
+        "supplier": "Поставщик",
+        "po_type": "Тип заказа",
+        "issue_date": "Дата выдачи",
+        "delivery_date": "Срок поставки",
+        "created_by": "Составитель",
+        "order_total": "Сумма заказа",
+        "line_items": "Позиции",
+        "col_no": "№",
+        "col_description": "Наименование",
+        "col_quantity": "Кол-во",
+        "col_unit": "Ед. изм.",
+        "col_unit_rate": "Цена за ед.",
+        "col_amount": "Сумма",
+        "no_line_items": "Позиций нет.",
+        "totals": "Итоги",
+        "subtotal": "Сумма без налога",
+        "tax": "Налог",
+        "total_gross": "Всего с налогом",
+        "terms": "Условия",
+        "payment_terms": "Условия оплаты",
+        "retention": "Удержание",
+        "retention_at": "Момент удержания",
+        "retention_at_receipt": "Приёмка",
+        "retention_at_invoice": "Счёт",
+        "invoice_tolerance": "Допуск по счёту",
+        "supplier_confirmation": "Подтверждение поставщика",
+        "supplier_reference": "Номер у поставщика",
+        "confirmed_delivery": "Подтверждённый срок",
+        "acknowledged_on": "Дата подтверждения",
+        "not_confirmed": "Поставщик ещё не подтвердил заказ.",
+        "notes": "Примечания",
+        "no_notes": "Примечаний нет.",
+        "sig_ordered_by": "Заказчик",
+        "purchase_order": "Заказ на поставку",
+        "receipt_date": "Дата приёмки",
+        "received_by": "Приёмщик",
+        "delivery_note": "Накладная",
+        "col_ordered": "Заказано",
+        "col_received": "Принято",
+        "col_rejected": "Отклонено",
+        "col_batch": "Партия",
+        "rejections": "Отклонения",
+        "col_reason": "Причина",
+        "no_rejections": "Отклонений нет.",
+        "sig_delivered_by": "Сдающая сторона",
+        "counterparty_tax_id": "ИНН",
+        "counterparty_address": "Адрес"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Черновик",
+          "approved": "Утверждён",
+          "issued": "Выдан",
+          "partially_received": "Получен частично",
+          "completed": "Выполнен",
+          "cancelled": "Отменён"
+        },
+        "gr_status": {
+          "draft": "Черновик",
+          "confirmed": "Подтверждена"
+        },
+        "po_type": {
+          "standard": "Стандартный",
+          "blanket": "Рамочный",
+          "service": "Услуги"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Счёт",
+        "payment_title": "Платёж",
+        "direction": "Тип счёта",
+        "supplier": "Поставщик",
+        "client": "Заказчик",
+        "invoice_date": "Дата счёта",
+        "due_date": "Срок оплаты",
+        "payment_terms": "Условия оплаты",
+        "purchase_order": "Заказ на поставку",
+        "invoice_total": "Сумма счёта",
+        "line_items": "Позиции",
+        "col_no": "№",
+        "col_description": "Наименование",
+        "col_quantity": "Кол-во",
+        "col_unit": "Ед. изм.",
+        "col_unit_rate": "Цена за ед.",
+        "col_vat": "НДС",
+        "col_amount": "Сумма",
+        "no_line_items": "Позиций нет.",
+        "totals": "Итоги",
+        "subtotal": "Сумма без налога",
+        "tax": "Налог",
+        "total_gross": "Всего с налогом",
+        "retention": "Удержание",
+        "amount_due": "К оплате за вычетом удержания",
+        "payments": "Платежи",
+        "col_date": "Дата",
+        "col_reference": "Основание",
+        "col_paid": "Оплачено",
+        "col_withheld": "Удержано",
+        "refund": "Возврат",
+        "no_payments": "Платежей нет.",
+        "notes": "Примечания",
+        "no_notes": "Примечаний нет.",
+        "invoice": "Счёт",
+        "invoice_number": "№ счёта",
+        "payment_date": "Дата платежа",
+        "reference": "Основание",
+        "amount_paid": "Сумма платежа",
+        "exchange_rate": "Курс",
+        "kind": "Вид",
+        "kind_payment": "Оплата",
+        "kind_refund": "Возврат",
+        "withholding": "Удержание",
+        "withheld_amount": "Сумма удержания",
+        "release_date": "Дата возврата удержания",
+        "gross_settled": "Погашено всего",
+        "no_withholding": "Удержаний по этому платежу нет.",
+        "counterparty_tax_id": "ИНН",
+        "counterparty_address": "Адрес"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Черновик",
+          "pending": "На согласовании",
+          "approved": "Утверждён",
+          "sent": "Отправлен",
+          "paid": "Оплачен",
+          "cancelled": "Отменён",
+          "credit_note_issued": "Выставлена кредит-нота"
+        },
+        "direction": {
+          "payable": "Входящий счёт",
+          "receivable": "Исходящий счёт"
+        },
+        "payment_status": {
+          "completed": "Проведён",
+          "refunded": "Возвращён"
+        }
+      }
+    }
   }
 }

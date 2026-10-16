@@ -50,7 +50,7 @@ from app.core.file_signature import (
 from app.core.file_signature import (
     require as require_signature,
 )
-from app.core.party_names import resolve_party_names
+from app.core.party_names import resolve_party_details, resolve_party_names
 from app.core.pdf_appearance import resolve_sections
 from app.core.rate_limiter import approval_limiter
 from app.core.register_context import (
@@ -761,6 +761,7 @@ async def export_invoice_pdf(
         invoice,
         project=project,
         people=await resolve_party_names(session, [invoice.contact_id, invoice.created_by]),
+        parties=await resolve_party_details(session, [invoice.contact_id]),
         purchase_order_number=po_number,
         sections=resolve_sections("invoice"),
         locale=doc_locale,
@@ -793,6 +794,7 @@ async def export_payment_pdf(
         invoice=invoice,
         project=project,
         people=await resolve_party_names(session, [invoice.contact_id]),
+        parties=await resolve_party_details(session, [invoice.contact_id]),
         sections=resolve_sections("payment"),
         locale=doc_locale,
         generated=generated_now(tr(doc_locale, "datetime_format"), project),

@@ -20,7 +20,7 @@ import uuid
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
-from app.core.party_names import resolve_party_names
+from app.core.party_names import resolve_party_details, resolve_party_names
 from app.core.pdf_appearance import resolve_sections
 from app.core.register_context import (
     AcceptLanguageHeader,
@@ -59,6 +59,7 @@ async def export_purchase_order_pdf(
         po,
         project=project,
         people=await resolve_party_names(session, [po.vendor_contact_id, po.created_by]),
+        parties=await resolve_party_details(session, [po.vendor_contact_id]),
         sections=resolve_sections("purchase_order"),
         locale=doc_locale,
         generated=generated_now(tr(doc_locale, "datetime_format"), project),
@@ -86,6 +87,7 @@ async def export_goods_receipt_pdf(
         po=po,
         project=project,
         people=await resolve_party_names(session, [po.vendor_contact_id, receipt.received_by_id]),
+        parties=await resolve_party_details(session, [po.vendor_contact_id]),
         sections=resolve_sections("goods_receipt"),
         locale=doc_locale,
         generated=generated_now(tr(doc_locale, "datetime_format"), project),

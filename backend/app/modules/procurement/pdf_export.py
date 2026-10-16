@@ -28,6 +28,7 @@ from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from app.core.party_names import PartyDetails, party_detail_pairs
 from app.core.register_export import (
     EMPTY,
     ProjectHeader,
@@ -85,11 +86,22 @@ def _percent(value: Any, style: Any) -> str:
     return EMPTY if text == EMPTY else f"{text} %"
 
 
+def _supplier_details(po: Any, parties: Mapping[str, PartyDetails] | None, locale: str) -> list[tuple[str, str]]:
+    """The supplier's tax id and address rows, where the contact has them."""
+    return party_detail_pairs(
+        getattr(po, "vendor_contact_id", None),
+        parties,
+        tr(locale, "counterparty_tax_id"),
+        tr(locale, "counterparty_address"),
+    )
+
+
 def purchase_order_record(
     po: Any,
     *,
     project: ProjectHeader,
     people: Mapping[str, str] | None = None,
+    parties: Mapping[str, PartyDetails] | None = None,
     sections: Mapping[str, bool] | None = None,
     locale: str = DEFAULT_PDF_LOCALE,
     generated: str = "",
@@ -102,6 +114,8 @@ def purchase_order_record(
         project: The owning project.
         people: Display names keyed by ``str(id)``, for the supplier contact
             and the user who prepared the order.
+        parties: The supplier's tax id and address keyed by ``str(id)``, from
+            :func:`app.core.party_names.resolve_party_details`.
         sections: ``{section: printed}`` from
             :func:`app.core.pdf_appearance.resolve_sections`; ``None`` prints
             every section.
@@ -127,6 +141,7 @@ def purchase_order_record(
     grid = grid_rows(
         [
             (tr(locale, "supplier"), supplier),
+            *_supplier_details(po, parties, locale),
             (tr(locale, "po_type"), CATALOGUE.label("po_type", getattr(po, "po_type", None), locale)),
             (tr(locale, "issue_date"), _date("issue_date")),
             (tr(locale, "delivery_date"), _date("delivery_date")),
@@ -260,6 +275,7 @@ def goods_receipt_record(
     po: Any,
     project: ProjectHeader,
     people: Mapping[str, str] | None = None,
+    parties: Mapping[str, PartyDetails] | None = None,
     sections: Mapping[str, bool] | None = None,
     locale: str = DEFAULT_PDF_LOCALE,
     generated: str = "",
@@ -273,6 +289,7 @@ def goods_receipt_record(
         project: The owning project.
         people: Display names keyed by ``str(id)``, for the supplier and the
             person who received the goods.
+        parties: The supplier's tax id and address keyed by ``str(id)``.
         sections: ``{section: printed}``; ``None`` prints every section.
         locale: Document language; unsupported values fall back to English.
         generated: The timestamp printed in the footer.
@@ -293,6 +310,7 @@ def goods_receipt_record(
         [
             (tr(locale, "purchase_order"), po_number or EMPTY),
             (tr(locale, "supplier"), supplier),
+            *_supplier_details(po, parties, locale),
             (tr(locale, "receipt_date"), format_stored_date(getattr(receipt, "receipt_date", None), date_format)),
             (tr(locale, "received_by"), receiver),
             (tr(locale, "delivery_note"), delivery_note or EMPTY),

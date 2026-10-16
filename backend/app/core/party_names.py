@@ -31,7 +31,7 @@ What it deliberately does not do:
 import logging
 import uuid
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, NamedTuple
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -182,3 +182,121 @@ async def resolve_party_names(session: AsyncSession, values: Iterable[str | None
         if raw and name:
             resolved[raw] = name
     return resolved
+
+
+#: Address-line keys in order of preference: ``line1`` (the e-invoice field),
+#: ``street`` (how ``Project.address`` stores it) and ``text`` (the single
+#: unstructured line older contact forms wrote).
+ADDRESS_LINE_KEYS = ("line1", "street", "text")
+
+#: Post code spellings in circulation: ``postcode``, ``postal_code``, ``zip``.
+POSTCODE_KEYS = ("postcode", "postal_code", "zip")
+
+
+class PartyDetails(NamedTuple):
+    """What a printed document says about a counterparty beyond its name."""
+
+    tax_id: str
+    address: str
+
+
+def _first_present(address: dict[str, Any], keys: tuple[str, ...]) -> str:
+    for key in keys:
+        value = address.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def format_party_address(address: Any, country_code: str | None = None) -> str:
+    """One printable line from a contact's address dict: street, post code and city, country.
+
+    Args:
+        address: The stored address, a dict with free key spellings, or anything else.
+        country_code: The contact's ISO country code, printed last when known.
+
+    Returns:
+        The parts that carry a value, joined with commas, or an empty string.
+    """
+    data = address if isinstance(address, dict) else {}
+    line = _first_present(data, ADDRESS_LINE_KEYS)
+    town = " ".join(part for part in (_first_present(data, POSTCODE_KEYS), _first_present(data, ("city",))) if part)
+    if not line and not town:
+        # A country on its own is not an address anyone could post to.
+        return ""
+    country = (country_code or "").strip().upper() or _first_present(data, ("country", "country_code"))
+    return ", ".join(part for part in (line, town, country) if part)
+
+
+async def resolve_party_details(session: AsyncSession, values: Iterable[str | None]) -> dict[str, PartyDetails]:
+    """Map the contact ids among ``values`` onto their tax id and address.
+
+    Only contacts answer: a platform user has neither. Fail-soft like
+    :func:`resolve_party_names`, in its own savepoint, so a missing contacts
+    module costs the details rather than the document.
+
+    Args:
+        session: The caller's session.
+        values: Raw column values; non-ids and blanks are skipped.
+
+    Returns:
+        ``{raw value: PartyDetails}`` for contacts that carry a tax id or an
+        address. A contact with neither is absent.
+    """
+    wanted: dict[str, str] = {}
+    for value in values:
+        text = "" if value is None else str(value).strip()
+        if not text:
+            continue
+        try:
+            wanted[str(uuid.UUID(text))] = text
+        except (AttributeError, TypeError, ValueError):
+            continue
+    if not wanted:
+        return {}
+    try:
+        from app.modules.contacts.models import Contact
+
+        async with session.begin_nested():
+            rows = (
+                await session.execute(
+                    select(Contact.id, Contact.vat_number, Contact.address, Contact.country_code).where(
+                        Contact.id.in_(wanted)
+                    )
+                )
+            ).all()
+    except Exception:
+        logger.debug("Contacts unavailable, party details stay unresolved", exc_info=True)
+        return {}
+    resolved: dict[str, PartyDetails] = {}
+    for row in rows:
+        raw = wanted.get(canonical_id(row[0]))
+        details = PartyDetails(tax_id=(row[1] or "").strip(), address=format_party_address(row[2], row[3]))
+        if raw and (details.tax_id or details.address):
+            resolved[raw] = details
+    return resolved
+
+
+def party_detail_pairs(contact_id: Any, parties: Any, tax_label: str, address_label: str) -> list[tuple[str, str]]:
+    """The tax id and address rows a printed form adds under a counterparty's name.
+
+    Args:
+        contact_id: The counterparty's id as the record stores it.
+        parties: ``{str(id): PartyDetails}`` from :func:`resolve_party_details`, or ``None``.
+        tax_label: The caption for the tax id, in the document language.
+        address_label: The caption for the address, in the document language.
+
+    Returns:
+        Only the rows that carry a value; nothing when the party is unknown.
+    """
+    if contact_id is None or not parties:
+        return []
+    details = parties.get(str(contact_id).strip())
+    if details is None:
+        return []
+    pairs: list[tuple[str, str]] = []
+    if details.tax_id:
+        pairs.append((tax_label, details.tax_id))
+    if details.address:
+        pairs.append((address_label, details.address))
+    return pairs
