@@ -32,8 +32,12 @@ class CorrespondenceRepository:
         direction: str | None = None,
         correspondence_type: str | None = None,
         status: str | None = None,
+        party_clause: object | None = None,
     ) -> tuple[list[Correspondence], int]:
         base = select(Correspondence).where(Correspondence.project_id == project_id)
+        if party_clause is not None:
+            # Party visibility (teams.party_access): narrows to the caller's company.
+            base = base.where(party_clause)
         if direction is not None:
             base = base.where(Correspondence.direction == direction)
         if correspondence_type is not None:

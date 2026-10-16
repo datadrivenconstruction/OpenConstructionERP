@@ -3,6 +3,7 @@
 """RFI data access layer."""
 
 import uuid
+from typing import Any
 
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,8 +32,13 @@ class RFIRepository:
         status: str | None = None,
         search: str | None = None,
         with_total: bool = True,
+        party_clause: Any | None = None,
     ) -> tuple[list[RFI], int]:
         """List a page of RFIs for a project, newest first.
+
+        ``party_clause`` is the caller's party visibility filter (see
+        :func:`app.modules.teams.party_access.party_read_clause`). It narrows
+        the page and the total alike.
 
         PERF: when ``with_total`` is False the ``COUNT(*)`` over the (possibly
         ILIKE-filtered) base query is skipped entirely - that aggregate is a
@@ -43,6 +49,8 @@ class RFIRepository:
         length of the page slice so the tuple shape never changes.
         """
         base = select(RFI).where(RFI.project_id == project_id)
+        if party_clause is not None:
+            base = base.where(party_clause)
         if status is not None:
             base = base.where(RFI.status == status)
 

@@ -53,6 +53,7 @@ from app.modules.submittals.pdf_translations import (
 )
 from app.modules.submittals.schemas import DISCIPLINE_PATTERN, REVIEW_OUTCOME_PATTERN, SUBMITTAL_TYPE_PATTERN
 from app.modules.submittals.service import SubmittalService
+from app.modules.teams.party_access import party_read_clause, verify_record_access
 
 export_router = APIRouter()
 
@@ -151,6 +152,13 @@ async def export_submittal_register(
         approval_late=approval_late,
         sort="submittal_number",
         descending=False,
+        party_clause=await party_read_clause(
+            session,
+            user_id=user_id,
+            entity_type="submittal",
+            id_column=Submittal.id,
+            project_id_column=Submittal.project_id,
+        ),
     )
     project = await load_project_header(session, project_id)
     document = submittal_register(
@@ -179,7 +187,9 @@ async def export_submittal_pdf(
 ) -> StreamingResponse:
     """Download one submittal as a printable PDF form with signature lines."""
     submittal = await SubmittalService(session).get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session, entity_type="submittal", project_id=submittal.project_id, entity_id=submittal.id, user_id=user_id
+    )
     doc_locale = resolve_pdf_locale(locale, accept_language)
     project = await load_project_header(session, submittal.project_id)
     document = submittal_record(

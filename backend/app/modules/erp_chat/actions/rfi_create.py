@@ -268,6 +268,24 @@ class RFICreateSpec(ActionSpec):
         if project_id is None:
             raise ActionConflictError(code="target_missing")
         await ctx.require_project_access(project_id)
+        # Party visibility: an RFI hidden from the caller's company reads as
+        # missing, and a view-only share cannot delete it.
+        from fastapi import HTTPException
+
+        from app.modules.erp_chat.actions.base import error_from_http
+        from app.modules.teams.party_access import verify_party_record_access
+
+        try:
+            await verify_party_record_access(
+                ctx.session,
+                entity_type="rfi",
+                project_id=project_id,
+                entity_id=rfi_id,
+                user_id=ctx.user_id,
+                write=True,
+            )
+        except HTTPException as exc:
+            raise error_from_http(exc) from exc
 
     async def revert(self, ctx: ActionContext, action: ChatAction) -> dict[str, Any] | None:
         from app.modules.rfi.models import RFI

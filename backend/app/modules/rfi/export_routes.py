@@ -39,6 +39,7 @@ from app.modules.rfi.register_export import (
     rfi_register_filename,
 )
 from app.modules.rfi.service import RFIService
+from app.modules.teams.party_access import party_read_clause
 
 export_router = APIRouter()
 
@@ -65,15 +66,13 @@ async def export_rfi_register(
 
     await verify_project_access(project_id, user_id, session)
     doc_locale = resolve_register_locale(locale, accept_language)
-    items = (
-        (
-            await session.execute(
-                select(RFI).where(RFI.project_id == project_id).order_by(RFI.rfi_number).limit(_MAX_REGISTER_ROWS)
-            )
-        )
-        .scalars()
-        .all()
+    stmt = select(RFI).where(RFI.project_id == project_id)
+    party_clause = await party_read_clause(
+        session, user_id=user_id, entity_type="rfi", id_column=RFI.id, project_id_column=RFI.project_id
     )
+    if party_clause is not None:
+        stmt = stmt.where(party_clause)
+    items = (await session.execute(stmt.order_by(RFI.rfi_number).limit(_MAX_REGISTER_ROWS))).scalars().all()
     people = await RFIService(session).user_display_names(
         [value for item in items for value in (item.raised_by, item.assigned_to, item.ball_in_court)]
     )

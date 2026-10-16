@@ -23,7 +23,7 @@ import secrets
 import uuid
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -371,8 +371,14 @@ class TransmittalService:
 
     # ── Read ───────────────────────────────────────────────────────────
 
-    async def list_for_project(self, project_id: uuid.UUID) -> list[FileTransmittal]:
-        """Newest-first transmittal list for a project."""
+    async def list_for_project(
+        self, project_id: uuid.UUID, *, party_clause: Any | None = None
+    ) -> list[FileTransmittal]:
+        """Newest-first transmittal list for a project.
+
+        ``party_clause`` (from :func:`app.modules.teams.party_access.party_read_clause`)
+        narrows the list to the transmittals the caller's party may see.
+        """
         stmt = (
             select(FileTransmittal)
             .where(FileTransmittal.project_id == project_id)
@@ -382,6 +388,8 @@ class TransmittalService:
             )
             .order_by(FileTransmittal.created_at.desc())
         )
+        if party_clause is not None:
+            stmt = stmt.where(party_clause)
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def get(self, transmittal_id: uuid.UUID) -> FileTransmittal:
@@ -463,6 +471,17 @@ class TransmittalService:
         )
         self.session.add(transmittal)
         await self.session.flush()
+        # Same transaction as the insert: the sender's company is the
+        # originator, so an external sender can open what they created.
+        from app.modules.teams.party_access import stamp_originator
+
+        await stamp_originator(
+            self.session,
+            entity_type="file_transmittal",
+            project_id=data.project_id,
+            entity_id=transmittal.id,
+            user_id=sender_uuid,
+        )
 
         for idx, it in enumerate(data.items):
             self.session.add(

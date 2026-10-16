@@ -32,6 +32,7 @@ from app.core.register_context import (
     register_download,
 )
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.teams.party_access import party_read_clause, verify_record_access
 from app.modules.transmittals.models import Transmittal
 from app.modules.transmittals.pdf_export import transmittal_record, transmittal_register
 from app.modules.transmittals.pdf_translations import (
@@ -65,12 +66,20 @@ async def export_transmittal_register(
     """Download the transmittal register of a project as a workbook or a PDF."""
     await verify_project_access(project_id, user_id, session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    stmt = select(Transmittal).where(Transmittal.project_id == project_id)
+    party_clause = await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="transmittal",
+        id_column=Transmittal.id,
+        project_id_column=Transmittal.project_id,
+    )
+    if party_clause is not None:
+        stmt = stmt.where(party_clause)
     items = (
         (
             await session.execute(
-                select(Transmittal)
-                .where(Transmittal.project_id == project_id)
-                .options(selectinload(Transmittal.recipients), selectinload(Transmittal.items))
+                stmt.options(selectinload(Transmittal.recipients), selectinload(Transmittal.items))
                 .order_by(Transmittal.transmittal_number)
                 .limit(_MAX_REGISTER_ROWS)
             )
@@ -109,7 +118,13 @@ async def export_transmittal_pdf(
     ).scalar_one_or_none()
     if transmittal is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Transmittal not found")
-    await verify_project_access(transmittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="transmittal",
+        project_id=transmittal.project_id,
+        entity_id=transmittal.id,
+        user_id=user_id,
+    )
     doc_locale = resolve_pdf_locale(locale, accept_language)
     project = await load_project_header(session, transmittal.project_id)
     document = transmittal_record(

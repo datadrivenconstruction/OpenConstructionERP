@@ -21,6 +21,8 @@ import uuid
 from fastapi import APIRouter, Depends, Query
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.teams.party_access import party_read_clause, verify_record_access
+from app.modules.transmittals.models import Transmittal
 from app.modules.transmittals.schemas import (
     AcknowledgeRequest,
     RecipientCreate,
@@ -46,6 +48,18 @@ def _get_service(session: SessionDep) -> TransmittalService:
     return TransmittalService(session)
 
 
+async def _verify_record(session: SessionDep, item: Transmittal, user_id: str | None, *, write: bool = False) -> None:
+    """Project access plus party visibility for one transmittal (404 when hidden)."""
+    await verify_record_access(
+        session,
+        entity_type="transmittal",
+        project_id=item.project_id,
+        entity_id=item.id,
+        user_id=str(user_id) if user_id else None,
+        write=write,
+    )
+
+
 # ── List ────────────────────────────────────────────────────────────────────
 
 
@@ -65,11 +79,19 @@ async def list_transmittals(
 ) -> TransmittalListResponse:
     """List transmittals for a project."""
     await verify_project_access(project_id, user_id, session)
+    party_clause = await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="transmittal",
+        id_column=Transmittal.id,
+        project_id_column=Transmittal.project_id,
+    )
     items, total = await service.list_transmittals(
         project_id,
         transmittal_status=status,
         offset=offset,
         limit=limit,
+        party_clause=party_clause,
     )
     return TransmittalListResponse(
         items=[TransmittalResponse.model_validate(t) for t in items],
@@ -116,7 +138,7 @@ async def get_transmittal(
 ) -> TransmittalResponse:
     """Get a single transmittal by ID."""
     transmittal = await service.get_transmittal(transmittal_id)
-    await verify_project_access(transmittal.project_id, str(user_id), session)
+    await _verify_record(session, transmittal, user_id)
     return TransmittalResponse.model_validate(transmittal)
 
 
@@ -137,7 +159,7 @@ async def update_transmittal(
 ) -> TransmittalResponse:
     """Update a transmittal (fails if locked after issue)."""
     existing = await service.get_transmittal(transmittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     transmittal = await service.update_transmittal(transmittal_id, data)
     return TransmittalResponse.model_validate(transmittal)
 
@@ -158,7 +180,7 @@ async def delete_transmittal(
 ) -> None:
     """Delete a draft transmittal. Issued ones return 409."""
     existing = await service.get_transmittal(transmittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     await service.delete_transmittal(transmittal_id)
 
 
@@ -181,7 +203,7 @@ async def issue_transmittal(
     Needs at least one recipient and one document, otherwise returns 422.
     """
     existing = await service.get_transmittal(transmittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     transmittal = await service.issue_transmittal(transmittal_id)
     return TransmittalResponse.model_validate(transmittal)
 
@@ -204,7 +226,7 @@ async def add_recipient(
 ) -> RecipientResponse:
     """Add one recipient to a draft transmittal (blocked once issued)."""
     existing = await service.get_transmittal(transmittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     recipient = await service.add_recipient(transmittal_id, data)
     return RecipientResponse.model_validate(recipient)
 
@@ -223,7 +245,7 @@ async def remove_recipient(
 ) -> None:
     """Remove a recipient from a draft transmittal (blocked once issued)."""
     existing = await service.get_transmittal(transmittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     await service.remove_recipient(transmittal_id, recipient_id)
 
 
@@ -245,7 +267,8 @@ async def acknowledge_receipt(
 ) -> RecipientResponse:
     """Acknowledge receipt of a transmittal."""
     existing = await service.get_transmittal(transmittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    # Acknowledging receipt confirms the recipient saw it; read access is enough.
+    await _verify_record(session, existing, user_id)
     recipient = await service.acknowledge_receipt(transmittal_id, recipient_id)
     return RecipientResponse.model_validate(recipient)
 
@@ -268,6 +291,6 @@ async def submit_response(
 ) -> RecipientResponse:
     """Submit a response to a transmittal."""
     existing = await service.get_transmittal(transmittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     recipient = await service.submit_response(transmittal_id, recipient_id, data.response)
     return RecipientResponse.model_validate(recipient)

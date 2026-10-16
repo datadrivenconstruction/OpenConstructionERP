@@ -3,6 +3,7 @@
 """Submittals data access layer."""
 
 import uuid
+from typing import Any
 
 from sqlalchemy import Select, and_, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
@@ -110,9 +111,13 @@ class SubmittalRepository:
         long_lead: bool | None = None,
         sort: str | None = None,
         descending: bool = True,
+        party_clause: Any | None = None,
     ) -> tuple[list[Submittal], int]:
+        scoped = select(Submittal).where(Submittal.project_id == project_id)
+        if party_clause is not None:
+            scoped = scoped.where(party_clause)
         base = register_filters(
-            select(Submittal).where(Submittal.project_id == project_id),
+            scoped,
             status=status,
             submittal_type=submittal_type,
             discipline=discipline,
@@ -140,6 +145,7 @@ class SubmittalRepository:
         long_lead: bool | None = None,
         sort: str | None = "submittal_number",
         descending: bool = False,
+        party_clause: Any | None = None,
     ) -> list[Submittal]:
         """Every submittal of a project that passes the stored filters, unpaged.
 
@@ -147,9 +153,15 @@ class SubmittalRepository:
         review, approval needed-by passed, the summary): those figures are
         worked out in Python from the stored dates, because the dates are
         strings and casting them in SQL fails on the first malformed one.
+
+        ``party_clause`` (from :func:`app.modules.teams.party_access.party_read_clause`)
+        narrows the rows to those the caller's party may see.
         """
+        scoped = select(Submittal).where(Submittal.project_id == project_id)
+        if party_clause is not None:
+            scoped = scoped.where(party_clause)
         stmt = register_filters(
-            select(Submittal).where(Submittal.project_id == project_id),
+            scoped,
             status=status,
             submittal_type=submittal_type,
             discipline=discipline,

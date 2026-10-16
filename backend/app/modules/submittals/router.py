@@ -54,6 +54,7 @@ from app.modules.approval_routes.schemas import (
     StepStateResponse,
 )
 from app.modules.approval_routes.service import ApprovalRouteService
+from app.modules.submittals.models import Submittal
 from app.modules.submittals.schemas import (
     DISCIPLINE_PATTERN,
     REVIEW_OUTCOME_PATTERN,
@@ -68,6 +69,7 @@ from app.modules.submittals.schemas import (
 )
 from app.modules.submittals.service import SubmittalService
 from app.modules.submittals.tracking import track
+from app.modules.teams.party_access import party_read_clause, verify_record_access
 
 router = APIRouter(tags=["submittals"])
 
@@ -283,6 +285,13 @@ async def list_submittals(
     ``review_overdue`` and ``approval_late`` are measured as of today.
     """
     await verify_project_access(project_id, user_id, session)
+    party_clause = await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="submittal",
+        id_column=Submittal.id,
+        project_id_column=Submittal.project_id,
+    )
     submittals, _ = await service.list_submittals(
         project_id,
         offset=offset,
@@ -297,6 +306,7 @@ async def list_submittals(
         approval_late=approval_late,
         sort=sort,
         descending=order == "desc",
+        party_clause=party_clause,
     )
     name_map = await _name_map(session, submittals)
     return [_to_response(s, name_map) for s in submittals]
@@ -328,7 +338,9 @@ async def get_submittal(
     service: SubmittalService = Depends(_get_service),
 ) -> SubmittalResponse:
     submittal = await service.get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session, entity_type="submittal", project_id=submittal.project_id, entity_id=submittal.id, user_id=user_id
+    )
     name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 
@@ -343,7 +355,14 @@ async def update_submittal(
     service: SubmittalService = Depends(_get_service),
 ) -> SubmittalResponse:
     existing = await service.get_submittal(submittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=existing.project_id,
+        entity_id=existing.id,
+        user_id=user_id,
+        write=True,
+    )
     submittal = await service.update_submittal(submittal_id, data)
     name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
@@ -358,7 +377,14 @@ async def delete_submittal(
     service: SubmittalService = Depends(_get_service),
 ) -> None:
     existing = await service.get_submittal(submittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=existing.project_id,
+        entity_id=existing.id,
+        user_id=user_id,
+        write=True,
+    )
     await service.delete_submittal(submittal_id)
 
 
@@ -377,7 +403,9 @@ async def validate_submittal(
     is where to look first rather than where the problem is discovered.
     """
     existing = await service.get_submittal(submittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await verify_record_access(
+        session, entity_type="submittal", project_id=existing.project_id, entity_id=existing.id, user_id=user_id
+    )
     return await service.validate_submittal(submittal_id)
 
 
@@ -391,7 +419,14 @@ async def submit_submittal(
 ) -> SubmittalResponse:
     """Move a submittal from draft to submitted."""
     existing = await service.get_submittal(submittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=existing.project_id,
+        entity_id=existing.id,
+        user_id=user_id,
+        write=True,
+    )
     submittal = await service.submit_submittal(submittal_id)
     name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
@@ -420,7 +455,14 @@ async def review_submittal(
     ``submittals.update`` permission alone is not sufficient.
     """
     existing = await service.get_submittal(submittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=existing.project_id,
+        entity_id=existing.id,
+        user_id=user_id,
+        write=True,
+    )
     submittal = await service.review_submittal(
         submittal_id,
         body.status,
@@ -460,7 +502,14 @@ async def approve_submittal(
             "Rate limit exceeded. Try again later.",
         )
     existing = await service.get_submittal(submittal_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=existing.project_id,
+        entity_id=existing.id,
+        user_id=user_id,
+        write=True,
+    )
     submittal = await service.approve_submittal(
         submittal_id,
         approver_id=user_id,
@@ -518,7 +567,14 @@ async def start_submittal_approval(
     on the same submittal with 409.
     """
     submittal = await service.get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=submittal.project_id,
+        entity_id=submittal.id,
+        user_id=user_id,
+        write=True,
+    )
     instance = await service.start_approval(submittal_id, body.route_id, started_by=user_id)
     return await _instance_to_response(instance, ApprovalRouteService(session))
 
@@ -536,7 +592,9 @@ async def get_submittal_approval(
 ) -> InstanceResponse | None:
     """Return the latest approval instance on a submittal, or null if none."""
     submittal = await service.get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session, entity_type="submittal", project_id=submittal.project_id, entity_id=submittal.id, user_id=user_id
+    )
     instance = await service.get_latest_approval(submittal_id)
     if instance is None:
         return None
@@ -586,7 +644,9 @@ async def list_submittal_attachments(
 ) -> list[AttachmentResponse]:
     """List attachments linked to a submittal."""
     submittal = await service.get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session, entity_type="submittal", project_id=submittal.project_id, entity_id=submittal.id, user_id=user_id
+    )
     meta = dict(getattr(submittal, "metadata_", {}) or {})
     attachments_raw = meta.get("attachments", [])
     if not isinstance(attachments_raw, list):
@@ -640,7 +700,14 @@ async def upload_submittal_attachment(
     # project access never causes us to touch the disk or learn whether
     # the submittal exists.
     submittal = await service.get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=submittal.project_id,
+        entity_id=submittal.id,
+        user_id=user_id,
+        write=True,
+    )
 
     # Reject closed submittals - they're terminal and should not accept
     # late attachments. ``draft`` and the active FSM states are fine.
@@ -780,7 +847,14 @@ async def add_submittal_attachment(
         raise HTTPException(status_code=404, detail=translate("errors.document_not_found", locale=get_locale()))
 
     submittal = await service.get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=submittal.project_id,
+        entity_id=submittal.id,
+        user_id=user_id,
+        write=True,
+    )
     meta = dict(getattr(submittal, "metadata_", {}) or {})
     attachments: list[dict] = list(meta.get("attachments", []) or [])
 
@@ -826,7 +900,14 @@ async def remove_submittal_attachment(
     ``DELETE /api/documents/{id}`` for that.
     """
     submittal = await service.get_submittal(submittal_id)
-    await verify_project_access(submittal.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="submittal",
+        project_id=submittal.project_id,
+        entity_id=submittal.id,
+        user_id=user_id,
+        write=True,
+    )
     meta = dict(getattr(submittal, "metadata_", {}) or {})
     attachments: list[dict] = list(meta.get("attachments", []) or [])
 

@@ -1203,6 +1203,9 @@ _GUARD_WRAPPERS = frozenset(
         # economics.router: the one place a handler gets its EconomicsService. It awaits
         # verify_project_access(project_id, user_id, session) before it returns the service.
         "_economics_svc",
+        # teams.party_access: the by-id guard of the six shared registers. It awaits
+        # verify_project_access on the record's project, then narrows by project party.
+        "verify_record_access",
     }
 )
 

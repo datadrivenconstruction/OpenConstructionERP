@@ -82,6 +82,7 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildCorrespondenceInsights } from './correspondenceInsights';
 import { fmtList } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
+import { RecordPartiesPanel } from '@/features/teams/RecordPartiesPanel';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -1164,6 +1165,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({
       {/* Expanded detail */}
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
+          <RecordPartiesPanel projectId={item.project_id} entityType="correspondence" entityId={item.id} />
           <div className="flex items-center gap-4 text-xs text-content-tertiary flex-wrap">
             <span className="inline-flex items-center gap-1">
               {t('correspondence.label_from', { defaultValue: 'From' })}:{' '}

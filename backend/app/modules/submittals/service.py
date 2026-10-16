@@ -187,6 +187,17 @@ class SubmittalService:
                     submittal_number,
                 )
                 continue
+            # Same transaction as the insert: an external creator whose stamp
+            # failed would create a submittal their own company cannot open.
+            from app.modules.teams.party_access import stamp_originator
+
+            await stamp_originator(
+                self.session,
+                entity_type="submittal",
+                project_id=data.project_id,
+                entity_id=submittal.id,
+                user_id=user_id,
+            )
             logger.info(
                 "Submittal created: %s (%s) for project %s",
                 submittal_number,
@@ -245,6 +256,7 @@ class SubmittalService:
         sort: str | None = None,
         descending: bool = True,
         as_of: str | None = None,
+        party_clause: Any | None = None,
     ) -> tuple[list[Submittal], int]:
         """List a project's submittals, filtered and ordered.
 
@@ -263,10 +275,18 @@ class SubmittalService:
         }
         if review_overdue is None and approval_late is None:
             return await self.repo.list_for_project(
-                project_id, offset=offset, limit=limit, sort=sort, descending=descending, **stored
+                project_id,
+                offset=offset,
+                limit=limit,
+                sort=sort,
+                descending=descending,
+                party_clause=party_clause,
+                **stored,
             )
         today = as_of or self._today()
-        rows = await self.repo.register_rows(project_id, sort=sort, descending=descending, **stored)
+        rows = await self.repo.register_rows(
+            project_id, sort=sort, descending=descending, party_clause=party_clause, **stored
+        )
         kept = []
         for row in rows:
             figures = track(row, today)
@@ -284,10 +304,20 @@ class SubmittalService:
 
         return datetime.now(UTC).date().isoformat()
 
-    async def register_summary(self, project_id: uuid.UUID, *, as_of: str | None = None) -> dict[str, Any]:
-        """The counts shown above a project's register, as of today."""
+    async def register_summary(
+        self,
+        project_id: uuid.UUID,
+        *,
+        as_of: str | None = None,
+        party_clause: Any | None = None,
+    ) -> dict[str, Any]:
+        """The counts shown above a project's register, as of today.
+
+        ``party_clause`` limits the counts to the submittals the caller's party
+        may see, so the summary cannot disclose records the list hides.
+        """
         today = as_of or self._today()
-        rows = await self.repo.register_rows(project_id)
+        rows = await self.repo.register_rows(project_id, party_clause=party_clause)
         return {"project_id": project_id, "as_of": today, **summarise(rows, today)}
 
     async def update_submittal(

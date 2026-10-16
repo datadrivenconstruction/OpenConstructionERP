@@ -29,8 +29,13 @@ async def global_search(
     query: str,
     project_id: str | None = None,
     limit: int = 20,
+    user_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Search across all modules using ILIKE text matching.
+
+    ``user_id`` applies party visibility to the shared registers it searches
+    (RFIs): a caller bound to an external project party only finds the
+    records their company originated or received.
 
     Each result is a dict with keys:
         module, type, id, title, subtitle, url, score
@@ -162,6 +167,13 @@ async def global_search(
         )
         if project_id:
             stmt = stmt.where(RFI.project_id == project_id)
+        from app.modules.teams.party_access import party_read_clause
+
+        party_clause = await party_read_clause(
+            session, user_id=user_id, entity_type="rfi", id_column=RFI.id, project_id_column=RFI.project_id
+        )
+        if party_clause is not None:
+            stmt = stmt.where(party_clause)
         stmt = stmt.limit(limit)
         rows = (await session.execute(stmt)).scalars().all()
         for row in rows:

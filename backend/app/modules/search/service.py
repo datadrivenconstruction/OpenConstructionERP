@@ -947,6 +947,76 @@ async def _sql_search_collection_raw(
     return []
 
 
+#: Collections whose rows are shared-register records under party visibility,
+#: mapped to the record kind :mod:`app.modules.teams.party_access` knows them by.
+_PARTY_SCOPED_COLLECTIONS: dict[str, str] = {
+    COLLECTION_RFI: "rfi",
+    COLLECTION_SUBMITTALS: "submittal",
+    COLLECTION_CORRESPONDENCE: "correspondence",
+}
+
+
+async def _drop_party_hidden_hits(
+    session: AsyncSession,
+    rankings: list[list[VectorHit]],
+    collections: list[str],
+    user_id: str | None,
+) -> list[list[VectorHit]]:
+    """Remove hits on shared-register records the caller's party may not see.
+
+    Applies to both tracks, because the vector index knows nothing about
+    parties and the SQL track only fences by project. ``rankings`` is aligned
+    with ``collections``. A hit with no project id cannot be checked, so it is
+    dropped when the caller is bound to any party, and so is every hit of a
+    scoped collection when the lookup fails (fail closed).
+    """
+    if user_id is None or not any(c in _PARTY_SCOPED_COLLECTIONS for c in collections):
+        return list(rankings)
+
+    from app.modules.teams.models import ProjectPartyMember
+    from app.modules.teams.party_access import party_hidden_ids
+
+    out: list[list[VectorHit]] = []
+    for collection, ranking in zip(collections, rankings, strict=False):
+        entity_type = _PARTY_SCOPED_COLLECTIONS.get(collection)
+        if entity_type is None or not ranking:
+            out.append(list(ranking))
+            continue
+        try:
+            uid = _coerce_uuid(str(user_id))
+            if uid is None:
+                out.append([])
+                continue
+            bound = (
+                await session.execute(select(ProjectPartyMember.id).where(ProjectPartyMember.user_id == uid).limit(1))
+            ).scalar_one_or_none()
+            if bound is None:
+                out.append(list(ranking))
+                continue
+            by_project: dict[uuid.UUID, list[str]] = {}
+            for hit in ranking:
+                pid = _coerce_uuid(getattr(hit, "project_id", "") or None)
+                if pid is not None:
+                    by_project.setdefault(pid, []).append(hit.id)
+            hidden: set[tuple[uuid.UUID, str]] = set()
+            for pid, ids in by_project.items():
+                for entity_id in await party_hidden_ids(
+                    session, project_id=pid, entity_type=entity_type, entity_ids=ids, user_id=uid
+                ):
+                    hidden.add((pid, entity_id))
+            kept: list[VectorHit] = []
+            for hit in ranking:
+                pid = _coerce_uuid(getattr(hit, "project_id", "") or None)
+                if pid is None or (pid, str(hit.id)) in hidden:
+                    continue
+                kept.append(hit)
+            out.append(kept)
+        except Exception:  # noqa: BLE001 - fail closed on a shared register
+            logger.exception("party filter failed for %s search hits; dropping them", collection)
+            out.append([])
+    return out
+
+
 def _filter_vector_hits_by_access(
     rankings: list[list[VectorHit]],
     allowed_project_ids: set[uuid.UUID] | None,
@@ -1043,6 +1113,11 @@ async def unified_search_service(
                 logger.debug("_sql_search_collection(%s) failed: %s", collection, exc)
                 hits = []
             sql_rankings.append(hits)
+
+        # Party visibility on shared registers (RFI, submittals,
+        # correspondence): both tracks, for single- and cross-project runs.
+        sql_rankings = await _drop_party_hidden_hits(session, sql_rankings, chosen, user_id)
+        vector_rankings = await _drop_party_hidden_hits(session, list(vector_rankings), chosen, user_id)
 
     # Apply the same access fence to the vector track. For a single
     # authorised project_id the vector layer already filtered on the

@@ -31,6 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.content_disposition import attachment_disposition
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.file_transmittals.models import FileTransmittal
 from app.modules.file_transmittals.schemas import (
     TransmittalAcknowledgeResponse,
     TransmittalCreate,
@@ -42,6 +43,7 @@ from app.modules.file_transmittals.schemas import (
     TransmittalResponse,
 )
 from app.modules.file_transmittals.service import TransmittalService
+from app.modules.teams.party_access import party_read_clause, verify_record_access
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +67,28 @@ async def _require_project_access(session: AsyncSession, project_id: uuid.UUID, 
     from app.dependencies import verify_project_access
 
     await verify_project_access(project_id, user_id, session)
+
+
+async def _require_record_access(
+    session: AsyncSession,
+    transmittal,  # noqa: ANN001
+    user_id: str,
+    *,
+    write: bool = False,
+) -> None:
+    """Project access plus party visibility for one transmittal (404 when hidden).
+
+    ``write=True`` answers 403 to a party that holds the transmittal through a
+    view-only share.
+    """
+    await verify_record_access(
+        session,
+        entity_type="file_transmittal",
+        project_id=transmittal.project_id,
+        entity_id=transmittal.id,
+        user_id=user_id,
+        write=write,
+    )
 
 
 def _to_list_item(transmittal) -> TransmittalListItem:  # noqa: ANN001
@@ -140,7 +164,14 @@ async def list_transmittals(
 ) -> list[TransmittalListItem]:
     """List transmittals for one project, newest first."""
     await _require_project_access(session, project_id, user_id)
-    rows = await service.list_for_project(project_id)
+    party_clause = await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="file_transmittal",
+        id_column=FileTransmittal.id,
+        project_id_column=FileTransmittal.project_id,
+    )
+    rows = await service.list_for_project(project_id, party_clause=party_clause)
     return [_to_list_item(t) for t in rows]
 
 
@@ -181,7 +212,7 @@ async def get_transmittal(
 ) -> TransmittalResponse:
     """Load full transmittal payload (items + recipients)."""
     transmittal = await service.get(transmittal_id)
-    await _require_project_access(session, transmittal.project_id, user_id)
+    await _require_record_access(session, transmittal, user_id)
     return _to_response(transmittal)
 
 
@@ -206,7 +237,7 @@ async def send_transmittal(
     endpoint masks the token.
     """
     transmittal = await service.get(transmittal_id)
-    await _require_project_access(session, transmittal.project_id, user_id)
+    await _require_record_access(session, transmittal, user_id, write=True)
     transmittal = await service.send(transmittal_id)
     return _to_response(transmittal, mask_tokens=False)
 
@@ -229,7 +260,7 @@ async def add_item(
 ) -> TransmittalItemResponse:
     """Append an item to a transmittal."""
     transmittal = await service.get(transmittal_id)
-    await _require_project_access(session, transmittal.project_id, user_id)
+    await _require_record_access(session, transmittal, user_id, write=True)
     row = await service.add_item(transmittal_id, data)
     return TransmittalItemResponse.model_validate(row)
 
@@ -248,7 +279,7 @@ async def remove_item(
 ) -> Response:
     """Remove an item from a transmittal."""
     transmittal = await service.get(transmittal_id)
-    await _require_project_access(session, transmittal.project_id, user_id)
+    await _require_record_access(session, transmittal, user_id, write=True)
     await service.remove_item(transmittal_id, item_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -271,7 +302,7 @@ async def add_recipient(
 ) -> TransmittalRecipientResponse:
     """Append a recipient (idempotent on email)."""
     transmittal = await service.get(transmittal_id)
-    await _require_project_access(session, transmittal.project_id, user_id)
+    await _require_record_access(session, transmittal, user_id, write=True)
     row = await service.add_recipient(transmittal_id, data)
     return TransmittalRecipientResponse(
         id=row.id,
@@ -327,7 +358,7 @@ async def download_cover(
 ) -> Response:
     """Return the cover sheet bytes (PDF or TXT depending on availability)."""
     transmittal = await service.get(transmittal_id)
-    await _require_project_access(session, transmittal.project_id, user_id)
+    await _require_record_access(session, transmittal, user_id)
     data, media_type = await service.read_cover(transmittal_id)
     ext = "pdf" if media_type == "application/pdf" else "txt"
     safe_number = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in (transmittal.number or "transmittal"))

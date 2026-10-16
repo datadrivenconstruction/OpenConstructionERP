@@ -40,6 +40,7 @@ from app.modules.correspondence.pdf_translations import (
     tr,
 )
 from app.modules.correspondence.service import CorrespondenceService
+from app.modules.teams.party_access import party_read_clause, verify_record_access
 
 export_router = APIRouter()
 
@@ -62,15 +63,18 @@ async def export_correspondence_register(
     """Download the correspondence log of a project as a workbook or a PDF."""
     await verify_project_access(project_id, user_id, session)
     doc_locale = resolve_pdf_locale(locale, accept_language)
+    stmt = select(Correspondence).where(Correspondence.project_id == project_id)
+    party_clause = await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="correspondence",
+        id_column=Correspondence.id,
+        project_id_column=Correspondence.project_id,
+    )
+    if party_clause is not None:
+        stmt = stmt.where(party_clause)
     items = (
-        (
-            await session.execute(
-                select(Correspondence)
-                .where(Correspondence.project_id == project_id)
-                .order_by(Correspondence.reference_number)
-                .limit(_MAX_REGISTER_ROWS)
-            )
-        )
+        (await session.execute(stmt.order_by(Correspondence.reference_number).limit(_MAX_REGISTER_ROWS)))
         .scalars()
         .all()
     )
@@ -97,7 +101,13 @@ async def export_correspondence_pdf(
 ) -> StreamingResponse:
     """Download one piece of correspondence as a printable PDF record."""
     item = await CorrespondenceService(session).get_correspondence(correspondence_id)
-    await verify_project_access(item.project_id, str(user_id), session)
+    await verify_record_access(
+        session,
+        entity_type="correspondence",
+        project_id=item.project_id,
+        entity_id=item.id,
+        user_id=user_id,
+    )
     doc_locale = resolve_pdf_locale(locale, accept_language)
     project = await load_project_header(session, item.project_id)
     document = correspondence_record(

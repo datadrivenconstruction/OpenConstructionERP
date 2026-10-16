@@ -57,12 +57,19 @@ class TransmittalRepository:
         status: str | None = None,
         limit: int = 50,
         offset: int = 0,
+        party_clause: object | None = None,
     ) -> tuple[list[Transmittal], int]:
         """List transmittals for a project with optional status filter.
+
+        ``party_clause`` is the party visibility filter from
+        :func:`app.modules.teams.party_access.party_read_clause`; it narrows
+        both the page and the total.
 
         Returns (transmittals, total_count).
         """
         base = select(Transmittal).where(Transmittal.project_id == project_id)
+        if party_clause is not None:
+            base = base.where(party_clause)
 
         if status is not None:
             base = base.where(Transmittal.status == status)

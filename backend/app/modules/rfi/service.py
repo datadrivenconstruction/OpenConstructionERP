@@ -29,6 +29,7 @@ from app.core.json_merge import merge_metadata
 from app.modules.rfi.models import RFI
 from app.modules.rfi.repository import RFIRepository
 from app.modules.rfi.schemas import RFICreate, RFIStatsResponse, RFIUpdate
+from app.modules.teams.party_access import stamp_originator
 
 logger = logging.getLogger(__name__)
 _logger_ev = logging.getLogger(__name__ + ".events")
@@ -184,6 +185,15 @@ class RFIService:
                 last_exc = exc
                 await self.session.rollback()
                 continue
+            # Same transaction as the insert: an external creator whose
+            # company is not stamped as originator could not open the RFI.
+            await stamp_originator(
+                self.session,
+                entity_type="rfi",
+                project_id=data.project_id,
+                entity_id=rfi.id,
+                user_id=user_id,
+            )
             logger.info(
                 "rfi.created",
                 extra={
@@ -252,6 +262,7 @@ class RFIService:
         status_filter: str | None = None,
         search: str | None = None,
         with_total: bool = True,
+        party_clause: Any | None = None,
     ) -> tuple[list[RFI], int]:
         return await self.repo.list_for_project(
             project_id,
@@ -260,6 +271,7 @@ class RFIService:
             status=status_filter,
             search=search,
             with_total=with_total,
+            party_clause=party_clause,
         )
 
     async def update_rfi(
@@ -836,11 +848,12 @@ class RFIService:
         )
         return fresh or rfi
 
-    async def get_stats(self, project_id: uuid.UUID) -> RFIStatsResponse:
+    async def get_stats(self, project_id: uuid.UUID, *, party_clause: Any | None = None) -> RFIStatsResponse:
         """Compute summary statistics for all RFIs in a project.
 
         Returns total, open, overdue counts, average response time,
-        and cost/schedule impact counts.
+        and cost/schedule impact counts. ``party_clause`` narrows the
+        counted rows to the caller's party visibility.
         """
         from sqlalchemy import select
 
@@ -851,9 +864,10 @@ class RFIService:
         # When the cap is hit the numbers are still useful (open /
         # overdue / impact counts on the most recent slice) and large
         # tenants get sub-second p99 instead of a full table scan.
-        base = (
-            select(RFI).where(RFI.project_id == project_id).order_by(RFI.created_at.desc()).limit(_RFI_STATS_SCAN_CAP)
-        )
+        base = select(RFI).where(RFI.project_id == project_id)
+        if party_clause is not None:
+            base = base.where(party_clause)
+        base = base.order_by(RFI.created_at.desc()).limit(_RFI_STATS_SCAN_CAP)
         result = await self.session.execute(base)
         rfis = list(result.scalars().all())
 

@@ -18,6 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
+from app.modules.teams.party_access import stamp_originator
 from app.modules.transmittals.logic import (
     RESPONDABLE_STATUSES,
     STATUS_ISSUED,
@@ -179,6 +180,16 @@ class TransmittalService:
                 ),
             ) from last_exc
 
+        # The creator's company becomes the originator, in the same transaction
+        # as the insert (no-op on a project without parties).
+        await stamp_originator(
+            self.session,
+            entity_type="transmittal",
+            project_id=data.project_id,
+            entity_id=transmittal.id,
+            user_id=user_id,
+        )
+
         # Add recipients
         for r in data.recipients:
             recipient = TransmittalRecipient(
@@ -227,6 +238,7 @@ class TransmittalService:
         transmittal_status: str | None = None,
         limit: int = 50,
         offset: int = 0,
+        party_clause: object | None = None,
     ) -> tuple[list[Transmittal], int]:
         """List transmittals for a project."""
         return await self.repo.list_by_project(
@@ -234,6 +246,7 @@ class TransmittalService:
             status=transmittal_status,
             limit=limit,
             offset=offset,
+            party_clause=party_clause,
         )
 
     # ── Update ────────────────────────────────────────────────────────────

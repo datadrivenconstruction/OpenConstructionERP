@@ -418,6 +418,7 @@ async def _retrieve_relevant_chunks(
     project_id: str | None,
     *,
     limit: int = 12,
+    user_id: str | None = None,
 ) -> str:
     """Pull top-K semantic hits from the unified search layer.
 
@@ -433,6 +434,7 @@ async def _retrieve_relevant_chunks(
 
         response = await unified_search_service(
             query=question,
+            user_id=user_id,
             project_id=project_id,
             limit_per_collection=4,
             final_limit=limit,
@@ -460,6 +462,7 @@ async def answer_question(
     question: str,
     role: str = "estimator",
     language: str = "en",
+    user_id: str | None = None,
 ) -> str:
     """Answer a user question about the project.
 
@@ -470,6 +473,8 @@ async def answer_question(
         question: User's question.
         role: User role.
         language: Response language.
+        user_id: The asking user, so retrieved context respects their
+            party visibility on shared registers.
 
     Returns:
         Answer text.
@@ -486,7 +491,7 @@ async def answer_question(
             # genuine RAG agent - answers stay anchored in real evidence
             # instead of hallucinating from the structured project state alone.
             project_id = str(getattr(state, "project_id", "")) or None
-            rag_context = await _retrieve_relevant_chunks(question, project_id)
+            rag_context = await _retrieve_relevant_chunks(question, project_id, user_id=user_id)
             prompt_parts = [f"Project context:\n{context}"]
             if rag_context:
                 prompt_parts.append(rag_context)

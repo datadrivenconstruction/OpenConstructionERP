@@ -18,6 +18,7 @@ import { InlinePdfPreviewModal } from '@/features/file-references/InlinePdfPrevi
 import { downloadTransmittalCover } from './api';
 import { useTransmittal } from './hooks';
 import type { TransmittalItem, TransmittalRecipient } from './types';
+import { RecordPartiesPanel } from '@/features/teams/RecordPartiesPanel';
 
 // English fallbacks for the computed `files.transmittals.reason.*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -157,6 +158,11 @@ export function TransmittalDetailDrawer({
 
           {data && (
             <>
+              <RecordPartiesPanel
+                projectId={data.project_id}
+                entityType="file_transmittal"
+                entityId={data.id}
+              />
               <section>
                 <h3 className="text-xs font-semibold text-content-secondary uppercase mb-2">
                   {t('files.transmittals.items', { defaultValue: 'Items' })}

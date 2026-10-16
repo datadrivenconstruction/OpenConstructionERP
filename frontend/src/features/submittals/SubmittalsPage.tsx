@@ -105,6 +105,7 @@ import {
 import { submittalsGuide } from './submittalsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildSubmittalsInsights } from './submittalsInsights';
+import { RecordPartiesPanel } from '@/features/teams/RecordPartiesPanel';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -806,6 +807,7 @@ const SubmittalRow = React.memo(function SubmittalRow({
       {/* Expanded detail */}
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
+          <RecordPartiesPanel projectId={submittal.project_id} entityType="submittal" entityId={submittal.id} />
           {submittal.description && (
             <div className="rounded-lg bg-surface-secondary p-3">
               <p className="text-xs text-content-tertiary mb-1 font-medium uppercase tracking-wide">

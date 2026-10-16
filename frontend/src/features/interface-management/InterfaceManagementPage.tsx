@@ -64,6 +64,7 @@ import {
 } from './api';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildInterfaceManagementInsights } from './interfaceManagementInsights';
+import { RecordPartiesPanel } from '@/features/teams/RecordPartiesPanel';
 
 /* -- Vocabulary display maps ---------------------------------------------- */
 
@@ -1115,6 +1116,8 @@ const InterfaceRow = React.memo(function InterfaceRow({
             onSetStatus={onSetActionStatus}
             isPending={actionPending}
           />
+
+          <RecordPartiesPanel projectId={iface.project_id} entityType="interface" entityId={iface.id} />
 
           <div className="flex items-center gap-2 pt-1">
             <Button variant="secondary" size="sm" onClick={() => onEdit(iface)} icon={<Pencil size={14} />}>

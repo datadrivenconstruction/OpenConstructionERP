@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import or_, select
@@ -130,14 +130,21 @@ class InterfaceManagementService:
         work_package: str | None = None,
         interface_type: str | None = None,
         priority: str | None = None,
+        party_clause: Any | None = None,
     ) -> list[InterfaceRecord]:
         """List a project's interfaces with optional filters.
 
         ``work_package`` matches an interface touching that package on either
         side (``work_package_from`` or ``work_package_to``), so a coordinator can
         pull every interface a package is involved in with one query.
+
+        ``party_clause`` is the caller's party visibility filter
+        (:func:`app.modules.teams.party_access.party_read_clause`); it can only
+        remove rows.
         """
         stmt = select(InterfaceRecord).where(InterfaceRecord.project_id == project_id)
+        if party_clause is not None:
+            stmt = stmt.where(party_clause)
         if interface_status is not None:
             stmt = stmt.where(InterfaceRecord.status == interface_status)
         if owner_subcontractor_id is not None:
@@ -233,6 +240,7 @@ class InterfaceManagementService:
         *,
         interface_id: uuid.UUID | None = None,
         action_status: str | None = None,
+        party_clause: Any | None = None,
     ) -> list[InterfaceAction]:
         """List a project's actions with optional interface / status filters.
 
@@ -242,6 +250,9 @@ class InterfaceManagementService:
         if interface_id is not None:
             await self._require_interface_in_project(project_id, interface_id)
         stmt = select(InterfaceAction).where(InterfaceAction.project_id == project_id)
+        if party_clause is not None:
+            # An action is visible exactly when its interface is.
+            stmt = stmt.where(InterfaceAction.interface_id.in_(select(InterfaceRecord.id).where(party_clause)))
         if interface_id is not None:
             stmt = stmt.where(InterfaceAction.interface_id == interface_id)
         if action_status is not None:
@@ -287,10 +298,11 @@ class InterfaceManagementService:
         self,
         project_id: uuid.UUID,
         as_of: date | None = None,
+        party_clause: Any | None = None,
     ) -> dict:
         """Full interface register rollup for a project."""
         as_of = as_of or datetime.now(UTC).date()
-        interfaces = [_to_interface_row(r) for r in await self.list_interfaces(project_id)]
+        interfaces = [_to_interface_row(r) for r in await self.list_interfaces(project_id, party_clause=party_clause)]
         report = register.build_report(interfaces, as_of=as_of)
         payload = report.to_dict()
         payload["project_id"] = str(project_id)
@@ -300,10 +312,11 @@ class InterfaceManagementService:
         self,
         project_id: uuid.UUID,
         as_of: date | None = None,
+        party_clause: Any | None = None,
     ) -> dict:
         """Per-work-package health plus the overdue and disputed interface lists."""
         as_of = as_of or datetime.now(UTC).date()
-        interfaces = [_to_interface_row(r) for r in await self.list_interfaces(project_id)]
+        interfaces = [_to_interface_row(r) for r in await self.list_interfaces(project_id, party_clause=party_clause)]
         packages = register.work_package_health(interfaces, as_of)
         overdue = register.overdue_interfaces(interfaces, as_of)
         disputed = register.disputed_interfaces(interfaces)

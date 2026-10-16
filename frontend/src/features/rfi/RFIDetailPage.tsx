@@ -46,6 +46,7 @@ import {
   EmptyState,
 } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { RecordPartiesPanel } from '@/features/teams/RecordPartiesPanel';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { useToastStore } from '@/stores/useToastStore';
@@ -987,6 +988,10 @@ export function RFIDetailPage() {
             targetId={rfi.id}
             projectId={rfi.project_id}
           />
+
+          {/* Which companies hold this RFI (project parties). Renders nothing
+              on a project without parties. */}
+          <RecordPartiesPanel projectId={rfi.project_id} entityType="rfi" entityId={rfi.id} />
 
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-3">

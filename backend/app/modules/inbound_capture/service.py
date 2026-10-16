@@ -197,6 +197,17 @@ async def capture_message(
     # collision (concurrent capture). Mirror the Correspondence service's retry
     # so a parallel POST does not 500 on the unique (project, reference) index.
     row = await _create_with_retry(session, repo, row, project_id)
+    # Same originator stamp as the Correspondence service's create path: a
+    # message captured by a member of a project party belongs to that party.
+    from app.modules.teams.party_access import stamp_originator
+
+    await stamp_originator(
+        session,
+        entity_type="correspondence",
+        project_id=project_id,
+        entity_id=row.id,
+        user_id=created_by,
+    )
 
     # Reuse the EXACT event the Correspondence service publishes on create so
     # the vector indexer / comms digest treat a captured message like any other

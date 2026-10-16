@@ -40,4 +40,4 @@ async def search(
     """
     if not q.strip():
         return []
-    return await global_search(session, query=q, project_id=project_id, limit=limit)
+    return await global_search(session, query=q, project_id=project_id, limit=limit, user_id=_user_id)

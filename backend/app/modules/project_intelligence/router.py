@@ -307,6 +307,7 @@ async def chat(
         question=body.question,
         role=body.role,
         language=body.language,
+        user_id=user_id,
     )
 
     return {"text": text, "question": body.question}

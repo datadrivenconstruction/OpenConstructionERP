@@ -73,6 +73,7 @@ import {
 } from '@/features/cde/api';
 import { transmittalsGuide } from './transmittalsGuide';
 import { buildTransmittalsInsights } from './transmittalsInsights';
+import { RecordPartiesPanel } from '@/features/teams/RecordPartiesPanel';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -579,6 +580,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
       {/* Expanded detail */}
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
+          <RecordPartiesPanel projectId={transmittal.project_id} entityType="transmittal" entityId={transmittal.id} />
           {/* Cover note */}
           {transmittal.cover_note && (
             <div className="rounded-lg bg-surface-secondary p-3">

@@ -14,6 +14,7 @@ from app.core.json_merge import merge_metadata
 from app.modules.correspondence.models import Correspondence
 from app.modules.correspondence.repository import CorrespondenceRepository
 from app.modules.correspondence.schemas import CorrespondenceCreate, CorrespondenceUpdate
+from app.modules.teams.party_access import stamp_originator
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +95,15 @@ class CorrespondenceService:
                     reference_number,
                 )
                 continue
+            # The creator's company becomes the originator, in the same
+            # transaction as the insert (no-op on a project without parties).
+            await stamp_originator(
+                self.session,
+                entity_type="correspondence",
+                project_id=data.project_id,
+                entity_id=correspondence.id,
+                user_id=user_id,
+            )
             # PII discipline: log only structural fields (ref number, direction,
             # type, project id). Subject and notes can contain personal data -
             # legal names, addresses, allegations - and structured-log sinks
@@ -150,6 +160,7 @@ class CorrespondenceService:
         direction: str | None = None,
         correspondence_type: str | None = None,
         status: str | None = None,
+        party_clause: object | None = None,
     ) -> tuple[list[Correspondence], int]:
         return await self.repo.list_for_project(
             project_id,
@@ -158,6 +169,7 @@ class CorrespondenceService:
             direction=direction,
             correspondence_type=correspondence_type,
             status=status,
+            party_clause=party_clause,
         )
 
     async def update_correspondence(

@@ -24,6 +24,7 @@ from fastapi import APIRouter, Depends, Query
 
 from app.core.register_context import AcceptLanguageHeader, LocaleQuery
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.submittals.models import Submittal
 from app.modules.submittals.pdf_translations import CATALOGUE, resolve_pdf_locale
 from app.modules.submittals.schemas import (
     SUBMITTAL_SORT_FIELDS,
@@ -36,6 +37,7 @@ from app.modules.submittals.schemas import (
 )
 from app.modules.submittals.service import SubmittalService
 from app.modules.submittals.tracking import DEFAULT_REVIEW_CODES, DISCIPLINES, REVIEW_OUTCOMES
+from app.modules.teams.party_access import party_read_clause
 
 register_router = APIRouter()
 
@@ -56,7 +58,14 @@ async def get_register_summary(
 ) -> SubmittalRegisterSummary:
     """Counts above a project's submittal register, as of today."""
     await verify_project_access(project_id, user_id, session)
-    data = await SubmittalService(session).register_summary(project_id)
+    party_clause = await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="submittal",
+        id_column=Submittal.id,
+        project_id_column=Submittal.project_id,
+    )
+    data = await SubmittalService(session).register_summary(project_id, party_clause=party_clause)
     return SubmittalRegisterSummary(
         project_id=project_id,
         as_of=data["as_of"],

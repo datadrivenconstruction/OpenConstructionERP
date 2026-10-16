@@ -14,6 +14,10 @@ permission, and ``verify_project_access`` (which raises 404 on both "missing" an
 read or mutate another project's interface data. Any referenced ``interface_id``
 is additionally re-checked in the service layer against the same project, so an
 action can never be attached across projects.
+
+Party visibility narrows every read and write after the project check: a member
+bound to an external project party reaches only the interfaces their party
+originated or received (and their actions); anything else is 404.
 """
 
 from __future__ import annotations
@@ -29,6 +33,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.interface_management.models import InterfaceRecord
 from app.modules.interface_management.register import (
     ALL_ACTION_STATUSES,
     ALL_INTERFACE_STATUSES,
@@ -46,6 +51,11 @@ from app.modules.interface_management.schemas import (
     WorkPackageHealthReportResponse,
 )
 from app.modules.interface_management.service import InterfaceManagementService
+from app.modules.teams.party_access import (
+    party_read_clause,
+    stamp_originator,
+    verify_party_record_access,
+)
 
 router = APIRouter(tags=["interface-management"])
 
@@ -55,6 +65,41 @@ _WRITE = Depends(RequirePermission("interface_management.write"))
 
 def _get_service(session: SessionDep) -> InterfaceManagementService:
     return InterfaceManagementService(session)
+
+
+# Party visibility (see docs/specs/project-party-visibility.md): an external
+# party sees only the interfaces it originated or that were shared with it, and
+# an action is visible exactly when its interface is. Every read below narrows
+# after ``verify_project_access``; a hidden interface answers 404.
+_PARTY_KEY = "interface"
+
+
+async def _party_clause(session: SessionDep, user_id: str | None):  # noqa: ANN202 - SQL clause or None
+    return await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type=_PARTY_KEY,
+        id_column=InterfaceRecord.id,
+        project_id_column=InterfaceRecord.project_id,
+    )
+
+
+async def _check_interface(
+    session: SessionDep,
+    project_id: uuid.UUID,
+    interface_id: uuid.UUID,
+    user_id: str | None,
+    *,
+    write: bool = False,
+) -> None:
+    await verify_party_record_access(
+        session,
+        entity_type=_PARTY_KEY,
+        project_id=project_id,
+        entity_id=interface_id,
+        user_id=user_id,
+        write=write,
+    )
 
 
 def _validate_filter(value: str | None, allowed: tuple[str, ...], field: str) -> str | None:
@@ -100,7 +145,11 @@ async def create_interface(
     """Create an interface on a project."""
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
-    return await service.create_interface(project_id, payload, created_by=user_id)  # type: ignore[return-value]
+    interface = await service.create_interface(project_id, payload, created_by=user_id)
+    await stamp_originator(
+        session, entity_type=_PARTY_KEY, project_id=project_id, entity_id=interface.id, user_id=user_id
+    )
+    return interface  # type: ignore[return-value]
 
 
 @router.get(
@@ -131,6 +180,7 @@ async def list_interfaces(
         work_package=work_package,
         interface_type=interface_type,
         priority=priority,
+        party_clause=await _party_clause(session, user_id),
     )
 
 
@@ -148,7 +198,9 @@ async def get_interface(
     """Get one interface, scoped to the project (404 if missing/foreign)."""
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
-    return await service.require_interface(project_id, interface_id)  # type: ignore[return-value]
+    interface = await service.require_interface(project_id, interface_id)
+    await _check_interface(session, project_id, interface_id, user_id)
+    return interface  # type: ignore[return-value]
 
 
 @router.patch(
@@ -165,6 +217,7 @@ async def update_interface(
 ) -> InterfaceResponse:
     """Patch an interface (only provided fields change)."""
     await verify_project_access(project_id, user_id, session)
+    await _check_interface(session, project_id, interface_id, user_id, write=True)
     service = _get_service(session)
     return await service.update_interface(project_id, interface_id, payload)  # type: ignore[return-value]
 
@@ -182,6 +235,7 @@ async def delete_interface(
 ) -> None:
     """Delete an interface and its actions (404 if missing/foreign)."""
     await verify_project_access(project_id, user_id, session)
+    await _check_interface(session, project_id, interface_id, user_id, write=True)
     service = _get_service(session)
     await service.delete_interface(project_id, interface_id)
 
@@ -204,6 +258,7 @@ async def create_action(
 ) -> InterfaceActionResponse:
     """Add an action to an interface (service re-verifies the interface in-project)."""
     await verify_project_access(project_id, user_id, session)
+    await _check_interface(session, project_id, interface_id, user_id, write=True)
     service = _get_service(session)
     return await service.create_action(project_id, interface_id, payload, created_by=user_id)  # type: ignore[return-value]
 
@@ -223,11 +278,14 @@ async def list_actions(
     """List a project's actions, optionally filtered by interface / status."""
     await verify_project_access(project_id, user_id, session)
     action_status = _validate_filter(action_status, ALL_ACTION_STATUSES, "status")
+    if interface_id is not None:
+        await _check_interface(session, project_id, interface_id, user_id)
     service = _get_service(session)
     return await service.list_actions(  # type: ignore[return-value]
         project_id,
         interface_id=interface_id,
         action_status=action_status,
+        party_clause=await _party_clause(session, user_id),
     )
 
 
@@ -246,6 +304,8 @@ async def update_action(
     """Patch (or close) an action (only provided fields change)."""
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
+    action = await service.require_action(project_id, action_id)
+    await _check_interface(session, project_id, action.interface_id, user_id, write=True)
     return await service.update_action(project_id, action_id, payload)  # type: ignore[return-value]
 
 
@@ -266,7 +326,9 @@ async def get_register(
     """Full interface register rollup: counts, agreement, overdue, disputes, health."""
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
-    return await service.build_register(project_id, as_of=_parse_as_of(as_of))  # type: ignore[return-value]
+    return await service.build_register(  # type: ignore[return-value]
+        project_id, as_of=_parse_as_of(as_of), party_clause=await _party_clause(session, user_id)
+    )
 
 
 @router.get(
@@ -283,4 +345,6 @@ async def get_work_package_health(
     """Per-work-package health plus the overdue and disputed interface lists."""
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
-    return await service.get_work_package_health(project_id, as_of=_parse_as_of(as_of))  # type: ignore[return-value]
+    return await service.get_work_package_health(  # type: ignore[return-value]
+        project_id, as_of=_parse_as_of(as_of), party_clause=await _party_clause(session, user_id)
+    )

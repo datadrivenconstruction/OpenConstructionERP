@@ -67,6 +67,7 @@ from app.modules.rfi.schemas import (
     StartApprovalRequest,
 )
 from app.modules.rfi.service import RFIService
+from app.modules.teams.party_access import party_read_clause, verify_party_record_access
 
 router = APIRouter(tags=["rfi"])
 
@@ -102,6 +103,36 @@ ATTACHMENTS_DIR = module_uploads_dir("rfi", "attachments")
 
 def _get_service(session: SessionDep) -> RFIService:
     return RFIService(session)
+
+
+async def _verify_rfi_access(session: SessionDep, rfi: object, user_id: str | None, *, write: bool) -> None:
+    """Project access, then party visibility, for one RFI (404 when hidden).
+
+    ``write`` refuses a record the caller's company holds through a view-only
+    share with 403.
+    """
+    await verify_project_access(rfi.project_id, str(user_id), session)  # type: ignore[attr-defined]
+    await verify_party_record_access(
+        session,
+        entity_type="rfi",
+        project_id=rfi.project_id,  # type: ignore[attr-defined]
+        entity_id=rfi.id,  # type: ignore[attr-defined]
+        user_id=user_id,
+        write=write,
+    )
+
+
+async def _rfi_party_clause(session: SessionDep, user_id: str | None) -> object | None:
+    """The caller's party visibility filter on RFIs, or ``None`` when unfiltered."""
+    from app.modules.rfi.models import RFI
+
+    return await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="rfi",
+        id_column=RFI.id,
+        project_id_column=RFI.project_id,
+    )
 
 
 def _compute_rfi_fields(item: object) -> tuple[bool, int]:
@@ -226,6 +257,7 @@ async def list_rfis(
         status_filter=status_filter,
         search=search,
         with_total=True,
+        party_clause=await _rfi_party_clause(session, user_id),
     )
     return RFIListResponse(
         items=[_to_response(r) for r in rfis],
@@ -265,7 +297,7 @@ async def rfi_stats(
     Computes total, open, overdue, avg response time, and breakdown by status.
     """
     await verify_project_access(project_id, user_id, session)
-    return await service.get_stats(project_id)
+    return await service.get_stats(project_id, party_clause=await _rfi_party_clause(session, user_id))
 
 
 @router.get(
@@ -290,9 +322,11 @@ async def export_rfi_log(
     from app.modules.rfi.intl import localize_status
     from app.modules.rfi.models import RFI
 
-    result = await session.execute(
-        select(RFI).where(RFI.project_id == project_id).order_by(RFI.rfi_number).limit(50000)
-    )
+    stmt = select(RFI).where(RFI.project_id == project_id)
+    party_clause = await _rfi_party_clause(session, _user)
+    if party_clause is not None:
+        stmt = stmt.where(party_clause)
+    result = await session.execute(stmt.order_by(RFI.rfi_number).limit(50000))
     items = result.scalars().all()
 
     # The row holds people as ids, and the log used to print them that way: a
@@ -474,7 +508,12 @@ async def batch_delete_rfis(
     )
     owned_project_ids = {str(p.id) for p in owned_projects}
 
-    rows = (await session.execute(_select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids)))).all()
+    # A record hidden from the caller's party is treated as if it did not exist.
+    stmt = _select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids))
+    party_clause = await _rfi_party_clause(session, user_id)
+    if party_clause is not None:
+        stmt = stmt.where(party_clause)
+    rows = (await session.execute(stmt)).all()
     allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
 
     deleted = await bulk_delete(session, RFI, allowed)
@@ -529,7 +568,12 @@ async def batch_update_rfi_status(
     )
     owned_project_ids = {str(p.id) for p in owned_projects}
 
-    rows = (await session.execute(_select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids)))).all()
+    # A record hidden from the caller's party is treated as if it did not exist.
+    stmt = _select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids))
+    party_clause = await _rfi_party_clause(session, user_id)
+    if party_clause is not None:
+        stmt = stmt.where(party_clause)
+    rows = (await session.execute(stmt)).all()
     allowed_ids = [r[0] for r in rows if str(r[1]) in owned_project_ids]
 
     updated = await bulk_update_status(session, RFI, allowed_ids, body.status, allowed_statuses=allowed_statuses)
@@ -555,7 +599,7 @@ async def get_rfi(
 ) -> RFIResponse:
     """Get a single RFI."""
     rfi = await service.get_rfi(rfi_id)
-    await verify_project_access(rfi.project_id, str(user_id), session)
+    await _verify_rfi_access(session, rfi, user_id, write=False)
     return _to_response(rfi)
 
 
@@ -584,7 +628,7 @@ async def export_rfi_pdf(
     the body is actually in.
     """
     rfi = await service.get_rfi(rfi_id)
-    await verify_project_access(rfi.project_id, str(user_id), session)
+    await _verify_rfi_access(session, rfi, user_id, write=False)
     pdf_locale = resolve_pdf_locale(locale, accept_language)
     pdf_bytes, rfi_number = await service.generate_rfi_pdf(rfi_id, locale=pdf_locale)
     return StreamingResponse(
@@ -619,7 +663,7 @@ async def update_rfi(
     body fields without manager intervention.
     """
     existing = await service.get_rfi(rfi_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_rfi_access(session, existing, user_id, write=True)
     rfi = await service.update_rfi(
         rfi_id,
         data,
@@ -639,7 +683,7 @@ async def delete_rfi(
 ) -> None:
     """Delete an RFI."""
     existing = await service.get_rfi(rfi_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_rfi_access(session, existing, user_id, write=True)
     await service.delete_rfi(rfi_id, actor_id=str(user_id) if user_id else None)
 
 
@@ -661,7 +705,7 @@ async def respond_to_rfi(
     fine-grained identity check happens inside ``service.respond_to_rfi``.
     """
     existing = await service.get_rfi(rfi_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_rfi_access(session, existing, user_id, write=True)
     rfi = await service.respond_to_rfi(
         rfi_id,
         body.official_response,
@@ -695,7 +739,7 @@ async def create_variation_from_rfi(
     Pre-fills the change order with the RFI's subject, question, and cost impact value.
     """
     rfi = await service.get_rfi(rfi_id)
-    await verify_project_access(rfi.project_id, str(user_id), session)
+    await _verify_rfi_access(session, rfi, user_id, write=True)
     # Row lock shared with app.modules.changeorders.events, which drafts the
     # same change order when the RFI is answered. Both sides take it before
     # reading change_order_id, so whichever runs second sees the first one's
@@ -835,7 +879,7 @@ async def close_rfi(
     (MANAGER) because closing is a terminal state.
     """
     existing = await service.get_rfi(rfi_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_rfi_access(session, existing, user_id, write=True)
     rfi = await service.close_rfi(rfi_id, closed_by=user_id)
     return _to_response(rfi)
 
@@ -884,7 +928,7 @@ async def start_rfi_approval(
     the same RFI with 409.
     """
     rfi = await service.get_rfi(rfi_id)
-    await verify_project_access(rfi.project_id, str(user_id), session)
+    await _verify_rfi_access(session, rfi, user_id, write=True)
     instance = await service.start_approval(rfi_id, body.route_id, started_by=user_id)
     return await _instance_to_response(instance, ApprovalRouteService(session))
 
@@ -902,7 +946,7 @@ async def get_rfi_approval(
 ) -> InstanceResponse | None:
     """Return the latest approval instance on an RFI, or null if none."""
     rfi = await service.get_rfi(rfi_id)
-    await verify_project_access(rfi.project_id, str(user_id), session)
+    await _verify_rfi_access(session, rfi, user_id, write=False)
     instance = await service.get_latest_approval(rfi_id)
     if instance is None:
         return None
@@ -944,7 +988,7 @@ async def get_rfi_activity(
     missing. The count at least lets the timeline say there is more.
     """
     existing = await service.get_rfi(rfi_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_rfi_access(session, existing, user_id, write=False)
     rows = await get_activity_for_entity(
         session,
         entity_type="rfi",
@@ -990,7 +1034,7 @@ async def upload_rfi_attachment(
     # IDOR gate first - never read the body for a caller that can't see
     # the project.
     existing = await service.get_rfi(rfi_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_rfi_access(session, existing, user_id, write=True)
 
     try:
         content = await file.read()
@@ -1111,7 +1155,7 @@ async def download_rfi_attachment(
     upload feature had no read path.
     """
     existing = await service.get_rfi(rfi_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_rfi_access(session, existing, user_id, write=False)
 
     attachments = list(getattr(existing, "attachments", None) or [])
     if index < 0 or index >= len(attachments):

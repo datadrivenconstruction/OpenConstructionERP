@@ -7,7 +7,7 @@
  * the access-control model it implements was unreachable on every real
  * deployment. This page is that way in.
  *
- * Four tabs, answering the questions an operations lead actually asks:
+ * Five tabs, answering the questions an operations lead actually asks:
  *
  *   People         Who is on this job at all - staff, subcontractor gangs and
  *                  the client side, most of whom will never hold a login. This
@@ -15,6 +15,10 @@
  *                  what", and until it existed the module could only describe
  *                  the small minority of a site that signs in.
  *   Teams          Who is grouped how, and what does each group cover.
+ *   Companies      Which companies take part (project parties), and which
+ *                  member belongs to which. A bound member of a company other
+ *                  than the owner's sees only their company's records in the
+ *                  shared registers (see PartiesTab).
  *   Restricted     Which records are not open to the whole project, and can
  *                  anyone still read them.
  *   Who sees what  Per person, how much of the restricted material they still
@@ -84,10 +88,11 @@ import {
   type TeamsValidationFinding,
 } from './api';
 import { RosterTab } from './RosterTab';
+import { PartiesTab } from './PartiesTab';
 import { fmtList } from '@/shared/lib/formatters';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
 
-type TabId = 'people' | 'teams' | 'restricted' | 'matrix';
+type TabId = 'people' | 'teams' | 'parties' | 'restricted' | 'matrix';
 
 /** Read a backend `detail` off a failed request, falling back to the message. */
 function errorDetail(err: unknown, fallback: string): string {
@@ -1027,6 +1032,7 @@ export function TeamsPage() {
   const tabs: { id: TabId; label: string }[] = [
     { id: 'people', label: t('teams.tab_people', 'People on the project') },
     { id: 'teams', label: t('teams.tab_teams', 'Teams') },
+    { id: 'parties', label: t('teams.tab_parties', 'Companies (parties)') },
     { id: 'restricted', label: t('teams.tab_restricted', 'Restricted records') },
     { id: 'matrix', label: t('teams.tab_matrix', 'Who sees what') },
   ];
@@ -1072,6 +1078,7 @@ export function TeamsPage() {
           </div>
           {tab === 'people' ? <RosterTab projectId={projectId} /> : null}
           {tab === 'teams' ? <TeamsTab projectId={projectId} /> : null}
+          {tab === 'parties' ? <PartiesTab projectId={projectId} /> : null}
           {tab === 'restricted' ? <RestrictedTab projectId={projectId} /> : null}
           {tab === 'matrix' ? <MatrixTab projectId={projectId} /> : null}
         </div>

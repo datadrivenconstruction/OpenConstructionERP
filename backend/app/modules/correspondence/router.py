@@ -37,6 +37,7 @@ from app.core.storage import contained_upload_candidates, module_uploads_dir
 # correspondence attachments are PDFs, images, and Office docs (ZIP/OLE).
 ALLOWED_ATTACHMENT_TYPES = frozenset({"pdf", "png", "jpeg", "gif", "webp", "zip", "ole"})
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.correspondence.models import Correspondence
 from app.modules.correspondence.schemas import (
     CorrespondenceCreate,
     CorrespondenceListResponse,
@@ -44,6 +45,7 @@ from app.modules.correspondence.schemas import (
     CorrespondenceUpdate,
 )
 from app.modules.correspondence.service import CorrespondenceService
+from app.modules.teams.party_access import party_read_clause, verify_record_access
 
 router = APIRouter(tags=["correspondence"])
 
@@ -68,6 +70,20 @@ ATTACHMENTS_DIR = module_uploads_dir("correspondence", "attachments")
 
 def _get_service(session: SessionDep) -> CorrespondenceService:
     return CorrespondenceService(session)
+
+
+async def _verify_record(
+    session: SessionDep, item: Correspondence, user_id: str | None, *, write: bool = False
+) -> None:
+    """Project access plus party visibility for one correspondence item (404 when hidden)."""
+    await verify_record_access(
+        session,
+        entity_type="correspondence",
+        project_id=item.project_id,
+        entity_id=item.id,
+        user_id=str(user_id) if user_id else None,
+        write=write,
+    )
 
 
 def _compute_correspondence_fields(item: object) -> tuple[bool, int | None]:
@@ -147,6 +163,13 @@ async def list_correspondences(
     complete log from a truncated one.
     """
     await verify_project_access(project_id, user_id, session)
+    party_clause = await party_read_clause(
+        session,
+        user_id=user_id,
+        entity_type="correspondence",
+        id_column=Correspondence.id,
+        project_id_column=Correspondence.project_id,
+    )
     items, total = await service.list_correspondences(
         project_id,
         offset=offset,
@@ -154,6 +177,7 @@ async def list_correspondences(
         direction=direction,
         correspondence_type=type_filter,
         status=status_filter,
+        party_clause=party_clause,
     )
     return CorrespondenceListResponse(
         items=[_to_response(c) for c in items],
@@ -185,7 +209,7 @@ async def get_correspondence(
     service: CorrespondenceService = Depends(_get_service),
 ) -> CorrespondenceResponse:
     correspondence = await service.get_correspondence(correspondence_id)
-    await verify_project_access(correspondence.project_id, str(user_id), session)
+    await _verify_record(session, correspondence, user_id)
     return _to_response(correspondence)
 
 
@@ -199,7 +223,7 @@ async def update_correspondence(
     service: CorrespondenceService = Depends(_get_service),
 ) -> CorrespondenceResponse:
     existing = await service.get_correspondence(correspondence_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     correspondence = await service.update_correspondence(correspondence_id, data)
     return _to_response(correspondence)
 
@@ -213,7 +237,7 @@ async def delete_correspondence(
     service: CorrespondenceService = Depends(_get_service),
 ) -> None:
     existing = await service.get_correspondence(correspondence_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
     await service.delete_correspondence(correspondence_id)
 
 
@@ -249,7 +273,7 @@ async def upload_attachment(
     # caller without access to the project never causes us to read the
     # body, hit the disk, or learn whether the correspondence exists.
     existing = await service.get_correspondence(correspondence_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id, write=True)
 
     try:
         content = await file.read()
@@ -354,7 +378,7 @@ async def download_attachment(
     symlink) before streaming, mirroring the Documents photo-serve gate.
     """
     existing = await service.get_correspondence(correspondence_id)
-    await verify_project_access(existing.project_id, str(user_id), session)
+    await _verify_record(session, existing, user_id)
 
     attachments = list(getattr(existing, "attachments", None) or [])
     if index < 0 or index >= len(attachments):
