@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '18.6.3',
+    date: '2026-10-16',
+    tag: 'NEW',
+    summary:
+      'Requests come in types with their own numbering, deadlines, required fields and approval route, interfaces keep a status history and an approval route, and suppliers announce deliveries with their material certificates through the portal. Requisitions are approved and ordered once, forms print in Arabic, Hebrew, Persian and Urdu, the academy videos are in the platform, and the rebar schedule says what to import.',
+  },
+  {
     version: '18.6.2',
     date: '2026-10-15',
     tag: 'FIX',

@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [18.6.3] - 2026-10-16
+
+### Added
+
+- The request register handles more than RFIs. Each project keeps a catalogue of request types, added by hand or loaded from one of two preset sets, general construction or EPC and oil and gas with technical and vendor queries among others. Every type has its own numbering, response time, required fields and default approval route, a new request picks its type, and the list shows and filters by type. Existing requests stay RFIs.
+- Interface management keeps the full status history of every interface, routes interface agreements through an approval route, checks that linked records exist and shows how long each interface has been open. Nobody can approve an interface agreement they raised themselves.
+- Material requisitions are approved by a named approver and turned into one purchase order with the BOQ positions they came from, so a line cannot be ordered twice.
+- Supply chain from order to site. An order line can require a material certificate such as EN 10204 3.1 or ask for an inspection, suppliers announce deliveries through the portal and upload their certificates, and the site confirms the goods receipt against them. A missing certificate or a failed inspection opens a follow-up instead of passing silently.
+- Procurement and finance forms print in Arabic, Hebrew, Persian and Urdu, with joined letters and right-to-left lines in reading order.
+- Every public academy video is in the platform, as a library with series and languages and as short links from the screens they explain.
+- The rebar schedule says what to import: BVBS ABS files from rebar detailing software, what is read from them and which project they land in, with a sample file to preview or download.
+
+### Fixed
+
+- Project team members reach the property development data of their project, not only its owner.
+- The author of an estimate can delete it whatever their role.
+- A CAD import that comes without quantities says so instead of looking finished.
+- Procurement and finance PDFs are translated and print the counterparty's tax id and address.
+
 ## [18.6.2] - 2026-10-15
 
 ### Fixed
