@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_serializer, field_validator
 
 # Upper bound for client-supplied money - a finite-but-absurd claimed_amount
 # (e.g. 1e400) otherwise sums into gross and reaches retention quantize() ->
@@ -661,6 +661,136 @@ class PortalAgreementSummaryList(BaseModel):
     total: int = 0
 
 
+# ── Supplier deliveries (BF-01) ──────────────────────────────────────────────
+#
+# A supplier with ``submit`` access to a purchase order (resource type ``po``)
+# submits a delivery: the delivery note, the quantity per line and the
+# certificates that came with the material. It becomes a DRAFT goods receipt
+# that site staff confirm; nothing a supplier submits is applied by itself.
+
+
+class PortalPOLine(BaseModel):
+    """One order line as the supplier sees it."""
+
+    id: UUID
+    description: str
+    unit: str | None = None
+    quantity_ordered: str = "0"
+    quantity_received: str = "0"
+    required_certificate_type: str | None = None
+    requires_inspection: bool = False
+
+
+class PortalPurchaseOrderEntry(BaseModel):
+    """A purchase order shared with the supplier."""
+
+    id: UUID
+    po_number: str
+    status: str
+    delivery_date: str | None = None
+    currency_code: str = ""
+    can_deliver: bool = False
+    lines: list[PortalPOLine] = Field(default_factory=list)
+
+
+class PortalCertificateType(BaseModel):
+    """A certificate type the supplier may send, from the procurement catalogue."""
+
+    code: str
+    label: str
+
+
+class PortalPurchaseOrderList(BaseModel):
+    """Purchase orders the portal user may see, with the certificate types a line may need."""
+
+    items: list[PortalPurchaseOrderEntry] = Field(default_factory=list)
+    total: int = 0
+    certificate_types: list[PortalCertificateType] = Field(default_factory=list)
+
+
+class PortalDeliveryCertificate(BaseModel):
+    """A material certificate the supplier sends with a delivery line."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    certificate_type: str = Field(..., min_length=1, max_length=40)
+    certificate_number: str = Field(default="", max_length=100)
+    issuer: str | None = Field(default=None, max_length=255)
+    issue_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    document_id: UUID | None = None
+    batch_number: str | None = Field(default=None, max_length=100)
+
+    @field_validator("certificate_type")
+    @classmethod
+    def _known_type(cls, v: str) -> str:
+        from app.modules.procurement.certificates import is_known_type
+
+        if not is_known_type(v):
+            raise ValueError(f"Unknown certificate type: {v!r}")
+        return v
+
+
+class PortalDeliveryLine(BaseModel):
+    """The quantity of one order line in the delivery."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    po_item_id: UUID
+    quantity: Decimal = Field(..., ge=0, le=_MONEY_MAX)
+    batch_lot: str | None = Field(default=None, max_length=100)
+    certificates: list[PortalDeliveryCertificate] = Field(default_factory=list, max_length=20)
+
+
+class PortalDeliverySubmit(BaseModel):
+    """A delivery the supplier submits against one purchase order."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    po_id: UUID
+    delivery_note_number: str = Field(..., min_length=1, max_length=100)
+    delivery_date: date
+    delivery_note_document_id: UUID | None = None
+    notes: str | None = Field(default=None, max_length=2000)
+    lines: list[PortalDeliveryLine] = Field(..., min_length=1, max_length=200)
+
+
+class PortalDeliveryLineEntry(BaseModel):
+    """One line of a submitted delivery."""
+
+    po_item_id: UUID | None = None
+    description: str = ""
+    quantity_received: str = "0"
+    batch_lot: str | None = None
+    certificate_count: int = 0
+
+
+class PortalDeliveryEntry(BaseModel):
+    """A delivery the supplier submitted, with where it stands on site."""
+
+    id: UUID
+    po_id: UUID
+    po_number: str = ""
+    delivery_note_number: str | None = None
+    receipt_date: str
+    status: str
+    created_at: datetime
+    lines: list[PortalDeliveryLineEntry] = Field(default_factory=list)
+
+
+class PortalDeliveryList(BaseModel):
+    """Deliveries the portal user submitted."""
+
+    items: list[PortalDeliveryEntry] = Field(default_factory=list)
+    total: int = 0
+
+
+class PortalUploadedDocument(BaseModel):
+    """A file the supplier uploaded for a delivery."""
+
+    document_id: UUID
+    name: str
+
+
 __all__ = [
     "AccessRuleCreate",
     "AccessRuleList",
@@ -684,6 +814,17 @@ __all__ = [
     "PortalBimModelList",
     "PortalChangeOrderEntry",
     "PortalChangeOrderList",
+    "PortalDeliveryCertificate",
+    "PortalDeliveryEntry",
+    "PortalDeliveryLine",
+    "PortalDeliveryLineEntry",
+    "PortalDeliveryList",
+    "PortalDeliverySubmit",
+    "PortalPOLine",
+    "PortalPurchaseOrderEntry",
+    "PortalPurchaseOrderList",
+    "PortalUploadedDocument",
+    "PortalCertificateType",
     "PortalProgressReportEntry",
     "PortalProgressReportList",
     "PortalSelfPatch",

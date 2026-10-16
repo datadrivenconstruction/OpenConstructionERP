@@ -25,6 +25,10 @@ Two surfaces, mounted under ``/api/v1/portal/``:
         GET    /me/notifications
         POST   /me/notifications/{id}/read
         POST   /me/document-access
+        GET    /me/purchase-orders            - orders shared with a supplier
+        POST   /me/purchase-orders/{id}/documents - upload a delivery note / certificate
+        POST   /me/deliveries                 - submit a delivery (draft goods receipt)
+        GET    /me/deliveries                 - deliveries the caller submitted
 """
 
 from __future__ import annotations
@@ -34,10 +38,21 @@ import uuid
 from datetime import date, datetime
 from typing import Any, Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query, Request, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Header,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 
-from app.core.rate_limiter import client_identifier, registration_limiter
+from app.core.rate_limiter import client_identifier, registration_limiter, upload_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.models import NON_3D_MODEL_FORMATS, BIMModel
@@ -69,8 +84,12 @@ from app.modules.portal.schemas import (
     PortalAgreementSummaryList,
     PortalBimModelEntry,
     PortalBimModelList,
+    PortalCertificateType,
     PortalChangeOrderEntry,
     PortalChangeOrderList,
+    PortalDeliveryEntry,
+    PortalDeliveryList,
+    PortalDeliverySubmit,
     PortalInvoiceEntry,
     PortalInvoiceList,
     PortalMilestoneEntry,
@@ -80,12 +99,14 @@ from app.modules.portal.schemas import (
     PortalProgressReportList,
     PortalProjectSummary,
     PortalProjectSummaryList,
+    PortalPurchaseOrderList,
     PortalSelfPatch,
     PortalSharedDocument,
     PortalSharedDocumentList,
     PortalTicketCreate,
     PortalTicketList,
     PortalTicketResponse,
+    PortalUploadedDocument,
     PortalUserInvite,
     PortalUserInviteResponse,
     PortalUserList,
@@ -1618,6 +1639,86 @@ async def portal_me_payment_agreements(
         for agr, wps in pairs
     ]
     return PortalAgreementSummaryList(items=items, total=len(items))
+
+
+# ── Supplier deliveries (BF-01) ─────────────────────────────────────────────
+
+
+@router.get("/me/purchase-orders", response_model=PortalPurchaseOrderList)
+async def portal_me_purchase_orders(user: RequirePortalSession, session: SessionDep) -> PortalPurchaseOrderList:
+    """Purchase orders shared with the caller, with what is still open per line.
+
+    RLS: only orders the caller holds a live ``po`` rule on. ``can_deliver`` is
+    true where the rule grants ``submit`` and the order is out for delivery.
+    """
+    from app.modules.portal.deliveries import PortalDeliveryService
+    from app.modules.procurement.certificates import certificate_types
+
+    items = await PortalDeliveryService(session).list_purchase_orders(user.id)
+    return PortalPurchaseOrderList(
+        items=items,
+        total=len(items),
+        certificate_types=[PortalCertificateType(code=c.code, label=c.label) for c in certificate_types()],
+    )
+
+
+@router.post(
+    "/me/purchase-orders/{po_id}/documents",
+    response_model=PortalUploadedDocument,
+    status_code=201,
+)
+async def portal_me_upload_delivery_document(
+    po_id: uuid.UUID,
+    user: RequirePortalSession,
+    session: SessionDep,
+    file: UploadFile = File(...),
+) -> PortalUploadedDocument:
+    """Upload a delivery note or certificate scan for a delivery against this order.
+
+    RLS: ``submit`` on the order, else 404. The file is stored under the
+    order's project with the portal account as its uploader.
+    """
+    from app.modules.portal.deliveries import PortalDeliveryService
+
+    allowed, _ = upload_limiter.is_allowed(f"portal:{user.id}")
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many uploads. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
+    doc = await PortalDeliveryService(session).upload_document(user.id, po_id, file)
+    return PortalUploadedDocument(document_id=doc.id, name=doc.name)
+
+
+@router.post("/me/deliveries", response_model=PortalDeliveryEntry, status_code=201)
+async def portal_me_submit_delivery(
+    data: PortalDeliverySubmit,
+    request: Request,
+    user: RequirePortalSession,
+    session: SessionDep,
+) -> PortalDeliveryEntry:
+    """Submit a delivery: it becomes a draft goods receipt for the site to confirm.
+
+    RLS: ``submit`` on the order and every line must belong to it, else 404.
+    """
+    from app.modules.portal.deliveries import PortalDeliveryService
+
+    svc = PortalDeliveryService(session)
+    gr = await svc.submit_delivery(user.id, data, client_ip=_client_ip(request))
+    for entry in await svc.list_deliveries(user.id):
+        if entry.id == gr.id:
+            return entry
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Delivery not found")
+
+
+@router.get("/me/deliveries", response_model=PortalDeliveryList)
+async def portal_me_deliveries(user: RequirePortalSession, session: SessionDep) -> PortalDeliveryList:
+    """Deliveries the caller submitted, with their status on site."""
+    from app.modules.portal.deliveries import PortalDeliveryService
+
+    items = await PortalDeliveryService(session).list_deliveries(user.id)
+    return PortalDeliveryList(items=items, total=len(items))
 
 
 __all__ = ["router"]
