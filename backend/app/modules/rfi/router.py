@@ -15,6 +15,15 @@ Endpoints:
     POST   /{rfi_id}/attachments/         - Upload reply attachment
                                             (magic-byte gated, R5)
     GET    /{rfi_id}/attachments/{index}  - Download a stored reply attachment
+
+Request types (``type_routes.py``, included before the ``/{rfi_id}`` routes):
+    GET    /types/                         - The project's request type catalogue
+    POST   /types/                         - Add a type
+    PATCH  /types/{type_id}                - Edit a type
+    DELETE /types/{type_id}                - Delete an unused type
+    GET    /types/presets/                 - Shipped presets
+    POST   /types/presets/{code}/load/     - Load a preset into a project
+    GET    /validation/                    - Run the ``rfi`` rule set over the register
 """
 
 import asyncio
@@ -75,6 +84,12 @@ router = APIRouter(tags=["rfi"])
 from app.modules.rfi.export_routes import export_router  # noqa: E402
 
 router.include_router(export_router)
+
+# Request type catalogue, presets and register validation: static paths, so
+# they too go before "/{rfi_id}".
+from app.modules.rfi.type_routes import type_router  # noqa: E402
+
+router.include_router(type_router)
 logger = logging.getLogger(__name__)
 
 # R5 / BUG-RFI-ATT: allow-list of magic-byte tokens accepted for RFI reply
@@ -154,6 +169,7 @@ def _to_response(item: object) -> RFIResponse:
         id=item.id,  # type: ignore[attr-defined]
         project_id=item.project_id,  # type: ignore[attr-defined]
         rfi_number=item.rfi_number,  # type: ignore[attr-defined]
+        request_type=getattr(item, "request_type", None) or "RFI",
         subject=item.subject,  # type: ignore[attr-defined]
         question=item.question,  # type: ignore[attr-defined]
         raised_by=item.raised_by,  # type: ignore[attr-defined]
@@ -208,6 +224,11 @@ async def list_rfis(
         max_length=200,
         description="Free-text search across subject, question, response, and RFI number.",
     ),
+    request_type: str | None = Query(
+        default=None,
+        pattern=r"^[A-Za-z][A-Za-z0-9_]{0,31}$",
+        description="Filter by request type code (RFI, TQ, SQ, ...).",
+    ),
     service: RFIService = Depends(_get_service),
 ) -> RFIListResponse:
     """List RFIs for a project, with the size of the whole filtered set.
@@ -226,6 +247,7 @@ async def list_rfis(
         status_filter=status_filter,
         search=search,
         with_total=True,
+        request_type=request_type.upper() if request_type else None,
     )
     return RFIListResponse(
         items=[_to_response(r) for r in rfis],

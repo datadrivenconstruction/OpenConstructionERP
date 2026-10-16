@@ -28,7 +28,14 @@ from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 from app.modules.rfi.models import RFI
 from app.modules.rfi.repository import RFIRepository
-from app.modules.rfi.schemas import RFICreate, RFIStatsResponse, RFIUpdate
+from app.modules.rfi.request_types import (
+    DEFAULT_RESPONSE_DAYS,
+    DEFAULT_TYPE_CODE,
+    RequestTypeSpec,
+    missing_required_fields,
+)
+from app.modules.rfi.schemas import RFICreate, RFIStatsResponse, RFITypeStats, RFIUpdate
+from app.modules.rfi.type_service import BuiltinRequestTypes, RequestTypeService
 
 logger = logging.getLogger(__name__)
 _logger_ev = logging.getLogger(__name__ + ".events")
@@ -41,7 +48,8 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
         _logger_ev.debug("Event publish skipped: %s", name)
 
 
-_RFI_RESPONSE_DUE_DAYS = 14
+# The SLA of a request type that names none (the RFI default before types existed).
+_RFI_RESPONSE_DUE_DAYS = DEFAULT_RESPONSE_DAYS
 
 # BUG-RFI-STATS-UNBOUNDED: ``get_stats`` previously ran a
 # ``SELECT * FROM oe_rfi_rfi WHERE project_id=:p`` with no LIMIT, so a
@@ -97,12 +105,38 @@ def _add_business_days(start: datetime, days: int) -> str:
     return current.strftime("%Y-%m-%d")
 
 
+def _refuse_missing_fields(spec: RequestTypeSpec, values: dict[str, Any]) -> None:
+    """422 when a request is being issued without a field its type requires.
+
+    Drafts are exempt: a draft is where the author collects what the type asks
+    for. The check runs when the request is issued (created as ``open`` or moved
+    ``draft -> open``), which is the moment the other party starts the clock.
+    """
+    missing = missing_required_fields(spec, values)
+    if missing:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "error": "request_type_required_fields",
+                "message": (f"A {spec.code} request cannot be issued without: " + ", ".join(missing) + "."),
+                "request_type": spec.code,
+                "missing_fields": missing,
+            },
+        )
+
+
 class RFIService:
     """Business logic for RFI operations."""
+
+    # The catalogue types are resolved against. A service built through its
+    # constructor reads the project's catalogue; one assembled without a
+    # session (``__new__`` in pure unit tests) knows only the built-in RFI type.
+    types: BuiltinRequestTypes | RequestTypeService = BuiltinRequestTypes()
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.repo = RFIRepository(session)
+        self.types = RequestTypeService(session)
 
     async def create_rfi(
         self,
@@ -145,18 +179,32 @@ class RFIService:
         else:
             raised_by_val = data.raised_by
 
-        # Auto-calculate response_due_date (14 business days) when status
-        # is 'open' and no explicit due date was given.
+        # The request type decides the number prefix, the response SLA and
+        # which fields must be filled before the request is issued.
+        spec = await self.types.resolve(data.project_id, data.request_type or DEFAULT_TYPE_CODE)
+
+        # Auto-calculate response_due_date (the type's SLA in business days,
+        # 14 for a type without one) when status is 'open' and no explicit
+        # due date was given.
         response_due_date = data.response_due_date
         if response_due_date is None and data.status == "open":
-            response_due_date = _add_business_days(datetime.now(UTC), _RFI_RESPONSE_DUE_DAYS)
+            response_due_date = _add_business_days(datetime.now(UTC), spec.response_days)
+
+        if data.status == "open":
+            _refuse_missing_fields(
+                spec,
+                {**data.model_dump(), "response_due_date": response_due_date, "assigned_to": data.assigned_to},
+            )
 
         last_exc: Exception | None = None
         for attempt in range(_RFI_CREATE_MAX_RETRIES):
-            rfi_number = await self.repo.next_rfi_number(data.project_id)
+            rfi_number = await self.repo.next_rfi_number(
+                data.project_id, prefix=spec.number_prefix, digits=spec.number_digits
+            )
             rfi = RFI(
                 project_id=data.project_id,
                 rfi_number=rfi_number,
+                request_type=spec.code,
                 subject=data.subject,
                 question=data.question,
                 raised_by=raised_by_val,
@@ -189,6 +237,7 @@ class RFIService:
                 extra={
                     "rfi_id": str(rfi.id),
                     "rfi_number": rfi_number,
+                    "request_type": spec.code,
                     "project_id": str(data.project_id),
                     "actor": user_id,
                     "attempt": attempt + 1,
@@ -252,6 +301,7 @@ class RFIService:
         status_filter: str | None = None,
         search: str | None = None,
         with_total: bool = True,
+        request_type: str | None = None,
     ) -> tuple[list[RFI], int]:
         return await self.repo.list_for_project(
             project_id,
@@ -260,6 +310,7 @@ class RFIService:
             status=status_filter,
             search=search,
             with_total=with_total,
+            request_type=request_type,
         )
 
     async def update_rfi(
@@ -350,11 +401,21 @@ class RFIService:
                 )
 
         # When status transitions to 'open' and no response_due_date is set,
-        # auto-calculate it (14 business days from now).
+        # auto-calculate it (the type's SLA in business days from now).
         new_status = fields.get("status")
-        if new_status == "open" and not rfi.response_due_date:
-            if "response_due_date" not in fields or fields["response_due_date"] is None:
-                fields["response_due_date"] = _add_business_days(datetime.now(UTC), _RFI_RESPONSE_DUE_DAYS)
+        if new_status == "open" and (not rfi.response_due_date or rfi.status == "draft"):
+            spec = await self.types.resolve(
+                rfi.project_id, getattr(rfi, "request_type", None) or DEFAULT_TYPE_CODE, allow_inactive=True
+            )
+            if not rfi.response_due_date and fields.get("response_due_date") is None:
+                fields["response_due_date"] = _add_business_days(datetime.now(UTC), spec.response_days)
+            if rfi.status == "draft":
+                # Issuing the draft: what its type requires must be there, on
+                # the row as it will stand after this patch. Reopening an
+                # answered request is not an issue and is not re-checked.
+                merged = {name: getattr(rfi, name, None) for name in spec.required_fields}
+                merged.update({k: v for k, v in fields.items() if k in spec.required_fields})
+                _refuse_missing_fields(spec, merged)
 
         # Auto-update ball_in_court when assigned_to changes
         if "assigned_to" in fields and "ball_in_court" not in fields:
@@ -669,7 +730,7 @@ class RFIService:
     async def start_approval(
         self,
         rfi_id: uuid.UUID,
-        route_id: uuid.UUID,
+        route_id: uuid.UUID | None,
         *,
         started_by: str | None = None,
     ) -> Any:
@@ -687,6 +748,9 @@ class RFIService:
         ``metadata_["approval_instance_id"]`` for deep-linking. The FSM
         transition and the instance insert share this request session.
 
+        ``route_id`` may be ``None``: the request's type then names the route
+        through its ``default_route_id``, and a type without one is a 422.
+
         Returns the created approval ``Instance``.
         """
         from app.modules.approval_routes.schemas import InstanceCreate
@@ -698,6 +762,16 @@ class RFIService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(f"Cannot start an approval workflow on an RFI with status '{rfi.status}'."),
             )
+        if route_id is None:
+            spec = await self.types.resolve(
+                rfi.project_id, getattr(rfi, "request_type", None) or DEFAULT_TYPE_CODE, allow_inactive=True
+            )
+            if spec.default_route_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Request type '{spec.code}' has no default approval route; name a route.",
+                )
+            route_id = spec.default_route_id
 
         engine = ApprovalRouteService(self.session)
         instance = await engine.start_instance(
@@ -859,6 +933,7 @@ class RFIService:
 
         total = len(rfis)
         by_status: dict[str, int] = {}
+        by_type: dict[str, RFITypeStats] = {}
         open_count = 0
         overdue_count = 0
         cost_impact_count = 0
@@ -868,10 +943,17 @@ class RFIService:
         for rfi in rfis:
             # Count by status
             by_status[rfi.status] = by_status.get(rfi.status, 0) + 1
+            type_stats = by_type.setdefault(getattr(rfi, "request_type", None) or DEFAULT_TYPE_CODE, RFITypeStats())
+            type_stats.total += 1
+            if rfi.status == "answered":
+                type_stats.answered += 1
+            elif rfi.status == "closed":
+                type_stats.closed += 1
 
             # Open = draft or open
             if rfi.status in ("draft", "open"):
                 open_count += 1
+                type_stats.open += 1
 
             # Overdue = open/draft + past due date. Use the same
             # ``now > midnight(due)`` rule the row/detail view applies
@@ -886,6 +968,7 @@ class RFIService:
                         due = due.replace(tzinfo=UTC)
                     if now > due:
                         overdue_count += 1
+                        type_stats.overdue += 1
                 except (TypeError, ValueError):
                     pass
 
@@ -921,11 +1004,67 @@ class RFIService:
         return RFIStatsResponse(
             total=total,
             by_status=by_status,
+            by_type=by_type,
             open=open_count,
             overdue=overdue_count,
             avg_days_to_response=avg_days_to_response,
             cost_impact_count=cost_impact_count,
             schedule_impact_count=schedule_impact_count,
+        )
+
+    # ── Validation ────────────────────────────────────────────────────────
+
+    async def validate_register(self, project_id: uuid.UUID) -> Any:
+        """Run the ``rfi`` rule set over the project's catalogue and requests.
+
+        Returns the engine's :class:`~app.core.validation.engine.ValidationReport`.
+        The rules read the same pure functions the create and issue paths
+        enforce, so a register that passes here is one the service would have
+        let through, and a row that fails is one written before its type
+        demanded the field, or by a path that skips the service.
+        """
+        from sqlalchemy import select
+
+        from app.core.validation.engine import validation_engine
+        from app.modules.rfi.validators import RFI_RULE_SET, register_rfi_rules
+
+        register_rfi_rules()
+        rows = (
+            (
+                await self.session.execute(
+                    select(RFI)
+                    .where(RFI.project_id == project_id)
+                    .order_by(RFI.created_at.desc())
+                    .limit(_RFI_STATS_SCAN_CAP)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        requests = [
+            {
+                "id": str(r.id),
+                "rfi_number": r.rfi_number,
+                "request_type": r.request_type or DEFAULT_TYPE_CODE,
+                "status": r.status,
+                "assigned_to": r.assigned_to,
+                "date_required": r.date_required,
+                "response_due_date": r.response_due_date,
+                "discipline": r.discipline,
+                "priority": r.priority,
+                "linked_drawing_ids": r.linked_drawing_ids,
+                "cost_impact_value": r.cost_impact_value,
+                "schedule_impact_days": r.schedule_impact_days,
+                "change_order_id": r.change_order_id,
+            }
+            for r in rows
+        ]
+        return await validation_engine.validate(
+            data={"types": await self.types.catalogue(project_id), "requests": requests},
+            rule_sets=[RFI_RULE_SET],
+            target_type="rfi_register",
+            target_id=str(project_id),
+            project_id=str(project_id),
         )
 
     # ── Printable document ────────────────────────────────────────────────

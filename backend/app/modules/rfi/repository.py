@@ -10,7 +10,8 @@ from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
-from app.modules.rfi.models import RFI
+from app.modules.rfi.models import RFI, RFIRequestType
+from app.modules.rfi.request_types import format_request_number, number_regex
 
 
 class RFIRepository:
@@ -31,6 +32,7 @@ class RFIRepository:
         status: str | None = None,
         search: str | None = None,
         with_total: bool = True,
+        request_type: str | None = None,
     ) -> tuple[list[RFI], int]:
         """List a page of RFIs for a project, newest first.
 
@@ -45,6 +47,8 @@ class RFIRepository:
         base = select(RFI).where(RFI.project_id == project_id)
         if status is not None:
             base = base.where(RFI.status == status)
+        if request_type is not None:
+            base = base.where(RFI.request_type == request_type)
 
         if search and search.strip():
             pattern = f"%{search.strip()}%"
@@ -68,31 +72,33 @@ class RFIRepository:
         total = (await self.session.execute(count_stmt)).scalar_one()
         return rows, total
 
-    async def next_rfi_number(self, project_id: uuid.UUID) -> str:
-        """Generate the next ``RFI-NNN`` number using MAX to avoid duplicates.
+    async def next_rfi_number(self, project_id: uuid.UUID, *, prefix: str = "RFI", digits: int = 3) -> str:
+        """Generate the next ``<PREFIX>-<N>`` number of one request type using MAX to avoid duplicates.
 
-        Only canonical ``RFI-<digits>`` rows are cast: PostgreSQL rejects an
-        empty or non-numeric integer cast (unlike SQLite, which yielded 0), so
-        one legacy or externally-numbered row would otherwise raise on every
-        new RFI for the project.
+        Numbering runs per prefix inside the project: ``TQ-0001`` and
+        ``RFI-001`` count independently. Only canonical ``<PREFIX>-<digits>``
+        rows are cast: PostgreSQL rejects an empty or non-numeric integer cast
+        (unlike SQLite, which yielded 0), so one legacy or externally-numbered
+        row would otherwise raise on every new request for the project. The
+        anchored pattern also keeps ``SBQ-0001`` out of the ``SQ`` sequence.
         """
         from sqlalchemy import Integer as SAInteger
         from sqlalchemy import cast
         from sqlalchemy.sql import func as sqlfunc
 
-        # Extract numeric suffix from existing RFI numbers (e.g. 'RFI-007' -> 7)
+        # Extract the numeric suffix (e.g. 'TQ-0007' -> 7).
         stmt = (
             select(
                 sqlfunc.coalesce(
-                    sqlfunc.max(cast(func.substr(RFI.rfi_number, 5), SAInteger)),
+                    sqlfunc.max(cast(func.substr(RFI.rfi_number, len(prefix) + 2), SAInteger)),
                     0,
                 )
             )
             .where(RFI.project_id == project_id)
-            .where(RFI.rfi_number.regexp_match("^RFI-[0-9]+$"))
+            .where(RFI.rfi_number.regexp_match(number_regex(prefix)))
         )
         max_num = (await self.session.execute(stmt)).scalar_one()
-        return f"RFI-{max_num + 1:03d}"
+        return format_request_number(prefix, max_num + 1, digits)
 
     async def create(self, rfi: RFI) -> RFI:
         self.session.add(rfi)
@@ -118,3 +124,39 @@ class RFIRepository:
         if rfi is not None:
             await self.session.delete(rfi)
             await self.session.flush()
+
+
+class RequestTypeRepository:
+    """Data access for a project's request type catalogue."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get(self, type_id: uuid.UUID) -> RFIRequestType | None:
+        return await self.session.get(RFIRequestType, type_id)
+
+    async def list_for_project(self, project_id: uuid.UUID) -> list[RFIRequestType]:
+        stmt = (
+            select(RFIRequestType)
+            .where(RFIRequestType.project_id == project_id)
+            .order_by(RFIRequestType.sort_order, RFIRequestType.code)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def get_by_code(self, project_id: uuid.UUID, code: str) -> RFIRequestType | None:
+        stmt = select(RFIRequestType).where(RFIRequestType.project_id == project_id, RFIRequestType.code == code)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def add(self, row: RFIRequestType) -> RFIRequestType:
+        self.session.add(row)
+        await self.session.flush()
+        return row
+
+    async def delete(self, row: RFIRequestType) -> None:
+        await self.session.delete(row)
+        await self.session.flush()
+
+    async def request_counts(self, project_id: uuid.UUID) -> dict[str, int]:
+        """How many requests of each type code the project holds."""
+        stmt = select(RFI.request_type, func.count()).where(RFI.project_id == project_id).group_by(RFI.request_type)
+        return {code: int(n) for code, n in (await self.session.execute(stmt)).all()}

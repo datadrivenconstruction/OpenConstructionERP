@@ -135,9 +135,9 @@ class _StubRFIRepo:
     async def get_by_id(self, rfi_id: uuid.UUID) -> Any:
         return self.rows.get(rfi_id)
 
-    async def next_rfi_number(self, project_id: uuid.UUID) -> str:
+    async def next_rfi_number(self, project_id: uuid.UUID, *, prefix: str = "RFI", digits: int = 3) -> str:
         self._counter += 1
-        return f"RFI-{self._counter:03d}"
+        return f"{prefix}-{self._counter:0{digits}d}"
 
     async def list_for_project(
         self,
@@ -148,6 +148,7 @@ class _StubRFIRepo:
         status: str | None = None,
         search: str | None = None,
         with_total: bool = True,  # signature-compatible with the real repo (count skipped in unit fakes)
+        request_type: str | None = None,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
         if status is not None:

@@ -35,5 +35,9 @@ def register_rfi_permissions() -> None:
             "rfi.assign": Role.MANAGER,
             "rfi.respond": Role.EDITOR,
             "rfi.close": Role.MANAGER,
+            # The project's request type catalogue (types, presets, SLAs,
+            # required fields, default routes) shapes every request filed
+            # after it, so editing it is a manager action.
+            "rfi.types.manage": Role.MANAGER,
         },
     )

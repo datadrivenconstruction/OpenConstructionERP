@@ -51,9 +51,9 @@ class _CollidingRepo:
         self.collisions_remaining = collisions
         self._counter = 0
 
-    async def next_rfi_number(self, project_id: uuid.UUID) -> str:
+    async def next_rfi_number(self, project_id: uuid.UUID, *, prefix: str = "RFI", digits: int = 3) -> str:
         self._counter += 1
-        return f"RFI-{self._counter:03d}"
+        return f"{prefix}-{self._counter:0{digits}d}"
 
     async def create(self, rfi: Any) -> Any:
         if self.collisions_remaining > 0:

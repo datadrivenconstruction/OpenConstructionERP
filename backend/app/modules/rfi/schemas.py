@@ -9,6 +9,15 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.modules.rfi.request_types import (
+    CODE_PATTERN,
+    DEFAULT_TYPE_CODE,
+    MAX_DIGITS,
+    MIN_DIGITS,
+    PREFIX_PATTERN,
+    REQUIRED_FIELD_CHOICES,
+)
+
 
 def _sanitise_rfi_text(value: str | None) -> str | None:
     """Strip XSS payloads from RFI free-text fields (BUG-389).
@@ -58,11 +67,22 @@ class RFICreate(BaseModel):
     project_id: UUID
     subject: str = Field(..., min_length=1, max_length=500)
     question: str = Field(..., min_length=1, max_length=10000)
+    request_type: str = Field(
+        default=DEFAULT_TYPE_CODE,
+        min_length=1,
+        max_length=32,
+        description="Code of a type in the project's request type catalogue (RFI, TQ, SQ, ...).",
+    )
 
     @field_validator("subject", "question", mode="after")
     @classmethod
     def _sanitise(cls, v: str) -> str:
         return _sanitise_rfi_text(v) or ""
+
+    @field_validator("request_type", mode="before")
+    @classmethod
+    def _upper_type(cls, v: object) -> object:
+        return v.strip().upper() if isinstance(v, str) else v
 
     raised_by: UUID | None = None  # Auto-filled from authenticated user if not provided
     assigned_to: str | None = Field(default=None, max_length=36)
@@ -148,11 +168,16 @@ class RFIRespondRequest(BaseModel):
 
 
 class StartApprovalRequest(BaseModel):
-    """Request body for starting a routed approval workflow (feature 06)."""
+    """Request body for starting a routed approval workflow (feature 06).
+
+    ``route_id`` may be left out when the request's type names a default
+    approval route; the service then uses that one, and answers 422 when the
+    type has none.
+    """
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    route_id: UUID
+    route_id: UUID | None = None
 
 
 class RFIResponse(BaseModel):
@@ -163,6 +188,7 @@ class RFIResponse(BaseModel):
     id: UUID
     project_id: UUID
     rfi_number: str
+    request_type: str = DEFAULT_TYPE_CODE
     subject: str
     question: str
     raised_by: UUID
@@ -221,11 +247,25 @@ class RFIListResponse(BaseModel):
     limit: int = 50
 
 
+class RFITypeStats(BaseModel):
+    """Counts for one request type inside a project's stats."""
+
+    total: int = 0
+    open: int = 0
+    overdue: int = 0
+    answered: int = 0
+    closed: int = 0
+
+
 class RFIStatsResponse(BaseModel):
     """Summary statistics for RFIs in a project."""
 
     total: int = 0
     by_status: dict[str, int] = Field(default_factory=dict)
+    by_type: dict[str, RFITypeStats] = Field(
+        default_factory=dict,
+        description="Counts per request type code (RFI, TQ, SQ, ...); a type with no requests is absent.",
+    )
     open: int = 0
     overdue: int = 0
     avg_days_to_response: float | None = Field(
@@ -313,3 +353,199 @@ class RFIActivityListResponse(BaseModel):
     total: int = 0
     offset: int = 0
     limit: int = 50
+
+
+# ── Request type catalogue ────────────────────────────────────────────────
+
+
+def _check_i18n(value: dict[str, str] | None, *, need_english: bool) -> dict[str, str]:
+    """Keep non-empty texts under short language tags; demand English where asked."""
+    out: dict[str, str] = {}
+    for tag, text in (value or {}).items():
+        tag_s = str(tag).strip()
+        text_s = _sanitise_rfi_text(str(text).strip()) or ""
+        if not tag_s or len(tag_s) > 16:
+            raise ValueError(f"invalid language tag: {tag!r}")
+        if len(text_s) > 500:
+            raise ValueError(f"text for {tag_s!r} is longer than 500 characters")
+        if text_s:
+            out[tag_s] = text_s
+    if need_english and not out.get("en"):
+        raise ValueError("an English name is required (name_i18n.en)")
+    return out
+
+
+def _check_required_fields(value: list[str] | None) -> list[str]:
+    fields = list(dict.fromkeys(value or []))
+    unknown = [f for f in fields if f not in REQUIRED_FIELD_CHOICES]
+    if unknown:
+        raise ValueError("unknown required fields: " + ", ".join(unknown))
+    return fields
+
+
+class RequestTypeCreate(BaseModel):
+    """Add one request type to a project's catalogue."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    code: str = Field(..., pattern=CODE_PATTERN)
+    name_i18n: dict[str, str]
+    description_i18n: dict[str, str] = Field(default_factory=dict)
+    number_prefix: str = Field(..., pattern=PREFIX_PATTERN)
+    number_digits: int = Field(default=4, ge=MIN_DIGITS, le=MAX_DIGITS)
+    default_response_days: int | None = Field(default=None, ge=1, le=365)
+    required_fields: list[str] = Field(default_factory=list)
+    default_route_id: UUID | None = None
+    is_active: bool = True
+    sort_order: int = Field(default=0, ge=0, le=100000)
+
+    @field_validator("code", "number_prefix", mode="before")
+    @classmethod
+    def _upper(cls, v: object) -> object:
+        return v.strip().upper() if isinstance(v, str) else v
+
+    @field_validator("name_i18n", mode="after")
+    @classmethod
+    def _names(cls, v: dict[str, str]) -> dict[str, str]:
+        return _check_i18n(v, need_english=True)
+
+    @field_validator("description_i18n", mode="after")
+    @classmethod
+    def _descriptions(cls, v: dict[str, str]) -> dict[str, str]:
+        return _check_i18n(v, need_english=False)
+
+    @field_validator("required_fields", mode="after")
+    @classmethod
+    def _fields(cls, v: list[str]) -> list[str]:
+        return _check_required_fields(v)
+
+
+class RequestTypeUpdate(BaseModel):
+    """Partial update of a request type.
+
+    ``code`` and ``number_prefix`` are not editable: requests already store the
+    code and carry the prefix in their number, so renaming either would orphan
+    them. Retire a type with ``is_active = false`` and add a new one instead.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name_i18n: dict[str, str] | None = None
+    description_i18n: dict[str, str] | None = None
+    number_digits: int | None = Field(default=None, ge=MIN_DIGITS, le=MAX_DIGITS)
+    default_response_days: int | None = Field(default=None, ge=1, le=365)
+    required_fields: list[str] | None = None
+    default_route_id: UUID | None = None
+    is_active: bool | None = None
+    sort_order: int | None = Field(default=None, ge=0, le=100000)
+
+    @field_validator("name_i18n", mode="after")
+    @classmethod
+    def _names(cls, v: dict[str, str] | None) -> dict[str, str] | None:
+        return None if v is None else _check_i18n(v, need_english=True)
+
+    @field_validator("description_i18n", mode="after")
+    @classmethod
+    def _descriptions(cls, v: dict[str, str] | None) -> dict[str, str] | None:
+        return None if v is None else _check_i18n(v, need_english=False)
+
+    @field_validator("required_fields", mode="after")
+    @classmethod
+    def _fields(cls, v: list[str] | None) -> list[str] | None:
+        return None if v is None else _check_required_fields(v)
+
+
+class RequestTypeResponse(BaseModel):
+    """One type of a project's catalogue as the register reads it.
+
+    ``id`` is ``None`` for the built-in RFI type a project has before it loads
+    a catalogue: it numbers and behaves like a row but is not one, and it
+    becomes a row the moment a preset with an RFI type is loaded.
+    """
+
+    id: UUID | None = None
+    project_id: UUID
+    code: str
+    name: str = Field(description="English name, the fallback when the reader's language has none.")
+    name_i18n: dict[str, str] = Field(default_factory=dict)
+    description_i18n: dict[str, str] = Field(default_factory=dict)
+    number_prefix: str
+    number_digits: int
+    default_response_days: int | None = None
+    response_days: int = Field(description="The SLA applied: the type's own, else the platform default.")
+    required_fields: list[str] = Field(default_factory=list)
+    default_route_id: UUID | None = None
+    is_active: bool = True
+    is_builtin: bool = False
+    sort_order: int = 0
+    preset_code: str | None = None
+    request_count: int = 0
+
+
+class RequestTypeCatalogueResponse(BaseModel):
+    """A project's request types plus the field names a type may require."""
+
+    items: list[RequestTypeResponse] = Field(default_factory=list)
+    total: int = 0
+    required_field_choices: list[str] = Field(default_factory=lambda: list(REQUIRED_FIELD_CHOICES))
+
+
+class RequestTypePresetType(BaseModel):
+    """One type inside a shipped preset."""
+
+    code: str
+    number_prefix: str
+    number_digits: int
+    name_i18n: dict[str, str] = Field(default_factory=dict)
+    default_response_days: int | None = None
+    required_fields: list[str] = Field(default_factory=list)
+
+
+class RequestTypePresetResponse(BaseModel):
+    """A shipped preset a project can load."""
+
+    code: str
+    name_i18n: dict[str, str] = Field(default_factory=dict)
+    description_i18n: dict[str, str] = Field(default_factory=dict)
+    types: list[RequestTypePresetType] = Field(default_factory=list)
+
+
+class RequestTypePresetListResponse(BaseModel):
+    """Every shipped preset; total is the whole set, which is never paged."""
+
+    items: list[RequestTypePresetResponse] = Field(default_factory=list)
+    total: int = 0
+
+
+class RequestTypePresetLoadResponse(BaseModel):
+    """What loading a preset into a project did.
+
+    A type whose code or prefix the project already has is skipped, never
+    overwritten: the project's edits to its own catalogue win over the preset.
+    """
+
+    preset_code: str
+    created: list[str] = Field(default_factory=list)
+    skipped: list[str] = Field(default_factory=list)
+
+
+class RFIValidationResult(BaseModel):
+    """One rule outcome of the register's validation run."""
+
+    rule_id: str
+    severity: str
+    passed: bool
+    message: str
+    element_ref: str | None = None
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
+class RFIValidationResponse(BaseModel):
+    """Traffic-light result of the ``rfi`` rule set over one project's register."""
+
+    status: str
+    score: float | None = None
+    errors: int = 0
+    warnings: int = 0
+    results: list[RFIValidationResult] = Field(default_factory=list)
