@@ -80,6 +80,13 @@ class BOQ(Base):
     # off ``parent_estimate_id`` exactly as it does for a project bill.
     variation_request_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
+    # The user who started the bill (new, from a template, duplicate, scenario
+    # or revision). The author may delete it without the ``boq.delete`` role:
+    # a viewer can start an estimate (issue #101), so a viewer must be able to
+    # remove the one they started. NULL on every bill created before the column
+    # and on bills seeded without a user; those keep the role rule only.
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

@@ -32,6 +32,8 @@ import { useModuleStore } from '@/stores/useModuleStore';
 import { PresenceAvatars } from '@/modules/collaboration/components/PresenceAvatars';
 import { usePresenceStore } from '@/modules/collaboration/hooks/usePresence';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { canDeleteBoq } from './canDeleteBoq';
 import { CreateBOQModal } from './CreateBOQPage';
 import { BOQRenameDialog } from './BOQRenameDialog';
 import { projectFilterOptions } from './projectFilterOptions';
@@ -815,6 +817,10 @@ export function BOQListPage() {
     },
   });
 
+  // Editors delete any bill; the author of a bill may delete that one.
+  const userRole = useAuthStore((s) => s.userRole);
+  const userId = useAuthStore((s) => s.userId);
+
   const deleteMutation = useMutation({
     mutationFn: (boqId: string) => boqApi.deleteBoq(boqId),
     onSuccess: () => {
@@ -1335,13 +1341,15 @@ export function BOQListPage() {
                   >
                     <Copy size={13} />
                   </button>
-                  <button
-                    onClick={() => setConfirmDeleteId(boq.id)}
-                    className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
-                    title={t('common.delete')}
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                  {canDeleteBoq(userRole, userId, boq) && (
+                    <button
+                      onClick={() => setConfirmDeleteId(boq.id)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
+                      title={t('common.delete')}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
                   <span className="inline-flex items-center text-2xs font-semibold text-oe-blue-text opacity-0 transition-opacity group-hover:opacity-100">
                     <ArrowRight size={13} />
                   </span>
@@ -1491,13 +1499,15 @@ export function BOQListPage() {
                         <Copy size={13} />
                       </button>
 
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(boq.id); }}
-                        className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
-                        title={t('common.delete')}
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                      {canDeleteBoq(userRole, userId, boq) && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(boq.id); }}
+                          className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
+                          title={t('common.delete')}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
                     </div>
 
                     {/* Open affordance — appears on hover so the card reads as

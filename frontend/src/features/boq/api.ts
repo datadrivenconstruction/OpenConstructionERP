@@ -33,6 +33,8 @@ export interface BOQ {
    * its `base_date`, which is every bill created before the field existed.
    */
   tax_date?: string | null;
+  /** The user who started the bill; null for bills older than the field. */
+  created_by?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +46,8 @@ export interface BOQListRow {
   name: string;
   description: string;
   status: string;
+  /** The user who started the bill; null for bills older than the field. */
+  created_by?: string | null;
   created_at: string;
   updated_at: string;
   /** Money arrives as a Decimal string (v3 §10); coerce before arithmetic. */

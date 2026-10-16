@@ -250,6 +250,41 @@ def _get_service(session: SessionDep) -> BOQService:
     return BOQService(session)
 
 
+async def _stamp_creator(session: SessionDep, boq: Any, user_id: str) -> None:
+    """Record who started ``boq``, so the author can delete it later."""
+    try:
+        boq.created_by = uuid.UUID(str(user_id))
+    except (TypeError, ValueError):
+        return
+    await session.flush()
+
+
+async def _require_delete_right(session: SessionDep, boq_id: uuid.UUID, user_id: str, payload: dict) -> None:
+    """Allow a BOQ delete to ``boq.delete`` holders and to the BOQ's own author.
+
+    ``boq.create`` is open to viewers (issue #101) while ``boq.delete`` needs an
+    editor, so a viewer could start an estimate and never remove it. The author
+    of a bill may now delete it whatever their role; anybody else still needs
+    the delete permission. Project access is checked before this by
+    :func:`_verify_boq_owner`.
+
+    Raises:
+        HTTPException: 403 when the caller holds neither.
+    """
+    from sqlalchemy import select
+
+    from app.modules.boq.models import BOQ
+
+    try:
+        await RequirePermission("boq.delete")(payload)
+        return
+    except HTTPException:
+        author = (await session.execute(select(BOQ.created_by).where(BOQ.id == boq_id))).scalar_one_or_none()
+        if author is not None and str(author) == str(uuid.UUID(str(user_id))):
+            return
+        raise
+
+
 async def _verify_boq_owner(
     session: SessionDep,
     boq_id: uuid.UUID,
@@ -629,6 +664,7 @@ async def create_boq(
     """Create a new Bill of Quantities."""
     await _verify_project_owner_for_boq(session, data.project_id, _user_id, payload)
     boq = await service.create_boq(data)
+    await _stamp_creator(session, boq, _user_id)
     await _log_activity(
         service,
         user_id=_user_id,
@@ -857,6 +893,7 @@ async def create_boq_from_template(
     # access (and a bogus project_id would surface as a raw FK 500 instead of 404).
     await _verify_project_owner_for_boq(session, data.project_id, _user_id, payload)
     boq = await service.create_boq_from_template(data)
+    await _stamp_creator(session, boq, _user_id)
     return BOQResponse.model_validate(boq)
 
 
@@ -1518,7 +1555,7 @@ async def update_boq(
     "/boqs/{boq_id}",
     status_code=204,
     summary="Delete BOQ",
-    dependencies=[Depends(RequirePermission("boq.delete"))],
+    description="Needs ``boq.delete``, except for the user who started the BOQ, who may always delete it.",
 )
 async def delete_boq(
     boq_id: uuid.UUID,
@@ -1529,6 +1566,7 @@ async def delete_boq(
 ) -> None:
     """Delete a BOQ and all its positions."""
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await _require_delete_right(session, boq_id, _user_id, payload)
     await service.delete_boq(boq_id)
 
 
@@ -1557,6 +1595,7 @@ async def duplicate_boq(
     # IDOR guard: verify the caller owns the source BOQ before cloning it
     await _verify_boq_owner(session, boq_id, user_id, payload)
     new_boq = await service.duplicate_boq(boq_id)
+    await _stamp_creator(session, new_boq, user_id)
     return BOQResponse.model_validate(new_boq)
 
 
@@ -1593,6 +1632,7 @@ async def create_scenario(
     # IDOR guard: verify the caller can access the source BOQ.
     await _verify_boq_owner(session, boq_id, user_id, payload)
     new_boq = await service.create_scenario(boq_id, data, actor_id=user_id)
+    await _stamp_creator(session, new_boq, user_id)
     return BOQResponse.model_validate(new_boq)
 
 
@@ -1992,6 +2032,7 @@ async def create_revision(
         parent_estimate_id=boq_id,
         status="draft",
         is_locked=False,
+        created_by=uuid.UUID(str(_user_id)),
     )
     refreshed = await service.get_boq(new_boq_id)
     return BOQResponse.model_validate(refreshed)

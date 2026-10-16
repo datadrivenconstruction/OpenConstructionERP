@@ -401,6 +401,8 @@ class BOQResponse(BaseModel):
     #: instead of the project at large. NULL on every bill that existed
     #: before the column, and on every bill created through ``POST /boqs/``.
     variation_request_id: UUID | None = None
+    #: The user who started the bill; null for bills older than the column.
+    created_by: UUID | None = None
 
     # BUG-MATH04: defence-in-depth strip of any residual HTML on output.
     # Input validators only block the *dangerous* subset; legacy rows
