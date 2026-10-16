@@ -84,6 +84,9 @@ import clsx from 'clsx';
 import { projectsApi, type Project } from './api';
 import { PhotosTab } from './PhotosTab';
 import { CompliancePage } from '@/features/compliance-docs/CompliancePage';
+import type { GovernancePhase } from '@/features/project_governance/api';
+import { useGovernanceModel, useLabelContext } from '@/features/project_governance/hooks';
+import { catalogueName } from '@/features/project_governance/labels';
 import { TeamStrip } from './components/TeamStrip';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useRecentStore } from '@/stores/useRecentStore';
@@ -560,34 +563,28 @@ const PHASE_STEPS = [
   { key: 'closeout', match: ['closeout', 'handover', 'commission', 'turnover'] },
 ] as const;
 
-function ProjectPhaseRibbon({ phase }: { phase: string | null }) {
-  const { t } = useTranslation();
-  if (!phase || !phase.trim()) return null;
+/**
+ * The steps of a project's governance phase model in their order, with the
+ * index of the current phase (-1 when the model names none). A project run
+ * under a phase model (the owner's project control pack: development, then
+ * execution) shows those phases instead of the generic five-step lifecycle,
+ * which is not the model the project is governed by.
+ */
+export function governancePhaseSteps(
+  phases: readonly Pick<GovernancePhase, 'code' | 'order'>[],
+  current: string | null,
+): { codes: string[]; activeIdx: number } {
+  const codes = [...phases].sort((a, b) => a.order - b.order).map((p) => p.code);
+  return { codes, activeIdx: current ? codes.indexOf(current) : -1 };
+}
 
-  const norm = phase.toLowerCase();
-  const activeIdx = PHASE_STEPS.findIndex((s) => s.match.some((m) => norm.includes(m)));
-
-  // Unknown phase — show single chip instead of a fake stepper.
-  if (activeIdx < 0) {
-    return (
-      <div className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-xs">
-        <span className="font-medium uppercase tracking-wider text-content-tertiary">
-          {t('projects.phase_label', { defaultValue: 'Phase' })}
-        </span>
-        <span className="font-semibold text-content-primary">{phase}</span>
-      </div>
-    );
-  }
-
+function PhaseSteps({ steps, activeIdx }: { steps: { key: string; label: string }[]; activeIdx: number }) {
   return (
     <div className="rounded-lg border border-border-light bg-surface-secondary px-4 py-3">
       <div className="flex items-center gap-1.5 overflow-x-auto">
-        {PHASE_STEPS.map((step, idx) => {
+        {steps.map((step, idx) => {
           const isActive = idx === activeIdx;
           const isPast = idx < activeIdx;
-          const label = t(`projects.phase_${step.key}`, {
-            defaultValue: step.key.charAt(0).toUpperCase() + step.key.slice(1),
-          });
           return (
             <React.Fragment key={step.key}>
               <div className="flex items-center gap-1.5 shrink-0">
@@ -612,10 +609,10 @@ function ProjectPhaseRibbon({ phase }: { phase: string | null }) {
                         : 'text-content-quaternary'
                   }`}
                 >
-                  {label}
+                  {step.label}
                 </span>
               </div>
-              {idx < PHASE_STEPS.length - 1 && (
+              {idx < steps.length - 1 && (
                 <div
                   className={`h-px flex-1 min-w-[12px] ${
                     idx < activeIdx ? 'bg-oe-blue/40' : 'bg-border-light'
@@ -629,6 +626,61 @@ function ProjectPhaseRibbon({ phase }: { phase: string | null }) {
       </div>
     </div>
   );
+}
+
+function ProjectPhaseRibbon({
+  projectId,
+  phase,
+  governed,
+}: {
+  projectId: string;
+  phase: string | null;
+  /** Ask for the governance phase model (only while the framework pack is active). */
+  governed: boolean;
+}) {
+  const { t } = useTranslation();
+  const labels = useLabelContext();
+  const { data: model } = useGovernanceModel(projectId, governed);
+
+  if (governed && model && model.phases.length > 0) {
+    const { codes, activeIdx } = governancePhaseSteps(model.phases, model.current_phase);
+    const byCode = new Map(model.phases.map((p) => [p.code, p]));
+    const steps = codes.map((code) => ({
+      key: code,
+      label: catalogueName(labels, {
+        kind: 'phase',
+        code,
+        catalogueId: model.catalogue_id,
+        label: byCode.get(code)?.name,
+      }),
+    }));
+    return <PhaseSteps steps={steps} activeIdx={activeIdx} />;
+  }
+
+  if (!phase || !phase.trim()) return null;
+
+  const norm = phase.toLowerCase();
+  const activeIdx = PHASE_STEPS.findIndex((s) => s.match.some((m) => norm.includes(m)));
+
+  // Unknown phase — show single chip instead of a fake stepper.
+  if (activeIdx < 0) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-xs">
+        <span className="font-medium uppercase tracking-wider text-content-tertiary">
+          {t('projects.phase_label', { defaultValue: 'Phase' })}
+        </span>
+        <span className="font-semibold text-content-primary">{phase}</span>
+      </div>
+    );
+  }
+
+  const steps = PHASE_STEPS.map((step) => ({
+    key: step.key,
+    label: t(`projects.phase_${step.key}`, {
+      defaultValue: step.key.charAt(0).toUpperCase() + step.key.slice(1),
+    }),
+  }));
+  return <PhaseSteps steps={steps} activeIdx={activeIdx} />;
 }
 
 /**
@@ -2219,7 +2271,7 @@ export function ProjectDetailPage() {
 
       {!isWidgetHidden('phase-ribbon') && (
         /* ── Phase Ribbon ────────────────────────────────────────────── */
-        <ProjectPhaseRibbon phase={project.phase ?? null} />
+        <ProjectPhaseRibbon projectId={project.id} phase={project.phase ?? null} governed={frameworkPackActive} />
       )}
 
       {/* ── Status history (#274) ─────────────────────────────────────────

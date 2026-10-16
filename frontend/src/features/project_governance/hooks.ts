@@ -46,12 +46,12 @@ async function fetchModel(projectId: string): Promise<ModelAnswer> {
 }
 
 /** The model, or null when the project has none yet (404 `model_missing`), which is an empty state and not an error. */
-export function useGovernanceModel(projectId: string) {
+export function useGovernanceModel(projectId: string, enabled = true) {
   return useQuery({
     queryKey: governanceKeys.model(projectId),
     queryFn: () => fetchModel(projectId),
     select: (answer) => answer.model,
-    enabled: !!projectId,
+    enabled: !!projectId && enabled,
     retry: false,
   });
 }
