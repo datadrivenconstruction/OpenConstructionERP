@@ -21,6 +21,8 @@ differ per install while the demo id does not.
 
 from __future__ import annotations
 
+from typing import Any
+
 GERMAN_SHOWCASE_DEMO_IDS: frozenset[str] = frozenset(
     {
         "office-frankfurt",
@@ -36,4 +38,16 @@ GERMAN_SHOWCASE_DEMO_IDS: frozenset[str] = frozenset(
 #: that one also switches the variations and contracts seeders, which these projects do not use.
 GERMAN_DIARY_DEMO_IDS: frozenset[str] = GERMAN_SHOWCASE_DEMO_IDS | {"residential-regensburg", "school-ludwigsburg"}
 
-__all__ = ["GERMAN_DIARY_DEMO_IDS", "GERMAN_SHOWCASE_DEMO_IDS"]
+#: Demo projects whose site has not started on the install day. The generic seeder writes site
+#: registers (open RFIs to the contractors, safety incidents) for every project it builds; on a
+#: school still waiting for its construction gate there is no contractor to ask and no site to have
+#: an accident on, so those registers stay empty there.
+NOT_STARTED_SITE_DEMO_IDS: frozenset[str] = frozenset({"school-ludwigsburg"})
+
+
+def generic_site_rows(demo_id: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The generic site register rows for ``demo_id``, none for a site that has not started."""
+    return [] if demo_id in NOT_STARTED_SITE_DEMO_IDS else rows
+
+
+__all__ = ["GERMAN_DIARY_DEMO_IDS", "GERMAN_SHOWCASE_DEMO_IDS", "NOT_STARTED_SITE_DEMO_IDS", "generic_site_rows"]

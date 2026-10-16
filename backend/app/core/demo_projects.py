@@ -25,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
 from app.core.demo_resource_names import resource_name
-from app.core.demo_showcase import GERMAN_DIARY_DEMO_IDS
+from app.core.demo_showcase import GERMAN_DIARY_DEMO_IDS, generic_site_rows
 from app.core.demo_tender_scopes import (
     OPEN_STATUSES,
     PENDING_INVITEE,
@@ -8258,7 +8258,7 @@ async def _seed_module_data(
     }
 
     try:
-        rfi_list = _RFIS.get(demo_id) or generated.get("rfis", [])
+        rfi_list = _RFIS.get(demo_id) or generic_site_rows(demo_id, generated.get("rfis", []))
         rfi_now = datetime.now(UTC).replace(tzinfo=None)
         answered_seen = 0
         open_seen = 0
@@ -8840,7 +8840,9 @@ async def _seed_module_data(
     }
 
     try:
-        incident_list = _SAFETY_INCIDENTS.get(demo_id) or generated.get("safety_incidents", [])
+        incident_list = _SAFETY_INCIDENTS.get(demo_id) or generic_site_rows(
+            demo_id, generated.get("safety_incidents", [])
+        )
         for inc in incident_list:
             session.add(
                 SafetyIncident(
