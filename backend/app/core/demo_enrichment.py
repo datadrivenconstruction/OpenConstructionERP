@@ -80,6 +80,14 @@ async def _demo_cast(session_factory: Any, demo_pids: list[uuid.UUID]) -> dict[s
         async with session_factory() as _cs:
             _cast = await ensure_demo_cast(_cs, demo_pids)
             await _cs.commit()
+        try:
+            from app.core.demo_account_names import name_demo_accounts_for
+
+            async with session_factory() as _ns:
+                _cast["names"] = await name_demo_accounts_for(_ns, demo_pids)
+                await _ns.commit()
+        except Exception:
+            logger.warning("demo account names skipped (non-fatal)", exc_info=True)
         return _cast
     except Exception as exc:
         logger.warning("demo cast skipped (non-fatal)", exc_info=True)

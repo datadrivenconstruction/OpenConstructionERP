@@ -183,7 +183,7 @@ export function LoginPageNext() {
   // install. The tiles sign in through /auth/demo-login/ instead.
   const demoAccounts = [
     { email: 'demo@openconstructionerp.com', name: 'Admin', role: t('auth.demo_role_admin', 'Administrator'), color: 'bg-blue-500', letter: 'A' },
-    { email: 'manager@openconstructionerp.com', name: 'Michael Carter', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-amber-500', letter: 'M' },
+    { email: 'manager@openconstructionerp.com', name: t('auth.demo_role_manager', 'Manager'), role: t('auth.demo_role_manager', 'Manager'), color: 'bg-amber-500', letter: 'M' },
   ];
 
   const handleDemoLogin = async (demoEmail: string) => {

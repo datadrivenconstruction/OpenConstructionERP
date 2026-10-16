@@ -43,6 +43,7 @@ import time
 
 import httpx
 
+from app.core.demo_account_names import DEMO_EMAIL, demo_account_name
 from app.scripts.seed_credentials import describe_seed_login, login_failed_message, resolve_seed_password
 
 # Windows console defaults to cp1252; force utf-8 for the Unicode project names.
@@ -247,7 +248,7 @@ async def login_or_register(client: httpx.AsyncClient) -> dict[str, str]:
             json={
                 "email": ADMIN_EMAIL,
                 "password": ADMIN_PASSWORD,
-                "full_name": "Elena Marchetti",
+                "full_name": demo_account_name(DEMO_EMAIL),
             },
         )
         r = await client.post(

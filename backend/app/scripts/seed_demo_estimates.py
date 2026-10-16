@@ -21,6 +21,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from sqlalchemy import func, select
 
+from app.core.demo_account_names import DEMO_EMAIL, demo_account_name
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
 from app.core.demo_projects import find_showcase_owner
 from app.database import Base, async_session_factory, engine
@@ -645,7 +646,7 @@ async def main() -> None:
                 id=uuid.uuid4(),
                 email=SHOWCASE_OWNER_EMAIL,
                 hashed_password="$2b$12$DEMO_HASH_NOT_FOR_PRODUCTION_USE_ONLY",
-                full_name="Elena Marchetti",
+                full_name=demo_account_name(DEMO_EMAIL),
                 role="viewer",
                 locale="en",
                 is_active=True,

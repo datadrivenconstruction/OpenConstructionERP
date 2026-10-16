@@ -1514,11 +1514,6 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
 
     from sqlalchemy import func, select
 
-    from app.database import async_session_factory
-    from app.modules.projects.models import Project
-    from app.modules.users.models import User
-    from app.modules.users.service import hash_password
-
     # Email → env-var-name mapping. Order matters for stable banner output.
     #
     # Two login pages mirror this list by hand and show it on their demo
@@ -1530,23 +1525,35 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
     # also mirrored in ``app.modules.users.service`` and
     # ``app.modules.users.router`` (whitelists, kept in sync by
     # ``backend/tests/integration/test_demo_login_endpoint.py``).
+    from app.core.demo_account_names import (
+        DEMO_EMAIL,
+        ESTIMATOR_EMAIL,
+        MANAGER_EMAIL,
+        demo_account_name,
+        retire_placeholder_names,
+    )
+    from app.database import async_session_factory
+    from app.modules.projects.models import Project
+    from app.modules.users.models import User
+    from app.modules.users.service import hash_password
+
     demo_account_specs: list[dict[str, str]] = [
         {
             "email": "demo@openconstructionerp.com",
             "env_var": "DEMO_USER_PASSWORD",
-            "full_name": "Elena Marchetti",
+            "full_name": demo_account_name(DEMO_EMAIL),
             "role": "admin",
         },
         {
             "email": "estimator@openconstructionerp.com",
             "env_var": "DEMO_ESTIMATOR_PASSWORD",
-            "full_name": "Anna Musterfrau",
+            "full_name": demo_account_name(ESTIMATOR_EMAIL),
             "role": "editor",
         },
         {
             "email": "manager@openconstructionerp.com",
             "env_var": "DEMO_MANAGER_PASSWORD",
-            "full_name": "Michael Carter",
+            "full_name": demo_account_name(MANAGER_EMAIL),
             "role": "manager",
         },
     ]
@@ -1604,6 +1611,8 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
             from app.core.demo_admin import reconcile_demo_admin_role
 
             await reconcile_demo_admin_role(session)
+            # Logins created before the demo names were retired still carry the placeholders.
+            await retire_placeholder_names(session)
 
             # Persist generated passwords and say where they are. Operators
             # who set env vars never see this banner.

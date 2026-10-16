@@ -23,6 +23,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.demo_account_names import DEMO_EMAIL, demo_account_name
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
 from app.core.demo_resource_names import resource_name
 from app.core.demo_showcase import GERMAN_DIARY_DEMO_IDS, generic_site_rows, stage_spend
@@ -3034,7 +3035,7 @@ async def _get_or_create_owner(session: AsyncSession) -> uuid.UUID:
             id=_id(),
             email=SHOWCASE_OWNER_EMAIL,
             hashed_password="$2b$12$DEMO_HASH_NOT_FOR_PRODUCTION_USE_ONLY",
-            full_name="Elena Marchetti",
+            full_name=demo_account_name(DEMO_EMAIL),
             role="admin",
             locale="en",
             is_active=True,
@@ -8399,7 +8400,7 @@ async def _seed_module_data(
                 "status": "completed",
                 "attendees": [
                     {"name": "James Harrison", "company": "Vittram Properties", "status": "present"},
-                    {"name": "Anna Musterfrau", "company": "Endaby", "status": "present"},
+                    {"name": "Hannah Price", "company": "Endaby", "status": "present"},
                     {"name": "David Thompson", "company": "Rensley", "status": "present"},
                     {"name": "Emma Wallace", "company": "M&T", "status": "present"},
                 ],
