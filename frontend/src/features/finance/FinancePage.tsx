@@ -96,6 +96,7 @@ import { RetentionLedgerTab } from './RetentionLedgerTab';
 import { AgeingTab } from './AgeingTab';
 import { PaymentRunsTab } from './PaymentRunsTab';
 import { PayeeTotalsTab } from './PayeeTotalsTab';
+import { OpenItemsImportModal } from './OpenItemsImportModal';
 import { EInvoiceModal } from './EInvoiceModal';
 import { downloadInvoicePdf, downloadPaymentPdf } from './api';
 import { PURCHASING_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
@@ -2104,6 +2105,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [showCreate, setShowCreate] = useState(false);
+  const [showOpenItems, setShowOpenItems] = useState(false);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -2541,6 +2543,17 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
             {t('finance.export', { defaultValue: 'Export' })}
           </Button>
           <Button
+            variant="secondary"
+            size="sm"
+            icon={<Upload size={14} />}
+            onClick={() => setShowOpenItems(true)}
+            title={t('finance.openitems_button_hint', {
+              defaultValue: 'Carry over the invoices still open in your previous system',
+            })}
+          >
+            {t('finance.openitems_button', { defaultValue: 'Import open items' })}
+          </Button>
+          <Button
             variant="primary"
             size="sm"
             icon={<Plus size={14} />}
@@ -2554,6 +2567,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
           </Button>
         </div>
       </div>
+      {showOpenItems && <OpenItemsImportModal projectId={projectId} onClose={() => setShowOpenItems(false)} />}
 
       <Card padding="none">
         {/* Search + Status filter */}

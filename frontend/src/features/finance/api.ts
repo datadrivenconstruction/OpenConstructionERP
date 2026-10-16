@@ -8,7 +8,17 @@
  * the page can drop straight onto the API.
  */
 
-import { API_BASE, apiDelete, apiGet, apiPatch, apiPost, apiPut, downloadWithAuth } from '@/shared/lib/api';
+import {
+  API_BASE,
+  apiDelete,
+  apiGet,
+  apiPatch,
+  apiPost,
+  apiPut,
+  downloadWithAuth,
+  extractErrorMessageFromBody,
+  fetchWithAuth,
+} from '@/shared/lib/api';
 import { downloadRecordPdf } from '@/shared/lib/documentExport';
 
 /* ── Retention / withholding ledger ───────────────────────────────────── */
@@ -289,6 +299,78 @@ export function downloadPayeeTotalsCsv(query: PayeeTotalsQuery, filename: string
   const qs = payeeParams(query);
   qs.set('format', 'csv');
   return downloadWithAuth(`${API_BASE}/v1/finance/payee-totals/?${qs}`, filename);
+}
+
+/* ── Open items carried over from another system ──────────────────────── */
+
+export type OpenItemRowStatus = 'ready' | 'imported' | 'exists' | 'error';
+
+export interface OpenItemRow {
+  row: number;
+  status: OpenItemRowStatus;
+  message: string | null;
+  /** Stable reason of an error or exists row, translated as finance.openitems_err_<code>. */
+  code: string | null;
+  params: Record<string, string>;
+  direction: 'payable' | 'receivable' | null;
+  invoice_number: string | null;
+  counterparty: string | null;
+  contact_id: string | null;
+  contact_name: string | null;
+  invoice_date: string | null;
+  due_date: string | null;
+  currency_code: string | null;
+  total: string | null;
+  retention_held: string | null;
+  open: string | null;
+  paid: string | null;
+  invoice_id: string | null;
+}
+
+export interface OpenItemControlTotal {
+  direction: 'payable' | 'receivable';
+  currency_code: string;
+  count: number;
+  total: string;
+  retention_held: string;
+  open: string;
+}
+
+export interface OpenItemsImportResult {
+  project_id: string;
+  cutover_date: string;
+  dry_run: boolean;
+  missing_columns: string[];
+  imported: number;
+  ready: number;
+  exists: number;
+  errors: number;
+  rows: OpenItemRow[];
+  control_totals: OpenItemControlTotal[];
+}
+
+/**
+ * Check (``dryRun``) or import a file of invoices still open at the cut-over.
+ * The import is all or nothing: while any row has an error nothing is written.
+ */
+export async function importOpenItems(
+  projectId: string,
+  file: File,
+  cutoverDate: string,
+  dryRun: boolean,
+): Promise<OpenItemsImportResult> {
+  const qs = new URLSearchParams({ project_id: projectId, cutover_date: cutoverDate, dry_run: String(dryRun) });
+  const body = new FormData();
+  body.append('file', file);
+  const response = await fetchWithAuth(`${API_BASE}/v1/finance/open-items/import/?${qs}`, { method: 'POST', body });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(extractErrorMessageFromBody(payload) ?? `HTTP ${response.status}`);
+  return payload as OpenItemsImportResult;
+}
+
+/** The CSV template an open items import reads. */
+export function downloadOpenItemsTemplate(): Promise<void> {
+  return downloadWithAuth(`${API_BASE}/v1/finance/open-items/template/`, 'open_items_template.csv');
 }
 
 /* ── E-invoice export ─────────────────────────────────────────────────── */
