@@ -94,7 +94,6 @@ import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { isFrameworkPackActive } from '@/app/layout/packMenu';
 import { fmtList, fmtPercent, fmtFixed, formatDateValue } from '@/shared/lib/formatters';
 import { formatCurrency as formatMoney, toNum } from '@/shared/lib/money';
-import { useHasPermission } from '@/shared/lib/permissionGates';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1464,8 +1463,6 @@ function ProjectStatusSelect({
 
 export function ProjectDetailPage() {
   const { t } = useTranslation();
-  // Starting a BOQ needs boq.create (editor and above); a viewer would only collect a 403.
-  const canCreateBoq = useHasPermission('boq.create');
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -2985,8 +2982,6 @@ export function ProjectDetailPage() {
                       size="md"
                       className="w-full justify-start"
                       icon={<Plus size={14} />}
-                      disabled={!canCreateBoq}
-                      title={canCreateBoq ? undefined : t('boq.create_needs_editor', { defaultValue: 'Creating an estimate needs the editor role.' })}
                       onClick={() => navigate(`/projects/${projectId}/boq/new`)}
                     >
                       {t('projects.new_boq', { defaultValue: 'New BOQ' })}
@@ -3147,8 +3142,6 @@ export function ProjectDetailPage() {
                     variant="primary"
                     size="sm"
                     icon={<Table2 size={14} />}
-                    disabled={!canCreateBoq}
-                    title={canCreateBoq ? undefined : t('boq.create_needs_editor', { defaultValue: 'Creating an estimate needs the editor role.' })}
                     onClick={() => navigate(`/projects/${projectId}/boq/new`)}
                   >
                     {t('projects.new_boq')}
@@ -3176,8 +3169,6 @@ export function ProjectDetailPage() {
                       variant="primary"
                       size="sm"
                       icon={<Table2 size={14} />}
-                      disabled={!canCreateBoq}
-                      title={canCreateBoq ? undefined : t('boq.create_needs_editor', { defaultValue: 'Creating an estimate needs the editor role.' })}
                       onClick={() => navigate(`/projects/${projectId}/boq/new`)}
                     >
                       {t('projects.create_boq')}

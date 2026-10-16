@@ -33,7 +33,6 @@ import { PresenceAvatars } from '@/modules/collaboration/components/PresenceAvat
 import { usePresenceStore } from '@/modules/collaboration/hooks/usePresence';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { CreateBOQModal } from './CreateBOQPage';
-import { useHasPermission } from '@/shared/lib/permissionGates';
 import { BOQRenameDialog } from './BOQRenameDialog';
 import { projectFilterOptions } from './projectFilterOptions';
 
@@ -430,8 +429,7 @@ export function BOQListPage() {
   // list isn't a tour through every project's BOQs first.
   const { projectId: projectIdFromUrl } = useParams<{ projectId?: string }>();
 
-  // Create BOQ modal. Creating needs boq.create (editor and above).
-  const canCreateBoq = useHasPermission('boq.create');
+  // Create BOQ modal
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createModalProjectId, setCreateModalProjectId] = useState<string | undefined>();
 
@@ -926,8 +924,6 @@ export function BOQListPage() {
               variant="primary"
               size="sm"
               icon={<Plus size={14} />}
-              disabled={!canCreateBoq}
-              title={canCreateBoq ? undefined : t('boq.create_needs_editor', { defaultValue: 'Creating an estimate needs the editor role.' })}
               onClick={() => {
                 const pid = projectIdFromUrl || activeProjectId || projectFilter || (projects && projects.length === 1 ? projects[0]!.id : undefined) || undefined;
                 setCreateModalProjectId(pid);
@@ -1225,14 +1221,10 @@ export function BOQListPage() {
           icon={<Table size={28} strokeWidth={1.5} />}
           title={t('boq.no_boqs', { defaultValue: 'No BOQs yet' })}
           description={t('boq.no_boqs_hint', { defaultValue: 'A Bill of Quantities is the foundation of your estimate. Start by creating a project, then add sections (trade groups) and positions (work items) with quantities and rates.' })}
-          action={
-            canCreateBoq
-              ? {
-                  label: t('boq.create_boq', { defaultValue: 'Create BOQ' }),
-                  onClick: () => navigate('/projects/new'),
-                }
-              : undefined
-          }
+          action={{
+            label: t('boq.create_boq', { defaultValue: 'Create BOQ' }),
+            onClick: () => navigate('/projects/new'),
+          }}
         />
       ) : (
         <div className="space-y-6">

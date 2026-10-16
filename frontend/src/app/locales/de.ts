@@ -8889,7 +8889,6 @@ const resource = {
     "boq.cost_risk_title": "Monte-Carlo-Kostenrisiko",
     "boq.cost_risk_variance_share": "Varianzanteil",
     "boq.create_boq": "LV erstellen",
-    "boq.create_needs_editor": "Zum Anlegen eines LV ist die Rolle Bearbeiter nötig.",
     "boq.create_from_template": "LV aus Vorlage erstellen",
     "boq.creating": "Wird erstellt...",
     "boq.date": "Datum",

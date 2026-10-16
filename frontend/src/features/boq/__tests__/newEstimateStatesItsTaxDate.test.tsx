@@ -21,10 +21,6 @@ vi.mock('../api', () => ({
 }));
 
 import { CreateBOQModal } from '../CreateBOQPage';
-import { useAuthStore } from '@/stores/useAuthStore';
-
-// Creating an estimate needs boq.create, editor and above.
-useAuthStore.setState({ userRole: 'editor' });
 
 function renderModal() {
   const client = new QueryClient();

@@ -22,14 +22,13 @@ function rankOf(role: string): number | undefined {
 }
 
 // Minimum role each known tool permission requires (mirrors the modules'
-// permission registrations; `boq.create` is EDITOR since viewers no longer
-// start estimates). Unknown permissions fall back
+// permission registrations — all VIEWER today). Unknown permissions fall back
 // to "editor" so we never falsely enable a tool the backend will reject.
 const PERMISSION_MIN_RANK: Record<string, number> = {
   'costs.read': ROLE_RANK.viewer,
   'assemblies.read': ROLE_RANK.viewer,
   'boq.read': ROLE_RANK.viewer,
-  'boq.create': ROLE_RANK.editor,
+  'boq.create': ROLE_RANK.viewer,
   'documents.read': ROLE_RANK.viewer,
   'projects.read': ROLE_RANK.viewer,
   'ai_agents.run': ROLE_RANK.editor,

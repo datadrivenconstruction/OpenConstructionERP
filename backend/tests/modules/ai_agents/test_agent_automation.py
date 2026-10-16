@@ -209,7 +209,7 @@ async def test_set_tools_permission_gate(session: AsyncSession) -> None:
     if not permission_registry.has("costs.read"):
         permission_registry.register("costs.read", Role.VIEWER)
     if not permission_registry.has("boq.create"):
-        permission_registry.register("boq.create", Role.EDITOR)
+        permission_registry.register("boq.create", Role.VIEWER)
 
     # search_costs requires costs.read (VIEWER). An editor can grant it.
     assert required_permission_for_tool("search_costs") == "costs.read"
@@ -223,7 +223,7 @@ async def test_set_tools_permission_gate(session: AsyncSession) -> None:
     assert "search_costs" in meta["allowed_tools"]
     assert "create_position" in meta["allowed_tools"]
 
-    # create_position requires boq.create (EDITOR per the boq module), so a
+    # create_position requires boq.create (VIEWER per the boq module), so a
     # viewer can grant search_costs but NOT a tool requiring more than viewer.
     # Use a synthetic tool mapping check: project the runnable agent and assert
     # the granted tools land on allowed_tools.

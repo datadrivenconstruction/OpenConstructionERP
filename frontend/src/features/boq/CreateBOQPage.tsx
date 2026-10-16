@@ -10,7 +10,6 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchProjectList } from '@/shared/lib/projectList';
-import { useHasPermission } from '@/shared/lib/permissionGates';
 import { boqApi } from './api';
 import { importFailureFromBody } from './importFailureText';
 import { ImportJobFailedError, isImportJob, waitForImportJob } from './importJob';
@@ -73,8 +72,6 @@ class ImportFailure extends Error {}
 
 export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQModalProps) {
   const { t } = useTranslation();
-  // Creating needs boq.create (editor and above); a viewer would only collect a 403.
-  const canCreate = useHasPermission('boq.create');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -147,7 +144,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (busy || !canCreate) return;
+    if (busy) return;
     setError(null);
     setTouched(true);
 
@@ -523,13 +520,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
             <Button variant="secondary" type="button" onClick={onClose} disabled={busy}>
               {t('common.cancel')}
             </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              loading={busy}
-              disabled={!canCreate}
-              title={canCreate ? undefined : t('boq.create_needs_editor', { defaultValue: 'Creating an estimate needs the editor role.' })}
-            >
+            <Button variant="primary" type="submit" loading={busy}>
               {submitLabel}
             </Button>
           </div>
