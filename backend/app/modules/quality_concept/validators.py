@@ -21,7 +21,7 @@ from app.core.validation.engine import (
     ValidationRule,
     rule_registry,
 )
-from app.modules.quality_concept.messages import translate
+from app.modules.quality_concept.messages import is_key_present, translate
 
 QUALITY_CONCEPT_RULE_SET = "quality_concept"
 
@@ -35,6 +35,20 @@ def _data(context: ValidationContext) -> dict[str, Any]:
     return context.data if isinstance(context.data, dict) else {}
 
 
+# Finding params that name the proof a message is about.
+_NAMING = ("label", "evidence_type", "package")
+
+
+def _proof_name(locale: str, evidence_type: Any, package: Any) -> str:
+    """A proof named by its evidence type (in ``locale``) and package, for a proof with no title."""
+    code = str(evidence_type or "")
+    if not code:
+        return ""
+    key = f"quality_concept.evidence_type.{code}"
+    name = translate(key, locale=locale) if is_key_present(key, "en") else code.replace("_", " ").capitalize()
+    return f"{name} ({package})" if package else name
+
+
 class _QcRule(ValidationRule):
     standard = "quality_concept"
     category = RuleCategory.COMPLETENESS
@@ -45,7 +59,10 @@ class _QcRule(ValidationRule):
 
     def _result(self, locale: str, passed: bool, ref: str, **params: Any) -> RuleResult:
         # A finding may carry a human label (a proof title) to show in place of its raw id.
-        shown = str(params.pop("label", "") or "") or ref
+        label = str(params.pop("label", "") or "")
+        shown = label or _proof_name(locale, params.pop("evidence_type", ""), params.pop("package", "")) or ref
+        params.pop("evidence_type", None)
+        params.pop("package", None)
         base = f"quality_concept.rules.{self.key}"
         return RuleResult(
             rule_id=self.rule_id,
@@ -72,7 +89,7 @@ class _QcRule(ValidationRule):
         hits = self.findings(context)
         if not hits:
             return [self._result(loc, True, "")]
-        return [self._result(loc, False, ref, label=params.get("label", "")) for ref, params in hits]
+        return [self._result(loc, False, ref, **{k: params[k] for k in _NAMING if k in params}) for ref, params in hits]
 
 
 def _rule(
