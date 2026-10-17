@@ -7678,7 +7678,7 @@ const resource = {
     "guide.projects.concept.title": "Ce conține un proiect",
     "guide.projects.concept.body": "Fiecare proiect deține listele sale de cantități, fișierele încărcate, rapoartele de validare și setările. Pe aceasta pagina, fiecare proiect apare ca un card cu numărul de antemăsurători, valoarea totala în moneda proprie, regiunea și tipurile de fișiere, astfel încât citiți întregul portofoliu dintr-o privire.",
     "guide.projects.create.title": "Crearea unui proiect",
-    "guide.projects.create.body": "Faceți clic pe Proiect Nou. Alegeți Creare Rapida pentru a seta totul pe un singur ecran, sau Configurare Ghidata pentru cinci pași scurti care pre-selectează și modulele potrivite. Doar numele proiectului este obligatoriu; toate celelalte câmpuri sunt opționale și pot fi editate ulterior.",
+    "guide.projects.create.body": "Faceți clic pe Proiect Nou. Alegeți Creare Rapidă pentru a seta totul pe un singur ecran, sau Configurare Ghidată pentru cinci pași scurți care pre-selectează și modulele potrivite. Doar numele proiectului este obligatoriu; toate celelalte câmpuri sunt opționale și pot fi editate ulterior.",
     "guide.projects.fields.title": "Câmpurile cheie",
     "guide.projects.fields.body": "Numele identifică proiectul. Regiunea determina bază de date de costuri și regulile locale. Moneda este moneda de bază pentru fiecare preț și total. Standardul de clasificare (DIN 276, NRM, MasterFormat și altele) stabilește cum este codificata lucrarea. Limba localizeaza etichetele pentru echipa.",
     "guide.projects.details.title": "Detalii opționale",
