@@ -39,12 +39,11 @@ import {
   Sparkles,
   X,
   ArrowRight,
-  Scissors,
-  Ruler,
-  Mountain,
-  Camera,
-  Coins,
-  GraduationCap,
+  Scale,
+  Route,
+  Link2,
+  CalendarCheck,
+  Map as MapIcon,
   type LucideIcon,
 } from 'lucide-react';
 import { APP_VERSION, isNewerFeatureRelease } from '@/shared/lib/version';
@@ -67,126 +66,70 @@ interface Section {
   bullets: { key: string; default: string }[];
 }
 
-/* ── v11.0.0 release content ────────────────────────────────────────────
-   Six chips for the v11.0 wave: the new point cloud review tools take the
-   headline (section a scan, measure on it, colour it by height, snapshot a
-   view), then onboarding that leads with the cost base, and the start-here
-   worked cases now translated into every language. Bullets surface only
-   when the chip is expanded. */
-const SECTIONS_V1110: Section[] = [
+/* ── v18.7.0 release content ────────────────────────────────────────────
+   Cost control is the headline: one page per project with the expected final
+   cost and where each figure comes from, then the three things a user does on
+   it, and the plan room that now explains itself. Bullets surface only when
+   the chip is expanded. */
+const SECTIONS_V1870: Section[] = [
   {
-    id: 'pc-section',
-    icon: Scissors,
-    titleKey: 'whatsnew.v1110.section.title',
-    titleDefault: 'Slice a point cloud',
-    chipKey: 'whatsnew.v1110.section.chip',
-    chipDefault: 'Section a scan',
+    id: 'cost-control',
+    icon: Scale,
+    titleKey: 'whatsnew.v1870.cost_control.title',
+    titleDefault: 'Cost control per project',
+    chipKey: 'whatsnew.v1870.cost_control.chip',
+    chipDefault: 'Cost control',
     bullets: [
-      {
-        key: 'whatsnew.v1110.section.b1',
-        default:
-          'Cut a reality-capture scan to a height band and read just that slice.',
-      },
-      {
-        key: 'whatsnew.v1110.section.b2',
-        default:
-          'Switch the slice to a top-down plan view to work it like a floor plan.',
-      },
+      { key: 'whatsnew.v1870.cost_control.b1', default: 'Planned, awarded, changes, expected final cost, certified and paid on one page, by cost line or by contract.' },
+      { key: 'whatsnew.v1870.cost_control.b2', default: 'Open it from the sidebar under Cost control.' },
     ],
   },
   {
-    id: 'pc-measure',
-    icon: Ruler,
-    titleKey: 'whatsnew.v1110.measure.title',
-    titleDefault: 'Measure on the cloud',
-    chipKey: 'whatsnew.v1110.measure.chip',
-    chipDefault: 'Measure points',
+    id: 'forecast-source',
+    icon: Route,
+    titleKey: 'whatsnew.v1870.forecast.title',
+    titleDefault: 'A forecast that says where it comes from',
+    chipKey: 'whatsnew.v1870.forecast.chip',
+    chipDefault: 'Forecast source',
     bullets: [
-      {
-        key: 'whatsnew.v1110.measure.b1',
-        default:
-          'Measure point to point and read the distance with its horizontal and vertical parts in millimetres.',
-      },
-      {
-        key: 'whatsnew.v1110.measure.b2',
-        default:
-          'Box off a region with a clip box to isolate part of a scan.',
-      },
+      { key: 'whatsnew.v1870.forecast.b1', default: 'Each line takes its most reliable figure, from the final account down to the budget, and a label says which one.' },
+      { key: 'whatsnew.v1870.forecast.b2', default: 'While less than half of a line is let, the plan stays the forecast.' },
     ],
   },
   {
-    id: 'pc-elevation',
-    icon: Mountain,
-    titleKey: 'whatsnew.v1110.elevation.title',
-    titleDefault: 'Colour points by height',
-    chipKey: 'whatsnew.v1110.elevation.chip',
-    chipDefault: 'Elevation colours',
+    id: 'assign-money',
+    icon: Link2,
+    titleKey: 'whatsnew.v1870.assign.title',
+    titleDefault: 'Put money on the right cost line',
+    chipKey: 'whatsnew.v1870.assign.chip',
+    chipDefault: 'Assign money',
     bullets: [
-      {
-        key: 'whatsnew.v1110.elevation.b1',
-        default:
-          'Colour the cloud by elevation with a legend from the lowest to the highest point.',
-      },
-      {
-        key: 'whatsnew.v1110.elevation.b2',
-        default:
-          'Pin a height band to hold the colour range while you look around.',
-      },
+      { key: 'whatsnew.v1870.assign.b1', default: 'Contract and order lines on no cost line are listed in one place.' },
+      { key: 'whatsnew.v1870.assign.b2', default: 'Assign a whole contract in one step or line by line; the forecast follows at once.' },
     ],
   },
   {
-    id: 'pc-snapshot',
-    icon: Camera,
-    titleKey: 'whatsnew.v1110.snapshot.title',
-    titleDefault: 'Save the view',
-    chipKey: 'whatsnew.v1110.snapshot.chip',
-    chipDefault: 'Snapshot',
+    id: 'monthly-report',
+    icon: CalendarCheck,
+    titleKey: 'whatsnew.v1870.snapshots.title',
+    titleDefault: 'Monthly cost report',
+    chipKey: 'whatsnew.v1870.snapshots.chip',
+    chipDefault: 'Monthly report',
     bullets: [
-      {
-        key: 'whatsnew.v1110.snapshot.b1',
-        default:
-          'Save the current point cloud view as a PNG image in one click.',
-      },
+      { key: 'whatsnew.v1870.snapshots.b1', default: 'Save the forecast each month with its stage, from budget to final account.' },
+      { key: 'whatsnew.v1870.snapshots.b2', default: 'A chart shows how the cost moved, and your own forecasts keep their reason.' },
     ],
   },
   {
-    id: 'onboarding-base',
-    icon: Coins,
-    titleKey: 'whatsnew.v1110.onboarding.title',
-    titleDefault: 'Onboarding leads with the cost base',
-    chipKey: 'whatsnew.v1110.onboarding.chip',
-    chipDefault: 'Cost base first',
+    id: 'plan-room',
+    icon: MapIcon,
+    titleKey: 'whatsnew.v1870.plan_room.title',
+    titleDefault: 'The plan room explains itself',
+    chipKey: 'whatsnew.v1870.plan_room.chip',
+    chipDefault: 'Plan room',
     bullets: [
-      {
-        key: 'whatsnew.v1110.onboarding.b1',
-        default:
-          'Choose your national price base first, right at the start of setup.',
-      },
-      {
-        key: 'whatsnew.v1110.onboarding.b2_modules',
-        default:
-          'The modules switched on follow the company profile you pick, and a profile with its own workspace opens the menu shaped to how you work.',
-      },
-    ],
-  },
-  {
-    id: 'start-here',
-    icon: GraduationCap,
-    titleKey: 'whatsnew.v1110.cases.title',
-    titleDefault: 'Learn by example',
-    chipKey: 'whatsnew.v1110.cases.chip',
-    chipDefault: 'Start-here cases',
-    bullets: [
-      {
-        key: 'whatsnew.v1110.cases.b1',
-        default:
-          'A start-here row on the dashboard opens worked cases you can follow step by step.',
-      },
-      {
-        key: 'whatsnew.v1110.cases.b2',
-        default:
-          'The full case library is translated into every language.',
-      },
+      { key: 'whatsnew.v1870.plan_room.b1', default: 'Three short steps say what the page is for, and a project without drawings offers an upload.' },
+      { key: 'whatsnew.v1870.plan_room.b2', default: 'Dropping a pin is the main action, and empty layers link to where their marks are made.' },
     ],
   },
 ];
@@ -304,7 +247,7 @@ export function WhatsNewCard({ forceShow = false, versionOverride }: WhatsNewCar
     navigate('/about#changelog');
   }, [navigate, handleDismiss]);
 
-  const sections = useMemo(() => SECTIONS_V1110, []);
+  const sections = useMemo(() => SECTIONS_V1870, []);
 
   if (mode === null) return null;
 

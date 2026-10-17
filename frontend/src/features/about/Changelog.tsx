@@ -71,7 +71,7 @@ const CHANGELOG: ChangelogEntry[] = [
     date: '2026-10-17',
     tag: 'NEW',
     summary:
-      'Cost control per project: planned, awarded, changes, expected final cost, certified and paid on one page, by cost line or by contract, with each forecast saying where its figure comes from. Money on no cost line can be put on one in a step, forecasts can be overruled with a reason, saved monthly with their stage and compared over time, tables sit on a solid background, and the plan room explains itself and offers to upload drawings when there are none.',
+      'Cost control per project: planned, awarded, changes, expected final cost, certified and paid on one page, by cost line or by contract, with each forecast saying where its figure comes from. Money on no cost line can be put on one in a step, forecasts can be overruled with a reason, saved monthly with their stage and compared over time, the validation report groups problems by rule and names bill positions by number, tables sit on a solid background, the dashboard shows cases and videos in one row each, and the plan room explains itself and offers to upload drawings when there are none.',
   },
   {
     version: '18.6.4',
