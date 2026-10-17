@@ -138,6 +138,12 @@ class BidPackageLineItem(Base):
     # Carried onto the contract line on award, so the contract bills against
     # the same bill position the estimate priced.
     boq_position_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Plain UUID - the cost line (oe_costmodel_cost_line) this scope line is
+    # costed on, copied from the bill position when the line is made from one.
+    # A position split over several cost lines keeps its split in
+    # oe_costmodel_line_allocation (source "bid_line"); this column then names
+    # the line with the largest share. The award hands it to the contract line.
+    cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     package: Mapped[BidPackage] = relationship(back_populates="line_items")
 

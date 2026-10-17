@@ -461,6 +461,7 @@ async def _on_bid_package_awarded(event: Event) -> None:
             for sl in (await session.execute(priced_stmt)).scalars().all():
                 priced_by_line[sl.line_item_id] = sl
 
+        drafted_lines: list[ContractLine] = []
         for pkg_line in pkg_lines:
             priced = priced_by_line.get(pkg_line.id)
             if priced is not None:
@@ -489,7 +490,15 @@ async def _on_bid_package_awarded(event: Event) -> None:
                 # contracts.service.BOQ_POSITION_META_KEY.
                 cl.metadata_["boq_position_id"] = str(pkg_line.boq_position_id)
             session.add(cl)
+            drafted_lines.append(cl)
 
+        # Each line takes the cost line of its scope line (which took it from
+        # the bill position), split included, so the award lands on the
+        # account the estimate planned it on.
+        await session.flush()
+        from app.modules.costmodel.inheritance_service import inherit_contract_lines  # noqa: PLC0415
+
+        await inherit_contract_lines(session, contract, drafted_lines)
         await session.commit()
 
         event_bus.publish_detached(

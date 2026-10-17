@@ -1069,5 +1069,47 @@
     "parent_not_found": "Wala sa proyektong ito ang modelong dapat ay pagmulan ng bagong bersyon ng upload na ito. Pumili ng iba, o i-upload ito bilang hiwalay na modelo.",
     "parent_not_ready": "Hindi pa tapos ang pag-import ng \"{name}\", kaya hindi pa ito makakatanggap ng bagong bersyon. Hintaying maging handa, o i-upload ito bilang hiwalay na modelo.",
     "parent_superseded": "May mas bago nang bersyon ang \"{name}\", ang {version}. I-upload na lang ito bilang bagong bersyon ng pinakabago."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Ang kontrata {code} ay nagkakahalaga ng {amount} pero walang schedule lines, kaya wala sa anumang cost line ang pera nito.",
+      "suggestion": "Bigyan ang kontrata ng isang account sa cost control, o idagdag ang schedule lines nito."
+    },
+    "contract_sum_differs": {
+      "fail": "Ang kontrata {code} ay nagkakahalaga ng {total}, pero ang schedule lines nito ay umaabot lang sa {lines} (may pagkakaiba na {difference}).",
+      "suggestion": "Ayusin ang halaga ng kontrata o ang schedule lines para magtugma."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Aprubado na ang change order {code} pero walang napagkasunduang halaga.",
+      "suggestion": "I-record ang halagang napagkasunduan sa kontratista bago aprubahan ang change."
+    },
+    "change_without_approval_date": {
+      "fail": "Aprubado na ang change order {code} pero walang petsa ng pag-apruba.",
+      "suggestion": "I-record kung kailan inaprubahan ang change."
+    },
+    "billed_before_approval": {
+      "fail": "May siningil na {amount} sa kontrata {contract} para sa change {code}, na may status na {status} at hindi pa aprubado.",
+      "suggestion": "Aprubahan muna ang change, o alisin ang singil sa claim."
+    },
+    "contract_over_target": {
+      "fail": "Ang kontrata {code} ay may commitment na {committed}, lampas ng {difference} sa {target} ng bill of quantities na pinagmulan nito (higit sa {tolerance} %).",
+      "suggestion": "Suriin ang award at mga change nito laban sa bill of quantities, at itala kung bakit mas mahal ang gawa."
+    },
+    "account_over_plan": {
+      "fail": "Ang account {code} ay may commitments na {committed}, lampas ng {difference} sa plano nitong {planned} (higit sa {tolerance} %).",
+      "suggestion": "Suriin ang commitments sa account na ito, o i-update ang plano kasama ang dahilan."
+    },
+    "quantity_overrun": {
+      "fail": "Ang line {code} ng kontrata {contract} ay nasukat sa {measured} {unit} kontra sa {contracted} {unit} na nasa kontrata, lampas ng {over} % (pinapayagan ang {tolerance} %).",
+      "suggestion": "Suriin ang sukat, o pagkasunduan ang dagdag na dami bilang change."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Ang kontrata {code} ay nasukat sa {measured}, lampas ng {difference} sa halaga nito kasama ang aprubadong changes na {committed}.",
+      "suggestion": "Aprubahan ang change na sumasaklaw sa dagdag na gawa, o suriin ang sukat."
+    },
+    "invoice_without_contract": {
+      "fail": "Ang supplier invoice {number} na {amount} ay hindi kabilang sa anumang kontrata o order.",
+      "suggestion": "Iugnay ang mga line nito sa isang kontrata, o i-record bilang direct cost sa isang account."
+    }
   }
 }

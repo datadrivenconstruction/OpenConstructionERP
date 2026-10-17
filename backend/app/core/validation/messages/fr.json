@@ -1069,5 +1069,47 @@
     "parent_not_found": "Le modèle dont cet import devrait être une nouvelle version n'existe pas dans ce projet. Choisissez-en un autre ou importez ce fichier comme modèle distinct.",
     "parent_not_ready": "L'import de « {name} » n'est pas terminé, il ne peut donc pas encore recevoir de nouvelle version. Attendez qu'il soit prêt ou importez ce fichier comme modèle distinct.",
     "parent_superseded": "« {name} » possède déjà une version plus récente, {version}. Importez plutôt ce fichier comme nouvelle version de la plus récente."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Le contrat {code} vaut {amount} mais n'a aucune ligne d'échéancier, son montant n'est donc sur aucune ligne de coût.",
+      "suggestion": "Donnez au contrat un compte dans le contrôle des coûts, ou ajoutez ses lignes d'échéancier."
+    },
+    "contract_sum_differs": {
+      "fail": "Le contrat {code} vaut {total}, mais ses lignes d'échéancier totalisent {lines} (écart de {difference}).",
+      "suggestion": "Corrigez la valeur du contrat ou les lignes d'échéancier pour qu'elles concordent."
+    },
+    "change_without_agreed_amount": {
+      "fail": "L'avenant {code} est approuvé sans montant convenu.",
+      "suggestion": "Saisissez le montant convenu avec l'entreprise avant d'approuver l'avenant."
+    },
+    "change_without_approval_date": {
+      "fail": "L'avenant {code} est approuvé sans date d'approbation.",
+      "suggestion": "Saisissez la date d'approbation de l'avenant."
+    },
+    "billed_before_approval": {
+      "fail": "{amount} sont facturés sur le contrat {contract} pour l'avenant {code}, qui est au statut {status} et non approuvé.",
+      "suggestion": "Approuvez d'abord l'avenant, ou retirez la facturation de la situation de travaux."
+    },
+    "contract_over_target": {
+      "fail": "Le contrat {code} engage {committed}, soit {difference} de plus que les {target} du bordereau dont il est issu (plus de {tolerance} %).",
+      "suggestion": "Vérifiez l'attribution et ses avenants par rapport au bordereau, et notez pourquoi les travaux coûtent plus cher."
+    },
+    "account_over_plan": {
+      "fail": "Le compte {code} porte {committed} d'engagements, soit {difference} de plus que son budget de {planned} (plus de {tolerance} %).",
+      "suggestion": "Vérifiez les engagements de ce compte, ou mettez à jour le budget en indiquant la raison."
+    },
+    "quantity_overrun": {
+      "fail": "La ligne {code} du contrat {contract} est métrée à {measured} {unit} pour {contracted} {unit} au marché, soit {over} % de plus (toléré {tolerance} %).",
+      "suggestion": "Vérifiez le métré, ou convenez de la quantité supplémentaire par avenant."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Le contrat {code} est métré à {measured}, soit {difference} de plus que sa valeur avec avenants approuvés de {committed}.",
+      "suggestion": "Approuvez l'avenant qui couvre les travaux en plus, ou vérifiez le métré."
+    },
+    "invoice_without_contract": {
+      "fail": "La facture fournisseur {number} de {amount} n'est rattachée à aucun contrat ni commande.",
+      "suggestion": "Rattachez ses lignes à un contrat, ou enregistrez-la en coût direct sur un compte."
+    }
   }
 }

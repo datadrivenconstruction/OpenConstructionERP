@@ -1886,6 +1886,8 @@ class ContractsService:
             # this year's clauses, which is not what "clone" means to anyone.
             template_code=getattr(source, "template_code", None),
             template_version=getattr(source, "template_version", None),
+            # Cost lines belong to one project: a clone into another starts without accounts.
+            cost_line_id=source.cost_line_id if dest_project_id == source.project_id else None,
             created_by=user_id,
             metadata_=cloned_meta,
         )
@@ -1912,9 +1914,12 @@ class ContractsService:
                     total_value=Decimal(str(ln.total_value or 0)),
                     order_index=ln.order_index,
                     metadata_=dict(getattr(ln, "metadata_", {}) or {}),
+                    cost_line_id=ln.cost_line_id if dest_project_id == source.project_id else None,
                 )
                 new_line = await self.line_repo.create(new_line)
                 id_map[ln.id] = new_line.id
+                if new_line.cost_line_id is not None:
+                    await self._copy_line_split(dest_project_id, ln, new_line)
             # Pass 2 - wire up parent_line_id translations.
             for ln in src_lines:
                 if ln.parent_line_id is None:
@@ -2908,7 +2913,38 @@ class ContractsService:
             metadata_=data.metadata,
         )
         line = await self.line_repo.create(line)
+        await self._inherit_line_cost_lines(data.contract_id, [line])
         return line
+
+    async def _copy_line_split(self, project_id: uuid.UUID, source: ContractLine, target: ContractLine) -> None:
+        """Give a cloned line the split of the line it was cloned from."""
+        try:
+            from app.modules.costmodel.inheritance import SOURCE_CONTRACT_LINE  # noqa: PLC0415
+            from app.modules.costmodel.inheritance_service import copy_line_split  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - the cost model is a core module
+            return
+        await copy_line_split(
+            self.session,
+            project_id=project_id,
+            source_type=SOURCE_CONTRACT_LINE,
+            source_id=source.id,
+            source_main=source.cost_line_id,
+            target_type=SOURCE_CONTRACT_LINE,
+            target_id=target.id,
+        )
+
+    async def _inherit_line_cost_lines(self, contract_id: uuid.UUID, lines: list[ContractLine]) -> None:
+        """Put new lines without a cost line on what they inherit: bid line, bill position, contract account."""
+        try:
+            from app.modules.costmodel.inheritance_service import inherit_contract_lines  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - the cost model is a core module
+            return
+        contract = await self.session.get(Contract, contract_id)
+        if contract is None:
+            return
+        if await inherit_contract_lines(self.session, contract, lines):
+            for line in lines:
+                await self.session.refresh(line)
 
     async def bulk_create_lines(
         self,
@@ -2936,7 +2972,9 @@ class ContractsService:
                     metadata_=it.metadata,
                 )
             )
-        return await self.line_repo.bulk_create(lines)
+        created = await self.line_repo.bulk_create(lines)
+        await self._inherit_line_cost_lines(contract_id, list(created))
+        return created
 
     async def update_line(
         self,
@@ -2969,6 +3007,9 @@ class ContractsService:
             fields["total_value"] = qty * rate
         await self.line_repo.update_fields(line_id, **fields)
         await self.session.refresh(line)
+        # A line just linked to a bill position, with no cost line yet, takes the position's.
+        if line.cost_line_id is None and boq_position_id_for_line(line) is not None:
+            await self._inherit_line_cost_lines(line.contract_id, [line])
         return line
 
     async def _assert_line_may_be_linked(self, line: ContractLine, metadata: dict[str, Any]) -> None:

@@ -187,6 +187,10 @@ class ChangeOrderItemResponse(BaseModel):
     cost_delta: str = "0"
     unit: str
     sort_order: int
+    # The account the item's money is costed on, and where it came from:
+    # contract_line, position, contract or manual (see costmodel.inheritance).
+    cost_line_id: UUID | None = None
+    cost_line_source: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -280,6 +284,10 @@ class ChangeOrderItemCreate(BaseModel):
     unit: str = Field(default="", max_length=20)
     sort_order: int = Field(default=0, ge=0, le=_INT32_MAX)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Leave empty to inherit the account; a line outside what the item
+    # inherits needs a reason.
+    cost_line_id: UUID | None = None
+    cost_line_reason: str | None = Field(default=None, max_length=2000)
 
     _coerce_in = field_validator(
         "original_quantity",
@@ -312,6 +320,9 @@ class ChangeOrderItemUpdate(BaseModel):
     unit: str | None = Field(default=None, max_length=20)
     sort_order: int | None = Field(default=None, ge=0, le=_INT32_MAX)
     metadata: dict[str, Any] | None = None
+    # Sent (even as null) to choose the account again: null inherits.
+    cost_line_id: UUID | None = None
+    cost_line_reason: str | None = Field(default=None, max_length=2000)
 
     _coerce_in = field_validator(
         "original_quantity",

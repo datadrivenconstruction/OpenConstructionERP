@@ -19,6 +19,9 @@ Tables:
         dictionary a custom cost structure is built from
     oe_costmodel_position_allocation - one share of a bill position on a cost
         line, when the position is split over more than one
+    oe_costmodel_line_allocation - one share of a downstream line (bid line,
+        contract line, order item, invoice line) on a cost line, inherited from
+        the split position it came from
 """
 
 import uuid
@@ -560,3 +563,45 @@ class PositionAllocation(Base):
 
     def __repr__(self) -> str:
         return f"<PositionAllocation {self.position_id} -> {self.cost_line_id} {self.share} {self.mode}>"
+
+
+class LineAllocation(Base):
+    """One share of a downstream line on a cost line: the inherited, split vector.
+
+    A bill position split over several cost lines (:class:`PositionAllocation`)
+    passes that split down the chain: to the bid line made from it, the contract
+    line the award writes, the order item, the invoice line. Each of those rows
+    keeps its own ``cost_line_id`` pointing at the line with the largest share,
+    so every reader written before splits existed still finds the main line, and
+    this table holds the whole split once the row has more than one share.
+
+    ``source_type`` names the table the row belongs to (see
+    :mod:`app.modules.costmodel.inheritance`), ``source_id`` its id. ``share`` is
+    a percentage; the shares of one row add up to 100. A row with one cost line
+    has no rows here at all.
+    """
+
+    __tablename__ = "oe_costmodel_line_allocation"
+    __table_args__ = (
+        UniqueConstraint("source_type", "source_id", "cost_line_id", name="uq_costmodel_line_alloc_source_line"),
+        Index("ix_costmodel_line_alloc_source", "source_type", "source_id"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    source_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    source_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    cost_line_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_costmodel_cost_line.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    share: Mapped[Decimal] = mapped_column(MoneyType(20, 6), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<LineAllocation {self.source_type}:{self.source_id} -> {self.cost_line_id} {self.share}%>"

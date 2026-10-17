@@ -153,6 +153,9 @@ def _draft_contract() -> SimpleNamespace:
         # on the missing attribute rather than on anything they assert.
         total_value=Decimal("2500"),
         contract_type="lump_sum",
+        # A client contract: the commitment release check on signing applies
+        # to subcontracts only, and this stub has no session to run it on.
+        counterparty_type="client",
         retention_percent=Decimal("10"),
         metadata_={},
     )

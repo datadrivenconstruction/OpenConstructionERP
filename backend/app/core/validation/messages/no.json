@@ -1069,5 +1069,47 @@
     "parent_not_found": "Modellen denne opplastingen skal være en ny versjon av, finnes ikke i prosjektet. Velg en annen, eller last den opp som en separat modell.",
     "parent_not_ready": "Importen av \"{name}\" er ikke ferdig, så den kan ikke få en ny versjon ennå. Vent til den er klar, eller last opp denne som en separat modell.",
     "parent_superseded": "\"{name}\" har allerede en nyere versjon, {version}. Last heller opp denne som en ny versjon av den nyeste."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Kontrakt {code} er verdt {amount} men har ingen kontraktposter, så pengene ligger på ingen kostnadslinje.",
+      "suggestion": "Gi kontrakten en konto i kostnadskontrollen, eller legg til postene."
+    },
+    "contract_sum_differs": {
+      "fail": "Kontrakt {code} er verdt {total}, men postene summerer seg til {lines} (forskjell på {difference}).",
+      "suggestion": "Rett kontraktsverdien eller postene slik at de stemmer."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Endringsordre {code} er godkjent uten avtalt beløp.",
+      "suggestion": "Registrer beløpet som er avtalt med entreprenøren før endringen godkjennes."
+    },
+    "change_without_approval_date": {
+      "fail": "Endringsordre {code} er godkjent uten godkjenningsdato.",
+      "suggestion": "Registrer når endringen ble godkjent."
+    },
+    "billed_before_approval": {
+      "fail": "Det er fakturert {amount} på kontrakt {contract} for endring {code}, som har status {status} og ikke er godkjent.",
+      "suggestion": "Godkjenn endringen først, eller ta faktureringen ut av kravet."
+    },
+    "contract_over_target": {
+      "fail": "Kontrakt {code} binder {committed}, {difference} over de {target} i mengdefortegnelsen den ble tildelt fra (mer enn {tolerance} %).",
+      "suggestion": "Sammenlign tildelingen og endringene med mengdefortegnelsen, og noter hvorfor arbeidet koster mer."
+    },
+    "account_over_plan": {
+      "fail": "Konto {code} har {committed} i forpliktelser, {difference} over planen på {planned} (mer enn {tolerance} %).",
+      "suggestion": "Sjekk forpliktelsene på kontoen, eller oppdater planen med en begrunnelse."
+    },
+    "quantity_overrun": {
+      "fail": "Post {code} i kontrakt {contract} er målt til {measured} {unit} mot {contracted} {unit} i kontrakten, {over} % over (tillatt {tolerance} %).",
+      "suggestion": "Sjekk målingen, eller avtal ekstra mengde som endring."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Kontrakt {code} er målt til {measured}, {difference} over verdien med godkjente endringer på {committed}.",
+      "suggestion": "Godkjenn endringen som dekker ekstraarbeidet, eller sjekk målingen."
+    },
+    "invoice_without_contract": {
+      "fail": "Leverandørfaktura {number} på {amount} hører ikke til noen kontrakt eller bestilling.",
+      "suggestion": "Koble linjene til en kontrakt, eller før den som direkte kostnad på en konto."
+    }
   }
 }

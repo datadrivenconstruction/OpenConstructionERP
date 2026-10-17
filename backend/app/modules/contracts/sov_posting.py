@@ -295,7 +295,8 @@ async def post_source_to_sov(
         created = True
         if line is None:
             target = _new_line(contract, key, kind, code, title or code or "", share.delta, next_order)
-            target.cost_line_id = pooled_cost_line
+            # The items' own account when they agree on one, else the contract's single line.
+            target.cost_line_id = await _items_cost_line(session, kind, share.item_ids) or pooled_cost_line
             next_order += 1
             session.add(target)
             meta["placement"] = "new_line"
@@ -307,10 +308,13 @@ async def post_source_to_sov(
                 # turn that line into a roll-up parent nobody can bill.
                 target = _new_line(contract, key, kind, code, title or code or "", share.delta, next_order)
                 target.metadata_ = {ADJUSTS_LINE_META_KEY: str(line.id), "adjusts_line_code": line.code or ""}
-                # The change prices the work of the line it adjusts, so it costs where that line costs.
+                # The change prices the work of the line it adjusts, so it costs where that line costs,
+                # split included.
                 target.cost_line_id = line.cost_line_id
                 next_order += 1
                 session.add(target)
+                await session.flush()
+                await _copy_split(session, contract, line, target)
                 meta[ADJUSTS_LINE_META_KEY] = str(line.id)
             else:
                 line.quantity = placed.quantity
@@ -339,6 +343,45 @@ async def post_source_to_sov(
         adjustments.append(adjustment)
     await session.flush()
     return adjustments
+
+
+async def _items_cost_line(session: AsyncSession, kind: str, item_ids: tuple[str, ...]) -> uuid.UUID | None:
+    """The one cost line the change order items of a share are on, when they agree on one."""
+    if kind != SOURCE_CHANGE_ORDER or not item_ids:
+        return None
+    try:
+        from app.modules.changeorders.models import ChangeOrderItem  # noqa: PLC0415
+    except ImportError:  # pragma: no cover - change orders are a plugin
+        return None
+    ids = []
+    for raw in item_ids:
+        try:
+            ids.append(uuid.UUID(str(raw)))
+        except ValueError:
+            continue
+    if not ids:
+        return None
+    rows = await session.execute(select(ChangeOrderItem.cost_line_id).where(ChangeOrderItem.id.in_(ids)).distinct())
+    found = {r[0] for r in rows.all()}
+    return next(iter(found)) if len(found) == 1 else None
+
+
+async def _copy_split(session: AsyncSession, contract: Contract, line: ContractLine, target: ContractLine) -> None:
+    """Give a line beside the one it adjusts that line's split over cost lines."""
+    if line.cost_line_id is None:
+        return
+    from app.modules.costmodel.inheritance import SOURCE_CONTRACT_LINE  # noqa: PLC0415
+    from app.modules.costmodel.inheritance_service import copy_line_split  # noqa: PLC0415
+
+    await copy_line_split(
+        session,
+        project_id=contract.project_id,
+        source_type=SOURCE_CONTRACT_LINE,
+        source_id=line.id,
+        source_main=line.cost_line_id,
+        target_type=SOURCE_CONTRACT_LINE,
+        target_id=target.id,
+    )
 
 
 async def _sole_cost_line(session: AsyncSession, contract_id: uuid.UUID) -> uuid.UUID | None:

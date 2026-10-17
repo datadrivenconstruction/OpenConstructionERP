@@ -163,6 +163,8 @@ def _order_to_with_items(order: object, names: Mapping[str, str] | None = None) 
                 cost_delta=str(item.cost_delta),
                 unit=item.unit,
                 sort_order=item.sort_order,
+                cost_line_id=getattr(item, "cost_line_id", None),
+                cost_line_source=getattr(item, "cost_line_source", None),
                 metadata=getattr(item, "metadata_", {}),
                 created_at=item.created_at,
                 updated_at=item.updated_at,
@@ -215,6 +217,8 @@ def _item_to_response(item: object) -> ChangeOrderItemResponse:
         cost_delta=str(item.cost_delta),  # type: ignore[attr-defined]
         unit=item.unit,  # type: ignore[attr-defined]
         sort_order=item.sort_order,  # type: ignore[attr-defined]
+        cost_line_id=getattr(item, "cost_line_id", None),
+        cost_line_source=getattr(item, "cost_line_source", None),
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
@@ -388,7 +392,7 @@ async def add_item(
     """Add an item to a change order."""
     existing = await service.get_order(order_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    item = await service.add_item(order_id, data)
+    item = await service.add_item(order_id, data, actor_id=str(user_id) if user_id else None)
     return _item_to_response(item)
 
 
@@ -405,7 +409,7 @@ async def update_item(
     """Update an item in a change order."""
     existing = await service.get_order(order_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    item = await service.update_item(order_id, item_id, data)
+    item = await service.update_item(order_id, item_id, data, actor_id=str(user_id) if user_id else None)
     return _item_to_response(item)
 
 

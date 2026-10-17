@@ -1069,5 +1069,47 @@
     "parent_not_found": "המודל שההעלאה הזו אמורה להיות גרסה חדשה שלו אינו קיים בפרויקט הזה. בחרו מודל אחר או העלו אותו כמודל נפרד.",
     "parent_not_ready": "הייבוא של \"{name}\" טרם הסתיים, ולכן עדיין אי אפשר להוסיף לו גרסה חדשה. המתינו עד שיהיה מוכן או העלו קובץ זה כמודל נפרד.",
     "parent_superseded": "ל-\"{name}\" כבר יש גרסה חדשה יותר, {version}. העלו את הקובץ הזה במקום זאת כגרסה חדשה של העדכנית ביותר."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "החוזה {code} שווה {amount} אך אין בו שורות לוח זמנים, ולכן הכסף שלו לא נמצא באף שורת עלות.",
+      "suggestion": "פתחו לחוזה חשבון בבקרת עלויות או הוסיפו את שורותיו."
+    },
+    "contract_sum_differs": {
+      "fail": "החוזה {code} שווה {total}, אך שורותיו מסתכמות ב-{lines} (פער של {difference}).",
+      "suggestion": "תקנו את ערך החוזה או את השורות כך שיתאימו."
+    },
+    "change_without_agreed_amount": {
+      "fail": "שינוי {code} אושר ללא סכום מוסכם.",
+      "suggestion": "רשמו את הסכום שהוסכם עם הקבלן לפני אישור השינוי."
+    },
+    "change_without_approval_date": {
+      "fail": "שינוי {code} אושר ללא תאריך אישור.",
+      "suggestion": "רשמו מתי השינוי אושר."
+    },
+    "billed_before_approval": {
+      "fail": "בחוזה {contract} חויבו {amount} עבור שינוי {code}, שסטטוסו {status} והוא לא אושר.",
+      "suggestion": "אשרו קודם את השינוי או הסירו את החיוב מחשבון החלקי."
+    },
+    "contract_over_target": {
+      "fail": "החוזה {code} מתחייב ל-{committed}, גבוה ב-{difference} מ-{target} בכתב הכמויות שממנו הוא הוזמן (יותר מ-{tolerance} %).",
+      "suggestion": "השוו את ההזמנה והשינויים לכתב הכמויות ורשמו מדוע העבודה עולה יותר."
+    },
+    "account_over_plan": {
+      "fail": "בחשבון {code} יש התחייבויות של {committed}, גבוה ב-{difference} מהתכנון של {planned} (יותר מ-{tolerance} %).",
+      "suggestion": "בדקו את ההתחייבויות בחשבון זה או עדכנו את התכנון עם נימוק."
+    },
+    "quantity_overrun": {
+      "fail": "שורה {code} בחוזה {contract} נמדדה ב-{measured} {unit} לעומת {contracted} {unit} בחוזה, חריגה של {over} % (מותר {tolerance} %).",
+      "suggestion": "בדקו את המדידה או סכמו את הכמות הנוספת כשינוי."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "החוזה {code} נמדד ב-{measured}, גבוה ב-{difference} מערכו עם שינויים מאושרים של {committed}.",
+      "suggestion": "אשרו את השינוי שמכסה את העבודה הנוספת או בדקו את המדידה."
+    },
+    "invoice_without_contract": {
+      "fail": "חשבונית ספק {number} על סך {amount} לא שייכת לאף חוזה או הזמנה.",
+      "suggestion": "קשרו את שורותיה לחוזה או רשמו אותה כעלות ישירה בחשבון אחד."
+    }
   }
 }

@@ -87,6 +87,7 @@ class _StubSession:
             scalar_one_or_none=lambda: None,
             scalars=lambda: SimpleNamespace(all=lambda: [], first=lambda: None),
             scalar_one=lambda: 0,
+            all=lambda: [],
         )
 
     async def get(self, _model: Any, _id: Any) -> Any:

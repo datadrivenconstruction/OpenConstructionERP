@@ -1069,5 +1069,47 @@
     "parent_not_found": "Het model waarvan deze upload een nieuwe versie moet zijn, staat niet in dit project. Kies een ander model of upload het als los model.",
     "parent_not_ready": "\"{name}\" is nog niet klaar met importeren en kan daarom nog geen nieuwe versie krijgen. Wacht tot het klaar is of upload dit bestand als los model.",
     "parent_superseded": "\"{name}\" heeft al een nieuwere versie, {version}. Upload dit bestand in plaats daarvan als nieuwe versie van de nieuwste."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Contract {code} is {amount} waard, maar heeft geen bestekregels, dus het bedrag staat op geen enkele kostenregel.",
+      "suggestion": "Geef het contract een rekening in de kostenbewaking of voeg de bestekregels toe."
+    },
+    "contract_sum_differs": {
+      "fail": "Contract {code} is {total} waard, maar de bestekregels tellen op tot {lines} ({difference} verschil).",
+      "suggestion": "Corrigeer de contractwaarde of de bestekregels zodat ze overeenkomen."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Meerwerk {code} is goedgekeurd zonder overeengekomen bedrag.",
+      "suggestion": "Leg het met de aannemer overeengekomen bedrag vast voordat het meerwerk wordt goedgekeurd."
+    },
+    "change_without_approval_date": {
+      "fail": "Meerwerk {code} is goedgekeurd zonder goedkeuringsdatum.",
+      "suggestion": "Leg vast wanneer het meerwerk is goedgekeurd."
+    },
+    "billed_before_approval": {
+      "fail": "Er is {amount} gefactureerd op contract {contract} voor meerwerk {code}, dat de status {status} heeft en niet is goedgekeurd.",
+      "suggestion": "Keur het meerwerk eerst goed, of haal de facturering van het termijnstaat af."
+    },
+    "contract_over_target": {
+      "fail": "Contract {code} legt {committed} vast, {difference} boven de {target} van het bestek waaruit het is gegund (meer dan {tolerance} %).",
+      "suggestion": "Controleer de gunning en het meerwerk aan de hand van het bestek en leg vast waarom het werk meer kost."
+    },
+    "account_over_plan": {
+      "fail": "Rekening {code} draagt {committed} aan verplichtingen, {difference} boven de raming van {planned} (meer dan {tolerance} %).",
+      "suggestion": "Controleer de verplichtingen op deze rekening of werk de raming bij met een reden."
+    },
+    "quantity_overrun": {
+      "fail": "Regel {code} van contract {contract} is opgemeten op {measured} {unit} tegen {contracted} {unit} contractueel, {over} % te veel (toegestaan {tolerance} %).",
+      "suggestion": "Controleer de opmeting, of spreek de extra hoeveelheid af als meerwerk."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Contract {code} is opgemeten op {measured}, {difference} boven de waarde met goedgekeurd meerwerk van {committed}.",
+      "suggestion": "Keur het meerwerk goed dat de extra werkzaamheden dekt, of controleer de opmeting."
+    },
+    "invoice_without_contract": {
+      "fail": "Leveranciersfactuur {number} van {amount} hoort bij geen enkel contract of bestelling.",
+      "suggestion": "Koppel de regels aan een contract, of boek de factuur als directe kosten op één rekening."
+    }
   }
 }

@@ -1069,5 +1069,47 @@
     "parent_not_found": "Mudel, mille uus versioon see üleslaadimine peaks olema, ei kuulu sellesse projekti. Valige mõni muu või laadige see üles eraldi mudelina.",
     "parent_not_ready": "Mudeli \"{name}\" import pole veel lõppenud, seega ei saa see veel uut versiooni vastu võtta. Oodake, kuni see on valmis, või laadige see fail üles eraldi mudelina.",
     "parent_superseded": "Mudelil \"{name}\" on juba uuem versioon {version}. Laadige see fail selle asemel üles uusima versiooni uue versioonina."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Leping {code} on väärt {amount}, kuid sellel pole ajakava ridu, seega pole selle raha ühelgi kulureal.",
+      "suggestion": "Andke lepingule konto kulukontrollis või lisage selle read."
+    },
+    "contract_sum_differs": {
+      "fail": "Leping {code} on väärt {total}, kuid selle read annavad kokku {lines} (vahe {difference}).",
+      "suggestion": "Parandage lepingu väärtust või ridu, et need klapiksid."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Muudatus {code} on kinnitatud ilma kokkulepitud summata.",
+      "suggestion": "Sisestage töövõtjaga kokku lepitud summa enne muudatuse kinnitamist."
+    },
+    "change_without_approval_date": {
+      "fail": "Muudatus {code} on kinnitatud ilma kinnitamise kuupäevata.",
+      "suggestion": "Sisestage, millal muudatus kinnitati."
+    },
+    "billed_before_approval": {
+      "fail": "Lepingule {contract} on muudatuse {code} eest arvestatud {amount}, kuid muudatuse staatus on {status} ja see pole kinnitatud.",
+      "suggestion": "Kinnitage muudatus enne või võtke arvestus maksenõudest maha."
+    },
+    "contract_over_target": {
+      "fail": "Leping {code} seob {committed}, see on {difference} rohkem kui {target} mahuloendis, mille alusel see anti (üle {tolerance} %).",
+      "suggestion": "Võrrelge tellimist ja selle muudatusi mahuloendiga ning märkige, miks töö maksab rohkem."
+    },
+    "account_over_plan": {
+      "fail": "Kontol {code} on kohustusi {committed}, see on {difference} üle plaani {planned} (üle {tolerance} %).",
+      "suggestion": "Kontrollige konto kohustusi või uuendage plaani koos põhjendusega."
+    },
+    "quantity_overrun": {
+      "fail": "Lepingu {contract} rida {code} on mõõdetud {measured} {unit}, lepingus {contracted} {unit}, see on {over} % rohkem (lubatud {tolerance} %).",
+      "suggestion": "Kontrollige mõõtmist või leppige lisakogus kokku muudatusena."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Leping {code} on mõõdetud {measured}, see on {difference} üle selle väärtuse koos kinnitatud muudatustega ({committed}).",
+      "suggestion": "Kinnitage lisatööd katvad muudatus või kontrollige mõõtmist."
+    },
+    "invoice_without_contract": {
+      "fail": "Hankija arve {number} summas {amount} ei kuulu ühegi lepingu ega tellimuse alla.",
+      "suggestion": "Siduge selle read lepinguga või kandke see otsese kuluna ühele kontole."
+    }
   }
 }

@@ -1069,5 +1069,47 @@
     "parent_not_found": "이 업로드가 새 버전이 되어야 할 모델이 이 프로젝트에 없습니다. 다른 모델을 선택하거나 별도 모델로 업로드하세요.",
     "parent_not_ready": "\"{name}\" 가져오기가 아직 끝나지 않아 새 버전을 받을 수 없습니다. 준비될 때까지 기다리거나 이 파일을 별도 모델로 업로드하세요.",
     "parent_superseded": "\"{name}\"에는 이미 더 새로운 버전 {version}이(가) 있습니다. 대신 가장 최신 모델의 새 버전으로 업로드하세요."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "계약 {code}의 금액은 {amount}인데 공정 내역 항목이 없어서, 이 금액이 어떤 원가 항목에도 잡혀 있지 않습니다.",
+      "suggestion": "원가 관리에서 이 계약에 계정을 하나 지정하거나 내역 항목을 추가하세요."
+    },
+    "contract_sum_differs": {
+      "fail": "계약 {code}의 금액은 {total}인데 내역 항목의 합계는 {lines}입니다(차이 {difference}).",
+      "suggestion": "계약 금액이나 내역 항목을 고쳐서 서로 맞추세요."
+    },
+    "change_without_agreed_amount": {
+      "fail": "변경 {code}가 합의 금액 없이 승인되었습니다.",
+      "suggestion": "변경을 승인하기 전에 시공사와 합의한 금액을 기록하세요."
+    },
+    "change_without_approval_date": {
+      "fail": "변경 {code}가 승인일 없이 승인되었습니다.",
+      "suggestion": "변경이 언제 승인되었는지 기록하세요."
+    },
+    "billed_before_approval": {
+      "fail": "계약 {contract}에 변경 {code}로 {amount}이 청구되었는데, 이 변경은 {status} 상태이며 승인되지 않았습니다.",
+      "suggestion": "먼저 변경을 승인하거나, 기성 청구에서 해당 청구를 빼세요."
+    },
+    "contract_over_target": {
+      "fail": "계약 {code}의 약정액은 {committed}로, 발주 근거인 내역서의 {target}보다 {difference} 많습니다({tolerance}% 초과).",
+      "suggestion": "발주와 변경 내용을 내역서와 대조하고, 공사비가 더 드는 이유를 기록하세요."
+    },
+    "account_over_plan": {
+      "fail": "계정 {code}의 약정액은 {committed}로, 계획 {planned}보다 {difference} 많습니다({tolerance}% 초과).",
+      "suggestion": "이 계정의 약정을 확인하거나 사유와 함께 계획을 수정하세요."
+    },
+    "quantity_overrun": {
+      "fail": "계약 {contract}의 {code}번 항목은 {measured} {unit}로 계측되어 계약 수량 {contracted} {unit}보다 {over}% 많습니다(허용 {tolerance}%).",
+      "suggestion": "계측을 확인하거나, 추가 수량을 변경으로 합의하세요."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "계약 {code}의 계측 금액은 {measured}로, 승인된 변경을 포함한 계약 금액 {committed}보다 {difference} 많습니다.",
+      "suggestion": "추가 공사를 포함하는 변경을 승인하거나 계측을 확인하세요."
+    },
+    "invoice_without_contract": {
+      "fail": "공급업체 청구서 {number}({amount})가 어떤 계약이나 발주에도 속해 있지 않습니다.",
+      "suggestion": "청구서 항목을 계약에 연결하거나, 한 계정에 직접비로 기록하세요."
+    }
   }
 }

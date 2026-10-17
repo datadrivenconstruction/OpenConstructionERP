@@ -14,13 +14,17 @@ line and keeping the bill position it was priced against under
 ``ContractLine.metadata_["boq_position_id"]``, the key the contracts progress
 bridge reads.
 
-What it does not do, on purpose:
+Each contract line inherits the cost line of the bill position it was priced
+against, and the position's split when it has one
+(:func:`app.modules.costmodel.inheritance_service.inherit_contract_lines`), so
+the award lands on the account the estimate planned it on instead of in "not on
+any cost line". The purchase order procurement drafts from the same event
+carries the same cost lines; the commitment rules count an order and a contract
+of one award once (``CostSpineRepository.committed_by_cost_line``).
 
-* It creates no purchase order and publishes nothing procurement listens to.
-  The purchase order for this award is procurement's, from the same event.
-* It sets no ``ContractLine.cost_line_id``. The purchase order lines already
-  carry the cost line for this award, and a second link on the contract lines
-  would commit the same money twice in the cost model.
+What it does not do, on purpose: it creates no purchase order and publishes
+nothing procurement listens to. The purchase order for this award is
+procurement's, from the same event.
 
 Idempotency: ``metadata.tender_package_id`` is the key, shared with the
 bid_management path whenever a bid package is linked to this tender package
@@ -90,6 +94,16 @@ def _recipient_subcontractor(package_metadata: Any, contact_email: str) -> uuid.
             if sub_id is not None:
                 return sub_id
     return None
+
+
+async def _inherit_award_cost_lines(session: Any, contract: Any, lines: list[Any]) -> None:
+    """Put the drafted lines on the cost lines their positions are on. Never a reason to lose the award."""
+    try:
+        from app.modules.costmodel.inheritance_service import inherit_contract_lines  # noqa: PLC0415
+
+        await inherit_contract_lines(session, contract, lines)
+    except ImportError:  # pragma: no cover - the cost model is a core module
+        return
 
 
 async def _on_tender_awarded(event: Event) -> None:
@@ -235,6 +249,7 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
         await session.flush()
         add_award_party(session, contract.id, counterparty)
 
+        drafted_lines: list[ContractLine] = []
         for spec in line_specs:
             cl = ContractLine(
                 contract_id=contract.id,
@@ -253,7 +268,10 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
                 # contracts.service.BOQ_POSITION_META_KEY
                 cl.metadata_["boq_position_id"] = str(spec["position_id"])
             session.add(cl)
+            drafted_lines.append(cl)
 
+        await session.flush()
+        await _inherit_award_cost_lines(session, contract, drafted_lines)
         await session.commit()
 
         event_bus.publish_detached(

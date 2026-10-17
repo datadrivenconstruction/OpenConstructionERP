@@ -1069,5 +1069,47 @@
     "parent_not_found": "Model čija bi nova verzija trebala biti ovaj prijenos nije u ovom projektu. Odaberite drugi ili ga prenesite kao zaseban model.",
     "parent_not_ready": "Uvoz modela \"{name}\" još nije završen pa još ne može primiti novu verziju. Pričekajte da bude spreman ili prenesite ovu datoteku kao zaseban model.",
     "parent_superseded": "Model \"{name}\" već ima noviju verziju, {version}. Umjesto toga prenesite ovu datoteku kao novu verziju najnovije."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Ugovor {code} vrijedi {amount}, ali nema stavki troškovnika, pa njegov novac nije ni na jednoj stavci troška.",
+      "suggestion": "Dodijelite ugovoru račun u kontroli troškova ili dodajte njegove stavke."
+    },
+    "contract_sum_differs": {
+      "fail": "Ugovor {code} vrijedi {total}, ali njegove stavke zbrajaju {lines} (razlika {difference}).",
+      "suggestion": "Ispravite vrijednost ugovora ili stavke da se podudaraju."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Izmjena {code} odobrena je bez dogovorenog iznosa.",
+      "suggestion": "Upišite iznos dogovoren s izvođačem prije odobrenja izmjene."
+    },
+    "change_without_approval_date": {
+      "fail": "Izmjena {code} odobrena je bez datuma odobrenja.",
+      "suggestion": "Upišite kada je izmjena odobrena."
+    },
+    "billed_before_approval": {
+      "fail": "Na ugovor {contract} fakturirano je {amount} za izmjenu {code}, koja je u statusu {status} i nije odobrena.",
+      "suggestion": "Prvo odobrite izmjenu ili uklonite fakturiranje iz situacije."
+    },
+    "contract_over_target": {
+      "fail": "Ugovor {code} obvezuje {committed}, to je {difference} više od {target} troškovnika iz kojeg je ugovoren (više od {tolerance} %).",
+      "suggestion": "Usporedite ugovaranje i njegove izmjene s troškovnikom i zapišite zašto radovi koštaju više."
+    },
+    "account_over_plan": {
+      "fail": "Račun {code} nosi obveze od {committed}, {difference} iznad plana od {planned} (više od {tolerance} %).",
+      "suggestion": "Provjerite obveze na ovom računu ili ažurirajte plan uz razlog."
+    },
+    "quantity_overrun": {
+      "fail": "Stavka {code} ugovora {contract} izmjerena je na {measured} {unit} prema ugovorenih {contracted} {unit}, to je {over} % više (dopušteno {tolerance} %).",
+      "suggestion": "Provjerite izmjeru ili dogovorite dodatnu količinu kao izmjenu."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Ugovor {code} izmjeren je na {measured}, to je {difference} više od njegove vrijednosti s odobrenim izmjenama od {committed}.",
+      "suggestion": "Odobrite izmjenu koja pokriva dodatne radove ili provjerite izmjeru."
+    },
+    "invoice_without_contract": {
+      "fail": "Račun dobavljača {number} na {amount} ne pripada nijednom ugovoru ni narudžbi.",
+      "suggestion": "Povežite njegove stavke s ugovorom ili ga knjižite kao izravni trošak na jednom računu."
+    }
   }
 }

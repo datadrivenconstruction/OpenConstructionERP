@@ -158,6 +158,14 @@ class ChangeOrderItem(Base):
     cost_delta: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"))
     unit: Mapped[str] = mapped_column(String(20), nullable=False, default="")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Plain UUID - the cost line (oe_costmodel_cost_line) this item's money is
+    # costed on. Inherited when the item is written, from the schedule line it
+    # changes, else the bill position it was picked from, else the contract's
+    # own account; set by hand it is an override (see ``cost_line_source``).
+    cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Where ``cost_line_id`` came from: contract_line, position, contract or
+    # manual. Empty when the item has no account.
+    cost_line_source: Mapped[str | None] = mapped_column(String(20), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

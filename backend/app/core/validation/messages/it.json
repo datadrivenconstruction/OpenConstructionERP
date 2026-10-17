@@ -1069,5 +1069,47 @@
     "parent_not_found": "Il modello di cui questo caricamento dovrebbe essere una nuova versione non è in questo progetto. Scegline un altro oppure caricalo come modello separato.",
     "parent_not_ready": "L'importazione di \"{name}\" non è terminata, quindi non può ancora ricevere una nuova versione. Attendi che sia pronto oppure carica questo file come modello separato.",
     "parent_superseded": "\"{name}\" ha già una versione più recente, {version}. Carica invece questo file come nuova versione di quella più recente."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Il contratto {code} vale {amount} ma non ha voci di computo, quindi il suo importo non è su nessuna riga di costo.",
+      "suggestion": "Assegni al contratto un conto nel controllo costi, oppure aggiunga le sue voci."
+    },
+    "contract_sum_differs": {
+      "fail": "Il contratto {code} vale {total}, ma le sue voci sommano {lines} (differenza di {difference}).",
+      "suggestion": "Corregga il valore del contratto o le voci in modo che coincidano."
+    },
+    "change_without_agreed_amount": {
+      "fail": "La variante {code} è approvata senza un importo concordato.",
+      "suggestion": "Registri l'importo concordato con l'appaltatore prima di approvare la variante."
+    },
+    "change_without_approval_date": {
+      "fail": "La variante {code} è approvata senza data di approvazione.",
+      "suggestion": "Registri quando la variante è stata approvata."
+    },
+    "billed_before_approval": {
+      "fail": "Sono fatturati {amount} sul contratto {contract} per la variante {code}, che è in stato {status} e non approvata.",
+      "suggestion": "Approvi prima la variante, oppure tolga la fatturazione dallo stato avanzamento."
+    },
+    "contract_over_target": {
+      "fail": "Il contratto {code} impegna {committed}, {difference} oltre i {target} del computo da cui è stato affidato (oltre {tolerance} %).",
+      "suggestion": "Verifichi l'affidamento e le sue varianti rispetto al computo e registri perché i lavori costano di più."
+    },
+    "account_over_plan": {
+      "fail": "Il conto {code} porta {committed} di impegni, {difference} oltre il preventivo di {planned} (oltre {tolerance} %).",
+      "suggestion": "Verifichi gli impegni di questo conto, oppure aggiorni il preventivo indicando il motivo."
+    },
+    "quantity_overrun": {
+      "fail": "La voce {code} del contratto {contract} è misurata a {measured} {unit} contro {contracted} {unit} contrattuali, {over} % in più (ammesso {tolerance} %).",
+      "suggestion": "Verifichi la misurazione, oppure concordi la quantità extra come variante."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Il contratto {code} è misurato a {measured}, {difference} oltre il suo valore con varianti approvate di {committed}.",
+      "suggestion": "Approvi la variante che copre il lavoro in più, oppure verifichi la misurazione."
+    },
+    "invoice_without_contract": {
+      "fail": "La fattura fornitore {number} di {amount} non appartiene a nessun contratto né ordine.",
+      "suggestion": "Colleghi le sue righe a un contratto, oppure la registri come costo diretto su un conto."
+    }
   }
 }

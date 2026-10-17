@@ -1069,5 +1069,47 @@
     "parent_not_found": "Malli, jonka uusi versio tämän latauksen pitäisi olla, ei ole tässä projektissa. Valitse toinen tai lataa tiedosto erillisenä mallina.",
     "parent_not_ready": "Mallin \"{name}\" tuonti ei ole vielä valmis, joten se ei voi vielä vastaanottaa uutta versiota. Odota, kunnes se on valmis, tai lataa tämä erillisenä mallina.",
     "parent_superseded": "Mallilla \"{name}\" on jo uudempi versio, {version}. Lataa tämä sen sijaan uusimman version uutena versiona."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Sopimus {code} on arvoltaan {amount}, mutta sillä ei ole sopimusrivejä, joten rahat eivät ole millään kustannusrivillä.",
+      "suggestion": "Anna sopimukselle tili kustannusseurannassa tai lisää sen rivit."
+    },
+    "contract_sum_differs": {
+      "fail": "Sopimus {code} on arvoltaan {total}, mutta sen rivit summautuvat arvoon {lines} (ero {difference}).",
+      "suggestion": "Korjaa sopimuksen arvo tai rivit niin, että ne täsmäävät."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Muutostyö {code} on hyväksytty ilman sovittua summaa.",
+      "suggestion": "Kirjaa urakoitsijan kanssa sovittu summa ennen muutostyön hyväksymistä."
+    },
+    "change_without_approval_date": {
+      "fail": "Muutostyö {code} on hyväksytty ilman hyväksymispäivää.",
+      "suggestion": "Kirjaa, milloin muutostyö hyväksyttiin."
+    },
+    "billed_before_approval": {
+      "fail": "Sopimukselle {contract} on laskutettu {amount} muutostyöstä {code}, jonka tila on {status} eikä sitä ole hyväksytty.",
+      "suggestion": "Hyväksy muutostyö ensin tai poista laskutus maksuerästä."
+    },
+    "contract_over_target": {
+      "fail": "Sopimus {code} sitoo {committed}, {difference} yli sen määräluettelon {target}, josta se kilpailutettiin (yli {tolerance} %).",
+      "suggestion": "Tarkista urakan myöntö ja sen muutokset määräluetteloa vasten ja kirjaa, miksi työ maksaa enemmän."
+    },
+    "account_over_plan": {
+      "fail": "Tilillä {code} on sitoumuksia {committed}, {difference} yli suunnitelman {planned} (yli {tolerance} %).",
+      "suggestion": "Tarkista tilin sitoumukset tai päivitä suunnitelma perustelun kanssa."
+    },
+    "quantity_overrun": {
+      "fail": "Sopimuksen {contract} rivi {code} on mitattu {measured} {unit}, sopimuksessa {contracted} {unit}, {over} % yli (sallittu {tolerance} %).",
+      "suggestion": "Tarkista mittaus tai sovi lisämäärä muutostyönä."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Sopimus {code} on mitattu {measured}, {difference} yli sen arvon hyväksytyt muutokset mukaan lukien ({committed}).",
+      "suggestion": "Hyväksy lisätyön kattava muutostyö tai tarkista mittaus."
+    },
+    "invoice_without_contract": {
+      "fail": "Toimittajan lasku {number}, {amount}, ei kuulu millekään sopimukselle tai tilaukselle.",
+      "suggestion": "Liitä sen rivit sopimukseen tai kirjaa se suorana kustannuksena tilille."
+    }
   }
 }

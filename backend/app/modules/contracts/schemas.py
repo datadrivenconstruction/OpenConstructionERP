@@ -209,6 +209,9 @@ class ContractResponse(BaseModel):
     # versions of its own.
     template_code: str | None = None
     template_version: int | None = None
+    # The contract's own account: the whole value of a lump-sum contract, and
+    # the default of its lines (see costmodel.inheritance_service).
+    cost_line_id: UUID | None = None
     created_by: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
@@ -326,6 +329,10 @@ class ContractLineResponse(BaseModel):
     unit_rate: Decimal
     total_value: Decimal
     order_index: int
+    # The cost line the line is costed on: inherited from its bid line or bill
+    # position, else the contract's account; ``metadata.cost_line_source`` says
+    # which, and ``metadata.cost_line_override`` holds a person's override.
+    cost_line_id: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     # True when a progress claim has billed on this line. The server then
     # refuses to change or delete it whatever the contract's status, and the
