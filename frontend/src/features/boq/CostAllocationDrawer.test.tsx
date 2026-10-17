@@ -15,7 +15,7 @@ vi.mock('@/features/costmodel/structureApi', async (importOriginal) => {
 
 import { ApiError } from '@/shared/lib/api';
 import type { PositionAllocation } from '@/features/costmodel/structureApi';
-import { CostAllocationDrawer, quantityLabel } from './CostAllocationDrawer';
+import { CostAllocationDrawer, quantityLabel, trimShare } from './CostAllocationDrawer';
 
 function allocation(over: Partial<PositionAllocation> = {}): PositionAllocation {
   return {
@@ -138,6 +138,16 @@ describe('<CostAllocationDrawer>', () => {
     expect(await screen.findByText('A share points at a cost line that belongs to another bill.')).toBeInTheDocument();
     // The drawer says it in the user's language; the global toast must not repeat it raw.
     expect(globalErrors).toEqual([{ suppressGlobalErrorToast: true }]);
+  });
+
+  it('opens a stored split with its shares as people typed them', () => {
+    expect(trimShare('30.000000')).toBe('30');
+    expect(trimShare('12.500000')).toBe('12.5');
+    expect(trimShare('120')).toBe('120');
+    const second = { ...allocation().rows[0]!, cost_line_id: 'line-2', cost_line_code: 'CL-2', share: '70.000000' };
+    renderDrawer(allocation({ mode: 'percent', rows: [{ ...allocation().rows[0]!, share: '30.000000' }, second] }));
+    expect(screen.getByLabelText('Share for CL-1')).toHaveValue('30');
+    expect(screen.getByLabelText('Share for CL-2')).toHaveValue('70');
   });
 
   it('writes the position quantity the way people write it', () => {

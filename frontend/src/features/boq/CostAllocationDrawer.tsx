@@ -70,12 +70,16 @@ function draftFrom(allocation: PositionAllocation | undefined): { mode: SplitMod
       label: [r.account_code, r.cost_line_description || r.account_title].filter(Boolean).join(' · '),
     },
     // A single allocation is the whole position: 100 %.
-    share: allocation.mode === 'single' ? '100' : r.share,
+    share: allocation.mode === 'single' ? '100' : trimShare(r.share),
   }));
   return { mode, rows };
 }
 
-/** The share to suggest for a new row: whatever is still missing, if positive. */
+/** A stored share ("30.000000") without its trailing zeros ("30"), exactly, as a decimal string. */
+export function trimShare(share: string): string {
+  return share.includes('.') ? share.replace(/0+$/, '').replace(/\.$/, '') : share;
+}
+
 /** A stored quantity ("610.0000") as people write it ("610"), in the user's number format. */
 export function quantityLabel(quantity: string): string {
   const n = Number(quantity);
@@ -83,6 +87,7 @@ export function quantityLabel(quantity: string): string {
   return new Intl.NumberFormat(getNumberLocale(), { maximumFractionDigits: 4 }).format(n);
 }
 
+/** The share to suggest for a new row: whatever is still missing, if positive. */
 function suggestedShare(remaining: string): string {
   return remaining.startsWith('-') || remaining === '0' ? '' : remaining;
 }
