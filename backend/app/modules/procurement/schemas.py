@@ -1387,3 +1387,16 @@ class ScheduleActivityOption(BaseModel):
     start_date: str
     end_date: str | None = None
     activity_type: str | None = None
+
+
+class ScheduleActivityOptionPage(BaseModel):
+    """One page of the schedule activities a requisition line can take its date from.
+
+    ``total`` counts every activity of the project, so a reader can tell when
+    the page was cut short.
+    """
+
+    items: list[ScheduleActivityOption]
+    total: int
+    offset: int = 0
+    limit: int = 500

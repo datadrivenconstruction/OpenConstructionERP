@@ -170859,6 +170859,33 @@
               "default": "None"
             }
           ]
+        },
+        {
+          "class_name": "ScheduleActivityOptionPage",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of the schedule activities a requisition line can take its date from.\n\n``total`` counts every activity of the project, so a reader can tell when\nthe page was cut short.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ScheduleActivityOption]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "500"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -273491,7 +273518,7 @@
     "total_columns": 9000,
     "total_relationships": 240,
     "total_routes": 4560,
-    "total_schemas": 4042,
+    "total_schemas": 4043,
     "total_python_files": 2718,
     "frontend_features": 209,
     "frontend_ts_files": 3493,

@@ -90,7 +90,14 @@ beforeEach(() => {
   mockGet.mockImplementation((url: string) =>
     Promise.resolve(
       url.includes('schedule-activities')
-        ? [{ id: ACT, name: 'Pour slab', schedule_name: 'Master', start_date: '2026-11-10', end_date: null, activity_type: 'task' }]
+        ? {
+            items: [
+              { id: ACT, name: 'Pour slab', schedule_name: 'Master', start_date: '2026-11-10', end_date: null, activity_type: 'task' },
+            ],
+            total: 1,
+            offset: 0,
+            limit: 1000,
+          }
         : {
             items: [
               { id: V1, code: 'V-1', name: 'Beton Nord', status: 'active' },

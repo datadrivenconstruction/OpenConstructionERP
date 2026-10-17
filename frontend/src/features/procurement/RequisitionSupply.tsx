@@ -187,12 +187,13 @@ interface LineSupplyCellProps {
 /** Suggested supplier, needed-by date and schedule link of one requisition line. */
 export function LineSupplyCell({ projectId, line, stored, headerDate, editable, onChange }: LineSupplyCellProps) {
   const { t } = useTranslation();
-  const { data: activities } = useQuery({
+  const { data: activityPage } = useQuery({
     queryKey: ['procurement-schedule-activities', projectId],
     queryFn: () => listScheduleActivities(projectId),
     enabled: editable && !!projectId,
     staleTime: 60_000,
   });
+  const activities = activityPage?.items;
   const offered = stored?.source_suggested_vendors ?? [];
   const conflict = offered.length > 1;
   const activityId = line.schedule_activity_id ?? '';
@@ -296,6 +297,16 @@ export function LineSupplyCell({ projectId, line, stored, headerDate, editable, 
               </option>
             ))}
           </select>
+          {activityPage && activityPage.total > activityPage.items.length && (
+            <span className="mt-0.5 block">
+              {t('common.showing_range', {
+                defaultValue: 'Showing {{from}}-{{to}} of {{total}}',
+                from: 1,
+                to: activityPage.items.length,
+                total: activityPage.total,
+              })}
+            </span>
+          )}
         </label>
         {activityId && (
           <label className="block w-20 text-content-tertiary">

@@ -48,7 +48,7 @@ from app.modules.procurement.schemas import (
     RequisitionResponse,
     RequisitionUpdate,
     RequisitionValidationResponse,
-    ScheduleActivityOption,
+    ScheduleActivityOptionPage,
 )
 from app.modules.procurement.service import ProcurementService
 
@@ -140,18 +140,20 @@ async def convert_requisitions_to_po(
 
 @router.get(
     "/schedule-activities",
-    response_model=list[ScheduleActivityOption],
+    response_model=ScheduleActivityOptionPage,
     dependencies=[Depends(RequirePermission("procurement.read"))],
 )
 async def list_schedule_activities(
     user_id: CurrentUserId,
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=500, ge=1, le=1000),
     service: RequisitionWorkflowService = Depends(_get_service),
-) -> list[ScheduleActivityOption]:
-    """The project's schedule activities, by start date, for proposing a line's needed-by date."""
+) -> ScheduleActivityOptionPage:
+    """One page of the project's schedule activities, by start date, for proposing a line's needed-by date."""
     await verify_project_access(project_id, str(user_id), session)
-    return await service.list_schedule_activities(project_id)
+    return await service.page_schedule_activities(project_id, offset=offset, limit=limit)
 
 
 @router.get(

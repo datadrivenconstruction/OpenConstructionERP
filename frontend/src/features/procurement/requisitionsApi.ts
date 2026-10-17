@@ -333,9 +333,17 @@ export function convertRequisitionsToPurchaseOrder(body: ConvertToPOBody): Promi
   return apiPost<ConvertToPOResult, ConvertToPOBody>(`/v1/procurement/requisitions/convert-to-po`, body);
 }
 
-export function listScheduleActivities(projectId: string): Promise<ScheduleActivityOption[]> {
-  const qs = new URLSearchParams({ project_id: projectId });
-  return apiGet<ScheduleActivityOption[]>(`/v1/procurement/requisitions/schedule-activities?${qs.toString()}`);
+/** One page of schedule activities; total counts all of the project's. */
+export interface ScheduleActivityOptionPage {
+  items: ScheduleActivityOption[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
+export function listScheduleActivities(projectId: string): Promise<ScheduleActivityOptionPage> {
+  const qs = new URLSearchParams({ project_id: projectId, limit: '1000' });
+  return apiGet<ScheduleActivityOptionPage>(`/v1/procurement/requisitions/schedule-activities?${qs.toString()}`);
 }
 
 export function traceBoqPosition(positionId: string, projectId: string): Promise<PositionTrace> {

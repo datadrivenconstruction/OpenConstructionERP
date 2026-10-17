@@ -80,6 +80,7 @@ from app.modules.procurement.schemas import (
     RequisitionUpdate,
     RequisitionVendorRef,
     ScheduleActivityOption,
+    ScheduleActivityOptionPage,
     TracePOLine,
     TraceSource,
 )
@@ -409,9 +410,14 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         project_id: uuid.UUID,
         *,
         activity_ids: set[uuid.UUID] | None = None,
+        offset: int = 0,
         limit: int = 500,
     ) -> list[ScheduleActivityOption]:
-        """The project's schedule activities a line can take its needed-by date from, by start date."""
+        """The project's schedule activities a line can take its needed-by date from, by start date.
+
+        With ``activity_ids`` every named activity of the project is returned;
+        without, one page of ``limit`` rows from ``offset``.
+        """
         try:
             from app.modules.schedule.models import Activity, Schedule  # noqa: PLC0415
         except ImportError:  # pragma: no cover - schedule module not installed
@@ -425,7 +431,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         if activity_ids is not None:
             stmt = stmt.where(Activity.id.in_(activity_ids))
         else:
-            stmt = stmt.limit(limit)
+            stmt = stmt.offset(offset).limit(limit)
         rows = (await self.session.execute(stmt)).all()
         return [
             ScheduleActivityOption(
@@ -438,6 +444,24 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             )
             for activity, schedule_name in rows
         ]
+
+    async def page_schedule_activities(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 500
+    ) -> ScheduleActivityOptionPage:
+        """One page of the project's schedule activities, with the count of all of them."""
+        try:
+            from app.modules.schedule.models import Activity, Schedule  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - schedule module not installed
+            return ScheduleActivityOptionPage(items=[], total=0, offset=offset, limit=limit)
+        items = await self.list_schedule_activities(project_id, offset=offset, limit=limit)
+        total = (
+            await self.session.execute(
+                select(func.count(Activity.id))
+                .join(Schedule, Activity.schedule_id == Schedule.id)
+                .where(Schedule.project_id == project_id)
+            )
+        ).scalar_one()
+        return ScheduleActivityOptionPage(items=items, total=int(total or 0), offset=offset, limit=limit)
 
     async def _activities_for_lines(
         self, project_id: uuid.UUID, lines: list[RequisitionItemIn]

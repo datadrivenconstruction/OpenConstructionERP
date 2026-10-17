@@ -254,7 +254,8 @@ async def test_a_line_date_comes_from_the_schedule_and_a_moved_activity_is_repor
         options = (await c.get(f"{REQ}/schedule-activities", params={"project_id": str(world.project_id)})).json()
         created = (await c.post(f"{REQ}/", json=_create_body(world, line))).json()
 
-    assert [o["name"] for o in options] == ["Pour slab"]
+    assert [o["name"] for o in options["items"]] == ["Pour slab"]
+    assert (options["total"], options["offset"]) == (1, 0)
     [item] = created["items"]
     proposed = (date.fromisoformat(start) - timedelta(days=5)).isoformat()
     assert (item["required_date"], item["required_date_source"], item["schedule_anchor_date"]) == (
