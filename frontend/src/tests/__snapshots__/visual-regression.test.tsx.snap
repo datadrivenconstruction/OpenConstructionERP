@@ -3230,7 +3230,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
         </div>
       </div>
       <div
-        class="self-start lg:col-span-2"
+        class="self-start lg:col-span-6"
       >
         <div
           aria-hidden="true"
@@ -3238,7 +3238,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
         />
       </div>
       <div
-        class="h-full [&>*]:h-full lg:col-span-4"
+        class="h-full [&>*]:h-full lg:col-span-6"
       >
         <div
           aria-hidden="true"
