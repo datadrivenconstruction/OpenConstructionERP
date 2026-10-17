@@ -46,6 +46,7 @@ import {
 } from './api';
 import { CostBenchmark } from './CostBenchmark';
 import { CostSpinePanel } from './CostSpinePanel';
+import { CostStructurePanel } from './CostStructurePanel';
 import { ContractExposurePanel } from './ContractExposurePanel';
 import { costmodelGuide } from './costmodelGuide';
 import { BudgetLineThresholdEditor, parseThreshold } from './BudgetLineThresholdEditor';
@@ -2664,7 +2665,10 @@ function FiveDDashboard({ project }: { project: Project }) {
             {t('costmodel.spine.section_badge', { defaultValue: 'Estimate to actual' })}
           </span>
         </div>
-        <CostSpinePanel projectId={project.id} currency={currency} />
+        <div className="space-y-4">
+          <CostStructurePanel projectId={project.id} currency={currency} />
+          <CostSpinePanel projectId={project.id} currency={currency} />
+        </div>
       </div>
     </div>
   );

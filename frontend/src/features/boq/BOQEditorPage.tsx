@@ -76,6 +76,9 @@ import { ResourceSummary } from './ResourceSummary';
 import { CommentDrawer, type CommentEntry } from './CommentDrawer';
 import { PriceAnalysisPanel } from './PriceAnalysisPanel';
 import { PositionActualsDrawer } from '@/features/costmodel/PositionActualsDrawer';
+import { costStructureApi, type PositionAllocation } from '@/features/costmodel/structureApi';
+import { CostAllocationDrawer } from './CostAllocationDrawer';
+import { CostAllocationCoverageBar } from './CostAllocationCoverage';
 import { PositionProcurementDrawer } from '@/features/procurement/PositionProcurementDrawer';
 import { MeasurementDrawer } from './MeasurementDrawer';
 import { GaebSiteExchangeDialog } from './GaebSiteExchangeDialog';
@@ -2548,6 +2551,46 @@ export function BOQEditorPage() {
   // is true; both false when the user cycled the button to `off`.
   const showResourceSplit = resourceSplitMode === 'columns';
   const showResourceSplitPill = resourceSplitMode === 'pill';
+
+  /* Cost allocation: where each position's money lands on the cost structure.
+   *  The list feeds the coverage bar, the optional read-only column and the
+   *  allocation drawer. It is refetched whenever the bill changes, since a
+   *  remeasured position can break a quantity split. The column choice is a
+   *  per-viewer preference, like the resource split. */
+  const COST_ALLOCATION_COLUMN_KEY = 'oe_boq_cost_allocation_column';
+  const [showCostAllocation, setShowCostAllocation] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(COST_ALLOCATION_COLUMN_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleCostAllocation = useCallback(() => {
+    setShowCostAllocation((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(COST_ALLOCATION_COLUMN_KEY, next ? '1' : '0');
+      } catch { /* localStorage unavailable - the choice lasts for this visit */ }
+      return next;
+    });
+  }, []);
+  const allocationsQuery = useQuery({
+    queryKey: ['boq-allocations', boqId],
+    queryFn: () => costStructureApi.getBoqAllocations(boqId!),
+    enabled: !!boqId,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  useEffect(() => {
+    if (!boqId || !boq) return;
+    queryClient.invalidateQueries({ queryKey: ['boq-allocations', boqId] });
+  }, [boq, boqId, queryClient]);
+  const costAllocations = useMemo(() => {
+    const map = new Map<string, PositionAllocation>();
+    for (const p of allocationsQuery.data?.positions ?? []) map.set(p.position_id, p);
+    return map;
+  }, [allocationsQuery.data]);
+  const [allocationPositionId, setAllocationPositionId] = useState<string | null>(null);
 
   const displayCurrencyMeta = useMemo(() => {
     if (!displayCurrency) return null;
@@ -5494,6 +5537,14 @@ export function BOQEditorPage() {
         // keeps its own internal horizontal scrollbar, which is what the
         // user expects (toolbar and headers stay aligned with the page).
         <div className="mb-2 min-w-0" data-testid="boq-grid">
+        {allocationsQuery.data && allocationsQuery.data.coverage.positions_total > 0 && (
+          <CostAllocationCoverageBar
+            coverage={allocationsQuery.data.coverage}
+            currency={allocationsQuery.data.currency || currencyCode}
+            showColumn={showCostAllocation}
+            onToggleColumn={toggleCostAllocation}
+          />
+        )}
         <BOQFilterBar
           search={boqSearch}
           onSearch={setBoqSearch}
@@ -5580,6 +5631,9 @@ export function BOQEditorPage() {
           customColumns={boqCustomColumns}
           showResourceSplit={showResourceSplit}
           showResourceSplitPill={showResourceSplitPill}
+          showCostAllocation={showCostAllocation}
+          costAllocations={costAllocations}
+          onOpenCostAllocation={setAllocationPositionId}
           boqVariables={boqVariables}
           bimModelId={bimModelId}
           onHighlightBIMElements={handleHighlightBIMElements}
@@ -6213,6 +6267,14 @@ export function BOQEditorPage() {
           />
         );
       })()}
+
+      <CostAllocationDrawer
+        open={allocationPositionId !== null}
+        onClose={() => setAllocationPositionId(null)}
+        projectId={boq?.project_id}
+        allocation={allocationPositionId ? costAllocations.get(allocationPositionId) : undefined}
+        currency={allocationsQuery.data?.currency || currencyCode}
+      />
 
       {/* Issue #516: requisitions and purchase order lines for one position. */}
       {(() => {

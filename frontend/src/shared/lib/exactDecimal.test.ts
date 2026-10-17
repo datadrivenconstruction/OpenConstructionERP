@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, expect, it } from 'vitest';
-import { subtractDecimalStrings } from './exactDecimal';
+import { addDecimalStrings, subtractDecimalStrings, sumDecimalStrings, sumMoneyStrings } from './exactDecimal';
 
 describe('exact invoice decimal subtraction', () => {
   it.each([
@@ -28,4 +28,30 @@ describe('exact invoice decimal subtraction', () => {
       expect(subtractDecimalStrings('1', invalid)).toBeNull();
     },
   );
+});
+
+describe('exact decimal sums', () => {
+  it.each([
+    ['0.10', '0.20', '0.30'],
+    ['9007199254740993.01', '0.01', '9007199254740993.02'],
+    ['1.5', '-2.25', '-0.75'],
+    ['100', '0.001', '100.001'],
+  ])('%s plus %s is exactly %s', (left, right, expected) => {
+    expect(addDecimalStrings(left, right)).toBe(expected);
+  });
+
+  it('sums a list at the widest scale and an empty list to zero', () => {
+    expect(sumDecimalStrings(['0.1', '0.2', '0.3'])).toBe('0.6');
+    expect(sumDecimalStrings(['33.34', '33.33', '33.33'])).toBe('100.00');
+    expect(sumDecimalStrings([])).toBe('0');
+  });
+
+  it('refuses a sum with an unreadable operand', () => {
+    expect(sumDecimalStrings(['1', '1e3'])).toBeNull();
+    expect(addDecimalStrings('1', '')).toBeNull();
+  });
+
+  it('display sums treat missing figures as zero', () => {
+    expect(sumMoneyStrings(['0.10', null, undefined, 'x', '0.20'])).toBe('0.30');
+  });
 });

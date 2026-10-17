@@ -67043,6 +67043,10 @@
         "schemas.py",
         "seed.py",
         "service.py",
+        "structure.py",
+        "structure_rules.py",
+        "structure_schemas.py",
+        "structure_service.py",
         "validators.py"
       ],
       "manifest": {
@@ -67352,6 +67356,30 @@
               "nullable": false
             },
             {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "level",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "own_amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "MoneyType",
+              "nullable": false
+            },
+            {
+              "name": "is_leaf_postable",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
               "name": "classification_standard",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -67651,6 +67679,108 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "CostCodeList",
+          "tablename": "oe_costmodel_code_list",
+          "docstring": "A code list a user imported for one project.\n\nThe shipped lists and those of the active pack are read from files by\n:mod:`app.core.code_lists`; a list a company keeps for itself is uploaded\nas CSV or Excel and stored here, validated, in tree order. ``key`` is what\nan account's ``classification_standard`` and a position's classification\nname it by, unique within the project.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "entries",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "PositionAllocation",
+          "tablename": "oe_costmodel_position_allocation",
+          "docstring": "One share of a bill position on a cost line: the position's vector, split.\n\nA position on a single cost line needs no row here: ``Position.cost_line_id``\nis that link, and every reader written before splits existed keeps reading\nit. A position split over several cost lines has one row per line, and its\n``cost_line_id`` names the line with the largest share, so those readers\nstill find the main line. Shares are percentages adding up to 100 or partial\nquantities adding up to the position's quantity (``mode``), never a mix.\n\nRows go with their position and with their cost line; deleting a cost line\nthat still carries a share is refused by the service before it gets here.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "boq_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "position_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_boq_position.id"
+            },
+            {
+              "name": "cost_line_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_costmodel_cost_line.id"
+            },
+            {
+              "name": "mode",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "share",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "MoneyType",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -67946,6 +68076,68 @@
           "handler": "get_cost_line_history",
           "response_model": "LineHistory",
           "request_schema": "CostControlService"
+        },
+        {
+          "method": "GET",
+          "path": "/code-lists/",
+          "handler": "list_code_lists",
+          "response_model": "list[CodeListSummary]",
+          "request_schema": "CostStructureService"
+        },
+        {
+          "method": "GET",
+          "path": "/code-lists/{key}/",
+          "handler": "get_code_list",
+          "response_model": "CodeListDetail",
+          "request_schema": "CostStructureService"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/code-lists/import/",
+          "handler": "import_code_list",
+          "response_model": "CodeListImportResult",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "DELETE",
+          "path": "/projects/{project_id}/code-lists/{key}/",
+          "handler": "delete_code_list",
+          "request_schema": "CostStructureService"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/spine/structure/",
+          "handler": "get_cost_structure",
+          "response_model": "StructureTree",
+          "request_schema": "CostStructureService"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/spine/structure/apply-code-list/",
+          "handler": "apply_code_list",
+          "response_model": "ApplyCodeListResult",
+          "request_schema": "ApplyCodeListRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/boqs/{boq_id}/allocations/",
+          "handler": "get_boq_allocations",
+          "response_model": "BoqAllocations",
+          "request_schema": "CostStructureService"
+        },
+        {
+          "method": "PUT",
+          "path": "/positions/{position_id}/allocation/",
+          "handler": "put_position_allocation",
+          "response_model": "PositionAllocationOut",
+          "request_schema": "PositionAllocationRequest"
+        },
+        {
+          "method": "DELETE",
+          "path": "/positions/{position_id}/allocation/",
+          "handler": "clear_position_allocation",
+          "response_model": "PositionAllocationOut",
+          "request_schema": "CostStructureService"
         }
       ],
       "schemas": [
@@ -69035,6 +69227,10 @@
               "type": "str"
             },
             {
+              "name": "title",
+              "type": "str"
+            },
+            {
               "name": "classification_standard",
               "type": "str"
             },
@@ -69046,6 +69242,15 @@
               "name": "sort_order",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "own_amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "is_leaf_postable",
+              "type": "bool",
+              "default": "True"
             },
             {
               "name": "metadata",
@@ -69074,6 +69279,10 @@
               "type": "str | None"
             },
             {
+              "name": "title",
+              "type": "str | None"
+            },
+            {
               "name": "classification_standard",
               "type": "str | None"
             },
@@ -69084,6 +69293,15 @@
             {
               "name": "sort_order",
               "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "own_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "is_leaf_postable",
+              "type": "bool | None",
               "default": "None"
             },
             {
@@ -69119,6 +69337,25 @@
             {
               "name": "name",
               "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "level",
+              "type": "int",
+              "default": "1"
+            },
+            {
+              "name": "own_amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "is_leaf_postable",
+              "type": "bool",
+              "default": "True"
             },
             {
               "name": "classification_standard",
@@ -69505,6 +69742,11 @@
               "type": "UUID"
             },
             {
+              "name": "standard",
+              "type": "str",
+              "default": "''"
+            },
+            {
               "name": "accounts_created",
               "type": "int",
               "default": "0"
@@ -69523,6 +69765,15 @@
               "name": "budget_lines_linked",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "positions_in_suspense",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "suspense_amount",
+              "type": "Decimal"
             }
           ]
         },
@@ -270374,10 +270625,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 198,
+      "ts_files": 205,
       "css_files": 0,
-      "test_files": 107,
-      "total_files": 198
+      "test_files": 110,
+      "total_files": 205
     },
     {
       "name": "buyer-portal",
@@ -270542,10 +270793,10 @@
     },
     {
       "name": "cost-control",
-      "ts_files": 9,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 9
+      "test_files": 2,
+      "total_files": 10
     },
     {
       "name": "cost-explorer",
@@ -270577,10 +270828,10 @@
     },
     {
       "name": "costmodel",
-      "ts_files": 16,
+      "ts_files": 22,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 16
+      "test_files": 6,
+      "total_files": 22
     },
     {
       "name": "costs",
@@ -273235,14 +273486,14 @@
   "statistics": {
     "backend_modules": 211,
     "modules_with_manifests": 209,
-    "total_models": 773,
-    "total_columns": 8994,
+    "total_models": 775,
+    "total_columns": 9011,
     "total_relationships": 240,
-    "total_routes": 4560,
+    "total_routes": 4569,
     "total_schemas": 4040,
-    "total_python_files": 2715,
+    "total_python_files": 2719,
     "frontend_features": 209,
-    "frontend_ts_files": 3495,
+    "frontend_ts_files": 3509,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
