@@ -62,7 +62,10 @@ __all__ = [
     "convert",
     "conversion_factor",
     "convert_between",
+    "convert_strict",
     "display_rate",
+    "strict_unit_factor",
+    "unit_dimension",
     "display_unit_for",
 ]
 
@@ -331,6 +334,17 @@ _DIMENSION_FACTORS: Final[dict[str, dict[str, str]]] = {
         "unit": "1",
         "count": "1",
     },
+    # Time, for positions measured in hours (hire, attendance, day work).
+    # Days and weeks are deliberately absent: a working day is 8 hours on
+    # one site and 10 on the next, so there is no factor to write down.
+    "time": {
+        "h": "1",
+        "hr": "1",
+        "hrs": "1",
+        "hour": "1",
+        "hours": "1",
+        "min": "60",
+    },
 }
 
 # Reverse index: unit code -> its dimension. Built once from the table above.
@@ -382,3 +396,78 @@ def convert_between(
     if per_base_src == 0:
         return None
     return amount * per_base_dst / per_base_src
+
+
+def unit_dimension(unit: str | None) -> str | None:
+    """The physical dimension a unit measures, or ``None`` when it is unknown.
+
+    ``m2``, ``M2`` and ``m²`` are all ``"area"``; ``pcs`` is ``"count"``; a
+    locale-native or trade-specific label this table does not carry (``шт``,
+    ``set``, ``lsum``) is ``None``, which every caller must read as "not
+    convertible", never as "dimensionless".
+    """
+    key = _dimension_key(unit)
+    return _UNIT_DIMENSION.get(key) if key else None
+
+
+def strict_unit_factor(from_unit: str | None, to_unit: str | None) -> Decimal | None:
+    """How many ``to_unit`` one ``from_unit`` is, or ``None`` when that is undefined.
+
+    The strict sibling of :func:`convert_between` for comparing readings
+    across projects. ``convert_between`` passes a value through unchanged
+    when a unit is missing, which is right for a takeoff link and wrong for a
+    benchmark: a quantity with no unit is not "the same unit as the other
+    one", it is unknown. So here a missing or unknown unit on either side is
+    ``None``, as is a pair from two dimensions.
+
+    Two spellings of one unit (``m2`` and ``m²``) give ``Decimal(1)``.
+
+    Returns:
+        ``k`` such that ``quantity_in_to = quantity_in_from * k``.
+    """
+    src = _dimension_key(from_unit)
+    dst = _dimension_key(to_unit)
+    if not src or not dst:
+        return None
+    dim_src = _UNIT_DIMENSION.get(src)
+    dim_dst = _UNIT_DIMENSION.get(dst)
+    if dim_src is None or dim_dst is None or dim_src != dim_dst:
+        return None
+    if src == dst:
+        return Decimal(1)
+    per_base_src = Decimal(_DIMENSION_FACTORS[dim_src][src])
+    per_base_dst = Decimal(_DIMENSION_FACTORS[dim_dst][dst])
+    if per_base_src == 0:
+        return None
+    return per_base_dst / per_base_src
+
+
+def convert_strict(
+    value: Decimal,
+    from_unit: str | None,
+    to_unit: str | None,
+    exponent: int = 1,
+) -> Decimal | None:
+    """Restate ``value`` from ``from_unit`` to ``to_unit``, or ``None`` when undefined.
+
+    ``exponent`` says how the value carries the unit: ``1`` for a quantity
+    (10 m2 -> 107.639 ft2), ``-1`` for a rate per unit (50 per m2 -> 4.645
+    per ft2), ``0`` for a figure the unit does not touch. The multiply and
+    the divide are done in that order on the table's exact factors, so a
+    round trip through a reciprocal does not leave a trailing digit behind:
+    2152.78 ft2 is exactly 200 m2 here, not 199.99999...
+
+    Same refusal rules as :func:`strict_unit_factor`.
+    """
+    if strict_unit_factor(from_unit, to_unit) is None:
+        return None
+    if exponent == 0:
+        return value
+    src = _dimension_key(from_unit)
+    dst = _dimension_key(to_unit)
+    dimension = _UNIT_DIMENSION[src]
+    per_base_src = Decimal(_DIMENSION_FACTORS[dimension][src])
+    per_base_dst = Decimal(_DIMENSION_FACTORS[dimension][dst])
+    if exponent > 0:
+        return value * per_base_dst**exponent / per_base_src**exponent
+    return value * per_base_src ** (-exponent) / per_base_dst ** (-exponent)
