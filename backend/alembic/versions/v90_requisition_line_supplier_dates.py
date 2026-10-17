@@ -55,6 +55,8 @@ _COLUMNS: list[tuple[str, str, object, str | None]] = [
 ]
 
 
+# data-rewrite-ack: table=oe_procurement_requisition growth=tenure rows=one row per material requisition raised, accumulates across projects and years
+# boot-repair: registry=procurement_requisition_delivery_date_from_order
 def upgrade() -> None:
     """Add each column and its index when missing, then correct the stored delivery forecast."""
     bind = op.get_bind()

@@ -335,3 +335,65 @@ async def test_the_header_date_is_the_default_and_the_forecast_waits_for_the_ord
     assert ordered["items"][0]["effective_required_date"] == needed.isoformat(), (
         "the need stays apart from the supplier's date"
     )
+
+
+async def test_the_boot_repair_replaces_the_stored_ordering_deadline(world: World) -> None:
+    """An install that heals at boot never runs v90's data half; the registered repair does it instead."""
+    from sqlalchemy import update
+
+    from app.modules.procurement.models import MaterialRequisition
+    from app.modules.procurement.repairs import PROCUREMENT_REQUISITION_DELIVERY_DATE
+
+    needed = date.today() + timedelta(days=30)
+    delivery = (needed - timedelta(days=3)).isoformat()
+    async with client_as(world, world.editor, "editor") as c:
+        draft = (
+            await c.post(f"{REQ}/", json=_create_body(world, _line(world), required_date=needed.isoformat()))
+        ).json()
+        ordered = (
+            await c.post(
+                f"{REQ}/",
+                json=_create_body(
+                    world, _line(world), required_date=needed.isoformat(), vendor_id=str(world.vendor_active)
+                ),
+            )
+        ).json()
+        await c.post(f"{REQ}/{ordered['id']}/submit")
+    async with client_as(world, world.manager, "manager") as c:
+        await c.post(f"{REQ}/{ordered['id']}/approve", json={})
+        converted = await c.post(
+            f"{REQ}/convert-to-po",
+            json={"project_id": str(world.project_id), "requisition_ids": [ordered["id"]], "delivery_date": delivery},
+        )
+    assert converted.status_code == 201, converted.text
+
+    stale = (needed - timedelta(days=14)).isoformat()
+    async with world.factory() as s:
+        await s.execute(
+            update(MaterialRequisition)
+            .where(MaterialRequisition.id.in_([uuid.UUID(draft["id"]), uuid.UUID(ordered["id"])]))
+            .values(estimated_delivery_date=stale)
+        )
+        await s.commit()
+
+    async with world.factory() as s:
+        changed = await PROCUREMENT_REQUISITION_DELIVERY_DATE.run(s)
+        await s.commit()
+    async with world.factory() as s:
+        again = await PROCUREMENT_REQUISITION_DELIVERY_DATE.run(s)
+        await s.commit()
+        rows = {
+            str(r.id): r.estimated_delivery_date
+            for r in (
+                await s.execute(
+                    MaterialRequisition.__table__.select().where(
+                        MaterialRequisition.id.in_([uuid.UUID(draft["id"]), uuid.UUID(ordered["id"])])
+                    )
+                )
+            ).all()
+        }
+
+    assert changed >= 2
+    assert again == 0, "the repair is idempotent: a corrected database reports nothing to do"
+    assert rows[draft["id"]] is None, "no order, no delivery date"
+    assert rows[ordered["id"]] == delivery, "the order's delivery date replaces the ordering deadline"
