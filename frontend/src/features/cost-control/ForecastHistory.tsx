@@ -82,7 +82,7 @@ function Chart({ points, currency }: { points: SnapshotSummary[]; currency: stri
                 </text>
               )}
               <text x={x(i)} y={H - 10} textAnchor="middle" className="fill-content-tertiary text-[11px]">
-                {fmtDate(points[i]!.taken_on, { day: '2-digit', month: 'short', year: '2-digit' })}
+                {fmtDate(points[i]!.taken_on, { day: '2-digit', month: 'short', year: 'numeric' })}
               </text>
             </g>
           ))}
