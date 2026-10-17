@@ -34,6 +34,7 @@ from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+from app.modules.boq.supplier_suggestion import effective_suggestion
 from app.modules.price_breakdown import ResourceKind, coerce_kind, kind_i18n_key
 
 _2P = Decimal("0.01")
@@ -308,6 +309,9 @@ class BuyListSource:
     and its ``code`` (``"2:CWICR-123"``), or the index alone. ``quantity`` is
     the gross purchase quantity this one line contributes, in ``unit`` as the
     source states it, so a requisition raised from the row can keep both.
+    ``suggested_vendor_id`` is the supplier the estimator suggested for the
+    resource, or the position default, with ``suggested_vendor_origin`` saying
+    which; sources of one row may suggest different suppliers.
     """
 
     position_id: str
@@ -316,9 +320,13 @@ class BuyListSource:
     unit: str
     code: str = ""
     catalog_item_id: str | None = None
+    suggested_vendor_id: str | None = None
+    suggested_vendor_origin: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "suggested_vendor_id": self.suggested_vendor_id,
+            "suggested_vendor_origin": self.suggested_vendor_origin,
             "position_id": self.position_id,
             "resource_key": self.resource_key,
             "quantity": _q(self.quantity, _4P),
@@ -508,6 +516,7 @@ def aggregate_material_buy_list(
             acc["quantity"] += line_qty
             acc["cost"] += line_cost
             acc["positions"].add(pos_id)
+            suggested, origin = effective_suggestion(meta, res)
             acc["sources"].append(
                 BuyListSource(
                     position_id=pos_id,
@@ -516,6 +525,8 @@ def aggregate_material_buy_list(
                     unit=unit,
                     code=str(res.get("code") or "").strip(),
                     catalog_item_id=str(res.get("catalog_item_id") or "").strip() or None,
+                    suggested_vendor_id=str(suggested) if suggested else None,
+                    suggested_vendor_origin=origin,
                 )
             )
             contributed = True

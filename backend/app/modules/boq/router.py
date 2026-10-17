@@ -231,6 +231,7 @@ from app.modules.boq.service import (
     exportable_positions,
     resource_fx_factor,
 )
+from app.modules.boq.supplier_suggestion_router import supplier_suggestion_router
 from app.modules.boq.units import is_lump_sum_unit, to_gaeb_unit_code
 from app.modules.costs.repository import CostItemRepository
 from app.modules.measurement.presets import PRESETS as MEASUREMENT_PRESETS
@@ -241,6 +242,7 @@ router = APIRouter(tags=["boq"])
 # The module loader mounts exactly one router per module, this one. Sub-routers
 # that live in their own files answer nowhere until they are included here.
 router.include_router(resource_review_router)
+router.include_router(supplier_suggestion_router)
 router.include_router(change_review_router)
 router.include_router(gaeb_exchange_router)
 _log = logging.getLogger(__name__)
