@@ -57,12 +57,6 @@ import { DASHBOARD_WIDGET_BY_ID } from './widgetRegistry';
 // card and not with the dashboard's own chunk.
 const DashboardVideosStrip = lazy(() => import('@/features/videos/DashboardVideosStrip'));
 
-/** How many video thumbnails each width shows: one row, Start here first.
- *  One more than a comfortable fit from a third of the page up, so each
- *  thumbnail is about a fifth smaller and the row reads as a quiet index
- *  rather than a second gallery. */
-const VIDEOS_BY_SPAN: Record<SpanStep, number> = { 2: 2, 3: 4, 4: 5, 6: 5 };
-
 /** This card's id in the dashboard widget registry. Its width and its
  *  visibility are both stored against it, so the id is the whole link between
  *  the controls below and the preference that survives a reload. */
@@ -76,14 +70,14 @@ const SPAN_STEPS = [2, 3, 4, 6] as const;
 type SpanStep = (typeof SPAN_STEPS)[number];
 
 interface GalleryShape {
-  /** Case tiles to preview. The "all cases" tile is drawn on top of this, so
-   *  each count is one short of a whole number of rows.
-   *
-   *  Every column count in the same `columns` string divides that total, which
-   *  used to hold only at span 6. It holds at all four now because the ladders
-   *  were rebuilt around it: no breakpoint is left drawing a short last row,
-   *  which is what a gallery meant to read as two tidy rows was always for. */
+  /** Case tiles to preview at the widest column count. The "all cases" tile
+   *  takes the last cell, so this is one short of that column count: the
+   *  gallery is ONE row. */
   count: number;
+  /** Per tile, the classes that hide it below the breakpoint where it still
+   *  fits on the row. Index i is the i-th case; a tile past the end of this
+   *  list is never drawn. Literal strings for the same reason as `columns`. */
+  tileVisibility: readonly string[];
   /** Complete literal Tailwind column classes. NEVER built by concatenation:
    *  the JIT only keeps classes it can see whole, which is the same rule the
    *  comment at the top of features/cases/companyTypes.ts sets out for tints. */
@@ -95,61 +89,41 @@ interface GalleryShape {
 }
 
 /**
- * How the gallery is drawn at each width. Full width is the default and is
- * meant to read as a real part of the dashboard: seventeen cases plus the way
- * into the rest, NINE across on a wide screen, which is TWO rows.
- *
- * Nine, not the six it drew before, and the block loses about a quarter of its
- * height for it. Height here is not set by a height: a tile is a 16/9 banner
- * over two lines of text that never wrap (both are `truncate`), so the text
- * block is a constant and only the banner moves with the column width. On a
- * 1400px-wide card - stated because the number depends on it - the tile goes
- * from roughly 227px across to 148px, its banner from 128px to 83px, and the
- * two rows from about 366px to 272px. Six MORE cases in a quarter LESS room,
- * which is the trade the width was hiding all along: at six across the tiles
- * were larger than the line art inside them needed.
- *
- * Two rows is the rule at every width, not a number chosen for the full-width
- * card alone. Each count is two rows at the widest column count in its own
- * `columns` string, minus the one cell the "all cases" tile takes. That is what
- * keeps the ladder monotonic: narrowing the card has to show FEWER cases, and a
- * count fixed only at span 6 would have left a card that grew when you shrank
- * it. Spans 4 and 3 land on the same number because they share a `columns`
- * string; only the portrait size and the type scale differ between them.
- *
- * The narrow breakpoints moved up with the wide ones on purpose. Raising only
- * the widest column count would have kept the same tile count on a phone at
- * two across, so the block a laptop shows a third shorter would have grown by
- * half on the device with the least room for it.
- *
- * Six across starts at `md` rather than `sm` for the same reason nine is the
- * ceiling and not twelve. A tile is only ever as tall as it is wide, so the
- * column count that reads well is the one where the drawing still reads: six
- * across a 640px viewport is a 105px tile, narrower than the portrait band and
- * the title need, while at 768 it is 128px. The ladder is bounded by the
- * smallest tile that still shows a picture, not by how many will fit.
+ * How the gallery is drawn at each width: always ONE row, ending on the tile
+ * that opens the whole library. Two rows of seventeen cases pushed the videos
+ * and everything below them down by a screen, and the founder asked for one
+ * row (17.10.2026). The column ladders are unchanged; what changed is that a
+ * tile which would start a second row at the current breakpoint is hidden, so
+ * every width shows exactly one full row and never a short second one.
  */
 const GALLERY_BY_SPAN: Record<SpanStep, GalleryShape> = {
   6: {
-    count: 17,
+    // 3 / 6 / 9 across, so 2 / 5 / 8 cases plus the "all cases" tile.
+    count: 8,
+    tileVisibility: ['', '', 'max-md:hidden', 'max-md:hidden', 'max-md:hidden', 'max-xl:hidden', 'max-xl:hidden', 'max-xl:hidden'],
     columns: 'grid-cols-3 md:grid-cols-6 xl:grid-cols-9',
     faceClass: 'w-[26%] max-w-[3rem]',
     titleClass: 'text-xs',
   },
   4: {
-    count: 11,
+    // 3 / 4 / 6 across, so 2 / 3 / 5 cases.
+    count: 5,
+    tileVisibility: ['', '', 'max-sm:hidden', 'max-lg:hidden', 'max-lg:hidden'],
     columns: 'grid-cols-3 sm:grid-cols-4 lg:grid-cols-6',
     faceClass: 'w-[26%] max-w-[2.75rem]',
     titleClass: 'text-xs',
   },
   3: {
-    count: 11,
+    count: 5,
+    tileVisibility: ['', '', 'max-sm:hidden', 'max-lg:hidden', 'max-lg:hidden'],
     columns: 'grid-cols-3 sm:grid-cols-4 lg:grid-cols-6',
     faceClass: 'w-[30%] max-w-[2.5rem]',
     titleClass: 'text-xs',
   },
   2: {
-    count: 7,
+    // 2 / 4 across, so 1 / 3 cases.
+    count: 3,
+    tileVisibility: ['', 'max-sm:hidden', 'max-sm:hidden'],
     columns: 'grid-cols-2 sm:grid-cols-4',
     faceClass: 'w-[30%] max-w-[2.5rem]',
     titleClass: 'text-xs',
@@ -375,7 +349,7 @@ export function DashboardCasesCard() {
               block previews the library visually. How many tiles, how many
               across and how big the type is all come from the card's width. */}
           <div className={clsx('grid gap-2', shape.columns)}>
-          {picks.map(({ pb, best, total, inProgress }) => {
+          {picks.map(({ pb, best, total, inProgress }, index) => {
             const face = faces.get(pb.id);
             const Icon = iconFor(pb.icon);
             const tint = tintFor(pb.category);
@@ -386,7 +360,10 @@ export function DashboardCasesCard() {
                 type="button"
                 onClick={() => navigate(`/cases/${pb.id}`)}
                 title={title}
-                className="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                className={clsx(
+                  shape.tileVisibility[index],
+                  'group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
+                )}
               >
                 {/* Faint discipline wash behind the whole tile. */}
                 <span
@@ -496,13 +473,13 @@ export function DashboardCasesCard() {
         </div>
       )}
 
-      {/* Video guides: Start here, then picks for the reader's role and
-          country. AFTER the cases, not above them: the cases are what this
+      {/* Video guides picked for the reader's role and country, on the
+          same grid as the case tiles, tile for tile. AFTER the cases, not above them: the cases are what this
           card is for, and a row of bright thumbnails at its top pulled the eye
           away from them. The fallback holds the row's height so nothing
           jumps. */}
       <Suspense fallback={<div className="mt-3 h-24" aria-hidden="true" />}>
-        <DashboardVideosStrip count={VIDEOS_BY_SPAN[span]} />
+        <DashboardVideosStrip count={shape.count} columns={shape.columns} tileVisibility={shape.tileVisibility} />
       </Suspense>
     </div>
   );

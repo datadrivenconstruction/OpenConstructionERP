@@ -52580,6 +52580,7 @@ const resource = {
     "videos.play": "播放：{{title}}",
     "videos.open_external": "在 YouTube 上打开",
     "videos.any_role": "任意角色",
+    "videos.tile_badge": "视频",
     "videos.change": "更改",
     "videos.channel_button": "打开频道",
     "videos.subscribe_channel": "订阅频道",

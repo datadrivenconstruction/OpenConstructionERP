@@ -53218,6 +53218,7 @@ const resource = {
     "videos.play": "Lire : {{title}}",
     "videos.open_external": "Ouvrir sur YouTube",
     "videos.any_role": "Tous les rôles",
+    "videos.tile_badge": "Vidéo",
     "videos.change": "Changer",
     "videos.channel_button": "Ouvrir la chaîne",
     "videos.subscribe_channel": "S'abonner à la chaîne",

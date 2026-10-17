@@ -50299,6 +50299,7 @@ const resource = {
     "videos.play": "Esita: {{title}}",
     "videos.open_external": "Ava YouTube'is",
     "videos.any_role": "Suvaline roll",
+    "videos.tile_badge": "Video",
     "videos.change": "Muuda",
     "videos.channel_button": "Ava kanal",
     "videos.subscribe_channel": "Telli kanal",

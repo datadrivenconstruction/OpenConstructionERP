@@ -50311,6 +50311,7 @@ const resource = {
     "videos.play": "پخش: {{title}}",
     "videos.open_external": "باز کردن در YouTube",
     "videos.any_role": "هر نقشی",
+    "videos.tile_badge": "ویدیو",
     "videos.change": "تغییر",
     "videos.channel_button": "باز کردن کانال",
     "videos.subscribe_channel": "عضویت در کانال",

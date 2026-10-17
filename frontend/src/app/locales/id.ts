@@ -50110,6 +50110,7 @@ const resource = {
     "videos.play": "Putar: {{title}}",
     "videos.open_external": "Buka di YouTube",
     "videos.any_role": "Peran apa saja",
+    "videos.tile_badge": "Video",
     "videos.change": "Ubah",
     "videos.channel_button": "Buka kanal",
     "videos.subscribe_channel": "Berlangganan kanal",

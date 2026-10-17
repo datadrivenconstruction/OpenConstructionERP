@@ -50594,6 +50594,7 @@ const resource = {
     "videos.play": "הפעלה: {{title}}",
     "videos.open_external": "פתיחה ב-YouTube",
     "videos.any_role": "כל תפקיד",
+    "videos.tile_badge": "וידאו",
     "videos.change": "שינוי",
     "videos.channel_button": "פתיחת הערוץ",
     "videos.subscribe_channel": "הירשמו לערוץ",

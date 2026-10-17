@@ -134,32 +134,36 @@ beforeEach(() => {
 });
 
 describe('DashboardCasesCard size', () => {
-  it('opens as two rows: 17 cases plus the way into the rest', () => {
+  it('opens as one row: 8 cases plus the way into the rest', () => {
     renderCard();
 
-    // Seventeen cases and the "all cases" tile is eighteen cells, and eighteen
-    // cells nine across is two rows. Both halves are asserted here on purpose:
-    // two rows is a JOINT property of the count and the column class, so a test
-    // that pinned only the count would stay green if someone dropped the `xl:`
-    // column and turned the block back into three rows on a wide screen.
-    expect(caseTileCount()).toBe(17);
-    expect(tileCount()).toBe(18);
+    // Eight cases and the "all cases" tile is nine cells, and nine cells nine
+    // across is one row (founder, 17.10.2026). Both halves are asserted on
+    // purpose: one row is a JOINT property of the count and the column class.
+    expect(caseTileCount()).toBe(8);
+    expect(tileCount()).toBe(9);
     expect(grid().className).toContain('xl:grid-cols-9');
   });
 
-  it('divides evenly at every breakpoint it declares, not only the widest', () => {
-    // A short last row is what "two rows" quietly turns into on the widths
-    // nobody looks at. Read the column counts out of the class string the card
-    // actually rendered and check the total against each one, so a future
-    // breakpoint added to that string is checked by this test on the day it is
-    // added rather than on the day someone notices the ragged row.
+  it('fills exactly one row at every breakpoint it declares, not only the widest', () => {
+    // A tile that would start a second row carries `max-<bp>:hidden`. Read the
+    // column counts out of the class string the card actually rendered and,
+    // for each, count the tiles still shown at that width: it must be exactly
+    // the column count, so a breakpoint added later is checked the day it is
+    // added rather than the day someone notices a short second row.
     renderCard();
-    const columns = Array.from(grid().className.matchAll(/grid-cols-(\d+)/g)).map((m) =>
-      Number(m[1]),
+    const rank: Record<string, number> = { '': 0, sm: 1, md: 2, lg: 3, xl: 4, '2xl': 5 };
+    const columns = Array.from(grid().className.matchAll(/(?:^|\s)(?:(sm|md|lg|xl|2xl):)?grid-cols-(\d+)/g)).map(
+      (m) => ({ bp: m[1] ?? '', cols: Number(m[2]) }),
     );
     expect(columns.length).toBeGreaterThan(1);
-    for (const c of columns) {
-      expect({ columns: c, remainder: tileCount() % c }).toEqual({ columns: c, remainder: 0 });
+    const tiles = Array.from(grid().children);
+    for (const { bp, cols } of columns) {
+      const shown = tiles.filter((tile) => {
+        const hiddenBelow = Array.from(tile.className.matchAll(/max-(sm|md|lg|xl|2xl):hidden/g)).map((m) => m[1]!);
+        return hiddenBelow.every((x) => rank[bp]! >= rank[x]!);
+      }).length;
+      expect({ bp, shown }).toEqual({ bp, shown: cols });
     }
   });
 
@@ -169,7 +173,7 @@ describe('DashboardCasesCard size', () => {
     useDashboardLayoutStore.setState({ spans: { [WIDGET_ID]: 2 } });
     renderCard();
 
-    expect(tileCount()).toBe(8);
+    expect(tileCount()).toBe(4);
     // The column count has to come off the same number as the tile count: the
     // grid's breakpoints are viewport-wide, so a third-width card asking for
     // nine columns would draw nine microscopic tiles on a wide screen.
@@ -191,7 +195,7 @@ describe('DashboardCasesCard size', () => {
     // The whole ladder, so every width is pinned here and not only in the
     // constant it is read from, and the same list sorted, so the property the
     // test is named for survives a deliberate change to the numbers.
-    expect(seen).toEqual([7, 11, 11, 17]);
+    expect(seen).toEqual([3, 5, 5, 8]);
     expect(seen).toEqual([...seen].sort((a, b) => a - b));
   });
 });
@@ -203,7 +207,7 @@ describe('DashboardCasesCard way out', () => {
 
     // The value Customize shows and persists - not a private flag of this card.
     expect(useDashboardLayoutStore.getState().spans[WIDGET_ID]).toBe(4);
-    expect(tileCount()).toBe(12);
+    expect(tileCount()).toBe(6);
   });
 
   it('grows back the same way', () => {
@@ -275,8 +279,8 @@ describe('DashboardCasesCard faces', () => {
     // `caseFaceFor` is allowed to miss, and which cases land in the window is a
     // function of the ranking, so an equality here would fail one day for a
     // reason that has nothing to do with the faces. Scaled down with the
-    // gallery when it was cut from four rows to two.
-    expect(checked).toBeGreaterThan(8);
+    // gallery when it was cut from four rows to two, and to one.
+    expect(checked).toBeGreaterThan(4);
   });
 });
 
@@ -286,59 +290,77 @@ describe('DashboardCasesCard video guides', () => {
     useVideosStore.setState({ role: 'estimator', market: 'any', started: {}, watched: {} });
   });
 
-  it('shows a row of video guides after the cases, Start here first, then picks for the role', async () => {
+  /** The case tiles of the gallery, without its closing "All cases" tile. */
+  function caseTiles(): HTMLElement[] {
+    const card = screen.getByTestId('dashboard-cases-card');
+    return within(card.querySelector('div.grid') as HTMLElement).getAllByRole('button').slice(0, -1);
+  }
+
+  it('shows as many videos as cases, on the same grid, picked for the role', async () => {
     renderCard();
     const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
     const tiles = within(strip).getAllByTestId('dashboard-video');
-    const expected = dashboardVideos({ role: 'estimator', market: null, language: 'en' }, 5);
-    expect(tiles).toHaveLength(5);
-    expect(expected[0]!.id).toBe(startHereVideo()!.id);
+    const cases = caseTiles();
+    const expected = dashboardVideos({ role: 'estimator', market: null, language: 'en' }, cases.length);
+    expect(tiles).toHaveLength(cases.length);
     expect(tiles.map((t) => t.getAttribute('aria-label'))).toEqual(expected.map((v) => `Play: ${v.title}`));
-    expect(within(tiles[0]!).getByText('Start here')).toBeTruthy();
-    // Every one plays now, and every cover comes from the video host.
+    // Same columns, and each video hides at the same breakpoint as the case above it.
+    const card = screen.getByTestId('dashboard-cases-card');
+    expect(within(strip).getByTestId('dashboard-videos-grid').className).toBe(
+      (card.querySelector('div.grid') as HTMLElement).className,
+    );
+    tiles.forEach((tile, i) => {
+      const hide = (el: Element) => el.className.split(' ').filter((c) => c.endsWith(':hidden'));
+      expect(hide(tile.parentElement!)).toEqual(hide(cases[i]!));
+    });
     for (const v of expected) {
       expect(v.status).toBe('published');
       expect(v.cover).toMatch(/^https:\/\/i\.ytimg\.com\//);
     }
-    // Both halves are labelled, and the cases come first: the videos are the
-    // quiet row under them, not the headline above them.
-    const card = screen.getByTestId('dashboard-cases-card');
+    // The cases come first: the videos are the row under them.
     expect(strip.compareDocumentPosition(card.querySelector('div.grid')!) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
     expect(within(strip).getByText('Video guides')).toBeTruthy();
     expect(within(card).getByText('Use cases')).toBeTruthy();
   });
 
-  it('plays nothing on the dashboard: a tile opens the Videos page at that video', async () => {
+  it('leaves the setup lesson out: whoever reads the dashboard has installed the platform', async () => {
     renderCard();
     const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
-    expect(document.querySelector('iframe')).toBeNull();
-    fireEvent.click(within(strip).getAllByTestId('dashboard-video')[0]!);
-    expect(navigateSpy).toHaveBeenCalledWith(`/videos?v=${startHereVideo()!.id}`);
-    expect(within(strip).getByRole('link', { name: /All videos/ }).getAttribute('href')).toBe('/videos');
+    const setup = startHereVideo()!;
+    const labels = within(strip).getAllByTestId('dashboard-video').map((t) => t.getAttribute('aria-label'));
+    expect(labels).not.toContain(`Play: ${setup.title}`);
+    expect(dashboardVideos({ role: 'estimator', market: null, language: 'en' }, 8).some((v) => v.startHere)).toBe(false);
   });
 
-  it('shows fewer videos in a narrower card, and keeps two on a phone', async () => {
-    useDashboardLayoutStore.setState({ order: [], hidden: [], spans: { [WIDGET_ID]: 2 } });
+  it('marks every tile as a video with a readable running time', async () => {
     renderCard();
     const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
-    expect(within(strip).getAllByTestId('dashboard-video')).toHaveLength(2);
-  });
-
-  it('keeps the row compact and quiet: one more column than before, small play mark, no lift', async () => {
-    renderCard();
-    const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
-    // Five across at the default full width where four used to fill the row,
-    // so each thumbnail is a fifth smaller; three on a phone.
-    const grid = within(strip).getByTestId('dashboard-videos-grid');
-    expect(grid.className).toContain('sm:grid-cols-5');
-    expect(grid.className).toContain('grid-cols-3');
-    for (const tile of within(strip).getAllByTestId('dashboard-video')) {
-      expect(tile.className).not.toMatch(/hover:-translate-y|shadow-md|bg-oe-blue/);
+    const tiles = within(strip).getAllByTestId('dashboard-video');
+    for (const tile of tiles) {
+      expect(within(tile).getByText('Video')).toBeTruthy();
       // Nothing on the dashboard plays by itself.
       expect(tile.querySelector('video, iframe')).toBeNull();
     }
-    // The link to the library is there and is text, not a primary button.
-    expect(within(strip).getByRole('link', { name: /All videos/ }).className).not.toMatch(/bg-oe-blue/);
+    const durations = within(strip).getAllByTestId('dashboard-video-duration');
+    expect(durations.length).toBeGreaterThan(0);
+    for (const d of durations) expect(d.className).toContain('text-xs');
   });
 
+  it('plays nothing on the dashboard: a tile opens the Videos page at that video, the last tile the library', async () => {
+    renderCard();
+    const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
+    expect(document.querySelector('iframe')).toBeNull();
+    const first = dashboardVideos({ role: 'estimator', market: null, language: 'en' }, 1)[0]!;
+    fireEvent.click(within(strip).getAllByTestId('dashboard-video')[0]!);
+    expect(navigateSpy).toHaveBeenCalledWith(`/videos?v=${first.id}`);
+    fireEvent.click(within(strip).getByTestId('dashboard-videos-all'));
+    expect(navigateSpy).toHaveBeenCalledWith('/videos');
+  });
+
+  it('shows fewer videos in a narrower card, matching its cases', async () => {
+    useDashboardLayoutStore.setState({ order: [], hidden: [], spans: { [WIDGET_ID]: 2 } });
+    renderCard();
+    const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
+    expect(within(strip).getAllByTestId('dashboard-video')).toHaveLength(caseTiles().length);
+  });
 });

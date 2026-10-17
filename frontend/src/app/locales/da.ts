@@ -50349,6 +50349,7 @@ const resource = {
     "videos.play": "Afspil: {{title}}",
     "videos.open_external": "Åbn på YouTube",
     "videos.any_role": "Enhver rolle",
+    "videos.tile_badge": "Video",
     "videos.change": "Skift",
     "videos.channel_button": "Åbn kanalen",
     "videos.subscribe_channel": "Abonner på kanalen",

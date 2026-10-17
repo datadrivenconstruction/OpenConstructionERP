@@ -51230,6 +51230,7 @@ const resource = {
     "videos.play": "Oynat: {{title}}",
     "videos.open_external": "YouTube'da Aç",
     "videos.any_role": "Herhangi bir rol",
+    "videos.tile_badge": "Video",
     "videos.change": "Değiştir",
     "videos.channel_button": "Kanalı aç",
     "videos.subscribe_channel": "Kanala abone ol",

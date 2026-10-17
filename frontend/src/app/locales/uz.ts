@@ -51281,6 +51281,7 @@ const resource = {
     "videos.play": "Ijro etish: {{title}}",
     "videos.open_external": "YouTubeʼda ochish",
     "videos.any_role": "Har qanday rol",
+    "videos.tile_badge": "Video",
     "videos.change": "Oʻzgartirish",
     "videos.channel_button": "Kanalni ochish",
     "videos.subscribe_channel": "Kanalga obuna boʻlish",

@@ -52914,6 +52914,7 @@ const resource = {
     "videos.play": "Lejátszás: {{title}}",
     "videos.open_external": "Megnyitás a YouTube-on",
     "videos.any_role": "Bármilyen szerepkör",
+    "videos.tile_badge": "Videó",
     "videos.change": "Módosítás",
     "videos.channel_button": "Csatorna megnyitása",
     "videos.subscribe_channel": "Feliratkozás a csatornára",

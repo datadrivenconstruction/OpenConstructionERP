@@ -50309,6 +50309,7 @@ const resource = {
     "videos.play": "Αναπαραγωγή: {{title}}",
     "videos.open_external": "Άνοιγμα στο YouTube",
     "videos.any_role": "Οποιοσδήποτε ρόλος",
+    "videos.tile_badge": "Βίντεο",
     "videos.change": "Αλλαγή",
     "videos.channel_button": "Άνοιγμα καναλιού",
     "videos.subscribe_channel": "Εγγραφή στο κανάλι",

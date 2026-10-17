@@ -50029,6 +50029,7 @@ const resource = {
     "videos.play": "Тоглуулах: {{title}}",
     "videos.open_external": "YouTube-д нээх",
     "videos.any_role": "Дурын үүрэг",
+    "videos.tile_badge": "Видео",
     "videos.change": "Өөрчлөх",
     "videos.channel_button": "Суваг нээх",
     "videos.subscribe_channel": "Сувагт бүртгүүлэх",

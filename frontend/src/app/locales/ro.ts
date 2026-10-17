@@ -50636,6 +50636,7 @@ const resource = {
     "videos.play": "Redă: {{title}}",
     "videos.open_external": "Deschide pe YouTube",
     "videos.any_role": "Orice rol",
+    "videos.tile_badge": "Video",
     "videos.change": "Schimbă",
     "videos.channel_button": "Deschide canalul",
     "videos.subscribe_channel": "Abonează-te la canal",

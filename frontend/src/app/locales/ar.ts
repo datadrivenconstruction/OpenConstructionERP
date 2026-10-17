@@ -53074,6 +53074,7 @@ const resource = {
     "videos.play": "تشغيل: {{title}}",
     "videos.open_external": "فتح على يوتيوب",
     "videos.any_role": "أي دور",
+    "videos.tile_badge": "فيديو",
     "videos.change": "تغيير",
     "videos.channel_button": "افتح القناة",
     "videos.subscribe_channel": "اشترك في القناة",

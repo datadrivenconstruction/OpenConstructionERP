@@ -50354,6 +50354,7 @@ const resource = {
     "videos.play": "चलाएँ: {{title}}",
     "videos.open_external": "YouTube पर खोलें",
     "videos.any_role": "कोई भी भूमिका",
+    "videos.tile_badge": "वीडियो",
     "videos.change": "बदलें",
     "videos.channel_button": "चैनल खोलें",
     "videos.subscribe_channel": "चैनल सब्सक्राइब करें",

@@ -51230,6 +51230,7 @@ const resource = {
     "videos.play": "Afspelen: {{title}}",
     "videos.open_external": "Openen op YouTube",
     "videos.any_role": "Elke rol",
+    "videos.tile_badge": "Video",
     "videos.change": "Wijzigen",
     "videos.channel_button": "Kanaal openen",
     "videos.subscribe_channel": "Abonneren op het kanaal",

@@ -50353,6 +50353,7 @@ const resource = {
     "videos.play": "Toista: {{title}}",
     "videos.open_external": "Avaa YouTubessa",
     "videos.any_role": "Mikä tahansa rooli",
+    "videos.tile_badge": "Video",
     "videos.change": "Vaihda",
     "videos.channel_button": "Avaa kanava",
     "videos.subscribe_channel": "Tilaa kanava",

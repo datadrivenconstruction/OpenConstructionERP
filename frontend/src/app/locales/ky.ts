@@ -50466,6 +50466,7 @@ const resource = {
     "videos.play": "Ойнотуу: {{title}}",
     "videos.open_external": "YouTube'де ачуу",
     "videos.any_role": "Каалаган роль",
+    "videos.tile_badge": "Видео",
     "videos.change": "Өзгөртүү",
     "videos.channel_button": "Каналды ачуу",
     "videos.subscribe_channel": "Каналга жазылуу",

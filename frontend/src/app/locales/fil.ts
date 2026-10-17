@@ -50309,6 +50309,7 @@ const resource = {
     "videos.play": "I-play: {{title}}",
     "videos.open_external": "Buksan sa YouTube",
     "videos.any_role": "Kahit anong role",
+    "videos.tile_badge": "Video",
     "videos.change": "Palitan",
     "videos.channel_button": "Buksan ang channel",
     "videos.subscribe_channel": "Mag-subscribe sa channel",

@@ -53360,6 +53360,7 @@ const resource = {
     "videos.play": "Смотреть: {{title}}",
     "videos.open_external": "Открыть на YouTube",
     "videos.any_role": "Любая роль",
+    "videos.tile_badge": "Видео",
     "videos.change": "Изменить",
     "videos.channel_button": "Открыть канал",
     "videos.subscribe_channel": "Подписаться на канал",

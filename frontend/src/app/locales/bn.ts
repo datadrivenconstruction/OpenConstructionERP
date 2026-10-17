@@ -50621,6 +50621,7 @@ const resource = {
     "videos.play": "চালান: {{title}}",
     "videos.open_external": "YouTube-এ খুলুন",
     "videos.any_role": "যেকোনো ভূমিকা",
+    "videos.tile_badge": "ভিডিও",
     "videos.change": "পরিবর্তন",
     "videos.channel_button": "চ্যানেল খুলুন",
     "videos.subscribe_channel": "চ্যানেলটি সাবস্ক্রাইব করুন",

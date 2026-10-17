@@ -51537,6 +51537,7 @@ const resource = {
     "videos.play": "Přehrát: {{title}}",
     "videos.open_external": "Otevřít na YouTube",
     "videos.any_role": "Jakákoli role",
+    "videos.tile_badge": "Video",
     "videos.change": "Změnit",
     "videos.channel_button": "Otevřít kanál",
     "videos.subscribe_channel": "Odebírat kanál",

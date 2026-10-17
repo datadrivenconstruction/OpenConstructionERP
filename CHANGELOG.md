@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A change order line added to a subcontract schedule now keeps the contract's cost line, so the change shows in the cost breakdown.
 - Tables in every module sit on a solid background instead of showing the page pattern through their rows.
 - The plan room says what it is for in one line and three short steps. A project without drawings offers to upload them instead of pointing at an empty list, only PDF drawings are offered, dropping a pin is the main action, an empty layer links to where its marks are made, and the drawing set check has its own section below the drawing.
+- The dashboard shows the use cases in one row at every width, and the video guides below them on the same grid, tile for tile, each marked as a video with its running time easy to read. The setup video is no longer offered there, since whoever sees the dashboard has installed the platform already.
 
 ## [18.6.4] - 2026-10-16
 

@@ -52345,6 +52345,7 @@ const resource = {
     "videos.play": "Відтворити: {{title}}",
     "videos.open_external": "Відкрити на YouTube",
     "videos.any_role": "Будь-яка роль",
+    "videos.tile_badge": "Відео",
     "videos.change": "Змінити",
     "videos.channel_button": "Відкрити канал",
     "videos.subscribe_channel": "Підписатися на канал",

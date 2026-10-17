@@ -50646,6 +50646,7 @@ const resource = {
     "videos.play": "Reproduciraj: {{title}}",
     "videos.open_external": "Otvori na YouTubeu",
     "videos.any_role": "Bilo koja uloga",
+    "videos.tile_badge": "Video",
     "videos.change": "Promijeni",
     "videos.channel_button": "Otvori kanal",
     "videos.subscribe_channel": "Pretplati se na kanal",

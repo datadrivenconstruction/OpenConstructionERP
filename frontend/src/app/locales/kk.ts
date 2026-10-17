@@ -50310,6 +50310,7 @@ const resource = {
     "videos.play": "Ойнату: {{title}}",
     "videos.open_external": "YouTube-те ашу",
     "videos.any_role": "Кез келген рөл",
+    "videos.tile_badge": "Бейне",
     "videos.change": "Өзгерту",
     "videos.channel_button": "Арнаны ашу",
     "videos.subscribe_channel": "Арнаға жазылу",

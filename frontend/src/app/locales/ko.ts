@@ -50729,6 +50729,7 @@ const resource = {
     "videos.play": "재생: {{title}}",
     "videos.open_external": "YouTube에서 열기",
     "videos.any_role": "모든 역할",
+    "videos.tile_badge": "동영상",
     "videos.change": "변경",
     "videos.channel_button": "채널 열기",
     "videos.subscribe_channel": "채널 구독",

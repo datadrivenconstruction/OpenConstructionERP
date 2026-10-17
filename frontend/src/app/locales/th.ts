@@ -50111,6 +50111,7 @@ const resource = {
     "videos.play": "เล่น: {{title}}",
     "videos.open_external": "เปิดใน YouTube",
     "videos.any_role": "ทุกบทบาท",
+    "videos.tile_badge": "วิดีโอ",
     "videos.change": "เปลี่ยน",
     "videos.channel_button": "เปิดช่อง",
     "videos.subscribe_channel": "ติดตามช่องนี้",

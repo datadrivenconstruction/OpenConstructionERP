@@ -50119,6 +50119,7 @@ const resource = {
     "videos.play": "Phát: {{title}}",
     "videos.open_external": "Mở trên YouTube",
     "videos.any_role": "Mọi vai trò",
+    "videos.tile_badge": "Video",
     "videos.change": "Đổi",
     "videos.channel_button": "Mở kênh",
     "videos.subscribe_channel": "Đăng ký kênh",

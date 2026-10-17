@@ -51643,6 +51643,7 @@ const resource = {
     "videos.play": "再生: {{title}}",
     "videos.open_external": "YouTubeで開く",
     "videos.any_role": "どの役割でも",
+    "videos.tile_badge": "動画",
     "videos.change": "変更",
     "videos.channel_button": "チャンネルを開く",
     "videos.subscribe_channel": "チャンネル登録",
