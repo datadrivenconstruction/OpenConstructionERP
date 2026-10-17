@@ -271212,10 +271212,10 @@
     },
     {
       "name": "processes",
-      "ts_files": 10,
+      "ts_files": 11,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 10
+      "total_files": 11
     },
     {
       "name": "procurement",
@@ -273240,7 +273240,7 @@
     "total_schemas": 4040,
     "total_python_files": 2715,
     "frontend_features": 209,
-    "frontend_ts_files": 3490,
+    "frontend_ts_files": 3491,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

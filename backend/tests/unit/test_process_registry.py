@@ -566,3 +566,58 @@ async def test_dependency_that_fails_while_loading_fails_the_dependent() -> None
     assert reg.status("backfill") is ProcessStatus.ERROR
     assert "store" in reg.describe("backfill")["last_error"]["message"]
     await reg.stop_all()
+
+
+@pytest.mark.asyncio
+async def test_first_run_answers_before_the_switched_off_processes_have_stopped() -> None:
+    """The wizard waits on ``first_run``; a slow stop must not hold it.
+
+    ``kpi`` is running and its stop blocks until ``gate`` opens, as a worker
+    thread being joined would. Switching it off records the choice at once and
+    stops it in the background, and the listing then reports the stop.
+    """
+    gate = asyncio.Event()
+
+    class SlowStop(ManagedProcess):
+        async def start(self) -> None:
+            return None
+
+        async def stop(self) -> None:
+            await gate.wait()
+
+    reg = await _registry(fresh=True)
+    reg.register(_spec("emb", modules=["search"], default_enabled=False))
+    reg.register(_spec("kpi", modules=["reporting"], default_enabled=True, factory=SlowStop))
+    await reg.start_boot()
+    assert reg.status("kpi") is ProcessStatus.RUNNING
+
+    await asyncio.wait_for(reg.first_run(["search"], start_now=True), timeout=2)
+
+    assert reg.first_run_done is True
+    assert reg.is_enabled("kpi") is False
+    assert reg.is_enabled("emb") is True
+    await _until(lambda: reg.status("kpi") is ProcessStatus.STOPPING)
+    gate.set()
+    await _until(lambda: reg.status("kpi") is ProcessStatus.DISABLED)
+    await _until(lambda: reg.status("emb") is ProcessStatus.RUNNING)
+    await reg.stop_all()
+
+
+@pytest.mark.asyncio
+async def test_a_process_switched_back_on_before_its_stop_ran_keeps_running() -> None:
+    """The background stop judges the process again once it holds the lock."""
+    reg = await _registry(fresh=True)
+    reg.register(_spec("kpi", modules=["reporting"], default_enabled=True))
+    await reg.start_boot()
+    assert reg.status("kpi") is ProcessStatus.RUNNING
+
+    entry = reg._entries["kpi"]
+    # Holding the lock keeps the background stop waiting, so the "on" lands
+    # first; ``enable`` itself would wait on the same lock.
+    async with entry.lock:
+        await asyncio.wait_for(reg.first_run([], start_now=False), timeout=2)
+        assert reg.is_enabled("kpi") is False
+        await reg._persist(entry, True, None)
+    await asyncio.sleep(0.05)
+    assert reg.status("kpi") is ProcessStatus.RUNNING
+    await reg.stop_all()

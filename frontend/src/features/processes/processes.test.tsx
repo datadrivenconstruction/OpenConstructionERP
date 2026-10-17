@@ -26,6 +26,7 @@ import { ProcessesButton } from './ProcessesButton';
 import { ProcessesPanel } from './ProcessesPanel';
 import { ModuleProcessesNotice } from './ModuleProcessesNotice';
 import { useProcessesUi } from './useProcessesUi';
+import { useToastStore } from '@/stores/useToastStore';
 
 function proc(over) {
   return {
@@ -72,8 +73,11 @@ beforeEach(() => {
   vi.mocked(apiPost).mockReset();
   vi.mocked(apiPost).mockResolvedValue({});
   resetEnsured();
-  useProcessesUi.setState({ panelOpen: false, wizardOpen: false, focusId: null });
+  useProcessesUi.setState({ panelOpen: false, wizardOpen: false, focusId: null, startWatch: [] });
+  useToastStore.setState({ toasts: [], history: [] });
 });
+
+const toastTitles = () => useToastStore.getState().toasts.map((x) => x.title);
 
 describe('overallHealth', () => {
   it('ranks error over busy over ok, and nothing running is idle', () => {
@@ -210,6 +214,72 @@ describe('ProcessesWizard', () => {
         start_now: true,
       }),
     );
+  });
+
+  it('closes at once and does not wait for the services to start', async () => {
+    vi.mocked(apiGet).mockResolvedValue(snapshot([proc({ id: 'kpi', modules: ['reporting'] })], { first_run_done: false }));
+    // The server never answers: the wizard must be gone anyway.
+    vi.mocked(apiPost).mockImplementation(() => new Promise(() => {}));
+    renderWith(<ProcessesButton />);
+    await screen.findByTestId('processes-wizard', {}, { timeout: 5000 });
+    fireEvent.click(screen.getByTestId('wizard-start'));
+    expect(screen.queryByTestId('processes-wizard')).toBeNull();
+    expect(useProcessesUi.getState().wizardOpen).toBe(false);
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/v1/processes/first-run', expect.objectContaining({ start_now: true })),
+    );
+  });
+
+  it('follows the started services from the header and says when they are ready', async () => {
+    const emb = { id: 'emb', category: 'ai_model', modules: ['costs'], start_mode: 'boot' };
+    vi.mocked(apiGet)
+      .mockResolvedValueOnce(snapshot([proc(emb)], { first_run_done: false }))
+      .mockResolvedValue(snapshot([proc({ ...emb, enabled: true, status: 'running' })]));
+    vi.mocked(apiPost).mockResolvedValue(snapshot([proc({ ...emb, enabled: true, status: 'idle', queued: true })]));
+    renderWith(<ProcessesButton />);
+    await screen.findByTestId('processes-wizard', {}, { timeout: 5000 });
+    fireEvent.click(screen.getByTestId('wizard-start'));
+    await waitFor(() => expect(toastTitles()).toContain('Starting services in the background'));
+    await waitFor(() => expect(toastTitles()).toContain('Background services are ready'), { timeout: 5000 });
+    expect(useProcessesUi.getState().startWatch).toEqual([]);
+  });
+
+  it('names a service that failed to start and retries it on request', async () => {
+    const emb = { id: 'emb', category: 'ai_model', modules: ['costs'], start_mode: 'boot' };
+    vi.mocked(apiGet)
+      .mockResolvedValueOnce(snapshot([proc(emb)], { first_run_done: false }))
+      .mockResolvedValue(
+        snapshot([proc({ ...emb, enabled: true, status: 'error', last_error: { message: 'model missing', at: null } })]),
+      );
+    vi.mocked(apiPost).mockResolvedValue(snapshot([proc({ ...emb, enabled: true, status: 'starting' })]));
+    renderWith(<ProcessesButton />);
+    await screen.findByTestId('processes-wizard', {}, { timeout: 5000 });
+    fireEvent.click(screen.getByTestId('wizard-start'));
+    let failed;
+    await waitFor(() => {
+      failed = useToastStore.getState().toasts.find((x) => x.type === 'error');
+      expect(failed).toBeTruthy();
+    }, { timeout: 5000 });
+    expect(failed.title).toContain('could not start');
+    expect(failed.message).toBe('model missing');
+    expect(toastTitles()).not.toContain('Background services are ready');
+    failed.action.onClick();
+    await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/v1/processes/emb/restart'));
+  });
+
+  it('offers a retry when the answer could not be sent', async () => {
+    vi.mocked(apiGet).mockResolvedValue(snapshot([proc({ id: 'kpi', modules: ['reporting'] })], { first_run_done: false }));
+    vi.mocked(apiPost).mockRejectedValueOnce(new Error('offline')).mockResolvedValue(snapshot([]));
+    renderWith(<ProcessesButton />);
+    await screen.findByTestId('processes-wizard', {}, { timeout: 5000 });
+    fireEvent.click(screen.getByTestId('wizard-later'));
+    let failed;
+    await waitFor(() => {
+      failed = useToastStore.getState().toasts.find((x) => x.type === 'error');
+      expect(failed).toBeTruthy();
+    });
+    failed.action.onClick();
+    await waitFor(() => expect(vi.mocked(apiPost).mock.calls.filter((c) => c[0] === '/v1/processes/first-run')).toHaveLength(2));
   });
 
   it('is not offered to a non-admin', async () => {

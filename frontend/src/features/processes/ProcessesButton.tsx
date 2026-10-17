@@ -14,6 +14,7 @@ import { fmtList } from '@/shared/lib/formatters';
 import { isLoading, isOn, isUnsupported, overallHealth, useProcesses } from './api';
 import { processName, useIsProcessAdmin } from './labels';
 import { useProcessesUi } from './useProcessesUi';
+import { ProcessesStartWatch } from './ProcessesStartWatch';
 
 const DOT: Record<string, string> = {
   ok: 'bg-emerald-500',
@@ -102,6 +103,7 @@ export function ProcessesButton() {
         className={clsx('absolute right-0.5 top-0.5 h-2 w-2 rounded-full ring-2 ring-surface-primary', DOT[health])}
       />
     </button>
+    {isAdmin && <ProcessesStartWatch />}
     {(panelOpen || wizardOpen) && (
       <Suspense fallback={null}>
         {panelOpen && <ProcessesPanel />}

@@ -146,15 +146,6 @@ export function useMinimalPreset() {
   });
 }
 
-export function useFirstRun() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (body: { module_ids: string[]; start_now: boolean }) =>
-      apiPost<ProcessesSnapshot>('/v1/processes/first-run', body),
-    onSettled: () => qc.invalidateQueries({ queryKey: processesKey }),
-  });
-}
-
 export type OverallHealth = 'ok' | 'busy' | 'error' | 'idle';
 
 /** One colour for the header dot: red beats amber beats green; nothing on is grey. */

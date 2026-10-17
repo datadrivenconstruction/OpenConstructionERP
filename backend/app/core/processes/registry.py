@@ -21,7 +21,7 @@ import time
 import traceback
 import uuid
 from collections import deque
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Coroutine
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
@@ -712,7 +712,18 @@ class ProcessRegistry:
         }
 
     async def _apply_set(self, wanted: set[str], start_now: bool, updated_by: str | None) -> None:
+        """Persist the wanted set now and leave the starting and stopping to the background.
+
+        The first-run wizard and the presets wait on this call, so it only
+        writes the choice down. Starts already went to the serial queue;
+        stops go to a background task as well, because stopping a process
+        takes its lock and can join a worker thread or wait out a start that
+        is still in flight, and none of that is the admin's to wait for. The
+        listing shows the progress: ``enabled`` flips at once, ``status``
+        follows when the work is done.
+        """
         to_start: list[str] = []
+        to_stop: list[_Entry] = []
         for entry in list(self._entries.values()):
             spec = entry.spec
             if self._env(entry) is not None or spec.required or not spec.stoppable:
@@ -728,9 +739,41 @@ class ProcessRegistry:
                     entry.booted = True
                     to_start.append(spec.id)
             else:
-                await self.disable(spec.id, updated_by)
+                await self._persist(entry, False, updated_by)
+                to_stop.append(entry)
         if to_start:
             self.enqueue(to_start)
+        if to_stop:
+            self._spawn_background(self._stop_switched_off(to_stop), name="process-switch-off")
+
+    def _spawn_background(self, coro: Coroutine[Any, Any, None], name: str) -> None:
+        """Run ``coro`` detached, kept alive in ``_bg`` so ``stop_all`` awaits it."""
+        try:
+            task = asyncio.get_running_loop().create_task(coro, name=name)
+        except RuntimeError:
+            coro.close()
+            return
+        self._bg.add(task)
+        task.add_done_callback(self._bg.discard)
+
+    async def _stop_switched_off(self, entries: list[_Entry]) -> None:
+        """Stop what a first run or a preset switched off, one after another.
+
+        Each entry is judged again under its lock: an admin who switches a
+        process back on before its stop came round keeps it running.
+        """
+        reconcile = False
+        for entry in entries:
+            try:
+                async with entry.lock:
+                    if self._desired(entry):
+                        continue
+                    await self._stop_locked(entry, final=ProcessStatus.DISABLED)
+            except Exception as exc:  # pragma: no cover - _stop_locked records stop errors itself
+                self._record_error(entry, exc)
+            reconcile = reconcile or entry.spec.state_set is not None
+        if reconcile:
+            await self.reconcile(force=True)
 
     async def first_run(self, module_ids: list[str], start_now: bool, updated_by: str | None = None) -> None:
         """Answer the first-run wizard: run exactly what the chosen modules need."""
