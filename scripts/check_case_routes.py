@@ -41,6 +41,12 @@ slot when a sample project is picked and strips the whole
 unscoped form are reachable at run time and both have to exist. Checking only
 the scoped one would pass a case that dead-ends for every reader who has not
 picked a project, which is the default.
+
+The one exception to that second form is declared, not listed. A case whose
+screens exist only inside a project sets ``requiresProject: true``, and for it
+``resolveStepRoute`` sends a reader without a project to the project list
+instead of stripping the prefix, so ``/projects`` is the form checked. The flag
+changes where the runner goes; it does not excuse a step from the check.
 """
 
 from __future__ import annotations
@@ -62,6 +68,8 @@ PLAYBOOK_GLOB = "*.playbook.ts"
 # `to` inside a playbook step. Single and double quotes both appear in the tree.
 STEP_TO_RE = re.compile(r"""^\s*to:\s*(["'])([^"']*)\1""", re.MULTILINE)
 PLAYBOOK_ID_RE = re.compile(r"""^\s*id:\s*(["'])([^"']*)\1""", re.MULTILINE)
+# A case-level flag, written once at the top level of the playbook object.
+REQUIRES_PROJECT_RE = re.compile(r"^  requiresProject:\s*true\s*,", re.MULTILINE)
 
 
 def segments(path: str) -> list[str]:
@@ -80,7 +88,7 @@ def matches(target: str, route: str) -> bool:
     return all(r.startswith(":") or r == t for t, r in zip(t_parts, r_parts, strict=False))
 
 
-def resolve_unscoped(target: str) -> str | None:
+def resolve_unscoped(target: str, requires_project: bool = False) -> str | None:
     """The form a step resolves to when no sample project is picked.
 
     Mirrors ``resolveStepRoute``. Returns None when the step has no
@@ -88,22 +96,25 @@ def resolve_unscoped(target: str) -> str | None:
     """
     if ":projectId" not in target:
         return None
+    if requires_project:
+        return "/projects"
     stripped = re.sub(r"^/projects/:projectId", "", target)
     if stripped == "":
         return "/"
     return stripped if stripped.startswith("/") else f"/{stripped}"
 
 
-def read_steps(directory: Path) -> list[tuple[str, str]]:
-    """Every (playbook file stem, step target) pair, query strings stripped."""
-    pairs: list[tuple[str, str]] = []
+def read_steps(directory: Path) -> list[tuple[str, str, bool]]:
+    """Every (case id, step target, requires project) triple, query strings stripped."""
+    triples: list[tuple[str, str, bool]] = []
     for path in sorted(directory.glob(PLAYBOOK_GLOB)):
         source = path.read_text(encoding="utf-8", errors="replace")
         first_id = PLAYBOOK_ID_RE.search(source)
         case_id = first_id.group(2) if first_id else path.stem
+        requires_project = REQUIRES_PROJECT_RE.search(source) is not None
         for _, target in STEP_TO_RE.findall(source):
-            pairs.append((case_id, target.split("?", 1)[0]))
-    return pairs
+            triples.append((case_id, target.split("?", 1)[0], requires_project))
+    return triples
 
 
 def main() -> int:
@@ -162,11 +173,11 @@ def main() -> int:
         return 1
 
     dead: list[tuple[str, str, str]] = []
-    for case_id, target in steps:
+    for case_id, target, requires_project in steps:
         if not any(matches(target, route) for route in routes):
             dead.append((case_id, target, "no route declares this path"))
             continue
-        unscoped = resolve_unscoped(target)
+        unscoped = resolve_unscoped(target, requires_project)
         if unscoped is not None and not any(matches(unscoped, r) for r in routes):
             dead.append(
                 (
@@ -196,7 +207,7 @@ def main() -> int:
         )
         return 1
 
-    cases = len({case_id for case_id, _ in steps})
+    cases = len({case_id for case_id, _, _ in steps})
     resolved_from_table = sum(
         1 for r in table.module_routes if r.origin == "resolved" and r.default_enabled is not False
     )

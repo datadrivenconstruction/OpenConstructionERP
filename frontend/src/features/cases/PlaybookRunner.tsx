@@ -874,9 +874,18 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
           .getState()
           .setActiveProject(projectId, selectedProject.name);
       }
-      navigate(resolveStepRoute(step.to, projectId));
+      // A case whose screens only exist inside a project has no unscoped form
+      // to fall back on, so with no project picked here it borrows the one the
+      // top bar already holds. Only when neither exists does `resolveStepRoute`
+      // send the reader to the project list.
+      const target =
+        projectId ??
+        (playbook.requiresProject
+          ? useProjectContextStore.getState().activeProjectId
+          : null);
+      navigate(resolveStepRoute(step.to, target, playbook.requiresProject));
     },
-    [navigate, projectId, selectedProject],
+    [navigate, projectId, selectedProject, playbook.requiresProject],
   );
 
   const handleToggle = useCallback(
@@ -1197,6 +1206,17 @@ export function PlaybookRunner({ playbook, onBack }: PlaybookRunnerProps) {
                   );
                 })}
               </select>
+              {playbook.requiresProject && !projectId && (
+                <p
+                  data-testid="case-requires-project"
+                  className="mt-1.5 text-2xs leading-relaxed text-content-tertiary"
+                >
+                  {t("cases.runner.requires_project", {
+                    defaultValue:
+                      "This case works inside one project. Pick a project above, the demo projects come first. Without one, the Go button opens the project list.",
+                  })}
+                </p>
+              )}
             </div>
           </div>
         </div>

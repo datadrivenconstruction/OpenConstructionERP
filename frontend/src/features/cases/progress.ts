@@ -90,11 +90,19 @@ export function clampStepIndex(index: number, total: number): number {
  *  - With a project: fill the `:projectId` slot.
  *  - Without a project: strip the leading `/projects/:projectId` segment so the
  *    module opens unscoped.
+ *  - Without a project, for a case whose screens only exist inside a project
+ *    (`requiresProject`): the project list, so the reader picks one instead of
+ *    landing on a stripped path that names no screen or the wrong one.
  *  - No slot: returned unchanged (query strings are preserved).
  */
-export function resolveStepRoute(to: string, projectId: string | null): string {
+export function resolveStepRoute(
+  to: string,
+  projectId: string | null,
+  requiresProject = false,
+): string {
   if (!to.includes(':projectId')) return to;
   if (projectId) return to.replace(':projectId', projectId);
+  if (requiresProject) return '/projects';
   const stripped = to.replace(/^\/projects\/:projectId/, '');
   if (stripped === '') return '/';
   return stripped.startsWith('/') ? stripped : `/${stripped}`;

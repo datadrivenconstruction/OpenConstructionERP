@@ -55,6 +55,7 @@ import {
   ChevronDown,
   Check,
   Package,
+  Signpost,
   type LucideProps,
 } from "lucide-react";
 import {
@@ -135,6 +136,12 @@ import { regionDisplayName } from "./regions";
 import { homeMarketFirst, homeMarketForLanguage } from "./homeMarket";
 import { countCasesByMarket, orderMarkets } from "./marketCases";
 import { compareNames } from '@/shared/lib/collator';
+import {
+  CASE_TRACKS,
+  orderByTrack,
+  trackFromParam,
+  type CaseTrack,
+} from "./tracks";
 
 export function CasesPage() {
   const { playbookId } = useParams<{ playbookId?: string }>();
@@ -383,6 +390,21 @@ function CasesList() {
   // reached, so the hub is the only address this effect ever writes to.
   const [searchParams, setSearchParams] = useSearchParams();
   const seenMarketParam = useRef<string | null | undefined>(undefined);
+  // The path ("Start here") the reader picked, read straight from the address
+  // so a link to `/cases?track=cost-control` opens the same short list for
+  // whoever receives it. It is not persisted: a path is a way in, and someone
+  // coming back to the hub a week later should see the whole catalogue again.
+  const activeTrack = trackFromParam(searchParams.get("track"));
+  const leaveTrack = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("track");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
   useEffect(() => {
     const raw = searchParams.get("market");
     if (raw !== seenMarketParam.current) {
@@ -545,6 +567,18 @@ function CasesList() {
   // because its shelf now sits above everything else on the page.
   const activeFilterChips = useMemo(
     () => [
+      ...(activeTrack
+        ? [
+            {
+              kind: "track" as const,
+              id: activeTrack.id,
+              label: t(activeTrack.titleKey, {
+                defaultValue: activeTrack.titleDefault,
+              }),
+              remove: leaveTrack,
+            },
+          ]
+        : []),
       ...(activeRegion !== "all"
         ? [
             {
@@ -593,6 +627,8 @@ function CasesList() {
       })),
     ],
     [
+      activeTrack,
+      leaveTrack,
       activeRegion,
       activeStage,
       setRegion,
@@ -636,6 +672,9 @@ function CasesList() {
       )} ${(pb.region && marketTerms.get(pb.region)) || ""}`.toLowerCase();
       return haystack.includes(q);
     });
+    // A path replaces the catalogue order with its own: its cases only, in
+    // the order they are meant to be run, so case 1 is the place to start.
+    if (activeTrack) return orderByTrack(matched, activeTrack);
     // Then order it: the reader's own market in front, the rest of the
     // catalogue behind it in the lifecycle order it always had. Not when the
     // shortlist is showing - that list is the set this reader curated for this
@@ -659,6 +698,7 @@ function CasesList() {
     caseNumbers,
     homeMarket,
     marketTerms,
+    activeTrack,
     t,
   ]);
 
@@ -722,9 +762,95 @@ function CasesList() {
   // controls call this: a chip the user can see next to a Clear button that
   // leaves it standing is worse than no Clear button at all.
   const clearAllFilters = useCallback(() => {
-    clearFilters();
+    if (!activeTrack) {
+      clearFilters();
+      setActiveStage("all");
+      return;
+    }
+    // With a path in the address there are two places to clear, and the
+    // market effect above writes the address too. Clearing the market in the
+    // store here would let that effect write back an address read before
+    // this click, with the path still in it, so the market goes through the
+    // address (`market=all`, which the effect turns into the store value and
+    // then drops) and the path leaves in the same write.
+    setCompanyTypes([]);
+    setRoles([]);
+    setCategories([]);
     setActiveStage("all");
-  }, [clearFilters]);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("track");
+        if (activeRegion !== "all") next.set("market", "all");
+        return next;
+      },
+      { replace: true },
+    );
+  }, [
+    activeTrack,
+    activeRegion,
+    clearFilters,
+    setCompanyTypes,
+    setRoles,
+    setCategories,
+    setSearchParams,
+  ]);
+
+  // Picking a path starts from the whole catalogue: a company or market pick
+  // left over from an earlier visit would otherwise silently drop cases from
+  // the path and leave the reader with a list that starts at case 3. Picking
+  // the active path again leaves it. The market is cleared through the
+  // address for the reason `clearAllFilters` gives.
+  const pickTrack = useCallback(
+    (track: CaseTrack) => {
+      if (activeTrack?.id === track.id) {
+        leaveTrack();
+        return;
+      }
+      setCompanyTypes([]);
+      setRoles([]);
+      setCategories([]);
+      setActiveStage("all");
+      setQuery("");
+      setShowOnlyPinned(false);
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set("track", track.id);
+        if (activeRegion !== "all") next.set("market", "all");
+        return next;
+      });
+    },
+    [
+      activeTrack,
+      activeRegion,
+      leaveTrack,
+      setCompanyTypes,
+      setRoles,
+      setCategories,
+      setSearchParams,
+    ],
+  );
+
+  // One tile per path, with what it holds: how many cases and roughly how
+  // long they take end to end. Counted over the catalogue the hub actually
+  // carries, so a path whose cases are missing from a build shows fewer, and
+  // a path left with none is not offered at all.
+  const trackSummaries = useMemo(
+    () =>
+      CASE_TRACKS.map((track) => {
+        const cases = orderByTrack(allPlaybooks, track);
+        return {
+          track,
+          cases,
+          minutes: cases.reduce((sum, pb) => sum + pb.estMinutes, 0),
+        };
+      }).filter((summary) => summary.cases.length > 0),
+    [allPlaybooks],
+  );
+  const activeTrackSummary = activeTrack
+    ? (trackSummaries.find((s) => s.track.id === activeTrack.id) ?? null)
+    : null;
+  const ActiveTrackIcon = activeTrackSummary?.track.icon;
 
   // A hub of this many cases is easy to bounce off: none of them is wrong, so none of
   // them is obviously the one to open. This opens one at random from whatever
@@ -850,6 +976,105 @@ function CasesList() {
               exactly to the reader who came looking for it, and it decays: the
               day a second case lands the market appears from nowhere and
               nobody remembers why. ──────────────────────────────────────────*/}
+          {/* ── Start here: paths by goal ─────────────────────────────────────
+              The filters below answer who the reader is and where they work.
+              This answers what they came to do, which is the question a new
+              reader actually has, and it answers it with a short ordered list
+              rather than a narrower grid: case 1 of the path is the obvious
+              first click. Kept compact so the market shelf and the finder
+              stay on the first screen. ────────────────────────────────────── */}
+          {trackSummaries.length > 0 && (
+            <section
+              className="rounded-2xl border border-border-light bg-surface-primary p-3.5"
+              data-testid="case-tracks"
+            >
+              <div className="mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <Signpost
+                  size={15}
+                  className="shrink-0 text-content-tertiary"
+                  aria-hidden="true"
+                />
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-content-secondary">
+                  {t("cases.tracks.heading", {
+                    defaultValue: "Start here: what do you want to get done?",
+                  })}
+                </h2>
+                <span className="text-2xs text-content-tertiary">
+                  {t("cases.tracks.subtitle", {
+                    defaultValue:
+                      "Each path is a short list of cases in the order you would run them. Pick the one closest to your work, or browse all cases below.",
+                  })}
+                </span>
+              </div>
+              <div
+                className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                role="group"
+                aria-label={t("cases.tracks.heading", {
+                  defaultValue: "Start here: what do you want to get done?",
+                })}
+              >
+                {trackSummaries.map(({ track, cases, minutes }) => {
+                  const active = activeTrack?.id === track.id;
+                  const TrackIcon = track.icon;
+                  return (
+                    <button
+                      key={track.id}
+                      type="button"
+                      data-testid="case-track"
+                      data-track={track.id}
+                      onClick={() => pickTrack(track)}
+                      aria-pressed={active}
+                      className={clsx(
+                        "flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 motion-reduce:transition-none",
+                        active
+                          ? track.tint.chip
+                          : "border-border-light bg-surface-primary text-content-primary hover:border-oe-blue/30",
+                      )}
+                    >
+                      <span
+                        className={clsx(
+                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
+                          track.tint.tile,
+                        )}
+                      >
+                        <TrackIcon size={18} strokeWidth={1.9} aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold leading-tight">
+                          {t(track.titleKey, { defaultValue: track.titleDefault })}
+                        </span>
+                        <span
+                          className={clsx(
+                            "mt-0.5 block text-2xs leading-snug",
+                            active ? "opacity-90" : "text-content-secondary",
+                          )}
+                        >
+                          {t(track.forKey, { defaultValue: track.forDefault })}
+                        </span>
+                        <span
+                          className={clsx(
+                            "mt-1 block text-2xs tabular-nums",
+                            active ? "opacity-80" : "text-content-tertiary",
+                          )}
+                        >
+                          {t("cases.selector.count", {
+                            defaultValue: "{{count}} cases",
+                            count: cases.length,
+                          })}
+                          {" \u00b7 "}
+                          {t("cases.tracks.minutes", {
+                            defaultValue: "about {{minutes}} min",
+                            minutes,
+                          })}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {regions.length > 0 && (
             <section className="relative overflow-hidden rounded-2xl border border-border-light bg-surface-primary p-3.5">
               {/* The founder's own visual language for "this surface is scoped
@@ -1691,6 +1916,63 @@ function CasesList() {
         </section>
       )}
 
+      {/* ── Path hero: the picked path, its promise and its first case ───── */}
+      {activeTrackSummary && ActiveTrackIcon && (
+        <section
+          className="flex flex-wrap items-start gap-4 rounded-2xl border border-border-light bg-surface-primary p-5"
+          data-testid="case-track-hero"
+        >
+          <span
+            className={clsx(
+              "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset",
+              activeTrackSummary.track.tint.tile,
+            )}
+          >
+            <ActiveTrackIcon size={24} strokeWidth={1.9} aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <span className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+              {t("cases.tracks.eyebrow", { defaultValue: "Path" })}
+            </span>
+            <h2 className="text-lg font-semibold tracking-tight text-content-primary">
+              {t(activeTrackSummary.track.titleKey, {
+                defaultValue: activeTrackSummary.track.titleDefault,
+              })}
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-content-secondary">
+              {t(activeTrackSummary.track.forKey, {
+                defaultValue: activeTrackSummary.track.forDefault,
+              })}
+            </p>
+          </div>
+          <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto">
+            {activeTrackSummary.cases[0] && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<ArrowRight size={14} />}
+                onClick={() =>
+                  navigate(`/cases/${activeTrackSummary.cases[0]!.id}`)
+                }
+                className="justify-center"
+              >
+                {t("cases.tracks.start_first", {
+                  defaultValue: "Start with case 1",
+                })}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={leaveTrack}
+              className="justify-center"
+            >
+              {t("cases.tracks.leave", { defaultValue: "Show all cases" })}
+            </Button>
+          </div>
+        </section>
+      )}
+
       {/* ── Cards ───────────────────────────────────────────────────────── */}
       {allPlaybooks.length === 0 ? (
         <EmptyState
@@ -1756,6 +2038,9 @@ function CasesList() {
                   authored={authored}
                   num={caseNumbers.get(pb.id)}
                   totalCases={caseNumbers.size}
+                  pathPosition={
+                    activeTrack ? visible.indexOf(pb) + 1 : undefined
+                  }
                   stage={stageId ? STAGE_BY_ID[stageId] : undefined}
                   roles={rolesByPlaybook.get(pb.id) ?? []}
                   face={facesByPlaybook.get(pb.id) ?? null}
@@ -1830,6 +2115,8 @@ interface CaseCardProps {
   num: number | undefined;
   /** Total number of numbered cases, for the "Case X of N" tooltip. */
   totalCases: number;
+  /** 1-based place of this case in the picked path, when one is picked. */
+  pathPosition?: number;
   /** Resolved lifecycle-stage metadata, or undefined. */
   stage: StageMeta | undefined;
   /** Professional roles that run this case (already resolved). */
@@ -1874,6 +2161,7 @@ function CaseCard({
   authored,
   num,
   totalCases,
+  pathPosition,
   stage,
   roles,
   face,
@@ -2058,9 +2346,24 @@ function CaseCard({
             )}
           </>
         )}
-        {(num != null || authored || pb.region) && (
+        {(num != null || authored || pb.region || pathPosition != null) && (
           <div className="absolute left-3 top-3 flex items-center gap-1.5">
-            {num != null && (
+            {/* The place in the picked path replaces the catalogue number while
+                a path is picked, in the hub's own blue, so the order the path
+                is meant to be run in is the number the reader sees. */}
+            {pathPosition != null && (
+              <span
+                data-testid="case-path-position"
+                className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-oe-blue px-1.5 text-2xs font-bold tabular-nums text-white shadow-sm ring-1 ring-inset ring-white/20"
+                title={t("cases.tracks.position", {
+                  defaultValue: "Case {{n}} of the path",
+                  n: pathPosition,
+                })}
+              >
+                {pathPosition}
+              </span>
+            )}
+            {num != null && pathPosition == null && (
               <span
                 className="inline-flex h-6 min-w-[1.5rem] items-center justify-center rounded-md bg-slate-900/85 px-1.5 text-2xs font-bold tabular-nums text-white shadow-sm ring-1 ring-inset ring-white/15"
                 title={t("cases.card.number", {
