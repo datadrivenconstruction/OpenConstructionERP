@@ -21,7 +21,7 @@ from app.modules.costmodel.schemas import _serialise_money
 Money = Annotated[Decimal, PlainSerializer(_serialise_money, return_type=str, when_used="json")]
 OptionalMoney = Annotated[Decimal | None, PlainSerializer(_serialise_money, return_type=str | None, when_used="json")]
 
-RowKind = Literal["cost_line", "contract", "unassigned", "changes_without_contract", "other", "remaining"]
+RowKind = Literal["cost_line", "contract", "unassigned", "changes_without_contract", "other", "remaining", "allowance"]
 
 
 class ForecastOverrideInfo(BaseModel):
@@ -70,7 +70,12 @@ class CostControlAccount(BaseModel):
     id: str
     code: str
     name: str
+    # The account's own title; empty when its code list has none (then ``name`` is shown).
+    title: str = ""
     parent_id: str | None = None
+    level: int = 1
+    # Money planned on the account itself; it also appears as an ``allowance`` row.
+    own_amount: Money = Decimal("0")
 
 
 class CostControlFinding(BaseModel):

@@ -7145,6 +7145,26 @@ class BOQService:
             if cap["parent_id"] is not None and cap["parent_id"] in old_to_new:
                 await self.position_repo.update_fields(new_id, parent_id=old_to_new[cap["parent_id"]])
 
+        # Carry each position's cost vector (its cost line, or its split over
+        # several) onto the copy. Cost control is a module of its own: without
+        # it there is nothing to carry, and a failure here must not cost the
+        # user the copy of their bill.
+        try:
+            from app.modules.costmodel.structure_service import copy_vectors
+        except ImportError:
+            copy_vectors = None
+        if copy_vectors is not None:
+            try:
+                async with self.session.begin_nested():
+                    await copy_vectors(
+                        self.session,
+                        project_id=source_project_id,
+                        new_boq_id=new_boq_id,
+                        old_to_new=old_to_new,
+                    )
+            except Exception:
+                logger.exception("BOQ duplicate: cost vectors not copied for %s", new_boq_id)
+
         # Copy markups. A scoped line has to point at the COPY of the position
         # it was confined to, and an override at the COPY of the line it
         # replaces. Carrying the source bill's ids over would leave the new

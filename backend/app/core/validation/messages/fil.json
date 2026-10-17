@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Ang committed na pera ay hindi naitalaga sa anumang cost line.",
+      "suggestion": "I-link ang mga linya ng kontrata o order sa mga cost line para lumabas ang pera sa tamang lugar."
+    },
+    "certified_over_committed": {
+      "fail": "Ang na-certify na gawa ay lampas sa award kasama ang mga aprubadong pagbabago.",
+      "suggestion": "Aprubahan ang pagbabagong sumasaklaw sa karagdagang gawa, o suriin ang claim."
+    },
+    "forecast_over_plan": {
+      "fail": "Mas mataas ang forecast kaysa sa nakaplanong halaga.",
+      "suggestion": "Suriin ang pinagmulan ng forecast; magtala ng manual na forecast na may dahilan kung inaasahan mong may matitipid."
+    },
+    "partly_awarded": {
+      "fail": "Bahagi lamang ng nakaplanong halaga ang na-award; maaaring kulang ang forecast sa mga gawang ia-award pa lang.",
+      "suggestion": "Kung may gawa pang ia-award sa linyang ito, maglagay ng manual na forecast."
+    },
+    "pending_changes": {
+      "fail": "May mga change order na naghihintay ng desisyon.",
+      "suggestion": "Magdesisyon sa mga nakabinbing change order; hindi pa kasama ang mga ito sa forecast."
+    },
+    "snapshot_stale": {
+      "fail": "Wala pang naiimbak na forecast sa loob ng mahigit isang buwan.",
+      "suggestion": "Mag-save ng forecast snapshot para manatiling nababasa ang kasaysayan ng gastos."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Ang account code na {code} ay lumalabas nang higit sa isang beses sa cost structure.",
+      "suggestion": "Mag-iwan ng isang account bawat code at ilipat dito ang mga cost line nito."
+    },
+    "mixed_standard": {
+      "fail": "Pinaghahalo ng cost structure ang mga code list: {standards}.",
+      "suggestion": "Buuin ang structure mula sa isang code list; i-map ang iba pang code dito."
+    },
+    "account_parent_cycle": {
+      "fail": "Ang account na {code} ay sarili nitong ninuno sa pamamagitan ng {count} account.",
+      "suggestion": "Bigyan ang isa sa mga account na ito ng parent sa labas ng loop."
+    },
+    "account_too_deep": {
+      "fail": "Ang account na {code} ay nasa level {level}, mas malalim kaysa sa {max} level ng code list nito.",
+      "suggestion": "Ikabit ang account sa parent na nasa loob ng lalim ng code list."
+    },
+    "no_account": {
+      "fail": "{count} cost line na nagkakahalaga ng {amount} ang wala sa anumang account (una: {code}).",
+      "suggestion": "Bigyan ang mga item na ito ng code mula sa code list ng structure, o italaga ang mga cost line sa isang account."
+    },
+    "invalid_account": {
+      "fail": "{count} cost line na nagkakahalaga ng {amount} ang nasa saradong account o account na hindi tumatanggap ng posting (una: {code}).",
+      "suggestion": "Ilipat ang mga cost line sa bukas na account na tumatanggap ng posting."
+    },
+    "own_amount_on_parent": {
+      "fail": "Ang account na {code} ay may mga sub-account at may sarili ring halagang {amount}.",
+      "suggestion": "Ilipat ang sariling halaga sa isang sub-account, o panatilihin ito bilang sinadyang allowance."
+    },
+    "rollup_mismatch": {
+      "fail": "Ang kabuuan ng structure na {reported} ay iba ng {difference} sa kabuuan ng mga bahagi nito na {expected}.",
+      "suggestion": "I-reload ang structure; kung nananatili ang agwat, suriin ang mga account na walang parent."
+    },
+    "allocation_incomplete": {
+      "fail": "Ang mga share ng item {ordinal} ay umaabot sa {total}{unit} sa halip na {expected}{unit}.",
+      "suggestion": "Ayusin ang mga share para maipamahagi ang buong item, hindi sobra at hindi kulang."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Ang item {ordinal} ay hinati nang bahagya ayon sa porsiyento at bahagya ayon sa dami.",
+      "suggestion": "Hatiin ang item sa iisang paraan lamang."
+    },
+    "vector_not_inherited": {
+      "fail": "Ang linya ng kontrata na {code} ay nasa cost line na hindi pinaglaanan ng BOQ item nito.",
+      "suggestion": "Ibalik ang linya sa mga cost line ng item, o itala ang exception na may dahilan."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Ang contingency na \"{markup}\" ay kinukuwenta sa base na kasama na ang linya ng tubo na \"{profit}\", kaya pinapatungan ng tubo ang perang nakalaan para sa panganib",

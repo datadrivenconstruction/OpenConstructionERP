@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "コミット済みの金額がどの原価明細にも割り当てられていません。",
+      "suggestion": "契約または発注の明細を原価明細に紐付けて、金額が正しい場所に表示されるようにしてください。"
+    },
+    "certified_over_committed": {
+      "fail": "出来高認定額が発注額に承認済み変更を加えた額を超えています。",
+      "suggestion": "追加工事をカバーする変更を承認するか、請求内容を確認してください。"
+    },
+    "forecast_over_plan": {
+      "fail": "予測が計画額を上回っています。",
+      "suggestion": "予測の根拠を確認してください。削減を見込む場合は、理由を付けて手動予測を登録してください。"
+    },
+    "partly_awarded": {
+      "fail": "計画額の一部しか発注されていません。これから発注する工事が予測に含まれていない可能性があります。",
+      "suggestion": "この明細にまだ発注予定の工事がある場合は、手動予測を入力してください。"
+    },
+    "pending_changes": {
+      "fail": "変更指示が判断待ちです。",
+      "suggestion": "保留中の変更指示を判断してください。予測にはまだ含まれていません。"
+    },
+    "snapshot_stale": {
+      "fail": "1か月以上、予測が保存されていません。",
+      "suggestion": "原価の履歴を読み取れる状態に保つため、予測のスナップショットを保存してください。"
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "勘定コード {code} が原価構成内に複数あります。",
+      "suggestion": "コードごとに勘定を1つに絞り、その原価明細を移してください。"
+    },
+    "mixed_standard": {
+      "fail": "原価構成に複数のコード体系が混在しています: {standards}。",
+      "suggestion": "構成を1つのコード体系で組み直し、他のコードをそれに対応付けてください。"
+    },
+    "account_parent_cycle": {
+      "fail": "勘定 {code} は {count} 件の勘定を経由して自分自身の上位になっています。",
+      "suggestion": "これらの勘定のうち1つに、ループの外にある親勘定を設定してください。"
+    },
+    "account_too_deep": {
+      "fail": "勘定 {code} は第{level}階層にあり、コード体系の {max} 階層より深くなっています。",
+      "suggestion": "コード体系の深さの範囲内にある親勘定に付け替えてください。"
+    },
+    "no_account": {
+      "fail": "金額 {amount} の原価明細 {count} 件がどの勘定にも属していません(最初: {code})。",
+      "suggestion": "これらの積算項目に構成のコード体系のコードを付けるか、原価明細を勘定に割り当ててください。"
+    },
+    "invalid_account": {
+      "fail": "金額 {amount} の原価明細 {count} 件が、閉鎖済みまたは計上できない勘定にあります(最初: {code})。",
+      "suggestion": "原価明細を、計上可能な有効な勘定に移してください。"
+    },
+    "own_amount_on_parent": {
+      "fail": "勘定 {code} には下位勘定があり、さらに自身の金額 {amount} もあります。",
+      "suggestion": "自身の金額を下位勘定に移すか、意図的な予備費として残してください。"
+    },
+    "rollup_mismatch": {
+      "fail": "構成の合計 {reported} が、内訳の合計 {expected} と {difference} ずれています。",
+      "suggestion": "構成を再読み込みしてください。差が残る場合は、親勘定のない勘定を確認してください。"
+    },
+    "allocation_incomplete": {
+      "fail": "項目 {ordinal} の配分の合計が {expected}{unit} ではなく {total}{unit} です。",
+      "suggestion": "項目全体が過不足なく配分されるよう、配分を調整してください。"
+    },
+    "allocation_mixed_modes": {
+      "fail": "項目 {ordinal} が、一部は割合、一部は数量で分割されています。",
+      "suggestion": "項目は1つの方法だけで分割してください。"
+    },
+    "vector_not_inherited": {
+      "fail": "契約明細 {code} が、その数量書項目の配分先ではない原価明細に付いています。",
+      "suggestion": "明細を項目の原価明細に戻すか、理由を付けて例外を記録してください。"
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "予備費「{markup}」の計算基礎に利益項目「{profit}」が既に含まれているため、リスクに備えた資金にも利益率が適用されています",

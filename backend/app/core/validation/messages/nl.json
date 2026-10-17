@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Vastgelegde bedragen zijn aan geen enkele kostenregel toegewezen.",
+      "suggestion": "Koppel de contract- of orderregels aan kostenregels, zodat het geld op de juiste plek verschijnt."
+    },
+    "certified_over_committed": {
+      "fail": "Het gecertificeerde werk overschrijdt de gunning plus goedgekeurde wijzigingen.",
+      "suggestion": "Keur de wijziging goed die het meerwerk dekt, of controleer de termijnstaat."
+    },
+    "forecast_over_plan": {
+      "fail": "De prognose ligt boven het geplande bedrag.",
+      "suggestion": "Controleer de bron van de prognose; leg een handmatige prognose met reden vast als u besparingen verwacht."
+    },
+    "partly_awarded": {
+      "fail": "Slechts een deel van het geplande bedrag is gegund; de prognose mist mogelijk nog te gunnen werk.",
+      "suggestion": "Als op deze regel nog werk te gunnen is, voer dan een handmatige prognose in."
+    },
+    "pending_changes": {
+      "fail": "Wijzigingsopdrachten wachten op een besluit.",
+      "suggestion": "Beslis over de openstaande wijzigingsopdrachten; de prognose bevat ze nog niet."
+    },
+    "snapshot_stale": {
+      "fail": "Er is al meer dan een maand geen prognose opgeslagen.",
+      "suggestion": "Sla een prognosemomentopname op, zodat de kostenhistorie leesbaar blijft."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Rekeningcode {code} komt meer dan eens voor in de kostenstructuur.",
+      "suggestion": "Houd één rekening per code aan en verplaats de kostenregels daarheen."
+    },
+    "mixed_standard": {
+      "fail": "De kostenstructuur combineert codelijsten: {standards}.",
+      "suggestion": "Bouw de structuur op uit één codelijst; koppel de andere codes eraan."
+    },
+    "account_parent_cycle": {
+      "fail": "Rekening {code} is via {count} rekeningen zijn eigen voorouder.",
+      "suggestion": "Geef een van deze rekeningen een bovenliggende rekening buiten de lus."
+    },
+    "account_too_deep": {
+      "fail": "Rekening {code} staat op niveau {level}, dieper dan de {max} niveaus van de codelijst.",
+      "suggestion": "Hang de rekening onder een bovenliggende rekening binnen de diepte van de codelijst."
+    },
+    "no_account": {
+      "fail": "{count} kostenregels ter waarde van {amount} staan op geen enkele rekening (eerste: {code}).",
+      "suggestion": "Geef deze posten een code uit de codelijst van de structuur, of wijs de kostenregels aan een rekening toe."
+    },
+    "invalid_account": {
+      "fail": "{count} kostenregels ter waarde van {amount} staan op een gesloten rekening of een rekening waarop niet geboekt kan worden (eerste: {code}).",
+      "suggestion": "Verplaats de kostenregels naar een open rekening waarop geboekt kan worden."
+    },
+    "own_amount_on_parent": {
+      "fail": "Rekening {code} heeft subrekeningen en daarnaast een eigen bedrag van {amount}.",
+      "suggestion": "Verplaats het eigen bedrag naar een subrekening, of houd het aan als bewuste stelpost."
+    },
+    "rollup_mismatch": {
+      "fail": "Het structuurtotaal {reported} wijkt {difference} af van de som van de delen {expected}.",
+      "suggestion": "Laad de structuur opnieuw; blijft het verschil, controleer dan rekeningen zonder bovenliggende rekening."
+    },
+    "allocation_incomplete": {
+      "fail": "De aandelen van post {ordinal} tellen op tot {total}{unit} in plaats van {expected}{unit}.",
+      "suggestion": "Pas de aandelen aan zodat de hele post is verdeeld, niet meer en niet minder."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Post {ordinal} is deels naar percentage en deels naar hoeveelheid verdeeld.",
+      "suggestion": "Verdeel de post op één manier."
+    },
+    "vector_not_inherited": {
+      "fail": "Contractregel {code} staat op een kostenregel waaraan de bijbehorende bestekpost niet is toegewezen.",
+      "suggestion": "Zet de regel terug op de kostenregels van de post, of leg de afwijking met reden vast."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "De risicopost \"{markup}\" wordt berekend over een grondslag waarin de winstpost \"{profit}\" al is opgenomen; daardoor wordt ook marge berekend over het voor risico gereserveerde bedrag",

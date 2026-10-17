@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Majburiyat qilingan mablag' hech bir xarajat qatoriga biriktirilmagan.",
+      "suggestion": "Mablag' to'g'ri joyda ko'rinishi uchun shartnoma yoki buyurtma qatorlarini xarajat qatorlariga bog'lang."
+    },
+    "certified_over_committed": {
+      "fail": "Tasdiqlangan ishlar berilgan summa va tasdiqlangan o'zgarishlardan oshib ketdi.",
+      "suggestion": "Qo'shimcha ishni qoplaydigan o'zgarishni tasdiqlang yoki to'lov talabini tekshiring."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognoz rejalashtirilgan summadan yuqori.",
+      "suggestion": "Prognoz manbasini tekshiring; tejash kutsangiz, sababi bilan qo'lda prognoz kiriting."
+    },
+    "partly_awarded": {
+      "fail": "Rejalashtirilgan summaning faqat bir qismi berilgan; prognozda hali berilmagan ishlar yetishmasligi mumkin.",
+      "suggestion": "Bu qatorda hali beriladigan ish qolgan bo'lsa, qo'lda prognoz kiriting."
+    },
+    "pending_changes": {
+      "fail": "O'zgartirish buyurtmalari qarorni kutmoqda.",
+      "suggestion": "Kutilayotgan o'zgartirish buyurtmalari bo'yicha qaror qabul qiling; prognoz ularni hali o'z ichiga olmaydi."
+    },
+    "snapshot_stale": {
+      "fail": "Bir oydan ortiq vaqtdan beri prognoz saqlanmadi.",
+      "suggestion": "Xarajatlar tarixi o'qiladigan bo'lib qolishi uchun prognoz snapshotini saqlang."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "{code} hisob kodi xarajat tuzilmasida bir necha marta uchraydi.",
+      "suggestion": "Har bir kod uchun bitta hisob qoldiring va uning xarajat qatorlarini shunga ko'chiring."
+    },
+    "mixed_standard": {
+      "fail": "Xarajat tuzilmasi kod ro'yxatlarini aralashtiradi: {standards}.",
+      "suggestion": "Tuzilmani bitta kod ro'yxatidan quring; qolgan kodlarni unga moslashtiring."
+    },
+    "account_parent_cycle": {
+      "fail": "{code} hisobi {count} ta hisob orqali o'zining ajdodi bo'lib turibdi.",
+      "suggestion": "Bu hisoblardan biriga sikldan tashqaridagi ota hisob bering."
+    },
+    "account_too_deep": {
+      "fail": "{code} hisobi {level}-darajada, kod ro'yxatining {max} darajasidan chuqurroq.",
+      "suggestion": "Hisobni kod ro'yxati chuqurligi doirasida ota hisobga biriktiring."
+    },
+    "no_account": {
+      "fail": "Qiymati {amount} bo'lgan {count} ta xarajat qatori hech bir hisobda emas (birinchisi: {code}).",
+      "suggestion": "Bu pozitsiyalarga tuzilmaning kod ro'yxatidan kod bering yoki xarajat qatorlarini hisobga biriktiring."
+    },
+    "invalid_account": {
+      "fail": "Qiymati {amount} bo'lgan {count} ta xarajat qatori yopiq hisobda yoki o'tkazma qabul qilmaydigan hisobda (birinchisi: {code}).",
+      "suggestion": "Xarajat qatorlarini o'tkazma qabul qiladigan ochiq hisobga ko'chiring."
+    },
+    "own_amount_on_parent": {
+      "fail": "{code} hisobida quyi hisoblar bor va bundan tashqari o'z summasi ham bor: {amount}.",
+      "suggestion": "O'z summasini quyi hisobga ko'chiring yoki ongli zaxira sifatida qoldiring."
+    },
+    "rollup_mismatch": {
+      "fail": "Tuzilma jami {reported} qismlari yig'indisi {expected} dan {difference} ga farq qiladi.",
+      "suggestion": "Tuzilmani qayta yuklang; farq qolsa, ota hisobi yo'q hisoblarni tekshiring."
+    },
+    "allocation_incomplete": {
+      "fail": "{ordinal} pozitsiyasining ulushlari {expected}{unit} o'rniga {total}{unit} bo'lmoqda.",
+      "suggestion": "Ulushlarni butun pozitsiya taqsimlanadigan, ortiq ham kam ham bo'lmaydigan qilib to'g'rilang."
+    },
+    "allocation_mixed_modes": {
+      "fail": "{ordinal} pozitsiyasi qisman foiz bilan, qisman miqdor bo'yicha bo'lingan.",
+      "suggestion": "Pozitsiyani faqat bitta usulda bo'ling."
+    },
+    "vector_not_inherited": {
+      "fail": "{code} shartnoma qatori o'zining smeta pozitsiyasi taqsimlanmagan xarajat qatorida turibdi.",
+      "suggestion": "Qatorni pozitsiyaning xarajat qatorlariga qaytaring yoki chetga chiqishni sababi bilan yozing."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "\"{markup}\" tavakkal zaxirasi \"{profit}\" foyda satri allaqachon kiritilgan baza asosida hisoblanadi, shu sababli xavf uchun ajratilgan mablagʻga foyda marjasi qoʻshiladi",

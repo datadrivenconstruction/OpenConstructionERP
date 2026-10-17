@@ -256,19 +256,19 @@ async def test_generate_budget_then_spine_links_everything(http_client, scenario
     )
     assert gen_spine.status_code == 200, f"generate-from-boq failed: {gen_spine.text}"
     result = gen_spine.json()
-    # One account (both positions share din276 330) + two cost lines.
-    assert result["accounts_created"] == 1, result
+    # Account 330 (both positions share it) under its group 300, and two cost lines.
+    assert result["accounts_created"] == 2, result
     assert result["cost_lines_created"] == 2, result
     assert result["positions_linked"] == 2, result
     # The two pre-existing budget lines were auto-linked by shared position.
     assert result["budget_lines_linked"] == 2, result
 
-    # ── 3. Accounts endpoint returns the one control account ──
+    # ── 3. Accounts endpoint returns the group and its account, tree-ordered ──
     accounts_resp = await client.get(f"{API}/costmodel/projects/{project_id}/spine/accounts/", headers=headers)
     assert accounts_resp.status_code == 200, accounts_resp.text
     accounts = accounts_resp.json()
-    assert len(accounts) == 1
-    assert accounts[0]["code"] == "330"
+    assert [(a["code"], a["level"]) for a in accounts] == [("300", 1), ("330", 2)]
+    assert accounts[1]["parent_id"] == accounts[0]["id"]
 
     # ── 4. Cost lines endpoint returns the two lines ──
     lines_resp = await client.get(f"{API}/costmodel/projects/{project_id}/spine/lines/", headers=headers)
@@ -388,7 +388,7 @@ async def test_generate_spine_idempotent_unreferenced_positions(http_client):
     assert first.status_code == 200, first.text
     first_body = first.json()
     assert first_body["cost_lines_created"] == 3, first_body
-    assert first_body["accounts_created"] == 2, first_body  # din276 330 + 340
+    assert first_body["accounts_created"] == 3, first_body  # din276 330 + 340 under 300
     assert first_body["positions_linked"] == 3, first_body
 
     lines_after_first = (await client.get(lines_url, headers=headers)).json()
@@ -573,7 +573,7 @@ async def test_project_rollup_shape(http_client, scenario):
     body = resp.json()
     assert body["currency"] == "EUR"
     assert body["mixed_currency"] is False
-    assert len(body["accounts"]) == 1
+    assert len(body["accounts"]) == 2  # 330 and its group 300
     assert len(body["lines"]) == 2
     # Totals sum estimate across lines = 1000 + 200 = 1200.
     assert Decimal(body["totals"]["estimate_amount"]) == Decimal("1200")

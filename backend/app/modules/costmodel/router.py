@@ -30,12 +30,21 @@ Endpoints:
     PUT    /cost-control/lines/{line_id}/forecast/       - manual forecast with a reason
     DELETE /cost-control/lines/{line_id}/forecast/       - back to the automatic forecast
     GET    /cost-control/lines/{line_id}/history/        - why the forecast is what it is
+    GET    /code-lists/                                  - code lists a structure can be built from
+    GET    /code-lists/{key}/                            - one code list with its entries
+    POST   /projects/{project_id}/code-lists/import/     - import a CSV or Excel code list
+    DELETE /projects/{project_id}/code-lists/{key}/      - remove an imported code list
+    GET    /projects/{project_id}/spine/structure/       - account tree with money, suspense, findings
+    POST   /projects/{project_id}/spine/structure/apply-code-list/ - create the accounts of a list
+    GET    /boqs/{boq_id}/allocations/                   - the vector of every position, coverage
+    PUT    /positions/{position_id}/allocation/          - put a position on one or more cost lines
+    DELETE /positions/{position_id}/allocation/          - take a position off its cost lines
 """
 
 import uuid
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.costmodel.cost_control_schemas import (
@@ -84,6 +93,18 @@ from app.modules.costmodel.schemas import (
     WhatIfResult,
 )
 from app.modules.costmodel.service import CostModelService, CostSpineService
+from app.modules.costmodel.structure_schemas import (
+    ApplyCodeListRequest,
+    ApplyCodeListResult,
+    BoqAllocations,
+    CodeListDetail,
+    CodeListImportResult,
+    CodeListSummary,
+    PositionAllocationOut,
+    PositionAllocationRequest,
+    StructureTree,
+)
+from app.modules.costmodel.structure_service import MAX_UPLOAD_BYTES, CostStructureService
 
 router = APIRouter(tags=["costmodel"])
 
@@ -990,11 +1011,14 @@ async def generate_spine_from_boq(
 ) -> SpineGenerationResult:
     """Generate the cost spine from a BOQ (idempotent).
 
-    Body may contain ``{"boq_id": "<uuid>"}``; when omitted the project's
-    most-recent BOQ is used.
+    Body may contain ``{"boq_id": "<uuid>", "standard": "<code list key>"}``;
+    without ``boq_id`` the project's most-recent BOQ is used, without
+    ``standard`` the project's classification standard.
     """
     await verify_project_access(project_id, user_id, session)
     boq_id: uuid.UUID | None = None
+    raw_standard = body.get("standard") if isinstance(body, dict) else None
+    standard = str(raw_standard).strip()[:40] if raw_standard else None
     raw_boq_id = body.get("boq_id") if isinstance(body, dict) else None
     if raw_boq_id:
         try:
@@ -1004,7 +1028,7 @@ async def generate_spine_from_boq(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid boq_id: {e}",
             )
-    return await service.generate_from_boq(project_id, boq_id)
+    return await service.generate_from_boq(project_id, boq_id, standard)
 
 
 @router.get(
@@ -1276,3 +1300,182 @@ async def get_cost_line_history(
     line = await service.line_project(line_id)
     await verify_project_access(line.project_id, user_id, session)
     return await service.line_history(line)
+
+
+# ── Cost structure: code lists, tree, vectors ─────────────────────────────────
+
+
+def _get_structure_service(session: SessionDep) -> CostStructureService:
+    return CostStructureService(session)
+
+
+@router.get(
+    "/code-lists/",
+    response_model=list[CodeListSummary],
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def list_code_lists(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID | None = Query(default=None),
+    service: CostStructureService = Depends(_get_structure_service),
+) -> list[CodeListSummary]:
+    """The shipped and pack code lists, plus the project's own when ``project_id`` is given."""
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
+    return await service.list_code_lists(project_id)
+
+
+@router.get(
+    "/code-lists/{key}/",
+    response_model=CodeListDetail,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_code_list(
+    key: str,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID | None = Query(default=None),
+    service: CostStructureService = Depends(_get_structure_service),
+) -> CodeListDetail:
+    """One code list with its entries in tree order."""
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
+    return await service.code_list_detail(key, project_id)
+
+
+@router.post(
+    "/projects/{project_id}/code-lists/import/",
+    response_model=CodeListImportResult,
+    dependencies=[Depends(RequirePermission("costmodel.manage"))],
+)
+async def import_code_list(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    file: UploadFile = File(..., description="CSV or XLSX with the columns code, title and optionally parent"),
+    key: str = Form(..., max_length=40),
+    name: str = Form(..., max_length=200),
+    dry_run: bool = Form(default=True),
+    service: CostStructureService = Depends(_get_structure_service),
+) -> CodeListImportResult:
+    """Validate a company code list and, unless ``dry_run`` or a row is wrong, store it for the project."""
+    await verify_project_access(project_id, user_id, session)
+    content = await file.read(MAX_UPLOAD_BYTES + 1)
+    return await service.import_code_list(
+        project_id,
+        filename=file.filename or "",
+        content=content,
+        key=key,
+        name=name,
+        dry_run=dry_run,
+        user_id=str(user_id) if user_id else None,
+    )
+
+
+@router.delete(
+    "/projects/{project_id}/code-lists/{key}/",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("costmodel.manage"))],
+)
+async def delete_code_list(
+    project_id: uuid.UUID,
+    key: str,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CostStructureService = Depends(_get_structure_service),
+) -> None:
+    """Remove an imported code list (409 while accounts are built from it)."""
+    await verify_project_access(project_id, user_id, session)
+    await service.delete_code_list(project_id, key)
+
+
+@router.get(
+    "/projects/{project_id}/spine/structure/",
+    response_model=StructureTree,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_cost_structure(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CostStructureService = Depends(_get_structure_service),
+) -> StructureTree:
+    """The account tree with own, posted and total money, the suspense buckets and rules V1 to V5."""
+    from app.core.i18n import get_locale
+
+    await verify_project_access(project_id, user_id, session)
+    return await service.tree(project_id, locale=get_locale())
+
+
+@router.post(
+    "/projects/{project_id}/spine/structure/apply-code-list/",
+    response_model=ApplyCodeListResult,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def apply_code_list(
+    project_id: uuid.UUID,
+    body: ApplyCodeListRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CostStructureService = Depends(_get_structure_service),
+) -> ApplyCodeListResult:
+    """Create the accounts of a code list, down to ``max_level``; existing accounts are kept."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.apply_code_list(project_id, body.key, body.max_level)
+
+
+@router.get(
+    "/boqs/{boq_id}/allocations/",
+    response_model=BoqAllocations,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_boq_allocations(
+    boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CostStructureService = Depends(_get_structure_service),
+) -> BoqAllocations:
+    """Every costed position of a bill with the cost lines it is on, and the coverage."""
+    from app.modules.boq.models import BOQ
+
+    boq = await session.get(BOQ, boq_id)
+    if boq is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+    await verify_project_access(boq.project_id, user_id, session)
+    return await service.boq_allocations(boq_id)
+
+
+@router.put(
+    "/positions/{position_id}/allocation/",
+    response_model=PositionAllocationOut,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def put_position_allocation(
+    position_id: uuid.UUID,
+    body: PositionAllocationRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CostStructureService = Depends(_get_structure_service),
+) -> PositionAllocationOut:
+    """Put a position on one cost line, or split it by percent or quantity over several."""
+    project_id = await service.project_of_position(position_id)
+    await verify_project_access(project_id, user_id, session)
+    return await service.set_allocation(position_id, body, str(user_id) if user_id else None)
+
+
+@router.delete(
+    "/positions/{position_id}/allocation/",
+    response_model=PositionAllocationOut,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def clear_position_allocation(
+    position_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CostStructureService = Depends(_get_structure_service),
+) -> PositionAllocationOut:
+    """Take a position off every cost line."""
+    project_id = await service.project_of_position(position_id)
+    await verify_project_access(project_id, user_id, session)
+    return await service.clear_allocation(position_id, str(user_id) if user_id else None)

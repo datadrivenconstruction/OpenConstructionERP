@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "已承诺的金额未分配到任何成本行。",
+      "suggestion": "请将合同或订单行关联到成本行,这样金额才会显示在正确的位置。"
+    },
+    "certified_over_committed": {
+      "fail": "已确认的工程量超出了合同授予额加已批准变更之和。",
+      "suggestion": "请批准涵盖额外工作的变更,或核查付款申请。"
+    },
+    "forecast_over_plan": {
+      "fail": "预测高于计划金额。",
+      "suggestion": "请核查预测的来源;如预计会有节省,请登记手动预测并注明原因。"
+    },
+    "partly_awarded": {
+      "fail": "计划金额中只有一部分已发包,预测可能遗漏了尚未发包的工作。",
+      "suggestion": "如果该成本行上还有未发包的工作,请录入手动预测。"
+    },
+    "pending_changes": {
+      "fail": "变更单正在等待决定。",
+      "suggestion": "请对待处理的变更单作出决定;预测目前尚未包含它们。"
+    },
+    "snapshot_stale": {
+      "fail": "已有一个多月没有保存预测。",
+      "suggestion": "请保存一份预测快照,以便成本历史保持可读。"
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "科目编码 {code} 在成本结构中出现了多次。",
+      "suggestion": "每个编码只保留一个科目,并把其成本行移到该科目下。"
+    },
+    "mixed_standard": {
+      "fail": "成本结构混用了多种编码体系:{standards}。",
+      "suggestion": "请只用一种编码体系搭建结构,并把其他编码映射过去。"
+    },
+    "account_parent_cycle": {
+      "fail": "科目 {code} 通过 {count} 个科目成为了自己的上级。",
+      "suggestion": "请为其中一个科目指定循环之外的上级科目。"
+    },
+    "account_too_deep": {
+      "fail": "科目 {code} 位于第 {level} 级,超过了其编码体系的 {max} 级。",
+      "suggestion": "请把该科目挂到不超过编码体系层级深度的上级科目下。"
+    },
+    "no_account": {
+      "fail": "{count} 个成本行(合计 {amount})不属于任何科目(第一个:{code})。",
+      "suggestion": "请给这些清单项赋予结构编码体系中的编码,或把成本行分配到某个科目。"
+    },
+    "invalid_account": {
+      "fail": "{count} 个成本行(合计 {amount})位于已关闭或不接受记账的科目上(第一个:{code})。",
+      "suggestion": "请把成本行移到可记账的开放科目。"
+    },
+    "own_amount_on_parent": {
+      "fail": "科目 {code} 既有下级科目,又有自身金额 {amount}。",
+      "suggestion": "请把自身金额移到某个下级科目,或将其作为有意设置的备用金保留。"
+    },
+    "rollup_mismatch": {
+      "fail": "结构合计 {reported} 与各部分之和 {expected} 相差 {difference}。",
+      "suggestion": "请重新加载结构;如果差额仍在,请检查缺少上级的科目。"
+    },
+    "allocation_incomplete": {
+      "fail": "清单项 {ordinal} 的各份额合计为 {total}{unit},而不是 {expected}{unit}。",
+      "suggestion": "请调整份额,使整个清单项恰好分配完,不多也不少。"
+    },
+    "allocation_mixed_modes": {
+      "fail": "清单项 {ordinal} 一部分按百分比拆分,一部分按数量拆分。",
+      "suggestion": "清单项只能用一种方式拆分。"
+    },
+    "vector_not_inherited": {
+      "fail": "合同行 {code} 所在的成本行并未分配其对应的工程量清单项。",
+      "suggestion": "请把该行放回清单项对应的成本行,或登记例外并注明原因。"
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "风险预备费“{markup}”的计算基数已包含利润项“{profit}”，因此对预留的风险资金也计取了利润。",

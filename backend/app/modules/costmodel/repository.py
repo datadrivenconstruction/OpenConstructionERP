@@ -22,12 +22,14 @@ from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
+from app.core.code_lists import code_sort_key
 from app.modules.costmodel.models import (
     BudgetLine,
     CashFlow,
     ControlAccount,
     CostLine,
     CostSnapshot,
+    PositionAllocation,
 )
 
 # ── Currency conversion helper (R5 audit, May 2026) ─────────────────────
@@ -800,7 +802,7 @@ class ControlAccountRepository:
         for acct in accounts:
             children.setdefault(acct.parent_id, []).append(acct)
         for bucket in children.values():
-            bucket.sort(key=lambda a: (a.sort_order, a.code))
+            bucket.sort(key=lambda a: (a.sort_order, code_sort_key(a.code)))
 
         ordered: list[ControlAccount] = []
 
@@ -815,7 +817,7 @@ class ControlAccountRepository:
         _walk(None)
         if len(ordered) != len(accounts):
             seen = {a.id for a in ordered}
-            for acct in sorted(accounts, key=lambda a: (a.sort_order, a.code)):
+            for acct in sorted(accounts, key=lambda a: (a.sort_order, code_sort_key(a.code))):
                 if acct.id not in seen:
                     ordered.append(acct)
         return ordered
@@ -1479,3 +1481,37 @@ def _combine_po_and_contracts(
     for (group_value, _tokens), po_value in zip(groups, matched_po, strict=True):
         total += max(group_value, po_value)
     return total
+
+
+class PositionAllocationRepository:
+    """Data access for the split shares of bill positions (two or more rows per split position)."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def list_for_positions(self, position_ids: list[uuid.UUID]) -> list[PositionAllocation]:
+        """Every share of the given positions."""
+        if not position_ids:
+            return []
+        stmt = select(PositionAllocation).where(PositionAllocation.position_id.in_(position_ids))
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def retarget(self, allocation_id: uuid.UUID, cost_line_id: uuid.UUID, share: object = None) -> None:
+        """Point one share at another cost line, optionally with a new share value."""
+        values: dict[str, object] = {"cost_line_id": cost_line_id}
+        if share is not None:
+            values["share"] = share
+        await self.session.execute(
+            update(PositionAllocation).where(PositionAllocation.id == allocation_id).values(**values)
+        )
+
+    async def delete(self, allocation_id: uuid.UUID) -> None:
+        """Remove one share."""
+        await self.session.execute(delete(PositionAllocation).where(PositionAllocation.id == allocation_id))
+
+    async def count_for_line(self, cost_line_id: uuid.UUID) -> int:
+        """How many shares point at a cost line (for the delete guard)."""
+        stmt = (
+            select(func.count()).select_from(PositionAllocation).where(PositionAllocation.cost_line_id == cost_line_id)
+        )
+        return int((await self.session.execute(stmt)).scalar_one())

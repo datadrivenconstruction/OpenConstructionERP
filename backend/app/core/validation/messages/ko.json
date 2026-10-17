@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "약정된 금액이 어떤 원가 항목에도 배정되지 않았습니다.",
+      "suggestion": "계약 또는 발주 항목을 원가 항목에 연결해 금액이 올바른 위치에 표시되도록 하세요."
+    },
+    "certified_over_committed": {
+      "fail": "기성 인정 금액이 도급액에 승인된 변경을 더한 금액을 초과합니다.",
+      "suggestion": "추가 공사를 반영한 변경을 승인하거나 청구 내용을 확인하세요."
+    },
+    "forecast_over_plan": {
+      "fail": "예측이 계획 금액보다 높습니다.",
+      "suggestion": "예측의 출처를 확인하세요. 절감이 예상되면 사유와 함께 수동 예측을 등록하세요."
+    },
+    "partly_awarded": {
+      "fail": "계획 금액의 일부만 발주되었습니다. 아직 발주할 공사가 예측에서 빠졌을 수 있습니다.",
+      "suggestion": "이 항목에 아직 발주할 공사가 남아 있다면 수동 예측을 입력하세요."
+    },
+    "pending_changes": {
+      "fail": "변경 지시가 결정을 기다리고 있습니다.",
+      "suggestion": "보류 중인 변경 지시를 결정하세요. 예측에는 아직 포함되지 않았습니다."
+    },
+    "snapshot_stale": {
+      "fail": "한 달 넘게 저장된 예측이 없습니다.",
+      "suggestion": "원가 이력을 읽기 쉽게 유지하도록 예측 스냅샷을 저장하세요."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "계정 코드 {code}이(가) 원가 구조에 두 번 이상 나옵니다.",
+      "suggestion": "코드당 계정을 하나만 남기고 그 원가 항목을 해당 계정으로 옮기세요."
+    },
+    "mixed_standard": {
+      "fail": "원가 구조에 여러 코드 체계가 섞여 있습니다: {standards}.",
+      "suggestion": "하나의 코드 체계로 구조를 구성하고 나머지 코드를 그 체계에 매핑하세요."
+    },
+    "account_parent_cycle": {
+      "fail": "계정 {code}이(가) {count}개 계정을 거쳐 자기 자신의 상위가 됩니다.",
+      "suggestion": "이 계정 중 하나에 순환 밖의 상위 계정을 지정하세요."
+    },
+    "account_too_deep": {
+      "fail": "계정 {code}이(가) {level}단계에 있어 코드 체계의 {max}단계보다 깊습니다.",
+      "suggestion": "코드 체계의 깊이 이내에 있는 상위 계정에 연결하세요."
+    },
+    "no_account": {
+      "fail": "금액 {amount}의 원가 항목 {count}건이 어떤 계정에도 속하지 않습니다(첫 번째: {code}).",
+      "suggestion": "이 내역 항목에 구조의 코드 체계 코드를 부여하거나 원가 항목을 계정에 배정하세요."
+    },
+    "invalid_account": {
+      "fail": "금액 {amount}의 원가 항목 {count}건이 마감된 계정 또는 전기를 받지 않는 계정에 있습니다(첫 번째: {code}).",
+      "suggestion": "원가 항목을 전기를 받는 열린 계정으로 옮기세요."
+    },
+    "own_amount_on_parent": {
+      "fail": "계정 {code}에는 하위 계정이 있고 자체 금액 {amount}도 있습니다.",
+      "suggestion": "자체 금액을 하위 계정으로 옮기거나 의도된 예비비로 유지하세요."
+    },
+    "rollup_mismatch": {
+      "fail": "구조 합계 {reported}이(가) 하위 합계 {expected}와(과) {difference}만큼 다릅니다.",
+      "suggestion": "구조를 다시 불러오세요. 차이가 남으면 상위 계정이 없는 계정을 확인하세요."
+    },
+    "allocation_incomplete": {
+      "fail": "내역 항목 {ordinal}의 배분 합계가 {expected}{unit}이(가) 아니라 {total}{unit}입니다.",
+      "suggestion": "내역 항목 전체가 많지도 적지도 않게 배분되도록 배분을 조정하세요."
+    },
+    "allocation_mixed_modes": {
+      "fail": "내역 항목 {ordinal}이(가) 일부는 비율로, 일부는 수량으로 나뉘어 있습니다.",
+      "suggestion": "내역 항목은 한 가지 방식으로만 나누세요."
+    },
+    "vector_not_inherited": {
+      "fail": "계약 항목 {code}이(가) 해당 내역 항목이 배분되지 않은 원가 항목에 있습니다.",
+      "suggestion": "항목을 내역 항목의 원가 항목으로 되돌리거나 사유와 함께 예외를 기록하세요."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "예비비 \"{markup}\"의 산정 기준에 이윤 항목 \"{profit}\"이 이미 포함되어 있어, 위험 대비 자금에도 이윤이 부과됩니다",

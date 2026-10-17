@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Vázané peníze nejsou přiřazeny k žádné nákladové položce.",
+      "suggestion": "Propojte řádky smlouvy nebo objednávky s nákladovými položkami, aby se peníze zobrazily na správném místě."
+    },
+    "certified_over_committed": {
+      "fail": "Certifikované práce překračují zadanou hodnotu včetně schválených změn.",
+      "suggestion": "Schvalte změnu, která pokrývá práce navíc, nebo zkontrolujte fakturu."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognóza je vyšší než plánovaná částka.",
+      "suggestion": "Zkontrolujte zdroj prognózy; pokud očekáváte úspory, zadejte ruční prognózu s odůvodněním."
+    },
+    "partly_awarded": {
+      "fail": "Zadána je jen část plánované částky; v prognóze mohou chybět práce, které se teprve zadají.",
+      "suggestion": "Pokud je na této položce ještě co zadávat, zadejte ruční prognózu."
+    },
+    "pending_changes": {
+      "fail": "Změnové příkazy čekají na rozhodnutí.",
+      "suggestion": "Rozhodněte o čekajících změnových příkazech; prognóza je zatím neobsahuje."
+    },
+    "snapshot_stale": {
+      "fail": "Více než měsíc nebyla uložena žádná prognóza.",
+      "suggestion": "Uložte snímek prognózy, aby zůstala čitelná historie nákladů."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Kód účtu {code} se v nákladové struktuře vyskytuje vícekrát.",
+      "suggestion": "Ponechte jeden účet na kód a přesuňte na něj jeho nákladové položky."
+    },
+    "mixed_standard": {
+      "fail": "Nákladová struktura míchá číselníky: {standards}.",
+      "suggestion": "Sestavte strukturu z jednoho číselníku; ostatní kódy na něj namapujte."
+    },
+    "account_parent_cycle": {
+      "fail": "Účet {code} je svým vlastním předkem přes {count} účtů.",
+      "suggestion": "Přiřaďte jednomu z těchto účtů nadřazený účet mimo smyčku."
+    },
+    "account_too_deep": {
+      "fail": "Účet {code} leží na úrovni {level}, hlouběji než {max} úrovní jeho číselníku.",
+      "suggestion": "Zařaďte účet pod nadřazený účet v mezích hloubky číselníku."
+    },
+    "no_account": {
+      "fail": "{count} nákladových položek v hodnotě {amount} není na žádném účtu (první: {code}).",
+      "suggestion": "Přiřaďte těmto položkám rozpočtu kód z číselníku struktury nebo přiřaďte nákladové položky k účtu."
+    },
+    "invalid_account": {
+      "fail": "{count} nákladových položek v hodnotě {amount} je na uzavřeném účtu nebo účtu, který nepřijímá zápisy (první: {code}).",
+      "suggestion": "Přesuňte nákladové položky na otevřený účet, který přijímá zápisy."
+    },
+    "own_amount_on_parent": {
+      "fail": "Účet {code} má podúčty a zároveň vlastní částku {amount}.",
+      "suggestion": "Přesuňte vlastní částku na podúčet, nebo ji ponechte jako záměrnou rezervu."
+    },
+    "rollup_mismatch": {
+      "fail": "Součet struktury {reported} se liší od součtu jejích částí {expected} o {difference}.",
+      "suggestion": "Načtěte strukturu znovu; pokud rozdíl zůstane, zkontrolujte účty bez nadřazeného účtu."
+    },
+    "allocation_incomplete": {
+      "fail": "Podíly položky {ordinal} dávají dohromady {total}{unit} místo {expected}{unit}.",
+      "suggestion": "Upravte podíly tak, aby byla rozdělena celá položka, ani více, ani méně."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Položka {ordinal} je rozdělena částečně v procentech a částečně podle množství.",
+      "suggestion": "Rozdělte položku jediným způsobem."
+    },
+    "vector_not_inherited": {
+      "fail": "Řádek smlouvy {code} leží na nákladové položce, ke které jeho položka rozpočtu není přiřazena.",
+      "suggestion": "Vraťte řádek na nákladové položky dané položky rozpočtu, nebo zaznamenejte výjimku s odůvodněním."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Riziková přirážka \"{markup}\" se počítá ze základu, který již obsahuje řádek zisku \"{profit}\", takže se marže účtuje i z peněz vyčleněných na riziko",

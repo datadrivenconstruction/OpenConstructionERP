@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Taahhüt edilen tutar hiçbir maliyet kalemine atanmamış.",
+      "suggestion": "Sözleşme veya sipariş satırlarını maliyet kalemlerine bağlayın, böylece tutar doğru yerde görünür."
+    },
+    "certified_over_committed": {
+      "fail": "Onaylanan hakediş, ihale bedeli ile onaylı değişikliklerin toplamını aşıyor.",
+      "suggestion": "Ek işi kapsayan değişikliği onaylayın veya hakedişi kontrol edin."
+    },
+    "forecast_over_plan": {
+      "fail": "Tahmin, planlanan tutarın üzerinde.",
+      "suggestion": "Tahminin kaynağını kontrol edin; tasarruf bekliyorsanız gerekçesiyle manuel tahmin girin."
+    },
+    "partly_awarded": {
+      "fail": "Planlanan tutarın yalnızca bir kısmı ihale edilmiş; tahminde henüz ihale edilecek işler eksik olabilir.",
+      "suggestion": "Bu kalemde ihale edilecek iş kaldıysa manuel tahmin girin."
+    },
+    "pending_changes": {
+      "fail": "Değişiklik emirleri karar bekliyor.",
+      "suggestion": "Bekleyen değişiklik emirleri hakkında karar verin; tahmin bunları henüz içermiyor."
+    },
+    "snapshot_stale": {
+      "fail": "Bir aydan uzun süredir tahmin kaydedilmedi.",
+      "suggestion": "Maliyet geçmişi okunabilir kalsın diye bir tahmin anlık görüntüsü kaydedin."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "{code} hesap kodu maliyet yapısında birden fazla kez geçiyor.",
+      "suggestion": "Kod başına tek hesap bırakın ve maliyet kalemlerini ona taşıyın."
+    },
+    "mixed_standard": {
+      "fail": "Maliyet yapısı kod listelerini karıştırıyor: {standards}.",
+      "suggestion": "Yapıyı tek bir kod listesinden kurun; diğer kodları ona eşleyin."
+    },
+    "account_parent_cycle": {
+      "fail": "{code} hesabı, {count} hesap üzerinden kendi atası.",
+      "suggestion": "Bu hesaplardan birine döngü dışında bir üst hesap verin."
+    },
+    "account_too_deep": {
+      "fail": "{code} hesabı {level}. seviyede, kod listesinin {max} seviyesinden daha derinde.",
+      "suggestion": "Hesabı kod listesinin derinliği içinde bir üst hesaba bağlayın."
+    },
+    "no_account": {
+      "fail": "{amount} değerindeki {count} maliyet kalemi hiçbir hesapta değil (ilki: {code}).",
+      "suggestion": "Bu pozlara yapının kod listesinden bir kod verin veya maliyet kalemlerini bir hesaba atayın."
+    },
+    "invalid_account": {
+      "fail": "{amount} değerindeki {count} maliyet kalemi kapalı bir hesapta veya kayıt kabul etmeyen bir hesapta (ilki: {code}).",
+      "suggestion": "Maliyet kalemlerini kayıt kabul eden açık bir hesaba taşıyın."
+    },
+    "own_amount_on_parent": {
+      "fail": "{code} hesabının alt hesapları var ve ayrıca kendi tutarı da var: {amount}.",
+      "suggestion": "Kendi tutarını bir alt hesaba taşıyın veya bilinçli bir ödenek olarak bırakın."
+    },
+    "rollup_mismatch": {
+      "fail": "Yapı toplamı {reported}, parçalarının toplamı {expected} ile {difference} farklı.",
+      "suggestion": "Yapıyı yeniden yükleyin; fark sürerse üst hesabı eksik hesapları kontrol edin."
+    },
+    "allocation_incomplete": {
+      "fail": "{ordinal} pozunun paylarının toplamı {expected}{unit} yerine {total}{unit} ediyor.",
+      "suggestion": "Payları, pozun tamamı dağıtılacak şekilde, ne fazla ne eksik olacak biçimde düzeltin."
+    },
+    "allocation_mixed_modes": {
+      "fail": "{ordinal} pozu kısmen yüzdeyle, kısmen miktarla bölünmüş.",
+      "suggestion": "Pozu yalnızca tek bir yöntemle bölün."
+    },
+    "vector_not_inherited": {
+      "fail": "{code} sözleşme satırı, metraj pozunun dağıtılmadığı bir maliyet kaleminde duruyor.",
+      "suggestion": "Satırı pozun maliyet kalemlerine geri alın veya sapmayı gerekçesiyle kaydedin."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "\"{markup}\" risk payı, \"{profit}\" kâr kalemini zaten içeren bir matrah üzerinden hesaplanıyor; böylece risk için ayrılan tutara kâr marjı uygulanıyor",

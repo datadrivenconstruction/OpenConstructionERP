@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Gebundene Mittel sind keiner Kostenstelle zugeordnet.",
+      "suggestion": "Verknüpfen Sie die Vertrags- oder Bestellpositionen mit Kostenstellen, damit die Mittel an der richtigen Stelle erscheinen."
+    },
+    "certified_over_committed": {
+      "fail": "Die bescheinigten Leistungen übersteigen die Vergabe zuzüglich genehmigter Änderungen.",
+      "suggestion": "Genehmigen Sie die Änderung, die die Mehrleistung abdeckt, oder prüfen Sie die Forderung."
+    },
+    "forecast_over_plan": {
+      "fail": "Die Prognose liegt über dem Planwert.",
+      "suggestion": "Prüfen Sie die Quelle der Prognose; erfassen Sie bei erwarteten Einsparungen eine manuelle Prognose mit Begründung."
+    },
+    "partly_awarded": {
+      "fail": "Nur ein Teil des Planwerts ist vergeben; in der Prognose könnten noch zu vergebende Leistungen fehlen.",
+      "suggestion": "Wenn auf dieser Kostenstelle noch Leistungen zu vergeben sind, erfassen Sie eine manuelle Prognose."
+    },
+    "pending_changes": {
+      "fail": "Nachträge warten auf eine Entscheidung.",
+      "suggestion": "Entscheiden Sie über die offenen Nachträge; die Prognose enthält sie noch nicht."
+    },
+    "snapshot_stale": {
+      "fail": "Seit über einem Monat wurde keine Prognose gespeichert.",
+      "suggestion": "Speichern Sie einen Prognosestand, damit der Kostenverlauf nachvollziehbar bleibt."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Das Konto {code} kommt in der Kostengliederung mehrfach vor.",
+      "suggestion": "Behalten Sie ein Konto je Code und verschieben Sie dessen Kostenstellen darauf."
+    },
+    "mixed_standard": {
+      "fail": "Die Kostengliederung mischt Klassifikationen: {standards}.",
+      "suggestion": "Bauen Sie die Gliederung aus einer Klassifikation auf; ordnen Sie die übrigen Codes dieser zu."
+    },
+    "account_parent_cycle": {
+      "fail": "Das Konto {code} ist über {count} Konten sein eigener Vorgänger.",
+      "suggestion": "Weisen Sie einem dieser Konten ein übergeordnetes Konto außerhalb der Schleife zu."
+    },
+    "account_too_deep": {
+      "fail": "Das Konto {code} liegt auf Ebene {level}, tiefer als die {max} Ebenen seiner Klassifikation.",
+      "suggestion": "Hängen Sie das Konto unter ein übergeordnetes Konto innerhalb der Gliederungstiefe der Klassifikation."
+    },
+    "no_account": {
+      "fail": "{count} Kostenstellen im Wert von {amount} liegen auf keinem Konto (zuerst: {code}).",
+      "suggestion": "Geben Sie diesen LV-Positionen einen Code der Klassifikation der Gliederung oder weisen Sie die Kostenstellen einem Konto zu."
+    },
+    "invalid_account": {
+      "fail": "{count} Kostenstellen im Wert von {amount} liegen auf einem geschlossenen oder nicht bebuchbaren Konto (zuerst: {code}).",
+      "suggestion": "Verschieben Sie die Kostenstellen auf ein offenes, bebuchbares Konto."
+    },
+    "own_amount_on_parent": {
+      "fail": "Das Konto {code} hat Unterkonten und zusätzlich einen eigenen Betrag von {amount}.",
+      "suggestion": "Verschieben Sie den eigenen Betrag auf ein Unterkonto oder behalten Sie ihn bewusst als Pauschalansatz."
+    },
+    "rollup_mismatch": {
+      "fail": "Die Summe der Gliederung {reported} weicht von der Summe ihrer Teile {expected} um {difference} ab.",
+      "suggestion": "Laden Sie die Gliederung neu; bleibt die Abweichung, prüfen Sie Konten ohne übergeordnetes Konto."
+    },
+    "allocation_incomplete": {
+      "fail": "Die Anteile der Position {ordinal} ergeben {total}{unit} statt {expected}{unit}.",
+      "suggestion": "Passen Sie die Anteile so an, dass die ganze Position verteilt ist, nicht mehr und nicht weniger."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Position {ordinal} ist teils nach Prozent und teils nach Menge aufgeteilt.",
+      "suggestion": "Teilen Sie die Position nur auf eine Weise auf."
+    },
+    "vector_not_inherited": {
+      "fail": "Die Vertragsposition {code} liegt auf einer Kostenstelle, der ihre LV-Position nicht zugeordnet ist.",
+      "suggestion": "Legen Sie die Position wieder auf die Kostenstellen der LV-Position oder erfassen Sie die Abweichung mit Begründung."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Der Risikozuschlag \"{markup}\" wird auf eine Basis berechnet, die bereits die Gewinnposition \"{profit}\" enthält, sodass Gewinn auf zurückgestellte Risikomittel anfällt",

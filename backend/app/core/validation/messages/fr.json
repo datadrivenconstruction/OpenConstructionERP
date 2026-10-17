@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Des montants engagés ne sont affectés à aucune ligne de coût.",
+      "suggestion": "Rattachez les lignes du contrat ou de la commande à des lignes de coût pour que les montants apparaissent au bon endroit."
+    },
+    "certified_over_committed": {
+      "fail": "Les travaux certifiés dépassent le marché attribué augmenté des modifications approuvées.",
+      "suggestion": "Approuvez la modification qui couvre les travaux supplémentaires ou vérifiez la demande de paiement."
+    },
+    "forecast_over_plan": {
+      "fail": "La prévision dépasse le montant prévu.",
+      "suggestion": "Vérifiez l'origine de la prévision ; saisissez une prévision manuelle avec un motif si vous attendez des économies."
+    },
+    "partly_awarded": {
+      "fail": "Seule une partie du montant prévu est attribuée ; la prévision peut omettre des travaux restant à attribuer.",
+      "suggestion": "S'il reste des travaux à attribuer sur cette ligne, saisissez une prévision manuelle."
+    },
+    "pending_changes": {
+      "fail": "Des avenants attendent une décision.",
+      "suggestion": "Statuez sur les avenants en attente ; la prévision ne les inclut pas encore."
+    },
+    "snapshot_stale": {
+      "fail": "Aucune prévision n'a été enregistrée depuis plus d'un mois.",
+      "suggestion": "Enregistrez un instantané de la prévision pour que l'historique des coûts reste lisible."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Le code de compte {code} apparaît plusieurs fois dans la structure de coûts.",
+      "suggestion": "Conservez un seul compte par code et reportez-y ses lignes de coût."
+    },
+    "mixed_standard": {
+      "fail": "La structure de coûts mélange plusieurs nomenclatures : {standards}.",
+      "suggestion": "Construisez la structure à partir d'une seule nomenclature ; faites correspondre les autres codes à celle-ci."
+    },
+    "account_parent_cycle": {
+      "fail": "Le compte {code} est son propre ascendant via {count} comptes.",
+      "suggestion": "Donnez à l'un de ces comptes un parent situé en dehors de la boucle."
+    },
+    "account_too_deep": {
+      "fail": "Le compte {code} se trouve au niveau {level}, plus profond que les {max} niveaux de sa nomenclature.",
+      "suggestion": "Rattachez le compte à un parent dans la limite de profondeur de la nomenclature."
+    },
+    "no_account": {
+      "fail": "{count} lignes de coût d'un montant de {amount} ne sont sur aucun compte (première : {code}).",
+      "suggestion": "Donnez à ces postes un code de la nomenclature de la structure, ou affectez les lignes de coût à un compte."
+    },
+    "invalid_account": {
+      "fail": "{count} lignes de coût d'un montant de {amount} sont sur un compte clos ou n'acceptant pas d'imputations (première : {code}).",
+      "suggestion": "Reportez les lignes de coût sur un compte ouvert acceptant les imputations."
+    },
+    "own_amount_on_parent": {
+      "fail": "Le compte {code} a des sous-comptes et également un montant propre de {amount}.",
+      "suggestion": "Reportez le montant propre sur un sous-compte, ou conservez-le comme provision volontaire."
+    },
+    "rollup_mismatch": {
+      "fail": "Le total de la structure {reported} diffère de la somme de ses parties {expected} de {difference}.",
+      "suggestion": "Rechargez la structure ; si l'écart persiste, vérifiez les comptes sans parent."
+    },
+    "allocation_incomplete": {
+      "fail": "Les parts du poste {ordinal} totalisent {total}{unit} au lieu de {expected}{unit}.",
+      "suggestion": "Ajustez les parts pour que tout le poste soit réparti, ni plus ni moins."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Le poste {ordinal} est réparti en partie en pourcentage et en partie en quantité.",
+      "suggestion": "Répartissez le poste d'une seule manière."
+    },
+    "vector_not_inherited": {
+      "fail": "La ligne de contrat {code} est sur une ligne de coût à laquelle son poste du bordereau n'est pas affecté.",
+      "suggestion": "Remettez la ligne sur les lignes de coût du poste, ou enregistrez la dérogation avec un motif."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "La provision pour risques « {markup} » est calculée sur une base qui comprend déjà le bénéfice « {profit} » ; une marge est donc appliquée aux fonds réservés aux risques",

@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Committed money is not assigned to any cost line.",
+      "suggestion": "Link the contract or order lines to cost lines so the money shows in the right place."
+    },
+    "certified_over_committed": {
+      "fail": "Certified work exceeds the award plus approved changes.",
+      "suggestion": "Approve the change that covers the extra work, or check the claim."
+    },
+    "forecast_over_plan": {
+      "fail": "The forecast is above the planned amount.",
+      "suggestion": "Check the source of the forecast; record a manual forecast with a reason if you expect savings."
+    },
+    "partly_awarded": {
+      "fail": "Only part of the planned amount is awarded; the forecast may be missing work still to let.",
+      "suggestion": "If more work is still to be let on this line, enter a manual forecast."
+    },
+    "pending_changes": {
+      "fail": "Change orders are waiting for a decision.",
+      "suggestion": "Decide the pending change orders; the forecast does not include them yet."
+    },
+    "snapshot_stale": {
+      "fail": "No forecast has been saved for more than a month.",
+      "suggestion": "Save a forecast snapshot so the cost history stays readable."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Account code {code} appears more than once in the cost structure.",
+      "suggestion": "Keep one account per code and move its cost lines onto it."
+    },
+    "mixed_standard": {
+      "fail": "The cost structure mixes code lists: {standards}.",
+      "suggestion": "Build the structure from one code list; map the other codes onto it."
+    },
+    "account_parent_cycle": {
+      "fail": "Account {code} is its own ancestor through {count} accounts.",
+      "suggestion": "Give one of these accounts a parent outside the loop."
+    },
+    "account_too_deep": {
+      "fail": "Account {code} sits on level {level}, deeper than the {max} levels of its code list.",
+      "suggestion": "Attach the account to a parent within the code list's depth."
+    },
+    "no_account": {
+      "fail": "{count} cost lines worth {amount} are on no account (first: {code}).",
+      "suggestion": "Give these positions a code of the structure's code list, or assign the cost lines to an account."
+    },
+    "invalid_account": {
+      "fail": "{count} cost lines worth {amount} are on a closed account or one that takes no postings (first: {code}).",
+      "suggestion": "Move the cost lines to an open account that takes postings."
+    },
+    "own_amount_on_parent": {
+      "fail": "Account {code} has sub-accounts and also its own amount of {amount}.",
+      "suggestion": "Move the own amount to a sub-account, or keep it as a deliberate allowance."
+    },
+    "rollup_mismatch": {
+      "fail": "The structure total {reported} differs from its parts {expected} by {difference}.",
+      "suggestion": "Reload the structure; if the gap stays, check accounts whose parent is missing."
+    },
+    "allocation_incomplete": {
+      "fail": "The shares of position {ordinal} add up to {total}{unit} instead of {expected}{unit}.",
+      "suggestion": "Adjust the shares so the whole position is allocated, no more and no less."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Position {ordinal} is split partly by percent and partly by quantity.",
+      "suggestion": "Split the position in one way only."
+    },
+    "vector_not_inherited": {
+      "fail": "Contract line {code} sits on a cost line its bill position is not allocated to.",
+      "suggestion": "Put the line back on the position's cost lines, or record the override with a reason."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Contingency \"{markup}\" is computed on a base that already carries the profit line \"{profit}\", so a margin is charged on money set aside for risk",

@@ -15,6 +15,7 @@ import uuid
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,6 +37,7 @@ from app.modules.costmodel.repository import (
     ControlAccountRepository,
     CostLineRepository,
     CostSpineRepository,
+    PositionAllocationRepository,
     SnapshotRepository,
     _amount_in_base,
 )
@@ -1806,34 +1808,6 @@ def _cost_line_to_response(line: CostLine) -> CostLineResponse:
     )
 
 
-def _account_code_from_classification(classification: object, standard: str) -> tuple[str, str] | None:
-    """Derive ``(code, name)`` for a control account from a position classification.
-
-    ``classification`` is the BOQ position JSONB, e.g.
-    ``{"din276": "330", "masterformat": "04 20 00"}``. We pick the value for the
-    requested ``standard`` (falling back to the first present standard) and use
-    it as both the account code and a human label. Returns None when the
-    position carries no usable classification so the caller can skip building an
-    account for it.
-    """
-    if not isinstance(classification, dict) or not classification:
-        return None
-    # Prefer the configured standard, else the first non-empty entry.
-    code = None
-    if standard:
-        raw = classification.get(standard)
-        if raw not in (None, ""):
-            code = str(raw).strip()
-    if code is None:
-        for value in classification.values():
-            if value not in (None, ""):
-                code = str(value).strip()
-                break
-    if not code:
-        return None
-    return code, code
-
-
 class CostSpineService:
     """Business logic for the Cost Spine: control accounts, cost lines, rollups.
 
@@ -1848,6 +1822,7 @@ class CostSpineService:
         self.line_repo = CostLineRepository(session)
         self.spine_repo = CostSpineRepository(session)
         self.budget_repo = BudgetLineRepository(session)
+        self.alloc_repo = PositionAllocationRepository(session)
         # Reuse CostModelService helpers (project currency, default BOQ pick).
         self._cost_service = CostModelService(session)
 
@@ -1871,6 +1846,7 @@ class CostSpineService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Control account code '{data.code}' already exists in this project.",
             )
+        level = 1
         if data.parent_id is not None:
             parent = await self.account_repo.get_by_id(data.parent_id)
             if parent is None or parent.project_id != data.project_id:
@@ -1878,11 +1854,18 @@ class CostSpineService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="parent_id does not reference a control account in this project.",
                 )
+            level = int(getattr(parent, "level", 1) or 1) + 1
+        title = (data.title or "").strip()
         account = ControlAccount(
             project_id=data.project_id,
             parent_id=data.parent_id,
             code=data.code,
-            name=data.name,
+            # ``name`` is what older readers show: the title, else the code.
+            name=(data.name or title or data.code)[:255],
+            title=title,
+            level=level,
+            own_amount=data.own_amount,
+            is_leaf_postable=data.is_leaf_postable,
             classification_standard=data.classification_standard,
             status=data.status,
             sort_order=data.sort_order,
@@ -1912,6 +1895,7 @@ class CostSpineService:
                     status_code=status.HTTP_409_CONFLICT,
                     detail=f"Control account code '{fields['code']}' already exists in this project.",
                 )
+        reparent = "parent_id" in fields and fields["parent_id"] != account.parent_id
         if fields.get("parent_id") is not None:
             if fields["parent_id"] == account_id:
                 raise HTTPException(
@@ -1924,6 +1908,22 @@ class CostSpineService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="parent_id does not reference a control account in this project.",
                 )
+            # Walk up from the new parent: meeting this account means a loop.
+            seen: set[uuid.UUID] = set()
+            cursor = parent
+            while cursor is not None and cursor.id not in seen:
+                if cursor.id == account_id:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail={"problem": "parent_cycle", "message": "The new parent sits under this account."},
+                    )
+                seen.add(cursor.id)
+                cursor = await self.account_repo.get_by_id(cursor.parent_id) if cursor.parent_id else None
+        if "title" in fields and fields["title"] is not None:
+            fields["title"] = fields["title"].strip()
+        for key in ("own_amount", "is_leaf_postable"):
+            if key in fields and fields[key] is None:
+                fields.pop(key)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
             fields["metadata_"] = (
@@ -1934,6 +1934,8 @@ class CostSpineService:
 
         if fields:
             await self.account_repo.update_fields(account_id, **fields)
+        if reparent:
+            await self._relevel_subtree(project_id, account_id)
         updated = await self.account_repo.get_by_id(account_id)
         if updated is None:
             raise HTTPException(
@@ -1941,6 +1943,32 @@ class CostSpineService:
                 detail="Control account not found after update",
             )
         return _control_account_to_response(updated)
+
+    async def _relevel_subtree(self, project_id: uuid.UUID, account_id: uuid.UUID) -> None:
+        """Set ``level`` on an account that moved and on everything under it."""
+        rows = [
+            SimpleNamespace(id=a.id, parent_id=a.parent_id, level=int(getattr(a, "level", 1) or 1))
+            for a in await self.account_repo.list_for_project(project_id)
+        ]
+        by_id = {r.id: r for r in rows}
+        children: dict[uuid.UUID, list[SimpleNamespace]] = {}
+        for r in rows:
+            if r.parent_id is not None:
+                children.setdefault(r.parent_id, []).append(r)
+        start = by_id.get(account_id)
+        if start is None:
+            return
+        parent = by_id.get(start.parent_id) if start.parent_id else None
+        queue = [(start, (parent.level + 1) if parent is not None else 1)]
+        visited: set[uuid.UUID] = set()
+        while queue:
+            node, level = queue.pop()
+            if node.id in visited:
+                continue
+            visited.add(node.id)
+            if node.level != level:
+                await self.account_repo.update_fields(node.id, level=level)
+            queue.extend((child, level + 1) for child in children.get(node.id, []))
 
     async def delete_account(self, account_id: uuid.UUID) -> None:
         """Delete a control account. Raises 404 if missing, 409 if lines reference it."""
@@ -2116,7 +2144,9 @@ class CostSpineService:
         po_items = await _count(select(func.count()).where(PurchaseOrderItem.cost_line_id == line_id))
         req_items = await _count(select(func.count()).where(MaterialRequisitionItem.cost_line_id == line_id))
         contract_lines = await _count(select(func.count()).where(ContractLine.cost_line_id == line_id))
+        shares = await self.alloc_repo.count_for_line(line_id)
         return {
+            "position_allocations": shares,
             "budget_lines": budget,
             "boq_positions": positions,
             "po_items": po_items,
@@ -2130,24 +2160,46 @@ class CostSpineService:
         self,
         project_id: uuid.UUID,
         boq_id: uuid.UUID | None = None,
+        standard: str | None = None,
     ) -> SpineGenerationResult:
-        """Build the cost spine from a BOQ (idempotent on the BOQ position).
+        """Build the cost structure and the cost lines from a BOQ (idempotent on the BOQ position).
 
-        Resolves the BOQ (largest/most-recent when ``boq_id`` is omitted), loads
-        its positions, builds a control-account tree from each position's
-        classification, and upserts exactly one cost line per BOQ position. The
-        dedup key is the STABLE ``boq_position_id`` provenance, not the line
-        ``code``: a position without a ``reference_code`` gets a random
-        ``CL-XXXXXXXX`` code on first create, so keying on the code would never
-        match across runs and would duplicate the whole batch every time. A new
-        line copies the estimate quantity/rate/amount and inherits the project
-        currency; an existing line is reused (its id and code kept) with the
-        estimate refreshed from the current position. The position gets its
-        ``cost_line_id`` written back and any budget line sharing the
-        ``boq_position_id`` is auto-linked. Re-running creates zero new lines and
-        accounts for both referenced and unreferenced positions.
+        Resolves the BOQ (largest/most-recent when ``boq_id`` is omitted) and
+        builds the account tree from ONE code list: ``standard`` when given,
+        else the project's classification standard. A position's account comes
+        from its code in that standard and in no other; every ancestor the code
+        needs is created with it (from the code list when it carries the code,
+        else under the most specific code above it). A costed position without a
+        code of the standard still gets its cost line, on no account, and is
+        counted in ``positions_in_suspense`` so it shows instead of vanishing.
+
+        Exactly one cost line per BOQ position, deduped by the STABLE
+        ``boq_position_id`` (a position without a ``reference_code`` gets a
+        random ``CL-XXXXXXXX`` code on first create, so keying on the code would
+        duplicate the batch on every run). The position gets its
+        ``cost_line_id`` written back. A position copied from another bill
+        still points at the original's line; it inherits that line's account
+        (the vector wins over the classification), moves to its own line, and
+        its split shares move to the lines of this bill, so neither bill counts
+        the other's money. Finally the estimate of every line of this bill is
+        recomputed from the positions and shares it carries.
+
+        Raises 409 ``structure_standard_mismatch`` when the project's accounts
+        are built from another code list: one structure is never a mix.
         """
         from app.modules.boq.repository import BOQRepository, PositionRepository
+        from app.modules.costmodel.structure import (
+            AllocationView,
+            PositionView,
+            estimate_fields,
+            line_contributions,
+        )
+        from app.modules.costmodel.structure_service import (
+            DERIVED_LINE_SOURCES,
+            SOURCE_ALLOCATION,
+            AccountTreeBuilder,
+            position_code,
+        )
 
         resolved_boq_id = boq_id
         if resolved_boq_id is None:
@@ -2175,30 +2227,30 @@ class CostSpineService:
             )
 
         project_currency = await self._get_project_currency(project_id)
+        chosen = (standard or "").strip().lower() or await self._resolve_classification_standard(project_id)
+        if chosen == "none":
+            chosen = ""
 
-        # Resolve the classification standard once from the project config when
-        # available; default to DIN 276 which is the most common in the seed set.
-        standard = await self._resolve_classification_standard(project_id)
+        existing_accounts = await self.account_repo.list_for_project(project_id)
+        used = sorted({(a.classification_standard or "").strip() for a in existing_accounts} - {""})
+        if chosen and used and chosen not in used:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "problem": "structure_standard_mismatch",
+                    "message": "The cost structure of this project is built from another code list.",
+                    "params": {"standard": used[0], "requested": chosen},
+                },
+            )
+        code_list = await self._code_list_for(chosen, project_id) if chosen else None
+        builder = AccountTreeBuilder(self.account_repo, project_id, chosen, code_list, existing_accounts)
 
-        # Cache existing accounts + lines so the whole generation is one pass.
-        # Store only the account *id* (a plain UUID) - that is all the loop
-        # needs, and it keeps the map off ORM rows the loop writes, where a
-        # reload would raise MissingGreenlet.
-        accounts_by_code: dict[str, uuid.UUID] = {
-            a.code: a.id for a in await self.account_repo.list_for_project(project_id)
-        }
         # Existing BOQ-sourced cost lines are deduped by their STABLE
         # ``boq_position_id`` - the true invariant is exactly one cost line per
-        # BOQ position in a project. Keying on ``code`` was the original bug:
-        # for a position with no ``reference_code`` the code is a random
-        # ``CL-XXXX`` regenerated every run, so the previous line was never
-        # matched and each re-run created a fresh duplicate batch (a real demo
-        # BOQ went 129 -> 258 cost lines on the 2nd run).
-        #
-        # We snapshot only the identity + linkage columns into plain namespaces
-        # up front, so the dedupe below matches against the state the run
-        # started from rather than reloading rows the loop has already created,
-        # which raises MissingGreenlet.
+        # BOQ position in a project. We snapshot only the identity + linkage
+        # columns into plain namespaces up front, so the loop matches against
+        # the state the run started from rather than reloading rows it has
+        # already written, which raises MissingGreenlet.
         lines_by_position: dict[str, SimpleNamespace] = {}
         for key, line in (await self.line_repo.existing_by_boq_position(project_id)).items():
             lines_by_position[key] = SimpleNamespace(
@@ -2208,26 +2260,43 @@ class CostSpineService:
                 boq_id=line.boq_id,
                 control_account_id=line.control_account_id,
             )
-        # All cost-line codes already taken in this project, so a freshly
-        # generated ``CL-XXXX`` for an unreferenced position cannot collide with
-        # an existing code (manual lines included). The unique
-        # ``(project_id, code)`` constraint stays the DB-level belt to this.
-        existing_codes: set[str] = {
-            line.code for line in (await self.line_repo.list_for_project(project_id, limit=100000))[0]
+        # Every line of the project, by id, as it was when the run started:
+        # whose bill it is, which account it is on, and its current estimate.
+        all_lines = {
+            line.id: SimpleNamespace(
+                id=line.id,
+                code=line.code,
+                boq_id=line.boq_id,
+                control_account_id=line.control_account_id,
+                source=line.source or "",
+                unit=line.unit,
+                estimate_quantity=str(line.estimate_quantity or "0"),
+                estimate_unit_rate=str(line.estimate_unit_rate or "0"),
+                estimate_amount=str(line.estimate_amount or "0"),
+            )
+            for line in (await self.line_repo.list_for_project(project_id, limit=100000))[0]
         }
+        existing_codes: set[str] = {line.code for line in all_lines.values()}
 
-        accounts_created = 0
+        def _foreign(line_id: uuid.UUID | None) -> SimpleNamespace | None:
+            """The line, when it belongs to another bill of this project."""
+            line = all_lines.get(line_id) if line_id is not None else None
+            if line is None or line.boq_id is None or line.boq_id == resolved_boq_id:
+                return None
+            return line
+
         cost_lines_created = 0
         positions_linked = 0
+        positions_in_suspense = 0
+        suspense_amount = Decimal("0")
 
         # Snapshot every position attribute the loop needs BEFORE we mutate
         # anything, so each iteration reads the position as it was when the
         # generation started and never reloads one mid-loop (MissingGreenlet).
-        # Reading the columns up front also keeps generation a single pass with
-        # no mid-loop per-row IO.
         pos_views = [
             SimpleNamespace(
                 id=pos.id,
+                boq_id=getattr(pos, "boq_id", None) or resolved_boq_id,
                 unit=pos.unit,
                 classification=pos.classification,
                 reference_code=getattr(pos, "reference_code", None),
@@ -2240,41 +2309,82 @@ class CostSpineService:
             for pos in positions
         ]
 
+        async def _new_line(**fields: Any) -> SimpleNamespace:
+            line = await self.line_repo.create(
+                CostLine(project_id=project_id, currency=project_currency, status="active", **fields)
+            )
+            view = SimpleNamespace(
+                id=line.id,
+                code=fields["code"],
+                boq_id=fields.get("boq_id"),
+                control_account_id=fields.get("control_account_id"),
+                source=fields.get("source") or "",
+                unit=fields.get("unit"),
+                estimate_quantity=str(fields.get("estimate_quantity") or "0"),
+                estimate_unit_rate=str(fields.get("estimate_unit_rate") or "0"),
+                estimate_amount=str(fields.get("estimate_amount") or "0"),
+            )
+            all_lines[line.id] = view
+            existing_codes.add(view.code)
+            return view
+
+        def _free_code(preferred: str) -> str:
+            code, n = preferred, 1
+            while code in existing_codes:
+                n += 1
+                code = f"{preferred}-{n}"
+            return code
+
+        account_lines: dict[uuid.UUID, uuid.UUID] = {
+            line.control_account_id: line.id
+            for line in all_lines.values()
+            if line.boq_id == resolved_boq_id and line.source == SOURCE_ALLOCATION and line.control_account_id
+        }
+
+        async def _account_line(account_id: uuid.UUID) -> uuid.UUID:
+            """This bill's line for shares put on an account."""
+            found = account_lines.get(account_id)
+            if found is not None:
+                return found
+            account = await self.account_repo.get_by_id(account_id)
+            code = _free_code(getattr(account, "code", None) or "ALLOC")
+            view = await _new_line(
+                control_account_id=account_id,
+                code=code[:80],
+                description=(getattr(account, "title", "") or getattr(account, "name", "") or code)[:2000],
+                unit=None,
+                source=SOURCE_ALLOCATION,
+                boq_id=resolved_boq_id,
+                estimate_quantity="0",
+                estimate_unit_rate="0",
+                estimate_amount="0",
+            )
+            account_lines[account_id] = view.id
+            return view.id
+
+        own_line_of: dict[uuid.UUID, uuid.UUID] = {}
         for pos in pos_views:
             # Skip section headers (empty unit) - mirrors generate_budget_from_boq.
             if not pos.unit:
                 continue
 
-            # ── Control account from classification ──────────────────────
+            # ── Account: an inherited vector first, else the code of the chosen standard ──
+            inherited = _foreign(pos.cost_line_id)
             account_id: uuid.UUID | None = None
-            account_info = _account_code_from_classification(pos.classification, standard)
-            if account_info is not None:
-                acct_code, acct_name = account_info
-                account_id = accounts_by_code.get(acct_code)
-                if account_id is None:
-                    account = ControlAccount(
-                        project_id=project_id,
-                        parent_id=None,
-                        code=acct_code,
-                        name=acct_name,
-                        classification_standard=standard,
-                        status="open",
-                        sort_order=0,
-                    )
-                    account = await self.account_repo.create(account)
-                    # Capture the id immediately; the ORM object expires on the
-                    # next create/update inside this loop.
-                    account_id = account.id
-                    accounts_by_code[acct_code] = account_id
-                    accounts_created += 1
+            if inherited is not None and inherited.control_account_id is not None:
+                account_id = inherited.control_account_id
+            else:
+                code = position_code(pos.classification, chosen)
+                if code is not None:
+                    account_id = await builder.ensure(code)
+            if account_id is None:
+                positions_in_suspense += 1
+                try:
+                    suspense_amount += Decimal(str(pos.total or "0"))
+                except (InvalidOperation, ValueError):
+                    pass
 
             # ── Resolve the cost line by STABLE boq_position_id ──────────
-            # Dedup on the position id, NOT the line code: an unreferenced
-            # position has a random ``CL-XXXX`` code each run, so a 2nd
-            # generate must find its line by the invariant provenance or it
-            # would duplicate. A referenced position is matched the same way
-            # once its line is wired (its ``boq_position_id`` is set on first
-            # create), keeping the run idempotent regardless of reference_code.
             existing_line = lines_by_position.get(str(pos.id))
             if existing_line is None:
                 # New line: code is the reference_code when present, else an
@@ -2283,8 +2393,7 @@ class CostSpineService:
                 code = ref or f"CL-{uuid.uuid4().hex[:8].upper()}"
                 while not ref and code in existing_codes:
                     code = f"CL-{uuid.uuid4().hex[:8].upper()}"
-                new_line = CostLine(
-                    project_id=project_id,
+                view = await _new_line(
                     control_account_id=account_id,
                     code=code,
                     description=(pos.description or "")[:2000],
@@ -2295,82 +2404,159 @@ class CostSpineService:
                     estimate_quantity=str(pos.quantity or "0"),
                     estimate_unit_rate=str(pos.unit_rate or "0"),
                     estimate_amount=str(pos.total or "0"),
-                    currency=project_currency,
-                    status="active",
                 )
-                new_line = await self.line_repo.create(new_line)
-                # Capture identity NOW, before the next iteration expires it.
-                view = SimpleNamespace(
-                    id=new_line.id,
+                lines_by_position[str(pos.id)] = SimpleNamespace(
+                    id=view.id,
                     code=code,
                     boq_position_id=pos.id,
                     boq_id=resolved_boq_id,
                     control_account_id=account_id,
                 )
-                lines_by_position[str(pos.id)] = view
-                existing_codes.add(code)
                 cost_lines_created += 1
+                line_id = view.id
             else:
-                # Reuse the existing line: keep its id + code, refresh the
-                # estimate from the current BOQ position, and fill any missing
-                # linkage. This keeps exactly one cost line per position and
-                # tracks edits to the BOQ without duplicating rows.
-                view = existing_line
-                fill: dict[str, object] = {
-                    "estimate_quantity": str(pos.quantity or "0"),
-                    "estimate_unit_rate": str(pos.unit_rate or "0"),
-                    "estimate_amount": str(pos.total or "0"),
-                }
-                if view.boq_id is None:
+                # Reuse the existing line: keep its id + code and fill any
+                # missing linkage. The estimate is recomputed below.
+                fill: dict[str, object] = {}
+                if existing_line.boq_id is None:
                     fill["boq_id"] = resolved_boq_id
-                    view.boq_id = resolved_boq_id
-                if view.control_account_id is None and account_id is not None:
+                    existing_line.boq_id = resolved_boq_id
+                if existing_line.control_account_id is None and account_id is not None:
                     fill["control_account_id"] = account_id
-                    view.control_account_id = account_id
-                await self.line_repo.update_fields(view.id, **fill)
+                    existing_line.control_account_id = account_id
+                if fill:
+                    await self.line_repo.update_fields(existing_line.id, **fill)
+                    snap = all_lines.get(existing_line.id)
+                    if snap is not None:
+                        snap.boq_id = existing_line.boq_id
+                        snap.control_account_id = existing_line.control_account_id
+                line_id = existing_line.id
+            own_line_of[pos.id] = line_id
 
-            # ── Write cost_line_id back onto the position (fill-only) ────
-            if pos.cost_line_id is None:
-                await position_repo.update_fields(pos.id, cost_line_id=view.id)
+            # ── Write cost_line_id back: fill an empty one, or bring a copied one home ──
+            if pos.cost_line_id is None or inherited is not None:
+                await position_repo.update_fields(pos.id, cost_line_id=line_id)
+                pos.cost_line_id = line_id
                 positions_linked += 1
 
+        # ── Split shares that still point at another bill's lines come home too ──
+        alloc_repo = getattr(self, "alloc_repo", None)
+        shares = await alloc_repo.list_for_positions([p.id for p in pos_views]) if alloc_repo is not None else []
+        kept: dict[tuple[uuid.UUID, uuid.UUID], Any] = {}
+        alloc_views: list[AllocationView] = []
+        for row in sorted(shares, key=lambda r: str(r.id)):
+            target = row.cost_line_id
+            foreign = _foreign(target)
+            if foreign is not None:
+                own = own_line_of.get(row.position_id)
+                own_view = all_lines.get(own) if own is not None else None
+                if own_view is not None and own_view.control_account_id == foreign.control_account_id:
+                    target = own
+                elif foreign.control_account_id is not None:
+                    target = await _account_line(foreign.control_account_id)
+                else:
+                    target = own or target
+            twin = kept.get((row.position_id, target))
+            if twin is not None:
+                # Two shares landed on one line: they are one share now.
+                twin.share = Decimal(str(twin.share)) + Decimal(str(row.share))
+                await alloc_repo.retarget(twin.id, target, twin.share)
+                await alloc_repo.delete(row.id)
+                continue
+            if target != row.cost_line_id:
+                await alloc_repo.retarget(row.id, target)
+                row.cost_line_id = target
+            kept[(row.position_id, target)] = row
+        for row in kept.values():
+            alloc_views.append(AllocationView(str(row.position_id), str(row.cost_line_id), row.mode, row.share))
+
+        # ── Every line of this bill carries exactly what is on it now ──
+        own_bill_lines = [ln for ln in all_lines.values() if ln.boq_id == resolved_boq_id]
+        contributions = line_contributions(
+            [
+                PositionView(
+                    id=str(p.id),
+                    boq_id=str(p.boq_id),
+                    total=p.total,
+                    quantity=p.quantity,
+                    unit=p.unit or "",
+                    cost_line_id=str(p.cost_line_id) if p.cost_line_id else None,
+                    unit_rate=p.unit_rate,
+                )
+                for p in pos_views
+            ],
+            alloc_views,
+            line_boq={str(ln.id): str(resolved_boq_id) for ln in own_bill_lines},
+        )
+        for ln in own_bill_lines:
+            contribution = contributions.get(str(ln.id))
+            if contribution is None and ln.source not in DERIVED_LINE_SOURCES:
+                continue
+            fields = estimate_fields(contribution, ln.unit)
+            if any(getattr(ln, k) != v for k, v in fields.items()):
+                await self.line_repo.update_fields(ln.id, **fields)
+
         # ── Auto-link budget lines by boq_position_id (fill-nulls-only) ──
-        # ``lines_by_position`` values are plain namespaces (id + linkage cols),
-        # so the autolink pass never re-reads the rows the loop above wrote.
         budget_lines_linked = await self._autolink_budget_lines(project_id, lines_by_position)
 
+        accounts_created = builder.created
         await _safe_publish(
             "costmodel.spine.generated",
             {
                 "project_id": str(project_id),
                 "boq_id": str(resolved_boq_id),
+                "standard": chosen,
                 "accounts_created": accounts_created,
                 "cost_lines_created": cost_lines_created,
                 "positions_linked": positions_linked,
                 "budget_lines_linked": budget_lines_linked,
+                "positions_in_suspense": positions_in_suspense,
             },
             source_module="oe_costmodel",
         )
         logger.info(
-            "Cost spine generated: project=%s boq=%s accounts=+%d lines=+%d positions_linked=%d budget_linked=%d",
+            "Cost spine generated: project=%s boq=%s standard=%s accounts=+%d lines=+%d positions_linked=%d "
+            "budget_linked=%d suspense=%d",
             project_id,
             resolved_boq_id,
+            chosen or "-",
             accounts_created,
             cost_lines_created,
             positions_linked,
             budget_lines_linked,
+            positions_in_suspense,
         )
         return SpineGenerationResult(
             project_id=project_id,
             boq_id=resolved_boq_id,
+            standard=chosen,
             accounts_created=accounts_created,
             cost_lines_created=cost_lines_created,
             positions_linked=positions_linked,
             budget_lines_linked=budget_lines_linked,
+            positions_in_suspense=positions_in_suspense,
+            suspense_amount=suspense_amount,
         )
 
+    async def _code_list_for(self, standard: str, project_id: uuid.UUID) -> Any:
+        """The code list a structure is built from: shipped, pack, or imported for the project."""
+        from app.core.code_lists import get_code_list
+
+        shared = get_code_list(standard)
+        if shared is not None:
+            return shared
+        from app.modules.costmodel.structure_service import CostStructureService
+
+        return await CostStructureService(self.session).code_list(standard, project_id)
+
     async def _resolve_classification_standard(self, project_id: uuid.UUID) -> str:
-        """Best-effort project classification standard, defaulting to ``din276``."""
+        """The project's classification standard (its own column), defaulting to ``din276``.
+
+        This used to read a ``classification_standard`` key from the project's
+        config, which the project form never writes, so every project built its
+        structure from DIN 276 whatever it had chosen. ``none`` means the
+        project uses no standard; the caller then puts every position in suspense.
+        """
         try:
             from app.modules.projects.repository import ProjectRepository
 
@@ -2379,11 +2565,14 @@ class CostSpineService:
             return "din276"
         if project is None:
             return "din276"
+        std = str(getattr(project, "classification_standard", "") or "").strip().lower()
+        if std:
+            return std
         cfg = getattr(project, "config", None) or getattr(project, "settings", None)
         if isinstance(cfg, dict):
-            std = str(cfg.get("classification_standard") or "").strip()
-            if std:
-                return std
+            legacy = str(cfg.get("classification_standard") or "").strip().lower()
+            if legacy:
+                return legacy
         return "din276"
 
     async def _autolink_budget_lines(

@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Gli importi impegnati non sono assegnati ad alcuna voce di costo.",
+      "suggestion": "Collega le righe del contratto o dell'ordine alle voci di costo, così gli importi compaiono al posto giusto."
+    },
+    "certified_over_committed": {
+      "fail": "I lavori certificati superano l'aggiudicazione più le varianti approvate.",
+      "suggestion": "Approva la variante che copre i lavori aggiuntivi oppure verifica la richiesta di pagamento."
+    },
+    "forecast_over_plan": {
+      "fail": "La previsione supera l'importo pianificato.",
+      "suggestion": "Verifica l'origine della previsione; se prevedi risparmi, inserisci una previsione manuale con la motivazione."
+    },
+    "partly_awarded": {
+      "fail": "Solo una parte dell'importo pianificato è aggiudicata; la previsione potrebbe non includere lavori ancora da affidare.",
+      "suggestion": "Se su questa voce ci sono ancora lavori da affidare, inserisci una previsione manuale."
+    },
+    "pending_changes": {
+      "fail": "Ci sono varianti in attesa di decisione.",
+      "suggestion": "Decidi sulle varianti in sospeso; la previsione non le include ancora."
+    },
+    "snapshot_stale": {
+      "fail": "Da oltre un mese non viene salvata alcuna previsione.",
+      "suggestion": "Salva un'istantanea della previsione, così lo storico dei costi resta leggibile."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Il codice conto {code} compare più volte nella struttura dei costi.",
+      "suggestion": "Mantieni un solo conto per codice e sposta su di esso le sue voci di costo."
+    },
+    "mixed_standard": {
+      "fail": "La struttura dei costi mescola più sistemi di codifica: {standards}.",
+      "suggestion": "Costruisci la struttura con un solo sistema di codifica; riconduci gli altri codici ad esso."
+    },
+    "account_parent_cycle": {
+      "fail": "Il conto {code} è antenato di se stesso attraverso {count} conti.",
+      "suggestion": "Assegna a uno di questi conti un padre fuori dal ciclo."
+    },
+    "account_too_deep": {
+      "fail": "Il conto {code} si trova al livello {level}, più in profondità dei {max} livelli del suo sistema di codifica.",
+      "suggestion": "Collega il conto a un padre entro la profondità del sistema di codifica."
+    },
+    "no_account": {
+      "fail": "{count} voci di costo per un valore di {amount} non sono su alcun conto (prima: {code}).",
+      "suggestion": "Assegna a queste voci di computo un codice del sistema di codifica della struttura, oppure assegna le voci di costo a un conto."
+    },
+    "invalid_account": {
+      "fail": "{count} voci di costo per un valore di {amount} sono su un conto chiuso o che non accetta registrazioni (prima: {code}).",
+      "suggestion": "Sposta le voci di costo su un conto aperto che accetta registrazioni."
+    },
+    "own_amount_on_parent": {
+      "fail": "Il conto {code} ha sottoconti e anche un importo proprio di {amount}.",
+      "suggestion": "Sposta l'importo proprio su un sottoconto, oppure mantienilo come accantonamento voluto."
+    },
+    "rollup_mismatch": {
+      "fail": "Il totale della struttura {reported} differisce dalla somma delle sue parti {expected} di {difference}.",
+      "suggestion": "Ricarica la struttura; se lo scarto resta, controlla i conti senza padre."
+    },
+    "allocation_incomplete": {
+      "fail": "Le quote della voce {ordinal} sommano {total}{unit} invece di {expected}{unit}.",
+      "suggestion": "Regola le quote in modo che l'intera voce sia ripartita, né più né meno."
+    },
+    "allocation_mixed_modes": {
+      "fail": "La voce {ordinal} è suddivisa in parte per percentuale e in parte per quantità.",
+      "suggestion": "Suddividi la voce in un solo modo."
+    },
+    "vector_not_inherited": {
+      "fail": "La riga di contratto {code} è su una voce di costo a cui la sua voce di computo non è assegnata.",
+      "suggestion": "Riporta la riga sulle voci di costo della voce di computo, oppure registra la deroga con una motivazione."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "L'accantonamento per imprevisti \"{markup}\" è calcolato su una base che comprende già la voce di utile \"{profit}\", per cui si applica un margine su somme destinate al rischio",
