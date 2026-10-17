@@ -99,7 +99,7 @@ from app.modules.costmodel.structure_schemas import (
     BoqAllocations,
     CodeListDetail,
     CodeListImportResult,
-    CodeListSummary,
+    CodeListPage,
     PositionAllocationOut,
     PositionAllocationRequest,
     StructureTree,
@@ -1311,7 +1311,7 @@ def _get_structure_service(session: SessionDep) -> CostStructureService:
 
 @router.get(
     "/code-lists/",
-    response_model=list[CodeListSummary],
+    response_model=CodeListPage,
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
 async def list_code_lists(
@@ -1319,11 +1319,12 @@ async def list_code_lists(
     session: SessionDep,
     project_id: uuid.UUID | None = Query(default=None),
     service: CostStructureService = Depends(_get_structure_service),
-) -> list[CodeListSummary]:
+) -> CodeListPage:
     """The shipped and pack code lists, plus the project's own when ``project_id`` is given."""
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
-    return await service.list_code_lists(project_id)
+    items = await service.list_code_lists(project_id)
+    return CodeListPage(items=items, total=len(items), offset=0, limit=len(items))
 
 
 @router.get(

@@ -243,8 +243,13 @@ function projectQuery(projectId?: string): string {
 }
 
 export const costStructureApi = {
-  listCodeLists: (projectId?: string) =>
-    apiGet<CodeListSummary[]>(`/v1/costmodel/code-lists/${projectQuery(projectId)}`),
+  /** The lists come in one envelope page; callers get the plain list. */
+  listCodeLists: async (projectId?: string) =>
+    (
+      await apiGet<{ items: CodeListSummary[]; total: number }>(
+        `/v1/costmodel/code-lists/${projectQuery(projectId)}`,
+      )
+    ).items,
 
   getCodeList: (key: string, projectId?: string) =>
     apiGet<CodeListDetail>(

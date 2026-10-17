@@ -2587,7 +2587,8 @@ export function BOQEditorPage() {
   }, [boq, boqId, queryClient]);
   const costAllocations = useMemo(() => {
     const map = new Map<string, PositionAllocation>();
-    for (const p of allocationsQuery.data?.positions ?? []) map.set(p.position_id, p);
+    const positions = allocationsQuery.data?.positions;
+    for (const p of Array.isArray(positions) ? positions : []) map.set(p.position_id, p);
     return map;
   }, [allocationsQuery.data]);
   const [allocationPositionId, setAllocationPositionId] = useState<string | null>(null);
@@ -5537,7 +5538,7 @@ export function BOQEditorPage() {
         // keeps its own internal horizontal scrollbar, which is what the
         // user expects (toolbar and headers stay aligned with the page).
         <div className="mb-2 min-w-0" data-testid="boq-grid">
-        {allocationsQuery.data && allocationsQuery.data.coverage.positions_total > 0 && (
+        {allocationsQuery.data?.coverage && allocationsQuery.data.coverage.positions_total > 0 && (
           <CostAllocationCoverageBar
             coverage={allocationsQuery.data.coverage}
             currency={allocationsQuery.data.currency || currencyCode}

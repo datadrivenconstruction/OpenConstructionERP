@@ -40,6 +40,15 @@ class CodeListSummary(BaseModel):
     depth: int = 0
 
 
+class CodeListPage(BaseModel):
+    """Every code list a structure can be built from, in one page (the set is small and bounded)."""
+
+    items: list[CodeListSummary] = Field(default_factory=list)
+    total: int = 0
+    offset: int = 0
+    limit: int = 0
+
+
 class CodeListEntryOut(BaseModel):
     """One code of a list."""
 
