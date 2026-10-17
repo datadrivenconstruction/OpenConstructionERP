@@ -29,6 +29,7 @@ from app.modules.bi_dashboards.alert_dsl import (
 )
 from app.modules.bi_dashboards.models import (
     AlertRule,
+    BenchmarkSet,
     Dashboard,
     DashboardWidget,
     KPIValue,
@@ -45,6 +46,8 @@ from app.modules.bi_dashboards.report_builder import (
 from app.modules.bi_dashboards.repository import BIDashboardsRepository
 from app.modules.bi_dashboards.schemas import (
     AlertRuleCreate,
+    BenchmarkSetCreate,
+    BenchmarkSetUpdate,
     DashboardCreate,
     DashboardEvaluateResponse,
     DashboardRenderResponse,
@@ -1779,6 +1782,105 @@ class BIDashboardsService:
             "aggregate_value": result.value,
             "aggregate_unit": result.unit,
         }
+
+    # ── Benchmark sets ────────────────────────────────────────────
+
+    async def validate_benchmark_definition(self, kpis: list[str], row_filters: list[dict[str, Any]]) -> None:
+        """Refuse a set whose KPIs do not exist or whose row filters do not fit them.
+
+        Every KPI must be a preset id or a stored custom KPI code, and every
+        row filter must be a whitelisted filter on that KPI's entity, so a
+        set can never be saved that would fail, or silently ignore a
+        condition, the first time it is read.
+
+        Raises:
+            KPISpecError: A row filter does not fit one of the KPIs; the
+                path names the KPI.
+            UnknownPerformanceKPI: A KPI id names nothing.
+        """
+        from app.modules.bi_dashboards import performance
+
+        for code in kpis:
+            spec = await performance.resolve_spec(self.session, kpi=code, spec=None)
+            if spec["aggregation"] == "top_by":
+                raise _kpi_spec.KPISpecError(
+                    f"kpis.{code}",
+                    "'top_by' names a row, not a measure, so it has no per-project value to benchmark.",
+                    value=code,
+                )
+            try:
+                performance.with_row_filters(spec, row_filters)
+            except _kpi_spec.KPISpecError as exc:
+                # Name the KPI the filter did not fit, keep the rest of the rejection.
+                exc.path = f"kpis.{code}.{exc.path}"
+                raise
+
+    async def list_benchmark_sets(self, *, viewer_user_id: uuid.UUID | None) -> list[BenchmarkSet]:
+        return await self.repo.list_benchmark_sets(viewer_user_id=viewer_user_id)
+
+    async def get_visible_benchmark_set(
+        self, set_id: uuid.UUID, *, viewer_user_id: uuid.UUID | None
+    ) -> BenchmarkSet | None:
+        """The set when the viewer owns it or it is shared; ``None`` otherwise.
+
+        A personal set of someone else and a set that does not exist are the
+        same ``None``, so a set id leaks nothing.
+        """
+        row = await self.repo.get_benchmark_set(set_id)
+        if row is None:
+            return None
+        if row.scope == "shared" or (viewer_user_id is not None and row.owner_user_id == viewer_user_id):
+            return row
+        return None
+
+    async def create_benchmark_set(
+        self, payload: BenchmarkSetCreate, *, owner_user_id: uuid.UUID | None
+    ) -> BenchmarkSet:
+        await self.validate_benchmark_definition(payload.kpis, payload.cohort.row_filters)
+        row = BenchmarkSet(
+            name=payload.name,
+            description=payload.description,
+            owner_user_id=owner_user_id,
+            scope=payload.scope,
+            kpis_json=list(payload.kpis),
+            cohort_json=payload.cohort.model_dump(mode="json"),
+            statistic=payload.statistic,
+            min_projects=payload.min_projects,
+            min_records=payload.min_records,
+            convert_units=payload.convert_units,
+        )
+        return await self.repo.create_benchmark_set(row)
+
+    async def update_benchmark_set(
+        self, set_id: uuid.UUID, payload: BenchmarkSetUpdate, *, owner_user_id: uuid.UUID | None
+    ) -> BenchmarkSet | None:
+        """Apply an edit; ``None`` unless the caller owns the set."""
+        row = await self.repo.get_benchmark_set(set_id)
+        if row is None or owner_user_id is None or row.owner_user_id != owner_user_id:
+            return None
+        kpis = payload.kpis if payload.kpis is not None else list(row.kpis_json or [])
+        cohort_filters = (
+            payload.cohort.row_filters if payload.cohort is not None else (row.cohort_json or {}).get("row_filters", [])
+        )
+        await self.validate_benchmark_definition(kpis, cohort_filters)
+        changes = payload.model_dump(exclude_unset=True)
+        for key in ("name", "description", "scope", "statistic", "min_projects", "min_records", "convert_units"):
+            if key in changes and changes[key] is not None:
+                setattr(row, key, changes[key])
+        if payload.kpis is not None:
+            row.kpis_json = list(payload.kpis)
+        if payload.cohort is not None:
+            row.cohort_json = payload.cohort.model_dump(mode="json")
+        await self.session.flush()
+        return row
+
+    async def delete_benchmark_set(self, set_id: uuid.UUID, *, owner_user_id: uuid.UUID | None) -> bool:
+        """Delete a set the caller owns; ``False`` for any other set."""
+        row = await self.repo.get_benchmark_set(set_id)
+        if row is None or owner_user_id is None or row.owner_user_id != owner_user_id:
+            return False
+        await self.repo.delete_benchmark_set(row)
+        return True
 
     # ── Saved Filters ─────────────────────────────────────────────
 

@@ -566,19 +566,70 @@ class ReportRunRead(BaseModel):
 # ── Cross-project performance benchmark ────────────────────────────────
 
 
-class PerformanceBenchmarkRequest(BaseModel):
-    """One KPI, read per project over a cohort.
+#: The statistics a benchmark may lead with; see ``performance.headline``.
+BENCHMARK_STATISTICS: tuple[str, ...] = ("weighted", "mean", "median")
+#: Who sees a benchmark set: its owner only, or everyone who reads KPIs.
+BENCHMARK_SET_SCOPES: tuple[str, ...] = ("personal", "shared")
 
-    Exactly one of ``kpi`` (a preset id or a stored custom KPI code) and
-    ``spec`` (a whitelisted spec, validated like ``POST /kpis``). An empty
-    ``project_ids`` means every project the caller can open.
+_MAX_COHORT_VALUES = 50
+_MAX_ROW_FILTERS = 10
+
+
+def _clean_values(value: list[str]) -> list[str]:
+    """Trim, drop blanks and duplicates, keep order; refuse an over-long value."""
+    out: list[str] = []
+    for item in value:
+        text = str(item).strip()
+        if not text:
+            continue
+        if len(text) > 255:
+            raise ValueError("a filter value is at most 255 characters")
+        if text not in out:
+            out.append(text)
+    return out
+
+
+def _check_name(value: str) -> str:
+    text = value.strip()
+    if not text:
+        raise ValueError("name must not be blank")
+    return text
+
+
+def _check_choice(value: str, allowed: tuple[str, ...], name: str) -> str:
+    if value not in allowed:
+        raise ValueError(f"{name} must be one of {', '.join(allowed)}")
+    return value
+
+
+def _check_kpis(value: list[str]) -> list[str]:
+    out = _clean_values(value)
+    if not out:
+        raise ValueError("name at least one KPI")
+    if any(len(k) > 100 for k in out):
+        raise ValueError("a KPI id is at most 100 characters")
+    return out
+
+
+class BenchmarkCohort(BaseModel):
+    """Which projects and which rows a benchmark reads.
+
+    Every list narrows: a project must be in ``project_ids`` (when given) AND
+    have one of the ``clients`` AND one of the ``regions`` AND one of the
+    ``project_types``. ``row_filters`` are whitelisted KPI filters a row must
+    pass, typically ``{"field": "classification.din276", "op": "eq",
+    "value": "330"}``; they are checked against each KPI's entity when the set
+    is saved. The result is always intersected with the projects the reader
+    may open.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     project_ids: list[UUID] = Field(default_factory=list, max_length=500)
-    kpi: str | None = Field(default=None, min_length=1, max_length=100)
-    spec: dict[str, Any] | None = None
+    clients: list[str] = Field(default_factory=list, max_length=_MAX_COHORT_VALUES)
+    regions: list[str] = Field(default_factory=list, max_length=_MAX_COHORT_VALUES)
+    project_types: list[str] = Field(default_factory=list, max_length=_MAX_COHORT_VALUES)
+    row_filters: list[dict[str, Any]] = Field(default_factory=list, max_length=_MAX_ROW_FILTERS)
     period_start: date | None = None
     period_end: date | None = None
 
@@ -587,12 +638,49 @@ class PerformanceBenchmarkRequest(BaseModel):
     def _dedupe(cls, value: list[UUID]) -> list[UUID]:
         return list(dict.fromkeys(value))
 
+    @field_validator("clients", "regions", "project_types")
+    @classmethod
+    def _clean(cls, value: list[str]) -> list[str]:
+        return _clean_values(value)
+
+    @model_validator(mode="after")
+    def _period_in_order(self) -> BenchmarkCohort:
+        if self.period_start and self.period_end and self.period_start > self.period_end:
+            raise ValueError("period_start must not be after period_end")
+        return self
+
+
+class PerformanceBenchmarkRequest(BenchmarkCohort):
+    """One KPI, read per project over a cohort.
+
+    Exactly one of ``kpi`` (a preset id or a stored custom KPI code) and
+    ``spec`` (a whitelisted spec, validated like ``POST /kpis``). An empty
+    ``project_ids`` means every project the caller can open, narrowed by the
+    other cohort filters.
+
+    ``convert_units`` merges readings in compatible units (m2 and ft2) into
+    one group and lists each conversion; off, every unit is its own group.
+    ``min_projects`` and ``min_records`` mark a group with less evidence as
+    not a reliable benchmark; ``statistic`` picks the figure each group leads
+    with.
+    """
+
+    kpi: str | None = Field(default=None, min_length=1, max_length=100)
+    spec: dict[str, Any] | None = None
+    convert_units: bool = False
+    min_projects: int = Field(default=0, ge=0, le=500)
+    min_records: int = Field(default=0, ge=0, le=1_000_000)
+    statistic: str = "weighted"
+
+    @field_validator("statistic")
+    @classmethod
+    def _known_statistic(cls, value: str) -> str:
+        return _check_choice(value, BENCHMARK_STATISTICS, "statistic")
+
     @model_validator(mode="after")
     def _one_kpi(self) -> PerformanceBenchmarkRequest:
         if (self.kpi is None) == (self.spec is None):
             raise ValueError("name exactly one of 'kpi' or 'spec'")
-        if self.period_start and self.period_end and self.period_start > self.period_end:
-            raise ValueError("period_start must not be after period_end")
         return self
 
 
@@ -603,6 +691,8 @@ class PerformanceProjectRow(BaseModel):
     denominator: Decimal | None = None
     records: int = 0
     unavailable_reason: str | None = None
+    #: Units this project's rows were converted from to land in the group.
+    converted_from: list[str] = Field(default_factory=list)
 
 
 class PerformanceBenchmarkFigures(BaseModel):
@@ -611,6 +701,8 @@ class PerformanceBenchmarkFigures(BaseModel):
     #: with a reason for a sum, count, min or max.
     weighted: Decimal | None
     weighted_unavailable_reason: str | None = None
+    #: Arithmetic mean of the per-project values: every project counts once.
+    mean: Decimal | None = None
     median: Decimal | None
     p25: Decimal | None
     p75: Decimal | None
@@ -622,6 +714,15 @@ class PerformanceEvidence(BaseModel):
     projects_with_data: int
     projects_with_value: int
     records: int
+    records_with_value: int = 0
+
+
+class PerformanceConversion(BaseModel):
+    """``1 from_unit = factor to_unit``, applied to land rows in this group."""
+
+    from_unit: str
+    to_unit: str
+    factor: Decimal
 
 
 class PerformanceGroup(BaseModel):
@@ -632,6 +733,17 @@ class PerformanceGroup(BaseModel):
     evidence: PerformanceEvidence
     #: Projects with a value in this group over projects selected.
     coverage: Decimal
+    conversions: list[PerformanceConversion] = Field(default_factory=list)
+    #: The figure this group leads with, and which statistic it is. The
+    #: statistic can differ from the one asked for when that one does not
+    #: exist for the KPI (a sum has no weighted figure); the label follows
+    #: what was delivered.
+    headline: Decimal | None = None
+    headline_statistic: str = "weighted"
+    #: False when the group misses ``min_projects`` or ``min_records``; the
+    #: figures are still served, but are not to be read as a benchmark.
+    sufficient: bool = True
+    shortfall: list[str] = Field(default_factory=list)
 
 
 class PerformanceProjectLabel(BaseModel):
@@ -647,11 +759,195 @@ class PerformanceBenchmarkResponse(BaseModel):
     projects_selected: int
     projects: list[PerformanceProjectLabel]
     groups: list[PerformanceGroup]
+    convert_units: bool = False
+    min_projects: int = 0
+    min_records: int = 0
+    statistic: str = "weighted"
 
 
 class PerformancePreset(BaseModel):
     key: str
     spec: dict[str, Any]
+
+
+class PerformanceCohortOptions(BaseModel):
+    """Filter values present on the projects the caller may open."""
+
+    clients: list[str] = Field(default_factory=list)
+    regions: list[str] = Field(default_factory=list)
+    project_types: list[str] = Field(default_factory=list)
+
+
+class BenchmarkSetBase(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(..., min_length=1, max_length=255)
+    description: str = Field(default="", max_length=4000)
+    scope: str = "personal"
+    kpis: list[str] = Field(..., min_length=1, max_length=8)
+    cohort: BenchmarkCohort = Field(default_factory=BenchmarkCohort)
+    statistic: str = "weighted"
+    min_projects: int = Field(default=3, ge=0, le=500)
+    min_records: int = Field(default=0, ge=0, le=1_000_000)
+    convert_units: bool = True
+
+    @field_validator("name")
+    @classmethod
+    def _name(cls, value: str) -> str:
+        return _check_name(value)
+
+    @field_validator("scope")
+    @classmethod
+    def _scope(cls, value: str) -> str:
+        return _check_choice(value, BENCHMARK_SET_SCOPES, "scope")
+
+    @field_validator("statistic")
+    @classmethod
+    def _statistic(cls, value: str) -> str:
+        return _check_choice(value, BENCHMARK_STATISTICS, "statistic")
+
+    @field_validator("kpis")
+    @classmethod
+    def _kpis(cls, value: list[str]) -> list[str]:
+        return _check_kpis(value)
+
+
+class BenchmarkSetCreate(BenchmarkSetBase):
+    """A new benchmark set. Its KPIs and row filters are checked on save."""
+
+
+class BenchmarkSetUpdate(BaseModel):
+    """A partial edit; only the owner may make it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=4000)
+    scope: str | None = None
+    kpis: list[str] | None = Field(default=None, min_length=1, max_length=8)
+    cohort: BenchmarkCohort | None = None
+    statistic: str | None = None
+    min_projects: int | None = Field(default=None, ge=0, le=500)
+    min_records: int | None = Field(default=None, ge=0, le=1_000_000)
+    convert_units: bool | None = None
+
+    @model_validator(mode="after")
+    def _same_rules(self) -> BenchmarkSetUpdate:
+        # One rule set for create and edit: re-run the base validators on
+        # whatever this edit carries.
+        if self.name is not None:
+            self.name = _check_name(self.name)
+        if self.scope is not None:
+            _check_choice(self.scope, BENCHMARK_SET_SCOPES, "scope")
+        if self.statistic is not None:
+            _check_choice(self.statistic, BENCHMARK_STATISTICS, "statistic")
+        if self.kpis is not None:
+            self.kpis = _check_kpis(self.kpis)
+        return self
+
+
+class BenchmarkSetRead(BaseModel):
+    id: UUID
+    name: str
+    description: str
+    owner_user_id: UUID | None = None
+    scope: str
+    kpis: list[str]
+    cohort: BenchmarkCohort
+    statistic: str
+    min_projects: int
+    min_records: int
+    convert_units: bool
+    #: Whether the caller may edit or delete it.
+    is_owner: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+
+class BenchmarkSetPage(BaseModel):
+    """One page of the benchmark sets a caller sees, ordered by name."""
+
+    items: list[BenchmarkSetRead]
+    total: int
+    offset: int
+    limit: int
+
+
+class BenchmarkSetEvaluateRequest(BaseModel):
+    """Which of the set's KPIs to read; the first when omitted."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kpi: str | None = Field(default=None, min_length=1, max_length=100)
+
+
+class PerformanceCheckRequest(BaseModel):
+    """Where an estimate sits against a benchmark set's history.
+
+    Either a ``value`` in ``unit`` and ``currency`` typed by the estimator,
+    or a ``boq_position_id`` whose own estimate is read (its unit rate, or
+    the labour hours per unit of its resource split). Nothing is written.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    kpi: str | None = Field(default=None, min_length=1, max_length=100)
+    value: Decimal | None = Field(default=None, gt=0, max_digits=24, decimal_places=8)
+    unit: str | None = Field(default=None, max_length=30)
+    currency: str | None = Field(default=None, max_length=10)
+    boq_position_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def _one_source(self) -> PerformanceCheckRequest:
+        if (self.value is None) == (self.boq_position_id is None):
+            raise ValueError("give exactly one of 'value' or 'boq_position_id'")
+        return self
+
+
+class PerformanceAdHocCheckRequest(PerformanceBenchmarkRequest):
+    """A check against a cohort described in the request rather than a saved set.
+
+    Same cohort, KPI and reading options as ``POST /performance/benchmark``,
+    plus the estimate: a ``value`` in ``unit`` and ``currency``, or a
+    ``boq_position_id``. Nothing is written.
+    """
+
+    value: Decimal | None = Field(default=None, gt=0, max_digits=24, decimal_places=8)
+    unit: str | None = Field(default=None, max_length=30)
+    currency: str | None = Field(default=None, max_length=10)
+    boq_position_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def _one_source(self) -> PerformanceAdHocCheckRequest:
+        if (self.value is None) == (self.boq_position_id is None):
+            raise ValueError("give exactly one of 'value' or 'boq_position_id'")
+        return self
+
+
+class PerformanceCheckResponse(BaseModel):
+    """A suggestion for a person to weigh; nothing was changed by it.
+
+    ``status`` is ``ok`` or why there is no reading (``no_comparable_group``,
+    ``kpi_not_per_unit``, ``no_estimate_value``). ``value`` is the estimate in
+    the group's unit, ``input_value`` and ``input_unit`` what was checked, and
+    ``unit_factor`` the conversion between them when one was applied.
+    """
+
+    kpi: str
+    status: str
+    input_value: Decimal | None = None
+    input_unit: str | None = None
+    input_currency: str | None = None
+    value: Decimal | None = None
+    unit_factor: Decimal | None = None
+    group: PerformanceGroup | None = None
+    headline: Decimal | None = None
+    statistic: str | None = None
+    variance: Decimal | None = None
+    percentile_rank: Decimal | None = None
+    band: str | None = None
+    confidence: str | None = None
+    shortfall: list[str] = Field(default_factory=list)
 
 
 __all__ = [
@@ -680,9 +976,22 @@ __all__ = [
     "KPI_CATEGORIES",
     "KPI_UNITS",
     "OUTPUT_FORMATS",
+    "BENCHMARK_SET_SCOPES",
+    "BENCHMARK_STATISTICS",
+    "BenchmarkCohort",
+    "BenchmarkSetCreate",
+    "BenchmarkSetEvaluateRequest",
+    "BenchmarkSetPage",
+    "BenchmarkSetRead",
+    "BenchmarkSetUpdate",
+    "PerformanceAdHocCheckRequest",
     "PerformanceBenchmarkFigures",
     "PerformanceBenchmarkRequest",
     "PerformanceBenchmarkResponse",
+    "PerformanceCheckRequest",
+    "PerformanceCheckResponse",
+    "PerformanceCohortOptions",
+    "PerformanceConversion",
     "PerformanceEvidence",
     "PerformanceGroup",
     "PerformancePreset",

@@ -1996,6 +1996,10 @@ class ProjectReading:
     numerator: Decimal | None = None
     denominator: Decimal | None = None
     unavailable_reason: str | None = None
+    #: The units this reading was converted from to land in its group, empty
+    #: when it was read in the group's own unit. Set only by the benchmark's
+    #: unit conversion, so a reader can always tell a converted figure apart.
+    converted_from: list[str] = field(default_factory=list)
 
 
 async def evaluate_spec_by_project(

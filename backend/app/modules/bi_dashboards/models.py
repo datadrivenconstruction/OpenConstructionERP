@@ -692,8 +692,57 @@ class KPIValue(Base):
     )
 
 
+class BenchmarkSet(Base):
+    """A saved, named benchmark: which projects, which KPIs, how to read them.
+
+    The definition only. Figures are always computed fresh, over the cohort
+    intersected with what the person reading may open, so a set shared with
+    a colleague who cannot see half its projects shows them the other half
+    and nothing about the rest.
+
+    ``cohort_json`` holds the population: explicit ``project_ids``, the
+    ``clients``, ``regions`` and ``project_types`` a project must match, the
+    ``row_filters`` a position must pass (whitelisted KPI filters such as a
+    classification code) and an optional ``period_start`` / ``period_end``.
+    Its shape is validated by ``BenchmarkCohort`` on every write.
+    """
+
+    __tablename__ = "oe_bi_dashboards_benchmark_set"
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    # No ORM FK to oe_users_user - keep the consumer module decoupled
+    owner_user_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    #: ``personal`` (only the owner sees it) or ``shared`` (everyone who may
+    #: read KPIs sees it; only the owner edits it).
+    scope: Mapped[str] = mapped_column(String(16), nullable=False, default="personal", server_default="personal")
+    #: Preset ids or custom KPI codes, in the order the set shows them.
+    kpis_json: Mapped[list] = mapped_column(  # type: ignore[type-arg]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    cohort_json: Mapped[dict] = mapped_column(  # type: ignore[type-arg]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    #: The figure the set leads with: ``weighted`` (sum over sum), ``mean``
+    #: (every project counts once) or ``median``.
+    statistic: Mapped[str] = mapped_column(String(16), nullable=False, default="weighted", server_default="weighted")
+    #: Below either minimum a group is shown, but marked as not enough
+    #: evidence to be a benchmark.
+    min_projects: Mapped[int] = mapped_column(Integer, nullable=False, default=3, server_default="3")
+    min_records: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    #: Convert readings in compatible units (m2 and ft2) into one group.
+    convert_units: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+
+
 __all__ = [
     "AlertRule",
+    "BenchmarkSet",
     "Dashboard",
     "DashboardWidget",
     "DashboardWidgetSnapshot",

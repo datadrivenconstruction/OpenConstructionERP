@@ -14,6 +14,7 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from app.modules.bi_dashboards.models import (
     AlertRule,
+    BenchmarkSet,
     Dashboard,
     DashboardWidget,
     DashboardWidgetSnapshot,
@@ -797,6 +798,28 @@ class BIDashboardsRepository:
         self.session.add(kv)
         await self.session.flush()
         return kv
+
+    # ── Benchmark sets ──────────────────────────────────────────────
+
+    async def list_benchmark_sets(self, *, viewer_user_id: uuid.UUID | None) -> list[BenchmarkSet]:
+        """The benchmark sets a viewer sees: their own and every shared one, by name."""
+        stmt = select(BenchmarkSet).order_by(BenchmarkSet.name.asc(), BenchmarkSet.created_at.asc())
+        visible = BenchmarkSet.scope == "shared"
+        if viewer_user_id is not None:
+            visible = or_(visible, BenchmarkSet.owner_user_id == viewer_user_id)
+        return list((await self.session.execute(stmt.where(visible))).scalars().all())
+
+    async def get_benchmark_set(self, set_id: uuid.UUID) -> BenchmarkSet | None:
+        return await self.session.get(BenchmarkSet, set_id)
+
+    async def create_benchmark_set(self, row: BenchmarkSet) -> BenchmarkSet:
+        self.session.add(row)
+        await self.session.flush()
+        return row
+
+    async def delete_benchmark_set(self, row: BenchmarkSet) -> None:
+        await self.session.delete(row)
+        await self.session.flush()
 
 
 __all__ = ["BIDashboardsRepository", "project_scope_clause"]
