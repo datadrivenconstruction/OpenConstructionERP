@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from decimal import ROUND_DOWN, Decimal
+from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
 
 ZERO = Decimal("0")
 CENT = Decimal("0.01")
@@ -124,7 +124,8 @@ def split_amount(total: object, fractions: Sequence[Decimal]) -> list[Decimal]:
     total (a credit position) is split as its absolute value and the sign put
     back, so a credit is cut the same way a charge is.
     """
-    amount = _dec(total).quantize(CENT)
+    # Half away from zero, as the bill and the browser preview round a total to the cent.
+    amount = _dec(total).quantize(CENT, rounding=ROUND_HALF_UP)
     if not fractions:
         return []
     sign = -1 if amount < ZERO else 1

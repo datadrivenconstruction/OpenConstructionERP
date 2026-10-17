@@ -756,6 +756,8 @@ class CostStructureService:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_missing", "Cost line not found")
                 if line.project_id != project_id:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_not_in_project", "Cost line of another project")
+                if (line.status or "") == "archived":
+                    raise _problem(status.HTTP_400_BAD_REQUEST, "target_missing", "Cost line not found")
                 if line.boq_id is not None and line.boq_id != pos.boq_id:
                     raise _problem(
                         status.HTTP_400_BAD_REQUEST, "line_of_other_bill", "This cost line carries another bill"
@@ -767,6 +769,12 @@ class CostStructureService:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_missing", "Account not found")
                 if account.project_id != project_id:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_not_in_project", "Account of another project")
+                # A heading or a closed account takes no postings: money put there would only
+                # land in the invalid-account suspense bucket.
+                if not account.is_leaf_postable or (account.status or "") == "closed":
+                    raise _problem(
+                        status.HTTP_400_BAD_REQUEST, "account_not_postable", "This account takes no postings"
+                    )
                 if own_line is not None and own_line.control_account_id == account.id:
                     targets.append((own_line.id, row.share))
                 else:
@@ -982,9 +990,16 @@ class CostStructureService:
             }
             if rows:
                 mode = rows[0].mode
-                views = [AllocationView(str(r.position_id), str(r.cost_line_id), r.mode, r.share) for r in rows]
+                # The cents are cut in the order line_contributions uses (by line id), so the
+                # amount the bill shows on each share is the amount that line's estimate carries,
+                # also when a remainder cent falls on a tie. Display stays sorted by code.
+                in_line_order = sorted(rows, key=lambda r: str(r.cost_line_id))
+                views = [
+                    AllocationView(str(r.position_id), str(r.cost_line_id), r.mode, r.share) for r in in_line_order
+                ]
                 fractions = share_fractions(views, qty)
                 amounts = split_amount(total, fractions)
+                cut = {r.cost_line_id: (f, a) for r, f, a in zip(in_line_order, fractions, amounts, strict=True)}
                 check = check_shares(mode, [r.share for r in rows], qty)
                 mixed = len({r.mode for r in rows}) > 1
                 problem = None
@@ -996,10 +1011,7 @@ class CostStructureService:
                     PositionAllocationOut(
                         **base,
                         mode="quantity" if mode == MODE_QUANTITY else "percent",
-                        rows=[
-                            _row(r.cost_line_id, _dec(r.share), f, a)
-                            for r, f, a in zip(rows, fractions, amounts, strict=True)
-                        ],
+                        rows=[_row(r.cost_line_id, _dec(r.share), *cut[r.cost_line_id]) for r in rows],
                         valid=problem is None,
                         problem=problem,
                         share_total=check.total,

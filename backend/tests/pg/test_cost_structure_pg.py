@@ -453,3 +453,103 @@ async def test_a_project_without_a_standard_parks_every_position(pg_session) -> 
     boq_id, _ = await _bill(pg_session, project_id, SPECS[:3])
     result = await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
     assert (result.standard, result.accounts_created, result.positions_in_suspense) == ("", 0, 3)
+
+
+async def test_the_bill_shows_each_share_the_cent_its_cost_line_carries(pg_session) -> None:
+    """A remainder cent on a tie lands on the same line in the bill's view and in the line estimate."""
+    from sqlalchemy import update
+
+    from app.modules.costmodel.models import ControlAccount, CostLine
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_schemas import AllocationRowIn, PositionAllocationRequest
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(
+        pg_session,
+        project_id,
+        [
+            ("01", "m3", "1", "100.01", "100.01", {"din276": "331"}),
+            ("02", "kg", "1", "5", "5.00", {"din276": "340"}),
+        ],
+    )
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+    own = await _line_of(pg_session, ids[0])
+    own_account = own.control_account_id
+    acct_340 = (
+        await pg_session.execute(
+            ControlAccount.__table__.select().where(
+                ControlAccount.project_id == project_id, ControlAccount.code == "340"
+            )
+        )
+    ).one()
+    service = CostStructureService(pg_session)
+    out = await service.set_allocation(
+        ids[0],
+        PositionAllocationRequest(
+            mode="percent",
+            rows=[
+                AllocationRowIn(control_account_id=own_account, share=D("50")),
+                AllocationRowIn(control_account_id=acct_340.id, share=D("50")),
+            ],
+        ),
+        "tester",
+    )
+    line_ids = sorted((r.cost_line_id for r in out.rows), key=str)
+    # Make the code order the reverse of the id order, so the two orders a cut could follow disagree.
+    for code, line_id in zip(("Z-LAST", "A-FIRST"), line_ids, strict=True):
+        await pg_session.execute(update(CostLine).where(CostLine.id == line_id).values(code=code))
+    await service.recompute_lines(set(line_ids))
+    await pg_session.flush()
+    pg_session.expire_all()
+
+    shown = next(p for p in (await service.boq_allocations(boq_id)).positions if p.position_id == ids[0])
+    assert sum((r.amount for r in shown.rows), D("0")) == D("100.01")
+    estimates = {
+        r.id: D(str(r.estimate_amount))
+        for r in (await pg_session.execute(CostLine.__table__.select().where(CostLine.id.in_(line_ids)))).all()
+    }
+    assert {r.cost_line_id: r.amount for r in shown.rows} == estimates
+    assert sorted(estimates.values()) == [D("50.00"), D("50.01")]
+
+
+async def test_a_share_on_a_heading_or_closed_account_is_refused(pg_session) -> None:
+    from sqlalchemy import update
+
+    from app.modules.costmodel.models import ControlAccount
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_schemas import AllocationRowIn, PositionAllocationRequest
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(pg_session, project_id, SPECS[:3])
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+    accounts = {
+        r.code: r.id
+        for r in (
+            await pg_session.execute(ControlAccount.__table__.select().where(ControlAccount.project_id == project_id))
+        ).all()
+    }
+    await pg_session.execute(
+        update(ControlAccount).where(ControlAccount.id == accounts["300"]).values(is_leaf_postable=False)
+    )
+    await pg_session.execute(update(ControlAccount).where(ControlAccount.id == accounts["340"]).values(status="closed"))
+    await pg_session.flush()
+    pg_session.expire_all()
+
+    service = CostStructureService(pg_session)
+    for target in ("300", "340"):
+        with pytest.raises(HTTPException) as err:
+            await service.set_allocation(
+                ids[0],
+                PositionAllocationRequest(
+                    mode="percent",
+                    rows=[
+                        AllocationRowIn(control_account_id=accounts["331"], share=D("50")),
+                        AllocationRowIn(control_account_id=accounts[target], share=D("50")),
+                    ],
+                ),
+                "tester",
+            )
+        assert err.value.status_code == 400
+        assert err.value.detail["problem"] == "account_not_postable"
