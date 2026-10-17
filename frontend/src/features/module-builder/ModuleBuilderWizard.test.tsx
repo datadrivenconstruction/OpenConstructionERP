@@ -249,15 +249,26 @@ describe('the first screen', () => {
     expect(screen.queryByTestId('module-builder-draft')).toBeNull();
     expect(screen.queryByTestId('module-builder-description')).toBeNull();
     expect(screen.getByTestId('module-builder-template-concrete_pours')).toBeTruthy();
+    // With no sentence box above them, the templates are not an "or".
+    expect(screen.getByText('Start from a template')).toBeTruthy();
+    expect(screen.queryByText('Or start from a template')).toBeNull();
 
     await user.click(screen.getByTestId('module-builder-scratch'));
     expect(await screen.findByTestId('module-builder-name')).toBeTruthy();
   });
 
-  it('offers all six templates', async () => {
+  it('offers all eight templates', async () => {
     renderWizard();
     await screen.findByTestId('module-builder-template-concrete_pours');
-    for (const id of ['work_permits', 'site_measurements', 'material_deliveries', 'site_diary', 'safety_briefings']) {
+    for (const id of [
+      'work_permits',
+      'site_measurements',
+      'material_deliveries',
+      'site_diary',
+      'safety_briefings',
+      'site_visitors',
+      'waste_disposal',
+    ]) {
       expect(screen.getByTestId(`module-builder-template-${id}`)).toBeTruthy();
     }
   });
@@ -628,6 +639,38 @@ describe('the create screen', () => {
     expect(install).not.toHaveBeenCalled();
   });
 
+  it('says in plain words what Create does before anything is written', async () => {
+    const user = userEvent.setup();
+    renderWizard();
+    await toCreate(user);
+    const effects = screen.getByTestId('module-builder-install-effects');
+    for (const id of ['table', 'screen', 'checks', 'permissions', 'undo']) {
+      expect(within(effects).getByTestId(`module-builder-install-effect-${id}`)).toBeTruthy();
+    }
+    expect(within(effects).getByText(/new table in the database for Pours/)).toBeTruthy();
+    // It claims nothing the platform does not do: built modules are not
+    // added to the side menu, so the old "appears in the menu" line is gone.
+    expect(screen.queryByText(/appears in the menu/i)).toBeNull();
+  });
+
+  it('lets every generated file be read before it is written', async () => {
+    preview.mockResolvedValue({
+      ...PREVIEW,
+      files: [{ path: 'models.py', lines: 2, content: 'class Pour:\n    pass' }],
+    });
+    const user = userEvent.setup();
+    renderWizard();
+    await toCreate(user);
+    await user.click(screen.getByTestId('module-builder-what-created'));
+    expect(screen.queryByTestId('module-builder-file-content-models.py')).toBeNull();
+    const row = screen.getByTestId('module-builder-file-models.py');
+    await user.click(row);
+    expect(row.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByTestId('module-builder-file-content-models.py').textContent).toContain('class Pour:');
+    await user.click(row);
+    expect(screen.queryByTestId('module-builder-file-content-models.py')).toBeNull();
+  });
+
   it('sends the old spec shape to a server from before features', async () => {
     const user = userEvent.setup();
     renderWizard();
@@ -665,6 +708,7 @@ describe('the create screen', () => {
     await screen.findByTestId('module-builder-done');
     expect(install).toHaveBeenCalledWith(PREVIEW.spec, 'issued-for-this-preview');
     expect(screen.getByText(/ready to use/i)).toBeTruthy();
+    expect(screen.getByTestId('module-builder-done-next').textContent).toMatch(/add the first entry/);
 
     await user.click(screen.getByTestId('module-builder-open'));
     expect(navigate).toHaveBeenCalledWith('/modules/pour_register');

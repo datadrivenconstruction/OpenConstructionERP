@@ -25,7 +25,18 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowRight, Boxes, ExternalLink, Sparkles, Trash2, Wand2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Boxes,
+  Columns3,
+  ExternalLink,
+  Puzzle,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+  Wand2,
+} from 'lucide-react';
 
 import {
   Badge,
@@ -127,8 +138,8 @@ export function ModuleBuilderPage() {
     <div className="space-y-4">
       <PageHeader
         srTitle={t('module_builder.title', { defaultValue: 'Module builder' })}
-        subtitle={t('module_builder.page_subtitle', {
-          defaultValue: 'Modules built on this instance, and where they live.',
+        subtitle={t('module_builder.page_subtitle_v2', {
+          defaultValue: 'Create your own registers for what the site keeps track of, without writing code.',
         })}
         actions={
           isAdmin ? (
@@ -183,10 +194,10 @@ export function ModuleBuilderPage() {
 
       <CollapsibleSection
         storageKey="module_builder.how"
-        title={t('module_builder.title', { defaultValue: 'Module builder' })}
+        title={t('module_builder.how_title', { defaultValue: 'How the module builder works' })}
         icon={<Boxes size={15} strokeWidth={1.9} />}
-        subtitle={t('module_builder.page_subtitle', {
-          defaultValue: 'Modules built on this instance, and where they live.',
+        subtitle={t('module_builder.how_subtitle', {
+          defaultValue: 'What a module is, and the five steps from an idea to a working register.',
         })}
       >
         <p className="text-sm text-content-secondary">
@@ -195,30 +206,9 @@ export function ModuleBuilderPage() {
               'Build your own register for anything the site keeps track of, such as pours, permits, deliveries or briefings. It works like every other part of the platform, with its own list, form and checks, and it is ready the moment you create it.',
           })}
         </p>
-        <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-content-secondary">
-          <li>
-            {t('module_builder.how_1_v2', {
-              defaultValue: 'Say what you want to keep track of, in a sentence or by picking a template.',
-            })}
-          </li>
-          <li>
-            {t('module_builder.how_2_v2', {
-              defaultValue:
-                'Look over what each entry holds and switch on the extras you want, such as stages, reminders or export.',
-            })}
-          </li>
-          <li>
-            {t('module_builder.how_3_v2', {
-              defaultValue: 'Create it. It appears in the menu straight away, with no restart.',
-            })}
-          </li>
-          <li>
-            {t('module_builder.how_4_v2', {
-              defaultValue: 'It belongs to this instance, so a platform upgrade leaves it and its entries alone.',
-            })}
-          </li>
-        </ol>
-        <p className="mt-2 text-sm text-content-secondary">
+        <BuilderConcepts />
+        <BuilderSteps />
+        <p className="mt-3 text-sm text-content-secondary">
           {t('module_builder.how_ai_v2', {
             defaultValue:
               'Where an AI is connected, it only suggests the fields, the checks and the extras. Nothing is added until you switch it on, and nothing is created until you press Create module.',
@@ -265,10 +255,17 @@ export function ModuleBuilderPage() {
         <EmptyState
           icon={<Boxes size={28} strokeWidth={1.5} />}
           title={t('module_builder.empty_title', { defaultValue: 'Nothing has been built here yet' })}
-          description={t('module_builder.empty_hint', {
-            defaultValue:
-              'A module built here is a register the platform did not ship: whatever this project actually records.',
-          })}
+          description={
+            isAdmin
+              ? t('module_builder.empty_hint_admin', {
+                  defaultValue:
+                    'Start from a template such as a site diary, a visitor log or a waste log, change what you need and create it. It takes about two minutes.',
+                })
+              : t('module_builder.empty_hint_reader', {
+                  defaultValue:
+                    'Only an administrator can create a module. Ask yours for the register your site needs, and it will appear here.',
+                })
+          }
           action={
             isAdmin
               ? {
@@ -425,6 +422,127 @@ export function ModuleBuilderPage() {
 
       <ModuleBuilderWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </div>
+  );
+}
+
+/**
+ * The four words the wizard uses, each said once in plain terms. A reader who
+ * meets "function" or "check" on the next screen has already been told what
+ * it means here, rather than guessing from the toggle next to it.
+ */
+function BuilderConcepts() {
+  const { t } = useTranslation();
+  const concepts = [
+    {
+      id: 'module',
+      icon: <Boxes size={15} strokeWidth={1.9} />,
+      title: t('module_builder.concept_module_title', { defaultValue: 'Module' }),
+      text: t('module_builder.concept_module_text', {
+        defaultValue:
+          'A register for one kind of entry, such as pours or site visits, with its own page, list, form and database table.',
+      }),
+    },
+    {
+      id: 'field',
+      icon: <Columns3 size={15} strokeWidth={1.9} />,
+      title: t('module_builder.concept_field_title', { defaultValue: 'Field' }),
+      text: t('module_builder.concept_field_text', {
+        defaultValue:
+          'One piece of information every entry holds: a date, a number with its unit, a choice from a list, or a link to a contact or a document.',
+      }),
+    },
+    {
+      id: 'check',
+      icon: <ShieldCheck size={15} strokeWidth={1.9} />,
+      title: t('module_builder.concept_check_title', { defaultValue: 'Check' }),
+      text: t('module_builder.concept_check_text', {
+        defaultValue:
+          'A rule tested every time an entry is saved, for example that a date is not in the future. Every module has at least one.',
+      }),
+    },
+    {
+      id: 'function',
+      icon: <Puzzle size={15} strokeWidth={1.9} />,
+      title: t('module_builder.concept_function_title', { defaultValue: 'Function' }),
+      text: t('module_builder.concept_function_text', {
+        defaultValue:
+          'An extra a module can carry on top of its fields: stages with a status, a reminder before a due date, Excel export or comments.',
+      }),
+    },
+  ];
+  return (
+    <ul className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4" data-testid="module-builder-concepts">
+      {concepts.map((concept) => (
+        <li
+          key={concept.id}
+          className="rounded-xl border border-border-light bg-surface-primary p-3"
+          data-testid={`module-builder-concept-${concept.id}`}
+        >
+          <p className="flex items-center gap-2 text-sm font-semibold text-content-primary">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-oe-blue-subtle text-oe-blue-text">
+              {concept.icon}
+            </span>
+            {concept.title}
+          </p>
+          <p className="mt-1.5 text-xs leading-relaxed text-content-secondary">{concept.text}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** The path through the wizard, in the order its screens come. */
+function BuilderSteps() {
+  const { t } = useTranslation();
+  const steps = [
+    {
+      title: t('module_builder.flow_describe_title', { defaultValue: 'Describe' }),
+      text: t('module_builder.flow_describe_text', {
+        defaultValue: 'Say what you track in a sentence when an AI is connected, pick a template, or start empty.',
+      }),
+    },
+    {
+      title: t('module_builder.flow_review_title', { defaultValue: 'Review the specification' }),
+      text: t('module_builder.flow_review_text', {
+        defaultValue:
+          'See the fields and checks, switch on the functions you want, and rename or add fields under Fine-tune.',
+      }),
+    },
+    {
+      title: t('module_builder.flow_read_title', { defaultValue: 'Read what will be created' }),
+      text: t('module_builder.flow_read_text', {
+        defaultValue:
+          'Before anything is written you see the table, the page, the checks, who may do what, and every generated file.',
+      }),
+    },
+    {
+      title: t('module_builder.flow_create_title', { defaultValue: 'Create' }),
+      text: t('module_builder.flow_create_text', {
+        defaultValue: 'Press Create module. It works at once, with no restart, and is listed below.',
+      }),
+    },
+    {
+      title: t('module_builder.flow_use_title', { defaultValue: 'Use and extend' }),
+      text: t('module_builder.flow_use_text', {
+        defaultValue:
+          'Add entries on its page. Add fields and functions later; entries already recorded stay as they are.',
+      }),
+    },
+  ];
+  return (
+    <ol className="mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5" data-testid="module-builder-steps">
+      {steps.map((step, i) => (
+        <li key={i} className="flex items-start gap-2.5">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-oe-blue text-[11px] font-semibold text-white">
+            {i + 1}
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-medium text-content-primary">{step.title}</span>
+            <span className="mt-0.5 block text-xs leading-relaxed text-content-tertiary">{step.text}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
   );
 }
 

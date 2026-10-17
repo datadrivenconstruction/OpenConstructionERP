@@ -90,6 +90,39 @@ beforeEach(() => {
   useAuthStore.setState({ userRole: 'admin' });
 });
 
+describe('the explainer', () => {
+  it('says what a module, a field, a check and a function are, once each', async () => {
+    renderPage();
+    const concepts = await screen.findByTestId('module-builder-concepts');
+    for (const id of ['module', 'field', 'check', 'function']) {
+      expect(within(concepts).getByTestId(`module-builder-concept-${id}`)).toBeTruthy();
+    }
+  });
+
+  it('walks the five steps in the order the wizard takes them', async () => {
+    renderPage();
+    const steps = await screen.findByTestId('module-builder-steps');
+    const titles = within(steps)
+      .getAllByRole('listitem')
+      .map((li) => li.querySelector('span > span')?.textContent);
+    expect(titles).toEqual([
+      'Describe',
+      'Review the specification',
+      'Read what will be created',
+      'Create',
+      'Use and extend',
+    ]);
+    expect(screen.queryByText(/appears in the menu/i)).toBeNull();
+  });
+
+  it('tells a reader who cannot build why the list is empty', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    installed.mockResolvedValue({ items: [], total: 0, runtime_root: '/tmp' });
+    renderPage();
+    expect(await screen.findByText(/Only an administrator can create a module/)).toBeTruthy();
+  });
+});
+
 describe('the register', () => {
   it('lists what is installed and where it answers', async () => {
     renderPage();

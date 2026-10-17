@@ -125,7 +125,10 @@ export function DescribeScreen({
 
       <div>
         <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
-          {t('module_builder.templates_heading', { defaultValue: 'Or start from a template' })}
+          {/* "Or" only makes sense under a sentence box to choose instead of. */}
+          {assistantAvailable
+            ? t('module_builder.templates_heading', { defaultValue: 'Or start from a template' })
+            : t('module_builder.templates_heading_manual', { defaultValue: 'Start from a template' })}
         </p>
         <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
           {MODULE_TEMPLATES.map((template) => (

@@ -21,9 +21,11 @@ import {
   Layers,
   Link2,
   List,
+  Recycle,
   Ruler,
   Truck,
   Type,
+  UserCheck,
   type LucideIcon,
 } from 'lucide-react';
 import clsx from 'clsx';
@@ -77,8 +79,10 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   FileCheck,
   Ruler,
   Truck,
+  UserCheck,
   CloudSun,
   HardHat,
+  Recycle,
   Boxes,
 };
 
