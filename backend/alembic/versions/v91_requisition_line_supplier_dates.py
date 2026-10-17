@@ -20,8 +20,8 @@ The columns are additive and nullable, so the boot heal adds them on an install 
 ``alembic upgrade``; the data correction runs only here. Every step is inspector-guarded, so a database
 whose tables ``create_all`` already built reaches this revision and does nothing but the correction.
 
-Revision ID: v90_requisition_line_supplier_dates
-Revises: v89_costmodel_cost_control
+Revision ID: v91_requisition_line_supplier_dates
+Revises: v90_bi_benchmark_sets
 Create Date: 2026-10-17
 """
 
@@ -34,8 +34,8 @@ from alembic import op
 
 from app.database import GUID
 
-revision: str = "v90_requisition_line_supplier_dates"
-down_revision: str | Sequence[str] | None = "v89_costmodel_cost_control"
+revision: str = "v91_requisition_line_supplier_dates"
+down_revision: str | Sequence[str] | None = "v90_bi_benchmark_sets"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
