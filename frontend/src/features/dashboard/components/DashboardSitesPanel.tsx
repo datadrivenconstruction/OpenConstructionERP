@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { MapPin } from 'lucide-react';
+import { CloudSun, MapPin } from 'lucide-react';
 import { ProjectWeather } from '@/shared/ui/ProjectWeather/ProjectWeather';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { resolveProjectCoords, type ProjectPin } from './DashboardProjectsMap';
@@ -42,6 +42,7 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const weatherEnabled = useWidgetSettingsStore((s) => s.projectWeatherEnabled);
+  const toggleWeather = useWidgetSettingsStore((s) => s.toggleProjectWeather);
 
   const groups = useMemo(() => {
     const otherLabel = t('dashboard.sites_other', { defaultValue: 'Other locations' });
@@ -76,7 +77,26 @@ export function DashboardSitesPanel({ projects }: DashboardSitesPanelProps) {
         <span className="text-xs font-semibold text-content-primary">
           {t('dashboard.sites_title', { defaultValue: 'Sites & weather' })}
         </span>
-        <span className="text-[10px] tabular-nums text-content-tertiary">{groups.length}</span>
+        <span className="flex items-center gap-1.5">
+          {/* The forecast stays opt-in, but the panel is named after it, so the
+              switch has to live here too: without it the panel shows bare city
+              names and reads as broken. Clicking it is the consent. */}
+          <button
+            type="button"
+            onClick={toggleWeather}
+            aria-pressed={weatherEnabled}
+            title={t('widget_settings.toggle_weather', { defaultValue: 'Toggle weather forecast' })}
+            className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+              weatherEnabled
+                ? 'bg-oe-blue-subtle text-oe-blue-text'
+                : 'text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary'
+            }`}
+          >
+            <CloudSun size={11} />
+            {t('widget_settings.weather', { defaultValue: 'Weather' })}
+          </button>
+          <span className="text-[10px] tabular-nums text-content-tertiary">{groups.length}</span>
+        </span>
       </div>
       <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 overflow-hidden p-2">
         {cities.map(([city, rows]) => {
