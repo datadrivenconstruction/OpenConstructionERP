@@ -1547,16 +1547,24 @@ def _serialize_lien_waiver(entity: LienWaiver) -> LienWaiverResponse:
 async def list_lien_waivers(
     sub_id: uuid.UUID,
     session: SessionDep,
-    _user: CurrentUserId,
+    user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("subcontractors.read")),
 ) -> list[LienWaiverResponse]:
-    """List every lien waiver / W-9 / W-8 filed against a subcontractor.
+    """List the lien waivers / W-9 / W-8 filed against a subcontractor.
 
     Newest first so the most recent waiver wins on the dashboard. Returns
     an empty list when no waivers exist - the UI shows an empty state.
+
+    A waiver tied to a payment application carries that project's amount
+    and document, so it is listed only when the caller can open the
+    project, the same rule the dashboard applies to agreement figures.
+    Stand-alone W-9 / W-8 forms describe the firm and are always listed.
     """
     svc = SubcontractorService(session)
-    rows = await svc.lien_waivers.list_for_subcontractor(sub_id)
+    rows = await svc.lien_waivers.list_for_subcontractor(
+        sub_id,
+        visible_project_ids=await accessible_project_ids(session, user_id),
+    )
     return [_serialize_lien_waiver(r) for r in rows]
 
 

@@ -106,7 +106,9 @@ async def _gate_team_admin(
     What this adds is structural. ``test_idor_router_guards`` pins that every
     single-resource mutation resolves its parent project at the route, so a
     later refactor of the service cannot quietly become the only thing
-    standing between a caller and someone else's data.
+    standing between a caller and someone else's data. The team-scoped reads
+    call it for the same reason; despite the name it checks project access,
+    not ownership, so a plain member passes.
 
     A team id that names nothing and a team in someone else's project both
     answer "Team not found", so the id cannot be probed for existence.
@@ -147,16 +149,18 @@ async def list_entity_types(user_id: CurrentUserId) -> list[EntityTypeResponse]:
 @router.get("", response_model=list[TeamResponse], include_in_schema=False)
 async def list_teams_by_query(
     user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     include_inactive: bool = Query(default=False),
     service: TeamService = Depends(_get_service),
 ) -> list[TeamResponse]:
     """List teams for a project (query-param style), with counts.
 
-    IDOR-gated on the parent project inside the service: a caller may only
-    list teams of a project they own, admin, or belong to. Anything else is
-    404.
+    IDOR-gated on the parent project at the route and inside the service: a
+    caller may only list teams of a project they own, admin, or belong to.
+    Anything else is 404.
     """
+    await verify_project_access(project_id, str(user_id or ""), session)
     return await service.list_teams_detailed(
         project_id,
         actor_id=user_id,
@@ -169,10 +173,12 @@ async def list_teams_by_query(
 async def list_teams(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     include_inactive: bool = Query(default=False),
     service: TeamService = Depends(_get_service),
 ) -> list[TeamResponse]:
     """List teams for a project (path style). Same gate as the query form."""
+    await verify_project_access(project_id, str(user_id or ""), session)
     return await service.list_teams_detailed(
         project_id,
         actor_id=user_id,
@@ -245,6 +251,7 @@ async def delete_team(
 async def list_members(
     team_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: TeamService = Depends(_get_service),
 ) -> list[MembershipResponse]:
     """List members of a team, with email and display name resolved.
@@ -252,6 +259,7 @@ async def list_members(
     Read gate: project access. A team in a project the caller cannot reach
     answers 404.
     """
+    await _gate_team_admin(team_id, user_id, service, session)
     return await service.list_members_detailed(team_id, actor_id=user_id)
 
 
@@ -335,9 +343,11 @@ async def remove_member(
 async def list_team_visibility(
     team_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: TeamService = Depends(_get_service),
 ) -> list[EntityVisibilityResponse]:
     """The records restricted to this team (read gate: project access)."""
+    await _gate_team_admin(team_id, user_id, service, session)
     rows = await service.list_team_visibility(team_id, actor_id=user_id)
     return [EntityVisibilityResponse.model_validate(row) for row in rows]
 
@@ -401,6 +411,7 @@ async def describe_entity_visibility(
     entity_type: str,
     entity_id: str,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: TeamService = Depends(_get_service),
 ) -> EntityVisibilityState:
     """Who can currently see one record.
@@ -409,6 +420,7 @@ async def describe_entity_visibility(
     which teams, tells a project member nothing about a project they cannot
     already reach, and nothing about the record's contents.
     """
+    await verify_project_access(project_id, str(user_id or ""), session)
     return await service.describe_entity_visibility(
         project_id,
         entity_type,
@@ -458,10 +470,12 @@ async def set_entity_visibility(
 async def list_restricted_entities(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     entity_type: str | None = Query(default=None),
     service: TeamService = Depends(_get_service),
 ) -> list[RestrictedEntityRow]:
     """The project's restriction register: every record that is not open."""
+    await verify_project_access(project_id, str(user_id or ""), session)
     return await service.list_restricted_entities(
         project_id,
         entity_type=entity_type,
@@ -478,9 +492,11 @@ async def list_restricted_entities(
 async def get_access_matrix(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: TeamService = Depends(_get_service),
 ) -> AccessMatrixResponse:
     """Who on this project can still open the restricted records, and who cannot."""
+    await verify_project_access(project_id, str(user_id or ""), session)
     return await service.build_access_matrix(project_id, actor_id=user_id)
 
 
@@ -496,6 +512,7 @@ async def get_access_matrix(
 async def validate_project_teams(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: TeamService = Depends(_get_service),
 ) -> TeamsValidationReport:
     """Run the ``teams`` rule set over one project's access configuration.
@@ -504,6 +521,7 @@ async def validate_project_teams(
     describe the project's own teams and restrictions, so they disclose
     nothing a member cannot already list.
     """
+    await verify_project_access(project_id, str(user_id or ""), session)
     return await service.validate_project(project_id, actor_id=user_id)
 
 

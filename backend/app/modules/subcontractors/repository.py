@@ -612,13 +612,35 @@ class LienWaiverRepository(_BaseRepo):
     async def list_for_subcontractor(
         self,
         subcontractor_id: uuid.UUID,
+        *,
+        visible_project_ids: set[uuid.UUID] | None = None,
     ) -> list[LienWaiver]:
-        """Return all waivers for a subcontractor, newest first."""
-        stmt = (
-            select(LienWaiver)
-            .where(LienWaiver.subcontractor_id == subcontractor_id)
-            .order_by(LienWaiver.created_at.desc())
-        )
+        """Return the waivers for a subcontractor, newest first.
+
+        A subcontractor is shared across projects, but a waiver filed against
+        a payment application belongs to that application's project. With
+        ``visible_project_ids`` set, those waivers are kept only when their
+        project is in the set; a stand-alone W-9 / W-8 with no payment
+        application describes the firm itself and is always kept. ``None``
+        returns every waiver, which is the admin view.
+        """
+        stmt = select(LienWaiver).where(LienWaiver.subcontractor_id == subcontractor_id)
+        if visible_project_ids is not None:
+            stmt = (
+                stmt.outerjoin(
+                    PaymentApplication,
+                    PaymentApplication.id == LienWaiver.payment_application_id,
+                )
+                .outerjoin(
+                    SubcontractAgreement,
+                    SubcontractAgreement.id == PaymentApplication.agreement_id,
+                )
+                .where(
+                    (LienWaiver.payment_application_id.is_(None))
+                    | (SubcontractAgreement.project_id.in_(visible_project_ids))
+                )
+            )
+        stmt = stmt.order_by(LienWaiver.created_at.desc())
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def list_for_payment_app(
