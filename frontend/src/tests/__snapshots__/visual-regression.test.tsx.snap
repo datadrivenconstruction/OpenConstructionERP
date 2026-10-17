@@ -738,14 +738,53 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
           class="flex flex-1 flex-wrap items-center gap-1.5 min-w-0"
         >
           <button
-            aria-controls="whatsnew-chip-pc-section-popover"
+            aria-controls="whatsnew-chip-cost-control-popover"
             aria-expanded="false"
             class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
-            title="Slice a point cloud"
+            title="Cost control per project"
             type="button"
           >
             <svg
-              class="lucide lucide-scissors"
+              class="lucide lucide-scale"
+              fill="none"
+              height="11"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.25"
+              viewBox="0 0 24 24"
+              width="11"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"
+              />
+              <path
+                d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"
+              />
+              <path
+                d="M7 21h10"
+              />
+              <path
+                d="M12 3v18"
+              />
+              <path
+                d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"
+              />
+            </svg>
+            <span>
+              Cost control
+            </span>
+          </button>
+          <button
+            aria-controls="whatsnew-chip-forecast-source-popover"
+            aria-expanded="false"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
+            title="A forecast that says where it comes from"
+            type="button"
+          >
+            <svg
+              class="lucide lucide-route"
               fill="none"
               height="11"
               stroke="currentColor"
@@ -758,173 +797,31 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             >
               <circle
                 cx="6"
-                cy="6"
+                cy="19"
                 r="3"
               />
               <path
-                d="M8.12 8.12 12 12"
-              />
-              <path
-                d="M20 4 8.12 15.88"
+                d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"
               />
               <circle
-                cx="6"
-                cy="18"
-                r="3"
-              />
-              <path
-                d="M14.8 14.8 20 20"
-              />
-            </svg>
-            <span>
-              Section a scan
-            </span>
-          </button>
-          <button
-            aria-controls="whatsnew-chip-pc-measure-popover"
-            aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
-            title="Measure on the cloud"
-            type="button"
-          >
-            <svg
-              class="lucide lucide-ruler"
-              fill="none"
-              height="11"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.25"
-              viewBox="0 0 24 24"
-              width="11"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"
-              />
-              <path
-                d="m14.5 12.5 2-2"
-              />
-              <path
-                d="m11.5 9.5 2-2"
-              />
-              <path
-                d="m8.5 6.5 2-2"
-              />
-              <path
-                d="m17.5 15.5 2-2"
-              />
-            </svg>
-            <span>
-              Measure points
-            </span>
-          </button>
-          <button
-            aria-controls="whatsnew-chip-pc-elevation-popover"
-            aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
-            title="Colour points by height"
-            type="button"
-          >
-            <svg
-              class="lucide lucide-mountain"
-              fill="none"
-              height="11"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.25"
-              viewBox="0 0 24 24"
-              width="11"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m8 3 4 8 5-5 5 15H2L8 3z"
-              />
-            </svg>
-            <span>
-              Elevation colours
-            </span>
-          </button>
-          <button
-            aria-controls="whatsnew-chip-pc-snapshot-popover"
-            aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
-            title="Save the view"
-            type="button"
-          >
-            <svg
-              class="lucide lucide-camera"
-              fill="none"
-              height="11"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.25"
-              viewBox="0 0 24 24"
-              width="11"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"
-              />
-              <circle
-                cx="12"
-                cy="13"
+                cx="18"
+                cy="5"
                 r="3"
               />
             </svg>
             <span>
-              Snapshot
+              Forecast source
             </span>
           </button>
           <button
-            aria-controls="whatsnew-chip-onboarding-base-popover"
+            aria-controls="whatsnew-chip-assign-money-popover"
             aria-expanded="false"
             class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
-            title="Onboarding leads with the cost base"
+            title="Put money on the right cost line"
             type="button"
           >
             <svg
-              class="lucide lucide-coins"
-              fill="none"
-              height="11"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.25"
-              viewBox="0 0 24 24"
-              width="11"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="8"
-                cy="8"
-                r="6"
-              />
-              <path
-                d="M18.09 10.37A6 6 0 1 1 10.34 18"
-              />
-              <path
-                d="M7 6h1v4"
-              />
-              <path
-                d="m16.71 13.88.7.71-2.82 2.82"
-              />
-            </svg>
-            <span>
-              Cost base first
-            </span>
-          </button>
-          <button
-            aria-controls="whatsnew-chip-start-here-popover"
-            aria-expanded="false"
-            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
-            title="Learn by example"
-            type="button"
-          >
-            <svg
-              class="lucide lucide-graduation-cap"
+              class="lucide lucide-link2"
               fill="none"
               height="11"
               stroke="currentColor"
@@ -936,17 +833,96 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"
+                d="M9 17H7A5 5 0 0 1 7 7h2"
               />
               <path
-                d="M22 10v6"
+                d="M15 7h2a5 5 0 1 1 0 10h-2"
               />
-              <path
-                d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"
+              <line
+                x1="8"
+                x2="16"
+                y1="12"
+                y2="12"
               />
             </svg>
             <span>
-              Start-here cases
+              Assign money
+            </span>
+          </button>
+          <button
+            aria-controls="whatsnew-chip-monthly-report-popover"
+            aria-expanded="false"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
+            title="Monthly cost report"
+            type="button"
+          >
+            <svg
+              class="lucide lucide-calendar-check"
+              fill="none"
+              height="11"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.25"
+              viewBox="0 0 24 24"
+              width="11"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 2v4"
+              />
+              <path
+                d="M16 2v4"
+              />
+              <rect
+                height="18"
+                rx="2"
+                width="18"
+                x="3"
+                y="4"
+              />
+              <path
+                d="M3 10h18"
+              />
+              <path
+                d="m9 16 2 2 4-4"
+              />
+            </svg>
+            <span>
+              Monthly report
+            </span>
+          </button>
+          <button
+            aria-controls="whatsnew-chip-plan-room-popover"
+            aria-expanded="false"
+            class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ring-1 transition-colors bg-white/65 dark:bg-slate-900/45 text-blue-900 dark:text-sky-100 ring-sky-500/25 hover:bg-sky-500/15 dark:hover:bg-sky-400/15"
+            title="The plan room explains itself"
+            type="button"
+          >
+            <svg
+              class="lucide lucide-map"
+              fill="none"
+              height="11"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.25"
+              viewBox="0 0 24 24"
+              width="11"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"
+              />
+              <path
+                d="M15 5.764v15"
+              />
+              <path
+                d="M9 3.236v15"
+              />
+            </svg>
+            <span>
+              Plan room
             </span>
           </button>
         </div>
@@ -2166,7 +2142,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 </div>
               </button>
               <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                class="max-md:hidden group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                 title="Run a tender from a BOQ"
                 type="button"
               >
@@ -2365,7 +2341,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 </div>
               </button>
               <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                class="max-md:hidden group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                 title="Procure materials from the BOQ"
                 type="button"
               >
@@ -2560,7 +2536,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 </div>
               </button>
               <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                class="max-md:hidden group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                 title="Get 6D carbon from a BIM model"
                 type="button"
               >
@@ -2704,7 +2680,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 </div>
               </button>
               <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                class="max-xl:hidden group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                 title="Build a baseline and track progress"
                 type="button"
               >
@@ -2873,7 +2849,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 </div>
               </button>
               <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                class="max-xl:hidden group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                 title="Get quantities from a BIM model"
                 type="button"
               >
@@ -3049,7 +3025,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 </div>
               </button>
               <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+                class="max-xl:hidden group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
                 title="Measure quantities from a DWG"
                 type="button"
               >
@@ -3202,1533 +3178,6 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     class="truncate font-semibold leading-snug text-content-primary text-xs"
                   >
                     Measure quantities from a DWG
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    3 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Run the site day"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-amber-400/5 dark:bg-amber-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Run the site day"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <rect
-                      fill="#0d3550"
-                      height="58"
-                      opacity="0.08"
-                      rx="4"
-                      stroke="none"
-                      width="80"
-                      x="22"
-                      y="17"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="58"
-                      rx="4"
-                      stroke="#9fb3c2"
-                      stroke-width="1.6"
-                      width="80"
-                      x="20"
-                      y="14"
-                    />
-                    <path
-                      d="M20 25 V18 a4 4 0 0 1 4 -4 H96 a4 4 0 0 1 4 4 V25 Z"
-                      fill="#d97706"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="3.4"
-                      opacity="0.9"
-                      rx="1.7"
-                      stroke="none"
-                      width="24"
-                      x="26"
-                      y="18"
-                    />
-                    <circle
-                      cx="90"
-                      cy="19.5"
-                      fill="#e0a23a"
-                      r="4"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#fcd34d"
-                      height="8"
-                      rx="2"
-                      stroke="none"
-                      width="16"
-                      x="26"
-                      y="32"
-                    />
-                    <text
-                      dominant-baseline="central"
-                      fill="#ffffff"
-                      font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
-                      font-size="4.6"
-                      font-weight="700"
-                      stroke="none"
-                      text-anchor="middle"
-                      x="34"
-                      y="36.2"
-                    >
-                      hrs
-                    </text>
-                    <rect
-                      fill="#cdd9e2"
-                      height="3"
-                      opacity="1"
-                      rx="1.5"
-                      stroke="none"
-                      width="26"
-                      x="46"
-                      y="34"
-                    />
-                    <rect
-                      fill="#fcd34d"
-                      height="16"
-                      rx="2"
-                      stroke="#ffffff"
-                      stroke-width="1.2"
-                      width="22"
-                      x="26"
-                      y="44"
-                    />
-                    <circle
-                      cx="31"
-                      cy="49"
-                      fill="#ffffff"
-                      r="1.8"
-                      stroke="none"
-                    />
-                    <path
-                      d="M28 60 l6 -5 l4 3 l4 -4 l4 6 z"
-                      fill="#b45309"
-                      stroke="none"
-                    />
-                    <path
-                      d="M62 46.6 L68 57.4 L56 57.4 Z"
-                      fill="#0d3550"
-                      opacity="0.08"
-                      stroke="none"
-                      transform="translate(1.5,2)"
-                    />
-                    <path
-                      d="M62 46.6 L68 57.4 L56 57.4 Z"
-                      fill="#e0a23a"
-                      stroke="none"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M62 50.488 V53.08"
-                      fill="none"
-                      stroke="#ffffff"
-                      stroke-linecap="round"
-                      stroke-width="1.32"
-                    />
-                    <circle
-                      cx="62"
-                      cy="54.808"
-                      fill="#ffffff"
-                      r="0.72"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3"
-                      opacity="1"
-                      rx="1.5"
-                      stroke="none"
-                      width="22"
-                      x="72"
-                      y="50"
-                    />
-                    <path
-                      d="M72 62 c2.6399999999999997 -6 4.4 6 6.6 0 c1.76 -4.5 3.52 3.5 5.279999999999999 0 c1.3199999999999998 -2.5 3.08 2.5 4.84 0.5"
-                      fill="none"
-                      stroke="#d97706"
-                      stroke-linecap="round"
-                      stroke-width="1.8"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/pbk-run-the-site-day.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Run the site day
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    4 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Inspect work and close a non-conformance"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-teal-400/5 dark:bg-teal-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Inspect work and close a non-conformance"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <rect
-                      fill="#eaf2f8"
-                      height="28"
-                      rx="2"
-                      stroke="#9fb3c2"
-                      stroke-width="1.4"
-                      width="30"
-                      x="18"
-                      y="30"
-                    />
-                    <path
-                      d="M24 40 H42 M24 48 H38"
-                      fill="none"
-                      stroke="#b7c6d2"
-                      stroke-linecap="round"
-                      stroke-width="2"
-                    />
-                    <circle
-                      cx="44"
-                      cy="48"
-                      fill="#4aa6d8"
-                      fill-opacity="0.18"
-                      r="9"
-                      stroke="#1a6c9c"
-                      stroke-width="2.2"
-                    />
-                    <circle
-                      cx="44"
-                      cy="48"
-                      fill="none"
-                      r="5.3999999999999995"
-                      stroke="#ffffff"
-                      stroke-width="1.4"
-                    />
-                    <path
-                      d="M50.48 54.48 l6.4799999999999995 6.4799999999999995"
-                      fill="none"
-                      stroke="#1a6c9c"
-                      stroke-linecap="round"
-                      stroke-width="3"
-                    />
-                    <rect
-                      fill="#d1495b"
-                      height="11"
-                      rx="2"
-                      stroke="none"
-                      width="22"
-                      x="58"
-                      y="24"
-                    />
-                    <text
-                      dominant-baseline="central"
-                      fill="#ffffff"
-                      font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
-                      font-size="4.6"
-                      font-weight="700"
-                      stroke="none"
-                      text-anchor="middle"
-                      x="69"
-                      y="29.7"
-                    >
-                      NCR
-                    </text>
-                    <path
-                      d="M64 40 V50 M60 46 l4 4 l4 -4"
-                      fill="none"
-                      stroke="#0d9488"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                    />
-                    <circle
-                      cx="73.5"
-                      cy="60"
-                      fill="#0d3550"
-                      opacity="0.08"
-                      r="9"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="72"
-                      cy="58"
-                      fill="#2e9c6a"
-                      r="9"
-                      stroke="#ffffff"
-                      stroke-width="1"
-                    />
-                    <path
-                      d="M68.22 58.18 l2.5200000000000005 2.88 l5.040000000000001 -5.58"
-                      fill="none"
-                      stroke="#ffffff"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2.5200000000000005"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/pbk-inspect-and-close-ncr.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Inspect work and close a non-conformance
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    3 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Turn a change into a paid variation"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-rose-400/5 dark:bg-rose-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Turn a change into a paid variation"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <rect
-                      fill="#0d3550"
-                      height="42"
-                      opacity="0.08"
-                      rx="4"
-                      stroke="none"
-                      width="30"
-                      x="18"
-                      y="23"
-                    />
-                    <rect
-                      fill="#fff4d6"
-                      height="42"
-                      rx="4"
-                      stroke="#e0a23a"
-                      stroke-width="1.6"
-                      width="30"
-                      x="16"
-                      y="20"
-                    />
-                    <rect
-                      fill="#e0a23a"
-                      height="3"
-                      opacity="1"
-                      rx="1.5"
-                      stroke="none"
-                      width="18"
-                      x="21"
-                      y="28"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3"
-                      opacity="1"
-                      rx="1.5"
-                      stroke="none"
-                      width="14"
-                      x="21"
-                      y="36"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3"
-                      opacity="1"
-                      rx="1.5"
-                      stroke="none"
-                      width="16"
-                      x="21"
-                      y="44"
-                    />
-                    <path
-                      d="M48 42 H60 M56 38 l4 4 l-4 4"
-                      fill="none"
-                      stroke="#e11d48"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2.4"
-                    />
-                    <rect
-                      fill="#0d3550"
-                      height="52"
-                      opacity="0.08"
-                      rx="4"
-                      stroke="none"
-                      width="40"
-                      x="64"
-                      y="19"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="52"
-                      rx="4"
-                      stroke="#9fb3c2"
-                      stroke-width="1.6"
-                      width="40"
-                      x="62"
-                      y="16"
-                    />
-                    <path
-                      d="M62 26 V20 a4 4 0 0 1 4 -4 H98 a4 4 0 0 1 4 4 V26 Z"
-                      fill="#e11d48"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="22"
-                      x="68"
-                      y="32"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="18"
-                      x="68"
-                      y="40"
-                    />
-                    <path
-                      d="M68 50 H96"
-                      fill="none"
-                      stroke="#9fb3c2"
-                      stroke-width="1"
-                    />
-                    <rect
-                      fill="#2e9c6a"
-                      height="4"
-                      opacity="1"
-                      rx="2"
-                      stroke="none"
-                      width="20"
-                      x="68"
-                      y="53"
-                    />
-                    <circle
-                      cx="95.5"
-                      cy="60"
-                      fill="#0d3550"
-                      opacity="0.08"
-                      r="7"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="94"
-                      cy="58"
-                      fill="#2e9c6a"
-                      r="7"
-                      stroke="#ffffff"
-                      stroke-width="1"
-                    />
-                    <path
-                      d="M91.06 58.14 l1.9600000000000002 2.24 l3.9200000000000004 -4.34"
-                      fill="none"
-                      stroke="#ffffff"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.9600000000000002"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/pbk-change-to-paid-variation.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Turn a change into a paid variation
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    3 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Run a subcontractor package"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-rose-400/5 dark:bg-rose-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Run a subcontractor package"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <rect
-                      fill="#0d3550"
-                      height="56"
-                      opacity="0.08"
-                      rx="4"
-                      stroke="none"
-                      width="44"
-                      x="22"
-                      y="17"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="56"
-                      rx="4"
-                      stroke="#9fb3c2"
-                      stroke-width="1.6"
-                      width="44"
-                      x="20"
-                      y="14"
-                    />
-                    <path
-                      d="M20 24 V18 a4 4 0 0 1 4 -4 H60 a4 4 0 0 1 4 4 V24 Z"
-                      fill="#e11d48"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="3"
-                      opacity="0.9"
-                      rx="1.5"
-                      stroke="none"
-                      width="22"
-                      x="26"
-                      y="18"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="22"
-                      x="26"
-                      y="32"
-                    />
-                    <rect
-                      fill="#2e9c6a"
-                      height="6"
-                      rx="2"
-                      stroke="none"
-                      width="7"
-                      x="52"
-                      y="30"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="18"
-                      x="26"
-                      y="40"
-                    />
-                    <rect
-                      fill="#2e9c6a"
-                      height="6"
-                      rx="2"
-                      stroke="none"
-                      width="7"
-                      x="52"
-                      y="38"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="20"
-                      x="26"
-                      y="48"
-                    />
-                    <rect
-                      fill="#e0a23a"
-                      height="6"
-                      rx="2"
-                      stroke="none"
-                      width="7"
-                      x="52"
-                      y="46"
-                    />
-                    <path
-                      d="M26 61 c2.88 -6 4.800000000000001 6 7.199999999999999 0 c1.92 -4.5 3.84 3.5 5.76 0 c1.44 -2.5 3.3600000000000003 2.5 5.28 0.5"
-                      fill="none"
-                      stroke="#e11d48"
-                      stroke-linecap="round"
-                      stroke-width="1.8"
-                    />
-                    <circle
-                      cx="86"
-                      cy="40"
-                      fill="#cf8320"
-                      r="12"
-                      stroke="#ffffff"
-                      stroke-width="1.4"
-                    />
-                    <circle
-                      cx="86"
-                      cy="40"
-                      fill="none"
-                      opacity="0.7"
-                      r="6.5"
-                      stroke="#ffffff"
-                      stroke-width="1.3"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/prf-general-contractor.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Run a subcontractor package
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    3 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Hand over and close out"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-cyan-400/5 dark:bg-cyan-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Hand over and close out"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <rect
-                      fill="#0891b2"
-                      height="38"
-                      rx="2"
-                      stroke="none"
-                      width="30"
-                      x="22"
-                      y="30"
-                    />
-                    <path
-                      d="M20 30 L37 20 L54 30 Z"
-                      fill="#0e7490"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#67e8f9"
-                      height="7"
-                      rx="1"
-                      stroke="none"
-                      width="7"
-                      x="28"
-                      y="38"
-                    />
-                    <rect
-                      fill="#67e8f9"
-                      height="7"
-                      rx="1"
-                      stroke="none"
-                      width="7"
-                      x="39"
-                      y="38"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="14"
-                      rx="1"
-                      stroke="none"
-                      width="8"
-                      x="33"
-                      y="54"
-                    />
-                    <circle
-                      cx="68"
-                      cy="40"
-                      fill="none"
-                      r="6"
-                      stroke="#cf8320"
-                      stroke-width="3"
-                    />
-                    <path
-                      d="M73 43 l12 12 M80 50 l4 -4 M84 54 l4 -4"
-                      fill="none"
-                      stroke="#cf8320"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="3"
-                    />
-                    <circle
-                      cx="93.5"
-                      cy="28"
-                      fill="#0d3550"
-                      opacity="0.08"
-                      r="9"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="92"
-                      cy="26"
-                      fill="#2e9c6a"
-                      r="9"
-                      stroke="#ffffff"
-                      stroke-width="1"
-                    />
-                    <path
-                      d="M88.22 26.18 l2.5200000000000005 2.88 l5.040000000000001 -5.58"
-                      fill="none"
-                      stroke="#ffffff"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2.5200000000000005"
-                    />
-                    <path
-                      d="M37 12 Q38.36 14.64 41 16 Q38.36 17.36 37 20 Q35.64 17.36 33 16 Q35.64 14.64 37 12 Z"
-                      fill="#0891b2"
-                      stroke="none"
-                    />
-                    <path
-                      d="M20 68 H98"
-                      fill="none"
-                      stroke="#9fb3c2"
-                      stroke-linecap="round"
-                      stroke-width="1.6"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/pbk-handover-and-closeout.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Hand over and close out
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    5 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Estimate from a cost database"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-emerald-400/5 dark:bg-emerald-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Estimate from a cost database"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <ellipse
-                      cx="36"
-                      cy="59"
-                      fill="#0d3550"
-                      opacity="0.08"
-                      rx="14"
-                      ry="5"
-                      stroke="none"
-                    />
-                    <path
-                      d="M20 26 V56 a14 5 0 0 0 28 0 V26 Z"
-                      fill="#059669"
-                      stroke="none"
-                    />
-                    <path
-                      d="M20 36.8 a14 5 0 0 0 28 0"
-                      fill="none"
-                      opacity="0.35"
-                      stroke="#ffffff"
-                      stroke-width="1"
-                    />
-                    <path
-                      d="M20 46.400000000000006 a14 5 0 0 0 28 0"
-                      fill="none"
-                      opacity="0.35"
-                      stroke="#ffffff"
-                      stroke-width="1"
-                    />
-                    <ellipse
-                      cx="34"
-                      cy="26"
-                      fill="#6ee7b7"
-                      rx="14"
-                      ry="5"
-                      stroke="#ffffff"
-                      stroke-width="0.8"
-                    />
-                    <path
-                      d="M50 42 H60 M56 38 l4 4 l-4 4"
-                      fill="none"
-                      stroke="#059669"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2.2"
-                    />
-                    <rect
-                      fill="#0d3550"
-                      height="48"
-                      opacity="0.08"
-                      rx="4"
-                      stroke="none"
-                      width="44"
-                      x="64"
-                      y="21"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="48"
-                      rx="4"
-                      stroke="#9fb3c2"
-                      stroke-width="1.6"
-                      width="44"
-                      x="62"
-                      y="18"
-                    />
-                    <path
-                      d="M62 27 V22 a4 4 0 0 1 4 -4 H102 a4 4 0 0 1 4 4 V27 Z"
-                      fill="#059669"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="22"
-                      x="68"
-                      y="33"
-                    />
-                    <rect
-                      fill="#2e9c6a"
-                      height="6"
-                      rx="2"
-                      stroke="none"
-                      width="10"
-                      x="92"
-                      y="31"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="18"
-                      x="68"
-                      y="42"
-                    />
-                    <rect
-                      fill="#2e9c6a"
-                      height="6"
-                      rx="2"
-                      stroke="none"
-                      width="10"
-                      x="92"
-                      y="40"
-                    />
-                    <rect
-                      fill="#cdd9e2"
-                      height="3.2"
-                      opacity="1"
-                      rx="1.6"
-                      stroke="none"
-                      width="20"
-                      x="68"
-                      y="51"
-                    />
-                    <rect
-                      fill="#2e9c6a"
-                      height="6"
-                      rx="2"
-                      stroke="none"
-                      width="10"
-                      x="92"
-                      y="49"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/prf-construction-manager.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Estimate from a cost database
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    4 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Set contingency from cost risk"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-emerald-400/5 dark:bg-emerald-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Set contingency from cost risk"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <path
-                      d="M18 66 H104"
-                      fill="none"
-                      stroke="#9fb3c2"
-                      stroke-width="1.2"
-                    />
-                    <path
-                      d="M22 66 C40 66 44 26 60 26 C76 26 80 66 100 66"
-                      fill="#6ee7b7"
-                      fill-opacity="0.18"
-                      stroke="#059669"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                    />
-                    <path
-                      d="M60 26 V66"
-                      fill="none"
-                      stroke="#9fb3c2"
-                      stroke-dasharray="2 2"
-                      stroke-width="1.2"
-                    />
-                    <path
-                      d="M82 42 V66"
-                      fill="none"
-                      stroke="#059669"
-                      stroke-width="1.8"
-                    />
-                    <circle
-                      cx="82"
-                      cy="42"
-                      fill="#059669"
-                      r="2.6"
-                      stroke="none"
-                    />
-                    <rect
-                      fill="#ffffff"
-                      height="14"
-                      rx="2.5"
-                      stroke="#9fb3c2"
-                      stroke-width="1.4"
-                      width="14"
-                      x="20"
-                      y="20"
-                    />
-                    <circle
-                      cx="24"
-                      cy="24"
-                      fill="#047857"
-                      r="1.3"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="30"
-                      cy="24"
-                      fill="#047857"
-                      r="1.3"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="27"
-                      cy="27"
-                      fill="#047857"
-                      r="1.3"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="24"
-                      cy="30"
-                      fill="#047857"
-                      r="1.3"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="30"
-                      cy="30"
-                      fill="#047857"
-                      r="1.3"
-                      stroke="none"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/prf-commercial-manager.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Set contingency from cost risk
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    3 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Compare bids and award"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-violet-400/5 dark:bg-violet-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Compare bids and award"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <path
-                      d="M20 66 H104"
-                      fill="none"
-                      stroke="#9fb3c2"
-                      stroke-width="1.2"
-                    />
-                    <rect
-                      fill="#b7c6d2"
-                      height="34"
-                      rx="1.2"
-                      stroke="none"
-                      width="14"
-                      x="28"
-                      y="32"
-                    />
-                    <rect
-                      fill="#b7c6d2"
-                      height="42"
-                      rx="1.2"
-                      stroke="none"
-                      width="14"
-                      x="50"
-                      y="24"
-                    />
-                    <rect
-                      fill="#2e9c6a"
-                      height="26"
-                      rx="1.2"
-                      stroke="none"
-                      width="14"
-                      x="72"
-                      y="40"
-                    />
-                    <path
-                      d="M79 28 Q81.04 31.96 85 34 Q81.04 36.04 79 40 Q76.96 36.04 73 34 Q76.96 31.96 79 28 Z"
-                      fill="#cf8320"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="99.5"
-                      cy="42"
-                      fill="#0d3550"
-                      opacity="0.08"
-                      r="8"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="98"
-                      cy="40"
-                      fill="#2e9c6a"
-                      r="8"
-                      stroke="#ffffff"
-                      stroke-width="1"
-                    />
-                    <path
-                      d="M94.64 40.16 l2.24 2.56 l4.48 -4.96"
-                      fill="none"
-                      stroke="#ffffff"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2.24"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/prf-commercial-manager.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Compare bids and award
-                  </span>
-                  <span
-                    class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
-                  >
-                    3 steps
-                  </span>
-                </div>
-              </button>
-              <button
-                class="group relative isolate flex flex-col overflow-hidden rounded-lg border border-border-light bg-surface-primary text-left shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-oe-blue/40 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                title="Earned value and forecast"
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  class="pointer-events-none absolute inset-0 -z-10 bg-sky-400/5 dark:bg-sky-400/10"
-                />
-                <div
-                  class="relative aspect-[16/9] w-full overflow-hidden border-b border-border-light bg-white ring-1 ring-inset ring-slate-900/[0.04]"
-                >
-                  <svg
-                    aria-label="Earned value and forecast"
-                    class="h-full w-full p-3 text-slate-400 ps-[14%]"
-                    fill="none"
-                    role="img"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.4"
-                    viewBox="0 0 120 84"
-                  >
-                    <g
-                      opacity="0.16"
-                      stroke-width="0.6"
-                    >
-                      <path
-                        d="M0 21 H120 M0 42 H120 M0 63 H120"
-                      />
-                      <path
-                        d="M30 0 V84 M60 0 V84 M90 0 V84"
-                      />
-                    </g>
-                    <path
-                      d="M18 68 H104 M18 68 V18"
-                      fill="none"
-                      stroke="#9fb3c2"
-                      stroke-width="1.2"
-                    />
-                    <path
-                      d="M18 66 C40 60 60 40 96 22"
-                      fill="none"
-                      stroke="#b7c6d2"
-                      stroke-linecap="round"
-                      stroke-width="2"
-                    />
-                    <path
-                      d="M18 66 C36 62 52 50 70 44"
-                      fill="none"
-                      stroke="#0284c7"
-                      stroke-linecap="round"
-                      stroke-width="2.4"
-                    />
-                    <path
-                      d="M70 44 C82 40 90 34 100 30"
-                      fill="none"
-                      stroke="#0284c7"
-                      stroke-dasharray="3 3"
-                      stroke-linecap="round"
-                      stroke-width="2.2"
-                    />
-                    <circle
-                      cx="70"
-                      cy="44"
-                      fill="#0284c7"
-                      r="2.6"
-                      stroke="none"
-                    />
-                    <circle
-                      cx="100"
-                      cy="30"
-                      fill="#0284c7"
-                      r="2.6"
-                      stroke="none"
-                    />
-                  </svg>
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute top-1/2 start-1 block -translate-y-1/2 w-[26%] max-w-[3rem]"
-                  >
-                    <span
-                      class="block bg-white/90 p-[2px] shadow-sm shadow-slate-900/20"
-                      style="aspect-ratio: 0.8660254 / 1; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                    >
-                      <img
-                        alt=""
-                        class="h-full w-full object-cover object-[50%_18%]"
-                        decoding="async"
-                        draggable="false"
-                        loading="lazy"
-                        src="/assets/people/prf-quality-manager.webp"
-                        style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div
-                  class="flex min-w-0 flex-1 flex-col gap-0.5 px-2.5 py-2"
-                >
-                  <span
-                    class="truncate font-semibold leading-snug text-content-primary text-xs"
-                  >
-                    Earned value and forecast
                   </span>
                   <span
                     class="mt-auto flex items-center gap-1 text-2xs text-content-tertiary"
