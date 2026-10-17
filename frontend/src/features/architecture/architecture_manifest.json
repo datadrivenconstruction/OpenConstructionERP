@@ -270400,10 +270400,10 @@
     },
     {
       "name": "cases",
-      "ts_files": 366,
+      "ts_files": 385,
       "css_files": 0,
-      "test_files": 23,
-      "total_files": 389
+      "test_files": 24,
+      "total_files": 408
     },
     {
       "name": "catalog",
@@ -273240,7 +273240,7 @@
     "total_schemas": 4040,
     "total_python_files": 2715,
     "frontend_features": 209,
-    "frontend_ts_files": 3490,
+    "frontend_ts_files": 3509,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

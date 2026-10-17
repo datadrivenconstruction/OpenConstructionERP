@@ -267,6 +267,17 @@ export interface Playbook {
    *  only when the case happens at a different point than its discipline
    *  implies. */
   stage?: LifecycleStage;
+  /** Set when the screens this case walks exist only inside a project, such as
+   *  `/projects/:projectId/governance`, and have no unscoped twin. Without a
+   *  project a step of such a case cannot strip its prefix the way
+   *  `resolveStepRoute` normally does, because the stripped path either names
+   *  no screen or names a different one (`/governance` is the admin page, not
+   *  the project's gates). So the runner falls back to the app-wide active
+   *  project, and when there is none either, Go opens the project list
+   *  (`/projects`) and the runner says why. `scripts/check_case_routes.py`
+   *  reads the same flag and checks the `/projects` form instead of the
+   *  stripped one. */
+  requiresProject?: boolean;
   /** Optional explicit ids of the case(s) to run NEXT after this one - its
    *  outputs feed their first step. When omitted the successor is derived from
    *  the in -> out chaining between cases (see `nextCasesFor` in
