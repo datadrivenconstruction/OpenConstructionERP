@@ -67621,7 +67621,9 @@
               "name": "document_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
-              "nullable": true
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_documents_document.id"
             },
             {
               "name": "document_ref",
@@ -271646,10 +271648,10 @@
     },
     {
       "name": "validation",
-      "ts_files": 12,
+      "ts_files": 17,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 12
+      "test_files": 6,
+      "total_files": 17
     },
     {
       "name": "value",
@@ -273240,7 +273242,7 @@
     "total_schemas": 4040,
     "total_python_files": 2715,
     "frontend_features": 209,
-    "frontend_ts_files": 3490,
+    "frontend_ts_files": 3495,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

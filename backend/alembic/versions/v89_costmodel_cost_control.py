@@ -103,7 +103,16 @@ def upgrade() -> None:
             ),
             sa.Column("amount", MoneyType(), nullable=False),
             sa.Column("reason", sa.Text(), nullable=False),
-            sa.Column("document_id", GUID(), nullable=True),
+            sa.Column(
+                "document_id",
+                GUID(),
+                sa.ForeignKey(
+                    "oe_documents_document.id",
+                    ondelete="SET NULL",
+                    name="fk_costmodel_forecast_override_document",
+                ),
+                nullable=True,
+            ),
             sa.Column("document_ref", sa.String(length=255), nullable=False, server_default=""),
             sa.Column("created_by", sa.String(length=36), nullable=True),
             sa.Column("closed_at", sa.DateTime(timezone=True), nullable=True),

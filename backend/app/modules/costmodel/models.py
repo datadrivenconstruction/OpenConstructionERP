@@ -451,7 +451,12 @@ class CostForecastOverride(Base):
     )
     amount: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False)
     reason: Mapped[str] = mapped_column(Text, nullable=False)
-    document_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Deleting the document clears the link; the reason and the typed reference stay.
+    document_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_documents_document.id", ondelete="SET NULL", name="fk_costmodel_forecast_override_document"),
+        nullable=True,
+    )
     document_ref: Mapped[str] = mapped_column(String(255), nullable=False, server_default="")
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
