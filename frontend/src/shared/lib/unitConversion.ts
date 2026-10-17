@@ -391,6 +391,17 @@ const DIMENSION_FACTORS: Record<string, Record<string, number>> = {
     unit: 1,
     count: 1,
   },
+  // Time, for positions measured in hours. Days and weeks are absent on
+  // purpose: a working day has no single length. Kept identical to
+  // _DIMENSION_FACTORS in unit_conversion.py.
+  time: {
+    h: 1,
+    hr: 1,
+    hrs: 1,
+    hour: 1,
+    hours: 1,
+    min: 60,
+  },
 };
 
 /** Reverse index: unit code -> its dimension, built once from the table. */

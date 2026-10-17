@@ -12604,6 +12604,74 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "BenchmarkSet",
+          "tablename": "oe_bi_dashboards_benchmark_set",
+          "docstring": "A saved, named benchmark: which projects, which KPIs, how to read them.\n\nThe definition only. Figures are always computed fresh, over the cohort\nintersected with what the person reading may open, so a set shared with\na colleague who cannot see half its projects shows them the other half\nand nothing about the rest.\n\n``cohort_json`` holds the population: explicit ``project_ids``, the\n``clients``, ``regions`` and ``project_types`` a project must match, the\n``row_filters`` a position must pass (whitelisted KPI filters such as a\nclassification code) and an optional ``period_start`` / ``period_end``.\nIts shape is validated by ``BenchmarkCohort`` on every write.",
+          "columns": [
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "owner_user_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "scope",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kpis_json",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "cohort_json",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "statistic",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "min_projects",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "min_records",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "convert_units",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -12626,11 +12694,72 @@
           "response_model": "list[PerformancePreset]"
         },
         {
+          "method": "GET",
+          "path": "/performance/cohort-options",
+          "handler": "performance_cohort_options",
+          "response_model": "PerformanceCohortOptions"
+        },
+        {
           "method": "POST",
           "path": "/performance/benchmark",
           "handler": "performance_benchmark",
           "response_model": "PerformanceBenchmarkResponse",
           "request_schema": "PerformanceBenchmarkRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/performance/benchmark-sets",
+          "handler": "list_benchmark_sets",
+          "response_model": "BenchmarkSetPage",
+          "request_schema": "BIDashboardsService"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/benchmark-sets",
+          "handler": "create_benchmark_set",
+          "response_model": "BenchmarkSetRead",
+          "request_schema": "BenchmarkSetCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/performance/benchmark-sets/{set_id}",
+          "handler": "get_benchmark_set",
+          "response_model": "BenchmarkSetRead",
+          "request_schema": "BIDashboardsService"
+        },
+        {
+          "method": "PATCH",
+          "path": "/performance/benchmark-sets/{set_id}",
+          "handler": "update_benchmark_set",
+          "response_model": "BenchmarkSetRead",
+          "request_schema": "BenchmarkSetUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/performance/benchmark-sets/{set_id}",
+          "handler": "delete_benchmark_set",
+          "request_schema": "BIDashboardsService"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/benchmark-sets/{set_id}/evaluate",
+          "handler": "evaluate_benchmark_set",
+          "response_model": "PerformanceBenchmarkResponse",
+          "request_schema": "BenchmarkSetEvaluateRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/benchmark-sets/{set_id}/check",
+          "handler": "check_against_benchmark_set",
+          "response_model": "PerformanceCheckResponse",
+          "request_schema": "PerformanceCheckRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/check",
+          "handler": "check_against_cohort",
+          "response_model": "PerformanceCheckResponse",
+          "request_schema": "PerformanceAdHocCheckRequest"
         },
         {
           "method": "POST",
@@ -14423,24 +14552,31 @@
           ]
         },
         {
-          "class_name": "PerformanceBenchmarkRequest",
+          "class_name": "BenchmarkCohort",
           "bases": [
             "BaseModel"
           ],
-          "docstring": "One KPI, read per project over a cohort.\n\nExactly one of ``kpi`` (a preset id or a stored custom KPI code) and\n``spec`` (a whitelisted spec, validated like ``POST /kpis``). An empty\n``project_ids`` means every project the caller can open.",
+          "docstring": "Which projects and which rows a benchmark reads.\n\nEvery list narrows: a project must be in ``project_ids`` (when given) AND\nhave one of the ``clients`` AND one of the ``regions`` AND one of the\n``project_types``. ``row_filters`` are whitelisted KPI filters a row must\npass, typically ``{\"field\": \"classification.din276\", \"op\": \"eq\",\n\"value\": \"330\"}``; they are checked against each KPI's entity when the set\nis saved. The result is always intersected with the projects the reader\nmay open.",
           "fields": [
             {
               "name": "project_ids",
               "type": "list[UUID]"
             },
             {
-              "name": "kpi",
-              "type": "str | None"
+              "name": "clients",
+              "type": "list[str]"
             },
             {
-              "name": "spec",
-              "type": "dict[str, Any] | None",
-              "default": "None"
+              "name": "regions",
+              "type": "list[str]"
+            },
+            {
+              "name": "project_types",
+              "type": "list[str]"
+            },
+            {
+              "name": "row_filters",
+              "type": "list[dict[str, Any]]"
             },
             {
               "name": "period_start",
@@ -14451,6 +14587,42 @@
               "name": "period_end",
               "type": "date | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceBenchmarkRequest",
+          "bases": [
+            "BenchmarkCohort"
+          ],
+          "docstring": "One KPI, read per project over a cohort.\n\nExactly one of ``kpi`` (a preset id or a stored custom KPI code) and\n``spec`` (a whitelisted spec, validated like ``POST /kpis``). An empty\n``project_ids`` means every project the caller can open, narrowed by the\nother cohort filters.\n\n``convert_units`` merges readings in compatible units (m2 and ft2) into\none group and lists each conversion; off, every unit is its own group.\n``min_projects`` and ``min_records`` mark a group with less evidence as\nnot a reliable benchmark; ``statistic`` picks the figure each group leads\nwith.",
+          "fields": [
+            {
+              "name": "kpi",
+              "type": "str | None"
+            },
+            {
+              "name": "spec",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "convert_units",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "min_projects",
+              "type": "int"
+            },
+            {
+              "name": "min_records",
+              "type": "int"
+            },
+            {
+              "name": "statistic",
+              "type": "str",
+              "default": "'weighted'"
             }
           ]
         },
@@ -14488,6 +14660,10 @@
               "name": "unavailable_reason",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "converted_from",
+              "type": "list[str]"
             }
           ]
         },
@@ -14505,6 +14681,11 @@
             {
               "name": "weighted_unavailable_reason",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "mean",
+              "type": "Decimal | None",
               "default": "None"
             },
             {
@@ -14547,6 +14728,32 @@
             {
               "name": "records",
               "type": "int"
+            },
+            {
+              "name": "records_with_value",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceConversion",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "``1 from_unit = factor to_unit``, applied to land rows in this group.",
+          "fields": [
+            {
+              "name": "from_unit",
+              "type": "str"
+            },
+            {
+              "name": "to_unit",
+              "type": "str"
+            },
+            {
+              "name": "factor",
+              "type": "Decimal"
             }
           ]
         },
@@ -14580,6 +14787,29 @@
             {
               "name": "coverage",
               "type": "Decimal"
+            },
+            {
+              "name": "conversions",
+              "type": "list[PerformanceConversion]"
+            },
+            {
+              "name": "headline",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "headline_statistic",
+              "type": "str",
+              "default": "'weighted'"
+            },
+            {
+              "name": "sufficient",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "shortfall",
+              "type": "list[str]"
             }
           ]
         },
@@ -14634,6 +14864,26 @@
             {
               "name": "groups",
               "type": "list[PerformanceGroup]"
+            },
+            {
+              "name": "convert_units",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "min_projects",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "min_records",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "statistic",
+              "type": "str",
+              "default": "'weighted'"
             }
           ]
         },
@@ -14653,6 +14903,374 @@
               "type": "dict[str, Any]"
             }
           ]
+        },
+        {
+          "class_name": "PerformanceCohortOptions",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Filter values present on the projects the caller may open.",
+          "fields": [
+            {
+              "name": "clients",
+              "type": "list[str]"
+            },
+            {
+              "name": "regions",
+              "type": "list[str]"
+            },
+            {
+              "name": "project_types",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "BenchmarkSetBase",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "scope",
+              "type": "str",
+              "default": "'personal'"
+            },
+            {
+              "name": "kpis",
+              "type": "list[str]"
+            },
+            {
+              "name": "cohort",
+              "type": "BenchmarkCohort"
+            },
+            {
+              "name": "statistic",
+              "type": "str",
+              "default": "'weighted'"
+            },
+            {
+              "name": "min_projects",
+              "type": "int"
+            },
+            {
+              "name": "min_records",
+              "type": "int"
+            },
+            {
+              "name": "convert_units",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "BenchmarkSetCreate",
+          "bases": [
+            "BenchmarkSetBase"
+          ],
+          "docstring": "A new benchmark set. Its KPIs and row filters are checked on save.",
+          "fields": []
+        },
+        {
+          "class_name": "BenchmarkSetUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A partial edit; only the owner may make it.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "description",
+              "type": "str | None"
+            },
+            {
+              "name": "scope",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "kpis",
+              "type": "list[str] | None"
+            },
+            {
+              "name": "cohort",
+              "type": "BenchmarkCohort | None",
+              "default": "None"
+            },
+            {
+              "name": "statistic",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "min_projects",
+              "type": "int | None"
+            },
+            {
+              "name": "min_records",
+              "type": "int | None"
+            },
+            {
+              "name": "convert_units",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BenchmarkSetRead",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "owner_user_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "scope",
+              "type": "str"
+            },
+            {
+              "name": "kpis",
+              "type": "list[str]"
+            },
+            {
+              "name": "cohort",
+              "type": "BenchmarkCohort"
+            },
+            {
+              "name": "statistic",
+              "type": "str"
+            },
+            {
+              "name": "min_projects",
+              "type": "int"
+            },
+            {
+              "name": "min_records",
+              "type": "int"
+            },
+            {
+              "name": "convert_units",
+              "type": "bool"
+            },
+            {
+              "name": "is_owner",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "BenchmarkSetPage",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of the benchmark sets a caller sees, ordered by name.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BenchmarkSetRead]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "BenchmarkSetEvaluateRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Which of the set's KPIs to read; the first when omitted.",
+          "fields": [
+            {
+              "name": "kpi",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceCheckRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Where an estimate sits against a benchmark set's history.\n\nEither a ``value`` in ``unit`` and ``currency`` typed by the estimator,\nor a ``boq_position_id`` whose own estimate is read (its unit rate, or\nthe labour hours per unit of its resource split). Nothing is written.",
+          "fields": [
+            {
+              "name": "kpi",
+              "type": "str | None"
+            },
+            {
+              "name": "value",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
+            },
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceAdHocCheckRequest",
+          "bases": [
+            "PerformanceBenchmarkRequest"
+          ],
+          "docstring": "A check against a cohort described in the request rather than a saved set.\n\nSame cohort, KPI and reading options as ``POST /performance/benchmark``,\nplus the estimate: a ``value`` in ``unit`` and ``currency``, or a\n``boq_position_id``. Nothing is written.",
+          "fields": [
+            {
+              "name": "value",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
+            },
+            {
+              "name": "boq_position_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceCheckResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A suggestion for a person to weigh; nothing was changed by it.\n\n``status`` is ``ok`` or why there is no reading (``no_comparable_group``,\n``kpi_not_per_unit``, ``no_estimate_value``). ``value`` is the estimate in\nthe group's unit, ``input_value`` and ``input_unit`` what was checked, and\n``unit_factor`` the conversion between them when one was applied.",
+          "fields": [
+            {
+              "name": "kpi",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "input_value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "input_unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "input_currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "unit_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "group",
+              "type": "PerformanceGroup | None",
+              "default": "None"
+            },
+            {
+              "name": "headline",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "statistic",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "variance",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "percentile_rank",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "band",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "confidence",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "shortfall",
+              "type": "list[str]"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -14667,6 +15285,8 @@
         "finance",
         "inspections",
         "ncr",
+        "postcalc",
+        "price_breakdown",
         "procurement",
         "progress",
         "projects",
@@ -270274,10 +270894,10 @@
     },
     {
       "name": "analytics",
-      "ts_files": 5,
+      "ts_files": 6,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 6
     },
     {
       "name": "approval-routes",
@@ -271781,6 +272401,8 @@
       "finance",
       "inspections",
       "ncr",
+      "postcalc",
+      "price_breakdown",
       "procurement",
       "progress",
       "projects",
@@ -273233,14 +273855,14 @@
   "statistics": {
     "backend_modules": 211,
     "modules_with_manifests": 209,
-    "total_models": 773,
-    "total_columns": 8994,
+    "total_models": 774,
+    "total_columns": 9004,
     "total_relationships": 240,
-    "total_routes": 4560,
-    "total_schemas": 4040,
+    "total_routes": 4569,
+    "total_schemas": 4052,
     "total_python_files": 2715,
     "frontend_features": 209,
-    "frontend_ts_files": 3490,
+    "frontend_ts_files": 3491,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
