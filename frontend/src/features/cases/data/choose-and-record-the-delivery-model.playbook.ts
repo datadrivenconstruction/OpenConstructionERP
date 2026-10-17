@@ -11,7 +11,7 @@ import type { Playbook } from "../types";
 
 const playbook: Playbook = {
   id: "choose-and-record-the-delivery-model",
-  order: 4,
+  order: 1683,
   category: "tendering",
   stage: "define",
   companyTypes: ["developer-client", "project-manager", "cost-consultant"],

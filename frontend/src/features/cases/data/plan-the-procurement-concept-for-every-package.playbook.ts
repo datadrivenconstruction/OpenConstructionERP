@@ -11,7 +11,7 @@ import type { Playbook } from "../types";
 
 const playbook: Playbook = {
   id: "plan-the-procurement-concept-for-every-package",
-  order: 6,
+  order: 1684,
   category: "tendering",
   stage: "procure",
   companyTypes: ["developer-client", "project-manager", "cost-consultant"],

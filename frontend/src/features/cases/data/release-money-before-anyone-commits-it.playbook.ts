@@ -11,7 +11,7 @@ import type { Playbook } from "../types";
 
 const playbook: Playbook = {
   id: "release-money-before-anyone-commits-it",
-  order: 3,
+  order: 1682,
   category: "commercial",
   stage: "define",
   companyTypes: ["developer-client", "project-manager", "cost-consultant"],

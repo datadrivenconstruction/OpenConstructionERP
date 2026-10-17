@@ -11,7 +11,7 @@ import type { Playbook } from "../types";
 
 const playbook: Playbook = {
   id: "map-and-engage-the-stakeholders",
-  order: 8,
+  order: 1686,
   category: "planning",
   stage: "define",
   companyTypes: ["developer-client", "project-manager", "owner-operator"],

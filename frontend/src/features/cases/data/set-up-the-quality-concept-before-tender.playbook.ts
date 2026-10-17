@@ -11,7 +11,7 @@ import type { Playbook } from "../types";
 
 const playbook: Playbook = {
   id: "set-up-the-quality-concept-before-tender",
-  order: 9,
+  order: 1687,
   category: "quality",
   stage: "design",
   companyTypes: ["developer-client", "project-manager", "designer"],

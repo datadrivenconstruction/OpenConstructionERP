@@ -11,7 +11,7 @@ import type { Playbook } from "../types";
 
 const playbook: Playbook = {
   id: "plan-site-logistics-for-the-start-gate",
-  order: 13,
+  order: 1691,
   category: "site",
   stage: "plan",
   companyTypes: ["developer-client", "project-manager", "general-contractor"],
