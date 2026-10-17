@@ -194,4 +194,23 @@ describe('<CostStructurePanel>', () => {
     renderPanel();
     expect(await screen.findByText('No cost structure yet')).toBeInTheDocument();
   });
+
+  it('reads empty suspense buckets as no structure, with no green light', async () => {
+    // The server lists both buckets even when they carry nothing.
+    api.getStructure.mockResolvedValue(
+      tree({
+        nodes: [],
+        suspense: [
+          { kind: 'no_account', line_count: 0, amount: '0', line_ids: [] },
+          { kind: 'invalid_account', line_count: 0, amount: '0', line_ids: [] },
+        ],
+        findings: [],
+        total: '0',
+      }),
+    );
+    renderPanel();
+    expect(await screen.findByText('No cost structure yet')).toBeInTheDocument();
+    expect(screen.queryByTestId('structure-traffic-light')).not.toBeInTheDocument();
+    expect(screen.queryByText('Expand all')).not.toBeInTheDocument();
+  });
 });

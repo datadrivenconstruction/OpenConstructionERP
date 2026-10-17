@@ -18,6 +18,7 @@ import { Plus, Trash2, Search, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { Button, SideDrawer } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { costModelApi } from '@/features/costmodel/api';
 import {
   costStructureApi,
@@ -75,6 +76,13 @@ function draftFrom(allocation: PositionAllocation | undefined): { mode: SplitMod
 }
 
 /** The share to suggest for a new row: whatever is still missing, if positive. */
+/** A stored quantity ("610.0000") as people write it ("610"), in the user's number format. */
+export function quantityLabel(quantity: string): string {
+  const n = Number(quantity);
+  if (!Number.isFinite(n)) return quantity;
+  return new Intl.NumberFormat(getNumberLocale(), { maximumFractionDigits: 4 }).format(n);
+}
+
 function suggestedShare(remaining: string): string {
   return remaining.startsWith('-') || remaining === '0' ? '' : remaining;
 }
@@ -162,6 +170,8 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
   };
 
   const save = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: () => {
       const body: AllocationRowInput[] = rows.map((r) => {
         const share = normalizeShare(r.share) ?? r.share;
@@ -178,6 +188,8 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
     onError: (err) => setServerError(describe(err)),
   });
   const clear = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: () => costStructureApi.clearAllocation(allocation!.position_id),
     onSuccess: () => {
       invalidate();
@@ -277,7 +289,7 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
               <input type="radio" name="alloc-mode" checked={mode === 'quantity'} onChange={() => switchMode('quantity')} />
               {t('boq.cost_allocation.mode_quantity', {
                 defaultValue: 'Quantity (of {{quantity}} {{unit}})',
-                quantity: allocation.quantity,
+                quantity: quantityLabel(allocation.quantity),
                 unit: allocation.unit,
               })}
             </label>

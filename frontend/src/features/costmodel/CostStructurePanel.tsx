@@ -215,6 +215,10 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
   });
 
   const structure = structureQuery.data;
+  // The server always lists both suspense buckets, empty ones included, so emptiness is
+  // read from what they carry. An empty structure shows guidance, not a green light.
+  const suspenseInUse = (structure?.suspense ?? []).filter((b) => b.line_count > 0 || Number(b.amount) !== 0);
+  const structureEmpty = !structure || (structure.nodes.length === 0 && suspenseInUse.length === 0);
   const lists = useMemo(() => listsQuery.data ?? [], [listsQuery.data]);
   const resolvedCurrency = structure?.currency || currency || '';
   const money = (value: string) => formatCurrency(value, resolvedCurrency);
@@ -242,6 +246,8 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
   };
 
   const apply = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: () =>
       costStructureApi.applyCodeList(projectId, chosenKey, maxLevel ? Number(maxLevel) : null),
     onSuccess: (result) => {
@@ -260,6 +266,8 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
   });
 
   const removeList = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: () => costStructureApi.deleteCodeList(projectId, chosenKey),
     onSuccess: () => {
       setConfirmDelete(false);
@@ -317,6 +325,8 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
   const [edit, setEdit] = useState<EditState | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
   const save = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: ({ id, patch }: { id: string; patch: AccountPatch }) =>
       costStructureApi.updateAccount(id, patch),
     onSuccess: () => {
@@ -379,7 +389,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
             })}
           </p>
         </div>
-        {structure && <TrafficLight findings={structure.findings} />}
+        {structure && !structureEmpty && <TrafficLight findings={structure.findings} />}
       </div>
 
       <div className="flex flex-wrap items-end gap-2">
@@ -478,7 +488,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
         {getErrorMessage(structureQuery.error)}
       </div>
     );
-  } else if (!structure || (structure.nodes.length === 0 && structure.suspense.length === 0)) {
+  } else if (!structure || structureEmpty) {
     body = (
       <EmptyState
         icon={<FolderTree size={22} />}
@@ -585,7 +595,7 @@ export function CostStructurePanel({ projectId, currency, boqId }: CostStructure
                 </Fragment>
               );
             })}
-            {structure.suspense.map((bucket) => (
+            {suspenseInUse.map((bucket) => (
               <tr
                 key={bucket.kind}
                 className="border-b border-border-light/60 bg-amber-50/60 dark:bg-amber-900/10"

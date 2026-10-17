@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const spine = vi.hoisted(() => ({ getSpineAccounts: vi.fn(), getSpineLines: vi.fn() }));
 const structure = vi.hoisted(() => ({ putAllocation: vi.fn(), clearAllocation: vi.fn() }));
@@ -15,7 +15,7 @@ vi.mock('@/features/costmodel/structureApi', async (importOriginal) => {
 
 import { ApiError } from '@/shared/lib/api';
 import type { PositionAllocation } from '@/features/costmodel/structureApi';
-import { CostAllocationDrawer } from './CostAllocationDrawer';
+import { CostAllocationDrawer, quantityLabel } from './CostAllocationDrawer';
 
 function allocation(over: Partial<PositionAllocation> = {}): PositionAllocation {
   return {
@@ -35,6 +35,7 @@ function allocation(over: Partial<PositionAllocation> = {}): PositionAllocation 
         account_id: 'acc-330',
         account_code: '330',
         account_title: 'External walls',
+        account_postable: true,
         share: '1',
         fraction: '1',
         amount: '1000.00',
@@ -44,13 +45,20 @@ function allocation(over: Partial<PositionAllocation> = {}): PositionAllocation 
     problem: null,
     share_total: '1',
     share_expected: '1',
+    in_suspense: false,
     ...over,
   };
 }
 
+/** Metas of the mutations that reached the global error handler, as main.tsx wires it. */
+const globalErrors: Array<Record<string, unknown> | undefined> = [];
+
 function renderDrawer(a: PositionAllocation | undefined = allocation()) {
   const onClose = vi.fn();
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    mutationCache: new MutationCache({ onError: (_e, _v, _c, m) => void globalErrors.push(m.meta) }),
+  });
   render(
     <QueryClientProvider client={client}>
       <CostAllocationDrawer open onClose={onClose} projectId="p1" allocation={a} currency="EUR" />
@@ -67,6 +75,7 @@ beforeEach(() => {
   spine.getSpineLines.mockReset().mockResolvedValue([]);
   structure.putAllocation.mockReset();
   structure.clearAllocation.mockReset();
+  globalErrors.length = 0;
 });
 
 describe('<CostAllocationDrawer>', () => {
@@ -127,6 +136,15 @@ describe('<CostAllocationDrawer>', () => {
     renderDrawer();
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(await screen.findByText('A share points at a cost line that belongs to another bill.')).toBeInTheDocument();
+    // The drawer says it in the user's language; the global toast must not repeat it raw.
+    expect(globalErrors).toEqual([{ suppressGlobalErrorToast: true }]);
+  });
+
+  it('writes the position quantity the way people write it', () => {
+    expect(quantityLabel('610.0000')).toBe('610');
+    expect(quantityLabel('12.5000')).toBe('12.5');
+    renderDrawer(allocation({ quantity: '610.0000', unit: 'm2' }));
+    expect(screen.getByLabelText(/Quantity \(of 610 m2\)/)).toBeInTheDocument();
   });
 
   it('removes the allocation', async () => {

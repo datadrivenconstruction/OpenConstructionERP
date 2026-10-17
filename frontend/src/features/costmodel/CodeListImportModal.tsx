@@ -72,6 +72,8 @@ export function CodeListImportModal({ open, projectId, onClose, onImported }: Co
   };
 
   const run = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: (dryRun: boolean) =>
       costStructureApi.importCodeList(projectId, { file: file!, key, name, dryRun }),
     onSuccess: (result, dryRun) => {
