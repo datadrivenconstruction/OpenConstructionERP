@@ -24,7 +24,7 @@ export interface CostAllocationGridContext {
 }
 
 export type AllocationCellView =
-  | { kind: 'single'; label: string }
+  | { kind: 'single'; label: string; valid: boolean }
   | { kind: 'split'; parts: number; valid: boolean }
   | { kind: 'none' };
 
@@ -34,7 +34,9 @@ export function allocationCellView(allocation: PositionAllocation): AllocationCe
   if (allocation.mode === 'single' || allocation.rows.length === 1) {
     const row = allocation.rows[0]!;
     const label = [row.account_code, row.cost_line_code].filter(Boolean).join(' · ');
-    return { kind: 'single', label: label || row.cost_line_description };
+    // A one-row quantity split goes stale like any split when the position is
+    // remeasured, so validity travels with the single view as well.
+    return { kind: 'single', label: label || row.cost_line_description, valid: allocation.valid };
   }
   return { kind: 'split', parts: allocation.rows.length, valid: allocation.valid };
 }
@@ -56,7 +58,17 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
 
   let content: React.ReactNode;
   let title: string;
-  if (view.kind === 'single') {
+  if (view.kind === 'single' && !view.valid) {
+    title = t('boq.cost_allocation.invalid_tip', {
+      defaultValue: 'The shares no longer add up, for example after the quantity changed. Click to fix them.',
+    });
+    content = (
+      <span className="inline-flex min-w-0 items-center gap-1 text-2xs text-semantic-error">
+        <AlertTriangle size={11} className="shrink-0" />
+        <span className="truncate font-mono">{view.label}</span>
+      </span>
+    );
+  } else if (view.kind === 'single') {
     title = t('boq.cost_allocation.single_tip', {
       defaultValue: 'On one cost line. Click to split or move it.',
     });
@@ -95,7 +107,7 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
       }}
       title={title}
       data-testid={`cost-allocation-cell-${id}`}
-      className="flex h-full w-full min-w-0 items-center text-left hover:underline"
+      className="flex h-full w-full min-w-0 items-center text-start hover:underline"
     >
       {content}
     </button>

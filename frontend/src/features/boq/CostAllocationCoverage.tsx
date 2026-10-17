@@ -89,7 +89,7 @@ export function CostAllocationCoverageBar({
         onClick={onToggleColumn}
         aria-pressed={showColumn}
         data-testid="cost-allocation-column-toggle"
-        className={`ml-auto flex items-center gap-1 rounded-md px-2 py-0.5 font-medium transition-colors ${
+        className={`ms-auto flex items-center gap-1 rounded-md px-2 py-0.5 font-medium transition-colors ${
           showColumn ? 'bg-oe-blue/10 text-oe-blue' : 'text-content-secondary hover:bg-surface-secondary'
         }`}
       >
@@ -97,6 +97,36 @@ export function CostAllocationCoverageBar({
         {showColumn
           ? t('boq.cost_allocation.hide_column', { defaultValue: 'Hide allocation column' })
           : t('boq.cost_allocation.show_column', { defaultValue: 'Show allocation column' })}
+      </button>
+    </div>
+  );
+}
+
+export interface CostAllocationCoverageErrorProps {
+  onRetry: () => void;
+}
+
+/**
+ * The coverage bar when the allocations could not be loaded. Without it the
+ * bar and the allocation column would simply be missing, which reads as "no
+ * position is costed" rather than "something failed".
+ */
+export function CostAllocationCoverageError({ onRetry }: CostAllocationCoverageErrorProps) {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border-light bg-surface-elevated px-3 py-1.5 text-xs text-semantic-error"
+      role="alert"
+      data-testid="cost-allocation-coverage-error"
+    >
+      <span className="flex items-center gap-1">
+        <AlertTriangle size={12} />
+        {t('boq.cost_allocation.coverage_failed', {
+          defaultValue: 'The cost allocation of this bill could not be loaded.',
+        })}
+      </span>
+      <button type="button" onClick={onRetry} className="ms-auto font-medium text-oe-blue hover:underline">
+        {t('common.retry', { defaultValue: 'Retry' })}
       </button>
     </div>
   );

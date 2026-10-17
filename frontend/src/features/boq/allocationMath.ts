@@ -13,6 +13,12 @@ import { normalizeDecimalSeparators } from '@/shared/lib/parseDecimal';
 /** Relative tolerance of a share total against its target: 0.01 %. */
 export const SHARE_TOLERANCE = '0.0001';
 
+/** Most decimals a share may carry; the backend refuses more (`decimal_places=6`). */
+export const MAX_SHARE_DECIMALS = 6;
+
+/** Most shares one position may be split into; the backend refuses more. */
+export const MAX_SHARES = 50;
+
 const DECIMAL_RE = /^([+-])?(\d+)(?:\.(\d*))?$|^([+-])?\.(\d+)$/;
 
 interface Scaled {
@@ -61,6 +67,8 @@ export interface ShareCheck {
   remaining: string;
   /** Every share parsed and is greater than zero. */
   sharesValid: boolean;
+  /** Some share carries more than {@link MAX_SHARE_DECIMALS} decimals. */
+  tooPrecise: boolean;
   /** The total meets the target within the tolerance. */
   addsUp: boolean;
 }
@@ -93,6 +101,7 @@ export function checkShares(mode: 'percent' | 'quantity', shares: readonly strin
     expected: format(exp, scale),
     remaining: format(diff, scale),
     sharesValid,
+    tooPrecise: parsed.some((p) => p !== null && p.scale > MAX_SHARE_DECIMALS),
     addsUp: sharesValid && exp !== 0n && absDiff <= allowed,
   };
 }

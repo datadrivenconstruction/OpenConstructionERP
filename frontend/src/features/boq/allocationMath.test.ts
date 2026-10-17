@@ -5,6 +5,11 @@ import { describe, it, expect } from 'vitest';
 import { checkShares, normalizeShare, splitPreview } from './allocationMath';
 
 describe('checkShares', () => {
+  it('flags a share with more decimals than the backend stores', () => {
+    expect(checkShares('percent', ['50.000001', '49.999999'], '0')).toMatchObject({ tooPrecise: false, addsUp: true });
+    expect(checkShares('percent', ['50.0000001', '49.9999999'], '0').tooPrecise).toBe(true);
+  });
+
   it('adds percent shares exactly and accepts a hundredth of a percent of slack', () => {
     expect(checkShares('percent', ['33.333', '33.333', '33.334'], '0')).toMatchObject({
       total: '100',

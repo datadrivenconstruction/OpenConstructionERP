@@ -220,6 +220,8 @@ export interface CostLine {
   unit: string;
   source: string;
   boq_position_id: string | null;
+  /** The bill the line carries money of; null for a line on no bill. */
+  boq_id?: string | null;
   currency: string;
   estimate_quantity: string;
   estimate_unit_rate: string;

@@ -86,6 +86,19 @@ describe('<CodeListImportModal>', () => {
     expect(toast.addToast).toHaveBeenCalledWith(expect.objectContaining({ type: 'success' }));
   });
 
+  it('counts codes and levels with plural forms', async () => {
+    api.importCodeList
+      .mockResolvedValueOnce({ ...base, entry_count: 1, depth: 1, ok: true, dry_run: true, issues: [], preview: [] })
+      .mockResolvedValueOnce({ ...base, entry_count: 12, depth: 3, ok: true, dry_run: false, issues: [], preview: [] });
+    renderModal();
+    fill();
+    fireEvent.click(screen.getByRole('button', { name: 'Check file' }));
+    expect(await screen.findByText('The file is fine: 1 code in 1 level.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Import' }));
+    await waitFor(() => expect(toast.addToast).toHaveBeenCalled());
+    expect(toast.addToast.mock.calls[0]![0].message).toBe('Company Codes 2026 is stored with 12 codes in 3 levels.');
+  });
+
   it('shows a file-level refusal as a sentence', async () => {
     api.importCodeList.mockRejectedValueOnce(
       new ApiError(400, 'Bad Request', { detail: { problem: 'missing_code_column', message: 'x', params: {} } }),

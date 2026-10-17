@@ -137,6 +137,44 @@ describe('<CostAllocationDrawer>', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
+  it('does not offer a cost line of another bill', async () => {
+    spine.getSpineLines.mockResolvedValue([
+      { id: 'line-own', project_id: 'p1', control_account_id: 'acc-340', code: 'CL-OWN', description: 'Own bill line', unit: 'm3', source: 'boq', boq_position_id: null, boq_id: 'boq-1', currency: 'EUR', estimate_quantity: '0', estimate_unit_rate: '0', estimate_amount: '0', status: 'active' },
+      { id: 'line-free', project_id: 'p1', control_account_id: null, code: 'CL-FREE', description: 'Line on no bill', unit: '', source: 'manual', boq_position_id: null, boq_id: null, currency: 'EUR', estimate_quantity: '0', estimate_unit_rate: '0', estimate_amount: '0', status: 'active' },
+      { id: 'line-other', project_id: 'p1', control_account_id: 'acc-340', code: 'CL-OTHER', description: 'Other bill line', unit: 'm3', source: 'boq', boq_position_id: null, boq_id: 'boq-2', currency: 'EUR', estimate_quantity: '0', estimate_unit_rate: '0', estimate_amount: '0', status: 'active' },
+    ]);
+    renderDrawer();
+    const candidates = screen.getByTestId('cost-allocation-candidates');
+    expect(await within(candidates).findByText('Own bill line')).toBeInTheDocument();
+    expect(within(candidates).getByText('Line on no bill')).toBeInTheDocument();
+    expect(within(candidates).queryByText('Other bill line')).not.toBeInTheDocument();
+  });
+
+  it('says so when the candidates cannot be loaded instead of "Nothing matches"', async () => {
+    spine.getSpineLines.mockRejectedValue(new ApiError(500, 'Server Error', null));
+    renderDrawer();
+    const candidates = screen.getByTestId('cost-allocation-candidates');
+    expect(await within(candidates).findByText('Cost lines and accounts could not be loaded.')).toBeInTheDocument();
+    expect(within(candidates).queryByText('Nothing matches.')).not.toBeInTheDocument();
+    spine.getSpineLines.mockResolvedValue([]);
+    fireEvent.click(within(candidates).getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(spine.getSpineLines).toHaveBeenCalledTimes(2));
+  });
+
+  it('holds back a share the server would refuse for its precision', async () => {
+    renderDrawer();
+    fireEvent.click(await screen.findByText('Internal walls'));
+    fireEvent.change(screen.getByLabelText('Share for CL-1'), { target: { value: '60.0000001' } });
+    fireEvent.change(screen.getByLabelText('Share for 340'), { target: { value: '39.9999999' } });
+    expect(screen.getByRole('alert')).toHaveTextContent('Too many decimals in a share. Allowed: 6.');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('labels the candidate search for assistive technology', () => {
+    renderDrawer();
+    expect(screen.getByRole('textbox', { name: 'Find a cost line or account by code or text' })).toBeInTheDocument();
+  });
+
   it('names a stored split that no longer adds up', () => {
     renderDrawer(
       allocation({

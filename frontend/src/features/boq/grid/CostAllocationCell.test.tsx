@@ -6,7 +6,7 @@ import type { ICellRendererParams } from 'ag-grid-community';
 
 import type { PositionAllocation } from '@/features/costmodel/structureApi';
 import { CostAllocationCellRenderer, allocationCellView } from './CostAllocationCell';
-import { CostAllocationCoverageBar } from '../CostAllocationCoverage';
+import { CostAllocationCoverageBar, CostAllocationCoverageError } from '../CostAllocationCoverage';
 
 const row = {
   cost_line_id: 'l1',
@@ -41,7 +41,7 @@ function alloc(over: Partial<PositionAllocation>): PositionAllocation {
 
 describe('allocationCellView', () => {
   it('reads single, split and none', () => {
-    expect(allocationCellView(alloc({}))).toEqual({ kind: 'single', label: '330 · CL-1' });
+    expect(allocationCellView(alloc({}))).toEqual({ kind: 'single', label: '330 · CL-1', valid: true });
     expect(allocationCellView(alloc({ mode: 'percent', rows: [row, { ...row, cost_line_id: 'l2' }], valid: false }))).toEqual({
       kind: 'split',
       parts: 2,
@@ -69,6 +69,13 @@ describe('<CostAllocationCellRenderer>', () => {
   it('marks an unallocated position and draws nothing for a position not in the list', () => {
     cell(alloc({ mode: 'none', rows: [] }));
     expect(screen.getByText('Unallocated')).toBeInTheDocument();
+  });
+
+  it('flags a one-row quantity split that no longer adds up', () => {
+    cell(alloc({ mode: 'quantity', valid: false, problem: 'shares_do_not_add_up' }));
+    const button = screen.getByRole('button');
+    expect(button).toHaveTextContent('330 · CL-1');
+    expect(button).toHaveAttribute('title', expect.stringMatching(/no longer add up/));
   });
 
   it('renders nothing without an allocation', () => {
@@ -103,5 +110,15 @@ describe('<CostAllocationCoverageBar>', () => {
     expect(screen.getByText('Splits to fix: 1')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('cost-allocation-column-toggle'));
     expect(onToggle).toHaveBeenCalled();
+  });
+});
+
+describe('<CostAllocationCoverageError>', () => {
+  it('says the allocation failed to load and retries', () => {
+    const onRetry = vi.fn();
+    render(<CostAllocationCoverageError onRetry={onRetry} />);
+    expect(screen.getByRole('alert')).toHaveTextContent('The cost allocation of this bill could not be loaded.');
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(onRetry).toHaveBeenCalled();
   });
 });

@@ -76,9 +76,9 @@ import { ResourceSummary } from './ResourceSummary';
 import { CommentDrawer, type CommentEntry } from './CommentDrawer';
 import { PriceAnalysisPanel } from './PriceAnalysisPanel';
 import { PositionActualsDrawer } from '@/features/costmodel/PositionActualsDrawer';
-import { costStructureApi, type PositionAllocation } from '@/features/costmodel/structureApi';
+import { costStructureApi, statusOf, type PositionAllocation } from '@/features/costmodel/structureApi';
 import { CostAllocationDrawer } from './CostAllocationDrawer';
-import { CostAllocationCoverageBar } from './CostAllocationCoverage';
+import { CostAllocationCoverageBar, CostAllocationCoverageError } from './CostAllocationCoverage';
 import { PositionProcurementDrawer } from '@/features/procurement/PositionProcurementDrawer';
 import { MeasurementDrawer } from './MeasurementDrawer';
 import { GaebSiteExchangeDialog } from './GaebSiteExchangeDialog';
@@ -2592,6 +2592,11 @@ export function BOQEditorPage() {
     return map;
   }, [allocationsQuery.data]);
   const [allocationPositionId, setAllocationPositionId] = useState<string | null>(null);
+  // A viewer without cost-model access (or with the module off) simply sees no
+  // allocation; any other failure is said out loud instead of looking empty.
+  const allocationsStatus = allocationsQuery.isError ? statusOf(allocationsQuery.error) : null;
+  const allocationsFailed =
+    allocationsQuery.isError && allocationsStatus !== 401 && allocationsStatus !== 403 && allocationsStatus !== 404;
 
   const displayCurrencyMeta = useMemo(() => {
     if (!displayCurrency) return null;
@@ -5546,6 +5551,7 @@ export function BOQEditorPage() {
             onToggleColumn={toggleCostAllocation}
           />
         )}
+        {allocationsFailed && <CostAllocationCoverageError onRetry={() => void allocationsQuery.refetch()} />}
         <BOQFilterBar
           search={boqSearch}
           onSearch={setBoqSearch}

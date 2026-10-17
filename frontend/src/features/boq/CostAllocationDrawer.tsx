@@ -27,7 +27,10 @@ import {
   type SplitMode,
 } from '@/features/costmodel/structureApi';
 import { problemMessage } from '@/features/costmodel/problemMessages';
-import { checkShares, normalizeShare, splitPreview } from './allocationMath';
+import { MAX_SHARE_DECIMALS, MAX_SHARES, checkShares, normalizeShare, splitPreview } from './allocationMath';
+
+/** Longest search the cost-line endpoint takes (`max_length=200`). */
+const MAX_SEARCH = 200;
 
 export interface CostAllocationDrawerProps {
   open: boolean;
@@ -100,7 +103,7 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
   }, [open, positionId]);
 
   useEffect(() => {
-    const id = setTimeout(() => setDebounced(search.trim()), 250);
+    const id = setTimeout(() => setDebounced(search.trim().slice(0, MAX_SEARCH)), 250);
     return () => clearTimeout(id);
   }, [search]);
 
@@ -125,21 +128,28 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
       .filter((a) => !q || a.code.toLowerCase().includes(q) || (a.title || a.name).toLowerCase().includes(q))
       .slice(0, 30)
       .map((a) => ({ type: 'account' as const, id: a.id, code: a.code, label: a.title || a.name }));
-    const lines = (linesQuery.data ?? []).map((l) => ({
+    // A cost line that carries another bill is refused on save
+    // (`line_of_other_bill`), so it is not offered.
+    const boqId = allocation?.boq_id;
+    const lines = (linesQuery.data ?? []).filter((l) => !l.boq_id || l.boq_id === boqId).map((l) => ({
       type: 'line' as const,
       id: l.id,
       code: l.code,
       label: l.description,
     }));
     return [...accounts, ...lines].filter((c) => !chosen.has(`${c.type}:${c.id}`));
-  }, [accountsQuery.data, linesQuery.data, debounced, chosen]);
+  }, [accountsQuery.data, linesQuery.data, debounced, chosen, allocation?.boq_id]);
+  const candidatesLoading = accountsQuery.isLoading || linesQuery.isLoading;
+  const candidatesFailed = accountsQuery.isError || linesQuery.isError;
 
   const quantity = allocation?.quantity ?? '0';
   const check = checkShares(mode, rows.map((r) => r.share), quantity);
   const preview = splitPreview(allocation?.total ?? '0', rows.map((r) => r.share));
   const duplicate = chosen.size !== rows.length;
   const quantityless = mode === 'quantity' && checkShares('quantity', ['1'], quantity).expected === '0';
-  const canSave = rows.length > 0 && check.sharesValid && check.addsUp && !duplicate && !quantityless;
+  const tooMany = rows.length > MAX_SHARES;
+  const canSave =
+    rows.length > 0 && check.sharesValid && check.addsUp && !check.tooPrecise && !tooMany && !duplicate && !quantityless;
 
   const invalidate = () => {
     if (allocation) queryClient.invalidateQueries({ queryKey: ['boq-allocations', allocation.boq_id] });
@@ -203,10 +213,14 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
   let status: React.ReactNode = null;
   if (duplicate) {
     status = problemMessage(t, 'duplicate_target');
+  } else if (tooMany) {
+    status = problemMessage(t, 'too_many_shares', { max: MAX_SHARES });
   } else if (quantityless) {
     status = problemMessage(t, 'quantity_split_without_quantity');
   } else if (rows.length > 0 && !check.sharesValid) {
     status = problemMessage(t, 'share_not_positive');
+  } else if (check.tooPrecise) {
+    status = problemMessage(t, 'share_too_precise', { max: MAX_SHARE_DECIMALS });
   } else if (rows.length > 0 && !check.addsUp) {
     status = problemMessage(t, 'shares_do_not_add_up', {
       total: `${check.total} ${unitLabel}`.trim(),
@@ -226,7 +240,7 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
         allocation ? (
           <span>
             <span className="font-mono">{allocation.ordinal}</span> {allocation.description}
-            <span className="ml-2 text-content-tertiary">{money(allocation.total)}</span>
+            <span className="ms-2 text-content-tertiary">{money(allocation.total)}</span>
           </span>
         ) : undefined
       }
@@ -271,14 +285,14 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
 
           <table className="w-full text-sm" data-testid="cost-allocation-rows">
             <thead>
-              <tr className="text-left text-2xs uppercase text-content-tertiary">
-                <th className="py-1 pr-2">{t('boq.cost_allocation.col_target', { defaultValue: 'Cost line or account' })}</th>
-                <th className="w-28 py-1 pr-2 text-right">
+              <tr className="text-start text-2xs uppercase text-content-tertiary">
+                <th className="py-1 pe-2">{t('boq.cost_allocation.col_target', { defaultValue: 'Cost line or account' })}</th>
+                <th className="w-28 py-1 pe-2 text-end">
                   {mode === 'percent'
                     ? t('boq.cost_allocation.col_share_pct', { defaultValue: 'Share %' })
                     : t('boq.cost_allocation.col_share_qty', { defaultValue: 'Quantity' })}
                 </th>
-                <th className="w-28 py-1 pr-2 text-right">{t('boq.cost_allocation.col_amount', { defaultValue: 'Amount' })}</th>
+                <th className="w-28 py-1 pe-2 text-end">{t('boq.cost_allocation.col_amount', { defaultValue: 'Amount' })}</th>
                 <th className="w-8" />
               </tr>
             </thead>
@@ -294,26 +308,26 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
               )}
               {rows.map((r, i) => (
                 <tr key={r.key} className="border-t border-border-light">
-                  <td className="py-1.5 pr-2">
-                    <span className="mr-1.5 rounded bg-surface-secondary px-1 py-0.5 text-2xs text-content-tertiary">
+                  <td className="py-1.5 pe-2">
+                    <span className="me-1.5 rounded bg-surface-secondary px-1 py-0.5 text-2xs text-content-tertiary">
                       {r.target.type === 'account'
                         ? t('boq.cost_allocation.kind_account', { defaultValue: 'Account' })
                         : t('boq.cost_allocation.kind_line', { defaultValue: 'Cost line' })}
                     </span>
                     <span className="font-mono text-xs">{r.target.code}</span>
-                    <span className="ml-1.5 text-content-secondary">{r.target.label}</span>
+                    <span className="ms-1.5 text-content-secondary">{r.target.label}</span>
                   </td>
-                  <td className="py-1.5 pr-2">
+                  <td className="py-1.5 pe-2">
                     <input
                       type="text"
                       inputMode="decimal"
                       value={r.share}
                       onChange={(e) => setShare(r.key, e.target.value)}
                       aria-label={t('boq.cost_allocation.share_for', { defaultValue: 'Share for {{code}}', code: r.target.code })}
-                      className="h-7 w-full rounded-md border border-border bg-surface-primary px-2 text-right tabular-nums"
+                      className="h-7 w-full rounded-md border border-border bg-surface-primary px-2 text-end tabular-nums"
                     />
                   </td>
-                  <td className="py-1.5 pr-2 text-right tabular-nums text-content-secondary">{money(preview[i] ?? '0')}</td>
+                  <td className="py-1.5 pe-2 text-end tabular-nums text-content-secondary">{money(preview[i] ?? '0')}</td>
                   <td className="py-1.5">
                     <button
                       type="button"
@@ -330,10 +344,10 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
             {rows.length > 0 && (
               <tfoot>
                 <tr className="border-t-2 border-border">
-                  <th className="py-1.5 pr-2 text-left text-xs font-semibold">
+                  <th className="py-1.5 pe-2 text-start text-xs font-semibold">
                     {t('boq.cost_allocation.sum', { defaultValue: 'Sum' })}
                   </th>
-                  <td className="py-1.5 pr-2 text-right text-xs font-semibold tabular-nums" data-testid="cost-allocation-sum">
+                  <td className="py-1.5 pe-2 text-end text-xs font-semibold tabular-nums" data-testid="cost-allocation-sum">
                     {check.total} / {check.expected} {unitLabel}
                   </td>
                   <td colSpan={2} />
@@ -370,16 +384,36 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('boq.cost_allocation.search', { defaultValue: 'Find a cost line or account by code or text' })}
+                aria-label={t('boq.cost_allocation.search', { defaultValue: 'Find a cost line or account by code or text' })}
+                maxLength={MAX_SEARCH}
                 className="flex-1 bg-transparent text-sm outline-none"
               />
             </div>
             <ul className="max-h-56 overflow-y-auto p-1" data-testid="cost-allocation-candidates">
-              {(accountsQuery.isLoading || linesQuery.isLoading) && (
+              {candidatesLoading && (
                 <li className="px-2 py-2 text-xs text-content-tertiary">
                   {t('boq.cost_allocation.loading', { defaultValue: 'Loading cost lines and accounts...' })}
                 </li>
               )}
-              {!accountsQuery.isLoading && !linesQuery.isLoading && candidates.length === 0 && (
+              {!candidatesLoading && candidatesFailed && (
+                <li className="flex items-center gap-2 px-2 py-2 text-xs text-semantic-error" role="alert">
+                  <AlertTriangle size={13} className="shrink-0" />
+                  {t('boq.cost_allocation.candidates_failed', {
+                    defaultValue: 'Cost lines and accounts could not be loaded.',
+                  })}
+                  <button
+                    type="button"
+                    className="ms-auto text-oe-blue hover:underline"
+                    onClick={() => {
+                      if (accountsQuery.isError) void accountsQuery.refetch();
+                      if (linesQuery.isError) void linesQuery.refetch();
+                    }}
+                  >
+                    {t('common.retry', { defaultValue: 'Retry' })}
+                  </button>
+                </li>
+              )}
+              {!candidatesLoading && !candidatesFailed && candidates.length === 0 && (
                 <li className="px-2 py-2 text-xs text-content-tertiary">
                   {t('boq.cost_allocation.no_candidates', { defaultValue: 'Nothing matches.' })}
                 </li>
@@ -389,7 +423,7 @@ export function CostAllocationDrawer({ open, onClose, projectId, allocation, cur
                   <button
                     type="button"
                     onClick={() => addTarget(c)}
-                    className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-surface-secondary"
+                    className="flex w-full items-center gap-2 rounded px-2 py-1 text-start text-sm hover:bg-surface-secondary"
                   >
                     <Plus size={12} className="text-oe-blue" />
                     <span className="rounded bg-surface-secondary px-1 py-0.5 text-2xs text-content-tertiary">

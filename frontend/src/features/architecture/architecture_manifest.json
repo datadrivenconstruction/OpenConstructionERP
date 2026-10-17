@@ -67661,12 +67661,14 @@
         "models.py",
         "permissions.py",
         "position_actuals.py",
+        "repairs.py",
         "repository.py",
         "router.py",
         "schemas.py",
         "seed.py",
         "service.py",
         "structure.py",
+        "structure_backfill.py",
         "structure_rules.py",
         "structure_schemas.py",
         "structure_service.py",
@@ -271727,10 +271729,10 @@
     },
     {
       "name": "costmodel",
-      "ts_files": 22,
+      "ts_files": 23,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 22
+      "test_files": 7,
+      "total_files": 23
     },
     {
       "name": "costs",
@@ -274394,9 +274396,9 @@
     "total_relationships": 240,
     "total_routes": 4578,
     "total_schemas": 4055,
-    "total_python_files": 2722,
+    "total_python_files": 2724,
     "frontend_features": 209,
-    "frontend_ts_files": 3538,
+    "frontend_ts_files": 3539,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
