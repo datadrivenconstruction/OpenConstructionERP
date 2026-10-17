@@ -702,6 +702,34 @@ _AGREEMENT_TRANSITIONS: dict[str, set[str]] = {
 SUBCONTRACT_RULE_SET = "subcontract"
 
 
+def _refused_subcontractor(exc: IntegrityError) -> HTTPException:
+    """The answer for a subcontractor row the database refused.
+
+    It names the constraint when it is one we know and is otherwise a plain
+    conflict. It never blames ``tax_id``: no constraint makes it unique, so a
+    tax number is never the reason. The one constraint a migrated install
+    carries is the foreign key from ``contact_id`` to the contacts table; its
+    name holds the column whether PostgreSQL chose it or the naming
+    convention truncated it, so the column is what is matched.
+    """
+    orig = getattr(exc, "orig", None)
+    cause = getattr(orig, "__cause__", None) or orig
+    sqlstate = getattr(cause, "sqlstate", None) or getattr(orig, "pgcode", None)
+    # asyncpg carries the name on the error itself, psycopg on its ``diag``.
+    constraint = str(
+        getattr(cause, "constraint_name", None) or getattr(getattr(cause, "diag", None), "constraint_name", None) or ""
+    )
+    if sqlstate == "23503" and "contact_id" in constraint:
+        return HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="The linked contact does not exist.",
+        )
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail="This subcontractor conflicts with an existing record.",
+    )
+
+
 def _assert_transition(
     from_status: str,
     to_status: str,
@@ -797,15 +825,12 @@ class SubcontractorService:
         )
         try:
             await self.subs.create(entity)
-        except IntegrityError:
+        except IntegrityError as exc:
             # Some other constraint refused the row. It is not a tax_id race:
             # nothing in the database makes tax_id unique, so two concurrent
             # POSTs with the same number both land.
             await self.session.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="A subcontractor with this tax_id already exists.",
-            ) from None
+            raise _refused_subcontractor(exc) from None
         event_bus.publish_detached(
             "subcontractors.subcontractor.created",
             {"subcontractor_id": str(entity.id), "legal_name": entity.legal_name},

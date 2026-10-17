@@ -12,13 +12,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { Check, Loader2, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { compareNames } from '@/shared/lib/collator';
-import { getErrorMessage } from '@/shared/lib/api';
-import { useToastStore } from '@/stores/useToastStore';
-import { processesForModules, ramOf, useFirstRun, useProcesses, type ProcessCategory } from './api';
+import { processesForModules, ramOf, useProcesses, type ProcessCategory } from './api';
+import { sendFirstRun } from './ProcessesStartWatch';
 
 /** Kinds of service that load a model or an index into memory. */
 const HEAVY = new Set<ProcessCategory>(['ai_model', 'vector_index']);
@@ -31,8 +31,7 @@ export function ProcessesWizard() {
   const wizardOpen = useProcessesUi((s) => s.wizardOpen);
   const closeWizard = useProcessesUi((s) => s.closeWizard);
   const { data } = useProcesses(wizardOpen);
-  const firstRun = useFirstRun();
-  const addToast = useToastStore((s) => s.addToast);
+  const qc = useQueryClient();
   const ref = useRef<HTMLDivElement>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
 
@@ -79,19 +78,13 @@ export function ProcessesWizard() {
 
   if (!wizardOpen || !isAdmin) return null;
 
-  const finish = (startNow: boolean) =>
-    firstRun.mutate(
-      { module_ids: startNow ? [...picked] : [], start_now: startNow },
-      {
-        onSuccess: () => closeWizard(),
-        onError: (err) =>
-          addToast({
-            type: 'error',
-            title: t('processes.wizard.failed', { defaultValue: 'Could not start the services' }),
-            message: getErrorMessage(err),
-          }),
-      },
-    );
+  // The answer is recorded and the services load in the background, so the
+  // wizard closes at once instead of waiting on either. The header follows the
+  // starts and reports them; a failed send comes back as a toast with Retry.
+  const finish = (startNow: boolean) => {
+    closeWizard();
+    void sendFirstRun(qc, { module_ids: startNow ? [...picked] : [], start_now: startNow });
+  };
 
   const toggle = (id: string) =>
     setPicked((s) => {
@@ -227,7 +220,6 @@ export function ProcessesWizard() {
           <button
             type="button"
             onClick={() => finish(false)}
-            disabled={firstRun.isPending}
             data-testid="wizard-later"
             className="rounded-lg px-3 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary"
           >
@@ -236,11 +228,9 @@ export function ProcessesWizard() {
           <button
             type="button"
             onClick={() => finish(true)}
-            disabled={firstRun.isPending}
             data-testid="wizard-start"
             className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-2 text-sm font-semibold text-white hover:bg-oe-blue/90 disabled:opacity-60"
           >
-            {firstRun.isPending && <Loader2 size={14} className="animate-spin" aria-hidden />}
             {t('processes.wizard.start', { defaultValue: 'Start now' })}
           </button>
         </footer>
