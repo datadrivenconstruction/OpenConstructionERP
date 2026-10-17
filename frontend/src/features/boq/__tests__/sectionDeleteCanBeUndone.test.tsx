@@ -248,7 +248,13 @@ describe('deleting a section', () => {
   it('sends one cascade delete when the window ends without undo, and asks nothing for an empty section', async () => {
     await renderPage();
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    act(() => grid.props!.onDeleteSection('empty'));
+    // The handler is async, so act gets an async callback and is awaited. A
+    // sync act around it returns a promise nobody awaits, and React keeps the
+    // render that drops the row in the act queue until some other act happens
+    // to flush it; on a slow runner none does before the wait gives up.
+    await act(async () => {
+      await grid.props!.onDeleteSection('empty');
+    });
 
     await waitFor(() => expect(screen.queryByTestId('row-empty')).toBeNull(), { timeout: 10_000 });
     expect(screen.queryByTestId('confirm-dialog-confirm')).toBeNull();
