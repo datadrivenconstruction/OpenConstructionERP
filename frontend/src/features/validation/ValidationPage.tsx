@@ -7,19 +7,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldCheck,
   Play,
-  AlertTriangle,
-  CheckCircle2,
   XCircle,
-  Info,
   ChevronDown,
   ChevronRight,
   Download,
-  Wand2,
-  Filter,
-  ExternalLink,
-  AlertOctagon,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
+import { Button, Card, EmptyState, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { validationGuide } from './validationGuide';
 import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
@@ -34,7 +27,9 @@ import {
 } from './validationExport';
 import { ruleSetLabel } from './ruleSetLabels';
 import { EstimateAuditPanel } from './EstimateAuditPanel';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { SummaryStrip, ValidationResults } from './ValidationResults';
+import { ruleTitle } from './ruleTitles';
+import type { FindingFilter, PositionRef } from './validationFindings';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -157,8 +152,6 @@ interface ValidationReportResponse {
     unsupported_rule_sets?: string[];
   } | null;
 }
-
-type FilterMode = 'all' | 'errors' | 'warnings' | 'info' | 'passed';
 
 /* ── Rule-set resolution ──────────────────────────────────────────────── */
 
@@ -321,107 +314,6 @@ function getRuleSetDescription(
   });
 }
 
-/* ── Helpers ───────────────────────────────────────────────────────────── */
-
-function getScoreLabel(pct: number, t: (key: string, fallback: string) => string): string {
-  if (pct >= 95) return t('validation.score_excellent', 'Excellent');
-  if (pct >= 80) return t('validation.score_good', 'Good');
-  if (pct >= 60) return t('validation.score_needs_review', 'Needs Review');
-  return t('validation.score_poor', 'Poor');
-}
-
-function getScoreColor(pct: number): string {
-  if (pct >= 95) return 'text-semantic-success';
-  if (pct >= 80) return 'text-oe-blue';
-  if (pct >= 60) return 'text-semantic-warning';
-  return 'text-semantic-error';
-}
-
-function getScoreRingColor(pct: number): string {
-  if (pct >= 95) return 'stroke-semantic-success';
-  if (pct >= 80) return 'stroke-oe-blue';
-  if (pct >= 60) return 'stroke-semantic-warning';
-  return 'stroke-semantic-error';
-}
-
-/* ── Sub-components ────────────────────────────────────────────────────── */
-
-/**
- * The score is not a pass rate. Any blocking error caps it at
- * `0.5 / (1 + errors)` (see `compute_quality_score`, E-VAL-007), so a run with
- * a handful of errors reads near zero even when almost every rule passed. Shown
- * on its own next to "Passed 4721 of 4975" that looks like two numbers
- * contradicting each other, so when the cap is what produced the number, say so.
- */
-function ScoreCircle({ score, errors, warnings }: { score: number; errors: number; warnings: number }) {
-  const { t } = useTranslation();
-  const pct = Math.round(score * 100);
-  const capped = errors > 0;
-  const hasWarnings = warnings > 0 && errors === 0;
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference - (pct / 100) * circumference;
-
-  const label = hasWarnings ? t('validation.score_warnings', 'Warnings') : getScoreLabel(pct, t);
-  const color = hasWarnings ? 'text-semantic-warning' : getScoreColor(pct);
-  const ringColor = hasWarnings ? 'stroke-semantic-warning' : getScoreRingColor(pct);
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative h-36 w-36">
-        <svg className="h-36 w-36 -rotate-90" viewBox="0 0 120 120" role="img" aria-label={`${t('validation.quality_score', { defaultValue: 'Quality score' })}: ${pct}%`}>
-          <circle
-            cx="60"
-            cy="60"
-            r={radius}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="8"
-            className="text-surface-secondary"
-          />
-          <circle
-            cx="60"
-            cy="60"
-            r={radius}
-            fill="none"
-            strokeWidth="8"
-            strokeLinecap="round"
-            className={`${ringColor} transition-all duration-700 ease-out`}
-            style={{
-              strokeDasharray: circumference,
-              strokeDashoffset: dashOffset,
-            }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`text-3xl font-bold tabular-nums ${color}`}>
-            {pct}
-          </span>
-          <span className={`text-sm font-medium ${color}`}>%</span>
-        </div>
-      </div>
-      <span className={`text-sm font-semibold ${color}`}>
-        {label}
-      </span>
-      {capped && (
-        <span className="max-w-40 text-center text-xs text-content-secondary">
-          {t('validation.score_capped', {
-            defaultValue: 'Capped by blocking errors, not a pass rate',
-          })}
-        </span>
-      )}
-      {hasWarnings && (
-        <span className="max-w-40 text-center text-xs text-semantic-warning">
-          {t('validation.score_has_warnings', {
-            defaultValue: '{{count}} warning(s)',
-            count: warnings,
-          })}
-        </span>
-      )}
-    </div>
-  );
-}
-
 /**
  * How many decimals to print for a run duration in milliseconds.
  *
@@ -440,291 +332,6 @@ function ScoreCircle({ score, errors, warnings }: { score: number; errors: numbe
  */
 export function durationDecimals(ms: number): number {
   return Math.abs(ms) < 10 ? 2 : 1;
-}
-
-function SummaryCard({ report }: { report: ValidationReportData }) {
-  const { t } = useTranslation();
-
-  return (
-    <Card>
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-content-primary">
-          {t('validation.summary', 'Summary')}
-        </h3>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-content-secondary">
-              {t('validation.rules_checked', 'Rules checked')}
-            </span>
-            <span className="font-medium text-content-primary tabular-nums">
-              {report.counts.total}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2 text-content-secondary">
-              <CheckCircle2 size={14} className="text-semantic-success" />
-              {t('validation.passed', 'Passed')}
-            </span>
-            <span className="font-medium text-semantic-success tabular-nums">
-              {report.counts.passed}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2 text-content-secondary">
-              <AlertTriangle size={14} className="text-semantic-warning" />
-              {t('validation.warnings', 'Warnings')}
-            </span>
-            <span className="font-medium text-semantic-warning tabular-nums">
-              {report.counts.warnings}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2 text-content-secondary">
-              <XCircle size={14} className="text-semantic-error" />
-              {t('validation.errors', 'Errors')}
-            </span>
-            <span className="font-medium text-semantic-error tabular-nums">
-              {report.counts.errors}
-            </span>
-          </div>
-        </div>
-        <div className="border-t border-border-light pt-3">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-content-tertiary">
-              {t('validation.rule_sets', 'Rule sets')}:
-            </span>
-            {report.rule_sets.length > 0 ? (
-              report.rule_sets.map((rs) => <RuleSetChip key={rs} ruleSet={rs} tone="neutral" />)
-            ) : (
-              <span className="text-xs text-content-tertiary italic">
-                {t('validation.no_rule_sets', {
-                  defaultValue: 'none configured for this project',
-                })}
-              </span>
-            )}
-          </div>
-          {report.unsupported_rule_sets && report.unsupported_rule_sets.length > 0 && (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-content-tertiary">
-                {t('validation.unsupported_rule_sets', {
-                  defaultValue: 'Not implemented (did not run):',
-                })}
-              </span>
-              {report.unsupported_rule_sets.map((rs) => (
-                <span
-                  key={rs}
-                  title={t('validation.unsupported_rule_sets_hint', {
-                    defaultValue:
-                      'No validation rules are implemented for this rule set, so it was not run. It is reported as not implemented rather than passed.',
-                  })}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
-                >
-                  {rs}
-                </span>
-              ))}
-            </div>
-          )}
-          <p className="mt-1.5 text-xs text-content-tertiary">
-            {t('validation.rule_sets_auto_hint', {
-              defaultValue:
-                'Rule sets are chosen automatically from the project’s region & classification standard.',
-            })}
-          </p>
-          {report.duration_ms !== null && (
-            <p className="mt-1 text-xs text-content-tertiary tabular-nums">
-              {t('validation.duration_ms', {
-                defaultValue: 'Duration: {{ms}}ms',
-                ms: fmtFixed(report.duration_ms, durationDecimals(report.duration_ms)),
-              })}
-            </p>
-          )}
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function ResultRow({
-  result,
-  expanded,
-  onToggle,
-  boqId,
-  onNavigateToPosition,
-  onRaiseNcr,
-}: {
-  result: ValidationResultItem;
-  expanded: boolean;
-  onToggle: () => void;
-  boqId?: string;
-  onNavigateToPosition?: (boqId: string, positionId: string) => void;
-  /** Open the NCR module with this finding pre-filled. Only offered for
-   *  failing error rows (a real non-conformance worth a formal record). */
-  onRaiseNcr?: (result: ValidationResultItem) => void;
-}) {
-  const { t } = useTranslation();
-
-  const statusIcon = result.passed ? (
-    <CheckCircle2 size={16} className="shrink-0 text-semantic-success" />
-  ) : result.severity === 'error' ? (
-    <XCircle size={16} className="shrink-0 text-semantic-error" />
-  ) : result.severity === 'info' ? (
-    <Info size={16} className="shrink-0 text-blue-500" />
-  ) : (
-    <AlertTriangle size={16} className="shrink-0 text-semantic-warning" />
-  );
-
-  const statusBadgeVariant = result.passed
-    ? 'success'
-    : result.severity === 'error'
-      ? 'error'
-      : result.severity === 'info'
-        ? 'blue'
-        : 'warning';
-
-  const statusLabel = result.passed
-    ? t('validation.status_passed', 'Passed')
-    : result.severity === 'error'
-      ? t('validation.status_error', 'Error')
-      : result.severity === 'info'
-        ? t('validation.status_info', 'Info')
-        : t('validation.status_warning', 'Warning');
-
-  const tooltip = getRuleDescriptions(t)[result.rule_id] || '';
-
-  return (
-    <div
-      className={`rounded-xl border transition-all duration-fast ${
-        expanded
-          ? 'border-border bg-surface-primary shadow-xs'
-          : 'border-border-light bg-surface-primary hover:bg-surface-secondary/50'
-      }`}
-    >
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left"
-        title={tooltip}
-        aria-expanded={expanded}
-        aria-label={`${result.rule_name}: ${statusLabel}`}
-      >
-        {statusIcon}
-        <div className="min-w-0 flex-1">
-          <span className="text-sm font-medium text-content-primary">
-            {result.rule_name}
-          </span>
-        </div>
-        {result.element_ref && (
-          <span className="hidden text-xs font-mono text-content-tertiary sm:inline-block">
-            {result.element_ref.substring(0, 8)}
-          </span>
-        )}
-        <Badge variant={statusBadgeVariant as 'success' | 'error' | 'warning'} size="sm">
-          {statusLabel}
-        </Badge>
-        <span className="shrink-0 text-content-tertiary">
-          {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        </span>
-      </button>
-
-      {expanded && (
-        <div className="border-t border-border-light px-4 py-3 animate-fade-in">
-          <p className="text-sm text-content-secondary">{result.message}</p>
-          {result.suggestion && (
-            <div className="mt-2 flex items-start gap-2 rounded-lg bg-oe-blue-subtle px-3 py-2">
-              <Wand2 size={14} className="mt-0.5 shrink-0 text-oe-blue" />
-              <p className="text-xs text-oe-blue">
-                {t('validation.suggestion', 'Suggestion')}: {result.suggestion}
-              </p>
-            </div>
-          )}
-          {result.element_ref && (
-            <p className="mt-2 flex items-center gap-1.5 text-xs text-content-tertiary">
-              <Info size={12} />
-              {t('validation.element_ref', 'Element')}:{' '}
-              {boqId && onNavigateToPosition ? (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onNavigateToPosition(boqId, result.element_ref!); }}
-                  aria-label={t('validation.go_to_element', { defaultValue: 'Go to element' })}
-                  className="inline-flex items-center gap-1 text-oe-blue hover:underline font-mono"
-                >
-                  {result.element_ref.substring(0, 8)}...
-                  <ExternalLink size={10} />
-                </button>
-              ) : (
-                <span className="font-mono">{result.element_ref}</span>
-              )}
-            </p>
-          )}
-          {tooltip && (
-            <p className="mt-1 text-xs text-content-tertiary italic">{tooltip}</p>
-          )}
-          {/* Raise NCR — turn a blocking validation error into a formal
-              non-conformance, pre-filled from the finding (CONN-58). */}
-          {!result.passed && result.severity === 'error' && onRaiseNcr && (
-            <div className="mt-3 border-t border-border-light pt-3">
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<AlertOctagon size={14} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRaiseNcr(result);
-                }}
-              >
-                {t('validation.raise_ncr', { defaultValue: 'Raise NCR' })}
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function FilterBar({
-  filter,
-  onFilterChange,
-  counts,
-}: {
-  filter: FilterMode;
-  onFilterChange: (f: FilterMode) => void;
-  counts: { all: number; errors: number; warnings: number; infos: number; passed: number };
-}) {
-  const { t } = useTranslation();
-
-  const options: { value: FilterMode; label: string; count: number }[] = [
-    { value: 'all', label: t('validation.filter_all', 'All'), count: counts.all },
-    { value: 'errors', label: t('validation.filter_errors', 'Errors'), count: counts.errors },
-    { value: 'warnings', label: t('validation.filter_warnings', 'Warnings'), count: counts.warnings },
-    { value: 'info', label: t('validation.filter_info', 'Info'), count: counts.infos },
-    { value: 'passed', label: t('validation.filter_passed', 'Passed'), count: counts.passed },
-  ];
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <Filter size={14} className="text-content-tertiary" />
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onFilterChange(opt.value)}
-          aria-pressed={filter === opt.value}
-          className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-fast ${
-            filter === opt.value
-              ? 'bg-oe-blue text-content-inverse shadow-xs'
-              : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary'
-          }`}
-        >
-          {opt.label}
-          <span
-            className={`tabular-nums ${
-              filter === opt.value ? 'text-content-inverse/70' : 'text-content-tertiary'
-            }`}
-          >
-            {opt.count}
-          </span>
-        </button>
-      ))}
-    </div>
-  );
 }
 
 /**
@@ -813,8 +420,11 @@ export function ValidationPage() {
   // link first, then the remembered context, so a returning user lands on the
   // same BOQ they last validated without re-picking it.
   const [selectedBoqId, setSelectedBoqId] = useState(boqIdParam ?? activeBOQId ?? '');
-  const [filter, setFilter] = useState<FilterMode>('all');
-  const [expandedResults, setExpandedResults] = useState<Set<number>>(new Set());
+  // Problems first: the passes stay one click away under their own filter.
+  const [filter, setFilter] = useState<FindingFilter>('problems');
+  // The long explainer is open by default only while there is no report; once
+  // a report is on screen it folds into a one-line toggle above the results.
+  const [introOpen, setIntroOpen] = useState(false);
 
   // Fetch projects
   const { data: projects, isLoading: projectsLoading } = useQuery({
@@ -954,8 +564,7 @@ export function ValidationPage() {
       ),
     onSuccess: (data) => {
       setReport(mapRunResponse(data));
-      setFilter('all');
-      setExpandedResults(new Set());
+      setFilter('problems');
       // Persist the report id in the URL so re-entry restores this result.
       setSearchParams(
         (prev) => {
@@ -1013,56 +622,38 @@ export function ValidationPage() {
     [setSearchParams, setActiveBOQ],
   );
 
-  // Filter results
-  const filteredResults = useMemo(() => {
-    if (!report) return [];
-    let results: ValidationResultItem[];
-    switch (filter) {
-      case 'errors':
-        results = report.results.filter((r) => !r.passed && r.severity === 'error');
-        break;
-      case 'warnings':
-        results = report.results.filter((r) => !r.passed && r.severity === 'warning');
-        break;
-      case 'info':
-        results = report.results.filter((r) => !r.passed && r.severity === 'info');
-        break;
-      case 'passed':
-        results = report.results.filter((r) => r.passed);
-        break;
-      default:
-        results = [...report.results];
+  // Positions of the validated BOQ, so a finding names its position (ordinal
+  // and description) instead of the id the engine stores in element_ref.
+  const reportHasRefs = useMemo(
+    () => !!report && report.results.some((r) => r.element_ref),
+    [report],
+  );
+  const { data: boqPositions } = useQuery({
+    queryKey: ['validation', 'boq-positions', selectedBoqId],
+    queryFn: () =>
+      apiGet<{ positions: { id: string; ordinal: string; description: string }[] }>(
+        `/v1/boq/boqs/${selectedBoqId}`,
+      ),
+    enabled: !!selectedBoqId && reportHasRefs,
+    staleTime: 60_000,
+  });
+  const positionsById = useMemo(() => {
+    if (!boqPositions) return null;
+    const map = new Map<string, PositionRef>();
+    for (const p of boqPositions.positions ?? []) {
+      map.set(p.id, { ordinal: p.ordinal ?? '', description: p.description ?? '' });
     }
-    // Sort: errors first, then warnings, then info, then passed
-    const severityOrder: Record<string, number> = { error: 0, warning: 1, info: 2 };
-    return results.sort((a, b) => {
-      if (a.passed !== b.passed) return a.passed ? 1 : -1;
-      return (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3);
-    });
-  }, [report, filter]);
-
-  const filterCounts = useMemo(() => {
-    if (!report) return { all: 0, errors: 0, warnings: 0, infos: 0, passed: 0 };
-    return {
-      all: report.results.length,
-      errors: report.results.filter((r) => !r.passed && r.severity === 'error').length,
-      warnings: report.results.filter((r) => !r.passed && r.severity === 'warning').length,
-      infos: report.results.filter((r) => !r.passed && r.severity === 'info').length,
-      passed: report.results.filter((r) => r.passed).length,
-    };
-  }, [report]);
-
-  const toggleResult = useCallback((idx: number) => {
-    setExpandedResults((prev) => {
-      const next = new Set(prev);
-      if (next.has(idx)) {
-        next.delete(idx);
-      } else {
-        next.add(idx);
-      }
-      return next;
-    });
-  }, []);
+    return map;
+  }, [boqPositions]);
+  const boqNamesById = useMemo(
+    () => new Map((boqs ?? []).map((b) => [b.id, b.name] as const)),
+    [boqs],
+  );
+  const ruleDescriptions = useMemo(() => getRuleDescriptions(t), [t]);
+  const ruleHint = useCallback(
+    (ruleId: string) => ruleDescriptions[ruleId] ?? null,
+    [ruleDescriptions],
+  );
 
   const [pdfPending, setPdfPending] = useState(false);
 
@@ -1140,7 +731,7 @@ export function ValidationPage() {
         'title',
         t('validation.ncr_title_prefill', {
           defaultValue: 'Validation: {{rule}}',
-          rule: result.rule_name,
+          rule: ruleTitle(result.rule_id, result.rule_name, t),
         }),
       );
       const descParts = [result.message];
@@ -1164,6 +755,17 @@ export function ValidationPage() {
     },
     [selectedProjectId, navigate, t],
   );
+
+  const introLinks = [
+    {
+      label: t('validation.intro_link_boq', { defaultValue: 'Open BOQ editor' }),
+      onClick: () => navigate('/boq'),
+    },
+    {
+      label: t('validation.intro_link_bim', { defaultValue: 'BIM / canonical model' }),
+      onClick: () => navigate('/bim'),
+    },
+  ];
 
   const boqOptions = (boqs || []).map((b) => ({
     value: b.id,
@@ -1189,32 +791,27 @@ export function ValidationPage() {
         actions={<ModuleGuideButton content={validationGuide} />}
       />
 
-      <DismissibleInfo
-        storageKey="validation"
-        title={t('validation.intro_title', {
-          defaultValue: 'How validation fits the workflow',
-        })}
-        more={
-          t('validation.intro_more', { defaultValue: '' })
-            ? <IntroRichText text={t('validation.intro_more', { defaultValue: '' })} />
-            : undefined
-        }
-        links={[
-          {
-            label: t('validation.intro_link_boq', { defaultValue: 'Open BOQ editor' }),
-            onClick: () => navigate('/boq'),
-          },
-          {
-            label: t('validation.intro_link_bim', { defaultValue: 'BIM / canonical model' }),
-            onClick: () => navigate('/bim'),
-          },
-        ]}
-      >
-        {t('validation.intro_body', {
-          defaultValue:
-            'Validation is a first-class step in the Import → Validate → Enrich → Estimate pipeline. It checks a Bill of Quantities (and its linked canonical/BIM elements) against the rule sets configured for the project - these are derived automatically from the project’s region and classification standard (DIN 276, GAEB, NRM, MasterFormat, boq_quality, …). Each finding links back to the exact BOQ position so you can fix it at the source.',
-        })}
-      </DismissibleInfo>
+      {/* The explainer is for a first visit. Once a report is on screen it
+          folds into one line, so the results start near the top. */}
+      {!report && (
+        <DismissibleInfo
+          storageKey="validation"
+          title={t('validation.intro_title', {
+            defaultValue: 'How validation fits the workflow',
+          })}
+          more={
+            t('validation.intro_more', { defaultValue: '' })
+              ? <IntroRichText text={t('validation.intro_more', { defaultValue: '' })} />
+              : undefined
+          }
+          links={introLinks}
+        >
+          {t('validation.intro_body', {
+            defaultValue:
+              'Validation is a first-class step in the Import → Validate → Enrich → Estimate pipeline. It checks a Bill of Quantities (and its linked canonical/BIM elements) against the rule sets configured for the project - these are derived automatically from the project’s region and classification standard (DIN 276, GAEB, NRM, MasterFormat, boq_quality, …). Each finding links back to the exact BOQ position so you can fix it at the source.',
+          })}
+        </DismissibleInfo>
+      )}
 
       {/* No active project — the project is chosen globally in the top bar, so
           guide the user there instead of duplicating a picker. */}
@@ -1272,7 +869,9 @@ export function ValidationPage() {
           </div>
 
           {/* Resolved rule sets — shown before running so the user knows
-              exactly which checks will be applied to this project. */}
+              exactly which checks will be applied to this project. Once a
+              report exists the summary strip names the sets it ran. */}
+          {!report && (
           <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-border-light pt-3">
             <span className="text-xs text-content-tertiary">
               {t('validation.will_check_with', { defaultValue: 'Will check with' })}:
@@ -1286,12 +885,13 @@ export function ValidationPage() {
               })}
             </span>
           </div>
+          )}
         </Card>
       )}
 
       {/* One-click estimate audit - grouped findings + per-finding apply-fix
           + re-run score delta. Independent of the rule-set report above. */}
-      {selectedProjectId && (
+      {selectedProjectId && !report && (
         <EstimateAuditPanel projectId={selectedProjectId} boqId={selectedBoqId} />
       )}
 
@@ -1311,11 +911,7 @@ export function ValidationPage() {
       {/* Loading state */}
       {runValidation.isPending && (
         <div className="space-y-4">
-          <div className="flex gap-6">
-            <Skeleton width={160} height={200} rounded="lg" />
-            <Skeleton height={200} className="flex-1" rounded="lg" />
-          </div>
-          <Skeleton height={48} className="w-full" rounded="lg" />
+          <Skeleton height={72} className="w-full" rounded="lg" />
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} height={56} className="w-full" rounded="lg" />
           ))}
@@ -1346,83 +942,59 @@ export function ValidationPage() {
 
       {/* Report */}
       {report && !runValidation.isPending && (
-        <div className="space-y-6 animate-fade-in">
-          {/* Score + Summary row */}
-          <div className="grid gap-6 md:grid-cols-[200px_1fr]">
-            {/* Score circle card */}
-            <Card className="flex items-center justify-center">
-              <ScoreCircle score={report.score} errors={report.counts.errors} warnings={report.counts.warnings} />
-            </Card>
-
-            {/* Summary card */}
-            <SummaryCard report={report} />
-          </div>
-
-          {/* Filter + Results */}
+        <div className="space-y-4 animate-fade-in">
+          {/* Explainer folded to one line while a report is on screen. */}
           <div>
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="text-lg font-semibold text-content-primary">
-                {t('validation.results_title', 'Results')}
-              </h2>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setExpandedResults(new Set(filteredResults.map((_, i) => i)))}
-                    aria-label={t('validation.expand_all', { defaultValue: 'Expand All' })}
-                    className="text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
-                  >
-                    {t('validation.expand_all', { defaultValue: 'Expand All' })}
-                  </button>
-                  <span className="text-content-quaternary">|</span>
-                  <button
-                    onClick={() => setExpandedResults(new Set())}
-                    aria-label={t('validation.collapse_all', { defaultValue: 'Collapse All' })}
-                    className="text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
-                  >
-                    {t('validation.collapse_all', { defaultValue: 'Collapse All' })}
-                  </button>
+            <button
+              type="button"
+              onClick={() => setIntroOpen((v) => !v)}
+              aria-expanded={introOpen}
+              className="inline-flex items-center gap-1 text-xs font-medium text-content-secondary transition-colors hover:text-content-primary"
+            >
+              {introOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              {t('validation.intro_toggle', { defaultValue: 'How validation works' })}
+            </button>
+            {introOpen && (
+              <div className="mt-2 rounded-xl border border-border-light bg-surface-secondary/40 px-4 py-3 text-sm leading-relaxed text-content-secondary animate-fade-in">
+                {t('validation.intro_body', {
+                  defaultValue:
+                    'Validation is a first-class step in the Import → Validate → Enrich → Estimate pipeline. It checks a Bill of Quantities (and its linked canonical/BIM elements) against the rule sets configured for the project - these are derived automatically from the project’s region and classification standard (DIN 276, GAEB, NRM, MasterFormat, boq_quality, …). Each finding links back to the exact BOQ position so you can fix it at the source.',
+                })}
+                <div className="mt-2 flex flex-wrap gap-3">
+                  {introLinks.map((link) => (
+                    <button
+                      key={link.label}
+                      type="button"
+                      onClick={link.onClick}
+                      className="text-xs font-medium text-oe-blue hover:underline"
+                    >
+                      {link.label}
+                    </button>
+                  ))}
                 </div>
-                <FilterBar
-                  filter={filter}
-                  onFilterChange={setFilter}
-                  counts={filterCounts}
-                />
-              </div>
-            </div>
-
-            {/* All passed banner */}
-            {report.counts.total > 0 && report.counts.errors === 0 && report.counts.warnings === 0 && (
-              <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-success-bg px-5 py-4">
-                <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
-                <p className="text-sm font-medium text-semantic-success">
-                  {t(
-                    'validation.all_passed',
-                    'All validation rules passed successfully!',
-                  )}
-                </p>
               </div>
             )}
-
-            {/* Results list */}
-            <div className="space-y-2">
-              {filteredResults.length === 0 && (
-                <p className="py-8 text-center text-sm text-content-tertiary">
-                  {t('validation.no_results_for_filter', 'No results match this filter.')}
-                </p>
-              )}
-              {filteredResults.map((result, idx) => (
-                <ResultRow
-                  key={`${result.rule_id}-${idx}`}
-                  result={result}
-                  expanded={expandedResults.has(idx)}
-                  onToggle={() => toggleResult(idx)}
-                  boqId={selectedBoqId || undefined}
-                  onNavigateToPosition={(bId, posId) => navigate(`/boq/${bId}?highlight=${posId}`)}
-                  onRaiseNcr={handleRaiseNcr}
-                />
-              ))}
-            </div>
           </div>
+
+          <SummaryStrip
+            report={report}
+            filter={filter}
+            onFilterChange={setFilter}
+            ruleSetLabel={(rs) => getRuleSetLabel(rs, t)}
+            durationDecimals={durationDecimals}
+          />
+
+          <ValidationResults
+            findings={report.results}
+            totalChecks={report.counts.total}
+            filter={filter}
+            onFilterChange={setFilter}
+            positions={positionsById}
+            boqs={boqNamesById}
+            boqId={selectedBoqId || undefined}
+            ruleHint={ruleHint}
+            onRaiseNcr={handleRaiseNcr}
+          />
 
           {/* Action buttons */}
           <div className="flex flex-wrap items-center gap-3 border-t border-border-light pt-6">
@@ -1462,17 +1034,13 @@ export function ValidationPage() {
                 ? t('validation.export_boq_pdf_pending', { defaultValue: 'Preparing BOQ PDF…' })
                 : t('validation.export_priced_boq_pdf', { defaultValue: 'Export priced BOQ (PDF)' })}
             </Button>
-            {(report.counts.warnings > 0 || report.counts.errors > 0) && (
-              <Button
-                variant="ghost"
-                size="md"
-                icon={<Wand2 size={16} />}
-                onClick={() => setFilter('errors')}
-              >
-                {t('validation.show_issues', 'Show All Issues')}
-              </Button>
-            )}
           </div>
+
+          {/* The one-click estimate audit is a separate tool; with a report
+              on screen it sits below the findings instead of above them. */}
+          {selectedProjectId && (
+            <EstimateAuditPanel projectId={selectedProjectId} boqId={selectedBoqId} />
+          )}
         </div>
       )}
     </div>

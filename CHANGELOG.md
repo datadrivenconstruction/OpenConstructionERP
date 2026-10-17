@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Forecasts can be saved monthly with their stage (budget, estimate, detailed estimate, pre-tender, award, forecast, final account, with the DIN 276, RIBA and AACE names as hints). Saved forecasts are never edited, and a chart across the full width shows how the cost moved, with the amount and date at every point.
 - A cost control demo project for training and screen recordings, installed with `python -m app.cli demo-cost-control`. Its figures are tested against the forecast rules, and running it again finds the project instead of creating a second one.
 - Cost control findings from the validation engine: money on no cost line, more certified than awarded, a forecast above plan, a line only partly awarded, changes waiting for a decision, and no forecast saved for over a month.
+- The validation report reads as a list of problems. It opens on errors and warnings, groups the findings by rule with a translated rule name and what to do, names the bill position by its number and text instead of an internal id, links each finding to its position in the bill, and offers a search once there are more than twenty findings. Passed checks are one click away.
 
 ### Fixed
 
