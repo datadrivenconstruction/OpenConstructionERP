@@ -4,6 +4,7 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, X } from 'lucide-react';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
+import { SearchableSelect, type SearchableSelectOption } from '@/shared/ui/SearchableSelect';
 import {
   editLine,
   invoiceTotals,
@@ -31,6 +32,7 @@ export function InvoiceLinesEditor({
   vatOptions,
   defaultVat,
   error,
+  contractLineOptions,
 }: {
   lines: InvoiceEditorLine[];
   onChange: (lines: InvoiceEditorLine[]) => void;
@@ -38,6 +40,8 @@ export function InvoiceLinesEditor({
   vatOptions: string[];
   defaultVat: string | null;
   error?: string;
+  /** Given for a supplier invoice: each line can name the contract line it bills. */
+  contractLineOptions?: SearchableSelectOption[];
 }) {
   const { t } = useTranslation();
   const listId = useId();
@@ -53,7 +57,11 @@ export function InvoiceLinesEditor({
     rate: t('finance.line_unit_rate', { defaultValue: 'Unit rate' }),
     vat: t('finance.line_vat_rate', { defaultValue: 'VAT %' }),
     net: t('finance.line_net', { defaultValue: 'Net' }),
+    contractLine: t('finance.line_contract_line', { defaultValue: 'Contract line' }),
+    noContractLine: t('finance.line_no_contract_line', { defaultValue: 'No contract line' }),
   };
+  const setContractLine = (key: string, value: string) =>
+    onChange(lines.map((line) => (line.key === key ? { ...line, contract_line_id: value } : line)));
 
   return (
     <div className="space-y-3" data-testid="invoice-lines-editor">
@@ -85,6 +93,19 @@ export function InvoiceLinesEditor({
                     aria-label={labels.description}
                     onChange={(e) => update(line.key, 'description', e.target.value)}
                   />
+                  {contractLineOptions && contractLineOptions.length > 0 && (
+                    <div className="mt-1">
+                      <SearchableSelect
+                        value={line.contract_line_id ?? ''}
+                        onChange={(v) => setContractLine(line.key, v)}
+                        options={contractLineOptions}
+                        allowEmpty
+                        emptyLabel={labels.noContractLine}
+                        placeholder={labels.contractLine}
+                        data-testid="invoice-line-contract-line"
+                      />
+                    </div>
+                  )}
                 </td>
                 <td className="py-1 pr-2">
                   <input

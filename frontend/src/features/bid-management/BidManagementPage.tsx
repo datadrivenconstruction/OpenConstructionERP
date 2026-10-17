@@ -103,6 +103,7 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildBidManagementInsights } from './bidManagementInsights';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { useCostLineLabel } from '@/features/costmodel/CostLinePicker';
 
 // English fallbacks for the computed `bid_management.prequal_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1987,6 +1988,8 @@ function PackageDrawer({
   });
 
   const pkg = pkgQ.data;
+  // Scope lines show the cost line they took from the bill.
+  const costLineLabel = useCostLineLabel(pkg?.project_id);
 
   // What the award drafted. The award subscriber stamps this package's id
   // (and its tender package's id, when linked) on the contract and the
@@ -2260,7 +2263,20 @@ function PackageDrawer({
                         return (
                           <tr key={li.id} className="border-t border-border-light">
                             <td className="py-1 font-mono">{li.code || '—'}</td>
-                            <td className="py-1 truncate max-w-[300px]">{li.description || '—'}</td>
+                            <td className="py-1 max-w-[300px]">
+                              <span className="block truncate">{li.description || '—'}</span>
+                              {li.cost_line_id && costLineLabel(li.cost_line_id) && (
+                                <span
+                                  className="block truncate text-2xs text-content-tertiary"
+                                  data-testid={`scope-line-cost-${li.id}`}
+                                >
+                                  {t('bid_management.scope_cost_line', {
+                                    defaultValue: 'Cost line {{line}}, from the bill',
+                                    line: costLineLabel(li.cost_line_id),
+                                  })}
+                                </span>
+                              )}
+                            </td>
                             <td className="py-1 text-right tabular-nums">{d.value.toLocaleString(getNumberLocale())}</td>
                             <td className="py-1 text-content-secondary">{li.unit ? d.unit : '—'}</td>
                           </tr>

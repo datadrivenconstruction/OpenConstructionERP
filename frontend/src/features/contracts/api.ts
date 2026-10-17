@@ -111,6 +111,11 @@ export interface ContractItem {
   template_code: string | null;
   template_version: number | null;
   terms: Record<string, unknown>;
+  /**
+   * The contract's own cost line: the whole value of a lump-sum contract
+   * without a schedule, and the default of lines that name no other.
+   */
+  cost_line_id?: string | null;
   created_by: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
@@ -130,6 +135,11 @@ export interface ContractLine {
   unit_rate: number | string;
   total_value: number | string;
   order_index: number;
+  /**
+   * The cost line the line is costed on. ``metadata.cost_line_source`` says
+   * where it came from, ``metadata.cost_line_override`` holds a hand override.
+   */
+  cost_line_id?: string | null;
   metadata: Record<string, unknown>;
   /**
    * A progress claim has billed on this line. The server then refuses to

@@ -123,6 +123,49 @@ export function problemMessage(t: TFunction, problem: string, params: Params = {
       return t('costmodel.problem.line_of_other_bill', {
         defaultValue: 'A share points at a cost line that belongs to another bill.',
       });
+    // Putting rows on cost lines down the chain.
+    case 'override_reason_required':
+      return t('costmodel.problem.override_reason_required', {
+        defaultValue: 'This row takes another cost line from what it changes or bills. Say why it goes on this one.',
+      });
+    case 'override_not_allowed':
+      return t('costmodel.problem.override_not_allowed', {
+        defaultValue: 'This row follows the line it comes from. Change the cost line there instead.',
+      });
+    case 'nothing_to_inherit':
+      return t('costmodel.problem.nothing_to_inherit', {
+        defaultValue: 'Nothing above this row names a cost line yet, so it has nothing to take over.',
+      });
+    case 'cost_line_required':
+      return t('costmodel.problem.cost_line_required', { defaultValue: 'Choose a cost line.' });
+    case 'cost_line_not_found':
+      return t('costmodel.problem.cost_line_not_found', {
+        defaultValue: 'That cost line is not in this project.',
+      });
+    case 'target_not_found':
+      return t('costmodel.problem.target_not_found', {
+        defaultValue: 'This row is no longer in the project. Reload the page.',
+      });
+    case 'contract_closed':
+      return t('costmodel.problem.contract_closed', {
+        defaultValue: 'This contract is closed, so no schedule line can be added to it.',
+      });
+    case 'contract_line_not_in_project':
+      return t('costmodel.problem.contract_line_not_in_project', {
+        defaultValue: 'The contract line is not on a contract of this project.',
+      });
+    case 'cost_line_conflicts_with_contract_line':
+      return t('costmodel.problem.cost_line_conflicts_with_contract_line', {
+        defaultValue: 'The line names a contract line and a different cost line. Keep one of them.',
+      });
+    case 'not_a_supplier_invoice':
+      return t('costmodel.problem.not_a_supplier_invoice', {
+        defaultValue: 'Only a supplier invoice can be recorded as a direct cost.',
+      });
+    case 'invoice_has_contract':
+      return t('costmodel.problem.invoice_has_contract', {
+        defaultValue: 'This invoice already belongs to a contract or an order.',
+      });
     case 'not_costed':
       // Same sentence the drawer shows for a position without money.
       return t('boq.cost_allocation.not_costed', {

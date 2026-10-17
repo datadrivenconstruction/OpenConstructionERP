@@ -69,6 +69,7 @@ import { apiGet, apiPost, apiPatch, downloadWithAuth, extractErrorMessageFromBod
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { InvoicePurchaseOrderField } from './InvoicePurchaseOrderField';
+import { useContractLineOptions } from './contractLineOptions';
 import { InvoiceLinesEditor } from './InvoiceLinesEditor';
 import {
   editorLinesFromInvoice,
@@ -2178,6 +2179,8 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const isEditingInvoice = editingInvoice !== null;
   const invoiceModalOpen = showCreate || isEditingInvoice;
+  // A supplier invoice line can name the contract line it bills.
+  const contractLineChoices = useContractLineOptions(projectId, invoiceModalOpen);
 
   // The invoice currently being issued as an EN 16931 e-invoice, if any.
   const [einvoiceFor, setEinvoiceFor] = useState<Invoice | null>(null);
@@ -3365,6 +3368,9 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
                 vatOptions={vatOptions}
                 defaultVat={defaultVat}
                 error={invoiceErrors.lines}
+                contractLineOptions={
+                  invoiceForm.direction === 'payable' ? contractLineChoices.data : undefined
+                }
               />
             </div>
           </WideModalSection>
