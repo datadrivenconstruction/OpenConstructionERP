@@ -129,7 +129,7 @@ describe('<GenerateSpineButton>', () => {
     const toast = addToastMock.mock.calls[0]?.[0] as { type: string; message: string };
     expect(toast.type).toBe('warning');
     expect(toast.message).toContain('Positions without a code of this list: 4');
-    expect(toast.message).toMatch(/1[,.\s  ]?250/);
+    expect(toast.message).toMatch(/1[,.\s\u00a0\u202f]?250/);
   });
 
   it('shows the structure mismatch as a sentence naming both lists', async () => {

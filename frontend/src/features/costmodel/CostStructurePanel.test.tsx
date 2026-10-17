@@ -102,11 +102,11 @@ describe('<CostStructurePanel>', () => {
     renderPanel();
     const row330 = await screen.findByTestId('structure-row-330');
     expect(row330).toHaveTextContent('External walls');
-    expect(row330).toHaveTextContent(/1[,.\s  ]?000[.,]25/);
+    expect(row330).toHaveTextContent(/1[,.\s\u00a0\u202f]?000[.,]25/);
     expect(row330).toHaveTextContent(/250[.,]50/);
     expect(screen.getByTestId('structure-row-300')).toHaveTextContent('Heading');
     expect(screen.getByTestId('structure-suspense-no_account')).toHaveTextContent(/cost lines on no account/);
-    expect(screen.getByTestId('structure-total')).toHaveTextContent(/1[,.\s  ]?349[.,]85/);
+    expect(screen.getByTestId('structure-total')).toHaveTextContent(/1[,.\s\u00a0\u202f]?349[.,]85/);
     expect(screen.getByTestId('structure-traffic-light')).toHaveAttribute('data-severity', 'warning');
     expect(screen.getByTestId('structure-findings')).toHaveTextContent('One cost line sits on no account.');
   });

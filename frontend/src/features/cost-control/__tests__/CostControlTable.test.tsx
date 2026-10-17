@@ -55,7 +55,7 @@ describe('CostControlTable', () => {
     // Group title is code plus title, not code plus the code-as-name.
     const header = screen.getByText('330 External walls').closest('tr')!;
     // The subtotal carries the two lines and the allowance: 3 x 1000.40 = 3001.20.
-    expect(within(header).getAllByText(/3[,.\s  ]?001/).length).toBeGreaterThan(0);
+    expect(within(header).getAllByText(/3[,.\s\u00a0\u202f]?001/).length).toBeGreaterThan(0);
     // The allowance is labelled and cannot be opened like a cost line.
     const allowance = screen.getByTestId('cost-control-row-allowance:a1');
     expect(allowance).toHaveTextContent(/Allowance on the account/);
