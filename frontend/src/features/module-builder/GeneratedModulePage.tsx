@@ -460,12 +460,13 @@ export function GeneratedModulePage() {
         storageKey={`runtime_module.${spec.key}.how`}
         title={spec.display_name}
         icon={<Boxes size={15} strokeWidth={1.9} />}
-        subtitle={t('runtime_module.built_here', {
-          defaultValue: 'Built on this instance from a description of it.',
+        subtitle={t('runtime_module.built_here_v2', {
+          defaultValue: 'Built on this instance with the module builder.',
         })}
       >
+        {/* The description is already the page subtitle, so it is not said a
+            second time here. */}
         <div className="space-y-3 text-sm text-content-secondary">
-          {spec.description && <p>{spec.description}</p>}
           <div>
             <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
               <ShieldCheck size={13} strokeWidth={2} />

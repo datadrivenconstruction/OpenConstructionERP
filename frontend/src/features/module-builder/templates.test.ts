@@ -70,10 +70,10 @@ function loadEnglish(): Record<string, string> {
 const english: Translate = (_key, options) => String(options?.defaultValue ?? '');
 
 describe('the templates', () => {
-  it('are six, with distinct ids and keys', () => {
-    expect(MODULE_TEMPLATES).toHaveLength(6);
-    expect(new Set(MODULE_TEMPLATES.map((t) => t.id)).size).toBe(6);
-    expect(new Set(MODULE_TEMPLATES.map((t) => t.key)).size).toBe(6);
+  it('are eight, with distinct ids and keys', () => {
+    expect(MODULE_TEMPLATES).toHaveLength(8);
+    expect(new Set(MODULE_TEMPLATES.map((t) => t.id)).size).toBe(8);
+    expect(new Set(MODULE_TEMPLATES.map((t) => t.key)).size).toBe(8);
   });
 
   it('found the shipped module tree to check the keys against', () => {

@@ -41,7 +41,7 @@ export const FEATURE_DESCRIPTIONS: Record<ModuleFeatureName, Phrase> = {
   status: { labelKey: 'module_builder.feature.status_desc', defaultLabel: 'Each entry moves through stages, shown as a coloured badge you can filter by.' },
   due: { labelKey: 'module_builder.feature.due_desc', defaultLabel: 'A reminder goes out a few days before the date, until the entry is done.' },
   export: { labelKey: 'module_builder.feature.export_desc', defaultLabel: 'One click downloads the list, for sending on or keeping on file.' },
-  comments: { labelKey: 'module_builder.feature.comments_desc', defaultLabel: 'The team can talk about an entry right where it is recorded.' },
+  comments: { labelKey: 'module_builder.feature.comments_desc_v2', defaultLabel: 'Each entry gets its own comment thread, so questions and answers stay with the record.' },
 };
 
 /** Why a suggestion cannot be switched on, in place of its reason. */
