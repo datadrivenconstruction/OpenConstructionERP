@@ -22,6 +22,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -1286,6 +1287,16 @@ class ProcurementService:
 
         if fields:
             await self.po_repo.update(po_id, **fields)
+
+        # A requisition's delivery date is a copy of its order's date. Keep the
+        # copy in step on the write that moves the date, not at the next boot.
+        if "delivery_date" in fields:
+            await self.session.execute(
+                sa_update(MaterialRequisition)
+                .where(MaterialRequisition.po_id == po_id)
+                .values(estimated_delivery_date=fields["delivery_date"])
+                .execution_options(synchronize_session=False)
+            )
 
         # Replace items if provided. The goods-receipt refusal and the cost
         # line resolution for this replace both run above, before any write.

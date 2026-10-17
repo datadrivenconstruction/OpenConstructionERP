@@ -398,3 +398,28 @@ async def test_the_boot_repair_replaces_the_stored_ordering_deadline(world: Worl
     assert again == 0, "the repair is idempotent: a corrected database reports nothing to do"
     assert rows[draft["id"]] is None, "no order, no delivery date"
     assert rows[ordered["id"]] == delivery, "the order's delivery date replaces the ordering deadline"
+
+
+async def test_moving_the_order_date_moves_the_requisition_forecast_at_once(world: World) -> None:
+    needed = date.today() + timedelta(days=30)
+    body = _create_body(world, _line(world), required_date=needed.isoformat(), vendor_id=str(world.vendor_active))
+    async with client_as(world, world.editor, "editor") as c:
+        created = (await c.post(f"{REQ}/", json=body)).json()
+        await c.post(f"{REQ}/{created['id']}/submit")
+    async with client_as(world, world.manager, "manager") as c:
+        await c.post(f"{REQ}/{created['id']}/approve", json={})
+        converted = await c.post(
+            f"{REQ}/convert-to-po",
+            json={
+                "project_id": str(world.project_id),
+                "requisition_ids": [created["id"]],
+                "delivery_date": (needed - timedelta(days=2)).isoformat(),
+            },
+        )
+        assert converted.status_code == 201, converted.text
+        moved = (needed + timedelta(days=5)).isoformat()
+        patched = await c.patch(f"/api/v1/procurement/{converted.json()['po_id']}", json={"delivery_date": moved})
+        assert patched.status_code == 200, patched.text
+        ordered = (await c.get(f"{REQ}/{created['id']}")).json()
+
+    assert ordered["estimated_delivery_date"] == moved, "the forecast follows the order without waiting for a boot"
