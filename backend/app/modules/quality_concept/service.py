@@ -1144,11 +1144,12 @@ class QualityConceptService:
             bucket = packages[p.package_ref or ""]
             bucket["total"] += 1
             bucket[state] += 1
-            # The proof title reads better than its id in the message a finding turns into.
-            findings += [
-                dataclasses.replace(f, params={**f.params, "label": p.title}) if p.title else f
-                for f in delivery[p.id].findings
-            ]
+            # The proof title (or its evidence type and package) reads better than its id in the
+            # message a finding turns into; the rule names the evidence type in the reader's locale.
+            named = (
+                {"label": p.title} if p.title else {"evidence_type": p.evidence_type, "package": p.package_ref or ""}
+            )
+            findings += [dataclasses.replace(f, params={**f.params, **named}) for f in delivery[p.id].findings]
         return {
             "packages": [
                 {"package_ref": ref or None, **dict(counts), "done": sum(counts[s] for s in _DONE_PROOF)}
