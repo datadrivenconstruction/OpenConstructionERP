@@ -1,0 +1,72 @@
+{
+  "key": "gb50500",
+  "name": "GB 50500",
+  "standard": "gb50500",
+  "entries": [
+    {
+      "code": "01",
+      "title": "Site preparation",
+      "parent": null
+    },
+    {
+      "code": "02",
+      "title": "Foundation engineering",
+      "parent": null
+    },
+    {
+      "code": "03",
+      "title": "Masonry engineering",
+      "parent": null
+    },
+    {
+      "code": "04",
+      "title": "Concrete and RC engineering",
+      "parent": null
+    },
+    {
+      "code": "05",
+      "title": "Structural steel engineering",
+      "parent": null
+    },
+    {
+      "code": "06",
+      "title": "Metal structure engineering",
+      "parent": null
+    },
+    {
+      "code": "07",
+      "title": "Wooden structure engineering",
+      "parent": null
+    },
+    {
+      "code": "08",
+      "title": "Doors, windows and curtain walls",
+      "parent": null
+    },
+    {
+      "code": "09",
+      "title": "Roofing engineering",
+      "parent": null
+    },
+    {
+      "code": "10",
+      "title": "Waterproofing engineering",
+      "parent": null
+    },
+    {
+      "code": "11",
+      "title": "Insulation engineering",
+      "parent": null
+    },
+    {
+      "code": "12",
+      "title": "Decoration engineering",
+      "parent": null
+    },
+    {
+      "code": "13",
+      "title": "Mechanical and electrical installation",
+      "parent": null
+    }
+  ]
+}

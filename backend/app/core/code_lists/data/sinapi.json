@@ -1,0 +1,77 @@
+{
+  "key": "sinapi",
+  "name": "SINAPI",
+  "standard": "sinapi",
+  "entries": [
+    {
+      "code": "73",
+      "title": "Servicos preliminares",
+      "parent": null
+    },
+    {
+      "code": "74",
+      "title": "Movimento de terra",
+      "parent": null
+    },
+    {
+      "code": "75",
+      "title": "Fundacoes e estruturas",
+      "parent": null
+    },
+    {
+      "code": "76",
+      "title": "Paredes e paineis",
+      "parent": null
+    },
+    {
+      "code": "77",
+      "title": "Coberturas e protecoes",
+      "parent": null
+    },
+    {
+      "code": "78",
+      "title": "Forros",
+      "parent": null
+    },
+    {
+      "code": "79",
+      "title": "Instalacoes eletricas",
+      "parent": null
+    },
+    {
+      "code": "80",
+      "title": "Instalacoes hidro-sanitarias",
+      "parent": null
+    },
+    {
+      "code": "81",
+      "title": "Revestimentos",
+      "parent": null
+    },
+    {
+      "code": "82",
+      "title": "Pisos",
+      "parent": null
+    },
+    {
+      "code": "83",
+      "title": "Esquadrias",
+      "parent": null
+    },
+    {
+      "code": "84",
+      "title": "Vidros",
+      "parent": null
+    },
+    {
+      "code": "85",
+      "title": "Pintura",
+      "parent": null
+    },
+    {
+      "code": "86",
+      "title": "Servicos complementares",
+      "parent": null
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+{
+  "key": "din276",
+  "name": "DIN 276",
+  "standard": "din276",
+  "entries": [
+    {
+      "code": "100",
+      "title": "Grundstück / Land",
+      "parent": null
+    },
+    {
+      "code": "110",
+      "title": "Grundstückswert / Land value",
+      "parent": "100"
+    },
+    {
+      "code": "120",
+      "title": "Grundstücksnebenkosten / Incidental costs",
+      "parent": "100"
+    },
+    {
+      "code": "130",
+      "title": "Freimachen / Clearing",
+      "parent": "100"
+    },
+    {
+      "code": "200",
+      "title": "Vorbereitende Maßnahmen / Preliminary works",
+      "parent": null
+    },
+    {
+      "code": "210",
+      "title": "Herrichten / Site preparation",
+      "parent": "200"
+    },
+    {
+      "code": "220",
+      "title": "Öffentliche Erschließung / Public development",
+      "parent": "200"
+    },
+    {
+      "code": "230",
+      "title": "Nichtöffentliche Erschließung / Private development",
+      "parent": "200"
+    },
+    {
+      "code": "240",
+      "title": "Ausgleichsmaßnahmen / Compensatory measures",
+      "parent": "200"
+    },
+    {
+      "code": "250",
+      "title": "Übergangsmaßnahmen / Interim measures",
+      "parent": "200"
+    },
+    {
+      "code": "300",
+      "title": "Bauwerk – Baukonstruktionen / Building construction",
+      "parent": null
+    },
+    {
+      "code": "310",
+      "title": "Baugrube / Excavation",
+      "parent": "300"
+    },
+    {
+      "code": "311",
+      "title": "Baugrubenherstellung / Excavation work",
+      "parent": "310"
+    },
+    {
+      "code": "312",
+      "title": "Baugrubenumschließung / Shoring",
+      "parent": "310"
+    },
+    {
+      "code": "313",
+      "title": "Wasserhaltung / Dewatering",
+      "parent": "310"
+    },
+    {
+      "code": "320",
+      "title": "Gründung / Foundations",
+      "parent": "300"
+    },
+    {
+      "code": "321",
+      "title": "Baugrundverbesserung / Ground improvement",
+      "parent": "320"
+    },
+    {
+      "code": "322",
+      "title": "Flachgründungen / Shallow foundations",
+      "parent": "320"
+    },
+    {
+      "code": "323",
+      "title": "Tiefgründungen / Deep foundations",
+      "parent": "320"
+    },
+    {
+      "code": "324",
+      "title": "Unterböden u. Bodenplatten / Subfloors",
+      "parent": "320"
+    },
+    {
+      "code": "325",
+      "title": "Bodenbeläge / Floor finishes",
+      "parent": "320"
+    },
+    {
+      "code": "326",
+      "title": "Bauwerksabdichtung / Waterproofing",
+      "parent": "320"
+    },
+    {
+      "code": "327",
+      "title": "Dränagen / Drainage",
+      "parent": "320"
+    },
+    {
+      "code": "330",
+      "title": "Außenwände / External walls",
+      "parent": "300"
+    },
+    {
+      "code": "331",
+      "title": "Tragende Außenwände / Load-bearing ext. walls",
+      "parent": "330"
+    },
+    {
+      "code": "332",
+      "title": "Nichttragende Außenwände / Non-load-bearing",
+      "parent": "330"
+    },
+    {
+      "code": "333",
+      "title": "Außenstützen / External columns",
+      "parent": "330"
+    },
+    {
+      "code": "334",
+      "title": "Außentüren u. -fenster / Ext. doors & windows",
+      "parent": "330"
+    },
+    {
+      "code": "335",
+      "title": "Außenwandbekleidungen, außen / Ext. cladding",
+      "parent": "330"
+    },
+    {
+      "code": "336",
+      "title": "Außenwandbekleidungen, innen / Int. lining",
+      "parent": "330"
+    },
+    {
+      "code": "337",
+      "title": "Elementierte Außenwände / Prefab ext. walls",
+      "parent": "330"
+    },
+    {
+      "code": "338",
+      "title": "Sonnenschutz / Sun protection",
+      "parent": "330"
+    },
+    {
+      "code": "339",
+      "title": "Außenwände, sonstiges / Other",
+      "parent": "330"
+    },
+    {
+      "code": "340",
+      "title": "Innenwände / Internal walls",
+      "parent": "300"
+    },
+    {
+      "code": "341",
+      "title": "Tragende Innenwände / Load-bearing int. walls",
+      "parent": "340"
+    },
+    {
+      "code": "342",
+      "title": "Nichttragende Innenwände / Partitions",
+      "parent": "340"
+    },
+    {
+      "code": "343",
+      "title": "Innenstützen / Internal columns",
+      "parent": "340"
+    },
+    {
+      "code": "344",
+      "title": "Innentüren u. -fenster / Int. doors & windows",
+      "parent": "340"
+    },
+    {
+      "code": "345",
+      "title": "Innenwandbekleidungen / Int. wall finishes",
+      "parent": "340"
+    },
+    {
+      "code": "346",
+      "title": "Elementierte Innenwände / Prefab int. walls",
+      "parent": "340"
+    },
+    {
+      "code": "350",
+      "title": "Decken / Floors/slabs",
+      "parent": "300"
+    },
+    {
+      "code": "351",
+      "title": "Deckenkonstruktionen / Floor structures",
+      "parent": "350"
+    },
+    {
+      "code": "352",
+      "title": "Deckenbeläge / Floor finishes",
+      "parent": "350"
+    },
+    {
+      "code": "353",
+      "title": "Deckenbekleidungen / Ceiling finishes",
+      "parent": "350"
+    },
+    {
+      "code": "360",
+      "title": "Dächer / Roofs",
+      "parent": "300"
+    },
+    {
+      "code": "361",
+      "title": "Dachkonstruktionen / Roof structures",
+      "parent": "360"
+    },
+    {
+      "code": "362",
+      "title": "Dachfenster, Dachöffnungen / Roof windows",
+      "parent": "360"
+    },
+    {
+      "code": "363",
+      "title": "Dachbeläge / Roof coverings",
+      "parent": "360"
+    },
+    {
+      "code": "364",
+      "title": "Dachbekleidungen / Roof lining",
+      "parent": "360"
+    },
+    {
+      "code": "370",
+      "title": "Baukonstruktive Einbauten / Structural fittings",
+      "parent": "300"
+    },
+    {
+      "code": "371",
+      "title": "Allgemeine Einbauten / General fittings",
+      "parent": "370"
+    },
+    {
+      "code": "372",
+      "title": "Besondere Einbauten / Special fittings",
+      "parent": "370"
+    },
+    {
+      "code": "390",
+      "title": "Sonstige Baukonstruktionen / Other construction",
+      "parent": "300"
+    },
+    {
+      "code": "400",
+      "title": "Bauwerk – Technische Anlagen / Building services",
+      "parent": null
+    },
+    {
+      "code": "410",
+      "title": "Abwasser-, Wasser-, Gasanlagen / Plumbing",
+      "parent": "400"
+    },
+    {
+      "code": "420",
+      "title": "Wärmeversorgungsanlagen / Heating",
+      "parent": "400"
+    },
+    {
+      "code": "430",
+      "title": "Raumlufttechnische Anlagen / HVAC",
+      "parent": "400"
+    },
+    {
+      "code": "440",
+      "title": "Starkstromanlagen / Electrical power",
+      "parent": "400"
+    },
+    {
+      "code": "450",
+      "title": "Fernmelde- u. IT-Anlagen / Telecom & IT",
+      "parent": "400"
+    },
+    {
+      "code": "460",
+      "title": "Förderanlagen / Conveying systems",
+      "parent": "400"
+    },
+    {
+      "code": "470",
+      "title": "Nutzungsspezifische Anlagen / Use-specific",
+      "parent": "400"
+    },
+    {
+      "code": "480",
+      "title": "Gebäudeautomation / Building automation",
+      "parent": "400"
+    },
+    {
+      "code": "490",
+      "title": "Sonstige techn. Anlagen / Other services",
+      "parent": "400"
+    },
+    {
+      "code": "500",
+      "title": "Außenanlagen / External works",
+      "parent": null
+    },
+    {
+      "code": "510",
+      "title": "Geländeflächen / Terrain",
+      "parent": "500"
+    },
+    {
+      "code": "520",
+      "title": "Befestigte Flächen / Paved areas",
+      "parent": "500"
+    },
+    {
+      "code": "530",
+      "title": "Baukonstruktionen Außenanlagen / Ext. structures",
+      "parent": "500"
+    },
+    {
+      "code": "540",
+      "title": "Technische Anlagen Außenanlagen / Ext. services",
+      "parent": "500"
+    },
+    {
+      "code": "550",
+      "title": "Einbauten Außenanlagen / Ext. fittings",
+      "parent": "500"
+    },
+    {
+      "code": "590",
+      "title": "Sonstige Außenanlagen / Other external",
+      "parent": "500"
+    },
+    {
+      "code": "600",
+      "title": "Ausstattung und Kunstwerke / Furnishing & artwork",
+      "parent": null
+    },
+    {
+      "code": "610",
+      "title": "Ausstattung / Furnishing",
+      "parent": "600"
+    },
+    {
+      "code": "620",
+      "title": "Kunstwerke / Artwork",
+      "parent": "600"
+    },
+    {
+      "code": "700",
+      "title": "Baunebenkosten / Construction overhead",
+      "parent": null
+    },
+    {
+      "code": "710",
+      "title": "Bauherrenaufgaben / Client tasks",
+      "parent": "700"
+    },
+    {
+      "code": "720",
+      "title": "Vorbereitung Objektplanung / Design preparation",
+      "parent": "700"
+    },
+    {
+      "code": "730",
+      "title": "Architekten- u. Ingenieurleistungen / A&E fees",
+      "parent": "700"
+    },
+    {
+      "code": "740",
+      "title": "Gutachten u. Beratung / Consulting",
+      "parent": "700"
+    },
+    {
+      "code": "750",
+      "title": "Kunst / Art",
+      "parent": "700"
+    },
+    {
+      "code": "760",
+      "title": "Finanzierung / Financing",
+      "parent": "700"
+    },
+    {
+      "code": "770",
+      "title": "Allgemeine Baunebenkosten / General overhead",
+      "parent": "700"
+    },
+    {
+      "code": "790",
+      "title": "Sonstige Baunebenkosten / Other overhead",
+      "parent": "700"
+    },
+    {
+      "code": "800",
+      "title": "Finanzierung / Financing",
+      "parent": null
+    }
+  ]
+}

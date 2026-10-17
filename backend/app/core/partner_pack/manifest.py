@@ -195,6 +195,17 @@ class PartnerPackManifest(BaseModel):
             "empty registry and wave everything through."
         ),
     )
+    code_lists: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Paths inside the pack package to code-list JSON files "
+            "(``{key, name, standard, entries: [{code, title, parent}]}``). While "
+            "the pack is active they are offered next to the shipped lists as "
+            "dictionaries a project cost structure can be built from. A key that "
+            "names a shipped list is ignored, so a pack adds lists and never "
+            "replaces one. Read by :mod:`app.core.code_lists`."
+        ),
+    )
 
     # Module presets
     default_modules: list[str] = Field(
@@ -500,6 +511,7 @@ class PartnerPackManifest(BaseModel):
             "default_methodology": self.default_methodology,
             "validation_rule_packs": self.validation_rule_packs,
             "validation_rule_sets": self.validation_rule_sets,
+            "code_lists": self.code_lists,
             "demo_template_ids": self.demo_template_ids,
             "default_modules": self.default_modules,
             "hidden_modules": self.hidden_modules,

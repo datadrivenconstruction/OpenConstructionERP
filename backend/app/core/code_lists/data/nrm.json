@@ -1,0 +1,177 @@
+{
+  "key": "nrm",
+  "name": "NRM",
+  "standard": "nrm",
+  "entries": [
+    {
+      "code": "0",
+      "title": "Facilitating works",
+      "parent": null
+    },
+    {
+      "code": "1",
+      "title": "Substructure",
+      "parent": null
+    },
+    {
+      "code": "2",
+      "title": "Superstructure",
+      "parent": null
+    },
+    {
+      "code": "2.1",
+      "title": "Frame",
+      "parent": "2"
+    },
+    {
+      "code": "2.2",
+      "title": "Upper floors",
+      "parent": "2"
+    },
+    {
+      "code": "2.3",
+      "title": "Roof",
+      "parent": "2"
+    },
+    {
+      "code": "2.4",
+      "title": "Stairs and ramps",
+      "parent": "2"
+    },
+    {
+      "code": "2.5",
+      "title": "External walls",
+      "parent": "2"
+    },
+    {
+      "code": "2.6",
+      "title": "Windows and external doors",
+      "parent": "2"
+    },
+    {
+      "code": "2.7",
+      "title": "Internal walls and partitions",
+      "parent": "2"
+    },
+    {
+      "code": "2.8",
+      "title": "Internal doors",
+      "parent": "2"
+    },
+    {
+      "code": "3",
+      "title": "Internal finishes",
+      "parent": null
+    },
+    {
+      "code": "3.1",
+      "title": "Wall finishes",
+      "parent": "3"
+    },
+    {
+      "code": "3.2",
+      "title": "Floor finishes",
+      "parent": "3"
+    },
+    {
+      "code": "3.3",
+      "title": "Ceiling finishes",
+      "parent": "3"
+    },
+    {
+      "code": "4",
+      "title": "Fittings, furnishings and equipment",
+      "parent": null
+    },
+    {
+      "code": "5",
+      "title": "Services",
+      "parent": null
+    },
+    {
+      "code": "5.1",
+      "title": "Sanitary installations",
+      "parent": "5"
+    },
+    {
+      "code": "5.2",
+      "title": "Services equipment",
+      "parent": "5"
+    },
+    {
+      "code": "5.3",
+      "title": "Disposal installations",
+      "parent": "5"
+    },
+    {
+      "code": "5.4",
+      "title": "Water installations",
+      "parent": "5"
+    },
+    {
+      "code": "5.5",
+      "title": "Heat source",
+      "parent": "5"
+    },
+    {
+      "code": "5.6",
+      "title": "Space heating and air conditioning",
+      "parent": "5"
+    },
+    {
+      "code": "5.7",
+      "title": "Ventilation",
+      "parent": "5"
+    },
+    {
+      "code": "5.8",
+      "title": "Electrical installations",
+      "parent": "5"
+    },
+    {
+      "code": "5.9",
+      "title": "Fuel installations",
+      "parent": "5"
+    },
+    {
+      "code": "5.10",
+      "title": "Lift and conveyor installations",
+      "parent": "5"
+    },
+    {
+      "code": "5.11",
+      "title": "Fire and lightning protection",
+      "parent": "5"
+    },
+    {
+      "code": "5.12",
+      "title": "Communication/security/control",
+      "parent": "5"
+    },
+    {
+      "code": "5.13",
+      "title": "Special installations",
+      "parent": "5"
+    },
+    {
+      "code": "5.14",
+      "title": "Builder's work in connection with services",
+      "parent": "5"
+    },
+    {
+      "code": "6",
+      "title": "Prefabricated buildings and building units",
+      "parent": null
+    },
+    {
+      "code": "7",
+      "title": "Work to existing buildings",
+      "parent": null
+    },
+    {
+      "code": "8",
+      "title": "External works",
+      "parent": null
+    }
+  ]
+}
