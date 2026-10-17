@@ -21,6 +21,12 @@
 name: Release gate
 
 on:
+  # GitHub only offers workflow_dispatch for a file that exists on the default
+  # branch, so until this file reaches main the only way to run it is a push to
+  # a branch named for it. It never runs on ordinary pushes.
+  push:
+    branches:
+      - 'wip/release-gate-*'
   workflow_dispatch:
     inputs:
       previous_version:
