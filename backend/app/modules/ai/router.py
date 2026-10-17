@@ -969,8 +969,10 @@ async def advisor_chat(
         from app.core.vector import encode_texts, vector_search
 
         query_vector = encode_texts([message])[0]
+        from app.core import cost_scope
+
         results = vector_search(query_vector, region=region or None, limit=8)
-        context_items = results
+        context_items = await cost_scope.visible_hits(session, results)
     except Exception:
         # Fallback: multi-keyword text search (use all significant words)
         keywords = [w for w in message.split() if len(w) > 2]

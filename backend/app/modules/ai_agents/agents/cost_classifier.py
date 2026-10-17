@@ -30,9 +30,9 @@ an explicit ``{"error": "unavailable"}`` observation rather than guessing.
 from __future__ import annotations
 
 import logging
-import uuid
 from typing import Any
 
+from app.core import cost_scope
 from app.modules.ai_agents.base import (
     Agent,
     FunctionTool,
@@ -124,7 +124,6 @@ async def _tool_classify_item(description: str, region: str | None = None) -> di
     try:
         from app.database import async_session_factory
         from app.modules.costs.matcher import match_cwicr_items
-        from app.modules.costs.models import CostItem
 
         async with async_session_factory() as session:
             results = await match_cwicr_items(
@@ -142,7 +141,7 @@ async def _tool_classify_item(description: str, region: str | None = None) -> di
                 # MatchResult carries no classification - load the underlying
                 # CostItem by its UUID to read the real classification JSON.
                 try:
-                    item = await session.get(CostItem, uuid.UUID(str(r.cost_item_id)))
+                    item = await cost_scope.get_cost_item(session, r.cost_item_id)
                 except (ValueError, TypeError):
                     item = None
                 if item is not None:

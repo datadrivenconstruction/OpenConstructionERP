@@ -11,10 +11,12 @@ import uuid
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
+from fastapi import HTTPException, status
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core import cost_scope
 from app.modules.labor_rates import rate_math
 from app.modules.labor_rates.models import CrewMember, LaborRateTemplate, OnCostComponent
 from app.modules.labor_rates.schemas import (
@@ -443,7 +445,14 @@ class LaborRateService:
         classification = {"collection": _PUBLISHED_LABOR_COLLECTION, "resource_kind": _PUBLISHED_LABOR_KIND}
 
         costs = CostItemService(self.session)
-        existing = await costs.repo.get_by_code(code, region=region_norm)
+        existing = await costs.repo.code_holder(code, region=region_norm)
+        if existing is not None and str(existing.id) not in await cost_scope.visible_ids(self.session, [existing.id]):
+            # The code is held by a row the caller may not read; refreshing it
+            # in place would rewrite someone else's catalogue.
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cost item with code '{code}' already exists for region '{region_norm or 'global'}'",
+            )
         if existing is not None:
             # Same template + region + catalog: refresh the row in place so a
             # re-publish never leaves a duplicate pickable line behind.

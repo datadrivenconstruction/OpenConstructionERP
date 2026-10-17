@@ -173,8 +173,14 @@ async def _run_in_process(
     be scheduled as a background task - never awaited inline - to keep the
     request handler responsive.
     """
+    from app.core import cost_scope
+
     try:
-        await _dispatch_job_sync(job_run_id, session_factory=factory)
+        # A worker process has no request around it, so a job reads cost items
+        # as the system; the in-process fallback is started from a request and
+        # would otherwise inherit that request's reader. Same job, same rows.
+        with cost_scope.system_scope():
+            await _dispatch_job_sync(job_run_id, session_factory=factory)
     except Exception:  # noqa: BLE001 - background task; never propagate.
         logger.exception("In-process job dispatch failed for job_run_id=%s", job_run_id)
 

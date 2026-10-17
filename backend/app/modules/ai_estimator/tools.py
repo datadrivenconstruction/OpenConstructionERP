@@ -35,6 +35,7 @@ import logging
 import uuid
 from typing import Any
 
+from app.core import cost_scope
 from app.modules.ai_agents.base import (
     Agent,
     FunctionTool,
@@ -260,7 +261,6 @@ async def _tool_llm_rerank(
 async def _tool_resource_breakdown(candidate_id: str = "", **_kwargs: Any) -> dict[str, Any]:
     """Read a candidate's CWICR resource components from the cost database."""
     from app.database import async_session_factory
-    from app.modules.costs.models import CostItem
 
     cid = (candidate_id or "").strip()
     if not cid:
@@ -271,7 +271,7 @@ async def _tool_resource_breakdown(candidate_id: str = "", **_kwargs: Any) -> di
         return {"resources": [], "note": "bad_candidate_id"}
     try:
         async with async_session_factory() as session:
-            item = await session.get(CostItem, item_uuid)
+            item = await cost_scope.get_cost_item(session, item_uuid)
     except Exception as exc:  # noqa: BLE001
         logger.warning("estimator resource breakdown failed: %s", exc)
         return {"resources": [], "note": f"lookup_error:{type(exc).__name__}"}

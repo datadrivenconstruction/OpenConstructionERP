@@ -676,6 +676,16 @@ async def search(
         if len(out) >= limit:
             break
 
+    # The collection keeps a copy of every cost row, rows of user-owned
+    # catalogues included, with no owner on it: check each hit against the
+    # row it copies, as the caller this context reads for.
+    if out:
+        from app.core import cost_scope  # noqa: PLC0415
+        from app.database import async_session_factory  # noqa: PLC0415
+
+        async with async_session_factory() as session:
+            out = await cost_scope.visible_hits(session, out)
+
     # Trip the SQL lexical fallback when LanceDB returned nothing or
     # only fixtures - this is what real CWICR users see today, before
     # the admin reindex completes.

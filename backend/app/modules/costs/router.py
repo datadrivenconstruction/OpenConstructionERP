@@ -40,6 +40,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import cost_scope
 from app.core.document_locale import resolve_document_locale
 from app.core.file_signature import (
     SIGNATURE_BYTES_REQUIRED,
@@ -462,6 +463,7 @@ async def autocomplete_cost_items(
             if status.get("connected") and status.get("cost_collection"):
                 query_vec = encode_texts([q])[0]
                 results = vector_search(query_vec, region=region, limit=limit)
+                results = await cost_scope.visible_hits(service.session, results)
                 if results:
                     # Vector results may not have components - look them up from DB
                     codes = [r.get("code", "") for r in results]
@@ -814,6 +816,10 @@ async def search_cost_items(
                 if isinstance(total_active, int):
                     cached_total = total_active
                     skip_count_via_cache = True
+        if skip_count_via_cache:
+            # The cached totals count shared rows only; add what this caller
+            # reads on top of them (their own catalogues, or all for an admin).
+            cached_total += await _private_row_count(service.session, region)
 
     if skip_count_via_cache:
         items, _, has_more, next_cursor = await service.search_costs_paginated(
@@ -914,7 +920,52 @@ _CACHE_TTL = 3600
 # cache is wiped on import via ``_invalidate_cost_cache()`` so user-visible
 # data is always fresh after a CWICR load.
 _CATEGORY_TREE_CACHE_TTL = 3600  # 60 minutes
+# A tree that includes a caller's own catalogues is cached under that caller.
+_OWN_CATEGORY_TREE_CACHE_TTL = 300
 _category_tree_cache: dict[str, dict[str, Any]] = {}
+
+
+# The aggregates cached above are read by everyone, so they are built from
+# shared rows only (``cost_scope.shared_scope``). What a caller reads on top of
+# that, rows of their own catalogues, is few and is queried live for each
+# request under the caller's own scope, then merged in. A private catalogue's
+# name, size or categories therefore never enter a cache another user reads.
+
+
+def _private_rows() -> Any:
+    """Rows that belong to a user-owned catalogue (the caller's scope decides which)."""
+    from app.modules.costs.models import CostItem
+
+    return CostItem.catalog_id.isnot(None)
+
+
+async def _private_region_counts(session: Any) -> dict[str, int]:
+    """Active rows per region in the catalogues the caller may read."""
+    from sqlalchemy import func, select
+
+    from app.modules.costs.models import CostItem
+
+    rows = await session.execute(
+        select(CostItem.region, func.count(CostItem.id))
+        .where(CostItem.is_active.is_(True))
+        .where(CostItem.region.isnot(None))
+        .where(CostItem.region != "")
+        .where(_private_rows())
+        .group_by(CostItem.region)
+    )
+    return {str(region): int(count) for region, count in rows.all()}
+
+
+async def _private_row_count(session: Any, region: str | None = None) -> int:
+    """Active rows in the catalogues the caller may read, optionally in one region."""
+    from sqlalchemy import func, select
+
+    from app.modules.costs.models import CostItem
+
+    stmt = select(func.count(CostItem.id)).where(CostItem.is_active.is_(True)).where(_private_rows())
+    if region:
+        stmt = stmt.where(CostItem.region == region)
+    return int((await session.execute(stmt)).scalar() or 0)
 
 
 def _invalidate_cost_cache() -> None:
@@ -940,27 +991,29 @@ async def list_loaded_regions(
 
     Signed-in callers only, like its sibling ``/regions/stats/``.
     """
+    own = [r for r in await _private_region_counts(session) if not r.startswith("__xlate_")]
     now = _time.monotonic()
     if _region_cache["regions"] is not None and now - _region_cache["ts"] < _CACHE_TTL:
-        return _region_cache["regions"]
+        return sorted({*_region_cache["regions"], *own})
 
     from sqlalchemy import distinct, select
 
     from app.modules.costs.models import CostItem
 
-    result = await session.execute(
-        select(distinct(CostItem.region))
-        .where(CostItem.is_active.is_(True))
-        .where(CostItem.region.isnot(None))
-        .where(CostItem.region != "")
-        # transient language-swap staging regions (an interrupted swap can leave
-        # them behind); they are internal and must never show up as a real region
-        .where(~CostItem.region.startswith("__xlate_", autoescape=True))
-    )
+    with cost_scope.shared_scope():
+        result = await session.execute(
+            select(distinct(CostItem.region))
+            .where(CostItem.is_active.is_(True))
+            .where(CostItem.region.isnot(None))
+            .where(CostItem.region != "")
+            # transient language-swap staging regions (an interrupted swap can leave
+            # them behind); they are internal and must never show up as a real region
+            .where(~CostItem.region.startswith("__xlate_", autoescape=True))
+        )
     regions = sorted(row[0] for row in result.all())
     _region_cache["regions"] = regions
     _region_cache["ts"] = now
-    return regions
+    return sorted({*regions, *own})
 
 
 @router.get("/regions/stats/")
@@ -973,22 +1026,33 @@ async def region_stats(
     Signed-in callers only: every screen that shows these counts is behind
     sign-in, and nothing before it asks for them.
     """
+    own = await _private_region_counts(session)
+
+    def _with_own(shared: list[dict]) -> list[dict]:
+        if not own:
+            return shared
+        merged = {entry["region"]: int(entry["count"]) for entry in shared}
+        for region, count in own.items():
+            merged[region] = merged.get(region, 0) + count
+        return [{"region": region, "count": count} for region, count in sorted(merged.items(), key=lambda kv: -kv[1])]
+
     now = _time.monotonic()
     if _region_cache["stats"] is not None and now - _region_cache["ts"] < _CACHE_TTL:
-        return _region_cache["stats"]
+        return _with_own(_region_cache["stats"])
 
     from sqlalchemy import func, select
 
     from app.modules.costs.models import CostItem
 
-    result = await session.execute(
-        select(CostItem.region, func.count(CostItem.id).label("cnt"))
-        .where(CostItem.is_active.is_(True))
-        .where(CostItem.region.isnot(None))
-        .where(CostItem.region != "")
-        .group_by(CostItem.region)
-        .order_by(func.count(CostItem.id).desc())
-    )
+    with cost_scope.shared_scope():
+        result = await session.execute(
+            select(CostItem.region, func.count(CostItem.id).label("cnt"))
+            .where(CostItem.is_active.is_(True))
+            .where(CostItem.region.isnot(None))
+            .where(CostItem.region != "")
+            .group_by(CostItem.region)
+            .order_by(func.count(CostItem.id).desc())
+        )
     stats = [{"region": row[0], "count": row[1]} for row in result.all()]
     _region_cache["stats"] = stats
     # The per-region stats above deliberately exclude region-less rows (region
@@ -996,16 +1060,17 @@ async def region_stats(
     # sum of per-region counts as the no-region total undercounts by exactly the
     # region-less items. Cache the true grand total (regioned + region-less) so
     # the search fast-path stays accurate without losing the count optimisation.
-    region_less = (
-        await session.execute(
-            select(func.count(CostItem.id))
-            .where(CostItem.is_active.is_(True))
-            .where((CostItem.region.is_(None)) | (CostItem.region == ""))
-        )
-    ).scalar_one()
+    with cost_scope.shared_scope():
+        region_less = (
+            await session.execute(
+                select(func.count(CostItem.id))
+                .where(CostItem.is_active.is_(True))
+                .where((CostItem.region.is_(None)) | (CostItem.region == ""))
+            )
+        ).scalar_one()
     _region_cache["total_active"] = sum(s["count"] for s in stats) + int(region_less or 0)
     _region_cache["ts"] = now
-    return stats
+    return _with_own(stats)
 
 
 @router.delete(
@@ -3316,6 +3381,8 @@ async def install_v3_catalogue(
 
 @router.get("/vector/search/")
 async def semantic_search(
+    session: SessionDep,
+    _user_id: CurrentUserId,
     q: str = Query(..., min_length=2, max_length=500, description="Natural language query"),
     region: str | None = Query(default=None, description="Filter by region"),
     limit: int = Query(default=25, ge=1, le=500),
@@ -3342,7 +3409,8 @@ async def semantic_search(
         from app.core.vector import encode_texts, vector_search
 
         query_vector = encode_texts([q])[0]
-        return vector_search(query_vector, region=region, limit=limit)
+        hits = vector_search(query_vector, region=region, limit=limit)
+        return await cost_scope.visible_hits(session, hits)
     except (ImportError, ModuleNotFoundError, RuntimeError) as exc:
         from app.core.vector import embedder_status
 
@@ -3371,13 +3439,12 @@ async def semantic_search(
 @router.get("/categories/", response_model=list[str])
 async def list_categories(
     session: SessionDep,
+    _user_id: CurrentUserId,
     region: str | None = Query(default=None, description="Filter by region"),
 ) -> list[str]:
     """Return distinct classification.collection values. Cached for 30s."""
     cache_key = f"categories_{region or 'all'}"
     now = _time.monotonic()
-    if _region_cache.get(cache_key) is not None and now - _region_cache["ts"] < _CACHE_TTL:
-        return _region_cache[cache_key]
 
     from sqlalchemy import distinct, select
 
@@ -3402,11 +3469,17 @@ async def list_categories(
 
     stmt = stmt.order_by(collection_expr)
 
-    result = await session.execute(stmt)
+    # The caller's own catalogues, live; the shared part below is cached.
+    own = [row[0] for row in (await session.execute(stmt.where(_private_rows()))).all() if row[0]]
+    if _region_cache.get(cache_key) is not None and now - _region_cache["ts"] < _CACHE_TTL:
+        return sorted({*_region_cache[cache_key], *own})
+
+    with cost_scope.shared_scope():
+        result = await session.execute(stmt)
     cats = [row[0] for row in result.all() if row[0]]
     _region_cache[cache_key] = cats
     _region_cache["ts"] = now
-    return cats
+    return sorted({*cats, *own})
 
 
 # ── Category tree (4-level classification hierarchy) ─────────────────────
@@ -3414,6 +3487,7 @@ async def list_categories(
 
 @router.get("/category-tree/", response_model=list[CategoryTreeNode])
 async def get_category_tree(
+    _user_id: CurrentUserId,
     service: CostItemService = Depends(_get_service),
     region: str | None = Query(
         default=None,
@@ -3450,13 +3524,26 @@ async def get_category_tree(
     wiped on any import / delete via ``_invalidate_cost_cache()``, so
     post-import catalogues become visible immediately on the next request.
     """
+    # A caller who reads catalogue rows in this scope gets a tree of their own,
+    # cached under their id and for a short time only, so a change of role or
+    # of ownership is not outlived by it for long. Everyone else shares the
+    # cached tree of the shared rows.
+    own = bool(await _private_row_count(service.session, region))
     cache_key = f"tree::{region or '__all__'}::d={depth}::p={parent_path or ''}"
+    ttl = _CATEGORY_TREE_CACHE_TTL
+    if own:
+        cache_key += f"::u={cost_scope.current_caller()}"
+        ttl = _OWN_CATEGORY_TREE_CACHE_TTL
     now = _time.monotonic()
     cached = _category_tree_cache.get(cache_key)
-    if cached is not None and now - cached.get("ts", 0) < _CATEGORY_TREE_CACHE_TTL:
+    if cached is not None and now - cached.get("ts", 0) < ttl:
         return cached["nodes"]
 
-    raw = await service.category_tree(region=region, depth=depth, parent_path=parent_path)
+    if own:
+        raw = await service.category_tree(region=region, depth=depth, parent_path=parent_path)
+    else:
+        with cost_scope.shared_scope():
+            raw = await service.category_tree(region=region, depth=depth, parent_path=parent_path)
     nodes = [CategoryTreeNode.model_validate(n) for n in raw]
     _category_tree_cache[cache_key] = {"nodes": nodes, "ts": now}
     return nodes
@@ -7880,6 +7967,10 @@ async def get_cost_item_usage_counts(
         if raw not in seen:
             seen.add(raw)
             ordered_ids.append(raw)
+    # The ledger is keyed by item id and carries no owner; count only for the
+    # items this caller may read.
+    readable = await cost_scope.visible_ids(session, ordered_ids)
+    ordered_ids = [item_id for item_id in ordered_ids if str(item_id) in readable]
     if not ordered_ids:
         return {}
 

@@ -260,12 +260,18 @@ class EventBus:
         handlers = self._handlers.get(event_name, []) + self._wildcard_handlers
         result = EventResult(event=event)
 
+        from app.core import cost_scope
+
         for handler in handlers:
             try:
-                if inspect.iscoroutinefunction(handler):
-                    outcome = await handler(event)
-                else:
-                    outcome = await asyncio.to_thread(handler, event)
+                # A handler is the platform reacting to an event, not an answer
+                # to whoever caused it: it reindexes, audits and aggregates over
+                # every cost item, so it does not inherit the request's reader.
+                with cost_scope.system_scope():
+                    if inspect.iscoroutinefunction(handler):
+                        outcome = await handler(event)
+                    else:
+                        outcome = await asyncio.to_thread(handler, event)
                 result.handler_results.append(
                     {
                         "handler": handler.__qualname__,

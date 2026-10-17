@@ -550,7 +550,7 @@ class CostItemService:
         unknown ``catalog_id`` is referenced. An item created into a
         catalog without its own currency inherits the catalog currency.
         """
-        existing = await self.repo.get_by_code(data.code, region=data.region)
+        existing = await self.repo.code_holder(data.code, region=data.region)
         if existing is not None:
             region_label = data.region or "global"
             raise HTTPException(
@@ -889,7 +889,7 @@ class CostItemService:
         new_code = fields.get("code", item.code)
         new_region = fields.get("region", item.region)
         if new_code != item.code or new_region != item.region:
-            existing = await self.repo.get_by_code(new_code, region=new_region)
+            existing = await self.repo.code_holder(new_code, region=new_region)
             if existing is not None and existing.id != item_id:
                 region_label = new_region or "global"
                 raise HTTPException(
@@ -976,7 +976,7 @@ class CostItemService:
                 skipped_codes.append(data.code)
                 continue
 
-            existing = await self.repo.get_by_code(data.code, region=data.region)
+            existing = await self.repo.code_holder(data.code, region=data.region)
             if existing is not None:
                 skipped_codes.append(data.code)
                 continue

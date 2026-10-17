@@ -380,6 +380,16 @@ except Exception as _rls_exc:  # noqa: BLE001
         raise
     logging.getLogger(__name__).warning("RLS tenant listener not registered: %r", _rls_exc)
 
+# Register the cost item visibility rule on the same sync Session class, so
+# every ORM read of a cost item is scoped to the caller the request bound (see
+# app.core.cost_scope). It is not wrapped in a try: the rule is part of the
+# ownership model, so a failure to install stops the process.
+from sqlalchemy.orm import Session as _CostScopeSession
+
+from app.core import cost_scope as _cost_scope
+
+_cost_scope.install(_CostScopeSession)
+
 # Register the read-only-demo write tripwire on the Engine class, next to the
 # slow-query listeners above and for the same reason: it has to cover every
 # engine in the process, not just the one built here. It is a no-op until

@@ -378,8 +378,13 @@ class CatalogResourceService:
         await self.repo.delete_by_source("cwicr_extraction")
 
         # Query all active cost items with components
+        from app.core import cost_scope
+
+        # The resources written below are a catalogue everyone reads, so they
+        # are derived from shared cost items only, whoever runs the extraction.
         stmt = select(CostItem).where(CostItem.is_active.is_(True))
-        result = await self.session.execute(stmt)
+        with cost_scope.shared_scope():
+            result = await self.session.execute(stmt)
         cost_items = list(result.scalars().all())
 
         # Aggregate components by (code, type)

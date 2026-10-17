@@ -17,6 +17,9 @@ from fastapi import HTTPException
 from app.core import vector
 from app.modules.costs.router import semantic_search
 
+# Called directly, outside a request: no reader is bound, so the hits are not
+# looked up against the database and the session is never used.
+
 
 @pytest.mark.asyncio
 async def test_missing_embedding_model_is_a_503_not_an_empty_answer(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -26,7 +29,7 @@ async def test_missing_embedding_model_is_a_503_not_an_empty_answer(monkeypatch:
     monkeypatch.setattr(vector, "encode_texts", no_model)
 
     with pytest.raises(HTTPException) as raised:
-        await semantic_search(q="reinforced concrete", region=None, limit=25)
+        await semantic_search(session=None, _user_id="reader", q="reinforced concrete", region=None, limit=25)
 
     assert raised.value.status_code == 503
     assert "not available" in str(raised.value.detail)
@@ -44,7 +47,7 @@ async def test_missing_optional_package_is_a_503_too(monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(vector, "encode_texts", no_package)
 
     with pytest.raises(HTTPException) as raised:
-        await semantic_search(q="foundation slab", region="de", limit=10)
+        await semantic_search(session=None, _user_id="reader", q="foundation slab", region="de", limit=10)
 
     assert raised.value.status_code == 503
     assert "qdrant_client" not in str(raised.value.detail)
@@ -59,7 +62,7 @@ async def test_a_working_stack_still_answers_with_its_hits(monkeypatch: pytest.M
         lambda _vector, region=None, limit=25: [{"id": "1", "description": "Stahlbetonwand"}],
     )
 
-    hits = await semantic_search(q="concrete wall", region=None, limit=25)
+    hits = await semantic_search(session=None, _user_id="reader", q="concrete wall", region=None, limit=25)
 
     assert hits == [{"id": "1", "description": "Stahlbetonwand"}]
 

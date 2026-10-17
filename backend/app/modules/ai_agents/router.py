@@ -769,6 +769,27 @@ async def _run_in_background(
     project_id: uuid.UUID | None,
     run_id: uuid.UUID,
 ) -> None:
+    """Run the agent as its user, wherever the task happens to execute."""
+    from app.core import cost_scope
+
+    with cost_scope.caller_scope(user_id):
+        await _run_in_background_as_user(
+            user_id=user_id,
+            agent_name=agent_name,
+            user_input=user_input,
+            project_id=project_id,
+            run_id=run_id,
+        )
+
+
+async def _run_in_background_as_user(
+    *,
+    user_id: uuid.UUID,
+    agent_name: str,
+    user_input: str,
+    project_id: uuid.UUID | None,
+    run_id: uuid.UUID,
+) -> None:
     """Background-task entry point - opens its own session.
 
     The FastAPI-supplied session is gone by the time the background

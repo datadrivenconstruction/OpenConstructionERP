@@ -36,6 +36,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import cost_scope
 from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.stats import percentile
@@ -10205,6 +10206,7 @@ class BOQService:
             import asyncio
 
             matches = await asyncio.to_thread(vector_search, query_vec, None, 10)
+            matches = await cost_scope.visible_hits(self.session, matches)
         except Exception:
             logger.debug("Vector search failed for classify_position")
             return []
@@ -10306,6 +10308,7 @@ class BOQService:
             import asyncio
 
             matches = await asyncio.to_thread(vector_search, query_vec, region, 10)
+            matches = await cost_scope.visible_hits(self.session, matches)
         except Exception:
             logger.debug("Vector search failed for suggest_rate")
             return empty_result
@@ -10435,6 +10438,15 @@ class BOQService:
                 return []
 
         all_matches = await asyncio.gather(*[_search_one(i) for i in range(len(eligible))])
+        # One visibility lookup for the whole batch, after the parallel
+        # searches: the session cannot be shared between them.
+        try:
+            allowed = await cost_scope.visible_hits(self.session, [hit for hits in all_matches for hit in hits])
+        except Exception:
+            logger.debug("Visibility check failed for check_anomalies", exc_info=True)
+            return {"anomalies": [], "positions_checked": 0}
+        allowed_ids = {str(hit.get("id")) for hit in allowed}
+        all_matches = [[hit for hit in hits if str(hit.get("id")) in allowed_ids] for hits in all_matches]
 
         def _percentile_val(data: list[float], pct: float) -> float:
             # Callers guarantee at least two rates, so this is never None here.
@@ -10575,6 +10587,7 @@ class BOQService:
         t1 = time.monotonic()
         try:
             raw_matches = await asyncio.to_thread(vector_search, vectors[0], region, min(limit * 2, 30))
+            raw_matches = await cost_scope.visible_hits(self.session, raw_matches)
         except Exception:
             logger.debug("Vector search failed for search_cost_items")
             return empty
