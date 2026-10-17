@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import io
 import uuid
+from datetime import timedelta
 
 import pytest
 import pytest_asyncio
@@ -279,6 +280,7 @@ async def test_documents_activity_dedupe_within_1s(
     client: AsyncClient,
     auth_headers: dict[str, str],
     project_id: str,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Two identical PATCH calls inside the 1-s dedupe window must
     produce a single ``renamed`` row in the timeline.
@@ -291,6 +293,15 @@ async def test_documents_activity_dedupe_within_1s(
     dedupe helper itself by issuing TWO renames inside the 1-s window
     that toggle then re-toggle the name.
     """
+    # The window is wall clock time, and on a loaded CI runner one PATCH
+    # through the app took 2.5 s, so the second rename landed outside 1 s
+    # and the test failed with nothing wrong in the code. What this test
+    # checks is that two renames inside the window collapse, not how long
+    # the window is, so it widens the window instead of racing the clock.
+    from app.modules.documents import activity_service
+
+    monkeypatch.setattr(activity_service, "_DEDUPE_WINDOW", timedelta(minutes=5))
+
     pdf_bytes = b"%PDF-1.4\n%fake\n%%EOF"
     files = {"file": ("dedupe.pdf", io.BytesIO(pdf_bytes), "application/pdf")}
     resp = await client.post(
