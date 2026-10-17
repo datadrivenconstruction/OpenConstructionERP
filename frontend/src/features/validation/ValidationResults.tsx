@@ -21,7 +21,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { Badge, Button, Card } from '@/shared/ui';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { ruleTitle } from './ruleTitles';
 import {
   countFindings,
@@ -165,7 +165,7 @@ export function SummaryStrip({
             <span>{t('validation.rule_sets', 'Rule sets')}:</span>
             <span className="text-content-secondary">
               {report.rule_sets.length > 0
-                ? report.rule_sets.map(ruleSetLabel).join(', ')
+                ? fmtList(report.rule_sets.map(ruleSetLabel))
                 : t('validation.no_rule_sets', { defaultValue: 'none configured for this project' })}
             </span>
           </span>
@@ -193,7 +193,7 @@ export function SummaryStrip({
           })}
         >
           {t('validation.unsupported_rule_sets', { defaultValue: 'Not implemented (did not run):' })}{' '}
-          {report.unsupported_rule_sets.map(ruleSetLabel).join(', ')}
+          {fmtList(report.unsupported_rule_sets.map(ruleSetLabel))}
         </p>
       )}
     </Card>
@@ -515,13 +515,13 @@ export function ValidationResults<T extends FindingLike>({
           {inView > SEARCH_THRESHOLD && (
             <label className="relative flex-1">
               <span className="sr-only">{t('validation.search_label', { defaultValue: 'Search findings' })}</span>
-              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
+              <Search size={14} className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
               <input
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('validation.search_placeholder', { defaultValue: 'Search position or text' })}
-                className="h-9 w-full rounded-lg border border-border bg-surface-primary pl-8 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                className="h-9 w-full rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
               />
             </label>
           )}

@@ -11,6 +11,8 @@
 // rule, its findings underneath) and orders the groups so the worst come first.
 // It is pure so the ordering and the filter can be tested without the page.
 
+import { compareNames } from '@/shared/lib/collator';
+
 export type FindingSeverity = 'error' | 'warning' | 'info';
 
 /** The fields of a report row this module reads. */
@@ -178,7 +180,7 @@ export function groupFindings<T extends FindingLike>(
     (a, b) =>
       TONE_ORDER[a.tone] - TONE_ORDER[b.tone] ||
       b.findings.length - a.findings.length ||
-      a.ruleName.localeCompare(b.ruleName),
+      compareNames(a.ruleName, b.ruleName),
   );
 }
 
