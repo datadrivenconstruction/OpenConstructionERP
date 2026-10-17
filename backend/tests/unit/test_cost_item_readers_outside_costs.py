@@ -278,10 +278,18 @@ def test_every_cost_vector_search_checks_its_hits() -> None:
     """The cost vector store has no owner on its points, so each search is followed by a check."""
     offenders = []
     for path, text in _sources():
-        if path == "core/vector.py":
+        # The store layer itself: it holds no session and answers whoever calls it.
+        if path in ("core/vector.py", "core/vector_index.py"):
             continue
-        searches = len(re.findall(r"\bvector_search\(|to_thread\(\s*vector_search\b", text))
-        checks = len(re.findall(r"cost_scope\.visible_hits\(", text))
+        searches = len(
+            re.findall(
+                r"\bvector_search\(|to_thread\(\s*vector_search\b|vector_search_collection\(\s*COLLECTION_COSTS\b",
+                text,
+            )
+        )
+        # The cross-collection search checks its cost ranking by id.
+        searches += len(re.findall(r"\bsearch_collection\(\s*collection\b", text)) if "COLLECTION_COSTS" in text else 0
+        checks = len(re.findall(r"cost_scope\.visible_hits\(|_drop_unreadable_cost_hits\(session", text))
         if searches > checks:
             offenders.append(f"{path}: {searches} searches, {checks} checks")
     assert not offenders, offenders

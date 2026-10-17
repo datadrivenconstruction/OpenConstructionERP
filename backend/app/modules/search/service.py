@@ -973,6 +973,30 @@ def _filter_vector_hits_by_access(
     return out
 
 
+async def _drop_unreadable_cost_hits(
+    session: AsyncSession,
+    chosen: list[str],
+    rankings: list[list[VectorHit]],
+) -> list[list[VectorHit]]:
+    """Drop the cost vector hits whose cost item the caller may not read.
+
+    The cost collection keeps a copy of every cost row, rows of user-owned
+    catalogues included, with no owner and no project on it, so the project
+    fence keeps them all. Each hit is checked against the row it copies, as
+    the caller the request is bound to (``cost_scope``). A hit whose row is
+    gone is dropped as well.
+    """
+    from app.core import cost_scope  # noqa: PLC0415
+
+    out: list[list[VectorHit]] = []
+    for collection, ranking in zip(chosen, rankings, strict=False):
+        if collection == COLLECTION_COSTS and ranking:
+            allowed = await cost_scope.visible_ids(session, [hit.id for hit in ranking])
+            ranking = [hit for hit in ranking if hit.id in allowed]
+        out.append(ranking)
+    return out
+
+
 async def unified_search_service(
     query: str,
     *,
@@ -1043,6 +1067,7 @@ async def unified_search_service(
                 logger.debug("_sql_search_collection(%s) failed: %s", collection, exc)
                 hits = []
             sql_rankings.append(hits)
+        vector_rankings = await _drop_unreadable_cost_hits(session, chosen, vector_rankings)
 
     # Apply the same access fence to the vector track. For a single
     # authorised project_id the vector layer already filtered on the
