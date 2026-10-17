@@ -190,6 +190,14 @@ export interface ControlAccount {
   parent_id: string | null;
   code: string;
   name: string;
+  /** Readable title; `name` stays the legacy label and often repeats the code. */
+  title?: string;
+  /** Depth in the tree, 1 for a root. */
+  level?: number;
+  /** Money planned on the account itself, a decimal string. */
+  own_amount?: string;
+  /** False for a heading account that only groups its children. */
+  is_leaf_postable?: boolean;
   classification_standard: string;
   status: string;
   sort_order: number;
@@ -351,14 +359,31 @@ export interface SpineRollup {
 
 /** Result of generating spine lines from a BOQ (created-record counts). */
 export interface SpineGenerationResult {
+  project_id?: string;
+  boq_id?: string;
+  /** The code list the tree was built from; empty when the project names none. */
+  standard?: string;
   accounts_created: number;
-  lines_created: number;
+  cost_lines_created: number;
+  positions_linked?: number;
+  budget_lines_linked?: number;
+  /** Costed positions with no code of `standard`: their lines sit on no account. */
+  positions_in_suspense?: number;
+  suspense_amount?: string;
+}
+
+/** Options for generating the spine: which bill, and which code list to read. */
+export interface SpineGenerationOptions {
+  boqId?: string;
+  standard?: string;
 }
 
 /** Query parameters accepted by the cost-line listing endpoint. */
 export interface SpineLinesParams {
   control_account_id?: string;
   status?: string;
+  /** Match on code or description, server side, so a large bill stays reachable. */
+  search?: string;
   offset?: number;
   limit?: number;
 }
@@ -434,16 +459,21 @@ export const costModelApi = {
     const qs = new URLSearchParams();
     if (params?.control_account_id) qs.set('control_account_id', params.control_account_id);
     if (params?.status) qs.set('status', params.status);
+    if (params?.search) qs.set('search', params.search);
     if (params?.offset !== undefined) qs.set('offset', String(params.offset));
     if (params?.limit !== undefined) qs.set('limit', String(params.limit));
     const suffix = qs.toString() ? `?${qs.toString()}` : '';
     return apiGet<CostLine[]>(`/v1/costmodel/projects/${projectId}/spine/lines/${suffix}`);
   },
-  generateSpine: (projectId: string, boqId?: string) =>
-    apiPost<SpineGenerationResult>(
+  generateSpine: (projectId: string, options: SpineGenerationOptions = {}) => {
+    const body: { boq_id?: string; standard?: string } = {};
+    if (options.boqId) body.boq_id = options.boqId;
+    if (options.standard) body.standard = options.standard;
+    return apiPost<SpineGenerationResult>(
       `/v1/costmodel/projects/${projectId}/spine/generate-from-boq/`,
-      boqId ? { boq_id: boqId } : {},
-    ),
+      body,
+    );
+  },
   getSpineRollup: (projectId: string) =>
     apiGet<SpineRollup>(`/v1/costmodel/projects/${projectId}/spine/rollup/`),
   getLineRollup: (lineId: string) =>

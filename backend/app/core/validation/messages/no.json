@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Bundne midler er ikke tildelt noen kostnadslinje.",
+      "suggestion": "Koble kontrakts- eller ordrelinjene til kostnadslinjer, slik at pengene vises på riktig sted."
+    },
+    "certified_over_committed": {
+      "fail": "Attestert arbeid overstiger tildelingen pluss godkjente endringer.",
+      "suggestion": "Godkjenn endringen som dekker tilleggsarbeidet, eller kontroller kravet."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognosen ligger over det planlagte beløpet.",
+      "suggestion": "Kontroller kilden til prognosen; registrer en manuell prognose med begrunnelse hvis du venter besparelser."
+    },
+    "partly_awarded": {
+      "fail": "Bare en del av det planlagte beløpet er tildelt; prognosen kan mangle arbeid som ennå skal lyses ut.",
+      "suggestion": "Hvis det fortsatt skal lyses ut arbeid på denne linjen, legg inn en manuell prognose."
+    },
+    "pending_changes": {
+      "fail": "Endringsordrer venter på en beslutning.",
+      "suggestion": "Ta stilling til de ventende endringsordrene; prognosen inkluderer dem ikke ennå."
+    },
+    "snapshot_stale": {
+      "fail": "Ingen prognose er lagret på over en måned.",
+      "suggestion": "Lagre et prognoseøyeblikksbilde slik at kostnadshistorikken forblir lesbar."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Kontokoden {code} forekommer mer enn én gang i kostnadsstrukturen.",
+      "suggestion": "Behold én konto per kode og flytt kostnadslinjene dit."
+    },
+    "mixed_standard": {
+      "fail": "Kostnadsstrukturen blander kodelister: {standards}.",
+      "suggestion": "Bygg strukturen ut fra én kodeliste; map de andre kodene til den."
+    },
+    "account_parent_cycle": {
+      "fail": "Konto {code} er sin egen forfader via {count} kontoer.",
+      "suggestion": "Gi en av disse kontoene en overordnet konto utenfor løkken."
+    },
+    "account_too_deep": {
+      "fail": "Konto {code} ligger på nivå {level}, dypere enn kodelistens {max} nivåer.",
+      "suggestion": "Plasser kontoen under en overordnet konto innenfor kodelistens dybde."
+    },
+    "no_account": {
+      "fail": "{count} kostnadslinjer til en verdi av {amount} ligger på ingen konto (første: {code}).",
+      "suggestion": "Gi disse postene en kode fra strukturens kodeliste, eller tilordne kostnadslinjene til en konto."
+    },
+    "invalid_account": {
+      "fail": "{count} kostnadslinjer til en verdi av {amount} ligger på en lukket konto eller en konto som ikke tar imot posteringer (første: {code}).",
+      "suggestion": "Flytt kostnadslinjene til en åpen konto som tar imot posteringer."
+    },
+    "own_amount_on_parent": {
+      "fail": "Konto {code} har underkontoer og i tillegg et eget beløp på {amount}.",
+      "suggestion": "Flytt det egne beløpet til en underkonto, eller behold det som en bevisst reserve."
+    },
+    "rollup_mismatch": {
+      "fail": "Strukturens sum {reported} avviker fra summen av delene {expected} med {difference}.",
+      "suggestion": "Last strukturen på nytt; hvis avviket består, kontroller kontoer uten overordnet konto."
+    },
+    "allocation_incomplete": {
+      "fail": "Andelene for post {ordinal} summerer seg til {total}{unit} i stedet for {expected}{unit}.",
+      "suggestion": "Juster andelene slik at hele posten er fordelt, verken mer eller mindre."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Post {ordinal} er delvis delt i prosent og delvis etter mengde.",
+      "suggestion": "Del posten opp på bare én måte."
+    },
+    "vector_not_inherited": {
+      "fail": "Kontraktslinjen {code} ligger på en kostnadslinje som posten i mengdebeskrivelsen ikke er tilordnet.",
+      "suggestion": "Legg linjen tilbake på postens kostnadslinjer, eller registrer avviket med begrunnelse."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Risikopåslaget \"{markup}\" beregnes på et grunnlag som allerede inneholder fortjenestelinjen \"{profit}\", slik at det legges margin på penger satt av til risiko",

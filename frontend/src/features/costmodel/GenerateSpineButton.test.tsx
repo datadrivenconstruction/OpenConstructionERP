@@ -59,6 +59,7 @@ vi.mock('./api', () => ({
   costModelApi: { generateSpine: apiMocks.generateSpineMock },
 }));
 
+import { ApiError } from '@/shared/lib/api';
 import { GenerateSpineButton } from './GenerateSpineButton';
 
 afterEach(() => {
@@ -84,7 +85,7 @@ function renderButton(projectId = 'proj-1') {
 
 describe('<GenerateSpineButton>', () => {
   it('shows a toast with the created counts on success', async () => {
-    generateSpineMock.mockResolvedValueOnce({ accounts_created: 5, lines_created: 42 });
+    generateSpineMock.mockResolvedValueOnce({ accounts_created: 5, cost_lines_created: 42 });
     renderButton();
 
     fireEvent.click(screen.getByRole('button', { name: /Generate from BOQ/i }));
@@ -103,7 +104,7 @@ describe('<GenerateSpineButton>', () => {
   });
 
   it('invalidates the ["spine", projectId] query on success', async () => {
-    generateSpineMock.mockResolvedValueOnce({ accounts_created: 1, lines_created: 1 });
+    generateSpineMock.mockResolvedValueOnce({ accounts_created: 1, cost_lines_created: 1 });
     const { invalidateSpy } = renderButton('proj-99');
 
     fireEvent.click(screen.getByRole('button', { name: /Generate from BOQ/i }));
@@ -113,8 +114,48 @@ describe('<GenerateSpineButton>', () => {
     );
   });
 
+  it('names the positions left in suspense with a warning toast', async () => {
+    generateSpineMock.mockResolvedValueOnce({
+      accounts_created: 2,
+      cost_lines_created: 3,
+      positions_in_suspense: 4,
+      suspense_amount: '1250.50',
+    });
+    renderButton();
+
+    fireEvent.click(screen.getByRole('button', { name: /Generate from BOQ/i }));
+
+    await waitFor(() => expect(addToastMock).toHaveBeenCalledTimes(1));
+    const toast = addToastMock.mock.calls[0]?.[0] as { type: string; message: string };
+    expect(toast.type).toBe('warning');
+    expect(toast.message).toContain('Positions without a code of this list: 4');
+    expect(toast.message).toMatch(/1[,.\s\u00a0\u202f]?250/);
+  });
+
+  it('shows the structure mismatch as a sentence naming both lists', async () => {
+    generateSpineMock.mockRejectedValueOnce(
+      new ApiError(409, 'Conflict', {
+        detail: {
+          problem: 'structure_standard_mismatch',
+          message: 'mismatch',
+          params: { standard: 'din276', requested: 'nrm1' },
+        },
+      }),
+    );
+    renderButton();
+
+    fireEvent.click(screen.getByRole('button', { name: /Generate from BOQ/i }));
+
+    await waitFor(() => expect(addToastMock).toHaveBeenCalledTimes(1));
+    const toast = addToastMock.mock.calls[0]?.[0] as { type: string; message: string };
+    expect(toast.type).toBe('error');
+    expect(toast.message).toBe(
+      'The cost structure is built on din276, so it cannot take codes of nrm1.',
+    );
+  });
+
   it('passes the projectId through to generateSpine', async () => {
-    generateSpineMock.mockResolvedValueOnce({ accounts_created: 0, lines_created: 0 });
+    generateSpineMock.mockResolvedValueOnce({ accounts_created: 0, cost_lines_created: 0 });
     renderButton('proj-7');
 
     fireEvent.click(screen.getByRole('button', { name: /Generate from BOQ/i }));

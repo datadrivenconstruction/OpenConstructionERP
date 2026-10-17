@@ -1,0 +1,47 @@
+{
+  "key": "uniformat",
+  "name": "Elemental building classification",
+  "standard": "uniformat",
+  "entries": [
+    {
+      "code": "A",
+      "title": "Substructure",
+      "parent": null
+    },
+    {
+      "code": "B",
+      "title": "Shell",
+      "parent": null
+    },
+    {
+      "code": "C",
+      "title": "Interiors",
+      "parent": null
+    },
+    {
+      "code": "D",
+      "title": "Services",
+      "parent": null
+    },
+    {
+      "code": "E",
+      "title": "Equipment and furnishings",
+      "parent": null
+    },
+    {
+      "code": "F",
+      "title": "Special construction and demolition",
+      "parent": null
+    },
+    {
+      "code": "G",
+      "title": "Building sitework",
+      "parent": null
+    },
+    {
+      "code": "Z",
+      "title": "General",
+      "parent": null
+    }
+  ]
+}

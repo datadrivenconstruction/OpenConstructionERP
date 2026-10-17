@@ -93,6 +93,7 @@ import {
   type VariationLineTraceBadge,
 } from './grid/cellRenderers';
 import { countComments } from './CommentDrawer';
+import { CostAllocationCellRenderer } from './grid/CostAllocationCell';
 import {
   convertToBase,
   fmtWithCurrency,
@@ -615,6 +616,12 @@ export interface BOQGridProps {
   showResourceSplit?: boolean;
   /** Show the compact inline split pill (tri-state `pill` position). */
   showResourceSplitPill?: boolean;
+  /** Show the read-only cost allocation column. */
+  showCostAllocation?: boolean;
+  /** Allocation of every costed position, keyed by position id. */
+  costAllocations?: Map<string, import('@/features/costmodel/structureApi').PositionAllocation>;
+  /** Opens the allocation drawer for a position (cost allocation cell click). */
+  onOpenCostAllocation?: (positionId: string) => void;
   /**
    * BOQ-scoped named variables ($GFA, $LABOR_RATE, …). Used by `calculated`
    * custom columns; safe to omit when no calculated columns are defined.
@@ -740,6 +747,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   customColumns,
   showResourceSplit,
   showResourceSplitPill,
+  showCostAllocation,
+  costAllocations,
+  onOpenCostAllocation,
   boqVariables,
   bimModelId,
   onHighlightBIMElements,
@@ -1372,6 +1382,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // description cell, `off` shows neither. At most one flag is true.
       showResourceSplit: showResourceSplit ?? false,
       showResourceSplitPill: showResourceSplitPill ?? false,
+      showCostAllocation: showCostAllocation ?? false,
+      costAllocations,
+      onOpenCostAllocation,
       locale,
       fmt,
       t,
@@ -1464,7 +1477,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
      onUpdatePosition, onHighlightBIMElements, onLinkFromModel, onDeleteSection, onReorderSections, onFormulaApplied,
-     positions, boqVariablesMap, customColumns, showResourceSplit, showResourceSplitPill, renderInlineCopilot, displayQuantity,
+     positions, boqVariablesMap, customColumns, showResourceSplit, showResourceSplitPill, showCostAllocation, costAllocations, onOpenCostAllocation, renderInlineCopilot, displayQuantity,
      sectionTotalBasis, variationTraces, variationUntracedBadge, readOnly, canDelete, addToast],
   );
 
@@ -1489,7 +1502,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   // nothing to rebuild, and a stable empty list keeps the memo quiet.
   const customColumnPositions = customColumns && customColumns.length > 0 ? positions : NO_POSITIONS;
   const columnDefs = useMemo(() => {
-    const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t: tRef.current, displayCurrency: displayCurrency ?? null, showResourceSplit, displayQuantity, maxOrdinalChars });
+    const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t: tRef.current, displayCurrency: displayCurrency ?? null, showResourceSplit, showCostAllocation, displayQuantity, maxOrdinalChars });
     // Override ordinal column with custom renderer
     const ordinalCol = defs.find((c) => c.field === 'ordinal');
     if (ordinalCol) {
@@ -1529,7 +1542,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // A locked bill: no column opens an editor and no row drags.
     if (readOnly) return defs.map((c) => ({ ...c, editable: false, rowDrag: false }));
     return defs;
-  }, [currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, displayQuantity, maxOrdinalChars, readOnly]);
+  }, [currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, showCostAllocation, displayQuantity, maxOrdinalChars, readOnly]);
 
   /* ── Calculated-column refresh on positions change ──────────────────
    * AG Grid re-runs `valueGetter` on every refresh; for cross-position
@@ -1585,6 +1598,22 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       applyOrder: false,
     });
   }, [showResourceSplit]);
+
+  /* ── Cost allocation column: same explicit visibility as the split columns,
+   * and a repaint when the allocations change, since the cell reads them off
+   * the grid context and AG Grid does not re-render a cell for that. */
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api) return;
+    api.applyColumnState({
+      state: [{ colId: 'cost_allocation', hide: !showCostAllocation }],
+      applyOrder: false,
+    });
+  }, [showCostAllocation]);
+  useEffect(() => {
+    if (!showCostAllocation) return;
+    gridApiRef.current?.refreshCells({ columns: ['cost_allocation'], force: true });
+  }, [costAllocations, showCostAllocation]);
 
   /* ── Display-currency refresh (Issue #88) ────────────────────────────
    * When the user flips the active display currency the column-defs
@@ -2468,6 +2497,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       sectionFullWidthRenderer: SectionFullWidthRenderer,
       resourceFullWidthRenderer: ResourceFullWidthRenderer,
       descriptionCellRenderer: DescriptionCellRenderer,
+      costAllocationCellRenderer: CostAllocationCellRenderer,
     }),
     [],
   );

@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Bundna medel är inte kopplade till någon kostnadsrad.",
+      "suggestion": "Koppla kontrakts- eller orderraderna till kostnadsrader så att pengarna visas på rätt plats."
+    },
+    "certified_over_committed": {
+      "fail": "Attesterat arbete överstiger tilldelningen plus godkända ändringar.",
+      "suggestion": "Godkänn ändringen som täcker extraarbetet, eller kontrollera fakturan."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognosen ligger över det planerade beloppet.",
+      "suggestion": "Kontrollera prognosens källa; registrera en manuell prognos med orsak om du väntar dig besparingar."
+    },
+    "partly_awarded": {
+      "fail": "Bara en del av det planerade beloppet är tilldelad; prognosen kan sakna arbete som ännu ska upphandlas.",
+      "suggestion": "Om mer arbete ska upphandlas på den här raden, ange en manuell prognos."
+    },
+    "pending_changes": {
+      "fail": "Ändringsorder väntar på beslut.",
+      "suggestion": "Besluta om de väntande ändringsordrarna; prognosen innehåller dem ännu inte."
+    },
+    "snapshot_stale": {
+      "fail": "Ingen prognos har sparats på över en månad.",
+      "suggestion": "Spara en prognosögonblicksbild så att kostnadshistoriken förblir läsbar."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Kontokoden {code} förekommer mer än en gång i kostnadsstrukturen.",
+      "suggestion": "Behåll ett konto per kod och flytta dess kostnadsrader dit."
+    },
+    "mixed_standard": {
+      "fail": "Kostnadsstrukturen blandar kodlistor: {standards}.",
+      "suggestion": "Bygg strukturen utifrån en kodlista; mappa de andra koderna mot den."
+    },
+    "account_parent_cycle": {
+      "fail": "Konto {code} är sin egen förfader via {count} konton.",
+      "suggestion": "Ge ett av dessa konton ett överordnat konto utanför slingan."
+    },
+    "account_too_deep": {
+      "fail": "Konto {code} ligger på nivå {level}, djupare än kodlistans {max} nivåer.",
+      "suggestion": "Placera kontot under ett överordnat konto inom kodlistans djup."
+    },
+    "no_account": {
+      "fail": "{count} kostnadsrader värda {amount} ligger på inget konto (första: {code}).",
+      "suggestion": "Ge dessa poster en kod ur strukturens kodlista, eller koppla kostnadsraderna till ett konto."
+    },
+    "invalid_account": {
+      "fail": "{count} kostnadsrader värda {amount} ligger på ett stängt konto eller ett konto som inte tar emot bokningar (första: {code}).",
+      "suggestion": "Flytta kostnadsraderna till ett öppet konto som tar emot bokningar."
+    },
+    "own_amount_on_parent": {
+      "fail": "Konto {code} har underkonton och dessutom ett eget belopp på {amount}.",
+      "suggestion": "Flytta det egna beloppet till ett underkonto, eller behåll det som en medveten reserv."
+    },
+    "rollup_mismatch": {
+      "fail": "Strukturens summa {reported} avviker från summan av delarna {expected} med {difference}.",
+      "suggestion": "Ladda om strukturen; om avvikelsen finns kvar, kontrollera konton utan överordnat konto."
+    },
+    "allocation_incomplete": {
+      "fail": "Andelarna för post {ordinal} summerar till {total}{unit} i stället för {expected}{unit}.",
+      "suggestion": "Justera andelarna så att hela posten fördelas, varken mer eller mindre."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Post {ordinal} är delvis uppdelad i procent och delvis i mängd.",
+      "suggestion": "Dela upp posten på ett enda sätt."
+    },
+    "vector_not_inherited": {
+      "fail": "Kontraktsraden {code} ligger på en kostnadsrad som dess post i mängdförteckningen inte är kopplad till.",
+      "suggestion": "Lägg tillbaka raden på postens kostnadsrader, eller registrera avvikelsen med orsak."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Riskpåslaget \"{markup}\" beräknas på ett underlag som redan innehåller vinstpåslaget \"{profit}\", så en marginal läggs på pengar som avsatts för risk",

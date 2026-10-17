@@ -1,0 +1,282 @@
+{
+  "key": "masterformat",
+  "name": "Division numbering (commercial and institutional)",
+  "standard": "masterformat",
+  "entries": [
+    {
+      "code": "01",
+      "title": "General project requirements and temporary provisions",
+      "parent": null
+    },
+    {
+      "code": "02",
+      "title": "Demolition, site assessment and existing structures",
+      "parent": null
+    },
+    {
+      "code": "03",
+      "title": "Cast-in-place and precast concrete work",
+      "parent": null
+    },
+    {
+      "code": "03 10 00",
+      "title": "Formwork, shoring and embeds",
+      "parent": "03"
+    },
+    {
+      "code": "03 20 00",
+      "title": "Rebar and mesh supply and placing",
+      "parent": "03"
+    },
+    {
+      "code": "03 30 00",
+      "title": "Site-poured slabs, walls and frames",
+      "parent": "03"
+    },
+    {
+      "code": "03 40 00",
+      "title": "Factory-cast panels and members",
+      "parent": "03"
+    },
+    {
+      "code": "04",
+      "title": "Brick, block and stone work",
+      "parent": null
+    },
+    {
+      "code": "05",
+      "title": "Structural and miscellaneous metal work",
+      "parent": null
+    },
+    {
+      "code": "05 10 00",
+      "title": "Steel frame: beams, columns, bracing",
+      "parent": "05"
+    },
+    {
+      "code": "05 20 00",
+      "title": "Open-web steel joists",
+      "parent": "05"
+    },
+    {
+      "code": "05 30 00",
+      "title": "Steel floor and roof deck",
+      "parent": "05"
+    },
+    {
+      "code": "05 50 00",
+      "title": "Stairs, railings, lintels and misc. steel",
+      "parent": "05"
+    },
+    {
+      "code": "06",
+      "title": "Carpentry, millwork and composite framing",
+      "parent": null
+    },
+    {
+      "code": "06 10 00",
+      "title": "Framing, blocking and sheathing",
+      "parent": "06"
+    },
+    {
+      "code": "06 20 00",
+      "title": "Trim, shelving and interior joinery",
+      "parent": "06"
+    },
+    {
+      "code": "06 40 00",
+      "title": "Custom cabinetry and panelling",
+      "parent": "06"
+    },
+    {
+      "code": "07",
+      "title": "Roofing, waterproofing and insulation",
+      "parent": null
+    },
+    {
+      "code": "08",
+      "title": "Doors, windows and glazed assemblies",
+      "parent": null
+    },
+    {
+      "code": "08 10 00",
+      "title": "Door leaves, frames and hardware sets",
+      "parent": "08"
+    },
+    {
+      "code": "08 40 00",
+      "title": "Shopfronts, entrance systems and glass facades",
+      "parent": "08"
+    },
+    {
+      "code": "08 50 00",
+      "title": "Window units",
+      "parent": "08"
+    },
+    {
+      "code": "08 80 00",
+      "title": "Glass panes and glazing work",
+      "parent": "08"
+    },
+    {
+      "code": "09",
+      "title": "Interior finishing: drywall, flooring, painting",
+      "parent": null
+    },
+    {
+      "code": "09 20 00",
+      "title": "Drywall partitions and plasterwork",
+      "parent": "09"
+    },
+    {
+      "code": "09 30 00",
+      "title": "Ceramic and stone tile work",
+      "parent": "09"
+    },
+    {
+      "code": "09 50 00",
+      "title": "Suspended and acoustic ceiling systems",
+      "parent": "09"
+    },
+    {
+      "code": "09 60 00",
+      "title": "Floor coverings: resilient, carpet, timber",
+      "parent": "09"
+    },
+    {
+      "code": "09 90 00",
+      "title": "Paint and protective coatings",
+      "parent": "09"
+    },
+    {
+      "code": "10",
+      "title": "Built-in specialty items and signage",
+      "parent": null
+    },
+    {
+      "code": "11",
+      "title": "Fixed building equipment",
+      "parent": null
+    },
+    {
+      "code": "12",
+      "title": "Furniture, casework and window treatments",
+      "parent": null
+    },
+    {
+      "code": "13",
+      "title": "Pre-engineered and special-purpose structures",
+      "parent": null
+    },
+    {
+      "code": "14",
+      "title": "Elevators, escalators and lifts",
+      "parent": null
+    },
+    {
+      "code": "21",
+      "title": "Sprinkler and fire-suppression systems",
+      "parent": null
+    },
+    {
+      "code": "22",
+      "title": "Piping systems and sanitary fixtures",
+      "parent": null
+    },
+    {
+      "code": "22 10 00",
+      "title": "Water, waste and vent pipework, pumps",
+      "parent": "22"
+    },
+    {
+      "code": "22 30 00",
+      "title": "Water heaters and softeners",
+      "parent": "22"
+    },
+    {
+      "code": "22 40 00",
+      "title": "WCs, basins, sinks and showers",
+      "parent": "22"
+    },
+    {
+      "code": "23",
+      "title": "Heating, cooling and ventilation systems",
+      "parent": null
+    },
+    {
+      "code": "23 05 00",
+      "title": "Mechanical supports, insulation, balancing",
+      "parent": "23"
+    },
+    {
+      "code": "23 20 00",
+      "title": "Heating and chilled water pipework, pumps",
+      "parent": "23"
+    },
+    {
+      "code": "23 30 00",
+      "title": "Ductwork, diffusers and fans",
+      "parent": "23"
+    },
+    {
+      "code": "23 60 00",
+      "title": "Boilers and heat generation plant",
+      "parent": "23"
+    },
+    {
+      "code": "23 70 00",
+      "title": "Air-handling units and packaged plant",
+      "parent": "23"
+    },
+    {
+      "code": "26",
+      "title": "Power distribution and lighting systems",
+      "parent": null
+    },
+    {
+      "code": "26 05 00",
+      "title": "Conduit, cable, earthing and supports",
+      "parent": "26"
+    },
+    {
+      "code": "26 20 00",
+      "title": "Switchboards, panels and final circuits",
+      "parent": "26"
+    },
+    {
+      "code": "26 40 00",
+      "title": "Surge and corrosion protection",
+      "parent": "26"
+    },
+    {
+      "code": "26 50 00",
+      "title": "Luminaires and lighting controls",
+      "parent": "26"
+    },
+    {
+      "code": "27",
+      "title": "Voice, data and network cabling",
+      "parent": null
+    },
+    {
+      "code": "28",
+      "title": "Fire alarm, access control and surveillance",
+      "parent": null
+    },
+    {
+      "code": "31",
+      "title": "Excavation, grading and earth support",
+      "parent": null
+    },
+    {
+      "code": "32",
+      "title": "Paving, landscaping and site amenities",
+      "parent": null
+    },
+    {
+      "code": "33",
+      "title": "Site water, sewer, storm and power services",
+      "parent": null
+    }
+  ]
+}

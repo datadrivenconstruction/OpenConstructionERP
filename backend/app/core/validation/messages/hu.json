@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "A lekötött összeg nincs hozzárendelve egyetlen költségsorhoz sem.",
+      "suggestion": "Kapcsolja a szerződés vagy a megrendelés sorait költségsorokhoz, hogy az összeg a megfelelő helyen jelenjen meg."
+    },
+    "certified_over_committed": {
+      "fail": "Az igazolt teljesítés meghaladja az odaítélt összeget és a jóváhagyott módosításokat.",
+      "suggestion": "Hagyja jóvá a pótmunkát fedező módosítást, vagy ellenőrizze a számlát."
+    },
+    "forecast_over_plan": {
+      "fail": "Az előrejelzés meghaladja a tervezett összeget.",
+      "suggestion": "Ellenőrizze az előrejelzés forrását; ha megtakarításra számít, rögzítsen indoklással kézi előrejelzést."
+    },
+    "partly_awarded": {
+      "fail": "A tervezett összegnek csak egy része van odaítélve; az előrejelzésből hiányozhat a még kiadandó munka.",
+      "suggestion": "Ha ezen a soron még kiadandó munka van, adjon meg kézi előrejelzést."
+    },
+    "pending_changes": {
+      "fail": "Módosítási megrendelések döntésre várnak.",
+      "suggestion": "Döntsön a függő módosítási megrendelésekről; az előrejelzés még nem tartalmazza őket."
+    },
+    "snapshot_stale": {
+      "fail": "Több mint egy hónapja nem készült előrejelzés-mentés.",
+      "suggestion": "Mentsen előrejelzés-pillanatképet, hogy a költségtörténet olvasható maradjon."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "A(z) {code} számlakód többször szerepel a költségstruktúrában.",
+      "suggestion": "Kódonként tartson meg egy számlát, és helyezze át rá a költségsorait."
+    },
+    "mixed_standard": {
+      "fail": "A költségstruktúra több kódrendszert kever: {standards}.",
+      "suggestion": "Építse fel a struktúrát egyetlen kódrendszerből; a többi kódot képezze le rá."
+    },
+    "account_parent_cycle": {
+      "fail": "A(z) {code} számla {count} számlán keresztül a saját őse.",
+      "suggestion": "Adjon az egyik számlának a hurkon kívüli szülőt."
+    },
+    "account_too_deep": {
+      "fail": "A(z) {code} számla a(z) {level}. szinten van, mélyebben, mint a kódrendszer {max} szintje.",
+      "suggestion": "Csatolja a számlát a kódrendszer mélységén belüli szülőhöz."
+    },
+    "no_account": {
+      "fail": "{count} db, {amount} értékű költségsor egyetlen számlán sincs (első: {code}).",
+      "suggestion": "Adjon ezeknek a tételeknek a struktúra kódrendszeréből való kódot, vagy rendelje a költségsorokat számlához."
+    },
+    "invalid_account": {
+      "fail": "{count} db, {amount} értékű költségsor lezárt vagy könyvelést nem fogadó számlán van (első: {code}).",
+      "suggestion": "Helyezze át a költségsorokat nyitott, könyvelést fogadó számlára."
+    },
+    "own_amount_on_parent": {
+      "fail": "A(z) {code} számlának vannak alszámlái, és saját összege is van: {amount}.",
+      "suggestion": "Helyezze át a saját összeget alszámlára, vagy tartsa meg tudatos tartalékként."
+    },
+    "rollup_mismatch": {
+      "fail": "A struktúra összege ({reported}) {difference} összeggel eltér a részek összegétől ({expected}).",
+      "suggestion": "Töltse újra a struktúrát; ha az eltérés megmarad, ellenőrizze a szülő nélküli számlákat."
+    },
+    "allocation_incomplete": {
+      "fail": "A(z) {ordinal} tétel részarányai {total}{unit} összeget adnak {expected}{unit} helyett.",
+      "suggestion": "Igazítsa a részarányokat úgy, hogy a teljes tétel szétosztásra kerüljön, se több, se kevesebb."
+    },
+    "allocation_mixed_modes": {
+      "fail": "A(z) {ordinal} tétel részben százalék, részben mennyiség szerint van felosztva.",
+      "suggestion": "A tételt csak egyféleképpen ossza fel."
+    },
+    "vector_not_inherited": {
+      "fail": "A(z) {code} szerződéssor olyan költségsoron van, amelyhez a költségvetési tétele nincs hozzárendelve.",
+      "suggestion": "Tegye vissza a sort a tétel költségsoraira, vagy rögzítse az eltérést indoklással."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "A(z) „{markup}” kockázati tartalék alapja már tartalmazza a(z) „{profit}” nyereségtételt, így a kockázatra félretett összegre is árrés kerül",

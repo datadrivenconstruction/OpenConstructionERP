@@ -132,6 +132,13 @@ export interface BOQColumnContext {
    */
   showResourceSplitPill?: boolean;
   /**
+   * Read-only "Cost allocation" column: the account and cost line a
+   * position's money lands on, or how many parts it is split into. Off by
+   * default; the allocations themselves travel on the grid context
+   * (`costAllocations`) so the cell repaints without rebuilding the defs.
+   */
+  showCostAllocation?: boolean;
+  /**
    * ── Imperial-units display seam (Issue #285).
    * Carries the measurement-system-aware quantity API (built once by
    * BOQGrid via ``useDisplayQuantity``). The Qty / Unit-rate value
@@ -1067,6 +1074,19 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',
     })),
+    {
+      headerName: t('boq.cost_allocation.column', { defaultValue: 'Cost allocation' }),
+      headerTooltip: t('boq.cost_allocation.column_tip', {
+        defaultValue: 'Where the money of each position lands on the cost structure. Click a cell to change it.',
+      }),
+      colId: 'cost_allocation',
+      width: 130,
+      hide: !context.showCostAllocation,
+      editable: false,
+      sortable: false,
+      cellRenderer: 'costAllocationCellRenderer',
+      cellClass: 'text-xs !pr-2 !pl-2',
+    },
     {
       headerName: '',
       field: '_actions',

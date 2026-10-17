@@ -23,6 +23,7 @@ import { Network, AlertTriangle, Inbox } from 'lucide-react';
 import { Card, Skeleton, EmptyState } from '@/shared/ui';
 import { fmtCurrency } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
+import { sumMoneyStrings } from '@/shared/lib/exactDecimal';
 import {
   costModelApi,
   type ControlAccount,
@@ -50,12 +51,9 @@ function varianceColor(value: string): string {
   return n > 0 ? 'text-semantic-error' : 'text-semantic-success';
 }
 
-/** Sum a set of Decimal-string amounts for a per-account subtotal. */
-function sumAmounts(values: string[]): number {
-  return values.reduce((acc, v) => {
-    const n = Number(v);
-    return acc + (Number.isFinite(n) ? n : 0);
-  }, 0);
+/** Sum a set of Decimal-string amounts for a per-account subtotal, exactly. */
+function sumAmounts(values: string[]): string {
+  return sumMoneyStrings(values);
 }
 
 /** Column descriptor for the grid header + per-row cells. */
@@ -271,7 +269,7 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
                               <span className="font-mono text-2xs text-content-tertiary">
                                 {group.account.code}
                               </span>
-                              {group.account.name}
+                              {group.account.title || group.account.name}
                             </span>
                           ) : (
                             t('costmodel.spine.unassigned', { defaultValue: 'Unassigned' })
@@ -282,9 +280,7 @@ export function CostSpinePanel({ projectId, currency, boqId }: CostSpinePanelPro
                             key={col.key}
                             className={`px-4 py-1.5 text-right text-xs font-semibold tabular-nums ${
                               col.key === 'variance_estimate_vs_budget'
-                                ? varianceColor(
-                                    String(sumAmounts(group.lines.map((l) => l[col.key]))),
-                                  )
+                                ? varianceColor(sumAmounts(group.lines.map((l) => l[col.key])))
                                 : 'text-content-secondary'
                             }`}
                           >

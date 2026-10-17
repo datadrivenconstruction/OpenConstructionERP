@@ -91,7 +91,7 @@ export function ControlAccountTree({
             type="button"
             onClick={() => onSelect(account.id)}
             aria-current={isSelected ? 'true' : undefined}
-            title={`${account.code} ${account.name}`}
+            title={`${account.code} ${account.title || account.name}`}
             className={`flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm transition-colors ${
               isSelected
                 ? 'bg-oe-blue-subtle/60 font-medium text-oe-blue-text'
@@ -102,7 +102,7 @@ export function ControlAccountTree({
             <span className="shrink-0 font-mono text-2xs text-content-tertiary">
               {account.code}
             </span>
-            <span className="min-w-0 flex-1 truncate">{account.name}</span>
+            <span className="min-w-0 flex-1 truncate">{account.title || account.name}</span>
             {typeof count === 'number' && (
               <span className="shrink-0 rounded-full bg-surface-secondary px-1.5 text-2xs font-medium text-content-secondary">
                 {count}

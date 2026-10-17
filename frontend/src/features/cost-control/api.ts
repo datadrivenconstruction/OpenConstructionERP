@@ -17,7 +17,15 @@ export type ForecastSource =
   | 'final'
   | 'manual';
 
-export type RowKind = 'cost_line' | 'contract' | 'unassigned' | 'changes_without_contract' | 'other' | 'remaining';
+export type RowKind =
+  | 'cost_line'
+  | 'contract'
+  | 'unassigned'
+  | 'changes_without_contract'
+  | 'other'
+  | 'remaining'
+  /** An account's own amount, planned on the account and not broken down into cost lines yet. */
+  | 'allowance';
 
 export const COST_STAGES = [
   'budget',
@@ -70,7 +78,12 @@ export interface CostControlAccount {
   id: string;
   code: string;
   name: string;
+  /** The account's own title; empty when its code list has none, then `name` is shown. */
+  title?: string;
   parent_id: string | null;
+  level?: number;
+  /** Money planned on the account itself (decimal string). */
+  own_amount?: string;
 }
 
 export interface CostControlFinding {

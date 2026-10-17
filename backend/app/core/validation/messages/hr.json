@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Preuzete obveze nisu dodijeljene nijednoj troškovnoj stavci.",
+      "suggestion": "Povežite stavke ugovora ili narudžbe s troškovnim stavkama kako bi se novac prikazao na pravom mjestu."
+    },
+    "certified_over_committed": {
+      "fail": "Ovjereni radovi premašuju ugovoreno uz odobrene izmjene.",
+      "suggestion": "Odobrite izmjenu koja pokriva dodatne radove ili provjerite zahtjev za plaćanje."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognoza je iznad planiranog iznosa.",
+      "suggestion": "Provjerite izvor prognoze; ako očekujete uštede, unesite ručnu prognozu s razlogom."
+    },
+    "partly_awarded": {
+      "fail": "Ugovoren je samo dio planiranog iznosa; u prognozi možda nedostaju radovi koje tek treba ugovoriti.",
+      "suggestion": "Ako na ovoj stavci tek treba ugovoriti radove, unesite ručnu prognozu."
+    },
+    "pending_changes": {
+      "fail": "Izmjene naloga čekaju odluku.",
+      "suggestion": "Odlučite o izmjenama koje čekaju; prognoza ih još ne uključuje."
+    },
+    "snapshot_stale": {
+      "fail": "Više od mjesec dana nije spremljena nijedna prognoza.",
+      "suggestion": "Spremite snimku prognoze kako bi povijest troškova ostala čitljiva."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Šifra konta {code} pojavljuje se više puta u troškovnoj strukturi.",
+      "suggestion": "Zadržite jedno konto po šifri i premjestite na njega njegove troškovne stavke."
+    },
+    "mixed_standard": {
+      "fail": "Troškovna struktura miješa klasifikacije: {standards}.",
+      "suggestion": "Izgradite strukturu iz jedne klasifikacije; ostale šifre mapirajte na nju."
+    },
+    "account_parent_cycle": {
+      "fail": "Konto {code} je vlastiti predak preko {count} konta.",
+      "suggestion": "Dodijelite jednom od ovih konta nadređeno konto izvan petlje."
+    },
+    "account_too_deep": {
+      "fail": "Konto {code} je na razini {level}, dublje od {max} razina njegove klasifikacije.",
+      "suggestion": "Pridružite konto nadređenom kontu unutar dubine klasifikacije."
+    },
+    "no_account": {
+      "fail": "{count} troškovnih stavki vrijednih {amount} nije ni na jednom kontu (prva: {code}).",
+      "suggestion": "Dodijelite ovim stavkama troškovnika šifru iz klasifikacije strukture ili pridružite troškovne stavke kontu."
+    },
+    "invalid_account": {
+      "fail": "{count} troškovnih stavki vrijednih {amount} je na zatvorenom kontu ili kontu koji ne prima knjiženja (prva: {code}).",
+      "suggestion": "Premjestite troškovne stavke na otvoreni konto koji prima knjiženja."
+    },
+    "own_amount_on_parent": {
+      "fail": "Konto {code} ima podkonta i uz to vlastiti iznos od {amount}.",
+      "suggestion": "Premjestite vlastiti iznos na podkonto ili ga zadržite kao namjernu pričuvu."
+    },
+    "rollup_mismatch": {
+      "fail": "Zbroj strukture {reported} razlikuje se od zbroja njezinih dijelova {expected} za {difference}.",
+      "suggestion": "Ponovno učitajte strukturu; ako razlika ostane, provjerite konta bez nadređenog konta."
+    },
+    "allocation_incomplete": {
+      "fail": "Udjeli stavke {ordinal} zbrajaju se u {total}{unit} umjesto {expected}{unit}.",
+      "suggestion": "Prilagodite udjele tako da je cijela stavka raspoređena, ni više ni manje."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Stavka {ordinal} podijeljena je djelomično postotno, a djelomično po količini.",
+      "suggestion": "Podijelite stavku samo na jedan način."
+    },
+    "vector_not_inherited": {
+      "fail": "Stavka ugovora {code} je na troškovnoj stavci kojoj njezina stavka troškovnika nije dodijeljena.",
+      "suggestion": "Vratite stavku na troškovne stavke njezine stavke troškovnika ili zabilježite odstupanje s razlogom."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Pričuva „{markup}” računa se na osnovicu koja već uključuje stavku dobiti „{profit}”, pa se marža obračunava na novac izdvojen za rizik",

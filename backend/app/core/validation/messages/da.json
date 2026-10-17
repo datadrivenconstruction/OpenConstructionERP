@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Bundne midler er ikke tildelt nogen omkostningslinje.",
+      "suggestion": "Knyt kontrakt- eller ordrelinjerne til omkostningslinjer, så pengene vises det rigtige sted."
+    },
+    "certified_over_committed": {
+      "fail": "Attesteret arbejde overstiger tildelingen plus godkendte ændringer.",
+      "suggestion": "Godkend den ændring, der dækker ekstraarbejdet, eller kontroller kravet."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognosen ligger over det planlagte beløb.",
+      "suggestion": "Kontroller prognosens kilde; registrer en manuel prognose med begrundelse, hvis du forventer besparelser."
+    },
+    "partly_awarded": {
+      "fail": "Kun en del af det planlagte beløb er tildelt; prognosen mangler måske arbejde, der endnu skal udbydes.",
+      "suggestion": "Hvis der stadig skal udbydes arbejde på denne linje, så angiv en manuel prognose."
+    },
+    "pending_changes": {
+      "fail": "Ændringsordrer afventer en beslutning.",
+      "suggestion": "Tag stilling til de afventende ændringsordrer; prognosen indeholder dem endnu ikke."
+    },
+    "snapshot_stale": {
+      "fail": "Der er ikke gemt nogen prognose i mere end en måned.",
+      "suggestion": "Gem et prognoseøjebliksbillede, så omkostningshistorikken forbliver læsbar."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Kontokoden {code} optræder mere end én gang i omkostningsstrukturen.",
+      "suggestion": "Behold én konto pr. kode og flyt dens omkostningslinjer over på den."
+    },
+    "mixed_standard": {
+      "fail": "Omkostningsstrukturen blander kodelister: {standards}.",
+      "suggestion": "Opbyg strukturen ud fra én kodeliste; map de øvrige koder til den."
+    },
+    "account_parent_cycle": {
+      "fail": "Konto {code} er sin egen forfader via {count} konti.",
+      "suggestion": "Giv en af disse konti en overordnet konto uden for løkken."
+    },
+    "account_too_deep": {
+      "fail": "Konto {code} ligger på niveau {level}, dybere end kodelistens {max} niveauer.",
+      "suggestion": "Placer kontoen under en overordnet konto inden for kodelistens dybde."
+    },
+    "no_account": {
+      "fail": "{count} omkostningslinjer til en værdi af {amount} ligger på ingen konto (første: {code}).",
+      "suggestion": "Giv disse poster en kode fra strukturens kodeliste, eller tildel omkostningslinjerne til en konto."
+    },
+    "invalid_account": {
+      "fail": "{count} omkostningslinjer til en værdi af {amount} ligger på en lukket konto eller en konto, der ikke modtager posteringer (første: {code}).",
+      "suggestion": "Flyt omkostningslinjerne til en åben konto, der modtager posteringer."
+    },
+    "own_amount_on_parent": {
+      "fail": "Konto {code} har underkonti og desuden et eget beløb på {amount}.",
+      "suggestion": "Flyt det egne beløb til en underkonto, eller behold det som en bevidst reserve."
+    },
+    "rollup_mismatch": {
+      "fail": "Strukturens sum {reported} afviger fra summen af delene {expected} med {difference}.",
+      "suggestion": "Genindlæs strukturen; hvis forskellen består, så kontroller konti uden overordnet konto."
+    },
+    "allocation_incomplete": {
+      "fail": "Andelene for post {ordinal} summerer til {total}{unit} i stedet for {expected}{unit}.",
+      "suggestion": "Justér andelene, så hele posten er fordelt, hverken mere eller mindre."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Post {ordinal} er delvis fordelt i procent og delvis efter mængde.",
+      "suggestion": "Fordel posten på kun én måde."
+    },
+    "vector_not_inherited": {
+      "fail": "Kontraktlinjen {code} ligger på en omkostningslinje, som dens post i tilbudslisten ikke er tildelt.",
+      "suggestion": "Læg linjen tilbage på postens omkostningslinjer, eller registrer afvigelsen med begrundelse."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Risikotillægget \"{markup}\" beregnes på et grundlag, der allerede indeholder fortjenestelinjen \"{profit}\", så der lægges avance på penge afsat til risiko",

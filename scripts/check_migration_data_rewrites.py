@@ -303,6 +303,11 @@ _UNRESOLVED_BASELINE: frozenset[tuple[str, str]] = frozenset(
             "v3267_saved_views_team_share.py",
             "op.execute(sa.text(f'ALTER TABLE {table} ADD CONSTRAINT \"{name}\" CHECK ({condition})'))",
         ),
+        # A read: the backfill loads the accounts it nests; the UPDATE that follows is resolved and acked.
+        (
+            "v92_costmodel_cost_structure.py",
+            "bind.execute(sa.select(acct.c.id, acct.c.project_id, acct.c.parent_id, acct.c.code, acct.c.name, acct.c.title, acct.c.level, acct.c.classification_standard))",
+        ),
     }
 )
 

@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react';
 
 import { fmtCurrency, fmtPercent } from '@/shared/lib/formatters';
+import { sumMoneyStrings } from '@/shared/lib/exactDecimal';
 import { num, type CostControlAccount, type CostControlAxis, type CostControlRow } from './api';
 import { sourceLabel, sourceTone } from './labels';
 
@@ -30,8 +31,9 @@ const MONEY_COLUMNS = ['planned', 'awarded', 'changes', 'forecast', 'variance', 
 type MoneyColumn = (typeof MONEY_COLUMNS)[number];
 const PLAN_COLUMNS: ReadonlySet<MoneyColumn> = new Set<MoneyColumn>(['planned', 'variance']);
 
-function sum(rows: CostControlRow[], col: MoneyColumn): number {
-  return rows.reduce((acc, r) => acc + num(r[col]), 0);
+/** Exact decimal subtotal of one column; the server's figures are added as strings, never as floats. */
+function sum(rows: CostControlRow[], col: MoneyColumn): string {
+  return sumMoneyStrings(rows.map((r) => r[col]));
 }
 
 function varianceClass(value: number): string {
@@ -77,6 +79,10 @@ export function CostControlTable({
         return t('cost_control.row_other', { defaultValue: 'Purchase orders and other commitments' });
       case 'remaining':
         return t('cost_control.row_remaining', { defaultValue: 'Not on a contract yet' });
+      case 'allowance':
+        return t('cost_control.row_allowance', {
+          defaultValue: 'Allowance on the account, not broken down yet',
+        });
       default:
         return row.description;
     }
@@ -97,13 +103,20 @@ export function CostControlTable({
       map.get(key)!.rows.push(row);
     };
     for (const row of rows) {
-      if (row.kind !== 'cost_line') {
+      if (row.kind !== 'cost_line' && row.kind !== 'allowance') {
         push('__special', t('cost_control.group_other', { defaultValue: 'Not yet on a cost line' }), row);
         continue;
       }
       const acct = row.account_id ? byId.get(row.account_id) : undefined;
-      if (acct) push(acct.id, `${acct.code} ${acct.name}`.trim(), row);
-      else push('__none', t('cost_control.group_no_account', { defaultValue: 'Other cost lines' }), row);
+      if (acct) push(acct.id, `${acct.code} ${acct.title || acct.name}`.trim(), row);
+      else
+        push(
+          '__none',
+          t('cost_control.group_no_account_suspense', {
+            defaultValue: 'No account (suspense): cost lines not yet on the cost structure',
+          }),
+          row,
+        );
     }
     // Accounts in code order, the two catch-all groups last.
     const rank = (key: string) => (key === '__special' ? 2 : key === '__none' ? 1 : 0);
@@ -202,7 +215,7 @@ export function CostControlTable({
                       <td
                         key={col}
                         className={`px-3 py-2 text-right text-xs font-semibold tabular-nums ${
-                          col === 'variance' ? varianceClass(value) : 'text-content-primary'
+                          col === 'variance' ? varianceClass(num(value)) : 'text-content-primary'
                         }`}
                       >
                         {fmtCurrency(value, currency)}

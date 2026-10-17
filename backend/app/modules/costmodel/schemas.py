@@ -616,10 +616,15 @@ class ControlAccountCreate(BaseModel):
     project_id: UUID | None = None  # Set from URL path
     parent_id: UUID | None = None
     code: str = Field(..., min_length=1, max_length=80)
-    name: str = Field(..., min_length=1, max_length=255)
+    # The label older clients send. Optional now that ``title`` exists: when
+    # both are blank the account is labelled with its code.
+    name: str = Field(default="", max_length=255)
+    title: str = Field(default="", max_length=255)
     classification_standard: str = Field(default="", max_length=40)
     status: str = Field(default="open", max_length=40)
     sort_order: int = 0
+    own_amount: Decimal = Field(default=Decimal("0"), max_digits=18, decimal_places=2)
+    is_leaf_postable: bool = True
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -631,9 +636,12 @@ class ControlAccountUpdate(BaseModel):
     parent_id: UUID | None = None
     code: str | None = Field(default=None, min_length=1, max_length=80)
     name: str | None = Field(default=None, min_length=1, max_length=255)
+    title: str | None = Field(default=None, max_length=255)
     classification_standard: str | None = Field(default=None, max_length=40)
     status: str | None = Field(default=None, max_length=40)
     sort_order: int | None = None
+    own_amount: Decimal | None = Field(default=None, max_digits=18, decimal_places=2)
+    is_leaf_postable: bool | None = None
     metadata: dict[str, Any] | None = None
 
 
@@ -647,12 +655,20 @@ class ControlAccountResponse(BaseModel):
     parent_id: UUID | None
     code: str
     name: str
+    title: str = ""
+    level: int = 1
+    own_amount: Decimal = Decimal("0")
+    is_leaf_postable: bool = True
     classification_standard: str
     status: str
     sort_order: int
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    @field_serializer("own_amount", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
 
 
 class CostLineCreate(BaseModel):
@@ -816,10 +832,19 @@ class SpineGenerationResult(BaseModel):
 
     project_id: UUID
     boq_id: UUID
+    # The code list the tree was built from; empty when the project names none.
+    standard: str = ""
     accounts_created: int = 0
     cost_lines_created: int = 0
     positions_linked: int = 0
     budget_lines_linked: int = 0
+    # Costed positions with no code of ``standard``: their lines sit on no account.
+    positions_in_suspense: int = 0
+    suspense_amount: Decimal = Decimal("0")
+
+    @field_serializer("suspense_amount", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
 
 
 class SpineLinkRequest(BaseModel):

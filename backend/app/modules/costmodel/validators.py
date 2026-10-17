@@ -10,6 +10,8 @@ exactly what these rules return.
 Each rule reads the payload the report builds, a dict with ``lines`` (a list
 of :class:`~app.modules.costmodel.cost_control.LineInput`) and the project
 figures, and is silent when the payload is not a cost control payload.
+Messages and suggestions come from the validation message bundle
+(``cost_control.<rule>.fail`` and ``.suggestion``) in the caller's locale.
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ from app.core.validation.engine import (
     ValidationRule,
     rule_registry,
 )
+from app.core.validation.messages import DEFAULT_LOCALE, translate
 from app.modules.costmodel.cost_control import (
     FINDING_CERTIFIED_OVER_COMMITTED,
     FINDING_OVER_PLAN,
@@ -38,29 +41,12 @@ from app.modules.costmodel.cost_control import (
     line_findings,
     project_findings,
 )
+from app.modules.costmodel.structure_rules import register_cost_structure_rules
 
 logger = logging.getLogger(__name__)
 
 RULE_SET = "cost_control"
 PAYLOAD_KEY = "cost_control"
-
-_MESSAGES: dict[str, str] = {
-    FINDING_UNASSIGNED: "Committed money is not assigned to any cost line.",
-    FINDING_CERTIFIED_OVER_COMMITTED: "Certified work exceeds the award plus approved changes.",
-    FINDING_OVER_PLAN: "The forecast is above the planned amount.",
-    FINDING_PARTLY_AWARDED: "Only part of the planned amount is awarded; the forecast may be missing work still to let.",
-    FINDING_PENDING_CHANGES: "Change orders are waiting for a decision.",
-    FINDING_STALE_SNAPSHOT: "No forecast has been saved for more than a month.",
-}
-
-_SUGGESTIONS: dict[str, str] = {
-    FINDING_UNASSIGNED: "Link the contract or order lines to cost lines so the money shows in the right place.",
-    FINDING_CERTIFIED_OVER_COMMITTED: "Approve the change that covers the extra work, or check the claim.",
-    FINDING_OVER_PLAN: "Check the source of the forecast; record a manual forecast with a reason if you expect savings.",
-    FINDING_PARTLY_AWARDED: "If more work is still to be let on this line, enter a manual forecast.",
-    FINDING_PENDING_CHANGES: "Decide the pending change orders; the forecast does not include them yet.",
-    FINDING_STALE_SNAPSHOT: "Save a forecast snapshot so the cost history stays readable.",
-}
 
 
 def _payload(context: ValidationContext) -> dict[str, Any] | None:
@@ -70,17 +56,27 @@ def _payload(context: ValidationContext) -> dict[str, Any] | None:
     return None
 
 
-def _to_result(rule: ValidationRule, finding: Finding) -> RuleResult:
+def _locale(context: ValidationContext) -> str:
+    metadata = getattr(context, "metadata", None)
+    if isinstance(metadata, dict):
+        locale = metadata.get("locale")
+        if isinstance(locale, str) and locale.strip():
+            return locale.strip()
+    return DEFAULT_LOCALE
+
+
+def _to_result(rule: ValidationRule, finding: Finding, locale: str = DEFAULT_LOCALE) -> RuleResult:
+    """A finding as a rule result, message and suggestion in ``locale`` (keys ``<rule id>.fail``/``.suggestion``)."""
     return RuleResult(
         rule_id=rule.rule_id,
         rule_name=rule.name,
         severity=Severity.WARNING if finding.severity == "warning" else Severity.INFO,
         category=rule.category,
         passed=False,
-        message=_MESSAGES[finding.rule_id],
+        message=translate(f"{finding.rule_id}.fail", locale),
         element_ref=finding.line_key,
         details={"code": finding.code, "amount": str(finding.amount), **finding.details},
-        suggestion=_SUGGESTIONS[finding.rule_id],
+        suggestion=translate(f"{finding.rule_id}.suggestion", locale),
     )
 
 
@@ -106,7 +102,7 @@ class _CostControlRule(ValidationRule):
         payload = _payload(context)
         if payload is None:
             return []
-        return [_to_result(self, f) for f in self._findings(payload)]
+        return [_to_result(self, f, _locale(context)) for f in self._findings(payload)]
 
 
 class UnassignedMoneyRule(_CostControlRule):
@@ -163,9 +159,10 @@ COST_CONTROL_RULES: tuple[type[_CostControlRule], ...] = (
 
 
 def register_costmodel_validation_rules() -> None:
-    """Register the cost control rules into their own rule set, and nothing else."""
+    """Register the cost control rules and the cost structure rules (V1 to V5), each into its own set."""
     for rule_cls in COST_CONTROL_RULES:
         rule_registry.register(rule_cls(), [RULE_SET])
+    register_cost_structure_rules()
     logger.debug("Registered cost control validation rules")
 
 
