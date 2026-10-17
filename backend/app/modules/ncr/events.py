@@ -40,9 +40,6 @@ from app.modules.ncr.models import NCR
 logger = logging.getLogger(__name__)
 
 
-_SUBSCRIBED_FLAG = "_ncr_subscribers_registered"
-
-
 async def _can_open_isolated_session() -> bool:
     """Return True only when we can safely write from a subscriber.
 
@@ -423,11 +420,8 @@ async def _on_ncr_closed_with_cost_impact(event: Event) -> None:
 
 def register_subscribers() -> None:
     """Idempotently subscribe NCR cross-module handlers."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once("qms.audit.finding_raised", _on_qms_finding_raised)
     event_bus.subscribe_once("clash.high_severity.detected", _on_clash_high_severity)
     event_bus.subscribe_once("validation.results.errors_found", _on_validation_errors_found)
     event_bus.subscribe_once("ncr.closed_with_cost_impact", _on_ncr_closed_with_cost_impact)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     logger.info("NCR: 4 cross-module subscriber(s) registered")

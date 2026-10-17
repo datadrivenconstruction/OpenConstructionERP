@@ -94,7 +94,6 @@ PEPPOL_INVOICE_INGESTED = "supplier_catalogs.invoice.peppol_ingested"
 # downstream module to our ORM. All handlers are fail-soft.
 
 _logger = logging.getLogger(__name__)
-_SUBSCRIBED_FLAG = "_supplier_catalogs_subscribers_registered"
 
 
 async def _on_material_added(event: Event) -> None:
@@ -179,9 +178,6 @@ async def _on_vendor_rated(event: Event) -> None:
 
 def register_subscribers() -> None:
     """Idempotently subscribe supplier-catalogs cross-module handlers."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once(MATERIAL_ADDED, _on_material_added)
     event_bus.subscribe_once(VENDOR_RATED, _on_vendor_rated)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     _logger.info("Supplier Catalogs: 2 cross-module subscriber(s) registered")

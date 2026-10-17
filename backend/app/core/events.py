@@ -420,7 +420,10 @@ def publish_after_commit(
     work already succeeded.
 
     A transaction that rolls back never fires: the row the event describes does
-    not exist, so neither should the event.
+    not exist, so neither should the event. The same holds for a SAVEPOINT: an
+    event deferred inside ``begin_nested()`` is dropped when that savepoint, or
+    any savepoint or transaction around it, is rolled back, even if the outer
+    transaction goes on to commit.
 
     Args:
         session: The session whose commit the publish should follow.
@@ -461,14 +464,48 @@ def publish_after_commit(
     # the same session registers its own listener and fires on its own, which
     # tests/integration/test_event_after_commit_visibility.py covers along with
     # the savepoint case.
-    fired = False
+    #
+    # The deferral belongs to the innermost transaction open at the moment it is
+    # made. If that transaction, or any transaction enclosing it, is rolled
+    # back, the work the event describes is gone and the event is dropped: a
+    # SAVEPOINT rolled back inside a transaction that still commits must not
+    # publish what it undid. ``after_soft_rollback`` is dispatched for nested
+    # and root rollbacks alike and names the transaction that rolled back. The
+    # root ending without the commit having fired (``close()`` with the
+    # transaction still open, or a rollback) settles the deferral too, so a
+    # later, unrelated commit on the same session can never carry it.
+    root_tx = sync_session.get_transaction()
+    deferred_in = sync_session.get_nested_transaction() or root_tx
+    settled = False
+
+    def _undone_by(rolled_back: Any) -> bool:
+        tx = deferred_in
+        while tx is not None:
+            if tx is rolled_back:
+                return True
+            tx = tx.parent
+        return False
+
+    @sa_event.listens_for(sync_session, "after_soft_rollback")
+    def _drop(session_: Any, previous_transaction: Any) -> None:
+        nonlocal settled
+        if not settled and _undone_by(previous_transaction):
+            settled = True
+
+    @sa_event.listens_for(sync_session, "after_transaction_end")
+    def _end(session_: Any, transaction: Any) -> None:
+        nonlocal settled
+        if transaction is root_tx:
+            # ``after_commit`` runs before the root closes, so a committed root
+            # has already fired by now; anything still pending was not committed.
+            settled = True
 
     @sa_event.listens_for(sync_session, "after_commit")
     def _fire(session_: Any) -> None:
-        nonlocal fired
-        if fired or session_.in_nested_transaction():
+        nonlocal settled
+        if settled or session_.in_nested_transaction():
             return
-        fired = True
+        settled = True
         try:
             _publish()
         except Exception:

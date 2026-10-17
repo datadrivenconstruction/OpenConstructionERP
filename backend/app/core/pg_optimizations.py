@@ -33,7 +33,7 @@ from __future__ import annotations
 import hashlib
 import logging
 
-from sqlalchemy import JSON, Index
+from sqlalchemy import JSON, Index, UniqueConstraint
 from sqlalchemy import event as sa_event
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.compiler import compiles
@@ -91,6 +91,14 @@ def _existing_single_col_left(table) -> set[str]:  # noqa: ANN001
     for col in table.columns:
         if col.index or col.unique or col.primary_key:
             left.add(col.name)
+    # A table-level UniqueConstraint is backed by a unique btree index in
+    # PostgreSQL, so its left-most column is already served by it. Without this
+    # a foreign key leading one got a second, redundant index.
+    for constraint in table.constraints:
+        if isinstance(constraint, UniqueConstraint):
+            cols = list(constraint.columns)
+            if cols:
+                left.add(cols[0].name)
     return left
 
 

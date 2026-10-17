@@ -316,21 +316,16 @@ _BROADCAST_SUBSCRIPTIONS: tuple[tuple[str, Any], ...] = (
     ("schedule.activity.progress_updated", _on_activity_progress),
 )
 
-# Idempotency guard so repeated startups (test app re-creation, reload) do not
-# stack duplicate handlers on the bus - matching the collab-locks bridge intent.
-_SUBSCRIBED = False
-
 
 def register_schedule_realtime_subscribers() -> None:
     """Wire the schedule -> presence event bridge once. Idempotent."""
-    global _SUBSCRIBED
-    if _SUBSCRIBED:
-        return
+    # ``subscribe_once`` is the idempotency guard: repeated startups (test app
+    # re-creation, reload) do not stack duplicate handlers, and a bus that was
+    # emptied in between gets them back.
     from app.core.events import event_bus as _bus
 
     for name, handler in _BROADCAST_SUBSCRIPTIONS:
-        _bus.subscribe(name, handler)
-    _SUBSCRIBED = True
+        _bus.subscribe_once(name, handler)
     logger.info(
         "schedule realtime: subscribed %d presence-bridge handler(s)",
         len(_BROADCAST_SUBSCRIPTIONS),
