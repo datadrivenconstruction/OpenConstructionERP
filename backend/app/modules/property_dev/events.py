@@ -78,8 +78,6 @@ from app.database import async_session_factory
 logger = logging.getLogger(__name__)
 
 
-_SUBSCRIBED_FLAG = "_property_dev_subscribers_registered"
-
 # SPA statuses from signature on, and a cancelled one kept as record.
 _SPA_SIGNED_STATUSES = frozenset({"signed", "countersigned", "registered", "cancelled"})
 
@@ -416,9 +414,6 @@ def register_property_dev_event_subscribers() -> None:
 
 def register_subscribers() -> None:
     """Wire up cross-module subscribers (task #138). Idempotent."""
-    flag = getattr(event_bus, _SUBSCRIBED_FLAG, False)
-    if flag:
-        return
     event_bus.subscribe_once("property_dev.spa.signed", _on_spa_signed)
     event_bus.subscribe_once(
         "property_dev.reservation.created",
@@ -429,7 +424,6 @@ def register_subscribers() -> None:
         _on_handover_completed,
     )
     event_bus.subscribe_once("property_dev.instalment.paid", _on_instalment_paid)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     logger.info("property_dev cross-module subscribers registered")
 
 
@@ -662,17 +656,11 @@ async def _on_finance_invoice_created(event: Event) -> dict[str, Any] | None:
         return None
 
 
-_TASK_139_SUBSCRIBED_FLAG = "_property_dev_task_139_subscribers_registered"
-
-
 def register_task_139_subscribers() -> None:
     """Wire cross-module inbound subscribers (task #139). Idempotent."""
-    if getattr(event_bus, _TASK_139_SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once("crm.lead.qualified", _on_crm_lead_qualified)
     event_bus.subscribe_once("portal.buyer_signup.completed", _on_portal_buyer_signup)
     event_bus.subscribe_once("finance.invoice.created", _on_finance_invoice_created)
-    setattr(event_bus, _TASK_139_SUBSCRIBED_FLAG, True)
     logger.info("property_dev task #139 cross-module subscribers registered")
 
 
@@ -776,15 +764,9 @@ async def _on_snag_created_warranty_bridge(event: Event) -> dict[str, Any] | Non
         return None
 
 
-_WARRANTY_BRIDGE_FLAG = "_property_dev_warranty_bridge_subscribed"
-
-
 def register_warranty_bridge_subscribers() -> None:
     """Wire the snag→warranty auto-bridge subscriber. Idempotent."""
-    if getattr(event_bus, _WARRANTY_BRIDGE_FLAG, False):
-        return
     event_bus.subscribe_once("property_dev.snag.created", _on_snag_created_warranty_bridge)
-    setattr(event_bus, _WARRANTY_BRIDGE_FLAG, True)
     logger.info("property_dev snag→warranty bridge subscriber registered")
 
 
@@ -854,15 +836,9 @@ async def _on_portal_message_received(event: Event) -> dict[str, Any] | None:
         return None
 
 
-_PORTAL_MESSAGE_FLAG = "_property_dev_portal_message_subscribed"
-
-
 def register_portal_message_subscribers() -> None:
     """Wire the buyer-portal contact-agent fan-out subscriber. Idempotent."""
-    if getattr(event_bus, _PORTAL_MESSAGE_FLAG, False):
-        return
     event_bus.subscribe_once("crm.lead.message_received", _on_portal_message_received)
-    setattr(event_bus, _PORTAL_MESSAGE_FLAG, True)
     logger.info("property_dev buyer-portal contact-agent subscriber registered")
 
 

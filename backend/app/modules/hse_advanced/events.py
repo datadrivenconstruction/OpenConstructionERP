@@ -33,9 +33,6 @@ from app.core.events import Event, event_bus
 logger = logging.getLogger(__name__)
 
 
-_SUBSCRIBED_FLAG = "_hse_advanced_subscribers_registered"
-
-
 async def _on_safety_incident_created(event: Event) -> None:
     """``safety.incident.created`` → fan-out to risk register + BI.
 
@@ -155,10 +152,7 @@ async def _on_qms_ncr_safety_check(event: Event) -> None:
 
 def register_subscribers() -> None:
     """Idempotently subscribe HSE Advanced cross-module handlers."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once("safety.incident.created", _on_safety_incident_created)
     event_bus.subscribe_once("hse.capa.completed", _on_capa_completed)
     event_bus.subscribe_once("qms.ncr.raised", _on_qms_ncr_safety_check)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     logger.info("HSE Advanced: 3 cross-module subscriber(s) registered")

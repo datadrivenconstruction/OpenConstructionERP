@@ -24,7 +24,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_SUBSCRIBED_FLAG = "_closeout_subscribers_registered"
 
 # Events that should mark a project's closeout package stale.
 _STALE_EVENTS = (
@@ -73,12 +72,6 @@ async def _mark_project_package_stale(event: Event) -> None:
 
 def register_closeout_subscribers() -> None:
     """Subscribe the freshness handler to closure-evidence events (idempotent)."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     for name in _STALE_EVENTS:
         event_bus.subscribe_once(name, _mark_project_package_stale)
-    try:
-        setattr(event_bus, _SUBSCRIBED_FLAG, True)
-    except (AttributeError, TypeError):
-        pass
     logger.info("closeout: subscribed to %d freshness event(s)", len(_STALE_EVENTS))

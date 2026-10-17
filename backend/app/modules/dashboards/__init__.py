@@ -28,8 +28,6 @@ from app.modules.dashboards import events as event_taxonomy
 
 logger = logging.getLogger(__name__)
 
-_SUBSCRIBERS_REGISTERED = False
-
 
 def _on_snapshot_refreshed(event):  # type: ignore[no-untyped-def]
     """T09 sync protocol - mark every preset pointing at the refreshed
@@ -87,14 +85,10 @@ def _on_snapshot_refreshed(event):  # type: ignore[no-untyped-def]
 
 def register_subscribers() -> None:
     """Idempotent - call multiple times safely (tests do)."""
-    global _SUBSCRIBERS_REGISTERED
-    if _SUBSCRIBERS_REGISTERED:
-        return
     event_bus.subscribe_once(
         event_taxonomy.SNAPSHOT_REFRESHED,
         _on_snapshot_refreshed,
     )
-    _SUBSCRIBERS_REGISTERED = True
 
 
 # Register on import - the module loader pulls in models.py which

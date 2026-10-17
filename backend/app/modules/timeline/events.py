@@ -29,8 +29,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_SUBSCRIBED_FLAG = "_timeline_subscribers_registered"
-
 
 async def _record_event(event: Event) -> None:
     """Persist a significant event as one ActivityLog row (best-effort).
@@ -95,11 +93,5 @@ _timeline_queue = ContextBatchQueue("timeline", _write_timeline_batch)
 
 def register_timeline_subscribers() -> None:
     """Subscribe the wildcard bridge handler to the event bus (idempotent)."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once("*", _record_event)
-    try:
-        setattr(event_bus, _SUBSCRIBED_FLAG, True)
-    except (AttributeError, TypeError):
-        pass
     logger.info("timeline: wildcard bridge subscriber registered")

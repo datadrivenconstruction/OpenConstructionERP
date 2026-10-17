@@ -31,8 +31,6 @@ from app.core.events import Event, event_bus
 
 logger = logging.getLogger(__name__)
 
-_SUBSCRIBED_FLAG = "_safety_subscribers_registered"
-
 
 async def _on_threshold_alert(event: Event) -> None:
     """``safety.threshold_alert_triggered`` → BI KPI recompute nudge.
@@ -65,8 +63,5 @@ async def _on_threshold_alert(event: Event) -> None:
 
 def register_subscribers() -> None:
     """Idempotently subscribe the safety module's cross-module handlers."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once("safety.threshold_alert_triggered", _on_threshold_alert)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     logger.info("Safety: 1 cross-module subscriber(s) registered")

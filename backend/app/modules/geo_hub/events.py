@@ -54,8 +54,6 @@ from app.database import async_session_factory
 
 logger = logging.getLogger(__name__)
 
-_SUBSCRIBED_FLAG = "_geo_hub_subscribers_registered"
-
 
 # ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -907,12 +905,8 @@ _SUBSCRIPTIONS: tuple[tuple[str, Any], ...] = (
 
 def register_subscribers() -> None:
     """Wire the cross-module subscribers. Idempotent."""
-    flag = getattr(event_bus, _SUBSCRIBED_FLAG, False)
-    if flag:
-        return
     for event_name, handler in _SUBSCRIPTIONS:
         event_bus.subscribe_once(event_name, handler)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     logger.info("geo_hub: %d cross-module subscribers registered", len(_SUBSCRIPTIONS))
 
 

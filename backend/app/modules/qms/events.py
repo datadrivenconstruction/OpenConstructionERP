@@ -29,9 +29,6 @@ from app.modules.qms.models import QMSNCR
 logger = logging.getLogger(__name__)
 
 
-_SUBSCRIBED_FLAG = "_qms_subscribers_registered"
-
-
 async def _can_open_isolated_session() -> bool:
     """Return True if we can safely open a write session in a subscriber."""
     try:
@@ -313,8 +310,6 @@ async def _on_inspection_approval_requested(event: Event) -> None:
 
 def register_subscribers() -> None:
     """Idempotently subscribe QMS handlers to upstream events."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once("hse.capa.completed", _on_hse_capa_completed)
     event_bus.subscribe_once(
         "hse.capa.root_cause_recorded",
@@ -329,4 +324,3 @@ def register_subscribers() -> None:
         "qms.inspection.approval_requested",
         _on_inspection_approval_requested,
     )
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)

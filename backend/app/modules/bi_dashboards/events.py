@@ -27,8 +27,6 @@ from app.core.events import Event, event_bus
 logger = logging.getLogger(__name__)
 
 
-_SUBSCRIBED_FLAG = "_bi_dashboards_subscribers_registered"
-
 # ── KPI freshness watermarks ────────────────────────────────────────────────
 # In-process map of project_id -> {invalidated_at, reason, source_event}. An
 # upstream data change bumps the watermark for that project (and the global
@@ -194,12 +192,9 @@ async def _on_kpi_recompute(event: Event) -> None:
 
 def register_subscribers() -> None:
     """Idempotently subscribe BI cross-module handlers."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     for ev_name in _PROJECTION_INVALIDATING_EVENTS:
         event_bus.subscribe_once(ev_name, _on_invalidation_event)
     event_bus.subscribe_once("bi_dashboards.kpi_recompute", _on_kpi_recompute)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     logger.info(
         "BI Dashboards: %d cross-module subscriber(s) registered",
         len(_PROJECTION_INVALIDATING_EVENTS) + 1,

@@ -24,9 +24,6 @@ from app.core.events import Event, event_bus
 logger = logging.getLogger(__name__)
 
 
-_SUBSCRIBED_FLAG = "_daily_diary_subscribers_registered"
-
-
 async def _on_diary_closed(event: Event) -> None:
     """``daily_diary.closed`` → schedule-actuals + BI projection ticks."""
     data = event.data or {}
@@ -102,9 +99,6 @@ async def _on_diary_signed(event: Event) -> None:
 
 def register_subscribers() -> None:
     """Idempotently subscribe daily-diary cross-module handlers."""
-    if getattr(event_bus, _SUBSCRIBED_FLAG, False):
-        return
     event_bus.subscribe_once("daily_diary.closed", _on_diary_closed)
     event_bus.subscribe_once("daily_diary.signed", _on_diary_signed)
-    setattr(event_bus, _SUBSCRIBED_FLAG, True)
     logger.info("Daily Diary: 2 cross-module subscriber(s) registered")
