@@ -46,7 +46,8 @@ from app.core.code_lists import (
     same_code,
 )
 from app.core.code_lists import get_code_list as get_shared_code_list
-from app.modules.costmodel.models import ControlAccount, CostCodeList, CostLine, PositionAllocation
+from app.modules.costmodel.inheritance import SOURCE_CONTRACT_LINE
+from app.modules.costmodel.models import ControlAccount, CostCodeList, CostLine, LineAllocation, PositionAllocation
 from app.modules.costmodel.repository import ControlAccountRepository, _amount_in_base
 from app.modules.costmodel.structure import (
     MODE_QUANTITY,
@@ -567,18 +568,35 @@ class CostStructureService:
         ).all()
         for pid, lid in single:
             vectors.setdefault(str(pid), set()).add(str(lid))
+        # Every contract line of the project, the split ones included: a line frozen into a
+        # split carries no single cost line, its accounts are its LineAllocation rows.
         contract_rows = (
             await self.session.execute(
                 select(ContractLine.id, ContractLine.code, ContractLine.cost_line_id, ContractLine.metadata_)
                 .join(Contract, Contract.id == ContractLine.contract_id)
-                .where(Contract.project_id == project_id, ContractLine.cost_line_id.is_not(None))
+                .where(Contract.project_id == project_id)
             )
         ).all()
+        split_rows = (
+            await self.session.execute(
+                select(LineAllocation.source_id, LineAllocation.cost_line_id).where(
+                    LineAllocation.project_id == project_id,
+                    LineAllocation.source_type == SOURCE_CONTRACT_LINE,
+                )
+            )
+        ).all()
+        split_of: dict[str, list[str]] = {}
+        for sid, lid in split_rows:
+            split_of.setdefault(str(sid), []).append(str(lid))
         inherited = []
         for cid, code, lid, meta in contract_rows:
             meta = meta if isinstance(meta, dict) else {}
             pos_id = str(meta.get("boq_position_id") or "").strip()
             if not pos_id or pos_id not in vectors:
+                continue
+            split = sorted(split_of.get(str(cid), []))
+            if lid is None and not split:
+                # On no cost line at all: the suspense bucket lists it, not this check.
                 continue
             override = meta.get("cost_line_override")
             inherited.append(
@@ -587,7 +605,8 @@ class CostStructureService:
                     "id": str(cid),
                     "code": code or "",
                     "position_id": pos_id,
-                    "cost_line_id": str(lid),
+                    "cost_line_id": str(lid) if lid is not None else None,
+                    "cost_line_ids": split,
                     "vector": sorted(vectors[pos_id]),
                     "override_audited": isinstance(override, dict)
                     and bool(str(override.get("reason") or "").strip())

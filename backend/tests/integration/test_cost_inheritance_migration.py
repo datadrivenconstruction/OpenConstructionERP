@@ -14,7 +14,7 @@ from sqlalchemy import inspect
 
 from tests._pg import transactional_session
 
-_PATH = Path(__file__).resolve().parents[2] / "alembic/versions/v91_costmodel_cost_inheritance.py"
+_PATH = Path(__file__).resolve().parents[2] / "alembic/versions/v93_costmodel_cost_inheritance.py"
 
 _ADDED = {
     "oe_bid_management_line_item": {"cost_line_id"},
@@ -34,8 +34,8 @@ def _load():
 
 def test_the_revision_chains_after_the_cost_structure() -> None:
     migration = _load()
-    assert migration.revision == "v91_costmodel_cost_inheritance"
-    assert migration.down_revision == "v90_costmodel_cost_structure"
+    assert migration.revision == "v93_costmodel_cost_inheritance"
+    assert migration.down_revision == "v92_costmodel_cost_structure"
 
 
 @pytest.mark.asyncio

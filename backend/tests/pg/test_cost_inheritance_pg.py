@@ -25,6 +25,7 @@ import pytest_asyncio
 from fastapi import HTTPException
 from sqlalchemy import select
 
+from app.core.validation.engine import ValidationContext
 from app.modules.bid_management.models import Bidder, BidPackage, BidPackageLineItem
 from app.modules.bid_management.schemas import BidPackageLinesFromBOQ
 from app.modules.bid_management.service import BidManagementService
@@ -47,6 +48,9 @@ from app.modules.costmodel.inheritance import (
 from app.modules.costmodel.inheritance_service import set_vector
 from app.modules.costmodel.models import CostLine, LineAllocation, PositionAllocation
 from app.modules.costmodel.repository import CostSpineRepository
+from app.modules.costmodel.structure_rules import PAYLOAD_KEY as STRUCTURE_PAYLOAD_KEY
+from app.modules.costmodel.structure_rules import VectorInheritedRule
+from app.modules.costmodel.structure_service import CostStructureService
 from app.modules.costmodel.validators import register_costmodel_validation_rules
 from app.modules.finance.models import Invoice, InvoiceLineItem
 from app.modules.finance.service import FinanceService
@@ -255,6 +259,27 @@ async def test_scope_lines_and_the_award_contract_take_the_positions_split(sessi
     assert committed[str(walls.id)] + committed[str(floors.id)] == D("1000.01")
     assert committed[str(floors.id)] == D("400.00")
     assert committed[str(roofs.id)] == D("500.00")
+
+    # V5 reads the split itself: the frozen shares sit on the position's vector, so the line passes,
+    # and once a share is moved to a line the position is not allocated to, it is caught.
+    async def v5_refs() -> list[str]:
+        payload = await CostStructureService(session).validation_payload(project.id)
+        context = ValidationContext(data={STRUCTURE_PAYLOAD_KEY: payload}, metadata={"locale": "en"})
+        return [r.element_ref for r in await VectorInheritedRule().validate(context) if not r.passed]
+
+    assert await v5_refs() == []
+    moved = (
+        await session.execute(
+            select(LineAllocation).where(
+                LineAllocation.source_type == SOURCE_CONTRACT_LINE,
+                LineAllocation.source_id == wall_line.id,
+                LineAllocation.cost_line_id == floors.id,
+            )
+        )
+    ).scalar_one()
+    moved.cost_line_id = roofs.id
+    await session.flush()
+    assert await v5_refs() == [str(wall_line.id)]
 
 
 async def test_a_new_schedule_line_from_the_bill_inherits_and_a_set_line_is_kept(session) -> None:

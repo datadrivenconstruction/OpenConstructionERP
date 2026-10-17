@@ -21,8 +21,8 @@ buckets, where one action takes the account from the bill for every row that can
 Every step is inspector-guarded, so a database whose tables ``create_all`` already built reaches this
 revision without error.
 
-Revision ID: v91_costmodel_cost_inheritance
-Revises: v90_costmodel_cost_structure
+Revision ID: v93_costmodel_cost_inheritance
+Revises: v92_costmodel_cost_structure
 Create Date: 2026-10-17
 """
 
@@ -36,8 +36,8 @@ from alembic import op
 from app.core.db_types import MoneyType
 from app.database import GUID
 
-revision: str = "v91_costmodel_cost_inheritance"
-down_revision: str | Sequence[str] | None = "v90_costmodel_cost_structure"
+revision: str = "v93_costmodel_cost_inheritance"
+down_revision: str | Sequence[str] | None = "v92_costmodel_cost_structure"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
