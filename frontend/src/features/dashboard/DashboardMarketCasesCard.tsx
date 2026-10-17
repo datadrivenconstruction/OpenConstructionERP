@@ -273,7 +273,11 @@ export function DashboardMarketCasesCard() {
             size={44}
             className="mt-0.5 shrink-0 shadow-sm ring-1 ring-inset ring-black/10"
           />
-          <div className="min-w-0 flex-1">
+          {/* A 12rem floor on the text, not `flex-1`: a zero basis never
+              wraps, so on a phone the button beside it squeezed the market
+              name to a few letters and the sentence to a word per line. With a
+              real basis the button drops under the text instead. */}
+          <div className="min-w-0 grow basis-48">
             <p className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
               {title}
             </p>
