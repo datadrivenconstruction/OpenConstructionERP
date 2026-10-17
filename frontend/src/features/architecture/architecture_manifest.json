@@ -270619,10 +270619,10 @@
     },
     {
       "name": "dashboard",
-      "ts_files": 43,
+      "ts_files": 47,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 43
+      "test_files": 13,
+      "total_files": 47
     },
     {
       "name": "dashboards",
@@ -273242,7 +273242,7 @@
     "total_schemas": 4040,
     "total_python_files": 2715,
     "frontend_features": 209,
-    "frontend_ts_files": 3495,
+    "frontend_ts_files": 3499,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

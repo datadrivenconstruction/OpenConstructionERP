@@ -16,12 +16,16 @@ import type { AcademyVideo } from './academyTypes';
 import { VIDEOS, formatClock, recommend, type RecommendationContext } from './academy';
 import { VideoCover } from './VideoCover';
 import { useVideoContext } from './useVideoContext';
+import { languageTag, preferLanguage } from '@/features/dashboard/contentLanguage';
+import { ContentLanguageNote } from '@/features/dashboard/ContentLanguageNote';
 
 /**
  * The recommendations for the dashboard, published only, at most `count`.
  * The setup lesson is left out: whoever reads the dashboard has already
  * installed the platform (founder, 17.10.2026). It stays first on the Videos
- * page, where a new reader still finds it.
+ * page, where a new reader still finds it. Among the recommendations, videos
+ * spoken in the UI language come first, so the tiles a narrow screen keeps
+ * are the ones the reader can follow.
  */
 export function dashboardVideos(
   ctx: RecommendationContext,
@@ -29,7 +33,8 @@ export function dashboardVideos(
   videos: AcademyVideo[] = VIDEOS,
 ): AcademyVideo[] {
   const out: AcademyVideo[] = [];
-  for (const v of recommend(ctx, videos, count + 4)) {
+  const ranked = recommend(ctx, videos, count + 4);
+  for (const v of ctx.language ? preferLanguage(ranked, (x) => x.language, ctx.language) : ranked) {
     if (out.length >= count) break;
     if (v.status === 'published' && !v.startHere && !out.includes(v)) out.push(v);
   }
@@ -46,7 +51,7 @@ export interface DashboardVideosStripProps {
 }
 
 export default function DashboardVideosStrip({ count, columns, tileVisibility }: DashboardVideosStripProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const ctx = useVideoContext();
   const videos = useMemo(
@@ -54,6 +59,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
     [ctx.role, ctx.market, ctx.language, count],
   );
   if (videos.length === 0) return null;
+  const tags = videos.map((video) => languageTag(video.language, i18n.language));
 
   return (
     // The same grid as the case tiles above, tile for tile, ending on a
@@ -66,6 +72,7 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
           <MonitorPlay size={11} aria-hidden="true" />
           {t('nav.videos', { defaultValue: 'Video guides' })}
         </span>
+        <ContentLanguageNote tags={tags} className="ms-auto" testId="dashboard-videos-lang-note" />
       </div>
       <ul className={clsx('grid gap-2', columns)} data-testid="dashboard-videos-grid">
         {videos.map((video, i) => (
@@ -90,6 +97,15 @@ export default function DashboardVideosStrip({ count, columns, tileVisibility }:
                   <MonitorPlay size={10} aria-hidden="true" />
                   {t('videos.tile_badge', { defaultValue: 'Video' })}
                 </span>
+                {tags[i] && (
+                  <span
+                    data-testid="dashboard-video-lang"
+                    title={t('dashboard.content_language_fallback', { defaultValue: 'Not yet available in your language' })}
+                    className="absolute end-1.5 top-1.5 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
+                  >
+                    {tags[i]}
+                  </span>
+                )}
                 {video.duration ? (
                   <span
                     data-testid="dashboard-video-duration"

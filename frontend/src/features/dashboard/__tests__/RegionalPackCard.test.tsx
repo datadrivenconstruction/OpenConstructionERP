@@ -298,7 +298,7 @@ describe('RegionalPackCard, the compact tile layout', () => {
 
     await screen.findByTestId('regional-pack-active');
     expect(tileLabels()).toEqual([
-      'Language',
+      'Document language',
       'Currency',
       'Local price databases',
       'Validation rules',
@@ -329,7 +329,7 @@ describe('RegionalPackCard, the compact tile layout', () => {
     renderApp(<RegionalPackCard />);
 
     await screen.findByTestId('regional-pack-active');
-    expect(tileLabels()).toEqual(['Language', 'Currency', 'Validation rules']);
+    expect(tileLabels()).toEqual(['Document language', 'Currency', 'Validation rules']);
     // Only the generic checks are on, so the tile says "on" with a tick that
     // carries its own spoken label rather than naming a standard.
     expect(tileValue('Validation rules').querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
@@ -392,7 +392,11 @@ describe('RegionalPackCard, strings', () => {
     const en = readFileSync(EN, 'utf8');
     const keys = [...code().matchAll(/\bt\(\s*'([^'`]+)'/g)].map((m) => m[1]!);
     expect(keys.length).toBeGreaterThan(8);
-    const missing = keys.filter((key) => !en.includes(`"${key}":`));
+    // A counted string is answered by its plural forms (`_one`, `_other`), which
+    // is how i18next resolves a key called with `count`.
+    const missing = keys.filter(
+      (key) => !en.includes(`"${key}":`) && !(en.includes(`"${key}_one":`) && en.includes(`"${key}_other":`)),
+    );
     expect(missing).toEqual([]);
   });
 });

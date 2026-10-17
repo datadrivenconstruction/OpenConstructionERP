@@ -30,7 +30,7 @@
  * WIDGET_NO_STRETCH in DashboardPage).
  */
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -38,6 +38,7 @@ import {
   ArrowRight,
   Blocks,
   Check,
+  ChevronDown,
   Coins,
   Database,
   Globe2,
@@ -97,10 +98,27 @@ function OnMark({ label }: { label: string }) {
   );
 }
 
+/**
+ * What the validation tile says. One market standard is named outright
+ * ("DIN 276"); several collapse to a count the reader can open, because a row
+ * of six names in a tile is unreadable and truncates mid-word; none beyond the
+ * generic quality checks is a tick.
+ */
+export function validationSummary(ruleSets: readonly string[]): {
+  kind: 'none' | 'tick' | 'single' | 'many';
+  standards: string[];
+} {
+  if (ruleSets.length === 0) return { kind: 'none', standards: [] };
+  const standards = ruleSets.filter((rs) => rs !== GENERIC_RULE_SET);
+  if (standards.length === 0) return { kind: 'tick', standards };
+  return { kind: standards.length === 1 ? 'single' : 'many', standards };
+}
+
 export function RegionalPackCard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = usePartnerPack();
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   // The card's own skeleton, in the card's own frame. Returning null here left
   // the cell blank until the answer came: the grid's WidgetSkeleton is a
@@ -222,16 +240,43 @@ export function RegionalPackCard() {
   // two rule sets were. The tile names the market's own standards instead
   // ("DIN 276", "NRM"), which is what the reader recognises, and falls back to
   // a tick when the pack only switches on the generic quality checks.
-  const standards = manifest.validation_rule_sets
-    .filter((rs) => rs !== GENERIC_RULE_SET)
-    .map((rs) => ruleSetLabel(rs, t))
-    .join(' · ');
+  const validation = validationSummary(manifest.validation_rule_sets);
+  const ruleLabels = manifest.validation_rule_sets.map((rs) => ruleSetLabel(rs, t));
   const validationLabel = t('dashboard.validation_rules', { defaultValue: 'Validation rules' });
   const taxLabel = t('dashboard.regional_pack_taxes', { defaultValue: 'Local tax rules' });
+  // The validation tile's value, worked out here rather than as a ternary
+  // chain inside the tile, so the JSX below reads as a list of tiles.
+  let validationValue: ReactNode = null;
+  if (validation.kind === 'tick') {
+    validationValue = <OnMark label={validationLabel} />;
+  } else if (validation.kind === 'single') {
+    validationValue = ruleSetLabel(validation.standards[0] as string, t);
+  } else if (validation.kind === 'many') {
+    validationValue = (
+      <button
+        type="button"
+        data-testid="regional-pack-rules-toggle"
+        aria-expanded={rulesOpen}
+        aria-controls="regional-pack-rules"
+        onClick={() => setRulesOpen((v) => !v)}
+        className="inline-flex items-center gap-1 rounded text-oe-blue hover:text-oe-blue-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+      >
+        {t('dashboard.regional_pack_rule_sets', {
+          defaultValue: '{{count}} rule sets',
+          count: manifest.validation_rule_sets.length,
+        })}
+        <ChevronDown
+          size={12}
+          className={rulesOpen ? 'rotate-180 transition-transform' : 'transition-transform'}
+          aria-hidden="true"
+        />
+      </button>
+    );
+  }
 
   return (
     <div className={SHELL} data-testid="regional-pack-active">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         {country && country !== 'xx' ? (
           <CountryFlag code={country} size={28} className="shrink-0 rounded-sm shadow-sm" />
         ) : (
@@ -251,6 +296,20 @@ export function RegionalPackCard() {
           <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" aria-hidden="true" />
           {t('common.active', { defaultValue: 'Active' })}
         </span>
+        {/* The way to a different market. Quiet rather than a second primary
+            button, because for a reader who is already set up this is a way
+            out, not the next step. In the header so it costs no row; the header
+            wraps it under the name on a phone. */}
+        <button
+          type="button"
+          onClick={() => navigate(PACKS_ROUTE)}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md text-xs font-semibold text-oe-blue transition-colors hover:text-oe-blue-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+        >
+          {t('dashboard.regional_pack_manage', {
+            defaultValue: 'Change or add a country pack',
+          })}
+          <ArrowRight size={13} className="rtl:rotate-180" aria-hidden="true" />
+        </button>
       </div>
 
       {/* Every tile is skipped rather than shown empty. A pack that ships no
@@ -260,7 +319,7 @@ export function RegionalPackCard() {
       <ul className={`mt-3 ${TILE_GRID}`}>
         <PackTile
           icon={Languages}
-          label={t('dashboard.regional_pack_language', { defaultValue: 'Language' })}
+          label={t('dashboard.regional_pack_doc_language', { defaultValue: 'Document language' })}
           value={languageName}
         />
         <PackTile
@@ -275,11 +334,11 @@ export function RegionalPackCard() {
             value={manifest.cwicr_regions.length}
           />
         )}
-        {manifest.validation_rule_sets.length > 0 && (
+        {validation.kind !== 'none' && (
           <PackTile
             icon={ShieldCheck}
             label={validationLabel}
-            value={standards || <OnMark label={validationLabel} />}
+            value={validationValue}
           />
         )}
         {manifest.default_tax_template && (
@@ -294,19 +353,18 @@ export function RegionalPackCard() {
         )}
       </ul>
 
-      {/* The way to a different market. Quiet rather than a second primary
-          button, because for a reader who is already set up this is a way
-          out, not the next step. */}
-      <button
-        type="button"
-        onClick={() => navigate(PACKS_ROUTE)}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-md text-xs font-semibold text-oe-blue transition-colors hover:text-oe-blue-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-      >
-        {t('dashboard.regional_pack_manage', {
-          defaultValue: 'Change or add a country pack',
-        })}
-        <ArrowRight size={13} className="rtl:rotate-180" aria-hidden="true" />
-      </button>
+      {validation.kind === 'many' && rulesOpen && (
+        <ul id="regional-pack-rules" data-testid="regional-pack-rules" className="mt-2 flex flex-wrap gap-1.5">
+          {ruleLabels.map((label) => (
+            <li
+              key={label}
+              className="rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-secondary"
+            >
+              {label}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

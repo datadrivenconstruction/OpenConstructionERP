@@ -40,7 +40,7 @@ import { regionDisplayName } from '@/features/cases/regions';
 // The interpolating stand-in the sibling card's test uses: these assertions
 // read finished sentences, and a `t` that returned the key would hide the
 // difference between "your market" and "by market", which is the point here.
-const { language } = vi.hoisted(() => ({ language: { tag: 'en' } }));
+const { language } = vi.hoisted(() => ({ language: { tag: 'en', translated: 'all' as 'all' | 'none' } }));
 
 vi.mock('react-i18next', () => {
   const t = (key: string, opts?: Record<string, unknown>) => {
@@ -52,7 +52,15 @@ vi.mock('react-i18next', () => {
     return key;
   };
   return {
-    useTranslation: () => ({ t, i18n: { language: language.tag } }),
+    // The resource store the language tags read: English always has the
+    // key, the reader's language has it only when the test says so.
+    useTranslation: () => ({
+      t,
+      i18n: {
+        language: language.tag,
+        getResource: (lng: string) => (lng === 'en' || language.translated === 'all' ? 'text' : undefined),
+      },
+    }),
     initReactI18next: { type: '3rdParty', init: () => {} },
   };
 });
@@ -143,6 +151,7 @@ function allCasesLabel(market: string): string {
 beforeEach(() => {
   navigateSpy.mockClear();
   language.tag = 'en';
+  language.translated = 'all';
   packs.current = { active: false };
   packs.installed = { installed: [], active_slug: null };
   useDashboardLayoutStore.setState({ order: [], hidden: [], spans: {} });
@@ -201,10 +210,37 @@ describe('DashboardMarketCasesCard, the market it leads with', () => {
     packs.installed = { installed: [pack('bau-de', 'de', 'Bau DE')], active_slug: null };
     await renderCard();
 
+    // Said once for the market, not repeated on every tile.
     const badges = screen.getAllByTestId('market-case-pack');
-    expect(badges.length).toBe(tileMarkets().length);
+    expect(badges.length).toBe(1);
     expect(badges[0]?.getAttribute('data-pack-state')).toBe('install');
     expect(badges[0]?.textContent).toContain('Bau DE');
+  });
+});
+
+describe('DashboardMarketCasesCard, the language its cases are shown in', () => {
+  it('tags each case that falls back to English and says why, once, on screen', async () => {
+    language.tag = 'de';
+    language.translated = 'none';
+    await renderCard();
+
+    const tiles = screen.getAllByTestId('market-case');
+    expect(tiles.length).toBeGreaterThan(0);
+    const tags = screen.getAllByTestId('market-case-lang');
+    expect(tags.length).toBe(tiles.length);
+    expect(new Set(tags.map((el) => el.textContent))).toEqual(new Set(['EN']));
+    const note = screen.getByTestId('market-cases-lang-note');
+    expect(note.textContent).toContain('EN');
+    expect(note.textContent).toContain('Not yet available in your language');
+  });
+
+  it('prints no tag and no note when the cases exist in the UI language', async () => {
+    language.tag = 'de';
+    await renderCard();
+
+    expect(screen.getAllByTestId('market-case').length).toBeGreaterThan(0);
+    expect(screen.queryByTestId('market-case-lang')).toBeNull();
+    expect(screen.queryByTestId('market-cases-lang-note')).toBeNull();
   });
 });
 
