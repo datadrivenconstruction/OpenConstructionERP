@@ -657,6 +657,30 @@
       "fail": "Linia {line} nu este legată de o linie de cost, deci comanda ei nu va apărea ca angajată față de buget",
       "suggestion": "Creați linia din BOQ sau legați-o de o linie de cost înainte de comandă"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Linia {line} sugerează furnizorul {vendor}, care nu este în registrul de furnizori",
+      "suggestion": "Alegeți furnizorul sugerat din registrul de furnizori sau ștergeți sugestia"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Linia {line} sugerează pe {vendor}, un furnizor care nu este activ în registrul de furnizori",
+      "suggestion": "Sugerați un furnizor activ sau lăsați alegerea în seama achizitorului"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Sursele BOQ ale liniei {line} sugerează {count} furnizori diferiți",
+      "suggestion": "Alegeți un singur furnizor pentru linie sau împărțiți-o astfel încât fiecare furnizor să aibă linia lui"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Linia {line} sugerează pe {vendor}, dar cererea de achiziție urmează să fie comandată de la alt furnizor",
+      "suggestion": "Verificați dacă furnizorul ales poate livra această linie sau comandați-o separat"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Linia {line} este necesară până la {date}, dată care a trecut deja (astăzi este {today})",
+      "suggestion": "Indicați data la care materialul este cu adevărat necesar pe șantier"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Linia {line} a fost planificată pentru o activitate care începea la {anchor}, dar activitatea începe acum la {start}",
+      "suggestion": "Comparați data necesarului liniei cu graficul actual și modificați-o dacă este nevoie"
+    },
     "receipt_certificate_present": {
       "fail": "Linia {line} a fost comandată cu {required}, dar livrarea conține {delivered}",
       "suggestion": "Atașați certificatul cerut de comandă sau refuzați linia până când furnizorul îl trimite"

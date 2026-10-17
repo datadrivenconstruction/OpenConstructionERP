@@ -657,6 +657,30 @@
       "fail": "明細 {line} は原価明細に紐付いていないため、その発注は予算に対する発注済み金額として表示されません",
       "suggestion": "内訳書から明細を作成するか、発注前に原価明細に紐付けてください"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "明細 {line} は仕入先 {vendor} を提案していますが、仕入先台帳にありません",
+      "suggestion": "提案された仕入先を仕入先台帳から選ぶか、提案を削除してください"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "明細 {line} は {vendor} を提案していますが、この仕入先は仕入先台帳で有効になっていません",
+      "suggestion": "有効な仕入先を提案するか、選定を購買担当に任せてください"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "明細 {line} の内訳書の参照元が、{count} 社の異なる仕入先を提案しています",
+      "suggestion": "明細の仕入先を1社に決めるか、仕入先ごとに明細を分割してください"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "明細 {line} は {vendor} を提案していますが、この請求は別の仕入先に発注される予定です",
+      "suggestion": "選んだ仕入先がこの明細を納入できるか確認するか、別に発注してください"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "明細 {line} の納入希望日は {date} ですが、すでに過ぎています(本日は {today})",
+      "suggestion": "資材が現場で実際に必要になる日を入力してください"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "明細 {line} は {anchor} 開始の工程に合わせて計画されていましたが、工程は現在 {start} に開始します",
+      "suggestion": "明細の納入希望日を現在の工程表と照らし合わせ、必要なら変更してください"
+    },
     "receipt_certificate_present": {
       "fail": "明細{line}は{required}付きで発注されましたが、納品には{delivered}が含まれています",
       "suggestion": "発注で求められた証明書を添付するか、サプライヤーから届くまで該当明細を保留してください"

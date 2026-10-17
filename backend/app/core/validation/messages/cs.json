@@ -657,6 +657,30 @@
       "fail": "Řádek {line} není propojen s nákladovou položkou, takže jeho objednávka se nezobrazí jako závazek vůči rozpočtu",
       "suggestion": "Vytvořte řádek z BOQ, nebo ho před objednáním propojte s nákladovou položkou"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Řádek {line} navrhuje dodavatele {vendor}, který není v adresáři dodavatelů",
+      "suggestion": "Vyberte navrhovaného dodavatele z adresáře dodavatelů, nebo návrh smažte"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Řádek {line} navrhuje dodavatele {vendor}, který není v adresáři dodavatelů aktivní",
+      "suggestion": "Navrhněte aktivního dodavatele, nebo nechte výběr na nákupčím"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Zdroje BOQ řádku {line} navrhují různé dodavatele: {count}",
+      "suggestion": "Vyberte pro řádek jednoho dodavatele, nebo řádek rozdělte, aby každý dodavatel měl svůj řádek"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Řádek {line} navrhuje dodavatele {vendor}, ale poptávka se má objednat u jiného dodavatele",
+      "suggestion": "Ověřte, zda vybraný dodavatel tento řádek dodá, nebo jej objednejte zvlášť"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Řádek {line} je potřeba do {date}, což je datum, které už uplynulo (dnes je {today})",
+      "suggestion": "Zadejte datum, kdy je materiál na stavbě skutečně potřeba"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Řádek {line} byl naplánován pro činnost začínající {anchor}, ale činnost nyní začíná {start}",
+      "suggestion": "Porovnejte datum potřeby řádku s aktuálním harmonogramem a v případě potřeby ho změňte"
+    },
     "receipt_certificate_present": {
       "fail": "Položka {line} byla objednána s {required}, ale dodávka obsahuje {delivered}",
       "suggestion": "Připojte certifikát požadovaný objednávkou, nebo položku odmítněte, dokud dodavatel certifikát nepošle"

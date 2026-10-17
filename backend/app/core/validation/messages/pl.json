@@ -657,6 +657,30 @@
       "fail": "Pozycja {line} nie jest powiązana z pozycją kosztową, więc jej zamówienie nie pokaże się jako zobowiązanie wobec budżetu",
       "suggestion": "Utwórz pozycję z BOQ albo przed zamówieniem powiąż ją z pozycją kosztową"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Pozycja {line} sugeruje dostawcę {vendor}, którego nie ma w rejestrze dostawców",
+      "suggestion": "Wybierz sugerowanego dostawcę z rejestru dostawców lub usuń sugestię"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Pozycja {line} sugeruje dostawcę {vendor}, który nie jest aktywny w rejestrze dostawców",
+      "suggestion": "Zasugeruj aktywnego dostawcę lub zostaw wybór zaopatrzeniowcowi"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Źródła BOQ pozycji {line} sugerują różnych dostawców: {count}",
+      "suggestion": "Wybierz jednego dostawcę dla pozycji albo podziel ją tak, aby każdy dostawca miał własną pozycję"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Pozycja {line} sugeruje dostawcę {vendor}, ale zapotrzebowanie ma być zamówione u innego dostawcy",
+      "suggestion": "Sprawdź, czy wybrany dostawca może dostarczyć tę pozycję, lub zamów ją osobno"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Pozycja {line} jest potrzebna do {date}, a ten termin już minął (dziś jest {today})",
+      "suggestion": "Podaj datę, kiedy materiał jest faktycznie potrzebny na budowie"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Pozycja {line} była zaplanowana pod czynność zaczynającą się {anchor}, ale czynność zaczyna się teraz {start}",
+      "suggestion": "Porównaj termin potrzeby pozycji z aktualnym harmonogramem i w razie potrzeby zmień go"
+    },
     "receipt_certificate_present": {
       "fail": "Pozycja {line} zamówiona z {required}, ale dostawa zawiera {delivered}",
       "suggestion": "Dołącz certyfikat wymagany w zamówieniu lub wstrzymaj pozycję, dopóki dostawca go nie prześle"

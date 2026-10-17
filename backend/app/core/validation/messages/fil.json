@@ -657,6 +657,30 @@
       "fail": "Hindi nakakabit ang linya {line} sa isang cost line, kaya hindi lalabas ang order nito bilang committed sa budget",
       "suggestion": "Buuin ang linya mula sa BOQ, o ikabit ito sa isang cost line bago mag-order"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Iminumungkahi ng linya {line} ang supplier na {vendor}, na wala sa Vendor directory",
+      "suggestion": "Piliin ang iminungkahing supplier mula sa Vendor directory, o alisin ang mungkahi"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Iminumungkahi ng linya {line} ang {vendor}, isang supplier na hindi aktibo sa Vendor directory",
+      "suggestion": "Magmungkahi ng aktibong supplier, o ipaubaya ang pagpili sa buyer"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Ang mga BOQ source ng linya {line} ay nagmumungkahi ng {count} magkakaibang supplier",
+      "suggestion": "Pumili ng isang supplier para sa linya, o hatiin ito para may sariling linya ang bawat supplier"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Iminumungkahi ng linya {line} ang {vendor}, pero iuutos ang requisition sa ibang supplier",
+      "suggestion": "Tiyaking kaya ng napiling supplier na ihatid ang linyang ito, o iutos ito nang hiwalay"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Kailangan ang linya {line} sa {date}, na lampas na (ngayon ay {today})",
+      "suggestion": "Ilagay ang petsa kung kailan talaga kailangan ang materyales sa site"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Ang linya {line} ay planado para sa activity na magsisimula sa {anchor}, pero magsisimula na ngayon ang activity sa {start}",
+      "suggestion": "Suriin ang petsang kailangan ng linya laban sa kasalukuyang schedule at baguhin ito kung kinakailangan"
+    },
     "receipt_certificate_present": {
       "fail": "Ang linya {line} ay in-order na may {required}, pero ang delivery ay may {delivered}",
       "suggestion": "Ikabit ang certificate na hinihingi ng order, o tanggihan ang linya hanggang maipadala ito ng supplier"

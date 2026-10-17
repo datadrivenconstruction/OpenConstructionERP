@@ -657,6 +657,30 @@
       "fail": "{line}. satır bir maliyet satırına bağlı değil, bu yüzden siparişi bütçeye karşı taahhüt olarak görünmez",
       "suggestion": "Satırı BOQ'dan oluşturun veya sipariş vermeden önce bir maliyet satırına bağlayın"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "{line}. satır, tedarikçi rehberinde olmayan {vendor} tedarikçisini öneriyor",
+      "suggestion": "Önerilen tedarikçiyi tedarikçi rehberinden seçin veya öneriyi silin"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "{line}. satır, tedarikçi rehberinde aktif olmayan {vendor} tedarikçisini öneriyor",
+      "suggestion": "Aktif bir tedarikçi önerin veya seçimi satın almacıya bırakın"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "{line}. satırın BOQ kaynakları birbirinden farklı {count} tedarikçi öneriyor",
+      "suggestion": "Satır için tek bir tedarikçi seçin veya her tedarikçinin kendi satırı olacak şekilde satırı bölün"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "{line}. satır {vendor} tedarikçisini öneriyor, ancak talep başka bir tedarikçiden sipariş edilecek",
+      "suggestion": "Seçilen tedarikçinin bu satırı teslim edebildiğini kontrol edin veya satırı ayrı sipariş edin"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "{line}. satır {date} tarihine kadar gerekli, ancak bu tarih geçmişte kaldı (bugün {today})",
+      "suggestion": "Malzemenin şantiyede gerçekten gerektiği tarihi girin"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "{line}. satır {anchor} tarihinde başlayan bir faaliyet için planlanmıştı, ancak faaliyet şimdi {start} tarihinde başlıyor",
+      "suggestion": "Satırın ihtiyaç tarihini güncel programla karşılaştırın ve gerekirse değiştirin"
+    },
     "receipt_certificate_present": {
       "fail": "{line} numaralı kalem {required} ile sipariş edildi, ancak teslimat {delivered} içeriyor",
       "suggestion": "Siparişin istediği sertifikayı ekleyin veya tedarikçi göndermeden kalemi reddedin"

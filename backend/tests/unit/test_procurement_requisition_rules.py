@@ -21,10 +21,16 @@ from app.core.validation.engine import ValidationContext, rule_registry
 from app.core.validation.messages import available_locales, is_key_present
 from app.core.validation.rules import (
     ProcurementRequisitionLineCostLine,
+    ProcurementRequisitionLineNeededByNotPast,
+    ProcurementRequisitionLineScheduleMoved,
     ProcurementRequisitionNeededByNotPast,
     ProcurementRequisitionQuantityPositive,
     ProcurementRequisitionSingleCurrency,
     ProcurementRequisitionSourceUnit,
+    ProcurementRequisitionSuggestedVendorActive,
+    ProcurementRequisitionSuggestedVendorDiffers,
+    ProcurementRequisitionSuggestedVendorInDirectory,
+    ProcurementRequisitionSuggestionConflict,
     ProcurementRequisitionVendorActive,
     ProcurementRequisitionVendorChosen,
     ProcurementRequisitionVendorInDirectory,
@@ -49,6 +55,13 @@ RULES = [
     ProcurementRequisitionVendorChosen,
     ProcurementRequisitionSingleCurrency,
     ProcurementRequisitionLineCostLine,
+    # Issue #516, second slice: suggested supplier and line dates.
+    ProcurementRequisitionSuggestedVendorInDirectory,
+    ProcurementRequisitionSuggestedVendorActive,
+    ProcurementRequisitionSuggestionConflict,
+    ProcurementRequisitionSuggestedVendorDiffers,
+    ProcurementRequisitionLineNeededByNotPast,
+    ProcurementRequisitionLineScheduleMoved,
 ]
 
 

@@ -657,6 +657,30 @@
       "fail": "La ligne {line} n'est pas liée à une ligne de coût, sa commande n'apparaîtra donc pas comme engagée sur le budget",
       "suggestion": "Créez la ligne depuis le BOQ, ou liez-la à une ligne de coût avant de commander"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "La ligne {line} suggère le fournisseur {vendor}, qui n'est pas dans l'annuaire des fournisseurs",
+      "suggestion": "Choisissez le fournisseur suggéré dans l'annuaire des fournisseurs, ou supprimez la suggestion"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "La ligne {line} suggère {vendor}, un fournisseur qui n'est pas actif dans l'annuaire des fournisseurs",
+      "suggestion": "Suggérez un fournisseur actif, ou laissez le choix à l'acheteur"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Les sources BOQ de la ligne {line} suggèrent {count} fournisseurs différents",
+      "suggestion": "Choisissez un seul fournisseur pour la ligne, ou scindez-la pour que chaque fournisseur ait sa propre ligne"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "La ligne {line} suggère {vendor}, mais la demande d'achat doit être commandée chez un autre fournisseur",
+      "suggestion": "Vérifiez que le fournisseur choisi peut livrer cette ligne, ou commandez-la séparément"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "La ligne {line} est nécessaire pour le {date}, date déjà dépassée (aujourd'hui : {today})",
+      "suggestion": "Indiquez la date à laquelle le matériau est réellement nécessaire sur le chantier"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "La ligne {line} était prévue pour une tâche débutant le {anchor}, mais la tâche débute maintenant le {start}",
+      "suggestion": "Comparez la date de besoin de la ligne au planning actuel et modifiez-la si nécessaire"
+    },
     "receipt_certificate_present": {
       "fail": "La ligne {line} a été commandée avec {required}, mais la livraison comporte {delivered}",
       "suggestion": "Joignez le certificat exigé par la commande, ou refusez la ligne tant que le fournisseur ne l'a pas transmis"

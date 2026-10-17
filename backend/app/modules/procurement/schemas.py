@@ -1013,6 +1013,10 @@ class RequisitionItemSourceIn(BaseModel):
     quantity: str = Field(default="0", max_length=50)
     unit: str | None = Field(default=None, max_length=20)
     cost_line_id: UUID | None = None
+    # The supplier the BOQ suggested for this source. Left out, the server reads
+    # it from the BOQ resource (or its position default); sent, it is kept as
+    # sent so an edited draft does not re-read a BOQ that has changed since.
+    suggested_vendor_id: UUID | None = None
 
     @field_validator("quantity")
     @classmethod
@@ -1037,6 +1041,18 @@ class RequisitionItemIn(BaseModel):
     catalog_item_id: UUID | None = None
     cost_line_id: UUID | None = None
     boq_position_id: UUID | None = None
+    # The supplier suggested for this line. Left out, the line inherits the one
+    # its sources agree on; sent (null included), it is the requester's choice.
+    suggested_vendor_id: UUID | None = None
+    # When this line is needed. Left out or null, the requisition's
+    # ``required_date`` applies. With ``schedule_activity_id`` and no date, the
+    # server proposes the activity start minus ``schedule_buffer_days``.
+    required_date: date | None = None
+    schedule_activity_id: UUID | None = None
+    schedule_buffer_days: int | None = Field(default=None, ge=0, le=365)
+    # The activity start the date was proposed from, echoed back by the editor
+    # so a saved draft keeps it. Left out, the activity's start now is used.
+    schedule_anchor_date: date | None = None
     sources: list[RequisitionItemSourceIn] = Field(default_factory=list, max_length=1000)
 
     @field_validator("quantity_requested", "unit_cost")
@@ -1139,6 +1155,9 @@ class RequisitionPOItemRef(BaseModel):
     po_number: str | None = None
     quantity: str = "0"
     unit: str | None = None
+    # The supplier's dates, kept apart from the date the material is needed.
+    po_delivery_date: str | None = None
+    supplier_confirmed_delivery_date: str | None = None
 
 
 class RequisitionItemSourceResponse(BaseModel):
@@ -1152,6 +1171,16 @@ class RequisitionItemSourceResponse(BaseModel):
     quantity: str = "0"
     unit: str | None = None
     cost_line_id: UUID | None = None
+    suggested_vendor_id: UUID | None = None
+    suggested_vendor_name: str | None = None
+
+
+class RequisitionVendorRef(BaseModel):
+    """A Vendor directory entry as a requisition shows it."""
+
+    id: UUID
+    name: str | None = None
+    status: str | None = None
 
 
 class RequisitionItemResponse(BaseModel):
@@ -1178,6 +1207,30 @@ class RequisitionItemResponse(BaseModel):
     catalog_item_id: UUID | None = None
     cost_line_id: UUID | None = None
     sort_order: int = 0
+    # Suggested supplier (issue #516). ``source_suggested_vendors`` lists every
+    # distinct supplier the BOQ sources suggested; more than one means they
+    # disagree, which ``suggestion_conflict`` states outright.
+    suggested_vendor_id: UUID | None = None
+    suggested_vendor_name: str | None = None
+    suggested_vendor_status: str | None = None
+    source_suggested_vendors: list[RequisitionVendorRef] = Field(default_factory=list)
+    suggestion_conflict: bool = False
+    # Needed-by date. ``effective_required_date`` is the line's own date or the
+    # header's; ``required_date_source`` says which (``line``, ``schedule``,
+    # ``requisition``) or is null when neither is set. ``latest_order_date`` is
+    # the effective date minus the requisition's lead time.
+    required_date: str | None = None
+    effective_required_date: str | None = None
+    required_date_source: str | None = None
+    latest_order_date: str | None = None
+    schedule_activity_id: UUID | None = None
+    schedule_activity_name: str | None = None
+    schedule_buffer_days: int | None = None
+    schedule_anchor_date: str | None = None
+    # The activity start as the schedule holds it now, and whether it moved
+    # since the date was proposed. The line's date is never rewritten for it.
+    schedule_activity_start: str | None = None
+    schedule_moved: bool = False
     sources: list[RequisitionItemSourceResponse] = Field(default_factory=list)
     # The purchase order lines converted from this line (issue #516).
     po_items: list[RequisitionPOItemRef] = Field(default_factory=list)
@@ -1195,6 +1248,9 @@ class RequisitionResponse(BaseModel):
     title: str | None = None
     required_date: str | None = None
     lead_time_days: int = 0
+    # The last day to order and still arrive by ``required_date``.
+    latest_order_date: str | None = None
+    # The delivery date of the order this requisition became; null before.
     estimated_delivery_date: str | None = None
     requester_id: str | None = None
     approver_id: str | None = None
@@ -1205,6 +1261,10 @@ class RequisitionResponse(BaseModel):
     vendor_id: UUID | None = None
     vendor_name: str | None = None
     vendor_status: str | None = None
+    # Distinct suppliers the lines suggest. Never applied to ``vendor_id`` on
+    # its own: with one entry the requester may adopt it, with several the
+    # suppliers differ and a person decides.
+    suggested_vendors: list[RequisitionVendorRef] = Field(default_factory=list)
     po_id: UUID | None = None
     po_number: str | None = None
     notes: str | None = None
@@ -1245,6 +1305,8 @@ class TracePOLine(BaseModel):
     po_item_id: UUID
     quantity: str = "0"
     unit: str | None = None
+    po_delivery_date: str | None = None
+    supplier_confirmed_delivery_date: str | None = None
 
 
 class PositionTraceRow(BaseModel):
@@ -1314,3 +1376,14 @@ class POTraceResponse(BaseModel):
     po_status: str | None = None
     requisitions: list[POTraceRequisition] = Field(default_factory=list)
     lines: list[POTraceLine] = Field(default_factory=list)
+
+
+class ScheduleActivityOption(BaseModel):
+    """A schedule activity a requisition line can take its needed-by date from."""
+
+    id: UUID
+    name: str
+    schedule_name: str | None = None
+    start_date: str
+    end_date: str | None = None
+    activity_type: str | None = None

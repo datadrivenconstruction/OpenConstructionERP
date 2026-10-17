@@ -657,6 +657,30 @@
       "fail": "Rad {line} är inte länkad till en kostnadsrad, så dess order visas inte som bunden mot budgeten",
       "suggestion": "Skapa raden från BOQ, eller länka den till en kostnadsrad före beställning"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Rad {line} föreslår leverantören {vendor}, som inte finns i leverantörsregistret",
+      "suggestion": "Välj den föreslagna leverantören från leverantörsregistret eller ta bort förslaget"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Rad {line} föreslår {vendor}, en leverantör som inte är aktiv i leverantörsregistret",
+      "suggestion": "Föreslå en aktiv leverantör eller överlåt valet till inköparen"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "BOQ-källorna för rad {line} föreslår {count} olika leverantörer",
+      "suggestion": "Välj en leverantör för raden eller dela den så att varje leverantör får en egen rad"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Rad {line} föreslår {vendor}, men rekvisitionen ska beställas hos en annan leverantör",
+      "suggestion": "Kontrollera att den valda leverantören kan leverera den här raden, eller beställ den separat"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Rad {line} behövs senast {date}, ett datum som redan har passerat (idag är {today})",
+      "suggestion": "Ange det datum då materialet faktiskt behövs på arbetsplatsen"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Rad {line} var planerad för en aktivitet som startade {anchor}, men aktiviteten startar nu {start}",
+      "suggestion": "Jämför radens behovsdatum med den aktuella tidplanen och ändra det vid behov"
+    },
     "receipt_certificate_present": {
       "fail": "Rad {line} beställdes med {required}, men leveransen innehåller {delivered}",
       "suggestion": "Bifoga intyget som beställningen kräver, eller underkänn raden tills leverantören skickar det"

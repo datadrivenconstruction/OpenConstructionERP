@@ -657,6 +657,30 @@
       "fail": "A linha {line} não está vinculada a uma linha de custo, então o pedido dela não aparecerá como comprometido contra o orçamento",
       "suggestion": "Gere a linha a partir do BOQ ou vincule-a a uma linha de custo antes de pedir"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "A linha {line} sugere o fornecedor {vendor}, que não está no cadastro de fornecedores",
+      "suggestion": "Escolha o fornecedor sugerido no cadastro de fornecedores ou apague a sugestão"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "A linha {line} sugere {vendor}, um fornecedor que não está ativo no cadastro de fornecedores",
+      "suggestion": "Sugira um fornecedor ativo ou deixe a escolha para o comprador"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "As fontes de BOQ da linha {line} sugerem {count} fornecedores diferentes",
+      "suggestion": "Escolha um fornecedor para a linha ou divida-a para que cada fornecedor tenha a sua própria linha"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "A linha {line} sugere {vendor}, mas a requisição será pedida a outro fornecedor",
+      "suggestion": "Confirme se o fornecedor escolhido consegue fornecer esta linha ou peça-a separadamente"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "A linha {line} é necessária até {date}, data que já passou (hoje é {today})",
+      "suggestion": "Informe a data em que o material é realmente necessário na obra"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "A linha {line} foi planejada para uma atividade que começava em {anchor}, mas a atividade agora começa em {start}",
+      "suggestion": "Compare a data de necessidade da linha com o cronograma atual e altere-a se preciso"
+    },
     "receipt_certificate_present": {
       "fail": "A linha {line} foi pedida com {required}, mas a entrega traz {delivered}",
       "suggestion": "Anexe o certificado exigido no pedido ou recuse a linha até o fornecedor enviá-lo"

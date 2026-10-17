@@ -657,6 +657,30 @@
       "fail": "Rida {line} ei ole seotud kulureaga, seega ei kuvata selle tellimust eelarve vastu kohustusena",
       "suggestion": "Looge rida BOQ-st või siduge see enne tellimist kulureaga"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Rida {line} soovitab tarnijat {vendor}, kes ei ole tarnijate registris",
+      "suggestion": "Valige soovitatud tarnija tarnijate registrist või eemaldage soovitus"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Rida {line} soovitab tarnijat {vendor}, kes ei ole tarnijate registris aktiivne",
+      "suggestion": "Soovitage aktiivset tarnijat või jätke valik hankijale"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Rea {line} BOQ allikad soovitavad {count} erinevat tarnijat",
+      "suggestion": "Valige reale üks tarnija või jagage rida nii, et iga tarnija saab oma rea"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Rida {line} soovitab tarnijat {vendor}, kuid tellimistaotlus tuleb tellida teiselt tarnijalt",
+      "suggestion": "Kontrollige, kas valitud tarnija suudab selle rea tarnida, või tellige see eraldi"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Rida {line} on vaja kuupäevaks {date}, mis on juba möödas (täna on {today})",
+      "suggestion": "Märkige kuupäev, millal materjali objektil tegelikult vaja on"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Rida {line} oli planeeritud tegevusele, mis algas {anchor}, kuid tegevus algab nüüd {start}",
+      "suggestion": "Võrrelge rea vajaduse kuupäeva praeguse ajakavaga ja muutke seda vajaduse korral"
+    },
     "receipt_certificate_present": {
       "fail": "Rida {line} telliti koos {required}, kuid tarnes on {delivered}",
       "suggestion": "Lisage tellimuses nõutud sertifikaat või lükake rida tagasi, kuni tarnija selle saadab"

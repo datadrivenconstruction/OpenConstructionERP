@@ -657,6 +657,30 @@
       "fail": "السطر {line} غير مرتبط ببند تكلفة، لذا لن يظهر أمره كالتزام مقابل الميزانية",
       "suggestion": "أنشئ السطر من BOQ، أو اربطه ببند تكلفة قبل الطلب"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "السطر {line} يقترح المورد {vendor}، وهو غير موجود في سجل الموردين",
+      "suggestion": "اختر المورد المقترح من سجل الموردين أو احذف الاقتراح"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "السطر {line} يقترح {vendor}، وهو مورد غير نشط في سجل الموردين",
+      "suggestion": "اقترح موردًا نشطًا أو اترك الاختيار لمسؤول المشتريات"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "مصادر BOQ للسطر {line} تقترح {count} موردين مختلفين",
+      "suggestion": "اختر موردًا واحدًا للسطر أو قسّمه بحيث يحصل كل مورد على سطر خاص به"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "السطر {line} يقترح {vendor}، لكن طلب الشراء سيُطلب من مورد آخر",
+      "suggestion": "تحقق من قدرة المورد المختار على توريد هذا السطر أو اطلبه بشكل منفصل"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "السطر {line} مطلوب بحلول {date}، وهو تاريخ مضى بالفعل (اليوم هو {today})",
+      "suggestion": "حدد التاريخ الذي تلزم فيه المادة فعليًا في الموقع"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "السطر {line} كان مخططًا لنشاط يبدأ في {anchor}، لكن النشاط يبدأ الآن في {start}",
+      "suggestion": "قارن تاريخ الحاجة للسطر بالجدول الزمني الحالي وعدّله عند الحاجة"
+    },
     "receipt_certificate_present": {
       "fail": "تم طلب البند {line} مع {required}، لكن التسليم يتضمن {delivered}",
       "suggestion": "أرفق الشهادة التي يطلبها أمر الشراء، أو ارفض البند حتى يرسل المورد الشهادة"

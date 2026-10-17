@@ -657,6 +657,30 @@
       "fail": "Zeile {line} ist mit keiner Kostenzeile verknüpft, ihre Bestellung erscheint daher nicht als Obligo im Budget",
       "suggestion": "Erzeugen Sie die Zeile aus dem LV oder verknüpfen Sie sie vor der Bestellung mit einer Kostenzeile"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Position {line} schlägt den Lieferanten {vendor} vor, der nicht im Lieferantenverzeichnis steht",
+      "suggestion": "Wählen Sie den vorgeschlagenen Lieferanten aus dem Lieferantenverzeichnis oder entfernen Sie den Vorschlag"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Position {line} schlägt {vendor} vor, einen Lieferanten, der im Lieferantenverzeichnis nicht aktiv ist",
+      "suggestion": "Schlagen Sie einen aktiven Lieferanten vor oder überlassen Sie die Wahl dem Einkauf"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Die LV-Quellen von Position {line} schlagen {count} verschiedene Lieferanten vor",
+      "suggestion": "Wählen Sie einen Lieferanten für die Position oder teilen Sie sie, damit jeder Lieferant eine eigene Position erhält"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Position {line} schlägt {vendor} vor, die Anforderung soll aber bei einem anderen Lieferanten bestellt werden",
+      "suggestion": "Prüfen Sie, ob der gewählte Lieferant diese Position liefern kann, oder bestellen Sie sie separat"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Position {line} wird zum {date} benötigt, dieses Datum ist bereits vorbei (heute ist {today})",
+      "suggestion": "Geben Sie das Datum an, zu dem das Material tatsächlich auf der Baustelle benötigt wird"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Position {line} wurde für einen Vorgang mit Beginn am {anchor} geplant, der Vorgang beginnt jetzt am {start}",
+      "suggestion": "Prüfen Sie den Bedarfstermin der Position gegen den aktuellen Terminplan und ändern Sie ihn bei Bedarf"
+    },
     "receipt_certificate_present": {
       "fail": "Position {line} wurde mit {required} bestellt, die Lieferung enthält aber {delivered}",
       "suggestion": "Fügen Sie das in der Bestellung geforderte Zeugnis bei oder weisen Sie die Position zurück, bis der Lieferant es nachreicht"

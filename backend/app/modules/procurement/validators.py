@@ -668,6 +668,149 @@ def check_requisition_line_cost_line(req: dict[str, Any]) -> list[Finding]:
     ]
 
 
+# ── Material requisitions: suggested supplier and line dates (issue #516) ────
+#
+# Each line also carries ``suggested_vendor_id`` with ``suggested_vendor``
+# ({"id", "name", "status"} or None when the directory cannot resolve it),
+# ``source_suggested_vendor_ids`` (the distinct suggestions of its BOQ
+# sources), and its own ``required_date``, ``schedule_activity_id``,
+# ``schedule_anchor_date`` and ``schedule_activity_start`` (the activity's
+# start as the schedule holds it now).
+
+
+def _line_vendor_label(item: dict[str, Any]) -> str:
+    vendor = item.get("suggested_vendor")
+    if isinstance(vendor, dict) and str(vendor.get("name") or "").strip():
+        return str(vendor["name"]).strip()
+    return str(item.get("suggested_vendor_id") or "-")
+
+
+def check_requisition_suggested_vendor_in_directory(req: dict[str, Any]) -> list[Finding]:
+    """A line's suggested supplier must be an entry of the Vendor directory."""
+    return [
+        Finding(
+            element_ref=line_label(index, item),
+            params={"line": line_label(index, item), "vendor": str(item.get("suggested_vendor_id"))},
+            details={"suggested_vendor_id": str(item.get("suggested_vendor_id"))},
+        )
+        for index, item in enumerate(_items(req))
+        if item.get("suggested_vendor_id") and not isinstance(item.get("suggested_vendor"), dict)
+    ]
+
+
+def check_requisition_suggested_vendor_active(req: dict[str, Any]) -> list[Finding]:
+    """A line should not suggest a supplier that is suspended or blacklisted."""
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        vendor = item.get("suggested_vendor")
+        if not isinstance(vendor, dict):
+            continue
+        state = str(vendor.get("status") or "").strip().lower()
+        if state == "active":
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={"line": line_label(index, item), "vendor": _line_vendor_label(item)},
+                details={"suggested_vendor_id": str(vendor.get("id") or ""), "vendor_status": state},
+            )
+        )
+    return findings
+
+
+def check_requisition_suggestion_conflict(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line whose BOQ sources suggest different suppliers.
+
+    The line then carries no suggestion of its own until the requester picks
+    one; the warning makes the disagreement visible instead of choosing.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        offered = sorted({str(v) for v in item.get("source_suggested_vendor_ids") or [] if v})
+        if len(offered) > 1:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "count": str(len(offered))},
+                    details={"suggested_vendor_ids": offered},
+                )
+            )
+    return findings
+
+
+def check_requisition_suggested_vendor_differs(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line that suggests a supplier other than the one chosen for the requisition."""
+    chosen = str(req.get("vendor_id") or "")
+    if not chosen:
+        return []
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        line_vendor = str(item.get("suggested_vendor_id") or "")
+        if line_vendor and line_vendor != chosen:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "vendor": _line_vendor_label(item)},
+                    details={"suggested_vendor_id": line_vendor, "vendor_id": chosen},
+                )
+            )
+    return findings
+
+
+def check_requisition_line_needed_by_not_past(req: dict[str, Any]) -> list[Finding]:
+    """A line's own needed-by date must not already have passed."""
+    try:
+        today = date.fromisoformat(str(req.get("today") or date.today().isoformat())[:10])
+    except ValueError:
+        today = date.today()
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        raw = item.get("required_date")
+        if not raw:
+            continue
+        try:
+            needed = date.fromisoformat(str(raw)[:10])
+        except ValueError:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "date": str(raw), "today": today.isoformat()},
+                )
+            )
+            continue
+        if needed < today:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "date": needed.isoformat(), "today": today.isoformat()},
+                    details={"required_date": needed.isoformat(), "today": today.isoformat()},
+                )
+            )
+    return findings
+
+
+def check_requisition_line_schedule_moved(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line whose schedule activity has moved since its date was proposed.
+
+    The line's date is left as agreed; the warning tells the requester to look
+    at it again rather than having the schedule rewrite it.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        anchor = str(item.get("schedule_anchor_date") or "")[:10]
+        current = str(item.get("schedule_activity_start") or "")[:10]
+        if not item.get("schedule_activity_id") or not anchor or not current or anchor == current:
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={"line": line_label(index, item), "anchor": anchor, "start": current},
+                details={"schedule_activity_id": item.get("schedule_activity_id"), "anchor": anchor, "start": current},
+            )
+        )
+    return findings
+
+
 # ── Goods receipts: material certificates (confirmation gate, BF-01) ─────────
 #
 # Payload shape, built by ``ProcurementService.receipt_validation_payload``:

@@ -657,6 +657,30 @@
       "fail": "Regel {line} is niet gekoppeld aan een kostenregel, dus de bestelling verschijnt niet als vastgelegd tegen het budget",
       "suggestion": "Maak de regel aan vanuit de BOQ, of koppel hem vóór het bestellen aan een kostenregel"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Regel {line} stelt leverancier {vendor} voor, die niet in het leveranciersregister staat",
+      "suggestion": "Kies de voorgestelde leverancier uit het leveranciersregister of wis het voorstel"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Regel {line} stelt {vendor} voor, een leverancier die niet actief is in het leveranciersregister",
+      "suggestion": "Stel een actieve leverancier voor of laat de keuze aan de inkoper"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "De BOQ-bronnen van regel {line} stellen {count} verschillende leveranciers voor",
+      "suggestion": "Kies één leverancier voor de regel of splits de regel zodat elke leverancier een eigen regel krijgt"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Regel {line} stelt {vendor} voor, maar de materiaalaanvraag wordt bij een andere leverancier besteld",
+      "suggestion": "Controleer of de gekozen leverancier deze regel kan leveren of bestel hem apart"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Regel {line} is nodig op {date}, een datum die al verstreken is (vandaag is {today})",
+      "suggestion": "Vul de datum in waarop het materiaal echt op de bouwplaats nodig is"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Regel {line} was gepland voor een activiteit die begon op {anchor}, maar de activiteit begint nu op {start}",
+      "suggestion": "Vergelijk de benodigd-op-datum van de regel met de huidige planning en pas hem zo nodig aan"
+    },
     "receipt_certificate_present": {
       "fail": "Regel {line} is besteld met {required}, maar de levering bevat {delivered}",
       "suggestion": "Voeg het certificaat toe dat de bestelling vraagt, of keur de regel af totdat de leverancier het stuurt"

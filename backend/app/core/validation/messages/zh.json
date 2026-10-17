@@ -657,6 +657,30 @@
       "fail": "第 {line} 行未关联成本行,因此其订单不会显示为对预算的已占用金额",
       "suggestion": "请从 BOQ 生成该行,或在下单前将其关联到成本行"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "第 {line} 行建议的供应商 {vendor} 不在供应商名录中",
+      "suggestion": "请从供应商名录中选择建议的供应商,或清除该建议"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "第 {line} 行建议的供应商 {vendor} 在供应商名录中未启用",
+      "suggestion": "请建议一个已启用的供应商,或把选择交给采购人员"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "第 {line} 行的 BOQ 来源建议了 {count} 个不同的供应商",
+      "suggestion": "请为该行选定一个供应商,或拆分该行,使每个供应商各有一行"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "第 {line} 行建议 {vendor},但该请购单要向另一家供应商下单",
+      "suggestion": "请确认所选供应商能供应该行,或将其单独下单"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "第 {line} 行要求在 {date} 前到货,该日期已经过去(今天是 {today})",
+      "suggestion": "请填写材料在现场实际需要的日期"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "第 {line} 行是按开始于 {anchor} 的工序计划的,但该工序现在开始于 {start}",
+      "suggestion": "请对照当前进度计划检查该行的需求日期,必要时修改"
+    },
     "receipt_certificate_present": {
       "fail": "第{line}行订购的是{required}，但送货内容为{delivered}",
       "suggestion": "请附上订单要求的证书；若供应商尚未提供，请先拒收该行"
