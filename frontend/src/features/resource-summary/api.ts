@@ -69,6 +69,9 @@ export interface MaterialBuyListSource {
   unit: string;
   code: string;
   catalog_item_id: string | null;
+  /** The supplier the BOQ suggests for this resource, or its position default. */
+  suggested_vendor_id?: string | null;
+  suggested_vendor_origin?: 'resource' | 'position' | null;
 }
 
 /** One material purchase line in the procurement buy-list. */

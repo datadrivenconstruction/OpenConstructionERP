@@ -23216,6 +23216,8 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "supplier_suggestion.py",
+        "supplier_suggestion_router.py",
         "templates.py",
         "units.py",
         "validators.py",
@@ -28757,6 +28759,7 @@
         "projects",
         "schedule",
         "subcontractors",
+        "supplier_catalogs",
         "takeoff",
         "teams",
         "users",
@@ -167893,6 +167896,36 @@
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
+            },
+            {
+              "name": "suggested_vendor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "required_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "schedule_activity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "schedule_buffer_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "schedule_anchor_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -167949,6 +167982,12 @@
             },
             {
               "name": "cost_line_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "suggested_vendor_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
@@ -169800,6 +169839,11 @@
               "name": "cost_line_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "suggested_vendor_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -169843,6 +169887,30 @@
             {
               "name": "boq_position_id",
               "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "suggested_vendor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "required_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_buffer_days",
+              "type": "int | None"
+            },
+            {
+              "name": "schedule_anchor_date",
+              "type": "date | None",
               "default": "None"
             },
             {
@@ -170057,6 +170125,16 @@
               "name": "unit",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "po_delivery_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_confirmed_delivery_date",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -170094,6 +170172,39 @@
             {
               "name": "cost_line_id",
               "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "suggested_vendor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "suggested_vendor_name",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionVendorRef",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A Vendor directory entry as a requisition shows it.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str | None",
               "default": "None"
             }
           ]
@@ -170172,6 +170283,80 @@
               "default": "0"
             },
             {
+              "name": "suggested_vendor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "suggested_vendor_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "suggested_vendor_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "source_suggested_vendors",
+              "type": "list[RequisitionVendorRef]"
+            },
+            {
+              "name": "suggestion_conflict",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "required_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "effective_required_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "required_date_source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "latest_order_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_activity_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_buffer_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_anchor_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_activity_start",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_moved",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "sources",
               "type": "list[RequisitionItemSourceResponse]"
             },
@@ -170219,6 +170404,11 @@
               "name": "lead_time_days",
               "type": "int",
               "default": "0"
+            },
+            {
+              "name": "latest_order_date",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "estimated_delivery_date",
@@ -170269,6 +170459,10 @@
               "name": "vendor_status",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "suggested_vendors",
+              "type": "list[RequisitionVendorRef]"
             },
             {
               "name": "po_id",
@@ -170390,6 +170584,16 @@
             },
             {
               "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "po_delivery_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_confirmed_delivery_date",
               "type": "str | None",
               "default": "None"
             }
@@ -170618,6 +170822,42 @@
               "type": "list[POTraceLine]"
             }
           ]
+        },
+        {
+          "class_name": "ScheduleActivityOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A schedule activity a requisition line can take its needed-by date from.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "schedule_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "start_date",
+              "type": "str"
+            },
+            {
+              "name": "end_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "activity_type",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -170631,6 +170871,7 @@
         "inspections",
         "projects",
         "rfq_bidding",
+        "schedule",
         "subcontractors",
         "supplier_catalogs",
         "tendering",
@@ -205816,6 +206057,16 @@
             },
             {
               "name": "catalog_item_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "suggested_vendor_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "suggested_vendor_origin",
               "type": "str | None",
               "default": "None"
             }
@@ -271219,10 +271470,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 36,
+      "ts_files": 39,
       "css_files": 0,
-      "test_files": 14,
-      "total_files": 36
+      "test_files": 15,
+      "total_files": 39
     },
     {
       "name": "procurement_concept",
@@ -271846,6 +272097,7 @@
       "projects",
       "schedule",
       "subcontractors",
+      "supplier_catalogs",
       "takeoff",
       "teams",
       "users",
@@ -272750,6 +273002,7 @@
       "inspections",
       "projects",
       "rfq_bidding",
+      "schedule",
       "subcontractors",
       "supplier_catalogs",
       "tendering",
@@ -273234,13 +273487,13 @@
     "backend_modules": 211,
     "modules_with_manifests": 209,
     "total_models": 773,
-    "total_columns": 8994,
+    "total_columns": 9000,
     "total_relationships": 240,
     "total_routes": 4560,
-    "total_schemas": 4040,
-    "total_python_files": 2715,
+    "total_schemas": 4042,
+    "total_python_files": 2717,
     "frontend_features": 209,
-    "frontend_ts_files": 3490,
+    "frontend_ts_files": 3493,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

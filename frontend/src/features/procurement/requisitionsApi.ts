@@ -39,6 +39,11 @@ export interface RequisitionSourceIn {
   resource_key: string | null;
   quantity: string;
   unit: string | null;
+  /**
+   * The supplier the BOQ suggested for this source. Left out, the server reads
+   * it from the bill; sent (null included), it is kept as sent.
+   */
+  suggested_vendor_id?: string | null;
 }
 
 export interface RequisitionLineIn {
@@ -49,12 +54,31 @@ export interface RequisitionLineIn {
   unit_cost?: string;
   currency_code?: string;
   catalog_item_id?: string | null;
+  /**
+   * The supplier suggested for the line. Left out, the server takes the one
+   * the sources agree on; sent (null included), it is the requester's choice.
+   */
+  suggested_vendor_id?: string | null;
+  /** When the line is needed; null falls back to the requisition's date. */
+  required_date?: string | null;
+  schedule_activity_id?: string | null;
+  schedule_buffer_days?: number | null;
+  /** The activity start the date was proposed from, echoed back unchanged. */
+  schedule_anchor_date?: string | null;
   sources: RequisitionSourceIn[];
 }
 
 export interface RequisitionSource extends RequisitionSourceIn {
   id: string;
   cost_line_id: string | null;
+  suggested_vendor_name?: string | null;
+}
+
+/** A Vendor directory entry as a requisition shows it. */
+export interface RequisitionVendorRef {
+  id: string;
+  name: string | null;
+  status: string | null;
 }
 
 export interface RequisitionLine {
@@ -71,6 +95,24 @@ export interface RequisitionLine {
   catalog_item_id: string | null;
   cost_line_id: string | null;
   sort_order: number;
+  suggested_vendor_id?: string | null;
+  suggested_vendor_name?: string | null;
+  suggested_vendor_status?: string | null;
+  /** Every distinct supplier the BOQ sources suggested; more than one is a conflict. */
+  source_suggested_vendors?: RequisitionVendorRef[];
+  suggestion_conflict?: boolean;
+  required_date?: string | null;
+  /** The line's own date, or the requisition's when the line has none. */
+  effective_required_date?: string | null;
+  required_date_source?: 'line' | 'schedule' | 'requisition' | null;
+  latest_order_date?: string | null;
+  schedule_activity_id?: string | null;
+  schedule_activity_name?: string | null;
+  schedule_buffer_days?: number | null;
+  schedule_anchor_date?: string | null;
+  schedule_activity_start?: string | null;
+  /** The activity starts on another day than the one the date was proposed from. */
+  schedule_moved?: boolean;
   sources: RequisitionSource[];
   /** Purchase order lines raised from this line by a conversion. */
   po_items?: RequisitionPOItemRef[];
@@ -83,6 +125,19 @@ export interface RequisitionPOItemRef {
   po_number: string | null;
   quantity: string;
   unit: string | null;
+  /** The order's delivery date and the supplier's confirmed one, apart from the need date. */
+  po_delivery_date?: string | null;
+  supplier_confirmed_delivery_date?: string | null;
+}
+
+/** A schedule activity a line can take its needed-by date from. */
+export interface ScheduleActivityOption {
+  id: string;
+  name: string;
+  schedule_name: string | null;
+  start_date: string;
+  end_date: string | null;
+  activity_type: string | null;
 }
 
 export interface RequisitionHistoryEntry {
@@ -100,6 +155,11 @@ export interface Requisition {
   status: RequisitionStatus;
   title: string | null;
   required_date: string | null;
+  lead_time_days?: number;
+  /** The last day to order and still arrive by the needed-by date. */
+  latest_order_date?: string | null;
+  /** The delivery date of the order this requisition became; null before. */
+  estimated_delivery_date?: string | null;
   notes: string | null;
   requester_id: string | null;
   approver_id?: string | null;
@@ -110,6 +170,8 @@ export interface Requisition {
   vendor_id?: string | null;
   vendor_name?: string | null;
   vendor_status?: string | null;
+  /** Distinct suppliers the lines suggest. Never applied to vendor_id by itself. */
+  suggested_vendors?: RequisitionVendorRef[];
   submitted_by?: string | null;
   decided_at?: string | null;
   decision_comment?: string | null;
@@ -271,6 +333,11 @@ export function convertRequisitionsToPurchaseOrder(body: ConvertToPOBody): Promi
   return apiPost<ConvertToPOResult, ConvertToPOBody>(`/v1/procurement/requisitions/convert-to-po`, body);
 }
 
+export function listScheduleActivities(projectId: string): Promise<ScheduleActivityOption[]> {
+  const qs = new URLSearchParams({ project_id: projectId });
+  return apiGet<ScheduleActivityOption[]>(`/v1/procurement/requisitions/schedule-activities?${qs.toString()}`);
+}
+
 export function traceBoqPosition(positionId: string, projectId: string): Promise<PositionTrace> {
   const qs = new URLSearchParams({ project_id: projectId });
   return apiGet<PositionTrace>(
@@ -353,6 +420,8 @@ export interface BuyListSourceLike {
   quantity: string;
   unit: string;
   catalog_item_id?: string | null;
+  /** The supplier the BOQ suggests for this resource or its position. */
+  suggested_vendor_id?: string | null;
 }
 
 /** A buy-list row: the name/unit grouping plus every source folded into it. */
@@ -370,6 +439,9 @@ function toSource(s: BuyListSourceLike): RequisitionSourceIn {
     resource_key: s.resource_key || null,
     quantity: s.quantity,
     unit: s.unit || null,
+    // The bill's suggestion as the buy list read it; the line inherits it on
+    // the server when its sources agree.
+    suggested_vendor_id: s.suggested_vendor_id ?? null,
   };
 }
 
@@ -426,6 +498,12 @@ export function mergeRequisitionLines(lines: RequisitionLineIn[], indices: numbe
     quantity_requested: sumQuantities(picked.map((i) => lines[i]!.quantity_requested)),
     sources: picked.flatMap((i) => lines[i]!.sources),
   };
+  // Lines that suggest different suppliers lose the suggestion on merge rather
+  // than keeping the first one's: nobody chose it for the merged line.
+  if (picked.some((i) => 'suggested_vendor_id' in lines[i]!)) {
+    const offered = new Set(picked.map((i) => lines[i]!.suggested_vendor_id ?? null));
+    merged.suggested_vendor_id = offered.size === 1 ? [...offered][0]! : null;
+  }
   const out: RequisitionLineIn[] = [];
   lines.forEach((l, i) => {
     if (i === picked[0]) out.push(merged);
@@ -443,11 +521,26 @@ export function lineToInput(line: RequisitionLine): RequisitionLineIn {
     unit_cost: line.unit_cost != null ? String(line.unit_cost) : '0',
     currency_code: line.currency_code ?? '',
     catalog_item_id: line.catalog_item_id,
+    suggested_vendor_id: line.suggested_vendor_id ?? null,
+    required_date: line.required_date ?? null,
+    schedule_activity_id: line.schedule_activity_id ?? null,
+    schedule_buffer_days: line.schedule_buffer_days ?? null,
+    schedule_anchor_date: line.schedule_anchor_date ?? null,
     sources: line.sources.map((s) => ({
       boq_position_id: s.boq_position_id,
       resource_key: s.resource_key,
       quantity: s.quantity,
       unit: s.unit,
+      suggested_vendor_id: s.suggested_vendor_id ?? null,
     })),
   };
+}
+
+/** Days between two ISO dates (b minus a), or null when either is missing or invalid. */
+export function daysBetween(a: string | null | undefined, b: string | null | undefined): number | null {
+  if (!a || !b) return null;
+  const left = Date.parse(`${a.slice(0, 10)}T00:00:00Z`);
+  const right = Date.parse(`${b.slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(left) || Number.isNaN(right)) return null;
+  return Math.round((right - left) / 86_400_000);
 }

@@ -9,6 +9,9 @@
 // into, the requisition's status, and the purchase order lines raised from
 // that requisition line. The figures are the ones stored at the source, so a
 // later edit of the position does not rewrite what was asked for.
+//
+// Above the list, the supplier suggested for the position's materials can be
+// set (issue #516); new requisitions raised from the bill carry it.
 
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +20,7 @@ import { ClipboardList } from 'lucide-react';
 import { SideDrawer, Skeleton } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { traceBoqPosition } from './requisitionsApi';
+import { PositionSuggestedSupplier } from './PositionSuggestedSupplier';
 
 interface PositionProcurementDrawerProps {
   open: boolean;
@@ -50,6 +54,7 @@ export function PositionProcurementDrawer({
       subtitle={[positionOrdinal, positionDescription].filter(Boolean).join(' · ')}
     >
       <div className="space-y-3 p-4 text-sm">
+        {open && positionId && <PositionSuggestedSupplier positionId={positionId} />}
         {isLoading ? (
           <Skeleton className="h-24 w-full" />
         ) : error ? (
