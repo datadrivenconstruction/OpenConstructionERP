@@ -206,7 +206,7 @@ def publish_data_repair_verdict(app: FastAPI, report: "DataRepairReport | None")
     app.state.data_repair_ledger_failed = not report.ledger_written
 
 
-async def run_schema_heal(app: FastAPI, engine: Any, base: Any) -> None:
+async def run_schema_heal(app: FastAPI, engine: Any, base: Any) -> list[str]:
     """Run the boot-time schema heal and record its verdict on ``app.state``.
 
     Writes ``schema_heal_failed``, ``schema_heal_error``, ``schema_heal_skipped``
@@ -214,13 +214,18 @@ async def run_schema_heal(app: FastAPI, engine: Any, base: Any) -> None:
     status read. A module-level function rather than lifespan code so the
     mapping from what the heal did to what health publishes can be driven on
     its own.
+
+    Returns:
+        Tables whose foreign key to a not-yet-created table the heal deferred,
+        for :func:`run_deferred_foreign_key_heal` once ``create_all`` has run.
     """
     from app.core.postgres_migrator import HealLockUnavailable, heal_is_incomplete, postgres_auto_migrate
 
     _heal_skipped: list = []
+    _deferred_fks: list[str] = []
     _heal_raised = False
     try:
-        migrated = await postgres_auto_migrate(engine, base, skipped=_heal_skipped)
+        migrated = await postgres_auto_migrate(engine, base, skipped=_heal_skipped, deferred_foreign_keys=_deferred_fks)
         if migrated:
             logger.info("PostgreSQL auto-migration: %d schema objects (columns + indexes) added", migrated)
         app.state.schema_heal_failed = False
@@ -267,6 +272,31 @@ async def run_schema_heal(app: FastAPI, engine: Any, base: Any) -> None:
     # that never runs the heal keeps the None it was built with.
     app.state.schema_heal_skipped = tuple(_heal_skipped)
     app.state.schema_heal_incomplete = heal_is_incomplete(_heal_skipped, raised=_heal_raised)
+    return _deferred_fks
+
+
+async def run_deferred_foreign_key_heal(app: FastAPI, engine: Any, base: Any, tables: list[str]) -> None:
+    """Add the foreign keys the heal deferred, after ``create_all`` built their targets.
+
+    The heal runs before ``create_all``, so a key from an existing table to a
+    table this release introduces cannot be added by it. Its refusals, if any,
+    join the heal's own on ``app.state`` so ``/api/health`` reads one verdict.
+    Nothing is written when nothing was deferred.
+    """
+    if not tables:
+        return
+    from app.core.postgres_migrator import heal_deferred_foreign_keys
+
+    refused: list = []
+    raised = False
+    try:
+        await heal_deferred_foreign_keys(engine, base, tables, skipped=refused)
+    except Exception as exc:
+        raised = True
+        logger.warning("PostgreSQL deferred foreign key heal did not complete: %s", exc, exc_info=True)
+    if refused or raised:
+        app.state.schema_heal_skipped = tuple(getattr(app.state, "schema_heal_skipped", None) or ()) + tuple(refused)
+        app.state.schema_heal_incomplete = True
 
 
 def _expected_alembic_head(ini_path: os.PathLike[str] | str) -> str | None:
@@ -4681,7 +4711,7 @@ def create_app() -> FastAPI:
             # PostgreSQL keeps the ``None`` this application was built with,
             # which is what lets /api/health say "never ran" instead of "healed
             # fine".
-            await run_schema_heal(app, engine, Base)
+            _deferred_foreign_keys = await run_schema_heal(app, engine, Base)
 
             # Now ask whether it worked, which the flag above does not answer.
             # A heal that raised nothing still leaves the models and the
@@ -4777,6 +4807,10 @@ def create_app() -> FastAPI:
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
             logger.info("PostgreSQL tables created/verified")
+
+            # Keys from an existing table to one create_all has just built. The
+            # heal above could not add them because their target did not exist.
+            await run_deferred_foreign_key_heal(app, engine, Base, _deferred_foreign_keys)
 
             # Stamp the alembic version table to head on a fresh managed DB.
             # create_all above materialises the full current schema, so the

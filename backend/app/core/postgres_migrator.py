@@ -239,7 +239,13 @@ def _literal_default(col: Column) -> str:
     return ""
 
 
-async def postgres_auto_migrate(engine: AsyncEngine, base, *, skipped: list[SkippedStatement] | None = None) -> int:
+async def postgres_auto_migrate(
+    engine: AsyncEngine,
+    base,
+    *,
+    skipped: list[SkippedStatement] | None = None,
+    deferred_foreign_keys: list[str] | None = None,
+) -> int:
     """Compare SQLAlchemy models against the PostgreSQL schema and heal it.
 
     Adds missing sequences that a column defaults from (``CREATE SEQUENCE IF NOT
@@ -266,6 +272,12 @@ async def postgres_auto_migrate(engine: AsyncEngine, base, *, skipped: list[Skip
         base: The declarative ``Base`` whose metadata holds every model.
         skipped: Optional list the refused statements are appended to, as
             :class:`SkippedStatement` records, for the caller to publish.
+        deferred_foreign_keys: Optional list the names of tables are appended
+            to whose model foreign key points at a table that does not exist
+            yet. The boot heals existing tables before ``create_all`` builds
+            the new ones, so such a key cannot be added here; the caller hands
+            the list to :func:`heal_deferred_foreign_keys` once ``create_all``
+            has run.
 
     Returns:
         Total number of schema repairs made (sequences + columns + indexes +
@@ -538,7 +550,13 @@ async def postgres_auto_migrate(engine: AsyncEngine, base, *, skipped: list[Skip
                     _skip(refused, kind="index", table=table.name, name=index.name, sql=sql, exc=exc)
 
             constraints_added += await _heal_constraints(
-                conn, table, existing_names, existing_col_tuples, skipped=refused
+                conn,
+                table,
+                existing_names,
+                existing_col_tuples,
+                skipped=refused,
+                existing_tables=existing_tables,
+                deferred=deferred_foreign_keys,
             )
 
     if len(refused) > first_refusal:
@@ -818,6 +836,8 @@ async def _heal_constraints(
     existing_col_tuples: set[tuple[str, ...]],
     *,
     skipped: list[SkippedStatement] | None = None,
+    existing_tables: set[str] | None = None,
+    deferred: list[str] | None = None,
 ) -> int:
     """Add unique, check and foreign-key constraints the live table is missing.
 
@@ -888,6 +908,10 @@ async def _heal_constraints(
             unique constraint, used to recognise a constraint whose name was
             truncated or mangled.
         skipped: Where a refused ``ADD CONSTRAINT`` is recorded, if anywhere.
+        existing_tables: Tables live in the database when the heal started. A
+            foreign key whose target is not among them is not issued, see
+            :func:`_heal_foreign_keys`.
+        deferred: Where the name of a table with such a key is recorded.
 
     Returns:
         Number of constraints added.
@@ -906,15 +930,6 @@ async def _heal_constraints(
         return 0
 
     live_check_names = {c["name"] for c in live_checks if c.get("name")}
-    live_fk_names = {fk["name"] for fk in live_fks if fk.get("name")}
-    live_fk_shapes = {
-        (
-            tuple(fk.get("constrained_columns") or ()),
-            fk.get("referred_table"),
-            tuple(fk.get("referred_columns") or ()),
-        )
-        for fk in live_fks
-    }
 
     for constraint in table.constraints:
         if not isinstance(constraint, UniqueConstraint) or not constraint.name:
@@ -1017,6 +1032,48 @@ async def _heal_constraints(
         ):
             added += 1
 
+    added += await _heal_foreign_keys(
+        conn,
+        table,
+        live_fks,
+        skipped=skipped,
+        existing_tables=existing_tables,
+        deferred=deferred,
+    )
+
+    return added
+
+
+async def _heal_foreign_keys(
+    conn,
+    table,
+    live_fks: list[dict],
+    *,
+    skipped: list[SkippedStatement] | None = None,
+    existing_tables: set[str] | None = None,
+    deferred: list[str] | None = None,
+) -> int:
+    """Add the model foreign keys ``table`` is missing, as ``NOT VALID``.
+
+    When ``existing_tables`` is given, a key whose referred table is not in it is
+    not issued: the table's name goes into ``deferred`` and the key waits for
+    :func:`heal_deferred_foreign_keys`. Without ``existing_tables`` every missing
+    key is issued, and a refusal is recorded in ``skipped`` as before.
+
+    Returns:
+        Number of foreign keys added.
+    """
+    added = 0
+    live_fk_names = {fk["name"] for fk in live_fks if fk.get("name")}
+    live_fk_shapes = {
+        (
+            tuple(fk.get("constrained_columns") or ()),
+            fk.get("referred_table"),
+            tuple(fk.get("referred_columns") or ()),
+        )
+        for fk in live_fks
+    }
+
     for fk in table.foreign_key_constraints:
         if not fk.name:
             continue
@@ -1028,6 +1085,20 @@ async def _heal_constraints(
         referred_cols = [element.column.name for element in elements]
         shape = (tuple(cols), referred_table, tuple(referred_cols))
         if fk.name[:_PG_IDENTIFIER_LIMIT] in live_fk_names or shape in live_fk_shapes:
+            continue
+        if existing_tables is not None and referred_table != table.name and referred_table not in existing_tables:
+            # The target is a table this release introduces, and ``create_all``
+            # builds it only after the heal. Issuing the key now is refused on
+            # every upgrade boot, which reports the heal incomplete and leaves
+            # the key missing. Deferred instead, to the pass after create_all.
+            if deferred is not None and table.name not in deferred:
+                deferred.append(table.name)
+            logger.info(
+                "PostgreSQL migration: foreign key %s on %s deferred until %s exists",
+                fk.name,
+                table.name,
+                referred_table,
+            )
             continue
 
         cols_sql = ", ".join(f'"{c}"' for c in cols)
@@ -1057,6 +1128,62 @@ async def _heal_constraints(
         ):
             added += 1
 
+    return added
+
+
+async def heal_deferred_foreign_keys(
+    engine: AsyncEngine,
+    base,
+    table_names: Iterable[str],
+    *,
+    skipped: list[SkippedStatement] | None = None,
+) -> int:
+    """Add the foreign keys :func:`postgres_auto_migrate` deferred, now that their targets exist.
+
+    Called after ``create_all``. Only the named tables are inspected, so a boot
+    with nothing deferred does no work here at all. A key whose target is still
+    missing is issued anyway and its refusal recorded in ``skipped``, which is
+    what the first pass did before it learned to defer: nothing is dropped in
+    silence.
+
+    Args:
+        engine: The async SQLAlchemy engine (must be PostgreSQL).
+        base: The declarative ``Base`` whose metadata holds every model.
+        table_names: Tables named in ``deferred_foreign_keys`` by the heal.
+        skipped: Optional list refused statements are appended to.
+
+    Returns:
+        Number of foreign keys added.
+    """
+    wanted = set(table_names)
+    if not wanted:
+        return 0
+    refused: list[SkippedStatement] = skipped if skipped is not None else []
+    first_refusal = len(refused)
+    added = 0
+
+    async with engine.begin() as conn:
+        if not await _take_heal_lock(conn):
+            raise HealLockUnavailable(
+                f"another worker held the schema heal lock for more than {_HEAL_LOCK_WAIT_SECONDS:.0f}s, "
+                "so this worker could not add the deferred foreign keys"
+            )
+        await conn.execute(text("SET LOCAL lock_timeout = '3s'"))
+        existing_tables = await conn.run_sync(lambda sync_conn: set(inspect(sync_conn).get_table_names()))
+        for table in base.metadata.sorted_tables:
+            if table.name not in wanted or table.name not in existing_tables:
+                continue
+            try:
+                live_fks = await conn.run_sync(lambda sync_conn, tn=table.name: inspect(sync_conn).get_foreign_keys(tn))
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("PostgreSQL migration: could not inspect foreign keys on %s: %s", table.name, exc)
+                continue
+            added += await _heal_foreign_keys(conn, table, live_fks, skipped=refused)
+
+    if len(refused) > first_refusal:
+        _log_skipped(refused[first_refusal:])
+    if added:
+        logger.info("PostgreSQL auto-migration: %d deferred foreign key(s) added", added)
     return added
 
 
