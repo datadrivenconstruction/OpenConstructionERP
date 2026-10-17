@@ -553,3 +553,59 @@ async def test_a_share_on_a_heading_or_closed_account_is_refused(pg_session) -> 
             )
         assert err.value.status_code == 400
         assert err.value.detail["problem"] == "account_not_postable"
+
+
+async def test_editing_or_deleting_a_position_refreshes_the_cost_lines_it_feeds(pg_session) -> None:
+    from sqlalchemy import delete, update
+
+    from app.modules.boq.models import Position
+    from app.modules.costmodel.models import ControlAccount
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_schemas import AllocationRowIn, PositionAllocationRequest
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(pg_session, project_id, SPECS[:3])
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+    service = CostStructureService(pg_session)
+    acct_340 = (
+        await pg_session.execute(
+            ControlAccount.__table__.select().where(
+                ControlAccount.project_id == project_id, ControlAccount.code == "340"
+            )
+        )
+    ).one()
+    own_account = (await _line_of(pg_session, ids[0])).control_account_id
+    await service.set_allocation(
+        ids[0],
+        PositionAllocationRequest(
+            mode="percent",
+            rows=[
+                AllocationRowIn(control_account_id=own_account, share=D("75")),
+                AllocationRowIn(control_account_id=acct_340.id, share=D("25")),
+            ],
+        ),
+        "tester",
+    )
+
+    # The bill is re-priced: position 01 goes from 1000.00 to 2000.00, position 02 from 200.00 to 300.00.
+    await pg_session.execute(update(Position).where(Position.id == ids[0]).values(unit_rate="200", total="2000.00"))
+    await pg_session.execute(update(Position).where(Position.id == ids[1]).values(quantity="7.5", total="300.00"))
+    await pg_session.flush()
+    assert await service.recompute_after_bill_change({ids[0], ids[1]}, set()) >= 3
+    pg_session.expire_all()
+    assert D((await _line_of(pg_session, ids[0])).estimate_amount) == D("1500.00")
+    assert D((await _line_of(pg_session, ids[1])).estimate_amount) == D("300.00")
+    assert await _line_total(pg_session, project_id) == D("2000.00") + D("300.00") + D("300.00")
+    assert await service.recompute_after_bill_change({ids[0], ids[1]}, set()) == 0, "nothing left to refresh"
+
+    # Position 02 is deleted: its line keeps nothing.
+    line_02 = (await _line_of(pg_session, ids[1])).id
+    await pg_session.execute(delete(Position).where(Position.id == ids[1]))
+    await pg_session.flush()
+    await service.recompute_after_bill_change(set(), {boq_id})
+    pg_session.expire_all()
+    from app.modules.costmodel.models import CostLine
+
+    assert D((await pg_session.get(CostLine, line_02)).estimate_amount) == D("0")
+    assert await _line_total(pg_session, project_id) == D("2000.00") + D("300.00")

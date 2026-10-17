@@ -919,6 +919,48 @@ class CostStructureService:
             await self.session.flush()
         return changed
 
+    async def recompute_after_bill_change(
+        self, position_ids: set[uuid.UUID] | list[uuid.UUID], boq_ids: set[uuid.UUID] | list[uuid.UUID]
+    ) -> int:
+        """Refresh the cost lines that edited or deleted bill positions feed. Returns how many changed.
+
+        An edited position feeds its own generated line, the line it points at and
+        the lines of its shares. A deleted position can no longer be asked (its
+        shares went with it), so a delete refreshes every line of its bill.
+        """
+        from app.modules.boq.models import Position
+
+        line_ids: set[uuid.UUID] = set()
+        pids = [p for p in {*position_ids} if p is not None]
+        if pids:
+            line_ids.update(
+                (await self.session.execute(select(CostLine.id).where(CostLine.boq_position_id.in_(pids)))).scalars()
+            )
+            line_ids.update(
+                x
+                for x in (
+                    await self.session.execute(select(Position.cost_line_id).where(Position.id.in_(pids)))
+                ).scalars()
+                if x is not None
+            )
+            line_ids.update(
+                (
+                    await self.session.execute(
+                        select(PositionAllocation.cost_line_id).where(PositionAllocation.position_id.in_(pids))
+                    )
+                ).scalars()
+            )
+        bills = [b for b in {*boq_ids} if b is not None]
+        if bills:
+            line_ids.update(
+                (
+                    await self.session.execute(
+                        select(CostLine.id).where(CostLine.boq_id.in_(bills), CostLine.status != "archived")
+                    )
+                ).scalars()
+            )
+        return await self.recompute_lines(line_ids)
+
     async def _positions_out(
         self, boq_id: uuid.UUID, *, only: list[uuid.UUID] | None = None
     ) -> list[PositionAllocationOut]:
