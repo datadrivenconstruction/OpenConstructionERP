@@ -657,6 +657,30 @@
       "fail": "Linje {line} er ikke koblet til en kostnadslinje, så bestillingen vises ikke som bundet mot budsjettet",
       "suggestion": "Opprett linjen fra BOQ, eller koble den til en kostnadslinje før bestilling"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Linje {line} foreslår leverandøren {vendor}, som ikke finnes i leverandørregisteret",
+      "suggestion": "Velg den foreslåtte leverandøren fra leverandørregisteret, eller fjern forslaget"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Linje {line} foreslår {vendor}, en leverandør som ikke er aktiv i leverandørregisteret",
+      "suggestion": "Foreslå en aktiv leverandør, eller overlat valget til innkjøperen"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "BOQ-kildene til linje {line} foreslår {count} ulike leverandører",
+      "suggestion": "Velg én leverandør for linjen, eller del den slik at hver leverandør får sin egen linje"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Linje {line} foreslår {vendor}, men rekvisisjonen skal bestilles hos en annen leverandør",
+      "suggestion": "Kontroller at den valgte leverandøren kan levere denne linjen, eller bestill den separat"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Linje {line} trengs innen {date}, som allerede er passert (i dag er {today})",
+      "suggestion": "Angi datoen materialet faktisk trengs på byggeplassen"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Linje {line} var planlagt for en aktivitet som startet {anchor}, men aktiviteten starter nå {start}",
+      "suggestion": "Sjekk linjens behovsdato mot gjeldende fremdriftsplan, og endre den om nødvendig"
+    },
     "receipt_certificate_present": {
       "fail": "Linje {line} ble bestilt med {required}, men leveransen inneholder {delivered}",
       "suggestion": "Legg ved sertifikatet bestillingen krever, eller avvis linjen til leverandøren sender det"

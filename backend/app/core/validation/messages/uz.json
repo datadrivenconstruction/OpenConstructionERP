@@ -657,6 +657,30 @@
       "fail": "{line}-qator xarajat qatori bilan bogʻlanmagan, shuning uchun uning buyurtmasi byudjetga nisbatan majburiyat sifatida koʻrinmaydi",
       "suggestion": "Qatorni BOQ dan yarating yoki buyurtma berishdan oldin xarajat qatoriga bogʻlang"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "{line}-qator {vendor} yetkazib beruvchisini taklif qiladi, u yetkazib beruvchilar reyestrida yoʻq",
+      "suggestion": "Taklif qilingan yetkazib beruvchini yetkazib beruvchilar reyestridan tanlang yoki taklifni oʻchiring"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "{line}-qator {vendor} yetkazib beruvchisini taklif qiladi, u yetkazib beruvchilar reyestrida faol emas",
+      "suggestion": "Faol yetkazib beruvchini taklif qiling yoki tanlovni xaridorga qoldiring"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "{line}-qatorning BOQ manbalari {count} xil yetkazib beruvchini taklif qiladi",
+      "suggestion": "Qator uchun bitta yetkazib beruvchini tanlang yoki qatorni boʻling, shunda har bir yetkazib beruvchining oʻz qatori boʻladi"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "{line}-qator {vendor} yetkazib beruvchisini taklif qiladi, lekin talabnoma boshqa yetkazib beruvchidan buyurtma qilinishi kerak",
+      "suggestion": "Tanlangan yetkazib beruvchi bu qatorni yetkaza olishini tekshiring yoki uni alohida buyurtma qiling"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "{line}-qator {date} sanasigacha kerak, lekin bu sana allaqachon oʻtib ketgan (bugun {today})",
+      "suggestion": "Material obyektda haqiqatan kerak boʻladigan sanani kiriting"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "{line}-qator {anchor} sanasida boshlanadigan ishga moʻljallangan edi, lekin ish endi {start} sanasida boshlanadi",
+      "suggestion": "Qatorning kerak boʻlish sanasini joriy jadval bilan solishtiring va kerak boʻlsa oʻzgartiring"
+    },
     "receipt_certificate_present": {
       "fail": "{line} pozitsiyasi {required} bilan buyurtma qilingan, ammo yetkazib berishda {delivered} bor",
       "suggestion": "Buyurtmada talab qilingan sertifikatni biriktiring yoki yetkazib beruvchi yubormaguncha pozitsiyani rad eting"

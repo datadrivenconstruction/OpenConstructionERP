@@ -357,7 +357,7 @@ def expected_delivery_date(order_date: str | None, lead_time_days: object) -> st
     """Return the expected delivery date = order date plus lead-time days.
 
     This is the forward-looking companion to the service helper
-    ``_compute_delivery_date`` (which subtracts a lead time from a required
+    ``_latest_order_date`` (which subtracts a lead time from a required
     date to find the latest order date). Here you know when you ordered and how
     many days the supplier needs, and you want the arrival date.
 

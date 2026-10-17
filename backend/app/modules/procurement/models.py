@@ -448,7 +448,11 @@ class MaterialRequisition(Base):
     title: Mapped[str | None] = mapped_column(String(500), nullable=True)
     required_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
     lead_time_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    # Computed from required_date - lead_time_days; stored for query efficiency
+    # When the supplier is expected to deliver: the delivery date of the order
+    # the requisition was converted into, written at conversion and cleared
+    # when that order is released. None before an order exists. It is never
+    # required_date - lead_time_days, which is the latest ordering date and is
+    # derived on read (issue #516).
     estimated_delivery_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
     # FK to PO once approved → ordered
     po_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -507,6 +511,22 @@ class MaterialRequisitionItem(Base):
     # the only identity two lines are merged on without a person confirming it:
     # a shared description and unit are not proof of the same material.
     catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # The supplier the requester suggests for this line, from the Vendor
+    # directory. Inherited from the BOQ sources when they agree, overridable
+    # and clearable. A suggestion only: the order's supplier is chosen at
+    # approval or conversion and is never taken from here silently.
+    suggested_vendor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # When this line is needed on site. Null means the requisition's own
+    # ``required_date`` applies. Kept apart from the supplier's expected or
+    # confirmed delivery date, which belongs to the order.
+    required_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # The schedule activity the date was proposed from, the buffer in days
+    # before its start, and the activity start the proposal was read from.
+    # A later schedule change does not rewrite ``required_date``: the anchor
+    # lets the line show that the activity has moved since.
+    schedule_activity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    schedule_buffer_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    schedule_anchor_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
 
     # Relationship
     requisition: Mapped["MaterialRequisition"] = relationship(back_populates="items")
@@ -547,6 +567,10 @@ class MaterialRequisitionItemSource(Base):
     quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # The supplier the BOQ suggested for this source when the line was written:
+    # the resource's own suggestion, else the position default. Kept per source
+    # so sources that disagree stay visible on the line.
+    suggested_vendor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     item: Mapped["MaterialRequisitionItem"] = relationship(back_populates="sources", lazy="raise_on_sql")

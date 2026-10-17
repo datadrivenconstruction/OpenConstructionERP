@@ -10996,6 +10996,80 @@ class ProcurementRequisitionLineCostLine(_ProcurementRule):
     check_name = "check_requisition_line_cost_line"
 
 
+# Issue #516, second slice: the suggested supplier of each line and the line's
+# own needed-by date. The suggestion rules never pick a supplier; they make an
+# unknown, inactive or disagreeing suggestion visible.
+
+
+class ProcurementRequisitionSuggestedVendorInDirectory(_ProcurementRule):
+    """A line's suggested supplier must be an entry of the Vendor directory."""
+
+    rule_id = "procurement.requisition_suggested_vendor_in_directory"
+    name = "Requisition Suggested Supplier In Vendor Directory"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition line whose suggested supplier cannot be found in the Vendor directory."
+    check_name = "check_requisition_suggested_vendor_in_directory"
+
+
+class ProcurementRequisitionSuggestedVendorActive(_ProcurementRule):
+    """A line should not suggest a suspended or blacklisted supplier."""
+
+    rule_id = "procurement.requisition_suggested_vendor_active"
+    name = "Requisition Suggested Supplier Active"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Flags a requisition line that suggests a supplier who is suspended or blacklisted."
+    check_name = "check_requisition_suggested_vendor_active"
+
+
+class ProcurementRequisitionSuggestionConflict(_ProcurementRule):
+    """The BOQ sources of one line suggest different suppliers."""
+
+    rule_id = "procurement.requisition_suggestion_conflict"
+    name = "Requisition Line Sources Suggest Different Suppliers"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition line whose BOQ sources suggest different suppliers."
+    check_name = "check_requisition_suggestion_conflict"
+
+
+class ProcurementRequisitionSuggestedVendorDiffers(_ProcurementRule):
+    """A line suggests a supplier other than the one chosen for the requisition."""
+
+    rule_id = "procurement.requisition_suggested_vendor_differs"
+    name = "Requisition Suggested Supplier Differs From Chosen"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition line whose suggested supplier is not the supplier chosen for the requisition."
+    check_name = "check_requisition_suggested_vendor_differs"
+
+
+class ProcurementRequisitionLineNeededByNotPast(_ProcurementRule):
+    """A line's own needed-by date must not already have passed."""
+
+    rule_id = "procurement.requisition_line_needed_by_not_past"
+    name = "Requisition Line Needed-By Date Not Past"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition line whose own needed-by date is earlier than today."
+    check_name = "check_requisition_line_needed_by_not_past"
+
+
+class ProcurementRequisitionLineScheduleMoved(_ProcurementRule):
+    """A line's schedule activity moved after its date was proposed."""
+
+    rule_id = "procurement.requisition_line_schedule_moved"
+    name = "Requisition Line Schedule Activity Moved"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags a requisition line whose linked schedule activity now starts on a different day than the "
+        "one its needed-by date was proposed from."
+    )
+    check_name = "check_requisition_line_schedule_moved"
+
+
 # ── Goods receipts: material certificates (confirmation gate) ───────────────
 #
 # Run by ``ProcurementService.confirm_goods_receipt`` (and the read-only receipt
@@ -11729,6 +11803,12 @@ def register_builtin_rules() -> None:
         (ProcurementRequisitionVendorChosen(), ["procurement_requisition"]),
         (ProcurementRequisitionSingleCurrency(), ["procurement_requisition"]),
         (ProcurementRequisitionLineCostLine(), ["procurement_requisition"]),
+        (ProcurementRequisitionSuggestedVendorInDirectory(), ["procurement_requisition"]),
+        (ProcurementRequisitionSuggestedVendorActive(), ["procurement_requisition"]),
+        (ProcurementRequisitionSuggestionConflict(), ["procurement_requisition"]),
+        (ProcurementRequisitionSuggestedVendorDiffers(), ["procurement_requisition"]),
+        (ProcurementRequisitionLineNeededByNotPast(), ["procurement_requisition"]),
+        (ProcurementRequisitionLineScheduleMoved(), ["procurement_requisition"]),
         # Goods receipts (confirmation gate) and supplier invoice payment release.
         (ProcurementReceiptCertificatePresent(), ["goods_receipt"]),
         (ProcurementReceiptCertificateBatch(), ["goods_receipt"]),

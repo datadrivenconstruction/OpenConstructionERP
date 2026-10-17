@@ -657,6 +657,30 @@
       "fail": "Line {line} is not linked to a cost line, so its order will not show as committed against the budget",
       "suggestion": "Raise the line from the BOQ, or link it to a cost line before ordering"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Line {line} suggests supplier {vendor}, which is not in the Vendor directory",
+      "suggestion": "Pick the suggested supplier from the Vendor directory, or clear the suggestion"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Line {line} suggests {vendor}, a supplier that is not active in the Vendor directory",
+      "suggestion": "Suggest an active supplier, or leave the choice to the buyer"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "The BOQ sources of line {line} suggest {count} different suppliers",
+      "suggestion": "Pick one supplier for the line, or split it so each supplier gets its own line"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Line {line} suggests {vendor}, but the requisition is to be ordered from another supplier",
+      "suggestion": "Check that the chosen supplier can deliver this line, or order it separately"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Line {line} is needed by {date}, which is already past (today is {today})",
+      "suggestion": "Set the date the material is actually needed on site"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Line {line} was planned for an activity starting {anchor}, but the activity now starts {start}",
+      "suggestion": "Check the needed-by date of the line against the current schedule and change it if needed"
+    },
     "receipt_certificate_present": {
       "fail": "Line {line} was ordered with a {required}, but the delivery carries {delivered}",
       "suggestion": "Attach the certificate the order asks for, or reject the line until the supplier sends it"

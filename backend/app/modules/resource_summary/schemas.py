@@ -157,6 +157,10 @@ class MaterialBuyListSource(BaseModel):
     unit: str
     code: str = ""
     catalog_item_id: str | None = None
+    # The supplier suggested on the BOQ for this resource (``resource``) or its
+    # position (``position``). Sources of one row may disagree (issue #516).
+    suggested_vendor_id: str | None = None
+    suggested_vendor_origin: str | None = None
 
     @field_serializer("quantity", when_used="json")
     def _ser_quantity(self, v: Decimal) -> str:
@@ -205,6 +209,8 @@ class MaterialBuyListItem(BaseModel):
                     unit=source.unit,
                     code=source.code,
                     catalog_item_id=source.catalog_item_id,
+                    suggested_vendor_id=source.suggested_vendor_id,
+                    suggested_vendor_origin=source.suggested_vendor_origin,
                 )
                 for source in item.sources
             ],

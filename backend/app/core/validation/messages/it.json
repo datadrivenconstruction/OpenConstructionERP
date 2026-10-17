@@ -657,6 +657,30 @@
       "fail": "La riga {line} non è collegata a una voce di costo, quindi il suo ordine non risulterà impegnato sul budget",
       "suggestion": "Genera la riga dal BOQ, oppure collegala a una voce di costo prima di ordinare"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "La riga {line} suggerisce il fornitore {vendor}, che non è nell'anagrafica fornitori",
+      "suggestion": "Scegli il fornitore suggerito dall'anagrafica fornitori, oppure elimina il suggerimento"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "La riga {line} suggerisce {vendor}, un fornitore che non è attivo nell'anagrafica fornitori",
+      "suggestion": "Suggerisci un fornitore attivo, oppure lascia la scelta all'ufficio acquisti"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Le fonti BOQ della riga {line} suggeriscono {count} fornitori diversi",
+      "suggestion": "Scegli un solo fornitore per la riga, oppure dividila in modo che ogni fornitore abbia la propria riga"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "La riga {line} suggerisce {vendor}, ma la richiesta d'acquisto deve essere ordinata a un altro fornitore",
+      "suggestion": "Verifica che il fornitore scelto possa consegnare questa riga, oppure ordinala separatamente"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "La riga {line} serve entro il {date}, data già trascorsa (oggi è {today})",
+      "suggestion": "Indica la data in cui il materiale serve davvero in cantiere"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "La riga {line} era pianificata per un'attività che iniziava il {anchor}, ma ora l'attività inizia il {start}",
+      "suggestion": "Confronta la data di fabbisogno della riga con il cronoprogramma attuale e modificala se serve"
+    },
     "receipt_certificate_present": {
       "fail": "La riga {line} è stata ordinata con {required}, ma la consegna riporta {delivered}",
       "suggestion": "Allegate il certificato richiesto dall'ordine, oppure respingete la riga finché il fornitore non lo invia"

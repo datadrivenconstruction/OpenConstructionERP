@@ -657,6 +657,30 @@
       "fail": "Stavka {line} nije povezana s troškovnom stavkom, pa se njezina narudžba neće prikazati kao preuzeta obveza prema proračunu",
       "suggestion": "Izradite stavku iz BOQ-a ili je prije naručivanja povežite s troškovnom stavkom"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Stavka {line} predlaže dobavljača {vendor}, koji nije u imeniku dobavljača",
+      "suggestion": "Odaberite predloženog dobavljača iz imenika dobavljača ili obrišite prijedlog"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Stavka {line} predlaže {vendor}, dobavljača koji nije aktivan u imeniku dobavljača",
+      "suggestion": "Predložite aktivnog dobavljača ili prepustite izbor nabavi"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "BOQ izvori stavke {line} predlažu različite dobavljače: {count}",
+      "suggestion": "Odaberite jednog dobavljača za stavku ili je podijelite tako da svaki dobavljač ima svoju stavku"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Stavka {line} predlaže {vendor}, ali se zahtjev za nabavu namjerava naručiti od drugog dobavljača",
+      "suggestion": "Provjerite može li odabrani dobavljač isporučiti ovu stavku ili je naručite zasebno"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Stavka {line} potrebna je do {date}, a taj je datum već prošao (danas je {today})",
+      "suggestion": "Unesite datum kada je materijal doista potreban na gradilištu"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Stavka {line} planirana je za aktivnost koja počinje {anchor}, ali aktivnost sada počinje {start}",
+      "suggestion": "Usporedite datum potrebe stavke s trenutnim planom i po potrebi ga promijenite"
+    },
     "receipt_certificate_present": {
       "fail": "Stavka {line} naručena je s {required}, ali isporuka sadrži {delivered}",
       "suggestion": "Priložite certifikat koji narudžbenica traži ili odbijte stavku dok dobavljač ne pošalje certifikat"

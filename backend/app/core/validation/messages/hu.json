@@ -657,6 +657,30 @@
       "fail": "A(z) {line}. sor nincs költségsorhoz kapcsolva, így a rendelése nem jelenik meg a költségvetés terhére lekötöttként",
       "suggestion": "Hozza létre a sort a BOQ-ból, vagy rendelés előtt kapcsolja költségsorhoz"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "A(z) {line}. sor a(z) {vendor} szállítót javasolja, amely nincs a szállítói törzsben",
+      "suggestion": "Válassza ki a javasolt szállítót a szállítói törzsből, vagy törölje a javaslatot"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "A(z) {line}. sor a(z) {vendor} szállítót javasolja, amely nem aktív a szállítói törzsben",
+      "suggestion": "Javasoljon aktív szállítót, vagy hagyja a választást a beszerzőre"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "A(z) {line}. sor BOQ forrásai {count} különböző szállítót javasolnak",
+      "suggestion": "Válasszon egy szállítót a sorhoz, vagy ossza fel úgy, hogy minden szállítónak saját sora legyen"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "A(z) {line}. sor a(z) {vendor} szállítót javasolja, de az igénylést másik szállítótól kell megrendelni",
+      "suggestion": "Ellenőrizze, hogy a kiválasztott szállító tudja-e szállítani ezt a sort, vagy rendelje meg külön"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "A(z) {line}. sor szükséglete {date} napra szól, ami már elmúlt (ma {today} van)",
+      "suggestion": "Adja meg azt a dátumot, amikor az anyagra a munkaterületen ténylegesen szükség van"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "A(z) {line}. sort olyan tevékenységre tervezték, amely {anchor} napon kezdődött, de a tevékenység most {start} napon kezdődik",
+      "suggestion": "Vesse össze a sor szükséglet-időpontját az aktuális ütemtervvel, és szükség esetén módosítsa"
+    },
     "receipt_certificate_present": {
       "fail": "A(z) {line} tétel megrendelésében {required} szerepelt, a szállítmányban viszont {delivered} van",
       "suggestion": "Csatolja a megrendelés által kért tanúsítványt, vagy utasítsa vissza a tételt, amíg a szállító be nem küldi"

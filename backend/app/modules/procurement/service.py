@@ -126,20 +126,24 @@ def _mr_assert_transition(current: str, target: str) -> None:
         )
 
 
-def _compute_delivery_date(required_date: str | None, lead_time_days: int) -> str | None:
-    """Compute estimated delivery date = required_date - lead_time_days.
+def _latest_order_date(required_date: str | None, lead_time_days: int) -> str | None:
+    """The last day an order can be placed and still arrive by ``required_date``.
 
-    Returns an ISO-8601 date string, or None if inputs are invalid.
-    Zero lead_time means "deliver on the required date" - returns None to
-    signal that no meaningful pre-order window exists.
-    Note: uses calendar days, not working-day calendar.
+    ``required_date - lead_time_days``, in calendar days. This is an ordering
+    deadline, not a delivery forecast: the supplier's expected or confirmed
+    delivery date lives on the purchase order (``delivery_date`` and
+    ``supplier_confirmed_delivery_date``). Until 18.6.x this value was stored
+    as the requisition's ``estimated_delivery_date``, which read an ordering
+    deadline as an arrival (issue #516).
+
+    Returns None when either input is missing or invalid, or when there is no
+    lead time, because the deadline then equals the required date itself.
     """
     if not required_date or lead_time_days <= 0:
         return None
     try:
         req = date.fromisoformat(required_date)
-        est = req - timedelta(days=lead_time_days)
-        return est.isoformat()
+        return (req - timedelta(days=lead_time_days)).isoformat()
     except (ValueError, TypeError):
         return None
 
@@ -3485,7 +3489,6 @@ class MaterialRequisitionService:
         correct on the day the endpoint lands, rather than being a second
         omission to discover then.
         """
-        est_delivery = _compute_delivery_date(required_date, lead_time_days)
         # Insert the requisition with a per-project sequential req_number, retrying
         # on the unique-constraint collision a concurrent insert can cause. The
         # number is derived from the NUMERIC MAX of existing "MR-<digits>" rows
@@ -3496,7 +3499,8 @@ class MaterialRequisitionService:
             title=title,
             required_date=required_date,
             lead_time_days=lead_time_days,
-            estimated_delivery_date=est_delivery,
+            # No delivery forecast exists before an order does; see _latest_order_date.
+            estimated_delivery_date=None,
             notes=notes,
         )
 

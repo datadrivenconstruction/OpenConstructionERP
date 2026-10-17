@@ -657,6 +657,30 @@
       "fail": "Rivi {line} ei ole linkitetty kustannusriviin, joten sen tilausta ei näytetä budjettiin sidottuna",
       "suggestion": "Luo rivi BOQ:sta tai linkitä se kustannusriviin ennen tilaamista"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Rivi {line} ehdottaa toimittajaa {vendor}, joka ei ole toimittajarekisterissä",
+      "suggestion": "Valitse ehdotettu toimittaja toimittajarekisteristä tai poista ehdotus"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Rivi {line} ehdottaa toimittajaa {vendor}, joka ei ole aktiivinen toimittajarekisterissä",
+      "suggestion": "Ehdota aktiivista toimittajaa tai jätä valinta ostajalle"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Rivin {line} BOQ-lähteet ehdottavat {count} eri toimittajaa",
+      "suggestion": "Valitse riville yksi toimittaja tai jaa rivi, jotta jokaisella toimittajalla on oma rivinsä"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Rivi {line} ehdottaa toimittajaa {vendor}, mutta hankintapyyntö on tarkoitus tilata toiselta toimittajalta",
+      "suggestion": "Tarkista, että valittu toimittaja voi toimittaa tämän rivin, tai tilaa se erikseen"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Rivi {line} tarvitaan {date} mennessä, ja päivä on jo mennyt (tänään on {today})",
+      "suggestion": "Anna päivä, jolloin materiaali todella tarvitaan työmaalla"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Rivi {line} oli suunniteltu toiminnolle, joka alkoi {anchor}, mutta toiminto alkaa nyt {start}",
+      "suggestion": "Tarkista rivin tarvepäivä nykyistä aikataulua vasten ja muuta sitä tarvittaessa"
+    },
     "receipt_certificate_present": {
       "fail": "Rivi {line} tilattiin ehdolla {required}, mutta toimitus sisältää {delivered}",
       "suggestion": "Liitä tilauksen vaatima todistus tai hylkää rivi, kunnes toimittaja lähettää sen"

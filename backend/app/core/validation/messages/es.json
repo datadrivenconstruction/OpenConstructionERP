@@ -657,6 +657,30 @@
       "fail": "La línea {line} no está vinculada a una partida de coste, así que su pedido no aparecerá como comprometido contra el presupuesto",
       "suggestion": "Genere la línea desde el BOQ o vincúlela a una partida de coste antes de pedir"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "La línea {line} sugiere al proveedor {vendor}, que no está en el directorio de proveedores",
+      "suggestion": "Elija al proveedor sugerido del directorio de proveedores o borre la sugerencia"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "La línea {line} sugiere a {vendor}, un proveedor que no está activo en el directorio de proveedores",
+      "suggestion": "Sugiera un proveedor activo o deje la elección al comprador"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Las fuentes de BOQ de la línea {line} sugieren {count} proveedores distintos",
+      "suggestion": "Elija un proveedor para la línea o divídala para que cada proveedor tenga su propia línea"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "La línea {line} sugiere a {vendor}, pero la solicitud se va a pedir a otro proveedor",
+      "suggestion": "Compruebe que el proveedor elegido puede suministrar esta línea o pídala por separado"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "La línea {line} se necesita para el {date}, fecha que ya pasó (hoy es {today})",
+      "suggestion": "Indique la fecha en que el material se necesita realmente en obra"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "La línea {line} se planificó para una actividad que empezaba el {anchor}, pero ahora la actividad empieza el {start}",
+      "suggestion": "Compare la fecha de necesidad de la línea con el cronograma actual y cámbiela si hace falta"
+    },
     "receipt_certificate_present": {
       "fail": "La línea {line} se pidió con {required}, pero la entrega incluye {delivered}",
       "suggestion": "Adjunte el certificado que exige el pedido o rechace la línea hasta que el proveedor lo envíe"

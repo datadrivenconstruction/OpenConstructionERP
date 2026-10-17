@@ -35,7 +35,7 @@ from app.modules.finance.service import (
 from app.modules.procurement.service import (
     _MR_STATUS_TRANSITIONS,
     MaterialRequisitionService,
-    _compute_delivery_date,
+    _latest_order_date,
     _mr_assert_transition,
     _mr_reconcile,
 )
@@ -305,26 +305,26 @@ class TestMaterialRequisitionFSM:
 
 
 class TestDeliveryDateLogic:
-    """_compute_delivery_date: delivery_date = required_date - lead_time_days."""
+    """_latest_order_date = required_date - lead_time_days, an ordering deadline (issue #516)."""
 
     def test_basic_subtraction(self) -> None:
         required = "2026-06-10"
-        result = _compute_delivery_date(required, 5)
+        result = _latest_order_date(required, 5)
         expected = (date(2026, 6, 10) - timedelta(days=5)).isoformat()
         assert result == expected
 
     def test_zero_lead_time_returns_none(self) -> None:
-        """Zero lead time means no estimated delivery."""
-        assert _compute_delivery_date("2026-06-10", 0) is None
+        """Zero lead time means the deadline is the required date itself."""
+        assert _latest_order_date("2026-06-10", 0) is None
 
     def test_empty_required_date_returns_none(self) -> None:
-        assert _compute_delivery_date("", 7) is None
+        assert _latest_order_date("", 7) is None
 
     def test_none_required_date_returns_none(self) -> None:
-        assert _compute_delivery_date(None, 7) is None  # type: ignore[arg-type]
+        assert _latest_order_date(None, 7) is None  # type: ignore[arg-type]
 
     def test_invalid_date_returns_none(self) -> None:
-        assert _compute_delivery_date("not-a-date", 5) is None
+        assert _latest_order_date("not-a-date", 5) is None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -447,15 +447,24 @@ class TestMaterialRequisitionService:
         assert req.req_number.startswith("MR-")
 
     @pytest.mark.asyncio
-    async def test_create_computes_estimated_delivery(self) -> None:
+    async def test_create_stores_no_delivery_forecast(self) -> None:
+        """required_date - lead_time is an ordering deadline, not a delivery forecast (issue #516).
+
+        Before 18.6.x it was stored as ``estimated_delivery_date``, so a reader
+        saw material arriving five days before it was needed when in truth that
+        was the last day to order. No forecast exists until an order does.
+        """
         svc = self._make_mr_service()
         req = await svc.create_requisition(
             PROJECT_A,
             required_date="2026-06-10",
             lead_time_days=5,
         )
-        expected = (date(2026, 6, 10) - timedelta(days=5)).isoformat()
-        assert req.estimated_delivery_date == expected
+        assert req.estimated_delivery_date is None
+        assert (
+            _latest_order_date(req.required_date, req.lead_time_days)
+            == (date(2026, 6, 10) - timedelta(days=5)).isoformat()
+        )
 
     @pytest.mark.asyncio
     async def test_create_items_computes_extended_cost(self) -> None:

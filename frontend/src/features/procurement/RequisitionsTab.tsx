@@ -16,6 +16,9 @@
 // Approved requisitions are selected in the list and turned into one draft
 // purchase order at project level; each PO line remembers the requisition
 // line, and through it the BOQ positions, it came from.
+//
+// Each line also shows its suggested supplier and its own needed-by date,
+// which RequisitionSupply renders (issue #516).
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +29,6 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { QuantityDisplay } from '@/shared/ui/QuantityDisplay';
 import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { listVendors } from '@/features/supplier-catalogs/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { ROLE_RANK, normalizeRole } from '@/shared/lib/roles';
 import {
@@ -51,6 +53,7 @@ import {
   type RequisitionStatus,
 } from './requisitionsApi';
 import { fmtList } from '@/shared/lib/formatters';
+import { LineSupplyCell, SuggestedSupplierHint, VendorSelect } from './RequisitionSupply';
 
 const fieldCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
@@ -100,48 +103,6 @@ function StatusBadge({ status }: { status: RequisitionStatus }) {
     <Badge variant={STATUS_VARIANT[status] ?? 'neutral'} size="sm">
       {t(`procurement.requisitions.status.${status}`, { defaultValue: STATUS_DEFAULT[status] ?? status })}
     </Badge>
-  );
-}
-
-/** Active vendors of the directory, the only ones a requisition may name. */
-function useActiveVendors() {
-  return useQuery({
-    queryKey: ['supplier-catalogs-vendors', 'active'],
-    queryFn: () => listVendors({ status: 'active', limit: 200 }),
-    staleTime: 60_000,
-  });
-}
-
-interface VendorSelectProps {
-  value: string;
-  onChange: (id: string) => void;
-  disabled?: boolean;
-  /** Name to show for a stored vendor that is no longer active. */
-  fallbackName?: string | null;
-  id?: string;
-}
-
-function VendorSelect({ value, onChange, disabled, fallbackName, id }: VendorSelectProps) {
-  const { t } = useTranslation();
-  const { data, isLoading } = useActiveVendors();
-  const vendors = data?.items ?? [];
-  const known = !value || vendors.some((v) => v.id === value);
-  return (
-    <select
-      id={id}
-      className={fieldCls}
-      value={value}
-      disabled={disabled || isLoading}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      <option value="">{t('procurement.requisitions.vendor_none', { defaultValue: 'No vendor chosen yet' })}</option>
-      {!known && <option value={value}>{fallbackName || value}</option>}
-      {vendors.map((v) => (
-        <option key={v.id} value={v.id}>
-          {v.code ? `${v.name} (${v.code})` : v.name}
-        </option>
-      ))}
-    </select>
   );
 }
 
@@ -883,6 +844,15 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                     )}
                   </span>
                 )}
+                <SuggestedSupplierHint
+                  req={req}
+                  vendorId={isDraft ? vendorId : (req.vendor_id ?? '')}
+                  editable={isDraft}
+                  onUse={(id) => {
+                    setVendorId(id);
+                    setDirty(true);
+                  }}
+                />
               </div>
             </div>
             <label className="block text-xs font-medium text-content-secondary">
@@ -910,6 +880,22 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                   setDirty(true);
                 }}
               />
+              {(req.latest_order_date || req.estimated_delivery_date) && (
+                <span className="mt-1 block font-normal text-content-tertiary">
+                  {req.latest_order_date && (
+                    <span className="mr-3">
+                      {t('procurement.requisitions.latest_order_date', { defaultValue: 'Order by' })}:{' '}
+                      <DateDisplay value={req.latest_order_date} />
+                    </span>
+                  )}
+                  {req.estimated_delivery_date && (
+                    <span>
+                      {t('procurement.requisitions.supplier_expected', { defaultValue: 'Order delivery date' })}:{' '}
+                      <DateDisplay value={req.estimated_delivery_date} />
+                    </span>
+                  )}
+                </span>
+              )}
             </label>
             <label className="block text-xs font-medium text-content-secondary sm:col-span-2">
               {t('procurement.requisitions.field_notes', { defaultValue: 'Notes' })}
@@ -954,7 +940,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
               )}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[40rem] text-sm">
+              <table className="w-full min-w-[56rem] text-sm">
                 <thead>
                   <tr className="border-b border-border-light text-left text-2xs uppercase tracking-wide text-content-tertiary">
                     {isDraft && <th className="w-8 py-1.5" />}
@@ -965,6 +951,9 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_outstanding', { defaultValue: 'Outstanding' })}</th>
                     <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_sources', { defaultValue: 'From the BOQ' })}</th>
+                    <th className="py-1.5 pr-3 font-medium">
+                      {t('procurement.requisitions.col_supply', { defaultValue: 'Supplier and date' })}
+                    </th>
                     {isDraft && <th className="w-8 py-1.5" />}
                   </tr>
                 </thead>
@@ -1038,6 +1027,16 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                               })}
                             </div>
                           ))}
+                        </td>
+                        <td className="py-1.5 pr-3">
+                          <LineSupplyCell
+                            projectId={projectId}
+                            line={line}
+                            stored={stored}
+                            headerDate={neededBy}
+                            editable={isDraft}
+                            onChange={(patch) => editLine(index, patch)}
+                          />
                         </td>
                         {isDraft && (
                           <td className="py-1.5">

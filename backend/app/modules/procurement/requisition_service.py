@@ -30,13 +30,20 @@ returns its requisitions to ``approved``.
 The supplier is chosen from the Vendor directory of the supplier catalogue
 module, read lazily: procurement does not depend on that module, and without it
 a requisition simply cannot name a vendor.
+
+Each line may carry a suggested supplier, inherited from its BOQ sources when
+they agree and otherwise left empty with every source's suggestion still shown.
+A suggestion never becomes the requisition's supplier by itself. Each line may
+also carry its own needed-by date, proposed from a schedule activity minus a
+buffer; the activity start the proposal read is kept, so a later schedule change
+is shown on the line instead of rewriting a date someone already agreed to.
 """
 
 from __future__ import annotations
 
 import logging
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -71,6 +78,9 @@ from app.modules.procurement.schemas import (
     RequisitionPOItemRef,
     RequisitionResponse,
     RequisitionUpdate,
+    RequisitionVendorRef,
+    ScheduleActivityOption,
+    ScheduleActivityOptionPage,
     TracePOLine,
     TraceSource,
 )
@@ -78,7 +88,7 @@ from app.modules.procurement.service import (
     _MR_STATUS_TRANSITIONS,
     MaterialRequisitionService,
     ProcurementService,
-    _compute_delivery_date,
+    _latest_order_date,
     _mr_assert_transition,
     _mr_reconcile,
     _safe_decimal_str,
@@ -280,6 +290,21 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         lines = merge_lines_by_catalog_item(items)
         if not lines:
             return
+        boq_suggestions = await self._boq_suggestions(lines)
+        activities = await self._activities_for_lines(req.project_id, lines)
+        explicit_vendors = {
+            line.suggested_vendor_id
+            for line in lines
+            if "suggested_vendor_id" in line.model_fields_set and line.suggested_vendor_id is not None
+        }
+        if explicit_vendors:
+            known = await load_vendors(self.session, explicit_vendors)
+            unknown = sorted(str(v) for v in explicit_vendors if v not in known)
+            if unknown:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"Suggested suppliers not in the Vendor directory: {', '.join(unknown)}.",
+                )
         line_cost_lines = await resolve_cost_line_ids(
             self.session,
             req.project_id,
@@ -301,6 +326,12 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             unit_cost = _dec(line.unit_cost)
             sources: list[MaterialRequisitionItemSource] = []
             for order, source in enumerate(line.sources):
+                if "suggested_vendor_id" in source.model_fields_set:
+                    source_vendor = source.suggested_vendor_id
+                elif source.boq_position_id is not None:
+                    source_vendor = boq_suggestions.get((source.boq_position_id, source.resource_key))
+                else:
+                    source_vendor = None
                 sources.append(
                     MaterialRequisitionItemSource(
                         boq_position_id=source.boq_position_id,
@@ -308,10 +339,17 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                         quantity=_safe_decimal_str(source.quantity),
                         unit=source.unit,
                         cost_line_id=source_cost_lines[cursor],
+                        suggested_vendor_id=source_vendor,
                         sort_order=order,
                     )
                 )
                 cursor += 1
+            if "suggested_vendor_id" in line.model_fields_set:
+                line_vendor = line.suggested_vendor_id
+            else:
+                offered = {s.suggested_vendor_id for s in sources if s.suggested_vendor_id is not None}
+                line_vendor = next(iter(offered)) if len(offered) == 1 else None
+            required_date, anchor = self._line_dates(line, activities)
             cost_line_id = line_cost_lines[index]
             if cost_line_id is None:
                 agreed = {s.cost_line_id for s in sources}
@@ -328,11 +366,142 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     currency_code=line.currency_code,
                     catalog_item_id=line.catalog_item_id,
                     cost_line_id=cost_line_id,
+                    suggested_vendor_id=line_vendor,
+                    required_date=required_date,
+                    schedule_activity_id=line.schedule_activity_id,
+                    schedule_buffer_days=line.schedule_buffer_days if line.schedule_activity_id else None,
+                    schedule_anchor_date=anchor,
                     sort_order=index,
                     sources=sources,
                 )
             )
         await self.session.flush()
+
+    async def _boq_suggestions(
+        self, lines: list[RequisitionItemIn]
+    ) -> dict[tuple[uuid.UUID, str | None], uuid.UUID | None]:
+        """The BOQ's suggested supplier for every source that did not bring its own."""
+        wanted = [
+            (source.boq_position_id, source.resource_key)
+            for line in lines
+            for source in line.sources
+            if source.boq_position_id is not None and "suggested_vendor_id" not in source.model_fields_set
+        ]
+        if not wanted:
+            return {}
+        try:
+            from app.modules.boq.supplier_suggestion import resolve_suggested_vendors  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - BOQ module not installed
+            return {}
+        return await resolve_suggested_vendors(self.session, wanted)
+
+    async def load_activities(
+        self, project_id: uuid.UUID, activity_ids: set[uuid.UUID]
+    ) -> dict[uuid.UUID, ScheduleActivityOption]:
+        """Schedule activities of one project by id; ids from another project are left out."""
+        if not activity_ids:
+            return {}
+        return {
+            option.id: option for option in await self.list_schedule_activities(project_id, activity_ids=activity_ids)
+        }
+
+    async def list_schedule_activities(
+        self,
+        project_id: uuid.UUID,
+        *,
+        activity_ids: set[uuid.UUID] | None = None,
+        offset: int = 0,
+        limit: int = 500,
+    ) -> list[ScheduleActivityOption]:
+        """The project's schedule activities a line can take its needed-by date from, by start date.
+
+        With ``activity_ids`` every named activity of the project is returned;
+        without, one page of ``limit`` rows from ``offset``.
+        """
+        try:
+            from app.modules.schedule.models import Activity, Schedule  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - schedule module not installed
+            return []
+        stmt = (
+            select(Activity, Schedule.name)
+            .join(Schedule, Activity.schedule_id == Schedule.id)
+            .where(Schedule.project_id == project_id)
+            .order_by(Activity.start_date, Activity.name, Activity.id)
+        )
+        if activity_ids is not None:
+            stmt = stmt.where(Activity.id.in_(activity_ids))
+        else:
+            stmt = stmt.offset(offset).limit(limit)
+        rows = (await self.session.execute(stmt)).all()
+        return [
+            ScheduleActivityOption(
+                id=activity.id,
+                name=activity.name,
+                schedule_name=schedule_name,
+                start_date=str(activity.start_date)[:10],
+                end_date=str(activity.end_date)[:10] if activity.end_date else None,
+                activity_type=activity.activity_type,
+            )
+            for activity, schedule_name in rows
+        ]
+
+    async def page_schedule_activities(
+        self, project_id: uuid.UUID, *, offset: int = 0, limit: int = 500
+    ) -> ScheduleActivityOptionPage:
+        """One page of the project's schedule activities, with the count of all of them."""
+        try:
+            from app.modules.schedule.models import Activity, Schedule  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - schedule module not installed
+            return ScheduleActivityOptionPage(items=[], total=0, offset=offset, limit=limit)
+        items = await self.list_schedule_activities(project_id, offset=offset, limit=limit)
+        total = (
+            await self.session.execute(
+                select(func.count(Activity.id))
+                .join(Schedule, Activity.schedule_id == Schedule.id)
+                .where(Schedule.project_id == project_id)
+            )
+        ).scalar_one()
+        return ScheduleActivityOptionPage(items=items, total=int(total or 0), offset=offset, limit=limit)
+
+    async def _activities_for_lines(
+        self, project_id: uuid.UUID, lines: list[RequisitionItemIn]
+    ) -> dict[uuid.UUID, ScheduleActivityOption]:
+        """The activities the lines name, refusing one that is not in this project with a 422."""
+        wanted = {line.schedule_activity_id for line in lines if line.schedule_activity_id is not None}
+        found = await self.load_activities(project_id, wanted)
+        missing = sorted(str(a) for a in wanted if a not in found)
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"Schedule activities not found in this project: {', '.join(missing)}.",
+            )
+        return found
+
+    @staticmethod
+    def _line_dates(
+        line: RequisitionItemIn,
+        activities: dict[uuid.UUID, ScheduleActivityOption],
+    ) -> tuple[str | None, str | None]:
+        """The line's needed-by date and the activity start it was proposed from.
+
+        Without an activity the line keeps the date it was given (or none, so
+        the header applies). With one, the anchor is the start the client says
+        it proposed from, else the activity's start now; a line sent without a
+        date gets the anchor minus the buffer. A date sent with the activity is
+        the requester's and is kept as sent.
+        """
+        given = line.required_date.isoformat() if line.required_date else None
+        if line.schedule_activity_id is None:
+            return given, None
+        activity = activities[line.schedule_activity_id]
+        anchor = line.schedule_anchor_date.isoformat() if line.schedule_anchor_date else activity.start_date
+        if given is not None:
+            return given, anchor
+        try:
+            proposed = date.fromisoformat(anchor[:10]) - timedelta(days=line.schedule_buffer_days or 0)
+        except ValueError:
+            return None, anchor
+        return proposed.isoformat(), anchor
 
     async def create(self, data: RequisitionCreate, *, user_id: str | None) -> MaterialRequisition:
         """Create a draft requisition, its lines and their BOQ sources."""
@@ -343,7 +512,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             title=data.title,
             required_date=required,
             lead_time_days=data.lead_time_days,
-            estimated_delivery_date=_compute_delivery_date(required, data.lead_time_days),
+            # A delivery forecast exists only once an order does (set at conversion).
+            estimated_delivery_date=None,
             notes=data.notes,
         )
         if data.vendor_id is not None:
@@ -385,8 +555,6 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         if "lead_time_days" in fields and data.lead_time_days is not None:
             req.lead_time_days = data.lead_time_days
             changed.append("lead_time_days")
-        if "required_date" in fields or "lead_time_days" in fields:
-            req.estimated_delivery_date = _compute_delivery_date(req.required_date, req.lead_time_days)
         if "vendor_id" in fields and data.vendor_id != req.vendor_id:
             if data.vendor_id is not None:
                 await self._require_vendor(data.vendor_id)
@@ -788,7 +956,11 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         claimed = await self.session.execute(
             update(MaterialRequisition)
             .where(MaterialRequisition.id.in_(wanted), MaterialRequisition.status == "approved")
-            .values(status="ordered", po_id=po_id)
+            .values(
+                status="ordered",
+                po_id=po_id,
+                estimated_delivery_date=data.delivery_date.isoformat() if data.delivery_date else None,
+            )
             .execution_options(synchronize_session=False)
         )
         if claimed.rowcount != len(wanted):
@@ -899,6 +1071,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     PurchaseOrderItem.requisition_item_id,
                     PurchaseOrder.po_number,
                     PurchaseOrder.status,
+                    PurchaseOrder.delivery_date,
+                    PurchaseOrder.supplier_confirmed_delivery_date,
                 )
                 .join(PurchaseOrder, PurchaseOrderItem.po_id == PurchaseOrder.id)
                 .where(PurchaseOrderItem.requisition_item_id.in_(item_ids))
@@ -915,6 +1089,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     po_item_id=row.id,
                     quantity=row.quantity,
                     unit=row.unit,
+                    po_delivery_date=row.delivery_date,
+                    supplier_confirmed_delivery_date=row.supplier_confirmed_delivery_date,
                 )
             )
         return out
@@ -1008,13 +1184,25 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         operation: str = "submit",
         vendor: VendorInfo | None = None,
         vendor_id: uuid.UUID | None = None,
+        suggested_vendors: dict[uuid.UUID, VendorInfo] | None = None,
+        activity_starts: dict[uuid.UUID, str] | None = None,
     ) -> dict[str, Any]:
         """The payload the ``procurement_requisition`` rules read.
 
         ``vendor_id`` is the supplier the step uses (the requisition's own unless
         a conversion names one); ``vendor`` is its directory entry, or None when
         it cannot be read, which the vendor rule reports rather than trusts.
+        ``suggested_vendors`` holds the directory entries of the lines'
+        suggestions and ``activity_starts`` the current start of each linked
+        schedule activity.
         """
+        known = suggested_vendors or {}
+        starts = activity_starts or {}
+
+        def _vendor(vid: uuid.UUID | None) -> dict[str, Any] | None:
+            info = known.get(vid) if vid is not None else None
+            return info.as_payload() if info is not None else None
+
         return {
             "req_number": req.req_number,
             "required_date": req.required_date,
@@ -1029,6 +1217,17 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     "quantity_requested": item.quantity_requested,
                     "currency_code": item.currency_code,
                     "cost_line_id": str(item.cost_line_id) if item.cost_line_id else None,
+                    "required_date": item.required_date,
+                    "schedule_activity_id": str(item.schedule_activity_id) if item.schedule_activity_id else None,
+                    "schedule_anchor_date": item.schedule_anchor_date,
+                    "schedule_activity_start": starts.get(item.schedule_activity_id)
+                    if item.schedule_activity_id
+                    else None,
+                    "suggested_vendor_id": str(item.suggested_vendor_id) if item.suggested_vendor_id else None,
+                    "suggested_vendor": _vendor(item.suggested_vendor_id),
+                    "source_suggested_vendor_ids": sorted(
+                        {str(s.suggested_vendor_id) for s in item.sources if s.suggested_vendor_id is not None}
+                    ),
                     "sources": [
                         {"unit": s.unit, "quantity": s.quantity, "resource_key": s.resource_key} for s in item.sources
                     ],
@@ -1055,8 +1254,21 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             vendor_id = req.vendor_id
             if vendor_id is not None:
                 vendor = (await load_vendors(self.session, {vendor_id})).get(vendor_id)
+        suggested = await load_vendors(
+            self.session, {i.suggested_vendor_id for i in req.items if i.suggested_vendor_id is not None}
+        )
+        activities = await self.load_activities(
+            req.project_id, {i.schedule_activity_id for i in req.items if i.schedule_activity_id is not None}
+        )
         return await validation_engine.validate(
-            data=self.validation_payload(req, operation=operation, vendor=vendor, vendor_id=vendor_id),
+            data=self.validation_payload(
+                req,
+                operation=operation,
+                vendor=vendor,
+                vendor_id=vendor_id,
+                suggested_vendors=suggested,
+                activity_starts={aid: a.start_date for aid, a in activities.items()},
+            ),
             rule_sets=[REQUISITION_RULE_SET],
             target_type="material_requisition",
             target_id=str(req.id),
@@ -1096,6 +1308,7 @@ async def release_requisitions_for_po(
     for req in reqs:
         req.status = "approved"
         req.po_id = None
+        req.estimated_delivery_date = None
         for item in req.items:
             item.quantity_ordered = "0"
         RequisitionWorkflowService._record(
@@ -1130,11 +1343,13 @@ class ResponseContext:
         po_numbers: dict[uuid.UUID, str] | None = None,
         po_lines: dict[uuid.UUID, list[TracePOLine]] | None = None,
         user_names: dict[str, str] | None = None,
+        activities: dict[uuid.UUID, ScheduleActivityOption] | None = None,
     ) -> None:
         self.vendors = vendors or {}
         self.po_numbers = po_numbers or {}
         self.po_lines = po_lines or {}
         self.user_names = user_names or {}
+        self.activities = activities or {}
 
 
 async def load_user_names(session: AsyncSession, raw_ids: set[str]) -> dict[str, str]:
@@ -1154,8 +1369,14 @@ async def load_user_names(session: AsyncSession, raw_ids: set[str]) -> dict[str,
 
 
 async def build_response_context(session: AsyncSession, reqs: list[MaterialRequisition]) -> ResponseContext:
-    """Vendor names, order numbers, converted order lines and approver names, in four queries."""
-    vendors = await load_vendors(session, {r.vendor_id for r in reqs if r.vendor_id is not None})
+    """Vendor names, order numbers, converted order lines, approver names and schedule activities."""
+    vendor_ids = {r.vendor_id for r in reqs if r.vendor_id is not None}
+    for r in reqs:
+        for item in r.items:
+            if item.suggested_vendor_id is not None:
+                vendor_ids.add(item.suggested_vendor_id)
+            vendor_ids.update(s.suggested_vendor_id for s in item.sources if s.suggested_vendor_id is not None)
+    vendors = await load_vendors(session, vendor_ids)
     po_ids = {r.po_id for r in reqs if r.po_id is not None}
     po_numbers: dict[uuid.UUID, str] = {}
     if po_ids:
@@ -1170,15 +1391,67 @@ async def build_response_context(session: AsyncSession, reqs: list[MaterialRequi
     item_ids = {item.id for r in reqs for item in r.items}
     po_lines = await RequisitionWorkflowService(session)._po_lines_for_items(item_ids)
     user_names = await load_user_names(session, {r.approver_id for r in reqs if r.approver_id})
-    return ResponseContext(vendors, po_numbers, po_lines, user_names)
+    activities: dict[uuid.UUID, ScheduleActivityOption] = {}
+    workflow = RequisitionWorkflowService(session)
+    for project_id in {r.project_id for r in reqs}:
+        wanted = {
+            item.schedule_activity_id
+            for r in reqs
+            if r.project_id == project_id
+            for item in r.items
+            if item.schedule_activity_id is not None
+        }
+        activities.update(await workflow.load_activities(project_id, wanted))
+    return ResponseContext(vendors, po_numbers, po_lines, user_names, activities)
+
+
+def _vendor_ref(vendor_id: uuid.UUID, ctx: ResponseContext) -> RequisitionVendorRef:
+    info = ctx.vendors.get(vendor_id)
+    return RequisitionVendorRef(
+        id=vendor_id,
+        name=info.name if info is not None else None,
+        status=info.status if info is not None else None,
+    )
+
+
+def _line_dates_view(req: MaterialRequisition, item: MaterialRequisitionItem, ctx: ResponseContext) -> dict[str, Any]:
+    """The needed-by fields of one line as the response shows them."""
+    if item.required_date:
+        effective: str | None = item.required_date
+        origin: str | None = "schedule" if item.schedule_activity_id else "line"
+    elif req.required_date:
+        effective, origin = req.required_date, "requisition"
+    else:
+        effective, origin = None, None
+    activity = ctx.activities.get(item.schedule_activity_id) if item.schedule_activity_id else None
+    current = activity.start_date if activity is not None else None
+    return {
+        "required_date": item.required_date,
+        "effective_required_date": effective,
+        "required_date_source": origin,
+        "latest_order_date": _latest_order_date(effective, req.lead_time_days),
+        "schedule_activity_id": item.schedule_activity_id,
+        "schedule_activity_name": activity.name if activity is not None else None,
+        "schedule_buffer_days": item.schedule_buffer_days,
+        "schedule_anchor_date": item.schedule_anchor_date,
+        "schedule_activity_start": current,
+        "schedule_moved": bool(
+            current and item.schedule_anchor_date and current[:10] != str(item.schedule_anchor_date)[:10]
+        ),
+    }
 
 
 def requisition_to_response(req: MaterialRequisition, context: ResponseContext | None = None) -> RequisitionResponse:
     """Serialise a requisition with per-line progress and the header reconciliation."""
     ctx = context or ResponseContext()
     items: list[RequisitionItemResponse] = []
+    line_suggestions: list[uuid.UUID] = []
     for item in sorted(req.items, key=lambda i: i.sort_order):
         outstanding = _dec(item.quantity_requested) - _dec(item.quantity_received)
+        offered = list(dict.fromkeys(s.suggested_vendor_id for s in item.sources if s.suggested_vendor_id is not None))
+        suggested = ctx.vendors.get(item.suggested_vendor_id) if item.suggested_vendor_id else None
+        if item.suggested_vendor_id is not None:
+            line_suggestions.append(item.suggested_vendor_id)
         items.append(
             RequisitionItemResponse(
                 id=item.id,
@@ -1195,7 +1468,27 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
                 catalog_item_id=item.catalog_item_id,
                 cost_line_id=item.cost_line_id,
                 sort_order=item.sort_order,
-                sources=[RequisitionItemSourceResponse.model_validate(s) for s in item.sources],
+                suggested_vendor_id=item.suggested_vendor_id,
+                suggested_vendor_name=suggested.name if suggested is not None else None,
+                suggested_vendor_status=suggested.status if suggested is not None else None,
+                source_suggested_vendors=[_vendor_ref(vid, ctx) for vid in offered],
+                suggestion_conflict=len(offered) > 1,
+                **_line_dates_view(req, item, ctx),
+                sources=[
+                    RequisitionItemSourceResponse(
+                        id=s.id,
+                        boq_position_id=s.boq_position_id,
+                        resource_key=s.resource_key,
+                        quantity=s.quantity,
+                        unit=s.unit,
+                        cost_line_id=s.cost_line_id,
+                        suggested_vendor_id=s.suggested_vendor_id,
+                        suggested_vendor_name=(
+                            ctx.vendors[s.suggested_vendor_id].name if s.suggested_vendor_id in ctx.vendors else None
+                        ),
+                    )
+                    for s in item.sources
+                ],
                 po_items=[
                     RequisitionPOItemRef(
                         po_item_id=line.po_item_id,
@@ -1203,6 +1496,8 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
                         po_number=line.po_number,
                         quantity=line.quantity,
                         unit=line.unit,
+                        po_delivery_date=line.po_delivery_date,
+                        supplier_confirmed_delivery_date=line.supplier_confirmed_delivery_date,
                     )
                     for line in ctx.po_lines.get(item.id, [])
                 ],
@@ -1222,6 +1517,7 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
         title=req.title,
         required_date=req.required_date,
         lead_time_days=req.lead_time_days,
+        latest_order_date=_latest_order_date(req.required_date, req.lead_time_days),
         estimated_delivery_date=req.estimated_delivery_date,
         requester_id=req.requester_id,
         approver_id=req.approver_id,
@@ -1232,6 +1528,7 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
         vendor_id=req.vendor_id,
         vendor_name=vendor.name if vendor is not None else None,
         vendor_status=vendor.status if vendor is not None else None,
+        suggested_vendors=[_vendor_ref(vid, ctx) for vid in dict.fromkeys(line_suggestions)],
         po_id=req.po_id,
         po_number=ctx.po_numbers.get(req.po_id) if req.po_id else None,
         notes=req.notes,

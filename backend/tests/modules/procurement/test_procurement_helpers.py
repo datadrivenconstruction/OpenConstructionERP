@@ -9,7 +9,7 @@ Covered:
     * ``_parse_decimal``         - strict parse that 400s on garbage.
     * ``_compute_po_total``      - subtotal + tax, Decimal-exact.
     * ``_to_decimal`` / ``_fmt_qty`` - quantity coercion + display normalisation.
-    * ``_compute_delivery_date`` - required_date - lead_time_days windowing.
+    * ``_latest_order_date`` - required_date - lead_time_days, the latest ordering date.
     * ``_mr_assert_transition``  - requisition FSM allowlist (409 on illegal).
     * ``_mr_reconcile``          - requisition quantity rollup, clamped at 0.
     * ``_validate_3way_match``   - the qty-exceeds-received / over-invoice path
@@ -30,9 +30,9 @@ from fastapi import HTTPException
 
 from app.modules.procurement.models import PurchaseOrder
 from app.modules.procurement.service import (
-    _compute_delivery_date,
     _compute_po_total,
     _fmt_qty,
+    _latest_order_date,
     _mr_assert_transition,
     _mr_reconcile,
     _parse_decimal,
@@ -137,16 +137,16 @@ def test_fmt_qty_normalises_uniformly(value: object, expected: str) -> None:
     assert _fmt_qty(value) == expected
 
 
-# ── _compute_delivery_date ────────────────────────────────────────────────
+# ── _latest_order_date ────────────────────────────────────────────────
 
 
-def test_compute_delivery_date_subtracts_lead_time() -> None:
+def test_latest_order_date_subtracts_lead_time() -> None:
     # 2026-05-20 minus a 10-day lead time -> 2026-05-10.
-    assert _compute_delivery_date("2026-05-20", 10) == "2026-05-10"
+    assert _latest_order_date("2026-05-20", 10) == "2026-05-10"
 
 
-def test_compute_delivery_date_crosses_month_boundary() -> None:
-    assert _compute_delivery_date("2026-05-05", 10) == "2026-04-25"
+def test_latest_order_date_crosses_month_boundary() -> None:
+    assert _latest_order_date("2026-05-05", 10) == "2026-04-25"
 
 
 @pytest.mark.parametrize(
@@ -158,8 +158,8 @@ def test_compute_delivery_date_crosses_month_boundary() -> None:
         ("not-a-date", 10),  # unparseable date
     ],
 )
-def test_compute_delivery_date_returns_none_on_invalid(required: str | None, lead: int) -> None:
-    assert _compute_delivery_date(required, lead) is None
+def test_latest_order_date_returns_none_on_invalid(required: str | None, lead: int) -> None:
+    assert _latest_order_date(required, lead) is None
 
 
 # ── _mr_assert_transition (requisition FSM) ───────────────────────────────

@@ -16,6 +16,7 @@ Endpoints:
     POST   /requisitions/convert-to-po    - Approved requisitions of a project -> one draft purchase order
     GET    /requisitions/trace/position/{boq_position_id}  - Requisitions and orders behind a BOQ position
     GET    /requisitions/trace/purchase-order/{po_id}      - Requisitions and BOQ sources behind an order
+    GET    /requisitions/schedule-activities               - Activities a line can take its needed-by date from
 
 Every handler resolves the project from the trusted row (or the request body on
 create) and checks the caller's access to it, the same gate the purchase order
@@ -47,6 +48,7 @@ from app.modules.procurement.schemas import (
     RequisitionResponse,
     RequisitionUpdate,
     RequisitionValidationResponse,
+    ScheduleActivityOptionPage,
 )
 from app.modules.procurement.service import ProcurementService
 
@@ -134,6 +136,24 @@ async def convert_requisitions_to_po(
     """
     await verify_project_access(data.project_id, str(user_id), session)
     return await service.convert_to_purchase_order(data, user_id=str(user_id))
+
+
+@router.get(
+    "/schedule-activities",
+    response_model=ScheduleActivityOptionPage,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def list_schedule_activities(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=500, ge=1, le=1000),
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> ScheduleActivityOptionPage:
+    """One page of the project's schedule activities, by start date, for proposing a line's needed-by date."""
+    await verify_project_access(project_id, str(user_id), session)
+    return await service.page_schedule_activities(project_id, offset=offset, limit=limit)
 
 
 @router.get(

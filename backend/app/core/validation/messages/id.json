@@ -657,6 +657,30 @@
       "fail": "Baris {line} tidak terhubung ke baris biaya, sehingga pesanannya tidak akan tampil sebagai komitmen terhadap anggaran",
       "suggestion": "Buat baris dari BOQ, atau hubungkan ke baris biaya sebelum memesan"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Baris {line} menyarankan pemasok {vendor}, yang tidak ada di daftar pemasok",
+      "suggestion": "Pilih pemasok yang disarankan dari daftar pemasok, atau hapus sarannya"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Baris {line} menyarankan {vendor}, pemasok yang tidak aktif di daftar pemasok",
+      "suggestion": "Sarankan pemasok yang aktif, atau serahkan pilihan kepada bagian pembelian"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Sumber BOQ pada baris {line} menyarankan {count} pemasok yang berbeda",
+      "suggestion": "Pilih satu pemasok untuk baris ini, atau pecah baris agar setiap pemasok punya barisnya sendiri"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Baris {line} menyarankan {vendor}, tetapi permintaan pembelian akan dipesan dari pemasok lain",
+      "suggestion": "Pastikan pemasok yang dipilih bisa memasok baris ini, atau pesan secara terpisah"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Baris {line} dibutuhkan pada {date}, tanggal yang sudah lewat (hari ini {today})",
+      "suggestion": "Isi tanggal material benar-benar dibutuhkan di lokasi proyek"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Baris {line} direncanakan untuk aktivitas yang dimulai {anchor}, tetapi aktivitas kini dimulai {start}",
+      "suggestion": "Cocokkan tanggal dibutuhkan baris dengan jadwal terkini dan ubah jika perlu"
+    },
     "receipt_certificate_present": {
       "fail": "Baris {line} dipesan dengan {required}, tetapi pengiriman membawa {delivered}",
       "suggestion": "Lampirkan sertifikat yang diminta pesanan, atau tolak baris ini sampai pemasok mengirimkannya"

@@ -657,6 +657,30 @@
       "fail": "Dòng {line} chưa liên kết với dòng chi phí nên đơn đặt hàng của nó sẽ không hiện là khoản cam kết so với ngân sách",
       "suggestion": "Tạo dòng từ BOQ, hoặc liên kết nó với một dòng chi phí trước khi đặt hàng"
     },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Dòng {line} đề xuất nhà cung cấp {vendor}, nhưng nhà cung cấp này không có trong danh bạ nhà cung cấp",
+      "suggestion": "Chọn nhà cung cấp được đề xuất từ danh bạ nhà cung cấp, hoặc xóa đề xuất"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Dòng {line} đề xuất {vendor}, một nhà cung cấp không còn hoạt động trong danh bạ nhà cung cấp",
+      "suggestion": "Đề xuất một nhà cung cấp đang hoạt động, hoặc để bộ phận mua hàng chọn"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Các nguồn BOQ của dòng {line} đề xuất {count} nhà cung cấp khác nhau",
+      "suggestion": "Chọn một nhà cung cấp cho dòng, hoặc tách dòng để mỗi nhà cung cấp có dòng riêng"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Dòng {line} đề xuất {vendor}, nhưng phiếu yêu cầu vật tư sẽ đặt hàng từ nhà cung cấp khác",
+      "suggestion": "Kiểm tra nhà cung cấp đã chọn có giao được dòng này không, hoặc đặt riêng dòng này"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Dòng {line} cần trước ngày {date}, ngày này đã qua (hôm nay là {today})",
+      "suggestion": "Nhập ngày vật tư thực sự cần có tại công trường"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Dòng {line} được lập kế hoạch cho công việc bắt đầu ngày {anchor}, nhưng công việc nay bắt đầu ngày {start}",
+      "suggestion": "Đối chiếu ngày cần của dòng với tiến độ hiện tại và sửa nếu cần"
+    },
     "receipt_certificate_present": {
       "fail": "Dòng {line} được đặt với {required}, nhưng đợt giao hàng lại có {delivered}",
       "suggestion": "Đính kèm chứng chỉ mà đơn đặt hàng yêu cầu, hoặc từ chối dòng này cho đến khi nhà cung cấp gửi chứng chỉ"
