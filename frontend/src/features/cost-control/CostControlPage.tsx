@@ -331,10 +331,10 @@ export function CostControlPage() {
                 { id: 'contract', label: t('cost_control.axis_contract', { defaultValue: 'By contract' }) },
               ]}
             />
-            <label className="relative ml-auto flex items-center">
-              <Search size={14} className="pointer-events-none absolute left-2.5 text-content-quaternary" />
+            <label className="relative ms-auto flex items-center">
+              <Search size={14} className="pointer-events-none absolute start-2.5 text-content-quaternary" />
               <input
-                className="h-8 w-56 rounded-lg border border-border bg-surface-primary pl-8 pr-3 text-sm"
+                className="h-8 w-56 rounded-lg border border-border bg-surface-primary ps-8 pe-3 text-sm"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t('cost_control.search', { defaultValue: 'Find a code or name' })}
