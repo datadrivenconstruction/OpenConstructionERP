@@ -748,6 +748,17 @@ class CostStructureService:
                 select(CostLine).where(CostLine.project_id == project_id, CostLine.boq_position_id == pos.id).limit(1)
             )
         ).scalar_one_or_none()
+        old_rows = (
+            (await self.session.execute(select(PositionAllocation).where(PositionAllocation.position_id == pos.id)))
+            .scalars()
+            .all()
+        )
+        # A duplicated bill inherits its source's vectors, so its positions point at lines of
+        # the source bill. Keeping such a line, for example to change its share, stays allowed;
+        # only moving a position onto a line of another bill it was not on is refused.
+        current_lines: set[uuid.UUID] = {r.cost_line_id for r in old_rows}
+        if pos.cost_line_id is not None:
+            current_lines.add(pos.cost_line_id)
         targets: list[tuple[uuid.UUID, Decimal]] = []
         for row in request.rows:
             if row.cost_line_id is not None:
@@ -758,7 +769,7 @@ class CostStructureService:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_not_in_project", "Cost line of another project")
                 if (line.status or "") == "archived":
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_missing", "Cost line not found")
-                if line.boq_id is not None and line.boq_id != pos.boq_id:
+                if line.boq_id is not None and line.boq_id != pos.boq_id and line.id not in current_lines:
                     raise _problem(
                         status.HTTP_400_BAD_REQUEST, "line_of_other_bill", "This cost line carries another bill"
                     )
@@ -784,11 +795,6 @@ class CostStructureService:
         if len({t for t, _ in targets}) != len(targets):
             raise _problem(422, "duplicate_target", "Each cost line may appear once")
 
-        old_rows = (
-            (await self.session.execute(select(PositionAllocation).where(PositionAllocation.position_id == pos.id)))
-            .scalars()
-            .all()
-        )
         touched: set[uuid.UUID] = {r.cost_line_id for r in old_rows}
         if pos.cost_line_id is not None:
             touched.add(pos.cost_line_id)
@@ -1008,6 +1014,9 @@ class CostStructureService:
                 account_title=(account.title or ("" if same_code(account.name, account.code) else account.name))
                 if account is not None
                 else "",
+                account_postable=account is not None
+                and bool(account.is_leaf_postable)
+                and (account.status or "") != "closed",
                 share=share,
                 fraction=fraction,
                 amount=amount,
@@ -1072,6 +1081,8 @@ class CostStructureService:
                 )
             else:
                 out.append(PositionAllocationOut(**base, mode="none"))
+                continue
+            out[-1].in_suspense = any(not r.account_postable for r in out[-1].rows)
         return out
 
     async def boq_allocations(self, boq_id: uuid.UUID) -> BoqAllocations:
@@ -1084,7 +1095,11 @@ class CostStructureService:
         positions = await self._positions_out(boq_id)
         value_total = sum((p.total for p in positions), ZERO)
         allocated = [p for p in positions if p.mode != "none"]
-        value_allocated = sum((p.total for p in allocated), ZERO)
+        # Money on a cost line without a postable account is in suspense, not on the
+        # structure: it is counted apart so the share never reads as covered.
+        value_in_suspense = sum((r.amount for p in allocated for r in p.rows if not r.account_postable), ZERO)
+        value_on_lines = sum((p.total for p in allocated), ZERO)
+        value_allocated = value_on_lines - value_in_suspense
         share = (value_allocated / value_total * Decimal("100")).quantize(Decimal("0.01")) if value_total else ZERO
         currency = ""
         try:
@@ -1106,7 +1121,9 @@ class CostStructureService:
                 positions_invalid=sum(1 for p in positions if not p.valid),
                 value_total=value_total,
                 value_allocated=value_allocated,
-                value_unallocated=value_total - value_allocated,
+                value_unallocated=value_total - value_on_lines,
+                positions_in_suspense=sum(1 for p in positions if p.in_suspense),
+                value_in_suspense=value_in_suspense,
                 share_pct=share,
             ),
             positions=positions,

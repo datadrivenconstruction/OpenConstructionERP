@@ -40,7 +40,11 @@ export function CostAllocationCoverageBar({
 }: CostAllocationCoverageBarProps) {
   const { t } = useTranslation();
   const width = barWidth(coverage.share_pct);
-  const complete = coverage.positions_total > 0 && coverage.positions_allocated === coverage.positions_total;
+  const inSuspense = coverage.positions_in_suspense ?? 0;
+  // Money on a cost line without an account is not on the structure, so the bar is
+  // complete only when every position reaches a postable account.
+  const complete =
+    coverage.positions_total > 0 && coverage.positions_allocated === coverage.positions_total && inSuspense === 0;
   return (
     <div
       className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border-light bg-surface-elevated px-3 py-1.5 text-xs"
@@ -75,6 +79,23 @@ export function CostAllocationCoverageBar({
           split: coverage.positions_split,
         })}
       </span>
+      {inSuspense > 0 && (
+        <span
+          className="flex items-center gap-1 font-medium text-amber-700 dark:text-amber-300"
+          data-testid="cost-allocation-suspense"
+          title={t('boq.cost_allocation.coverage_suspense_tip', {
+            defaultValue:
+              'Positions on a cost line without an account: {{count}}. Their money is not on the cost structure until the cost line gets an account.',
+            count: inSuspense,
+          })}
+        >
+          <AlertTriangle size={12} />
+          {t('boq.cost_allocation.coverage_suspense', {
+            defaultValue: 'In suspense: {{amount}}',
+            amount: formatCurrency(coverage.value_in_suspense ?? '0', currency),
+          })}
+        </span>
+      )}
       {coverage.positions_invalid > 0 && (
         <span className="flex items-center gap-1 font-medium text-semantic-error">
           <AlertTriangle size={12} />

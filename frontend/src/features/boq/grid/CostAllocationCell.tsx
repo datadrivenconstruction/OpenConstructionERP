@@ -24,8 +24,8 @@ export interface CostAllocationGridContext {
 }
 
 export type AllocationCellView =
-  | { kind: 'single'; label: string; valid: boolean }
-  | { kind: 'split'; parts: number; valid: boolean }
+  | { kind: 'single'; label: string; valid: boolean; suspense: boolean }
+  | { kind: 'split'; parts: number; valid: boolean; suspense: boolean }
   | { kind: 'none' };
 
 /** How a position's allocation reads in one cell. */
@@ -36,9 +36,14 @@ export function allocationCellView(allocation: PositionAllocation): AllocationCe
     const label = [row.account_code, row.cost_line_code].filter(Boolean).join(' · ');
     // A one-row quantity split goes stale like any split when the position is
     // remeasured, so validity travels with the single view as well.
-    return { kind: 'single', label: label || row.cost_line_description, valid: allocation.valid };
+    return {
+      kind: 'single',
+      label: label || row.cost_line_description,
+      valid: allocation.valid,
+      suspense: Boolean(allocation.in_suspense),
+    };
   }
-  return { kind: 'split', parts: allocation.rows.length, valid: allocation.valid };
+  return { kind: 'split', parts: allocation.rows.length, valid: allocation.valid, suspense: Boolean(allocation.in_suspense) };
 }
 
 /** Used only when the grid context carries no `t`: the English default, interpolated. */
@@ -68,22 +73,38 @@ export function CostAllocationCellRenderer(params: ICellRendererParams) {
         <span className="truncate font-mono">{view.label}</span>
       </span>
     );
+  } else if (view.kind === 'single' && view.suspense) {
+    // On a cost line, yet on no account: the money sits in suspense, not on the structure.
+    title = t('boq.cost_allocation.suspense_tip', {
+      defaultValue: 'Its cost line has no account, so the money sits in suspense. Click to move it onto an account.',
+    });
+    content = (
+      <span className="inline-flex min-w-0 items-center gap-1 text-2xs text-amber-700 dark:text-amber-300">
+        <AlertTriangle size={11} className="shrink-0" />
+        <span className="shrink-0 font-medium">{t('boq.cost_allocation.suspense_cell', { defaultValue: 'No account' })}</span>
+        <span className="truncate font-mono text-content-tertiary">{view.label}</span>
+      </span>
+    );
   } else if (view.kind === 'single') {
     title = t('boq.cost_allocation.single_tip', {
       defaultValue: 'On one cost line. Click to split or move it.',
     });
     content = <span className="truncate font-mono text-2xs text-content-primary">{view.label}</span>;
   } else if (view.kind === 'split') {
-    title = view.valid
-      ? t('boq.cost_allocation.split_tip', { defaultValue: 'Split across several cost lines. Click to see the shares.' })
-      : t('boq.cost_allocation.invalid_tip', {
+    const warn = !view.valid || view.suspense;
+    title = !view.valid
+      ? t('boq.cost_allocation.invalid_tip', {
           defaultValue: 'The shares no longer add up, for example after the quantity changed. Click to fix them.',
-        });
+        })
+      : view.suspense
+        ? t('boq.cost_allocation.suspense_tip', {
+            defaultValue: 'Its cost line has no account, so the money sits in suspense. Click to move it onto an account.',
+          })
+        : t('boq.cost_allocation.split_tip', { defaultValue: 'Split across several cost lines. Click to see the shares.' });
+    const tone = !view.valid ? 'text-semantic-error' : view.suspense ? 'text-amber-700 dark:text-amber-300' : 'text-oe-blue';
     content = (
-      <span
-        className={`inline-flex items-center gap-1 text-2xs ${view.valid ? 'text-oe-blue' : 'text-semantic-error'}`}
-      >
-        {view.valid ? <GitFork size={11} /> : <AlertTriangle size={11} />}
+      <span className={`inline-flex items-center gap-1 text-2xs ${tone}`}>
+        {warn ? <AlertTriangle size={11} /> : <GitFork size={11} />}
         {t('boq.cost_allocation.split_cell', { defaultValue: 'Split ({{parts}})', parts: view.parts })}
       </span>
     );

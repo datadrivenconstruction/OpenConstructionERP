@@ -147,6 +147,8 @@ export interface AllocationRow {
   account_id: string | null;
   account_code: string;
   account_title: string;
+  /** False when the line has no account, or a heading or closed one: the money is in suspense. */
+  account_postable: boolean;
   share: string;
   fraction: string;
   amount: string;
@@ -166,6 +168,8 @@ export interface PositionAllocation {
   problem: string | null;
   share_total: string;
   share_expected: string;
+  /** At least one share lands on a cost line without a postable account. */
+  in_suspense: boolean;
 }
 
 export interface AllocationCoverage {
@@ -177,6 +181,9 @@ export interface AllocationCoverage {
   value_total: string;
   value_allocated: string;
   value_unallocated: string;
+  /** Positions with money on a cost line without a postable account, and that money. */
+  positions_in_suspense: number;
+  value_in_suspense: string;
   share_pct: string;
 }
 
