@@ -210,6 +210,7 @@ def _backfill(bind: sa.engine.Connection) -> None:
             if title:
                 updates.setdefault(r.id, {})["title"] = title[:255]
 
+    # boot-repair: gap - nests the flat accounts of the shipped standards by code and copies their titles; the boot heal adds the four columns empty, so on an install that never runs alembic the old accounts stay flat (level 1, no title) until someone sets their parents, while every account created afterwards is nested
     # data-rewrite-ack: table=oe_costmodel_control_account growth=bounded rows=one row per cost account of a project's cost structure, a few dozen to a few hundred per project, so it tracks the number of projects rather than transaction history
     for account_id, values in updates.items():
         bind.execute(acct.update().where(acct.c.id == account_id).values(**values))

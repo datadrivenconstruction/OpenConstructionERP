@@ -68081,7 +68081,7 @@
           "method": "GET",
           "path": "/code-lists/",
           "handler": "list_code_lists",
-          "response_model": "list[CodeListSummary]",
+          "response_model": "CodeListPage",
           "request_schema": "CostStructureService"
         },
         {
