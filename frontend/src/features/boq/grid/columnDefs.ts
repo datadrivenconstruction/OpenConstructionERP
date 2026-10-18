@@ -1085,7 +1085,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       editable: false,
       sortable: false,
       cellRenderer: 'costAllocationCellRenderer',
-      cellClass: 'text-xs !pr-2 !pl-2',
+      cellClass: 'text-xs !px-2',
     },
     {
       headerName: '',

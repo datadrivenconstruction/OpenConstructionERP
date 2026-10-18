@@ -168,9 +168,49 @@ describe('<CostStructurePanel>', () => {
     expect(screen.getByRole('button', { name: /Delete code list/ })).toBeInTheDocument();
   });
 
+  it('says so when the code lists cannot be loaded instead of offering none', async () => {
+    api.listCodeLists.mockRejectedValue(new ApiError(500, 'Server Error', null));
+    renderPanel();
+    expect(await screen.findByTestId('structure-code-lists-error')).toHaveTextContent('The code lists could not be loaded.');
+    expect(screen.queryByRole('option', { name: 'No code lists' })).not.toBeInTheDocument();
+    api.listCodeLists.mockResolvedValue([]);
+    fireEvent.click(within(screen.getByTestId('structure-code-lists-error')).getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(api.listCodeLists).toHaveBeenCalledTimes(2));
+  });
+
+  it('forgets the level when another code list is chosen', async () => {
+    api.applyCodeList.mockResolvedValue({ key: 'own-codes', accounts_created: 1 });
+    renderPanel();
+    await screen.findByTestId('structure-row-330');
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Own codes' })).toBeInTheDocument());
+    fireEvent.change(screen.getByLabelText('Down to level'), { target: { value: '3' } });
+    fireEvent.change(screen.getByTestId('structure-code-list'), { target: { value: 'own-codes' } });
+    fireEvent.click(screen.getByRole('button', { name: /Build from code list/ }));
+    await waitFor(() => expect(api.applyCodeList).toHaveBeenCalledWith('p1', 'own-codes', null));
+  });
+
   it('shows an empty state when there is no structure', async () => {
     api.getStructure.mockResolvedValue(tree({ nodes: [], suspense: [], findings: [], total: '0' }));
     renderPanel();
     expect(await screen.findByText('No cost structure yet')).toBeInTheDocument();
+  });
+
+  it('reads empty suspense buckets as no structure, with no green light', async () => {
+    // The server lists both buckets even when they carry nothing.
+    api.getStructure.mockResolvedValue(
+      tree({
+        nodes: [],
+        suspense: [
+          { kind: 'no_account', line_count: 0, amount: '0', line_ids: [] },
+          { kind: 'invalid_account', line_count: 0, amount: '0', line_ids: [] },
+        ],
+        findings: [],
+        total: '0',
+      }),
+    );
+    renderPanel();
+    expect(await screen.findByText('No cost structure yet')).toBeInTheDocument();
+    expect(screen.queryByTestId('structure-traffic-light')).not.toBeInTheDocument();
+    expect(screen.queryByText('Expand all')).not.toBeInTheDocument();
   });
 });

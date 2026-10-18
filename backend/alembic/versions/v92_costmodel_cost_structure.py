@@ -12,20 +12,18 @@ Four columns on ``oe_costmodel_control_account`` and two new tables:
 * ``oe_costmodel_position_allocation``: one share of a bill position on a cost line, for a position split
   over more than one. A position on a single line keeps ``oe_boq_position.cost_line_id`` and needs no row.
 
-The backfill turns the flat trees ``generate_from_boq`` used to write into trees. Within one project and
-one standard of a code shape the platform nests (DIN 276 digits, NRM dots, MasterFormat groups, UniFormat
-letters) an account without a parent is placed under the most specific other account of the same project
-and standard that covers its code, so ``330`` goes under ``300`` when both exist. A custom or unnamed
-standard is left as it is: its parents are whatever the user set. Every account then gets its level from
-its parent chain. ``title`` takes the existing name when the name is more than the code; when the name is
-just the code, the title comes from the shipped code list of that standard, or stays empty.
+The backfill turns the flat trees ``generate_from_boq`` used to write into trees, by the rule in
+:mod:`app.modules.costmodel.structure_backfill`: within one project and one standard of a code shape the
+platform nests (DIN 276 digits, NRM dots, MasterFormat groups, UniFormat letters), a group in which no account
+has a parent or a title yet (the state an upgrade leaves it in) is nested by code, so ``330`` goes under ``300``
+when both exist, and its titles come from the names or the shipped code list. A group someone already shaped,
+and every custom or unnamed standard, keeps its parents. Every account then gets its level from its parent
+chain.
 
 Schema steps are inspector-guarded, so a database whose tables ``create_all`` already built reaches this
-revision and only runs the backfill, which is idempotent: it fills parents that are empty and titles that
-are empty, and recomputes levels. Installs that are stamped rather than upgraded MUST run this revision
-(``alembic upgrade head``) to get the backfill; without it the service still works, because every reader
-falls back to the name for an empty title and recomputes levels from the parent links, but the old flat
-trees stay flat until the spine is regenerated from the bill.
+revision and only runs the backfill, which is idempotent. Installs that heal their schema at boot and stamp
+head instead get the same backfill from the boot repair ``costmodel_structure_backfill``
+(``app/modules/costmodel/repairs.py``), which calls the same planner on every start.
 
 Revision ID: v92_costmodel_cost_structure
 Revises: v91_requisition_line_supplier_dates
@@ -50,9 +48,6 @@ depends_on: str | Sequence[str] | None = None
 _ACCT = "oe_costmodel_control_account"
 _LIST = "oe_costmodel_code_list"
 _ALLOC = "oe_costmodel_position_allocation"
-
-#: Standards whose codes nest by their shape, so a parent can be read off the code.
-_SHAPE_STANDARDS = frozenset({"din276", "nrm", "masterformat", "uniformat"})
 
 
 def _columns(bind: sa.engine.Connection, table: str) -> set[str]:
@@ -143,8 +138,12 @@ def _create_allocation(bind: sa.engine.Connection) -> None:
 
 
 def _backfill(bind: sa.engine.Connection) -> None:
-    """Parents from code shape, levels from parents, titles from names or the shipped lists."""
-    from app.core.code_lists import get_code_list, parent_for, same_code
+    """Parents from code shape, levels from parents, titles from names or the shipped lists.
+
+    The decision lives in :func:`app.modules.costmodel.structure_backfill.plan_structure_backfill`,
+    which the boot repair ``costmodel_structure_backfill`` calls too.
+    """
+    from app.modules.costmodel.structure_backfill import AccountRow, plan_structure_backfill
 
     acct = sa.table(
         _ACCT,
@@ -169,48 +168,21 @@ def _backfill(bind: sa.engine.Connection) -> None:
             acct.c.classification_standard,
         )
     ).all()
-    if not rows:
-        return
-    parent_of = {r.id: r.parent_id for r in rows}
-    updates: dict[object, dict[str, object]] = {}
+    updates = plan_structure_backfill(
+        AccountRow(
+            id=r.id,
+            project_id=r.project_id,
+            parent_id=r.parent_id,
+            code=r.code or "",
+            name=r.name or "",
+            title=r.title or "",
+            level=int(r.level or 0),
+            standard=r.classification_standard or "",
+        )
+        for r in rows
+    )
 
-    groups: dict[tuple[object, str], list[sa.Row]] = {}
-    for r in rows:
-        std = (r.classification_standard or "").strip().lower()
-        if std in _SHAPE_STANDARDS:
-            groups.setdefault((r.project_id, std), []).append(r)
-    for members in groups.values():
-        by_code = {m.code: m.id for m in members}
-        codes = list(by_code)
-        for m in members:
-            if m.parent_id is not None:
-                continue
-            parent_code = parent_for(m.code, codes)
-            if parent_code is not None:
-                parent_of[m.id] = by_code[parent_code]
-                updates.setdefault(m.id, {})["parent_id"] = by_code[parent_code]
-
-    for r in rows:
-        depth, current, seen = 1, parent_of.get(r.id), {r.id}
-        while current is not None and current not in seen and current in parent_of:
-            seen.add(current)
-            depth += 1
-            current = parent_of.get(current)
-        if r.level != depth:
-            updates.setdefault(r.id, {})["level"] = depth
-        if not (r.title or "").strip():
-            name = (r.name or "").strip()
-            title = ""
-            if name and not same_code(name, r.code):
-                title = name
-            else:
-                code_list = get_code_list((r.classification_standard or "").strip().lower())
-                entry = code_list.find(r.code) if code_list is not None else None
-                title = entry.title if entry is not None else ""
-            if title:
-                updates.setdefault(r.id, {})["title"] = title[:255]
-
-    # boot-repair: gap - nests the flat accounts of the shipped standards by code and copies their titles; the boot heal adds the four columns empty, so on an install that never runs alembic the old accounts stay flat (level 1, no title) until someone sets their parents, while every account created afterwards is nested
+    # boot-repair: registry=costmodel_structure_backfill
     # data-rewrite-ack: table=oe_costmodel_control_account growth=bounded rows=one row per cost account of a project's cost structure, a few dozen to a few hundred per project, so it tracks the number of projects rather than transaction history
     for account_id, values in updates.items():
         bind.execute(acct.update().where(acct.c.id == account_id).values(**values))

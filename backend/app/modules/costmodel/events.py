@@ -33,6 +33,11 @@ is introduced; the notification itself is the side effect.
 
 from __future__ import annotations
 
+import logging
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
 # ── Published event names ───────────────────────────────────────────────────
 
 EVENT_BUDGET_LINE_ACTUAL_POSTED = "costmodel.budget_line.actual_posted"
@@ -59,3 +64,107 @@ def register_costmodel_subscribers() -> None:
     # Importing the service module ensures the labour-actuals subscriber is
     # bound even if nothing else has imported it yet at startup.
     import app.modules.costmodel.service  # noqa: F401
+    from app.core.events import event_bus
+
+    event_bus.subscribe_once("boq.position.updated", _on_bill_position_updated)
+    event_bus.subscribe_once("boq.position.deleted", _on_bill_position_deleted)
+
+
+# ── Cost lines follow the bill ───────────────────────────────────────────────
+#
+# A cost line generated from a bill position, or carrying a share of one, holds
+# the position's money in its estimate. When the position is edited or deleted
+# the line is refreshed from what it carries now, instead of waiting for the
+# next spine generation. A recalculation or an import fires one event per row
+# at commit, so the handlers only queue ids and one worker refreshes them up to
+# ``_BATCH_SIZE`` at a time in one session per batch, never a session per row.
+
+#: Position fields whose change can move money onto or off a cost line.
+#: ``metadata`` carries the resources a rate is built from.
+_MONEY_FIELDS = frozenset({"quantity", "unit_rate", "total", "unit", "metadata"})
+_BATCH_SIZE = 200
+_POSITION = "position"
+_BILL = "bill"
+
+_pending: dict[tuple[str, str], None] = {}
+_worker: Any = None
+
+
+def _touches_money(data: dict[str, Any]) -> bool:
+    changes = data.get("changes")
+    if not isinstance(changes, dict) or not changes or "propagated_from" in changes:
+        return True
+    return bool(_MONEY_FIELDS & set(changes))
+
+
+async def _refresh(items: list[tuple[str, str]]) -> None:
+    import uuid
+
+    from app.database import async_session_factory
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    positions: set[uuid.UUID] = set()
+    bills: set[uuid.UUID] = set()
+    for kind, raw in items:
+        try:
+            (positions if kind == _POSITION else bills).add(uuid.UUID(raw))
+        except (ValueError, AttributeError, TypeError):
+            continue
+    if not positions and not bills:
+        return
+    async with async_session_factory() as session:
+        changed = await CostStructureService(session).recompute_after_bill_change(positions, bills)
+        await session.commit()
+    if changed:
+        logger.debug("Refreshed %d cost line(s) after bill edits", changed)
+
+
+async def _drain() -> None:
+    global _worker
+    try:
+        while _pending:
+            keys = list(_pending)[:_BATCH_SIZE]
+            for key in keys:
+                _pending.pop(key, None)
+            try:
+                await _refresh(keys)
+            except Exception:
+                logger.exception("Cost line refresh after bill edits failed for %d key(s)", len(keys))
+    finally:
+        _worker = None
+
+
+def _queue(key: tuple[str, str]) -> None:
+    import asyncio
+
+    global _worker
+    loop = asyncio.get_running_loop()
+    if _worker is not None and _worker.get_loop() is not loop:
+        # Left over from a loop that is gone (a finished test's); it can never run here.
+        _pending.clear()
+        _worker = None
+    _pending[key] = None
+    if _worker is None or _worker.done():
+        _worker = loop.create_task(_drain())
+
+
+async def _on_bill_position_updated(event: object) -> None:
+    data = getattr(event, "data", None) or {}
+    position_id = str(data.get("position_id") or "")
+    if position_id and _touches_money(data):
+        _queue((_POSITION, position_id))
+
+
+async def _on_bill_position_deleted(event: object) -> None:
+    data = getattr(event, "data", None) or {}
+    boq_id = str(data.get("boq_id") or "")
+    if boq_id:
+        _queue((_BILL, boq_id))
+
+
+async def drain_bill_refresh() -> None:
+    """Wait until queued cost line refreshes are done. For tests and shutdown."""
+    import asyncio
+
+    while _worker is not None and not _worker.done() and _worker.get_loop() is asyncio.get_running_loop():
+        await asyncio.wait({_worker})

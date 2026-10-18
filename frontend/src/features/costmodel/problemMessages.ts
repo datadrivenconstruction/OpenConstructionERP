@@ -97,6 +97,16 @@ export function problemMessage(t: TFunction, problem: string, params: Params = {
       return t('costmodel.problem.share_not_positive', {
         defaultValue: 'Every share must be greater than zero.',
       });
+    case 'share_too_precise':
+      return t('costmodel.problem.share_too_precise', {
+        defaultValue: 'Too many decimals in a share. Allowed: {{max}}.',
+        max: str(params.max),
+      });
+    case 'too_many_shares':
+      return t('costmodel.problem.too_many_shares', {
+        defaultValue: 'Too many shares for one position. Allowed: {{max}}.',
+        max: str(params.max),
+      });
     case 'quantity_split_without_quantity':
       return t('costmodel.problem.quantity_split_without_quantity', {
         defaultValue: 'The position has no quantity, so it cannot be split by quantity.',
@@ -118,6 +128,11 @@ export function problemMessage(t: TFunction, problem: string, params: Params = {
     case 'target_not_in_project':
       return t('costmodel.problem.target_not_in_project', {
         defaultValue: 'A share points at a cost line or account of another project.',
+      });
+    case 'account_not_postable':
+      return t('costmodel.problem.account_not_postable', {
+        defaultValue:
+          'A share points at a heading or a closed account, which takes no postings. Choose an account at the lowest level.',
       });
     case 'line_of_other_bill':
       return t('costmodel.problem.line_of_other_bill', {

@@ -60,12 +60,20 @@ export function CodeListImportModal({ open, projectId, onClose, onImported }: Co
     setFileError(null);
   };
 
+  // Counted words go through plural keys, so "1 level" is not "1 levels".
+  const counts = (entries: number, depth: number) => ({
+    codes: t('costmodel.import.codes_count', { count: entries, defaultValue_one: '{{count}} code', defaultValue_other: '{{count}} codes' }),
+    levels: t('costmodel.import.levels_count', { count: depth, defaultValue_one: '{{count}} level', defaultValue_other: '{{count}} levels' }),
+  });
+
   const describe = (err: unknown) => {
     const problem = problemOf(err);
     return problem ? problemMessage(t, problem.problem, problem.params) : getErrorMessage(err);
   };
 
   const run = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: (dryRun: boolean) =>
       costStructureApi.importCodeList(projectId, { file: file!, key, name, dryRun }),
     onSuccess: (result, dryRun) => {
@@ -77,11 +85,10 @@ export function CodeListImportModal({ open, projectId, onClose, onImported }: Co
       addToast({
         type: 'success',
         title: t('costmodel.import.done_title', { defaultValue: 'Code list imported' }),
-        message: t('costmodel.import.done_message', {
-          defaultValue: '{{name}}: {{entries}} codes, {{depth}} levels.',
+        message: t('costmodel.import.done_summary', {
+          defaultValue: '{{name}} is stored with {{codes}} in {{levels}}.',
           name: result.name,
-          entries: result.entry_count,
-          depth: result.depth,
+          ...counts(result.entry_count, result.depth),
         }),
       });
       onImported?.(result.key);
@@ -207,10 +214,9 @@ export function CodeListImportModal({ open, projectId, onClose, onImported }: Co
           {checked.issues.length === 0 ? (
             <div className="flex items-center gap-2 rounded-md bg-semantic-success/10 px-3 py-2 text-sm text-semantic-success">
               <CheckCircle2 size={16} />
-              {t('costmodel.import.check_ok', {
-                defaultValue: 'The file is fine: {{entries}} codes in {{depth}} levels.',
-                entries: checked.entry_count,
-                depth: checked.depth,
+              {t('costmodel.import.check_ok_summary', {
+                defaultValue: 'The file is fine: {{codes}} in {{levels}}.',
+                ...counts(checked.entry_count, checked.depth),
               })}
             </div>
           ) : (
@@ -223,7 +229,7 @@ export function CodeListImportModal({ open, projectId, onClose, onImported }: Co
               </p>
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-left text-2xs uppercase text-content-tertiary">
+                  <tr className="text-start text-2xs uppercase text-content-tertiary">
                     <th className="px-2 py-1">{t('costmodel.import.col_row', { defaultValue: 'Row' })}</th>
                     <th className="px-2 py-1">{t('costmodel.import.col_code', { defaultValue: 'Code' })}</th>
                     <th className="px-2 py-1">{t('costmodel.import.col_problem', { defaultValue: 'Problem' })}</th>
@@ -247,11 +253,12 @@ export function CodeListImportModal({ open, projectId, onClose, onImported }: Co
                 {t('costmodel.import.preview', { defaultValue: 'Preview' })}
               </p>
               <ul className="max-h-48 overflow-y-auto rounded-md border border-border-light p-1 text-xs">
-                {checked.preview.slice(0, PREVIEW_ROWS).map((entry) => (
+                {checked.preview.slice(0, PREVIEW_ROWS).map((entry, i) => (
                   <li
-                    key={entry.code}
+                    // A rejected file can carry the same code twice.
+                    key={`${entry.code}-${i}`}
                     className="flex gap-2 py-0.5"
-                    style={{ paddingLeft: `${(Math.max(entry.level, 1) - 1) * 14 + 4}px` }}
+                    style={{ paddingInlineStart: `${(Math.max(entry.level, 1) - 1) * 14 + 4}px` }}
                   >
                     <span className="font-mono text-content-tertiary">{entry.code}</span>
                     <span className="truncate text-content-primary">{entry.title}</span>

@@ -453,3 +453,243 @@ async def test_a_project_without_a_standard_parks_every_position(pg_session) -> 
     boq_id, _ = await _bill(pg_session, project_id, SPECS[:3])
     result = await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
     assert (result.standard, result.accounts_created, result.positions_in_suspense) == ("", 0, 3)
+
+
+async def test_the_bill_shows_each_share_the_cent_its_cost_line_carries(pg_session) -> None:
+    """A remainder cent on a tie lands on the same line in the bill's view and in the line estimate."""
+    from sqlalchemy import update
+
+    from app.modules.costmodel.models import ControlAccount, CostLine
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_schemas import AllocationRowIn, PositionAllocationRequest
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(
+        pg_session,
+        project_id,
+        [
+            ("01", "m3", "1", "100.01", "100.01", {"din276": "331"}),
+            ("02", "kg", "1", "5", "5.00", {"din276": "340"}),
+        ],
+    )
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+    own = await _line_of(pg_session, ids[0])
+    own_account = own.control_account_id
+    acct_340 = (
+        await pg_session.execute(
+            ControlAccount.__table__.select().where(
+                ControlAccount.project_id == project_id, ControlAccount.code == "340"
+            )
+        )
+    ).one()
+    service = CostStructureService(pg_session)
+    out = await service.set_allocation(
+        ids[0],
+        PositionAllocationRequest(
+            mode="percent",
+            rows=[
+                AllocationRowIn(control_account_id=own_account, share=D("50")),
+                AllocationRowIn(control_account_id=acct_340.id, share=D("50")),
+            ],
+        ),
+        "tester",
+    )
+    line_ids = sorted((r.cost_line_id for r in out.rows), key=str)
+    # Make the code order the reverse of the id order, so the two orders a cut could follow disagree.
+    for code, line_id in zip(("Z-LAST", "A-FIRST"), line_ids, strict=True):
+        await pg_session.execute(update(CostLine).where(CostLine.id == line_id).values(code=code))
+    await service.recompute_lines(set(line_ids))
+    await pg_session.flush()
+    pg_session.expire_all()
+
+    shown = next(p for p in (await service.boq_allocations(boq_id)).positions if p.position_id == ids[0])
+    assert sum((r.amount for r in shown.rows), D("0")) == D("100.01")
+    estimates = {
+        r.id: D(str(r.estimate_amount))
+        for r in (await pg_session.execute(CostLine.__table__.select().where(CostLine.id.in_(line_ids)))).all()
+    }
+    assert {r.cost_line_id: r.amount for r in shown.rows} == estimates
+    assert sorted(estimates.values()) == [D("50.00"), D("50.01")]
+
+
+async def test_a_share_on_a_heading_or_closed_account_is_refused(pg_session) -> None:
+    from sqlalchemy import update
+
+    from app.modules.costmodel.models import ControlAccount
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_schemas import AllocationRowIn, PositionAllocationRequest
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(pg_session, project_id, SPECS[:3])
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+    accounts = {
+        r.code: r.id
+        for r in (
+            await pg_session.execute(ControlAccount.__table__.select().where(ControlAccount.project_id == project_id))
+        ).all()
+    }
+    await pg_session.execute(
+        update(ControlAccount).where(ControlAccount.id == accounts["300"]).values(is_leaf_postable=False)
+    )
+    await pg_session.execute(update(ControlAccount).where(ControlAccount.id == accounts["340"]).values(status="closed"))
+    await pg_session.flush()
+    pg_session.expire_all()
+
+    service = CostStructureService(pg_session)
+    for target in ("300", "340"):
+        with pytest.raises(HTTPException) as err:
+            await service.set_allocation(
+                ids[0],
+                PositionAllocationRequest(
+                    mode="percent",
+                    rows=[
+                        AllocationRowIn(control_account_id=accounts["331"], share=D("50")),
+                        AllocationRowIn(control_account_id=accounts[target], share=D("50")),
+                    ],
+                ),
+                "tester",
+            )
+        assert err.value.status_code == 400
+        assert err.value.detail["problem"] == "account_not_postable"
+
+
+async def test_editing_or_deleting_a_position_refreshes_the_cost_lines_it_feeds(pg_session) -> None:
+    from sqlalchemy import delete, update
+
+    from app.modules.boq.models import Position
+    from app.modules.costmodel.models import ControlAccount
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_schemas import AllocationRowIn, PositionAllocationRequest
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(pg_session, project_id, SPECS[:3])
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+    service = CostStructureService(pg_session)
+    acct_340 = (
+        await pg_session.execute(
+            ControlAccount.__table__.select().where(
+                ControlAccount.project_id == project_id, ControlAccount.code == "340"
+            )
+        )
+    ).one()
+    own_account = (await _line_of(pg_session, ids[0])).control_account_id
+    await service.set_allocation(
+        ids[0],
+        PositionAllocationRequest(
+            mode="percent",
+            rows=[
+                AllocationRowIn(control_account_id=own_account, share=D("75")),
+                AllocationRowIn(control_account_id=acct_340.id, share=D("25")),
+            ],
+        ),
+        "tester",
+    )
+
+    # The bill is re-priced: position 01 goes from 1000.00 to 2000.00, position 02 from 200.00 to 300.00.
+    await pg_session.execute(update(Position).where(Position.id == ids[0]).values(unit_rate="200", total="2000.00"))
+    await pg_session.execute(update(Position).where(Position.id == ids[1]).values(quantity="7.5", total="300.00"))
+    await pg_session.flush()
+    assert await service.recompute_after_bill_change({ids[0], ids[1]}, set()) >= 3
+    pg_session.expire_all()
+    assert D((await _line_of(pg_session, ids[0])).estimate_amount) == D("1500.00")
+    assert D((await _line_of(pg_session, ids[1])).estimate_amount) == D("300.00")
+    assert await _line_total(pg_session, project_id) == D("2000.00") + D("300.00") + D("300.00")
+    assert await service.recompute_after_bill_change({ids[0], ids[1]}, set()) == 0, "nothing left to refresh"
+
+    # Position 02 is deleted: its line keeps nothing.
+    line_02 = (await _line_of(pg_session, ids[1])).id
+    await pg_session.execute(delete(Position).where(Position.id == ids[1]))
+    await pg_session.flush()
+    await service.recompute_after_bill_change(set(), {boq_id})
+    pg_session.expire_all()
+    from app.modules.costmodel.models import CostLine
+
+    assert D((await pg_session.get(CostLine, line_02)).estimate_amount) == D("0")
+    assert await _line_total(pg_session, project_id) == D("2000.00") + D("300.00")
+
+
+async def test_money_on_a_line_without_an_account_is_not_counted_as_covered(pg_session) -> None:
+    """A position parked in suspense sits on a cost line, yet it is not on the structure."""
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(pg_session, project_id, SPECS)
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+
+    bill = await CostStructureService(pg_session).boq_allocations(boq_id)
+    cov = bill.coverage
+    assert cov.positions_allocated == 4
+    assert (cov.positions_in_suspense, cov.value_in_suspense) == (1, D("100.00"))
+    assert cov.value_allocated == D("1500.00")
+    assert cov.value_unallocated == D("0")
+    assert cov.value_allocated + cov.value_in_suspense + cov.value_unallocated == cov.value_total
+    assert cov.share_pct == D("93.75"), "money in suspense never reads as covered"
+    by_id = {p.position_id: p for p in bill.positions}
+    assert by_id[ids[3]].in_suspense and not by_id[ids[3]].rows[0].account_postable
+    assert not by_id[ids[0]].in_suspense and by_id[ids[0]].rows[0].account_postable
+
+
+async def test_a_copied_bill_can_change_the_split_it_inherited(pg_session) -> None:
+    """The copy may keep or reweigh the source lines it inherited, but not move onto new ones."""
+    from sqlalchemy import select
+
+    from app.modules.boq.models import Position
+    from app.modules.boq.service import BOQService
+    from app.modules.costmodel.service import CostSpineService
+    from app.modules.costmodel.structure_schemas import AllocationRowIn, PositionAllocationRequest
+    from app.modules.costmodel.structure_service import CostStructureService
+
+    project_id = await _project(pg_session)
+    boq_id, ids = await _bill(pg_session, project_id, SPECS[:3])
+    await CostSpineService(pg_session).generate_from_boq(project_id, boq_id)
+    line_a = (await _line_of(pg_session, ids[0])).id
+    line_b = (await _line_of(pg_session, ids[1])).id
+    line_c = (await _line_of(pg_session, ids[2])).id
+    svc = CostStructureService(pg_session)
+    await svc.set_allocation(
+        ids[0],
+        PositionAllocationRequest(
+            rows=[
+                AllocationRowIn(cost_line_id=line_a, share=D("50")),
+                AllocationRowIn(cost_line_id=line_c, share=D("50")),
+            ]
+        ),
+        None,
+    )
+    before = await _line_total(pg_session, project_id)
+
+    copy_id = (await BOQService(pg_session).duplicate_boq(boq_id)).id
+    pg_session.expire_all()
+    copy_01 = (
+        await pg_session.execute(select(Position.id).where(Position.boq_id == copy_id, Position.ordinal == "01"))
+    ).scalar_one()
+
+    out = await svc.set_allocation(
+        copy_01,
+        PositionAllocationRequest(
+            rows=[
+                AllocationRowIn(cost_line_id=line_a, share=D("70")),
+                AllocationRowIn(cost_line_id=line_c, share=D("30")),
+            ]
+        ),
+        None,
+    )
+    assert sorted(r.share for r in out.rows) == [D("30"), D("70")]
+    assert await _line_total(pg_session, project_id) == before, "the copy still adds no money to the source lines"
+
+    with pytest.raises(HTTPException) as err:
+        await svc.set_allocation(
+            copy_01,
+            PositionAllocationRequest(
+                rows=[
+                    AllocationRowIn(cost_line_id=line_a, share=D("50")),
+                    AllocationRowIn(cost_line_id=line_b, share=D("50")),
+                ]
+            ),
+            None,
+        )
+    assert err.value.detail["problem"] == "line_of_other_bill"

@@ -62,6 +62,8 @@ export function GenerateSpineButton({
   const addToast = useToastStore((s) => s.addToast);
 
   const generate = useMutation({
+    // The error is shown here in the user's language; the global toast would repeat it raw.
+    meta: { suppressGlobalErrorToast: true },
     mutationFn: () => costModelApi.generateSpine(projectId, { boqId, standard }),
     onSuccess: (result: SpineGenerationResult) => {
       const counts = t('costmodel.spine.generated_counts', {

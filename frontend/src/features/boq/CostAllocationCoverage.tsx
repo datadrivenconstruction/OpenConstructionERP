@@ -40,7 +40,11 @@ export function CostAllocationCoverageBar({
 }: CostAllocationCoverageBarProps) {
   const { t } = useTranslation();
   const width = barWidth(coverage.share_pct);
-  const complete = coverage.positions_total > 0 && coverage.positions_allocated === coverage.positions_total;
+  const inSuspense = coverage.positions_in_suspense ?? 0;
+  // Money on a cost line without an account is not on the structure, so the bar is
+  // complete only when every position reaches a postable account.
+  const complete =
+    coverage.positions_total > 0 && coverage.positions_allocated === coverage.positions_total && inSuspense === 0;
   return (
     <div
       className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border-light bg-surface-elevated px-3 py-1.5 text-xs"
@@ -75,6 +79,23 @@ export function CostAllocationCoverageBar({
           split: coverage.positions_split,
         })}
       </span>
+      {inSuspense > 0 && (
+        <span
+          className="flex items-center gap-1 font-medium text-amber-700 dark:text-amber-300"
+          data-testid="cost-allocation-suspense"
+          title={t('boq.cost_allocation.coverage_suspense_tip', {
+            defaultValue:
+              'Positions on a cost line without an account: {{count}}. Their money is not on the cost structure until the cost line gets an account.',
+            count: inSuspense,
+          })}
+        >
+          <AlertTriangle size={12} />
+          {t('boq.cost_allocation.coverage_suspense', {
+            defaultValue: 'In suspense: {{amount}}',
+            amount: formatCurrency(coverage.value_in_suspense ?? '0', currency),
+          })}
+        </span>
+      )}
       {coverage.positions_invalid > 0 && (
         <span className="flex items-center gap-1 font-medium text-semantic-error">
           <AlertTriangle size={12} />
@@ -89,7 +110,7 @@ export function CostAllocationCoverageBar({
         onClick={onToggleColumn}
         aria-pressed={showColumn}
         data-testid="cost-allocation-column-toggle"
-        className={`ml-auto flex items-center gap-1 rounded-md px-2 py-0.5 font-medium transition-colors ${
+        className={`ms-auto flex items-center gap-1 rounded-md px-2 py-0.5 font-medium transition-colors ${
           showColumn ? 'bg-oe-blue/10 text-oe-blue' : 'text-content-secondary hover:bg-surface-secondary'
         }`}
       >
@@ -97,6 +118,36 @@ export function CostAllocationCoverageBar({
         {showColumn
           ? t('boq.cost_allocation.hide_column', { defaultValue: 'Hide allocation column' })
           : t('boq.cost_allocation.show_column', { defaultValue: 'Show allocation column' })}
+      </button>
+    </div>
+  );
+}
+
+export interface CostAllocationCoverageErrorProps {
+  onRetry: () => void;
+}
+
+/**
+ * The coverage bar when the allocations could not be loaded. Without it the
+ * bar and the allocation column would simply be missing, which reads as "no
+ * position is costed" rather than "something failed".
+ */
+export function CostAllocationCoverageError({ onRetry }: CostAllocationCoverageErrorProps) {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-border-light bg-surface-elevated px-3 py-1.5 text-xs text-semantic-error"
+      role="alert"
+      data-testid="cost-allocation-coverage-error"
+    >
+      <span className="flex items-center gap-1">
+        <AlertTriangle size={12} />
+        {t('boq.cost_allocation.coverage_failed', {
+          defaultValue: 'The cost allocation of this bill could not be loaded.',
+        })}
+      </span>
+      <button type="button" onClick={onRetry} className="ms-auto font-medium text-oe-blue hover:underline">
+        {t('common.retry', { defaultValue: 'Retry' })}
       </button>
     </div>
   );

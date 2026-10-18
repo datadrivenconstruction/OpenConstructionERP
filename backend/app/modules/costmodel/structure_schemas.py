@@ -205,6 +205,9 @@ class AllocationRowOut(BaseModel):
     account_id: UUID | None = None
     account_code: str = ""
     account_title: str = ""
+    #: False when the line has no account, or a heading or closed one: its money then
+    #: sits in a suspense bucket of the structure instead of on an account.
+    account_postable: bool = False
     share: Decimal = Decimal("0")
     fraction: Decimal = Decimal("0")
     amount: Decimal = Decimal("0")
@@ -221,7 +224,9 @@ class PositionAllocationOut(BaseModel):
     ``cost_line_id``, ``percent`` or ``quantity`` for a split, and ``none`` for a
     position on no cost line. ``valid`` is False when stored shares no longer
     add up (a quantity split whose position was remeasured), with the problem
-    key in ``problem``.
+    key in ``problem``. ``in_suspense`` is True when at least one share lands on
+    a cost line without a postable account, so part of the money is in a
+    suspense bucket rather than on the structure.
     """
 
     position_id: UUID
@@ -237,6 +242,7 @@ class PositionAllocationOut(BaseModel):
     problem: str | None = None
     share_total: Decimal = Decimal("0")
     share_expected: Decimal = Decimal("0")
+    in_suspense: bool = False
 
     @field_serializer("quantity", "total", "share_total", "share_expected", when_used="json")
     def _ser(self, v: Decimal) -> str:
@@ -244,7 +250,14 @@ class PositionAllocationOut(BaseModel):
 
 
 class AllocationCoverage(BaseModel):
-    """How much of a bill's value sits on cost lines."""
+    """How much of a bill's value sits on the cost structure.
+
+    The value splits three ways and adds back up to ``value_total``:
+    ``value_allocated`` reaches a postable account, ``value_in_suspense`` sits on
+    a cost line whose account is missing, a heading or closed, and
+    ``value_unallocated`` is on no cost line at all. ``share_pct`` counts only
+    the first part, so money in suspense never reads as covered.
+    """
 
     boq_id: UUID
     positions_total: int = 0
@@ -254,9 +267,13 @@ class AllocationCoverage(BaseModel):
     value_total: Decimal = Decimal("0")
     value_allocated: Decimal = Decimal("0")
     value_unallocated: Decimal = Decimal("0")
+    positions_in_suspense: int = 0
+    value_in_suspense: Decimal = Decimal("0")
     share_pct: Decimal = Decimal("0")
 
-    @field_serializer("value_total", "value_allocated", "value_unallocated", "share_pct", when_used="json")
+    @field_serializer(
+        "value_total", "value_allocated", "value_unallocated", "value_in_suspense", "share_pct", when_used="json"
+    )
     def _ser(self, v: Decimal) -> str:
         return _money(v)
 

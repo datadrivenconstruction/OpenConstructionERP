@@ -748,6 +748,17 @@ class CostStructureService:
                 select(CostLine).where(CostLine.project_id == project_id, CostLine.boq_position_id == pos.id).limit(1)
             )
         ).scalar_one_or_none()
+        old_rows = (
+            (await self.session.execute(select(PositionAllocation).where(PositionAllocation.position_id == pos.id)))
+            .scalars()
+            .all()
+        )
+        # A duplicated bill inherits its source's vectors, so its positions point at lines of
+        # the source bill. Keeping such a line, for example to change its share, stays allowed;
+        # only moving a position onto a line of another bill it was not on is refused.
+        current_lines: set[uuid.UUID] = {r.cost_line_id for r in old_rows}
+        if pos.cost_line_id is not None:
+            current_lines.add(pos.cost_line_id)
         targets: list[tuple[uuid.UUID, Decimal]] = []
         for row in request.rows:
             if row.cost_line_id is not None:
@@ -756,7 +767,9 @@ class CostStructureService:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_missing", "Cost line not found")
                 if line.project_id != project_id:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_not_in_project", "Cost line of another project")
-                if line.boq_id is not None and line.boq_id != pos.boq_id:
+                if (line.status or "") == "archived":
+                    raise _problem(status.HTTP_400_BAD_REQUEST, "target_missing", "Cost line not found")
+                if line.boq_id is not None and line.boq_id != pos.boq_id and line.id not in current_lines:
                     raise _problem(
                         status.HTTP_400_BAD_REQUEST, "line_of_other_bill", "This cost line carries another bill"
                     )
@@ -767,6 +780,12 @@ class CostStructureService:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_missing", "Account not found")
                 if account.project_id != project_id:
                     raise _problem(status.HTTP_400_BAD_REQUEST, "target_not_in_project", "Account of another project")
+                # A heading or a closed account takes no postings: money put there would only
+                # land in the invalid-account suspense bucket.
+                if not account.is_leaf_postable or (account.status or "") == "closed":
+                    raise _problem(
+                        status.HTTP_400_BAD_REQUEST, "account_not_postable", "This account takes no postings"
+                    )
                 if own_line is not None and own_line.control_account_id == account.id:
                     targets.append((own_line.id, row.share))
                 else:
@@ -776,11 +795,6 @@ class CostStructureService:
         if len({t for t, _ in targets}) != len(targets):
             raise _problem(422, "duplicate_target", "Each cost line may appear once")
 
-        old_rows = (
-            (await self.session.execute(select(PositionAllocation).where(PositionAllocation.position_id == pos.id)))
-            .scalars()
-            .all()
-        )
         touched: set[uuid.UUID] = {r.cost_line_id for r in old_rows}
         if pos.cost_line_id is not None:
             touched.add(pos.cost_line_id)
@@ -911,6 +925,48 @@ class CostStructureService:
             await self.session.flush()
         return changed
 
+    async def recompute_after_bill_change(
+        self, position_ids: set[uuid.UUID] | list[uuid.UUID], boq_ids: set[uuid.UUID] | list[uuid.UUID]
+    ) -> int:
+        """Refresh the cost lines that edited or deleted bill positions feed. Returns how many changed.
+
+        An edited position feeds its own generated line, the line it points at and
+        the lines of its shares. A deleted position can no longer be asked (its
+        shares went with it), so a delete refreshes every line of its bill.
+        """
+        from app.modules.boq.models import Position
+
+        line_ids: set[uuid.UUID] = set()
+        pids = [p for p in {*position_ids} if p is not None]
+        if pids:
+            line_ids.update(
+                (await self.session.execute(select(CostLine.id).where(CostLine.boq_position_id.in_(pids)))).scalars()
+            )
+            line_ids.update(
+                x
+                for x in (
+                    await self.session.execute(select(Position.cost_line_id).where(Position.id.in_(pids)))
+                ).scalars()
+                if x is not None
+            )
+            line_ids.update(
+                (
+                    await self.session.execute(
+                        select(PositionAllocation.cost_line_id).where(PositionAllocation.position_id.in_(pids))
+                    )
+                ).scalars()
+            )
+        bills = [b for b in {*boq_ids} if b is not None]
+        if bills:
+            line_ids.update(
+                (
+                    await self.session.execute(
+                        select(CostLine.id).where(CostLine.boq_id.in_(bills), CostLine.status != "archived")
+                    )
+                ).scalars()
+            )
+        return await self.recompute_lines(line_ids)
+
     async def _positions_out(
         self, boq_id: uuid.UUID, *, only: list[uuid.UUID] | None = None
     ) -> list[PositionAllocationOut]:
@@ -958,6 +1014,9 @@ class CostStructureService:
                 account_title=(account.title or ("" if same_code(account.name, account.code) else account.name))
                 if account is not None
                 else "",
+                account_postable=account is not None
+                and bool(account.is_leaf_postable)
+                and (account.status or "") != "closed",
                 share=share,
                 fraction=fraction,
                 amount=amount,
@@ -982,9 +1041,16 @@ class CostStructureService:
             }
             if rows:
                 mode = rows[0].mode
-                views = [AllocationView(str(r.position_id), str(r.cost_line_id), r.mode, r.share) for r in rows]
+                # The cents are cut in the order line_contributions uses (by line id), so the
+                # amount the bill shows on each share is the amount that line's estimate carries,
+                # also when a remainder cent falls on a tie. Display stays sorted by code.
+                in_line_order = sorted(rows, key=lambda r: str(r.cost_line_id))
+                views = [
+                    AllocationView(str(r.position_id), str(r.cost_line_id), r.mode, r.share) for r in in_line_order
+                ]
                 fractions = share_fractions(views, qty)
                 amounts = split_amount(total, fractions)
+                cut = {r.cost_line_id: (f, a) for r, f, a in zip(in_line_order, fractions, amounts, strict=True)}
                 check = check_shares(mode, [r.share for r in rows], qty)
                 mixed = len({r.mode for r in rows}) > 1
                 problem = None
@@ -996,10 +1062,7 @@ class CostStructureService:
                     PositionAllocationOut(
                         **base,
                         mode="quantity" if mode == MODE_QUANTITY else "percent",
-                        rows=[
-                            _row(r.cost_line_id, _dec(r.share), f, a)
-                            for r, f, a in zip(rows, fractions, amounts, strict=True)
-                        ],
+                        rows=[_row(r.cost_line_id, _dec(r.share), *cut[r.cost_line_id]) for r in rows],
                         valid=problem is None,
                         problem=problem,
                         share_total=check.total,
@@ -1018,6 +1081,8 @@ class CostStructureService:
                 )
             else:
                 out.append(PositionAllocationOut(**base, mode="none"))
+                continue
+            out[-1].in_suspense = any(not r.account_postable for r in out[-1].rows)
         return out
 
     async def boq_allocations(self, boq_id: uuid.UUID) -> BoqAllocations:
@@ -1030,7 +1095,11 @@ class CostStructureService:
         positions = await self._positions_out(boq_id)
         value_total = sum((p.total for p in positions), ZERO)
         allocated = [p for p in positions if p.mode != "none"]
-        value_allocated = sum((p.total for p in allocated), ZERO)
+        # Money on a cost line without a postable account is in suspense, not on the
+        # structure: it is counted apart so the share never reads as covered.
+        value_in_suspense = sum((r.amount for p in allocated for r in p.rows if not r.account_postable), ZERO)
+        value_on_lines = sum((p.total for p in allocated), ZERO)
+        value_allocated = value_on_lines - value_in_suspense
         share = (value_allocated / value_total * Decimal("100")).quantize(Decimal("0.01")) if value_total else ZERO
         currency = ""
         try:
@@ -1052,7 +1121,9 @@ class CostStructureService:
                 positions_invalid=sum(1 for p in positions if not p.valid),
                 value_total=value_total,
                 value_allocated=value_allocated,
-                value_unallocated=value_total - value_allocated,
+                value_unallocated=value_total - value_on_lines,
+                positions_in_suspense=sum(1 for p in positions if p.in_suspense),
+                value_in_suspense=value_in_suspense,
                 share_pct=share,
             ),
             positions=positions,

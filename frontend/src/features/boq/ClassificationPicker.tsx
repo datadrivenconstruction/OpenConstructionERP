@@ -74,21 +74,23 @@ function TreeNode({
   return (
     <>
       <button
+        type="button"
+        aria-expanded={hasChildren ? isExpanded : undefined}
         onClick={() => {
           if (hasChildren) onToggle(node.code);
           onSelect(node.code, node.label);
         }}
         className={clsx(
-          'flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-xs transition-colors',
+          'flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-start text-xs transition-colors',
           isSelected
             ? 'bg-oe-blue/10 text-oe-blue font-medium'
             : 'text-content-primary hover:bg-surface-secondary',
         )}
-        style={{ paddingLeft: `${depth * 16 + 8}px` }}
+        style={{ paddingInlineStart: `${depth * 16 + 8}px` }}
       >
         {hasChildren ? (
           <span className="shrink-0 w-4 h-4 flex items-center justify-center text-content-tertiary">
-            {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} className="rtl:rotate-180" />}
           </span>
         ) : (
           <span className="shrink-0 w-4" />
@@ -203,6 +205,8 @@ export function ClassificationPicker({
   // Dropdown trigger button
   const trigger = mode === 'dropdown' && (
     <button
+      type="button"
+      aria-expanded={isOpen}
       onClick={() => setIsOpen((prev) => !prev)}
       className={clsx(
         'flex items-center gap-1.5 h-7 rounded-md border border-border px-2 text-xs transition-colors',
@@ -215,7 +219,7 @@ export function ClassificationPicker({
       {value ? (
         <span className="truncate max-w-[180px]">
           <span className="font-mono">{value}</span>
-          {selectedLabel && <span className="ml-1 text-content-tertiary">– {(selectedLabel.split('/')[0] ?? '').trim()}</span>}
+          {selectedLabel && <span className="ms-1 text-content-tertiary">– {(selectedLabel.split('/')[0] ?? '').trim()}</span>}
         </span>
       ) : (
         <span>{t('boq.select_classification', { defaultValue: 'Classification...' })}</span>
@@ -241,10 +245,11 @@ export function ClassificationPicker({
     body = filteredItems.length > 0 ? (
       filteredItems.map((item) => (
         <button
+          type="button"
           key={item.code}
           onClick={() => handleSelect(item.code, item.label)}
           className={clsx(
-            'flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-xs transition-colors',
+            'flex w-full items-center gap-2 rounded-md px-2 py-1 text-start text-xs transition-colors',
             value === item.code
               ? 'bg-oe-blue/10 text-oe-blue font-medium'
               : 'text-content-primary hover:bg-surface-secondary',
@@ -284,7 +289,7 @@ export function ClassificationPicker({
     <div
       className={clsx(
         'flex flex-col bg-surface-elevated border border-border-light shadow-lg rounded-lg overflow-hidden',
-        mode === 'dropdown' ? 'absolute left-0 top-full mt-1 z-50 w-72 max-h-80' : 'w-full h-full',
+        mode === 'dropdown' ? 'absolute start-0 top-full mt-1 z-50 w-72 max-h-80' : 'w-full h-full',
       )}
     >
       {/* Header */}
@@ -296,11 +301,12 @@ export function ClassificationPicker({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('common.search', { defaultValue: 'Search...' })}
+            aria-label={t('common.search', { defaultValue: 'Search...' })}
             className="flex-1 bg-transparent border-none outline-none text-xs text-content-primary placeholder:text-content-tertiary"
             autoFocus={mode === 'dropdown'}
           />
           {search && (
-            <button aria-label={t('common.clear_search', { defaultValue: 'Clear search' })} onClick={() => setSearch('')} className="text-content-tertiary hover:text-content-primary">
+            <button type="button" aria-label={t('common.clear_search', { defaultValue: 'Clear search' })} onClick={() => setSearch('')} className="text-content-tertiary hover:text-content-primary">
               <X size={11} />
             </button>
           )}

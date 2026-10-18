@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const spine = vi.hoisted(() => ({ getSpineAccounts: vi.fn(), getSpineLines: vi.fn() }));
 const structure = vi.hoisted(() => ({ putAllocation: vi.fn(), clearAllocation: vi.fn() }));
@@ -15,7 +15,7 @@ vi.mock('@/features/costmodel/structureApi', async (importOriginal) => {
 
 import { ApiError } from '@/shared/lib/api';
 import type { PositionAllocation } from '@/features/costmodel/structureApi';
-import { CostAllocationDrawer } from './CostAllocationDrawer';
+import { CostAllocationDrawer, quantityLabel, trimShare } from './CostAllocationDrawer';
 
 function allocation(over: Partial<PositionAllocation> = {}): PositionAllocation {
   return {
@@ -35,6 +35,7 @@ function allocation(over: Partial<PositionAllocation> = {}): PositionAllocation 
         account_id: 'acc-330',
         account_code: '330',
         account_title: 'External walls',
+        account_postable: true,
         share: '1',
         fraction: '1',
         amount: '1000.00',
@@ -44,13 +45,20 @@ function allocation(over: Partial<PositionAllocation> = {}): PositionAllocation 
     problem: null,
     share_total: '1',
     share_expected: '1',
+    in_suspense: false,
     ...over,
   };
 }
 
+/** Metas of the mutations that reached the global error handler, as main.tsx wires it. */
+const globalErrors: Array<Record<string, unknown> | undefined> = [];
+
 function renderDrawer(a: PositionAllocation | undefined = allocation()) {
   const onClose = vi.fn();
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    mutationCache: new MutationCache({ onError: (_e, _v, _c, m) => void globalErrors.push(m.meta) }),
+  });
   render(
     <QueryClientProvider client={client}>
       <CostAllocationDrawer open onClose={onClose} projectId="p1" allocation={a} currency="EUR" />
@@ -67,6 +75,7 @@ beforeEach(() => {
   spine.getSpineLines.mockReset().mockResolvedValue([]);
   structure.putAllocation.mockReset();
   structure.clearAllocation.mockReset();
+  globalErrors.length = 0;
 });
 
 describe('<CostAllocationDrawer>', () => {
@@ -127,6 +136,25 @@ describe('<CostAllocationDrawer>', () => {
     renderDrawer();
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(await screen.findByText('A share points at a cost line that belongs to another bill.')).toBeInTheDocument();
+    // The drawer says it in the user's language; the global toast must not repeat it raw.
+    expect(globalErrors).toEqual([{ suppressGlobalErrorToast: true }]);
+  });
+
+  it('opens a stored split with its shares as people typed them', () => {
+    expect(trimShare('30.000000')).toBe('30');
+    expect(trimShare('12.500000')).toBe('12.5');
+    expect(trimShare('120')).toBe('120');
+    const second = { ...allocation().rows[0]!, cost_line_id: 'line-2', cost_line_code: 'CL-2', share: '70.000000' };
+    renderDrawer(allocation({ mode: 'percent', rows: [{ ...allocation().rows[0]!, share: '30.000000' }, second] }));
+    expect(screen.getByLabelText('Share for CL-1')).toHaveValue('30');
+    expect(screen.getByLabelText('Share for CL-2')).toHaveValue('70');
+  });
+
+  it('writes the position quantity the way people write it', () => {
+    expect(quantityLabel('610.0000')).toBe('610');
+    expect(quantityLabel('12.5000')).toBe('12.5');
+    renderDrawer(allocation({ quantity: '610.0000', unit: 'm2' }));
+    expect(screen.getByLabelText(/Quantity \(of 610 m2\)/)).toBeInTheDocument();
   });
 
   it('removes the allocation', async () => {
@@ -135,6 +163,44 @@ describe('<CostAllocationDrawer>', () => {
     fireEvent.click(screen.getByRole('button', { name: /Remove allocation/ }));
     await waitFor(() => expect(structure.clearAllocation).toHaveBeenCalledWith('pos-1'));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it('does not offer a cost line of another bill', async () => {
+    spine.getSpineLines.mockResolvedValue([
+      { id: 'line-own', project_id: 'p1', control_account_id: 'acc-340', code: 'CL-OWN', description: 'Own bill line', unit: 'm3', source: 'boq', boq_position_id: null, boq_id: 'boq-1', currency: 'EUR', estimate_quantity: '0', estimate_unit_rate: '0', estimate_amount: '0', status: 'active' },
+      { id: 'line-free', project_id: 'p1', control_account_id: null, code: 'CL-FREE', description: 'Line on no bill', unit: '', source: 'manual', boq_position_id: null, boq_id: null, currency: 'EUR', estimate_quantity: '0', estimate_unit_rate: '0', estimate_amount: '0', status: 'active' },
+      { id: 'line-other', project_id: 'p1', control_account_id: 'acc-340', code: 'CL-OTHER', description: 'Other bill line', unit: 'm3', source: 'boq', boq_position_id: null, boq_id: 'boq-2', currency: 'EUR', estimate_quantity: '0', estimate_unit_rate: '0', estimate_amount: '0', status: 'active' },
+    ]);
+    renderDrawer();
+    const candidates = screen.getByTestId('cost-allocation-candidates');
+    expect(await within(candidates).findByText('Own bill line')).toBeInTheDocument();
+    expect(within(candidates).getByText('Line on no bill')).toBeInTheDocument();
+    expect(within(candidates).queryByText('Other bill line')).not.toBeInTheDocument();
+  });
+
+  it('says so when the candidates cannot be loaded instead of "Nothing matches"', async () => {
+    spine.getSpineLines.mockRejectedValue(new ApiError(500, 'Server Error', null));
+    renderDrawer();
+    const candidates = screen.getByTestId('cost-allocation-candidates');
+    expect(await within(candidates).findByText('Cost lines and accounts could not be loaded.')).toBeInTheDocument();
+    expect(within(candidates).queryByText('Nothing matches.')).not.toBeInTheDocument();
+    spine.getSpineLines.mockResolvedValue([]);
+    fireEvent.click(within(candidates).getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(spine.getSpineLines).toHaveBeenCalledTimes(2));
+  });
+
+  it('holds back a share the server would refuse for its precision', async () => {
+    renderDrawer();
+    fireEvent.click(await screen.findByText('Internal walls'));
+    fireEvent.change(screen.getByLabelText('Share for CL-1'), { target: { value: '60.0000001' } });
+    fireEvent.change(screen.getByLabelText('Share for 340'), { target: { value: '39.9999999' } });
+    expect(screen.getByRole('alert')).toHaveTextContent('Too many decimals in a share. Allowed: 6.');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('labels the candidate search for assistive technology', () => {
+    renderDrawer();
+    expect(screen.getByRole('textbox', { name: 'Find a cost line or account by code or text' })).toBeInTheDocument();
   });
 
   it('names a stored split that no longer adds up', () => {
