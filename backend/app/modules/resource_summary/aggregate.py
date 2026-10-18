@@ -430,8 +430,12 @@ def aggregate_material_buy_list(
 ) -> MaterialBuyList:
     """Roll the estimate's material resource lines into a procurement buy-list.
 
-    Every ``type == material`` resource line across all positions is grouped by
-    ``(normalized name, unit)`` and its gross purchase quantity and cost summed,
+    Every ``type == material`` resource line across all positions is grouped and
+    its gross purchase quantity and cost summed. A line that names a catalogue
+    item (``catalog_item_id``) groups with the other lines of that item in the
+    same unit, whatever they are called; a line without one groups by
+    ``(normalized name, unit)``. A coded and an uncoded line, or two different
+    catalogue items, never share a row even when their names agree (issue #516),
     so a buyer reads one order line per distinct material - the next action the
     passive rollup never gave them. Non-material lines (labour, machinery,
     equipment, subcontract, other) are skipped.
@@ -459,8 +463,8 @@ def aggregate_material_buy_list(
     fx = {str(k).strip().upper(): v for k, v in (fx_rates or {}).items()}
     first_currency = ""
 
-    # (name_lower, unit_lower) -> accumulator
-    groups: dict[tuple[str, str], dict[str, Any]] = {}
+    # ("item", catalog id, unit) or ("name", name, unit) -> accumulator
+    groups: dict[tuple[str, str, str], dict[str, Any]] = {}
     contributing: set[str] = set()
     anon = 0
 
@@ -501,7 +505,8 @@ def aggregate_material_buy_list(
             line_qty = _line_gross_quantity_per_unit(res) * pos_qty
             line_cost = per_unit_cost * pos_qty
 
-            key = (name.lower(), unit.lower())
+            catalog_item_id = str(res.get("catalog_item_id") or "").strip() or None
+            key = ("item", catalog_item_id, unit.lower()) if catalog_item_id else ("name", name.lower(), unit.lower())
             acc = groups.get(key)
             if acc is None:
                 acc = {
@@ -524,7 +529,7 @@ def aggregate_material_buy_list(
                     quantity=line_qty,
                     unit=unit,
                     code=str(res.get("code") or "").strip(),
-                    catalog_item_id=str(res.get("catalog_item_id") or "").strip() or None,
+                    catalog_item_id=catalog_item_id,
                     suggested_vendor_id=str(suggested) if suggested else None,
                     suggested_vendor_origin=origin,
                 )
