@@ -425,6 +425,8 @@ class PaymentReleaseService:
         """Retention withheld, paid back and still held per supplier contract.
 
         A contract is listed once it has an invoice, a posting (void ones too) or any retention.
+        Held is what the released invoices withheld less what postings paid back, the same
+        figure a new posting is capped at; an open invoice has withheld nothing yet.
         """
         billing = billing or await load_billing(self.session, project_id)
         rows = (
@@ -446,7 +448,7 @@ class PaymentReleaseService:
         posted_total = ZERO
         for c in billing.contracts:
             ledger = c.ledger
-            held = ledger.retention_held if ledger else ZERO
+            held = released_retention_held(c)
             posted = ledger.retention_posted if ledger else ZERO
             postings = by_contract.get(c.id, [])
             if not c.invoices and not postings and held == ZERO and posted == ZERO:

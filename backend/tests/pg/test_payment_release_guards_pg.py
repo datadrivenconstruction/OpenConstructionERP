@@ -126,6 +126,8 @@ async def test_retention_of_an_open_invoice_cannot_be_paid_back(world: World) ->
     async with world.client() as client:
         await client.put(f"{BASE}/contracts/{world.contract_id}/terms/", json=TERMS)
         # Both invoices open: the ledger shows 1071 held on paper, none of it withheld from a payment yet.
+        register = (await client.get(f"{BASE}/projects/{world.project_id}/retention/")).json()
+        assert (D(register["held"]), D(register["contracts"][0]["withheld"])) == (0, 0)
         refused = await client.post(url, json={**body, "amount": "100"})
         assert refused.status_code == 409
         assert (refused.json()["detail"]["problem"], D(refused.json()["detail"]["held"])) == ("exceeds_held", 0)
@@ -133,6 +135,9 @@ async def test_retention_of_an_open_invoice_cannot_be_paid_back(world: World) ->
         # Invoice 1 released withholds 595 (10 % of 5950 gross).
         assert (await client.post(url, json={**body, "amount": "596"})).status_code == 409
         assert (await client.post(url, json={**body, "amount": "595"})).status_code == 201
+        register = (await client.get(f"{BASE}/projects/{world.project_id}/retention/")).json()
+    (row,) = register["contracts"]
+    assert (D(row["withheld"]), D(row["posted"]), D(row["held"])) == (D("595.00"), D("595.00"), 0)
 
 
 async def test_a_released_invoice_keeps_its_figures_when_the_finance_invoice_changes(world: World) -> None:  # noqa: F811
