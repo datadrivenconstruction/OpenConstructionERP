@@ -9,13 +9,22 @@
 // Nothing is typed in twice: budget, estimate, contracts, changes and claims
 // already live in their own modules, and each line's forecast takes the most
 // reliable of them. A person can still overrule a line, with a reason.
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, ArrowRight, Info, Save, Scale, Search, TrendingUp, Wallet } from 'lucide-react';
+import { AlertTriangle, ArrowRight, FilePenLine, Info, Save, Scale, Search, TrendingUp, Wallet } from 'lucide-react';
 
-import { Breadcrumb, Button, Card, DismissibleInfo, EmptyState, KpiBand, Skeleton } from '@/shared/ui';
+import {
+  Breadcrumb,
+  Button,
+  Card,
+  DismissibleInfo,
+  EmptyState,
+  KpiBand,
+  ModuleGuideButton,
+  Skeleton,
+} from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TabBar } from '@/shared/ui/TabBar';
 import { fmtCurrency, fmtPercent } from '@/shared/lib/formatters';
@@ -24,6 +33,12 @@ import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { costControlApi, num, type CostControlAxis, type CostControlFinding, type CostControlRow } from './api';
+import { costControlGuide } from './costControlGuide';
+import { ExportMenu } from './ExportMenu';
+import { ForecastMethodCard } from './ForecastMethodCard';
+import { PhaseComparison } from './PhaseComparison';
+import { SnapshotCompare } from './SnapshotCompare';
+import { SnapshotDrawer } from './SnapshotDrawer';
 import { CostControlTable } from './CostControlTable';
 import { ForecastHistory } from './ForecastHistory';
 import { AssignDrawer } from './AssignDrawer';
@@ -118,6 +133,10 @@ export function CostControlPage() {
   const canReleasePayments = useHasPermission('payment_release.release');
 
   const [axis, setAxis] = useState<CostControlAxis>('cost_line');
+  /** The table can also show the phase comparison, which reads the cost line axis. */
+  const [view, setView] = useState<CostControlAxis | 'phases'>('cost_line');
+  const [openSnapshot, setOpenSnapshot] = useState<string | null>(null);
+  const [pendingLine, setPendingLine] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [onlyOver, setOnlyOver] = useState(false);
   const [openRow, setOpenRow] = useState<CostControlRow | null>(null);
@@ -135,13 +154,21 @@ export function CostControlPage() {
     enabled: !!projectId,
   });
 
+  const panel = useQuery({
+    queryKey: ['cost-control', 'forecast-panel', projectId],
+    queryFn: () => costControlApi.forecastPanel(projectId!),
+    enabled: !!projectId,
+  });
+  const openDraft = panel.data?.open_draft ?? null;
+
   const saveSnapshot = useMutation({
     mutationFn: (body: Parameters<typeof costControlApi.createSnapshot>[1]) =>
       costControlApi.createSnapshot(projectId!, body),
-    onSuccess: () => {
+    onSuccess: (created) => {
       setSaving(false);
       queryClient.invalidateQueries({ queryKey: ['cost-control'] });
-      addToast({ type: 'success', title: t('cost_control.saved', { defaultValue: 'Forecast saved' }) });
+      setOpenSnapshot(created.id);
+      addToast({ type: 'success', title: t('cost_control.draft_started', { defaultValue: 'Draft started' }) });
     },
     onError: (err: unknown) =>
       addToast({
@@ -164,6 +191,21 @@ export function CostControlPage() {
 
   const data = report.data;
   const currency = data?.currency || 'EUR';
+
+  // A finding names a cost line by its key; on the contract axis that line is not a row, so switch first.
+  useEffect(() => {
+    if (!pendingLine || !data || data.axis !== 'cost_line') return;
+    const row = data.rows.find((r) => r.key === pendingLine);
+    if (row) setOpenRow(row);
+    setPendingLine(null);
+  }, [pendingLine, data]);
+  const openLine = (key: string) => {
+    if (axis !== 'cost_line') {
+      setAxis('cost_line');
+      setView('cost_line');
+    }
+    setPendingLine(key);
+  };
   const totals = data?.totals ?? {};
 
   const rows = useMemo(() => {
@@ -207,11 +249,24 @@ export function CostControlPage() {
           defaultValue: 'What the project will cost in the end, where each figure comes from, and how it moved.',
         })}
         actions={
-          canEdit && !hasNothing ? (
-            <Button variant="primary" size="sm" icon={<Save size={14} />} onClick={() => setSaving(true)}>
-              {t('cost_control.save_button', { defaultValue: 'Save forecast' })}
-            </Button>
-          ) : undefined
+          <div className="flex flex-wrap items-center gap-2">
+            <ModuleGuideButton content={costControlGuide} />
+            {!hasNothing && <ExportMenu projectId={projectId} />}
+            {!hasNothing && openDraft ? (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<FilePenLine size={14} />}
+                onClick={() => setOpenSnapshot(openDraft.id)}
+              >
+                {t('cost_control.draft_open', { defaultValue: 'Open the draft' })}
+              </Button>
+            ) : canEdit && !hasNothing ? (
+              <Button variant="primary" size="sm" icon={<Save size={14} />} onClick={() => setSaving(true)}>
+                {t('cost_control.draft_start', { defaultValue: 'Start snapshot' })}
+              </Button>
+            ) : null}
+          </div>
         }
       />
 
@@ -241,6 +296,12 @@ export function CostControlPage() {
             {t('cost_control.how_4', {
               defaultValue:
                 'Supplier invoices are checked against what is measured, and each one shows how its payment is worked out: retention, earlier payments, rounding and discount. A manager confirms the release.',
+            })}
+          </li>
+          <li>
+            {t('cost_control.how_5', {
+              defaultValue:
+                'Choose how the forecast is read: the most reliable figure, the highest one, or projected from progress. Each month start a snapshot, write the reason behind every large move, then freeze it. Frozen snapshots never change.',
             })}
           </li>
         </ol>
@@ -344,6 +405,16 @@ export function CostControlPage() {
           </Card>
 
           <Card>
+            <ForecastMethodCard
+              projectId={projectId}
+              currency={currency}
+              canManage={canManage}
+              onOpenLine={openLine}
+              onOpenDraft={setOpenSnapshot}
+            />
+          </Card>
+
+          <Card>
             <ChainPanel projectId={projectId} currency={currency} canEdit={canEdit} />
           </Card>
 
@@ -352,13 +423,19 @@ export function CostControlPage() {
               variant="segmented"
               size="sm"
               ariaLabel={t('cost_control.axis_label', { defaultValue: 'Group the table' })}
-              activeId={axis}
-              onChange={(next) => setAxis(next)}
+              activeId={view}
+              onChange={(next) => {
+                setView(next);
+                if (next !== 'phases') setAxis(next);
+              }}
               tabs={[
                 { id: 'cost_line', label: t('cost_control.axis_cost_line', { defaultValue: 'By cost line' }) },
                 { id: 'contract', label: t('cost_control.axis_contract', { defaultValue: 'By contract' }) },
+                { id: 'phases', label: t('cost_control.axis_phases', { defaultValue: 'Phase comparison' }) },
               ]}
             />
+            {view !== 'phases' && (
+              <>
             <label className="relative ms-auto flex items-center">
               <Search size={14} className="pointer-events-none absolute start-2.5 text-content-quaternary" />
               <input
@@ -373,17 +450,23 @@ export function CostControlPage() {
               <input type="checkbox" checked={onlyOver} onChange={(e) => setOnlyOver(e.target.checked)} />
               {t('cost_control.only_over', { defaultValue: 'Only lines above plan' })}
             </label>
+              </>
+            )}
           </div>
 
-          <CostControlTable
-            axis={axis}
-            rows={rows}
-            totals={totals}
-            accounts={data.accounts}
-            currency={currency}
-            onOpenLine={setOpenRow}
-            onOpenUnassigned={() => setAssigning(true)}
-          />
+          {view === 'phases' ? (
+            <PhaseComparison projectId={projectId} currency={currency} />
+          ) : (
+            <CostControlTable
+              axis={axis}
+              rows={rows}
+              totals={totals}
+              accounts={data.accounts}
+              currency={currency}
+              onOpenLine={setOpenRow}
+              onOpenUnassigned={() => setAssigning(true)}
+            />
+          )}
 
           <Card>
             <PaymentsPanel
@@ -401,9 +484,17 @@ export function CostControlPage() {
             <ForecastHistory
               snapshots={snapshots.data?.items ?? []}
               currency={currency}
-              canDelete={canManage}
+              canDelete={canEdit}
               onDelete={(id) => deleteSnapshot.mutate(id)}
+              onOpen={setOpenSnapshot}
             />
+          </Card>
+
+          <Card>
+            <h2 className="mb-3 text-sm font-semibold text-content-primary">
+              {t('cost_control.compare_section', { defaultValue: 'How the forecast moved' })}
+            </h2>
+            <SnapshotCompare projectId={projectId} snapshots={snapshots.data?.items ?? []} currency={currency} />
           </Card>
         </>
       ) : null}
@@ -414,6 +505,13 @@ export function CostControlPage() {
         currency={currency}
         canEdit={canEdit}
         onClose={() => setOpenRow(null)}
+      />
+      <SnapshotDrawer
+        projectId={projectId}
+        snapshotId={openSnapshot}
+        currency={currency}
+        canEdit={canEdit}
+        onClose={() => setOpenSnapshot(null)}
       />
       <AssignDrawer
         open={assigning}

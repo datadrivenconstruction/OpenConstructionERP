@@ -7,7 +7,159 @@
 import type { TFunction } from 'i18next';
 
 import { fmtNumber } from '@/shared/lib/formatters';
-import type { CostControlFinding, CostStage, ForecastSource } from './api';
+import type {
+  CostControlFinding,
+  CostStage,
+  EvidenceKind,
+  ExportKind,
+  ForecastMethod,
+  ForecastSource,
+  LadderCause,
+  PhaseLayer,
+  SnapshotStatus,
+} from './api';
+
+/** Short name of a forecast method. */
+export function methodLabel(t: TFunction, method: ForecastMethod | string): string {
+  switch (method) {
+    case 'maximum':
+      return t('cost_control.method_maximum', { defaultValue: 'Maximum value' });
+    case 'evm_cpi':
+      return t('cost_control.method_evm_cpi', { defaultValue: 'Projected from progress (CPI)' });
+    case 'manual':
+      return t('cost_control.method_manual', { defaultValue: 'Manual' });
+    default:
+      return t('cost_control.method_best_available', { defaultValue: 'Best available source' });
+  }
+}
+
+/** What a method does, in the words a site manager uses. */
+export function methodHelp(t: TFunction, method: ForecastMethod | string): string {
+  switch (method) {
+    case 'maximum':
+      return t('cost_control.method_maximum_help', {
+        defaultValue:
+          'Each line takes its highest figure: budget, estimate, award, measured or invoiced. Careful by design: a risk is never hidden behind a lower number.',
+      });
+    case 'evm_cpi':
+      return t('cost_control.method_evm_cpi_help', {
+        defaultValue:
+          'If half the work is done and it cost 10% more than planned, the rest will likely cost 10% more too. Needs measured work and invoices on the line.',
+      });
+    case 'manual':
+      return t('cost_control.method_manual_help', {
+        defaultValue: 'You type the expected final cost of a line yourself, with a reason and the document behind it.',
+      });
+    default:
+      return t('cost_control.method_best_available_help', {
+        defaultValue:
+          'Each line takes its most reliable figure: the final account, else the measured work, else the award plus changes, else the estimate, else the budget.',
+      });
+  }
+}
+
+/** When a method is the right choice, one short sentence. */
+export function methodWhen(t: TFunction, method: ForecastMethod | string): string {
+  switch (method) {
+    case 'maximum':
+      return t('cost_control.method_maximum_when', {
+        defaultValue: 'Use it when the client wants the cautious figure, or while claims are open.',
+      });
+    case 'evm_cpi':
+      return t('cost_control.method_evm_cpi_when', {
+        defaultValue: 'Use it once work is well under way and progress is measured regularly.',
+      });
+    case 'manual':
+      return t('cost_control.method_manual_when', {
+        defaultValue: 'Use it on a line where you know more than the data, for example a new offer.',
+      });
+    default:
+      return t('cost_control.method_best_available_when', {
+        defaultValue: 'The usual choice. It follows the project as it matures, with nothing to type in.',
+      });
+  }
+}
+
+/** Why a line moved between two snapshots. */
+export function causeLabel(t: TFunction, cause: LadderCause): string {
+  switch (cause) {
+    case 'new':
+      return t('cost_control.cause_new', { defaultValue: 'New line' });
+    case 'removed':
+      return t('cost_control.cause_removed', { defaultValue: 'Line removed' });
+    case 'method':
+      return t('cost_control.cause_method', { defaultValue: 'Method changed' });
+    case 'source':
+      return t('cost_control.cause_source', { defaultValue: 'More mature figure' });
+    default:
+      return t('cost_control.cause_value', { defaultValue: 'Figure moved' });
+  }
+}
+
+export function evidenceKindLabel(t: TFunction, kind: EvidenceKind | string): string {
+  switch (kind) {
+    case 'minutes':
+      return t('cost_control.evidence_minutes', { defaultValue: 'Minutes' });
+    case 'other':
+      return t('cost_control.evidence_other', { defaultValue: 'Other' });
+    default:
+      return t('cost_control.evidence_document', { defaultValue: 'Document' });
+  }
+}
+
+export function snapshotStatusLabel(t: TFunction, status: SnapshotStatus | 'live' | string): string {
+  switch (status) {
+    case 'draft':
+      return t('cost_control.status_draft', { defaultValue: 'Draft' });
+    case 'live':
+      return t('cost_control.status_live', { defaultValue: 'Today' });
+    default:
+      return t('cost_control.status_frozen', { defaultValue: 'Frozen' });
+  }
+}
+
+/** Column heading of one layer of the phase comparison. */
+export function layerLabel(t: TFunction, layer: PhaseLayer): string {
+  switch (layer) {
+    case 'budget':
+      return t('cost_control.layer_budget', { defaultValue: 'Budget' });
+    case 'estimate':
+      return t('cost_control.layer_estimate', { defaultValue: 'Estimate' });
+    case 'tender':
+      return t('cost_control.layer_tender', { defaultValue: 'Best tender' });
+    case 'awarded':
+      return t('cost_control.layer_awarded', { defaultValue: 'Awarded' });
+    case 'changes':
+      return t('cost_control.layer_changes', { defaultValue: 'Approved changes' });
+    case 'committed':
+      return t('cost_control.layer_committed', { defaultValue: 'Committed' });
+    case 'pending':
+      return t('cost_control.layer_pending', { defaultValue: 'Pending changes' });
+    case 'measured':
+      return t('cost_control.layer_measured', { defaultValue: 'Measured' });
+    case 'certified':
+      return t('cost_control.layer_certified', { defaultValue: 'Certified' });
+    case 'invoiced':
+      return t('cost_control.layer_invoiced', { defaultValue: 'Invoiced' });
+    case 'paid':
+      return t('cost_control.layer_paid', { defaultValue: 'Paid' });
+    default:
+      return t('cost_control.layer_forecast', { defaultValue: 'Forecast' });
+  }
+}
+
+export function exportKindLabel(t: TFunction, kind: ExportKind): string {
+  switch (kind) {
+    case 'phase_comparison':
+      return t('cost_control.export_phase_comparison', { defaultValue: 'Phase comparison' });
+    case 'invoice_ledger':
+      return t('cost_control.export_invoice_ledger', { defaultValue: 'Invoice ledger' });
+    case 'forecast_documentation':
+      return t('cost_control.export_forecast_documentation', { defaultValue: 'Forecast documentation' });
+    default:
+      return t('cost_control.export_cost_report', { defaultValue: 'Cost report' });
+  }
+}
 
 /** Short name of where a forecast came from. */
 export function sourceLabel(t: TFunction, source: ForecastSource): string {
@@ -26,6 +178,10 @@ export function sourceLabel(t: TFunction, source: ForecastSource): string {
       return t('cost_control.source_final', { defaultValue: 'Final account' });
     case 'manual':
       return t('cost_control.source_manual', { defaultValue: 'Your forecast' });
+    case 'invoiced':
+      return t('cost_control.source_invoiced', { defaultValue: 'Invoiced' });
+    case 'evm':
+      return t('cost_control.source_evm', { defaultValue: 'Projected from progress' });
     default:
       return t('cost_control.source_none', { defaultValue: 'No figure yet' });
   }
@@ -63,6 +219,15 @@ export function sourceExplanation(t: TFunction, source: ForecastSource): string 
       return t('cost_control.source_manual_why', {
         defaultValue: 'Someone entered their own forecast with a reason. It stays until it is removed.',
       });
+    case 'invoiced':
+      return t('cost_control.source_invoiced_why', {
+        defaultValue: 'The invoices on this line are the highest figure it has, so the maximum method takes them.',
+      });
+    case 'evm':
+      return t('cost_control.source_evm_why', {
+        defaultValue:
+          'The cost at completion is projected from progress: what was spent so far, divided by the share of the work done.',
+      });
     default:
       return t('cost_control.source_none_why', { defaultValue: 'This line has no money on it yet.' });
   }
@@ -85,6 +250,10 @@ export function sourceTone(source: ForecastSource): string {
       return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300';
     case 'manual':
       return 'bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300';
+    case 'invoiced':
+      return 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300';
+    case 'evm':
+      return 'bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300';
     default:
       return 'bg-surface-secondary text-content-tertiary';
   }

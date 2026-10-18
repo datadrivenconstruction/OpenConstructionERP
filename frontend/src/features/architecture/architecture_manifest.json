@@ -67725,10 +67725,16 @@
         "cost_control.py",
         "cost_control_data.py",
         "cost_control_demo.py",
+        "cost_control_export.py",
+        "cost_control_forecast.py",
+        "cost_control_phases.py",
         "cost_control_schemas.py",
         "cost_control_service.py",
+        "cost_control_settings.py",
         "elemental.py",
         "events.py",
+        "forecast_docs.py",
+        "forecast_rules.py",
         "inheritance.py",
         "inheritance_service.py",
         "manifest.py",
@@ -68250,7 +68256,7 @@
         {
           "class_name": "CostForecastSnapshot",
           "tablename": "oe_costmodel_forecast_snapshot",
-          "docstring": "A cost control report frozen at a date, never edited afterwards.\n\nTaken by hand (\"save this month's forecast\") or tagged with the cost stage\nit records, so the same table holds the estimate, the award and every\nmonthly forecast in between, and the history of a line is read straight\nfrom it. ``rows`` keeps one entry per cost line with the figures and the\nforecast source as they stood; money is stored as decimal strings.",
+          "docstring": "A cost control report kept at a date.\n\nTaken by hand (\"save this month's forecast\") or tagged with the cost stage\nit records, so the same table holds the estimate, the award and every\nmonthly forecast in between, and the history of a line is read straight\nfrom it. ``rows`` keeps one entry per cost line with the figures and the\nforecast source as they stood; money is stored as decimal strings.\n\nA snapshot starts as a ``draft``: its figures can be refreshed and each\nline documented (:class:`CostForecastSnapshotNote`). Freezing it is final:\na ``frozen`` snapshot is never changed or deleted again, which the service\nrefuses and the mapper events at the end of this module refuse as well.\nSnapshots written before drafts existed are frozen.\n``previous_snapshot_id`` names the frozen snapshot its moves are measured\nfrom; ``meta`` keeps the forecast method and evidence threshold in force.",
           "columns": [
             {
               "name": "project_id",
@@ -68307,6 +68313,36 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "frozen_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "frozen_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "previous_snapshot_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "meta",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
             }
           ],
           "relationships": []
@@ -68519,6 +68555,134 @@
               "annotation": "Mapped[Decimal]",
               "sql_type": "MoneyType",
               "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "CostControlSettings",
+          "tablename": "oe_costmodel_cost_control_settings",
+          "docstring": "How a project's forecast is worked out and documented. One row per project.\n\nA project without a row reads the defaults: the best available source, and\nevidence for a move above 10 % of the previous forecast.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "forecast_method",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "evidence_threshold_amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "MoneyType",
+              "nullable": false
+            },
+            {
+              "name": "evidence_threshold_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "CostForecastMethodChoice",
+          "tablename": "oe_costmodel_forecast_method",
+          "docstring": "The forecast method one cost line is read with, when someone picked one for it.\n\nA line without a row follows the project's method. A manual amount is not\nstored here: it is a :class:`CostForecastOverride`, and setting one removes\nthe line's choice (and choosing a method closes the open manual amount).",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "cost_line_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_costmodel_cost_line.id"
+            },
+            {
+              "name": "method",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "comment",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "CostForecastSnapshotNote",
+          "tablename": "oe_costmodel_forecast_snapshot_note",
+          "docstring": "Why one line of a snapshot moved: a comment and the evidence behind it.\n\n``row_key`` is the key the snapshot row carries (a cost line id, or a\nspecial row such as ``unassigned``). ``evidence`` is a list of\n``{\"kind\": \"document\" | \"minutes\" | \"other\", \"ref\": str, \"document_id\": str | None}``.\nWritten while the snapshot is a draft; frozen with it.",
+          "columns": [
+            {
+              "name": "snapshot_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_costmodel_forecast_snapshot.id"
+            },
+            {
+              "name": "row_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "comment",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "evidence",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -68843,6 +69007,88 @@
           "handler": "get_cost_line_history",
           "response_model": "LineHistory",
           "request_schema": "CostControlService"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/cost-control/settings/",
+          "handler": "get_cost_control_settings",
+          "response_model": "CostControlSettingsInfo",
+          "request_schema": "ForecastDocsService"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/cost-control/settings/",
+          "handler": "put_cost_control_settings",
+          "response_model": "CostControlSettingsInfo",
+          "request_schema": "CostControlSettingsRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/cost-control/forecast/",
+          "handler": "get_cost_control_forecast_panel",
+          "response_model": "ForecastPanel",
+          "request_schema": "ForecastDocsService"
+        },
+        {
+          "method": "PUT",
+          "path": "/cost-control/lines/{line_id}/method/",
+          "handler": "set_cost_line_method",
+          "response_model": "LineMethodChoice",
+          "request_schema": "LineMethodRequest"
+        },
+        {
+          "method": "DELETE",
+          "path": "/cost-control/lines/{line_id}/method/",
+          "handler": "clear_cost_line_method",
+          "request_schema": "ForecastDocsService"
+        },
+        {
+          "method": "PUT",
+          "path": "/cost-control/snapshots/{snapshot_id}/notes/{row_key}/",
+          "handler": "put_cost_control_snapshot_note",
+          "response_model": "SnapshotLine",
+          "request_schema": "SnapshotNoteRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/cost-control/snapshots/{snapshot_id}/refresh/",
+          "handler": "refresh_cost_control_snapshot",
+          "response_model": "SnapshotSummary",
+          "request_schema": "ForecastDocsService"
+        },
+        {
+          "method": "POST",
+          "path": "/cost-control/snapshots/{snapshot_id}/freeze/",
+          "handler": "freeze_cost_control_snapshot",
+          "response_model": "SnapshotSummary",
+          "request_schema": "ForecastDocsService"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/cost-control/compare/",
+          "handler": "compare_cost_control_snapshots",
+          "response_model": "SnapshotMatrix",
+          "request_schema": "ForecastDocsService"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/cost-control/ladder/",
+          "handler": "get_cost_control_ladder",
+          "response_model": "DeltaLadder",
+          "request_schema": "Decimal"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/cost-control/phases/",
+          "handler": "get_cost_control_phases",
+          "response_model": "PhaseComparison"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/cost-control/export/{kind}/",
+          "handler": "export_cost_control",
+          "response_model": "None",
+          "request_schema": "dict"
         },
         {
           "method": "GET",
@@ -70714,6 +70960,7 @@
         "boq",
         "changeorders",
         "contracts",
+        "documents",
         "field_time",
         "finance",
         "notifications",
@@ -273056,10 +273303,10 @@
     },
     {
       "name": "cost-control",
-      "ts_files": 17,
+      "ts_files": 24,
       "css_files": 0,
       "test_files": 4,
-      "total_files": 17
+      "total_files": 24
     },
     {
       "name": "cost-explorer",
@@ -274628,6 +274875,7 @@
       "boq",
       "changeorders",
       "contracts",
+      "documents",
       "field_time",
       "finance",
       "notifications",
@@ -275767,14 +276015,14 @@
   "statistics": {
     "backend_modules": 212,
     "modules_with_manifests": 210,
-    "total_models": 780,
-    "total_columns": 9086,
+    "total_models": 783,
+    "total_columns": 9107,
     "total_relationships": 240,
-    "total_routes": 4592,
+    "total_routes": 4604,
     "total_schemas": 4071,
-    "total_python_files": 2739,
+    "total_python_files": 2745,
     "frontend_features": 209,
-    "frontend_ts_files": 3551,
+    "frontend_ts_files": 3558,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

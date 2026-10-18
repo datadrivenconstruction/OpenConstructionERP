@@ -15,7 +15,23 @@ export type ForecastSource =
   | 'awarded'
   | 'measured'
   | 'final'
-  | 'manual';
+  | 'manual'
+  /** The net invoiced amount, read by the maximum method. */
+  | 'invoiced'
+  /** Projected from progress and spend (earned value). */
+  | 'evm';
+
+/** How a project, or one line, reads its forecast. */
+export const FORECAST_METHODS = ['best_available', 'maximum', 'evm_cpi', 'manual'] as const;
+export type ForecastMethod = (typeof FORECAST_METHODS)[number];
+/** The methods a line can be set to by choice; manual is set by entering an amount. */
+export const LINE_METHODS = ['best_available', 'maximum', 'evm_cpi'] as const;
+export type LineForecastMethod = (typeof LINE_METHODS)[number];
+/** Where a line's method comes from: the project, the line's own choice, or a person's amount. */
+export type MethodOrigin = 'project' | 'line' | 'manual';
+export type SnapshotStatus = 'draft' | 'frozen';
+export const EVIDENCE_KINDS = ['document', 'minutes', 'other'] as const;
+export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
 
 export type RowKind =
   | 'cost_line'
@@ -76,6 +92,11 @@ export interface CostControlRow {
   variance: string;
   variance_pct: string | null;
   override: ForecastOverride | null;
+  forecast_method: ForecastMethod;
+  method_origin: MethodOrigin;
+  /** False when the chosen method had nothing to work with and the best available figure stands in. */
+  method_applied: boolean;
+  method_comment: string;
 }
 
 export interface CostControlAccount {
@@ -109,6 +130,13 @@ export interface SnapshotSummary {
   totals: Record<string, string>;
   created_by: string | null;
   created_at: string | null;
+  status: SnapshotStatus;
+  frozen_at: string | null;
+  frozen_by: string | null;
+  previous_snapshot_id: string | null;
+  forecast_method: ForecastMethod;
+  threshold_amount: string;
+  threshold_pct: string | null;
 }
 
 export interface SnapshotPage {
@@ -128,6 +156,7 @@ export interface CostControlReport {
   accounts: CostControlAccount[];
   findings: CostControlFinding[];
   last_snapshot: SnapshotSummary | null;
+  forecast_method: ForecastMethod;
 }
 
 export interface LineHistoryPoint {
@@ -158,7 +187,209 @@ export interface LineHistory {
   snapshots: LineHistoryPoint[];
   changes: LineChangeEvent[];
   overrides: ForecastOverride[];
+  project_method: ForecastMethod;
+  method_choice: LineMethodChoice | null;
+  /** The line read under every method, side by side. */
+  methods: MethodOutcome[];
 }
+
+export interface MethodOutcome {
+  method: ForecastMethod;
+  amount: string;
+  source: ForecastSource;
+  applied: boolean;
+  progress: string | null;
+  cpi: string | null;
+  earned: string | null;
+  actual: string | null;
+}
+
+export interface LineMethodChoice {
+  cost_line_id: string;
+  method: LineForecastMethod;
+  comment: string;
+  updated_by: string | null;
+  updated_at: string | null;
+}
+
+export interface LineMethodBody {
+  method: LineForecastMethod;
+  comment: string;
+}
+
+export interface CostControlSettings {
+  project_id: string;
+  forecast_method: ForecastMethod;
+  evidence_threshold_amount: string;
+  evidence_threshold_pct: string | null;
+  is_default: boolean;
+  updated_by: string | null;
+  updated_at: string | null;
+}
+
+export interface CostControlSettingsBody {
+  forecast_method: ForecastMethod;
+  evidence_threshold_amount: string;
+  evidence_threshold_pct: string | null;
+}
+
+/** A V19, V20 or V22 finding, already in the reader's language. */
+export interface ForecastFinding {
+  rule_id: string;
+  rule_number: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+  suggestion: string;
+  element_ref: string | null;
+  details: Record<string, string>;
+}
+
+export interface ForecastPanel {
+  project_id: string;
+  currency: string;
+  settings: CostControlSettings;
+  method_counts: Record<string, number>;
+  fallback_lines: number;
+  line_choices: number;
+  manual_lines: number;
+  open_draft: SnapshotSummary | null;
+  findings: ForecastFinding[];
+}
+
+export interface EvidenceItem {
+  kind: EvidenceKind;
+  ref: string;
+  document_id: string | null;
+}
+
+export interface SnapshotLine {
+  key: string;
+  kind: string;
+  code: string;
+  description: string;
+  source: ForecastSource;
+  method: ForecastMethod;
+  forecast: string;
+  committed: string;
+  previous: string | null;
+  delta: string;
+  delta_pct: string | null;
+  needs_evidence: boolean;
+  documented: boolean;
+  comment: string;
+  evidence: EvidenceItem[];
+  note_updated_at: string | null;
+}
+
+export interface SnapshotDetail extends SnapshotSummary {
+  lines: SnapshotLine[];
+  previous: SnapshotSummary | null;
+  findings: ForecastFinding[];
+}
+
+export interface SnapshotNoteBody {
+  comment: string;
+  evidence: { kind: EvidenceKind; ref: string; document_id?: string | null }[];
+}
+
+export interface ComparisonColumn {
+  id: string | null;
+  taken_on: string;
+  stage: string;
+  label: string;
+  status: SnapshotStatus | 'live';
+  total: string;
+}
+
+export interface ComparisonRow {
+  key: string;
+  code: string;
+  description: string;
+  kind: string;
+  values: (string | null)[];
+  delta: string;
+  delta_pct: string | null;
+}
+
+export interface SnapshotMatrix {
+  project_id: string;
+  currency: string;
+  columns: ComparisonColumn[];
+  rows: ComparisonRow[];
+}
+
+export type LadderCause = 'new' | 'removed' | 'method' | 'source' | 'value';
+
+export interface LadderStep {
+  key: string;
+  code: string;
+  description: string;
+  kind: string;
+  before: string | null;
+  after: string | null;
+  delta: string;
+  cause: LadderCause;
+  source_before: string;
+  source_after: string;
+  method_before: string;
+  method_after: string;
+  comment: string;
+  evidence: EvidenceItem[];
+}
+
+export interface DeltaLadder {
+  project_id: string;
+  currency: string;
+  start_column: ComparisonColumn;
+  end_column: ComparisonColumn;
+  start: string;
+  end: string;
+  steps: LadderStep[];
+  other: string;
+  other_count: number;
+}
+
+export const PHASE_LAYERS = [
+  'budget',
+  'estimate',
+  'tender',
+  'awarded',
+  'changes',
+  'committed',
+  'pending',
+  'measured',
+  'certified',
+  'invoiced',
+  'paid',
+  'forecast',
+] as const;
+export type PhaseLayer = (typeof PHASE_LAYERS)[number];
+
+export interface PhaseRow {
+  key: string;
+  kind: 'account' | 'cost_line' | 'allowance' | 'unassigned';
+  account_id: string | null;
+  parent_key: string | null;
+  level: number;
+  code: string;
+  description: string;
+  values: Record<PhaseLayer, string>;
+  pct: Record<PhaseLayer, string | null>;
+  progress_pct: string | null;
+  invoiced_pct: string | null;
+}
+
+export interface PhaseComparison {
+  project_id: string;
+  currency: string;
+  as_of: string;
+  layers: PhaseLayer[];
+  rows: PhaseRow[];
+  totals: PhaseRow;
+}
+
+export const EXPORT_KINDS = ['cost_report', 'phase_comparison', 'invoice_ledger', 'forecast_documentation'] as const;
+export type ExportKind = (typeof EXPORT_KINDS)[number];
 
 export interface SnapshotCreate {
   stage: CostStage;
@@ -281,6 +512,36 @@ export const costControlApi = {
     apiPut<ForecastOverride, ForecastOverrideCreate>(`/v1/costmodel/cost-control/lines/${lineId}/forecast/`, body),
   clearForecast: (lineId: string) => apiDelete(`/v1/costmodel/cost-control/lines/${lineId}/forecast/`),
   lineHistory: (lineId: string) => apiGet<LineHistory>(`/v1/costmodel/cost-control/lines/${lineId}/history/`),
+  settings: (projectId: string) =>
+    apiGet<CostControlSettings>(`/v1/costmodel/projects/${projectId}/cost-control/settings/`),
+  saveSettings: (projectId: string, body: CostControlSettingsBody) =>
+    apiPut<CostControlSettings, CostControlSettingsBody>(
+      `/v1/costmodel/projects/${projectId}/cost-control/settings/`,
+      body,
+    ),
+  forecastPanel: (projectId: string) =>
+    apiGet<ForecastPanel>(`/v1/costmodel/projects/${projectId}/cost-control/forecast/`),
+  setLineMethod: (lineId: string, body: LineMethodBody) =>
+    apiPut<LineMethodChoice, LineMethodBody>(`/v1/costmodel/cost-control/lines/${lineId}/method/`, body),
+  clearLineMethod: (lineId: string) => apiDelete(`/v1/costmodel/cost-control/lines/${lineId}/method/`),
+  snapshot: (snapshotId: string) => apiGet<SnapshotDetail>(`/v1/costmodel/cost-control/snapshots/${snapshotId}/`),
+  putNote: (snapshotId: string, rowKey: string, body: SnapshotNoteBody) =>
+    apiPut<SnapshotLine, SnapshotNoteBody>(
+      `/v1/costmodel/cost-control/snapshots/${snapshotId}/notes/${encodeURIComponent(rowKey)}/`,
+      body,
+    ),
+  refreshSnapshot: (snapshotId: string) =>
+    apiPost<SnapshotSummary, Record<string, never>>(`/v1/costmodel/cost-control/snapshots/${snapshotId}/refresh/`, {}),
+  freezeSnapshot: (snapshotId: string) =>
+    apiPost<SnapshotSummary, Record<string, never>>(`/v1/costmodel/cost-control/snapshots/${snapshotId}/freeze/`, {}),
+  compare: (projectId: string) =>
+    apiGet<SnapshotMatrix>(`/v1/costmodel/projects/${projectId}/cost-control/compare/`),
+  ladder: (projectId: string, start: string, end: string) =>
+    apiGet<DeltaLadder>(
+      `/v1/costmodel/projects/${projectId}/cost-control/ladder/?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+    ),
+  phases: (projectId: string) =>
+    apiGet<PhaseComparison>(`/v1/costmodel/projects/${projectId}/cost-control/phases/`),
   unassigned: (projectId: string) =>
     apiGet<UnassignedPage>(`/v1/costmodel/projects/${projectId}/cost-control/unassigned/`),
   assign: (projectId: string, body: AssignBody) =>

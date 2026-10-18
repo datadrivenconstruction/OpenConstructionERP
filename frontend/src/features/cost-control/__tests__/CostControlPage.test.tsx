@@ -34,6 +34,11 @@ vi.mock('../api', async (importOriginal) => {
       setVector: vi.fn(),
       inheritAll: vi.fn(),
       directCost: vi.fn(),
+      forecastPanel: vi.fn(),
+      compare: vi.fn(),
+      ladder: vi.fn(),
+      phases: vi.fn(),
+      snapshot: vi.fn(),
     },
   };
 });
@@ -90,6 +95,10 @@ function row(over: Partial<CostControlRow>): CostControlRow {
     variance: '0',
     variance_pct: null,
     override: null,
+    forecast_method: 'best_available',
+    method_origin: 'project',
+    method_applied: true,
+    method_comment: '',
     ...over,
   };
 }
@@ -99,6 +108,7 @@ const REPORT: CostControlReport = {
   currency: 'EUR',
   axis: 'cost_line',
   as_of: '2026-10-17',
+  forecast_method: 'best_available',
   totals: {
     planned: '200000.00',
     forecast: '215000.00',
@@ -175,6 +185,25 @@ beforeEach(() => {
   vi.mocked(costControlApi.report).mockResolvedValue(REPORT);
   vi.mocked(costControlApi.chain).mockResolvedValue({ project_id: 'p-1', currency: 'EUR', buckets: [], findings: [] });
   vi.mocked(costControlApi.snapshots).mockResolvedValue({ items: [], total: 0, offset: 0, limit: 50 });
+  vi.mocked(costControlApi.forecastPanel).mockResolvedValue({
+    project_id: 'p-1',
+    currency: 'EUR',
+    settings: {
+      project_id: 'p-1',
+      forecast_method: 'best_available',
+      evidence_threshold_amount: '0',
+      evidence_threshold_pct: '10',
+      is_default: true,
+      updated_by: null,
+      updated_at: null,
+    },
+    method_counts: { best_available: 2 },
+    fallback_lines: 0,
+    line_choices: 0,
+    manual_lines: 0,
+    open_draft: null,
+    findings: [],
+  });
   vi.mocked(costControlApi.unassigned).mockResolvedValue({
     items: [
       {
@@ -226,11 +255,84 @@ describe('CostControlPage', () => {
     expect(within(table).getByText('Building construction')).toBeInTheDocument();
   });
 
-  it('asks for the stage before saving a forecast', async () => {
+  it('asks for the stage before starting a snapshot', async () => {
     renderPage();
     await screen.findByTestId('cost-control-table');
-    fireEvent.click(screen.getAllByRole('button', { name: /save forecast/i })[0]!);
+    fireEvent.click(await screen.findByRole('button', { name: /start snapshot/i }));
     expect(await screen.findByText('What does this forecast mark?')).toBeInTheDocument();
+    expect(screen.getByText("Start this month's snapshot")).toBeInTheDocument();
+  });
+
+  it('explains every forecast method in plain words', async () => {
+    renderPage();
+    expect(await screen.findByText('How the forecast is read')).toBeInTheDocument();
+    for (const name of ['Best available source', 'Maximum value', 'Projected from progress (CPI)', 'Manual']) {
+      expect(screen.getAllByText(name).length).toBeGreaterThan(0);
+    }
+    expect(screen.getByText(/Each line takes its highest figure/)).toBeInTheDocument();
+    expect(screen.getByText(/A line that moved by more than 10/)).toBeInTheDocument();
+  });
+
+  it('offers the open draft instead of a second one', async () => {
+    const panel = await costControlApi.forecastPanel('p-1');
+    vi.mocked(costControlApi.forecastPanel).mockResolvedValue({
+      ...panel,
+      open_draft: {
+        id: 'd-1',
+        taken_on: '2026-10-17',
+        stage: 'forecast',
+        label: '',
+        note: '',
+        currency: 'EUR',
+        totals: { forecast: '215000.00' },
+        created_by: null,
+        created_at: null,
+        status: 'draft',
+        frozen_at: null,
+        frozen_by: null,
+        previous_snapshot_id: null,
+        forecast_method: 'best_available',
+        threshold_amount: '0',
+        threshold_pct: '10',
+      },
+    });
+    renderPage();
+    expect(await screen.findByRole('button', { name: /open the draft/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /start snapshot/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the phase comparison as a third view of the table', async () => {
+    vi.mocked(costControlApi.phases).mockResolvedValue({
+      project_id: 'p-1',
+      currency: 'EUR',
+      as_of: '2026-10-17',
+      layers: ['budget', 'estimate', 'tender', 'awarded', 'changes', 'committed', 'pending', 'measured', 'certified', 'invoiced', 'paid', 'forecast'],
+      rows: [],
+      totals: {
+        key: 'total',
+        kind: 'account',
+        account_id: null,
+        parent_key: null,
+        level: 1,
+        code: '',
+        description: '',
+        values: {
+          budget: '0', estimate: '0', tender: '0', awarded: '0', changes: '0', committed: '0',
+          pending: '0', measured: '0', certified: '0', invoiced: '0', paid: '0', forecast: '0',
+        },
+        pct: {
+          budget: null, estimate: null, tender: null, awarded: null, changes: null, committed: null,
+          pending: null, measured: null, certified: null, invoiced: null, paid: null, forecast: null,
+        },
+        progress_pct: null,
+        invoiced_pct: null,
+      },
+    });
+    renderPage();
+    await screen.findByTestId('cost-control-table');
+    fireEvent.click(screen.getByRole('tab', { name: 'Phase comparison' }));
+    expect(await screen.findByText('No cost lines yet, so there is nothing to compare.')).toBeInTheDocument();
+    expect(costControlApi.phases).toHaveBeenCalledWith('p-1');
   });
 
   it('opens the lines behind the unassigned row, ready to be put on a cost line', async () => {

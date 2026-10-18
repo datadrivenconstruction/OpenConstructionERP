@@ -7,12 +7,12 @@
 // calculation, why is it 2.38 now?"), so it reads without opening anything.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2 } from 'lucide-react';
+import { ChevronRight, Lock, Trash2 } from 'lucide-react';
 
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { fmtCurrency, fmtDate } from '@/shared/lib/formatters';
 import { num, type SnapshotSummary } from './api';
-import { stageLabel } from './labels';
+import { snapshotStatusLabel, stageLabel } from './labels';
 
 const H = 200;
 const PAD_X = 56;
@@ -105,11 +105,13 @@ function Chart({ points, currency }: { points: SnapshotSummary[]; currency: stri
 export interface ForecastHistoryProps {
   snapshots: SnapshotSummary[];
   currency: string;
+  /** Whether the reader may delete a draft. A frozen snapshot is never deleted. */
   canDelete: boolean;
   onDelete: (id: string) => void;
+  onOpen: (id: string) => void;
 }
 
-export function ForecastHistory({ snapshots, currency, canDelete, onDelete }: ForecastHistoryProps) {
+export function ForecastHistory({ snapshots, currency, canDelete, onDelete, onOpen }: ForecastHistoryProps) {
   const { t } = useTranslation();
   const [pendingDelete, setPendingDelete] = useState<SnapshotSummary | null>(null);
   const newestFirst = useMemo(() => [...snapshots].reverse(), [snapshots]);
@@ -135,10 +137,27 @@ export function ForecastHistory({ snapshots, currency, canDelete, onDelete }: Fo
           return (
             <li key={s.id} className="flex items-center gap-3 py-2.5 text-sm">
               <span className="w-24 shrink-0 text-content-tertiary">{fmtDate(s.taken_on)}</span>
-              <span className="min-w-0 flex-1 truncate text-content-primary">
-                {s.label || stageLabel(t, s.stage)}
-                {s.label && <span className="ml-2 text-xs text-content-tertiary">{stageLabel(t, s.stage)}</span>}
-              </span>
+              <button
+                type="button"
+                className="flex min-w-0 flex-1 items-center gap-2 text-start text-content-primary hover:underline"
+                onClick={() => onOpen(s.id)}
+              >
+                <span className="truncate">
+                  {s.label || stageLabel(t, s.stage)}
+                  {s.label && <span className="ml-2 text-xs text-content-tertiary">{stageLabel(t, s.stage)}</span>}
+                </span>
+                <span
+                  className={`flex shrink-0 items-center gap-1 rounded px-1.5 py-px text-2xs font-medium ${
+                    s.status === 'draft'
+                      ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+                      : 'bg-surface-secondary text-content-tertiary'
+                  }`}
+                >
+                  {s.status !== 'draft' && <Lock size={10} />}
+                  {snapshotStatusLabel(t, s.status)}
+                </span>
+                <ChevronRight size={14} className="shrink-0 text-content-quaternary" />
+              </button>
               <span className="shrink-0 font-medium tabular-nums text-content-primary">
                 {fmtCurrency(s.totals.forecast, currency)}
               </span>
@@ -153,12 +172,12 @@ export function ForecastHistory({ snapshots, currency, canDelete, onDelete }: Fo
               >
                 {delta === null ? '' : `${delta > 0 ? '+' : ''}${fmtCurrency(delta, currency)}`}
               </span>
-              {canDelete && (
+              {canDelete && s.status === 'draft' && (
                 <button
                   type="button"
                   className="shrink-0 rounded p-1 text-content-quaternary hover:text-semantic-error"
                   onClick={() => setPendingDelete(s)}
-                  aria-label={t('cost_control.snapshot_delete', { defaultValue: 'Delete saved forecast' })}
+                  aria-label={t('cost_control.draft_delete', { defaultValue: 'Delete draft' })}
                 >
                   <Trash2 size={14} />
                 </button>
@@ -169,9 +188,9 @@ export function ForecastHistory({ snapshots, currency, canDelete, onDelete }: Fo
       </ul>
       <ConfirmDialog
         open={!!pendingDelete}
-        title={t('cost_control.snapshot_delete', { defaultValue: 'Delete saved forecast' })}
-        message={t('cost_control.snapshot_delete_confirm', {
-          defaultValue: 'The saved forecast of {{date}} is removed from the history for everyone.',
+        title={t('cost_control.draft_delete', { defaultValue: 'Delete draft' })}
+        message={t('cost_control.draft_delete_confirm', {
+          defaultValue: 'The draft of {{date}} and the reasons written on it are removed for everyone.',
           date: pendingDelete ? fmtDate(pendingDelete.taken_on) : '',
         })}
         onCancel={() => setPendingDelete(null)}

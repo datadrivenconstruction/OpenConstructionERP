@@ -1,9 +1,10 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// Save today's forecast. The stage is optional context: leave it on "Forecast"
-// for the monthly report, pick "Award" or "Final account" when the snapshot
-// marks one of those milestones. Each stage shows its national names, so a
+// Start a snapshot of today's forecast. It opens as a draft: the reasons behind
+// large moves are written on it, then it is frozen for good. The stage is
+// optional context: leave it on "Forecast" for the monthly report, pick
+// "Award" or "Final account" when the snapshot marks one of those milestones. Each stage shows its national names, so a
 // German, British or American user recognises their own step.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,9 +33,10 @@ export function SaveForecastDialog({ open, busy, onClose, onSave }: SaveForecast
       onClose={onClose}
       busy={busy}
       size="md"
-      title={t('cost_control.save_title', { defaultValue: 'Save the forecast' })}
-      subtitle={t('cost_control.save_subtitle', {
-        defaultValue: 'Freezes today\'s figures. Saved forecasts are never changed, so you can always see how the cost moved.',
+      title={t('cost_control.draft_start_title', { defaultValue: "Start this month's snapshot" })}
+      subtitle={t('cost_control.draft_start_subtitle', {
+        defaultValue:
+          "Takes today's figures into a draft. Write the reason behind each large move, then freeze it: a frozen snapshot is never changed.",
       })}
       footer={
         <div className="flex justify-end gap-2">
@@ -42,7 +44,7 @@ export function SaveForecastDialog({ open, busy, onClose, onSave }: SaveForecast
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button variant="primary" onClick={() => onSave({ stage, label, note })} disabled={busy}>
-            {t('cost_control.save_confirm', { defaultValue: 'Save' })}
+            {t('cost_control.draft_start_confirm', { defaultValue: 'Start draft' })}
           </Button>
         </div>
       }

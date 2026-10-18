@@ -267,6 +267,32 @@ SNAPSHOTS: tuple[_SnapSpec, ...] = (
 )
 
 
+#: The reasons written on the snapshots' larger moves, keyed by (snapshot date, cost line code):
+#: a comment and the evidence behind it, the way a monthly cost report is documented.
+SNAPSHOT_NOTES: dict[tuple[date, str], tuple[str, list[dict[str, str]]]] = {
+    (date(2026, 6, 30), "330"): (
+        "Vergabe Fassade unter Budget, zweites Angebot nach Aufklärungsgespräch.",
+        [{"kind": "document", "ref": "Vergabevermerk Fassade"}, {"kind": "minutes", "ref": "Bietergespräch 3"}],
+    ),
+    (date(2026, 6, 30), "410"): (
+        "Kostenschätzung Haustechnik nach Leitungsplanung fortgeschrieben.",
+        [{"kind": "document", "ref": "Kostenschätzung TGA Stand Juni"}],
+    ),
+    (date(2026, 8, 31), "410"): (
+        "Lüftung erweitert, Nutzer wünscht zusätzliche Zone im Erdgeschoss.",
+        [{"kind": "minutes", "ref": "Planungsbesprechung 11, Punkt 4"}],
+    ),
+    (date(2026, 8, 31), "330"): (
+        "Nachträge N-01 und N-02 freigegeben.",
+        [{"kind": "document", "ref": "Nachtrag N-01"}, {"kind": "document", "ref": "Nachtrag N-02"}],
+    ),
+    (date(2026, 9, 30), "320"): (
+        "Gründung nach Aufmaß über Auftrag, Mehrmengen Bodenaustausch.",
+        [{"kind": "document", "ref": "Aufmaß Gründung Blatt 7"}, {"kind": "minutes", "ref": "Baubesprechung 18"}],
+    ),
+}
+
+
 def _at(day: date) -> datetime:
     """A fixed time of day on ``day``, so stored timestamps are deterministic."""
     return datetime.combine(day, time(16, 0), tzinfo=UTC)
@@ -385,7 +411,7 @@ async def install_cost_control_demo(
     """
     from app.modules.changeorders.models import ChangeOrder
     from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
-    from app.modules.costmodel.models import BudgetLine, CostForecastSnapshot, CostLine
+    from app.modules.costmodel.models import BudgetLine, CostForecastSnapshot, CostForecastSnapshotNote, CostLine
     from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
     from app.modules.projects.models import Project
 
@@ -609,7 +635,10 @@ async def install_cost_control_demo(
     await session.flush()
 
     # ── Saved forecasts on past dates ─────────────────────────────────────
+    # Each one is written as a draft with the reasons behind its moves, then frozen, the way a
+    # month is closed in the product: a frozen snapshot takes no notes any more.
     line_ids = {code: line.id for code, line in lines.items()}
+    previous_id: uuid.UUID | None = None
     for spec in SNAPSHOTS:
         totals, rows = _snapshot_payload(spec, line_ids)
         snap = CostForecastSnapshot(
@@ -623,8 +652,28 @@ async def install_cost_control_demo(
             totals=totals,
             rows=rows,
             created_by=owner,
+            status="draft",
+            previous_snapshot_id=previous_id,
+            meta={"forecast_method": "best_available", "threshold_amount": "0", "threshold_pct": "10"},
         )
         snap.created_at = _at(spec.taken_on)
         session.add(snap)
-    await session.flush()
+        await session.flush()
+        for (day, code), (comment, evidence) in SNAPSHOT_NOTES.items():
+            if day == spec.taken_on:
+                session.add(
+                    CostForecastSnapshotNote(
+                        snapshot_id=snap.id,
+                        row_key=str(line_ids[code]),
+                        comment=comment,
+                        evidence=evidence,
+                        updated_by=owner,
+                    )
+                )
+        await session.flush()
+        snap.status = "frozen"
+        snap.frozen_at = _at(spec.taken_on)
+        snap.frozen_by = owner
+        await session.flush()
+        previous_id = snap.id
     return pid

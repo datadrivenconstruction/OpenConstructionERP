@@ -1376,7 +1376,7 @@ async def get_cost_control_snapshot(
 @router.delete(
     "/cost-control/snapshots/{snapshot_id}/",
     status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[Depends(RequirePermission("costmodel.manage"))],
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
 )
 async def delete_cost_control_snapshot(
     snapshot_id: uuid.UUID,
@@ -1384,7 +1384,7 @@ async def delete_cost_control_snapshot(
     session: SessionDep,
     service: CostControlService = Depends(_get_cost_control_service),
 ) -> None:
-    """Remove a saved forecast. Managers only: history is the point of keeping them."""
+    """Remove a draft snapshot. A frozen one is a record and answers 409."""
     await verify_project_access(await service.snapshot_project(snapshot_id), user_id, session)
     await service.delete_snapshot(snapshot_id)
 

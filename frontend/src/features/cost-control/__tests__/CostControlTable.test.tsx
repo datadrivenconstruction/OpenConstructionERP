@@ -32,6 +32,10 @@ function row(over: Partial<CostControlRow>): CostControlRow {
     variance: '0',
     variance_pct: null,
     override: null,
+    forecast_method: 'best_available',
+    method_origin: 'project',
+    method_applied: true,
+    method_comment: '',
     ...over,
   };
 }

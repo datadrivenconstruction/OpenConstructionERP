@@ -206,6 +206,28 @@ async def test_the_saved_forecasts_match_table_c(session: AsyncSession, project_
     assert report.last_snapshot is not None and report.last_snapshot.taken_on == "2026-09-30"
 
 
+async def test_the_saved_forecasts_are_frozen_records_with_their_reasons(
+    session: AsyncSession, project_id: uuid.UUID
+) -> None:
+    from app.modules.costmodel.cost_control_forecast import ForecastDocsService
+
+    service = CostControlService(session)
+    page = await service.list_snapshots(project_id)
+    assert [s.status for s in page.items] == ["frozen"] * 4
+    # Each one points at the one before it, so every move reads against the last frozen figure.
+    assert [s.previous_snapshot_id for s in page.items[1:]] == [s.id for s in page.items[:-1]]
+    _, september = await service.get_snapshot(page.items[-1].id)
+    foundations = next(line for line in september.lines if line.code == "320")
+    assert foundations.delta == D("11200")
+    assert foundations.documented and foundations.comment
+    # The ladder from August to September carries the reason on its step.
+    ladder = await ForecastDocsService(session).ladder(
+        project_id, start=str(page.items[2].id), end=str(page.items[3].id)
+    )
+    step = next(s for s in ladder.steps if s.code == "320")
+    assert step.comment == foundations.comment and len(step.evidence) == 2
+
+
 async def test_a_second_install_returns_the_same_project(session: AsyncSession, project_id: uuid.UUID) -> None:
     again = await install_cost_control_demo(session, OWNER, today=TODAY)
     assert again == project_id

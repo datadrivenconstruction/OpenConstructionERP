@@ -18,6 +18,7 @@ import { parseMoneyInput, stripCurrencySigns, toDecimalPayloadString } from '@/s
 import { useToastStore } from '@/stores/useToastStore';
 import { costControlApi, num, type CostControlRow, type LineHistory } from './api';
 import { sourceExplanation, sourceLabel, sourceTone, stageLabel } from './labels';
+import { LineMethodSection } from './LineMethodSection';
 
 interface TimelineEntry {
   date: string;
@@ -98,6 +99,7 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['cost-control', 'report', projectId] });
     queryClient.invalidateQueries({ queryKey: ['cost-control', 'history', lineId] });
+    queryClient.invalidateQueries({ queryKey: ['cost-control', 'forecast-panel', projectId] });
   };
 
   const save = useMutation({
@@ -200,6 +202,10 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
               ))}
             </dl>
           </section>
+
+          {history && history.methods.length > 0 && (
+            <LineMethodSection projectId={projectId} history={history} currency={currency} canEdit={canEdit} />
+          )}
 
           {canEdit && (
             <section>
