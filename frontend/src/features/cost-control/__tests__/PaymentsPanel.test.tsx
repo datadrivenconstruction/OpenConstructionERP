@@ -200,7 +200,7 @@ describe('PaymentsPanel', () => {
     const steps = await screen.findByTestId('release-steps');
     expect(within(steps).getByTestId('release-steps-retention')).toHaveTextContent(/714/);
     expect(within(steps).getByTestId('release-steps-rounding')).toHaveTextContent(/426/);
-    expect(within(steps).getByTestId('release-steps-release')).toHaveTextContent(/6[,.\s  ]?000/);
+    expect(within(steps).getByTestId('release-steps-release')).toHaveTextContent(/6[,.\s\u00a0\u202f]?000/);
     // No discount agreed: no discount step.
     expect(within(steps).queryByTestId('release-steps-discount')).toBeNull();
     fireEvent.click(screen.getByTestId('release-confirm'));
