@@ -122,6 +122,8 @@ class ControlData:
     invoiced: dict[str, Decimal] = field(default_factory=dict)
     unassigned_measured: Decimal = ZERO
     unassigned_invoiced: Decimal = ZERO
+    # Change orders waiting for a decision, per cost line, from the lines of those orders.
+    pending_by_line: dict[str, Decimal] = field(default_factory=dict)
 
 
 def _dec(value: object) -> str:
@@ -485,6 +487,7 @@ async def load_control_data(session: AsyncSession, project_id: uuid.UUID) -> Con
 
     pending_total = ZERO
     pending_count = 0
+    pending_ids: dict[uuid.UUID, str] = {}
     loose_total = ZERO
     loose_count = 0
     for co_id, co_status, impact, contractor_amount, approved_amount, ccy, meta in co_rows:
@@ -495,6 +498,7 @@ async def load_control_data(session: AsyncSession, project_id: uuid.UUID) -> Con
             value = _amount_in_base(_dec(raw), code, base, fx)
             pending_total += value
             pending_count += 1
+            pending_ids[co_id] = code
             if linked and linked in contracts:
                 contracts[linked].pending_changes += value
                 contracts[linked].pending_count += 1
@@ -509,6 +513,23 @@ async def load_control_data(session: AsyncSession, project_id: uuid.UUID) -> Con
             raw = approved_amount if approved_amount is not None else impact
             loose_total += _amount_in_base(_dec(raw), code, base, fx)
             loose_count += 1
+
+    # The lines of the waiting orders say which cost line each part of the money would land on.
+    pending_by_line: dict[str, Decimal] = {}
+    if pending_ids:
+        from app.modules.changeorders.models import ChangeOrderItem
+
+        item_rows = (
+            await session.execute(
+                select(ChangeOrderItem.change_order_id, ChangeOrderItem.cost_line_id, ChangeOrderItem.cost_delta).where(
+                    ChangeOrderItem.change_order_id.in_(list(pending_ids)),
+                    ChangeOrderItem.cost_line_id.is_not(None),
+                )
+            )
+        ).all()
+        for co_id, item_line, delta in item_rows:
+            value = _amount_in_base(_dec(delta), pending_ids.get(co_id, ""), base, fx)
+            pending_by_line[str(item_line)] = pending_by_line.get(str(item_line), ZERO) + value
 
     return ControlData(
         currency=base,
@@ -532,4 +553,5 @@ async def load_control_data(session: AsyncSession, project_id: uuid.UUID) -> Con
         invoiced=invoiced,
         unassigned_measured=unassigned_measured,
         unassigned_invoiced=unassigned_invoiced,
+        pending_by_line=pending_by_line,
     )

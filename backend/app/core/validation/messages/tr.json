@@ -1185,5 +1185,25 @@
       "fail": "{number} numaralı fatura, {other} numaralı faturayla aynı müteahhit, tutar ({amount}) ve tarihe ({on}) sahip.",
       "suggestion": "Aynı faturanın başka bir numarayla iki kez girilmediğini kontrol edin."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: {forecast} tutarındaki tahmin, zaten taahhüt edilen veya bekleyen değişikliklerde talep edilen {owed} tutarının altında ({difference} düşük) ve bunu hiçbir şey açıklamıyor.",
+      "suggestion": "Düşük rakamın arkasındaki belgeyi ekleyin (alacak dekontu, uzlaşma, tutanak) veya satırın yöntemi neden daha düşük sonuç verdiğini satıra yazın."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: tahmin, son dondurulmuş anlık görüntüden bu yana {previous} tutarından {current} tutarına ({delta}) değişti, proje eşiğini aşıyor ve henüz yorum ve dayanak belgesi yok.",
+      "suggestion": "Anlık görüntü dondurulmadan önce rakamın neden değiştiğini yazın ve arkasındaki belgeyi veya tutanağı bağlayın."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} için tahmin, projenin {project_method} yöntemi yerine {method} yöntemiyle yapılıyor ve nedenini açıklayan bir yorum yok.",
+      "suggestion": "Satırın yöntemine kısa bir yorum ekleyin veya satırı projenin yöntemine geri alın."
+    },
+    "method": {
+      "best_available": "en iyi mevcut kaynak",
+      "maximum": "en yüksek değer",
+      "evm_cpi": "maliyet performansı (CPI)",
+      "manual": "elle girilen tutar"
+    }
   }
 }

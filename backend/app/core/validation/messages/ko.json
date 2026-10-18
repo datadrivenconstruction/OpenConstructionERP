@@ -1185,5 +1185,25 @@
       "fail": "청구서 {number}는 시공사, 금액({amount}), 날짜({on})가 청구서 {other}와 같습니다.",
       "suggestion": "같은 청구서를 다른 번호로 두 번 입력한 것이 아닌지 확인하세요."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: 예측 {forecast}이(가) 이미 계약되었거나 보류 중인 변경으로 요청된 {owed}보다 낮고({difference} 적음), 이를 설명하는 내용이 없습니다.",
+      "suggestion": "낮은 수치의 근거 문서(크레딧 노트, 정산서, 회의록)를 첨부하거나, 해당 방법으로 금액이 적게 나오는 이유를 항목에 적으세요."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: 직전 확정 스냅샷 이후 예측이 {previous}에서 {current}({delta})로 변동해 프로젝트 기준을 넘었으며, 아직 의견과 근거 자료가 없습니다.",
+      "suggestion": "스냅샷을 확정하기 전에 수치가 바뀐 이유를 적고 근거 문서나 회의록을 연결하세요."
+    },
+    "method_override_without_comment": {
+      "fail": "{code}은(는) 프로젝트 방법인 {project_method} 대신 {method}(으)로 예측되었으며, 이유를 설명하는 의견이 없습니다.",
+      "suggestion": "항목의 방법에 짧은 의견을 추가하거나 항목을 프로젝트 방법으로 되돌리세요."
+    },
+    "method": {
+      "best_available": "사용 가능한 최선의 출처",
+      "maximum": "최댓값",
+      "evm_cpi": "비용 성과(CPI)",
+      "manual": "수동 금액"
+    }
   }
 }

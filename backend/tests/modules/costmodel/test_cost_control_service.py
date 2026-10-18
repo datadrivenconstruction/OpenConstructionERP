@@ -29,6 +29,7 @@ from app.modules.costmodel.cost_control import (
     FINDING_STALE_SNAPSHOT,
     FINDING_UNASSIGNED,
 )
+from app.modules.costmodel.cost_control_forecast import ForecastDocsService
 from app.modules.costmodel.cost_control_schemas import (
     AssignRequest,
     AssignTarget,
@@ -297,6 +298,13 @@ async def test_snapshot_freezes_the_report_and_feeds_the_line_history(
     _, detail = await service.get_snapshot(snap.id)
     shell_row = next(r for r in detail.rows if r["code"] == "330")
     assert (shell_row["forecast"], shell_row["source"]) == ("100000.00", "awarded")
+
+    # A new snapshot is a draft: the history and the stale check only read frozen ones.
+    assert snap.status == "draft"
+    assert (await service.line_history(project["shell"])).snapshots == []  # type: ignore[arg-type]
+    docs = ForecastDocsService(session)
+    frozen = await docs.freeze(await docs.snapshot(snap.id), "u1")
+    assert frozen.status == "frozen"
 
     history = await service.line_history(project["shell"])  # type: ignore[arg-type]
     assert [(p.stage, p.forecast) for p in history.snapshots] == [("award", D("100000"))]

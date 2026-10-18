@@ -1185,5 +1185,25 @@
       "fail": "La facture {number} a la même entreprise, le même montant ({amount}) et la même date ({on}) que la facture {other}.",
       "suggestion": "Vérifiez qu'il ne s'agit pas de la même facture saisie deux fois sous un autre numéro."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code} : la prévision de {forecast} est inférieure aux {owed} déjà engagés ou demandés dans des avenants en attente (soit {difference} de moins), et rien ne l'explique.",
+      "suggestion": "Joignez le document à l'origine du chiffre plus bas (avoir, protocole d'accord, compte rendu), ou indiquez sur la ligne pourquoi sa méthode donne moins."
+    },
+    "move_without_evidence": {
+      "fail": "{code} : la prévision est passée de {previous} à {current} ({delta}) depuis le dernier instantané figé, au-delà du seuil du projet, et n'a encore ni commentaire ni justificatif.",
+      "suggestion": "Expliquez la variation et joignez le document ou le compte rendu correspondant avant de figer l'instantané."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} est prévu avec la méthode {method} au lieu de la méthode du projet ({project_method}), sans commentaire qui explique pourquoi.",
+      "suggestion": "Ajoutez un bref commentaire sur la méthode de la ligne, ou remettez la ligne sur la méthode du projet."
+    },
+    "method": {
+      "best_available": "meilleure source disponible",
+      "maximum": "valeur maximale",
+      "evm_cpi": "performance des coûts (CPI)",
+      "manual": "montant manuel"
+    }
   }
 }

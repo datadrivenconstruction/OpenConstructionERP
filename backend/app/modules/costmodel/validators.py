@@ -42,6 +42,7 @@ from app.modules.costmodel.cost_control import (
     line_findings,
     project_findings,
 )
+from app.modules.costmodel.forecast_rules import register_cost_forecast_rules
 from app.modules.costmodel.structure_rules import register_cost_structure_rules
 
 logger = logging.getLogger(__name__)
@@ -160,7 +161,8 @@ COST_CONTROL_RULES: tuple[type[_CostControlRule], ...] = (
 
 
 def register_costmodel_validation_rules() -> None:
-    """Register the cost control rules, the cost structure rules (V1 to V5) and the chain rules (V6 to V10, V15).
+    """Register the cost control rules, the structure rules (V1 to V5), the chain rules (V6 to V10, V15)
+    and the forecast documentation rules (V19, V20, V22).
 
     Each family goes into its own rule set.
     """
@@ -168,6 +170,7 @@ def register_costmodel_validation_rules() -> None:
         rule_registry.register(rule_cls(), [RULE_SET])
     register_cost_structure_rules()
     register_cost_chain_rules()
+    register_cost_forecast_rules()
     logger.debug("Registered cost control validation rules")
 
 

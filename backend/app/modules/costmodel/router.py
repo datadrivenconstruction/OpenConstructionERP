@@ -30,6 +30,18 @@ Endpoints:
     PUT    /cost-control/lines/{line_id}/forecast/       - manual forecast with a reason
     DELETE /cost-control/lines/{line_id}/forecast/       - back to the automatic forecast
     GET    /cost-control/lines/{line_id}/history/        - why the forecast is what it is
+    GET    /projects/{project_id}/cost-control/settings/ - forecast method and evidence threshold
+    PUT    /projects/{project_id}/cost-control/settings/ - choose them (managers)
+    GET    /projects/{project_id}/cost-control/forecast/ - methods in force, open draft, checks V19 V20 V22
+    PUT    /cost-control/lines/{line_id}/method/         - one line read with its own method
+    DELETE /cost-control/lines/{line_id}/method/         - back to the project's method
+    PUT    /cost-control/snapshots/{snapshot_id}/notes/{row_key}/ - comment and evidence on a draft line
+    POST   /cost-control/snapshots/{snapshot_id}/refresh/ - today's figures into a draft
+    POST   /cost-control/snapshots/{snapshot_id}/freeze/ - freeze a draft for good
+    GET    /projects/{project_id}/cost-control/compare/  - snapshots side by side
+    GET    /projects/{project_id}/cost-control/ladder/   - from one total to another, line by line
+    GET    /projects/{project_id}/cost-control/phases/   - every cost layer on the account tree
+    GET    /projects/{project_id}/cost-control/export/{kind}/ - PDF or workbook of a cost report
     GET    /code-lists/                                  - code lists a structure can be built from
     GET    /code-lists/{key}/                            - one code list with its entries
     POST   /projects/{project_id}/code-lists/import/     - import a CSV or Excel code list
@@ -44,29 +56,47 @@ Endpoints:
 import uuid
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    RequirePermission,
+    SessionDep,
+    get_current_user_payload,
+    verify_project_access,
+)
+from app.modules.costmodel.cost_control_forecast import ForecastDocsService
 from app.modules.costmodel.cost_control_schemas import (
     AssignRequest,
     AssignResult,
     ChainReport,
     CostControlReport,
+    CostControlSettingsInfo,
+    CostControlSettingsRequest,
+    DeltaLadder,
     DirectCostRequest,
     DirectCostResult,
     ForecastOverrideInfo,
     ForecastOverrideRequest,
+    ForecastPanel,
     InheritResult,
     LineHistory,
+    LineMethodChoice,
+    LineMethodRequest,
+    PhaseComparison,
     SetVectorRequest,
     SetVectorResult,
     SnapshotCreateRequest,
     SnapshotDetail,
+    SnapshotLine,
+    SnapshotMatrix,
+    SnapshotNoteRequest,
     SnapshotPage,
     SnapshotSummary,
     UnassignedPage,
 )
 from app.modules.costmodel.cost_control_service import CostControlService
+from app.modules.costmodel.models import CostForecastSnapshot
 from app.modules.costmodel.position_actuals import build_position_actuals
 from app.modules.costmodel.schemas import (
     BudgetLineCreate,
@@ -1409,6 +1439,254 @@ async def get_cost_line_history(
     line = await service.line_project(line_id)
     await verify_project_access(line.project_id, user_id, session)
     return await service.line_history(line)
+
+
+# ── Forecast method, snapshot documentation, comparison and exports ───────────
+
+
+def _get_forecast_service(session: SessionDep) -> ForecastDocsService:
+    return ForecastDocsService(session)
+
+
+@router.get(
+    "/projects/{project_id}/cost-control/settings/",
+    response_model=CostControlSettingsInfo,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_cost_control_settings(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> CostControlSettingsInfo:
+    """The project's forecast method and the move above which a line needs evidence."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.get_settings(project_id)
+
+
+@router.put(
+    "/projects/{project_id}/cost-control/settings/",
+    response_model=CostControlSettingsInfo,
+    dependencies=[Depends(RequirePermission("costmodel.manage"))],
+)
+async def put_cost_control_settings(
+    project_id: uuid.UUID,
+    body: CostControlSettingsRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> CostControlSettingsInfo:
+    """Choose the project's forecast method and evidence threshold. Managers only: it moves every line."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.put_settings(project_id, body, str(user_id) if user_id else None)
+
+
+@router.get(
+    "/projects/{project_id}/cost-control/forecast/",
+    response_model=ForecastPanel,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_cost_control_forecast_panel(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> ForecastPanel:
+    """Methods in force, the open draft and the documentation checks V19, V20 and V22."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.panel(project_id)
+
+
+@router.put(
+    "/cost-control/lines/{line_id}/method/",
+    response_model=LineMethodChoice,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def set_cost_line_method(
+    line_id: uuid.UUID,
+    body: LineMethodRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> LineMethodChoice:
+    """Read one line with its own forecast method. An open manual amount on it is closed."""
+    line = await service.control.line_project(line_id)
+    await verify_project_access(line.project_id, user_id, session)
+    return await service.set_line_method(line, body, str(user_id) if user_id else None)
+
+
+@router.delete(
+    "/cost-control/lines/{line_id}/method/",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def clear_cost_line_method(
+    line_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> None:
+    """Back to the project's forecast method."""
+    line = await service.control.line_project(line_id)
+    await verify_project_access(line.project_id, user_id, session)
+    await service.clear_line_method(line)
+
+
+async def _snapshot_for(
+    snapshot_id: uuid.UUID, user_id: uuid.UUID | str | None, session: SessionDep, service: ForecastDocsService
+) -> CostForecastSnapshot:
+    snap = await service.snapshot(snapshot_id)
+    await verify_project_access(snap.project_id, user_id, session)
+    return snap
+
+
+@router.put(
+    "/cost-control/snapshots/{snapshot_id}/notes/{row_key}/",
+    response_model=SnapshotLine,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def put_cost_control_snapshot_note(
+    snapshot_id: uuid.UUID,
+    row_key: str,
+    body: SnapshotNoteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> SnapshotLine:
+    """Comment and evidence behind one line of a draft snapshot. A frozen snapshot answers 409."""
+    snap = await _snapshot_for(snapshot_id, user_id, session, service)
+    return await service.put_note(snap, row_key, body, str(user_id) if user_id else None)
+
+
+@router.post(
+    "/cost-control/snapshots/{snapshot_id}/refresh/",
+    response_model=SnapshotSummary,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def refresh_cost_control_snapshot(
+    snapshot_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> SnapshotSummary:
+    """Take today's figures into a draft; its notes stay on their lines."""
+    snap = await _snapshot_for(snapshot_id, user_id, session, service)
+    return await service.refresh(snap)
+
+
+@router.post(
+    "/cost-control/snapshots/{snapshot_id}/freeze/",
+    response_model=SnapshotSummary,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def freeze_cost_control_snapshot(
+    snapshot_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> SnapshotSummary:
+    """Freeze a draft for good. Refused (422) while a move above the threshold has no comment and evidence."""
+    snap = await _snapshot_for(snapshot_id, user_id, session, service)
+    return await service.freeze(snap, str(user_id) if user_id else None)
+
+
+@router.get(
+    "/projects/{project_id}/cost-control/compare/",
+    response_model=SnapshotMatrix,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def compare_cost_control_snapshots(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    ids: str = Query(default="", max_length=600, description="Comma separated snapshot ids, oldest first"),
+    live: bool = Query(default=True),
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> SnapshotMatrix:
+    """Snapshots side by side; without ids, the latest five frozen ones and today's figures."""
+    await verify_project_access(project_id, user_id, session)
+    parsed: list[uuid.UUID] = []
+    for raw in (part.strip() for part in ids.split(",")):
+        if not raw:
+            continue
+        try:
+            parsed.append(uuid.UUID(raw))
+        except ValueError as exc:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="ids") from exc
+    return await service.matrix(project_id, parsed or None, include_live=live)
+
+
+@router.get(
+    "/projects/{project_id}/cost-control/ladder/",
+    response_model=DeltaLadder,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_cost_control_ladder(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    start: str = Query(default="", max_length=40),
+    end: str = Query(default="live", max_length=40),
+    min_step: Decimal = Query(default=Decimal("0"), ge=0, max_digits=18, decimal_places=2),
+    limit: int = Query(default=25, ge=1, le=500),
+    service: ForecastDocsService = Depends(_get_forecast_service),
+) -> DeltaLadder:
+    """From one total to another, line by line: by default from the latest frozen snapshot to today."""
+    await verify_project_access(project_id, user_id, session)
+    return await service.ladder(project_id, start=start or None, end=end or None, min_step=min_step, limit=limit)
+
+
+@router.get(
+    "/projects/{project_id}/cost-control/phases/",
+    response_model=PhaseComparison,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_cost_control_phases(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> PhaseComparison:
+    """Budget, estimate, tender, award, changes, measured, invoiced, forecast side by side on the account tree."""
+    from app.modules.costmodel.cost_control_phases import phase_comparison
+
+    await verify_project_access(project_id, user_id, session)
+    return await phase_comparison(session, project_id)
+
+
+@router.get(
+    "/projects/{project_id}/cost-control/export/{kind}/",
+    response_model=None,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def export_cost_control(
+    project_id: uuid.UUID,
+    kind: str,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    format: str = Query(default="pdf", pattern="^(pdf|xlsx)$"),  # noqa: A002 - the query parameter every export takes
+    locale: str = Query(default="", max_length=20),
+    snapshot_id: uuid.UUID | None = Query(default=None),
+    payload: dict = Depends(get_current_user_payload),
+) -> Response:
+    """The cost report, phase comparison, invoice ledger or forecast documentation as PDF or workbook."""
+    from app.core.content_disposition import attachment_disposition
+    from app.core.i18n import get_locale
+    from app.modules.costmodel.cost_control_export import EXPORT_KINDS, media_type, render_export
+
+    if kind not in EXPORT_KINDS:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown export")
+    await verify_project_access(project_id, user_id, session)
+    if kind == "invoice_ledger":
+        # The ledger belongs to payment release: reading it asks for that module's own permission too.
+        await RequirePermission("payment_release.read")(payload)
+    data, filename = await render_export(
+        session, project_id, kind, format, locale.strip() or get_locale(), snapshot_id=snapshot_id
+    )
+    return Response(
+        content=data,
+        media_type=media_type(format),
+        headers={"Content-Disposition": attachment_disposition(filename)},
+    )
 
 
 # ── Cost structure: code lists, tree, vectors ─────────────────────────────────

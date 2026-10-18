@@ -1185,5 +1185,25 @@
       "fail": "Faktura {number} har samme entreprenør, beløp ({amount}) og dato ({on}) som faktura {other}.",
       "suggestion": "Sjekk at det ikke er samme faktura registrert to ganger under et annet nummer."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: prognosen på {forecast} ligger under de {owed} som allerede er forpliktet eller krevd i ventende endringer ({difference} lavere), og ingenting forklarer det.",
+      "suggestion": "Legg ved dokumentet bak det lavere tallet (en kreditnota, et forlik, et referat), eller skriv på linjen hvorfor metoden gir et lavere tall."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: prognosen har endret seg fra {previous} til {current} ({delta}) siden det siste frosne øyeblikksbildet, over prosjektets terskel, og mangler ennå kommentar og dokumentasjon.",
+      "suggestion": "Skriv hvorfor tallet endret seg, og koble dokumentet eller referatet bak det før øyeblikksbildet fryses."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} prognostiseres med {method} i stedet for prosjektets {project_method}, og ingen kommentar sier hvorfor.",
+      "suggestion": "Legg til en kort kommentar på linjens metode, eller sett linjen tilbake til prosjektets metode."
+    },
+    "method": {
+      "best_available": "beste tilgjengelige kilde",
+      "maximum": "høyeste verdi",
+      "evm_cpi": "kostnadsytelse (CPI)",
+      "manual": "manuelt beløp"
+    }
   }
 }

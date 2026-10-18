@@ -1185,5 +1185,25 @@
       "fail": "A(z) {number} számla vállalkozója, összege ({amount}) és dátuma ({on}) megegyezik a(z) {other} számláéval.",
       "suggestion": "Ellenőrizze, hogy nem ugyanaz a számla szerepel-e kétszer, más számlaszámmal."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: a(z) {forecast} előrebecslés alacsonyabb, mint a már lekötött vagy függő módosításokban kért {owed} ({difference} különbség), és semmi nem magyarázza.",
+      "suggestion": "Csatold az alacsonyabb érték mögötti dokumentumot (jóváíró számla, elszámolás, jegyzőkönyv), vagy írd a sorhoz, miért ad a módszere kevesebbet."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: az előrebecslés az utolsó lezárt pillanatkép óta {previous} értékről {current} értékre változott ({delta}), meghaladja a projekt küszöbét, és még nincs hozzá megjegyzés és alátámasztás.",
+      "suggestion": "Írd le, miért változott az érték, és csatold a mögötte álló dokumentumot vagy jegyzőkönyvet a pillanatkép lezárása előtt."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} előrebecslése a projekt {project_method} módszere helyett {method} módszerrel készül, és nincs megjegyzés az okról.",
+      "suggestion": "Írj rövid megjegyzést a sor módszeréhez, vagy állítsd vissza a sort a projekt módszerére."
+    },
+    "method": {
+      "best_available": "legjobb elérhető forrás",
+      "maximum": "legnagyobb érték",
+      "evm_cpi": "költséghatékonyság (CPI)",
+      "manual": "kézi összeg"
+    }
   }
 }

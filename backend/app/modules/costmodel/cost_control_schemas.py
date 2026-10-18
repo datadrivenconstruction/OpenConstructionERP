@@ -16,6 +16,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field, PlainSerializer, field_validator
 
 from app.modules.costmodel.cost_control import COST_STAGES
+from app.modules.costmodel.forecast_docs import EVIDENCE_KINDS
 from app.modules.costmodel.schemas import _serialise_money
 
 Money = Annotated[Decimal, PlainSerializer(_serialise_money, return_type=str, when_used="json")]
@@ -25,6 +26,14 @@ OptionalMoney = Annotated[Decimal | None, PlainSerializer(_serialise_money, retu
 VectorKind = Literal["contract_line", "po_item", "contract", "change_order_item", "invoice_line"]
 
 RowKind = Literal["cost_line", "contract", "unassigned", "changes_without_contract", "other", "remaining", "allowance"]
+
+#: A project's forecast method, or a line's.
+ForecastMethod = Literal["best_available", "maximum", "evm_cpi", "manual"]
+#: The methods a line can be set to by choice; ``manual`` is set by entering an amount.
+LineForecastMethod = Literal["best_available", "maximum", "evm_cpi"]
+#: Where a line's method comes from: the project, the line's own choice, or a person's amount.
+MethodOrigin = Literal["project", "line", "manual"]
+SnapshotStatus = Literal["draft", "frozen"]
 
 
 class ForecastOverrideInfo(BaseModel):
@@ -68,6 +77,11 @@ class CostControlRow(BaseModel):
     variance: Money = Decimal("0")
     variance_pct: OptionalMoney = None
     override: ForecastOverrideInfo | None = None
+    # The method the forecast was worked out with, and whether it could be (see cost_control.MethodOutcome).
+    forecast_method: str = "best_available"
+    method_origin: MethodOrigin = "project"
+    method_applied: bool = True
+    method_comment: str = ""
 
 
 class CostControlAccount(BaseModel):
@@ -107,6 +121,14 @@ class SnapshotSummary(BaseModel):
     totals: dict[str, str] = Field(default_factory=dict)
     created_by: str | None = None
     created_at: datetime | None = None
+    status: SnapshotStatus = "frozen"
+    frozen_at: datetime | None = None
+    frozen_by: str | None = None
+    previous_snapshot_id: UUID | None = None
+    # The forecast method and evidence threshold in force when the figures were taken.
+    forecast_method: str = "best_available"
+    threshold_amount: Money = Decimal("0")
+    threshold_pct: OptionalMoney = None
 
 
 class SnapshotPage(BaseModel):
@@ -130,6 +152,7 @@ class CostControlReport(BaseModel):
     accounts: list[CostControlAccount] = Field(default_factory=list)
     findings: list[CostControlFinding] = Field(default_factory=list)
     last_snapshot: SnapshotSummary | None = None
+    forecast_method: str = "best_available"
 
 
 class SnapshotCreateRequest(BaseModel):
@@ -147,10 +170,62 @@ class SnapshotCreateRequest(BaseModel):
         return v
 
 
+class EvidenceItem(BaseModel):
+    """One piece of evidence behind a forecast move: a project document, minutes, or another reference."""
+
+    kind: Literal["document", "minutes", "other"] = "document"
+    ref: str = Field(default="", max_length=500)
+    document_id: UUID | None = None
+
+    @field_validator("kind")
+    @classmethod
+    def _known_kind(cls, v: str) -> str:
+        if v not in EVIDENCE_KINDS:
+            raise ValueError(f"kind must be one of {', '.join(EVIDENCE_KINDS)}")
+        return v
+
+    @field_validator("ref")
+    @classmethod
+    def _strip(cls, v: str) -> str:
+        return v.strip()
+
+
+class SnapshotNoteRequest(BaseModel):
+    """The comment and evidence behind one line of a draft snapshot."""
+
+    comment: str = Field(default="", max_length=4000)
+    evidence: list[EvidenceItem] = Field(default_factory=list, max_length=20)
+
+
+class SnapshotLine(BaseModel):
+    """One line of a snapshot with its move since the previous frozen snapshot and its documentation."""
+
+    key: str
+    kind: str = ""
+    code: str = ""
+    description: str = ""
+    source: str = "none"
+    method: str = "best_available"
+    forecast: Money = Decimal("0")
+    committed: Money = Decimal("0")
+    #: The previous frozen snapshot's forecast; empty when the line is new.
+    previous: OptionalMoney = None
+    delta: Money = Decimal("0")
+    delta_pct: OptionalMoney = None
+    needs_evidence: bool = False
+    documented: bool = False
+    comment: str = ""
+    evidence: list[EvidenceItem] = Field(default_factory=list)
+    note_updated_at: datetime | None = None
+
+
 class SnapshotDetail(SnapshotSummary):
-    """A saved snapshot with its rows."""
+    """A saved snapshot with its rows, its documented lines and, for a draft, what still blocks freezing."""
 
     rows: list[dict[str, str]] = Field(default_factory=list)
+    lines: list[SnapshotLine] = Field(default_factory=list)
+    previous: SnapshotSummary | None = None
+    findings: list[ForecastFinding] = Field(default_factory=list)
 
 
 class ForecastOverrideRequest(BaseModel):
@@ -200,6 +275,41 @@ class LineChangeEvent(BaseModel):
     amount: Money = Decimal("0")
 
 
+class MethodOutcomeInfo(BaseModel):
+    """What one forecast method makes of a line."""
+
+    method: ForecastMethod
+    amount: Money
+    source: str
+    applied: bool = True
+    progress: OptionalMoney = None
+    cpi: OptionalMoney = None
+    earned: OptionalMoney = None
+    actual: OptionalMoney = None
+
+
+class LineMethodChoice(BaseModel):
+    """The forecast method one cost line was set to, and why."""
+
+    cost_line_id: UUID
+    method: LineForecastMethod
+    comment: str = ""
+    updated_by: str | None = None
+    updated_at: datetime | None = None
+
+
+class LineMethodRequest(BaseModel):
+    """Read a line with another forecast method than the project's. A comment says why (rule V22 asks for it)."""
+
+    method: LineForecastMethod
+    comment: str = Field(default="", max_length=2000)
+
+    @field_validator("comment")
+    @classmethod
+    def _strip(cls, v: str) -> str:
+        return v.strip()
+
+
 class LineHistory(BaseModel):
     """Why a line's forecast is what it is: snapshots, changes and manual forecasts."""
 
@@ -211,6 +321,10 @@ class LineHistory(BaseModel):
     snapshots: list[LineHistoryPoint] = Field(default_factory=list)
     changes: list[LineChangeEvent] = Field(default_factory=list)
     overrides: list[ForecastOverrideInfo] = Field(default_factory=list)
+    project_method: str = "best_available"
+    method_choice: LineMethodChoice | None = None
+    #: Every method on this line side by side, so the choice is made on figures.
+    methods: list[MethodOutcomeInfo] = Field(default_factory=list)
 
 
 class UnassignedItem(BaseModel):
@@ -340,3 +454,181 @@ class DirectCostResult(BaseModel):
     contract_id: UUID
     contract_code: str
     contract_line_id: UUID | None = None
+
+
+# ── Forecast method, documentation and comparison ─────────────────────────
+
+
+class CostControlSettingsInfo(BaseModel):
+    """A project's forecast method and the move above which a line needs evidence."""
+
+    project_id: UUID
+    forecast_method: ForecastMethod = "best_available"
+    evidence_threshold_amount: Money = Decimal("0")
+    #: Percent of the previous forecast; empty leaves the percentage test out.
+    evidence_threshold_pct: OptionalMoney = Decimal("10")
+    #: True while the project has never stored settings and reads the defaults.
+    is_default: bool = True
+    updated_by: str | None = None
+    updated_at: datetime | None = None
+
+
+class CostControlSettingsRequest(BaseModel):
+    """Store a project's forecast method and evidence threshold."""
+
+    forecast_method: ForecastMethod = "best_available"
+    evidence_threshold_amount: Decimal = Field(default=Decimal("0"), ge=0, max_digits=18, decimal_places=2)
+    evidence_threshold_pct: Decimal | None = Field(default=Decimal("10"), ge=0, le=1000, max_digits=7, decimal_places=2)
+
+    @field_validator("evidence_threshold_amount", "evidence_threshold_pct")
+    @classmethod
+    def _finite(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and not v.is_finite():
+            raise ValueError("must be a finite number")
+        return v
+
+
+class ForecastFinding(BaseModel):
+    """A finding of rules V19, V20 or V22, message in the caller's language."""
+
+    rule_id: str
+    rule_number: str
+    severity: Literal["error", "warning", "info"]
+    message: str
+    suggestion: str = ""
+    element_ref: str | None = None
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
+class ForecastPanel(BaseModel):
+    """The project's forecast method, how many lines use each, and the documentation checks."""
+
+    project_id: UUID
+    currency: str = ""
+    settings: CostControlSettingsInfo
+    #: Cost lines per method actually in force (after a line's own choice or amount).
+    method_counts: dict[str, int] = Field(default_factory=dict)
+    #: Lines whose chosen method had nothing to work with, so the best available figure stands in.
+    fallback_lines: int = 0
+    line_choices: int = 0
+    manual_lines: int = 0
+    open_draft: SnapshotSummary | None = None
+    findings: list[ForecastFinding] = Field(default_factory=list)
+
+
+class SnapshotFreezeRefused(BaseModel):
+    """Why a draft could not be frozen: the lines rule V20 still points at."""
+
+    message: str
+    findings: list[ForecastFinding] = Field(default_factory=list)
+
+
+class ComparisonColumn(BaseModel):
+    """One compared state: a snapshot, or today's figures (``id`` empty, ``status`` ``live``)."""
+
+    id: UUID | None = None
+    taken_on: str
+    stage: str = "forecast"
+    label: str = ""
+    status: Literal["draft", "frozen", "live"] = "frozen"
+    total: Money = Decimal("0")
+
+
+class ComparisonRow(BaseModel):
+    """One line across the compared states; an empty value where a state does not have the line."""
+
+    key: str
+    code: str = ""
+    description: str = ""
+    kind: str = ""
+    values: list[OptionalMoney] = Field(default_factory=list)
+    delta: Money = Decimal("0")
+    delta_pct: OptionalMoney = None
+
+
+class SnapshotMatrix(BaseModel):
+    """Several snapshots side by side, oldest first."""
+
+    project_id: UUID
+    currency: str = ""
+    columns: list[ComparisonColumn] = Field(default_factory=list)
+    rows: list[ComparisonRow] = Field(default_factory=list)
+
+
+class LadderStepInfo(BaseModel):
+    """One line's move between two states, why, and what backs it."""
+
+    key: str
+    code: str = ""
+    description: str = ""
+    kind: str = ""
+    before: OptionalMoney = None
+    after: OptionalMoney = None
+    delta: Money
+    cause: Literal["new", "removed", "method", "source", "value"]
+    source_before: str = ""
+    source_after: str = ""
+    method_before: str = ""
+    method_after: str = ""
+    comment: str = ""
+    evidence: list[EvidenceItem] = Field(default_factory=list)
+
+
+class DeltaLadder(BaseModel):
+    """From one total to the other, line by line, largest move first; small moves gathered in ``other``."""
+
+    project_id: UUID
+    currency: str = ""
+    start_column: ComparisonColumn
+    end_column: ComparisonColumn
+    start: Money
+    end: Money
+    steps: list[LadderStepInfo] = Field(default_factory=list)
+    other: Money = Decimal("0")
+    other_count: int = 0
+
+
+#: The phase layers of the comparison, left to right as the life of a cost.
+PHASE_LAYERS: tuple[str, ...] = (
+    "budget",
+    "estimate",
+    "tender",
+    "awarded",
+    "changes",
+    "committed",
+    "pending",
+    "measured",
+    "certified",
+    "invoiced",
+    "paid",
+    "forecast",
+)
+
+
+class PhaseRow(BaseModel):
+    """One account (with everything below it) or one cost line across the phase layers."""
+
+    key: str
+    kind: Literal["account", "cost_line", "allowance", "unassigned"]
+    account_id: str | None = None
+    parent_key: str | None = None
+    level: int = 1
+    code: str = ""
+    description: str = ""
+    values: dict[str, Money] = Field(default_factory=dict)
+    #: Each layer as a percentage of the plan (budget, else estimate); empty without a plan.
+    pct: dict[str, str | None] = Field(default_factory=dict)
+    #: Measured work and invoices as a percentage of the commitment.
+    progress_pct: str | None = None
+    invoiced_pct: str | None = None
+
+
+class PhaseComparison(BaseModel):
+    """Every layer of the project's cost side by side on its account tree."""
+
+    project_id: UUID
+    currency: str = ""
+    as_of: str
+    layers: list[str] = Field(default_factory=lambda: list(PHASE_LAYERS))
+    rows: list[PhaseRow] = Field(default_factory=list)
+    totals: PhaseRow

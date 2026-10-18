@@ -22,6 +22,12 @@ Tables:
     oe_costmodel_line_allocation - one share of a downstream line (bid line,
         contract line, order item, invoice line) on a cost line, inherited from
         the split position it came from
+    oe_costmodel_cost_control_settings - a project's forecast method and the
+        threshold above which a forecast move needs evidence
+    oe_costmodel_forecast_method - the forecast method one cost line is read
+        with when it differs from the project's, and why
+    oe_costmodel_forecast_snapshot_note - the comment and evidence behind one
+        line of a snapshot; written while the snapshot is a draft, frozen with it
 """
 
 import uuid
@@ -396,13 +402,21 @@ class LabourWorkerDay(Base):
 
 
 class CostForecastSnapshot(Base):
-    """A cost control report frozen at a date, never edited afterwards.
+    """A cost control report kept at a date.
 
     Taken by hand ("save this month's forecast") or tagged with the cost stage
     it records, so the same table holds the estimate, the award and every
     monthly forecast in between, and the history of a line is read straight
     from it. ``rows`` keeps one entry per cost line with the figures and the
     forecast source as they stood; money is stored as decimal strings.
+
+    A snapshot starts as a ``draft``: its figures can be refreshed and each
+    line documented (:class:`CostForecastSnapshotNote`). Freezing it is final:
+    a ``frozen`` snapshot is never changed or deleted again, which the service
+    refuses and the mapper events at the end of this module refuse as well.
+    Snapshots written before drafts existed are frozen.
+    ``previous_snapshot_id`` names the frozen snapshot its moves are measured
+    from; ``meta`` keeps the forecast method and evidence threshold in force.
     """
 
     __tablename__ = "oe_costmodel_forecast_snapshot"
@@ -432,9 +446,20 @@ class CostForecastSnapshot(Base):
         server_default="[]",
     )
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    status: Mapped[str] = mapped_column(String(10), nullable=False, default="frozen", server_default="frozen")
+    frozen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    frozen_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # The frozen snapshot this one's moves are measured from; no foreign key, a frozen row is never deleted.
+    previous_snapshot_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    meta: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
 
     def __repr__(self) -> str:
-        return f"<CostForecastSnapshot {self.taken_on} {self.stage}>"
+        return f"<CostForecastSnapshot {self.taken_on} {self.stage} {self.status}>"
 
 
 class CostForecastOverride(Base):
@@ -605,3 +630,137 @@ class LineAllocation(Base):
 
     def __repr__(self) -> str:
         return f"<LineAllocation {self.source_type}:{self.source_id} -> {self.cost_line_id} {self.share}%>"
+
+
+class CostControlSettings(Base):
+    """How a project's forecast is worked out and documented. One row per project.
+
+    A project without a row reads the defaults: the best available source, and
+    evidence for a move above 10 % of the previous forecast.
+    """
+
+    __tablename__ = "oe_costmodel_cost_control_settings"
+    __table_args__ = (UniqueConstraint("project_id", name="uq_costmodel_cc_settings_project"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE", name="fk_costmodel_cc_settings_project"),
+        nullable=False,
+        index=True,
+    )
+    forecast_method: Mapped[str] = mapped_column(String(20), nullable=False, server_default="best_available")
+    # A move must exceed the amount (when above zero) and the percentage (when set) to need evidence.
+    evidence_threshold_amount: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, server_default="0")
+    evidence_threshold_pct: Mapped[Decimal | None] = mapped_column(Numeric(7, 2), nullable=True, server_default="10")
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<CostControlSettings {self.project_id} {self.forecast_method}>"
+
+
+class CostForecastMethodChoice(Base):
+    """The forecast method one cost line is read with, when someone picked one for it.
+
+    A line without a row follows the project's method. A manual amount is not
+    stored here: it is a :class:`CostForecastOverride`, and setting one removes
+    the line's choice (and choosing a method closes the open manual amount).
+    """
+
+    __tablename__ = "oe_costmodel_forecast_method"
+    __table_args__ = (UniqueConstraint("cost_line_id", name="uq_costmodel_forecast_method_line"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE", name="fk_costmodel_forecast_method_project"),
+        nullable=False,
+        index=True,
+    )
+    cost_line_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_costmodel_cost_line.id", ondelete="CASCADE", name="fk_costmodel_forecast_method_line"),
+        nullable=False,
+    )
+    method: Mapped[str] = mapped_column(String(20), nullable=False)
+    comment: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<CostForecastMethodChoice {self.cost_line_id} {self.method}>"
+
+
+class CostForecastSnapshotNote(Base):
+    """Why one line of a snapshot moved: a comment and the evidence behind it.
+
+    ``row_key`` is the key the snapshot row carries (a cost line id, or a
+    special row such as ``unassigned``). ``evidence`` is a list of
+    ``{"kind": "document" | "minutes" | "other", "ref": str, "document_id": str | None}``.
+    Written while the snapshot is a draft; frozen with it.
+    """
+
+    __tablename__ = "oe_costmodel_forecast_snapshot_note"
+    __table_args__ = (UniqueConstraint("snapshot_id", "row_key", name="uq_costmodel_snapshot_note_row"),)
+
+    snapshot_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_costmodel_forecast_snapshot.id", ondelete="CASCADE", name="fk_costmodel_snapshot_note_snapshot"),
+        nullable=False,
+        index=True,
+    )
+    row_key: Mapped[str] = mapped_column(String(80), nullable=False)
+    comment: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
+    evidence: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<CostForecastSnapshotNote {self.snapshot_id} {self.row_key}>"
+
+
+# ── A frozen snapshot stays as it was ─────────────────────────────────────
+
+
+class FrozenSnapshotError(RuntimeError):
+    """Raised when a write would change a frozen snapshot or its notes."""
+
+
+def _stored_status(connection: object, snapshot_id: object) -> str | None:
+    """The status the database holds for a snapshot, before the write under way."""
+    from sqlalchemy import select
+
+    return connection.execute(  # type: ignore[attr-defined]
+        select(CostForecastSnapshot.status).where(CostForecastSnapshot.id == snapshot_id)
+    ).scalar()
+
+
+def _refuse_frozen_snapshot_write(_mapper: object, connection: object, target: CostForecastSnapshot) -> None:
+    """A frozen snapshot is never updated; freezing a draft is the one write that ends in ``frozen``."""
+    if _stored_status(connection, target.id) == "frozen":
+        raise FrozenSnapshotError(f"Snapshot {target.id} is frozen and cannot be changed")
+
+
+def _refuse_frozen_snapshot_delete(_mapper: object, connection: object, target: CostForecastSnapshot) -> None:
+    if _stored_status(connection, target.id) == "frozen":
+        raise FrozenSnapshotError(f"Snapshot {target.id} is frozen and cannot be deleted")
+
+
+def _refuse_note_on_frozen(_mapper: object, connection: object, target: CostForecastSnapshotNote) -> None:
+    """A note is written, changed or removed only while its snapshot is a draft."""
+    if _stored_status(connection, target.snapshot_id) == "frozen":
+        raise FrozenSnapshotError(f"Snapshot {target.snapshot_id} is frozen; its notes cannot be changed")
+
+
+def _install_frozen_guards() -> None:
+    from sqlalchemy import event
+
+    event.listen(CostForecastSnapshot, "before_update", _refuse_frozen_snapshot_write)
+    event.listen(CostForecastSnapshot, "before_delete", _refuse_frozen_snapshot_delete)
+    for name in ("before_insert", "before_update", "before_delete"):
+        event.listen(CostForecastSnapshotNote, name, _refuse_note_on_frozen)
+
+
+_install_frozen_guards()

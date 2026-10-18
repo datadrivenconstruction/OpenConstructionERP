@@ -1185,5 +1185,25 @@
       "fail": "Hóa đơn {number} có cùng nhà thầu, số tiền ({amount}) và ngày ({on}) với hóa đơn {other}.",
       "suggestion": "Kiểm tra xem có phải cùng một hóa đơn bị nhập hai lần dưới số khác hay không."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: dự báo {forecast} thấp hơn {owed} đã cam kết hoặc được yêu cầu trong các thay đổi chờ duyệt (thấp hơn {difference}), và không có gì giải thích điều này.",
+      "suggestion": "Đính kèm tài liệu đứng sau con số thấp hơn (giấy báo có, biên bản thanh lý, biên bản họp), hoặc ghi vào dòng lý do phương pháp của nó cho kết quả thấp hơn."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: dự báo đã đổi từ {previous} sang {current} ({delta}) kể từ bản chốt đã khóa gần nhất, vượt ngưỡng của dự án, và chưa có ghi chú cũng như tài liệu chứng minh.",
+      "suggestion": "Ghi rõ vì sao con số thay đổi và liên kết tài liệu hoặc biên bản làm căn cứ trước khi khóa bản chốt."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} được dự báo theo {method} thay vì {project_method} của dự án, và không có ghi chú nào giải thích lý do.",
+      "suggestion": "Thêm một ghi chú ngắn vào phương pháp của dòng, hoặc đặt dòng về phương pháp của dự án."
+    },
+    "method": {
+      "best_available": "nguồn tốt nhất hiện có",
+      "maximum": "giá trị lớn nhất",
+      "evm_cpi": "hiệu suất chi phí (CPI)",
+      "manual": "số tiền nhập tay"
+    }
   }
 }

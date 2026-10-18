@@ -1185,5 +1185,25 @@
       "fail": "Faktura {number} ma tego samego wykonawcę, kwotę ({amount}) i datę ({on}) co faktura {other}.",
       "suggestion": "Sprawdź, czy to nie ta sama faktura wprowadzona dwa razy pod innym numerem."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: prognoza {forecast} jest niższa niż {owed} już zakontraktowane lub zgłoszone w zmianach oczekujących (o {difference}) i nic tego nie wyjaśnia.",
+      "suggestion": "Dołącz dokument uzasadniający niższą kwotę (fakturę korygującą, ugodę, protokół) albo napisz przy pozycji, dlaczego jej metoda daje mniej."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: prognoza zmieniła się z {previous} na {current} ({delta}) od ostatniego zamrożonego zapisu stanu, powyżej progu projektu, i nie ma jeszcze komentarza ani dokumentu potwierdzającego.",
+      "suggestion": "Opisz, dlaczego kwota się zmieniła, i powiąż dokument lub protokół, który to potwierdza, zanim zapis stanu zostanie zamrożony."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} jest prognozowany metodą {method} zamiast metodą projektu ({project_method}), a żaden komentarz nie mówi dlaczego.",
+      "suggestion": "Dodaj krótki komentarz do metody pozycji albo przywróć dla pozycji metodę projektu."
+    },
+    "method": {
+      "best_available": "najlepsze dostępne źródło",
+      "maximum": "wartość maksymalna",
+      "evm_cpi": "wskaźnik wydajności kosztowej (CPI)",
+      "manual": "kwota ręczna"
+    }
   }
 }

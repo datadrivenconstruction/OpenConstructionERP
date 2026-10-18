@@ -1185,5 +1185,25 @@
       "fail": "{number} hisob-fakturasining pudratchisi, summasi ({amount}) va sanasi ({on}) {other} hisob-fakturasi bilan bir xil.",
       "suggestion": "Bu boshqa raqam bilan ikki marta kiritilgan bitta hisob-faktura emasligini tekshiring."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: {forecast} prognozi majburiyatga olingan yoki kutilayotgan o'zgarishlarda so'ralgan {owed} dan past ({difference} kam) va buni hech narsa tushuntirmaydi.",
+      "suggestion": "Past ko'rsatkich asosidagi hujjatni biriktiring (kredit-nota, kelishuv, bayonnoma) yoki qator usuli nega kamroq natija berishini qatorga yozing."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: prognoz oxirgi muzlatilgan lahzaki nusxadan beri {previous} dan {current} ga ({delta}) o'zgardi, loyiha chegarasidan oshadi va hali izohi hamda tasdiqlovchi hujjati yo'q.",
+      "suggestion": "Lahzaki nusxani muzlatishdan oldin ko'rsatkich nega o'zgarganini yozing va uning asosidagi hujjat yoki bayonnomani bog'lang."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} loyihaning {project_method} usuli o'rniga {method} usuli bilan prognoz qilinadi va sababini tushuntiruvchi izoh yo'q.",
+      "suggestion": "Qator usuliga qisqa izoh qo'shing yoki qatorni loyiha usuliga qaytaring."
+    },
+    "method": {
+      "best_available": "eng yaxshi mavjud manba",
+      "maximum": "eng yuqori qiymat",
+      "evm_cpi": "xarajat samaradorligi (CPI)",
+      "manual": "qo'lda kiritilgan summa"
+    }
   }
 }

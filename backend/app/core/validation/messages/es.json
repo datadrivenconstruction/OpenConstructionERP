@@ -1185,5 +1185,25 @@
       "fail": "La factura {number} tiene el mismo contratista, importe ({amount}) y fecha ({on}) que la factura {other}.",
       "suggestion": "Compruebe que no sea la misma factura registrada dos veces con otro número."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: la previsión de {forecast} es inferior a los {owed} ya comprometidos o solicitados en modificados pendientes ({difference} menos), y nada lo explica.",
+      "suggestion": "Adjunte el documento que respalda la cifra menor (un abono, un acuerdo, un acta), o indique en la partida por qué su método da menos."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: la previsión pasó de {previous} a {current} ({delta}) desde la última instantánea congelada, por encima del umbral del proyecto, y aún no tiene comentario ni justificante.",
+      "suggestion": "Explique por qué cambió la cifra y vincule el documento o el acta que la respalda antes de congelar la instantánea."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} se prevé con {method} en lugar del método del proyecto ({project_method}), y ningún comentario explica por qué.",
+      "suggestion": "Añada un breve comentario en el método de la partida, o devuelva la partida al método del proyecto."
+    },
+    "method": {
+      "best_available": "mejor fuente disponible",
+      "maximum": "valor máximo",
+      "evm_cpi": "rendimiento de costes (CPI)",
+      "manual": "importe manual"
+    }
   }
 }

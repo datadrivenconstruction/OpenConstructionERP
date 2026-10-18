@@ -1185,5 +1185,25 @@
       "fail": "Invoice {number} has the same contractor, amount ({amount}) and date ({on}) as invoice {other}.",
       "suggestion": "Check that it is not the same invoice entered twice under another number."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: the forecast of {forecast} is below the {owed} already committed or asked for in pending changes ({difference} lower), and nothing explains it.",
+      "suggestion": "Attach the document behind the lower figure (a credit note, a settlement, minutes), or say on the line why its method gives less."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: the forecast moved from {previous} to {current} ({delta}) since the last frozen snapshot, above the project's threshold, and has no comment and evidence yet.",
+      "suggestion": "Write why the figure moved and link the document or minutes behind it before the snapshot is frozen."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} is forecast by {method} instead of the project's {project_method}, and no comment says why.",
+      "suggestion": "Add a short comment on the line's method, or set the line back to the project's method."
+    },
+    "method": {
+      "best_available": "best available source",
+      "maximum": "maximum value",
+      "evm_cpi": "cost performance (CPI)",
+      "manual": "manual amount"
+    }
   }
 }

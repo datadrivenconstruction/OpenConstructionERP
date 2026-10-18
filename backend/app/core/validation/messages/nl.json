@@ -1185,5 +1185,25 @@
       "fail": "Factuur {number} heeft dezelfde aannemer, hetzelfde bedrag ({amount}) en dezelfde datum ({on}) als factuur {other}.",
       "suggestion": "Controleer dat het niet dezelfde factuur is die onder een ander nummer dubbel is ingevoerd."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: de prognose van {forecast} ligt onder de {owed} die al is aangegaan of gevraagd in openstaande wijzigingen ({difference} lager), en niets verklaart dat.",
+      "suggestion": "Voeg het document toe dat het lagere cijfer onderbouwt (creditnota, schikking, notulen), of vermeld op de regel waarom de methode minder oplevert."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: de prognose is sinds de laatste bevroren momentopname verschoven van {previous} naar {current} ({delta}), boven de drempel van het project, en heeft nog geen toelichting en onderbouwing.",
+      "suggestion": "Schrijf op waarom het cijfer is verschoven en koppel het document of de notulen erachter voordat de momentopname wordt bevroren."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} wordt geraamd met {method} in plaats van met de projectmethode ({project_method}), en geen toelichting zegt waarom.",
+      "suggestion": "Voeg een korte toelichting toe bij de methode van de regel, of zet de regel terug op de projectmethode."
+    },
+    "method": {
+      "best_available": "beste beschikbare bron",
+      "maximum": "maximumwaarde",
+      "evm_cpi": "kostenprestatie (CPI)",
+      "manual": "handmatig bedrag"
+    }
   }
 }

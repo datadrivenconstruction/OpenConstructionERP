@@ -1185,5 +1185,25 @@
       "fail": "Factura {number} are același constructor, aceeași sumă ({amount}) și aceeași dată ({on}) ca factura {other}.",
       "suggestion": "Verifică să nu fie aceeași factură introdusă de două ori sub alt număr."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: prognoza de {forecast} este sub {owed}, deja angajați sau ceruți în modificări în așteptare (cu {difference} mai puțin), iar nimic nu explică diferența.",
+      "suggestion": "Atașați documentul din spatele cifrei mai mici (o notă de credit, o înțelegere, un proces-verbal) sau precizați pe linie de ce metoda ei dă mai puțin."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: prognoza s-a mutat de la {previous} la {current} ({delta}) față de ultimul instantaneu înghețat, peste pragul proiectului, și nu are încă comentariu și document justificativ.",
+      "suggestion": "Scrieți de ce s-a modificat cifra și asociați documentul sau procesul-verbal care o susține înainte de înghețarea instantaneului."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} este prognozat prin {method} în loc de metoda proiectului ({project_method}), iar niciun comentariu nu spune de ce.",
+      "suggestion": "Adăugați un scurt comentariu la metoda liniei sau readuceți linia la metoda proiectului."
+    },
+    "method": {
+      "best_available": "cea mai bună sursă disponibilă",
+      "maximum": "valoare maximă",
+      "evm_cpi": "performanța costurilor (CPI)",
+      "manual": "sumă manuală"
+    }
   }
 }

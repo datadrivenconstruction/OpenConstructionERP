@@ -1185,5 +1185,25 @@
       "fail": "发票{number}与发票{other}的承包商、金额({amount})和日期({on})相同。",
       "suggestion": "请核对是不是同一张发票以另一个号码重复录入。"
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}：预测 {forecast} 低于已承诺或在待定变更中提出的 {owed}（低 {difference}），且没有任何说明。",
+      "suggestion": "请附上支撑较低数字的文件（贷项通知单、结算协议、会议纪要），或在该条目中说明其方法为何得出较少金额。"
+    },
+    "move_without_evidence": {
+      "fail": "{code}：自上一份冻结快照以来，预测从 {previous} 变为 {current}（{delta}），超过项目阈值，且尚无说明和依据。",
+      "suggestion": "冻结快照前，请写明数字变动的原因，并关联相应的文件或会议纪要。"
+    },
+    "method_override_without_comment": {
+      "fail": "{code} 采用{method}而非项目的{project_method}进行预测，且没有说明原因的备注。",
+      "suggestion": "请在该条目的方法上补一条简短备注，或将该条目改回项目的方法。"
+    },
+    "method": {
+      "best_available": "最佳可得来源",
+      "maximum": "最大值",
+      "evm_cpi": "成本绩效（CPI）",
+      "manual": "手动金额"
+    }
   }
 }

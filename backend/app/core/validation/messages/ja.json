@@ -1185,5 +1185,25 @@
       "fail": "請求書{number}は、請負業者、金額({amount})、日付({on})が請求書{other}と同じです。",
       "suggestion": "別の番号で同じ請求書を二重に入力していないか確認してください。"
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: 予測額 {forecast} が、すでに契約済または保留中の変更で請求されている {owed} を下回っています({difference} 少ない)。その理由が示されていません。",
+      "suggestion": "低い数値の根拠となる文書(クレジットノート、精算書、議事録)を添付するか、その方法で金額が少なくなる理由を明細に記入してください。"
+    },
+    "move_without_evidence": {
+      "fail": "{code}: 前回の確定済みスナップショット以降、予測が {previous} から {current}({delta})に動き、プロジェクトのしきい値を超えていますが、コメントと根拠資料がありません。",
+      "suggestion": "スナップショットを確定する前に、数値が動いた理由を記入し、根拠となる文書または議事録を紐づけてください。"
+    },
+    "method_override_without_comment": {
+      "fail": "{code} はプロジェクトの {project_method} ではなく {method} で予測されていますが、理由を説明するコメントがありません。",
+      "suggestion": "明細の方法に短いコメントを追加するか、明細をプロジェクトの方法に戻してください。"
+    },
+    "method": {
+      "best_available": "最良の入手可能な情報源",
+      "maximum": "最大値",
+      "evm_cpi": "コスト効率(CPI)",
+      "manual": "手入力額"
+    }
   }
 }

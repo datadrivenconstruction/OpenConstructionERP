@@ -1185,5 +1185,25 @@
       "fail": "Račun {number} ima istog izvođača, iznos ({amount}) i datum ({on}) kao račun {other}.",
       "suggestion": "Provjerite da nije riječ o istom računu unesenom dvaput pod drugim brojem."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: prognoza od {forecast} niža je od {owed} koji su već ugovoreni ili traženi u izmjenama na čekanju (za {difference}), a ništa to ne objašnjava.",
+      "suggestion": "Priložite dokument koji stoji iza nižeg iznosa (odobrenje, nagodba, zapisnik) ili na stavci navedite zašto njezina metoda daje manje."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: prognoza se od zadnjeg zamrznutog snimka promijenila s {previous} na {current} ({delta}), iznad praga projekta, a još nema komentara ni dokaznog dokumenta.",
+      "suggestion": "Napišite zašto se iznos promijenio i povežite dokument ili zapisnik koji ga potvrđuje prije zamrzavanja snimka."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} se prognozira metodom {method} umjesto metodom projekta ({project_method}), a nijedan komentar ne kaže zašto.",
+      "suggestion": "Dodajte kratak komentar uz metodu stavke ili vratite stavku na metodu projekta."
+    },
+    "method": {
+      "best_available": "najbolji dostupni izvor",
+      "maximum": "najveća vrijednost",
+      "evm_cpi": "učinkovitost troškova (CPI)",
+      "manual": "ručni iznos"
+    }
   }
 }

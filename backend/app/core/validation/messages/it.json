@@ -1185,5 +1185,25 @@
       "fail": "La fattura {number} ha lo stesso fornitore, importo ({amount}) e data ({on}) della fattura {other}.",
       "suggestion": "Verifichi che non sia la stessa fattura inserita due volte con un altro numero."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: la previsione di {forecast} è inferiore ai {owed} già impegnati o richiesti in varianti in attesa ({difference} in meno), e nulla lo spiega.",
+      "suggestion": "Allega il documento che sta dietro alla cifra più bassa (nota di credito, accordo transattivo, verbale), oppure indica sulla voce perché il suo metodo dà un valore minore."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: la previsione è passata da {previous} a {current} ({delta}) dall'ultimo snapshot congelato, oltre la soglia del progetto, e non ha ancora commento e giustificativo.",
+      "suggestion": "Scrivi perché la cifra è cambiata e collega il documento o il verbale che la supporta prima di congelare lo snapshot."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} è previsto con {method} invece del metodo del progetto ({project_method}), e nessun commento ne spiega il motivo.",
+      "suggestion": "Aggiungi un breve commento sul metodo della voce, oppure riporta la voce al metodo del progetto."
+    },
+    "method": {
+      "best_available": "miglior fonte disponibile",
+      "maximum": "valore massimo",
+      "evm_cpi": "andamento dei costi (CPI)",
+      "manual": "importo manuale"
+    }
   }
 }

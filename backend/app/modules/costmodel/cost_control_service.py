@@ -19,14 +19,16 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.i18n import t
 from app.core.validation.engine import ValidationContext, rule_registry
 from app.modules.costmodel.cost_control import (
     CENT,
     ZERO,
     LineFigures,
     LineInput,
+    all_method_outcomes,
     automatic_forecast,
-    forecast_for,
+    method_outcome,
     variance,
     variance_pct,
 )
@@ -43,6 +45,8 @@ from app.modules.costmodel.cost_control_schemas import (
     LineChangeEvent,
     LineHistory,
     LineHistoryPoint,
+    LineMethodChoice,
+    MethodOutcomeInfo,
     SnapshotCreateRequest,
     SnapshotDetail,
     SnapshotPage,
@@ -50,7 +54,13 @@ from app.modules.costmodel.cost_control_schemas import (
     UnassignedItem,
     UnassignedPage,
 )
-from app.modules.costmodel.models import CostForecastOverride, CostForecastSnapshot, CostLine
+from app.modules.costmodel.cost_control_settings import load_choices, load_settings, settings_from_meta
+from app.modules.costmodel.models import (
+    CostForecastMethodChoice,
+    CostForecastOverride,
+    CostForecastSnapshot,
+    CostLine,
+)
 from app.modules.costmodel.validators import PAYLOAD_KEY, RULE_SET
 
 AXIS_COST_LINE = "cost_line"
@@ -91,7 +101,15 @@ SNAPSHOT_ROW_FIELDS: tuple[str, ...] = (
     "certified",
     "paid",
     "forecast",
+    "budget",
+    "estimate",
+    "measured",
+    "invoiced",
+    "pending_changes",
 )
+
+SNAPSHOT_DRAFT = "draft"
+SNAPSHOT_FROZEN = "frozen"
 
 
 def _dec(raw: object) -> Decimal:
@@ -116,6 +134,7 @@ def _override_info(row: CostForecastOverride) -> ForecastOverrideInfo:
 
 
 def _snapshot_summary(row: CostForecastSnapshot) -> SnapshotSummary:
+    rules = settings_from_meta(row.project_id, row.meta)
     return SnapshotSummary(
         id=row.id,
         taken_on=row.taken_on,
@@ -126,6 +145,13 @@ def _snapshot_summary(row: CostForecastSnapshot) -> SnapshotSummary:
         totals={k: str(v) for k, v in (row.totals or {}).items()},
         created_by=row.created_by,
         created_at=row.created_at,
+        status=row.status if row.status in (SNAPSHOT_DRAFT, SNAPSHOT_FROZEN) else SNAPSHOT_FROZEN,
+        frozen_at=row.frozen_at,
+        frozen_by=row.frozen_by,
+        previous_snapshot_id=row.previous_snapshot_id,
+        forecast_method=rules.forecast_method,
+        threshold_amount=rules.threshold_amount,
+        threshold_pct=rules.threshold_pct,
     )
 
 
@@ -140,8 +166,10 @@ def _row(
     status_: str = "",
     pending: Decimal = ZERO,
     override: ForecastOverrideInfo | None = None,
+    method_origin: str = "project",
+    method_comment: str = "",
 ) -> CostControlRow:
-    forecast = forecast_for(figures)
+    forecast = method_outcome(figures)
     auto = automatic_forecast(figures)
     planned = figures.planned
     return CostControlRow(
@@ -169,6 +197,10 @@ def _row(
         variance=variance(forecast.amount, planned) if planned != ZERO else ZERO,
         variance_pct=variance_pct(forecast.amount, planned),
         override=override,
+        forecast_method=forecast.method,
+        method_origin="manual" if figures.override is not None else method_origin,  # type: ignore[arg-type]
+        method_applied=forecast.applied,
+        method_comment=method_comment,
     )
 
 
@@ -253,16 +285,21 @@ class CostControlService:
         return out
 
     async def _latest_snapshot(self, project_id: uuid.UUID) -> CostForecastSnapshot | None:
+        """The latest frozen snapshot: a draft is not a forecast anyone signed yet."""
         stmt = (
             select(CostForecastSnapshot)
-            .where(CostForecastSnapshot.project_id == project_id)
+            .where(CostForecastSnapshot.project_id == project_id, CostForecastSnapshot.status == SNAPSHOT_FROZEN)
             .order_by(CostForecastSnapshot.taken_on.desc(), CostForecastSnapshot.created_at.desc())
             .limit(1)
         )
         return (await self.session.execute(stmt)).scalars().first()
 
     def _line_figures(
-        self, line: CostLine, data: ControlData, overrides: dict[str, CostForecastOverride]
+        self,
+        line: CostLine,
+        data: ControlData,
+        overrides: dict[str, CostForecastOverride],
+        method: str,
     ) -> LineFigures:
         key = str(line.id)
         committed = data.committed.get(key, ZERO)
@@ -279,16 +316,23 @@ class CostControlService:
             invoiced=data.invoiced.get(key, ZERO),
             all_final=key in data.final_lines,
             override=_dec(override.amount) if override is not None else None,
+            method=method,
+            pending=data.pending_by_line.get(key, ZERO),
         )
 
     async def _cost_line_rows(
         self, project_id: uuid.UUID, data: ControlData
     ) -> tuple[list[CostControlRow], list[LineInput]]:
         overrides = await self._open_overrides(project_id)
+        settings = await load_settings(self.session, project_id)
+        choices = await load_choices(self.session, project_id)
         rows: list[CostControlRow] = []
         inputs: list[LineInput] = []
         for line in await self._lines(project_id):
-            figures = self._line_figures(line, data, overrides)
+            choice = choices.get(str(line.id))
+            figures = self._line_figures(
+                line, data, overrides, choice.method if choice is not None else settings.forecast_method
+            )
             override = overrides.get(str(line.id))
             rows.append(
                 _row(
@@ -298,7 +342,10 @@ class CostControlService:
                     description=line.description or "",
                     figures=figures,
                     account_id=str(line.control_account_id) if line.control_account_id else None,
+                    pending=figures.pending,
                     override=_override_info(override) if override is not None else None,
+                    method_origin="line" if choice is not None else "project",
+                    method_comment=choice.comment if choice is not None else "",
                 )
             )
             inputs.append(LineInput(str(line.id), line.code, figures))
@@ -465,6 +512,7 @@ class CostControlService:
         totals = _totals(line_rows, data)
         rows = line_rows if axis == AXIS_COST_LINE else self._contract_rows(data, _dec(totals["forecast"]))
         latest = await self._latest_snapshot(project_id)
+        settings = await load_settings(self.session, project_id)
         return CostControlReport(
             project_id=project_id,
             currency=data.currency,
@@ -475,6 +523,7 @@ class CostControlService:
             accounts=accounts if axis == AXIS_COST_LINE else [],
             findings=await self._findings(project_id, inputs, data, latest, today),
             last_snapshot=_snapshot_summary(latest) if latest is not None else None,
+            forecast_method=settings.forecast_method,
         )
 
     # ── Money on no cost line ─────────────────────────────────────────────
@@ -538,22 +587,53 @@ class CostControlService:
 
     # ── Snapshots ─────────────────────────────────────────────────────────
 
-    async def create_snapshot(
-        self, project_id: uuid.UUID, body: SnapshotCreateRequest, user_id: str | None
-    ) -> SnapshotSummary:
-        """Freeze today's report. Snapshots are never edited afterwards."""
-        report = await self.report(project_id)
-        rows = [
+    @staticmethod
+    def snapshot_rows(report: CostControlReport) -> list[dict[str, str]]:
+        """The rows a snapshot keeps: every report row with its source, method and figures."""
+        return [
             {
                 "key": r.key,
                 "kind": r.kind,
                 "code": r.code,
                 "description": r.description,
                 "source": r.forecast_source,
+                "method": r.forecast_method,
                 **{name: str(getattr(r, name).quantize(CENT)) for name in SNAPSHOT_ROW_FIELDS},
             }
             for r in report.rows
         ]
+
+    async def open_draft(self, project_id: uuid.UUID) -> CostForecastSnapshot | None:
+        """The project's draft snapshot, if one is open (there is at most one)."""
+        stmt = (
+            select(CostForecastSnapshot)
+            .where(CostForecastSnapshot.project_id == project_id, CostForecastSnapshot.status == SNAPSHOT_DRAFT)
+            .order_by(CostForecastSnapshot.created_at.desc())
+            .limit(1)
+        )
+        return (await self.session.execute(stmt)).scalars().first()
+
+    async def latest_frozen(self, project_id: uuid.UUID) -> CostForecastSnapshot | None:
+        """The latest frozen snapshot: the one a new draft's moves are measured from."""
+        return await self._latest_snapshot(project_id)
+
+    async def create_snapshot(
+        self, project_id: uuid.UUID, body: SnapshotCreateRequest, user_id: str | None
+    ) -> SnapshotSummary:
+        """Take today's report as a draft snapshot.
+
+        The draft can be refreshed and documented line by line, then frozen;
+        frozen, it is never changed again. One draft per project at a time, so
+        a month has one story.
+        """
+        if await self.open_draft(project_id) is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=t("cost_control.errors.draft_open"),
+            )
+        report = await self.report(project_id)
+        settings = await load_settings(self.session, project_id)
+        previous = await self._latest_snapshot(project_id)
         snap = CostForecastSnapshot(
             id=uuid.uuid4(),
             project_id=project_id,
@@ -563,8 +643,11 @@ class CostControlService:
             note=body.note.strip(),
             currency=report.currency,
             totals=dict(report.totals),
-            rows=rows,
+            rows=self.snapshot_rows(report),
             created_by=user_id,
+            status=SNAPSHOT_DRAFT,
+            previous_snapshot_id=previous.id if previous is not None else None,
+            meta=settings.meta(),
         )
         self.session.add(snap)
         await self.session.flush()
@@ -586,14 +669,13 @@ class CostControlService:
         return SnapshotPage(items=items, total=total, offset=offset, limit=limit)
 
     async def get_snapshot(self, snapshot_id: uuid.UUID) -> tuple[uuid.UUID, SnapshotDetail]:
+        """A snapshot with its rows, its lines and their documentation, and what still blocks a draft."""
+        from app.modules.costmodel.cost_control_forecast import ForecastDocsService
+
         snap = await self.session.get(CostForecastSnapshot, snapshot_id)
         if snap is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Snapshot not found")
-        detail = SnapshotDetail(
-            **_snapshot_summary(snap).model_dump(),
-            rows=[{k: str(v) for k, v in r.items()} for r in (snap.rows or []) if isinstance(r, dict)],
-        )
-        return snap.project_id, detail
+        return snap.project_id, await ForecastDocsService(self.session).snapshot_detail(snap)
 
     async def snapshot_project(self, snapshot_id: uuid.UUID) -> uuid.UUID:
         snap = await self.session.get(CostForecastSnapshot, snapshot_id)
@@ -602,9 +684,15 @@ class CostControlService:
         return snap.project_id
 
     async def delete_snapshot(self, snapshot_id: uuid.UUID) -> None:
+        """Remove a draft. A frozen snapshot is a record and stays (409)."""
         snap = await self.session.get(CostForecastSnapshot, snapshot_id)
         if snap is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Snapshot not found")
+        if snap.status != SNAPSHOT_DRAFT:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=t("cost_control.errors.frozen_no_delete"),
+            )
         await self.session.delete(snap)
         await self.session.flush()
 
@@ -637,6 +725,14 @@ class CostControlService:
         """
         now = datetime.now(UTC)
         await self._close_open(line.id, user_id, now)
+        # A person's amount is the line's method now: a method chosen for it before gives way.
+        choice = (
+            await self.session.execute(
+                select(CostForecastMethodChoice).where(CostForecastMethodChoice.cost_line_id == line.id)
+            )
+        ).scalar_one_or_none()
+        if choice is not None:
+            await self.session.delete(choice)
         # Close first, on its own flush, so the index never sees two open rows.
         await self.session.flush()
         row = CostForecastOverride(
@@ -685,7 +781,10 @@ class CostControlService:
             (
                 await self.session.execute(
                     select(CostForecastSnapshot)
-                    .where(CostForecastSnapshot.project_id == line.project_id)
+                    .where(
+                        CostForecastSnapshot.project_id == line.project_id,
+                        CostForecastSnapshot.status == SNAPSHOT_FROZEN,
+                    )
                     .order_by(CostForecastSnapshot.taken_on.desc(), CostForecastSnapshot.created_at.desc())
                     .limit(HISTORY_SNAPSHOT_LIMIT)
                 )
@@ -758,6 +857,34 @@ class CostControlService:
             .scalars()
             .all()
         )
+        settings = await load_settings(self.session, line.project_id)
+        choice = (await load_choices(self.session, line.project_id)).get(str(line.id))
+        figures = LineFigures(
+            budget=current.budget,
+            estimate=current.estimate,
+            awarded=current.awarded,
+            changes=current.changes,
+            certified=current.certified,
+            paid=current.paid,
+            measured=current.measured,
+            invoiced=current.invoiced,
+            all_final=current.forecast_source == "final" or current.automatic_source == "final",
+            override=current.override.amount if current.override is not None else None,
+            pending=current.pending_changes,
+        )
+        methods = [
+            MethodOutcomeInfo(
+                method=name,  # type: ignore[arg-type]
+                amount=outcome.amount,
+                source=outcome.source,
+                applied=outcome.applied,
+                progress=outcome.progress,
+                cpi=outcome.cpi,
+                earned=outcome.earned,
+                actual=outcome.actual,
+            )
+            for name, outcome in all_method_outcomes(figures).items()
+        ]
         return LineHistory(
             cost_line_id=line.id,
             code=line.code,
@@ -767,4 +894,17 @@ class CostControlService:
             snapshots=points,
             changes=changes,
             overrides=[_override_info(o) for o in override_rows],
+            project_method=settings.forecast_method,
+            method_choice=(
+                LineMethodChoice(
+                    cost_line_id=line.id,
+                    method=choice.method,  # type: ignore[arg-type]
+                    comment=choice.comment or "",
+                    updated_by=choice.updated_by or choice.created_by,
+                    updated_at=choice.updated_at,
+                )
+                if choice is not None
+                else None
+            ),
+            methods=methods,
         )

@@ -1185,5 +1185,25 @@
       "fail": "Die Rechnung {number} hat denselben Auftragnehmer, Betrag ({amount}) und dasselbe Datum ({on}) wie die Rechnung {other}.",
       "suggestion": "Prüfen Sie, dass es nicht dieselbe Rechnung ist, die unter einer anderen Nummer doppelt erfasst wurde."
     }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: Die Prognose von {forecast} liegt unter den bereits beauftragten oder in offenen Nachträgen geforderten {owed} (um {difference} niedriger), und nichts erklärt das.",
+      "suggestion": "Hängen Sie das Dokument zum niedrigeren Wert an (Gutschrift, Vergleich, Protokoll) oder vermerken Sie an der Position, warum ihre Methode weniger ergibt."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: Die Prognose hat sich seit dem letzten eingefrorenen Stand von {previous} auf {current} geändert ({delta}), über der Schwelle des Projekts, und hat noch keinen Kommentar und Nachweis.",
+      "suggestion": "Begründen Sie die Änderung und verknüpfen Sie das Dokument oder Protokoll dazu, bevor der Stand eingefroren wird."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} wird mit {method} statt mit der Projektmethode {project_method} prognostiziert, und kein Kommentar sagt warum.",
+      "suggestion": "Ergänzen Sie einen kurzen Kommentar zur Methode der Position oder stellen Sie die Position auf die Projektmethode zurück."
+    },
+    "method": {
+      "best_available": "beste verfügbare Quelle",
+      "maximum": "Höchstwert",
+      "evm_cpi": "Kostenentwicklung (CPI)",
+      "manual": "manueller Betrag"
+    }
   }
 }

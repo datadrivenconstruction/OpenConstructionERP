@@ -23,7 +23,7 @@ validation rules and the report.
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 
 ZERO = Decimal("0")
@@ -40,6 +40,10 @@ SOURCE_AWARDED = "awarded"
 SOURCE_MEASURED = "measured"
 SOURCE_FINAL = "final"
 SOURCE_MANUAL = "manual"
+# Taken by the "maximum value" method when supplier invoices are the highest figure.
+SOURCE_INVOICED = "invoiced"
+# Taken by the CPI based method: cost to date projected over the whole line.
+SOURCE_EVM = "evm"
 
 FORECAST_SOURCES: tuple[str, ...] = (
     SOURCE_NONE,
@@ -50,7 +54,29 @@ FORECAST_SOURCES: tuple[str, ...] = (
     SOURCE_MEASURED,
     SOURCE_FINAL,
     SOURCE_MANUAL,
+    SOURCE_INVOICED,
+    SOURCE_EVM,
 )
+
+#: How a line's forecast is worked out. A project picks one, a line may pick
+#: another. The wire values are stored on settings, lines and snapshots.
+#:
+#: * ``best_available``: the figure of the most mature stage the line has
+#:   (the behaviour cost control always had, and the default).
+#: * ``maximum``: the highest figure the line has anywhere, the cautious view
+#:   for open contracts.
+#: * ``evm_cpi``: cost to date divided by the share of the work done, the earned
+#:   value view (budget at completion divided by the cost performance index).
+#: * ``manual``: a person's amount with a reason.
+METHOD_BEST_AVAILABLE = "best_available"
+METHOD_MAXIMUM = "maximum"
+METHOD_EVM_CPI = "evm_cpi"
+METHOD_MANUAL = "manual"
+
+FORECAST_METHODS: tuple[str, ...] = (METHOD_BEST_AVAILABLE, METHOD_MAXIMUM, METHOD_EVM_CPI, METHOD_MANUAL)
+
+#: Digits a ratio (progress, CPI) is kept and shown with.
+RATIO = Decimal("0.0001")
 
 #: Cost stages a snapshot can be tagged with. Neutral names on purpose: the
 #: same seven steps exist under every national scheme (DIN 276 Kostenrahmen to
@@ -109,6 +135,15 @@ class LineFigures:
     override: Decimal | None = None
     measured: Decimal = ZERO
     invoiced: Decimal = ZERO
+    #: The forecast method this line is read with (see :data:`FORECAST_METHODS`).
+    method: str = METHOD_BEST_AVAILABLE
+    #: Change orders on this line still waiting for a decision.
+    pending: Decimal = ZERO
+
+    @property
+    def owed(self) -> Decimal:
+        """What the line is bound to pay or is asked to: the commitment plus undecided changes."""
+        return self.committed + self.pending
 
     @property
     def committed(self) -> Decimal:
@@ -157,11 +192,125 @@ def automatic_forecast(figures: LineFigures) -> Forecast:
     return Forecast(ZERO, SOURCE_NONE)
 
 
-def forecast_for(figures: LineFigures) -> Forecast:
-    """The forecast to report: a person's override when there is one."""
+@dataclass(frozen=True, slots=True)
+class MethodOutcome:
+    """What one forecast method makes of a line, with the figures it used.
+
+    ``method`` is the method asked for. ``applied`` is False when the method
+    had nothing to work with (CPI based with no measured work or no cost yet,
+    manual with no amount) and the best available figure stands in. ``progress``,
+    ``cpi``, ``earned`` and ``actual`` are filled by the CPI based method only.
+    """
+
+    amount: Decimal
+    source: str
+    method: str
+    applied: bool = True
+    progress: Decimal | None = None
+    cpi: Decimal | None = None
+    earned: Decimal | None = None
+    actual: Decimal | None = None
+
+
+#: Sources the "maximum value" method can land on, least mature first: a tie
+#: goes to the later one.
+_MAXIMUM_ORDER: tuple[str, ...] = (SOURCE_BUDGET, SOURCE_ESTIMATE, SOURCE_AWARDED, SOURCE_MEASURED, SOURCE_INVOICED)
+
+
+def maximum_forecast(figures: LineFigures) -> Forecast:
+    """The highest figure the line has: plan, commitment, measured or certified work, invoices."""
+    candidates = (
+        (figures.budget, SOURCE_BUDGET),
+        (figures.estimate, SOURCE_ESTIMATE),
+        (figures.committed, SOURCE_AWARDED),
+        (figures.certified, SOURCE_MEASURED),
+        (figures.measured, SOURCE_MEASURED),
+        (figures.invoiced, SOURCE_INVOICED),
+    )
+    best = Forecast(ZERO, SOURCE_NONE)
+    for amount, source in candidates:
+        if amount == ZERO:
+            continue
+        if (
+            best.source == SOURCE_NONE
+            or amount > best.amount
+            or (amount == best.amount and _MAXIMUM_ORDER.index(source) > _MAXIMUM_ORDER.index(best.source))
+        ):
+            best = Forecast(amount, source)
+    return best
+
+
+def evm_outcome(figures: LineFigures) -> MethodOutcome | None:
+    """The CPI based forecast, or ``None`` when the line has no measured work or no cost yet.
+
+    Earned value is the measured work at contract rates, actual cost the
+    supplier invoices (certified work where nothing is invoiced yet). The
+    budget at completion is the commitment, or the measured value once the
+    work runs past it. CPI = earned / actual, and the forecast is the budget
+    at completion divided by CPI, which is the same as actual cost divided by
+    the share of the work done.
+    """
+    earned = figures.measured
+    actual = figures.invoiced if figures.invoiced != ZERO else figures.certified
+    if earned <= ZERO or actual <= ZERO:
+        return None
+    at_completion = max(figures.committed, earned)
+    amount = (at_completion * actual / earned).quantize(CENT)
+    return MethodOutcome(
+        amount=amount,
+        source=SOURCE_EVM,
+        method=METHOD_EVM_CPI,
+        progress=(earned / at_completion).quantize(RATIO),
+        cpi=(earned / actual).quantize(RATIO),
+        earned=earned,
+        actual=actual,
+    )
+
+
+def method_outcome(figures: LineFigures, method: str | None = None) -> MethodOutcome:
+    """The forecast of a line under ``method`` (the line's own method when ``None``).
+
+    A person's amount wins under every method, and a line whose contracts are
+    all completed reads its final figure under every other one.
+    """
     if figures.override is not None:
-        return Forecast(figures.override, SOURCE_MANUAL)
-    return automatic_forecast(figures)
+        return MethodOutcome(figures.override, SOURCE_MANUAL, METHOD_MANUAL)
+    chosen = method or figures.method
+    best = automatic_forecast(figures)
+    if best.source == SOURCE_FINAL:
+        return MethodOutcome(best.amount, best.source, chosen)
+    if chosen == METHOD_MAXIMUM:
+        top = maximum_forecast(figures)
+        return MethodOutcome(top.amount, top.source, chosen)
+    if chosen == METHOD_EVM_CPI:
+        evm = evm_outcome(figures)
+        if evm is not None:
+            return evm
+        return MethodOutcome(best.amount, best.source, chosen, applied=False)
+    if chosen == METHOD_MANUAL:
+        return MethodOutcome(best.amount, best.source, chosen, applied=False)
+    return MethodOutcome(best.amount, best.source, METHOD_BEST_AVAILABLE)
+
+
+def all_method_outcomes(figures: LineFigures) -> dict[str, MethodOutcome]:
+    """Every method on one line side by side, for the line's documentation.
+
+    The manual entry is the person's amount when there is one; the other three
+    are worked out from the data as if no amount had been entered.
+    """
+    plain = replace(figures, override=None)
+    out = {m: method_outcome(plain, m) for m in FORECAST_METHODS if m != METHOD_MANUAL}
+    if figures.override is not None:
+        out[METHOD_MANUAL] = MethodOutcome(figures.override, SOURCE_MANUAL, METHOD_MANUAL)
+    else:
+        out[METHOD_MANUAL] = method_outcome(plain, METHOD_MANUAL)
+    return out
+
+
+def forecast_for(figures: LineFigures) -> Forecast:
+    """The forecast to report: a person's override when there is one, else the line's method."""
+    out = method_outcome(figures)
+    return Forecast(out.amount, out.source)
 
 
 def variance(forecast: Decimal, planned: Decimal) -> Decimal:
