@@ -40,8 +40,8 @@ through ``previous_releases``, in incremental mode on the final. A final is
 never rounded, nothing would follow it.
 
 **Retention postings** release held retention as cash. They count as previous
-releases for every later cumulative invoice (otherwise the final would pay the
-same retention again) and reduce what is held.
+releases for every cumulative invoice dated on the same day or later (otherwise
+the final would pay the same retention again) and reduce what is held.
 
 **A released invoice is frozen.** Its figures are kept as they were confirmed
 (``frozen``) and later invoices build on them; the recomputed figures are kept
@@ -364,8 +364,10 @@ def compute_releases(
 ) -> Ledger:
     """Walk one contract's invoices in the given order, with its retention postings by date.
 
-    A posting dated before an invoice is applied before it; a posting on the
-    same day or later comes after. Raises ``ValueError`` on an unknown mode,
+    A posting dated on or before an invoice's date is applied before it, a
+    later one after. On the same day the posting goes first: a cumulative
+    invoice subtracts everything paid, so counting the posting can never pay
+    too much, while leaving it out pays the posted retention twice. Raises ``ValueError`` on an unknown mode,
     basis, scope or invoice kind.
     """
     terms.check()
@@ -381,7 +383,7 @@ def compute_releases(
 
     def apply_postings(before: date | None) -> None:
         nonlocal series_previous, all_previous, held
-        while pending and (before is None or pending[0].on < before):
+        while pending and (before is None or pending[0].on <= before):
             posting = pending.pop(0)
             amount = _q(posting.amount, quantum)
             series_previous += amount
