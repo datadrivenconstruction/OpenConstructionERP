@@ -350,6 +350,9 @@ async def test_a_duplicate_blocks_its_release(world: World) -> None:
 async def test_retention_register_and_a_posting_never_beyond_what_is_held(world: World) -> None:
     async with world.client() as client:
         await client.put(f"{BASE}/contracts/{world.contract_id}/terms/", json=TERMS)
+        # Only retention withheld from a confirmed release can be paid back.
+        for inv in (world.invoices["i1"], world.invoices["i2"]):
+            assert (await client.post(f"{BASE}/invoices/{inv.id}/release/")).status_code == 200
         url = f"{BASE}/contracts/{world.contract_id}/retention-postings/"
         body = {"event": "substantial_completion", "event_on": "2026-06-01", "posted_on": "2026-06-15"}
         too_much = await client.post(url, json={**body, "amount": "2000"})
@@ -370,7 +373,9 @@ async def test_cost_control_reads_measured_invoiced_and_paid_per_cost_line(world
     async with world.client() as client:
         await client.put(f"{BASE}/contracts/{world.contract_id}/terms/", json=TERMS)
         await client.patch(f"{BASE}/invoices/{world.invoices['i2'].id}/", json={"net_deduction": "500"})
-        await client.post(
+        for inv in (world.invoices["i1"], world.invoices["i2"]):
+            assert (await client.post(f"{BASE}/invoices/{inv.id}/release/")).status_code == 200
+        posted = await client.post(
             f"{BASE}/contracts/{world.contract_id}/retention-postings/",
             json={
                 "event": "substantial_completion",
@@ -379,6 +384,7 @@ async def test_cost_control_reads_measured_invoiced_and_paid_per_cost_line(world
                 "amount": "1010",
             },
         )
+        assert posted.status_code == 201, posted.text
     report = await CostControlService(world.session).report(world.project_id)
     rows = {r.key: r for r in report.rows}
     a, b = rows[str(world.cost_lines["a"].id)], rows[str(world.cost_lines["b"].id)]

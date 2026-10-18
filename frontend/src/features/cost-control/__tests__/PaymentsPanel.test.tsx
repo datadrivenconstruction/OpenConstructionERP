@@ -256,6 +256,51 @@ describe('PaymentsPanel', () => {
     );
   });
 
+  it('shows release figures to the cent, so the steps add up on screen', async () => {
+    const cents: ReleaseFigures = {
+      ...FIGURES,
+      net: '138765.43',
+      net_after: '138765.43',
+      vat: '26365.43',
+      vat_after: '26365.43',
+      gross: '165130.86',
+      gross_after: '165130.86',
+      retention: '7632.10',
+      release_before_rounding: '82698.76',
+      rounding: '98.76',
+      release: '82600.00',
+    };
+    vi.mocked(paymentsApi.ledger).mockResolvedValue({
+      ...LEDGER,
+      contracts: [{ ...LEDGER.contracts[0]!, invoices: [invoice({ figures: cents, computed: cents })] }],
+    });
+    renderPanel();
+    fireEvent.click(await screen.findByTestId('ledger-invoice-AR-1'));
+    const steps = await screen.findByTestId('release-steps');
+    // Rounded to whole euros these read 138,765 + 26,365 = 165,131, which does not add up.
+    expect(within(steps).getByTestId('release-steps-net')).toHaveTextContent(/138[,.\s]?765[.,]43/);
+    expect(within(steps).getByTestId('release-steps-vat')).toHaveTextContent(/26[,.\s]?365[.,]43/);
+    expect(within(steps).getByTestId('release-steps-rounding')).toHaveTextContent(/98[.,]76/);
+  });
+
+  it('sends deductions typed with a decimal comma as dot-decimal strings', async () => {
+    vi.mocked(paymentsApi.updateInvoice).mockResolvedValue({
+      invoice_id: 'i-1',
+      contract_id: 'c-1',
+      kind: 'interim',
+      status: 'open',
+      release_amount: null,
+      payable_amount: null,
+    });
+    renderPanel();
+    fireEvent.click(await screen.findByTestId('ledger-invoice-AR-1'));
+    fireEvent.change(await screen.findByTestId('release-net-deduction'), { target: { value: '1.250,50 €' } });
+    fireEvent.click(screen.getByTestId('release-save'));
+    await waitFor(() =>
+      expect(paymentsApi.updateInvoice).toHaveBeenCalledWith('i-1', expect.objectContaining({ net_deduction: '1250.50' })),
+    );
+  });
+
   it('lists the checks with their rule number', async () => {
     renderPanel();
     fireEvent.click(await screen.findByTestId('payments-tab-checks'));

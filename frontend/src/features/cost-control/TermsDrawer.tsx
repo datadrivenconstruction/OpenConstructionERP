@@ -14,6 +14,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Skeleton } from '@/shared/ui';
 import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { getErrorMessage } from '@/shared/lib/api';
+import { stripCurrencySigns, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { problemOf } from '@/features/costmodel/structureApi';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -30,6 +31,18 @@ const INPUT = 'h-8 w-full rounded-lg border border-border bg-surface-primary px-
 function bodyOf(terms: PaymentTerms): PaymentTermsBody {
   const { contract_id: _c, terms_set: _s, currency: _cur, ...body } = terms;
   return body;
+}
+
+/** Rates and the rounding step as the reader typed them (`5,5`, `100,00 €`), sent as dot-decimal strings. */
+export function payloadOf(form: PaymentTermsBody): PaymentTermsBody {
+  const dec = (raw: string) => toDecimalPayloadString(stripCurrencySigns(raw), '0');
+  return {
+    ...form,
+    retention_percent: dec(form.retention_percent),
+    warranty_percent: dec(form.warranty_percent),
+    discount_percent: dec(form.discount_percent),
+    rounding_step: dec(form.rounding_step),
+  };
 }
 
 /** An empty or non-numeric field reads as null for the optional day counts. */
@@ -155,7 +168,7 @@ export function TermsDrawer({
           data-testid="payment-terms-form"
           onSubmit={(e) => {
             e.preventDefault();
-            if (canEdit) save.mutate(form);
+            if (canEdit) save.mutate(payloadOf(form));
           }}
         >
           {!terms.data?.terms_set && (

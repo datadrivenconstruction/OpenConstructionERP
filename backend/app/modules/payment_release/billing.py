@@ -340,6 +340,53 @@ def invoice_line_money(invoice: InvoiceRecord, net_after: Decimal) -> dict[str, 
     return {str(k): v for k, v in allocate(net_after, weights).items()}
 
 
+def invoice_entry(inv: InvoiceRecord) -> InvoiceEntry:
+    """One invoice as :func:`compute_releases` reads it."""
+    return InvoiceEntry(
+        key=inv.id,
+        kind=inv.kind,
+        on=inv.invoice_date,
+        net=inv.net,
+        vat=inv.vat,
+        net_deduction=inv.net_deduction,
+        gross_deduction=inv.gross_deduction,
+        vat_lines=tuple(VatLine(net=ln.amount, rate=ln.vat_rate) for ln in inv.lines),
+        fixed_retention=inv.claim_retention,
+        frozen=inv.frozen,
+    )
+
+
+def posting_entries(contract: ContractRecord) -> list[PostingEntry]:
+    return [PostingEntry(key=p.id, on=p.posted_on, amount=p.amount) for p in contract.postings]
+
+
+def released_retention_held(contract: ContractRecord) -> Decimal:
+    """Retention held on the released invoices only, less what postings paid back.
+
+    An open invoice has paid nothing yet, so it has withheld nothing either:
+    its retention cannot be paid back before its release is confirmed.
+    """
+    released = [invoice_entry(inv) for inv in contract.invoices if inv.frozen is not None]
+    return compute_releases(contract.terms, released, posting_entries(contract)).retention_held
+
+
+def released_invoices_counting(contract: ContractRecord, on: date) -> list[InvoiceRecord]:
+    """Released invoices that subtract every payment dated on or before ``on``.
+
+    These are the cumulative releases (a final, or an interim on a cumulative
+    contract) dated ``on`` or later. A posting or a release slipped in before
+    them would change what they should have paid after they were frozen.
+    """
+    return [
+        inv
+        for inv in contract.invoices
+        if inv.frozen is not None
+        and inv.frozen.previous_counted
+        and inv.invoice_date is not None
+        and inv.invoice_date >= on
+    ]
+
+
 # ── The loader ───────────────────────────────────────────────────────────
 
 
@@ -633,23 +680,7 @@ async def load_billing(session: AsyncSession, project_id: uuid.UUID) -> Billing:
         contract.invoices.sort(key=lambda i: (i.invoice_date or date.max, i.number, i.id))
         contract.postings.sort(key=lambda p: (p.posted_on, p.id))
         contract.ledger = compute_releases(
-            contract.terms,
-            [
-                InvoiceEntry(
-                    key=inv.id,
-                    kind=inv.kind,
-                    on=inv.invoice_date,
-                    net=inv.net,
-                    vat=inv.vat,
-                    net_deduction=inv.net_deduction,
-                    gross_deduction=inv.gross_deduction,
-                    vat_lines=tuple(VatLine(net=ln.amount, rate=ln.vat_rate) for ln in inv.lines),
-                    fixed_retention=inv.claim_retention,
-                    frozen=inv.frozen,
-                )
-                for inv in contract.invoices
-            ],
-            [PostingEntry(key=p.id, on=p.posted_on, amount=p.amount) for p in contract.postings],
+            contract.terms, [invoice_entry(inv) for inv in contract.invoices], posting_entries(contract)
         )
     loose.sort(key=lambda i: (i.invoice_date or date.max, i.number, i.id))
     return Billing(currency=base, contracts=list(contracts.values()), loose_invoices=loose)
