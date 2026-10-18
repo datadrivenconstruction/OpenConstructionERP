@@ -8,7 +8,10 @@ posts a retention release; nothing here moves money on its own.
 
 Releasing goes in order: an invoice is released only when every earlier
 invoice of its contract is released, because its ``previous_releases`` reads
-them, and it is reopened only while no later invoice is released. An ERROR
+them, and it is reopened only while no later invoice is released. For the same
+reason nothing is slipped in under a released cumulative invoice: neither an
+invoice dated before it nor a retention posting dated on or before it is
+released, posted or voided until that invoice is reopened. An ERROR
 finding of the ``payment_release`` rules on the invoice blocks its release.
 """
 
@@ -34,6 +37,8 @@ from app.modules.payment_release.billing import (
     discount_taken,
     invoice_paid,
     load_billing,
+    released_invoices_counting,
+    released_retention_held,
 )
 from app.modules.payment_release.models import InvoiceRelease, PaymentTerms, RetentionPosting
 from app.modules.payment_release.repository import PaymentReleaseRepository
@@ -47,6 +52,15 @@ TENTH = Decimal("0.1")
 
 def _problem(code: int, problem: str, message: str, **params: Any) -> HTTPException:
     return HTTPException(status_code=code, detail={"problem": problem, "message": message, **params})
+
+
+def _later_released(invoices: list[InvoiceRecord]) -> HTTPException:
+    return _problem(
+        409,
+        "later_invoice_released",
+        "A later invoice of this contract is released and builds on this one; reopen that first",
+        numbers=[inv.number for inv in invoices],
+    )
 
 
 def _pct(part: Decimal, whole: Decimal) -> str | None:
@@ -329,6 +343,12 @@ class PaymentReleaseService:
                 "Release the earlier invoices of this contract first; this release builds on them",
                 numbers=[inv.number for inv in earlier],
             )
+        if contract.invoices[index].kind in SERIES_KINDS:
+            later = [
+                inv for inv in contract.invoices[index + 1 :] if inv.frozen is not None and inv.frozen.previous_counted
+            ]
+            if later:
+                raise _later_released(later)
         blocking = [
             f
             for f in await self.findings(invoice.project_id, locale=locale, billing=billing)
@@ -388,12 +408,7 @@ class PaymentReleaseService:
         if contract is not None:
             later = [inv for inv in contract.invoices[index + 1 :] if inv.frozen is not None]
             if later:
-                raise _problem(
-                    409,
-                    "later_invoice_released",
-                    "A later invoice of this contract is released and builds on this one; reopen that first",
-                    numbers=[inv.number for inv in later],
-                )
+                raise _later_released(later)
         row.status = "open"
         row.snapshot = {**(row.snapshot or {}), "reopened_at": datetime.now(UTC).isoformat(), "reopened_by": actor}
         row.snapshot.pop("release", None)
@@ -480,10 +495,18 @@ class PaymentReleaseService:
         }
 
     async def post_retention(self, contract: Any, body: Any, actor: str | None) -> RetentionPosting:
-        """Pay back held retention: never more than the contract holds."""
+        """Pay back held retention: never more than the released invoices hold.
+
+        Not dated on or before a released cumulative invoice either: that invoice
+        already paid what it found, and would pay the posted amount again.
+        """
         billing = await load_billing(self.session, contract.project_id)
         record = billing.contract(str(contract.id))
-        held = record.ledger.retention_held if record is not None and record.ledger else ZERO
+        if record is not None:
+            counting = released_invoices_counting(record, body.posted_on)
+            if counting:
+                raise _later_released(counting)
+        held = released_retention_held(record) if record is not None else ZERO
         if body.amount > held:
             raise _problem(
                 409,
@@ -510,6 +533,11 @@ class PaymentReleaseService:
     async def void_posting(self, row: RetentionPosting, actor: str | None) -> RetentionPosting:
         if row.status == "void":
             raise _problem(409, "posting_void", "The retention posting is already void")
+        billing = await load_billing(self.session, row.project_id)
+        record = billing.contract(str(row.contract_id))
+        counting = released_invoices_counting(record, row.posted_on) if record is not None else []
+        if counting:
+            raise _later_released(counting)
         row.status = "void"
         row.voided_at = datetime.now(UTC)
         row.voided_by = actor
