@@ -741,18 +741,12 @@ async def test_conditions_of_the_walk_are_cleared_once_the_module_answers_met(fa
 # ── events and savepoints ──
 
 
-async def test_pin_of_current_core_behaviour_a_rolled_back_savepoint_still_fires_its_deferred_events(
-    factory, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """A pin of what ``app.core.events.publish_after_commit`` does today. It is a defect, not a contract.
+async def test_a_rolled_back_savepoint_drops_its_deferred_events(factory, monkeypatch: pytest.MonkeyPatch) -> None:
+    """An event deferred inside a savepoint that rolled back never fires.
 
-    An event deferred inside a savepoint fires on the outer commit although the
-    savepoint was rolled back and its rows are gone. Governance works around it
-    for its own events (the outbox in ``seed._attempt``); events of the other
-    services a story calls are still exposed.
-
-    Whoever fixes the core: this test fails on your change, as it should. Flip
-    the last assertion to ``not in`` and remove the outbox from the seed.
+    ``app.core.events.publish_after_commit`` used to fire it on the outer commit
+    although the savepoint's rows were gone. The core drops it now; the outbox
+    in ``seed._attempt`` stays as a second line for governance's own events.
     """
     from sqlalchemy import text
 
@@ -772,7 +766,7 @@ async def test_pin_of_current_core_behaviour_a_rolled_back_savepoint_still_fires
         assert fired == []
         await s.commit()
     assert "project_governance.probe.kept" in fired
-    assert "project_governance.probe.rolled_back" in fired
+    assert "project_governance.probe.rolled_back" not in fired
 
 
 async def test_a_story_that_was_rolled_back_publishes_none_of_its_governance_events(

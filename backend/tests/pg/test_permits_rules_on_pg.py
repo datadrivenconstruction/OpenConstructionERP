@@ -500,7 +500,10 @@ async def test_before_the_construction_gate_the_seed_tells_the_pre_construction_
         items = {i.code.split(":")[0]: i for i in await permits_evidence.start_and_handover(s, pid, attempt, area)}
         # The one blocker is the fence. The road occupation is needed at mobilisation, long after the
         # gate date: it is an item of its own that names the day and does not hold the gate.
-        road_needed = (NOW + timedelta(days=175)).isoformat()
+        # The seeder takes its own "today"; a long run can cross midnight after NOW was taken at import.
+        (road,) = [r for r in reqs.values() if r.title == "Road occupation for crane and site access"]
+        assert (road.needed_by_date - NOW).days in (175, 176)
+        road_needed = road.needed_by_date.isoformat()
         assert items["permits_start"].state == "not_met"
         assert [d.split(":")[0] for d in items["permits_start"].detail.split(", ")] == ["before_start_obligation_open"]
         assert sorted(items) == ["permits_due_later", "permits_start"]
