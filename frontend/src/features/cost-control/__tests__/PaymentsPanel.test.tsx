@@ -272,7 +272,7 @@ describe('PaymentsPanel', () => {
     };
     vi.mocked(paymentsApi.ledger).mockResolvedValue({
       ...LEDGER,
-      contracts: [{ ...LEDGER.contracts[0], invoices: [invoice({ figures: cents, computed: cents })] }],
+      contracts: [{ ...LEDGER.contracts[0]!, invoices: [invoice({ figures: cents, computed: cents })] }],
     });
     renderPanel();
     fireEvent.click(await screen.findByTestId('ledger-invoice-AR-1'));
