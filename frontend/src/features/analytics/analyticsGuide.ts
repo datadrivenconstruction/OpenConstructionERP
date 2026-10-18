@@ -16,7 +16,7 @@ export const analyticsGuide: ModuleGuideContent = {
   titleDefault: 'Analytics',
   introKey: 'guide.analytics.intro',
   introDefault:
-    'Analytics rolls budget against actual cost across every project into one portfolio view. Use it to see at a glance which jobs are over budget and by how much, without opening each project one by one.',
+    'Analytics rolls budget against actual cost across every project into one portfolio view, and its Performance tab benchmarks what your past projects actually achieved. Use it to see which jobs are over budget, and to ground the next estimate in your own measured history.',
   sections: [
     {
       icon: 'Workflow',
@@ -57,6 +57,46 @@ export const analyticsGuide: ModuleGuideContent = {
       bodyKey: 'guide.analytics.filter.body',
       bodyDefault:
         'Narrow the table by searching for a project name or filtering by region and status. The budget breakdown chart below mirrors the rows in view, plotting planned against actual cost as bars so overruns are easy to spot.',
+    },
+    {
+      icon: 'GraduationCap',
+      titleKey: 'guide.analytics.perf.title',
+      titleDefault: 'Historical performance: what your projects achieved',
+      bodyKey: 'guide.analytics.perf.body',
+      bodyDefault:
+        'The Performance tab compares measured results across projects: labour hours per installed unit, cost per m², rates in past estimates and your own KPIs. Pick projects by name, client, region, type or status, or leave the selection empty to use every project you can open. Each project is one row and opens with a click. Save the selection and settings as a benchmark set to reuse it or share the definition with colleagues; everyone sees only the projects they may open.',
+    },
+    {
+      icon: 'Layers',
+      titleKey: 'guide.analytics.perf_stats.title',
+      titleDefault: 'How the benchmark is computed',
+      bodyKey: 'guide.analytics.perf_stats.body',
+      bodyDefault:
+        'A ratio is a sum over a sum: 420 hours over 290 m² is 1.45 h/m², not the average of the project ratios. The average of projects and the median are shown beside it, with the normal range P25 - P75, P10 - P90 from ten projects, the standard deviation and the spread. A group with fewer projects or records than the minimum you set is marked as not enough evidence. Missing data is shown as unavailable with its reason, never as zero.',
+    },
+    {
+      icon: 'Database',
+      titleKey: 'guide.analytics.perf_units.title',
+      titleDefault: 'Units, currencies and splits',
+      bodyKey: 'guide.analytics.perf_units.body',
+      bodyDefault:
+        'm² and ft², m³ and yd³, kg, t and lb can be converted into one unit; different kinds of unit are never added. Enter a reporting currency to restate money with the FX rates in Settings: each converted row shows its original value and the rate used, and currencies without a rate stay apart. Split by client, region, project type, status, end year or a classification standard such as DIN 276 to get one block per value.',
+    },
+    {
+      icon: 'FileSearch',
+      titleKey: 'guide.analytics.perf_drill.title',
+      titleDefault: 'Trace a value, check the data, export',
+      bodyKey: 'guide.analytics.perf_drill.body',
+      bodyDefault:
+        'The list button on a row opens the records behind that value, each linked to its bill position; the totals match the value in the table. The data quality line shows how much of the selected work has hours booked to positions, reported progress and a classification. Compare KPIs puts up to eight KPIs side by side and exports them to CSV or Excel.',
+    },
+    {
+      icon: 'ClipboardCheck',
+      titleKey: 'guide.analytics.perf_estimating.title',
+      titleDefault: 'History while you estimate',
+      bodyKey: 'guide.analytics.perf_estimating.body',
+      bodyDefault:
+        'The same figures appear where you estimate: the bill editor shows historical labour hours per unit for positions with the same classification code on your other projects, post-calculation shows what other projects achieved next to each feedback factor, and the conceptual estimate compares its cost per m² with the actual cost of completed projects. These are measured history, kept apart from market price ranges and from the accuracy band of an estimate class. Nothing is changed in an estimate automatically.',
     },
     {
       icon: 'Rocket',

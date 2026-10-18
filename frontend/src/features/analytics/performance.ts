@@ -28,6 +28,13 @@ export interface PerformanceProjectRow {
   unavailable_reason: string | null;
   /** Units this project's rows were converted from to land in the group. */
   converted_from?: string[];
+  /** (value - headline) / headline: +0.25 is 25 % above the group's leading figure. */
+  variance?: Decimalish;
+  /** Currencies restated into the reporting currency, with the original value and rate. */
+  converted_from_currency?: string[];
+  original_value?: Decimalish;
+  original_currency?: string | null;
+  fx_rate?: Decimalish;
 }
 
 export interface PerformanceBenchmarkFigures {
@@ -40,6 +47,21 @@ export interface PerformanceBenchmarkFigures {
   p75: Decimalish;
   min: Decimalish;
   max: Decimalish;
+  /** Only from ten projects with a value; null below that. */
+  p10?: Decimalish;
+  p90?: Decimalish;
+  /** Sample standard deviation and coefficient of variation, from two projects. */
+  stddev?: Decimalish;
+  cv?: Decimalish;
+}
+
+/** One currency restated into the reporting currency: `1 from = rate to`. */
+export interface PerformanceCurrencyConversion {
+  from_currency: string;
+  to_currency: string;
+  rate: Decimalish;
+  as_of: string | null;
+  source: string;
 }
 
 /** `1 from_unit = factor to_unit`, applied to land rows in a group. */
@@ -59,6 +81,11 @@ export interface PerformanceGroup {
   evidence: { projects_with_data: number; projects_with_value: number; records: number; records_with_value?: number };
   coverage: Decimalish;
   conversions?: PerformanceConversion[];
+  currency_conversions?: PerformanceCurrencyConversion[];
+  /** Compound unit the values are in, such as h/m2 or EUR/m2; null when it cannot be stated. */
+  value_unit?: string | null;
+  /** Readings left out of the statistics, counted by reason. */
+  excluded?: Record<string, number>;
   /** The figure the group leads with, and which statistic it actually is. */
   headline?: Decimalish;
   headline_statistic?: BenchmarkStatistic;
@@ -71,6 +98,10 @@ export interface PerformanceProjectLabel {
   project_id: string;
   name: string;
   currency: string;
+  client?: string | null;
+  region?: string | null;
+  status?: string | null;
+  project_type?: string | null;
 }
 
 export interface PerformanceBenchmarkResponse {
@@ -80,6 +111,14 @@ export interface PerformanceBenchmarkResponse {
   projects_selected: number;
   projects: PerformanceProjectLabel[];
   groups: PerformanceGroup[];
+  split_by?: string | null;
+  reporting_currency?: string | null;
+  /** Currencies left apart because the FX register has no rate for them. */
+  currencies_unconverted?: string[];
+  /** Groups past the display cap, not returned. */
+  groups_omitted?: number;
+  /** Selected projects with no record for this KPI at all. */
+  projects_without_data?: number;
 }
 
 export interface KpiRowFilter {
@@ -94,6 +133,7 @@ export interface BenchmarkCohort {
   clients: string[];
   regions: string[];
   project_types: string[];
+  statuses: string[];
   row_filters: KpiRowFilter[];
   period_start: string | null;
   period_end: string | null;
@@ -108,12 +148,19 @@ export interface BenchmarkReadingOptions {
 
 export interface PerformanceBenchmarkRequest extends BenchmarkCohort, BenchmarkReadingOptions {
   kpi: string;
+  /** A project attribute (client, region, ...) or a row field such as classification.din276. */
+  split_by?: string | null;
+  /** ISO code to restate money in with the FX register; null keeps every currency apart. */
+  reporting_currency?: string | null;
 }
 
 export interface PerformanceCohortOptions {
   clients: string[];
   regions: string[];
   project_types: string[];
+  statuses?: string[];
+  /** The project attributes a benchmark can be split by. */
+  project_splits?: string[];
 }
 
 export interface BenchmarkSet extends BenchmarkReadingOptions {
@@ -124,6 +171,8 @@ export interface BenchmarkSet extends BenchmarkReadingOptions {
   scope: 'personal' | 'shared';
   kpis: string[];
   cohort: BenchmarkCohort;
+  split_by?: string | null;
+  reporting_currency?: string | null;
   is_owner: boolean;
   created_at: string;
   updated_at: string;
@@ -142,12 +191,17 @@ export interface BenchmarkSetWrite extends BenchmarkReadingOptions {
   scope: 'personal' | 'shared';
   kpis: string[];
   cohort: BenchmarkCohort;
+  /** Empty string clears it on update. */
+  split_by?: string | null;
+  reporting_currency?: string | null;
 }
 
 export interface PerformanceCheckRequest extends PerformanceBenchmarkRequest {
   value: string;
   unit: string | null;
   currency: string | null;
+  /** With a split, the group value the estimate is compared with. */
+  split_value?: string | null;
 }
 
 export interface PerformanceCheckResponse {
@@ -173,6 +227,7 @@ export const EMPTY_COHORT: BenchmarkCohort = {
   clients: [],
   regions: [],
   project_types: [],
+  statuses: [],
   row_filters: [],
   period_start: null,
   period_end: null,
@@ -375,6 +430,7 @@ export function activeFilterCount(cohort: BenchmarkCohort): number {
     (cohort.clients.length ? 1 : 0) +
     (cohort.regions.length ? 1 : 0) +
     (cohort.project_types.length ? 1 : 0) +
+    (cohort.statuses?.length ? 1 : 0) +
     (cohort.row_filters.length ? 1 : 0) +
     (cohort.period_start || cohort.period_end ? 1 : 0)
   );
@@ -389,4 +445,269 @@ export function downloadCsv(csv: string, filename: string): void {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/* ── Comparison, coverage, drilldown, position context ─────────────────── */
+
+export interface PerformanceCompareRequest extends BenchmarkCohort {
+  kpis: string[];
+  convert_units: boolean;
+  min_projects: number;
+  min_records: number;
+  statistic: BenchmarkStatistic;
+  reporting_currency?: string | null;
+}
+
+/** One column of the comparison: one KPI in one unit or currency group. */
+export interface PerformanceCompareColumn {
+  kpi: string;
+  aggregation: string;
+  group: PerformanceGroup;
+}
+
+export interface PerformanceCompareResponse {
+  projects_selected: number;
+  projects: PerformanceProjectLabel[];
+  columns: PerformanceCompareColumn[];
+  groups_omitted?: Record<string, number>;
+  reporting_currency?: string | null;
+  currencies_unconverted?: string[];
+  statistic?: BenchmarkStatistic;
+}
+
+export interface PerformanceDataQualityRequest extends BenchmarkCohort {
+  classification_key?: string | null;
+}
+
+/** How much of the cohort's data can feed a position benchmark. Shares are null, not 0, when the whole is 0. */
+export interface PerformanceDataQuality {
+  projects: number;
+  hours_total: Decimalish;
+  hours_linked: Decimalish;
+  hours_linked_share: Decimalish;
+  positions_total: number | null;
+  positions_with_progress: number | null;
+  progress_share: Decimalish;
+  classification_key: string | null;
+  positions_classified: number | null;
+  classification_share: Decimalish;
+}
+
+export interface PerformanceDrilldownRequest {
+  kpi: string;
+  project_id: string;
+  row_filters: KpiRowFilter[];
+  period_start: string | null;
+  period_end: string | null;
+  split_by?: string | null;
+  /** Group dimensions to match, each with every raw value that landed in the group. */
+  dimensions: Record<string, (string | null)[]>;
+  target_unit?: string | null;
+  reporting_currency?: string | null;
+  offset: number;
+  limit: number;
+}
+
+export interface PerformanceDrillRecord {
+  record_id: string;
+  boq_id: string | null;
+  position_id: string | null;
+  ref: string;
+  description: string;
+  dimensions: Record<string, string | null>;
+  numerator: Decimalish;
+  denominator: Decimalish;
+  /** The figures as counted in the group, after unit or currency conversion. */
+  counted_numerator: Decimalish;
+  counted_denominator: Decimalish;
+}
+
+export interface PerformanceDrilldownResponse {
+  project_id: string;
+  kpi: string | null;
+  aggregation: string;
+  total_records: number;
+  numerator: Decimalish;
+  denominator: Decimalish;
+  value: Decimalish;
+  unavailable_reason: string | null;
+  value_unit: string | null;
+  offset: number;
+  limit: number;
+  records: PerformanceDrillRecord[];
+}
+
+export interface PerformancePositionContextItem {
+  position_id: string;
+  status: string;
+  classification_code: string | null;
+  unit: string | null;
+  currency: string | null;
+  estimate: Decimalish;
+  value: Decimalish;
+  value_unit: string | null;
+  headline: Decimalish;
+  statistic: BenchmarkStatistic | null;
+  median: Decimalish;
+  p25: Decimalish;
+  p75: Decimalish;
+  variance: Decimalish;
+  percentile_rank: Decimalish;
+  band: RangeBand | null;
+  confidence: 'low' | 'medium' | 'high' | null;
+  projects: number;
+  records: number;
+  shortfall: string[];
+}
+
+export interface PerformancePositionContextResponse {
+  kpi: string;
+  classification_key: string | null;
+  items: PerformancePositionContextItem[];
+}
+
+export interface PerformancePositionContextRequest {
+  position_ids: string[];
+  kpi?: string;
+  classification_key?: string | null;
+}
+
+export function fetchPerformanceCompare(body: PerformanceCompareRequest): Promise<PerformanceCompareResponse> {
+  return apiPost<PerformanceCompareResponse, PerformanceCompareRequest>('/v1/bi-dashboards/performance/compare', body);
+}
+
+export function fetchDataQuality(body: PerformanceDataQualityRequest): Promise<PerformanceDataQuality> {
+  return apiPost<PerformanceDataQuality, PerformanceDataQualityRequest>(
+    '/v1/bi-dashboards/performance/data-quality',
+    body,
+  );
+}
+
+export function fetchDrilldown(body: PerformanceDrilldownRequest): Promise<PerformanceDrilldownResponse> {
+  return apiPost<PerformanceDrilldownResponse, PerformanceDrilldownRequest>(
+    '/v1/bi-dashboards/performance/drilldown',
+    body,
+  );
+}
+
+export function fetchPositionContext(
+  body: PerformancePositionContextRequest,
+): Promise<PerformancePositionContextResponse> {
+  return apiPost<PerformancePositionContextResponse, PerformancePositionContextRequest>(
+    '/v1/bi-dashboards/performance/position-context',
+    body,
+  );
+}
+
+/** Values a project's rows had before they landed in this group, per dimension, for the drilldown. */
+export function drillDimensions(
+  group: PerformanceGroup,
+  row: PerformanceProjectRow,
+): Record<string, (string | null)[]> {
+  const out: Record<string, (string | null)[]> = {};
+  for (const [name, value] of Object.entries(group.dimensions)) {
+    const raw = value === NULL_GROUP_KEY ? null : value;
+    const extra =
+      name === 'unit' ? (row.converted_from ?? []) : name === 'currency' ? (row.converted_from_currency ?? []) : [];
+    out[name] = Array.from(new Set([raw, ...extra]));
+  }
+  return out;
+}
+
+export type RowSort = 'name' | 'value_asc' | 'value_desc';
+
+/** Rows sorted by name or by value; a row with no value always goes last. */
+export function sortTableRows(
+  rows: PerformanceTableRow[],
+  sort: RowSort,
+  byName: (a: string, b: string) => number,
+): PerformanceTableRow[] {
+  if (sort === 'name') return [...rows].sort((a, b) => byName(a.name, b.name));
+  const dir = sort === 'value_asc' ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const va = toNumber(a.row?.value);
+    const vb = toNumber(b.row?.value);
+    if (va === null && vb === null) return byName(a.name, b.name);
+    if (va === null) return 1;
+    if (vb === null) return -1;
+    return va === vb ? byName(a.name, b.name) : (va - vb) * dir;
+  });
+}
+
+export type MatrixCell = string | number | null;
+
+export interface CompareMatrixLabels {
+  project: string;
+  client: string;
+  region: string;
+  status: string;
+  /** Header text for one column. */
+  column: (column: PerformanceCompareColumn) => string;
+  /** First cell of the benchmark line. */
+  benchmark: string;
+}
+
+/**
+ * The comparison as a plain matrix: header, one line per project, then the
+ * benchmark line. Values stay numbers (null when unavailable, never 0) so CSV
+ * and Excel read them as numbers in any locale.
+ */
+export function buildCompareMatrix(data: PerformanceCompareResponse, labels: CompareMatrixLabels): MatrixCell[][] {
+  const header: MatrixCell[] = [
+    labels.project,
+    labels.client,
+    labels.region,
+    labels.status,
+    ...data.columns.map(labels.column),
+  ];
+  const byColumn = data.columns.map((c) => new Map(c.group.rows.map((r) => [r.project_id, toNumber(r.value)])));
+  const lines: MatrixCell[][] = [header];
+  for (const p of data.projects) {
+    lines.push([
+      p.name,
+      p.client ?? '',
+      p.region ?? '',
+      p.status ?? '',
+      ...byColumn.map((m) => m.get(p.project_id) ?? null),
+    ]);
+  }
+  lines.push([
+    labels.benchmark,
+    '',
+    '',
+    '',
+    ...data.columns.map((c) => toNumber(c.group.headline ?? c.group.benchmark.weighted)),
+  ]);
+  return lines;
+}
+
+export function matrixToCsv(matrix: MatrixCell[][]): string {
+  return matrix.map((line) => line.map((cell) => csvCell(cell)).join(',')).join('\r\n');
+}
+
+/** The matrix as an .xlsx file. exceljs loads only on click, so it never weighs on the page. */
+export async function downloadMatrixXlsx(matrix: MatrixCell[][], filename: string, sheetName: string): Promise<void> {
+  const mod = await import('exceljs');
+  const Ctor = (mod.Workbook ?? mod.default.Workbook) as typeof import('exceljs').Workbook;
+  const wb = new Ctor();
+  wb.creator = 'OpenConstructionERP';
+  wb.created = new Date();
+  const ws = wb.addWorksheet(sheetName.slice(0, 31) || 'Sheet1');
+  for (const line of matrix) {
+    // Text a spreadsheet would run as a formula is written as literal text.
+    ws.addRow(line.map((cell) => (typeof cell === 'string' && /^[=+\-@\t\r\n]/.test(cell) ? `'${cell}` : cell)));
+  }
+  ws.getRow(1).font = { bold: true };
+  ws.views = [{ state: 'frozen', xSplit: 1, ySplit: 1 }];
+  ws.columns.forEach((col, i) => {
+    col.width = i === 0 ? 36 : 16;
+  });
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

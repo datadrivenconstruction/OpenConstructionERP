@@ -434,3 +434,16 @@ def test_line_productivity_is_a_dataclass_instance():
     # Money / hours are Decimal, never float.
     assert isinstance(lp.planned_hours, Decimal)
     assert isinstance(lp.planned_labour_cost, Decimal)
+
+
+def test_feedback_factor_names_the_position_so_its_history_can_be_fetched():
+    line = _line(ref="W1", actual_quantity="100", actual_labour_hours="300")
+    line["position_id"] = "8a1d4a9e-0000-4000-8000-000000000001"
+    (factor,) = build_feedback_factors([compute_line_productivity(line)])
+    assert factor.position_id == "8a1d4a9e-0000-4000-8000-000000000001"
+    assert factor.to_dict()["position_id"] == "8a1d4a9e-0000-4000-8000-000000000001"
+    # A line handed in without one (an upload, a test) reads None, not an empty string.
+    (bare,) = build_feedback_factors(
+        [compute_line_productivity(_line(actual_quantity="100", actual_labour_hours="300"))]
+    )
+    assert bare.position_id is None

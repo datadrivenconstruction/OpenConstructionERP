@@ -856,3 +856,46 @@ async def test_benchmark_set_keeps_split_and_currency_and_checks_the_split_on_sa
             service=service,
         )
     assert bad.value.status_code == 422
+
+
+# ── Database: a conceptual estimate against actual cost per floor area ──
+
+
+@pytest.mark.asyncio
+async def test_conceptual_cost_per_area_is_checked_against_actuals_only(session: AsyncSession) -> None:
+    from app.modules.bi_dashboards.router import check_against_cohort
+    from app.modules.bi_dashboards.schemas import PerformanceAdHocCheckRequest
+    from app.modules.costmodel.models import BudgetLine
+    from app.modules.projects.models import Project
+
+    me = await _user(session)
+    stranger = await _user(session)
+    # Actual cost per m2: 2,000,000 / 1000 = 2000; 3,000,000 / 1000 = 3000; 4,000,000 / 1000 = 4000.
+    # Median 3000, P25 2500, P75 3500. A 3600 estimate is above P75, +20 % on the median.
+    owners = [me, me, me, stranger]
+    actuals = ["2000000", "3000000", "4000000", "1"]
+    for owner, actual in zip(owners, actuals, strict=True):
+        pid = await _project(session, owner, f"Built {actual}")
+        project = await session.get(Project, pid)
+        assert project is not None
+        project.gross_floor_area = "1000"
+        session.add(BudgetLine(project_id=pid, category="construction", actual_amount=actual, currency="EUR"))
+    await session.flush()
+
+    out = await check_against_cohort(
+        PerformanceAdHocCheckRequest(
+            kpi="actual_cost_per_floor_area", value=D("3600"), currency="EUR", statistic="median"
+        ),
+        user_id=str(me),
+        session=session,
+    )
+    assert out.status == "ok"
+    assert out.group is not None
+    assert out.group.evidence.projects_with_value == 3
+    assert (out.group.benchmark.median, out.group.benchmark.p25, out.group.benchmark.p75) == (
+        D("3000"),
+        D("2500"),
+        D("3500"),
+    )
+    assert out.band == "above"
+    assert out.variance == D("0.2")

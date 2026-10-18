@@ -12669,6 +12669,18 @@
               "annotation": "Mapped[bool]",
               "sql_type": "Boolean",
               "nullable": false
+            },
+            {
+              "name": "split_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "reporting_currency",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -12760,6 +12772,34 @@
           "handler": "check_against_cohort",
           "response_model": "PerformanceCheckResponse",
           "request_schema": "PerformanceAdHocCheckRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/compare",
+          "handler": "compare_projects",
+          "response_model": "PerformanceCompareResponse",
+          "request_schema": "PerformanceCompareRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/data-quality",
+          "handler": "performance_data_quality",
+          "response_model": "PerformanceDataQualityResponse",
+          "request_schema": "PerformanceDataQualityRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/drilldown",
+          "handler": "performance_drilldown",
+          "response_model": "PerformanceDrilldownResponse",
+          "request_schema": "PerformanceDrilldownRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/performance/position-context",
+          "handler": "performance_position_context",
+          "response_model": "PerformancePositionContextResponse",
+          "request_schema": "PerformancePositionContextRequest"
         },
         {
           "method": "POST",
@@ -14563,6 +14603,10 @@
               "type": "list[UUID]"
             },
             {
+              "name": "exclude_project_ids",
+              "type": "list[UUID]"
+            },
+            {
               "name": "clients",
               "type": "list[str]"
             },
@@ -14572,6 +14616,10 @@
             },
             {
               "name": "project_types",
+              "type": "list[str]"
+            },
+            {
+              "name": "statuses",
               "type": "list[str]"
             },
             {
@@ -14623,6 +14671,19 @@
               "name": "statistic",
               "type": "str",
               "default": "'weighted'"
+            },
+            {
+              "name": "split_by",
+              "type": "str | None"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None"
+            },
+            {
+              "name": "fx_date",
+              "type": "date | None",
+              "default": "None"
             }
           ]
         },
@@ -14664,6 +14725,30 @@
             {
               "name": "converted_from",
               "type": "list[str]"
+            },
+            {
+              "name": "variance",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "converted_from_currency",
+              "type": "list[str]"
+            },
+            {
+              "name": "original_value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "original_currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "fx_rate",
+              "type": "Decimal | None",
+              "default": "None"
             }
           ]
         },
@@ -14707,6 +14792,26 @@
             {
               "name": "max",
               "type": "Decimal | None"
+            },
+            {
+              "name": "p10",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "p90",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "stddev",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "cv",
+              "type": "Decimal | None",
+              "default": "None"
             }
           ]
         },
@@ -14758,6 +14863,37 @@
           ]
         },
         {
+          "class_name": "PerformanceCurrencyConversion",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "``1 from_currency = rate to_currency``, from the FX register on ``as_of``.",
+          "fields": [
+            {
+              "name": "from_currency",
+              "type": "str"
+            },
+            {
+              "name": "to_currency",
+              "type": "str"
+            },
+            {
+              "name": "rate",
+              "type": "Decimal"
+            },
+            {
+              "name": "as_of",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "source",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
           "class_name": "PerformanceGroup",
           "bases": [
             "BaseModel"
@@ -14791,6 +14927,19 @@
             {
               "name": "conversions",
               "type": "list[PerformanceConversion]"
+            },
+            {
+              "name": "currency_conversions",
+              "type": "list[PerformanceCurrencyConversion]"
+            },
+            {
+              "name": "value_unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "excluded",
+              "type": "dict[str, int]"
             },
             {
               "name": "headline",
@@ -14831,6 +14980,26 @@
             {
               "name": "currency",
               "type": "str"
+            },
+            {
+              "name": "client",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "region",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "project_type",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -14884,6 +15053,30 @@
               "name": "statistic",
               "type": "str",
               "default": "'weighted'"
+            },
+            {
+              "name": "split_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currencies_unconverted",
+              "type": "list[str]"
+            },
+            {
+              "name": "groups_omitted",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "projects_without_data",
+              "type": "int",
+              "default": "0"
             }
           ]
         },
@@ -14921,6 +15114,14 @@
             },
             {
               "name": "project_types",
+              "type": "list[str]"
+            },
+            {
+              "name": "statuses",
+              "type": "list[str]"
+            },
+            {
+              "name": "project_splits",
               "type": "list[str]"
             }
           ]
@@ -14970,6 +15171,14 @@
               "name": "convert_units",
               "type": "bool",
               "default": "True"
+            },
+            {
+              "name": "split_by",
+              "type": "str | None"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None"
             }
           ]
         },
@@ -15027,6 +15236,14 @@
               "name": "convert_units",
               "type": "bool | None",
               "default": "None"
+            },
+            {
+              "name": "split_by",
+              "type": "str | None"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None"
             }
           ]
         },
@@ -15081,6 +15298,16 @@
             {
               "name": "convert_units",
               "type": "bool"
+            },
+            {
+              "name": "split_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "is_owner",
@@ -15188,6 +15415,540 @@
               "name": "boq_position_id",
               "type": "UUID | None",
               "default": "None"
+            },
+            {
+              "name": "split_value",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceCompareRequest",
+          "bases": [
+            "BenchmarkCohort"
+          ],
+          "docstring": "Several KPIs over one cohort, one project per row and one column per KPI group.\n\nThe same cohort and reading options as ``POST /performance/benchmark``;\neach KPI is a preset id or a custom KPI code. A split is not offered: a\ncomparison is by project, and a split would multiply the columns.",
+          "fields": [
+            {
+              "name": "kpis",
+              "type": "list[str]"
+            },
+            {
+              "name": "convert_units",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "min_projects",
+              "type": "int"
+            },
+            {
+              "name": "min_records",
+              "type": "int"
+            },
+            {
+              "name": "statistic",
+              "type": "str",
+              "default": "'weighted'"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None"
+            },
+            {
+              "name": "fx_date",
+              "type": "date | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceCompareColumn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One column of the comparison: one KPI read in one unit/currency group.",
+          "fields": [
+            {
+              "name": "kpi",
+              "type": "str"
+            },
+            {
+              "name": "aggregation",
+              "type": "str"
+            },
+            {
+              "name": "group",
+              "type": "PerformanceGroup"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceCompareResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "projects_selected",
+              "type": "int"
+            },
+            {
+              "name": "projects",
+              "type": "list[PerformanceProjectLabel]"
+            },
+            {
+              "name": "columns",
+              "type": "list[PerformanceCompareColumn]"
+            },
+            {
+              "name": "groups_omitted",
+              "type": "dict[str, int]"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currencies_unconverted",
+              "type": "list[str]"
+            },
+            {
+              "name": "statistic",
+              "type": "str",
+              "default": "'weighted'"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceDataQualityRequest",
+          "bases": [
+            "BenchmarkCohort"
+          ],
+          "docstring": "The cohort to measure, and the classification standard to count.",
+          "fields": [
+            {
+              "name": "classification_key",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceDataQualityResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Coverage of the cohort's actuals. A share is unset when its whole is zero.",
+          "fields": [
+            {
+              "name": "projects",
+              "type": "int"
+            },
+            {
+              "name": "hours_total",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "hours_linked",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "hours_linked_share",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "positions_total",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "positions_with_progress",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "progress_share",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "classification_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "positions_classified",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "classification_share",
+              "type": "Decimal | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceDrilldownRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The rows behind one project's reading in one group.\n\n``dimensions`` lists, per row dimension of the group, the stored values\nthat land in it: the group's own unit and currency plus whatever the\nreading lists in ``converted_from`` / ``converted_from_currency``.\n``target_unit`` and ``reporting_currency`` are the group's, so the totals\nare restated the way the reading was.",
+          "fields": [
+            {
+              "name": "kpi",
+              "type": "str | None"
+            },
+            {
+              "name": "spec",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "row_filters",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "period_start",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "period_end",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "split_by",
+              "type": "str | None"
+            },
+            {
+              "name": "dimensions",
+              "type": "dict[str, list[str | None]]"
+            },
+            {
+              "name": "target_unit",
+              "type": "str | None"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str | None"
+            },
+            {
+              "name": "fx_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceDrillRecord",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "record_id",
+              "type": "str"
+            },
+            {
+              "name": "boq_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "position_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "ref",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "dimensions",
+              "type": "dict[str, str | None]"
+            },
+            {
+              "name": "numerator",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "denominator",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "counted_numerator",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "counted_denominator",
+              "type": "Decimal | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceDrilldownResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A page of contributing rows; the totals are over every row, not the page.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "kpi",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "aggregation",
+              "type": "str"
+            },
+            {
+              "name": "total_records",
+              "type": "int"
+            },
+            {
+              "name": "numerator",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "denominator",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "unavailable_reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "value_unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            },
+            {
+              "name": "records",
+              "type": "list[PerformanceDrillRecord]"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformancePositionContextRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Historical context for bill positions: comparable past positions by classification.\n\n``kpi`` is a per-unit KPI: ``labour_hours_per_installed_unit`` (actual\nhours per installed unit, compared with the position's planned hours per\nunit) or ``estimate_rate_per_unit`` (rates of past estimates, compared\nwith the position's own rate), or a custom KPI of the same shape.",
+          "fields": [
+            {
+              "name": "position_ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "kpi",
+              "type": "str"
+            },
+            {
+              "name": "classification_key",
+              "type": "str | None"
+            },
+            {
+              "name": "include_own_projects",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "convert_units",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "statistic",
+              "type": "str",
+              "default": "'median'"
+            },
+            {
+              "name": "min_projects",
+              "type": "int"
+            },
+            {
+              "name": "min_records",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformancePositionContextItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "classification_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "estimate",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "value_unit",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "headline",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "statistic",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "median",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "p25",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "p75",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "variance",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "percentile_rank",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "band",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "confidence",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "projects",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "records",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "shortfall",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformancePositionContextResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Suggestions for a person to weigh; nothing was changed by them.",
+          "fields": [
+            {
+              "name": "kpi",
+              "type": "str"
+            },
+            {
+              "name": "classification_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "items",
+              "type": "list[PerformancePositionContextItem]"
             }
           ]
         },
@@ -15283,6 +16044,7 @@
         "equipment",
         "field_time",
         "finance",
+        "fx",
         "inspections",
         "ncr",
         "postcalc",
@@ -175017,6 +175779,7 @@
         "repository.py",
         "router.py",
         "schemas.py",
+        "seed.py",
         "seq_repair.py",
         "service.py"
       ],
@@ -175673,7 +176436,9 @@
       ],
       "import_dependencies": [
         "boq",
-        "costmodel"
+        "costmodel",
+        "field_time",
+        "projects"
       ]
     },
     {
@@ -272790,10 +273555,10 @@
     },
     {
       "name": "analytics",
-      "ts_files": 6,
+      "ts_files": 12,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 6
+      "test_files": 3,
+      "total_files": 12
     },
     {
       "name": "approval-routes",
@@ -274295,6 +275060,7 @@
       "equipment",
       "field_time",
       "finance",
+      "fx",
       "inspections",
       "ncr",
       "postcalc",
@@ -275306,6 +276072,7 @@
     "progress": [
       "boq",
       "costmodel",
+      "field_time",
       "projects"
     ],
     "project_controls": [
@@ -275768,13 +276535,13 @@
     "backend_modules": 212,
     "modules_with_manifests": 210,
     "total_models": 780,
-    "total_columns": 9086,
+    "total_columns": 9088,
     "total_relationships": 240,
-    "total_routes": 4592,
-    "total_schemas": 4071,
-    "total_python_files": 2739,
+    "total_routes": 4596,
+    "total_schemas": 4083,
+    "total_python_files": 2740,
     "frontend_features": 209,
-    "frontend_ts_files": 3551,
+    "frontend_ts_files": 3557,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

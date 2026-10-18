@@ -135,6 +135,7 @@ import { CatalogPickerModal, type CatalogResource } from './CatalogPickerModal';
 import { CustomColumnsDialog } from './CustomColumnsDialog';
 import { BOQVariablesDialog } from './BOQVariablesDialog';
 import { CostPerAreaBenchmark } from './CostPerAreaBenchmark';
+import { HistoricalRangePanel } from '@/features/analytics/HistoricalRange';
 import { RenumberDialog, type RenumberScheme, type RenumberCustom } from './RenumberDialog';
 import { LinkedPositionsModal } from './LinkedPositionsModal';
 import { repointedMetadata } from './repointedMetadata';
@@ -4734,6 +4735,14 @@ export function BOQEditorPage() {
 
   /* ── AG Grid footer rows (must be before early returns — Rules of Hooks) */
   const hasPositions = boq ? boq.positions.length > 0 : false;
+  // Measured work only: section rows carry no unit and have no history to match.
+  const historicalPositions = useMemo(
+    () =>
+      (boq?.positions ?? [])
+        .filter((p) => Boolean(p.unit))
+        .map((p) => ({ id: p.id, ordinal: p.ordinal, description: p.description })),
+    [boq?.positions],
+  );
 
   const boqFooterRows = useMemo(() => {
     type FooterRow = { _isFooter: true; _footerType: string; id: string; description: string; total: number; ordinal: string; unit: string; quantity: number; unit_rate: number; _resourceSplitMoney?: Record<string, number> };
@@ -5702,6 +5711,11 @@ export function BOQEditorPage() {
           locale={locale}
         />
       )}
+
+      {/* ── Historical actuals per position ──────────────────────────────
+          Closed by default; loads only when opened. Distinct from the market
+          price check and from the estimate class accuracy band. */}
+      {boqId && hasPositions && <HistoricalRangePanel positions={historicalPositions} />}
 
       {/* ── Resource Summary ──────────────────────────────────────────── */}
       {boqId && hasPositions && <div className="mt-6" data-testid="boq-resource-summary"><ResourceSummary boqId={boqId} locale={locale} currency={currencyCode} /></div>}

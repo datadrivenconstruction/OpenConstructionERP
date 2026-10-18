@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, ApiError } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -115,7 +115,9 @@ export function AnalyticsPage() {
   // the user pauses for 300ms instead of on every keystroke.
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
-  const [tab, setTab] = useState<AnalyticsTab>('overview');
+  // `?tab=performance` opens the Performance tab, so estimating screens can link straight to it.
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState<AnalyticsTab>(searchParams.get('tab') === 'performance' ? 'performance' : 'overview');
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 

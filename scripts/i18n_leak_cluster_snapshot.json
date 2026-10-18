@@ -2005,5 +2005,17 @@
     ],
     "key_count_at_seed": 3,
     "note": "Reviewed 2026-10-14 with the second translation wave: Concept is the ordinary word or abbreviation in the listed languages, spelled the same as English, while the other locales carry their own word (values read in ar, bg, bn and others). Keys: engineeringBrief.phase.concept, engineeringBrief.requirements.answered, engineeringBrief.tabs.concept."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "fil",
+      "id",
+      "no",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Reviewed: analytics.perf.median, analytics.perf.stat.median and analytics.hist.cost_median read 'Median' because the statistical term is spelled Median in Danish, German, Norwegian, Swedish, Indonesian and Filipino; the non-member locales carry their own word (ru Медиана, fr Médiane, nl Mediaan)."
   }
 ]

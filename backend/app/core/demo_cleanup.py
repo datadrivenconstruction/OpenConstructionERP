@@ -170,16 +170,18 @@ def _fingerprinters() -> list[Callable[[AsyncSession, list[uuid.UUID]], Awaitabl
     """Each unmarked seeder's own recogniser, in the order their rows can be deleted.
 
     Field time goes before variations because its lines point at variation
-    orders; everything else is independent of the others.
+    orders; everything else is independent of the others. Position progress
+    readings carry a mark of their own, so only those are listed.
     """
     from app.modules.field_time.seed import seeded_row_ids as field_time
     from app.modules.hse_advanced.seed import seeded_row_ids as hse
+    from app.modules.progress.seed import seeded_row_ids as progress
     from app.modules.qms.seed import seeded_row_ids as qms
     from app.modules.service.seed import seeded_row_ids as service
     from app.modules.teams.seed import seeded_row_ids as teams
     from app.modules.variations.seed import seeded_row_ids as variations
 
-    return [field_time, variations, qms, hse, service, teams]
+    return [field_time, variations, qms, hse, service, teams, progress]
 
 
 @dataclass

@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import clsx from 'clsx';
+import { HistoricalRangeCell, useHistoricalContext } from '@/features/analytics/HistoricalRange';
 import {
   Download,
   Gauge,
@@ -608,6 +609,11 @@ function ResourceTable({ resources, currency }: { resources: ResourceRollup[]; c
 
 function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
   const { t, i18n } = useTranslation();
+  // What other projects achieved for work with the same classification code: one batch request.
+  const history = useHistoricalContext(
+    factors.map((f) => f.position_id ?? '').filter(Boolean),
+    factors.length > 0,
+  );
 
   if (factors.length === 0) {
     return (
@@ -631,6 +637,9 @@ function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
                 <th className="px-3 py-2 text-left">{t('postcalc.col_description')}</th>
                 <th className="px-3 py-2 text-right">{t('postcalc.col_current_norm')}</th>
                 <th className="px-3 py-2 text-right">{t('postcalc.col_observed_norm')}</th>
+                <th className="px-3 py-2 text-left" title={t('analytics.hist.postcalc_col_hint', { defaultValue: 'Median and P25 - P75 of labour hours per unit measured on your other projects for the same classification code. The badge places the achieved norm in that range.' })}>
+                  {t('analytics.hist.postcalc_col', { defaultValue: 'Other projects' })}
+                </th>
                 <th className="px-3 py-2 text-right">{t('postcalc.col_confidence')}</th>
                 <th className="px-3 py-2 text-left">{t('postcalc.col_recommendation')}</th>
               </tr>
@@ -661,6 +670,12 @@ function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
                     </td>
                     <td className="px-3 py-2 text-right tabular-nums">
                       {t('postcalc.norm_value', { value: observed, unit })}
+                    </td>
+                    <td className="px-3 py-2">
+                      <HistoricalRangeCell
+                        item={factor.position_id ? history.byId.get(factor.position_id) : undefined}
+                        bandFor={num(factor.observed_hours_per_unit)}
+                      />
                     </td>
                     <td className="px-3 py-2 text-right">
                       <Badge variant={num(factor.confidence) >= 0.6 ? 'success' : 'warning'}>

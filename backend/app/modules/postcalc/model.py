@@ -153,6 +153,9 @@ class LineProductivity:
     # recorded for the line, which is not the same as nothing having been used.
     actual_material_cost: Decimal | None = None
     material_cost_variance: Decimal | None = None
+    # The BoQ position this line reads, so a consumer can fetch its history.
+    # ``None`` for a line handed in without one (a file upload, a test).
+    position_id: str | None = None
 
     @property
     def labour_cost_variance_earned(self) -> Decimal | None:
@@ -189,6 +192,7 @@ class LineProductivity:
         """JSON-ready view (money/hours 2 dp, quantities/factor 4 dp, pct 2 dp)."""
         return {
             "ref": self.ref,
+            "position_id": self.position_id,
             "description": self.description,
             "unit": self.unit,
             "currency": self.currency,
@@ -328,6 +332,7 @@ class FeedbackFactor:
     observed_quantity: Decimal
     confidence: Decimal
     recommendation: str
+    position_id: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """JSON-ready view of the estimating feedback factor."""
@@ -343,6 +348,7 @@ class FeedbackFactor:
             "observed_quantity": _q(self.observed_quantity, _QTY_Q),
             "confidence": _q(self.confidence, _PCT_Q),
             "recommendation": self.recommendation,
+            "position_id": self.position_id,
         }
 
 

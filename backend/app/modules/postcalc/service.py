@@ -320,6 +320,7 @@ def compute_line_productivity(
         earned_material_cost=earned_material_cost,
         actual_material_cost=actual_material_cost,
         material_cost_variance=material_cost_variance,
+        position_id=str(line.get("position_id") or "").strip() or None,
     )
 
 
@@ -550,6 +551,7 @@ def build_feedback_factors(
                 observed_quantity=line.actual_quantity,
                 confidence=coverage,
                 recommendation=_recommendation(line, _q_factor),
+                position_id=line.position_id,
             )
         )
     factors.sort(
@@ -728,6 +730,7 @@ class PostCalcService:
             lines.append(
                 {
                     "ref": str(pos.reference_code or pos.ordinal or "").strip(),
+                    "position_id": str(pid),
                     "description": pos.description or "",
                     "unit": pos.unit or "",
                     "currency": currency,
