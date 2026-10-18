@@ -2898,6 +2898,7 @@ class CostSpineService:
 
         from app.modules.boq.models import BOQ, Position
         from app.modules.contracts.models import Contract, ContractLine
+        from app.modules.costmodel.inheritance import SOURCE_CONTRACT_LINE, SOURCE_PO_ITEM, drop_splits
         from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
         from app.modules.rfq_bidding.models import RFQ
 
@@ -2934,6 +2935,8 @@ class CostSpineService:
             await self.session.execute(
                 update(PurchaseOrderItem).where(PurchaseOrderItem.id == target_id).values(cost_line_id=new_value)
             )
+            # The item now sits whole on one line (or none); a split it inherited no longer applies.
+            await drop_splits(self.session, SOURCE_PO_ITEM, [target_id])
 
         elif normalized == "contract_line":
             cl = await self.session.get(ContractLine, target_id)
@@ -2945,6 +2948,7 @@ class CostSpineService:
             await self.session.execute(
                 update(ContractLine).where(ContractLine.id == target_id).values(cost_line_id=new_value)
             )
+            await drop_splits(self.session, SOURCE_CONTRACT_LINE, [target_id])
 
         elif normalized == "rfq":
             rfq = await self.session.get(RFQ, target_id)

@@ -53,8 +53,7 @@ from app.modules.costmodel.inheritance_service import (
     KIND_CONTRACT_LINE,
     KIND_INVOICE_LINE,
     KIND_PO_ITEM,
-    apply_change_item_inheritance,
-    change_item_inherits,
+    change_items_inherit,
     contract_line_candidates,
     inherit_contract_lines,
     set_contract_account,
@@ -465,11 +464,16 @@ class CostChainService:
                 .order_by(ChangeOrder.code, ChangeOrderItem.sort_order)
             )
         ).all()
-        for item, order in items:
-            amount = _amount_in_base(str(_dec(item.cost_delta)), (order.currency or "").strip().upper(), base, fx)
-            if amount == ZERO:
-                continue
-            picked = await change_item_inherits(self.session, order, dict(item.metadata_ or {}))
+        priced = [
+            (item, order, amount)
+            for item, order in items
+            if (amount := _amount_in_base(str(_dec(item.cost_delta)), (order.currency or "").strip().upper(), base, fx))
+            != ZERO
+        ]
+        inherited = await change_items_inherit(
+            self.session, [(order, dict(item.metadata_ or {})) for item, order, _ in priced]
+        )
+        for (item, order, amount), picked in zip(priced, inherited, strict=True):
             rows[KIND_CHANGE_ITEM].append(
                 {
                     "kind": KIND_CHANGE_ITEM,
@@ -584,9 +588,13 @@ class CostChainService:
                 .where(ChangeOrder.project_id == project_id, ChangeOrderItem.cost_line_id.is_(None))
             )
         ).all()
-        for item, order in items:
-            await apply_change_item_inheritance(self.session, order, item)
-            if item.cost_line_id is not None:
+        picked_all = await change_items_inherit(
+            self.session, [(order, dict(item.metadata_ or {})) for item, order in items]
+        )
+        for (item, _order), picked in zip(items, picked_all, strict=True):
+            if picked.vector.main:
+                item.cost_line_id = uuid.UUID(picked.vector.main)
+                item.cost_line_source = picked.source
                 counts[KIND_CHANGE_ITEM] += 1
 
         lines = (
@@ -658,6 +666,19 @@ class CostChainService:
             )
         meta = dict(invoice.metadata_ or {})
         if str(meta.get("contract_id") or "").strip() or invoice.purchase_order_id or invoice.source_claim_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"problem": "invoice_has_contract", "message": "This invoice already belongs to a commitment."},
+            )
+        billed = (
+            await self.session.execute(
+                select(func.count()).where(
+                    InvoiceLineItem.invoice_id == invoice.id, InvoiceLineItem.contract_line_id.is_not(None)
+                )
+            )
+        ).scalar_one()
+        if billed:
+            # Its lines already bill a schedule line: a new contract would move that money off the one they bill.
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail={"problem": "invoice_has_contract", "message": "This invoice already belongs to a commitment."},

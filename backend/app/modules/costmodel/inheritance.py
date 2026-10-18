@@ -260,8 +260,24 @@ async def row_vectors(session: AsyncSession, source_type: str, mains: dict[objec
         for sid, lid, share in rows:
             shares.setdefault(str(sid), []).append((lid, share))
     for sid, rows_ in shares.items():
-        out[sid] = vector_of(out.get(sid, NO_VECTOR).main, rows_)
+        out[sid] = stored_vector(out.get(sid, NO_VECTOR).main, rows_)
     return out
+
+
+def stored_vector(main: object, shares: Iterable[tuple[object, object]]) -> Vector:
+    """A row's vector from its own ``cost_line_id`` and the split stored for it.
+
+    The row's own column has the last word. Every writer of a split also
+    writes its main line into the column, so a split whose lines do not
+    include the column's line, or a split on a row whose column is empty, was
+    left behind by a writer that re-pointed or cleared the row without knowing
+    about splits. That split is stale and the row reads as its column.
+    """
+    key = _key(main)
+    if key is None:
+        return NO_VECTOR
+    vector = vector_of(key, shares)
+    return vector if key in vector.lines else Vector(main=key)
 
 
 async def row_vector(session: AsyncSession, source_type: str, source_id: object, main: object) -> Vector:

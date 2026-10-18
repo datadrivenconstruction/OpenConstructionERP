@@ -18,6 +18,7 @@ from app.modules.costmodel.inheritance import (
     expand,
     first_inherited,
     percent_shares,
+    stored_vector,
     vector_of,
 )
 
@@ -120,3 +121,17 @@ def test_first_inherited_with_nothing_is_empty() -> None:
     picked = first_inherited([(FROM_POSITION, None)])
     assert picked.vector.empty
     assert picked.source is None
+
+
+def test_a_stored_split_reads_as_written_when_the_row_points_into_it() -> None:
+    v = stored_vector("A", [("A", "60"), ("B", "40")])
+    assert v.is_split and v.main == "A"
+
+
+def test_a_split_the_row_no_longer_points_into_is_stale() -> None:
+    """A writer re-pointed the row without dropping its split: the row's own column wins."""
+    assert stored_vector("C", [("A", "60"), ("B", "40")]) == Vector(main="C")
+
+
+def test_a_split_on_a_row_taken_off_every_line_is_stale() -> None:
+    assert stored_vector(None, [("A", "60"), ("B", "40")]) == NO_VECTOR

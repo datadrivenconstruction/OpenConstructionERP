@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from collections.abc import Iterable, Sequence
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
@@ -112,20 +113,6 @@ async def _contract_default(session: AsyncSession, contract: Any) -> Vector:
     return Vector(main=str(contract.cost_line_id)) if getattr(contract, "cost_line_id", None) else NO_VECTOR
 
 
-async def _sole_line_vector(session: AsyncSession, contract_id: uuid.UUID) -> Vector:
-    """The one cost line every costed schedule line of the contract sits on, if there is exactly one."""
-    from app.modules.contracts.models import ContractLine
-
-    rows = await session.execute(
-        select(ContractLine.cost_line_id)
-        .where(ContractLine.contract_id == contract_id, ContractLine.cost_line_id.is_not(None))
-        .distinct()
-        .limit(2)
-    )
-    found = [r[0] for r in rows.all()]
-    return Vector(main=str(found[0])) if len(found) == 1 else NO_VECTOR
-
-
 # ── Bid lines ────────────────────────────────────────────────────────────────
 
 
@@ -143,10 +130,11 @@ async def inherit_bid_lines(session: AsyncSession, project_id: uuid.UUID, lines:
     if not todo:
         return 0
     vectors = await position_vectors(session, [ln.boq_position_id for ln in todo])
+    mine = (await _lines_by_project(session, [project_id], vectors.values())).get(project_id, set())
     done = 0
     for ln in todo:
         vector = vectors.get(str(ln.boq_position_id), NO_VECTOR)
-        if vector.empty:
+        if vector.empty or not vector.lines <= mine:
             continue
         ln.cost_line_id = await write_split(
             session, project_id=project_id, source_type=SOURCE_BID_LINE, source_id=ln.id, vector=vector
@@ -191,7 +179,9 @@ async def contract_line_candidates(
             (FROM_POSITION, pos_vectors.get(str(pos)) if pos else None),
             (FROM_CONTRACT, default),
         ]
-    return out
+    allowed = await _lines_by_project(session, [contract.project_id], (v for c in out.values() for _, v in c))
+    mine = allowed.get(contract.project_id, set())
+    return {key: _within(cands, mine) for key, cands in out.items()}
 
 
 async def inherit_contract_lines(session: AsyncSession, contract: Any, lines: list[Any] | None = None) -> int:
@@ -282,66 +272,130 @@ async def split_po_items_like_positions(
 # ── Change order items ───────────────────────────────────────────────────────
 
 
-async def _order_contract(session: AsyncSession, order: Any) -> Any | None:
-    from app.modules.contracts.models import Contract
+async def change_items_inherit(session: AsyncSession, pairs: Sequence[tuple[Any, dict[str, Any]]]) -> list[Inherited]:
+    """What each change order item inherits, for many items in a fixed number of queries.
 
-    contract_id = _uuid(_meta(order).get("contract_id"))
-    if contract_id is None:
-        return None
-    contract = await session.get(Contract, contract_id)
-    if contract is None or contract.project_id != order.project_id:
-        return None
-    return contract
-
-
-async def change_item_inherits(session: AsyncSession, order: Any, item_metadata: dict[str, Any]) -> Inherited:
-    """What a change order item inherits, from the references in its metadata.
-
-    The schedule line named by ``contract_line_id`` counts only when it is on
-    the change order's own contract (or, for a change order on no contract, on
-    a contract of the same project); a bill position only when it is in the
-    same project.
+    ``pairs`` are ``(change order, item metadata)``. Precedence per item: the
+    schedule line named by ``contract_line_id``, counted only when it is on the
+    change order's own contract (or, for a change order on no contract, on a
+    contract of the same project); else the bill position named by
+    ``boq_position_id``, only when it is in the same project, and only its
+    main line (a change item carries one account); else the contract's own
+    account, else the one cost line every costed line of the contract is on.
+    A cost line outside the change order's project is never inherited.
     """
     from app.modules.boq.models import BOQ, Position
     from app.modules.contracts.models import Contract, ContractLine
 
-    contract = await _order_contract(session, order)
-    candidates: list[tuple[str, Vector | None]] = []
+    if not pairs:
+        return []
+    contract_ids = {cid for order, _ in pairs if (cid := _uuid(_meta(order).get("contract_id")))}
+    line_ids = {lid for _, meta in pairs if (lid := _uuid((meta or {}).get("contract_line_id")))}
+    pos_ids = {pid for _, meta in pairs if (pid := _uuid((meta or {}).get("boq_position_id")))}
 
-    line_id = _uuid(item_metadata.get("contract_line_id"))
-    line_vector: Vector | None = None
-    if line_id is not None:
-        row = (
-            await session.execute(
-                select(ContractLine.id, ContractLine.cost_line_id, ContractLine.contract_id, Contract.project_id)
-                .join(Contract, Contract.id == ContractLine.contract_id)
-                .where(ContractLine.id == line_id)
-            )
-        ).first()
-        if row is not None and row[3] == order.project_id and (contract is None or row[2] == contract.id):
-            line_vector = Vector(main=str(row[1])) if row[1] else None
-    candidates.append((FROM_CONTRACT_LINE, line_vector))
+    contracts: dict[uuid.UUID, Any] = {}
+    if contract_ids:
+        contracts = {
+            c.id: c for c in (await session.execute(select(Contract).where(Contract.id.in_(contract_ids)))).scalars()
+        }
+    lines: dict[uuid.UUID, tuple[Any, uuid.UUID, uuid.UUID]] = {}
+    if line_ids:
+        rows = await session.execute(
+            select(ContractLine.id, ContractLine.cost_line_id, ContractLine.contract_id, Contract.project_id)
+            .join(Contract, Contract.id == ContractLine.contract_id)
+            .where(ContractLine.id.in_(line_ids))
+        )
+        lines = {r[0]: (r[1], r[2], r[3]) for r in rows.all()}
+    pos_project: dict[uuid.UUID, uuid.UUID] = {}
+    pos_main: dict[str, Vector] = {}
+    if pos_ids:
+        rows = await session.execute(
+            select(Position.id, BOQ.project_id).join(BOQ, BOQ.id == Position.boq_id).where(Position.id.in_(pos_ids))
+        )
+        pos_project = {r[0]: r[1] for r in rows.all()}
+        pos_main = await position_vectors(session, pos_project)
+    # The one costed line of each contract that has no account of its own.
+    sole: dict[uuid.UUID, Vector] = {}
+    bare = [cid for cid, c in contracts.items() if not getattr(c, "cost_line_id", None)]
+    if bare:
+        found: dict[uuid.UUID, set[uuid.UUID]] = {}
+        rows = await session.execute(
+            select(ContractLine.contract_id, ContractLine.cost_line_id)
+            .where(ContractLine.contract_id.in_(bare), ContractLine.cost_line_id.is_not(None))
+            .distinct()
+        )
+        for cid, lid in rows.all():
+            found.setdefault(cid, set()).add(lid)
+        sole = {cid: Vector(main=str(next(iter(ids)))) for cid, ids in found.items() if len(ids) == 1}
 
-    pos_id = _uuid(item_metadata.get("boq_position_id"))
-    pos_vector: Vector | None = None
-    if pos_id is not None:
-        project = (
-            await session.execute(
-                select(BOQ.project_id).join(Position, Position.boq_id == BOQ.id).where(Position.id == pos_id)
-            )
-        ).scalar_one_or_none()
-        if project == order.project_id:
-            vec = (await position_vectors(session, [pos_id])).get(str(pos_id))
-            # A change item carries one account: the position's main line.
+    per_item: list[list[tuple[str, Vector | None]]] = []
+    for order, meta in pairs:
+        meta = meta or {}
+        contract = contracts.get(_uuid(_meta(order).get("contract_id")))  # type: ignore[arg-type]
+        if contract is not None and contract.project_id != order.project_id:
+            contract = None
+        candidates: list[tuple[str, Vector | None]] = []
+
+        line_vector: Vector | None = None
+        found_line = lines.get(_uuid(meta.get("contract_line_id")))  # type: ignore[arg-type]
+        if found_line is not None:
+            cost_line, line_contract, line_project = found_line
+            if line_project == order.project_id and (contract is None or line_contract == contract.id) and cost_line:
+                line_vector = Vector(main=str(cost_line))
+        candidates.append((FROM_CONTRACT_LINE, line_vector))
+
+        pos_vector: Vector | None = None
+        pos_id = _uuid(meta.get("boq_position_id"))
+        if pos_id is not None and pos_project.get(pos_id) == order.project_id:
+            vec = pos_main.get(str(pos_id))
             pos_vector = Vector(main=vec.main) if vec is not None and vec.main else None
-    candidates.append((FROM_POSITION, pos_vector))
+        candidates.append((FROM_POSITION, pos_vector))
 
-    if contract is not None:
-        default = await _contract_default(session, contract)
-        if default.empty:
-            default = await _sole_line_vector(session, contract.id)
-        candidates.append((FROM_CONTRACT, default))
-    return first_inherited(candidates)
+        if contract is not None:
+            default = await _contract_default(session, contract)
+            candidates.append((FROM_CONTRACT, default if not default.empty else sole.get(contract.id, NO_VECTOR)))
+        per_item.append(candidates)
+
+    projects = {order.project_id for order, _ in pairs}
+    allowed = await _lines_by_project(session, projects, (v for cands in per_item for _, v in cands))
+    return [
+        first_inherited(_within(cands, allowed.get(order.project_id, set())))
+        for (order, _), cands in zip(pairs, per_item, strict=True)
+    ]
+
+
+async def change_item_inherits(session: AsyncSession, order: Any, item_metadata: dict[str, Any]) -> Inherited:
+    """What one change order item inherits (see :func:`change_items_inherit`)."""
+    return (await change_items_inherit(session, [(order, item_metadata)]))[0]
+
+
+async def _lines_by_project(
+    session: AsyncSession, project_ids: Iterable[uuid.UUID], vectors: Iterable[Vector | None]
+) -> dict[uuid.UUID, set[str]]:
+    """Which of the cost lines named by ``vectors`` belong to each of ``project_ids``. One query."""
+    from app.modules.costmodel.models import CostLine
+
+    wanted = {uuid.UUID(lid) for v in vectors if v is not None for lid in v.lines}
+    projects = set(project_ids)
+    if not wanted or not projects:
+        return {}
+    rows = await session.execute(
+        select(CostLine.project_id, CostLine.id).where(CostLine.id.in_(wanted), CostLine.project_id.in_(projects))
+    )
+    out: dict[uuid.UUID, set[str]] = {}
+    for project_id, line_id in rows.all():
+        out.setdefault(project_id, set()).add(str(line_id))
+    return out
+
+
+def _within(candidates: list[tuple[str, Vector | None]], allowed: set[str]) -> list[tuple[str, Vector | None]]:
+    """The candidates with every vector that names a cost line outside ``allowed`` dropped.
+
+    A reference copied from another project (a scope line, a position, an
+    account) would put the row on a line no report of its own project sums,
+    so its money would leave "not on any cost line" without arriving anywhere.
+    """
+    return [(source, v if v is not None and v.lines <= allowed else None) for source, v in candidates]
 
 
 async def apply_change_item_inheritance(session: AsyncSession, order: Any, item: Any) -> None:
