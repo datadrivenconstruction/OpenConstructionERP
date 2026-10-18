@@ -49,6 +49,18 @@ def _walk(migration, connection, monkeypatch) -> None:
     assert "uq_payment_release_invoice_invoice" in uniques
     indexes = {i["name"] for i in inspect(connection).get_indexes("oe_payment_release_posting")}
     assert "ix_oe_payment_release_posting_contract_id" in indexes
+    _matches_the_models(connection)
+
+
+def _matches_the_models(connection) -> None:
+    """Every model column exists in the migrated table with the same nullability, and nothing more."""
+    from app.modules.payment_release import models
+
+    for table in (models.PaymentTerms.__table__, models.InvoiceRelease.__table__, models.RetentionPosting.__table__):
+        migrated = {c["name"]: c for c in inspect(connection).get_columns(table.name)}
+        assert set(migrated) == {c.name for c in table.columns}, table.name
+        for column in table.columns:
+            assert migrated[column.name]["nullable"] == column.nullable, (table.name, column.name)
 
 
 def test_the_revision_chains_after_the_cost_inheritance() -> None:
