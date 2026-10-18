@@ -1088,7 +1088,7 @@
       "suggestion": "Değişikliğin ne zaman onaylandığını kaydedin."
     },
     "billed_before_approval": {
-      "fail": "{contract} sözleşmesine {code} değişikliği için {amount} faturalanmış; bu değişiklik {status} durumunda ve onaylı değil.",
+      "fail": "{contract} sözleşmesine {code} değişikliği için {amount} faturalanmış; bu değişiklik henüz onaylanmamış.",
       "suggestion": "Önce değişikliği onaylayın veya faturalamayı hakedişten çıkarın."
     },
     "contract_over_target": {

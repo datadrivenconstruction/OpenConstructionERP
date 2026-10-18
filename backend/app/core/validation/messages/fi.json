@@ -1088,7 +1088,7 @@
       "suggestion": "Kirjaa, milloin muutostyö hyväksyttiin."
     },
     "billed_before_approval": {
-      "fail": "Sopimukselle {contract} on laskutettu {amount} muutostyöstä {code}, jonka tila on {status} eikä sitä ole hyväksytty.",
+      "fail": "Sopimukselle {contract} on laskutettu {amount} muutostyöstä {code}, jota ei ole vielä hyväksytty.",
       "suggestion": "Hyväksy muutostyö ensin tai poista laskutus maksuerästä."
     },
     "contract_over_target": {

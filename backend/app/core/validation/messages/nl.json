@@ -1088,7 +1088,7 @@
       "suggestion": "Leg vast wanneer het meerwerk is goedgekeurd."
     },
     "billed_before_approval": {
-      "fail": "Er is {amount} gefactureerd op contract {contract} voor meerwerk {code}, dat de status {status} heeft en niet is goedgekeurd.",
+      "fail": "Er is {amount} gefactureerd op contract {contract} voor meerwerk {code}, dat nog niet is goedgekeurd.",
       "suggestion": "Keur het meerwerk eerst goed, of haal de facturering van het termijnstaat af."
     },
     "contract_over_target": {

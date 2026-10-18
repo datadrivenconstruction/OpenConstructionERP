@@ -1088,7 +1088,7 @@
       "suggestion": "请记录该变更的批准时间。"
     },
     "billed_before_approval": {
-      "fail": "合同{contract}已为变更{code}开票{amount},但该变更状态为{status},尚未批准。",
+      "fail": "合同{contract}已为变更{code}开票{amount},但该变更尚未批准。",
       "suggestion": "请先批准该变更,或把这笔开票从付款申请中撤下。"
     },
     "contract_over_target": {

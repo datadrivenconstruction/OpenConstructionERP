@@ -1088,7 +1088,7 @@
       "suggestion": "변경이 언제 승인되었는지 기록하세요."
     },
     "billed_before_approval": {
-      "fail": "계약 {contract}에 변경 {code}로 {amount}이 청구되었는데, 이 변경은 {status} 상태이며 승인되지 않았습니다.",
+      "fail": "계약 {contract}에 변경 {code}로 {amount}이 청구되었는데, 이 변경은 아직 승인되지 않았습니다.",
       "suggestion": "먼저 변경을 승인하거나, 기성 청구에서 해당 청구를 빼세요."
     },
     "contract_over_target": {

@@ -1088,7 +1088,7 @@
       "suggestion": "Registrera när ÄTA godkändes."
     },
     "billed_before_approval": {
-      "fail": "{amount} faktureras på kontrakt {contract} för ÄTA {code}, som har status {status} och inte är godkänd.",
+      "fail": "{amount} faktureras på kontrakt {contract} för ÄTA {code}, som ännu inte är godkänd.",
       "suggestion": "Godkänn ÄTA först, eller ta bort faktureringen från fakturaunderlaget."
     },
     "contract_over_target": {

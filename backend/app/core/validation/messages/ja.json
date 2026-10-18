@@ -1088,7 +1088,7 @@
       "suggestion": "変更がいつ承認されたかを記録してください。"
     },
     "billed_before_approval": {
-      "fail": "契約{contract}に変更{code}の{amount}が請求されていますが、この変更は{status}で、承認されていません。",
+      "fail": "契約{contract}に変更{code}の{amount}が請求されていますが、この変更はまだ承認されていません。",
       "suggestion": "先に変更を承認するか、出来高請求から請求を外してください。"
     },
     "contract_over_target": {

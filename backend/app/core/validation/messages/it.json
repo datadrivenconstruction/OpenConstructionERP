@@ -1088,7 +1088,7 @@
       "suggestion": "Registri quando la variante è stata approvata."
     },
     "billed_before_approval": {
-      "fail": "Sono fatturati {amount} sul contratto {contract} per la variante {code}, che è in stato {status} e non approvata.",
+      "fail": "Sono fatturati {amount} sul contratto {contract} per la variante {code}, che non è ancora approvata.",
       "suggestion": "Approvi prima la variante, oppure tolga la fatturazione dallo stato avanzamento."
     },
     "contract_over_target": {

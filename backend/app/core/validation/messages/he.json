@@ -1088,7 +1088,7 @@
       "suggestion": "רשמו מתי השינוי אושר."
     },
     "billed_before_approval": {
-      "fail": "בחוזה {contract} חויבו {amount} עבור שינוי {code}, שסטטוסו {status} והוא לא אושר.",
+      "fail": "בחוזה {contract} חויבו {amount} עבור שינוי {code}, שטרם אושר.",
       "suggestion": "אשרו קודם את השינוי או הסירו את החיוב מחשבון החלקי."
     },
     "contract_over_target": {

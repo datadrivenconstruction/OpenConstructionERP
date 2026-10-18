@@ -1088,7 +1088,7 @@
       "suggestion": "Înregistrați când a fost aprobat actul adițional."
     },
     "billed_before_approval": {
-      "fail": "S-au facturat {amount} pe contractul {contract} pentru actul adițional {code}, care are starea {status} și nu este aprobat.",
+      "fail": "S-au facturat {amount} pe contractul {contract} pentru actul adițional {code}, care nu este încă aprobat.",
       "suggestion": "Aprobați mai întâi actul adițional sau scoateți facturarea din situația de lucrări."
     },
     "contract_over_target": {

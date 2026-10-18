@@ -1088,7 +1088,7 @@
       "suggestion": "Erfassen Sie, wann der Nachtrag freigegeben wurde."
     },
     "billed_before_approval": {
-      "fail": "Im Vertrag {contract} sind {amount} für den Nachtrag {code} abgerechnet, der den Status {status} hat und nicht freigegeben ist.",
+      "fail": "Im Vertrag {contract} sind {amount} für den Nachtrag {code} abgerechnet, der noch nicht freigegeben ist.",
       "suggestion": "Geben Sie den Nachtrag zuerst frei oder nehmen Sie die Abrechnung aus der Forderung zurück."
     },
     "contract_over_target": {

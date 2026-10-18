@@ -1088,7 +1088,7 @@
       "suggestion": "Sisestage, millal muudatus kinnitati."
     },
     "billed_before_approval": {
-      "fail": "Lepingule {contract} on muudatuse {code} eest arvestatud {amount}, kuid muudatuse staatus on {status} ja see pole kinnitatud.",
+      "fail": "Lepingule {contract} on muudatuse {code} eest arvestatud {amount}, kuid muudatus pole veel kinnitatud.",
       "suggestion": "Kinnitage muudatus enne või võtke arvestus maksenõudest maha."
     },
     "contract_over_target": {

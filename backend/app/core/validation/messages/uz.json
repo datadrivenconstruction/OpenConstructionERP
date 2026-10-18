@@ -1088,7 +1088,7 @@
       "suggestion": "O'zgartirish qachon tasdiqlanganini yozib qo'ying."
     },
     "billed_before_approval": {
-      "fail": "{contract} shartnomasi bo'yicha {code} o'zgartirishi uchun {amount} hisoblangan, lekin u {status} holatida va tasdiqlanmagan.",
+      "fail": "{contract} shartnomasi bo'yicha {code} o'zgartirishi uchun {amount} hisoblangan, lekin u hali tasdiqlanmagan.",
       "suggestion": "Avval o'zgartirishni tasdiqlang yoki hisoblashni dalolatnomadan olib tashlang."
     },
     "contract_over_target": {

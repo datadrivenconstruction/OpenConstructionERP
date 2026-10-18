@@ -1088,7 +1088,7 @@
       "suggestion": "Registrer når endringen ble godkjent."
     },
     "billed_before_approval": {
-      "fail": "Det er fakturert {amount} på kontrakt {contract} for endring {code}, som har status {status} og ikke er godkjent.",
+      "fail": "Det er fakturert {amount} på kontrakt {contract} for endring {code}, som ikke er godkjent ennå.",
       "suggestion": "Godkjenn endringen først, eller ta faktureringen ut av kravet."
     },
     "contract_over_target": {

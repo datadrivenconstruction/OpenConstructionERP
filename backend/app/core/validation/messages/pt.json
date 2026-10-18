@@ -1088,7 +1088,7 @@
       "suggestion": "Registe quando o aditivo foi aprovado."
     },
     "billed_before_approval": {
-      "fail": "Foram faturados {amount} no contrato {contract} pelo aditivo {code}, que está em estado {status} e não aprovado.",
+      "fail": "Foram faturados {amount} no contrato {contract} pelo aditivo {code}, que ainda não foi aprovado.",
       "suggestion": "Aprove primeiro o aditivo ou retire a faturação da medição."
     },
     "contract_over_target": {

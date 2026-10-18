@@ -1088,7 +1088,7 @@
       "suggestion": "Zapište, kdy byly vícepráce schváleny."
     },
     "billed_before_approval": {
-      "fail": "Na smlouvu {contract} je za vícepráce {code} vyfakturováno {amount}, ale ty mají stav {status} a nejsou schváleny.",
+      "fail": "Na smlouvu {contract} je za vícepráce {code} vyfakturováno {amount}, ale ty ještě nejsou schváleny.",
       "suggestion": "Nejprve vícepráce schvalte, nebo fakturaci z výzvy k platbě odeberte."
     },
     "contract_over_target": {

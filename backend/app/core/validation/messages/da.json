@@ -1088,7 +1088,7 @@
       "suggestion": "Registrer, hvornår tillægget blev godkendt."
     },
     "billed_before_approval": {
-      "fail": "Der er faktureret {amount} på kontrakt {contract} for tillæg {code}, som har status {status} og ikke er godkendt.",
+      "fail": "Der er faktureret {amount} på kontrakt {contract} for tillæg {code}, som endnu ikke er godkendt.",
       "suggestion": "Godkend tillægget først, eller tag faktureringen af betalingsanmodningen."
     },
     "contract_over_target": {

@@ -1088,7 +1088,7 @@
       "suggestion": "Upišite kada je izmjena odobrena."
     },
     "billed_before_approval": {
-      "fail": "Na ugovor {contract} fakturirano je {amount} za izmjenu {code}, koja je u statusu {status} i nije odobrena.",
+      "fail": "Na ugovor {contract} fakturirano je {amount} za izmjenu {code}, koja još nije odobrena.",
       "suggestion": "Prvo odobrite izmjenu ili uklonite fakturiranje iz situacije."
     },
     "contract_over_target": {

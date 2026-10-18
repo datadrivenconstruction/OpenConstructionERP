@@ -1088,7 +1088,7 @@
       "suggestion": "Hãy ghi lại thời điểm phát sinh được duyệt."
     },
     "billed_before_approval": {
-      "fail": "Đã xuất hóa đơn {amount} trên hợp đồng {contract} cho phát sinh {code}, nhưng phát sinh này đang ở trạng thái {status} và chưa được duyệt.",
+      "fail": "Đã xuất hóa đơn {amount} trên hợp đồng {contract} cho phát sinh {code}, nhưng phát sinh này chưa được duyệt.",
       "suggestion": "Hãy duyệt phát sinh trước, hoặc gỡ khoản thanh toán này khỏi hồ sơ thanh toán."
     },
     "contract_over_target": {

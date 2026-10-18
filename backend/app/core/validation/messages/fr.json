@@ -1088,7 +1088,7 @@
       "suggestion": "Saisissez la date d'approbation de l'avenant."
     },
     "billed_before_approval": {
-      "fail": "{amount} sont facturés sur le contrat {contract} pour l'avenant {code}, qui est au statut {status} et non approuvé.",
+      "fail": "{amount} sont facturés sur le contrat {contract} pour l'avenant {code}, qui n'est pas encore approuvé.",
       "suggestion": "Approuvez d'abord l'avenant, ou retirez la facturation de la situation de travaux."
     },
     "contract_over_target": {

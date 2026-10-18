@@ -1088,7 +1088,7 @@
       "suggestion": "Rögzítse, mikor hagyták jóvá a pótmunkát."
     },
     "billed_before_approval": {
-      "fail": "A(z) {contract} szerződésen {amount} van számlázva a(z) {code} pótmunkára, amely {status} állapotú, nem jóváhagyott.",
+      "fail": "A(z) {contract} szerződésen {amount} van számlázva a(z) {code} pótmunkára, amely még nincs jóváhagyva.",
       "suggestion": "Először hagyja jóvá a pótmunkát, vagy vegye le a számlázást a kifizetési kérelemről."
     },
     "contract_over_target": {

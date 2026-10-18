@@ -1088,7 +1088,7 @@
       "suggestion": "Registre cuándo se aprobó el modificado."
     },
     "billed_before_approval": {
-      "fail": "Se facturan {amount} en el contrato {contract} por el modificado {code}, que está en estado {status} y no aprobado.",
+      "fail": "Se facturan {amount} en el contrato {contract} por el modificado {code}, que aún no está aprobado.",
       "suggestion": "Apruebe primero el modificado o retire la facturación de la certificación."
     },
     "contract_over_target": {

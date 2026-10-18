@@ -1088,7 +1088,7 @@
       "suggestion": "سجّل متى تم اعتماد أمر التغيير."
     },
     "billed_before_approval": {
-      "fail": "تمت فوترة {amount} على العقد {contract} لأمر التغيير {code}، وحالته {status} وغير معتمد.",
+      "fail": "تمت فوترة {amount} على العقد {contract} لأمر التغيير {code}، وهو غير معتمد بعد.",
       "suggestion": "اعتمد أمر التغيير أولاً، أو أزل الفوترة من المطالبة."
     },
     "contract_over_target": {

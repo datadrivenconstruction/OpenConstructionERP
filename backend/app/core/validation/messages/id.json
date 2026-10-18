@@ -1088,7 +1088,7 @@
       "suggestion": "Catat kapan perubahan itu disetujui."
     },
     "billed_before_approval": {
-      "fail": "{amount} ditagihkan pada kontrak {contract} untuk perubahan {code}, yang berstatus {status} dan belum disetujui.",
+      "fail": "{amount} ditagihkan pada kontrak {contract} untuk perubahan {code}, yang belum disetujui.",
       "suggestion": "Setujui perubahan lebih dulu, atau tarik penagihan dari tagihan termin."
     },
     "contract_over_target": {

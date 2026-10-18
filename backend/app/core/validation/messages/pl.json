@@ -1088,7 +1088,7 @@
       "suggestion": "Wpisz, kiedy zmianę zatwierdzono."
     },
     "billed_before_approval": {
-      "fail": "Na umowę {contract} zafakturowano {amount} za zmianę {code}, która ma status {status} i nie jest zatwierdzona.",
+      "fail": "Na umowę {contract} zafakturowano {amount} za zmianę {code}, która nie została jeszcze zatwierdzona.",
       "suggestion": "Najpierw zatwierdź zmianę albo zdejmij fakturowanie z wniosku o płatność."
     },
     "contract_over_target": {

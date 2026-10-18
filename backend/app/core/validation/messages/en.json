@@ -1088,7 +1088,7 @@
       "suggestion": "Record when the change was approved."
     },
     "billed_before_approval": {
-      "fail": "{amount} is billed on contract {contract} for change {code}, which is {status}, not approved.",
+      "fail": "{amount} is billed on contract {contract} for change {code}, which is not approved yet.",
       "suggestion": "Approve the change first, or take the billing back off the claim."
     },
     "contract_over_target": {

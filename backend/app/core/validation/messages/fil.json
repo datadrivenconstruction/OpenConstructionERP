@@ -1088,7 +1088,7 @@
       "suggestion": "I-record kung kailan inaprubahan ang change."
     },
     "billed_before_approval": {
-      "fail": "May siningil na {amount} sa kontrata {contract} para sa change {code}, na may status na {status} at hindi pa aprubado.",
+      "fail": "May siningil na {amount} sa kontrata {contract} para sa change {code}, na hindi pa aprubado.",
       "suggestion": "Aprubahan muna ang change, o alisin ang singil sa claim."
     },
     "contract_over_target": {
