@@ -473,7 +473,14 @@ def check_single_alembic_head(venv: Path, res: Result) -> None:
         "print(json.dumps({'ini': str(ini), 'exists': ini.is_file(), "
         "'heads': list(ScriptDirectory.from_config(Config(str(ini))).get_heads()) if ini.is_file() else []}))\n"
     )
-    proc = subprocess.run([str(py), "-c", code], capture_output=True, text=True, timeout=300, check=False)  # noqa: S603
+    # Some revisions import app.database at module level, and that refuses to
+    # load without a PostgreSQL URL. Reading the tree never connects, so an
+    # unreachable placeholder is enough; a URL the job already set is kept.
+    env = dict(os.environ)
+    env.setdefault("DATABASE_URL", "postgresql+asyncpg://gate:gate@127.0.0.1:1/gate")
+    proc = subprocess.run(  # noqa: S603
+        [str(py), "-c", code], capture_output=True, text=True, timeout=300, check=False, env=env
+    )
     try:
         info = json.loads(proc.stdout.strip().splitlines()[-1])
     except (IndexError, json.JSONDecodeError):
@@ -495,8 +502,16 @@ def check_boot(server: Server, args: argparse.Namespace, res: Result, *, fresh: 
     print("health: " + json.dumps(health, sort_keys=True), flush=True)
     for problem in health_problems(health, args.expect_version, fresh=fresh):
         res.fail(f"health: {problem}")
-    if not fresh:
-        print(f"note: alembic_head_matches after upgrade = {health.get('alembic_head_matches')!r}", flush=True)
+    if not fresh and health.get("alembic_head_matches") is not True:
+        # Known product behaviour, not a gate failure: the boot stamps the
+        # migration head only on an empty database, so an upgraded install keeps
+        # the previous release's revision while the boot heal brings the schema
+        # itself up to date (schema_matches_models above is what is asserted).
+        print(
+            f"::warning::alembic_head_matches after the upgrade is {health.get('alembic_head_matches')!r}: "
+            "the boot does not advance an existing migration stamp, the schema check is what this lane asserts",
+            flush=True,
+        )
     return health
 
 
