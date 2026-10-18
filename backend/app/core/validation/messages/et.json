@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Seotud raha ei ole määratud ühelegi kulureale.",
+      "suggestion": "Seo lepingu- või tellimusread kulureadega, et raha kuvataks õiges kohas."
+    },
+    "certified_over_committed": {
+      "fail": "Kinnitatud töö ületab hankelepingu summat koos kinnitatud muudatustega.",
+      "suggestion": "Kinnita lisatööd katvad muudatus või kontrolli arvet."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognoos on planeeritud summast kõrgem.",
+      "suggestion": "Kontrolli prognoosi allikat; kui ootad kokkuhoidu, sisesta põhjendusega käsitsi prognoos."
+    },
+    "partly_awarded": {
+      "fail": "Planeeritud summast on hankega kaetud vaid osa; prognoosist võib puududa veel hankimata töö.",
+      "suggestion": "Kui sellel real on veel hankimata tööd, sisesta käsitsi prognoos."
+    },
+    "pending_changes": {
+      "fail": "Muudatustellimused ootavad otsust.",
+      "suggestion": "Tee otsus ootel muudatustellimuste kohta; prognoos ei sisalda neid veel."
+    },
+    "snapshot_stale": {
+      "fail": "Üle kuu pole ühtegi prognoosi salvestatud.",
+      "suggestion": "Salvesta prognoosi hetktõmmis, et kuluajalugu püsiks loetav."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Konto kood {code} esineb kulustruktuuris mitu korda.",
+      "suggestion": "Jäta koodi kohta üks konto ja liiguta selle kuluread sellele."
+    },
+    "mixed_standard": {
+      "fail": "Kulustruktuur segab koodistikke: {standards}.",
+      "suggestion": "Ehita struktuur ühest koodistikust; vasta teised koodid sellele."
+    },
+    "account_parent_cycle": {
+      "fail": "Konto {code} on oma esivanem {count} konto kaudu.",
+      "suggestion": "Anna ühele neist kontodest ülemkonto väljaspool tsüklit."
+    },
+    "account_too_deep": {
+      "fail": "Konto {code} asub tasemel {level}, sügavamal kui koodistiku {max} taset.",
+      "suggestion": "Lisa konto ülemkonto alla koodistiku sügavuse piires."
+    },
+    "no_account": {
+      "fail": "{count} kulurida väärtusega {amount} ei ole ühelgi kontol (esimene: {code}).",
+      "suggestion": "Anna neile positsioonidele struktuuri koodistiku kood või määra kuluread kontole."
+    },
+    "invalid_account": {
+      "fail": "{count} kulurida väärtusega {amount} on suletud kontol või kontol, mis ei võta kandeid vastu (esimene: {code}).",
+      "suggestion": "Liiguta kuluread avatud kontole, mis võtab kandeid vastu."
+    },
+    "own_amount_on_parent": {
+      "fail": "Kontol {code} on alamkontod ja lisaks oma summa {amount}.",
+      "suggestion": "Liiguta oma summa alamkontole või jäta see teadliku reservina."
+    },
+    "rollup_mismatch": {
+      "fail": "Struktuuri summa {reported} erineb osade summast {expected} võrra {difference}.",
+      "suggestion": "Laadi struktuur uuesti; kui vahe jääb, kontrolli kontosid, millel puudub ülemkonto."
+    },
+    "allocation_incomplete": {
+      "fail": "Positsiooni {ordinal} osad annavad kokku {total}{unit}, mitte {expected}{unit}.",
+      "suggestion": "Korrigeeri osad nii, et kogu positsioon on jaotatud, ei rohkem ega vähem."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Positsioon {ordinal} on jaotatud osaliselt protsendi ja osaliselt koguse järgi.",
+      "suggestion": "Jaota positsioon ainult ühel viisil."
+    },
+    "vector_not_inherited": {
+      "fail": "Lepingurida {code} on kulureal, millele selle ehitusmahtude positsiooni pole määratud.",
+      "suggestion": "Pane rida tagasi positsiooni kulureale või salvesta erand koos põhjendusega."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Ettenägematute kulude rida „{markup}” arvutatakse aluselt, mis sisaldab juba kasumirida „{profit}”, nii et riskideks eraldatud rahale lisatakse kasumimarginaal",

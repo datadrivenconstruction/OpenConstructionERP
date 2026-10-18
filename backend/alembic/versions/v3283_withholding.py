@@ -104,7 +104,10 @@ _PERFORMANCE_INDEXES: tuple[tuple[str, str, list[str]], ...] = (
     ("ix_oe_tax_withholding_deduction_party_status_id", _DEDUCTION, ["party_status_id"]),
     ("ix_oe_tax_withholding_deduction_project_id_created_at", _DEDUCTION, ["project_id", "created_at"]),
     ("ix_oe_tax_withholding_deduction_project_id_status", _DEDUCTION, ["project_id", "status"]),
-    ("ix_oe_tax_withholding_reverse_charge_project_id", _REVERSE_CHARGE, ["project_id"]),
+    # No single-column project_id index on the reverse charge table: the
+    # unique constraint on (project_id, invoice_reference) already leads with
+    # it, and a fresh install no longer adds the duplicate. Installs that ran
+    # this revision earlier keep theirs, which is harmless.
     (
         "ix_oe_tax_withholding_reverse_charge_project_id_created_at",
         _REVERSE_CHARGE,

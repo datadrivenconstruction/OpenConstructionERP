@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Sitoutuneet varat eivät kuulu mihinkään kustannusriviin.",
+      "suggestion": "Liitä sopimus- tai tilausrivit kustannusriveihin, jotta rahat näkyvät oikeassa paikassa."
+    },
+    "certified_over_committed": {
+      "fail": "Hyväksytty työ ylittää urakkahinnan ja hyväksytyt muutokset yhteensä.",
+      "suggestion": "Hyväksy lisätyön kattava muutos tai tarkista laskutus."
+    },
+    "forecast_over_plan": {
+      "fail": "Ennuste on suunniteltua summaa suurempi.",
+      "suggestion": "Tarkista ennusteen lähde; kirjaa manuaalinen ennuste perusteluineen, jos odotat säästöjä."
+    },
+    "partly_awarded": {
+      "fail": "Vain osa suunnitellusta summasta on kilpailutettu; ennusteesta voi puuttua vielä kilpailutettavaa työtä.",
+      "suggestion": "Jos tällä rivillä on vielä kilpailutettavaa työtä, syötä manuaalinen ennuste."
+    },
+    "pending_changes": {
+      "fail": "Muutostöitä odottaa päätöstä.",
+      "suggestion": "Päätä odottavista muutostöistä; ennuste ei sisällä niitä vielä."
+    },
+    "snapshot_stale": {
+      "fail": "Ennustetta ei ole tallennettu yli kuukauteen.",
+      "suggestion": "Tallenna ennusteen tilannekuva, jotta kustannushistoria pysyy luettavana."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Tilikoodi {code} esiintyy kustannusrakenteessa useammin kuin kerran.",
+      "suggestion": "Säilytä yksi tili koodia kohti ja siirrä sen kustannusrivit sille."
+    },
+    "mixed_standard": {
+      "fail": "Kustannusrakenne sekoittaa koodistoja: {standards}.",
+      "suggestion": "Rakenna rakenne yhdestä koodistosta; yhdistä muut koodit siihen."
+    },
+    "account_parent_cycle": {
+      "fail": "Tili {code} on oma esivanhempansa {count} tilin kautta.",
+      "suggestion": "Anna jollekin näistä tileistä ylätili silmukan ulkopuolelta."
+    },
+    "account_too_deep": {
+      "fail": "Tili {code} on tasolla {level}, syvemmällä kuin koodiston {max} tasoa.",
+      "suggestion": "Liitä tili ylätiliin koodiston syvyyden rajoissa."
+    },
+    "no_account": {
+      "fail": "{count} kustannusriviä arvoltaan {amount} ei kuulu millekään tilille (ensimmäinen: {code}).",
+      "suggestion": "Anna näille nimikkeille rakenteen koodiston koodi tai kohdista kustannusrivit tilille."
+    },
+    "invalid_account": {
+      "fail": "{count} kustannusriviä arvoltaan {amount} on suljetulla tilillä tai tilillä, johon ei voi kirjata (ensimmäinen: {code}).",
+      "suggestion": "Siirrä kustannusrivit avoimelle tilille, johon voi kirjata."
+    },
+    "own_amount_on_parent": {
+      "fail": "Tilillä {code} on alatilejä ja lisäksi oma summa {amount}.",
+      "suggestion": "Siirrä oma summa alatilille tai säilytä se tietoisena varauksena."
+    },
+    "rollup_mismatch": {
+      "fail": "Rakenteen summa {reported} poikkeaa osien summasta {expected} määrällä {difference}.",
+      "suggestion": "Lataa rakenne uudelleen; jos ero säilyy, tarkista tilit, joilta puuttuu ylätili."
+    },
+    "allocation_incomplete": {
+      "fail": "Nimikkeen {ordinal} osuudet summautuvat arvoon {total}{unit} eikä arvoon {expected}{unit}.",
+      "suggestion": "Säädä osuudet niin, että koko nimike on jaettu, ei enempää eikä vähempää."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Nimike {ordinal} on jaettu osin prosentteina ja osin määrän mukaan.",
+      "suggestion": "Jaa nimike vain yhdellä tavalla."
+    },
+    "vector_not_inherited": {
+      "fail": "Sopimusrivi {code} on kustannusrivillä, johon sen määräluettelon nimikettä ei ole kohdistettu.",
+      "suggestion": "Palauta rivi nimikkeen kustannusriveille tai kirjaa poikkeama perusteluineen."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Riskivaraus ”{markup}” lasketaan pohjasta, joka sisältää jo voittorivin ”{profit}”, joten riskeihin varatulle rahalle lisätään kate",

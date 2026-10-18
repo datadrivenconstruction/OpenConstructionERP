@@ -14,6 +14,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { Button, Skeleton } from '@/shared/ui';
 import { SideDrawer } from '@/shared/ui/SideDrawer';
 import { SearchableSelect, type SearchableSelectOption } from '@/shared/ui/SearchableSelect';
+import { sumMoneyStrings } from '@/shared/lib/exactDecimal';
 import { fmtCurrency } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -149,7 +150,7 @@ export function AssignDrawer({ open, projectId, currency, canEdit, onClose, onOp
                   <div className="truncate text-sm font-semibold text-content-primary">{group.label}</div>
                   <div className="text-xs text-content-tertiary tabular-nums">
                     {fmtCurrency(
-                      group.items.reduce((acc, i) => acc + Number(i.amount || 0), 0),
+                      sumMoneyStrings(group.items.map((i) => i.amount)),
                       currency,
                     )}
                   </div>

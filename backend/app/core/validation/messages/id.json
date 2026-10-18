@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Dana yang sudah dikomitmenkan belum dialokasikan ke baris biaya mana pun.",
+      "suggestion": "Hubungkan baris kontrak atau pesanan ke baris biaya agar dana tampil di tempat yang benar."
+    },
+    "certified_over_committed": {
+      "fail": "Pekerjaan yang disertifikasi melebihi nilai penunjukan ditambah perubahan yang disetujui.",
+      "suggestion": "Setujui perubahan yang mencakup pekerjaan tambahan, atau periksa klaimnya."
+    },
+    "forecast_over_plan": {
+      "fail": "Prakiraan berada di atas jumlah yang direncanakan.",
+      "suggestion": "Periksa sumber prakiraan; catat prakiraan manual beserta alasannya jika Anda memperkirakan ada penghematan."
+    },
+    "partly_awarded": {
+      "fail": "Hanya sebagian dari jumlah rencana yang ditunjuk; prakiraan mungkin belum memuat pekerjaan yang masih akan ditenderkan.",
+      "suggestion": "Jika pada baris ini masih ada pekerjaan yang akan ditenderkan, masukkan prakiraan manual."
+    },
+    "pending_changes": {
+      "fail": "Perintah perubahan menunggu keputusan.",
+      "suggestion": "Putuskan perintah perubahan yang tertunda; prakiraan belum memasukkannya."
+    },
+    "snapshot_stale": {
+      "fail": "Sudah lebih dari sebulan tidak ada prakiraan yang disimpan.",
+      "suggestion": "Simpan snapshot prakiraan agar riwayat biaya tetap terbaca."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Kode akun {code} muncul lebih dari sekali dalam struktur biaya.",
+      "suggestion": "Pertahankan satu akun per kode dan pindahkan baris biayanya ke akun tersebut."
+    },
+    "mixed_standard": {
+      "fail": "Struktur biaya mencampur daftar kode: {standards}.",
+      "suggestion": "Susun struktur dari satu daftar kode; petakan kode lainnya ke daftar tersebut."
+    },
+    "account_parent_cycle": {
+      "fail": "Akun {code} menjadi leluhur bagi dirinya sendiri melalui {count} akun.",
+      "suggestion": "Beri salah satu akun ini induk di luar siklus."
+    },
+    "account_too_deep": {
+      "fail": "Akun {code} berada di tingkat {level}, lebih dalam daripada {max} tingkat pada daftar kodenya.",
+      "suggestion": "Pasang akun ke induk dalam batas kedalaman daftar kode."
+    },
+    "no_account": {
+      "fail": "{count} baris biaya senilai {amount} tidak berada di akun mana pun (pertama: {code}).",
+      "suggestion": "Beri item-item ini kode dari daftar kode struktur, atau tetapkan baris biaya ke sebuah akun."
+    },
+    "invalid_account": {
+      "fail": "{count} baris biaya senilai {amount} berada di akun yang sudah ditutup atau yang tidak menerima posting (pertama: {code}).",
+      "suggestion": "Pindahkan baris biaya ke akun terbuka yang menerima posting."
+    },
+    "own_amount_on_parent": {
+      "fail": "Akun {code} memiliki sub-akun dan juga jumlahnya sendiri sebesar {amount}.",
+      "suggestion": "Pindahkan jumlah sendiri ke sub-akun, atau pertahankan sebagai dana cadangan yang disengaja."
+    },
+    "rollup_mismatch": {
+      "fail": "Total struktur {reported} berbeda dari jumlah bagiannya {expected} sebesar {difference}.",
+      "suggestion": "Muat ulang struktur; jika selisih tetap ada, periksa akun yang tidak memiliki induk."
+    },
+    "allocation_incomplete": {
+      "fail": "Porsi item {ordinal} berjumlah {total}{unit}, bukan {expected}{unit}.",
+      "suggestion": "Sesuaikan porsi agar seluruh item teralokasi, tidak lebih dan tidak kurang."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Item {ordinal} dibagi sebagian berdasarkan persen dan sebagian berdasarkan kuantitas.",
+      "suggestion": "Bagi item dengan satu cara saja."
+    },
+    "vector_not_inherited": {
+      "fail": "Baris kontrak {code} berada pada baris biaya yang tidak dialokasikan untuk item BOQ-nya.",
+      "suggestion": "Kembalikan baris ke baris biaya milik item, atau catat pengecualian beserta alasannya."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Cadangan risiko \"{markup}\" dihitung dari dasar yang sudah memuat baris laba \"{profit}\", sehingga margin dibebankan pada dana yang disisihkan untuk risiko",

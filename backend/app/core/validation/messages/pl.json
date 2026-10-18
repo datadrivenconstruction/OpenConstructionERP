@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Środki zaangażowane nie są przypisane do żadnej pozycji kosztowej.",
+      "suggestion": "Powiąż pozycje umowy lub zamówienia z pozycjami kosztowymi, aby środki wyświetlały się we właściwym miejscu."
+    },
+    "certified_over_committed": {
+      "fail": "Roboty potwierdzone przekraczają wartość zlecenia wraz z zatwierdzonymi zmianami.",
+      "suggestion": "Zatwierdź zmianę obejmującą dodatkowe roboty lub sprawdź wniosek o płatność."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognoza jest wyższa niż kwota planowana.",
+      "suggestion": "Sprawdź źródło prognozy; jeśli spodziewasz się oszczędności, wprowadź prognozę ręczną z uzasadnieniem."
+    },
+    "partly_awarded": {
+      "fail": "Zlecono tylko część kwoty planowanej; w prognozie mogą brakować robót, które jeszcze trzeba zlecić.",
+      "suggestion": "Jeśli na tej pozycji kosztowej są jeszcze roboty do zlecenia, wprowadź prognozę ręczną."
+    },
+    "pending_changes": {
+      "fail": "Zmiany zamówień czekają na decyzję.",
+      "suggestion": "Rozstrzygnij oczekujące zmiany zamówień; prognoza jeszcze ich nie uwzględnia."
+    },
+    "snapshot_stale": {
+      "fail": "Od ponad miesiąca nie zapisano żadnej prognozy.",
+      "suggestion": "Zapisz migawkę prognozy, aby historia kosztów pozostała czytelna."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Kod konta {code} występuje w strukturze kosztów więcej niż raz.",
+      "suggestion": "Zostaw jedno konto na kod i przenieś na nie jego pozycje kosztowe."
+    },
+    "mixed_standard": {
+      "fail": "Struktura kosztów miesza klasyfikacje: {standards}.",
+      "suggestion": "Zbuduj strukturę z jednej klasyfikacji; pozostałe kody przypisz do niej."
+    },
+    "account_parent_cycle": {
+      "fail": "Konto {code} jest własnym przodkiem przez {count} kont.",
+      "suggestion": "Nadaj jednemu z tych kont konto nadrzędne spoza pętli."
+    },
+    "account_too_deep": {
+      "fail": "Konto {code} leży na poziomie {level}, głębiej niż {max} poziomów jego klasyfikacji.",
+      "suggestion": "Przypisz konto do konta nadrzędnego w granicach głębokości klasyfikacji."
+    },
+    "no_account": {
+      "fail": "{count} pozycji kosztowych o wartości {amount} nie ma przypisanego konta (pierwsza: {code}).",
+      "suggestion": "Nadaj tym pozycjom kosztorysu kod z klasyfikacji struktury lub przypisz pozycje kosztowe do konta."
+    },
+    "invalid_account": {
+      "fail": "{count} pozycji kosztowych o wartości {amount} jest na koncie zamkniętym lub niedopuszczającym księgowań (pierwsza: {code}).",
+      "suggestion": "Przenieś pozycje kosztowe na otwarte konto dopuszczające księgowania."
+    },
+    "own_amount_on_parent": {
+      "fail": "Konto {code} ma podkonta, a także własną kwotę {amount}.",
+      "suggestion": "Przenieś własną kwotę na podkonto lub zachowaj ją jako świadomą rezerwę."
+    },
+    "rollup_mismatch": {
+      "fail": "Suma struktury {reported} różni się od sumy jej części {expected} o {difference}.",
+      "suggestion": "Wczytaj strukturę ponownie; jeśli różnica pozostaje, sprawdź konta bez konta nadrzędnego."
+    },
+    "allocation_incomplete": {
+      "fail": "Udziały pozycji {ordinal} sumują się do {total}{unit} zamiast {expected}{unit}.",
+      "suggestion": "Dostosuj udziały tak, aby cała pozycja była rozdzielona, nie więcej i nie mniej."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Pozycja {ordinal} jest podzielona częściowo procentowo, a częściowo ilościowo.",
+      "suggestion": "Dziel pozycję tylko w jeden sposób."
+    },
+    "vector_not_inherited": {
+      "fail": "Pozycja umowy {code} jest na pozycji kosztowej, do której nie przypisano jej pozycji kosztorysu.",
+      "suggestion": "Przywróć pozycję na pozycje kosztowe tej pozycji kosztorysu lub zapisz odstępstwo z uzasadnieniem."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Rezerwa na ryzyko „{markup}” jest naliczana od podstawy zawierającej już pozycję zysku „{profit}”, więc marża obejmuje środki przeznaczone na ryzyko",

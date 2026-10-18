@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Số tiền đã cam kết chưa được gán cho dòng chi phí nào.",
+      "suggestion": "Liên kết các dòng hợp đồng hoặc đơn đặt hàng với dòng chi phí để số tiền hiển thị đúng chỗ."
+    },
+    "certified_over_committed": {
+      "fail": "Khối lượng đã xác nhận vượt giá trị giao thầu cộng các thay đổi đã duyệt.",
+      "suggestion": "Hãy duyệt thay đổi bao phủ phần việc phát sinh, hoặc kiểm tra lại đề nghị thanh toán."
+    },
+    "forecast_over_plan": {
+      "fail": "Dự báo cao hơn số tiền kế hoạch.",
+      "suggestion": "Kiểm tra nguồn của dự báo; nếu dự kiến tiết kiệm, hãy nhập dự báo thủ công kèm lý do."
+    },
+    "partly_awarded": {
+      "fail": "Chỉ một phần số tiền kế hoạch đã được giao thầu; dự báo có thể thiếu phần việc còn phải giao.",
+      "suggestion": "Nếu dòng này còn việc phải giao thầu, hãy nhập dự báo thủ công."
+    },
+    "pending_changes": {
+      "fail": "Lệnh thay đổi đang chờ quyết định.",
+      "suggestion": "Hãy quyết định các lệnh thay đổi đang chờ; dự báo chưa bao gồm chúng."
+    },
+    "snapshot_stale": {
+      "fail": "Đã hơn một tháng chưa lưu dự báo nào.",
+      "suggestion": "Hãy lưu một bản chụp dự báo để lịch sử chi phí vẫn dễ đọc."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Mã tài khoản {code} xuất hiện nhiều lần trong cơ cấu chi phí.",
+      "suggestion": "Giữ một tài khoản cho mỗi mã và chuyển các dòng chi phí của nó sang tài khoản đó."
+    },
+    "mixed_standard": {
+      "fail": "Cơ cấu chi phí đang trộn nhiều bảng mã: {standards}.",
+      "suggestion": "Hãy xây dựng cơ cấu từ một bảng mã; ánh xạ các mã khác vào bảng đó."
+    },
+    "account_parent_cycle": {
+      "fail": "Tài khoản {code} là tổ tiên của chính nó qua {count} tài khoản.",
+      "suggestion": "Hãy gán cho một trong các tài khoản này một tài khoản cha nằm ngoài vòng lặp."
+    },
+    "account_too_deep": {
+      "fail": "Tài khoản {code} ở cấp {level}, sâu hơn {max} cấp của bảng mã.",
+      "suggestion": "Gắn tài khoản vào tài khoản cha trong giới hạn độ sâu của bảng mã."
+    },
+    "no_account": {
+      "fail": "{count} dòng chi phí trị giá {amount} không thuộc tài khoản nào (đầu tiên: {code}).",
+      "suggestion": "Hãy gán cho các hạng mục này một mã của bảng mã trong cơ cấu, hoặc gán các dòng chi phí vào một tài khoản."
+    },
+    "invalid_account": {
+      "fail": "{count} dòng chi phí trị giá {amount} nằm trên tài khoản đã đóng hoặc tài khoản không nhận bút toán (đầu tiên: {code}).",
+      "suggestion": "Chuyển các dòng chi phí sang tài khoản đang mở và nhận bút toán."
+    },
+    "own_amount_on_parent": {
+      "fail": "Tài khoản {code} có tài khoản con và còn có số tiền riêng {amount}.",
+      "suggestion": "Chuyển số tiền riêng sang một tài khoản con, hoặc giữ lại như một khoản dự phòng có chủ đích."
+    },
+    "rollup_mismatch": {
+      "fail": "Tổng cơ cấu {reported} chênh lệch {difference} so với tổng các phần {expected}.",
+      "suggestion": "Tải lại cơ cấu; nếu chênh lệch vẫn còn, hãy kiểm tra các tài khoản thiếu tài khoản cha."
+    },
+    "allocation_incomplete": {
+      "fail": "Các phần chia của hạng mục {ordinal} cộng lại là {total}{unit} thay vì {expected}{unit}.",
+      "suggestion": "Điều chỉnh các phần chia để toàn bộ hạng mục được phân bổ, không thừa không thiếu."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Hạng mục {ordinal} được chia một phần theo phần trăm và một phần theo khối lượng.",
+      "suggestion": "Chỉ chia hạng mục theo một cách."
+    },
+    "vector_not_inherited": {
+      "fail": "Dòng hợp đồng {code} nằm ở dòng chi phí mà hạng mục BOQ của nó không được phân bổ vào.",
+      "suggestion": "Đưa dòng về các dòng chi phí của hạng mục, hoặc ghi nhận ngoại lệ kèm lý do."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Dự phòng \"{markup}\" được tính trên cơ sở đã bao gồm dòng lợi nhuận \"{profit}\", nên phần tiền dành cho rủi ro cũng bị tính thêm lợi nhuận",

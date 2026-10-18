@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "El dinero comprometido no está asignado a ninguna partida de coste.",
+      "suggestion": "Vincule las líneas del contrato o del pedido a partidas de coste para que el dinero aparezca en su lugar."
+    },
+    "certified_over_committed": {
+      "fail": "La obra certificada supera la adjudicación más los cambios aprobados.",
+      "suggestion": "Apruebe el cambio que cubre el trabajo adicional o revise la certificación."
+    },
+    "forecast_over_plan": {
+      "fail": "La previsión supera el importe planificado.",
+      "suggestion": "Revise el origen de la previsión; registre una previsión manual con motivo si espera ahorros."
+    },
+    "partly_awarded": {
+      "fail": "Solo se ha adjudicado una parte del importe planificado; la previsión podría omitir trabajos aún por adjudicar.",
+      "suggestion": "Si en esta partida aún quedan trabajos por adjudicar, introduzca una previsión manual."
+    },
+    "pending_changes": {
+      "fail": "Hay órdenes de cambio pendientes de decisión.",
+      "suggestion": "Resuelva las órdenes de cambio pendientes; la previsión todavía no las incluye."
+    },
+    "snapshot_stale": {
+      "fail": "Hace más de un mes que no se guarda ninguna previsión.",
+      "suggestion": "Guarde una instantánea de la previsión para que el historial de costes siga siendo legible."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "El código de cuenta {code} aparece más de una vez en la estructura de costes.",
+      "suggestion": "Conserve una cuenta por código y traslade a ella sus partidas de coste."
+    },
+    "mixed_standard": {
+      "fail": "La estructura de costes mezcla listas de códigos: {standards}.",
+      "suggestion": "Construya la estructura con una sola lista de códigos; asigne los demás códigos a ella."
+    },
+    "account_parent_cycle": {
+      "fail": "La cuenta {code} es su propio ascendiente a través de {count} cuentas.",
+      "suggestion": "Asigne a una de estas cuentas un padre fuera del bucle."
+    },
+    "account_too_deep": {
+      "fail": "La cuenta {code} está en el nivel {level}, más profundo que los {max} niveles de su lista de códigos.",
+      "suggestion": "Asigne la cuenta a un padre dentro de la profundidad de la lista de códigos."
+    },
+    "no_account": {
+      "fail": "{count} partidas de coste por valor de {amount} no están en ninguna cuenta (primera: {code}).",
+      "suggestion": "Asigne a estas partidas del presupuesto un código de la lista de códigos de la estructura, o asigne las partidas de coste a una cuenta."
+    },
+    "invalid_account": {
+      "fail": "{count} partidas de coste por valor de {amount} están en una cuenta cerrada o que no admite imputaciones (primera: {code}).",
+      "suggestion": "Traslade las partidas de coste a una cuenta abierta que admita imputaciones."
+    },
+    "own_amount_on_parent": {
+      "fail": "La cuenta {code} tiene subcuentas y además un importe propio de {amount}.",
+      "suggestion": "Traslade el importe propio a una subcuenta o manténgalo como una provisión deliberada."
+    },
+    "rollup_mismatch": {
+      "fail": "El total de la estructura {reported} difiere de la suma de sus partes {expected} en {difference}.",
+      "suggestion": "Recargue la estructura; si la diferencia persiste, revise las cuentas sin padre."
+    },
+    "allocation_incomplete": {
+      "fail": "Los porcentajes de la partida {ordinal} suman {total}{unit} en lugar de {expected}{unit}.",
+      "suggestion": "Ajuste las partes para que toda la partida quede repartida, ni más ni menos."
+    },
+    "allocation_mixed_modes": {
+      "fail": "La partida {ordinal} está dividida en parte por porcentaje y en parte por cantidad.",
+      "suggestion": "Divida la partida de una sola forma."
+    },
+    "vector_not_inherited": {
+      "fail": "La línea de contrato {code} está en una partida de coste a la que su partida del presupuesto no está asignada.",
+      "suggestion": "Devuelva la línea a las partidas de coste de la partida o registre la excepción con un motivo."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "La contingencia \"{markup}\" se calcula sobre una base que ya incluye la línea de beneficio \"{profit}\", de modo que se cobra margen sobre dinero reservado para riesgo",

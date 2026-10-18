@@ -27,9 +27,14 @@ from app.modules.procurement.service import (
 PROJECT_ID = uuid.uuid4()
 
 
+async def _no_rows(_statement: Any) -> SimpleNamespace:
+    """Bulk statements (the requisition date sync) touch tables this stub has none of."""
+    return SimpleNamespace(rowcount=0)
+
+
 def _make_service() -> ProcurementService:
     service = ProcurementService.__new__(ProcurementService)
-    service.session = SimpleNamespace(expunge=lambda _obj: None)
+    service.session = SimpleNamespace(expunge=lambda _obj: None, execute=_no_rows)
     service.po_repo = _StubPORepo()
     service.po_item_repo = _StubPOItemRepo()
     # Wire the repos so po_repo.get() reflects newly inserted items

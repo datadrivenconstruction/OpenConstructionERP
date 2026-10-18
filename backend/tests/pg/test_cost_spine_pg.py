@@ -483,7 +483,7 @@ async def test_generate_from_boq_idempotent_unreferenced_positions_pg(pg_session
     # ── 1st generate ──
     first = await service.generate_from_boq(project_id, boq_id)
     assert first.cost_lines_created == 3
-    assert first.accounts_created == 2  # din276 330 + 340
+    assert first.accounts_created == 3  # din276 330 + 340 under their group 300
     assert first.positions_linked == 3
 
     lines_after_first, total_after_first = await line_repo.list_for_project(project_id, limit=1000)

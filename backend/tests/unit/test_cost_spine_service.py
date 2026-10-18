@@ -376,10 +376,13 @@ async def test_generate_builds_account_tree_from_classification(monkeypatch: pyt
 
     result = await service.generate_from_boq(project_id, boq_id)
 
-    # Two distinct classifications (330, 340) → two accounts.
-    assert result.accounts_created == 2
+    # Two distinct classifications (330, 340) and the group 300 above both.
+    assert result.accounts_created == 3
     accounts = await service.account_repo.list_for_project(project_id)
-    assert {a.code for a in accounts} == {"330", "340"}
+    assert {a.code for a in accounts} == {"300", "330", "340"}
+    by_code = {a.code: a for a in accounts}
+    assert by_code["330"].parent_id == by_code["300"].id == by_code["340"].parent_id
+    assert (by_code["300"].level, by_code["330"].level) == (1, 2)
     # Both 330 cost lines share the SAME control account.
     lines, _ = await service.line_repo.list_for_project(project_id)
     acct_330 = next(a for a in accounts if a.code == "330")
@@ -456,9 +459,9 @@ async def test_generate_skips_section_headers(monkeypatch: pytest.MonkeyPatch) -
 
     result = await service.generate_from_boq(project_id, boq_id)
 
-    # Only the costed position produced a line + account.
+    # Only the costed position produced a line + account (330, under its group 300).
     assert result.cost_lines_created == 1
-    assert result.accounts_created == 1
+    assert result.accounts_created == 2
     lines, total = await service.line_repo.list_for_project(project_id)
     assert total == 1
     assert lines[0].unit == "m3"
@@ -521,7 +524,7 @@ async def test_generate_is_idempotent(monkeypatch: pytest.MonkeyPatch) -> None:
 
     first = await service.generate_from_boq(project_id, boq_id)
     assert first.cost_lines_created == 2
-    assert first.accounts_created == 2
+    assert first.accounts_created == 3  # 330 and 340 under their group 300
     assert first.positions_linked == 2
 
     lines_after_first, total_after_first = await service.line_repo.list_for_project(project_id)
@@ -537,7 +540,7 @@ async def test_generate_is_idempotent(monkeypatch: pytest.MonkeyPatch) -> None:
     lines_after_second, total_after_second = await service.line_repo.list_for_project(project_id)
     assert total_after_second == total_after_first == 2
     assert {line_.id for line_ in lines_after_second} == {line_.id for line_ in lines_after_first}
-    assert len(await service.account_repo.list_for_project(project_id)) == len(accounts_after_first) == 2
+    assert len(await service.account_repo.list_for_project(project_id)) == len(accounts_after_first) == 3
 
 
 @pytest.mark.asyncio
@@ -581,7 +584,7 @@ async def test_generate_is_idempotent_without_reference_code(monkeypatch: pytest
 
     first = await service.generate_from_boq(project_id, boq_id)
     assert first.cost_lines_created == 2
-    assert first.accounts_created == 2
+    assert first.accounts_created == 3  # 330 and 340 under their group 300
     assert first.positions_linked == 2
 
     lines_after_first, total_after_first = await service.line_repo.list_for_project(project_id)
@@ -604,7 +607,7 @@ async def test_generate_is_idempotent_without_reference_code(monkeypatch: pytest
     assert total_after_second == total_after_first == 2
     assert {line_.id for line_ in lines_after_second} == first_line_ids
     assert {line_.code for line_ in lines_after_second} == first_codes
-    assert len(await service.account_repo.list_for_project(project_id)) == len(accounts_after_first) == 2
+    assert len(await service.account_repo.list_for_project(project_id)) == len(accounts_after_first) == 3
 
 
 @pytest.mark.asyncio

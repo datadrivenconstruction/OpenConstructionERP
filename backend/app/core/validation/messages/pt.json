@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Valores comprometidos não estão atribuídos a nenhuma linha de custo.",
+      "suggestion": "Associe as linhas do contrato ou do pedido a linhas de custo para que o valor apareça no lugar certo."
+    },
+    "certified_over_committed": {
+      "fail": "Os trabalhos certificados excedem a adjudicação mais as alterações aprovadas.",
+      "suggestion": "Aprove a alteração que cobre os trabalhos adicionais ou verifique o auto de medição."
+    },
+    "forecast_over_plan": {
+      "fail": "A previsão está acima do valor planeado.",
+      "suggestion": "Verifique a origem da previsão; registe uma previsão manual com justificação se espera poupanças."
+    },
+    "partly_awarded": {
+      "fail": "Apenas parte do valor planeado foi adjudicada; a previsão pode não incluir trabalhos ainda por adjudicar.",
+      "suggestion": "Se ainda houver trabalhos por adjudicar nesta linha, introduza uma previsão manual."
+    },
+    "pending_changes": {
+      "fail": "Há ordens de alteração a aguardar decisão.",
+      "suggestion": "Decida sobre as ordens de alteração pendentes; a previsão ainda não as inclui."
+    },
+    "snapshot_stale": {
+      "fail": "Há mais de um mês que não é guardada nenhuma previsão.",
+      "suggestion": "Guarde um instantâneo da previsão para que o histórico de custos continue legível."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "O código de conta {code} aparece mais de uma vez na estrutura de custos.",
+      "suggestion": "Mantenha uma conta por código e mova para ela as respetivas linhas de custo."
+    },
+    "mixed_standard": {
+      "fail": "A estrutura de custos mistura listas de códigos: {standards}.",
+      "suggestion": "Construa a estrutura a partir de uma única lista de códigos; mapeie os restantes códigos para ela."
+    },
+    "account_parent_cycle": {
+      "fail": "A conta {code} é o seu próprio ascendente através de {count} contas.",
+      "suggestion": "Atribua a uma destas contas um pai fora do ciclo."
+    },
+    "account_too_deep": {
+      "fail": "A conta {code} está no nível {level}, mais fundo do que os {max} níveis da sua lista de códigos.",
+      "suggestion": "Associe a conta a um pai dentro da profundidade da lista de códigos."
+    },
+    "no_account": {
+      "fail": "{count} linhas de custo no valor de {amount} não estão em nenhuma conta (primeira: {code}).",
+      "suggestion": "Atribua a estes artigos um código da lista de códigos da estrutura, ou atribua as linhas de custo a uma conta."
+    },
+    "invalid_account": {
+      "fail": "{count} linhas de custo no valor de {amount} estão numa conta fechada ou que não aceita lançamentos (primeira: {code}).",
+      "suggestion": "Mova as linhas de custo para uma conta aberta que aceite lançamentos."
+    },
+    "own_amount_on_parent": {
+      "fail": "A conta {code} tem subcontas e também um valor próprio de {amount}.",
+      "suggestion": "Mova o valor próprio para uma subconta ou mantenha-o como provisão deliberada."
+    },
+    "rollup_mismatch": {
+      "fail": "O total da estrutura {reported} difere da soma das suas partes {expected} em {difference}.",
+      "suggestion": "Recarregue a estrutura; se a diferença persistir, verifique as contas sem pai."
+    },
+    "allocation_incomplete": {
+      "fail": "As parcelas do artigo {ordinal} somam {total}{unit} em vez de {expected}{unit}.",
+      "suggestion": "Ajuste as parcelas para que o artigo fique todo repartido, nem mais nem menos."
+    },
+    "allocation_mixed_modes": {
+      "fail": "O artigo {ordinal} está dividido em parte por percentagem e em parte por quantidade.",
+      "suggestion": "Divida o artigo de uma única forma."
+    },
+    "vector_not_inherited": {
+      "fail": "A linha de contrato {code} está numa linha de custo a que o respetivo artigo do mapa de quantidades não está atribuído.",
+      "suggestion": "Volte a colocar a linha nas linhas de custo do artigo ou registe a exceção com justificação."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "A contingência «{markup}» é calculada sobre uma base que já inclui o lucro «{profit}», aplicando uma margem aos valores reservados para riscos",

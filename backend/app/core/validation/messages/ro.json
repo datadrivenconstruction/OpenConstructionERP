@@ -1,4 +1,76 @@
 {
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Sumele angajate nu sunt atribuite niciunei linii de cost.",
+      "suggestion": "Legați liniile contractului sau ale comenzii de linii de cost, pentru ca banii să apară la locul potrivit."
+    },
+    "certified_over_committed": {
+      "fail": "Lucrările certificate depășesc valoarea atribuită plus modificările aprobate.",
+      "suggestion": "Aprobați modificarea care acoperă lucrările suplimentare sau verificați cererea de plată."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognoza depășește suma planificată.",
+      "suggestion": "Verificați sursa prognozei; dacă vă așteptați la economii, introduceți o prognoză manuală cu motivul."
+    },
+    "partly_awarded": {
+      "fail": "Doar o parte din suma planificată este atribuită; prognozei îi pot lipsi lucrări încă de atribuit.",
+      "suggestion": "Dacă pe această linie mai sunt lucrări de atribuit, introduceți o prognoză manuală."
+    },
+    "pending_changes": {
+      "fail": "Ordinele de modificare așteaptă o decizie.",
+      "suggestion": "Decideți asupra ordinelor de modificare în așteptare; prognoza nu le include încă."
+    },
+    "snapshot_stale": {
+      "fail": "De peste o lună nu a fost salvată nicio prognoză.",
+      "suggestion": "Salvați un instantaneu al prognozei, pentru ca istoricul costurilor să rămână lizibil."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Codul de cont {code} apare de mai multe ori în structura de costuri.",
+      "suggestion": "Păstrați un singur cont pe cod și mutați pe el liniile sale de cost."
+    },
+    "mixed_standard": {
+      "fail": "Structura de costuri amestecă clasificări: {standards}.",
+      "suggestion": "Construiți structura dintr-o singură clasificare; mapați celelalte coduri pe aceasta."
+    },
+    "account_parent_cycle": {
+      "fail": "Contul {code} este propriul său strămoș prin {count} conturi.",
+      "suggestion": "Dați unuia dintre aceste conturi un cont părinte din afara buclei."
+    },
+    "account_too_deep": {
+      "fail": "Contul {code} este pe nivelul {level}, mai adânc decât cele {max} niveluri ale clasificării sale.",
+      "suggestion": "Atașați contul unui părinte în limita adâncimii clasificării."
+    },
+    "no_account": {
+      "fail": "{count} linii de cost în valoare de {amount} nu sunt pe niciun cont (prima: {code}).",
+      "suggestion": "Dați acestor poziții un cod din clasificarea structurii sau atribuiți liniile de cost unui cont."
+    },
+    "invalid_account": {
+      "fail": "{count} linii de cost în valoare de {amount} sunt pe un cont închis sau care nu acceptă înregistrări (prima: {code}).",
+      "suggestion": "Mutați liniile de cost pe un cont deschis care acceptă înregistrări."
+    },
+    "own_amount_on_parent": {
+      "fail": "Contul {code} are subconturi și, în plus, o sumă proprie de {amount}.",
+      "suggestion": "Mutați suma proprie pe un subcont sau păstrați-o ca rezervă deliberată."
+    },
+    "rollup_mismatch": {
+      "fail": "Totalul structurii {reported} diferă de suma părților sale {expected} cu {difference}.",
+      "suggestion": "Reîncărcați structura; dacă diferența rămâne, verificați conturile fără părinte."
+    },
+    "allocation_incomplete": {
+      "fail": "Cotele poziției {ordinal} însumează {total}{unit} în loc de {expected}{unit}.",
+      "suggestion": "Ajustați cotele astfel încât întreaga poziție să fie repartizată, nici mai mult, nici mai puțin."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Poziția {ordinal} este împărțită parțial procentual și parțial pe cantitate.",
+      "suggestion": "Împărțiți poziția într-un singur fel."
+    },
+    "vector_not_inherited": {
+      "fail": "Linia de contract {code} este pe o linie de cost la care poziția sa din devizul de lucrări nu este atribuită.",
+      "suggestion": "Puneți linia înapoi pe liniile de cost ale poziției sau înregistrați derogarea cu un motiv."
+    }
+  },
   "boq_markup": {
     "contingency_not_on_profit": {
       "fail": "Rezerva de risc „{markup}” se calculează pe o bază care include deja linia de profit „{profit}”, astfel încât se aplică o marjă banilor rezervați pentru risc",

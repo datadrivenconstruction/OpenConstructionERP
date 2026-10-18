@@ -50,7 +50,7 @@ from app.modules.costmodel.cost_control_schemas import (
     UnassignedItem,
     UnassignedPage,
 )
-from app.modules.costmodel.models import ControlAccount, CostForecastOverride, CostForecastSnapshot, CostLine
+from app.modules.costmodel.models import CostForecastOverride, CostForecastSnapshot, CostLine
 from app.modules.costmodel.validators import PAYLOAD_KEY, RULE_SET
 
 AXIS_COST_LINE = "cost_line"
@@ -60,6 +60,8 @@ KEY_UNASSIGNED = "unassigned"
 KEY_LOOSE_CHANGES = "changes_without_contract"
 KEY_OTHER = "other"
 KEY_REMAINING = "remaining"
+# Row key prefix of an account's own amount (the account id follows).
+KEY_ALLOWANCE = "allowance:"
 
 #: Saved forecasts a line's history reads, newest first: ten years of months.
 HISTORY_SNAPSHOT_LIMIT = 120
@@ -201,19 +203,38 @@ class CostControlService:
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def _accounts(self, project_id: uuid.UUID) -> list[CostControlAccount]:
-        stmt = (
-            select(ControlAccount)
-            .where(ControlAccount.project_id == project_id)
-            .order_by(ControlAccount.sort_order, ControlAccount.code)
-        )
+        from app.modules.costmodel.repository import ControlAccountRepository
+
         return [
             CostControlAccount(
                 id=str(a.id),
                 code=a.code,
                 name=a.name,
+                title=a.title or "",
                 parent_id=str(a.parent_id) if a.parent_id else None,
+                level=int(a.level or 1),
+                own_amount=_dec(a.own_amount),
             )
-            for a in (await self.session.execute(stmt)).scalars().all()
+            for a in await ControlAccountRepository(self.session).list_for_project(project_id)
+        ]
+
+    def _allowance_rows(self, accounts: list[CostControlAccount]) -> list[CostControlRow]:
+        """An account's own amount as a row of its own: planned money not broken into cost lines yet.
+
+        Only the plan: nothing is awarded or certified on an allowance, so its
+        forecast is the plan until the money moves onto cost lines.
+        """
+        return [
+            _row(
+                key=f"{KEY_ALLOWANCE}{a.id}",
+                kind="allowance",
+                code=a.code,
+                description=a.title or a.name,
+                figures=LineFigures(budget=a.own_amount),
+                account_id=a.id,
+            )
+            for a in accounts
+            if a.own_amount != ZERO
         ]
 
     async def _open_overrides(self, project_id: uuid.UUID) -> dict[str, CostForecastOverride]:
@@ -391,7 +412,11 @@ class CostControlService:
             "days_since_snapshot": days,
             "has_money": has_money,
         }
-        context = ValidationContext(data={PAYLOAD_KEY: payload}, project_id=str(project_id))
+        from app.core.i18n import get_locale
+
+        context = ValidationContext(
+            data={PAYLOAD_KEY: payload}, project_id=str(project_id), metadata={"locale": get_locale()}
+        )
         results = []
         for rule in rule_registry.get_rules_for_sets([RULE_SET]):
             if rule.enabled:
@@ -418,7 +443,10 @@ class CostControlService:
         today = today or datetime.now(UTC).date()
         data = await load_control_data(self.session, project_id)
         line_rows, inputs = await self._cost_line_rows(project_id, data)
-        # The totals are the project's, the same on both axes: the plan lives on cost lines.
+        accounts = await self._accounts(project_id)
+        line_rows += self._allowance_rows(accounts)
+        # The totals are the project's, the same on both axes: the plan lives on
+        # cost lines and on the accounts' own amounts.
         totals = _totals(line_rows, data)
         rows = line_rows if axis == AXIS_COST_LINE else self._contract_rows(data, _dec(totals["forecast"]))
         latest = await self._latest_snapshot(project_id)
@@ -429,7 +457,7 @@ class CostControlService:
             as_of=today.isoformat(),
             totals=totals,
             rows=rows,
-            accounts=await self._accounts(project_id) if axis == AXIS_COST_LINE else [],
+            accounts=accounts if axis == AXIS_COST_LINE else [],
             findings=await self._findings(project_id, inputs, data, latest, today),
             last_snapshot=_snapshot_summary(latest) if latest is not None else None,
         )

@@ -15,6 +15,10 @@ Tables:
         tagged with the cost stage it records (estimate, award, final, ...)
     oe_costmodel_forecast_override - a person's forecast for one cost line,
         with the reason; append-only, the newest open row is the one in force
+    oe_costmodel_code_list - a code list a user imported for one project, the
+        dictionary a custom cost structure is built from
+    oe_costmodel_position_allocation - one share of a bill position on a cost
+        line, when the position is split over more than one
 """
 
 import uuid
@@ -23,6 +27,7 @@ from decimal import Decimal
 
 from sqlalchemy import (
     JSON,
+    Boolean,
     DateTime,
     ForeignKey,
     Index,
@@ -251,7 +256,21 @@ class ControlAccount(Base):
         index=True,
     )
     code: Mapped[str] = mapped_column(String(80), nullable=False)
+    # The label shown next to the code. Kept for every reader written before
+    # ``title`` existed; it carries the title when there is one, else the code.
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    # The account's own title, separate from its code. Empty when the code list
+    # the account came from has no title for it (a code deeper than the list).
+    title: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    # Depth in the tree, 1 at the top. Maintained on every write; readers that
+    # need certainty recompute it from ``parent_id``.
+    level: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+    # Money planned on the account itself and not broken down into its
+    # children or cost lines yet. ``total = own + posted + sum(children)``.
+    own_amount: Mapped[Decimal] = mapped_column(MoneyType(), nullable=False, default=Decimal("0"), server_default="0")
+    # Whether cost lines may be posted onto this account. A pure grouping node
+    # is switched off, and money posted on it anyway is held in suspense.
+    is_leaf_postable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default=text("true"))
     classification_standard: Mapped[str] = mapped_column(String(40), nullable=False, server_default="")
     status: Mapped[str] = mapped_column(String(40), nullable=False, server_default="open", index=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
@@ -464,3 +483,80 @@ class CostForecastOverride(Base):
 
     def __repr__(self) -> str:
         return f"<CostForecastOverride {self.cost_line_id} {self.amount}>"
+
+
+class CostCodeList(Base):
+    """A code list a user imported for one project.
+
+    The shipped lists and those of the active pack are read from files by
+    :mod:`app.core.code_lists`; a list a company keeps for itself is uploaded
+    as CSV or Excel and stored here, validated, in tree order. ``key`` is what
+    an account's ``classification_standard`` and a position's classification
+    name it by, unique within the project.
+    """
+
+    __tablename__ = "oe_costmodel_code_list"
+    __table_args__ = (UniqueConstraint("project_id", "key", name="uq_costmodel_code_list_project_key"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    key: Mapped[str] = mapped_column(String(40), nullable=False)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    # ``[{"code", "title", "parent", "level"}]`` in tree order.
+    entries: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<CostCodeList {self.key} ({len(self.entries or [])} codes)>"
+
+
+class PositionAllocation(Base):
+    """One share of a bill position on a cost line: the position's vector, split.
+
+    A position on a single cost line needs no row here: ``Position.cost_line_id``
+    is that link, and every reader written before splits existed keeps reading
+    it. A position split over several cost lines has one row per line, and its
+    ``cost_line_id`` names the line with the largest share, so those readers
+    still find the main line. Shares are percentages adding up to 100 or partial
+    quantities adding up to the position's quantity (``mode``), never a mix.
+
+    Rows go with their position and with their cost line; deleting a cost line
+    that still carries a share is refused by the service before it gets here.
+    """
+
+    __tablename__ = "oe_costmodel_position_allocation"
+    __table_args__ = (
+        UniqueConstraint("position_id", "cost_line_id", name="uq_costmodel_alloc_position_line"),
+        Index("ix_costmodel_alloc_boq", "boq_id"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    boq_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    position_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_position.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    cost_line_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_costmodel_cost_line.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    mode: Mapped[str] = mapped_column(String(10), nullable=False, server_default="percent")
+    share: Mapped[Decimal] = mapped_column(MoneyType(20, 6), nullable=False)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    note: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
+
+    def __repr__(self) -> str:
+        return f"<PositionAllocation {self.position_id} -> {self.cost_line_id} {self.share} {self.mode}>"

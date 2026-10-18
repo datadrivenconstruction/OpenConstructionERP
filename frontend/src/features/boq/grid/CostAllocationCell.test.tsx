@@ -1,0 +1,107 @@
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import type { ICellRendererParams } from 'ag-grid-community';
+
+import type { PositionAllocation } from '@/features/costmodel/structureApi';
+import { CostAllocationCellRenderer, allocationCellView } from './CostAllocationCell';
+import { CostAllocationCoverageBar } from '../CostAllocationCoverage';
+
+const row = {
+  cost_line_id: 'l1',
+  cost_line_code: 'CL-1',
+  cost_line_description: 'Walls',
+  account_id: 'a1',
+  account_code: '330',
+  account_title: 'External walls',
+  share: '1',
+  fraction: '1',
+  amount: '10',
+};
+
+function alloc(over: Partial<PositionAllocation>): PositionAllocation {
+  return {
+    position_id: 'p1',
+    boq_id: 'b1',
+    ordinal: '1',
+    description: '',
+    unit: 'm',
+    quantity: '1',
+    total: '10',
+    mode: 'single',
+    rows: [row],
+    valid: true,
+    problem: null,
+    share_total: '1',
+    share_expected: '1',
+    ...over,
+  };
+}
+
+describe('allocationCellView', () => {
+  it('reads single, split and none', () => {
+    expect(allocationCellView(alloc({}))).toEqual({ kind: 'single', label: '330 · CL-1' });
+    expect(allocationCellView(alloc({ mode: 'percent', rows: [row, { ...row, cost_line_id: 'l2' }], valid: false }))).toEqual({
+      kind: 'split',
+      parts: 2,
+      valid: false,
+    });
+    expect(allocationCellView(alloc({ mode: 'none', rows: [] }))).toEqual({ kind: 'none' });
+  });
+});
+
+describe('<CostAllocationCellRenderer>', () => {
+  function cell(allocation: PositionAllocation | undefined, onOpen = vi.fn()) {
+    const map = new Map<string, PositionAllocation>();
+    if (allocation) map.set('p1', allocation);
+    const params = { data: { id: 'p1' }, context: { costAllocations: map, onOpenCostAllocation: onOpen } } as unknown as ICellRendererParams;
+    render(<CostAllocationCellRenderer {...params} />);
+    return onOpen;
+  }
+
+  it('shows the split count and opens the drawer on click', () => {
+    const onOpen = cell(alloc({ mode: 'quantity', rows: [row, { ...row, cost_line_id: 'l2' }, { ...row, cost_line_id: 'l3' }] }));
+    fireEvent.click(screen.getByText('Split (3)'));
+    expect(onOpen).toHaveBeenCalledWith('p1');
+  });
+
+  it('marks an unallocated position and draws nothing for a position not in the list', () => {
+    cell(alloc({ mode: 'none', rows: [] }));
+    expect(screen.getByText('Unallocated')).toBeInTheDocument();
+  });
+
+  it('renders nothing without an allocation', () => {
+    cell(undefined);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+});
+
+describe('<CostAllocationCoverageBar>', () => {
+  it('shows the allocated share, the split count and the splits to fix', () => {
+    const onToggle = vi.fn();
+    render(
+      <CostAllocationCoverageBar
+        coverage={{
+          boq_id: 'b1',
+          positions_total: 10,
+          positions_allocated: 7,
+          positions_split: 2,
+          positions_invalid: 1,
+          value_total: '1000',
+          value_allocated: '725.5',
+          value_unallocated: '274.5',
+          share_pct: '72.55',
+        }}
+        currency="EUR"
+        showColumn={false}
+        onToggleColumn={onToggle}
+      />,
+    );
+    expect(screen.getByTestId('cost-allocation-share')).toHaveTextContent(/72[.,]6 % of the value/);
+    expect(screen.getByText('Split positions: 2')).toBeInTheDocument();
+    expect(screen.getByText('Splits to fix: 1')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('cost-allocation-column-toggle'));
+    expect(onToggle).toHaveBeenCalled();
+  });
+});

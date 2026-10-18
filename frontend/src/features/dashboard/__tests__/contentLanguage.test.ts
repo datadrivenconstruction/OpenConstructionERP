@@ -37,9 +37,12 @@ describe('keyLanguage', () => {
       language: 'pt-BR',
       languages: ['pt-BR', 'pt', 'en'],
       getResource: (lng: string, _ns: string, key: string) =>
-        ({ pt: { 'cases.a.title': 'Título' }, en: { 'cases.a.title': 'Title', 'cases.b.title': 'Other' } })[lng]?.[
-          key
-        ],
+        (
+          {
+            pt: { 'cases.a.title': 'Título' },
+            en: { 'cases.a.title': 'Title', 'cases.b.title': 'Other' },
+          } as Record<string, Record<string, string>>
+        )[lng]?.[key],
     };
     expect(keyLanguage(chained, 'cases.a.title')).toBe('pt');
     expect(languageTag(keyLanguage(chained, 'cases.a.title'), chained.language)).toBeNull();
