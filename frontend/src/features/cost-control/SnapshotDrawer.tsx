@@ -357,14 +357,14 @@ export function SnapshotDrawer({ projectId, snapshotId, currency, canEdit, onClo
           : t('cost_control.snapshot_title', { defaultValue: 'Snapshot' })
       }
       subtitle={data ? snapshotStatusLabel(t, data.status) : undefined}
-      widthClass="w-full max-w-2xl"
+      widthClass="max-w-2xl sm:min-w-[40rem]"
     >
       {detail.isLoading ? (
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="m-5 h-64" />
       ) : detail.error || !data ? (
-        <p className="text-sm text-semantic-error">{getErrorMessage(detail.error)}</p>
+        <p className="p-5 text-sm text-semantic-error">{getErrorMessage(detail.error)}</p>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-5 p-5">
           <section className="rounded-xl border border-border-light p-4 text-sm">
             <div className="flex items-start justify-between gap-3">
               <div>

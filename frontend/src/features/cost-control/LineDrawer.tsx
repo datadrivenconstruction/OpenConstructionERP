@@ -17,7 +17,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { parseMoneyInput, stripCurrencySigns, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 import { costControlApi, num, type CostControlRow, type LineHistory } from './api';
-import { sourceExplanation, sourceLabel, sourceTone, stageLabel } from './labels';
+import { methodHelp, sourceExplanation, sourceLabel, sourceTone, stageLabel } from './labels';
 import { LineMethodSection } from './LineMethodSection';
 
 interface TimelineEntry {
@@ -183,7 +183,13 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
                 {sourceLabel(t, current.forecast_source)}
               </span>
             </div>
-            <p className="mt-2 text-sm text-content-secondary">{sourceExplanation(t, current.forecast_source)}</p>
+            {/* A line read with the highest figure or projected from progress is explained by its
+                method: the source sentence would say why that figure is the most reliable one. */}
+            <p className="mt-2 text-sm text-content-secondary">
+              {(current.forecast_method === 'maximum' || current.forecast_method === 'evm_cpi') && current.method_applied
+                ? methodHelp(t, current.forecast_method)
+                : sourceExplanation(t, current.forecast_source)}
+            </p>
             {current.override && (
               <p className="mt-2 text-xs text-content-tertiary">
                 {t('cost_control.automatic_would_be', {

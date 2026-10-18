@@ -79,11 +79,11 @@ export function ExportMenu({ projectId }: ExportMenuProps) {
       {open && (
         <div
           role="menu"
-          className="absolute end-0 z-30 mt-1 w-72 rounded-xl border border-border-light bg-surface-primary p-1.5 shadow-lg"
+          className="absolute end-0 z-30 mt-1 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border-light bg-surface-primary p-1.5 shadow-lg"
         >
           {EXPORT_KINDS.map((kind) => (
             <div key={kind} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
-              <span className="min-w-0 flex-1 truncate text-sm text-content-primary">{exportKindLabel(t, kind)}</span>
+              <span className="min-w-0 flex-1 text-sm leading-snug text-content-primary">{exportKindLabel(t, kind)}</span>
               <button
                 type="button"
                 role="menuitem"
