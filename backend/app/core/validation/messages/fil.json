@@ -1111,5 +1111,79 @@
       "fail": "Ang supplier invoice {number} na {amount} ay hindi kabilang sa anumang kontrata o order.",
       "suggestion": "Iugnay ang mga line nito sa isang kontrata, o i-record bilang direct cost sa isang account."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Ang invoice {number} sa kontrata {contract} ay nagsasaad ng {net} hanggang ngayon, mas mababa sa {previous} ng naunang invoice {previous_number}, kahit cumulative ang pag-invoice ng kontrata.",
+      "suggestion": "Kung bagong trabaho lang ang sinisingil ng invoice, incremental ang pag-invoice ng kontrata; kung binabawasan nito ang total, ilagay ito bilang credit note."
+    },
+    "invoice_after_final": {
+      "fail": "Ang invoice {number} sa kontrata {contract} ay sumusunod sa final invoice {final}.",
+      "suggestion": "Ilagay ang mga susunod na trabaho bilang day work o credit note, o markahan ang tamang invoice bilang final."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Ang invoice {number} sa kontrata {contract} ay ginawa mula sa isang claim at naniningil ng isang panahon, pero cumulative ang pag-invoice ng kontrata.",
+      "suggestion": "Gumamit ng iisang paraan ng pag-invoice kada kontrata: ilipat ang kontrata sa incremental na pag-invoice, o ilagay na lang ang mga cumulative invoice ng kontratista."
+    },
+    "release_differs": {
+      "fail": "Ang kinumpirmang release para sa invoice {number} sa kontrata {contract} ay {stored}, pero ang terms ng kontrata ay nagbibigay ngayon ng {computed}.",
+      "suggestion": "Tingnan kung ano ang nagbago mula nang ma-release (terms, halaga ng invoice, mga bawas), saka buksan muli ang release at kumpirmahin ito ulit."
+    },
+    "rounding_out_of_range": {
+      "fail": "Ang invoice {number} ay na-round ng {rounding}, labas sa napagkasunduang rounding step na {step}.",
+      "suggestion": "Binabawasan lang ng rounding ang release nang mas mababa sa isang step; i-on ang rounding sa payment terms o buksan muli ang release."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Ang final invoice {number} sa kontrata {contract} ay may hawak na {amount} na retention, pero walang napagkasunduang warranty retention.",
+      "suggestion": "Pagkasunduan ang warranty retention sa payment terms, o buksan muli ang release para mabayaran ang buong retention kasama ng final invoice."
+    },
+    "posting_exceeds_held": {
+      "fail": "Mas maraming retention ang naibalik sa kontrata {contract} kaysa sa hawak nito: sobra ng {amount}.",
+      "suggestion": "I-void ang retention posting na sobra at i-post ang halagang talagang hawak."
+    },
+    "posting_before_event": {
+      "fail": "Ang {amount} na retention sa kontrata {contract} ay naibalik noong {posted}, bago ang release event nito na due sa {due}.",
+      "suggestion": "Tingnan ang petsa ng release event, o i-post ang release kapag nangyari na ang event."
+    },
+    "posting_without_event_date": {
+      "fail": "Ang {amount} na retention sa kontrata {contract} ay naibalik, pero hindi naitala ang petsa ng release event nito.",
+      "suggestion": "Itala ang petsa kung kailan naabot ang release event, para masuri ang bayad laban dito."
+    },
+    "retention_still_held": {
+      "fail": "Tapos na ang kontrata {contract} at may hawak pa itong {amount} na retention.",
+      "suggestion": "I-release ang retention sa event nito sa retention register, o panatilihin itong hawak para sa warranty period."
+    },
+    "discount_not_agreed": {
+      "fail": "Ang release ng invoice {number} sa kontrata {contract} ay kumukuha ng early payment discount na {amount}, pero walang pinapayagan ang kontrata.",
+      "suggestion": "I-on ang early payment discount sa payment terms, o buksan muli ang release nang wala ito."
+    },
+    "discount_after_deadline": {
+      "fail": "May discount na {amount} na itinabi sa invoice {number}, pero ang bayad noong {paid_on} ay lampas sa discount date na {until}.",
+      "suggestion": "Bayaran din ang halaga ng discount, o itala kung bakit tinanggap ng kontratista ang huling discount."
+    },
+    "invoiced_over_measured": {
+      "fail": "Ang kontrata {contract} ay na-invoice ng {invoiced}, {difference} na higit sa {measured} na nasukat (dami beses rate).",
+      "suggestion": "Suriin ang measurement bago mag-release ng dagdag na pera, o hawakan ang pagkakaiba sa susunod na release."
+    },
+    "invoiced_over_contract": {
+      "fail": "Ang kontrata {contract} ay na-invoice ng {invoiced}, {difference} na higit sa halaga nitong {value}, at walang nasukat dito.",
+      "suggestion": "Itala ang measurement o ang change order na sumasaklaw sa dagdag na pera bago mag-release ng higit pa."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Ang invoice {number} ay reverse charge pero may kasamang {vat} na VAT.",
+      "suggestion": "Walang VAT ang reverse charge na invoice; itama ang halaga ng VAT o ang VAT category ng mga line nito."
+    },
+    "line_without_vat_rate": {
+      "fail": "May VAT ang invoice {number}, pero {count} sa mga line nito ay walang VAT rate.",
+      "suggestion": "Ilagay ang VAT rate sa bawat line para tamang buwis ang makuha ng mga bawas at export."
+    },
+    "duplicate_number": {
+      "fail": "Ang invoice number {number} mula sa parehong kontratista ay naipasok nang {count} beses.",
+      "suggestion": "Kanselahin ang kopya, o itama ang invoice number kung magkaibang invoice ang mga ito."
+    },
+    "possible_duplicate": {
+      "fail": "Ang invoice {number} ay may parehong kontratista, halaga ({amount}) at petsa ({on}) gaya ng invoice {other}.",
+      "suggestion": "Tiyaking hindi ito iisang invoice na dalawang beses naipasok sa ibang numero."
+    }
   }
 }

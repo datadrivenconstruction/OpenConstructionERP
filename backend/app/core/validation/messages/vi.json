@@ -1111,5 +1111,79 @@
       "fail": "Hóa đơn nhà cung cấp {number} trị giá {amount} không thuộc hợp đồng hay đơn hàng nào.",
       "suggestion": "Hãy liên kết các dòng của nó với một hợp đồng, hoặc ghi nhận là chi phí trực tiếp trên một tài khoản."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Hóa đơn {number} của hợp đồng {contract} ghi lũy kế {net}, thấp hơn {previous} của hóa đơn trước {previous_number}, trong khi hợp đồng thanh toán theo lũy kế.",
+      "suggestion": "Nếu hóa đơn chỉ thanh toán phần việc mới thì hợp đồng thanh toán theo phần tăng thêm; nếu hóa đơn làm giảm tổng thì hãy nhập thành giấy báo có."
+    },
+    "invoice_after_final": {
+      "fail": "Hóa đơn {number} của hợp đồng {contract} nằm sau hóa đơn quyết toán {final}.",
+      "suggestion": "Hãy nhập phần việc phát sinh sau đó thành công việc theo ngày công hoặc giấy báo có, hoặc đánh dấu đúng hóa đơn là hóa đơn quyết toán."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Hóa đơn {number} của hợp đồng {contract} được lập từ yêu cầu bồi thường và chỉ thanh toán một kỳ, nhưng hợp đồng thanh toán theo lũy kế.",
+      "suggestion": "Mỗi hợp đồng chỉ dùng một cách xuất hóa đơn: chuyển hợp đồng sang thanh toán theo phần tăng thêm, hoặc nhập các hóa đơn lũy kế của nhà thầu."
+    },
+    "release_differs": {
+      "fail": "Số tiền đã xác nhận cho phép thanh toán của hóa đơn {number} thuộc hợp đồng {contract} là {stored}, nhưng theo điều khoản hợp đồng hôm nay ra {computed}.",
+      "suggestion": "Kiểm tra điều gì đã thay đổi kể từ lúc duyệt thanh toán (điều khoản, số tiền hóa đơn, khoản khấu trừ), rồi mở lại và xác nhận lại."
+    },
+    "rounding_out_of_range": {
+      "fail": "Hóa đơn {number} được làm tròn {rounding}, vượt ngoài bước làm tròn đã thỏa thuận là {step}.",
+      "suggestion": "Làm tròn chỉ cắt số tiền duyệt thanh toán ít hơn một bước; hãy bật làm tròn trong điều kiện thanh toán hoặc mở lại phần duyệt thanh toán."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Hóa đơn quyết toán {number} của hợp đồng {contract} giữ lại {amount} tiền giữ lại, nhưng chưa thỏa thuận tiền giữ lại bảo hành.",
+      "suggestion": "Thỏa thuận tiền giữ lại bảo hành trong điều kiện thanh toán, hoặc mở lại phần duyệt thanh toán để trả toàn bộ tiền giữ lại cùng hóa đơn quyết toán."
+    },
+    "posting_exceeds_held": {
+      "fail": "Hợp đồng {contract} đã hoàn trả tiền giữ lại nhiều hơn số đang giữ: dư {amount}.",
+      "suggestion": "Hủy bút toán hoàn trả tiền giữ lại bị quá cao và hạch toán đúng số tiền thực sự đang giữ."
+    },
+    "posting_before_event": {
+      "fail": "Tiền giữ lại {amount} của hợp đồng {contract} đã được hoàn trả vào {posted}, trước khi sự kiện giải phóng đến hạn vào {due}.",
+      "suggestion": "Kiểm tra ngày của sự kiện giải phóng, hoặc hạch toán giải phóng sau khi sự kiện đã diễn ra."
+    },
+    "posting_without_event_date": {
+      "fail": "Tiền giữ lại {amount} của hợp đồng {contract} đã được hoàn trả, nhưng chưa ghi ngày của sự kiện giải phóng.",
+      "suggestion": "Ghi ngày sự kiện giải phóng đạt được, để có thể đối chiếu khoản thanh toán với ngày đó."
+    },
+    "retention_still_held": {
+      "fail": "Hợp đồng {contract} đã hoàn thành nhưng vẫn đang giữ lại {amount} tiền giữ lại.",
+      "suggestion": "Giải phóng tiền giữ lại theo sự kiện của nó trong sổ tiền giữ lại, hoặc tiếp tục giữ trong thời hạn bảo hành."
+    },
+    "discount_not_agreed": {
+      "fail": "Phần duyệt thanh toán của hóa đơn {number} thuộc hợp đồng {contract} áp dụng chiết khấu thanh toán sớm {amount}, nhưng hợp đồng không cho phép.",
+      "suggestion": "Bật chiết khấu thanh toán sớm trong điều kiện thanh toán, hoặc mở lại phần duyệt thanh toán mà không có chiết khấu."
+    },
+    "discount_after_deadline": {
+      "fail": "Đã giữ lại khoản chiết khấu {amount} trên hóa đơn {number}, nhưng lần thanh toán ngày {paid_on} đến sau ngày hết hạn chiết khấu {until}.",
+      "suggestion": "Trả thêm cả khoản chiết khấu, hoặc ghi lại lý do nhà thầu chấp nhận chiết khấu trễ."
+    },
+    "invoiced_over_measured": {
+      "fail": "Hợp đồng {contract} đã xuất hóa đơn {invoiced}, cao hơn {difference} so với khối lượng đã nghiệm thu {measured} (số lượng nhân đơn giá).",
+      "suggestion": "Kiểm tra lại số liệu đo bóc trước khi duyệt thêm tiền, hoặc giữ lại phần chênh ở lần duyệt thanh toán kế tiếp."
+    },
+    "invoiced_over_contract": {
+      "fail": "Hợp đồng {contract} đã xuất hóa đơn {invoiced}, cao hơn giá trị hợp đồng {value} là {difference}, và chưa có khối lượng nào được đo bóc.",
+      "suggestion": "Ghi nhận đo bóc hoặc phát sinh hợp đồng bao phủ khoản tiền vượt trước khi duyệt thêm."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Hóa đơn {number} áp dụng cơ chế khai thuế ngược (reverse charge) nhưng lại có {vat} VAT.",
+      "suggestion": "Hóa đơn khai thuế ngược không có VAT; hãy sửa số tiền VAT hoặc nhóm VAT của các dòng."
+    },
+    "line_without_vat_rate": {
+      "fail": "Hóa đơn {number} có VAT, nhưng {count} dòng không ghi thuế suất VAT.",
+      "suggestion": "Nhập thuế suất VAT cho mọi dòng để các khoản khấu trừ và xuất dữ liệu lấy đúng thuế."
+    },
+    "duplicate_number": {
+      "fail": "Số hóa đơn {number} của cùng một nhà thầu được nhập {count} lần.",
+      "suggestion": "Hủy bản sao, hoặc sửa số hóa đơn nếu đó là các hóa đơn khác nhau."
+    },
+    "possible_duplicate": {
+      "fail": "Hóa đơn {number} có cùng nhà thầu, số tiền ({amount}) và ngày ({on}) với hóa đơn {other}.",
+      "suggestion": "Kiểm tra xem có phải cùng một hóa đơn bị nhập hai lần dưới số khác hay không."
+    }
   }
 }

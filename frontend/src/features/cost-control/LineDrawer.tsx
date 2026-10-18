@@ -150,7 +150,9 @@ export function LineDrawer({ projectId, row, currency, canEdit, onClose }: LineD
         { label: t('cost_control.col_planned', { defaultValue: 'Planned' }), value: current.planned },
         { label: t('cost_control.col_awarded', { defaultValue: 'Awarded' }), value: current.awarded },
         { label: t('cost_control.col_changes', { defaultValue: 'Changes' }), value: current.changes },
+        { label: t('cost_control.col_measured', { defaultValue: 'Measured' }), value: current.measured },
         { label: t('cost_control.col_certified', { defaultValue: 'Certified' }), value: current.certified },
+        { label: t('cost_control.col_invoiced', { defaultValue: 'Invoiced' }), value: current.invoiced },
         { label: t('cost_control.col_paid', { defaultValue: 'Paid' }), value: current.paid },
       ]
     : [];

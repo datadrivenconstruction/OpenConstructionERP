@@ -57,6 +57,9 @@ class CostControlRow(BaseModel):
     committed: Money = Decimal("0")
     certified: Money = Decimal("0")
     paid: Money = Decimal("0")
+    # Measured quantity times the contract rate, and supplier invoices (net after agreed deductions).
+    measured: Money = Decimal("0")
+    invoiced: Money = Decimal("0")
     pending_changes: Money = Decimal("0")
     forecast: Money = Decimal("0")
     forecast_source: str = "none"

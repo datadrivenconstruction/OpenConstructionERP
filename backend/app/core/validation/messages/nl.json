@@ -1111,5 +1111,79 @@
       "fail": "Leveranciersfactuur {number} van {amount} hoort bij geen enkel contract of bestelling.",
       "suggestion": "Koppel de regels aan een contract, of boek de factuur als directe kosten op één rekening."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Factuur {number} op contract {contract} vermeldt {net} tot nu toe, minder dan de {previous} van de voorgaande factuur {previous_number}, terwijl het contract cumulatief gefactureerd wordt.",
+      "suggestion": "Als de factuur alleen het nieuwe werk factureert, wordt het contract incrementeel gefactureerd; als ze het totaal verlaagt, voer haar dan in als creditnota."
+    },
+    "invoice_after_final": {
+      "fail": "Factuur {number} op contract {contract} volgt op de eindfactuur {final}.",
+      "suggestion": "Voer later werk in als regiewerk of creditnota, of markeer de juiste factuur als eindfactuur."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Factuur {number} op contract {contract} is opgemaakt uit een claim en factureert één periode, maar het contract wordt cumulatief gefactureerd.",
+      "suggestion": "Gebruik één factureringswijze per contract: zet het contract op incrementele facturatie, of voer in plaats daarvan de cumulatieve facturen van de aannemer in."
+    },
+    "release_differs": {
+      "fail": "De vrijgave die voor factuur {number} op contract {contract} is bevestigd, is {stored}, maar de voorwaarden van het contract geven vandaag {computed}.",
+      "suggestion": "Controleer wat er na de vrijgave is gewijzigd (voorwaarden, factuurbedragen, inhoudingen), heropen de vrijgave en bevestig haar opnieuw."
+    },
+    "rounding_out_of_range": {
+      "fail": "Factuur {number} is afgerond met {rounding}, buiten de afgesproken afrondingsstap van {step}.",
+      "suggestion": "Afronden verlaagt een vrijgave met minder dan één stap; zet afronding aan in de betalingsvoorwaarden of heropen de vrijgave."
+    },
+    "final_retention_without_warranty": {
+      "fail": "De eindfactuur {number} op contract {contract} houdt {amount} retentie in, maar er is geen garantieretentie afgesproken.",
+      "suggestion": "Spreek garantieretentie af in de betalingsvoorwaarden, of heropen de vrijgave zodat alle retentie met de eindfactuur wordt betaald."
+    },
+    "posting_exceeds_held": {
+      "fail": "Op contract {contract} is meer retentie terugbetaald dan er wordt ingehouden: {amount} te veel.",
+      "suggestion": "Boek de te hoge retentieboeking terug en boek het bedrag dat werkelijk is ingehouden."
+    },
+    "posting_before_event": {
+      "fail": "{amount} retentie op contract {contract} is op {posted} terugbetaald, vóór de vrijgavegebeurtenis die op {due} verviel.",
+      "suggestion": "Controleer de datum van de vrijgavegebeurtenis, of boek de vrijgave zodra de gebeurtenis heeft plaatsgevonden."
+    },
+    "posting_without_event_date": {
+      "fail": "{amount} retentie op contract {contract} is terugbetaald, maar de datum van de vrijgavegebeurtenis is niet vastgelegd.",
+      "suggestion": "Leg de datum vast waarop de vrijgavegebeurtenis is bereikt, zodat de betaling daartegen gecontroleerd kan worden."
+    },
+    "retention_still_held": {
+      "fail": "Contract {contract} is opgeleverd en houdt nog {amount} retentie in.",
+      "suggestion": "Geef de retentie vrij bij haar gebeurtenis in het retentieregister, of houd haar in voor de garantieperiode."
+    },
+    "discount_not_agreed": {
+      "fail": "De vrijgave van factuur {number} op contract {contract} past een korting voor vroegtijdige betaling van {amount} toe, maar het contract staat dat niet toe.",
+      "suggestion": "Zet de korting voor vroegtijdige betaling aan in de betalingsvoorwaarden, of heropen de vrijgave zonder korting."
+    },
+    "discount_after_deadline": {
+      "fail": "Op factuur {number} is een korting van {amount} ingehouden, maar de betaling op {paid_on} kwam na de kortingsdatum {until}.",
+      "suggestion": "Betaal ook het kortingsbedrag, of leg vast waarom de aannemer de late korting heeft geaccepteerd."
+    },
+    "invoiced_over_measured": {
+      "fail": "Contract {contract} is gefactureerd voor {invoiced}, {difference} meer dan de {measured} die is opgemeten (hoeveelheid maal tarief).",
+      "suggestion": "Controleer de opmeting voordat u meer geld vrijgeeft, of houd het verschil in bij de volgende vrijgave."
+    },
+    "invoiced_over_contract": {
+      "fail": "Contract {contract} is gefactureerd voor {invoiced}, {difference} meer dan de contractwaarde van {value}, en er is niets opgemeten.",
+      "suggestion": "Registreer de opmeting of het meerwerk dat het extra bedrag dekt voordat u meer vrijgeeft."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Factuur {number} is verlegd, maar bevat {vat} btw.",
+      "suggestion": "Een verlegde factuur bevat geen btw; corrigeer het btw-bedrag of de btw-categorie van de regels."
+    },
+    "line_without_vat_rate": {
+      "fail": "Factuur {number} bevat btw, maar {count} van de regels vermelden geen btw-tarief.",
+      "suggestion": "Vul op elke regel het btw-tarief in, zodat inhoudingen en exports de juiste belasting gebruiken."
+    },
+    "duplicate_number": {
+      "fail": "Factuurnummer {number} van dezelfde aannemer is {count} keer ingevoerd.",
+      "suggestion": "Annuleer de kopie, of corrigeer het factuurnummer als het om verschillende facturen gaat."
+    },
+    "possible_duplicate": {
+      "fail": "Factuur {number} heeft dezelfde aannemer, hetzelfde bedrag ({amount}) en dezelfde datum ({on}) als factuur {other}.",
+      "suggestion": "Controleer dat het niet dezelfde factuur is die onder een ander nummer dubbel is ingevoerd."
+    }
   }
 }

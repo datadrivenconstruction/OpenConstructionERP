@@ -1111,5 +1111,79 @@
       "fail": "{amount} tutarındaki {number} tedarikçi faturası hiçbir sözleşmeye veya siparişe bağlı değil.",
       "suggestion": "Satırlarını bir sözleşmeye bağlayın veya bir hesapta doğrudan maliyet olarak kaydedin."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "{contract} sözleşmesindeki {number} numaralı fatura bugüne kadar {net} gösteriyor, bu önceki {previous_number} numaralı faturadaki {previous} tutarından az, oysa sözleşme kümülatif faturalanıyor.",
+      "suggestion": "Fatura yalnızca yeni işi faturalıyorsa sözleşme artışlı faturalanır; toplamı düşürüyorsa alacak dekontu olarak girin."
+    },
+    "invoice_after_final": {
+      "fail": "{contract} sözleşmesindeki {number} numaralı fatura, {final} numaralı kesin faturadan sonra geliyor.",
+      "suggestion": "Sonraki işi günlük iş veya alacak dekontu olarak girin ya da doğru faturayı kesin fatura olarak işaretleyin."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "{contract} sözleşmesindeki {number} numaralı fatura bir talepten oluşturulmuş ve tek bir dönemi faturalıyor, ama sözleşme kümülatif faturalanıyor.",
+      "suggestion": "Sözleşme başına tek bir faturalama yöntemi kullanın: sözleşmeyi artışlı faturalamaya geçirin ya da onun yerine müteahhidin kümülatif faturalarını girin."
+    },
+    "release_differs": {
+      "fail": "{contract} sözleşmesindeki {number} numaralı fatura için onaylanan ödeme serbest bırakma tutarı {stored}, ama sözleşme şartları bugün {computed} veriyor.",
+      "suggestion": "Serbest bırakmadan sonra neyin değiştiğine (şartlar, fatura tutarları, kesintiler) bakın, sonra serbest bırakmayı yeniden açıp tekrar onaylayın."
+    },
+    "rounding_out_of_range": {
+      "fail": "{number} numaralı fatura {rounding} tutarında yuvarlanmış, bu anlaşılan {step} yuvarlama adımının dışında.",
+      "suggestion": "Yuvarlama serbest bırakılan tutarı bir adımdan az düşürür; ödeme şartlarında yuvarlamayı açın veya serbest bırakmayı yeniden açın."
+    },
+    "final_retention_without_warranty": {
+      "fail": "{contract} sözleşmesindeki {number} numaralı kesin fatura {amount} teminat kesintisi tutuyor, ama garanti teminatı kararlaştırılmamış.",
+      "suggestion": "Ödeme şartlarında garanti teminatını kararlaştırın ya da tüm teminatın kesin faturayla ödenmesi için serbest bırakmayı yeniden açın."
+    },
+    "posting_exceeds_held": {
+      "fail": "{contract} sözleşmesinde tutulandan fazla teminat iade edilmiş: {amount} fazla.",
+      "suggestion": "Fazla yüksek teminat iade kaydını iptal edin ve fiilen tutulan tutarı kaydedin."
+    },
+    "posting_before_event": {
+      "fail": "{contract} sözleşmesindeki {amount} teminat, {due} tarihinde gelecek serbest bırakma olayından önce, {posted} tarihinde iade edilmiş.",
+      "suggestion": "Serbest bırakma olayının tarihini kontrol edin ya da olay gerçekleştikten sonra serbest bırakmayı kaydedin."
+    },
+    "posting_without_event_date": {
+      "fail": "{contract} sözleşmesindeki {amount} teminat iade edilmiş, ancak serbest bırakma olayının tarihi kayıtlı değil.",
+      "suggestion": "Serbest bırakma olayının gerçekleştiği tarihi kaydedin, böylece ödeme buna göre kontrol edilebilir."
+    },
+    "retention_still_held": {
+      "fail": "{contract} sözleşmesi tamamlanmış ve hâlâ {amount} teminat tutuyor.",
+      "suggestion": "Teminat kayıt defterinde teminatı olayında serbest bırakın veya garanti süresi boyunca tutmaya devam edin."
+    },
+    "discount_not_agreed": {
+      "fail": "{contract} sözleşmesindeki {number} numaralı faturanın serbest bırakılması {amount} erken ödeme iskontosu uyguluyor, ama sözleşme buna izin vermiyor.",
+      "suggestion": "Ödeme şartlarında erken ödeme iskontosunu açın veya serbest bırakmayı iskontosuz yeniden açın."
+    },
+    "discount_after_deadline": {
+      "fail": "{number} numaralı faturadan {amount} iskonto tutuldu, ama {paid_on} tarihli ödeme {until} iskonto tarihinden sonra geldi.",
+      "suggestion": "İskonto tutarını da ödeyin veya müteahhidin geç iskontoyu neden kabul ettiğini kaydedin."
+    },
+    "invoiced_over_measured": {
+      "fail": "{contract} sözleşmesi {invoiced} faturalanmış, bu ölçülen {measured} tutarının (miktar çarpı birim fiyat) {difference} üzerinde.",
+      "suggestion": "Daha fazla ödeme serbest bırakmadan önce metrajı kontrol edin ya da farkı bir sonraki serbest bırakmada tutun."
+    },
+    "invoiced_over_contract": {
+      "fail": "{contract} sözleşmesi {invoiced} faturalanmış, bu {value} sözleşme bedelinin {difference} üzerinde ve üzerinde hiç metraj yok.",
+      "suggestion": "Daha fazlasını serbest bırakmadan önce fazla tutarı karşılayan metrajı veya değişiklik emrini kaydedin."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "{number} numaralı fatura sorumlu sıfatıyla (reverse charge) düzenlenmiş ama {vat} KDV taşıyor.",
+      "suggestion": "Reverse charge faturada KDV olmaz; KDV tutarını veya satırlarının KDV kategorisini düzeltin."
+    },
+    "line_without_vat_rate": {
+      "fail": "{number} numaralı faturada KDV var, ama {count} satırında KDV oranı belirtilmemiş.",
+      "suggestion": "Kesintiler ve dışa aktarımlar doğru vergiyi alsın diye her satıra KDV oranını girin."
+    },
+    "duplicate_number": {
+      "fail": "Aynı müteahhitten gelen {number} numaralı fatura {count} kez girilmiş.",
+      "suggestion": "Kopyayı iptal edin veya farklı faturalarsa fatura numarasını düzeltin."
+    },
+    "possible_duplicate": {
+      "fail": "{number} numaralı fatura, {other} numaralı faturayla aynı müteahhit, tutar ({amount}) ve tarihe ({on}) sahip.",
+      "suggestion": "Aynı faturanın başka bir numarayla iki kez girilmediğini kontrol edin."
+    }
   }
 }

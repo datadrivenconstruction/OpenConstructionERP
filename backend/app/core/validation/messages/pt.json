@@ -1111,5 +1111,79 @@
       "fail": "A fatura de fornecedor {number} de {amount} não pertence a nenhum contrato nem encomenda.",
       "suggestion": "Associe as suas linhas a um contrato ou registe-a como custo direto numa conta."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "A fatura {number} do contrato {contract} indica {net} acumulados, menos do que os {previous} da fatura anterior {previous_number}, embora o contrato seja faturado de forma acumulada.",
+      "suggestion": "Se a fatura cobra apenas o trabalho novo, o contrato é faturado de forma incremental; se reduz o total, lance-a como nota de crédito."
+    },
+    "invoice_after_final": {
+      "fail": "A fatura {number} do contrato {contract} vem depois da fatura final {final}.",
+      "suggestion": "Lance os trabalhos posteriores como trabalhos a custo ou nota de crédito, ou marque a fatura correta como final."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "A fatura {number} do contrato {contract} foi criada a partir de uma reclamação e cobra um período, mas o contrato é faturado de forma acumulada.",
+      "suggestion": "Use uma só forma de faturação por contrato: passe o contrato para faturação incremental ou lance, em vez disso, as faturas acumuladas do empreiteiro."
+    },
+    "release_differs": {
+      "fail": "A liberação confirmada para a fatura {number} do contrato {contract} é {stored}, mas as condições do contrato dão hoje {computed}.",
+      "suggestion": "Verifique o que mudou desde a liberação (condições, valores da fatura, deduções), reabra a liberação e confirme-a de novo."
+    },
+    "rounding_out_of_range": {
+      "fail": "A fatura {number} está arredondada em {rounding}, fora do passo de arredondamento acordado de {step}.",
+      "suggestion": "O arredondamento só reduz uma liberação em menos de um passo; ative o arredondamento nas condições de pagamento ou reabra a liberação."
+    },
+    "final_retention_without_warranty": {
+      "fail": "A fatura final {number} do contrato {contract} retém {amount} de caução, mas não há caução de garantia acordada.",
+      "suggestion": "Acorde a caução de garantia nas condições de pagamento ou reabra a liberação para pagar toda a caução com a fatura final."
+    },
+    "posting_exceeds_held": {
+      "fail": "No contrato {contract} foi devolvida mais caução do que a retida: {amount} a mais.",
+      "suggestion": "Anule o lançamento de caução que está alto demais e lance o valor realmente retido."
+    },
+    "posting_before_event": {
+      "fail": "A caução de {amount} do contrato {contract} foi devolvida em {posted}, antes do evento de liberação, previsto para {due}.",
+      "suggestion": "Verifique a data do evento de liberação ou lance a liberação depois de o evento ter ocorrido."
+    },
+    "posting_without_event_date": {
+      "fail": "A caução de {amount} do contrato {contract} foi devolvida, mas a data do evento de liberação não está registada.",
+      "suggestion": "Registe a data em que o evento de liberação foi atingido, para que o pagamento possa ser conferido com ela."
+    },
+    "retention_still_held": {
+      "fail": "O contrato {contract} está concluído e ainda retém {amount} de caução.",
+      "suggestion": "Libere a caução no seu evento no registo de cauções ou mantenha-a retida durante o período de garantia."
+    },
+    "discount_not_agreed": {
+      "fail": "A liberação da fatura {number} do contrato {contract} aplica um desconto por pagamento antecipado de {amount}, mas o contrato não o permite.",
+      "suggestion": "Ative o desconto por pagamento antecipado nas condições de pagamento ou reabra a liberação sem ele."
+    },
+    "discount_after_deadline": {
+      "fail": "Foi retido um desconto de {amount} na fatura {number}, mas o pagamento de {paid_on} foi posterior à data do desconto {until}.",
+      "suggestion": "Pague também o valor do desconto ou registe por que o empreiteiro aceitou o desconto tardio."
+    },
+    "invoiced_over_measured": {
+      "fail": "O contrato {contract} está faturado em {invoiced}, {difference} acima dos {measured} medidos (quantidade vezes preço).",
+      "suggestion": "Verifique a medição antes de liberar mais dinheiro ou retenha a diferença na próxima liberação."
+    },
+    "invoiced_over_contract": {
+      "fail": "O contrato {contract} está faturado em {invoiced}, {difference} acima do seu valor de {value}, e nada está medido.",
+      "suggestion": "Registe a medição ou o aditivo que cobre o valor extra antes de liberar mais."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "A fatura {number} tem inversão do sujeito passivo, mas traz {vat} de IVA.",
+      "suggestion": "Uma fatura com inversão do sujeito passivo não leva IVA; corrija o valor do IVA ou a categoria de IVA das suas linhas."
+    },
+    "line_without_vat_rate": {
+      "fail": "A fatura {number} tem IVA, mas {count} das suas linhas não indicam taxa de IVA.",
+      "suggestion": "Indique a taxa de IVA em todas as linhas para que deduções e exportações usem o imposto correto."
+    },
+    "duplicate_number": {
+      "fail": "O número de fatura {number} do mesmo empreiteiro foi lançado {count} vezes.",
+      "suggestion": "Anule a cópia ou corrija o número da fatura se forem faturas diferentes."
+    },
+    "possible_duplicate": {
+      "fail": "A fatura {number} tem o mesmo empreiteiro, valor ({amount}) e data ({on}) da fatura {other}.",
+      "suggestion": "Verifique que não é a mesma fatura lançada duas vezes com outro número."
+    }
   }
 }

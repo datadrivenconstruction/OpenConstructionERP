@@ -1111,5 +1111,79 @@
       "fail": "仕入先請求書{number}({amount})は、どの契約にも発注にも属していません。",
       "suggestion": "明細行を契約に紐付けるか、1つの勘定に直接費として記録してください。"
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "契約{contract}の請求書{number}は累計{net}ですが、直前の請求書{previous_number}の{previous}より少なくなっています。この契約は累計請求です。",
+      "suggestion": "請求書が新規出来高のみを請求しているなら、この契約は差分請求です。合計を減らす場合は、クレジットノートとして入力してください。"
+    },
+    "invoice_after_final": {
+      "fail": "契約{contract}の請求書{number}は、最終請求書{final}の後に出ています。",
+      "suggestion": "その後の作業は日当作業(ダイワーク)またはクレジットノートとして入力するか、正しい請求書を最終請求書にしてください。"
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "契約{contract}の請求書{number}はクレームから作成され1期間分を請求していますが、この契約は累計請求です。",
+      "suggestion": "契約ごとに請求方式を1つに統一してください。契約を差分請求に切り替えるか、請負業者の累計請求書を入力してください。"
+    },
+    "release_differs": {
+      "fail": "契約{contract}の請求書{number}で確定した支払承認額は{stored}ですが、現在の契約条件では{computed}になります。",
+      "suggestion": "承認後に何が変わったか(条件、請求額、控除)を確認し、承認を再オープンしてもう一度確定してください。"
+    },
+    "rounding_out_of_range": {
+      "fail": "請求書{number}の端数処理額は{rounding}で、合意した端数単位{step}の範囲外です。",
+      "suggestion": "端数処理は支払承認額を1単位未満だけ切り下げるものです。支払条件で端数処理を有効にするか、承認を再オープンしてください。"
+    },
+    "final_retention_without_warranty": {
+      "fail": "契約{contract}の最終請求書{number}で保留金{amount}が留保されていますが、瑕疵担保の保留金は合意されていません。",
+      "suggestion": "支払条件で瑕疵担保の保留金を合意するか、承認を再オープンして保留金を全額最終請求書で支払ってください。"
+    },
+    "posting_exceeds_held": {
+      "fail": "契約{contract}で、留保額より多い保留金が返還されています。超過は{amount}です。",
+      "suggestion": "高すぎる保留金の仕訳を取り消し、実際に留保している額で仕訳し直してください。"
+    },
+    "posting_before_event": {
+      "fail": "契約{contract}の保留金{amount}が{posted}に返還されていますが、解除イベントの期日は{due}です。",
+      "suggestion": "解除イベントの日付を確認するか、イベントが発生してから解除を仕訳してください。"
+    },
+    "posting_without_event_date": {
+      "fail": "契約{contract}の保留金{amount}が返還されていますが、解除イベントの日付が記録されていません。",
+      "suggestion": "解除イベントに到達した日付を記録してください。支払との照合に使います。"
+    },
+    "retention_still_held": {
+      "fail": "契約{contract}は完了していますが、保留金{amount}がまだ留保されています。",
+      "suggestion": "保留金台帳でイベント時に保留金を解除するか、瑕疵担保期間中は留保したままにしてください。"
+    },
+    "discount_not_agreed": {
+      "fail": "契約{contract}の請求書{number}の支払承認で早期支払割引{amount}が適用されていますが、この契約では割引が認められていません。",
+      "suggestion": "支払条件で早期支払割引を有効にするか、割引なしで承認を再オープンしてください。"
+    },
+    "discount_after_deadline": {
+      "fail": "請求書{number}から割引{amount}が差し引かれましたが、{paid_on}の支払は割引期限{until}を過ぎています。",
+      "suggestion": "割引額も支払うか、請負業者が期限後の割引を認めた理由を記録してください。"
+    },
+    "invoiced_over_measured": {
+      "fail": "契約{contract}の請求額は{invoiced}で、出来高{measured}(数量×単価)を{difference}上回っています。",
+      "suggestion": "追加で支払承認する前に出来高を確認するか、差額を次回の承認で留保してください。"
+    },
+    "invoiced_over_contract": {
+      "fail": "契約{contract}の請求額は{invoiced}で、契約金額{value}を{difference}上回っており、出来高も記録されていません。",
+      "suggestion": "追加の支払承認の前に、超過分を裏付ける出来高または変更を記録してください。"
+    },
+    "reverse_charge_with_vat": {
+      "fail": "請求書{number}はリバースチャージ対象ですが、VAT {vat}が計上されています。",
+      "suggestion": "リバースチャージの請求書にはVATは付きません。VAT額または明細行のVAT区分を修正してください。"
+    },
+    "line_without_vat_rate": {
+      "fail": "請求書{number}にはVATがありますが、{count}行にVAT率が入っていません。",
+      "suggestion": "控除や出力で正しい税額が使われるよう、すべての行にVAT率を入力してください。"
+    },
+    "duplicate_number": {
+      "fail": "同じ請負業者の請求書番号{number}が{count}回入力されています。",
+      "suggestion": "重複分を取り消すか、別の請求書であれば請求書番号を修正してください。"
+    },
+    "possible_duplicate": {
+      "fail": "請求書{number}は、請負業者、金額({amount})、日付({on})が請求書{other}と同じです。",
+      "suggestion": "別の番号で同じ請求書を二重に入力していないか確認してください。"
+    }
   }
 }

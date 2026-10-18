@@ -1111,5 +1111,79 @@
       "fail": "La facture fournisseur {number} de {amount} n'est rattachée à aucun contrat ni commande.",
       "suggestion": "Rattachez ses lignes à un contrat, ou enregistrez-la en coût direct sur un compte."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "La facture {number} du contrat {contract} indique {net} à ce jour, soit moins que les {previous} de la facture précédente {previous_number}, alors que le contrat est facturé en cumulé.",
+      "suggestion": "Si la facture ne facture que les travaux nouveaux, le contrat est facturé en incrémental ; si elle réduit le total, saisissez-la comme avoir."
+    },
+    "invoice_after_final": {
+      "fail": "La facture {number} du contrat {contract} est postérieure à la facture finale {final}.",
+      "suggestion": "Saisissez les travaux ultérieurs en régie ou en avoir, ou marquez la bonne facture comme finale."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "La facture {number} du contrat {contract} est issue d'une réclamation et facture une seule période, mais le contrat est facturé en cumulé.",
+      "suggestion": "Utilisez un seul mode de facturation par contrat : passez le contrat en facturation incrémentale, ou saisissez à la place les factures cumulées de l'entreprise."
+    },
+    "release_differs": {
+      "fail": "La libération confirmée pour la facture {number} du contrat {contract} est de {stored}, mais les conditions du contrat donnent aujourd'hui {computed}.",
+      "suggestion": "Vérifiez ce qui a changé depuis la libération (conditions, montants de la facture, déductions), puis rouvrez la libération et confirmez-la de nouveau."
+    },
+    "rounding_out_of_range": {
+      "fail": "La facture {number} est arrondie de {rounding}, hors du pas d'arrondi convenu de {step}.",
+      "suggestion": "L'arrondi ne réduit une libération que de moins d'un pas ; activez l'arrondi dans les conditions de paiement ou rouvrez la libération."
+    },
+    "final_retention_without_warranty": {
+      "fail": "La facture finale {number} du contrat {contract} retient {amount} de retenue, mais aucune retenue de garantie n'est convenue.",
+      "suggestion": "Convenez d'une retenue de garantie dans les conditions de paiement, ou rouvrez la libération pour que toute la retenue soit payée avec la facture finale."
+    },
+    "posting_exceeds_held": {
+      "fail": "Sur le contrat {contract}, plus de retenue a été restituée que retenue : {amount} en trop.",
+      "suggestion": "Annulez l'écriture de retenue trop élevée et comptabilisez le montant réellement retenu."
+    },
+    "posting_before_event": {
+      "fail": "{amount} de retenue du contrat {contract} ont été restitués le {posted}, avant l'événement de libération prévu le {due}.",
+      "suggestion": "Vérifiez la date de l'événement de libération, ou comptabilisez la libération une fois l'événement survenu."
+    },
+    "posting_without_event_date": {
+      "fail": "{amount} de retenue du contrat {contract} ont été restitués, mais la date de l'événement de libération n'est pas saisie.",
+      "suggestion": "Saisissez la date à laquelle l'événement de libération a été atteint, pour pouvoir y comparer le paiement."
+    },
+    "retention_still_held": {
+      "fail": "Le contrat {contract} est terminé et retient encore {amount} de retenue.",
+      "suggestion": "Libérez la retenue à son événement dans le registre des retenues, ou conservez-la pendant la période de garantie."
+    },
+    "discount_not_agreed": {
+      "fail": "La libération de la facture {number} du contrat {contract} déduit un escompte de {amount}, mais le contrat n'en prévoit aucun.",
+      "suggestion": "Activez l'escompte pour paiement anticipé dans les conditions de paiement, ou rouvrez la libération sans lui."
+    },
+    "discount_after_deadline": {
+      "fail": "Un escompte de {amount} a été retenu sur la facture {number}, mais le paiement du {paid_on} est postérieur à la date d'escompte {until}.",
+      "suggestion": "Payez aussi le montant de l'escompte, ou consignez pourquoi l'entreprise a accepté l'escompte tardif."
+    },
+    "invoiced_over_measured": {
+      "fail": "Le contrat {contract} est facturé à {invoiced}, soit {difference} au-dessus des {measured} métrés (quantité fois prix).",
+      "suggestion": "Vérifiez le métré avant de libérer davantage d'argent, ou retenez l'écart à la prochaine libération."
+    },
+    "invoiced_over_contract": {
+      "fail": "Le contrat {contract} est facturé à {invoiced}, soit {difference} au-dessus de sa valeur de {value}, et rien n'est métré dessus.",
+      "suggestion": "Saisissez le métré ou l'avenant qui couvre le surplus avant de libérer davantage."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "La facture {number} est en autoliquidation mais porte {vat} de TVA.",
+      "suggestion": "Une facture en autoliquidation ne porte pas de TVA ; corrigez le montant de TVA ou la catégorie de TVA de ses lignes."
+    },
+    "line_without_vat_rate": {
+      "fail": "La facture {number} porte de la TVA, mais {count} de ses lignes n'indiquent pas de taux de TVA.",
+      "suggestion": "Saisissez le taux de TVA sur chaque ligne pour que les déductions et les exports appliquent la bonne taxe."
+    },
+    "duplicate_number": {
+      "fail": "Le numéro de facture {number} de la même entreprise est saisi {count} fois.",
+      "suggestion": "Annulez la copie, ou corrigez le numéro de facture s'il s'agit de factures différentes."
+    },
+    "possible_duplicate": {
+      "fail": "La facture {number} a la même entreprise, le même montant ({amount}) et la même date ({on}) que la facture {other}.",
+      "suggestion": "Vérifiez qu'il ne s'agit pas de la même facture saisie deux fois sous un autre numéro."
+    }
   }
 }

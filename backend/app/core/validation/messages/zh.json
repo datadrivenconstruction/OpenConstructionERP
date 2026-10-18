@@ -1111,5 +1111,79 @@
       "fail": "供应商发票{number}({amount})不属于任何合同或订单。",
       "suggestion": "请把它的明细行关联到某个合同,或作为直接成本记入一个科目。"
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "合同{contract}的发票{number}累计金额为{net},低于上一张发票{previous_number}的{previous},而该合同按累计方式开票。",
+      "suggestion": "如果发票只结算新增工程量,则合同按增量方式开票;如果发票使合计减少,请录入为贷项通知单。"
+    },
+    "invoice_after_final": {
+      "fail": "合同{contract}的发票{number}排在最终发票{final}之后。",
+      "suggestion": "请将之后的工作录入为计日工或贷项通知单,或把正确的发票标记为最终发票。"
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "合同{contract}的发票{number}由索赔生成且只结算一个期间,但该合同按累计方式开票。",
+      "suggestion": "每个合同只使用一种开票方式:把合同改为增量开票,或改为录入承包商的累计发票。"
+    },
+    "release_differs": {
+      "fail": "合同{contract}的发票{number}已确认的放款金额为{stored},但按合同条款今天算出的是{computed}。",
+      "suggestion": "请检查放款之后有什么变化(条款、发票金额、扣款),然后重新打开放款并再次确认。"
+    },
+    "rounding_out_of_range": {
+      "fail": "发票{number}的尾数调整为{rounding},超出了约定的取整步长{step}。",
+      "suggestion": "取整只会让放款金额减少不到一个步长;请在付款条款中启用取整,或重新打开放款。"
+    },
+    "final_retention_without_warranty": {
+      "fail": "合同{contract}的最终发票{number}扣留了{amount}质保金,但并未约定质保期保留金。",
+      "suggestion": "请在付款条款中约定质保期保留金,或重新打开放款,把全部保留金随最终发票一并支付。"
+    },
+    "posting_exceeds_held": {
+      "fail": "合同{contract}退还的保留金多于已扣留的金额,多退了{amount}。",
+      "suggestion": "请作废过高的保留金退还记账,按实际扣留的金额重新记账。"
+    },
+    "posting_before_event": {
+      "fail": "合同{contract}的{amount}保留金已于{posted}退还,早于其释放事件的到期日{due}。",
+      "suggestion": "请核对释放事件的日期,或在事件发生后再记账释放。"
+    },
+    "posting_without_event_date": {
+      "fail": "合同{contract}的{amount}保留金已退还,但未记录其释放事件的日期。",
+      "suggestion": "请记录释放事件达成的日期,以便将该笔付款与之核对。"
+    },
+    "retention_still_held": {
+      "fail": "合同{contract}已完工,但仍扣留着{amount}保留金。",
+      "suggestion": "请在保留金台账中按其事件释放保留金,或继续扣留至质保期结束。"
+    },
+    "discount_not_agreed": {
+      "fail": "合同{contract}的发票{number}放款时扣减了{amount}提前付款折扣,但合同不允许折扣。",
+      "suggestion": "请在付款条款中启用提前付款折扣,或在不含折扣的情况下重新打开放款。"
+    },
+    "discount_after_deadline": {
+      "fail": "发票{number}已扣留{amount}折扣,但{paid_on}的付款晚于折扣截止日{until}。",
+      "suggestion": "请连同折扣金额一并支付,或记录承包商接受逾期折扣的原因。"
+    },
+    "invoiced_over_measured": {
+      "fail": "合同{contract}已开票{invoiced},比已计量的{measured}(数量乘单价)多出{difference}。",
+      "suggestion": "在继续放款之前请核对计量,或在下次放款时扣留差额。"
+    },
+    "invoiced_over_contract": {
+      "fail": "合同{contract}已开票{invoiced},比合同价值{value}多出{difference},且没有任何计量。",
+      "suggestion": "在继续放款之前,请先录入能覆盖超出金额的计量或变更。"
+    },
+    "reverse_charge_with_vat": {
+      "fail": "发票{number}适用反向征税,却带有{vat}增值税。",
+      "suggestion": "反向征税的发票不含增值税;请更正增值税金额或其明细行的增值税类别。"
+    },
+    "line_without_vat_rate": {
+      "fail": "发票{number}含增值税,但有{count}个明细行没有填写税率。",
+      "suggestion": "请在每个明细行填写增值税税率,以便扣款和导出使用正确的税额。"
+    },
+    "duplicate_number": {
+      "fail": "同一承包商的发票号{number}被录入了{count}次。",
+      "suggestion": "请作废重复的那张,或者若是不同的发票,请更正发票号。"
+    },
+    "possible_duplicate": {
+      "fail": "发票{number}与发票{other}的承包商、金额({amount})和日期({on})相同。",
+      "suggestion": "请核对是不是同一张发票以另一个号码重复录入。"
+    }
   }
 }

@@ -1111,5 +1111,79 @@
       "fail": "Faktura dostawcy {number} na {amount} nie należy do żadnej umowy ani zamówienia.",
       "suggestion": "Powiąż jej pozycje z umową albo zapisz ją jako koszt bezpośredni na jednym koncie."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Faktura {number} do umowy {contract} wykazuje {net} narastająco, czyli mniej niż {previous} z poprzedniej faktury {previous_number}, mimo że umowa jest fakturowana narastająco.",
+      "suggestion": "Jeśli faktura obejmuje tylko nowe roboty, umowa jest fakturowana przyrostowo; jeśli zmniejsza sumę, wprowadź ją jako fakturę korygującą."
+    },
+    "invoice_after_final": {
+      "fail": "Faktura {number} do umowy {contract} jest wystawiona po fakturze końcowej {final}.",
+      "suggestion": "Wprowadź późniejsze roboty jako roboty dodatkowe w regie lub fakturę korygującą, albo oznacz właściwą fakturę jako końcową."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Faktura {number} do umowy {contract} powstała z roszczenia i obejmuje jeden okres, ale umowa jest fakturowana narastająco.",
+      "suggestion": "Stosuj jeden sposób fakturowania na umowę: przełącz umowę na fakturowanie przyrostowe albo wprowadź narastające faktury wykonawcy."
+    },
+    "release_differs": {
+      "fail": "Zatwierdzona do wypłaty kwota dla faktury {number} do umowy {contract} wynosi {stored}, ale warunki umowy dają dziś {computed}.",
+      "suggestion": "Sprawdź, co zmieniło się od zatwierdzenia (warunki, kwoty faktury, potrącenia), a następnie otwórz zatwierdzenie ponownie i potwierdź je jeszcze raz."
+    },
+    "rounding_out_of_range": {
+      "fail": "Faktura {number} jest zaokrąglona o {rounding}, poza uzgodnionym krokiem zaokrąglenia {step}.",
+      "suggestion": "Zaokrąglenie zmniejsza kwotę do wypłaty o mniej niż jeden krok; włącz zaokrąglanie w warunkach płatności albo otwórz zatwierdzenie ponownie."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Faktura końcowa {number} do umowy {contract} zatrzymuje {amount} kaucji, ale nie uzgodniono kaucji gwarancyjnej.",
+      "suggestion": "Uzgodnij kaucję gwarancyjną w warunkach płatności albo otwórz zatwierdzenie ponownie, aby całą kaucję wypłacić z fakturą końcową."
+    },
+    "posting_exceeds_held": {
+      "fail": "W umowie {contract} zwrócono więcej kaucji, niż jest zatrzymane: o {amount} za dużo.",
+      "suggestion": "Anuluj zbyt wysoki zapis zwrotu kaucji i zaksięguj kwotę faktycznie zatrzymaną."
+    },
+    "posting_before_event": {
+      "fail": "Kaucję {amount} w umowie {contract} zwrócono {posted}, przed zdarzeniem zwalniającym, którego termin przypadał na {due}.",
+      "suggestion": "Sprawdź datę zdarzenia zwalniającego albo zaksięguj zwolnienie dopiero po tym zdarzeniu."
+    },
+    "posting_without_event_date": {
+      "fail": "Kaucję {amount} w umowie {contract} zwrócono, ale nie zapisano daty zdarzenia zwalniającego.",
+      "suggestion": "Zapisz datę nastąpienia zdarzenia zwalniającego, aby można było sprawdzić zwrot względem niej."
+    },
+    "retention_still_held": {
+      "fail": "Umowa {contract} jest zakończona i nadal zatrzymuje {amount} kaucji.",
+      "suggestion": "Zwolnij kaucję przy jej zdarzeniu w rejestrze kaucji albo zatrzymaj ją na okres gwarancji."
+    },
+    "discount_not_agreed": {
+      "fail": "Zatwierdzenie faktury {number} do umowy {contract} uwzględnia rabat za wcześniejszą płatność {amount}, ale umowa go nie przewiduje.",
+      "suggestion": "Włącz rabat za wcześniejszą płatność w warunkach płatności albo otwórz zatwierdzenie ponownie bez niego."
+    },
+    "discount_after_deadline": {
+      "fail": "Z faktury {number} zatrzymano rabat {amount}, ale płatność z dnia {paid_on} nastąpiła po terminie rabatu {until}.",
+      "suggestion": "Zapłać także kwotę rabatu albo zapisz, dlaczego wykonawca zaakceptował spóźniony rabat."
+    },
+    "invoiced_over_measured": {
+      "fail": "Umowa {contract} jest zafakturowana na {invoiced}, czyli o {difference} powyżej obmierzonych {measured} (ilość razy cena).",
+      "suggestion": "Sprawdź obmiar przed wypłatą kolejnych środków albo zatrzymaj różnicę przy następnym zatwierdzeniu."
+    },
+    "invoiced_over_contract": {
+      "fail": "Umowa {contract} jest zafakturowana na {invoiced}, czyli o {difference} powyżej jej wartości {value}, a nic nie jest obmierzone.",
+      "suggestion": "Zapisz obmiar lub zmianę, która pokrywa dodatkową kwotę, zanim wypłacisz więcej."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Faktura {number} podlega odwrotnemu obciążeniu, ale zawiera VAT {vat}.",
+      "suggestion": "Faktura z odwrotnym obciążeniem nie zawiera VAT; popraw kwotę VAT albo kategorię VAT jej pozycji."
+    },
+    "line_without_vat_rate": {
+      "fail": "Faktura {number} zawiera VAT, ale {count} jej pozycji nie ma stawki VAT.",
+      "suggestion": "Wpisz stawkę VAT w każdej pozycji, aby potrącenia i eksporty stosowały właściwy podatek."
+    },
+    "duplicate_number": {
+      "fail": "Numer faktury {number} tego samego wykonawcy wprowadzono {count} razy.",
+      "suggestion": "Anuluj kopię albo popraw numer faktury, jeśli to różne faktury."
+    },
+    "possible_duplicate": {
+      "fail": "Faktura {number} ma tego samego wykonawcę, kwotę ({amount}) i datę ({on}) co faktura {other}.",
+      "suggestion": "Sprawdź, czy to nie ta sama faktura wprowadzona dwa razy pod innym numerem."
+    }
   }
 }

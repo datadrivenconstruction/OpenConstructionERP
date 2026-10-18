@@ -38,6 +38,29 @@ vi.mock('../api', async (importOriginal) => {
   };
 });
 
+vi.mock('../paymentsApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../paymentsApi')>();
+  const empty = {
+    contract_value: '0',
+    invoiced: '0',
+    invoiced_pct: null,
+    released: '0',
+    payable: '0',
+    paid: '0',
+    open_amount: '0',
+    retention_held: '0',
+    retention_posted: '0',
+  };
+  return {
+    ...actual,
+    paymentsApi: {
+      ledger: vi.fn().mockResolvedValue({ project_id: 'p-1', currency: 'EUR', contracts: [], other_invoices: [], totals: empty }),
+      retention: vi.fn().mockResolvedValue({ project_id: 'p-1', currency: 'EUR', contracts: [], held: '0', posted: '0' }),
+      findings: vi.fn().mockResolvedValue({ project_id: 'p-1', findings: [], errors: 0, warnings: 0 }),
+    },
+  };
+});
+
 import { costControlApi, type CostControlReport, type CostControlRow } from '../api';
 import { CostControlPage } from '../CostControlPage';
 
@@ -55,7 +78,9 @@ function row(over: Partial<CostControlRow>): CostControlRow {
     awarded: '0',
     changes: '0',
     committed: '0',
+    measured: '0',
     certified: '0',
+    invoiced: '0',
     paid: '0',
     pending_changes: '0',
     forecast: '0',

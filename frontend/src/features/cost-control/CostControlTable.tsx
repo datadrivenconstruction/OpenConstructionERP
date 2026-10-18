@@ -27,7 +27,17 @@ interface Group {
   rows: CostControlRow[];
 }
 
-const MONEY_COLUMNS = ['planned', 'awarded', 'changes', 'forecast', 'variance', 'certified', 'paid'] as const;
+const MONEY_COLUMNS = [
+  'planned',
+  'awarded',
+  'changes',
+  'forecast',
+  'variance',
+  'measured',
+  'certified',
+  'invoiced',
+  'paid',
+] as const;
 type MoneyColumn = (typeof MONEY_COLUMNS)[number];
 const PLAN_COLUMNS: ReadonlySet<MoneyColumn> = new Set<MoneyColumn>(['planned', 'variance']);
 
@@ -131,7 +141,9 @@ export function CostControlTable({
     changes: t('cost_control.col_changes', { defaultValue: 'Changes' }),
     forecast: t('cost_control.col_forecast', { defaultValue: 'Forecast' }),
     variance: t('cost_control.col_variance', { defaultValue: 'Difference' }),
+    measured: t('cost_control.col_measured', { defaultValue: 'Measured' }),
     certified: t('cost_control.col_certified', { defaultValue: 'Certified' }),
+    invoiced: t('cost_control.col_invoiced', { defaultValue: 'Invoiced' }),
     paid: t('cost_control.col_paid', { defaultValue: 'Paid' }),
   };
 
@@ -186,7 +198,7 @@ export function CostControlTable({
   return (
     <div className="overflow-x-auto rounded-xl border border-border-light">
       <table
-        className={`w-full text-sm ${axis === 'cost_line' ? 'min-w-[920px]' : 'min-w-[720px]'}`}
+        className={`w-full text-sm ${axis === 'cost_line' ? 'min-w-[1080px]' : 'min-w-[880px]'}`}
         data-testid="cost-control-table"
       >
         <thead>

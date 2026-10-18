@@ -1111,5 +1111,79 @@
       "fail": "Toimittajan lasku {number}, {amount}, ei kuulu millekään sopimukselle tai tilaukselle.",
       "suggestion": "Liitä sen rivit sopimukseen tai kirjaa se suorana kustannuksena tilille."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Sopimuksen {contract} lasku {number} ilmoittaa tähän mennessä {net}, vähemmän kuin edellisen laskun {previous_number} {previous}, vaikka sopimus laskutetaan kumulatiivisesti.",
+      "suggestion": "Jos lasku veloittaa vain uudet työt, sopimus laskutetaan erillisinä erinä; jos se pienentää kokonaissummaa, kirjaa se hyvityslaskuna."
+    },
+    "invoice_after_final": {
+      "fail": "Sopimuksen {contract} lasku {number} tulee loppulaskun {final} jälkeen.",
+      "suggestion": "Kirjaa myöhemmät työt tuntityönä tai hyvityslaskuna, tai merkitse oikea lasku loppulaskuksi."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Sopimuksen {contract} lasku {number} on luotu vaatimuksesta ja veloittaa yhden jakson, mutta sopimus laskutetaan kumulatiivisesti.",
+      "suggestion": "Käytä sopimuksella yhtä laskutustapaa: vaihda sopimus erälaskutukseen tai kirjaa urakoitsijan kumulatiiviset laskut sen sijaan."
+    },
+    "release_differs": {
+      "fail": "Sopimuksen {contract} laskun {number} vahvistettu maksuun vapautus on {stored}, mutta sopimuksen ehdoilla tulos on tänään {computed}.",
+      "suggestion": "Tarkista, mikä on muuttunut vapautuksen jälkeen (ehdot, laskun summat, vähennykset), avaa sitten vapautus uudelleen ja vahvista se."
+    },
+    "rounding_out_of_range": {
+      "fail": "Laskua {number} on pyöristetty {rounding}, sovitun pyöristysaskeleen {step} ulkopuolella.",
+      "suggestion": "Pyöristys pienentää vapautusta vähemmän kuin yhden askeleen; ota pyöristys käyttöön maksuehdoissa tai avaa vapautus uudelleen."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Sopimuksen {contract} loppulasku {number} pidättää takuupidätystä {amount}, mutta takuupidätystä ei ole sovittu.",
+      "suggestion": "Sovi takuupidätyksestä maksuehdoissa tai avaa vapautus uudelleen, jotta koko pidätys maksetaan loppulaskun mukana."
+    },
+    "posting_exceeds_held": {
+      "fail": "Sopimukselta {contract} on palautettu pidätystä enemmän kuin sitä pidetään: {amount} liikaa.",
+      "suggestion": "Mitätöi liian suuri pidätyskirjaus ja kirjaa todellisuudessa pidätetty summa."
+    },
+    "posting_before_event": {
+      "fail": "Sopimuksen {contract} pidätys {amount} palautettiin {posted}, ennen kuin vapautustapahtuma oli erääntynyt {due}.",
+      "suggestion": "Tarkista vapautustapahtuman päivä tai kirjaa vapautus vasta tapahtuman jälkeen."
+    },
+    "posting_without_event_date": {
+      "fail": "Sopimuksen {contract} pidätys {amount} palautettiin, mutta vapautustapahtuman päivää ei ole kirjattu.",
+      "suggestion": "Kirjaa päivä, jolloin vapautustapahtuma toteutui, jotta maksu voidaan tarkistaa sitä vasten."
+    },
+    "retention_still_held": {
+      "fail": "Sopimus {contract} on valmis ja pidättää edelleen {amount}.",
+      "suggestion": "Vapauta pidätys sen tapahtumassa pidätysrekisterissä tai pidä se takuuajan."
+    },
+    "discount_not_agreed": {
+      "fail": "Sopimuksen {contract} laskun {number} vapautus ottaa maksuaikaa nopeammasta maksusta {amount} alennusta, mutta sopimus ei salli sitä.",
+      "suggestion": "Ota käteisalennus käyttöön maksuehdoissa tai avaa vapautus uudelleen ilman sitä."
+    },
+    "discount_after_deadline": {
+      "fail": "Laskulta {number} pidettiin {amount} alennus, mutta maksu {paid_on} tuli alennuspäivän {until} jälkeen.",
+      "suggestion": "Maksa myös alennuksen summa tai kirjaa, miksi urakoitsija hyväksyi myöhäisen alennuksen."
+    },
+    "invoiced_over_measured": {
+      "fail": "Sopimus {contract} on laskutettu summalla {invoiced}, {difference} yli mitatun {measured} (määrä kertaa yksikköhinta).",
+      "suggestion": "Tarkista mittaus, ennen kuin vapautat lisää rahaa, tai pidätä erotus seuraavassa vapautuksessa."
+    },
+    "invoiced_over_contract": {
+      "fail": "Sopimus {contract} on laskutettu summalla {invoiced}, {difference} yli sen arvon {value}, eikä siitä ole mitattu mitään.",
+      "suggestion": "Kirjaa mittaus tai muutostyö, joka kattaa lisärahan, ennen kuin vapautat enempää."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Lasku {number} on käännetyn verovelvollisuuden lasku, mutta siinä on alv {vat}.",
+      "suggestion": "Käännetyn verovelvollisuuden laskussa ei ole alv:ia; korjaa alv-summa tai rivien alv-luokka."
+    },
+    "line_without_vat_rate": {
+      "fail": "Laskussa {number} on alv, mutta {count} sen riviltä puuttuu alv-kanta.",
+      "suggestion": "Syötä alv-kanta jokaiselle riville, jotta vähennykset ja viennit käyttävät oikeaa veroa."
+    },
+    "duplicate_number": {
+      "fail": "Saman urakoitsijan laskunumero {number} on kirjattu {count} kertaa.",
+      "suggestion": "Peruuta kopio tai korjaa laskunumero, jos kyseessä ovat eri laskut."
+    },
+    "possible_duplicate": {
+      "fail": "Laskulla {number} on sama urakoitsija, summa ({amount}) ja päivä ({on}) kuin laskulla {other}.",
+      "suggestion": "Tarkista, ettei kyseessä ole sama lasku kirjattuna kahdesti eri numerolla."
+    }
   }
 }

@@ -1111,5 +1111,79 @@
       "fail": "Faktur pemasok {number} sebesar {amount} tidak termasuk kontrak atau pesanan mana pun.",
       "suggestion": "Kaitkan barisnya ke kontrak, atau catat sebagai biaya langsung di satu akun."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Faktur {number} pada kontrak {contract} mencatat {net} sampai saat ini, lebih kecil dari {previous} pada faktur sebelumnya {previous_number}, padahal kontrak ditagih secara kumulatif.",
+      "suggestion": "Jika faktur hanya menagih pekerjaan baru, kontrak ditagih secara inkremental; jika faktur mengurangi total, catat sebagai nota kredit."
+    },
+    "invoice_after_final": {
+      "fail": "Faktur {number} pada kontrak {contract} terbit setelah faktur final {final}.",
+      "suggestion": "Catat pekerjaan berikutnya sebagai pekerjaan harian atau nota kredit, atau tandai faktur yang benar sebagai faktur final."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Faktur {number} pada kontrak {contract} dibuat dari klaim dan menagih satu periode, tetapi kontrak ditagih secara kumulatif.",
+      "suggestion": "Gunakan satu cara penagihan per kontrak: ubah kontrak ke penagihan inkremental, atau catat faktur kumulatif kontraktor sebagai gantinya."
+    },
+    "release_differs": {
+      "fail": "Pencairan yang dikonfirmasi untuk faktur {number} pada kontrak {contract} sebesar {stored}, tetapi ketentuan kontrak hari ini menghasilkan {computed}.",
+      "suggestion": "Periksa apa yang berubah sejak pencairan (ketentuan, jumlah faktur, potongan), lalu buka kembali pencairan dan konfirmasi ulang."
+    },
+    "rounding_out_of_range": {
+      "fail": "Faktur {number} dibulatkan sebesar {rounding}, di luar langkah pembulatan yang disepakati yaitu {step}.",
+      "suggestion": "Pembulatan hanya mengurangi pencairan kurang dari satu langkah; aktifkan pembulatan di ketentuan pembayaran atau buka kembali pencairan."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Faktur final {number} pada kontrak {contract} menahan retensi {amount}, tetapi tidak ada retensi garansi yang disepakati.",
+      "suggestion": "Sepakati retensi garansi di ketentuan pembayaran, atau buka kembali pencairan agar seluruh retensi dibayar bersama faktur final."
+    },
+    "posting_exceeds_held": {
+      "fail": "Retensi yang dikembalikan pada kontrak {contract} lebih besar dari yang ditahan: kelebihan {amount}.",
+      "suggestion": "Batalkan pencatatan retensi yang terlalu besar dan catat jumlah yang benar-benar ditahan."
+    },
+    "posting_before_event": {
+      "fail": "Retensi {amount} pada kontrak {contract} dikembalikan pada {posted}, sebelum peristiwa pencairannya jatuh tempo pada {due}.",
+      "suggestion": "Periksa tanggal peristiwa pencairan, atau catat pencairan setelah peristiwa itu terjadi."
+    },
+    "posting_without_event_date": {
+      "fail": "Retensi {amount} pada kontrak {contract} dikembalikan, tetapi tanggal peristiwa pencairannya tidak dicatat.",
+      "suggestion": "Catat tanggal peristiwa pencairan tercapai, agar pembayaran dapat dicocokkan dengannya."
+    },
+    "retention_still_held": {
+      "fail": "Kontrak {contract} sudah selesai dan masih menahan retensi {amount}.",
+      "suggestion": "Cairkan retensi pada peristiwanya di register retensi, atau tetap tahan selama masa garansi."
+    },
+    "discount_not_agreed": {
+      "fail": "Pencairan faktur {number} pada kontrak {contract} mengambil diskon pembayaran dini sebesar {amount}, padahal kontrak tidak mengizinkannya.",
+      "suggestion": "Aktifkan diskon pembayaran dini di ketentuan pembayaran, atau buka kembali pencairan tanpa diskon."
+    },
+    "discount_after_deadline": {
+      "fail": "Diskon {amount} ditahan pada faktur {number}, tetapi pembayaran pada {paid_on} terjadi setelah batas diskon {until}.",
+      "suggestion": "Bayar juga jumlah diskonnya, atau catat alasan kontraktor menerima diskon yang terlambat."
+    },
+    "invoiced_over_measured": {
+      "fail": "Kontrak {contract} ditagih sebesar {invoiced}, {difference} di atas {measured} yang terukur (volume kali harga satuan).",
+      "suggestion": "Periksa pengukuran sebelum mencairkan dana lagi, atau tahan selisihnya pada pencairan berikutnya."
+    },
+    "invoiced_over_contract": {
+      "fail": "Kontrak {contract} ditagih sebesar {invoiced}, {difference} di atas nilainya yaitu {value}, dan belum ada yang terukur.",
+      "suggestion": "Catat pengukuran atau perubahan pekerjaan yang mencakup kelebihan dana sebelum mencairkan lebih banyak."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Faktur {number} berstatus reverse charge tetapi memuat PPN {vat}.",
+      "suggestion": "Faktur reverse charge tidak memuat PPN; perbaiki jumlah PPN atau kategori PPN pada barisnya."
+    },
+    "line_without_vat_rate": {
+      "fail": "Faktur {number} memuat PPN, tetapi {count} barisnya tidak mencantumkan tarif PPN.",
+      "suggestion": "Isi tarif PPN pada setiap baris agar potongan dan ekspor memakai pajak yang benar."
+    },
+    "duplicate_number": {
+      "fail": "Nomor faktur {number} dari kontraktor yang sama dimasukkan {count} kali.",
+      "suggestion": "Batalkan salinannya, atau perbaiki nomor faktur jika faktur-faktur itu berbeda."
+    },
+    "possible_duplicate": {
+      "fail": "Faktur {number} memiliki kontraktor, jumlah ({amount}) dan tanggal ({on}) yang sama dengan faktur {other}.",
+      "suggestion": "Pastikan ini bukan faktur yang sama yang dimasukkan dua kali dengan nomor lain."
+    }
   }
 }

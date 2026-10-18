@@ -1111,5 +1111,79 @@
       "fail": "Die Lieferantenrechnung {number} über {amount} gehört zu keinem Vertrag und keiner Bestellung.",
       "suggestion": "Verknüpfen Sie ihre Positionen mit einem Vertrag oder erfassen Sie sie als Direktkosten auf einem Konto."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Die Rechnung {number} zum Vertrag {contract} weist bis heute {net} aus, weniger als die {previous} der vorherigen Rechnung {previous_number}, obwohl der Vertrag kumulativ abgerechnet wird.",
+      "suggestion": "Rechnet die Rechnung nur die neue Leistung ab, wird der Vertrag inkrementell abgerechnet; mindert sie die Gesamtsumme, erfassen Sie sie als Gutschrift."
+    },
+    "invoice_after_final": {
+      "fail": "Die Rechnung {number} zum Vertrag {contract} folgt auf die Schlussrechnung {final}.",
+      "suggestion": "Erfassen Sie spätere Leistungen als Stundenlohnarbeiten oder Gutschrift, oder markieren Sie die richtige Rechnung als Schlussrechnung."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Die Rechnung {number} zum Vertrag {contract} wurde aus einer Forderung erstellt und rechnet einen Zeitraum ab, der Vertrag wird aber kumulativ abgerechnet.",
+      "suggestion": "Verwenden Sie je Vertrag eine Abrechnungsart: Stellen Sie den Vertrag auf inkrementelle Abrechnung um oder erfassen Sie stattdessen die kumulativen Rechnungen des Auftragnehmers."
+    },
+    "release_differs": {
+      "fail": "Die bestätigte Zahlungsfreigabe der Rechnung {number} zum Vertrag {contract} beträgt {stored}, nach den Vertragsbedingungen ergibt sich heute aber {computed}.",
+      "suggestion": "Prüfen Sie, was sich seit der Freigabe geändert hat (Bedingungen, Rechnungsbeträge, Abzüge), öffnen Sie die Freigabe dann erneut und bestätigen Sie sie noch einmal."
+    },
+    "rounding_out_of_range": {
+      "fail": "Die Rechnung {number} wird um {rounding} gerundet, außerhalb der vereinbarten Rundungsstufe von {step}.",
+      "suggestion": "Die Rundung kürzt eine Freigabe um weniger als eine Stufe; aktivieren Sie die Rundung in den Zahlungsbedingungen oder öffnen Sie die Freigabe erneut."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Die Schlussrechnung {number} zum Vertrag {contract} behält {amount} Einbehalt zurück, es ist aber kein Gewährleistungseinbehalt vereinbart.",
+      "suggestion": "Vereinbaren Sie einen Gewährleistungseinbehalt in den Zahlungsbedingungen oder öffnen Sie die Freigabe erneut, damit der gesamte Einbehalt mit der Schlussrechnung ausgezahlt wird."
+    },
+    "posting_exceeds_held": {
+      "fail": "Im Vertrag {contract} wurde mehr Einbehalt zurückgezahlt, als einbehalten ist: {amount} zu viel.",
+      "suggestion": "Stornieren Sie die zu hohe Einbehaltsbuchung und buchen Sie den tatsächlich einbehaltenen Betrag."
+    },
+    "posting_before_event": {
+      "fail": "{amount} Einbehalt im Vertrag {contract} wurden am {posted} zurückgezahlt, vor dem Freigabeereignis, das am {due} fällig war.",
+      "suggestion": "Prüfen Sie das Datum des Freigabeereignisses oder buchen Sie die Freigabe erst, wenn das Ereignis eingetreten ist."
+    },
+    "posting_without_event_date": {
+      "fail": "{amount} Einbehalt im Vertrag {contract} wurden zurückgezahlt, aber das Datum des Freigabeereignisses ist nicht erfasst.",
+      "suggestion": "Erfassen Sie das Datum, an dem das Freigabeereignis eingetreten ist, damit die Zahlung dagegen geprüft werden kann."
+    },
+    "retention_still_held": {
+      "fail": "Der Vertrag {contract} ist abgeschlossen und hält noch {amount} Einbehalt.",
+      "suggestion": "Geben Sie den Einbehalt zum Ereignis im Einbehaltsregister frei oder lassen Sie ihn für die Gewährleistungsfrist einbehalten."
+    },
+    "discount_not_agreed": {
+      "fail": "Die Freigabe der Rechnung {number} zum Vertrag {contract} nimmt {amount} Skonto ab, der Vertrag sieht aber keines vor.",
+      "suggestion": "Aktivieren Sie das Skonto in den Zahlungsbedingungen oder öffnen Sie die Freigabe erneut und geben Sie sie ohne Skonto frei."
+    },
+    "discount_after_deadline": {
+      "fail": "Bei der Rechnung {number} wurde ein Skonto von {amount} abgezogen, die Zahlung am {paid_on} erfolgte aber nach der Skontofrist {until}.",
+      "suggestion": "Zahlen Sie den Skontobetrag nach oder halten Sie fest, warum der Auftragnehmer das verspätete Skonto akzeptiert hat."
+    },
+    "invoiced_over_measured": {
+      "fail": "Der Vertrag {contract} ist mit {invoiced} abgerechnet, {difference} über den aufgemessenen {measured} (Menge mal Einheitspreis).",
+      "suggestion": "Prüfen Sie das Aufmaß, bevor Sie weiteres Geld freigeben, oder behalten Sie die Differenz bei der nächsten Freigabe ein."
+    },
+    "invoiced_over_contract": {
+      "fail": "Der Vertrag {contract} ist mit {invoiced} abgerechnet, {difference} über seinem Wert von {value}, und es ist nichts aufgemessen.",
+      "suggestion": "Erfassen Sie das Aufmaß oder den Nachtrag, der den Mehrbetrag abdeckt, bevor Sie weiteres Geld freigeben."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Die Rechnung {number} unterliegt dem Reverse-Charge-Verfahren, weist aber {vat} Umsatzsteuer aus.",
+      "suggestion": "Eine Rechnung im Reverse-Charge-Verfahren weist keine Umsatzsteuer aus; korrigieren Sie den Steuerbetrag oder die Steuerkategorie der Positionen."
+    },
+    "line_without_vat_rate": {
+      "fail": "Die Rechnung {number} weist Umsatzsteuer aus, aber {count} ihrer Positionen haben keinen Steuersatz.",
+      "suggestion": "Tragen Sie bei jeder Position den Steuersatz ein, damit Abzüge und Exporte die richtige Steuer verwenden."
+    },
+    "duplicate_number": {
+      "fail": "Die Rechnungsnummer {number} desselben Auftragnehmers ist {count}-mal erfasst.",
+      "suggestion": "Stornieren Sie die Kopie oder korrigieren Sie die Rechnungsnummer, falls es verschiedene Rechnungen sind."
+    },
+    "possible_duplicate": {
+      "fail": "Die Rechnung {number} hat denselben Auftragnehmer, Betrag ({amount}) und dasselbe Datum ({on}) wie die Rechnung {other}.",
+      "suggestion": "Prüfen Sie, dass es nicht dieselbe Rechnung ist, die unter einer anderen Nummer doppelt erfasst wurde."
+    }
   }
 }
