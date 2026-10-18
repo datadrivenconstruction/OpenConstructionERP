@@ -1887,7 +1887,7 @@ class ContractsService:
             template_code=getattr(source, "template_code", None),
             template_version=getattr(source, "template_version", None),
             # Cost lines belong to one project: a clone into another starts without accounts.
-            cost_line_id=source.cost_line_id if dest_project_id == source.project_id else None,
+            cost_line_id=getattr(source, "cost_line_id", None) if dest_project_id == source.project_id else None,
             created_by=user_id,
             metadata_=cloned_meta,
         )
@@ -1914,7 +1914,7 @@ class ContractsService:
                     total_value=Decimal(str(ln.total_value or 0)),
                     order_index=ln.order_index,
                     metadata_=dict(getattr(ln, "metadata_", {}) or {}),
-                    cost_line_id=ln.cost_line_id if dest_project_id == source.project_id else None,
+                    cost_line_id=getattr(ln, "cost_line_id", None) if dest_project_id == source.project_id else None,
                 )
                 new_line = await self.line_repo.create(new_line)
                 id_map[ln.id] = new_line.id
