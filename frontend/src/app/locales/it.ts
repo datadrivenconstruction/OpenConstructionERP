@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "Onboarding",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "Orologio pagamenti",
+    "modules.catalog.payment_release": "Benestare al pagamento",
     "modules.catalog.payroll": "Buste Paga",
     "modules.catalog.phonelog": "Registro delle chiamate",
     "modules.catalog.pipelines": "Generatore di Pipeline",

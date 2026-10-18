@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Sisseelamine",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Maksekell",
+    "modules.catalog.payment_release": "Maksete vabastamine",
     "modules.catalog.payroll": "Palgaarvestus",
     "modules.catalog.phonelog": "Kõnepäevik",
     "modules.catalog.pipelines": "Andmevoo koostaja",

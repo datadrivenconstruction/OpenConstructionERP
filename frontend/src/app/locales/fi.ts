@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Perehdytys",
     "modules.catalog.opencde_api": "OpenCDE-API",
     "modules.catalog.payment_clock": "Maksukello",
+    "modules.catalog.payment_release": "Maksujen vapautus",
     "modules.catalog.payroll": "Palkanlaskenta",
     "modules.catalog.phonelog": "Puheluloki",
     "modules.catalog.pipelines": "Putkien rakennustyökalu",

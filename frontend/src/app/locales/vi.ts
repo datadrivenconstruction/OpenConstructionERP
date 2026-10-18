@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "Định hướng nhập môn",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "Đồng hồ thanh toán",
+    "modules.catalog.payment_release": "Duyệt thanh toán",
     "modules.catalog.payroll": "Bảng lương",
     "modules.catalog.phonelog": "Nhật ký cuộc gọi",
     "modules.catalog.pipelines": "Trình dựng quy trình",

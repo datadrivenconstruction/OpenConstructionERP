@@ -572,6 +572,7 @@ const resource = {
     "modules.catalog.onboarding": "Дасан зохицуулах",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Төлбөрийн цаг",
+    "modules.catalog.payment_release": "Төлбөр олголт",
     "modules.catalog.payroll": "Цалин хөлс",
     "modules.catalog.phonelog": "Утасны бүртгэл",
     "modules.catalog.pipelines": "Дамжуулах хоолой бүтээгч",

@@ -235,25 +235,23 @@ export interface ReleaseFindings {
   warnings: number;
 }
 
-const BASE = '/v1/payment-release';
-
 export const paymentsApi = {
-  ledger: (projectId: string) => apiGet<ProjectLedger>(`${BASE}/projects/${projectId}/ledger/`),
-  retention: (projectId: string) => apiGet<RetentionRegister>(`${BASE}/projects/${projectId}/retention/`),
-  findings: (projectId: string) => apiGet<ReleaseFindings>(`${BASE}/projects/${projectId}/findings/`),
-  terms: (contractId: string) => apiGet<PaymentTerms>(`${BASE}/contracts/${contractId}/terms/`),
+  ledger: (projectId: string) => apiGet<ProjectLedger>(`/v1/payment-release/projects/${projectId}/ledger/`),
+  retention: (projectId: string) => apiGet<RetentionRegister>(`/v1/payment-release/projects/${projectId}/retention/`),
+  findings: (projectId: string) => apiGet<ReleaseFindings>(`/v1/payment-release/projects/${projectId}/findings/`),
+  terms: (contractId: string) => apiGet<PaymentTerms>(`/v1/payment-release/contracts/${contractId}/terms/`),
   putTerms: (contractId: string, body: PaymentTermsBody) =>
-    apiPut<PaymentTerms, PaymentTermsBody>(`${BASE}/contracts/${contractId}/terms/`, body),
+    apiPut<PaymentTerms, PaymentTermsBody>(`/v1/payment-release/contracts/${contractId}/terms/`, body),
   updateInvoice: (invoiceId: string, body: InvoiceReleaseUpdate) =>
-    apiPatch<InvoiceReleaseState, InvoiceReleaseUpdate>(`${BASE}/invoices/${invoiceId}/`, body),
+    apiPatch<InvoiceReleaseState, InvoiceReleaseUpdate>(`/v1/payment-release/invoices/${invoiceId}/`, body),
   release: (invoiceId: string) =>
-    apiPost<InvoiceReleaseState, Record<string, never>>(`${BASE}/invoices/${invoiceId}/release/`, {}),
+    apiPost<InvoiceReleaseState, Record<string, never>>(`/v1/payment-release/invoices/${invoiceId}/release/`, {}),
   reopen: (invoiceId: string) =>
-    apiPost<InvoiceReleaseState, Record<string, never>>(`${BASE}/invoices/${invoiceId}/reopen/`, {}),
+    apiPost<InvoiceReleaseState, Record<string, never>>(`/v1/payment-release/invoices/${invoiceId}/reopen/`, {}),
   postRetention: (contractId: string, body: RetentionPostingCreate) =>
-    apiPost<RetentionPosting, RetentionPostingCreate>(`${BASE}/contracts/${contractId}/retention-postings/`, body),
+    apiPost<RetentionPosting, RetentionPostingCreate>(`/v1/payment-release/contracts/${contractId}/retention-postings/`, body),
   voidPosting: (postingId: string) =>
-    apiPost<RetentionPosting, Record<string, never>>(`${BASE}/retention-postings/${postingId}/void/`, {}),
+    apiPost<RetentionPosting, Record<string, never>>(`/v1/payment-release/retention-postings/${postingId}/void/`, {}),
 };
 
 /* ── Labels ─────────────────────────────────────────────────────────── */

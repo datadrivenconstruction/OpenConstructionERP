@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Въвеждане",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Часовник за плащания",
+    "modules.catalog.payment_release": "Освобождаване на плащания",
     "modules.catalog.payroll": "Заплати",
     "modules.catalog.phonelog": "Дневник на обажданията",
     "modules.catalog.pipelines": "Конструктор на конвейери",

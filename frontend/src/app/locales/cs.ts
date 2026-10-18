@@ -572,6 +572,7 @@ const resource = {
     "modules.catalog.onboarding": "Onboarding",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "Hodiny plateb",
+    "modules.catalog.payment_release": "Uvolnění plateb",
     "modules.catalog.payroll": "Mzdy",
     "modules.catalog.phonelog": "Záznam hovorů",
     "modules.catalog.pipelines": "Tvůrce pipeline",

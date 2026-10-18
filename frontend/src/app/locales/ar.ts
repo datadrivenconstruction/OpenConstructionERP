@@ -576,6 +576,7 @@ const resource = {
     "modules.catalog.onboarding": "التهيئة والإعداد",
     "modules.catalog.opencde_api": "واجهة OpenCDE",
     "modules.catalog.payment_clock": "ساعة الدفع",
+    "modules.catalog.payment_release": "الإفراج عن الدفعات",
     "modules.catalog.payroll": "كشوف الرواتب",
     "modules.catalog.phonelog": "سجل المكالمات",
     "modules.catalog.pipelines": "منشئ خطوط المعالجة",

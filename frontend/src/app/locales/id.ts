@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "Orientasi",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "Jam Pembayaran",
+    "modules.catalog.payment_release": "Pelepasan Pembayaran",
     "modules.catalog.payroll": "Penggajian",
     "modules.catalog.phonelog": "Catatan Telepon",
     "modules.catalog.pipelines": "Pembangun Alur",

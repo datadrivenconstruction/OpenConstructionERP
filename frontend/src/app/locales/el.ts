@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Ένταξη",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "Χρονόμετρο πληρωμής",
+    "modules.catalog.payment_release": "Αποδέσμευση πληρωμών",
     "modules.catalog.payroll": "Μισθοδοσία",
     "modules.catalog.phonelog": "Καταγραφή Κλήσεων",
     "modules.catalog.pipelines": "Κατασκευαστής Ροών",

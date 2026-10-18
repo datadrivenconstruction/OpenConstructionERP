@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "Uvođenje",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Sat plaćanja",
+    "modules.catalog.payment_release": "Odobrenje plaćanja",
     "modules.catalog.payroll": "Obračun plaća",
     "modules.catalog.phonelog": "Zapisnik poziva",
     "modules.catalog.pipelines": "Graditelj tokova",

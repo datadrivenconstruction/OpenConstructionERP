@@ -573,6 +573,7 @@ const resource = {
     "modules.catalog.onboarding": "קליטה",
     "modules.catalog.opencde_api": "ממשק API של OpenCDE",
     "modules.catalog.payment_clock": "שעון תשלום",
+    "modules.catalog.payment_release": "שחרור תשלומים",
     "modules.catalog.payroll": "שכר",
     "modules.catalog.phonelog": "יומן שיחות",
     "modules.catalog.pipelines": "בונה צינורות",

@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "Integrare",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "Ceas de plăți",
+    "modules.catalog.payment_release": "Aprobarea plăților",
     "modules.catalog.payroll": "Salarizare",
     "modules.catalog.phonelog": "Jurnal de apeluri",
     "modules.catalog.pipelines": "Generator de fluxuri",

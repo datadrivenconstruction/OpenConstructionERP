@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Ыңгайлаштыруу",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Төлөм саат",
+    "modules.catalog.payment_release": "Төлөмдү бошотуу",
     "modules.catalog.payroll": "Эмгек акы",
     "modules.catalog.phonelog": "Телефон журналы",
     "modules.catalog.pipelines": "Түтүк куруучу",

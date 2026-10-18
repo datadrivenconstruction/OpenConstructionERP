@@ -572,6 +572,7 @@ const resource = {
     "modules.catalog.onboarding": "Onboarding",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "Orasan ng Bayad",
+    "modules.catalog.payment_release": "Pag-release ng Bayad",
     "modules.catalog.payroll": "Talaan ng Sweldo",
     "modules.catalog.phonelog": "Talaan ng Tawag",
     "modules.catalog.pipelines": "Tagabuo ng Pipeline",

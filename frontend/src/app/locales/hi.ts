@@ -572,6 +572,7 @@ const resource = {
     "modules.catalog.onboarding": "ऑनबोर्डिंग",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "भुगतान घड़ी",
+    "modules.catalog.payment_release": "भुगतान रिलीज़",
     "modules.catalog.payroll": "वेतन",
     "modules.catalog.phonelog": "फ़ोन लॉग",
     "modules.catalog.pipelines": "पाइपलाइन बिल्डर",

@@ -48015,6 +48015,7 @@ const resource = {
     "modules.catalog.middle_east_pack": "Регіональний пакет - Близький Схід і країни Перської затоки (GCC)",
     "modules.catalog.onboarding": "Введення в роботу",
     "modules.catalog.payment_clock": "Годинник платежів",
+    "modules.catalog.payment_release": "Дозвіл платежів",
     "modules.catalog.pointcloud": "Хмара точок / фіксація реальності",
     "modules.catalog.portfolio": "Портфель",
     "modules.catalog.prefab": "Позамайданчикове виготовлення / Префаб / DfMA",

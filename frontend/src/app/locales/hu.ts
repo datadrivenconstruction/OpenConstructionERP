@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Bevezető útmutató",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Fizetési óra",
+    "modules.catalog.payment_release": "Kifizetés jóváhagyása",
     "modules.catalog.payroll": "Bérszámfejtés",
     "modules.catalog.phonelog": "Telefonnapló",
     "modules.catalog.pipelines": "Folyamatépítő",

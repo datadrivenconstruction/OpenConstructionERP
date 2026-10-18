@@ -572,6 +572,7 @@ const resource = {
     "modules.catalog.onboarding": "অনবোর্ডিং",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "পেমেন্ট ক্লক",
+    "modules.catalog.payment_release": "পেমেন্ট রিলিজ",
     "modules.catalog.payroll": "পে-রোল",
     "modules.catalog.phonelog": "ফোন লগ",
     "modules.catalog.pipelines": "পাইপলাইন বিল্ডার",

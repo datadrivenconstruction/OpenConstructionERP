@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Onboarding",
     "modules.catalog.opencde_api": "OpenCDE-API",
     "modules.catalog.payment_clock": "Betalingsklok",
+    "modules.catalog.payment_release": "Betalingsvrijgave",
     "modules.catalog.payroll": "Loonadministratie",
     "modules.catalog.phonelog": "Telefoonlogboek",
     "modules.catalog.pipelines": "Pipeline-bouwer",

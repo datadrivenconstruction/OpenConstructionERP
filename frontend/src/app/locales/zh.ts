@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "引导入门",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "付款时钟",
+    "modules.catalog.payment_release": "付款审批",
     "modules.catalog.payroll": "薪资",
     "modules.catalog.phonelog": "通话记录",
     "modules.catalog.pipelines": "流程构建器",

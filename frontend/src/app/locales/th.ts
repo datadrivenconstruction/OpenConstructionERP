@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "การปฐมนิเทศ",
     "modules.catalog.opencde_api": "API OpenCDE",
     "modules.catalog.payment_clock": "นาฬิกาการชำระเงิน",
+    "modules.catalog.payment_release": "การอนุมัติจ่ายเงิน",
     "modules.catalog.payroll": "บัญชีเงินเดือน",
     "modules.catalog.phonelog": "บันทึกการโทร",
     "modules.catalog.pipelines": "ตัวสร้างไปป์ไลน์",

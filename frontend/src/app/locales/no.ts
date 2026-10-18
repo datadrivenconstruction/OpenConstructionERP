@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Onboarding",
     "modules.catalog.opencde_api": "OpenCDE-API",
     "modules.catalog.payment_clock": "Betalingsklokke",
+    "modules.catalog.payment_release": "Betalingsfrigivelse",
     "modules.catalog.payroll": "Lønn",
     "modules.catalog.phonelog": "Anropslogg",
     "modules.catalog.pipelines": "Flytbygger",

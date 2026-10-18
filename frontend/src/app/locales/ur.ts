@@ -572,6 +572,7 @@ const resource = {
     "modules.catalog.onboarding": "شمولیت کا عمل",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "ادائیگی کی گھڑی",
+    "modules.catalog.payment_release": "ادائیگی کی منظوری",
     "modules.catalog.payroll": "تنخواہ",
     "modules.catalog.phonelog": "فون لاگ",
     "modules.catalog.pipelines": "پائپ لائن بلڈر",

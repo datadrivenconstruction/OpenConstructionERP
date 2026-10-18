@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "İşe Alım Süreci",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Ödeme Saati",
+    "modules.catalog.payment_release": "Ödeme Onayı",
     "modules.catalog.payroll": "Bordro",
     "modules.catalog.phonelog": "Telefon Kaydı",
     "modules.catalog.pipelines": "Hat Oluşturucu",

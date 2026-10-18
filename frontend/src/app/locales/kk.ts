@@ -570,6 +570,7 @@ const resource = {
     "modules.catalog.onboarding": "Бейімдеу",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "Төлем сағаты",
+    "modules.catalog.payment_release": "Төлемді босату",
     "modules.catalog.payroll": "Жалақы",
     "modules.catalog.phonelog": "Қоңырау журналы",
     "modules.catalog.pipelines": "Құбыр Құрастырушысы",

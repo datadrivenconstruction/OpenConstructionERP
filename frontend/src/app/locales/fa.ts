@@ -572,6 +572,7 @@ const resource = {
     "modules.catalog.onboarding": "فرآیند ورود",
     "modules.catalog.opencde_api": "API متن‌باز OpenCDE",
     "modules.catalog.payment_clock": "ساعت پرداخت",
+    "modules.catalog.payment_release": "آزادسازی پرداخت",
     "modules.catalog.payroll": "حقوق و دستمزد",
     "modules.catalog.phonelog": "گزارش تماس",
     "modules.catalog.pipelines": "سازنده خط‌لوله",

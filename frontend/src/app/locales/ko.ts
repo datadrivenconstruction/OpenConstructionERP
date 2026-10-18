@@ -571,6 +571,7 @@ const resource = {
     "modules.catalog.onboarding": "온보딩",
     "modules.catalog.opencde_api": "OpenCDE API",
     "modules.catalog.payment_clock": "결제 시계",
+    "modules.catalog.payment_release": "지급 승인",
     "modules.catalog.payroll": "급여",
     "modules.catalog.phonelog": "통화 기록",
     "modules.catalog.pipelines": "파이프라인 빌더",

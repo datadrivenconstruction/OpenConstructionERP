@@ -46337,6 +46337,7 @@ const resource = {
     "modules.catalog.middle_east_pack": "Mintaqaviy paket - Yaqin Sharq va GCC",
     "modules.catalog.onboarding": "Boshlangʻich sozlash",
     "modules.catalog.payment_clock": "Toʻlov soati",
+    "modules.catalog.payment_release": "Toʻlovni ruxsat etish",
     "modules.catalog.pointcloud": "Nuqtalar buluti / haqiqiy muhitni suratga olish",
     "modules.catalog.portfolio": "Portfel",
     "modules.catalog.prefab": "Off-site / Prefab / DfMA",
