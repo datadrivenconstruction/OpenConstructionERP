@@ -1069,5 +1069,47 @@
     "parent_not_found": "Model, którego nową wersją ma być to wgranie, nie należy do tego projektu. Wybierz inny albo wgraj plik jako osobny model.",
     "parent_not_ready": "Import modelu \"{name}\" jeszcze się nie zakończył, więc nie może on na razie przyjąć nowej wersji. Poczekaj, aż będzie gotowy, albo wgraj ten plik jako osobny model.",
     "parent_superseded": "Model \"{name}\" ma już nowszą wersję, {version}. Wgraj ten plik zamiast tego jako nową wersję najnowszego."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Umowa {code} jest warta {amount}, ale nie ma pozycji harmonogramu, więc jej kwota nie leży na żadnej pozycji kosztowej.",
+      "suggestion": "Przypisz umowie konto w kontroli kosztów albo dodaj jej pozycje."
+    },
+    "contract_sum_differs": {
+      "fail": "Umowa {code} jest warta {total}, ale jej pozycje sumują się do {lines} (różnica {difference}).",
+      "suggestion": "Popraw wartość umowy lub pozycje, aby się zgadzały."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Zmiana {code} jest zatwierdzona bez uzgodnionej kwoty.",
+      "suggestion": "Wpisz kwotę uzgodnioną z wykonawcą, zanim zmiana zostanie zatwierdzona."
+    },
+    "change_without_approval_date": {
+      "fail": "Zmiana {code} jest zatwierdzona bez daty zatwierdzenia.",
+      "suggestion": "Wpisz, kiedy zmianę zatwierdzono."
+    },
+    "billed_before_approval": {
+      "fail": "Na umowę {contract} zafakturowano {amount} za zmianę {code}, która ma status {status} i nie jest zatwierdzona.",
+      "suggestion": "Najpierw zatwierdź zmianę albo zdejmij fakturowanie z wniosku o płatność."
+    },
+    "contract_over_target": {
+      "fail": "Umowa {code} zobowiązuje {committed}, czyli o {difference} więcej niż {target} z przedmiaru, z którego ją zlecono (ponad {tolerance} %).",
+      "suggestion": "Porównaj zlecenie i jego zmiany z przedmiarem i zapisz, dlaczego robota kosztuje więcej."
+    },
+    "account_over_plan": {
+      "fail": "Konto {code} niesie zobowiązania {committed}, o {difference} powyżej planu {planned} (ponad {tolerance} %).",
+      "suggestion": "Sprawdź zobowiązania na tym koncie albo zaktualizuj plan z uzasadnieniem."
+    },
+    "quantity_overrun": {
+      "fail": "Pozycja {code} umowy {contract} jest obmierzona na {measured} {unit} wobec {contracted} {unit} w umowie, czyli {over} % więcej (dozwolone {tolerance} %).",
+      "suggestion": "Sprawdź obmiar albo uzgodnij dodatkową ilość jako zmianę."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Umowa {code} jest obmierzona na {measured}, o {difference} więcej niż jej wartość ze zmianami zatwierdzonymi ({committed}).",
+      "suggestion": "Zatwierdź zmianę obejmującą dodatkowe roboty albo sprawdź obmiar."
+    },
+    "invoice_without_contract": {
+      "fail": "Faktura dostawcy {number} na {amount} nie należy do żadnej umowy ani zamówienia.",
+      "suggestion": "Powiąż jej pozycje z umową albo zapisz ją jako koszt bezpośredni na jednym koncie."
+    }
   }
 }

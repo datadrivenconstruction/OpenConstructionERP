@@ -1069,5 +1069,47 @@
     "parent_not_found": "本次上传应作为其新版本的模型不在此项目中。请另选一个，或将其作为独立模型上传。",
     "parent_not_ready": "“{name}”尚未导入完成，暂时无法接收新版本。请等待其就绪，或将本文件作为独立模型上传。",
     "parent_superseded": "“{name}”已有更新的版本 {version}。请改为将本文件作为最新版本的新版本上传。"
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "合同{code}价值{amount},但没有明细行,所以它的金额不在任何成本行上。",
+      "suggestion": "请在成本控制中为该合同设置一个科目,或添加它的明细行。"
+    },
+    "contract_sum_differs": {
+      "fail": "合同{code}价值{total},但其明细行合计为{lines}(相差{difference})。",
+      "suggestion": "请修正合同金额或明细行,使两者一致。"
+    },
+    "change_without_agreed_amount": {
+      "fail": "变更{code}已批准,但没有商定金额。",
+      "suggestion": "批准变更之前,请先记录与承包商商定的金额。"
+    },
+    "change_without_approval_date": {
+      "fail": "变更{code}已批准,但没有批准日期。",
+      "suggestion": "请记录该变更的批准时间。"
+    },
+    "billed_before_approval": {
+      "fail": "合同{contract}已为变更{code}开票{amount},但该变更状态为{status},尚未批准。",
+      "suggestion": "请先批准该变更,或把这笔开票从付款申请中撤下。"
+    },
+    "contract_over_target": {
+      "fail": "合同{code}承诺{committed},比其发包所依据的工程量清单{target}高出{difference}(超过{tolerance} %)。",
+      "suggestion": "请对照工程量清单核对发包和变更,并记录工程造价偏高的原因。"
+    },
+    "account_over_plan": {
+      "fail": "科目{code}的承诺额为{committed},比计划{planned}高出{difference}(超过{tolerance} %)。",
+      "suggestion": "请检查该科目上的承诺,或附上原因更新计划。"
+    },
+    "quantity_overrun": {
+      "fail": "合同{contract}的第{code}行计量为{measured}{unit},合同量为{contracted}{unit},超出{over} %(允许{tolerance} %)。",
+      "suggestion": "请核对计量,或把多出的数量作为变更商定。"
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "合同{code}的计量额为{measured},比含已批准变更的合同价{committed}高出{difference}。",
+      "suggestion": "请批准涵盖额外工作的变更,或核对计量。"
+    },
+    "invoice_without_contract": {
+      "fail": "供应商发票{number}({amount})不属于任何合同或订单。",
+      "suggestion": "请把它的明细行关联到某个合同,或作为直接成本记入一个科目。"
+    }
   }
 }

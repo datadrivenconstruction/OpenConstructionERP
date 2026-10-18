@@ -351,7 +351,11 @@ class VectorInheritedRule(_StructureRule):
             if not isinstance(row, dict) or row.get("override_audited"):
                 continue
             vector = {str(v) for v in row.get("vector") or []}
-            if not vector or str(row.get("cost_line_id")) in vector:
+            # A split line sits on every line of its split, so each share must be on the vector.
+            held = {str(v) for v in row.get("cost_line_ids") or []}
+            if row.get("cost_line_id"):
+                held.add(str(row["cost_line_id"]))
+            if not vector or not held or held <= vector:
                 continue
             out.append(
                 self._result(

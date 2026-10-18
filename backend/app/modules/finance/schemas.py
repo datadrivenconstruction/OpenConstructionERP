@@ -109,6 +109,11 @@ class InvoiceLineItemCreate(BaseModel):
     # a line that silently posted nowhere is the failure this whole field
     # exists to remove.
     boq_position_id: UUID | None = Field(default=None)
+    # The contract schedule line this invoice line bills. The line then takes
+    # that schedule line's cost line (and its split), so a supplier's bill
+    # lands where the contract was costed; naming a cost line the schedule line
+    # is not on is refused.
+    contract_line_id: UUID | None = Field(default=None)
     sort_order: int = Field(default=0, ge=0)
     # EN 16931 per-line VAT. Left unset the exporter falls back to the
     # invoice-level rate, which is only right when every line shares one rate.
@@ -260,6 +265,7 @@ class InvoiceLineItemResponse(BaseModel):
     wbs_id: str | None = None
     cost_category: str | None = None
     cost_line_id: UUID | None = None
+    contract_line_id: UUID | None = None
     sort_order: int = 0
     vat_rate: str | None = None
     vat_category: str | None = None

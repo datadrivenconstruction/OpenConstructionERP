@@ -75,6 +75,8 @@ export interface BidPackageLineItem {
   is_mandatory: boolean;
   /** Bill position the line was added from; carried onto the contract line on award. */
   boq_position_id: string | null;
+  /** The cost line it takes from that position (split included), carried onto the award. */
+  cost_line_id?: string | null;
   created_at: string;
   updated_at: string;
 }

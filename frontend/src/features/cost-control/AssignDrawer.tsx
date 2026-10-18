@@ -6,7 +6,7 @@
 // and a whole contract can go to one cost line in one step, which is the usual
 // case for a trade package. Each choice is saved at once; the report refreshes
 // and the line leaves this list.
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2 } from 'lucide-react';
@@ -18,6 +18,9 @@ import { sumMoneyStrings } from '@/shared/lib/exactDecimal';
 import { fmtCurrency } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { OverrideReasonDialog } from '@/features/costmodel/OverrideReasonDialog';
+import { problemMessage } from '@/features/costmodel/problemMessages';
+import { problemOf } from '@/features/costmodel/structureApi';
 import { costControlApi, type AssignBody, type UnassignedItem } from './api';
 
 interface Group {
@@ -53,21 +56,30 @@ export function AssignDrawer({ open, projectId, currency, canEdit, onClose, onOp
   });
   const costLines = useMemo(() => (byLine.data?.rows ?? []).filter((r) => r.kind === 'cost_line'), [byLine.data]);
 
+  // A line that inherits another cost line asks why before it moves.
+  const [askReason, setAskReason] = useState<AssignBody | null>(null);
   const assign = useMutation({
     mutationFn: (body: AssignBody) => costControlApi.assign(projectId, body),
     onSuccess: () => {
+      setAskReason(null);
       queryClient.invalidateQueries({ queryKey: ['cost-control'] });
       addToast({
         type: 'success',
         title: t('cost_control.assign_saved', { defaultValue: 'Put on the cost line' }),
       });
     },
-    onError: (e) =>
+    onError: (e, body) => {
+      const problem = problemOf(e);
+      if (problem?.problem === 'override_reason_required' && !body.reason) {
+        setAskReason(body);
+        return;
+      }
       addToast({
         type: 'error',
         title: t('cost_control.assign_failed', { defaultValue: 'Could not put it on the cost line' }),
-        message: getErrorMessage(e),
-      }),
+        message: problem ? problemMessage(t, problem.problem, problem.params) : getErrorMessage(e),
+      });
+    },
   });
 
   const options = useMemo<SearchableSelectOption[]>(
@@ -199,6 +211,12 @@ export function AssignDrawer({ open, projectId, currency, canEdit, onClose, onOp
           ))}
         </div>
       )}
+      <OverrideReasonDialog
+        open={askReason !== null}
+        busy={assign.isPending}
+        onCancel={() => setAskReason(null)}
+        onConfirm={(reason) => askReason && assign.mutate({ ...askReason, reason })}
+      />
     </SideDrawer>
   );
 }

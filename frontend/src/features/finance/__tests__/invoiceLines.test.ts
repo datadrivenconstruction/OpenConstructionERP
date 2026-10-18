@@ -129,3 +129,27 @@ describe('vatChoices', () => {
     expect(vatChoices(rows, '').defaultRate).toBe('19');
   });
 });
+
+describe('a line that bills a contract line', () => {
+  it('sends the contract line and lets the server choose its cost line', () => {
+    const stored = editorLinesFromInvoice(
+      [{ description: 'Walls', quantity: '1', unit_rate: '300', amount: '300', cost_line_id: 'cl-old', contract_line_id: 'k-1' }],
+      {},
+      null,
+    )[0]!;
+    expect(stored.contract_line_id).toBe('k-1');
+    const [moved] = linesToPayload([{ ...stored, contract_line_id: 'k-2' }], 'Invoice');
+    expect(moved).toMatchObject({ contract_line_id: 'k-2', cost_line_id: null });
+  });
+
+  it('keeps the cost line of a line that bills no contract line', () => {
+    const stored = editorLinesFromInvoice(
+      [{ description: 'Skip hire', quantity: '1', unit_rate: '80', amount: '80', cost_line_id: 'cl-1' }],
+      {},
+      null,
+    )[0]!;
+    const sent = linesToPayload([stored], 'Invoice')[0]!;
+    expect(sent.cost_line_id).toBe('cl-1');
+    expect('contract_line_id' in sent).toBe(false);
+  });
+});

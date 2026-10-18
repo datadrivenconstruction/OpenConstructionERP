@@ -1069,5 +1069,47 @@
     "parent_not_found": "Bu yüklemenin yeni sürümü olacağı model bu projede yok. Başka bir model seçin ya da ayrı bir model olarak yükleyin.",
     "parent_not_ready": "\"{name}\" içe aktarımı henüz bitmedi, bu yüzden henüz yeni sürüm alamaz. Hazır olana kadar bekleyin veya bu dosyayı ayrı bir model olarak yükleyin.",
     "parent_superseded": "\"{name}\" için daha yeni bir sürüm var: {version}. Bunun yerine bu dosyayı en yeni modelin yeni sürümü olarak yükleyin."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "{code} sözleşmesi {amount} değerinde ama iş kalemleri yok, bu yüzden parası hiçbir maliyet satırında değil.",
+      "suggestion": "Sözleşmeye maliyet kontrolünde bir hesap verin veya iş kalemlerini ekleyin."
+    },
+    "contract_sum_differs": {
+      "fail": "{code} sözleşmesi {total} değerinde, ama iş kalemleri toplamı {lines} ({difference} fark).",
+      "suggestion": "Sözleşme değerini veya iş kalemlerini birbirini tutacak şekilde düzeltin."
+    },
+    "change_without_agreed_amount": {
+      "fail": "{code} değişikliği kararlaştırılmış tutar olmadan onaylanmış.",
+      "suggestion": "Değişikliği onaylamadan önce yüklenici ile anlaşılan tutarı kaydedin."
+    },
+    "change_without_approval_date": {
+      "fail": "{code} değişikliği onay tarihi olmadan onaylanmış.",
+      "suggestion": "Değişikliğin ne zaman onaylandığını kaydedin."
+    },
+    "billed_before_approval": {
+      "fail": "{contract} sözleşmesine {code} değişikliği için {amount} faturalanmış; bu değişiklik {status} durumunda ve onaylı değil.",
+      "suggestion": "Önce değişikliği onaylayın veya faturalamayı hakedişten çıkarın."
+    },
+    "contract_over_target": {
+      "fail": "{code} sözleşmesi {committed} taahhüt ediyor; bu, ihale edildiği metrajın {target} tutarının {difference} üzerinde (%{tolerance} üzeri).",
+      "suggestion": "İhaleyi ve değişikliklerini metrajla karşılaştırın ve işin neden daha pahalı olduğunu kaydedin."
+    },
+    "account_over_plan": {
+      "fail": "{code} hesabında {committed} taahhüt var; bu, {planned} planının {difference} üzerinde (%{tolerance} üzeri).",
+      "suggestion": "Bu hesaptaki taahhütleri kontrol edin veya planı gerekçeyle güncelleyin."
+    },
+    "quantity_overrun": {
+      "fail": "{contract} sözleşmesinin {code} kalemi {measured} {unit} ölçülmüş, sözleşmede {contracted} {unit}; %{over} fazla (izin verilen %{tolerance}).",
+      "suggestion": "Ölçüyü kontrol edin veya fazla miktarı değişiklik olarak anlaşın."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "{code} sözleşmesi {measured} ölçülmüş; bu, onaylı değişikliklerle {committed} olan değerinin {difference} üzerinde.",
+      "suggestion": "Fazla işi kapsayan değişikliği onaylayın veya ölçüyü kontrol edin."
+    },
+    "invoice_without_contract": {
+      "fail": "{amount} tutarındaki {number} tedarikçi faturası hiçbir sözleşmeye veya siparişe bağlı değil.",
+      "suggestion": "Satırlarını bir sözleşmeye bağlayın veya bir hesapta doğrudan maliyet olarak kaydedin."
+    }
   }
 }

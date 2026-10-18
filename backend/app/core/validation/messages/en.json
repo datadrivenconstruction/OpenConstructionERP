@@ -1069,5 +1069,47 @@
     "parent_not_found": "The model this upload should be a new version of is not in this project. Choose another one, or upload it as a separate model.",
     "parent_not_ready": "\"{name}\" has not finished importing, so it cannot take a new version yet. Wait until it is ready, or upload this one as a separate model.",
     "parent_superseded": "\"{name}\" already has a newer version, {version}. Upload this one as a new version of the newest one instead."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Contract {code} is worth {amount} but has no schedule lines, so its money is on no cost line.",
+      "suggestion": "Give the contract one account in cost control, or add its schedule lines."
+    },
+    "contract_sum_differs": {
+      "fail": "Contract {code} is worth {total}, but its schedule lines add up to {lines} ({difference} apart).",
+      "suggestion": "Correct the contract value or the schedule lines so they agree."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Change order {code} is approved without an agreed amount.",
+      "suggestion": "Record the amount agreed with the contractor before the change is approved."
+    },
+    "change_without_approval_date": {
+      "fail": "Change order {code} is approved without an approval date.",
+      "suggestion": "Record when the change was approved."
+    },
+    "billed_before_approval": {
+      "fail": "{amount} is billed on contract {contract} for change {code}, which is {status}, not approved.",
+      "suggestion": "Approve the change first, or take the billing back off the claim."
+    },
+    "contract_over_target": {
+      "fail": "Contract {code} commits {committed}, {difference} above the {target} of the bill it was let from (more than {tolerance} %).",
+      "suggestion": "Check the award and its changes against the bill, and record why the work costs more."
+    },
+    "account_over_plan": {
+      "fail": "Account {code} carries {committed} of commitments, {difference} above its plan of {planned} (more than {tolerance} %).",
+      "suggestion": "Check the commitments on this account, or update the plan with a reason."
+    },
+    "quantity_overrun": {
+      "fail": "Line {code} of contract {contract} is measured at {measured} {unit} against {contracted} {unit} contracted, {over} % over (allowed {tolerance} %).",
+      "suggestion": "Check the measurement, or agree the extra quantity as a change."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Contract {code} is measured at {measured}, {difference} above its value with approved changes of {committed}.",
+      "suggestion": "Approve the change that covers the extra work, or check the measurement."
+    },
+    "invoice_without_contract": {
+      "fail": "Supplier invoice {number} for {amount} belongs to no contract or order.",
+      "suggestion": "Link its lines to a contract, or record it as a direct cost on one account."
+    }
   }
 }

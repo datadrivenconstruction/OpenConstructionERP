@@ -1069,5 +1069,47 @@
     "parent_not_found": "Modelul a cărui versiune nouă ar trebui să fie această încărcare nu se află în acest proiect. Alegeți altul sau încărcați fișierul ca model separat.",
     "parent_not_ready": "Importul modelului \"{name}\" nu s-a încheiat, deci acesta nu poate primi încă o versiune nouă. Așteptați până este gata sau încărcați acest fișier ca model separat.",
     "parent_superseded": "Modelul \"{name}\" are deja o versiune mai nouă, {version}. Încărcați în schimb acest fișier ca versiune nouă a celei mai recente."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Contractul {code} valorează {amount}, dar nu are articole de deviz, așa că banii lui nu sunt pe nicio linie de cost.",
+      "suggestion": "Dați contractului un cont în controlul costurilor sau adăugați articolele lui."
+    },
+    "contract_sum_differs": {
+      "fail": "Contractul {code} valorează {total}, dar articolele lui însumează {lines} (diferență de {difference}).",
+      "suggestion": "Corectați valoarea contractului sau articolele, astfel încât să corespundă."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Actul adițional {code} este aprobat fără sumă convenită.",
+      "suggestion": "Înregistrați suma convenită cu constructorul înainte de aprobarea actului adițional."
+    },
+    "change_without_approval_date": {
+      "fail": "Actul adițional {code} este aprobat fără dată de aprobare.",
+      "suggestion": "Înregistrați când a fost aprobat actul adițional."
+    },
+    "billed_before_approval": {
+      "fail": "S-au facturat {amount} pe contractul {contract} pentru actul adițional {code}, care are starea {status} și nu este aprobat.",
+      "suggestion": "Aprobați mai întâi actul adițional sau scoateți facturarea din situația de lucrări."
+    },
+    "contract_over_target": {
+      "fail": "Contractul {code} angajează {committed}, cu {difference} peste {target} din devizul din care a fost atribuit (peste {tolerance} %).",
+      "suggestion": "Verificați atribuirea și actele adiționale față de deviz și notați de ce lucrarea costă mai mult."
+    },
+    "account_over_plan": {
+      "fail": "Contul {code} are angajamente de {committed}, cu {difference} peste planul de {planned} (peste {tolerance} %).",
+      "suggestion": "Verificați angajamentele de pe acest cont sau actualizați planul cu un motiv."
+    },
+    "quantity_overrun": {
+      "fail": "Articolul {code} din contractul {contract} este măsurat la {measured} {unit} față de {contracted} {unit} contractate, cu {over} % peste (permis {tolerance} %).",
+      "suggestion": "Verificați măsurătoarea sau convenți cantitatea suplimentară ca act adițional."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Contractul {code} este măsurat la {measured}, cu {difference} peste valoarea lui cu acte adiționale aprobate de {committed}.",
+      "suggestion": "Aprobați actul adițional care acoperă lucrarea în plus sau verificați măsurătoarea."
+    },
+    "invoice_without_contract": {
+      "fail": "Factura furnizorului {number} de {amount} nu aparține niciunui contract sau comenzi.",
+      "suggestion": "Legați rândurile ei de un contract sau înregistrați-o drept cost direct pe un cont."
+    }
   }
 }

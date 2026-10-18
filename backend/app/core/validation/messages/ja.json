@@ -1069,5 +1069,47 @@
     "parent_not_found": "このアップロードの元になるモデルが、このプロジェクトに見つかりません。別のモデルを選ぶか、別モデルとしてアップロードしてください。",
     "parent_not_ready": "「{name}」のインポートがまだ完了していないため、新バージョンを受け付けられません。完了するまで待つか、別モデルとしてアップロードしてください。",
     "parent_superseded": "「{name}」にはすでに新しいバージョン {version} があります。代わりに、最新のモデルの新バージョンとしてアップロードしてください。"
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "契約{code}は{amount}ですが、明細行がないため、その金額はどの原価行にも入っていません。",
+      "suggestion": "原価管理でこの契約に勘定を1つ設定するか、明細行を追加してください。"
+    },
+    "contract_sum_differs": {
+      "fail": "契約{code}は{total}ですが、明細行の合計は{lines}です(差額{difference})。",
+      "suggestion": "契約金額か明細行を直して、一致させてください。"
+    },
+    "change_without_agreed_amount": {
+      "fail": "変更{code}は合意金額がないまま承認されています。",
+      "suggestion": "変更を承認する前に、請負業者と合意した金額を記録してください。"
+    },
+    "change_without_approval_date": {
+      "fail": "変更{code}は承認日がないまま承認されています。",
+      "suggestion": "変更がいつ承認されたかを記録してください。"
+    },
+    "billed_before_approval": {
+      "fail": "契約{contract}に変更{code}の{amount}が請求されていますが、この変更は{status}で、承認されていません。",
+      "suggestion": "先に変更を承認するか、出来高請求から請求を外してください。"
+    },
+    "contract_over_target": {
+      "fail": "契約{code}の拘束額は{committed}で、発注元の内訳書の{target}を{difference}上回っています({tolerance}%超)。",
+      "suggestion": "発注と変更を内訳書と照合し、工事費が上がった理由を記録してください。"
+    },
+    "account_over_plan": {
+      "fail": "勘定{code}のコミット額は{committed}で、計画{planned}を{difference}上回っています({tolerance}%超)。",
+      "suggestion": "この勘定のコミット額を確認するか、理由を付けて計画を更新してください。"
+    },
+    "quantity_overrun": {
+      "fail": "契約{contract}の行{code}は{measured}{unit}で計測され、契約数量{contracted}{unit}を{over}%超えています(許容{tolerance}%)。",
+      "suggestion": "計測を確認するか、増量分を変更として合意してください。"
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "契約{code}の計測額は{measured}で、承認済み変更を含む契約額{committed}を{difference}上回っています。",
+      "suggestion": "追加工事をカバーする変更を承認するか、計測を確認してください。"
+    },
+    "invoice_without_contract": {
+      "fail": "仕入先請求書{number}({amount})は、どの契約にも発注にも属していません。",
+      "suggestion": "明細行を契約に紐付けるか、1つの勘定に直接費として記録してください。"
+    }
   }
 }

@@ -63,6 +63,8 @@ import {
 } from './ContractTemplatesPanel';
 import { ContractStatusPipeline } from './ContractStatusPipeline';
 import { SovLineLinkEditor, SovLineLinkSummary } from './SovLineLink';
+import { AccountChooser, overrideReason } from '@/features/costmodel/AccountChooser';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { ContractCodeRename } from './ContractCodeRename';
 import { ContractExpiryBadge } from './ContractExpiryBadge';
 import { ComplianceGate } from './ComplianceGate';
@@ -1620,6 +1622,9 @@ function SoVLineRow({
   const [linking, setLinking] = useState(false);
   const [draft, setDraft] = useState(() => lineDraftOf(line));
   const billed = line.billed === true;
+  const canCost = useHasPermission('costmodel.write');
+  const rawSource = line.metadata?.cost_line_source;
+  const costLineSource = typeof rawSource === 'string' ? rawSource : null;
 
   // The listing this row was drawn from can be older than the server's
   // answer: a claim may have billed on the line since, or the contract been
@@ -1757,6 +1762,17 @@ function SoVLineRow({
         <td className="py-1 max-w-[260px]">
           <span className="block truncate">{line.description || '—'}</span>
           <SovLineLinkSummary line={line} canLink={linkable} onOpen={() => setLinking((v) => !v)} />
+          <AccountChooser
+            compact
+            projectId={projectId}
+            kind="contract_line"
+            targetId={line.id}
+            costLineId={line.cost_line_id}
+            source={costLineSource}
+            reason={overrideReason(line.metadata)}
+            canEdit={canCost && linkable}
+            onSaved={() => invalidateSoV(qc, contractId)}
+          />
         </td>
         <td className="py-1 text-right text-content-secondary">
           {toNum(line.quantity).toLocaleString(getNumberLocale())} {line.unit || ''}
@@ -1835,6 +1851,7 @@ export function ContractDetailDrawer({
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const canCostContract = useHasPermission('costmodel.write');
   const addToast = useToastStore((s) => s.addToast);
   const contract = contracts.find((c) => c.id === contractId);
   // Item #27 — signing goes through the compliance gate modal, which runs
@@ -2392,6 +2409,33 @@ export function ContractDetailDrawer({
               header's counterparty field is one side and a category, and this
               is the list the signature block is actually built from. */}
           <ContractPartiesPanel contractId={contractId} />
+
+          {/* The contract's own cost line: a lump sum without a schedule is
+              committed on it as one line, and lines that name no cost line
+              of their own take it. */}
+          <Card padding="sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-1">
+              {t('contracts.cost_account', { defaultValue: 'Cost line of the contract' })}
+            </p>
+            <p className="mb-2 text-xs text-content-tertiary">
+              {t('contracts.cost_account_hint', {
+                defaultValue:
+                  'Lines without a cost line of their own take this one. A contract without a schedule is committed on it as one lump-sum line.',
+              })}
+            </p>
+            <AccountChooser
+              projectId={contract.project_id}
+              kind="contract"
+              targetId={contract.id}
+              costLineId={contract.cost_line_id}
+              canEdit={canCostContract && contract.status !== 'terminated'}
+              canInherit={false}
+              onSaved={() => {
+                invalidateSoV(qc, contractId);
+                qc.invalidateQueries({ queryKey: ['contracts', 'list'] });
+              }}
+            />
+          </Card>
 
           {/* SoV */}
           <Card padding="sm">

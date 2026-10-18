@@ -1069,5 +1069,47 @@
     "parent_not_found": "Model, jehož novou verzí má toto nahrání být, v tomto projektu není. Vyberte jiný, nebo nahrajte soubor jako samostatný model.",
     "parent_not_ready": "Import modelu \"{name}\" ještě neskončil, proto zatím nemůže přijmout novou verzi. Počkejte, až bude hotový, nebo nahrajte tento soubor jako samostatný model.",
     "parent_superseded": "Model \"{name}\" už má novější verzi, {version}. Nahrajte tento soubor raději jako novou verzi nejnovějšího modelu."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Smlouva {code} má hodnotu {amount}, ale nemá žádné položky rozpisu, takže její peníze nejsou na žádné nákladové položce.",
+      "suggestion": "Přiřaďte smlouvě účet v nákladové kontrole nebo doplňte její položky."
+    },
+    "contract_sum_differs": {
+      "fail": "Smlouva {code} má hodnotu {total}, ale její položky dávají dohromady {lines} (rozdíl {difference}).",
+      "suggestion": "Opravte hodnotu smlouvy nebo položky tak, aby si odpovídaly."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Vícepráce {code} jsou schváleny bez dohodnuté částky.",
+      "suggestion": "Zapište částku dohodnutou se zhotovitelem, než vícepráce schválíte."
+    },
+    "change_without_approval_date": {
+      "fail": "Vícepráce {code} jsou schváleny bez data schválení.",
+      "suggestion": "Zapište, kdy byly vícepráce schváleny."
+    },
+    "billed_before_approval": {
+      "fail": "Na smlouvu {contract} je za vícepráce {code} vyfakturováno {amount}, ale ty mají stav {status} a nejsou schváleny.",
+      "suggestion": "Nejprve vícepráce schvalte, nebo fakturaci z výzvy k platbě odeberte."
+    },
+    "contract_over_target": {
+      "fail": "Smlouva {code} zavazuje {committed}, tedy o {difference} více než {target} z výkazu výměr, podle kterého byla zadána (více než {tolerance} %).",
+      "suggestion": "Porovnejte zadání a jeho vícepráce s výkazem výměr a zapište, proč práce stojí více."
+    },
+    "account_over_plan": {
+      "fail": "Účet {code} nese závazky {committed}, o {difference} nad plánem {planned} (více než {tolerance} %).",
+      "suggestion": "Zkontrolujte závazky na tomto účtu nebo plán aktualizujte s odůvodněním."
+    },
+    "quantity_overrun": {
+      "fail": "Položka {code} smlouvy {contract} je zaměřena na {measured} {unit} oproti smluvním {contracted} {unit}, tedy o {over} % více (povoleno {tolerance} %).",
+      "suggestion": "Zkontrolujte zaměření, nebo dohodněte navíc množství jako vícepráce."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Smlouva {code} je zaměřena na {measured}, o {difference} více než její hodnota se schválenými změnami {committed}.",
+      "suggestion": "Schvalte vícepráce, které kryjí práci navíc, nebo zkontrolujte zaměření."
+    },
+    "invoice_without_contract": {
+      "fail": "Faktura dodavatele {number} na {amount} nepatří k žádné smlouvě ani objednávce.",
+      "suggestion": "Propojte její řádky se smlouvou nebo ji zaúčtujte jako přímý náklad na jednom účtu."
+    }
   }
 }

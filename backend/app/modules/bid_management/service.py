@@ -1449,7 +1449,19 @@ class BidManagementService:
             )
         if not rows:
             return []
-        return await self.line_repo.bulk_create(rows)
+        created = await self.line_repo.bulk_create(rows)
+        await self._inherit_cost_lines(package.project_id, created)
+        return created
+
+    async def _inherit_cost_lines(self, project_id: uuid.UUID, lines: list[BidPackageLineItem]) -> None:
+        """Give lines made from bill positions the position's cost line and split (see costmodel.inheritance)."""
+        try:
+            from app.modules.costmodel.inheritance_service import inherit_bid_lines  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - the cost model is a core module
+            return
+        await inherit_bid_lines(self.session, project_id, lines)
+        for line in lines:
+            await self.session.refresh(line)
 
     async def create_line(self, data: BidPackageLineItemCreate) -> BidPackageLineItem:
         package = await self.get_package(data.package_id)  # 404 if missing
@@ -1469,7 +1481,9 @@ class BidManagementService:
             is_mandatory=data.is_mandatory,
             boq_position_id=data.boq_position_id,
         )
-        return await self.line_repo.create(line)
+        line = await self.line_repo.create(line)
+        await self._inherit_cost_lines(package.project_id, [line])
+        return line
 
     async def bulk_create_lines(
         self, package_id: uuid.UUID, items: list[BidPackageLineItemCreate]
@@ -1495,7 +1509,9 @@ class BidManagementService:
             )
             for item in items
         ]
-        return await self.line_repo.bulk_create(rows)
+        created = await self.line_repo.bulk_create(rows)
+        await self._inherit_cost_lines(package.project_id, created)
+        return created
 
     async def update_line(self, line_id: uuid.UUID, data: BidPackageLineItemUpdate) -> BidPackageLineItem:
         line = await self.line_repo.get_by_id(line_id)
@@ -1505,6 +1521,7 @@ class BidManagementService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "quantity" in fields and fields["quantity"] is not None:
             fields["quantity"] = str(fields["quantity"])
+        package = None
         if fields.get("boq_position_id") is not None:
             package = await self.get_package(line.package_id)
             await self._load_project_positions(package.project_id, [fields["boq_position_id"]])
@@ -1512,6 +1529,8 @@ class BidManagementService:
             return line
         await self.line_repo.update_fields(line_id, **fields)
         await self.session.refresh(line)
+        if package is not None and line.cost_line_id is None:
+            await self._inherit_cost_lines(package.project_id, [line])
         return line
 
     async def delete_line(self, line_id: uuid.UUID) -> None:

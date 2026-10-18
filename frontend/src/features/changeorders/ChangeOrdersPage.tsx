@@ -73,6 +73,10 @@ import {
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildChangeordersInsights } from './changeordersInsights';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { CostLinePicker } from '@/features/costmodel/CostLinePicker';
+import { AccountChooser, overrideReason } from '@/features/costmodel/AccountChooser';
+import { OverrideReasonDialog } from '@/features/costmodel/OverrideReasonDialog';
+import { problemOf } from '@/features/costmodel/structureApi';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -99,6 +103,9 @@ interface ChangeOrderItem {
   cost_delta: string;
   unit: string;
   sort_order: number;
+  /** The cost line the item is costed on, and where it came from. */
+  cost_line_id?: string | null;
+  cost_line_source?: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -495,6 +502,11 @@ function AddItemDialog({
   // so the change order line stays traceable back to the estimate it amends.
   const [boqSource, setBoqSource] = useState<BoqPositionPick | null>(null);
   const [showBoqPicker, setShowBoqPicker] = useState(false);
+  // Empty takes the cost line from the bill position or the contract; a
+  // different one is an override the server asks a reason for.
+  const [costLineId, setCostLineId] = useState('');
+  const [askReason, setAskReason] = useState(false);
+  const canCost = useHasPermission('costmodel.write');
   const addToast = useToastStore((s) => s.addToast);
 
   // Pre-fill the form from a chosen BOQ position. The position's quantity/rate
@@ -514,8 +526,10 @@ function AddItemDialog({
   const clearBoqSource = () => setBoqSource(null);
 
   const mutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (reason?: string) =>
       apiPost<ChangeOrderItem>(`/v1/changeorders/${orderId}/items/`, {
+        ...(costLineId ? { cost_line_id: costLineId } : {}),
+        ...(reason ? { cost_line_reason: reason } : {}),
         description: desc,
         change_type: changeType,
         original_quantity: origQty,
@@ -537,6 +551,7 @@ function AddItemDialog({
           : {}),
       }),
     onSuccess: () => {
+      setAskReason(false);
       onCreated();
       onClose();
       addToast({
@@ -544,7 +559,11 @@ function AddItemDialog({
         title: t('changeorders.item_added', { defaultValue: 'Item added' }),
       });
     },
-    onError: (err: Error) => {
+    onError: (err: Error, reason) => {
+      if (problemOf(err)?.problem === 'override_reason_required' && !reason) {
+        setAskReason(true);
+        return;
+      }
       addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
     },
   });
@@ -570,7 +589,7 @@ function AddItemDialog({
           <Button
             variant="primary"
             disabled={!desc.trim() || mutation.isPending}
-            onClick={() => mutation.mutate()}
+            onClick={() => mutation.mutate(undefined)}
           >
             {mutation.isPending
               ? t('common.adding', { defaultValue: 'Adding...' })
@@ -658,6 +677,28 @@ function AddItemDialog({
             className={fieldCls}
           />
         </WideModalField>
+        {canCost && (
+          <WideModalField
+            label={t('changeorders.cost_line', { defaultValue: 'Cost line' })}
+            span={2}
+            htmlFor="item-cost-line"
+          >
+            <CostLinePicker
+              id="item-cost-line"
+              projectId={projectId}
+              value={costLineId}
+              onChange={setCostLineId}
+              allowEmpty
+              emptyLabel={t('changeorders.cost_line_inherit', {
+                defaultValue: 'Take it from the bill position or the contract',
+              })}
+              placeholder={t('changeorders.cost_line_inherit', {
+                defaultValue: 'Take it from the bill position or the contract',
+              })}
+              data-testid="co-item-cost-line"
+            />
+          </WideModalField>
+        )}
       </WideModalSection>
 
       <WideModalSection
@@ -736,6 +777,12 @@ function AddItemDialog({
         onPick={applyBoqPick}
       />
     )}
+    <OverrideReasonDialog
+      open={askReason}
+      busy={mutation.isPending}
+      onCancel={() => setAskReason(false)}
+      onConfirm={(reason) => mutation.mutate(reason)}
+    />
     </>
   );
 }
@@ -1402,6 +1449,7 @@ function DetailView({
     onError: (err: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message }),
   });
 
+  const canCostItems = useHasPermission('costmodel.write');
   const deleteItemMut = useMutation({
     mutationFn: (itemId: string) => apiDelete(`/v1/changeorders/${orderId}/items/${itemId}`),
     onSuccess: () => {
@@ -2261,7 +2309,20 @@ function DetailView({
                   const costDelta = Number(item.cost_delta);
                   return (
                   <tr key={item.id} className="border-b border-border last:border-0 hover:bg-surface-secondary/30">
-                    <td className="px-4 py-3 text-content-primary">{item.description}</td>
+                    <td className="px-4 py-3 text-content-primary">
+                      {item.description}
+                      <AccountChooser
+                        compact
+                        projectId={order.project_id}
+                        kind="change_order_item"
+                        targetId={item.id}
+                        costLineId={item.cost_line_id}
+                        source={item.cost_line_source}
+                        reason={overrideReason(item.metadata)}
+                        canEdit={canCostItems && !['executed', 'rejected'].includes(order.status)}
+                        onSaved={() => queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] })}
+                      />
+                    </td>
                     <td className="px-4 py-3">
                       <Badge variant={item.change_type === 'added' ? 'success' : item.change_type === 'removed' ? 'error' : 'neutral'}>
                         {t(`changeorders.type_${item.change_type}`, { defaultValue: item.change_type })}

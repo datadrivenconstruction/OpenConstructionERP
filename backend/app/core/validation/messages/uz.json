@@ -1069,5 +1069,47 @@
     "parent_not_found": "Ushbu yuklama yangi versiyasi boʻlishi kerak boʻlgan model bu loyihada yoʻq. Boshqasini tanlang yoki alohida model sifatida yuklang.",
     "parent_not_ready": "\"{name}\" importi hali tugamagan, shuning uchun u hozircha yangi versiyani qabul qila olmaydi. Tayyor boʻlguncha kuting yoki bu faylni alohida model sifatida yuklang.",
     "parent_superseded": "\"{name}\" uchun yangiroq versiya bor: {version}. Buning oʻrniga bu faylni eng oxirgi modelning yangi versiyasi sifatida yuklang."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "{code} shartnomasi {amount} turadi, lekin uning jadval qatorlari yo'q, shuning uchun uning puli birorta xarajat qatorida emas.",
+      "suggestion": "Shartnomaga xarajatlar nazoratida hisob bering yoki uning jadval qatorlarini qo'shing."
+    },
+    "contract_sum_differs": {
+      "fail": "{code} shartnomasi {total} turadi, lekin qatorlari yig'indisi {lines} (farqi {difference}).",
+      "suggestion": "Shartnoma qiymatini yoki qatorlarni bir-biriga mos qilib to'g'rilang."
+    },
+    "change_without_agreed_amount": {
+      "fail": "{code} o'zgartirishi kelishilgan summasiz tasdiqlangan.",
+      "suggestion": "O'zgartirishni tasdiqlashdan oldin pudratchi bilan kelishilgan summani yozib qo'ying."
+    },
+    "change_without_approval_date": {
+      "fail": "{code} o'zgartirishi tasdiqlash sanasisiz tasdiqlangan.",
+      "suggestion": "O'zgartirish qachon tasdiqlanganini yozib qo'ying."
+    },
+    "billed_before_approval": {
+      "fail": "{contract} shartnomasi bo'yicha {code} o'zgartirishi uchun {amount} hisoblangan, lekin u {status} holatida va tasdiqlanmagan.",
+      "suggestion": "Avval o'zgartirishni tasdiqlang yoki hisoblashni dalolatnomadan olib tashlang."
+    },
+    "contract_over_target": {
+      "fail": "{code} shartnomasi {committed} majburiyat oladi, bu u berilgan hajmlar ro'yxatidagi {target} summadan {difference} ko'p ({tolerance} % dan ortiq).",
+      "suggestion": "Berilgan ishni va uning o'zgartirishlarini hajmlar ro'yxati bilan solishtiring va ish nega qimmat ekanini yozib qo'ying."
+    },
+    "account_over_plan": {
+      "fail": "{code} hisobida {committed} majburiyat bor, bu {planned} rejadan {difference} ko'p ({tolerance} % dan ortiq).",
+      "suggestion": "Ushbu hisobdagi majburiyatlarni tekshiring yoki rejani sababi bilan yangilang."
+    },
+    "quantity_overrun": {
+      "fail": "{contract} shartnomasining {code} qatori {measured} {unit} o'lchangan, shartnomada {contracted} {unit}, bu {over} % ko'p (ruxsat {tolerance} %).",
+      "suggestion": "O'lchovni tekshiring yoki qo'shimcha hajmni o'zgartirish sifatida kelishing."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "{code} shartnomasi {measured} o'lchangan, bu tasdiqlangan o'zgartirishlar bilan uning {committed} qiymatidan {difference} ko'p.",
+      "suggestion": "Qo'shimcha ishni qoplaydigan o'zgartirishni tasdiqlang yoki o'lchovni tekshiring."
+    },
+    "invoice_without_contract": {
+      "fail": "Yetkazib beruvchining {number} hisob-fakturasi ({amount}) hech bir shartnoma yoki buyurtmaga tegishli emas.",
+      "suggestion": "Uning qatorlarini shartnomaga bog'lang yoki bitta hisobga to'g'ridan-to'g'ri xarajat sifatida yozing."
+    }
   }
 }

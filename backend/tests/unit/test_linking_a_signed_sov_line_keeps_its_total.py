@@ -24,7 +24,7 @@ from app.modules.contracts.service import ContractsService
 
 def _service(line: SimpleNamespace) -> tuple[ContractsService, AsyncMock]:
     svc = ContractsService.__new__(ContractsService)
-    svc.session = SimpleNamespace(refresh=AsyncMock())
+    svc.session = SimpleNamespace(refresh=AsyncMock(), get=AsyncMock(return_value=None))
     update_fields = AsyncMock()
     svc.line_repo = SimpleNamespace(get_by_id=AsyncMock(return_value=line), update_fields=update_fields)
     svc._assert_line_may_be_linked = AsyncMock()  # type: ignore[method-assign]
@@ -39,6 +39,7 @@ def _signed_line() -> SimpleNamespace:
         quantity=Decimal("0.7"),
         unit_rate=Decimal("36.9963"),
         total_value=Decimal("25.90"),
+        cost_line_id=None,
         metadata_={},
     )
 

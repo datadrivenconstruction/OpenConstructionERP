@@ -150,6 +150,8 @@ class BidPackageLineItemResponse(BaseModel):
     spec_attachment_url: str | None = None
     is_mandatory: bool = True
     boq_position_id: UUID | None = None
+    # The cost line the scope line is costed on, inherited from its bill position.
+    cost_line_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
 

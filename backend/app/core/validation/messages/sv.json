@@ -1069,5 +1069,47 @@
     "parent_not_found": "Modellen som den här uppladdningen ska vara en ny version av finns inte i projektet. Välj en annan eller ladda upp den som en separat modell.",
     "parent_not_ready": "Importen av \"{name}\" är inte klar, så den kan inte få en ny version ännu. Vänta tills den är klar eller ladda upp den här som en separat modell.",
     "parent_superseded": "\"{name}\" har redan en nyare version, {version}. Ladda i stället upp den här som en ny version av den senaste."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Kontrakt {code} är värt {amount} men saknar kontraktsposter, så pengarna ligger på ingen kostnadspost.",
+      "suggestion": "Ge kontraktet ett konto i kostnadskontrollen eller lägg till dess poster."
+    },
+    "contract_sum_differs": {
+      "fail": "Kontrakt {code} är värt {total}, men posterna summerar till {lines} (skillnad {difference}).",
+      "suggestion": "Rätta kontraktsvärdet eller posterna så att de stämmer överens."
+    },
+    "change_without_agreed_amount": {
+      "fail": "ÄTA {code} är godkänd utan överenskommet belopp.",
+      "suggestion": "Registrera beloppet som överenskommits med entreprenören innan ÄTA godkänns."
+    },
+    "change_without_approval_date": {
+      "fail": "ÄTA {code} är godkänd utan godkännandedatum.",
+      "suggestion": "Registrera när ÄTA godkändes."
+    },
+    "billed_before_approval": {
+      "fail": "{amount} faktureras på kontrakt {contract} för ÄTA {code}, som har status {status} och inte är godkänd.",
+      "suggestion": "Godkänn ÄTA först, eller ta bort faktureringen från fakturaunderlaget."
+    },
+    "contract_over_target": {
+      "fail": "Kontrakt {code} binder {committed}, {difference} över de {target} i den förteckning det upphandlades från (mer än {tolerance} %).",
+      "suggestion": "Jämför tilldelningen och dess ÄTA mot förteckningen och notera varför arbetet kostar mer."
+    },
+    "account_over_plan": {
+      "fail": "Konto {code} har {committed} i åtaganden, {difference} över planen på {planned} (mer än {tolerance} %).",
+      "suggestion": "Kontrollera åtagandena på kontot eller uppdatera planen med en orsak."
+    },
+    "quantity_overrun": {
+      "fail": "Post {code} i kontrakt {contract} är uppmätt till {measured} {unit} mot {contracted} {unit} i kontraktet, {over} % över (tillåtet {tolerance} %).",
+      "suggestion": "Kontrollera mätningen, eller kom överens om extra mängd som ÄTA."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Kontrakt {code} är uppmätt till {measured}, {difference} över dess värde med godkända ÄTA på {committed}.",
+      "suggestion": "Godkänn den ÄTA som täcker extraarbetet, eller kontrollera mätningen."
+    },
+    "invoice_without_contract": {
+      "fail": "Leverantörsfaktura {number} på {amount} hör inte till något kontrakt eller någon order.",
+      "suggestion": "Koppla dess rader till ett kontrakt, eller bokför den som direkt kostnad på ett konto."
+    }
   }
 }

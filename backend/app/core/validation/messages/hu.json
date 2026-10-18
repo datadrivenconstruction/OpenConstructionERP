@@ -1069,5 +1069,47 @@
     "parent_not_found": "Az a modell, amelynek ez a feltöltés az új verziója lenne, nincs ebben a projektben. Válasszon másikat, vagy töltse fel különálló modellként.",
     "parent_not_ready": "A(z) \"{name}\" importálása még nem fejeződött be, ezért még nem fogadhat új verziót. Várja meg, amíg elkészül, vagy töltse fel ezt különálló modellként.",
     "parent_superseded": "A(z) \"{name}\" modellnek már van újabb verziója: {version}. Inkább ezt töltse fel a legújabb új verziójaként."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "A(z) {code} szerződés értéke {amount}, de nincsenek ütemezési tételei, ezért a pénze egyetlen költségsoron sincs.",
+      "suggestion": "Rendeljen a szerződéshez számlát a költségkövetésben, vagy vegye fel a tételeit."
+    },
+    "contract_sum_differs": {
+      "fail": "A(z) {code} szerződés értéke {total}, de a tételei összege {lines} (eltérés: {difference}).",
+      "suggestion": "Javítsa a szerződés értékét vagy a tételeket, hogy egyezzenek."
+    },
+    "change_without_agreed_amount": {
+      "fail": "A(z) {code} pótmunka jóvá van hagyva egyeztetett összeg nélkül.",
+      "suggestion": "Rögzítse a kivitelezővel egyeztetett összeget, mielőtt jóváhagyja a pótmunkát."
+    },
+    "change_without_approval_date": {
+      "fail": "A(z) {code} pótmunka jóvá van hagyva jóváhagyási dátum nélkül.",
+      "suggestion": "Rögzítse, mikor hagyták jóvá a pótmunkát."
+    },
+    "billed_before_approval": {
+      "fail": "A(z) {contract} szerződésen {amount} van számlázva a(z) {code} pótmunkára, amely {status} állapotú, nem jóváhagyott.",
+      "suggestion": "Először hagyja jóvá a pótmunkát, vagy vegye le a számlázást a kifizetési kérelemről."
+    },
+    "contract_over_target": {
+      "fail": "A(z) {code} szerződés {committed} kötelezettséget vállal, ez {difference} a(z) {target} feletti összeg ahhoz a költségvetéshez képest, amelyből kiadták (több mint {tolerance} %).",
+      "suggestion": "Vesse össze a kiadást és a pótmunkákat a költségvetéssel, és jegyezze fel, miért kerül többe a munka."
+    },
+    "account_over_plan": {
+      "fail": "A(z) {code} számlán {committed} kötelezettség van, ez {difference} a(z) {planned} terv felett (több mint {tolerance} %).",
+      "suggestion": "Ellenőrizze a számla kötelezettségeit, vagy frissítse a tervet indoklással."
+    },
+    "quantity_overrun": {
+      "fail": "A(z) {contract} szerződés {code} tétele {measured} {unit} mért mennyiség a szerződött {contracted} {unit} helyett, {over} % többlet (megengedett: {tolerance} %).",
+      "suggestion": "Ellenőrizze a felmérést, vagy egyeztesse a többletmennyiséget pótmunkaként."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "A(z) {code} szerződés mért értéke {measured}, ez {difference} a jóváhagyott pótmunkákkal növelt {committed} érték felett.",
+      "suggestion": "Hagyja jóvá a többletmunkát fedező pótmunkát, vagy ellenőrizze a felmérést."
+    },
+    "invoice_without_contract": {
+      "fail": "A(z) {number} beszállítói számla ({amount}) nem tartozik egyetlen szerződéshez vagy megrendeléshez sem.",
+      "suggestion": "Kapcsolja a sorait szerződéshez, vagy rögzítse közvetlen költségként egy számlán."
+    }
   }
 }

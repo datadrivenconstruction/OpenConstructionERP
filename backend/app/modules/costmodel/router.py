@@ -50,10 +50,16 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.costmodel.cost_control_schemas import (
     AssignRequest,
     AssignResult,
+    ChainReport,
     CostControlReport,
+    DirectCostRequest,
+    DirectCostResult,
     ForecastOverrideInfo,
     ForecastOverrideRequest,
+    InheritResult,
     LineHistory,
+    SetVectorRequest,
+    SetVectorResult,
     SnapshotCreateRequest,
     SnapshotDetail,
     SnapshotPage,
@@ -1176,9 +1182,112 @@ async def assign_cost_control_lines(
     session: SessionDep,
     service: CostControlService = Depends(_get_cost_control_service),
 ) -> AssignResult:
-    """Put contract lines and order items on one cost line of the project."""
+    """Put contract lines, order items, contracts, change items or invoice lines on one cost line."""
     await verify_project_access(project_id, user_id, session)
-    return await service.assign(project_id, body)
+    return await service.assign(project_id, body, user_id)
+
+
+@router.get(
+    "/projects/{project_id}/cost-control/chain/",
+    response_model=ChainReport,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_cost_control_chain(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> ChainReport:
+    """Suspense buckets of everything on no cost line, and the chain rules V6 to V10 and V15."""
+    from app.core.i18n import get_locale
+    from app.modules.costmodel.chain_service import CostChainService
+
+    await verify_project_access(project_id, user_id, session)
+    report = await CostChainService(session).report(project_id, locale=get_locale())
+    return ChainReport.model_validate(
+        {**report, "findings": [f.model_dump() for f in report["findings"]]},
+    )
+
+
+@router.put(
+    "/projects/{project_id}/cost-control/vectors/",
+    response_model=SetVectorResult,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def set_cost_control_vector(
+    project_id: uuid.UUID,
+    body: SetVectorRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> SetVectorResult:
+    """Put one row on a cost line, back on what it inherits, or off every line.
+
+    A row put on a line other than the one it inherits needs a reason, kept on
+    the row with who and when.
+    """
+    from app.modules.costmodel.inheritance_service import set_vector
+
+    await verify_project_access(project_id, user_id, session)
+    result = await set_vector(
+        session,
+        project_id,
+        kind=body.kind,
+        target_id=body.id,
+        mode=body.mode,
+        cost_line_id=body.cost_line_id,
+        reason=body.reason,
+        user_id=user_id,
+    )
+    await session.flush()
+    return SetVectorResult(
+        cost_line_id=result.get("cost_line_id"),
+        source=result.get("source"),
+        override=bool(result.get("override")),
+    )
+
+
+@router.post(
+    "/projects/{project_id}/cost-control/inherit/",
+    response_model=InheritResult,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def inherit_cost_control_accounts(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> InheritResult:
+    """Give every row with no cost line the account it inherits; rows on a line are left alone."""
+    from app.modules.costmodel.chain_service import CostChainService
+
+    await verify_project_access(project_id, user_id, session)
+    return InheritResult(**await CostChainService(session).inherit_missing(project_id))
+
+
+@router.post(
+    "/projects/{project_id}/cost-control/invoices/{invoice_id}/direct-contract/",
+    response_model=DirectCostResult,
+    status_code=201,
+    dependencies=[
+        Depends(RequirePermission("costmodel.write")),
+        Depends(RequirePermission("contracts.create")),
+    ],
+)
+async def record_invoice_as_direct_cost(
+    project_id: uuid.UUID,
+    invoice_id: uuid.UUID,
+    body: DirectCostRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> DirectCostResult:
+    """Record a supplier invoice without a contract as a lump-sum direct cost contract on one account."""
+    from app.modules.costmodel.chain_service import CostChainService
+
+    await verify_project_access(project_id, user_id, session)
+    result = await CostChainService(session).direct_cost_contract(project_id, invoice_id, body.cost_line_id, user_id)
+    return DirectCostResult(
+        contract_id=result["contract_id"],
+        contract_code=result["contract_code"],
+        contract_line_id=result["contract_line_id"],
+    )
 
 
 @router.get(

@@ -130,6 +130,11 @@ class InvoiceLineItem(Base):
     # GUID (no cross-module FK) - the cost line may be deleted while the
     # invoice and its posting history survive. NULL on legacy / unlinked lines.
     cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Plain GUID - the contract schedule line (oe_contracts_contract_line) this
+    # invoice line bills. The line inherits that schedule line's cost line, and
+    # its split when it has one, so a supplier's bill lands where the contract
+    # was costed without anyone re-coding it.
+    contract_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     # Relationship

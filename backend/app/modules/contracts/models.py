@@ -137,6 +137,12 @@ class Contract(Base):
     # keeps the pair populated instead of carving out a null case.
     template_code: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
     template_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Plain UUID - the contract's own cost line (oe_costmodel_cost_line). A
+    # lump-sum contract, a fee or an authority charge has no bill behind it, so
+    # its whole value goes on this one account; on a contract with a schedule it
+    # is the default a new line, a change order item or an invoice line takes
+    # when nothing more specific names an account.
+    cost_line_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

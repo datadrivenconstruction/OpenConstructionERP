@@ -168,7 +168,8 @@ export interface ForecastOverrideCreate {
   document_ref: string;
 }
 
-export type AssignKind = 'contract_line' | 'po_item';
+/** Rows that can be put on a cost line from cost control. */
+export type AssignKind = 'contract_line' | 'po_item' | 'contract' | 'change_order_item' | 'invoice_line';
 
 export interface UnassignedItem {
   kind: AssignKind;
@@ -191,6 +192,77 @@ export interface UnassignedPage {
 export interface AssignBody {
   cost_line_id: string;
   items: { kind: AssignKind; id: string }[];
+  /** Needed when a row inherits another cost line; kept on the row with who and when. */
+  reason?: string;
+}
+
+/* ── The chain: suspense buckets, rules V6 to V10 and V15, their fixes ── */
+
+export interface SuspenseItem {
+  kind: AssignKind;
+  id: string;
+  group_id: string;
+  group_code: string;
+  group_title: string;
+  code: string;
+  description: string;
+  amount: string;
+  can_inherit: boolean;
+}
+
+export interface SuspenseBucket {
+  kind: AssignKind;
+  count: number;
+  amount: string;
+  inheritable: number;
+  /** True when this money is in the report's "not on any cost line" row. */
+  in_report: boolean;
+  items: SuspenseItem[];
+}
+
+export interface ChainFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  /** Already in the reader's language. */
+  message: string;
+  suggestion: string;
+  element_ref: string | null;
+  details: Record<string, string>;
+}
+
+export interface ChainReport {
+  project_id: string;
+  currency: string;
+  buckets: SuspenseBucket[];
+  findings: ChainFinding[];
+}
+
+export type VectorMode = 'set' | 'inherit' | 'clear';
+
+export interface SetVectorBody {
+  kind: AssignKind;
+  id: string;
+  mode: VectorMode;
+  cost_line_id?: string | null;
+  reason?: string;
+}
+
+export interface SetVectorResult {
+  cost_line_id: string | null;
+  source: string | null;
+  override: boolean;
+}
+
+export interface InheritResult {
+  contract_line: number;
+  change_order_item: number;
+  invoice_line: number;
+}
+
+export interface DirectCostResult {
+  contract_id: string;
+  contract_code: string;
+  contract_line_id: string | null;
 }
 
 export const costControlApi = {
@@ -209,6 +281,16 @@ export const costControlApi = {
     apiGet<UnassignedPage>(`/v1/costmodel/projects/${projectId}/cost-control/unassigned/`),
   assign: (projectId: string, body: AssignBody) =>
     apiPost<{ assigned: number }, AssignBody>(`/v1/costmodel/projects/${projectId}/cost-control/assign/`, body),
+  chain: (projectId: string) => apiGet<ChainReport>(`/v1/costmodel/projects/${projectId}/cost-control/chain/`),
+  setVector: (projectId: string, body: SetVectorBody) =>
+    apiPut<SetVectorResult, SetVectorBody>(`/v1/costmodel/projects/${projectId}/cost-control/vectors/`, body),
+  inheritAll: (projectId: string) =>
+    apiPost<InheritResult, Record<string, never>>(`/v1/costmodel/projects/${projectId}/cost-control/inherit/`, {}),
+  directCost: (projectId: string, invoiceId: string, costLineId: string) =>
+    apiPost<DirectCostResult, { cost_line_id: string }>(
+      `/v1/costmodel/projects/${projectId}/cost-control/invoices/${invoiceId}/direct-contract/`,
+      { cost_line_id: costLineId },
+    ),
 };
 
 /** Money string to number for display and geometry only. */

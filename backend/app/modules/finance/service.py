@@ -538,6 +538,7 @@ def _line_item_from(
         wbs_id=item_data.wbs_id,
         cost_category=item_data.cost_category,
         cost_line_id=getattr(item_data, "cost_line_id", None),
+        contract_line_id=getattr(item_data, "contract_line_id", None),
         sort_order=item_data.sort_order if item_data.sort_order else idx,
         vat_rate=item_data.vat_rate if item_data.vat_rate is not None else default_vat_rate,
         vat_category=item_data.vat_category,
@@ -715,6 +716,47 @@ async def resolve_position_cost_lines(
         item.cost_line_id = cost_line_id
 
 
+async def _resolve_contract_lines(session: AsyncSession, project_id: uuid.UUID, items: Sequence[Any]) -> None:
+    """Fill each line's cost line from the contract line it bills (``costmodel.inheritance_service``)."""
+    if not any(getattr(i, "contract_line_id", None) for i in items):
+        return
+    from app.modules.costmodel.inheritance_service import resolve_invoice_contract_lines
+
+    await resolve_invoice_contract_lines(session, project_id, list(items))
+
+
+async def _split_like_contract_lines(
+    session: AsyncSession, project_id: uuid.UUID, invoice_id: uuid.UUID, items: Sequence[Any] | None = None
+) -> None:
+    """Once the lines exist, give those billing a split schedule line its split.
+
+    ``items`` are the lines just written; when none of them bills a schedule
+    line there is nothing to split and no query is made.
+    """
+    if items is not None and not any(getattr(i, "contract_line_id", None) for i in items):
+        return
+    try:
+        from app.modules.costmodel.inheritance_service import split_invoice_lines
+    except ImportError:  # pragma: no cover - the cost model is a core module
+        return
+    await split_invoice_lines(session, project_id, invoice_id)
+
+
+async def _drop_line_splits(session: AsyncSession, prior_items: Sequence[Any]) -> None:
+    """Forget the splits of the lines an invoice is about to replace.
+
+    Only a line that billed a schedule line can carry a split.
+    """
+    ids = [i.id for i in prior_items if getattr(i, "contract_line_id", None) is not None]
+    if not ids:
+        return
+    try:
+        from app.modules.costmodel.inheritance import SOURCE_INVOICE_LINE, drop_splits
+    except ImportError:  # pragma: no cover - the cost model is a core module
+        return
+    await drop_splits(session, SOURCE_INVOICE_LINE, ids)
+
+
 class FinanceService:
     """Business logic for finance operations."""
 
@@ -839,6 +881,7 @@ class FinanceService:
 
         # Create line items
         await resolve_position_cost_lines(self.session, data.line_items)
+        await _resolve_contract_lines(self.session, invoice.project_id, data.line_items)
         default_vat = _default_vat_matching_tax(
             data.line_items,
             # Weighed only when the tax is stated and the lines are held to make
@@ -848,6 +891,7 @@ class FinanceService:
         )
         for idx, item_data in enumerate(data.line_items):
             await self.line_items.create(_line_item_from(invoice.id, item_data, idx, default_vat))
+        await _split_like_contract_lines(self.session, invoice.project_id, invoice.id, data.line_items)
         if invoice.invoice_direction == "payable":
             await self._sync_budget_quietly(invoice.project_id)
 
@@ -1087,6 +1131,8 @@ class FinanceService:
             new_total = _sum(data.line_items)
 
             await resolve_position_cost_lines(self.session, data.line_items)
+            await _resolve_contract_lines(self.session, invoice.project_id, data.line_items)
+            await _drop_line_splits(self.session, prior_items)
             await self.line_items.delete_by_invoice(invoice_id)
             default_vat = _default_vat_matching_tax(
                 data.line_items,
@@ -1099,6 +1145,7 @@ class FinanceService:
             )
             for idx, item_data in enumerate(data.line_items):
                 await self.line_items.create(_line_item_from(invoice_id, item_data, idx, default_vat))
+            await _split_like_contract_lines(self.session, invoice.project_id, invoice_id, data.line_items)
 
             # Single audit row for the bulk replacement. Best-effort:
             # failures are warned (not rolled back) for the same reason as
@@ -2212,12 +2259,19 @@ class FinanceService:
                     amount=amount_base,
                     wbs_id=None,
                     cost_category=None,
+                    # The schedule line the claim line billed, and the cost line
+                    # that schedule line is on: the invoice lands on the same
+                    # account the certified work was costed on.
+                    contract_line_id=cl.contract_line_id,
+                    cost_line_id=sov.cost_line_id if sov is not None else None,
                     sort_order=idx,
                     # Only a certificate invoice states the rate per line: it is
                     # the rate its confirmed taxes were computed with.
                     **({"vat_rate": line_vat_rate} if line_vat_rate is not None else {}),
                 )
             )
+
+        await _split_like_contract_lines(self.session, project_id, invoice.id)
 
         refreshed = await self.invoices.get(invoice.id)
         if refreshed is None:

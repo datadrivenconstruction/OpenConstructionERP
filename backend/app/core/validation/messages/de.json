@@ -1069,5 +1069,47 @@
     "parent_not_found": "Das Modell, von dem dieser Upload eine neue Version sein soll, gehört nicht zu diesem Projekt. Wählen Sie ein anderes oder laden Sie die Datei als eigenständiges Modell hoch.",
     "parent_not_ready": "Der Import von \"{name}\" ist noch nicht abgeschlossen, daher kann noch keine neue Version angelegt werden. Warten Sie, bis das Modell bereit ist, oder laden Sie diese Datei als eigenständiges Modell hoch.",
     "parent_superseded": "Von \"{name}\" gibt es bereits eine neuere Version, {version}. Laden Sie diese Datei stattdessen als neue Version der neuesten hoch."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Der Vertrag {code} ist {amount} wert, hat aber keine Leistungsverzeichnis-Positionen, deshalb liegt sein Geld auf keiner Kostenposition.",
+      "suggestion": "Legen Sie für den Vertrag ein Konto in der Kostenkontrolle an oder erfassen Sie seine Positionen."
+    },
+    "contract_sum_differs": {
+      "fail": "Der Vertrag {code} ist {total} wert, seine Positionen ergeben aber {lines} (Abweichung {difference}).",
+      "suggestion": "Korrigieren Sie den Vertragswert oder die Positionen, damit beide übereinstimmen."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Der Nachtrag {code} ist freigegeben, aber ohne vereinbarten Betrag.",
+      "suggestion": "Erfassen Sie den mit dem Auftragnehmer vereinbarten Betrag, bevor der Nachtrag freigegeben wird."
+    },
+    "change_without_approval_date": {
+      "fail": "Der Nachtrag {code} ist freigegeben, aber ohne Freigabedatum.",
+      "suggestion": "Erfassen Sie, wann der Nachtrag freigegeben wurde."
+    },
+    "billed_before_approval": {
+      "fail": "Im Vertrag {contract} sind {amount} für den Nachtrag {code} abgerechnet, der den Status {status} hat und nicht freigegeben ist.",
+      "suggestion": "Geben Sie den Nachtrag zuerst frei oder nehmen Sie die Abrechnung aus der Forderung zurück."
+    },
+    "contract_over_target": {
+      "fail": "Der Vertrag {code} bindet {committed}, das sind {difference} mehr als die {target} des Leistungsverzeichnisses, aus dem er vergeben wurde (mehr als {tolerance} %).",
+      "suggestion": "Prüfen Sie Vergabe und Nachträge gegen das Leistungsverzeichnis und halten Sie fest, warum die Leistung mehr kostet."
+    },
+    "account_over_plan": {
+      "fail": "Das Konto {code} trägt {committed} an Bindungen, das sind {difference} über dem Plan von {planned} (mehr als {tolerance} %).",
+      "suggestion": "Prüfen Sie die Bindungen auf diesem Konto oder aktualisieren Sie den Plan mit Begründung."
+    },
+    "quantity_overrun": {
+      "fail": "Position {code} des Vertrags {contract} ist mit {measured} {unit} aufgemessen, vereinbart sind {contracted} {unit}, das sind {over} % mehr (erlaubt {tolerance} %).",
+      "suggestion": "Prüfen Sie die Aufmaßmenge oder vereinbaren Sie die Mehrmenge als Nachtrag."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Der Vertrag {code} ist mit {measured} aufgemessen, das sind {difference} mehr als sein Wert samt freigegebenen Nachträgen von {committed}.",
+      "suggestion": "Geben Sie den Nachtrag für die Mehrleistung frei oder prüfen Sie das Aufmaß."
+    },
+    "invoice_without_contract": {
+      "fail": "Die Lieferantenrechnung {number} über {amount} gehört zu keinem Vertrag und keiner Bestellung.",
+      "suggestion": "Verknüpfen Sie ihre Positionen mit einem Vertrag oder erfassen Sie sie als Direktkosten auf einem Konto."
+    }
   }
 }

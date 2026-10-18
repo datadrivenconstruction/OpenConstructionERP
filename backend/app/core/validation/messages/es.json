@@ -1069,5 +1069,47 @@
     "parent_not_found": "El modelo del que esta carga debería ser una nueva versión no está en este proyecto. Elija otro o cárguelo como modelo independiente.",
     "parent_not_ready": "\"{name}\" aún no ha terminado de importarse, así que todavía no admite una nueva versión. Espere a que esté listo o cargue este archivo como modelo independiente.",
     "parent_superseded": "\"{name}\" ya tiene una versión más reciente, {version}. Cargue este archivo como nueva versión de la más reciente."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "El contrato {code} vale {amount} pero no tiene partidas de calendario, así que su dinero no está en ninguna línea de coste.",
+      "suggestion": "Asigne al contrato una cuenta en el control de costes o añada sus partidas."
+    },
+    "contract_sum_differs": {
+      "fail": "El contrato {code} vale {total}, pero sus partidas suman {lines} (diferencia de {difference}).",
+      "suggestion": "Corrija el valor del contrato o las partidas para que coincidan."
+    },
+    "change_without_agreed_amount": {
+      "fail": "El modificado {code} está aprobado sin importe acordado.",
+      "suggestion": "Registre el importe acordado con el contratista antes de aprobar el modificado."
+    },
+    "change_without_approval_date": {
+      "fail": "El modificado {code} está aprobado sin fecha de aprobación.",
+      "suggestion": "Registre cuándo se aprobó el modificado."
+    },
+    "billed_before_approval": {
+      "fail": "Se facturan {amount} en el contrato {contract} por el modificado {code}, que está en estado {status} y no aprobado.",
+      "suggestion": "Apruebe primero el modificado o retire la facturación de la certificación."
+    },
+    "contract_over_target": {
+      "fail": "El contrato {code} compromete {committed}, {difference} por encima de los {target} del presupuesto con el que se adjudicó (más del {tolerance} %).",
+      "suggestion": "Revise la adjudicación y sus modificados frente al presupuesto y registre por qué la obra cuesta más."
+    },
+    "account_over_plan": {
+      "fail": "La cuenta {code} acumula {committed} en compromisos, {difference} por encima de su plan de {planned} (más del {tolerance} %).",
+      "suggestion": "Revise los compromisos de esta cuenta o actualice el plan indicando el motivo."
+    },
+    "quantity_overrun": {
+      "fail": "La partida {code} del contrato {contract} está medida en {measured} {unit} frente a {contracted} {unit} contratadas, un {over} % de exceso (permitido {tolerance} %).",
+      "suggestion": "Revise la medición o acuerde la cantidad adicional como modificado."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "El contrato {code} está medido en {measured}, {difference} por encima de su valor con modificados aprobados de {committed}.",
+      "suggestion": "Apruebe el modificado que cubre el trabajo extra o revise la medición."
+    },
+    "invoice_without_contract": {
+      "fail": "La factura de proveedor {number} por {amount} no pertenece a ningún contrato ni pedido.",
+      "suggestion": "Vincule sus líneas a un contrato o regístrela como coste directo en una cuenta."
+    }
   }
 }

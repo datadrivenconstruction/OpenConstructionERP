@@ -30,6 +30,10 @@ vi.mock('../api', async (importOriginal) => {
       lineHistory: vi.fn(),
       unassigned: vi.fn(),
       assign: vi.fn(),
+      chain: vi.fn(),
+      setVector: vi.fn(),
+      inheritAll: vi.fn(),
+      directCost: vi.fn(),
     },
   };
 });
@@ -144,6 +148,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   projectState.activeProjectId = 'p-1';
   vi.mocked(costControlApi.report).mockResolvedValue(REPORT);
+  vi.mocked(costControlApi.chain).mockResolvedValue({ project_id: 'p-1', currency: 'EUR', buckets: [], findings: [] });
   vi.mocked(costControlApi.snapshots).mockResolvedValue({ items: [], total: 0, offset: 0, limit: 50 });
   vi.mocked(costControlApi.unassigned).mockResolvedValue({
     items: [

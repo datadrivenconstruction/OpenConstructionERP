@@ -1069,5 +1069,47 @@
     "parent_not_found": "Model yang seharusnya menjadi induk versi baru dari unggahan ini tidak ada di proyek ini. Pilih model lain, atau unggah sebagai model terpisah.",
     "parent_not_ready": "Impor \"{name}\" belum selesai, sehingga belum dapat menerima versi baru. Tunggu sampai siap, atau unggah file ini sebagai model terpisah.",
     "parent_superseded": "\"{name}\" sudah memiliki versi yang lebih baru, {version}. Unggah file ini sebagai versi baru dari yang terbaru."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Kontrak {code} bernilai {amount} tetapi tidak punya baris jadwal, jadi uangnya tidak ada di baris biaya mana pun.",
+      "suggestion": "Beri kontrak satu akun di pengendalian biaya, atau tambahkan baris jadwalnya."
+    },
+    "contract_sum_differs": {
+      "fail": "Kontrak {code} bernilai {total}, tetapi baris jadwalnya berjumlah {lines} (selisih {difference}).",
+      "suggestion": "Perbaiki nilai kontrak atau baris jadwal agar sama."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Perubahan {code} disetujui tanpa jumlah yang disepakati.",
+      "suggestion": "Catat jumlah yang disepakati dengan kontraktor sebelum perubahan disetujui."
+    },
+    "change_without_approval_date": {
+      "fail": "Perubahan {code} disetujui tanpa tanggal persetujuan.",
+      "suggestion": "Catat kapan perubahan itu disetujui."
+    },
+    "billed_before_approval": {
+      "fail": "{amount} ditagihkan pada kontrak {contract} untuk perubahan {code}, yang berstatus {status} dan belum disetujui.",
+      "suggestion": "Setujui perubahan lebih dulu, atau tarik penagihan dari tagihan termin."
+    },
+    "contract_over_target": {
+      "fail": "Kontrak {code} mengikat {committed}, {difference} di atas {target} dari BQ tempat kontrak ini ditenderkan (lebih dari {tolerance} %).",
+      "suggestion": "Cocokkan penunjukan dan perubahannya dengan BQ, lalu catat mengapa pekerjaan lebih mahal."
+    },
+    "account_over_plan": {
+      "fail": "Akun {code} memuat komitmen {committed}, {difference} di atas rencananya sebesar {planned} (lebih dari {tolerance} %).",
+      "suggestion": "Periksa komitmen di akun ini, atau perbarui rencana beserta alasannya."
+    },
+    "quantity_overrun": {
+      "fail": "Baris {code} kontrak {contract} terukur {measured} {unit} dari {contracted} {unit} di kontrak, lebih {over} % (batas {tolerance} %).",
+      "suggestion": "Periksa pengukuran, atau sepakati kuantitas tambahan sebagai perubahan."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Kontrak {code} terukur {measured}, {difference} di atas nilainya beserta perubahan yang disetujui sebesar {committed}.",
+      "suggestion": "Setujui perubahan yang menutup pekerjaan tambahan, atau periksa pengukuran."
+    },
+    "invoice_without_contract": {
+      "fail": "Faktur pemasok {number} sebesar {amount} tidak termasuk kontrak atau pesanan mana pun.",
+      "suggestion": "Kaitkan barisnya ke kontrak, atau catat sebagai biaya langsung di satu akun."
+    }
   }
 }

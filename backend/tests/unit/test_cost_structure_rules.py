@@ -180,6 +180,17 @@ async def test_v5_a_contract_line_off_its_positions_vector_unless_overridden_wit
     assert found[0].severity.value == "warning"
 
 
+async def test_v5_reads_the_split_of_a_line_that_has_no_single_cost_line() -> None:
+    payload = _clean()
+    payload["inherited"] = [
+        {"id": "s1", "code": "S1", "cost_line_id": None, "cost_line_ids": ["l1", "l2"], "vector": ["l1", "l2"]},
+        {"id": "s2", "code": "S2", "cost_line_id": None, "cost_line_ids": ["l1", "l9"], "vector": ["l1", "l2"]},
+        {"id": "s3", "code": "S3", "cost_line_id": None, "cost_line_ids": [], "vector": ["l1"]},
+    ]
+    found = await _run(VectorInheritedRule, payload)
+    assert [r.element_ref for r in found] == ["s2"]
+
+
 async def test_messages_follow_the_callers_locale() -> None:
     payload = _clean()
     payload["lines"].append({"id": "l2", "code": "L2", "account_id": None, "amount": "40.00"})

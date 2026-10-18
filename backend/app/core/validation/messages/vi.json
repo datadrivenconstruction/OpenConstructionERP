@@ -1069,5 +1069,47 @@
     "parent_not_found": "Mô hình mà bản tải lên này lẽ ra là phiên bản mới của nó không có trong dự án này. Hãy chọn mô hình khác, hoặc tải lên như một mô hình riêng.",
     "parent_not_ready": "\"{name}\" chưa nhập xong nên chưa thể nhận phiên bản mới. Hãy đợi đến khi sẵn sàng, hoặc tải tệp này lên như một mô hình riêng.",
     "parent_superseded": "\"{name}\" đã có phiên bản mới hơn là {version}. Thay vào đó, hãy tải tệp này lên làm phiên bản mới của bản mới nhất."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Hợp đồng {code} trị giá {amount} nhưng không có dòng tiến độ nào, nên tiền của nó không nằm ở dòng chi phí nào.",
+      "suggestion": "Hãy gán cho hợp đồng một tài khoản trong kiểm soát chi phí, hoặc thêm các dòng tiến độ của nó."
+    },
+    "contract_sum_differs": {
+      "fail": "Hợp đồng {code} trị giá {total}, nhưng các dòng của nó cộng lại là {lines} (chênh {difference}).",
+      "suggestion": "Hãy sửa giá trị hợp đồng hoặc các dòng để hai bên khớp nhau."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Phát sinh {code} đã được duyệt nhưng chưa có số tiền thỏa thuận.",
+      "suggestion": "Hãy ghi số tiền đã thỏa thuận với nhà thầu trước khi duyệt phát sinh."
+    },
+    "change_without_approval_date": {
+      "fail": "Phát sinh {code} đã được duyệt nhưng chưa có ngày duyệt.",
+      "suggestion": "Hãy ghi lại thời điểm phát sinh được duyệt."
+    },
+    "billed_before_approval": {
+      "fail": "Đã xuất hóa đơn {amount} trên hợp đồng {contract} cho phát sinh {code}, nhưng phát sinh này đang ở trạng thái {status} và chưa được duyệt.",
+      "suggestion": "Hãy duyệt phát sinh trước, hoặc gỡ khoản thanh toán này khỏi hồ sơ thanh toán."
+    },
+    "contract_over_target": {
+      "fail": "Hợp đồng {code} cam kết {committed}, cao hơn {difference} so với {target} của bảng khối lượng dùng để giao thầu (vượt {tolerance} %).",
+      "suggestion": "Hãy đối chiếu việc giao thầu và các phát sinh với bảng khối lượng, và ghi lại vì sao công việc tốn hơn."
+    },
+    "account_over_plan": {
+      "fail": "Tài khoản {code} có cam kết {committed}, cao hơn kế hoạch {planned} là {difference} (vượt {tolerance} %).",
+      "suggestion": "Hãy kiểm tra các cam kết trên tài khoản này, hoặc cập nhật kế hoạch kèm lý do."
+    },
+    "quantity_overrun": {
+      "fail": "Dòng {code} của hợp đồng {contract} đo được {measured} {unit} so với {contracted} {unit} trong hợp đồng, vượt {over} % (cho phép {tolerance} %).",
+      "suggestion": "Hãy kiểm tra số đo, hoặc thỏa thuận phần khối lượng thêm như một phát sinh."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Hợp đồng {code} đo được {measured}, cao hơn giá trị kèm phát sinh đã duyệt là {committed} một khoản {difference}.",
+      "suggestion": "Hãy duyệt phát sinh bao phủ phần việc thêm, hoặc kiểm tra số đo."
+    },
+    "invoice_without_contract": {
+      "fail": "Hóa đơn nhà cung cấp {number} trị giá {amount} không thuộc hợp đồng hay đơn hàng nào.",
+      "suggestion": "Hãy liên kết các dòng của nó với một hợp đồng, hoặc ghi nhận là chi phí trực tiếp trên một tài khoản."
+    }
   }
 }

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, PlainSerializer, field_validator
@@ -20,6 +20,9 @@ from app.modules.costmodel.schemas import _serialise_money
 
 Money = Annotated[Decimal, PlainSerializer(_serialise_money, return_type=str, when_used="json")]
 OptionalMoney = Annotated[Decimal | None, PlainSerializer(_serialise_money, return_type=str | None, when_used="json")]
+
+#: Rows that can be put on a cost line from cost control (see costmodel.inheritance_service).
+VectorKind = Literal["contract_line", "po_item", "contract", "change_order_item", "invoice_line"]
 
 RowKind = Literal["cost_line", "contract", "unassigned", "changes_without_contract", "other", "remaining", "allowance"]
 
@@ -208,9 +211,9 @@ class LineHistory(BaseModel):
 
 
 class UnassignedItem(BaseModel):
-    """A contract line or order item whose money is on no cost line yet."""
+    """A contract line, order item or contract without a schedule whose money is on no cost line yet."""
 
-    kind: Literal["contract_line", "po_item"]
+    kind: Literal["contract_line", "po_item", "contract"]
     id: UUID
     group_id: UUID
     group_code: str = ""
@@ -230,16 +233,107 @@ class UnassignedPage(BaseModel):
 
 
 class AssignTarget(BaseModel):
-    kind: Literal["contract_line", "po_item"]
+    kind: VectorKind
     id: UUID
 
 
 class AssignRequest(BaseModel):
-    """Put these lines on one cost line."""
+    """Put these rows on one cost line.
+
+    A row that inherits another cost line is overridden onto this one, which
+    needs ``reason``; it is recorded on the row with who and when.
+    """
 
     cost_line_id: UUID
     items: list[AssignTarget] = Field(min_length=1, max_length=500)
+    reason: str | None = Field(default=None, max_length=2000)
 
 
 class AssignResult(BaseModel):
     assigned: int
+
+
+# ── The chain panel: suspense buckets, rules V6 to V10 and V15, their fixes ──
+
+
+class SuspenseItem(BaseModel):
+    """One row with money on no cost line."""
+
+    kind: VectorKind
+    id: UUID
+    group_id: UUID
+    group_code: str = ""
+    group_title: str = ""
+    code: str = ""
+    description: str = ""
+    amount: Money
+    #: True when the row has something above it that names a cost line.
+    can_inherit: bool = False
+
+
+class SuspenseBucket(BaseModel):
+    """The rows of one kind on no cost line; count and amount are for all of them."""
+
+    kind: VectorKind
+    count: int
+    amount: Money
+    inheritable: int
+    #: True when the bucket's money is in the report's "not on any cost line" row.
+    in_report: bool
+    items: list[SuspenseItem] = Field(default_factory=list)
+
+
+class ChainFinding(BaseModel):
+    """A finding of the chain rules, message in the caller's language."""
+
+    rule_id: str
+    severity: Literal["error", "warning", "info"]
+    message: str
+    suggestion: str = ""
+    element_ref: str | None = None
+    details: dict[str, Any] = Field(default_factory=dict)
+
+
+class ChainReport(BaseModel):
+    """Suspense buckets and chain findings of one project."""
+
+    project_id: UUID
+    currency: str = ""
+    buckets: list[SuspenseBucket] = Field(default_factory=list)
+    findings: list[ChainFinding] = Field(default_factory=list)
+
+
+class SetVectorRequest(BaseModel):
+    """Put one row on a cost line (``set``), back on what it inherits (``inherit``), or off (``clear``)."""
+
+    kind: VectorKind
+    id: UUID
+    mode: Literal["set", "inherit", "clear"] = "set"
+    cost_line_id: UUID | None = None
+    reason: str | None = Field(default=None, max_length=2000)
+
+
+class SetVectorResult(BaseModel):
+    cost_line_id: UUID | None = None
+    source: str | None = None
+    override: bool = False
+
+
+class InheritResult(BaseModel):
+    """How many rows of each kind took the account they inherit."""
+
+    contract_line: int = 0
+    change_order_item: int = 0
+    invoice_line: int = 0
+
+
+class DirectCostRequest(BaseModel):
+    """The cost line a supplier invoice without a contract is recorded on."""
+
+    cost_line_id: UUID
+
+
+class DirectCostResult(BaseModel):
+    contract_id: UUID
+    contract_code: str
+    contract_line_id: UUID | None = None

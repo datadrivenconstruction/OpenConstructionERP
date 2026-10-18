@@ -1069,5 +1069,47 @@
     "parent_not_found": "Modellen, som denne upload skal være en ny version af, findes ikke i projektet. Vælg en anden, eller upload den som en separat model.",
     "parent_not_ready": "\"{name}\" er ikke færdigimporteret, så den kan ikke få en ny version endnu. Vent, til den er klar, eller upload denne som en separat model.",
     "parent_superseded": "\"{name}\" har allerede en nyere version, {version}. Upload i stedet denne som en ny version af den nyeste."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Kontrakt {code} er {amount} værd, men har ingen kontraktposter, så pengene ligger på ingen omkostningslinje.",
+      "suggestion": "Giv kontrakten en konto i omkostningsstyringen, eller tilføj dens poster."
+    },
+    "contract_sum_differs": {
+      "fail": "Kontrakt {code} er {total} værd, men posterne summerer til {lines} (forskel på {difference}).",
+      "suggestion": "Ret kontraktværdien eller posterne, så de stemmer overens."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Tillægget {code} er godkendt uden aftalt beløb.",
+      "suggestion": "Registrer det beløb, der er aftalt med entreprenøren, før tillægget godkendes."
+    },
+    "change_without_approval_date": {
+      "fail": "Tillægget {code} er godkendt uden godkendelsesdato.",
+      "suggestion": "Registrer, hvornår tillægget blev godkendt."
+    },
+    "billed_before_approval": {
+      "fail": "Der er faktureret {amount} på kontrakt {contract} for tillæg {code}, som har status {status} og ikke er godkendt.",
+      "suggestion": "Godkend tillægget først, eller tag faktureringen af betalingsanmodningen."
+    },
+    "contract_over_target": {
+      "fail": "Kontrakt {code} binder {committed}, {difference} over de {target} i det tilbudsunderlag, den blev afgivet fra (mere end {tolerance} %).",
+      "suggestion": "Sammenhold tildelingen og dens tillæg med tilbudsunderlaget, og notér hvorfor arbejdet koster mere."
+    },
+    "account_over_plan": {
+      "fail": "Konto {code} bærer {committed} i forpligtelser, {difference} over planen på {planned} (mere end {tolerance} %).",
+      "suggestion": "Tjek forpligtelserne på kontoen, eller opdater planen med en begrundelse."
+    },
+    "quantity_overrun": {
+      "fail": "Post {code} i kontrakt {contract} er opmålt til {measured} {unit} mod {contracted} {unit} aftalt, {over} % over (tilladt {tolerance} %).",
+      "suggestion": "Tjek opmålingen, eller aftal den ekstra mængde som tillæg."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Kontrakt {code} er opmålt til {measured}, {difference} over dens værdi med godkendte tillæg på {committed}.",
+      "suggestion": "Godkend det tillæg, der dækker det ekstra arbejde, eller tjek opmålingen."
+    },
+    "invoice_without_contract": {
+      "fail": "Leverandørfaktura {number} på {amount} hører ikke til nogen kontrakt eller ordre.",
+      "suggestion": "Knyt dens linjer til en kontrakt, eller bogfør den som direkte omkostning på en konto."
+    }
   }
 }

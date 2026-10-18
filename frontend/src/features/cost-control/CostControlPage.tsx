@@ -27,6 +27,7 @@ import { costControlApi, num, type CostControlAxis, type CostControlFinding, typ
 import { CostControlTable } from './CostControlTable';
 import { ForecastHistory } from './ForecastHistory';
 import { AssignDrawer } from './AssignDrawer';
+import { ChainPanel } from './ChainPanel';
 import { LineDrawer } from './LineDrawer';
 import { SaveForecastDialog } from './SaveForecastDialog';
 import { SOURCE_PRIORITY, findingHint, findingTitle, sourceLabel, sourceTone } from './labels';
@@ -317,6 +318,10 @@ export function CostControlPage() {
               onOpen={setOpenRow}
               onAssign={() => setAssigning(true)}
             />
+          </Card>
+
+          <Card>
+            <ChainPanel projectId={projectId} currency={currency} canEdit={canEdit} />
           </Card>
 
           <div className="flex flex-wrap items-center gap-3">

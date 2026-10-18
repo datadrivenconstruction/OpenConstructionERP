@@ -482,12 +482,18 @@ class CostControlService:
         ]
         return UnassignedPage(items=items, total=len(entries), offset=offset, limit=limit)
 
-    async def assign(self, project_id: uuid.UUID, body: AssignRequest) -> AssignResult:
-        """Put contract lines and order items on one cost line of the same project.
+    async def assign(self, project_id: uuid.UUID, body: AssignRequest, user_id: str | None = None) -> AssignResult:
+        """Put rows on one cost line of the same project.
 
-        The link itself is the cost spine's: it checks every target belongs to
-        the project, so a line of another project is a 404, not a silent move.
+        Order items keep the cost spine's link, and lose any split they had.
+        Every other kind goes through
+        :func:`~app.modules.costmodel.inheritance_service.set_vector`, which
+        checks the row belongs to the project (another project's row is a 404,
+        not a silent move) and asks for ``body.reason`` when the row inherits a
+        different cost line.
         """
+        from app.modules.costmodel.inheritance import SOURCE_PO_ITEM, drop_splits
+        from app.modules.costmodel.inheritance_service import KIND_PO_ITEM, set_vector
         from app.modules.costmodel.service import CostSpineService
 
         line = await self.session.get(CostLine, body.cost_line_id)
@@ -495,6 +501,20 @@ class CostControlService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cost line not found")
         spine = CostSpineService(self.session)
         for target in body.items:
+            if target.kind != KIND_PO_ITEM:
+                await set_vector(
+                    self.session,
+                    project_id,
+                    kind=target.kind,
+                    target_id=target.id,
+                    mode="set",
+                    cost_line_id=body.cost_line_id,
+                    reason=body.reason,
+                    user_id=user_id,
+                )
+                await self.session.flush()
+                continue
+            await drop_splits(self.session, SOURCE_PO_ITEM, [target.id])
             # Each link ends with expire_all; reload the line before the next one
             # reads it, or the attribute access would be lazy IO outside the loop.
             await self.session.refresh(line)

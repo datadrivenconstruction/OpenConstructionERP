@@ -1069,5 +1069,47 @@
     "parent_not_found": "O modelo do qual este envio deveria ser uma nova versão não está neste projeto. Escolha outro ou envie como modelo separado.",
     "parent_not_ready": "A importação de \"{name}\" ainda não terminou, então ele ainda não pode receber uma nova versão. Aguarde até ficar pronto ou envie este arquivo como modelo separado.",
     "parent_superseded": "\"{name}\" já tem uma versão mais recente, {version}. Envie este arquivo como nova versão da mais recente."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "O contrato {code} vale {amount} mas não tem itens de cronograma, por isso o seu valor não está em nenhuma linha de custo.",
+      "suggestion": "Dê ao contrato uma conta no controlo de custos ou adicione os seus itens."
+    },
+    "contract_sum_differs": {
+      "fail": "O contrato {code} vale {total}, mas os seus itens somam {lines} (diferença de {difference}).",
+      "suggestion": "Corrija o valor do contrato ou os itens para que coincidam."
+    },
+    "change_without_agreed_amount": {
+      "fail": "O aditivo {code} está aprovado sem valor acordado.",
+      "suggestion": "Registe o valor acordado com o empreiteiro antes de aprovar o aditivo."
+    },
+    "change_without_approval_date": {
+      "fail": "O aditivo {code} está aprovado sem data de aprovação.",
+      "suggestion": "Registe quando o aditivo foi aprovado."
+    },
+    "billed_before_approval": {
+      "fail": "Foram faturados {amount} no contrato {contract} pelo aditivo {code}, que está em estado {status} e não aprovado.",
+      "suggestion": "Aprove primeiro o aditivo ou retire a faturação da medição."
+    },
+    "contract_over_target": {
+      "fail": "O contrato {code} compromete {committed}, {difference} acima dos {target} do orçamento a partir do qual foi adjudicado (mais de {tolerance} %).",
+      "suggestion": "Confira a adjudicação e os seus aditivos com o orçamento e registe por que a obra custa mais."
+    },
+    "account_over_plan": {
+      "fail": "A conta {code} tem {committed} em compromissos, {difference} acima do planeado de {planned} (mais de {tolerance} %).",
+      "suggestion": "Confira os compromissos desta conta ou atualize o plano com um motivo."
+    },
+    "quantity_overrun": {
+      "fail": "O item {code} do contrato {contract} está medido em {measured} {unit} contra {contracted} {unit} contratadas, {over} % acima (permitido {tolerance} %).",
+      "suggestion": "Confira a medição ou acorde a quantidade extra como aditivo."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "O contrato {code} está medido em {measured}, {difference} acima do seu valor com aditivos aprovados de {committed}.",
+      "suggestion": "Aprove o aditivo que cobre o trabalho extra ou confira a medição."
+    },
+    "invoice_without_contract": {
+      "fail": "A fatura de fornecedor {number} de {amount} não pertence a nenhum contrato nem encomenda.",
+      "suggestion": "Associe as suas linhas a um contrato ou registe-a como custo direto numa conta."
+    }
   }
 }
