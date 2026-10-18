@@ -671,6 +671,10 @@ class ChangeOrderService:
                 last_exc = exc
                 continue
             await self._warn_standalone_overlap(order)
+            # Write the warning now, inside the async context. Left pending, it
+            # was flushed by the first lazy attribute access after create,
+            # which runs synchronously and fails outside the greenlet.
+            await self.session.flush()
             logger.info(
                 "Change order created: %s for project %s (attempt %d)",
                 code,
