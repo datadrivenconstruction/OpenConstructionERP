@@ -1111,5 +1111,79 @@
       "fail": "Supplier invoice {number} for {amount} belongs to no contract or order.",
       "suggestion": "Link its lines to a contract, or record it as a direct cost on one account."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Invoice {number} on contract {contract} states {net} to date, less than the {previous} of invoice {previous_number} before it, although the contract is invoiced cumulatively.",
+      "suggestion": "If the invoice bills only the new work, the contract is invoiced incrementally; if it reduces the total, enter it as a credit note."
+    },
+    "invoice_after_final": {
+      "fail": "Invoice {number} on contract {contract} follows the final invoice {final}.",
+      "suggestion": "Enter later work as day work or a credit note, or mark the right invoice as the final one."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Invoice {number} on contract {contract} was raised from a claim and bills one period, but the contract is invoiced cumulatively.",
+      "suggestion": "Use one way of invoicing per contract: switch the contract to incremental invoicing, or enter the contractor's cumulative invoices instead."
+    },
+    "release_differs": {
+      "fail": "The release confirmed for invoice {number} on contract {contract} is {stored}, but the contract's terms give {computed} today.",
+      "suggestion": "Check what changed since the release (terms, invoice amounts, deductions), then reopen and confirm the release again."
+    },
+    "rounding_out_of_range": {
+      "fail": "Invoice {number} is rounded by {rounding}, outside the agreed rounding step of {step}.",
+      "suggestion": "Rounding only cuts a release down by less than one step; switch rounding on in the payment terms or reopen the release."
+    },
+    "final_retention_without_warranty": {
+      "fail": "The final invoice {number} on contract {contract} holds {amount} retention, but no warranty retention is agreed.",
+      "suggestion": "Agree warranty retention in the payment terms, or reopen the release so all retention is paid with the final invoice."
+    },
+    "posting_exceeds_held": {
+      "fail": "More retention was paid back on contract {contract} than it holds: {amount} too much.",
+      "suggestion": "Void the retention posting that is too high and post the amount actually held."
+    },
+    "posting_before_event": {
+      "fail": "{amount} retention on contract {contract} was paid back on {posted}, before its release event was due on {due}.",
+      "suggestion": "Check the date of the release event, or post the release once the event has happened."
+    },
+    "posting_without_event_date": {
+      "fail": "{amount} retention on contract {contract} was paid back, but the date of its release event is not recorded.",
+      "suggestion": "Record the date the release event was reached, so the payment can be checked against it."
+    },
+    "retention_still_held": {
+      "fail": "Contract {contract} is completed and still holds {amount} retention.",
+      "suggestion": "Release the retention at its event in the retention register, or keep it held for the warranty period."
+    },
+    "discount_not_agreed": {
+      "fail": "The release of invoice {number} on contract {contract} takes an early payment discount of {amount}, but the contract allows none.",
+      "suggestion": "Switch the early payment discount on in the payment terms, or reopen the release without it."
+    },
+    "discount_after_deadline": {
+      "fail": "A discount of {amount} was kept back on invoice {number}, but the payment on {paid_on} came after the discount date {until}.",
+      "suggestion": "Pay the discount amount as well, or record why the contractor accepted the late discount."
+    },
+    "invoiced_over_measured": {
+      "fail": "Contract {contract} is invoiced at {invoiced}, {difference} above the {measured} measured (quantity times rate).",
+      "suggestion": "Check the measurement before releasing more money, or hold the difference back on the next release."
+    },
+    "invoiced_over_contract": {
+      "fail": "Contract {contract} is invoiced at {invoiced}, {difference} above its value of {value}, and nothing is measured on it.",
+      "suggestion": "Record the measurement or the change order that covers the extra money before releasing more."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Invoice {number} is reverse charged but carries {vat} VAT.",
+      "suggestion": "A reverse charged invoice carries no VAT; correct the VAT amount or the VAT category of its lines."
+    },
+    "line_without_vat_rate": {
+      "fail": "Invoice {number} carries VAT, but {count} of its lines state no VAT rate.",
+      "suggestion": "Enter the VAT rate on every line so deductions and exports take the right tax."
+    },
+    "duplicate_number": {
+      "fail": "Invoice number {number} from the same contractor is entered {count} times.",
+      "suggestion": "Cancel the copy, or correct the invoice number if these are different invoices."
+    },
+    "possible_duplicate": {
+      "fail": "Invoice {number} has the same contractor, amount ({amount}) and date ({on}) as invoice {other}.",
+      "suggestion": "Check that it is not the same invoice entered twice under another number."
+    }
   }
 }

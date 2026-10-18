@@ -1111,5 +1111,79 @@
       "fail": "La factura de proveedor {number} por {amount} no pertenece a ningún contrato ni pedido.",
       "suggestion": "Vincule sus líneas a un contrato o regístrela como coste directo en una cuenta."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "La factura {number} del contrato {contract} indica {net} a origen, menos que los {previous} de la factura anterior {previous_number}, aunque el contrato se factura de forma acumulada.",
+      "suggestion": "Si la factura solo cobra la obra nueva, el contrato se factura de forma incremental; si reduce el total, regístrela como abono."
+    },
+    "invoice_after_final": {
+      "fail": "La factura {number} del contrato {contract} es posterior a la factura final {final}.",
+      "suggestion": "Registre los trabajos posteriores como trabajos por administración o como abono, o marque la factura correcta como final."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "La factura {number} del contrato {contract} se generó a partir de una reclamación y cobra un solo periodo, pero el contrato se factura de forma acumulada.",
+      "suggestion": "Use una sola forma de facturar por contrato: cambie el contrato a facturación incremental o registre en su lugar las facturas acumuladas del contratista."
+    },
+    "release_differs": {
+      "fail": "La liberación de pago confirmada para la factura {number} del contrato {contract} es {stored}, pero las condiciones del contrato dan hoy {computed}.",
+      "suggestion": "Revise qué ha cambiado desde la liberación (condiciones, importes de la factura, deducciones), reabra la liberación y vuelva a confirmarla."
+    },
+    "rounding_out_of_range": {
+      "fail": "La factura {number} se redondea en {rounding}, fuera del paso de redondeo acordado de {step}.",
+      "suggestion": "El redondeo solo reduce una liberación en menos de un paso; active el redondeo en las condiciones de pago o reabra la liberación."
+    },
+    "final_retention_without_warranty": {
+      "fail": "La factura final {number} del contrato {contract} retiene {amount} de retención, pero no se ha acordado retención de garantía.",
+      "suggestion": "Acuerde una retención de garantía en las condiciones de pago o reabra la liberación para que toda la retención se pague con la factura final."
+    },
+    "posting_exceeds_held": {
+      "fail": "En el contrato {contract} se devolvió más retención de la que se retiene: {amount} de más.",
+      "suggestion": "Anule el asiento de retención excesivo y contabilice el importe realmente retenido."
+    },
+    "posting_before_event": {
+      "fail": "Se devolvieron {amount} de retención del contrato {contract} el {posted}, antes del hito de liberación, previsto para el {due}.",
+      "suggestion": "Compruebe la fecha del hito de liberación o contabilice la liberación una vez ocurrido el hito."
+    },
+    "posting_without_event_date": {
+      "fail": "Se devolvieron {amount} de retención del contrato {contract}, pero no está registrada la fecha de su hito de liberación.",
+      "suggestion": "Registre la fecha en que se alcanzó el hito de liberación, para poder contrastar el pago con ella."
+    },
+    "retention_still_held": {
+      "fail": "El contrato {contract} está terminado y aún retiene {amount} de retención.",
+      "suggestion": "Libere la retención en su hito en el registro de retenciones o manténgala retenida durante el periodo de garantía."
+    },
+    "discount_not_agreed": {
+      "fail": "La liberación de la factura {number} del contrato {contract} aplica un descuento por pronto pago de {amount}, pero el contrato no permite ninguno.",
+      "suggestion": "Active el descuento por pronto pago en las condiciones de pago o reabra la liberación sin él."
+    },
+    "discount_after_deadline": {
+      "fail": "Se retuvo un descuento de {amount} en la factura {number}, pero el pago del {paid_on} llegó después de la fecha de descuento {until}.",
+      "suggestion": "Pague también el importe del descuento o registre por qué el contratista aceptó el descuento tardío."
+    },
+    "invoiced_over_measured": {
+      "fail": "El contrato {contract} está facturado en {invoiced}, {difference} por encima de los {measured} medidos (cantidad por precio).",
+      "suggestion": "Revise la medición antes de liberar más dinero o retenga la diferencia en la próxima liberación."
+    },
+    "invoiced_over_contract": {
+      "fail": "El contrato {contract} está facturado en {invoiced}, {difference} por encima de su valor de {value}, y no tiene nada medido.",
+      "suggestion": "Registre la medición o el modificado que cubre el importe adicional antes de liberar más."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "La factura {number} está en inversión del sujeto pasivo pero incluye {vat} de IVA.",
+      "suggestion": "Una factura con inversión del sujeto pasivo no lleva IVA; corrija el importe del IVA o la categoría de IVA de sus líneas."
+    },
+    "line_without_vat_rate": {
+      "fail": "La factura {number} lleva IVA, pero {count} de sus líneas no indican tipo de IVA.",
+      "suggestion": "Indique el tipo de IVA en cada línea para que las deducciones y las exportaciones usen el impuesto correcto."
+    },
+    "duplicate_number": {
+      "fail": "El número de factura {number} del mismo contratista está registrado {count} veces.",
+      "suggestion": "Anule la copia o corrija el número de factura si se trata de facturas distintas."
+    },
+    "possible_duplicate": {
+      "fail": "La factura {number} tiene el mismo contratista, importe ({amount}) y fecha ({on}) que la factura {other}.",
+      "suggestion": "Compruebe que no sea la misma factura registrada dos veces con otro número."
+    }
   }
 }

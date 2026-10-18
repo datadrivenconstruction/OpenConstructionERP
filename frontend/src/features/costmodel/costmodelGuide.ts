@@ -66,6 +66,14 @@ export const costmodelGuide: ModuleGuideContent = {
       bodyDefault:
         'The cost spine is the control-account structure that ties the BOQ, schedule and finance data together. Generate it to roll costs up through control accounts and cost lines, giving the EVM and budget figures a consistent backbone to report against.',
     },
+    {
+      icon: 'ClipboardCheck',
+      titleKey: 'guide.costmodel.payments.title',
+      titleDefault: 'Invoices, retention and payment',
+      bodyKey: 'guide.costmodel.payments.body',
+      bodyDefault:
+        'On the cost control page every supplier contract has payment terms: cumulative or incremental invoices, retention, and optional warranty retention, early payment discount and rounding. Each invoice shows the steps from its amount to the amount released for payment, measured work is kept apart from certified value, and the invoiced and paid figures land on the cost lines. A manager confirms each release and pays held retention back after its event.',
+    },
   ],
   ctaKey: 'guide.costmodel.cta',
   ctaDefault: 'Select a project to begin',

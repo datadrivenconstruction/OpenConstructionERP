@@ -1111,5 +1111,79 @@
       "fail": "Factura furnizorului {number} de {amount} nu aparține niciunui contract sau comenzi.",
       "suggestion": "Legați rândurile ei de un contract sau înregistrați-o drept cost direct pe un cont."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Factura {number} de pe contractul {contract} arată {net} cumulat, mai puțin decât cei {previous} ai facturii anterioare {previous_number}, deși contractul se facturează cumulat.",
+      "suggestion": "Dacă factura cuprinde doar lucrările noi, contractul se facturează incremental; dacă reduce totalul, înregistreaz-o ca notă de credit."
+    },
+    "invoice_after_final": {
+      "fail": "Factura {number} de pe contractul {contract} vine după factura finală {final}.",
+      "suggestion": "Înregistrează lucrările ulterioare ca lucrări în regie sau notă de credit, ori marchează factura corectă drept finală."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Factura {number} de pe contractul {contract} a fost creată dintr-o revendicare și facturează o singură perioadă, dar contractul se facturează cumulat.",
+      "suggestion": "Folosește un singur mod de facturare pe contract: treci contractul pe facturare incrementală sau înregistrează în loc facturile cumulate ale constructorului."
+    },
+    "release_differs": {
+      "fail": "Plata aprobată pentru factura {number} de pe contractul {contract} este {stored}, dar condițiile contractului dau azi {computed}.",
+      "suggestion": "Verifică ce s-a schimbat de la aprobare (condiții, sume facturate, deduceri), apoi redeschide aprobarea și confirm-o din nou."
+    },
+    "rounding_out_of_range": {
+      "fail": "Factura {number} este rotunjită cu {rounding}, în afara pasului de rotunjire convenit de {step}.",
+      "suggestion": "Rotunjirea reduce suma aprobată cu mai puțin de un pas; activează rotunjirea în condițiile de plată sau redeschide aprobarea."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Factura finală {number} de pe contractul {contract} reține {amount} din garanția de bună execuție, dar nu este convenită nicio reținere pentru perioada de garanție.",
+      "suggestion": "Convino reținerea pentru garanție în condițiile de plată sau redeschide aprobarea ca toată garanția să se plătească cu factura finală."
+    },
+    "posting_exceeds_held": {
+      "fail": "Pe contractul {contract} s-a returnat mai multă garanție decât se reține: {amount} în plus.",
+      "suggestion": "Anulează înregistrarea de garanție prea mare și înregistrează suma reținută efectiv."
+    },
+    "posting_before_event": {
+      "fail": "Garanția de {amount} de pe contractul {contract} a fost returnată la {posted}, înainte de evenimentul de eliberare, scadent la {due}.",
+      "suggestion": "Verifică data evenimentului de eliberare sau înregistrează eliberarea după ce a avut loc evenimentul."
+    },
+    "posting_without_event_date": {
+      "fail": "Garanția de {amount} de pe contractul {contract} a fost returnată, dar data evenimentului de eliberare nu este înregistrată.",
+      "suggestion": "Înregistrează data la care a fost atins evenimentul de eliberare, ca plata să poată fi verificată în raport cu ea."
+    },
+    "retention_still_held": {
+      "fail": "Contractul {contract} este finalizat și reține încă {amount} din garanție.",
+      "suggestion": "Eliberează garanția la evenimentul ei în registrul de garanții sau păstreaz-o reținută pe perioada de garanție."
+    },
+    "discount_not_agreed": {
+      "fail": "Aprobarea plății facturii {number} de pe contractul {contract} aplică un discount pentru plată anticipată de {amount}, dar contractul nu permite așa ceva.",
+      "suggestion": "Activează discountul pentru plată anticipată în condițiile de plată sau redeschide aprobarea fără el."
+    },
+    "discount_after_deadline": {
+      "fail": "S-a reținut un discount de {amount} pe factura {number}, dar plata din {paid_on} a venit după data discountului {until}.",
+      "suggestion": "Plătește și suma discountului sau notează de ce a acceptat constructorul discountul întârziat."
+    },
+    "invoiced_over_measured": {
+      "fail": "Contractul {contract} este facturat la {invoiced}, cu {difference} peste cei {measured} măsurați (cantitate înmulțită cu preț).",
+      "suggestion": "Verifică măsurătorile înainte de a aproba mai mulți bani sau reține diferența la următoarea aprobare."
+    },
+    "invoiced_over_contract": {
+      "fail": "Contractul {contract} este facturat la {invoiced}, cu {difference} peste valoarea lui de {value}, și nu are nimic măsurat.",
+      "suggestion": "Înregistrează măsurătoarea sau actul adițional care acoperă suma în plus înainte de a aproba mai mult."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Factura {number} are taxare inversă, dar conține {vat} TVA.",
+      "suggestion": "O factură cu taxare inversă nu conține TVA; corectează suma TVA sau categoria de TVA a liniilor."
+    },
+    "line_without_vat_rate": {
+      "fail": "Factura {number} conține TVA, dar {count} dintre liniile ei nu au cotă de TVA.",
+      "suggestion": "Completează cota de TVA pe fiecare linie, ca deducerile și exporturile să ia taxa corectă."
+    },
+    "duplicate_number": {
+      "fail": "Numărul de factură {number} de la același constructor este introdus de {count} ori.",
+      "suggestion": "Anulează copia sau corectează numărul facturii dacă sunt facturi diferite."
+    },
+    "possible_duplicate": {
+      "fail": "Factura {number} are același constructor, aceeași sumă ({amount}) și aceeași dată ({on}) ca factura {other}.",
+      "suggestion": "Verifică să nu fie aceeași factură introdusă de două ori sub alt număr."
+    }
   }
 }

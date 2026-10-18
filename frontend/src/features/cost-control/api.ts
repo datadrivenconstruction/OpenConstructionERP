@@ -62,7 +62,11 @@ export interface CostControlRow {
   awarded: string;
   changes: string;
   committed: string;
+  /** Quantity times contract rate of the measured work, apart from what is certified. */
+  measured: string;
   certified: string;
+  /** Net amount of supplier invoices on this line. */
+  invoiced: string;
   paid: string;
   pending_changes: string;
   forecast: string;

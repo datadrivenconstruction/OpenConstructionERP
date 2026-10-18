@@ -1111,5 +1111,79 @@
       "fail": "Hankija arve {number} summas {amount} ei kuulu ühegi lepingu ega tellimuse alla.",
       "suggestion": "Siduge selle read lepinguga või kandke see otsese kuluna ühele kontole."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Lepingu {contract} arve {number} näitab seisuga {net}, mis on vähem kui eelmise arve {previous_number} {previous}, kuigi leping arveldatakse kumulatiivselt.",
+      "suggestion": "Kui arve esitab ainult uusi töid, arveldatakse leping juurdekasvuna; kui see vähendab kogusummat, sisestage see kreeditarvena."
+    },
+    "invoice_after_final": {
+      "fail": "Lepingu {contract} arve {number} järgneb lõpparvele {final}.",
+      "suggestion": "Sisestage hilisemad tööd tunnitööna või kreeditarvena või märkige õige arve lõpparveks."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Lepingu {contract} arve {number} loodi nõudest ja esitab ühe perioodi, kuid leping arveldatakse kumulatiivselt.",
+      "suggestion": "Kasutage lepingu kohta ühte arveldusviisi: lülitage leping juurdekasvu arveldusele või sisestage selle asemel töövõtja kumulatiivsed arved."
+    },
+    "release_differs": {
+      "fail": "Lepingu {contract} arve {number} kinnitatud vabastus on {stored}, kuid lepingu tingimused annavad täna {computed}.",
+      "suggestion": "Kontrollige, mis on pärast vabastamist muutunud (tingimused, arve summad, mahaarvamised), seejärel avage vabastus uuesti ja kinnitage see."
+    },
+    "rounding_out_of_range": {
+      "fail": "Arve {number} on ümardatud {rounding} võrra, mis jääb väljapoole kokkulepitud ümardussammu {step}.",
+      "suggestion": "Ümardamine vähendab vabastust vähem kui ühe sammu võrra; lülitage ümardamine maksetingimustes sisse või avage vabastus uuesti."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Lepingu {contract} lõpparve {number} peab kinni {amount} kinnipidamist, kuid garantiikinnipidamist pole kokku lepitud.",
+      "suggestion": "Leppige maksetingimustes kokku garantiikinnipidamine või avage vabastus uuesti, et kogu kinnipidamine makstaks välja lõpparvega."
+    },
+    "posting_exceeds_held": {
+      "fail": "Lepingult {contract} on tagastatud rohkem kinnipidamist, kui kinni peetakse: {amount} liiga palju.",
+      "suggestion": "Tühistage liiga suur kinnipidamise kanne ja kandke tegelikult kinnipeetav summa."
+    },
+    "posting_before_event": {
+      "fail": "Lepingu {contract} kinnipidamine {amount} tagastati {posted}, enne vabastamise sündmust, mille tähtaeg oli {due}.",
+      "suggestion": "Kontrollige vabastamise sündmuse kuupäeva või kandke vabastus pärast sündmuse toimumist."
+    },
+    "posting_without_event_date": {
+      "fail": "Lepingu {contract} kinnipidamine {amount} tagastati, kuid vabastamise sündmuse kuupäeva pole sisestatud.",
+      "suggestion": "Sisestage vabastamise sündmuse saabumise kuupäev, et makset saaks selle vastu kontrollida."
+    },
+    "retention_still_held": {
+      "fail": "Leping {contract} on lõpetatud ja peab endiselt kinni {amount} kinnipidamist.",
+      "suggestion": "Vabastage kinnipidamine selle sündmuse järgi kinnipidamiste registris või jätke see garantiiajaks kinni."
+    },
+    "discount_not_agreed": {
+      "fail": "Lepingu {contract} arve {number} vabastus arvestab ette makstud soodustust {amount}, kuid leping seda ei luba.",
+      "suggestion": "Lülitage ettemaksusoodustus makse tingimustes sisse või avage vabastus uuesti ilma selleta."
+    },
+    "discount_after_deadline": {
+      "fail": "Arvelt {number} peeti kinni soodustus {amount}, kuid makse kuupäeval {paid_on} tehti pärast soodustuse kuupäeva {until}.",
+      "suggestion": "Makske ka soodustuse summa või märkige, miks töövõtja hilinenud soodustuse vastu võttis."
+    },
+    "invoiced_over_measured": {
+      "fail": "Leping {contract} on arveldatud summas {invoiced}, mis on {difference} võrra üle mõõdetud {measured} (kogus korrutatud ühikuhinnaga).",
+      "suggestion": "Kontrollige mõõdistust enne rohkema raha vabastamist või pidage vahe järgmisel vabastusel kinni."
+    },
+    "invoiced_over_contract": {
+      "fail": "Leping {contract} on arveldatud summas {invoiced}, mis on {difference} võrra üle selle väärtuse {value}, ja midagi pole mõõdetud.",
+      "suggestion": "Sisestage mõõdistus või muudatus, mis katab lisaraha, enne kui vabastate rohkem."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Arve {number} on pöördmaksustatav, kuid sisaldab käibemaksu {vat}.",
+      "suggestion": "Pöördmaksustatav arve ei sisalda käibemaksu; parandage käibemaksu summa või selle ridade käibemaksu kategooria."
+    },
+    "line_without_vat_rate": {
+      "fail": "Arve {number} sisaldab käibemaksu, kuid {count} rea juures puudub käibemaksumäär.",
+      "suggestion": "Sisestage käibemaksumäär igale reale, et mahaarvamised ja ekspordid kasutaksid õiget maksu."
+    },
+    "duplicate_number": {
+      "fail": "Sama töövõtja arve number {number} on sisestatud {count} korda.",
+      "suggestion": "Tühistage koopia või parandage arve number, kui tegu on erinevate arvetega."
+    },
+    "possible_duplicate": {
+      "fail": "Arvel {number} on sama töövõtja, summa ({amount}) ja kuupäev ({on}) mis arvel {other}.",
+      "suggestion": "Kontrollige, et see pole sama arve, mis on sisestatud kaks korda teise numbriga."
+    }
   }
 }

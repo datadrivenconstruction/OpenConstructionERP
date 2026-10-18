@@ -78,6 +78,8 @@ TOTAL_FIELDS: tuple[str, ...] = (
     "paid",
     "forecast",
     "variance",
+    "measured",
+    "invoiced",
 )
 
 #: Row fields a snapshot keeps per cost line.
@@ -157,6 +159,8 @@ def _row(
         committed=figures.committed,
         certified=figures.certified,
         paid=figures.paid,
+        measured=figures.measured,
+        invoiced=figures.invoiced,
         pending_changes=pending,
         forecast=forecast.amount,
         forecast_source=forecast.source,
@@ -271,6 +275,8 @@ class CostControlService:
             changes=changes,
             certified=data.certified.get(key, ZERO),
             paid=data.paid.get(key, ZERO),
+            measured=data.measured.get(key, ZERO),
+            invoiced=data.invoiced.get(key, ZERO),
             all_final=key in data.final_lines,
             override=_dec(override.amount) if override is not None else None,
         )
@@ -296,7 +302,12 @@ class CostControlService:
                 )
             )
             inputs.append(LineInput(str(line.id), line.code, figures))
-        if data.unassigned_committed != ZERO or data.unassigned_certified != ZERO:
+        if (
+            data.unassigned_committed != ZERO
+            or data.unassigned_certified != ZERO
+            or data.unassigned_invoiced != ZERO
+            or data.unassigned_paid != ZERO
+        ):
             rows.append(
                 _row(
                     key=KEY_UNASSIGNED,
@@ -307,6 +318,8 @@ class CostControlService:
                         awarded=data.unassigned_committed,
                         certified=data.unassigned_certified,
                         paid=data.unassigned_paid,
+                        measured=data.unassigned_measured,
+                        invoiced=data.unassigned_invoiced,
                     ),
                 )
             )
@@ -337,6 +350,8 @@ class CostControlService:
                 changes=c.changes,
                 certified=c.certified,
                 paid=c.paid,
+                measured=c.measured,
+                invoiced=c.invoiced,
                 all_final=c.status == "completed",
             )
             rows.append(

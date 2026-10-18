@@ -1111,5 +1111,79 @@
       "fail": "Faktura dodavatele {number} na {amount} nepatří k žádné smlouvě ani objednávce.",
       "suggestion": "Propojte její řádky se smlouvou nebo ji zaúčtujte jako přímý náklad na jednom účtu."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Faktura {number} ke smlouvě {contract} uvádí k dnešku {net}, tedy méně než {previous} na předchozí faktuře {previous_number}, ačkoli se smlouva fakturuje kumulativně.",
+      "suggestion": "Pokud faktura účtuje jen nové práce, smlouva se fakturuje přírůstkově; pokud snižuje celkovou částku, zadejte ji jako dobropis."
+    },
+    "invoice_after_final": {
+      "fail": "Faktura {number} ke smlouvě {contract} následuje po konečné faktuře {final}.",
+      "suggestion": "Pozdější práce zadejte jako práce v režii nebo dobropis, případně označte správnou fakturu jako konečnou."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Faktura {number} ke smlouvě {contract} vznikla z nároku a účtuje jedno období, ale smlouva se fakturuje kumulativně.",
+      "suggestion": "Používejte u smlouvy jeden způsob fakturace: přepněte smlouvu na přírůstkovou fakturaci, nebo zadejte kumulativní faktury zhotovitele."
+    },
+    "release_differs": {
+      "fail": "Potvrzené uvolnění k fakturě {number} ke smlouvě {contract} činí {stored}, ale podle podmínek smlouvy vychází dnes {computed}.",
+      "suggestion": "Zkontrolujte, co se od uvolnění změnilo (podmínky, částky faktury, srážky), pak uvolnění znovu otevřete a potvrďte."
+    },
+    "rounding_out_of_range": {
+      "fail": "Faktura {number} je zaokrouhlena o {rounding}, mimo dohodnutý krok zaokrouhlení {step}.",
+      "suggestion": "Zaokrouhlení snižuje uvolňovanou částku o méně než jeden krok; zapněte zaokrouhlení v platebních podmínkách, nebo uvolnění znovu otevřete."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Konečná faktura {number} ke smlouvě {contract} zadržuje zádržné {amount}, ale není dohodnuto záruční zádržné.",
+      "suggestion": "Dohodněte záruční zádržné v platebních podmínkách, nebo uvolnění znovu otevřete, aby se veškeré zádržné vyplatilo s konečnou fakturou."
+    },
+    "posting_exceeds_held": {
+      "fail": "Ke smlouvě {contract} bylo vráceno více zádržného, než se drží: o {amount} více.",
+      "suggestion": "Stornujte příliš vysoký zápis zádržného a zaúčtujte skutečně zadržovanou částku."
+    },
+    "posting_before_event": {
+      "fail": "Zádržné {amount} ke smlouvě {contract} bylo vráceno dne {posted}, před nastáním události uvolnění, která měla nastat {due}.",
+      "suggestion": "Zkontrolujte datum události uvolnění, nebo uvolnění zaúčtujte až po jejím nastání."
+    },
+    "posting_without_event_date": {
+      "fail": "Zádržné {amount} ke smlouvě {contract} bylo vráceno, ale datum události uvolnění není zadáno.",
+      "suggestion": "Zadejte datum, kdy nastala událost uvolnění, aby bylo možné platbu s ním porovnat."
+    },
+    "retention_still_held": {
+      "fail": "Smlouva {contract} je dokončena a stále drží zádržné {amount}.",
+      "suggestion": "Uvolněte zádržné při jeho události v registru zádržného, nebo je ponechte zadržené po dobu záruky."
+    },
+    "discount_not_agreed": {
+      "fail": "Uvolnění faktury {number} ke smlouvě {contract} uplatňuje skonto {amount}, ale smlouva žádné neumožňuje.",
+      "suggestion": "Zapněte skonto v platebních podmínkách, nebo uvolnění znovu otevřete bez něj."
+    },
+    "discount_after_deadline": {
+      "fail": "U faktury {number} bylo skonto {amount} zadrženo, ale platba dne {paid_on} přišla po datu skonta {until}.",
+      "suggestion": "Doplaťte i částku skonta, nebo zaznamenejte, proč zhotovitel pozdní skonto přijal."
+    },
+    "invoiced_over_measured": {
+      "fail": "Smlouva {contract} je vyfakturována na {invoiced}, tedy o {difference} nad naměřených {measured} (množství krát cena).",
+      "suggestion": "Před uvolněním dalších peněz zkontrolujte výměry, nebo rozdíl zadržte při příštím uvolnění."
+    },
+    "invoiced_over_contract": {
+      "fail": "Smlouva {contract} je vyfakturována na {invoiced}, tedy o {difference} nad její hodnotu {value}, a nic na ní není naměřeno.",
+      "suggestion": "Před uvolněním dalších peněz zaznamenejte výměry nebo změnu, která extra částku pokrývá."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Faktura {number} je v režimu přenesené daňové povinnosti, ale obsahuje DPH {vat}.",
+      "suggestion": "Faktura s přenesenou daňovou povinností neobsahuje DPH; opravte částku DPH nebo kategorii DPH jejích položek."
+    },
+    "line_without_vat_rate": {
+      "fail": "Faktura {number} obsahuje DPH, ale {count} jejích položek nemá uvedenu sazbu DPH.",
+      "suggestion": "Zadejte sazbu DPH u každé položky, aby srážky a exporty počítaly se správnou daní."
+    },
+    "duplicate_number": {
+      "fail": "Číslo faktury {number} od stejného zhotovitele je zadáno {count}krát.",
+      "suggestion": "Zrušte kopii, nebo opravte číslo faktury, pokud jde o různé faktury."
+    },
+    "possible_duplicate": {
+      "fail": "Faktura {number} má stejného zhotovitele, částku ({amount}) i datum ({on}) jako faktura {other}.",
+      "suggestion": "Ověřte, že nejde o tutéž fakturu zadanou dvakrát pod jiným číslem."
+    }
   }
 }

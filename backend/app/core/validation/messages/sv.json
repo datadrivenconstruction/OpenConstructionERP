@@ -1111,5 +1111,79 @@
       "fail": "Leverantörsfaktura {number} på {amount} hör inte till något kontrakt eller någon order.",
       "suggestion": "Koppla dess rader till ett kontrakt, eller bokför den som direkt kostnad på ett konto."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Faktura {number} på kontrakt {contract} anger {net} hittills, mindre än de {previous} på föregående faktura {previous_number}, trots att kontraktet faktureras kumulativt.",
+      "suggestion": "Om fakturan bara avser det nya arbetet faktureras kontraktet inkrementellt; om den minskar totalen, registrera den som kreditnota."
+    },
+    "invoice_after_final": {
+      "fail": "Faktura {number} på kontrakt {contract} kommer efter slutfakturan {final}.",
+      "suggestion": "Registrera senare arbete som regiearbete eller kreditnota, eller markera rätt faktura som slutfaktura."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Faktura {number} på kontrakt {contract} har skapats från ett krav och fakturerar en period, men kontraktet faktureras kumulativt.",
+      "suggestion": "Använd ett faktureringssätt per kontrakt: byt kontraktet till inkrementell fakturering, eller registrera entreprenörens kumulativa fakturor i stället."
+    },
+    "release_differs": {
+      "fail": "Den frisläppning som bekräftats för faktura {number} på kontrakt {contract} är {stored}, men kontraktets villkor ger {computed} i dag.",
+      "suggestion": "Kontrollera vad som ändrats sedan frisläppningen (villkor, fakturabelopp, avdrag), öppna frisläppningen igen och bekräfta den på nytt."
+    },
+    "rounding_out_of_range": {
+      "fail": "Faktura {number} är avrundad med {rounding}, utanför det överenskomna avrundningssteget på {step}.",
+      "suggestion": "Avrundning drar bara ned en frisläppning med mindre än ett steg; slå på avrundning i betalningsvillkoren eller öppna frisläppningen igen."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Slutfaktura {number} på kontrakt {contract} håller inne {amount} i innehållning, men ingen garantiinnehållning är överenskommen.",
+      "suggestion": "Avtala garantiinnehållning i betalningsvillkoren, eller öppna frisläppningen igen så att hela innehållningen betalas med slutfakturan."
+    },
+    "posting_exceeds_held": {
+      "fail": "På kontrakt {contract} har mer innehållning betalats tillbaka än som hålls inne: {amount} för mycket.",
+      "suggestion": "Makulera den för höga återbetalningsbokningen och bokför det belopp som faktiskt hålls inne."
+    },
+    "posting_before_event": {
+      "fail": "Innehållning på {amount} på kontrakt {contract} betalades tillbaka {posted}, före frisläppningshändelsen som förföll {due}.",
+      "suggestion": "Kontrollera datumet för frisläppningshändelsen, eller bokför frisläppningen när händelsen har inträffat."
+    },
+    "posting_without_event_date": {
+      "fail": "Innehållning på {amount} på kontrakt {contract} betalades tillbaka, men datumet för frisläppningshändelsen är inte registrerat.",
+      "suggestion": "Registrera datumet då frisläppningshändelsen inträffade, så att betalningen kan kontrolleras mot det."
+    },
+    "retention_still_held": {
+      "fail": "Kontrakt {contract} är slutfört och håller fortfarande inne {amount} i innehållning.",
+      "suggestion": "Frisläpp innehållningen vid dess händelse i innehållningsregistret, eller behåll den under garantitiden."
+    },
+    "discount_not_agreed": {
+      "fail": "Frisläppningen av faktura {number} på kontrakt {contract} tar ett avdrag för snabbetalning på {amount}, men kontraktet medger inget.",
+      "suggestion": "Slå på kassarabatt i betalningsvillkoren, eller öppna frisläppningen igen utan den."
+    },
+    "discount_after_deadline": {
+      "fail": "En rabatt på {amount} hölls inne på faktura {number}, men betalningen den {paid_on} kom efter rabattdatumet {until}.",
+      "suggestion": "Betala även rabattbeloppet, eller dokumentera varför entreprenören godtog den sena rabatten."
+    },
+    "invoiced_over_measured": {
+      "fail": "Kontrakt {contract} är fakturerat med {invoiced}, {difference} över de {measured} som är uppmätta (mängd gånger pris).",
+      "suggestion": "Kontrollera mätningen innan mer pengar frisläpps, eller håll inne differensen vid nästa frisläppning."
+    },
+    "invoiced_over_contract": {
+      "fail": "Kontrakt {contract} är fakturerat med {invoiced}, {difference} över kontraktsvärdet på {value}, och inget är uppmätt.",
+      "suggestion": "Registrera mätningen eller ÄTA-arbetet som täcker det extra beloppet innan mer frisläpps."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Faktura {number} har omvänd skattskyldighet men innehåller {vat} moms.",
+      "suggestion": "En faktura med omvänd skattskyldighet har ingen moms; rätta momsbeloppet eller momskategorin på raderna."
+    },
+    "line_without_vat_rate": {
+      "fail": "Faktura {number} innehåller moms, men {count} av raderna anger ingen momssats.",
+      "suggestion": "Ange momssatsen på varje rad så att avdrag och exporter får rätt skatt."
+    },
+    "duplicate_number": {
+      "fail": "Fakturanummer {number} från samma entreprenör är registrerat {count} gånger.",
+      "suggestion": "Makulera kopian, eller rätta fakturanumret om det är olika fakturor."
+    },
+    "possible_duplicate": {
+      "fail": "Faktura {number} har samma entreprenör, belopp ({amount}) och datum ({on}) som faktura {other}.",
+      "suggestion": "Kontrollera att det inte är samma faktura som registrerats två gånger under ett annat nummer."
+    }
   }
 }

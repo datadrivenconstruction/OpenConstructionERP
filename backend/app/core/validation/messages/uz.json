@@ -1111,5 +1111,79 @@
       "fail": "Yetkazib beruvchining {number} hisob-fakturasi ({amount}) hech bir shartnoma yoki buyurtmaga tegishli emas.",
       "suggestion": "Uning qatorlarini shartnomaga bog'lang yoki bitta hisobga to'g'ridan-to'g'ri xarajat sifatida yozing."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "{contract} shartnomasi bo'yicha {number} hisob-fakturasi hozirgacha {net} ko'rsatadi, bu oldingi {previous_number} hisob-fakturasidagi {previous} dan kam, holbuki shartnoma jamlanma tarzda hisob-faktura qilinadi.",
+      "suggestion": "Agar hisob-faktura faqat yangi ishni ko'rsatsa, shartnoma o'sib boruvchi tarzda hisob-faktura qilinadi; agar u jamini kamaytirsa, uni kredit-nota sifatida kiriting."
+    },
+    "invoice_after_final": {
+      "fail": "{contract} shartnomasi bo'yicha {number} hisob-fakturasi {final} yakuniy hisob-fakturasidan keyin keladi.",
+      "suggestion": "Keyingi ishni kunlik ish yoki kredit-nota sifatida kiriting, yoki to'g'ri hisob-fakturani yakuniy deb belgilang."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "{contract} shartnomasi bo'yicha {number} hisob-fakturasi da'vodan yaratilgan va bitta davrni ko'rsatadi, lekin shartnoma jamlanma tarzda hisob-faktura qilinadi.",
+      "suggestion": "Bitta shartnomaga hisob-faktura qilishning bitta usulini qo'llang: shartnomani o'sib boruvchi hisob-fakturaga o'tkazing yoki o'rniga pudratchining jamlanma hisob-fakturalarini kiriting."
+    },
+    "release_differs": {
+      "fail": "{contract} shartnomasi bo'yicha {number} hisob-fakturasi uchun tasdiqlangan to'lovga ruxsat {stored}, lekin shartnoma shartlari bugun {computed} beradi.",
+      "suggestion": "Ruxsatdan keyin nima o'zgarganini (shartlar, hisob-faktura summalari, ushlab qolishlar) tekshiring, so'ng ruxsatni qayta oching va yana tasdiqlang."
+    },
+    "rounding_out_of_range": {
+      "fail": "{number} hisob-fakturasi {rounding} ga yaxlitlangan, bu kelishilgan {step} yaxlitlash qadamidan tashqarida.",
+      "suggestion": "Yaxlitlash to'lovga ruxsatni bir qadamdan kam kamaytiradi; to'lov shartlarida yaxlitlashni yoqing yoki ruxsatni qayta oching."
+    },
+    "final_retention_without_warranty": {
+      "fail": "{contract} shartnomasi bo'yicha {number} yakuniy hisob-fakturasi {amount} ushlab qolingan summani saqlaydi, lekin kafolat ushlab qolish kelishilmagan.",
+      "suggestion": "To'lov shartlarida kafolat ushlab qolishni kelishing yoki barcha ushlab qolingan summa yakuniy hisob-faktura bilan to'lanishi uchun ruxsatni qayta oching."
+    },
+    "posting_exceeds_held": {
+      "fail": "{contract} shartnomasi bo'yicha ushlab turilganidan ko'p ushlab qolingan summa qaytarilgan: {amount} ortiqcha.",
+      "suggestion": "Juda yuqori qaytarish provodkasini bekor qiling va haqiqatda ushlab turilgan summani o'tkazing."
+    },
+    "posting_before_event": {
+      "fail": "{contract} shartnomasi bo'yicha {amount} ushlab qolingan summa {posted} kuni qaytarilgan, holbuki uni bo'shatish hodisasining muddati {due} edi.",
+      "suggestion": "Bo'shatish hodisasi sanasini tekshiring yoki hodisa sodir bo'lgandan keyin bo'shatishni o'tkazing."
+    },
+    "posting_without_event_date": {
+      "fail": "{contract} shartnomasi bo'yicha {amount} ushlab qolingan summa qaytarilgan, lekin bo'shatish hodisasi sanasi yozilmagan.",
+      "suggestion": "Bo'shatish hodisasi sodir bo'lgan sanani yozing, shunda to'lovni shunga solishtirib tekshirish mumkin."
+    },
+    "retention_still_held": {
+      "fail": "{contract} shartnomasi yakunlangan va hali ham {amount} ushlab qolingan summani ushlab turibdi.",
+      "suggestion": "Ushlab qolish reestrida summani hodisasi bo'yicha bo'shating yoki kafolat muddatiga ushlab turing."
+    },
+    "discount_not_agreed": {
+      "fail": "{contract} shartnomasi bo'yicha {number} hisob-fakturasini to'lashga ruxsatda {amount} muddatidan oldin to'lash chegirmasi qo'llangan, lekin shartnoma buni ruxsat etmaydi.",
+      "suggestion": "To'lov shartlarida muddatidan oldin to'lash chegirmasini yoqing yoki ruxsatni chegirmasiz qayta oching."
+    },
+    "discount_after_deadline": {
+      "fail": "{number} hisob-fakturasidan {amount} chegirma ushlab qolingan, lekin {paid_on} dagi to'lov chegirma sanasi {until} dan keyin bo'lgan.",
+      "suggestion": "Chegirma summasini ham to'lang yoki pudratchi kechikkan chegirmani nega qabul qilganini yozib qo'ying."
+    },
+    "invoiced_over_measured": {
+      "fail": "{contract} shartnomasi bo'yicha {invoiced} hisob-faktura qilingan, bu o'lchangan {measured} dan (hajm ko'paytirilgan narx) {difference} ortiq.",
+      "suggestion": "Ko'proq to'lashga ruxsat berishdan oldin o'lchovni tekshiring yoki farqni keyingi ruxsatda ushlab qoling."
+    },
+    "invoiced_over_contract": {
+      "fail": "{contract} shartnomasi bo'yicha {invoiced} hisob-faktura qilingan, bu uning {value} qiymatidan {difference} ortiq, va unda hech narsa o'lchanmagan.",
+      "suggestion": "Ko'proq to'lashga ruxsat berishdan oldin ortiqcha summani qoplaydigan o'lchovni yoki o'zgartirish buyrug'ini yozing."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "{number} hisob-fakturasi teskari hisoblash (reverse charge) bilan, lekin {vat} QQS bor.",
+      "suggestion": "Teskari hisoblashli hisob-fakturada QQS bo'lmaydi; QQS summasini yoki qatorlarining QQS toifasini to'g'rilang."
+    },
+    "line_without_vat_rate": {
+      "fail": "{number} hisob-fakturasida QQS bor, lekin uning {count} qatorida QQS stavkasi ko'rsatilmagan.",
+      "suggestion": "Ushlab qolishlar va eksport to'g'ri soliq olishi uchun har bir qatorga QQS stavkasini kiriting."
+    },
+    "duplicate_number": {
+      "fail": "Bir pudratchining {number} hisob-faktura raqami {count} marta kiritilgan.",
+      "suggestion": "Nusxani bekor qiling yoki bular turli hisob-fakturalar bo'lsa, raqamini to'g'rilang."
+    },
+    "possible_duplicate": {
+      "fail": "{number} hisob-fakturasining pudratchisi, summasi ({amount}) va sanasi ({on}) {other} hisob-fakturasi bilan bir xil.",
+      "suggestion": "Bu boshqa raqam bilan ikki marta kiritilgan bitta hisob-faktura emasligini tekshiring."
+    }
   }
 }

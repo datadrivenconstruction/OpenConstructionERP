@@ -70717,6 +70717,7 @@
         "field_time",
         "finance",
         "notifications",
+        "payment_release",
         "procurement",
         "progress",
         "projects",
@@ -154851,6 +154852,1207 @@
         }
       ],
       "import_dependencies": []
+    },
+    {
+      "module_id": "payment_release",
+      "module_label": "Payment Release",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "billing.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "release_math.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_payment_release",
+        "version": "1.0.0",
+        "display_name": "Payment Release",
+        "description": "Contract payment terms, payment release computation from the gross invoiced to the amount to pay, invoice ledger per contract and project, and the retention register with release postings",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_projects",
+          "oe_contracts",
+          "oe_finance",
+          "oe_costmodel"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "PaymentTerms",
+          "tablename": "oe_payment_release_terms",
+          "docstring": "How a contract is invoiced and paid. Optional features default to off.",
+          "columns": [
+            {
+              "name": "contract_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_contracts_contract.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "invoice_mode",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "retention_basis",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "warranty_enabled",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "warranty_percent",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "warranty_release_event",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "warranty_period_months",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "discount_enabled",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "discount_percent",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "discount_days",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "discount_applies_to",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "rounding_enabled",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "rounding_step",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "interim_due_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "final_due_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "InvoiceRelease",
+          "tablename": "oe_payment_release_invoice",
+          "docstring": "A supplier invoice's place in its contract's payment release, and the release once confirmed.",
+          "columns": [
+            {
+              "name": "invoice_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "contract_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "net_deduction",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "MoneyType",
+              "nullable": false
+            },
+            {
+              "name": "net_deduction_note",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "gross_deduction",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "MoneyType",
+              "nullable": false
+            },
+            {
+              "name": "gross_deduction_note",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "released_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "released_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "release_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "payable_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "retention_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "rounding_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "discount_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "snapshot",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "RetentionPosting",
+          "tablename": "oe_payment_release_posting",
+          "docstring": "Held retention paid back to the contractor: the money posting a release event triggers.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "contract_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_contracts_contract.id"
+            },
+            {
+              "name": "retention_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "event",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "event_on",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "MoneyType",
+              "nullable": false
+            },
+            {
+              "name": "posted_on",
+              "annotation": "Mapped[date]",
+              "sql_type": "Date",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "document_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "voided_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "voided_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/ledger/",
+          "handler": "project_ledger",
+          "response_model": "ProjectLedger"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/retention/",
+          "handler": "retention_register",
+          "response_model": "RetentionRegister"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/findings/",
+          "handler": "findings",
+          "response_model": "ReleaseFindings"
+        },
+        {
+          "method": "GET",
+          "path": "/contracts/{contract_id}/terms/",
+          "handler": "get_terms",
+          "response_model": "PaymentTermsResponse"
+        },
+        {
+          "method": "PUT",
+          "path": "/contracts/{contract_id}/terms/",
+          "handler": "put_terms",
+          "response_model": "PaymentTermsResponse",
+          "request_schema": "PaymentTermsBody"
+        },
+        {
+          "method": "POST",
+          "path": "/contracts/{contract_id}/retention-postings/",
+          "handler": "post_retention",
+          "response_model": "RetentionPostingResponse",
+          "request_schema": "RetentionPostingCreate"
+        },
+        {
+          "method": "POST",
+          "path": "/retention-postings/{posting_id}/void/",
+          "handler": "void_posting",
+          "response_model": "RetentionPostingResponse"
+        },
+        {
+          "method": "PATCH",
+          "path": "/invoices/{invoice_id}/",
+          "handler": "update_invoice",
+          "response_model": "InvoiceReleaseState",
+          "request_schema": "InvoiceReleaseUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/invoices/{invoice_id}/release/",
+          "handler": "release_invoice",
+          "response_model": "InvoiceReleaseState"
+        },
+        {
+          "method": "POST",
+          "path": "/invoices/{invoice_id}/reopen/",
+          "handler": "reopen_invoice",
+          "response_model": "InvoiceReleaseState"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "PaymentTermsBody",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A contract's payment terms. The optional features stay off until switched on.",
+          "fields": [
+            {
+              "name": "invoice_mode",
+              "type": "InvoiceMode",
+              "default": "'incremental'"
+            },
+            {
+              "name": "retention_percent",
+              "type": "Percent"
+            },
+            {
+              "name": "retention_release_event",
+              "type": "ReleaseEventName",
+              "default": "'substantial_completion'"
+            },
+            {
+              "name": "retention_basis",
+              "type": "RetentionBasis",
+              "default": "'net'"
+            },
+            {
+              "name": "warranty_enabled",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "warranty_percent",
+              "type": "Percent"
+            },
+            {
+              "name": "warranty_release_event",
+              "type": "ReleaseEventName",
+              "default": "'defects_period_end'"
+            },
+            {
+              "name": "warranty_period_months",
+              "type": "int | None"
+            },
+            {
+              "name": "discount_enabled",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "discount_percent",
+              "type": "Percent"
+            },
+            {
+              "name": "discount_days",
+              "type": "int"
+            },
+            {
+              "name": "discount_applies_to",
+              "type": "DiscountScope",
+              "default": "'both'"
+            },
+            {
+              "name": "rounding_enabled",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "rounding_step",
+              "type": "Amount"
+            },
+            {
+              "name": "interim_due_days",
+              "type": "int | None"
+            },
+            {
+              "name": "final_due_days",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PaymentTermsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The terms in force, and whether anyone has set them (else they are the defaults).",
+          "fields": [
+            {
+              "name": "contract_id",
+              "type": "str"
+            },
+            {
+              "name": "terms_set",
+              "type": "bool"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "invoice_mode",
+              "type": "InvoiceMode"
+            },
+            {
+              "name": "retention_percent",
+              "type": "Decimal"
+            },
+            {
+              "name": "retention_release_event",
+              "type": "str"
+            },
+            {
+              "name": "retention_basis",
+              "type": "RetentionBasis"
+            },
+            {
+              "name": "warranty_enabled",
+              "type": "bool"
+            },
+            {
+              "name": "warranty_percent",
+              "type": "Decimal"
+            },
+            {
+              "name": "warranty_release_event",
+              "type": "str"
+            },
+            {
+              "name": "warranty_period_months",
+              "type": "int | None"
+            },
+            {
+              "name": "discount_enabled",
+              "type": "bool"
+            },
+            {
+              "name": "discount_percent",
+              "type": "Decimal"
+            },
+            {
+              "name": "discount_days",
+              "type": "int"
+            },
+            {
+              "name": "discount_applies_to",
+              "type": "DiscountScope"
+            },
+            {
+              "name": "rounding_enabled",
+              "type": "bool"
+            },
+            {
+              "name": "rounding_step",
+              "type": "Decimal"
+            },
+            {
+              "name": "interim_due_days",
+              "type": "int | None"
+            },
+            {
+              "name": "final_due_days",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "InvoiceReleaseUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a controller sets on one invoice before its release. Fields left out keep their value.",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "InvoiceKind | None",
+              "default": "None"
+            },
+            {
+              "name": "contract_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "net_deduction",
+              "type": "Amount | None",
+              "default": "None"
+            },
+            {
+              "name": "net_deduction_note",
+              "type": "str | None"
+            },
+            {
+              "name": "gross_deduction",
+              "type": "Amount | None",
+              "default": "None"
+            },
+            {
+              "name": "gross_deduction_note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReleaseFigures",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every step of one release as decimal strings (see :class:`release_math.Release`).",
+          "fields": []
+        },
+        {
+          "class_name": "LedgerInvoice",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "invoice_id",
+              "type": "str"
+            },
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "invoice_date",
+              "type": "str | None"
+            },
+            {
+              "name": "finance_status",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "InvoiceKind"
+            },
+            {
+              "name": "kind_set",
+              "type": "bool"
+            },
+            {
+              "name": "contract_source",
+              "type": "str | None"
+            },
+            {
+              "name": "release_status",
+              "type": "Literal['open', 'released']"
+            },
+            {
+              "name": "released_at",
+              "type": "str | None"
+            },
+            {
+              "name": "net_deduction_note",
+              "type": "str"
+            },
+            {
+              "name": "gross_deduction_note",
+              "type": "str"
+            },
+            {
+              "name": "figures",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "computed",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "differs",
+              "type": "bool"
+            },
+            {
+              "name": "counted",
+              "type": "bool"
+            },
+            {
+              "name": "progress_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "paid",
+              "type": "Money"
+            },
+            {
+              "name": "paid_cash",
+              "type": "Money"
+            },
+            {
+              "name": "discount_taken",
+              "type": "Money"
+            },
+            {
+              "name": "open_amount",
+              "type": "Money"
+            }
+          ]
+        },
+        {
+          "class_name": "LedgerTotals",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "contract_value",
+              "type": "Money"
+            },
+            {
+              "name": "invoiced",
+              "type": "Money"
+            },
+            {
+              "name": "invoiced_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "released",
+              "type": "Money"
+            },
+            {
+              "name": "payable",
+              "type": "Money"
+            },
+            {
+              "name": "paid",
+              "type": "Money"
+            },
+            {
+              "name": "open_amount",
+              "type": "Money"
+            },
+            {
+              "name": "retention_held",
+              "type": "Money"
+            },
+            {
+              "name": "retention_posted",
+              "type": "Money"
+            }
+          ]
+        },
+        {
+          "class_name": "LedgerContract",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "contract_id",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "invoice_mode",
+              "type": "InvoiceMode"
+            },
+            {
+              "name": "terms_set",
+              "type": "bool"
+            },
+            {
+              "name": "original_value",
+              "type": "Money"
+            },
+            {
+              "name": "changes",
+              "type": "Money"
+            },
+            {
+              "name": "current_value",
+              "type": "Money"
+            },
+            {
+              "name": "changes_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "measured",
+              "type": "Money"
+            },
+            {
+              "name": "measured_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "has_measurement",
+              "type": "bool"
+            },
+            {
+              "name": "invoices",
+              "type": "list[LedgerInvoice]"
+            },
+            {
+              "name": "totals",
+              "type": "LedgerTotals"
+            }
+          ]
+        },
+        {
+          "class_name": "LooseInvoice",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "invoice_id",
+              "type": "str"
+            },
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "invoice_date",
+              "type": "str | None"
+            },
+            {
+              "name": "finance_status",
+              "type": "str"
+            },
+            {
+              "name": "net",
+              "type": "Money"
+            },
+            {
+              "name": "gross",
+              "type": "Money"
+            },
+            {
+              "name": "paid",
+              "type": "Money"
+            },
+            {
+              "name": "purchase_order_id",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ProjectLedger",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "contracts",
+              "type": "list[LedgerContract]"
+            },
+            {
+              "name": "other_invoices",
+              "type": "list[LooseInvoice]"
+            },
+            {
+              "name": "totals",
+              "type": "LedgerTotals"
+            }
+          ]
+        },
+        {
+          "class_name": "RetentionPostingCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "retention_kind",
+              "type": "RetentionKind",
+              "default": "'interim'"
+            },
+            {
+              "name": "event",
+              "type": "ReleaseEventName"
+            },
+            {
+              "name": "event_on",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "amount",
+              "type": "Annotated[Decimal, Field(gt=0, max_digits=18, decimal_places=2)]"
+            },
+            {
+              "name": "posted_on",
+              "type": "date"
+            },
+            {
+              "name": "document_ref",
+              "type": "str | None"
+            },
+            {
+              "name": "note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RetentionPostingResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "contract_id",
+              "type": "str"
+            },
+            {
+              "name": "retention_kind",
+              "type": "str"
+            },
+            {
+              "name": "event",
+              "type": "str"
+            },
+            {
+              "name": "event_on",
+              "type": "str | None"
+            },
+            {
+              "name": "amount",
+              "type": "Money"
+            },
+            {
+              "name": "posted_on",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "document_ref",
+              "type": "str"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "RetentionContract",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "contract_id",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "retention_percent",
+              "type": "str"
+            },
+            {
+              "name": "retention_release_event",
+              "type": "str"
+            },
+            {
+              "name": "warranty_enabled",
+              "type": "bool"
+            },
+            {
+              "name": "warranty_percent",
+              "type": "str"
+            },
+            {
+              "name": "warranty_release_event",
+              "type": "str"
+            },
+            {
+              "name": "warranty_period_months",
+              "type": "int | None"
+            },
+            {
+              "name": "withheld",
+              "type": "Money"
+            },
+            {
+              "name": "posted",
+              "type": "Money"
+            },
+            {
+              "name": "held",
+              "type": "Money"
+            },
+            {
+              "name": "postings",
+              "type": "list[RetentionPostingResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "RetentionRegister",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "contracts",
+              "type": "list[RetentionContract]"
+            },
+            {
+              "name": "held",
+              "type": "Money"
+            },
+            {
+              "name": "posted",
+              "type": "Money"
+            }
+          ]
+        },
+        {
+          "class_name": "ReleaseFinding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "rule_number",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "suggestion",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "problem",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReleaseFindings",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "str"
+            },
+            {
+              "name": "findings",
+              "type": "list[ReleaseFinding]"
+            },
+            {
+              "name": "errors",
+              "type": "int"
+            },
+            {
+              "name": "warnings",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "InvoiceReleaseState",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Where one invoice stands in the release view after a change.",
+          "fields": [
+            {
+              "name": "invoice_id",
+              "type": "str"
+            },
+            {
+              "name": "contract_id",
+              "type": "str | None"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "release_amount",
+              "type": "Money | None"
+            },
+            {
+              "name": "payable_amount",
+              "type": "Money | None"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "boq",
+        "contracts",
+        "costmodel",
+        "finance"
+      ]
     },
     {
       "module_id": "payroll",
@@ -271854,10 +273056,10 @@
     },
     {
       "name": "cost-control",
-      "ts_files": 12,
+      "ts_files": 17,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 12
+      "test_files": 4,
+      "total_files": 17
     },
     {
       "name": "cost-explorer",
@@ -273429,6 +274631,7 @@
       "field_time",
       "finance",
       "notifications",
+      "payment_release",
       "procurement",
       "progress",
       "projects",
@@ -273941,6 +275144,13 @@
       "users"
     ],
     "payment_clock": [
+      "projects"
+    ],
+    "payment_release": [
+      "boq",
+      "contracts",
+      "costmodel",
+      "finance",
       "projects"
     ],
     "payroll": [
@@ -274555,16 +275765,16 @@
     ]
   },
   "statistics": {
-    "backend_modules": 211,
-    "modules_with_manifests": 209,
-    "total_models": 777,
-    "total_columns": 9037,
+    "backend_modules": 212,
+    "modules_with_manifests": 210,
+    "total_models": 780,
+    "total_columns": 9086,
     "total_relationships": 240,
-    "total_routes": 4582,
-    "total_schemas": 4055,
-    "total_python_files": 2728,
+    "total_routes": 4592,
+    "total_schemas": 4071,
+    "total_python_files": 2739,
     "frontend_features": 209,
-    "frontend_ts_files": 3546,
+    "frontend_ts_files": 3551,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

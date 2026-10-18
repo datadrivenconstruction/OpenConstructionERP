@@ -1111,5 +1111,79 @@
       "fail": "A(z) {number} beszállítói számla ({amount}) nem tartozik egyetlen szerződéshez vagy megrendeléshez sem.",
       "suggestion": "Kapcsolja a sorait szerződéshez, vagy rögzítse közvetlen költségként egy számlán."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "A(z) {contract} szerződés {number} számlája a mai napig {net} összeget mutat, ami kevesebb, mint a megelőző {previous_number} számla {previous} összege, pedig a szerződés halmozottan van számlázva.",
+      "suggestion": "Ha a számla csak az új munkát számlázza, a szerződés növekményesen van számlázva; ha csökkenti az összeget, rögzítse jóváíró számlaként."
+    },
+    "invoice_after_final": {
+      "fail": "A(z) {contract} szerződés {number} számlája a(z) {final} végszámla után következik.",
+      "suggestion": "A későbbi munkákat rögzítse előre nem tervezett (naplóban elszámolt) munkaként vagy jóváíró számlaként, vagy jelölje a megfelelő számlát végszámlának."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "A(z) {contract} szerződés {number} számlája igényből készült és egy időszakot számláz, de a szerződés halmozottan van számlázva.",
+      "suggestion": "Szerződésenként egy számlázási módot használjon: állítsa át a szerződést növekményes számlázásra, vagy rögzítse helyette a vállalkozó halmozott számláit."
+    },
+    "release_differs": {
+      "fail": "A(z) {contract} szerződés {number} számlájához jóváhagyott kifizetési felszabadítás {stored}, de a szerződés feltételei ma {computed} összeget adnak.",
+      "suggestion": "Ellenőrizze, mi változott a felszabadítás óta (feltételek, számlaösszegek, levonások), majd nyissa meg újra a felszabadítást és hagyja jóvá ismét."
+    },
+    "rounding_out_of_range": {
+      "fail": "A(z) {number} számla kerekítése {rounding}, ami kívül esik a megállapodott {step} kerekítési lépésen.",
+      "suggestion": "A kerekítés egy lépésnél kisebb összeggel csökkenti a felszabadítást; kapcsolja be a kerekítést a fizetési feltételekben, vagy nyissa meg újra a felszabadítást."
+    },
+    "final_retention_without_warranty": {
+      "fail": "A(z) {contract} szerződés {number} végszámlája {amount} visszatartást tart vissza, de jótállási visszatartásban nem állapodtak meg.",
+      "suggestion": "Állapodjon meg jótállási visszatartásban a fizetési feltételekben, vagy nyissa meg újra a felszabadítást, hogy a teljes visszatartást a végszámlával fizessék ki."
+    },
+    "posting_exceeds_held": {
+      "fail": "A(z) {contract} szerződésen több visszatartást fizettek vissza, mint amennyi vissza van tartva: {amount} többlet.",
+      "suggestion": "Sztornózza a túl magas visszatartás-könyvelést, és könyvelje a ténylegesen visszatartott összeget."
+    },
+    "posting_before_event": {
+      "fail": "A(z) {contract} szerződés {amount} visszatartását {posted} napján fizették vissza, még a felszabadítási esemény {due} napi esedékessége előtt.",
+      "suggestion": "Ellenőrizze a felszabadítási esemény dátumát, vagy az esemény bekövetkezte után könyvelje a felszabadítást."
+    },
+    "posting_without_event_date": {
+      "fail": "A(z) {contract} szerződés {amount} visszatartását visszafizették, de a felszabadítási esemény dátuma nincs rögzítve.",
+      "suggestion": "Rögzítse a felszabadítási esemény bekövetkezésének dátumát, hogy a kifizetést ahhoz lehessen mérni."
+    },
+    "retention_still_held": {
+      "fail": "A(z) {contract} szerződés befejeződött, és még mindig {amount} visszatartást tart.",
+      "suggestion": "Szabadítsa fel a visszatartást az eseményénél a visszatartási nyilvántartásban, vagy tartsa vissza a jótállási időszakra."
+    },
+    "discount_not_agreed": {
+      "fail": "A(z) {contract} szerződés {number} számlájának felszabadítása {amount} korai fizetési engedményt vesz igénybe, de a szerződés nem enged ilyet.",
+      "suggestion": "Kapcsolja be a korai fizetési engedményt a fizetési feltételekben, vagy nyissa meg újra a felszabadítást engedmény nélkül."
+    },
+    "discount_after_deadline": {
+      "fail": "A(z) {number} számlán {amount} engedményt tartottak vissza, de a(z) {paid_on} napi fizetés az engedmény {until} határnapja után érkezett.",
+      "suggestion": "Fizesse ki az engedmény összegét is, vagy rögzítse, miért fogadta el a vállalkozó a késői engedményt."
+    },
+    "invoiced_over_measured": {
+      "fail": "A(z) {contract} szerződés számlázása {invoiced}, ami {difference} összeggel meghaladja a felmért {measured} értéket (mennyiség szorozva egységárral).",
+      "suggestion": "Ellenőrizze a felmérést, mielőtt további pénzt szabadít fel, vagy tartsa vissza a különbözetet a következő felszabadításnál."
+    },
+    "invoiced_over_contract": {
+      "fail": "A(z) {contract} szerződés számlázása {invoiced}, ami {difference} összeggel meghaladja az értékét ({value}), és nincs rajta felmérés.",
+      "suggestion": "Rögzítse a többletet fedező felmérést vagy pótmunkát, mielőtt további pénzt szabadít fel."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "A(z) {number} számla fordított adózású, de {vat} áfát tartalmaz.",
+      "suggestion": "A fordított adózású számla nem tartalmaz áfát; javítsa az áfa összegét vagy a tételek áfakategóriáját."
+    },
+    "line_without_vat_rate": {
+      "fail": "A(z) {number} számla áfát tartalmaz, de {count} tételén nincs áfakulcs megadva.",
+      "suggestion": "Adja meg az áfakulcsot minden tételnél, hogy a levonások és az exportok a helyes adót használják."
+    },
+    "duplicate_number": {
+      "fail": "Ugyanazon vállalkozó {number} számlaszáma {count} alkalommal van rögzítve.",
+      "suggestion": "Sztornózza a másolatot, vagy javítsa a számlaszámot, ha különböző számlákról van szó."
+    },
+    "possible_duplicate": {
+      "fail": "A(z) {number} számla vállalkozója, összege ({amount}) és dátuma ({on}) megegyezik a(z) {other} számláéval.",
+      "suggestion": "Ellenőrizze, hogy nem ugyanaz a számla szerepel-e kétszer, más számlaszámmal."
+    }
   }
 }

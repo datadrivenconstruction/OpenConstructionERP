@@ -29,6 +29,7 @@ import { ForecastHistory } from './ForecastHistory';
 import { AssignDrawer } from './AssignDrawer';
 import { ChainPanel } from './ChainPanel';
 import { LineDrawer } from './LineDrawer';
+import { PaymentsPanel } from './PaymentsPanel';
 import { SaveForecastDialog } from './SaveForecastDialog';
 import { SOURCE_PRIORITY, findingHint, findingTitle, sourceLabel, sourceTone } from './labels';
 
@@ -113,6 +114,8 @@ export function CostControlPage() {
   const projectName = useProjectContextStore((s) => s.activeProjectName);
   const canEdit = useHasPermission('costmodel.write');
   const canManage = useHasPermission('costmodel.manage');
+  const canEditPayments = useHasPermission('payment_release.write');
+  const canReleasePayments = useHasPermission('payment_release.release');
 
   const [axis, setAxis] = useState<CostControlAxis>('cost_line');
   const [search, setSearch] = useState('');
@@ -234,6 +237,12 @@ export function CostControlPage() {
               defaultValue: 'Save the forecast once a month. The saved forecasts show how the cost moved and why.',
             })}
           </li>
+          <li>
+            {t('cost_control.how_4', {
+              defaultValue:
+                'Supplier invoices are checked against what is measured, and each one shows how its payment is worked out: retention, earlier payments, rounding and discount. A manager confirms the release.',
+            })}
+          </li>
         </ol>
         <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-content-tertiary">
           <span>{t('cost_control.how_order', { defaultValue: 'Most reliable first:' })}</span>
@@ -260,7 +269,21 @@ export function CostControlPage() {
           })}
           action={{ label: t('cost_control.go_5d', { defaultValue: 'Open the 5D cost model' }), onClick: () => navigate('/5d') }}
         />
-      ) : data ? (
+      ) : null}
+
+      {/* Supplier invoices and their releases exist without cost lines too, so the panel is never hidden behind the empty state. */}
+      {hasNothing && (
+        <Card>
+          <PaymentsPanel
+            projectId={projectId}
+            currency={currency}
+            canEdit={canEditPayments}
+            canRelease={canReleasePayments}
+          />
+        </Card>
+      )}
+
+      {report.isLoading || report.error || hasNothing ? null : data ? (
         <>
           <KpiBand
             columns={4}
@@ -361,6 +384,15 @@ export function CostControlPage() {
             onOpenLine={setOpenRow}
             onOpenUnassigned={() => setAssigning(true)}
           />
+
+          <Card>
+            <PaymentsPanel
+              projectId={projectId}
+              currency={currency}
+              canEdit={canEditPayments}
+              canRelease={canReleasePayments}
+            />
+          </Card>
 
           <Card>
             <h2 className="mb-3 text-sm font-semibold text-content-primary">

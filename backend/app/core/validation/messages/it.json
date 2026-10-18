@@ -1111,5 +1111,79 @@
       "fail": "La fattura fornitore {number} di {amount} non appartiene a nessun contratto né ordine.",
       "suggestion": "Colleghi le sue righe a un contratto, oppure la registri come costo diretto su un conto."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "La fattura {number} sul contratto {contract} riporta {net} a oggi, meno dei {previous} della fattura precedente {previous_number}, anche se il contratto è fatturato a importi cumulati.",
+      "suggestion": "Se la fattura riguarda solo i lavori nuovi, il contratto è fatturato a importi incrementali; se riduce il totale, la registri come nota di credito."
+    },
+    "invoice_after_final": {
+      "fail": "La fattura {number} sul contratto {contract} è successiva alla fattura finale {final}.",
+      "suggestion": "Registri i lavori successivi come lavori in economia o come nota di credito, oppure segni come finale la fattura corretta."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "La fattura {number} sul contratto {contract} nasce da una riserva e fattura un solo periodo, ma il contratto è fatturato a importi cumulati.",
+      "suggestion": "Usi un solo modo di fatturazione per contratto: passi il contratto alla fatturazione incrementale, oppure registri le fatture cumulative dell'impresa."
+    },
+    "release_differs": {
+      "fail": "L'autorizzazione al pagamento confermata per la fattura {number} sul contratto {contract} è {stored}, ma le condizioni del contratto oggi danno {computed}.",
+      "suggestion": "Verifichi cosa è cambiato dopo l'autorizzazione (condizioni, importi della fattura, detrazioni), poi riapra e riconfermi l'autorizzazione."
+    },
+    "rounding_out_of_range": {
+      "fail": "La fattura {number} è arrotondata di {rounding}, fuori dal passo di arrotondamento concordato di {step}.",
+      "suggestion": "L'arrotondamento riduce l'importo da pagare di meno di un passo; attivi l'arrotondamento nelle condizioni di pagamento o riapra l'autorizzazione."
+    },
+    "final_retention_without_warranty": {
+      "fail": "La fattura finale {number} sul contratto {contract} trattiene {amount} di ritenuta, ma non è concordata alcuna ritenuta di garanzia.",
+      "suggestion": "Concordi la ritenuta di garanzia nelle condizioni di pagamento, oppure riapra l'autorizzazione per pagare tutta la ritenuta con la fattura finale."
+    },
+    "posting_exceeds_held": {
+      "fail": "Sul contratto {contract} è stata restituita più ritenuta di quella trattenuta: {amount} in eccesso.",
+      "suggestion": "Annulli la registrazione di ritenuta troppo alta e registri l'importo effettivamente trattenuto."
+    },
+    "posting_before_event": {
+      "fail": "La ritenuta di {amount} sul contratto {contract} è stata restituita il {posted}, prima che l'evento di svincolo fosse previsto per il {due}.",
+      "suggestion": "Verifichi la data dell'evento di svincolo, oppure registri lo svincolo dopo che l'evento è avvenuto."
+    },
+    "posting_without_event_date": {
+      "fail": "La ritenuta di {amount} sul contratto {contract} è stata restituita, ma la data del suo evento di svincolo non è registrata.",
+      "suggestion": "Registri la data in cui è stato raggiunto l'evento di svincolo, così il pagamento può essere confrontato con essa."
+    },
+    "retention_still_held": {
+      "fail": "Il contratto {contract} è completato e trattiene ancora {amount} di ritenuta.",
+      "suggestion": "Svincoli la ritenuta al suo evento nel registro delle ritenute, oppure la mantenga trattenuta per il periodo di garanzia."
+    },
+    "discount_not_agreed": {
+      "fail": "L'autorizzazione al pagamento della fattura {number} sul contratto {contract} applica uno sconto per pagamento anticipato di {amount}, ma il contratto non lo prevede.",
+      "suggestion": "Attivi lo sconto per pagamento anticipato nelle condizioni di pagamento, oppure riapra l'autorizzazione senza sconto."
+    },
+    "discount_after_deadline": {
+      "fail": "Sulla fattura {number} è stato trattenuto uno sconto di {amount}, ma il pagamento del {paid_on} è arrivato dopo la data dello sconto {until}.",
+      "suggestion": "Paghi anche l'importo dello sconto, oppure registri perché l'impresa ha accettato lo sconto tardivo."
+    },
+    "invoiced_over_measured": {
+      "fail": "Il contratto {contract} è fatturato per {invoiced}, {difference} sopra i {measured} misurati (quantità per prezzo).",
+      "suggestion": "Verifichi la misurazione prima di autorizzare altri pagamenti, oppure trattenga la differenza sulla prossima autorizzazione."
+    },
+    "invoiced_over_contract": {
+      "fail": "Il contratto {contract} è fatturato per {invoiced}, {difference} sopra il suo valore di {value}, e non ha nulla di misurato.",
+      "suggestion": "Registri la misurazione o la variante che copre l'importo in più prima di autorizzare altri pagamenti."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "La fattura {number} è in reverse charge ma riporta {vat} di IVA.",
+      "suggestion": "Una fattura in reverse charge non porta IVA; corregga l'importo IVA o la categoria IVA delle sue righe."
+    },
+    "line_without_vat_rate": {
+      "fail": "La fattura {number} riporta IVA, ma {count} delle sue righe non indicano l'aliquota IVA.",
+      "suggestion": "Inserisca l'aliquota IVA su ogni riga, così detrazioni ed esportazioni applicano l'imposta corretta."
+    },
+    "duplicate_number": {
+      "fail": "Il numero di fattura {number} dello stesso fornitore è inserito {count} volte.",
+      "suggestion": "Annulli la copia, oppure corregga il numero fattura se si tratta di fatture diverse."
+    },
+    "possible_duplicate": {
+      "fail": "La fattura {number} ha lo stesso fornitore, importo ({amount}) e data ({on}) della fattura {other}.",
+      "suggestion": "Verifichi che non sia la stessa fattura inserita due volte con un altro numero."
+    }
   }
 }

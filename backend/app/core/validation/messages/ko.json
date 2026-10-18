@@ -1111,5 +1111,79 @@
       "fail": "공급업체 청구서 {number}({amount})가 어떤 계약이나 발주에도 속해 있지 않습니다.",
       "suggestion": "청구서 항목을 계약에 연결하거나, 한 계정에 직접비로 기록하세요."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "계약 {contract}의 청구서 {number}는 현재까지 {net}을 기재했는데, 이는 직전 청구서 {previous_number}의 {previous}보다 적습니다. 이 계약은 누계 청구 방식입니다.",
+      "suggestion": "청구서가 신규 시공분만 청구한다면 이 계약은 증분 청구 방식입니다. 합계를 줄이는 청구서라면 대변 전표(크레딧 노트)로 입력하세요."
+    },
+    "invoice_after_final": {
+      "fail": "계약 {contract}의 청구서 {number}가 최종 청구서 {final} 뒤에 발행되었습니다.",
+      "suggestion": "이후 작업은 일용 작업(day work) 또는 크레딧 노트로 입력하거나, 올바른 청구서를 최종 청구서로 지정하세요."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "계약 {contract}의 청구서 {number}는 클레임에서 생성되어 한 기간분을 청구하지만, 계약은 누계 청구 방식입니다.",
+      "suggestion": "계약당 청구 방식을 하나로 통일하세요. 계약을 증분 청구로 바꾸거나, 시공사의 누계 청구서를 입력하세요."
+    },
+    "release_differs": {
+      "fail": "계약 {contract}의 청구서 {number}에 확정된 지급 승인액은 {stored}인데, 현재 계약 조건으로는 {computed}입니다.",
+      "suggestion": "승인 이후 무엇이 바뀌었는지(조건, 청구 금액, 공제) 확인한 뒤 승인을 다시 열어 재확정하세요."
+    },
+    "rounding_out_of_range": {
+      "fail": "청구서 {number}의 단수 처리액은 {rounding}로, 합의된 단수 처리 단위 {step}를 벗어났습니다.",
+      "suggestion": "단수 처리는 지급 승인액을 한 단위 미만으로만 줄입니다. 지급 조건에서 단수 처리를 켜거나 승인을 다시 여세요."
+    },
+    "final_retention_without_warranty": {
+      "fail": "계약 {contract}의 최종 청구서 {number}에서 유보금 {amount}을 보류하고 있지만, 하자보증 유보금은 합의되어 있지 않습니다.",
+      "suggestion": "지급 조건에서 하자보증 유보금을 합의하거나, 승인을 다시 열어 유보금 전액을 최종 청구서로 지급하세요."
+    },
+    "posting_exceeds_held": {
+      "fail": "계약 {contract}에서 보유 중인 유보금보다 많은 금액이 반환되었습니다. 초과액은 {amount}입니다.",
+      "suggestion": "너무 큰 유보금 반환 전표를 취소하고 실제 보유 금액으로 다시 기표하세요."
+    },
+    "posting_before_event": {
+      "fail": "계약 {contract}의 유보금 {amount}이 {posted}에 반환되었으나, 해제 시점의 기한은 {due}입니다.",
+      "suggestion": "해제 시점의 날짜를 확인하거나, 해당 시점이 지난 뒤에 해제를 기표하세요."
+    },
+    "posting_without_event_date": {
+      "fail": "계약 {contract}의 유보금 {amount}이 반환되었지만, 해제 시점의 날짜가 기록되어 있지 않습니다.",
+      "suggestion": "해제 시점에 도달한 날짜를 기록해 두면 지급 내역과 대조할 수 있습니다."
+    },
+    "retention_still_held": {
+      "fail": "계약 {contract}는 완료되었지만 아직 유보금 {amount}을 보유하고 있습니다.",
+      "suggestion": "유보금 대장에서 해당 시점에 유보금을 해제하거나, 하자보증 기간 동안 계속 보유하세요."
+    },
+    "discount_not_agreed": {
+      "fail": "계약 {contract}의 청구서 {number} 지급 승인에 조기 지급 할인 {amount}이 적용되었지만, 계약상 할인이 허용되지 않습니다.",
+      "suggestion": "지급 조건에서 조기 지급 할인을 켜거나, 할인 없이 승인을 다시 여세요."
+    },
+    "discount_after_deadline": {
+      "fail": "청구서 {number}에서 할인 {amount}을 공제했지만, {paid_on} 지급은 할인 기한 {until} 이후였습니다.",
+      "suggestion": "할인액도 함께 지급하거나, 시공사가 기한 후 할인을 수용한 사유를 기록하세요."
+    },
+    "invoiced_over_measured": {
+      "fail": "계약 {contract}의 청구액은 {invoiced}로, 측정된 {measured}(수량 곱하기 단가)보다 {difference} 많습니다.",
+      "suggestion": "추가 지급을 승인하기 전에 측정 내역을 확인하거나, 차액을 다음 승인에서 유보하세요."
+    },
+    "invoiced_over_contract": {
+      "fail": "계약 {contract}의 청구액은 {invoiced}로, 계약 금액 {value}보다 {difference} 많고 측정 내역도 없습니다.",
+      "suggestion": "추가 지급 전에 초과 금액을 뒷받침하는 측정 내역이나 변경 계약을 기록하세요."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "청구서 {number}는 리버스 차지 대상인데 부가세 {vat}이 포함되어 있습니다.",
+      "suggestion": "리버스 차지 청구서에는 부가세가 붙지 않습니다. 부가세 금액 또는 항목의 부가세 구분을 수정하세요."
+    },
+    "line_without_vat_rate": {
+      "fail": "청구서 {number}에 부가세가 있지만 {count}개 항목에 부가세율이 없습니다.",
+      "suggestion": "공제와 내보내기에서 올바른 세액이 적용되도록 모든 항목에 부가세율을 입력하세요."
+    },
+    "duplicate_number": {
+      "fail": "같은 시공사의 청구서 번호 {number}가 {count}번 입력되어 있습니다.",
+      "suggestion": "사본을 취소하거나, 서로 다른 청구서라면 청구서 번호를 수정하세요."
+    },
+    "possible_duplicate": {
+      "fail": "청구서 {number}는 시공사, 금액({amount}), 날짜({on})가 청구서 {other}와 같습니다.",
+      "suggestion": "같은 청구서를 다른 번호로 두 번 입력한 것이 아닌지 확인하세요."
+    }
   }
 }

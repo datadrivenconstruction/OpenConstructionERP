@@ -1111,5 +1111,79 @@
       "fail": "Leverandørfaktura {number} på {amount} hører ikke til noen kontrakt eller bestilling.",
       "suggestion": "Koble linjene til en kontrakt, eller før den som direkte kostnad på en konto."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Faktura {number} på kontrakt {contract} oppgir {net} til nå, mindre enn de {previous} på forrige faktura {previous_number}, selv om kontrakten faktureres kumulativt.",
+      "suggestion": "Hvis fakturaen bare krever det nye arbeidet, faktureres kontrakten inkrementelt; hvis den reduserer summen, registrer den som kreditnota."
+    },
+    "invoice_after_final": {
+      "fail": "Faktura {number} på kontrakt {contract} kommer etter sluttfakturaen {final}.",
+      "suggestion": "Registrer senere arbeid som regningsarbeid eller kreditnota, eller marker riktig faktura som sluttfaktura."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Faktura {number} på kontrakt {contract} er opprettet fra et krav og fakturerer én periode, men kontrakten faktureres kumulativt.",
+      "suggestion": "Bruk én faktureringsmåte per kontrakt: bytt kontrakten til inkrementell fakturering, eller registrer entreprenørens kumulative fakturaer i stedet."
+    },
+    "release_differs": {
+      "fail": "Frigivelsen som er bekreftet for faktura {number} på kontrakt {contract} er {stored}, men kontraktens vilkår gir {computed} i dag.",
+      "suggestion": "Sjekk hva som er endret siden frigivelsen (vilkår, fakturabeløp, fradrag), åpne frigivelsen på nytt og bekreft den igjen."
+    },
+    "rounding_out_of_range": {
+      "fail": "Faktura {number} er avrundet med {rounding}, utenfor det avtalte avrundingssteget på {step}.",
+      "suggestion": "Avrunding kutter en frigivelse med mindre enn ett steg; slå på avrunding i betalingsvilkårene eller åpne frigivelsen på nytt."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Sluttfaktura {number} på kontrakt {contract} holder tilbake {amount} i tilbakeholdt beløp, men det er ikke avtalt garantiinnehold.",
+      "suggestion": "Avtal garantiinnehold i betalingsvilkårene, eller åpne frigivelsen på nytt slik at hele innholdet utbetales med sluttfakturaen."
+    },
+    "posting_exceeds_held": {
+      "fail": "På kontrakt {contract} er det utbetalt mer innehold enn det som holdes tilbake: {amount} for mye.",
+      "suggestion": "Annuller innholdsføringen som er for høy, og før det beløpet som faktisk holdes tilbake."
+    },
+    "posting_before_event": {
+      "fail": "{amount} innehold på kontrakt {contract} ble utbetalt {posted}, før frigivelseshendelsen forfalt {due}.",
+      "suggestion": "Kontroller datoen for frigivelseshendelsen, eller før frigivelsen når hendelsen har funnet sted."
+    },
+    "posting_without_event_date": {
+      "fail": "{amount} innehold på kontrakt {contract} ble utbetalt, men datoen for frigivelseshendelsen er ikke registrert.",
+      "suggestion": "Registrer datoen frigivelseshendelsen ble nådd, slik at utbetalingen kan kontrolleres mot den."
+    },
+    "retention_still_held": {
+      "fail": "Kontrakt {contract} er ferdigstilt og holder fortsatt tilbake {amount} i innehold.",
+      "suggestion": "Frigi innholdet ved hendelsen i innholdsregisteret, eller behold det for garantiperioden."
+    },
+    "discount_not_agreed": {
+      "fail": "Frigivelsen av faktura {number} på kontrakt {contract} tar et rabattfradrag for tidlig betaling på {amount}, men kontrakten tillater ingen.",
+      "suggestion": "Slå på rabatt for tidlig betaling i betalingsvilkårene, eller åpne frigivelsen på nytt uten den."
+    },
+    "discount_after_deadline": {
+      "fail": "Det er holdt tilbake en rabatt på {amount} på faktura {number}, men betalingen {paid_on} kom etter rabattdatoen {until}.",
+      "suggestion": "Betal også rabattbeløpet, eller registrer hvorfor entreprenøren godtok den sene rabatten."
+    },
+    "invoiced_over_measured": {
+      "fail": "Kontrakt {contract} er fakturert for {invoiced}, {difference} over de {measured} som er målt (mengde ganger pris).",
+      "suggestion": "Sjekk oppmålingen før mer penger frigis, eller hold differansen tilbake ved neste frigivelse."
+    },
+    "invoiced_over_contract": {
+      "fail": "Kontrakt {contract} er fakturert for {invoiced}, {difference} over kontraktsverdien på {value}, og ingenting er målt.",
+      "suggestion": "Registrer oppmålingen eller endringsordren som dekker det ekstra beløpet før mer frigis."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Faktura {number} er med omvendt avgiftsplikt, men har {vat} mva.",
+      "suggestion": "En faktura med omvendt avgiftsplikt har ikke mva; rett mva-beløpet eller mva-kategorien på linjene."
+    },
+    "line_without_vat_rate": {
+      "fail": "Faktura {number} har mva, men {count} av linjene oppgir ingen mva-sats.",
+      "suggestion": "Fyll inn mva-satsen på hver linje, slik at fradrag og eksporter bruker riktig avgift."
+    },
+    "duplicate_number": {
+      "fail": "Fakturanummer {number} fra samme entreprenør er registrert {count} ganger.",
+      "suggestion": "Annuller kopien, eller rett fakturanummeret hvis det er forskjellige fakturaer."
+    },
+    "possible_duplicate": {
+      "fail": "Faktura {number} har samme entreprenør, beløp ({amount}) og dato ({on}) som faktura {other}.",
+      "suggestion": "Sjekk at det ikke er samme faktura registrert to ganger under et annet nummer."
+    }
   }
 }

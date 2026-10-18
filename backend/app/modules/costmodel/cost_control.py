@@ -94,7 +94,9 @@ class LineFigures:
     cumulative value of work certified on claims, ``paid`` the part of it paid.
     ``all_final`` says every contract on the line is completed, so certified
     work is the final cost. ``override`` is a person's forecast, ``None`` when
-    nobody overruled the line.
+    nobody overruled the line. ``measured`` (quantity times contract rate) and
+    ``invoiced`` (supplier invoices, net) are shown next to certified and do not
+    move the forecast.
     """
 
     budget: Decimal = ZERO
@@ -105,6 +107,8 @@ class LineFigures:
     paid: Decimal = ZERO
     all_final: bool = False
     override: Decimal | None = None
+    measured: Decimal = ZERO
+    invoiced: Decimal = ZERO
 
     @property
     def committed(self) -> Decimal:

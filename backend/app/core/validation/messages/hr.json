@@ -1111,5 +1111,79 @@
       "fail": "Račun dobavljača {number} na {amount} ne pripada nijednom ugovoru ni narudžbi.",
       "suggestion": "Povežite njegove stavke s ugovorom ili ga knjižite kao izravni trošak na jednom računu."
     }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Račun {number} na ugovoru {contract} navodi {net} do danas, manje od {previous} s prethodnog računa {previous_number}, iako se ugovor fakturira kumulativno.",
+      "suggestion": "Ako račun naplaćuje samo nove radove, ugovor se fakturira inkrementalno; ako smanjuje ukupni iznos, unesite ga kao odobrenje (knjižno odobrenje)."
+    },
+    "invoice_after_final": {
+      "fail": "Račun {number} na ugovoru {contract} slijedi nakon završnog računa {final}.",
+      "suggestion": "Naknadne radove unesite kao radove u režiji ili odobrenje, ili označite ispravan račun kao završni."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Račun {number} na ugovoru {contract} nastao je iz zahtjeva i naplaćuje jedno razdoblje, ali se ugovor fakturira kumulativno.",
+      "suggestion": "Koristite jedan način fakturiranja po ugovoru: prebacite ugovor na inkrementalno fakturiranje ili umjesto toga unesite kumulativne račune izvođača."
+    },
+    "release_differs": {
+      "fail": "Potvrđeno puštanje u isplatu za račun {number} na ugovoru {contract} iznosi {stored}, ali uvjeti ugovora danas daju {computed}.",
+      "suggestion": "Provjerite što se promijenilo od puštanja (uvjeti, iznosi računa, odbici), zatim ponovno otvorite puštanje i potvrdite ga."
+    },
+    "rounding_out_of_range": {
+      "fail": "Račun {number} zaokružen je za {rounding}, izvan dogovorenog koraka zaokruživanja od {step}.",
+      "suggestion": "Zaokruživanje smanjuje isplatu za manje od jednog koraka; uključite zaokruživanje u uvjetima plaćanja ili ponovno otvorite puštanje."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Završni račun {number} na ugovoru {contract} zadržava {amount} zadržanog iznosa, ali jamstveni zadržani iznos nije dogovoren.",
+      "suggestion": "Dogovorite jamstveni zadržani iznos u uvjetima plaćanja ili ponovno otvorite puštanje kako bi se sav zadržani iznos isplatio sa završnim računom."
+    },
+    "posting_exceeds_held": {
+      "fail": "Na ugovoru {contract} vraćeno je više zadržanog iznosa nego što se drži: {amount} previše.",
+      "suggestion": "Stornirajte preveliko knjiženje zadržanog iznosa i proknjižite iznos koji se stvarno drži."
+    },
+    "posting_before_event": {
+      "fail": "Zadržani iznos od {amount} na ugovoru {contract} vraćen je {posted}, prije događaja otpuštanja koji je dospijevao {due}.",
+      "suggestion": "Provjerite datum događaja otpuštanja ili proknjižite otpuštanje nakon što se događaj dogodi."
+    },
+    "posting_without_event_date": {
+      "fail": "Zadržani iznos od {amount} na ugovoru {contract} vraćen je, ali datum događaja otpuštanja nije unesen.",
+      "suggestion": "Unesite datum kada je događaj otpuštanja nastupio kako bi se isplata mogla provjeriti prema njemu."
+    },
+    "retention_still_held": {
+      "fail": "Ugovor {contract} je dovršen i još drži zadržani iznos od {amount}.",
+      "suggestion": "Otpustite zadržani iznos na njegovom događaju u registru zadržanih iznosa ili ga zadržite za jamstveno razdoblje."
+    },
+    "discount_not_agreed": {
+      "fail": "Puštanje računa {number} na ugovoru {contract} koristi popust za rano plaćanje od {amount}, ali ugovor ne dopušta nikakav.",
+      "suggestion": "Uključite popust za rano plaćanje u uvjetima plaćanja ili ponovno otvorite puštanje bez njega."
+    },
+    "discount_after_deadline": {
+      "fail": "Na računu {number} zadržan je popust od {amount}, ali je plaćanje dana {paid_on} stiglo nakon datuma popusta {until}.",
+      "suggestion": "Platite i iznos popusta ili zabilježite zašto je izvođač prihvatio kasni popust."
+    },
+    "invoiced_over_measured": {
+      "fail": "Ugovor {contract} fakturiran je na {invoiced}, {difference} iznad izmjerenih {measured} (količina puta cijena).",
+      "suggestion": "Provjerite obračun količina prije puštanja još novca ili zadržite razliku kod sljedećeg puštanja."
+    },
+    "invoiced_over_contract": {
+      "fail": "Ugovor {contract} fakturiran je na {invoiced}, {difference} iznad svoje vrijednosti od {value}, a na njemu nije ništa izmjereno.",
+      "suggestion": "Unesite obračun količina ili izmjenu koja pokriva dodatni iznos prije puštanja još novca."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Račun {number} je u prijenosu porezne obveze, ali sadrži PDV od {vat}.",
+      "suggestion": "Račun u prijenosu porezne obveze ne sadrži PDV; ispravite iznos PDV-a ili kategoriju PDV-a na njegovim stavkama."
+    },
+    "line_without_vat_rate": {
+      "fail": "Račun {number} sadrži PDV, ali {count} njegovih stavki nema navedenu stopu PDV-a.",
+      "suggestion": "Unesite stopu PDV-a na svaku stavku kako bi odbici i izvozi uzeli ispravan porez."
+    },
+    "duplicate_number": {
+      "fail": "Broj računa {number} istog izvođača unesen je {count} puta.",
+      "suggestion": "Stornirajte kopiju ili ispravite broj računa ako je riječ o različitim računima."
+    },
+    "possible_duplicate": {
+      "fail": "Račun {number} ima istog izvođača, iznos ({amount}) i datum ({on}) kao račun {other}.",
+      "suggestion": "Provjerite da nije riječ o istom računu unesenom dvaput pod drugim brojem."
+    }
   }
 }
