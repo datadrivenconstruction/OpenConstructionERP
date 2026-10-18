@@ -421,12 +421,18 @@ ENTITY_CATALOG: dict[str, CatalogEntity] = {
             "``gross_floor_area`` is m2 GFA, ``contract_value`` and "
             "``budget_estimate`` are money in ``currency``, and all three may "
             "be unset, in which case the row is left out of the reading "
-            "rather than counted as zero."
+            "rather than counted as zero. ``actual_cost`` is the sum of the "
+            "actual amounts on the project's cost-model budget lines, the same "
+            "figure the Analytics overview calls actual, and is unset on a "
+            "project with no budget lines rather than read as nothing spent. "
+            "``client`` is the client recorded on the project and ``region`` its "
+            "region, so a portfolio reading can be grouped or filtered by either."
         ),
         fields={
             "gross_floor_area": KIND_NUMERIC,
             "contract_value": KIND_NUMERIC,
             "budget_estimate": KIND_NUMERIC,
+            "actual_cost": KIND_NUMERIC,
             "name": KIND_TEXT,
             "status": KIND_TEXT,
             "phase": KIND_TEXT,
@@ -434,9 +440,15 @@ ENTITY_CATALOG: dict[str, CatalogEntity] = {
             "project_type": KIND_TEXT,
             "country_code": KIND_TEXT,
             "currency": KIND_TEXT,
+            "client": KIND_TEXT,
+            "region": KIND_TEXT,
             "parent_project_id": KIND_UUID,
         },
-        dimensions={"contract_value": ("currency",), "budget_estimate": ("currency",)},
+        dimensions={
+            "contract_value": ("currency",),
+            "budget_estimate": ("currency",),
+            "actual_cost": ("currency",),
+        },
         # One row per project, which is exactly what makes it useful and
         # exactly what stops it narrowing: an estimate does not have a
         # project's floor area, it has whatever part of the building it was
@@ -691,6 +703,11 @@ class BoundEntity:
     #: ``period_column`` is a calendar date rather than a timestamp, so the
     #: period bounds are compared as dates.
     period_is_date: bool = False
+    #: How one contributing row is named when a reading is drilled into:
+    #: ``id`` (the row), ``boq_id`` and ``position_id`` (where an estimate
+    #: screen can show it, either may be absent), ``ref`` and ``description``
+    #: (what a person reads). Only these five keys are used.
+    record_columns: dict[str, Any] = field(default_factory=dict)
 
     def resolve_field(self, name: str) -> BoundField:
         """The bound field for a plain name or a ``<column>.<key>`` path.
@@ -735,6 +752,13 @@ def _bind_boq_position() -> BoundEntity:
         period_column=Position.created_at,
         joins=[(BOQ, Position.boq_id == BOQ.id), (Project, BOQ.project_id == Project.id)],
         boq_column=Position.boq_id,
+        record_columns={
+            "id": Position.id,
+            "boq_id": Position.boq_id,
+            "position_id": Position.id,
+            "ref": Position.ordinal,
+            "description": Position.description,
+        },
         fields={
             "quantity": BoundField(numeric_value(Position.quantity), KIND_NUMERIC),
             "unit_rate": BoundField(numeric_value(Position.unit_rate), KIND_NUMERIC),
@@ -811,6 +835,7 @@ def _bind_boq() -> BoundEntity:
         # The bill itself, so narrowing to one estimate leaves one row and
         # ``count`` reads 1 rather than the project's estimate count.
         boq_column=BOQ.id,
+        record_columns={"id": BOQ.id, "boq_id": BOQ.id, "ref": BOQ.name, "description": BOQ.description},
         fields={
             "name": BoundField(BOQ.name, KIND_TEXT),
             "status": BoundField(BOQ.status, KIND_TEXT),
@@ -830,12 +855,38 @@ def _bind_project() -> BoundEntity:
     # PostgreSQL, so without it ``min(gross_floor_area)`` over a portfolio
     # where one project records an area and thirteen do not comes back 0, and
     # ``avg`` divides one building by fourteen.
+    #
+    # ``actual_cost`` is pre-aggregated per project and outer joined, the same
+    # shape the booked hours of ``position_progress`` use: one read of the
+    # budget lines per query, and a project with no budget line keeps its row
+    # with the field unset instead of being dropped or read as zero spent.
+    outer_joins: list[tuple[Any, Any]] = []
+    try:
+        from app.modules.costmodel.models import BudgetLine
+    except ImportError:  # pragma: no cover - cost model not installed
+        actual_cost = BoundField(literal(None), KIND_NUMERIC, nullable_source=literal(None))
+    else:
+        spent = (
+            select(
+                BudgetLine.project_id.label("project_id"),
+                func.sum(numeric_value(BudgetLine.actual_amount)).label("actual_cost"),
+            )
+            .group_by(BudgetLine.project_id)
+            .subquery("project_actual_cost")
+        )
+        outer_joins.append((spent, spent.c.project_id == Project.id))
+        actual_cost = BoundField(spent.c.actual_cost, KIND_NUMERIC, nullable_source=spent.c.actual_cost)
     return BoundEntity(
         model=Project,
         project_column=Project.id,
         period_column=Project.created_at,
         joins=[],
+        outer_joins=outer_joins,
+        record_columns={"id": Project.id, "ref": Project.project_code, "description": Project.name},
         fields={
+            "actual_cost": actual_cost,
+            "client": BoundField(Project.client_id, KIND_TEXT, nullable_source=Project.client_id),
+            "region": BoundField(Project.region, KIND_TEXT),
             "gross_floor_area": BoundField(
                 numeric_value(Project.gross_floor_area),
                 KIND_NUMERIC,
@@ -883,6 +934,7 @@ def _bind_boq_markup() -> BoundEntity:
         # textbook case of a figure that means one thing per estimate and
         # nothing averaged across the estimates of one project.
         boq_column=BOQMarkup.boq_id,
+        record_columns={"id": BOQMarkup.id, "boq_id": BOQMarkup.boq_id, "ref": BOQMarkup.name, "description": BOQ.name},
         fields={
             # Both NOT NULL with a "0" default, so an inactive or unused half
             # of a line reads as zero rather than as absent - which is what it
@@ -919,6 +971,7 @@ def _bind_cost_item_usage() -> BoundEntity:
         project_column=CostItemUsage.project_id,
         period_column=CostItemUsage.used_at,
         joins=[(CostItem, CostItemUsage.cost_item_id == CostItem.id)],
+        record_columns={"id": CostItemUsage.id, "ref": CostItem.code, "description": CostItem.description},
         fields={
             "price_age_days": BoundField(
                 days_since(CostItem.price_as_of),
@@ -952,6 +1005,7 @@ def _bind_schedule_activity() -> BoundEntity:
         project_column=Schedule.project_id,
         period_column=Activity.created_at,
         joins=[(Schedule, Activity.schedule_id == Schedule.id)],
+        record_columns={"id": Activity.id, "ref": Activity.wbs_code, "description": Activity.name},
         fields={
             "duration_days": BoundField(Activity.duration_days, KIND_NUMERIC),
             "total_float": BoundField(
@@ -1007,6 +1061,13 @@ def _bind_field_time_line() -> BoundEntity:
         # hours of its project.
         outer_joins=[(Position, FieldTimesheetLine.boq_position_id == Position.id)],
         where=[counted_timesheet_clause()],
+        record_columns={
+            "id": FieldTimesheetLine.id,
+            "boq_id": Position.boq_id,
+            "position_id": FieldTimesheetLine.boq_position_id,
+            "ref": FieldTimesheet.reference,
+            "description": Position.description,
+        },
         fields={
             # Numeric(18, 4), NOT NULL - no coercion and no null source.
             "hours": BoundField(FieldTimesheetLine.hours, KIND_NUMERIC),
@@ -1074,6 +1135,13 @@ def _bind_position_progress() -> BoundEntity:
             (booked, (booked.c.position_id == Position.id) & (booked.c.project_id == BOQ.project_id)),
         ],
         boq_column=Position.boq_id,
+        record_columns={
+            "id": Position.id,
+            "boq_id": Position.boq_id,
+            "position_id": Position.id,
+            "ref": Position.ordinal,
+            "description": Position.description,
+        },
         fields={
             "planned_quantity": BoundField(numeric_value(Position.quantity), KIND_NUMERIC),
             "percent_complete": BoundField(
@@ -1655,6 +1723,35 @@ def spec_dimensions(spec: dict[str, Any]) -> list[str]:
     return sorted(dims)
 
 
+def validate_split_field(spec: dict[str, Any], name: Any, path: str = "split_by") -> str:
+    """A row-level field a benchmark may split its readings by, or the rejection.
+
+    The same vocabulary a ``group_by`` accepts: a declared text, id or flag
+    field of the spec's entity, or a ``classification.<key>`` path on an
+    entity that carries the column. A measure is refused for the reason a
+    measure is refused as a group: one bucket per amount answers nothing.
+
+    Raises:
+        KPISpecError: The name is not a groupable field of the entity.
+    """
+    entry = ENTITY_CATALOG[str(spec["entity"])]
+    field_name = _lookup_field(entry, name, path)
+    if entry.kind_of(field_name) == KIND_NUMERIC:
+        raise KPISpecError(
+            path,
+            f"field '{field_name}' is numeric, and a split keyed by a measure is one bucket per amount.",
+            value=field_name,
+            allowed=entry.groupable_fields(),
+        )
+    if field_name in spec_dimensions(spec):
+        raise KPISpecError(
+            path,
+            f"readings are already split by '{field_name}'.",
+            value=field_name,
+        )
+    return field_name
+
+
 def dimension_key(values: list[Any]) -> str:
     """The partition key for one combination of dimension values."""
     return DIMENSION_KEY_SEPARATOR.join(_group_key(v) for v in values)
@@ -2000,6 +2097,17 @@ class ProjectReading:
     #: when it was read in the group's own unit. Set only by the benchmark's
     #: unit conversion, so a reader can always tell a converted figure apart.
     converted_from: list[str] = field(default_factory=list)
+    #: The currencies this reading was restated from into the reporting
+    #: currency, empty when it was read in that currency. Set only by the
+    #: benchmark's currency normalisation.
+    converted_from_currency: list[str] = field(default_factory=list)
+    #: The figure as it was before an exchange rate was applied, the currency
+    #: it was in and the rate. Kept beside the normalised value so the reading
+    #: shows original value, rule and result together; unset when no rate was
+    #: applied, or when two readings in different currencies were merged.
+    original_value: Decimal | None = None
+    original_currency: str | None = None
+    fx_rate: Decimal | None = None
 
 
 async def evaluate_spec_by_project(
@@ -2009,6 +2117,7 @@ async def evaluate_spec_by_project(
     project_ids: set[uuid.UUID],
     period_start: _date | None = None,
     period_end: _date | None = None,
+    split_field: str | None = None,
 ) -> list[ProjectReading]:
     """Run a validated spec once per project of a cohort.
 
@@ -2021,6 +2130,11 @@ async def evaluate_spec_by_project(
     only ``ratio``: a benchmark compares projects with each other, and a sum
     of money in two currencies compared with a sum in one is the comparison
     that must not happen.
+
+    ``split_field`` (already checked by :func:`validate_split_field`) splits
+    each project's reading once more, by a row-level field such as
+    ``classification.din276``. It comes first in every reading's dimensions,
+    so a group reads "330 / m2" rather than "m2 / 330".
 
     Raises:
         KPISpecError: The aggregation has no per-project reading to rank.
@@ -2036,7 +2150,7 @@ async def evaluate_spec_by_project(
             allowed=[a for a in AGGREGATIONS if a != "top_by"],
         )
     bound = bind_entity(spec["entity"])
-    dims = spec_dimensions(spec)
+    dims = ([split_field] if split_field else []) + spec_dimensions(spec)
     dim_exprs = [bound.resolve_field(name).expr for name in dims]
     stmt = select(bound.project_column, *dim_exprs, *_measures(bound, spec), func.count()).select_from(bound.model)
     stmt = _base_predicates(
@@ -2268,4 +2382,5 @@ __all__ = [
     "spec_dimensions",
     "source_modules_for",
     "validate_spec",
+    "validate_split_field",
 ]

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
@@ -573,6 +574,14 @@ BENCHMARK_SET_SCOPES: tuple[str, ...] = ("personal", "shared")
 
 _MAX_COHORT_VALUES = 50
 _MAX_ROW_FILTERS = 10
+#: A split is a project attribute or a ``<field>`` / ``<column>.<key>`` path.
+_SPLIT_RE = r"^[A-Za-z][A-Za-z0-9_]{0,63}(\.[A-Za-z][A-Za-z0-9_]{0,63})?$"
+_CURRENCY_RE = r"^[A-Za-z]{3}$"
+
+
+def _clean_currency(value: str | None) -> str | None:
+    text = (value or "").strip().upper()
+    return text or None
 
 
 def _clean_values(value: list[str]) -> list[str]:
@@ -626,19 +635,24 @@ class BenchmarkCohort(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     project_ids: list[UUID] = Field(default_factory=list, max_length=500)
+    #: Projects left out whatever else matches, typically the project an
+    #: estimator is comparing, so it is not benchmarked against itself.
+    exclude_project_ids: list[UUID] = Field(default_factory=list, max_length=500)
     clients: list[str] = Field(default_factory=list, max_length=_MAX_COHORT_VALUES)
     regions: list[str] = Field(default_factory=list, max_length=_MAX_COHORT_VALUES)
     project_types: list[str] = Field(default_factory=list, max_length=_MAX_COHORT_VALUES)
+    #: Project statuses, as stored (``active``, ``completed``, ...).
+    statuses: list[str] = Field(default_factory=list, max_length=_MAX_COHORT_VALUES)
     row_filters: list[dict[str, Any]] = Field(default_factory=list, max_length=_MAX_ROW_FILTERS)
     period_start: date | None = None
     period_end: date | None = None
 
-    @field_validator("project_ids")
+    @field_validator("project_ids", "exclude_project_ids")
     @classmethod
     def _dedupe(cls, value: list[UUID]) -> list[UUID]:
         return list(dict.fromkeys(value))
 
-    @field_validator("clients", "regions", "project_types")
+    @field_validator("clients", "regions", "project_types", "statuses")
     @classmethod
     def _clean(cls, value: list[str]) -> list[str]:
         return _clean_values(value)
@@ -671,11 +685,26 @@ class PerformanceBenchmarkRequest(BenchmarkCohort):
     min_projects: int = Field(default=0, ge=0, le=500)
     min_records: int = Field(default=0, ge=0, le=1_000_000)
     statistic: str = "weighted"
+    #: Split every project's reading once more: a project attribute
+    #: (``client``, ``region``, ``project_type``, ``status``, ``phase``,
+    #: ``country``, ``end_year``) or a row field of the KPI's entity such as
+    #: ``classification.din276``. Each value becomes its own group.
+    split_by: str | None = Field(default=None, max_length=129, pattern=_SPLIT_RE)
+    #: Restate money in this currency with the platform's FX rates. Absent,
+    #: every currency stays its own group.
+    reporting_currency: str | None = Field(default=None, pattern=_CURRENCY_RE)
+    #: The date whose rates are applied; today when absent.
+    fx_date: date | None = None
 
     @field_validator("statistic")
     @classmethod
     def _known_statistic(cls, value: str) -> str:
         return _check_choice(value, BENCHMARK_STATISTICS, "statistic")
+
+    @field_validator("reporting_currency")
+    @classmethod
+    def _currency(cls, value: str | None) -> str | None:
+        return _clean_currency(value)
 
     @model_validator(mode="after")
     def _one_kpi(self) -> PerformanceBenchmarkRequest:
@@ -693,6 +722,15 @@ class PerformanceProjectRow(BaseModel):
     unavailable_reason: str | None = None
     #: Units this project's rows were converted from to land in the group.
     converted_from: list[str] = Field(default_factory=list)
+    #: ``(value - headline) / headline``, unset when either is missing or the
+    #: headline is zero.
+    variance: Decimal | None = None
+    #: Currencies restated into the reporting currency, the value before the
+    #: rate, its currency and the rate itself.
+    converted_from_currency: list[str] = Field(default_factory=list)
+    original_value: Decimal | None = None
+    original_currency: str | None = None
+    fx_rate: Decimal | None = None
 
 
 class PerformanceBenchmarkFigures(BaseModel):
@@ -708,6 +746,13 @@ class PerformanceBenchmarkFigures(BaseModel):
     p75: Decimal | None
     min: Decimal | None
     max: Decimal | None
+    #: Served from ten projects with a value up, unset below.
+    p10: Decimal | None = None
+    p90: Decimal | None = None
+    #: Sample standard deviation and coefficient of variation of the
+    #: per-project values.
+    stddev: Decimal | None = None
+    cv: Decimal | None = None
 
 
 class PerformanceEvidence(BaseModel):
@@ -725,6 +770,16 @@ class PerformanceConversion(BaseModel):
     factor: Decimal
 
 
+class PerformanceCurrencyConversion(BaseModel):
+    """``1 from_currency = rate to_currency``, from the FX register on ``as_of``."""
+
+    from_currency: str
+    to_currency: str
+    rate: Decimal
+    as_of: date | None = None
+    source: str = ""
+
+
 class PerformanceGroup(BaseModel):
     key: str
     dimensions: dict[str, str | None]
@@ -734,6 +789,11 @@ class PerformanceGroup(BaseModel):
     #: Projects with a value in this group over projects selected.
     coverage: Decimal
     conversions: list[PerformanceConversion] = Field(default_factory=list)
+    currency_conversions: list[PerformanceCurrencyConversion] = Field(default_factory=list)
+    #: What the values are in, such as ``h/m2`` or ``EUR/m2``; unset for a count.
+    value_unit: str | None = None
+    #: Readings with no value, by reason (``zero_denominator``, ``no_data``).
+    excluded: dict[str, int] = Field(default_factory=dict)
     #: The figure this group leads with, and which statistic it is. The
     #: statistic can differ from the one asked for when that one does not
     #: exist for the KPI (a sum has no weighted figure); the label follows
@@ -750,6 +810,10 @@ class PerformanceProjectLabel(BaseModel):
     project_id: UUID
     name: str
     currency: str
+    client: str | None = None
+    region: str | None = None
+    status: str | None = None
+    project_type: str | None = None
 
 
 class PerformanceBenchmarkResponse(BaseModel):
@@ -763,6 +827,14 @@ class PerformanceBenchmarkResponse(BaseModel):
     min_projects: int = 0
     min_records: int = 0
     statistic: str = "weighted"
+    split_by: str | None = None
+    reporting_currency: str | None = None
+    #: Currencies the FX register had no rate for; they kept their own group.
+    currencies_unconverted: list[str] = Field(default_factory=list)
+    #: Groups beyond the split cap, counted rather than dropped silently.
+    groups_omitted: int = 0
+    #: Selected projects with no row at all for this KPI.
+    projects_without_data: int = 0
 
 
 class PerformancePreset(BaseModel):
@@ -776,6 +848,9 @@ class PerformanceCohortOptions(BaseModel):
     clients: list[str] = Field(default_factory=list)
     regions: list[str] = Field(default_factory=list)
     project_types: list[str] = Field(default_factory=list)
+    statuses: list[str] = Field(default_factory=list)
+    #: Project attributes a benchmark can be split by.
+    project_splits: list[str] = Field(default_factory=list)
 
 
 class BenchmarkSetBase(BaseModel):
@@ -790,11 +865,18 @@ class BenchmarkSetBase(BaseModel):
     min_projects: int = Field(default=3, ge=0, le=500)
     min_records: int = Field(default=0, ge=0, le=1_000_000)
     convert_units: bool = True
+    split_by: str | None = Field(default=None, max_length=129, pattern=_SPLIT_RE)
+    reporting_currency: str | None = Field(default=None, pattern=_CURRENCY_RE)
 
     @field_validator("name")
     @classmethod
     def _name(cls, value: str) -> str:
         return _check_name(value)
+
+    @field_validator("reporting_currency")
+    @classmethod
+    def _currency(cls, value: str | None) -> str | None:
+        return _clean_currency(value)
 
     @field_validator("scope")
     @classmethod
@@ -830,6 +912,9 @@ class BenchmarkSetUpdate(BaseModel):
     min_projects: int | None = Field(default=None, ge=0, le=500)
     min_records: int | None = Field(default=None, ge=0, le=1_000_000)
     convert_units: bool | None = None
+    #: An empty string clears the split or the reporting currency.
+    split_by: str | None = Field(default=None, max_length=129)
+    reporting_currency: str | None = Field(default=None, max_length=3)
 
     @model_validator(mode="after")
     def _same_rules(self) -> BenchmarkSetUpdate:
@@ -843,6 +928,13 @@ class BenchmarkSetUpdate(BaseModel):
             _check_choice(self.statistic, BENCHMARK_STATISTICS, "statistic")
         if self.kpis is not None:
             self.kpis = _check_kpis(self.kpis)
+        if self.split_by:
+            if not re.fullmatch(_SPLIT_RE, self.split_by):
+                raise ValueError("split_by is a project attribute or a field path")
+        if self.reporting_currency:
+            if not re.fullmatch(_CURRENCY_RE, self.reporting_currency):
+                raise ValueError("reporting_currency is a three-letter currency code")
+            self.reporting_currency = self.reporting_currency.upper()
         return self
 
 
@@ -858,6 +950,8 @@ class BenchmarkSetRead(BaseModel):
     min_projects: int
     min_records: int
     convert_units: bool
+    split_by: str | None = None
+    reporting_currency: str | None = None
     #: Whether the caller may edit or delete it.
     is_owner: bool = False
     created_at: datetime
@@ -916,12 +1010,223 @@ class PerformanceAdHocCheckRequest(PerformanceBenchmarkRequest):
     unit: str | None = Field(default=None, max_length=30)
     currency: str | None = Field(default=None, max_length=10)
     boq_position_id: UUID | None = None
+    #: With ``split_by``: the value of the split group the estimate belongs to.
+    split_value: str | None = Field(default=None, max_length=255)
 
     @model_validator(mode="after")
     def _one_source(self) -> PerformanceAdHocCheckRequest:
         if (self.value is None) == (self.boq_position_id is None):
             raise ValueError("give exactly one of 'value' or 'boq_position_id'")
         return self
+
+
+class PerformanceCompareRequest(BenchmarkCohort):
+    """Several KPIs over one cohort, one project per row and one column per KPI group.
+
+    The same cohort and reading options as ``POST /performance/benchmark``;
+    each KPI is a preset id or a custom KPI code. A split is not offered: a
+    comparison is by project, and a split would multiply the columns.
+    """
+
+    kpis: list[str] = Field(..., min_length=1, max_length=8)
+    convert_units: bool = True
+    min_projects: int = Field(default=0, ge=0, le=500)
+    min_records: int = Field(default=0, ge=0, le=1_000_000)
+    statistic: str = "weighted"
+    reporting_currency: str | None = Field(default=None, pattern=_CURRENCY_RE)
+    fx_date: date | None = None
+
+    @field_validator("kpis")
+    @classmethod
+    def _kpis(cls, value: list[str]) -> list[str]:
+        return _check_kpis(value)
+
+    @field_validator("statistic")
+    @classmethod
+    def _known_statistic(cls, value: str) -> str:
+        return _check_choice(value, BENCHMARK_STATISTICS, "statistic")
+
+    @field_validator("reporting_currency")
+    @classmethod
+    def _currency(cls, value: str | None) -> str | None:
+        return _clean_currency(value)
+
+
+class PerformanceCompareColumn(BaseModel):
+    """One column of the comparison: one KPI read in one unit/currency group."""
+
+    kpi: str
+    aggregation: str
+    group: PerformanceGroup
+
+
+class PerformanceCompareResponse(BaseModel):
+    projects_selected: int
+    projects: list[PerformanceProjectLabel]
+    columns: list[PerformanceCompareColumn]
+    #: Per KPI, the groups beyond the per-KPI column cap.
+    groups_omitted: dict[str, int] = Field(default_factory=dict)
+    reporting_currency: str | None = None
+    currencies_unconverted: list[str] = Field(default_factory=list)
+    statistic: str = "weighted"
+
+
+class PerformanceDataQualityRequest(BenchmarkCohort):
+    """The cohort to measure, and the classification standard to count."""
+
+    classification_key: str | None = Field(default=None, max_length=64, pattern=r"^[A-Za-z][A-Za-z0-9_]{0,63}$")
+
+
+class PerformanceDataQualityResponse(BaseModel):
+    """Coverage of the cohort's actuals. A share is unset when its whole is zero."""
+
+    projects: int
+    hours_total: Decimal | None = None
+    hours_linked: Decimal | None = None
+    hours_linked_share: Decimal | None = None
+    positions_total: int | None = None
+    positions_with_progress: int | None = None
+    progress_share: Decimal | None = None
+    classification_key: str | None = None
+    positions_classified: int | None = None
+    classification_share: Decimal | None = None
+
+
+class PerformanceDrilldownRequest(BaseModel):
+    """The rows behind one project's reading in one group.
+
+    ``dimensions`` lists, per row dimension of the group, the stored values
+    that land in it: the group's own unit and currency plus whatever the
+    reading lists in ``converted_from`` / ``converted_from_currency``.
+    ``target_unit`` and ``reporting_currency`` are the group's, so the totals
+    are restated the way the reading was.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    kpi: str | None = Field(default=None, min_length=1, max_length=100)
+    spec: dict[str, Any] | None = None
+    project_id: UUID
+    row_filters: list[dict[str, Any]] = Field(default_factory=list, max_length=_MAX_ROW_FILTERS)
+    period_start: date | None = None
+    period_end: date | None = None
+    split_by: str | None = Field(default=None, max_length=129, pattern=_SPLIT_RE)
+    dimensions: dict[str, list[str | None]] = Field(default_factory=dict, max_length=8)
+    target_unit: str | None = Field(default=None, max_length=30)
+    reporting_currency: str | None = Field(default=None, pattern=_CURRENCY_RE)
+    fx_date: date | None = None
+    offset: int = Field(default=0, ge=0, le=1_000_000)
+    limit: int = Field(default=50, ge=1, le=200)
+
+    @field_validator("reporting_currency")
+    @classmethod
+    def _currency(cls, value: str | None) -> str | None:
+        return _clean_currency(value)
+
+    @field_validator("dimensions")
+    @classmethod
+    def _dimension_values(cls, value: dict[str, list[str | None]]) -> dict[str, list[str | None]]:
+        for name, values in value.items():
+            if len(name) > 129 or len(values) > 20:
+                raise ValueError("a dimension names at most 20 values")
+            if any(v is not None and len(v) > 255 for v in values):
+                raise ValueError("a dimension value is at most 255 characters")
+        return value
+
+    @model_validator(mode="after")
+    def _one_kpi(self) -> PerformanceDrilldownRequest:
+        if (self.kpi is None) == (self.spec is None):
+            raise ValueError("name exactly one of 'kpi' or 'spec'")
+        return self
+
+
+class PerformanceDrillRecord(BaseModel):
+    record_id: str
+    boq_id: UUID | None = None
+    position_id: UUID | None = None
+    ref: str = ""
+    description: str = ""
+    dimensions: dict[str, str | None] = Field(default_factory=dict)
+    numerator: Decimal | None = None
+    denominator: Decimal | None = None
+    counted_numerator: Decimal | None = None
+    counted_denominator: Decimal | None = None
+
+
+class PerformanceDrilldownResponse(BaseModel):
+    """A page of contributing rows; the totals are over every row, not the page."""
+
+    project_id: UUID
+    kpi: str | None = None
+    aggregation: str
+    total_records: int
+    numerator: Decimal | None = None
+    denominator: Decimal | None = None
+    value: Decimal | None = None
+    unavailable_reason: str | None = None
+    value_unit: str | None = None
+    offset: int = 0
+    limit: int = 50
+    records: list[PerformanceDrillRecord] = Field(default_factory=list)
+
+
+class PerformancePositionContextRequest(BaseModel):
+    """Historical context for bill positions: comparable past positions by classification.
+
+    ``kpi`` is a per-unit KPI: ``labour_hours_per_installed_unit`` (actual
+    hours per installed unit, compared with the position's planned hours per
+    unit) or ``estimate_rate_per_unit`` (rates of past estimates, compared
+    with the position's own rate), or a custom KPI of the same shape.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    position_ids: list[UUID] = Field(..., min_length=1, max_length=500)
+    kpi: str = Field(default="labour_hours_per_installed_unit", min_length=1, max_length=100)
+    classification_key: str | None = Field(default=None, max_length=64, pattern=r"^[A-Za-z][A-Za-z0-9_]{0,63}$")
+    include_own_projects: bool = False
+    convert_units: bool = True
+    statistic: str = "median"
+    min_projects: int = Field(default=3, ge=0, le=500)
+    min_records: int = Field(default=0, ge=0, le=1_000_000)
+
+    @field_validator("statistic")
+    @classmethod
+    def _known_statistic(cls, value: str) -> str:
+        return _check_choice(value, BENCHMARK_STATISTICS, "statistic")
+
+
+class PerformancePositionContextItem(BaseModel):
+    position_id: UUID
+    #: ``ok``, ``no_classification``, ``no_comparable_group``,
+    #: ``kpi_not_per_unit`` or ``no_estimate_value``.
+    status: str
+    classification_code: str | None = None
+    unit: str | None = None
+    currency: str | None = None
+    estimate: Decimal | None = None
+    value: Decimal | None = None
+    value_unit: str | None = None
+    headline: Decimal | None = None
+    statistic: str | None = None
+    median: Decimal | None = None
+    p25: Decimal | None = None
+    p75: Decimal | None = None
+    variance: Decimal | None = None
+    percentile_rank: Decimal | None = None
+    band: str | None = None
+    confidence: str | None = None
+    projects: int = 0
+    records: int = 0
+    shortfall: list[str] = Field(default_factory=list)
+
+
+class PerformancePositionContextResponse(BaseModel):
+    """Suggestions for a person to weigh; nothing was changed by them."""
+
+    kpi: str
+    classification_key: str | None = None
+    items: list[PerformancePositionContextItem] = Field(default_factory=list)
 
 
 class PerformanceCheckResponse(BaseModel):

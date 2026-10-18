@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v90 builds exactly the benchmark set table the model builds, and undoes it.
+"""Revisions v90 and v97 build exactly the benchmark set table the model builds, and undo it.
 
 Up, down, up on PostgreSQL; the reflected schema from the revision must equal the one ``create_all``
 produces from the model, so a fresh install and an upgraded one cannot drift.
@@ -35,6 +35,20 @@ def _load(name: str):
 
 
 _rev = _load("v90_bi_benchmark_sets")
+# v97 adds two columns the model now carries, so the chain v90 -> v97 is what must equal create_all.
+_followers = [_load("v97_bi_benchmark_set_split_currency")]
+
+
+def _upgrade() -> None:
+    _rev.upgrade()
+    for follower in _followers:
+        follower.upgrade()
+
+
+def _downgrade() -> None:
+    for follower in reversed(_followers):
+        follower.downgrade()
+    _rev.downgrade()
 
 
 def _run(sync_conn, direction) -> None:
@@ -77,13 +91,13 @@ async def test_revision_reproduces_the_model_schema_up_down_up() -> None:
         async with engine.begin() as conn:
             await conn.execute(sa.text(f"DROP TABLE IF EXISTS {TABLE} CASCADE"))
         async with engine.begin() as conn:
-            await conn.run_sync(_run, _rev.upgrade)
+            await conn.run_sync(_run, _upgrade)
             first = await conn.run_sync(_reflect)
         async with engine.begin() as conn:
-            await conn.run_sync(_run, _rev.downgrade)
+            await conn.run_sync(_run, _downgrade)
             down = await conn.run_sync(_reflect)
         async with engine.begin() as conn:
-            await conn.run_sync(_run, _rev.upgrade)
+            await conn.run_sync(_run, _upgrade)
             second = await conn.run_sync(_reflect)
 
     assert down == {"present": False}
@@ -95,6 +109,6 @@ async def test_revision_is_a_no_op_over_a_create_all_schema() -> None:
     async with isolated_engine() as engine:
         async with engine.begin() as conn:
             before = await conn.run_sync(_reflect)
-            await conn.run_sync(_run, _rev.upgrade)
+            await conn.run_sync(_run, _upgrade)
             after = await conn.run_sync(_reflect)
     assert after == before

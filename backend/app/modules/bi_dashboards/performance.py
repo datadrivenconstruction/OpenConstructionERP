@@ -43,7 +43,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.stats import quartiles, weighted_mean
+from app.core.stats import percentile, quartiles, weighted_mean
 from app.core.unit_conversion import convert_strict, strict_unit_factor, unit_dimension
 from app.modules.bi_dashboards import kpi_spec
 
@@ -99,6 +99,24 @@ PRESETS: dict[str, dict[str, Any]] = {
         "aggregation": "sum",
         "field": "labour_hours",
     },
+    "installed_units_per_labour_hour": {
+        "entity": "position_progress",
+        "aggregation": "ratio",
+        "field": "installed_quantity",
+        "denominator_field": "labour_hours",
+        "filters": [{"field": "installed_quantity", "op": "gt", "value": 0}],
+    },
+    "installed_quantity": {
+        "entity": "position_progress",
+        "aggregation": "sum",
+        "field": "installed_quantity",
+    },
+    "actual_cost_per_floor_area": {
+        "entity": "project",
+        "aggregation": "ratio",
+        "field": "actual_cost",
+        "denominator_field": "gross_floor_area",
+    },
 }
 
 #: The presets in their validated, stored form.
@@ -134,6 +152,19 @@ class BenchmarkSummary:
     #: Records behind the projects that have a value, which is the evidence
     #: a minimum-observations rule is about.
     records_with_value: int = 0
+    #: The tails, only once there are :data:`TAIL_PERCENTILES_FROM` projects
+    #: with a value: P10 of four projects is an interpolation between the two
+    #: smallest, which reads like a finding and is not one.
+    p10: Decimal | None = None
+    p90: Decimal | None = None
+    #: Sample standard deviation of the per-project values (n - 1), from two
+    #: projects up, and the coefficient of variation: the deviation over the
+    #: absolute mean, unset when the mean is zero.
+    stddev: Decimal | None = None
+    cv: Decimal | None = None
+    #: Readings without a value, counted by why: ``zero_denominator`` (the
+    #: project booked hours and installed nothing) or ``no_data``.
+    excluded: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -150,6 +181,22 @@ class UnitConversion:
     factor: Decimal
 
 
+@dataclass(frozen=True)
+class CurrencyConversion:
+    """One exchange rate applied to land money in the reporting currency.
+
+    ``rate`` is how many ``to_currency`` one ``from_currency`` is, taken from
+    the platform's FX register for ``as_of`` (``source`` says which feed or
+    set), so the reader can redo the arithmetic and see whose rate it was.
+    """
+
+    from_currency: str
+    to_currency: str
+    rate: Decimal
+    as_of: _date | None = None
+    source: str = ""
+
+
 @dataclass
 class BenchmarkGroup:
     key: str
@@ -157,6 +204,21 @@ class BenchmarkGroup:
     readings: list[kpi_spec.ProjectReading] = field(default_factory=list)
     summary: BenchmarkSummary | None = None
     conversions: list[UnitConversion] = field(default_factory=list)
+    currency_conversions: list[CurrencyConversion] = field(default_factory=list)
+
+
+#: Projects with a value from which P10 and P90 are served.
+TAIL_PERCENTILES_FROM = 10
+
+
+def _dispersion(values: list[Decimal], mean: Decimal | None) -> tuple[Decimal | None, Decimal | None]:
+    """``(sample standard deviation, coefficient of variation)``, each ``None`` when undefined."""
+    if mean is None or len(values) < 2:
+        return None, None
+    squares = sum(((v - mean) * (v - mean) for v in values[1:]), (values[0] - mean) * (values[0] - mean))
+    stddev = (squares / Decimal(len(values) - 1)).sqrt()
+    cv = stddev / abs(mean) if mean != 0 else None
+    return stddev, cv
 
 
 def summarise(readings: list[kpi_spec.ProjectReading], aggregation: str) -> BenchmarkSummary:
@@ -186,6 +248,18 @@ def summarise(readings: list[kpi_spec.ProjectReading], aggregation: str) -> Benc
     else:
         reason = WEIGHT_NOT_APPLICABLE
 
+    mean = (sum(values[1:], values[0]) / len(values)) if values else None
+    stddev, cv = _dispersion(values, mean)
+    p10 = p90 = None
+    if len(values) >= TAIL_PERCENTILES_FROM:
+        ordered = sorted(values)
+        p10, p90 = percentile(ordered, 10), percentile(ordered, 90)
+    excluded: dict[str, int] = {}
+    for r in readings:
+        if r.value is None:
+            why = r.unavailable_reason or kpi_spec.UNAVAILABLE_NO_DATA
+            excluded[why] = excluded.get(why, 0) + 1
+
     return BenchmarkSummary(
         weighted=weighted,
         weighted_unavailable_reason=reason,
@@ -197,8 +271,13 @@ def summarise(readings: list[kpi_spec.ProjectReading], aggregation: str) -> Benc
         projects_with_data=len({r.project_id for r in readings}),
         projects_with_value=len({r.project_id for r in available}),
         records=sum(r.records for r in readings),
-        mean=(sum(values[1:], values[0]) / len(values)) if values else None,
+        mean=mean,
         records_with_value=sum(r.records for r in available),
+        p10=p10,
+        p90=p90,
+        stddev=stddev,
+        cv=cv,
+        excluded=excluded,
     )
 
 
@@ -206,6 +285,7 @@ def group_readings(
     readings: list[kpi_spec.ProjectReading],
     aggregation: str,
     conversions: dict[str, list[UnitConversion]] | None = None,
+    fx: FxRates | None = None,
 ) -> list[BenchmarkGroup]:
     """Bucket readings by unit/currency partition and summarise each bucket.
 
@@ -222,6 +302,19 @@ def group_readings(
     for group in groups.values():
         group.summary = summarise(group.readings, aggregation)
         group.conversions = list((conversions or {}).get(group.key, []))
+        if fx is not None:
+            converted = sorted({c for r in group.readings for c in r.converted_from_currency})
+            group.currency_conversions = [
+                CurrencyConversion(
+                    from_currency=c,
+                    to_currency=fx.to_currency,
+                    rate=fx.rates[c],
+                    as_of=fx.as_of,
+                    source=fx.source,
+                )
+                for c in converted
+                if c in fx.rates
+            ]
     return sorted(
         groups.values(),
         key=lambda g: (-(g.summary.projects_with_value if g.summary else 0), g.key),
@@ -264,17 +357,36 @@ def resolve_cohort(requested: list[uuid.UUID], accessible: set[uuid.UUID]) -> se
 
 
 async def project_labels(session: AsyncSession, project_ids: set[uuid.UUID]) -> list[dict[str, Any]]:
-    """``[{project_id, name, currency}]`` for the cohort, by name."""
+    """``[{project_id, name, currency, client, region, status, project_type}]`` for the cohort, by name."""
     from app.modules.projects.models import Project
 
     if not project_ids:
         return []
     rows = (
         await session.execute(
-            select(Project.id, Project.name, Project.currency).where(Project.id.in_(sorted(project_ids)))
+            select(
+                Project.id,
+                Project.name,
+                Project.currency,
+                Project.client_id,
+                Project.region,
+                Project.status,
+                Project.project_type,
+            ).where(Project.id.in_(sorted(project_ids)))
         )
     ).all()
-    out = [{"project_id": pid, "name": name or "", "currency": currency or ""} for pid, name, currency in rows]
+    out = [
+        {
+            "project_id": pid,
+            "name": name or "",
+            "currency": currency or "",
+            "client": (client or "").strip() or None,
+            "region": (region or "").strip() or None,
+            "status": status or None,
+            "project_type": project_type or None,
+        }
+        for pid, name, currency, client, region, status, project_type in rows
+    ]
     out.sort(key=lambda p: (p["name"].casefold(), str(p["project_id"])))
     return out
 
@@ -287,13 +399,18 @@ async def benchmark(
     period_start: _date | None = None,
     period_end: _date | None = None,
     convert: bool = False,
+    split: Split | None = None,
+    fx: FxRates | None = None,
 ) -> list[BenchmarkGroup]:
     """Read ``spec`` per project over ``cohort`` and summarise each group.
 
     ``cohort`` must already be access-narrowed (see :func:`resolve_cohort`).
     A source module that is not installed reads as no data, the way every
-    KPI degrades. With ``convert`` the readings go through
-    :func:`convert_units` first, so compatible units share one group.
+    KPI degrades. ``split`` (from :func:`resolve_split`) splits every
+    project's reading by a project attribute or a row field. With ``fx`` money
+    in other currencies is restated in the reporting currency first, then with
+    ``convert`` compatible units are merged (:func:`convert_units`); both list
+    what they applied.
     """
     if not cohort:
         return []
@@ -304,13 +421,19 @@ async def benchmark(
             project_ids=cohort,
             period_start=period_start,
             period_end=period_end,
+            split_field=split.row_field if split else None,
         )
     except ImportError:
         return []
+    if split is not None and split.project_attribute is not None:
+        values = await project_attribute_values(session, cohort, split.project_attribute)
+        apply_project_split(readings, values, split.project_attribute)
+    if fx is not None:
+        readings = convert_currencies(readings, spec, fx)
     conversions: dict[str, list[UnitConversion]] = {}
     if convert:
         readings, conversions = convert_units(readings, spec)
-    return group_readings(readings, spec["aggregation"], conversions)
+    return group_readings(readings, spec["aggregation"], conversions, fx)
 
 
 # ── Unit conversion ─────────────────────────────────────────────────────
@@ -397,6 +520,12 @@ def _merge_pair(a: kpi_spec.ProjectReading, b: kpi_spec.ProjectReading, aggregat
         a,
         records=a.records + b.records,
         converted_from=sorted(set(a.converted_from) | set(b.converted_from)),
+        converted_from_currency=sorted(set(a.converted_from_currency) | set(b.converted_from_currency)),
+        # Two readings merged have no single figure "before conversion"; the
+        # group lists every rate and unit factor that was applied instead.
+        original_value=None,
+        original_currency=a.original_currency if a.original_currency == b.original_currency else None,
+        fx_rate=a.fx_rate if a.fx_rate == b.fx_rate else None,
     )
     if aggregation in ("ratio", "weighted_avg"):
         merged.numerator = (a.numerator or Decimal("0")) + (b.numerator or Decimal("0"))
@@ -489,7 +618,7 @@ def convert_units(
             converted = replace(
                 r,
                 dimensions=new_dims,
-                group_key=kpi_spec.dimension_key([new_dims.get(name) for name in dims]),
+                group_key=kpi_spec.dimension_key(list(new_dims.values())),
                 converted_from=sorted({*r.converted_from, unit}),
             )
             if aggregation in ("ratio", "weighted_avg"):
@@ -506,19 +635,22 @@ def convert_units(
                 from_unit=unit, to_unit=target, factor=factor
             )
 
+    out = merge_duplicates([replaced.get(id(reading), reading) for reading in readings], aggregation)
+    return out, {key: sorted(found.values(), key=lambda c: c.from_unit) for key, found in conversions.items()}
+
+
+def merge_duplicates(readings: list[kpi_spec.ProjectReading], aggregation: str) -> list[kpi_spec.ProjectReading]:
+    """One reading per project and group, merging the ones a conversion brought together."""
     merged: dict[tuple[uuid.UUID, str], kpi_spec.ProjectReading] = {}
     order: list[tuple[uuid.UUID, str]] = []
-    for reading in readings:
-        r = replaced.get(id(reading), reading)
+    for r in readings:
         key = (r.project_id, r.group_key)
         if key in merged:
             merged[key] = _merge_pair(merged[key], r, aggregation)
         else:
             merged[key] = r
             order.append(key)
-    return [merged[k] for k in order], {
-        key: sorted(found.values(), key=lambda c: c.from_unit) for key, found in conversions.items()
-    }
+    return [merged[k] for k in order]
 
 
 # ── Cohort filters ──────────────────────────────────────────────────────
@@ -531,6 +663,7 @@ async def filter_projects(
     clients: list[str] | None = None,
     regions: list[str] | None = None,
     project_types: list[str] | None = None,
+    statuses: list[str] | None = None,
 ) -> set[uuid.UUID]:
     """``project_ids`` narrowed to the projects matching every given filter.
 
@@ -539,7 +672,7 @@ async def filter_projects(
     """
     from app.modules.projects.models import Project
 
-    if not project_ids or not (clients or regions or project_types):
+    if not project_ids or not (clients or regions or project_types or statuses):
         return set(project_ids)
     stmt = select(Project.id).where(Project.id.in_(sorted(project_ids)))
     if clients:
@@ -548,27 +681,31 @@ async def filter_projects(
         stmt = stmt.where(Project.region.in_(regions))
     if project_types:
         stmt = stmt.where(Project.project_type.in_(project_types))
+    if statuses:
+        stmt = stmt.where(Project.status.in_(statuses))
     rows = (await session.execute(stmt)).scalars().all()
     return {r if isinstance(r, uuid.UUID) else uuid.UUID(str(r)) for r in rows}
 
 
 async def cohort_options(session: AsyncSession, project_ids: set[uuid.UUID]) -> dict[str, list[str]]:
-    """The client, region and project type values present on ``project_ids``.
+    """The client, region, project type and status values present on ``project_ids``.
 
     Only values that occur on a project the caller may open are listed, so
     the options are no window onto the rest of the portfolio.
     """
     from app.modules.projects.models import Project
 
-    out: dict[str, list[str]] = {"clients": [], "regions": [], "project_types": []}
+    out: dict[str, list[str]] = {"clients": [], "regions": [], "project_types": [], "statuses": []}
     if not project_ids:
         return out
     rows = (
         await session.execute(
-            select(Project.client_id, Project.region, Project.project_type).where(Project.id.in_(sorted(project_ids)))
+            select(Project.client_id, Project.region, Project.project_type, Project.status).where(
+                Project.id.in_(sorted(project_ids))
+            )
         )
     ).all()
-    for key, index in (("clients", 0), ("regions", 1), ("project_types", 2)):
+    for key, index in (("clients", 0), ("regions", 1), ("project_types", 2), ("statuses", 3)):
         values = {str(row[index]).strip() for row in rows if row[index] and str(row[index]).strip()}
         out[key] = sorted(values, key=str.casefold)
     return out
@@ -813,6 +950,729 @@ async def position_estimate(
     position, project_id, currency = row
     if project_id not in accessible:
         return None
+    return estimate_of(position, currency or "", spec)
+
+
+# ── Compound units ──────────────────────────────────────────────────────
+
+#: What a field without a declared unit or currency dimension is measured
+#: in. Hours are hours whatever the entity, a floor area is m2 GFA (the
+#: project form records it so), durations and ages are days.
+_FIELD_UNITS: dict[str, str] = {
+    "hours": "h",
+    "labour_hours": "h",
+    "plant_hours": "h",
+    "gross_floor_area": "m2",
+    "duration_days": "d",
+    "total_float": "d",
+    "free_float": "d",
+    "price_age_days": "d",
+    "percent_complete": "%",
+    "progress_pct": "%",
+    "percentage": "%",
+}
+
+
+def _measure_unit(spec: dict[str, Any], key: str, dimensions: dict[str, str | None]) -> str | None:
+    name = spec.get(key)
+    if not name:
+        return None
+    entry = kpi_spec.ENTITY_CATALOG.get(str(spec.get("entity")))
+    declared = entry.dimensions.get(str(name), ()) if entry else ()
+    if not declared:
+        return _FIELD_UNITS.get(str(name))
+    currency = _usable_unit(dimensions.get(CURRENCY_DIMENSION)) if CURRENCY_DIMENSION in declared else None
+    unit = _usable_unit(dimensions.get(UNIT_DIMENSION)) if UNIT_DIMENSION in declared else None
+    if CURRENCY_DIMENSION in declared and UNIT_DIMENSION in declared:
+        return f"{currency}/{unit}" if currency and unit else None
+    return currency or unit
+
+
+def value_unit(spec: dict[str, Any], dimensions: dict[str, str | None]) -> str | None:
+    """The compound unit one group's values are in, such as ``h/m2`` or ``EUR/m2``.
+
+    Built from what the KPI's fields are measured in and the group's own unit
+    and currency, so the same KPI reads ``h/m2`` in one group and ``h/m3`` in
+    the next. ``None`` when it cannot be stated honestly: a count, or a field
+    whose unit or currency the group does not carry.
+    """
+    aggregation = spec["aggregation"]
+    if aggregation == "count":
+        return None
+    numerator = _measure_unit(spec, "field", dimensions)
+    if aggregation != "ratio":
+        return numerator
+    denominator = _measure_unit(spec, "denominator_field", dimensions)
+    if numerator and denominator:
+        return f"{numerator}/{denominator}"
+    if denominator:
+        return f"1/{denominator}"
+    # A ratio whose denominator unit is unknown is not in the numerator's unit.
+    return None
+
+
+# ── Splits ──────────────────────────────────────────────────────────────
+
+#: Project attributes a benchmark can be split by, and the column each reads.
+#: ``end_year`` is the year of the recorded actual end date: a finished job
+#: is filed under the year it finished, a running one under "not set".
+PROJECT_SPLITS: dict[str, str] = {
+    "client": "client_id",
+    "region": "region",
+    "project_type": "project_type",
+    "status": "status",
+    "phase": "phase",
+    "country": "country_code",
+    "end_year": "actual_end_date",
+}
+
+#: Most groups a split benchmark returns; the rest are counted, not dropped
+#: silently. A split by a field with a thousand values is a data export.
+MAX_SPLIT_GROUPS = 60
+
+
+@dataclass(frozen=True)
+class Split:
+    """How a benchmark's readings are split beyond unit and currency.
+
+    Exactly one of the two is set: a project attribute from
+    :data:`PROJECT_SPLITS`, or a row-level field of the KPI's entity such as
+    ``classification.din276``.
+    """
+
+    project_attribute: str | None = None
+    row_field: str | None = None
+
+    @property
+    def name(self) -> str:
+        return self.project_attribute or self.row_field or ""
+
+
+def resolve_split(spec: dict[str, Any], split_by: str | None) -> Split | None:
+    """The split a request names, checked against the KPI's entity.
+
+    Raises:
+        KPISpecError: ``split_by`` is neither a project attribute nor a
+            groupable field of the entity.
+    """
+    name = (split_by or "").strip()
+    if not name:
+        return None
+    if name in PROJECT_SPLITS:
+        return Split(project_attribute=name)
+    return Split(row_field=kpi_spec.validate_split_field(spec, name))
+
+
+async def project_attribute_values(
+    session: AsyncSession,
+    project_ids: set[uuid.UUID],
+    attribute: str,
+) -> dict[uuid.UUID, str | None]:
+    """``{project_id: value}`` of one :data:`PROJECT_SPLITS` attribute, blank read as unset."""
+    from app.modules.projects.models import Project
+
+    if not project_ids:
+        return {}
+    column = getattr(Project, PROJECT_SPLITS[attribute])
+    rows = (await session.execute(select(Project.id, column).where(Project.id.in_(sorted(project_ids))))).all()
+    out: dict[uuid.UUID, str | None] = {}
+    for pid, raw in rows:
+        text = str(raw).strip() if raw is not None else ""
+        if attribute == "end_year":
+            text = text[:4] if len(text) >= 4 and text[:4].isdigit() else ""
+        out[pid if isinstance(pid, uuid.UUID) else uuid.UUID(str(pid))] = text or None
+    return out
+
+
+def apply_project_split(
+    readings: list[kpi_spec.ProjectReading],
+    values: dict[uuid.UUID, str | None],
+    attribute: str,
+) -> None:
+    """Prefix each reading's dimensions with its project's ``attribute`` value, in place."""
+    for r in readings:
+        r.dimensions = {attribute: values.get(r.project_id), **r.dimensions}
+        r.group_key = kpi_spec.dimension_key(list(r.dimensions.values()))
+
+
+def cap_groups(groups: list[BenchmarkGroup], limit: int = MAX_SPLIT_GROUPS) -> tuple[list[BenchmarkGroup], int]:
+    """The largest ``limit`` groups and how many were left out."""
+    return groups[:limit], max(0, len(groups) - limit)
+
+
+# ── Currency normalisation ──────────────────────────────────────────────
+
+#: The dimension a reading's currency is carried under.
+CURRENCY_DIMENSION = "currency"
+
+
+@dataclass(frozen=True)
+class FxRates:
+    """Exchange rates into one reporting currency, as the FX register gave them.
+
+    ``rates[code]`` is how many ``to_currency`` one ``code`` is. A currency
+    missing from it is not converted and keeps its own group.
+    """
+
+    to_currency: str
+    rates: dict[str, Decimal]
+    as_of: _date | None = None
+    source: str = ""
+
+
+def _currency_exponent(spec: dict[str, Any], key: str) -> int:
+    name = spec.get(key)
+    entry = kpi_spec.ENTITY_CATALOG.get(str(spec.get("entity")))
+    if not name or entry is None:
+        return 0
+    return 1 if CURRENCY_DIMENSION in entry.dimensions.get(str(name), ()) else 0
+
+
+def currency_exponents(spec: dict[str, Any]) -> tuple[int, int]:
+    """How a reading's numerator and denominator move with an exchange rate.
+
+    The money twin of :func:`quotient_exponents`: a field in a currency moves
+    by the rate, a weighted average's numerator by the field's and the
+    weight's together, a count never.
+    """
+    aggregation = spec["aggregation"]
+    if aggregation == "count":
+        return 0, 0
+    field_exp = _currency_exponent(spec, "field")
+    if aggregation == "ratio":
+        return field_exp, _currency_exponent(spec, "denominator_field")
+    if aggregation == "weighted_avg":
+        weight_exp = _currency_exponent(spec, "weight_field")
+        return field_exp + weight_exp, weight_exp
+    return field_exp, 0
+
+
+def currency_value_exponent(spec: dict[str, Any]) -> int:
+    """How a reading's value moves with an exchange rate: 1 money, 0 not money, -1 per money."""
+    numerator, denominator = currency_exponents(spec)
+    if spec["aggregation"] in ("ratio", "weighted_avg"):
+        return numerator - denominator
+    return numerator
+
+
+def _times_rate(value: Decimal | None, rate: Decimal, exponent: int) -> Decimal | None:
+    if value is None or exponent == 0:
+        return value
+    out = value
+    for _ in range(abs(exponent)):
+        out = out * rate if exponent > 0 else out / rate
+    return out
+
+
+def convert_currencies(
+    readings: list[kpi_spec.ProjectReading],
+    spec: dict[str, Any],
+    fx: FxRates,
+) -> list[kpi_spec.ProjectReading]:
+    """Restate readings in other currencies in ``fx.to_currency``.
+
+    Only on request, and only with a rate the FX register has: a currency
+    with no rate, or a reading with no currency at all, is left exactly as it
+    was in its own group, never merged on a guess. Each converted reading
+    keeps its original value, currency and the rate applied, and lists the
+    currency it came from. A ratio's two sums are converted and re-divided,
+    so a money-over-money ratio is unchanged, as it should be.
+    """
+    if CURRENCY_DIMENSION not in kpi_spec.spec_dimensions(spec):
+        return readings
+    aggregation = spec["aggregation"]
+    num_exp, den_exp = currency_exponents(spec)
+    target = fx.to_currency.strip().upper()
+    out: list[kpi_spec.ProjectReading] = []
+    for r in readings:
+        code = (_usable_unit(r.dimensions.get(CURRENCY_DIMENSION)) or "").strip().upper()
+        rate = fx.rates.get(code)
+        if not code or code == target or rate is None or rate <= 0:
+            out.append(r)
+            continue
+        new_dims = {**r.dimensions, CURRENCY_DIMENSION: target}
+        converted = replace(
+            r,
+            dimensions=new_dims,
+            group_key=kpi_spec.dimension_key(list(new_dims.values())),
+            converted_from_currency=sorted({*r.converted_from_currency, code}),
+            original_value=r.value,
+            original_currency=code,
+            fx_rate=rate,
+        )
+        if aggregation in ("ratio", "weighted_avg"):
+            converted.numerator = _times_rate(r.numerator, rate, num_exp)
+            converted.denominator = _times_rate(r.denominator, rate, den_exp)
+            if r.value is not None:
+                converted.value, converted.unavailable_reason = kpi_spec.ratio_value(
+                    converted.numerator, converted.denominator
+                )
+        else:
+            converted.value = _times_rate(r.value, rate, num_exp)
+        out.append(converted)
+    return merge_duplicates(out, aggregation)
+
+
+async def load_fx_rates(
+    session: AsyncSession,
+    to_currency: str,
+    *,
+    on_date: _date | None = None,
+) -> FxRates:
+    """Rates into ``to_currency`` for every currency the platform's FX register knows.
+
+    Resolved once for the whole request (register, then cache, then the
+    bundled seed, exactly as every other conversion in the platform). A
+    currency the register cannot price is simply absent, and a reading in it
+    keeps its own group; :func:`reading_currencies` names those afterwards.
+    """
+    target = to_currency.strip().upper()
+    try:
+        from app.modules.fx.service import FxService, convert_via_base
+    except ImportError:  # pragma: no cover - FX module not installed
+        return FxRates(to_currency=target, rates={})
+    resolved = await FxService(session).resolve_rates(on_date=on_date)
+    rates: dict[str, Decimal] = {}
+    for code in sorted({str(c).upper() for c in resolved.rates} | {str(resolved.base_currency).upper()}):
+        if code == target:
+            continue
+        try:
+            _converted, rate = convert_via_base(
+                Decimal("1"), code, target, resolved.rates, base_currency=resolved.base_currency
+            )
+        except Exception:  # noqa: S112 - a currency the set cannot price stays apart
+            continue
+        rate_d = Decimal(str(rate))
+        if rate_d.is_finite() and rate_d > 0:
+            rates[code] = rate_d
+    return FxRates(to_currency=target, rates=rates, as_of=resolved.as_of, source=str(resolved.source or ""))
+
+
+def reading_currencies(readings_or_groups: list[BenchmarkGroup]) -> set[str]:
+    """The currency codes the groups of a benchmark span."""
+    return {
+        str(g.dimensions.get(CURRENCY_DIMENSION) or "").strip().upper()
+        for g in readings_or_groups
+        if _usable_unit(g.dimensions.get(CURRENCY_DIMENSION))
+    }
+
+
+# ── Data quality ────────────────────────────────────────────────────────
+
+
+@dataclass
+class DataQuality:
+    """How much of the cohort's site data a productivity benchmark can use.
+
+    Each share is ``None`` when its denominator is zero: a cohort with no
+    hours has no linked-hours coverage, which is not the same as 0 %.
+    """
+
+    projects: int
+    hours_total: Decimal | None = None
+    hours_linked: Decimal | None = None
+    hours_linked_share: Decimal | None = None
+    positions_total: int | None = None
+    positions_with_progress: int | None = None
+    progress_share: Decimal | None = None
+    classification_key: str | None = None
+    positions_classified: int | None = None
+    classification_share: Decimal | None = None
+
+
+def _share(part: Decimal | int | None, whole: Decimal | int | None) -> Decimal | None:
+    if part is None or whole is None or Decimal(whole) == 0:
+        return None
+    return (Decimal(part) / Decimal(whole)).quantize(Decimal("0.0001"))
+
+
+async def data_quality(
+    session: AsyncSession,
+    cohort: set[uuid.UUID],
+    *,
+    period_start: _date | None = None,
+    period_end: _date | None = None,
+    classification_key: str | None = None,
+) -> DataQuality:
+    """Coverage of the cohort's actuals, in two set-based queries.
+
+    * Hours: counted labour and plant hours (approved, not reversed, in the
+      period) and the part of them booked against a bill position. Hours on
+      no position can never reach a per-unit figure.
+    * Positions: priced bill lines (quantity above zero), how many have any
+      reported progress, and how many carry ``classification_key``.
+
+    ``cohort`` must already be access-narrowed. A source module that is not
+    installed leaves its half unset rather than reading zero.
+    """
+    out = DataQuality(projects=len(cohort), classification_key=classification_key or None)
+    if not cohort:
+        return out
+    from sqlalchemy import case, func
+
+    from app.core.sql_numeric import numeric_value
+
+    ids = sorted(cohort)
+    try:
+        from app.modules.field_time.counted import counted_timesheet_clause
+        from app.modules.field_time.models import FieldTimesheet, FieldTimesheetLine
+    except ImportError:  # pragma: no cover - field time not installed
+        pass
+    else:
+        stmt = (
+            select(
+                func.sum(FieldTimesheetLine.hours),
+                func.sum(case((FieldTimesheetLine.boq_position_id.is_not(None), FieldTimesheetLine.hours), else_=0)),
+            )
+            .join(FieldTimesheet, FieldTimesheetLine.timesheet_id == FieldTimesheet.id)
+            .where(counted_timesheet_clause(), FieldTimesheet.project_id.in_(ids))
+        )
+        if period_start is not None:
+            stmt = stmt.where(FieldTimesheet.date >= period_start)
+        if period_end is not None:
+            stmt = stmt.where(FieldTimesheet.date <= period_end)
+        total, linked = (await session.execute(stmt)).one()
+        out.hours_total = Decimal(str(total or 0))
+        out.hours_linked = Decimal(str(linked or 0))
+        out.hours_linked_share = _share(out.hours_linked, out.hours_total)
+    try:
+        from app.modules.boq.models import BOQ, Position
+        from app.modules.progress.installed import latest_percent_subquery
+    except ImportError:  # pragma: no cover - boq or progress not installed
+        return out
+    latest = latest_percent_subquery()
+    measures: list[Any] = [func.count(), func.count(latest.c.percent_complete)]
+    key = (classification_key or "").strip()
+    if key and kpi_spec.JSON_KEY_RE.fullmatch(key):
+        measures.append(func.count(Position.classification[key].as_string()))
+    else:
+        out.classification_key = None
+    stmt = (
+        select(*measures)
+        .select_from(Position)
+        .join(BOQ, Position.boq_id == BOQ.id)
+        .outerjoin(
+            latest,
+            (latest.c.boq_position_id == Position.id) & (latest.c.project_id == BOQ.project_id),
+        )
+        .where(BOQ.project_id.in_(ids), numeric_value(Position.quantity) > 0)
+    )
+    row = (await session.execute(stmt)).one()
+    out.positions_total = int(row[0] or 0)
+    out.positions_with_progress = int(row[1] or 0)
+    out.progress_share = _share(out.positions_with_progress, out.positions_total)
+    if out.classification_key:
+        out.positions_classified = int(row[2] or 0)
+        out.classification_share = _share(out.positions_classified, out.positions_total)
+    return out
+
+
+# ── Drilldown ───────────────────────────────────────────────────────────
+
+#: Largest page of contributing records one drilldown call returns.
+MAX_DRILL_PAGE = 200
+
+
+@dataclass
+class DrillRecord:
+    """One row that contributes to a project's reading, as stored and as counted."""
+
+    record_id: str
+    boq_id: str | None
+    position_id: str | None
+    ref: str
+    description: str
+    dimensions: dict[str, str | None]
+    numerator: Decimal | None
+    denominator: Decimal | None
+    #: The two figures restated in the group's unit and currency, which is
+    #: what the reading adds up; equal to the stored ones when nothing moved.
+    counted_numerator: Decimal | None
+    counted_denominator: Decimal | None
+
+
+@dataclass
+class DrillResult:
+    records: list[DrillRecord]
+    total_records: int
+    numerator: Decimal | None
+    denominator: Decimal | None
+    value: Decimal | None
+    unavailable_reason: str | None
+
+
+def _row_measures(bound: kpi_spec.BoundEntity, spec: dict[str, Any]) -> tuple[Any, Any | None]:
+    """The per-row numerator and denominator whose aggregate is the reading."""
+    from sqlalchemy import literal
+
+    aggregation = spec["aggregation"]
+    if aggregation == "count":
+        return literal(1), None
+    value = bound.resolve_field(spec["field"]).expr
+    if aggregation == "ratio":
+        return value, bound.resolve_field(spec["denominator_field"]).expr
+    if aggregation == "weighted_avg":
+        weight = bound.resolve_field(spec["weight_field"]).expr
+        return value * weight, weight
+    if aggregation == "avg":
+        return value, literal(1)
+    return value, None
+
+
+def _restate(
+    value: Decimal | None,
+    dims: dict[str, str | None],
+    *,
+    unit_exp: int,
+    currency_exp: int,
+    target_unit: str | None,
+    fx: FxRates | None,
+) -> Decimal | None:
+    """One stored figure in the group's unit and currency, or ``None`` when it cannot be."""
+    if value is None:
+        return None
+    out: Decimal | None = value
+    unit = _usable_unit(dims.get(UNIT_DIMENSION))
+    if unit_exp and target_unit and unit and unit != target_unit:
+        out = convert_strict(out, unit, target_unit, unit_exp)
+        if out is None:
+            return None
+    code = (_usable_unit(dims.get(CURRENCY_DIMENSION)) or "").upper()
+    if currency_exp and fx is not None and code and code != fx.to_currency:
+        rate = fx.rates.get(code)
+        if rate is None:
+            return None
+        out = _times_rate(out, rate, currency_exp)
+    return out
+
+
+async def drilldown(
+    session: AsyncSession,
+    spec: dict[str, Any],
+    *,
+    project_id: uuid.UUID,
+    dimensions: dict[str, list[str | None]],
+    split: Split | None = None,
+    target_unit: str | None = None,
+    fx: FxRates | None = None,
+    period_start: _date | None = None,
+    period_end: _date | None = None,
+    offset: int = 0,
+    limit: int = 50,
+) -> DrillResult:
+    """The rows behind one project's reading in one group, and their totals.
+
+    ``project_id`` must already be access-checked. ``dimensions`` gives, per
+    row-level dimension of the group, the stored values that land in it: the
+    group's unit plus every unit the reading lists as ``converted_from``, the
+    reporting currency plus every currency converted from. A project-level
+    split is not a row field and is ignored here, the project already fixes
+    it.
+
+    The totals are computed in SQL over every matching row, not summed from
+    the page, and restated into ``target_unit`` and ``fx`` the same way the
+    benchmark restated the reading, so they equal the reading's numerator and
+    denominator exactly. The page is ordered by the numerator, biggest
+    contributor first.
+    """
+    from sqlalchemy import func, literal, or_
+
+    bound = kpi_spec.bind_entity(spec["entity"])
+    aggregation = spec["aggregation"]
+    row_dims = ([split.row_field] if split and split.row_field else []) + kpi_spec.spec_dimensions(spec)
+    dim_exprs = [bound.resolve_field(name).expr for name in row_dims]
+    num_expr, den_expr = _row_measures(bound, spec)
+    unit_num, unit_den = quotient_exponents(spec)
+    cur_num, cur_den = currency_exponents(spec)
+
+    def scoped(stmt: Any) -> Any:
+        stmt = kpi_spec._base_predicates(
+            stmt,
+            bound,
+            spec,
+            project_id=project_id,
+            period_start=period_start,
+            period_end=period_end,
+            allowed_project_ids={project_id},
+        )
+        for name, expr in zip(row_dims, dim_exprs, strict=True):
+            allowed = dimensions.get(name)
+            if allowed is None:
+                continue
+            values = [v for v in allowed if v is not None and v != kpi_spec.NULL_GROUP_KEY]
+            wants_null = any(v is None or v == kpi_spec.NULL_GROUP_KEY for v in allowed)
+            clauses = []
+            if values:
+                clauses.append(expr.in_(values))
+            if wants_null:
+                clauses.append(expr.is_(None))
+            stmt = stmt.where(or_(*clauses) if clauses else literal(False))
+        return stmt
+
+    if aggregation in ("min", "max"):
+        folded = func.min(num_expr) if aggregation == "min" else func.max(num_expr)
+        total_measures = [folded, literal(None)]
+    else:
+        total_measures = [func.sum(num_expr), func.sum(den_expr) if den_expr is not None else literal(None)]
+    totals_stmt = scoped(select(*dim_exprs, *total_measures, func.count()).select_from(bound.model))
+    if dim_exprs:
+        totals_stmt = totals_stmt.group_by(*dim_exprs)
+
+    from app.modules.bi_dashboards.kpis import _to_decimal
+
+    numerator: Decimal | None = None
+    denominator: Decimal | None = None
+    total_records = 0
+    for raw in (await session.execute(totals_stmt)).all():
+        row = list(raw)
+        count = int(row.pop() or 0)
+        if count == 0:
+            continue
+        values = dict(zip(row_dims, (None if v is None else str(v) for v in row[: len(row_dims)]), strict=True))
+        n_raw, d_raw = row[len(row_dims) :]
+        n = _restate(
+            _to_decimal(n_raw) if n_raw is not None else None,
+            values,
+            unit_exp=unit_num,
+            currency_exp=cur_num,
+            target_unit=target_unit,
+            fx=fx,
+        )
+        d = _restate(
+            _to_decimal(d_raw) if d_raw is not None else None,
+            values,
+            unit_exp=unit_den,
+            currency_exp=cur_den,
+            target_unit=target_unit,
+            fx=fx,
+        )
+        total_records += count
+        if aggregation == "min":
+            numerator = n if numerator is None or (n is not None and n < numerator) else numerator
+        elif aggregation == "max":
+            numerator = n if numerator is None or (n is not None and n > numerator) else numerator
+        else:
+            numerator = (numerator or Decimal("0")) + (n or Decimal("0"))
+            if d is not None:
+                denominator = (denominator or Decimal("0")) + d
+
+    value: Decimal | None
+    reason: str | None = None
+    if total_records == 0:
+        value, reason = None, kpi_spec.UNAVAILABLE_NO_DATA
+    elif aggregation in ("ratio", "weighted_avg", "avg"):
+        value, reason = kpi_spec.ratio_value(numerator, denominator)
+    else:
+        value = numerator
+
+    def column(key: str) -> Any:
+        expr = bound.record_columns.get(key)
+        return (expr if expr is not None else literal(None)).label(f"rec_{key}")
+
+    page_stmt = scoped(
+        select(
+            column("id"),
+            column("boq_id"),
+            column("position_id"),
+            column("ref"),
+            column("description"),
+            *dim_exprs,
+            num_expr.label("rec_num"),
+            (den_expr if den_expr is not None else literal(None)).label("rec_den"),
+        ).select_from(bound.model)
+    )
+    page_stmt = (
+        page_stmt.order_by(num_expr.desc(), bound.record_columns.get("id", literal(None)))
+        .offset(max(0, offset))
+        .limit(max(1, min(limit, MAX_DRILL_PAGE)))
+    )
+    records: list[DrillRecord] = []
+    for raw in (await session.execute(page_stmt)).all():
+        row = list(raw)
+        rid, boq_id, position_id, ref, description = row[:5]
+        dim_values = row[5 : 5 + len(row_dims)]
+        n_raw, d_raw = row[5 + len(row_dims) :]
+        dims = dict(zip(row_dims, (None if v is None else str(v) for v in dim_values), strict=True))
+        n = _to_decimal(n_raw) if n_raw is not None else None
+        d = _to_decimal(d_raw) if d_raw is not None else None
+        records.append(
+            DrillRecord(
+                record_id=str(rid) if rid is not None else "",
+                boq_id=str(boq_id) if boq_id is not None else None,
+                position_id=str(position_id) if position_id is not None else None,
+                ref=str(ref or ""),
+                description=str(description or ""),
+                dimensions=dims,
+                numerator=n,
+                denominator=d,
+                counted_numerator=_restate(
+                    n, dims, unit_exp=unit_num, currency_exp=cur_num, target_unit=target_unit, fx=fx
+                ),
+                counted_denominator=_restate(
+                    d, dims, unit_exp=unit_den, currency_exp=cur_den, target_unit=target_unit, fx=fx
+                ),
+            )
+        )
+    return DrillResult(
+        records=records,
+        total_records=total_records,
+        numerator=numerator,
+        denominator=denominator,
+        value=value,
+        unavailable_reason=reason,
+    )
+
+
+# ── Historical context for bill positions ───────────────────────────────
+
+#: Why a bill position has no historical context.
+CONTEXT_NO_CLASSIFICATION = "no_classification"
+
+#: Most positions one context request may ask about.
+MAX_CONTEXT_POSITIONS = 500
+
+
+@dataclass
+class PositionContext:
+    """Where one bill position's own figure sits among comparable past positions."""
+
+    position_id: uuid.UUID
+    status: str
+    classification_code: str | None = None
+    unit: str | None = None
+    currency: str | None = None
+    estimate: Decimal | None = None
+    check: EstimateCheck | None = None
+
+
+def pick_classification_key(classifications: list[dict[str, Any]], requested: str | None) -> str | None:
+    """The classification standard positions are matched on.
+
+    The requested key when it is a valid key, otherwise the key the most of
+    these positions carry a code under (ties alphabetically), so an estimate
+    classified by DIN 276 is matched by DIN 276 without anyone choosing it.
+    """
+    wanted = (requested or "").strip()
+    if wanted:
+        return wanted if kpi_spec.JSON_KEY_RE.fullmatch(wanted) else None
+    counts: dict[str, int] = {}
+    for item in classifications:
+        if not isinstance(item, dict):
+            continue
+        for key, code in item.items():
+            if isinstance(key, str) and kpi_spec.JSON_KEY_RE.fullmatch(key) and str(code or "").strip():
+                counts[key] = counts.get(key, 0) + 1
+    if not counts:
+        return None
+    return min(counts, key=lambda k: (-counts[k], k))
+
+
+def estimate_of(position: Any, currency: str, spec: dict[str, Any]) -> tuple[Decimal, str, str] | str:
+    """A loaded position's own figure for this KPI, or the reason it has none.
+
+    The same reading :func:`position_estimate` gives, for a position the
+    caller has already loaded and access-checked.
+    """
     kind = position_estimate_kind(spec)
     if kind is None:
         return CHECK_NOT_PER_UNIT
@@ -833,7 +1693,131 @@ async def position_estimate(
     return rate, position.unit or "", currency or ""
 
 
+async def position_context(
+    session: AsyncSession,
+    spec: dict[str, Any],
+    *,
+    position_ids: list[uuid.UUID],
+    accessible: set[uuid.UUID],
+    classification_key: str | None = None,
+    include_own_projects: bool = False,
+    convert: bool = True,
+    statistic: str = "weighted",
+    min_projects: int = 0,
+    min_records: int = 0,
+) -> tuple[str | None, list[PositionContext]]:
+    """Historical context for bill positions, in one benchmark query.
+
+    Comparable means the same classification code under one standard
+    (:func:`pick_classification_key`) and a unit that is the same or converts.
+    The cohort is every project the caller may open except, by default, the
+    positions' own projects, so a position is never compared with itself.
+    Positions outside ``accessible`` are left out of the answer entirely.
+
+    Returns the classification key used and one context per readable position,
+    in the order asked. Nothing is written.
+    """
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.projects.models import Project
+
+    ids = list(dict.fromkeys(position_ids))[:MAX_CONTEXT_POSITIONS]
+    if not ids:
+        return None, []
+    rows = (
+        await session.execute(
+            select(Position, BOQ.project_id, Project.currency)
+            .join(BOQ, BOQ.id == Position.boq_id)
+            .join(Project, Project.id == BOQ.project_id)
+            .where(Position.id.in_(ids))
+        )
+    ).all()
+    loaded = {pos.id: (pos, pid, currency or "") for pos, pid, currency in rows if pid in accessible}
+    key = pick_classification_key([pos.classification or {} for pos, _p, _c in loaded.values()], classification_key)
+
+    def code_of(position: Any) -> str | None:
+        raw = (position.classification or {}).get(key) if key else None
+        text = str(raw).strip() if raw is not None else ""
+        return text or None
+
+    codes = sorted({c for pos, _p, _c in loaded.values() if (c := code_of(pos))})[: kpi_spec.MAX_IN_VALUES]
+    groups: list[BenchmarkGroup] = []
+    split: Split | None = None
+    if key and codes:
+        own = {pid for _pos, pid, _c in loaded.values()}
+        cohort = set(accessible) if include_own_projects else set(accessible) - own
+        split = resolve_split(spec, f"classification.{key}")
+        scoped = with_row_filters(spec, [{"field": f"classification.{key}", "op": "in", "value": codes}])
+        groups = await benchmark(session, spec=scoped, cohort=cohort, convert=convert, split=split)
+
+    out: list[PositionContext] = []
+    for pid in ids:
+        if pid not in loaded:
+            continue
+        position, _project, currency = loaded[pid]
+        code = code_of(position)
+        ctx = PositionContext(position_id=pid, status="ok", classification_code=code, unit=position.unit or None)
+        found = estimate_of(position, currency, spec)
+        if isinstance(found, str):
+            ctx.status = found
+            out.append(ctx)
+            continue
+        value, unit, cur = found
+        ctx.estimate, ctx.currency = value, cur or None
+        if code is None or split is None:
+            ctx.status = CONTEXT_NO_CLASSIFICATION
+            out.append(ctx)
+            continue
+        candidates = [g for g in groups if g.dimensions.get(split.name) == code]
+        match = find_group(candidates, unit=unit, currency=cur)
+        if match is None:
+            ctx.status = CHECK_NO_GROUP
+            out.append(ctx)
+            continue
+        group, from_unit = match
+        ctx.check = check_value(
+            group,
+            value,
+            spec=spec,
+            from_unit=from_unit,
+            statistic=statistic,
+            min_projects=min_projects,
+            min_records=min_records,
+        )
+        out.append(ctx)
+    return key, out
+
+
 __all__ = [
+    "CONTEXT_NO_CLASSIFICATION",
+    "CURRENCY_DIMENSION",
+    "MAX_CONTEXT_POSITIONS",
+    "MAX_DRILL_PAGE",
+    "MAX_SPLIT_GROUPS",
+    "PROJECT_SPLITS",
+    "TAIL_PERCENTILES_FROM",
+    "CurrencyConversion",
+    "DataQuality",
+    "DrillRecord",
+    "DrillResult",
+    "FxRates",
+    "PositionContext",
+    "Split",
+    "apply_project_split",
+    "cap_groups",
+    "convert_currencies",
+    "currency_exponents",
+    "currency_value_exponent",
+    "data_quality",
+    "drilldown",
+    "estimate_of",
+    "load_fx_rates",
+    "merge_duplicates",
+    "pick_classification_key",
+    "position_context",
+    "project_attribute_values",
+    "reading_currencies",
+    "resolve_split",
+    "value_unit",
     "CHECK_NOT_PER_UNIT",
     "CHECK_NO_ESTIMATE",
     "CHECK_NO_GROUP",
