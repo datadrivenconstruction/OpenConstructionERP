@@ -753,6 +753,18 @@
       "fail": "{line}-qator {anchor} sanasida boshlanadigan ishga moʻljallangan edi, lekin ish endi {start} sanasida boshlanadi",
       "suggestion": "Qatorning kerak boʻlish sanasini joriy jadval bilan solishtiring va kerak boʻlsa oʻzgartiring"
     },
+    "requisition_approver_not_requester": {
+      "fail": "{req} material soʻrovini yaratgan shaxs bir vaqtning oʻzida uning tayinlangan {step}-tasdiqlovchisi hamdir",
+      "suggestion": "Shu bosqich uchun boshqa tasdiqlovchini tayinlang, shunda soʻrov beruvchidan boshqa kishi qaror qiladi"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "{line}-qatorda buyurtmalarda {ordered} {unit} bor, bu soʻralgan {requested} {unit} dan koʻp",
+      "suggestion": "Ortiqcha miqdor ataylab qoʻyilganini tekshiring yoki buyurtma qatorini kamaytiring"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "{order} buyurtmasida {line}-qator {unit} birligida, uni qatorning {line_unit} birligiga aylantirib boʻlmaydi",
+      "suggestion": "Buyurtma qatoridagi birlikni tuzating, shunda uning miqdori buyurtma qilingan deb hisoblanadi"
+    },
     "receipt_certificate_present": {
       "fail": "{line} pozitsiyasi {required} bilan buyurtma qilingan, ammo yetkazib berishda {delivered} bor",
       "suggestion": "Buyurtmada talab qilingan sertifikatni biriktiring yoki yetkazib beruvchi yubormaguncha pozitsiyani rad eting"

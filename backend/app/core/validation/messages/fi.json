@@ -753,6 +753,18 @@
       "fail": "Rivi {line} oli suunniteltu toiminnolle, joka alkoi {anchor}, mutta toiminto alkaa nyt {start}",
       "suggestion": "Tarkista rivin tarvepäivä nykyistä aikataulua vasten ja muuta sitä tarvittaessa"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Hankintapyynnön {req} luonut henkilö on myös sen nimetty hyväksyjä numero {step}",
+      "suggestion": "Nimeä tälle vaiheelle toinen hyväksyjä, jotta päätöksen tekee joku muu kuin pyytäjä"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Rivillä {line} on tilauksissa {ordered} {unit}, enemmän kuin pyydetty {requested} {unit}",
+      "suggestion": "Tarkista, onko lisämäärä tarkoituksellinen, tai pienennä tilausriviä"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Tilauksen {order} rivi {line} on yksikössä {unit}, jota ei voi muuntaa rivin yksikköön {line_unit}",
+      "suggestion": "Korjaa tilausrivin yksikkö, jotta sen määrä lasketaan tilatuksi"
+    },
     "receipt_certificate_present": {
       "fail": "Rivi {line} tilattiin ehdolla {required}, mutta toimitus sisältää {delivered}",
       "suggestion": "Liitä tilauksen vaatima todistus tai hylkää rivi, kunnes toimittaja lähettää sen"

@@ -753,6 +753,18 @@
       "fail": "Řádek {line} byl naplánován pro činnost začínající {anchor}, ale činnost nyní začíná {start}",
       "suggestion": "Porovnejte datum potřeby řádku s aktuálním harmonogramem a v případě potřeby ho změňte"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Osoba, která založila požadavek {req}, je zároveň jeho určeným schvalovatelem číslo {step}",
+      "suggestion": "Určete pro tento krok jiného schvalovatele, aby rozhodoval někdo jiný než zadavatel"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Řádek {line} má v objednávkách {ordered} {unit}, což je více než požadovaných {requested} {unit}",
+      "suggestion": "Ověřte, zda je množství navíc záměrné, nebo řádek objednávky snižte"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Objednávka {order} obsahuje řádek {line} v {unit}, které nelze převést na jednotku řádku {line_unit}",
+      "suggestion": "Opravte jednotku na řádku objednávky, aby se jeho množství započítalo jako objednané"
+    },
     "receipt_certificate_present": {
       "fail": "Položka {line} byla objednána s {required}, ale dodávka obsahuje {delivered}",
       "suggestion": "Připojte certifikát požadovaný objednávkou, nebo položku odmítněte, dokud dodavatel certifikát nepošle"

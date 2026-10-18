@@ -371,13 +371,19 @@ async def import_price_list(
     )
 
 
-# ── Purchase Requisition ─────────────────────────────────────────────────────
+# ── Purchase Requisition ──────────────────────────────────────────────────────
+#
+# Legacy. The canonical requisition is ``procurement.MaterialRequisition`` behind
+# ``/api/v1/procurement/requisitions/`` (issue #516), which keeps BOQ sources,
+# designated approvers, line-level ordering and the change feed. These routes
+# stay for existing callers and records and are marked deprecated in OpenAPI.
 
 
 @router.post(
     "/prs",
     response_model=PRResponse,
     status_code=201,
+    deprecated=True,
     dependencies=[Depends(RequirePermission("supplier_catalogs.pr.create"))],
 )
 async def create_pr(
@@ -392,6 +398,7 @@ async def create_pr(
 @router.post(
     "/prs/{pr_id}/submit",
     response_model=PRResponse,
+    deprecated=True,
     dependencies=[Depends(RequirePermission("supplier_catalogs.pr.create"))],
 )
 async def submit_pr(
@@ -406,6 +413,7 @@ async def submit_pr(
 @router.post(
     "/prs/{pr_id}/approve",
     response_model=PRResponse,
+    deprecated=True,
     dependencies=[Depends(RequirePermission("supplier_catalogs.pr.approve"))],
 )
 async def approve_pr(
@@ -420,6 +428,7 @@ async def approve_pr(
 @router.post(
     "/prs/{pr_id}/reject",
     response_model=PRResponse,
+    deprecated=True,
     dependencies=[Depends(RequirePermission("supplier_catalogs.pr.approve"))],
 )
 async def reject_pr(
@@ -435,6 +444,7 @@ async def reject_pr(
 @router.post(
     "/prs/{pr_id}/convert-to-po",
     response_model=POResponseExt,
+    deprecated=True,
     dependencies=[Depends(RequirePermission("supplier_catalogs.po.create"))],
 )
 async def convert_pr_to_po(

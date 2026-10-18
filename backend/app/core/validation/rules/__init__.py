@@ -11070,6 +11070,42 @@ class ProcurementRequisitionLineScheduleMoved(_ProcurementRule):
     check_name = "check_requisition_line_schedule_moved"
 
 
+class ProcurementRequisitionApproverNotRequester(_ProcurementRule):
+    """The requester may not be one of the requisition's designated approvers."""
+
+    rule_id = "procurement.requisition_approver_not_requester"
+    name = "Requisition Approver Is Not The Requester"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Flags a requisition whose designated approvers include the person who raised it."
+    check_name = "check_requisition_approver_not_requester"
+
+
+class ProcurementRequisitionLineOverOrdered(_ProcurementRule):
+    """A line's live orders hold more than it requested."""
+
+    rule_id = "procurement.requisition_line_over_ordered"
+    name = "Requisition Line Over-Ordered"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a requisition line whose purchase or external orders add up to more than it requested."
+    check_name = "check_requisition_line_over_ordered"
+
+
+class ProcurementRequisitionOrderUnitMismatch(_ProcurementRule):
+    """An order line is in a unit the requisition line's unit cannot be restated in."""
+
+    rule_id = "procurement.requisition_order_unit_mismatch"
+    name = "Requisition Order Line Unit Mismatch"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags an order line against a requisition line whose unit cannot be converted into the requisition "
+        "line's unit, so it is left out of the ordered and received quantities."
+    )
+    check_name = "check_requisition_order_unit_mismatch"
+
+
 # ── Goods receipts: material certificates (confirmation gate) ───────────────
 #
 # Run by ``ProcurementService.confirm_goods_receipt`` (and the read-only receipt
@@ -11809,6 +11845,9 @@ def register_builtin_rules() -> None:
         (ProcurementRequisitionSuggestedVendorDiffers(), ["procurement_requisition"]),
         (ProcurementRequisitionLineNeededByNotPast(), ["procurement_requisition"]),
         (ProcurementRequisitionLineScheduleMoved(), ["procurement_requisition"]),
+        (ProcurementRequisitionApproverNotRequester(), ["procurement_requisition"]),
+        (ProcurementRequisitionLineOverOrdered(), ["procurement_requisition"]),
+        (ProcurementRequisitionOrderUnitMismatch(), ["procurement_requisition"]),
         # Goods receipts (confirmation gate) and supplier invoice payment release.
         (ProcurementReceiptCertificatePresent(), ["goods_receipt"]),
         (ProcurementReceiptCertificateBatch(), ["goods_receipt"]),

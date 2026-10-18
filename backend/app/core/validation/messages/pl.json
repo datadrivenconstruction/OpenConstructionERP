@@ -753,6 +753,18 @@
       "fail": "Pozycja {line} była zaplanowana pod czynność zaczynającą się {anchor}, ale czynność zaczyna się teraz {start}",
       "suggestion": "Porównaj termin potrzeby pozycji z aktualnym harmonogramem i w razie potrzeby zmień go"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Osoba, która utworzyła zapotrzebowanie {req}, jest jednocześnie jego wyznaczonym zatwierdzającym nr {step}",
+      "suggestion": "Wskaż dla tego kroku innego zatwierdzającego, aby decydował ktoś inny niż zgłaszający"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Pozycja {line} ma w zamówieniach {ordered} {unit}, więcej niż zgłoszone {requested} {unit}",
+      "suggestion": "Sprawdź, czy dodatkowa ilość jest zamierzona, lub zmniejsz pozycję zamówienia"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Zamówienie {order} zawiera pozycję {line} w {unit}, której nie można przeliczyć na jednostkę pozycji {line_unit}",
+      "suggestion": "Popraw jednostkę w pozycji zamówienia, aby jej ilość liczyła się jako zamówiona"
+    },
     "receipt_certificate_present": {
       "fail": "Pozycja {line} zamówiona z {required}, ale dostawa zawiera {delivered}",
       "suggestion": "Dołącz certyfikat wymagany w zamówieniu lub wstrzymaj pozycję, dopóki dostawca go nie prześle"

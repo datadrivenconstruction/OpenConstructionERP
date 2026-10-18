@@ -17,6 +17,10 @@ Endpoints:
     GET    /requisitions/trace/position/{boq_position_id}  - Requisitions and orders behind a BOQ position
     GET    /requisitions/trace/purchase-order/{po_id}      - Requisitions and BOQ sources behind an order
     GET    /requisitions/schedule-activities               - Activities a line can take its needed-by date from
+    GET    /requisitions/settings          - The project's order owner and default approvers
+    PUT    /requisitions/settings          - Change them (``procurement.manage_settings``)
+    GET    /requisitions/feed              - Replayable change feed of a project's requisitions (cursor)
+    POST   /requisitions/{id}/external-orders - Reconcile an order an external purchasing system placed
 
 Every handler resolves the project from the trusted row (or the request body on
 create) and checks the caller's access to it, the same gate the purchase order
@@ -30,19 +34,24 @@ from fastapi import APIRouter, Depends, Query
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.procurement.models import MaterialRequisition
+from app.modules.procurement.requisition_feed import DEFAULT_SETTLE_SECONDS, MAX_SETTLE_SECONDS, page_feed
 from app.modules.procurement.requisition_service import (
     RequisitionWorkflowService,
     build_response_context,
     requisition_to_response,
 )
 from app.modules.procurement.schemas import (
+    ExternalOrderReport,
     PositionTraceResponse,
     POTraceResponse,
+    ProcurementSettingsResponse,
+    ProcurementSettingsUpdate,
     RequisitionApprove,
     RequisitionCancel,
     RequisitionConvert,
     RequisitionConvertResponse,
     RequisitionCreate,
+    RequisitionFeedPage,
     RequisitionListResponse,
     RequisitionReject,
     RequisitionResponse,
@@ -112,10 +121,78 @@ async def create_requisition(
     session: SessionDep,
     service: RequisitionWorkflowService = Depends(_get_service),
 ) -> RequisitionResponse:
-    """Create a draft requisition, optionally with lines raised from the BOQ."""
+    """Create a draft requisition, optionally with lines raised from the BOQ.
+
+    With ``client_request_id`` a repeated create answers with the requisition
+    the first one made instead of raising a second one.
+    """
     await verify_project_access(data.project_id, str(user_id), session)
     req = await service.create(data, user_id=str(user_id))
     return await _respond(service, req)
+
+
+@router.get(
+    "/settings",
+    response_model=ProcurementSettingsResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def get_requisition_settings(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> ProcurementSettingsResponse:
+    """Where the project's orders are placed, and who approves its requisitions by default."""
+    await verify_project_access(project_id, str(user_id), session)
+    return await service.settings_response(project_id)
+
+
+@router.put(
+    "/settings",
+    response_model=ProcurementSettingsResponse,
+    dependencies=[Depends(RequirePermission("procurement.manage_settings"))],
+)
+async def update_requisition_settings(
+    data: ProcurementSettingsUpdate,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> ProcurementSettingsResponse:
+    """Change the project's order owner or default approvers. Existing requisitions keep theirs."""
+    await verify_project_access(project_id, str(user_id), session)
+    return await service.update_settings(project_id, data, user_id=str(user_id))
+
+
+@router.get(
+    "/feed",
+    response_model=RequisitionFeedPage,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def requisition_feed(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    after: str | None = Query(default=None, max_length=200),
+    limit: int = Query(default=100, ge=1, le=500),
+    settle_seconds: int = Query(default=DEFAULT_SETTLE_SECONDS, ge=0, le=MAX_SETTLE_SECONDS),
+    requisition_id: uuid.UUID | None = Query(default=None),
+) -> RequisitionFeedPage:
+    """Every change to the project's requisitions after a cursor, oldest first.
+
+    An integration keeps the last ``next_cursor`` and asks again with it as
+    ``after``; replaying from an older cursor returns the same entries again,
+    each with its id and the requisition's ``row_version`` to drop duplicates by.
+    """
+    await verify_project_access(project_id, str(user_id), session)
+    return await page_feed(
+        session,
+        project_id,
+        after=after,
+        limit=limit,
+        settle_seconds=settle_seconds,
+        requisition_id=requisition_id,
+    )
 
 
 @router.post(
@@ -302,6 +379,27 @@ async def reject_requisition(
     """Reject a submitted requisition with the reason the requester needs."""
     await _load_guarded(service, requisition_id, user_id)
     req = await service.reject(requisition_id, user_id=str(user_id), comment=data.comment)
+    return await _respond(service, req)
+
+
+@router.post(
+    "/{requisition_id}/external-orders",
+    response_model=RequisitionResponse,
+    dependencies=[Depends(RequirePermission("procurement.update"))],
+)
+async def report_external_order(
+    requisition_id: uuid.UUID,
+    data: ExternalOrderReport,
+    user_id: CurrentUserId,
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> RequisitionResponse:
+    """Reconcile an order an external purchasing system placed against this requisition.
+
+    No purchase order and no commitment is created. Repeating the same report
+    changes nothing.
+    """
+    await _load_guarded(service, requisition_id, user_id)
+    req = await service.report_external_order(requisition_id, data, user_id=str(user_id))
     return await _respond(service, req)
 
 

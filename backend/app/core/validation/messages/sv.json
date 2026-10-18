@@ -753,6 +753,18 @@
       "fail": "Rad {line} var planerad för en aktivitet som startade {anchor}, men aktiviteten startar nu {start}",
       "suggestion": "Jämför radens behovsdatum med den aktuella tidplanen och ändra det vid behov"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Personen som skapade inköpsbegäran {req} är också dess utsedda godkännare nummer {step}",
+      "suggestion": "Ange en annan godkännare för det steget, så att någon annan än beställaren avgör"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Rad {line} har {ordered} {unit} på order, mer än de {requested} {unit} som begärts",
+      "suggestion": "Kontrollera om den extra kvantiteten är avsiktlig, eller minska orderraden"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Order {order} har rad {line} i {unit}, som inte kan räknas om till radens enhet {line_unit}",
+      "suggestion": "Rätta enheten på orderraden så att kvantiteten räknas som beställd"
+    },
     "receipt_certificate_present": {
       "fail": "Rad {line} beställdes med {required}, men leveransen innehåller {delivered}",
       "suggestion": "Bifoga intyget som beställningen kräver, eller underkänn raden tills leverantören skickar det"

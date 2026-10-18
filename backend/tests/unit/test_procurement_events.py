@@ -34,7 +34,7 @@ from app.modules.bid_management.models import (
     BidSubmissionLine,
 )
 from app.modules.procurement import events as proc_events
-from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
+from app.modules.procurement.models import ProcurementProjectSettings, PurchaseOrder, PurchaseOrderItem
 from app.modules.tendering.models import TenderBid, TenderPackage
 
 # ── Fake session / repositories ────────────────────────────────────────────
@@ -85,6 +85,7 @@ class _FakeStore:
         self.tender_bids: list[TenderBid] = []
         self.purchase_orders: list[PurchaseOrder] = []
         self.po_items: list[PurchaseOrderItem] = []
+        self.settings: list[ProcurementProjectSettings] = []
 
 
 def _entity_of(stmt: Any) -> Any:
@@ -159,6 +160,7 @@ class _FakeSession:
             TenderPackage: self.store.tender_packages,
             TenderBid: self.store.tender_bids,
             PurchaseOrder: self.store.purchase_orders,
+            ProcurementProjectSettings: self.store.settings,
         }
         rows = mapping.get(entity, [])
         matched = _filter_eq(rows, stmt)
@@ -448,3 +450,53 @@ async def test_handler_dispatches_detached(monkeypatch: pytest.MonkeyPatch) -> N
         Event(name="bid_management.package.awarded", data={}, source_module="bid_management")
     )
     assert calls == ["procurement.auto_po_from_bid_award"]
+
+
+# ── Order owner (issue #516) ───────────────────────────────────────────────
+
+
+def _tender_award(store: _FakeStore, project_id: uuid.UUID) -> Event:
+    tender_pkg = TenderPackage(id=uuid.uuid4(), project_id=project_id, name="Concrete works")
+    store.tender_packages.append(tender_pkg)
+    tender_bid = TenderBid(
+        id=uuid.uuid4(),
+        package_id=tender_pkg.id,
+        company_name="ACME Bau GmbH",
+        contact_email="bids@acme.example",
+        total_amount="95000.00",
+        currency="EUR",
+        line_items=[],
+    )
+    store.tender_bids.append(tender_bid)
+    return Event(
+        name="tendering.package.awarded",
+        data={"package_id": str(tender_pkg.id), "bid_id": str(tender_bid.id)},
+        source_module="oe_tendering",
+    )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("owner, drafted", [("external", 0), ("ocerp", 1)])
+async def test_an_award_drafts_no_order_when_an_external_system_places_the_orders(
+    patched: _FakeStore, owner: str, drafted: int
+) -> None:
+    """The external system raises the order for the award; a local draft would be a second one."""
+    project_id = uuid.uuid4()
+    patched.settings.append(ProcurementProjectSettings(id=uuid.uuid4(), project_id=project_id, order_owner=owner))
+    package, bidder = _seed_bid_award(patched, project_id=project_id)
+
+    await proc_events._create_po_from_bid_award(_bid_award_event(package, bidder))
+    assert len(patched.purchase_orders) == drafted
+
+    other_project = uuid.uuid4()
+    patched.settings.append(ProcurementProjectSettings(id=uuid.uuid4(), project_id=other_project, order_owner=owner))
+    await proc_events._create_po_from_award(_tender_award(patched, other_project))
+    assert len(patched.purchase_orders) == 2 * drafted
+
+
+@pytest.mark.asyncio
+async def test_a_project_without_settings_keeps_drafting_award_orders(patched: _FakeStore) -> None:
+    """No settings row is the behaviour every project had before the setting existed."""
+    project_id = uuid.uuid4()
+    await proc_events._create_po_from_award(_tender_award(patched, project_id))
+    assert len(patched.purchase_orders) == 1

@@ -1301,6 +1301,11 @@ class ProcurementService:
         # Replace items if provided. The goods-receipt refusal and the cost
         # line resolution for this replace both run above, before any write.
         if data.items is not None:
+            # Issue #516: whether a requisition line is on this order before or
+            # after the replace decides whether requisitions need a recount.
+            touches_requisitions = any(
+                getattr(old, "requisition_item_id", None) for old in (getattr(po, "items", None) or [])
+            ) or any(getattr(new, "requisition_item_id", None) for new in data.items)
             await self.po_item_repo.delete_by_po(po_id)
             item_amounts: list[Decimal] = []
             for idx, item_data in enumerate(data.items):
@@ -1354,6 +1359,14 @@ class ProcurementService:
                     tax_amount=current_tax,
                     amount_total=recomputed_total,
                 )
+
+            # Issue #516: a requisition line's ordered quantity is read from its
+            # order lines, so a changed line can leave quantity to order again
+            # (or none). Bring the requisitions' status in step in this write.
+            if touches_requisitions:
+                from app.modules.procurement.requisition_service import sync_requisitions_for_po
+
+                await sync_requisitions_for_po(self.session, po_id, actor_id=None)
 
         updated = await self.po_repo.get(po_id)
         if updated is None:
@@ -1514,9 +1527,12 @@ class ProcurementService:
         """Refuse a line replace that links a line to a requisition not converted into this order.
 
         Issue #516. A replace sends every line's ``requisition_item_id`` back so
-        the provenance survives the edit. A link may only point at a line of a
-        requisition whose ``po_id`` is this order; anything else would claim a
-        requisition that was never converted into it. Checked before any write.
+        the provenance survives the edit. A link may only point at a requisition
+        line this order already carries, or at a line of a requisition whose
+        ``po_id`` is this order; anything else would claim a requisition line
+        that was never converted into it. A requisition may be ordered over
+        several orders, so its ``po_id`` alone no longer names every order it
+        went on. Checked before any write.
         """
         wanted = {item.requisition_item_id for item in items if getattr(item, "requisition_item_id", None)}
         if not wanted:
@@ -1530,7 +1546,15 @@ class ProcurementService:
                 .where(MaterialRequisitionItem.id.in_(wanted), MaterialRequisition.po_id == po.id)
             )
         ).scalars()
-        foreign = wanted - set(rows)
+        carried = (
+            await self.session.execute(
+                select(PurchaseOrderItem.requisition_item_id).where(
+                    PurchaseOrderItem.po_id == po.id,
+                    PurchaseOrderItem.requisition_item_id.in_(wanted),
+                )
+            )
+        ).scalars()
+        foreign = wanted - set(rows) - set(carried)
         if foreign:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,

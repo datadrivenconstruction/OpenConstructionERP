@@ -753,6 +753,18 @@
       "fail": "第 {line} 行是按开始于 {anchor} 的工序计划的,但该工序现在开始于 {start}",
       "suggestion": "请对照当前进度计划检查该行的需求日期,必要时修改"
     },
+    "requisition_approver_not_requester": {
+      "fail": "请购单 {req} 的创建人同时也是其指定的第 {step} 级审批人",
+      "suggestion": "请为该步骤另指定审批人,使决定由请购人以外的人做出"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "第 {line} 行已下单 {ordered} {unit},超过请购的 {requested} {unit}",
+      "suggestion": "请确认多出的数量是否有意为之,或减少订单行"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "订单 {order} 中第 {line} 行的单位是 {unit},无法换算为该行的单位 {line_unit}",
+      "suggestion": "请更正订单行上的单位,使其数量计入已订购"
+    },
     "receipt_certificate_present": {
       "fail": "第{line}行订购的是{required}，但送货内容为{delivered}",
       "suggestion": "请附上订单要求的证书；若供应商尚未提供，请先拒收该行"

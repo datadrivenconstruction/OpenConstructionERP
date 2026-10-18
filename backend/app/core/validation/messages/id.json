@@ -753,6 +753,18 @@
       "fail": "Baris {line} direncanakan untuk aktivitas yang dimulai {anchor}, tetapi aktivitas kini dimulai {start}",
       "suggestion": "Cocokkan tanggal dibutuhkan baris dengan jadwal terkini dan ubah jika perlu"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Pembuat permintaan {req} juga merupakan penyetuju nomor {step} yang ditunjuk",
+      "suggestion": "Tunjuk penyetuju lain untuk langkah itu, agar keputusan diambil orang selain pemohon"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Baris {line} memiliki {ordered} {unit} pada pesanan, melebihi {requested} {unit} yang diminta",
+      "suggestion": "Periksa apakah kelebihan kuantitas disengaja, atau kurangi baris pesanan"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Pesanan {order} memuat baris {line} dalam {unit}, yang tidak dapat dikonversi ke satuan baris {line_unit}",
+      "suggestion": "Perbaiki satuan pada baris pesanan agar kuantitasnya terhitung sebagai dipesan"
+    },
     "receipt_certificate_present": {
       "fail": "Baris {line} dipesan dengan {required}, tetapi pengiriman membawa {delivered}",
       "suggestion": "Lampirkan sertifikat yang diminta pesanan, atau tolak baris ini sampai pemasok mengirimkannya"

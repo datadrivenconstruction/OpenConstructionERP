@@ -11,6 +11,9 @@ Tables:
     oe_procurement_requisition   - material requisitions (R7 FSM)
     oe_procurement_req_item      - requisition line items
     oe_procurement_req_item_source - BOQ provenance of a requisition line
+    oe_procurement_project_settings - per-project order owner and default approvers
+    oe_procurement_req_ext_line  - external order lines reconciled against requisition lines
+    oe_procurement_req_change    - replayable requisition change feed
 """
 
 import uuid
@@ -462,6 +465,22 @@ class MaterialRequisition(Base):
         index=True,
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Who places the orders for this requisition: ``ocerp`` (purchase orders
+    # are raised here) or ``external`` (another purchasing system orders and
+    # reports back). Null reads as ``ocerp``. Taken from the project setting
+    # when the requisition is created and editable while it is a draft.
+    order_owner: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Designated approvers in order (user id strings). Empty or null means any
+    # holder of ``procurement.approve_requisition`` approves in one step.
+    approval_chain: Mapped[list | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
+    # How many designated approvers have approved in the current round.
+    approval_step: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Bumped on every change that lands in the change feed. Doubles as the
+    # row lock a line-level conversion takes before it counts what is ordered.
+    row_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # A caller-chosen key that makes a create idempotent: a second create in
+    # the same project with the same key returns the first requisition.
+    client_request_id: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -577,3 +596,97 @@ class MaterialRequisitionItemSource(Base):
 
     def __repr__(self) -> str:
         return f"<MaterialRequisitionItemSource {self.boq_position_id} {self.resource_key}>"
+
+
+class ProcurementProjectSettings(Base):
+    """Per-project purchasing settings for requisitions (issue #516).
+
+    ``order_owner`` says where orders for this project's requisitions are
+    placed: ``ocerp`` (purchase orders are raised here) or ``external`` (an
+    outside purchasing system orders, and OCERP only reconciles what it
+    reports). Award subscribers read it and draft no order when it is
+    ``external``. ``default_approval_chain`` is copied onto new requisitions.
+    """
+
+    __tablename__ = "oe_procurement_project_settings"
+
+    project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, unique=True, index=True)
+    order_owner: Mapped[str] = mapped_column(String(20), nullable=False, default="ocerp", server_default="ocerp")
+    default_approval_chain: Mapped[list | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<ProcurementProjectSettings {self.project_id} {self.order_owner}>"
+
+
+class RequisitionExternalOrderLine(Base):
+    """An order line placed in an external purchasing system against a requisition line.
+
+    No purchase order and no commitment is created for it: the external system
+    owns the order, OCERP keeps what it reported so requested, ordered and
+    received quantities reconcile. One row per (requisition line, system,
+    order number, line reference); a repeated report updates the row.
+    """
+
+    __tablename__ = "oe_procurement_req_ext_line"
+    __table_args__ = (
+        UniqueConstraint(
+            "requisition_item_id",
+            "external_system",
+            "external_order_number",
+            "external_line_ref",
+            name="uq_procurement_req_ext_line_key",
+        ),
+    )
+
+    requisition_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_procurement_requisition.id", ondelete="CASCADE", name="fk_oe_procurement_req_ext_line_req"),
+        nullable=False,
+        index=True,
+    )
+    requisition_item_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_procurement_req_item.id", ondelete="CASCADE", name="fk_oe_procurement_req_ext_line_item"),
+        nullable=False,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    external_system: Mapped[str] = mapped_column(String(100), nullable=False)
+    external_order_number: Mapped[str] = mapped_column(String(100), nullable=False)
+    external_line_ref: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    status: Mapped[str] = mapped_column(String(30), nullable=False, default="open", server_default="open")
+    quantity_ordered: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    quantity_received: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    unit: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    expected_delivery_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    confirmed_delivery_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<RequisitionExternalOrderLine {self.external_system}:{self.external_order_number}>"
+
+
+class RequisitionChange(Base):
+    """One entry of the requisition change feed (issue #516).
+
+    Written in the same transaction as the change it describes, so a committed
+    submission, edit or cancellation always has its entry and an integration
+    that missed a detached event can replay the feed from its last cursor.
+    Rows are never updated or deleted by the application.
+    """
+
+    __tablename__ = "oe_procurement_req_change"
+    __table_args__ = (Index("ix_procurement_req_change_cursor", "project_id", "created_at", "id"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    requisition_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    req_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    event: Mapped[str] = mapped_column(String(50), nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False)
+    row_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    actor_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")  # type: ignore[assignment]
+
+    def __repr__(self) -> str:
+        return f"<RequisitionChange {self.requisition_id} {self.event} v{self.row_version}>"

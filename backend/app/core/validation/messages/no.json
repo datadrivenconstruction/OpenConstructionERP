@@ -753,6 +753,18 @@
       "fail": "Linje {line} var planlagt for en aktivitet som startet {anchor}, men aktiviteten starter nå {start}",
       "suggestion": "Sjekk linjens behovsdato mot gjeldende fremdriftsplan, og endre den om nødvendig"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Personen som opprettet innkjøpsforespørsel {req}, er også dens utpekte godkjenner nummer {step}",
+      "suggestion": "Angi en annen godkjenner for det trinnet, slik at noen andre enn rekvirenten avgjør"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Linje {line} har {ordered} {unit} på ordrer, mer enn de {requested} {unit} som er forespurt",
+      "suggestion": "Sjekk om den ekstra mengden er tilsiktet, eller reduser ordrelinjen"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Ordre {order} har linje {line} i {unit}, som ikke kan regnes om til linjens enhet {line_unit}",
+      "suggestion": "Rett enheten på ordrelinjen slik at mengden teller som bestilt"
+    },
     "receipt_certificate_present": {
       "fail": "Linje {line} ble bestilt med {required}, men leveransen inneholder {delivered}",
       "suggestion": "Legg ved sertifikatet bestillingen krever, eller avvis linjen til leverandøren sender det"

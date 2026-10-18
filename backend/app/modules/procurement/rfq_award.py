@@ -55,7 +55,9 @@ second order while the earlier one is past draft, because two live orders for
 one RFQ is a double commitment.
 
 The project is always the RFQ's own, read from the database, never the event
-payload's.
+payload's. A project whose orders are placed in an external purchasing system
+gets no draft: that system orders for the award, and a local draft would be a
+second order for the same decision (issue #516).
 
 Failure mode: everything is logged and swallowed. The award is already
 committed and must never be affected; the buyer can raise the order by hand.
@@ -78,6 +80,7 @@ from app.core.events import Event, _log_failures
 from app.database import async_session_factory
 from app.modules.procurement.cost_spine import resolve_cost_line_ids
 from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
+from app.modules.procurement.order_owner import EXTERNAL, order_owner_for_project
 from app.modules.procurement.repository import PurchaseOrderRepository
 from app.modules.procurement.validators import MONEY_TOLERANCE
 
@@ -262,6 +265,13 @@ async def _draft(
         return None
 
     project_id = rfq.project_id
+    if await order_owner_for_project(session, project_id) == EXTERNAL:
+        logger.info(
+            "rfq.awarded: project %s orders in an external purchasing system; no draft for award %s",
+            project_id,
+            award_id,
+        )
+        return None
     rfq_key = str(rfq_id)
     award_key = str(award_id)
 

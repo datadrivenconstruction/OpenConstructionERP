@@ -753,6 +753,18 @@
       "fail": "שורה {line} תוכננה לפעילות שמתחילה ב-{anchor}, אך הפעילות מתחילה כעת ב-{start}",
       "suggestion": "השוו את תאריך הנדרש של השורה ללוח הזמנים הנוכחי ושנו אותו במידת הצורך"
     },
+    "requisition_approver_not_requester": {
+      "fail": "יוצר דרישת הרכש {req} הוא גם המאשר שהוגדר מספר {step}",
+      "suggestion": "הגדירו מאשר אחר לשלב זה, כך שמישהו שאינו מגיש הדרישה יחליט"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "בשורה {line} יש {ordered} {unit} בהזמנות, יותר מה-{requested} {unit} שנדרשו",
+      "suggestion": "בדקו אם הכמות העודפת מכוונת, או הקטינו את שורת ההזמנה"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "הזמנה {order} כוללת את שורה {line} ביחידת {unit}, שאי אפשר להמיר ליחידת השורה {line_unit}",
+      "suggestion": "תקנו את היחידה בשורת ההזמנה כדי שהכמות שלה תיספר כמוזמנת"
+    },
     "receipt_certificate_present": {
       "fail": "שורה {line} הוזמנה עם {required}, אך המשלוח כולל {delivered}",
       "suggestion": "צרפו את התעודה שההזמנה דורשת, או דחו את השורה עד שהספק ישלח אותה"

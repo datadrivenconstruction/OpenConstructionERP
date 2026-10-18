@@ -37,6 +37,17 @@ A suggestion never becomes the requisition's supplier by itself. Each line may
 also carry its own needed-by date, proposed from a schedule activity minus a
 buffer; the activity start the proposal read is kept, so a later schedule change
 is shown on the line instead of rewriting a date someone already agreed to.
+
+A requisition may name designated approvers in order. Each of them approves in
+turn, the requisition stays ``submitted`` through the intermediate steps and is
+``approved`` only by the last one; without designated approvers one holder of
+the permission approves. Conversion orders line by line: part of a line, a line
+over several orders, and lines of several requisitions on one order, with what
+is ordered and received read live from the orders and receipts
+(:mod:`requisition_progress`). A requisition whose orders are placed in an
+external purchasing system is never converted; that system's order lines are
+reconciled against it instead, without a local order or commitment. Every
+change lands in the replayable change feed (:mod:`requisition_feed`).
 """
 
 from __future__ import annotations
@@ -58,10 +69,28 @@ from app.modules.procurement.models import (
     MaterialRequisition,
     MaterialRequisitionItem,
     MaterialRequisitionItemSource,
+    ProcurementProjectSettings,
     PurchaseOrder,
     PurchaseOrderItem,
+    RequisitionExternalOrderLine,
+)
+from app.modules.procurement.order_owner import (
+    EXTERNAL,
+    OCERP,
+    effective_owner,
+    load_settings,
+)
+from app.modules.procurement.requisition_feed import append_history, line_summary, note_change
+from app.modules.procurement.requisition_progress import (
+    LineProgress,
+    fmt,
+    in_line_unit,
+    load_progress,
+    order_progress,
+    refresh_requisitions,
 )
 from app.modules.procurement.schemas import (
+    ExternalOrderReport,
     POCreate,
     POItemCreate,
     PositionTraceResponse,
@@ -69,12 +98,17 @@ from app.modules.procurement.schemas import (
     POTraceLine,
     POTraceRequisition,
     POTraceResponse,
+    ProcurementSettingsResponse,
+    ProcurementSettingsUpdate,
+    RequisitionApprovalStep,
     RequisitionConvert,
     RequisitionConvertResponse,
     RequisitionCreate,
+    RequisitionExternalLineResponse,
     RequisitionItemIn,
     RequisitionItemResponse,
     RequisitionItemSourceResponse,
+    RequisitionOrderRef,
     RequisitionPOItemRef,
     RequisitionResponse,
     RequisitionUpdate,
@@ -90,7 +124,6 @@ from app.modules.procurement.service import (
     ProcurementService,
     _latest_order_date,
     _mr_assert_transition,
-    _mr_reconcile,
     _safe_decimal_str,
     _safe_publish,
 )
@@ -262,18 +295,67 @@ class RequisitionWorkflowService(MaterialRequisitionService):
 
     @staticmethod
     def _record(req: MaterialRequisition, action: str, actor: str | None, **extra: Any) -> None:
-        """Append one entry to the requisition's history.
+        """Append one entry to the requisition's history only, without a feed entry.
 
-        The metadata dict is replaced rather than mutated so the change is
-        seen by the ORM.
+        Kept for callers outside the workflow; the workflow itself records
+        through :meth:`_note` so the change also reaches the feed.
         """
-        meta = dict(req.metadata_ or {})
-        history = list(meta.get("history") or [])
-        entry: dict[str, Any] = {"at": datetime.now(UTC).isoformat(), "action": action, "actor": actor}
-        entry.update({k: v for k, v in extra.items() if v is not None})
-        history.append(entry)
-        meta["history"] = history
-        req.metadata_ = meta
+        append_history(req, action, actor, **extra)
+
+    def _note(self, req: MaterialRequisition, action: str, actor: str | None, **extra: Any) -> None:
+        """Record a change in the history and the replayable feed, in this transaction."""
+        note_change(self.session, req, action, actor, **extra)
+
+    # ── Designated approvers ────────────────────────────────────────────────
+
+    async def _validated_chain(self, project_id: uuid.UUID, raw: list[uuid.UUID] | list[str] | None) -> list[str]:
+        """Designated approvers as stored, refusing a chain that could never be completed.
+
+        Each approver must be an active user who can open the project and whose
+        role holds ``procurement.approve_requisition``; nobody may appear twice.
+        """
+        chain = [str(uuid.UUID(str(v))) for v in (raw or [])]
+        if len(set(chain)) != len(chain):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Each designated approver may appear only once in the approval chain.",
+            )
+        if not chain:
+            return []
+        from app.core.permissions import permission_registry
+        from app.dependencies import verify_project_access
+        from app.modules.users.models import User
+
+        users = {
+            str(u.id): u
+            for u in (await self.session.execute(select(User).where(User.id.in_([uuid.UUID(c) for c in chain]))))
+            .scalars()
+            .all()
+        }
+        refused: list[str] = []
+        for approver in chain:
+            user = users.get(approver)
+            if user is None or not getattr(user, "is_active", True):
+                refused.append(approver)
+                continue
+            role = str(getattr(user, "role", "") or "")
+            if role != "admin" and not permission_registry.role_has_permission(role, "procurement.approve_requisition"):
+                refused.append(approver)
+                continue
+            try:
+                await verify_project_access(project_id, approver, self.session)
+            except HTTPException:
+                refused.append(approver)
+        if refused:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "These designated approvers cannot approve requisitions in this project "
+                    f"(unknown, inactive, without project access or without the approval permission): "
+                    f"{', '.join(refused)}."
+                ),
+            )
+        return chain
 
     async def _write_items(
         self,
@@ -503,8 +585,36 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             return None, anchor
         return proposed.isoformat(), anchor
 
+    async def find_by_client_request_id(self, project_id: uuid.UUID, key: str) -> MaterialRequisition | None:
+        """The requisition an earlier create with this idempotency key made in the project."""
+        return (
+            await self.session.execute(
+                select(MaterialRequisition).where(
+                    MaterialRequisition.project_id == project_id,
+                    MaterialRequisition.client_request_id == key,
+                )
+            )
+        ).scalar_one_or_none()
+
     async def create(self, data: RequisitionCreate, *, user_id: str | None) -> MaterialRequisition:
-        """Create a draft requisition, its lines and their BOQ sources."""
+        """Create a draft requisition, its lines and their BOQ sources.
+
+        With ``client_request_id`` a repeated create answers with the
+        requisition the first one made, so an integration may retry safely.
+        """
+        if data.client_request_id:
+            existing = await self.find_by_client_request_id(data.project_id, data.client_request_id)
+            if existing is not None:
+                return await self._reload(existing.id)
+        settings = await load_settings(self.session, data.project_id)
+        owner = data.order_owner or effective_owner(settings.order_owner if settings is not None else None)
+        if data.approval_chain is not None:
+            chain = await self._validated_chain(data.project_id, data.approval_chain)
+        else:
+            # The project default is re-checked: an approver may have left the project since.
+            chain = await self._validated_chain(
+                data.project_id, list(settings.default_approval_chain or []) if settings is not None else []
+            )
         required = data.required_date.isoformat() if data.required_date else None
         req = await self._create_req_with_retry(
             project_id=data.project_id,
@@ -519,8 +629,22 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         if data.vendor_id is not None:
             await self._require_vendor(data.vendor_id)
             req.vendor_id = data.vendor_id
-        self._record(req, "created", user_id)
+        req.order_owner = owner
+        req.approval_chain = chain
+        req.approval_step = 0
+        req.client_request_id = data.client_request_id
         await self._write_items(req, data.items)
+        await self.session.flush()
+        req = await self._reload(req.id)
+        self._note(
+            req,
+            "created",
+            user_id,
+            order_owner=owner,
+            approval_chain=chain or None,
+            lines=line_summary(list(req.items)) or None,
+            client_request_id=data.client_request_id,
+        )
         await self.session.flush()
         return await self._reload(req.id)
 
@@ -560,14 +684,38 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 await self._require_vendor(data.vendor_id)
             req.vendor_id = data.vendor_id
             changed.append("vendor_id")
+        if (
+            "order_owner" in fields
+            and data.order_owner is not None
+            and data.order_owner != effective_owner(req.order_owner)
+        ):
+            req.order_owner = data.order_owner
+            changed.append("order_owner")
+        if "approval_chain" in fields and data.approval_chain is not None:
+            chain = await self._validated_chain(req.project_id, data.approval_chain)
+            if chain != list(req.approval_chain or []):
+                req.approval_chain = chain
+                req.approval_step = 0
+                changed.append("approval_chain")
+        lines_before: list[dict[str, Any]] | None = None
         if data.items is not None:
+            lines_before = line_summary(list(req.items))
             for item in list(req.items):
                 await self.session.delete(item)
             await self.session.flush()
             await self._write_items(req, data.items)
             changed.append("items")
+        req = await self._reload(req.id)
         if changed:
-            self._record(req, "updated", user_id, fields=changed)
+            lines_after = line_summary(list(req.items)) if lines_before is not None else None
+            self._note(
+                req,
+                "updated",
+                user_id,
+                fields=changed,
+                lines_before=lines_before if lines_before != lines_after else None,
+                lines_after=lines_after if lines_before != lines_after else None,
+            )
         await self.session.flush()
         return await self._reload(req.id)
 
@@ -591,7 +739,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         _mr_assert_transition(req.status, target)
         previous = req.status
         req.status = target
-        self._record(req, action, user_id, previous=previous, status=target, reason=reason)
+        self._note(req, action, user_id, previous=previous, status=target, reason=reason)
         await self.session.flush()
         await _safe_publish(
             f"procurement.requisition.{action}",
@@ -625,12 +773,26 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                         "Correct each error listed below, then submit again.",
                     ),
                 )
+            chain = [str(a) for a in (req.approval_chain or [])]
+            if user_id and str(user_id) in chain:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=(
+                        "You are one of the designated approvers of this requisition, so you cannot submit it "
+                        "yourself (four-eyes principle). Remove yourself from the approval chain or ask a "
+                        "colleague to submit it."
+                    ),
+                )
             # A fresh submission is a fresh decision: the previous approver's
             # verdict and comment belong to the history, not to this round.
             req.submitted_by = user_id
             req.approver_id = None
             req.decided_at = None
             req.decision_comment = None
+            req.approval_step = 0
+            meta = dict(req.metadata_ or {})
+            meta["approval_round"] = []
+            req.metadata_ = meta
         return await self._transition(requisition_id, "submitted", user_id=user_id, action="submitted")
 
     async def withdraw(self, requisition_id: uuid.UUID, *, user_id: str | None) -> MaterialRequisition:
@@ -718,6 +880,24 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         except Exception:
             logger.warning("Activity log FAILED for requisition %s (%s -> %s)", req.id, previous, target, exc_info=True)
 
+    @staticmethod
+    def _next_designated(req: MaterialRequisition) -> str | None:
+        """The designated approver who decides now, or None without a chain (or past its end)."""
+        chain = [str(a) for a in (req.approval_chain or [])]
+        step = int(req.approval_step or 0)
+        return chain[step] if step < len(chain) else None
+
+    def _assert_designated(self, req: MaterialRequisition, user_id: str | None, action: str) -> None:
+        """With designated approvers, only the next one in the chain may decide."""
+        expected = self._next_designated(req)
+        if expected is not None and str(user_id) != expected:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    f"This requisition has designated approvers. Only the next one in the chain may {action} it now."
+                ),
+            )
+
     async def approve(
         self,
         requisition_id: uuid.UUID,
@@ -725,11 +905,16 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         user_id: str | None,
         comment: str | None = None,
     ) -> MaterialRequisition:
-        """Approve a submitted requisition.
+        """Approve a submitted requisition, one step of its approval chain at a time.
 
-        The submitter may not approve it. The rules run again first, with the
+        The submitter may not approve it. With designated approvers only the
+        next one in the chain may approve; every approval but the last is an
+        intermediate step that leaves the requisition ``submitted``, and the
+        last one approves it. Without designated approvers one approval by a
+        permission holder is final. The rules run again at every step, with the
         vendor as it stands now: a supplier blacklisted after submission blocks
-        the approval. Approving an approved requisition is a no-op.
+        the approval. Approving an approved requisition, or approving again a
+        step one already approved, is a no-op.
         """
         req = await self.get_requisition(requisition_id)
         if req.status == "approved":
@@ -740,6 +925,11 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 detail=f"Only a submitted requisition can be approved; this one is '{req.status}'.",
             )
         self._assert_not_own_submission(req, user_id, "approve")
+        chain = [str(a) for a in (req.approval_chain or [])]
+        step = int(req.approval_step or 0)
+        if chain and user_id and str(user_id) in chain[:step]:
+            return await self._reload(req.id)
+        self._assert_designated(req, user_id, "approve")
         report = await self.validate(req, operation="approve")
         if report.has_errors:
             raise HTTPException(
@@ -750,10 +940,61 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     "Reject it with a comment so the requester can fix them.",
                 ),
             )
+        now = datetime.now(UTC).isoformat()
+        meta = dict(req.metadata_ or {})
+        meta["approval_round"] = [
+            *list(meta.get("approval_round") or []),
+            {"user_id": str(user_id) if user_id else None, "at": now, "comment": comment or None, "step": step + 1},
+        ]
+        req.metadata_ = meta
+        if chain and step + 1 < len(chain):
+            # An intermediate approval: the requisition waits for the next approver.
+            req.approval_step = step + 1
+            self._note(
+                req,
+                "approval_step",
+                user_id,
+                step=step + 1,
+                of=len(chain),
+                next_approver_id=chain[step + 1],
+                reason=comment,
+            )
+            await self._audit(
+                req,
+                actor_id=user_id,
+                previous="submitted",
+                target="submitted",
+                reason=comment,
+                extra={"approval_step": step + 1, "approval_steps": len(chain), "final": False},
+            )
+            await self.session.flush()
+            await _safe_publish(
+                "procurement.requisition.approval_step",
+                {
+                    "requisition_id": str(req.id),
+                    "req_number": req.req_number,
+                    "project_id": str(req.project_id),
+                    "status": "submitted",
+                    "actor_id": user_id,
+                    "step": step + 1,
+                    "of": len(chain),
+                    "final": False,
+                    "next_approver_id": chain[step + 1],
+                },
+            )
+            return await self._reload(req.id)
+        req.approval_step = len(chain)
         req.approver_id = user_id
-        req.decided_at = datetime.now(UTC).isoformat()
+        req.decided_at = now
         req.decision_comment = comment or None
-        await self._audit(req, actor_id=user_id, previous="submitted", target="approved", reason=comment)
+        await self._audit(
+            req,
+            actor_id=user_id,
+            previous="submitted",
+            target="approved",
+            reason=comment,
+            extra={"approval_steps": len(chain), "final": True} if chain else None,
+        )
         return await self._transition(requisition_id, "approved", user_id=user_id, action="approved", reason=comment)
 
     async def reject(self, requisition_id: uuid.UUID, *, user_id: str | None, comment: str) -> MaterialRequisition:
@@ -777,6 +1018,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 detail="A rejection needs a comment that tells the requester what to change.",
             )
         self._assert_not_own_submission(req, user_id, "reject")
+        self._assert_designated(req, user_id, "reject")
         req.approver_id = user_id
         req.decided_at = datetime.now(UTC).isoformat()
         req.decision_comment = reason
@@ -804,37 +1046,159 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             },
         )
 
+    async def _conversion_by_key(self, project_id: uuid.UUID, key: str) -> RequisitionConvertResponse | None:
+        """The answer of an earlier conversion with this idempotency key in the project, if there was one."""
+        orders = (
+            (await self.session.execute(select(PurchaseOrder).where(PurchaseOrder.project_id == project_id)))
+            .scalars()
+            .all()
+        )
+        for po in orders:
+            md = po.metadata_ if isinstance(po.metadata_, dict) else {}
+            if md.get("requisition_conversion_key") != key:
+                continue
+            req_ids = [uuid.UUID(str(r)) for r in md.get("source_requisition_ids") or []]
+            reqs = (
+                (await self.session.execute(select(MaterialRequisition).where(MaterialRequisition.id.in_(req_ids))))
+                .scalars()
+                .all()
+                if req_ids
+                else []
+            )
+            return RequisitionConvertResponse(
+                po_id=po.id,
+                po_number=po.po_number,
+                project_id=project_id,
+                requisition_ids=req_ids,
+                line_count=len(po.items),
+                replayed=True,
+                fully_ordered_requisition_ids=[r.id for r in reqs if r.status == "ordered"],
+            )
+        return None
+
+    def _plan_lines(
+        self,
+        data: RequisitionConvert,
+        ordered_reqs: list[MaterialRequisition],
+        progress: dict[uuid.UUID, LineProgress],
+    ) -> list[tuple[MaterialRequisition, MaterialRequisitionItem, Decimal]]:
+        """Which requisition lines go on the order, and how much of each, in requisition and line order.
+
+        Without ``data.lines`` every line goes with what is still to order. With
+        them, only the named lines, each with its quantity, which must be
+        positive and no more than what is still to order on that line.
+        """
+        if data.lines is None:
+            return [
+                (req, item, progress[item.id].to_order)
+                for req in ordered_reqs
+                for item in sorted(req.items, key=lambda i: i.sort_order)
+                if progress[item.id].to_order > 0
+            ]
+        owners = {item.id: (req, item) for req in ordered_reqs for item in req.items}
+        wanted: dict[uuid.UUID, Decimal] = {}
+        for line in data.lines:
+            if line.requisition_item_id not in owners:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=(
+                        f"Line {line.requisition_item_id} is not a line of the requisitions being converted. "
+                        "Add its requisition to requisition_ids or leave the line out."
+                    ),
+                )
+            if line.requisition_item_id in wanted:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"Line {line.requisition_item_id} is named twice. Name each line once with its quantity.",
+                )
+            quantity = _dec(line.quantity)
+            if quantity <= 0:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"Line {line.requisition_item_id} needs a quantity above zero to go on the order.",
+                )
+            wanted[line.requisition_item_id] = quantity
+        too_much = [
+            {
+                "requisition_item_id": str(item_id),
+                "description": owners[item_id][1].description,
+                "unit": owners[item_id][1].unit,
+                "quantity": format(quantity, "f"),
+                "quantity_to_order": fmt(progress[item_id].to_order),
+            }
+            for item_id, quantity in wanted.items()
+            if quantity > progress[item_id].to_order
+        ]
+        if too_much:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "quantity_exceeds_remaining",
+                    "message": "Some lines ask for more than is still to order on them.",
+                    "lines": too_much,
+                },
+            )
+        unused = [r for r in ordered_reqs if not any(item.id in wanted for item in r.items)]
+        if unused:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "These requisitions have no line in this conversion: "
+                    f"{', '.join(r.req_number or str(r.id) for r in unused)}. Leave them out of requisition_ids."
+                ),
+            )
+        return [
+            (req, item, wanted[item.id])
+            for req in ordered_reqs
+            for item in sorted(req.items, key=lambda i: i.sort_order)
+            if item.id in wanted
+        ]
+
     async def convert_to_purchase_order(
         self,
         data: RequisitionConvert,
         *,
         user_id: str | None,
     ) -> RequisitionConvertResponse:
-        """Turn approved requisitions of one project into one draft purchase order.
+        """Turn approved requisition lines of one project into one draft purchase order.
 
         Every requisition must belong to ``data.project_id`` (404 otherwise, so a
-        foreign id is not confirmed to exist) and be ``approved`` (409 naming the
-        ones that are not). The supplier is ``data.vendor_id`` or the one the
-        requisitions agree on; requisitions naming different suppliers, or a
-        stated supplier another requisition contradicts, are a 409. The rules
-        then run on each requisition with that supplier and operation
-        ``convert``, which requires a supplier, an active one, and lines in one
-        currency.
+        foreign id is not confirmed to exist), be ``approved`` (409 naming the
+        ones that are not) and have its orders placed in OCERP (409 for one an
+        external purchasing system orders). The supplier is ``data.vendor_id``
+        or the one the requisitions agree on; requisitions naming different
+        suppliers, or a stated supplier another requisition contradicts, are a
+        409. The rules then run on each requisition with that supplier and
+        operation ``convert``, which requires a supplier, an active one, and
+        lines in one currency.
 
-        The requisitions are claimed with one conditional UPDATE from
-        ``approved`` to ``ordered`` once the order is written. A concurrent
-        conversion that got there first leaves fewer rows matched, and the whole
-        request is refused and rolled back, order included, so a requisition is
-        never ordered twice. The claim follows the order rather than preceding
-        it because the order number retry rolls the session back on a
-        collision, which would silently undo a claim made before it.
+        One order line is written per requisition line in the plan
+        (:meth:`_plan_lines`), with the planned quantity, the line's unit, its
+        unit cost as the rate, its frozen cost line and its id as
+        ``requisition_item_id``. Lines are never merged across requisitions, so
+        each order line leads back to exactly one requisition line, and the
+        quantity a requisition line put on each order is that order line's
+        quantity. A line may be split over several orders; one order may hold
+        lines of several requisitions.
 
-        One order line is written per requisition line, in requisition then
-        line order: the requested quantity and unit unchanged, the line's unit
-        cost as the rate, its frozen cost line, and its id as
-        ``requisition_item_id``. Lines are never merged across requisitions,
-        so each order line leads back to exactly one requisition line.
+        Once the order is written the requisitions are locked with a
+        conditional UPDATE that bumps ``row_version`` while they are still
+        ``approved``, and what is ordered is counted again under that lock. A
+        concurrent conversion that ordered the same quantity first makes the
+        count exceed the request, and the whole request is refused and rolled
+        back, order included, so a line is never ordered twice. The lock follows
+        the order rather than preceding it because the order number retry rolls
+        the session back on a collision, which would release a lock taken
+        before it. A requisition whose lines are now all on orders moves to
+        ``ordered``; one with quantity left stays ``approved``.
+
+        With ``data.idempotency_key`` a repeated conversion answers with the
+        order the first one wrote and writes nothing.
         """
+        if data.idempotency_key:
+            replay = await self._conversion_by_key(data.project_id, data.idempotency_key)
+            if replay is not None:
+                return replay
         wanted = list(dict.fromkeys(data.requisition_ids))
         reqs = list(
             (
@@ -857,7 +1221,24 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         ordered_reqs = [found[i] for i in wanted]
         ordered_reqs.sort(key=lambda r: (r.req_number or "", str(r.id)))
 
-        already = [r for r in ordered_reqs if r.status in ("ordered", "received", "consumed") or r.po_id is not None]
+        external = [r for r in ordered_reqs if effective_owner(r.order_owner) == EXTERNAL]
+        if external:
+            raise self._conflict(
+                "requisition_orders_external",
+                "The orders for these requisitions are placed in an external purchasing system. Record the "
+                "external order against them instead of raising a purchase order here.",
+                external,
+            )
+        progress = await load_progress(self.session, [item for r in ordered_reqs for item in r.items])
+
+        def _nothing_left(r: MaterialRequisition) -> bool:
+            return bool(r.items) and all(progress[i.id].to_order <= 0 for i in r.items)
+
+        already = [
+            r
+            for r in ordered_reqs
+            if r.status in ("ordered", "received", "consumed") or (r.status == "approved" and _nothing_left(r))
+        ]
         if already:
             raise self._conflict(
                 "requisition_already_ordered",
@@ -906,37 +1287,47 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 ),
             )
 
+        plan = self._plan_lines(data, ordered_reqs, progress)
+        if not plan:
+            raise self._conflict(
+                "requisition_already_ordered",
+                "Nothing is left to order on these requisitions.",
+                ordered_reqs,
+            )
+        planned_reqs = list(dict.fromkeys(req.id for req, _item, _qty in plan))
         currencies = {
             (item.currency_code or "").strip().upper()
-            for req in ordered_reqs
-            for item in req.items
+            for _req, item, _qty in plan
             if (item.currency_code or "").strip()
         }
         items: list[POItemCreate] = []
-        for req in ordered_reqs:
-            for item in sorted(req.items, key=lambda i: i.sort_order):
-                items.append(
-                    POItemCreate(
-                        description=item.description,
-                        quantity=_safe_decimal_str(item.quantity_requested),
-                        unit=item.unit,
-                        unit_rate=format(_dec(item.unit_cost), "f"),
-                        cost_line_id=str(item.cost_line_id) if item.cost_line_id else None,
-                        requisition_item_id=item.id,
-                        sort_order=len(items),
-                    )
+        for _req, item, quantity in plan:
+            items.append(
+                POItemCreate(
+                    description=item.description,
+                    quantity=format(quantity, "f"),
+                    unit=item.unit,
+                    unit_rate=format(_dec(item.unit_cost), "f"),
+                    cost_line_id=str(item.cost_line_id) if item.cost_line_id else None,
+                    requisition_item_id=item.id,
+                    sort_order=len(items),
                 )
+            )
+        by_id = {r.id: r for r in ordered_reqs}
         metadata: dict[str, Any] = {
             "source": "material_requisitions",
-            "source_requisition_ids": [str(r.id) for r in ordered_reqs],
-            "source_requisition_numbers": [r.req_number for r in ordered_reqs],
+            "source_requisition_ids": [str(rid) for rid in planned_reqs],
+            "source_requisition_numbers": [by_id[rid].req_number for rid in planned_reqs],
         }
+        if data.idempotency_key:
+            metadata["requisition_conversion_key"] = data.idempotency_key
         if vendor is not None:
             metadata["vendor_id"] = str(vendor.id)
             metadata["supplier_name"] = vendor.name
         # Plain values from here on: the order number retry inside create_po may
         # roll the session back, which expires every instance read above.
-        req_keys = [(r.id, r.req_number, r.project_id) for r in ordered_reqs]
+        req_keys = [(rid, by_id[rid].req_number, by_id[rid].project_id) for rid in planned_reqs]
+        planned_qty = {item.id: quantity for _req, item, quantity in plan}
         po = await ProcurementService(self.session).create_po(
             POCreate(
                 project_id=data.project_id,
@@ -953,49 +1344,68 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         vendor_warnings = list(getattr(po, "vendor_warnings", []) or [])
         po_id, po_number = po.id, po.po_number
 
-        claimed = await self.session.execute(
+        locked = await self.session.execute(
             update(MaterialRequisition)
-            .where(MaterialRequisition.id.in_(wanted), MaterialRequisition.status == "approved")
-            .values(
-                status="ordered",
-                po_id=po_id,
-                estimated_delivery_date=data.delivery_date.isoformat() if data.delivery_date else None,
-            )
+            .where(MaterialRequisition.id.in_(planned_reqs), MaterialRequisition.status == "approved")
+            .values(row_version=func.coalesce(MaterialRequisition.row_version, 0) + 1)
             .execution_options(synchronize_session=False)
         )
-        if claimed.rowcount != len(wanted):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={
-                    "code": "requisition_already_ordered",
-                    "message": "Another conversion claimed some of these requisitions first. Reload and try again.",
-                    "requisitions": [{"id": str(rid), "req_number": number} for rid, number, _pid in req_keys],
-                },
-            )
+        conflict_detail = {
+            "code": "requisition_already_ordered",
+            "message": "Another conversion ordered some of these lines first. Reload and try again.",
+            "requisitions": [{"id": str(rid), "req_number": number} for rid, number, _pid in req_keys],
+        }
+        if locked.rowcount != len(planned_reqs):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=conflict_detail)
 
-        for rid, _number, _pid in req_keys:
-            fresh = await self._reload(rid)
-            for item in fresh.items:
-                item.quantity_ordered = _safe_decimal_str(item.quantity_requested)
-            self._record(fresh, "ordered", user_id, previous="approved", status="ordered", po_number=po_number)
+        fresh_reqs = [await self._reload(rid) for rid, _number, _pid in req_keys]
+        recount = await load_progress(self.session, [item for r in fresh_reqs for item in r.items])
+        if any(recount[item_id].ordered > recount[item_id].requested for item_id in planned_qty):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=conflict_detail)
+
+        changed = await refresh_requisitions(self.session, fresh_reqs)
+        fully_ordered: list[uuid.UUID] = []
+        for fresh in fresh_reqs:
+            if data.delivery_date:
+                fresh.estimated_delivery_date = data.delivery_date.isoformat()
+            previous, target = changed.get(fresh.id, (fresh.status, fresh.status))
+            if fresh.status == "ordered":
+                fully_ordered.append(fresh.id)
+            self._note(
+                fresh,
+                "ordered" if target == "ordered" else "partially_ordered",
+                user_id,
+                previous=previous,
+                status=target,
+                po_id=str(po_id),
+                po_number=po_number,
+                lines=[
+                    {"requisition_item_id": str(item.id), "quantity": format(planned_qty[item.id], "f")}
+                    for item in sorted(fresh.items, key=lambda i: i.sort_order)
+                    if item.id in planned_qty
+                ],
+            )
             await self._audit(
                 fresh,
                 actor_id=user_id,
-                previous="approved",
-                target="ordered",
+                previous=previous,
+                target=target,
                 reason=None,
                 extra={"po_id": str(po_id), "po_number": po_number},
             )
         await self.session.flush()
-        for rid, number, pid in req_keys:
+        for fresh in fresh_reqs:
+            previous, target = changed.get(fresh.id, (fresh.status, fresh.status))
             await _safe_publish(
-                "procurement.requisition.ordered",
+                "procurement.requisition.ordered"
+                if target == "ordered"
+                else "procurement.requisition.partially_ordered",
                 {
-                    "requisition_id": str(rid),
-                    "req_number": number,
-                    "project_id": str(pid),
-                    "status": "ordered",
-                    "previous_status": "approved",
+                    "requisition_id": str(fresh.id),
+                    "req_number": fresh.req_number,
+                    "project_id": str(fresh.project_id),
+                    "status": target,
+                    "previous_status": previous,
                     "actor_id": user_id,
                     "po_id": str(po_id),
                     "po_number": po_number,
@@ -1008,7 +1418,219 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             requisition_ids=[rid for rid, _number, _pid in req_keys],
             line_count=len(items),
             vendor_warnings=vendor_warnings,
+            fully_ordered_requisition_ids=fully_ordered,
         )
+
+    # ── External orders ─────────────────────────────────────────────────────
+
+    async def report_external_order(
+        self,
+        requisition_id: uuid.UUID,
+        data: ExternalOrderReport,
+        *,
+        user_id: str | None,
+    ) -> MaterialRequisition:
+        """Reconcile an order an external purchasing system placed against a requisition.
+
+        Only a requisition whose orders are placed externally, and that has been
+        approved, takes a report. Each reported line is upserted on (requisition
+        line, system, order number, line reference): a report repeated with the
+        same figures changes nothing and records nothing, so an integration may
+        retry it. No purchase order and no commitment is created. Quantities
+        are taken in the reported unit and must be restatable in the
+        requisition line's unit; a cancelled external line stops counting.
+        """
+        req = await self.get_requisition(requisition_id)
+        if effective_owner(req.order_owner) != EXTERNAL:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "requisition_orders_in_ocerp",
+                    "message": (
+                        f"Requisition {req.req_number or req.id} is ordered in OpenConstructionERP. Convert it into "
+                        "a purchase order here instead of recording an external order."
+                    ),
+                },
+            )
+        if req.status not in ("approved", "ordered", "received"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Requisition {req.req_number or req.id} is '{req.status}'. An external order can only be "
+                    "recorded against an approved requisition."
+                ),
+            )
+        items = {item.id: item for item in req.items}
+        unknown = sorted({str(line.requisition_item_id) for line in data.lines} - {str(i) for i in items})
+        if unknown:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"These lines are not lines of requisition {req.req_number or req.id}: {', '.join(unknown)}.",
+            )
+        keys = [(line.requisition_item_id, line.external_line_ref) for line in data.lines]
+        if len(set(keys)) != len(keys):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Each external line may appear only once in a report.",
+            )
+        mismatched = [
+            f"{items[line.requisition_item_id].description} ({line.unit} -> {items[line.requisition_item_id].unit})"
+            for line in data.lines
+            if line.unit and in_line_unit(Decimal("1"), line.unit, items[line.requisition_item_id].unit) is None
+        ]
+        if mismatched:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "These external lines are in a unit that cannot be restated in the requisition line's unit: "
+                    f"{'; '.join(mismatched)}. Report them in the requisition line's unit."
+                ),
+            )
+        existing = {
+            (row.requisition_item_id, row.external_line_ref): row
+            for row in (
+                await self.session.execute(
+                    select(RequisitionExternalOrderLine).where(
+                        RequisitionExternalOrderLine.requisition_id == req.id,
+                        RequisitionExternalOrderLine.external_system == data.external_system,
+                        RequisitionExternalOrderLine.external_order_number == data.external_order_number,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        }
+        changes: list[dict[str, Any]] = []
+        for line in data.lines:
+            values = {
+                "status": line.status,
+                "quantity_ordered": fmt(_dec(line.quantity_ordered)),
+                "quantity_received": fmt(_dec(line.quantity_received)),
+                "unit": line.unit or items[line.requisition_item_id].unit,
+                "expected_delivery_date": line.expected_delivery_date.isoformat()
+                if line.expected_delivery_date
+                else None,
+                "confirmed_delivery_date": line.confirmed_delivery_date.isoformat()
+                if line.confirmed_delivery_date
+                else None,
+            }
+            row = existing.get((line.requisition_item_id, line.external_line_ref))
+            if row is None:
+                self.session.add(
+                    RequisitionExternalOrderLine(
+                        requisition_id=req.id,
+                        requisition_item_id=line.requisition_item_id,
+                        project_id=req.project_id,
+                        external_system=data.external_system,
+                        external_order_number=data.external_order_number,
+                        external_line_ref=line.external_line_ref,
+                        updated_by=user_id,
+                        **values,
+                    )
+                )
+                changes.append({"requisition_item_id": str(line.requisition_item_id), "change": "added", **values})
+                continue
+            diff = {k: v for k, v in values.items() if getattr(row, k) != v}
+            if not diff:
+                continue
+            before = {k: getattr(row, k) for k in diff}
+            for key, value in diff.items():
+                setattr(row, key, value)
+            row.updated_by = user_id
+            changes.append(
+                {
+                    "requisition_item_id": str(line.requisition_item_id),
+                    "external_line_ref": line.external_line_ref,
+                    "change": "updated",
+                    "before": before,
+                    "after": diff,
+                }
+            )
+        if not changes:
+            return await self._reload(req.id)
+        await self.session.flush()
+        req = await self._reload(req.id)
+        changed = await refresh_requisitions(self.session, [req])
+        previous, target = changed.get(req.id, (req.status, req.status))
+        self._note(
+            req,
+            "external_order_reported",
+            user_id,
+            previous=previous if previous != target else None,
+            status=target,
+            external_system=data.external_system,
+            external_order_number=data.external_order_number,
+            lines=changes,
+        )
+        await self.session.flush()
+        await _safe_publish(
+            "procurement.requisition.external_order_reported",
+            {
+                "requisition_id": str(req.id),
+                "req_number": req.req_number,
+                "project_id": str(req.project_id),
+                "status": target,
+                "previous_status": previous,
+                "actor_id": user_id,
+                "external_system": data.external_system,
+                "external_order_number": data.external_order_number,
+            },
+        )
+        return await self._reload(req.id)
+
+    # ── Project settings ────────────────────────────────────────────────────
+
+    async def settings_response(self, project_id: uuid.UUID) -> ProcurementSettingsResponse:
+        """The project's order owner and default approvers, with their names."""
+        row = await load_settings(self.session, project_id)
+        chain = [str(a) for a in ((row.default_approval_chain if row is not None else None) or [])]
+        names = await load_user_names(self.session, set(chain))
+        return ProcurementSettingsResponse(
+            project_id=project_id,
+            order_owner=effective_owner(row.order_owner if row is not None else None),
+            default_approvers=[RequisitionApprovalStep(user_id=a, name=names.get(a), state="waiting") for a in chain],
+        )
+
+    async def update_settings(
+        self, project_id: uuid.UUID, data: ProcurementSettingsUpdate, *, user_id: str | None
+    ) -> ProcurementSettingsResponse:
+        """Change the project's order owner or default approvers.
+
+        Requisitions already raised keep the owner and approvers they were
+        created with; the setting applies to new ones and to award drafts.
+        """
+        row = await load_settings(self.session, project_id)
+        if row is None:
+            row = ProcurementProjectSettings(project_id=project_id, order_owner=OCERP, default_approval_chain=[])
+            self.session.add(row)
+        before = {"order_owner": row.order_owner, "default_approval_chain": list(row.default_approval_chain or [])}
+        if data.order_owner is not None:
+            row.order_owner = data.order_owner
+        if data.default_approval_chain is not None:
+            row.default_approval_chain = await self._validated_chain(project_id, data.default_approval_chain)
+        row.updated_by = user_id
+        await self.session.flush()
+        after = {"order_owner": row.order_owner, "default_approval_chain": list(row.default_approval_chain or [])}
+        if before != after:
+            await self._audit_settings(project_id, user_id, before, after)
+        return await self.settings_response(project_id)
+
+    async def _audit_settings(
+        self, project_id: uuid.UUID, actor_id: str | None, before: dict[str, Any], after: dict[str, Any]
+    ) -> None:
+        try:
+            from app.core.audit_log import log_activity
+
+            await log_activity(
+                self.session,
+                actor_id=actor_id,
+                entity_type="procurement_project_settings",
+                entity_id=str(project_id),
+                action="updated",
+                metadata={"before": before, "after": after},
+            )
+        except Exception:
+            logger.warning("Activity log FAILED for procurement settings of %s", project_id, exc_info=True)
 
     # ── Traceability ────────────────────────────────────────────────────────
 
@@ -1186,6 +1808,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         vendor_id: uuid.UUID | None = None,
         suggested_vendors: dict[uuid.UUID, VendorInfo] | None = None,
         activity_starts: dict[uuid.UUID, str] | None = None,
+        progress: dict[uuid.UUID, LineProgress] | None = None,
     ) -> dict[str, Any]:
         """The payload the ``procurement_requisition`` rules read.
 
@@ -1194,10 +1817,32 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         it cannot be read, which the vendor rule reports rather than trusts.
         ``suggested_vendors`` holds the directory entries of the lines'
         suggestions and ``activity_starts`` the current start of each linked
-        schedule activity.
+        schedule activity. ``progress`` carries each line's live ordered
+        quantity and the order lines whose unit cannot be restated.
         """
         known = suggested_vendors or {}
         starts = activity_starts or {}
+        lines = progress or {}
+
+        def _ordered(item: MaterialRequisitionItem) -> str:
+            line = lines.get(item.id)
+            return fmt(line.ordered) if line is not None else str(item.quantity_ordered or "0")
+
+        def _mismatches(item: MaterialRequisitionItem) -> list[dict[str, Any]]:
+            line = lines.get(item.id)
+            if line is None:
+                return []
+            found = [
+                {"ref": po_line.po_number or str(po_line.po_id), "unit": po_line.unit}
+                for po_line in line.po_lines
+                if po_line.unit_mismatch and po_line.po_status != "cancelled"
+            ]
+            found.extend(
+                {"ref": f"{ext.external_system} {ext.external_order_number}", "unit": ext.unit}
+                for ext in line.external_lines
+                if ext.id in line.external_mismatch and ext.status != "cancelled"
+            )
+            return found
 
         def _vendor(vid: uuid.UUID | None) -> dict[str, Any] | None:
             info = known.get(vid) if vid is not None else None
@@ -1210,11 +1855,15 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             "operation": operation,
             "vendor_id": str(vendor_id) if vendor_id else None,
             "vendor": vendor.as_payload() if vendor is not None else None,
+            "requester_id": req.requester_id,
+            "approval_chain": [str(a) for a in (req.approval_chain or [])],
             "items": [
                 {
                     "description": item.description,
                     "unit": item.unit,
                     "quantity_requested": item.quantity_requested,
+                    "quantity_ordered": _ordered(item),
+                    "order_unit_mismatches": _mismatches(item),
                     "currency_code": item.currency_code,
                     "cost_line_id": str(item.cost_line_id) if item.cost_line_id else None,
                     "required_date": item.required_date,
@@ -1260,6 +1909,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         activities = await self.load_activities(
             req.project_id, {i.schedule_activity_id for i in req.items if i.schedule_activity_id is not None}
         )
+        progress = await load_progress(self.session, list(req.items))
         return await validation_engine.validate(
             data=self.validation_payload(
                 req,
@@ -1268,6 +1918,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 vendor_id=vendor_id,
                 suggested_vendors=suggested,
                 activity_starts={aid: a.start_date for aid, a in activities.items()},
+                progress=progress,
             ),
             rule_sets=[REQUISITION_RULE_SET],
             target_type="material_requisition",
@@ -1277,6 +1928,33 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         )
 
 
+async def _requisitions_linked_to_po(session: AsyncSession, po_id: uuid.UUID) -> list[MaterialRequisition]:
+    """Approved or ordered requisitions with a line on this order, or that name it as their order."""
+    item_req_ids = select(MaterialRequisitionItem.requisition_id).where(
+        MaterialRequisitionItem.id.in_(
+            select(PurchaseOrderItem.requisition_item_id).where(
+                PurchaseOrderItem.po_id == po_id,
+                PurchaseOrderItem.requisition_item_id.is_not(None),
+            )
+        )
+    )
+    return list(
+        (
+            await session.execute(
+                select(MaterialRequisition)
+                .where(
+                    (MaterialRequisition.po_id == po_id) | MaterialRequisition.id.in_(item_req_ids),
+                    MaterialRequisition.status.in_(("approved", "ordered")),
+                )
+                .order_by(MaterialRequisition.req_number, MaterialRequisition.id)
+                .execution_options(populate_existing=True)
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+
 async def release_requisitions_for_po(
     session: AsyncSession,
     po_id: uuid.UUID,
@@ -1284,54 +1962,62 @@ async def release_requisitions_for_po(
     actor_id: str | None,
     action: str,
 ) -> list[uuid.UUID]:
-    """Return the requisitions converted into an order to ``approved``.
+    """Take an order that is about to be cancelled or deleted out of its requisitions' figures.
 
-    Called when the order is cancelled or deleted. The need behind each
-    requisition is still approved, so it can be ordered again; the order lines
-    of a cancelled order keep their ``requisition_item_id``, so the history of
-    the first attempt stays traceable. Only requisitions still ``ordered`` are
-    released: one that has started receiving is left for a person to resolve.
+    Called under the order's lock, before it is cancelled or deleted. What the
+    order held is counted as not ordered any more, so each requisition goes
+    back to ``approved`` when it has quantity to order again (the need is
+    still approved and may be ordered again) and names its newest remaining
+    order, or none. The order lines of a cancelled order keep their
+    ``requisition_item_id``, so the history of the first attempt stays
+    traceable. Only ``approved`` and ``ordered`` requisitions move: one that
+    has started receiving is left for a person to resolve.
     """
-    reqs = (
-        (
-            await session.execute(
-                select(MaterialRequisition).where(
-                    MaterialRequisition.po_id == po_id,
-                    MaterialRequisition.status == "ordered",
-                )
-            )
-        )
-        .scalars()
-        .all()
-    )
-    released: list[uuid.UUID] = []
+    reqs = await _requisitions_linked_to_po(session, po_id)
+    if not reqs:
+        return []
+    changed = await refresh_requisitions(session, reqs, exclude_po_ids={po_id})
     for req in reqs:
-        req.status = "approved"
-        req.po_id = None
-        req.estimated_delivery_date = None
-        for item in req.items:
-            item.quantity_ordered = "0"
-        RequisitionWorkflowService._record(
-            req, "released", actor_id, previous="ordered", status="approved", reason=action, po_id=str(po_id)
+        previous, target = changed.get(req.id, (req.status, req.status))
+        note_change(
+            session, req, "released", actor_id, previous=previous, status=target, reason=action, po_id=str(po_id)
         )
-        released.append(req.id)
-    if released:
-        await session.flush()
-        for req in reqs:
-            await _safe_publish(
-                "procurement.requisition.released",
-                {
-                    "requisition_id": str(req.id),
-                    "req_number": req.req_number,
-                    "project_id": str(req.project_id),
-                    "status": "approved",
-                    "previous_status": "ordered",
-                    "actor_id": actor_id,
-                    "po_id": str(po_id),
-                    "reason": action,
-                },
-            )
-    return released
+    await session.flush()
+    for req in reqs:
+        previous, target = changed.get(req.id, (req.status, req.status))
+        await _safe_publish(
+            "procurement.requisition.released",
+            {
+                "requisition_id": str(req.id),
+                "req_number": req.req_number,
+                "project_id": str(req.project_id),
+                "status": target,
+                "previous_status": previous,
+                "actor_id": actor_id,
+                "po_id": str(po_id),
+                "reason": action,
+            },
+        )
+    return [req.id for req in reqs]
+
+
+async def sync_requisitions_for_po(session: AsyncSession, po_id: uuid.UUID, *, actor_id: str | None) -> None:
+    """Bring requisitions in step after the lines of one of their orders were replaced.
+
+    A buyer who lowers a line on a draft order leaves quantity to order again,
+    so a fully ordered requisition goes back to ``approved``; raising it does
+    the opposite. Nothing is recorded when nothing moved.
+    """
+    reqs = await _requisitions_linked_to_po(session, po_id)
+    if not reqs:
+        return
+    changed = await refresh_requisitions(session, reqs)
+    for req in reqs:
+        if req.id not in changed:
+            continue
+        previous, target = changed[req.id]
+        note_change(session, req, "order_changed", actor_id, previous=previous, status=target, po_id=str(po_id))
+    await session.flush()
 
 
 class ResponseContext:
@@ -1344,12 +2030,14 @@ class ResponseContext:
         po_lines: dict[uuid.UUID, list[TracePOLine]] | None = None,
         user_names: dict[str, str] | None = None,
         activities: dict[uuid.UUID, ScheduleActivityOption] | None = None,
+        progress: dict[uuid.UUID, LineProgress] | None = None,
     ) -> None:
         self.vendors = vendors or {}
         self.po_numbers = po_numbers or {}
         self.po_lines = po_lines or {}
         self.user_names = user_names or {}
         self.activities = activities or {}
+        self.progress = progress or {}
 
 
 async def load_user_names(session: AsyncSession, raw_ids: set[str]) -> dict[str, str]:
@@ -1369,7 +2057,7 @@ async def load_user_names(session: AsyncSession, raw_ids: set[str]) -> dict[str,
 
 
 async def build_response_context(session: AsyncSession, reqs: list[MaterialRequisition]) -> ResponseContext:
-    """Vendor names, order numbers, converted order lines, approver names and schedule activities."""
+    """Vendor names, order numbers, live order progress, approver names and schedule activities."""
     vendor_ids = {r.vendor_id for r in reqs if r.vendor_id is not None}
     for r in reqs:
         for item in r.items:
@@ -1388,9 +2076,11 @@ async def build_response_context(session: AsyncSession, reqs: list[MaterialRequi
                 )
             ).all()
         }
-    item_ids = {item.id for r in reqs for item in r.items}
-    po_lines = await RequisitionWorkflowService(session)._po_lines_for_items(item_ids)
-    user_names = await load_user_names(session, {r.approver_id for r in reqs if r.approver_id})
+    progress = await load_progress(session, [item for r in reqs for item in r.items])
+    people: set[str] = {r.approver_id for r in reqs if r.approver_id}
+    for r in reqs:
+        people.update(str(a) for a in (r.approval_chain or []))
+    user_names = await load_user_names(session, people)
     activities: dict[uuid.UUID, ScheduleActivityOption] = {}
     workflow = RequisitionWorkflowService(session)
     for project_id in {r.project_id for r in reqs}:
@@ -1402,7 +2092,7 @@ async def build_response_context(session: AsyncSession, reqs: list[MaterialRequi
             if item.schedule_activity_id is not None
         }
         activities.update(await workflow.load_activities(project_id, wanted))
-    return ResponseContext(vendors, po_numbers, po_lines, user_names, activities)
+    return ResponseContext(vendors, po_numbers, {}, user_names, activities, progress)
 
 
 def _vendor_ref(vendor_id: uuid.UUID, ctx: ResponseContext) -> RequisitionVendorRef:
@@ -1441,27 +2131,78 @@ def _line_dates_view(req: MaterialRequisition, item: MaterialRequisitionItem, ct
     }
 
 
+def _approval_view(req: MaterialRequisition, ctx: ResponseContext) -> list[RequisitionApprovalStep]:
+    """Each designated approver and where they stand in the current round."""
+    chain = [str(a) for a in (req.approval_chain or [])]
+    if not chain:
+        return []
+    step = int(req.approval_step or 0)
+    meta = req.metadata_ if isinstance(req.metadata_, dict) else {}
+    done = {str(a.get("user_id")): a for a in meta.get("approval_round") or [] if isinstance(a, dict)}
+    steps: list[RequisitionApprovalStep] = []
+    for index, approver in enumerate(chain):
+        decided = done.get(approver) if index < step else None
+        if index < step:
+            state = "approved"
+        elif index == step and req.status == "submitted":
+            state = "next"
+        else:
+            state = "waiting"
+        steps.append(
+            RequisitionApprovalStep(
+                user_id=approver,
+                name=ctx.user_names.get(approver),
+                state=state,
+                decided_at=decided.get("at") if decided else None,
+                comment=decided.get("comment") if decided else None,
+            )
+        )
+    return steps
+
+
+def _line_progress(item: MaterialRequisitionItem, ctx: ResponseContext) -> LineProgress:
+    """The live figures of a line, or its stored ones when the context carries none."""
+    live = ctx.progress.get(item.id)
+    if live is not None:
+        return live
+    return LineProgress(
+        requested=_dec(item.quantity_requested),
+        ordered=_dec(item.quantity_ordered),
+        received=_dec(item.quantity_received),
+    )
+
+
 def requisition_to_response(req: MaterialRequisition, context: ResponseContext | None = None) -> RequisitionResponse:
     """Serialise a requisition with per-line progress and the header reconciliation."""
     ctx = context or ResponseContext()
     items: list[RequisitionItemResponse] = []
     line_suggestions: list[uuid.UUID] = []
+    progress: dict[uuid.UUID, LineProgress] = {}
+    orders: dict[uuid.UUID, RequisitionOrderRef] = {}
     for item in sorted(req.items, key=lambda i: i.sort_order):
-        outstanding = _dec(item.quantity_requested) - _dec(item.quantity_received)
+        line = _line_progress(item, ctx)
+        progress[item.id] = line
         offered = list(dict.fromkeys(s.suggested_vendor_id for s in item.sources if s.suggested_vendor_id is not None))
         suggested = ctx.vendors.get(item.suggested_vendor_id) if item.suggested_vendor_id else None
         if item.suggested_vendor_id is not None:
             line_suggestions.append(item.suggested_vendor_id)
+        for po_line in line.po_lines:
+            orders.setdefault(
+                po_line.po_id,
+                RequisitionOrderRef(po_id=po_line.po_id, po_number=po_line.po_number, status=po_line.po_status),
+            )
         items.append(
             RequisitionItemResponse(
                 id=item.id,
                 description=item.description,
                 unit=item.unit,
                 quantity_requested=item.quantity_requested,
-                quantity_ordered=item.quantity_ordered,
-                quantity_received=item.quantity_received,
+                quantity_ordered=fmt(line.ordered),
+                quantity_received=fmt(line.received),
                 quantity_consumed=item.quantity_consumed,
-                quantity_outstanding=format(outstanding, "f"),
+                quantity_outstanding=fmt(line.outstanding),
+                quantity_to_order=fmt(line.to_order),
+                over_ordered=line.over_ordered,
                 unit_cost=item.unit_cost,
                 extended_cost=item.extended_cost,
                 currency_code=item.currency_code,
@@ -1491,24 +2232,55 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
                 ],
                 po_items=[
                     RequisitionPOItemRef(
-                        po_item_id=line.po_item_id,
-                        po_id=line.po_id,
-                        po_number=line.po_number,
-                        quantity=line.quantity,
-                        unit=line.unit,
-                        po_delivery_date=line.po_delivery_date,
-                        supplier_confirmed_delivery_date=line.supplier_confirmed_delivery_date,
+                        po_item_id=po_line.po_item_id,
+                        po_id=po_line.po_id,
+                        po_number=po_line.po_number,
+                        po_status=po_line.po_status,
+                        quantity=fmt(po_line.quantity),
+                        unit=po_line.unit,
+                        po_delivery_date=po_line.po_delivery_date,
+                        supplier_confirmed_delivery_date=po_line.supplier_confirmed_delivery_date,
+                        quantity_received=fmt(po_line.received),
+                        unit_mismatch=po_line.unit_mismatch,
                     )
-                    for line in ctx.po_lines.get(item.id, [])
+                    for po_line in line.po_lines
+                ],
+                external_orders=[
+                    RequisitionExternalLineResponse(
+                        id=ext.id,
+                        external_system=ext.external_system,
+                        external_order_number=ext.external_order_number,
+                        external_line_ref=ext.external_line_ref or "",
+                        status=ext.status,
+                        quantity_ordered=ext.quantity_ordered,
+                        quantity_received=ext.quantity_received,
+                        unit=ext.unit,
+                        expected_delivery_date=ext.expected_delivery_date,
+                        confirmed_delivery_date=ext.confirmed_delivery_date,
+                        unit_mismatch=ext.id in line.external_mismatch,
+                        updated_at=ext.updated_at,
+                    )
+                    for ext in line.external_lines
                 ],
             )
         )
-    reconciliation = {key: format(value, "f") for key, value in _mr_reconcile(list(req.items)).items()}
-    requested = _dec(reconciliation.get("requested"))
-    received = _dec(reconciliation.get("received"))
-    reconciliation["outstanding"] = format(requested - received, "f")
+    requested = sum((p.requested for p in progress.values()), Decimal("0"))
+    ordered = sum((p.ordered for p in progress.values()), Decimal("0"))
+    received = sum((p.received for p in progress.values()), Decimal("0"))
+    consumed = sum((_dec(i.quantity_consumed) for i in req.items), Decimal("0"))
+    reconciliation = {
+        "requested": fmt(requested),
+        "ordered": fmt(ordered),
+        "received": fmt(received),
+        "consumed": fmt(consumed),
+        "to_order": fmt(sum((p.to_order for p in progress.values()), Decimal("0"))),
+        "undelivered": fmt(max(ordered - received, Decimal("0"))),
+        "unconsumed": fmt(max(received - consumed, Decimal("0"))),
+        "outstanding": fmt(requested - received),
+    }
     history = (req.metadata_ or {}).get("history") if isinstance(req.metadata_, dict) else None
     vendor = ctx.vendors.get(req.vendor_id) if req.vendor_id else None
+    next_approver = RequisitionWorkflowService._next_designated(req) if req.status == "submitted" else None
     return RequisitionResponse(
         id=req.id,
         project_id=req.project_id,
@@ -1532,6 +2304,14 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
         po_id=req.po_id,
         po_number=ctx.po_numbers.get(req.po_id) if req.po_id else None,
         notes=req.notes,
+        order_owner=effective_owner(req.order_owner),
+        order_progress=order_progress(progress),
+        purchase_orders=list(orders.values()),
+        approval_chain=_approval_view(req, ctx),
+        approval_step=int(req.approval_step or 0),
+        next_approver_id=next_approver,
+        row_version=int(req.row_version or 0),
+        client_request_id=req.client_request_id,
         items=items,
         reconciliation=reconciliation,
         history=list(history) if isinstance(history, list) else [],

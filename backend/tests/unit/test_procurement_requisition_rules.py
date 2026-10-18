@@ -20,10 +20,13 @@ from typing import Any
 from app.core.validation.engine import ValidationContext, rule_registry
 from app.core.validation.messages import available_locales, is_key_present
 from app.core.validation.rules import (
+    ProcurementRequisitionApproverNotRequester,
     ProcurementRequisitionLineCostLine,
     ProcurementRequisitionLineNeededByNotPast,
+    ProcurementRequisitionLineOverOrdered,
     ProcurementRequisitionLineScheduleMoved,
     ProcurementRequisitionNeededByNotPast,
+    ProcurementRequisitionOrderUnitMismatch,
     ProcurementRequisitionQuantityPositive,
     ProcurementRequisitionSingleCurrency,
     ProcurementRequisitionSourceUnit,
@@ -62,6 +65,10 @@ RULES = [
     ProcurementRequisitionSuggestedVendorDiffers,
     ProcurementRequisitionLineNeededByNotPast,
     ProcurementRequisitionLineScheduleMoved,
+    # Issue #516, third slice: designated approvers and orders per line.
+    ProcurementRequisitionApproverNotRequester,
+    ProcurementRequisitionLineOverOrdered,
+    ProcurementRequisitionOrderUnitMismatch,
 ]
 
 
