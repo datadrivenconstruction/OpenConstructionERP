@@ -1828,5 +1828,30 @@
     "en_value": "{{count}} d",
     "note": "unit abbreviation for day in the interface register's ageing column; cs den, da/no/sv/nl dag, es dia, pt dia, pl dzien and hr dan all abbreviate it to d, the same convention as submittals.days_short, while de, fr, it and the non-Latin locales write their own abbreviation",
     "reason_category": "abbreviation"
+  },
+  "cost_control.export_pdf": {
+    "en_value": "PDF",
+    "note": "file format name on an export button, written the same in every locale",
+    "reason_category": "product_name"
+  },
+  "cost_control.export_xlsx": {
+    "en_value": "Excel",
+    "note": "application name on an export button, written the same in every locale",
+    "reason_category": "product_name"
+  },
+  "cost_control.method_count": {
+    "en_value": "{{method}}: {{n}}",
+    "note": "entirely template variables and a colon; fr spaces the colon and ja/zh use the full-width colon, the rest share it",
+    "reason_category": "template_placeholder"
+  },
+  "cost_control.layer_budget": {
+    "en_value": "Budget",
+    "note": "the word is the native term in da, de, fil, fr, it, nl and sv; every other locale translates it",
+    "reason_category": "cognate_loanword"
+  },
+  "cost_control.source_budget": {
+    "en_value": "Budget",
+    "note": "the word is the native term in da, de, fil, fr, it, nl and sv; every other locale translates it",
+    "reason_category": "cognate_loanword"
   }
 }
