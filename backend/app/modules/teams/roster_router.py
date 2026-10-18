@@ -7,6 +7,11 @@ way ``resources`` mounts its depth routes. The module loader only looks for a
 ``router`` attribute in ``router.py``, so this file is reached through that
 include and never directly.
 
+The reads check project access here as well as in the service, the way the
+team routes do, so a later change to the service cannot leave a roster read
+with no gate in front of it. The project and user rows the second check needs
+are already in the session's identity map.
+
 Every path is project-scoped (``/project/{project_id}/roster/...``). That is
 not decoration: it is what lets the service gate a read or a write on the
 project before it touches a row, and what stops a roster id from being usable
@@ -22,7 +27,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, SessionDep, verify_project_access
 from app.modules.teams.roster_schemas import (
     RosterBulkCreate,
     RosterCandidateListResponse,
@@ -76,6 +81,7 @@ async def get_roster_vocabulary(user_id: CurrentUserId) -> RosterVocabularyRespo
 async def list_roster(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     include_inactive: bool = Query(default=True),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=500),
@@ -95,6 +101,7 @@ async def list_roster(
     caller wanting the roster in one read is the normal case here, not paging
     through it, and a large site can put several hundred people on a job.
     """
+    await verify_project_access(project_id, str(user_id or ""), session)
     items, total = await service.list_roster(
         project_id,
         actor_id=user_id,
@@ -114,9 +121,11 @@ async def list_roster(
 async def get_roster_summary(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: RosterService = Depends(_get_service),
 ) -> RosterSummary:
     """Headcount, firms, trades, expired tickets and the access gaps."""
+    await verify_project_access(project_id, str(user_id or ""), session)
     return await service.summary(project_id, actor_id=user_id)
 
 
@@ -129,6 +138,7 @@ async def get_roster_summary(
 async def list_roster_candidates(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
     q: str = Query(default="", max_length=120),
     limit: int = Query(default=50, ge=1, le=200),
     service: RosterService = Depends(_get_service),
@@ -150,6 +160,7 @@ async def list_roster_candidates(
     independently ordered sources cannot be served honestly; narrowing ``q`` is
     how a caller reaches the names beyond the first page.
     """
+    await verify_project_access(project_id, str(user_id or ""), session)
     items, total = await service.list_candidates(project_id, actor_id=user_id, query=q, limit=limit)
     return RosterCandidateListResponse(items=items, total=total, offset=0, limit=limit)
 

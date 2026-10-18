@@ -488,3 +488,70 @@ class TestWaiverAgainstAPayApplication:
             )
         assert resp.status_code == 422, resp.text
         assert resp.json()["detail"]["code"] == "currency_mismatch"
+
+
+# ── 8. The list is scoped to the projects the caller can open ────────────
+
+
+class TestWaiverListIsScopedToVisibleProjects:
+    """A waiver on a pay application carries that project's amount and document.
+
+    The subcontractor is shared across projects, so the list used to hand
+    anybody with ``subcontractors.read`` every waiver the firm had filed,
+    including the ones against projects they cannot open. A stand-alone W-9
+    describes the firm and stays visible to everyone who can see the firm.
+    """
+
+    @pytest.mark.tenant_isolation
+    @pytest.mark.asyncio
+    async def test_an_outsider_sees_only_the_firm_level_forms(self, db_session) -> None:
+        from decimal import Decimal
+
+        from app.modules.projects.models import Project
+        from app.modules.subcontractors.models import LienWaiver, PaymentApplication, SubcontractAgreement
+        from app.modules.teams.models import Team, TeamMembership
+
+        owner = await _make_user(db_session)
+        member = await _make_user(db_session)
+        outsider = await _make_user(db_session)
+        sub_id = await _make_subcontractor(db_session)
+        pay_app_id = await _make_pay_app(db_session, owner_id=owner, sub_id=sub_id)
+
+        pay_app = await db_session.get(PaymentApplication, pay_app_id)
+        agreement = await db_session.get(SubcontractAgreement, pay_app.agreement_id)
+        project = await db_session.get(Project, agreement.project_id)
+        team = Team(project_id=project.id, name="Site")
+        db_session.add(team)
+        await db_session.flush()
+        db_session.add(TeamMembership(team_id=team.id, user_id=uuid.UUID(member), role="member"))
+
+        db_session.add(
+            LienWaiver(
+                subcontractor_id=sub_id,
+                payment_application_id=pay_app_id,
+                waiver_type="conditional_partial",
+                document_url="lien_waivers/pay.pdf",
+                amount=Decimal("1800.00"),
+                currency="USD",
+            )
+        )
+        db_session.add(
+            LienWaiver(
+                subcontractor_id=sub_id,
+                payment_application_id=None,
+                waiver_type="w9",
+                document_url="lien_waivers/w9.pdf",
+            )
+        )
+        await db_session.commit()
+
+        async def _types(caller: str) -> set[str]:
+            transport = httpx.ASGITransport(app=_build_app(db_session, caller_id=caller))
+            async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+                resp = await client.get(f"/v1/subcontractors/subcontractors/{sub_id}/lien-waivers")
+            assert resp.status_code == 200, resp.text
+            return {row["waiver_type"] for row in resp.json()}
+
+        assert await _types(outsider) == {"w9"}
+        assert await _types(member) == {"w9", "conditional_partial"}
+        assert await _types(owner) == {"w9", "conditional_partial"}
