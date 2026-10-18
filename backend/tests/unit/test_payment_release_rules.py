@@ -290,3 +290,36 @@ async def test_a_finding_reads_in_the_callers_language() -> None:
     (en,) = await _fails(InvoiceSequenceRule, payload, "en")
     (de,) = await _fails(InvoiceSequenceRule, payload, "de")
     assert en.message != de.message and "SC-01" in de.message
+
+
+async def test_v13_is_silent_on_retention_paid_back_after_its_events() -> None:
+    payload = {
+        "contracts": [
+            _contract(
+                status="completed",
+                warranty_enabled=True,
+                warranty_period_months=24,
+                retention_held="0",
+                invoices=[_inv("f", "final", retention="50")],
+                postings=[
+                    {
+                        "id": "p1",
+                        "retention_kind": "interim",
+                        "event": "substantial_completion",
+                        "event_on": "2026-01-15",
+                        "posted_on": "2026-01-15",
+                        "amount": "100",
+                    },
+                    {
+                        "id": "p2",
+                        "retention_kind": "warranty",
+                        "event": "defects_period_end",
+                        "event_on": "2026-01-15",
+                        "posted_on": "2028-01-15",
+                        "amount": "50",
+                    },
+                ],
+            )
+        ]
+    }
+    assert await _fails(RetentionTermsRule, payload) == []
