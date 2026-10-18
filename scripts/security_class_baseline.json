@@ -256,6 +256,7 @@
     "backend/app/modules/cost_explorer/events.py::_DRAINING",
     "backend/app/modules/cost_explorer/events.py::_PENDING_GLOBAL",
     "backend/app/modules/cost_explorer/events.py::_PENDING_REGIONS",
+    "backend/app/modules/costmodel/events.py::_pending",
     "backend/app/modules/costs/base_state.py::_PROCESS_LOCKS",
     "backend/app/modules/costs/match_index.py::_jobs",
     "backend/app/modules/costs/match_index.py::_language_cache",
