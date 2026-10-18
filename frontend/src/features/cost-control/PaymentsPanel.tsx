@@ -19,7 +19,9 @@ import { AlertOctagon, AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, I
 
 import { Badge, Button, Skeleton } from '@/shared/ui';
 import { TabBar } from '@/shared/ui/TabBar';
-import { fmtCurrency, fmtDate, fmtPercent } from '@/shared/lib/formatters';
+import { fmtDate, fmtPercent } from '@/shared/lib/formatters';
+// Release figures are amounts to pay: shown to the minor unit, never rounded to whole units.
+import { formatCurrency as fmtMoney } from '@/shared/lib/money';
 import { getErrorMessage } from '@/shared/lib/api';
 import { problemOf } from '@/features/costmodel/structureApi';
 import { useToastStore } from '@/stores/useToastStore';
@@ -39,7 +41,7 @@ import {
   type RetentionContract,
   type RetentionKind,
 } from './paymentsApi';
-import { ReleaseDrawer } from './ReleaseDrawer';
+import { ReleaseDrawer, moneyPayload } from './ReleaseDrawer';
 import { TermsDrawer } from './TermsDrawer';
 
 type Tab = 'ledger' | 'retention' | 'checks';
@@ -56,7 +58,7 @@ function errorText(t: TFunction, err: unknown, currency: string): string {
   const problem = problemOf(err);
   if (problem) {
     const params = { ...problem.params };
-    if (params.held !== undefined) params.held = fmtCurrency(String(params.held), currency);
+    if (params.held !== undefined) params.held = fmtMoney(String(params.held), currency);
     const text = paymentProblem(t, problem.problem, params);
     if (text) return text;
   }
@@ -77,19 +79,19 @@ function TotalsStrip({ totals, currency, measured }: { totals: LedgerTotals; cur
   const { t } = useTranslation();
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-      <Figure label={t('cost_control.pay.fig_value', { defaultValue: 'Contract value' })} value={fmtCurrency(totals.contract_value, currency)} />
+      <Figure label={t('cost_control.pay.fig_value', { defaultValue: 'Contract value' })} value={fmtMoney(totals.contract_value, currency)} />
       {measured !== undefined && (
-        <Figure label={t('cost_control.pay.fig_measured', { defaultValue: 'Measured' })} value={fmtCurrency(measured, currency)} />
+        <Figure label={t('cost_control.pay.fig_measured', { defaultValue: 'Measured' })} value={fmtMoney(measured, currency)} />
       )}
       <Figure
         label={t('cost_control.pay.fig_invoiced', { defaultValue: 'Invoiced (net)' })}
-        value={fmtCurrency(totals.invoiced, currency)}
+        value={fmtMoney(totals.invoiced, currency)}
         sub={totals.invoiced_pct ? t('cost_control.pay.fig_of_value', { defaultValue: '{{pct}} of the value', pct: fmtPercent(totals.invoiced_pct) }) : undefined}
       />
-      <Figure label={t('cost_control.pay.fig_due', { defaultValue: 'Due for payment' })} value={fmtCurrency(totals.released, currency)} />
-      <Figure label={t('cost_control.pay.fig_paid', { defaultValue: 'Paid' })} value={fmtCurrency(totals.paid, currency)} />
-      <Figure label={t('cost_control.pay.fig_due_open', { defaultValue: 'Due, not paid' })} value={fmtCurrency(totals.open_amount, currency)} />
-      <Figure label={t('cost_control.pay.fig_held', { defaultValue: 'Retention held' })} value={fmtCurrency(totals.retention_held, currency)} />
+      <Figure label={t('cost_control.pay.fig_due', { defaultValue: 'Due for payment' })} value={fmtMoney(totals.released, currency)} />
+      <Figure label={t('cost_control.pay.fig_paid', { defaultValue: 'Paid' })} value={fmtMoney(totals.paid, currency)} />
+      <Figure label={t('cost_control.pay.fig_due_open', { defaultValue: 'Due, not paid' })} value={fmtMoney(totals.open_amount, currency)} />
+      <Figure label={t('cost_control.pay.fig_held', { defaultValue: 'Retention held' })} value={fmtMoney(totals.retention_held, currency)} />
     </div>
   );
 }
@@ -198,10 +200,10 @@ function ContractBlock({
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtCurrency(inv.figures.gross_after, currency)}</td>
-                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtCurrency(inv.figures.retention, currency)}</td>
-                        <td className="px-2 py-2 text-end font-semibold tabular-nums text-content-primary">{fmtCurrency(inv.figures.release, currency)}</td>
-                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtCurrency(inv.paid, currency)}</td>
+                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtMoney(inv.figures.gross_after, currency)}</td>
+                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtMoney(inv.figures.retention, currency)}</td>
+                        <td className="px-2 py-2 text-end font-semibold tabular-nums text-content-primary">{fmtMoney(inv.figures.release, currency)}</td>
+                        <td className="px-2 py-2 text-end tabular-nums text-content-secondary">{fmtMoney(inv.paid, currency)}</td>
                         <td className="px-2 py-2 text-end">
                           <Badge variant={inv.release_status === 'released' ? (inv.differs ? 'warning' : 'success') : 'neutral'} size="sm">
                             {inv.release_status === 'released'
@@ -319,7 +321,7 @@ function LedgerTab({
                   <span className="font-medium text-content-primary">{inv.number}</span>
                   {inv.invoice_date && <span className="ms-2 text-xs text-content-tertiary">{fmtDate(inv.invoice_date)}</span>}
                 </span>
-                <span className="tabular-nums text-content-secondary">{fmtCurrency(inv.gross, cur)}</span>
+                <span className="tabular-nums text-content-secondary">{fmtMoney(inv.gross, cur)}</span>
                 {canEdit && data.contracts.length > 0 && (
                   <select
                     className="h-8 w-48 rounded-lg border border-border bg-surface-primary px-2 text-sm"
@@ -389,7 +391,7 @@ function PostingForm({
         retention_kind: kind,
         event,
         event_on: eventOn || null,
-        amount: amount.trim(),
+        amount: moneyPayload(amount),
         posted_on: postedOn,
         document_ref: ref || undefined,
       }),
@@ -511,8 +513,8 @@ function RetentionTab({ projectId, currency, canRelease }: { projectId: string; 
   return (
     <div className="space-y-3" data-testid="payments-retention">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Figure label={t('cost_control.pay.fig_held', { defaultValue: 'Retention held' })} value={fmtCurrency(data.held, cur)} testId="retention-held-total" />
-        <Figure label={t('cost_control.pay.fig_posted', { defaultValue: 'Paid back' })} value={fmtCurrency(data.posted, cur)} />
+        <Figure label={t('cost_control.pay.fig_held', { defaultValue: 'Retention held' })} value={fmtMoney(data.held, cur)} testId="retention-held-total" />
+        <Figure label={t('cost_control.pay.fig_posted', { defaultValue: 'Paid back' })} value={fmtMoney(data.posted, cur)} />
       </div>
       <div className="overflow-x-auto rounded-xl border border-border-light">
         <table className="w-full min-w-[720px] text-sm">
@@ -538,7 +540,7 @@ function RetentionTab({ projectId, currency, canRelease }: { projectId: string; 
                       {c.postings.map((p) => (
                         <li key={p.id} className={`flex flex-wrap items-center gap-2 text-xs ${p.status === 'void' ? 'text-content-quaternary line-through' : 'text-content-secondary'}`}>
                           <span>{fmtDate(p.posted_on)}</span>
-                          <span>{fmtCurrency(p.amount, cur)}</span>
+                          <span>{fmtMoney(p.amount, cur)}</span>
                           <span>{eventLabel(t, p.event)}</span>
                           {p.document_ref && <span>{p.document_ref}</span>}
                           {p.status === 'posted' && canRelease && (
@@ -574,9 +576,9 @@ function RetentionTab({ projectId, currency, canRelease }: { projectId: string; 
                     </span>
                   )}
                 </td>
-                <td className="px-2 py-2.5 text-end tabular-nums text-content-secondary">{fmtCurrency(c.withheld, cur)}</td>
-                <td className="px-2 py-2.5 text-end tabular-nums text-content-secondary">{fmtCurrency(c.posted, cur)}</td>
-                <td className="px-2 py-2.5 text-end font-semibold tabular-nums text-content-primary">{fmtCurrency(c.held, cur)}</td>
+                <td className="px-2 py-2.5 text-end tabular-nums text-content-secondary">{fmtMoney(c.withheld, cur)}</td>
+                <td className="px-2 py-2.5 text-end tabular-nums text-content-secondary">{fmtMoney(c.posted, cur)}</td>
+                <td className="px-2 py-2.5 text-end font-semibold tabular-nums text-content-primary">{fmtMoney(c.held, cur)}</td>
                 <td className="py-2.5 pe-4 ps-2 text-end">
                   {canRelease && num(c.held) > 0 && posting !== c.contract_id && (
                     <Button variant="secondary" size="sm" onClick={() => setPosting(c.contract_id)} data-testid={`posting-open-${c.code}`}>

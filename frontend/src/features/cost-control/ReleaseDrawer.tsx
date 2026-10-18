@@ -15,8 +15,11 @@ import { AlertOctagon, AlertTriangle, Info, Lock, Unlock } from 'lucide-react';
 
 import { Badge, Button } from '@/shared/ui';
 import { SideDrawer } from '@/shared/ui/SideDrawer';
-import { fmtCurrency, fmtDate, fmtPercent } from '@/shared/lib/formatters';
+import { fmtDate, fmtPercent } from '@/shared/lib/formatters';
+// Release figures are amounts to pay: shown to the minor unit, never rounded to whole units.
+import { formatCurrency as fmtMoney } from '@/shared/lib/money';
 import { getErrorMessage } from '@/shared/lib/api';
+import { stripCurrencySigns, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { problemOf } from '@/features/costmodel/structureApi';
 import { useToastStore } from '@/stores/useToastStore';
 import { num } from './api';
@@ -33,6 +36,11 @@ import {
   type ReleaseFigures,
   type ReleaseFinding,
 } from './paymentsApi';
+
+/** A typed amount in the reader's own spelling (`120,50`, `1.234,56 €`) as the dot-decimal string the API parses. */
+export function moneyPayload(raw: string): string {
+  return toDecimalPayloadString(stripCurrencySigns(raw), '0');
+}
 
 const INPUT = 'h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm disabled:opacity-60';
 
@@ -56,7 +64,7 @@ export function releaseSteps(t: TFunction, f: ReleaseFigures, currency: string):
   }
   steps.push({ key: 'vat', sign: '+', amount: f.vat_after, label: t('cost_control.pay.step_vat', { defaultValue: 'VAT' }),
     note: num(f.vat_deduction) !== 0
-      ? t('cost_control.pay.step_vat_note', { defaultValue: 'less {{amount}} VAT on the deduction', amount: fmtCurrency(f.vat_deduction, currency) })
+      ? t('cost_control.pay.step_vat_note', { defaultValue: 'less {{amount}} VAT on the deduction', amount: fmtMoney(f.vat_deduction, currency) })
       : undefined });
   if (num(f.gross_deduction) !== 0) {
     steps.push({ key: 'gross', sign: '=', amount: f.gross, label: t('cost_control.pay.step_gross', { defaultValue: 'Gross amount' }) });
@@ -75,7 +83,7 @@ export function releaseSteps(t: TFunction, f: ReleaseFigures, currency: string):
           ? t('cost_control.pay.step_retention_note', {
               defaultValue: '{{percent}} of {{base}}',
               percent: fmtPercent(f.retention_percent, 2),
-              base: fmtCurrency(f.retention_base, currency),
+              base: fmtMoney(f.retention_base, currency),
             })
           : undefined,
   });
@@ -124,7 +132,7 @@ export function StepTable({ steps, currency, testId }: { steps: Step[]; currency
             <td
               className={`py-1.5 text-end tabular-nums ${s.strong ? 'font-semibold text-content-primary' : 'text-content-secondary'}`}
             >
-              {fmtCurrency(s.amount, currency)}
+              {fmtMoney(s.amount, currency)}
             </td>
           </tr>
         ))}
@@ -186,7 +194,7 @@ export function ReleaseDrawer({
   const fail = (title: string) => (err: unknown) => {
     const problem = problemOf(err);
     const params = { ...(problem?.params ?? {}) };
-    if (params.held !== undefined) params.held = fmtCurrency(String(params.held), currency);
+    if (params.held !== undefined) params.held = fmtMoney(String(params.held), currency);
     addToast({
       type: 'error',
       title,
@@ -270,7 +278,7 @@ export function ReleaseDrawer({
           <p className="mt-2 text-xs text-content-tertiary">
             {t('cost_control.pay.held_after', {
               defaultValue: 'Retention held on the contract after this invoice: {{amount}}',
-              amount: fmtCurrency(invoice.figures.retention_held_after, currency),
+              amount: fmtMoney(invoice.figures.retention_held_after, currency),
             })}
           </p>
         </section>
@@ -281,8 +289,8 @@ export function ReleaseDrawer({
               {t('cost_control.pay.differs', {
                 defaultValue:
                   'The terms today give {{amount}} for this invoice, not the {{released}} confirmed. Reopen it to release it again, or keep the confirmed figure.',
-                amount: fmtCurrency(invoice.computed.release, currency),
-                released: fmtCurrency(invoice.figures.release, currency),
+                amount: fmtMoney(invoice.computed.release, currency),
+                released: fmtMoney(invoice.figures.release, currency),
               })}
             </p>
           </section>
@@ -389,9 +397,9 @@ export function ReleaseDrawer({
                 onClick={() =>
                   update.mutate({
                     kind,
-                    net_deduction: netDeduction.trim() || '0',
+                    net_deduction: moneyPayload(netDeduction),
                     net_deduction_note: netNote,
-                    gross_deduction: grossDeduction.trim() || '0',
+                    gross_deduction: moneyPayload(grossDeduction),
                     gross_deduction_note: grossNote,
                   })
                 }
@@ -430,7 +438,7 @@ export function ReleaseDrawer({
                 onClick={() => release.mutate()}
                 data-testid="release-confirm"
               >
-                {t('cost_control.pay.confirm', { defaultValue: 'Confirm release of {{amount}}', amount: fmtCurrency(invoice.figures.release, currency) })}
+                {t('cost_control.pay.confirm', { defaultValue: 'Confirm release of {{amount}}', amount: fmtMoney(invoice.figures.release, currency) })}
               </Button>
             ))}
         </section>
