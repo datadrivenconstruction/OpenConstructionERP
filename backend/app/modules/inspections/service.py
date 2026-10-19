@@ -259,7 +259,8 @@ class InspectionService:
             result: Must be one of ``pass``, ``fail``, or ``partial``.
 
         Emits ``inspection.completed.failed`` event when result is ``fail``
-        or ``partial`` to trigger punchlist item creation flow.
+        or ``partial`` to trigger punchlist item creation flow, and
+        ``inspection.completed.passed`` on a pass.
         """
         if result not in ("pass", "fail", "partial"):
             raise HTTPException(
@@ -326,6 +327,20 @@ class InspectionService:
                     "inspection_number": inspection.inspection_number,
                     "result": result,
                     "failed_items": failed_items,
+                },
+                source_module="inspections",
+            )
+        else:
+            # A pass is closure evidence too: closeout marks a built handover
+            # package stale on it, the same as on a failure.
+            publish_after_commit(
+                self.session,
+                "inspection.completed.passed",
+                data={
+                    "project_id": str(inspection.project_id),
+                    "inspection_id": str(inspection_id),
+                    "inspection_number": inspection.inspection_number,
+                    "result": result,
                 },
                 source_module="inspections",
             )
