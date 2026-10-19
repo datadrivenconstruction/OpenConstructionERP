@@ -101643,7 +101643,7 @@
           "method": "GET",
           "path": "/units/",
           "handler": "list_units",
-          "response_model": "list[UnitResponse]"
+          "response_model": "EinvoiceZatcaListResponse"
         },
         {
           "method": "POST",
@@ -101840,6 +101840,33 @@
             {
               "name": "last_error",
               "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "EinvoiceZatcaListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[UnitResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
             }
           ]
         },
@@ -278522,7 +278549,7 @@
     "total_columns": 9170,
     "total_relationships": 240,
     "total_routes": 4622,
-    "total_schemas": 4107,
+    "total_schemas": 4108,
     "total_python_files": 2805,
     "frontend_features": 209,
     "frontend_ts_files": 3568,
