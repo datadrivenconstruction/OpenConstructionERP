@@ -1034,7 +1034,7 @@ function PerformanceGroupCard({
           {excluded.length > 0 && (
             <span data-testid="analytics-performance-excluded">
               {t('analytics.perf.excluded', { defaultValue: 'Left out:' })}{' '}
-              {excluded.map(([reason, n]) => `${reasonLabel(reason)} ${n}`).join(', ')}
+              {fmtList(excluded.map(([reason, n]) => `${reasonLabel(reason)} ${n}`))}
             </span>
           )}
         </div>
