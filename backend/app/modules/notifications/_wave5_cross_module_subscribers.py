@@ -5,7 +5,6 @@
 Wires real cross-module side-effects emitted by the wave-5 deep-dive:
 
 * ``resources.cert_expiring`` → notification per expiring certification.
-* ``contracts.retention.released`` → notification for project owner.
 * ``crm.opportunity.won`` → bid_management BidPackage (draft, pre-populated).
 * ``crm.opportunity.scored`` → notification for opportunity owner.
 * ``carbon.boq_position.assigned`` → notification for project sustainability lead.
@@ -96,46 +95,6 @@ async def _on_cert_expiring(event: Event) -> None:
             entity_type="resource_certification",
             entity_id=str(data.get("certification_id", "")),
             action_url=f"/resources?resourceId={resource_id}",
-        )
-        await session.commit()
-
-
-# ── Contracts: retention released → notification ─────────────────────────
-
-
-async def _on_retention_released(event: Event) -> None:
-    """``contracts.retention.released`` → notify project owner."""
-    if not await _can_open_isolated_session():
-        return
-    data = event.data or {}
-    contract_id = data.get("contract_id")
-    if not contract_id:
-        return
-    async with async_session_factory() as session:
-        from app.modules.contracts.repository import ContractRepository
-
-        repo = ContractRepository(session)
-        try:
-            contract = await repo.get_by_id(uuid.UUID(str(contract_id)))
-        except (ValueError, TypeError):
-            return
-        if contract is None or contract.created_by is None:
-            return
-        svc = NotificationService(session)
-        await svc.create(
-            user_id=str(contract.created_by),
-            notification_type="contracts_retention_released",
-            title_key="notifications.contracts.retention_released.title",
-            body_key="notifications.contracts.retention_released.body",
-            body_context={
-                "contract_code": contract.code,
-                "event": data.get("event", ""),
-                "amount_released": data.get("amount_released", "0"),
-                "remaining": data.get("remaining", "0"),
-            },
-            entity_type="contract",
-            entity_id=str(contract.id),
-            action_url=f"/contracts?highlight={contract.id}",
         )
         await session.commit()
 
@@ -1120,7 +1079,6 @@ async def _on_changeorder_approved_schedule(event: Event) -> None:
 
 _SUBSCRIPTIONS: tuple[tuple[str, Callable[[Event], object]], ...] = (
     ("resources.cert_expiring", _on_cert_expiring),
-    ("contracts.retention.released", _on_retention_released),
     ("crm.opportunity.won", _on_opportunity_won),
     ("crm.opportunity.scored", _on_opportunity_scored),
     ("carbon.boq_position.assigned", _on_boq_position_assigned),

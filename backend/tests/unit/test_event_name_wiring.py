@@ -105,43 +105,7 @@ def _is_constant_name(identifier: str) -> bool:
 #: create records; turning thirty of them on in one commit would be a behaviour
 #: change disguised as a rename. One seam per commit, with a test that asserts
 #: the handler's effect rather than that it fired.
-KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
-    "bim_hub.federation.created": (
-        "geo_hub/events.py _SUBSCRIPTIONS; bim_hub publishes no federation event, and the handler only "
-        "queues a tile job that no worker runs"
-    ),
-    "bim_hub.model.uploaded": (
-        "geo_hub/events.py _SUBSCRIPTIONS; bim_hub publishes no upload event, and the handler only "
-        "queues a tile job that no worker runs"
-    ),
-    "carbon.footprint.computed": "geo_hub/events.py _SUBSCRIPTIONS; carbon publishes inventory events, never a footprint",
-    "cde.container.state_transitioned": (
-        "notifications/events.py _SUBSCRIPTIONS; cde/service.py publishes 'cde.container.promoted', "
-        "and the handler would notify the actor of their own transition"
-    ),
-    "clash.detected": (
-        "geo_hub/events.py _SUBSCRIPTIONS; clash publishes 'clash.high_severity.detected' with no "
-        "coordinates, which the handler needs"
-    ),
-    "contracts.retention.released": (
-        "notifications/_wave5_cross_module_subscribers.py; contracts publishes "
-        "'contracts.retention.release_proposed' only, and the handler's title and body keys have no text"
-    ),
-    "field_reports.submitted": "geo_hub/events.py _SUBSCRIPTIONS; there is no field_reports module",
-    "projects.created": (
-        "geo_hub/events.py _SUBSCRIPTIONS; projects publishes 'projects.project.created', and the handler "
-        "would pin every new project at latitude 0, longitude 0"
-    ),
-    "property_dev.development.created": (
-        "geo_hub/events.py _SUBSCRIPTIONS; property_dev publishes no development creation event"
-    ),
-    "risk.zone.flagged": "geo_hub/events.py _SUBSCRIPTIONS; risk publishes no zone event and stores no polygons",
-    "schedule.activity.slipped": (
-        "subcontractors/events.py _SUBSCRIPTIONS; nothing publishes a slip, and the monthly rating already "
-        "counts slips straight from the activity rows"
-    ),
-    "schedule.task.scheduled": "geo_hub/events.py _SUBSCRIPTIONS; the schedule module has no task scheduling event",
-}
+KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {}
 
 
 def _callee(node: ast.Call) -> str:

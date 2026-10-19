@@ -6,15 +6,13 @@ When the NCR / HSE / Quality modules publish an event whose payload names a
 ``subcontractor_id``, this module bumps the corresponding sub's rating
 counters for the *current* period and recomputes the weighted overall score.
 
-The subscriber list is intentionally small (NCR, HSE incidents, schedule
-slippage). Each handler opens its own short-lived session via
+The subscriber list is intentionally small (NCR and HSE incidents). Each handler opens its own short-lived session via
 ``async_session_factory()`` so a rating-write failure can never roll back the
 upstream module's transaction.
 
 Subscribers wired:
     ``ncr.created``                  → ``bump_rating_from_event(kind="ncr")``
     ``safety.incident.created``      → ``bump_rating_from_event(kind="hse")``
-    ``schedule.activity.slipped``    → ``bump_rating_from_event(kind="schedule")``
     ``contracts.contract.signed``    → commit a subcontract's value to the budget
     ``contracts.claim.paid``         → pay a subcontractor claim's payable
     ``invoice.paid``                 → draw the subcontract commitment down
@@ -90,11 +88,6 @@ async def _on_ncr_created(event: Event) -> None:
 async def _on_safety_incident_created(event: Event) -> None:
     """``safety.incident.created`` → +1 HSE for the current month."""
     await _bump("hse", event)
-
-
-async def _on_schedule_slipped(event: Event) -> None:
-    """``schedule.activity.slipped`` → +1 schedule-deviation day."""
-    await _bump("schedule", event)
 
 
 async def _on_defect_recorded(event: Event) -> None:
@@ -173,7 +166,6 @@ async def _on_claim_paid(event: Event) -> None:
 _SUBSCRIPTIONS: list[tuple[str, object]] = [
     ("ncr.created", _on_ncr_created),
     ("safety.incident.created", _on_safety_incident_created),
-    ("schedule.activity.slipped", _on_schedule_slipped),
     ("subcontractors.defect.recorded", _on_defect_recorded),
     ("contracts.contract.signed", _on_contract_signed),
     ("contracts.claim.paid", _on_claim_paid),

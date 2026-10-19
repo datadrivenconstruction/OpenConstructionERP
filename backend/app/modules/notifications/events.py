@@ -22,7 +22,6 @@ Events currently consumed:
 * ``meeting.action_items_created`` →  task owners (one per item)
 * ``boq.boq.created`` →  the creator (acks the create operation)
 * ``bim_hub.element.deleted`` →  the deleter (audit echo)
-* ``cde.container.state_transitioned`` →  the actor
 
 Other modules can extend this list by adding to ``_SUBSCRIPTIONS``
 without touching the rest of the file.
@@ -162,34 +161,6 @@ async def _on_bim_element_deleted(event: Event) -> None:
     changes.
     """
     return
-
-
-async def _on_cde_state_transitioned(event: Event) -> None:
-    """``cde.container.state_transitioned`` → notify the actor."""
-    if not await _can_open_isolated_session():
-        return
-    data = event.data or {}
-    actor_id = data.get("user_id") or data.get("actor_id")
-    container_id = data.get("container_id") or data.get("id")
-    new_state = data.get("new_state") or data.get("to_state") or ""
-    if not actor_id or not container_id:
-        return
-    try:
-        async with async_session_factory() as session:
-            svc = NotificationService(session)
-            await svc.create(
-                user_id=actor_id,
-                notification_type="info",
-                title_key="notifications.cde.state_transitioned.title",
-                body_key="notifications.cde.state_transitioned.body",
-                body_context={"new_state": new_state},
-                entity_type="cde_container",
-                entity_id=str(container_id),
-                action_url=f"/cde?id={container_id}",
-            )
-            await session.commit()
-    except Exception:
-        logger.warning("notifications: _on_cde_state_transitioned failed", exc_info=True)
 
 
 async def _on_rfi_assigned(event: Event) -> None:
@@ -826,7 +797,6 @@ _SUBSCRIPTIONS: list[tuple[str, callable]] = [  # type: ignore[type-arg]
     ("boq.boq.created", _on_boq_created),
     ("meeting.action_items_created", _on_meeting_action_items_created),
     ("bim_hub.element.deleted", _on_bim_element_deleted),
-    ("cde.container.state_transitioned", _on_cde_state_transitioned),
     ("rfi.assigned", _on_rfi_assigned),
     ("rfi.responded", _on_rfi_responded),
     ("risk.assigned", _on_risk_assigned),
