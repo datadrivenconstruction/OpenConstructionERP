@@ -212,11 +212,22 @@ def build_input_from_invoice(
         raise fa3.Fa3BuildError(f"split payment cannot be decided: {decision.reason}")
     metadata = invoice.get("metadata") if isinstance(invoice.get("metadata"), dict) else {}
     stored = metadata.get(STORED_SPLIT_PAYMENT_KEY)
-    if stored is not None and _flag(stored) != decision.required:
-        raise fa3.Fa3BuildError(
-            f"the invoice is recorded as split payment {'required' if _flag(stored) else 'not required'} but its "
-            f"lines say otherwise ({decision.reason}); mark the Annex 15 lines or correct the invoice"
-        )
+    if decision.verdict == split_payment.NOT_CHECKED:
+        # No threshold to compare with. The invoice's own marker is the only
+        # answer left; without it the build stops rather than guess a number.
+        if stored is None:
+            raise fa3.Fa3BuildError(
+                f"split payment was not checked: {decision.reason}; record the split payment marker on the "
+                "invoice or restore the Polish VAT data"
+            )
+        split_required = _flag(stored)
+    else:
+        if stored is not None and _flag(stored) != decision.required:
+            raise fa3.Fa3BuildError(
+                f"the invoice is recorded as split payment {'required' if _flag(stored) else 'not required'} but "
+                f"its lines say otherwise ({decision.reason}); mark the Annex 15 lines or correct the invoice"
+            )
+        split_required = decision.required
 
     correction = None
     raw_correction = ksef_fields.get("correction") if isinstance(ksef_fields.get("correction"), dict) else None
@@ -275,7 +286,7 @@ def build_input_from_invoice(
         cash_accounting=_flag(ksef_fields.get("cash_accounting")),
         self_billing=_flag(ksef_fields.get("self_billing")),
         reverse_charge=_flag(ksef_fields.get("reverse_charge")) or any(line.vat_code == "oo" for line in built),
-        split_payment=decision.required,
+        split_payment=split_required,
         exemption_basis=str(ksef_fields.get("exemption_basis") or "").strip(),
         correction=correction,
         advance_invoices=tuple(

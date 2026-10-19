@@ -15,7 +15,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
-from decimal import Decimal
 
 READ_DATE = "2026-10-19"
 
@@ -168,23 +167,9 @@ PHASES: tuple[DatedFact, ...] = (PHASE_RECEIVE_ALL, PHASE_ISSUE_LARGE, PHASE_ISS
 
 
 # ── Split payment (MPP) ─────────────────────────────────────────────────────
-SPLIT_PAYMENT_THRESHOLD_PLN = Decimal("15000")
-SPLIT_PAYMENT = DatedFact(
-    key="split_payment",
-    effective_date="2019-11-01",
-    description=(
-        "Mandatory split payment when the invoice covers goods or services listed in Annex 15 to the VAT Act "
-        "and its gross total exceeds PLN 15,000 or the equivalent; the invoice carries the words "
-        "'mechanizm podzielonej platnosci' (FA(3) P_18A = 1). VAT Act art. 108a ust. 1a, art. 106e ust. 1 pkt 18a."
-    ),
-    source_url="https://www.roedl.pl/en/good-to-know/good-to-know/split-payment-mechanism/split-payment-mandatory-until-2028",
-    confidence="H",
-    threshold="PLN 15000 gross invoice total",
-)
-# PKWiU sections whose services Annex 15 lists in part. A prefix is a hint, never
-# a verdict: Annex 15 names individual codes, so a line is flagged by data and
-# this only drives an advisory warning on a construction line left unflagged.
-CONSTRUCTION_PKWIU_SECTIONS: tuple[str, ...] = ("41", "42", "43")
+# Split payment is a VAT rule, not a KSeF fact. Its threshold and the Annex 15
+# sections are read from the Polish VAT data (``app.core.vat_construction``);
+# see ``split_payment.py``. Nothing here repeats them.
 
 
 # ── Offline modes ────────────────────────────────────────────────────────────
@@ -326,7 +311,7 @@ class FactSheet:
     schemas: tuple[SchemaVersion, ...] = SCHEMA_VERSIONS
     phases: tuple[DatedFact, ...] = PHASES
     others: tuple[DatedFact, ...] = field(
-        default=(PENALTIES_FROM, TOKEN_AUTH_LAST_DAY, KSEF_NUMBER_IN_PAYMENT_TITLE, SPLIT_PAYMENT, JPK_V7_3)
+        default=(PENALTIES_FROM, TOKEN_AUTH_LAST_DAY, KSEF_NUMBER_IN_PAYMENT_TITLE, JPK_V7_3)
     )
 
 
@@ -336,7 +321,6 @@ def on_or_after(day: date, fact: DatedFact) -> bool:
 
 
 __all__ = [
-    "CONSTRUCTION_PKWIU_SECTIONS",
     "ENVIRONMENTS",
     "FA2",
     "FA3",
@@ -359,8 +343,6 @@ __all__ = [
     "PHASE_ISSUE_MICRO",
     "PHASE_RECEIVE_ALL",
     "SCHEMA_VERSIONS",
-    "SPLIT_PAYMENT",
-    "SPLIT_PAYMENT_THRESHOLD_PLN",
     "TOKEN_AUTH_LAST_DAY",
     "DatedFact",
     "Environment",

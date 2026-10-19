@@ -52,10 +52,10 @@ from a later status read), so one interface serves both.
 
 | File | Role |
 |---|---|
-| `facts.py` | Dated, sourced facts as data rows: schema identities, phases, deadlines, environments, offline modes, JPK markers, the split payment threshold |
+| `facts.py` | Dated, sourced facts as data rows: schema identities, phases, deadlines, environments, offline modes, JPK markers |
 | `ksef_number.py` | KSeF number format and CRC-8 check |
 | `fa3.py` | Neutral input dataclasses and the FA(3) XML writer; a reader for what the rules need |
-| `split_payment.py` | Whether P_18A applies (Annex 15 line and gross above PLN 15,000) |
+| `split_payment.py` | Whether P_18A applies; the threshold and Annex 15 sections are read from the Polish VAT data (`app.core.vat_construction`) |
 | `builder.py` | Finance invoice to FA(3) input; the registered payload builder |
 | `offline.py` | Offline modes and upload deadlines |
 | `qr.py` | KOD I and KOD II links, the link signer, QR rendering to SVG |
@@ -88,7 +88,10 @@ Annex 15 (`P_12_Zal_15`) and the gross total in PLN exceeds 15,000. A line is fl
 code prefix is not a reliable test. A line with a construction PKWiU (sections 41-43) that is not
 flagged raises an advisory warning only. For a foreign-currency invoice the PLN equivalent needs
 the exchange rate (`country_fields.ksef.exchange_rate`); without it the decision cannot be made
-and the rule says so.
+and the rule says so. The threshold (strictly above PLN 15,000) and the Annex 15 sections belong to
+the Polish VAT data, `app.core.vat_construction`, and this module keeps no copy. If that data cannot
+be read, P_18A is "not checked": the rules warn, and the builder uses the invoice's stored marker or
+stops. It never falls back to a remembered number.
 
 **Advance invoices.** ZAL carries the received payment in P_13_x / P_14_x / P_15 and the order or
 contract it relates to in `Zamowienie` (value with VAT, and its lines). ROZ (the settlement invoice
