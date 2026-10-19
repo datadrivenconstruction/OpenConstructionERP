@@ -27,6 +27,15 @@ export interface AppliedInfo {
   update_available?: boolean;
 }
 
+/** What the core registries hold for one country (see ``country_builtins.py``). */
+export interface CountryBuiltIns {
+  country: string;
+  vat: { standard?: string; reduced?: string; zero?: string } | null;
+  holidays: { year: number; count: number } | null;
+  einvoice: { platform: string; label: string } | null;
+  payment_terms: { code: string; statute: string; final_date_days: number | null }[] | null;
+}
+
 export interface ApplyPlan {
   branding: {
     partner_name: string;
@@ -49,6 +58,10 @@ export interface ApplyPlan {
   /** Engine rule sets switched on for new projects while the pack is active. */
   rule_sets_enabled?: string[];
   default_tax_template?: string | null;
+  /** VAT, holidays, e-invoicing and payment terms the platform already applies
+   *  to projects in the pack's country. Not set by the pack; absent on older
+   *  backends and null for a pack with no single market. */
+  built_in_for_country?: CountryBuiltIns | null;
   /** Built-in estimating-methodology slug the pack activates on its demo
    *  project and seeds on projects created while the pack is active. */
   default_methodology?: string | null;

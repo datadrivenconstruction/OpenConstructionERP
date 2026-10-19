@@ -2390,14 +2390,12 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "uk-jct": "commercial-london",
     "us-costdata": "commercial-denver",
     # Texas gets the medical centre because that project is actually in
-    # Houston. California has no demo of its own yet, so it points at the
-    # Denver project as a placeholder; that is the one earmarked to be
-    # relocated, and this mapping becomes true if it lands in California and
-    # wants re-pointing if it lands elsewhere. A pack is not installable
-    # without an entry here, so the placeholder is what keeps the gate honest
-    # rather than a claim about where the project sits.
+    # Houston. California gets the Sacramento office, its own demo; it used to
+    # point at the Denver project as a placeholder, so the California pack
+    # installed a project located in Colorado. The state packs fill only with
+    # demos located in their own state (see ``_country_fill``).
     "us-texas": "medical-us",
-    "us-california": "commercial-denver",
+    "us-california": "commercial-sacramento",
     # 10 country packs added 2026-09-11. Each maps to its flagship demo.
     "germany-de": "residential-berlin",
     "france-fr": "school-paris",
@@ -2588,6 +2586,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "infrastructure-capetown": "Infrastructure",
     "commercial-london": "Commercial",
     "commercial-denver": "Commercial",
+    "commercial-sacramento": "Commercial",
     "hospital-lyon": "Healthcare",
     "tower-abudhabi": "Mixed-use",
     "condo-toronto": "Residential",

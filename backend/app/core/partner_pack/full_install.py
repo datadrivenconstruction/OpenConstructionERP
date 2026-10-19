@@ -169,6 +169,28 @@ def _build_city_index() -> dict[str, str]:
     return index
 
 
+def _registry_region(db_id: str) -> str:
+    """The id the base registry knows a loadable base by.
+
+    A base can be published under two names for one file: the Canadian base is
+    ``CA_TORONTO`` to the loader and ``ENG_TORONTO`` to the registry. Asking
+    the registry for ``CA_TORONTO`` found nothing, so the activation dialog
+    showed the Canadian base with no size, no market and no currency. Fall back
+    to the alias that points at the same parquet.
+    """
+    from app.modules.costs import base_registry
+    from app.modules.costs.router import _GITHUB_CWICR_FILES
+
+    if base_registry.variant_by_region(db_id) is not None:
+        return db_id
+    path = _GITHUB_CWICR_FILES.get(db_id)
+    if path:
+        for alias, alias_path in _GITHUB_CWICR_FILES.items():
+            if alias != db_id and alias_path == path and base_registry.variant_by_region(alias) is not None:
+                return alias
+    return db_id
+
+
 def describe_cost_bases(region_slugs: list[str]) -> list[dict[str, Any]]:
     """What each of a pack's declared cost regions would load, before loading.
 
@@ -193,8 +215,9 @@ def describe_cost_bases(region_slugs: list[str]) -> list[dict[str, Any]]:
     seen: set[str] = set()
     for slug in region_slugs:
         db_id = resolve_cwicr_db_id(slug)
-        variant = base_registry.variant_by_region(db_id) if db_id else None
-        family = base_registry.family_by_region(db_id) if db_id else None
+        registry_id = _registry_region(db_id) if db_id else None
+        variant = base_registry.variant_by_region(registry_id) if registry_id else None
+        family = base_registry.family_by_region(registry_id) if registry_id else None
         entry: dict[str, Any] = {
             "slug": slug,
             "db_id": db_id,
@@ -420,7 +443,9 @@ async def _step_cost_db(slug: str) -> tuple[StepResult, list[str]]:
             loaded.append(db_id)
         except Exception as exc:  # noqa: BLE001 - fail-soft per region
             logger.warning("full-install cost_db: region %s (%s) failed: %s", region_slug, db_id, exc)
-            errors.append({"region": region_slug, "db_id": db_id, "error": str(exc)})
+            errors.append(
+                {"region": region_slug, "db_id": db_id, "error": str(exc), "reason_code": _load_failure_reason(exc)}
+            )
 
     detail: dict[str, Any] = {"regions": loaded, "items": items}
     if skipped:
@@ -429,6 +454,8 @@ async def _step_cost_db(slug: str) -> tuple[StepResult, list[str]]:
         detail["errors"] = errors
 
     status = _cost_db_status(loaded, errors)
+    if status == "error":
+        _mark_cost_base_not_loaded(detail, loaded)
     if not regions:
         detail.setdefault("reason", "no cwicr_regions declared")
     return StepResult(step="cost_db", status=status, detail=detail), loaded
@@ -446,6 +473,34 @@ def _cost_db_status(loaded: list[str], errors: list[dict[str, str]]) -> str:
     if errors:
         return "error"
     return "ok" if loaded else "skipped"
+
+
+def _load_failure_reason(exc: Exception) -> str:
+    """Why one cost base did not load, as a code the dialog and the banner localize.
+
+    ``load_cwicr_region`` answers 404 when no copy of the base is on disk and
+    the download from the public repository failed, which on an install with
+    no internet is the usual cause. That case gets its own code so the screen
+    can say "could not be downloaded" rather than a generic failure.
+    """
+    from fastapi import HTTPException
+
+    if isinstance(exc, HTTPException) and exc.status_code == 404:
+        return "download_failed"
+    return "load_failed"
+
+
+def _mark_cost_base_not_loaded(detail: dict[str, Any], loaded: list[str]) -> None:
+    """Say on the step, not only per base, whether the workspace got its prices.
+
+    The install is fail-soft and carries on to the demos, so a cost step that
+    errored used to be one red row among green ones. ``prices_loaded`` and the
+    step-level reason make the outcome explicit for every reader of the result.
+    """
+    detail["prices_loaded"] = bool(loaded)
+    if not loaded:
+        detail["reason"] = "the cost database was not loaded, so the workspace has no prices"
+        detail["reason_code"] = "cost_base_not_loaded"
 
 
 async def _step_vector_db(loaded_regions: list[str]) -> StepResult:
@@ -534,15 +589,28 @@ def _country_fill(slug: str, ordered: list[str]) -> None:
     always lead and the same-country siblings follow. No-op when the pack has
     no derivable country.
     """
-    from app.core.demo_projects import DEMO_CATALOG
+    from app.core.demo_projects import DEMO_CATALOG, DEMO_TEMPLATES
+    from app.core.partner_pack.discovery import get_pack_by_slug
 
     country = _pack_country(slug)
     if not country:
         return
+    # A state pack (California, Texas) is about one subdivision. Filling it
+    # with the country's other demos installed a Denver office under the
+    # California pack and the same Denver office under the Texas one, so the
+    # fill keeps to demos located in the pack's own subdivision.
+    pack = get_pack_by_slug(slug)
+    meta = (pack.metadata or {}) if pack else {}
+    subdivision = str(meta.get("subdivision") or "").strip().upper()
     for row in DEMO_CATALOG:
         demo_id = row.get("demo_id")
-        if demo_id and demo_id not in ordered and (row.get("country") or "").strip() == country:
-            ordered.append(demo_id)
+        if not demo_id or demo_id in ordered or (row.get("country") or "").strip() != country:
+            continue
+        if subdivision:
+            template = DEMO_TEMPLATES.get(demo_id)
+            if (getattr(template, "subdivision_code", "") or "").strip().upper() != subdivision:
+                continue
+        ordered.append(demo_id)
 
 
 def _demo_install_list(slug: str, demo_count: int, country_fill: bool = True) -> list[str]:
@@ -804,7 +872,7 @@ async def _step_cost_db_detailed(slug: str, cost_regions: list[str] | None = Non
                     "slug": region_slug,
                     "db_id": db_id,
                     "status": "error",
-                    "reason_code": "load_failed",
+                    "reason_code": _load_failure_reason(exc),
                     "error": str(exc),
                 }
             )
@@ -816,6 +884,8 @@ async def _step_cost_db_detailed(slug: str, cost_regions: list[str] | None = Non
         detail["errors"] = errors
 
     status = _cost_db_status(loaded, errors)
+    if status == "error":
+        _mark_cost_base_not_loaded(detail, loaded)
     if not declared:
         detail.setdefault("reason", "no cwicr_regions declared")
         detail["reason_code"] = "no_regions_declared"
@@ -1113,7 +1183,8 @@ async def full_install(
     """Run the five-step one-click install for ``req.slug`` (DESIGN §5).
 
     Each step is fully fail-soft; the call always returns the §5 response.
-    ``ok`` is true iff apply_pack succeeded **and** at least one demo installed.
+    ``ok`` is true iff apply_pack succeeded, at least one demo installed, and the
+    cost step did not error.
     """
     slug = req.slug
     steps: list[StepResult] = []
@@ -1157,7 +1228,11 @@ async def full_install(
 
     apply_ok = apply_result.status == "ok"
     demos_ok = demos_step.status == "ok" and bool(demos_step.detail.get("installed"))
-    ok = apply_ok and demos_ok
+    # A cost base the pack asked for and did not get leaves a workspace with no
+    # prices. That is not success, even with the demos in: the stream path
+    # already reads it that way and the batch path now agrees.
+    cost_ok = not any(s.step == "cost_db" and s.status == "error" for s in steps)
+    ok = apply_ok and demos_ok and cost_ok
 
     logger.info(
         "Partner-pack full-install '%s': ok=%s steps=%s",

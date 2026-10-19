@@ -447,10 +447,20 @@ class PartnerPackManifest(BaseModel):
     # ------------------------------------------------------------------
     @property
     def effective_powered_by(self) -> str:
-        """Co-branding string. Default preserves AGPL attribution."""
+        """Co-branding string. Default preserves AGPL attribution.
+
+        The "in partnership with" half is only synthesized for a ``partner``
+        pack. A country or industry pack we author carries a ``partner_name``
+        too ("Germany Construction Pack"), and the old default turned that into
+        "In partnership with Germany Construction Pack", a partnership that
+        does not exist. Packs under a real partnership agreement (see the
+        License section of their README) state their line explicitly.
+        """
         if self.branding.powered_by_text:
             return self.branding.powered_by_text
-        return f"Powered by OpenConstructionERP · In partnership with {self.partner_name}"
+        if self.type == "partner":
+            return f"Powered by OpenConstructionERP · In partnership with {self.partner_name}"
+        return "Powered by OpenConstructionERP"
 
     def _carries(self, relpath: str | None) -> bool:
         """Whether the pack actually ships the file it names at ``relpath``.

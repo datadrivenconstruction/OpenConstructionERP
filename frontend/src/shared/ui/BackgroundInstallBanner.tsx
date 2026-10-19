@@ -10,6 +10,7 @@ import {
   MinusCircle,
   ChevronDown,
   ChevronUp,
+  RotateCcw,
   X,
 } from 'lucide-react';
 import {
@@ -37,6 +38,7 @@ export function BackgroundInstallBanner() {
   const { t } = useTranslation();
   const install = useBackgroundInstallStore((s) => s.install);
   const dismiss = useBackgroundInstallStore((s) => s.dismiss);
+  const retryCostBase = useBackgroundInstallStore((s) => s.retryCostBase);
   const [collapsed, setCollapsed] = useState(false);
   const qc = useQueryClient();
 
@@ -87,6 +89,10 @@ export function BackgroundInstallBanner() {
   ).length;
   const pct = total > 0 ? Math.round((finished / total) * 100) : 0;
   const runningStep = install.steps.find((s) => s.status === 'running');
+  // A cost database that did not load leaves a workspace with no prices. The
+  // install carries on to the sample projects, so a red row alone read as a
+  // minor hiccup; say what it means and offer the retry right here.
+  const costFailed = install.done && install.steps.some((s) => s.step === 'cost_db' && s.status === 'error');
 
   // A step that failed is not "ready, with some items skipped": that line read
   // next to a red cross on a cost database that never loaded.
@@ -197,6 +203,42 @@ export function BackgroundInstallBanner() {
             </li>
           ))}
         </ul>
+      )}
+
+      {costFailed && (
+        <div
+          className="mx-4 mb-3 rounded-lg border border-semantic-warning/40 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-900/20 dark:text-amber-100"
+          data-testid="bg-install-no-prices"
+        >
+          <p>
+            {t('onboarding.bg_install_no_prices', {
+              defaultValue:
+                'The cost database was not loaded, so the workspace has no prices yet. Check the internet connection and retry.',
+            })}
+          </p>
+          {retryCostBase && (
+            <button
+              type="button"
+              onClick={retryCostBase}
+              className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-oe-blue px-2.5 py-1 text-xs font-semibold text-white hover:bg-oe-blue/90"
+              data-testid="bg-install-retry-cost"
+            >
+              <RotateCcw size={12} aria-hidden />
+              {t('onboarding.bg_install_retry_cost', { defaultValue: 'Retry cost database' })}
+            </button>
+          )}
+        </div>
+      )}
+
+      {install.done && (
+        <p className="px-4 pb-3 text-2xs text-content-tertiary" data-testid="bg-install-search-index">
+          {t('onboarding.bg_install_search_index', {
+            defaultValue: 'The AI search index is not built during setup.',
+          })}{' '}
+          <a href="/setup/databases" className="font-medium text-oe-blue hover:underline">
+            {t('onboarding.bg_install_search_index_link', { defaultValue: 'Build it when needed' })}
+          </a>
+        </p>
       )}
     </div>
   );

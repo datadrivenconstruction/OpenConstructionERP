@@ -21,6 +21,8 @@ Status: DESIGN (2026-05-31). Owner: core. Supersedes the disconnected
 So: pick a country/partner pack in onboarding → **one click installs everything**:
 1. **Language** (locale) switched + activated.
 2. **Both databases**: the *simple/relational* cost DB (CWICR) **and** the *vector* DB (embeddings for semantic search).
+   See the decision of 2026-10-19 below: the vector DB is not built during the
+   install, and the install says so.
 3. **2 example projects from that country**, each **fully worked through every module** so a new user immediately sees how to operate the whole platform.
 
 And the **partner packs we actually built** (17 in `packs/` as of 2026-08) must be the thing shown in onboarding — not a separate hardcoded list.
@@ -152,6 +154,27 @@ Steps (each fail-soft; a failed step is reported, never aborts the rest):
 4. **vector_db** — for each loaded region, run the existing
    `vector/vectorize` path (LanceDB embedded / Qdrant server). Fail-soft if the
    embedding model is unavailable (feature degrades, not a hard error).
+
+   **Decision, 2026-10-19: off during the install.** The step stays in the
+   orchestrator and runs when a caller passes `vectorize: true`, but neither the
+   onboarding picker nor the Modules dialog asks for it. Reasons:
+
+   * Memory. CLAUDE.md principle 1 sets a 3 GB floor for a server running the
+     whole platform. The cost import alone is measured by the "Pack cost bases"
+     CI lane: CA_TORONTO peaks at 1,086 MiB of Python RSS, an import delta of
+     828 MiB, with the largest PostgreSQL backend at 175 MiB. Loading the
+     embedding model and encoding about 55,000 items straight after that would
+     stack a second peak on the first, on the one machine size we promise to fit.
+   * Time. Vectorising a base is the slowest step by far (about 2 to 5 minutes
+     for 55,000 items), and inline it made the install look stuck.
+   * It is optional. The semantic index only powers AI-assisted matching, which
+     falls back gracefully when the index is absent.
+
+   What the user is told instead: the activation preview has an "AI search
+   index" row saying it is not built during installation, the finished summary
+   and the onboarding background banner repeat that, and each links to
+   Databases & Resources (`/setup/databases`), where the index is built on
+   demand. The vector step is not reported as done anywhere it did not run.
 5. **demos** — pick up to `demo_count` demo ids for the pack's country from
    `DEMO_CATALOG` (filter by `country`; the pack flagship from
    `PACK_DEMO_PROJECT` is always included first), then call

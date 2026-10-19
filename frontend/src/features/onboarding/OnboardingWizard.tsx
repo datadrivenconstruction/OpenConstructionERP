@@ -753,6 +753,7 @@ function startBackgroundReadyPackInstall(
     { step: 'demos', label: i18n.t('onboarding.pp_step_demos', { defaultValue: 'Example projects' }), status: 'pending' },
   ];
   store.begin(slug, country, seed);
+  store.setRetryCostBase(() => retryBackgroundCostBase(slug));
 
   return new Promise<boolean>((resolve) => {
     let settled = false;
@@ -777,6 +778,7 @@ function startBackgroundReadyPackInstall(
             status: 'pending',
           }));
           s.begin(slug, country, steps);
+          s.setRetryCostBase(() => retryBackgroundCostBase(slug));
         } else if (evt.type === 'step_start') {
           s.markRunning(evt.step);
         } else if (evt.type === 'step_done') {
@@ -825,6 +827,42 @@ function startBackgroundReadyPackInstall(
       }
       finishLanguage(localeApplied);
     });
+  });
+}
+
+/**
+ * Re-run only the cost database step of a background pack install, from the
+ * banner's Retry button. The server reruns ``resources`` with it and skips a
+ * base that is already in, so this is safe to press more than once.
+ */
+function retryBackgroundCostBase(slug: string): void {
+  const store = useBackgroundInstallStore.getState();
+  if (!store.install || store.install.slug !== slug) return;
+  store.reopen();
+  const settle = () => {
+    const s = useBackgroundInstallStore.getState();
+    const hadError = (s.install?.steps ?? []).some((row) => row.status === 'error');
+    s.finish(hadError);
+  };
+  void fullInstallPackStream(
+    slug,
+    (evt) => {
+      const s = useBackgroundInstallStore.getState();
+      if (evt.type === 'step_start') {
+        s.markRunning(evt.step);
+      } else if (evt.type === 'step_done') {
+        s.markDone(evt.step, evt.status, bgStepDetail(evt.step, evt.detail));
+      } else if (evt.type === 'done') {
+        settle();
+      }
+    },
+    { demoCount: 0, onlySteps: ['cost_db'] },
+  ).catch(() => {
+    const s = useBackgroundInstallStore.getState();
+    for (const row of s.install?.steps ?? []) {
+      if (row.status === 'running') s.markDone(row.step, 'error');
+    }
+    settle();
   });
 }
 

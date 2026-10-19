@@ -19,8 +19,10 @@ Design decisions (confirmed with the product owner 2026-05-29):
     implement under a different identifier, the plan says so - unless the pack
     has since declared that identifier in ``validation_rule_sets``, in which
     case the rules already run and there is nothing to report.
-  * Currency / locale / tax / CWICR are recorded as the new defaults and NEVER
-    re-denominate or mutate existing projects' data.
+  * Currency / locale / CWICR are recorded as the new defaults and NEVER
+    re-denominate or mutate existing projects' data. Tax is not set by a pack at
+    all: VAT, holidays, e-invoicing and payment terms come from core registries
+    by project country, and the plan reports them as built in.
 
 The headline effect of an apply is that ``get_active_pack`` starts returning the
 chosen pack (co-branding, logo, colours, shipped locales) immediately - the
@@ -451,9 +453,19 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
         warnings.append(
             f"Default currency {m.default_currency} applies to NEW projects only; existing projects keep their currency."
         )
-    if m.default_tax_template:
+    # The pack does not set tax. VAT, public holidays, e-invoicing and the
+    # statutory payment terms come from core registries keyed by the project's
+    # country, pack or no pack, so the plan names them as built in and carries
+    # the values those registries hold (``built_in_for_country``) instead of
+    # listing ``default_tax_template`` as if applying the pack installed it.
+    from app.core.partner_pack.country_builtins import country_builtins
+
+    built_in = country_builtins(m.market_country_code)
+    if built_in:
         warnings.append(
-            f"Default tax template '{m.default_tax_template}' is recorded for reference (no automatic tax resolver yet)."
+            f"Tax, public holidays, e-invoicing and payment terms are built into the platform for "
+            f"{built_in['country']} and apply to projects located there, with or without this pack. "
+            "The pack does not change them."
         )
     if m.default_methodology:
         warnings.append(
@@ -496,6 +508,7 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
         "cwicr_regions": list(m.cwicr_regions or []),
         "cost_bases": cost_bases,
         "default_tax_template": m.default_tax_template,
+        "built_in_for_country": built_in,
         "default_methodology": m.default_methodology,
         "default_company_profile": m.default_company_profile,
         "demo_project": _pack_demo_info(m.slug),
