@@ -23,13 +23,30 @@ country-neutral mechanisms with Egypt as data.
 2. **Withholding on account of tax.** Payments to contractors and suppliers are
    withheld at 1 percent (contracting), 1 percent (supplies), 3 percent
    (services) and 5 percent (commissions), on payments exceeding EGP 300, and
-   declared quarterly on Form 41. A payee under the small-business regime of
+   declared quarterly on Form 41, by the end of the month following each
+   quarter. A payee under the small-business regime of
    Law No. 6 of 2025 is exempt.
 3. **Validation rules** for the regime choice, the claim date against the
    regime window, and an amount entered on a tax that does not arise.
 
-Out of scope: real-estate exemptions, the VAT registration threshold,
-e-invoice submission to the tax authority, and a screen for
+Out of scope, with the facts recorded here so the next step does not redo the
+reading:
+
+- The VAT registration threshold, EGP 500 000 of turnover (VAT Law article 16).
+  A reported cut to EGP 250 000 was not found in any source; Law No. 157 of
+  2025 changed the base, not the threshold.
+- The real-estate exemption, item 28 of the exempt list: sale and lease of
+  vacant and agricultural land, buildings, and residential and non-residential
+  units. It is a sale or lease of property, not a contracting service, so no
+  construction bill row is exempted by it.
+- Stamp tax on payments by government bodies (Law No. 111 of 1980, articles
+  79 to 81): no current rate was read, so nothing ships.
+- The VAT tax point of a construction advance. Only the general rule was found
+  (tax is due when the taxable event occurs, and a sale includes payment in
+  full or in part), so an advance plausibly triggers VAT; nothing
+  construction-specific is coded and the point is listed for review below.
+
+Also out of scope: e-invoice submission to the tax authority, and a screen for
 choosing a regime or recording an exemption (the API and the stored fields are
 there; the picker is follow-up work).
 
@@ -107,6 +124,8 @@ Coverage probes: `tax.payment_withholding` and `tax.vat_regimes`.
 - Decrees No. 417 and 418 of 2025: https://taxnews.ey.com/news/2025-2316-egypt-introduces-significant-updates-to-vat-provisions
 - Schedule tax on contracting before the change: https://eg.andersen.com/subcontractors-in-egypt/
 - Withholding rates and threshold: https://taxsummaries.pwc.com/egypt/corporate/withholding-taxes
+- Form 41 deadline: https://www.eta.gov.eg/ar/news/aqrar-drybt-almrtbat-alrb-snwy-wnmwdhj-41-khsm-wthsyl (2024-04-15)
+- Registration threshold, VAT Law article 16 (English translation): https://consortiolawfirm.com/egypt-vat-law-67-2016-english-translation/
 - Standard rate history: https://taxsummaries.pwc.com/egypt/corporate/other-taxes
 
 All read 2026-10-19. None is the primary gazette text.
@@ -118,12 +137,14 @@ All read 2026-10-19. None is the primary gazette text.
 2. Decree No. 418 was issued 2025-10-24 for contracts from 2025-07-18. Whether
    invoices issued between those dates may be restated under the transitional
    regime is open; the code lets the regime apply from 2025-07-18.
-3. The number and start date of the ministerial decision that sets the
-   withholding rates. Rows start 2025-03-01 (Law No. 6 of 2025) and are marked
-   `unconfirmed`, so confirming a document that uses them needs an explicit
-   acknowledgement.
+3. The ministerial decision that sets the withholding rates, likely Ministry
+   of Finance Decree No. 405 of 2018 (one summary cites No. 310 of 2013), and
+   the rates' start date. Rows start 2025-03-01 (Law No. 6 of 2025) and are
+   marked `unconfirmed`, so confirming a document that uses them needs an
+   explicit acknowledgement.
 4. Whether the EGP 300 threshold is measured before VAT. Shipped as net.
-5. The due day of the quarterly Form 41 return. Not shipped as a deadline.
+5. Whether a construction advance is a VAT tax point under a specific rule,
+   or only under the general one.
 
 ## Test plan
 

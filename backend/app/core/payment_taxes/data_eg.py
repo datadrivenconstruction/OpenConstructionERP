@@ -17,8 +17,10 @@ internationalisation module and in :mod:`app.core.vat_regimes`.
 **Why every row is ``unconfirmed``.** The rates, the EGP 300 threshold and the
 small-business exemption were read in two professional summaries that agree
 (PwC Worldwide Tax Summaries and Andersen Egypt, and EY for the exemption),
-not in the ministerial decision that sets the rates: its number could not be
-established. An unconfirmed row still computes; the status travels with the
+not in the ministerial decision that sets the rates. That decision is likely
+Ministry of Finance Decree No. 405 of 2018 under article 59 of the Income Tax
+Law, but its table could not be read and one summary cites Decree No. 310 of
+2013 instead, so the number is given as likely only. An unconfirmed row still computes; the status travels with the
 figure so the accountant who confirms the document sees it.
 
 **Why the rows start on 2025-03-01.** That is the date the small-business
@@ -34,8 +36,9 @@ What is deliberately absent, and why:
 * Withholding on payments to non-residents (20 percent on services and
   royalties, remitted the day after payment): a different tax with treaty
   relief, which needs a residence input this table does not take.
-* The due day of the quarterly Form 41 return inside its month: not
-  established. The return itself is named in ``conditions``.
+* The Form 41 deadline as a computed date. The return is due by the end of
+  the month following each quarter (Egyptian Tax Authority news, 2024-04-15),
+  which ``conditions`` states; a filing calendar is not part of this table.
 """
 
 from __future__ import annotations
@@ -51,8 +54,8 @@ _READ = "2026-10-19"
 _PWC_WHT_URL = "https://taxsummaries.pwc.com/egypt/corporate/withholding-taxes"
 _LEGAL_REFERENCE = (
     "Income Tax Law No. 91 of 2005 (withholding on account of tax, the advance payment system) and "
-    "Unified Tax Procedures Law No. 206 of 2020; rates per the implementing ministerial decision, "
-    "whose number was not established"
+    "Unified Tax Procedures Law No. 206 of 2020; rates under article 59 of Law No. 91 of 2005, set by "
+    "ministerial decision, likely Ministry of Finance Decree No. 405 of 2018 (not confirmed)"
 )
 # The day Law No. 6 of 2025 (incentives for small enterprises) took effect.
 _SMALL_BUSINESS_FROM = date(2025, 3, 1)
@@ -68,12 +71,12 @@ _CONDITIONS = {
     "en": (
         "Withheld by the payer from each payment exceeding EGP 300 to a resident business, on the amount "
         "before VAT, and credited against the payee's income tax. Not withheld from a payee registered under "
-        "the small-business regime of Law No. 6 of 2025. Declared and paid quarterly on Form 41."
+        "the small-business regime of Law No. 6 of 2025. Declared and paid quarterly on Form 41, by the end of the month following the quarter."
     ),
     "ar": (
         "يخصمها الممول من كل دفعة تزيد على 300 جنيه مصري لمنشأة مقيمة، على المبلغ قبل ضريبة القيمة المضافة، "
         "وتُخصم من ضريبة الدخل المستحقة على المستفيد. لا تُخصم من المسجل في نظام المشروعات الصغيرة وفق القانون "
-        "رقم 6 لسنة 2025. يُقدَّم الإقرار وتُسدَّد الضريبة ربع سنويًا على النموذج 41."
+        "رقم 6 لسنة 2025. يُقدَّم الإقرار وتُسدَّد الضريبة ربع سنويًا على النموذج 41، قبل نهاية الشهر التالي لانتهاء الربع."
     ),
 }
 
