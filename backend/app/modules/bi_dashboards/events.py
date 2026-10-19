@@ -99,7 +99,6 @@ _PROJECTION_INVALIDATING_EVENTS: tuple[str, ...] = (
     "supplier_catalogs.gr.posted",
     # Schedule Advanced
     "schedule_advanced.actuals_update",
-    "schedule_advanced.task.completed",
     # Schedule (EVM earned-value depends on activity progress)
     "schedule.activity.progress_updated",
     "schedule.activity.created",
@@ -117,9 +116,10 @@ _PROJECTION_INVALIDATING_EVENTS: tuple[str, ...] = (
     "contracts.contract.signed",
     "contracts.claim.certified",
     "contracts.claim.paid",
-    # Variations / Change Orders
+    # Variations / Change Orders. An approved change order writes the budget
+    # delta row EVM reads as BAC.
     "variations.contract_sum.updated",
-    "variations.completed",
+    "changeorder.approved",
     # Bid Management
     "bid_management.package.awarded",
     # CRM

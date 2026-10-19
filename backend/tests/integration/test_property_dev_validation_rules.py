@@ -1030,60 +1030,6 @@ async def test_subscriber_crm_lead_qualified_creates_buyer(session, seeded_dev):
         assert rows[0].status == "lead"
 
 
-@pytest.mark.asyncio
-async def test_subscriber_portal_buyer_signup_wires_portal_id(session, seeded_dev):
-    """``portal.buyer_signup.completed`` stamps Buyer.portal_user_id."""
-    from app.core.events import Event
-    from app.modules.property_dev.events import _on_portal_buyer_signup
-    from app.modules.property_dev.models import Buyer
-
-    buyer = seeded_dev["buyer"]
-    portal_uid = uuid.uuid4()
-    event = Event(
-        name="portal.buyer_signup.completed",
-        data={"portal_user_id": str(portal_uid), "email": buyer.email},
-        source_module="portal",
-    )
-    await _on_portal_buyer_signup(event)
-    # Verify with a fresh session.
-    from app.database import async_session_factory
-
-    async with async_session_factory() as s:
-        fresh = await s.get(Buyer, buyer.id)
-        assert fresh.portal_user_id == portal_uid
-
-
-@pytest.mark.asyncio
-async def test_subscriber_finance_invoice_created_records_ref(session, seeded_dev):
-    """``finance.invoice.created`` appends to Buyer.metadata.invoice_refs."""
-    from app.core.events import Event
-    from app.modules.property_dev.events import _on_finance_invoice_created
-    from app.modules.property_dev.models import Buyer
-
-    buyer = seeded_dev["buyer"]
-    event = Event(
-        name="finance.invoice.created",
-        data={
-            "invoice_id": str(uuid.uuid4()),
-            "invoice_number": "INV-2026-00042",
-            "metadata": {
-                "instalment_buyer_id": str(buyer.id),
-                "instalment_kind": "deposit",
-            },
-        },
-        source_module="finance",
-    )
-    await _on_finance_invoice_created(event)
-    from app.database import async_session_factory
-
-    async with async_session_factory() as s:
-        fresh = await s.get(Buyer, buyer.id)
-        meta = fresh.metadata_ or {}
-        assert meta.get("invoice_ref") == "INV-2026-00042"
-        refs = meta.get("invoice_refs") or []
-        assert refs and refs[-1]["invoice_number"] == "INV-2026-00042"
-
-
 # ─────────────────────────────────────────────────────────────────────────
 # Compliance endpoints — IDOR / RBAC / 404
 # ─────────────────────────────────────────────────────────────────────────

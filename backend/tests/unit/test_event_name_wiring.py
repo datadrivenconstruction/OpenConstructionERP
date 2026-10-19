@@ -11,6 +11,13 @@ Thirty-one such subscriptions were already in the tree when this gate was
 written. They are listed in ``KNOWN_DEAD_SUBSCRIPTIONS`` with the site and the
 nearest published name, because the point is to shrink that list, not hold it.
 
+The scan was wrong in both directions at first. It read only literals and
+constants, so five live seams that name their event through a local variable
+(a dict lookup, a conditional, a queue fired after commit) were listed as dead,
+and fifteen subscriptions registered from a ``(name, handler)`` table were not
+seen at all - twelve of them dead. The ``test_scanner_*`` cases below pin each
+shape the scan now reads, with the near miss it must not count.
+
 The gate deliberately does not assert the reverse. A published event with no
 subscriber is normal and common: events exist for modules that may not be
 installed, and the platform publishes far more names than it consumes.
@@ -55,7 +62,7 @@ _CALL_TOKENS = ("publish", "subscribe", "emit", ".on(")
 #:
 #: Files matching this are parsed even when they hold no bus call, because a
 #: publisher commonly names its event through a constant imported from a module
-#: that holds nothing else - ``event_taxonomy.SNAPSHOT_REFRESHED`` is exactly
+#: that holds nothing else - ``event_taxonomy.SNAPSHOT_CREATED`` in dashboards is exactly
 #: that shape. Without this the scan would lose the definition and report the
 #: subscriber as dead.
 _CONSTANT_LINE = re.compile(
@@ -98,77 +105,7 @@ def _is_constant_name(identifier: str) -> bool:
 #: create records; turning thirty of them on in one commit would be a behaviour
 #: change disguised as a rename. One seam per commit, with a test that asserts
 #: the handler's effect rather than that it fired.
-KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
-    "approval_routes.instance.completed": (
-        "rfi/approval_subscribers.py:93 and submittals/approval_subscribers.py:104; "
-        "approval_routes/service.py:683 publishes 'approval_routes.instance.started'"
-    ),
-    "approval_routes.instance.rejected": (
-        "rfi/approval_subscribers.py:94 and submittals/approval_subscribers.py:105; "
-        "same publisher gap as the completed variant above"
-    ),
-    "bim_hub.element.updated": (
-        "bim_hub/events.py:112; bim_hub/service.py:2228 publishes 'bim_hub.element.deleted' "
-        "but nothing publishes the updated variant"
-    ),
-    "bim_model.new_version": "core/event_handlers.py:1839; the bim_hub module publishes under the 'bim_hub.' prefix",
-    "bim_model.ready": "core/event_handlers.py:1838; the bim_hub module publishes under the 'bim_hub.' prefix",
-    "catalog.resource.price_adjusted": "assemblies/events.py:406; no catalog publisher emits a price-adjusted event",
-    "catalog.resource.updated": (
-        "assemblies/events.py:405; catalog/router.py:747 publishes the plural "
-        "'catalog.resources.updated' - a singular/plural mismatch, nothing more"
-    ),
-    "correspondence.outbound.delivered": (
-        "property_dev/events.py:407; property_dev/service.py:4568 publishes "
-        "'correspondence.outbound.requested' and nothing marks delivery"
-    ),
-    "document.revision.created": (
-        "core/event_handlers.py:1833; documents and connectors publish 'documents.document.created' instead"
-    ),
-    "documents.uploaded": "core/event_handlers.py:1834; the documents module publishes 'documents.document.created'",
-    "erp_chat.message.deleted": "erp_chat subscribes to its own delete event that no service publishes",
-    "estimate.approved": "core/event_handlers.py:1831; no module publishes an estimate approval",
-    "finance.invoice.created": (
-        "property_dev/events.py:684; its only publisher was the duplicate claim-invoice "
-        "subscriber removed from notifications/_wave5_cross_module_subscribers.py in "
-        "8b71dec65, and that one never sent the metadata.instalment_buyer_id the handler "
-        "keys on. Nothing writes that key, so publishing from finance would not wake it either"
-    ),
-    "inspection.completed.passed": "qms subscribes to a pass-specific name; inspections publish a single completion event",
-    "inspection.scheduled": "nothing publishes when an inspection is scheduled",
-    "meeting.action_item.created": (
-        "core/event_handlers.py:1827; meetings/service.py:470 publishes the plural 'meeting.action_items_created'"
-    ),
-    "meeting.scheduled": "nothing publishes when a meeting is scheduled",
-    "moc.entry.accepted": "moc subscribers wait on an acceptance event no service publishes",
-    "moc.entry.implemented": "moc subscribers wait on an implementation event no service publishes",
-    "po.issued": "core/event_handlers.py:1835; procurement/service.py:1588 publishes 'procurement.po.issued'",
-    "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
-    "qms.inspection.hold_point_failed": "qms subscribes to a hold-point failure no inspection service publishes",
-    "schedule_advanced.task.completed": (
-        "bi_dashboards/events.py:104, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
-        "tuple; schedule_advanced publishes actuals updates but never a task completion, so "
-        "the BI projection for it is never invalidated"
-    ),
-    "snapshot.refreshed": (
-        "dashboards/__init__.py:94 via event_taxonomy.SNAPSHOT_REFRESHED, which is declared "
-        "twice (dashboards/events.py:31 and dashboards/sync_protocol.py:58) and published "
-        "nowhere. sync_protocol.py:18 documents the refresh cascade as if it runs"
-    ),
-    "submittal.status_changed": "nothing publishes a submittal status change",
-    "validation.report.updated": "validation/events.py:72; validation publishes report creation, not update",
-    "variations.completed": (
-        "bi_dashboards/events.py:124, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
-        "tuple; the changeorders module publishes under the singular 'changeorder.' prefix"
-    ),
-    "variation.approved": (
-        "core/event_handlers.py:1840; changeorders/service.py:1551 publishes "
-        "'changeorder.approved'. Fix this seam LAST and on its own: the handler writes "
-        "contract value, and a second, live subscriber already writes it from "
-        "notifications/_wave5_cross_module_subscribers.py, so renaming without checking "
-        "risks a double write"
-    ),
-}
+KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {}
 
 
 def _callee(node: ast.Call) -> str:
@@ -191,6 +128,129 @@ def _looks_like_event(value: str) -> bool:
     return "." in value and value.islower() and value.replace(".", "").replace("_", "").isalnum()
 
 
+def _literals(node: ast.AST) -> list[str]:
+    """Every string literal inside an expression, f-strings excepted.
+
+    An f-string's fixed parts (``"moc.entry."`` in ``f"moc.entry.{status}"``)
+    are fragments, not event names, so their subtrees are skipped.
+    """
+    out: list[str] = []
+    stack = [node]
+    while stack:
+        current = stack.pop()
+        if isinstance(current, ast.JoinedStr):
+            continue
+        if isinstance(current, ast.Constant) and isinstance(current.value, str):
+            out.append(current.value)
+        stack.extend(ast.iter_child_nodes(current))
+    return out
+
+
+def _fstring_pattern(node: ast.AST) -> str | None:
+    """A regex for an event name built with an f-string, or None.
+
+    ``f"notifications.dispatch.{channel}"`` publishes one event per channel.
+    Each placeholder matches one name segment. The f-string must open with a
+    literal that already reads like an event name (lower case, a dot), so
+    ``f"{module}.created"`` cannot turn into a pattern that calls every
+    ``*.created`` subscriber live, and a revision code such as ``f"C.{n}"``
+    handed to a ``_announce_revision_if_published`` helper is not one.
+    """
+    if not isinstance(node, ast.JoinedStr) or not node.values:
+        return None
+    head = node.values[0]
+    if not (isinstance(head, ast.Constant) and isinstance(head.value, str) and _looks_like_event(head.value)):
+        return None
+    parts: list[str] = []
+    for value in node.values:
+        if isinstance(value, ast.Constant) and isinstance(value.value, str):
+            parts.append(re.escape(value.value))
+        else:
+            parts.append("[a-z0-9_]+")
+    return "".join(parts)
+
+
+def _first_literals(node: ast.AST) -> list[str]:
+    """The name half of a ``(name, payload)`` or ``(name, handler)`` pair."""
+    if isinstance(node, ast.Tuple) and node.elts:
+        return _literals(node.elts[0])
+    return _literals(node)
+
+
+def _local_values(scope: ast.AST, identifier: str, consts: dict[str, list[str]]) -> tuple[list[str], list[str]]:
+    """Names and f-string patterns a function binds to ``identifier``.
+
+    See ``_Scan._resolve_locals``.
+    """
+    values: list[str] = []
+    patterns: list[str] = []
+    queues: set[str] = set()
+    for node in ast.walk(scope):
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == identifier for t in node.targets):
+            values.extend(_literals(node.value))
+            patterns.extend(p for p in map(_fstring_pattern, ast.walk(node.value)) if p)
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == identifier
+            and node.value is not None
+        ):
+            values.extend(_literals(node.value))
+        elif (
+            isinstance(node, ast.For)
+            and isinstance(node.target, ast.Tuple)
+            and node.target.elts
+            and isinstance(node.target.elts[0], ast.Name)
+            and node.target.elts[0].id == identifier
+        ):
+            if isinstance(node.iter, ast.Name) and node.iter.id in consts:
+                values.extend(consts[node.iter.id])
+            elif isinstance(node.iter, ast.Name):
+                queues.add(node.iter.id)
+            elif isinstance(node.iter, (ast.Tuple, ast.List)):
+                for element in node.iter.elts:
+                    values.extend(_first_literals(element))
+    if queues:
+        for node in ast.walk(scope):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "append"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in queues
+                and node.args
+            ):
+                values.extend(_first_literals(node.args[0]))
+            elif (
+                isinstance(node, (ast.Assign, ast.AnnAssign))
+                and isinstance(node.value, (ast.Tuple, ast.List))
+                and any(isinstance(t, ast.Name) and t.id in queues for t in _targets(node))
+            ):
+                for element in node.value.elts:
+                    values.extend(_first_literals(element))
+    return values, patterns
+
+
+def _parameter_position(scope: ast.FunctionDef | ast.AsyncFunctionDef, identifier: str) -> int | None:
+    """Where ``identifier`` sits among a call's positional arguments, or None.
+
+    A method's ``self`` or ``cls`` is bound by the attribute access, so it is
+    not counted.
+    """
+    positional = [a.arg for a in (*scope.args.posonlyargs, *scope.args.args)]
+    if positional and positional[0] in ("self", "cls"):
+        positional = positional[1:]
+    if identifier in positional:
+        return positional.index(identifier)
+    if identifier in (a.arg for a in scope.args.kwonlyargs):
+        return 1_000_000  # keyword only, never positional
+    return None
+
+
+def _targets(node: ast.Assign | ast.AnnAssign) -> list[ast.expr]:
+    return list(node.targets) if isinstance(node, ast.Assign) else [node.target]
+
+
 class _Scan:
     """One pass over the backend tree, collecting publishers and subscribers.
 
@@ -207,6 +267,8 @@ class _Scan:
 
     def __init__(self) -> None:
         self.published: dict[str, set[str]] = defaultdict(set)
+        # Regexes for names published through an f-string, with their sites.
+        self.published_patterns: dict[str, set[str]] = defaultdict(set)
         self.subscribed: dict[str, set[str]] = defaultdict(set)
         # Constants defined anywhere in the tree, so a publisher that names its
         # event through an imported constant is not reported as missing. Every
@@ -217,6 +279,9 @@ class _Scan:
         # (is_publish, identifier, site) for arguments the defining file did not
         # hold. Resolved once every file has been read.
         self.pending: list[tuple[bool, str, str]] = []
+        # (is_publish, local variable, line, site) for calls in the file being
+        # read that name the event through a lowercase local. Resolved per file.
+        self.local_pending: list[tuple[bool, str, int, str]] = []
 
     def _strings(self, node: ast.AST, consts: dict[str, list[str]]) -> list[str]:
         if isinstance(node, ast.Constant):
@@ -268,8 +333,74 @@ class _Scan:
         arguments.extend(kw.value for kw in node.keywords if kw.arg in _NAME_KEYWORDS)
         for argument in arguments:
             self._record(is_publish, self._strings(argument, consts), site)
+            pattern = _fstring_pattern(argument) if is_publish else None
+            if pattern:
+                self.published_patterns[pattern].add(site)
             for unresolved in self._unresolved_names(argument, consts):
                 self.pending.append((is_publish, unresolved, site))
+            if isinstance(argument, ast.Name) and argument.id not in consts and not _is_constant_name(argument.id):
+                self.local_pending.append((is_publish, argument.id, node.lineno, site))
+
+    def _resolve_locals(self, tree: ast.Module, consts: dict[str, list[str]], path: str) -> None:
+        """Resolve event names a publisher or subscriber keeps in a local variable.
+
+        Three shapes in this tree name the event through a local rather than a
+        literal or a constant, and a scan blind to them reports a live seam as
+        dead. A dict lookup or conditional (``event_name = {...}.get(status)``,
+        ``hold_event = "a" if passed else "b"``), a queue of ``(name, payload)``
+        pairs fired after the transaction (``events_to_fire.append((...))``),
+        and a ``for event_name, handler in _SUBSCRIPTIONS`` registration loop.
+
+        Resolution is scoped to the innermost function holding the call, so a
+        variable of the same name in another function cannot invent a
+        publisher. Only files with such a call pay for the extra walk.
+        """
+        functions = [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        # Same-file helpers that take the event name as a parameter and publish
+        # it, keyed by helper name: (position among the call's arguments, name).
+        wrappers: dict[str, tuple[int, str]] = {}
+        for is_publish, identifier, lineno, site in self.local_pending:
+            owners = [f for f in functions if f.lineno <= lineno <= (f.end_lineno or f.lineno)]
+            if not owners:
+                continue
+            scope = max(owners, key=lambda f: f.lineno)
+            values, patterns = _local_values(scope, identifier, consts)
+            self._record(is_publish, values, site)
+            if is_publish:
+                for pattern in patterns:
+                    self.published_patterns[pattern].add(site)
+                position = _parameter_position(scope, identifier)
+                if position is not None:
+                    wrappers[scope.name] = (position, identifier)
+        self.local_pending.clear()
+        if wrappers:
+            self._read_wrapper_calls(tree, consts, wrappers, path)
+
+    def _read_wrapper_calls(
+        self, tree: ast.Module, consts: dict[str, list[str]], wrappers: dict[str, tuple[int, str]], path: str
+    ) -> None:
+        """Count what callers hand a publishing helper as published.
+
+        ``self._set_vendor_status(vendor_id, "blacklisted", ev.VENDOR_BLACKLISTED)``
+        publishes ``supplier_catalogs.vendor.blacklisted`` inside the helper,
+        but the name only appears at the call. Same file only: a helper is
+        private to its module in every case this tree holds.
+        """
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            wrapper = wrappers.get(_callee(node))
+            if wrapper is None:
+                continue
+            position, keyword = wrapper
+            arguments = [kw.value for kw in node.keywords if kw.arg == keyword]
+            if position < len(node.args):
+                arguments.append(node.args[position])
+            site = f"{path}:{node.lineno}"
+            for argument in arguments:
+                self._record(True, self._strings(argument, consts), site)
+                for unresolved in self._unresolved_names(argument, consts):
+                    self.pending.append((True, unresolved, site))
 
     def _harvest(self, node: ast.AST, consts: dict[str, list[str]]) -> bool:
         """Record a constant assignment. True when the node was one."""
@@ -303,13 +434,16 @@ class _Scan:
             source = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             return
+        self.read_source(source, path.relative_to(_APP_ROOT).as_posix())
+
+    def read_source(self, source: str, relative: str) -> None:
+        """Scan one module's text. Split from ``read`` so the scanner can be tested on snippets."""
         if not _worth_parsing(source):
             return
         try:
             tree = ast.parse(source)
         except (SyntaxError, ValueError):
             return
-        relative = path.relative_to(_APP_ROOT).as_posix()
         consts: dict[str, list[str]] = {}
         # Constants live at module level, so harvest them from the top-level
         # body alone. Keeping _harvest out of the full walk below matters: that
@@ -331,6 +465,14 @@ class _Scan:
                 for decorator in node.decorator_list:
                     if isinstance(decorator, ast.Call):
                         self._handle_call(decorator, consts, relative)
+        if self.local_pending:
+            self._resolve_locals(tree, consts, relative)
+
+    def is_published(self, name: str) -> bool:
+        """True when a literal, a constant or an f-string publishes ``name``."""
+        if name in self.published:
+            return True
+        return any(re.fullmatch(pattern, name) for pattern in self.published_patterns)
 
     def resolve_pending(self) -> None:
         """Second chance for names defined in a file other than the caller's."""
@@ -366,7 +508,7 @@ def test_no_new_dead_event_subscriptions() -> None:
         f"scanner found only {len(scan.subscribed)} subscribed names - instrument is broken"
     )
 
-    dead = {name for name in scan.subscribed if name not in scan.published}
+    dead = {name for name in scan.subscribed if not scan.is_published(name)}
     undocumented = dead - set(KNOWN_DEAD_SUBSCRIPTIONS)
     repaired = set(KNOWN_DEAD_SUBSCRIPTIONS) - dead
 
@@ -390,3 +532,146 @@ def test_allowlist_entries_all_carry_a_reason() -> None:
     """An allowlist of bare names decays into a list nobody can act on."""
     for name, reason in KNOWN_DEAD_SUBSCRIPTIONS.items():
         assert len(reason) > 30, f"{name} needs a reason saying where it is subscribed and what it probably meant"
+
+
+def _scan_snippets(**modules: str) -> _Scan:
+    scan = _Scan()
+    for relative, source in modules.items():
+        scan.read_source(source, relative)
+    scan.resolve_pending()
+    return scan
+
+
+def test_scanner_reads_names_held_in_a_local_variable() -> None:
+    """A dict lookup, a conditional and a queue fired after commit all publish.
+
+    These three shapes made the gate list five live seams as dead
+    (``approval_routes.instance.completed`` and ``.rejected``, the two MoC
+    transitions, the QMS hold-point failure).
+    """
+    scan = _scan_snippets(
+        a="""
+def transition(to_status):
+    event_name = {"accepted": "moc.entry.accepted"}.get(to_status, f"moc.entry.{to_status}")
+    _safe_publish(event_name, {})
+
+def record(result):
+    hold_event = "qms.hold.passed" if result == "passed" else "qms.hold.failed"
+    event_bus.publish_detached(hold_event, {})
+
+def decide(rejected):
+    events_to_fire = []
+    if rejected:
+        events_to_fire.append(("routes.instance.rejected", {"status": "rejected"}))
+    else:
+        events_to_fire.append(("routes.instance.completed", {"status": "approved"}))
+    for event_name, event_data in events_to_fire:
+        _safe_publish(event_name, event_data)
+""",
+    )
+    for name in (
+        "moc.entry.accepted",
+        "qms.hold.passed",
+        "qms.hold.failed",
+        "routes.instance.rejected",
+        "routes.instance.completed",
+    ):
+        assert scan.is_published(name), name
+    # The f-string fallback publishes one name per status.
+    assert scan.is_published("moc.entry.implemented")
+    # The dict's keys are statuses, not names, and the payload's values are
+    # statuses too.
+    assert not scan.is_published("accepted")
+    assert not scan.is_published("approved")
+
+
+def test_scanner_keeps_a_local_name_inside_its_own_function() -> None:
+    """The same variable name elsewhere in the file must not invent a publisher."""
+    scan = _scan_snippets(
+        a="""
+def labels():
+    event_name = "orders.order.shipped"
+    return event_name
+
+def send(event_name):
+    log(event_name)
+
+def fire():
+    event_name = "orders.order.created"
+    event_bus.publish_detached(event_name, {})
+""",
+    )
+    assert scan.is_published("orders.order.created")
+    assert not scan.is_published("orders.order.shipped")
+
+
+def test_scanner_reads_subscriptions_registered_from_a_pair_table() -> None:
+    """``for event_name, handler in _SUBSCRIPTIONS`` registers every pair.
+
+    Fifteen subscriptions in four modules were invisible to the gate in this
+    shape, so a dead one among them could never be reported.
+    """
+    scan = _scan_snippets(
+        a="""
+_SUBSCRIPTIONS = (
+    ("projects.created", _on_project_created),
+    ("risk.zone.flagged", _on_risk_zone_flagged),
+)
+
+def register_subscribers():
+    for event_name, handler in _SUBSCRIPTIONS:
+        event_bus.subscribe_once(event_name, handler)
+
+def register_dispatchers():
+    handlers_to_register = [
+        ("notifications.dispatch.email", _on_dispatch_email),
+    ]
+    for event_name, handler in handlers_to_register:
+        event_bus.subscribe_once(event_name, handler)
+""",
+    )
+    assert set(scan.subscribed) == {"projects.created", "risk.zone.flagged", "notifications.dispatch.email"}
+
+
+def test_scanner_matches_f_string_publishers_by_segment() -> None:
+    scan = _scan_snippets(
+        a="""
+async def dispatch(channel, module):
+    name = f"notifications.dispatch.{channel}"
+    await _safe_publish(name, {})
+    event_bus.publish_detached(f"{module}.created", {})
+    self._announce_revision_if_published(container, f"C.{module}")
+""",
+    )
+    assert scan.is_published("notifications.dispatch.email")
+    # One placeholder is one segment, not a free suffix.
+    assert not scan.is_published("notifications.dispatch.email.retry")
+    # An f-string that opens on a placeholder would match every "*.created".
+    assert not scan.is_published("projects.created")
+    assert scan.published_patterns.keys() == {r"notifications\.dispatch\.[a-z0-9_]+"}
+
+
+def test_scanner_follows_an_event_name_through_a_publishing_helper() -> None:
+    """The name appears at the helper's call, the publish inside the helper."""
+    scan = _scan_snippets(
+        a="""
+from . import events as ev
+
+class VendorService:
+    async def _set_vendor_status(self, vendor_id, new_status, event_name, user_id=None):
+        _safe_publish(event_name, {"vendor_id": str(vendor_id)})
+
+    async def blacklist_vendor(self, vendor_id):
+        return await self._set_vendor_status(vendor_id, "blacklisted", ev.VENDOR_BLACKLISTED)
+
+    async def suspend_vendor(self, vendor_id):
+        return await self._set_vendor_status(vendor_id, "suspended", event_name="vendors.vendor.suspended")
+""",
+        b="""
+VENDOR_BLACKLISTED = "vendors.vendor.blacklisted"
+""",
+    )
+    assert scan.is_published("vendors.vendor.blacklisted")
+    assert scan.is_published("vendors.vendor.suspended")
+    # The status argument sits in another position and is not a name.
+    assert not scan.is_published("blacklisted")

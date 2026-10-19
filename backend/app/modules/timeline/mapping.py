@@ -54,7 +54,6 @@ from typing import Any
 # at every publish site.
 ALLOWLIST_PREFIXES: tuple[str, ...] = (
     "approval.",
-    "bim_model.",
     "boq.",
     "cc.",
     "cde.",
@@ -105,7 +104,6 @@ ALLOWLIST_EVENTS: frozenset[str] = frozenset(
         "equipment.parts_logged",
         "equipment.rental_returned",
         "finance.invoice.created_from_claim",
-        "property_dev.development.geo_placed",
         "qms.audit.completed",
         "qms.audit.finding_raised",
         "qms.calibration.expiring",

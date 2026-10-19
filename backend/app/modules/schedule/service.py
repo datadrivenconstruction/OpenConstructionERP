@@ -82,7 +82,13 @@ def _normalize_deps(deps: list | None) -> list[dict]:
 
 from app.modules.schedule.boq_plan import PlanFit
 from app.modules.schedule.milestone_events import announce_if_milestone_reached
-from app.modules.schedule.models import Activity, Schedule, ScheduleRelationship, WorkOrder
+from app.modules.schedule.models import (
+    Activity,
+    Schedule,
+    ScheduleBaseline,
+    ScheduleRelationship,
+    WorkOrder,
+)
 from app.modules.schedule.ordering import activity_order_terms
 from app.modules.schedule.plan_confidence import plan_confidence, task_confidence
 from app.modules.schedule.repository import (
@@ -120,6 +126,16 @@ logger = logging.getLogger(__name__)
 
 # Placeholder sort order for a row being placed; any value past the real ones.
 _INT32_LAST = 2**31 - 1
+
+
+def _parse_iso_date(value: object) -> date | None:
+    """The calendar date at the front of an ISO string, or None when it is not one."""
+    if not isinstance(value, str):
+        return None
+    try:
+        return date.fromisoformat(value.strip()[:10])
+    except ValueError:
+        return None
 
 
 def _str_to_float(value: str | None) -> float:
@@ -2486,8 +2502,12 @@ class ScheduleService:
         new_start = fields.get("start_date", activity.start_date)
         new_end = fields.get("end_date", activity.end_date)
         dates_change = "start_date" in fields or "end_date" in fields
+        previous_end = activity.end_date
+        assignee_contact_id = fields.get("assignee_id", activity.assignee_id)
+        slip_project_id: uuid.UUID | None = None
         if dates_change:
             schedule = await self.get_schedule(schedule_id)
+            slip_project_id = schedule.project_id
             fields["duration_days"] = await self.working_duration(
                 schedule.project_id, getattr(activity, "calendar_id", None), new_start, new_end
             )
@@ -2515,6 +2535,16 @@ class ScheduleService:
                 source_module="oe_schedule",
             )
 
+        if "end_date" in fields and slip_project_id is not None and assignee_contact_id is not None:
+            await self._announce_baseline_slip(
+                activity_id=activity_id,
+                schedule_id=schedule_id,
+                project_id=slip_project_id,
+                assignee_id=assignee_contact_id,
+                previous_end=previous_end,
+                new_end=new_end,
+            )
+
         # Project the (validated) dependency payload into the canonical store,
         # then rebuild the JSON mirror from those rows. Done after the field
         # write so a deleted edge truly disappears from CPM.
@@ -2538,6 +2568,85 @@ class ScheduleService:
         refreshed = await self.get_activity(activity_id)
         await announce_if_milestone_reached(self.session, refreshed, was_completed=was_completed, actor_id=actor_id)
         return refreshed
+
+    async def _baseline_finish(
+        self, project_id: uuid.UUID, schedule_id: uuid.UUID, activity_id: uuid.UUID
+    ) -> date | None:
+        """The finish the active baseline recorded for one activity, or None.
+
+        ``snapshot_data`` is a caller-defined blob; the same shapes the
+        milestone slippage KPI reads are accepted (an ``activities`` list or a
+        bare list of entries carrying ``id``/``activity_id`` and a finish).
+        """
+        rows = (
+            (
+                await self.session.execute(
+                    select(ScheduleBaseline).where(
+                        ScheduleBaseline.project_id == project_id,
+                        ScheduleBaseline.is_active.is_(True),
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        found: date | None = None
+        wanted = str(activity_id)
+        for row in sorted(rows, key=lambda r: str(r.baseline_date or "")):
+            if row.schedule_id not in (None, schedule_id):
+                continue
+            data = row.snapshot_data
+            entries = data.get("activities") if isinstance(data, dict) else data
+            if not isinstance(entries, list):
+                continue
+            for entry in entries:
+                if not isinstance(entry, dict) or wanted not in (str(entry.get("id")), str(entry.get("activity_id"))):
+                    continue
+                raw = entry.get("end_date") or entry.get("finish") or entry.get("baseline_finish")
+                parsed = _parse_iso_date(raw)
+                if parsed is not None:
+                    found = parsed
+        return found
+
+    async def _announce_baseline_slip(
+        self,
+        *,
+        activity_id: uuid.UUID,
+        schedule_id: uuid.UUID,
+        project_id: uuid.UUID,
+        assignee_id: uuid.UUID,
+        previous_end: str | None,
+        new_end: str | None,
+    ) -> None:
+        """Publish ``schedule.activity.slipped`` when a finish date moves past its baseline.
+
+        Only the move that crosses the baseline counts: an activity already
+        past it that slips further is the same slip, so a subcontractor's
+        rating is not charged again for every nudge of the date.
+        """
+        finish = _parse_iso_date(new_end)
+        if finish is None:
+            return
+        baseline = await self._baseline_finish(project_id, schedule_id, activity_id)
+        if baseline is None or finish <= baseline:
+            return
+        before = _parse_iso_date(previous_end)
+        if before is not None and before > baseline:
+            return
+        publish_after_commit(
+            self.session,
+            "schedule.activity.slipped",
+            {
+                "activity_id": str(activity_id),
+                "schedule_id": str(schedule_id),
+                "project_id": str(project_id),
+                "assignee_id": str(assignee_id),
+                "baseline_finish": baseline.isoformat(),
+                "new_finish": finish.isoformat(),
+                "slip_days": (finish - baseline).days,
+            },
+            source_module="oe_schedule",
+        )
 
     async def delete_activity(self, activity_id: uuid.UUID, *, cascade: bool = False) -> int:
         """Delete an activity.

@@ -4128,6 +4128,34 @@ class ContractsService:
                 },
             )
 
+    async def _announce_retention_released(self, claim: ProgressClaim, actor_id: str | None) -> None:
+        """Tell the project owner that retention billed on a paid claim is now released.
+
+        A release billed on a claim is money back to the contractor only once
+        that claim is paid, so this is the moment, and it is deferred to the
+        commit like every other claim event.
+        """
+        billed = await self.release_repo.billed_on_claims([claim.id])
+        if not billed:
+            return
+        accrued, released_total = await self._retention_ledger(await self.get_contract(claim.contract_id))
+        remaining = max(accrued - released_total, DEC_ZERO)
+        for release in billed:
+            publish_after_commit(
+                self.session,
+                "contracts.retention.released",
+                {
+                    "contract_id": str(claim.contract_id),
+                    "release_id": str(release.id),
+                    "claim_id": str(claim.id),
+                    "event": release.event,
+                    "amount_released": str(release.amount),
+                    "remaining": str(remaining),
+                    "actor": actor_id,
+                },
+                source_module="contracts",
+            )
+
     async def transition_claim(
         self,
         claim_id: uuid.UUID,
@@ -4261,6 +4289,7 @@ class ContractsService:
                 },
                 source_module="contracts",
             )
+            await self._announce_retention_released(claim, actor_id)
         await self.claim_repo.update_fields(claim_id, **fields)
         if getattr(claim, "milestone_id", None) is not None and target_status in _MILESTONE_STATUS_ON_CLAIM:
             await self._sync_milestone_with_claim(claim, _MILESTONE_STATUS_ON_CLAIM[target_status])

@@ -6,8 +6,8 @@ When the NCR / HSE / Quality modules publish an event whose payload names a
 ``subcontractor_id``, this module bumps the corresponding sub's rating
 counters for the *current* period and recomputes the weighted overall score.
 
-The subscriber list is intentionally small (NCR, HSE incidents, schedule
-slippage). Each handler opens its own short-lived session via
+The subscriber list is intentionally small (NCR, HSE incidents and schedule slippage). Each handler opens its own
+short-lived session via
 ``async_session_factory()`` so a rating-write failure can never roll back the
 upstream module's transaction.
 
@@ -93,7 +93,31 @@ async def _on_safety_incident_created(event: Event) -> None:
 
 
 async def _on_schedule_slipped(event: Event) -> None:
-    """``schedule.activity.slipped`` → +1 schedule-deviation day."""
+    """``schedule.activity.slipped`` → +1 schedule-deviation day.
+
+    The schedule names the contact an activity is assigned to rather than a
+    subcontractor, so the sub is the one whose ``contact_id`` that is.
+    """
+    data = dict(event.data or {})
+    if _resolve_sub_id(data) is None:
+        contact = data.get("assignee_id")
+        if not contact:
+            return
+        try:
+            contact_id = uuid.UUID(str(contact))
+            async with async_session_factory() as session:
+                sub_id = (
+                    (await session.execute(select(Subcontractor.id).where(Subcontractor.contact_id == contact_id)))
+                    .scalars()
+                    .first()
+                )
+        except Exception:
+            logger.debug("subcontractors: slip assignee lookup failed", exc_info=True)
+            return
+        if sub_id is None:
+            return
+        data["subcontractor_id"] = str(sub_id)
+        event = Event(name=event.name, data=data, source_module=event.source_module)
     await _bump("schedule", event)
 
 

@@ -49,8 +49,6 @@ Inbound (we subscribe to)
     property_dev.instalment.paid        → create EscrowTransaction credit if
                                           ``escrow_account_id`` is in payload
     schedule.milestone.reached          → mark matching instalments due
-    correspondence.outbound.delivered   → stamp instalment demand audit
-    documents.uploaded                  → cross-link SPA envelope_id
 
 Outbound (published by the service layer)
     property_dev.commission.accrued
@@ -76,10 +74,6 @@ from app.core.events import Event, event_bus
 from app.database import async_session_factory
 
 logger = logging.getLogger(__name__)
-
-
-# SPA statuses from signature on, and a cancelled one kept as record.
-_SPA_SIGNED_STATUSES = frozenset({"signed", "countersigned", "registered", "cancelled"})
 
 
 # ── Helpers ────────────────────────────────────────────────────────────
@@ -149,104 +143,6 @@ async def _on_schedule_milestone_reached(event: Event) -> dict[str, Any]:
             return {"status": "ok", "touched": touched}
     except Exception as exc:  # noqa: BLE001 - never crash event loop
         logger.warning("property_dev._on_schedule_milestone_reached failed: %s", exc)
-        return {"status": "error", "error": str(exc)}
-
-
-async def _on_correspondence_outbound_delivered(
-    event: Event,
-) -> dict[str, Any]:
-    """React to ``correspondence.outbound.delivered`` for demand letters.
-
-    Payload:
-        template: str - only INSTALMENT_DEMAND is handled here.
-        instalment_id: UUID
-        delivered_at?: str
-        delivery_ref?: str
-
-    Stamps ``metadata.demand_delivered_at`` + ``metadata.demand_ref`` on
-    the matching instalment so the audit trail is preserved.
-    """
-    payload = event.data or {}
-    if payload.get("template") != "INSTALMENT_DEMAND":
-        return {"status": "ignored"}
-    instalment_id = payload.get("instalment_id")
-    if not instalment_id:
-        return {"status": "ignored"}
-
-    from app.modules.property_dev.repository import InstalmentRepository
-
-    try:
-        import uuid as _uuid
-
-        try:
-            ins_uuid = _uuid.UUID(str(instalment_id))
-        except (TypeError, ValueError):
-            return {"status": "ignored", "reason": "bad instalment_id"}
-
-        async with async_session_factory() as session:
-            repo = InstalmentRepository(session)
-            ins = await repo.get_by_id(ins_uuid)
-            if ins is None:
-                return {"status": "ignored", "reason": "instalment gone"}
-            md = dict(ins.metadata_ or {})
-            md["demand_delivered_at"] = payload.get("delivered_at") or ""
-            md["demand_ref"] = payload.get("delivery_ref") or ""
-            await repo.update_fields(ins_uuid, metadata_=md)
-            await session.commit()
-            return {"status": "ok"}
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("property_dev._on_correspondence_outbound_delivered: %s", exc)
-        return {"status": "error", "error": str(exc)}
-
-
-async def _on_documents_uploaded(event: Event) -> dict[str, Any]:
-    """React to ``documents.uploaded`` for category=spa.
-
-    Payload:
-        category: str - only ``spa`` is handled.
-        external_id: str - envelope id / doc ref.
-        sales_contract_id: UUID - required.
-
-    Sets ``SalesContract.e_sign_envelope_id`` for cross-linking.
-    """
-    payload = event.data or {}
-    if (payload.get("category") or "").lower() != "spa":
-        return {"status": "ignored"}
-    spa_id = payload.get("sales_contract_id") or payload.get("spa_id")
-    envelope_id = payload.get("external_id") or payload.get("envelope_id")
-    if not spa_id or not envelope_id:
-        return {"status": "ignored"}
-
-    from app.modules.property_dev.repository import SalesContractRepository
-
-    try:
-        import uuid as _uuid
-
-        try:
-            spa_uuid = _uuid.UUID(str(spa_id))
-        except (TypeError, ValueError):
-            return {"status": "ignored", "reason": "bad spa_id"}
-
-        async with async_session_factory() as session:
-            repo = SalesContractRepository(session)
-            spa = await repo.get_by_id(spa_uuid)
-            if spa is None:
-                return {"status": "ignored", "reason": "spa gone"}
-            # Once signed, the SPA's envelope is the one the parties signed
-            # through. A later upload may fill a missing link but never
-            # re-point an existing one.
-            if spa.status in _SPA_SIGNED_STATUSES and spa.e_sign_envelope_id and spa.e_sign_envelope_id != envelope_id:
-                logger.info(
-                    "property_dev._on_documents_uploaded: SPA %s is %s, keeping its signed envelope link",
-                    spa_uuid,
-                    spa.status,
-                )
-                return {"status": "ignored", "reason": "spa signed"}
-            await repo.update_fields(spa_uuid, e_sign_envelope_id=envelope_id)
-            await session.commit()
-            return {"status": "ok", "envelope_id": envelope_id}
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("property_dev._on_documents_uploaded failed: %s", exc)
         return {"status": "error", "error": str(exc)}
 
 
@@ -405,11 +301,6 @@ def register_property_dev_event_subscribers() -> None:
     de-duplicated at startup via module loader call-once semantics).
     """
     event_bus.subscribe_once("schedule.milestone.reached", _on_schedule_milestone_reached)
-    event_bus.subscribe_once(
-        "correspondence.outbound.delivered",
-        _on_correspondence_outbound_delivered,
-    )
-    event_bus.subscribe_once("documents.uploaded", _on_documents_uploaded)
 
 
 def register_subscribers() -> None:
@@ -532,135 +423,9 @@ async def _on_crm_lead_qualified(event: Event) -> dict[str, Any] | None:
         return None
 
 
-async def _on_portal_buyer_signup(event: Event) -> dict[str, Any] | None:
-    """Stamp ``Buyer.portal_user_id`` when a portal account is created.
-
-    Payload contract::
-
-        {
-            "portal_user_id": "<uuid>",
-            "email": "buyer@example.com",
-            "development_id": "<uuid?>",   # OPTIONAL - narrows the lookup
-        }
-
-    Only a single buyer match counts - multiple matches are logged and
-    skipped (the consistency rule
-    ``property_dev.buyer_email_unique_in_dev`` will catch the duplicate).
-    """
-    from sqlalchemy import func as _sql_func
-    from sqlalchemy import select as _sql_select
-
-    from app.modules.property_dev.models import Buyer
-
-    data = event.data or {}
-    portal_user_id = _coerce_uuid(data.get("portal_user_id"))
-    email = (data.get("email") or "").strip()
-    if portal_user_id is None or not email:
-        return None
-    dev_id = _coerce_uuid(data.get("development_id"))
-    try:
-        async with async_session_factory() as session:
-            stmt = (
-                _sql_select(Buyer)
-                .where(_sql_func.lower(Buyer.email) == email.lower())
-                .where(Buyer.status != "cancelled")
-            )
-            if dev_id is not None:
-                stmt = stmt.where(Buyer.development_id == dev_id)
-            rows = list((await session.execute(stmt)).scalars().all())
-            if len(rows) != 1:
-                logger.debug(
-                    "property_dev.on_portal_buyer_signup: ambiguous match (found=%d) for email=%s",
-                    len(rows),
-                    email,
-                )
-                return None
-            buyer = rows[0]
-            await session.execute(
-                Buyer.__table__.update().where(Buyer.id == buyer.id).values(portal_user_id=portal_user_id)
-            )
-            await session.commit()
-            logger.info(
-                "property_dev: wired portal_user_id=%s onto buyer %s",
-                portal_user_id,
-                buyer.id,
-            )
-            return {"status": "ok", "buyer_id": str(buyer.id)}
-    except Exception:
-        logger.debug(
-            "property_dev.on_portal_buyer_signup: handler failed",
-            exc_info=True,
-        )
-        return None
-
-
-async def _on_finance_invoice_created(event: Event) -> dict[str, Any] | None:
-    """Append the invoice reference onto the linked buyer's metadata.
-
-    Payload contract::
-
-        {
-            "invoice_id": "<uuid>",
-            "invoice_number": "INV-2026-00042",
-            "metadata": {
-                "instalment_buyer_id": "<uuid>",
-                "instalment_kind": "deposit|stage_1|...",
-            }
-        }
-    """
-    from app.modules.property_dev.models import Buyer
-
-    data = event.data or {}
-    meta = data.get("metadata") or {}
-    if not isinstance(meta, dict):
-        return None
-    buyer_id = _coerce_uuid(meta.get("instalment_buyer_id"))
-    if buyer_id is None:
-        return None
-    invoice_id = data.get("invoice_id")
-    invoice_number = data.get("invoice_number") or invoice_id
-    if not invoice_number:
-        return None
-    try:
-        async with async_session_factory() as session:
-            buyer = await session.get(Buyer, buyer_id)
-            if buyer is None:
-                logger.debug(
-                    "property_dev.on_finance_invoice_created: buyer %s missing",
-                    buyer_id,
-                )
-                return None
-            buyer_meta = dict(buyer.metadata_ or {})
-            invoices = list(buyer_meta.get("invoice_refs") or [])
-            entry = {
-                "invoice_id": str(invoice_id) if invoice_id else None,
-                "invoice_number": str(invoice_number),
-                "kind": meta.get("instalment_kind") or "instalment",
-            }
-            invoices.append(entry)
-            buyer_meta["invoice_refs"] = invoices
-            buyer_meta["invoice_ref"] = entry["invoice_number"]  # latest
-            await session.execute(Buyer.__table__.update().where(Buyer.id == buyer.id).values(metadata=buyer_meta))
-            await session.commit()
-            logger.info(
-                "property_dev: recorded invoice %s on buyer %s",
-                entry["invoice_number"],
-                buyer.id,
-            )
-            return {"status": "ok", "buyer_id": str(buyer.id), "invoice_number": entry["invoice_number"]}
-    except Exception:
-        logger.debug(
-            "property_dev.on_finance_invoice_created: handler failed",
-            exc_info=True,
-        )
-        return None
-
-
 def register_task_139_subscribers() -> None:
     """Wire cross-module inbound subscribers (task #139). Idempotent."""
     event_bus.subscribe_once("crm.lead.qualified", _on_crm_lead_qualified)
-    event_bus.subscribe_once("portal.buyer_signup.completed", _on_portal_buyer_signup)
-    event_bus.subscribe_once("finance.invoice.created", _on_finance_invoice_created)
     logger.info("property_dev task #139 cross-module subscribers registered")
 
 

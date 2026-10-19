@@ -22,7 +22,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 from app.modules.meetings import logic
 from app.modules.meetings.models import Meeting, MeetingActionItem, MeetingAttendance, MeetingMinutes
@@ -218,7 +218,43 @@ class MeetingService:
             data.meeting_type,
             data.project_id,
         )
+        if meeting.status == "scheduled":
+            self._announce_scheduled(meeting, user_id)
         return meeting
+
+    def _announce_scheduled(self, meeting: Meeting, user_id: str | None) -> None:
+        """Tell the attendees a meeting is on, once the write commits.
+
+        ``core.event_handlers._notify_meeting_scheduled`` turns this into a
+        notification per attendee. Only attendees linked to a user account
+        have an inbox; walk-in guests are named on the meeting and nowhere
+        else. The handler skips whoever scheduled it.
+        """
+        attendee_user_ids: list[str] = []
+        for attendee in meeting.attendees or []:
+            raw = str(attendee.get("user_id") or "").strip() if isinstance(attendee, dict) else ""
+            try:
+                uid = str(uuid.UUID(raw))
+            except ValueError:
+                continue
+            if uid not in attendee_user_ids:
+                attendee_user_ids.append(uid)
+        if not attendee_user_ids:
+            return
+        publish_after_commit(
+            self.session,
+            "meeting.scheduled",
+            data={
+                "project_id": str(meeting.project_id),
+                "meeting_id": str(meeting.id),
+                "meeting_number": meeting.meeting_number,
+                "title": meeting.title,
+                "meeting_date": meeting.meeting_date,
+                "attendee_user_ids": attendee_user_ids,
+                "scheduled_by": str(user_id) if user_id else None,
+            },
+            source_module="meetings",
+        )
 
     # ── Read ──────────────────────────────────────────────────────────────
 
@@ -262,9 +298,15 @@ class MeetingService:
         self,
         meeting_id: uuid.UUID,
         data: MeetingUpdate,
+        user_id: str | None = None,
     ) -> Meeting:
-        """Update meeting fields."""
+        """Update meeting fields.
+
+        Scheduling a draft, or moving a scheduled meeting to another day, tells
+        the attendees the same way creating a scheduled meeting does.
+        """
         meeting = await self.get_meeting(meeting_id)
+        before = (meeting.status, meeting.meeting_date)
 
         if meeting.status in ("completed", "cancelled"):
             raise HTTPException(
@@ -323,6 +365,8 @@ class MeetingService:
         await self.session.refresh(meeting)
 
         logger.info("Meeting updated: %s (fields=%s)", meeting_id, list(fields.keys()))
+        if meeting.status == "scheduled" and (meeting.status, meeting.meeting_date) != before:
+            self._announce_scheduled(meeting, user_id)
         return meeting
 
     # ── Delete ────────────────────────────────────────────────────────────

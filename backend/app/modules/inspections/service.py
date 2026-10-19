@@ -107,7 +107,33 @@ class InspectionService:
             data.inspection_type,
             data.project_id,
         )
+        if inspection.status == "scheduled":
+            self._announce_scheduled(inspection, user_id)
         return inspection
+
+    def _announce_scheduled(self, inspection: QualityInspection, user_id: str | None) -> None:
+        """Tell the inspector an inspection is booked for them, once it commits.
+
+        ``core.event_handlers._notify_inspection_due`` turns this into a
+        notification for ``inspector_id``. An inspection with no inspector has
+        nobody to tell, and the handler skips an inspector who booked it.
+        """
+        if not inspection.inspector_id:
+            return
+        publish_after_commit(
+            self.session,
+            "inspection.scheduled",
+            data={
+                "project_id": str(inspection.project_id),
+                "inspection_id": str(inspection.id),
+                "inspection_number": inspection.inspection_number,
+                "title": inspection.title,
+                "inspector_id": str(inspection.inspector_id),
+                "inspection_date": inspection.inspection_date,
+                "scheduled_by": str(user_id) if user_id else None,
+            },
+            source_module="inspections",
+        )
 
     async def get_inspection(self, inspection_id: uuid.UUID) -> QualityInspection:
         """Get inspection by ID. Raises 404 if not found."""
@@ -141,9 +167,16 @@ class InspectionService:
         self,
         inspection_id: uuid.UUID,
         data: InspectionUpdate,
+        user_id: str | None = None,
     ) -> QualityInspection:
-        """Update inspection fields."""
+        """Update inspection fields.
+
+        Scheduling it again (``failed`` back to ``scheduled``), moving its date
+        or handing it to another inspector tells the inspector, the same way
+        creating a scheduled inspection does.
+        """
         inspection = await self.get_inspection(inspection_id)
+        before = (inspection.status, str(inspection.inspector_id or ""), inspection.inspection_date)
 
         # ``completed`` is terminal (see _INSPECTION_STATUS_TRANSITIONS) so it
         # stays locked. ``failed`` is NOT terminal: the FSM allows
@@ -192,6 +225,9 @@ class InspectionService:
         await self.repo.update_fields(inspection_id, **fields)
         await self.session.refresh(inspection)
         logger.info("Inspection updated: %s (fields=%s)", inspection_id, list(fields.keys()))
+        after = (inspection.status, str(inspection.inspector_id or ""), inspection.inspection_date)
+        if inspection.status == "scheduled" and after != before:
+            self._announce_scheduled(inspection, user_id)
         return inspection
 
     async def delete_inspection(self, inspection_id: uuid.UUID) -> None:
@@ -223,7 +259,8 @@ class InspectionService:
             result: Must be one of ``pass``, ``fail``, or ``partial``.
 
         Emits ``inspection.completed.failed`` event when result is ``fail``
-        or ``partial`` to trigger punchlist item creation flow.
+        or ``partial`` to trigger punchlist item creation flow, and
+        ``inspection.completed.passed`` on a pass.
         """
         if result not in ("pass", "fail", "partial"):
             raise HTTPException(
@@ -290,6 +327,20 @@ class InspectionService:
                     "inspection_number": inspection.inspection_number,
                     "result": result,
                     "failed_items": failed_items,
+                },
+                source_module="inspections",
+            )
+        else:
+            # A pass is closure evidence too: closeout marks a built handover
+            # package stale on it, the same as on a failure.
+            publish_after_commit(
+                self.session,
+                "inspection.completed.passed",
+                data={
+                    "project_id": str(inspection.project_id),
+                    "inspection_id": str(inspection_id),
+                    "inspection_number": inspection.inspection_number,
+                    "result": result,
                 },
                 source_module="inspections",
             )

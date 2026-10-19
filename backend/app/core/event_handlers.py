@@ -6,22 +6,29 @@ Imported at startup to register all handlers with the event bus.
 Each handler is thin: validates the event, calls the target module's service.
 
 Dataflows wired:
-   1. meeting.action_item.created   -> auto-create task
    2. safety.observation.high_risk  -> notify PM + safety officer
    3. inspection.completed.failed   -> punch suggestion event (punchlist creates the items)
    4. rfi.response.design_change    -> flag for variation (changeorders drafts a CO)
    5. ncr.closed_with_cost_impact   -> flag for variation (changeorders drafts a CO)
-   6. document.revision.created     -> flag linked BOQ positions
    7. invoice.paid                  -> update project budget actuals
-   8. po.issued                     -> update project budget committed
-   9. estimate.approved             -> auto-populate project budget from BOQ
   10. schedule.activity.progress_updated -> today's EVM snapshot (one per project per day)
-  11. bim_model.ready               -> apply quantity maps -> draft BOQ
-  12. bim_model.new_version         -> diff -> flag affected BOQ positions
-  13. variation.approved             -> update contract_value + budget
   14. transmittal.issued            -> audit trail for distribution
   15. cde.container.promoted        -> audit + notify stakeholders
   15b. commissioning.system.commissioned -> audit trail for handover
+
+Retired handlers, each because the work happens elsewhere and reviving it would
+do the work twice: meeting.action_item.created (complete_meeting creates the
+tasks itself), po.issued (finance commits budget at PO approval, per budget
+line), estimate.approved (costmodel.budget.generated seeds the budget) and
+submittal.status_changed (notifications subscribes to each submittal outcome)
+and variation.approved (approve_order writes the budget delta row itself,
+the wave-5 subscriber moves Contract.total_value, and Project.contract_value is
+the original contract value change_intelligence divides by).
+
+document.revision.created, bim_model.new_version and bim_model.ready are gone
+for the same reason: the BOQ change review scan works out which positions a new
+drawing revision or model version touched straight from the data, and the BOQ
+editor runs it on every visit (boq/change_review.py).
 """
 
 import logging
@@ -42,95 +49,6 @@ if TYPE_CHECKING:
     from app.modules.schedule.progress_math import WorkCalendar
 
 logger = logging.getLogger(__name__)
-
-
-async def _resolve_project_currency(
-    session: "AsyncSession",
-    project_id: "str | uuid.UUID",
-) -> str:
-    """Return the project's currency code, or "" when it cannot be read.
-
-    ``ProjectBudget.currency_code`` carries no DB default on purpose - the
-    model comment requires service code to supply it from the project
-    context so per-project rollups do not bias toward one currency. A
-    budget line written without it reaches the UI with no currency and
-    renders as an em-dash instead of money.
-
-    Mirrors ``FinanceService.create_budget``: best-effort, never raises.
-    An empty string is the honest "unknown", and a wrong hardcoded
-    currency is worse than a blank one.
-    """
-    from sqlalchemy import select
-
-    from app.modules.projects.models import Project
-
-    try:
-        row = await session.execute(select(Project.currency).where(Project.id == project_id))
-        return row.scalar_one_or_none() or ""
-    except Exception:  # noqa: BLE001 - lookup is non-critical, never fail the handler
-        logger.exception("Project-currency lookup failed for project %s", project_id)
-        return ""
-
-
-# ---------------------------------------------------------------------------
-# 1. meeting.action_item.created -> auto-create task
-# ---------------------------------------------------------------------------
-
-
-async def _handle_meeting_action_item_created(event: Event) -> None:
-    """Create a task for each open action item from a meeting.
-
-    Expected event.data:
-        project_id: str (UUID)
-        meeting_id: str (UUID)
-        action_items: list[dict] with keys:
-            description, owner_id, due_date, status
-        created_by: str (UUID, optional)
-    """
-    try:
-        data = event.data
-        project_id = data.get("project_id")
-        meeting_id = data.get("meeting_id")
-        action_items = data.get("action_items", [])
-        created_by = data.get("created_by")
-
-        if not project_id or not action_items:
-            logger.debug("meeting.action_item.created: missing project_id or action_items")
-            return
-
-        # Lazy import to avoid circular dependencies
-        from app.database import async_session_factory
-        from app.modules.tasks.schemas import TaskCreate
-        from app.modules.tasks.service import TaskService
-
-        async with async_session_factory() as session:
-            svc = TaskService(session)
-            created_count = 0
-            for item in action_items:
-                if item.get("status") != "open":
-                    continue
-                task_data = TaskCreate(
-                    project_id=project_id,
-                    task_type="task",
-                    title=item.get("description", "Action item from meeting")[:500],
-                    responsible_id=item.get("owner_id"),
-                    due_date=item.get("due_date"),
-                    meeting_id=str(meeting_id) if meeting_id else None,
-                    status="open",
-                    priority="normal",
-                    metadata={"source": "meeting_action_item", "meeting_id": str(meeting_id)},
-                )
-                await svc.create_task(task_data, user_id=created_by)
-                created_count += 1
-            await session.commit()
-
-        logger.info(
-            "meeting.action_item.created: created %d tasks for meeting %s",
-            created_count,
-            meeting_id,
-        )
-    except Exception:
-        logger.exception("Error handling meeting.action_item.created")
 
 
 # ---------------------------------------------------------------------------
@@ -464,52 +382,6 @@ async def _handle_ncr_cost_impact(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 6. document.revision.created -> flag linked BOQ positions
-# ---------------------------------------------------------------------------
-
-
-async def _handle_document_revision_created(event: Event) -> None:
-    """Log new document revision for affected BOQ positions.
-
-    Expected event.data:
-        project_id: str (UUID)
-        document_id: str (UUID)
-        document_name: str
-        revision_code: str
-        previous_revision_id: str | None (UUID)
-        affected_boq_position_ids: list[str] (UUIDs, if known)
-    """
-    try:
-        data = event.data
-        document_id = data.get("document_id")
-        document_name = data.get("document_name", "")
-        revision_code = data.get("revision_code", "")
-        affected_ids = data.get("affected_boq_position_ids", [])
-
-        logger.info(
-            "document.revision.created: document '%s' rev %s -- %d linked BOQ positions",
-            document_name,
-            revision_code,
-            len(affected_ids),
-        )
-
-        if affected_ids:
-            await event_bus.publish(
-                "boq.positions.revision_flagged",
-                data={
-                    "project_id": data.get("project_id"),
-                    "document_id": str(document_id),
-                    "document_name": document_name,
-                    "revision_code": revision_code,
-                    "affected_position_ids": affected_ids,
-                },
-                source_module="event_handlers",
-            )
-    except Exception:
-        logger.exception("Error handling document.revision.created")
-
-
-# ---------------------------------------------------------------------------
 # 7. invoice.paid -> update project budget actuals
 # ---------------------------------------------------------------------------
 
@@ -573,173 +445,6 @@ async def _handle_invoice_paid(event: Event) -> None:
         )
     except Exception:
         logger.exception("Error handling invoice.paid")
-
-
-# ---------------------------------------------------------------------------
-# 8. po.issued -> update project budget committed
-# ---------------------------------------------------------------------------
-
-
-# Unpublished: procurement emits ``procurement.po.issued``, never ``po.issued``,
-# so this handler never runs. Do not revive it as it stands. It writes the
-# project's whole committed total onto every budget row, the same defect the
-# invoice.paid handler had, and it commits gross. Finance owns the
-# commitment (``finance/events.py``, ``finance/cost_position.py``).
-async def _handle_po_issued(event: Event) -> None:
-    """Recalculate project budget committed when a PO is issued.
-
-    Expected event.data:
-        project_id: str (UUID)
-        po_id: str (UUID)
-        amount_total: str (monetary value)
-        currency_code: str
-    """
-    try:
-        data = event.data
-        project_id = data.get("project_id")
-        po_id = data.get("po_id")
-
-        if not project_id:
-            logger.debug("po.issued: missing project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.finance.models import ProjectBudget
-        from app.modules.procurement.models import PurchaseOrder
-
-        async with async_session_factory() as session:
-            # Sum all issued POs for the project
-            result = await session.execute(
-                select(PurchaseOrder).where(
-                    PurchaseOrder.project_id == project_id,
-                    PurchaseOrder.status == "issued",
-                )
-            )
-            issued_pos = result.scalars().all()
-
-            total_committed = Decimal("0")
-            for po in issued_pos:
-                try:
-                    total_committed += Decimal(str(po.amount_total))
-                except (InvalidOperation, ValueError):
-                    continue
-
-            # Update budget lines for the project
-            budget_result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id))
-            budgets = budget_result.scalars().all()
-            for budget in budgets:
-                budget.committed = str(total_committed)
-
-            await session.commit()
-
-        logger.info(
-            "po.issued: updated budget committed for project %s (po %s, total_committed=%s)",
-            project_id,
-            po_id,
-            total_committed,
-        )
-    except Exception:
-        logger.exception("Error handling po.issued")
-
-
-# ---------------------------------------------------------------------------
-# 9. estimate.approved -> auto-populate project budget from BOQ
-# ---------------------------------------------------------------------------
-
-
-# Unpublished: no module emits ``estimate.approved``. A locked BOQ seeds the
-# finance budget through ``costmodel.budget.generated`` instead
-# (``FinanceService.seed_budget_from_boq``). Reviving this as well would seed
-# the same bill twice.
-async def _handle_estimate_approved(event: Event) -> None:
-    """BOQ approved -> create project_budgets.original_budget entries.
-
-    When a BOQ is locked/approved, auto-create ProjectBudget rows from BOQ
-    section totals grouped by WBS or parent position.
-
-    Expected event.data:
-        boq_id: str (UUID)
-        project_id: str (UUID)
-    """
-    try:
-        data = event.data
-        boq_id = data.get("boq_id")
-        project_id = data.get("project_id")
-
-        if not boq_id or not project_id:
-            logger.debug("estimate.approved: missing boq_id or project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.boq.models import Position
-        from app.modules.finance.models import ProjectBudget
-
-        async with async_session_factory() as session:
-            # Load all positions for this BOQ
-            result = await session.execute(select(Position).where(Position.boq_id == boq_id))
-            positions = result.scalars().all()
-
-            if not positions:
-                logger.debug("estimate.approved: no positions for boq %s", boq_id)
-                return
-
-            # Group totals by wbs_id (or "general" if unassigned)
-            wbs_totals: dict[str, Decimal] = {}
-            for pos in positions:
-                wbs_key = pos.wbs_id or "general"
-                try:
-                    total = Decimal(str(pos.total))
-                except (InvalidOperation, ValueError):
-                    total = Decimal("0")
-                wbs_totals[wbs_key] = wbs_totals.get(wbs_key, Decimal("0")) + total
-
-            # Upsert budget lines for each WBS group
-            currency_code = await _resolve_project_currency(session, project_id)
-            created_count = 0
-            for wbs_key, total in wbs_totals.items():
-                existing = await session.execute(
-                    select(ProjectBudget).where(
-                        ProjectBudget.project_id == project_id,
-                        ProjectBudget.wbs_id == (wbs_key if wbs_key != "general" else None),
-                        ProjectBudget.category == "estimate",
-                    )
-                )
-                budget = existing.scalar_one_or_none()
-
-                if budget:
-                    budget.original_budget = str(total)
-                    budget.revised_budget = str(total)
-                else:
-                    session.add(
-                        ProjectBudget(
-                            project_id=project_id,
-                            wbs_id=wbs_key if wbs_key != "general" else None,
-                            category="estimate",
-                            currency_code=currency_code,
-                            original_budget=str(total),
-                            revised_budget=str(total),
-                        )
-                    )
-                    created_count += 1
-
-            await session.commit()
-
-        logger.info(
-            "estimate.approved: populated %d budget lines for project %s (boq %s)",
-            created_count,
-            project_id,
-            boq_id,
-        )
-    except Exception:
-        logger.exception("Error handling estimate.approved")
 
 
 # ---------------------------------------------------------------------------
@@ -1200,310 +905,6 @@ async def _write_progress_snapshot(
 
 
 # ---------------------------------------------------------------------------
-# 11. bim_model.ready -> apply quantity maps -> draft BOQ
-# ---------------------------------------------------------------------------
-
-
-async def _handle_bim_model_ready(event: Event) -> None:
-    """BIM model processed -> apply quantity maps -> generate draft BOQ positions.
-
-    When a BIM model finishes processing, load active quantity map rules and
-    create draft BOQ positions for matching elements.
-
-    Expected event.data:
-        model_id: str (UUID)
-        project_id: str (UUID)
-        boq_id: str (UUID, optional - target BOQ for new positions)
-    """
-    try:
-        data = event.data
-        model_id = data.get("model_id")
-        project_id = data.get("project_id")
-        boq_id = data.get("boq_id")
-
-        if not model_id or not project_id:
-            logger.debug("bim_model.ready: missing model_id or project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.bim_hub.models import BIMElement, BIMQuantityMap
-        from app.modules.bim_hub.service import BIMHubService, rule_element_group_id
-
-        async with async_session_factory() as session:
-            # Load BIM elements for this model
-            elem_result = await session.execute(select(BIMElement).where(BIMElement.model_id == model_id))
-            elements = elem_result.scalars().all()
-
-            if not elements:
-                logger.debug("bim_model.ready: no elements for model %s", model_id)
-                return
-
-            # Load active quantity maps (project-scoped or global)
-            map_result = await session.execute(
-                select(BIMQuantityMap).where(
-                    BIMQuantityMap.is_active.is_(True),
-                    ((BIMQuantityMap.project_id == project_id) | BIMQuantityMap.project_id.is_(None)),
-                )
-            )
-            qty_maps = map_result.scalars().all()
-
-            if not qty_maps:
-                logger.debug(
-                    "bim_model.ready: no active quantity maps for project %s",
-                    project_id,
-                )
-                return
-
-            # Apply each rule to matching elements
-            matched_count = 0
-            for qmap in qty_maps:
-                for elem in elements:
-                    # The one rule matcher (type wildcards, property operators),
-                    # so this path cannot select differently from apply.
-                    if not BIMHubService._rule_matches_element(qmap, elem):
-                        continue
-                    # A rule fed by a saved group needs its members; this
-                    # path cannot resolve them, so it leaves such rules alone
-                    # rather than letting them select every element.
-                    if rule_element_group_id(qmap) is not None:
-                        continue
-
-                    # Extract quantity from element
-                    raw_qty = elem.quantities.get(qmap.quantity_source, 0)
-                    try:
-                        quantity = Decimal(str(raw_qty)) * Decimal(str(qmap.multiplier))
-                        waste = Decimal(str(qmap.waste_factor_pct)) / Decimal("100")
-                        quantity *= Decimal("1") + waste
-                    except (InvalidOperation, ValueError):
-                        continue
-
-                    matched_count += 1
-
-            logger.info(
-                "bim_model.ready: matched %d element-rule pairs for model %s (project %s, %d elements, %d rules)",
-                matched_count,
-                model_id,
-                project_id,
-                len(elements),
-                len(qty_maps),
-            )
-
-            # Emit a downstream event so the UI or another handler can create
-            # actual BOQ positions from the matched results.
-            await event_bus.publish(
-                "bim_model.quantity_maps_applied",
-                data={
-                    "project_id": project_id,
-                    "model_id": model_id,
-                    "boq_id": boq_id,
-                    "matched_count": matched_count,
-                    "element_count": len(elements),
-                    "rule_count": len(qty_maps),
-                },
-                source_module="event_handlers",
-            )
-    except Exception:
-        logger.exception("Error handling bim_model.ready")
-
-
-# ---------------------------------------------------------------------------
-# 12. bim_model.new_version -> diff -> flag affected BOQ positions
-# ---------------------------------------------------------------------------
-
-
-async def _handle_bim_model_new_version(event: Event) -> None:
-    """New BIM model version -> compute diff -> flag linked BOQ positions.
-
-    When a new version of a BIM model is uploaded, compare element stable_id
-    and geometry_hash to detect modified/deleted elements, then flag any BOQ
-    positions linked to those elements.
-
-    Expected event.data:
-        new_model_id: str (UUID)
-        old_model_id: str (UUID)
-        project_id: str (UUID)
-    """
-    try:
-        data = event.data
-        new_model_id = data.get("new_model_id")
-        old_model_id = data.get("old_model_id")
-        project_id = data.get("project_id")
-
-        if not new_model_id or not old_model_id:
-            logger.debug("bim_model.new_version: missing new_model_id or old_model_id")
-            return
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.bim_hub.models import BIMElement, BOQElementLink
-
-        async with async_session_factory() as session:
-            # Load elements for both versions keyed by stable_id
-            old_result = await session.execute(select(BIMElement).where(BIMElement.model_id == old_model_id))
-            old_elements = {e.stable_id: e for e in old_result.scalars().all()}
-
-            new_result = await session.execute(select(BIMElement).where(BIMElement.model_id == new_model_id))
-            new_elements = {e.stable_id: e for e in new_result.scalars().all()}
-
-            # Detect modified and deleted elements
-            modified_old_elem_ids: list[str] = []
-            deleted_old_elem_ids: list[str] = []
-
-            for stable_id, old_elem in old_elements.items():
-                new_elem = new_elements.get(stable_id)
-                if new_elem is None:
-                    # Element was deleted in new version
-                    deleted_old_elem_ids.append(str(old_elem.id))
-                elif old_elem.geometry_hash != new_elem.geometry_hash:
-                    # Geometry changed
-                    modified_old_elem_ids.append(str(old_elem.id))
-
-            affected_elem_ids = modified_old_elem_ids + deleted_old_elem_ids
-
-            if not affected_elem_ids:
-                logger.info(
-                    "bim_model.new_version: no modified/deleted elements between %s and %s",
-                    old_model_id,
-                    new_model_id,
-                )
-                return
-
-            # Find BOQ positions linked to the affected old elements
-            link_result = await session.execute(
-                select(BOQElementLink).where(BOQElementLink.bim_element_id.in_(affected_elem_ids))
-            )
-            affected_links = link_result.scalars().all()
-            affected_position_ids = list({str(link.boq_position_id) for link in affected_links})
-
-        logger.info(
-            "bim_model.new_version: %d modified, %d deleted elements; %d BOQ positions affected (models %s -> %s)",
-            len(modified_old_elem_ids),
-            len(deleted_old_elem_ids),
-            len(affected_position_ids),
-            old_model_id,
-            new_model_id,
-        )
-
-        if affected_position_ids:
-            await event_bus.publish(
-                "boq.positions.bim_version_flagged",
-                data={
-                    "project_id": project_id,
-                    "old_model_id": str(old_model_id),
-                    "new_model_id": str(new_model_id),
-                    "modified_element_count": len(modified_old_elem_ids),
-                    "deleted_element_count": len(deleted_old_elem_ids),
-                    "affected_position_ids": affected_position_ids,
-                },
-                source_module="event_handlers",
-            )
-    except Exception:
-        logger.exception("Error handling bim_model.new_version")
-
-
-# ---------------------------------------------------------------------------
-# 13. variation.approved -> update contract_value + budget
-# ---------------------------------------------------------------------------
-
-
-async def _handle_variation_approved(event: Event) -> None:
-    """Variation approved -> update project contract_value and budget.
-
-    When a change order / variation is approved, increment the project's
-    contract_value and create or update a budget entry for variations.
-
-    Expected event.data:
-        project_id: str (UUID)
-        variation_id: str (UUID)
-        approved_amount: str (monetary value, e.g. "25000")
-        description: str (optional)
-    """
-    try:
-        data = event.data
-        project_id = data.get("project_id")
-        variation_id = data.get("variation_id")
-        approved_amount = data.get("approved_amount", "0")
-
-        if not project_id:
-            logger.debug("variation.approved: missing project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.finance.models import ProjectBudget
-        from app.modules.projects.models import Project
-
-        try:
-            amount = Decimal(str(approved_amount).replace(",", ""))
-        except (InvalidOperation, ValueError):
-            logger.warning("variation.approved: invalid approved_amount=%s", approved_amount)
-            return
-
-        if amount == 0:
-            logger.debug("variation.approved: approved_amount=0, skipping")
-            return
-
-        async with async_session_factory() as session:
-            # Update project.contract_value
-            project = await session.get(Project, project_id)
-            if project:
-                try:
-                    current_cv = Decimal(str(project.contract_value or "0"))
-                except (InvalidOperation, ValueError):
-                    current_cv = Decimal("0")
-                project.contract_value = str(current_cv + amount)
-
-            # Upsert budget entry for the "variations" category
-            existing = await session.execute(
-                select(ProjectBudget).where(
-                    ProjectBudget.project_id == project_id,
-                    ProjectBudget.category == "variations",
-                )
-            )
-            budget = existing.scalar_one_or_none()
-
-            if budget:
-                try:
-                    current_revised = Decimal(str(budget.revised_budget))
-                except (InvalidOperation, ValueError):
-                    current_revised = Decimal("0")
-                budget.revised_budget = str(current_revised + amount)
-            else:
-                session.add(
-                    ProjectBudget(
-                        project_id=project_id,
-                        wbs_id=None,
-                        category="variations",
-                        # The project is already loaded above - reuse it
-                        # rather than re-query. "" when the project row is
-                        # missing, matching _resolve_project_currency.
-                        currency_code=(getattr(project, "currency", None) or "") if project else "",
-                        original_budget="0",
-                        revised_budget=str(amount),
-                    )
-                )
-
-            await session.commit()
-
-        logger.info(
-            "variation.approved: updated contract_value (+%s) and budget for project %s (variation %s)",
-            approved_amount,
-            project_id,
-            variation_id,
-        )
-    except Exception:
-        logger.exception("Error handling variation.approved")
-
-
-# ---------------------------------------------------------------------------
 # 14. transmittal.issued -> audit trail for distribution
 # ---------------------------------------------------------------------------
 
@@ -1874,11 +1275,15 @@ async def _notify_inspection_due(event: Event) -> None:
         title: str
         inspector_id: str (UUID)
         inspection_date: str
+        scheduled_by: str | None (UUID; an inspector who booked it is not told)
+
+    Published by ``InspectionService`` when an inspection is created as, or
+    becomes, scheduled, or is moved or reassigned while scheduled.
     """
     try:
         data = event.data
         inspector_id = data.get("inspector_id")
-        if not inspector_id:
+        if not inspector_id or str(inspector_id) == str(data.get("scheduled_by") or ""):
             return
 
         from app.database import async_session_factory
@@ -1912,60 +1317,6 @@ async def _notify_inspection_due(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 20. submittal.status_changed -> notify the submitter
-# ---------------------------------------------------------------------------
-
-
-async def _notify_submittal_status_changed(event: Event) -> None:
-    """Notify the submitter when a submittal's review status changes.
-
-    Expected event.data:
-        project_id: str (UUID)
-        submittal_id: str (UUID)
-        submittal_number: str
-        title: str
-        new_status: str (approved / rejected / revise_resubmit)
-        submitted_by: str (UUID)
-        reviewer_name: str (optional)
-    """
-    try:
-        data = event.data
-        submitted_by = data.get("submitted_by")
-        if not submitted_by:
-            return
-
-        from app.database import async_session_factory
-        from app.modules.notifications.service import NotificationService
-
-        async with async_session_factory() as session:
-            svc = NotificationService(session)
-            await svc.create(
-                user_id=submitted_by,
-                notification_type="info",
-                entity_type="submittal",
-                entity_id=str(data.get("submittal_id", "")),
-                title_key="notification.submittal_status_changed_title",
-                body_key="notification.submittal_status_changed_body",
-                body_context={
-                    "submittal_number": data.get("submittal_number", ""),
-                    "title": str(data.get("title", ""))[:200],
-                    "new_status": data.get("new_status", ""),
-                },
-                action_url=f"/projects/{data.get('project_id')}/submittals",
-            )
-            await session.commit()
-
-        logger.info(
-            "notify: submittal %s status -> %s, notified submitter %s",
-            data.get("submittal_number"),
-            data.get("new_status"),
-            submitted_by,
-        )
-    except Exception:
-        logger.exception("Error in _notify_submittal_status_changed")
-
-
-# ---------------------------------------------------------------------------
 # 21. meeting.scheduled -> notify all attendees
 # ---------------------------------------------------------------------------
 
@@ -1980,10 +1331,15 @@ async def _notify_meeting_scheduled(event: Event) -> None:
         title: str
         meeting_date: str
         attendee_user_ids: list[str] (UUIDs of attendees)
+        scheduled_by: str | None (UUID; left out of the recipients)
+
+    Published by ``MeetingService`` when a meeting is created as, or becomes,
+    scheduled, or is moved to another day while scheduled.
     """
     try:
         data = event.data
-        attendee_ids = data.get("attendee_user_ids", [])
+        scheduled_by = str(data.get("scheduled_by") or "")
+        attendee_ids = [uid for uid in data.get("attendee_user_ids") or [] if str(uid) != scheduled_by]
         if not attendee_ids:
             return
 
@@ -2207,7 +1563,7 @@ async def _dispatch_to_webhooks(event: Event) -> None:
 # Registration
 # ---------------------------------------------------------------------------
 
-_HANDLER_COUNT = 25
+_HANDLER_COUNT = 17
 
 
 def register_event_handlers() -> None:
@@ -2222,22 +1578,15 @@ def register_event_handlers() -> None:
     the same event pushed to every outgoing webhook twice.
     """
     # Original cross-module dataflow handlers (1–15)
-    event_bus.subscribe_once("meeting.action_item.created", _handle_meeting_action_item_created)
     event_bus.subscribe_once("safety.observation.high_risk", _handle_safety_observation_high_risk)
     event_bus.subscribe_once("safety.incident.created", _handle_safety_incident_created)
     event_bus.subscribe_once("inspection.completed.failed", _handle_inspection_completed_failed)
     event_bus.subscribe_once("rfi.response.design_change", _handle_rfi_response_design_change)
     event_bus.subscribe_once("ncr.closed_with_cost_impact", _handle_ncr_cost_impact)
-    event_bus.subscribe_once("document.revision.created", _handle_document_revision_created)
     # invoice.paid is NOT subscribed here any more: _handle_invoice_paid wrote the
     # total of every paid invoice onto EACH budget line, inflating actual N times.
     # FinanceService.pay_invoice buckets actual per (wbs, category, currency) itself.
-    event_bus.subscribe_once("po.issued", _handle_po_issued)
-    event_bus.subscribe_once("estimate.approved", _handle_estimate_approved)
     event_bus.subscribe_once("schedule.activity.progress_updated", _handle_schedule_progress)
-    event_bus.subscribe_once("bim_model.ready", _handle_bim_model_ready)
-    event_bus.subscribe_once("bim_model.new_version", _handle_bim_model_new_version)
-    event_bus.subscribe_once("variation.approved", _handle_variation_approved)
     event_bus.subscribe_once("transmittal.issued", _handle_transmittal_issued)
     event_bus.subscribe_once("cde.container.promoted", _handle_cde_container_promoted)
     event_bus.subscribe_once("commissioning.system.commissioned", _handle_system_commissioned)
@@ -2247,7 +1596,6 @@ def register_event_handlers() -> None:
     event_bus.subscribe_once("task.assigned", _notify_task_assigned)
     event_bus.subscribe_once("invoice.approved", _notify_invoice_approved)
     event_bus.subscribe_once("inspection.scheduled", _notify_inspection_due)
-    event_bus.subscribe_once("submittal.status_changed", _notify_submittal_status_changed)
     event_bus.subscribe_once("meeting.scheduled", _notify_meeting_scheduled)
     event_bus.subscribe_once("ncr.created", _notify_ncr_created)
     event_bus.subscribe_once("document.uploaded", _notify_document_uploaded)
