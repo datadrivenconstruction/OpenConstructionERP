@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Bu iş günü {date} tarihinde gerçekleşti ancak ofise {days} gün sonra ulaştı",
       "suggestion": "Onaylamadan önce saatleri ilgili günün kayıtlarıyla karşılaştırın; hakediş dönemi kapanmış olabilir"
+    },
+    "outdoor_heat_ban": {
+      "fail": "{line}. satır, {date} tarihinde {start} - {end} arası çalışma kaydediyor; bu, {ban_from} - {ban_to} arasındaki öğle saatlerinde açık havada çalışma yasağı kapsamına giriyor",
+      "suggestion": "Bu iş açık havada doğrudan güneş altında yapıldıysa yasak saatlerin dışına alın; kapalı alandaki işler ve muaf sektörler etkilenmez"
     }
   },
   "ai_takeoff": {

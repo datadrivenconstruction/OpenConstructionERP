@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Pekerjaan dilakukan pada {date}, tetapi baru diterima kantor {days} hari kemudian",
       "suggestion": "Periksa jam terhadap catatan hari tersebut sebelum menyetujui; periode penilaian pembayaran mungkin sudah ditutup"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Baris {line} mencatat pekerjaan dari {start} sampai {end} pada {date}, yang masuk dalam larangan kerja di luar ruangan saat tengah hari dari {ban_from} sampai {ban_to}",
+      "suggestion": "Jika pekerjaan ini dilakukan di luar ruangan di bawah sinar matahari langsung, pindahkan ke luar jam larangan; pekerjaan di dalam ruangan dan sektor yang dikecualikan tidak terpengaruh"
     }
   },
   "ai_takeoff": {

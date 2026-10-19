@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Ginawa ang trabahong ito noong {date} ngunit nakarating lamang sa opisina pagkalipas ng {days} araw",
       "suggestion": "Ihambing ang mga oras sa mismong araw ng trabaho bago aprubahan; maaaring sarado na ang valuation period"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Ang linya {line} ay may naitalang trabaho mula {start} hanggang {end} noong {date}, na pasok sa pagbabawal sa trabaho sa labas tuwing tanghali mula {ban_from} hanggang {ban_to}",
+      "suggestion": "Kung ang trabahong ito ay isinagawa sa labas sa ilalim ng direktang araw, ilipat ito sa labas ng oras ng pagbabawal; hindi sakop ang trabaho sa loob ng gusali at ang mga sektor na exempted"
     }
   },
   "ai_takeoff": {

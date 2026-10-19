@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Questo giorno è stato lavorato il {date} ed è arrivato in ufficio solo {days} giorni dopo",
       "suggestion": "Verificare le ore rispetto al giorno stesso prima di approvare: la valutazione potrebbe essere già chiusa"
+    },
+    "outdoor_heat_ban": {
+      "fail": "La riga {line} registra lavoro dalle {start} alle {end} del {date}, entro il divieto di lavoro all'aperto di mezzogiorno dalle {ban_from} alle {ban_to}",
+      "suggestion": "Se il lavoro era all'aperto sotto il sole diretto, spostarlo fuori dalle ore di divieto; i lavori al chiuso e i settori esentati non sono interessati"
     }
   },
   "ai_takeoff": {

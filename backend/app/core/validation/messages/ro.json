@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Lucrările au fost executate la {date}, dar datele au ajuns la birou abia după {days} zile",
       "suggestion": "Verificați orele față de ziua efectiv lucrată înainte de aprobare; decontarea poate fi deja închisă"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Rândul {line} înregistrează lucru de la {start} până la {end} în data de {date}, în intervalul interdicției de la prânz pentru lucrul în aer liber, de la {ban_from} până la {ban_to}",
+      "suggestion": "Dacă lucrarea s-a desfășurat în aer liber, în soare direct, mutați-o în afara orelor de interdicție; lucrările în spații închise și sectoarele exceptate nu sunt afectate"
     }
   },
   "ai_takeoff": {

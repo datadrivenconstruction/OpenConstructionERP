@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Töö tehti {date}, kuid andmed jõudsid kontorisse alles {days} päeva hiljem",
       "suggestion": "Kontrollige enne kinnitamist tunde selle päeva andmetega; maksearvestuse periood võib juba suletud olla"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Real {line} on töö ajavahemikus {start}-{end} kuupäeval {date}, mis jääb keskpäevase välitööde keelu ({ban_from}-{ban_to}) sisse",
+      "suggestion": "Kui töö tehti väljas otsese päikese käes, viige see keeluaegadest välja; sisetööd ja erandiga sektorid ei kuulu keelu alla"
     }
   },
   "ai_takeoff": {

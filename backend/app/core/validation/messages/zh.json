@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "此记录对应 {date} 的作业，但在 {days} 天后才传至办公室。",
       "suggestion": "批准前，请核对实际作业当日的工时；对应计价期间可能已经结算。"
+    },
+    "outdoor_heat_ban": {
+      "fail": "第 {line} 行记录了 {date} 从 {start} 到 {end} 的工作，落在 {ban_from} 至 {ban_to} 的正午户外作业禁止时段内",
+      "suggestion": "如果该工作为烈日下的户外作业，请调整到禁止时段之外；室内作业和豁免行业不受影响"
     }
   },
   "ai_takeoff": {

@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "This day was worked on {date} and only reached the office {days} days later",
       "suggestion": "Check the hours against the day itself before approving, the valuation may already be closed"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Line {line} records work from {start} to {end} on {date}, inside the midday outdoor work ban from {ban_from} to {ban_to}",
+      "suggestion": "If this work was outdoors in direct sun, move it out of the ban hours; indoor work and exempt sectors are not affected"
     }
   },
   "ai_takeoff": {
