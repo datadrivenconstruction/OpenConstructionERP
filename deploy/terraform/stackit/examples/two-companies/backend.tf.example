@@ -1,0 +1,37 @@
+# Copy to backend.tf and pick ONE variant. The state holds database passwords and
+# object storage keys in clear text: keep the backend private and encrypted.
+
+# Variant 1: PostgreSQL backend (recommended, supports state locking).
+# Use a database that is NOT one of the company instances, for example a small
+# separate PostgreSQL Flex instance for operations.
+#
+# terraform {
+#   backend "pg" {
+#     conn_str = "postgres://tfstate:PASSWORD@HOST:5432/tfstate?sslmode=require"
+#   }
+# }
+# (or leave conn_str out and export PG_CONN_STR)
+
+# Variant 2: S3 backend on STACKIT Object Storage. Works, but has NO state locking:
+# make sure only one person or pipeline applies at a time.
+#
+# terraform {
+#   backend "s3" {
+#     bucket = "oce-terraform-state"
+#     key    = "stackit/two-companies.tfstate"
+#     region = "eu01"
+#
+#     endpoints = {
+#       s3 = "https://object.storage.eu01.onstackit.cloud"
+#     }
+#
+#     skip_credentials_validation = true
+#     skip_region_validation      = true
+#     skip_requesting_account_id  = true
+#     skip_metadata_api_check     = true
+#     skip_s3_checksum            = true
+#     use_path_style              = true
+#   }
+# }
+# Credentials: export AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY with a credential
+# of a dedicated STACKIT object storage credentials group.
