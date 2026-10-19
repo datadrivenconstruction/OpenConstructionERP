@@ -135,5 +135,85 @@
     "source": "Social Insurance Law 148/2019, general scheme",
     "source_url": "https://taxsummaries.pwc.com/egypt/corporate/other-taxes",
     "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "FR", "key": "legal_working_week_hours", "value": "35", "unit": "hours",
+    "effective_from": "2000-01-01", "effective_to": null,
+    "source": "Code du travail, art. L3121-27: the legal working week, above which hours are overtime",
+    "source_url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050",
+    "confidence": "H", "needs_expert_review": false,
+    "note": "A threshold, not a maximum: hours beyond 35 are overtime, paid at a premium. Thirty-five hours since loi 2000-37 (firms of 20 or fewer from 2002); the article number dates from the 2016 recodification."
+  },
+  {
+    "country": "FR", "key": "overtime_premium_first_8_hours_pct", "value": "25", "unit": "percent of hourly wage",
+    "effective_from": "2016-08-10", "effective_to": null,
+    "source": "Code du travail, art. L3121-36: default premium for the 36th to the 43rd hour of the week",
+    "source_url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050",
+    "confidence": "M", "needs_expert_review": false,
+    "note": "Default where no company or branch agreement sets another rate, which may not be below 10 percent."
+  },
+  {
+    "country": "FR", "key": "overtime_premium_beyond_8_hours_pct", "value": "50", "unit": "percent of hourly wage",
+    "effective_from": "2016-08-10", "effective_to": null,
+    "source": "Code du travail, art. L3121-36: default premium from the 44th hour of the week",
+    "source_url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050",
+    "confidence": "M", "needs_expert_review": false,
+    "note": "Default where no company or branch agreement sets another rate."
+  },
+  {
+    "country": "FR", "key": "public_holiday_days", "value": "11", "unit": "days per year",
+    "effective_from": "2008-05-01", "effective_to": null,
+    "source": "Code du travail, art. L3133-1 (eleven public holidays)",
+    "source_url": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072050",
+    "confidence": "H", "needs_expert_review": false,
+    "note": "Alsace-Moselle adds Good Friday and 26 December (L3134-13); the calendar engine computes both."
+  },
+  {
+    "country": "FR", "key": "minimum_wage_hourly", "value": "12.02", "unit": "EUR per hour, gross",
+    "effective_from": "2026-01-01", "effective_to": null,
+    "source": "Décret 2025-1228 du 17 décembre 2025 (SMIC from 1 January 2026)",
+    "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F2300",
+    "confidence": "H", "needs_expert_review": true,
+    "note": "The figure from 1 January 2026 is confirmed. Whether a revision took effect later in 2026 was not, so the row is shown and not enforced until a reviewer closes it. Mayotte has its own SMIC (EUR 9.33)."
+  },
+  {
+    "country": "FR", "key": "minimum_wage_monthly", "value": "1823.03", "unit": "EUR per month, gross, at 35 hours a week",
+    "effective_from": "2026-01-01", "effective_to": null,
+    "source": "Décret 2025-1228 du 17 décembre 2025: 12.02 x 35 x 52 / 12 hours",
+    "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F2300",
+    "confidence": "H", "needs_expert_review": true,
+    "note": "Follows the hourly SMIC, so it carries the same open question about a revision later in 2026."
+  },
+  {
+    "country": "FR", "key": "btp_paid_leave_fund_pct", "value": "20.20", "unit": "percent of gross wages",
+    "effective_from": "2026-04-01", "effective_to": "2027-03-31",
+    "source": "CIBTP Île-de-France rate sheet, campaign 2026-2027 (building and public works paid-leave fund)",
+    "source_url": "https://www.cibtp-idf.fr/media/ile-de-france/adhesion-cotisation/Page_des_taux_avril_2026.pdf",
+    "confidence": "M", "needs_expert_review": true,
+    "note": "Every building and public works employer pays its paid leave through a regional CIBTP caisse. The rate differs by caisse (about 20.2 to 20.7 percent); 20.20 is Île-de-France. The 2026 campaign abatement is EUR 96,168. A per-caisse table needs a region key and a reviewer."
+  },
+  {
+    "country": "FR", "key": "btp_bad_weather_fund_pct_structural_works", "value": "0.68", "unit": "percent of the capped social security base",
+    "effective_from": "2026-04-01", "effective_to": "2027-03-31",
+    "source": "CIBTP rate sheets 2026 (chômage intempéries): structural works and public works",
+    "source_url": "https://www.cibtp-idf.fr/media/ile-de-france/adhesion-cotisation/Page_des_taux_avril_2026.pdf",
+    "confidence": "M", "needs_expert_review": false,
+    "note": "Gros oeuvre and travaux publics. How the bad-weather indemnity is paid out (share of wage, waiting day) was not read and is not encoded."
+  },
+  {
+    "country": "FR", "key": "btp_bad_weather_fund_pct_finishing_works", "value": "0.13", "unit": "percent of the capped social security base",
+    "effective_from": "2026-04-01", "effective_to": "2027-03-31",
+    "source": "CIBTP rate sheets 2026 (chômage intempéries): finishing trades",
+    "source_url": "https://www.cibtp-idf.fr/media/ile-de-france/adhesion-cotisation/Page_des_taux_avril_2026.pdf",
+    "confidence": "M", "needs_expert_review": false,
+    "note": "Second oeuvre."
+  },
+  {
+    "country": "FR", "key": "btp_oppbtp_levy_pct", "value": "0.11", "unit": "percent of payroll, base grossed up for paid leave",
+    "effective_from": "2026-01-01", "effective_to": "2026-12-31",
+    "source": "OPPBTP contribution for 2026, as reported by a professional news service",
+    "source_url": "https://www.weblex.fr/weblex-actualite/cotisations-oppbtp-quel-taux-en-2026",
+    "confidence": "M", "needs_expert_review": false,
+    "note": "The building and public works health and safety body's levy."
   }
 ]
