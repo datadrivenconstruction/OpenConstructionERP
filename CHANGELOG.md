@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
-## [18.7.0] - 2026-10-17
+## [18.7.0] - 2026-10-19
 
 ### Added
 
@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A cost control demo project for training and screen recordings, installed with `python -m app.cli demo-cost-control`. Its figures are tested against the forecast rules, and running it again finds the project instead of creating a second one.
 - Cost control findings from the validation engine: money on no cost line, more certified than awarded, a forecast above plan, a line only partly awarded, changes waiting for a decision, and no forecast saved for over a month.
 - The validation report reads as a list of problems. It opens on errors and warnings, groups the findings by rule with a translated rule name and what to do, names the bill position by its number and text instead of an internal id, links each finding to its position in the bill, and offers a search once there are more than twenty findings. Passed checks are one click away.
+- Cost control offers four forecast methods (best available source, the default, maximum value, earned value from progress and CPI, and a manual amount backed by a document), per project and per line. A saved forecast starts as a draft: lines that moved more than the project's threshold need a comment and evidence before it can be frozen, and a frozen snapshot is never changed. A phase comparison shows amounts or percent of plan, and the cost report, phase comparison, invoice ledger and forecast documentation export as PDF or Excel.
+- Requisitions take designated approvers in order, and only the next one may approve. Lines convert to purchase orders one by one or in parts over several orders, lines of several requisitions can share one order, and a project that orders in an external purchasing system records those orders on the requisition. Every change lands in a feed other systems can read.
+- Historical benchmarks from finished projects split by client, region, type, status, phase, country, end year or a classification such as DIN 276, with P10 and P90, spread and the readings left out by reason. Money can be restated in one reporting currency, a drilldown lists the records behind a reading, and estimating shows the historical range of past positions.
 
 ### Fixed
 
@@ -29,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The regional pack card and the cases for your market sit one above the other at full width on the dashboard. The pack shows its facts in one row with the link to change it in its header, several validation rule sets fold into a count that opens the list, and the pack language is called the document language. Case and video tiles whose text is not in your interface language carry a small language tag, the card says once that the content is not yet available in your language, and videos in your language come first.
 - The dashboard's what's new strip describes this release instead of an older one.
 - Deleting a document that a cost forecast override cites clears the link and keeps the reason, instead of leaving a reference to a document that is gone.
+- The buy list keeps catalogue items with the same name apart instead of adding them up.
+- Site logistics zones and deliveries now link to their areas and transports through foreign keys, so the database itself keeps those links valid.
+- Readiness messages in the quality concept name an untitled proof by its evidence type instead of showing an empty name.
+- Ordered quantities are labelled with the correct French accents again.
 
 ## [18.6.4] - 2026-10-16
 
