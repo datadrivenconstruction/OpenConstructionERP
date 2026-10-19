@@ -144,7 +144,9 @@
       "start_milestone": "Rozpoczęcie projektu",
       "start_milestone_description": "Kamień milowy rozpoczęcia projektu",
       "completion_milestone": "Zakończenie projektu",
-      "completion_milestone_description": "Kamień milowy zakończenia projektu"
+      "completion_milestone_description": "Kamień milowy zakończenia projektu",
+      "labour_resource": "Robocizna",
+      "machine_resource": "Sprzęt"
     }
   },
   "cad": {

@@ -597,6 +597,20 @@
       "suggestion": "Limitahan ang mga adjustment sa -50% hanggang +200% upang maiwasan ang hindi makatotohanang presyo ng lote"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Ang item {ordinal} '{description}' ({amount}) ay may presyo sa bill of quantities, pero walang activity na may dala nito, kaya wala sa schedule ang gastos nito",
+      "suggestion": "Bigyan ng dami ang item o iugnay ito sa isang activity, saka buuin muli ang schedule."
+    },
+    "cost_reconciliation": {
+      "fail": "Ang schedule ay may {planned} mula sa {bill} ng bill: {difference} ng may presyong gawain ay wala sa anumang activity",
+      "suggestion": "Suriin ang mga item na inililista ng coverage check, saka buuin muli ang schedule."
+    },
+    "duration_vs_norm": {
+      "fail": "Ang activity na '{activity}' ay tumatagal ng {duration} araw ng trabaho, habang ang norm ng labor at makinarya ay nagbibigay ng {norm}",
+      "suggestion": "Suriin ang dami, ang crew at ang norm hours ng item, o ang tagal na binago nang mano-mano."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Walang logic link sa {ends} ang activity na '{activity}' (bukas na dulo / hindi kumpletong konektadong activity)",

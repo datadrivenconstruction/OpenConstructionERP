@@ -144,7 +144,9 @@
       "start_milestone": "Projekti algus",
       "start_milestone_description": "Projekti alguse verstapost",
       "completion_milestone": "Projekti lõpetamine",
-      "completion_milestone_description": "Projekti lõpetamise verstapost"
+      "completion_milestone_description": "Projekti lõpetamise verstapost",
+      "labour_resource": "Tööjõud",
+      "machine_resource": "Masinad"
     }
   },
   "cad": {

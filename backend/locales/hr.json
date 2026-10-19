@@ -355,7 +355,9 @@
       "start_milestone": "Početak projekta",
       "start_milestone_description": "Prekretnica početka projekta",
       "completion_milestone": "Dovršetak projekta",
-      "completion_milestone_description": "Prekretnica dovršetka projekta"
+      "completion_milestone_description": "Prekretnica dovršetka projekta",
+      "labour_resource": "Radna snaga",
+      "machine_resource": "Strojevi"
     }
   },
   "settings": {

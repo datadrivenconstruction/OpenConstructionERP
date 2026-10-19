@@ -597,6 +597,20 @@
       "suggestion": "Yer uchastkalarining noreal narxlarini oldini olish uchun tuzatishlarni -50% dan +200% gacha cheklang"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "{ordinal}-pozitsiya '{description}' ({amount}) xarajatlar smetasida narxlangan, lekin uni hech bir faoliyat olib yurmaydi, shuning uchun uning narxi jadvalda yoʻq",
+      "suggestion": "Pozitsiyaga hajm bering yoki uni faoliyatga bogʻlang, soʻng jadvalni qayta yarating."
+    },
+    "cost_reconciliation": {
+      "fail": "Jadvalda smetaning {bill} summasidan {planned} bor: narxlangan ishning {difference} qismi hech bir faoliyatda yoʻq",
+      "suggestion": "Qamrovni tekshirish koʻrsatgan pozitsiyalarni tekshiring, soʻng jadvalni qayta yarating."
+    },
+    "duration_vs_norm": {
+      "fail": "'{activity}' faoliyati {duration} ish kuni davom etadi, mehnat va mashina me'yorlari esa {norm} beradi",
+      "suggestion": "Pozitsiyaning hajmini, brigadasini va me'yor soatlarini yoki qoʻlda oʻzgartirilgan davomiylikni tekshiring."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "'{activity}' faoliyatida {ends} bogʻlanishi yoʻq (ochiq uch / uzilgan faoliyat)",

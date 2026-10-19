@@ -19,6 +19,7 @@ import math
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
+from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 
 from fastapi import HTTPException, status
@@ -83,6 +84,7 @@ from app.modules.schedule.boq_plan import PlanFit
 from app.modules.schedule.milestone_events import announce_if_milestone_reached
 from app.modules.schedule.models import Activity, Schedule, ScheduleRelationship, WorkOrder
 from app.modules.schedule.ordering import activity_order_terms
+from app.modules.schedule.plan_confidence import plan_confidence, task_confidence
 from app.modules.schedule.repository import (
     ActivityRepository,
     RelationshipRepository,
@@ -133,6 +135,17 @@ def _str_to_float(value: str | None) -> float:
     except (ValueError, TypeError):
         return 0.0
     return number if math.isfinite(number) else 0.0
+
+
+def _money_decimal(value: object) -> Decimal | None:
+    """A stored money value as an exact decimal; ``None`` when it is no number."""
+    if value is None:
+        return None
+    try:
+        number = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError):
+        return None
+    return number if number.is_finite() else None
 
 
 # ── Fallback production rates for generate-from-BOQ durations ─────────────
@@ -378,7 +391,100 @@ def _resource_is_hourly(resource: dict) -> bool:
     return unit in _LEGACY_RESOURCE_HOUR_UNITS or (kind in ("labor", "operator") and unit in _RESOURCE_HOUR_UNITS)
 
 
-def _calc_duration_from_resources(
+# Resource types that are plant, and the hour units a machine row is counted
+# in. The cost database writes "machine hours", "h-maş." (RO), "giờ máy" (VI)
+# and "sa" (TR) besides the labour spellings. A machine shift (机班) is not an
+# hour and is not read.
+_MACHINE_RESOURCE_TYPES = frozenset({"equipment", "machine", "machinery", "plant"})
+_MACHINE_HOUR_UNITS = _RESOURCE_HOUR_UNITS | frozenset(
+    {
+        "machine hours",
+        "machine hour",
+        "machine-hours",
+        "machine-hour",
+        "machine-hrs",
+        "machine hrs",
+        "mh",
+        "h-maş.",
+        "h-mas.",
+        "giờ máy",
+        "sa",
+        "masch.-std.",
+        "maschinenstunden",
+        "маш.-ч",
+        "маш-ч",
+        "маш.ч",
+    }
+)
+
+
+def _resource_rows(pos_meta: dict) -> list[dict]:
+    """The resource rows of a position that are mappings (the bill tolerates junk)."""
+    raw = pos_meta.get("resources", []) if isinstance(pos_meta, dict) else []
+    return [r for r in raw if isinstance(r, dict)] if isinstance(raw, list) else []
+
+
+def _is_machine_hour_row(resource: dict) -> bool:
+    unit = str(resource.get("unit") or "").strip().lower()
+    kind = str(resource.get("type") or "").strip().lower()
+    return kind in _MACHINE_RESOURCE_TYPES and unit in _MACHINE_HOUR_UNITS
+
+
+def plausible_crew(value: float) -> int:
+    """A crew size read from the bill, or 0 when the number is no crew.
+
+    The cost database's ``count_total_people_per_unit`` lands on a position as
+    ``workers_per_unit``, but it tracks the labour hours (median ratio 1.01,
+    thousands of items above 50), so read as a crew it makes every duration
+    about ``quantity / 8`` days. Only a number a person could have typed for a
+    crew, 1 to :data:`MAX_ASSUMED_WORKERS`, is taken as one.
+    """
+    if value <= 0 or value > MAX_ASSUMED_WORKERS:
+        return 0
+    return max(1, math.ceil(value))
+
+
+def machine_hours_per_unit(pos_meta: dict) -> float:
+    """Machine hours per unit of the position: the LARGEST machine row, not the sum.
+
+    Machines on one position work alongside each other, so the longest-running
+    one bounds the work. The sum would also count one machine hour up to three
+    times: the cost database follows each plant row with an operator row and
+    an electricity row of the same hours, all typed as equipment.
+    """
+    best = 0.0
+    for res in _resource_rows(pos_meta):
+        if _is_machine_hour_row(res):
+            best = max(best, _meta_number(res, "quantity"))
+    return best
+
+
+def _row_unverified(resource: dict) -> bool:
+    provenance = resource.get("demo_provenance")
+    return isinstance(provenance, dict) and provenance.get("productivity_verified") is False
+
+
+@dataclass(frozen=True)
+class PositionEffort:
+    """What a position takes to build, as the generator reads it from the bill.
+
+    ``labour_days`` and ``machine_days`` are calendar days at ``crew`` people
+    and ``machine_sets`` machines; the duration is the larger of the two.
+    ``source`` is where the labour figure came from, or ``machine_hours`` when
+    the position has machine rows and no labour data at all.
+    """
+
+    source: str
+    labour_days: int
+    labour_hours: float
+    crew: int
+    machine_hours: float
+    machine_days: int
+    machine_sets: int
+    unverified: bool
+
+
+def _position_effort(
     pos_meta: dict,
     quantity: float,
     unit: str | None,
@@ -389,20 +495,27 @@ def _calc_duration_from_resources(
     hours_per_day: float,
     work_days_per_week: int,
     assumed_workers: int = 1,
-) -> tuple[int, str]:
-    """Calculate the calendar-day duration for a BOQ-generated activity.
+    machine_sets: int = 1,
+) -> PositionEffort:
+    """Labour and machine effort of a BOQ position, and their durations.
 
-    Priority:
-        1. Explicit ``labor_hours`` (+ ``workers_per_unit``) in position
-           metadata - the primary, data-driven path.
+    Labour, in priority order:
+        1. Explicit ``labor_hours`` (+ ``workers_per_unit`` when it is a
+           plausible crew, see :func:`plausible_crew`) in position metadata.
         2. Sum of hourly labor resources stored in position metadata.
-        3. Unit-based fallback production rates when the position has a
+        3. Machine rows alone, when the position has no labour data: the
+           machine duration is the duration (``machine_hours``).
+        4. Unit-based fallback production rates when the position has a
            nonzero quantity but no labor metadata at all. Lump-sum units
            are the exception: their quantity carries no production-rate
            signal, so when total cost data is available they defer to the
            cost-proportional path below (audit m10) and only take the flat
            8h allowance as the last resort.
-        4. Cost-proportional share of the total project duration.
+        5. Cost-proportional share of the total project duration.
+
+    Machine: the largest hourly machine row per unit times the quantity,
+    worked by ``machine_sets`` machines one shift a day, with the same
+    mobilisation factor and week conversion as labour.
 
     Args:
         pos_meta: BOQ position metadata dict.
@@ -417,38 +530,56 @@ def _calc_duration_from_resources(
         hours_per_day: Crew hours per working day (regional calendar).
         work_days_per_week: Working days per week (regional calendar).
         assumed_workers: Workers on the position when its metadata names no
-            ``workers_per_unit``; a count of labour rows above it wins.
-
-    Returns:
-        ``(duration_days, source)`` where ``source`` is one of
-        ``labor_hours``, ``resource_sum``, ``estimated_fallback``,
-        ``cost_proportional`` or ``default_minimum`` so the UI can
-        distinguish measured from estimated durations.
+            plausible ``workers_per_unit``; a count of labour rows above it wins.
+        machine_sets: Machines working the position side by side (one per
+            parallel gang).
     """
+    week_factor = 7 / work_days_per_week
+    resources = _resource_rows(pos_meta)
+    unverified = isinstance(pos_meta, dict) and _row_unverified(pos_meta)
+
+    machine_per_unit = machine_hours_per_unit(pos_meta) if quantity > 0 else 0.0
+    machine_hours = quantity * machine_per_unit if machine_per_unit > 0 else 0.0
+    sets = max(machine_sets, 1)
+    machine_days = 0
+    if machine_hours > 0:
+        machine_days = max(1, int(round(machine_hours / (sets * hours_per_day) * 1.1 * week_factor)))
+        unverified = unverified or any(_row_unverified(r) for r in resources if _is_machine_hour_row(r))
+
+    def _effort(source: str, days: int, hours: float = 0.0, crew: int = 0) -> PositionEffort:
+        return PositionEffort(
+            source=source,
+            labour_days=days,
+            labour_hours=hours,
+            crew=crew,
+            machine_hours=machine_hours,
+            machine_days=machine_days,
+            machine_sets=sets if machine_hours > 0 else 0,
+            unverified=unverified,
+        )
+
     # ── Try 1: explicit labor_hours + workers_per_unit in metadata ──────
     labor_hours = _meta_number(pos_meta, "labor_hours")
-    workers = _meta_number(pos_meta, "workers_per_unit")
+    workers_raw = _meta_number(pos_meta, "workers_per_unit")
+    workers = plausible_crew(workers_raw)
 
     if labor_hours > 0 and quantity > 0:
         total_hours = quantity * labor_hours
-        crew = max(workers, 1) if workers > 0 else max(assumed_workers, 1)
-        crew_hours_per_day = crew * hours_per_day
-        working_days = total_hours / crew_hours_per_day
-        # Add 10% for mobilization / demobilization
-        cal_days = working_days * 1.1
-        # Convert working days -> calendar days
-        cal_days = cal_days * 7 / work_days_per_week
-        return max(1, int(round(cal_days))), "labor_hours"
+        # A fractional crew from the bill (2.5 people) is worked as written;
+        # the resource row rounds it up to whole people.
+        crew_hours = max(workers_raw, 1) if workers > 0 else max(assumed_workers, 1)
+        crew = workers if workers > 0 else max(assumed_workers, 1)
+        working_days = total_hours / (crew_hours * hours_per_day)
+        # Add 10% for mobilization / demobilization, then working days ->
+        # calendar days.
+        cal_days = working_days * 1.1 * week_factor
+        return _effort("labor_hours", max(1, int(round(cal_days))), total_hours, crew)
 
     # ── Try 2: sum labor-type resources stored in metadata ──────────────
-    # The bill tolerates resource rows that are not mappings (and a resources
-    # value that is not a list), so they are skipped here rather than crashing
-    # the whole generation.
-    raw_resources = pos_meta.get("resources", []) if isinstance(pos_meta, dict) else []
-    resources = [r for r in raw_resources if isinstance(r, dict)] if isinstance(raw_resources, list) else []
     if resources and quantity > 0:
         labor_hrs_per_unit = 0.0
         labor_rows = 0
+        labour_unverified = False
         for res in resources:
             if not _resource_is_hourly(res):
                 continue
@@ -456,34 +587,81 @@ def _calc_duration_from_resources(
             if res_type in ("labor", "operator"):
                 labor_rows += 1
             labor_hrs_per_unit += _meta_number(res, "quantity")
+            labour_unverified = labour_unverified or _row_unverified(res)
         if labor_hrs_per_unit > 0:
+            unverified = unverified or labour_unverified
             total_hours = quantity * labor_hrs_per_unit
             crew_size = max(labor_rows, assumed_workers, 1)
-            crew_hours_per_day = crew_size * hours_per_day
-            working_days = total_hours / crew_hours_per_day
-            cal_days = working_days * 1.1 * 7 / work_days_per_week
-            return max(1, int(round(cal_days))), "resource_sum"
+            working_days = total_hours / (crew_size * hours_per_day)
+            cal_days = working_days * 1.1 * week_factor
+            return _effort("resource_sum", max(1, int(round(cal_days))), total_hours, crew_size)
 
-    # ── Try 3: unit-based fallback production rates ──────────────────────
+    # ── Try 3: machine rows alone ────────────────────────────────────────
+    if machine_hours > 0:
+        return _effort("machine_hours", 0)
+
+    # ── Try 4: unit-based fallback production rates ──────────────────────
     # No labor metadata at all but a real quantity - estimate from the
     # module-level production-rate table so the activity never gets a
     # zero / near-zero duration. Lump-sum units only carry a flat 8h
     # allowance regardless of size, which would collapse a big lump-sum
-    # subcontract to 1 day - prefer the cost-proportional share (Try 4)
+    # subcontract to 1 day - prefer the cost-proportional share (Try 5)
     # whenever total cost data is available and keep the flat allowance
     # strictly as the last resort (audit m10).
     if quantity > 0:
         lump_sum_with_cost_data = _normalize_unit(unit) == "lsum" and total_cost > 0 and grand_total > 0
         if not lump_sum_with_cost_data:
             days = estimate_fallback_duration_days(unit, quantity, hours_per_day)
-            return max(1, days), "estimated_fallback"
+            return _effort("estimated_fallback", max(1, days))
 
-    # ── Try 4: cost-proportional fallback ────────────────────────────────
+    # ── Try 5: cost-proportional fallback ────────────────────────────────
     if total_cost > 0 and grand_total > 0:
         proportion = total_cost / grand_total
-        return max(1, round(proportion * total_days)), "cost_proportional"
+        return _effort("cost_proportional", max(1, round(proportion * total_days)))
 
-    return 3, "default_minimum"  # minimum default
+    return _effort("default_minimum", 3)  # minimum default
+
+
+def _calc_duration_from_resources(
+    pos_meta: dict,
+    quantity: float,
+    unit: str | None,
+    total_cost: float,
+    grand_total: float,
+    total_days: int,
+    *,
+    hours_per_day: float,
+    work_days_per_week: int,
+    assumed_workers: int = 1,
+    machine_sets: int = 1,
+) -> tuple[int, str]:
+    """Calculate the calendar-day duration for a BOQ-generated activity.
+
+    The larger of the labour-driven and the machine-driven duration, see
+    :func:`_position_effort` for the paths and the arguments.
+
+    Returns:
+        ``(duration_days, source)`` where ``source`` is one of
+        ``labor_hours``, ``resource_sum``, ``machine_hours``,
+        ``estimated_fallback``, ``cost_proportional`` or ``default_minimum``
+        so the UI can distinguish measured from estimated durations.
+        ``machine_hours`` means the machines, not the labour, set the length.
+    """
+    effort = _position_effort(
+        pos_meta,
+        quantity,
+        unit,
+        total_cost,
+        grand_total,
+        total_days,
+        hours_per_day=hours_per_day,
+        work_days_per_week=work_days_per_week,
+        assumed_workers=assumed_workers,
+        machine_sets=machine_sets,
+    )
+    if effort.machine_days > effort.labour_days:
+        return effort.machine_days, "machine_hours"
+    return effort.labour_days, effort.source
 
 
 # ── Regional work calendar configuration ─────────────────────────────────
@@ -1168,6 +1346,9 @@ def _effective_activity_status(
 _DURATION_NOTE: dict[str, str] = {
     "labor_hours": "from_labor_norm",
     "resource_sum": "from_labor_norm",
+    # The machines, not the labour, set the length: said in the preview so a
+    # duration longer than the crew needs is never a mystery.
+    "machine_hours": "machine_bound",
     "estimated_fallback": "estimated_from_unit",
     "cost_proportional": "cost_share",
     "default_minimum": "default_duration",
@@ -1198,6 +1379,8 @@ _GENERATED_ENGLISH: dict[str, str] = {
     "start_milestone_description": "Project kick-off milestone",
     "completion_milestone": "Project Completion",
     "completion_milestone_description": "Project completion milestone",
+    "labour_resource": "Labour",
+    "machine_resource": "Machines",
 }
 
 
@@ -1260,6 +1443,15 @@ class _BoqGenerationPlan:
     notes: list[dict[str, Any]]
     note_counts: dict[str, int]
     warnings: list[dict]
+    # Every position of the bill with money on it (``id``, ``ordinal``,
+    # ``description``, ``total`` as a decimal string), scheduled or not: what
+    # the 5D rules hold the plan's cost loading against.
+    priced_positions: list[dict[str, Any]]
+    # ``{"score", "band", "counts"}`` for the plan, and the tasks below the
+    # medium band, worst first (``position_id``, ``ordinal``, ``description``,
+    # ``score``, ``reasons``).
+    confidence: dict[str, Any]
+    low_confidence: list[dict[str, Any]]
 
 
 class ScheduleService:
@@ -3482,6 +3674,7 @@ class ScheduleService:
 
         positions = await PositionRepository(self.session).list_all_for_boq(boq_id)
         rows: list[BoqRow] = []
+        priced_positions: list[dict[str, Any]] = []
         for p in positions:
             try:
                 meta = dict(p.metadata_) if isinstance(p.metadata_, dict) else {}
@@ -3489,7 +3682,19 @@ class ScheduleService:
                 meta = {}
             quantity = _str_to_float(p.quantity)
             total = _str_to_float(p.total)
+            # The money exactly as the bill holds it: the cost loading and the
+            # check against the bill must not pass through a float.
+            money = _money_decimal(p.total)
             lump_sum = _normalize_unit(p.unit) == "lsum"
+            if money is not None and money != 0 and not _is_section(p) and not is_empty_position(p):
+                priced_positions.append(
+                    {
+                        "id": str(p.id),
+                        "ordinal": (p.ordinal or "").strip(),
+                        "description": (p.description or "").strip()[:160],
+                        "total": str(money),
+                    }
+                )
             rows.append(
                 BoqRow(
                     id=str(p.id),
@@ -3502,6 +3707,7 @@ class ScheduleService:
                         "unit": p.unit or "",
                         "quantity": quantity,
                         "total": total,
+                        "money": money,
                         "metadata": meta,
                     },
                     # A lump sum is often priced by its total alone, with the
@@ -3550,7 +3756,7 @@ class ScheduleService:
         if grand_total <= 0:
             grand_total = 1.0
 
-        def _from_resources(data: dict[str, Any], workers: int) -> tuple[int, str]:
+        def _from_resources(data: dict[str, Any], workers: int, machine_sets: int = 1) -> tuple[int, str]:
             return _calc_duration_from_resources(
                 data["metadata"],
                 data["quantity"],
@@ -3561,13 +3767,30 @@ class ScheduleService:
                 hours_per_day=hours_per_day,
                 work_days_per_week=work_days_per_week,
                 assumed_workers=workers,
+                machine_sets=machine_sets,
             )
 
+        def _effort_of(data: dict[str, Any], workers: int, machine_sets: int = 1) -> PositionEffort:
+            return _position_effort(
+                data["metadata"],
+                data["quantity"],
+                data["unit"],
+                data["total"],
+                grand_total,
+                total_project_days,
+                hours_per_day=hours_per_day,
+                work_days_per_week=work_days_per_week,
+                assumed_workers=workers,
+                machine_sets=machine_sets,
+            )
+
+        # Where each task's labour figure comes from. A position whose machines
+        # outlast its labour is told apart once the crews are known, below.
         sources: dict[str, str] = {}
         basis: dict[str, dict[str, Any]] = {}
         for task in tasks:
             data = task.row.data
-            _, source = _from_resources(data, 1)
+            source = _effort_of(data, 1).source
             sources[task.row.id] = source
             if source == "estimated_fallback":
                 # Worked in working days straight from the hours, so the
@@ -3610,7 +3833,7 @@ class ScheduleService:
             if sources[task.row.id] in ("resource_sum", "estimated_fallback")
             or (
                 sources[task.row.id] == "labor_hours"
-                and _meta_number(task.row.data["metadata"], "workers_per_unit") <= 0
+                and plausible_crew(_meta_number(task.row.data["metadata"], "workers_per_unit")) <= 0
             )
         }
 
@@ -3626,7 +3849,8 @@ class ScheduleService:
                 if b is not None:
                     out[task.row.id] = max(1, math.ceil(b["hours"] / (max(b["gang"], crew) * hours_per_day)))
                 else:
-                    duration_cal, _ = _from_resources(task.row.data, crew)
+                    # Each parallel gang brings its own machines.
+                    duration_cal, _ = _from_resources(task.row.data, crew, gangs.get(task.row.id, 1))
                     # Calendar days to working days on the project's own week.
                     out[task.row.id] = max(1, math.ceil(duration_cal * work_days_per_week / 7))
             # A quantity the unit table cannot size (an XPWE "a misura" line
@@ -3707,6 +3931,19 @@ class ScheduleService:
         for key, b in basis.items():
             b["gang"] = max(b["gang"], workers * gangs.get(key, 1))
         layout = fit.layout
+        # The effort at the crews the plan uses: the resources written onto
+        # each task, and whether its machines rather than its labour set the
+        # length. A unit-table guess has no machines (machine rows alone take
+        # the machine path), so its effort is its basis.
+        efforts: dict[str, PositionEffort] = {}
+        for task in tasks:
+            if task.row.id in basis:
+                continue
+            sets = gangs.get(task.row.id, 1)
+            effort = _effort_of(task.row.data, workers * sets, sets)
+            efforts[task.row.id] = effort
+            if effort.machine_hours > 0 and effort.machine_days > effort.labour_days:
+                sources[task.row.id] = "machine_hours"
         # A loose lump sum runs for the whole works; whatever its own estimate
         # said is not what the chart shows, so neither is the note.
         for position_id in layout.spanning:
@@ -3745,6 +3982,55 @@ class ScheduleService:
                 )
             )
             return {"activity_id": str(ids[pred_key]), "type": dep_type, "lag_days": lag}
+
+        labour_name = _generated_text("labour_resource")
+        machine_name = _generated_text("machine_resource")
+        scored: list[tuple[float, float]] = []
+        low_confidence: list[dict[str, Any]] = []
+
+        def _task_loading(position_id: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+            """The resources one task carries, and what its metadata records of them.
+
+            A row per kind in the shape resource levelling reads (``name`` and
+            ``count``), so a limit on "Labour" across the plan levels it.
+            """
+            resources: list[dict[str, Any]] = []
+            recorded: dict[str, Any] = {}
+            if sources[position_id] == "spans_works":
+                return resources, recorded
+            b = basis.get(position_id)
+            effort = efforts.get(position_id)
+            labour_hours = float(b["hours"]) if b is not None else (effort.labour_hours if effort else 0.0)
+            crew = int(b["gang"]) if b is not None else (effort.crew if effort else 0)
+            if labour_hours > 0 and crew > 0:
+                resources.append(
+                    {
+                        "name": labour_name,
+                        "type": "labor",
+                        "count": crew,
+                        "hours": round(labour_hours, 1),
+                        "unit": "h",
+                        "source": "boq_generation",
+                    }
+                )
+                recorded["labor_hours_total"] = round(labour_hours, 1)
+            if effort is not None and effort.machine_hours > 0:
+                resources.append(
+                    {
+                        "name": machine_name,
+                        "type": "equipment",
+                        "count": effort.machine_sets,
+                        "hours": round(effort.machine_hours, 1),
+                        "unit": "h",
+                        "source": "boq_generation",
+                    }
+                )
+                recorded["machine_hours_total"] = round(effort.machine_hours, 1)
+            if sources[position_id] in ("labor_hours", "resource_sum", "machine_hours"):
+                # The working days the norms give at this crew, before any
+                # shortening: what duration_vs_norm holds the bar against.
+                recorded["norm_days"] = durations[position_id]
+            return resources, recorded
 
         sort_counter = 0
         for item, parent in iter_items(tree.roots):
@@ -3797,6 +4083,34 @@ class ScheduleService:
                     task_meta["duration_basis"] = basis[item.row.id]
                 if gangs.get(item.row.id, 1) > 1:
                     task_meta["parallel_gangs"] = gangs[item.row.id]
+                task_resources, recorded = _task_loading(item.row.id)
+                task_meta.update(recorded)
+                effort = efforts.get(item.row.id)
+                planned_days = fit.durations.get(item.row.id, durations[item.row.id])
+                confidence = task_confidence(
+                    sources[item.row.id],
+                    capped_by_price=bool(basis.get(item.row.id, {}).get("capped_by_price")),
+                    unverified=bool(effort and effort.unverified),
+                    compressed_pct=(
+                        fit.compressed_pct
+                        if item.row.id not in layout.spanning and planned_days < durations[item.row.id]
+                        else None
+                    ),
+                    lump_sum=item.row.lump_sum,
+                )
+                task_meta["confidence"] = confidence
+                scored.append((confidence["score"], max(float(data["total"]), 0.0)))
+                if confidence["band"] == "low":
+                    low_confidence.append(
+                        {
+                            "position_id": item.row.id,
+                            "ordinal": ordinal,
+                            "description": data["description"][:160],
+                            "score": confidence["score"],
+                            "reasons": confidence["reasons"],
+                            "total": str(data["money"]) if data["money"] is not None else None,
+                        }
+                    )
                 activities.append(
                     Activity(
                         id=activity_id,
@@ -3818,11 +4132,14 @@ class ScheduleService:
                         status="not_started",
                         activity_type="task",
                         dependencies=deps,
-                        resources=[],
+                        resources=task_resources,
                         boq_position_ids=[item.row.id],
                         color="#0071e3",
                         sort_order=sort_counter,
                         metadata_=task_meta,
+                        # The position's money, exactly: the plan is cost-loaded
+                        # the moment it is written, so BAC is the bill's total.
+                        cost_planned=data["money"],
                     )
                 )
                 created.append({"id": activity_id, "activity_type": "task", "end_date": _end(slot.finish)})
@@ -3930,6 +4247,14 @@ class ScheduleService:
             }
             if task.row.id in basis:
                 note["basis"] = basis[task.row.id]
+            elif code == "machine_bound" and task.row.id in efforts:
+                effort = efforts[task.row.id]
+                note["basis"] = {
+                    "machine_hours": round(effort.machine_hours, 1),
+                    "machines": effort.machine_sets,
+                    "labour_hours": round(effort.labour_hours, 1),
+                    "hours_per_day": hours_per_day,
+                }
             notes.append(note)
         for row, reason in tree.skipped_rows:
             note_counts[reason] = note_counts.get(reason, 0) + 1
@@ -4001,6 +4326,14 @@ class ScheduleService:
             notes=notes,
             note_counts=note_counts,
             warnings=warnings,
+            priced_positions=priced_positions,
+            confidence=plan_confidence(scored),
+            # Worst first, and among equals the most money first: the review
+            # that moves the plan most comes first.
+            low_confidence=sorted(
+                low_confidence,
+                key=lambda row: (row["score"], -float(row["total"] or 0)),
+            ),
         )
 
     async def _instalment_relinks(
@@ -4072,12 +4405,113 @@ class ScheduleService:
                 update(ContractMilestone).where(ContractMilestone.id == instalment_id).values(activity_id=activity_id)
             )
 
+    async def _project_currency(self, plan: _BoqGenerationPlan) -> str:
+        """The currency the plan's money is in: the project's, else empty."""
+        from app.modules.projects.repository import ProjectRepository
+
+        schedule = await self.get_schedule(plan.activities[0].schedule_id) if plan.activities else None
+        if schedule is None:
+            return ""
+        project = await ProjectRepository(self.session).get_by_id(schedule.project_id)
+        return str(getattr(project, "currency", "") or "") if project is not None else ""
+
     async def _project_planned_start(self, project_id: uuid.UUID) -> date | None:
         """The project's planned start, when it has one."""
         from app.modules.projects.repository import ProjectRepository
 
         project = await ProjectRepository(self.session).get_by_id(project_id)
         return _parse_day(getattr(project, "planned_start_date", None)) if project is not None else None
+
+    @staticmethod
+    def _plan_cost(plan: _BoqGenerationPlan) -> dict[str, Any]:
+        """The plan's cost loading against the bill, money as decimal strings."""
+        bill_total = sum((Decimal(p["total"]) for p in plan.priced_positions), Decimal("0"))
+        loaded = [a.cost_planned for a in plan.activities if a.activity_type == "task" and a.cost_planned is not None]
+        scheduled = {pid for a in plan.activities for pid in (a.boq_position_ids or [])}
+        return {
+            "boq_total": str(bill_total),
+            "planned_total": str(sum(loaded, Decimal("0"))),
+            "loaded_tasks": sum(1 for amount in loaded if amount != 0),
+            "unscheduled_positions": sum(1 for p in plan.priced_positions if p["id"] not in scheduled),
+        }
+
+    async def _plan_validation(self, plan: _BoqGenerationPlan, schedule_id: uuid.UUID) -> dict[str, Any]:
+        """Run ``schedule_quality`` and ``schedule_5d`` over the plan a generation would write.
+
+        Findings are for the person who confirms the plan; none of them blocks
+        it. Each names the bill position it is about, by ordinal.
+        """
+        from app.core.i18n import get_locale
+        from app.core.validation.engine import rule_registry, validation_engine
+
+        if not rule_registry.get_rules_for_sets(["schedule_5d"]):
+            # A worker or script that never started the app has an empty
+            # registry; registering is idempotent.
+            from app.core.validation.rules import register_builtin_rules
+
+            register_builtin_rules()
+        payload = {
+            "activities": [
+                {
+                    "id": str(a.id),
+                    "name": a.name,
+                    "wbs_code": a.wbs_code,
+                    "activity_type": a.activity_type,
+                    "duration_days": a.duration_days,
+                    "dependencies": a.dependencies or [],
+                    "constraint_type": a.constraint_type,
+                    "boq_position_ids": list(a.boq_position_ids or []),
+                    "cost_planned": str(a.cost_planned) if a.cost_planned is not None else None,
+                    "metadata": a.metadata_ or {},
+                }
+                for a in plan.activities
+            ],
+            "relationships": [
+                {
+                    "predecessor_id": str(r.predecessor_id),
+                    "successor_id": str(r.successor_id),
+                    "relationship_type": r.relationship_type,
+                    "lag_days": r.lag_days,
+                }
+                for r in plan.relationships
+            ],
+            "boq_positions": plan.priced_positions,
+        }
+        report = await validation_engine.validate(
+            payload,
+            ["schedule_quality", "schedule_5d"],
+            target_type="schedule",
+            target_id=str(schedule_id),
+            metadata={"locale": get_locale()},
+        )
+        position_of = {str(a.id): (a.boq_position_ids or [None])[0] for a in plan.activities}
+        ordinal_of = {p["id"]: p["ordinal"] for p in plan.priced_positions}
+        ordinal_of.update({str(a.id): a.wbs_code or "" for a in plan.activities})
+        findings = []
+        for result in report.results:
+            if result.passed:
+                continue
+            ref = str(result.element_ref) if result.element_ref is not None else ""
+            findings.append(
+                {
+                    "rule_id": result.rule_id,
+                    "severity": getattr(result.severity, "value", str(result.severity)),
+                    "message": result.message,
+                    "suggestion": result.suggestion,
+                    "position_id": position_of.get(ref, ref if ref in ordinal_of else None),
+                    "ordinal": ordinal_of.get(ref, ""),
+                }
+            )
+        # Errors first, then warnings, then the rest, each in plan order.
+        rank = {"error": 0, "warning": 1}
+        findings.sort(key=lambda f: rank.get(f["severity"], 2))
+        return {
+            "rule_sets": list(report.rule_sets_applied),
+            "errors": len(report.errors),
+            "warnings": len(report.warnings),
+            "infos": len(report.infos),
+            "findings": findings[:200],
+        }
 
     async def preview_generation(
         self,
@@ -4132,6 +4566,13 @@ class ScheduleService:
             "instalments_relinked": len(relinks),
             "instalments_unlinked": lost,
             "notes": plan.notes,
+            "confidence": {
+                **plan.confidence,
+                "low": plan.low_confidence[:100],
+                "low_total": len(plan.low_confidence),
+            },
+            "cost": {**self._plan_cost(plan), "currency": await self._project_currency(plan)},
+            "validation": await self._plan_validation(plan, schedule_id),
         }
 
     async def generate_from_boq(
@@ -4243,6 +4684,13 @@ class ScheduleService:
             "planned_end": plan.planned_end,
             "replaced_activities": existing_count if replace else 0,
             "warnings": plan.warnings,
+            "confidence": plan.confidence,
+            "cost": self._plan_cost(plan),
+            "validation": {
+                key: value
+                for key, value in (await self._plan_validation(plan, schedule_id)).items()
+                if key != "findings"
+            },
         }
         await self.schedule_repo.update_fields(
             schedule_id,

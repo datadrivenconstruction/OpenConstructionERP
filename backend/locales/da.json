@@ -144,7 +144,9 @@
       "start_milestone": "Projektstart",
       "start_milestone_description": "Milepæl for projektstart",
       "completion_milestone": "Projektafslutning",
-      "completion_milestone_description": "Milepæl for projektafslutning"
+      "completion_milestone_description": "Milepæl for projektafslutning",
+      "labour_resource": "Arbejdskraft",
+      "machine_resource": "Maskiner"
     }
   },
   "cad": {

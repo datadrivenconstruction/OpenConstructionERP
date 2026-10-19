@@ -815,14 +815,15 @@ class GenerationNote(BaseModel):
     ordinal: str = ""
     description: str = ""
     note: str = Field(
-        description="estimated_from_unit, cost_share, default_duration, skipped_zero_qty, "
-        "empty_section_dropped or blank_row_dropped."
+        description="estimated_from_unit, cost_share, default_duration, machine_bound, spans_works, "
+        "skipped_zero_qty, empty_section_dropped or blank_row_dropped."
     )
     days: int | None = Field(default=None, description="Working days planned for the position.")
     basis: dict[str, Any] | None = Field(
         default=None,
         description="For estimated_from_unit: unit, rate (hours per unit), hours, gang (people), "
-        "hours_per_day, and capped_by_price with hours_from_unit when the price held the guess down.",
+        "hours_per_day, and capped_by_price with hours_from_unit when the price held the guess down. "
+        "For machine_bound: machine_hours, machines, labour_hours and hours_per_day.",
     )
 
 
@@ -865,6 +866,18 @@ class GenerationPreviewResponse(BaseModel):
     instalments_relinked: int = 0
     instalments_unlinked: int = 0
     notes: list[GenerationNote] = Field(default_factory=list)
+    # How much of the plan is backed by data: {"score", "band", "counts":
+    # {"high", "medium", "low"}, "low": [{"position_id", "ordinal",
+    # "description", "score", "reasons", "total"}], "low_total"}. Weights in
+    # docs/design/schedule_from_estimate.md.
+    confidence: dict[str, Any] | None = None
+    # The plan's cost loading against the bill: {"boq_total", "planned_total"
+    # (decimal strings), "loaded_tasks", "unscheduled_positions", "currency"}.
+    cost: dict[str, Any] | None = None
+    # schedule_quality and schedule_5d over the plan: {"rule_sets", "errors",
+    # "warnings", "infos", "findings": [{"rule_id", "severity", "message",
+    # "suggestion", "position_id", "ordinal"}]}. Findings never block confirming.
+    validation: dict[str, Any] | None = None
 
 
 class CPMActivityResult(BaseModel):

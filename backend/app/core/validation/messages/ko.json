@@ -597,6 +597,20 @@
       "suggestion": "비현실적인 필지 가격을 피하려면 조정률을 -50%에서 +200% 사이로 제한하세요"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "항목 {ordinal} '{description}'({amount})은(는) 내역서에 단가가 매겨져 있지만 이를 담은 작업이 없어 공정표에 비용이 반영되지 않았습니다",
+      "suggestion": "항목에 수량을 입력하거나 작업에 연결한 다음 공정표를 다시 생성하세요."
+    },
+    "cost_reconciliation": {
+      "fail": "공정표에는 내역서 {bill} 중 {planned}이(가) 반영되어 있습니다. 단가가 매겨진 공사 중 {difference}은(는) 어느 작업에도 없습니다",
+      "suggestion": "포괄성 검사에서 나열한 항목을 확인한 다음 공정표를 다시 생성하세요."
+    },
+    "duration_vs_norm": {
+      "fail": "작업 '{activity}'은(는) {duration} 작업일이 걸리지만 노무 및 장비 품셈 기준으로는 {norm}입니다",
+      "suggestion": "항목의 수량, 작업조, 품셈 시간 또는 수동으로 변경한 기간을 확인하세요."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "작업 '{activity}'에 {ends} 논리 관계가 없습니다(열린 끝 / 연결되지 않은 작업)",

@@ -144,7 +144,9 @@
       "start_milestone": "Începutul proiectului",
       "start_milestone_description": "Reper de început al proiectului",
       "completion_milestone": "Finalizarea proiectului",
-      "completion_milestone_description": "Reper de finalizare al proiectului"
+      "completion_milestone_description": "Reper de finalizare al proiectului",
+      "labour_resource": "Manoperă",
+      "machine_resource": "Utilaje"
     }
   },
   "cad": {

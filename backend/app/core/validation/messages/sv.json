@@ -597,6 +597,20 @@
       "suggestion": "Begränsa justeringarna till mellan -50% och +200% för att undvika orimliga tomtpriser"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Posten {ordinal} '{description}' ({amount}) är prissatt i mängdförteckningen, men ingen aktivitet bär den, så dess kostnad finns inte i tidsplanen",
+      "suggestion": "Ge posten en mängd eller koppla den till en aktivitet och generera sedan tidsplanen på nytt."
+    },
+    "cost_reconciliation": {
+      "fail": "Tidsplanen innehåller {planned} av mängdförteckningens {bill}: {difference} av det prissatta arbetet ligger inte på någon aktivitet",
+      "suggestion": "Kontrollera posterna som täckningskontrollen listar och generera sedan tidsplanen på nytt."
+    },
+    "duration_vs_norm": {
+      "fail": "Aktiviteten '{activity}' varar {duration} arbetsdagar, medan normerna för arbetskraft och maskiner ger {norm}",
+      "suggestion": "Kontrollera postens mängd, arbetslag och normtimmar, eller en varaktighet som ändrats manuellt."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Aktiviteten '{activity}' saknar logikkoppling för {ends} (öppen ände / fristående aktivitet)",

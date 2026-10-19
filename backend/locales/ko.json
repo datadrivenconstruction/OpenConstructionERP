@@ -144,7 +144,9 @@
       "start_milestone": "프로젝트 시작",
       "start_milestone_description": "프로젝트 시작 마일스톤",
       "completion_milestone": "프로젝트 완료",
-      "completion_milestone_description": "프로젝트 완료 마일스톤"
+      "completion_milestone_description": "프로젝트 완료 마일스톤",
+      "labour_resource": "노무",
+      "machine_resource": "장비"
     }
   },
   "cad": {

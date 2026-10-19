@@ -144,7 +144,9 @@
       "start_milestone": "شروع پروژه",
       "start_milestone_description": "نقطه عطف شروع پروژه",
       "completion_milestone": "تکمیل پروژه",
-      "completion_milestone_description": "نقطه عطف تکمیل پروژه"
+      "completion_milestone_description": "نقطه عطف تکمیل پروژه",
+      "labour_resource": "نیروی کار",
+      "machine_resource": "ماشین‌آلات"
     }
   },
   "cad": {

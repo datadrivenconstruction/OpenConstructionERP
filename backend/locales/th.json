@@ -144,7 +144,9 @@
       "start_milestone": "เริ่มต้นโครงการ",
       "start_milestone_description": "หลักไมล์การเริ่มต้นโครงการ",
       "completion_milestone": "เสร็จสิ้นโครงการ",
-      "completion_milestone_description": "หลักไมล์การเสร็จสิ้นโครงการ"
+      "completion_milestone_description": "หลักไมล์การเสร็จสิ้นโครงการ",
+      "labour_resource": "แรงงาน",
+      "machine_resource": "เครื่องจักร"
     }
   },
   "cad": {

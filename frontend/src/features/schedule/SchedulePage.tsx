@@ -68,6 +68,7 @@ import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
 import { DependencyEditor } from './DependencyEditor';
 import { MilestoneClientToggle } from './MilestoneClientToggle';
 import { BoqLinkEditor } from './BoqLinkEditor';
+import { ConfidenceBadge, activityConfidence } from './planConfidence';
 import {
   generateInWindow,
   generationStamp,
@@ -822,6 +823,12 @@ function GanttChart({
                     <Badge variant={sc.variant} size="sm">
                       {displayProgress}%
                     </Badge>
+                    {(() => {
+                      // Generated tasks carry how much of their plan is backed
+                      // by data; low ones are marked for review.
+                      const confidence = activityConfidence(activity.metadata);
+                      return confidence ? <ConfidenceBadge confidence={confidence} /> : null;
+                    })()}
                     {hasEstimatedDuration(activity) && (
                       <span
                         title={t('schedule.duration_estimated_tooltip', {

@@ -144,7 +144,9 @@
       "start_milestone": "Loyihaning boshlanishi",
       "start_milestone_description": "Loyihaning boshlanish bosqichi",
       "completion_milestone": "Loyihaning tugashi",
-      "completion_milestone_description": "Loyihaning tugash bosqichi"
+      "completion_milestone_description": "Loyihaning tugash bosqichi",
+      "labour_resource": "Mehnat",
+      "machine_resource": "Mashinalar"
     }
   },
   "cad": {

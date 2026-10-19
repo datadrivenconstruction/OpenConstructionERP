@@ -144,7 +144,9 @@
       "start_milestone": "پروجیکٹ کا آغاز",
       "start_milestone_description": "پروجیکٹ کے آغاز کا سنگ میل",
       "completion_milestone": "پروجیکٹ کی تکمیل",
-      "completion_milestone_description": "پروجیکٹ کی تکمیل کا سنگ میل"
+      "completion_milestone_description": "پروجیکٹ کی تکمیل کا سنگ میل",
+      "labour_resource": "مزدور",
+      "machine_resource": "مشینری"
     }
   },
   "cad": {

@@ -144,7 +144,9 @@
       "start_milestone": "بداية المشروع",
       "start_milestone_description": "معلم بداية المشروع",
       "completion_milestone": "اكتمال المشروع",
-      "completion_milestone_description": "معلم اكتمال المشروع"
+      "completion_milestone_description": "معلم اكتمال المشروع",
+      "labour_resource": "العمالة",
+      "machine_resource": "المعدات"
     }
   },
   "cad": {

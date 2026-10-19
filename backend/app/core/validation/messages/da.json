@@ -597,6 +597,20 @@
       "suggestion": "Begræns justeringerne til mellem -50% og +200% for at undgå urealistiske grundpriser"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Position {ordinal} '{description}' ({amount}) er prissat i tilbudslisten, men ingen aktivitet bærer den, så dens pris er ikke med i tidsplanen",
+      "suggestion": "Giv positionen en mængde eller kobl den til en aktivitet, og generer derefter tidsplanen igen."
+    },
+    "cost_reconciliation": {
+      "fail": "Tidsplanen indeholder {planned} af tilbudslistens {bill}: {difference} af det prissatte arbejde ligger ikke på nogen aktivitet",
+      "suggestion": "Kontroller de positioner, som dækningskontrollen angiver, og generer derefter tidsplanen igen."
+    },
+    "duration_vs_norm": {
+      "fail": "Aktiviteten '{activity}' varer {duration} arbejdsdage, mens normerne for arbejdskraft og maskiner giver {norm}",
+      "suggestion": "Kontroller positionens mængde, mandskab og normtimer, eller en varighed, der er ændret manuelt."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Aktiviteten '{activity}' mangler logikkobling til {ends} (åben ende / fritstående aktivitet)",

@@ -597,6 +597,20 @@
       "suggestion": "Limite los modificadores entre -50% y +200% para evitar precios de parcela poco realistas"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "La partida {ordinal} '{description}' ({amount}) está valorada en el presupuesto, pero ninguna actividad la incluye, por lo que su coste no está en el cronograma",
+      "suggestion": "Asigne una cantidad a la partida o vincúlela a una actividad y vuelva a generar el cronograma."
+    },
+    "cost_reconciliation": {
+      "fail": "El cronograma incluye {planned} de los {bill} del presupuesto: {difference} de los trabajos valorados no están en ninguna actividad",
+      "suggestion": "Revise las partidas que indica la comprobación de cobertura y vuelva a generar el cronograma."
+    },
+    "duration_vs_norm": {
+      "fail": "La actividad '{activity}' dura {duration} días laborables, mientras que los rendimientos de mano de obra y maquinaria dan {norm}",
+      "suggestion": "Revise la medición, la cuadrilla y las horas de rendimiento de la partida, o una duración cambiada a mano."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "La actividad '{activity}' no tiene lógica de {ends} (extremo abierto / actividad colgante)",

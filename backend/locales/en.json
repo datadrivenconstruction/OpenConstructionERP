@@ -144,7 +144,9 @@
       "start_milestone": "Project Start",
       "start_milestone_description": "Project kick-off milestone",
       "completion_milestone": "Project Completion",
-      "completion_milestone_description": "Project completion milestone"
+      "completion_milestone_description": "Project completion milestone",
+      "labour_resource": "Labour",
+      "machine_resource": "Machines"
     }
   },
   "cad": {

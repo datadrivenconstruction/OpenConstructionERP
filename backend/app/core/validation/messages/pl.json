@@ -597,6 +597,20 @@
       "suggestion": "Ogranicz modyfikatory do przedziału od -50% do +200%, aby uniknąć nierealistycznych cen działek"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Pozycja {ordinal} „{description}” ({amount}) jest wyceniona w kosztorysie, ale żadna czynność jej nie niesie, więc jej koszt nie jest ujęty w harmonogramie",
+      "suggestion": "Podaj ilość pozycji lub powiąż ją z czynnością, a następnie wygeneruj harmonogram ponownie."
+    },
+    "cost_reconciliation": {
+      "fail": "Harmonogram obejmuje {planned} z {bill} kosztorysu: {difference} wycenionych robót nie przypisano do żadnej czynności",
+      "suggestion": "Sprawdź pozycje wymienione przez kontrolę pokrycia, a następnie wygeneruj harmonogram ponownie."
+    },
+    "duration_vs_norm": {
+      "fail": "Czynność „{activity}” trwa {duration} dni roboczych, a normy robocizny i sprzętu dają {norm}",
+      "suggestion": "Sprawdź ilość, brygadę i nakłady (r-g, m-g) pozycji albo czas trwania zmieniony ręcznie."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Czynność „{activity}” nie ma powiązania logicznego typu {ends} (otwarty koniec / niepowiązana czynność)",

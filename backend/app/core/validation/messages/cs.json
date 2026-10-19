@@ -597,6 +597,20 @@
       "suggestion": "Omezte úpravy na -50% až +200%, abyste předešli nereálným cenám pozemků"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Položka {ordinal} „{description}“ ({amount}) je v rozpočtu naceněna, ale žádná činnost ji nenese, takže její náklady nejsou v harmonogramu",
+      "suggestion": "Zadejte položce množství nebo ji propojte s činností a poté harmonogram vygenerujte znovu."
+    },
+    "cost_reconciliation": {
+      "fail": "Harmonogram nese {planned} z {bill} rozpočtu: {difference} naceněných prací není v žádné činnosti",
+      "suggestion": "Zkontrolujte položky, které uvádí kontrola pokrytí, a poté harmonogram vygenerujte znovu."
+    },
+    "duration_vs_norm": {
+      "fail": "Činnost '{activity}' trvá {duration} pracovních dní, zatímco normy práce a strojů dávají {norm}",
+      "suggestion": "Zkontrolujte množství, četu a normohodiny položky, nebo ručně změněnou dobu trvání."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Činnost '{activity}' nemá vazbu typu {ends} (otevřený konec / nepropojená činnost)",

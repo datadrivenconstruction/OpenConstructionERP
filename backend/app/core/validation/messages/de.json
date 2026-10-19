@@ -597,6 +597,20 @@
       "suggestion": "Modifikatoren auf -50% bis +200% begrenzen, um unrealistische Preise zu vermeiden"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Position {ordinal} '{description}' ({amount}) ist im Leistungsverzeichnis bepreist, aber kein Vorgang trägt sie, daher fehlen ihre Kosten im Terminplan",
+      "suggestion": "Geben Sie der Position eine Menge oder verknüpfen Sie sie mit einem Vorgang und erzeugen Sie den Terminplan dann erneut."
+    },
+    "cost_reconciliation": {
+      "fail": "Der Terminplan trägt {planned} von {bill} des Leistungsverzeichnisses: {difference} der bepreisten Leistung liegen auf keinem Vorgang",
+      "suggestion": "Prüfen Sie die Positionen, die die Abdeckungsprüfung auflistet, und erzeugen Sie den Terminplan dann erneut."
+    },
+    "duration_vs_norm": {
+      "fail": "Vorgang '{activity}' dauert {duration} Arbeitstage, während die Aufwandswerte für Lohn und Gerät {norm} ergeben",
+      "suggestion": "Prüfen Sie Menge, Kolonne und Aufwandsstunden der Position oder eine von Hand geänderte Dauer."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Vorgang '{activity}' hat keine {ends}-Verknüpfung (offenes Ende / hängender Vorgang)",

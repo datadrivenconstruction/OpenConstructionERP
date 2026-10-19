@@ -144,7 +144,9 @@
       "start_milestone": "项目启动",
       "start_milestone_description": "项目启动里程碑",
       "completion_milestone": "项目完工",
-      "completion_milestone_description": "项目完工里程碑"
+      "completion_milestone_description": "项目完工里程碑",
+      "labour_resource": "人工",
+      "machine_resource": "机械"
     }
   },
   "cad": {

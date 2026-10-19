@@ -597,6 +597,20 @@
       "suggestion": "Limitare i modificatori tra -50% e +200% per evitare prezzi di lotto irrealistici"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "La voce {ordinal} '{description}' ({amount}) è prezzata nel computo, ma nessuna attività la porta, quindi il suo costo non è nel cronoprogramma",
+      "suggestion": "Assegna una quantità alla voce o collegala a un'attività, poi rigenera il cronoprogramma."
+    },
+    "cost_reconciliation": {
+      "fail": "Il cronoprogramma porta {planned} dei {bill} del computo: {difference} dei lavori prezzati non sono su alcuna attività",
+      "suggestion": "Controlla le voci elencate dal controllo di copertura, poi rigenera il cronoprogramma."
+    },
+    "duration_vs_norm": {
+      "fail": "L'attività '{activity}' dura {duration} giorni lavorativi, mentre le norme di manodopera e mezzi danno {norm}",
+      "suggestion": "Controlla quantità, squadra e ore di norma della voce, oppure una durata modificata a mano."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "L'attività '{activity}' non ha legami di {ends} (estremo aperto / attività isolata)",

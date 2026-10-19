@@ -597,6 +597,20 @@
       "suggestion": "Ograničite korekcije na -50% do +200% kako biste izbjegli nerealne cijene parcela"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Stavka {ordinal} '{description}' ({amount}) ocijenjena je u troškovniku, ali je nijedna aktivnost ne nosi, pa njezin trošak nije u terminskom planu",
+      "suggestion": "Stavci zadajte količinu ili je povežite s aktivnošću, pa ponovno generirajte terminski plan."
+    },
+    "cost_reconciliation": {
+      "fail": "Terminski plan nosi {planned} od {bill} troškovnika: {difference} ocijenjenih radova nije ni na jednoj aktivnosti",
+      "suggestion": "Provjerite stavke koje navodi provjera pokrivenosti, pa ponovno generirajte terminski plan."
+    },
+    "duration_vs_norm": {
+      "fail": "Aktivnost '{activity}' traje {duration} radnih dana, dok norme rada i strojeva daju {norm}",
+      "suggestion": "Provjerite količinu, ekipu i normirane sate stavke ili ručno promijenjeno trajanje."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Aktivnosti '{activity}' nedostaje veza tipa {ends} (otvoreni kraj / nepovezana aktivnost)",

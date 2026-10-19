@@ -597,6 +597,20 @@
       "suggestion": "Batasi penyesuaian antara -50% dan +200% untuk menghindari harga kavling yang tidak realistis"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Item {ordinal} '{description}' ({amount}) sudah diberi harga di RAB, tetapi tidak ada aktivitas yang memuatnya, sehingga biayanya tidak ada di jadwal",
+      "suggestion": "Isi volume pada item atau hubungkan ke sebuah aktivitas, lalu buat ulang jadwal."
+    },
+    "cost_reconciliation": {
+      "fail": "Jadwal memuat {planned} dari {bill} RAB: {difference} pekerjaan yang sudah diberi harga tidak ada di aktivitas mana pun",
+      "suggestion": "Periksa item yang dicantumkan pemeriksaan cakupan, lalu buat ulang jadwal."
+    },
+    "duration_vs_norm": {
+      "fail": "Aktivitas '{activity}' berlangsung {duration} hari kerja, sedangkan koefisien tenaga kerja dan alat memberi {norm}",
+      "suggestion": "Periksa volume, regu, dan jam koefisien item, atau durasi yang diubah manual."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Aktivitas '{activity}' tidak memiliki hubungan {ends} (ujung terbuka / aktivitas terputus)",

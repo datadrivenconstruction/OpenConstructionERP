@@ -597,6 +597,20 @@
       "suggestion": "Limitați ajustările între -50% și +200% pentru a evita prețuri nerealiste ale parcelelor"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Poziția {ordinal} '{description}' ({amount}) este evaluată în devizul de lucrări, dar nicio activitate nu o conține, deci costul ei nu e în grafic",
+      "suggestion": "Dați poziției o cantitate sau legați-o de o activitate, apoi generați din nou graficul."
+    },
+    "cost_reconciliation": {
+      "fail": "Graficul conține {planned} din {bill} al devizului: {difference} din lucrările evaluate nu sunt în nicio activitate",
+      "suggestion": "Verificați pozițiile listate de verificarea de acoperire, apoi generați din nou graficul."
+    },
+    "duration_vs_norm": {
+      "fail": "Activitatea '{activity}' durează {duration} zile lucrătoare, în timp ce normele de manoperă și utilaje dau {norm}",
+      "suggestion": "Verificați cantitatea, formația și orele de normă ale poziției sau o durată modificată manual."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Activitatea '{activity}' nu are legătură logică de tip {ends} (capăt deschis / activitate neconectată)",

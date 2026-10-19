@@ -144,7 +144,9 @@
       "start_milestone": "התחלת הפרויקט",
       "start_milestone_description": "אבן דרך להתחלת הפרויקט",
       "completion_milestone": "השלמת הפרויקט",
-      "completion_milestone_description": "אבן דרך להשלמת הפרויקט"
+      "completion_milestone_description": "אבן דרך להשלמת הפרויקט",
+      "labour_resource": "כוח אדם",
+      "machine_resource": "ציוד מכני"
     }
   },
   "cad": {

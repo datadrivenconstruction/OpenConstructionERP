@@ -144,7 +144,9 @@
       "start_milestone": "Έναρξη έργου",
       "start_milestone_description": "Ορόσημο έναρξης έργου",
       "completion_milestone": "Ολοκλήρωση έργου",
-      "completion_milestone_description": "Ορόσημο ολοκλήρωσης έργου"
+      "completion_milestone_description": "Ορόσημο ολοκλήρωσης έργου",
+      "labour_resource": "Εργατικά",
+      "machine_resource": "Μηχανήματα"
     }
   },
   "cad": {

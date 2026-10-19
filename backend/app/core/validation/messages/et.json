@@ -597,6 +597,20 @@
       "suggestion": "Piirake korrigeerimised vahemikku -50% kuni +200%, et vältida ebarealistlikke krundihindu"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Positsioon {ordinal} '{description}' ({amount}) on hinnakirjas hinnatud, kuid ükski tegevus seda ei kanna, seega pole selle maksumus ajakavas",
+      "suggestion": "Lisage positsioonile kogus või siduge see tegevusega ning koostage ajakava uuesti."
+    },
+    "cost_reconciliation": {
+      "fail": "Ajakavas on {planned} hinnakirja {bill}-st: {difference} hinnatud tööst ei ole üheski tegevuses",
+      "suggestion": "Kontrollige positsioone, mille kattuvuskontroll loetleb, ning koostage ajakava uuesti."
+    },
+    "duration_vs_norm": {
+      "fail": "Tegevus '{activity}' kestab {duration} tööpäeva, samas kui töö- ja masinanormid annavad {norm}",
+      "suggestion": "Kontrollige positsiooni kogust, brigaadi ja normtunde või käsitsi muudetud kestust."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Tegevusel '{activity}' puudub seos tüübiga {ends} (avatud ots / eraldiseisev tegevus)",

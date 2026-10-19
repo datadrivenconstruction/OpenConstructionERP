@@ -144,7 +144,9 @@
       "start_milestone": "Projektin aloitus",
       "start_milestone_description": "Projektin aloituksen virstanpylväs",
       "completion_milestone": "Projektin valmistuminen",
-      "completion_milestone_description": "Projektin valmistumisen virstanpylväs"
+      "completion_milestone_description": "Projektin valmistumisen virstanpylväs",
+      "labour_resource": "Työvoima",
+      "machine_resource": "Koneet"
     }
   },
   "cad": {

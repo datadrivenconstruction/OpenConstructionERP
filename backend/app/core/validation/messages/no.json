@@ -597,6 +597,20 @@
       "suggestion": "Begrens justeringene til mellom -50% og +200% for å unngå urealistiske tomtepriser"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Posisjon {ordinal} '{description}' ({amount}) er priset i mengdebeskrivelsen, men ingen aktivitet bærer den, så kostnaden er ikke med i fremdriftsplanen",
+      "suggestion": "Gi posisjonen en mengde eller koble den til en aktivitet, og generer deretter fremdriftsplanen på nytt."
+    },
+    "cost_reconciliation": {
+      "fail": "Fremdriftsplanen inneholder {planned} av mengdebeskrivelsens {bill}: {difference} av det prisede arbeidet ligger ikke på noen aktivitet",
+      "suggestion": "Kontroller posisjonene som dekningskontrollen lister opp, og generer deretter fremdriftsplanen på nytt."
+    },
+    "duration_vs_norm": {
+      "fail": "Aktiviteten '{activity}' varer {duration} arbeidsdager, mens normene for arbeidskraft og maskiner gir {norm}",
+      "suggestion": "Kontroller posisjonens mengde, mannskap og normtimer, eller en varighet som er endret manuelt."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Aktiviteten '{activity}' mangler logikkobling for {ends} (åpen ende / frakoblet aktivitet)",

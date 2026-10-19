@@ -93,9 +93,23 @@ def test_explicit_labor_hours_remains_primary_over_resource_units():
     assert _duration(resources, labor_hours=8, workers_per_unit=1) == (154, "labor_hours")
 
 
-@pytest.mark.parametrize("kind", ["equipment", "machinery", "material", ""])
+@pytest.mark.parametrize("kind", ["material", ""])
 def test_plain_hr_non_labor_resources_keep_existing_exclusion(kind):
     assert _duration([{"type": kind, "unit": "hr", "quantity": 2000}]) == _duration([])
+
+
+@pytest.mark.parametrize("kind", ["equipment", "machinery"])
+def test_plain_hr_machine_rows_bound_the_duration_but_are_not_labour(kind):
+    # Machine hours are never added to the labour sum. Since the schedule-from-
+    # estimate work they set the duration on their own when they outlast the
+    # labour (docs/design/schedule_from_estimate.md, section 3.2).
+    days, source = _duration([{"type": kind, "unit": "hr", "quantity": 2000}])
+    assert source == "machine_hours"
+    assert days > _duration([])[0]
+    with_labour = _duration(
+        [{"type": "labor", "unit": "hr", "quantity": 8}, {"type": kind, "unit": "hr", "quantity": 0.01}]
+    )
+    assert with_labour == _duration([{"type": "labor", "unit": "hr", "quantity": 8}])
 
 
 @pytest.mark.parametrize("unit", ["hrs", "hours", "person-hours", "man-hours", "machine-hours", "machine-hrs"])

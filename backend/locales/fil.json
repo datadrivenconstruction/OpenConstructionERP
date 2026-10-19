@@ -144,7 +144,9 @@
       "start_milestone": "Simula ng Proyekto",
       "start_milestone_description": "Milestone ng simula ng proyekto",
       "completion_milestone": "Pagkumpleto ng Proyekto",
-      "completion_milestone_description": "Milestone ng pagkumpleto ng proyekto"
+      "completion_milestone_description": "Milestone ng pagkumpleto ng proyekto",
+      "labour_resource": "Labor",
+      "machine_resource": "Makinarya"
     }
   },
   "cad": {

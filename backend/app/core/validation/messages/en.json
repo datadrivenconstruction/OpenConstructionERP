@@ -597,6 +597,20 @@
       "suggestion": "Cap modifiers between -50% and +200% to avoid unrealistic plot prices"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Position {ordinal} '{description}' ({amount}) is priced in the bill, but no activity carries it, so its cost is not in the schedule",
+      "suggestion": "Give the position a quantity or link it to an activity, then generate the schedule again."
+    },
+    "cost_reconciliation": {
+      "fail": "The schedule carries {planned} of the bill's {bill}: {difference} of the priced work is on no activity",
+      "suggestion": "Check the positions the coverage check lists, then generate the schedule again."
+    },
+    "duration_vs_norm": {
+      "fail": "Activity '{activity}' lasts {duration} working days, while its labour and machine norms give {norm}",
+      "suggestion": "Check the quantity, the crew and the norm hours of the position, or a duration that was changed by hand."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Activity '{activity}' has no {ends} logic (open end / dangling activity)",
