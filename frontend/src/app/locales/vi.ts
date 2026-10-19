@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Bóc tách DWG",
     "modules.catalog.eac": "Bộ máy EAC v2",
     "modules.catalog.einvoice": "Hóa đơn điện tử",
+    "modules.catalog.einvoice_ksef": "Hóa đơn điện tử KSeF (Ba Lan)",
     "modules.catalog.einvoice_clearance": "Xác thực hóa đơn điện tử",
     "modules.catalog.einvoice_eta": "Hóa đơn điện tử ETA (Ai Cập)",
     "modules.catalog.einvoice_zatca": "Hóa đơn điện tử Ả Rập Xê Út (ZATCA)",

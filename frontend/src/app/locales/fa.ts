@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "متره DWG",
     "modules.catalog.eac": "موتور EAC v2",
     "modules.catalog.einvoice": "صورت‌حساب الکترونیکی",
+    "modules.catalog.einvoice_ksef": "صورتحساب الکترونیکی KSeF (لهستان)",
     "modules.catalog.einvoice_clearance": "تأیید فاکتور الکترونیکی",
     "modules.catalog.einvoice_eta": "صورتحساب الکترونیکی ETA مصر",
     "modules.catalog.einvoice_zatca": "فاکتور الکترونیکی عربستان سعودی (ZATCA)",

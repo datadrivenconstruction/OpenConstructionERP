@@ -520,6 +520,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "حصر كميات DWG",
     "modules.catalog.eac": "محرك EAC v2",
     "modules.catalog.einvoice": "الفاتورة الإلكترونية",
+    "modules.catalog.einvoice_ksef": "الفوترة الإلكترونية KSeF (بولندا)",
     "modules.catalog.einvoice_clearance": "تخليص الفاتورة الإلكترونية",
     "modules.catalog.einvoice_eta": "الفوترة الإلكترونية لمصلحة الضرائب المصرية (ETA)",
     "modules.catalog.einvoice_zatca": "الفوترة الإلكترونية في المملكة العربية السعودية (ZATCA)",

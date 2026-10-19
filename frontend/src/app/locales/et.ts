@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG-mõõdistus",
     "modules.catalog.eac": "EAC v2 mootor",
     "modules.catalog.einvoice": "E-arve",
+    "modules.catalog.einvoice_ksef": "KSeF e-arveldus (Poola)",
     "modules.catalog.einvoice_clearance": "E-arve valideerimine",
     "modules.catalog.einvoice_eta": "E-arveldus ETA (Egiptus)",
     "modules.catalog.einvoice_zatca": "Saudi Araabia e-arveldus (ZATCA)",

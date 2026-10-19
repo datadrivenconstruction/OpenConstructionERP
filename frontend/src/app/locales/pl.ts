@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Przedmiar z DWG",
     "modules.catalog.eac": "Silnik EAC v2",
     "modules.catalog.einvoice": "E-faktura",
+    "modules.catalog.einvoice_ksef": "E-fakturowanie KSeF",
     "modules.catalog.einvoice_clearance": "Walidacja e-faktury",
     "modules.catalog.einvoice_eta": "E-fakturowanie ETA (Egipt)",
     "modules.catalog.einvoice_zatca": "E-faktury w Arabii Saudyjskiej (ZATCA)",

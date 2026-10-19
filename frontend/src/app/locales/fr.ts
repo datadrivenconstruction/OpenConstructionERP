@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Métré DWG",
     "modules.catalog.eac": "Moteur EAC v2",
     "modules.catalog.einvoice": "Facture électronique",
+    "modules.catalog.einvoice_ksef": "Facturation électronique KSeF (Pologne)",
     "modules.catalog.einvoice_clearance": "Validation de facture électronique",
     "modules.catalog.einvoice_eta": "Facturation électronique ETA (Égypte)",
     "modules.catalog.einvoice_zatca": "Facturation électronique Arabie saoudite (ZATCA)",

@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG Metraj",
     "modules.catalog.eac": "EAC v2 Motoru",
     "modules.catalog.einvoice": "E-fatura",
+    "modules.catalog.einvoice_ksef": "KSeF e-fatura (Polonya)",
     "modules.catalog.einvoice_clearance": "E-fatura Doğrulama",
     "modules.catalog.einvoice_eta": "Mısır ETA e-fatura",
     "modules.catalog.einvoice_zatca": "Suudi Arabistan e-fatura (ZATCA)",

@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG Такеофф",
     "modules.catalog.eac": "EAC v2 кыймылдаткычы",
     "modules.catalog.einvoice": "Электрондук эсеп-фактура",
+    "modules.catalog.einvoice_ksef": "KSeF электрондук эсеп-фактура (Польша)",
     "modules.catalog.einvoice_clearance": "Электрондук эсеп-фактураны текшерүү",
     "modules.catalog.einvoice_eta": "Египет ETA электрондук эсеп-фактура",
     "modules.catalog.einvoice_zatca": "Сауд Арабиясынын электрондук эсеп-фактурасы (ZATCA)",

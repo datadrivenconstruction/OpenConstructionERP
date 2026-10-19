@@ -520,6 +520,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG-Aufmaß",
     "modules.catalog.eac": "EAC-v2-Engine",
     "modules.catalog.einvoice": "E-Rechnung",
+    "modules.catalog.einvoice_ksef": "E-Rechnung KSeF (Polen)",
     "modules.catalog.einvoice_clearance": "E-Rechnungs-Clearing",
     "modules.catalog.einvoice_eta": "E-Rechnung ETA (Ägypten)",
     "modules.catalog.einvoice_zatca": "E-Rechnung Saudi-Arabien (ZATCA)",

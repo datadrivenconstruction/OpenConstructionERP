@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Επιμέτρηση DWG",
     "modules.catalog.eac": "Μηχανή EAC v2",
     "modules.catalog.einvoice": "Ηλεκτρονικό τιμολόγιο",
+    "modules.catalog.einvoice_ksef": "Ηλεκτρονική τιμολόγηση KSeF (Πολωνία)",
     "modules.catalog.einvoice_clearance": "Εκκαθάριση ηλ. τιμολογίων",
     "modules.catalog.einvoice_eta": "Ηλεκτρονική τιμολόγηση ETA (Αίγυπτος)",
     "modules.catalog.einvoice_zatca": "Ηλεκτρονική τιμολόγηση Σαουδικής Αραβίας (ZATCA)",

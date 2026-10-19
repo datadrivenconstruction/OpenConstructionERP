@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Изчисление от DWG",
     "modules.catalog.eac": "Двигател EAC v2",
     "modules.catalog.einvoice": "Електронна фактура",
+    "modules.catalog.einvoice_ksef": "Електронно фактуриране KSeF (Полша)",
     "modules.catalog.einvoice_clearance": "Валидиране на електронна фактура",
     "modules.catalog.einvoice_eta": "Електронно фактуриране ETA (Египет)",
     "modules.catalog.einvoice_zatca": "Електронно фактуриране в Саудитска Арабия (ZATCA)",

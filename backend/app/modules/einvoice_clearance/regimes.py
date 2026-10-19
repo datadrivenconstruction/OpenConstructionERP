@@ -81,7 +81,7 @@ terminal state rather than the adapter guessing it.
 Where it is set, the country's format is one the platform already builds - the
 EN 16931 engine in :mod:`app.modules.einvoice`, which ships CII and UBL and ten
 profiles. Where it is empty the national format is outside that engine (CFDI,
-NF-e, FatturaPA, KSeF FA(2), ZATCA, the Indian IRP schema, SII, RTIR), and the
+NF-e, FatturaPA, KSeF FA(3), ZATCA, the Indian IRP schema, SII, RTIR), and the
 caller supplies the payload. Nothing here reimplements a byte of EN 16931.
 
 Country names, platform names and national field names are data.
@@ -475,12 +475,103 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         platform="KSeF",
         label="Poland - KSeF national e-invoicing system",
         identifier_label="KSeF number",
-        document_format="ksef_fa_2",
+        # FA(3) since 2026-02-01. FA(2) is listed under ``extra`` as history only.
+        document_format="ksef_fa_3",
         profile_fields=("tax_registration_id",),
         document_fields=("nip_issuer", "nip_buyer"),
         # Nothing in KSeF can be withdrawn once it has a number.
         cancellation_window_days=None,
         correction_mechanism="faktura korygujaca (corrective invoice) issued through KSeF",
+        scope=(
+            "KSeF 2.0 with the FA(3) structure. Every taxpayer receives through KSeF from 2026-02-01; issuing "
+            "phases in by size. Penalties for invoices not issued in KSeF apply from 2027-01-01."
+        ),
+        commencement=(
+            CommencementPhase(
+                obligation=OBLIGATION_RECEIVE,
+                effective_date="2026-02-01",
+                scope="all taxpayers",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://www.ey.com/en_gl/technical/tax-alerts/poland-signs-into-law-mandatory-national-e-invoicing-system",
+                read_date="2026-10-19",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2026-02-01",
+                scope="taxpayers whose 2024 sales including VAT exceeded the threshold",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://www.ey.com/en_gl/technical/tax-alerts/poland-signs-into-law-mandatory-national-e-invoicing-system",
+                read_date="2026-10-19",
+                threshold="PLN 200000000 sales including VAT in 2024",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2026-04-01",
+                scope="all other taxpayers",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://www.ey.com/en_gl/technical/tax-alerts/poland-signs-into-law-mandatory-national-e-invoicing-system",
+                read_date="2026-10-19",
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2027-01-01",
+                scope="micro taxpayers and cash-register invoices",
+                legal_status=LEGAL_STATUS_ENACTED,
+                source_url="https://www.mddp.pl/ksef-2-0-takes-shape-what-changes-in-the-legislation/",
+                read_date="2026-10-19",
+                threshold="PLN 10000 invoiced sales per month",
+                notes="A per-invoice cap reported by one source is not modelled and needs expert review.",
+            ),
+        ),
+        extra={
+            "schema": {
+                "key": "ksef_fa_3",
+                "system_code": "FA (3)",
+                "schema_version": "1-0E",
+                "namespace": "http://crd.gov.pl/wzor/2025/06/25/13775/",
+                "valid_from": "2026-02-01",
+                "source_url": "https://crd.gov.pl/wzor/2025/06/25/13775/schemat.xsd",
+            },
+            "historical_schemas": [
+                {
+                    "key": "ksef_fa_2",
+                    "system_code": "FA (2)",
+                    "namespace": "http://crd.gov.pl/wzor/2023/06/29/12648/",
+                    "valid_from": "2023-09-01",
+                    "valid_to": "2026-01-31",
+                },
+            ],
+            # Maximums, not fixed amounts: the tax office sets the figure up to the cap.
+            "penalties": [
+                {
+                    "key": "invoice_outside_ksef_vat",
+                    "description": "An invoice that should have been issued in KSeF was issued outside it.",
+                    "amount": None,
+                    "currency": "PLN",
+                    "cap": "100% of the VAT shown on the invoice",
+                    "basis": "percent_of_invoice_vat",
+                    "legal_basis": "VAT Act art. 106ni",
+                    "effective_date": "2027-01-01",
+                    "source_url": "https://api.sejm.gov.pl/sejm/term10/interpellations/attachment/ATTDPLJWP/z02943-o1.pdf",
+                    "read_date": "2026-10-19",
+                },
+                {
+                    "key": "invoice_outside_ksef_no_vat",
+                    "description": "The same, on an invoice that shows no VAT.",
+                    "amount": None,
+                    "currency": "PLN",
+                    "cap": "18.7% of the invoice gross amount",
+                    "basis": "percent_of_invoice_gross",
+                    "legal_basis": "VAT Act art. 106ni",
+                    "effective_date": "2027-01-01",
+                    "source_url": "https://api.sejm.gov.pl/sejm/term10/interpellations/attachment/ATTDPLJWP/z02943-o1.pdf",
+                    "read_date": "2026-10-19",
+                },
+            ],
+            "token_auth_last_day": "2026-12-31",
+            "ksef_number_in_payment_title_from": "2027-01-01",
+            "read_date": "2026-10-19",
+        },
     ),
     "RO": CountryRegime(
         country="RO",

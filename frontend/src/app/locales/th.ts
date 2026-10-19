@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "การถอดปริมาณจาก DWG",
     "modules.catalog.eac": "เอนจิน EAC v2",
     "modules.catalog.einvoice": "ใบแจ้งหนี้อิเล็กทรอนิกส์",
+    "modules.catalog.einvoice_ksef": "ใบกำกับภาษีอิเล็กทรอนิกส์ KSeF (โปแลนด์)",
     "modules.catalog.einvoice_clearance": "การตรวจสอบใบแจ้งหนี้อิเล็กทรอนิกส์",
     "modules.catalog.einvoice_eta": "ใบกำกับภาษีอิเล็กทรอนิกส์ ETA (อียิปต์)",
     "modules.catalog.einvoice_zatca": "ใบแจ้งหนี้อิเล็กทรอนิกส์ซาอุดีอาระเบีย (ZATCA)",

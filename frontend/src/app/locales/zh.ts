@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG 工程量提取",
     "modules.catalog.eac": "EAC v2 引擎",
     "modules.catalog.einvoice": "电子发票",
+    "modules.catalog.einvoice_ksef": "KSeF 电子发票(波兰)",
     "modules.catalog.einvoice_clearance": "电子发票验证",
     "modules.catalog.einvoice_eta": "埃及 ETA 电子发票",
     "modules.catalog.einvoice_zatca": "沙特阿拉伯 ZATCA 电子发票",

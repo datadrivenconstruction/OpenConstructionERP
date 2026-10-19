@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG-mängdning",
     "modules.catalog.eac": "EAC v2-motor",
     "modules.catalog.einvoice": "E-faktura",
+    "modules.catalog.einvoice_ksef": "KSeF e-fakturering (Polen)",
     "modules.catalog.einvoice_clearance": "E-fakturavalidering",
     "modules.catalog.einvoice_eta": "E-fakturering ETA (Egypten)",
     "modules.catalog.einvoice_zatca": "E-fakturering i Saudiarabien (ZATCA)",

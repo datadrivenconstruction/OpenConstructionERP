@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG پیمائش",
     "modules.catalog.eac": "EAC v2 انجن",
     "modules.catalog.einvoice": "ای-انوائس",
+    "modules.catalog.einvoice_ksef": "KSeF ای-انوائسنگ (پولینڈ)",
     "modules.catalog.einvoice_clearance": "ای انوائس کلیئرنس",
     "modules.catalog.einvoice_eta": "مصر ETA ای-انوائسنگ",
     "modules.catalog.einvoice_zatca": "سعودی عرب ای انوائسنگ (ZATCA)",

@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG Өлшеу",
     "modules.catalog.eac": "EAC v2 қозғалтқышы",
     "modules.catalog.einvoice": "Электрондық шот-фактура",
+    "modules.catalog.einvoice_ksef": "KSeF электрондық шот-фактура (Польша)",
     "modules.catalog.einvoice_clearance": "Электрондық шот-фактура клиренсі",
     "modules.catalog.einvoice_eta": "Мысыр ETA электрондық шот-фактура",
     "modules.catalog.einvoice_zatca": "Сауд Арабиясының электрондық шот-фактурасы (ZATCA)",

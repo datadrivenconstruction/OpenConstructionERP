@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG mennyiségszámítás",
     "modules.catalog.eac": "EAC v2 motor",
     "modules.catalog.einvoice": "E-számla",
+    "modules.catalog.einvoice_ksef": "KSeF e-számlázás (Lengyelország)",
     "modules.catalog.einvoice_clearance": "E-számla klíring",
     "modules.catalog.einvoice_eta": "ETA e-számlázás (Egyiptom)",
     "modules.catalog.einvoice_zatca": "Szaúd-arábiai e-számlázás (ZATCA)",

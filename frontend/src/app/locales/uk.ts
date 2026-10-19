@@ -48132,6 +48132,7 @@ const resource = {
     "modules.catalog.dashboards": "Панелі приладів",
     "modules.catalog.eac": "Рушій EAC v2",
     "modules.catalog.einvoice": "Електронний рахунок",
+    "modules.catalog.einvoice_ksef": "Електронні рахунки KSeF (Польща)",
     "modules.catalog.einvoice_clearance": "Кліренс е-рахунків",
     "modules.catalog.einvoice_eta": "Електронні рахунки ETA (Єгипет)",
     "modules.catalog.einvoice_zatca": "Електронні рахунки Саудівської Аравії (ZATCA)",

@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG 数量拾い",
     "modules.catalog.eac": "EAC v2エンジン",
     "modules.catalog.einvoice": "電子請求書",
+    "modules.catalog.einvoice_ksef": "KSeF 電子インボイス(ポーランド)",
     "modules.catalog.einvoice_clearance": "電子請求書検証",
     "modules.catalog.einvoice_eta": "エジプト ETA 電子インボイス",
     "modules.catalog.einvoice_zatca": "サウジアラビア電子請求書 (ZATCA)",

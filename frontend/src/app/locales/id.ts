@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Takeoff DWG",
     "modules.catalog.eac": "Mesin EAC v2",
     "modules.catalog.einvoice": "Faktur elektronik",
+    "modules.catalog.einvoice_ksef": "E-faktur KSeF (Polandia)",
     "modules.catalog.einvoice_clearance": "Validasi Faktur Elektronik",
     "modules.catalog.einvoice_eta": "E-faktur ETA (Mesir)",
     "modules.catalog.einvoice_zatca": "Faktur Elektronik Arab Saudi (ZATCA)",

@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Výkaz výměr z DWG",
     "modules.catalog.eac": "Engine EAC v2",
     "modules.catalog.einvoice": "E-faktura",
+    "modules.catalog.einvoice_ksef": "Elektronická fakturace KSeF (Polsko)",
     "modules.catalog.einvoice_clearance": "Validace e-faktury",
     "modules.catalog.einvoice_eta": "Elektronická fakturace ETA (Egypt)",
     "modules.catalog.einvoice_zatca": "E-fakturace v Saúdské Arábii (ZATCA)",

@@ -46427,6 +46427,7 @@ const resource = {
     "modules.catalog.dashboards": "Boshqaruv panellari",
     "modules.catalog.eac": "EAC v2 mexanizmi",
     "modules.catalog.einvoice": "Elektron hisob-faktura",
+    "modules.catalog.einvoice_ksef": "KSeF elektron hisob-faktura (Polsha)",
     "modules.catalog.einvoice_clearance": "Elektron hisob-fakturani rasmiylashtirish",
     "modules.catalog.einvoice_eta": "Misr ETA elektron hisob-faktura",
     "modules.catalog.einvoice_zatca": "Saudiya Arabistoni elektron hisob-faktura (ZATCA)",

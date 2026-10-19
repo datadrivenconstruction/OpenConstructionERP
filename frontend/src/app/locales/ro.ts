@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Antemăsurătoare din DWG",
     "modules.catalog.eac": "Motor EAC v2",
     "modules.catalog.einvoice": "Factură electronică",
+    "modules.catalog.einvoice_ksef": "Facturare electronică KSeF (Polonia)",
     "modules.catalog.einvoice_clearance": "Validare factură electronică",
     "modules.catalog.einvoice_eta": "Facturare electronică ETA (Egipt)",
     "modules.catalog.einvoice_zatca": "Facturare electronică Arabia Saudită (ZATCA)",

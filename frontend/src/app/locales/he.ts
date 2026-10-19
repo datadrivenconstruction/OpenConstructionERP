@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Takeoff מ-DWG",
     "modules.catalog.eac": "מנוע EAC v2",
     "modules.catalog.einvoice": "חשבונית אלקטרונית",
+    "modules.catalog.einvoice_ksef": "חשבונית אלקטרונית KSeF (פולין)",
     "modules.catalog.einvoice_clearance": "אישור חשבוניות אלקטרוניות",
     "modules.catalog.einvoice_eta": "חשבונית אלקטרונית ETA (מצרים)",
     "modules.catalog.einvoice_zatca": "חשבוניות אלקטרוניות בסעודיה (ZATCA)",

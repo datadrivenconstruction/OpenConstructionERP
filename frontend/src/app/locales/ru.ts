@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Обмер по DWG",
     "modules.catalog.eac": "Движок EAC v2",
     "modules.catalog.einvoice": "Электронный счёт",
+    "modules.catalog.einvoice_ksef": "Электронные счета KSeF (Польша)",
     "modules.catalog.einvoice_clearance": "Клиринг электронных счетов-фактур",
     "modules.catalog.einvoice_eta": "Электронные счета ETA (Египет)",
     "modules.catalog.einvoice_zatca": "Электронные счета-фактуры Саудовской Аравии (ZATCA)",

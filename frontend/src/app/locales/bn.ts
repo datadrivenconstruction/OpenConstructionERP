@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG টেকঅফ",
     "modules.catalog.eac": "EAC v2 ইঞ্জিন",
     "modules.catalog.einvoice": "ই-ইনভয়েস",
+    "modules.catalog.einvoice_ksef": "KSeF ই-ইনভয়েসিং (পোল্যান্ড)",
     "modules.catalog.einvoice_clearance": "ই-ইনভয়েস ক্লিয়ারেন্স",
     "modules.catalog.einvoice_eta": "মিশর ETA ই-ইনভয়েসিং",
     "modules.catalog.einvoice_zatca": "সৌদি আরবের ZATCA ই-ইনভয়েসিং",
