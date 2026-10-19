@@ -195,6 +195,10 @@ def rows_for(country: str) -> tuple[RateRow, ...]:
         from app.core.payment_taxes.data_tr import ROWS
 
         return ROWS
+    if wanted == "SA":
+        from app.core.payment_taxes.data_sa import ROWS as SA_ROWS
+
+        return SA_ROWS
     return ()
 
 
