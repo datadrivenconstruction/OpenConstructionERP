@@ -153,19 +153,10 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "keys on. Nothing writes that key, so publishing from finance would not wake it either"
     ),
     "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
-    "schedule_advanced.task.completed": (
-        "bi_dashboards/events.py:104, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
-        "tuple; schedule_advanced publishes actuals updates but never a task completion, so "
-        "the BI projection for it is never invalidated"
-    ),
     "snapshot.refreshed": (
         "dashboards/__init__.py:94 via event_taxonomy.SNAPSHOT_REFRESHED, which is declared "
         "twice (dashboards/events.py:31 and dashboards/sync_protocol.py:58) and published "
         "nowhere. sync_protocol.py:18 documents the refresh cascade as if it runs"
-    ),
-    "variations.completed": (
-        "bi_dashboards/events.py:124, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
-        "tuple; the changeorders module publishes under the singular 'changeorder.' prefix"
     ),
 }
 
