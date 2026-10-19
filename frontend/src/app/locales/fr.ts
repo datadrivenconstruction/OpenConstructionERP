@@ -29633,7 +29633,7 @@ const resource = {
     "cases.run_a_three_way_match_before_paying_a_supplier.step.order.why": "La facture n'est qu'un des trois documents qui doivent concorder. Sortir la commande et la réception d'abord, c'est ce qui vous donne une base honnête pour vérifier la facture du fournisseur.",
     "cases.run_a_three_way_match_before_paying_a_supplier.step.order.in.po": "Bon de commande",
     "cases.run_a_three_way_match_before_paying_a_supplier.step.order.in.grn": "Bon de réception",
-    "cases.run_a_three_way_match_before_paying_a_supplier.step.order.out.ordered": "Quantites commandees",
+    "cases.run_a_three_way_match_before_paying_a_supplier.step.order.out.ordered": "Quantités commandées",
     "cases.run_a_three_way_match_before_paying_a_supplier.step.order.out.received": "Quantites reçues",
     "cases.run_a_three_way_match_before_paying_a_supplier.step.match.title": "Rapprocher la facture des deux",
     "cases.run_a_three_way_match_before_paying_a_supplier.step.match.what": "Aligner la facture sur la commande et la réception, passer les lignes où prix et quantité concordent sur les trois, et signaler toute livraison incomplète, dérive de prix ou article jamais commandé.",
