@@ -1,0 +1,5 @@
+{
+  "_comment": "Country-neutral catalogue of invoice mentions. Each country adds rows under 'mentions' and, when an obligation starts per company size, a block under 'phase_by_size'. Row fields: key, country (ISO-2), label, document_kinds, dated_by ('fixed' with effective_date, or 'issuer_phase'), when (clauses that make the row apply), satisfied_by (list of alternatives, each a list of clauses), legal_basis, source_url, needs_expert_review. A clause is {path, present|truthy|equals|in|not_in}.",
+  "phase_by_size": {},
+  "mentions": []
+}
