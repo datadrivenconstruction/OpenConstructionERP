@@ -22,6 +22,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cost control offers four forecast methods (best available source, the default, maximum value, earned value from progress and CPI, and a manual amount backed by a document), per project and per line. A saved forecast starts as a draft: lines that moved more than the project's threshold need a comment and evidence before it can be frozen, and a frozen snapshot is never changed. A phase comparison shows amounts or percent of plan, and the cost report, phase comparison, invoice ledger and forecast documentation export as PDF or Excel.
 - Requisitions take designated approvers in order, and only the next one may approve. Lines convert to purchase orders one by one or in parts over several orders, lines of several requisitions can share one order, and a project that orders in an external purchasing system records those orders on the requisition. Every change lands in a feed other systems can read.
 - Historical benchmarks from finished projects split by client, region, type, status, phase, country, end year or a classification such as DIN 276, with P10 and P90, spread and the readings left out by reason. Money can be restated in one reporting currency, a drilldown lists the records behind a reading, and estimating shows the historical range of past positions.
+- Egypt pack. Projects plan on a Sunday to Thursday week with Egyptian holidays, public and private contract rules ship as data, and VAT regimes and withholding on account of tax are set up with the Form 41 deadline recorded. Arabic-Indic digits, right-to-left tables and Egyptian identifiers such as the registration number are checked through the shared party registry.
+- Egyptian e-invoicing. Invoices are built in the ETA v1.0 format, signed as CAdES-BES and sent to the Egyptian Tax Authority, which answers with a document UUID. Totals, parties and lines are checked before sending, so a document with a wrong total never leaves the platform. The service URLs must be https and pass the outbound URL policy.
+- Saudi Arabia pack. Public works contracts follow the procurement law in force at tender, a Saudi bill is priced at Saudi VAT, withholding tax on payments to non-residents is available, and statutory social contributions (GOSI rates) are kept in a table. Field time warns about lines inside the summer midday outdoor work ban, and a Saudi real estate sale is treated as VAT exempt with the real estate transaction tax. The pack cites SBC 2024 and no longer carries unsourced Nitaqat rules.
+- Saudi e-invoicing (ZATCA). The Saudi module builds the UBL 2.1 invoice, keeps the invoice counter and previous-hash chain for each EGS unit, applies the XAdES stamp and the QR code, onboards a unit with ZATCA, and clears standard invoices and reports simplified ones through FATOORA phase 2. The units list is paged.
+- Poland pack. Polish holidays, working week and planning calendar, checks for NIP, REGON, KRS and postcode, kosztorys overhead and profit (narzuty) priced on their own bases with KNR as the default for Poland, late payment terms with statutory interest and recovery compensation, and checks for split payment, housing VAT limits and reverse charge before an invoice is released.
+- Polish e-invoicing (KSeF). Invoices are built in the FA(3) structure that KSeF requires from 1 February 2026 and cleared through KSeF, with both verification codes and the offline upload deadlines. Seller and buyer NIP are checked, and the split payment marker must agree with the annex goods and the PLN 15,000 threshold, which is read from the Polish VAT data instead of a fixed number.
+- France pack. French public holidays for every year, late payment clocks and one markup stack, public and private works contracts checked against the law, and French labour figures in the shared labour standards catalogue.
+- French late payment. Interest, term caps and the recovery indemnity are a row of the shared late payment engine. Business buyers pay the ECB rate plus ten points, and public buyers are priced at the rate fixed when the delay began and held for the whole delay.
+- French e-invoicing. SIREN and SIRET are validated, the legally required invoice mentions and the issuer's company size can be edited in the clearance forms, and a missing company size warns instead of blocking.
+- Clearance adapters can report a submission as pending and poll for the verdict, for authorities that answer in two steps. Documents can be refreshed from the document page, a country can name the act a document went through (clearance or reporting), and country facts such as penalties appear in the module's meta information.
+- Holiday calendars for Orthodox Easter in Bulgaria and for the Saudi Eid spans, each with a source.
+- Schedules generated from an estimate now carry cost and resources. Every task takes its position total as planned cost and gets a labour row, and a machine row where the bill has machine hours, so a fresh plan has a budget, an S-curve and something for resource levelling. Durations take the longer of the labour and machine length. Each task shows a confidence from 0 to 1 for its duration, logic and breakdown, the plan gets a cost-weighted score, and the new schedule_5d rule set checks the result. A person still reviews and confirms the plan.
+- Historical benchmarks can restate money to a reference month and region with the price index register (issue #492). A month, region or series the register lacks excludes the reading with a reason instead of counting it unadjusted.
+- Events: a passed inspection marks the closeout package stale, inspectors and attendees are told when something is scheduled for them, and retention release, schedule slip and project ids are wired.
 
 ### Fixed
 
@@ -36,6 +50,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Site logistics zones and deliveries now link to their areas and transports through foreign keys, so the database itself keeps those links valid.
 - Readiness messages in the quality concept name an untitled proof by its evidence type instead of showing an empty name.
 - Ordered quantities are labelled with the correct French accents again.
+- Creating a change order on a project that has an active variation order no longer answers 500, and a regression test covers a deactivated project owner.
+- Approving a change order refreshes the dashboard figures, and a deleted chat conversation no longer turns up in search.
+- A country pack install says what it set up and what it did not. A cost base that could not be downloaded no longer reads as done, and the preview lists what VAT, holidays, e-invoicing and payment terms the platform already provides for the country.
+- Packs no longer name a tax template that nothing resolved, a pack can switch on its own validation rule sets even if a module was switched off, and our own country packs no longer print an invented partnership line.
+- The Canadian cost base shows its size, and the California and Texas packs install their own demo projects instead of the Denver office.
+- Tax rate history is reconciled without duplicating a rate that a country ships twice, so Egypt's 14 % construction VAT lands beside its 14 % standard rate.
+- The confidence score of a generated schedule is written in the reader's number format.
+
+### Changed
+
+- The locale bundles have one command line tool for adding, renaming, finding missing keys and exporting to translators.
+- Event subscriptions that no module fed or no record triggered were retired, and a gate now checks event names held in variables and pair tables.
 
 ## [18.6.4] - 2026-10-16
 
