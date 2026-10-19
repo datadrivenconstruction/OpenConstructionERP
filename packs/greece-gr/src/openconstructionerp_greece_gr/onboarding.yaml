@@ -36,7 +36,6 @@ steps:
       label: "Create my Greek workspace / Δημιουργία χώρου εργασίας"
       apply:
         - set_default_currency: EUR
-        - set_tax_template: gr_fpa_24
         - enable_rule_packs:
             - gr_net_timologia
             - gr_dimosia_erga_4412

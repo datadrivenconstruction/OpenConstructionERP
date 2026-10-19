@@ -29,7 +29,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-pl-warsaw",  # resolves to PL_WARSAW
     ],
     default_currency="PLN",
-    default_tax_template="pl_vat_23",
+    default_tax_template=None,
     default_methodology="poland",
     validation_rule_packs=[
         "prawo_budowlane",

@@ -190,6 +190,14 @@ yet"** until a tax-template resolver exists (parallel to `currency_resolver`). D
 pretend it changes tax behaviour. Building the resolver is tracked as future work,
 not part of this apply feature.
 
+**Decision, 2026-10-19:** no resolver. Tax is not a pack setting: VAT, public
+holidays, e-invoicing and statutory payment terms come from the core registries
+by the project's country, pack or no pack. The preview now carries
+`built_in_for_country` with those values, every shipped pack leaves
+`default_tax_template` unset, the onboarding scripts no longer carry
+`set_tax_template`, and `test_pack_conformance` refuses a pack that names a
+template id nothing resolves.
+
 ### 2.5 `validation_rule_packs` → no-op-with-warning (recommended) vs. block
 
 > **Outcome note, 2026-08-26.** Fork C shipped as (a), and (a) turned out to be

@@ -30,7 +30,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-es-madrid",
     ],
     default_currency="EUR",
-    default_tax_template="es_iva_21",
+    default_tax_template=None,
     default_methodology="spain",
     validation_rule_packs=[
         "cte",

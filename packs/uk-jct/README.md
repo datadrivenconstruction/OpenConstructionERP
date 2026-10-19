@@ -7,7 +7,7 @@ Building Safety Act 2022.
 
 ## What this pack enables
 
-- Currency GBP, the `uk_vat_20` tax template and the `united_kingdom`
+- Currency GBP (the pack does not set VAT) and the `united_kingdom`
   estimating methodology
 - The en-GB locale overlay
 - Two engine rule sets: `nrm`, the method of measurement, and `uk_statutory`,

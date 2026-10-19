@@ -35,7 +35,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-hi-mumbai",
     ],
     default_currency="INR",
-    default_tax_template="in_gst_18",
+    default_tax_template=None,
     default_methodology="india",
     validation_rule_packs=[
         # Specifications & rates

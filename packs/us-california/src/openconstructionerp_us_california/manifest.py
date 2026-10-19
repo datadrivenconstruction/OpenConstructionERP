@@ -33,7 +33,7 @@ MANIFEST = PartnerPackManifest(
     # Los Angeles and San Francisco are both in its pre-offered metro list.
     cwicr_regions=["cwicr-usa-usd"],
     default_currency="USD",
-    default_tax_template="us_state_sales_tax",
+    default_tax_template=None,
     default_methodology="united_states",
     validation_rule_packs=[
         "ca_sales_tax_contractors",

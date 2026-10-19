@@ -32,7 +32,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-it-toscana",
     ],
     default_currency="EUR",
-    default_tax_template="it_iva_22",
+    default_tax_template=None,
     default_methodology="italy",
     validation_rule_packs=[
         "dlgs_36_2023",

@@ -34,7 +34,6 @@ steps:
       label: "Create my Croatia workspace / Stvori moj radni prostor"
       apply:
         - set_default_currency: EUR
-        - set_tax_template: hr_pdv_25
         - enable_rule_packs:
             - hr_troskovnik
             - hr_zakon_o_gradnji

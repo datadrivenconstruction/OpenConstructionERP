@@ -37,7 +37,6 @@ steps:
       label: "Create my Romanian workspace / Creează spațiul de lucru"
       apply:
         - set_default_currency: RON
-        - set_tax_template: ro_tva_21
         - enable_rule_packs:
             - ro_deviz_general
             - ro_achizitii_publice

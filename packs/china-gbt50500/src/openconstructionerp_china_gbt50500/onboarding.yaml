@@ -67,7 +67,6 @@ steps:
       label: "创建中国工作区 / Create my China workspace"
       apply:
         - set_default_currency: CNY
-        - set_tax_template: cn_vat_9
         - enable_rule_packs:
             - cn_gb50500_qingdan_bianma
             - cn_qingdan_wubu_jiegou

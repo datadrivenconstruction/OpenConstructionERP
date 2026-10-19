@@ -40,7 +40,7 @@ Construction services carry the standard rate.
 
 ## What this pack enables
 
-- **Currency CHF**, the `ch_mwst_8_1` tax template and the `switzerland`
+- **Currency CHF** (the pack does not set VAT) and the `switzerland`
   estimating methodology, with a German, French and Italian interface.
 - **Three validation rule packs** covering SIA 451 cost planning, BKP
   classification structure, and SIA 118 contract conditions.

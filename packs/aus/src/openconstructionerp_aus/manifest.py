@@ -31,7 +31,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-eng-sydney",
     ],
     default_currency="AUD",
-    default_tax_template="au_gst_10",
+    default_tax_template=None,
     default_methodology="australia",
     validation_rule_packs=[
         "ncc_2022",

@@ -26,7 +26,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-ja-tokyo",
     ],
     default_currency="JPY",
-    default_tax_template="jp_consumption_10",
+    default_tax_template=None,
     default_methodology="japan",
     validation_rule_packs=[
         "building_standard_law",

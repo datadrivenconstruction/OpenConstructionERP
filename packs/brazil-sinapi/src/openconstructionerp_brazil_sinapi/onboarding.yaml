@@ -161,7 +161,6 @@ steps:
       label: "Criar meu workspace brasileiro"
       apply:
         - set_default_currency: BRL
-        - set_tax_template: br_iss_municipal
         - enable_rule_packs:
             - sinapi_cost_db
             - nbr_12721

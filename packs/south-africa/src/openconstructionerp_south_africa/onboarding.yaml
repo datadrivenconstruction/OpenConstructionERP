@@ -56,5 +56,4 @@ steps:
       label: "Create my South Africa workspace"
       apply:
         - set_default_currency: ZAR
-        - set_tax_template: za_vat_15
         - enable_rule_packs: [sans_1200_measurement, asaqs_measurement, cidb_grading, pppfa_preferential_procurement, ipdm_procurement_gates]

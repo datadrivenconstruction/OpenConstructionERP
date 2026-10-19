@@ -119,8 +119,8 @@ time with a logged warning.
 |---|---|
 | Type | `str \| None` |
 | Default | `None` |
-| Purpose | Slug of a tax template to set as default in the finance module. When `None`, the platform's default applies. |
-| Example | `"ca_gst_pst"` |
+| Purpose | Ignored; leave it unset. There is no tax template registry, so nothing resolves the value. VAT, public holidays, e-invoicing and statutory payment terms come from the platform's built-in registries by the project's country, and the activation preview shows them. The rate that reaches an estimate is the tax line of the market's markup stack, editable per project. The field is still accepted so older manifests keep loading. |
+| Example | `None` |
 
 ---
 
@@ -328,7 +328,7 @@ MANIFEST = PartnerPackManifest(
     },
     cwicr_regions=["cwicr-eng-toronto", "cwicr-fra-montreal"],
     default_currency="CAD",
-    default_tax_template="ca_gst_pst",
+    default_tax_template=None,
     # Validation - the engine identifiers that make rules run ...
     validation_rule_sets=["boq_quality"],
     # ... and the reference documents the pack ships, which run nothing

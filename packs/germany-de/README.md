@@ -40,12 +40,11 @@ Honorarzone.
 
 Tax is straightforward compared to some jurisdictions. The standard
 Umsatzsteuer rate is 19 percent, and it applies to construction services
-without the withholding complexity found elsewhere. The pack sets the
-`de_ust_19` tax template.
+without the withholding complexity found elsewhere. The pack does not set VAT.
 
 ## What this pack enables
 
-- **Currency EUR**, the `de_ust_19` tax template and the `germany` estimating
+- **Currency EUR** (the pack does not set VAT) and the `germany` estimating
   methodology, with a German and English interface.
 - **Two engine rule sets**, `din276` and `gaeb`. The DIN 276 rules check that
   every cost line carries a valid Kostengruppe reference and that the hierarchy

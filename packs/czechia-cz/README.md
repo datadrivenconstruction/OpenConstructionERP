@@ -20,11 +20,11 @@ the building permit and control framework.
 
 DPH (dan z pridane hodnoty, VAT) on construction services is 21 percent at
 the standard rate, with a reduced 12 percent rate applying to certain housing
-works. The pack sets the `cz_dph_21` tax template.
+works. The pack does not set DPH.
 
 ## What this pack enables
 
-- **Currency CZK** with the `cz_dph_21` tax template and the `czechia`
+- **Currency CZK** (the pack does not set DPH) and the `czechia`
   estimating methodology
 - **DIN 276 rule set** for classification validation, as the nearest supported
   hierarchy Czech TSKP-structured bills map onto

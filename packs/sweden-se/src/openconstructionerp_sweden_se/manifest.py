@@ -26,7 +26,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-se-stockholm",
     ],
     default_currency="SEK",
-    default_tax_template="se_moms_25",
+    default_tax_template=None,
     default_methodology="sweden",
     validation_rule_packs=[
         "ama_specification",

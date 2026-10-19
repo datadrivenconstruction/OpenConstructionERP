@@ -29,7 +29,7 @@ for construction. The pack sets the standard 25 percent rate.
 
 ## What this pack enables
 
-- **Currency DKK**, the `dk_moms_25` tax template and the `denmark` estimating
+- **Currency DKK** (the pack does not set VAT) and the `denmark` estimating
   methodology, with a Danish and English interface.
 - **Three validation rule packs** covering the V&S specification system,
   SfB/CCS classification, and AB 18 contract conditions. These are reference

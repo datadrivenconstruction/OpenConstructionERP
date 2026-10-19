@@ -108,7 +108,7 @@ the work, and a contractor can be running both at once on different jobs.
 |---|---|
 | Interface | Simplified Chinese (`zh`), English available |
 | Currency | CNY |
-| Tax template | `cn_vat_9` |
+| Tax | Not set by the pack |
 | Methodology | `china`, derived from the regional markup table |
 | Cost data | `cwicr-zh-shanghai` (global-market catalogue, Shanghai prices) and `cwicr-zh-china` (national Dinge base); Beijing, Shenzhen, Guangzhou and Chengdu are listed as preferred metros and arrive in marketplace updates |
 | Demo project | `office-shanghai`, a 32-storey Grade A tower in Lujiazui, measured works approx. CNY 690 million |

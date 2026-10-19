@@ -31,7 +31,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-eng-toronto",
     ],
     default_currency="CAD",
-    default_tax_template="ca_gst_pst",
+    default_tax_template=None,
     # A country pack that named no methodology left every project created under
     # it on the flat international default, so the pack shipped Canadian cost
     # regions and Canadian tax and then priced the bill with a method that

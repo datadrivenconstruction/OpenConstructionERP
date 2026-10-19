@@ -36,4 +36,3 @@ steps:
       label: "Create my South Korea workspace / \ud55c\uad6d \uc6cc\ud06c\uc2a4\ud398\uc774\uc2a4 \ub9cc\ub4e4\uae30"
       apply:
         - set_default_currency: KRW
-        - set_tax_template: kr_vat_10

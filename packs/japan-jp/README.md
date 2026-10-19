@@ -34,7 +34,7 @@ rate with no regional variation.
 
 ## What this pack enables
 
-- **Currency JPY**, the `jp_consumption_10` tax template and sekisan as the
+- **Currency JPY** (the pack does not set consumption tax) and sekisan as the
   classification standard, with a Japanese-language interface.
 - **No engine rule sets** are registered yet. The validation engine does not
   carry a sekisan rule set at this time; this pack sets the locale, currency

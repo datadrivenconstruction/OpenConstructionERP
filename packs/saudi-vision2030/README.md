@@ -19,8 +19,7 @@ When installed alongside the OCERP core, this pack registers via the
 - **Preloads CWICR cost region: `cwicr-eng-riyadh`.** Jeddah, Dammam, Khobar,
   Makkah, Madinah, NEOM/Tabuk are surfaced as opt-in options in the
   onboarding wizard (resolved via the CWICR marketplace import).
-- **Sets default currency to `SAR`** and applies the **`sa_vat_15`** tax
-  template (ZATCA 15% VAT).
+- **Sets default currency to `SAR`** (ZATCA 15% VAT, not set by the pack).
 - **Enables fourteen Saudi validation rule packs:**
   - Saudi Building Code 2024 (mandatory since 2025-06-30; replaced SBC 2018) — per-Part:
     - `sbc_201_energy` — Energy Conservation Code

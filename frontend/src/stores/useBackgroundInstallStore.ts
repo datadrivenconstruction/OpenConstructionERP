@@ -47,6 +47,17 @@ export interface BackgroundInstall {
 
 interface BackgroundInstallStore {
   install: BackgroundInstall | null;
+  /**
+   * Re-run the cost database step of the install shown in the banner. Set by
+   * the pack driver, which owns the stream; null for installs that cannot be
+   * retried step by step (the plain region path). ``begin`` clears it, so an
+   * install never inherits the retry of the one before it; the pack driver
+   * sets it again after each ``begin``.
+   */
+  retryCostBase: (() => void) | null;
+  setRetryCostBase: (fn: (() => void) | null) => void;
+  /** Put a finished install back into the running state for a retry. */
+  reopen: () => void;
   /** Begin tracking a new background install (replaces any previous one). */
   begin: (slug: string, country: string, steps: BgInstallStep[]) => void;
   /** Flip a single step to ``running``. */
@@ -61,9 +72,19 @@ interface BackgroundInstallStore {
 
 export const useBackgroundInstallStore = create<BackgroundInstallStore>((set) => ({
   install: null,
+  retryCostBase: null,
+
+  setRetryCostBase: (fn) => set({ retryCostBase: fn }),
+
+  reopen: () =>
+    set((state) => {
+      if (!state.install) return state;
+      return { install: { ...state.install, running: true, done: false } };
+    }),
 
   begin: (slug, country, steps) =>
     set({
+      retryCostBase: null,
       install: {
         slug,
         country,
@@ -108,5 +129,5 @@ export const useBackgroundInstallStore = create<BackgroundInstallStore>((set) =>
       };
     }),
 
-  dismiss: () => set({ install: null }),
+  dismiss: () => set({ install: null, retryCostBase: null }),
 }));

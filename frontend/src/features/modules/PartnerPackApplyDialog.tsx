@@ -47,6 +47,7 @@ import {
   Database,
   FolderOpen,
   Globe,
+  Landmark,
   Languages,
   Library,
   Loader2,
@@ -67,7 +68,12 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 
-import { canInstallPacks, useApplyPreview, type PackCostBase } from './partnerPacks';
+import {
+  canInstallPacks,
+  useApplyPreview,
+  type CountryBuiltIns,
+  type PackCostBase,
+} from './partnerPacks';
 import {
   fullInstallPackStream,
   packInstallFailureTitle,
@@ -726,6 +732,10 @@ export function PartnerPackApplyDialog({
         return t('modules.pp_reason_no_locale', { defaultValue: 'the pack sets no language' });
       case 'load_failed':
         return t('modules.pp_reason_load_failed', { defaultValue: 'the download or import failed' });
+      case 'download_failed':
+        return t('modules.pp_reason_download_failed', {
+          defaultValue: 'it could not be downloaded. Check the internet connection and retry',
+        });
       case 'repriced_market':
         return t('modules.pp_reason_repriced_market', {
           defaultValue: 'the cost database is priced in another market than its catalogue',
@@ -815,7 +825,18 @@ export function PartnerPackApplyDialog({
       case 'cost_db': {
         const bases = asRecords(d.bases);
         if (bases.length === 0) return reason ? [reason] : [];
-        return bases.flatMap((b) => {
+        // The install carries on to the sample projects when a base fails, so
+        // say in one sentence what that leaves behind: a workspace with no prices.
+        const noPrices =
+          d.prices_loaded === false
+            ? [
+                t('modules.pp_result_no_prices', {
+                  defaultValue:
+                    'No cost database was loaded, so this workspace has no prices yet. Use Retry once the server can reach the internet, or import a cost database later under Cost databases.',
+                }),
+              ]
+            : [];
+        return noPrices.concat(bases.flatMap((b) => {
           const name = asString(b.db_id) ?? asString(b.slug) ?? '';
           const status = asString(b.status);
           if (status === 'ok' && b.resumed) {
@@ -865,7 +886,7 @@ export function PartnerPackApplyDialog({
             base: name,
             reason: reasonText(asString(b.reason_code), null) ?? '',
           });
-        });
+        }));
       }
       case 'resources': {
         const n = asCount(d.resources) ?? 0;
@@ -1180,6 +1201,7 @@ export function PartnerPackApplyDialog({
               </span>
             </div>
           )}
+          {finished && <SearchIndexNote />}
         </div>
       ) : (
         <>
@@ -1261,6 +1283,22 @@ export function PartnerPackApplyDialog({
                   </Badge>
                 </Row>
               )}
+
+              {plan.built_in_for_country && (
+                <Row
+                  icon={<Landmark size={15} />}
+                  label={t('modules.pack_built_in', { defaultValue: 'Built in for this country' })}
+                >
+                  <BuiltInForCountry facts={plan.built_in_for_country} />
+                </Row>
+              )}
+
+              <Row
+                icon={<Boxes size={15} />}
+                label={t('modules.pack_search_index', { defaultValue: 'AI search index' })}
+              >
+                <SearchIndexNote inline />
+              </Row>
 
               {/* The country's cost databases, offered before anything loads. */}
               <Row
@@ -1489,3 +1527,109 @@ export function PartnerPackApplyDialog({
 }
 
 export default PartnerPackApplyDialog;
+/**
+ * VAT, public holidays, e-invoicing and payment terms the platform already
+ * applies to projects located in the pack's country. They come from core
+ * registries keyed by the project country, not from the pack, so the preview
+ * says so instead of listing the pack's tax template as if it installed tax.
+ */
+function BuiltInForCountry({ facts }: { facts: CountryBuiltIns }) {
+  const { t } = useTranslation();
+  const lines: string[] = [];
+  if (facts.vat) {
+    const rates = (['standard', 'reduced', 'zero'] as const)
+      .map((k) => facts.vat?.[k])
+      .filter((v): v is string => typeof v === 'string')
+      .map((v) => `${v}%`);
+    if (rates.length > 0) {
+      lines.push(t('modules.pack_built_in_vat', { defaultValue: 'VAT {{rates}}', rates: rates.join(' / ') }));
+    }
+  }
+  if (facts.holidays) {
+    lines.push(
+      t('modules.pack_built_in_holidays', {
+        defaultValue: '{{holidays}} public holidays in {{year}}',
+        holidays: facts.holidays.count,
+        year: facts.holidays.year,
+      }),
+    );
+  }
+  if (facts.einvoice) {
+    lines.push(
+      t('modules.pack_built_in_einvoice', {
+        defaultValue: 'E-invoicing: {{platform}}',
+        platform: facts.einvoice.platform,
+      }),
+    );
+  }
+  if (facts.payment_terms && facts.payment_terms.length > 0) {
+    lines.push(
+      t('modules.pack_built_in_payment', {
+        defaultValue: 'Statutory payment terms: {{terms}}',
+        terms: facts.payment_terms.map((p) => p.statute || p.code).join('; '),
+      }),
+    );
+  }
+  return (
+    <div className="space-y-1" data-testid="pack-built-in">
+      {!facts.vat && (
+        // The core tax table does not cover every pack country yet; saying
+        // nothing about VAT here reads as if it were handled.
+        <p data-testid="pack-built-in-no-vat">
+          {t('modules.pack_built_in_no_vat', {
+            defaultValue: "No VAT rates for {{country}} yet. Set the tax line in each estimate's markups.",
+            country: facts.country,
+          })}
+        </p>
+      )}
+      {lines.length > 0 && (
+        <ul className="space-y-0.5">
+          {lines.map((l) => (
+            <li key={l}>{l}</li>
+          ))}
+        </ul>
+      )}
+      <p className="text-xs text-content-tertiary">
+        {t('modules.pack_built_in_note', {
+          defaultValue:
+            'These come with the platform for projects located in {{country}}, with or without this pack. The pack does not change them.',
+          country: facts.country,
+        })}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The semantic search index is deliberately not built during a pack install:
+ * the cost import alone peaks around 1.1 GB on top of the app, and embedding
+ * 55,000 items straight after it would push a 3 GB server past its floor. It
+ * is built on demand from Databases & Resources. The install says so rather
+ * than implying both databases were set up.
+ */
+function SearchIndexNote({ inline = false }: { inline?: boolean }) {
+  const { t } = useTranslation();
+  const text = t('modules.pack_search_index_note', {
+    defaultValue:
+      'Not built during installation, to keep memory use low. Build it later under Databases & Resources when you want AI-assisted matching.',
+  });
+  const link = (
+    <a href="/setup/databases" className="ms-1 font-medium text-oe-blue hover:underline">
+      {t('modules.pack_search_index_link', { defaultValue: 'Open Databases & Resources' })}
+    </a>
+  );
+  if (inline) {
+    return (
+      <span className="text-content-secondary" data-testid="pack-search-index-note">
+        {text}
+        {link}
+      </span>
+    );
+  }
+  return (
+    <p className="mt-2 text-xs text-content-tertiary" data-testid="pack-search-index-note">
+      {text}
+      {link}
+    </p>
+  );
+}

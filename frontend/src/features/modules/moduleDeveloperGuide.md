@@ -8,9 +8,9 @@ There are two ways to extend the platform. A **partner pack** is a code-free pre
 
 ## Partner Packs
 
-A partner pack is a small, code-free preset bundle for a country, region or company. It carries presets only: branding (logo and colours), a default locale, currency and tax defaults, which modules to show or hide, an optional onboarding script, and references to cost-database regions and validation rule packs that already exist in the core. Anyone can build one, share it, and let an admin activate it in one click from the Partner Packs tab.
+A partner pack is a small, code-free preset bundle for a country, region or company. It carries presets only: branding (logo and colours), a default locale and currency, which modules to show or hide, an optional onboarding script, and references to cost-database regions and validation rule packs that already exist in the core. Anyone can build one, share it, and let an admin activate it in one click from the Partner Packs tab.
 
-> A pack switches on what already exists. It can set a default currency and tax template, default and additional languages, which modules are visible, co-branding, an onboarding script, and which built-in CWICR regions and validation rule packs to turn on.
+> A pack switches on what already exists. It can set a default currency, default and additional languages, which modules are visible, co-branding, an onboarding script, and which built-in CWICR regions and validation rule packs to turn on.
 
 > A pack ships no code and no data. It is declarative only and is never executed. It cannot ship new validation rule classes or its own catalog data; it only references rule packs and cost regions the core already provides. If you need new screens, endpoints, tables or rules, build a module instead.
 
@@ -44,7 +44,7 @@ Prefer to author it by hand? Just create a folder with a `manifest.json`. The mi
   "additional_locales": {},
   "cwicr_regions": [],
   "default_currency": "GBP",
-  "default_tax_template": "uk_vat",
+  "default_tax_template": null,
   "validation_rule_packs": [],
   "default_modules": [],
   "hidden_modules": [],

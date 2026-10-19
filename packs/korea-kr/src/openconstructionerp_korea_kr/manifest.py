@@ -25,7 +25,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-ko-seoul",
     ],
     default_currency="KRW",
-    default_tax_template="kr_vat_10",
+    default_tax_template=None,
     default_methodology="south_korea",
     validation_rule_packs=[
         "kbc_building_code",

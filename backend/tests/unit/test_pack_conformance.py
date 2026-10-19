@@ -789,20 +789,39 @@ def test_a_pack_describes_cost_data_by_category_not_by_publisher(slug: str) -> N
     assert hits == [], f"{slug} names a commercial cost-data publisher in {hits}"
 
 
+#: Tax template ids the platform can resolve. Empty on purpose: there is no
+#: registry of tax templates anywhere. VAT, holidays, e-invoicing and payment
+#: terms come from the core registries by the project's country, and the
+#: activation preview shows those values (``built_in_for_country``). A pack
+#: that names a template here names nothing.
+_RESOLVABLE_TAX_TEMPLATES: frozenset[str] = frozenset()
+
+
 @pytest.mark.parametrize("slug", SLUGS)
-def test_the_tax_template_agrees_with_the_rate_beside_it(slug: str) -> None:
-    """The Russian pack said ``ru_nds_20`` next to a 22% rate."""
-    manifest = _manifests()[slug]
-    template = manifest.default_tax_template or ""
-    digits = re.findall(r"_(\d+(?:_\d+)?)$", template)
-    rates = {
-        manifest.metadata.get(k)
-        for k in ("vat_standard_rate", "vat_standard_rate_pct", "vat_construction_rate", "vat_reduced_rate")
-    } - {None}
-    if not digits or not rates:
+def test_a_pack_names_no_tax_template_the_platform_cannot_resolve(slug: str) -> None:
+    """Forty-five packs used to name one, such as ``de_vat_19`` or ``sa_vat_15``.
+
+    The cards printed the id beside a tax icon and the preview listed it, so
+    an admin read it as a tax setting the pack installs. Nothing ever read it.
+    """
+    template = _manifests()[slug].default_tax_template
+    assert template is None or template in _RESOLVABLE_TAX_TEMPLATES, (
+        f"{slug} names the tax template {template!r}, which nothing in the platform resolves"
+    )
+
+
+_TAX_TEMPLATE_VERB = re.compile(r"\bset_tax_template\b")
+
+
+@pytest.mark.parametrize("slug", SLUGS)
+def test_an_onboarding_script_does_not_set_a_tax_template(slug: str) -> None:
+    """The same dangling id, written a second time as an onboarding action."""
+    script = _package_dir(slug) / "onboarding.yaml"
+    if not script.is_file():
         return
-    value = float(digits[0].replace("_", "."))
-    assert value in {float(r) for r in rates}, f"{slug} names {template!r} beside the rates {sorted(rates)}"
+    assert not _TAX_TEMPLATE_VERB.search(script.read_text(encoding="utf-8")), (
+        f"{slug}'s onboarding script sets a tax template, and no tax template exists"
+    )
 
 
 @pytest.mark.parametrize("slug", SLUGS)

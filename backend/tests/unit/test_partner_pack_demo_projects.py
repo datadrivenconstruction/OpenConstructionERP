@@ -182,9 +182,21 @@ def test_mapped_demo_ids_resolve_to_templates() -> None:
 #: one, a Jeddah hospital in the Turkish one), in another currency and
 #: validated as another country, which is the opposite of the in-market
 #: guarantee this test exists for. turkey-tr-mep is derived from turkey-tr and
-#: is in the same market, so it has the same one demo.
+#: is in the same market, so it has the same one demo. The two US state packs
+#: are markets of one state: California installs its Sacramento office and
+#: Texas its Houston medical centre, and neither is padded with the Denver
+#: office any more.
 PACKS_WITH_ONE_IN_MARKET_DEMO = frozenset(
-    {"japan-jp", "korea-kr", "poland-pl", "spain-es", "turkey-tr", "turkey-tr-mep"}
+    {
+        "japan-jp",
+        "korea-kr",
+        "poland-pl",
+        "spain-es",
+        "turkey-tr",
+        "turkey-tr-mep",
+        "us-california",
+        "us-texas",
+    }
 )
 
 

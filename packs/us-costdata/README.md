@@ -7,7 +7,7 @@ city cost index structure for localizing rates per metro.
 
 ## What this pack enables
 
-- Currency USD and the US state sales tax template
+- Currency USD. The pack does not set sales tax; the tax line is set on the estimate's markups
 - en-US locale with US construction vocabulary (bid, RFI, punch list,
   submittal, sub, GC, CM at Risk) and US spellings for the imperial units
   (sq ft, lin ft, cu yd, gal, ton). Metric units keep their own names: the

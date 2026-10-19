@@ -29,7 +29,7 @@ the standard 25 percent rate.
 
 ## What this pack enables
 
-- **Currency NOK**, the `no_mva_25` tax template and the `norway` estimating
+- **Currency NOK** (the pack does not set VAT) and the `norway` estimating
   methodology, with a Norwegian and English interface.
 - **Three validation rule packs** covering the NS 3420 specification standard,
   NS 3451 classification, and NS 8405 contract conditions. These are reference

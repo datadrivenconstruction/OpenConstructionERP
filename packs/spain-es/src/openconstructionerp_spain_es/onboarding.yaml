@@ -36,6 +36,5 @@ steps:
       label: "Create my Spain workspace / Crear mi espacio de trabajo Espana"
       apply:
         - set_default_currency: EUR
-        - set_tax_template: es_iva_21
         - preload_cwicr_regions:
             - cwicr-es-madrid

@@ -67,7 +67,6 @@ steps:
       label: "Создать рабочее пространство / Create my Russian workspace"
       apply:
         - set_default_currency: RUB
-        - set_tax_template: ru_nds_22
         - enable_rule_packs:
             - ru_gesn_fer_kody
             - ru_nakladnye_smetnaya_pribyl

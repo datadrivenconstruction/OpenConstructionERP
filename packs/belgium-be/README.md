@@ -18,14 +18,14 @@ conforming to the standard template.
 Two VAT rates matter for construction. New-build work carries the standard 21
 percent. Renovation of a dwelling older than ten years carries the reduced 6
 percent rate, and the distinction between the two is a significant part of
-project economics. The pack sets the `be_btw_21` tax template for new-build.
+project economics. The pack does not set BTW.
 
 Energy performance is regulated through the EPB/PEB framework, and structural
 design follows the NBN EN Eurocodes (Belgian adoption).
 
 ## What this pack enables
 
-- **Currency EUR** with the `be_btw_21` tax template and the `belgium`
+- **Currency EUR** (the pack does not set BTW) and the `belgium`
   estimating methodology, defaulting to Dutch with French support
 - **DIN 276 rule set** for classification validation, as the nearest supported
   hierarchy Belgian element-based bills map onto

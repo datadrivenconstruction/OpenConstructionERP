@@ -71,5 +71,4 @@ steps:
       label: "Create my Australia workspace"
       apply:
         - set_default_currency: AUD
-        - set_tax_template: au_gst_10
         - enable_rule_packs: [ncc_2022, as_1684_timber, as_3600_concrete, as_4100_steel, as_4000_contracts, rawlinsons_benchmarks]

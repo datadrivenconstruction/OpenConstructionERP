@@ -19,8 +19,10 @@ Design decisions (confirmed with the product owner 2026-05-29):
     implement under a different identifier, the plan says so - unless the pack
     has since declared that identifier in ``validation_rule_sets``, in which
     case the rules already run and there is nothing to report.
-  * Currency / locale / tax / CWICR are recorded as the new defaults and NEVER
-    re-denominate or mutate existing projects' data.
+  * Currency / locale / CWICR are recorded as the new defaults and NEVER
+    re-denominate or mutate existing projects' data. Tax is not set by a pack at
+    all: VAT, holidays, e-invoicing and payment terms come from core registries
+    by project country, and the plan reports them as built in.
 
 The headline effect of an apply is that ``get_active_pack`` starts returning the
 chosen pack (co-branding, logo, colours, shipped locales) immediately - the
@@ -356,6 +358,21 @@ def _module_exists(name: str) -> bool:
         return False
 
 
+def _unloaded_modules(names: Sequence[str]) -> list[str]:
+    """Those of ``names`` the loader has not loaded and enabled right now.
+
+    A module registers its own rule sets in its ``on_startup``, so a rule set a
+    pack names can be missing from the registry only because the module that
+    owns it is switched off. Answers ``[]`` when the loader cannot be read, so
+    a failure here leaves the strict rule-set check exactly as strict as before.
+    """
+    try:
+        loaded = module_loader.loaded_modules
+        return [n for n in names if n not in loaded or not module_loader.is_enabled(n)]
+    except Exception:  # noqa: BLE001 - fall back to the strict refusal
+        return []
+
+
 def _pack_demo_info(slug: str) -> dict[str, Any] | None:
     """The flagship country demo project this pack installs, if any.
 
@@ -380,7 +397,12 @@ def _pack_demo_info(slug: str) -> dict[str, Any] | None:
     return info
 
 
-def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str, Any]:
+def _plan(
+    m: PartnerPackManifest,
+    *,
+    strict_rule_sets: bool = True,
+    allow_pending_modules: bool = True,
+) -> dict[str, Any]:
     """Compute the field-by-field effect plan for applying pack ``m`` (no mutation).
 
     Args:
@@ -388,13 +410,20 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
         strict_rule_sets: Whether an unresolvable ``validation_rule_sets``
             entry raises. Left on for both preview and apply so the admin sees
             the refusal before the button as well as after it.
+        allow_pending_modules: Whether an unresolvable entry is held as
+            pending, rather than refused, while a module this pack switches on
+            is off. Such a module registers its rule sets when it starts, so
+            the set is missing only until the apply switches it on. The apply
+            plans again with this off once its modules are on.
 
     Returns:
-        The effect plan.
+        The effect plan. ``rule_sets_pending_modules`` lists the declared sets
+        held as pending.
 
     Raises:
         UnknownRuleSetError: When ``strict_rule_sets`` and the pack names a
-            rule set the engine does not register.
+            rule set the engine does not register, and no module this pack
+            switches on is off (or ``allow_pending_modules`` is false).
     """
     default_modules = list(m.default_modules or [])
     hidden_modules = list(m.hidden_modules or [])
@@ -411,7 +440,21 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
     # A near miss is only worth reporting while the pack has not yet declared
     # the engine identifier next to it. Once it has, the rules run and the
     # document id is doing its own job.
-    rule_sets = resolve_declared_rule_sets(m, strict=strict_rule_sets)
+    # The eleven-areas pack names fifteen rule sets, each registered by a module
+    # the same pack switches on. With one of those modules off, a strict check
+    # here refused the preview and the apply with a 409, and the apply is the
+    # very action that switches the module on. So while such a module is off,
+    # the sets the registry does not know yet are held as pending, and the
+    # apply checks them strictly once the modules are on.
+    pending_modules = _unloaded_modules(to_enable) if allow_pending_modules else []
+    rule_sets_pending: list[str] = []
+    try:
+        rule_sets = resolve_declared_rule_sets(m, strict=strict_rule_sets)
+    except UnknownRuleSetError:
+        if not (pending_modules and known):
+            raise
+        rule_sets = resolve_declared_rule_sets(m, strict=False)
+        rule_sets_pending = [r for r in (m.validation_rule_sets or []) if r not in rule_sets]
     near_misses = {
         r: match for r in rules_docs_only if (match := _near_miss_rule_set(r, known)) and match not in rule_sets
     }
@@ -437,6 +480,13 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
             "validation_rule_sets if those rules should run, and read them first, because some of "
             "them are error severity and will fail bills of quantities that pass today."
         )
+    if rule_sets_pending:
+        warnings.append(
+            f"Validation rule set(s) {', '.join(rule_sets_pending)} are not registered yet. Modules "
+            f"register their own rule sets when they start, and {len(pending_modules)} module(s) this "
+            f"pack switches on are off now ({', '.join(pending_modules)}). The rule sets are checked "
+            "again once those modules are on, and applying stops if one is still missing."
+        )
     if rule_sets:
         counts = _rule_set_severities(rule_sets)
         n_errors = sum(c.get("error", 0) for c in counts.values())
@@ -451,9 +501,27 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
         warnings.append(
             f"Default currency {m.default_currency} applies to NEW projects only; existing projects keep their currency."
         )
-    if m.default_tax_template:
+    # The pack does not set tax. VAT, public holidays, e-invoicing and the
+    # statutory payment terms come from core registries keyed by the project's
+    # country, pack or no pack, so the plan names them as built in and carries
+    # the values those registries hold (``built_in_for_country``) instead of
+    # listing ``default_tax_template`` as if applying the pack installed it.
+    from app.core.partner_pack.country_builtins import country_builtins
+
+    built_in = country_builtins(m.market_country_code)
+    if built_in and built_in.get("vat"):
         warnings.append(
-            f"Default tax template '{m.default_tax_template}' is recorded for reference (no automatic tax resolver yet)."
+            f"Tax, public holidays, e-invoicing and payment terms are built into the platform for "
+            f"{built_in['country']} and apply to projects located there, with or without this pack. "
+            "The pack does not change them."
+        )
+    elif built_in:
+        # The core tax table does not cover every pack country yet. Saying tax
+        # is built in for one it does not cover is the claim this replaced.
+        warnings.append(
+            f"The platform has no VAT rates for {built_in['country']} yet, and the pack does not add "
+            "any. Set the tax line in each estimate's markups. Public holidays, e-invoicing and "
+            "payment terms shown here are built in and the pack does not change them."
         )
     if m.default_methodology:
         warnings.append(
@@ -492,10 +560,12 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
         "rule_packs_documentation_only": rules_docs_only,
         "rule_packs_engine_equivalent": near_misses,
         "rule_sets_enabled": rule_sets,
+        "rule_sets_pending_modules": rule_sets_pending,
         "rule_sets_severities": _rule_set_severities(rule_sets),
         "cwicr_regions": list(m.cwicr_regions or []),
         "cost_bases": cost_bases,
         "default_tax_template": m.default_tax_template,
+        "built_in_for_country": built_in,
         "default_methodology": m.default_methodology,
         "default_company_profile": m.default_company_profile,
         "demo_project": _pack_demo_info(m.slug),
@@ -555,7 +625,10 @@ async def apply_pack(
         ValueError: If the pack is not installed.
         UnknownRuleSetError: If the pack declares a validation rule set the
             engine does not register. Nothing is applied in that case: a pack
-            whose rules would silently not run is not a pack we install.
+            whose rules would silently not run is not a pack we install. The
+            one exception is a set owned by a module this pack switches on
+            while that module was off: the module is enabled first, the check
+            runs again, and if it still refuses the module stays enabled.
         PackStateWriteError: If the applied-pack record could not be written.
             The modules this call enabled stay enabled - enabling is additive
             and safe - but the pack is NOT active, so this must not come back
@@ -591,6 +664,16 @@ async def apply_pack(
                 effects["modules_failed"].append({"name": name, "action": "disable", "error": str(exc)})
     else:
         skipped_disables = list(plan["modules_to_disable"])
+
+    # A rule set held as pending belongs to a module that was off. The modules
+    # are on now and their on_startup has registered what they own, so plan
+    # again with nothing held: a set that is still missing refuses the apply
+    # here, before anything is recorded as applied. The modules this call
+    # enabled stay enabled, as with PackStateWriteError below.
+    if plan["rule_sets_pending_modules"]:
+        pending = list(plan["rule_sets_pending_modules"])
+        plan = _plan(m, allow_pending_modules=False)
+        logger.info("Partner-pack apply: %s rule set(s) %s registered once its modules were on", m.slug, pending)
 
     # Install the pack's demo projects (idempotent, fail-soft): every id the manifest pins, or the
     # flagship country demo of a pack that pins none. Each project has a session of its own so a

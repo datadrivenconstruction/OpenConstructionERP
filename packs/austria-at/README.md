@@ -37,7 +37,7 @@ USt (Umsatzsteuer) is 20 percent at the standard rate. A reduced rate of
 
 ## What this pack enables
 
-- **Currency EUR**, the `at_ust_20` tax template and the `austria` estimating
+- **Currency EUR** (the pack does not set VAT) and the `austria` estimating
   methodology, with a German and English interface.
 - **Three validation rule packs** covering OENORM B 2061 tendering and pricing,
   OENORM B 1801 cost planning, and OENORM A 2063 data exchange.

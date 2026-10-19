@@ -35,7 +35,7 @@ can qualify for the super-reduced 4% rate.
 
 ## What this pack enables
 
-- **Currency EUR**, the `es_iva_21` tax template and the `spain` estimating
+- **Currency EUR** (the pack does not set VAT) and the `spain` estimating
   methodology, with a Spanish interface.
 - **One cost catalogue**, `cwicr-es-madrid`, resolving to ES_MADRID.
 - **A three-step onboarding wizard** that collects the company profile and

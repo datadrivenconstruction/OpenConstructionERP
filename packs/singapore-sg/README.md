@@ -17,12 +17,11 @@ Construction contracts typically follow SIA (Singapore Institute of Architects)
 conditions for private work or PSSCOC (Public Sector Standard Conditions of
 Contract) for government projects. Both are well defined and widely understood.
 
-GST at 9 percent applies to construction services. The pack sets the `sg_gst_9`
-tax template.
+GST at 9 percent applies to construction services. The pack does not set the rate.
 
 ## What this pack enables
 
-- **Currency SGD** with the `sg_gst_9` tax template and the `singapore` estimating
+- **Currency SGD** (the pack does not set GST) and the `singapore` estimating
   methodology
 - **NRM rule set** for measurement validation, aligned with Singapore QS practice
 - **Two demo projects**: an office building and a residential development, both

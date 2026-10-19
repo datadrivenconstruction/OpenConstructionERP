@@ -18,8 +18,7 @@ which covers both.
 Construction VAT in Ireland is 13.5 percent on building services, not the
 standard 23 percent that applies to most goods. The distinction matters in
 estimating because every line in a bill carries the reduced rate and the
-professional fee carries the standard rate. The pack sets the `ie_vat_13_5`
-tax template for construction works.
+professional fee carries the standard rate. The pack does not set VAT.
 
 Contracts follow either the RIAI forms (Yellow or Blue book) for private work
 or the PWC (Public Works Contract) suite administered by the Government
@@ -28,7 +27,7 @@ Document) series define the building control framework.
 
 ## What this pack enables
 
-- **Currency EUR** with the `ie_vat_13_5` tax template and the `ireland`
+- **Currency EUR** (the pack does not set VAT) and the `ireland`
   estimating methodology
 - **NRM rule set** for measurement validation
 - **Two demo projects**: an office building in Dublin and a residential

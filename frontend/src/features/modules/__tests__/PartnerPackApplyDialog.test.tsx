@@ -586,3 +586,104 @@ describe('who may install', () => {
     expect(button.disabled).toBe(false);
   });
 });
+
+/* ── The install says what it did not do ───────────────────────────────── */
+
+describe('a pack install is honest about prices, tax and the search index', () => {
+  it('an offline cost step says the workspace has no prices and why the base failed', async () => {
+    streamMock.fullInstallPackStream.mockImplementation(
+      streamOf(
+        [
+          { step: 'apply_pack', status: 'ok', detail: { rule_sets: [] } },
+          {
+            step: 'cost_db',
+            status: 'error',
+            detail: {
+              prices_loaded: false,
+              reason_code: 'cost_base_not_loaded',
+              bases: [
+                {
+                  slug: 'cwicr-de-berlin',
+                  db_id: 'DE_BERLIN',
+                  status: 'error',
+                  reason_code: 'download_failed',
+                  error: '404: GitHub download failed',
+                },
+              ],
+            },
+          },
+        ],
+        false,
+      ),
+    );
+    renderDialog();
+    activate();
+
+    await screen.findByText(/this workspace has no prices yet/);
+    expect(screen.getByText(/DE_BERLIN: not loaded, it could not be downloaded/)).toBeTruthy();
+    // The failed step keeps its own retry.
+    expect(screen.getAllByRole('button', { name: /Retry/ }).length).toBeGreaterThan(0);
+  });
+
+  it('the preview shows tax, holidays, e-invoicing and payment terms as built in, not installed', () => {
+    packMock.useApplyPreview.mockReturnValue({
+      data: preview({
+        built_in_for_country: {
+          country: 'DE',
+          vat: { standard: '19', reduced: '7', zero: '0' },
+          holidays: { year: 2026, count: 9 },
+          einvoice: { platform: 'XRechnung / Peppol', label: 'Germany' },
+          payment_terms: [{ code: 'de_vob_b_abschlag', statute: 'VOB/B § 16 Abs. 1', final_date_days: 21 }],
+        },
+      }),
+      isLoading: false,
+      isError: false,
+    });
+    renderDialog();
+
+    const block = screen.getByTestId('pack-built-in');
+    expect(within(block).getByText('VAT 19% / 7% / 0%')).toBeTruthy();
+    expect(within(block).getByText('9 public holidays in 2026')).toBeTruthy();
+    expect(within(block).getByText('E-invoicing: XRechnung / Peppol')).toBeTruthy();
+    expect(within(block).getByText(/Statutory payment terms: VOB\/B § 16 Abs. 1/)).toBeTruthy();
+    expect(within(block).getByText(/with or without this pack/)).toBeTruthy();
+  });
+
+  it('a country the tax table does not cover yet says so instead of showing no VAT line', () => {
+    packMock.useApplyPreview.mockReturnValue({
+      data: preview({
+        built_in_for_country: {
+          country: 'FR',
+          vat: null,
+          holidays: { year: 2026, count: 11 },
+          einvoice: null,
+          payment_terms: null,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+    });
+    renderDialog();
+
+    const block = screen.getByTestId('pack-built-in');
+    expect(within(block).getByTestId('pack-built-in-no-vat').textContent).toMatch(/No VAT rates for FR yet/);
+    expect(within(block).queryByText(/^VAT /)).toBeNull();
+  });
+
+  it('the preview says the search index is not built during installation', () => {
+    renderDialog();
+    const note = screen.getByTestId('pack-search-index-note');
+    expect(note.textContent).toMatch(/Not built during installation/);
+    expect(within(note).getByRole('link').getAttribute('href')).toBe('/setup/databases');
+  });
+
+  it('a pack with no single market shows no built-in block', () => {
+    packMock.useApplyPreview.mockReturnValue({
+      data: preview({ built_in_for_country: null }),
+      isLoading: false,
+      isError: false,
+    });
+    renderDialog();
+    expect(screen.queryByTestId('pack-built-in')).toBeNull();
+  });
+});

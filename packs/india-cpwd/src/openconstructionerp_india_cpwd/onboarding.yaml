@@ -74,7 +74,6 @@ steps:
       label: "Create my India workspace / मेरा कार्यक्षेत्र बनाएं"
       apply:
         - set_default_currency: INR
-        - set_tax_template: in_gst_18
         - enable_rule_packs:
             - cpwd_specs_2019
             - dsr_delhi_rates

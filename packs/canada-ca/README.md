@@ -36,7 +36,7 @@ Services Tax (GST) at 5% applies everywhere. Ontario, New Brunswick, Nova
 Scotia, Newfoundland and PEI harmonize it into HST at 13% or 15%. Quebec
 adds its own QST at 9.975%. British Columbia charges a separate PST at 7%.
 Alberta, Yukon, Northwest Territories and Nunavut charge only the federal GST.
-The pack sets the `ca_gst_pst` tax template and lets the onboarding wizard
+The pack does not set sales tax (the tax line is set on the estimate's markups) and lets the onboarding wizard
 adjust the provincial rate.
 
 Units are metric by code and by regulation (the Weights and Measures Act
@@ -45,7 +45,7 @@ speech. The pack uses metric throughout.
 
 ## What this pack enables
 
-- **Currency CAD**, the `ca_gst_pst` tax template and the `canada` estimating
+- **Currency CAD** (the pack does not set sales tax; the tax line is set on the estimate's markups) and the `canada` estimating
   methodology, with an English and French interface.
 - **One engine rule set**, `masterformat`. The MasterFormat rules check that
   every priced line carries a valid division reference and that the hierarchy

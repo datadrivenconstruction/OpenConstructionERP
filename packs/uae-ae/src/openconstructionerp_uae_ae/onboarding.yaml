@@ -34,7 +34,6 @@ steps:
       label: "Create my UAE workspace"
       apply:
         - set_default_currency: AED
-        - set_tax_template: ae_vat_5
         - enable_rule_sets:
             - masterformat
         - preload_cwicr_regions_from: emirate

@@ -452,7 +452,9 @@ def test_the_standard_rate_is_one_number_everywhere(manifest, onboarding: dict) 
     assert get_vat_rate("TR", "reduced") * 100 == Decimal(manifest.metadata["vat_reduced_rate"])
     field = next(f for s in onboarding["steps"] for f in s.get("fields", []) if f["key"] == "default_kdv_rate")
     assert field["default"].startswith(f"{standard}%")
-    assert manifest.default_tax_template.endswith(f"_{standard}")
+    # No tax template: nothing in the platform resolves one, and the rate above
+    # is the one the platform applies (test_pack_conformance pins the rest).
+    assert manifest.default_tax_template is None
 
 
 # ── The onboarding script ────────────────────────────────────────────────────
@@ -475,8 +477,8 @@ def _apply(onboarding: dict) -> list[dict]:
 
 def test_every_apply_action_names_something_that_exists(manifest, onboarding: dict) -> None:
     known_verbs = {
+        # set_tax_template is not here: no tax template exists for it to set.
         "set_default_currency",
-        "set_tax_template",
         "preload_cwicr_regions",
         "enable_rule_packs",
         "conditionally_enable_rule_pack",
@@ -488,8 +490,6 @@ def test_every_apply_action_names_something_that_exists(manifest, onboarding: di
         assert verb in known_verbs, verb
         if verb == "set_default_currency":
             assert value == manifest.default_currency
-        elif verb == "set_tax_template":
-            assert value == manifest.default_tax_template
         elif verb == "preload_cwicr_regions":
             assert value == list(manifest.cwicr_regions)
         elif verb == "enable_rule_packs":

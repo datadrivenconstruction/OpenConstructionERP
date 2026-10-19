@@ -49,7 +49,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-es-mexico",
     ],
     default_currency="MXN",
-    default_tax_template="mx_iva_16",
+    default_tax_template=None,
     default_methodology="mexico",
     # Built-in engine rule sets: the Mexican rules plus universal BOQ quality.
     # These are what actually run; a project created under this pack inherits

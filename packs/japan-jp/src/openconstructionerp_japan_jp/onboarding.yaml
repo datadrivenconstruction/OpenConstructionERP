@@ -36,4 +36,3 @@ steps:
       label: "Create my Japan workspace / \u65e5\u672c\u306e\u30ef\u30fc\u30af\u30b9\u30da\u30fc\u30b9\u3092\u4f5c\u6210"
       apply:
         - set_default_currency: JPY
-        - set_tax_template: jp_consumption_10

@@ -42,7 +42,6 @@ steps:
       label: "Opret mit arbejdsomraade / Create my workspace"
       apply:
         - set_default_currency: DKK
-        - set_tax_template: dk_moms_25
         - enable_rule_packs:
             - vs_specification
             - sfb_ccs_classification

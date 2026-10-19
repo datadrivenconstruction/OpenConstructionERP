@@ -31,7 +31,7 @@ the standard 25 percent rate.
 
 ## What this pack enables
 
-- **Currency SEK**, the `se_moms_25` tax template and the `sweden` estimating
+- **Currency SEK** (the pack does not set VAT) and the `sweden` estimating
   methodology, with a Swedish and English interface.
 - **Three validation rule packs** covering the AMA specification system, BSAB
   classification, and AB 04 contract conditions. These are reference material

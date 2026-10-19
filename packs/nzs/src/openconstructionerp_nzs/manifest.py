@@ -27,7 +27,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-eng-auckland",
     ],
     default_currency="NZD",
-    default_tax_template="nz_gst_15",
+    default_tax_template=None,
     # Was absent, which is not the same as deliberately empty: a project made
     # under this pack opened on the flat international default while the pack
     # itself declared NZD, the NZ cost regions and the NZ standards.

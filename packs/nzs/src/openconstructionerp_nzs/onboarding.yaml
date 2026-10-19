@@ -68,5 +68,4 @@ steps:
       label: "Create my New Zealand workspace"
       apply:
         - set_default_currency: NZD
-        - set_tax_template: nz_gst_15
         - enable_rule_packs: [nzbc_acceptable_solutions, nzs_3604_timber, nzs_3910_2023_contracts, rawlinsons_nz_benchmarks]

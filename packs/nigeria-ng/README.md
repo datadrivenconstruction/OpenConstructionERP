@@ -19,12 +19,11 @@ Bureau of Public Procurement. The National Building Code 2006 sets the regulator
 framework. Professional practice is governed by NIQS for quantity surveyors, COREN
 for engineers and ARCON for architects.
 
-VAT on construction services is 7.5 percent. The pack sets the `ng_vat_7_5` tax
-template.
+VAT on construction services is 7.5 percent. The pack does not set the rate.
 
 ## What this pack enables
 
-- **Currency NGN** with the `ng_vat_7_5` tax template and the `nigeria`
+- **Currency NGN** (the pack does not set VAT) and the `nigeria`
   estimating methodology
 - **NRM rule set** for measurement validation, aligned with Nigerian BESMM/QS
   practice

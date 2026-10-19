@@ -7,7 +7,7 @@ receipt.
 
 ## What this pack enables
 
-- Currency BRL and the `br_iss_municipal` tax template (ISS is collected by
+- Currency BRL. The pack does not set tax; the tax line is set on the estimate's markups (ISS is collected by
   the municipality, at a rate between 2 and 5 percent)
 - Portuguese locale overrides (`pt-BR`)
 - Eight validation rule packs: `sinapi_cost_db`, `nbr_12721`,

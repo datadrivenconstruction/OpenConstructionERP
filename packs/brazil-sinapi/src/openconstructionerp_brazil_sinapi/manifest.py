@@ -70,7 +70,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-pt-saopaulo",
     ],
     default_currency="BRL",
-    default_tax_template="br_iss_municipal",
+    default_tax_template=None,
     # The Brazilian cascade the catalogue already builds from the BR regional
     # markup stack: BDI, and the federal and municipal levies underneath it.
     # This field was empty, which is not the same as absent. An empty field

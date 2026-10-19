@@ -7,7 +7,7 @@ ISO 19650 information management and the HOAI fee phases.
 
 ## What this pack enables
 
-- Currency EUR, the `de_vat_19` tax template and the Germany estimating
+- Currency EUR (the pack does not set VAT) and the Germany estimating
   methodology
 - German locale overrides on top of the core `de` strings
 - Seven validation rule packs: `din_276`, `gaeb_x83_x86`, `vob_2019`,

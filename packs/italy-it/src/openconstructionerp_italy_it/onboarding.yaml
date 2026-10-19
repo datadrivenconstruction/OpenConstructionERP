@@ -36,7 +36,6 @@ steps:
       label: "Create my Italy workspace / Crea il mio spazio di lavoro Italia"
       apply:
         - set_default_currency: EUR
-        - set_tax_template: it_iva_22
         - preload_cwicr_regions:
             - cwicr-it-rome
             - cwicr-it-toscana

@@ -7,7 +7,7 @@ sides of the Atlantic.
 
 ## What this pack enables
 
-- Currency EUR and the English locale; no tax template, because the pack
+- Currency EUR and the English locale; the pack sets no tax, because it
   crosses jurisdictions and the tax regime comes from wherever the plant is
   built
 - Eight validation rule packs: `iec_61400_wind`, `iec_61400_wind_full`,

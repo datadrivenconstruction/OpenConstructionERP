@@ -129,7 +129,6 @@ steps:
       label: "Create my US workspace"
       apply:
         - { set_default_currency: USD }
-        - { set_tax_template: us_state_sales_tax }
         - enable_rule_packs:
             - masterformat_2020
             - uniformat_ii_e1557

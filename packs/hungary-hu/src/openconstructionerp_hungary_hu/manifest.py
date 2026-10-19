@@ -40,7 +40,7 @@ MANIFEST = PartnerPackManifest(
     # Documentation only, the way every other pack's tax template is: there
     # is no tax resolver behind this field yet. The rate itself lives in the
     # methodology template, which does drive the cascade.
-    default_tax_template="hu_afa_27",
+    default_tax_template=None,
     default_methodology="hungary",
     validation_rule_packs=[
         # The two item orders, both read out of real Hungarian workbooks.

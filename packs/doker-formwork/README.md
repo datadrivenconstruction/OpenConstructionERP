@@ -13,7 +13,7 @@ When installed alongside `openconstructionerp`, this pack:
   Bewehrung, Biegeliste, Sichtbeton-Klassen SB1–SB4 …)
 - Preloads three CWICR cost regions — Berlin (national average),
   München (Bavaria / Doker HQ), Düsseldorf (NRW)
-- Sets `de_vat_19` (19 % VAT) as the default tax template
+- German VAT (19 %) is not set by the pack
 - Enables **eight** validation rule packs:
   - `din_18218_formwork_pressure` — fresh-concrete pressure σ_h_max
     against pour rate v (m/h), consistency class F1–F6/SCC, concrete

@@ -30,7 +30,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-usa-usd",
     ],
     default_currency="USD",
-    default_tax_template="us_state_sales_tax",
+    default_tax_template=None,
     default_methodology="united_states",
     validation_rule_packs=[
         "masterformat_2020",

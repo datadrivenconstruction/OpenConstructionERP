@@ -27,7 +27,7 @@ MANIFEST = PartnerPackManifest(
     # listed on the activation dialog and then skipped at install.
     cwicr_regions=[],
     default_currency="DKK",
-    default_tax_template="dk_moms_25",
+    default_tax_template=None,
     default_methodology="denmark",
     validation_rule_packs=[
         "vs_specification",
