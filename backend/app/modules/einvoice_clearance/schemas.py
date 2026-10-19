@@ -334,6 +334,9 @@ class SubmissionResponse(BaseModel):
     rejection_message: str = ""
     message: str = ""
     findings: list[ClearanceFinding] = Field(default_factory=list)
+    # The platform took the document in and has not decided yet; the document
+    # stays submitted until a refresh reads the verdict. Added later.
+    pending: bool = False
 
 
 class EventResponse(BaseModel):
@@ -411,6 +414,9 @@ class AdapterResponse(BaseModel):
     key: str
     label: str
     countries: list[str]
+    # Whether the adapter can read the platform's verdict after the submission
+    # returned. Added later; absent means it cannot.
+    can_poll: bool = False
 
 
 class MetaResponse(BaseModel):

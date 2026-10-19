@@ -30,6 +30,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import uuid
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -41,13 +42,16 @@ from app.core.validation.engine import RuleResult, Severity
 from app.modules.einvoice_clearance import repository
 from app.modules.einvoice_clearance.adapters import (
     CancellationRequest,
+    PollRequest,
     SubmissionOutcome,
     SubmissionRequest,
     adapter_registry,
+    supports_polling,
 )
 from app.modules.einvoice_clearance.models import (
     SETTLED_STATUSES,
     STATUS_CANCELLED,
+    STATUS_CLEARED,
     STATUS_DRAFT,
     STATUS_QUEUED,
     STATUS_REJECTED,
@@ -221,6 +225,31 @@ async def build_payload_from_invoice(
     return body.decode("utf-8"), media_type
 
 
+# A national format outside the EN 16931 engine can still be built from the
+# finance invoice, by the package that knows the format. That package registers
+# a builder here under the regime's ``document_format`` from its own startup
+# hook, so this module never imports it and removing the package removes the
+# format cleanly.
+PayloadBuilder = Callable[..., Awaitable[tuple[str, str]]]
+
+_payload_builders: dict[str, PayloadBuilder] = {}
+
+
+def register_payload_builder(document_format: str, builder: PayloadBuilder) -> None:
+    """Register the builder for one national format. Overwrites by format.
+
+    The builder is awaited as ``builder(session, invoice_id=..., profile=...,
+    country_fields=...)`` and returns ``(payload_text, media_type)``. It raises
+    :class:`ClearanceError` for an invoice it cannot turn into that format.
+    """
+    _payload_builders[(document_format or "").strip()] = builder
+
+
+def payload_builder_for(document_format: str) -> PayloadBuilder | None:
+    """The registered builder for a national format, or ``None``."""
+    return _payload_builders.get((document_format or "").strip())
+
+
 async def resolve_payload(
     session: AsyncSession,
     *,
@@ -228,6 +257,8 @@ async def resolve_payload(
     supplied: str | None,
     invoice_id: uuid.UUID | None,
     media_type: str,
+    profile: EInvoiceProfile | None = None,
+    country_fields: dict[str, Any] | None = None,
 ) -> tuple[str, str]:
     """Decide what document is going to the platform.
 
@@ -239,6 +270,14 @@ async def resolve_payload(
         return supplied, media_type
     if regime.en16931_profile and invoice_id is not None:
         return await build_payload_from_invoice(session, invoice_id=invoice_id, en16931_profile=regime.en16931_profile)
+    builder = payload_builder_for(regime.document_format)
+    if builder is not None and invoice_id is not None and profile is not None:
+        return await builder(
+            session,
+            invoice_id=invoice_id,
+            profile=profile,
+            country_fields=dict(country_fields or {}),
+        )
     raise ClearanceError(
         f"{regime.country} uses {regime.document_format}, which this platform does not generate, "
         "so the document has to be supplied with the request."
@@ -335,6 +374,13 @@ def build_context(
         "changed_fields": list(changed_fields or []),
         "invoice_is_real": document.invoice_id is not None,
         "reference_time": _now(),
+        # The document itself, for the rules that read a national format. Only
+        # rules registered for that format look at it.
+        "payload": {
+            "format": document.document_format,
+            "media_type": document.payload_media_type,
+            "text": document.payload or "",
+        },
     }
 
 
@@ -407,6 +453,8 @@ async def create_document(
         supplied=body.payload,
         invoice_id=body.invoice_id,
         media_type=body.payload_media_type,
+        profile=profile,
+        country_fields=dict(body.country_fields or {}),
     )
 
     document = EInvoiceDocument(
@@ -699,7 +747,9 @@ async def submit_document(
             "already be cleared. Read what the platform shows and record that against this document."
         ) from exc
 
-    if outcome.accepted:
+    if outcome.accepted and outcome.pending:
+        await _record_pending(session, document, outcome, regime=regime, actor_id=actor_id)
+    elif outcome.accepted:
         target = TERMINAL_SUCCESS.get(regime.regime, STATUS_SUBMITTED)
         document.authority_identifier = outcome.authority_identifier
         document.rejection_code = ""
@@ -732,6 +782,132 @@ async def submit_document(
         )
     await session.flush()
     return document, outcome, findings
+
+
+async def _record_pending(
+    session: AsyncSession,
+    document: EInvoiceDocument,
+    outcome: SubmissionOutcome,
+    *,
+    regime: CountryRegime,
+    actor_id: uuid.UUID | None,
+) -> None:
+    """Keep a document the platform took in but has not decided about.
+
+    The identifier is stored now, because it is the only handle there is on the
+    document at the platform: losing it would leave nothing to poll and nothing
+    to quote to the authority. The status stays ``submitted``, which already
+    means "gone, verdict not recorded", so a second submission stays refused.
+    """
+    if outcome.authority_identifier:
+        document.authority_identifier = outcome.authority_identifier
+    await repository.append_event(
+        session,
+        document_id=document.id,
+        event_type="note",
+        from_status=STATUS_SUBMITTED,
+        to_status=STATUS_SUBMITTED,
+        message=outcome.message or f"{regime.platform} took the document in; its verdict is pending.",
+        authority_code=outcome.rejection_code,
+        raw_response=outcome.raw_response,
+        actor_id=actor_id,
+    )
+
+
+async def refresh_document(
+    session: AsyncSession,
+    *,
+    document: EInvoiceDocument,
+    profile: EInvoiceProfile,
+    actor_id: uuid.UUID | None = None,
+) -> tuple[EInvoiceDocument, SubmissionOutcome]:
+    """Ask the platform for its verdict on a document it took in.
+
+    Only for a document in ``submitted`` that carries the platform's identifier,
+    and only through an adapter that can poll. Without the identifier there is
+    nothing to ask about, and the way out is the hand-recorded resolve.
+    """
+    regime = regime_for(profile)
+    if document.status != STATUS_SUBMITTED:
+        raise ClearanceError(
+            f"Only a submitted document waits for a verdict; this one is {document.status}.",
+            conflict=True,
+        )
+    if not (document.authority_identifier or "").strip():
+        raise ClearanceError(
+            f"Nothing came back from {regime.platform} for this document, so there is nothing to ask about. "
+            "Read what the platform shows and record it by hand.",
+            conflict=True,
+        )
+    adapter_key = document.adapter_key or profile.adapter_key
+    adapter = adapter_registry.get(adapter_key)
+    if adapter is None or not supports_polling(adapter):
+        raise ClearanceError(
+            f"The adapter {adapter_key!r} cannot read a verdict back from {regime.platform}. "
+            "Read it on the platform and record it by hand.",
+            conflict=True,
+        )
+
+    try:
+        outcome: SubmissionOutcome = await adapter.poll(  # type: ignore[attr-defined]
+            PollRequest(
+                country=document.country,
+                regime=document.regime,
+                authority_identifier=document.authority_identifier,
+                profile=profile_as_dict(profile),
+                document=document_as_dict(document),
+                regime_spec=regime_as_dict(regime),
+            )
+        )
+    except Exception as exc:  # noqa: BLE001 - the transport failed, the document did not
+        logger.warning("e-invoice clearance poll via %s failed", adapter_key, exc_info=True)
+        raise ClearanceError(
+            f"{regime.platform} could not be asked about this document: {exc}. Nothing was changed; try again."
+        ) from exc
+
+    if outcome.pending:
+        await repository.append_event(
+            session,
+            document_id=document.id,
+            event_type="note",
+            from_status=STATUS_SUBMITTED,
+            to_status=STATUS_SUBMITTED,
+            message=outcome.message or f"{regime.platform} has not decided yet.",
+            raw_response=outcome.raw_response,
+            actor_id=actor_id,
+        )
+    elif outcome.accepted:
+        target = TERMINAL_SUCCESS.get(regime.regime, STATUS_CLEARED)
+        if outcome.authority_identifier:
+            document.authority_identifier = outcome.authority_identifier
+        document.rejection_code = ""
+        document.rejection_message = ""
+        document.cleared_at = _now()
+        await _move(
+            session,
+            document,
+            target,
+            event_type=target,
+            message=outcome.message or f"{regime.platform} accepted the document.",
+            raw_response=outcome.raw_response,
+            actor_id=actor_id,
+        )
+    else:
+        document.rejection_code = outcome.rejection_code
+        document.rejection_message = outcome.rejection_message
+        document.retry_count += 1
+        await _move(
+            session,
+            document,
+            STATUS_REJECTED,
+            event_type="rejected",
+            message=outcome.rejection_message,
+            authority_code=outcome.rejection_code,
+            raw_response=outcome.raw_response,
+            actor_id=actor_id,
+        )
+    await session.flush()
+    return document, outcome
 
 
 async def resolve_document(
@@ -902,8 +1078,11 @@ __all__ = [
     "compute_payload_hash",
     "create_document",
     "document_as_dict",
+    "payload_builder_for",
     "profile_as_dict",
+    "refresh_document",
     "regime_for",
+    "register_payload_builder",
     "resolve_document",
     "resolve_payload",
     "submit_document",

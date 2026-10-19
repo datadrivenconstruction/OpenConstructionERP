@@ -146,8 +146,17 @@ LEGAL_STATUSES: tuple[str, ...] = (
 # days is wrong by up to a year depending on the month the invoice was issued in.
 CANCELLATION_BASIS_DAYS = "days_from_clearance"
 CANCELLATION_BASIS_FISCAL_YEAR = "fiscal_year_of_issue"
+# The platform publishes its own window and it is read from the platform at the
+# moment of cancelling, not shipped here. A day count copied from a guide would go
+# stale the day the authority changes it, and the platform refuses late requests
+# itself, so the adapter reads the window when it cancels.
+CANCELLATION_BASIS_AUTHORITY = "read_from_authority"
 
-CANCELLATION_BASES: tuple[str, ...] = (CANCELLATION_BASIS_DAYS, CANCELLATION_BASIS_FISCAL_YEAR)
+CANCELLATION_BASES: tuple[str, ...] = (
+    CANCELLATION_BASIS_DAYS,
+    CANCELLATION_BASIS_FISCAL_YEAR,
+    CANCELLATION_BASIS_AUTHORITY,
+)
 
 
 @dataclass(frozen=True)
@@ -234,8 +243,12 @@ class CountryRegime:
 
     @property
     def is_cancellable(self) -> bool:
-        """Whether the platform accepts a cancellation of a cleared document."""
-        return self.cancellation_window_days is not None
+        """Whether the platform accepts a cancellation of a cleared document.
+
+        A window the platform publishes at runtime is a window, even though no
+        day count is stored for it here.
+        """
+        return self.cancellation_window_days is not None or self.cancellation_basis == CANCELLATION_BASIS_AUTHORITY
 
     @property
     def regimes(self) -> tuple[str, ...]:
@@ -960,6 +973,7 @@ def regime_as_dict(entry: CountryRegime) -> dict[str, Any]:
 
 __all__ = [
     "CANCELLATION_BASES",
+    "CANCELLATION_BASIS_AUTHORITY",
     "CANCELLATION_BASIS_DAYS",
     "CANCELLATION_BASIS_FISCAL_YEAR",
     "COUNTRY_REGIMES",
