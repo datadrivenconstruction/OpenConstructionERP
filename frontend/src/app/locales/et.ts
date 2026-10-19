@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 mootor",
     "modules.catalog.einvoice": "E-arve",
     "modules.catalog.einvoice_clearance": "E-arve valideerimine",
+    "modules.catalog.einvoice_zatca": "Saudi Araabia e-arveldus (ZATCA)",
     "modules.catalog.enterprise_workflows": "Ettevõtte töövood",
     "modules.catalog.equipment": "Seadmete ja sõidukipargi haldus",
     "modules.catalog.erp_chat": "AI vestlus",

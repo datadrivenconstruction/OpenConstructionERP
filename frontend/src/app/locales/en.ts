@@ -523,6 +523,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 Engine",
     "modules.catalog.einvoice": "E-invoice",
     "modules.catalog.einvoice_clearance": "E-invoice clearance",
+    "modules.catalog.einvoice_zatca": "Saudi Arabia ZATCA e-invoicing",
     "modules.catalog.enterprise_workflows": "Enterprise Workflows",
     "modules.catalog.equipment": "Equipment & Fleet Management",
     "modules.catalog.erp_chat": "ERP Chat",

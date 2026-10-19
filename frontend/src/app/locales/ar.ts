@@ -521,6 +521,7 @@ const resource = {
     "modules.catalog.eac": "محرك EAC v2",
     "modules.catalog.einvoice": "الفاتورة الإلكترونية",
     "modules.catalog.einvoice_clearance": "تخليص الفاتورة الإلكترونية",
+    "modules.catalog.einvoice_zatca": "الفوترة الإلكترونية في المملكة العربية السعودية (ZATCA)",
     "modules.catalog.enterprise_workflows": "سير عمل المؤسسات",
     "modules.catalog.equipment": "إدارة المعدات والأسطول",
     "modules.catalog.erp_chat": "محادثة ERP",

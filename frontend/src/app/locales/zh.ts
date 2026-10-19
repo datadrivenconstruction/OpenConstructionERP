@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 引擎",
     "modules.catalog.einvoice": "电子发票",
     "modules.catalog.einvoice_clearance": "电子发票验证",
+    "modules.catalog.einvoice_zatca": "沙特阿拉伯 ZATCA 电子发票",
     "modules.catalog.enterprise_workflows": "企业工作流",
     "modules.catalog.equipment": "设备与车队管理",
     "modules.catalog.erp_chat": "ERP 聊天",

@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 Motoru",
     "modules.catalog.einvoice": "E-fatura",
     "modules.catalog.einvoice_clearance": "E-fatura Doğrulama",
+    "modules.catalog.einvoice_zatca": "Suudi Arabistan e-fatura (ZATCA)",
     "modules.catalog.enterprise_workflows": "Kurumsal İş Akışları",
     "modules.catalog.equipment": "Ekipman ve Filo Yönetimi",
     "modules.catalog.erp_chat": "ERP Sohbet",

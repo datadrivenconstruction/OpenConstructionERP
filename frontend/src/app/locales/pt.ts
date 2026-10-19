@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.eac": "Motor EAC v2",
     "modules.catalog.einvoice": "Fatura eletrónica",
     "modules.catalog.einvoice_clearance": "Validação de fatura eletrónica",
+    "modules.catalog.einvoice_zatca": "Faturação eletrónica da Arábia Saudita (ZATCA)",
     "modules.catalog.enterprise_workflows": "Fluxos de Trabalho Corporativos",
     "modules.catalog.equipment": "Gestão de equipamento e frota",
     "modules.catalog.erp_chat": "Chat ERP",

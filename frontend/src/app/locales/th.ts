@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.eac": "เอนจิน EAC v2",
     "modules.catalog.einvoice": "ใบแจ้งหนี้อิเล็กทรอนิกส์",
     "modules.catalog.einvoice_clearance": "การตรวจสอบใบแจ้งหนี้อิเล็กทรอนิกส์",
+    "modules.catalog.einvoice_zatca": "ใบแจ้งหนี้อิเล็กทรอนิกส์ซาอุดีอาระเบีย (ZATCA)",
     "modules.catalog.enterprise_workflows": "เวิร์กโฟลว์ระดับองค์กร",
     "modules.catalog.equipment": "การจัดการอุปกรณ์และยานพาหนะ",
     "modules.catalog.erp_chat": "แชท ERP",

@@ -518,6 +518,7 @@ const resource = {
     "modules.catalog.eac": "מנוע EAC v2",
     "modules.catalog.einvoice": "חשבונית אלקטרונית",
     "modules.catalog.einvoice_clearance": "אישור חשבוניות אלקטרוניות",
+    "modules.catalog.einvoice_zatca": "חשבוניות אלקטרוניות בסעודיה (ZATCA)",
     "modules.catalog.enterprise_workflows": "תהליכי עבודה ארגוניים",
     "modules.catalog.equipment": "ניהול ציוד וצי רכב",
     "modules.catalog.erp_chat": "צ'אט ERP",
