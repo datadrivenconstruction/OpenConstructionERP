@@ -81,7 +81,6 @@ steps:
       apply:
         - set_default_currency: GBP
         - set_default_locale: en-GB
-        - set_tax_template: uk_vat_20
         - set_default_methodology: united_kingdom
         - enable_rule_packs:
             - nrm_1_cost_planning

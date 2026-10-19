@@ -28,7 +28,7 @@ rate is the most common way an Indian estimate ends up wrong.
 
 ## What this pack enables
 
-- **Currency INR**, the `in_gst_18` tax template and the `india` estimating
+- **Currency INR** (the pack does not set GST) and the `india` estimating
   methodology, with an English and Hindi interface.
 - **Two engine rules**, under the `cpwd` rule set. `cpwd.code_required` asks
   that every priced line carries a schedule item reference, because a rate

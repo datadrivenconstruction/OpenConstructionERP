@@ -37,7 +37,7 @@ MANIFEST = PartnerPackManifest(
     # (oe_i18n_tax_config): PDV 25 % since 2012-03-01 as the default, 13 %
     # since 2014-01-01, 5 % since 2013-01-01 and 0 % on solar panel
     # installation since 2022-10-01.
-    default_tax_template="hr_pdv_25",
+    default_tax_template=None,
     # A troškovnik carries overheads and profit inside every unit rate rather
     # than as separate lines, so the Croatian template is the PDV line alone,
     # built from the HR stack of the regional markup table. It invents no

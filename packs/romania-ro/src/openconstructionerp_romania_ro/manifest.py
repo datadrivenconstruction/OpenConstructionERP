@@ -31,7 +31,7 @@ MANIFEST = PartnerPackManifest(
     # Documentation only, as on every pack: the rate a bill is charged comes
     # from the dated tax seed for the project's country, and the methodology
     # template carries the same 21 for the cascade.
-    default_tax_template="ro_tva_21",
+    default_tax_template=None,
     default_methodology="romania",
     validation_rule_packs=[
         "ro_deviz_general",

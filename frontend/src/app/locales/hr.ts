@@ -35277,6 +35277,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-račun: {{platform}}",
     "modules.pack_built_in_payment": "Zakonski rokovi plaćanja: {{terms}}",
     "modules.pack_built_in_note": "Ovo dolazi s platformom za projekte u zemlji {{country}}, s ovim paketom ili bez njega. Paket ih ne mijenja.",
+    "modules.pack_built_in_no_vat": "Za {{country}} još nema stopa PDV-a. Redak poreza postavite u dodacima svake procjene troškova.",
     "modules.pack_search_index": "AI indeks pretraživanja",
     "modules.pack_search_index_note": "Ne gradi se tijekom instalacije radi manje potrošnje memorije. Izgradite ga kasnije u odjeljku «Baze podataka i resursi» kad želite AI potpomognuto usklađivanje.",
     "modules.pack_search_index_link": "Otvori «Baze podataka i resursi»",

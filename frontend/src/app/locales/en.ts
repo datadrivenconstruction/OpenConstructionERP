@@ -32050,6 +32050,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-invoicing: {{platform}}",
     "modules.pack_built_in_payment": "Statutory payment terms: {{terms}}",
     "modules.pack_built_in_note": "These come with the platform for projects located in {{country}}, with or without this pack. The pack does not change them.",
+    "modules.pack_built_in_no_vat": "No VAT rates for {{country}} yet. Set the tax line in each estimate's markups.",
     "modules.pack_search_index": "AI search index",
     "modules.pack_search_index_note": "Not built during installation, to keep memory use low. Build it later under Databases & Resources when you want AI-assisted matching.",
     "modules.pack_search_index_link": "Open Databases & Resources",

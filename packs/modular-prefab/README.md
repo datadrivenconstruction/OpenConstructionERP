@@ -8,7 +8,7 @@ phased handover.
 
 ## What this pack enables
 
-- Currency EUR and the English locale; no tax template, because the pack
+- Currency EUR and the English locale; the pack sets no tax, because it
   crosses jurisdictions and the tax regime comes from wherever the project
   sits
 - Seven validation rule packs: `en_1090_steel`, `as_5104_modular`,

@@ -35,7 +35,7 @@ National Tax Service (NTS).
 
 ## What this pack enables
 
-- **Currency KRW**, the `kr_vat_10` tax template and kbim as the
+- **Currency KRW** (the pack does not set VAT) and kbim as the
   classification standard, with a Korean-language interface.
 - **No engine rule sets** are registered yet. The validation engine does not
   carry a Korean rule set at this time; this pack sets the locale, currency

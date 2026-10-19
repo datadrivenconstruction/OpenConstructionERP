@@ -29,7 +29,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-ar-dubai",  # resolves to AE_DUBAI
     ],
     default_currency="AED",
-    default_tax_template="ae_vat_5",
+    default_tax_template=None,
     default_methodology="united_arab_emirates",
     validation_rule_packs=[
         "abudhabi_building_code",

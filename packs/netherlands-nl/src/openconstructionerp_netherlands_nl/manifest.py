@@ -28,7 +28,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-nl-amsterdam",  # resolves to NL_AMSTERDAM
     ],
     default_currency="EUR",
-    default_tax_template="nl_btw_21",
+    default_tax_template=None,
     default_methodology="netherlands",
     validation_rule_packs=[
         "bouwbesluit_2012",

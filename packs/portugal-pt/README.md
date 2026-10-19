@@ -22,11 +22,11 @@ Eurocodes (Portuguese adoption).
 
 IVA (Imposto sobre o Valor Acrescentado, VAT) on construction services is 23
 percent at the standard rate, with a reduced 6 percent rate applying to certain
-renovation and social housing works. The pack sets the `pt_iva_23` tax template.
+renovation and social housing works. The pack does not set IVA.
 
 ## What this pack enables
 
-- **Currency EUR** with the `pt_iva_23` tax template and the `portugal`
+- **Currency EUR** (the pack does not set VAT) and the `portugal`
   estimating methodology
 - **MasterFormat rule set** for classification validation, as the nearest
   supported hierarchy Portuguese ProNIC-structured bills map onto

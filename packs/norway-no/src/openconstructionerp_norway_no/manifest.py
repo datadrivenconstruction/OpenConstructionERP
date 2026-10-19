@@ -29,7 +29,7 @@ MANIFEST = PartnerPackManifest(
     # listed on the activation dialog and then skipped at install.
     cwicr_regions=[],
     default_currency="NOK",
-    default_tax_template="no_mva_25",
+    default_tax_template=None,
     default_methodology="norway",
     validation_rule_packs=[
         "ns3420_specification",

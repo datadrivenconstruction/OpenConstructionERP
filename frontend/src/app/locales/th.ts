@@ -34983,6 +34983,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "ใบกำกับภาษีอิเล็กทรอนิกส์: {{platform}}",
     "modules.pack_built_in_payment": "เงื่อนไขการชำระเงินตามกฎหมาย: {{terms}}",
     "modules.pack_built_in_note": "ข้อมูลเหล่านี้มาพร้อมแพลตฟอร์มสำหรับโครงการใน {{country}} ไม่ว่าจะมีแพ็กนี้หรือไม่ก็ตาม แพ็กไม่เปลี่ยนแปลงข้อมูลเหล่านี้",
+    "modules.pack_built_in_no_vat": "ยังไม่มีอัตราภาษีมูลค่าเพิ่ม (VAT) สำหรับ {{country}} โปรดตั้งค่าบรรทัดภาษีในค่าบวกเพิ่มของแต่ละประมาณการ",
     "modules.pack_search_index": "ดัชนีค้นหา AI",
     "modules.pack_search_index_note": "ไม่สร้างระหว่างการติดตั้งเพื่อประหยัดหน่วยความจำ สร้างภายหลังที่ «ฐานข้อมูล & ทรัพยากร» เมื่อต้องการการจับคู่ด้วย AI ช่วย",
     "modules.pack_search_index_link": "เปิด «ฐานข้อมูล & ทรัพยากร»",

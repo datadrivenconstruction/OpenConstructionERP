@@ -35966,6 +35966,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Faktury elektroniczne: {{platform}}",
     "modules.pack_built_in_payment": "Ustawowe terminy płatności: {{terms}}",
     "modules.pack_built_in_note": "Są one częścią platformy dla projektów w kraju {{country}}, z tym pakietem lub bez niego. Pakiet ich nie zmienia.",
+    "modules.pack_built_in_no_vat": "Brak jeszcze stawek VAT dla {{country}}. Ustaw wiersz podatku w narzutach każdego kosztorysu.",
     "modules.pack_search_index": "Indeks wyszukiwania AI",
     "modules.pack_search_index_note": "Nie jest budowany podczas instalacji, aby ograniczyć zużycie pamięci. Zbuduj go później w sekcji «Bazy danych i zasoby», gdy będziesz chcieć dopasowania wspieranego przez AI.",
     "modules.pack_search_index_link": "Otwórz «Bazy danych i zasoby»",

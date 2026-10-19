@@ -26,7 +26,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-fr-paris",
     ],
     default_currency="EUR",
-    default_tax_template="fr_tva_20",
+    default_tax_template=None,
     default_methodology="france",
     validation_rule_packs=[
         "dtu_standards",

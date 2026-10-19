@@ -5,7 +5,7 @@ Pre-configures OpenConstructionERP for **Australian** general contractors.
 ## What's inside
 
 - **Locale**: `en-AU` (Australian English overrides — tradies, EBA, RDO, BAS, ABN).
-- **Currency**: `AUD` with `au_gst_10` tax template (10% GST).
+- **Currency**: `AUD` (GST 10%, not set by the pack).
 - **CWICR regions pre-loaded**: Sydney, Melbourne, Brisbane, Perth, Adelaide.
 - **Standards & validation rule packs**:
   - `ncc_2022` — National Construction Code 2022 (Vol 1 commercial, Vol 2 housing, Vol 3 plumbing, Section J energy uplift).

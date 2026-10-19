@@ -34158,6 +34158,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-invoicing: {{platform}}",
     "modules.pack_built_in_payment": "Mga itinakda ng batas na termino sa pagbabayad: {{terms}}",
     "modules.pack_built_in_note": "Kasama ang mga ito sa platform para sa mga proyektong nasa {{country}}, may pack man o wala. Hindi binabago ng pack ang mga ito.",
+    "modules.pack_built_in_no_vat": "Wala pang VAT rate para sa {{country}}. Itakda ang tax line sa mga markup ng bawat estimate.",
     "modules.pack_search_index": "AI search index",
     "modules.pack_search_index_note": "Hindi binubuo habang nag-i-install, para mapanatiling mababa ang gamit ng memory. Buuin ito sa ibang pagkakataon sa ilalim ng «Mga Database at Resource» kapag gusto mo ng AI-assisted na pagtutugma.",
     "modules.pack_search_index_link": "Buksan ang «Mga Database at Resource»",

@@ -32,7 +32,7 @@ VAT system are issued as eRačun under EN 16931 (Zakon o fiskalizaciji, NN
 
 ## What this pack enables
 
-- **Currency EUR** with the `hr_pdv_25` tax template. The platform's dated
+- **Currency EUR**. The platform's dated
   tax table carries PDV at 25 percent as the default rate, with 13, 5 and 0
   percent beside it
 - **Zagreb cost database** (`HR_ZAGREB`, EUR) preloaded from the CWICR

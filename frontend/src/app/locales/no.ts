@@ -35062,6 +35062,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-fakturering: {{platform}}",
     "modules.pack_built_in_payment": "Lovfestede betalingsvilkår: {{terms}}",
     "modules.pack_built_in_note": "Disse følger med plattformen for prosjekter i {{country}}, med eller uten denne pakken. Pakken endrer dem ikke.",
+    "modules.pack_built_in_no_vat": "Det finnes ennå ingen MVA-satser for {{country}}. Angi avgiftslinjen i påslagene i hvert kostnadsoverslag.",
     "modules.pack_search_index": "AI-søkeindeks",
     "modules.pack_search_index_note": "Bygges ikke under installasjonen, for å holde minnebruken lav. Bygg den senere under «Databaser og ressurser» når du vil ha AI-støttet matching.",
     "modules.pack_search_index_link": "Åpne «Databaser og ressurser»",

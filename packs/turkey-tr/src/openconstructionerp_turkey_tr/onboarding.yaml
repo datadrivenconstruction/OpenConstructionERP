@@ -58,7 +58,6 @@ steps:
       label: "Create my Türkiye workspace / Çalışma alanımı oluştur"
       apply:
         - set_default_currency: TRY
-        - set_tax_template: tr_kdv_20
         - preload_cwicr_regions:
             - cwicr-tr-national
         - enable_rule_packs:

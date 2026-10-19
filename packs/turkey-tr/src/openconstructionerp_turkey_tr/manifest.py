@@ -41,7 +41,7 @@ MANIFEST = PartnerPackManifest(
     # dated tax seed (TR rows for the 20 and the 10 percent; the 1 percent
     # tier is not seeded yet) and in the TR markup stack, which is what a new
     # bill charges KDV from.
-    default_tax_template="tr_kdv_20",
+    default_tax_template=None,
     default_methodology="turkey",
     validation_rule_packs=[
         # The unit-price book: poz numbering, chapters, units, the 25 percent.

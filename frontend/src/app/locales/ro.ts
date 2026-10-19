@@ -35392,6 +35392,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Facturare electronică: {{platform}}",
     "modules.pack_built_in_payment": "Termene legale de plată: {{terms}}",
     "modules.pack_built_in_note": "Acestea vin cu platforma pentru proiectele din {{country}}, cu sau fără acest pachet. Pachetul nu le modifică.",
+    "modules.pack_built_in_no_vat": "Nu există încă cote de TVA pentru {{country}}. Setați linia de taxă în adaosurile fiecărui deviz.",
     "modules.pack_search_index": "Index de căutare AI",
     "modules.pack_search_index_note": "Nu este construit în timpul instalării, pentru a păstra consumul de memorie redus. Construiți-l mai târziu în «Baze de date și resurse» când doriți potrivire asistată de AI.",
     "modules.pack_search_index_link": "Deschide «Baze de date și resurse»",

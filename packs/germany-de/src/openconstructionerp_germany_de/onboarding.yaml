@@ -48,7 +48,6 @@ steps:
       label: "Arbeitsbereich anlegen / Create my workspace"
       apply:
         - set_default_currency: EUR
-        - set_tax_template: de_ust_19
         - enable_rule_packs:
             - din_276
             - gaeb_x83_x86

@@ -35,4 +35,3 @@ steps:
       label: "Create my Poland workspace / Utworz moja przestrzen robocza"
       apply:
         - set_default_currency: PLN
-        - set_tax_template: pl_vat_23

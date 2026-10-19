@@ -628,7 +628,6 @@ describe('a pack install is honest about prices, tax and the search index', () =
   it('the preview shows tax, holidays, e-invoicing and payment terms as built in, not installed', () => {
     packMock.useApplyPreview.mockReturnValue({
       data: preview({
-        default_tax_template: 'de_vat_19',
         built_in_for_country: {
           country: 'DE',
           vat: { standard: '19', reduced: '7', zero: '0' },
@@ -648,6 +647,27 @@ describe('a pack install is honest about prices, tax and the search index', () =
     expect(within(block).getByText('E-invoicing: XRechnung / Peppol')).toBeTruthy();
     expect(within(block).getByText(/Statutory payment terms: VOB\/B § 16 Abs. 1/)).toBeTruthy();
     expect(within(block).getByText(/with or without this pack/)).toBeTruthy();
+  });
+
+  it('a country the tax table does not cover yet says so instead of showing no VAT line', () => {
+    packMock.useApplyPreview.mockReturnValue({
+      data: preview({
+        built_in_for_country: {
+          country: 'FR',
+          vat: null,
+          holidays: { year: 2026, count: 11 },
+          einvoice: null,
+          payment_terms: null,
+        },
+      }),
+      isLoading: false,
+      isError: false,
+    });
+    renderDialog();
+
+    const block = screen.getByTestId('pack-built-in');
+    expect(within(block).getByTestId('pack-built-in-no-vat').textContent).toMatch(/No VAT rates for FR yet/);
+    expect(within(block).queryByText(/^VAT /)).toBeNull();
   });
 
   it('the preview says the search index is not built during installation', () => {

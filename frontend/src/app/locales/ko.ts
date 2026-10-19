@@ -34955,6 +34955,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "전자세금계산서: {{platform}}",
     "modules.pack_built_in_payment": "법정 지급 조건: {{terms}}",
     "modules.pack_built_in_note": "이 항목들은 이 팩의 유무와 관계없이 {{country}}에 위치한 프로젝트용으로 플랫폼에 포함되어 있습니다. 팩은 이를 변경하지 않습니다.",
+    "modules.pack_built_in_no_vat": "{{country}}의 VAT 세율이 아직 없습니다. 각 견적의 마크업에서 세금 항목을 설정하세요.",
     "modules.pack_search_index": "AI 검색 인덱스",
     "modules.pack_search_index_note": "메모리 사용량을 낮게 유지하기 위해 설치 중에는 만들지 않습니다. AI 지원 매칭이 필요할 때 나중에 「데이터베이스 및 리소스」에서 만드세요.",
     "modules.pack_search_index_link": "「데이터베이스 및 리소스」 열기",

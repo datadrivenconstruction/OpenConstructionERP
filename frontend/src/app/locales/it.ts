@@ -35455,6 +35455,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Fatturazione elettronica: {{platform}}",
     "modules.pack_built_in_payment": "Termini di pagamento di legge: {{terms}}",
     "modules.pack_built_in_note": "Questi dati sono forniti con la piattaforma per i progetti situati in {{country}}, con o senza questo pacchetto. Il pacchetto non li modifica.",
+    "modules.pack_built_in_no_vat": "Non ci sono ancora aliquote IVA per {{country}}. Imposta la riga delle imposte nelle maggiorazioni di ogni preventivo.",
     "modules.pack_search_index": "Indice di ricerca IA",
     "modules.pack_search_index_note": "Non viene creato durante l'installazione, per contenere l'uso di memoria. Crealo più tardi in «Database e Risorse» quando vuoi l'abbinamento assistito dall'IA.",
     "modules.pack_search_index_link": "Apri «Database e Risorse»",

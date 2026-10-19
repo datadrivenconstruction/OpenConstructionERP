@@ -7,7 +7,7 @@ system (KNR, KNNR) that underpins Polish cost estimation.
 
 ## What this pack configures
 
-- **Currency PLN**, the `pl_vat_23` tax template and the `poland` estimating
+- **Currency PLN** (the pack does not set VAT) and the `poland` estimating
   methodology, with a Polish interface.
 - **DIN 276 classification** as the default cost grouping, which is the
   standard used in Polish practice following the German DIN tradition.
@@ -41,7 +41,7 @@ the Rozporzadzenie w sprawie kosztorysu inwestorskiego.
 
 The standard VAT rate is 23%. A reduced rate of 8% applies to construction and
 renovation services for residential buildings up to 300 square metres of usable
-area. The pack sets the `pl_vat_23` template as the default.
+area. The pack does not set the default VAT rate.
 
 ## Onboarding
 

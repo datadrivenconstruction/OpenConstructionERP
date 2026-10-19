@@ -141,16 +141,16 @@ class PartnerPackManifest(BaseModel):
     default_tax_template: str | None = Field(
         default=None,
         description=(
-            "Documentation only: a label for the tax regime the pack's market "
-            "applies, e.g. 'ca_gst_pst'. Nothing resolves it. There is no "
-            "registry of tax-template slugs anywhere in the platform, so the "
-            "string travels to the pack preview panel and stops there, and "
-            "applying the pack says as much in its warnings. It used to be "
-            "described as a slug 'to set as default', which reads as a setting "
-            "that will be applied and is why this note is long. The rate that "
-            "actually reaches money is the tax line in the market's markup "
-            "stack (app.modules.boq.markup_templates), overridable per project; "
-            "changing this field changes no number anywhere."
+            "Ignored. Leave it unset. Nothing resolves it: there is no "
+            "registry of tax templates anywhere in the platform. It is still "
+            "accepted so an older third-party manifest that sets it keeps "
+            "loading, but no shipped pack sets it any more (forty-five used "
+            "to, and the cards printed the id as if it were a tax setting). "
+            "VAT, public holidays, e-invoicing and statutory payment terms "
+            "come from the core registries by the project's country, and the "
+            "activation preview shows them as 'built_in_for_country'. The rate "
+            "that reaches money is the tax line in the market's markup stack "
+            "(app.modules.boq.markup_templates), overridable per project."
         ),
     )
     default_methodology: str | None = Field(

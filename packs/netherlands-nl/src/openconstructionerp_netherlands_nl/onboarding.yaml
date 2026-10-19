@@ -34,4 +34,3 @@ steps:
       label: "Create my Netherlands workspace / Mijn werkruimte aanmaken"
       apply:
         - set_default_currency: EUR
-        - set_tax_template: nl_btw_21

@@ -1572,6 +1572,16 @@ function BuiltInForCountry({ facts }: { facts: CountryBuiltIns }) {
   }
   return (
     <div className="space-y-1" data-testid="pack-built-in">
+      {!facts.vat && (
+        // The core tax table does not cover every pack country yet; saying
+        // nothing about VAT here reads as if it were handled.
+        <p data-testid="pack-built-in-no-vat">
+          {t('modules.pack_built_in_no_vat', {
+            defaultValue: "No VAT rates for {{country}} yet. Set the tax line in each estimate's markups.",
+            country: facts.country,
+          })}
+        </p>
+      )}
       {lines.length > 0 && (
         <ul className="space-y-0.5">
           {lines.map((l) => (

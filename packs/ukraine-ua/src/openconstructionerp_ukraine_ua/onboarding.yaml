@@ -37,7 +37,6 @@ steps:
       label: "Create my Ukrainian workspace / Створити робочий простір"
       apply:
         - set_default_currency: UAH
-        - set_tax_template: ua_pdv_20
         - enable_rule_packs:
             - ua_nastanova_281
             - ua_publichni_zakupivli

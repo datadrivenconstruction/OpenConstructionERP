@@ -275,7 +275,6 @@ steps:
       label_en: "Create my Saudi workspace"
       apply:
         - set_default_currency: SAR
-        - set_tax_template: sa_vat_15
         - set_default_locale: ar
         - enable_rule_packs:
             - sbc_201_energy

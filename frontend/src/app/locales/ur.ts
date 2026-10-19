@@ -34349,6 +34349,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "ای انوائسنگ: {{platform}}",
     "modules.pack_built_in_payment": "قانونی ادائیگی کی شرائط: {{terms}}",
     "modules.pack_built_in_note": "یہ {{country}} میں واقع منصوبوں کے لیے پلیٹ فارم کے ساتھ آتے ہیں، اس پیکج کے ساتھ یا اس کے بغیر۔ پیکج انہیں تبدیل نہیں کرتا۔",
+    "modules.pack_built_in_no_vat": "{{country}} کے لیے ابھی VAT کی کوئی شرح موجود نہیں۔ ہر تخمینے کے Markups میں ٹیکس لائن سیٹ کریں۔",
     "modules.pack_search_index": "AI سرچ انڈیکس",
     "modules.pack_search_index_note": "میموری کا استعمال کم رکھنے کے لیے انسٹالیشن کے دوران نہیں بنایا جاتا۔ AI کی مدد سے میچنگ چاہیں تو اسے بعد میں «ڈیٹا بیسز اور Resources» کے تحت بنائیں۔",
     "modules.pack_search_index_link": "«ڈیٹا بیسز اور Resources» کھولیں",

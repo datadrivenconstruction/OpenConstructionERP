@@ -42,7 +42,6 @@ steps:
       label: "Skapa min arbetsyta / Create my workspace"
       apply:
         - set_default_currency: SEK
-        - set_tax_template: se_moms_25
         - enable_rule_packs:
             - ama_specification
             - bsab_classification

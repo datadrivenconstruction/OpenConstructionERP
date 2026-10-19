@@ -18,9 +18,7 @@ When installed alongside the OCERP core, this pack registers via the
   snapshot live in the marketplace today; Montréal / Vancouver / Calgary /
   Halifax / Ottawa are flagged "upcoming" in the onboarding wizard and will
   auto-activate when published).
-- Sets default currency to **CAD** and applies the **`ca_gst_pst`** tax
-  template (note: the tax-template runtime is a roadmap item — the slug is
-  recorded on the manifest but no rules currently consume it).
+- Sets default currency to **CAD**. The pack does not set sales tax; the tax line is set on the estimate's markups.
 - Enables **nine** Canadian validation rule packs:
   - `nbc_2020` — National Building Code of Canada 2020 (Parts 1–10)
   - `ccdc_2` — CCDC 2-2020 Stipulated Price Contract

@@ -35581,6 +35581,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Электронные счета: {{platform}}",
     "modules.pack_built_in_payment": "Установленные законом сроки оплаты: {{terms}}",
     "modules.pack_built_in_note": "Это поставляется с платформой для проектов в стране {{country}}, с этим пакетом или без него. Пакет их не меняет.",
+    "modules.pack_built_in_no_vat": "Для {{country}} пока нет ставок НДС. Задайте строку налога в наценках каждой сметы.",
     "modules.pack_search_index": "Индекс ИИ-поиска",
     "modules.pack_search_index_note": "Не строится при установке, чтобы не расходовать память. Постройте его позже в разделе «Базы данных и ресурсы», когда понадобится подбор позиций с помощью ИИ.",
     "modules.pack_search_index_link": "Открыть «Базы данных и ресурсы»",

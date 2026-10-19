@@ -35458,6 +35458,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Facturation électronique : {{platform}}",
     "modules.pack_built_in_payment": "Délais de paiement légaux : {{terms}}",
     "modules.pack_built_in_note": "Ces éléments sont fournis avec la plateforme pour les projets situés en {{country}}, avec ou sans ce pack. Le pack ne les modifie pas.",
+    "modules.pack_built_in_no_vat": "Aucun taux de TVA n'est encore disponible pour {{country}}. Définissez la ligne de taxe dans les majorations de chaque estimation.",
     "modules.pack_search_index": "Index de recherche IA",
     "modules.pack_search_index_note": "Non construit pendant l'installation, afin de limiter l'usage de la mémoire. Construisez-le plus tard dans «Bases de données et ressources» quand vous voulez un rapprochement assisté par IA.",
     "modules.pack_search_index_link": "Ouvrir «Bases de données et ressources»",

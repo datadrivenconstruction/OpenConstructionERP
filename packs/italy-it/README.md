@@ -31,7 +31,7 @@ rate under specific conditions.
 
 ## What this pack enables
 
-- **Currency EUR**, the `it_iva_22` tax template and the `italy` estimating
+- **Currency EUR** (the pack does not set VAT) and the `italy` estimating
   methodology, with an Italian interface.
 - **Two cost bases**: `cwicr-it-rome`, resolving to IT_ROME, and
   `cwicr-it-toscana`, resolving to IT_TOSCANA, the base built from the

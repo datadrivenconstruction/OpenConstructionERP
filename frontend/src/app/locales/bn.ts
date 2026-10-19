@@ -34158,6 +34158,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "ই-ইনভয়েসিং: {{platform}}",
     "modules.pack_built_in_payment": "বিধিবদ্ধ পেমেন্ট শর্ত: {{terms}}",
     "modules.pack_built_in_note": "এগুলো {{country}}-এ অবস্থিত প্রকল্পের জন্য প্ল্যাটফর্মের সঙ্গেই আসে, এই প্যাক থাকুক বা না থাকুক। প্যাক এগুলো পরিবর্তন করে না।",
+    "modules.pack_built_in_no_vat": "{{country}}-এর জন্য এখনও কোনো ভ্যাট হার নেই। প্রতিটি এস্টিমেটের মার্কআপে কর লাইনটি সেট করুন।",
     "modules.pack_search_index": "AI সার্চ ইনডেক্স",
     "modules.pack_search_index_note": "মেমরি ব্যবহার কম রাখতে ইনস্টলেশনের সময় এটি তৈরি হয় না। AI-সহায়তায় ম্যাচিং চাইলে পরে «ডেটাবেস ও রিসোর্স» থেকে তৈরি করুন।",
     "modules.pack_search_index_link": "«ডেটাবেস ও রিসোর্স» খুলুন",

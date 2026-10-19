@@ -34520,6 +34520,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "חשבונית אלקטרונית: {{platform}}",
     "modules.pack_built_in_payment": "תנאי תשלום חוקיים: {{terms}}",
     "modules.pack_built_in_note": "אלה מגיעים עם הפלטפורמה עבור פרויקטים הממוקמים ב-{{country}}, עם החבילה או בלעדיה. החבילה אינה משנה אותם.",
+    "modules.pack_built_in_no_vat": "עדיין אין שיעורי מע\"מ עבור {{country}}. הגדירו את שורת המס בתוספות של כל אומדן.",
     "modules.pack_search_index": "אינדקס חיפוש בבינה מלאכותית",
     "modules.pack_search_index_note": "לא נבנה בזמן ההתקנה, כדי לשמור על צריכת זיכרון נמוכה. בנה אותו מאוחר יותר תחת «מאגרי נתונים ומשאבים» כשתרצה התאמה בסיוע בינה מלאכותית.",
     "modules.pack_search_index_link": "פתח את «מאגרי נתונים ומשאבים»",

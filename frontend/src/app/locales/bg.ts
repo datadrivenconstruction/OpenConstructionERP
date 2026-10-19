@@ -35143,6 +35143,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Електронно фактуриране: {{platform}}",
     "modules.pack_built_in_payment": "Законови срокове за плащане: {{terms}}",
     "modules.pack_built_in_note": "Те се предоставят с платформата за проекти в {{country}}, с този пакет или без него. Пакетът не ги променя.",
+    "modules.pack_built_in_no_vat": "За {{country}} все още няма ставки на ДДС. Задайте реда за данък в добавките на всяка оферта.",
     "modules.pack_search_index": "Индекс за AI търсене",
     "modules.pack_search_index_note": "Не се изгражда при инсталиране, за да се пести памет. Изградете го по-късно в «Бази данни и ресурси», когато искате AI-подпомогнато съпоставяне.",
     "modules.pack_search_index_link": "Отвори «Бази данни и ресурси»",

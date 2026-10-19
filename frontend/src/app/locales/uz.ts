@@ -35299,6 +35299,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Elektron hisob-faktura: {{platform}}",
     "modules.pack_built_in_payment": "Qonunda belgilangan toʻlov muddatlari: {{terms}}",
     "modules.pack_built_in_note": "Bular shu paket bilan yoki usiz {{country}} mamlakatidagi loyihalar uchun platforma bilan birga beriladi. Paket ularni oʻzgartirmaydi.",
+    "modules.pack_built_in_no_vat": "{{country}} uchun QQS stavkalari hali yoʻq. Soliq qatorini har bir smetaning ustamalarida belgilang.",
     "modules.pack_search_index": "AI qidiruv indeksi",
     "modules.pack_search_index_note": "Xotira sarfini kam saqlash uchun oʻrnatish vaqtida yaratilmaydi. AI yordamida moslashtirish kerak boʻlganda uni keyinroq «Maʼlumotlar bazalari va resurslar» boʻlimida yarating.",
     "modules.pack_search_index_link": "«Maʼlumotlar bazalari va resurslar» boʻlimini ochish",

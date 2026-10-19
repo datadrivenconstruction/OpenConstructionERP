@@ -38,7 +38,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-eng-johannesburg",
     ],
     default_currency="ZAR",
-    default_tax_template="za_vat_15",
+    default_tax_template=None,
     # Absent until now, so the pack shipped the SANS and ASAQS measurement
     # rules and the CIDB grading and then priced with a method belonging to no
     # country. The template existed the whole time and nothing named it.

@@ -32,7 +32,7 @@ MANIFEST = PartnerPackManifest(
     # Documentation only, as on every pack: the rate a bill is charged comes
     # from the dated tax seed for the project's country, and the methodology
     # template carries the same 20 for the cascade.
-    default_tax_template="ua_pdv_20",
+    default_tax_template=None,
     default_methodology="ukraine",
     validation_rule_packs=[
         "ua_nastanova_281",

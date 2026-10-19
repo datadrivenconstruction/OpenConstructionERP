@@ -35185,6 +35185,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-fakturering: {{platform}}",
     "modules.pack_built_in_payment": "Lovbestemte betalingsfrister: {{terms}}",
     "modules.pack_built_in_note": "Disse følger med platformen til projekter i {{country}}, med eller uden denne pakke. Pakken ændrer dem ikke.",
+    "modules.pack_built_in_no_vat": "Der er endnu ingen momssatser for {{country}}. Angiv momslinjen i tillæggene i hvert overslag.",
     "modules.pack_search_index": "AI-søgeindeks",
     "modules.pack_search_index_note": "Bygges ikke under installationen, for at holde hukommelsesforbruget lavt. Byg det senere under «Databaser & ressourcer», når du vil have AI-understøttet matching.",
     "modules.pack_search_index_link": "Åbn «Databaser & ressourcer»",

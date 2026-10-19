@@ -302,3 +302,123 @@ def test_the_california_demo_is_in_california_and_validates_as_masterformat() ->
     assert template.classification_standard == "masterformat"
     text = " ".join([template.project_name, template.project_description, str(template.project_metadata)])
     assert "Denver" not in text and "Colorado" not in text
+
+
+# ── A rule set that arrives with a module the pack switches on ─────────────────
+#
+# The eleven-areas pack names fifteen rule sets, and each one is registered by
+# the on_startup of a module the same pack switches on. On a fresh install every
+# module loads, so the preview resolves them all (the "Pack installs" CI lane
+# installs the pack on a fresh database). But an admin who had switched one of
+# those modules off got a 409 from the preview and from the apply, which is the
+# very action that would switch the module back on. A name nothing registers is
+# still refused while every module the pack needs is loaded.
+
+
+def _governance_pack() -> PartnerPackManifest:
+    return PartnerPackManifest(
+        slug="pending-module-pack",
+        partner_name="Pending Module Pack",
+        default_locale="de",
+        default_currency="EUR",
+        validation_rule_sets=["boq_quality", "project_governance"],
+        default_modules=["oe_project_governance"],
+    )
+
+
+def _registry(monkeypatch: pytest.MonkeyPatch, known: set[str], unloaded: list[str]) -> None:
+    import app.core.partner_pack.apply as apply_module
+
+    monkeypatch.setattr(apply_module, "_known_rule_sets", lambda: set(known))
+    monkeypatch.setattr(apply_module, "_module_exists", lambda _name: True)
+    monkeypatch.setattr(apply_module, "_unloaded_modules", lambda names: [n for n in names if n in unloaded])
+
+
+def test_a_rule_set_whose_module_the_pack_switches_on_is_pending_not_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    import app.core.partner_pack.apply as apply_module
+
+    _registry(monkeypatch, {"boq_quality"}, ["oe_project_governance"])
+    plan = apply_module._plan(_governance_pack())
+
+    assert plan["rule_sets_enabled"] == ["boq_quality"]
+    assert plan["rule_sets_pending_modules"] == ["project_governance"]
+    assert any("oe_project_governance" in w and "project_governance" in w for w in plan["warnings"])
+
+
+def test_a_rule_set_nothing_registers_is_still_refused_when_every_module_is_loaded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import app.core.partner_pack.apply as apply_module
+
+    _registry(monkeypatch, {"boq_quality"}, [])
+    with pytest.raises(apply_module.UnknownRuleSetError):
+        apply_module._plan(_governance_pack())
+
+
+async def test_the_apply_switches_the_module_on_and_then_runs_its_rule_set(monkeypatch: pytest.MonkeyPatch) -> None:
+    import app.core.partner_pack.apply as apply_module
+
+    known = {"boq_quality"}
+    unloaded = ["oe_project_governance"]
+    monkeypatch.setattr(apply_module, "_known_rule_sets", lambda: set(known))
+    monkeypatch.setattr(apply_module, "_module_exists", lambda _name: True)
+    monkeypatch.setattr(apply_module, "_unloaded_modules", lambda names: [n for n in names if n in unloaded])
+    monkeypatch.setattr(apply_module, "get_pack_by_slug", lambda _slug: _governance_pack())
+    saved: list[Any] = []
+    monkeypatch.setattr(apply_module, "save_applied_state", saved.append)
+    monkeypatch.setattr(apply_module, "reset_cache", lambda: None)
+
+    async def enable(name: str, _app: object) -> dict[str, str]:
+        # What the real loader does: on_startup registers the module's rule set.
+        unloaded.remove(name)
+        known.add("project_governance")
+        return {"name": name, "status": "enabled"}
+
+    monkeypatch.setattr(apply_module.module_loader, "enable_module", enable)
+    result = await apply_module.apply_pack("pending-module-pack", install_demo=False, app=object())  # type: ignore[arg-type]
+
+    assert result["applied"] is True
+    assert result["plan"]["rule_sets_enabled"] == ["boq_quality", "project_governance"]
+    assert result["plan"]["rule_sets_pending_modules"] == []
+    assert len(saved) == 1
+
+
+async def test_the_apply_refuses_when_the_module_came_up_without_the_rule_set(monkeypatch: pytest.MonkeyPatch) -> None:
+    import app.core.partner_pack.apply as apply_module
+
+    unloaded = ["oe_project_governance"]
+    monkeypatch.setattr(apply_module, "_known_rule_sets", lambda: {"boq_quality"})
+    monkeypatch.setattr(apply_module, "_module_exists", lambda _name: True)
+    monkeypatch.setattr(apply_module, "_unloaded_modules", lambda names: [n for n in names if n in unloaded])
+    monkeypatch.setattr(apply_module, "get_pack_by_slug", lambda _slug: _governance_pack())
+    saved: list[Any] = []
+    monkeypatch.setattr(apply_module, "save_applied_state", saved.append)
+
+    async def enable(name: str, _app: object) -> dict[str, str]:
+        unloaded.remove(name)
+        return {"name": name, "status": "enabled"}
+
+    monkeypatch.setattr(apply_module.module_loader, "enable_module", enable)
+    with pytest.raises(apply_module.UnknownRuleSetError):
+        await apply_module.apply_pack("pending-module-pack", install_demo=False, app=object())  # type: ignore[arg-type]
+    assert saved == [], "a pack whose rule set never arrived must not be recorded as applied"
+
+
+def test_the_preview_of_a_pack_with_no_vat_row_does_not_claim_tax_is_built_in(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The core tax table has no row for some pack countries yet (France, for one)."""
+    import app.core.partner_pack.apply as apply_module
+    import app.core.partner_pack.country_builtins as cb
+
+    monkeypatch.setattr(cb, "_vat", lambda _country: None)
+    m = PartnerPackManifest(
+        slug="no-vat-row-pack",
+        partner_name="No VAT Row Pack",
+        default_locale="fr",
+        default_currency="EUR",
+        metadata={"country": "FR"},
+    )
+    plan = apply_module._plan(m)
+    assert plan["built_in_for_country"]["vat"] is None
+    text = " ".join(plan["warnings"])
+    assert "Tax, public holidays" not in text
+    assert "no VAT rates for FR" in text

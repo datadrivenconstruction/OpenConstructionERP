@@ -35034,6 +35034,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Sähköinen laskutus: {{platform}}",
     "modules.pack_built_in_payment": "Lakisääteiset maksuehdot: {{terms}}",
     "modules.pack_built_in_note": "Nämä tulevat alustan mukana hankkeille, jotka sijaitsevat maassa {{country}}, tämän paketin kanssa tai ilman. Paketti ei muuta niitä.",
+    "modules.pack_built_in_no_vat": "Maalle {{country}} ei ole vielä ALV-kantoja. Määritä verorivi kunkin kustannusarvion lisissä.",
     "modules.pack_search_index": "Tekoälyhakuindeksi",
     "modules.pack_search_index_note": "Sitä ei rakenneta asennuksen aikana, jotta muistinkäyttö pysyy pienenä. Rakenna se myöhemmin kohdassa «Tietokannat ja Resurssit», kun haluat tekoälyavusteisen kohdistuksen.",
     "modules.pack_search_index_link": "Avaa «Tietokannat ja Resurssit»",

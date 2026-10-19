@@ -32,7 +32,7 @@ MANIFEST = PartnerPackManifest(
     # Documentation only, as on every pack: the rate a bill is charged comes
     # from the dated tax seed for the project's country, and the methodology
     # template carries the same 24 for the cascade.
-    default_tax_template="gr_fpa_24",
+    default_tax_template=None,
     default_methodology="greece",
     validation_rule_packs=[
         "gr_net_timologia",

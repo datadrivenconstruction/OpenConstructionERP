@@ -34775,6 +34775,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "ई-इनवॉइसिंग: {{platform}}",
     "modules.pack_built_in_payment": "वैधानिक भुगतान शर्तें: {{terms}}",
     "modules.pack_built_in_note": "ये {{country}} में स्थित परियोजनाओं के लिए प्लेटफ़ॉर्म के साथ आते हैं, इस पैक के साथ या उसके बिना। पैक इन्हें नहीं बदलता।",
+    "modules.pack_built_in_no_vat": "{{country}} के लिए अभी कोई VAT दर उपलब्ध नहीं है। हर एस्टीमेट के मार्कअप में कर वाली पंक्ति सेट करें।",
     "modules.pack_search_index": "AI खोज इंडेक्स",
     "modules.pack_search_index_note": "मेमोरी उपयोग कम रखने के लिए इंस्टॉलेशन के दौरान नहीं बनाया जाता। AI-सहायता प्राप्त मिलान चाहिए तो इसे बाद में «डेटाबेस और संसाधन» में बनाएँ।",
     "modules.pack_search_index_link": "«डेटाबेस और संसाधन» खोलें",

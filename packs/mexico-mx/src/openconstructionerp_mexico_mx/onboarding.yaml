@@ -55,6 +55,5 @@ steps:
       label: "Crear mi espacio de trabajo Mexico"
       apply:
         - set_default_currency: MXN
-        - set_tax_template: mx_iva_16
         - set_methodology: mexico
         - enable_rule_packs: [mexico, boq_quality, apu_precios_unitarios, iva_retenciones_cfdi, lopsrm_obra_publica, vivienda_social_infonavit, imss_nom_seguridad]

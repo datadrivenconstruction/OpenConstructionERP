@@ -34858,6 +34858,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-faktur: {{platform}}",
     "modules.pack_built_in_payment": "Ketentuan pembayaran menurut undang-undang: {{terms}}",
     "modules.pack_built_in_note": "Ini disertakan dalam platform untuk proyek yang berlokasi di {{country}}, dengan atau tanpa paket ini. Paket tidak mengubahnya.",
+    "modules.pack_built_in_no_vat": "Belum ada tarif PPN untuk {{country}}. Atur baris pajak di markup setiap estimasi.",
     "modules.pack_search_index": "Indeks pencarian AI",
     "modules.pack_search_index_note": "Tidak dibangun saat instalasi agar penggunaan memori tetap rendah. Bangun nanti di «Database & Sumber Daya» saat Anda ingin pencocokan berbantuan AI.",
     "modules.pack_search_index_link": "Buka «Database & Sumber Daya»",

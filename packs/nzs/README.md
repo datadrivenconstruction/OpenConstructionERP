@@ -5,7 +5,7 @@ Pre-configures OpenConstructionERP for **New Zealand** contractors.
 ## What's inside
 
 - **Locale**: `en-NZ` (NZ English with Kiwi construction vocabulary — chippie, sparkie, smoko, bach, gib board, LBP).
-- **Currency**: `NZD` with `nz_gst_15` tax template (15% GST).
+- **Currency**: `NZD` (GST 15%, not set by the pack).
 - **CWICR regions pre-loaded**: Auckland, Wellington, Christchurch.
 - **Standards & validation rule packs**:
   - `nzbc_acceptable_solutions` — New Zealand Building Code (B1, B2, C, E2, E3, F2, F4, G12, H1 acceptable solutions; PS1-PS4 producer statements).

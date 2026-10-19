@@ -42,7 +42,6 @@ steps:
       label: "Opprett mitt arbeidsomraade / Create my workspace"
       apply:
         - set_default_currency: NOK
-        - set_tax_template: no_mva_25
         - enable_rule_packs:
             - ns3420_specification
             - ns3451_classification

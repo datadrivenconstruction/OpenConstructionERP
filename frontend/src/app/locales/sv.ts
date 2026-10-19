@@ -35193,6 +35193,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-fakturering: {{platform}}",
     "modules.pack_built_in_payment": "Lagstadgade betalningsvillkor: {{terms}}",
     "modules.pack_built_in_note": "Dessa följer med plattformen för projekt i {{country}}, med eller utan det här paketet. Paketet ändrar dem inte.",
+    "modules.pack_built_in_no_vat": "Det finns ännu inga momssatser för {{country}}. Ange skatteraden i påslagen i varje kalkyl.",
     "modules.pack_search_index": "AI-sökindex",
     "modules.pack_search_index_note": "Byggs inte under installationen, för att hålla minnesanvändningen låg. Bygg det senare under «Databaser och resurser» när du vill ha AI-stödd matchning.",
     "modules.pack_search_index_link": "Öppna «Databaser och resurser»",

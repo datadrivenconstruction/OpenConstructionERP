@@ -65,7 +65,6 @@ steps:
       label: "Create my Hungarian workspace / Munkaterület létrehozása"
       apply:
         - set_default_currency: HUF
-        - set_tax_template: hu_afa_27
         - enable_rule_packs:
             - hu_magasepitesi_tetelrend
             - hu_anyag_dij_bontas

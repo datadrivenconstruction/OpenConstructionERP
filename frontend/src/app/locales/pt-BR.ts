@@ -33932,6 +33932,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Faturamento eletrônico: {{platform}}",
     "modules.pack_built_in_payment": "Prazos de pagamento previstos em lei: {{terms}}",
     "modules.pack_built_in_note": "Estes dados vêm com a plataforma para projetos localizados em {{country}}, com ou sem este pacote. O pacote não os altera.",
+    "modules.pack_built_in_no_vat": "Ainda não há alíquotas de IVA para {{country}}. Defina a linha de imposto nos acréscimos de cada orçamento.",
     "modules.pack_search_index": "Índice de pesquisa com IA",
     "modules.pack_search_index_note": "Não é criado durante a instalação, para manter baixo o uso de memória. Crie-o mais tarde em «Bancos de Dados e Recursos» quando quiser a correspondência assistida por IA.",
     "modules.pack_search_index_link": "Abrir «Bancos de Dados e Recursos»",

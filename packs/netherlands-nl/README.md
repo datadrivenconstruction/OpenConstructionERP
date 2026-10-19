@@ -7,7 +7,7 @@ engineering (RAW) and building (STABU).
 
 ## What this pack configures
 
-- **Currency EUR**, the `nl_btw_21` tax template and the `netherlands`
+- **Currency EUR** (the pack does not set BTW) and the `netherlands`
   estimating methodology, with a Dutch interface.
 - **NL/SfB classification** as the default, which is the Dutch adaptation of
   the SfB system used across Nordic and Benelux countries.
@@ -40,8 +40,7 @@ are the frameworks a Dutch estimate is written to fit.
 ## BTW
 
 The standard BTW rate is 21%. A reduced rate of 9% applies to renovation and
-maintenance of dwellings older than two years. The pack sets the `nl_btw_21`
-template as the default.
+maintenance of dwellings older than two years. The pack does not set BTW.
 
 ## Onboarding
 

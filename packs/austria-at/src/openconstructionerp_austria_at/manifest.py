@@ -24,7 +24,7 @@ MANIFEST = PartnerPackManifest(
     additional_locales={},
     cwicr_regions=[],
     default_currency="EUR",
-    default_tax_template="at_ust_20",
+    default_tax_template=None,
     default_methodology="austria",
     validation_rule_packs=[
         "oenorm_b2061",

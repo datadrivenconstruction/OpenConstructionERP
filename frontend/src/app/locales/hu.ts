@@ -34993,6 +34993,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-számlázás: {{platform}}",
     "modules.pack_built_in_payment": "Törvényi fizetési határidők: {{terms}}",
     "modules.pack_built_in_note": "Ezek a platformmal együtt érkeznek a(z) {{country}} országban lévő projektekhez, ezzel a csomaggal vagy nélküle. A csomag nem módosítja őket.",
+    "modules.pack_built_in_no_vat": "{{country}} országhoz még nincsenek ÁFA-kulcsok. Az adósort az egyes költségbecslések felárainál állítsa be.",
     "modules.pack_search_index": "MI-keresési index",
     "modules.pack_search_index_note": "Telepítés közben nem készül el, hogy alacsony maradjon a memóriahasználat. Később építse fel a «Adatbázisok és erőforrások» alatt, ha MI-támogatású párosítást szeretne.",
     "modules.pack_search_index_link": "«Adatbázisok és erőforrások» megnyitása",

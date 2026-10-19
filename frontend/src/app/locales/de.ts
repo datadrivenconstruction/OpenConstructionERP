@@ -35301,6 +35301,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-Rechnung: {{platform}}",
     "modules.pack_built_in_payment": "Gesetzliche Zahlungsfristen: {{terms}}",
     "modules.pack_built_in_note": "Diese sind für Projekte in {{country}} Teil der Plattform, mit oder ohne dieses Paket. Das Paket ändert sie nicht.",
+    "modules.pack_built_in_no_vat": "Für {{country}} liegen noch keine MwSt-Sätze vor. Legen Sie die Steuerzeile in den Zuschlägen jeder Kalkulation fest.",
     "modules.pack_search_index": "KI-Suchindex",
     "modules.pack_search_index_note": "Wird bei der Installation nicht aufgebaut, damit der Speicherbedarf niedrig bleibt. Bauen Sie ihn später unter «Datenbanken und Ressourcen» auf, wenn Sie KI-gestützten Abgleich nutzen möchten.",
     "modules.pack_search_index_link": "«Datenbanken und Ressourcen» öffnen",

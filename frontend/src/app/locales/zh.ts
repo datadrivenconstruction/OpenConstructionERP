@@ -35005,6 +35005,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "电子发票：{{platform}}",
     "modules.pack_built_in_payment": "法定付款期限：{{terms}}",
     "modules.pack_built_in_note": "无论是否安装此包，这些内容都随平台提供，适用于位于 {{country}} 的项目。此包不会更改它们。",
+    "modules.pack_built_in_no_vat": "{{country}} 暂无增值税(VAT)税率。请在每份估算的加价中设置税费行。",
     "modules.pack_search_index": "AI 搜索索引",
     "modules.pack_search_index_note": "为降低内存占用，安装期间不会构建。需要 AI 辅助匹配时，可稍后在“数据库和资源”中构建。",
     "modules.pack_search_index_link": "打开“数据库和资源”",

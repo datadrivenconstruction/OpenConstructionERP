@@ -35165,6 +35165,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-facturatie: {{platform}}",
     "modules.pack_built_in_payment": "Wettelijke betalingstermijnen: {{terms}}",
     "modules.pack_built_in_note": "Deze horen bij het platform voor projecten in {{country}}, met of zonder dit pakket. Het pakket wijzigt ze niet.",
+    "modules.pack_built_in_no_vat": "Er zijn nog geen btw-tarieven voor {{country}}. Stel de belastingregel in bij de opslagen van elke raming.",
     "modules.pack_search_index": "AI-zoekindex",
     "modules.pack_search_index_note": "Wordt tijdens de installatie niet opgebouwd, om het geheugengebruik laag te houden. Bouw hem later op onder «Databases en bronnen» als u AI-ondersteunde matching wilt.",
     "modules.pack_search_index_link": "«Databases en bronnen» openen",

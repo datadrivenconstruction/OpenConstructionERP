@@ -30,7 +30,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-de-berlin",
     ],
     default_currency="EUR",
-    default_tax_template="de_ust_19",
+    default_tax_template=None,
     default_methodology="germany",
     validation_rule_packs=[
         # DIN 276 cost group hierarchy and completeness

@@ -105,7 +105,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-zh-china",
     ],
     default_currency="CNY",
-    default_tax_template="cn_vat_9",
+    default_tax_template=None,
     # The regional markup table states the Chinese national build-up, and
     # ``_reconcile_with_region_table`` derives the methodology from it. Naming
     # it here is what makes a project created from this pack open on that

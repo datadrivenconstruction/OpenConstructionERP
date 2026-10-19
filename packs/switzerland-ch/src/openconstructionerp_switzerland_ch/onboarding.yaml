@@ -40,7 +40,6 @@ steps:
       label: "Arbeitsbereich anlegen / Create my workspace"
       apply:
         - set_default_currency: CHF
-        - set_tax_template: ch_mwst_8_1
         - enable_rule_packs:
             - sia_451
             - bkp_classification

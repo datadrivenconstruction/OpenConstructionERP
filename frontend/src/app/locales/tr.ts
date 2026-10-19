@@ -35605,6 +35605,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-fatura: {{platform}}",
     "modules.pack_built_in_payment": "Yasal ödeme koşulları: {{terms}}",
     "modules.pack_built_in_note": "Bunlar, bu paketle veya paketsiz, {{country}} konumundaki projeler için platformla birlikte gelir. Paket bunları değiştirmez.",
+    "modules.pack_built_in_no_vat": "{{country}} için henüz KDV oranı yok. Vergi satırını her keşfin kar ve genel gider kalemlerinde belirleyin.",
     "modules.pack_search_index": "Yapay zekâ arama dizini",
     "modules.pack_search_index_note": "Bellek kullanımını düşük tutmak için kurulum sırasında oluşturulmaz. Yapay zekâ destekli eşleştirme istediğinizde daha sonra «Veritabanları ve Kaynaklar» altında oluşturun.",
     "modules.pack_search_index_link": "«Veritabanları ve Kaynaklar» sayfasını aç",

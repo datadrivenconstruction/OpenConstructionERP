@@ -36041,6 +36041,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "الفوترة الإلكترونية: {{platform}}",
     "modules.pack_built_in_payment": "شروط الدفع النظامية: {{terms}}",
     "modules.pack_built_in_note": "تأتي هذه مع المنصة للمشاريع الواقعة في {{country}}، سواء مع هذه الحزمة أو بدونها. الحزمة لا تغيّرها.",
+    "modules.pack_built_in_no_vat": "لا توجد حتى الآن معدلات ضريبة القيمة المضافة للبلد {{country}}. حدّد بند الضريبة في هوامش كل تقدير.",
     "modules.pack_search_index": "فهرس البحث بالذكاء الاصطناعي",
     "modules.pack_search_index_note": "لا يُبنى أثناء التثبيت للحفاظ على انخفاض استهلاك الذاكرة. ابنِه لاحقًا ضمن «قواعد البيانات والموارد» عندما تريد المطابقة بمساعدة الذكاء الاصطناعي.",
     "modules.pack_search_index_link": "افتح «قواعد البيانات والموارد»",

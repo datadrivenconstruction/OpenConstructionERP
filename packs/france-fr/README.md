@@ -31,7 +31,7 @@ through insulation, HVAC and renewable energy provisions.
 
 ## What this pack enables
 
-- **Currency EUR**, the `fr_tva_20` tax template and DPGF as the
+- **Currency EUR** (the pack does not set VAT) and DPGF as the
   classification standard, with a French-language interface.
 - **One engine rule set**, `dpgf`, which validates that priced lines carry
   the decomposition structure the standard expects.

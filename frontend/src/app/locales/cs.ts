@@ -35563,6 +35563,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Elektronická fakturace: {{platform}}",
     "modules.pack_built_in_payment": "Zákonné platební lhůty: {{terms}}",
     "modules.pack_built_in_note": "Tyto údaje jsou součástí platformy pro projekty v zemi {{country}}, s tímto balíčkem i bez něj. Balíček je nemění.",
+    "modules.pack_built_in_no_vat": "Pro {{country}} zatím nejsou k dispozici sazby DPH. Řádek daně nastavte v přirážkách každého rozpočtu.",
     "modules.pack_search_index": "Index AI vyhledávání",
     "modules.pack_search_index_note": "Při instalaci se nevytváří, aby se ušetřila paměť. Vytvořte jej později v sekci «Databáze a zdroje», až budete chtít párování s pomocí AI.",
     "modules.pack_search_index_link": "Otevřít «Databáze a zdroje»",

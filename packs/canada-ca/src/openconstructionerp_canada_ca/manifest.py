@@ -30,7 +30,7 @@ MANIFEST = PartnerPackManifest(
         "cwicr-eng-toronto",
     ],
     default_currency="CAD",
-    default_tax_template="ca_gst_pst",
+    default_tax_template=None,
     default_methodology="canada",
     validation_rule_packs=[
         # CSI MasterFormat 2020 division numbering

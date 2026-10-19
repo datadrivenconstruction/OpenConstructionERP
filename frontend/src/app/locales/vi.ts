@@ -35021,6 +35021,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "Hóa đơn điện tử: {{platform}}",
     "modules.pack_built_in_payment": "Thời hạn thanh toán theo luật định: {{terms}}",
     "modules.pack_built_in_note": "Các mục này đi kèm nền tảng cho dự án tại {{country}}, dù có hay không có gói này. Gói không thay đổi chúng.",
+    "modules.pack_built_in_no_vat": "Chưa có thuế suất VAT cho {{country}}. Hãy đặt dòng thuế trong phần phụ phí của từng dự toán.",
     "modules.pack_search_index": "Chỉ mục tìm kiếm AI",
     "modules.pack_search_index_note": "Không được tạo trong lúc cài đặt để giữ mức dùng bộ nhớ thấp. Hãy tạo sau trong «Cơ sở dữ liệu & Tài nguyên» khi bạn muốn đối chiếu có AI hỗ trợ.",
     "modules.pack_search_index_link": "Mở «Cơ sở dữ liệu & Tài nguyên»",

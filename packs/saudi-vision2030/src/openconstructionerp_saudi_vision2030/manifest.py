@@ -49,7 +49,7 @@ MANIFEST = PartnerPackManifest(
     # on the activation dialog and then skipped at install.
     cwicr_regions=[],
     default_currency="SAR",
-    default_tax_template="sa_vat_15",
+    default_tax_template=None,
     # The GCC preliminaries-and-general cascade the catalogue builds for Saudi
     # Arabia from the GULF regional markup stack. Left empty until now, which
     # put every project created under this pack on the flat international

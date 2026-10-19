@@ -34957,6 +34957,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "電子インボイス: {{platform}}",
     "modules.pack_built_in_payment": "法定の支払条件: {{terms}}",
     "modules.pack_built_in_note": "これらは、このパックの有無にかかわらず、{{country}} 所在のプロジェクト向けにプラットフォームに含まれています。パックはこれらを変更しません。",
+    "modules.pack_built_in_no_vat": "{{country}} の VAT 税率はまだありません。各見積の「マークアップ」で税の行を設定してください。",
     "modules.pack_search_index": "AI検索インデックス",
     "modules.pack_search_index_note": "メモリ使用量を抑えるため、インストール中は作成されません。AI支援のマッチングを使いたいときに、後から「データベースとリソース」で作成してください。",
     "modules.pack_search_index_link": "「データベースとリソース」を開く",

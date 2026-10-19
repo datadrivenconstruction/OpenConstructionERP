@@ -7,7 +7,7 @@ regulatory landscape split between Abu Dhabi and Dubai.
 
 ## What this pack configures
 
-- **Currency AED**, the `ae_vat_5` tax template and the `uae` estimating
+- **Currency AED** (the pack does not set VAT) and the `uae` estimating
   methodology, with an English interface.
 - **MasterFormat classification** as the default work breakdown, which is the
   predominant system used across the UAE construction industry.
@@ -32,8 +32,7 @@ buildings, and communities, and scores from 1 Pearl (mandatory minimum) to
 ## VAT
 
 The UAE introduced VAT at 5% on 1 January 2018 under Federal Decree-Law No. 8
-of 2017. Construction services and materials are standard-rated at 5%. The pack
-sets the `ae_vat_5` tax template as the default.
+of 2017. Construction services and materials are standard-rated at 5%. The pack does not set the default rate.
 
 ## Onboarding
 

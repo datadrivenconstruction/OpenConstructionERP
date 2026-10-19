@@ -35001,6 +35001,7 @@ const resource = {
     "modules.pack_built_in_einvoice": "E-arveldus: {{platform}}",
     "modules.pack_built_in_payment": "Seadusjärgsed maksetingimused: {{terms}}",
     "modules.pack_built_in_note": "Need tulevad platvormiga kaasa projektidele riigis {{country}}, olenemata sellest paketist. Pakett neid ei muuda.",
+    "modules.pack_built_in_no_vat": "Riigi {{country}} jaoks pole käibemaksumäärasid veel olemas. Määrake maksurida iga eelarve juurdehindlustes.",
     "modules.pack_search_index": "Tehisintellekti otsinguindeks",
     "modules.pack_search_index_note": "Paigaldamise ajal seda ei ehitata, et mälukasutus püsiks madal. Ehitage see hiljem jaotises «Andmebaasid ja ressursid», kui soovite tehisintellekti abil sobitada.",
     "modules.pack_search_index_link": "Ava «Andmebaasid ja ressursid»",

@@ -22,11 +22,11 @@ No. 2/2017 (Jasa Konstruksi). The Kementerian PUPR (Ministry of Public Works and
 Housing) publishes the AHSP reference coefficients and regional price indices.
 
 PPN (Pajak Pertambahan Nilai, VAT) on construction services is 11 percent. The
-pack sets the `id_ppn_11` tax template.
+pack does not set it.
 
 ## What this pack enables
 
-- **Currency IDR** with the `id_ppn_11` tax template and the `indonesia`
+- **Currency IDR** (the pack does not set PPN) and the `indonesia`
   estimating methodology
 - **MasterFormat rule set** for classification validation, as the nearest
   supported hierarchy Indonesian AHSP-structured works map onto

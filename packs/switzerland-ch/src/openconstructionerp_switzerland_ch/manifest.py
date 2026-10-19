@@ -24,7 +24,7 @@ MANIFEST = PartnerPackManifest(
     additional_locales={},
     cwicr_regions=[],
     default_currency="CHF",
-    default_tax_template="ch_mwst_8_1",
+    default_tax_template=None,
     default_methodology="switzerland",
     validation_rule_packs=[
         "sia_451",
