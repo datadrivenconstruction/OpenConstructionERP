@@ -28,6 +28,7 @@ from typing import Any
 
 import httpx
 
+from app.core.url_safety import UnsafeUrlError, resolve_and_validate_ai_provider_url
 from app.modules.einvoice_clearance.adapters import (
     CancellationRequest,
     PollRequest,
@@ -149,7 +150,9 @@ def _external_http_signer(config: dict[str, Any]) -> XadesSigner:
 
     The service holds the certificate (a qualified seal, or a KSeF certificate
     on an HSM). ``config``: ``url`` (https), and optionally ``token_env`` naming
-    the environment variable with a bearer token for the service.
+    the environment variable with a bearer token for the service. The URL comes
+    from a registration, so it passes the self-hosted endpoint policy of
+    :mod:`app.core.url_safety` before every call.
     """
     url = str(config.get("url") or "").strip()
     if not url.startswith("https://"):
@@ -157,6 +160,10 @@ def _external_http_signer(config: dict[str, Any]) -> XadesSigner:
     token_env = str(config.get("token_env") or "").strip()
 
     async def sign(unsigned: str) -> str:
+        try:
+            await resolve_and_validate_ai_provider_url(url)
+        except UnsafeUrlError as exc:
+            raise KsefApiError(f"the XAdES signing service URL is refused: {exc}") from exc
         headers = {"Content-Type": "application/xml"}
         if token_env and os.environ.get(token_env):
             headers["Authorization"] = f"Bearer {os.environ[token_env]}"

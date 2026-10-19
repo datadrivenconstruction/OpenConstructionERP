@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import base64
 import datetime as dt
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
@@ -35,6 +36,8 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
+
+from app.core.url_safety import UnsafeUrlError, resolve_and_validate_ai_provider_url
 
 SIGNER_TEST = "test"
 SIGNER_STORED_KEY = "stored_key"
@@ -155,6 +158,11 @@ class ExternalHttpSigner:
     "ECDSA-SHA256"}``. Answer: JSON ``{"signature": <base64 DER>}``. The
     certificate is configured beside the URL, so a service that only signs is
     enough.
+
+    The URL comes from a unit's settings, so it passes the self-hosted endpoint
+    policy of :mod:`app.core.url_safety` before every call: loopback and the
+    private ranges are allowed for an agent next to the HSM, link-local and
+    cloud metadata addresses are refused.
     """
 
     kind = SIGNER_EXTERNAL_HTTP
@@ -167,6 +175,7 @@ class ExternalHttpSigner:
         headers: dict[str, str] | None = None,
         transport: httpx.AsyncBaseTransport | None = None,
         timeout: float = 15.0,
+        url_guard: Callable[[str], Awaitable[str]] | None = None,
     ) -> None:
         if not url.startswith("https://") and not url.startswith("http://localhost"):
             raise SigningError("An external signer is reached over https (or http://localhost for a local agent).")
@@ -174,6 +183,7 @@ class ExternalHttpSigner:
         self._headers = dict(headers or {})
         self._transport = transport
         self._timeout = timeout
+        self._url_guard = url_guard or resolve_and_validate_ai_provider_url
         self._certificate = certificate_info(certificate)
 
     @property
@@ -181,6 +191,10 @@ class ExternalHttpSigner:
         return self._certificate
 
     async def sign(self, message: bytes) -> bytes:
+        try:
+            await self._url_guard(self._url)
+        except UnsafeUrlError as exc:
+            raise SigningError(f"The signing service URL is refused: {exc}") from exc
         payload = {"message": base64.b64encode(message).decode("ascii"), "algorithm": "ECDSA-SHA256"}
         try:
             async with httpx.AsyncClient(transport=self._transport, timeout=self._timeout) as client:

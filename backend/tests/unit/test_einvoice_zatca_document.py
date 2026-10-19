@@ -407,10 +407,22 @@ class TestSigners:
             assert b"ECDSA-SHA256" in body
             return httpx.Response(200, json={"signature": base64.b64encode(b"sig").decode()})
 
+        async def resolves(url: str) -> str:
+            return url
+
         external = signing.ExternalHttpSigner(
-            "https://signer.example/sign", donor.certificate.certificate, transport=httpx.MockTransport(handler)
+            "https://signer.example/sign",
+            donor.certificate.certificate,
+            transport=httpx.MockTransport(handler),
+            url_guard=resolves,
         )
         assert await external.sign(b"x" * 32) == b"sig"
+
+    async def test_an_external_signer_at_a_metadata_address_is_refused(self):
+        donor = signing.make_test_signer()
+        external = signing.ExternalHttpSigner("https://169.254.169.254/sign", donor.certificate.certificate)
+        with pytest.raises(signing.SigningError, match="refused"):
+            await external.sign(b"x" * 32)
 
     def test_an_external_signer_must_be_https(self):
         donor = signing.make_test_signer()
