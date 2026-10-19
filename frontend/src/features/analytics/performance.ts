@@ -35,6 +35,43 @@ export interface PerformanceProjectRow {
   original_value?: Decimalish;
   original_currency?: string | null;
   fx_rate?: Decimalish;
+  /** How a cost index moved this project's money: series, months, factor and the value before. */
+  index_series?: string | null;
+  index_base_periods?: string[];
+  index_target_period?: string | null;
+  index_factor?: Decimalish;
+  /** Months the index series has no point for; they excluded the reading. */
+  index_missing_periods?: string[];
+  location_region?: string | null;
+  location_factor?: Decimalish;
+  unadjusted_value?: Decimalish;
+}
+
+/** The month and region historical money was brought to. `applicable` is false for a KPI without money. */
+export interface PerformanceCostIndex {
+  series_id: string | null;
+  series_name: string | null;
+  target_period: string | null;
+  target_region: string | null;
+  target_region_factor: Decimalish;
+  applicable: boolean;
+}
+
+/** Opt-in: bring historical money to a reference month and region with the price index register. */
+export interface CostIndexRequest {
+  index_series_id?: string | null;
+  /** YYYY-MM; the series' latest month when null. */
+  index_target_period?: string | null;
+  location_target_region?: string | null;
+}
+
+/** The cost index part of a request, to pass on to compare and drilldown unchanged. */
+export function costIndexOf(request: CostIndexRequest): CostIndexRequest {
+  return {
+    index_series_id: request.index_series_id ?? null,
+    index_target_period: request.index_target_period ?? null,
+    location_target_region: request.location_target_region ?? null,
+  };
 }
 
 export interface PerformanceBenchmarkFigures {
@@ -115,6 +152,7 @@ export interface PerformanceBenchmarkResponse {
   reporting_currency?: string | null;
   /** Currencies left apart because the FX register has no rate for them. */
   currencies_unconverted?: string[];
+  cost_index?: PerformanceCostIndex | null;
   /** Groups past the display cap, not returned. */
   groups_omitted?: number;
   /** Selected projects with no record for this KPI at all. */
@@ -146,7 +184,7 @@ export interface BenchmarkReadingOptions {
   statistic: BenchmarkStatistic;
 }
 
-export interface PerformanceBenchmarkRequest extends BenchmarkCohort, BenchmarkReadingOptions {
+export interface PerformanceBenchmarkRequest extends BenchmarkCohort, BenchmarkReadingOptions, CostIndexRequest {
   kpi: string;
   /** A project attribute (client, region, ...) or a row field such as classification.din276. */
   split_by?: string | null;
@@ -213,6 +251,7 @@ export interface PerformanceCheckResponse {
   value: Decimalish;
   unit_factor: Decimalish;
   group: PerformanceGroup | null;
+  cost_index?: PerformanceCostIndex | null;
   headline: Decimalish;
   statistic: BenchmarkStatistic | null;
   variance: Decimalish;
@@ -449,7 +488,7 @@ export function downloadCsv(csv: string, filename: string): void {
 
 /* ── Comparison, coverage, drilldown, position context ─────────────────── */
 
-export interface PerformanceCompareRequest extends BenchmarkCohort {
+export interface PerformanceCompareRequest extends BenchmarkCohort, CostIndexRequest {
   kpis: string[];
   convert_units: boolean;
   min_projects: number;
@@ -493,7 +532,7 @@ export interface PerformanceDataQuality {
   classification_share: Decimalish;
 }
 
-export interface PerformanceDrilldownRequest {
+export interface PerformanceDrilldownRequest extends CostIndexRequest {
   kpi: string;
   project_id: string;
   row_filters: KpiRowFilter[];
@@ -520,6 +559,8 @@ export interface PerformanceDrillRecord {
   /** The figures as counted in the group, after unit or currency conversion. */
   counted_numerator: Decimalish;
   counted_denominator: Decimalish;
+  /** The cost index and location factor this record's money moved by. */
+  index_factor?: Decimalish;
 }
 
 export interface PerformanceDrilldownResponse {

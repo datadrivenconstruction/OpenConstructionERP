@@ -14639,8 +14639,31 @@
           ]
         },
         {
+          "class_name": "CostIndexOptions",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Bring historical money to a reference month and region with the price index register.\n\nOpt-in. ``index_series_id`` restates every month of money by the series'\nratio to ``index_target_period`` (the series' latest month when absent);\n``location_target_region`` restates it by the ratio of that region's\nfactor to the project's. Either or both. A reading whose month, project\nregion or region factor the register lacks is excluded with the reason.",
+          "fields": [
+            {
+              "name": "index_series_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "index_target_period",
+              "type": "str | None"
+            },
+            {
+              "name": "location_target_region",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
           "class_name": "PerformanceBenchmarkRequest",
           "bases": [
+            "CostIndexOptions",
             "BenchmarkCohort"
           ],
           "docstring": "One KPI, read per project over a cohort.\n\nExactly one of ``kpi`` (a preset id or a stored custom KPI code) and\n``spec`` (a whitelisted spec, validated like ``POST /kpis``). An empty\n``project_ids`` means every project the caller can open, narrowed by the\nother cohort filters.\n\n``convert_units`` merges readings in compatible units (m2 and ft2) into\none group and lists each conversion; off, every unit is its own group.\n``min_projects`` and ``min_records`` mark a group with less evidence as\nnot a reliable benchmark; ``statistic`` picks the figure each group leads\nwith.",
@@ -14749,6 +14772,83 @@
               "name": "fx_rate",
               "type": "Decimal | None",
               "default": "None"
+            },
+            {
+              "name": "index_series",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "index_base_periods",
+              "type": "list[str]"
+            },
+            {
+              "name": "index_target_period",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "index_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "index_missing_periods",
+              "type": "list[str]"
+            },
+            {
+              "name": "location_region",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "location_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "unadjusted_value",
+              "type": "Decimal | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceCostIndex",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The reference a benchmark brought historical money to.\n\n``applicable`` is false for a KPI without money (hours per m2), which a\ncost index leaves as it is.",
+          "fields": [
+            {
+              "name": "series_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "series_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "target_period",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "target_region",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "target_region_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "applicable",
+              "type": "bool",
+              "default": "True"
             }
           ]
         },
@@ -15069,6 +15169,11 @@
               "type": "list[str]"
             },
             {
+              "name": "cost_index",
+              "type": "PerformanceCostIndex | None",
+              "default": "None"
+            },
+            {
               "name": "groups_omitted",
               "type": "int",
               "default": "0"
@@ -15365,7 +15470,7 @@
         {
           "class_name": "PerformanceCheckRequest",
           "bases": [
-            "BaseModel"
+            "CostIndexOptions"
           ],
           "docstring": "Where an estimate sits against a benchmark set's history.\n\nEither a ``value`` in ``unit`` and ``currency`` typed by the estimator,\nor a ``boq_position_id`` whose own estimate is read (its unit rate, or\nthe labour hours per unit of its resource split). Nothing is written.",
           "fields": [
@@ -15425,6 +15530,7 @@
         {
           "class_name": "PerformanceCompareRequest",
           "bases": [
+            "CostIndexOptions",
             "BenchmarkCohort"
           ],
           "docstring": "Several KPIs over one cohort, one project per row and one column per KPI group.\n\nThe same cohort and reading options as ``POST /performance/benchmark``;\neach KPI is a preset id or a custom KPI code. A split is not offered: a\ncomparison is by project, and a split would multiply the columns.",
@@ -15519,6 +15625,11 @@
               "name": "statistic",
               "type": "str",
               "default": "'weighted'"
+            },
+            {
+              "name": "cost_index",
+              "type": "PerformanceCostIndex | None",
+              "default": "None"
             }
           ]
         },
@@ -15596,7 +15707,7 @@
         {
           "class_name": "PerformanceDrilldownRequest",
           "bases": [
-            "BaseModel"
+            "CostIndexOptions"
           ],
           "docstring": "The rows behind one project's reading in one group.\n\n``dimensions`` lists, per row dimension of the group, the stored values\nthat land in it: the group's own unit and currency plus whatever the\nreading lists in ``converted_from`` / ``converted_from_currency``.\n``target_unit`` and ``reporting_currency`` are the group's, so the totals\nare restated the way the reading was.",
           "fields": [
@@ -15710,6 +15821,11 @@
             },
             {
               "name": "counted_denominator",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "index_factor",
               "type": "Decimal | None",
               "default": "None"
             }
@@ -16030,6 +16146,11 @@
             {
               "name": "shortfall",
               "type": "list[str]"
+            },
+            {
+              "name": "cost_index",
+              "type": "PerformanceCostIndex | None",
+              "default": "None"
             }
           ]
         }
@@ -16049,6 +16170,7 @@
         "ncr",
         "postcalc",
         "price_breakdown",
+        "price_index",
         "procurement",
         "progress",
         "projects",
@@ -275065,6 +275187,7 @@
       "ncr",
       "postcalc",
       "price_breakdown",
+      "price_index",
       "procurement",
       "progress",
       "projects",
@@ -276538,7 +276661,7 @@
     "total_columns": 9088,
     "total_relationships": 240,
     "total_routes": 4596,
-    "total_schemas": 4083,
+    "total_schemas": 4085,
     "total_python_files": 2740,
     "frontend_features": 209,
     "frontend_ts_files": 3557,

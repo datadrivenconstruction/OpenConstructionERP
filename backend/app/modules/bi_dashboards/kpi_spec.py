@@ -2108,6 +2108,37 @@ class ProjectReading:
     original_value: Decimal | None = None
     original_currency: str | None = None
     fx_rate: Decimal | None = None
+    #: The ``YYYY-MM`` month of the rows behind this reading, set only while
+    #: a benchmark reads money month by month to restate it with a cost index.
+    #: ``None`` there means the rows carry no date.
+    period: str | None = None
+    #: How a cost index restated the money, set only on request: the series,
+    #: the months the money was in, the month it was brought to, the factor
+    #: the reading moved by, and the value before. ``index_missing_periods``
+    #: names the months the series lacks when that excluded the reading.
+    index_series: str | None = None
+    index_base_periods: list[str] = field(default_factory=list)
+    index_target_period: str | None = None
+    index_factor: Decimal | None = None
+    index_missing_periods: list[str] = field(default_factory=list)
+    #: The project's region and the regional factor ratio applied to bring
+    #: the money to the requested region.
+    location_region: str | None = None
+    location_factor: Decimal | None = None
+    unadjusted_value: Decimal | None = None
+
+
+def period_bucket_exprs(bound: BoundEntity) -> list[Any]:
+    """Year and month of an entity's period column, to group money by the month it is in."""
+    column = bound.period_column
+    return [func.extract("year", column), func.extract("month", column)]
+
+
+def period_bucket_key(year: Any, month: Any) -> str | None:
+    """``YYYY-MM`` from the two extracted parts, ``None`` when the row has no date."""
+    if year is None or month is None:
+        return None
+    return f"{int(year):04d}-{int(month):02d}"
 
 
 async def evaluate_spec_by_project(
@@ -2118,6 +2149,7 @@ async def evaluate_spec_by_project(
     period_start: _date | None = None,
     period_end: _date | None = None,
     split_field: str | None = None,
+    by_period: bool = False,
 ) -> list[ProjectReading]:
     """Run a validated spec once per project of a cohort.
 
@@ -2136,6 +2168,11 @@ async def evaluate_spec_by_project(
     ``classification.din276``. It comes first in every reading's dimensions,
     so a group reads "330 / m2" rather than "m2 / 330".
 
+    ``by_period`` splits each reading once more by the month of the entity's
+    period column, carried in :attr:`ProjectReading.period` and not in the
+    group key, so a cost index can restate each month by its own factor
+    before the months are merged back.
+
     Raises:
         KPISpecError: The aggregation has no per-project reading to rank.
     """
@@ -2152,7 +2189,10 @@ async def evaluate_spec_by_project(
     bound = bind_entity(spec["entity"])
     dims = ([split_field] if split_field else []) + spec_dimensions(spec)
     dim_exprs = [bound.resolve_field(name).expr for name in dims]
-    stmt = select(bound.project_column, *dim_exprs, *_measures(bound, spec), func.count()).select_from(bound.model)
+    period_exprs = period_bucket_exprs(bound) if by_period else []
+    stmt = select(bound.project_column, *dim_exprs, *period_exprs, *_measures(bound, spec), func.count()).select_from(
+        bound.model
+    )
     stmt = _base_predicates(
         stmt,
         bound,
@@ -2162,7 +2202,7 @@ async def evaluate_spec_by_project(
         period_end=period_end,
         allowed_project_ids=project_ids,
     )
-    stmt = stmt.group_by(bound.project_column, *dim_exprs)
+    stmt = stmt.group_by(bound.project_column, *dim_exprs, *period_exprs)
     readings: list[ProjectReading] = []
     for raw in (await session.execute(stmt)).all():
         row = list(raw)
@@ -2170,13 +2210,16 @@ async def evaluate_spec_by_project(
         if records == 0:
             continue
         pid = row.pop(0)
-        dim_values, measures = row[: len(dims)], row[len(dims) :]
+        dim_values = row[: len(dims)]
+        period = period_bucket_key(*row[len(dims) : len(dims) + 2]) if by_period else None
+        measures = row[len(dims) + len(period_exprs) :]
         reading = ProjectReading(
             project_id=pid if isinstance(pid, uuid.UUID) else uuid.UUID(str(pid)),
             group_key=dimension_key(dim_values),
             dimensions={name: (None if v is None else str(v)) for name, v in zip(dims, dim_values, strict=True)},
             value=None,
             records=records,
+            period=period,
         )
         if aggregation in ("ratio", "weighted_avg"):
             reading.numerator = _to_decimal(measures[0])

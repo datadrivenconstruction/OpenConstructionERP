@@ -17,6 +17,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import {
   NULL_GROUP_KEY,
   buildCompareMatrix,
+  costIndexOf,
   downloadCsv,
   downloadMatrixXlsx,
   fetchPerformanceCompare,
@@ -62,6 +63,7 @@ export function PerformanceCompare({
       min_records: request.min_records,
       statistic: request.statistic,
       reporting_currency: request.reporting_currency ?? null,
+      ...costIndexOf(request),
     }),
     [request, chosen],
   );

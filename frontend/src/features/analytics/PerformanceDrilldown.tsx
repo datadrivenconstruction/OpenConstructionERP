@@ -12,9 +12,12 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import { Button, EmptyState, SideDrawer, Skeleton } from '@/shared/ui';
+import { fmtNumber } from '@/shared/lib/formatters';
 import {
+  costIndexOf,
   drillDimensions,
   fetchDrilldown,
+  toNumber,
   type PerformanceBenchmarkRequest,
   type PerformanceGroup,
   type PerformanceProjectRow,
@@ -53,6 +56,7 @@ export function PerformanceDrilldown({
         dimensions: drillDimensions(target.group, target.row),
         target_unit: target.group.dimensions.unit ?? null,
         reporting_currency: request.reporting_currency ?? null,
+        ...costIndexOf(request),
         offset,
         limit: PAGE,
       }
@@ -102,7 +106,7 @@ export function PerformanceDrilldown({
           <p className="text-2xs text-content-tertiary">
             {t('analytics.perf.drill_hint', {
               defaultValue:
-                'The totals are summed over every record below and match the value in the table. Figures in brackets are as counted after unit or currency conversion.',
+                'The totals are summed over every record below and match the value in the table. Figures in brackets are as counted after unit, currency or cost index conversion.',
             })}
           </p>
           {data.records.length === 0 ? (
@@ -127,6 +131,11 @@ export function PerformanceDrilldown({
                       r.counted_denominator !== null &&
                       r.counted_denominator !== undefined &&
                       String(r.counted_denominator) !== String(r.denominator);
+                    const restated =
+                      r.counted_numerator !== null &&
+                      r.counted_numerator !== undefined &&
+                      String(r.counted_numerator) !== String(r.numerator);
+                    const factor = toNumber(r.index_factor ?? null);
                     return (
                       <tr key={r.record_id} className="border-b border-border-light last:border-0">
                         <td className="max-w-[18rem] py-1 pe-2">
@@ -145,7 +154,20 @@ export function PerformanceDrilldown({
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-1 text-right tabular-nums">{fmtValue(r.numerator) ?? '-'}</td>
+                        <td className="px-2 py-1 text-right tabular-nums">
+                          {fmtValue(r.numerator) ?? '-'}
+                          {restated && (
+                            <span className="ms-1 text-content-tertiary">({fmtValue(r.counted_numerator)})</span>
+                          )}
+                          {factor !== null && factor !== 1 && (
+                            <div className="text-2xs text-content-tertiary">
+                              {t('analytics.perf.factor_times', {
+                                defaultValue: 'x{{factor}}',
+                                factor: fmtNumber(factor, 4),
+                              })}
+                            </div>
+                          )}
+                        </td>
                         <td className="px-2 py-1 text-right tabular-nums">
                           {fmtValue(r.denominator) ?? '-'}
                           {converted && (
