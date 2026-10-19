@@ -25,6 +25,7 @@ describe('limitationRegime', () => {
       'fr_civil_1792_6',
       'fr_civil_1792_3',
       'fr_civil_1792',
+      'sa_sbc_decennial',
     ]);
     expect(limitationRegime('de_vob_b')?.months).toBe(48);
     expect(limitationRegime('de_bgb')?.months).toBe(60);
@@ -32,6 +33,7 @@ describe('limitationRegime', () => {
     expect(limitationRegime('fr_civil_1792_6')?.months).toBe(12);
     expect(limitationRegime('fr_civil_1792_3')?.months).toBe(24);
     expect(limitationRegime('fr_civil_1792')?.months).toBe(120);
+    expect(limitationRegime('sa_sbc_decennial')?.months).toBe(120);
   });
 
   it('treats no regime and an unknown regime alike, as no regime', () => {

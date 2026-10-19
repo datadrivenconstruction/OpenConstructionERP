@@ -20,7 +20,10 @@ one was removed.
 Public holidays are deliberately not shipped here: they differ by jurisdiction
 and change every year, and a wrong holiday list is worse than an honest
 weekends-only count because it produces a date nobody can reproduce. Callers
-with a holiday calendar pass it as ``holidays``.
+with a holiday calendar pass it as ``holidays``. A country whose week is not
+Monday to Friday passes its working weekdays as ``working_week`` (Monday is
+0), which :func:`working_week_for` reads from the country table in
+:mod:`app.core.calendar`, so the two modules never disagree on the week.
 
 That decision is what separates this module from :mod:`app.core.calendar`, which
 does ship per-country holiday tables and counts on a *scheduling* convention: it
@@ -38,19 +41,43 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import date, timedelta
 
-_SATURDAY = 5
+#: Monday to Friday, Monday being 0.
+MONDAY_TO_FRIDAY: frozenset[int] = frozenset({0, 1, 2, 3, 4})
 
 #: The two bases a period can be counted on.
 CALENDAR = "calendar"
 BUSINESS = "business"
 
 
-def is_business_day(day: date, holidays: Iterable[date] = ()) -> bool:
+def working_week_for(country_code: str | None) -> frozenset[int]:
+    """The working weekdays of a country (Monday is 0), Monday to Friday when it has none on file.
+
+    Read from the working-week table of :mod:`app.core.calendar`, the one
+    place the platform states a country's week. Only the week is read, never
+    the holidays: this module ships no holiday list.
+    """
+    from app.core.calendar import _DEFAULT_WORKING_WEEK, _WORKING_WEEK  # noqa: PLC0415
+
+    code = (country_code or "").strip().upper().split("-", 1)[0]
+    return frozenset(_WORKING_WEEK.get(code, _DEFAULT_WORKING_WEEK))
+
+
+def is_business_day(
+    day: date,
+    holidays: Iterable[date] = (),
+    working_week: frozenset[int] = MONDAY_TO_FRIDAY,
+) -> bool:
     """Whether ``day`` counts as a business (working) day."""
-    return day.weekday() < _SATURDAY and day not in set(holidays)
+    return day.weekday() in working_week and day not in set(holidays)
 
 
-def add_days(start: date, days: int, basis: str = CALENDAR, holidays: Iterable[date] = ()) -> date:
+def add_days(
+    start: date,
+    days: int,
+    basis: str = CALENDAR,
+    holidays: Iterable[date] = (),
+    working_week: frozenset[int] = MONDAY_TO_FRIDAY,
+) -> date:
     """``start`` plus ``days``, counted on ``basis``.
 
     ``days`` may be negative, which counts backwards on the same basis. Zero
@@ -61,7 +88,8 @@ def add_days(start: date, days: int, basis: str = CALENDAR, holidays: Iterable[d
         start: The date the period runs from.
         days: How many days, positive forwards and negative backwards.
         basis: ``"calendar"`` or ``"business"``.
-        holidays: Days that are not business days beyond Saturday and Sunday.
+        holidays: Days that are not business days beyond the weekend.
+        working_week: The weekdays that are business days, Monday being 0.
 
     Returns:
         The end of the period.
@@ -81,9 +109,9 @@ def add_days(start: date, days: int, basis: str = CALENDAR, holidays: Iterable[d
     current = start
     while remaining:
         current = current + timedelta(days=step)
-        if is_business_day(current, holiday_set):
+        if is_business_day(current, holiday_set, working_week):
             remaining -= 1
     return current
 
 
-__all__ = ["BUSINESS", "CALENDAR", "add_days", "is_business_day"]
+__all__ = ["BUSINESS", "CALENDAR", "MONDAY_TO_FRIDAY", "add_days", "is_business_day", "working_week_for"]

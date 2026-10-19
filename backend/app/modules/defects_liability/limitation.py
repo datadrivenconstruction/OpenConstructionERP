@@ -61,6 +61,7 @@ class LimitationRegime(StrEnum):
     FR_CIVIL_1792_6 = "fr_civil_1792_6"  # France: garantie de parfait achèvement, one year
     FR_CIVIL_1792_3 = "fr_civil_1792_3"  # France: garantie biennale de bon fonctionnement, two years
     FR_CIVIL_1792 = "fr_civil_1792"  # France: responsabilité décennale, ten years
+    SA_SBC_DECENNIAL = "sa_sbc_decennial"  # Saudi Arabia: decennial liability under the building code law
 
 
 @dataclass(frozen=True)
@@ -191,6 +192,27 @@ LIMITATION_REGIMES: tuple[LimitationRegimeSpec, ...] = (
             "insurance is a period this register computes."
         ),
     ),
+    LimitationRegimeSpec(
+        code=LimitationRegime.SA_SBC_DECENNIAL.value,
+        jurisdiction="Saudi Arabia",
+        country_code="SA",
+        statute="Saudi Building Code Application Law (Royal Decree M/43 of 1438H), Art. 29",
+        statute_reference=(
+            "Art. 29 Saudi Building Code Application Law: the contractor, the designer and the supervising "
+            "consultant are jointly liable for ten years from completion"
+        ),
+        months=120,
+        starts_from="acceptance",
+        notes=(
+            "The contractor, the designer and the supervising consultant are jointly liable for ten years for "
+            "the total or partial collapse of the building and for defects that threaten its stability or "
+            "safety. The ten years run from completion and handover for occupation, recorded here as the "
+            "acceptance date. Inherent defects insurance covering the same decade is compulsory for "
+            "qualifying private projects (see MANDATORY_DEFECTS_INSURANCE). Read "
+            "in secondary summaries; the window for bringing a claim after a defect appears was not confirmed "
+            "and is not computed."
+        ),
+    ),
 )
 
 # Canonical ordered tuple of the shipped regime codes, exposed so the schemas,
@@ -200,6 +222,29 @@ LIMITATION_REGIMES: tuple[LimitationRegimeSpec, ...] = (
 ALL_LIMITATION_REGIMES: tuple[str, ...] = tuple(spec.code for spec in LIMITATION_REGIMES)
 
 _BY_CODE: dict[str, LimitationRegimeSpec] = {spec.code: spec for spec in LIMITATION_REGIMES}
+
+#: Insurance a country makes compulsory against the defects its decennial
+#: liability covers. Data shown beside the limitation regime; nothing enforces
+#: it. Saudi Arabia: Cabinet Resolution 509 made inherent defects
+#: insurance compulsory for qualifying private projects, starting on 2020-05-02
+#: in the main cities of five regions. The current
+#: scope (which regions and building types in 2025-2026) was not confirmed in
+#: a primary text, so the row is flagged for review.
+MANDATORY_DEFECTS_INSURANCE: dict[str, dict[str, object]] = {
+    "SA": {
+        "name": "Inherent defects insurance (IDI)",
+        "statute_reference": "Cabinet Resolution 509; standard policy wording of the insurance regulator",
+        "source_url": "https://www.hfw.com/insights/ksa-mandates-inherent-defects-insurance-policy-for-projects-oct-2021",
+        "read_date": "2026-10-19",
+        "effective_date": "2020-05-02",
+        "years": 10,
+        "limitation_regime": LimitationRegime.SA_SBC_DECENNIAL.value,
+        "covers": "Structural collapse and defects threatening stability or safety of the building",
+        "applies_to": "Qualifying private projects; at the start in 2020, those in the main cities of five regions",
+        "needs_expert_review": True,
+        "review_reason": "The scope in force in 2025-2026 and the phased list of regions were not read.",
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -335,6 +380,7 @@ def describe(spec: LimitationRegimeSpec, end_date: date | None = None) -> str:
 __all__ = [
     "ALL_LIMITATION_REGIMES",
     "LIMITATION_REGIMES",
+    "MANDATORY_DEFECTS_INSURANCE",
     "LIMITATION_STARTS",
     "DerivedPeriod",
     "LimitationRegime",

@@ -137,6 +137,52 @@ PRICE_ADJUSTMENT_REGIMES: dict[str, dict[str, Any]] = {
 }
 
 
+#: Price adjustment by a threshold test instead of a formula. Some laws do not
+#: index the price; they compensate a material price movement only when it
+#: crosses a threshold on the item and on the contract, up to a cap, through a
+#: claim a committee decides. :func:`assess_trigger_claim` answers whether a
+#: claim crosses both thresholds and how much of it the cap lets through. No
+#: amount is computed from indices: the committee decides the movement.
+PRICE_ADJUSTMENT_TRIGGERS: dict[str, dict[str, Any]] = {
+    "sa_gtpl_ir113": {
+        "code": "sa_gtpl_ir113",
+        "country_code": "SA",
+        "jurisdiction": "Saudi Arabia (public works, tenders under the 2019 law)",
+        "statute": "Implementing Regulations of the Government Tenders and Procurement Law (2019), Art. 113",
+        "source_url": "https://mof.gov.sa/en/Knowledgecenter/newGovTendandProcLow/Documents/Executive%20Regulations.pdf",
+        "read_date": "2026-10-19",
+        "effective_date": "2020-04-24",
+        "materials": ["cement", "steel", "asphalt", "ready_mix_concrete", "timber", "pipes", "cables"],
+        "material_change_min_percent": "10",
+        "contract_change_above_percent": "3",
+        "compensation_cap_percent_of_contract": "20",
+        "claim_days": 60,
+        "consultant_days": 21,
+        "agency_days": 45,
+        "committee_days": 45,
+        "index_publisher": "Official price indexes; the series the Ministry of Finance accepts is not confirmed",
+        "needs_expert_review": True,
+        "note": (
+            "A listed raw material whose price moves by ten percent or more on the official indexes, and a "
+            "resulting change in the contract cost of more than three percent of its value, not caused by the "
+            "contractor's delay, entitle the contractor to compensation, and a fall is deducted the same way. "
+            "Changes in customs duties, fees, taxes and officially priced items after the bid date are "
+            "compensated separately. The claim is made within 60 days of the event; the consultant has 21 days, "
+            "the agency 45 and the committee 45. Compensation is capped at twenty percent of the contract value, "
+            "the rest goes to the Administrative Court. Fixed profit margin contracts are excluded. The English "
+            'text reads "five percent (3%)" for the contract threshold: the figure in brackets is used here '
+            "until the Arabic text is checked. A Ministry of Finance decision reported in September 2026 may "
+            "have replaced the article; it was not read."
+        ),
+    },
+}
+
+
+def trigger_for(code: str | None) -> dict[str, Any] | None:
+    """The trigger row for ``code``, or ``None``."""
+    return PRICE_ADJUSTMENT_TRIGGERS.get((code or "").strip())
+
+
 class PriceAdjustmentError(ValueError):
     """The inputs cannot produce an adjustment. ``problem`` names why, for a translated message."""
 
@@ -322,6 +368,51 @@ def compute_adjustment(
     )
 
 
+def assess_trigger_claim(
+    code: str,
+    material_change_percent: Any,
+    contract_change_percent: Any,
+    claimed_percent_of_contract: Any,
+) -> dict[str, Any]:
+    """Whether a price movement crosses a trigger regime's thresholds, and what the cap lets through.
+
+    Args:
+        code: A key of :data:`PRICE_ADJUSTMENT_TRIGGERS`.
+        material_change_percent: The listed material's price movement, signed.
+        contract_change_percent: The resulting change in contract cost as a
+            percent of the contract value, signed.
+        claimed_percent_of_contract: The compensation claimed, as a percent of
+            the contract value.
+
+    Returns:
+        ``triggered`` (both thresholds crossed, in either direction),
+        ``payable_percent_of_contract`` (the claim up to the cap, ``0`` when
+        not triggered), ``excess_percent_of_contract`` (what the cap leaves to
+        the court) and ``needs_expert_review`` from the row.
+
+    Raises:
+        PriceAdjustmentError: An unknown regime or an input that is not a number.
+    """
+    row = trigger_for(code)
+    if row is None:
+        raise PriceAdjustmentError("unknown_regime", f"unknown price adjustment trigger {code!r}")
+    material = abs(_decimal(material_change_percent, "material_change_percent"))
+    contract = abs(_decimal(contract_change_percent, "contract_change_percent"))
+    claimed = abs(_decimal(claimed_percent_of_contract, "claimed_percent_of_contract"))
+    triggered = material >= Decimal(row["material_change_min_percent"]) and contract > Decimal(
+        row["contract_change_above_percent"]
+    )
+    cap = Decimal(row["compensation_cap_percent_of_contract"])
+    payable = min(claimed, cap) if triggered else ZERO
+    return {
+        "code": row["code"],
+        "triggered": triggered,
+        "payable_percent_of_contract": payable,
+        "excess_percent_of_contract": (claimed - payable) if triggered else ZERO,
+        "needs_expert_review": bool(row.get("needs_expert_review")),
+    }
+
+
 def add_months(start: date, months: int) -> date:
     """``start`` plus whole months, clamped to the last day of a shorter month."""
     month = start.month - 1 + months
@@ -367,13 +458,16 @@ def adjustment_dates(regime_code: str, base_date: date, start: date | None, end:
 __all__ = [
     "COEFFICIENT_RULES",
     "PRICE_ADJUSTMENT_REGIMES",
+    "PRICE_ADJUSTMENT_TRIGGERS",
     "AdjustmentItem",
     "AdjustmentResult",
     "PriceAdjustmentError",
     "add_months",
     "adjustment_dates",
+    "assess_trigger_claim",
     "coefficient_problems",
     "compute_adjustment",
     "qualifies",
     "regime_for",
+    "trigger_for",
 ]

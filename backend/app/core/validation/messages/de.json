@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Dieser Tag wurde am {date} gearbeitet und erreichte das Büro erst {days} Tage später",
       "suggestion": "Die Stunden vor der Genehmigung gegen den Tag selbst prüfen, die Abrechnung kann bereits geschlossen sein"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Zeile {line} erfasst Arbeit von {start} bis {end} am {date}, innerhalb des mittäglichen Verbots für Arbeiten im Freien von {ban_from} bis {ban_to}",
+      "suggestion": "Fand die Arbeit im Freien in direkter Sonne statt, außerhalb der Verbotszeiten verlegen; Arbeiten in Innenräumen und ausgenommene Branchen sind nicht betroffen"
     }
   },
   "ai_takeoff": {

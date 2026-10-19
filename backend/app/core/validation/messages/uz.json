@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Ish {date} kuni bajarilgan, lekin ofisga faqat {days} kundan keyin yetib kelgan",
       "suggestion": "Tasdiqlashdan oldin soatlarni shu kunning yozuvlari bilan tekshiring; toʻlovni baholash davri allaqachon yopilgan boʻlishi mumkin"
+    },
+    "outdoor_heat_ban": {
+      "fail": "{line}-qatorda {date} kuni {start} dan {end} gacha bajarilgan ish qayd etilgan, bu {ban_from} dan {ban_to} gacha tushki paytda ochiq havoda ishlashni taqiqlash vaqtiga to'g'ri keladi",
+      "suggestion": "Agar bu ish ochiq havoda to'g'ri quyosh ostida bajarilgan bo'lsa, uni taqiqlangan soatlardan tashqariga ko'chiring; bino ichidagi ishlar va istisno qilingan sohalarga bu taalluqli emas"
     }
   },
   "ai_takeoff": {

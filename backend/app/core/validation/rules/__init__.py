@@ -20,6 +20,7 @@ from __future__ import annotations
 import logging
 import re
 import unicodedata
+from datetime import timezone
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
@@ -9631,6 +9632,66 @@ class FieldTimeOfflineSyncDelay(ValidationRule):
         ]
 
 
+class FieldTimeOutdoorHeatBan(ValidationRule):
+    """A line whose clock times touch a seasonal midday outdoor work ban.
+
+    The bans are national data in :mod:`app.core.work_restrictions` (Saudi
+    Arabia: 12:00 to 15:00 from 15 June to 15 September), read on the
+    project's country, which the service passes as ``project_country``. A
+    WARNING, never an error: the line does not say whether the work was
+    outdoors in the sun, and every ban exempts some sectors. A line without
+    clock times, or a project without a country, is not judged.
+    """
+
+    rule_id = "field_time.outdoor_heat_ban"
+    name = "Field Time Outdoor Heat Ban"
+    standard = "field_time"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Flags a line recorded inside a country's summer midday outdoor work ban."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        meta = getattr(context, "metadata", None) or {}
+        country = meta.get("project_country")
+        if not country:
+            return []
+        from app.core.work_restrictions import ban_overlap
+
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for index, line in enumerate(_ft_lines(context)):
+            hit = ban_overlap(str(country), line.get("start"), line.get("end"))
+            if hit is None:
+                continue
+            ban, day = hit
+            start, end = line["start"], line["end"]
+            offset = timezone(ban.utc_offset)
+            local_start = start.astimezone(offset) if start.tzinfo else start
+            local_end = end.astimezone(offset) if end.tzinfo else end
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "field_time.outdoor_heat_ban.fail",
+                        locale=locale,
+                        line=_ft_line_label(index, line),
+                        start=local_start.strftime("%H:%M"),
+                        end=local_end.strftime("%H:%M"),
+                        date=day.isoformat(),
+                        ban_from=ban.hours_from.strftime("%H:%M"),
+                        ban_to=ban.hours_to.strftime("%H:%M"),
+                    ),
+                    element_ref=str(line.get("id") or index + 1),
+                    suggestion=translate("field_time.outdoor_heat_ban.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
 class FieldTimeApprovedImmutable(ValidationRule):
     """An approved or reversed timesheet cannot be edited - only reversed."""
 
@@ -11804,6 +11865,7 @@ def register_builtin_rules() -> None:
         (FieldTimeApprovedImmutable(), None),
         (FieldTimeOfflineClockPlausible(), None),
         (FieldTimeOfflineSyncDelay(), None),
+        (FieldTimeOutdoorHeatBan(), None),
         # Estimate Audit (curated cross-checks: wrong unit, near-duplicate,
         # missing companion, catalogue-benchmarked rate outlier)
         (WrongUnitOfMeasure(), ["estimate_audit"]),

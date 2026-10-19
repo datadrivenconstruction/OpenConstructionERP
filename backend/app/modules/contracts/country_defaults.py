@@ -812,6 +812,60 @@ WORKS_CONTRACT_DEFAULTS: dict[str, dict[str, dict[str, Any]]] = {
             ),
         },
     },
+    # Saudi Arabia, public works: the Government Tenders and Procurement Law
+    # (Royal Decree M/128 of 2019) and its Implementing Regulations (Ministerial
+    # Resolution 1242/1441 as amended, in force 2020-04-24), read in the
+    # Ministry of Finance English text,
+    # https://mof.gov.sa/en/Knowledgecenter/newGovTendandProcLow/Documents/Executive%20Regulations.pdf,
+    # on 2026-10-19. IR Art. 111: the agency may deduct up to ten percent of
+    # each invoice to build the final invoice, which is not less than ten
+    # percent of the value of a general construction contract, and pays it on
+    # initial delivery against the completion, zakat/tax and GOSI certificates.
+    # The payment cycle is 70 working days (IR Art. 109), which is the payment
+    # clock's regime sa_gtpl_ir109 and not a calendar figure. Tenders floated
+    # under the new law (Royal Decree M/76 of 2026) may differ once its
+    # regulations are issued; the dated limits in public_procurement say so.
+    "SA": {
+        "public": {
+            "standard_form": "Government Tenders and Procurement Law tender documents",
+            "retention_percent": _figure(
+                "10",
+                "statute",
+                "Government Tenders and Procurement Law 2019, Implementing Regulations, Art. 111(1)",
+                "The agency may deduct up to ten percent of each invoice to build the final invoice that is paid "
+                "on initial delivery.",
+            ),
+            "retention_cap_percent": _figure(
+                "10",
+                "statute",
+                "Government Tenders and Procurement Law 2019, Implementing Regulations, Art. 111(2)",
+                "The final invoice is ten percent of the value of a general construction contract (five percent "
+                "for other contracts), so deductions stop once they reach it.",
+            ),
+            "retention_release_split": _figure(
+                _split(("substantial_completion", "100")),
+                "statute",
+                "Government Tenders and Procurement Law 2019, Implementing Regulations, Art. 111",
+                "The final invoice is paid in full on initial delivery, against the completion certificate and "
+                "the zakat and tax certificate and the social insurance (GOSI) certificate. The five percent "
+                "final guarantee is a separate bank guarantee.",
+            ),
+            "payment_period_days": _figure(
+                None,
+                "statute",
+                "Government Tenders and Procurement Law 2019, Implementing Regulations, Art. 109",
+                "No calendar figure: the consultant has 10 working days, the agency 15 to issue the payment "
+                "order and the Ministry of Finance 45 to pay, 70 working days in all on the Sunday to Thursday "
+                "week. The payment clock counts them.",
+            ),
+            "certificate_name": _figure(
+                "مستخلص",
+                "statute",
+                "Government Tenders and Procurement Law 2019, Implementing Regulations, Arts. 109 and 111",
+                "The contractor's invoice (mustakhlas) for each interim payment, certified by the consultant.",
+            ),
+        },
+    },
 }
 
 

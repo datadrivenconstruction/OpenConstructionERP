@@ -35,7 +35,9 @@ from app.modules.payment_clock.clock import compute_schedule
 from app.modules.payment_clock.data import PAYMENT_REGIMES
 from app.modules.payment_release.release_certificates import gated_requirements
 
-_GULF = ("AE", "SA", "QA", "KW", "BH", "OM", "JO")
+# Saudi Arabia is left out: it has a public works profile of its own, held
+# by test_saudi_public_works.py.
+_GULF = ("AE", "QA", "KW", "BH", "OM", "JO")
 
 
 def _split(resolved: dict) -> list[tuple[str, str]]:

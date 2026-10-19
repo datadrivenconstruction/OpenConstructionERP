@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Arbetet utfördes {date}, men uppgifterna nådde kontoret först {days} dagar senare",
       "suggestion": "Kontrollera timmarna mot den aktuella arbetsdagen innan godkännande; avräkningen kan redan vara stängd"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Rad {line} registrerar arbete från {start} till {end} den {date}, inom middagsförbudet mot utomhusarbete från {ban_from} till {ban_to}",
+      "suggestion": "Om arbetet utfördes utomhus i direkt sol, flytta det utanför förbudstiderna; inomhusarbete och undantagna sektorer påverkas inte"
     }
   },
   "ai_takeoff": {

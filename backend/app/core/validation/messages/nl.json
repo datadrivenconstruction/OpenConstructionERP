@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Het werk is uitgevoerd op {date}, maar de registratie bereikte het kantoor pas {days} dagen later",
       "suggestion": "Controleer vóór goedkeuring de uren tegen de werkelijke werkdag; de waarderingsperiode kan al zijn afgesloten"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Regel {line} registreert werk van {start} tot {end} op {date}, binnen het middagverbod op buitenwerk van {ban_from} tot {ban_to}",
+      "suggestion": "Als dit werk buiten in de volle zon was, verplaats het dan buiten de verboden uren; binnenwerk en vrijgestelde sectoren worden niet geraakt"
     }
   },
   "ai_takeoff": {

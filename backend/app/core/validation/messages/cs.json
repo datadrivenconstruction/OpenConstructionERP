@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Práce proběhla dne {date}, ale do kanceláře se údaje dostaly až o {days} dní později",
       "suggestion": "Před schválením ověřte hodiny podle skutečného pracovního dne; vyúčtování již může být uzavřeno"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Řádek {line} eviduje práci od {start} do {end} dne {date}, tedy v rámci polední zákazu práce venku od {ban_from} do {ban_to}",
+      "suggestion": "Pokud se práce konala venku na přímém slunci, přesuňte ji mimo hodiny zákazu; práce v interiéru a vyňaté sektory se to netýká"
     }
   },
   "ai_takeoff": {

@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Arbejdet blev udført {date}, men oplysningerne nåede først kontoret {days} dage senere",
       "suggestion": "Kontrollér timerne mod den faktiske arbejdsdag før godkendelse; afregningen kan allerede være lukket"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Linje {line} registrerer arbejde fra {start} til {end} den {date}, inden for middagsforbuddet mod udendørs arbejde fra {ban_from} til {ban_to}",
+      "suggestion": "Hvis arbejdet foregik udendørs i direkte sol, så flyt det uden for forbudstiden; indendørs arbejde og undtagne sektorer berøres ikke"
     }
   },
   "ai_takeoff": {

@@ -6,7 +6,7 @@
     "direction": "rtl",
     "fallback": "en",
     "coverage": "high-traffic overrides — nav, sidebar groups, common buttons, onboarding, dashboard banner. Falls back to en for the rest.",
-    "source": "saudi-vision2030 partner pack v0.2.0",
+    "source": "saudi-vision2030 partner pack v0.3.0",
     "register": "Modern Standard Arabic (فصحى) — not dialect. Construction terminology aligned with MoMRAH / Aramco / Etimad tender corpus."
   },
   "translation": {

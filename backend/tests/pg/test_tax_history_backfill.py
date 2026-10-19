@@ -107,7 +107,8 @@ async def test_an_old_install_learns_the_swiss_rates_before_2024(repair_factory,
 
     report = await run_data_repairs(repair_factory)
 
-    assert _outcome(report).rows_changed == 3
+    # Every declared window lands: Switzerland's three and Saudi Arabia's one.
+    assert _outcome(report).rows_changed == len(WINDOW_FIRST_SHIPPED)
     for on_date, rate in _SWISS_DATES.items():
         assert await _swiss(repair_factory, on_date) == rate, f"Switzerland on {on_date}"
     assert await _swiss_windows(repair_factory) == [
@@ -151,7 +152,7 @@ async def test_a_delivered_window_the_customer_deletes_stays_deleted(repair_fact
 
 async def test_an_install_seeded_after_the_windows_shipped_is_given_nothing(repair_factory) -> None:
     """Seeded from a file that had them, so their absence means somebody removed them."""
-    await _install(repair_factory, v15_9_1(), "2026-10-04")
+    await _install(repair_factory, v15_9_1(), max(WINDOW_FIRST_SHIPPED.values()))
 
     report = await run_data_repairs(repair_factory)
 

@@ -253,9 +253,9 @@ def test_a_country_without_a_works_variant_ignores_the_works(country: str, works
     assert resolve_contract_defaults(country, works=works) == resolve_contract_defaults(country)
 
 
-def test_only_france_and_egypt_have_a_works_variant_so_far() -> None:
+def test_only_france_egypt_and_saudi_arabia_have_a_works_variant_so_far() -> None:
     # Adding a country here is a decision with its own primary sources, not a refactor.
-    assert set(WORKS_CONTRACT_DEFAULTS) == {"FR", "EG"}
+    assert set(WORKS_CONTRACT_DEFAULTS) == {"FR", "EG", "SA"}
 
 
 # ── The project field ─────────────────────────────────────────────────────────

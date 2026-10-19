@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Ngày công này được thực hiện vào {date} nhưng {days} ngày sau mới gửi đến văn phòng",
       "suggestion": "Đối chiếu số giờ với ngày thực tế trước khi duyệt vì kỳ xác định giá trị có thể đã khóa"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Dòng {line} ghi nhận công việc từ {start} đến {end} ngày {date}, nằm trong khung giờ cấm làm việc ngoài trời buổi trưa từ {ban_from} đến {ban_to}",
+      "suggestion": "Nếu công việc này làm ngoài trời dưới nắng trực tiếp, hãy dời ra ngoài giờ cấm; công việc trong nhà và các ngành được miễn trừ không bị ảnh hưởng"
     }
   },
   "ai_takeoff": {

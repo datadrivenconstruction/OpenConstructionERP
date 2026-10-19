@@ -1808,7 +1808,7 @@ _SUBCONTRACT_KEYS: dict[str, tuple[str, str]] = {
 
 def _public_works_country(context: ValidationContext) -> str | None:
     """The country whose public works law binds this contract, or ``None``."""
-    from app.modules.contracts.public_procurement import PUBLIC_WORKS_LIMITS  # noqa: PLC0415
+    from app.modules.contracts.public_procurement import has_public_works_limits  # noqa: PLC0415
 
     project = _data(context).get("project")
     if not isinstance(project, dict) or str(project.get("works") or "").strip().lower() != "public":
@@ -1817,7 +1817,22 @@ def _public_works_country(context: ValidationContext) -> str | None:
     if not contract or str(contract.get("counterparty_type") or "").strip().lower() == "subcontractor":
         return None
     country = str(project.get("country_code") or "").strip().upper()
-    return country if country in PUBLIC_WORKS_LIMITS else None
+    return country if has_public_works_limits(country) else None
+
+
+def _tender_day(contract: dict[str, Any]) -> date | None:
+    """The day the contract's tender was floated, which picks the law that governs it.
+
+    Read from ``terms.tender_date``; a contract that does not record it falls
+    back to its start date, the latest day the tender can have been floated,
+    and then to the law in force today.
+    """
+    terms = contract.get("terms") if isinstance(contract.get("terms"), dict) else {}
+    for raw in (terms.get("tender_date"), contract.get("start_date")):
+        day = _iso_day(str(raw or "")[:10])
+        if day is not None:
+            return day
+    return None
 
 
 def _dec_or_none(raw: Any) -> Decimal | None:
@@ -1863,8 +1878,8 @@ class PublicWorksLimitsRule(_PublicWorksRule):
         country = _public_works_country(context)
         if country is None:
             return []
-        limits = public_works_limits(country)
         contract = _contract(context)
+        limits = public_works_limits(country, tender_date=_tender_day(contract))
         ref = str(contract.get("id", ""))
         terms = contract.get("terms") if isinstance(contract.get("terms"), dict) else {}
         value = _dec_or_none(contract.get("total_value"))

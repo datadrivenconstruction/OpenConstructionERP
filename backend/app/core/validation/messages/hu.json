@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "A munkavégzés napja {date}, de az adatok csak {days} nappal később érkeztek meg az irodába",
       "suggestion": "Jóváhagyás előtt vesse össze az órákat a tényleges munkanappal; az elszámolási időszak már lezárulhatott"
+    },
+    "outdoor_heat_ban": {
+      "fail": "A(z) {line}. sor munkát rögzít {start} és {end} között, {date} napon, ami beleesik a déli, szabadtéri munkavégzési tilalomba ({ban_from} - {ban_to})",
+      "suggestion": "Ha a munka szabadtéren, közvetlen napsütésben folyt, vigye a tiltási időszakon kívülre; a beltéri munkát és a mentesített ágazatokat ez nem érinti"
     }
   },
   "ai_takeoff": {

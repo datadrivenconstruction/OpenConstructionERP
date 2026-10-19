@@ -106,6 +106,11 @@ _SWISS_HISTORY_ADDED_IN_18_4 = {
     ("CH", "VAT_SPECIAL", "2018-01-01"),
 }
 
+#: Saudi Arabia's 5 % VAT from 2018-01-01 to 2020-06-30, the Swiss shape: a
+#: closed window before the 15 % one every cohort already holds, delivered by
+#: tax_history_backfill and by neither the reconciler nor the supersede repair.
+_SAUDI_HISTORY_ADDED_2026_10 = {("SA", "VAT", "2018-01-01")}
+
 #: The same four as delivery keys.
 _IRISH_AND_HUNGARIAN_TIERS = {"IE/VAT_RED_9", "IE/VAT_ZERO", "HU/AFA_18", "HU/AFA_5"}
 
@@ -157,6 +162,7 @@ _ADDED_AFTER_V15_4_0 = {
     *_TIERS_ADDED_IN_18_4,
     *_IRISH_WINDOWS_ADDED_IN_18_4,
     *_SWISS_HISTORY_ADDED_IN_18_4,
+    *_SAUDI_HISTORY_ADDED_2026_10,
     *_TURKISH_TIER_ADDED_2026_10,
 }
 
@@ -197,6 +203,7 @@ _ADDED_AFTER_V15_9_1 = {
     *_TIERS_ADDED_IN_18_4,
     *_IRISH_WINDOWS_ADDED_IN_18_4,
     *_SWISS_HISTORY_ADDED_IN_18_4,
+    *_SAUDI_HISTORY_ADDED_2026_10,
     *_TURKISH_TIER_ADDED_2026_10,
 }
 

@@ -1216,6 +1216,9 @@ class FieldTimeService:
         """Build the validation payload and run the ``field_time`` rule set."""
         valid_cost_codes, valid_wbs = await self._resolve_cost_codes(timesheet.project_id)
         open_variation_ids = await self._open_variation_ids(timesheet.project_id)
+        # The project's country picks the national work restrictions (the
+        # summer midday outdoor work ban); None leaves those rules silent.
+        project_country = await self._project_country(timesheet.project_id)
         # The per-worker daily cap is a project setting (defaults to 24 hours):
         # forward it so the rule checks hours against the configured ceiling
         # rather than a single hard-coded value.
@@ -1238,6 +1241,7 @@ class FieldTimeService:
             "valid_wbs": (list(valid_wbs) if valid_wbs is not None else None),
             "open_variation_ids": (list(open_variation_ids) if open_variation_ids is not None else None),
             "max_hours_per_day": str(config.max_hours_per_day),
+            "project_country": project_country,
         }
         return await validation_engine.validate(
             data=payload,
@@ -1447,6 +1451,26 @@ class FieldTimeService:
             seen.add(code)
             candidates.append({"code": code, "label": str(description or "").strip()})
         return candidates
+
+    async def _project_country(self, project_id: uuid.UUID) -> str | None:
+        """Return the project's ISO country code, or None when it names none.
+
+        Only ``country_code`` is read: ``Project.region`` defaults to a market
+        and would hand that market's restrictions to a project that never chose
+        one.
+        """
+        try:
+            from sqlalchemy import select
+
+            from app.modules.projects.models import Project
+
+            stmt = select(Project.country_code).where(Project.id == project_id)
+            value = (await self.session.execute(stmt)).scalar_one_or_none()
+        except Exception:
+            logger.debug("Project country lookup unavailable for project=%s", project_id)
+            return None
+        code = str(value or "").strip().upper()
+        return code or None
 
     async def _open_variation_ids(self, project_id: uuid.UUID) -> set[str] | None:
         """Return the set of open variation-order ids, or None if unavailable."""

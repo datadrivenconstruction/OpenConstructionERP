@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Este día se trabajó el {date} y no llegó a la oficina hasta {days} días después",
       "suggestion": "Compruebe las horas contra el propio día antes de aprobar, la valoración puede estar ya cerrada"
+    },
+    "outdoor_heat_ban": {
+      "fail": "La línea {line} registra trabajo de {start} a {end} el {date}, dentro de la prohibición de trabajo al aire libre del mediodía, de {ban_from} a {ban_to}",
+      "suggestion": "Si el trabajo se hizo al aire libre bajo el sol directo, muévalo fuera del horario de prohibición; el trabajo en interiores y los sectores exentos no se ven afectados"
     }
   },
   "ai_takeoff": {

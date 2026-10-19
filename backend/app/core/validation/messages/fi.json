@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Työpäivä oli {date}, mutta tiedot saapuivat toimistoon vasta {days} päivää myöhemmin",
       "suggestion": "Tarkista tunnit kyseisen päivän tiedoista ennen hyväksymistä; maksatuskausi voi olla jo suljettu"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Rivi {line} kirjaa työtä ajalle {start}-{end} päivänä {date}, mikä osuu keskipäivän ulkotyökiellon ({ban_from}-{ban_to}) sisälle",
+      "suggestion": "Jos työ tehtiin ulkona suorassa auringonpaisteessa, siirrä se kieltoajan ulkopuolelle; sisätyöt ja vapautetut alat eivät kuulu rajoituksen piiriin"
     }
   },
   "ai_takeoff": {

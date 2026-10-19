@@ -2712,6 +2712,53 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
             "works use eg_law182_works instead."
         ),
     },
+    # Saudi Arabia, public contracts under the Government Tenders and
+    # Procurement Law 2019, Implementing Regulations Art. 109, read in the
+    # Ministry of Finance English text on 2026-10-19: the consultant has 10
+    # working days to review the contractor's invoice, the agency 15 to issue
+    # the payment order and the Ministry of Finance 45 to pay. Counted on the
+    # Saudi Sunday to Thursday week (the payment clock reads the week from
+    # app.core.calendar). There is no Saudi prompt payment statute for private
+    # works, so no private row ships.
+    {
+        "code": "sa_gtpl_ir109",
+        "jurisdiction": "Saudi Arabia (public contracts)",
+        "country_code": "SA",
+        "statute": "Government Tenders and Procurement Law 2019 (Royal Decree M/128) and its Implementing Regulations",
+        "statute_reference": (
+            "Implementing Regulations Art. 109, "
+            "https://mof.gov.sa/en/Knowledgecenter/newGovTendandProcLow/Documents/Executive%20Regulations.pdf"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": 25,
+        "payment_notice_day_basis": "business",
+        "final_date_basis": "application_date",
+        "final_date_days": 70,
+        "final_date_day_basis": "business",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "contract",
+        "interest_reference_rate": "",
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "",
+        "notes": (
+            "The clock for an invoice (mustakhlas) a contractor submits to a Saudi government agency on a "
+            "contract tendered under the 2019 law. Enter the day the invoice reached the consultant as the "
+            "application date. The consultant reviews it within 10 working days and the agency issues the "
+            "payment order within 15 more, which is the payment notice here at 25 working days; the Ministry "
+            "of Finance pays within 45 working days after that, the final date at 70. Working days are Sunday "
+            "to Thursday; supply the public holidays to reproduce the dates exactly. No statutory interest is "
+            "owed on late payment and Saudi courts do not enforce interest, so a financing charge in the "
+            "contract should not be relied on. Tenders floated under the new procurement law (Royal Decree "
+            "M/76, in force about 2027-01-02) follow its regulations once issued. Private works have no "
+            "statutory payment period."
+        ),
+    },
 )
 
 REGIME_CODES: tuple[str, ...] = tuple(regime["code"] for regime in PAYMENT_REGIMES)

@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Pracę wykonano dnia {date}, a dane dotarły do biura dopiero po {days} dniach",
       "suggestion": "Przed zatwierdzeniem zweryfikuj godziny z tego dnia; rozliczenie robót może być już zamknięte"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Wiersz {line} rejestruje pracę od {start} do {end} w dniu {date}, w czasie południowego zakazu pracy na zewnątrz od {ban_from} do {ban_to}",
+      "suggestion": "Jeśli praca odbywała się na zewnątrz w pełnym słońcu, przesuń ją poza godziny zakazu; prace wewnątrz budynków i wyłączone sektory nie podlegają ograniczeniu"
     }
   },
   "ai_takeoff": {

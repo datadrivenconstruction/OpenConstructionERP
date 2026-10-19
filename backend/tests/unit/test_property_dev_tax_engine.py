@@ -655,7 +655,7 @@ def test_one_contract_answered_at_one_class_and_refused_at_the_other() -> None:
     [
         ("AE", "standard", date(2018, 1, 1), "5000.00"),
         ("AE", "zero_rated", date(2018, 1, 1), "0.00"),
-        ("SA", "zero_rated", date(2020, 10, 4), "0.00"),
+        ("SA", "exempt", date(2020, 10, 4), "0.00"),
         ("AT", "standard", date(1984, 1, 1), "20000.00"),
         ("AT", "reduced", date(1984, 1, 1), "10000.00"),
         ("GB", "zero", date(1973, 4, 1), "0.00"),
@@ -666,7 +666,7 @@ def test_one_contract_answered_at_one_class_and_refused_at_the_other() -> None:
     ids=[
         "ae-vat-begins",
         "ae-zero-rated-arrives-with-the-law",
-        "sa-zero-rated-arrives-with-the-2020-reform",
+        "sa-exempt-arrives-with-the-2020-reform",
         "at-standard",
         "at-reduced",
         "gb-zero-since-vat-began",
@@ -693,7 +693,8 @@ def test_a_dated_single_mapping_refuses_the_day_before_it_opens(
     error separates a supply that is genuinely zero-rated from a date this
     table cannot speak for.
 
-    ``SA.zero_rated`` is the one where that difference was costing money
+    ``SA.exempt`` (named ``zero_rated`` until the class was corrected to the exemption the
+    2020 reform actually made) is the one where that difference was costing money
     rather than only meaning. It answered 0.00 for every date until this
     commit, and residential sales in Saudi Arabia were standard-rated at 5 %
     and then 15 % until the 2020 reform, so a 2019 first sale was quoted at

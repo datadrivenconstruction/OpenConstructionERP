@@ -72,7 +72,8 @@ export type LimitationRegime =
   | 'eg_civil_651'
   | 'fr_civil_1792_6'
   | 'fr_civil_1792_3'
-  | 'fr_civil_1792';
+  | 'fr_civil_1792'
+  | 'sa_sbc_decennial';
 
 /**
  * The shipped regimes, in lock-step with `ALL_LIMITATION_REGIMES` in the backend
@@ -98,6 +99,7 @@ export const LIMITATION_REGIMES: {
   { code: 'fr_civil_1792_6', months: 12, statute: 'Code civil art. 1792-6', short: 'C. civ. 1792-6' },
   { code: 'fr_civil_1792_3', months: 24, statute: 'Code civil art. 1792-3', short: 'C. civ. 1792-3' },
   { code: 'fr_civil_1792', months: 120, statute: 'Code civil art. 1792', short: 'C. civ. 1792' },
+  { code: 'sa_sbc_decennial', months: 120, statute: 'Saudi Building Code Application Law Art. 29', short: 'SA SBC 29' },
 ];
 
 /** The shipped regime with this code, or undefined for none / an unknown one. */

@@ -58,7 +58,7 @@ DefectSeverityLiteral = Literal["minor", "major", "critical"]
 # Always optional, on create and on update alike: an entry with no regime is the
 # normal state and the only state every existing row is in.
 LimitationRegimeLiteral = Literal[
-    "de_vob_b", "de_bgb", "eg_civil_651", "fr_civil_1792_6", "fr_civil_1792_3", "fr_civil_1792"
+    "de_vob_b", "de_bgb", "eg_civil_651", "fr_civil_1792_6", "fr_civil_1792_3", "fr_civil_1792", "sa_sbc_decennial"
 ]
 
 

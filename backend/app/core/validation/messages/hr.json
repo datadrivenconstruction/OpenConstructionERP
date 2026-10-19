@@ -131,6 +131,10 @@
     "offline_sync_delay": {
       "fail": "Rad je obavljen {date}, a podaci su stigli u ured tek {days} dana kasnije",
       "suggestion": "Prije odobrenja usporedite sate s podacima za taj dan; obračunsko razdoblje možda je već zatvoreno"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Redak {line} bilježi rad od {start} do {end} dana {date}, unutar podnevne zabrane rada na otvorenom od {ban_from} do {ban_to}",
+      "suggestion": "Ako se rad odvijao na otvorenom na izravnom suncu, premjestite ga izvan sati zabrane; rad u zatvorenom i izuzeti sektori nisu obuhvaćeni"
     }
   },
   "ai_takeoff": {

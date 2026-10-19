@@ -81,10 +81,15 @@ Window = tuple[str, str, str]
 #:
 #: Switzerland, ESTV "Erhoehung der MWST-Steuersaetze 2024" (read 2026-10-04):
 #: 7.7, 2.5 and 3.7 % from 2018-01-01 to 2023-12-31.
+#:
+#: Saudi Arabia, the VAT Law of 2018 and the rise to 15 %
+#: from 2020-07-01 (ZATCA): 5 % from 2018-01-01 to 2020-06-30. The seed had
+#: only the 15 % window, so a Saudi bill dated before July 2020 found no rate.
 WINDOW_FIRST_SHIPPED: Final[dict[Window, str]] = {
     ("CH", "VAT", "2018-01-01"): "2026-10-04",
     ("CH", "VAT_REDUCED", "2018-01-01"): "2026-10-04",
     ("CH", "VAT_SPECIAL", "2018-01-01"): "2026-10-04",
+    ("SA", "VAT", "2018-01-01"): "2026-10-19",
 }
 
 
