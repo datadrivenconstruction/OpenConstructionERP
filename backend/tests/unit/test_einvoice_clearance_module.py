@@ -789,6 +789,103 @@ class TestDocumentInDoubt:
         assert excinfo.value.conflict is True
 
 
+class _PendingAdapter:
+    """A platform that takes a document in and decides later."""
+
+    key = "pending_test_adapter"
+    label = "Asynchronous platform"
+    countries: tuple[str, ...] = ("*",)
+    verdict: adapters.SubmissionOutcome | None = None
+
+    async def submit(self, request):
+        return adapters.SubmissionOutcome(
+            accepted=True,
+            pending=True,
+            authority_identifier="PENDING-UUID-1",
+            message="Taken in; validating.",
+            raw_response={"status": "submitted"},
+        )
+
+    async def cancel(self, request):
+        return adapters.SubmissionOutcome(accepted=True, authority_identifier=request.authority_identifier)
+
+    async def poll(self, request):
+        assert request.authority_identifier == "PENDING-UUID-1"
+        return type(self).verdict or adapters.SubmissionOutcome(
+            accepted=True, pending=True, authority_identifier=request.authority_identifier
+        )
+
+
+@pytest.fixture
+def pending_adapter():
+    _PendingAdapter.verdict = None
+    adapters.adapter_registry.register(_PendingAdapter())
+    yield _PendingAdapter
+    adapters.adapter_registry._adapters.pop(_PendingAdapter.key, None)
+    _PendingAdapter.verdict = None
+
+
+@pytest.mark.asyncio
+class TestVerdictComesLater:
+    async def test_a_pending_answer_keeps_the_document_submitted_with_the_identifier(self, session, pending_adapter):
+        profile = await _profile(session, "MX", adapter_key=pending_adapter.key)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        document, outcome, _ = await service.submit_document(session, document=document, profile=profile)
+        assert outcome.pending is True
+        assert document.status == "submitted"
+        assert document.authority_identifier == "PENDING-UUID-1"
+        assert document.cleared_at is None
+        events = await repository.list_events(session, document.id)
+        assert events[-1].event_type == "note"
+        # Still gone: a second submission is refused while the verdict is out.
+        assert not can_be_sent(document.status)
+
+    async def test_refresh_moves_a_validated_document_to_cleared(self, session, pending_adapter):
+        profile = await _profile(session, "MX", adapter_key=pending_adapter.key)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        document, _, _ = await service.submit_document(session, document=document, profile=profile)
+
+        document, outcome = await service.refresh_document(session, document=document, profile=profile)
+        assert outcome.pending and document.status == "submitted"
+
+        pending_adapter.verdict = adapters.SubmissionOutcome(
+            accepted=True, authority_identifier="PENDING-UUID-1", message="Valid."
+        )
+        document, outcome = await service.refresh_document(session, document=document, profile=profile)
+        assert document.status == TERMINAL_SUCCESS["clearance"]
+        assert document.cleared_at is not None
+
+    async def test_refresh_records_an_invalid_verdict_as_a_rejection(self, session, pending_adapter):
+        profile = await _profile(session, "MX", adapter_key=pending_adapter.key)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        document, _, _ = await service.submit_document(session, document=document, profile=profile)
+
+        pending_adapter.verdict = adapters.SubmissionOutcome(
+            accepted=False,
+            authority_identifier="PENDING-UUID-1",
+            rejection_code="Invalid",
+            rejection_message="Step-04: Total amount is wrong",
+        )
+        document, _ = await service.refresh_document(session, document=document, profile=profile)
+        assert document.status == "rejected"
+        assert document.rejection_code == "Invalid"
+
+    async def test_an_adapter_that_cannot_poll_refuses_refresh(self, session, failing_adapter):
+        profile = await _profile(session, "MX", adapter_key=failing_adapter)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        with pytest.raises(service.ClearanceError):
+            await service.submit_document(session, document=document, profile=profile)
+        document.authority_identifier = "SOMETHING"
+        with pytest.raises(service.ClearanceError, match="cannot read a verdict"):
+            await service.refresh_document(session, document=document, profile=profile)
+
+    async def test_refresh_needs_a_submitted_document(self, session, pending_adapter):
+        profile = await _profile(session, "MX", adapter_key=pending_adapter.key)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        with pytest.raises(service.ClearanceError, match="Only a submitted document"):
+            await service.refresh_document(session, document=document, profile=profile)
+
+
 @pytest.mark.asyncio
 class TestCancellation:
     async def test_a_cancellation_inside_the_window_is_accepted(self, session):
