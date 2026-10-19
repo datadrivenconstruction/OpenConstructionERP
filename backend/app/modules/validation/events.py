@@ -60,14 +60,9 @@ async def _on_report_created(event: Event) -> None:
     await _index_report(event)
 
 
-async def _on_report_updated(event: Event) -> None:
-    await _index_report(event)
-
-
 async def _on_report_deleted(event: Event) -> None:
     await _delete_report_vector(event)
 
 
 event_bus.subscribe_once("validation.report.created", _on_report_created)
-event_bus.subscribe_once("validation.report.updated", _on_report_updated)
 event_bus.subscribe_once("validation.report.deleted", _on_report_deleted)

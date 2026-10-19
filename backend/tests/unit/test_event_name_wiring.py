@@ -141,15 +141,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "counts slips straight from the activity rows"
     ),
     "schedule.task.scheduled": "geo_hub/events.py _SUBSCRIPTIONS; the schedule module has no task scheduling event",
-    "bim_hub.element.updated": (
-        "bim_hub/events.py:112; bim_hub/service.py:2228 publishes 'bim_hub.element.deleted' "
-        "but nothing publishes the updated variant"
-    ),
-    "catalog.resource.price_adjusted": "assemblies/events.py:406; no catalog publisher emits a price-adjusted event",
-    "catalog.resource.updated": (
-        "assemblies/events.py:405; catalog/router.py:747 publishes the plural "
-        "'catalog.resources.updated' - a singular/plural mismatch, nothing more"
-    ),
     "correspondence.outbound.delivered": (
         "property_dev/events.py:407; property_dev/service.py:4568 publishes "
         "'correspondence.outbound.requested' and nothing marks delivery"
@@ -172,7 +163,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "twice (dashboards/events.py:31 and dashboards/sync_protocol.py:58) and published "
         "nowhere. sync_protocol.py:18 documents the refresh cascade as if it runs"
     ),
-    "validation.report.updated": "validation/events.py:72; validation publishes report creation, not update",
     "variations.completed": (
         "bi_dashboards/events.py:124, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
         "tuple; the changeorders module publishes under the singular 'changeorder.' prefix"
