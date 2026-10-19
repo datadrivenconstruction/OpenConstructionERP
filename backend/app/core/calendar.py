@@ -54,6 +54,9 @@ Sources:
   37.2: the national days no autonomous community may replace. The days a
   community may replace, the community's own days and the two local days are
   not modelled (see _holidays_es).
+- EG: Ministerial Decree 294/2025 under Labour Law 14/2025 for the days. The
+  per-year Thursday moves and announced lunar dates are rows in
+  ``country_data/holiday_observances.json`` (see _holidays_eg).
 """
 
 from __future__ import annotations
@@ -62,9 +65,10 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
-from dateutil.easter import easter  # type: ignore[import]
+from dateutil.easter import EASTER_ORTHODOX, easter  # type: ignore[import]
 from hijridate import Gregorian, Hijri  # type: ignore[import]
 
+from app.core.holiday_observances import apply_observances
 from app.core.provenance import Provenance, declared, fell_back, unavailable, weakest
 from app.core.seeded_holidays import seeded_holiday_dates
 
@@ -1286,6 +1290,117 @@ def _holidays_bg(year: int) -> set[date]:
     return days
 
 
+# ── Country-neutral computations used by Egypt ───────────────────────────────
+
+
+def orthodox_easter(year: int) -> date:
+    """Orthodox Easter Sunday, as a Gregorian date.
+
+    The Julian computus, the one the Eastern churches keep, expressed in the
+    civil calendar. It coincides with Western Easter in some years (2025) and
+    falls one or five weeks after it in the others (2026, 2024). Delegates to
+    ``dateutil``'s Orthodox method, which is the same library the Western
+    Easter above comes from; the tests hold it to published dates rather than
+    to itself.
+    """
+    return easter(year, EASTER_ORTHODOX)
+
+
+def julian_christmas(year: int) -> date:
+    """25 December of the Julian calendar, falling in January of ``year``.
+
+    The Julian calendar is behind by one more day each Gregorian century year
+    that is not a leap year. For 25 December Julian of ``year - 1`` that gap is
+    13 days from 1901 to 2100 and 14 from 2101, so the feast is 7 January now
+    and 8 January from 2101. Computed rather than written as 7 January, so the
+    function cannot outlive its own constant.
+    """
+    previous = year - 1
+    gap = previous // 100 - previous // 400 - 2
+    return date(previous, 12, 25) + timedelta(days=gap)
+
+
+def _hijri_span(month: int, day: int, length: int, year: int) -> set[date]:
+    """Every day of a ``length``-day run starting on a fixed Hijri date, inside ``year``.
+
+    An occurrence that starts at the end of the previous year and runs into
+    this one is included, which is what ``_gcc_eids`` does not do, so a feast
+    beginning on 31 December still counts its 1 January. The previous year's
+    occurrences are asked of the converter too; at the very start of its window
+    there is no previous year to ask, and that alone is not a failure.
+    """
+    days: set[date] = set()
+    for probe_year in (year - 1, year):
+        try:
+            starts = _hijri_dates_in_gregorian_year(month, day, probe_year)
+        except HijriRangeError:
+            if probe_year == year:
+                raise
+            continue
+        for start in starts:
+            days.update(start + timedelta(days=offset) for offset in range(length))
+    return {d for d in days if d.year == year}
+
+
+#: Labour Law 14/2025 and the holiday decree issued under it took effect on
+#: this day. A year that begins earlier is answered with this roster and says
+#: so on the year axis (see ``_ROSTER_EFFECTIVE``).
+_EG_ROSTER_EFFECTIVE = date(2025, 9, 1)
+
+
+def _holidays_eg_statutory(year: int) -> dict[str, set[date]]:
+    """Egyptian paid public holidays before any announced move, by holiday key.
+
+    Ministerial Decree 294/2025, issued under Labour Law 14/2025:
+
+    * Islamic: Hijri New Year (1 Muharram), the Prophet's Birthday (12 Rabi
+      al-Awwal), Eid al-Fitr (1 and 2 Shawwal), Arafat Day (9 Dhu al-Hijjah)
+      and the first two days of Eid al-Adha (10 and 11 Dhu al-Hijjah).
+    * Coptic Christmas, 25 December Julian, which is 7 January.
+    * Sham el-Nessim, the Monday after Orthodox Easter.
+    * Fixed civil days: 25 January (Revolution and Police Day), 25 April (Sinai
+      Liberation), 1 May (Labour Day), 30 June and 23 July (Revolution days),
+      6 October (Armed Forces Day).
+
+    The keys are what a row in ``country_data/holiday_observances.json`` names
+    when the government moves a holiday or the moon sighting places a feast on
+    another day. Islamic dates here come from the ``hijridate`` converter, which
+    follows the Umm al-Qura tables; Egypt announces its own after the sighting,
+    and an announced date that differs is a row, not an edit here.
+    """
+    return {
+        "coptic_christmas": {julian_christmas(year)},
+        "revolution_25_january": {date(year, 1, 25)},
+        "sham_el_nessim": {orthodox_easter(year) + timedelta(days=1)},
+        "sinai_liberation_day": {date(year, 4, 25)},
+        "labour_day": {date(year, 5, 1)},
+        "revolution_30_june": {date(year, 6, 30)},
+        "revolution_23_july": {date(year, 7, 23)},
+        "armed_forces_day": {date(year, 10, 6)},
+        "hijri_new_year": set(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year)),
+        "prophets_birthday": set(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year)),
+        "eid_al_fitr": _hijri_span(10, 1, 2, year),
+        "arafat_day": _hijri_span(12, 9, 1, year),
+        "eid_al_adha": _hijri_span(12, 10, 2, year),
+    }
+
+
+def _holidays_eg(year: int) -> set[date]:
+    """Egyptian public holidays as observed: the statutory days with announced moves applied.
+
+    The working week is Sunday to Thursday: see ``_WORKING_WEEK``.
+
+    Since 2020 the government moves most midweek national days to the Thursday,
+    and Decree 294/2025 lets the Labour Minister replace any holiday with a day
+    at the start or end of the working week. Eid al-Fitr, Eid al-Adha and Coptic
+    Christmas are not moved in practice. Whether a holiday moves in a given year
+    is a decree, so it is data and never computed here: a year with no recorded
+    rows answers the statutory days. Public-sector Eid extensions are not
+    applied, because they do not bind private employers.
+    """
+    return apply_observances("EG", year, _holidays_eg_statutory(year))
+
+
 # ── Working-week definitions (date.weekday(): 0=Mon, 6=Sun) ──────────────────
 #
 # Standard Mon–Fri work week: {0, 1, 2, 3, 4}
@@ -1325,6 +1440,11 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     "KW": frozenset({6, 0, 1, 2, 3}),
     "BH": frozenset({6, 0, 1, 2, 3}),
     "OM": frozenset({6, 0, 1, 2, 3}),
+    # Egypt: Labour Law 14/2025 caps the day at 8 hours and the week at 48 and
+    # gives at least 24 hours of weekly rest, Friday by custom. No statute names
+    # Saturday; Sunday to Thursday is the government week and the common office
+    # week. A site working Saturday to Thursday sets its own calendar.
+    "EG": frozenset({6, 0, 1, 2, 3}),
     # Bulgaria: Labour Code Art. 136, 40 hours a week, 8 hours a day, a
     # direct statutory maximum rather than a convention.
     "BG": frozenset({0, 1, 2, 3, 4}),
@@ -1385,6 +1505,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "HU": _holidays_hu,
     "ES": _holidays_es,
     "IT": _holidays_it,
+    "EG": _holidays_eg,
 }
 
 
@@ -1537,7 +1658,16 @@ _EXTENT_STANDINS: dict[str, str] = {
 #: through ``_gcc_eids``. That test is the point of the pair: Nigeria joined
 #: this set the day it was added and would have been missed by anybody writing
 #: the list from memory of which countries are "the Gulf ones".
-_HIJRI_DEPENDENT: frozenset[str] = frozenset({"AE", "BH", "KW", "NG", "OM", "QA", "SA"})
+_HIJRI_DEPENDENT: frozenset[str] = frozenset({"AE", "BH", "EG", "KW", "NG", "OM", "QA", "SA"})
+
+#: What answers for a year that began before the country's holiday roster took
+#: effect: the later roster, applied to the whole year. Egypt's Decree 294/2025
+#: took effect with Labour Law 14/2025 on 2025-09-01, and the roster under the
+#: previous law is not modelled.
+ROSTER_FROM_LATER_DECREE = "ROSTER_FROM_LATER_DECREE"
+
+#: The day each such roster took effect.
+_ROSTER_EFFECTIVE: dict[str, date] = {"EG": _EG_ROSTER_EFFECTIVE}
 
 #: Countries whose dates come from a formula fitted to a stated range, and the
 #: range. Japan's equinox approximation states 1980-2099 in ``_equinox_day`` and
@@ -1579,11 +1709,11 @@ def _canonical_holiday_country(country_code: str) -> str:
 def _year_standin(resolved: str, year: int, partial: bool, omitted_names: tuple[str, ...]) -> tuple[str, str] | None:
     """What stood in on the year axis, and why, or ``None`` if nothing did.
 
-    Three mechanisms can limit a year, and they are checked in a fixed order so
+    Four mechanisms can limit a year, and they are checked in a fixed order so
     that the answer is stable rather than depending on which test happens to run
-    first. They do not overlap today, because no country is served both by a
-    curated lunisolar table and by the Hijri converter, and the order exists so
-    that one which someday is still answers the same way on every call.
+    first. Egypt is the one country two of them can reach, the Hijri window and
+    its roster's effective date, and the order exists so that it and any other
+    such country answer the same way on every call.
     """
     if partial:
         return GREGORIAN_ONLY, (
@@ -1613,6 +1743,13 @@ def _year_standin(resolved: str, year: int, partial: bool, omitted_names: tuple[
                 "rather than the roster as the law stood that year"
             )
         return EXTRAPOLATED_EQUINOX, detail
+
+    effective = _ROSTER_EFFECTIVE.get(resolved)
+    if effective is not None and date(year, 1, 1) < effective:
+        return ROSTER_FROM_LATER_DECREE, (
+            f"{resolved}'s holiday roster took effect on {effective.isoformat()}; it is applied to the whole "
+            f"of {year} rather than the roster in force before it"
+        )
 
     return None
 

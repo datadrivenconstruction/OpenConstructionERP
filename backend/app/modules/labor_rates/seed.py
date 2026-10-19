@@ -121,6 +121,72 @@ DEFAULT_RATE_TEMPLATES: list[dict[str, Any]] = [
 ]
 
 
+def _egyptian_templates() -> list[dict[str, Any]]:
+    """Two Egyptian build-ups whose statutory on-costs come from the labour catalogue.
+
+    The social insurance rate and the leave provision are read from
+    ``app/core/country_data/labour_standards.json`` rather than typed here, so
+    a corrected statutory figure reaches the template without a second edit.
+    The leave provision spreads the paid annual leave and public holidays over
+    the remaining days of a five-day week: (21 + 15) / (260 - 36) = 16.07%.
+
+    Social insurance is the general-scheme employer rate on the wage. On a
+    construction contract the authority also assesses a deemed wage from the
+    contract value, which is not modelled; the description says so, because an
+    estimator should not carry both. Base wages are starting points above the
+    statutory minimum, not a market survey.
+    """
+    from datetime import date as _date
+
+    from app.core.labour_standards import hard_standard
+
+    on = _date(2026, 1, 1)
+
+    def fact(key: str) -> Decimal:
+        row = hard_standard("EG", key, on)
+        if row is None:
+            raise RuntimeError(f"labour standard EG/{key} is missing or awaits review")
+        return row.value
+
+    leave = fact("annual_leave_days") + fact("public_holiday_days")
+    provision = (leave / (Decimal(5 * 52) - leave) * 100).quantize(Decimal("0.01"))
+    insurance = fact("employer_social_insurance_pct")
+    note = (
+        " Social insurance is the general-scheme employer share; a contract assessed on a deemed wage "
+        "from its value should drop it here."
+    )
+    return [
+        {
+            "name": "General site labourer, Egypt",
+            "currency": "EGP",
+            "base_wage": Decimal("50.00"),
+            "description": "Unskilled site labour on an Egyptian project, Sunday to Thursday week." + note,
+            "components": [
+                ("Employer social insurance, general scheme", "percentage", insurance),
+                ("Annual leave and public holiday provision", "percentage", provision),
+                ("Site supervision", "percentage", Decimal("6.0")),
+                ("Transport and site meals", "fixed", Decimal("6.00")),
+            ],
+        },
+        {
+            "name": "Mason, Egypt",
+            "currency": "EGP",
+            "base_wage": Decimal("90.00"),
+            "description": "Blockwork and plaster mason on an Egyptian project." + note,
+            "components": [
+                ("Employer social insurance, general scheme", "percentage", insurance),
+                ("Annual leave and public holiday provision", "percentage", provision),
+                ("Site supervision", "percentage", Decimal("8.0")),
+                ("Small tools and consumables", "fixed", Decimal("2.50")),
+                ("Transport and site meals", "fixed", Decimal("6.00")),
+            ],
+        },
+    ]
+
+
+DEFAULT_RATE_TEMPLATES.extend(_egyptian_templates())
+
+
 async def seed_labor_rates(session: AsyncSession, owner_id: UUID) -> dict[str, int]:
     """Idempotently insert the starter rate templates for one owner.
 

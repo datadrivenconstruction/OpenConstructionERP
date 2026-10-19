@@ -632,6 +632,18 @@ WORK_CALENDARS: dict[str, dict] = {
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
         "label": "UAE (Mon-Fri, 8h)",
     },
+    # Egypt works the same Sunday-Thursday week as five of the Gulf states but
+    # has its own entry so an Egyptian project's badge does not read "Gulf".
+    # Labour Law 14/2025 caps the day at 8 hours and the week at 48, with at
+    # least 24 hours of weekly rest, Friday by custom; no statute names Saturday.
+    # Sunday-Thursday is the government and common office week. A site working
+    # Saturday to Thursday, common on Egyptian construction sites, sets its own
+    # calendar. Holidays: core.calendar._holidays_eg.
+    "EGYPT": {
+        "hours_per_day": 8,
+        "work_days": {6, 0, 1, 2, 3},  # Sun-Thu
+        "label": "Egypt (Sun-Thu, 8h)",
+    },
     # 10. China - ZH_SHANGHAI
     #
     # Source of the week: UNSOURCED. The six-day week is a construction site
@@ -685,6 +697,7 @@ _CALENDAR_BY_COUNTRY: dict[str, str] = {
     "CH": "DACH",
     "CN": "CHINA",
     "DE": "DACH",
+    "EG": "EGYPT",
     "ES": "SPAIN",
     "FR": "FRANCE",
     "GB": "UK",
@@ -776,6 +789,7 @@ _CALENDAR_BY_PICKER_REGION: dict[str, str] = {
 # form was typed, and the longer, more natural one was the wrong one.
 _CALENDAR_BY_LABEL: dict[str, str] = {
     "BAHRAIN": "GULF",
+    "EGYPT": "EGYPT",
     "KUWAIT": "GULF",
     # "Middle East" carries no country, so it gets the week five of the six GCC
     # states work. The UAE is named in full and is the one that does not.

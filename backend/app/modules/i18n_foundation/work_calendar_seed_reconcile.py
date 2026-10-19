@@ -127,6 +127,9 @@ CALENDAR_FIRST_SHIPPED: Final[dict[CalendarSlot, str]] = {
     # Hungary, the eleven days of Labour Code 102. § (1), with the engine's
     # Hungarian holiday function.
     ("HU", "2026"): "2026-10-10",
+    # Egypt, Sunday to Thursday with the Decree 294/2025 holidays and the
+    # announced 2026 Thursday moves, with the engine's Egyptian function.
+    ("EG", "2026"): "2026-10-19",
 }
 
 

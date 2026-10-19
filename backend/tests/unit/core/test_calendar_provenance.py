@@ -538,11 +538,18 @@ def test_the_hijri_dependent_set_is_derived_from_the_source() -> None:
     a country registered here that does not use the converter would report a
     window fallback it is not subject to.
     """
+
+    def _source(func) -> str:
+        # A country whose function applies announced moves to a statutory
+        # roster (Egypt) computes the roster in a ``_statutory`` companion.
+        companion = getattr(cal, f"{func.__name__}_statutory", None)
+        return inspect.getsource(func) + (inspect.getsource(companion) if companion else "")
+
     reaching = {
         code
         for code, func in cal._HOLIDAY_FUNCS.items()
         if getattr(func, "__name__", "").startswith("_holidays_")
-        and ("_gcc_eids(" in inspect.getsource(func) or "_hijri_dates_in_gregorian_year(" in inspect.getsource(func))
+        and ("_gcc_eids(" in _source(func) or "_hijri_dates_in_gregorian_year(" in _source(func))
     }
     assert reaching, "nothing reaches the Hijri converter; this test is checking nothing"
     assert reaching == set(cal._HIJRI_DEPENDENT), (
