@@ -386,7 +386,7 @@ class ForecastDocsService:
         doc = await self.session.get(Document, document_id)
         if doc is None or doc.project_id != project_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=t("cost_control.errors.document_missing")
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=t("cost_control.errors.document_missing")
             )
 
     async def put_note(
@@ -450,7 +450,7 @@ class ForecastDocsService:
         detail = await self.snapshot_detail(snap, locale=locale)
         if detail.findings:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": t("cost_control.errors.freeze_refused", count=len(detail.findings)),
                     "findings": [f.model_dump(mode="json") for f in detail.findings],

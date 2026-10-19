@@ -20,7 +20,7 @@ from openpyxl import load_workbook
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.costmodel.cost_control_export import EXPORT_KINDS, render_export
+from app.modules.costmodel.cost_control_export import EXPORT_KINDS, render_export, rendered_language
 from app.modules.costmodel.cost_control_forecast import ForecastDocsService
 from app.modules.costmodel.cost_control_phases import phase_comparison
 from app.modules.costmodel.cost_control_schemas import (
@@ -248,3 +248,13 @@ async def test_every_export_renders_as_pdf_and_workbook(
     assert name.endswith(".xlsx")
     sheet = load_workbook(io.BytesIO(xlsx)).active
     assert sheet is not None and sheet.max_row >= 1
+
+
+async def test_an_export_declares_the_language_its_texts_came_out_in() -> None:
+    from app.core.i18n import load_translations
+
+    load_translations()
+    assert rendered_language("de") == "de"
+    # A regional code is written in its base language, and a language with no catalogue in English.
+    assert rendered_language("pt-BR") == "pt"
+    assert rendered_language("xx") == "en"

@@ -1612,7 +1612,7 @@ async def compare_cost_control_snapshots(
         try:
             parsed.append(uuid.UUID(raw))
         except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="ids") from exc
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="ids") from exc
     return await service.matrix(project_id, parsed or None, include_live=live)
 
 
@@ -1671,7 +1671,12 @@ async def export_cost_control(
     """The cost report, phase comparison, invoice ledger or forecast documentation as PDF or workbook."""
     from app.core.content_disposition import attachment_disposition
     from app.core.i18n import get_locale
-    from app.modules.costmodel.cost_control_export import EXPORT_KINDS, media_type, render_export
+    from app.modules.costmodel.cost_control_export import (
+        EXPORT_KINDS,
+        media_type,
+        render_export,
+        rendered_language,
+    )
 
     if kind not in EXPORT_KINDS:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown export")
@@ -1679,13 +1684,15 @@ async def export_cost_control(
     if kind == "invoice_ledger":
         # The ledger belongs to payment release: reading it asks for that module's own permission too.
         await RequirePermission("payment_release.read")(payload)
-    data, filename = await render_export(
-        session, project_id, kind, format, locale.strip() or get_locale(), snapshot_id=snapshot_id
-    )
+    requested = locale.strip() or get_locale()
+    data, filename = await render_export(session, project_id, kind, format, requested, snapshot_id=snapshot_id)
     return Response(
         content=data,
         media_type=media_type(format),
-        headers={"Content-Disposition": attachment_disposition(filename)},
+        headers={
+            "Content-Disposition": attachment_disposition(filename),
+            "Content-Language": rendered_language(requested),
+        },
     )
 
 

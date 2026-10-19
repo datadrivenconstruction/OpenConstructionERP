@@ -24,7 +24,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.i18n import t
+from app.core.i18n import get_all_translations, resolve_locale, t
 from app.core.register_context import load_project_header
 from app.core.register_export import (
     EMPTY,
@@ -53,6 +53,19 @@ def media_type(fmt: str) -> str:
     return _MEDIA[fmt]
 
 
+def rendered_language(locale: str) -> str:
+    """The language the export's texts come out in for a reader who asked for ``locale``.
+
+    ``t`` walks the requested code, then its base language, then English, key by key. A
+    catalogue that resolves but lacks the cost control strings therefore writes English, and
+    the response has to say so rather than echo what was asked for.
+    """
+    resolved = resolve_locale(locale)
+    if resolved is not None and "cost_control.export.empty" in get_all_translations(resolved):
+        return resolved
+    return "en"
+
+
 class _Words:
     """The catalogue in one language."""
 
@@ -79,7 +92,7 @@ def _document(
     words: _Words,
     project: ProjectHeader,
     *,
-    title_key: str,
+    document_key: str,
     columns: list[RegisterColumn],
     rows: list[list[Any]],
     details: list[tuple[str, str]],
@@ -93,7 +106,7 @@ def _document(
         *details,
     ]
     return RegisterDocument(
-        title=words(f"export.{title_key}"),
+        title=words(f"export.{document_key}"),
         columns=columns,
         rows=rows,
         details=header,
@@ -104,7 +117,7 @@ def _document(
         generated_label=words("export.generated_at"),
         generated=datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         empty_text=words("export.empty"),
-        sheet_title=words(f"export.{title_key}"),
+        sheet_title=words(f"export.{document_key}"),
         totals_label=words("export.total") if totals else "",
         currency=project.currency,
     )
@@ -168,7 +181,7 @@ async def cost_report_document(session: AsyncSession, project_id: uuid.UUID, loc
         (words("export.as_of"), report.as_of),
         (words("export.forecast_method"), words.method(report.forecast_method)),
     ]
-    return _document(words, project, title_key="cost_report", columns=columns, rows=rows, details=details)
+    return _document(words, project, document_key="cost_report", columns=columns, rows=rows, details=details)
 
 
 # ── Phase comparison ─────────────────────────────────────────────────────
@@ -213,7 +226,7 @@ async def phase_document(session: AsyncSession, project_id: uuid.UUID, locale: s
     # Accounts already add up their lines, so the register's own totals would count money twice:
     # the last row is the project total instead.
     return _document(
-        words, project, title_key="phase_comparison", columns=columns, rows=rows, details=details, totals=False
+        words, project, document_key="phase_comparison", columns=columns, rows=rows, details=details, totals=False
     )
 
 
@@ -306,7 +319,7 @@ async def ledger_document(session: AsyncSession, project_id: uuid.UUID, locale: 
             format_amount(totals.get("retention_held") or "0", project.number_style, project.currency),
         ),
     ]
-    return _document(words, project, title_key="invoice_ledger", columns=columns, rows=rows, details=details)
+    return _document(words, project, document_key="invoice_ledger", columns=columns, rows=rows, details=details)
 
 
 # ── Forecast documentation ───────────────────────────────────────────────
@@ -394,7 +407,7 @@ async def forecast_document(
     ]
     if detail.frozen_at is not None:
         details.append((words("export.frozen_at"), detail.frozen_at.strftime("%Y-%m-%d %H:%M UTC")))
-    return _document(words, project, title_key="forecast_documentation", columns=columns, rows=rows, details=details)
+    return _document(words, project, document_key="forecast_documentation", columns=columns, rows=rows, details=details)
 
 
 async def render_export(
