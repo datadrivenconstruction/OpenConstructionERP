@@ -17,8 +17,8 @@ suite says so.
     returns a UUID for a CFDI, Brazil (BR) a chave de acesso for an NF-e,
     Italy (IT) a protocol number from SdI, Poland (PL) a KSeF number, Romania
     (RO) an upload index, Saudi Arabia (SA) a cryptographic stamp, India (IN)
-    an IRN. The document cannot be handed to the buyer until the authority has
-    answered.
+    an IRN, Egypt (EG) a document UUID. The document cannot be handed to the
+    buyer until the authority has answered.
 
 ``reporting``
     Post-issuance. The invoice is valid the moment it is issued and is reported
@@ -146,8 +146,17 @@ LEGAL_STATUSES: tuple[str, ...] = (
 # days is wrong by up to a year depending on the month the invoice was issued in.
 CANCELLATION_BASIS_DAYS = "days_from_clearance"
 CANCELLATION_BASIS_FISCAL_YEAR = "fiscal_year_of_issue"
+# The platform publishes its own window and it is read from the platform at the
+# moment of cancelling, not shipped here. A day count copied from a guide would go
+# stale the day the authority changes it, and the platform refuses late requests
+# itself, so the adapter reads the window when it cancels.
+CANCELLATION_BASIS_AUTHORITY = "read_from_authority"
 
-CANCELLATION_BASES: tuple[str, ...] = (CANCELLATION_BASIS_DAYS, CANCELLATION_BASIS_FISCAL_YEAR)
+CANCELLATION_BASES: tuple[str, ...] = (
+    CANCELLATION_BASIS_DAYS,
+    CANCELLATION_BASIS_FISCAL_YEAR,
+    CANCELLATION_BASIS_AUTHORITY,
+)
 
 
 @dataclass(frozen=True)
@@ -234,8 +243,12 @@ class CountryRegime:
 
     @property
     def is_cancellable(self) -> bool:
-        """Whether the platform accepts a cancellation of a cleared document."""
-        return self.cancellation_window_days is not None
+        """Whether the platform accepts a cancellation of a cleared document.
+
+        A window the platform publishes at runtime is a window, even though no
+        day count is stored for it here.
+        """
+        return self.cancellation_window_days is not None or self.cancellation_basis == CANCELLATION_BASIS_AUTHORITY
 
     @property
     def regimes(self) -> tuple[str, ...]:
@@ -433,6 +446,82 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         # e-way bill has been generated against it.
         cancellation_window_days=1,
         correction_mechanism="credit note (an IRN older than the window cannot be cancelled)",
+    ),
+    "EG": CountryRegime(
+        country="EG",
+        regime=REGIME_CLEARANCE,
+        platform="ETA e-Invoicing",
+        label="Egypt - Egyptian Tax Authority e-invoicing",
+        # 26 Latin alphanumeric symbols, assigned by the authority on submission.
+        # The 42 character long id that goes on printouts is kept in the trail.
+        identifier_label="ETA document UUID",
+        # The ETA v1.0 JSON document. Built by the ``einvoice_eta`` module, which
+        # registers a payload builder for this format; nothing in the EN 16931
+        # engine produces it.
+        document_format="eta_json_1_0",
+        en16931_profile="",
+        # The issuer's tax registration number (RIN). Everything else ETA needs
+        # lives in the profile settings and on the document itself, and the
+        # ``eta_*`` validation rules name what is missing.
+        profile_fields=("tax_registration_id",),
+        document_fields=(),
+        # ETA publishes the cancellation window per document type through Get
+        # Document Type (workflow parameters), and says it follows the law. The
+        # figures quoted in guides are not confirmed by an ETA page, so no day
+        # count is shipped: the adapter reads the window when it cancels.
+        cancellation_window_days=None,
+        cancellation_basis=CANCELLATION_BASIS_AUTHORITY,
+        correction_mechanism=(
+            "credit note (document type c) referencing the original invoice UUID; debit note (d) for an increase"
+        ),
+        scope=(
+            "Taxpayers ETA has notified, in waves since 2020. A taxpayer checks its own obligation in ETA's "
+            "obligated-taxpayer inquiry. B2C sales go through the separate e-receipt system, which this row "
+            "does not model."
+        ),
+        commencement=(
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="",
+                scope="Taxpayers named in ETA notification lists, phased from 2020 (ETA Decision 188/2020)",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url="https://eg.andersen.com/vat-in-egypt/",
+                read_date="2026-10-19",
+                notes=(
+                    "Legal basis Unified Tax Procedures Law 206/2020, Art. 35. The wave dates come from secondary "
+                    "sources only and are not stated here. The same-day submission deadline widely reported from "
+                    "2023-01-01 is not enforced by this platform."
+                ),
+            ),
+        ),
+        notes=(
+            "Submission is asynchronous: ETA answers 202 with a UUID, then validates; the document stays submitted "
+            "until a refresh reads valid or invalid. Every document carries a CAdES-BES signature made with an eSeal "
+            "certificate on a USB token or HSM. An identical request body within 10 minutes is refused as a "
+            "duplicate. Source: https://sdk.invoicing.eta.gov.eg/ read 2026-10-19."
+        ),
+        extra={
+            "sdk_url": "https://sdk.invoicing.eta.gov.eg/",
+            # The hosts of both environments, as the SDK FAQ lists them. They are
+            # the default base URLs of a registration; a registration may still
+            # name its own (a proxy, or hosts ETA changes later).
+            "environments": {
+                "source_url": "https://sdk.invoicing.eta.gov.eg/faq/",
+                "read_date": "2026-10-19",
+                "preprod": {
+                    "identity_base_url": "https://id.preprod.eta.gov.eg",
+                    "api_base_url": "https://api.preprod.invoicing.eta.gov.eg",
+                    "portal_url": "https://preprod.invoicing.eta.gov.eg",
+                    "profile_url": "https://profile.preprod.eta.gov.eg",
+                },
+                "prod": {
+                    "identity_base_url": "https://id.eta.gov.eg",
+                    "api_base_url": "https://api.invoicing.eta.gov.eg",
+                    "portal_url": "https://invoicing.eta.gov.eg",
+                    "profile_url": "https://profile.eta.gov.eg",
+                },
+            },
+        },
     ),
     # ── Reporting ────────────────────────────────────────────────────────────
     "ES": CountryRegime(
@@ -960,6 +1049,7 @@ def regime_as_dict(entry: CountryRegime) -> dict[str, Any]:
 
 __all__ = [
     "CANCELLATION_BASES",
+    "CANCELLATION_BASIS_AUTHORITY",
     "CANCELLATION_BASIS_DAYS",
     "CANCELLATION_BASIS_FISCAL_YEAR",
     "COUNTRY_REGIMES",

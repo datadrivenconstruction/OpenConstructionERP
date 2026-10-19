@@ -45,7 +45,7 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.einvoice_clearance import repository, service
-from app.modules.einvoice_clearance.adapters import adapter_registry
+from app.modules.einvoice_clearance.adapters import adapter_registry, supports_polling
 from app.modules.einvoice_clearance.models import EInvoiceDocument, EInvoiceProfile
 from app.modules.einvoice_clearance.regimes import COUNTRY_REGIMES, get_country_regime, regime_as_dict
 from app.modules.einvoice_clearance.schemas import (
@@ -151,7 +151,12 @@ async def get_meta() -> MetaResponse:
             for entry in sorted(COUNTRY_REGIMES.values(), key=lambda e: (e.regime, e.country))
         ],
         adapters=[
-            AdapterResponse(key=adapter.key, label=adapter.label, countries=list(adapter.countries))
+            AdapterResponse(
+                key=adapter.key,
+                label=adapter.label,
+                countries=list(adapter.countries),
+                can_poll=supports_polling(adapter),
+            )
             for adapter in adapter_registry.list_all().values()
         ],
     )
@@ -512,6 +517,47 @@ async def submit_clearance_document(
         rejection_message=outcome.rejection_message,
         message=outcome.message,
         findings=_to_findings(findings),
+        pending=outcome.pending,
+    )
+
+
+@router.post(
+    "/documents/{document_id}/refresh",
+    response_model=SubmissionResponse,
+    dependencies=[Depends(RequirePermission("einvoice_clearance.submit"))],
+)
+async def refresh_clearance_document(
+    document_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> SubmissionResponse:
+    """Ask the platform for its verdict on a document it took in.
+
+    For platforms that answer in two steps, a receipt first and the verdict
+    later. Guarded by the submit permission because it sets the same states a
+    submission does.
+    """
+    document, profile = await _load_document(session, document_id, user_id)
+    try:
+        updated, outcome = await service.refresh_document(
+            session,
+            document=document,
+            profile=profile,
+            actor_id=_actor(user_id),
+        )
+    except service.ClearanceError as exc:
+        raise _refuse(exc) from exc
+    return SubmissionResponse(
+        document=DocumentResponse.model_validate(updated),
+        # Same reading as submit: accepted means taken in, pending that the
+        # verdict is still out.
+        accepted=outcome.accepted,
+        authority_identifier=outcome.authority_identifier,
+        rejection_code=outcome.rejection_code,
+        rejection_message=outcome.rejection_message,
+        message=outcome.message,
+        findings=[],
+        pending=outcome.pending,
     )
 
 
@@ -581,4 +627,5 @@ async def cancel_clearance_document(
         rejection_message=outcome.rejection_message,
         message=outcome.message,
         findings=_to_findings(findings),
+        pending=outcome.pending,
     )

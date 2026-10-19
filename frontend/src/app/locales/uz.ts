@@ -46428,6 +46428,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 mexanizmi",
     "modules.catalog.einvoice": "Elektron hisob-faktura",
     "modules.catalog.einvoice_clearance": "Elektron hisob-fakturani rasmiylashtirish",
+    "modules.catalog.einvoice_eta": "Misr ETA elektron hisob-faktura",
     "modules.catalog.equipment": "Uskuna va texnika parkini boshqarish",
     "modules.catalog.field_diary": "Obyekt kundaligi",
     "modules.catalog.file_approvals": "Fayllarni tasdiqlash",

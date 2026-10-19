@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 кыймылдаткычы",
     "modules.catalog.einvoice": "Электрондук эсеп-фактура",
     "modules.catalog.einvoice_clearance": "Электрондук эсеп-фактураны текшерүү",
+    "modules.catalog.einvoice_eta": "Египет ETA электрондук эсеп-фактура",
     "modules.catalog.enterprise_workflows": "Корпоративдик иш процесстери",
     "modules.catalog.equipment": "Жабдуулар жана автопаркты башкаруу",
     "modules.catalog.erp_chat": "ERP чат",
