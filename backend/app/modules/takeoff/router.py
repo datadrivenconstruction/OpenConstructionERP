@@ -34,9 +34,7 @@ Routes:
     GET    /cad-data/missingness                 - per-column fill-rate + row completeness
 """
 
-import contextlib
 import logging
-import os
 import random as _random
 import threading
 import time as _time
@@ -52,12 +50,19 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, select
 
 from app.core.content_disposition import attachment_disposition
+from app.core.converter_package import PackageError, extract_package, read_stamp, verify_sha256, write_stamp
 from app.core.converter_source import (
-    DEFAULT_CONVERTER_REF,
-    WINDOWS_CONVERTER_DIRS,
-    is_graphical_only,
-    resolve_converter_ref,
+    CHECKSUMS_ASSET,
+    DEFAULT_CONVERTER_REPO,
+    DEFAULT_CONVERTER_TAG,
+    PACKAGES,
+    ConverterPackage,
+    package_exe,
+    parse_sha256sums,
+    release_asset_url,
+    release_page_url,
     resolve_converter_repo,
+    resolve_converter_tag,
 )
 from app.core.csv_safety import neutralise_formula
 from app.core.host_disclosure import without_host_fields
@@ -122,54 +127,40 @@ router = APIRouter(tags=["takeoff"])
 
 
 #
-# Converter metadata. Sizes reflect what is actually committed in the
-# `datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN` repository under
-# `DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/` - typically ~30-50 MB
-# per format (the small `*Exporter.exe` plus the bundled Qt6 DLLs).
-# These are NOT GitHub Releases; the binaries live directly on the
-# default branch and we install them by walking the directory tree
-# via the Contents API and downloading each file from
-# `raw.githubusercontent.com`.
+# Converter metadata. The converters are the packages of the DDC converter
+# release (see ``app.core.converter_source``): one portable archive per format,
+# unpacked into ``~/.openestimator/converters/{format}_windows/``. The DGN
+# converter is discontinued in this generation and is not listed.
 _CONVERTER_META: list[dict[str, Any]] = [
     {
         "id": "dwg",
-        "name": "DWG/DXF Converter",
-        "description": "Import DWG and DXF files. Extracts geometry, layers, blocks, and properties into structured element tables for cost estimation.",
-        "engine": "DDC Community",
-        "extensions": [".dwg", ".dxf"],
-        "exe": "DwgExporter.exe",
-        "version": "1.0.0",
-        "size_mb": 218.0,
+        "name": "DWG Converter",
+        "description": "Import DWG drawings (R13-2018). Extracts entities, layers and blocks into structured element tables for cost estimation, and a DXF for the drawing viewer.",
+        "engine": "DDC DWG to Excel",
+        "extensions": [".dwg"],
+        "exe": "dwg2excel.exe",
+        "version": PACKAGES["dwg"].version,
+        "size_mb": round(PACKAGES["dwg"].size_bytes / 1024 / 1024, 1),
     },
     {
         "id": "rvt",
-        "name": "RVT Parser",
-        "description": "Native RVT file parser. Supports RVT 2015-2026. Extracts families, parameters, quantities, and spatial structure without a proprietary CAD vendor license. Bundles format readers for every RVT version 2011-2026, which is why the download is large.",
-        "engine": "DDC Community",
+        "name": "RVT Converter",
+        "description": "Native RVT reader (Revit 2019-2027). Extracts saved element properties and 3D geometry (GLB) without a proprietary CAD vendor license. Preview: geometry completeness is not certified.",
+        "engine": "DDC RVT Converter",
         "extensions": [".rvt", ".rfa"],
-        "exe": "RvtExporter.exe",
-        "version": "1.0.0",
-        "size_mb": 598.0,
+        "exe": "RVTconverter.exe",
+        "version": PACKAGES["rvt"].version,
+        "size_mb": round(PACKAGES["rvt"].size_bytes / 1024 / 1024, 1),
     },
     {
         "id": "ifc",
         "name": "IFC Import",
-        "description": "Import IFC 2x3 and IFC4 files. Maps IFC entities to structured element tables with full property set extraction.",
-        "engine": "DDC Community",
+        "description": "Import IFC 2x3 and IFC4 files. Maps IFC entities to structured element tables with property and quantity set extraction. Preview: no geometry is produced.",
+        "engine": "DDC IFC to Excel",
         "extensions": [".ifc", ".ifczip"],
-        "exe": "IfcExporter.exe",
-        "version": "1.0.0",
-        "size_mb": 241.0,
-    },
-    {
-        "id": "dgn",
-        "name": "DGN Converter",
-        "description": "Import DGN files. Extracts elements, levels, properties, and 3D geometry into structured tables.",
-        "engine": "DDC Community",
-        "extensions": [".dgn"],
-        "exe": "DgnExporter.exe",
-        "version": "1.0.0",
-        "size_mb": 217.0,
+        "exe": "python.exe",
+        "version": PACKAGES["ifc"].version,
+        "size_mb": round(PACKAGES["ifc"].size_bytes / 1024 / 1024, 1),
     },
 ]
 
@@ -360,573 +351,18 @@ async def verify_converter(converter_id: str) -> dict[str, Any]:
 
 
 #
-# Source repository, ref and per-format directories for the DDC Community
-# converters all live in ``app.core.converter_source`` - one declaration
-# read by both the installer here and the ``/api/system/converters/
-# version-check`` endpoint in ``app.main``. They used to be written down
-# separately in each, which is how the version check ended up comparing
-# against the branch tip while the installer fetched a pinned commit: the
-# dashboard would show an "Update available" badge whose button reinstalls
-# identical bytes, so the badge never clears.
+# Repository, release tag and the pinned packages of the DDC converters live in
+# ``app.core.converter_source``, the one declaration read by both this installer
+# and the ``/api/system/converters/version-check`` endpoint in ``app.main``.
+# The converters are release assets (one portable ``.zip`` per format) verified
+# against the SHA-256 published with the release; see that module's docstring
+# for what is pinned and how to move the pin.
 #
-# ``app.core.converter_source`` imports nothing but ``os``, which keeps the
-# system endpoint working when the takeoff module is not loaded - the reason
-# the constants were duplicated in the first place. The module docstring
-# carries the rest: why the ref is a commit SHA, why it must stay one, and
-# how to move it deliberately.
-_DDC_DEFAULT_REF = DEFAULT_CONVERTER_REF
+# The release is Windows 10/11 x64 only. Linux and macOS builds are announced
+# upstream but not published, so there is nothing to install on those hosts.
+_DDC_DEFAULT_TAG = DEFAULT_CONVERTER_TAG
 _DDC_REPO = resolve_converter_repo()
-_DDC_REF = resolve_converter_ref()
-
-# Re-exported under the router's own name because call sites below and the
-# module's tests refer to it here.
-_WINDOWS_CONVERTER_DIRS: dict[str, str] = WINDOWS_CONVERTER_DIRS
-
-# Linux apt package names. We don't auto-install these (would need
-# `sudo` and an apt source rewrite of `/etc/apt/sources.list.d/`),
-# but we surface them in the install endpoint's error response so
-# the user can run the command themselves.
-_LINUX_APT_PACKAGES: dict[str, str] = {
-    "rvt": "ddc-rvtconverter",
-    "ifc": "ddc-ifcconverter",
-    "dwg": "ddc-dwgconverter",
-    "dgn": "ddc-dgnconverter",
-}
-
-# ── Linux converter auto-download (signed apt repo, no root) ──────────────────
-#
-# Unlike the Windows path (raw `.exe` files in a public GitHub repo), the Linux
-# converter binaries ship as proprietary `.deb` packages on the signed DDC apt
-# repository. We do NOT shell out to `apt` (that needs root + a sources.list
-# rewrite). Instead we fetch the repo's `Packages` index ourselves, resolve the
-# converter's transitive `ddc-*` dependencies, download the `.deb` set, and
-# extract it with `dpkg-deb -x` into a per-arch, user-writable root - exactly
-# the zero-user-action flow the Windows installer provides. Validated
-# end-to-end against the live repo (amd64; arm64 is advertised in Release but
-# currently ships an empty index, so that arch falls back to a clear apt hint).
-_DDC_APT_BASE_URL = os.environ.get("OE_CONVERTER_APT_URL", "https://pkg.datadrivenconstruction.io").rstrip("/")
-_DDC_APT_SUITE = os.environ.get("OE_CONVERTER_APT_SUITE", "stable")
-
-# converter_id -> the real ELF binary name shipped under usr/bin (no suffix).
-_LINUX_CONVERTER_BINARIES: dict[str, str] = {
-    "rvt": "RvtExporter",
-    "ifc": "IfcExporter",
-    "dwg": "DwgExporter",
-    "dgn": "DgnExporter",
-}
-
-# Deterministic fallback used only when the apt `Packages` index can't be
-# fetched/parsed (transient outage, or an arch whose index is empty). Mirrors
-# the exact transitive dependency chains validated in WSL. If the published
-# versions drift, the live-index path (primary) self-heals and this fallback
-# simply 404s into a clear "run apt install" message.
-_DDC_DEB_DEPS: dict[str, list[str]] = {
-    "rvt": ["ddc-rvtconverter", "ddc-deps-kernel", "ddc-deps-revit", "ddc-thirdparty"],
-    "ifc": ["ddc-ifcconverter", "ddc-deps-kernel", "ddc-deps-ifc", "ddc-thirdparty"],
-    "dwg": ["ddc-dwgconverter", "ddc-deps-kernel", "ddc-deps-drawings", "ddc-deps-architecture", "ddc-thirdparty"],
-    "dgn": ["ddc-dgnconverter", "ddc-deps-kernel", "ddc-deps-drawings", "ddc-deps-architecture", "ddc-thirdparty"],
-}
-# NOTE: these are only the OFFLINE fallback used when the live apt `Packages`
-# index can't be fetched (the primary path reads versions straight from the
-# index and self-heals across upstream bumps). Keep them in step with the
-# published repo so an index-fetch hiccup doesn't build 404 URLs - last
-# reconciled against pkg.datadrivenconstruction.io on 2026-06-21
-# (converters 18.4.3.0, deps 27.2).
-_DDC_DEB_VERSIONS: dict[str, str] = {
-    "ddc-rvtconverter": "18.4.3.0",
-    "ddc-ifcconverter": "18.4.3.0",
-    "ddc-dwgconverter": "18.4.3.0",
-    "ddc-dgnconverter": "18.4.3.0",
-    "ddc-thirdparty": "18.4.3.0",
-    "ddc-deps-kernel": "27.2",
-    "ddc-deps-revit": "27.2",
-    "ddc-deps-ifc": "27.2",
-    "ddc-deps-drawings": "27.2",
-    "ddc-deps-architecture": "27.2",
-}
-
-
-def _ddc_apt_hosts() -> frozenset[str]:
-    """Allow-listed hosts for apt `.deb` downloads (the configured repo only)."""
-    from urllib.parse import urlparse
-
-    host = (urlparse(_DDC_APT_BASE_URL).hostname or "").lower()
-    return frozenset({host}) if host else frozenset()
-
-
-def _deb_arch() -> str:
-    """Debian architecture tag (amd64/arm64) for the running machine."""
-    import platform as _platform
-
-    m = (_platform.machine() or "").lower()
-    if m in ("x86_64", "amd64"):
-        return "amd64"
-    if m in ("aarch64", "arm64"):
-        return "arm64"
-    return m or "amd64"
-
-
-def _ddc_linux_root(arch: str | None = None) -> Path:
-    """Per-arch, user-writable install root for the no-root `.deb` extraction."""
-    return (_CONVERTER_INSTALL_DIR / f"_ddc_linux_{arch or _deb_arch()}").resolve()
-
-
-def _check_apt_url_allowed(url: str) -> None:
-    """Reject apt download URLs whose host isn't the configured DDC repo."""
-    from urllib.parse import urlparse
-
-    parsed = urlparse(url)
-    if parsed.scheme not in {"https", "http"}:
-        raise RuntimeError(f"Refused to download {url!r} - non-HTTP(S) scheme")
-    host = (parsed.hostname or "").lower()
-    allowed = _ddc_apt_hosts()
-    if host not in allowed:
-        raise RuntimeError(
-            f"Refused to download {url!r} - host {host!r} is not the configured DDC apt host {sorted(allowed)}"
-        )
-
-
-def _parse_apt_packages(text: str) -> dict[str, dict[str, str]]:
-    """Parse a Debian ``Packages`` index into ``{package: {field: value}}``."""
-    out: dict[str, dict[str, str]] = {}
-    for stanza in text.replace("\r\n", "\n").split("\n\n"):
-        fields: dict[str, str] = {}
-        key: str | None = None
-        for line in stanza.split("\n"):
-            if not line:
-                continue
-            if line[0] in " \t" and key:  # folded continuation line
-                fields[key] += " " + line.strip()
-                continue
-            name, sep, val = line.partition(":")
-            if sep:
-                key = name.strip()
-                fields[key] = val.strip()
-        pkg = fields.get("Package")
-        if pkg:
-            out[pkg] = fields
-    return out
-
-
-def _resolve_deb_deps(root_pkg: str, index: dict[str, dict[str, str]]) -> list[str]:
-    """Transitively resolve a package's ``ddc-*`` deps (root first, then deps)."""
-    order: list[str] = []
-    seen: set[str] = set()
-
-    def visit(pkg: str) -> None:
-        if pkg in seen:
-            return
-        seen.add(pkg)
-        order.append(pkg)
-        for dep in (index.get(pkg, {}).get("Depends", "") or "").split(","):
-            dep = dep.strip()
-            if not dep:
-                continue
-            # First alternative; drop any "(>= x)" version constraint.
-            name = dep.split("|")[0].split("(")[0].strip()
-            if name.startswith("ddc-") and name in index:
-                visit(name)
-
-    visit(root_pkg)
-    return order
-
-
-def _fallback_deb_plan(converter_id: str, arch: str) -> list[tuple[str, str]]:
-    """Offline fallback ``.deb`` plan: ``[(package, pool-relative path)]``.
-
-    Used only when the live apt ``Packages`` index can't be fetched. Builds the
-    pool path from the deterministic dep chain + pinned versions, which must be
-    kept in step with the published repo (see ``_DDC_DEB_VERSIONS``). Raises
-    ``RuntimeError`` when no chain / version is known for the converter.
-    """
-    deps = _DDC_DEB_DEPS.get(converter_id)
-    if not deps:
-        raise RuntimeError(
-            f"Could not resolve the .deb set for '{converter_id}' from the apt "
-            f"index and no deterministic fallback chain is defined."
-        )
-    plan: list[tuple[str, str]] = []
-    for pkg in deps:
-        ver = _DDC_DEB_VERSIONS.get(pkg)
-        if not ver:
-            raise RuntimeError(f"No fallback version known for package '{pkg}'.")
-        plan.append((pkg, f"pool/main/{pkg[0]}/{pkg}/{pkg}_{ver}_{arch}.deb"))
-    return plan
-
-
-def _fetch_apt_index(arch: str) -> dict[str, dict[str, str]] | None:
-    """Fetch + parse the apt ``Packages`` index for ``arch`` (uncompressed or .gz)."""
-    import gzip
-    import urllib.error
-    import urllib.request
-
-    base = f"{_DDC_APT_BASE_URL}/dists/{_DDC_APT_SUITE}/main/binary-{arch}"
-    for name in ("Packages", "Packages.gz"):
-        url = f"{base}/{name}"
-        try:
-            _check_apt_url_allowed(url)
-            req = urllib.request.Request(url, headers={"User-Agent": "OpenConstructionERP-converter-installer"})
-            with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310 - host allow-listed
-                raw = resp.read(_MAX_DOWNLOAD_BYTES + 1)
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            logger.debug("apt index fetch failed for %s: %s", url, exc)
-            continue
-        if not raw:
-            continue
-        if name.endswith(".gz"):
-            try:
-                raw = gzip.decompress(raw)
-            except OSError:
-                continue
-        index = _parse_apt_packages(raw.decode("utf-8", errors="replace"))
-        if index:
-            return index
-    return None
-
-
-# Per-.deb download tuning. The apt mirror serves packages of very different
-# sizes (the IFC chain tops out ~58 MB; the RVT chain's converter deps are ~280 MB)
-# and community VPS uplinks are frequently slow, so a single short deadline
-# produced spurious failures (the user-visible "signal timed out"). We use a
-# generous per-read socket timeout, retry transient network errors, and resume
-# with an HTTP Range request so a dropped connection on a large package does
-# not restart the whole download.
-_DEB_READ_TIMEOUT_SEC = 180
-_DEB_DOWNLOAD_ATTEMPTS = 3
-_DEB_RETRY_BACKOFF_SEC = 2.0
-
-
-def _download_one_deb(
-    deb_url: str,
-    dest: Path,
-    *,
-    converter_id: str,
-    pkg: str,
-    index: int,
-    total_count: int,
-    completed_bytes: int,
-    apt_pkg: str,
-    arch: str,
-) -> int:
-    """Download a single ``.deb`` with retry + HTTP-Range resume.
-
-    Returns the downloaded file size in bytes. Raises ``RuntimeError`` with an
-    actionable message when every attempt fails. ``completed_bytes`` is the
-    cumulative size of already-finished packages, used only to keep the
-    progress feed (``bytes_done``) monotonic across the whole set.
-    """
-    import urllib.error
-    import urllib.request
-
-    last_exc: Exception | None = None
-    for attempt in range(1, _DEB_DOWNLOAD_ATTEMPTS + 1):
-        have = dest.stat().st_size if dest.exists() else 0
-        headers = {"User-Agent": "OpenConstructionERP-converter-installer"}
-        if have > 0:
-            headers["Range"] = f"bytes={have}-"
-        req = urllib.request.Request(deb_url, headers=headers)
-        try:
-            with urllib.request.urlopen(req, timeout=_DEB_READ_TIMEOUT_SEC) as resp:  # noqa: S310 - allow-listed
-                # If we asked to resume but the server ignored Range (status
-                # 200, not 206), start the file over so we don't corrupt it.
-                status = getattr(resp, "status", None) or resp.getcode()
-                resuming = have > 0 and status == 206
-                size = have if resuming else 0
-                with open(dest, "ab" if resuming else "wb") as fh:
-                    while True:
-                        chunk = resp.read(1024 * 256)
-                        if not chunk:
-                            break
-                        size += len(chunk)
-                        if size > _MAX_DOWNLOAD_BYTES:
-                            raise RuntimeError(
-                                f"{pkg}.deb exceeds the per-file cap ({_MAX_DOWNLOAD_BYTES // (1024 * 1024)} MB)."
-                            )
-                        if completed_bytes + size > _MAX_INSTALL_BYTES:
-                            raise RuntimeError(
-                                f"Converter download exceeds the total cap ({_MAX_INSTALL_BYTES // (1024 * 1024)} MB)."
-                            )
-                        fh.write(chunk)
-                        _set_install_progress(
-                            converter_id,
-                            stage="downloading",
-                            current=index,
-                            total=total_count,
-                            bytes_done=completed_bytes + size,
-                            file=f"{pkg}.deb",
-                        )
-            return size
-        except urllib.error.HTTPError as exc:
-            # 4xx (other than 408/429) will not fix on retry - a 404 means the
-            # version/arch is not published; fail fast with the apt hint.
-            if exc.code in (408, 429) or 500 <= exc.code < 600:
-                last_exc = exc
-            else:
-                raise RuntimeError(
-                    f"Download failed for {pkg} (HTTP {exc.code}) from {deb_url}. "
-                    f"This architecture ({arch}) may not be published - install via "
-                    f"`sudo apt install -y {apt_pkg}` instead."
-                ) from exc
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
-            last_exc = exc
-        # Transient failure - back off and retry, resuming from bytes on disk.
-        if attempt < _DEB_DOWNLOAD_ATTEMPTS:
-            _time.sleep(_DEB_RETRY_BACKOFF_SEC * attempt)
-    raise RuntimeError(
-        f"Download failed for {pkg} after {_DEB_DOWNLOAD_ATTEMPTS} attempts: {last_exc}. "
-        f"The connection to {_DDC_APT_BASE_URL} may be slow or blocked - you can install "
-        f"manually with `sudo apt install -y {apt_pkg}` once the DDC apt source is configured."
-    )
-
-
-def _download_converter_files_linux(converter_id: str) -> Path:
-    """Auto-download + extract the DDC Linux converter for ``converter_id``.
-
-    The Linux mirror of :func:`_download_converter_files_windows`: resolve the
-    converter's transitive ``ddc-*`` `.deb` set from the signed apt repo, stream
-    each package (host allow-listed, size-capped), then unpack each (via
-    ``dpkg-deb`` when present, else a pure-Python ``ar`` + :mod:`tarfile`
-    reader) into a per-arch, user-writable root under
-    ``~/.openestimator/converters/_ddc_linux_<arch>`` - preserving the
-    ``usr/bin`` + ``usr/lib/datadrivenconstruction`` layout so the binary's
-    ``$ORIGIN`` RUNPATH resolves (``LD_LIBRARY_PATH`` is also set at launch by
-    :func:`app.modules.boq.cad_import._converter_subprocess_env` to cover the
-    further DDC cad2data SDK libraries loaded at conversion time).
-
-    Returns the extracted ``usr/bin/{Format}Exporter`` path. Raises
-    ``RuntimeError`` with an actionable message on any failure.
-    """
-    import tempfile
-
-    from app.modules.takeoff.deb_extract import DebExtractError, extract_deb
-
-    binary_name = _LINUX_CONVERTER_BINARIES.get(converter_id)
-    apt_pkg = _LINUX_APT_PACKAGES.get(converter_id)
-    if not binary_name or not apt_pkg:
-        raise RuntimeError(f"No Linux converter package is defined for '{converter_id}'.")
-
-    # No hard dependency on dpkg-deb: extract_deb() unpacks each package with
-    # dpkg-deb when it is present and falls back to a pure-Python ar + tarfile
-    # reader otherwise, so the install also works on minimal containers and
-    # non-Debian hosts where dpkg is absent.
-
-    arch = _deb_arch()
-    root = _ddc_linux_root(arch)
-    bin_path = root / "usr" / "bin" / binary_name
-    if bin_path.exists() and bin_path.stat().st_size > 1024:
-        bin_path.chmod(0o755)
-        return bin_path
-
-    # Resolve the ordered .deb set: prefer the live apt index (auto-adapts to
-    # version bumps); fall back to the validated hard-coded chain + versions.
-    _set_install_progress(
-        converter_id,
-        stage="listing",
-        current=0,
-        total=0,
-        bytes_done=0,
-        file=None,
-        started_at=_time.time(),
-    )
-    index = _fetch_apt_index(arch)
-    plan: list[tuple[str, str]] = []  # (package, filename relative to base URL)
-    if index and apt_pkg in index:
-        for pkg in _resolve_deb_deps(apt_pkg, index):
-            fn = index.get(pkg, {}).get("Filename")
-            if not fn:
-                plan = []
-                break
-            plan.append((pkg, fn.lstrip("/")))
-    if not plan:
-        plan = _fallback_deb_plan(converter_id, arch)
-        logger.info(
-            "Linux converter %s using deterministic .deb fallback (%d packages)",
-            converter_id,
-            len(plan),
-        )
-
-    logger.info(
-        "Linux converter %s resolves to %d .deb packages: %s",
-        converter_id,
-        len(plan),
-        [p for p, _ in plan],
-    )
-
-    root.mkdir(parents=True, exist_ok=True)
-    n = len(plan)
-    with tempfile.TemporaryDirectory(prefix="ddc_deb_") as tmp:
-        tmpdir = Path(tmp)
-        completed_total = 0
-        for i, (pkg, rel) in enumerate(plan, 1):
-            deb_url = f"{_DDC_APT_BASE_URL}/{rel}"
-            _check_apt_url_allowed(deb_url)
-            dest = tmpdir / f"{i:02d}_{pkg}.deb"
-            _set_install_progress(
-                converter_id,
-                stage="downloading",
-                current=i,
-                total=n,
-                bytes_done=completed_total,
-                file=f"{pkg}.deb",
-            )
-            size = _download_one_deb(
-                deb_url,
-                dest,
-                converter_id=converter_id,
-                pkg=pkg,
-                index=i,
-                total_count=n,
-                completed_bytes=completed_total,
-                apt_pkg=apt_pkg,
-                arch=arch,
-            )
-            completed_total += size
-
-        _set_install_progress(
-            converter_id,
-            stage="extracting",
-            current=n,
-            total=n,
-            bytes_done=completed_total,
-            file=None,
-        )
-
-        # Method 1 (root only): install the downloaded packages system-wide with
-        # apt. apt additionally pulls any base-system libraries the converter
-        # needs, and lands the binary on the system PATH. Any problem here falls
-        # straight through to the universal rootless extraction below, so this is
-        # a safe best-effort upgrade, not a new hard requirement.
-        if _system_apt_available():
-            deb_files = [str(tmpdir / f"{i:02d}_{pkg}.deb") for i, (pkg, _r) in enumerate(plan, 1)]
-            try:
-                sys_bin = _apt_install_local_debs(deb_files, binary_name, timeout=600)
-            except Exception as exc:  # noqa: BLE001 - fall back to rootless extract
-                logger.warning(
-                    "Linux converter %s: system apt install failed (%s); using rootless extract",
-                    converter_id,
-                    exc,
-                )
-                sys_bin = None
-            if sys_bin is not None:
-                _linux_converter_self_test(converter_id, sys_bin)
-                logger.info("Linux converter %s installed system-wide at %s", converter_id, sys_bin)
-                return sys_bin
-
-        # Method 2 (universal, no root needed): unpack each package into the
-        # per-user converter dir with extract_deb (dpkg-deb when present, else a
-        # pure-Python ar + tarfile reader).
-        for i, (pkg, _rel) in enumerate(plan, 1):
-            deb = tmpdir / f"{i:02d}_{pkg}.deb"
-            try:
-                method = extract_deb(deb, root, timeout=180)
-            except DebExtractError as exc:
-                raise RuntimeError(f"Could not unpack {pkg}: {exc}") from exc
-            logger.info("Linux converter %s: unpacked %s (%s)", converter_id, pkg, method)
-
-    if not bin_path.exists():
-        raise RuntimeError(f"Converter binary {binary_name} was not found after extraction (expected at {bin_path}).")
-    bin_path.chmod(0o755)
-    _linux_converter_self_test(converter_id, bin_path)
-    logger.info("Linux converter %s ready at %s", converter_id, bin_path)
-    return bin_path
-
-
-def _linux_converter_self_test(converter_id: str, bin_path: Path) -> None:
-    """Best-effort post-install launch check (Linux).
-
-    Runs the freshly extracted binary with a harmless flag to confirm its
-    shared libraries load. This is purely diagnostic - it never raises and
-    never removes the install - but when the dynamic loader is missing a
-    *system* library it logs an actionable warning, so an operator can see
-    *why* a later conversion falls back to placeholder geometry instead of it
-    failing silently. The binary's own bundled libs are covered by
-    ``_converter_subprocess_env`` (LD_LIBRARY_PATH); this catches the rarer
-    case of a missing base-system library on a very slim host.
-    """
-    import subprocess
-
-    try:
-        from app.modules.boq.cad_import import _converter_subprocess_env
-
-        env = _converter_subprocess_env(bin_path)
-    except Exception:  # noqa: BLE001 - diagnostics must never break the install
-        env = None
-    try:
-        proc = subprocess.run(  # noqa: S603 - fixed argv, no shell
-            [str(bin_path), "--version"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=env,
-            timeout=30,
-            input=b"\n",
-        )
-    except OSError as exc:
-        logger.warning(
-            "Linux converter %s self-test could not launch %s: %s",
-            converter_id,
-            bin_path.name,
-            exc,
-        )
-        return
-    except subprocess.TimeoutExpired:
-        # It started and is waiting on input - that means the libraries loaded.
-        logger.info("Linux converter %s self-test: %s launched, libraries OK", converter_id, bin_path.name)
-        return
-    blob = (proc.stdout + b"\n" + proc.stderr).decode("utf-8", "replace")
-    low = blob.lower()
-    if "error while loading shared libraries" in low or "cannot open shared object" in low:
-        logger.warning(
-            "Linux converter %s installed but a system library is missing: %s. Real "
-            "geometry conversion will fall back to placeholder until it is present "
-            "(on Debian/Ubuntu try `sudo apt-get install -f`).",
-            converter_id,
-            blob.strip()[:200],
-        )
-    else:
-        logger.info("Linux converter %s self-test OK (%s)", converter_id, bin_path.name)
-
-
-def _system_apt_available() -> bool:
-    """True when we may install ``.deb`` files system-wide (Linux, root, apt-get)."""
-    import shutil
-    import sys
-
-    if not sys.platform.startswith("linux"):
-        return False
-    geteuid = getattr(os, "geteuid", None)
-    if geteuid is None or geteuid() != 0:
-        return False
-    return shutil.which("apt-get") is not None
-
-
-def _apt_install_local_debs(deb_files: list[str], binary_name: str, *, timeout: int) -> Path | None:
-    """Install already-downloaded ``.deb`` files with the system apt (as root).
-
-    Runs ``apt-get install`` on the local files so apt resolves both the
-    package order AND any base-system libraries the packages depend on (libGL,
-    fontconfig, ...) - something a bare extraction cannot do. No apt *source*
-    is added; only the supplied files plus their system dependencies are
-    installed. Returns the system binary path on success, ``None`` if the
-    binary did not appear; raises on a non-zero apt exit so the caller can
-    fall back to the rootless extraction.
-    """
-    import subprocess
-
-    env = {**os.environ, "DEBIAN_FRONTEND": "noninteractive"}
-    proc = subprocess.run(  # noqa: S603 - fixed argv, no shell
-        ["apt-get", "install", "-y", "--no-install-recommends", *deb_files],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        timeout=timeout,
-        env=env,
-    )
-    if proc.returncode != 0:
-        raise RuntimeError(proc.stderr.decode("utf-8", "replace").strip()[:300] or f"apt-get exited {proc.returncode}")
-    sys_bin = Path("/usr/bin") / binary_name
-    if sys_bin.exists() and sys_bin.stat().st_size > 1024:
-        sys_bin.chmod(0o755)
-        return sys_bin
-    return None
+_DDC_TAG = resolve_converter_tag()
 
 
 _CONVERTER_CACHE_DIR = Path.home() / ".openestimator" / "cache" / "converters"
@@ -978,44 +414,38 @@ def _get_install_progress(converter_id: str) -> dict[str, Any] | None:
 
 # ── Audit A2 / A11: converter download hardening ─────────────────────────────
 
-# Allowed hosts for converter file downloads. We hard-code this against
-# GitHub's raw.githubusercontent.com (where the Contents API redirects
-# blob downloads) so an attacker who tampers with the API response -
-# substituting download_url with an attacker-controlled CDN - can't
-# trick the installer into fetching a poisoned exe. The Contents API
-# itself returns absolute URLs but FastAPI never trusts user-supplied
-# URLs, so this matters only if GitHub itself is compromised OR if
-# an upstream MITM rewrites the JSON in transit (which TLS already
-# prevents, but defence in depth).
+# Allowed hosts for converter downloads. A release asset URL on github.com
+# answers with a redirect to GitHub's asset CDN, so the CDN hosts are listed
+# too and every redirect hop is checked against this list (see
+# ``_download_one_file``). An attacker who rewrote the URL or a redirect
+# cannot send the installer to a CDN of their own; the SHA-256 check on the
+# finished download is the second line behind it.
 _ALLOWED_DOWNLOAD_HOSTS = frozenset(
     {
-        "raw.githubusercontent.com",
         "github.com",
-        "objects.githubusercontent.com",  # GitHub's blob CDN, used for >5 MB
+        "raw.githubusercontent.com",
+        "objects.githubusercontent.com",  # GitHub's blob CDN
+        "release-assets.githubusercontent.com",  # GitHub's release asset CDN
     }
 )
 
-# Hard size cap per file. The largest single file in the DDC converter
-# repo today is the ~140 MB IfcExporter.exe; we add ~3x headroom for
-# future versions and the bundled cad2data format readers. Anything above this
-# threshold is almost certainly a substitution attack or a pathological
+# Hard size cap per download. The largest package of the release today is
+# the ~79 MB RVT converter archive; this leaves headroom for future versions.
+# Anything above it is almost certainly a substitution attack or a pathological
 # upstream change - refuse rather than waste disk and download time.
 _MAX_DOWNLOAD_BYTES = 512 * 1024 * 1024  # 512 MB
 
-# Total cap per converter install. RVT today is ~600 MB; we set 1.5 GB
-# so existing installs continue to work but a runaway listing can't
-# eat all the disk.
+# Total cap on what one converter install may unpack to (enforced by
+# ``app.core.converter_package.extract_package``).
 _MAX_INSTALL_BYTES = 1536 * 1024 * 1024  # 1.5 GB
 
 
 def _check_download_url_allowed(url: str) -> None:
     """Reject converter download URLs whose host isn't on the allow-list.
 
-    Audit A2 - without this check, a tampered GitHub Contents API
-    response (or a future bug that lets a malicious value leak into
-    ``download_url``) could redirect the installer to an attacker-
-    controlled CDN. Allow-listing the three GitHub hosts that
-    legitimately serve blob downloads closes that vector.
+    Audit A2 - without this check, a tampered URL or redirect could send
+    the installer to an attacker-controlled CDN. Allow-listing the GitHub
+    hosts that legitimately serve release downloads closes that vector.
     """
     from urllib.parse import urlparse
 
@@ -1028,87 +458,6 @@ def _check_download_url_allowed(url: str) -> None:
             f"Refused to download {url!r} - host {host!r} is not on "
             f"the converter allow-list {sorted(_ALLOWED_DOWNLOAD_HOSTS)}"
         )
-
-
-def _github_list_directory(repo_path: str) -> list[dict[str, Any]]:
-    """Recursively list every file in a GitHub repo directory.
-
-    Walks the GitHub Contents API at
-    ``https://api.github.com/repos/{_DDC_REPO}/contents/{repo_path}``
-    and follows nested directories. Returns a flat list of file
-    descriptors with at least ``path``, ``download_url``, and ``size``
-    fields. Directories themselves are not included; only their files.
-
-    Raises ``RuntimeError`` if the API call fails so the caller can
-    surface a useful error to the user instead of silently installing
-    nothing.
-    """
-    import json
-    import urllib.error
-    import urllib.request
-
-    api_url = f"https://api.github.com/repos/{_DDC_REPO}/contents/{repo_path}?ref={_DDC_REF}"
-    req = urllib.request.Request(
-        api_url,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "OpenConstructionERP-converter-installer",
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            payload = json.loads(resp.read())
-    except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"GitHub Contents API returned {exc.code} for {repo_path}: {exc.reason}") from exc
-    except (urllib.error.URLError, TimeoutError) as exc:
-        raise RuntimeError(f"Could not reach GitHub Contents API: {exc}") from exc
-
-    if not isinstance(payload, list):
-        raise RuntimeError(f"GitHub Contents API returned a non-list for {repo_path} - is the path correct?")
-
-    files: list[dict[str, Any]] = []
-    for item in payload:
-        item_type = item.get("type")
-        if item_type == "file":
-            files.append(item)
-        elif item_type == "dir":
-            # Recurse into subdirectories. The exporter loads most of what
-            # it needs from datadrivenlibs/, so a flat download would miss
-            # the DLLs the .exe needs at runtime. platforms/ and styles/ are
-            # listed by this walk too and then dropped by the caller, because
-            # they belong to the graphical converter we do not ship.
-            files.extend(_github_list_directory(item["path"]))
-    return files
-
-
-def _resolve_target_path(
-    repo_path: str,
-    src_prefix: str,
-    dest_root: Path,
-    install_dir_resolved: Path,
-) -> Path:
-    """Compute the on-disk target for a file from the GitHub listing.
-
-    Strips the converter's source-dir prefix so we mirror the inner
-    tree (datadrivenlibs/, platforms/, styles/) into ``dest_root``.
-    Rejects path-traversal attempts up-front so an attacker who
-    compromised the upstream repo can not write outside the install
-    directory.
-    """
-    if repo_path.startswith(src_prefix):
-        rel = repo_path[len(src_prefix) :]
-    else:
-        rel = Path(repo_path).name
-    if Path(rel).is_absolute() or ".." in Path(rel).parts:
-        raise RuntimeError(
-            f"Refused to write to suspicious path {rel!r} from GitHub Contents response (path-traversal attempt)"
-        )
-    target = (dest_root / rel).resolve()
-    try:
-        target.relative_to(install_dir_resolved)
-    except ValueError as exc:
-        raise RuntimeError(f"Refused to write {target} - escapes install directory") from exc
-    return target
 
 
 def _download_one_file(download_url: str, target: Path) -> int:
@@ -1173,6 +522,11 @@ def _download_one_file(download_url: str, target: Path) -> int:
 
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
+            # The release URL redirects to a CDN: check where we ended up
+            # before reading a byte of the body.
+            final_url = getattr(resp, "geturl", lambda: download_url)()
+            if final_url != download_url:
+                _check_download_url_allowed(final_url)
             # Servers may advertise size up-front; reject grossly large
             # files before reading a single byte.
             content_length = resp.headers.get("Content-Length")
@@ -1281,8 +635,7 @@ def _verify_pe_executable(path: Path) -> str | None:
     where the DOS header points. Validating that chain catches exactly
     that corruption at install time instead of at launch time.
 
-    Structure only. Whether the image matches the rest of the install is
-    :func:`_verify_downloaded_architecture`, which needs the whole tree.
+    Structure only; the package digest is checked separately.
     """
     machine, problem = _read_pe_machine(path)
     if problem is not None:
@@ -1293,403 +646,158 @@ def _verify_pe_executable(path: Path) -> str | None:
 
 
 # How many filenames an install failure names before it stops listing them.
-# Shared by the three messages that can each end up describing the whole tree:
-# an architecture mismatch, files a prune could not remove, and files that
-# survived a clean. A 250-file converter would otherwise produce a 250-line
-# error string.
 _MAX_REPORTED_FILES = 5
 
 
-def _verify_downloaded_architecture(dest_root: Path, exe_path: Path) -> str | None:
-    """Check every downloaded PE image against the exe we will launch.
+def _fetch_release_checksums(repo: str, tag: str) -> dict[str, str]:
+    """Read ``SHA256SUMS.txt`` of the release into ``{asset: sha256}``."""
+    import urllib.error
+    import urllib.request
 
-    Windows refuses to start an image whose dependencies were built for
-    another word size, with ``0xC000007B``, and it names the library
-    rather than the program - so the failure arrives pointing at a file
-    the install gate never looked at. The gate used to read four bytes of
-    the exe and stop: one file out of 251 for DGN, and never the Machine
-    field, so a 32-bit build passed it cleanly.
+    url = release_asset_url(CHECKSUMS_ASSET, repo=repo, tag=tag)
+    _check_download_url_allowed(url)
+    req = urllib.request.Request(url, headers={"User-Agent": "OpenConstructionERP-converter-installer"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            final_url = getattr(resp, "geturl", lambda: url)()
+            if final_url != url:
+                _check_download_url_allowed(final_url)
+            body = resp.read(1024 * 1024 + 1)
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"Could not read {CHECKSUMS_ASSET} of release {tag}: HTTP {exc.code}") from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise RuntimeError(f"Could not reach GitHub to read {CHECKSUMS_ASSET} of release {tag}: {exc}") from exc
+    if len(body) > 1024 * 1024:
+        raise RuntimeError(f"{CHECKSUMS_ASSET} of release {tag} is implausibly large")
+    return parse_sha256sums(body.decode("utf-8", errors="replace"))
 
-    Returns a reason when anything disagrees with the exe or fails to
-    parse, and ``None`` when the tree is one architecture throughout.
+
+def _expected_package_digest(pkg: ConverterPackage, repo: str, tag: str) -> str:
+    """The SHA-256 a downloaded package must have.
+
+    The digest published in the release's ``SHA256SUMS.txt`` is authoritative
+    for a tag we do not pin. For the pinned tag it has to agree with the digest
+    committed in ``converter_source`` as well, so that neither a tampered release
+    page nor a stale constant can pass a wrong file.
     """
-    exe_machine, exe_problem = _read_pe_machine(exe_path)
-    if exe_problem is not None:
-        return f"{exe_path.name}: {exe_problem}"
-    if exe_machine is None:
-        return f"{exe_path.name} is not a PE executable"
-
-    mismatched: list[str] = []
-    unparsable: list[str] = []
-    images = 1  # the exe itself
-    for candidate in sorted(dest_root.rglob("*")):
-        if candidate == exe_path or not candidate.is_file():
-            continue
-        machine, problem = _read_pe_machine(candidate)
-        rel = candidate.relative_to(dest_root)
-        if problem is not None:
-            unparsable.append(f"{rel} ({problem})")
-            continue
-        if machine is None:
-            continue  # data file - the licence, the readme PDF, the notices
-        images += 1
-        if machine != exe_machine:
-            mismatched.append(f"{rel} is {_describe_machine(machine)}")
-
-    if not mismatched and not unparsable:
-        logger.info(
-            "Verified %d PE images under %s, all %s",
-            images,
-            dest_root,
-            _describe_machine(exe_machine),
-        )
-        return None
-
-    parts: list[str] = []
-    if mismatched:
-        shown = mismatched[:_MAX_REPORTED_FILES]
-        rest = len(mismatched) - len(shown)
-        parts.append(
-            f"{len(mismatched)} of {images} binaries do not match "
-            f"{exe_path.name} ({_describe_machine(exe_machine)}): "
-            + "; ".join(shown)
-            + (f"; and {rest} more" if rest else "")
-        )
-    if unparsable:
-        shown = unparsable[:_MAX_REPORTED_FILES]
-        rest = len(unparsable) - len(shown)
-        parts.append(
-            f"{len(unparsable)} file(s) start like a Windows binary but do not parse as one: "
-            + "; ".join(shown)
-            + (f"; and {rest} more" if rest else "")
-        )
-    return ". ".join(parts)
-
-
-def _prune_unlisted_files(dest_root: Path, expected: set[Path]) -> list[str]:
-    """Delete everything under ``dest_root`` the current listing does not carry.
-
-    The installer mirrored without ever pruning, so a converter folder
-    accumulated across versions: the download overwrites and adds, and
-    nothing removed a file that disappeared upstream. Measured on a real
-    install, a binary upstream dropped in one release was still on disk
-    after a reinstall three days later, in the folder our own remediation
-    text told people to fix by downloading again.
-
-    Returns the paths removed, relative to ``dest_root``. Raises
-    ``RuntimeError`` if a file cannot be deleted: a leftover we
-    deliberately tried to remove and could not is exactly the state this
-    exists to end, so it is not something to log and walk past.
-    """
-    # os.path.normcase because NTFS is case-insensitive - if upstream only
-    # changes a file's casing, the download overwrites the existing file
-    # while Windows keeps the old name on disk, and a case-sensitive
-    # comparison would then delete the file we just fetched.
-    keep = {os.path.normcase(str(p)) for p in expected}
-    removed: list[str] = []
-    stuck: list[str] = []
-    for candidate in sorted(dest_root.rglob("*")):
-        if not candidate.is_file() and not candidate.is_symlink():
-            continue
-        if os.path.normcase(str(candidate)) in keep:
-            continue
-        try:
-            candidate.unlink()
-        except OSError as exc:
-            stuck.append(f"{candidate.relative_to(dest_root)} ({exc})")
-            continue
-        removed.append(str(candidate.relative_to(dest_root)))
-
-    if stuck:
-        shown = stuck[:_MAX_REPORTED_FILES]
-        rest = len(stuck) - len(shown)
-        raise RuntimeError(
-            f"Could not remove {len(stuck)} file(s) that are no longer part of "
-            f"the converter: " + "; ".join(shown) + (f"; and {rest} more" if rest else "") + ". "
-            f"Close any running converter (and any antivirus scan of "
-            f"{dest_root}), then install again."
-        )
-
-    # Directories the prune emptied. Deepest first so a nested tree
-    # collapses in one pass; a directory that is not empty, or that
-    # something holds open, simply stays.
-    for candidate in sorted(dest_root.rglob("*"), reverse=True):
-        if candidate.is_dir():
-            with contextlib.suppress(OSError):
-                candidate.rmdir()
-    return removed
+    published = _fetch_release_checksums(repo, tag).get(pkg.asset)
+    if tag == DEFAULT_CONVERTER_TAG and repo == DEFAULT_CONVERTER_REPO:
+        if published is not None and published != pkg.sha256:
+            raise RuntimeError(
+                f"SHA256SUMS.txt of release {tag} lists {published} for {pkg.asset}, "
+                f"but this build pins {pkg.sha256}. Refusing to install."
+            )
+        return pkg.sha256
+    if published is None:
+        raise RuntimeError(f"Release {tag} of {repo} publishes no checksum for {pkg.asset}.")
+    return published
 
 
 def _download_converter_files_windows(converter_id: str, *, clean: bool = False) -> Path:
-    """Download every file of a Windows converter into the install dir.
+    """Install a Windows converter package into the per-format install folder.
 
-    Mirrors the per-format directory tree from
-    `DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/` into
-    `~/.openestimator/converters/{format}_windows/` so multiple
-    converters can coexist without overwriting each other's Qt DLLs
-    or format readers.
+    Downloads the portable ``.zip`` of the converter from the pinned GitHub
+    release, checks its SHA-256 against the release's ``SHA256SUMS.txt``,
+    unpacks it into ``~/.openestimator/converters/{format}_windows/`` and
+    checks that the executable is a well-formed PE file.
 
-    Mirroring means mirroring in both directions: after the download,
-    anything in the destination the listing did not carry is removed. Set
-    ``clean`` to empty the destination up front instead - that is what the
-    install endpoint's ``force`` asks for, and unlike the prune it also
-    replaces files whose name still matches.
+    The new folder is built next to the old one and swapped in at the end, so a
+    failed download or a bad archive never leaves a half-installed converter
+    that ``find_converter`` would then discover. A folder that is not stamped
+    with the release package it came from (an install of the retired 18.x
+    generation) is replaced. ``clean`` additionally replaces a current install.
 
-    The RVT converter alone is ~600 MB across ~175 files (most of
-    which are the bundled cad2data format readers for every RVT
-    version 2011-2026), so we use a small ThreadPoolExecutor to
-    download files in parallel - sequential `urlretrieve` calls
-    against `raw.githubusercontent.com` would take 5+ minutes from
-    a typical home connection. Eight workers gets RVT down to
-    ~30-60 seconds without tripping any GitHub abuse detection.
-
-    Returns the path to the installed `*Exporter.exe`. Raises
-    ``RuntimeError`` if the listing fails, any download fails, or
-    the expected exe is missing after download.
+    Returns the path to the installed executable. Raises ``RuntimeError`` if the
+    download, the digest check or the unpacking fails.
     """
-    from concurrent.futures import ThreadPoolExecutor, as_completed
+    import shutil as _shutil
+    import uuid
+
+    pkg = PACKAGES.get(converter_id)
+    if pkg is None:
+        raise RuntimeError(f"There is no DDC converter package for {converter_id!r}.")
+    repo, tag = _DDC_REPO, _DDC_TAG
 
     _set_install_progress(
         converter_id,
         stage="listing",
         current=0,
-        total=0,
+        total=2,
         bytes_done=0,
-        file=None,
+        file=pkg.asset,
         started_at=_time.time(),
     )
-    src_dir = _WINDOWS_CONVERTER_DIRS[converter_id]
-    files = _github_list_directory(src_dir)
-    if not files:
-        _clear_install_progress(converter_id)
-        raise RuntimeError(
-            f"GitHub directory {src_dir!r} contains no files - the DDC converter repo layout may have changed."
-        )
-
-    # Per-format install root keeps Qt DLLs and cad2data format readers from
-    # clobbering each other when multiple formats are installed.
-    dest_root = (_CONVERTER_INSTALL_DIR / f"{converter_id}_windows").resolve()
-    if clean and dest_root.exists():
-        import shutil as _shutil
-
-        _shutil.rmtree(dest_root, ignore_errors=True)
-        # rmtree with ignore_errors is silent about a file Windows would
-        # not let it delete, which is how a partial tree survives a
-        # rollback and then passes for an install. A forced reinstall is
-        # the one place the user has explicitly asked for the old folder
-        # to go, so say when it did not.
-        if dest_root.exists():
-            leftovers = sorted(str(p.relative_to(dest_root)) for p in dest_root.rglob("*") if p.is_file())
-            if leftovers:
-                _clear_install_progress(converter_id)
-                shown = leftovers[:_MAX_REPORTED_FILES]
-                rest = len(leftovers) - len(shown)
-                raise RuntimeError(
-                    f"Could not empty {dest_root} before reinstalling - "
-                    f"{len(leftovers)} file(s) are still there: "
-                    + "; ".join(shown)
-                    + (f"; and {rest} more" if rest else "")
-                    + ". Something has them open; close any running converter and try again."
-                )
-    dest_root.mkdir(parents=True, exist_ok=True)
-    install_dir_resolved = _CONVERTER_INSTALL_DIR.resolve()
-    src_prefix = src_dir.rstrip("/") + "/"
-
-    # Pre-resolve every target path so the security checks happen
-    # BEFORE any network IO - we want to fail fast on a hostile
-    # listing rather than partway through a 600 MB download.
-    download_jobs: list[tuple[str, Path]] = []
-    skipped_graphical = 0
-    for entry in files:
-        download_url = entry.get("download_url")
-        if not download_url:
-            continue  # submodules / symlinks - skip
-        # THE DOWNLOAD IS THE TERMINAL BUILD ONLY. Upstream ships the
-        # command-line ``*Exporter.exe`` and a windowed
-        # ``DDC_Community_*_converter.exe`` in the same folder, and we drive
-        # only the first one - see ``is_graphical_only`` in
-        # app/core/converter_source.py for the file-by-file measurement of
-        # what that leaves out and why Qt6Core.dll is not in the list. Do not
-        # widen this back to "download everything the listing returns": that
-        # is how ~19 MB of Qt GUI libraries, under LGPL-3.0, ended up on
-        # every user's disk for a window nothing in this codebase opens.
-        # Skipped files are also absent from the prune set below, so a repair
-        # install clears them out of a folder that already has them.
-        repo_path = entry["path"]
-        rel_path = repo_path[len(src_prefix) :] if repo_path.startswith(src_prefix) else Path(repo_path).name
-        if is_graphical_only(rel_path):
-            skipped_graphical += 1
-            continue
-        target = _resolve_target_path(
-            repo_path,
-            src_prefix,
-            dest_root,
-            install_dir_resolved,
-        )
-        download_jobs.append((download_url, target))
-
-    if skipped_graphical:
-        logger.info(
-            "Converter %s: skipping %d file(s) that only the graphical shell needs",
-            converter_id,
-            skipped_graphical,
-        )
-
-    if not download_jobs:
-        _clear_install_progress(converter_id)
-        raise RuntimeError(f"GitHub listing for {src_dir} contained no downloadable files.")
-
-    total_bytes = 0
-    file_count = 0
-    failures: list[str] = []
-    _set_install_progress(
-        converter_id,
-        stage="downloading",
-        current=0,
-        total=len(download_jobs),
-        bytes_done=0,
-    )
-
-    # Eight workers is a sweet spot - enough parallelism to saturate
-    # most home links without triggering GitHub's anti-abuse limiter
-    # on raw.githubusercontent.com (we've measured no 429s up to 16
-    # workers in practice but 8 leaves headroom).
-    #
-    # Audit A11 - cumulative cap. Per-file caps don't help if the
-    # repo listing itself grows hostile (1000 files * 500 MB each).
-    # We abort the install when the running total exceeds
-    # ``_MAX_INSTALL_BYTES`` and clean up the partial download.
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        future_to_path = {pool.submit(_download_one_file, url, target): (url, target) for url, target in download_jobs}
-        for fut in as_completed(future_to_path):
-            url, target = future_to_path[fut]
-            try:
-                size = fut.result()
-            except Exception as exc:
-                failures.append(f"{url}: {exc}")
-                continue
-            total_bytes += size
-            file_count += 1
-            _set_install_progress(
-                converter_id,
-                current=file_count,
-                bytes_done=total_bytes,
-                file=Path(target).name,
-            )
-            if total_bytes > _MAX_INSTALL_BYTES:
-                failures.append(
-                    f"cumulative install size {total_bytes} bytes exceeded cap of {_MAX_INSTALL_BYTES} bytes - aborting"
-                )
-                # Cancel anything still in flight; the partial directory
-                # gets cleaned up by the failure-handler below.
-                for pending in future_to_path:
-                    pending.cancel()
-                break
-            if file_count % 25 == 0:
-                logger.info(
-                    "Converter %s: downloaded %d/%d files (%.1f MB)",
-                    converter_id,
-                    file_count,
-                    len(download_jobs),
-                    total_bytes / 1024 / 1024,
-                )
-
-    if failures:
-        # Roll back the partial download - we don't want a half-
-        # installed converter that find_converter() will then
-        # discover and try to use.
-        import shutil as _shutil
-
-        _shutil.rmtree(dest_root, ignore_errors=True)
-        _clear_install_progress(converter_id)
-        # ``ignore_errors`` cannot remove a file another process holds
-        # open, and what it leaves behind is the partial tree that later
-        # passes for an install - so name it rather than let it be silent.
-        residue = f" {dest_root} could not be fully removed." if dest_root.exists() else ""
-        raise RuntimeError(
-            f"{len(failures)} of {len(download_jobs)} downloads failed; first error: {failures[0]}.{residue}"
-        )
-
-    exe_name: str = _META_BY_ID[converter_id]["exe"]
-    exe_path = dest_root / exe_name
-    if not exe_path.exists():
-        _clear_install_progress(converter_id)
-        raise RuntimeError(
-            f"Installed {file_count} files ({total_bytes} bytes) for "
-            f"{converter_id} but {exe_name} is missing at {exe_path}"
-        )
-
-    _set_install_progress(
-        converter_id,
-        stage="verifying",
-        current=len(download_jobs),
-        bytes_done=total_bytes,
-        file=None,
-    )
-
-    # Structural integrity gate. A file that merely *exists* is not
-    # enough: a text-mode-corrupted download (the WinError 216 bug)
-    # leaves a same-name file whose PE header is shifted. Catch it here
-    # and roll back so a corrupt copy can't linger on disk and shadow a
-    # pristine toolkit binary that find_converter() would otherwise use.
-    pe_problem = _verify_pe_executable(exe_path)
-    if pe_problem is not None:
-        import shutil as _shutil
-
-        _shutil.rmtree(dest_root, ignore_errors=True)
-        _clear_install_progress(converter_id)
-        raise RuntimeError(
-            f"{converter_id} install verification failed: {exe_name} "
-            f"{pe_problem}. The partial install was removed - please "
-            f"retry the download (the binary-mode write fix ensures a "
-            f"clean retry)."
-        )
-
-    # Prune before the architecture sweep, not after. A file left over
-    # from an older converter version is not ours to verify, and rolling
-    # the download back because a stale binary failed the check would
-    # delete a good fresh tree over a file we were about to remove.
     try:
-        pruned = _prune_unlisted_files(dest_root, {target for _url, target in download_jobs})
+        expected = _expected_package_digest(pkg, repo, tag)
     except RuntimeError:
         _clear_install_progress(converter_id)
         raise
-    if pruned:
-        shown = pruned[:_MAX_REPORTED_FILES]
-        logger.info(
-            "Converter %s: removed %d file(s) no longer published upstream (%s%s)",
-            converter_id,
-            len(pruned),
-            ", ".join(shown),
-            ", ..." if len(pruned) > len(shown) else "",
-        )
 
-    # Architecture gate. Every file we publish is 64-bit, in every version
-    # we have ever published, so the tree the installer just wrote has to
-    # be uniform - and if it is not, the loader will refuse the image at
-    # launch and name a DLL nobody verified. Compare the whole tree
-    # against the exe we are going to start.
-    arch_problem = _verify_downloaded_architecture(dest_root, exe_path)
-    if arch_problem is not None:
-        import shutil as _shutil
+    dest_root = (_CONVERTER_INSTALL_DIR / f"{converter_id}_windows").resolve()
+    stamp = read_stamp(dest_root) if dest_root.exists() else None
+    if not clean and stamp and stamp.get("sha256") == expected and package_exe(dest_root, converter_id).exists():
+        # Already the pinned package: nothing to fetch.
+        return package_exe(dest_root, converter_id)
 
-        _shutil.rmtree(dest_root, ignore_errors=True)
+    _CONVERTER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    archive = _CONVERTER_CACHE_DIR / f"{pkg.asset}.part"
+    _set_install_progress(converter_id, stage="downloading", current=1, total=2, file=pkg.asset)
+    try:
+        written = _download_one_file(release_asset_url(pkg.asset, repo=repo, tag=tag), archive)
+        _set_install_progress(converter_id, bytes_done=written, stage="verifying", file=pkg.asset)
+        try:
+            verify_sha256(archive, expected)
+        except PackageError as exc:
+            raise RuntimeError(str(exc)) from exc
+
+        staging = dest_root.parent / f"{dest_root.name}.new-{uuid.uuid4().hex[:8]}"
+        try:
+            _set_install_progress(converter_id, stage="extracting", current=2, file=None)
+            try:
+                file_count = extract_package(archive, staging, pkg)
+            except PackageError as exc:
+                raise RuntimeError(str(exc)) from exc
+            exe_new = package_exe(staging, converter_id)
+            if not exe_new.exists():
+                raise RuntimeError(f"Unpacked {file_count} files from {pkg.asset} but {pkg.exe_rel} is not among them.")
+            for companion in pkg.companions:
+                if not (staging / companion).exists():
+                    raise RuntimeError(f"{pkg.asset} is missing {companion}.")
+            pe_problem = _verify_pe_executable(exe_new)
+            if pe_problem is not None:
+                raise RuntimeError(
+                    f"{converter_id} install verification failed: {Path(pkg.exe_rel).name} {pe_problem}."
+                )
+            write_stamp(staging, pkg, tag=tag, repo=repo)
+
+            if dest_root.exists():
+                _shutil.rmtree(dest_root, ignore_errors=True)
+                if dest_root.exists():
+                    leftovers = sorted(str(p.relative_to(dest_root)) for p in dest_root.rglob("*") if p.is_file())
+                    if leftovers:
+                        shown = leftovers[:_MAX_REPORTED_FILES]
+                        rest = len(leftovers) - len(shown)
+                        raise RuntimeError(
+                            f"Could not replace {dest_root} - {len(leftovers)} file(s) are still there: "
+                            + "; ".join(shown)
+                            + (f"; and {rest} more" if rest else "")
+                            + ". Something has them open; close any running converter and try again."
+                        )
+            staging.rename(dest_root)
+        finally:
+            if staging.exists():
+                _shutil.rmtree(staging, ignore_errors=True)
+    except RuntimeError:
         _clear_install_progress(converter_id)
-        raise RuntimeError(
-            f"{converter_id} install verification failed: {arch_problem}. "
-            f"The install was removed. Everything we publish for this "
-            f"converter is built for one architecture, so a tree that fails "
-            f"this check did not come from our download alone - check what "
-            f"else writes into {dest_root}, then install again."
-        )
+        raise
+    finally:
+        try:
+            archive.unlink()
+        except OSError:
+            pass
 
-    logger.info(
-        "Installed %s converter: %d files, %.1f MB -> %s",
-        converter_id,
-        file_count,
-        total_bytes / 1024 / 1024,
-        exe_path,
-    )
+    exe_path = package_exe(dest_root, converter_id)
+    logger.info("Installed %s converter %s %s -> %s", converter_id, pkg.name, pkg.version, exe_path)
     return exe_path
 
 
@@ -1721,7 +829,7 @@ async def get_install_progress(converter_id: str, user: OptionalUserPayload = No
       * ``{"active": False}`` - no install currently in flight (default,
         and what every fresh page-load returns)
       * ``{"active": True, "stage": "downloading", "current": 12,
-            "total": 175, "bytes_done": 41943040, "file": "Qt6Core.dll",
+            "total": 2, "bytes_done": 41943040, "file": "DDC-DWG-to-Excel-0.4.1-portable.zip",
             "started_at": 1715814723.49}`` - install in progress
 
     The dict is in-memory only - restarting the backend wipes it. That's
@@ -1773,16 +881,15 @@ async def install_converter(
     fallback. This endpoint therefore returns immediately:
 
     * already installed (and not ``force``) -> ``installed: true`` synchronously
-    * macOS / unsupported OS -> ``platform_unsupported: true`` synchronously
+    * not Windows -> ``platform_unsupported: true`` synchronously
     * otherwise -> ``async_install: true`` while :func:`_install_converter_impl`
       runs in a background task. The frontend (and ``installBIMConverter`` in
       the client) polls ``/install-progress/`` for the terminal ``done`` /
       ``error`` stage, which carries the same fields the inline result used to.
 
-    On Windows the worker walks ``DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/``
-    via the GitHub Contents API; on Linux it streams the signed ``.deb`` set from
-    the apt repo and extracts it without root. The endpoint itself never raises
-    for a failed download - failures are reported through the progress feed.
+    On Windows the worker downloads the converter's package from the pinned
+    GitHub release, verifies its SHA-256 and unpacks it. The endpoint itself never
+    raises for a failed download - failures are reported through the progress feed.
     """
     import asyncio
     import sys
@@ -1833,21 +940,22 @@ async def install_converter(
             ),
         }
 
-    # macOS / other: no native DDC build and nothing to download - answer
-    # synchronously rather than spinning up a background task.
+    # The release is Windows 10/11 x64 only. Linux and macOS builds are
+    # announced upstream but not published, so there is nothing to download:
+    # answer synchronously rather than spinning up a background task.
     platform = sys.platform
-    if platform != "win32" and not platform.startswith("linux"):
+    if platform != "win32":
         return {
             "converter_id": converter_id,
             "installed": False,
             "platform": platform,
             "platform_unsupported": True,
             "message": (
-                f"{meta['name']} has no native build for {platform}. Run "
-                f"OpenConstructionERP in Docker (Linux container - the converter "
-                f"downloads automatically there) or on a Linux host, or convert the "
-                f"file to IFC first and upload the IFC - IFC has a built-in text "
-                f"fallback parser that works on every platform."
+                f"{meta['name']} is published for Windows 10/11 x64 only; "
+                f"Linux and macOS builds are not available yet. Run "
+                f"OpenConstructionERP on Windows to convert {', '.join(meta['extensions'])} files, "
+                f"or convert the file to DXF or IFC elsewhere and upload that. "
+                f"DXF is read natively on every platform."
             ),
         }
 
@@ -1911,8 +1019,6 @@ async def _run_background_install(converter_id: str, force: bool, app: Any) -> N
             "smoke_test_passed",
             "error",
             "instructions",
-            "apt_package",
-            "apt_source_present",
             "platform_unsupported",
             "platform",
             "size_bytes",
@@ -1941,7 +1047,6 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
     for the Install button: files were overwritten and added, never removed.
     It is a user action only - nothing auto-provisioning reaches it, so an
     upload can never wipe a working converter on a flaky connection. The
-    Linux path installs from signed .deb archives and has no equivalent.
     """
     import asyncio
     import sys
@@ -1970,95 +1075,27 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
                     "message": (
                         f"Could not install {meta['name']}: {exc}. "
                         f"You can install it manually from "
-                        f"https://github.com/{_DDC_REPO}/tree/{_DDC_REF}/"
-                        f"{_WINDOWS_CONVERTER_DIRS[converter_id]}"
+                        f"{release_page_url(repo=_DDC_REPO, tag=_DDC_TAG)}"
                     ),
                 }
 
             _set_install_progress(converter_id, stage="verifying", file=None)
-            # Post-install smoke test: launch the binary with a non-existent
-            # input + output so it exits quickly. We're only checking that the
-            # OS can load the exe + its Qt6 DLLs - a "missing DLL" error here
-            # means the install is broken and would fail silently on the next
-            # CAD upload, leaving the user staring at a "needs_converter"
-            # banner with no clue why. Exit codes and stderr from valid CLI
-            # error paths are fine; the only failure we care about is the
-            # Windows loader emitting WinError 3221225781 (0xc0000135) -
-            # "DLL not found" - which usually surfaces as a non-zero exit
-            # AND empty stdout/stderr on stderr=PIPE.
-            smoke_ok = True
-            smoke_message: str | None = None
-            try:
-                import subprocess
+            # Post-install smoke test: start the converter with ``--help`` and
+            # check the OS can load it. A converter that installed but cannot
+            # start would otherwise fail silently on the next CAD upload and
+            # leave the user staring at a "needs_converter" banner.
+            from app.modules.boq.cad_import import invalidate_converter_health, smoke_test_converter
 
-                from app.modules.boq.cad_import import _converter_subprocess_env
-
-                def _smoke() -> tuple[int, bytes, bytes]:
-                    proc = subprocess.run(
-                        [str(exe_path)],
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        cwd=str(exe_path.parent),
-                        # Probe in the SAME environment the real conversion uses
-                        # so the check is meaningful on Linux (the no-root
-                        # converter resolves its bundled DDC SDK libs via
-                        # LD_LIBRARY_PATH); None (inherit) on Windows/macOS.
-                        env=_converter_subprocess_env(exe_path),
-                        input=b"\n",
-                        timeout=15,
-                    )
-                    return proc.returncode, proc.stdout, proc.stderr
-
-                rc, _stdout, stderr = await asyncio.to_thread(_smoke)
-                # 0xC0000135 (-1073741515) → STATUS_DLL_NOT_FOUND
-                # 0xC0000142 (-1073741502) → STATUS_DLL_INIT_FAILED
-                if rc in (-1073741515, -1073741502, 3221225781, 3221225794):
-                    smoke_ok = False
-                    smoke_message = (
-                        f"Installed but the binary can't load - "
-                        f"a required DLL is missing (Windows error 0x{rc & 0xFFFFFFFF:08x}). "
-                        f"Check that Qt6Core.dll landed next to the exe: it is the only Qt library "
-                        f"this converter needs, and the platforms/ and styles/ plugin folders are "
-                        f"not part of a healthy install any more. "
-                        f"Try uninstalling and reinstalling, or install manually from "
-                        f"https://github.com/{_DDC_REPO}/tree/{_DDC_REF}/"
-                        f"{_WINDOWS_CONVERTER_DIRS[converter_id]}"
-                    )
-            except subprocess.TimeoutExpired:
-                # Timeout = binary loaded successfully and is waiting for
-                # stdin (likely showing a Qt window or sitting in a
-                # message loop).  That's exactly what we want to confirm:
-                # the loader works.  Treat as healthy and log at INFO
-                # instead of WARNING so the line doesn't read as a
-                # contradiction next to the "smoke_test_passed: true"
-                # response - see BUG-RVT02.
-                logger.info(
-                    "Smoke test for %s converter timed out - binary loaded but waiting for stdin; treating as healthy.",
-                    converter_id,
-                )
-            except Exception as exc:  # noqa: BLE001 - smoke test is best-effort
-                # Any other exception (FileNotFoundError, PermissionError,
-                # OSError) genuinely means the binary couldn't run.  Don't
-                # claim ``smoke_test_passed: true`` in the response.
-                smoke_ok = False
-                smoke_message = (
-                    f"Installed but the smoke test failed: {exc}. Try the Re-check button on the BIM page or reinstall."
-                )
-                logger.warning("Smoke test for %s converter failed: %s", converter_id, exc)
+            invalidate_converter_health(converter_id)
+            health = await asyncio.to_thread(smoke_test_converter, converter_id, True)
+            smoke_ok = health.get("status") != "failed"
+            smoke_message: str | None = None if smoke_ok else (health.get("message") or None)
 
             size_bytes = exe_path.stat().st_size if exe_path.exists() else 0
 
-            # Drop any stale "not_installed" health entry so the next
-            # ``/converters/?verify=true`` poll re-runs the smoke test
-            # against the freshly installed binary instead of replaying
-            # a cached pre-install ``not_installed`` result.
-            from app.modules.boq.cad_import import invalidate_converter_health
-
-            invalidate_converter_health(converter_id)
-
             # Bust the 6-hour version-check cache so the "Update available"
-            # banner re-evaluates against the freshly written blob - without
-            # this the badge stays "outdated" for up to 6 h after a Windows
+            # banner re-evaluates against the freshly written package stamp -
+            # without this the badge stays "outdated" for up to 6 h after an
             # install and the user thinks the Update button did nothing.
             try:
                 app.state._converter_version_cache = None
@@ -2076,88 +1113,15 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
                 "message": smoke_message or (f"{meta['name']} installed successfully at {exe_path}"),
             }
 
-        if platform.startswith("linux"):
-            # Linux: auto-download the `.deb` set from the signed apt repo and
-            # extract it WITHOUT root (mirrors the Windows path) so the Install
-            # button is genuinely one-click. The binaries are user-private under
-            # ~/.openestimator/converters/_ddc_linux_<arch>/ - we never touch
-            # /etc/apt or sudo. If the auto-download can't complete (unpublished
-            # arch, no dpkg-deb, network failure) we fall back to surfacing the
-            # one-time apt instructions so the user can install system-wide.
-            apt_pkg = _LINUX_APT_PACKAGES.get(converter_id, f"ddc-{converter_id}converter")
-            try:
-                exe_path = await asyncio.to_thread(_download_converter_files_linux, converter_id)
-            except Exception as exc:  # noqa: BLE001 - fall back to apt instructions
-                logger.warning("Linux converter auto-download failed for %s: %s", converter_id, exc)
-                apt_source_path = Path("/etc/apt/sources.list.d/ddc.list")
-                source_already_present = apt_source_path.exists()
-                if source_already_present:
-                    instructions = f"sudo apt update && sudo apt install -y {apt_pkg}"
-                else:
-                    instructions = (
-                        f"echo 'deb [trusted=yes] {_DDC_APT_BASE_URL} {_DDC_APT_SUITE} main' "
-                        f"| sudo tee /etc/apt/sources.list.d/ddc.list\n"
-                        f"sudo apt update\n"
-                        f"sudo apt install -y {apt_pkg}"
-                    )
-                return {
-                    "converter_id": converter_id,
-                    "installed": False,
-                    "platform": "linux",
-                    "platform_unsupported": False,
-                    "apt_package": apt_pkg,
-                    "apt_source_present": source_already_present,
-                    "instructions": instructions,
-                    "error": str(exc),
-                    "message": (
-                        f"Automatic download failed: {exc}. Install {meta['name']} "
-                        f"manually with the apt commands in `instructions`, or retry."
-                    ),
-                }
-
-            # Auto-download succeeded - smoke-test it (verifies the ELF loads its
-            # DDC cad2data SDK shared libs; LD_LIBRARY_PATH is set by _converter_subprocess_env).
-            from app.modules.boq.cad_import import (
-                invalidate_converter_health,
-                smoke_test_converter,
-            )
-
-            _set_install_progress(converter_id, stage="verifying", file=None)
-            invalidate_converter_health(converter_id)
-            health = await asyncio.to_thread(smoke_test_converter, converter_id, True)
-            smoke_ok = health.get("status") == "ok"
-            try:
-                app.state._converter_version_cache = None
-            except AttributeError:
-                pass
-            return {
-                "converter_id": converter_id,
-                "installed": smoke_ok,
-                "path": str(exe_path),
-                "already_installed": False,
-                "size_bytes": exe_path.stat().st_size if exe_path.exists() else 0,
-                "platform": "linux",
-                "smoke_test_passed": smoke_ok,
-                "apt_package": apt_pkg,
-                "message": (
-                    f"{meta['name']} installed successfully at {exe_path}"
-                    if smoke_ok
-                    else (health.get("message") or f"{meta['name']} installed but the smoke test did not pass.")
-                ),
-            }
-
-        # macOS / other - no native DDC build available.
+        # Not Windows: the release has no build for this platform.
         return {
             "converter_id": converter_id,
             "installed": False,
             "platform": platform,
             "platform_unsupported": True,
             "message": (
-                f"{meta['name']} has no native build for {platform}. Run "
-                f"OpenConstructionERP in Docker (Linux container - the converter "
-                f"downloads automatically there) or on a Linux host, or convert the "
-                f"file to IFC first and upload the IFC - IFC has a built-in text "
-                f"fallback parser that works on every platform."
+                f"{meta['name']} is published for Windows 10/11 x64 only; "
+                f"Linux and macOS builds are not available yet."
             ),
         }
     except Exception as exc:  # noqa: BLE001 - last-ditch error envelope
@@ -2173,8 +1137,7 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
             "message": (
                 f"Could not install {meta['name']}: {type(exc).__name__}: {exc}. "
                 f"Check the server logs for the full traceback. You can install "
-                f"manually from https://github.com/{_DDC_REPO}/tree/{_DDC_REF}/"
-                f"{_WINDOWS_CONVERTER_DIRS.get(converter_id, '')}"
+                f"manually from {release_page_url(repo=_DDC_REPO, tag=_DDC_TAG)}"
             ),
         }
 
@@ -2296,59 +1259,17 @@ async def uninstall_converter(
             detail=f"Unknown converter: '{converter_id}'",
         )
 
-    import sys
-
-    exe_name: str = meta["exe"]
     removed = False
 
-    # Linux: the converter was apt-installed under `/usr/bin/`, so we
-    # can't delete it from a web handler (no root, and `dpkg --remove`
-    # needs to update the package database). Surface `apt remove`
-    # instructions and let the user run them.
-    platform = sys.platform.lower()
-    if platform.startswith("linux"):
-        apt_pkg = _LINUX_APT_PACKAGES.get(converter_id, f"ddc-{converter_id}converter")
-        return {
-            "converter_id": converter_id,
-            "removed": False,
-            "platform": "linux",
-            "apt_package": apt_pkg,
-            "instructions": f"sudo apt remove -y {apt_pkg}",
-            "message": (
-                f"Run `sudo apt remove -y {apt_pkg}` to uninstall "
-                f"{meta['name']}. The status poll picks up the change "
-                f"automatically; no service restart needed."
-            ),
-        }
-
-    # Windows uninstall: sweep the install dir for the binary + bundled
-    # plugin folders. The new installer drops files into a per-format
-    # folder ({ext}_windows/) so its bundled Qt6 DLLs don't collide
-    # with other converters; older builds may still have files at the
-    # install root or in arbitrary subdirs, so we sweep all of those.
-    candidates: list[Path] = [_CONVERTER_INSTALL_DIR / exe_name]
+    # The installer keeps each converter in its own folder
+    # (``{ext}_windows/``), so uninstalling is removing that folder.
     per_format_root = _CONVERTER_INSTALL_DIR / f"{converter_id}_windows"
-    if per_format_root.exists():
-        candidates.append(per_format_root / exe_name)
-    if _CONVERTER_INSTALL_DIR.exists():
-        for child in _CONVERTER_INSTALL_DIR.iterdir():
-            if child.is_dir():
-                candidates.append(child / exe_name)
-
-    # Remove from install dir
-    for candidate in candidates:
-        if candidate.exists():
-            candidate.unlink()
-            removed = True
-            logger.info("Removed converter executable: %s", candidate)
-
-    # Also wipe the per-format folder entirely if we created one - no
-    # point in keeping orphaned Qt DLLs around once the user opted out.
     if per_format_root.exists() and per_format_root.is_dir():
         import shutil as _shutil
 
         try:
             _shutil.rmtree(per_format_root)
+            removed = True
             logger.info("Removed per-format converter folder: %s", per_format_root)
         except OSError as exc:
             logger.warning("Could not remove %s: %s", per_format_root, exc)
@@ -2371,7 +1292,7 @@ async def uninstall_converter(
 
 MAX_CAD_SIZE = 500 * 1024 * 1024  # 500 MB
 
-_SUPPORTED_CAD_EXTS = {"rvt", "ifc", "dwg", "dgn", "rfa", "dxf"}
+_SUPPORTED_CAD_EXTS = {"rvt", "ifc", "dwg", "rfa", "dxf"}
 
 
 @router.post(
@@ -2381,7 +1302,7 @@ _SUPPORTED_CAD_EXTS = {"rvt", "ifc", "dwg", "dgn", "rfa", "dxf"}
 async def cad_extract(
     file: UploadFile = File(
         ...,
-        description="CAD/BIM file. Accepted extensions: .rvt, .rfa, .ifc, .dwg, .dxf, .dgn",
+        description="CAD/BIM file. Accepted extensions: .rvt, .rfa, .ifc, .dwg, .dxf",
     ),
 ) -> dict[str, Any]:
     """Extract grouped quantity tables from a CAD/BIM file.
@@ -2427,7 +1348,7 @@ async def cad_extract(
 
     # Resolve the converter, auto-downloading it on first use if missing.
     # This makes a fresh install work with zero user action: uploading a
-    # .rvt/.ifc/.dwg/.dgn/.rfa fetches the matching converter automatically
+    # .rvt/.ifc/.dwg/.rfa fetches the matching converter automatically
     # instead of returning "converter not installed".
     #
     # A format the platform reads in-process is exempt, and the check is on the
@@ -2651,7 +1572,7 @@ class CadGroupRequest(BaseModel):
 async def cad_columns(
     file: UploadFile = File(
         ...,
-        description="CAD/BIM file. Accepted extensions: .rvt, .rfa, .ifc, .dwg, .dxf, .dgn",
+        description="CAD/BIM file. Accepted extensions: .rvt, .rfa, .ifc, .dwg, .dxf",
     ),
     session: SessionDep = None,  # type: ignore[assignment]
     user_id: CurrentUserId = None,  # type: ignore[assignment]

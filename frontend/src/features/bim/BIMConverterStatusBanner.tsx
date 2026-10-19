@@ -78,7 +78,7 @@ const CONVERTERS_WITH_FALLBACK = new Set<string>(['ifc']);
 
 /** GitHub root for the manual-install fallback links. */
 const DDC_REPO_URL =
-  'https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN';
+  'https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG/releases/tag/v2026.10.0';
 
 const VC_REDIST_URL =
   'https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist';
@@ -239,7 +239,7 @@ export function BIMConverterStatusBanner({
       staleTime: 30_000,
     });
 
-  // Compare each installed converter's git-blob SHA against the latest on
+  // Compare each installed converter's package SHA-256 against the latest on
   // GitHub. Backend caches 6 h. When ``is_outdated`` is true for an
   // installed converter, we surface an "Update Available" badge with a
   // direct download link — users can drop the new exe into the same
@@ -1200,7 +1200,7 @@ function ConverterRow({
             className="hidden lg:inline text-[10px] text-content-quaternary dark:text-zinc-400 font-mono"
             title={t('bim.converter_sha_tooltip', {
               defaultValue:
-                'Installed git-blob SHA. Compared against {{repo}} on the upstream cad2data-Revit-IFC-DWG-DGN repo.',
+                'Installed package SHA-256. Compared against the package this version installs from the DDC converter release.',
               repo: 'main',
             })}
           >

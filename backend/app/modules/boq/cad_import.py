@@ -2,12 +2,12 @@
 # CAD2DATA Pipeline · CWICR Cost Database Engine
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 # AGPL-3.0 License · DDC-CWICR-OE-2026
-"""CAD/BIM file import via DDC Community converters.
+"""CAD/BIM file import via the DDC converters (release 2026.10).
 
 Workflow:
-1. User uploads .rvt/.ifc/.dwg/.dgn file
+1. User uploads .rvt/.rfa/.ifc/.dwg file
 2. Backend saves to temp dir
-3. Runs appropriate DDC converter (.exe) -> produces Excel
+3. Runs the matching DDC converter (see ``ddc_runner``) -> one-row-per-element Excel
 4. Parses Excel -> extracts elements (type, volume, area, count)
 5. AI maps elements to construction work items with pricing
 6. Returns BOQ positions ready for import
@@ -22,94 +22,27 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
+from app.core.converter_source import PACKAGES, SUPPORTED_PLATFORM
+
 logger = logging.getLogger(__name__)
 
-# Converter mapping per platform.
-#
-# Windows: GitHub-bundled `*.exe` from `cad2data-Revit-IFC-DWG-DGN`.
-# Linux:   apt-installed ELF binary at `/usr/bin/{Format}Exporter` (no
-#          extension, CapitalCamelCase) from the signed apt repo at
-#          `pkg.datadrivenconstruction.io`. The .deb packages
-#          (`ddc-rvtconverter` etc.) drop exactly one file each - the
-#          binary itself - and apt resolves the shared-lib runtime
-#          (`ddc-deps-kernel`, `ddc-deps-revit`, `ddc-thirdparty`).
-_WINDOWS_CONVERTERS: dict[str, str] = {
-    "rvt": "RvtExporter.exe",
-    "ifc": "IfcExporter.exe",
-    "dwg": "DwgExporter.exe",
-    "dgn": "DgnExporter.exe",
-}
-_LINUX_CONVERTERS: dict[str, str] = {
-    "rvt": "RvtExporter",
-    "ifc": "IfcExporter",
-    "dwg": "DwgExporter",
-    "dgn": "DgnExporter",
-}
+# Converter executables, relative to a format's install folder. The converters
+# are the packages of the DDC 2026.10 release (``app.core.converter_source``),
+# published for Windows 10/11 x64 only. The IFC package has no executable of its
+# own: its entry is the bundled Python, which runs ``converter.py``.
+CONVERTERS: dict[str, str] = {fmt: pkg.exe_rel for fmt, pkg in PACKAGES.items()}
 
-
-def _deb_arch_tag() -> str:
-    """Debian architecture tag (``amd64``/``arm64``) for the running machine.
-
-    Mirrors ``takeoff.router._deb_arch`` so ``find_converter`` can locate the
-    per-arch directory the Linux auto-downloader extracts into.
-    """
-    import platform as _platform
-
-    m = (_platform.machine() or "").lower()
-    if m in ("x86_64", "amd64"):
-        return "amd64"
-    if m in ("aarch64", "arm64"):
-        return "arm64"
-    return m or "amd64"
+SUPPORTED_CAD_EXTENSIONS: set[str] = set(CONVERTERS.keys())
 
 
 def _converter_subprocess_env(converter_path: Path) -> dict[str, str] | None:
-    """Build the subprocess environment for launching a DDC converter.
+    """Environment for launching a converter: ``None`` means inherit ours.
 
-    On Linux the DDC cad2data SDK shared objects (ddc-deps-kernel/drawings/
-    architecture, ddc-thirdparty) live next to the binary's install tree
-    (``usr/lib/datadrivenconstruction`` + ``usr/lib``). The frontend installer
-    unpacks the converter's ``.deb`` set into a user-writable dir (no apt, no
-    root), so those libraries are not on the system linker path. The binaries
-    carry an ``$ORIGIN``-relative RUNPATH that resolves their *direct*
-    dependencies, but the converters load further SDK libraries at conversion
-    time that RUNPATH does not cover. We therefore prepend the SDK lib dirs to
-    ``LD_LIBRARY_PATH`` so every dependency resolves. Harmless when RUNPATH
-    already covers everything.
-
-    Returns ``None`` on Windows/macOS (inherit the parent environment unchanged;
-    Windows resolves its bundled Qt6 DLLs from the converter's own directory via
-    the subprocess ``cwd``). Returning ``None`` is the signal for callers to
-    pass ``env=None`` to ``subprocess.run`` - i.e. inherit, no override.
+    The Windows packages are self-contained (their own runtime DLLs sit beside
+    the executable), so nothing needs adding.
     """
-    if not sys.platform.startswith("linux"):
-        return None
-    usr_dir = converter_path.parent.parent  # .../usr/bin/<bin> -> .../usr
-    lib_dirs = [
-        usr_dir / "lib" / "datadrivenconstruction",
-        usr_dir / "lib",
-        usr_dir / "lib" / "x86_64-linux-gnu",
-    ]
-    existing = [str(d) for d in lib_dirs if d.is_dir()]
-    if not existing:
-        return None
-    env = dict(os.environ)
-    prev = env.get("LD_LIBRARY_PATH", "")
-    env["LD_LIBRARY_PATH"] = os.pathsep.join([*existing, prev]) if prev else os.pathsep.join(existing)
-    return env
+    return None
 
-
-# Active mapping for the running platform - kept under the legacy name
-# `CONVERTERS` so external callers (and the takeoff router) don't need
-# to know about platform branching.
-#
-# Windows uses the bundled `.exe`; every POSIX platform (Linux + macOS) uses
-# the no-suffix CapitalCamelCase ELF/Mach-O names. macOS has no native DDC
-# build (``ensure_converter`` raises a clear, actionable message there), but it
-# must NEVER resolve to a Windows `.exe`, so darwin maps to the POSIX names too.
-CONVERTERS: dict[str, str] = _WINDOWS_CONVERTERS if sys.platform == "win32" else _LINUX_CONVERTERS
-
-SUPPORTED_CAD_EXTENSIONS: set[str] = set(CONVERTERS.keys())
 
 # Look for converters in these locations (in order)
 CONVERTER_SEARCH_PATHS: list[Path] = [
@@ -203,54 +136,50 @@ if _ddc_bin:
     logger.info("DDC toolkit converters found at %s", _ddc_bin)
 
 
-# The library every Windows converter folder carries beside its exe.
-# All four formats ship the same blob, so its absence is not a per-format
-# quirk of the layout, it is a folder holding part of what we installed.
-#
-# This used to name Qt6Gui.dll and Qt6Widgets.dll as well, and it stopped
-# because we stopped installing them: the PE import tables say the command
-# line ``*Exporter.exe`` binaries need Qt6Core.dll and nothing else from Qt,
-# while Gui and Widgets are reachable only from the graphical shell we never
-# launch. ``app.core.converter_source.is_graphical_only`` carries the
-# measurement. A folder without them is complete; keep this list in step
-# with what the installer actually writes, or every install reports itself
-# as partial.
-_WINDOWS_COMPANION_FILES: tuple[str, ...] = ("Qt6Core.dll",)
-
-
 def missing_companion_files(exe_path: Path) -> list[str]:
-    """Names of the Windows companion libraries absent from the exe's folder.
+    """Files a healthy install has beside the executable that are absent.
 
-    A rollback on Windows cannot delete a file another process holds open,
-    and the installer's rollbacks pass ``ignore_errors=True``, so a failed
-    install can leave a folder with the exe in it and little else. Nothing
-    downstream noticed: resolution accepted any file over 1 KB. Windows
-    then walks the rest of its search order for the missing libraries and
-    can bind the converter to an unrelated build elsewhere on the machine,
-    which is what error 0xC000007B looks like from the outside.
-
-    Keyed on the ``.exe`` suffix and not on the host platform: the Linux
-    build is a single ELF binary that resolves its dependencies through
-    the loader path and has no library beside it by design.
+    A rollback on Windows cannot delete a file another process holds open, so
+    a failed install can leave a folder with the executable in it and little
+    else. The check is per package: the IFC converter is a script run by the
+    bundled Python, so its companion is that script.
     """
-    if exe_path.suffix.lower() != ".exe":
+    root = _install_root_of(exe_path)
+    if root is None:
         return []
-    folder = exe_path.parent
-    return [name for name in _WINDOWS_COMPANION_FILES if not (folder / name).exists()]
+    for pkg in PACKAGES.values():
+        if (
+            exe_path.name.lower() == Path(pkg.exe_rel).name.lower()
+            and exe_path.parent.name == Path(pkg.exe_rel).parent.name
+        ):
+            return [name for name in pkg.companions if not (root / name).exists()]
+    return []
+
+
+def _install_root_of(exe_path: Path) -> Path | None:
+    """Install folder (``<fmt>_windows``) an executable of a package belongs to."""
+    for pkg in PACKAGES.values():
+        rel = Path(pkg.exe_rel)
+        if exe_path.name.lower() == rel.name.lower() and exe_path.parent.name == rel.parent.name:
+            return exe_path.parents[len(rel.parts) - 1]
+    return None
 
 
 def find_converter(extension: str) -> Path | None:
     """Find the converter executable for a given file extension.
 
-    Searches through ``CONVERTER_SEARCH_PATHS`` in order and returns the
-    first existing executable path, or ``None`` if no converter is found.
+    Looks for the package's executable (``CONVERTERS[extension]``, a path
+    relative to the install folder) in, in order: ``OPENESTIMATOR_CONVERTERS_DIR``,
+    the desktop installer's bundled folder (``OE_BUNDLED_CONVERTERS_DIR``), the
+    per-format install folder the auto-installer writes
+    (``~/.openestimator/converters/{extension}_windows``), a DDC toolkit checkout,
+    and the other ``CONVERTER_SEARCH_PATHS``. A folder holding the executable
+    without the files that belong beside it is a partial install and is returned
+    only when there is nothing better, so this never answers ``None`` where it
+    used to answer a path; reporting the partial folder is the health check's job.
 
-    A Windows folder holding the exe without the Qt libraries beside it is
-    a partial install, and it used to win the search purely by sitting
-    earlier in the order. Such a candidate is now kept back: a complete
-    tree anywhere wins, and the partial one is returned only when there is
-    nothing better, so this never answers ``None`` where it used to answer
-    a path. Reporting the partial folder is the health check's job.
+    Converters from the retired 18.x generation (``RvtExporter.exe`` and
+    friends) are not found: their command line is not the one this module speaks.
 
     Args:
         extension: Lowercase file extension without dot (e.g. ``"rvt"``).
@@ -258,35 +187,26 @@ def find_converter(extension: str) -> Path | None:
     Returns:
         Path to the converter executable, or ``None``.
     """
-    exe_name = CONVERTERS.get(extension)
-    if not exe_name:
+    exe_rel = CONVERTERS.get(extension)
+    if not exe_rel:
         return None
 
-    # Build dynamic search paths
     search_paths = list(CONVERTER_SEARCH_PATHS)
 
-    # Also check OPENESTIMATOR_CONVERTERS_DIR env var
     env_dir = os.environ.get("OPENESTIMATOR_CONVERTERS_DIR")
     if env_dir:
         search_paths.insert(0, Path(env_dir))
 
-    # Auto-detect DDC toolkit in sibling directories
     ddc_bin = _find_ddc_toolkit_bin()
     if ddc_bin and ddc_bin not in search_paths:
         search_paths.insert(0, ddc_bin)
 
-    # Read-only converter dir bundled into the desktop installer. The Tauri
-    # shell ships the small (~30 MB) Windows IFC converter as an app resource
-    # and points us at it via OE_BUNDLED_CONVERTERS_DIR so a fresh install can
-    # convert .ifc offline with zero first-use download. The layout mirrors the
-    # auto-installer's: <bundled>/{ext}_windows/{Exporter}.exe, plus a flat
-    # <bundled>/ fallback for a single-converter bundle. Best-effort and
-    # backward compatible: when the env var is unset (pip installs, dev runs,
-    # non-Windows, or a bundle that did not ship this format) nothing changes
-    # and the normal install/download path still applies. We insert it FIRST
-    # here so the per-format user-install dir, appended just below, ends up
-    # ahead of it: a user who deliberately installed a newer converter still
-    # wins over the read-only bundled copy.
+    # Read-only converter folder bundled into the desktop installer. The layout
+    # mirrors the auto-installer's: <bundled>/{ext}_windows/<package layout>, plus
+    # a flat <bundled>/ fallback. When the variable is unset nothing changes. It
+    # goes in first so the per-format user-install folder, inserted below, ends up
+    # ahead of it: a user who deliberately installed a newer converter wins over
+    # the read-only bundled copy.
     bundled_dir = os.environ.get("OE_BUNDLED_CONVERTERS_DIR")
     if bundled_dir:
         bundled_root = Path(bundled_dir)
@@ -294,56 +214,13 @@ def find_converter(extension: str) -> Path | None:
             if cand not in search_paths:
                 search_paths.insert(0, cand)
 
-    # Per-format Windows install dir written by the BIM converter
-    # auto-installer (takeoff/router.py:install_converter). The
-    # installer drops files at ~/.openestimator/converters/{ext}_windows/
-    # so multiple converters can coexist without their bundled Qt6
-    # DLLs colliding. Probe this location explicitly so an installed
-    # converter is picked up by the next find_converter() call without
-    # any service restart.
     per_format_windows = Path.home() / ".openestimator" / "converters" / f"{extension}_windows"
     if per_format_windows not in search_paths:
         search_paths.insert(0, per_format_windows)
 
-    # Linux apt install puts the binaries on PATH. The .deb packages
-    # at `pkg.datadrivenconstruction.io` (apt v18.0.0.0, amd64+arm64)
-    # ship exactly one file each - `/usr/bin/{Format}Exporter`
-    # (CapitalCamelCase, no extension). We probe these locations
-    # BEFORE walking the rest of `search_paths` so a system-installed
-    # converter is found instantly with no environment fiddling.
-    #
-    # The legacy `ddc-{ext}converter` names are kept as fallbacks for
-    # users who installed from older instructions or symlinked the
-    # binary manually. `linux_exe` is the *real* binary name; `exe_name`
-    # at this point may still be a Windows `.exe` if the module was
-    # imported on Windows but is being asked about a Linux install (the
-    # cross-platform smoke-test scenario is unusual but cheap to cover).
-    linux_exe = _LINUX_CONVERTERS.get(extension, exe_name.removesuffix(".exe"))
-    # Per-arch no-root extract dir written by the auto-downloader
-    # (takeoff.router._download_converter_files_linux): the real ELF binary
-    # lands at ~/.openestimator/converters/_ddc_linux_<arch>/usr/bin/{Format}Exporter
-    # with the DDC SDK libs alongside (resolved at launch via LD_LIBRARY_PATH set in
-    # _converter_subprocess_env). Probe it FIRST so an auto-downloaded converter
-    # is found with no apt install and no service restart.
-    per_arch_linux_bin = (
-        Path.home() / ".openestimator" / "converters" / f"_ddc_linux_{_deb_arch_tag()}" / "usr" / "bin" / linux_exe
-    )
-    linux_apt_candidates = [
-        per_arch_linux_bin,
-        Path("/usr/bin") / linux_exe,
-        Path("/usr/local/bin") / linux_exe,
-        # Legacy probe paths from earlier instructions - kept for users
-        # who hand-symlinked the binary under the apt-package name.
-        Path("/usr/bin") / f"ddc-{extension}converter",
-        Path("/usr/local/bin") / f"ddc-{extension}converter",
-    ]
-    for cand in linux_apt_candidates:
-        if cand.exists() and cand.stat().st_size > 1024:
-            return cand
-
     partial: Path | None = None
     for search_path in search_paths:
-        exe_path = search_path / exe_name
+        exe_path = search_path / exe_rel
         if exe_path.exists() and exe_path.stat().st_size > 1024:
             if not missing_companion_files(exe_path):
                 return exe_path
@@ -353,7 +230,7 @@ def find_converter(extension: str) -> Path | None:
     if partial is not None:
         logger.warning(
             "Converter %s at %s is missing %s - that folder holds part of an install",
-            exe_name,
+            exe_rel,
             partial,
             ", ".join(missing_companion_files(partial)),
         )
@@ -381,14 +258,9 @@ def find_converter(extension: str) -> Path | None:
 #   * double-checked resolution (re-probe inside the lock),
 #   * graceful, non-crashing failure on non-Windows platforms.
 
-# Download source is centralised in ``takeoff.router`` (``_DDC_REPO`` /
-# ``_DDC_REF``, both env-overridable via ``OE_CONVERTER_REPO`` /
-# ``OE_CONVERTER_REF``, the latter still accepting the older
-# ``OE_CONVERTER_BRANCH`` name). The ref is a pinned commit SHA, not a
-# branch. We surface the canonical base-URL env name
-# here too so this module documents the single knob an operator turns to
-# point the auto-installer somewhere else.
-OE_CONVERTER_BASE_URL_ENV = "OE_CONVERTER_BASE_URL"
+# Download source is declared in ``app.core.converter_source`` (repo and release
+# tag, env-overridable via ``OE_CONVERTER_REPO`` / ``OE_CONVERTER_TAG``) and the
+# installer in ``takeoff.router`` verifies every package against its SHA-256.
 
 # Where per-format Windows converters are installed. Mirrors the constant
 # in ``takeoff.router`` (kept in sync; the download routine writes here).
@@ -557,7 +429,7 @@ def ensure_converter(fmt: str) -> Path:
 
     Args:
         fmt: Lowercase format key without dot - one of ``rvt`` / ``ifc`` /
-            ``dwg`` / ``dgn``. Aliases (``rfa`` → ``rvt``, ``dxf`` → ``dwg``)
+            ``dwg``. Aliases (``rfa`` → ``rvt``, ``dxf`` → ``dwg``)
             are normalised by the caller; this function expects a key that
             exists in :data:`CONVERTERS`.
 
@@ -571,7 +443,7 @@ def ensure_converter(fmt: str) -> Path:
     """
     fmt = fmt.lower().lstrip(".")
     # Normalise format aliases to the converter that actually handles them:
-    # RvtExporter reads .rfa families, DwgExporter reads .dxf. This mirrors
+    # the RVT converter reads .rfa families, the DWG converter .dxf. This mirrors
     # the converter metadata in ``takeoff.router._CONVERTER_META`` (where
     # ``rvt`` advertises ``[".rvt", ".rfa"]`` and ``dwg`` advertises
     # ``[".dwg", ".dxf"]``) so an upload of either alias provisions and uses
@@ -587,24 +459,17 @@ def ensure_converter(fmt: str) -> Path:
     if existing is not None:
         return existing
 
-    # macOS has no native DDC build. Never fall through to a Windows `.exe`
-    # (the platform selector already excludes that) - give clear guidance.
-    if sys.platform == "darwin":
+    # The 2026.10 converters are published for Windows 10/11 x64 only; Linux
+    # and macOS builds are announced upstream but do not exist yet.
+    if sys.platform != SUPPORTED_PLATFORM:
         raise ConverterUnavailableError(
-            f"There is no native macOS build of the .{fmt.upper()} converter. "
-            f"Run OpenConstructionERP in Docker (Linux container - the converter "
-            f"is downloaded automatically there) or on a Linux host, or convert "
-            f"the file to IFC first (IFC also has a built-in text fallback parser "
-            f"that works on macOS)."
-        )
-    if sys.platform != "win32" and not sys.platform.startswith("linux"):
-        raise ConverterUnavailableError(
-            f"The .{fmt.upper()} converter is not available on this platform "
-            f"({sys.platform}). Convert the file to IFC first - IFC has a "
-            f"built-in text fallback parser that works on every platform."
+            f"The .{fmt.upper()} converter is published for Windows 10/11 x64 only; "
+            f"Linux and macOS builds are not available yet. Run OpenConstructionERP on "
+            f"Windows to convert .{fmt} files, or convert the file to DXF (drawings) or "
+            f"IFC (models) first - both are read without a converter binary where supported."
         )
 
-    # Windows AND Linux both auto-download under a per-format lock so concurrent
+    # Windows auto-downloads under a per-format lock so concurrent
     # uploads of the same format don't both fetch into the same directory. The
     # lock is cross-platform (Windows O_EXCL / POSIX flock).
     try:
@@ -623,29 +488,17 @@ def ensure_converter(fmt: str) -> Path:
             # import-time cost of cad_import. Importing it here, only on the
             # cold-download path, is cheap and cycle-free.
             try:
-                if sys.platform == "win32":
-                    from app.modules.takeoff.router import (
-                        _download_converter_files_windows as _download_converter,
-                    )
-                else:
-                    from app.modules.takeoff.router import (
-                        _download_converter_files_linux as _download_converter,
-                    )
+                from app.modules.takeoff.router import (
+                    _download_converter_files_windows as _download_converter,
+                )
             except Exception as exc:  # noqa: BLE001 - import failure must be actionable
                 raise ConverterUnavailableError(f"Could not load the converter installer for .{fmt}: {exc}") from exc
 
             try:
                 exe_path = _download_converter(fmt)
             except Exception as exc:  # noqa: BLE001 - surface a clean message
-                hint = ""
-                if sys.platform.startswith("linux"):
-                    hint = (
-                        f" Alternatively install it from the signed apt source: "
-                        f"`sudo apt install -y ddc-{fmt}converter` "
-                        f"(repo pkg.datadrivenconstruction.io)."
-                    )
                 raise ConverterUnavailableError(
-                    f"Automatic download of the .{fmt.upper()} converter failed: {exc}.{hint}"
+                    f"Automatic download of the .{fmt.upper()} converter failed: {exc}"
                 ) from exc
 
             logger.info("Converter for .%s downloaded to %s", fmt, exe_path)
@@ -828,23 +681,14 @@ def _windows_loader_errors_stay_quiet() -> Iterator[None]:
         kernel32.SetErrorMode(previous)
 
 
-# Linux ld.so failure markers. When a shared dependency (`libQt6Core.so.6`
-# or one of the `ddc-deps-*` packages) is missing, glibc's `ld.so` writes
-# a line like `RvtExporter: error while loading shared libraries: <name>`
-# to stderr and exits with status 127. We match the substring (locale-
-# independent - glibc keeps the English text even on translated systems).
-_LINUX_LDSO_FAILURE_MARKER = b"error while loading shared libraries"
-_LINUX_LDSO_EXIT_CODE = 127
-
-
 def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth:
     """Quick health check: spawn the converter binary and verify it loads.
 
-    Sends an empty stdin and waits up to ``8`` seconds for an exit. The
-    purpose is NOT to detect feature bugs - only to verify that the OS
+    Runs the converter with ``--help`` and waits up to ``20`` seconds for an
+    exit. The purpose is NOT to detect feature bugs - only to verify that the OS
     can launch the binary without a missing-DLL / wrong-arch / perms
-    error. A binary that loads and then exits with an error code (because
-    the empty input didn't parse) is fine for our purposes.
+    error. A binary that loads and then exits with an error code
+    is fine for our purposes.
 
     Args:
         extension: Lowercase file extension without dot (``"rvt"`` etc.).
@@ -905,15 +749,17 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
         # native CAD format and leave the model stuck at
         # ``ddc_smoke_failed`` even when the binary was correctly
         # installed.  Drop the explicit ``stdin=PIPE``.
+        from app.core.converter_source import command_prefix
+
         with _windows_loader_errors_stay_quiet():
             proc = subprocess.run(
-                [str(exe_path)],
+                [*command_prefix(extension, exe_path), "--help"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
                 cwd=str(exe_path.parent),
                 env=_converter_subprocess_env(exe_path),
-                input=b"\n",
-                timeout=8,
+                timeout=20,
             )
         rc = proc.returncode
 
@@ -939,17 +785,11 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
                     f"here and a listing of that folder with file sizes."
                 )
             else:
-                # Do not blame the Qt6 plugin folders here. ``platforms/`` and
-                # ``styles/`` belong to the graphical converter and are no longer
-                # installed at all (see ``app.core.converter_source.is_graphical_only``),
-                # so a user sent looking for them would be hunting files that are
-                # absent from every healthy install. Qt6Core.dll is the one Qt
-                # library the command line exporter loads, so name that instead.
                 diagnosis = (
-                    f"{exe_path.name} exists on disk but cannot load - a required Qt6 / Visual C++ DLL is "
-                    f"missing or the wrong version (Windows error 0x{unsigned:08x}). Check that Qt6Core.dll "
-                    f"sits next to the exe in {exe_path.parent}: it is the only Qt library this converter "
-                    f"needs, and an interrupted install is the usual reason it is not there."
+                    f"{exe_path.name} exists on disk but cannot load - a required runtime DLL is "
+                    f"missing or the wrong version (Windows error 0x{unsigned:08x}). Install the "
+                    f"Microsoft Visual C++ Redistributable (x64), then press Uninstall and Install "
+                    f"so {exe_path.parent} is rebuilt from empty."
                 )
             result = {
                 "status": "failed",
@@ -961,38 +801,8 @@ def smoke_test_converter(extension: str, force: bool = False) -> ConverterHealth
                 ],
                 "checked_at": now,
             }
-        elif (
-            sys.platform.startswith("linux")
-            and rc == _LINUX_LDSO_EXIT_CODE
-            and _LINUX_LDSO_FAILURE_MARKER in (proc.stderr or b"")
-        ):
-            # Linux ld.so wrote "error while loading shared libraries: ..."
-            # - surface the exact missing-library line so the user sees
-            # which `ddc-deps-*` package is missing (or wasn't installed
-            # by `apt install` because the source wasn't added).
-            stderr_text = (proc.stderr or b"").decode("utf-8", errors="replace")
-            missing_line = next(
-                (line.strip() for line in stderr_text.splitlines() if "error while loading shared libraries" in line),
-                stderr_text.strip()[:200],
-            )
-            result = {
-                "status": "failed",
-                "message": (
-                    f"{exe_path.name} cannot load - a shared library "
-                    f"dependency is missing. {missing_line}\n\n"
-                    f"Reinstall the converter so apt resolves "
-                    f"`ddc-deps-kernel`, `ddc-deps-revit`, "
-                    f"`ddc-thirdparty` and the rest of the SDK runtime."
-                ),
-                "suggested_actions": [
-                    "reinstall_converter",
-                    "manual_install_from_github",
-                ],
-                "checked_at": now,
-            }
         else:
-            # Any other exit code (including non-zero from the empty input
-            # not being valid CAD): the binary did load, so the install
+            # Any other exit code (including non-zero from the missing input): the binary did load, so the install
             # is healthy from our perspective.
             result = {
                 "status": "ok",
@@ -1123,14 +933,11 @@ def read_rvt_revit_version(path: Path, *, max_scan_bytes: int = 262144) -> dict[
 
 
 def detect_converter_version(extension: str) -> dict[str, str | None]:
-    """Detect the installed DDC converter's version.
+    """Detect the installed DDC converter's package version.
 
-    On Linux: uses ``dpkg-query -f '${Version}\\n' -W ddc-<ext>converter``
-    to read the apt-installed package version.
-
-    On Windows: returns the converter binary's file size as a weak
-    fingerprint plus the parent-dir name (per-format install dir often
-    carries the version, e.g. ``rvt_windows_v18.0.0``).
+    Reads the stamp the installer writes beside an installed package, falling
+    back to the version declared for the package when the folder carries no
+    stamp (a bundled or hand-unpacked copy).
 
     Returns a dict ``{"version": str | None, "source": str | None,
     "binary_path": str | None}``. Never raises.
@@ -1140,537 +947,20 @@ def detect_converter_version(extension: str) -> dict[str, str | None]:
     if exe is None:
         return result
     result["binary_path"] = str(exe)
+    pkg = PACKAGES.get(extension)
+    root = _install_root_of(exe)
+    if root is not None:
+        from app.core.converter_package import read_stamp
 
-    # Linux: ask dpkg about the apt package.
-    if sys.platform.startswith("linux"):
-        try:
-            import subprocess
-
-            for pkg in (f"ddc-{extension}converter", f"ddc-{extension}-converter"):
-                proc = subprocess.run(
-                    ["dpkg-query", "-f", "${Version}", "-W", pkg],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    timeout=4,
-                )
-                if proc.returncode == 0 and proc.stdout:
-                    version_str = proc.stdout.decode("utf-8", errors="replace").strip()
-                    if version_str:
-                        result["version"] = version_str
-                        result["source"] = f"dpkg:{pkg}"
-                        return result
-        except (FileNotFoundError, OSError, Exception) as exc:  # noqa: BLE001
-            logger.debug("dpkg-query unavailable or failed: %s", exc)
-
-    # Windows or dpkg fallback: parent-dir name often encodes the version,
-    # e.g. ~/.openestimator/converters/rvt_windows -> "rvt_windows".
-    result["source"] = "binary_metadata"
-    parent_name = exe.parent.name
-    if parent_name and parent_name not in {"bin", "usr"}:
-        result["version"] = parent_name
+        stamp = read_stamp(root)
+        if stamp and stamp.get("version"):
+            result["version"] = str(stamp["version"])
+            result["source"] = f"release:{stamp.get('tag') or 'unknown'}"
+            return result
+    if pkg is not None:
+        result["version"] = pkg.version
+        result["source"] = "package"
     return result
-
-
-# ── Per-binary CLI capability matrix ──────────────────────────────────────
-#
-# Different DDC RvtExporter / IfcExporter builds accept different positional
-# arguments and flags.  Older releases (the ones a user already has installed
-# on disk) reject anything beyond ``<input> <output>``; newer releases accept
-# a depth-mode token (``standard`` / ``complete``) and the ``-no-collada``
-# flag we use to skip the geometry pass.
-#
-# The platform's invocation has historically appended those extra tokens
-# unconditionally - which produces a ``The following arguments were not
-# expected`` failure on old binaries even though they could otherwise
-# convert the file just fine.  This matrix records what each installed
-# binary actually understands so ``ifc_processor._run_ddc`` can build a
-# version-tolerant command line.
-#
-# Cache key is the resolved binary path (str), so a user with two
-# extensions sharing the same install dir gets one probe per binary.  We
-# also keep a per-extension "negative" sentinel so we don't re-probe a
-# missing converter on every call.
-_CONVERTER_CAPABILITIES: dict[str, dict[str, Any]] = {}
-
-
-# ── CLI profile identifiers ───────────────────────────────────────────────
-#
-# DDC has shipped three distinct CLI shapes that we have to deal with:
-#
-#   * ``v18_flag``       - v18.x.x: flag-driven, e.g.
-#                          ``RvtExporter input -x out.xlsx -d out.dae
-#                          -m standard --force-path --no-dae --no-xlsx``.
-#                          New keys: -x/--xlsx, -d/--dae, --no-dae,
-#                          --no-xlsx, -m/--mode, --force-path.
-#                          REJECTS the legacy positional ``standard`` and
-#                          flag ``-no-collada`` with ``exit 15``.
-#
-#   * ``v17_positional`` - v17.x.x: positional + a couple of optional flags.
-#                          ``RvtExporter input output [standard|complete]
-#                          [-no-collada]``. Modern enough to advertise
-#                          ``-no-collada`` in --help; pre-v18 so doesn't
-#                          know ``--no-dae`` or ``--force-path``.
-#
-#   * ``legacy``         - pre-v17 / unknown old binary. Only accepts the
-#                          bare ``[exe, input, output]`` shape.
-#
-#   * ``unknown``        - no binary installed (sentinel for "don't cache").
-#
-# ``cli_profile`` is the canonical key; the legacy booleans
-# (``accepts_depth_mode`` / ``accepts_no_collada_flag``) are kept for
-# back-compat with code paths that pre-date v18.
-CLI_PROFILE_V18_FLAG = "v18_flag"
-CLI_PROFILE_V17_POSITIONAL = "v17_positional"
-CLI_PROFILE_LEGACY = "legacy"
-CLI_PROFILE_UNKNOWN = "unknown"
-
-
-def _default_capabilities() -> dict[str, Any]:
-    """Conservative defaults for an unknown/old binary.
-
-    Old DDC CLIs only accept ``[converter, input, output]`` - they reject
-    the depth-mode positional and the ``-no-collada`` flag.  When the probe
-    fails we fall back to this profile so the retry path matches what
-    ``_run_ddc`` would have emitted as its second-attempt fallback.
-    """
-    return {
-        "accepts_depth_mode": False,
-        "accepts_no_collada_flag": False,
-        # v18-specific flag capabilities - all False on the legacy profile.
-        "accepts_flag_xlsx": False,
-        "accepts_flag_dae": False,
-        "accepts_flag_no_dae": False,
-        "accepts_flag_no_xlsx": False,
-        "accepts_flag_mode": False,
-        "accepts_flag_force_path": False,
-        "legacy_positional_input_output": True,
-        "cli_profile": CLI_PROFILE_LEGACY,
-        "version_text": None,
-        "probed": True,
-    }
-
-
-def _modern_capabilities(version_text: str | None = None) -> dict[str, Any]:
-    """Capability profile for a confirmed v17-era DDC binary.
-
-    "Modern" historically meant v17.x (positional CLI that DID accept
-    ``standard`` and ``-no-collada``). v18+ uses a different shape - see
-    ``_v18_capabilities`` and ``CLI_PROFILE_V18_FLAG``. This constructor
-    is retained for back-compat with tests and any external caller that
-    has the v17 banner in hand.
-    """
-    return {
-        "accepts_depth_mode": True,
-        "accepts_no_collada_flag": True,
-        "accepts_flag_xlsx": False,
-        "accepts_flag_dae": False,
-        "accepts_flag_no_dae": False,
-        "accepts_flag_no_xlsx": False,
-        "accepts_flag_mode": False,
-        "accepts_flag_force_path": False,
-        "legacy_positional_input_output": True,
-        "cli_profile": CLI_PROFILE_V17_POSITIONAL,
-        "version_text": version_text,
-        "probed": True,
-    }
-
-
-def _v18_capabilities(
-    version_text: str | None = None,
-    *,
-    help_tokens: set[str] | None = None,
-) -> dict[str, Any]:
-    """Capability profile for a confirmed DDC v18.x flag-driven binary.
-
-    v18 dropped the legacy positional output path AND the ``-no-collada``
-    flag in favour of:
-
-      ``RvtExporter <input> -x <xlsx> -d <dae> -m {basic|standard|complete}
-       --force-path [--no-dae] [--no-xlsx]``
-
-    The legacy boolean flags (``accepts_depth_mode`` /
-    ``accepts_no_collada_flag``) are set to False here because the
-    pre-v18 invocation builder must NOT try to emit those tokens -
-    v18 rejects them with ``exit 15: arguments were not expected``.
-
-    Per-flag granularity (``help_tokens``):
-        Not every v18-shaped binary exposes the SAME flag set. The full
-        ``RvtExporter`` / ``IfcExporter`` advertise a "Geometry outputs"
-        group (``-d`` / ``--dae``) and an "Export mode" group (``-m`` /
-        ``--mode``), but the ``DwgExporter`` is a "DWG to XLSX/JSON/CSV
-        converter [+PDF]" - it shares the v18 CLI shape (``--force-path``
-        / ``--no-xlsx`` / ``-x``) yet has NO geometry group and NO mode
-        group at all. Emitting ``-d`` / ``-m`` against it aborts the run
-        with ``exit 15: arguments were not expected: -d <path> -m complete``.
-
-        When ``help_tokens`` (the tokenised ``--help`` text from the probe)
-        is provided, each granular ``accepts_flag_*`` capability is derived
-        from the LITERAL flag spellings actually present, so the args
-        builder only emits what the specific binary understands. When it is
-        ``None`` (direct constructor callers / unit fixtures that hand-build
-        the v18 profile) we keep the historical "full v18" all-flags-True
-        shape for back-compat.
-    """
-    if help_tokens is None:
-        # Back-compat: assume the full flag set when no probe text was
-        # supplied (e.g. ``_v18_capabilities()`` in tests / callers that
-        # only have the version banner). The real probe path always passes
-        # ``help_tokens`` so production gets per-binary accuracy.
-        accepts_dae = True
-        accepts_mode = True
-        accepts_no_dae = True
-        accepts_no_xlsx = True
-        accepts_xlsx = True
-        accepts_force_path = True
-    else:
-        accepts_dae = "--dae" in help_tokens or "-d" in help_tokens
-        accepts_mode = "--mode" in help_tokens or "-m" in help_tokens
-        accepts_no_dae = "--no-dae" in help_tokens
-        accepts_no_xlsx = "--no-xlsx" in help_tokens
-        accepts_xlsx = "--xlsx" in help_tokens or "-x" in help_tokens
-        accepts_force_path = "--force-path" in help_tokens
-    return {
-        "accepts_depth_mode": False,
-        "accepts_no_collada_flag": False,
-        "accepts_flag_xlsx": accepts_xlsx,
-        "accepts_flag_dae": accepts_dae,
-        "accepts_flag_no_dae": accepts_no_dae,
-        "accepts_flag_no_xlsx": accepts_no_xlsx,
-        "accepts_flag_mode": accepts_mode,
-        "accepts_flag_force_path": accepts_force_path,
-        "legacy_positional_input_output": False,
-        "cli_profile": CLI_PROFILE_V18_FLAG,
-        "version_text": version_text,
-        "probed": True,
-    }
-
-
-# ── Help-text parsing ─────────────────────────────────────────────────────
-#
-# The v18 help text contains the word ``complete`` (in the mode-preset
-# enum ``{basic,standard,complete,custom}``), which historically caused a
-# false-positive against the substring-based ``_MODERN_HELP_MARKERS`` -
-# the conversion path would then emit ``standard`` + ``-no-collada`` and
-# eat ``exit 15`` from the v18 binary.
-#
-# Token-based detection avoids that trap: we split the help text into
-# whitespace-delimited tokens and check for the LITERAL flag spellings
-# that v18 (and only v18) advertises. ``--force-path``, ``--no-dae`` and
-# ``--no-xlsx`` are all v18-exclusive - none of them appear in any v17 or
-# older help text. ``-no-collada`` is v17-exclusive: v18 dropped it.
-
-_V18_EXCLUSIVE_TOKENS = (
-    "--force-path",
-    "--no-dae",
-    "--no-xlsx",
-)
-# Tokens that prove v17-era CLI (positional + ``-no-collada``). The leading
-# single dash is intentional - v17 used the GNU long-style ``-no-collada``
-# (not ``--no-collada``).
-_V17_EXCLUSIVE_TOKENS = ("-no-collada",)
-
-# v18 always advertises the short OUTPUT flags ``-x``/``--xlsx`` (Excel) and
-# ``-d``/``--dae`` (COLLADA), plus ``-m``/``--mode``. The long ``--no-*`` /
-# ``--force-path`` flags in ``_V18_EXCLUSIVE_TOKENS`` are OPTIONAL, so a v18
-# build whose --help lists only the short flags must STILL be recognised as a
-# flag CLI - otherwise we drop it to the legacy positional path and the v18
-# binary rejects the bare ``[exe, input, output]`` call with exit 15
-# ("arguments were not expected"), which used to surface as a false
-# "converter out of date".
-_V18_XLSX_TOKENS = ("-x", "--xlsx")
-_V18_GEOMETRY_TOKENS = ("-d", "--dae", "-m", "--mode")
-
-
-def _tokenize_help(text: str) -> set[str]:
-    """Split DDC --help output into a set of whitespace-delimited tokens.
-
-    Strips trailing punctuation that the CLI11 / Qt help formatter
-    sometimes appends (``,`` / ``.`` / ``;``) so an exact-match lookup
-    against ``"--no-dae"`` finds the token even when it appears mid-line
-    as ``--no-dae,`` in a comma-separated alias list. Lower-cases the
-    output because DDC has shipped both ``--No-Dae`` and ``--no-dae`` in
-    different builds.
-    """
-    tokens: set[str] = set()
-    for raw in text.split():
-        tok = raw.strip().lower().strip(",.;:()[]{}")
-        if tok:
-            tokens.add(tok)
-    return tokens
-
-
-def _classify_help_text(text: str) -> str:
-    """Pick the CLI profile from a probed --help / --version blob.
-
-    Returns one of the ``CLI_PROFILE_*`` constants. Resolution order:
-
-      1. Any v18-exclusive token present → ``v18_flag`` (highest precedence
-         because v18 binaries also mention ``complete`` in their mode enum
-         which would otherwise hit the v17 heuristic).
-      2. Any v17-exclusive token present → ``v17_positional``.
-      3. Otherwise → ``legacy``.
-
-    Lower-cased input is expected - the probe already normalises.
-    """
-    tokens = _tokenize_help(text)
-    if any(tok in tokens for tok in _V18_EXCLUSIVE_TOKENS):
-        return CLI_PROFILE_V18_FLAG
-    if any(tok in tokens for tok in _V17_EXCLUSIVE_TOKENS):
-        return CLI_PROFILE_V17_POSITIONAL
-    # A v18 build whose --help advertises the short output flags (but none of
-    # the optional long ``--no-*`` flags) is still a flag CLI, not legacy.
-    if any(tok in tokens for tok in _V18_XLSX_TOKENS) and any(tok in tokens for tok in _V18_GEOMETRY_TOKENS):
-        return CLI_PROFILE_V18_FLAG
-    return CLI_PROFILE_LEGACY
-
-
-# Substrings in ``--help`` / ``--version`` output that confirm the CLI
-# understands the modern argument shape.  Retained for back-compat with
-# tests that import this constant directly; new code should call
-# ``_classify_help_text`` which is token-based and false-positive-free.
-_MODERN_HELP_MARKERS = (
-    "-no-collada",
-    "--no-collada",
-    "no-collada",
-    "complete",  # the depth-mode token only newer CLIs document
-)
-
-
-def build_ddc_args(
-    converter: Path,
-    input_path: Path,
-    *,
-    caps: dict[str, Any],
-    xlsx_out: Path | None = None,
-    dae_out: Path | None = None,
-    mode: str = "standard",
-    include_no_dae: bool = False,
-    include_no_xlsx: bool = False,
-) -> list[str]:
-    """Compose a DDC converter command line that matches the binary's CLI shape.
-
-    Single source of truth for the v18-flag / v17-positional split. The
-    caller picks which outputs it wants by passing ``xlsx_out`` / ``dae_out``;
-    ``include_no_dae`` / ``include_no_xlsx`` let the v18 path actively
-    suppress the OTHER output so the converter doesn't spend time writing
-    something the caller will discard. The v17 path approximates the same
-    optimisation via the older ``-no-collada`` flag.
-
-    The legacy (``v17_positional`` / ``legacy``) path keeps the historical
-    behaviour: one output path per invocation as the third positional
-    arg. Callers who need both outputs run two invocations (XLSX pass +
-    DAE pass), which is exactly what ``ifc_processor._try_cad2data``
-    already does in parallel.
-
-    For ``v18_flag`` we DO emit both ``-x`` and ``-d`` in the same call
-    when both are requested - saves loading the RVT a second time. Callers
-    that want sequential passes (matching the v17 codepath) can still do
-    so by calling this twice with only one of ``xlsx_out`` / ``dae_out``
-    populated each time.
-    """
-    profile = caps.get("cli_profile", CLI_PROFILE_LEGACY)
-    args: list[str] = [str(converter), str(input_path)]
-
-    if profile == CLI_PROFILE_V18_FLAG:
-        if xlsx_out is not None:
-            args.extend(["-x", str(xlsx_out)])
-        # Only emit ``-d`` when the binary actually advertises the geometry
-        # flag. The DwgExporter is v18-shaped but has NO ``-d/--dae`` group;
-        # emitting it there aborts the run with ``exit 15``. RVT/IFC keep
-        # emitting ``-d`` because their probe sets ``accepts_flag_dae=True``.
-        if dae_out is not None and caps.get("accepts_flag_dae"):
-            args.extend(["-d", str(dae_out)])
-        if include_no_dae and caps.get("accepts_flag_no_dae"):
-            args.append("--no-dae")
-        if include_no_xlsx and caps.get("accepts_flag_no_xlsx"):
-            args.append("--no-xlsx")
-        if caps.get("accepts_flag_mode"):
-            args.extend(["-m", mode])
-        if caps.get("accepts_flag_force_path"):
-            args.append("--force-path")
-        return args
-
-    # Legacy / v17 positional path - single output target per call.
-    out_path = xlsx_out if xlsx_out is not None else dae_out
-    if out_path is None:
-        raise ValueError("build_ddc_args (legacy profile) requires at least one of xlsx_out or dae_out")
-    args.append(str(out_path))
-    if caps.get("accepts_depth_mode"):
-        args.append(mode)
-    # v17 only knows how to *skip* COLLADA; it has no flag to skip XLSX.
-    # ``include_no_dae=True`` on the legacy path maps to the v17 spelling
-    # ``-no-collada``.
-    if include_no_dae and caps.get("accepts_no_collada_flag"):
-        args.append("-no-collada")
-    return args
-
-
-def detect_converter_capabilities(extension: str) -> dict[str, Any]:
-    """Probe the installed DDC converter to learn which CLI args it accepts.
-
-    The probe runs the binary with ``--help`` (and falls back to
-    ``--version``); both calls are cheap (sub-second, no file IO).
-    Results are cached per-binary-path for the lifetime of the process so
-    subsequent conversions don't pay the probe cost.
-
-    Returns a dict with the keys:
-      * ``accepts_depth_mode`` (bool) - append ``standard`` / ``complete``?
-      * ``accepts_no_collada_flag`` (bool) - append ``-no-collada``?
-      * ``version_text`` (str | None) - raw probe output (debug only)
-      * ``probed`` (bool) - True once the binary was actually executed
-
-    If the probe itself fails (non-zero exit, no recognizable output,
-    process never started), the conservative "old CLI" profile is
-    returned and cached - so the conversion path skips the extra args
-    and avoids the exit-15 trap.
-    """
-    # Resolve format aliases (e.g. .dxf is read by the DWG/DwgExporter
-    # binary, .rfa by RvtExporter) before probing. find_converter does not
-    # alias, so probing the literal "dxf" finds no converter, falls back to
-    # the legacy CLI profile, and the v18 DwgExporter then rejects the
-    # legacy positional args with exit 15. ensure_converter already aliases
-    # when locating the binary; this keeps the capability probe consistent.
-    norm_ext = extension.lower().lstrip(".")
-    extension = _CONVERTER_FORMAT_ALIASES.get(norm_ext, norm_ext)
-    exe = find_converter(extension)
-    if exe is None:
-        # No binary installed at all - nothing to probe; mark as not-probed
-        # so a later install can trigger a fresh detect.
-        return {
-            "accepts_depth_mode": False,
-            "accepts_no_collada_flag": False,
-            "accepts_flag_xlsx": False,
-            "accepts_flag_dae": False,
-            "accepts_flag_no_dae": False,
-            "accepts_flag_no_xlsx": False,
-            "accepts_flag_mode": False,
-            "accepts_flag_force_path": False,
-            "legacy_positional_input_output": False,
-            "cli_profile": CLI_PROFILE_UNKNOWN,
-            "version_text": None,
-            "probed": False,
-        }
-
-    cache_key = str(exe)
-    cached = _CONVERTER_CAPABILITIES.get(cache_key)
-    if cached is not None:
-        return cached
-
-    import subprocess
-
-    probe_text = ""
-    probe_ok = False
-    for flag in ("--help", "-h", "--version"):
-        try:
-            proc = subprocess.run(
-                [str(exe), flag],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=str(exe.parent),
-                env=_converter_subprocess_env(exe),
-                input=b"\n",
-                # A cold first probe loads the bundled Qt6 DLLs (~26 MB) and
-                # may be slowed by an AV scan of the just-downloaded binary.
-                # 8s was tight enough to time out on that cold path, cache the
-                # legacy profile, and send the v17 positional shape that a v18
-                # binary rejects with exit 15. Give the probe room to answer.
-                timeout=20,
-            )
-        except (FileNotFoundError, PermissionError, OSError) as exc:
-            logger.debug("Converter probe (%s %s) failed to start: %s", exe, flag, exc)
-            continue
-        except subprocess.TimeoutExpired:
-            logger.debug("Converter probe (%s %s) timed out", exe, flag)
-            continue
-
-        # DDC binaries occasionally emit their banner on stderr instead of
-        # stdout; combine both so the marker scan doesn't miss it.
-        out = (proc.stdout or b"") + b"\n" + (proc.stderr or b"")
-        try:
-            text = out.decode("utf-8", errors="replace").lower()
-        except UnicodeError:
-            text = ""
-        if text.strip():
-            probe_text = text
-            # Any non-empty banner counts as "we successfully spoke to the
-            # binary" - even an exit-1 from ``-h`` on a CLI that wants
-            # ``--help``.  The marker scan below decides the actual profile.
-            probe_ok = True
-            break
-
-    if not probe_ok or not probe_text:
-        # Probe failed entirely → assume old CLI.  This is the SAFE branch:
-        # if we're wrong and the binary is actually modern, we just lose
-        # the COLLADA-skip optimisation but conversion still succeeds.
-        caps = _default_capabilities()
-        _CONVERTER_CAPABILITIES[cache_key] = caps
-        logger.info(
-            "DDC capability probe for %s produced no usable output - "
-            "assuming legacy CLI (no depth-mode, no -no-collada)",
-            exe.name,
-        )
-        return caps
-
-    # Classify the probed help text against the v18 / v17 / legacy
-    # decision tree.  Token-based - see ``_classify_help_text`` for why
-    # substring matching was retired (v18 mentions ``complete`` in its
-    # mode-preset enum, which used to false-positive the legacy
-    # ``_MODERN_HELP_MARKERS`` substring check and emit ``-no-collada``
-    # against a v18 binary that rejects it with exit 15).
-    profile = _classify_help_text(probe_text)
-    if profile == CLI_PROFILE_V18_FLAG:
-        # Derive each granular flag capability from the LITERAL tokens the
-        # binary advertises rather than a blanket v18 profile. The full
-        # RvtExporter / IfcExporter expose ``-d/--dae`` + ``-m/--mode``;
-        # the DwgExporter (XLSX/JSON/CSV-only) does NOT, and emitting those
-        # flags against it aborts with ``exit 15``. See ``_v18_capabilities``.
-        help_tokens = _tokenize_help(probe_text)
-        caps = _v18_capabilities(version_text=probe_text[:512], help_tokens=help_tokens)
-        _CONVERTER_CAPABILITIES[cache_key] = caps
-        logger.info(
-            "DDC capability probe for %s detected v18 flag CLI (dae=%s mode=%s no_dae=%s no_xlsx=%s force_path=%s)",
-            exe.name,
-            caps["accepts_flag_dae"],
-            caps["accepts_flag_mode"],
-            caps["accepts_flag_no_dae"],
-            caps["accepts_flag_no_xlsx"],
-            caps["accepts_flag_force_path"],
-        )
-        return caps
-    if profile == CLI_PROFILE_V17_POSITIONAL:
-        caps = _modern_capabilities(version_text=probe_text[:512])
-        _CONVERTER_CAPABILITIES[cache_key] = caps
-        logger.info(
-            "DDC capability probe for %s detected v17 positional CLI (depth-mode + -no-collada accepted)",
-            exe.name,
-        )
-        return caps
-
-    # Help worked but no modern marker → treat as legacy.  Surfaced at INFO
-    # because this is the path the v4.6.2 user-reported bug originally hit.
-    caps = _default_capabilities()
-    _CONVERTER_CAPABILITIES[cache_key] = caps
-    logger.info(
-        "DDC capability probe for %s did not advertise modern flags - "
-        "assuming legacy CLI (no depth-mode, no -no-collada)",
-        exe.name,
-    )
-    return caps
-
-
-def invalidate_converter_capabilities(extension: str | None = None) -> None:
-    """Drop the cached capability profile so the next conversion re-probes.
-
-    Call this after a reinstall / update so an upgraded binary's new
-    argument shape is picked up without a service restart.  Matches the
-    sibling ``invalidate_converter_health`` API.
-    """
-    if extension is None:
-        _CONVERTER_CAPABILITIES.clear()
-        return
-    exe = find_converter(extension)
-    if exe is not None:
-        _CONVERTER_CAPABILITIES.pop(str(exe), None)
 
 
 def invalidate_converter_health(extension: str | None = None) -> None:
@@ -1684,9 +974,6 @@ def invalidate_converter_health(extension: str | None = None) -> None:
         _HEALTH_CACHE.clear()
     else:
         _HEALTH_CACHE.pop(extension, None)
-    # Capabilities are tied 1:1 to the installed binary - drop them in
-    # lock-step so a reinstall picks up the new CLI shape immediately.
-    invalidate_converter_capabilities(extension)
 
 
 async def convert_cad_to_excel(
@@ -1694,9 +981,12 @@ async def convert_cad_to_excel(
     output_dir: Path,
     extension: str,
 ) -> Path | None:
-    """Run a DDC converter to transform a CAD file into Excel.
+    """Run a DDC converter to transform a CAD file into a one-row-per-element Excel file.
 
-    The converter is executed as a subprocess with a 5-minute timeout.
+    The converter runs as a subprocess with a 10-minute timeout. What it writes
+    depends on the format (see :mod:`app.modules.boq.ddc_runner`): IFC and RVT
+    output is flattened into an ``Elements`` workbook; a DWG's own ``Entities``
+    workbook is returned as it is.
 
     Args:
         input_path: Path to the uploaded CAD file.
@@ -1723,127 +1013,46 @@ async def convert_cad_to_excel(
     # unsupported platform (or a failed download) it raises
     # ``ConverterUnavailableError``, which we translate to the historical
     # ``None`` return so the caller's existing "conversion failed" path is
-    # preserved (no behavioural regression for callers that already handle
-    # a missing converter).
+    # preserved.
     try:
         converter = await ensure_converter_async(extension)
     except ConverterUnavailableError as exc:
         logger.error("No converter available for .%s: %s", extension, exc)
         return None
 
-    logger.info("Converting %s using %s", input_path.name, converter.name)
+    import subprocess
 
-    # Compose the CLI through the capability-aware builder so v18 binaries
-    # get ``-x <xlsx> --no-dae -m standard`` (and v17 binaries keep the
-    # legacy ``<xlsx> standard -no-collada`` positional shape). Calling
-    # the v17 positional form against a v18 binary causes ``exit 15`` with
-    # "arguments were not expected: ... standard -no-collada" - the bug
-    # the CAD/BIM Data Explorer surfaced as "CAD conversion failed for
-    # .rvt file" on every fresh-install with a current DDC binary.
-    output_xlsx = output_dir / (input_path.stem + ".xlsx")
+    from app.modules.boq.ddc_runner import run_converter, tool_label, write_flat_workbook
 
+    fmt = _CONVERTER_FORMAT_ALIASES.get(extension, extension)
+    logger.info("Converting %s using %s", input_path.name, tool_label(fmt))
+
+    output_dir.mkdir(parents=True, exist_ok=True)
     try:
-        import subprocess
-        from concurrent.futures import ThreadPoolExecutor
-
-        # DDC converters need DLLs (Qt6Core.dll etc.) from their own directory
-        converter_dir = converter.parent
-
-        def _compose(caps: dict[str, Any]) -> list[str]:
-            # XLSX-only conversion: ask the binary to skip the COLLADA pass.
-            # v18 emits ``--no-dae``; v17 emits ``-no-collada``. The legacy
-            # profile (no flag) just runs both, which is harmless here.
-            return build_ddc_args(
-                converter,
-                input_path,
-                caps=caps,
-                xlsx_out=output_xlsx,
-                mode="standard",
-                include_no_dae=True,
-            )
-
-        def _run_converter(args: list[str]) -> subprocess.CompletedProcess:
-            return subprocess.run(
-                args,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=str(converter_dir),
-                env=_converter_subprocess_env(converter),
-                input=b"\n",  # handle "Press Enter to continue..." prompt
-                timeout=300,
-            )
-
-        def _collect_output() -> Path | None:
-            # Find the generated Excel file in the output directory.
-            for f in output_dir.iterdir():
-                if f.suffix in (".xlsx", ".xls"):
-                    return f
-            # Also check if xlsx was written directly (not in output_dir).
-            if output_xlsx.exists():
-                return output_xlsx
-            return None
-
-        async def _attempt(args: list[str]) -> subprocess.CompletedProcess:
-            loop = asyncio.get_event_loop()
-            with ThreadPoolExecutor(max_workers=1) as pool:
-                return await loop.run_in_executor(pool, _run_converter, args)
-
-        caps = detect_converter_capabilities(extension)
-        args = _compose(caps)
-        result = await _attempt(args)
-        if result.returncode == 0:
-            found = _collect_output()
-            if found is not None:
-                return found
-
-        # First attempt failed. The dominant cause is a mis-detected CLI
-        # profile: a v18 binary probed before its Qt DLLs settled (or while an
-        # AV scan held the freshly downloaded files) gets cached as legacy, so
-        # we send the v17 positional shape and the binary aborts with exit 15
-        # ("arguments were not expected"). That surfaced to the user as
-        # "CAD conversion failed for .rvt file". Drop the cached capabilities,
-        # force a fresh probe, and retry once with the corrected shape -
-        # self-healing within the same request, no service restart needed.
-        first_err = (result.stderr or b"").decode(errors="replace")
-        logger.warning(
-            "Converter first attempt failed for %s (exit %d): %s - re-probing CLI shape and retrying once.",
-            input_path.name,
-            result.returncode,
-            first_err[:300],
-        )
-        invalidate_converter_capabilities(extension)
-        retry_caps = detect_converter_capabilities(extension)
-        retry_args = _compose(retry_caps)
-        if retry_args != args:
-            # Clear any partial output the aborted first run may have left so
-            # ``_collect_output`` cannot return a stale or corrupt file.
-            if output_xlsx.exists():
-                try:
-                    output_xlsx.unlink()
-                except OSError:
-                    pass
-            result = await _attempt(retry_args)
-            if result.returncode == 0:
-                found = _collect_output()
-                if found is not None:
-                    return found
-
-        if result.returncode != 0:
-            logger.error(
-                "Converter failed (exit %d) for %s: %s",
-                result.returncode,
-                input_path.name,
-                (result.stderr or b"").decode(errors="replace")[:500],
-            )
-        else:
-            logger.error("No Excel output found in %s after conversion", output_dir)
-        return None
-
+        run = await asyncio.to_thread(run_converter, fmt, converter, input_path, output_dir, timeout=600)
     except subprocess.TimeoutExpired:
-        logger.error("Converter timed out after 300s for %s", input_path.name)
+        logger.error("Converter timed out after 600s for %s", input_path.name)
         return None
     except Exception:
         logger.exception("Converter error for %s", input_path.name)
+        return None
+
+    if not run.ok:
+        logger.error(
+            "Converter failed (exit %d, status %s) for %s: %s",
+            run.returncode,
+            run.status,
+            input_path.name,
+            (run.stderr or run.stdout)[:500],
+        )
+        return None
+
+    try:
+        if fmt == "dwg":
+            return run.outputs["xlsx"]
+        return await asyncio.to_thread(write_flat_workbook, run, output_dir / (input_path.stem + ".xlsx"))
+    except Exception:
+        logger.exception("Could not read the converter output for %s", input_path.name)
         return None
 
 

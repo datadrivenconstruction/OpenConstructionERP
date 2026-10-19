@@ -98,11 +98,16 @@ def test_rejects_ftp_scheme() -> None:
         _check_download_url_allowed("ftp://raw.githubusercontent.com/x")
 
 
-def test_allowed_hosts_constant_includes_three_github_hosts() -> None:
-    """Catches accidental shrinking of the allow-list during refactors."""
-    assert "raw.githubusercontent.com" in _ALLOWED_DOWNLOAD_HOSTS
+def test_allowed_hosts_constant_includes_the_github_release_hosts() -> None:
+    """Catches accidental shrinking of the allow-list during refactors.
+
+    A release asset URL on github.com redirects to GitHub's asset CDN, so both
+    the entry host and the CDN hosts have to be listed.
+    """
     assert "github.com" in _ALLOWED_DOWNLOAD_HOSTS
     assert "objects.githubusercontent.com" in _ALLOWED_DOWNLOAD_HOSTS
+    assert "release-assets.githubusercontent.com" in _ALLOWED_DOWNLOAD_HOSTS
+    assert "raw.githubusercontent.com" in _ALLOWED_DOWNLOAD_HOSTS
 
 
 # ── A11: streaming size cap ----------------------------------------------

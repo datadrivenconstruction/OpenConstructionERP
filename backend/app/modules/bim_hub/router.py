@@ -833,7 +833,7 @@ def _rows_to_elements(
             props = raw_props
 
         # Explicit mesh_ref column wins, otherwise fall back to element_id
-        # (which matches DDC RvtExporter's DAE ``<node id="...">`` pattern).
+        # (which matches the converter's mesh node naming: DAE ``<node id="...">`` or GLB node name).
         raw_mesh_ref = row.get("mesh_ref")
         if raw_mesh_ref is not None and str(raw_mesh_ref).strip():
             mesh_ref: str | None = str(raw_mesh_ref).strip()
@@ -1521,14 +1521,15 @@ async def _process_cad_in_background(
         except Exception:  # noqa: BLE001 - pre-flight is best-effort
             logger.exception("RVT converter pre-flight check failed for %s", model_id)
 
-    # IFC pre-provision: always try to get the real DDC IfcExporter so the
-    # viewer shows accurate meshes, not the crude box placeholder. IFC has a
-    # text fallback (so we do NOT gate the import on the converter the way RVT
-    # does), but on a fresh install the converter is missing and the inline
-    # ``ensure_converter`` call inside ``process_ifc_file`` would race a cold
-    # ~30 MB download. Provisioning it here, up front and off the request path,
-    # means the conversion below uses the real converter on the first upload
-    # instead of silently degrading to placeholder geometry. This is
+    # IFC pre-provision: always try to get the DDC IFC converter so the
+    # element table carries the model's full property and quantity sets, not
+    # just what the text fallback parser reads. IFC has a text fallback (so we
+    # do NOT gate the import on the converter the way RVT does), but on a fresh
+    # install the converter is missing and the inline ``ensure_converter`` call
+    # inside ``process_ifc_file`` would race a cold ~35 MB download.
+    # Provisioning it here, up front and off the request path, means the
+    # conversion below uses the converter on the first upload instead of
+    # silently degrading to the text parser. This is
     # best-effort: a genuine failure (offline / locked-down host) just falls
     # through to the text fallback, so the import still completes.
     if ext.lower() == ".ifc":
@@ -1542,7 +1543,7 @@ async def _process_cad_in_background(
 
             if _fc("ifc") is None:
                 logger.info(
-                    "IFC converter not present for model %s - provisioning the DDC IfcExporter before conversion",
+                    "IFC converter not present for model %s - provisioning the DDC IFC converter before conversion",
                     model_id,
                 )
                 converter_path = await asyncio.to_thread(_ensure, "ifc")

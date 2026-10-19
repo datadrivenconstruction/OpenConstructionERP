@@ -83,47 +83,32 @@ def test_detect_converter_version_no_binary(monkeypatch: pytest.MonkeyPatch) -> 
     assert info == {"version": None, "source": None, "binary_path": None}
 
 
-def test_detect_converter_version_dpkg_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    fake_bin = tmp_path / "RvtExporter"
+def test_detect_converter_version_reads_the_install_stamp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    root = tmp_path / "rvt_windows"
+    (root / "cli").mkdir(parents=True)
+    fake_bin = root / "cli" / "RVTconverter.exe"
     fake_bin.write_bytes(b"x" * 2048)
+    (root / ".ddc-package.json").write_text('{"version": "0.6.8", "tag": "v2026.10.0"}', encoding="utf-8")
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: fake_bin)
-    monkeypatch.setattr(cad_import.sys, "platform", "linux")
-
-    # Stub subprocess.run to mimic a successful dpkg-query response.
-    import subprocess as _subprocess
-
-    class _Proc:
-        returncode = 0
-        stdout = b"18.0.0.0\n"
-        stderr = b""
-
-    def fake_run(*_args: object, **_kwargs: object) -> _Proc:
-        return _Proc()
-
-    monkeypatch.setattr(_subprocess, "run", fake_run)
 
     info = cad_import.detect_converter_version("rvt")
 
-    assert info["version"] == "18.0.0.0"
-    assert info["source"] == "dpkg:ddc-rvtconverter"
+    assert info["version"] == "0.6.8"
+    assert info["source"] == "release:v2026.10.0"
     assert info["binary_path"] == str(fake_bin)
 
 
-def test_detect_converter_version_dpkg_missing_falls_back_to_parent_dir(
+def test_detect_converter_version_without_a_stamp_reports_the_declared_package_version(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Simulate Windows-style per-format install dir
-    install_dir = tmp_path / "rvt_windows_v18.0.0"
-    install_dir.mkdir()
-    fake_bin = install_dir / "RvtExporter.exe"
+    root = tmp_path / "rvt_windows"
+    (root / "cli").mkdir(parents=True)
+    fake_bin = root / "cli" / "RVTconverter.exe"
     fake_bin.write_bytes(b"x" * 2048)
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: fake_bin)
-    monkeypatch.setattr(cad_import.sys, "platform", "win32")
 
     info = cad_import.detect_converter_version("rvt")
 
-    # On Windows we don't try dpkg — we just expose the parent dir name as
-    # a best-effort fingerprint.
-    assert info["source"] == "binary_metadata"
-    assert info["version"] == "rvt_windows_v18.0.0"
+    assert info["source"] == "package"
+    assert info["version"] == "0.6.8"
     assert info["binary_path"] == str(fake_bin)

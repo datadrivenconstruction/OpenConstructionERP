@@ -1,7 +1,7 @@
 """The converter health check has to notice a binary Windows refuses to start.
 
 Issue #416. A user opened the BIM page and Windows put up a "Bad Image" box
-naming Qt6Core.dll beside DgnExporter.exe, error 0xC000007B. Two separate
+naming a DLL beside the converter executable, error 0xC000007B. Two separate
 things were wrong, and the one that matters is not the one in the title.
 
 The exit code was not in the set the health check recognises, so it fell
@@ -49,12 +49,13 @@ def installed_exe(tmp_path: Path) -> Path:
     Pointing these at a path that does not exist would quietly move every
     one of them onto that branch.
     """
-    folder = tmp_path / "dgn_windows"
-    folder.mkdir()
-    exe = folder / "DgnExporter.exe"
+    folder = tmp_path / "ifc_windows"
+    (folder / "runtime").mkdir(parents=True)
+    exe = folder / "runtime" / "python.exe"
     exe.write_bytes(b"MZ" + b"\x00" * 2048)
-    for companion in cad_import._WINDOWS_COMPANION_FILES:
-        (folder / companion).write_bytes(b"MZ" + b"\x00" * 2048)
+    script = folder / "sources" / "ifc-excel" / "converter.py"
+    script.parent.mkdir(parents=True)
+    script.write_text("print('converter')", encoding="utf-8")
     return exe
 
 
@@ -65,7 +66,7 @@ def _run_smoke(exe: Path, exit_code: int, stderr: bytes = b"") -> dict[str, Any]
         mock.patch.object(cad_import, "find_converter", return_value=exe),
         mock.patch("subprocess.run", return_value=completed),
     ):
-        return dict(cad_import.smoke_test_converter("dgn", force=True))
+        return dict(cad_import.smoke_test_converter("ifc", force=True))
 
 
 # The four codes are one family: the image never reaches its first
@@ -108,7 +109,7 @@ def test_bitness_message_claims_only_what_we_have_measured(installed_exe: Path) 
     should not be in the folder. Uninstall is.
 
     The plugin assertion stays from the original: sending somebody to fetch
-    the Qt plugins is the advice the other codes need and this one does not.
+    plugins is not advice this converter generation has any use for.
     """
     message = _run_smoke(installed_exe, 0xC000007B)["message"]
     assert "0xc000007b" in message.lower()
@@ -119,7 +120,7 @@ def test_bitness_message_claims_only_what_we_have_measured(installed_exe: Path) 
 
 def test_missing_dll_still_names_the_runtime(installed_exe: Path) -> None:
     message = _run_smoke(installed_exe, 0xC0000135)["message"]
-    assert "Qt6" in message
+    assert "Visual C++" in message
     assert "0xc0000135" in message.lower()
 
 
@@ -161,7 +162,7 @@ def test_the_probe_asks_windows_not_to_draw_its_own_dialog(installed_exe: Path) 
         mock.patch.object(cad_import, "_windows_loader_errors_stay_quiet", _tracking_guard),
         mock.patch("subprocess.run", _tracking_run),
     ):
-        cad_import.smoke_test_converter("dgn", force=True)
+        cad_import.smoke_test_converter("ifc", force=True)
 
     assert calls == ["guard-enter", "spawn", "guard-exit"]
 
@@ -169,7 +170,7 @@ def test_the_probe_asks_windows_not_to_draw_its_own_dialog(installed_exe: Path) 
 # ── The partial folder, which used to read as a healthy install ──────────
 
 
-def test_a_folder_missing_the_qt_libraries_is_reported_before_anything_is_spawned(
+def test_a_folder_missing_the_converter_script_is_reported_before_anything_is_spawned(
     installed_exe: Path,
 ) -> None:
     """The leading hypothesis for the reported failure, and it was invisible.
@@ -184,7 +185,7 @@ def test_a_folder_missing_the_qt_libraries_is_reported_before_anything_is_spawne
     The spawn is asserted not to happen: whether such a folder starts at all
     depends on what else is on the machine, so the answer must not.
     """
-    (installed_exe.parent / "Qt6Core.dll").unlink()
+    (installed_exe.parents[1] / "sources" / "ifc-excel" / "converter.py").unlink()
     spawned: list[str] = []
 
     def _refuse_to_spawn(*_args: Any, **_kwargs: Any) -> Any:
@@ -195,31 +196,31 @@ def test_a_folder_missing_the_qt_libraries_is_reported_before_anything_is_spawne
         mock.patch.object(cad_import, "find_converter", return_value=installed_exe),
         mock.patch("subprocess.run", _refuse_to_spawn),
     ):
-        result = cad_import.smoke_test_converter("dgn", force=True)
+        result = cad_import.smoke_test_converter("ifc", force=True)
 
     assert spawned == []
     assert result["status"] == "failed"
-    assert "Qt6Core.dll" in result["message"]
+    assert "converter.py" in result["message"]
     assert "uninstall" in result["message"].lower()
 
 
 def test_a_complete_folder_is_not_reported_as_partial(installed_exe: Path) -> None:
     """The other half of the pair - the check has to pass on a good tree.
 
-    Without this, deleting the three libraries from the list would leave the
-    test above green while the guard did nothing at all.
+    Without this, emptying the companion list would leave the test above
+    green while the guard did nothing at all.
     """
     assert cad_import.missing_companion_files(installed_exe) == []
     assert _run_smoke(installed_exe, 0)["status"] == "ok"
 
 
-def test_a_linux_binary_is_not_asked_for_windows_libraries(tmp_path: Path) -> None:
-    """The Linux build is one ELF file and resolves its dependencies elsewhere.
+def test_a_binary_that_is_not_one_of_our_packages_is_not_asked_for_companions(tmp_path: Path) -> None:
+    """Only the executables of the release packages have companions to check.
 
-    Keyed on the exe suffix rather than on the host platform, so this holds
+    Keyed on the package layout rather than on the host platform, so this holds
     when the check runs on a Windows machine too.
     """
-    linux_exe = tmp_path / "DgnExporter"
+    linux_exe = tmp_path / "SomethingElse"
     linux_exe.write_bytes(b"\x7fELF" + b"\x00" * 2048)
     assert cad_import.missing_companion_files(linux_exe) == []
 

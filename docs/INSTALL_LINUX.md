@@ -246,76 +246,25 @@ Note: installs set up before the rename may still run under the legacy unit name
 
 ---
 
-## 7. BIM/CAD converters (.rvt / .ifc / .dwg / .dgn)
+## 7. BIM/CAD converters (.rvt / .ifc / .dwg)
 
-Native CAD/BIM files are turned into element data + 3D geometry by the DDC
-`cad2data` converters. On Linux these ship as signed `.deb` packages from
-`https://pkg.datadrivenconstruction.io` (amd64 only for now - arm64 is not yet
-published). IFC also has a built-in text fallback parser, so `.ifc` files still
-import without the binary - just with simplified placeholder geometry instead of
-real meshes.
+Native CAD/BIM files are turned into element data (and, for RVT, 3D geometry) by
+the DDC converters of release 2026.10 (`datadrivenconstruction/cad2data-Revit-IFC-DWG`).
+That release is published for **Windows 10/11 x64 only**; the Linux and macOS
+builds are announced upstream but do not exist yet, so on Linux the app cannot
+install or run a converter. The 18.x `.deb` packages and the apt source that used
+to serve them are retired and are not used any more.
 
-**You normally do not need this section.** The app installs the converter
-automatically the first time you upload a CAD/BIM file (and you can also trigger
-it from **Settings -> BIM Converters -> Install**). The download runs in the
-background and the panel updates when it finishes. It tries several methods so it
-works on the widest range of hosts:
+What still works on Linux without a converter:
 
-- it does **not** require root - the packages are unpacked into the app's own
-  data directory (`~/.openestimator/converters/`), so an unprivileged service
-  account can provision the converter on its own;
-- it does **not** require `dpkg`/`apt` - it unpacks the `.deb` payload with a
-  built-in pure-Python reader when those tools are absent (minimal containers,
-  non-Debian distros);
-- it resumes interrupted downloads and retries slow or flaky links
-  automatically, and self-tests the binary after install.
+- **DXF** drawings are read natively, with no binary.
+- **IFC** files import through the built-in text parser, with simplified
+  placeholder geometry instead of real meshes.
+- DWG, RVT and RFA files need the converter. Convert them to DXF or IFC on a
+  Windows machine (or in your CAD application) and upload that instead, or run
+  OpenConstructionERP on Windows.
 
-On a slow server link the first download (the IFC chain is ~114 MB) can take a
-few minutes - that is expected; let it run.
-
-Only if the automatic install genuinely cannot complete (no outbound network, a
-blocking proxy, or an unsupported CPU architecture) install it from the terminal
-as a fallback. **amd64 only** - check your arch with `uname -m` (`x86_64` =
-amd64). On arm64 the binary converter is not yet published, so `.ifc` files fall
-back to the built-in placeholder parser.
-
-### Option A - signed apt source (recommended; auto-updates)
-
-```bash
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://pkg.datadrivenconstruction.io/ddc-archive-keyring.gpg \
-  | sudo gpg --dearmor -o /etc/apt/keyrings/ddc-archive-keyring.gpg
-echo "deb [signed-by=/etc/apt/keyrings/ddc-archive-keyring.gpg] https://pkg.datadrivenconstruction.io stable main" \
-  | sudo tee /etc/apt/sources.list.d/ddc.list
-sudo apt update
-sudo apt install -y ddc-ifcconverter     # or ddc-rvtconverter / ddc-dwgconverter / ddc-dgnconverter
-```
-
-### Option B - direct .deb download (no apt source; one converter)
-
-Downloads the four IFC packages and lets `apt` resolve their order and system
-dependencies. (Swap the names for `ddc-rvtconverter` etc. for other formats - see
-the repo's `Packages` index for the current version numbers.)
-
-```bash
-cd /tmp
-base=https://pkg.datadrivenconstruction.io/pool/main/d
-wget $base/ddc-deps-kernel/ddc-deps-kernel_27.2_amd64.deb
-wget $base/ddc-deps-ifc/ddc-deps-ifc_27.2_amd64.deb
-wget $base/ddc-thirdparty/ddc-thirdparty_18.4.3.0_amd64.deb
-wget $base/ddc-ifcconverter/ddc-ifcconverter_18.4.3.0_amd64.deb
-sudo apt install -y ./ddc-deps-kernel_27.2_amd64.deb ./ddc-deps-ifc_27.2_amd64.deb \
-                    ./ddc-thirdparty_18.4.3.0_amd64.deb ./ddc-ifcconverter_18.4.3.0_amd64.deb
-```
-
-Either option installs the binary at `/usr/bin/IfcExporter` (or
-`RvtExporter` / `DwgExporter` / `DgnExporter`). The app finds it automatically -
-no restart needed. Confirm, then re-upload the model or click **Re-check** on the
-BIM converters panel:
-
-```bash
-ls -l /usr/bin/IfcExporter        # should exist and be > 1 KB
-```
+When a Linux build of the converters is published, this section will describe it.
 
 ---
 
@@ -331,6 +280,6 @@ ls -l /usr/bin/IfcExporter        # should exist and be > 1 KB
 | `openconstructionerp: command not found` after pipx | Path not refreshed | `pipx ensurepath` then open a new shell |
 | The server stops answering while a country cost pack loads, nothing in the log | The kernel out of memory killer, not the application | Add swap and run 17.7.0 or newer (see "What the machine needs"), confirm with `dmesg \| grep -i "killed process"` |
 | Opens with `curl` on the server, unreachable from any other machine | The default bind is `127.0.0.1` | Start it as `openconstructionerp serve --host 0.0.0.0 --port 8080` (section 6) |
-| BIM converter install "signal timed out", stuck on placeholder geometry | A slow link aborted an older build's blocking download | Fixed in 8.8.0+: the install now runs in the background, resumes, and unpacks without root or dpkg. Retry **Settings -> BIM Converters -> Install**; only if it still fails, install from the terminal (section 7) |
+| An RVT/DWG upload says the converter is not available | The 2026.10 converters are Windows-only | Upload DXF or IFC instead, or run on Windows (section 7) |
 
 If you still cannot install, run `openconstructionerp doctor` (or `python -m openconstructionerp doctor`) and open an issue with the full output: https://github.com/datadrivenconstruction/OpenConstructionERP/issues

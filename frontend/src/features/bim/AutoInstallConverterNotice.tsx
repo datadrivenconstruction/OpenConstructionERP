@@ -28,7 +28,7 @@ import type { AutoInstallConverterState } from './useAutoInstallConverter';
 /** GitHub root for the manual-install fallback link. Matches the URL used
  *  by BIMConverterStatusBanner. */
 const DDC_REPO_URL =
-  'https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN';
+  'https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG/releases/tag/v2026.10.0';
 
 interface AutoInstallConverterNoticeProps {
   state: AutoInstallConverterState;

@@ -889,17 +889,18 @@ The components:
     user receives Qt 5 through us, and because both wheels declare
     Apache-2.0, so nothing generated from metadata will tell them.
 
-    Qt 6 Core, LGPL-3.0, inside the Windows desktop installer. This one
-    is different from the Qt 5 above in every respect except the name:
-    a different version, a different delivery path, and we are the party
-    redistributing it. The command line IFC exporter imports it directly
-    and cannot start without it, so Qt6Core.dll is in every Windows
-    installer, about ten megabytes of it. Installers up to and including
-    16.1.0 also carried Qt 6 Gui and Qt 6 Widgets and the platforms and
-    styles plugin folders, which existed only for a graphical converter
-    we never start; those are gone from later builds. The section below
-    on the bundled converter says what is in the installer and what
-    notices travel with it.
+    Qt 6 Core, LGPL-3.0, inside the earlier Windows desktop installers.
+    This one is different from the Qt 5 above in every respect except the
+    name: a different version, a different delivery path, and we were the
+    party redistributing it. The command line IFC exporter of the 18.x
+    converter generation imported it directly, so Qt6Core.dll was in every
+    Windows installer up to and including 18.7.0, about ten megabytes of
+    it (installers up to and including 16.1.0 also carried Qt 6 Gui and
+    Qt 6 Widgets and the platforms and styles plugin folders). Later
+    installers carry no Qt: the bundled converter is the release 2026.10
+    package, a Python application with no Qt in it. The section below on
+    the bundled converter says what is in the installer and what notices
+    travel with it.
 
 Licence texts are committed at backend/app/core/licenses/LICENSE_LGPL_3_0,
 backend/app/core/licenses/LICENSE_LGPL_2_1 and
@@ -961,12 +962,12 @@ Letting you replace the library with your own build.
     OpenCV over ours and the application uses it, with nothing to
     rebuild and nothing to ask us for.
 
-    Qt 6 Core in the Windows installer is the simplest case here and
-    the one the licence describes most directly. It is an ordinary DLL
-    beside the converter that loads it, resolved by name through the
-    import table, so putting your own build of Qt 6 Core in its place is
-    a file copy. Nothing needs rebuilding and nothing needs asking us
-    for.
+    Qt 6 Core in the Windows installers up to and including 18.7.0 was
+    the simplest case here and the one the licence describes most
+    directly. It was an ordinary DLL beside the converter that loaded it,
+    resolved by name through the import table, so putting your own build
+    of Qt 6 Core in its place was a file copy. Later installers carry no
+    Qt 6.
 
     In the desktop installers the backend is a single frozen executable
     and you cannot swap a file inside it. What replaces that is the
@@ -1041,63 +1042,49 @@ Bundled Converter Inside the Windows Desktop Installer
 ------------------------------------------------------------------------
 
 The Windows installer, and only the Windows installer, carries a second
-program of ours and the third-party runtime it needs. The release job
-fetches the DDC IFC converter from the public repository
-`datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN` at a pinned commit
-and stages its `DDC_CONVERTER_IFC` directory as a Tauri resource, so a
-fresh install converts IFC offline with no download. The job fails the
-build rather than shipping without it, and it runs on Windows alone; the
-macOS and Linux packages carry nothing from it and fetch a converter on
-first use instead.
+program of ours and the runtime it needs. The release job fetches the DDC
+IFC converter, the portable package `DDC-IFC-to-Excel-0.3.1-preview` of
+release `v2026.10.0` of the public repository
+`datadrivenconstruction/cad2data-Revit-IFC-DWG`, checks its SHA-256 against
+the digest pinned in the job and against the release's `SHA256SUMS.txt`, and
+stages the unpacked package as a Tauri resource, so a fresh install converts
+IFC offline with no download. The job fails the build rather than shipping
+without it, and it runs on Windows alone; the macOS and Linux packages carry
+nothing from it, and the converters have no macOS or Linux build.
 
-The upstream directory holds two programs: `IfcExporter.exe`, which we
-run from the command line and is the only converter this application
-ever starts, and `DDC_Community_IFC_converter.exe`, a window for a
-person to click. Since we never open the window, the release job now
-deletes it before the installer is built, together with the Qt libraries
-that only it loads: Qt6Gui.dll, Qt6Widgets.dll and the platforms/ and
-styles/ plugin folders. Installers up to and including 16.1.0 carry all
-of them; later ones carry Qt 6 Core alone, which the command line
-converter imports directly and cannot run without.
+The converters of this release read IFC, DWG and RVT files with
+DataDrivenConstruction's own readers. They contain no third-party CAD SDK.
 
 What the staged directory contains is three things with three different
 licensing positions:
 
-    IfcExporter.exe
+    DDC IFC to Excel (the converter and its reader)
         Proprietary software of DataDrivenConstruction, all rights
-        reserved. It is not licensed under the AGPL and the AGPL is not
-        offered for it. It travels beside OpenConstructionERP in one
-        installer without becoming part of the same work.
+        reserved, free for private and commercial use under the
+        DataDrivenConstruction EULA named in the release notes. It is not licensed under the AGPL and
+        the AGPL is not offered for it. It travels beside
+        OpenConstructionERP in one installer without becoming part of the
+        same work.
 
-    Open Design Alliance SDK
-        Proprietary, incorporated into the converter under a licence
-        agreement between DataDrivenConstruction and the Open Design
-        Alliance. Copyright (C) 2002-2026 Open Design Alliance.
+    CPython 3.13 runtime
+        Copyright (C) Python Software Foundation, under the Python
+        Software Foundation License. The package carries it as a complete
+        interpreter under `runtime/`, with its licence text in
+        `runtime/LICENSE.txt`, and the converter runs on it.
 
-    Qt 6 Core
-        Copyright (C) 2022-2025 The Qt Company Ltd., under the GNU
-        Lesser General Public License version 3. The converter links it
-        dynamically, as a separate DLL a user can replace. Qt 6 Gui and
-        Qt 6 Widgets, and the platforms/ and styles/ plugin folders,
-        stood here too until the graphical converter they exist for
-        stopped being shipped.
+    openpyxl 3.1.5 and et-xmlfile 2.0.0
+        MIT licensed Python libraries the converter uses to write
+        workbooks, installed into the runtime above. The package records
+        their versions and sources in `SOURCES.json`.
 
-The converter directory ships its own LICENSE and its own
-THIRD-PARTY-NOTICES, the second of which carries the Qt attribution,
-the verbatim LGPL-3.0 text, the statement that linking is dynamic under
-LGPL-3.0 section 4(d)(1), and where to obtain the Qt sources. The
-release job stages both files into the resource directory along with
-everything else in the converter tree, and the bundle configuration maps
-that directory into the installer, so the notices arrive with the
-binaries they describe rather than only with this file. That was read
-from the build configuration and has since been confirmed against a
-published artefact: the 16.1.0 Windows installer was unpacked and both
-files are in it, under converters\ifc_windows\.
+The package is unpacked unchanged, so `runtime/LICENSE.txt` and
+`SOURCES.json` arrive with the binaries they describe rather than only with
+this file.
 
 This section exists because nothing else in this notice mentioned any of
 it. A reader working out what a Windows installer contains would have
-found no Qt, no ODA and no proprietary component named anywhere, and the
-sections above present themselves as complete.
+found no proprietary component named anywhere, and the sections above
+present themselves as complete.
 
 ------------------------------------------------------------------------
 Disclaimer of Warranty

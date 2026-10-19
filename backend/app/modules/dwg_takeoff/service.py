@@ -1515,19 +1515,11 @@ class DwgTakeoffService:
             return
 
         try:
-            from app.modules.boq.cad_import import (
-                _converter_subprocess_env,
-                build_ddc_args,
-                detect_converter_capabilities,
-                find_converter,
-            )
+            from app.modules.boq.cad_import import find_converter
 
             converter = find_converter("dwg")
         except ImportError:
             converter = None
-            build_ddc_args = None  # type: ignore[assignment]
-            detect_converter_capabilities = None  # type: ignore[assignment]
-            _converter_subprocess_env = None  # type: ignore[assignment]
 
         if converter is None:
             # Actionable install path - the previous message ("Please upload
@@ -1537,15 +1529,17 @@ class DwgTakeoffService:
             # multi-user reports landed in (the Offline Ready pill on the
             # /dwg-takeoff page also offers a one-click install via the
             # same /v1/takeoff/converters/dwg/install/ endpoint).
+            from app.core.converter_source import release_page_url
+
             await self.drawing_repo.update_fields(
                 drawing_id,
                 status="error",
                 error_message=(
-                    "DWG conversion requires the DDC DwgExporter binary, "
+                    "DWG conversion requires the DDC DWG converter, "
                     "which was not found on this server. Click the "
                     '"Install converter" pill at the top right of /dwg-takeoff, '
-                    "or download manually from "
-                    "https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN. "
+                    f"or download it manually from {release_page_url()}. "
+                    "The converter is published for Windows only. "
                     "DXF files work without the converter."
                 ),
             )
@@ -1577,207 +1571,85 @@ class DwgTakeoffService:
         # was reading "uploaded" for the whole conversion.
         await self.session.commit()
 
+        import shutil
         import subprocess
         from pathlib import Path as _Path
 
-        # DDC DwgExporter → Excel. Compose the CLI through the same
-        # capability-aware builder the takeoff router uses so we don't
-        # hand v18 flag-driven binaries the legacy positional shape
-        # (``<input> <output> -no-collada``) - that returns exit 15 with
-        # ``arguments were not expected: ... -no-collada``, the same root
-        # cause that previously surfaced as "CAD conversion failed for
-        # .rvt" in the CAD/BIM Data Explorer. Once DDC ships a v18
-        # DwgExporter this code keeps working without any further patch.
+        from app.modules.boq.ddc_runner import run_converter
+
+        # DDC DWG to Excel -> DXF. The converter writes the drawing as a DXF
+        # beside its entity table, and the DXF goes through exactly the path an
+        # uploaded DXF takes (ezdxf parse, layers, extents, units, thumbnail),
+        # so a DWG and a DXF of the same drawing end up as the same entities.
+        #
         # DWG conversion can legitimately take minutes on large drawings, so
         # match the 300s the CAD/BIM Data Explorer (boq.cad_import) already
-        # allows. The old 120s cap timed out files the explorer converts fine.
-        # Overridable via env for very large sets or slow boxes.
+        # allows. Overridable via env for very large sets or slow boxes.
         convert_timeout_s = int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "300"))
-        xlsx_path = _sidecar_xlsx_path(file_path)
+        work_dir = _Path(file_path).resolve().with_name(_Path(file_path).stem + "_dwg_work")
         try:
-            caps = detect_converter_capabilities("dwg")
-            args = build_ddc_args(
-                converter,
-                _Path(file_path).resolve(),
-                caps=caps,
-                xlsx_out=_Path(xlsx_path).resolve(),
-                # DWG converters historically do not support a mode preset
-                # (the takeoff router only emits ``standard`` for RVT/IFC).
-                # build_ddc_args' v18 path emits ``-m standard`` only when
-                # ``caps.accepts_flag_mode`` is True, which currently fires
-                # for RVT - harmless on DWG should DDC adopt it later.
-                mode="standard",
-                include_no_dae=True,
-            )
-            # Pass the converter launch environment. On Linux this sets
-            # LD_LIBRARY_PATH to the extracted .deb tree so the DDC cad2data
-            # DwgExporter resolves its bundled SDK shared libraries
-            # (ddc-deps-kernel/drawings/architecture, ddc-thirdparty) at launch.
-            # The frontend "Install converter" flow downloads and unpacks those
-            # .deb packages into a user-writable dir (no apt/root), so the libs
-            # are not on the system linker path; without LD_LIBRARY_PATH the
-            # binary starts but conversion produces empty output on a headless
-            # server. Returns None on Windows/macOS, where inheriting the parent
-            # environment is correct. This mirrors every other converter launch
-            # site (cad_import.convert_cad_to_excel, smoke_test_converter,
-            # detect_converter_capabilities).
-            proc = await asyncio.to_thread(
-                lambda: subprocess.run(
-                    args,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    cwd=str(converter.parent),
-                    env=_converter_subprocess_env(converter),
-                    input=b"\n",
+            try:
+                run = await asyncio.to_thread(
+                    run_converter,
+                    "dwg",
+                    converter,
+                    _Path(file_path),
+                    work_dir,
                     timeout=convert_timeout_s,
                 )
-            )
-            if not os.path.exists(xlsx_path) or os.path.getsize(xlsx_path) < 100:
-                stderr_msg = proc.stderr.decode(errors="replace")[:300] if proc.stderr else ""
-                rc = proc.returncode
-                low = stderr_msg.lower()
-                # Surface the actual reason instead of a generic "no output".
-                # On a headless Linux server the common failure is a missing
-                # shared library: exit 127 / "error while loading shared
-                # libraries" is the tell. Name the library from stderr and give
-                # both fixes, since we can't reliably tell from the .so name
-                # alone which it is: a DDC cad2data SDK library means reinstall
-                # the converter (its .deb set bundles them), a system library
-                # such as libssl3 means install it with the OS package manager
-                # (the converter download does not ship system dependencies).
-                if rc == 127 or "error while loading shared libraries" in low:
-                    import re
+            except subprocess.TimeoutExpired:
+                await self.drawing_repo.update_fields(
+                    drawing_id,
+                    status="error",
+                    # Name the limit and how to raise it. A large drawing from a
+                    # real project can legitimately need longer than the default,
+                    # and without this the message reads like a permanent verdict
+                    # on the file, so people retry the same upload instead.
+                    error_message=(
+                        f"DWG conversion timed out after {convert_timeout_s}s. "
+                        "Large drawings can need longer: raise the limit by setting "
+                        "OE_DWG_CONVERT_TIMEOUT_S on the server, for example "
+                        "OE_DWG_CONVERT_TIMEOUT_S=900, and upload again."
+                    ),
+                )
+                return
+            except Exception as exc:
+                await self.drawing_repo.update_fields(
+                    drawing_id,
+                    status="error",
+                    error_message=f"DWG conversion error: {exc}"[:500],
+                )
+                return
 
-                    m = re.search(r"lib[\w.+-]*\.so[.\d]*", stderr_msg)
-                    lib_txt = f" ({m.group(0)})" if m else ""
-                    nice_msg = (
-                        f"The DWG converter could not start: a shared library{lib_txt} is missing "
-                        "on this server. If it is a system library (for example libssl3), install "
-                        "it with your OS package manager, e.g. apt-get install libssl3. If it is a "
-                        'converter library, reinstall the converter with the "Install converter" '
-                        "button on the /dwg-takeoff page so its cad2data SDK libraries are restored. "
-                        f"Details: {stderr_msg}"
-                    ).strip()
-                # "Error: converter crashed." is the DDC binary's generic
-                # catch-all when it can't initialise (incompatible DWG version
-                # DDC's parser doesn't yet support, or an internal exception).
-                # Surface an actionable alternative: DXF upload works without DDC.
-                elif "converter crashed" in low:
-                    nice_msg = (
-                        "The DWG converter could not process this file. "
-                        "Try exporting the drawing as DXF from your CAD "
-                        "application (File, Save As, DXF) and upload that "
-                        "instead. DXF is handled directly without requiring DDC."
-                    )
-                else:
-                    nice_msg = (f"DDC DwgExporter produced no output (exit {rc}): {stderr_msg}").strip()
+            dxf_path = run.outputs.get("dxf")
+            if not run.ok or dxf_path is None or not dxf_path.is_file():
+                detail = (run.stderr or run.stdout or "").strip()[:300]
+                nice_msg = (
+                    "The DWG converter could not process this file "
+                    f"(exit {run.returncode}{', ' + run.status if run.status else ''}). "
+                    "Try exporting the drawing as DXF from your CAD "
+                    "application (File, Save As, DXF) and upload that "
+                    "instead. DXF is handled directly without requiring the converter."
+                )
+                if detail:
+                    nice_msg = f"{nice_msg} Details: {detail}"
                 await self.drawing_repo.update_fields(
                     drawing_id,
                     status="error",
                     error_message=nice_msg[:500],
                 )
                 return
-        except subprocess.TimeoutExpired:
-            await self.drawing_repo.update_fields(
-                drawing_id,
-                status="error",
-                # Name the limit and how to raise it. A large drawing from a
-                # real project can legitimately need longer than the default,
-                # and without this the message reads like a permanent verdict
-                # on the file, so people retry the same upload instead.
-                error_message=(
-                    f"DWG conversion timed out after {convert_timeout_s}s. "
-                    "Large drawings can need longer: raise the limit by setting "
-                    "OE_DWG_CONVERT_TIMEOUT_S on the server, for example "
-                    "OE_DWG_CONVERT_TIMEOUT_S=900, and upload again."
-                ),
-            )
-            return
-        except Exception as exc:
-            await self.drawing_repo.update_fields(
-                drawing_id,
-                status="error",
-                error_message=f"DWG conversion error: {exc}"[:500],
-            )
-            return
-
-        # Parse DDC Excel → entities (same format as ezdxf output)
-        try:
-            from app.modules.dwg_takeoff.ddc_dwg_parser import parse_ddc_dwg_excel
-
-            result = await asyncio.to_thread(parse_ddc_dwg_excel, xlsx_path)
-
-            if result["entity_count"] == 0:
-                await self.drawing_repo.update_fields(
-                    drawing_id,
-                    status="error",
-                    error_message="No drawable entities found in DWG file",
-                )
-                return
-
-            # Store entities JSON under the SAME relative key the DXF path
-            # uses ({drawing_id}/entities.json inside _get_entities_dir()), so
-            # get_entities()/list-versions resolve it via os.path.join on every
-            # platform and the row survives a DATA_DIR move or cross-host
-            # restore. Previously DWG stored an absolute, env-specific path
-            # next to the source file, which only resolved on the same machine.
-            entities_key = f"{drawing_id}/entities.json"
-            entities_path = os.path.join(_get_entities_dir(), entities_key)
-            os.makedirs(os.path.dirname(entities_path), exist_ok=True)
-            import json
-
-            with open(entities_path, "w", encoding="utf-8") as f:
-                json.dump(result["entities"], f)
 
             # The drawing may have been deleted while this ran, and telling
             # people to delete it is exactly what the orphan message does.
-            # Check before inserting rather than discovering it afterwards:
-            # drawing_id is a NOT NULL foreign key, so an insert against a
-            # missing parent raises an integrity error which, in a detached
-            # task nobody is watching, gets logged as "conversion failed" - a
-            # false statement about a conversion that had in fact succeeded.
+            # Check before writing rather than discovering it afterwards.
             if not await self._drawing_exists(drawing_id):
                 raise DrawingRemovedDuringConversion(str(drawing_id))
 
-            # Create drawing version
-            version_number = await self.version_repo.get_next_version_number(drawing_id)
-            version = DwgDrawingVersion(
-                drawing_id=drawing_id,
-                version_number=version_number,
-                layers=result["layers"],
-                entities_key=entities_key,
-                entity_count=result["entity_count"],
-                extents=result["extents"],
-                units=result.get("units", "unitless"),
-                status="ready",
-            )
-            self.session.add(version)
-            await self.drawing_repo.update_fields(
-                drawing_id,
-                status="ready",
-                error_message=None,
-            )
-            await self.session.flush()
-
-            logger.info(
-                "DWG processed via DDC: %s - %d entities, %d layers",
-                drawing_id,
-                result["entity_count"],
-                len(result["layers"]),
-            )
-
-        except DrawingRemovedDuringConversion:
-            # Must outrun the generic handler below. Caught there it would be
-            # written onto the drawing as a parsing error, and there is no
-            # drawing left to write it to and no parsing error to report.
-            raise
-        except Exception as exc:
-            await self.drawing_repo.update_fields(
-                drawing_id,
-                status="error",
-                error_message=f"DWG parsing error: {exc}"[:500],
-            )
-            logger.exception("Failed to parse DWG %s: %s", drawing_id, exc)
+            logger.info("DWG converted via DDC: %s (%s)", drawing_id, run.status)
+            await self._process_drawing(drawing_id, str(dxf_path))
+        finally:
+            shutil.rmtree(work_dir, ignore_errors=True)
 
     # ── Drawing CRUD ────────────────────────────────────────────────────
 

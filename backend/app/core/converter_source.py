@@ -1,58 +1,121 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Where the DDC Community converters come from - one declaration, one place.
+"""Where the DDC converters come from - one declaration, one place.
 
-The converter binaries are NOT published as GitHub Releases. They live
-committed in the source repository under
-``DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/``, and the installer walks
-them with the GitHub Contents API. Linux users get separate ``.deb`` packages
-from the apt source at ``pkg.datadrivenconstruction.io``.
+The converters are published as packages on a GitHub *release* of
+``datadrivenconstruction/cad2data-Revit-IFC-DWG``. Release 2026.10.0 replaced
+the 18.x generation with converters built on DataDrivenConstruction's own
+RVT, IFC and DWG readers; no third-party CAD SDK is inside them. The release
+carries a ``SHA256SUMS.txt`` and this module pins the digest of every package
+it installs, so an install is a download of one named asset followed by a hash
+check, not a walk over a repository tree.
 
-**The ref is a commit SHA and must stay one.** It used to read ``"main"``,
-which meant every install fetched whatever the branch tip happened to be at
-that moment: no tag, no pin, no checksum, and native executables at the other
-end. The ref is not cosmetic here, because the ``download_url`` the Contents
-API hands back carries it, so a SHA-pinned listing resolves to SHA-addressed
-``raw.githubusercontent.com`` blobs that a later force-push cannot change. A
-branch name resolves to whatever that branch points at today.
+Three packages are used (DGN is discontinued in this generation):
 
-Upstream publishes no tags and no releases (measured 2026-08-22: ``/tags``
-returns an empty array, ``/releases/latest`` returns 404), so a commit SHA is
-the only pinnable ref available. This one is the tree the 2026-08-22 licence
-audit enumerated - 1266 entries, verified identical to ``main`` at the time of
-pinning.
+==========  ================================  ================================
+format      package                           command line
+==========  ================================  ================================
+``rvt``     DDC RVT Converter 0.6.8           ``cli/RVTconverter.exe``
+``ifc``     DDC IFC to Excel 0.3.1 (preview)  ``runtime/python.exe`` running
+                                              ``sources/ifc-excel/converter.py``
+``dwg``     DDC DWG to Excel 0.4.1            ``cli/dwg2excel.exe``
+==========  ================================  ================================
 
-Why this module exists at all, rather than a constant in the takeoff router:
-the ref had been written down three times - the installer, the desktop release
-workflow, and ``/api/system/converters/version-check`` in ``app.main``. The
-version check compares the git-blob SHA of each installed converter against
-the ref, and the dashboard turns a mismatch into an "Update available" badge
-whose button runs the installer. Two copies that disagree therefore produce a
-badge that never clears over a button that reinstalls identical bytes, which
-teaches users that our status indicators lie. The workflow copy is checked
-against this one by ``tests/unit/test_converter_ref_is_pinned.py``; the two
-Python readers now import instead of repeating.
+The digest below is the one published in the release's ``SHA256SUMS.txt``. The
+installer re-reads that file from the release it downloads from and refuses a
+package whose digest is not the same in both places, so moving the pin is a
+deliberate act: bump the tag and every ``sha256`` here together. ``OE_CONVERTER_TAG``
+and ``OE_CONVERTER_REPO`` point a fork or a newer release at the installer
+without a code change; for a tag other than the pinned one the digest comes
+from that release's ``SHA256SUMS.txt`` alone.
 
-This module deliberately has no imports beyond ``os`` and no dependencies of
-its own. ``app.main`` duplicated these constants in the first place so the
-system endpoint keeps working when the takeoff module is not loaded (it ships
-disabled in some configurations), and importing from here preserves that:
-neither reader depends on the other. Keep it that way - anything added here
-becomes a dependency of the system endpoint.
-
-Moving the pin is a deliberate act: bump ``DEFAULT_CONVERTER_REF`` below, or
-set ``OE_CONVERTER_REF`` to point a fork or a newer commit at the installer
-without a code change.
+This module imports nothing beyond the standard library. ``app.main`` reads it
+for ``/api/system/converters/version-check`` and must keep working when the
+takeoff module is not loaded; keep it that way.
 """
 
 from __future__ import annotations
 
 import os
 from collections.abc import Mapping
+from dataclasses import dataclass
+from pathlib import Path
 
-DEFAULT_CONVERTER_REF = "45498426fd225c36a2a2a3a67993fd39c5d9d0ff"
+DEFAULT_CONVERTER_REPO = "datadrivenconstruction/cad2data-Revit-IFC-DWG"
 
-DEFAULT_CONVERTER_REPO = "datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN"
+DEFAULT_CONVERTER_TAG = "v2026.10.0"
+
+#: Name of the checksum file attached to every release.
+CHECKSUMS_ASSET = "SHA256SUMS.txt"
+
+#: Written next to an installed package so a later check can tell which
+#: release asset the folder came from without re-hashing hundreds of files.
+INSTALL_STAMP_NAME = ".ddc-package.json"
+
+
+@dataclass(frozen=True)
+class ConverterPackage:
+    """One installable converter package of the release."""
+
+    fmt: str
+    name: str
+    version: str
+    asset: str
+    sha256: str
+    size_bytes: int
+    #: Command-line executable, relative to the install folder, POSIX separators.
+    exe_rel: str
+    #: Python script the executable runs, relative to the install folder, or
+    #: ``None`` when the executable is the converter itself.
+    script_rel: str | None
+    #: Only these top-level entries of the archive are extracted. ``None``
+    #: extracts everything. The desktop apps and viewers inside the RVT and DWG
+    #: packages are not used from the command line, so they are not installed.
+    include: tuple[str, ...] | None
+    #: Files that must exist next to a healthy install besides the executable.
+    companions: tuple[str, ...] = ()
+
+
+PACKAGES: dict[str, ConverterPackage] = {
+    "rvt": ConverterPackage(
+        fmt="rvt",
+        name="DDC RVT Converter",
+        version="0.6.8",
+        asset="DDC-RVT-Converter-0.6.8-portable.zip",
+        sha256="5e285e69202e698b950ee98611823af892d16ff8b6fd7e5025cd0a79cef8a365",
+        size_bytes=79087488,
+        exe_rel="cli/RVTconverter.exe",
+        script_rel=None,
+        include=("cli/", "licenses/", "EULA.txt"),
+    ),
+    "ifc": ConverterPackage(
+        fmt="ifc",
+        name="DDC IFC to Excel",
+        version="0.3.1-preview",
+        asset="DDC-IFC-to-Excel-0.3.1-preview-portable.zip",
+        sha256="5776b6bd1a3f6ab75c5e8fb7902ae1688b1adbf40f8d1398913999a9a1ada57c",
+        size_bytes=35209146,
+        exe_rel="runtime/python.exe",
+        script_rel="sources/ifc-excel/converter.py",
+        include=None,
+        companions=("sources/ifc-excel/converter.py",),
+    ),
+    "dwg": ConverterPackage(
+        fmt="dwg",
+        name="DDC DWG to Excel",
+        version="0.4.1",
+        asset="DDC-DWG-to-Excel-0.4.1-portable.zip",
+        sha256="b84defacf1ca9209baa17f509053b57b50bfc00a669d96d44cfc9739752a070b",
+        size_bytes=22507533,
+        exe_rel="cli/dwg2excel.exe",
+        script_rel=None,
+        include=("cli/", "licenses/", "EULA.txt"),
+    ),
+}
+
+#: The release is Windows 10/11 x64 only today; Linux and macOS builds are
+#: announced by upstream but not published.
+SUPPORTED_PLATFORM = "win32"
 
 
 def resolve_converter_repo(env: Mapping[str, str] | None = None) -> str:
@@ -61,95 +124,57 @@ def resolve_converter_repo(env: Mapping[str, str] | None = None) -> str:
     return source.get("OE_CONVERTER_REPO") or DEFAULT_CONVERTER_REPO
 
 
-def resolve_converter_ref(env: Mapping[str, str] | None = None) -> str:
-    """Pick the converter ref: new env name, old env name, then the pin.
+def resolve_converter_tag(env: Mapping[str, str] | None = None) -> str:
+    """Pick the release tag: the override, then the pin.
 
-    Takes ``env`` so the precedence is testable without touching the real
-    process environment. An empty string is treated as unset - a CI runner
-    that exports ``OE_CONVERTER_REF=`` from an undefined variable should get
-    the pin, not an empty ref that would make every Contents API call 404.
-
-    ``OE_CONVERTER_BRANCH`` predates the rename and is still honoured, so an
-    operator who already set it does not silently fall back to the pin.
+    An empty string counts as unset, so a CI runner that exports
+    ``OE_CONVERTER_TAG=`` from an undefined variable still gets the pin.
     """
     source = os.environ if env is None else env
-    return source.get("OE_CONVERTER_REF") or source.get("OE_CONVERTER_BRANCH") or DEFAULT_CONVERTER_REF
+    return source.get("OE_CONVERTER_TAG") or DEFAULT_CONVERTER_TAG
 
 
-# Per-format directory inside the repo for the Windows binaries. Each holds
-# the small ``*Exporter.exe``, the matching ``DDC_Community_*_converter.exe``
-# GUI shell, the bundled Qt6 DLLs, and ``platforms/``, ``styles/`` and
-# ``datadrivenlibs/`` subfolders.
-WINDOWS_CONVERTER_DIRS: dict[str, str] = {
-    "rvt": "DDC_WINDOWS_Converters/DDC_CONVERTER_REVIT",
-    "ifc": "DDC_WINDOWS_Converters/DDC_CONVERTER_IFC",
-    "dwg": "DDC_WINDOWS_Converters/DDC_CONVERTER_DWG",
-    "dgn": "DDC_WINDOWS_Converters/DDC_CONVERTER_DGN",
-}
+def release_asset_url(asset: str, *, repo: str | None = None, tag: str | None = None) -> str:
+    """Download URL of one asset of the release."""
+    return f"https://github.com/{repo or resolve_converter_repo()}/releases/download/{tag or resolve_converter_tag()}/{asset}"
 
 
-# ── We take the terminal converter and leave the graphical one ───────────
-#
-# Every upstream converter folder holds two programs: the ``*Exporter.exe``
-# we drive from the command line, and a ``DDC_Community_*_converter.exe``
-# window that a person clicks. We only ever run the first one - every call
-# site goes through ``boq.cad_import.convert_cad_to_excel``, which is a
-# ``subprocess`` invocation with arguments and no window - so the second one
-# and the Qt libraries that exist solely for it have no reason to be in our
-# installer or on a user's disk.
-#
-# Which files those are was measured on the pinned tree, from the PE import
-# tables of all 140 executables and libraries in DDC_CONVERTER_IFC
-# (2026-08-28):
-#
-#   IfcExporter.exe                  imports Qt6Core.dll and nothing else Qt
-#   RvtExporter/DwgExporter/DgnExporter  same, Qt6Core.dll only
-#   DDC_Community_IFC_converter.exe  imports Qt6Core, Qt6Gui, Qt6Widgets
-#   Qt6Widgets.dll                   imports Qt6Core, Qt6Gui
-#   platforms/qwindows.dll           imports Qt6Core, Qt6Gui
-#   styles/qmodernwindowsstyle.dll   imports Qt6Core, Qt6Gui, Qt6Widgets
-#   none of the 133 files in datadrivenlibs/ import Qt at all
-#
-# So Qt6Core.dll stays: the terminal build is itself a Qt program and cannot
-# run without it. Qt6Gui.dll, Qt6Widgets.dll and the two plugin folders are
-# reachable only from the graphical shell. Converting a 4 MB IFC model with
-# those five entries removed produced a byte-identical XLSX (all 13 archive
-# members) and a byte-identical JSON, so nothing we ship depends on them.
-#
-# Do not "fix" a converter folder by adding them back. A missing Qt6Gui.dll
-# is not a broken install here, it is this decision.
-GRAPHICAL_ONLY_LIBRARIES: tuple[str, ...] = ("Qt6Gui.dll", "Qt6Widgets.dll")
-
-GRAPHICAL_ONLY_DIRS: tuple[str, ...] = ("platforms", "styles")
-
-# The graphical shell is named per format - DDC_Community_IFC_converter.exe,
-# DDC_Community_DWG_converter.exe, DDC_Community_Revit(2015-2026)_converter.exe
-# - so it is matched by prefix rather than listed. Only at the top level:
-# datadrivenlibs/ holds helper executables of its own and none of them is a
-# window.
-GRAPHICAL_SHELL_PREFIX = "DDC_Community_"
+def release_page_url(*, repo: str | None = None, tag: str | None = None) -> str:
+    return f"https://github.com/{repo or resolve_converter_repo()}/releases/tag/{tag or resolve_converter_tag()}"
 
 
-def is_graphical_only(rel_path: str) -> bool:
-    """Is this converter file needed only by the graphical shell?
+def parse_sha256sums(text: str) -> dict[str, str]:
+    """Parse ``sha256sum`` output (``<hex> *<name>`` or ``<hex>  <name>``)."""
+    sums: dict[str, str] = {}
+    for line in text.splitlines():
+        parts = line.strip().split(None, 1)
+        if len(parts) != 2:
+            continue
+        digest, name = parts[0].lower(), parts[1].strip().lstrip("*")
+        if len(digest) == 64 and all(c in "0123456789abcdef" for c in digest):
+            sums[name] = digest
+    return sums
 
-    Args:
-        rel_path: Path relative to the converter folder, e.g. ``"Qt6Gui.dll"``
-            or ``"platforms/qwindows.dll"``. Both separators are accepted so
-            a caller can pass a POSIX repo path or a Windows on-disk one.
 
-    Returns:
-        True when the file can be left out of an install without changing
-        what a command-line conversion produces.
+def package_exe(install_dir: Path, fmt: str) -> Path:
+    """Absolute path of a format's executable inside its install folder."""
+    return install_dir / PACKAGES[fmt].exe_rel
+
+
+def command_prefix(fmt: str, exe: Path) -> list[str]:
+    """Argv prefix that starts the converter of ``fmt`` whose executable is ``exe``.
+
+    For the IFC package ``exe`` is the bundled Python and the converter is a
+    script two levels up from it; the other formats are plain executables.
     """
-    parts = [part for part in rel_path.replace("\\", "/").split("/") if part]
-    if not parts:
-        return False
-    if parts[0] in GRAPHICAL_ONLY_DIRS:
-        return True
-    if len(parts) > 1:
-        return False
-    name = parts[0]
-    if name in GRAPHICAL_ONLY_LIBRARIES:
-        return True
-    return name.startswith(GRAPHICAL_SHELL_PREFIX) and name.lower().endswith(".exe")
+    pkg = PACKAGES.get(fmt)
+    if pkg is None or pkg.script_rel is None:
+        return [str(exe)]
+    root = exe.parents[len(Path(pkg.exe_rel).parts) - 1]
+    return [str(exe), str(root / pkg.script_rel)]
+
+
+def is_new_generation(exe: Path) -> bool:
+    """True when ``exe`` is one of the 2026.10 command lines."""
+    name = exe.name.lower()
+    return name in {"rvtconverter.exe", "dwg2excel.exe", "python.exe"}

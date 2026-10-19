@@ -190,7 +190,7 @@ const DWG_PICKER_KINDS: readonly FileKind[] = ['dwg_drawing'];
  *  have fetched, and then reported bugs against a version we could not
  *  reproduce. If the backend pin moves, move this with it. */
 const DWG_CONVERTER_MANUAL_URL =
-  'https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN/tree/45498426fd225c36a2a2a3a67993fd39c5d9d0ff/DDC_WINDOWS_Converters/DDC_CONVERTER_DWG';
+  'https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG/releases/tag/v2026.10.0';
 
 /* ── GridBackground ──────────────────────────────────────────────────── */
 
@@ -6704,7 +6704,7 @@ function ConversionProgressCard({
 /** Sub-component: one-click DWG converter installer.
  *
  * Mounted by ConversionErrorCard when the backend signals "converter
- * missing" via the stable substring `DDC DwgExporter`. Calls the same
+ * missing" via the stable substring `DDC DWG converter`. Calls the same
  * `POST /v1/takeoff/converters/dwg/install/` that /settings → Converters
  * uses, with a live progress bar (downloads ~150 MB of Qt6 DLLs on
  * Windows; Linux is unsupported and the response carries the apt-get
@@ -6742,7 +6742,7 @@ function InstallDwgConverterCTA({
           result.message ||
             t('dwg_takeoff.conv_install_unsupported', {
               defaultValue:
-                'Automated install is only available on Windows. On Linux, install the DDC DwgExporter manually.',
+                'The DDC DWG converter is available for Windows only. On other systems, upload a DXF instead.',
             }),
         );
       } else {
@@ -6833,7 +6833,7 @@ function ConversionErrorCard({
   // returns None. Keeps the install CTA scoped - generic conversion
   // failures (wrong version, corrupt file) should still show the
   // "Retry / Delete" UX without an Install button that wouldn't help.
-  const isMissingConverter = !!message && message.includes('DDC DwgExporter');
+  const isMissingConverter = !!message && message.includes('DDC DWG converter');
   return (
     <div className="flex flex-1 items-center justify-center p-6">
       <div
@@ -6861,7 +6861,7 @@ function ConversionErrorCard({
               {isMissingConverter
                 ? t('dwg_takeoff.conv_missing_message', {
                     defaultValue:
-                      'OpenConstructionERP needs the DDC DwgExporter to read DWG files. Install it once - works for every DWG you upload after.',
+                      'OpenConstructionERP needs the DDC DWG converter to read DWG files. Install it once - works for every DWG you upload after.',
                   })
                 : message ||
                   t('dwg_takeoff.conv_error_default', {

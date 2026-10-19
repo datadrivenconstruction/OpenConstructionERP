@@ -53,7 +53,12 @@ interface ChangelogEntry {
  * claims to be, so anything numeric-looking here would be read as a release
  * that nothing else in the tree has been bumped to.
  */
-const UNRELEASED: ChangelogEntry | null = null;
+const UNRELEASED: ChangelogEntry | null = {
+  version: 'Unreleased',
+  date: '2026-10-19',
+  summary:
+    'CAD and BIM converters now come from the DDC converter release 2026.10, which reads RVT, IFC and DWG without any third-party CAD SDK. Windows only; DGN conversion is gone.',
+};
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.

@@ -3490,7 +3490,7 @@ export function BIMViewer({
                 })}
               </span>{' '}
               <a
-                href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN"
+                href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG"
                 target="_blank"
                 rel="noreferrer"
                 className="font-medium underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-200"

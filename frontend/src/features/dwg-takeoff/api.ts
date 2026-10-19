@@ -15,7 +15,7 @@ export type DwgScaleMode = 'preset' | 'calibrated' | 'per_annotation';
 
 /** Lifecycle states the backend reports for a drawing.
  *  - `uploaded`: file persisted, conversion not yet started.
- *  - `processing`: DXF parser or DDC DwgExporter is running. This is the
+ *  - `processing`: DXF parser or the DDC DWG converter is running. This is the
  *    long step — a medium DWG can stay here for 3–8 minutes.
  *  - `ready`: entities + thumbnail are available. The viewer can render.
  *  - `empty`: file parsed cleanly but produced 0 entities.

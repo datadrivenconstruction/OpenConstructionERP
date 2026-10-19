@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Changed
+
+- CAD and BIM converters now come from the DDC converter release 2026.10 (`datadrivenconstruction/cad2data-Revit-IFC-DWG`), which reads RVT, IFC and DWG with DataDrivenConstruction's own readers and contains no third-party CAD SDK. The installer downloads one package per format from the release and checks its SHA-256 against the digest pinned in the build and the one published in the release's `SHA256SUMS.txt` before unpacking it. The converters are published for Windows 10/11 x64 only, so there is no converter install on Linux or macOS; DXF and IFC still import there without one.
+- RVT models now come with the converter's GLB mesh and the stored element properties; IFC models come as property and quantity tables from the IFC converter (it writes no geometry, so the viewer shows placeholder boxes as before); DWG drawings are converted to DXF and go through the DXF path.
+- The converter version check compares the installed package with the one this version installs, offline.
+
+### Removed
+
+- DGN conversion (no converter exists for it in the new generation) and the Linux apt/`.deb` converter installer. The NOTICE no longer describes a third-party CAD SDK or Qt inside the Windows installer.
+
 ## [18.7.0] - 2026-10-19
 
 ### Added

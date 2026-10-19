@@ -1339,141 +1339,96 @@ jobs:
           done
 
       # Bundle the DDC IFC converter into the Windows installer so a fresh
-      # install converts .ifc files offline with no first-use download. We
-      # fetch the public converter repo as a zipball for the pinned ref,
-      # extract only the DDC_WINDOWS_Converters/DDC_CONVERTER_IFC subtree,
-      # and drop it under resources/converters/ifc_windows/ (the layout the
-      # backend resolver expects via OE_BUNDLED_CONVERTERS_DIR). Windows only,
-      # because the bundled exe is win_amd64; the much larger RVT converter is
-      # deliberately NOT bundled and stays on demand. The step retries on
-      # transient network failures and never code-signs these binaries (they are
-      # upstream artifacts shipped as resources, not our own executables).
+      # install converts .ifc files offline with no first-use download. The
+      # converter is the portable package of the DDC converter release
+      # (datadrivenconstruction/cad2data-Revit-IFC-DWG, tag v2026.10.0): a zip
+      # with its own Python runtime and the IFC reader. We download that one
+      # asset, check its SHA-256 against the digest pinned below AND against the
+      # release's SHA256SUMS.txt, and unpack it under
+      # resources/converters/ifc_windows/ - the layout the backend resolver
+      # expects via OE_BUNDLED_CONVERTERS_DIR. Windows only, because the package
+      # is win_amd64; the RVT and DWG converters are deliberately NOT bundled and
+      # stay on demand. The step retries on transient network failures and never
+      # code-signs these files (they are upstream artifacts shipped as resources,
+      # not our own executables).
       #
-      # This comment said "~30 MB" for months. The step prints the real number
-      # and the v16.1.0 build printed 241.96 MB, so the installer carries a
-      # quarter of a gigabyte of converter. Read the step's own output before
-      # quoting a size here again.
-      #
-      # WE TAKE THE TERMINAL BUILD AND LEAVE THE GRAPHICAL ONE. The upstream
-      # folder holds both: IfcExporter.exe, which the backend runs as a
-      # subprocess with arguments, and DDC_Community_IFC_converter.exe, a
-      # window nothing in this codebase opens. The prune below drops the
-      # window and the Qt libraries that exist only for it. Qt6Core.dll stays
-      # because the command line exporter imports it directly and will not
-      # start without it. Anyone tempted to bundle "the whole folder, it is
-      # simpler" should read app/core/converter_source.py first: the list is
-      # measured from PE import tables, not guessed, and the test
-      # backend/tests/unit/test_converter_graphical_payload_is_not_shipped.py
-      # compares the names below against the ones the backend uses.
+      # The tag, asset and digest below must stay equal to PACKAGES["ifc"] and
+      # DEFAULT_CONVERTER_TAG in backend/app/core/converter_source.py: the bytes
+      # we ship and the bytes the runtime installer downloads have to be the same
+      # package. The gate that keeps them equal is
+      # backend/tests/unit/test_converter_ref_is_pinned.py.
       - name: Bundle IFC converter (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         env:
-          # Same override knobs the runtime auto-installer honours, so a fork or
-          # a newer commit can be selected without editing this file.
-          #
-          # The ref default is a COMMIT SHA and must stay one, and it must stay
-          # equal to ``_DDC_DEFAULT_REF`` in backend/app/modules/takeoff/router.py.
-          # This step bakes the IFC converter into the Windows installer, so the
-          # bytes we ship and the bytes the runtime installer downloads have to
-          # come from the same commit - otherwise a user who installs DWG on a
-          # machine that already has the bundled IFC converter gets two different
-          # builds of the same Qt DLLs side by side. The gate that keeps the two
-          # literals equal is backend/tests/unit/test_converter_ref_is_pinned.py.
-          OE_CONVERTER_REPO: ${{ vars.OE_CONVERTER_REPO || 'datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN' }}
-          OE_CONVERTER_REF: ${{ vars.OE_CONVERTER_REF || '45498426fd225c36a2a2a3a67993fd39c5d9d0ff' }}
-          # Lifts the unauthenticated API rate limit on the runner. The converter
-          # repo is public, so a read with the default job token is enough.
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Same override knobs the runtime auto-installer honours. A fork or a
+          # newer release can be selected without editing this file, in which
+          # case the digest comes from that release's SHA256SUMS.txt alone.
+          OE_CONVERTER_REPO: ${{ vars.OE_CONVERTER_REPO || 'datadrivenconstruction/cad2data-Revit-IFC-DWG' }}
+          OE_CONVERTER_TAG: ${{ vars.OE_CONVERTER_TAG || 'v2026.10.0' }}
+          OE_CONVERTER_IFC_ASSET: DDC-IFC-to-Excel-0.3.1-preview-portable.zip
+          OE_CONVERTER_IFC_SHA256: 5776b6bd1a3f6ab75c5e8fb7902ae1688b1adbf40f8d1398913999a9a1ada57c
         run: |
           $ErrorActionPreference = 'Stop'
-          $repo = $env:OE_CONVERTER_REPO
-          $ref  = $env:OE_CONVERTER_REF
-          $subPath = 'DDC_WINDOWS_Converters/DDC_CONVERTER_IFC'
+          $repo  = $env:OE_CONVERTER_REPO
+          $tag   = $env:OE_CONVERTER_TAG
+          $asset = $env:OE_CONVERTER_IFC_ASSET
+          $pinnedTag = 'v2026.10.0'
+          $pinnedRepo = 'datadrivenconstruction/cad2data-Revit-IFC-DWG'
           $destRoot = 'desktop/src-tauri/resources/converters/ifc_windows'
-          # The API zipball endpoint accepts any ref - branch, tag, or SHA - so
-          # the pinned SHA works with no URL change. Verified against the live
-          # endpoint on 2026-08-22: zipball/<sha> answers 200.
-          $zipUrl = "https://api.github.com/repos/$repo/zipball/$ref"
+          $base = "https://github.com/$repo/releases/download/$tag"
           $tmpZip = Join-Path $env:RUNNER_TEMP 'ddc_ifc.zip'
-          $tmpDir = Join-Path $env:RUNNER_TEMP 'ddc_ifc_extract'
-          # GITHUB_TOKEN lifts the unauthenticated API rate limit on the runner.
+          $tmpSums = Join-Path $env:RUNNER_TEMP 'ddc_sha256sums.txt'
           $headers = @{ 'User-Agent' = 'OpenConstructionERP-desktop-build' }
-          if ($env:GH_TOKEN) { $headers['Authorization'] = "Bearer $($env:GH_TOKEN)" }
 
-          # Resilient download with a few retries on transient network errors.
-          $ok = $false
-          for ($i = 1; $i -le 5; $i++) {
-            try {
-              Write-Host "Downloading IFC converter zipball (attempt $i): $zipUrl"
-              Invoke-WebRequest -Uri $zipUrl -OutFile $tmpZip -Headers $headers -UseBasicParsing -TimeoutSec 180
-              $ok = $true
-              break
-            } catch {
-              Write-Host "Attempt $i failed: $($_.Exception.Message)"
-              Start-Sleep -Seconds ([math]::Min(30, 5 * $i))
+          function Get-WithRetry([string]$url, [string]$out) {
+            for ($i = 1; $i -le 5; $i++) {
+              try {
+                Write-Host "Downloading (attempt $i): $url"
+                Invoke-WebRequest -Uri $url -OutFile $out -Headers $headers -UseBasicParsing -TimeoutSec 300
+                return
+              } catch {
+                Write-Host "Attempt $i failed: $($_.Exception.Message)"
+                Start-Sleep -Seconds ([math]::Min(30, 5 * $i))
+              }
             }
+            throw "Could not download $url after 5 attempts."
           }
-          if (-not $ok) { throw "Could not download the IFC converter zipball after 5 attempts." }
 
-          if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir }
-          Expand-Archive -Path $tmpZip -DestinationPath $tmpDir -Force
+          Get-WithRetry "$base/SHA256SUMS.txt" $tmpSums
+          Get-WithRetry "$base/$asset" $tmpZip
 
-          # The zipball extracts to a single top-level <repo>-<ref> folder.
-          $top = Get-ChildItem -Path $tmpDir -Directory | Select-Object -First 1
-          if ($null -eq $top) { throw "Unexpected zip layout: no top-level directory found." }
-          $srcDir = Join-Path $top.FullName $subPath
-          if (-not (Test-Path $srcDir)) {
-            throw "Converter subpath not found in zipball: $subPath (looked under $($top.FullName))."
+          # The digest published with the release.
+          $published = $null
+          foreach ($line in Get-Content $tmpSums) {
+            $parts = $line.Trim() -split '\s+', 2
+            if ($parts.Count -eq 2 -and $parts[1].TrimStart('*') -eq $asset) { $published = $parts[0].ToLower() }
+          }
+          if (-not $published) { throw "SHA256SUMS.txt of release $tag publishes no digest for $asset." }
+          $actual = (Get-FileHash -Algorithm SHA256 $tmpZip).Hash.ToLower()
+          if ($actual -ne $published) { throw "SHA-256 mismatch for ${asset}: release lists $published, downloaded file is $actual." }
+          if ($tag -eq $pinnedTag -and $repo -eq $pinnedRepo -and $actual -ne $env:OE_CONVERTER_IFC_SHA256) {
+            throw "SHA-256 of $asset is $actual but this workflow pins $($env:OE_CONVERTER_IFC_SHA256)."
           }
 
           # Reset the destination so a re-run never mixes stale files in.
           if (Test-Path $destRoot) { Remove-Item -Recurse -Force $destRoot }
           New-Item -ItemType Directory -Force -Path $destRoot | Out-Null
-          Copy-Item -Path (Join-Path $srcDir '*') -Destination $destRoot -Recurse -Force
+          Expand-Archive -Path $tmpZip -DestinationPath $destRoot -Force
 
-          # Drop the graphical shell and the Qt libraries only it uses. Keep
-          # this list equal to GRAPHICAL_ONLY_LIBRARIES / GRAPHICAL_ONLY_DIRS
-          # and the DDC_Community_ prefix in backend/app/core/converter_source.py.
-          $graphicalOnly = @(
-            'DDC_Community_IFC_converter.exe',
-            'Qt6Gui.dll',
-            'Qt6Widgets.dll',
-            'platforms',
-            'styles'
-          )
-          $beforeMb = [math]::Round(((Get-ChildItem -Recurse -File $destRoot | Measure-Object -Property Length -Sum).Sum) / 1MB, 2)
-          foreach ($name in $graphicalOnly) {
-            $victim = Join-Path $destRoot $name
-            if (Test-Path $victim) {
-              Remove-Item -Recurse -Force $victim
-              Write-Host "Removed graphical-only payload: $name"
-            } else {
-              # Not fatal: upstream may rename or drop it. Say so, because a
-              # silent no-op here is how the payload comes back unnoticed.
-              Write-Host "::warning::Expected graphical-only payload $name was not in the converter folder."
-            }
+          $python = Join-Path $destRoot 'runtime/python.exe'
+          $script = Join-Path $destRoot 'sources/ifc-excel/converter.py'
+          if (-not (Test-Path $python) -or -not (Test-Path $script)) {
+            Get-ChildItem -Path $destRoot | Select-Object -First 50 FullName | Format-Table -AutoSize
+            throw "The IFC converter package is missing runtime/python.exe or sources/ifc-excel/converter.py."
           }
+          # The same stamp the runtime installer writes, so the version check
+          # recognises the bundled copy as this package.
+          @{ fmt = 'ifc'; asset = $asset; version = '0.3.1-preview'; sha256 = $actual; tag = $tag; repo = $repo } |
+            ConvertTo-Json | Set-Content -Path (Join-Path $destRoot '.ddc-package.json') -Encoding utf8
 
-          $exe = Join-Path $destRoot 'IfcExporter.exe'
-          if (-not (Test-Path $exe)) {
-            Get-ChildItem -Recurse $destRoot | Select-Object -First 50 FullName | Format-Table -AutoSize
-            throw "IfcExporter.exe missing after extraction at $exe."
-          }
-          # The exporter is a Qt program: without Qt6Core.dll beside it the
-          # installer would ship a converter that cannot start at all.
-          $qtCore = Join-Path $destRoot 'Qt6Core.dll'
-          if (-not (Test-Path $qtCore)) {
-            throw "Qt6Core.dll missing after the graphical-only prune. IfcExporter.exe imports it and will not run."
-          }
-          foreach ($name in @('Qt6Gui.dll', 'Qt6Widgets.dll', 'DDC_Community_IFC_converter.exe')) {
-            if (Test-Path (Join-Path $destRoot $name)) {
-              throw "$name is still in the bundle after the prune - the installer would ship the graphical build."
-            }
-          }
-          $sizeMb = [math]::Round((Get-Item $exe).Length / 1MB, 2)
           $totalMb = [math]::Round(((Get-ChildItem -Recurse -File $destRoot | Measure-Object -Property Length -Sum).Sum) / 1MB, 2)
-          Write-Host "Bundled IFC converter: IfcExporter.exe = $sizeMb MB, total resource = $totalMb MB (was $beforeMb MB before the graphical-only prune)"
+          Write-Host "Bundled IFC converter $asset ($actual): total resource = $totalMb MB"
 
       - name: Set up Windows code signing
         if: runner.os == 'Windows'

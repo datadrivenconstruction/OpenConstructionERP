@@ -423,35 +423,31 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
     """
     ext = ifc_path.suffix.lower().lstrip(".")
 
-    # --- Method 1: DDC Community Converter (same pipeline as Data Explorer) ---
-    # The DDC RvtExporter / IfcExporter is dispatched by the OUTPUT FILE
-    # EXTENSION: .xlsx/.xls → Excel, .dae → COLLADA, .pdf → PDF.
-    # We invoke it TWICE so we get both:
-    #   1. Element list as Excel (parsed into BIMElement records)
-    #   2. Real 3D geometry as native COLLADA (saved as geometry.dae)
-    # The second call replaces the simplified box-grid we used to generate
-    # from element bounding boxes.
+    # --- Method 1: DDC converter (release 2026.10; same pipeline as Data Explorer) ---
     #
-    # CRITICAL: DDC needs cwd=converter.parent (Qt6Core.dll lives there),
-    # so all paths must be absolute or the converter reports "File does not exist".
+    # One converter run per file. What it writes depends on the format (see
+    # ``app.modules.boq.ddc_runner``): RVT gives a GLB mesh plus a stored-object
+    # graph, IFC gives semantic tables and no geometry, DWG gives an entity table
+    # and a DXF. The IFC and RVT output is flattened into the one-row-per-element
+    # workbook that ``parse_cad_excel`` and ``_excel_elements_to_bim_result`` read,
+    # so everything downstream of the converter is unchanged.
     try:
+        from app.modules.boq import ddc_runner
         from app.modules.boq.cad_import import (
+            _CONVERTER_FORMAT_ALIASES,
             ConverterUnavailableError,
-            _converter_subprocess_env,
-            detect_converter_capabilities,
             ensure_converter,
             parse_cad_excel,
-            read_cad_excel_labels,
         )
 
         # Resolve the converter, auto-downloading it on first use when it is
-        # missing. ``ensure_converter`` is concurrency-safe (per-format
-        # install lock) and idempotent - a present binary is returned with
-        # no network IO. On an unsupported platform / failed download it
-        # raises ``ConverterUnavailableError``; we treat that exactly like
-        # the historical "converter not found" case (fall through to the
-        # cad2data-on-PATH method, then the text-IFC fallback) so geometry
-        # ingest degrades gracefully instead of crashing.
+        # missing. ``ensure_converter`` is concurrency-safe (per-format install
+        # lock) and idempotent - a present binary is returned with no network
+        # IO. On an unsupported platform / failed download it raises
+        # ``ConverterUnavailableError``; we treat that exactly like the
+        # historical "converter not found" case (fall through to the
+        # cad2data-on-PATH method, then the text-IFC fallback) so ingest
+        # degrades gracefully instead of crashing.
         try:
             converter = ensure_converter(ext)
         except ConverterUnavailableError as exc:
@@ -460,427 +456,76 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
         if converter:
             import subprocess
 
-            logger.info("Using DDC Community Converter: %s", converter)
+            fmt = _CONVERTER_FORMAT_ALIASES.get(ext, ext)
+            logger.info("Using DDC converter: %s (%s)", converter, ddc_runner.tool_label(fmt))
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            input_abs = ifc_path.resolve()
+            try:
+                run = ddc_runner.run_converter(fmt, converter, ifc_path, output_dir, timeout=600)
+            except subprocess.TimeoutExpired:
+                logger.error("DDC conversion timed out for %s", ifc_path.name)
+                _record_ddc_failure(ext, "timeout", ifc_path=ifc_path)
+                return None
 
-            # Probe the binary once so we know which positional / flag
-            # arguments it understands.  Old DDC builds reject ``standard``
-            # and ``-no-collada`` with ``exit 15: The following arguments
-            # were not expected``; the matrix below lets us suppress those
-            # tokens up front and avoid the exit-15 trap entirely.
-            caps = detect_converter_capabilities(ext)
-            # Resolve the CLI profile up front so the args-builder and the
-            # retry path can branch off it without re-reading the dict on
-            # every call.  v18 binaries (flag-driven CLI) and v17/legacy
-            # binaries (positional CLI) build completely different command
-            # lines - see ``cad_import.build_ddc_args`` for the canonical
-            # mapping.
-            from app.modules.boq.cad_import import (
-                CLI_PROFILE_LEGACY,
-                CLI_PROFILE_V17_POSITIONAL,
-                CLI_PROFILE_V18_FLAG,
-                build_ddc_args,
-            )
-
-            cli_profile = caps.get("cli_profile", CLI_PROFILE_LEGACY)
-            # Whether this binary can produce geometry (a COLLADA/.dae pass)
-            # at all.  The v18 flag CLI only does so when it advertises the
-            # ``-d/--dae`` geometry group: the full RvtExporter / IfcExporter
-            # do, but the DwgExporter (XLSX/JSON/CSV-only) does NOT - running
-            # a DAE pass against it aborts with ``exit 15``.  v17 positional /
-            # legacy binaries always emit geometry via their positional output
-            # path, so they keep the DAE pass unconditionally.
-            if cli_profile == CLI_PROFILE_V18_FLAG:
-                geometry_supported = bool(caps.get("accepts_flag_dae"))
-            else:
-                geometry_supported = True
-            # Track whether the conservative path was taken for any reason
-            # (probe-driven OR exit-15 retry) so callers can surface a
-            # "converter_outdated" diagnostic to the UI.  v18 is the
-            # current release - only v17_positional / legacy / no-flag
-            # paths get the "outdated" badge.
-            outdated_cli_observed = cli_profile not in (
-                CLI_PROFILE_V18_FLAG,
-                CLI_PROFILE_V17_POSITIONAL,
-            )
-
-            # Stderr substrings that prove the failure was specifically an
-            # "unknown argument" rejection - keep these tight to avoid
-            # false-retries on genuine conversion failures (license probe,
-            # corrupt file, missing DLL, …).  Match is case-insensitive on
-            # the decoded text.  Both phrasings have been observed across
-            # DDC RvtExporter / IfcExporter versions.
-            UNKNOWN_ARG_MARKERS = (
-                "arguments were not expected",
-                "unexpected argument",
-                "unknown argument",
-                "unknown option",
-                "unrecognized argument",
-                "unrecognised argument",
-            )
-
-            def _stderr_indicates_unknown_arg(stderr_bytes: bytes) -> bool:
-                """True iff stderr contains an 'unknown CLI arg' substring.
-
-                Used in conjunction with exit-15 - *both* must be true for
-                the retry-without-extras path to fire, so a normal
-                conversion failure with a non-zero exit and unrelated
-                stderr keeps the strict error report instead of being
-                silently retried.
-                """
-                if not stderr_bytes:
-                    return False
-                try:
-                    text = stderr_bytes.decode("utf-8", errors="replace").lower()
-                except UnicodeError:
-                    return False
-                return any(marker in text for marker in UNKNOWN_ARG_MARKERS)
-
-            def _build_args(
-                out_path: Path,
-                *,
-                allow_depth_mode: bool,
-                allow_no_collada: bool,
-                extra: tuple[str, ...] = (),
-            ) -> list[str]:
-                """Compose the CLI invocation honouring the capability flags.
-
-                Routes through ``cad_import.build_ddc_args`` whenever the
-                probe identified a v18 flag-driven binary - that path
-                emits ``-x out.xlsx`` / ``-d out.dae`` / ``-m mode``
-                / ``--force-path`` instead of the legacy positional
-                ``output [mode] [-no-collada]`` shape that v18 rejects
-                with exit 15.
-
-                For v17 positional / legacy binaries the historical layout
-                is preserved verbatim so the existing test contract (and
-                any user with an old binary on disk) keeps working.
-
-                Depth-mode is only appended when both the caller asked for
-                it AND the binary advertises support.  ``extra`` is the
-                tuple of caller-supplied flags (currently only
-                ``-no-collada`` for the Excel pass) - those are filtered
-                against ``allow_no_collada`` so a probe-confirmed legacy
-                binary never sees the flag at all.
-                """
-                ddc_mode = "complete" if conversion_depth == "complete" else "standard"
-
-                if cli_profile == CLI_PROFILE_V18_FLAG:
-                    # The output extension picks which v18 flag we emit:
-                    # .xlsx / .xls → ``-x`` and suppress DAE; .dae → ``-d``
-                    # and suppress XLSX.  Suppressing the other output
-                    # halves wall-time per pass (the bundled exporter
-                    # writes both by default).
-                    suffix = out_path.suffix.lower()
-                    is_xlsx = suffix in (".xlsx", ".xls")
-                    is_dae = suffix == ".dae"
-                    # ``allow_depth_mode`` is gated on the legacy
-                    # ``accepts_depth_mode`` boolean (v17 positional);
-                    # v18 uses ``accepts_flag_mode`` (``-m``).  Honour
-                    # caller intent across both: emit the mode whenever
-                    # EITHER capability is on.
-                    return build_ddc_args(
-                        converter,
-                        input_abs,
-                        caps=caps,
-                        xlsx_out=out_path if is_xlsx else None,
-                        dae_out=out_path if is_dae else None,
-                        mode=ddc_mode,
-                        # Default-skip the *other* output on every v18
-                        # single-output pass - saves a roundtrip and
-                        # keeps the work on-spec.
-                        include_no_dae=is_xlsx,
-                        include_no_xlsx=is_dae,
-                    )
-
-                # Legacy / v17 positional path - unchanged historical behaviour.
-                args_list = [str(converter), str(input_abs), str(out_path)]
-                if ext in ("rvt", "ifc") and allow_depth_mode:
-                    args_list.append(ddc_mode)
-                for arg in extra:
-                    if arg == "-no-collada" and not allow_no_collada:
-                        continue
-                    args_list.append(arg)
-                return args_list
-
-            def _invoke(args_list: list[str]) -> tuple[int, bytes, bytes]:
-                """Thin subprocess wrapper - separated so the retry path can
-                rebuild the args list and call again without re-implementing
-                the cwd/timeout/stdin plumbing."""
-                logger.debug("DDC call: %s", args_list)
-                proc = subprocess.run(
-                    args_list,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    cwd=str(converter.parent),
-                    # On Linux the no-root .deb-extracted converter needs
-                    # LD_LIBRARY_PATH pointing at its bundled DDC cad2data SDK
-                    # .so files; returns None (inherit) on Windows/macOS.
-                    env=_converter_subprocess_env(converter),
-                    input=b"\n",
-                    timeout=600,
-                )
-                return proc.returncode, proc.stdout, proc.stderr
-
-            def _run_ddc(out_path: Path, *extra_args: str) -> tuple[int, bytes, bytes]:
-                """Invoke RvtExporter / IfcExporter with the given output target.
-
-                Two-stage logic:
-                  1. Build args using the probed capability matrix and run.
-                  2. If exit code is 15 AND stderr names an unknown
-                     argument, rebuild args as bare ``[converter, input,
-                     output]`` (no depth-mode, no flags) and retry once.
-                     A success here records the binary as "outdated CLI"
-                     so the UI can surface a Reinstall CTA.
-
-                Why exit code 15 specifically: the bundled CLI parser
-                (CLI11 / similar) emits 15 for "argument parse error".
-                Other failure modes use different codes (file-not-found
-                = 8, license error = 6, ...).  The substring guard is the
-                belt-and-braces second condition so a coincidental exit-15
-                from an unrelated cause doesn't trip the retry.
-                """
-                nonlocal outdated_cli_observed
-                args_list = _build_args(
-                    out_path,
-                    allow_depth_mode=caps.get("accepts_depth_mode", False),
-                    allow_no_collada=caps.get("accepts_no_collada_flag", False),
-                    extra=tuple(extra_args),
-                )
-                rc, stdout, stderr = _invoke(args_list)
-                if rc == 0:
-                    return rc, stdout, stderr
-
-                # Retry guard: only fire when the probe didn't already
-                # downgrade us to the bare form (otherwise we'd retry the
-                # same command), and the failure looks like a CLI parse
-                # error.  Either both signals (exit 15 + stderr marker) or
-                # any-exit + stderr marker is sufficient - DDC has shipped
-                # at least one release that exits 64 for unknown args.
-                #
-                # "Already bare" is profile-dependent: on the v18 flag
-                # CLI the minimum-acceptable call is
-                # ``[exe, input, -x out, -m standard, --force-path]`` (or
-                # ``-d`` for the COLLADA pass) - never the bare positional
-                # ``[exe, input, output]`` that the v17/legacy bare branch
-                # would emit.  Recognising this prevents a v18 binary from
-                # retrying with a shape it doesn't understand, and prevents
-                # a legacy binary from retrying with v18 flags it doesn't
-                # understand.
-                already_bare = cli_profile == CLI_PROFILE_LEGACY and not (
-                    caps.get("accepts_depth_mode") or caps.get("accepts_no_collada_flag")
-                )
-                stderr_hit = _stderr_indicates_unknown_arg(stderr)
-                parse_error = rc == 15 or stderr_hit
-                # A bare positional call that the binary rejects as an unknown
-                # or unexpected argument is strong evidence the --help probe
-                # mis-detected a current v18 flag CLI as legacy (the probe can
-                # yield nothing on a timeout, a GUI banner, or a Mark-of-the-Web
-                # block). A genuinely legacy binary ACCEPTS the bare positional
-                # shape, so it would not raise a parse error here - so retry the
-                # legacy/bare failure with the v18 flag shape instead of giving
-                # up (this is what previously surfaced as a false "out of date").
-                suspected_v18 = already_bare and parse_error
-                if already_bare and not parse_error:
-                    return rc, stdout, stderr
-                if parse_error:
-                    if cli_profile == CLI_PROFILE_V18_FLAG or suspected_v18:
-                        # v18 retry: keep the flag CLI but drop the
-                        # output-suppression flags + mode preset - leaves
-                        # ``[exe, input, -x out, --force-path]`` (or -d).
-                        # If THIS still fails we surface the original
-                        # error; falling through to the legacy positional
-                        # bare shape would just trade one parse error for
-                        # another.
-                        suffix = out_path.suffix.lower()
-                        is_xlsx = suffix in (".xlsx", ".xls")
-                        bare_args = [str(converter), str(input_abs)]
-                        if is_xlsx:
-                            bare_args.extend(["-x", str(out_path)])
-                        else:
-                            bare_args.extend(["-d", str(out_path)])
-                        if caps.get("accepts_flag_force_path") or suspected_v18:
-                            bare_args.append("--force-path")
-                    else:
-                        bare_args = _build_args(
-                            out_path,
-                            allow_depth_mode=False,
-                            allow_no_collada=False,
-                            extra=(),
-                        )
-                    logger.warning(
-                        "DDC converter rejected modern CLI args (rc=%d, marker=%s, profile=%s) - "
-                        "retrying with reduced invocation: %s",
-                        rc,
-                        stderr_hit,
-                        cli_profile,
-                        bare_args,
-                    )
-                    rc2, stdout2, stderr2 = _invoke(bare_args)
-                    if rc2 == 0:
-                        if suspected_v18:
-                            # The probe was wrong, not the binary: a healthy v18
-                            # converter was mis-detected as legacy. Drop the
-                            # stale capability cache so the next conversion uses
-                            # the v18 profile directly, and do NOT flag the
-                            # converter as outdated.
-                            try:
-                                from app.modules.boq.cad_import import (
-                                    invalidate_converter_capabilities,
-                                )
-
-                                invalidate_converter_capabilities(ext)
-                            except Exception:  # noqa: BLE001
-                                pass
-                        else:
-                            # Latch the diagnostic so the caller can record
-                            # cause="converter_outdated" once the conversion
-                            # completes - the user keeps their result, but the
-                            # next page-load nudges them to reinstall.
-                            outdated_cli_observed = True
-                        return rc2, stdout2, stderr2
-                    # Second attempt also failed - surface the original
-                    # error so the user sees the parse complaint, not a
-                    # downstream "file not found" from a stripped-down
-                    # invocation that the legacy CLI also couldn't run.
-                    return rc, stdout, stderr
-                return rc, stdout, stderr
-
-            # ── Passes 1 + 2 in parallel: Excel + native COLLADA ──────
-            # DDC RvtExporter has to load the entire RVT file from scratch
-            # for each invocation (no shared state between processes), so
-            # running the Excel and COLLADA passes sequentially used to
-            # double the effective conversion time.  The two output files
-            # are independent - both passes only read the input and write
-            # to a different target - so we run them in parallel threads.
-            # Wall-time drops to roughly max(Excel, COLLADA) instead of sum.
-            #
-            # The previously-present third synchronous pass for PDF sheet
-            # export was removed: it triples upload latency, frequently
-            # times out, and the PDF can be regenerated on demand from the
-            # original RVT/IFC blob (which is already saved by the router
-            # before this processor runs).
-            import concurrent.futures
-
-            output_xlsx = (output_dir / (ifc_path.stem + ".xlsx")).resolve()
-            real_dae = (output_dir / "geometry.dae").resolve()
-
-            # The DAE pass is only meaningful when the binary can produce
-            # geometry.  For a data-only converter (e.g. DwgExporter, which
-            # has no ``-d/--dae`` group) we SKIP it entirely instead of
-            # invoking it and logging a failure - "no geometry" is a normal
-            # outcome for that format, not an error.
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as _pool:
-                fut_xlsx = _pool.submit(_run_ddc, output_xlsx, "-no-collada")
-                fut_dae = _pool.submit(_run_ddc, real_dae) if geometry_supported else None
-
-                try:
-                    rc, _stdout, stderr = fut_xlsx.result()
-                except subprocess.TimeoutExpired:
-                    logger.error("DDC Excel pass timed out for %s", ifc_path.name)
-                    _record_ddc_failure(ext, "timeout", ifc_path=ifc_path)
-                    return None
-                if rc != 0:
-                    logger.warning(
-                        "DDC Excel pass exit %d: %s",
-                        rc,
-                        stderr.decode(errors="replace")[:300],
-                    )
-                    _record_ddc_failure(
-                        ext,
-                        "nonzero_exit",
-                        exit_code=rc,
-                        stderr=stderr,
-                        ifc_path=ifc_path,
-                    )
-                    return None
-
-                excel_path: Path | None = None
-                if output_xlsx.exists() and output_xlsx.stat().st_size > 0:
-                    excel_path = output_xlsx
-                else:
-                    for f in output_dir.iterdir():
-                        if f.suffix in (".xlsx", ".xls") and f.stat().st_size > 0:
-                            excel_path = f
-                            break
-                if not excel_path:
-                    logger.warning("DDC Excel pass produced no output file in %s", output_dir)
-                    _record_ddc_failure(
-                        ext,
-                        "no_output_file",
-                        exit_code=rc,
-                        stderr=stderr,
-                        ifc_path=ifc_path,
-                    )
-                    return None
-
-                raw_elements = parse_cad_excel(excel_path)
-                raw_element_labels = read_cad_excel_labels(excel_path)
-                if not raw_elements:
-                    logger.warning("DDC Excel pass produced empty file")
-                    _record_ddc_failure(
-                        ext,
-                        "empty_output",
-                        exit_code=rc,
-                        stderr=stderr,
-                        ifc_path=ifc_path,
-                    )
-                    return None
-                logger.info(
-                    "DDC converter extracted %d raw rows from %s",
-                    len(raw_elements),
-                    ifc_path.name,
-                )
-
-                # Only wait on the COLLADA pass when we actually launched it.
-                rc2 = -1
-                stderr2 = b""
-                if fut_dae is not None:
-                    try:
-                        rc2, _stdout2, stderr2 = fut_dae.result()
-                    except subprocess.TimeoutExpired:
-                        logger.warning("DDC COLLADA pass timed out - will fall back to box geometry")
-                        rc2 = -1
-                        stderr2 = b""
-
-            real_dae_path: Path | None = None
-            if not geometry_supported:
-                # Data-only converter (no ``-d/--dae`` support) - geometry was
-                # never attempted.  Not a failure: the entity properties from
-                # the XLSX pass are the real, expected output for this format.
-                logger.info(
-                    "Converter for .%s is data-only (no geometry group) - "
-                    "skipping COLLADA pass; %d entity rows extracted",
-                    ext,
-                    len(raw_elements),
-                )
-            elif rc2 == 0 and real_dae.exists() and real_dae.stat().st_size > 0:
-                real_dae_path = real_dae
-                logger.info(
-                    "DDC native COLLADA generated: %d bytes",
-                    real_dae.stat().st_size,
-                )
-            else:
+            if not run.ok:
                 logger.warning(
-                    "DDC COLLADA pass failed (rc=%s, stderr=%s) - using box fallback",
-                    rc2,
-                    stderr2.decode(errors="replace")[:200] if stderr2 else "",
+                    "DDC conversion exit %d (status %s): %s",
+                    run.returncode,
+                    run.status,
+                    (run.stderr or run.stdout)[:300],
                 )
+                _record_ddc_failure(
+                    ext,
+                    "nonzero_exit" if run.returncode else "no_output_file",
+                    exit_code=run.returncode,
+                    stderr=run.stderr or run.stdout,
+                    ifc_path=ifc_path,
+                )
+                return None
+
+            if fmt == "dwg":
+                excel_path = run.outputs["xlsx"]
+            else:
+                excel_path = ddc_runner.write_flat_workbook(run, output_dir / (ifc_path.stem + ".xlsx"))
+
+            raw_elements = parse_cad_excel(excel_path)
+            if not raw_elements:
+                logger.warning("DDC conversion produced an empty table")
+                _record_ddc_failure(
+                    ext,
+                    "empty_output",
+                    exit_code=run.returncode,
+                    stderr=run.stderr,
+                    ifc_path=ifc_path,
+                )
+                return None
+            logger.info("DDC converter extracted %d raw rows from %s", len(raw_elements), ifc_path.name)
+
+            real_glb_path: Path | None = None
+            if fmt == "rvt":
+                glb = run.outputs["glb"]
+                try:
+                    ddc_runner.normalize_glb_node_names(glb)
+                except Exception as exc:  # noqa: BLE001 - the mesh is still usable by id
+                    logger.warning("Could not normalise GLB node names: %s", exc)
+                ok, reason = _validate_geometry_file(glb)
+                if ok:
+                    real_glb_path = glb
+                else:
+                    logger.warning("DDC GLB failed validation (%s): %s", glb.name, reason)
 
             result_excel = _excel_elements_to_bim_result(
                 raw_elements,
                 output_dir,
-                real_dae_path=real_dae_path,
-                geometry_supported=geometry_supported,
+                real_glb_path=real_glb_path,
+                # The DWG converter writes entities, not building geometry; the
+                # IFC converter writes no geometry either, so it keeps the box
+                # placeholders (flagged as such) the viewer has always had.
+                geometry_supported=fmt != "dwg",
             )
             # Surface the converter version so the frontend can render a
-            # "Processed with DDC v{X}" badge on the model card (Stream D
-            # / v3.12.0). Detection is best-effort and never raises -
-            # missing values silently degrade to ``None`` and the badge
-            # hides. See ``detect_converter_version`` for the dpkg /
-            # parent-dir resolution logic.
+            # "Processed with DDC v{X}" badge on the model card. Detection is
+            # best-effort and never raises.
             try:
                 conv_info = _detect_converter_version_safe(ext)
                 if conv_info.get("version"):
@@ -889,16 +534,10 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                     result_excel["converter_source"] = conv_info["source"]
             except Exception:  # noqa: BLE001 - diagnostics must never block import
                 pass
-            # If the conversion only succeeded because we stripped modern
-            # CLI args (or had to retry without them), flag the result so
-            # the router can persist a "converter_outdated" warning in the
-            # model metadata.  The data is good - but the user should be
-            # nudged to reinstall before the next file fails.
-            if outdated_cli_observed:
-                result_excel["converter_cli_outdated"] = True
-            # Original header text per lowercased column key, so the Parquet
-            # sidecar can show "Phase Created" for ``phase created``.
-            result_excel["raw_element_labels"] = raw_element_labels
+            # The converters are previews and say so in their own reports;
+            # carry that status so the UI can tell the user.
+            if run.status:
+                result_excel["converter_status"] = run.status
             return result_excel
     except ImportError:
         logger.debug("cad_import module not available")
@@ -1076,6 +715,7 @@ def _excel_elements_to_bim_result(
     output_dir: Path,
     *,
     real_dae_path: Path | None = None,
+    real_glb_path: Path | None = None,
     geometry_supported: bool = True,
 ) -> dict[str, Any]:
     """Convert parsed Excel elements (from DDC converter) into BIM result format.
@@ -1090,9 +730,11 @@ def _excel_elements_to_bim_result(
     We filter out non-element rows (sun studies, materials, viewports, etc.)
     and map the meaningful RVT categories into our generic element model.
 
-    If ``real_dae_path`` is provided (output of a separate RvtExporter call to
-    .dae), we use the real RVT COLLADA geometry instead of the placeholder
-    box-grid generated from element bounding boxes.
+    If ``real_dae_path`` is provided (a COLLADA file from a converter), we use
+    that geometry instead of the placeholder box-grid generated from element
+    bounding boxes. ``real_glb_path`` is the same for a converter that writes a
+    GLB directly (the 2026.10 RVT converter): the file is used as it is, with no
+    COLLADA step.
 
     ``geometry_supported`` distinguishes "the geometry pass ran but produced
     nothing usable" from "this converter can't do geometry at all". When it
@@ -1659,6 +1301,12 @@ def _excel_elements_to_bim_result(
     # Fall back to the simplified box-grid only when the real .dae is missing.
     geometry_path: Path | None = None
     bounding_box = None
+    glb_direct: Path | None = None
+    if real_glb_path and real_glb_path.exists() and real_glb_path.stat().st_size > 0:
+        glb_direct = real_glb_path
+        logger.info(
+            "Using converter GLB geometry: %s (%d KB)", real_glb_path.name, real_glb_path.stat().st_size // 1024
+        )
     if real_dae_path and real_dae_path.exists() and real_dae_path.stat().st_size > 0:
         # Already named geometry.dae in output_dir - use as-is.
         geometry_path = real_dae_path
@@ -1667,7 +1315,7 @@ def _excel_elements_to_bim_result(
             real_dae_path.name,
             real_dae_path.stat().st_size // 1024,
         )
-    elif elements and geometry_supported:
+    elif glb_direct is None and elements and geometry_supported:
         try:
             geometry_path, bounding_box = _generate_collada_boxes(elements, output_dir)
             logger.info("Generated placeholder box geometry (no real COLLADA available)")
@@ -1703,11 +1351,16 @@ def _excel_elements_to_bim_result(
                     )
                     glb_path = None
 
+    if glb_direct is not None:
+        glb_path = glb_direct
+
     # Re-check the real-dae flag after validation dropped invalid files.
     # If validation nuked the real DAE path above, ``geometry_path`` will
     # be None even though ``real_dae_path`` originally existed, so we
     # treat that as placeholder for the purpose of the metadata flag.
-    is_real = bool(real_dae_path and real_dae_path.exists() and geometry_path == real_dae_path)
+    is_real = glb_direct is not None or bool(
+        real_dae_path and real_dae_path.exists() and geometry_path == real_dae_path
+    )
     # ``data_only`` is a normal, non-degraded outcome: the converter genuinely
     # can't produce geometry (e.g. DwgExporter), so no placeholder boxes were
     # synthesised and the elements carry no ``is_placeholder`` flag. Only the
@@ -1756,7 +1409,7 @@ def _excel_elements_to_bim_result(
         "storeys": sorted(storeys_set),
         "disciplines": sorted(disciplines_set),
         "element_count": len(elements),
-        "has_geometry": geometry_path is not None,
+        "has_geometry": geometry_path is not None or glb_path is not None,
         "geometry_path": str(geometry_path) if geometry_path else None,
         "glb_path": str(glb_path) if glb_path else None,
         "bounding_box": bounding_box,

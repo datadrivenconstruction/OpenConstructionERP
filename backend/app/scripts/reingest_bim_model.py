@@ -8,7 +8,7 @@ The v3.x snapshot-loader produced placeholder rows for the 14 showcase
 BIM models: 380 synthetic ``"Walls 1".."Walls 64"`` rows per RVT, all
 with ``mesh_ref=NULL`` so the 3D viewer could never bind any of the
 5440 numeric Revit ElementIds carved into the DAE.  This script runs
-the *real* DDC RvtExporter against the ``original.rvt`` blob that lives
+the *real* DDC converter against the ``original.rvt`` blob that lives
 alongside ``geometry.glb`` and replaces the placeholders with the
 properly-keyed element rows that should have been there from day one.
 
@@ -127,167 +127,25 @@ async def _resolve_original_path(model_id: uuid.UUID) -> tuple[dict, Path] | Non
         return info, tmp
 
 
-def _ddc_invocation_v18(
-    converter: Path,
-    input_path: Path,
-    xlsx_out: Path,
-    dae_out: Path,
-) -> list[tuple[list[str], Path]]:
-    """Build the v18.3+ DDC RvtExporter invocations.
-
-    The flag-based CLI introduced in v18.3 supersedes the legacy
-    ``[converter, input, output, mode]`` positional form that
-    ``_try_cad2data`` still emits.  We invoke twice - once for Excel
-    (no geometry) and once for the COLLADA pass (no Excel) - which
-    matches ``ifc_processor._try_cad2data``'s two-pass design.
-    """
-    return [
-        (
-            [
-                str(converter),
-                str(input_path),
-                "-x",
-                str(xlsx_out),
-                "--no-dae",
-                "-m",
-                "standard",
-            ],
-            xlsx_out,
-        ),
-        (
-            [
-                str(converter),
-                str(input_path),
-                "-d",
-                str(dae_out),
-                "--no-xlsx",
-            ],
-            dae_out,
-        ),
-    ]
-
-
-def _ddc_invocation_legacy(
-    converter: Path,
-    input_path: Path,
-    xlsx_out: Path,
-    dae_out: Path,
-) -> list[tuple[list[str], Path]]:
-    """Build the legacy DDC ``[exe, input, output, mode]`` invocations."""
-    return [
-        ([str(converter), str(input_path), str(xlsx_out), "standard"], xlsx_out),
-        ([str(converter), str(input_path), str(dae_out)], dae_out),
-    ]
-
-
-def _probe_ddc_cli_style(converter: Path) -> str:
-    """Return ``"v18"`` (flag-based) or ``"legacy"`` (positional)."""
-    import subprocess
-
-    try:
-        proc = subprocess.run(
-            [str(converter), "--help"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=str(converter.parent),
-            input=b"\n",
-            timeout=8,
-        )
-        text = (proc.stdout + b"\n" + proc.stderr).decode("utf-8", errors="replace")
-        if "--no-dae" in text or "--no-xlsx" in text or "-m,     --mode" in text:
-            return "v18"
-    except Exception:  # noqa: BLE001 - probe failure is non-fatal
-        pass
-    return "legacy"
-
-
 def _run_ddc_extraction(
     original_path: Path,
     tmp_dir: Path,
 ) -> dict[str, Any]:
-    """Synchronous DDC + Excel parse + result-shaping pipeline.
+    """Run the DDC converter pipeline on the original CAD blob.
 
-    Tries the existing :func:`process_ifc_file` bridge first (which knows
-    how to deal with placeholder geometry, DAE bboxes, GLB conversion,
-    etc.).  When that returns zero elements we fall back to a direct DDC
-    invocation that supports the v18.3+ flag-based CLI - the bridge's
-    capability probe over-reports modern support and trips exit-15 on
-    v18.3 binaries.  We then feed the resulting xlsx + dae back through
-    the existing :func:`_excel_elements_to_bim_result` so the column
-    mapping stays in one place.
+    :func:`process_ifc_file` is the one place that knows how to run the
+    converter (``app.modules.boq.ddc_runner``), shape its output into BIM
+    elements and attach geometry, so the re-ingest uses it as it is.
 
     Returns the same dict shape :func:`process_ifc_file` produces.
     """
-    import subprocess
-
-    from app.modules.bim_hub.ifc_processor import (
-        _excel_elements_to_bim_result,
-        process_ifc_file,
-    )
-    from app.modules.boq.cad_import import find_converter, parse_cad_excel
+    from app.modules.bim_hub.ifc_processor import process_ifc_file
 
     result = process_ifc_file(original_path, tmp_dir, "standard")
-    if result.get("element_count", 0) > 0:
-        return result
-
-    ext = original_path.suffix.lower().lstrip(".")
-    converter = find_converter(ext)
-    if converter is None:
-        logger.warning("No DDC converter found for ext=%s - cannot fall back", ext)
-        return result
-
-    cli_style = _probe_ddc_cli_style(converter)
-    logger.info(
-        "Fallback DDC invocation: cli_style=%s, converter=%s",
-        cli_style,
-        converter,
-    )
-    xlsx_out = (tmp_dir / "ddc_direct.xlsx").resolve()
-    dae_out = (tmp_dir / "geometry.dae").resolve()
-    invocations = (_ddc_invocation_v18 if cli_style == "v18" else _ddc_invocation_legacy)(
-        converter, original_path, xlsx_out, dae_out
-    )
-
-    for args, expected_output in invocations:
-        logger.info("Direct DDC call: %s", args)
-        proc = subprocess.run(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=str(converter.parent),
-            input=b"\n",
-            timeout=600,
-        )
-        if proc.returncode != 0:
-            logger.warning(
-                "Direct DDC call exit %d: %s",
-                proc.returncode,
-                proc.stderr.decode(errors="replace")[:400],
-            )
-            # Excel pass is mandatory; DAE pass failure is degraded but OK.
-            if expected_output == xlsx_out:
-                return {"elements": [], "element_count": 0, "storeys": []}
-
-    if not xlsx_out.exists() or xlsx_out.stat().st_size == 0:
-        logger.error("DDC produced no xlsx at %s", xlsx_out)
-        return {"elements": [], "element_count": 0, "storeys": []}
-
-    raw_elements = parse_cad_excel(xlsx_out)
-    logger.info("Direct DDC: parsed %d raw rows from xlsx", len(raw_elements))
-
-    real_dae_path: Path | None = None
-    if dae_out.exists() and dae_out.stat().st_size > 0:
-        real_dae_path = dae_out
-
-    shaped = _excel_elements_to_bim_result(
-        raw_elements,
-        tmp_dir,
-        real_dae_path=real_dae_path,
-    )
-    shaped.setdefault("element_count", len(shaped.get("elements") or []))
-    shaped.setdefault("storeys", [])
-    shaped.setdefault("disciplines", [])
-    return shaped
+    result.setdefault("element_count", len(result.get("elements") or []))
+    result.setdefault("storeys", [])
+    result.setdefault("disciplines", [])
+    return result
 
 
 async def _replace_elements(

@@ -3915,35 +3915,29 @@ def create_app() -> FastAPI:
         which say where anything lives. The Settings panel still prints the
         path, and its reader is signed in.
 
-        Computes the git-blob SHA-1 of every locally-installed converter and
-        compares it to the SHA returned by GitHub's Contents API for the same
-        file in `cad2data-Revit-IFC-DWG-DGN`, at the ref the installer is
-        pinned to. A mismatch means the user's build differs from the one the
-        Update button would fetch.
+        Reads the stamp the installer writes beside every converter package it
+        unpacks and compares the package digest in it with the one this build
+        installs (``app.core.converter_source.PACKAGES``, the SHA-256 published in
+        the release's ``SHA256SUMS.txt``). A different digest means the user's
+        copy came from another release than the one the Update button would
+        fetch. A copy without a stamp (bundled with the desktop installer, or
+        unpacked by hand) is reported as installed and never as outdated: there is
+        nothing to compare, and the Update button would only add a second copy.
 
         "The build we would install" rather than "the latest upstream" is the
         whole point: this result drives an "Update available" badge whose
         button runs that installer, so comparing against anything the installer
         would not fetch produces a badge that cannot be cleared by pressing it.
-
-        Cached on `app.state` for 6 h so the dashboard banner can poll
-        cheaply without burning the unauthenticated GitHub rate limit
-        (60 req/h). Network failures degrade gracefully - `network_ok=false`
-        and `any_outdated=false` so the UI suppresses the banner.
+        Nothing here touches the network, so there is no rate limit to guard and
+        ``network_ok`` is always true.
         """
-        import asyncio
-        import hashlib
         import sys
-
-        import httpx
 
         from app.modules.boq.cad_import import find_converter
 
-        # The git-blob SHA comparison below only applies to the Windows `.exe`
-        # builds fetched from the GitHub repo. On Linux/macOS the converters come
-        # from the signed apt repo (or aren't natively available), so there is no
-        # per-file SHA to compare - return a benign, non-alarming result so the
-        # dashboard never shows a false "update available" banner off-Windows.
+        # The converter release is published for Windows only, so there is
+        # nothing to compare elsewhere - return a benign, non-alarming result
+        # so the dashboard never shows a false "update available" banner.
         if sys.platform != "win32":
             return {
                 "network_ok": True,
@@ -3956,46 +3950,30 @@ def create_app() -> FastAPI:
                 "results": [],
                 "platform": sys.platform,
                 "note": (
-                    "Converter version checks apply to the Windows builds; this "
-                    "platform uses the DDC apt repository (Linux) or has no native build."
+                    "The DDC converters are published for Windows 10/11 x64 only; "
+                    "this platform has no converter build to check."
                 ),
             }
 
-        # Repo, ref and per-format directories come from
+        # Repo, tag and the pinned packages come from
         # ``app.core.converter_source``, the same declaration the installer in
-        # takeoff/router.py reads. This used to be a hand-copied duplicate, and
-        # the copy said ``DDC_BRANCH = "main"`` while the installer fetched a
-        # pinned commit. The moment upstream's branch tip moved ahead of the
-        # pin, every installed converter's blob SHA would stop matching what
-        # this endpoint fetched, the dashboard would raise its "Update
-        # available" badge, and the button under it would reinstall byte-identical
-        # files - a badge that never clears over a control that appears to do
-        # nothing. The check has to compare against the ref the installer will
-        # actually use, so it reads the same constant rather than a copy of it.
+        # takeoff/router.py reads, so the answer here is about the build the
+        # installer will fetch and not about some other one.
         #
-        # ``app.core.converter_source`` imports only ``os``, so this keeps the
-        # property the duplication was protecting: the endpoint still works when
-        # the takeoff module is not loaded (it ships disabled in some
-        # configurations) because nothing here depends on that module.
+        # ``app.core.converter_source`` imports only the standard library, so
+        # the endpoint still works when the takeoff module is not loaded (it
+        # ships disabled in some configurations).
+        from app.core.converter_package import read_stamp
         from app.core.converter_source import (
-            WINDOWS_CONVERTER_DIRS,
-            resolve_converter_ref,
+            PACKAGES,
+            release_asset_url,
+            release_page_url,
             resolve_converter_repo,
+            resolve_converter_tag,
         )
 
-        DDC_REPO = resolve_converter_repo()
-        DDC_REF = resolve_converter_ref()
-        # ext: (github_dir, exe_name, display_name). The directory comes from the
-        # shared map; the exe and the display name are this endpoint's own.
-        _EXE_AND_LABEL: dict[str, tuple[str, str]] = {
-            "rvt": ("RvtExporter.exe", "RVT Parser"),
-            "ifc": ("IfcExporter.exe", "IFC Import"),
-            "dwg": ("DwgExporter.exe", "DWG/DXF Converter"),
-            "dgn": ("DgnExporter.exe", "DGN Converter"),
-        }
-        WIN_DIRS: dict[str, tuple[str, str, str]] = {
-            ext: (WINDOWS_CONVERTER_DIRS[ext], exe, label) for ext, (exe, label) in _EXE_AND_LABEL.items()
-        }
+        repo = resolve_converter_repo()
+        tag = resolve_converter_tag()
         TTL = 6 * 3600
 
         def visible_to_caller(payload: dict[str, Any]) -> dict[str, Any]:
@@ -4022,67 +4000,47 @@ def create_app() -> FastAPI:
         if cached and (time.time() - cached.get("checked_at_ts", 0)) < TTL:
             return visible_to_caller(cached["data"])
 
-        def git_blob_sha1(content: bytes) -> str:
-            header = f"blob {len(content)}\0".encode()
-            return hashlib.sha1(header + content).hexdigest()  # noqa: S324  # git uses SHA-1
-
-        async def fetch_remote(ext: str, gh_dir: str, exe: str) -> dict[str, Any] | None:
-            url = f"https://api.github.com/repos/{DDC_REPO}/contents/{gh_dir}/{exe}?ref={DDC_REF}"
-            try:
-                async with httpx.AsyncClient(timeout=10.0) as client:
-                    r = await client.get(url, headers={"Accept": "application/vnd.github+json"})
-                    if r.status_code != 200:
-                        return None
-                    p = r.json()
-                    return {
-                        "sha": p.get("sha"),
-                        "size": p.get("size"),
-                        "download_url": p.get("download_url"),
-                        "html_url": p.get("html_url"),
-                    }
-            except Exception:  # noqa: BLE001 - degrade gracefully
-                return None
-
-        remote_calls = [fetch_remote(ext, gh_dir, exe) for ext, (gh_dir, exe, _) in WIN_DIRS.items()]
-        remote_results = await asyncio.gather(*remote_calls)
-
         results: list[dict[str, Any]] = []
         any_outdated = False
-        network_ok = False
-        for (ext, (gh_dir, exe, display)), remote in zip(WIN_DIRS.items(), remote_results, strict=True):
+        for ext, pkg in PACKAGES.items():
             path = find_converter(ext)
             installed = path is not None
             local_sha: str | None = None
+            local_version: str | None = None
             local_size: int | None = None
             if installed:
                 try:
-                    content = path.read_bytes()
-                    local_sha = git_blob_sha1(content)
-                    local_size = len(content)
+                    local_size = path.stat().st_size
                 except OSError:
                     pass
+                from app.modules.boq.cad_import import _install_root_of
 
-            if remote is not None:
-                network_ok = True
+                root = _install_root_of(path)
+                stamp = read_stamp(root) if root is not None else None
+                if stamp:
+                    local_sha = stamp.get("sha256")
+                    local_version = stamp.get("version")
 
-            is_outdated = bool(installed and remote and local_sha and remote.get("sha") and local_sha != remote["sha"])
+            is_outdated = bool(installed and local_sha and local_sha != pkg.sha256)
             if is_outdated:
                 any_outdated = True
 
             results.append(
                 {
                     "id": ext,
-                    "name": display,
-                    "exe": exe,
+                    "name": pkg.name,
+                    "exe": Path(pkg.exe_rel).name,
                     "installed": installed,
                     "installed_path": str(path) if path else None,
                     "installed_size": local_size,
                     "installed_sha": local_sha,
-                    "latest_size": remote["size"] if remote else None,
-                    "latest_sha": remote["sha"] if remote else None,
+                    "installed_version": local_version,
+                    "latest_size": pkg.size_bytes,
+                    "latest_sha": pkg.sha256,
+                    "latest_version": pkg.version,
                     "is_outdated": is_outdated,
-                    "download_url": remote["download_url"] if remote else None,
-                    "html_url": remote["html_url"] if remote else None,
+                    "download_url": release_asset_url(pkg.asset, repo=repo, tag=tag),
+                    "html_url": release_page_url(repo=repo, tag=tag),
                 }
             )
 
@@ -4093,12 +4051,12 @@ def create_app() -> FastAPI:
             # Back-compat alias so any client still reading `results` keeps working.
             "results": results,
             "any_outdated": any_outdated,
-            "network_ok": network_ok,
+            # Nothing here is fetched, so the check cannot fail on the network.
+            "network_ok": True,
             "checked_at": _dt.now(UTC).isoformat(),
             "ttl_seconds": TTL,
         }
-        if network_ok:
-            app.state._converter_version_cache = {"data": response, "checked_at_ts": time.time()}
+        app.state._converter_version_cache = {"data": response, "checked_at_ts": time.time()}
         return visible_to_caller(response)
 
     @app.get("/api/system/modules", tags=["System"])
