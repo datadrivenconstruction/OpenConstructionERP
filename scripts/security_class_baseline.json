@@ -246,7 +246,6 @@
     "backend/app/modules/bim_hub/glb_cache.py::_results",
     "backend/app/modules/bim_hub/router.py::_PARQUET_FAILURE_COUNTER",
     "backend/app/modules/bim_requirements/rule_runtime.py::_REGEX_CACHE",
-    "backend/app/modules/boq/cad_import.py::_CONVERTER_CAPABILITIES",
     "backend/app/modules/boq/cad_import.py::_HEALTH_CACHE",
     "backend/app/modules/changeorders/events.py::_source_locks",
     "backend/app/modules/clash_ai_triage/service.py::_subject_lock_users",

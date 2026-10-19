@@ -24693,6 +24693,7 @@
         "copilot_schemas.py",
         "copilot_service.py",
         "cost_risk_engine.py",
+        "ddc_runner.py",
         "dxf_native.py",
         "epd_materials.py",
         "events.py",
@@ -256028,7 +256029,6 @@
       "module_category": "extension",
       "files": [
         "__init__.py",
-        "deb_extract.py",
         "dedup.py",
         "manifest.py",
         "manifest_verifier.py",

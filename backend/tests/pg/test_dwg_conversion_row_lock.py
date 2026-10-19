@@ -113,31 +113,31 @@ async def _start_conversion(session: AsyncSession, drawing_id: uuid.UUID, path: 
     """Leave the drawing exactly as a conversion in progress leaves it.
 
     The converter is reported as present so the handler does not bail out
-    before the status transition, and the last call before the converter is
-    launched raises the marker above. What remains is the state the row is in
+    before the status transition, and the call that would launch it raises
+    the marker above. What remains is the state the row is in
     for however long the conversion runs, which for the report behind these
     tests was several minutes.
     """
-    from app.modules.boq import cad_import
+    from app.modules.boq import cad_import, ddc_runner
 
     original_find = cad_import.find_converter
-    original_detect = cad_import.detect_converter_capabilities
+    original_run = ddc_runner.run_converter
 
     def _fake_find(fmt: str):
-        return Path(path).parent / "DwgExporter"
+        return Path(path).parent / "dwg2excel.exe"
 
-    def _fake_detect(fmt: str):
+    def _fake_run(*_args, **_kwargs):
         raise _ConversionWouldStartHere
 
     cad_import.find_converter = _fake_find  # type: ignore[assignment]
-    cad_import.detect_converter_capabilities = _fake_detect  # type: ignore[assignment]
+    ddc_runner.run_converter = _fake_run  # type: ignore[assignment]
     try:
         await DwgTakeoffService(session)._handle_dwg(drawing_id, path)
     except _ConversionWouldStartHere:
         pass
     finally:
         cad_import.find_converter = original_find  # type: ignore[assignment]
-        cad_import.detect_converter_capabilities = original_detect  # type: ignore[assignment]
+        ddc_runner.run_converter = original_run  # type: ignore[assignment]
 
 
 @pytest.mark.asyncio
