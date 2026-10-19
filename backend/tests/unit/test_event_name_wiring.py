@@ -186,13 +186,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "bi_dashboards/events.py:124, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
         "tuple; the changeorders module publishes under the singular 'changeorder.' prefix"
     ),
-    "variation.approved": (
-        "core/event_handlers.py:1840; changeorders/service.py:1551 publishes "
-        "'changeorder.approved'. Fix this seam LAST and on its own: the handler writes "
-        "contract value, and a second, live subscriber already writes it from "
-        "notifications/_wave5_cross_module_subscribers.py, so renaming without checking "
-        "risks a double write"
-    ),
 }
 
 

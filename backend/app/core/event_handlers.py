@@ -15,7 +15,6 @@ Dataflows wired:
   10. schedule.activity.progress_updated -> today's EVM snapshot (one per project per day)
   11. bim_model.ready               -> apply quantity maps -> draft BOQ
   12. bim_model.new_version         -> diff -> flag affected BOQ positions
-  13. variation.approved             -> update contract_value + budget
   14. transmittal.issued            -> audit trail for distribution
   15. cde.container.promoted        -> audit + notify stakeholders
   15b. commissioning.system.commissioned -> audit trail for handover
@@ -24,7 +23,10 @@ Retired handlers, each because the work happens elsewhere and reviving it would
 do the work twice: meeting.action_item.created (complete_meeting creates the
 tasks itself), po.issued (finance commits budget at PO approval, per budget
 line), estimate.approved (costmodel.budget.generated seeds the budget) and
-submittal.status_changed (notifications subscribes to each submittal outcome).
+submittal.status_changed (notifications subscribes to each submittal outcome)
+and variation.approved (approve_order writes the budget delta row itself,
+the wave-5 subscriber moves Contract.total_value, and Project.contract_value is
+the original contract value change_intelligence divides by).
 """
 
 import logging
@@ -1154,103 +1156,6 @@ async def _handle_bim_model_new_version(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 13. variation.approved -> update contract_value + budget
-# ---------------------------------------------------------------------------
-
-
-async def _handle_variation_approved(event: Event) -> None:
-    """Variation approved -> update project contract_value and budget.
-
-    When a change order / variation is approved, increment the project's
-    contract_value and create or update a budget entry for variations.
-
-    Expected event.data:
-        project_id: str (UUID)
-        variation_id: str (UUID)
-        approved_amount: str (monetary value, e.g. "25000")
-        description: str (optional)
-    """
-    try:
-        data = event.data
-        project_id = data.get("project_id")
-        variation_id = data.get("variation_id")
-        approved_amount = data.get("approved_amount", "0")
-
-        if not project_id:
-            logger.debug("variation.approved: missing project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.finance.models import ProjectBudget
-        from app.modules.projects.models import Project
-
-        try:
-            amount = Decimal(str(approved_amount).replace(",", ""))
-        except (InvalidOperation, ValueError):
-            logger.warning("variation.approved: invalid approved_amount=%s", approved_amount)
-            return
-
-        if amount == 0:
-            logger.debug("variation.approved: approved_amount=0, skipping")
-            return
-
-        async with async_session_factory() as session:
-            # Update project.contract_value
-            project = await session.get(Project, project_id)
-            if project:
-                try:
-                    current_cv = Decimal(str(project.contract_value or "0"))
-                except (InvalidOperation, ValueError):
-                    current_cv = Decimal("0")
-                project.contract_value = str(current_cv + amount)
-
-            # Upsert budget entry for the "variations" category
-            existing = await session.execute(
-                select(ProjectBudget).where(
-                    ProjectBudget.project_id == project_id,
-                    ProjectBudget.category == "variations",
-                )
-            )
-            budget = existing.scalar_one_or_none()
-
-            if budget:
-                try:
-                    current_revised = Decimal(str(budget.revised_budget))
-                except (InvalidOperation, ValueError):
-                    current_revised = Decimal("0")
-                budget.revised_budget = str(current_revised + amount)
-            else:
-                session.add(
-                    ProjectBudget(
-                        project_id=project_id,
-                        wbs_id=None,
-                        category="variations",
-                        # The project is already loaded above - reuse it
-                        # rather than re-query. "" when the project row is
-                        # missing, matching _resolve_project_currency.
-                        currency_code=(getattr(project, "currency", None) or "") if project else "",
-                        original_budget="0",
-                        revised_budget=str(amount),
-                    )
-                )
-
-            await session.commit()
-
-        logger.info(
-            "variation.approved: updated contract_value (+%s) and budget for project %s (variation %s)",
-            approved_amount,
-            project_id,
-            variation_id,
-        )
-    except Exception:
-        logger.exception("Error handling variation.approved")
-
-
-# ---------------------------------------------------------------------------
 # 14. transmittal.issued -> audit trail for distribution
 # ---------------------------------------------------------------------------
 
@@ -1900,7 +1805,7 @@ async def _dispatch_to_webhooks(event: Event) -> None:
 # Registration
 # ---------------------------------------------------------------------------
 
-_HANDLER_COUNT = 21
+_HANDLER_COUNT = 20
 
 
 def register_event_handlers() -> None:
@@ -1927,7 +1832,6 @@ def register_event_handlers() -> None:
     event_bus.subscribe_once("schedule.activity.progress_updated", _handle_schedule_progress)
     event_bus.subscribe_once("bim_model.ready", _handle_bim_model_ready)
     event_bus.subscribe_once("bim_model.new_version", _handle_bim_model_new_version)
-    event_bus.subscribe_once("variation.approved", _handle_variation_approved)
     event_bus.subscribe_once("transmittal.issued", _handle_transmittal_issued)
     event_bus.subscribe_once("cde.container.promoted", _handle_cde_container_promoted)
     event_bus.subscribe_once("commissioning.system.commissioned", _handle_system_commissioned)
