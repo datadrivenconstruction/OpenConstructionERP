@@ -1196,6 +1196,10 @@
     "possible_duplicate": {
       "fail": "Factuur {number} heeft dezelfde aannemer, hetzelfde bedrag ({amount}) en dezelfde datum ({on}) als factuur {other}.",
       "suggestion": "Controleer dat het niet dezelfde factuur is die onder een ander nummer dubbel is ingevoerd."
+    },
+    "certificate_missing": {
+      "fail": "Factuur {number} bij contract {contract}: de begunstigde beschikt op {on} niet over een geldig bewijs ({certificate}), dat {reference} vereist voordat de betaling wordt vrijgegeven.",
+      "suggestion": "Leg het bewijs vast in het onderaannemersdossier van de begunstigde, of houd de betaling aan totdat het wordt getoond."
     }
   },
   "cost_forecast": {
@@ -1217,5 +1221,12 @@
       "evm_cpi": "kostenprestatie (CPI)",
       "manual": "handmatig bedrag"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "verklaring geen schulden sociale verzekering",
+    "construction_tax_exemption": "bewijs van vrijstelling van bouwbelasting",
+    "employers_liability_clearance": "verklaring vrijwaring werkgeversaansprakelijkheid",
+    "insurance": "verzekeringsbewijs",
+    "license": "aannemersvergunning"
   }
 }

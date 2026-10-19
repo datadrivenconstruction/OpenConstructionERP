@@ -641,6 +641,53 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The progress payment report the site supervisor and the contractor sign.",
         ),
     },
+    # Egypt. The row is the private profile: FIDIC is the form private and
+    # donor-funded works use, and the form leaves the retention figures to the
+    # Contract Data, so no Egyptian number stands in for them. Public works are
+    # the ``public`` variant in WORKS_CONTRACT_DEFAULTS (Law 182/2018).
+    "EG": {
+        "standard_form": "FIDIC Red Book 2017",
+        "retention_percent": _figure(
+            None,
+            "standard_form",
+            "FIDIC Red Book 2017, Sub-Clause 14.3(iii) and the Contract Data",
+            "Private works take the percentage the Contract Data states; five to ten percent is common practice "
+            "but no law sets it. Public works hold five percent under Law 182/2018.",
+        ),
+        "retention_cap_percent": _figure(
+            None,
+            "standard_form",
+            "FIDIC Red Book 2017, Sub-Clause 14.3(iii), Limit of Retention Money",
+            "Retention stops at the limit of retention money the Contract Data states; there is no usual "
+            "Egyptian figure for it.",
+        ),
+        "retention_release_split": _figure(
+            _split(("substantial_completion", "50"), ("defects_period_end", "100")),
+            "standard_form",
+            "FIDIC Red Book 2017, Sub-Clause 14.9",
+            "Half is paid back when the Taking-Over Certificate is issued and the rest when the Defects "
+            "Notification Period expires.",
+        ),
+        "payment_period_days": _figure(
+            56,
+            "standard_form",
+            "FIDIC Red Book 2017, Sub-Clause 14.7(b)",
+            "Each interim payment is due within 56 days after the Engineer receives the Statement and its "
+            "supporting documents. Public works are paid within 60 days of the certificate under Law 182/2018.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "standard_form",
+            "FIDIC Red Book 2017, Sub-Clause 14.3",
+            "The contractor submits a Statement after the end of each month.",
+        ),
+        "certificate_name": _figure(
+            "Interim Payment Certificate (IPC)",
+            "standard_form",
+            "FIDIC Red Book 2017, Sub-Clause 14.6",
+            "The Engineer certifies each interim payment on an IPC.",
+        ),
+    },
 }
 
 
@@ -713,6 +760,55 @@ WORKS_CONTRACT_DEFAULTS: dict[str, dict[str, dict[str, Any]]] = {
                 "Paid back within 30 days after the warranty period (délai de garantie) ends, or within 30 days "
                 "after reserves notified during it are lifted. The contractor may replace it with a first-demand "
                 "guarantee or, unless the buyer objects, a joint and several surety.",
+            ),
+        },
+    },
+    # Egypt, public works: the Public Contracts Law 182/2018 and its Executive
+    # Regulations (Minister of Finance Decree 692/2019), read in the
+    # consolidated English translation by Andersen Egypt (January 2026),
+    # https://eg.andersen.com/wp-content/uploads/2026/01/Law-No.-182-of-2018.pdf,
+    # on 2026-10-19. ExReg Art. 93: interim payments "at a rate of (95%) of the
+    # scheduled value of works actually executed"; the retained 5% may be paid
+    # against a bank guarantee expiring 30 days after provisional acceptance,
+    # and after provisional acceptance the final statement pays what is due.
+    # Law Art. 45 and ExReg Art. 93: works certificates are paid within 60 days
+    # of submission. Private works follow the country row.
+    "EG": {
+        "public": {
+            "standard_form": "Law 182/2018 tender documents",
+            "retention_percent": _figure(
+                "5",
+                "statute",
+                "Law 182/2018, Executive Regulations (Decree 692/2019), Art. 93",
+                "Each interim payment pays 95 percent of the work executed and holds five percent. The contractor "
+                "may have it paid against a local bank guarantee that expires 30 days after provisional acceptance.",
+            ),
+            "retention_cap_percent": _figure(
+                None,
+                "statute",
+                "Law 182/2018, Executive Regulations (Decree 692/2019), Art. 93",
+                "No ceiling: five percent is held on every interim payment until provisional acceptance.",
+            ),
+            "retention_release_split": _figure(
+                _split(("substantial_completion", "100")),
+                "statute",
+                "Law 182/2018, Executive Regulations (Decree 692/2019), Art. 93",
+                "After provisional acceptance the final statement pays what is due, the retention included. The "
+                "five percent final guarantee is a separate bank guarantee, returned after final acceptance at "
+                "the end of the warranty period (Law Art. 40).",
+            ),
+            "payment_period_days": _figure(
+                60,
+                "statute",
+                "Law 182/2018, Art. 45; Executive Regulations (Decree 692/2019), Art. 93",
+                "Interim payments on works are made within 60 days of the payment certificate being submitted. "
+                "Late payment carries the financing cost at the Central Bank credit and discount rate.",
+            ),
+            "certificate_name": _figure(
+                "مستخلص",
+                "statute",
+                "Law 182/2018, Art. 45; Executive Regulations (Decree 692/2019), Art. 93",
+                "The payment certificate (mustakhlas) the contractor submits for each interim payment.",
             ),
         },
     },
@@ -1032,6 +1128,18 @@ def _validate_table() -> None:
 _validate_table()
 
 
+#: What a works variant may change. Retention, and where the law that follows
+#: the client also sets them (Egypt), the payment period and the name of the
+#: certificate. The valuation interval stays the country's.
+_WORKS_VARIANT_FIELDS: tuple[str, ...] = (
+    "retention_percent",
+    "retention_cap_percent",
+    "retention_release_split",
+    "payment_period_days",
+    "certificate_name",
+)
+
+
 def _validate_works_table() -> None:
     """Hold each works variant to the rules its country row is held to."""
     for country, variants in WORKS_CONTRACT_DEFAULTS.items():
@@ -1052,12 +1160,24 @@ def _validate_works_table() -> None:
                     raise ValueError(f"{where}.{field} must be a figure with value, source, reference and note")
                 if figure["source"] not in SOURCES or not figure["note"] or not figure["reference"]:
                     raise ValueError(f"{where}.{field} must name its source, reference and note")
-                if field not in ("retention_percent", "retention_cap_percent", "retention_release_split"):
-                    raise ValueError(f"{where}.{field}: a works variant changes retention figures only")
+                if field not in _WORKS_VARIANT_FIELDS:
+                    raise ValueError(
+                        f"{where}.{field}: a works variant changes {', '.join(_WORKS_VARIANT_FIELDS)} only"
+                    )
+                value = figure["value"]
+                if value is None:
+                    # No figure under this law, as a country row may say; the note says why.
+                    continue
                 if field == "retention_release_split":
-                    validate_release_split(figure["value"], f"{where}.{field}")
+                    validate_release_split(value, f"{where}.{field}")
+                elif field == "payment_period_days":
+                    if not isinstance(value, int) or isinstance(value, bool) or not 0 < value <= 365:
+                        raise ValueError(f"{where}.{field} must be a whole number of days between 1 and 365")
+                elif field == "certificate_name":
+                    if not str(value).strip():
+                        raise ValueError(f"{where}.{field} must not be blank")
                 else:
-                    _check_percent(figure["value"], f"{where}.{field}")
+                    _check_percent(value, f"{where}.{field}")
             for field, reference in (variant.get("references") or {}).items():
                 if field not in CONTRACT_DEFAULT_FIELDS or field in variant or not str(reference).strip():
                     raise ValueError(f"{where}.references.{field} must re-cite a figure the variant leaves standing")

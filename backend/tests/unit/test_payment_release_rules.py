@@ -84,7 +84,7 @@ async def _fails(rule, payload: dict, locale: str = "en") -> list:
 async def test_rules_are_silent_without_their_payload() -> None:
     for rule in PAYMENT_RELEASE_RULES:
         assert await rule().validate(ValidationContext(data={"other": {}})) == []
-    assert set(RULE_NUMBERS.values()) == {"V11", "V12", "V13", "V14", "V16", "V17", "V18"}
+    assert set(RULE_NUMBERS.values()) == {"V11", "V12", "V13", "V14", "V16", "V17", "V18", "V19"}
 
 
 async def test_v11_a_falling_cumulative_total_and_an_invoice_after_the_final() -> None:

@@ -1196,6 +1196,10 @@
     "possible_duplicate": {
       "fail": "发票{number}与发票{other}的承包商、金额({amount})和日期({on})相同。",
       "suggestion": "请核对是不是同一张发票以另一个号码重复录入。"
+    },
+    "certificate_missing": {
+      "fail": "合同 {contract} 的发票 {number}：收款方在 {on} 没有有效的{certificate}，而 {reference} 要求在付款放行前具备。",
+      "suggestion": "请将证书登记到收款方的分包商记录中，或在出示证书前暂缓付款。"
     }
   },
   "cost_forecast": {
@@ -1217,5 +1221,12 @@
       "evm_cpi": "成本绩效（CPI）",
       "manual": "手动金额"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "社会保险无欠费证明",
+    "construction_tax_exemption": "建筑税免税证明",
+    "employers_liability_clearance": "雇主责任无欠费证明",
+    "insurance": "保险证明",
+    "license": "承包商执照"
   }
 }

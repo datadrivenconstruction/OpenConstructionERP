@@ -54,6 +54,7 @@ KEY_PREFIXES = (
     "compliance_gate.",
     "hakedis.",
     "pay_application.",
+    "public_works.",
     "payment_plan.",
     "retention_release.",
     "sov_reconcile.",

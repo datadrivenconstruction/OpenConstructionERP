@@ -1196,6 +1196,10 @@
     "possible_duplicate": {
       "fail": "الفاتورة {number} لها المقاول والمبلغ ({amount}) والتاريخ ({on}) نفسها الخاصة بالفاتورة {other}.",
       "suggestion": "تحقق من أنها ليست الفاتورة نفسها مدخلة مرتين برقم مختلف."
+    },
+    "certificate_missing": {
+      "fail": "الفاتورة {number} على العقد {contract}: لا يحوز المستفيد {certificate} ساري المفعول بتاريخ {on}، وهو ما تشترطه {reference} قبل صرف الدفعة.",
+      "suggestion": "سجّل الشهادة في سجل المقاول من الباطن للمستفيد، أو أوقف الدفعة إلى حين إبرازها."
     }
   },
   "cost_forecast": {
@@ -1217,5 +1221,12 @@
       "evm_cpi": "أداء التكلفة (CPI)",
       "manual": "مبلغ يدوي"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "شهادة براءة ذمة من التأمينات الاجتماعية",
+    "construction_tax_exemption": "شهادة إعفاء من ضريبة البناء",
+    "employers_liability_clearance": "شهادة براءة ذمة من مسؤولية أصحاب العمل",
+    "insurance": "شهادة تأمين",
+    "license": "ترخيص المقاول"
   }
 }

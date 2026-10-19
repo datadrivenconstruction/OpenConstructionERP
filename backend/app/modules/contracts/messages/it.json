@@ -218,5 +218,61 @@
       "fail": "La voce {line} è registrata a {stated} a oggi, ma la sua quantità o percentuale dà {computed}",
       "suggestion": "Correggete la quantità o l'importo nel documento in modo che le due colonne della riga coincidano"
     }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "La ritenuta del {percent} per cento supera il {limit} per cento che la legge sugli appalti pubblici consente su ogni pagamento intermedio",
+      "suggestion": "Ridurre la ritenuta del contratto all'aliquota di legge"
+    },
+    "advance_above_cap": {
+      "fail": "La garanzia sull'anticipazione copre il {percent} per cento del valore del contratto, oltre il {limit} per cento che gli appalti pubblici ammettono senza l'approvazione del ministro delle finanze",
+      "suggestion": "Ridurre l'anticipazione, oppure registrare nelle condizioni contrattuali l'approvazione ottenuta prima della gara"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Una clausola sulle penali per ritardo non ha un importo massimo, mentre la legge sugli appalti pubblici limita le penali per ritardo al {limit} per cento del valore del contratto",
+      "suggestion": "Inserire l'importo massimo della clausola sulle penali per ritardo"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Una clausola sulle penali per ritardo è limitata al {percent} per cento del valore del contratto, oltre il {limit} per cento consentito dalla legge sugli appalti pubblici",
+      "suggestion": "Ridurre l'importo massimo della clausola al limite di legge"
+    },
+    "performance_security_missing": {
+      "fail": "Non è registrata alcuna garanzia di buona esecuzione, mentre gli appalti pubblici ne richiedono una pari al {limit} per cento del valore del contratto",
+      "suggestion": "Registrare la garanzia definitiva come cauzione di buona esecuzione o garanzia bancaria"
+    },
+    "performance_security_below": {
+      "fail": "La garanzia di buona esecuzione copre il {percent} per cento del valore del contratto, meno del {limit} per cento richiesto dagli appalti pubblici",
+      "suggestion": "Registrare una garanzia di buona esecuzione pari all'intera percentuale di legge"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "I lavori pubblici di {months} mesi o più devono essere soggetti a revisione prezzi per legge, e il contratto non indica coefficienti per le sue voci variabili",
+        "suggestion": "Inserire i coefficienti indicati dall'appaltatore nella busta tecnica"
+      },
+      "duplicate_item": {
+        "fail": "La voce variabile {item} è elencata due volte tra i coefficienti di revisione prezzi",
+        "suggestion": "Mantenere un solo coefficiente per ogni voce variabile"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Il coefficiente di revisione prezzi di {item} non è un numero",
+        "suggestion": "Inserire il coefficiente come decimale, ad esempio 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Il coefficiente di revisione prezzi di {item} è pari o inferiore a zero, mentre la legge richiede che ogni coefficiente sia maggiore di zero",
+        "suggestion": "Inserire un coefficiente maggiore di zero, oppure rimuovere la voce"
+      },
+      "coefficient_negative": {
+        "fail": "Il coefficiente di revisione prezzi di {item} è negativo",
+        "suggestion": "Inserire un coefficiente pari o superiore a zero"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "I coefficienti di revisione prezzi sommano a {item}, mentre la legge richiede che la somma resti inferiore a uno",
+        "suggestion": "Ridurre i coefficienti in modo che resti una parte fissa del prezzo"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "I coefficienti di revisione prezzi sommano a {item}, più di uno",
+        "suggestion": "Ridurre i coefficienti in modo che sommino a uno o meno"
+      }
+    }
   }
 }

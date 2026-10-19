@@ -1196,6 +1196,10 @@
     "possible_duplicate": {
       "fail": "Faktur {number} memiliki kontraktor, jumlah ({amount}) dan tanggal ({on}) yang sama dengan faktur {other}.",
       "suggestion": "Pastikan ini bukan faktur yang sama yang dimasukkan dua kali dengan nomor lain."
+    },
+    "certificate_missing": {
+      "fail": "Faktur {number} pada kontrak {contract}: penerima pembayaran tidak memiliki {certificate} yang berlaku pada {on}, yang disyaratkan {reference} sebelum pembayaran dicairkan.",
+      "suggestion": "Catat sertifikat pada data subkontraktor penerima pembayaran, atau tahan pembayaran sampai sertifikat ditunjukkan."
     }
   },
   "cost_forecast": {
@@ -1217,5 +1221,12 @@
       "evm_cpi": "kinerja biaya (CPI)",
       "manual": "jumlah manual"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "surat keterangan bebas tunggakan jaminan sosial",
+    "construction_tax_exemption": "surat keterangan bebas pajak konstruksi",
+    "employers_liability_clearance": "surat keterangan bebas tanggung jawab pemberi kerja",
+    "insurance": "sertifikat asuransi",
+    "license": "izin kontraktor"
   }
 }

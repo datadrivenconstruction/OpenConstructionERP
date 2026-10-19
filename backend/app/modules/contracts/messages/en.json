@@ -218,5 +218,61 @@
       "fail": "Item {line} is recorded at {stated} to date, but its quantity or percent gives {computed}",
       "suggestion": "Correct the quantity or the amount on the document so that the two columns of the row agree"
     }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Retention of {percent} percent is above the {limit} percent the public works law allows on each interim payment",
+      "suggestion": "Lower the contract's retention to the statutory rate"
+    },
+    "advance_above_cap": {
+      "fail": "The advance payment bond covers {percent} percent of the contract value, above the {limit} percent public works allow without the finance minister's approval",
+      "suggestion": "Reduce the advance payment, or record in the contract terms the approval obtained before tendering"
+    },
+    "delay_damages_uncapped": {
+      "fail": "A delay damages clause has no maximum amount, while the public works law caps delay damages at {limit} percent of the contract value",
+      "suggestion": "Enter the maximum amount of the delay damages clause"
+    },
+    "delay_damages_above_cap": {
+      "fail": "A delay damages clause is capped at {percent} percent of the contract value, above the {limit} percent the public works law allows",
+      "suggestion": "Lower the clause's maximum amount to the statutory cap"
+    },
+    "performance_security_missing": {
+      "fail": "No performance security is recorded, while public works require one of {limit} percent of the contract value",
+      "suggestion": "Record the final guarantee as a performance bond or a bank guarantee"
+    },
+    "performance_security_below": {
+      "fail": "The performance security covers {percent} percent of the contract value, below the {limit} percent public works require",
+      "suggestion": "Record a performance security for the full statutory percentage"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Public works of {months} months or more must be price-adjusted by law, and the contract states no coefficients for its variable items",
+        "suggestion": "Enter the coefficients the contractor stated in the technical envelope"
+      },
+      "duplicate_item": {
+        "fail": "The variable item {item} is listed twice among the price adjustment coefficients",
+        "suggestion": "Keep one coefficient per variable item"
+      },
+      "coefficient_not_a_number": {
+        "fail": "The price adjustment coefficient of {item} is not a number",
+        "suggestion": "Enter the coefficient as a decimal, for example 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "The price adjustment coefficient of {item} is zero or less, while the law requires each coefficient to be above zero",
+        "suggestion": "Enter a coefficient above zero, or remove the item"
+      },
+      "coefficient_negative": {
+        "fail": "The price adjustment coefficient of {item} is negative",
+        "suggestion": "Enter a coefficient of zero or more"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "The price adjustment coefficients add up to {item}, while the law requires their sum to stay below one",
+        "suggestion": "Lower the coefficients so that a fixed part of the price remains"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "The price adjustment coefficients add up to {item}, more than one",
+        "suggestion": "Lower the coefficients so that they add up to one or less"
+      }
+    }
   }
 }

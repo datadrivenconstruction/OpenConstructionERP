@@ -27,9 +27,11 @@ import asyncio
 import logging
 import uuid
 from decimal import Decimal
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
+from sqlalchemy import select
 
 from app.core.content_disposition import attachment_disposition
 from app.core.i18n import get_locale
@@ -131,6 +133,8 @@ from app.modules.contracts.schemas import (
     LDClauseUpdate,
     PaymentApplicationResponse,
     PaymentPlanResponse,
+    PriceAdjustmentComputeRequest,
+    PriceAdjustmentComputeResponse,
     ProgressClaimCommitRequest,
     ProgressClaimCreate,
     ProgressClaimLineCreate,
@@ -345,6 +349,76 @@ async def get_contract_country_defaults(
     return ContractCountryDefaultsResponse.model_validate(
         await service.country_defaults_for_project(project_id, counterparty_type)
     )
+
+
+@router.get("/price-adjustment/regimes/")
+async def list_price_adjustment_regimes(
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> list[dict[str, Any]]:
+    """The weighted index price adjustment regimes, each with its source."""
+    from app.modules.contracts.price_adjustment import PRICE_ADJUSTMENT_REGIMES  # noqa: PLC0415
+
+    return [dict(regime) for regime in PRICE_ADJUSTMENT_REGIMES.values()]
+
+
+@router.post("/price-adjustment/compute/", response_model=PriceAdjustmentComputeResponse)
+async def compute_price_adjustment(
+    body: PriceAdjustmentComputeRequest,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> PriceAdjustmentComputeResponse:
+    """One settlement of a price adjustment, for example a quarter under Egypt's Law 182/2018 Art. 47.
+
+    Each item's index values are taken from the request, or read from its
+    cost-index series (``price_index``) at ``base_period`` and
+    ``current_period``. Nothing is stored: a person reads the figure and
+    raises the claim.
+    """
+    from app.modules.contracts.price_adjustment import PriceAdjustmentError, compute_adjustment  # noqa: PLC0415
+
+    def refuse(problem: str, message: str, **params: Any) -> HTTPException:
+        return HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"problem": problem, "message": message, **{k: str(v) for k, v in params.items()}},
+        )
+
+    base: dict[str, Decimal] = {}
+    current: dict[str, Decimal] = {}
+    for row in body.coefficients:
+        base_value, current_value = row.base_index, row.current_index
+        if (base_value is None or current_value is None) and row.index_series_id is not None:
+            if not body.base_period or not body.current_period:
+                raise refuse("periods_required", "Name base_period and current_period to read a series", item=row.item)
+            from app.modules.price_index.models import CostIndexPoint  # noqa: PLC0415
+
+            points = (
+                await session.execute(
+                    select(CostIndexPoint).where(
+                        CostIndexPoint.series_id == row.index_series_id,
+                        CostIndexPoint.period.in_([body.base_period, body.current_period]),
+                    )
+                )
+            ).scalars()
+            by_period = {p.period: Decimal(str(p.factor)) for p in points}
+            base_value = base_value if base_value is not None else by_period.get(body.base_period)
+            current_value = current_value if current_value is not None else by_period.get(body.current_period)
+        if base_value is None or current_value is None:
+            raise refuse("missing_index", f"No index for {row.item} in the requested periods", item=row.item)
+        base[row.item] = base_value
+        current[row.item] = current_value
+    try:
+        result = compute_adjustment(
+            body.regime,
+            body.value_subject,
+            [(row.item, row.coefficient) for row in body.coefficients],
+            base,
+            current,
+        )
+    except PriceAdjustmentError as exc:
+        raise refuse(exc.problem, str(exc), **exc.params) from exc
+    return PriceAdjustmentComputeResponse.model_validate(result.as_dict())
 
 
 @router.post("/contracts/", response_model=ContractResponse, status_code=201)

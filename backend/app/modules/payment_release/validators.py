@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Invoice and payment release rules V11 to V14 and V16 to V18, rule set ``payment_release``.
+"""Invoice and payment release rules V11 to V14 and V16 to V19, rule set ``payment_release``.
 
 The checks a controller runs before money leaves the project, in the order an
 invoice goes through its release. V15 (a supplier invoice belongs to a
@@ -32,6 +32,10 @@ other data.
   rate, and a reverse charged invoice carries no VAT.
 * V18 ``duplicate_invoice``: the same contractor's invoice number once, and
   the same contractor, amount and date pointed out as a possible duplicate.
+* V19 ``release_certificates``: where the pack makes a certificate a
+  condition of paying (a social insurance clearance), an interim or final
+  invoice is released only while the payee holds one valid on the release
+  date (:mod:`app.modules.payment_release.release_certificates`).
 
 Messages come from the validation message bundle in the caller's locale.
 """
@@ -601,6 +605,84 @@ class DuplicateInvoiceRule(_ReleaseRule):
         return out
 
 
+class ReleaseCertificatesRule(_ReleaseRule):
+    """V19: the payee holds the certificates the law asks for before a payment is released.
+
+    Reads ``contract["release_certificates"]`` (built by the service from the
+    project's pack and the counterparty's subcontractor record)::
+
+        {"enforcement": "pack" | "block" | "warn" | "off",
+         "requirements": [{"code", "cert_type", "release_effect", "applies_to_kinds",
+                           "statute_reference", "needs_expert_review"}],
+         "certificates": [{"cert_type", "issue_date", "valid_until", "status", "revoked"}]}
+
+    and ``payload["as_of"]``, the release date. Only invoices not yet
+    released are checked: a confirmed release is history, and a certificate
+    that lapsed afterwards says nothing about the day it was paid.
+    """
+
+    rule_id = "payment_release.release_certificates"
+    name = "Payee holds the certificates required before payment"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "Where the pack makes a certificate (for example a social insurance clearance) a condition of paying, "
+        "each interim or final invoice is released only while the payee holds one valid on the release date."
+    )
+
+    def check(self, context: ValidationContext, payload: dict[str, Any]) -> list[RuleResult]:
+        from app.modules.payment_release.release_certificates import (  # noqa: PLC0415
+            effective_severity,
+            normalise_enforcement,
+        )
+
+        as_of = _date(payload.get("as_of"))
+        if as_of is None:
+            return []
+        locale = _locale(context)
+        out: list[RuleResult] = []
+        for c in _rows(payload, "contracts"):
+            gate = c.get("release_certificates")
+            if not isinstance(gate, dict):
+                continue
+            enforcement = normalise_enforcement(gate.get("enforcement"))
+            held = [
+                cert
+                for cert in _rows(gate, "certificates")
+                if not cert.get("revoked")
+                and str(cert.get("status") or "") != "revoked"
+                and (_date(cert.get("issue_date")) or as_of) <= as_of
+                and (_date(cert.get("valid_until")) is None or _date(cert.get("valid_until")) >= as_of)  # type: ignore[operator]
+            ]
+            for requirement in _rows(gate, "requirements"):
+                level = effective_severity(requirement, enforcement)
+                if level is None:
+                    continue
+                cert_type = str(requirement.get("cert_type") or "")
+                if any(cert.get("cert_type") == cert_type for cert in held):
+                    continue
+                type_key = f"payment_release_certificate_types.{cert_type}"
+                label = translate(type_key, locale)
+                kinds = requirement.get("applies_to_kinds") or []
+                for inv in _rows(c, "invoices"):
+                    if inv.get("released") or str(inv.get("kind") or "") not in kinds:
+                        continue
+                    out.append(
+                        self._result(
+                            context,
+                            "certificate_missing",
+                            severity=Severity.ERROR if level == "error" else Severity.WARNING,
+                            element_ref=str(inv.get("id") or ""),
+                            number=inv.get("number") or "",
+                            contract=c.get("code") or "",
+                            certificate=cert_type if label == type_key else label,
+                            on=as_of.isoformat(),
+                            reference=str(requirement.get("statute_reference") or ""),
+                        )
+                    )
+        return out
+
+
 PAYMENT_RELEASE_RULES: tuple[type[_ReleaseRule], ...] = (
     InvoiceSequenceRule,
     ReleaseRecomputedRule,
@@ -609,6 +691,7 @@ PAYMENT_RELEASE_RULES: tuple[type[_ReleaseRule], ...] = (
     InvoicedWithinValueRule,
     InvoiceVatRule,
     DuplicateInvoiceRule,
+    ReleaseCertificatesRule,
 )
 
 #: The spec's numbering of each rule (V15 is ``cost_chain.invoice_has_contract``).
@@ -620,11 +703,12 @@ RULE_NUMBERS: dict[str, str] = {
     InvoicedWithinValueRule.rule_id: "V16",
     InvoiceVatRule.rule_id: "V17",
     DuplicateInvoiceRule.rule_id: "V18",
+    ReleaseCertificatesRule.rule_id: "V19",
 }
 
 
 def register_payment_release_rules() -> None:
-    """Register V11 to V14 and V16 to V18 into the ``payment_release`` rule set."""
+    """Register V11 to V14 and V16 to V19 into the ``payment_release`` rule set."""
     for rule_cls in PAYMENT_RELEASE_RULES:
         rule_registry.register(rule_cls(), [RULE_SET])
     logger.debug("Registered payment release validation rules")

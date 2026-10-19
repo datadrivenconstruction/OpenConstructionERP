@@ -1003,51 +1003,51 @@
       "suggestion": "Registrare il trattamento: l'aliquota ordinaria, un'aliquota ridotta o zero se il lavoro ne ha i requisiti, oppure il reverse charge interno se la fornitura ne rientra. Il reverse charge trasferisce l'IVA al cliente e modifica ciò che l'impresa può fatturare"
     }
   },
-    "project_completeness": {
-      "country_set": {
-        "fail": "Il progetto non indica nessun paese, quindi non è possibile determinare né la base prezzi, né l'aliquota fiscale né il calendario lavorativo",
-        "suggestion": "Impostare il paese del progetto nelle sue impostazioni. Il paese determina quale pacchetto regionale, imposta e calendario vengono usati per interpretare ogni cifra"
-      },
-      "currency_set": {
-        "fail": "Il progetto non indica nessuna valuta, quindi i suoi computi, ricarichi e contratti non possono essere totalizzati",
-        "suggestion": "Scegliere la valuta del progetto nelle sue impostazioni. Ogni computo e ogni contratto è valorizzato in essa e ogni totale viene letto in essa"
-      },
-      "currency_matches_bill": {
-        "fail": "Il progetto è valorizzato in {project_currency}, ma alcune righe di questo computo sono valorizzate in {bill_currencies}",
-        "suggestion": "Convertire le righe nella valuta del progetto a un cambio dichiarato, oppure registrare il cambio sul progetto, affinché il totale del computo sia un'unica cifra"
-      },
-      "priced_bill_present": {
-        "fail": "Il progetto non ha nessun computo metrico con voci, quindi non c'è nulla da cui stimare",
-        "suggestion": "Creare un computo metrico e aggiungere voci, oppure importarne uno da un modello CAD, un foglio di calcolo o un file di interscambio"
-      },
-      "bill_base_date_set": {
-        "fail": "Il computo \"{bill}\" non indica la data base a cui sono riferiti i suoi prezzi",
-        "suggestion": "Registrare la data base sul computo. Senza di essa i prezzi non possono essere aggiornati, attualizzati alla propria data né confrontati con un'altra stima"
-      },
-      "classification_standard_set": {
-        "fail": "Il progetto non ha nessuno standard di classificazione, quindi le sue voci portano codici che nessuno può verificare",
-        "suggestion": "Scegliere lo standard di classificazione secondo cui è codificato il progetto. Determina anche quali set di regole nazionali esegue la validazione"
-      },
-      "planned_dates_set": {
-        "both_missing": "Il progetto non ha né una data di inizio prevista né una data di fine prevista",
-        "start_missing": "Il progetto ha una data di fine prevista ma non una data di inizio prevista",
-        "end_missing": "Il progetto ha una data di inizio prevista ma non una data di fine prevista",
-        "unreadable": "La data prevista \"{value}\" non può essere letta come data",
-        "suggestion": "Inserire le date di inizio e fine previste del progetto come date. I costi legati al tempo, la revisione prezzi e il programma lavori sono valorizzati tra queste due date"
-      },
-      "planned_dates_ordered": {
-        "fail": "Il progetto è previsto iniziare il {start} e terminare il {end}, che è prima dell'inizio",
-        "suggestion": "Scambiare o correggere le date previste affinché l'inizio preceda la fine"
-      },
-      "client_recorded": {
-        "fail": "Il progetto non registra nessun committente, e nessun contratto indica un employer",
-        "suggestion": "Registrare il committente sul progetto, oppure aggiungere l'employer come parte nel contratto, affinché la stima abbia un destinatario"
-      },
-      "procurement_started": {
-        "fail": "Il progetto è nella fase {phase}, eppure non ha nessun contratto né nessun pacchetto di gara",
-        "suggestion": "Creare un pacchetto di gara a partire dal computo o registrare il contratto, oppure riportare la fase allo stadio di stima in cui il progetto effettivamente si trova"
-      }
+  "project_completeness": {
+    "country_set": {
+      "fail": "Il progetto non indica nessun paese, quindi non è possibile determinare né la base prezzi, né l'aliquota fiscale né il calendario lavorativo",
+      "suggestion": "Impostare il paese del progetto nelle sue impostazioni. Il paese determina quale pacchetto regionale, imposta e calendario vengono usati per interpretare ogni cifra"
     },
+    "currency_set": {
+      "fail": "Il progetto non indica nessuna valuta, quindi i suoi computi, ricarichi e contratti non possono essere totalizzati",
+      "suggestion": "Scegliere la valuta del progetto nelle sue impostazioni. Ogni computo e ogni contratto è valorizzato in essa e ogni totale viene letto in essa"
+    },
+    "currency_matches_bill": {
+      "fail": "Il progetto è valorizzato in {project_currency}, ma alcune righe di questo computo sono valorizzate in {bill_currencies}",
+      "suggestion": "Convertire le righe nella valuta del progetto a un cambio dichiarato, oppure registrare il cambio sul progetto, affinché il totale del computo sia un'unica cifra"
+    },
+    "priced_bill_present": {
+      "fail": "Il progetto non ha nessun computo metrico con voci, quindi non c'è nulla da cui stimare",
+      "suggestion": "Creare un computo metrico e aggiungere voci, oppure importarne uno da un modello CAD, un foglio di calcolo o un file di interscambio"
+    },
+    "bill_base_date_set": {
+      "fail": "Il computo \"{bill}\" non indica la data base a cui sono riferiti i suoi prezzi",
+      "suggestion": "Registrare la data base sul computo. Senza di essa i prezzi non possono essere aggiornati, attualizzati alla propria data né confrontati con un'altra stima"
+    },
+    "classification_standard_set": {
+      "fail": "Il progetto non ha nessuno standard di classificazione, quindi le sue voci portano codici che nessuno può verificare",
+      "suggestion": "Scegliere lo standard di classificazione secondo cui è codificato il progetto. Determina anche quali set di regole nazionali esegue la validazione"
+    },
+    "planned_dates_set": {
+      "both_missing": "Il progetto non ha né una data di inizio prevista né una data di fine prevista",
+      "start_missing": "Il progetto ha una data di fine prevista ma non una data di inizio prevista",
+      "end_missing": "Il progetto ha una data di inizio prevista ma non una data di fine prevista",
+      "unreadable": "La data prevista \"{value}\" non può essere letta come data",
+      "suggestion": "Inserire le date di inizio e fine previste del progetto come date. I costi legati al tempo, la revisione prezzi e il programma lavori sono valorizzati tra queste due date"
+    },
+    "planned_dates_ordered": {
+      "fail": "Il progetto è previsto iniziare il {start} e terminare il {end}, che è prima dell'inizio",
+      "suggestion": "Scambiare o correggere le date previste affinché l'inizio preceda la fine"
+    },
+    "client_recorded": {
+      "fail": "Il progetto non registra nessun committente, e nessun contratto indica un employer",
+      "suggestion": "Registrare il committente sul progetto, oppure aggiungere l'employer come parte nel contratto, affinché la stima abbia un destinatario"
+    },
+    "procurement_started": {
+      "fail": "Il progetto è nella fase {phase}, eppure non ha nessun contratto né nessun pacchetto di gara",
+      "suggestion": "Creare un pacchetto di gara a partire dal computo o registrare il contratto, oppure riportare la fase allo stadio di stima in cui il progetto effettivamente si trova"
+    }
+  },
   "boq_resources": {
     "unit_rate_not_rederived": {
       "fail": "Voce {ordinal}: le righe delle risorse non possono valorizzare la voce, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
@@ -1196,6 +1196,10 @@
     "possible_duplicate": {
       "fail": "La fattura {number} ha lo stesso fornitore, importo ({amount}) e data ({on}) della fattura {other}.",
       "suggestion": "Verifichi che non sia la stessa fattura inserita due volte con un altro numero."
+    },
+    "certificate_missing": {
+      "fail": "Fattura {number} sul contratto {contract}: il beneficiario non possiede alcun documento valido al {on} ({certificate}), richiesto da {reference} prima dello svincolo del pagamento.",
+      "suggestion": "Registrare il certificato nella scheda subappaltatore del beneficiario, oppure trattenere il pagamento fino alla sua presentazione."
     }
   },
   "cost_forecast": {
@@ -1217,5 +1221,12 @@
       "evm_cpi": "andamento dei costi (CPI)",
       "manual": "importo manuale"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "certificato di regolarità contributiva",
+    "construction_tax_exemption": "certificato di esenzione dall'imposta sulle costruzioni",
+    "employers_liability_clearance": "certificato di liberatoria sulla responsabilità dei datori di lavoro",
+    "insurance": "certificato assicurativo",
+    "license": "licenza dell'appaltatore"
   }
 }

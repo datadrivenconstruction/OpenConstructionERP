@@ -1196,6 +1196,10 @@
     "possible_duplicate": {
       "fail": "Laskulla {number} on sama urakoitsija, summa ({amount}) ja päivä ({on}) kuin laskulla {other}.",
       "suggestion": "Tarkista, ettei kyseessä ole sama lasku kirjattuna kahdesti eri numerolla."
+    },
+    "certificate_missing": {
+      "fail": "Lasku {number} sopimuksessa {contract}: maksun saajalla ei ole päivälle {on} voimassa olevaa asiakirjaa ({certificate}), jota {reference} edellyttää ennen maksun vapauttamista.",
+      "suggestion": "Kirjaa asiakirja maksun saajan aliurakoitsijatietoihin tai pidätä maksu, kunnes se esitetään."
     }
   },
   "cost_forecast": {
@@ -1217,5 +1221,12 @@
       "evm_cpi": "kustannustehokkuus (CPI)",
       "manual": "käsin syötetty summa"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "sosiaalivakuutuksen selvitystodistus",
+    "construction_tax_exemption": "rakennusveron vapautustodistus",
+    "employers_liability_clearance": "työnantajan vastuun selvitystodistus",
+    "insurance": "vakuutustodistus",
+    "license": "urakoitsijan lupa"
   }
 }
