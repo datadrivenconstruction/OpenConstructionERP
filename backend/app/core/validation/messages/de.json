@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "Die Rechnung {number} hat denselben Auftragnehmer, Betrag ({amount}) und dasselbe Datum ({on}) wie die Rechnung {other}.",
       "suggestion": "Prüfen Sie, dass es nicht dieselbe Rechnung ist, die unter einer anderen Nummer doppelt erfasst wurde."
+    },
+    "certificate_missing": {
+      "fail": "Rechnung {number} zum Vertrag {contract}: Dem Zahlungsempfänger liegt zum {on} kein gültiger Nachweis vor ({certificate}), den {reference} vor der Freigabe der Zahlung verlangt.",
+      "suggestion": "Erfassen Sie den Nachweis am Nachunternehmer-Datensatz des Zahlungsempfängers oder halten Sie die Zahlung zurück, bis er vorgelegt wird."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "Unbedenklichkeitsbescheinigung der Sozialversicherung",
+    "construction_tax_exemption": "Bescheinigung über die Befreiung von der Bausteuer",
+    "employers_liability_clearance": "Unbedenklichkeitsbescheinigung zur Arbeitgeberhaftung",
+    "insurance": "Versicherungsnachweis",
+    "license": "Unternehmerlizenz"
   }
 }

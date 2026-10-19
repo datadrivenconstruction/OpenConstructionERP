@@ -367,6 +367,7 @@ NATIONAL_RULE_SET_BY_COUNTRY: dict[str, str] = {
     "CA": "masterformat",
     "CN": "gbt50500",
     "DE": "din276",
+    "EG": "masterformat",
     "ES": "bc3",
     "FR": "dpgf",
     "GB": "nrm",

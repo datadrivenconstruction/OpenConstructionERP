@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "Hóa đơn {number} có cùng nhà thầu, số tiền ({amount}) và ngày ({on}) với hóa đơn {other}.",
       "suggestion": "Kiểm tra xem có phải cùng một hóa đơn bị nhập hai lần dưới số khác hay không."
+    },
+    "certificate_missing": {
+      "fail": "Hóa đơn {number} theo hợp đồng {contract}: bên nhận thanh toán không có {certificate} còn hiệu lực vào ngày {on}, mà {reference} yêu cầu trước khi giải ngân khoản thanh toán.",
+      "suggestion": "Ghi nhận giấy này vào hồ sơ nhà thầu phụ của bên nhận, hoặc giữ lại khoản thanh toán cho đến khi giấy được xuất trình."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "giấy xác nhận hoàn thành nghĩa vụ bảo hiểm xã hội",
+    "construction_tax_exemption": "giấy chứng nhận miễn thuế xây dựng",
+    "employers_liability_clearance": "giấy xác nhận hoàn thành trách nhiệm của người sử dụng lao động",
+    "insurance": "giấy chứng nhận bảo hiểm",
+    "license": "giấy phép nhà thầu"
   }
 }

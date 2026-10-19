@@ -25,6 +25,8 @@ InvoiceKind = Literal["interim", "final", "daywork", "credit_note"]
 RetentionBasis = Literal["net", "gross"]
 DiscountScope = Literal["interim", "final", "both"]
 RetentionKind = Literal["interim", "warranty"]
+#: How a contract enforces the certificates its pack makes a condition of payment (rule V19).
+ReleaseCertificatesEnforcement = Literal["pack", "block", "warn", "off"]
 
 assert set(InvoiceMode.__args__) == set(INVOICE_MODES)  # type: ignore[attr-defined]
 assert set(InvoiceKind.__args__) == set(INVOICE_KINDS)  # type: ignore[attr-defined]
@@ -74,6 +76,8 @@ class PaymentTermsBody(BaseModel):
     rounding_step: Amount = Decimal("0")
     interim_due_days: int | None = Field(default=None, ge=0, le=365)
     final_due_days: int | None = Field(default=None, ge=0, le=365)
+    # Not sent: the contract keeps what it had. Stored in the terms' metadata, no column.
+    release_certificates_enforcement: ReleaseCertificatesEnforcement | None = None
 
     _finite_values = field_validator("retention_percent", "warranty_percent", "discount_percent", "rounding_step")(
         _finite
@@ -112,6 +116,7 @@ class PaymentTermsResponse(BaseModel):
     rounding_step: Decimal
     interim_due_days: int | None
     final_due_days: int | None
+    release_certificates_enforcement: ReleaseCertificatesEnforcement = "pack"
 
 
 # ── Invoice in the release view ──────────────────────────────────────────

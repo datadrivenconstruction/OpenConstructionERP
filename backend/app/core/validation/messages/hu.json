@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "A(z) {number} számla vállalkozója, összege ({amount}) és dátuma ({on}) megegyezik a(z) {other} számláéval.",
       "suggestion": "Ellenőrizze, hogy nem ugyanaz a számla szerepel-e kétszer, más számlaszámmal."
+    },
+    "certificate_missing": {
+      "fail": "{number} számla a(z) {contract} szerződésen: a kedvezményezettnek {on} napján nincs érvényes igazolása ({certificate}), amelyet {reference} a kifizetés felszabadítása előtt megkövetel.",
+      "suggestion": "Rögzítse az igazolást a kedvezményezett alvállalkozói nyilvántartásában, vagy tartsa vissza a kifizetést, amíg be nem mutatják."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "társadalombiztosítási tartozásmentességi igazolás",
+    "construction_tax_exemption": "építési adó alóli mentességi igazolás",
+    "employers_liability_clearance": "munkáltatói felelősségi tartozásmentességi igazolás",
+    "insurance": "biztosítási igazolás",
+    "license": "vállalkozói engedély"
   }
 }

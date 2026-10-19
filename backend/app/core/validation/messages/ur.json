@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "انوائس {number} کا ٹھیکیدار، رقم ({amount}) اور تاریخ ({on}) انوائس {other} جیسی ہی ہے۔",
       "suggestion": "چیک کریں کہ یہ وہی انوائس نہ ہو جو کسی اور نمبر سے دو بار درج ہو گئی ہو۔"
+    },
+    "certificate_missing": {
+      "fail": "انوائس {number} بر معاہدہ {contract}: وصول کنندہ کے پاس {on} کو درست {certificate} موجود نہیں ہے، جسے {reference} ادائیگی جاری کرنے سے پہلے لازمی قرار دیتا ہے۔",
+      "suggestion": "سرٹیفکیٹ کو وصول کنندہ کے ذیلی ٹھیکیدار ریکارڈ میں درج کریں، یا اس کے پیش کیے جانے تک ادائیگی روک رکھیں۔"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "سماجی بیمہ کلیئرنس سرٹیفکیٹ",
+    "construction_tax_exemption": "تعمیراتی ٹیکس استثنیٰ سرٹیفکیٹ",
+    "employers_liability_clearance": "آجر کی ذمہ داری کلیئرنس سرٹیفکیٹ",
+    "insurance": "بیمہ سرٹیفکیٹ",
+    "license": "ٹھیکیدار کا لائسنس"
   }
 }

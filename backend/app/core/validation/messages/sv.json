@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "Faktura {number} har samma entreprenör, belopp ({amount}) och datum ({on}) som faktura {other}.",
       "suggestion": "Kontrollera att det inte är samma faktura som registrerats två gånger under ett annat nummer."
+    },
+    "certificate_missing": {
+      "fail": "Faktura {number} på kontrakt {contract}: mottagaren har inget giltigt underlag ({certificate}) per {on}, som {reference} kräver innan betalningen frisläpps.",
+      "suggestion": "Registrera underlaget i mottagarens underentreprenörspost, eller håll inne betalningen tills det visas upp."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "intyg om betalda socialförsäkringsavgifter",
+    "construction_tax_exemption": "intyg om undantag från byggskatt",
+    "employers_liability_clearance": "intyg om arbetsgivaransvar",
+    "insurance": "försäkringsbevis",
+    "license": "entreprenörslicens"
   }
 }

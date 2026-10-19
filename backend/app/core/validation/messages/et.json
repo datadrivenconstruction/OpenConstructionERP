@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "Arvel {number} on sama töövõtja, summa ({amount}) ja kuupäev ({on}) mis arvel {other}.",
       "suggestion": "Kontrollige, et see pole sama arve, mis on sisestatud kaks korda teise numbriga."
+    },
+    "certificate_missing": {
+      "fail": "Arve {number} lepingu {contract} alusel: saajal ei ole kuupäeva {on} seisuga kehtivat dokumenti ({certificate}), mida {reference} nõuab enne makse vabastamist.",
+      "suggestion": "Kandke tõend saaja alltöövõtja kirjele või hoidke makset kinni, kuni see esitatakse."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "sotsiaalkindlustuse võlgnevuse puudumise tõend",
+    "construction_tax_exemption": "ehitusmaksu vabastuse tõend",
+    "employers_liability_clearance": "tööandja vastutuse võlgnevuse puudumise tõend",
+    "insurance": "kindlustustõend",
+    "license": "töövõtja tegevusluba"
   }
 }

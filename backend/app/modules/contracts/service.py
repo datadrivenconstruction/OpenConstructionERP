@@ -2338,11 +2338,34 @@ class ContractsService:
                     "display_name": await self._party_signing_name(p),
                 }
             )
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, contract.project_id)
+        ld_clauses = await self.ld_repo.list_for_contract(contract.id)
         context = {
+            # Read by the public works rules: the law that binds a contract
+            # follows the project's country and whether its client is public.
+            "project": {
+                "country_code": getattr(project, "country_code", None),
+                "works": getattr(project, "works", None),
+            },
+            "ld_clauses": [
+                {
+                    "id": str(c.id),
+                    "per_day_amount": str(c.per_day_amount),
+                    "max_amount": None if c.max_amount is None else str(c.max_amount),
+                }
+                for c in ld_clauses
+            ],
             "contract": {
                 "id": str(contract.id),
                 "status": contract.status,
                 "contract_type": contract.contract_type,
+                "counterparty_type": contract.counterparty_type,
+                "total_value": str(contract.total_value or 0),
+                "retention_percent": str(contract.retention_percent or 0),
+                "start_date": contract.start_date,
+                "end_date": contract.end_date,
                 "terms": contract.terms or {},
                 # Both of these, not just the code: the rule that reads them
                 # asks whether the pair is complete, and a rule handed half a
@@ -2351,7 +2374,15 @@ class ContractsService:
                 "template_version": contract.template_version,
             },
             "parties": party_rows,
-            "securities": [{"security_type": s.security_type, "status": s.status} for s in securities],
+            "securities": [
+                {
+                    "security_type": s.security_type,
+                    "status": s.status,
+                    "amount": str(s.amount),
+                    "percent_of_contract": None if s.percent_of_contract is None else str(s.percent_of_contract),
+                }
+                for s in securities
+            ],
             # The engine applies the newest schedule that carries tiers and
             # ignores the rest without saying so, which is fine as a rule and
             # bad as a surprise. The rule that reads this says out loud that

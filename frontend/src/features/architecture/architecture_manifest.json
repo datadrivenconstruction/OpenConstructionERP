@@ -56171,6 +56171,8 @@
         "payment_plan.py",
         "periods.py",
         "permissions.py",
+        "price_adjustment.py",
+        "public_procurement.py",
         "repairs.py",
         "repository.py",
         "retention.py",
@@ -57964,6 +57966,19 @@
           "handler": "get_contract_country_defaults",
           "response_model": "ContractCountryDefaultsResponse",
           "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/price-adjustment/regimes/",
+          "handler": "list_price_adjustment_regimes",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/price-adjustment/compute/",
+          "handler": "compute_price_adjustment",
+          "response_model": "PriceAdjustmentComputeResponse",
+          "request_schema": "PriceAdjustmentComputeRequest"
         },
         {
           "method": "POST",
@@ -63353,6 +63368,96 @@
               "type": "bool"
             }
           ]
+        },
+        {
+          "class_name": "PriceAdjustmentCoefficientIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One variable item: its coefficient and either its two index values or the series to read them from.",
+          "fields": [
+            {
+              "name": "item",
+              "type": "str"
+            },
+            {
+              "name": "coefficient",
+              "type": "Decimal"
+            },
+            {
+              "name": "base_index",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "current_index",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "index_series_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAdjustmentComputeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One settlement of a weighted index price adjustment.",
+          "fields": [
+            {
+              "name": "regime",
+              "type": "str"
+            },
+            {
+              "name": "value_subject",
+              "type": "Decimal"
+            },
+            {
+              "name": "coefficients",
+              "type": "list[PriceAdjustmentCoefficientIn]"
+            },
+            {
+              "name": "base_period",
+              "type": "str | None"
+            },
+            {
+              "name": "current_period",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAdjustmentComputeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The adjustment: positive is owed to the contractor, negative is deducted.",
+          "fields": [
+            {
+              "name": "regime",
+              "type": "str"
+            },
+            {
+              "name": "value_subject",
+              "type": "str"
+            },
+            {
+              "name": "fixed_portion",
+              "type": "str"
+            },
+            {
+              "name": "items",
+              "type": "list[dict[str, str]]"
+            },
+            {
+              "name": "total",
+              "type": "str"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -63362,6 +63467,7 @@
         "costmodel",
         "finance",
         "i18n_foundation",
+        "price_index",
         "progress",
         "projects",
         "punchlist",
@@ -154863,6 +154969,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "release_certificates.py",
         "release_math.py",
         "repository.py",
         "router.py",
@@ -155360,6 +155467,11 @@
             {
               "name": "final_due_days",
               "type": "int | None"
+            },
+            {
+              "name": "release_certificates_enforcement",
+              "type": "ReleaseCertificatesEnforcement | None",
+              "default": "None"
             }
           ]
         },
@@ -155445,6 +155557,11 @@
             {
               "name": "final_due_days",
               "type": "int | None"
+            },
+            {
+              "name": "release_certificates_enforcement",
+              "type": "ReleaseCertificatesEnforcement",
+              "default": "'pack'"
             }
           ]
         },
@@ -156051,7 +156168,9 @@
         "boq",
         "contracts",
         "costmodel",
-        "finance"
+        "finance",
+        "projects",
+        "subcontractors"
       ]
     },
     {
@@ -274575,6 +274694,7 @@
       "costmodel",
       "finance",
       "i18n_foundation",
+      "price_index",
       "progress",
       "projects",
       "punchlist",
@@ -275151,7 +275271,8 @@
       "contracts",
       "costmodel",
       "finance",
-      "projects"
+      "projects",
+      "subcontractors"
     ],
     "payroll": [
       "costmodel",
@@ -275770,9 +275891,9 @@
     "total_models": 780,
     "total_columns": 9086,
     "total_relationships": 240,
-    "total_routes": 4592,
-    "total_schemas": 4071,
-    "total_python_files": 2739,
+    "total_routes": 4594,
+    "total_schemas": 4074,
+    "total_python_files": 2742,
     "frontend_features": 209,
     "frontend_ts_files": 3551,
     "frontend_backend_mapped": 187

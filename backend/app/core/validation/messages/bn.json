@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "ইনভয়েস {number}-এর ঠিকাদার, অঙ্ক ({amount}) ও তারিখ ({on}) ইনভয়েস {other}-এর সঙ্গে হুবহু এক।",
       "suggestion": "যাচাই করুন, এটি অন্য নম্বরে দুইবার এন্ট্রি করা একই ইনভয়েস কি না।"
+    },
+    "certificate_missing": {
+      "fail": "চালান {number}, চুক্তি {contract}: প্রাপকের কাছে {on} তারিখে বৈধ কোনো {certificate} নেই, যা পেমেন্ট ছাড়ের আগে {reference} অনুযায়ী প্রয়োজন।",
+      "suggestion": "প্রাপকের সাবকন্ট্রাক্টর রেকর্ডে সনদটি নথিভুক্ত করুন, অথবা সনদ দেখানো পর্যন্ত পেমেন্ট স্থগিত রাখুন।"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "সামাজিক বিমা ছাড়পত্র সনদ",
+    "construction_tax_exemption": "নির্মাণ কর অব্যাহতি সনদ",
+    "employers_liability_clearance": "নিয়োগকর্তার দায় ছাড়পত্র সনদ",
+    "insurance": "বিমা সনদ",
+    "license": "ঠিকাদারের লাইসেন্স"
   }
 }

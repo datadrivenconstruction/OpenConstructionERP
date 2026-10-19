@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "청구서 {number}는 시공사, 금액({amount}), 날짜({on})가 청구서 {other}와 같습니다.",
       "suggestion": "같은 청구서를 다른 번호로 두 번 입력한 것이 아닌지 확인하세요."
+    },
+    "certificate_missing": {
+      "fail": "계약 {contract}의 송장 {number}: 수취인은 {on} 기준으로 유효한 {certificate}을(를) 보유하고 있지 않으며, {reference}에서 지급 해제 전에 이를 요구합니다.",
+      "suggestion": "수취인의 하도급업체 기록에 증명서를 등록하거나, 제시될 때까지 지급을 보류하십시오."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "사회보험 완납 증명서",
+    "construction_tax_exemption": "건설세 면제 증명서",
+    "employers_liability_clearance": "사용자 책임 면제 확인서",
+    "insurance": "보험 증서",
+    "license": "시공업자 면허"
   }
 }

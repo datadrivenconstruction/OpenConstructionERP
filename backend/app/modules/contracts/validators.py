@@ -1692,9 +1692,272 @@ def _register_claim_as_tax_source() -> None:
     register_source_owner("progress_claim", _claim_project)
 
 
+# ── Public works limits ──────────────────────────────────────────────────────
+#
+# Two rules in the ``contracts`` set read the statutory limits of
+# :mod:`app.modules.contracts.public_procurement`. Both are silent unless the
+# context carries ``project: {"country_code", "works": "public"}`` for a
+# country that has a row there, and the contract is not a subcontract (a main
+# contractor letting work is not a public buyer). The context the service adds
+# for them::
+#
+#     "project": {"country_code": "EG", "works": "public" | "private" | None},
+#     "contract": {..., "counterparty_type", "total_value", "retention_percent",
+#                  "start_date", "end_date"},
+#     "securities": [{"security_type", "status", "amount", "percent_of_contract"}],
+#     "ld_clauses": [{"id", "per_day_amount", "max_amount"}],
+
+
+#: Message keys of the public works findings, written out whole so the bundle
+#: tests can see every key the rules ask for.
+_PUBLIC_WORKS_KEYS: dict[str, tuple[str, str]] = {
+    "retention_above_limit": (
+        "public_works.retention_above_limit.fail",
+        "public_works.retention_above_limit.suggestion",
+    ),
+    "advance_above_cap": (
+        "public_works.advance_above_cap.fail",
+        "public_works.advance_above_cap.suggestion",
+    ),
+    "delay_damages_uncapped": (
+        "public_works.delay_damages_uncapped.fail",
+        "public_works.delay_damages_uncapped.suggestion",
+    ),
+    "delay_damages_above_cap": (
+        "public_works.delay_damages_above_cap.fail",
+        "public_works.delay_damages_above_cap.suggestion",
+    ),
+    "performance_security_missing": (
+        "public_works.performance_security_missing.fail",
+        "public_works.performance_security_missing.suggestion",
+    ),
+    "performance_security_below": (
+        "public_works.performance_security_below.fail",
+        "public_works.performance_security_below.suggestion",
+    ),
+}
+_PRICE_ADJUSTMENT_KEYS: dict[str, tuple[str, str]] = {
+    "no_coefficients": (
+        "public_works.price_adjustment.no_coefficients.fail",
+        "public_works.price_adjustment.no_coefficients.suggestion",
+    ),
+    "duplicate_item": (
+        "public_works.price_adjustment.duplicate_item.fail",
+        "public_works.price_adjustment.duplicate_item.suggestion",
+    ),
+    "coefficient_not_a_number": (
+        "public_works.price_adjustment.coefficient_not_a_number.fail",
+        "public_works.price_adjustment.coefficient_not_a_number.suggestion",
+    ),
+    "coefficient_not_positive": (
+        "public_works.price_adjustment.coefficient_not_positive.fail",
+        "public_works.price_adjustment.coefficient_not_positive.suggestion",
+    ),
+    "coefficient_negative": (
+        "public_works.price_adjustment.coefficient_negative.fail",
+        "public_works.price_adjustment.coefficient_negative.suggestion",
+    ),
+    "coefficient_sum_not_below_one": (
+        "public_works.price_adjustment.coefficient_sum_not_below_one.fail",
+        "public_works.price_adjustment.coefficient_sum_not_below_one.suggestion",
+    ),
+    "coefficient_sum_above_one": (
+        "public_works.price_adjustment.coefficient_sum_above_one.fail",
+        "public_works.price_adjustment.coefficient_sum_above_one.suggestion",
+    ),
+}
+
+
+def _public_works_country(context: ValidationContext) -> str | None:
+    """The country whose public works law binds this contract, or ``None``."""
+    from app.modules.contracts.public_procurement import PUBLIC_WORKS_LIMITS  # noqa: PLC0415
+
+    project = _data(context).get("project")
+    if not isinstance(project, dict) or str(project.get("works") or "").strip().lower() != "public":
+        return None
+    contract = _contract(context)
+    if not contract or str(contract.get("counterparty_type") or "").strip().lower() == "subcontractor":
+        return None
+    country = str(project.get("country_code") or "").strip().upper()
+    return country if country in PUBLIC_WORKS_LIMITS else None
+
+
+def _dec_or_none(raw: Any) -> Decimal | None:
+    if raw in (None, ""):
+        return None
+    try:
+        value = Decimal(str(raw))
+    except (InvalidOperation, ValueError):
+        return None
+    return value if value.is_finite() else None
+
+
+def _pct_text(value: Decimal) -> str:
+    return format(value.quantize(Decimal("0.01")).normalize(), "f")
+
+
+class _PublicWorksRule(_ClaimRule):
+    """Shared plumbing for the public works rules: the ``contracts`` set and the limits row."""
+
+    standard = CONTRACTS_RULE_SET
+    category = RuleCategory.COMPLIANCE
+
+
+class PublicWorksLimitsRule(_PublicWorksRule):
+    """A public works contract stays within its country's statutory limits."""
+
+    rule_id = "contracts.public_works_limits"
+    name = "Public works contract within the statutory limits"
+    severity = Severity.ERROR
+    description = (
+        "On public works, retention, the advance payment and the cap on delay damages stay within the "
+        "procurement law's limits, and the performance security is recorded."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.contracts.public_procurement import limit_value, public_works_limits  # noqa: PLC0415
+
+        country = _public_works_country(context)
+        if country is None:
+            return []
+        limits = public_works_limits(country)
+        contract = _contract(context)
+        ref = str(contract.get("id", ""))
+        terms = contract.get("terms") if isinstance(contract.get("terms"), dict) else {}
+        value = _dec_or_none(contract.get("total_value"))
+        out: list[RuleResult] = []
+
+        def fail(fail_key: str, severity: Severity | None = None, **params: Any) -> None:
+            out.append(
+                self._result(
+                    context,
+                    passed=False,
+                    element_ref=ref,
+                    fail_key=_PUBLIC_WORKS_KEYS[fail_key][0],
+                    suggestion_key=_PUBLIC_WORKS_KEYS[fail_key][1],
+                    severity=severity,
+                    country=country,
+                    **params,
+                )
+            )
+
+        retention_limit = limit_value(limits, "retention_percent")
+        retention = _dec_or_none(contract.get("retention_percent"))
+        if retention_limit is not None and retention is not None and retention > retention_limit:
+            fail("retention_above_limit", percent=_pct_text(retention), limit=_pct_text(retention_limit))
+
+        def percent_of_contract(security: dict[str, Any]) -> Decimal | None:
+            stated = _dec_or_none(security.get("percent_of_contract"))
+            if stated is not None:
+                return stated
+            amount = _dec_or_none(security.get("amount"))
+            if amount is None or not value:
+                return None
+            return amount / value * Decimal("100")
+
+        live = [s for s in _rows(context, "securities") if s.get("status") not in ("released", "expired")]
+        sme = _truthy(terms.get("contractor_is_sme"))
+        approved = _truthy(terms.get("advance_payment_mof_approval"))
+        advance_cap = limit_value(limits, "advance_payment_max_percent_sme" if sme else "advance_payment_max_percent")
+        if advance_cap is not None and not approved:
+            for security in live:
+                if security.get("security_type") != "advance_payment_bond":
+                    continue
+                percent = percent_of_contract(security)
+                if percent is not None and percent > advance_cap:
+                    fail("advance_above_cap", percent=_pct_text(percent), limit=_pct_text(advance_cap))
+
+        damages_cap = limit_value(limits, "delay_damages_cap_percent_works_long_delay")
+        if damages_cap is not None:
+            for clause in _rows(context, "ld_clauses"):
+                cap_amount = _dec_or_none(clause.get("max_amount"))
+                if cap_amount is None:
+                    fail("delay_damages_uncapped", severity=Severity.WARNING, limit=_pct_text(damages_cap))
+                elif value:
+                    percent = cap_amount / value * Decimal("100")
+                    if percent > damages_cap:
+                        fail("delay_damages_above_cap", percent=_pct_text(percent), limit=_pct_text(damages_cap))
+
+        security_rate = limit_value(limits, "performance_security_percent")
+        if security_rate is not None:
+            performance = [s for s in live if s.get("security_type") in ("performance_bond", "bank_guarantee")]
+            if not performance:
+                fail("performance_security_missing", severity=Severity.WARNING, limit=_pct_text(security_rate))
+            else:
+                best = max((percent_of_contract(s) or Decimal("0") for s in performance), default=Decimal("0"))
+                if best < security_rate:
+                    fail(
+                        "performance_security_below",
+                        severity=Severity.WARNING,
+                        percent=_pct_text(best),
+                        limit=_pct_text(security_rate),
+                    )
+        if out:
+            return out
+        return [self._result(context, passed=True, element_ref=ref)]
+
+
+class PriceAdjustmentTermsRule(_PublicWorksRule):
+    """Public works long enough to be price-adjusted by law carry valid coefficients."""
+
+    rule_id = "contracts.price_adjustment_terms"
+    name = "Price adjustment coefficients on qualifying public works"
+    severity = Severity.ERROR
+    description = (
+        "Where the procurement law makes price adjustment mandatory for works of a minimum duration, the "
+        "contract states the coefficients of its variable items and they satisfy the law."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.contracts.price_adjustment import (  # noqa: PLC0415
+            coefficient_problems,
+            qualifies,
+            regime_for,
+        )
+        from app.modules.contracts.public_procurement import PUBLIC_WORKS_PRICE_ADJUSTMENT  # noqa: PLC0415
+
+        country = _public_works_country(context)
+        regime_code = PUBLIC_WORKS_PRICE_ADJUSTMENT.get(country or "")
+        regime = regime_for(regime_code)
+        if regime is None:
+            return []
+        contract = _contract(context)
+        ref = str(contract.get("id", ""))
+        # Contract dates are stored as text and may carry a time; the day is what counts.
+        start = _iso_day(str(contract.get("start_date") or "")[:10])
+        end = _iso_day(str(contract.get("end_date") or "")[:10])
+        if qualifies(str(regime_code), start, end) is not True:
+            return []
+        terms = contract.get("terms") if isinstance(contract.get("terms"), dict) else {}
+        block = terms.get("price_adjustment") if isinstance(terms.get("price_adjustment"), dict) else {}
+        rows = [r for r in block.get("coefficients") or [] if isinstance(r, dict)]
+        problems = coefficient_problems(regime, [(str(r.get("item") or ""), r.get("coefficient")) for r in rows])
+        if not problems:
+            return [self._result(context, passed=True, element_ref=ref)]
+        months = str(regime.get("min_duration_months") or "")
+        return [
+            self._result(
+                context,
+                passed=False,
+                element_ref=ref,
+                fail_key=_PRICE_ADJUSTMENT_KEYS[p["problem"]][0],
+                suggestion_key=_PRICE_ADJUSTMENT_KEYS[p["problem"]][1],
+                country=country,
+                months=months,
+                item=p["item"],
+            )
+            for p in problems
+        ]
+
+
+PUBLIC_WORKS_RULES: tuple[type[ValidationRule], ...] = (PublicWorksLimitsRule, PriceAdjustmentTermsRule)
+
+
 def register_contracts_validation_rules() -> None:
     """Register the contracts rules with the platform rule registry."""
     rule_registry.register(ContractPartyRolesRule(), [CONTRACTS_RULE_SET])
+    for rule_class in PUBLIC_WORKS_RULES:
+        rule_registry.register(rule_class(), [CONTRACTS_RULE_SET])
     rule_registry.register(ContractPerformanceBondRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(ContractRetentionPolicySingleRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(EOTDaysRule(), [CONTRACTS_RULE_SET])

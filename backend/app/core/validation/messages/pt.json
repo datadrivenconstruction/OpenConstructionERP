@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "A fatura {number} tem o mesmo empreiteiro, valor ({amount}) e data ({on}) da fatura {other}.",
       "suggestion": "Verifique que não é a mesma fatura lançada duas vezes com outro número."
+    },
+    "certificate_missing": {
+      "fail": "Fatura {number} do contrato {contract}: o beneficiário não possui documento válido em {on} ({certificate}), exigido por {reference} antes da liberação do pagamento.",
+      "suggestion": "Registre o documento no cadastro de subempreiteiro do beneficiário ou retenha o pagamento até que seja apresentado."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "certidão negativa de débitos da previdência social",
+    "construction_tax_exemption": "certidão de isenção do imposto sobre construção",
+    "employers_liability_clearance": "certidão negativa de responsabilidade dos empregadores",
+    "insurance": "certificado de seguro",
+    "license": "licença do empreiteiro"
   }
 }

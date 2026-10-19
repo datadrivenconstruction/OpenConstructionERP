@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "Faktura {number} má stejného zhotovitele, částku ({amount}) i datum ({on}) jako faktura {other}.",
       "suggestion": "Ověřte, že nejde o tutéž fakturu zadanou dvakrát pod jiným číslem."
+    },
+    "certificate_missing": {
+      "fail": "Faktura {number} ke smlouvě {contract}: příjemce k {on} nemá platný doklad ({certificate}), který {reference} vyžaduje před uvolněním platby.",
+      "suggestion": "Zaznamenejte doklad u záznamu subdodavatele příjemce, nebo platbu zadržte, dokud nebude předložen."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "potvrzení o bezdlužnosti vůči sociálnímu pojištění",
+    "construction_tax_exemption": "potvrzení o osvobození od stavební daně",
+    "employers_liability_clearance": "potvrzení o bezdlužnosti u odpovědnosti zaměstnavatelů",
+    "insurance": "pojistný certifikát",
+    "license": "oprávnění zhotovitele"
   }
 }

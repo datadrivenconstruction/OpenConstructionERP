@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "La fattura {number} ha lo stesso fornitore, importo ({amount}) e data ({on}) della fattura {other}.",
       "suggestion": "Verifichi che non sia la stessa fattura inserita due volte con un altro numero."
+    },
+    "certificate_missing": {
+      "fail": "Fattura {number} sul contratto {contract}: il beneficiario non possiede alcun documento valido al {on} ({certificate}), richiesto da {reference} prima dello svincolo del pagamento.",
+      "suggestion": "Registrare il certificato nella scheda subappaltatore del beneficiario, oppure trattenere il pagamento fino alla sua presentazione."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "certificato di regolarità contributiva",
+    "construction_tax_exemption": "certificato di esenzione dall'imposta sulle costruzioni",
+    "employers_liability_clearance": "certificato di liberatoria sulla responsabilità dei datori di lavoro",
+    "insurance": "certificato assicurativo",
+    "license": "licenza dell'appaltatore"
   }
 }

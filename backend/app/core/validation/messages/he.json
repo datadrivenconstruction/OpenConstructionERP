@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "לחשבונית {number} אותו קבלן, סכום ({amount}) ותאריך ({on}) כמו לחשבונית {other}.",
       "suggestion": "ודאו שזו אינה אותה חשבונית שהוזנה פעמיים תחת מספר אחר."
+    },
+    "certificate_missing": {
+      "fail": "חשבונית {number} בחוזה {contract}: למוטב אין {certificate} בתוקף ליום {on}, הנדרש לפי {reference} לפני שחרור התשלום.",
+      "suggestion": "רשמו את האישור ברשומת הקבלן המשנה של המוטב, או עכבו את התשלום עד שיוצג."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "אישור העדר חובות לביטוח הלאומי",
+    "construction_tax_exemption": "אישור פטור ממס בנייה",
+    "employers_liability_clearance": "אישור העדר חבות של מעסיקים",
+    "insurance": "אישור ביטוח",
+    "license": "רישיון קבלן"
   }
 }

@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "Faktura {number} har samme entreprenør, beløp ({amount}) og dato ({on}) som faktura {other}.",
       "suggestion": "Sjekk at det ikke er samme faktura registrert to ganger under et annet nummer."
+    },
+    "certificate_missing": {
+      "fail": "Faktura {number} på kontrakt {contract}: mottakeren har ikke gyldig dokumentasjon pr. {on} ({certificate}), som {reference} krever før betalingen frigis.",
+      "suggestion": "Registrer dokumentasjonen i mottakerens underentreprenørpost, eller hold tilbake betalingen til den er fremvist."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "klareringsattest for sosialforsikring",
+    "construction_tax_exemption": "attest om fritak for byggeskatt",
+    "employers_liability_clearance": "klareringsattest for arbeidsgiveransvar",
+    "insurance": "forsikringsbevis",
+    "license": "entreprenørlisens"
   }
 }

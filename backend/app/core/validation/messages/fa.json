@@ -1184,6 +1184,17 @@
     "possible_duplicate": {
       "fail": "فاکتور {number} پیمانکار، مبلغ ({amount}) و تاریخ ({on}) یکسانی با فاکتور {other} دارد.",
       "suggestion": "بررسی کنید که این همان فاکتور نباشد که با شماره دیگری دو بار ثبت شده است."
+    },
+    "certificate_missing": {
+      "fail": "صورت‌حساب {number} در قرارداد {contract}: دریافت‌کننده در تاریخ {on} هیچ {certificate} معتبری ندارد، که {reference} پیش از آزادسازی پرداخت آن را الزامی می‌داند.",
+      "suggestion": "گواهی را در سابقه پیمانکار دست‌دوم دریافت‌کننده ثبت کنید یا تا ارائه آن پرداخت را متوقف نگه دارید."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "گواهی تسویه‌حساب بیمه تأمین اجتماعی",
+    "construction_tax_exemption": "گواهی معافیت از مالیات ساختمان",
+    "employers_liability_clearance": "گواهی تسویه‌حساب مسئولیت کارفرمایان",
+    "insurance": "گواهی بیمه",
+    "license": "پروانه پیمانکار"
   }
 }
