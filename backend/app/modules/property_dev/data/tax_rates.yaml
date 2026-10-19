@@ -300,8 +300,8 @@ jurisdictions:
   SA:
     name: "Saudi Arabia"
     vat:
-      # Real-estate sales are subject to RETT (5 %) instead of VAT
-      # since 2020 reform; new residential first sale is zero-rated.
+      # Real-estate sales are exempt from VAT since the 2020 reform and carry
+      # the 5 % RETT below instead; see the ``exempt`` class.
       # VAT began in Saudi Arabia on 2018-01-01 at 5 %, the same GCC start as
       # the UAE above, and tripled to 15 % on 2020-07-01 as oil revenue fell.
       # Dating this class from 2020 alone would price every 2018 and 2019
@@ -309,25 +309,31 @@ jurisdictions:
       standard:
         - { rate: 0.05, effective_from: "2018-01-01" }     # General VAT, services etc.
         - { rate: 0.15, effective_from: "2020-07-01" }
-      zero_rated:
-        # Dated from the day the treatment changed, NOT from the day VAT began,
-        # and the gap between those two dates is the defect. Between
-        # 2018-01-01 and 2020-10-04 the sale of residential real estate here
-        # was standard-rated, at 5 % and then at 15 %, so this class was
-        # answering 0.00 for contracts that owed the full rate. Royal Decree
-        # A/84 changed the treatment of real-estate transfers with effect from
-        # 2020-10-04 and put the 5 % RETT below in its place.
+      exempt:
+        # A disposal of real estate is exempt from VAT, not zero-rated. Royal
+        # Decree A/84 changed the treatment of real-estate transfers with
+        # effect from 2020-10-04 and put the 5 % RETT below in its place; the
+        # ZATCA e-invoice code list carries it as exemption reason VATEX-SA-30
+        # (VAT Implementing Regulations, Art. 30), under category E, not Z.
+        # The difference is input tax: a zero-rated supply keeps the
+        # developer's recovery, an exempt one does not. This class used to be
+        # ``zero_rated``, which was the open question an earlier note left to
+        # a domain reader; PwC's and KPMG's summaries of the reform both
+        # describe exemption with RETT, so the class is named for what it is
+        # and a caller still asking for ``zero_rated`` is refused rather than
+        # handed a mislabelled zero.
         #
-        # OPEN QUESTION for a domain reader, which this date does not settle.
-        # Sources disagree about what the post-2020 treatment IS. One describes
-        # the first supply of new residential as zero-rated; another describes
-        # real-estate transfers as exempt from VAT with RETT charged instead.
-        # The two differ in whether the developer recovers input tax, and if it
-        # is exemption then this class is misnamed and a date does not fix
-        # that. What the date does fix is the narrower thing both sources
-        # agree on: the 0.00 this class gave for 2018 and 2019 was wrong.
+        # Dated from the day the treatment changed, NOT from the day VAT began.
+        # Between 2018-01-01 and 2020-10-04 the sale of residential real estate
+        # was standard-rated, at 5 % and then at 15 %, so a 2019 contract is
+        # refused here and priced at ``standard``.
+        #
+        # Not computed: the state bears the RETT on a citizen's first home up
+        # to SAR 1,000,000 of value (KPMG, 2020). That is a relief for the
+        # buyer that the quote has no input for, so it is stated here and the
+        # RETT line below stays at 5 %.
         rate: 0.00
-        applies_to: ["residential.first_sale"]
+        applies_to: ["real_estate.sale", "residential.first_sale", "residential.subsequent_sale"]
         effective_from: "2020-10-04"
     rett: 0.05                      # Real Estate Transaction Tax 5 %.
     late_interest:
