@@ -12,7 +12,9 @@ without a row is silent. Poland is the first country with rows.
   under it. An invoice that bills a construction subcontract is taken to list
   construction works unless its metadata says otherwise (``annex_15`` false, or
   goods codes outside the annex); a loose invoice without codes is asked about,
-  never convicted.
+  never convicted. A payment made another way is an error only where the
+  invoice declares ``annex_15``; where the annex status is inferred it is a
+  warning, because the annex lists named positions an inference cannot prove.
 * V21 ``reduced_vat_housing``: an invoice charged at the reduced housing rate
   on the whole price, on a project whose dwelling is above the area limit, of
   a kind that does not qualify, or not recorded at all. The project records
@@ -86,7 +88,11 @@ class SplitPaymentRule(_StatutoryRule):
                 continue
             facts = _facts(inv)
             annex: bool | None
-            if isinstance(facts.get("annex_15"), bool):
+            # Declared on the invoice, or inferred. An inferred status can warn
+            # and never block: the annex lists named positions, which neither a
+            # code's section nor the contract it bills can prove.
+            declared = isinstance(facts.get("annex_15"), bool)
+            if declared:
                 annex = facts["annex_15"]
             else:
                 codes = facts.get("pkwiu_codes")
@@ -135,7 +141,7 @@ class SplitPaymentRule(_StatutoryRule):
                     self._result(
                         context,
                         "split_payment_not_used",
-                        severity=Severity.ERROR,
+                        severity=Severity.ERROR if declared else Severity.WARNING,
                         element_ref=ref,
                         money=("sanction",),
                         number=number,

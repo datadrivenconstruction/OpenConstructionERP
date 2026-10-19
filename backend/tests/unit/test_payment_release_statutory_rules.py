@@ -79,12 +79,18 @@ async def test_v20_the_same_invoice_at_the_threshold_is_silent() -> None:
 
 
 async def test_v20_a_payment_made_another_way_is_an_error_with_the_sanction() -> None:
-    inv = _invoice(vat_facts={"split_payment": True}, payment_methods=["transfer"])
+    inv = _invoice(vat_facts={"split_payment": True, "annex_15": True}, payment_methods=["transfer"])
     out = await SplitPaymentRule().validate(_ctx(_pl(invoices=[inv])))
     bad = [r for r in out if not r.passed]
     assert [(r.details["problem"], r.severity) for r in bad] == [("split_payment_not_used", Severity.ERROR)]
     # 30 percent of VAT 4,600.00
     assert bad[0].details["sanction"] == "1380.00"
+
+
+async def test_v20_the_same_payment_on_an_inferred_annex_status_only_warns() -> None:
+    # The invoice bills a subcontract, so construction works are inferred, not declared.
+    inv = _invoice(vat_facts={"split_payment": True}, payment_methods=["transfer"])
+    assert await _problems(SplitPaymentRule, _pl(invoices=[inv])) == [("split_payment_not_used", Severity.WARNING)]
 
 
 async def test_v20_a_payment_without_a_recorded_method_is_not_convicted() -> None:
