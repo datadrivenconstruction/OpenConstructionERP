@@ -234,8 +234,10 @@ def test_every_shipped_observance_validates_and_names_a_computed_holiday() -> No
         assert row.private_sector in {"stated", "not_stated"}
         if row.country == "EG":
             named = {2025: named_2025, 2026: named_2026}[row.year]
-            assert row.holiday in named
-            assert tuple(sorted(named[row.holiday])) == row.statutory
+        else:
+            named = cal._eid_days(row.country, row.year)
+        assert row.holiday in named
+        assert tuple(sorted(named[row.holiday])) == row.statutory
 
 
 @pytest.mark.unit
@@ -279,11 +281,63 @@ def test_the_seeded_2026_row_is_the_engine_answer_on_a_sunday_week() -> None:
         assert exc["name"]["en"] and exc["name"]["ar"]
 
 
-# ── The Gulf is unchanged ─────────────────────────────────────────────────────
+# ── Saudi Arabia: its own sourced Eid spans ───────────────────────────────────
+
+
+@pytest.mark.unit
+def test_saudi_eids_are_four_days_and_adha_starts_on_arafah() -> None:
+    """Eid al-Fitr four days from 1 Shawwal, Eid al-Adha four from 9 Dhu al-Hijjah.
+
+    The shared Gulf placeholder gave three days of Fitr and started Adha on the
+    10th. 2025 has no announced row, so it is the computed span; 2026 carries
+    the HRSD announcement that Eid al-Fitr ran from Thursday 19 March, which
+    makes the engine equal the shipped 2026 calendar row.
+    """
+    assert set(resolve_holidays("SA", 2025)["dates"]) == {
+        date(2025, 2, 22),
+        date(2025, 3, 30), date(2025, 3, 31), date(2025, 4, 1), date(2025, 4, 2),
+        date(2025, 6, 5), date(2025, 6, 6), date(2025, 6, 7), date(2025, 6, 8),
+        date(2025, 9, 23),
+    }  # fmt: skip
+    assert set(resolve_holidays("SA", 2026)["dates"]) == {
+        date(2026, 2, 22),
+        date(2026, 3, 19), date(2026, 3, 20), date(2026, 3, 21), date(2026, 3, 22),
+        date(2026, 5, 26), date(2026, 5, 27), date(2026, 5, 28), date(2026, 5, 29),
+        date(2026, 9, 23),
+    }  # fmt: skip
+
+
+@pytest.mark.unit
+def test_saudi_arabia_no_longer_reports_a_placeholder_span() -> None:
+    answer = resolve_holidays("SA", 2026)
+    assert answer["placeholder_spans"] == ()
+    assert answer[cal.AXIS_HOLIDAY_EXTENT].source is Source.DECLARED
+    assert cal._EID_SPANS["SA"].sourced and cal._EID_SPANS["EG"].sourced
+
+
+@pytest.mark.unit
+def test_an_eid_that_starts_in_december_counts_its_january_days() -> None:
+    """Arafah 1483 falls on 30 December 2071 in the converter.
+
+    Measured over the converter's whole window this is the only year boundary
+    an Eid span crosses after 2006. The old Gulf expansion filed 1 and 2
+    January 2072 under 2071, where no lookup by year ever reads them, and left
+    2072 without them, so they counted as working days. A sourced or
+    placeholder span now files each day under its own year.
+    """
+    sa_2071 = resolve_holidays("SA", 2071)["dates"]
+    sa_2072 = resolve_holidays("SA", 2072)["dates"]
+    assert {date(2071, 12, 30), date(2071, 12, 31)} <= sa_2071
+    assert all(day.year == 2071 for day in sa_2071)
+    assert {date(2072, 1, 1), date(2072, 1, 2)} <= sa_2072
+    assert is_working_day(date(2072, 1, 1), "SA") is False
+    # The UAE placeholder starts a day later and runs to 3 January.
+    assert {date(2072, 1, 1), date(2072, 1, 2), date(2072, 1, 3)} <= resolve_holidays("AE", 2072)["dates"]
+
+
+# ── The rest of the Gulf is unchanged ─────────────────────────────────────────
 
 _GCC_EXPECTED: dict[tuple[str, int], tuple[str, ...]] = {
-    ("SA", 2025): ("02-22", "03-30", "03-31", "04-01", "06-06", "06-07", "06-08", "06-09", "09-23"),
-    ("SA", 2026): ("02-22", "03-20", "03-21", "03-22", "05-27", "05-28", "05-29", "05-30", "09-23"),
     ("AE", 2025): (
         "01-01", "03-30", "03-31", "04-01", "06-06", "06-07", "06-08", "06-09", "06-26", "09-04",
         "12-01", "12-02", "12-03",
@@ -327,7 +381,10 @@ def test_gulf_holidays_are_unchanged(country: str, year: int) -> None:
 
 
 @pytest.mark.unit
-def test_gulf_weeks_are_unchanged() -> None:
+def test_gulf_weeks_and_unsourced_spans_are_unchanged() -> None:
+    for country in ("AE", "QA", "KW", "BH", "OM"):
+        assert cal._EID_SPANS[country] is cal._UNSOURCED_GULF_SPAN
+        assert resolve_holidays(country, 2026)["placeholder_spans"] == ("Eid al-Fitr", "Eid al-Adha")
     assert cal._WORKING_WEEK["AE"] == frozenset({0, 1, 2, 3, 4})
     for country in ("SA", "QA", "KW", "BH", "OM"):
         assert cal._WORKING_WEEK[country] == frozenset({6, 0, 1, 2, 3})

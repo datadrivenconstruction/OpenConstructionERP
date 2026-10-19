@@ -62,6 +62,7 @@ Sources:
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Any
 
@@ -578,34 +579,113 @@ _HIJRI_NEW_YEAR = (1, 1)  # 1 Muharram
 _PROPHETS_BIRTHDAY = (3, 12)  # 12 Rabi al-Awwal
 
 
-def _gcc_eids(year: int) -> set[date]:
-    """The two Eids, converted from the Islamic calendar, shared by every Gulf country.
+def _hijri_span(month: int, day: int, length: int, year: int) -> set[date]:
+    """Every day of a ``length``-day run starting on a fixed Hijri date, inside ``year``.
 
-    What is shared here is a calendar fact, not a national one. 1 Shawwal and 10
-    Dhu al-Hijjah fall on the same Gregorian day everywhere, the conversion via
-    ``hijridate`` has no policy content, and there is nothing per-country to split.
-    National days are the opposite, and each country states its own.
-
-    Known limitation, and it is the seam in this split: the *length* of each Eid
-    is policy. It is announced annually by each government, and the 3 and 4 day
-    spans below are one placeholder applied to all six countries. The spans are
-    closest to correct for the UAE, whose set they were originally written for,
-    and too short for Saudi Arabia, where both Eids routinely run longer.
-    Per-country spans are deliberately not invented here: an approximation that
-    says so is worth more than a fabricated number that does not.
-
-    Either Eid can occur once or twice within one Gregorian year, so every
-    converted occurrence is expanded rather than the first one only. Twice
-    happens because the Islamic year is ~11 days shorter; that same gap is why
-    it can never be zero, which is what lets the converter raise on a year it
-    cannot reach instead of returning an empty set nobody could tell apart from
-    an answer.
+    An occurrence that starts at the end of the previous year and runs into
+    this one is included, which the Gulf expansion before it did not do, so a feast
+    beginning on 31 December still counts its 1 January. The previous year's
+    occurrences are asked of the converter too; at the very start of its window
+    there is no previous year to ask, and that alone is not a failure.
     """
     days: set[date] = set()
-    for start in _hijri_dates_in_gregorian_year(10, 1, year):  # Eid al-Fitr, 1 Shawwal
-        days.update(start + timedelta(days=offset) for offset in range(3))
-    for start in _hijri_dates_in_gregorian_year(12, 10, year):  # Eid al-Adha, 10 Dhu al-Hijjah
-        days.update(start + timedelta(days=offset) for offset in range(4))
+    for probe_year in (year - 1, year):
+        try:
+            starts = _hijri_dates_in_gregorian_year(month, day, probe_year)
+        except HijriRangeError:
+            if probe_year == year:
+                raise
+            continue
+        for start in starts:
+            days.update(start + timedelta(days=offset) for offset in range(length))
+    return {d for d in days if d.year == year}
+
+
+@dataclass(frozen=True)
+class EidSpans:
+    """Where each Eid starts in the Hijri calendar and how many days it runs, for one country.
+
+    The dates are calendar facts and the converter has no policy in it, but the
+    first day and the length of each holiday are national law, so they are
+    data per country. ``sourced`` is False where the span is the placeholder
+    first written for the UAE and applied to its neighbours unchanged; those
+    countries report it on the extent axis (``SHARED_GCC_EID_SPAN``).
+    """
+
+    fitr_start: tuple[int, int]
+    fitr_days: int
+    adha_start: tuple[int, int]
+    adha_days: int
+    sourced: bool
+    source: str
+
+
+_UNSOURCED_GULF_SPAN = EidSpans(
+    fitr_start=(10, 1),
+    fitr_days=3,
+    adha_start=(12, 10),
+    adha_days=4,
+    sourced=False,
+    source="placeholder written for the UAE and shared unchanged; no national source checked",
+)
+
+#: Per-country Eid spans. A country is changed here only with a source.
+_EID_SPANS: dict[str, EidSpans] = {
+    **dict.fromkeys(("AE", "QA", "KW", "BH", "OM"), _UNSOURCED_GULF_SPAN),
+    # Saudi Labour Law Implementing Regulations Art. 24 (HRSD), as announced
+    # each year for the private sector: Eid al-Fitr four days from 1 Shawwal,
+    # Eid al-Adha four days from the Day of Arafah, 9 Dhu al-Hijjah.
+    # https://gulfnews.com/world/gulf/saudi/saudi-arabia-announces-eid-al-fitr-holidays-for-private-and-non-profit-sectors-1.500462986
+    "SA": EidSpans(
+        fitr_start=(10, 1),
+        fitr_days=4,
+        adha_start=(12, 9),
+        adha_days=4,
+        sourced=True,
+        source="Saudi Labour Law Implementing Regulations Art. 24 (HRSD private-sector announcements)",
+    ),
+    # Ministerial Decree 294/2025 under Egypt's Labour Law 14/2025: the first
+    # and second days of Shawwal, and Arafah Day with the first two days of
+    # Eid al-Adha.
+    "EG": EidSpans(
+        fitr_start=(10, 1),
+        fitr_days=2,
+        adha_start=(12, 9),
+        adha_days=3,
+        sourced=True,
+        source="Egypt Ministerial Decree 294/2025",
+    ),
+}
+
+
+def _eid_days(country: str, year: int) -> dict[str, set[date]]:
+    """The two Eids for one country in one year, keyed for announced observances.
+
+    Built from the country's row in :data:`_EID_SPANS`. Each occurrence that
+    reaches into ``year`` counts, including one that began the previous
+    December, so a year boundary never drops or misfiles a day.
+    """
+    spans = _EID_SPANS[country]
+    return {
+        "eid_al_fitr": _hijri_span(*spans.fitr_start, spans.fitr_days, year),
+        "eid_al_adha": _hijri_span(*spans.adha_start, spans.adha_days, year),
+    }
+
+
+def _gcc_eids(year: int, country: str) -> set[date]:
+    """Both Eids for a Gulf country, as one set of dates.
+
+    The conversion is shared and has no policy content; the first day and the
+    length of each Eid come from the country's row in :data:`_EID_SPANS`. Five
+    of the six countries still carry the unsourced placeholder (three and four
+    days from 1 Shawwal and 10 Dhu al-Hijjah) and report it on the extent axis;
+    Saudi Arabia has its own sourced row. Until October 2026 all six shared the
+    placeholder, which gave Saudi Arabia one day of Eid al-Fitr too few and
+    started its Eid al-Adha a day late.
+    """
+    days: set[date] = set()
+    for feast in _eid_days(country, year).values():
+        days.update(feast)
     return days
 
 
@@ -618,7 +698,7 @@ def _holidays_ae(year: int) -> set[date]:
     together but are separate holidays. Commemoration Day moved to 1 December in
     2019, from 30 November.
     """
-    days = _gcc_eids(year)
+    days = _gcc_eids(year, "AE")
     days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
     days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
     days.update(
@@ -649,15 +729,21 @@ def _holidays_sa(year: int) -> set[date]:
 
     Founding Day, 22 February, was established in 2022 and is a different holiday
     from National Day, 23 September, which marks the 1932 unification.
+
+    The Eids are four days each, Eid al-Fitr from 1 Shawwal and Eid al-Adha from
+    the Day of Arafah (see ``_EID_SPANS``). The dates HRSD announces after the
+    moon sighting are rows in ``country_data/holiday_observances.json``. The
+    compensatory day for a national day falling on a weekend is not modelled.
     """
-    days = _gcc_eids(year)
-    days.update(
+    return apply_observances(
+        "SA",
+        year,
         {
-            date(year, 2, 22),  # Founding Day
-            date(year, 9, 23),  # National Day
-        }
+            **_eid_days("SA", year),
+            "founding_day": {date(year, 2, 22)},
+            "national_day": {date(year, 9, 23)},
+        },
     )
-    return days
 
 
 def _holidays_qa(year: int) -> set[date]:
@@ -670,7 +756,7 @@ def _holidays_qa(year: int) -> set[date]:
     National Sports Day is the second Tuesday of February, so it is computed
     rather than fixed.
     """
-    days = _gcc_eids(year)
+    days = _gcc_eids(year, "QA")
     days.update(
         {
             _nth_weekday(year, 2, 1, 2),  # National Sports Day - 2nd Tuesday February
@@ -689,7 +775,7 @@ def _holidays_kw(year: int) -> set[date]:
     end of the 1990-91 occupation, are adjacent but separate. Neither is the UAE
     National Day that the shared set used to return for this country.
     """
-    days = _gcc_eids(year)
+    days = _gcc_eids(year, "KW")
     days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
     days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
     days.update(
@@ -717,7 +803,7 @@ def _holidays_bh(year: int) -> set[date]:
     wrong by two. Short is the direction that overcounts working days, which pulls
     a derived deadline earlier, so this limitation is worth closing.
     """
-    days = _gcc_eids(year)
+    days = _gcc_eids(year, "BH")
     days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
     days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
     days.update(
@@ -744,7 +830,7 @@ def _holidays_om(year: int) -> set[date]:
     Renaissance Day has itself been moved. Only 18 November is claimed here, so
     this set is short rather than wrong in a year that observed both.
     """
-    days = _gcc_eids(year)
+    days = _gcc_eids(year, "OM")
     days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
     days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
     days.update(
@@ -1256,7 +1342,7 @@ def _holidays_bg(year: int) -> set[date]:
     Saturday puts Christmas Eve and Christmas Day's substitutes on 27 and 28
     December, after Boxing Day, which is already a Monday holiday.
     """
-    e = easter(year)
+    e = orthodox_easter(year)  # Bulgaria keeps the Orthodox Easter
     easter_block = {
         e - timedelta(days=2),  # Good Friday
         e - timedelta(days=1),  # Holy Saturday
@@ -1320,28 +1406,6 @@ def julian_christmas(year: int) -> date:
     return date(previous, 12, 25) + timedelta(days=gap)
 
 
-def _hijri_span(month: int, day: int, length: int, year: int) -> set[date]:
-    """Every day of a ``length``-day run starting on a fixed Hijri date, inside ``year``.
-
-    An occurrence that starts at the end of the previous year and runs into
-    this one is included, which is what ``_gcc_eids`` does not do, so a feast
-    beginning on 31 December still counts its 1 January. The previous year's
-    occurrences are asked of the converter too; at the very start of its window
-    there is no previous year to ask, and that alone is not a failure.
-    """
-    days: set[date] = set()
-    for probe_year in (year - 1, year):
-        try:
-            starts = _hijri_dates_in_gregorian_year(month, day, probe_year)
-        except HijriRangeError:
-            if probe_year == year:
-                raise
-            continue
-        for start in starts:
-            days.update(start + timedelta(days=offset) for offset in range(length))
-    return {d for d in days if d.year == year}
-
-
 #: Labour Law 14/2025 and the holiday decree issued under it took effect on
 #: this day. A year that begins earlier is answered with this roster and says
 #: so on the year axis (see ``_ROSTER_EFFECTIVE``).
@@ -1354,8 +1418,9 @@ def _holidays_eg_statutory(year: int) -> dict[str, set[date]]:
     Ministerial Decree 294/2025, issued under Labour Law 14/2025:
 
     * Islamic: Hijri New Year (1 Muharram), the Prophet's Birthday (12 Rabi
-      al-Awwal), Eid al-Fitr (1 and 2 Shawwal), Arafat Day (9 Dhu al-Hijjah)
-      and the first two days of Eid al-Adha (10 and 11 Dhu al-Hijjah).
+      al-Awwal), Eid al-Fitr (1 and 2 Shawwal), and Eid al-Adha held as Arafat
+      Day with the first two days of the feast (9 to 11 Dhu al-Hijjah); the
+      spans are Egypt's row in ``_EID_SPANS``.
     * Coptic Christmas, 25 December Julian, which is 7 January.
     * Sham el-Nessim, the Monday after Orthodox Easter.
     * Fixed civil days: 25 January (Revolution and Police Day), 25 April (Sinai
@@ -1379,9 +1444,7 @@ def _holidays_eg_statutory(year: int) -> dict[str, set[date]]:
         "armed_forces_day": {date(year, 10, 6)},
         "hijri_new_year": set(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year)),
         "prophets_birthday": set(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year)),
-        "eid_al_fitr": _hijri_span(10, 1, 2, year),
-        "arafat_day": _hijri_span(12, 9, 1, year),
-        "eid_al_adha": _hijri_span(12, 10, 2, year),
+        **_eid_days("EG", year),
     }
 
 
@@ -1614,10 +1677,10 @@ _CURATED_TABLES: dict[str, tuple[dict[int, Any], tuple[str, ...]]] = {
     "TR": (_TR_BAYRAMS, ("Ramazan Bayramı", "Kurban Bayramı")),
 }
 
-#: Holidays whose dates are computed but whose length is not. ``_gcc_eids``
-#: applies one span of three and four days to every Gulf country, because the
-#: length of each Eid is announced annually by each government; the span is a
-#: stand-in, not a measurement.
+#: Holidays whose dates are computed but whose length is not. The Gulf
+#: countries without a sourced row in ``_EID_SPANS`` share one span of three
+#: and four days, because nobody has sourced each government's own; the span
+#: is a stand-in, not a measurement.
 #:
 #: This is a sibling of the ``omitted`` names and not a kind of coverage.
 #: ``omitted`` says a row is missing from our data. This says a row is present
@@ -1633,7 +1696,7 @@ _CURATED_TABLES: dict[str, tuple[dict[int, Any], tuple[str, ...]]] = {
 #: not: closest to correct is still not computed.
 _GCC_PLACEHOLDER_SPANS: tuple[str, ...] = ("Eid al-Fitr", "Eid al-Adha")
 _PLACEHOLDER_SPANS: dict[str, tuple[str, ...]] = dict.fromkeys(
-    ("AE", "SA", "QA", "KW", "BH", "OM"), _GCC_PLACEHOLDER_SPANS
+    sorted(code for code, spans in _EID_SPANS.items() if not spans.sourced), _GCC_PLACEHOLDER_SPANS
 )
 
 #: The stand-in that answered for how far a country's holidays extend, for the
@@ -1648,7 +1711,7 @@ _PLACEHOLDER_SPANS: dict[str, tuple[str, ...]] = dict.fromkeys(
 #: stand-in we know of, not that anybody checked. Nobody has checked the German
 #: roster either.
 _EXTENT_STANDINS: dict[str, str] = {
-    **dict.fromkeys(("AE", "SA", "QA", "KW", "BH", "OM"), SHARED_GCC_EID_SPAN),
+    **dict.fromkeys(_PLACEHOLDER_SPANS, SHARED_GCC_EID_SPAN),
     "CH": THREE_FIXED_DAYS,
 }
 
@@ -1684,7 +1747,7 @@ _FORMULA_WINDOWS: dict[str, tuple[int, int]] = {"JP": (1980, 2099)}
 _EXTENT_DETAIL: dict[str, str] = {
     SHARED_GCC_EID_SPAN: (
         "Eid lengths are announced annually by each government; one shared span of three and four days "
-        "stands in for all six Gulf countries"
+        "stands in for the Gulf countries without a sourced span of their own"
     ),
     THREE_FIXED_DAYS: "three fixed national days stand in for the full Swiss calendar",
 }

@@ -23,18 +23,18 @@
   {
     "country": "EG", "key": "overtime_premium_day_pct", "value": "35", "unit": "percent of hourly wage",
     "effective_from": "2025-09-01", "effective_to": null,
-    "source": "Secondary HR-platform summary; article number not found, and another secondary source gives 25%",
-    "source_url": "https://remotepass.com/country/egypt/employment-laws",
+    "source": "Ministry of Labour explanation of Labour Law 14/2025, as reported in the press; article number not found",
+    "source_url": "https://www.masrawy.com/news/news_egypt/details/2026/9/4/3043032",
     "confidence": "M", "needs_expert_review": true,
-    "note": "UNCONFIRMED: 35% matches the 2003 law; Law 14/2025 premium must be read in the official text."
+    "note": "Configurable default. One transcription of the law text (Art. 122) reads 25% for day hours; confirm against the Official Gazette."
   },
   {
     "country": "EG", "key": "overtime_premium_night_pct", "value": "70", "unit": "percent of hourly wage",
     "effective_from": "2025-09-01", "effective_to": null,
-    "source": "Secondary HR-platform summary; article number not found, and another secondary source gives 75%",
-    "source_url": "https://remotepass.com/country/egypt/employment-laws",
+    "source": "Ministry of Labour explanation of Labour Law 14/2025, as reported in the press; article number not found",
+    "source_url": "https://www.masrawy.com/news/news_egypt/details/2026/9/4/3043032",
     "confidence": "M", "needs_expert_review": true,
-    "note": "UNCONFIRMED: 70% matches the 2003 law; Law 14/2025 premium must be read in the official text."
+    "note": "Configurable default; the transcriptions agree on 70% for night hours but the article is not confirmed."
   },
   {
     "country": "EG", "key": "public_holiday_work_extra_pay_multiplier", "value": "2", "unit": "x the day's wage, on top of the regular wage",

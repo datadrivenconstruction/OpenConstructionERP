@@ -400,13 +400,15 @@ def test_every_country_served_by_the_shared_eid_spans_is_registered() -> None:
         if getattr(func, "__name__", "").startswith("_holidays_") and "_gcc_eids(" in inspect.getsource(func)
     }
     assert served, "no function calls _gcc_eids; this test is checking nothing"
-    assert served <= set(cal._PLACEHOLDER_SPANS), (
-        f"served by the shared Eid spans but not registered: {sorted(served - set(cal._PLACEHOLDER_SPANS))}"
+    unsourced = {code for code, spans in cal._EID_SPANS.items() if not spans.sourced}
+    assert served <= set(cal._EID_SPANS), f"served without a span row: {sorted(served - set(cal._EID_SPANS))}"
+    assert unsourced == set(cal._PLACEHOLDER_SPANS), (
+        f"unsourced spans and registered placeholders differ: {sorted(unsourced ^ set(cal._PLACEHOLDER_SPANS))}"
     )
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("country", ["AE", "SA", "QA", "KW", "BH", "OM"])
+@pytest.mark.parametrize("country", ["AE", "QA", "KW", "BH", "OM"])
 def test_a_placeholder_span_is_reported_without_downgrading_coverage(country: str) -> None:
     """The rows are present, so coverage is complete, and that is a true sentence.
 
@@ -427,7 +429,6 @@ def test_a_placeholder_span_is_reported_without_downgrading_coverage(country: st
     ("country", "token"),
     [
         ("AE", cal.SHARED_GCC_EID_SPAN),
-        ("SA", cal.SHARED_GCC_EID_SPAN),
         ("QA", cal.SHARED_GCC_EID_SPAN),
         ("KW", cal.SHARED_GCC_EID_SPAN),
         ("BH", cal.SHARED_GCC_EID_SPAN),
@@ -451,7 +452,7 @@ def test_an_uncomputed_extent_is_a_fallback_naming_what_stood_in(country: str, t
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("country", ["DE", "US", "CN", "IN", "JP", "NG", "BG"])
+@pytest.mark.parametrize("country", ["DE", "US", "CN", "IN", "JP", "NG", "BG", "SA", "EG"])
 def test_a_country_with_no_known_stand_in_is_declared_on_the_extent_axis(country: str) -> None:
     """Absence means no stand-in we know of, not an extent anybody verified.
 
@@ -470,7 +471,7 @@ def test_the_verdict_goes_amber_for_a_country_whose_span_was_never_computed() ->
     answered fully covered on a span its own source says runs short, so the rule
     read the answer and never saw the caveat.
     """
-    verdict = holiday_provenance("SA", 2026)
+    verdict = holiday_provenance("QA", 2026)
     assert verdict.source is Source.FALLBACK
     assert verdict.axis == cal.AXIS_HOLIDAY_EXTENT
     assert verdict.answered is False
@@ -514,14 +515,14 @@ def test_an_omitted_holiday_and_a_placeholder_span_are_independent() -> None:
     """Two different facts in two slots, which is the point of the second slot.
 
     China past its curated table has omissions and no placeholder spans. Saudi
-    Arabia has the reverse. One field carrying both would have had to call these
-    the same thing.
+    Arabia used to have the reverse; Qatar still does. One field carrying both
+    would have had to call these the same thing.
     """
     china = resolve_holidays("CN", 2099)
-    saudi = resolve_holidays("SA", 2026)
+    qatar = resolve_holidays("QA", 2026)
 
     assert china["omitted"] and not china["placeholder_spans"]
-    assert saudi["placeholder_spans"] and not saudi["omitted"]
+    assert qatar["placeholder_spans"] and not qatar["omitted"]
 
 
 # ── Windows that the code states and used to not enforce ──────────────────────
@@ -549,7 +550,7 @@ def test_the_hijri_dependent_set_is_derived_from_the_source() -> None:
         code
         for code, func in cal._HOLIDAY_FUNCS.items()
         if getattr(func, "__name__", "").startswith("_holidays_")
-        and ("_gcc_eids(" in _source(func) or "_hijri_dates_in_gregorian_year(" in _source(func))
+        and any(call in _source(func) for call in ("_gcc_eids(", "_eid_days(", "_hijri_dates_in_gregorian_year("))
     }
     assert reaching, "nothing reaches the Hijri converter; this test is checking nothing"
     assert reaching == set(cal._HIJRI_DEPENDENT), (
