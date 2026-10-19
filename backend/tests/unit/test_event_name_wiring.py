@@ -62,7 +62,7 @@ _CALL_TOKENS = ("publish", "subscribe", "emit", ".on(")
 #:
 #: Files matching this are parsed even when they hold no bus call, because a
 #: publisher commonly names its event through a constant imported from a module
-#: that holds nothing else - ``event_taxonomy.SNAPSHOT_REFRESHED`` is exactly
+#: that holds nothing else - ``event_taxonomy.SNAPSHOT_CREATED`` in dashboards is exactly
 #: that shape. Without this the scan would lose the definition and report the
 #: subscriber as dead.
 _CONSTANT_LINE = re.compile(
@@ -153,11 +153,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "keys on. Nothing writes that key, so publishing from finance would not wake it either"
     ),
     "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
-    "snapshot.refreshed": (
-        "dashboards/__init__.py:94 via event_taxonomy.SNAPSHOT_REFRESHED, which is declared "
-        "twice (dashboards/events.py:31 and dashboards/sync_protocol.py:58) and published "
-        "nowhere. sync_protocol.py:18 documents the refresh cascade as if it runs"
-    ),
 }
 
 

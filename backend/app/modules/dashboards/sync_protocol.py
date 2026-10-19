@@ -14,10 +14,9 @@ auto-heal that staleness.
 Pipeline
 --------
 
-1. Snapshot is refreshed (a fresh Parquet dump is written) →
-   :data:`SNAPSHOT_REFRESHED` event fires, every preset whose
-   ``config_json.snapshot_id`` points at the refreshed snapshot is
-   marked ``sync_status='stale'``.
+1. Snapshots are immutable: a rebuild writes a new snapshot row with a
+   new id, so a preset never goes stale behind its back. It drifts when
+   the user points it at a newer snapshot of the same model.
 2. The user opens the preset (or clicks the badge) → the frontend hits
    ``POST /presets/{id}/sync-check`` which loads the snapshot's current
    meta and runs :class:`PresetSyncProbe` to produce a
@@ -50,16 +49,6 @@ from dataclasses import dataclass, field
 from typing import Any, Final, Literal
 
 logger = logging.getLogger(__name__)
-
-
-# ── Event constants ────────────────────────────────────────────────────────
-
-
-SNAPSHOT_REFRESHED: Final = "snapshot.refreshed"
-"""Fired by the snapshot service when an existing snapshot's data is
-re-materialised from a fresh upload. Payload contains at minimum
-``{snapshot_id, project_id, tenant_id}``. Marked-stale presets carry
-the same ``snapshot_id`` inside their ``config_json``."""
 
 
 # ── Public types ───────────────────────────────────────────────────────────
@@ -730,7 +719,6 @@ def _clone(v: Any) -> Any:
 
 __all__ = [
     "PresetSyncProbe",
-    "SNAPSHOT_REFRESHED",
     "Severity",
     "SnapshotMeta",
     "SuggestedFix",

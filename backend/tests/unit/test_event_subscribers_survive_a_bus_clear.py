@@ -50,7 +50,6 @@ REGISTRARS: list[tuple[str, str]] = [
     ("app.modules.submittals.approval_subscribers", "register_submittal_approval_subscribers"),
     ("app.modules.supplier_catalogs.events", "register_subscribers"),
     ("app.modules.timeline.events", "register_timeline_subscribers"),
-    ("app.modules.dashboards", "register_subscribers"),
     ("app.modules.schedule.realtime_router", "register_schedule_realtime_subscribers"),
 ]
 
