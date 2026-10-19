@@ -56,58 +56,57 @@ function converter(id: string, name: string): BIMConverterInfo {
     description: '',
     engine: 'ddc',
     extensions: [`.${id}`],
-    exe: `${id}Exporter.exe`,
+    exe: `${id}.exe`,
     version: '1.0.0',
     size_mb: 120,
     installed: true,
-    path: `C:/converters/${id}/${id}Exporter.exe`,
+    path: `C:/converters/${id}/${id}.exe`,
   };
 }
 
-/** Four converters on disk and no smoke-test verdict for any of them - what
+/** Three converters on disk and no smoke-test verdict for any of them - what
  *  the server returns when nobody asked it to run anything. */
 const INSTALLED_UNCHECKED: BIMConvertersResponse = {
   converters: [
     converter('rvt', 'Revit converter'),
     converter('ifc', 'IFC converter'),
     converter('dwg', 'DWG converter'),
-    converter('dgn', 'DGN converter'),
   ],
-  installed_count: 4,
-  total_count: 4,
+  installed_count: 3,
+  total_count: 3,
 };
 
-/** The same four, checked, with the DGN one refusing to start - the reporter's
+/** The same three, checked, with the DWG one refusing to start - the reporter's
  *  machine. */
-const DGN_BROKEN: BIMConvertersResponse = {
+const DWG_BROKEN: BIMConvertersResponse = {
   converters: INSTALLED_UNCHECKED.converters.map((c) =>
-    c.id === 'dgn'
+    c.id === 'dwg'
       ? {
           ...c,
           health: 'failed' as const,
           health_message:
-            'DgnExporter.exe cannot start because one of the libraries beside it is built for a different processor architecture.',
+            'dwg2excel.exe cannot start because one of the libraries beside it is built for a different processor architecture.',
           suggested_actions: ['reinstall_converter' as const],
         }
       : { ...c, health: 'ok' as const },
   ),
-  installed_count: 4,
-  healthy_count: 3,
-  total_count: 4,
+  installed_count: 3,
+  healthy_count: 2,
+  total_count: 3,
 };
 
 /** An update waiting upstream. Independent of the smoke test - the backend
  *  compares blob SHAs and never starts anything - so it can land on top of
  *  the unchecked listing above, and on a machine that has not updated in a
  *  while it usually does. */
-const DGN_OUTDATED: ConverterVersionCheck = {
+const DWG_OUTDATED: ConverterVersionCheck = {
   converters: [
     {
-      id: 'dgn',
-      name: 'DGN converter',
-      exe: 'DgnExporter.exe',
+      id: 'dwg',
+      name: 'DWG converter',
+      exe: 'dwg2excel.exe',
       installed: true,
-      installed_path: 'C:/converters/dgn/DgnExporter.exe',
+      installed_path: 'C:/converters/dwg/cli/dwg2excel.exe',
       installed_size: 120,
       installed_sha: 'def5678',
       latest_size: 121,
@@ -187,10 +186,10 @@ describe('An unchecked panel says so rather than guessing (#416)', () => {
     renderBanner();
 
     // With no verdicts, "working" is not a number the panel has. Reusing the
-    // verified wording here printed "0/4 up to date" and the install nag on a
+    // verified wording here printed "0/3 up to date" and the install nag on a
     // machine where all four converters are present and fine.
-    expect(await screen.findByText('4/4 installed · not checked')).toBeInTheDocument();
-    expect(screen.queryByText('4/4 up to date')).not.toBeInTheDocument();
+    expect(await screen.findByText('3/3 installed · not checked')).toBeInTheDocument();
+    expect(screen.queryByText('3/3 up to date')).not.toBeInTheDocument();
     expect(
       screen.queryByText(
         'Without these, drag-and-drop of native CAD/BIM files will fail. One-time install from GitHub.',
@@ -211,7 +210,7 @@ describe('An unchecked panel says so rather than guessing (#416)', () => {
     renderBanner();
 
     expect(await screen.findByTestId('bim-converters-mini-icon')).toHaveTextContent(
-      '4/4',
+      '3/3',
     );
   });
 
@@ -219,13 +218,13 @@ describe('An unchecked panel says so rather than guessing (#416)', () => {
     // An update available is not a converter missing, but it is enough to
     // keep the panel out of its "nothing to report" state - so the wording
     // and the collapsed badge cannot hang off one flag. Off one flag the
-    // header read "4/4 installed" with "One-time install from GitHub"
+    // header read "3/3 installed" with "One-time install from GitHub"
     // directly underneath it.
-    fetchConverterVersionCheck.mockResolvedValue(DGN_OUTDATED);
+    fetchConverterVersionCheck.mockResolvedValue(DWG_OUTDATED);
 
     renderBanner();
 
-    expect(await screen.findByText('4/4 installed · not checked')).toBeInTheDocument();
+    expect(await screen.findByText('3/3 installed · not checked')).toBeInTheDocument();
     expect(
       screen.queryByText(
         'Without these, drag-and-drop of native CAD/BIM files will fail. One-time install from GitHub.',
@@ -245,11 +244,11 @@ describe('An unchecked panel says so rather than guessing (#416)', () => {
     // broken converter into a silent success. This passes before and after -
     // it is here so a future "just drop the verified branch" cannot go
     // unnoticed.
-    fetchBIMConverters.mockResolvedValue(DGN_BROKEN);
+    fetchBIMConverters.mockResolvedValue(DWG_BROKEN);
 
     renderBanner();
 
     expect(await screen.findByText('Broken')).toBeInTheDocument();
-    expect(screen.getByText('1 broken · 3/4 working')).toBeInTheDocument();
+    expect(screen.getByText('1 broken · 2/3 working')).toBeInTheDocument();
   });
 });

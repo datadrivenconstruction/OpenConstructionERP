@@ -30,10 +30,10 @@ import type { PropertyFilterValue } from './ruleOperators';
 /* ── Format helpers ────────────────────────────────────────────────────── */
 
 /** Source formats that are 2D drawings, not 3D models (no mesh ever). */
-const NON_3D_BIM_FORMATS = ['dwg', 'dxf', 'dgn'];
+const NON_3D_BIM_FORMATS = ['dwg', 'dxf'];
 
 /**
- * True when a model's source format is a 2D drawing (DWG/DXF/DGN) that can
+ * True when a model's source format is a 2D drawing (DWG/DXF) that can
  * never carry 3D geometry. Such models belong to the DWG Takeoff module and
  * must never appear in the BIM 3D Takeoff filmstrip, picker or viewer. Mirrors
  * the backend `is_non_3d_format` guard so the UI stays correct even against a
@@ -209,7 +209,7 @@ export type BIMConverterAction =
 /** Single DDC converter entry as returned by the backend
  *  `/v1/takeoff/converters/` endpoint. */
 export interface BIMConverterInfo {
-  /** Stable converter id — one of `'rvt'`, `'dwg'`, `'ifc'`, `'dgn'`. */
+  /** Stable converter id — one of `'rvt'`, `'dwg'`, `'ifc'`. */
   id: string;
   name: string;
   description: string;
@@ -275,7 +275,7 @@ export interface BIMConverterInstallResult {
    *  that case. */
   apt_source_present?: boolean;
   /** Linux only — predicted binary path after install
-   *  (e.g. `/usr/bin/RvtExporter`). Surfaced in the toast so the user
+   *  (e.g. `RVTconverter.exe`). Surfaced in the toast so the user
    *  knows where the .deb will land before running apt. */
   expected_binary_path?: string | null;
   /** Whether the post-install smoke test passed (Windows only). */
@@ -1682,7 +1682,7 @@ export async function listActivitiesForElement(
   );
 }
 
-/** Upload a raw CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS) for background processing. */
+/** Upload a raw CAD file (RVT, IFC, DWG, FBX, OBJ, 3DS) for background processing. */
 export async function uploadCADFile(
   projectId: string,
   name: string,

@@ -2416,7 +2416,7 @@ function ConverterStatusPanel() {
             <p className="text-2xs text-content-tertiary">
               {t('settings.converters_source_desc', {
                 defaultValue:
-                  'Open-source converters for Revit® (RVT), IFC, DWG and DGN, maintained by DataDrivenConstruction.',
+                  'Open-source converters for Revit® (RVT), IFC and DWG, maintained by DataDrivenConstruction.',
               })}
             </p>
           </div>

@@ -4807,7 +4807,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 <p
                   class="mt-1 text-xs leading-relaxed text-content-tertiary line-clamp-2"
                 >
-                  Drop a RVT, IFC, DWG or DGN file - the converter extracts quantities and matches elements to cost positions.
+                  Drop a RVT, IFC or DWG file - the converter extracts quantities and matches elements to cost positions.
                 </p>
               </div>
               <span

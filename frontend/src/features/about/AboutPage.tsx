@@ -314,7 +314,7 @@ export function AboutPage() {
             ))}
           </div>
           <p className="mt-auto pt-4 text-sm text-content-secondary leading-relaxed">
-            {t('about.platform_desc', { defaultValue: 'OpenConstructionERP covers the full construction estimation workflow - BOQ editing, 4D scheduling, 5D cost modeling, AI-powered estimation, CAD/BIM quantity takeoff (RVT, IFC, DWG, DGN), tendering, and reporting. Supports regional classification standards and custom schemas.' })}
+            {t('about.platform_desc', { defaultValue: 'OpenConstructionERP covers the full construction estimation workflow - BOQ editing, 4D scheduling, 5D cost modeling, AI-powered estimation, CAD/BIM quantity takeoff (RVT, IFC, DWG), tendering, and reporting. Supports regional classification standards and custom schemas.' })}
           </p>
         </div>
       </Card>
@@ -518,7 +518,7 @@ export function AboutPage() {
                 <p>
                   <Trans
                     i18nKey="about.founder_bio_p3"
-                    defaults='Two other problems kept us busy. One was helping non-developers get into proprietary file formats that were never meant to be opened. The other was finding a cleaner way to describe construction work through a resource model. Both produced free tools: the <cad>DDC CAD/BIM converters</cad> (Revit®, IFC, DWG, DGN → structured data) <gh>on GitHub</gh>, and <cwicr>CWICR</cwicr>, a multilingual database of construction works and resources - over 55,000 items in 11 languages, published as <cwicr>OpenConstructionEstimate-DDC-CWICR</cwicr>.'
+                    defaults='Two other problems kept us busy. One was helping non-developers get into proprietary file formats that were never meant to be opened. The other was finding a cleaner way to describe construction work through a resource model. Both produced free tools: the <cad>DDC CAD/BIM converters</cad> (Revit®, IFC, DWG → structured data) <gh>on GitHub</gh>, and <cwicr>CWICR</cwicr>, a multilingual database of construction works and resources - over 55,000 items in 11 languages, published as <cwicr>OpenConstructionEstimate-DDC-CWICR</cwicr>.'
                     components={{
                       cad: (
                         <a

@@ -200,11 +200,6 @@ const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: strin
     border: 'border-emerald-200 dark:border-emerald-900/30',
     icon: 'bg-gradient-to-br from-emerald-500 to-green-500',
   },
-  dgn: {
-    bg: 'from-purple-500/10 to-violet-500/10',
-    border: 'border-purple-200 dark:border-purple-900/30',
-    icon: 'bg-gradient-to-br from-purple-500 to-violet-500',
-  },
 };
 
 // ── Converter card component ────────────────────────────────────────────
@@ -1151,7 +1146,7 @@ export function QuantitiesPage() {
         {/* Fallback when API hasn't loaded yet — show skeleton cards */}
         {converters.length === 0 && (
           <div className="grid gap-3 sm:grid-cols-2">
-            {['dwg', 'rvt', 'ifc', 'dgn'].map((id) => {
+            {['dwg', 'rvt', 'ifc'].map((id) => {
               const colors = CONVERTER_COLORS[id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-gray-200', icon: 'bg-gray-500' };
               return (
                 <div

@@ -85,7 +85,7 @@ export interface StartUploadParams {
   projectId: string;
   modelName: string;
   discipline: string;
-  /** 'cad' for native CAD files (RVT/IFC/DWG/DGN), 'data' for CSV/XLSX. */
+  /** 'cad' for native CAD files (RVT/IFC/DWG), 'data' for CSV/XLSX. */
   uploadType: 'cad' | 'data';
   /** Optional geometry file for advanced (data) uploads. */
   geometryFile?: File | null;

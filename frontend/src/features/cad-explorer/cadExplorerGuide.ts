@@ -25,7 +25,7 @@ export const cadExplorerGuide: ModuleGuideContent = {
       titleDefault: 'Load a model session',
       bodyKey: 'guide.cad_explorer.load.body',
       bodyDefault:
-        'Drop an IFC, Revit®, DWG, DGN or DXF file into the upload card and it is converted locally into element data, or open a model you already have from the BIM hub or Recent Models. Each load becomes a data session with its element rows and parameter columns ready to explore.',
+        'Drop an IFC, Revit®, DWG or DXF file into the upload card and it is converted locally into element data, or open a model you already have from the BIM hub or Recent Models. Each load becomes a data session with its element rows and parameter columns ready to explore.',
     },
     {
       icon: 'ListChecks',

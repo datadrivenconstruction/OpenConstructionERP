@@ -5,7 +5,7 @@
  *
  * Two source groups, fetched live:
  *
- *  1. 3D models (BIM Hub: RVT / IFC / DWG / DGN). A model that has finished
+ *  1. 3D models (BIM Hub: RVT / IFC / DWG). A model that has finished
  *     converting (``status === 'ready'`` with geometry) is placed as a
  *     georeferenced 3D Tileset anchored to the project location, via
  *     ``POST /v1/geo-hub/from-canonical/{modelId}``. Models still

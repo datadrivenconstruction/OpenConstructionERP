@@ -2391,7 +2391,7 @@ export function BIMPage() {
   const clearBIMLinkSelection = useBIMLinkSelectionStore((s) => s.clear);
 
   const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId, staleTime: 5 * 60_000 });
-  // Defense in depth: never surface 2D drawing formats (DWG/DXF/DGN) in the
+  // Defense in depth: never surface 2D drawing formats (DWG/DXF) in the
   // BIM 3D Takeoff filmstrip, picker or deep-link resolver. Those belong to the
   // DWG Takeoff module and carry no 3D mesh, so the viewer must never try to
   // load geometry for them. The backend list query already filters these out;

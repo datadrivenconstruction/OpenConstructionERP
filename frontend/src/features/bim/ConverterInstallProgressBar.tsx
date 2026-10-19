@@ -39,7 +39,7 @@ import {
 import { fmtFixed } from '@/shared/lib/formatters';
 
 interface ConverterInstallProgressBarProps {
-  /** Converter id (``rvt`` / ``ifc`` / ``dwg`` / ``dgn``). */
+  /** Converter id (``rvt`` / ``ifc`` / ``dwg``). */
   converterId: string;
   /** Whether the parent's install mutation is in flight. The poll is
    *  disabled when ``false`` so nothing is fetched at rest. */

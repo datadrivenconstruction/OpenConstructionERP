@@ -162,7 +162,7 @@ export default function BIMSnapshotsPopover({
               <p className="text-xs text-content-tertiary">
                 {t('dashboards.no_snapshots_desc', {
                   defaultValue:
-                    'Upload IFC, RVT, DWG or DGN files to freeze a parquet dataset.',
+                    'Upload IFC, RVT or DWG files to freeze a parquet dataset.',
                 })}
               </p>
             </div>

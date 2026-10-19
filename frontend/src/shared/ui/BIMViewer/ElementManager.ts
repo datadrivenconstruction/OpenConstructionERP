@@ -256,7 +256,7 @@ export interface BIMModelData {
   error_message?: string | null;
   /** Free-form metadata bag from the backend. Keys we read here:
    *    - error_code: 'ddc_not_found' | 'ddc_failed' | 'zero_elements' | 'unexpected'
-   *    - converter_id: 'rvt' | 'ifc' | 'dwg' | 'dgn' (when error_code is converter-related)
+   *    - converter_id: 'rvt' | 'ifc' | 'dwg' (when error_code is converter-related)
    *    - install_endpoint: POST URL to install the missing converter */
   metadata?: Record<string, unknown> | null;
   /** Stable error id surfaced as a top-level field by the backend
@@ -1078,7 +1078,7 @@ export class ElementManager {
       // it shares the same prefix. The viewer needs COLLADA DAE (which
       // is also XML but with a <COLLADA root) or a GLB binary.
       hint =
-        ' - The file is XML but not COLLADA. This usually means the DDC cad2data converter did not emit 3D geometry for this model (an older converter version, or a source format without geometry - e.g. .ifcXML / gbXML). Try re-running the conversion with the latest DDC cad2data (v0.3+) or upload the source as RVT/IFC/DWG/DGN to trigger geometry export.';
+        ' - The file is XML but not COLLADA. This usually means the DDC cad2data converter did not emit 3D geometry for this model (an older converter version, or a source format without geometry - e.g. .ifcXML / gbXML). Try re-running the conversion with the latest DDC cad2data (v0.3+) or upload the source as RVT/IFC/DWG to trigger geometry export.';
     } else if (asAscii.startsWith('<!doctype') || asAscii.startsWith('<html')) {
       // HTML — almost always an auth/redirect or error page.
       hint =
@@ -1301,7 +1301,7 @@ export class ElementManager {
     }
 
     // Walk ALL ancestors up to the scene root and collect every Object3D.name.
-    // The DDC RvtExporter DAE sometimes nests nodes:
+    // The DDC RVT converter DAE sometimes nests nodes:
     //   <node id="140056" name="140056">        ← RVT ElementId (outer)
     //     <node id="135248" name="135248">      ← internal sub-node
     //       <instance_geometry />

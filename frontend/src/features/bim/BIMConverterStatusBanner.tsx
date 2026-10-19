@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * BIMConverterStatusBanner — always-visible health panel for the four DDC
- * converters needed by the BIM Hub drag-and-drop (.rvt / .ifc / .dwg / .dgn).
+ * converters needed by the BIM Hub drag-and-drop (.rvt / .ifc / .dwg).
  *
  * v2.6.23 architecture: the banner is the single source of truth for
  * converter state on /bim. It does three things the previous version did
@@ -66,7 +66,7 @@ import { useToastStore } from '@/stores/useToastStore';
  *  ``upload-cad`` but without a dedicated converter (.fbx/.obj/.3ds) are
  *  noted in the banner subtitle rather than rendered as fake chips —
  *  there is no separate binary to install for those. */
-const PANEL_CONVERTER_IDS = ['rvt', 'ifc', 'dwg', 'dgn'] as const;
+const PANEL_CONVERTER_IDS = ['rvt', 'ifc', 'dwg'] as const;
 
 /** Converter ids that have a built-in fallback parser in the backend. The
  *  IFC text-parser at ``ifc_processor.py`` produces 2D placeholder
@@ -879,7 +879,7 @@ export function BIMConverterStatusBanner({
                 : allHealthy
                   ? t('bim.converter_panel_subtitle_ok', {
                       defaultValue:
-                        'Drag-and-drop of .rvt / .ifc / .dwg / .dgn is ready.',
+                        'Drag-and-drop of .rvt / .ifc / .dwg is ready.',
                     })
                   : /* Everything is installed and unchecked: there is
                        nothing to install, so the install nag below would be
@@ -1198,11 +1198,7 @@ function ConverterRow({
         {versionEntry?.installed_sha && (
           <span
             className="hidden lg:inline text-[10px] text-content-quaternary dark:text-zinc-400 font-mono"
-            title={t('bim.converter_sha_tooltip', {
-              defaultValue:
-                'Installed package SHA-256. Compared against the package this version installs from the DDC converter release.',
-              repo: 'main',
-            })}
+            title={`SHA-256 ${versionEntry.installed_sha}`}
           >
             v {versionEntry.installed_sha.slice(0, 7)}
             {updateAvailable && versionEntry.latest_sha && (

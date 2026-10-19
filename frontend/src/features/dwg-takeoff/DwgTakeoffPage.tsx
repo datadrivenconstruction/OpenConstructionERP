@@ -6475,7 +6475,7 @@ function UploadProgressInline() {
  * counter.
  *
  * Cancel: the backend has no "abort conversion" endpoint (the asyncio
- * task runs DwgExporter to completion), so "Cancel" here actually means
+ * task runs the DWG converter to completion), so "Cancel" here actually means
  * "delete this drawing row" - the conversion continues server-side but
  * the user gets back to the upload flow immediately. This matches user
  * intent ("I changed my mind, get me out of here") without pretending

@@ -3070,13 +3070,12 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
 
 /* ── Upload & Convert Zone ──────────────────────────────────────────────── */
 
-const CAD_ACCEPT = '.rvt,.ifc,.dwg,.dgn,.dxf,.rfa';
-const CAD_FORMATS = ['RVT', 'IFC', 'DWG', 'DGN', 'DXF', 'RFA'];
+const CAD_ACCEPT = '.rvt,.ifc,.dwg,.dxf,.rfa';
+const CAD_FORMATS = ['RVT', 'IFC', 'DWG', 'DXF', 'RFA'];
 const FORMAT_COLORS: Record<string, string> = {
   RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   IFC: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
   DWG: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
-  DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   DXF: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
   RFA: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
 };
@@ -3112,8 +3111,8 @@ function UploadConvertZone({
 
   const handleFile = useCallback(async (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    if (!['rvt', 'ifc', 'dwg', 'dgn', 'dxf', 'rfa'].includes(ext)) {
-      addToast({ type: 'warning', title: t('explorer.invalid_format', { defaultValue: 'Unsupported file format. Use RVT, IFC, DWG, or DGN.' }) });
+    if (!['rvt', 'ifc', 'dwg', 'dxf', 'rfa'].includes(ext)) {
+      addToast({ type: 'warning', title: t('explorer.invalid_format', { defaultValue: 'Unsupported file format. Use RVT, IFC, or DWG.' }) });
       return;
     }
     const taskId = uuid();
@@ -3245,7 +3244,7 @@ function UploadConvertZone({
       <div
         role="button"
         tabIndex={uploading ? -1 : 0}
-        aria-label={t('explorer.upload_dropzone_aria', { defaultValue: 'Upload CAD file (IFC, RVT, DWG, DGN)' })}
+        aria-label={t('explorer.upload_dropzone_aria', { defaultValue: 'Upload CAD file (IFC, RVT, DWG)' })}
         aria-disabled={uploading}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -3268,7 +3267,7 @@ function UploadConvertZone({
           id="cad-explorer-file-input"
           type="file"
           accept={CAD_ACCEPT}
-          aria-label={t('explorer.upload_dropzone_aria', { defaultValue: 'Upload CAD file (IFC, RVT, DWG, DGN)' })}
+          aria-label={t('explorer.upload_dropzone_aria', { defaultValue: 'Upload CAD file (IFC, RVT, DWG)' })}
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }}
           className="hidden"
         />
@@ -3300,7 +3299,7 @@ function UploadConvertZone({
               </div>
               <div>
                 <p className="text-base font-bold text-content-primary mb-1">
-                  {t('explorer.drop_cad', { defaultValue: 'Drop your IFC, RVT, DWG, or DGN file here' })}
+                  {t('explorer.drop_cad', { defaultValue: 'Drop your IFC, RVT, or DWG file here' })}
                 </p>
                 <p className="text-sm text-content-tertiary">
                   {t('explorer.or_click', { defaultValue: 'or click to browse your files' })}
@@ -4045,7 +4044,7 @@ export function CadDataExplorerPage() {
                     {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit® models.' })}
                   </p>
                   <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
-                    IFC 2x3, 4.0, 4.1, 4.3 &middot; Revit® 2015–2026 &middot; DWG &middot; DGN &middot; DXF &middot; RFA
+                    IFC 2x3, 4.0, 4.1, 4.3 &middot; Revit® 2015–2026 &middot; DWG &middot; DXF &middot; RFA
                   </p>
                   <div className="mt-4 flex items-center justify-start">
                     <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
@@ -4129,7 +4128,6 @@ export function CadDataExplorerPage() {
                       fmt === 'RVT' ? 'bg-blue-500' :
                       fmt === 'IFC' ? 'bg-green-500' :
                       fmt === 'DWG' ? 'bg-orange-500' :
-                      fmt === 'DGN' ? 'bg-purple-500' :
                       fmt === 'DXF' ? 'bg-amber-500' :
                       'bg-gray-400'
                     }`} />
@@ -4139,7 +4137,6 @@ export function CadDataExplorerPage() {
                           fmt === 'RVT' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
                           fmt === 'IFC' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
                           fmt === 'DWG' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' :
-                          fmt === 'DGN' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' :
                           'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                         }`}>{fmt || '?'}</div>
                         <span className="text-xs font-semibold text-content-primary truncate">{s.display_name}</span>

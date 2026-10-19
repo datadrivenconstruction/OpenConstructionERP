@@ -7,7 +7,7 @@
  * Goal (2026-06): the user used to have to find and press an "Install"
  * button in BIMConverterStatusBanner / InstallConverterPrompt before any
  * converter would download. Now, the moment a convertible file is picked
- * (.rvt / .rfa / .ifc / .dwg / .dxf / .dgn) and the matching converter is
+ * (.rvt / .rfa / .ifc / .dwg / .dxf) and the matching converter is
  * not yet on disk, the install starts automatically in the background and
  * the existing progress UI (ConverterInstallProgressBar) is surfaced
  * inline by the caller. The manual Install / Retry buttons stay as a
@@ -50,7 +50,6 @@ const EXT_TO_CONVERTER_ID: Record<string, string> = {
   ifczip: 'ifc',
   dwg: 'dwg',
   dxf: 'dwg',
-  dgn: 'dgn',
 };
 
 /** Converter ids that have a built-in backend fallback parser, so the

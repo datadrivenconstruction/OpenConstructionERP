@@ -1534,7 +1534,7 @@ function NextSteps({
       id: 'upload-cad',
       icon: <Layers size={18} strokeWidth={1.75} />,
       title: t('dashboard.next_upload_cad', { defaultValue: 'Upload a CAD or BIM model' }),
-      description: t('dashboard.next_upload_cad_desc', { defaultValue: 'Drop a RVT, IFC, DWG or DGN file - the converter extracts quantities and matches elements to cost positions.' }),
+      description: t('dashboard.next_upload_cad_desc', { defaultValue: 'Drop a RVT, IFC or DWG file - the converter extracts quantities and matches elements to cost positions.' }),
       actionLabel: t('dashboard.next_upload_cad_action', { defaultValue: 'Open BIM' }),
       url: '/bim',
     });
