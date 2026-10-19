@@ -685,6 +685,22 @@
       "ar": "ضريبة القيمة المضافة"
     },
     "tax_code": "VAT",
+    "rate_pct": "5.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2018-01-01",
+    "effective_to": "2020-06-30",
+    "is_default": true
+  },
+  {
+    "country_code": "SA",
+    "tax_name": "VAT Standard",
+    "tax_name_translations": {
+      "en": "VAT Standard",
+      "ar": "ضريبة القيمة المضافة"
+    },
+    "tax_code": "VAT",
     "rate_pct": "15.0",
     "tax_type": "vat",
     "combination": "national",

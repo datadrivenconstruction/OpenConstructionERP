@@ -83,6 +83,8 @@ const REGIONS: MarkupRegion[] = [
   { code: 'VN', flag: '\ud83c\uddfb\ud83c\uddf3', standard: 'BXD' },
   // Middle East / Africa
   { code: 'GULF', flag: '\ud83c\udde6\ud83c\uddea', labelKey: 'boq.markup_region.gulf', labelDefault: 'Gulf states', standard: 'FIDIC' },
+  // The Gulf lines at Saudi VAT (15 since 2020-07-01) rather than the Gulf 5.
+  { code: 'SA', flag: '\ud83c\uddf8\ud83c\udde6', standard: 'FIDIC' },
   { code: 'IL', flag: '\ud83c\uddee\ud83c\uddf1', standard: 'SI' },
   { code: 'TR', flag: '\ud83c\uddf9\ud83c\uddf7', standard: 'BIB' },
   { code: 'NG', flag: '\ud83c\uddf3\ud83c\uddec', standard: 'BQSM' },

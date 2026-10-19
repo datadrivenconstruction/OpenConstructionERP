@@ -2679,6 +2679,18 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     ],
 }
 
+# Saudi Arabia reads the Gulf preliminaries-and-general convention, but not the
+# Gulf VAT line. That line is 5, the UAE rate, and Saudi Arabia's rate only
+# until 2020-06-30; it has been 15 since 2020-07-01 (VAT Law, Royal Decree
+# M/113, as amended). A bill takes its VAT from the dated tax seed when it can,
+# so the 5 reached a Saudi bill exactly where the seed answered nothing. The
+# stack is derived from GULF rather than written out again, so the convention
+# stays written once and only the number that differs is stated here.
+DEFAULT_MARKUP_TEMPLATES["SA"] = [
+    {**line, "percentage": "15.0"} if line.get("category") == "tax" else dict(line)
+    for line in DEFAULT_MARKUP_TEMPLATES["GULF"]
+]
+
 # ── Which country reads which stack ──────────────────────────────────────────
 #
 # A region key above is a convention, not a border. DACH is the German
@@ -2714,7 +2726,9 @@ REGION_BY_COUNTRY: dict[str, str] = {
     "AE": "GULF",
     "KW": "GULF",
     "QA": "GULF",
-    "SA": "GULF",
+    # Saudi Arabia has a stack of its own, the Gulf lines at Saudi VAT; see
+    # the note under the table.
+    "SA": "SA",
     "IN": "IN",
     "AU": "AU",
     "JP": "JP",
