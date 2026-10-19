@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Pass 6: Translate the remaining 50 long heavily-mixed entries."""
+"""Pass 6: Translate the remaining 50 long heavily-mixed entries.
+
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
+"""
 from __future__ import annotations
 
 import re

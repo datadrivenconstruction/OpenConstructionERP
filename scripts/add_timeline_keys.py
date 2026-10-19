@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Insert 23 timeline keys after timeline.showing in all required locale files."""
+"""Insert 23 timeline keys after timeline.showing in all required locale files.
+
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
+"""
 
 import re
 import sys

@@ -1,6 +1,7 @@
 """‌⁠‍Inject 5 sidebar CTA i18n keys into all locale files.
 
 Idempotent: if a key already exists in a locale, it's left unchanged.
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 from __future__ import annotations

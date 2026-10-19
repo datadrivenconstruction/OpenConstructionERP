@@ -5,6 +5,7 @@ These are mostly technical labels where translation matters less, but we'll
 handle the cases that have real prose. Pure-acronym entries (CPI, SPI, EVM,
 MEP, HVAC, etc.) and brand names are intentionally left in English — these
 are domain conventions used internationally regardless of locale.
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 from __future__ import annotations
 

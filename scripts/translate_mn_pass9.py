@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""‌⁠‍Pass 9: tiny final boost to push translated count over 99%."""
+"""‌⁠‍Pass 9: tiny final boost to push translated count over 99%.
+
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
+"""
 import re
 from pathlib import Path
 

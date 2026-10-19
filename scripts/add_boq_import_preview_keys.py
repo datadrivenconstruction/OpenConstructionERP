@@ -2,6 +2,7 @@
 """
 Add boq.import_preview.* keys to all required locale files.
 29 keys, 42 locales.
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 import re
