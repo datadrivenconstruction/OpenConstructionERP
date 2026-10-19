@@ -57,8 +57,6 @@ _EVENT_DESCRIPTIONS: dict[str, str] = {
     "boq.quantity_link.created": "Linked a position quantity to a model",
     "boq.quantity_link.applied": "Updated {applied} position quantities from linked models",
     "boq.bim_quantity.applied": "Updated {applied} position quantities from a new BIM model version",
-    "boq.positions.revision_flagged": "Flagged positions measured on {document_name} (revision {revision_code})",
-    "boq.positions.bim_version_flagged": "Flagged positions linked to a changed BIM model version",
     "boq.section.created": "Created section {ordinal}",
     "boq.markup.created": "Added markup: {name}",
     "boq.markup.updated": "Updated markup",
@@ -561,20 +559,6 @@ async def _on_positions_bulk_created(event: Event) -> None:
         await _vector_queue.submit((pid, _INDEX) for pid in ids)
 
 
-async def _on_revision_flagged(event: Event) -> None:
-    # Imported here: change_review pulls in the BOQ service, which this
-    # module must not load at import time.
-    from app.modules.boq.change_review import handle_revision_flagged
-
-    await handle_revision_flagged(event)
-
-
-async def _on_bim_version_flagged(event: Event) -> None:
-    from app.modules.boq.change_review import handle_bim_version_flagged
-
-    await handle_bim_version_flagged(event)
-
-
 def _register_handlers() -> None:
     """Register the BOQ event-bus handlers.
 
@@ -588,12 +572,6 @@ def _register_handlers() -> None:
     event_bus.subscribe_once("boq.position.deleted", _on_position_deleted)
     event_bus.subscribe_once("boq.position.duplicated", _on_position_created)
     event_bus.subscribe_once("boq.positions.bulk_created", _on_positions_bulk_created)
-
-    # Change awareness: the core handlers publish which positions a new
-    # drawing revision or BIM model version affects; these persist that as
-    # review flags the estimator sees in the BOQ editor.
-    event_bus.subscribe_once("boq.positions.revision_flagged", _on_revision_flagged)
-    event_bus.subscribe_once("boq.positions.bim_version_flagged", _on_bim_version_flagged)
 
     event_bus.subscribe_once("*", _log_boq_activity)
 

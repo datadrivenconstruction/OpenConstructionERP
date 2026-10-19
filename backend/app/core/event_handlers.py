@@ -10,11 +10,8 @@ Dataflows wired:
    3. inspection.completed.failed   -> punch suggestion event (punchlist creates the items)
    4. rfi.response.design_change    -> flag for variation (changeorders drafts a CO)
    5. ncr.closed_with_cost_impact   -> flag for variation (changeorders drafts a CO)
-   6. document.revision.created     -> flag linked BOQ positions
    7. invoice.paid                  -> update project budget actuals
   10. schedule.activity.progress_updated -> today's EVM snapshot (one per project per day)
-  11. bim_model.ready               -> apply quantity maps -> draft BOQ
-  12. bim_model.new_version         -> diff -> flag affected BOQ positions
   14. transmittal.issued            -> audit trail for distribution
   15. cde.container.promoted        -> audit + notify stakeholders
   15b. commissioning.system.commissioned -> audit trail for handover
@@ -27,6 +24,11 @@ submittal.status_changed (notifications subscribes to each submittal outcome)
 and variation.approved (approve_order writes the budget delta row itself,
 the wave-5 subscriber moves Contract.total_value, and Project.contract_value is
 the original contract value change_intelligence divides by).
+
+document.revision.created, bim_model.new_version and bim_model.ready are gone
+for the same reason: the BOQ change review scan works out which positions a new
+drawing revision or model version touched straight from the data, and the BOQ
+editor runs it on every visit (boq/change_review.py).
 """
 
 import logging
@@ -377,52 +379,6 @@ async def _handle_ncr_cost_impact(event: Event) -> None:
         )
     except Exception:
         logger.exception("Error handling ncr.closed_with_cost_impact")
-
-
-# ---------------------------------------------------------------------------
-# 6. document.revision.created -> flag linked BOQ positions
-# ---------------------------------------------------------------------------
-
-
-async def _handle_document_revision_created(event: Event) -> None:
-    """Log new document revision for affected BOQ positions.
-
-    Expected event.data:
-        project_id: str (UUID)
-        document_id: str (UUID)
-        document_name: str
-        revision_code: str
-        previous_revision_id: str | None (UUID)
-        affected_boq_position_ids: list[str] (UUIDs, if known)
-    """
-    try:
-        data = event.data
-        document_id = data.get("document_id")
-        document_name = data.get("document_name", "")
-        revision_code = data.get("revision_code", "")
-        affected_ids = data.get("affected_boq_position_ids", [])
-
-        logger.info(
-            "document.revision.created: document '%s' rev %s -- %d linked BOQ positions",
-            document_name,
-            revision_code,
-            len(affected_ids),
-        )
-
-        if affected_ids:
-            await event_bus.publish(
-                "boq.positions.revision_flagged",
-                data={
-                    "project_id": data.get("project_id"),
-                    "document_id": str(document_id),
-                    "document_name": document_name,
-                    "revision_code": revision_code,
-                    "affected_position_ids": affected_ids,
-                },
-                source_module="event_handlers",
-            )
-    except Exception:
-        logger.exception("Error handling document.revision.created")
 
 
 # ---------------------------------------------------------------------------
@@ -946,213 +902,6 @@ async def _write_progress_snapshot(
         ev,
         ac,
     )
-
-
-# ---------------------------------------------------------------------------
-# 11. bim_model.ready -> apply quantity maps -> draft BOQ
-# ---------------------------------------------------------------------------
-
-
-async def _handle_bim_model_ready(event: Event) -> None:
-    """BIM model processed -> apply quantity maps -> generate draft BOQ positions.
-
-    When a BIM model finishes processing, load active quantity map rules and
-    create draft BOQ positions for matching elements.
-
-    Expected event.data:
-        model_id: str (UUID)
-        project_id: str (UUID)
-        boq_id: str (UUID, optional - target BOQ for new positions)
-    """
-    try:
-        data = event.data
-        model_id = data.get("model_id")
-        project_id = data.get("project_id")
-        boq_id = data.get("boq_id")
-
-        if not model_id or not project_id:
-            logger.debug("bim_model.ready: missing model_id or project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.bim_hub.models import BIMElement, BIMQuantityMap
-        from app.modules.bim_hub.service import BIMHubService, rule_element_group_id
-
-        async with async_session_factory() as session:
-            # Load BIM elements for this model
-            elem_result = await session.execute(select(BIMElement).where(BIMElement.model_id == model_id))
-            elements = elem_result.scalars().all()
-
-            if not elements:
-                logger.debug("bim_model.ready: no elements for model %s", model_id)
-                return
-
-            # Load active quantity maps (project-scoped or global)
-            map_result = await session.execute(
-                select(BIMQuantityMap).where(
-                    BIMQuantityMap.is_active.is_(True),
-                    ((BIMQuantityMap.project_id == project_id) | BIMQuantityMap.project_id.is_(None)),
-                )
-            )
-            qty_maps = map_result.scalars().all()
-
-            if not qty_maps:
-                logger.debug(
-                    "bim_model.ready: no active quantity maps for project %s",
-                    project_id,
-                )
-                return
-
-            # Apply each rule to matching elements
-            matched_count = 0
-            for qmap in qty_maps:
-                for elem in elements:
-                    # The one rule matcher (type wildcards, property operators),
-                    # so this path cannot select differently from apply.
-                    if not BIMHubService._rule_matches_element(qmap, elem):
-                        continue
-                    # A rule fed by a saved group needs its members; this
-                    # path cannot resolve them, so it leaves such rules alone
-                    # rather than letting them select every element.
-                    if rule_element_group_id(qmap) is not None:
-                        continue
-
-                    # Extract quantity from element
-                    raw_qty = elem.quantities.get(qmap.quantity_source, 0)
-                    try:
-                        quantity = Decimal(str(raw_qty)) * Decimal(str(qmap.multiplier))
-                        waste = Decimal(str(qmap.waste_factor_pct)) / Decimal("100")
-                        quantity *= Decimal("1") + waste
-                    except (InvalidOperation, ValueError):
-                        continue
-
-                    matched_count += 1
-
-            logger.info(
-                "bim_model.ready: matched %d element-rule pairs for model %s (project %s, %d elements, %d rules)",
-                matched_count,
-                model_id,
-                project_id,
-                len(elements),
-                len(qty_maps),
-            )
-
-            # Emit a downstream event so the UI or another handler can create
-            # actual BOQ positions from the matched results.
-            await event_bus.publish(
-                "bim_model.quantity_maps_applied",
-                data={
-                    "project_id": project_id,
-                    "model_id": model_id,
-                    "boq_id": boq_id,
-                    "matched_count": matched_count,
-                    "element_count": len(elements),
-                    "rule_count": len(qty_maps),
-                },
-                source_module="event_handlers",
-            )
-    except Exception:
-        logger.exception("Error handling bim_model.ready")
-
-
-# ---------------------------------------------------------------------------
-# 12. bim_model.new_version -> diff -> flag affected BOQ positions
-# ---------------------------------------------------------------------------
-
-
-async def _handle_bim_model_new_version(event: Event) -> None:
-    """New BIM model version -> compute diff -> flag linked BOQ positions.
-
-    When a new version of a BIM model is uploaded, compare element stable_id
-    and geometry_hash to detect modified/deleted elements, then flag any BOQ
-    positions linked to those elements.
-
-    Expected event.data:
-        new_model_id: str (UUID)
-        old_model_id: str (UUID)
-        project_id: str (UUID)
-    """
-    try:
-        data = event.data
-        new_model_id = data.get("new_model_id")
-        old_model_id = data.get("old_model_id")
-        project_id = data.get("project_id")
-
-        if not new_model_id or not old_model_id:
-            logger.debug("bim_model.new_version: missing new_model_id or old_model_id")
-            return
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.bim_hub.models import BIMElement, BOQElementLink
-
-        async with async_session_factory() as session:
-            # Load elements for both versions keyed by stable_id
-            old_result = await session.execute(select(BIMElement).where(BIMElement.model_id == old_model_id))
-            old_elements = {e.stable_id: e for e in old_result.scalars().all()}
-
-            new_result = await session.execute(select(BIMElement).where(BIMElement.model_id == new_model_id))
-            new_elements = {e.stable_id: e for e in new_result.scalars().all()}
-
-            # Detect modified and deleted elements
-            modified_old_elem_ids: list[str] = []
-            deleted_old_elem_ids: list[str] = []
-
-            for stable_id, old_elem in old_elements.items():
-                new_elem = new_elements.get(stable_id)
-                if new_elem is None:
-                    # Element was deleted in new version
-                    deleted_old_elem_ids.append(str(old_elem.id))
-                elif old_elem.geometry_hash != new_elem.geometry_hash:
-                    # Geometry changed
-                    modified_old_elem_ids.append(str(old_elem.id))
-
-            affected_elem_ids = modified_old_elem_ids + deleted_old_elem_ids
-
-            if not affected_elem_ids:
-                logger.info(
-                    "bim_model.new_version: no modified/deleted elements between %s and %s",
-                    old_model_id,
-                    new_model_id,
-                )
-                return
-
-            # Find BOQ positions linked to the affected old elements
-            link_result = await session.execute(
-                select(BOQElementLink).where(BOQElementLink.bim_element_id.in_(affected_elem_ids))
-            )
-            affected_links = link_result.scalars().all()
-            affected_position_ids = list({str(link.boq_position_id) for link in affected_links})
-
-        logger.info(
-            "bim_model.new_version: %d modified, %d deleted elements; %d BOQ positions affected (models %s -> %s)",
-            len(modified_old_elem_ids),
-            len(deleted_old_elem_ids),
-            len(affected_position_ids),
-            old_model_id,
-            new_model_id,
-        )
-
-        if affected_position_ids:
-            await event_bus.publish(
-                "boq.positions.bim_version_flagged",
-                data={
-                    "project_id": project_id,
-                    "old_model_id": str(old_model_id),
-                    "new_model_id": str(new_model_id),
-                    "modified_element_count": len(modified_old_elem_ids),
-                    "deleted_element_count": len(deleted_old_elem_ids),
-                    "affected_position_ids": affected_position_ids,
-                },
-                source_module="event_handlers",
-            )
-    except Exception:
-        logger.exception("Error handling bim_model.new_version")
 
 
 # ---------------------------------------------------------------------------
@@ -1805,7 +1554,7 @@ async def _dispatch_to_webhooks(event: Event) -> None:
 # Registration
 # ---------------------------------------------------------------------------
 
-_HANDLER_COUNT = 20
+_HANDLER_COUNT = 17
 
 
 def register_event_handlers() -> None:
@@ -1825,13 +1574,10 @@ def register_event_handlers() -> None:
     event_bus.subscribe_once("inspection.completed.failed", _handle_inspection_completed_failed)
     event_bus.subscribe_once("rfi.response.design_change", _handle_rfi_response_design_change)
     event_bus.subscribe_once("ncr.closed_with_cost_impact", _handle_ncr_cost_impact)
-    event_bus.subscribe_once("document.revision.created", _handle_document_revision_created)
     # invoice.paid is NOT subscribed here any more: _handle_invoice_paid wrote the
     # total of every paid invoice onto EACH budget line, inflating actual N times.
     # FinanceService.pay_invoice buckets actual per (wbs, category, currency) itself.
     event_bus.subscribe_once("schedule.activity.progress_updated", _handle_schedule_progress)
-    event_bus.subscribe_once("bim_model.ready", _handle_bim_model_ready)
-    event_bus.subscribe_once("bim_model.new_version", _handle_bim_model_new_version)
     event_bus.subscribe_once("transmittal.issued", _handle_transmittal_issued)
     event_bus.subscribe_once("cde.container.promoted", _handle_cde_container_promoted)
     event_bus.subscribe_once("commissioning.system.commissioned", _handle_system_commissioned)

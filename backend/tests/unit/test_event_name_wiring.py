@@ -145,8 +145,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "bim_hub/events.py:112; bim_hub/service.py:2228 publishes 'bim_hub.element.deleted' "
         "but nothing publishes the updated variant"
     ),
-    "bim_model.new_version": "core/event_handlers.py:1839; the bim_hub module publishes under the 'bim_hub.' prefix",
-    "bim_model.ready": "core/event_handlers.py:1838; the bim_hub module publishes under the 'bim_hub.' prefix",
     "catalog.resource.price_adjusted": "assemblies/events.py:406; no catalog publisher emits a price-adjusted event",
     "catalog.resource.updated": (
         "assemblies/events.py:405; catalog/router.py:747 publishes the plural "
@@ -155,9 +153,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
     "correspondence.outbound.delivered": (
         "property_dev/events.py:407; property_dev/service.py:4568 publishes "
         "'correspondence.outbound.requested' and nothing marks delivery"
-    ),
-    "document.revision.created": (
-        "core/event_handlers.py:1833; documents and connectors publish 'documents.document.created' instead"
     ),
     "documents.uploaded": "core/event_handlers.py:1834; the documents module publishes 'documents.document.created'",
     "erp_chat.message.deleted": "erp_chat subscribes to its own delete event that no service publishes",
