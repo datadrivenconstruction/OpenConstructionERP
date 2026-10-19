@@ -150,6 +150,7 @@ _RESOLVES_RECIPIENTS_FROM_THE_DATABASE: dict[str, str] = {
     "_wave4_subscribers._on_bi_report_generated": "loads the report to find its subscribers",
     "_wave5_cross_module_subscribers._on_boq_position_assigned": "loads the position and its assignee",
     "_wave5_cross_module_subscribers._on_cert_expiring": "loads the resource through ResourceRepository",
+    "_wave5_cross_module_subscribers._on_retention_released": "loads the contract to find who created it",
     "events._on_meeting_action_items_created": "loads the meeting to find action-item owners",
     "events._on_validation_report_created": "loads the ValidationReport by id",
 }

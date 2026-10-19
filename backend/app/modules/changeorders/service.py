@@ -1355,7 +1355,7 @@ class ChangeOrderService:
         publish_after_commit(
             self.session,
             "changeorders.notify.awaiting_approval",
-            {"change_order_id": str(order_id), "actor_id": user_id},
+            {"change_order_id": str(order_id), "project_id": str(order.project_id), "actor_id": user_id},
             source_module="oe_changeorders",
         )
 
@@ -1397,6 +1397,7 @@ class ChangeOrderService:
         from app.modules.projects.models import Project
 
         order = await self.get_order(order_id)
+        order_project_id = str(order.project_id)
         # Idempotent: re-approving an already-approved change order is a
         # no-op (ENH-095). Prevents double budget-writeback if a client
         # retries an approval call after a flaky network round-trip.
@@ -1640,7 +1641,12 @@ class ChangeOrderService:
         publish_after_commit(
             self.session,
             "changeorders.notify.decided",
-            {"change_order_id": str(order_id), "decision": "approved", "actor_id": user_id},
+            {
+                "change_order_id": str(order_id),
+                "project_id": order_project_id,
+                "decision": "approved",
+                "actor_id": user_id,
+            },
             source_module="oe_changeorders",
         )
 
@@ -2233,6 +2239,7 @@ class ChangeOrderService:
         without tripping the gate.
         """
         order = await self.get_order(order_id)
+        order_project_id = str(order.project_id)
         # Gate the legacy single-step reject on the presence of an approval
         # chain so a non-approver cannot kill an in-flight chain without the
         # per-step authorization advance_approval enforces.
@@ -2273,7 +2280,12 @@ class ChangeOrderService:
         publish_after_commit(
             self.session,
             "changeorders.notify.decided",
-            {"change_order_id": str(order_id), "decision": "rejected", "actor_id": user_id},
+            {
+                "change_order_id": str(order_id),
+                "project_id": order_project_id,
+                "decision": "rejected",
+                "actor_id": user_id,
+            },
             source_module="oe_changeorders",
         )
         fresh = await self.repo.get_by_id(order_id)
@@ -2672,6 +2684,7 @@ class ChangeOrderService:
             )
 
         order = await self.get_order(order_id)
+        order_project_id = str(order.project_id)
         if order.status != "submitted":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -2755,7 +2768,7 @@ class ChangeOrderService:
         publish_after_commit(
             self.session,
             "changeorders.notify.awaiting_approval",
-            {"change_order_id": str(order_id), "actor_id": None},
+            {"change_order_id": str(order_id), "project_id": order_project_id, "actor_id": None},
             source_module="oe_changeorders",
         )
         logger.info(
@@ -2823,6 +2836,7 @@ class ChangeOrderService:
             )
 
         order = await self.get_order(order_id)
+        order_project_id = str(order.project_id)
         if order.status not in ("submitted",):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -2964,7 +2978,12 @@ class ChangeOrderService:
             publish_after_commit(
                 self.session,
                 "changeorders.notify.decided",
-                {"change_order_id": str(order_id), "decision": "rejected", "actor_id": str(user_id)},
+                {
+                    "change_order_id": str(order_id),
+                    "project_id": order_project_id,
+                    "decision": "rejected",
+                    "actor_id": str(user_id),
+                },
                 source_module="oe_changeorders",
             )
             logger.info(
@@ -3025,7 +3044,7 @@ class ChangeOrderService:
         publish_after_commit(
             self.session,
             "changeorders.notify.awaiting_approval",
-            {"change_order_id": str(order_id), "actor_id": str(user_id)},
+            {"change_order_id": str(order_id), "project_id": order_project_id, "actor_id": str(user_id)},
             source_module="oe_changeorders",
         )
         logger.info(

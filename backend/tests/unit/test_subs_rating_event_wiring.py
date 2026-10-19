@@ -5,8 +5,9 @@
 These cover the parts of ``subcontractors/events.py`` that do not need a
 database:
 
-* ``register_subcontractor_rating_subscribers`` wires exactly the two
-  rating-driving events (``ncr.created`` / ``safety.incident.created``) onto the global :data:`event_bus`, and is
+* ``register_subcontractor_rating_subscribers`` wires exactly the three
+  rating-driving events (``ncr.created`` / ``safety.incident.created`` /
+  ``schedule.activity.slipped``) onto the global :data:`event_bus`, and is
   idempotent (re-registering does not duplicate handlers). This is the
   "event subscriber not wired" risk-row test from the design doc - if the
   subscriber list is ever trimmed or a name typo creeps in, this fails.
@@ -33,13 +34,14 @@ from app.modules.subcontractors.events import (
 _RATING_EVENTS = (
     "ncr.created",
     "safety.incident.created",
+    "schedule.activity.slipped",
 )
 
 
 # ── subscriber wiring ──────────────────────────────────────────────────────
 
 
-def test_rating_subscribers_registered_for_both_events() -> None:
+def test_rating_subscribers_registered_for_all_three_events() -> None:
     """Every rating-driving event has at least one subscriber bound."""
     register_subcontractor_rating_subscribers()
     handlers = event_bus.list_handlers()
