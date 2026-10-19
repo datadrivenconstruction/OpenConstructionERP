@@ -17,11 +17,11 @@ from app.core.demo_projects import DemoTemplate
 # paediatrics, isolation suites). Reinforced concrete frame on a piled raft,
 # medical-grade mechanical and electrical services, full medical gas
 # pipeline system and radiation shielding to imaging and oncology. Designed
-# to the Saudi Building Code (SBC 2018) and Ministry of Health (MOH) design
+# to the Saudi Building Code (SBC 2024) and Ministry of Health (MOH) design
 # standards for healthcare facilities. GFA ~52,000 m2.
 #
 # Classification: CSI MasterFormat 2018 (primary, as required by the demo
-# harness) with Saudi Building Code (SBC 2018) part references carried in
+# harness) with Saudi Building Code (SBC 2024) part references carried in
 # each classification dict under the "sbc" key. Rates are Jeddah 2026
 # market rates in SAR, exclusive of VAT (15% carried as a separate markup
 # line). All descriptions are in Arabic (RTL) with an English gloss in
@@ -50,9 +50,9 @@ TEMPLATE = DemoTemplate(
         "(Total GFA approx. 52,000 m2. RC frame on a piled raft, with "
         "medical-grade MEP, a full medical gas pipeline system and radiation "
         "shielding to imaging and oncology.) "
-        "مصمم وفق كود البناء السعودي SBC 2018 ومعايير وزارة الصحة لتصميم "
+        "مصمم وفق كود البناء السعودي SBC 2024 ومعايير وزارة الصحة لتصميم "
         "المنشآت الصحية. "
-        "(Designed to Saudi Building Code SBC 2018 and Ministry of Health (MOH) "
+        "(Designed to Saudi Building Code SBC 2024 and Ministry of Health (MOH) "
         "design standards for healthcare facilities.) "
         "تكلفة الإنشاء المباشرة التقديرية حوالي 720 مليون ريال سعودي "
         "(قبل المصاريف والضريبة). "
@@ -73,8 +73,8 @@ TEMPLATE = DemoTemplate(
     },
     validation_rule_sets=["masterformat", "boq_quality"],
     boq_name=(
-        "جدول الكميات - مستشفى عام وفق SBC 2018 ومعايير وزارة الصحة "
-        "(BOQ - General Hospital, SBC 2018 & MOH Standards)"
+        "جدول الكميات - مستشفى عام وفق SBC 2024 ومعايير وزارة الصحة "
+        "(BOQ - General Hospital, SBC 2024 & MOH Standards)"
     ),
     boq_description=(
         "جدول كميات تفصيلي وفق تصنيف الأقسام مع مراجع كود البناء السعودي "
@@ -83,7 +83,7 @@ TEMPLATE = DemoTemplate(
         "Ministry of Health hospital design requirements.)"
     ),
     boq_metadata={
-        "standard": "Division-based classification + SBC 2018 (SBC 201/301/304/501/601/801) + MOH",
+        "standard": "Division-based classification + SBC 2024 (SBC 201/301/304/501/601/801) + MOH",
         "phase": "Detailed Estimate (Tender Documents)",
         "base_date": "2026-Q1",
         "price_level": "Jeddah 2026 (SAR, excl. VAT)",
@@ -395,7 +395,7 @@ TEMPLATE = DemoTemplate(
             "paediatrics, isolation suites, outpatient clinics"
         ),
         "structure": "Reinforced concrete frame on a piled raft foundation",
-        "building_code": "Saudi Building Code SBC 2018",
+        "building_code": "Saudi Building Code SBC 2024",
         "code_parts": (
             "SBC 201 (general), SBC 301 (structural loads), SBC 304 (concrete), "
             "SBC 401 (electrical), SBC 501 (mechanical/HVAC), SBC 601 (energy "

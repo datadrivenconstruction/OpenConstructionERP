@@ -7,7 +7,8 @@ Saudi Vision 2030 pack — pre-configures OCERP for KSA mega-project
 contractors (NEOM, Red Sea Global, Diriyah Gate, Qiddiya, RCJY, Aramco
 EPC). Loads the full Saudi standards stack:
 
-  * SBC 2018 (Saudi Building Code), split per-Part:
+  * SBC 2024 (Saudi Building Code, mandatory since 2025-06-30 after a
+    180-day transition; it replaced SBC 2018), split per-Part:
         SBC 201  — Energy Conservation
         SBC 301  — Loads & structural design
         SBC 304  — Concrete
@@ -31,9 +32,9 @@ MANIFEST = PartnerPackManifest(
     slug="saudi-vision2030",
     partner_name="Saudi Vision 2030 Pack",
     partner_url=None,
-    pack_version="0.2.0",
+    pack_version="0.3.0",
     description=(
-        "Pre-configured for Saudi Arabian mega-projects: full SBC 2018 stack "
+        "Pre-configured for Saudi Arabian mega-projects: full SBC 2024 stack "
         "(per-Part: 201 / 301 / 304 / 401 / 501 / 801), MoMRAH & Balady, "
         "Saudi Aramco SAES + SAMSS + 9COM, NEOM net-zero standards, "
         "Saudization (Nitaqat), ISO 19650 BIM, Vision 2030 KPIs. "
@@ -57,7 +58,7 @@ MANIFEST = PartnerPackManifest(
     # stack around it.
     default_methodology="saudi_arabia",
     validation_rule_packs=[
-        # Saudi Building Code 2018 — split per-Part for selective enablement.
+        # Saudi Building Code 2024 — split per-Part for selective enablement.
         "sbc_201_energy",
         "sbc_301_loads",
         "sbc_304_concrete",
@@ -101,7 +102,7 @@ MANIFEST = PartnerPackManifest(
         "country_name_ar": "المملكة العربية السعودية",
         "writing_direction": "rtl",
         "regulator_refs": [
-            "SBC 2018 (Saudi Building Code) — SBC 201/301/304/401/501/801",
+            "SBC 2024 (Saudi Building Code, mandatory since 2025-06-30) — SBC 201/301/304/401/501/801",
             "MoMRAH (Ministry of Municipal, Rural Affairs and Housing)",
             "Balady building-permit E-service",
             "Saudi Aramco SAES / SAMSS / GES",

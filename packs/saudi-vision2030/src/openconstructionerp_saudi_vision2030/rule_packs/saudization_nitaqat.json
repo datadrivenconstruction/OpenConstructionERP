@@ -7,11 +7,15 @@
   "regulator": "Ministry of Human Resources and Social Development (HRSD)",
   "publication_year": 2021,
   "applies_to": ["projects", "tendering", "subcontractors", "validation"],
-  "description": "Enables OCERP built-in validation rules that enforce the Nitaqat workforce-localisation programme on every tender and subcontractor record. Construction firms with >9 employees must hold at least a Yellow band; only Platinum / Green-High / Green-Medium / Green-Low bands can sponsor new visas, win government tenders, or be Aramco-approved. Rules check that each subcontractor row discloses its current Nitaqat band, that the Saudi workforce percentage matches the required band threshold for the firm size + activity (construction has its own table), and that any firm awarded a public-sector tender is at Green-Medium or above.",
-  "description_ar": "تفعيل قواعد التحقق لإنفاذ برنامج نطاقات لتوطين القوى العاملة — التحقق من النطاق الحالي للمقاول، ونسبة العمالة السعودية، والأهلية للمناقصات الحكومية.",
+  "description": "Describes the validation rules planned for the Nitaqat workforce-localisation programme on tender and subcontractor records: that each subcontractor row discloses its current Nitaqat band and its validity date, and that the Saudi workforce percentage is read against the band threshold for the firm's size and activity. Two statements an earlier version made are not carried, because no source was found for them: that construction firms above nine employees must hold at least the Yellow band (the phase of Developed Nitaqat introduced on 2026-04-26 reportedly removed the Yellow band), and that a public tender requires the Green-Medium band or above. The rules that would encode them are listed under needs_expert_review and must not be built until a Saudi expert confirms the requirement and its source.",
+  "description_ar": "تفعيل قواعد التحقق لإنفاذ برنامج نطاقات لتوطين القوى العاملة — التحقق من النطاق الحالي للمقاول ونسبة العمالة السعودية. أي حد أدنى للنطاق في المناقصات الحكومية بانتظار تأكيد خبير سعودي ومصدره.",
   "severity_overrides": {
-    "nitaqat.subcontractor_band_disclosed": "ERROR",
-    "nitaqat.public_tender_requires_green_medium": "ERROR"
+    "nitaqat.subcontractor_band_disclosed": "ERROR"
+  },
+  "needs_expert_review": {
+    "nitaqat.public_tender_requires_green_medium": "No source found that a public tender requires the Green-Medium band or any minimum band.",
+    "nitaqat.visa_sponsorship_blocked_if_yellow_or_red": "The 2026-04-26 Developed Nitaqat phase reportedly removed the Yellow band (EY, Envoy); the band list and its consequences need confirming against HRSD.",
+    "nitaqat.construction_activity_threshold_table_referenced": "The 2026-2028 construction thresholds by firm size were not found."
   },
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [

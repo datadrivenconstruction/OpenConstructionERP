@@ -6,7 +6,7 @@ Diriyah Gate, Qiddiya, PIF giga-projects, Saudi Aramco EPC, RCJY,
 MoMRAH municipal works.
 
 > **مهيأ مسبقاً لمقاولي المشاريع العملاقة في المملكة العربية السعودية —
-> SBC 2018 (بكامل أجزائه)، MoMRAH وبلدي، أرامكو (SAES / SAMSS / 9COM)،
+> SBC 2024 (بكامل أجزائه)، MoMRAH وبلدي، أرامكو (SAES / SAMSS / 9COM)،
 > معايير نيوم لصفر صافي الكربون، السعودة (نطاقات)، ISO 19650، مؤشرات رؤية 2030.**
 
 ## What this pack does
@@ -22,7 +22,7 @@ When installed alongside the OCERP core, this pack registers via the
 - **Sets default currency to `SAR`** and applies the **`sa_vat_15`** tax
   template (ZATCA 15% VAT).
 - **Enables fourteen Saudi validation rule packs:**
-  - Saudi Building Code 2018 — per-Part:
+  - Saudi Building Code 2024 (mandatory since 2025-06-30; replaced SBC 2018) — per-Part:
     - `sbc_201_energy` — Energy Conservation Code
     - `sbc_301_loads` — Loads & structural design (KSA seismic / wind / Hajj surcharge / sabkha)
     - `sbc_304_concrete` — Concrete (hot-weather, coastal / Gulf chloride exposure)
@@ -34,7 +34,7 @@ When installed alongside the OCERP core, this pack registers via the
   - `aramco_approval_chain` — Proponent → Discipline → PMT → Inspection → AFC workflow
   - `aramco_pim_qualification` — Aramco AVL membership, Schedule Q, PIM validity, IKTVA gate
   - `neom_design_standards` — NEOM net-zero, no-ICE, 15-minute city, subzone-aware
-  - `saudization_nitaqat` — Nitaqat band gate for public tenders & Aramco work
+  - `saudization_nitaqat` — Nitaqat band disclosure (band minimums for tenders await expert review)
   - `iso_19650_bim` — BIM Information Management (EIR / BEP / CDE / MIDP / TIDP)
   - `vision_2030_kpis` — IKTVA, Saudi Green Initiative, water / energy / waste targets
 - **Applies Saudi flag green branding** (`#006C35` primary + `#FFFFFF` accent)
@@ -49,6 +49,10 @@ on rules already present in the OCERP core. No modules are hidden; the full
 sidebar remains available.
 
 ## Standards coverage
+
+The lineage in brackets is the one stated for the 2018 edition. The base
+editions the 2024 parts adopt were not confirmed when the pack moved to SBC
+2024, so each rule pack keeps that list under `derives_from_2018_edition`.
 
 | Layer | Standard | Rule pack |
 |-------|----------|-----------|

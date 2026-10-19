@@ -134,8 +134,8 @@ steps:
       ar: "السعودة (نطاقات)"
       en: "Saudization (Nitaqat) band"
     body_i18n:
-      ar: "حدد نطاقك الحالي. النطاق الأخضر فأعلى مطلوب للمناقصات الحكومية وتأهيل أرامكو. للشركات التي يقل عدد موظفيها عن 10، اختر 'غير مطلوب'."
-      en: "Pick your current Nitaqat band. Green or above is required for government tenders and Aramco pre-qualification. If headcount < 10, pick 'Not applicable'."
+      ar: "حدد نطاقك الحالي في نطاقات. يُسجَّل النطاق لعرضه على المقاولين من الباطن والمناقصات، ولا يفرض أي حد أدنى حتى يؤكد خبير سعودي المتطلب ومصدره. للشركات التي يقل عدد موظفيها عن 10، اختر 'غير منطبق'."
+      en: "Pick your current Nitaqat band. It is recorded and shown on subcontractor and tender records; no minimum band is enforced until a Saudi expert confirms the requirement and its source. If headcount < 10, pick 'Not applicable'."
     options:
       - { value: "platinum", label_ar: "بلاتيني", label_en: "Platinum", recommended: true }
       - { value: "green_high", label_ar: "أخضر مرتفع", label_en: "Green-High" }
@@ -149,11 +149,11 @@ steps:
     kind: form
     skippable: true
     title_i18n:
-      ar: "كود البناء السعودي (SBC 2018)"
-      en: "Saudi Building Code (SBC 2018)"
+      ar: "كود البناء السعودي (SBC 2024)"
+      en: "Saudi Building Code (SBC 2024)"
     body_i18n:
-      ar: "أكّد أجزاء SBC 2018 المنطبقة على نطاق عملك المعتاد. ستفرض محرر جدول الكميات ومحرك التحقق هذه القواعد على كل استيراد."
-      en: "Confirm which SBC 2018 Parts apply to your typical scope. The BOQ editor and validation engine will enforce these on every import."
+      ar: "أكّد أجزاء SBC 2024 المنطبقة على نطاق عملك المعتاد. ستفرض محرر جدول الكميات ومحرك التحقق هذه القواعد على كل استيراد."
+      en: "Confirm which SBC 2024 Parts apply to your typical scope. The BOQ editor and validation engine will enforce these on every import."
     fields:
       - key: sbc_201
         type: checkbox
@@ -268,8 +268,8 @@ steps:
       ar: "المراجعة والإنهاء"
       en: "Review and finish"
     body_i18n:
-      ar: "سنُنشئ مساحة عملك السعودية الأولى مع تفعيل قواعد التحقق الكاملة لـ SBC 2018 و MoMRAH و نطاقات و أرامكو و نيوم و ISO 19650، وريال سعودي كعملة افتراضية، وضريبة قيمة مضافة 15%، وواجهة عربية من اليمين إلى اليسار. يمكنك تغيير كل شيء لاحقاً من الإعدادات."
-      en: "We will create your first Saudi workspace with the full SBC 2018 + MoMRAH + Nitaqat + Aramco + NEOM + ISO 19650 validation stack enabled, SAR as default currency, 15% VAT, and Arabic RTL UI. You can change everything later in Settings."
+      ar: "سنُنشئ مساحة عملك السعودية الأولى مع تفعيل قواعد التحقق الكاملة لـ SBC 2024 و MoMRAH و نطاقات و أرامكو و نيوم و ISO 19650، وريال سعودي كعملة افتراضية، وضريبة قيمة مضافة 15%، وواجهة عربية من اليمين إلى اليسار. يمكنك تغيير كل شيء لاحقاً من الإعدادات."
+      en: "We will create your first Saudi workspace with the full SBC 2024 + MoMRAH + Nitaqat + Aramco + NEOM + ISO 19650 validation stack enabled, SAR as default currency, 15% VAT, and Arabic RTL UI. You can change everything later in Settings."
     action:
       label_ar: "إنشاء مساحة العمل السعودية"
       label_en: "Create my Saudi workspace"

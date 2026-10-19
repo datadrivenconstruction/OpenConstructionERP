@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openconstructionerp-saudi-vision2030"
-version = "0.2.0"
-description = "Pre-configured partner pack for Saudi Arabian mega-projects — full SBC 2018 stack (per-Part), MoMRAH & Balady, Saudi Aramco (SAES/SAMSS/9COM/PIM), NEOM net-zero standards, Saudization (Nitaqat), ISO 19650 BIM, Vision 2030 KPIs. Bilingual Arabic (RTL) + English."
+version = "0.3.0"
+description = "Pre-configured partner pack for Saudi Arabian mega-projects — full SBC 2024 stack (per-Part), MoMRAH & Balady, Saudi Aramco (SAES/SAMSS/9COM/PIM), NEOM net-zero standards, Saudization (Nitaqat), ISO 19650 BIM, Vision 2030 KPIs. Bilingual Arabic (RTL) + English."
 readme = "README.md"
 license = { text = "AGPL-3.0-or-later" }
 requires-python = ">=3.11"
