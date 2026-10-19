@@ -432,14 +432,14 @@ def test_the_shared_row_census_is_taken_over_the_axis_and_not_over_the_cohort():
     are on the axis, they are on a shared row, and they are in no cohort here.
     """
     census = cc.shared_calendar_rows()
-    assert census.on_axis == 20, f"the axis moved: {census.on_axis}"
+    assert census.on_axis == 21, f"the axis moved: {census.on_axis}"
     assert len(census.on_shared_row) == 8, f"expected 8 on a shared row, got {census.on_shared_row}"
     assert set(census.shared) == {"DACH", "GULF"}, f"the shared rows moved: {sorted(census.shared)}"
     off_cohort = set(census.on_shared_row) - set(_COHORT)
     assert off_cohort == {"AT", "BH", "CH", "KW", "OM", "QA"}, (
         f"the census looks drawn from the cohort rather than from the registry: {off_cohort}"
     )
-    assert "8 of 20" in census.summary(), census.summary()
+    assert "8 of 21" in census.summary(), census.summary()
 
 
 def test_the_two_registry_figures_are_separate_measurements_of_the_same_axis():
@@ -455,10 +455,10 @@ def test_the_two_registry_figures_are_separate_measurements_of_the_same_axis():
     calendars, _resolve, axis, _method = cc._schedule_registry()
     not_a_key = {code for code in axis if code not in calendars}
     shared = set(cc.shared_calendar_rows().on_shared_row)
-    assert len(not_a_key) == 18, f"countries missing from the table keys moved: {sorted(not_a_key)}"
+    assert len(not_a_key) == 19, f"countries missing from the table keys moved: {sorted(not_a_key)}"
     assert len(shared) == 8, f"countries on a shared row moved: {sorted(shared)}"
     assert shared < not_a_key, "a country on a shared row was also a table key; the decomposition changed"
-    assert len(not_a_key - shared) == 10, f"the 8 + 10 = 18 decomposition broke: {sorted(not_a_key - shared)}"
+    assert len(not_a_key - shared) == 11, f"the 8 + 11 = 19 decomposition broke: {sorted(not_a_key - shared)}"
 
 
 def test_a_shared_row_is_named_on_the_country_report_and_counted_in_its_summary():

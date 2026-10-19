@@ -308,7 +308,6 @@ _EXPECTED_UNBOUND: tuple[str, ...] = (
     "NL",
     "NO",
     "NZ",
-    "PL",
     "SE",
     "UA",
     "ZA",
@@ -414,7 +413,7 @@ def test_the_countries_that_agree_are_named() -> None:
     """
     agreeing = sorted(c for c in BOUND if c not in _DIVERGENCES)
     print(f"seed equals engine exactly for {len(agreeing)} of {len(BOUND)} bound countries: {agreeing}")
-    assert agreeing == ["BG", "DE", "HU", "IT", "NG", "PT", "TR", "US"], (
+    assert agreeing == ["BG", "DE", "HU", "IT", "NG", "PL", "PT", "TR", "US"], (
         f"the set of countries whose two sources agree exactly has changed, now {agreeing}. "
         f"A country that LEFT this list started disagreeing with the engine, and belongs in "
         f"_DIVERGENCES only with a reason. A country that JOINED it either had its divergence "

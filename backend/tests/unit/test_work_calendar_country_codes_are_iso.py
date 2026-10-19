@@ -334,6 +334,7 @@ EXPECTED_CALENDAR_BY_COUNTRY = {
     "CN": "CHINA",
     "IN": "INDIA",
     "IT": "ITALY",
+    "PL": "POLAND",
 }
 
 # Region ids the CWICR v3 catalogue ships today, for countries where the ISO

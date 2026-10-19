@@ -575,6 +575,18 @@ WORK_CALENDARS: dict[str, dict] = {
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
         "label": "Spain (Mon-Fri, 8h)",
     },
+    # Poland. Kodeks pracy art. 129 § 1: eight hours a day and an average of 40
+    # hours in an average five-day week. The statute fixes five days, not which
+    # five; Monday to Friday is the common schedule and what the shipped Polish
+    # calendar uses. Holidays: core.calendar._holidays_pl. A Saturday holiday
+    # owes another day off that the employer designates (art. 130 § 2), which
+    # is not a fixed date and is not removed here: see
+    # core.calendar.holidays_owing_a_day_off.
+    "POLAND": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "Poland (Mon-Fri, 8h)",
+    },
     # 7. Brazil - PT_SAOPAULO
     "BRAZIL": {
         "hours_per_day": 8,
@@ -692,6 +704,7 @@ _CALENDAR_BY_COUNTRY: dict[str, str] = {
     "IT": "ITALY",
     "KW": "GULF",
     "OM": "GULF",
+    "PL": "POLAND",
     "QA": "GULF",
     "RU": "RU",
     "SA": "GULF",
@@ -781,6 +794,7 @@ _CALENDAR_BY_LABEL: dict[str, str] = {
     # states work. The UAE is named in full and is the one that does not.
     "MIDDLE EAST": "GULF",
     "OMAN": "GULF",
+    "POLAND": "POLAND",
     "QATAR": "GULF",
     "SAUDI ARABIA": "GULF",
     "UNITED ARAB EMIRATES": "UAE",
