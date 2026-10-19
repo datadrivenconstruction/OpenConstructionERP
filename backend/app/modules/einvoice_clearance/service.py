@@ -149,7 +149,7 @@ async def build_payload_from_invoice(
 
     Only for the countries whose format that engine covers, which is the
     network-exchange set plus plain EN 16931. A national format outside it -
-    CFDI, NF-e, FatturaPA, KSeF FA(2), ZATCA, the Indian IRP schema - is not
+    CFDI, NF-e, FatturaPA, KSeF FA(3), ZATCA, the Indian IRP schema - is not
     produced here and never has been; for those the payload comes from whatever
     does produce it and is passed in.
     """

@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG پیمائش",
     "modules.catalog.eac": "EAC v2 انجن",
     "modules.catalog.einvoice": "ای-انوائس",
+    "modules.catalog.einvoice_ksef": "KSeF ای-انوائسنگ (پولینڈ)",
     "modules.catalog.einvoice_clearance": "ای انوائس کلیئرنس",
     "modules.catalog.enterprise_workflows": "انٹرپرائز ورک فلوز",
     "modules.catalog.equipment": "آلات اور فلیٹ کا انتظام",

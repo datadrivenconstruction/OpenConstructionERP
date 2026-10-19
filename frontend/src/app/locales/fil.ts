@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Panukat sa DWG",
     "modules.catalog.eac": "Makina ng EAC v2",
     "modules.catalog.einvoice": "E-invoice",
+    "modules.catalog.einvoice_ksef": "KSeF e-invoicing (Poland)",
     "modules.catalog.einvoice_clearance": "Pagpapatibay ng E-invoice",
     "modules.catalog.enterprise_workflows": "Daloy ng Trabaho ng Kumpanya",
     "modules.catalog.equipment": "Pamamahala ng Kagamitan at Sasakyan",

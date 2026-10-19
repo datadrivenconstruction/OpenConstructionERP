@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Medição DWG",
     "modules.catalog.eac": "Motor EAC v2",
     "modules.catalog.einvoice": "Fatura eletrónica",
+    "modules.catalog.einvoice_ksef": "Faturação eletrónica KSeF (Polónia)",
     "modules.catalog.einvoice_clearance": "Validação de fatura eletrónica",
     "modules.catalog.enterprise_workflows": "Fluxos de Trabalho Corporativos",
     "modules.catalog.equipment": "Gestão de equipamento e frota",

@@ -99148,6 +99148,12 @@
         },
         {
           "method": "POST",
+          "path": "/documents/{document_id}/refresh",
+          "handler": "refresh_clearance_document",
+          "response_model": "SubmissionResponse"
+        },
+        {
+          "method": "POST",
           "path": "/documents/{document_id}/resolve",
           "handler": "resolve_clearance_document",
           "response_model": "DocumentResponse",
@@ -99647,6 +99653,11 @@
             {
               "name": "findings",
               "type": "list[ClearanceFinding]"
+            },
+            {
+              "name": "pending",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -99858,6 +99869,11 @@
             {
               "name": "countries",
               "type": "list[str]"
+            },
+            {
+              "name": "can_poll",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -99907,6 +99923,48 @@
         "einvoice",
         "finance",
         "projects"
+      ]
+    },
+    {
+      "module_id": "einvoice_ksef",
+      "module_label": "Poland KSeF e-invoicing",
+      "module_category": "integration",
+      "files": [
+        "__init__.py",
+        "adapter.py",
+        "builder.py",
+        "client.py",
+        "crypto.py",
+        "fa3.py",
+        "facts.py",
+        "jpk.py",
+        "ksef_number.py",
+        "manifest.py",
+        "offline.py",
+        "payments.py",
+        "qr.py",
+        "split_payment.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_einvoice_ksef",
+        "version": "1.0.0",
+        "display_name": "Poland KSeF e-invoicing",
+        "description": "Issues invoices through KSeF, the Polish national e-invoicing system. Builds the FA(3) document from a finance invoice (basic, corrective, advance and settlement invoices, split payment and Annex 15 markers), produces the KOD I and KOD II verification QR codes, tracks the offline modes and their upload deadlines, and talks to the KSeF API 2.0. Checks that payment titles carry the KSeF number from 2027. A plugin of the e-invoice clearance module: it adds no tables and registers an adapter, a document builder and validation rules into that module's registries.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "integration",
+        "depends": [
+          "oe_einvoice_clearance"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [],
+      "routes": [],
+      "schemas": [],
+      "import_dependencies": [
+        "einvoice_clearance",
+        "finance"
       ]
     },
     {
@@ -274791,6 +274849,10 @@
       "finance",
       "projects"
     ],
+    "einvoice_ksef": [
+      "einvoice_clearance",
+      "finance"
+    ],
     "engineering_brief": [
       "documents",
       "permits",
@@ -275765,14 +275827,14 @@
     ]
   },
   "statistics": {
-    "backend_modules": 212,
-    "modules_with_manifests": 210,
+    "backend_modules": 213,
+    "modules_with_manifests": 211,
     "total_models": 780,
     "total_columns": 9086,
     "total_relationships": 240,
-    "total_routes": 4592,
+    "total_routes": 4593,
     "total_schemas": 4071,
-    "total_python_files": 2739,
+    "total_python_files": 2754,
     "frontend_features": 209,
     "frontend_ts_files": 3551,
     "frontend_backend_mapped": 187
