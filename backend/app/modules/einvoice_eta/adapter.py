@@ -45,6 +45,7 @@ from app.modules.einvoice_eta.client import (
     EtaClient,
     EtaDuplicateSubmission,
     EtaEnvironment,
+    EtaUrlRefused,
 )
 from app.modules.einvoice_eta.serialization import SIGNATURES_KEY, canonical_bytes, parse_preserving
 from app.modules.einvoice_eta.signing import (
@@ -289,6 +290,14 @@ class EtaAdapter:
         client = self._client_factory(settings)
         try:
             answer = await client.submit([signed])
+        except EtaUrlRefused as exc:
+            # Refused before anything left, so the document was not sent.
+            return SubmissionOutcome(
+                accepted=False,
+                rejection_code=CODE_NOT_CONFIGURED,
+                rejection_message=str(exc),
+                raw_response={"adapter": self.key, "stage": "url_safety"},
+            )
         except EtaDuplicateSubmission:
             # ETA holds an identical submission from the last 10 minutes. Raised
             # so the document stays submitted with an unknown outcome.
@@ -514,6 +523,13 @@ class EtaAdapter:
             )
         try:
             await client.cancel_document(document_uuid, request.reason)
+        except EtaUrlRefused as exc:
+            return SubmissionOutcome(
+                accepted=False,
+                rejection_code=CODE_NOT_CONFIGURED,
+                rejection_message=str(exc),
+                raw_response={"adapter": self.key, "uuid": document_uuid, "stage": "url_safety"},
+            )
         except EtaApiError as exc:
             if 400 <= exc.status < 500 and exc.status != 401:
                 return SubmissionOutcome(

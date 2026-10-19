@@ -425,13 +425,19 @@ class ExternalHttpSigner:
     tools do). The answer is verified against the canonical bytes before it is
     used, so a service that signed the wrong thing is caught here and not by
     ETA an hour later.
+
+    The URL comes from a registration, so it passes the self-hosted endpoint
+    policy of :mod:`app.core.url_safety` before every call: loopback and the
+    private ranges are allowed, because the service runs next to the token,
+    and link-local and cloud metadata addresses are refused.
     """
 
     kind = SIGNER_EXTERNAL_HTTP
     is_test = False
 
-    def __init__(self, config: dict[str, Any], *, transport: Any = None) -> None:
+    def __init__(self, config: dict[str, Any], *, transport: Any = None, url_guard: Any = None) -> None:
         self.url = str(config.get("url") or "").strip()
+        self._url_guard = url_guard
         if not self.url:
             raise EtaSigningError("The external signer settings need the url of the signing service.")
         self.timeout = float(config.get("timeout_seconds") or 30)
@@ -441,6 +447,13 @@ class ExternalHttpSigner:
     async def sign(self, canonical: bytes) -> str:
         import httpx
 
+        from app.core.url_safety import UnsafeUrlError, resolve_and_validate_ai_provider_url
+
+        guard = self._url_guard or resolve_and_validate_ai_provider_url
+        try:
+            await guard(self.url)
+        except UnsafeUrlError as exc:
+            raise EtaSigningError(f"The signing service URL {self.url} is refused: {exc}") from exc
         headers = {"Content-Type": "application/json"}
         if self.token_env and os.environ.get(self.token_env):
             headers["Authorization"] = f"Bearer {os.environ[self.token_env]}"

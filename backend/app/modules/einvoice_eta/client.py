@@ -12,10 +12,17 @@ Every call is documented on https://sdk.invoicing.eta.gov.eg/ (read
 * document types:     ``GET  {api}/api/v1.0/documenttypes[/{id}]`` (/api/02-, /api/03-get-document-type/)
 * cancel and reject:  ``PUT  {api}/api/v1.0/documents/state/{uuid}/state`` (/einvoicingapi/02-, 03-)
 
-Tokens are cached for their lifetime, per identity host, client id and
-represented taxpayer, because ETA lists "a new token with every call" as an
-anti-pattern it throttles (/integrationpractices/). A 401 drops the cached
-token and retries once.
+Tokens are cached for their lifetime, per identity host, client id, secret
+(as a hash) and represented taxpayer, because ETA lists "a new token with every
+call" as an anti-pattern it throttles (/integrationpractices/). The secret is
+part of the key so that a registration naming someone else's client id is
+never handed the token their secret earned. A 401 drops the cached token and
+retries once.
+
+Both base URLs come from a registration, so they pass
+:func:`app.core.url_safety.resolve_and_validate_external_url` before the first
+request: ETA is a public service, and an internal address (a proxy, say) has to
+be opened by an administrator through ``OE_WEBHOOK_INTERNAL_ALLOWLIST``.
 
 The transport is injectable, and the tests use :class:`httpx.MockTransport`
 with responses shaped like the SDK's examples. Nothing in the test suite ever
@@ -25,13 +32,16 @@ reaches ETA.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
 import httpx
+
+from app.core.url_safety import UnsafeUrlError, resolve_and_validate_external_url
 
 DEFAULT_TIMEOUT = 30.0
 # Renew a little before ETA's stated expiry, so a token never dies mid-call.
@@ -73,7 +83,13 @@ class EtaDuplicateSubmission(EtaApiError):
     """ETA saw an identical submission from this taxpayer within the last 10 minutes."""
 
 
-_TOKENS: dict[tuple[str, str, str], tuple[str, float]] = {}
+class EtaUrlRefused(EtaApiError):
+    """A base URL failed the outbound URL policy. Nothing was sent."""
+
+
+UrlGuard = Callable[[str], Awaitable[str]]
+
+_TOKENS: dict[tuple[str, str, str, str], tuple[str, float]] = {}
 
 
 def clear_token_cache() -> None:
@@ -122,6 +138,7 @@ class EtaClient:
         transport: httpx.AsyncBaseTransport | None = None,
         timeout: float = DEFAULT_TIMEOUT,
         clock: Callable[[], float] = time.monotonic,
+        url_guard: UrlGuard | None = None,
     ) -> None:
         if not environment.identity_base_url or not environment.api_base_url:
             raise EtaApiError("Both ETA base URLs (identity and API) must be configured.")
@@ -134,17 +151,38 @@ class EtaClient:
         self._transport = transport
         self._timeout = timeout
         self._clock = clock
+        self._url_guard = url_guard or resolve_and_validate_external_url
+        self._urls_checked = False
 
     # ── Session ──────────────────────────────────────────────────────────────
 
-    def _cache_key(self) -> tuple[str, str, str]:
-        return (self.environment.identity_base_url.rstrip("/"), self._client_id, self.on_behalf_of)
+    def _cache_key(self) -> tuple[str, str, str, str]:
+        secret = hashlib.sha256(self._client_secret.encode("utf-8")).hexdigest()
+        return (self.environment.identity_base_url.rstrip("/"), self._client_id, secret, self.on_behalf_of)
+
+    async def _check_urls(self) -> None:
+        if self._urls_checked:
+            return
+        for name, url in (
+            ("identity", self.environment.identity_base_url),
+            ("API", self.environment.api_base_url),
+        ):
+            if not url.strip().lower().startswith("https://"):
+                raise EtaUrlRefused(
+                    f"The ETA {name} base URL {url} is refused: it must be an https URL.", code="UnsafeUrl"
+                )
+            try:
+                await self._url_guard(url)
+            except UnsafeUrlError as exc:
+                raise EtaUrlRefused(f"The ETA {name} base URL {url} is refused: {exc}", code="UnsafeUrl") from exc
+        self._urls_checked = True
 
     def _http(self) -> httpx.AsyncClient:
         return httpx.AsyncClient(timeout=self._timeout, transport=self._transport)
 
     async def access_token(self, *, fresh: bool = False) -> str:
         """A bearer token, from the cache while it is still good."""
+        await self._check_urls()
         key = self._cache_key()
         cached = _TOKENS.get(key)
         if cached and not fresh and cached[1] > self._clock():
@@ -269,5 +307,6 @@ __all__ = [
     "EtaClient",
     "EtaDuplicateSubmission",
     "EtaEnvironment",
+    "EtaUrlRefused",
     "clear_token_cache",
 ]

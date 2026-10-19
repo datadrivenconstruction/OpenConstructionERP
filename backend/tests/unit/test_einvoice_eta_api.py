@@ -76,13 +76,26 @@ class FakeEta:
         return [c for c in self.calls if c.url.path != "/connect/token"]
 
 
-def _client(fake: FakeEta, *, on_behalf_of: str = "", clock: Callable[[], float] | None = None) -> eta_client.EtaClient:
+async def _any_url(url: str) -> str:
+    # The fake ETA lives on .test hosts that resolve nowhere; the URL policy
+    # itself is exercised in TestUrlSafety.
+    return url
+
+
+def _client(
+    fake: FakeEta,
+    *,
+    on_behalf_of: str = "",
+    clock: Callable[[], float] | None = None,
+    secret: str = "secret",
+) -> eta_client.EtaClient:
     return eta_client.EtaClient(
         eta_client.EtaEnvironment(IDENTITY, API),
         client_id="cid",
-        client_secret="secret",
+        client_secret=secret,
         on_behalf_of=on_behalf_of,
         transport=httpx.MockTransport(fake),
+        url_guard=_any_url,
         **({"clock": clock} if clock else {}),
     )
 
@@ -229,13 +242,14 @@ async def _no_sleep(_seconds: float) -> None:
     return None
 
 
-def _adapter(fake: FakeEta, *, now: datetime = NOW) -> eta_adapter.EtaAdapter:
+def _adapter(fake: FakeEta, *, now: datetime = NOW, guard: Any = None) -> eta_adapter.EtaAdapter:
     def factory(settings: eta_adapter.EtaSettings) -> eta_client.EtaClient:
         return eta_client.EtaClient(
             eta_client.EtaEnvironment(settings.identity_base_url, settings.api_base_url),
             client_id="cid",
             client_secret="secret",
             transport=httpx.MockTransport(fake),
+            url_guard=guard or _any_url,
         )
 
     return eta_adapter.EtaAdapter(client_factory=factory, sleep=_no_sleep, now=lambda: now)
@@ -530,3 +544,157 @@ class TestEgyptRegimeRow:
         )
         assert settings.api_base_url == "https://proxy.example.test"
         assert settings.identity_base_url == "https://id.eta.gov.eg"
+
+
+class TestUrlSafety:
+    def test_a_cached_token_is_never_served_for_another_secret(self):
+        fake = FakeEta()
+        asyncio.run(_client(fake, secret="right").access_token())
+        asyncio.run(_client(fake, secret="wrong").access_token())
+        assert fake.logins == 2
+
+    def test_the_default_policy_refuses_a_metadata_address_before_any_call(self):
+        fake = FakeEta()
+        client = eta_client.EtaClient(
+            eta_client.EtaEnvironment("https://169.254.169.254", API),
+            client_id="cid",
+            client_secret="secret",
+            transport=httpx.MockTransport(fake),
+        )
+        with pytest.raises(eta_client.EtaUrlRefused, match="identity base URL"):
+            asyncio.run(client.access_token())
+        assert fake.calls == []
+
+    def test_the_default_policy_refuses_loopback_for_eta(self):
+        client = eta_client.EtaClient(
+            eta_client.EtaEnvironment(IDENTITY, "https://127.0.0.1"),
+            client_id="cid",
+            client_secret="secret",
+            transport=httpx.MockTransport(FakeEta()),
+            url_guard=None,
+        )
+
+        async def identity_ok(url: str) -> str:
+            if url == IDENTITY:
+                return url
+            from app.core.url_safety import resolve_and_validate_external_url
+
+            return await resolve_and_validate_external_url(url)
+
+        client._url_guard = identity_ok
+        with pytest.raises(eta_client.EtaUrlRefused, match="API base URL"):
+            asyncio.run(client.access_token())
+
+    def test_a_refused_url_is_a_configuration_refusal_not_an_unknown_outcome(self):
+        from app.core.url_safety import UnsafeUrlError
+
+        async def refuse(url: str) -> str:
+            raise UnsafeUrlError("internal address")
+
+        fake = FakeEta()
+        outcome = asyncio.run(_adapter(fake, guard=refuse).submit(_request()))
+        assert not outcome.accepted
+        assert outcome.rejection_code == eta_adapter.CODE_NOT_CONFIGURED
+        assert fake.calls == []
+
+    def test_the_external_signer_may_reach_loopback_but_not_metadata(self):
+        from app.modules.einvoice_eta import signing
+
+        signer = signing.ExternalHttpSigner({"url": "http://169.254.169.254/sign"})
+        with pytest.raises(signing.EtaSigningError, match="refused"):
+            asyncio.run(signer.sign(b"x"))
+
+        seen = []
+
+        def answer(request: httpx.Request) -> httpx.Response:
+            seen.append(str(request.url))
+            return httpx.Response(500, text="token not inserted")
+
+        local = signing.ExternalHttpSigner({"url": "http://127.0.0.1:8099/sign"}, transport=httpx.MockTransport(answer))
+        with pytest.raises(signing.EtaSigningError, match="answered 500"):
+            asyncio.run(local.sign(b"x"))
+        assert seen == ["http://127.0.0.1:8099/sign"]
+
+    def test_a_plain_http_base_url_is_refused_by_the_client_itself(self):
+        fake = FakeEta()
+        client = eta_client.EtaClient(
+            eta_client.EtaEnvironment(IDENTITY, "http://api.example.test"),
+            client_id="cid",
+            client_secret="secret",
+            transport=httpx.MockTransport(fake),
+            url_guard=_any_url,
+        )
+        with pytest.raises(eta_client.EtaUrlRefused, match="https"):
+            asyncio.run(client.access_token())
+        assert fake.calls == []
+
+    def test_an_internal_proxy_is_refused_until_an_administrator_lists_it(self, monkeypatch):
+        from app.core import url_safety
+
+        def build() -> eta_client.EtaClient:
+            return eta_client.EtaClient(
+                eta_client.EtaEnvironment(IDENTITY, "https://10.20.30.40"),
+                client_id="cid",
+                client_secret="secret",
+                transport=httpx.MockTransport(FakeEta()),
+            )
+
+        async def identity_passes(url: str) -> str:
+            if url == IDENTITY:
+                return url
+            return await url_safety.resolve_and_validate_external_url(url)
+
+        monkeypatch.setattr(url_safety, "_internal_allowlist", lambda: [])
+        closed = build()
+        closed._url_guard = identity_passes
+        with pytest.raises(eta_client.EtaUrlRefused, match="API base URL"):
+            asyncio.run(closed.access_token())
+
+        monkeypatch.setattr(url_safety, "_internal_allowlist", lambda: ["10.20.30.40"])
+        opened = build()
+        opened._url_guard = identity_passes
+        assert asyncio.run(opened.access_token()) == "token-1"
+
+
+class TestTokenLifetime:
+    def test_a_token_is_still_served_one_second_before_the_margin(self):
+        fake = FakeEta()
+        moment = [0.0]
+        client = _client(fake, clock=lambda: moment[0])
+        asyncio.run(client.access_token())
+        moment[0] = 3600 - eta_client.TOKEN_MARGIN_SECONDS - 1
+        assert asyncio.run(client.access_token()) == "token-1"
+        assert fake.logins == 1
+
+    def test_an_expired_token_is_replaced_and_the_new_one_is_used(self):
+        fake = FakeEta()
+        moment = [0.0]
+        client = _client(fake, clock=lambda: moment[0])
+        asyncio.run(client.access_token())
+        moment[0] = 3600
+        assert asyncio.run(client.access_token()) == "token-2"
+
+    def test_the_cache_is_per_represented_taxpayer(self):
+        fake = FakeEta()
+        asyncio.run(_client(fake, on_behalf_of="111").access_token())
+        asyncio.run(_client(fake, on_behalf_of="222").access_token())
+        asyncio.run(_client(fake, on_behalf_of="111").access_token())
+        assert fake.logins == 2
+
+    def test_a_second_401_is_reported_and_there_is_no_third_attempt(self):
+        fake = FakeEta()
+        fake.routes[f"GET /api/v1.0/documents/{DOC_UUID}/details"] = lambda _r: httpx.Response(401)
+        with pytest.raises(eta_client.EtaApiError) as caught:
+            asyncio.run(_client(fake).get_document_details(DOC_UUID))
+        assert caught.value.status == 401
+        assert fake.logins == 2
+        assert len(fake.api_calls()) == 2
+
+    def test_a_401_retry_replaces_the_cached_token_for_later_calls(self):
+        fake = FakeEta()
+        answers = iter([httpx.Response(401), httpx.Response(200, json={"status": "Valid"})])
+        fake.routes[f"GET /api/v1.0/documents/{DOC_UUID}/details"] = lambda _r: next(answers)
+        client = _client(fake)
+        asyncio.run(client.get_document_details(DOC_UUID))
+        assert asyncio.run(client.access_token()) == "token-2"
+        assert fake.logins == 2
