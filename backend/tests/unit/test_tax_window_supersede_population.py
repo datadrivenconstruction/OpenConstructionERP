@@ -144,6 +144,19 @@ from app.modules.i18n_foundation.tax_window_supersede import (
 #:   it with ``vat_rate_unresolved_on`` and a warning.
 #: * ``EARLIEST_SUPERSEDED_FROM`` does not move: the Swiss replacement windows
 #:   start on 2024-01-01, after Ireland's 2020-09-01.
+#:
+#: ``SA/VAT`` was added on 2026-10-19, the Swiss shape again. What was looked at:
+#:
+#: * Saudi Arabia charged 5 % from 2018-01-01 and 15 % from 2020-07-01 (VAT Law
+#:   and the 2020 rise, ZATCA). The seed carried only the 15 % window, so a
+#:   Saudi date before July 2020 had no rate. The 5 % row is a closed window
+#:   placed BEFORE the 15 % one every install already holds.
+#: * What this repair will therefore do in the field: nothing. The only open
+#:   Saudi row on an install is the 15 % one, which the file still leaves open.
+#:   The 5 % window reaches old installs through ``tax_history_backfill``.
+#: * ``EARLIEST_SUPERSEDED_FROM`` moves from 2020-09-01 to 2020-07-01. It is
+#:   derived from ``windows[1:]`` and Saudi Arabia's second window, the 15 %
+#:   one, starts on 2020-07-01. The date is documentation; nothing branches on it.
 EXPECTED_POPULATION = {
     ("CA", "HST_NS"),
     ("IL", "VAT"),
@@ -152,6 +165,7 @@ EXPECTED_POPULATION = {
     ("CH", "VAT"),
     ("CH", "VAT_REDUCED"),
     ("CH", "VAT_SPECIAL"),
+    ("SA", "VAT"),
 }
 
 

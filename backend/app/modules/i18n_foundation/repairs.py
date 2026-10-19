@@ -290,6 +290,8 @@ TAX_HISTORY_BACKFILL = register_data_repair(
 #: it names Israel's rise now rather than Nova Scotia's cut. It moved again,
 #: to 2020-09-01, when Ireland's temporary 21 % window was added, which is
 #: the first superseding window in the population that lies wholly in the past.
+#: It moved to 2020-07-01 when Saudi Arabia's 5 % window was placed in front of
+#: its 15 % one: that 15 % window is now the earliest second window on file.
 #:
 #: Registered last on purpose. It writes to rows the two scope repairs above
 #: correct, and while its predicate does not require them to have run - an
@@ -303,7 +305,7 @@ TAX_WINDOW_SUPERSEDE = register_data_repair(
         run=_run_tax_window_supersede,
         nature="superseded",
         superseded=SupersededBy(
-            effective_from="2020-09-01",
+            effective_from="2020-07-01",
             table=TAX_CONFIG_TABLE,
             closes_column="effective_to",
         ),

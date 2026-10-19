@@ -21,11 +21,12 @@ from app.modules.i18n_foundation.tax_history_backfill import (
 from app.modules.i18n_foundation.tax_seed_reconcile import LINE_FIRST_SHIPPED, REPAIRED_ELSEWHERE
 
 
-def test_the_backfill_population_is_switzerland_s_three_past_windows() -> None:
+def test_the_backfill_population_is_switzerland_s_three_and_saudi_arabia_s_one_past_window() -> None:
     assert set(WINDOW_FIRST_SHIPPED) == {
         ("CH", "VAT", "2018-01-01"),
         ("CH", "VAT_REDUCED", "2018-01-01"),
         ("CH", "VAT_SPECIAL", "2018-01-01"),
+        ("SA", "VAT", "2018-01-01"),
     }
 
 
