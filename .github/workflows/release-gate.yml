@@ -1,0 +1,265 @@
+# Release gate: does the wheel install and upgrade the way a user does it?
+#
+# Run by hand on the branch or tag about to be released. It builds the wheel
+# with exactly the recipe pypi-publish.yml uses, then on Linux, Windows and
+# macOS installs it into a clean virtualenv, starts `openconstructionerp serve`
+# as the install guides say, and asks the running server whether it is healthy,
+# reports the right version, serves the frontend and answers a public API route.
+#
+# The upgrade lanes install the previous release from PyPI first, let it seed
+# its demo data, register the first admin and create a project with a BOQ and
+# priced positions, stop it, pip install the new wheel over the same virtualenv
+# and data directory, and check that the same amounts come back.
+#
+# The default runtime is the embedded PostgreSQL cluster, so the "embedded"
+# lanes are what a pip user on a laptop gets. The "external PostgreSQL" lane is
+# the same story with DATABASE_URL pointing at a postgres:16 service.
+#
+# All the logic is in scripts/release_gate/gate.py so it is identical on every
+# OS; the steps below only pass paths to it.
+
+name: Release gate
+
+on:
+  # GitHub only offers workflow_dispatch for a file that exists on the default
+  # branch, so until this file reaches main the only way to run it is a push to
+  # a branch named for it. It never runs on ordinary pushes.
+  push:
+    branches:
+      - 'wip/release-gate-*'
+  workflow_dispatch:
+    inputs:
+      previous_version:
+        description: 'Release on PyPI to upgrade from'
+        required: false
+        default: '18.6.4'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-gate-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PREVIOUS_VERSION: ${{ inputs.previous_version || '18.6.4' }}
+  PYTHONIOENCODING: utf-8
+
+jobs:
+  build:
+    name: Build wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # Same as pypi-publish.yml: the frontend bundle reaches the wheel through
+      # the force-include map in backend/pyproject.toml, never by copying dist.
+      - name: Build frontend bundle into wheel layout
+        env:
+          NODE_OPTIONS: --max-old-space-size=12288
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade build
+
+      - name: Build wheel
+        run: |
+          cd backend
+          python -m build --wheel --outdir ../dist/
+
+      - name: Read wheel version
+        id: version
+        run: |
+          ls -lh dist/
+          v="$(python scripts/release_gate/gate.py wheel-version dist)"
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Wheel version: $v"
+
+      - name: Repo hygiene - no internal-only files in the wheel
+        run: python scripts/check_repo_hygiene.py --zip "$(ls dist/*.whl | head -n1)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
+          retention-days: 7
+
+  fresh-install:
+    name: Fresh install (${{ matrix.os }}, py${{ matrix.python }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ['3.12', '3.13']
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/release_gate
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: ${{ runner.temp }}/wheel
+
+      - name: pip install the wheel into a clean virtualenv
+        run: python scripts/release_gate/gate.py install --venv "${{ runner.temp }}/venv" --wheel-dir "${{ runner.temp }}/wheel"
+
+      - name: Start it, check it, stop it
+        run: >-
+          python scripts/release_gate/gate.py fresh
+          --venv "${{ runner.temp }}/venv"
+          --out "${{ runner.temp }}/gate-out"
+          --expect-version "${{ needs.build.outputs.version }}"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fresh-${{ matrix.os }}-py${{ matrix.python }}-logs
+          path: ${{ runner.temp }}/gate-out
+          retention-days: 14
+
+  upgrade-embedded:
+    name: Upgrade ${{ inputs.previous_version || '18.6.4' }} on embedded PostgreSQL (${{ matrix.os }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/release_gate
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: ${{ runner.temp }}/wheel
+
+      - name: pip install the previous release from PyPI
+        run: python scripts/release_gate/gate.py install --venv "${{ runner.temp }}/venv" --spec "openconstructionerp==${PREVIOUS_VERSION}"
+
+      - name: Start the previous release and create data
+        run: >-
+          python scripts/release_gate/gate.py seed
+          --venv "${{ runner.temp }}/venv"
+          --out "${{ runner.temp }}/gate-out"
+          --snapshot "${{ runner.temp }}/gate-out/snapshot.json"
+
+      - name: pip install the new wheel over it
+        run: python scripts/release_gate/gate.py install --venv "${{ runner.temp }}/venv" --wheel-dir "${{ runner.temp }}/wheel"
+
+      - name: Start the upgraded install and check the data survived
+        run: >-
+          python scripts/release_gate/gate.py verify
+          --venv "${{ runner.temp }}/venv"
+          --out "${{ runner.temp }}/gate-out"
+          --snapshot "${{ runner.temp }}/gate-out/snapshot.json"
+          --expect-version "${{ needs.build.outputs.version }}"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade-embedded-${{ matrix.os }}-logs
+          path: ${{ runner.temp }}/gate-out
+          retention-days: 14
+
+  upgrade-postgres:
+    name: Upgrade ${{ inputs.previous_version || '18.6.4' }} on external PostgreSQL 16
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: oe
+          POSTGRES_PASSWORD: oe
+          POSTGRES_DB: oe_gate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U oe"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://oe:oe@localhost:5432/oe_gate
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/release_gate
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: ${{ runner.temp }}/wheel
+
+      - name: pip install the previous release from PyPI
+        run: python scripts/release_gate/gate.py install --venv "${{ runner.temp }}/venv" --spec "openconstructionerp==${PREVIOUS_VERSION}"
+
+      - name: Start the previous release and create data
+        run: >-
+          python scripts/release_gate/gate.py seed
+          --venv "${{ runner.temp }}/venv"
+          --out "${{ runner.temp }}/gate-out"
+          --snapshot "${{ runner.temp }}/gate-out/snapshot.json"
+
+      - name: pip install the new wheel over it
+        run: python scripts/release_gate/gate.py install --venv "${{ runner.temp }}/venv" --wheel-dir "${{ runner.temp }}/wheel"
+
+      - name: Start the upgraded install and check the data survived
+        run: >-
+          python scripts/release_gate/gate.py verify
+          --venv "${{ runner.temp }}/venv"
+          --out "${{ runner.temp }}/gate-out"
+          --snapshot "${{ runner.temp }}/gate-out/snapshot.json"
+          --expect-version "${{ needs.build.outputs.version }}"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrade-postgres-logs
+          path: ${{ runner.temp }}/gate-out
+          retention-days: 14
