@@ -13,7 +13,7 @@ The step is inspector-guarded, so a database whose column was already added on
 boot reaches this revision without error.
 
 Revision ID: v195_eg_tax_payee_exemption
-Revises: v94_payment_release
+Revises: v98_site_logistics_link_keys
 Create Date: 2026-10-19
 """
 
@@ -25,7 +25,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v195_eg_tax_payee_exemption"
-down_revision: str | Sequence[str] | None = "v94_payment_release"
+down_revision: str | Sequence[str] | None = "v98_site_logistics_link_keys"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

@@ -494,7 +494,7 @@ class TestMigration:
 
     def test_the_revision_keeps_the_agreed_parent(self):
         _ops, module = self._run()
-        assert module.revision == "v197_sa_zatca_egs_units" and module.down_revision == "v94_payment_release"
+        assert module.revision == "v197_sa_zatca_egs_units" and module.down_revision == "v195_eg_tax_payee_exemption"
 
     def test_the_revision_builds_the_columns_and_indexes_the_models_declare(self):
         from app.database import Base

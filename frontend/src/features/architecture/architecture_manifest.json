@@ -14639,8 +14639,31 @@
           ]
         },
         {
+          "class_name": "CostIndexOptions",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Bring historical money to a reference month and region with the price index register.\n\nOpt-in. ``index_series_id`` restates every month of money by the series'\nratio to ``index_target_period`` (the series' latest month when absent);\n``location_target_region`` restates it by the ratio of that region's\nfactor to the project's. Either or both. A reading whose month, project\nregion or region factor the register lacks is excluded with the reason.",
+          "fields": [
+            {
+              "name": "index_series_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "index_target_period",
+              "type": "str | None"
+            },
+            {
+              "name": "location_target_region",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
           "class_name": "PerformanceBenchmarkRequest",
           "bases": [
+            "CostIndexOptions",
             "BenchmarkCohort"
           ],
           "docstring": "One KPI, read per project over a cohort.\n\nExactly one of ``kpi`` (a preset id or a stored custom KPI code) and\n``spec`` (a whitelisted spec, validated like ``POST /kpis``). An empty\n``project_ids`` means every project the caller can open, narrowed by the\nother cohort filters.\n\n``convert_units`` merges readings in compatible units (m2 and ft2) into\none group and lists each conversion; off, every unit is its own group.\n``min_projects`` and ``min_records`` mark a group with less evidence as\nnot a reliable benchmark; ``statistic`` picks the figure each group leads\nwith.",
@@ -14749,6 +14772,83 @@
               "name": "fx_rate",
               "type": "Decimal | None",
               "default": "None"
+            },
+            {
+              "name": "index_series",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "index_base_periods",
+              "type": "list[str]"
+            },
+            {
+              "name": "index_target_period",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "index_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "index_missing_periods",
+              "type": "list[str]"
+            },
+            {
+              "name": "location_region",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "location_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "unadjusted_value",
+              "type": "Decimal | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PerformanceCostIndex",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The reference a benchmark brought historical money to.\n\n``applicable`` is false for a KPI without money (hours per m2), which a\ncost index leaves as it is.",
+          "fields": [
+            {
+              "name": "series_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "series_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "target_period",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "target_region",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "target_region_factor",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "applicable",
+              "type": "bool",
+              "default": "True"
             }
           ]
         },
@@ -15069,6 +15169,11 @@
               "type": "list[str]"
             },
             {
+              "name": "cost_index",
+              "type": "PerformanceCostIndex | None",
+              "default": "None"
+            },
+            {
               "name": "groups_omitted",
               "type": "int",
               "default": "0"
@@ -15365,7 +15470,7 @@
         {
           "class_name": "PerformanceCheckRequest",
           "bases": [
-            "BaseModel"
+            "CostIndexOptions"
           ],
           "docstring": "Where an estimate sits against a benchmark set's history.\n\nEither a ``value`` in ``unit`` and ``currency`` typed by the estimator,\nor a ``boq_position_id`` whose own estimate is read (its unit rate, or\nthe labour hours per unit of its resource split). Nothing is written.",
           "fields": [
@@ -15425,6 +15530,7 @@
         {
           "class_name": "PerformanceCompareRequest",
           "bases": [
+            "CostIndexOptions",
             "BenchmarkCohort"
           ],
           "docstring": "Several KPIs over one cohort, one project per row and one column per KPI group.\n\nThe same cohort and reading options as ``POST /performance/benchmark``;\neach KPI is a preset id or a custom KPI code. A split is not offered: a\ncomparison is by project, and a split would multiply the columns.",
@@ -15519,6 +15625,11 @@
               "name": "statistic",
               "type": "str",
               "default": "'weighted'"
+            },
+            {
+              "name": "cost_index",
+              "type": "PerformanceCostIndex | None",
+              "default": "None"
             }
           ]
         },
@@ -15596,7 +15707,7 @@
         {
           "class_name": "PerformanceDrilldownRequest",
           "bases": [
-            "BaseModel"
+            "CostIndexOptions"
           ],
           "docstring": "The rows behind one project's reading in one group.\n\n``dimensions`` lists, per row dimension of the group, the stored values\nthat land in it: the group's own unit and currency plus whatever the\nreading lists in ``converted_from`` / ``converted_from_currency``.\n``target_unit`` and ``reporting_currency`` are the group's, so the totals\nare restated the way the reading was.",
           "fields": [
@@ -15710,6 +15821,11 @@
             },
             {
               "name": "counted_denominator",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "index_factor",
               "type": "Decimal | None",
               "default": "None"
             }
@@ -16030,6 +16146,11 @@
             {
               "name": "shortfall",
               "type": "list[str]"
+            },
+            {
+              "name": "cost_index",
+              "type": "PerformanceCostIndex | None",
+              "default": "None"
             }
           ]
         }
@@ -16049,6 +16170,7 @@
         "ncr",
         "postcalc",
         "price_breakdown",
+        "price_index",
         "procurement",
         "progress",
         "projects",
@@ -56933,6 +57055,9 @@
         "payment_plan.py",
         "periods.py",
         "permissions.py",
+        "price_adjustment.py",
+        "public_procurement.py",
+        "public_procurement_sa.py",
         "repairs.py",
         "repository.py",
         "retention.py",
@@ -56943,7 +57068,9 @@
         "signing_bridge.py",
         "sov_adjustments.py",
         "sov_posting.py",
-        "validators.py"
+        "subcontract_protection.py",
+        "validators.py",
+        "vat_regime_rules.py"
       ],
       "manifest": {
         "name": "oe_contracts",
@@ -58728,6 +58855,26 @@
           "request_schema": "None"
         },
         {
+          "method": "GET",
+          "path": "/price-adjustment/regimes/",
+          "handler": "list_price_adjustment_regimes",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/price-adjustment/compute/",
+          "handler": "compute_price_adjustment",
+          "response_model": "PriceAdjustmentComputeResponse",
+          "request_schema": "PriceAdjustmentComputeRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/vat-regimes/",
+          "handler": "get_vat_regimes",
+          "response_model": "VatRegimesResponse",
+          "request_schema": "date | None"
+        },
+        {
           "method": "POST",
           "path": "/contracts/",
           "handler": "create_contract",
@@ -59943,6 +60090,127 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "VatRegimeOption",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One VAT regime a contract on this project may state, with its rate on the day asked about.\n\n``nominal_rate_pct`` is the rate of the tax seed row the regime names, in\nforce that day; ``effective_rate_pct`` is that rate times\n``base_fraction``, the rate on the full price. Both are None when no row\nis on file for the day: the regime is then offered without a number rather\nthan with a guessed one.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "labels",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "activity",
+              "type": "str"
+            },
+            {
+              "name": "tax_code",
+              "type": "str"
+            },
+            {
+              "name": "base_fraction",
+              "type": "Decimal"
+            },
+            {
+              "name": "input_credit",
+              "type": "bool"
+            },
+            {
+              "name": "nominal_rate_pct",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "effective_rate_pct",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool"
+            },
+            {
+              "name": "effective_from",
+              "type": "date"
+            },
+            {
+              "name": "effective_to",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "review_status",
+              "type": "str"
+            },
+            {
+              "name": "legal_reference",
+              "type": "str"
+            },
+            {
+              "name": "source_url",
+              "type": "str"
+            },
+            {
+              "name": "conditions",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "contract_signed_before",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "required_evidence",
+              "type": "list[str]"
+            },
+            {
+              "name": "subcontract_evidence",
+              "type": "list[str]"
+            },
+            {
+              "name": "evidence_dated_before",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "scope_increase_ends_regime",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "VatRegimesResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The regimes a contract on this project may state on one day; empty when the country has none.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "on",
+              "type": "date"
+            },
+            {
+              "name": "regimes",
+              "type": "list[VatRegimeOption]"
             }
           ]
         },
@@ -64115,6 +64383,96 @@
               "type": "bool"
             }
           ]
+        },
+        {
+          "class_name": "PriceAdjustmentCoefficientIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One variable item: its coefficient and either its two index values or the series to read them from.",
+          "fields": [
+            {
+              "name": "item",
+              "type": "str"
+            },
+            {
+              "name": "coefficient",
+              "type": "Decimal"
+            },
+            {
+              "name": "base_index",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "current_index",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "index_series_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAdjustmentComputeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One settlement of a weighted index price adjustment.",
+          "fields": [
+            {
+              "name": "regime",
+              "type": "str"
+            },
+            {
+              "name": "value_subject",
+              "type": "Decimal"
+            },
+            {
+              "name": "coefficients",
+              "type": "list[PriceAdjustmentCoefficientIn]"
+            },
+            {
+              "name": "base_period",
+              "type": "str | None"
+            },
+            {
+              "name": "current_period",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PriceAdjustmentComputeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The adjustment: positive is owed to the contractor, negative is deducted.",
+          "fields": [
+            {
+              "name": "regime",
+              "type": "str"
+            },
+            {
+              "name": "value_subject",
+              "type": "str"
+            },
+            {
+              "name": "fixed_portion",
+              "type": "str"
+            },
+            {
+              "name": "items",
+              "type": "list[dict[str, str]]"
+            },
+            {
+              "name": "total",
+              "type": "str"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -64124,6 +64482,7 @@
         "costmodel",
         "finance",
         "i18n_foundation",
+        "price_index",
         "progress",
         "projects",
         "punchlist",
@@ -99737,6 +100096,7 @@
         "__init__.py",
         "adapters.py",
         "manifest.py",
+        "mentions.py",
         "models.py",
         "permissions.py",
         "regimes.py",
@@ -100154,6 +100514,12 @@
           "handler": "submit_clearance_document",
           "response_model": "SubmissionResponse",
           "request_schema": "SubmitRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/documents/{document_id}/refresh",
+          "handler": "refresh_clearance_document",
+          "response_model": "SubmissionResponse"
         },
         {
           "method": "POST",
@@ -100656,6 +101022,11 @@
             {
               "name": "findings",
               "type": "list[ClearanceFinding]"
+            },
+            {
+              "name": "pending",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -100804,6 +101175,18 @@
               "type": "list[str]"
             },
             {
+              "name": "optional_document_fields",
+              "type": "list[str]"
+            },
+            {
+              "name": "profile_setting_fields",
+              "type": "list[str]"
+            },
+            {
+              "name": "company_sizes",
+              "type": "list[str]"
+            },
+            {
               "name": "cancellation_window_days",
               "type": "int | None"
             },
@@ -100846,6 +101229,10 @@
             {
               "name": "commencement",
               "type": "list[CommencementPhaseResponse]"
+            },
+            {
+              "name": "extra",
+              "type": "dict[str, Any]"
             }
           ]
         },
@@ -100867,6 +101254,11 @@
             {
               "name": "countries",
               "type": "list[str]"
+            },
+            {
+              "name": "can_poll",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -100916,6 +101308,633 @@
         "einvoice",
         "finance",
         "projects"
+      ]
+    },
+    {
+      "module_id": "einvoice_eta",
+      "module_label": "Egypt ETA e-invoicing",
+      "module_category": "integration",
+      "files": [
+        "__init__.py",
+        "adapter.py",
+        "builder.py",
+        "calculation.py",
+        "checks.py",
+        "client.py",
+        "codes.py",
+        "der.py",
+        "manifest.py",
+        "serialization.py",
+        "signing.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_einvoice_eta",
+        "version": "1.0.0",
+        "display_name": "Egypt ETA e-invoicing",
+        "description": "Clears invoices, credit notes and debit notes with the Egyptian Tax Authority. Builds the ETA v1.0 JSON document from a finance invoice with the published calculation rules, checks it before it leaves, signs it with the company's eSeal through a pluggable signer (USB token or HSM over PKCS#11, or an external signing service) and talks to the ETA API. A plugin of the e-invoice clearance module: it adds no tables and registers an adapter, a document builder and validation rules into that module's registries.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "integration",
+        "depends": [
+          "oe_einvoice_clearance"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [],
+      "routes": [],
+      "schemas": [],
+      "import_dependencies": [
+        "einvoice_clearance",
+        "finance"
+      ]
+    },
+    {
+      "module_id": "einvoice_ksef",
+      "module_label": "Poland KSeF e-invoicing",
+      "module_category": "integration",
+      "files": [
+        "__init__.py",
+        "adapter.py",
+        "builder.py",
+        "client.py",
+        "crypto.py",
+        "fa3.py",
+        "facts.py",
+        "jpk.py",
+        "ksef_number.py",
+        "manifest.py",
+        "offline.py",
+        "payments.py",
+        "qr.py",
+        "split_payment.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_einvoice_ksef",
+        "version": "1.0.0",
+        "display_name": "Poland KSeF e-invoicing",
+        "description": "Issues invoices through KSeF, the Polish national e-invoicing system. Builds the FA(3) document from a finance invoice (basic, corrective, advance and settlement invoices, split payment and Annex 15 markers), produces the KOD I and KOD II verification QR codes, tracks the offline modes and their upload deadlines, and talks to the KSeF API 2.0. Checks that payment titles carry the KSeF number from 2027. A plugin of the e-invoice clearance module: it adds no tables and registers an adapter, a document builder and validation rules into that module's registries.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "integration",
+        "depends": [
+          "oe_einvoice_clearance"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [],
+      "routes": [],
+      "schemas": [],
+      "import_dependencies": [
+        "einvoice_clearance",
+        "finance"
+      ]
+    },
+    {
+      "module_id": "einvoice_zatca",
+      "module_label": "Saudi Arabia ZATCA e-invoicing",
+      "module_category": "integration",
+      "files": [
+        "__init__.py",
+        "adapter.py",
+        "builder.py",
+        "c14n.py",
+        "checks.py",
+        "client.py",
+        "codes.py",
+        "csr.py",
+        "data.py",
+        "hashing.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "qr.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "signing.py",
+        "stamp.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_einvoice_zatca",
+        "version": "1.0.0",
+        "display_name": "Saudi Arabia ZATCA e-invoicing",
+        "description": "Issues invoices through ZATCA FATOORA phase 2. Builds the UBL 2.1 KSA document from a finance invoice (tax invoice, credit and debit notes, advance invoices), keeps the invoice counter and previous-invoice-hash chain per EGS unit, applies the cryptographic stamp and the QR, onboards the unit with ZATCA (compliance and production CSID), and clears standard invoices and reports simplified ones. Checks the contracting-sector VAT treatment of retention, advances and damages. A plugin of the e-invoice clearance module: it registers an adapter, a document builder and validation rules into that module's registries.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "integration",
+        "depends": [
+          "oe_einvoice_clearance"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "ZatcaEgsUnit",
+          "tablename": "oe_einvoice_zatca_egs_unit",
+          "docstring": "One e-invoice generation solution unit, from onboarding to its last invoice.",
+          "columns": [
+            {
+              "name": "profile_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_einvoice_clearance_profile.id"
+            },
+            {
+              "name": "unit_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "csr_fields",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "state",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "environment",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "private_key_encrypted",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "signer_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "signer_config",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "csr_pem",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "compliance_request_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "compliance_token",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "compliance_secret_encrypted",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "production_request_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "production_token",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "production_secret_encrypted",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "certificate_not_after",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "compliance_results",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "last_icv",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "last_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "last_error",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "ZatcaChainEntry",
+          "tablename": "oe_einvoice_zatca_chain_entry",
+          "docstring": "One counter of one unit: the document that took it and its hash.",
+          "columns": [
+            {
+              "name": "unit_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_einvoice_zatca_egs_unit.id"
+            },
+            {
+              "name": "icv",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "invoice_uuid",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "invoice_number",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "invoice_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "previous_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "invoice_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "type_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "subtype",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "issued_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/meta",
+          "handler": "get_meta",
+          "response_model": "MetaResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/units/",
+          "handler": "list_units",
+          "response_model": "list[UnitResponse]"
+        },
+        {
+          "method": "POST",
+          "path": "/units/",
+          "handler": "create_unit",
+          "response_model": "UnitResponse",
+          "request_schema": "UnitCreateRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/units/{unit_id}",
+          "handler": "get_unit",
+          "response_model": "UnitResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/csr",
+          "handler": "make_csr",
+          "response_model": "UnitResponse",
+          "request_schema": "CsrRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/compliance-csid",
+          "handler": "compliance_csid",
+          "response_model": "UnitResponse",
+          "request_schema": "OtpRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/compliance-checks",
+          "handler": "compliance_checks",
+          "response_model": "UnitResponse",
+          "request_schema": "ClientFactory"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/production-csid",
+          "handler": "production_csid",
+          "response_model": "UnitResponse",
+          "request_schema": "ClientFactory"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/renew",
+          "handler": "renew_unit",
+          "response_model": "UnitResponse",
+          "request_schema": "OtpRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/units/{unit_id}/revoke",
+          "handler": "revoke_unit",
+          "response_model": "UnitResponse"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "UnitCreateRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "profile_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "unit_key",
+              "type": "str"
+            },
+            {
+              "name": "csr_fields",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "signer_kind",
+              "type": "str"
+            },
+            {
+              "name": "signer_config",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "environment",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "CsrRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "csr_pem",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "OtpRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "otp",
+              "type": "str"
+            },
+            {
+              "name": "csr_pem",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "UnitResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "profile_id",
+              "type": "str"
+            },
+            {
+              "name": "unit_key",
+              "type": "str"
+            },
+            {
+              "name": "csr_fields",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "environment",
+              "type": "str"
+            },
+            {
+              "name": "signer_kind",
+              "type": "str"
+            },
+            {
+              "name": "signer_config",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "has_private_key",
+              "type": "bool"
+            },
+            {
+              "name": "csr_pem",
+              "type": "str"
+            },
+            {
+              "name": "compliance_request_id",
+              "type": "str"
+            },
+            {
+              "name": "production_request_id",
+              "type": "str"
+            },
+            {
+              "name": "certificate_not_after",
+              "type": "str | None"
+            },
+            {
+              "name": "compliance_results",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "last_icv",
+              "type": "int"
+            },
+            {
+              "name": "last_hash",
+              "type": "str"
+            },
+            {
+              "name": "last_error",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ApiPathResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "path",
+              "type": "str"
+            },
+            {
+              "name": "method",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "needs_expert_review",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "EnvironmentResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "base_url",
+              "type": "str"
+            },
+            {
+              "name": "live",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "MetaResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "states",
+              "type": "list[str]"
+            },
+            {
+              "name": "transitions",
+              "type": "dict[str, list[str]]"
+            },
+            {
+              "name": "signer_kinds",
+              "type": "list[str]"
+            },
+            {
+              "name": "environments",
+              "type": "list[EnvironmentResponse]"
+            },
+            {
+              "name": "api_paths",
+              "type": "list[ApiPathResponse]"
+            },
+            {
+              "name": "unconfirmed",
+              "type": "list[str]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "einvoice",
+        "einvoice_clearance",
+        "finance"
       ]
     },
     {
@@ -155872,11 +156891,13 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "release_certificates.py",
         "release_math.py",
         "repository.py",
         "router.py",
         "schemas.py",
         "service.py",
+        "statutory_rules.py",
         "validators.py"
       ],
       "manifest": {
@@ -156369,6 +157390,11 @@
             {
               "name": "final_due_days",
               "type": "int | None"
+            },
+            {
+              "name": "release_certificates_enforcement",
+              "type": "ReleaseCertificatesEnforcement | None",
+              "default": "None"
             }
           ]
         },
@@ -156454,6 +157480,11 @@
             {
               "name": "final_due_days",
               "type": "int | None"
+            },
+            {
+              "name": "release_certificates_enforcement",
+              "type": "ReleaseCertificatesEnforcement",
+              "default": "'pack'"
             }
           ]
         },
@@ -157060,7 +158091,9 @@
         "boq",
         "contracts",
         "costmodel",
-        "finance"
+        "finance",
+        "projects",
+        "subcontractors"
       ]
     },
     {
@@ -221986,6 +223019,7 @@
         "mspdi_export.py",
         "ordering.py",
         "permissions.py",
+        "plan_confidence.py",
         "progress_math.py",
         "progress_models.py",
         "progress_router.py",
@@ -224536,7 +225570,7 @@
             {
               "name": "note",
               "type": "str",
-              "description": "estimated_from_unit, cost_share, default_duration, skipped_zero_qty, empty_section_dropped or blank_row_dropped."
+              "description": "estimated_from_unit, cost_share, default_duration, machine_bound, spans_works, skipped_zero_qty, empty_section_dropped or blank_row_dropped."
             },
             {
               "name": "days",
@@ -224546,7 +225580,7 @@
             {
               "name": "basis",
               "type": "dict[str, Any] | None",
-              "description": "For estimated_from_unit: unit, rate (hours per unit), hours, gang (people), hours_per_day, and capped_by_price with hours_from_unit when the price held the guess down."
+              "description": "For estimated_from_unit: unit, rate (hours per unit), hours, gang (people), hours_per_day, and capped_by_price with hours_from_unit when the price held the guess down. For machine_bound: machine_hours, machines, labour_hours and hours_per_day."
             }
           ]
         },
@@ -224673,6 +225707,21 @@
             {
               "name": "notes",
               "type": "list[GenerationNote]"
+            },
+            {
+              "name": "confidence",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "cost",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "validation",
+              "type": "dict[str, Any] | None",
+              "default": "None"
             }
           ]
         },
@@ -258537,6 +259586,12 @@
               "nullable": false
             },
             {
+              "name": "payee_exemption_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
               "name": "status",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -260037,6 +261092,10 @@
             {
               "name": "stamp_duty",
               "type": "StatutoryChoice"
+            },
+            {
+              "name": "payee_exemption_code",
+              "type": "str"
             }
           ]
         },
@@ -260443,6 +261502,15 @@
             {
               "name": "work_value_threshold",
               "type": "Decimal | None"
+            },
+            {
+              "name": "threshold_applies",
+              "type": "str",
+              "default": "'at_or_above'"
+            },
+            {
+              "name": "payee_exemption_codes",
+              "type": "list[str]"
             },
             {
               "name": "conditions",
@@ -274881,10 +275949,10 @@
     },
     {
       "name": "einvoice-clearance",
-      "ts_files": 8,
+      "ts_files": 9,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 8
+      "total_files": 9
     },
     {
       "name": "engineering_brief",
@@ -275609,10 +276677,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 71,
+      "ts_files": 73,
       "css_files": 0,
-      "test_files": 30,
-      "total_files": 71
+      "test_files": 31,
+      "total_files": 73
     },
     {
       "name": "schedule-advanced",
@@ -275964,6 +277032,7 @@
       "ncr",
       "postcalc",
       "price_breakdown",
+      "price_index",
       "procurement",
       "progress",
       "projects",
@@ -276240,6 +277309,7 @@
       "costmodel",
       "finance",
       "i18n_foundation",
+      "price_index",
       "progress",
       "projects",
       "punchlist",
@@ -276456,6 +277526,19 @@
       "einvoice",
       "finance",
       "projects"
+    ],
+    "einvoice_eta": [
+      "einvoice_clearance",
+      "finance"
+    ],
+    "einvoice_ksef": [
+      "einvoice_clearance",
+      "finance"
+    ],
+    "einvoice_zatca": [
+      "einvoice",
+      "einvoice_clearance",
+      "finance"
     ],
     "engineering_brief": [
       "documents",
@@ -276817,7 +277900,8 @@
       "contracts",
       "costmodel",
       "finance",
-      "projects"
+      "projects",
+      "subcontractors"
     ],
     "payroll": [
       "costmodel",
@@ -277432,16 +278516,16 @@
     ]
   },
   "statistics": {
-    "backend_modules": 212,
-    "modules_with_manifests": 210,
-    "total_models": 786,
-    "total_columns": 9139,
+    "backend_modules": 215,
+    "modules_with_manifests": 213,
+    "total_models": 788,
+    "total_columns": 9170,
     "total_relationships": 240,
-    "total_routes": 4608,
-    "total_schemas": 4093,
-    "total_python_files": 2749,
+    "total_routes": 4622,
+    "total_schemas": 4107,
+    "total_python_files": 2805,
     "frontend_features": 209,
-    "frontend_ts_files": 3565,
+    "frontend_ts_files": 3568,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

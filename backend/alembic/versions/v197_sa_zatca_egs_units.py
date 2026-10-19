@@ -13,7 +13,7 @@ boot. Every step is inspector-guarded, so a database whose tables ``create_all``
 this revision without error.
 
 Revision ID: v197_sa_zatca_egs_units
-Revises: v94_payment_release
+Revises: v195_eg_tax_payee_exemption
 Create Date: 2026-10-19
 """
 
@@ -27,7 +27,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "v197_sa_zatca_egs_units"
-down_revision: str | Sequence[str] | None = "v94_payment_release"
+down_revision: str | Sequence[str] | None = "v195_eg_tax_payee_exemption"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
