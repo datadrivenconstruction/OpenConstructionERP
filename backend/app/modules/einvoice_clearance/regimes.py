@@ -968,6 +968,9 @@ def regime_as_dict(entry: CountryRegime) -> dict[str, Any]:
         "cancellation_basis": entry.cancellation_basis,
         "scope": entry.scope,
         "commencement": [phase_as_dict(p) for p in entry.commencement],
+        # Country-specific facts that fit no shared column, such as the platform
+        # model, the accepted syntaxes or the fines. Empty for most countries.
+        "extra": dict(entry.extra),
     }
 
 
