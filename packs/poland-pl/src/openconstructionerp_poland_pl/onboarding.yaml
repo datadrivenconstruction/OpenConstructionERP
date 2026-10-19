@@ -26,11 +26,11 @@ steps:
       - { key: enable_knr, label: "Enable KNR catalogues (Katalog Nakladow Rzeczowych) / Wlacz KNR", type: checkbox, default: true, help: "Standard norm catalogues for construction works." }
       - { key: enable_knnr, label: "Enable KNNR catalogues (Kosztorysowe Normy Nakladow Rzeczowych) / Wlacz KNNR", type: checkbox, default: true, help: "Updated cost estimation norms." }
       - { key: estimate_type, label: "Default estimate type / Domyslny typ kosztorysu", type: radio, options: ["Kosztorys inwestorski (investor estimate)", "Kosztorys ofertowy (tender estimate)", "Kosztorys powykonawczy (as-built estimate)"], required: true, default: "Kosztorys inwestorski (investor estimate)" }
-      - { key: classification, label: "Classification standard / Standard klasyfikacji", type: radio, options: ["DIN 276 (German tradition, common in Poland)", "Custom classification"], required: true, default: "DIN 276 (German tradition, common in Poland)" }
+      - { key: classification, label: "Classification standard / Standard klasyfikacji", type: radio, options: ["KNR / KNNR (Polish norm catalogues)", "DIN 276 (cost groups)", "Custom classification"], required: true, default: "KNR / KNNR (Polish norm catalogues)" }
 
   - id: review
     title: "Review and finish / Przejrzyj i zakoncz"
-    body: "We will create your workspace with DIN 276 classification, PLN currency, 23% VAT and the norm catalogues you selected. You can change everything later in Settings. Twoja przestrzen robocza zostanie utworzona z wybranymi ustawieniami."
+    body: "We will create your workspace with KNR classification, PLN currency, 23% VAT and the norm catalogues you selected. You can change everything later in Settings. Twoja przestrzen robocza zostanie utworzona z wybranymi ustawieniami."
     action:
       label: "Create my Poland workspace / Utworz moja przestrzen robocza"
       apply:

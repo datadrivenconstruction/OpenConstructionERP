@@ -1,0 +1,111 @@
+{
+  "_comment": "Statutory late payment in commercial transactions, per country. Read by app/core/late_payment.py. Every figure carries its source, the dates it holds for and a confidence (H official or two reliable sources agree, M one reliable secondary source or settled practice). Rates outside the listed periods are not known and are never extrapolated.",
+  "countries": {
+    "PL": {
+      "statute": "Ustawa z dnia 8 marca 2013 r. o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach handlowych (consolidated text Dz.U. 2022 poz. 893)",
+      "source_url": "https://eli.gov.pl/eli/DU/2022/893/ogl/pol/pdf",
+      "currency": "PLN",
+      "review_status": "needs_expert_review",
+      "reference_rate": {
+        "name": "Narodowy Bank Polski reference rate (stopa referencyjna)",
+        "fixed_on": "first_day_of_half_year",
+        "note": "The rate in force on 1 January applies to the first half-year and the rate in force on 1 July to the second; the minister publishes the resulting rate in Monitor Polski."
+      },
+      "margins": [
+        {
+          "debtor_kind": "commercial",
+          "margin_percent": "10.00",
+          "effective_from": "2020-01-01",
+          "effective_to": null,
+          "statute_reference": "art. 4 pkt 3 lit. a",
+          "source_url": "https://www.podatki.biz/artykuly/odsetki-ustawowe-w-2026-r-725-925-1175-czy-1375_51_39945.htm",
+          "confidence": "H"
+        },
+        {
+          "debtor_kind": "public",
+          "margin_percent": "10.00",
+          "effective_from": "2020-01-01",
+          "effective_to": null,
+          "statute_reference": "art. 4 pkt 3 lit. a and art. 8",
+          "source_url": "https://www.podatki.biz/artykuly/odsetki-ustawowe-w-2026-r-725-925-1175-czy-1375_51_39945.htm",
+          "confidence": "M"
+        },
+        {
+          "debtor_kind": "public_medical",
+          "margin_percent": "8.00",
+          "effective_from": "2020-01-01",
+          "effective_to": null,
+          "statute_reference": "art. 4 pkt 3 lit. b",
+          "source_url": "https://www.podatki.biz/artykuly/odsetki-ustawowe-w-2026-r-725-925-1175-czy-1375_51_39945.htm",
+          "confidence": "H"
+        }
+      ],
+      "reference_rate_periods": [
+        {
+          "effective_from": "2026-01-01",
+          "effective_to": "2026-06-30",
+          "reference_rate_percent": "4.00",
+          "published_rates": {"commercial": "14.00", "public_medical": "12.00"},
+          "source_url": "https://www.podatki.biz/artykuly/odsetki-ustawowe-w-2026-r-725-925-1175-czy-1375_51_39945.htm",
+          "confidence": "H"
+        },
+        {
+          "effective_from": "2026-07-01",
+          "effective_to": "2026-12-31",
+          "reference_rate_percent": "3.75",
+          "published_rates": {"commercial": "13.75", "public_medical": "11.75"},
+          "source_url": "https://www.podatki.biz/artykuly/odsetki-ustawowe-w-2026-r-725-925-1175-czy-1375_51_39945.htm",
+          "confidence": "H"
+        }
+      ],
+      "term_caps": [
+        {
+          "debtor_kind": "commercial",
+          "max_days": 60,
+          "counted_from": "invoice_delivery",
+          "effective_from": "2013-04-28",
+          "effective_to": null,
+          "statute_reference": "art. 7 ust. 2; art. 7 ust. 2a (no exception where a large enterprise pays an SME, from 2020-01-01)",
+          "source_url": "https://poradnikprzedsiebiorcy.pl/-odsetki-za-opoznienie-w-transakcjach-handlowych",
+          "confidence": "H",
+          "note": "A longer term between undertakings is allowed only if expressly agreed and not grossly unfair to the creditor, and never where the debtor is a large enterprise and the creditor an SME. Where no term was agreed, interest runs after 30 days."
+        },
+        {
+          "debtor_kind": "public",
+          "max_days": 30,
+          "counted_from": "invoice_delivery",
+          "effective_from": "2013-04-28",
+          "effective_to": null,
+          "statute_reference": "art. 8 ust. 1",
+          "source_url": "https://eli.gov.pl/eli/DU/2022/893/ogl/pol/pdf",
+          "confidence": "M"
+        },
+        {
+          "debtor_kind": "public_medical",
+          "max_days": 60,
+          "counted_from": "invoice_delivery",
+          "effective_from": "2013-04-28",
+          "effective_to": null,
+          "statute_reference": "art. 8 ust. 2",
+          "source_url": "https://eli.gov.pl/eli/DU/2022/893/ogl/pol/pdf",
+          "confidence": "M"
+        }
+      ],
+      "recovery_compensation": {
+        "currency": "EUR",
+        "statute_reference": "art. 10 ust. 1",
+        "source_url": "https://poradnikprzedsiebiorcy.pl/-odsetki-za-opoznienie-w-transakcjach-handlowych",
+        "effective_from": "2020-01-01",
+        "effective_to": null,
+        "confidence": "M",
+        "conversion": "Converted to PLN at the NBP average euro rate of the last business day of the month before the month in which the payment became due. The rate is an input; it is not fetched.",
+        "note": "Tier boundaries follow the statute wording: 40 euro where the claim does not exceed PLN 5,000, 70 euro where it is higher than PLN 5,000 but lower than PLN 50,000, 100 euro where it is equal to or higher than PLN 50,000. The creditor may also claim higher actual recovery costs.",
+        "tiers": [
+          {"lower_pln": null, "lower_inclusive": false, "upper_pln": "5000.00", "upper_inclusive": true, "amount": "40"},
+          {"lower_pln": "5000.00", "lower_inclusive": false, "upper_pln": "50000.00", "upper_inclusive": false, "amount": "70"},
+          {"lower_pln": "50000.00", "lower_inclusive": true, "upper_pln": null, "upper_inclusive": false, "amount": "100"}
+        ]
+      }
+    }
+  }
+}

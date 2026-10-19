@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Rechnung {number} zum Vertrag {contract}: Dem Zahlungsempfänger liegt zum {on} kein gültiger Nachweis vor ({certificate}), den {reference} vor der Freigabe der Zahlung verlangt.",
       "suggestion": "Erfassen Sie den Nachweis am Nachunternehmer-Datensatz des Zahlungsempfängers oder halten Sie die Zahlung zurück, bis er vorgelegt wird."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Die Rechnung {number} weist Bauleistungen oder andere Waren des Split-Payment-Verfahrens aus und übersteigt {threshold}, trägt aber nicht den Vermerk «{annotation}».",
+      "suggestion": "Fordern Sie vom Lieferanten eine korrigierte Rechnung mit dem Vermerk an und zahlen Sie sie in jedem Fall per Split Payment: die Zahlungspflicht hängt nicht vom Vermerk ab."
+    },
+    "split_payment_not_used": {
+      "fail": "Die Rechnung {number} unterliegt dem Split Payment, eine Zahlung dafür wurde jedoch mit einer anderen Methode erfasst. Der Käufer haftet zusätzlich für {sanction}, 30 Prozent der darauf entfallenden Umsatzsteuer.",
+      "suggestion": "Zahlen Sie solche Rechnungen per Split Payment vom USt-Konto und erfassen Sie die Methode an der Zahlung als split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Die Rechnung {number} übersteigt {threshold}, und es ist nicht erfasst, ob sie Waren oder Leistungen aus dem Anhang zum Split Payment ausweist.",
+      "suggestion": "Erfassen Sie an der Rechnung, ob sie Waren oder Leistungen aus dem Anhang ausweist (annex_15), oder deren Codes (pkwiu_codes), damit die Zahlungsmethode geprüft werden kann."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Die Rechnung {number} berechnet {rate} Prozent Umsatzsteuer auf den gesamten Preis, die Wohnung hat jedoch {area_m2} m2 Nutzfläche, und der ermäßigte Satz gilt bis {limit_m2} m2 ({reference}).",
+      "suggestion": "Berechnen Sie den ermäßigten Satz auf {reduced_share_percent} Prozent des Preises und den Regelsatz auf den Rest."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Die Rechnung {number} berechnet den ermäßigten Wohnungssatz von {rate} Prozent, im Projekt ist aber nicht erfasst, für welche Wohnung sie gilt und wie groß die Nutzfläche ist ({reference}).",
+      "suggestion": "Erfassen Sie Wohnungsart und Nutzfläche am Projekt (vat_housing), damit Satz und Flächengrenze geprüft werden können."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Die Rechnung {number} berechnet den ermäßigten Wohnungssatz von {rate} Prozent auf {object}, was dafür nicht in Frage kommt ({reference}).",
+      "suggestion": "Berechnen Sie den Regelsatz oder korrigieren Sie die am Projekt erfasste Wohnung."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Die Rechnung {number} wendet Reverse Charge auf {count} Position(en) an, doch das inländische Reverse-Charge-Verfahren für Bauleistungen ist in diesem Land ausgelaufen.",
+      "suggestion": "Fordern Sie, sofern der Lieferant nicht im Ausland ansässig ist, eine Rechnung mit Umsatzsteuer an; solche Rechnungen werden per Split Payment bezahlt."
+    },
+    "payment_term_over_cap": {
+      "fail": "Der Vertrag {contract} vereinbart eine Zahlungsfrist von {days} Tagen, länger als die {cap} Tage, die das Zahlungsverzugsgesetz zwischen Unternehmen zulässt.",
+      "suggestion": "Kürzen Sie die Frist auf {cap} Tage oder erfassen Sie, warum die längere Frist ausdrücklich vereinbart und für den Nachunternehmer nicht grob unbillig ist."
     }
   },
   "cost_forecast": {

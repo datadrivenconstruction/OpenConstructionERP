@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Factura {number} la contractul {contract}: beneficiarul nu deține la data {on} un document valabil ({certificate}), pe care {reference} îl cere înainte de eliberarea plății.",
       "suggestion": "Înregistrați documentul în fișa de subcontractant a beneficiarului sau rețineți plata până la prezentarea lui."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Factura {number} cuprinde lucrări de construcții sau alte bunuri supuse split payment și depășește {threshold}, dar nu poartă mențiunea «{annotation}».",
+      "suggestion": "Cere furnizorului o factură corectată cu mențiunea și plătește-o în orice caz prin split payment: obligația de a plăti astfel nu depinde de mențiune."
+    },
+    "split_payment_not_used": {
+      "fail": "Factura {number} intră sub split payment, dar o plată a ei a fost înregistrată cu altă metodă. Cumpărătorul răspunde în plus pentru {sanction}, 30 la sută din TVA-ul ei.",
+      "suggestion": "Plătește astfel de facturi din contul de TVA prin split payment și înregistrează metoda pe plată ca split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Factura {number} depășește {threshold} și nu este înregistrat dacă cuprinde bunuri sau servicii din anexa split payment.",
+      "suggestion": "Înregistrează pe factură dacă cuprinde bunuri sau servicii din anexă (annex_15) sau codurile lor (pkwiu_codes), ca metoda de plată să poată fi verificată."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Factura {number} aplică TVA de {rate} la sută pe întregul preț, dar locuința are {area_m2} m2 suprafață utilă, iar cota redusă se aplică până la {limit_m2} m2 ({reference}).",
+      "suggestion": "Aplică cota redusă pe {reduced_share_percent} la sută din preț și cota standard pe rest."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Factura {number} aplică cota redusă pentru locuințe de {rate} la sută, dar proiectul nu înregistrează pentru ce locuință este și nici suprafața ei utilă ({reference}).",
+      "suggestion": "Înregistrează pe proiect tipul locuinței și suprafața utilă (vat_housing), ca să poată fi verificate cota și limita de suprafață."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Factura {number} aplică cota redusă pentru locuințe de {rate} la sută pe {object}, care nu se califică pentru ea ({reference}).",
+      "suggestion": "Aplică cota standard sau corectează locuința înregistrată pe proiect."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Factura {number} aplică taxarea inversă pe {count} linie/linii, dar taxarea inversă internă pentru serviciile de construcții a încetat în această țară.",
+      "suggestion": "Dacă furnizorul nu este stabilit în străinătate, cere o factură cu TVA; astfel de facturi se plătesc prin split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Contractul {contract} convine un termen de plată de {days} zile, mai lung decât cele {cap} zile pe care legea privind întârzierea la plată le permite între întreprinderi.",
+      "suggestion": "Scurtează termenul la {cap} zile sau înregistrează de ce termenul mai lung este convenit în mod expres și nu este abuziv în mod grav față de subcontractor."
     }
   },
   "cost_forecast": {

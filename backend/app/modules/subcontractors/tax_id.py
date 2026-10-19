@@ -21,13 +21,15 @@ other without a cycle.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 
+from app.core.pl_ids import nip_is_valid
 from app.core.validation.identifiers import normalise_digits, rule_for
 from app.modules.subcontractors.schemas import TaxIdValidationResponse
 
 # Country -> (standard_name, compiled regex).
 # Patterns are *format* checks. They are deliberately permissive (no MOD-97 /
-# checksum validation) - the goal is to reject obviously broken input at the
+# checksum validation, except where ``_TAX_ID_CHECKSUMS`` names a country) - the goal is to reject obviously broken input at the
 # UI boundary, not to authenticate against a registry. Live VIES checks are a
 # follow-up module concern. Coverage: all 27 EU member states under the VAT
 # prefix VIES publishes for each; Greece is keyed twice, as EL (its VAT
@@ -82,6 +84,15 @@ _TAX_ID_RULES: dict[str, tuple[str, re.Pattern[str]]] = {
     "TR": ("TR VKN", re.compile(r"^\d{10}$|^\d{11}$")),
     "RU": ("RU INN", re.compile(r"^\d{10}$|^\d{12}$")),
     "ZA": ("ZA VAT", re.compile(r"^\d{10}$")),
+}
+
+#: Check digits verified on top of the format, for the countries where the
+#: algorithm is known and a wrong digit is the common typing error. A number
+#: that matches the pattern and fails its check is refused with reason
+#: ``checksum_mismatch:<standard>``, so the form can tell "wrong shape" from
+#: "right shape, mistyped digit". Poland's NIP: see :mod:`app.core.pl_ids`.
+_TAX_ID_CHECKSUMS: dict[str, Callable[[str], bool]] = {
+    "PL": nip_is_valid,
 }
 
 #: Suffixes a register prints after the number to say the firm is in its VAT
@@ -170,8 +181,17 @@ def validate_tax_id(country: str, tax_id: str) -> TaxIdValidationResponse:
             reason=None,
         )
     standard_name, pattern = rule
+    checksum = _TAX_ID_CHECKSUMS.get(country_u)
     for candidate in candidates:
         if pattern.fullmatch(candidate):
+            if checksum is not None and not checksum(candidate):
+                return TaxIdValidationResponse(
+                    country=country_u,
+                    tax_id_normalised=candidate,
+                    format_valid=False,
+                    standard=standard_name,
+                    reason=f"checksum_mismatch:{standard_name}",
+                )
             return TaxIdValidationResponse(
                 country=country_u,
                 tax_id_normalised=candidate,

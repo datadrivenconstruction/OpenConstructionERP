@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Invoice {number} sa kontratang {contract}: walang {certificate} na may bisa sa {on} ang tumatanggap ng bayad, na hinihingi ng {reference} bago ilabas ang bayad.",
       "suggestion": "Itala ang sertipiko sa talaan ng subcontractor ng tumatanggap, o ipagpaliban ang bayad hanggang maipakita ito."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Ang invoice {number} ay may construction works o ibang kalakal na sakop ng split payment at lampas sa {threshold}, pero walang annotation na «{annotation}».",
+      "suggestion": "Humingi sa supplier ng itinamang invoice na may annotation, at bayaran ito sa anumang kaso sa pamamagitan ng split payment: ang obligasyong magbayad sa ganitong paraan ay hindi nakadepende sa annotation."
+    },
+    "split_payment_not_used": {
+      "fail": "Ang invoice {number} ay sakop ng split payment, pero may naitalang bayad nito sa ibang paraan. Ang buyer ay mananagot pa sa {sanction}, 30 porsiyento ng VAT nito.",
+      "suggestion": "Bayaran ang ganitong mga invoice mula sa VAT account sa pamamagitan ng split payment, at itala ang paraan sa bayad bilang split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Ang invoice {number} ay lampas sa {threshold}, at hindi naitala kung may laman itong kalakal o serbisyo mula sa annex ng split payment.",
+      "suggestion": "Itala sa invoice kung may laman itong kalakal o serbisyo mula sa annex (annex_15), o ang mga code ng mga ito (pkwiu_codes), para masuri ang paraan ng pagbabayad."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Ang invoice {number} ay naniningil ng {rate} porsiyentong VAT sa buong presyo, pero ang tirahan ay may {area_m2} m2 na usable area at ang reduced rate ay hanggang {limit_m2} m2 lang ({reference}).",
+      "suggestion": "Ipataw ang reduced rate sa {reduced_share_percent} porsiyento ng presyo at ang standard rate sa natitira."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Ang invoice {number} ay naniningil ng reduced housing rate na {rate} porsiyento, pero hindi naitala ng proyekto kung aling tirahan ito o ang usable area nito ({reference}).",
+      "suggestion": "Itala sa proyekto ang uri ng tirahan at usable area (vat_housing) para masuri ang rate at ang limitasyon sa area."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Ang invoice {number} ay naniningil ng reduced housing rate na {rate} porsiyento sa {object}, na hindi kwalipikado rito ({reference}).",
+      "suggestion": "Ipataw ang standard rate, o itama ang tirahang naitala sa proyekto."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Ang invoice {number} ay nag-apply ng reverse charge sa {count} line, pero natapos na sa bansang ito ang domestic reverse charge sa construction services.",
+      "suggestion": "Maliban kung ang supplier ay nakabase sa ibang bansa, humingi ng invoice na may VAT; ang ganitong mga invoice ay binabayaran sa pamamagitan ng split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Ang kontrata {contract} ay may napagkasunduang payment term na {days} araw, mas mahaba kaysa sa {cap} araw na pinapayagan ng batas sa huling bayad sa pagitan ng mga negosyo.",
+      "suggestion": "Paikliin ang term sa {cap} araw, o itala kung bakit tahasang napagkasunduan ang mas mahabang term at hindi labis na hindi patas sa subcontractor."
     }
   },
   "cost_forecast": {

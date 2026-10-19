@@ -87,6 +87,11 @@ Sources (cited in commit message, summarised here for reference):
 - HU: 2007. évi CXXVII. törvény (Áfa tv.) 82. § - standard 27 %. Two reduced
   rates, 5 % and 18 %, and a 0 % rate exist and are not in this table; see
   the comment at the entry. (Nemzeti Jogszabálytár, read 2026-10-10)
+- PL: Ustawa o podatku od towarow i uslug (VAT Act of 11 Mar 2004) art. 41
+  and 146ef - standard 23 %, reduced 8 %, both since 1 Jan 2011. The 5 %
+  rate and the area limits of the 8 % housing rate are not in this table;
+  see the comment at the entry. (ifirma summary of the Ministry of Finance
+  explanations and gazetaprawna, read 2026-10-19)
 - ES: Ley 37/1992 art. 90 and 91 - standard 21 %, reduced 10 %, effective
   1 Sep 2012. The 4 % super-reduced rate is not in this table; see the comment
   at the entry. (BOE consolidated text, read 2026-10-10)
@@ -214,6 +219,17 @@ _RAW: dict[str, dict[str, str]] = {
     # customer (see HU_FORDITOTT_ADOZAS_EPITES in tax_withholding).
     # Like RO and TR, the entry has no consumer today.
     "HU": {"standard": "0.27"},
+    # ── Poland ────────────────────────────────────────────────────────────
+    # VAT Act of 11 March 2004, art. 41 ust. 1 and 2 with art. 146ef: 23 and
+    # 8 percent since 1 January 2011, zero on exports and intra-EU supplies.
+    # https://www.ifirma.pl/blog/stawki-vat-dla-budownictwa-mieszkaniowego-w-wyjasnieniach-mf
+    # (read 2026-10-19). "reduced" is the 8 percent because it is the one
+    # construction meets: art. 41 ust. 12 to 12c apply it to building and
+    # renovating dwellings, a house up to 300 m2 and a flat up to 150 m2 of
+    # usable area, and above the limit only to the limit's share of the price.
+    # This table cannot say that; app.core.vat_construction splits the price.
+    # The 5 percent rate (food, books) is the seed's VAT_5 line.
+    "PL": {"standard": "0.23", "reduced": "0.08", "zero": "0.00"},
     # ── Spain ─────────────────────────────────────────────────────────────
     # IVA, Ley 37/1992: art. 90.Uno, general rate 21 percent, and art. 91.Uno,
     # reduced rate 10 percent, both since 1 September 2012 (Real Decreto-ley

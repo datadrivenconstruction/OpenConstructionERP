@@ -196,9 +196,16 @@ def test_only_a_derived_template_carries_a_national_step_label() -> None:
     markets has carried the same names for as long as the regional table has
     existed and its exporter has the same gap.
     """
+    # The one other door: the Polish detailed template reads its narzuty names
+    # from the PL block of the same regional markup module.
+    from app.modules.boq.markup_templates import PL_KOSZTORYS_NARZUTY
+
+    polish_names = {str(n["name"]) for n in PL_KOSZTORYS_NARZUTY}
     for tpl in t.list_templates():
         for step in tpl["cascade_steps"]:
             if str(step["label"]).isascii():
+                continue
+            if tpl["slug"] == "poland_kosztorys" and step["label"] in polish_names:
                 continue
             assert tpl.get("derived_from_region"), (
                 f"{tpl['slug']}: step {step['key']} has a non-ASCII label {step['label']!r} "
@@ -268,7 +275,9 @@ def test_template_names_are_unique() -> None:
 # both in use there and the estimate is read by different people. Chile prices
 # an internal budget flat and submits a public tender as an APU. A country not
 # on this list appearing twice is a copied template, not a second method.
-_DUAL_METHOD_COUNTRIES = {"CL", "CO", "BR"}
+# Poland: the bill-level stack and the kosztorys szczegolowy, whose narzuty sit
+# on their own component bases and which a bill line cannot express.
+_DUAL_METHOD_COUNTRIES = {"CL", "CO", "BR", "PL"}
 
 
 def test_country_templates_have_unique_country_codes() -> None:

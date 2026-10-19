@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "{contract} shartnomasi bo'yicha {number}-hisob-faktura: oluvchida {on} sanasida amal qiladigan {certificate} yo'q, uni to'lovni bo'shatishdan oldin {reference} talab qiladi.",
       "suggestion": "Guvohnomani oluvchining subpudratchi yozuviga kiriting yoki u ko'rsatilguncha to'lovni ushlab turing."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "{number} hisob-fakturasida qurilish ishlari yoki split payment'ga tegishli boshqa tovarlar bor va u {threshold} dan oshadi, lekin «{annotation}» izohi yo'q.",
+      "suggestion": "Yetkazib beruvchidan izohli tuzatilgan hisob-fakturani so'rang va uni har holda split payment orqali to'lang: shunday to'lash majburiyati izohga bog'liq emas."
+    },
+    "split_payment_not_used": {
+      "fail": "{number} hisob-fakturasi split payment'ga tegishli, lekin uning to'lovi boshqa usulda qayd etilgan. Xaridor qo'shimcha ravishda {sanction} uchun javob beradi, bu uning QQS ning 30 foizi.",
+      "suggestion": "Bunday hisob-fakturalarni QQS hisobidan split payment orqali to'lang va to'lovda usulni split_payment deb qayd eting."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "{number} hisob-fakturasi {threshold} dan oshadi va unda split payment ilovasidagi tovar yoki xizmatlar bor-yo'qligi qayd etilmagan.",
+      "suggestion": "To'lov usulini tekshirish uchun hisob-fakturada unda ilovadagi tovar yoki xizmatlar (annex_15) yoki ularning kodlari (pkwiu_codes) bor-yo'qligini qayd eting."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "{number} hisob-fakturasi butun narxga {rate} foiz QQS hisoblaydi, lekin turar joyning foydali maydoni {area_m2} m2, kamaytirilgan stavka esa faqat {limit_m2} m2 gacha amal qiladi ({reference}).",
+      "suggestion": "Kamaytirilgan stavkani narxning {reduced_share_percent} foiziga, umumiy stavkani qolganiga hisoblang."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "{number} hisob-fakturasi {rate} foizlik kamaytirilgan turar joy stavkasini hisoblaydi, lekin loyihada bu qaysi turar joyga tegishli ekani va uning foydali maydoni qayd etilmagan ({reference}).",
+      "suggestion": "Stavka va maydon chegarasini tekshirish uchun loyihada turar joy turi va foydali maydonni qayd eting (vat_housing)."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "{number} hisob-fakturasi {rate} foizlik kamaytirilgan turar joy stavkasini {object} uchun hisoblaydi, u bunga mos kelmaydi ({reference}).",
+      "suggestion": "Umumiy stavkani hisoblang yoki loyihada qayd etilgan turar joyni to'g'rilang."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "{number} hisob-fakturasi {count} qatorga teskari hisoblashni qo'llaydi, lekin qurilish xizmatlari bo'yicha ichki teskari hisoblash bu mamlakatda tugagan.",
+      "suggestion": "Yetkazib beruvchi chet elda joylashmagan bo'lsa, QQS bilan hisob-faktura so'rang; bunday hisob-fakturalar split payment orqali to'lanadi."
+    },
+    "payment_term_over_cap": {
+      "fail": "{contract} shartnomasi {days} kunlik to'lov muddatini kelishadi, bu korxonalar o'rtasida to'lovni kechiktirish to'g'risidagi qonun ruxsat bergan {cap} kundan uzoq.",
+      "suggestion": "Muddatni {cap} kungacha qisqartiring yoki uzoqroq muddat nima uchun aniq kelishilgani va subpudratchiga nisbatan o'ta adolatsiz emasligini qayd eting."
     }
   },
   "cost_forecast": {

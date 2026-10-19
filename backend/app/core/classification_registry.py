@@ -103,6 +103,7 @@ CLASSIFICATION_STANDARD_LABELS: Mapping[str, str] = MappingProxyType(
         "gaeb": "GAEB",
         "tetelrend": "Tételrend",
         "nlsfb": "NL/SfB",
+        "knr": "KNR",
         # National codings a country pack writes on every line, which no
         # country maps to by default. Labelled so a line coded against them
         # can be named, like ONORM and GAEB above.
@@ -110,7 +111,6 @@ CLASSIFICATION_STANDARD_LABELS: Mapping[str, str] = MappingProxyType(
         "sfb_ccs": "SfB/CCS",
         "ns3451": "NS 3451",
         "bsab": "BSAB",
-        "knr": "KNR",
     }
 )
 
@@ -144,7 +144,15 @@ COUNTRY_TO_STANDARD: Mapping[str, str] = MappingProxyType(
         "BE": "din276",
         "NL": "nlsfb",
         "LU": "din276",
-        "PL": "din276",
+        # Poland. A Polish estimate is written against the KNR and KNNR norm
+        # catalogues: every priced line names its norm (for example
+        # "KNR 2-02 0201-01"), which the poland rule set reads under the
+        # ``knr`` key. Buildings are classed by PKOB and procurement by CPV,
+        # neither of which is a line coding. This read din276 until 2026-10,
+        # which was the Central European default rather than a statement about
+        # Poland. A catalogue item with no KNR code still renders its section
+        # path through DIN 276, the next standard in ``classification_order``.
+        "PL": "knr",
         "CZ": "din276",
         "SK": "din276",
         "RO": "din276",

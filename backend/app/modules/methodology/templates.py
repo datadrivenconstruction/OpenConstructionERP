@@ -62,9 +62,15 @@ adjust every percentage to their jurisdiction and date.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping, cast
 
-from app.modules.boq.markup_templates import REGION_BY_COUNTRY, region_lines_for_country
+from app.modules.boq.markup_templates import (
+    DEFAULT_MARKUP_TEMPLATES,
+    PL_KOSZTORYS_NARZUTY,
+    PL_KOSZTORYS_REVIEW_STATUS,
+    REGION_BY_COUNTRY,
+    region_lines_for_country,
+)
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from app.modules.methodology.cascade import CascadeSpec
@@ -162,6 +168,20 @@ def _flat_steps(*, overhead: str, profit: str, vat: str) -> list[dict[str, Any]]
             "base": ["direct", "overhead", "profit"],
         },
     ]
+
+
+def _region_rate(region: str, category: str) -> str:
+    """The rate of the one line of ``category`` in a regional bill stack, as a string.
+
+    Lets a template literal name the regional table's figure instead of
+    restating it, so the literal cannot hold a second number for the same
+    line. Raises when the region has no such line or more than one, because
+    then the question has no single answer.
+    """
+    rates = [str(ln["percentage"]) for ln in DEFAULT_MARKUP_TEMPLATES[region] if ln.get("category") == category]
+    if len(rates) != 1:
+        raise TemplateError(f"region {region!r} has {len(rates)} {category!r} lines, expected one")
+    return rates[0].removesuffix(".0")
 
 
 # A neutral two-level work breakdown used by the flat templates: a section
@@ -877,8 +897,17 @@ _COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         "column_preset": None,
         "base_mapping": _FLAT_BASE_MAPPING,
         "composites": _FLAT_COMPOSITES,
-        "cascade_steps": _flat_steps(overhead="12", profit="8", vat="23"),
-        "vat_rate": "23",
+        # The steps are rewritten from the PL bill stack at import (see
+        # _reconcile_with_region_table); the rates are read from it here too so
+        # this literal never shows a figure the bill does not use. The Polish
+        # detailed method with Kz, Kp and Z on their own bases is the
+        # ``poland_kosztorys`` template.
+        "cascade_steps": _flat_steps(
+            overhead=_region_rate("PL", "overhead"),
+            profit=_region_rate("PL", "profit"),
+            vat=_region_rate("PL", "tax"),
+        ),
+        "vat_rate": _region_rate("PL", "tax"),
     },
     {
         "slug": "austria",
@@ -1856,6 +1885,76 @@ _BRAZIL_BDI_TEMPLATE: dict[str, Any] = {
     "vat_rate": "0",
 }
 
+# Polish kosztorys szczegolowy. The detailed unit-price method prices each
+# narzut on its own component base: Kz (koszty zakupu) on materials, Kp (koszty
+# posrednie) on labour and equipment, Z (zysk) on labour, equipment and Kp, then
+# VAT on everything. A bill markup line cannot name those bases, which is why
+# this is a template of its own rather than a derivation of the PL bill stack.
+# The narzuty come from ``PL_KOSZTORYS_NARZUTY`` and the VAT from the PL bill
+# stack's tax line, so no rate is written here.
+#
+# Subcontracted work (podwykonawstwo) is its own base. It carries VAT and no
+# narzut, because the norm method applies Kp and Z to the contractor's own
+# labour and plant; whether a firm adds a markup on subcontracts is its own
+# policy and is added as a step once installed.
+_PL_KOSZTORYS_BASE_MAPPING: dict[str, list[str]] = {
+    "R": ["labor"],
+    "M": ["material"],
+    "S": ["equipment", "machinery"],
+    "podwykonawstwo": ["subcontractor"],
+}
+
+
+def _pl_kosztorys_steps() -> list[dict[str, Any]]:
+    """Cascade steps of the Polish detailed method, built from the one PL narzuty block."""
+    steps: list[dict[str, Any]] = [
+        {
+            "key": str(narzut["key"]),
+            "label": str(narzut["name"]),
+            "category": str(narzut["category"]),
+            "kind": "percentage",
+            "rate": str(narzut["percentage"]).removesuffix(".0"),
+            "amount": "0",
+            "base": list(cast("tuple[str, ...]", narzut["base"])),
+        }
+        for narzut in PL_KOSZTORYS_NARZUTY
+    ]
+    steps.append(
+        {
+            "key": "vat",
+            "label": "Podatek VAT",
+            "category": "tax",
+            "kind": "percentage",
+            "rate": _region_rate("PL", "tax"),
+            "amount": "0",
+            "base": [*_PL_KOSZTORYS_BASE_MAPPING, *(step["key"] for step in steps)],
+        }
+    )
+    return steps
+
+
+_POLAND_KOSZTORYS_TEMPLATE: dict[str, Any] = {
+    "slug": "poland_kosztorys",
+    "name": "Poland (kosztorys szczegolowy)",
+    "description": (
+        "Polish detailed unit-price calculation: Kz on materials, Kp on labour and equipment, "
+        "Z on labour, equipment and Kp, then VAT. The narzuty are editable starting points "
+        "that need confirming against the current Sekocenbud quarter."
+    ),
+    "country_code": "PL",
+    "industry": None,
+    "currency": "PLN",
+    "decimals": 2,
+    "hierarchy_levels": _FLAT_HIERARCHY,
+    "dimensions": [_stage_dimension()],
+    "column_preset": None,
+    "base_mapping": _PL_KOSZTORYS_BASE_MAPPING,
+    "composites": {},
+    "cascade_steps": _pl_kosztorys_steps(),
+    "vat_rate": _region_rate("PL", "tax"),
+    "review_status": PL_KOSZTORYS_REVIEW_STATUS,
+}
+
 # Railway-infrastructure industry template. Country-neutral (currency blank,
 # VAT a placeholder step) but ships the full railway typed hierarchy plus the
 # CBS / section-type / stage dimensions and the SMR-vs-equipment cascade, so an
@@ -2310,6 +2409,7 @@ TEMPLATES: tuple[dict[str, Any], ...] = tuple(
         _CHILE_APU_TEMPLATE,
         _COLOMBIA_AIU_TEMPLATE,
         _BRAZIL_BDI_TEMPLATE,
+        _POLAND_KOSZTORYS_TEMPLATE,
         *_INDUSTRY_TEMPLATES,
     )
 )

@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Faktura {number} på kontrakt {contract}: mottakeren har ikke gyldig dokumentasjon pr. {on} ({certificate}), som {reference} krever før betalingen frigis.",
       "suggestion": "Registrer dokumentasjonen i mottakerens underentreprenørpost, eller hold tilbake betalingen til den er fremvist."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Faktura {number} inneholder byggearbeider eller andre varer under split payment og overstiger {threshold}, men har ikke merknaden «{annotation}».",
+      "suggestion": "Be leverandøren om en korrigert faktura med merknaden og betal den uansett via split payment: plikten til å betale slik avhenger ikke av merknaden."
+    },
+    "split_payment_not_used": {
+      "fail": "Faktura {number} omfattes av split payment, men en betaling av den ble registrert med en annen metode. Kjøperen blir i tillegg ansvarlig for {sanction}, 30 prosent av mva-en på den.",
+      "suggestion": "Betal slike fakturaer fra mva-kontoen via split payment, og registrer metoden på betalingen som split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Faktura {number} overstiger {threshold}, og det er ikke registrert om den inneholder varer eller tjenester fra vedlegget til split payment.",
+      "suggestion": "Registrer på fakturaen om den inneholder varer eller tjenester fra vedlegget (annex_15), eller kodene deres (pkwiu_codes), slik at betalingsmetoden kan kontrolleres."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Faktura {number} beregner {rate} prosent mva på hele prisen, men boligen har {area_m2} m2 bruksareal, og den reduserte satsen gjelder opptil {limit_m2} m2 ({reference}).",
+      "suggestion": "Beregn den reduserte satsen på {reduced_share_percent} prosent av prisen og normalsatsen på resten."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Faktura {number} beregner den reduserte boligsatsen på {rate} prosent, men prosjektet registrerer ikke hvilken bolig det gjelder eller bruksarealet ({reference}).",
+      "suggestion": "Registrer boligtype og bruksareal på prosjektet (vat_housing), slik at satsen og arealgrensen kan kontrolleres."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Faktura {number} beregner den reduserte boligsatsen på {rate} prosent på {object}, som ikke kvalifiserer for den ({reference}).",
+      "suggestion": "Beregn normalsatsen, eller rett boligen som er registrert på prosjektet."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Faktura {number} bruker omvendt avgiftsplikt på {count} linje(r), men den innenlandske omvendte avgiftsplikten for byggetjenester har opphørt i dette landet.",
+      "suggestion": "Med mindre leverandøren er etablert i utlandet, be om en faktura med mva; slike fakturaer betales via split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Kontrakt {contract} avtaler en betalingsfrist på {days} dager, lengre enn de {cap} dagene loven om forsinket betaling tillater mellom foretak.",
+      "suggestion": "Forkort fristen til {cap} dager, eller registrer hvorfor den lengre fristen er uttrykkelig avtalt og ikke grovt urimelig overfor underentreprenøren."
     }
   },
   "cost_forecast": {

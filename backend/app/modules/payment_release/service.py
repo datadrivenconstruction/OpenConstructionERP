@@ -43,6 +43,7 @@ from app.modules.payment_release.billing import (
 from app.modules.payment_release.models import InvoiceRelease, PaymentTerms, RetentionPosting
 from app.modules.payment_release.release_certificates import ENFORCEMENT_KEY, normalise_enforcement
 from app.modules.payment_release.repository import PaymentReleaseRepository
+from app.modules.payment_release.statutory_rules import STATUTORY_RULE_NUMBERS
 from app.modules.payment_release.validators import PAYLOAD_KEY, RULE_NUMBERS, RULE_SET
 
 logger = logging.getLogger(__name__)
@@ -574,6 +575,8 @@ class PaymentReleaseService:
                     {"rate": str(ln.vat_rate) if ln.vat_rate is not None else None, "category": ln.vat_category}
                     for ln in inv.lines
                 ],
+                "vat_facts": dict(inv.vat_facts),
+                "payment_methods": list(inv.payment_methods),
             }
 
         for c in billing.contracts:
@@ -623,6 +626,8 @@ class PaymentReleaseService:
                     "invoiced_series": str(series),
                     "current_value": str(c.current_value),
                     "retention_held": str(c.ledger.retention_held if c.ledger else ZERO),
+                    "interim_due_days": c.terms.interim_due_days,
+                    "final_due_days": c.terms.final_due_days,
                     "invoices": entries,
                     "postings": [
                         {
@@ -638,7 +643,14 @@ class PaymentReleaseService:
                 }
             )
         invoices.extend(invoice_facts(inv, None) for inv in billing.loose_invoices)
-        return {"currency": billing.currency, "contracts": contracts, "invoices": invoices}
+        return {
+            "currency": billing.currency,
+            "contracts": contracts,
+            "invoices": invoices,
+            "country": billing.country or "",
+            "works": billing.works or "",
+            "housing": dict(billing.housing),
+        }
 
     async def _attach_release_certificates(
         self, payload: dict[str, Any], project_id: uuid.UUID, billing: Billing
@@ -707,7 +719,7 @@ class PaymentReleaseService:
                 out.append(
                     {
                         "rule_id": r.rule_id,
-                        "rule_number": RULE_NUMBERS.get(r.rule_id, ""),
+                        "rule_number": RULE_NUMBERS.get(r.rule_id) or STATUTORY_RULE_NUMBERS.get(r.rule_id, ""),
                         "severity": r.severity.value,
                         "message": r.message,
                         "suggestion": r.suggestion or "",

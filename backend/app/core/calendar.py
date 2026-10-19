@@ -57,6 +57,9 @@ Sources:
 - EG: Ministerial Decree 294/2025 under Labour Law 14/2025 for the days. The
   per-year Thursday moves and announced lunar dates are rows in
   ``country_data/holiday_observances.json`` (see _holidays_eg).
+- PL: ustawa o dniach wolnych od pracy (1951), art. 1, with Christmas Eve from
+  2025; Kodeks pracy art. 130 § 2 for the day off a Saturday holiday owes (see
+  _holidays_pl and holidays_owing_a_day_off).
 """
 
 from __future__ import annotations
@@ -1163,6 +1166,112 @@ def _holidays_hu(year: int) -> set[date]:
     return holidays
 
 
+# Poland: Epiphany became a public holiday again from 2011 (the 2010 amendment
+# of the 1951 act), and Christmas Eve (Wigilia) became one from 2025 (the 2024
+# amendment). Each is returned from its first year, so a span that crosses the
+# change counts the days as they were.
+_PL_EPIPHANY_FIRST_YEAR = 2011
+_PL_WIGILIA_FIRST_YEAR = 2025
+
+
+def _holidays_pl(year: int) -> set[date]:
+    """Polish public holidays (ustawa z 18 stycznia 1951 r. o dniach wolnych od pracy, art. 1).
+
+    Fixed days: 1 January, 6 January (from 2011), 1 May, 3 May, 15 August,
+    1 November, 11 November, 24 December (from 2025), 25 and 26 December.
+    Movable days, all from Western Easter: Easter Sunday, Easter Monday,
+    Pentecost Sunday (Zielone Świątki, Easter + 49) and Corpus Christi (Boże
+    Ciało, Easter + 60). Easter Sunday and Pentecost Sunday are statutory days
+    and are kept in the set; they are Sundays, so they move no working day on a
+    Monday to Friday week.
+
+    A holiday on a Saturday or Sunday is not moved to another date. A Saturday
+    holiday does give each employee another day off, which the employer
+    chooses (Kodeks pracy art. 130 § 2); that day is not computable and is
+    therefore not in this set, see :func:`holidays_owing_a_day_off`.
+
+    The rest of the roster is the one in force today, applied whole to earlier
+    years, except Epiphany and Christmas Eve, which are returned only from the
+    year they were added. The earlier roster changes (before 2011) are not
+    modelled.
+
+    Sources (secondary texts quoting the act, read 2026-10-19; the statute
+    portal did not load):
+    https://www.infor.pl/prawo/nowosci-prawne/6794562,wigilia-2025-r-wolna-od-pracy-sklepy-otwarte-przez-trzy-niedziele-na-pracownika-dwie-niedziele-jak-dzis.html
+    https://forsal.pl/praca/aktualnosci/artykuly/11225415,dni-wolne-od-pracy-2026-i-2027-kalendarz-swiat-dlugie-weekendy-i-dn.html
+    The 2026 and 2027 rosters published there equal what this function returns.
+    """
+    e = easter(year)
+    holidays: set[date] = {
+        date(year, 1, 1),  # Nowy Rok
+        e,  # Wielkanoc
+        e + timedelta(days=1),  # Poniedziałek Wielkanocny
+        date(year, 5, 1),  # Święto Państwowe (Święto Pracy)
+        date(year, 5, 3),  # Święto Narodowe Trzeciego Maja
+        e + timedelta(days=49),  # Zielone Świątki
+        e + timedelta(days=60),  # Boże Ciało
+        date(year, 8, 15),  # Wniebowzięcie Najświętszej Maryi Panny
+        date(year, 11, 1),  # Wszystkich Świętych
+        date(year, 11, 11),  # Narodowe Święto Niepodległości
+        date(year, 12, 25),  # Boże Narodzenie, pierwszy dzień
+        date(year, 12, 26),  # Boże Narodzenie, drugi dzień
+    }
+    if year >= _PL_EPIPHANY_FIRST_YEAR:
+        holidays.add(date(year, 1, 6))  # Święto Trzech Króli
+    if year >= _PL_WIGILIA_FIRST_YEAR:
+        holidays.add(date(year, 12, 24))  # Wigilia Bożego Narodzenia
+    return holidays
+
+
+#: Countries whose labour law gives a day off in exchange for a public holiday
+#: that falls on a Saturday, and on what terms. A rule, not a date: the law
+#: obliges the employer to designate the day, so the engine can say which
+#: holidays owe one but never which day it is.
+_SATURDAY_HOLIDAY_COMPENSATION: dict[str, dict[str, str]] = {
+    "PL": {
+        "statute": "Kodeks pracy (ustawa z 26 czerwca 1974 r.), art. 130 § 2",
+        "rule": "employer_designates_day_in_settlement_period",
+        "detail": (
+            "Each public holiday falling on a day other than Sunday reduces working time by eight hours; "
+            "on a five-day Monday to Friday week that is a Saturday holiday, and the employer must give "
+            "another day off within the same settlement period. A Sunday holiday gives nothing."
+        ),
+        "source_url": (
+            "https://www.gazetaprawna.pl/praca/prawo-pracy/artykuly/11283996,jak-zyskac-az-28-dni-wolnego-"
+            "biorac-tylko-8-dni-urlopu-kalendarz-na-2027-rok-to-prawdziwy-hit.html"
+        ),
+        "read_date": "2026-10-19",
+    },
+}
+
+
+def saturday_holiday_compensation_rule(country_code: str) -> dict[str, str] | None:
+    """The Saturday-holiday compensation rule of a country, or ``None`` if it has none."""
+    rule = _SATURDAY_HOLIDAY_COMPENSATION.get((country_code or "").strip().upper())
+    return dict(rule) if rule else None
+
+
+def holidays_owing_a_day_off(country_code: str, year: int) -> list[date]:
+    """Public holidays of ``year`` that oblige the employer to give another day off.
+
+    In Poland a holiday on a Saturday reduces working time, and the employer
+    designates a replacement day off in the same settlement period (Kodeks
+    pracy art. 130 § 2). Which day that is belongs to the employer, so it is not
+    added to the holiday set: :func:`is_working_day` would otherwise remove a
+    day the law does not name, and a schedule would move for a choice nobody
+    has made. What the engine can say, and says here, is how many such days are
+    owed and for which holidays, so a planner can place them.
+
+    Returns:
+        The Saturday holidays in date order. Empty for a country without such a
+        rule, and for a year in which no holiday falls on a Saturday.
+    """
+    code = (country_code or "").strip().upper()
+    if code not in _SATURDAY_HOLIDAY_COMPENSATION:
+        return []
+    return sorted(d for d in _get_holidays(code, year) if d.weekday() == _SATURDAY_INDEX)
+
+
 def _holidays_es(year: int) -> set[date]:
     """Spain's national holidays that no autonomous community may replace.
 
@@ -1529,6 +1638,11 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     # Saturday into a working day is not expressible here (see _holidays_hu).
     # https://njt.jog.gov.hu/jogszabaly/2012-1-00-00
     "HU": frozenset({0, 1, 2, 3, 4}),
+    # Poland: Kodeks pracy art. 129 § 1, eight hours a day and an average of 40
+    # hours in an average five-day working week. The statute fixes five days,
+    # not which five; Monday to Friday is the common schedule and the one the
+    # shipped Polish calendar uses. A site that works Saturdays sets its own.
+    "PL": frozenset({0, 1, 2, 3, 4}),
     # Spain: Estatuto de los Trabajadores art. 34.1 caps the week at 40 hours
     # averaged over the year and art. 37.1 gives a rest of a day and a half,
     # as a general rule Saturday afternoon or Monday morning and the whole of
@@ -1566,6 +1680,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "BG": _holidays_bg,
     "TR": _holidays_tr,
     "HU": _holidays_hu,
+    "PL": _holidays_pl,
     "ES": _holidays_es,
     "IT": _holidays_it,
     "EG": _holidays_eg,

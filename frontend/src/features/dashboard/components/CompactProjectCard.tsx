@@ -68,6 +68,7 @@ const standardLabels: Record<string, string> = {
   kbim: 'KBIM',
   birimfiyat: 'Birim Fiyat',
   nlsfb: 'NL/SfB',
+  knr: 'KNR',
 };
 
 function getRegionAvatarClass(region?: string): string {

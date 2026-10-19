@@ -150,8 +150,9 @@ def test_reading_the_region_alone_is_what_planned_the_saudi_pack_on_the_wrong_we
         # a Warsaw project created under the Saudi, Indian or Chinese pack was
         # planned on the Gulf, the Indian or the Chinese week while the BOQ
         # router validated it as Polish.
-        ("PL_WARSAW", "SA", "DEFAULT"),
-        ("PL", "IN", "DEFAULT"),
+        ("PL_WARSAW", "SA", "POLAND"),
+        ("PL", "IN", "POLAND"),
+        ("NL_AMSTERDAM", "SA", "DEFAULT"),
         ("IT_MILAN", "CN", "ITALY"),
         ("TR_ISTANBUL", "SA", "TURKEY"),
         ("JP", "IN", "DEFAULT"),
@@ -241,13 +242,15 @@ def test_the_agreement_check_catches_a_region_that_gives_way_to_the_column() -> 
             return country_code
         return region
 
-    region, column = "PL_WARSAW", "SA"
-    assert _router_country(region, column) == "PL"
+    # A country with no calendar of its own, so the first version let the
+    # column's week answer. Poland was the example until it got its own week.
+    region, column = "NL_AMSTERDAM", "SA"
+    assert _router_country(region, column) == "NL"
     assert _calendar_contract(get_work_calendar(_first_version(region, column))) != _calendar_contract(
-        get_work_calendar("PL")
+        get_work_calendar("NL")
     )
     assert _calendar_contract(get_work_calendar(calendar_region_for(region, column))) == _calendar_contract(
-        get_work_calendar("PL")
+        get_work_calendar("NL")
     )
 
 
@@ -298,12 +301,12 @@ def test_the_schedule_service_hands_the_resolver_the_country_of_a_pack_project()
     berlin = _service(SimpleNamespace(id=pid, region="DE_BERLIN", country_code="DE"))
     assert asyncio.run(berlin.resolve_project_region(pid)) == "DE_BERLIN"
 
-    # Created under the Saudi pack with a Warsaw region and no country typed:
-    # the column says SA, the project is in Poland, and the badge echoes the
-    # region the user wrote.
-    warsaw = _service(SimpleNamespace(id=pid, region="PL_WARSAW", country_code="SA"))
-    region = asyncio.run(warsaw.resolve_project_region(pid))
-    assert region == "PL_WARSAW"
+    # Created under the Saudi pack with an Amsterdam region and no country
+    # typed: the column says SA, the project is in the Netherlands, and the
+    # badge echoes the region the user wrote.
+    amsterdam = _service(SimpleNamespace(id=pid, region="NL_AMSTERDAM", country_code="SA"))
+    region = asyncio.run(amsterdam.resolve_project_region(pid))
+    assert region == "NL_AMSTERDAM"
     assert get_work_calendar(region)["week_fallback"]
 
     gone = _service(None)

@@ -35,6 +35,8 @@ __all__ = [
     "REGION_BY_COUNTRY",
     "REGION_VARIANTS",
     "NON_SINGLE_TAX_REGIONS",
+    "PL_KOSZTORYS_NARZUTY",
+    "PL_KOSZTORYS_REVIEW_STATUS",
     "CONSTRUCTION_TIER_COUNTRIES",
     "CONSTRUCTION_TIER_TAX_CODE",
     "resolve_region_lines",
@@ -67,6 +69,64 @@ __all__ = [
 # note. ``tests/unit/test_boq_service_pure_helpers.py`` pins the intent of every
 # region, so a new template that compounds contingency onto profit fails until
 # its entry there is updated deliberately.
+
+# ── Poland: kosztorys szczegółowy narzuty ────────────────────────────────────
+#
+# The Polish detailed unit-price calculation (kalkulacja szczegółowa, the method
+# of a kosztorys ofertowy and of any price built from KNR norms) does not put
+# its markups on the direct cost as one sum. Each narzut has its own base, by
+# cost component: R (robocizna, labour), M (materiały, materials) and S (praca
+# sprzętu, equipment):
+#
+#   * Kz, koszty zakupu, on M only;
+#   * Kp, koszty pośrednie, on R + S, never on materials;
+#   * Z, zysk, on R + S + Kp;
+#   * then VAT on the whole.
+#
+# A bill markup line can only say ``direct_cost`` or ``cumulative``, so this
+# shape cannot be stated in the PL stack below; the methodology catalogue
+# states it in the ``poland_kosztorys`` template, built from this block. This
+# block is the one place the Polish narzuty live. Nothing else may restate the
+# rates.
+#
+# Sources for the method: Rozporządzenie Ministra Rozwoju i Technologii z dnia
+# 20 grudnia 2021 r. (Dz.U. 2021 poz. 2458) on the methods and bases of the
+# investor estimate, and the gov.pl guidance on it,
+# https://www.gov.pl/attachment/b4097c7f-4294-41e1-80cb-93398602f1fb (read via
+# the programme research, 2026-10-19).
+#
+# The RATES are not regulated and were not read from a source. They are the
+# middle of the ranges practitioners quote for the quarterly Sekocenbud averages
+# (Kp about 60 to 70 percent of R + S, Z about 10 to 12 percent of R + S + Kp,
+# Kz about 5 to 8 percent of M), which the research marks UNCONFIRMED. They
+# ship as editable starting points flagged for expert review, and every
+# installed methodology lets a user replace them with the current quarter's
+# published values.
+PL_KOSZTORYS_REVIEW_STATUS = "needs_expert_review"
+PL_KOSZTORYS_NARZUTY: tuple[dict[str, object], ...] = (
+    {
+        "key": "kz",
+        "name": "Koszty zakupu (Kz)",
+        "category": "overhead",
+        "percentage": "6.0",
+        "base": ("M",),
+    },
+    {
+        "key": "kp",
+        "name": "Koszty pośrednie (Kp)",
+        "category": "overhead",
+        "percentage": "65.0",
+        "base": ("R", "S"),
+    },
+    {
+        "key": "z",
+        "name": "Zysk (Z)",
+        "category": "profit",
+        "percentage": "11.0",
+        "base": ("R", "S", "kp"),
+    },
+)
+
 
 DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # ── Germany / Austria / Switzerland ─────────────────────────────────
@@ -907,7 +967,20 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # header. It is recorded that way because a Polish reserve for unforeseen
     # works is taken on the net contract value rather than on bare cost, and
     # ``CONTINGENCY_ON_PROFIT_BY_DESIGN`` in the pure-helpers test carries the
-    # same statement so the shape cannot drift back without a decision.
+    # same statement so the shape cannot drift back without a decision. The
+    # reserve belongs to the investor estimate (kosztorys inwestorski), where a
+    # client budgets for unforeseen works; a contractor pricing a tender removes
+    # it. No regulation fixing its rate was read.
+    #
+    # This is the BILL-LEVEL approximation, and it is not the Polish method.
+    # Kp here sits on the whole direct cost because a bill line has no other
+    # base it can name; the real Kp sits on labour and equipment only, Z on
+    # those plus Kp, and Kz on materials, which is what the ``poland_kosztorys``
+    # methodology computes from ``PL_KOSZTORYS_NARZUTY`` above. On a bill the
+    # 18 percent therefore stands for Kz and Kp together expressed as a share
+    # of all direct cost, and it is a starting point to edit, not a converted
+    # figure: the share depends on how much of the cost is materials. Use the
+    # methodology where the estimate has its R, M and S split.
     "PL": [
         {
             "name": "Koszty pośrednie (Kp)",

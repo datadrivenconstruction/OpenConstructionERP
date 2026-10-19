@@ -1874,6 +1874,110 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
         ),
     },
     {
+        "code": "pl_late_payment_b2b",
+        "jurisdiction": "Poland",
+        "country_code": "PL",
+        "statute": (
+            "Ustawa z dnia 8 marca 2013 r. o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach handlowych"
+        ),
+        "statute_reference": (
+            "Articles 4, 7 and 10, consolidated text Dz.U. 2022 poz. 893, https://eli.gov.pl/eli/DU/2022/893/ogl/pol/pdf"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "reference_rate_plus_margin",
+        "interest_reference_rate": (
+            "Narodowy Bank Polski reference rate in force on 1 January for the first half-year and on 1 July "
+            "for the second"
+        ),
+        "interest_margin_percent": Decimal("10.000"),
+        "interest_fixed_percent": None,
+        "interest_statute": (
+            "Article 4 pkt 3 lit. a; the resulting rate is published in Monitor Polski each half-year "
+            "(13.75 percent for July to December 2026)"
+        ),
+        "notes": (
+            "An interest basis rather than a notice regime, the same shape as the EU Late Payment "
+            "Directive this act transposes: no payment or pay-less notice, so no_notice_effect is none. "
+            "It covers transactions between undertakings, including a main contractor and its "
+            "subcontractors and suppliers. Where the contract sets no term, statutory interest runs "
+            "after thirty days from delivery of the invoice, written here as the final date for "
+            "payment, so enter the date the invoice was delivered as the application date. The parties "
+            "may agree a term of up to sixty days from delivery of the invoice (Article 7(2)); longer "
+            "only if expressly agreed and not grossly unfair to the creditor, and never where the debtor "
+            "is a large enterprise and the creditor a micro, small or medium enterprise (Article 7(2a), "
+            "since 2020). State the agreed final date on the application where a contract sets one. "
+            "Late interest is the NBP reference rate plus ten percentage points, the reference rate "
+            "fixed on the first day of each half-year (14.00 percent for January to June 2026, 13.75 "
+            "percent for July to December 2026); the dated periods and the late interest arithmetic are "
+            "in app/core/late_payment.py. On top of interest the creditor is owed a fixed recovery "
+            "compensation of 40 euro (claim not above PLN 5,000), 70 euro (above PLN 5,000 and below "
+            "PLN 50,000) or 100 euro (PLN 50,000 or more), converted at the NBP average euro rate of the "
+            "last business day of the month before the payment fell due (Article 10). Confidence: the "
+            "60 day cap and the rate formula and values come from two secondary sources quoting the act "
+            "(high); the no-exception rule for a large enterprise paying an SME and the recovery "
+            "compensation tiers are settled practitioner knowledge consistent with one secondary source "
+            "(medium). The consolidated text named in the reference was not read article by article. "
+            "Pending review by a Polish lawyer."
+        ),
+    },
+    {
+        "code": "pl_late_payment_public",
+        "jurisdiction": "Poland (public)",
+        "country_code": "PL",
+        "statute": (
+            "Ustawa z dnia 8 marca 2013 r. o przeciwdziałaniu nadmiernym opóźnieniom w transakcjach handlowych"
+        ),
+        "statute_reference": (
+            "Articles 4, 8 and 10, consolidated text Dz.U. 2022 poz. 893, https://eli.gov.pl/eli/DU/2022/893/ogl/pol/pdf"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "reference_rate_plus_margin",
+        "interest_reference_rate": (
+            "Narodowy Bank Polski reference rate in force on 1 January for the first half-year and on 1 July "
+            "for the second"
+        ),
+        "interest_margin_percent": Decimal("10.000"),
+        "interest_fixed_percent": None,
+        "interest_statute": "Article 4 pkt 3 lit. a; for a public medical entity Article 4 pkt 3 lit. b",
+        "notes": (
+            "The payment term where the debtor is a public entity (podmiot publiczny), for example a "
+            "contracting authority paying a works contractor. The term may not exceed thirty days from "
+            "delivery of the invoice (Article 8(1)), written here as the final date for payment, so enter "
+            "the date the invoice was delivered as the application date. For a public entity providing "
+            "medical services the ceiling is sixty days (Article 8(2)) and its late interest is the NBP "
+            "reference rate plus eight percentage points instead of ten (12.00 percent for January to "
+            "June 2026, 11.75 percent for July to December 2026); state the agreed final date on the "
+            "application for such a debtor. The recovery compensation of Article 10 (40, 70 or 100 euro) "
+            "applies as for undertakings. Public procurement payment rules of the Pzp, such as payment "
+            "of interim amounts only on proof of payment to subcontractors, are not modelled by this "
+            "row. Confidence: the thirty and sixty day ceilings and the eight point margin for medical "
+            "entities are settled practitioner knowledge consistent with secondary sources (medium); "
+            "the 2026 rate values are high. Pending review by a Polish lawyer."
+        ),
+    },
+    {
         "code": "ng_ppa_2007",
         "jurisdiction": "Nigeria (public)",
         "country_code": "NG",

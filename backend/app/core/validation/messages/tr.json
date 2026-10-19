@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "{contract} sözleşmesindeki {number} numaralı fatura: ödeme alıcısında {on} tarihinde geçerli bir {certificate} bulunmuyor; {reference} ödeme serbest bırakılmadan önce bunu şart koşuyor.",
       "suggestion": "Belgeyi alıcının alt yüklenici kaydına işleyin veya belge ibraz edilene kadar ödemeyi bekletin."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "{number} numaralı fatura inşaat işleri veya split payment kapsamındaki diğer malları içeriyor ve {threshold} tutarını aşıyor, ancak «{annotation}» ibaresini taşımıyor.",
+      "suggestion": "Tedarikçiden ibareli düzeltilmiş fatura isteyin ve her durumda split payment ile ödeyin: bu şekilde ödeme yükümlülüğü ibareye bağlı değildir."
+    },
+    "split_payment_not_used": {
+      "fail": "{number} numaralı fatura split payment kapsamında, ancak ödemesi başka bir yöntemle kaydedilmiş. Alıcı ayrıca {sanction} tutarından sorumlu olur, bu KDV'sinin yüzde 30'udur.",
+      "suggestion": "Bu tür faturaları KDV hesabından split payment ile ödeyin ve ödemede yöntemi split_payment olarak kaydedin."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "{number} numaralı fatura {threshold} tutarını aşıyor ve split payment ekindeki mal veya hizmetleri içerip içermediği kayıtlı değil.",
+      "suggestion": "Faturanın ekteki mal veya hizmetleri (annex_15) ya da kodlarını (pkwiu_codes) içerip içermediğini kaydedin, böylece ödeme yöntemi kontrol edilebilsin."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "{number} numaralı fatura fiyatın tamamına yüzde {rate} KDV uyguluyor, ancak konutun kullanım alanı {area_m2} m2 ve indirimli oran {limit_m2} m2'ye kadar geçerli ({reference}).",
+      "suggestion": "İndirimli oranı fiyatın yüzde {reduced_share_percent} kısmına, genel oranı kalanına uygulayın."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "{number} numaralı fatura yüzde {rate} indirimli konut oranını uyguluyor, ancak projede hangi konut için olduğu ve kullanım alanı kayıtlı değil ({reference}).",
+      "suggestion": "Oran ve alan sınırı kontrol edilebilsin diye projede konut türünü ve kullanım alanını kaydedin (vat_housing)."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "{number} numaralı fatura yüzde {rate} indirimli konut oranını {object} için uyguluyor, ancak bu oran için uygun değil ({reference}).",
+      "suggestion": "Genel oranı uygulayın veya projede kayıtlı konutu düzeltin."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "{number} numaralı fatura {count} satıra sorumlu sıfatıyla (reverse charge) uyguluyor, ancak inşaat hizmetlerinde yurt içi reverse charge bu ülkede sona erdi.",
+      "suggestion": "Tedarikçi yurt dışında yerleşik değilse KDV'li fatura isteyin; bu tür faturalar split payment ile ödenir."
+    },
+    "payment_term_over_cap": {
+      "fail": "{contract} sözleşmesi {days} günlük ödeme süresi öngörüyor; bu, geç ödeme yasasının işletmeler arasında izin verdiği {cap} günden uzun.",
+      "suggestion": "Süreyi {cap} güne düşürün veya daha uzun sürenin neden açıkça kararlaştırıldığını ve alt yükleniciye karşı ağır biçimde haksız olmadığını kaydedin."
     }
   },
   "cost_forecast": {

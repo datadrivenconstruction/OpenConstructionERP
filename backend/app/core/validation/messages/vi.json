@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Hóa đơn {number} theo hợp đồng {contract}: bên nhận thanh toán không có {certificate} còn hiệu lực vào ngày {on}, mà {reference} yêu cầu trước khi giải ngân khoản thanh toán.",
       "suggestion": "Ghi nhận giấy này vào hồ sơ nhà thầu phụ của bên nhận, hoặc giữ lại khoản thanh toán cho đến khi giấy được xuất trình."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Hóa đơn {number} có công tác xây dựng hoặc hàng hóa khác thuộc split payment và vượt {threshold}, nhưng không có ghi chú «{annotation}».",
+      "suggestion": "Yêu cầu nhà cung cấp xuất hóa đơn đã sửa có ghi chú và trong mọi trường hợp vẫn thanh toán bằng split payment: nghĩa vụ thanh toán theo cách này không phụ thuộc vào ghi chú."
+    },
+    "split_payment_not_used": {
+      "fail": "Hóa đơn {number} thuộc diện split payment, nhưng khoản thanh toán của nó được ghi bằng phương thức khác. Bên mua phải chịu thêm {sanction}, bằng 30 phần trăm VAT của hóa đơn.",
+      "suggestion": "Hãy thanh toán các hóa đơn như vậy từ tài khoản VAT bằng split payment và ghi phương thức trên khoản thanh toán là split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Hóa đơn {number} vượt {threshold}, và chưa ghi nhận liệu có hàng hóa hay dịch vụ thuộc phụ lục split payment hay không.",
+      "suggestion": "Hãy ghi trên hóa đơn liệu có hàng hóa hay dịch vụ thuộc phụ lục (annex_15) hoặc mã của chúng (pkwiu_codes) để có thể kiểm tra phương thức thanh toán."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Hóa đơn {number} tính VAT {rate} phần trăm trên toàn bộ giá, nhưng căn hộ có diện tích sử dụng {area_m2} m2 và thuế suất ưu đãi chỉ áp dụng đến {limit_m2} m2 ({reference}).",
+      "suggestion": "Hãy tính thuế suất ưu đãi trên {reduced_share_percent} phần trăm giá và thuế suất thông thường trên phần còn lại."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Hóa đơn {number} tính thuế suất nhà ở ưu đãi {rate} phần trăm, nhưng dự án không ghi nhận căn nhà nào và diện tích sử dụng của nó ({reference}).",
+      "suggestion": "Hãy ghi loại nhà ở và diện tích sử dụng trên dự án (vat_housing) để có thể kiểm tra thuế suất và giới hạn diện tích."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Hóa đơn {number} tính thuế suất nhà ở ưu đãi {rate} phần trăm cho {object}, không đủ điều kiện áp dụng ({reference}).",
+      "suggestion": "Hãy tính thuế suất thông thường, hoặc sửa căn nhà đã ghi trên dự án."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Hóa đơn {number} áp dụng reverse charge cho {count} dòng, nhưng reverse charge trong nước đối với dịch vụ xây dựng đã chấm dứt ở quốc gia này.",
+      "suggestion": "Trừ khi nhà cung cấp đặt trụ sở ở nước ngoài, hãy yêu cầu hóa đơn có VAT; các hóa đơn này được thanh toán bằng split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Hợp đồng {contract} thỏa thuận thời hạn thanh toán {days} ngày, dài hơn {cap} ngày mà luật chậm thanh toán cho phép giữa các doanh nghiệp.",
+      "suggestion": "Hãy rút ngắn thời hạn còn {cap} ngày, hoặc ghi lại lý do thời hạn dài hơn được thỏa thuận rõ ràng và không bất công nghiêm trọng đối với nhà thầu phụ."
     }
   },
   "cost_forecast": {

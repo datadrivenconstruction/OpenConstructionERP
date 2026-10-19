@@ -100,7 +100,6 @@ PICKER_REGIONS_THAT_ARE_MONDAY_TO_FRIDAY: dict[str, str] = {
         "and eight hours, so routing there changes no computed date and only makes a Stockholm "
         "project render a badge reading 'Germany/DACH'."
     ),
-    "Poland": "Saturday-Sunday weekend.",
     "SouthAfrica": "Saturday-Sunday weekend.",
     "UA": "Existing i18n_foundation work_calendars.json UA seed declares ISO weekdays 1-5; holidays are separate.",
 }

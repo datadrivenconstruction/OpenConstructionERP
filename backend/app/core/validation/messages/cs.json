@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Faktura {number} ke smlouvě {contract}: příjemce k {on} nemá platný doklad ({certificate}), který {reference} vyžaduje před uvolněním platby.",
       "suggestion": "Zaznamenejte doklad u záznamu subdodavatele příjemce, nebo platbu zadržte, dokud nebude předložen."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Faktura {number} obsahuje stavební práce nebo jiné zboží podléhající split payment a překračuje {threshold}, ale nemá poznámku «{annotation}».",
+      "suggestion": "Požádejte dodavatele o opravenou fakturu s poznámkou a v každém případě ji zaplaťte přes split payment: povinnost platit tímto způsobem na poznámce nezávisí."
+    },
+    "split_payment_not_used": {
+      "fail": "Faktura {number} podléhá split payment, ale její úhrada byla zaznamenána jiným způsobem. Odběratel navíc ručí za {sanction}, 30 procent její DPH.",
+      "suggestion": "Takové faktury hraďte z účtu DPH přes split payment a způsob zaznamenejte u platby jako split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Faktura {number} překračuje {threshold} a není zaznamenáno, zda obsahuje zboží nebo služby z přílohy split payment.",
+      "suggestion": "Zaznamenejte na faktuře, zda obsahuje zboží nebo služby z přílohy (annex_15), nebo jejich kódy (pkwiu_codes), aby šlo ověřit způsob platby."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Faktura {number} účtuje {rate} procent DPH z celé ceny, ale byt má {area_m2} m2 užitné plochy a snížená sazba platí do {limit_m2} m2 ({reference}).",
+      "suggestion": "Účtujte sníženou sazbu z {reduced_share_percent} procent ceny a základní sazbu ze zbytku."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Faktura {number} účtuje sníženou sazbu pro bydlení {rate} procent, ale projekt nezaznamenává, o jaký byt jde ani jeho užitnou plochu ({reference}).",
+      "suggestion": "Zaznamenejte u projektu druh bytu a užitnou plochu (vat_housing), aby šlo ověřit sazbu a její limit plochy."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Faktura {number} účtuje sníženou sazbu pro bydlení {rate} procent u {object}, což na ni nemá nárok ({reference}).",
+      "suggestion": "Účtujte základní sazbu, nebo opravte byt zaznamenaný u projektu."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Faktura {number} uplatňuje přenesenou daňovou povinnost na {count} položek, ale tuzemské přenesení daňové povinnosti u stavebních prací v této zemi skončilo.",
+      "suggestion": "Pokud dodavatel nemá sídlo v zahraničí, požádejte o fakturu s DPH; takové faktury se platí přes split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Smlouva {contract} sjednává splatnost {days} dní, delší než {cap} dní, které zákon o pozdních platbách mezi podnikateli dovoluje.",
+      "suggestion": "Zkraťte splatnost na {cap} dní, nebo zaznamenejte, proč byla delší lhůta výslovně sjednána a není vůči subdodavateli hrubě nespravedlivá."
     }
   },
   "cost_forecast": {

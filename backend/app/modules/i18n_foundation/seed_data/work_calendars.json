@@ -258,6 +258,7 @@
       {"date": "2026-08-15", "name": {"en": "Assumption of Mary", "pl": "Wniebowzięcie NMP"}, "type": "public_holiday"},
       {"date": "2026-11-01", "name": {"en": "All Saints' Day", "pl": "Wszystkich Świętych"}, "type": "public_holiday"},
       {"date": "2026-11-11", "name": {"en": "Independence Day", "pl": "Narodowe Święto Niepodległości"}, "type": "public_holiday"},
+      {"date": "2026-12-24", "name": {"en": "Christmas Eve", "pl": "Wigilia Bożego Narodzenia"}, "type": "public_holiday"},
       {"date": "2026-12-25", "name": {"en": "Christmas Day", "pl": "Boże Narodzenie"}, "type": "public_holiday"},
       {"date": "2026-12-26", "name": {"en": "Second Day of Christmas", "pl": "Drugi dzień Bożego Narodzenia"}, "type": "public_holiday"}
     ]

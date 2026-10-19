@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Lasku {number} sopimuksessa {contract}: maksun saajalla ei ole päivälle {on} voimassa olevaa asiakirjaa ({certificate}), jota {reference} edellyttää ennen maksun vapauttamista.",
       "suggestion": "Kirjaa asiakirja maksun saajan aliurakoitsijatietoihin tai pidätä maksu, kunnes se esitetään."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Lasku {number} sisältää rakennustöitä tai muita split payment -tavaroita ja ylittää rajan {threshold}, mutta siinä ei ole merkintää «{annotation}».",
+      "suggestion": "Pyydä toimittajalta korjattu lasku merkinnällä ja maksa se joka tapauksessa split paymentilla: maksuvelvollisuus ei riipu merkinnästä."
+    },
+    "split_payment_not_used": {
+      "fail": "Lasku {number} kuuluu split paymentin piiriin, mutta sen maksu kirjattiin toisella tavalla. Ostaja vastaa lisäksi seuraamuksesta {sanction}, 30 prosentista laskun alv:stä.",
+      "suggestion": "Maksa tällaiset laskut alv-tililtä split paymentilla ja kirjaa maksuun tavaksi split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Lasku {number} ylittää rajan {threshold}, eikä ole kirjattu, sisältääkö se split paymentin liitteen mukaisia tavaroita tai palveluja.",
+      "suggestion": "Kirjaa laskulle, sisältääkö se liitteen tavaroita tai palveluja (annex_15) tai niiden koodit (pkwiu_codes), jotta maksutapa voidaan tarkistaa."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Lasku {number} veloittaa {rate} prosentin alv:n koko hinnasta, mutta asunnon käyttöala on {area_m2} m2 ja alennettu kanta pätee {limit_m2} m2:iin asti ({reference}).",
+      "suggestion": "Veloita alennettu kanta {reduced_share_percent} prosentista hintaa ja normaalikanta loppuosasta."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Lasku {number} veloittaa alennetun asuntokannan {rate} prosenttia, mutta hankkeessa ei ole kirjattu, mitä asuntoa se koskee, eikä sen käyttöalaa ({reference}).",
+      "suggestion": "Kirjaa hankkeelle asuntotyyppi ja käyttöala (vat_housing), jotta kanta ja sen alarajoitus voidaan tarkistaa."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Lasku {number} veloittaa alennetun asuntokannan {rate} prosenttia kohteesta {object}, joka ei siihen oikeuta ({reference}).",
+      "suggestion": "Veloita normaalikanta tai korjaa hankkeelle kirjattu asunto."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Lasku {number} soveltaa käännettyä verovelvollisuutta {count} riviin, mutta kotimainen käännetty verovelvollisuus rakennuspalveluissa on päättynyt tässä maassa.",
+      "suggestion": "Ellei toimittaja ole sijoittautunut ulkomaille, pyydä lasku alv:n kanssa; tällaiset laskut maksetaan split paymentilla."
+    },
+    "payment_term_over_cap": {
+      "fail": "Sopimus {contract} sopii maksuajaksi {days} päivää, mikä on pidempi kuin viivästyskorkolain yritysten välillä sallimat {cap} päivää.",
+      "suggestion": "Lyhennä aika {cap} päivään tai kirjaa, miksi pidempi aika on nimenomaisesti sovittu eikä ole kohtuuttoman epäedullinen aliurakoitsijalle."
     }
   },
   "cost_forecast": {

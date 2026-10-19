@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "Faktur {number} pada kontrak {contract}: penerima pembayaran tidak memiliki {certificate} yang berlaku pada {on}, yang disyaratkan {reference} sebelum pembayaran dicairkan.",
       "suggestion": "Catat sertifikat pada data subkontraktor penerima pembayaran, atau tahan pembayaran sampai sertifikat ditunjukkan."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Faktur {number} memuat pekerjaan konstruksi atau barang lain di bawah split payment dan melebihi {threshold}, tetapi tidak mencantumkan keterangan «{annotation}».",
+      "suggestion": "Minta pemasok menerbitkan faktur yang diperbaiki dengan keterangan itu, dan tetap bayar dengan split payment: kewajiban membayar dengan cara itu tidak bergantung pada keterangan."
+    },
+    "split_payment_not_used": {
+      "fail": "Faktur {number} termasuk split payment, tetapi pembayarannya dicatat dengan metode lain. Pembeli menanggung tambahan {sanction}, 30 persen dari PPN-nya.",
+      "suggestion": "Bayar faktur seperti itu dari rekening PPN dengan split payment, dan catat metode pada pembayaran sebagai split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Faktur {number} melebihi {threshold}, dan belum dicatat apakah memuat barang atau jasa dari lampiran split payment.",
+      "suggestion": "Catat pada faktur apakah memuat barang atau jasa dari lampiran (annex_15), atau kodenya (pkwiu_codes), agar metode pembayaran dapat diperiksa."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Faktur {number} mengenakan PPN {rate} persen pada seluruh harga, tetapi hunian itu memiliki luas bersih {area_m2} m2 dan tarif rendah berlaku hingga {limit_m2} m2 ({reference}).",
+      "suggestion": "Kenakan tarif rendah pada {reduced_share_percent} persen dari harga dan tarif standar pada sisanya."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Faktur {number} mengenakan tarif hunian rendah {rate} persen, tetapi proyek tidak mencatat hunian mana yang dimaksud maupun luas bersihnya ({reference}).",
+      "suggestion": "Catat jenis hunian dan luas bersih pada proyek (vat_housing) agar tarif dan batas luasnya dapat diperiksa."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Faktur {number} mengenakan tarif hunian rendah {rate} persen pada {object}, yang tidak memenuhi syarat ({reference}).",
+      "suggestion": "Kenakan tarif standar, atau perbaiki hunian yang tercatat pada proyek."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Faktur {number} menerapkan reverse charge pada {count} baris, tetapi reverse charge domestik untuk jasa konstruksi sudah berakhir di negara ini.",
+      "suggestion": "Kecuali pemasok berdomisili di luar negeri, minta faktur dengan PPN; faktur seperti itu dibayar dengan split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Kontrak {contract} menyepakati jangka waktu pembayaran {days} hari, lebih lama dari {cap} hari yang diizinkan undang-undang keterlambatan pembayaran antarpelaku usaha.",
+      "suggestion": "Persingkat jangka waktu menjadi {cap} hari, atau catat mengapa jangka waktu yang lebih lama disepakati secara tegas dan tidak sangat merugikan subkontraktor."
     }
   },
   "cost_forecast": {

@@ -1200,6 +1200,38 @@
     "certificate_missing": {
       "fail": "契約 {contract} の請求書 {number}: 受取人は {on} 時点で有効な{certificate}を保有しておらず、{reference} は支払の解除前にこれを要求しています。",
       "suggestion": "証明書を受取人の下請業者レコードに記録するか、提示されるまで支払を保留してください。"
+    },
+    "split_payment_annotation_missing": {
+      "fail": "請求書{number}には建設工事またはsplit payment対象のその他の物品が含まれ、{threshold}を超えていますが、注記「{annotation}」がありません。",
+      "suggestion": "サプライヤーに注記付きの修正請求書を依頼し、いずれにしてもsplit paymentで支払ってください。この方法での支払義務は注記に左右されません。"
+    },
+    "split_payment_not_used": {
+      "fail": "請求書{number}はsplit payment対象ですが、その支払が別の方法で記録されています。買主は追加で{sanction}、つまりそのVATの30パーセントの責任を負います。",
+      "suggestion": "このような請求書はVAT口座からsplit paymentで支払い、支払の方法をsplit_paymentとして記録してください。"
+    },
+    "split_payment_annex_unknown": {
+      "fail": "請求書{number}は{threshold}を超えており、split payment付属書の物品またはサービスが含まれるか記録されていません。",
+      "suggestion": "支払方法を確認できるよう、請求書に付属書の物品またはサービス(annex_15)、またはそのコード(pkwiu_codes)が含まれるかを記録してください。"
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "請求書{number}は価格全体にVAT {rate}パーセントを課していますが、住戸の使用可能面積は{area_m2} m2で、軽減税率は{limit_m2} m2まで適用されます({reference})。",
+      "suggestion": "軽減税率は価格の{reduced_share_percent}パーセントに、標準税率は残りに適用してください。"
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "請求書{number}は住宅の軽減税率{rate}パーセントを課していますが、プロジェクトにはどの住戸か、またその使用可能面積が記録されていません({reference})。",
+      "suggestion": "税率と面積上限を確認できるよう、プロジェクトに住戸の種別と使用可能面積を記録してください(vat_housing)。"
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "請求書{number}は{object}に住宅の軽減税率{rate}パーセントを課していますが、これは対象外です({reference})。",
+      "suggestion": "標準税率を適用するか、プロジェクトに記録された住戸を修正してください。"
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "請求書{number}は{count}行にリバースチャージを適用していますが、建設サービスの国内リバースチャージはこの国では終了しています。",
+      "suggestion": "サプライヤーが国外に所在する場合を除き、VAT付きの請求書を依頼してください。そのような請求書はsplit paymentで支払います。"
+    },
+    "payment_term_over_cap": {
+      "fail": "契約{contract}は支払期限を{days}日と定めており、支払遅延法が事業者間で認める{cap}日より長くなっています。",
+      "suggestion": "期限を{cap}日に短縮するか、より長い期限が明示的に合意され、下請業者にとって著しく不公正ではない理由を記録してください。"
     }
   },
   "cost_forecast": {

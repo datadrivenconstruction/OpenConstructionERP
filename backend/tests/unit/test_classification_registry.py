@@ -108,8 +108,13 @@ def test_a_shipped_catalogue_region_answers_as_its_own_country(catalogue) -> Non
 
 
 def test_the_reported_defect_stays_fixed() -> None:
-    """The exact pair from the bug report, named so it cannot be lost."""
-    assert _head("PL") == _head("PL_WARSAW") == "din276"
+    """The exact pair from the bug report, named so it cannot be lost.
+
+    The defect was that the two spellings disagreed. What they agree on moved
+    from DIN 276 to KNR when Poland got its own line coding; the agreement is
+    the point.
+    """
+    assert _head("PL") == _head("PL_WARSAW") == "knr"
 
 
 # ── Agreement and disjointness between the sources ───────────────────────
