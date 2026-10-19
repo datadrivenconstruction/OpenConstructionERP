@@ -520,6 +520,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "حصر كميات DWG",
     "modules.catalog.eac": "محرك EAC v2",
     "modules.catalog.einvoice": "الفاتورة الإلكترونية",
+    "modules.catalog.einvoice_ksef": "الفوترة الإلكترونية KSeF (بولندا)",
     "modules.catalog.einvoice_clearance": "تخليص الفاتورة الإلكترونية",
     "modules.catalog.enterprise_workflows": "سير عمل المؤسسات",
     "modules.catalog.equipment": "إدارة المعدات والأسطول",

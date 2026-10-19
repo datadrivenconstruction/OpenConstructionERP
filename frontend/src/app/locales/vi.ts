@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "Bóc tách DWG",
     "modules.catalog.eac": "Bộ máy EAC v2",
     "modules.catalog.einvoice": "Hóa đơn điện tử",
+    "modules.catalog.einvoice_ksef": "Hóa đơn điện tử KSeF (Ba Lan)",
     "modules.catalog.einvoice_clearance": "Xác thực hóa đơn điện tử",
     "modules.catalog.enterprise_workflows": "Quy trình doanh nghiệp",
     "modules.catalog.equipment": "Quản lý thiết bị & đội xe",

@@ -514,6 +514,7 @@ const resource = {
     "modules.catalog.dwg_takeoff": "DWG-opmåling",
     "modules.catalog.eac": "EAC v2-motor",
     "modules.catalog.einvoice": "E-faktura",
+    "modules.catalog.einvoice_ksef": "KSeF e-fakturering (Polen)",
     "modules.catalog.einvoice_clearance": "E-fakturavalidering",
     "modules.catalog.enterprise_workflows": "Enterprise-workflows",
     "modules.catalog.equipment": "Udstyrs- & flådestyring",
