@@ -2412,7 +2412,7 @@ def create_app() -> FastAPI:
         allow_origins=cors_origins,
         allow_credentials=True,
         allow_methods=["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization", "Accept", "Accept-Language"],
+        allow_headers=["Content-Type", "Authorization", "Accept", "Accept-Language", "X-Digit-System"],
         # A list route that pages returns the number of matches behind the page
         # in X-Total-Count, and a BCF export returns how many topics went into
         # the archive in X-BCF-Topic-Count. A browser hides every response

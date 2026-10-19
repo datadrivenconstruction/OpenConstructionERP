@@ -587,8 +587,20 @@ _BUNDLED_COMPLEX: dict[str, str] = {
 #: 159 KB, SIL Open Font License 1.1.
 ARABIC_FONT = "NotoNaskhArabic"
 
+#: The bold weight of the same release (2.021, unhinted, 158 KB, same licence).
+#: Without it bold markup on text that only this face can draw printed in the
+#: regular weight, so an Urdu heading or total looked like body text.
+ARABIC_BOLD_FONT = "NotoNaskhArabic-Bold"
+
 _BUNDLED_RTL: dict[str, str] = {
     ARABIC_FONT: "noto/NotoNaskhArabic-Regular.ttf",
+}
+
+#: Bold weights bundled for a complex face, by the face they embolden. A face
+#: listed here registers its bold as the bold member of its family; a face that
+#: is not keeps mapping bold onto itself.
+_BUNDLED_BOLD: dict[str, tuple[str, str]] = {
+    ARABIC_FONT: (ARABIC_BOLD_FONT, "noto/NotoNaskhArabic-Bold.ttf"),
 }
 
 #: Every bundled face :func:`register_complex_font` can register.
@@ -603,6 +615,8 @@ _SHAPED_FACES = frozenset(_BUNDLED_COMPLEX)
 
 _complex_lock = Lock()
 _complex_registered: dict[str, bool] = {}
+#: Complex face -> its registered bold weight, filled by :func:`_register_bold`.
+_complex_bold: dict[str, str] = {}
 
 
 def register_complex_font(face: str) -> bool:
@@ -633,13 +647,14 @@ def register_complex_font(face: str) -> bool:
             if not path.is_file():
                 raise FileNotFoundError(f"bundled face missing: {path}")
             pdfmetrics.registerFont(TTFont(face, str(path)))
-            # One weight is bundled, so bold markup resolves to the same face.
-            # Mapping bold onto a Latin bold would print the run as boxes, which
-            # is the trade the Chinese pack makes here too.
-            pdfmetrics.registerFontFamily(face, normal=face, bold=face, italic=face, boldItalic=face)
+            # Bold resolves to the bundled bold weight when there is one, and to
+            # the same face otherwise. Mapping bold onto a Latin bold would print
+            # the run as boxes, which is the trade the Chinese pack makes here too.
+            bold = _register_bold(face)
+            pdfmetrics.registerFontFamily(face, normal=face, bold=bold, italic=face, boldItalic=bold)
             for bold_flag in (0, 1):
                 for italic_flag in (0, 1):
-                    addMapping(face, bold_flag, italic_flag, face)
+                    addMapping(face, bold_flag, italic_flag, bold if bold_flag else face)
             _complex_registered[face] = True
             logger.debug("PDF fonts: registered bundled face %s", face)
         except Exception as exc:  # noqa: BLE001 - degrade, never break PDF output
@@ -650,6 +665,31 @@ def register_complex_font(face: str) -> bool:
                 exc,
             )
         return _complex_registered[face]
+
+
+def _register_bold(face: str) -> str:
+    """Register the bundled bold weight of ``face``; the face to use for bold.
+
+    Returns ``face`` itself when no bold is bundled or its file cannot be read,
+    so a missing bold costs the weight, never the glyphs.
+    """
+    entry = _BUNDLED_BOLD.get(face)
+    if entry is None:
+        return face
+    bold_face, relative = entry
+    try:
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+
+        path = _FONT_DIR / relative
+        if not path.is_file():
+            raise FileNotFoundError(f"bundled face missing: {path}")
+        pdfmetrics.registerFont(TTFont(bold_face, str(path)))
+    except Exception as exc:  # noqa: BLE001 - degrade to the regular weight
+        logger.warning("PDF fonts: could not register %s (%s); bold prints in the regular weight", bold_face, exc)
+        return face
+    _complex_bold[face] = bold_face
+    return bold_face
 
 
 def font_needs_shaping(face: str) -> bool:
@@ -729,7 +769,7 @@ def _face_ladder(base: str | None, *, bold: bool) -> tuple[list[str], str]:
     # an Urdu string mixed with Latin letters still settles for the widest face.
     for face in _BUNDLED_RTL:
         if register_complex_font(face):
-            rungs.append(face)
+            rungs.append(_complex_bold.get(face, face) if want_bold else face)
     return rungs, widest
 
 
@@ -1538,6 +1578,7 @@ install_reportlab_rtl(font_can_draw)
 
 
 __all__ = [
+    "ARABIC_BOLD_FONT",
     "ARABIC_FONT",
     "BODY_FONT",
     "BOLD_FONT",

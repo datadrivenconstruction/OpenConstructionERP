@@ -1256,8 +1256,19 @@ class UserService:
         user_id: uuid.UUID,
         data: UserPreferencesUpdate,
     ) -> User:
-        """Update regional preference fields for a user."""
+        """Update regional preference fields for a user.
+
+        ``digit_system`` has no column of its own: it is kept in the account's
+        metadata JSON under the same name, which needs no migration and is
+        read back through ``User.digit_system``.
+        """
         fields = data.model_dump(exclude_unset=True)
+        digit_system = fields.pop("digit_system", None)
+        if digit_system is not None:
+            current = await self.user_repo.get_by_id(user_id)
+            if current is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            fields["metadata_"] = {**(current.metadata_ or {}), "digit_system": digit_system}
         if fields:
             await self.user_repo.update_fields(user_id, **fields)
         user = await self.user_repo.get_by_id(user_id)

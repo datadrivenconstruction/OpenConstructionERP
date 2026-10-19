@@ -20,12 +20,13 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Globe, Ruler, FileText, Calendar, Hash, DollarSign, Search, Check } from 'lucide-react';
+import { Globe, Ruler, FileText, Calendar, Hash, Binary, DollarSign, Search, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { Card, CardHeader, CardContent } from '@/shared/ui';
 import { apiGet, apiPatch } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
-import { usePreferencesStore, resolveNumberLocale, adoptServerNumberFormat, useNumberLocale, NUMBER_LOCALES, type MeasurementSystem, type DateFormat, type NumberLocale } from '@/stores/usePreferencesStore';
+import { usePreferencesStore, resolveNumberLocale, adoptServerNumberFormat, useNumberLocale, NUMBER_LOCALES, type MeasurementSystem, type DateFormat, type NumberLocale, type DigitSystem } from '@/stores/usePreferencesStore';
+import { DIGIT_SYSTEMS } from '@/shared/lib/intlLocale';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   CUSTOM_CURRENCY_SENTINEL,
@@ -122,6 +123,18 @@ const NUMBER_FORMATS: NumberFormatOption[] = NUMBER_LOCALES.filter((l) => l !== 
   (locale) => ({ locale, example: new Intl.NumberFormat(locale).format(NUMBER_FORMAT_SAMPLE) }),
 );
 
+/**
+ * One button per digit system after `'auto'`, each labelled with the ten
+ * digits it writes. Computed through `Intl` like the number examples above, so
+ * the label is what the product will print, not a transcription of it.
+ */
+const DIGIT_SAMPLES: { value: DigitSystem; example: string }[] = DIGIT_SYSTEMS.filter((d) => d !== 'auto').map(
+  (value) => ({
+    value,
+    example: new Intl.NumberFormat(`en-u-nu-${value}`, { useGrouping: false }).format(1234567890),
+  }),
+);
+
 const CURRENCIES = [
   { code: 'EUR', symbol: '\u20AC', name: 'Euro' },
   { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -137,6 +150,7 @@ const CURRENCIES = [
   { code: 'TRY', symbol: '\u20BA', name: 'Turkish Lira' },
   { code: 'AED', symbol: 'AED', name: 'UAE Dirham' },
   { code: 'SAR', symbol: 'SAR', name: 'Saudi Riyal' },
+  { code: 'EGP', symbol: 'EGP', name: 'Egyptian Pound' },
   { code: 'INR', symbol: '\u20B9', name: 'Indian Rupee' },
   { code: 'CNY', symbol: '\u00A5', name: 'Chinese Yuan' },
   { code: 'JPY', symbol: '\u00A5', name: 'Japanese Yen' },
@@ -184,6 +198,7 @@ interface UserPreferencesResponse {
   // (no extra="forbid"), so the chosen currency never round-tripped and
   // vanished on reload. Use the real wire key so it persists server-side.
   currency_code?: string;
+  digit_system?: string;
 }
 
 // ── Searchable Dropdown ──────────────────────────────────────────────────────
@@ -350,6 +365,7 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
   const storeMeasurement = usePreferencesStore((s) => s.measurementSystem);
   const storeDateFormat = usePreferencesStore((s) => s.dateFormat);
   const storeNumberLocale = usePreferencesStore((s) => s.numberLocale);
+  const storeDigitSystem = usePreferencesStore((s) => s.digitSystem);
 
   // Fetch current preferences from backend
   const { data: prefs } = useQuery({
@@ -483,6 +499,9 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
           break;
         case 'number_format':
           setPreference('numberLocale', value as NumberLocale);
+          break;
+        case 'digit_system':
+          setPreference('digitSystem', value as DigitSystem);
           break;
       }
     },
@@ -635,6 +654,31 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
               {t('settings.number_format_preview', {
                 example: numberFormatPreview,
                 defaultValue: 'Amounts across the app now read {{example}}',
+              })}
+            </p>
+          </div>
+
+          {/* Digits */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-content-primary mb-1.5">
+              <Binary size={14} className="text-content-tertiary" />
+              {t('settings.digit_system', { defaultValue: 'Digits' })}
+            </label>
+            <ToggleGroup
+              value={storeDigitSystem}
+              options={[
+                {
+                  value: 'auto' as DigitSystem,
+                  label: t('settings.digit_system_auto', { defaultValue: 'Automatic' }),
+                },
+                ...DIGIT_SAMPLES.map((d) => ({ value: d.value, label: d.example })),
+              ]}
+              onChange={(val) => handleChange('digit_system', val)}
+            />
+            <p className="mt-1.5 text-xs text-content-tertiary">
+              {t('settings.digit_system_hint', {
+                defaultValue:
+                  'Digits for numbers and dates, independent of the number format. Automatic follows the language on screen and the project country on PDFs.',
               })}
             </p>
           </div>

@@ -26,6 +26,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from app.core.i18n import SUPPORTED_LOCALES, set_locale
+from app.core.regional_format import reset_document_digits, set_document_digits
 
 __all__ = [
     "AcceptLanguageMiddleware",
@@ -133,8 +134,16 @@ class AcceptLanguageMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         locale = self._resolve_locale(request)
         set_locale(locale)
-
-        response = await call_next(request)
+        # The digit shapes documents print in, when the reader chose them
+        # (see app.core.regional_format). ``?digits=`` wins over the header the
+        # web client sends, the same order the locale itself follows. An
+        # unknown value is recorded as no choice, so the market decides.
+        digits = request.query_params.get("digits") or request.headers.get("x-digit-system")
+        token = set_document_digits(digits)
+        try:
+            response = await call_next(request)
+        finally:
+            reset_document_digits(token)
         # ``setdefault``, not assignment: this middleware knows what the
         # reader asked for, not what the handler was able to produce. A
         # document route that renders from a narrower catalogue than

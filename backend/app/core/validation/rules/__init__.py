@@ -7666,6 +7666,7 @@ _IBAN_LENGTHS: dict[str, int] = {
     "BE": 16,
     "CH": 21,
     "DE": 22,
+    "EG": 29,  # Egypt, as the payment path's table (app.modules.einvoice.bank) already holds
     "ES": 24,
     "FR": 27,
     "GB": 22,

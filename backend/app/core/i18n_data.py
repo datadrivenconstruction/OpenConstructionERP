@@ -364,6 +364,19 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "number_format": "1,234.56",
         "locale": "ar",
     },
+    # Egypt. CLDR ar-EG prints Arabic-Indic digits, but Egyptian business
+    # documents are commonly printed with Western digits, so the row names
+    # them; a reader who wants Arabic-Indic digits asks per request
+    # (``X-Digit-System`` / ``?digits=``, see app.core.regional_format).
+    "EG": {
+        "currency": "EGP",
+        "measurement": "metric",
+        "paper": "A4",
+        "date_format": "DD/MM/YYYY",
+        "number_format": "1,234.56",
+        "locale": "ar",
+        "digit_system": "latn",
+    },
     # Asia-Pacific --------------------------------------------------------
     "AU": {
         "currency": "AUD",

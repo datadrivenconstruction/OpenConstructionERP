@@ -572,6 +572,7 @@ Noto Sans Devanagari
 
 Noto Naskh Arabic
     backend/app/core/fonts/noto/NotoNaskhArabic-Regular.ttf
+    backend/app/core/fonts/noto/NotoNaskhArabic-Bold.ttf
     Licence text:
     backend/app/core/fonts/noto/NotoNaskhArabic-OFL.txt
 

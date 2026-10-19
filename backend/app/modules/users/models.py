@@ -94,6 +94,16 @@ class User(Base):
     # (ORM inserts always supply the Python-side default).
     currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="EUR")
 
+    @property
+    def digit_system(self) -> str:
+        """The digit shapes the reader chose (``auto``, ``latn``, ``arab``, ``arabext``).
+
+        Kept in ``metadata`` rather than a column of its own; see
+        ``UserService.update_preferences``.
+        """
+        value = (self.metadata_ or {}).get("digit_system")
+        return value if isinstance(value, str) and value else "auto"
+
     # Relationships
     # Never loaded implicitly. Every authenticated request re-reads the caller
     # with session.get(User), and "selectin" made that a second SELECT against

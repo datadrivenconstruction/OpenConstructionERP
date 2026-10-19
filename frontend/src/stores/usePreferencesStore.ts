@@ -14,7 +14,14 @@
 
 import { create } from 'zustand';
 import { apiGet } from '@/shared/lib/api';
-import { getIntlLocale, useIntlLocale } from '@/shared/lib/intlLocale';
+import {
+  DIGIT_SYSTEMS,
+  getIntlLocale,
+  setDigitSystem,
+  useIntlLocale,
+  withDigitSystem,
+  type DigitSystem,
+} from '@/shared/lib/intlLocale';
 import { getMarketNumberLocale, useMarketNumberLocale } from '@/shared/lib/marketNumberLocale';
 
 const STORAGE_KEY = 'oe_preferences';
@@ -52,6 +59,7 @@ export type NumberLocale =
   | 'fr-FR'
   | 'ru-RU'
   | 'ar-SA'
+  | 'ar-EG'
   | 'ja-JP'
   | 'zh-CN'
   | 'es-MX'
@@ -63,8 +71,16 @@ interface Preferences {
   measurementSystem: MeasurementSystem;
   dateFormat: DateFormat;
   numberLocale: NumberLocale;
+  /**
+   * Which digit shapes numbers and dates print in, independent of the number
+   * format. `'auto'` keeps what the locale prints. Applied in `getIntlLocale`
+   * and in `resolveNumberLocale`, so every formatter follows it.
+   */
+  digitSystem: DigitSystem;
   defaultCurrency: string;
 }
+
+export type { DigitSystem };
 
 /**
  * Keys this store used to carry and no longer does.
@@ -85,6 +101,7 @@ const DEFAULTS: Preferences = {
   measurementSystem: 'metric',
   dateFormat: 'auto',
   numberLocale: 'auto',
+  digitSystem: 'auto',
   defaultCurrency: 'EUR',
 };
 
@@ -145,8 +162,8 @@ function persist(prefs: Preferences) {
  * by the market they are working in.
  */
 export function resolveNumberLocale(preference: NumberLocale): string {
-  if (preference !== 'auto') return preference;
-  return getMarketNumberLocale() ?? getIntlLocale();
+  if (preference !== 'auto') return withDigitSystem(preference);
+  return withDigitSystem(getMarketNumberLocale() ?? getIntlLocale());
 }
 
 /**
@@ -182,10 +199,11 @@ export function getNumberLocale(): string {
  */
 export function useNumberLocale(): string {
   const preference = usePreferencesStore((s) => s.numberLocale);
+  const digits = usePreferencesStore((s) => s.digitSystem);
   const intlLocale = useIntlLocale();
   const marketLocale = useMarketNumberLocale();
-  if (preference !== 'auto') return preference;
-  return marketLocale ?? intlLocale;
+  if (preference !== 'auto') return withDigitSystem(preference, digits);
+  return withDigitSystem(marketLocale ?? intlLocale, digits);
 }
 
 /* ── Server hydration (issue #335) ────────────────────────────────────── */
@@ -196,6 +214,7 @@ interface ServerPreferences {
   date_format?: string;
   number_format?: string;
   currency_code?: string;
+  digit_system?: string;
 }
 
 // Allow-lists so a server value is applied ONLY when it matches a value the
@@ -274,7 +293,7 @@ const SEEDED_ACCOUNT_LOCALE: NumberLocale | undefined =
  * currency while lakh and crore grouping was unreachable by any choice.
  */
 export const NUMBER_LOCALES: readonly NumberLocale[] = [
-  'auto', 'de-DE', 'en-US', 'en-GB', 'fr-FR', 'ru-RU', 'ar-SA', 'ja-JP', 'zh-CN', 'es-MX', 'en-IN', 'de-CH',
+  'auto', 'de-DE', 'en-US', 'en-GB', 'fr-FR', 'ru-RU', 'ar-SA', 'ar-EG', 'ja-JP', 'zh-CN', 'es-MX', 'en-IN', 'de-CH',
 ];
 
 /**
@@ -414,6 +433,12 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       }
       const mappedLocale = r.number_format ? adoptServerNumberFormat(r.number_format, get().numberLocale) : undefined;
       if (mappedLocale) updates.numberLocale = mappedLocale;
+      // `auto` is also what an account that never chose reports, so only an
+      // explicit system is adopted; a browser's own choice is never undone by
+      // the default.
+      if (r.digit_system && r.digit_system !== 'auto' && (DIGIT_SYSTEMS as readonly string[]).includes(r.digit_system)) {
+        updates.digitSystem = r.digit_system as DigitSystem;
+      }
       // An empty currency_code means "not chosen" on the account; only a real
       // ISO-4217 code overrides the local currency.
       if (r.currency_code && /^[A-Z]{3}$/.test(r.currency_code)) {
@@ -441,3 +466,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
     }
   },
 }));
+
+// The digit system lives in this store and is read by the leaf `intlLocale`
+// module, which cannot import the store. Push it there now and on every change.
+setDigitSystem(usePreferencesStore.getState().digitSystem);
+usePreferencesStore.subscribe((state) => setDigitSystem(state.digitSystem));
