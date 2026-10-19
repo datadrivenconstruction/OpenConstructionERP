@@ -738,3 +738,73 @@ class TestRegimeRow:
     def test_still_a_clearance_regime_without_cancellation(self):
         spec = regime_as_dict(get_country_regime("PL"))
         assert spec["regime"] == "clearance" and not spec["is_cancellable"]
+
+
+# ── Split payment data comes from the Polish VAT data ───────────────────────
+
+
+class TestSplitPaymentData:
+    def test_threshold_is_read_from_the_vat_data(self, monkeypatch):
+        from app.modules.einvoice_ksef import split_payment
+
+        monkeypatch.setattr(split_payment, "rules", lambda: {"threshold_gross": "100.00"})
+        decision = split_payment.decide(gross=Decimal("100.01"), currency="PLN", annex_15_lines=1)
+        assert decision.required and decision.threshold_pln == Decimal("100.00")
+        assert not split_payment.decide(gross=Decimal("100.00"), currency="PLN", annex_15_lines=1).required
+
+    def test_shipped_data_is_strictly_above_15000(self):
+        from app.modules.einvoice_ksef import split_payment
+
+        assert split_payment.threshold_pln() == Decimal("15000.00")
+        assert split_payment.annex_15_sections() == ("41", "42", "43")
+        assert split_payment.looks_like_construction("43.31.10.0") and not split_payment.looks_like_construction("430")
+
+    def test_changing_the_data_file_changes_the_decision(self, monkeypatch):
+        import copy
+
+        from app.core import vat_construction
+        from app.modules.einvoice_ksef import split_payment
+
+        data = copy.deepcopy(vat_construction._data())
+        data["countries"]["PL"]["split_payment"]["threshold_gross"] = "20000.00"
+        monkeypatch.setattr(vat_construction, "_data", lambda: data)
+        assert split_payment.threshold_pln() == Decimal("20000.00")
+        assert not split_payment.decide(gross=Decimal("16000"), currency="PLN", annex_15_lines=1).required
+        assert split_payment.decide(gross=Decimal("20000.01"), currency="PLN", annex_15_lines=1).required
+
+    def test_unreadable_data_is_not_checked_never_a_remembered_number(self, monkeypatch):
+        from app.modules.einvoice_ksef import split_payment
+
+        monkeypatch.setattr(split_payment, "rules", lambda: None)
+        decision = split_payment.decide(gross=Decimal("99999"), currency="PLN", annex_15_lines=1)
+        assert decision.verdict == split_payment.NOT_CHECKED and decision.threshold_pln is None
+        # Without Annex 15 lines the threshold is never needed.
+        assert split_payment.decide(gross=Decimal("99999"), currency="PLN", annex_15_lines=0).verdict == "not_required"
+
+    def test_builder_without_data_uses_the_stored_marker_or_stops(self, monkeypatch):
+        from app.modules.einvoice_ksef import split_payment
+
+        monkeypatch.setattr(split_payment, "rules", lambda: None)
+
+        def build(**invoice):
+            return build_input_from_invoice(
+                invoice=_invoice(**invoice),
+                lines=_lines(),
+                nip=SELLER_NIP,
+                settings={},
+                ksef_fields={"lines": [{"annex_15": True}]},
+                buyer={"name": "X", "country_code": "PL", "vat_id": "7010001454"},
+            )
+
+        with pytest.raises(fa3.Fa3BuildError, match="not checked"):
+            build()
+        assert build(metadata={"split_payment": True}).split_payment
+
+    async def test_rules_warn_and_do_not_block_without_data(self, monkeypatch):
+        from app.modules.einvoice_ksef import split_payment
+
+        monkeypatch.setattr(split_payment, "rules", lambda: None)
+        context = _context(text=_fa3_xml(annex=True, split=False))
+        assert not await _failures(rules.KsefSplitPayment(), context)
+        found = await _failures(rules.KsefSplitPaymentUnchecked(), context)
+        assert found and found[0].severity == Severity.WARNING

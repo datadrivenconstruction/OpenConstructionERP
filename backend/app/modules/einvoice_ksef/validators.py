@@ -14,6 +14,8 @@ the gate runs every rule of the set on every country.
       registration's own NIP, quoting valid KSeF numbers.
 * ``einvoice_clearance.pl_ksef_split_payment``   ERROR. P_18A says what the
       lines and the total say.
+* ``einvoice_clearance.pl_ksef_split_payment_unchecked`` WARNING. The VAT
+      data holding the threshold could not be read, so P_18A went unchecked.
 * ``einvoice_clearance.pl_ksef_registration``    ERROR. The KSeF settings are
       usable, including the end of token authentication.
 * ``einvoice_clearance.pl_ksef_number_format``   ERROR. A cleared document's
@@ -384,6 +386,26 @@ class KsefNipUnchecked(_KsefRule):
         return found or [self._ok()]
 
 
+def _split_decision(context: ValidationContext) -> tuple[fa3.Summary, split_payment.SplitPaymentDecision] | None:
+    text = _payload_text(context)
+    if not text:
+        return None
+    try:
+        summary = fa3.read_summary(text)
+    except fa3.Fa3BuildError:
+        # Unreadable is the structure rule's finding, not this one's.
+        return None
+    if summary.gross is None:
+        return None
+    decision = split_payment.decide(
+        gross=summary.gross,
+        currency=summary.currency or "PLN",
+        annex_15_lines=summary.annex_15_lines,
+        exchange_rate=_decimal(_ksef_fields(context).get("exchange_rate")),
+    )
+    return summary, decision
+
+
 class KsefSplitPayment(_KsefRule):
     rule_id = "einvoice_clearance.pl_ksef_split_payment"
     name = "Split Payment Marker Matches The Invoice"
@@ -396,22 +418,13 @@ class KsefSplitPayment(_KsefRule):
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         if not _is_polish(context) or _intent(context) == "cancel":
             return [self._ok()]
-        text = _payload_text(context)
-        if not text:
+        found = _split_decision(context)
+        if found is None:
             return [self._ok()]
-        try:
-            summary = fa3.read_summary(text)
-        except fa3.Fa3BuildError:
-            # Unreadable is the structure rule's finding, not this one's.
+        summary, decision = found
+        if decision.verdict == split_payment.NOT_CHECKED:
+            # Reported by the not-checked warning; a missing table must not block.
             return [self._ok()]
-        if summary.gross is None:
-            return [self._ok()]
-        decision = split_payment.decide(
-            gross=summary.gross,
-            currency=summary.currency or "PLN",
-            annex_15_lines=summary.annex_15_lines,
-            exchange_rate=_decimal(_ksef_fields(context).get("exchange_rate")),
-        )
         doc_id = _document_id(context)
         details = {
             "verdict": decision.verdict,
@@ -446,6 +459,31 @@ class KsefSplitPayment(_KsefRule):
                 )
             ]
         return [self._ok()]
+
+
+class KsefSplitPaymentUnchecked(_KsefRule):
+    rule_id = "einvoice_clearance.pl_ksef_split_payment_unchecked"
+    name = "Split Payment Not Checked"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "The Polish VAT data that holds the split payment threshold could not be read."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is_polish(context) or _intent(context) == "cancel":
+            return [self._ok()]
+        found = _split_decision(context)
+        if found is None or found[1].verdict != split_payment.NOT_CHECKED:
+            return [self._ok()]
+        summary, decision = found
+        return [
+            self._fail(
+                f"P_18A was not checked: {decision.reason}. The document says "
+                f"{'split payment' if summary.split_payment else 'no split payment'}.",
+                element_ref=_document_id(context),
+                suggestion="Check the split payment marker by hand, or restore the Polish VAT data.",
+                details={"verdict": decision.verdict, "marked": summary.split_payment},
+            )
+        ]
 
 
 class KsefRegistrationReady(_KsefRule):
@@ -643,6 +681,7 @@ class KsefNumberInPaymentTitle(_KsefRule):
 _DOCUMENT_RULES: tuple[ValidationRule, ...] = (
     KsefStructure(),
     KsefSplitPayment(),
+    KsefSplitPaymentUnchecked(),
     KsefRegistrationReady(),
     KsefNumberFormat(),
     KsefOfflineDeadline(),
@@ -695,6 +734,7 @@ __all__ = [
     "KsefOfflineDeadline",
     "KsefRegistrationReady",
     "KsefSplitPayment",
+    "KsefSplitPaymentUnchecked",
     "KsefStructure",
     "evaluate_payment",
     "nip_verdict",
