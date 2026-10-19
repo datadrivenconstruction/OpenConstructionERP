@@ -19,11 +19,16 @@
 //
 // Each line also shows its suggested supplier and its own needed-by date,
 // which RequisitionSupply renders (issue #516).
+//
+// Designated approvers decide in order, a line can be ordered in parts over
+// several orders, and a project that orders in an external purchasing system
+// records those orders instead of converting; RequisitionOrdering renders
+// those parts.
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Loader2, GitMerge, Send, Undo2, Ban, Trash2, Check, X, ShoppingCart } from 'lucide-react';
+import { ClipboardList, Loader2, GitMerge, Send, Undo2, Ban, Trash2, Check, X, ShoppingCart, Settings, ExternalLink } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, SkeletonTable, WideModal, type BadgeVariant } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { QuantityDisplay } from '@/shared/ui/QuantityDisplay';
@@ -42,11 +47,14 @@ import {
   lineToInput,
   listRequisitions,
   mergeRequisitionLines,
+  newIdempotencyKey,
   parseRequisitionRuleErrors,
+  plannedConvertLines,
   submitRequisition,
   updateRequisition,
   withdrawRequisition,
   type ConvertBlockReason,
+  type OrderOwner,
   type Requisition,
   type RequisitionLineIn,
   type RequisitionRuleError,
@@ -54,6 +62,17 @@ import {
 } from './requisitionsApi';
 import { fmtList } from '@/shared/lib/formatters';
 import { LineSupplyCell, SuggestedSupplierHint, VendorSelect } from './RequisitionSupply';
+import {
+  ApprovalChainView,
+  ApproverChainEditor,
+  ConvertLinesTable,
+  ExternalOrderModal,
+  LineOrderFlags,
+  OrderOwnerSelect,
+  ProcurementSettingsModal,
+  RequisitionOrderList,
+  orderOwnerLabel,
+} from './RequisitionOrdering';
 
 const fieldCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
@@ -144,6 +163,10 @@ function convertBlockMessage(t: Translate, reason: ConvertBlockReason): string {
       return t('procurement.requisitions.convert_blocked_vendor_conflict', {
         defaultValue: 'The selected requisitions name different vendors. Order them separately.',
       });
+    case 'external_owner':
+      return t('procurement.requisitions.convert_blocked_external', {
+        defaultValue: 'A selected requisition is ordered in an external purchasing system. Record its external order on the requisition instead.',
+      });
   }
 }
 
@@ -157,13 +180,15 @@ export const APPROVE_REQUISITION_PERMISSION = 'procurement.approve_requisition';
  * the role rank stands in until it loads.
  */
 export function canOfferDecision(
-  req: Pick<Requisition, 'status' | 'submitted_by'>,
+  req: Pick<Requisition, 'status' | 'submitted_by'> & Pick<Partial<Requisition>, 'next_approver_id'>,
   userId: string | null,
   userRole: string | null,
   permissions?: readonly string[] | null,
 ): boolean {
   if (req.status !== 'submitted') return false;
   if (userId && req.submitted_by && req.submitted_by === userId) return false;
+  // With designated approvers only the next one in the chain decides.
+  if (req.next_approver_id && req.next_approver_id !== userId) return false;
   if (Array.isArray(permissions)) {
     return normalizeRole(userRole) === 'admin' || permissions.includes(APPROVE_REQUISITION_PERMISSION);
   }
@@ -188,13 +213,21 @@ export function ConvertToPOModal({ projectId, requisitions, open, onClose, onCon
   const [vendorId, setVendorId] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
   const [ruleErrors, setRuleErrors] = useState<RequisitionRuleError[]>([]);
+  const [chosen, setChosen] = useState<Record<string, string>>({});
+  // One key per opening: a double click or a retry after a lost answer is one order.
+  const [idempotencyKey, setIdempotencyKey] = useState('');
 
   useEffect(() => {
     if (!open) return;
     setVendorId(check.vendorId ?? '');
     setDeliveryDate('');
     setRuleErrors([]);
+    setChosen({});
+    setIdempotencyKey(newIdempotencyKey());
   }, [open, check.vendorId]);
+
+  const plannedLines = plannedConvertLines(requisitions, chosen);
+  const invalidQuantity = Object.values(chosen).some((v) => v.trim() !== '' && !/^\d+(\.\d+)?$/.test(v.trim()));
 
   const convert = useMutation({
     mutationFn: () =>
@@ -203,6 +236,8 @@ export function ConvertToPOModal({ projectId, requisitions, open, onClose, onCon
         requisition_ids: requisitions.map((r) => r.id),
         vendor_id: vendorId || null,
         delivery_date: deliveryDate || null,
+        lines: plannedLines,
+        idempotency_key: idempotencyKey || null,
       }),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['procurement-requisitions', projectId] });
@@ -226,14 +261,14 @@ export function ConvertToPOModal({ projectId, requisitions, open, onClose, onCon
     },
   });
 
-  const lineCount = requisitions.reduce((n, r) => n + r.items.length, 0);
-  const blocked = !check.ok;
+  const lineCount = plannedLines ? plannedLines.length : requisitions.reduce((n, r) => n + r.items.length, 0);
+  const blocked = !check.ok || invalidQuantity || (plannedLines !== undefined && plannedLines.length === 0);
   return (
     <WideModal
       open={open}
       onClose={onClose}
       busy={convert.isPending}
-      size="md"
+      size="lg"
       title={t('procurement.requisitions.convert_title', { defaultValue: 'Create purchase order' })}
       footer={
         <>
@@ -264,6 +299,21 @@ export function ConvertToPOModal({ projectId, requisitions, open, onClose, onCon
           <p role="alert" className="text-semantic-error">
             {convertBlockMessage(t, check.reason)}
           </p>
+        )}
+        {check.ok && (
+          <>
+            <p className="text-xs text-content-tertiary">
+              {t('procurement.requisitions.convert_lines_hint', {
+                defaultValue:
+                  'Each line starts at what is still to order. Lower a quantity to order part of it now, or clear it to leave the line for a later order.',
+              })}
+            </p>
+            <ConvertLinesTable
+              requisitions={requisitions}
+              chosen={chosen}
+              onChange={(id, quantity) => setChosen((prev) => ({ ...prev, [id]: quantity }))}
+            />
+          </>
         )}
         <label className="block text-xs font-medium text-content-secondary" htmlFor="convert-vendor">
           {t('procurement.requisitions.field_vendor', { defaultValue: 'Vendor' })}
@@ -367,6 +417,10 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
   const [openId, setOpenId] = useState<string | null>(focusRequisitionId ?? null);
   const [picked, setPicked] = useState<string[]>([]);
   const [converting, setConverting] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const userRole = useAuthStore((s) => s.userRole);
+  // The server decides (procurement.manage_settings, manager and above); this only hides a button certain to fail.
+  const canManageSettings = ((ROLE_RANK as Record<string, number>)[normalizeRole(userRole)] ?? 0) >= ROLE_RANK.manager;
 
   useEffect(() => {
     if (focusRequisitionId) setOpenId(focusRequisitionId);
@@ -394,6 +448,12 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
               'Requests for material, raised from the buy-list or by hand. A request is not an order: purchasing takes it from here.',
           })}
         </p>
+        <div className="flex items-center gap-2">
+        {canManageSettings && (
+          <Button size="sm" variant="secondary" icon={<Settings size={14} />} onClick={() => setSettingsOpen(true)}>
+            {t('procurement.requisitions.settings', { defaultValue: 'Settings' })}
+          </Button>
+        )}
         <label className="flex items-center gap-2 text-xs text-content-secondary">
           {t('procurement.requisitions.filter_status', { defaultValue: 'Status' })}
           <select
@@ -409,9 +469,10 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
             ))}
           </select>
         </label>
+        </div>
       </div>
 
-      {(data?.items ?? []).some((r) => r.status === 'approved') && (
+      {(data?.items ?? []).some((r) => r.status === 'approved' && r.order_owner !== 'external') && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/40 px-3 py-2 text-xs text-content-secondary">
           <span>
             {t('procurement.requisitions.convert_hint', {
@@ -475,7 +536,7 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
                     onClick={() => setOpenId(r.id)}
                   >
                     <td className="px-2 py-2" onClick={(e) => e.stopPropagation()}>
-                      {r.status === 'approved' && (
+                      {r.status === 'approved' && r.order_owner !== 'external' && (
                         <input
                           type="checkbox"
                           aria-label={t('procurement.requisitions.select_for_order', {
@@ -498,6 +559,13 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
                     <td className="px-4 py-2 text-content-secondary">{r.vendor_name || '-'}</td>
                     <td className="px-4 py-2">
                       <StatusBadge status={r.status} />
+                      {r.order_progress === 'partial' && r.status === 'approved' && (
+                        <span className="ml-1 inline-block">
+                          <Badge variant="warning" size="sm">
+                            {t('procurement.requisitions.partly_ordered', { defaultValue: 'Partly ordered' })}
+                          </Badge>
+                        </span>
+                      )}
                       {r.po_number && (
                         <span className="ml-2 font-mono text-2xs text-content-tertiary">{r.po_number}</span>
                       )}
@@ -543,6 +611,9 @@ export function RequisitionsTab({ projectId, focusRequisitionId }: RequisitionsT
           setPicked([]);
         }}
       />
+      {canManageSettings && (
+        <ProcurementSettingsModal projectId={projectId} open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      )}
     </div>
   );
 }
@@ -570,6 +641,9 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
   const [neededBy, setNeededBy] = useState('');
   const [notes, setNotes] = useState('');
   const [vendorId, setVendorId] = useState('');
+  const [orderOwner, setOrderOwner] = useState<OrderOwner>('ocerp');
+  const [approvers, setApprovers] = useState<string[]>([]);
+  const [recordingExternal, setRecordingExternal] = useState(false);
   const [decision, setDecision] = useState<'approve' | 'reject' | null>(null);
   const userId = useAuthStore((s) => s.userId);
   const userRole = useAuthStore((s) => s.userRole);
@@ -589,6 +663,8 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
     setNeededBy(req.required_date ?? '');
     setNotes(req.notes ?? '');
     setVendorId(req.vendor_id ?? '');
+    setOrderOwner(req.order_owner ?? 'ocerp');
+    setApprovers((req.approval_chain ?? []).map((s) => s.user_id));
     setLines(req.items.map(lineToInput));
     setSelected([]);
     setDirty(false);
@@ -620,6 +696,8 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
         notes: notes.trim() || null,
         vendor_id: vendorId || null,
         items: lines,
+        order_owner: orderOwner,
+        approval_chain: approvers,
       }),
     onSuccess: (updated) => {
       onDone(updated);
@@ -665,7 +743,15 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
       onDone(updated);
       setDecision(null);
       setRuleErrors([]);
-      addToast({ type: 'success', title: t('procurement.requisitions.approved_toast', { defaultValue: 'Requisition approved' }) });
+      addToast({
+        type: 'success',
+        title:
+          updated.status === 'submitted'
+            ? t('procurement.requisitions.approval_step_toast', {
+                defaultValue: 'Your approval is recorded. The requisition now waits for the next approver.',
+              })
+            : t('procurement.requisitions.approved_toast', { defaultValue: 'Requisition approved' }),
+      });
     },
     onError: (e: unknown) => {
       setDecision(null);
@@ -715,6 +801,11 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
   };
 
   const storedLines = useMemo(() => req?.items ?? [], [req]);
+  const canRecordExternal =
+    !!req &&
+    req.order_owner === 'external' &&
+    (req.status === 'approved' || req.status === 'ordered' || req.status === 'received') &&
+    ((ROLE_RANK as Record<string, number>)[normalizeRole(userRole)] ?? 0) >= ROLE_RANK.editor;
 
   return (
     <WideModal
@@ -741,6 +832,11 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
             {(req.status === 'submitted' || req.status === 'rejected') && (
               <Button variant="secondary" icon={<Undo2 size={14} />} onClick={() => withdraw.mutate()} disabled={busy}>
                 {t('procurement.requisitions.withdraw', { defaultValue: 'Withdraw to draft' })}
+              </Button>
+            )}
+            {canRecordExternal && (
+              <Button variant="secondary" icon={<ExternalLink size={14} />} onClick={() => setRecordingExternal(true)} disabled={busy}>
+                {t('procurement.requisitions.external_record', { defaultValue: 'Record external order' })}
               </Button>
             )}
             {canOfferDecision(req, userId, userRole, me?.permissions) && (
@@ -810,7 +906,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
             </div>
           )}
 
-          {req.po_id && (
+          {req.po_id && (req.purchase_orders ?? []).length <= 1 && (
             <p className="text-sm text-content-secondary">
               {t('procurement.requisitions.ordered_on_po', {
                 defaultValue: 'Ordered on purchase order {{number}}',
@@ -818,6 +914,53 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
               })}
             </p>
           )}
+          {(req.purchase_orders ?? []).length > 1 && <RequisitionOrderList req={req} />}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="block text-xs font-medium text-content-secondary">
+              <label htmlFor="req-order-owner">
+                {t('procurement.requisitions.field_order_owner', { defaultValue: 'Orders are placed in' })}
+              </label>
+              <div className="mt-1">
+                {isDraft ? (
+                  <OrderOwnerSelect
+                    id="req-order-owner"
+                    value={orderOwner}
+                    onChange={(owner) => {
+                      setOrderOwner(owner);
+                      setDirty(true);
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm text-content-primary">{orderOwnerLabel(t, req.order_owner ?? 'ocerp')}</span>
+                )}
+              </div>
+            </div>
+            <div className="block text-xs font-medium text-content-secondary">
+              {t('procurement.requisitions.field_approvers', { defaultValue: 'Designated approvers, in order' })}
+              <div className="mt-1 font-normal">
+                {isDraft ? (
+                  <ApproverChainEditor
+                    projectId={projectId}
+                    value={approvers}
+                    knownNames={Object.fromEntries((req.approval_chain ?? []).map((s) => [s.user_id, s.name]))}
+                    excluded={[req.requester_id ?? '', userId ?? ''].filter(Boolean)}
+                    idPrefix="req"
+                    onChange={(chain) => {
+                      setApprovers(chain);
+                      setDirty(true);
+                    }}
+                  />
+                ) : (req.approval_chain ?? []).length > 0 ? (
+                  <ApprovalChainView steps={req.approval_chain ?? []} />
+                ) : (
+                  <span className="text-sm text-content-primary">
+                    {t('procurement.requisitions.approvers_single', { defaultValue: 'One approval decides' })}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="block text-xs font-medium text-content-secondary sm:col-span-2">
@@ -948,6 +1091,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                     <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_unit', { defaultValue: 'Unit' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_requested', { defaultValue: 'Requested' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
+                    <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_to_order', { defaultValue: 'Still to order' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_outstanding', { defaultValue: 'Outstanding' })}</th>
                     <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_sources', { defaultValue: 'From the BOQ' })}</th>
@@ -1005,6 +1149,13 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                           {stored ? <QuantityDisplay value={stored.quantity_ordered} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                          {stored ? (
+                            <QuantityDisplay value={stored.quantity_to_order ?? '0'} unit={stored.unit ?? ''} precision={2} />
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                        <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
                           {stored ? <QuantityDisplay value={stored.quantity_received} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
@@ -1018,7 +1169,10 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                                 n: line.sources.length,
                               })}
                           {(stored?.po_items ?? []).map((pi) => (
-                            <div key={pi.po_item_id} className="mt-0.5 text-content-secondary">
+                            <div
+                              key={pi.po_item_id}
+                              className={`mt-0.5 ${pi.po_status === 'cancelled' ? 'text-content-tertiary line-through' : 'text-content-secondary'}`}
+                            >
                               {t('procurement.requisitions.po_line_ref', {
                                 defaultValue: 'PO {{number}}: {{quantity}} {{unit}}',
                                 number: pi.po_number ?? pi.po_id.slice(0, 8),
@@ -1027,6 +1181,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                               })}
                             </div>
                           ))}
+                          {stored && <LineOrderFlags line={stored} />}
                         </td>
                         <td className="py-1.5 pr-3">
                           <LineSupplyCell
@@ -1058,6 +1213,17 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
             </div>
           </div>
         </div>
+      )}
+      {req && (
+        <ExternalOrderModal
+          req={req}
+          open={recordingExternal}
+          onClose={() => setRecordingExternal(false)}
+          onSaved={(updated) => {
+            onDone(updated);
+            setRecordingExternal(false);
+          }}
+        />
       )}
       <DecisionModal
         mode={decision}

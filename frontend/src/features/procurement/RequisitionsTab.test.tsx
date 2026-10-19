@@ -123,7 +123,72 @@ describe('ConvertToPOModal', () => {
       requisition_ids: ['r1', 'r2'],
       vendor_id: V1,
       delivery_date: null,
+      lines: undefined,
+      idempotency_key: expect.any(String),
     });
+  });
+
+  it('orders part of a line when its quantity is lowered, and the rest stays for later', async () => {
+    mockPost.mockResolvedValue({
+      po_id: 'po-2',
+      po_number: 'PO-0008',
+      project_id: 'p1',
+      requisition_ids: ['r1'],
+      line_count: 1,
+      vendor_warnings: [],
+    });
+    const line = (id: string, description: string, toOrder: string) =>
+      ({
+        id,
+        description,
+        unit: 'm3',
+        quantity_requested: toOrder,
+        quantity_ordered: '0',
+        quantity_received: '0',
+        quantity_consumed: '0',
+        quantity_outstanding: toOrder,
+        quantity_to_order: toOrder,
+        catalog_item_id: null,
+        cost_line_id: null,
+        sort_order: 0,
+        sources: [],
+      }) as Requisition['items'][number];
+    wrap(
+      <ConvertToPOModal
+        projectId="p1"
+        open
+        onClose={() => {}}
+        onConverted={() => {}}
+        requisitions={[req({ items: [line('i1', 'Concrete', '71.4000'), line('i2', 'Rebar', '3.2500')] })]}
+      />,
+    );
+    const concrete = screen.getByRole('textbox', { name: /concrete/i });
+    const rebar = screen.getByRole('textbox', { name: /rebar/i });
+    expect(concrete).toHaveValue('71.4000');
+    await userEvent.clear(concrete);
+    await userEvent.type(concrete, '30');
+    await userEvent.clear(rebar);
+    const create = screen.getByRole('button', { name: /create draft order/i });
+    await waitFor(() => expect(create).toBeEnabled());
+    await userEvent.click(create);
+    await waitFor(() => expect(mockPost).toHaveBeenCalled());
+    expect(mockPost.mock.calls[0]![1]).toMatchObject({
+      lines: [{ requisition_item_id: 'i1', quantity: '30' }],
+    });
+  });
+
+  it('does not offer a requisition that is ordered in an external system', () => {
+    wrap(
+      <ConvertToPOModal
+        projectId="p1"
+        open
+        onClose={() => {}}
+        onConverted={() => {}}
+        requisitions={[req({ order_owner: 'external' })]}
+      />,
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(/external purchasing system/i);
+    expect(screen.getByRole('button', { name: /create draft order/i })).toBeDisabled();
   });
 
   it('never sends a selection that names two vendors', async () => {
@@ -156,6 +221,13 @@ describe('canOfferDecision', () => {
     expect(canOfferDecision(submitted, 'u-2', 'estimator')).toBe(false);
     expect(canOfferDecision(submitted, 'u-2', null)).toBe(false);
     expect(canOfferDecision({ ...submitted, status: 'approved' }, 'u-2', 'admin')).toBe(false);
+  });
+
+  it('leaves the decision to the next designated approver alone', () => {
+    const chained = { ...submitted, next_approver_id: 'u-3' };
+    expect(canOfferDecision(chained, 'u-2', 'admin')).toBe(false);
+    expect(canOfferDecision(chained, 'u-3', 'manager')).toBe(true);
+    expect(canOfferDecision(chained, 'u-3', 'manager', ['procurement.read'])).toBe(false);
   });
 
   it('follows the real permission once the permission list is known', () => {

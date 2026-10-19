@@ -994,6 +994,11 @@
     "note": "da/id/it/no/pt/vi keep 'Skid' as an established prefab-industry loanword for a skid-mounted equipment frame - corroborated by prefab.intro_body's own untranslated use of 'skid(s)' in the same locales (non-baseline, already shipped).",
     "reason_category": "cognate_loanword"
   },
+  "procurement.requisitions.external_line_ref": {
+    "en_value": "{{system}} {{number}}: {{quantity}} {{unit}}",
+    "note": "entirely template variables/punctuation, no literal word to translate: the external system name, its order number, the quantity and the unit, as the system reported them",
+    "reason_category": "template_placeholder"
+  },
   "progress.record_period": {
     "en_value": "Period",
     "note": "sv.ts genuinely uses \"Period\" unchanged, matching sv's own progress.col_period and 15 other Period-labeled sibling keys across the app; a Germanic cognate, not leftover English (module 13 of #182)",
