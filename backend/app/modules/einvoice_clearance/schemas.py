@@ -406,6 +406,9 @@ class CountryRegimeResponse(BaseModel):
     cancellation_basis: str = ""
     scope: str = ""
     commencement: list[CommencementPhaseResponse] = Field(default_factory=list)
+    # Country-specific facts carried as data (penalties with their source and
+    # effective date, accepted formats, platform model). Empty for most countries.
+    extra: dict[str, Any] = Field(default_factory=dict)
 
 
 class AdapterResponse(BaseModel):

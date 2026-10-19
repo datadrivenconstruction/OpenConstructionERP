@@ -232,6 +232,20 @@ class TestCountryRegistry:
             assert entry.cancellation_basis in regimes.CANCELLATION_BASES, code
         assert regimes.COUNTRY_REGIMES["MX"].cancellation_basis == regimes.CANCELLATION_BASIS_FISCAL_YEAR
 
+    def test_the_flattened_regime_carries_its_extras(self):
+        # Additive: a country with no extras serialises an empty mapping, and one
+        # with extras (penalties, formats) reaches the meta endpoint unchanged.
+        from dataclasses import replace
+
+        from app.modules.einvoice_clearance.schemas import CountryRegimeResponse
+
+        entry = regimes.COUNTRY_REGIMES["DE"]
+        assert regimes.regime_as_dict(entry)["extra"] == {}
+        penalties = {"penalties": [{"key": "late", "amount": "50", "currency": "EUR"}]}
+        flat = regimes.regime_as_dict(replace(entry, extra=penalties))
+        assert flat["extra"] == penalties
+        assert CountryRegimeResponse.model_validate(flat).extra == penalties
+
     def test_the_flattened_regime_keeps_every_key_it_used_to_carry(self):
         # Additive only. A reader written against the older shape is a reader we
         # cannot see, so no key may change meaning and none may disappear.
