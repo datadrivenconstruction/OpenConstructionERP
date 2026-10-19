@@ -75,18 +75,18 @@ def _only(pattern: re.Pattern[str], text: str, what: str) -> str:
 
 
 def test_the_converter_tag_is_a_release_tag() -> None:
-    assert _TAG.match(
-        cs.DEFAULT_CONVERTER_TAG
-    ), f"DEFAULT_CONVERTER_TAG is {cs.DEFAULT_CONVERTER_TAG!r}; a branch name would make every install fetch an unknown tree."
+    assert _TAG.match(cs.DEFAULT_CONVERTER_TAG), (
+        f"DEFAULT_CONVERTER_TAG is {cs.DEFAULT_CONVERTER_TAG!r}; a branch name would make every install fetch an unknown tree."
+    )
 
 
 def test_every_package_pins_a_full_sha256_and_a_versioned_asset() -> None:
     assert set(cs.PACKAGES) == {"rvt", "ifc", "dwg"}, "DGN is discontinued in this release generation"
     for fmt, pkg in cs.PACKAGES.items():
         assert _SHA256.match(pkg.sha256), f"{fmt}: {pkg.sha256!r} is not a lowercase hex SHA-256"
-        assert (
-            pkg.version.split("-")[0] in pkg.asset
-        ), f"{fmt}: asset {pkg.asset!r} does not carry version {pkg.version}"
+        assert pkg.version.split("-")[0] in pkg.asset, (
+            f"{fmt}: asset {pkg.asset!r} does not carry version {pkg.version}"
+        )
         assert pkg.asset.endswith("-portable.zip")
         assert pkg.size_bytes > 0
 

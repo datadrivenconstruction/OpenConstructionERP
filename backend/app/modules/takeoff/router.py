@@ -1120,8 +1120,7 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
             "platform": platform,
             "platform_unsupported": True,
             "message": (
-                f"{meta['name']} is published for Windows 10/11 x64 only; "
-                f"Linux and macOS builds are not available yet."
+                f"{meta['name']} is published for Windows 10/11 x64 only; Linux and macOS builds are not available yet."
             ),
         }
     except Exception as exc:  # noqa: BLE001 - last-ditch error envelope
