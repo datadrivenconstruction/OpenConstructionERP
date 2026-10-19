@@ -71,6 +71,7 @@ from app.modules.bi_dashboards.schemas import (
     BenchmarkSetPage,
     BenchmarkSetRead,
     BenchmarkSetUpdate,
+    CostIndexOptions,
     DashboardCreate,
     DashboardEvaluateRequest,
     DashboardEvaluateResponse,
@@ -95,6 +96,7 @@ from app.modules.bi_dashboards.schemas import (
     PerformanceCompareRequest,
     PerformanceCompareResponse,
     PerformanceConversion,
+    PerformanceCostIndex,
     PerformanceCurrencyConversion,
     PerformanceDataQualityRequest,
     PerformanceDataQualityResponse,
@@ -484,6 +486,34 @@ async def _fx_or_none(
     return await performance.load_fx_rates(session, reporting_currency, on_date=on_date)
 
 
+async def _cost_index_or_none(session: SessionDep, options: CostIndexOptions | None) -> performance.CostIndex | None:
+    """The register's series and regional factors a request names; 422 when it lacks them."""
+    if options is None:
+        return None
+    try:
+        return await performance.load_cost_index(
+            session,
+            series_id=options.index_series_id,
+            target_period=options.index_target_period,
+            target_region=options.location_target_region,
+        )
+    except performance.CostIndexError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+def _cost_index_read(index: performance.CostIndex | None, spec: dict[str, Any]) -> PerformanceCostIndex | None:
+    if index is None:
+        return None
+    return PerformanceCostIndex(
+        series_id=index.series_id,
+        series_name=index.series_name,
+        target_period=index.target_period,
+        target_region=index.target_region,
+        target_region_factor=index.target_region_factor,
+        applicable=performance.cost_index_applies(spec),
+    )
+
+
 def _unconverted(groups: list[performance.BenchmarkGroup], fx: performance.FxRates | None) -> list[str]:
     if fx is None:
         return []
@@ -504,10 +534,12 @@ async def _run_benchmark(
     split_by: str | None = None,
     reporting_currency: str | None = None,
     fx_date: Any = None,
+    cost_index: CostIndexOptions | None = None,
 ) -> PerformanceBenchmarkResponse:
     """One benchmark, from a request or a saved set: the single place both run."""
     split = _split_or_error(spec, split_by)
     fx = await _fx_or_none(session, reporting_currency, fx_date)
+    index = await _cost_index_or_none(session, cost_index)
     projects = await _cohort_projects(session, user_id, cohort)
     groups = await performance.benchmark(
         session,
@@ -518,6 +550,7 @@ async def _run_benchmark(
         convert=convert_units,
         split=split,
         fx=fx,
+        cost_index=index,
     )
     kept, omitted = performance.cap_groups(groups)
     selected = len(projects)
@@ -541,6 +574,7 @@ async def _run_benchmark(
         split_by=split.name if split else None,
         reporting_currency=fx.to_currency if fx else None,
         currencies_unconverted=_unconverted(groups, fx),
+        cost_index=_cost_index_read(index, spec),
         groups_omitted=omitted,
         projects_without_data=max(0, selected - len(with_data)),
     )
@@ -594,6 +628,7 @@ async def performance_benchmark(
         split_by=payload.split_by,
         reporting_currency=payload.reporting_currency,
         fx_date=payload.fx_date,
+        cost_index=payload,
     )
 
 
@@ -632,6 +667,14 @@ def _performance_group(
                 original_value=r.original_value,
                 original_currency=r.original_currency,
                 fx_rate=r.fx_rate,
+                index_series=r.index_series,
+                index_base_periods=list(r.index_base_periods),
+                index_target_period=r.index_target_period,
+                index_factor=r.index_factor,
+                index_missing_periods=list(r.index_missing_periods),
+                location_region=r.location_region,
+                location_factor=r.location_factor,
+                unadjusted_value=r.unadjusted_value,
             )
             for r in group.readings
         ],
@@ -890,6 +933,7 @@ async def _check_estimate(
     split_value: str | None = None,
     reporting_currency: str | None = None,
     fx_date: Any = None,
+    cost_index: CostIndexOptions | None = None,
 ) -> PerformanceCheckResponse:
     """Place one estimate in a cohort's range: the single place both check routes run.
 
@@ -908,6 +952,7 @@ async def _check_estimate(
 
     split = _split_or_error(spec, split_by)
     fx = await _fx_or_none(session, reporting_currency, fx_date)
+    index = await _cost_index_or_none(session, cost_index)
     projects = await _cohort_projects(session, user_id, cohort)
     groups = await performance.benchmark(
         session,
@@ -918,6 +963,7 @@ async def _check_estimate(
         convert=convert_units,
         split=split,
         fx=fx,
+        cost_index=index,
     )
     if split is not None:
         wanted = split_value if split_value not in ("", kpi_spec.NULL_GROUP_KEY) else None
@@ -928,7 +974,13 @@ async def _check_estimate(
         value = value * rate if performance.currency_value_exponent(spec) == 1 else value
         currency = fx.to_currency
     match = performance.find_group(groups, unit=unit, currency=currency)
-    base = {"kpi": code, "input_value": value, "input_unit": unit, "input_currency": currency}
+    base = {
+        "kpi": code,
+        "input_value": value,
+        "input_unit": unit,
+        "input_currency": currency,
+        "cost_index": _cost_index_read(index, spec),
+    }
     if match is None:
         return PerformanceCheckResponse(status=performance.CHECK_NO_GROUP, **base)
     group, from_unit = match
@@ -1003,6 +1055,7 @@ async def check_against_benchmark_set(
         unit=payload.unit,
         currency=payload.currency,
         boq_position_id=payload.boq_position_id,
+        cost_index=payload,
     )
 
 
@@ -1041,6 +1094,7 @@ async def check_against_cohort(
         split_value=payload.split_value,
         reporting_currency=payload.reporting_currency,
         fx_date=payload.fx_date,
+        cost_index=payload,
     )
 
 
@@ -1068,6 +1122,7 @@ async def compare_projects(
             (code, await _resolve_benchmark_spec(session, kpi=code, spec=None, row_filters=payload.row_filters))
         )
     fx = await _fx_or_none(session, payload.reporting_currency, payload.fx_date)
+    index = await _cost_index_or_none(session, payload)
     projects = await _cohort_projects(session, user_id, payload)
     selected = len(projects)
     columns: list[PerformanceCompareColumn] = []
@@ -1082,6 +1137,7 @@ async def compare_projects(
             period_end=payload.period_end,
             convert=payload.convert_units,
             fx=fx,
+            cost_index=index,
         )
         unconverted.update(_unconverted(groups, fx))
         kept, extra = performance.cap_groups(groups, COMPARE_GROUPS_PER_KPI)
@@ -1110,6 +1166,7 @@ async def compare_projects(
         reporting_currency=fx.to_currency if fx else None,
         currencies_unconverted=sorted(unconverted),
         statistic=payload.statistic,
+        cost_index=_cost_index_read(index, specs[0][1]) if index is not None else None,
     )
 
 
@@ -1165,6 +1222,10 @@ async def performance_drilldown(
     spec = await _resolve_benchmark_spec(session, kpi=payload.kpi, spec=payload.spec, row_filters=payload.row_filters)
     split = _split_or_error(spec, payload.split_by)
     fx = await _fx_or_none(session, payload.reporting_currency, payload.fx_date)
+    index = await _cost_index_or_none(session, payload)
+    region: str | None = None
+    if index is not None and index.target_region:
+        region = (await performance.project_regions(session, {payload.project_id})).get(payload.project_id)
     try:
         found = await performance.drilldown(
             session,
@@ -1178,6 +1239,8 @@ async def performance_drilldown(
             period_end=payload.period_end,
             offset=payload.offset,
             limit=payload.limit,
+            cost_index=index,
+            project_region=region,
         )
     except ImportError:
         found = performance.DrillResult(
@@ -1219,6 +1282,7 @@ async def performance_drilldown(
                 denominator=r.denominator,
                 counted_numerator=r.counted_numerator,
                 counted_denominator=r.counted_denominator,
+                index_factor=r.index_factor,
             )
             for r in found.records
         ],

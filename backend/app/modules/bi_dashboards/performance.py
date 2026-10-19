@@ -401,6 +401,7 @@ async def benchmark(
     convert: bool = False,
     split: Split | None = None,
     fx: FxRates | None = None,
+    cost_index: CostIndex | None = None,
 ) -> list[BenchmarkGroup]:
     """Read ``spec`` per project over ``cohort`` and summarise each group.
 
@@ -410,10 +411,13 @@ async def benchmark(
     project's reading by a project attribute or a row field. With ``fx`` money
     in other currencies is restated in the reporting currency first, then with
     ``convert`` compatible units are merged (:func:`convert_units`); both list
-    what they applied.
+    what they applied. With ``cost_index`` money is first brought to its
+    reference month and region, month by month and in its own currency
+    (:func:`normalise_costs`), and only then converted.
     """
     if not cohort:
         return []
+    indexed = cost_index if cost_index is not None and cost_index_applies(spec) else None
     try:
         readings = await kpi_spec.evaluate_spec_by_project(
             spec,
@@ -422,12 +426,16 @@ async def benchmark(
             period_start=period_start,
             period_end=period_end,
             split_field=split.row_field if split else None,
+            by_period=indexed is not None and indexed.temporal,
         )
     except ImportError:
         return []
     if split is not None and split.project_attribute is not None:
         values = await project_attribute_values(session, cohort, split.project_attribute)
         apply_project_split(readings, values, split.project_attribute)
+    if indexed is not None:
+        regions = await project_regions(session, cohort) if indexed.target_region else {}
+        readings = normalise_costs(readings, spec, indexed, project_regions=regions)
     if fx is not None:
         readings = convert_currencies(readings, spec, fx)
     conversions: dict[str, list[UnitConversion]] = {}
@@ -526,6 +534,11 @@ def _merge_pair(a: kpi_spec.ProjectReading, b: kpi_spec.ProjectReading, aggregat
         original_value=None,
         original_currency=a.original_currency if a.original_currency == b.original_currency else None,
         fx_rate=a.fx_rate if a.fx_rate == b.fx_rate else None,
+        index_base_periods=sorted(set(a.index_base_periods) | set(b.index_base_periods)),
+        index_factor=a.index_factor if a.index_factor == b.index_factor else None,
+        index_missing_periods=sorted(set(a.index_missing_periods) | set(b.index_missing_periods)),
+        location_factor=a.location_factor if a.location_factor == b.location_factor else None,
+        unadjusted_value=None,
     )
     if aggregation in ("ratio", "weighted_avg"):
         merged.numerator = (a.numerator or Decimal("0")) + (b.numerator or Decimal("0"))
@@ -1257,6 +1270,278 @@ def reading_currencies(readings_or_groups: list[BenchmarkGroup]) -> set[str]:
     }
 
 
+# ── Cost index: historical money at a reference date and region ─────────
+
+#: Why a reading has no value once a cost index was asked for.
+INDEX_PERIOD_MISSING = "index_period_missing"
+NO_RECORD_DATE = "no_record_date"
+NO_LOCATION_FACTOR = "no_location_factor"
+NO_PROJECT_REGION = "no_project_region"
+
+
+class CostIndexError(ValueError):
+    """The request asked for a series, period or region the register does not hold."""
+
+
+@dataclass(frozen=True)
+class CostIndex:
+    """What to bring historical money to, from the price index register.
+
+    A temporal part (``points`` of one series and the ``target_period`` the
+    money is brought to) and a location part (``target_region`` and every
+    regional factor), either or both. ``region_factors`` is keyed by the
+    trimmed, upper-cased region code.
+    """
+
+    series_id: uuid.UUID | None = None
+    series_name: str | None = None
+    points: dict[str, Decimal] = field(default_factory=dict)
+    target_period: str | None = None
+    target_region: str | None = None
+    region_factors: dict[str, Decimal] = field(default_factory=dict)
+
+    @property
+    def temporal(self) -> bool:
+        """Whether money is brought to another month."""
+        return bool(self.points) and self.target_period is not None
+
+    @property
+    def target_region_factor(self) -> Decimal | None:
+        """The regional factor of the region money is brought to."""
+        return self.region_factors.get(_region_key(self.target_region)) if self.target_region else None
+
+
+def _region_key(value: str | None) -> str:
+    return (value or "").strip().upper()
+
+
+def cost_index_applies(spec: dict[str, Any]) -> bool:
+    """Whether the KPI carries money a cost index can move (hours per m2 does not)."""
+    return currency_exponents(spec) != (0, 0)
+
+
+def pick_target_period(points: dict[str, Decimal], requested: str | None) -> str:
+    """The month money is brought to: the one asked for, or the series' latest.
+
+    Raises:
+        CostIndexError: The series is empty, or lacks the month asked for.
+    """
+    if not points:
+        raise CostIndexError("the cost index series has no points")
+    if requested is None:
+        return max(points)
+    if requested not in points:
+        raise CostIndexError(f"the cost index series has no point for {requested}")
+    return requested
+
+
+def _moved(
+    reading: kpi_spec.ProjectReading, factor: Decimal, num_exp: int, den_exp: int, aggregation: str
+) -> kpi_spec.ProjectReading:
+    """``reading`` with its money multiplied by ``factor``, the way an exchange rate moves it."""
+    out = replace(reading)
+    if aggregation in ("ratio", "weighted_avg"):
+        out.numerator = _times_rate(reading.numerator, factor, num_exp)
+        out.denominator = _times_rate(reading.denominator, factor, den_exp)
+        if reading.value is not None:
+            out.value, out.unavailable_reason = kpi_spec.ratio_value(out.numerator, out.denominator)
+    else:
+        out.value = _times_rate(reading.value, factor, num_exp)
+    return out
+
+
+def _merged(parts: list[kpi_spec.ProjectReading], aggregation: str) -> kpi_spec.ProjectReading:
+    merged = parts[0]
+    for part in parts[1:]:
+        merged = _merge_pair(merged, part, aggregation)
+    return merged
+
+
+def _effective_factor(before: Decimal | None, after: Decimal | None, factors: set[Decimal]) -> Decimal | None:
+    """The one factor that takes the value before to the value after."""
+    from app.modules.price_index.index_math import quantize_factor
+
+    if len(factors) == 1:
+        return next(iter(factors))
+    if before is None or after is None or before == 0:
+        return None
+    return quantize_factor(after / before)
+
+
+def normalise_costs(
+    readings: list[kpi_spec.ProjectReading],
+    spec: dict[str, Any],
+    index: CostIndex,
+    *,
+    project_regions: dict[uuid.UUID, str | None],
+) -> list[kpi_spec.ProjectReading]:
+    """Bring each reading's money to ``index``'s month and region, one month at a time.
+
+    ``readings`` come per project, group and month (``period``), as
+    :func:`kpi_spec.evaluate_spec_by_project` gives them with ``by_period``.
+    Each month moves by its own factor ``index(target) / index(month)`` and
+    the months of one project and group are then merged, so a project whose
+    money spans years is not restated with a single factor. The location
+    factor is ``region(target) / region(project's region)``.
+
+    Nothing is guessed. A month the series has no point for, rows without a
+    date, a project without a region or a region without a factor exclude the
+    whole reading with that reason: counting the rest of the project, or the
+    money that cannot move as it was beside money that moved, would print a
+    figure that is neither. A KPI without money is returned as it came.
+    """
+    from app.modules.price_index.index_math import PeriodNotFoundError, quantize_factor, resolve_factor
+
+    aggregation = spec["aggregation"]
+    if not cost_index_applies(spec):
+        return [replace(r, period=None) for r in readings]
+    num_exp, den_exp = currency_exponents(spec)
+
+    buckets: dict[tuple[uuid.UUID, str], list[kpi_spec.ProjectReading]] = {}
+    for reading in readings:
+        buckets.setdefault((reading.project_id, reading.group_key), []).append(reading)
+
+    out: list[kpi_spec.ProjectReading] = []
+    for (pid, _key), parts in buckets.items():
+        reason: str | None = None
+        location: Decimal | None = None
+        region = _region_key(project_regions.get(pid)) if index.target_region else ""
+        if index.target_region:
+            target_factor = index.target_region_factor
+            base_factor = index.region_factors.get(region) if region else None
+            if not region:
+                reason = NO_PROJECT_REGION
+            elif base_factor is None or base_factor <= 0 or target_factor is None:
+                reason = NO_LOCATION_FACTOR
+            else:
+                location = quantize_factor(target_factor / base_factor)
+
+        temporal_parts: list[kpi_spec.ProjectReading] = []
+        moved_parts: list[kpi_spec.ProjectReading] = []
+        factors: set[Decimal] = set()
+        missing: list[str] = []
+        for part in parts:
+            temporal = Decimal("1")
+            if index.temporal:
+                if part.period is None:
+                    reason = reason or NO_RECORD_DATE
+                    continue
+                try:
+                    temporal = resolve_factor(index.points, part.period, str(index.target_period))
+                except PeriodNotFoundError:
+                    missing.append(part.period)
+                    continue
+                factors.add(temporal)
+            timed = _moved(part, temporal, num_exp, den_exp, aggregation)
+            temporal_parts.append(timed)
+            moved_parts.append(_moved(timed, location, num_exp, den_exp, aggregation) if location else timed)
+        if missing and reason is None:
+            reason = INDEX_PERIOD_MISSING
+
+        before = _merged(parts, aggregation)
+        series = index.series_name if index.temporal else None
+        target_period = index.target_period if index.temporal else None
+        if reason is not None:
+            out.append(
+                replace(
+                    before,
+                    value=None,
+                    numerator=None,
+                    denominator=None,
+                    unavailable_reason=reason,
+                    period=None,
+                    index_series=series,
+                    index_target_period=target_period,
+                    index_missing_periods=sorted(set(missing)),
+                    location_region=region or None,
+                    unadjusted_value=before.value,
+                )
+            )
+            continue
+        timed_all = _merged(temporal_parts, aggregation)
+        after = _merged(moved_parts, aggregation)
+        out.append(
+            replace(
+                after,
+                period=None,
+                index_series=series,
+                index_base_periods=sorted({p.period for p in parts if p.period}) if index.temporal else [],
+                index_target_period=target_period,
+                index_factor=_effective_factor(before.value, timed_all.value, factors) if index.temporal else None,
+                index_missing_periods=[],
+                location_region=region or None,
+                location_factor=location,
+                unadjusted_value=before.value,
+            )
+        )
+    return out
+
+
+async def load_cost_index(
+    session: AsyncSession,
+    *,
+    series_id: uuid.UUID | None,
+    target_period: str | None,
+    target_region: str | None,
+) -> CostIndex | None:
+    """The series points and regional factors a request names, checked against the register.
+
+    ``None`` when the request asked for neither.
+
+    Raises:
+        CostIndexError: The price index module is not installed, the series
+            does not exist or lacks the target month, or the target region
+            has no factor.
+    """
+    region = (target_region or "").strip() or None
+    if series_id is None and region is None:
+        return None
+    try:
+        from app.modules.price_index.models import CostIndexPoint, CostIndexSeries, LocationFactor
+    except ImportError as exc:  # pragma: no cover - module removed
+        raise CostIndexError("the price index module is not installed") from exc
+
+    name: str | None = None
+    points: dict[str, Decimal] = {}
+    period: str | None = None
+    if series_id is not None:
+        series = await session.get(CostIndexSeries, series_id)
+        if series is None:
+            raise CostIndexError("cost index series not found")
+        name = series.name
+        rows = await session.execute(
+            select(CostIndexPoint.period, CostIndexPoint.factor).where(CostIndexPoint.series_id == series_id)
+        )
+        points = {str(p).strip(): Decimal(str(f)) for p, f in rows.all() if p and str(p).strip()}
+        period = pick_target_period(points, target_period)
+
+    factors: dict[str, Decimal] = {}
+    if region is not None:
+        rows = await session.execute(select(LocationFactor.region_code, LocationFactor.factor))
+        factors = {_region_key(code): Decimal(str(f)) for code, f in rows.all() if _region_key(code)}
+        target_factor = factors.get(_region_key(region))
+        if target_factor is None or target_factor <= 0:
+            raise CostIndexError(f"no location factor for region {region}")
+    return CostIndex(
+        series_id=series_id,
+        series_name=name,
+        points=points,
+        target_period=period,
+        target_region=_region_key(region) if region else None,
+        region_factors=factors,
+    )
+
+
+async def project_regions(session: AsyncSession, project_ids: set[uuid.UUID]) -> dict[uuid.UUID, str | None]:
+    """Each project's region as stored, for the location factor."""
+    if not project_ids:
+        return {}
+    from app.modules.projects.models import Project
+
+    rows = await session.execute(select(Project.id, Project.region).where(Project.id.in_(project_ids)))
+    return {pid: region for pid, region in rows.all()}
+
+
 # ── Data quality ────────────────────────────────────────────────────────
 
 
@@ -1389,6 +1674,9 @@ class DrillRecord:
     #: what the reading adds up; equal to the stored ones when nothing moved.
     counted_numerator: Decimal | None
     counted_denominator: Decimal | None
+    #: The cost index and location factor this row's money moved by, unset
+    #: when none was asked for or the row's month cannot be moved.
+    index_factor: Decimal | None = None
 
 
 @dataclass
@@ -1427,8 +1715,9 @@ def _restate(
     currency_exp: int,
     target_unit: str | None,
     fx: FxRates | None,
+    index_factor: Decimal | None = None,
 ) -> Decimal | None:
-    """One stored figure in the group's unit and currency, or ``None`` when it cannot be."""
+    """One stored figure in the group's unit, month, region and currency, or ``None`` when it cannot be."""
     if value is None:
         return None
     out: Decimal | None = value
@@ -1437,6 +1726,8 @@ def _restate(
         out = convert_strict(out, unit, target_unit, unit_exp)
         if out is None:
             return None
+    if index_factor is not None:
+        out = _times_rate(out, index_factor, currency_exp)
     code = (_usable_unit(dims.get(CURRENCY_DIMENSION)) or "").upper()
     if currency_exp and fx is not None and code and code != fx.to_currency:
         rate = fx.rates.get(code)
@@ -1459,6 +1750,8 @@ async def drilldown(
     period_end: _date | None = None,
     offset: int = 0,
     limit: int = 50,
+    cost_index: CostIndex | None = None,
+    project_region: str | None = None,
 ) -> DrillResult:
     """The rows behind one project's reading in one group, and their totals.
 
@@ -1473,9 +1766,14 @@ async def drilldown(
     the page, and restated into ``target_unit`` and ``fx`` the same way the
     benchmark restated the reading, so they equal the reading's numerator and
     denominator exactly. The page is ordered by the numerator, biggest
-    contributor first.
+    contributor first. With ``cost_index`` every row moves by the factor of
+    its own month and the project's region, as :func:`normalise_costs` moved
+    the reading, and a month that cannot move leaves the totals unavailable
+    with the same reason.
     """
     from sqlalchemy import func, literal, or_
+
+    from app.modules.price_index.index_math import PeriodNotFoundError, quantize_factor, resolve_factor
 
     bound = kpi_spec.bind_entity(spec["entity"])
     aggregation = spec["aggregation"]
@@ -1484,6 +1782,38 @@ async def drilldown(
     num_expr, den_expr = _row_measures(bound, spec)
     unit_num, unit_den = quotient_exponents(spec)
     cur_num, cur_den = currency_exponents(spec)
+    indexed = cost_index if cost_index is not None and cost_index_applies(spec) else None
+    period_exprs = kpi_spec.period_bucket_exprs(bound) if indexed is not None and indexed.temporal else []
+    blocked: str | None = None
+    location: Decimal | None = None
+    if indexed is not None and indexed.target_region:
+        region = _region_key(project_region)
+        base_factor = indexed.region_factors.get(region) if region else None
+        target_factor = indexed.target_region_factor
+        if not region:
+            blocked = NO_PROJECT_REGION
+        elif base_factor is None or base_factor <= 0 or target_factor is None:
+            blocked = NO_LOCATION_FACTOR
+        else:
+            location = quantize_factor(target_factor / base_factor)
+
+    def factor_for(period: str | None) -> tuple[Decimal | None, str | None]:
+        """The row's combined factor, or why it has none."""
+        if indexed is None:
+            return None, None
+        if blocked is not None:
+            return None, blocked
+        factor = Decimal("1")
+        if indexed.temporal:
+            if period is None:
+                return None, NO_RECORD_DATE
+            try:
+                factor = resolve_factor(indexed.points, period, str(indexed.target_period))
+            except PeriodNotFoundError:
+                return None, INDEX_PERIOD_MISSING
+        if location is not None:
+            factor = factor * location
+        return factor, None
 
     def scoped(stmt: Any) -> Any:
         stmt = kpi_spec._base_predicates(
@@ -1514,22 +1844,26 @@ async def drilldown(
         total_measures = [folded, literal(None)]
     else:
         total_measures = [func.sum(num_expr), func.sum(den_expr) if den_expr is not None else literal(None)]
-    totals_stmt = scoped(select(*dim_exprs, *total_measures, func.count()).select_from(bound.model))
-    if dim_exprs:
-        totals_stmt = totals_stmt.group_by(*dim_exprs)
+    totals_stmt = scoped(select(*dim_exprs, *period_exprs, *total_measures, func.count()).select_from(bound.model))
+    if dim_exprs or period_exprs:
+        totals_stmt = totals_stmt.group_by(*dim_exprs, *period_exprs)
 
     from app.modules.bi_dashboards.kpis import _to_decimal
 
     numerator: Decimal | None = None
     denominator: Decimal | None = None
     total_records = 0
+    unmovable: str | None = None
     for raw in (await session.execute(totals_stmt)).all():
         row = list(raw)
         count = int(row.pop() or 0)
         if count == 0:
             continue
         values = dict(zip(row_dims, (None if v is None else str(v) for v in row[: len(row_dims)]), strict=True))
-        n_raw, d_raw = row[len(row_dims) :]
+        month = kpi_spec.period_bucket_key(*row[len(row_dims) : len(row_dims) + 2]) if period_exprs else None
+        factor, why = factor_for(month)
+        unmovable = unmovable or why
+        n_raw, d_raw = row[len(row_dims) + len(period_exprs) :]
         n = _restate(
             _to_decimal(n_raw) if n_raw is not None else None,
             values,
@@ -1537,6 +1871,7 @@ async def drilldown(
             currency_exp=cur_num,
             target_unit=target_unit,
             fx=fx,
+            index_factor=factor,
         )
         d = _restate(
             _to_decimal(d_raw) if d_raw is not None else None,
@@ -1545,6 +1880,7 @@ async def drilldown(
             currency_exp=cur_den,
             target_unit=target_unit,
             fx=fx,
+            index_factor=factor,
         )
         total_records += count
         if aggregation == "min":
@@ -1560,6 +1896,9 @@ async def drilldown(
     reason: str | None = None
     if total_records == 0:
         value, reason = None, kpi_spec.UNAVAILABLE_NO_DATA
+    elif unmovable is not None:
+        numerator = denominator = None
+        value, reason = None, unmovable
     elif aggregation in ("ratio", "weighted_avg", "avg"):
         value, reason = kpi_spec.ratio_value(numerator, denominator)
     else:
@@ -1577,6 +1916,7 @@ async def drilldown(
             column("ref"),
             column("description"),
             *dim_exprs,
+            *period_exprs,
             num_expr.label("rec_num"),
             (den_expr if den_expr is not None else literal(None)).label("rec_den"),
         ).select_from(bound.model)
@@ -1591,7 +1931,9 @@ async def drilldown(
         row = list(raw)
         rid, boq_id, position_id, ref, description = row[:5]
         dim_values = row[5 : 5 + len(row_dims)]
-        n_raw, d_raw = row[5 + len(row_dims) :]
+        month = kpi_spec.period_bucket_key(*row[5 + len(row_dims) : 7 + len(row_dims)]) if period_exprs else None
+        factor, _why = factor_for(month)
+        n_raw, d_raw = row[5 + len(row_dims) + len(period_exprs) :]
         dims = dict(zip(row_dims, (None if v is None else str(v) for v in dim_values), strict=True))
         n = _to_decimal(n_raw) if n_raw is not None else None
         d = _to_decimal(d_raw) if d_raw is not None else None
@@ -1606,11 +1948,24 @@ async def drilldown(
                 numerator=n,
                 denominator=d,
                 counted_numerator=_restate(
-                    n, dims, unit_exp=unit_num, currency_exp=cur_num, target_unit=target_unit, fx=fx
+                    n,
+                    dims,
+                    unit_exp=unit_num,
+                    currency_exp=cur_num,
+                    target_unit=target_unit,
+                    fx=fx,
+                    index_factor=factor,
                 ),
                 counted_denominator=_restate(
-                    d, dims, unit_exp=unit_den, currency_exp=cur_den, target_unit=target_unit, fx=fx
+                    d,
+                    dims,
+                    unit_exp=unit_den,
+                    currency_exp=cur_den,
+                    target_unit=target_unit,
+                    fx=fx,
+                    index_factor=factor,
                 ),
+                index_factor=factor,
             )
         )
     return DrillResult(
@@ -1795,6 +2150,12 @@ __all__ = [
     "MAX_SPLIT_GROUPS",
     "PROJECT_SPLITS",
     "TAIL_PERCENTILES_FROM",
+    "INDEX_PERIOD_MISSING",
+    "NO_LOCATION_FACTOR",
+    "NO_PROJECT_REGION",
+    "NO_RECORD_DATE",
+    "CostIndex",
+    "CostIndexError",
     "CurrencyConversion",
     "DataQuality",
     "DrillRecord",
@@ -1805,6 +2166,11 @@ __all__ = [
     "apply_project_split",
     "cap_groups",
     "convert_currencies",
+    "cost_index_applies",
+    "load_cost_index",
+    "normalise_costs",
+    "pick_target_period",
+    "project_regions",
     "currency_exponents",
     "currency_value_exponent",
     "data_quality",

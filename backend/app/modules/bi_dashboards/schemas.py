@@ -664,7 +664,36 @@ class BenchmarkCohort(BaseModel):
         return self
 
 
-class PerformanceBenchmarkRequest(BenchmarkCohort):
+_PERIOD_RE = r"^\d{4}-(0[1-9]|1[0-2])$"
+
+
+class CostIndexOptions(BaseModel):
+    """Bring historical money to a reference month and region with the price index register.
+
+    Opt-in. ``index_series_id`` restates every month of money by the series'
+    ratio to ``index_target_period`` (the series' latest month when absent);
+    ``location_target_region`` restates it by the ratio of that region's
+    factor to the project's. Either or both. A reading whose month, project
+    region or region factor the register lacks is excluded with the reason.
+    """
+
+    index_series_id: UUID | None = None
+    index_target_period: str | None = Field(default=None, pattern=_PERIOD_RE)
+    location_target_region: str | None = Field(default=None, max_length=64)
+
+    @field_validator("location_target_region")
+    @classmethod
+    def _region(cls, value: str | None) -> str | None:
+        return (value or "").strip() or None
+
+    @model_validator(mode="after")
+    def _period_needs_series(self) -> CostIndexOptions:
+        if self.index_target_period and self.index_series_id is None:
+            raise ValueError("index_target_period needs index_series_id")
+        return self
+
+
+class PerformanceBenchmarkRequest(CostIndexOptions, BenchmarkCohort):
     """One KPI, read per project over a cohort.
 
     Exactly one of ``kpi`` (a preset id or a stored custom KPI code) and
@@ -731,6 +760,33 @@ class PerformanceProjectRow(BaseModel):
     original_value: Decimal | None = None
     original_currency: str | None = None
     fx_rate: Decimal | None = None
+    #: How a cost index moved this project's money, when one was asked for:
+    #: the series, the months the money was in, the month it was brought to,
+    #: the factor, the months the series lacks (which excluded the reading),
+    #: the project's region and the location factor, and the value before.
+    index_series: str | None = None
+    index_base_periods: list[str] = Field(default_factory=list)
+    index_target_period: str | None = None
+    index_factor: Decimal | None = None
+    index_missing_periods: list[str] = Field(default_factory=list)
+    location_region: str | None = None
+    location_factor: Decimal | None = None
+    unadjusted_value: Decimal | None = None
+
+
+class PerformanceCostIndex(BaseModel):
+    """The reference a benchmark brought historical money to.
+
+    ``applicable`` is false for a KPI without money (hours per m2), which a
+    cost index leaves as it is.
+    """
+
+    series_id: UUID | None = None
+    series_name: str | None = None
+    target_period: str | None = None
+    target_region: str | None = None
+    target_region_factor: Decimal | None = None
+    applicable: bool = True
 
 
 class PerformanceBenchmarkFigures(BaseModel):
@@ -831,6 +887,8 @@ class PerformanceBenchmarkResponse(BaseModel):
     reporting_currency: str | None = None
     #: Currencies the FX register had no rate for; they kept their own group.
     currencies_unconverted: list[str] = Field(default_factory=list)
+    #: The month and region money was brought to, when a cost index was asked for.
+    cost_index: PerformanceCostIndex | None = None
     #: Groups beyond the split cap, counted rather than dropped silently.
     groups_omitted: int = 0
     #: Selected projects with no row at all for this KPI.
@@ -975,7 +1033,7 @@ class BenchmarkSetEvaluateRequest(BaseModel):
     kpi: str | None = Field(default=None, min_length=1, max_length=100)
 
 
-class PerformanceCheckRequest(BaseModel):
+class PerformanceCheckRequest(CostIndexOptions):
     """Where an estimate sits against a benchmark set's history.
 
     Either a ``value`` in ``unit`` and ``currency`` typed by the estimator,
@@ -1020,7 +1078,7 @@ class PerformanceAdHocCheckRequest(PerformanceBenchmarkRequest):
         return self
 
 
-class PerformanceCompareRequest(BenchmarkCohort):
+class PerformanceCompareRequest(CostIndexOptions, BenchmarkCohort):
     """Several KPIs over one cohort, one project per row and one column per KPI group.
 
     The same cohort and reading options as ``POST /performance/benchmark``;
@@ -1069,6 +1127,7 @@ class PerformanceCompareResponse(BaseModel):
     reporting_currency: str | None = None
     currencies_unconverted: list[str] = Field(default_factory=list)
     statistic: str = "weighted"
+    cost_index: PerformanceCostIndex | None = None
 
 
 class PerformanceDataQualityRequest(BenchmarkCohort):
@@ -1092,7 +1151,7 @@ class PerformanceDataQualityResponse(BaseModel):
     classification_share: Decimal | None = None
 
 
-class PerformanceDrilldownRequest(BaseModel):
+class PerformanceDrilldownRequest(CostIndexOptions):
     """The rows behind one project's reading in one group.
 
     ``dimensions`` lists, per row dimension of the group, the stored values
@@ -1151,6 +1210,8 @@ class PerformanceDrillRecord(BaseModel):
     denominator: Decimal | None = None
     counted_numerator: Decimal | None = None
     counted_denominator: Decimal | None = None
+    #: The cost index and location factor this record's money moved by.
+    index_factor: Decimal | None = None
 
 
 class PerformanceDrilldownResponse(BaseModel):
@@ -1253,6 +1314,9 @@ class PerformanceCheckResponse(BaseModel):
     band: str | None = None
     confidence: str | None = None
     shortfall: list[str] = Field(default_factory=list)
+    #: The month and region the history was brought to; the estimate is
+    #: read as already being in them.
+    cost_index: PerformanceCostIndex | None = None
 
 
 __all__ = [
@@ -1289,6 +1353,7 @@ __all__ = [
     "BenchmarkSetPage",
     "BenchmarkSetRead",
     "BenchmarkSetUpdate",
+    "CostIndexOptions",
     "PerformanceAdHocCheckRequest",
     "PerformanceBenchmarkFigures",
     "PerformanceBenchmarkRequest",
@@ -1297,6 +1362,7 @@ __all__ = [
     "PerformanceCheckResponse",
     "PerformanceCohortOptions",
     "PerformanceConversion",
+    "PerformanceCostIndex",
     "PerformanceEvidence",
     "PerformanceGroup",
     "PerformancePreset",

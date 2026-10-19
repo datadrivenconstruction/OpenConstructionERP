@@ -45,6 +45,7 @@ import { fmtList, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
 import { compareNames } from '@/shared/lib/collator';
 import { useToastStore } from '@/stores/useToastStore';
 import { listKpis } from '@/features/bi-dashboards/api';
+import { fetchSeries, listLocationFactors, listSeries } from '@/features/price-index/api';
 import { CustomKpiModal } from '@/features/bi-dashboards/CustomKpiModal';
 import { useProjectStatusLabel } from '@/features/projects/ProjectStatusBadge';
 import { PerformanceCompare } from './PerformanceCompare';
@@ -129,6 +130,9 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
   const [statuses, setStatuses] = useState<string[]>([]);
   const [splitBy, setSplitBy] = useState('');
   const [reportingCurrency, setReportingCurrency] = useState('');
+  const [indexSeriesId, setIndexSeriesId] = useState('');
+  const [indexPeriod, setIndexPeriod] = useState('');
+  const [indexRegion, setIndexRegion] = useState('');
   const [minRecords, setMinRecords] = useState(DEFAULT_READING.min_records);
   const [drill, setDrill] = useState<DrillTarget | null>(null);
   const [kpiModalOpen, setKpiModalOpen] = useState(false);
@@ -155,6 +159,29 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
     queryFn: fetchCohortOptions,
     staleTime: 5 * 60_000,
   });
+  // The price index register, read only once the person opens the extra options.
+  const seriesQuery = useQuery({
+    queryKey: ['price-index', 'series'],
+    queryFn: listSeries,
+    enabled: showMore,
+    staleTime: 5 * 60_000,
+  });
+  const seriesDetailQuery = useQuery({
+    queryKey: ['price-index', 'series', indexSeriesId],
+    queryFn: () => fetchSeries(indexSeriesId),
+    enabled: showMore && Boolean(indexSeriesId),
+    staleTime: 5 * 60_000,
+  });
+  const regionsQuery = useQuery({
+    queryKey: ['price-index', 'location-factors'],
+    queryFn: listLocationFactors,
+    enabled: showMore,
+    staleTime: 5 * 60_000,
+  });
+  const indexPeriods = useMemo(
+    () => [...new Set((seriesDetailQuery.data?.points ?? []).map((p) => p.period))].sort().reverse(),
+    [seriesDetailQuery.data],
+  );
   const setsQuery = useQuery({
     queryKey: ['analytics', 'performance', 'benchmark-sets'],
     queryFn: fetchBenchmarkSets,
@@ -190,8 +217,23 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
       statistic,
       split_by: validSplit,
       reporting_currency: validCurrency,
+      index_series_id: indexSeriesId || null,
+      index_target_period: indexSeriesId && indexPeriod ? indexPeriod : null,
+      location_target_region: indexRegion || null,
     }),
-    [cohort, kpi, convertUnits, minProjects, minRecords, statistic, validSplit, validCurrency],
+    [
+      cohort,
+      kpi,
+      convertUnits,
+      minProjects,
+      minRecords,
+      statistic,
+      validSplit,
+      validCurrency,
+      indexSeriesId,
+      indexPeriod,
+      indexRegion,
+    ],
   );
 
   const benchmarkQuery = useQuery({
@@ -565,6 +607,76 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                 className={`${inputClass} w-20`}
                 data-testid="analytics-performance-currency"
               />
+            </label>
+            <label
+              className="flex flex-col gap-1 text-xs text-content-secondary"
+              title={t('analytics.perf.index_series_hint', {
+                defaultValue:
+                  'Restate historical money to a reference month with a cost index from Price Index. Each month of a project moves by its own factor. A month the index does not cover leaves that project out, with the reason.',
+              })}
+            >
+              {t('analytics.perf.index_series_label', { defaultValue: 'Cost index' })}
+              <select
+                value={indexSeriesId}
+                onChange={(e) => {
+                  setIndexSeriesId(e.target.value);
+                  setIndexPeriod('');
+                }}
+                className={inputClass}
+                data-testid="analytics-performance-index-series"
+              >
+                <option value="">{t('analytics.perf.index_series_none', { defaultValue: 'Do not adjust' })}</option>
+                {(seriesQuery.data ?? []).map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {indexSeriesId && (
+              <label className="flex flex-col gap-1 text-xs text-content-secondary">
+                {t('analytics.perf.index_period_label', { defaultValue: 'Reference month' })}
+                <select
+                  value={indexPeriod}
+                  onChange={(e) => setIndexPeriod(e.target.value)}
+                  className={inputClass}
+                  data-testid="analytics-performance-index-period"
+                >
+                  <option value="">
+                    {t('analytics.perf.index_period_latest', {
+                      defaultValue: 'Latest ({{period}})',
+                      period: indexPeriods[0] ?? '-',
+                    })}
+                  </option>
+                  {indexPeriods.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <label
+              className="flex flex-col gap-1 text-xs text-content-secondary"
+              title={t('analytics.perf.index_region_hint', {
+                defaultValue:
+                  "Restate money by the ratio of this region's factor to each project's region. A project without a region or a factor is left out, with the reason.",
+              })}
+            >
+              {t('analytics.perf.index_region_label', { defaultValue: 'Reference region' })}
+              <select
+                value={indexRegion}
+                onChange={(e) => setIndexRegion(e.target.value)}
+                className={inputClass}
+                data-testid="analytics-performance-index-region"
+              >
+                <option value="">{t('analytics.perf.index_region_none', { defaultValue: 'No regional adjustment' })}</option>
+                {(regionsQuery.data ?? []).map((r) => (
+                  <option key={r.id} value={r.region_code}>
+                    {r.label && r.label !== r.region_code ? `${r.region_code} · ${r.label}` : r.region_code}
+                  </option>
+                ))}
+              </select>
             </label>
             <label className="flex flex-col gap-1 text-xs text-content-secondary">
               {t('analytics.perf.statistic_label', { defaultValue: 'Lead with' })}
@@ -1095,6 +1207,42 @@ function PerformanceGroupCard({
                         })}
                       </div>
                     )}
+                    {(row?.index_factor != null || row?.location_factor != null) && (
+                      <div className="text-2xs text-content-tertiary" data-testid="analytics-performance-index-provenance">
+                        {t('analytics.perf.index_was', {
+                          defaultValue: 'was {{value}}',
+                          value: fmtValue(row.unadjusted_value ?? null) ?? '-',
+                        })}
+                        {row.index_factor != null && (
+                          <span className="ms-1">
+                            {t('analytics.perf.index_provenance', {
+                              defaultValue: 'x{{factor}} {{series}}, {{from}} to {{to}}',
+                              factor: fmtNumber(toNumber(row.index_factor) ?? 0, 4),
+                              series: row.index_series ?? '',
+                              from: periodSpan(row.index_base_periods ?? []),
+                              to: row.index_target_period ?? '',
+                            })}
+                          </span>
+                        )}
+                        {row.location_factor != null && (
+                          <span className="ms-1">
+                            {t('analytics.perf.location_provenance', {
+                              defaultValue: 'x{{factor}} region {{region}}',
+                              factor: fmtNumber(toNumber(row.location_factor) ?? 0, 4),
+                              region: row.location_region ?? '',
+                            })}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {(row?.index_missing_periods ?? []).length > 0 && (
+                      <div className="text-2xs text-content-tertiary">
+                        {t('analytics.perf.index_missing', {
+                          defaultValue: 'the index has no point for {{periods}}',
+                          periods: fmtList(row?.index_missing_periods ?? []),
+                        })}
+                      </div>
+                    )}
                     {row?.original_currency && row.original_value != null && (
                       <div className="text-2xs text-content-tertiary">
                         {t('analytics.perf.fx_original', {
@@ -1271,6 +1419,14 @@ function CheckResult({
           })}
         </span>
       )}
+      {result.cost_index?.applicable && (result.cost_index.target_period || result.cost_index.target_region) && (
+        <span className="text-content-tertiary">
+          {t('analytics.perf.check_indexed', {
+            defaultValue: 'against history brought to {{reference}}',
+            reference: [result.cost_index.target_period, result.cost_index.target_region].filter(Boolean).join(' / '),
+          })}
+        </span>
+      )}
       {rank !== null && (
         <span>
           {t('analytics.perf.check_rank', { defaultValue: 'percentile {{rank}}', rank: fmtNumber(rank, 0) })}
@@ -1310,15 +1466,50 @@ function CheckResult({
   );
 }
 
+/** `2020-06` for one month, `2020-06 - 2022-11` for several. */
+function periodSpan(periods: string[]): string {
+  if (periods.length === 0) return '';
+  const sorted = [...periods].sort();
+  const first = sorted[0] ?? '';
+  const last = sorted[sorted.length - 1] ?? '';
+  return first === last ? first : `${first} - ${last}`;
+}
+
 /** What the response left out or could not convert, so a missing block is never a silent one. */
 function BenchmarkNotices({ data }: { data: PerformanceBenchmarkResponse }) {
   const { t } = useTranslation();
   const unconverted = data.currencies_unconverted ?? [];
   const omitted = data.groups_omitted ?? 0;
   const without = data.projects_without_data ?? 0;
-  if (!unconverted.length && !omitted && !without) return null;
+  const index = data.cost_index ?? null;
+  if (!unconverted.length && !omitted && !without && !index) return null;
   return (
     <div className="space-y-1 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-xs text-content-secondary">
+      {index && !index.applicable && (
+        <p>
+          {t('analytics.perf.index_not_applicable', {
+            defaultValue: 'This KPI carries no money, so the cost index does not change it.',
+          })}
+        </p>
+      )}
+      {index && index.applicable && index.series_name && (
+        <p data-testid="analytics-performance-index-notice">
+          {t('analytics.perf.index_notice', {
+            defaultValue:
+              'Money is brought to {{period}} with {{series}}, each month by its own factor. Projects with a month the index does not cover are left out.',
+            period: index.target_period ?? '',
+            series: index.series_name,
+          })}
+        </p>
+      )}
+      {index && index.applicable && index.target_region && (
+        <p>
+          {t('analytics.perf.index_region_notice', {
+            defaultValue: 'Money is brought to region {{region}}. Projects without a region or a regional factor are left out.',
+            region: index.target_region,
+          })}
+        </p>
+      )}
       {unconverted.length > 0 && (
         <p>
           {t('analytics.perf.fx_missing', {
