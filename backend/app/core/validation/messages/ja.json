@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "請求書{number}は、請負業者、金額({amount})、日付({on})が請求書{other}と同じです。",
       "suggestion": "別の番号で同じ請求書を二重に入力していないか確認してください。"
+    },
+    "certificate_missing": {
+      "fail": "契約 {contract} の請求書 {number}: 受取人は {on} 時点で有効な{certificate}を保有しておらず、{reference} は支払の解除前にこれを要求しています。",
+      "suggestion": "証明書を受取人の下請業者レコードに記録するか、提示されるまで支払を保留してください。"
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "社会保険納付証明書",
+    "construction_tax_exemption": "建設税免除証明書",
+    "employers_liability_clearance": "使用者責任に関する無債務証明書",
+    "insurance": "保険証券",
+    "license": "請負業者免許"
   }
 }

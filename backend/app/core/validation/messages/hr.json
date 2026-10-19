@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "Račun {number} ima istog izvođača, iznos ({amount}) i datum ({on}) kao račun {other}.",
       "suggestion": "Provjerite da nije riječ o istom računu unesenom dvaput pod drugim brojem."
+    },
+    "certificate_missing": {
+      "fail": "Račun {number} uz ugovor {contract}: primatelj na dan {on} nema valjan dokument ({certificate}) koji {reference} traži prije isplate.",
+      "suggestion": "Evidentirajte dokument u zapisu podizvođača primatelja ili zadržite isplatu dok se ne predoči."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "potvrda o podmirenim obvezama socijalnog osiguranja",
+    "construction_tax_exemption": "potvrda o oslobođenju od poreza na gradnju",
+    "employers_liability_clearance": "potvrda o ispunjenju odgovornosti poslodavaca",
+    "insurance": "potvrda o osiguranju",
+    "license": "licenca izvođača"
   }
 }

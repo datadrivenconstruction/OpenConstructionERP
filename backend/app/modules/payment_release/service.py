@@ -41,6 +41,7 @@ from app.modules.payment_release.billing import (
     released_retention_held,
 )
 from app.modules.payment_release.models import InvoiceRelease, PaymentTerms, RetentionPosting
+from app.modules.payment_release.release_certificates import ENFORCEMENT_KEY, normalise_enforcement
 from app.modules.payment_release.repository import PaymentReleaseRepository
 from app.modules.payment_release.validators import PAYLOAD_KEY, RULE_NUMBERS, RULE_SET
 
@@ -143,6 +144,9 @@ class PaymentReleaseService:
             "rounding_step": Decimal(str(row.rounding_step)) if row else ZERO,
             "interim_due_days": row.interim_due_days if row else None,
             "final_due_days": row.final_due_days if row else None,
+            "release_certificates_enforcement": normalise_enforcement((row.metadata_ or {}).get(ENFORCEMENT_KEY))
+            if row
+            else "pack",
         }
 
     async def put_terms(self, contract: Any, body: Any, actor: str | None) -> dict[str, Any]:
@@ -152,6 +156,9 @@ class PaymentReleaseService:
             row = PaymentTerms(contract_id=contract.id, project_id=contract.project_id)
             self.session.add(row)
         values = body.model_dump()
+        enforcement = values.pop("release_certificates_enforcement", None)
+        if enforcement is not None:
+            row.metadata_ = {**(row.metadata_ or {}), ENFORCEMENT_KEY: enforcement}
         contract.retention_percent = values.pop("retention_percent")
         contract.retention_release_event = values.pop("retention_release_event")
         for key, value in values.items():
@@ -633,6 +640,49 @@ class PaymentReleaseService:
         invoices.extend(invoice_facts(inv, None) for inv in billing.loose_invoices)
         return {"currency": billing.currency, "contracts": contracts, "invoices": invoices}
 
+    async def _attach_release_certificates(
+        self, payload: dict[str, Any], project_id: uuid.UUID, billing: Billing
+    ) -> None:
+        """Add what V19 reads: the release date, and per contract the gated requirements and the payee's certificates.
+
+        Nothing is attached when the project's pack gates no payment on a
+        certificate, so every other project's payload stays as it was.
+        """
+        from app.core.regional_packs import resolve_progress_billing  # noqa: PLC0415
+        from app.modules.payment_release.release_certificates import (  # noqa: PLC0415
+            counterparty_certificates,
+            gated_requirements,
+        )
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        payload["as_of"] = datetime.now(UTC).date().isoformat()
+        project = await self.session.get(Project, project_id)
+        if project is None:
+            return
+        requirements = gated_requirements(
+            resolve_progress_billing(
+                country_code=getattr(project, "country_code", None), region=getattr(project, "region", None)
+            )
+        )
+        if not requirements or not billing.contracts:
+            return
+        ids = [uuid.UUID(c.id) for c in billing.contracts]
+        rows = (await self.session.execute(select(PaymentTerms).where(PaymentTerms.contract_id.in_(ids)))).scalars()
+        enforcement = {
+            str(r.contract_id): normalise_enforcement((r.metadata_ or {}).get(ENFORCEMENT_KEY)) for r in rows
+        }
+        held = await counterparty_certificates(self.session, [c.counterparty_id for c in billing.contracts])
+        by_id = {c.id: c for c in billing.contracts}
+        for entry in payload.get("contracts") or []:
+            record = by_id.get(entry.get("id"))
+            if record is None:
+                continue
+            entry["release_certificates"] = {
+                "enforcement": enforcement.get(record.id, "pack"),
+                "requirements": requirements,
+                "certificates": held.get(str(record.counterparty_id or ""), []),
+            }
+
     async def findings(
         self, project_id: uuid.UUID, *, locale: str, billing: Billing | None = None
     ) -> list[dict[str, Any]]:
@@ -640,8 +690,10 @@ class PaymentReleaseService:
         from app.core.validation.engine import ValidationContext, rule_registry
 
         billing = billing or await load_billing(self.session, project_id)
+        payload = self.rules_payload(billing)
+        await self._attach_release_certificates(payload, project_id, billing)
         context = ValidationContext(
-            data={PAYLOAD_KEY: self.rules_payload(billing)},
+            data={PAYLOAD_KEY: payload},
             project_id=str(project_id),
             metadata={"locale": locale},
         )

@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "La facture {number} a la même entreprise, le même montant ({amount}) et la même date ({on}) que la facture {other}.",
       "suggestion": "Vérifiez qu'il ne s'agit pas de la même facture saisie deux fois sous un autre numéro."
+    },
+    "certificate_missing": {
+      "fail": "Facture {number} du contrat {contract} : le bénéficiaire ne détient aucun justificatif valide au {on} ({certificate}), que {reference} exige avant la libération du paiement.",
+      "suggestion": "Enregistrez le justificatif sur la fiche sous-traitant du bénéficiaire, ou retenez le paiement jusqu'à sa présentation."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "attestation de régularité auprès de l'assurance sociale",
+    "construction_tax_exemption": "attestation d'exonération de la taxe de construction",
+    "employers_liability_clearance": "attestation de régularité de la responsabilité des employeurs",
+    "insurance": "attestation d'assurance",
+    "license": "licence d'entrepreneur"
   }
 }

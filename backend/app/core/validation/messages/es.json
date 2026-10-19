@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "La factura {number} tiene el mismo contratista, importe ({amount}) y fecha ({on}) que la factura {other}.",
       "suggestion": "Compruebe que no sea la misma factura registrada dos veces con otro número."
+    },
+    "certificate_missing": {
+      "fail": "Factura {number} del contrato {contract}: el beneficiario no tiene {certificate} vigente a fecha {on}, documento que {reference} exige antes de liberar el pago.",
+      "suggestion": "Registre el documento en la ficha de subcontratista del beneficiario, o retenga el pago hasta que se presente."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "certificado de estar al corriente con la seguridad social",
+    "construction_tax_exemption": "certificado de exención del impuesto de construcción",
+    "employers_liability_clearance": "certificado de cumplimiento de la responsabilidad del empleador",
+    "insurance": "certificado de seguro",
+    "license": "licencia de contratista"
   }
 }

@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "{number} numaralı fatura, {other} numaralı faturayla aynı müteahhit, tutar ({amount}) ve tarihe ({on}) sahip.",
       "suggestion": "Aynı faturanın başka bir numarayla iki kez girilmediğini kontrol edin."
+    },
+    "certificate_missing": {
+      "fail": "{contract} sözleşmesindeki {number} numaralı fatura: ödeme alıcısında {on} tarihinde geçerli bir {certificate} bulunmuyor; {reference} ödeme serbest bırakılmadan önce bunu şart koşuyor.",
+      "suggestion": "Belgeyi alıcının alt yüklenici kaydına işleyin veya belge ibraz edilene kadar ödemeyi bekletin."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "sosyal sigorta borcu yoktur belgesi",
+    "construction_tax_exemption": "inşaat vergisi muafiyet belgesi",
+    "employers_liability_clearance": "işveren sorumluluğu borcu yoktur belgesi",
+    "insurance": "sigorta belgesi",
+    "license": "yüklenici ruhsatı"
   }
 }

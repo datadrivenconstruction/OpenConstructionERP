@@ -57,6 +57,7 @@ class LimitationRegime(StrEnum):
 
     DE_VOB_B = "de_vob_b"  # VOB/B agreed: four years for building works
     DE_BGB = "de_bgb"  # no VOB/B: the BGB's five years
+    EG_CIVIL_651 = "eg_civil_651"  # Egypt: decennial liability of the architect and the contractor
 
 
 @dataclass(frozen=True)
@@ -118,6 +119,29 @@ LIMITATION_REGIMES: tuple[LimitationRegimeSpec, ...] = (
             "carries its period by hand. Where the contractor concealed the defect fraudulently the ordinary "
             "limitation rules displace this period entirely (§ 634a Abs. 3 BGB); that is a legal finding "
             "about a particular defect and nothing a register can compute."
+        ),
+    ),
+    LimitationRegimeSpec(
+        code=LimitationRegime.EG_CIVIL_651.value,
+        jurisdiction="Egypt",
+        country_code="EG",
+        statute="Civil Code (Law 131/1948) Art. 651 (decennial liability)",
+        statute_reference=(
+            "Art. 651 Egyptian Civil Code: ten years from delivery of the works; the claim lapses three years "
+            "after the collapse or the discovery of the defect (Art. 654)"
+        ),
+        months=120,
+        starts_from="acceptance",
+        notes=(
+            "The architect and the contractor are jointly liable for ten years for the total or partial collapse "
+            "of buildings and other fixed structures they built, and for defects that threaten their stability, "
+            "even where the defect lies in the ground or the owner approved the faulty work, unless the structure "
+            "was meant to last less than ten years. The ten years run from delivery, recorded here as the "
+            "acceptance date. An architect who only designed is liable only for design defects (Art. 652), and a "
+            "clause that excludes or limits the liability is void. A claim must be brought within three years of "
+            "the collapse or of the discovery of the defect (Art. 654), a second clock this register does not "
+            "compute because it starts on an event only a person can record. Read in secondary summaries of the "
+            "Civil Code; the article numbering of 652 and 653 differs between sources."
         ),
     ),
 )

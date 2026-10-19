@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "Ang invoice {number} ay may parehong kontratista, halaga ({amount}) at petsa ({on}) gaya ng invoice {other}.",
       "suggestion": "Tiyaking hindi ito iisang invoice na dalawang beses naipasok sa ibang numero."
+    },
+    "certificate_missing": {
+      "fail": "Invoice {number} sa kontratang {contract}: walang {certificate} na may bisa sa {on} ang tumatanggap ng bayad, na hinihingi ng {reference} bago ilabas ang bayad.",
+      "suggestion": "Itala ang sertipiko sa talaan ng subcontractor ng tumatanggap, o ipagpaliban ang bayad hanggang maipakita ito."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "sertipiko ng clearance sa social insurance",
+    "construction_tax_exemption": "sertipiko ng exemption sa construction tax",
+    "employers_liability_clearance": "sertipiko ng clearance sa pananagutan ng employer",
+    "insurance": "sertipiko ng insurance",
+    "license": "lisensya ng kontratista"
   }
 }

@@ -1948,3 +1948,42 @@ class HakedisResponse(BaseModel):
     carried_total: str | None = None
     findings: list[dict[str, Any]]
     can_certify: bool
+
+
+# ── Price adjustment by weighted cost indices ────────────────────────────
+
+
+class PriceAdjustmentCoefficientIn(BaseModel):
+    """One variable item: its coefficient and either its two index values or the series to read them from."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    item: str = Field(..., min_length=1, max_length=120)
+    coefficient: Decimal
+    base_index: Decimal | None = None
+    current_index: Decimal | None = None
+    # A cost-index series of the price_index module; its points for
+    # ``base_period`` and ``current_period`` are read when the values are not sent.
+    index_series_id: UUID | None = None
+
+
+class PriceAdjustmentComputeRequest(BaseModel):
+    """One settlement of a weighted index price adjustment."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    regime: str = Field(..., min_length=1, max_length=60)
+    value_subject: Decimal
+    coefficients: list[PriceAdjustmentCoefficientIn] = Field(..., min_length=1, max_length=50)
+    base_period: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
+    current_period: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
+
+
+class PriceAdjustmentComputeResponse(BaseModel):
+    """The adjustment: positive is owed to the contractor, negative is deducted."""
+
+    regime: str
+    value_subject: str
+    fixed_portion: str
+    items: list[dict[str, str]]
+    total: str

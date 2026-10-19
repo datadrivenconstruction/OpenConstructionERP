@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "Invoice {number} has the same contractor, amount ({amount}) and date ({on}) as invoice {other}.",
       "suggestion": "Check that it is not the same invoice entered twice under another number."
+    },
+    "certificate_missing": {
+      "fail": "Invoice {number} on contract {contract}: the payee holds no {certificate} valid on {on}, which {reference} requires before the payment is released.",
+      "suggestion": "Record the certificate on the payee's subcontractor record, or hold the payment until it is shown."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "social insurance clearance certificate",
+    "construction_tax_exemption": "construction tax exemption certificate",
+    "employers_liability_clearance": "employers' liability clearance certificate",
+    "insurance": "insurance certificate",
+    "license": "contractor licence"
   }
 }

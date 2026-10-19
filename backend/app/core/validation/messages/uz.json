@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "{number} hisob-fakturasining pudratchisi, summasi ({amount}) va sanasi ({on}) {other} hisob-fakturasi bilan bir xil.",
       "suggestion": "Bu boshqa raqam bilan ikki marta kiritilgan bitta hisob-faktura emasligini tekshiring."
+    },
+    "certificate_missing": {
+      "fail": "{contract} shartnomasi bo'yicha {number}-hisob-faktura: oluvchida {on} sanasida amal qiladigan {certificate} yo'q, uni to'lovni bo'shatishdan oldin {reference} talab qiladi.",
+      "suggestion": "Guvohnomani oluvchining subpudratchi yozuviga kiriting yoki u ko'rsatilguncha to'lovni ushlab turing."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "ijtimoiy sug'urta bo'yicha qarzi yo'qligi haqidagi ma'lumotnoma",
+    "construction_tax_exemption": "qurilish solig'idan ozod etilganlik guvohnomasi",
+    "employers_liability_clearance": "ish beruvchilar javobgarligi bo'yicha qarzi yo'qligi haqidagi ma'lumotnoma",
+    "insurance": "sug'urta guvohnomasi",
+    "license": "pudratchi litsenziyasi"
   }
 }

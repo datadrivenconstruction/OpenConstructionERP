@@ -1188,6 +1188,17 @@
     "possible_duplicate": {
       "fail": "Factura {number} are același constructor, aceeași sumă ({amount}) și aceeași dată ({on}) ca factura {other}.",
       "suggestion": "Verifică să nu fie aceeași factură introdusă de două ori sub alt număr."
+    },
+    "certificate_missing": {
+      "fail": "Factura {number} la contractul {contract}: beneficiarul nu deține la data {on} un document valabil ({certificate}), pe care {reference} îl cere înainte de eliberarea plății.",
+      "suggestion": "Înregistrați documentul în fișa de subcontractant a beneficiarului sau rețineți plata până la prezentarea lui."
     }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "certificat de lipsă a restanțelor la asigurările sociale",
+    "construction_tax_exemption": "certificat de scutire de taxa pe construcții",
+    "employers_liability_clearance": "certificat de lipsă a restanțelor privind răspunderea angajatorilor",
+    "insurance": "certificat de asigurare",
+    "license": "licența antreprenorului"
   }
 }

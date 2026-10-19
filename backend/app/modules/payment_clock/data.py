@@ -2372,6 +2372,98 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
             "the same as the public regime, and the sourcing caveat there applies here too."
         ),
     },
+    # Egypt, the Public Contracts Law 182/2018 and its Executive Regulations
+    # (Minister of Finance Decree 692/2019), read in the consolidated English
+    # translation by Andersen Egypt (January 2026) on 2026-10-19. Law Art. 45:
+    # "In works contracts, the administrative entity shall make interim
+    # payments on account according to progress of work within sixty (60)
+    # days calculated from the date the payment certificate is submitted to
+    # it"; supplies and services "within a period not exceeding thirty (30)
+    # days calculated from the date of inspection, acceptance, and approval".
+    # Late payment: "the financing cost of the claim value or the approved
+    # payment certificate for the period of delay, calculated in accordance
+    # with the credit and discount rate announced by the Central Bank at the
+    # time of settlement". One clock per row, so works and supplies are two.
+    {
+        "code": "eg_law182_works",
+        "jurisdiction": "Egypt (public works)",
+        "country_code": "EG",
+        "statute": "Public Contracts Law No. 182 of 2018 and its Executive Regulations (Decree 692/2019)",
+        "statute_reference": (
+            "Law Art. 45; Executive Regulations Art. 93, "
+            "https://eg.andersen.com/wp-content/uploads/2026/01/Law-No.-182-of-2018.pdf"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 60,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "prescribed_rate",
+        "interest_reference_rate": (
+            "the Central Bank of Egypt as its credit and discount rate at the time of settlement, charged as "
+            "the financing cost of the delayed amount"
+        ),
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "Law 182/2018, Art. 45; Executive Regulations, Art. 93",
+        "notes": (
+            "The clock for an interim payment owed by an Egyptian administrative entity (ministries, local "
+            "units, public authorities, special funds) on a works contract. The 60 days run from the day the "
+            "contractor submits the payment certificate (mustakhlas) with the documents the contract names, "
+            "so enter that submission date as the application date; following the convention of the other "
+            "single-date regimes it is the due date and the 60 days are the final date for payment. Where the "
+            "entity refuses a compliant certificate, the contractor may send it by express mail and the date "
+            "the entity receives it starts the clock (Law Art. 45). The law does not say calendar or working "
+            "days and this row assumes calendar days. Interim payments pay 95 percent of executed work and "
+            "75 percent of approved materials stored on site (Executive Regulations Art. 93); the price "
+            "adjustment under Law Art. 47 is settled on its own clock, within 60 days of the claim. Private "
+            "Egyptian works have no statutory payment period; they follow the contract, usually FIDIC. The "
+            "commencement dates of the law and the regulations were not established from a primary text."
+        ),
+    },
+    {
+        "code": "eg_law182_supplies",
+        "jurisdiction": "Egypt (public supplies and services)",
+        "country_code": "EG",
+        "statute": "Public Contracts Law No. 182 of 2018 and its Executive Regulations (Decree 692/2019)",
+        "statute_reference": (
+            "Law Art. 45; Executive Regulations Art. 93, "
+            "https://eg.andersen.com/wp-content/uploads/2026/01/Law-No.-182-of-2018.pdf"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "prescribed_rate",
+        "interest_reference_rate": (
+            "the Central Bank of Egypt as its credit and discount rate at the time of settlement, charged as "
+            "the financing cost of the delayed amount"
+        ),
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "Law 182/2018, Art. 45; Executive Regulations, Art. 93",
+        "notes": (
+            "The clock for supplied items or services bought by an Egyptian administrative entity: payment as "
+            "soon as possible and within 30 days of inspection, acceptance and approval, so enter the approval "
+            "date as the application date. Calendar days are assumed, as the law does not say. Construction "
+            "works use eg_law182_works instead."
+        ),
+    },
 )
 
 REGIME_CODES: tuple[str, ...] = tuple(regime["code"] for regime in PAYMENT_REGIMES)
