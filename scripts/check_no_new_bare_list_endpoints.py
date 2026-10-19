@@ -88,6 +88,14 @@ CANNOT_TRUNCATE: frozenset[str] = frozenset(
         # which statute their hours are recorded under has to see every statute
         # on offer, so a short answer would be a correctness bug, not a page.
         "field_time/router.py::list_working_time_regimes",
+        # The same shape for price adjustment. PRICE_ADJUSTMENT_REGIMES in
+        # contracts/price_adjustment.py is a dict compiled into the source, one
+        # entry per law a developer implements (today Egypt's Law 182/2018
+        # Art. 97 and a plain contractual indexation), never added at runtime or
+        # per tenant. The route returns every value of it, so there is no query
+        # and no LIMIT, and a short answer would hide the regime a contract is
+        # bound by, a correctness bug rather than a page.
+        "contracts/router.py::list_price_adjustment_regimes",
         # An aggregate over a closed vocabulary, not a register. The route
         # answers one row per bar diameter present in one import, produced by a
         # GROUP BY in weight_by_diameter, so its length is the number of
