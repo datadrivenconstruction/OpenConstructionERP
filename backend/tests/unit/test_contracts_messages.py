@@ -55,6 +55,7 @@ KEY_PREFIXES = (
     "hakedis.",
     "pay_application.",
     "public_works.",
+    "works_contract.",
     "payment_plan.",
     "retention_release.",
     "sov_reconcile.",

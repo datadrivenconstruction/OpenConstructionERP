@@ -20,10 +20,13 @@ and measured. Each trade has its own DTU, and an estimate that measures outside
 the DTU for that trade cannot be checked against the standard the contract
 assumes.
 
-French public procurement is governed by the Code des marches publics, which
-sets the rules for how public works are tendered, evaluated and awarded. The
-CCAG-Travaux provides the general conditions for public works contracts.
-Private works follow the Loi MOP framework for project management.
+French public procurement is governed by the Code de la commande publique
+(2019), which sets the rules for how public works are tendered, awarded and
+paid. The CCAG-Travaux 2021 provides the general conditions for public works
+contracts, and the Loi MOP, now codified in the same code, frames public
+project management. Private building works commonly use NF P 03-001, and two
+laws protect private works payments: loi 71-584 caps retention at 5 percent
+and loi 75-1334 protects subcontractors.
 
 The RE 2020 regulation, which replaced RT 2012, sets the energy and
 environmental performance requirements for new buildings. It affects cost
@@ -35,6 +38,13 @@ through insulation, HVAC and renewable energy provisions.
   classification standard, with a French-language interface.
 - **One engine rule set**, `dpgf`, which validates that priced lines carry
   the decomposition structure the standard expects.
+- **Contract rules that run**: public works retention (5 percent, 3 percent
+  for an SME working for a large public buyer), the advance minimums and the
+  usual 30 percent maximum, the CCAG delay penalty of 1/3000 a day capped at
+  10 percent, price revision weights, direct payment of subcontractors from
+  EUR 600 including tax, the private works retention ceiling and the private
+  subcontractor payment guarantee. The Loi MOP, RE 2020 and NF DTU documents
+  are planned, not built: switching them on runs nothing yet.
 - **Two demo projects**, `school-paris` and `hospital-lyon`, showing a
   public school and a hospital project priced in the DPGF format.
 - **A three-step onboarding wizard** that collects the company profile
@@ -42,7 +52,7 @@ through insulation, HVAC and renewable energy provisions.
 
 ## Standards referenced
 
-- Code des marches publics (public procurement code)
+- Code de la commande publique (public procurement code)
 - NF DTU series (AFNOR/CSTB technical standards)
 - Loi MOP (project management framework for public works)
 - CCAG-Travaux (general conditions for public works contracts)

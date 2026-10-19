@@ -272,7 +272,45 @@
       "coefficient_sum_above_one": {
         "fail": "Fiyat farkı katsayılarının toplamı {item} ediyor, bu birden fazla",
         "suggestion": "Toplamları bir veya daha az olacak şekilde katsayıları düşürün"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Hammaddelerin maliyetin önemli bir kısmını oluşturduğu {months} aydan uzun kamu yapım işleri bir fiyat revizyonu maddesi içerir ve sözleşmede revizyon ağırlıkları belirtilmemiştir",
+        "suggestion": "Revizyon formülünün ağırlıklarını özel şartlardan girin veya fiyatın sabit olduğunu kaydedin"
       }
+    },
+    "advance_below_minimum": {
+      "fail": "Avans sözleşme bedelinin yüzde {percent} oranındadır ve kamu ihale mevzuatının bu yüklenici ve idare için öngördüğü yüzde {limit} asgari oranın altındadır",
+      "suggestion": "Avansı asgari orana yükseltin veya yüklenici avanstan vazgeçtiyse sıfır girin"
+    },
+    "advance_above_maximum": {
+      "fail": "Avans sözleşme bedelinin yüzde {percent} oranındadır ve kamu ihale mevzuatının olağan üst sınır olarak belirlediği yüzde {limit} oranını aşmaktadır",
+      "suggestion": "Özel şartların daha yüksek avansa izin verdiğini kontrol edin ve gerekli teminatı kaydedin"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Bir gecikme cezası maddesi günlük {amount} uygulamaktadır, oysa genel şartlar günlük {expected}, yani sözleşme bedelinin {divisor}'de birini öngörmektedir",
+      "suggestion": "Genel şartların günlük oranını koruyun veya farklı oranı özel şartlardaki istisnalar arasında belirtin"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Bir gecikme cezası maddesinin üst sınırı sözleşme bedelinin yüzde {percent} oranıdır ve genel şartlardaki yüzde {limit} oranını aşmaktadır",
+      "suggestion": "Üst sınırı genel şartlardaki değere indirin veya özel şartlardaki istisnalar arasında belirtin"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "{amount} tutarındaki bu alt yüklenici sözleşmesi, kamu idaresinin doğrudan ödemesi için {limit} eşiğine ulaşmaktadır ve sözleşme bundan feragat etmektedir; kanun buna izin vermez",
+      "suggestion": "Kamu idaresinin alt yükleniciye doğrudan ödeme yaptığını kaydedin"
+    },
+    "direct_payment_unstated": {
+      "fail": "{amount} tutarındaki bu alt yüklenici sözleşmesi, kamu idaresinin doğrudan ödemesi için {limit} eşiğine ulaşmaktadır ve sözleşme bunu kaydetmemektedir",
+      "suggestion": "Alt yüklenicinin onaylanıp onaylanmadığını ve kamu idaresi tarafından doğrudan ödenip ödenmediğini kaydedin"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Özel yapım işlerine ait bu alt yüklenici sözleşmesinde ne banka teminatı ne de iş sahibine ödeme talimatı kayıtlıdır; bunlardan biri olmadan sözleşme iptal edilebilir",
+      "suggestion": "Ana yüklenicinin banka teminatını veya iş sahibine verilen ödeme talimatını kaydedin"
+    },
+    "private_retention_above_limit": {
+      "fail": "Yüzde {percent} oranındaki kesinti, kanunun özel yapım işlerinde izin verdiği yüzde {limit} oranını aşmaktadır",
+      "suggestion": "Sözleşmedeki kesintiyi yasal üst sınıra indirin"
     }
   }
 }

@@ -57,7 +57,9 @@ DefectSeverityLiteral = Literal["minor", "major", "critical"]
 # app.modules.defects_liability.limitation, and pinned equal to it by the tests).
 # Always optional, on create and on update alike: an entry with no regime is the
 # normal state and the only state every existing row is in.
-LimitationRegimeLiteral = Literal["de_vob_b", "de_bgb", "eg_civil_651"]
+LimitationRegimeLiteral = Literal[
+    "de_vob_b", "de_bgb", "eg_civil_651", "fr_civil_1792_6", "fr_civil_1792_3", "fr_civil_1792"
+]
 
 
 def _serialise_pct(v: Decimal | None) -> str | None:

@@ -15,10 +15,13 @@ MANIFEST = PartnerPackManifest(
     pack_version="0.1.0",
     pack_type="country",
     description=(
-        "Pre-configured for French construction: DPGF decomposition, "
-        "NF DTU measurement standards, Code des marches publics, "
-        "CCAG-Travaux, Loi MOP, RE 2020 environmental regulation, "
-        "and EUR with TVA at 20 percent. French + English UI."
+        "Pre-configured for French construction: DPGF decomposition, EUR with "
+        "TVA at 20 percent, French + English UI. Runs today: public works limits "
+        "of the Code de la commande publique and CCAG-Travaux 2021 (retention, "
+        "advance, delay penalties, price revision, direct payment of "
+        "subcontractors) and the private works retention ceiling and "
+        "subcontractor guarantee. Loi MOP, RE 2020 and NF DTU documents are "
+        "planned, not built: nothing in them runs yet."
     ),
     default_locale="fr",
     additional_locales={},
@@ -57,7 +60,7 @@ MANIFEST = PartnerPackManifest(
         "measurement_system": "metric",
         "paper_size": "A4",
         "regulator_refs": [
-            "Code des marches publics",
+            "Code de la commande publique",
             "NF DTU series (AFNOR / CSTB)",
             "Loi MOP (Maitrise d'Ouvrage Publique)",
             "CCAG-Travaux (Cahier des Clauses Administratives Generales)",

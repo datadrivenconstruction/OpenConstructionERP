@@ -272,7 +272,45 @@
       "coefficient_sum_above_one": {
         "fail": "The price adjustment coefficients add up to {item}, more than one",
         "suggestion": "Lower the coefficients so that they add up to one or less"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Public works longer than {months} months carry a price revision clause where raw materials are a significant part of the cost, and the contract states no revision weights",
+        "suggestion": "Enter the weights of the revision formula from the special conditions, or record that the price is firm"
       }
+    },
+    "advance_below_minimum": {
+      "fail": "The advance is {percent} percent of the contract value, below the {limit} percent minimum the public works law sets for this contractor and buyer",
+      "suggestion": "Raise the advance to the minimum, or record zero if the contractor renounced it"
+    },
+    "advance_above_maximum": {
+      "fail": "The advance is {percent} percent of the contract value, above the {limit} percent the public works law sets as the usual maximum",
+      "suggestion": "Check that the special conditions allow the higher advance and record the guarantee it requires"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "A delay penalty clause charges {amount} a day, while the general conditions charge {expected} a day, one {divisor}th of the contract value",
+      "suggestion": "Keep the general conditions' daily rate, or list the different rate among the derogations of the special conditions"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "A delay penalty clause is capped at {percent} percent of the contract value, above the {limit} percent of the general conditions",
+      "suggestion": "Lower the cap to the general conditions' figure, or list it among the derogations of the special conditions"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "This subcontract of {amount} reaches the {limit} threshold for direct payment by the public buyer, and the contract waives it, which the law forbids",
+      "suggestion": "Record that the public buyer pays the subcontractor directly"
+    },
+    "direct_payment_unstated": {
+      "fail": "This subcontract of {amount} reaches the {limit} threshold for direct payment by the public buyer, and the contract does not record it",
+      "suggestion": "Record whether the subcontractor is accepted and paid directly by the public buyer"
+    },
+    "payment_guarantee_missing": {
+      "fail": "This subcontract on private works records neither a bank guarantee nor a delegation of payment, without which the subcontract can be voided",
+      "suggestion": "Record the main contractor's bank guarantee or the delegation of payment on the owner"
+    },
+    "private_retention_above_limit": {
+      "fail": "Retention of {percent} percent is above the {limit} percent the law allows on private works",
+      "suggestion": "Lower the contract's retention to the statutory ceiling"
     }
   }
 }

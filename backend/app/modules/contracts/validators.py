@@ -1735,6 +1735,22 @@ _PUBLIC_WORKS_KEYS: dict[str, tuple[str, str]] = {
         "public_works.performance_security_below.fail",
         "public_works.performance_security_below.suggestion",
     ),
+    "advance_below_minimum": (
+        "public_works.advance_below_minimum.fail",
+        "public_works.advance_below_minimum.suggestion",
+    ),
+    "advance_above_maximum": (
+        "public_works.advance_above_maximum.fail",
+        "public_works.advance_above_maximum.suggestion",
+    ),
+    "delay_damages_rate_differs": (
+        "public_works.delay_damages_rate_differs.fail",
+        "public_works.delay_damages_rate_differs.suggestion",
+    ),
+    "delay_damages_above_general_conditions": (
+        "public_works.delay_damages_above_general_conditions.fail",
+        "public_works.delay_damages_above_general_conditions.suggestion",
+    ),
 }
 _PRICE_ADJUSTMENT_KEYS: dict[str, tuple[str, str]] = {
     "no_coefficients": (
@@ -1764,6 +1780,28 @@ _PRICE_ADJUSTMENT_KEYS: dict[str, tuple[str, str]] = {
     "coefficient_sum_above_one": (
         "public_works.price_adjustment.coefficient_sum_above_one.fail",
         "public_works.price_adjustment.coefficient_sum_above_one.suggestion",
+    ),
+    "no_coefficients_advisory": (
+        "public_works.price_adjustment.no_coefficients_advisory.fail",
+        "public_works.price_adjustment.no_coefficients_advisory.suggestion",
+    ),
+}
+_SUBCONTRACT_KEYS: dict[str, tuple[str, str]] = {
+    "direct_payment_waived": (
+        "works_contract.direct_payment_waived.fail",
+        "works_contract.direct_payment_waived.suggestion",
+    ),
+    "direct_payment_unstated": (
+        "works_contract.direct_payment_unstated.fail",
+        "works_contract.direct_payment_unstated.suggestion",
+    ),
+    "payment_guarantee_missing": (
+        "works_contract.payment_guarantee_missing.fail",
+        "works_contract.payment_guarantee_missing.suggestion",
+    ),
+    "private_retention_above_limit": (
+        "works_contract.private_retention_above_limit.fail",
+        "works_contract.private_retention_above_limit.suggestion",
     ),
 }
 
@@ -1815,7 +1853,12 @@ class PublicWorksLimitsRule(_PublicWorksRule):
     )
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        from app.modules.contracts.public_procurement import limit_value, public_works_limits  # noqa: PLC0415
+        from app.modules.contracts.public_procurement import (  # noqa: PLC0415
+            is_derogable,
+            limit_value,
+            limit_value_on,
+            public_works_limits,
+        )
 
         country = _public_works_country(context)
         if country is None:
@@ -1841,7 +1884,16 @@ class PublicWorksLimitsRule(_PublicWorksRule):
                 )
             )
 
+        sme = _truthy(terms.get("contractor_is_sme"))
+        buyer = str(terms.get("public_buyer_category") or "").strip().lower()
+        # The SME tiers bind procedures launched after they took effect; the
+        # contract start stands in when the launch date was not recorded.
+        launched = _iso_day(str(terms.get("procedure_launch_date") or contract.get("start_date") or "")[:10])
+        sme_large_buyer = sme and buyer in ("state", "large_public_body")
+
         retention_limit = limit_value(limits, "retention_percent")
+        if sme_large_buyer:
+            retention_limit = limit_value_on(limits, "retention_percent_sme", launched) or retention_limit
         retention = _dec_or_none(contract.get("retention_percent"))
         if retention_limit is not None and retention is not None and retention > retention_limit:
             fail("retention_above_limit", percent=_pct_text(retention), limit=_pct_text(retention_limit))
@@ -1856,27 +1908,70 @@ class PublicWorksLimitsRule(_PublicWorksRule):
             return amount / value * Decimal("100")
 
         live = [s for s in _rows(context, "securities") if s.get("status") not in ("released", "expired")]
-        sme = _truthy(terms.get("contractor_is_sme"))
         approved = _truthy(terms.get("advance_payment_mof_approval"))
-        advance_cap = limit_value(limits, "advance_payment_max_percent_sme" if sme else "advance_payment_max_percent")
+        # The advance as the terms state it, else as the advance bonds cover it.
+        stated_advance = _dec_or_none(terms.get("advance_payment_percent"))
+        if stated_advance is not None:
+            advances = [stated_advance]
+        else:
+            advances = [
+                p
+                for p in (percent_of_contract(s) for s in live if s.get("security_type") == "advance_payment_bond")
+                if p is not None
+            ]
+        advance_cap = (limit_value(limits, "advance_payment_max_percent_sme") if sme else None) or limit_value(
+            limits, "advance_payment_max_percent"
+        )
         if advance_cap is not None and not approved:
-            for security in live:
-                if security.get("security_type") != "advance_payment_bond":
-                    continue
-                percent = percent_of_contract(security)
-                if percent is not None and percent > advance_cap:
-                    fail("advance_above_cap", percent=_pct_text(percent), limit=_pct_text(advance_cap))
+            derogable = is_derogable(limits, "advance_payment_max_percent")
+            for percent in advances:
+                if percent > advance_cap:
+                    fail(
+                        "advance_above_maximum" if derogable else "advance_above_cap",
+                        severity=Severity.WARNING if derogable else None,
+                        percent=_pct_text(percent),
+                        limit=_pct_text(advance_cap),
+                    )
+        advance_floor = limit_value_on(limits, "advance_payment_min_percent", launched)
+        if sme and buyer == "state":
+            advance_floor = limit_value_on(limits, "advance_payment_min_percent_sme", launched) or advance_floor
+        elif sme and buyer == "large_public_body":
+            advance_floor = (
+                limit_value_on(limits, "advance_payment_min_percent_sme_large_body", launched) or advance_floor
+            )
+        if advance_floor is not None:
+            # Zero is an advance the contractor renounced, which the law allows.
+            for percent in advances:
+                if Decimal("0") < percent < advance_floor:
+                    fail("advance_below_minimum", percent=_pct_text(percent), limit=_pct_text(advance_floor))
 
         damages_cap = limit_value(limits, "delay_damages_cap_percent_works_long_delay")
-        if damages_cap is not None:
-            for clause in _rows(context, "ld_clauses"):
-                cap_amount = _dec_or_none(clause.get("max_amount"))
-                if cap_amount is None:
-                    fail("delay_damages_uncapped", severity=Severity.WARNING, limit=_pct_text(damages_cap))
-                elif value:
-                    percent = cap_amount / value * Decimal("100")
-                    if percent > damages_cap:
-                        fail("delay_damages_above_cap", percent=_pct_text(percent), limit=_pct_text(damages_cap))
+        cap_derogable = is_derogable(limits, "delay_damages_cap_percent_works_long_delay")
+        divisor = limit_value(limits, "delay_damages_daily_divisor")
+        for clause in _rows(context, "ld_clauses"):
+            cap_amount = _dec_or_none(clause.get("max_amount"))
+            if damages_cap is not None and cap_amount is None:
+                fail("delay_damages_uncapped", severity=Severity.WARNING, limit=_pct_text(damages_cap))
+            elif damages_cap is not None and value and cap_amount is not None:
+                percent = cap_amount / value * Decimal("100")
+                if percent > damages_cap:
+                    fail(
+                        "delay_damages_above_general_conditions" if cap_derogable else "delay_damages_above_cap",
+                        severity=Severity.WARNING if cap_derogable else None,
+                        percent=_pct_text(percent),
+                        limit=_pct_text(damages_cap),
+                    )
+            per_day = _dec_or_none(clause.get("per_day_amount"))
+            if divisor and value and per_day is not None:
+                expected = (value / divisor).quantize(Decimal("0.01"))
+                if abs(per_day - expected) > Decimal("0.01"):
+                    fail(
+                        "delay_damages_rate_differs",
+                        severity=Severity.WARNING,
+                        amount=_pct_text(per_day),
+                        expected=_pct_text(expected),
+                        divisor=str(int(divisor)),
+                    )
 
         security_rate = limit_value(limits, "performance_security_percent")
         if security_rate is not None:
@@ -1930,27 +2025,198 @@ class PriceAdjustmentTermsRule(_PublicWorksRule):
             return []
         terms = contract.get("terms") if isinstance(contract.get("terms"), dict) else {}
         block = terms.get("price_adjustment") if isinstance(terms.get("price_adjustment"), dict) else {}
+        mandatory = bool(regime.get("mandatory"))
+        if not mandatory and _truthy(block.get("firm_price")):
+            # Where revision is a judgement (France: only with a significant
+            # raw-material share), a contract that recorded a firm price chose.
+            return [self._result(context, passed=True, element_ref=ref)]
         rows = [r for r in block.get("coefficients") or [] if isinstance(r, dict)]
         problems = coefficient_problems(regime, [(str(r.get("item") or ""), r.get("coefficient")) for r in rows])
         if not problems:
             return [self._result(context, passed=True, element_ref=ref)]
         months = str(regime.get("min_duration_months") or "")
+        out: list[RuleResult] = []
+        for p in problems:
+            key = p["problem"]
+            severity = None
+            if key == "no_coefficients" and not mandatory:
+                key, severity = "no_coefficients_advisory", Severity.WARNING
+            out.append(
+                self._result(
+                    context,
+                    passed=False,
+                    element_ref=ref,
+                    fail_key=_PRICE_ADJUSTMENT_KEYS[key][0],
+                    suggestion_key=_PRICE_ADJUSTMENT_KEYS[key][1],
+                    severity=severity,
+                    country=country,
+                    months=months,
+                    item=p["item"],
+                )
+            )
+        return out
+
+
+# ── Subcontractors and private works ────────────────────────────────────────
+#
+# Three rules read :mod:`app.modules.contracts.subcontract_protection` and the
+# private works variant of :mod:`app.modules.contracts.country_defaults`. They
+# speak only where the project records its works and the country has a row.
+
+
+def _project_works(context: ValidationContext) -> tuple[str, str]:
+    project = _data(context).get("project")
+    if not isinstance(project, dict):
+        return "", ""
+    works = str(project.get("works") or "").strip().lower()
+    return works, str(project.get("country_code") or "").strip().upper()
+
+
+def _is_subcontract(contract: dict[str, Any]) -> bool:
+    return str(contract.get("counterparty_type") or "").strip().lower() == "subcontractor"
+
+
+def _terms(contract: dict[str, Any]) -> dict[str, Any]:
+    return contract.get("terms") if isinstance(contract.get("terms"), dict) else {}
+
+
+class SubcontractDirectPaymentRule(_PublicWorksRule):
+    """On public works, a subcontract above the threshold is paid by the buyer directly."""
+
+    rule_id = "contracts.subcontract_direct_payment"
+    name = "Direct payment of a subcontractor on public works"
+    severity = Severity.ERROR
+    description = (
+        "On public works, an accepted subcontractor whose share reaches the statutory amount is paid directly "
+        "by the public buyer, and the right cannot be waived."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.contracts.subcontract_protection import protection_for  # noqa: PLC0415
+
+        works, country = _project_works(context)
+        contract = _contract(context)
+        row = protection_for(country)
+        if works != "public" or row is None or not contract or not _is_subcontract(contract):
+            return []
+        threshold = row["public_direct_payment_min_amount"]["value"]
+        amount = _dec_or_none(contract.get("total_value"))
+        if threshold is None or amount is None or amount < Decimal(str(threshold)):
+            return []
+        ref = str(contract.get("id", ""))
+        stated = _terms(contract).get("direct_payment")
+        if stated is None or stated == "":
+            key, severity = "direct_payment_unstated", Severity.WARNING
+        elif _truthy(stated):
+            return [self._result(context, passed=True, element_ref=ref)]
+        else:
+            key, severity = "direct_payment_waived", None
         return [
             self._result(
                 context,
                 passed=False,
                 element_ref=ref,
-                fail_key=_PRICE_ADJUSTMENT_KEYS[p["problem"]][0],
-                suggestion_key=_PRICE_ADJUSTMENT_KEYS[p["problem"]][1],
+                fail_key=_SUBCONTRACT_KEYS[key][0],
+                suggestion_key=_SUBCONTRACT_KEYS[key][1],
+                severity=severity,
                 country=country,
-                months=months,
-                item=p["item"],
+                amount=_pct_text(amount),
+                limit=str(threshold),
             )
-            for p in problems
         ]
 
 
-PUBLIC_WORKS_RULES: tuple[type[ValidationRule], ...] = (PublicWorksLimitsRule, PriceAdjustmentTermsRule)
+class SubcontractPaymentGuaranteeRule(_PublicWorksRule):
+    """On private works, a subcontract carries the payment guarantee the law asks of the main contractor."""
+
+    rule_id = "contracts.subcontract_payment_guarantee"
+    name = "Payment guarantee for a subcontractor on private works"
+    severity = Severity.WARNING
+    description = (
+        "On private works, the main contractor guarantees the subcontractor's payment by a bank guarantee or "
+        "a delegation of payment, without which the subcontract can be voided."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.contracts.subcontract_protection import protection_for  # noqa: PLC0415
+
+        works, country = _project_works(context)
+        contract = _contract(context)
+        row = protection_for(country)
+        if works != "private" or row is None or not contract or not _is_subcontract(contract):
+            return []
+        accepted = row["private_payment_guarantee_kinds"]["value"]
+        if not accepted:
+            return []
+        ref = str(contract.get("id", ""))
+        kind = str(_terms(contract).get("payment_guarantee") or "").strip().lower()
+        if kind in accepted:
+            return [self._result(context, passed=True, element_ref=ref)]
+        return [
+            self._result(
+                context,
+                passed=False,
+                element_ref=ref,
+                fail_key=_SUBCONTRACT_KEYS["payment_guarantee_missing"][0],
+                suggestion_key=_SUBCONTRACT_KEYS["payment_guarantee_missing"][1],
+                country=country,
+            )
+        ]
+
+
+class PrivateWorksRetentionCapRule(_PublicWorksRule):
+    """On private works, retention stays within a ceiling the country's statute sets."""
+
+    rule_id = "contracts.private_works_retention_cap"
+    name = "Retention on private works within the statutory ceiling"
+    severity = Severity.ERROR
+    description = (
+        "Where a country's law caps retention on private works, a contract on a project recorded as private "
+        "holds no more than that."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.contracts.country_defaults import resolve_contract_defaults  # noqa: PLC0415
+
+        works, country = _project_works(context)
+        contract = _contract(context)
+        if works != "private" or not country or not contract:
+            return []
+        defaults = resolve_contract_defaults(country, works="private")
+        # Only a country with its own private works variant whose ceiling is a
+        # statute: a usual figure, or a ceiling written for all works, is not
+        # this rule's to enforce.
+        if defaults is None or defaults.get("works") != "private":
+            return []
+        source = (defaults.get("sources") or {}).get("retention_cap_percent") or {}
+        limit = _dec_or_none((defaults.get("values") or {}).get("retention_cap_percent"))
+        if source.get("source") != "statute" or limit is None:
+            return []
+        ref = str(contract.get("id", ""))
+        retention = _dec_or_none(contract.get("retention_percent"))
+        if retention is None or retention <= limit:
+            return [self._result(context, passed=True, element_ref=ref)]
+        return [
+            self._result(
+                context,
+                passed=False,
+                element_ref=ref,
+                fail_key=_SUBCONTRACT_KEYS["private_retention_above_limit"][0],
+                suggestion_key=_SUBCONTRACT_KEYS["private_retention_above_limit"][1],
+                country=country,
+                percent=_pct_text(retention),
+                limit=_pct_text(limit),
+            )
+        ]
+
+
+PUBLIC_WORKS_RULES: tuple[type[ValidationRule], ...] = (
+    PublicWorksLimitsRule,
+    PriceAdjustmentTermsRule,
+    SubcontractDirectPaymentRule,
+    SubcontractPaymentGuaranteeRule,
+    PrivateWorksRetentionCapRule,
+)
 
 
 def register_contracts_validation_rules() -> None:

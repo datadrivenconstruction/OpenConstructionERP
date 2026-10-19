@@ -3,9 +3,13 @@
   "name": "Code de la commande publique — Public Procurement",
   "standard": "Code de la commande publique (CCP, Ordonnance 2018-1074)",
   "jurisdiction": "FR",
-  "description": "Validates public tender documents against the Code de la commande publique (effective 2019-04-01). Checks AAPC publication requirements, CCAG-Travaux references, allotissement (lot splitting) obligations, selection criteria documentation, threshold compliance (European and national), avance forfaitaire, and sous-traitance (subcontracting) declaration requirements.",
+  "description": "Validates public works contracts against the Code de la commande publique (effective 2019-04-01) and CCAG-Travaux 2021. Runs today: retention within 5 percent (3 percent for an SME working for the State or a large public body), the advance between its minimum (5 percent, 30 percent for an SME working for the State, 10 percent with a large public body) and the usual 30 percent maximum, the CCAG delay penalty of 1/3000 a day capped at 10 percent, price revision weights on contracts longer than three months, and direct payment of subcontractors from EUR 600 including tax. Tender-file checks (publication, thresholds, lots, award criteria, DCE contents) are planned, not built.",
   "applies_to": ["tender", "estimate", "validation"],
-  "enables_rule_ids": [],
+  "enables_rule_ids": [
+    "contracts.public_works_limits",
+    "contracts.price_adjustment_terms",
+    "contracts.subcontract_direct_payment"
+  ],
   "planned_not_built_rule_ids": [
     "ccp.aapc_published",
     "ccp.procedure_type_defined",
@@ -15,8 +19,6 @@
     "ccp.criteres_attribution_documented",
     "ccp.ccag_travaux_referenced",
     "ccp.ccag_version_2021_or_later",
-    "ccp.avance_forfaitaire_min_20_pct",
-    "ccp.delai_paiement_max_30_days",
     "ccp.sous_traitance_declaration_present",
     "ccp.variantes_autorisees_stated",
     "ccp.dce_complet",
@@ -24,5 +26,6 @@
   ],
   "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Direction des Affaires Juridiques (DAJ), Ministere de l'Economie",
-  "publication_year": 2019
+  "publication_year": 2019,
+  "superseded_rule_ids_note": "ccp.avance_forfaitaire_min_20_pct was dropped: its 20 percent SME minimum is outdated (30 percent with the State since décret 2024-1251) and contracts.public_works_limits checks the advance. ccp.delai_paiement_max_30_days was dropped: the 30, 50 and 60 day public payment terms run as payment clock regimes (fr_ccp_r2192_10, fr_ccp_r2192_11_health, fr_ccp_r2192_11_undertaking)."
 }
