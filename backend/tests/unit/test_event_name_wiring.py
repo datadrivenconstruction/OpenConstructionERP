@@ -155,7 +155,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "'correspondence.outbound.requested' and nothing marks delivery"
     ),
     "documents.uploaded": "core/event_handlers.py:1834; the documents module publishes 'documents.document.created'",
-    "erp_chat.message.deleted": "erp_chat subscribes to its own delete event that no service publishes",
     "finance.invoice.created": (
         "property_dev/events.py:684; its only publisher was the duplicate claim-invoice "
         "subscriber removed from notifications/_wave5_cross_module_subscribers.py in "

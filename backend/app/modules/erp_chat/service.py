@@ -30,6 +30,7 @@ from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import publish_after_commit
 from app.modules.ai.ai_client import SELF_HOSTED_PROVIDERS
 from app.modules.erp_chat.actions import registry as action_registry
 from app.modules.erp_chat.actions.base import ActionConflictError
@@ -395,14 +396,38 @@ class ERPChatService:
         return list(result.scalars().all())
 
     async def delete_session(self, session_id: uuid.UUID, user_id: str) -> bool:
-        """Delete a chat session and its messages."""
+        """Delete a chat session and its messages.
+
+        The messages go by cascade, which the vector index cannot see, so each
+        one is announced as ``erp_chat.message.deleted`` once the delete
+        commits. ``erp_chat/events.py`` drops it from the ``oe_chat``
+        collection global search reads; without that a deleted conversation
+        stayed findable.
+        """
         stmt = select(ChatSession).where(ChatSession.id == session_id, ChatSession.user_id == uuid.UUID(user_id))
         result = await self.session.execute(stmt)
         chat_session = result.scalar_one_or_none()
         if not chat_session:
             return False
+        message_ids = (
+            (await self.session.execute(select(ChatMessage.id).where(ChatMessage.session_id == chat_session.id)))
+            .scalars()
+            .all()
+        )
+        project_id = str(chat_session.project_id) if getattr(chat_session, "project_id", None) else None
         await self.session.delete(chat_session)
         await self.session.flush()
+        for message_id in message_ids:
+            publish_after_commit(
+                self.session,
+                "erp_chat.message.deleted",
+                data={
+                    "message_id": str(message_id),
+                    "session_id": str(chat_session.id),
+                    "project_id": project_id,
+                },
+                source_module="oe_erp_chat",
+            )
         return True
 
     # ── AI provider resolution ───────────────────────────────────────────
