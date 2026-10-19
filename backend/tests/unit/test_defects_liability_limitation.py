@@ -94,7 +94,7 @@ async def _findings(warranty: DlpWarranty) -> list:
 def test_the_german_regimes_are_the_four_and_five_year_ones():
     """The whole point of the feature is that these two numbers differ by a year."""
     by_code = {spec.code: spec for spec in limitation.LIMITATION_REGIMES}
-    assert set(by_code) == {"de_vob_b", "de_bgb", "eg_civil_651"}
+    assert set(by_code) == {"de_vob_b", "de_bgb", "eg_civil_651", "fr_civil_1792_6", "fr_civil_1792_3", "fr_civil_1792"}
     assert by_code["de_vob_b"].months == 48
     assert by_code["de_bgb"].months == 60
 
@@ -105,7 +105,7 @@ def test_every_regime_names_the_provision_it_comes_from():
         assert spec.statute.strip()
         assert spec.statute_reference.strip()
         assert spec.notes.strip()
-        assert spec.country_code in ("DE", "EG")
+        assert spec.country_code in ("DE", "EG", "FR")
         assert spec.starts_from in limitation.LIMITATION_STARTS
     assert "VOB/B" in limitation.regime_for("de_vob_b").statute
     assert "BGB" in limitation.regime_for("de_bgb").statute

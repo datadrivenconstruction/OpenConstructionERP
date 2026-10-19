@@ -34,7 +34,8 @@ Pure data and pure helpers; no ORM, no I/O.
 from __future__ import annotations
 
 import copy
-from decimal import Decimal, InvalidOperation
+from datetime import date
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 #: The consolidated English translation of Egypt's Public Contracts Law
@@ -66,6 +67,26 @@ LIMIT_FIELDS: tuple[str, ...] = (
     "delay_damages_long_delay_threshold_percent",
     "price_adjustment_min_duration_months",
 )
+
+#: Figures a row may carry when its law has them. A row that names one is
+#: checked like any other figure; a row without one simply has no such tier.
+#: France brought these: the SME tiers of retention and advance under décret
+#: 2024-1251, the CCAG-Travaux daily penalty and its waiver.
+OPTIONAL_LIMIT_FIELDS: tuple[str, ...] = (
+    "retention_percent_sme",
+    "advance_payment_min_percent",
+    "advance_payment_min_percent_sme",
+    "advance_payment_min_percent_sme_large_body",
+    "delay_damages_daily_divisor",
+    "delay_damages_waiver_amount",
+)
+
+#: The kinds of public buyer a contract may record in ``terms["public_buyer_category"]``.
+#: ``state`` is the State itself; ``large_public_body`` a public body the
+#: country's law treats like it for SME protection (in France the State's
+#: administrative public establishments and local authorities spending more
+#: than EUR 60 million a year); ``other`` everyone else.
+PUBLIC_BUYER_CATEGORIES: tuple[str, ...] = ("state", "large_public_body", "other")
 
 _FIGURE_KEYS = frozenset({"value", "statute_reference", "source_url", "read_date", "effective_date", "note"})
 
@@ -192,9 +213,180 @@ PUBLIC_WORKS_LIMITS: dict[str, dict[str, Any]] = {
     },
 }
 
+#: France: the Code de la commande publique as consolidated on Légifrance,
+#: read through the research brief of 2026-10-19 (docs/design/france/core.md).
+_FR_CCP_URL = "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000037701019"
+_FR_CCAG_URL = "https://www.economie.gouv.fr/daj/cahiers-clauses-administratives-generales-et-techniques"
+_FR_READ_DATE = "2026-10-19"
+
+
+def _fr(value: Any, reference: str, note: str, *, effective: str | None, url: str = _FR_CCP_URL) -> dict[str, Any]:
+    return {
+        "value": value,
+        "statute_reference": reference,
+        "source_url": url,
+        "read_date": _FR_READ_DATE,
+        "effective_date": effective,
+        "note": note,
+    }
+
+
+def _fr_none(field: str, note: str) -> dict[str, Any]:
+    return _fr(None, "Code de la commande publique", f"{field}: {note}", effective=None)
+
+
+PUBLIC_WORKS_LIMITS["FR"] = {
+    "law": "Code de la commande publique; CCAG-Travaux 2021 (arrêté du 30 mars 2021)",
+    # A general condition the special conditions (CCAP) may change, provided
+    # the change is listed among its derogations. A finding on one of these
+    # is a warning to check that list, never a block.
+    "derogable_fields": ["advance_payment_max_percent", "delay_damages_cap_percent_works_long_delay"],
+    "bid_security_max_percent": _fr_none("bid security", "French procedures ask for no bid security."),
+    "performance_security_percent": _fr_none(
+        "performance security",
+        "No statutory performance security; a buyer may ask for a first-demand guarantee instead of retention.",
+    ),
+    "performance_security_due_working_days": _fr_none("performance security", "Not set by the Code."),
+    "advance_payment_max_percent": _fr(
+        "30",
+        "Code de la commande publique, art. R2191-7 (décret 2024-1251)",
+        "The advance is set between 5 and 30 percent of the initial amount including tax (of twelve months' "
+        "worth on contracts longer than a year). A higher rate against a first-demand guarantee was not "
+        "confirmed in the text read, so a rate above 30 percent is a warning to check the CCAP.",
+        effective="2025-01-01",
+    ),
+    "advance_payment_max_percent_sme": _fr_none(
+        "SME advance maximum", "The Code sets SME minimums, not a separate SME maximum."
+    ),
+    "advance_payment_min_percent": _fr(
+        "5",
+        "Code de la commande publique, art. R2191-7",
+        "The advance may not be below five percent. A contractor may renounce it, recorded as zero. When it "
+        "is owed at all (above EUR 50,000 excluding tax and two months, R2191-3) was not confirmed in the "
+        "text read, so a contract without an advance is not reported.",
+        effective="2019-04-01",
+    ),
+    "advance_payment_min_percent_sme": _fr(
+        "30",
+        "Code de la commande publique, art. R2191-7 (décret 2024-1251)",
+        "At least 30 percent when the holder or a subcontractor paid directly is an SME and the buyer is the State.",
+        effective="2025-01-01",
+    ),
+    "advance_payment_min_percent_sme_large_body": _fr(
+        "10",
+        "Code de la commande publique, art. R2191-7 (décret 2024-1251)",
+        "At least 10 percent for an SME when the buyer is a State administrative public establishment or a "
+        "local authority whose operating expenses exceed EUR 60 million.",
+        effective="2025-01-01",
+    ),
+    "interim_payment_percent": _fr_none("interim payment", "Instalments pay the work done; no percentage is set."),
+    "retention_percent": _fr(
+        "5",
+        "Code de la commande publique, art. R2191-32 and R2191-33",
+        "The retenue de garantie may not exceed five percent of the initial amount including modifications, "
+        "and may be replaced by a first-demand guarantee or, with the buyer's consent, a caution.",
+        effective="2019-04-01",
+    ),
+    "retention_percent_sme": _fr(
+        "3",
+        "Code de la commande publique, art. R2191-32 to R2191-36 (décret 2024-1251)",
+        "Three percent where the holder is an SME and the buyer is the State, a State administrative public "
+        "establishment or a local authority spending more than EUR 60 million a year, for procedures launched "
+        "from 1 January 2025.",
+        effective="2025-01-01",
+    ),
+    "stored_materials_payment_percent": _fr_none("stored materials", "Not read in the Code for this pass."),
+    "works_payment_days": _fr(
+        30,
+        "Code de la commande publique, art. R2192-10",
+        "The State and local authorities pay within 30 days; the payment clocks carry the 50 and 60 day buyers.",
+        effective="2019-04-01",
+    ),
+    "supplies_payment_days": _fr(
+        30,
+        "Code de la commande publique, art. R2192-10",
+        "The same 30 days apply to supplies and services.",
+        effective="2019-04-01",
+    ),
+    "variation_max_percent_per_item_works": _fr_none(
+        "variation per item", "Modifications are capped on the contract as a whole (R2194-8), not per item."
+    ),
+    "variation_max_percent_per_item_other": _fr_none(
+        "variation per item", "Modifications are capped on the contract as a whole (R2194-8), not per item."
+    ),
+    "delay_damages_cap_percent_works": _fr(
+        "10",
+        "CCAG-Travaux 2021, art. 19.2.2",
+        "Penalties for delay may total at most ten percent of the amount excluding tax of the contract, "
+        "tranche or order, unless the CCAP derogates.",
+        effective="2021-04-01",
+        url=_FR_CCAG_URL,
+    ),
+    "delay_damages_cap_percent_works_long_delay": _fr(
+        "10",
+        "CCAG-Travaux 2021, art. 19.2.2",
+        "The CCAG sets one cap however long the delay, so the long-delay cap is the same ten percent.",
+        effective="2021-04-01",
+        url=_FR_CCAG_URL,
+    ),
+    "delay_damages_cap_percent_other": _fr_none(
+        "delay damages on other contracts", "Supplies and services follow other CCAGs, not read for this pass."
+    ),
+    "delay_damages_cap_percent_other_long_delay": _fr_none(
+        "delay damages on other contracts", "Supplies and services follow other CCAGs, not read for this pass."
+    ),
+    "delay_damages_long_delay_threshold_percent": _fr_none(
+        "long delay threshold", "The CCAG-Travaux has no second tier."
+    ),
+    "delay_damages_daily_divisor": _fr(
+        3000,
+        "CCAG-Travaux 2021, art. 19.2.3",
+        "Per calendar day of delay, one three-thousandth of the amount excluding tax of the contract, tranche "
+        "or order concerned.",
+        effective="2021-04-01",
+        url=_FR_CCAG_URL,
+    ),
+    "delay_damages_waiver_amount": _fr(
+        1000,
+        "CCAG-Travaux 2021, art. 19.2.1",
+        "Penalties whose total does not exceed EUR 1,000 excluding tax for the whole contract are not applied.",
+        effective="2021-04-01",
+        url=_FR_CCAG_URL,
+    ),
+    "price_adjustment_min_duration_months": _fr(
+        3,
+        "Code de la commande publique, art. R2112-13 and R2112-14",
+        "A contract longer than three months whose costs depend substantially on raw materials must carry a "
+        "revision clause with at least one official index. Whether the raw-material share is significant is a "
+        "judgement, so a missing clause is a warning.",
+        effective="2019-04-01",
+    ),
+}
+
 #: The price adjustment regime each country's public works use, a code of
 #: :data:`app.modules.contracts.price_adjustment.PRICE_ADJUSTMENT_REGIMES`.
-PUBLIC_WORKS_PRICE_ADJUSTMENT: dict[str, str] = {"EG": "eg_law182_art97"}
+PUBLIC_WORKS_PRICE_ADJUSTMENT: dict[str, str] = {"EG": "eg_law182_art97", "FR": "fr_ccag_travaux_2021_art_10_5"}
+
+#: The INSEE construction cost indices a French revision formula names (base
+#: 2010, monthly, published provisional and then definitive). Names only:
+#: the INSEE series identifiers were not confirmed, and index values belong to
+#: the tenant's ``price_index`` series, never to the platform.
+FR_REVISION_INDICES: tuple[dict[str, Any], ...] = tuple(
+    {
+        "code": code,
+        "name": name,
+        "family": family,
+        "base": "2010",
+        "publisher": "INSEE",
+        "source_url": "https://www.insee.fr/fr/metadonnees/source/fichier/MET_BT_TP_BASE_2010_FR.pdf",
+        "insee_series_id": None,
+        "needs_expert_review": True,
+    }
+    for code, name, family in (
+        ("BT01", "Building, all trades", "BT"),
+        ("TP01", "Public works, general index", "TP"),
+    )
+)
 
 
 # ── Reference data, not enforced ─────────────────────────────────────────
@@ -283,9 +475,15 @@ def _validate() -> None:
             raise ValueError(f"{country} must name its law")
         for field in LIMIT_FIELDS:
             _check_figure(country, field, row.get(field))
-        unknown = set(row) - {"law", *LIMIT_FIELDS}
+        for field in OPTIONAL_LIMIT_FIELDS:
+            if field in row:
+                _check_figure(country, field, row[field])
+        unknown = set(row) - {"law", "derogable_fields", *LIMIT_FIELDS, *OPTIONAL_LIMIT_FIELDS}
         if unknown:
             raise ValueError(f"{country} names fields the table does not have: {sorted(unknown)}")
+        stray = set(row.get("derogable_fields") or ()) - {*LIMIT_FIELDS, *OPTIONAL_LIMIT_FIELDS}
+        if stray:
+            raise ValueError(f"{country} calls derogable fields the table does not have: {sorted(stray)}")
     for country in PUBLIC_WORKS_PRICE_ADJUSTMENT:
         if country not in PUBLIC_WORKS_LIMITS:
             raise ValueError(f"price adjustment regime for {country!r}, which has no limits row")
@@ -311,12 +509,62 @@ def limit_value(limits: dict[str, Any] | None, field: str) -> Decimal | None:
     return Decimal(str(figure["value"]))
 
 
+def limit_value_on(limits: dict[str, Any] | None, field: str, on: date | None) -> Decimal | None:
+    """Like :func:`limit_value`, but ``None`` when the figure took effect after ``on``.
+
+    An unknown ``on`` reads the figure in force today. A figure with no
+    effective date is read on every date, as the table states for itself.
+    """
+    value = limit_value(limits, field)
+    if value is None or on is None:
+        return value
+    effective = (limits or {}).get(field, {}).get("effective_date")
+    if effective and on < date.fromisoformat(str(effective)):
+        return None
+    return value
+
+
+def is_derogable(limits: dict[str, Any] | None, field: str) -> bool:
+    """Whether the contract's special conditions may lawfully change ``field``."""
+    return field in ((limits or {}).get("derogable_fields") or ())
+
+
+def delay_damages_amount(country_code: str | None, contract_value: Any, days: int) -> Decimal | None:
+    """The delay penalty a country's general conditions charge for ``days`` calendar days.
+
+    Daily rate is the contract value over the row's daily divisor, the total
+    is capped at the works cap, and a total at or below the waiver amount is
+    not charged at all. ``None`` for a country that sets no daily rate.
+    France, CCAG-Travaux 2021 art. 19.2: EUR 900,000 excluding tax late 120
+    days owes 36,000.00; late 400 days, the 10 percent cap of 90,000.00.
+    """
+    limits = public_works_limits(country_code)
+    divisor = limit_value(limits, "delay_damages_daily_divisor")
+    if divisor is None or divisor <= 0 or days <= 0:
+        return None if divisor is None else Decimal("0")
+    value = Decimal(str(contract_value))
+    amount = value / divisor * Decimal(days)
+    cap = limit_value(limits, "delay_damages_cap_percent_works")
+    if cap is not None:
+        amount = min(amount, value * cap / Decimal("100"))
+    waiver = limit_value(limits, "delay_damages_waiver_amount")
+    if waiver is not None and amount <= waiver:
+        return Decimal("0")
+    return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
 __all__ = [
     "CONTRACTING_SOCIAL_INSURANCE",
     "CONTRACTOR_CLASSIFICATIONS",
+    "FR_REVISION_INDICES",
     "LIMIT_FIELDS",
+    "OPTIONAL_LIMIT_FIELDS",
+    "PUBLIC_BUYER_CATEGORIES",
     "PUBLIC_WORKS_LIMITS",
     "PUBLIC_WORKS_PRICE_ADJUSTMENT",
+    "delay_damages_amount",
+    "is_derogable",
     "limit_value",
+    "limit_value_on",
     "public_works_limits",
 ]

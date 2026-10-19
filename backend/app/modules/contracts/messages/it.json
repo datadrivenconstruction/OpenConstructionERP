@@ -272,7 +272,45 @@
       "coefficient_sum_above_one": {
         "fail": "I coefficienti di revisione prezzi sommano a {item}, più di uno",
         "suggestion": "Ridurre i coefficienti in modo che sommino a uno o meno"
+      },
+      "no_coefficients_advisory": {
+        "fail": "I lavori pubblici di durata superiore a {months} mesi prevedono una clausola di revisione dei prezzi quando le materie prime sono una parte rilevante del costo, e il contratto non indica i pesi della revisione",
+        "suggestion": "Inserite i pesi della formula di revisione dalle condizioni particolari, oppure registrate che il prezzo è fisso"
       }
+    },
+    "advance_below_minimum": {
+      "fail": "L'anticipazione è pari al {percent} per cento del valore del contratto, sotto il minimo del {limit} per cento che la legge sugli appalti pubblici fissa per questo appaltatore e committente",
+      "suggestion": "Portate l'anticipazione al minimo, oppure registrate zero se l'appaltatore vi ha rinunciato"
+    },
+    "advance_above_maximum": {
+      "fail": "L'anticipazione è pari al {percent} per cento del valore del contratto, oltre il {limit} per cento che la legge sugli appalti pubblici fissa come massimo ordinario",
+      "suggestion": "Verificate che le condizioni particolari consentano l'anticipazione più alta e registrate la garanzia richiesta"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Una clausola penale per ritardo applica {amount} al giorno, mentre le condizioni generali applicano {expected} al giorno, un {divisor}° del valore del contratto",
+      "suggestion": "Mantenete la penale giornaliera delle condizioni generali, oppure indicate la penale diversa tra le deroghe delle condizioni particolari"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Una clausola penale per ritardo ha un tetto del {percent} per cento del valore del contratto, oltre il {limit} per cento delle condizioni generali",
+      "suggestion": "Abbassate il tetto al valore delle condizioni generali, oppure indicatelo tra le deroghe delle condizioni particolari"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Questo subappalto di {amount} raggiunge la soglia di {limit} per il pagamento diretto da parte del committente pubblico, e il contratto vi rinuncia, cosa che la legge vieta",
+      "suggestion": "Registrate che il committente pubblico paga direttamente il subappaltatore"
+    },
+    "direct_payment_unstated": {
+      "fail": "Questo subappalto di {amount} raggiunge la soglia di {limit} per il pagamento diretto da parte del committente pubblico, e il contratto non lo indica",
+      "suggestion": "Registrate se il subappaltatore è autorizzato e pagato direttamente dal committente pubblico"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Questo subappalto di lavori privati non registra né una fideiussione bancaria né una delegazione di pagamento, senza le quali il subappalto può essere annullato",
+      "suggestion": "Registrate la fideiussione bancaria dell'appaltatore principale o la delegazione di pagamento sul committente"
+    },
+    "private_retention_above_limit": {
+      "fail": "Una ritenuta del {percent} per cento supera il {limit} per cento che la legge consente nei lavori privati",
+      "suggestion": "Abbassate la ritenuta del contratto al limite di legge"
     }
   },
   "vat_regime": {

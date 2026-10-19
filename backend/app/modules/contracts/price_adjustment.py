@@ -12,7 +12,10 @@ weighted index formula. The forms look different and are the same thing:
 * Egypt's public works formula (Executive Regulations of Law 182/2018,
   Art. 97): ``V * sum(c_i * (I_i,t - I_i,0) / I_i,0)``, the coefficients
   stated by the contractor in the technical envelope, each above zero and
-  together below one.
+  together below one;
+* France's revision coefficient (CCAG-Travaux 2021, art. 10.5),
+  ``C = a + sum(b_i * I_i / I0_i)`` applied monthly, which the regime rounds
+  up to the thousandth before it is applied (``coefficient_rounding``).
 
 Expanding the first gives the second: ``a + sum(b_i * I_n/I_o) - 1`` equals
 ``sum(b_i * (I_n - I_o) / I_o)`` once ``a = 1 - sum(b_i)``. So one function,
@@ -38,7 +41,7 @@ from __future__ import annotations
 import calendar
 from dataclasses import dataclass, field
 from datetime import date
-from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from decimal import ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 MONEY_QUANTUM = Decimal("0.01")
@@ -77,6 +80,36 @@ PRICE_ADJUSTMENT_REGIMES: dict[str, dict[str, Any]] = {
             "The certificate is paid at contract prices without waiting for the adjustment, which is settled "
             "within 60 days of the claim. Contracts under six months are not adjusted; where the delay is the "
             "entity's, quantities executed after six months are compensated by the CAPMAS inflation rate."
+        ),
+    },
+    "fr_ccag_travaux_2021_art_10_5": {
+        "code": "fr_ccag_travaux_2021_art_10_5",
+        "country_code": "FR",
+        "jurisdiction": "France (public works)",
+        "statute": (
+            "CCAG-Travaux 2021 (arrêté du 30 mars 2021), art. 10.5; Code de la commande publique, art. R2112-13 "
+            "and R2112-14"
+        ),
+        "source_url": "https://www.economie.gouv.fr/daj/cahiers-clauses-administratives-generales-et-techniques",
+        "read_date": "2026-10-19",
+        "effective_date": "2021-04-01",
+        "mandatory": False,
+        "period_months": 1,
+        "min_duration_months": 3,
+        "coefficient_rule": "non_negative_sum_at_most_one",
+        "coefficient_rounding": {"quantum": "0.001", "direction": "up"},
+        "base_date": "offer_date",
+        "index_publisher": "INSEE BT (building) and TP (public works) indices, base 2010",
+        "variable_items_list": None,
+        "settlement_days": None,
+        "note": (
+            "A revisable price is revised each month on the work done in the month by C = a + sum(b x I/I0), "
+            "where a is the optional fixed part, I0 the index of the month of the (final) offer and I the index "
+            "of the month the work was done. The CCAG rounds C up to the thousandth. A contract longer than three "
+            "months whose costs depend substantially on raw materials must carry such a clause (R2112-13, "
+            "R2112-14); since 2021 the CCAG no longer falls back to BT01 or TP01 when the contract names no "
+            "index. Index values are provisional at first and definitive later; both come from the tenant's "
+            "price index series."
         ),
     },
     "contract_indexation": {
@@ -144,15 +177,24 @@ class AdjustmentResult:
     fixed_portion: Decimal
     items: tuple[AdjustmentItem, ...] = field(default_factory=tuple)
     total: Decimal = ZERO
+    #: Only for a regime that rounds its coefficient (France): the rounded
+    #: ``a + sum(b x I/I0)``, and what the rounding added to the items' sum,
+    #: so the printed figures still add up to the total.
+    revision_coefficient: Decimal | None = None
+    rounding_amount: Decimal | None = None
 
     def as_dict(self) -> dict[str, Any]:
-        return {
+        out: dict[str, Any] = {
             "regime": self.regime,
             "value_subject": str(self.value_subject),
             "fixed_portion": str(self.fixed_portion),
             "items": [i.as_dict() for i in self.items],
             "total": str(self.total),
         }
+        if self.revision_coefficient is not None:
+            out["revision_coefficient"] = str(self.revision_coefficient)
+            out["rounding_amount"] = str(self.rounding_amount)
+        return out
 
 
 def regime_for(code: str | None) -> dict[str, Any] | None:
@@ -252,12 +294,31 @@ def compute_adjustment(
         amount = (value * coefficient * change).quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
         items.append(AdjustmentItem(key, coefficient, base, current, change, amount))
         weights += coefficient
+    items_total = sum((i.amount for i in items), ZERO)
+    rounding = regime.get("coefficient_rounding")
+    if not rounding:
+        return AdjustmentResult(
+            regime=str(regime["code"]),
+            value_subject=value,
+            fixed_portion=ONE - weights,
+            items=tuple(items),
+            total=items_total,
+        )
+    # The coefficient is rounded before it is applied, so the total is
+    # V x (C - 1) on the rounded C and the difference to the items' sum is
+    # printed as its own line.
+    exact = ONE + sum((i.coefficient * i.change for i in items), ZERO)
+    mode = ROUND_CEILING if rounding["direction"] == "up" else ROUND_FLOOR
+    coefficient = exact.quantize(Decimal(str(rounding["quantum"])), rounding=mode)
+    total = (value * (coefficient - ONE)).quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
     return AdjustmentResult(
         regime=str(regime["code"]),
         value_subject=value,
         fixed_portion=ONE - weights,
         items=tuple(items),
-        total=sum((i.amount for i in items), ZERO),
+        total=total,
+        revision_coefficient=coefficient,
+        rounding_amount=total - items_total,
     )
 
 

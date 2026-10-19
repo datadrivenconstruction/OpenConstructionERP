@@ -3,7 +3,7 @@
   "name": "NF DTU — Documents Techniques Unifies",
   "standard": "NF DTU series (AFNOR / CSTB)",
   "jurisdiction": "FR",
-  "description": "Validates BOQ items and specifications against NF DTU (Documents Techniques Unifies) measurement and workmanship rules published by AFNOR and maintained by CSTB. Covers the main DTU families for structural works, waterproofing, facades, roofing, HVAC and electrical installations, ensuring that specification clauses reference the applicable DTU and that measurement conventions match the DTU scope.",
+  "description": "Planned, not built: no rule of this document runs today. Meant to validate BOQ items and specifications against NF DTU (Documents Techniques Unifies) measurement and workmanship rules published by AFNOR and maintained by CSTB. Covers the main DTU families for structural works, waterproofing, facades, roofing, HVAC and electrical installations, ensuring that specification clauses reference the applicable DTU and that measurement conventions match the DTU scope.",
   "applies_to": ["boq", "estimate", "validation"],
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [

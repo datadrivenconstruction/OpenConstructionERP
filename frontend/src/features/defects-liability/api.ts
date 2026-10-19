@@ -66,7 +66,13 @@ export const DEFECT_SEVERITIES: DefectSeverity[] = ['minor', 'major', 'critical'
  * chooses one: `null` is the state every entry starts in and the state it stays
  * in for a team whose legal system has no such regime.
  */
-export type LimitationRegime = 'de_vob_b' | 'de_bgb' | 'eg_civil_651';
+export type LimitationRegime =
+  | 'de_vob_b'
+  | 'de_bgb'
+  | 'eg_civil_651'
+  | 'fr_civil_1792_6'
+  | 'fr_civil_1792_3'
+  | 'fr_civil_1792';
 
 /**
  * The shipped regimes, in lock-step with `ALL_LIMITATION_REGIMES` in the backend
@@ -89,6 +95,9 @@ export const LIMITATION_REGIMES: {
   { code: 'de_vob_b', months: 48, statute: 'VOB/B § 13 Abs. 4', short: 'VOB/B' },
   { code: 'de_bgb', months: 60, statute: 'BGB § 634a Abs. 1 Nr. 2', short: 'BGB' },
   { code: 'eg_civil_651', months: 120, statute: 'Egyptian Civil Code Art. 651', short: 'EG CC 651' },
+  { code: 'fr_civil_1792_6', months: 12, statute: 'Code civil art. 1792-6', short: 'C. civ. 1792-6' },
+  { code: 'fr_civil_1792_3', months: 24, statute: 'Code civil art. 1792-3', short: 'C. civ. 1792-3' },
+  { code: 'fr_civil_1792', months: 120, statute: 'Code civil art. 1792', short: 'C. civ. 1792' },
 ];
 
 /** The shipped regime with this code, or undefined for none / an unknown one. */

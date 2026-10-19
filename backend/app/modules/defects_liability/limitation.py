@@ -58,6 +58,9 @@ class LimitationRegime(StrEnum):
     DE_VOB_B = "de_vob_b"  # VOB/B agreed: four years for building works
     DE_BGB = "de_bgb"  # no VOB/B: the BGB's five years
     EG_CIVIL_651 = "eg_civil_651"  # Egypt: decennial liability of the architect and the contractor
+    FR_CIVIL_1792_6 = "fr_civil_1792_6"  # France: garantie de parfait achèvement, one year
+    FR_CIVIL_1792_3 = "fr_civil_1792_3"  # France: garantie biennale de bon fonctionnement, two years
+    FR_CIVIL_1792 = "fr_civil_1792"  # France: responsabilité décennale, ten years
 
 
 @dataclass(frozen=True)
@@ -142,6 +145,50 @@ LIMITATION_REGIMES: tuple[LimitationRegimeSpec, ...] = (
             "the collapse or of the discovery of the defect (Art. 654), a second clock this register does not "
             "compute because it starts on an event only a person can record. Read in secondary summaries of the "
             "Civil Code; the article numbering of 652 and 653 differs between sources."
+        ),
+    ),
+    LimitationRegimeSpec(
+        code=LimitationRegime.FR_CIVIL_1792_6.value,
+        jurisdiction="France",
+        country_code="FR",
+        statute="Code civil art. 1792-6 (garantie de parfait achèvement)",
+        statute_reference=(
+            "Art. 1792-6 Code civil: one year from réception; for public works also CCAG-Travaux 2021 art. 44.1"
+        ),
+        months=12,
+        starts_from="acceptance",
+        notes=(
+            "For one year from réception the contractor repairs every defect reserved at réception or notified "
+            "during the year, whatever its seriousness. Réception with reservations starts the year too. The "
+            "retenue de garantie is released at its end unless the client objected (loi 71-584, art. 2)."
+        ),
+    ),
+    LimitationRegimeSpec(
+        code=LimitationRegime.FR_CIVIL_1792_3.value,
+        jurisdiction="France",
+        country_code="FR",
+        statute="Code civil art. 1792-3 (garantie biennale de bon fonctionnement)",
+        statute_reference="Art. 1792-3 Code civil: at least two years from réception",
+        months=24,
+        starts_from="acceptance",
+        notes=(
+            "Equipment that can be removed without damaging the structure (dissociable elements) must work for "
+            "at least two years from réception. The contract may agree a longer period, entered by hand."
+        ),
+    ),
+    LimitationRegimeSpec(
+        code=LimitationRegime.FR_CIVIL_1792.value,
+        jurisdiction="France",
+        country_code="FR",
+        statute="Code civil art. 1792 and 1792-4-1 (responsabilité décennale)",
+        statute_reference="Art. 1792 and 1792-4-1 Code civil: ten years from réception",
+        months=120,
+        starts_from="acceptance",
+        notes=(
+            "Builders are liable as of right for ten years from réception for damage that compromises the "
+            "solidity of the works or makes them unfit for their purpose. Builders must insure it (Code des "
+            "assurances L241-1) and the owner must take out dommages-ouvrage insurance (L242-1); neither "
+            "insurance is a period this register computes."
         ),
     ),
 )

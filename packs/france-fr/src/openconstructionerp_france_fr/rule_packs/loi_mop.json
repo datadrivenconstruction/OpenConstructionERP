@@ -3,7 +3,7 @@
   "name": "Loi MOP — Public Project Delivery Framework",
   "standard": "Loi MOP (Loi 85-704, codified in Code de la commande publique)",
   "jurisdiction": "FR",
-  "description": "Validates project organisation and documentation against the Loi relative a la maitrise d'ouvrage publique (Loi MOP), now codified in the Code de la commande publique. Checks that the roles of maitre d'ouvrage, maitre d'oeuvre and entrepreneur are defined, that mission phases (ESQ, APS, APD, PRO, ACT, VISA, DET, AOR) are documented and ordered, and that cost estimates exist at the required project phases.",
+  "description": "Planned, not built: no rule of this document runs today. Meant to validate project organisation and documentation against the Loi relative a la maitrise d'ouvrage publique (Loi MOP), now codified in the Code de la commande publique. Checks that the roles of maitre d'ouvrage, maitre d'oeuvre and entrepreneur are defined, that mission phases (ESQ, APS, APD, PRO, ACT, VISA, DET, AOR) are documented and ordered, and that cost estimates exist at the required project phases.",
   "applies_to": ["estimate", "tender", "validation"],
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [

@@ -3,7 +3,7 @@
   "name": "RE 2020 — Environmental Regulation for New Buildings",
   "standard": "RE 2020 (Decret 2021-1004, Arrete du 4 aout 2021)",
   "jurisdiction": "FR",
-  "description": "Validates project documentation against RE 2020 (Reglementation Environnementale 2020) requirements for new buildings. Checks that the energy performance indicators (Bbio, Cep, Cep_nr), carbon footprint thresholds (Ic_construction, Ic_energie), and summer comfort (DH degree-hours) are documented and within the regulatory limits for the declared building type and climate zone.",
+  "description": "Planned, not built: no rule of this document runs today. Meant to validate project documentation against RE 2020 (Reglementation Environnementale 2020) requirements for new buildings. Checks that the energy performance indicators (Bbio, Cep, Cep_nr), carbon footprint thresholds (Ic_construction, Ic_energie), and summer comfort (DH degree-hours) are documented and within the regulatory limits for the declared building type and climate zone.",
   "applies_to": ["estimate", "validation", "submittals"],
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [

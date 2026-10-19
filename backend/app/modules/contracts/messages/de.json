@@ -272,7 +272,45 @@
       "coefficient_sum_above_one": {
         "fail": "Die Preisanpassungskoeffizienten ergeben zusammen {item}, mehr als eins",
         "suggestion": "Senken Sie die Koeffizienten, sodass sie zusammen höchstens eins ergeben"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Öffentliche Bauaufträge mit mehr als {months} Monaten Laufzeit enthalten eine Preisgleitklausel, wenn Rohstoffe einen erheblichen Teil der Kosten ausmachen, und der Vertrag nennt keine Gewichte für die Preisanpassung",
+        "suggestion": "Tragen Sie die Gewichte der Preisgleitformel aus den besonderen Vertragsbedingungen ein oder erfassen Sie, dass der Preis fest ist"
       }
+    },
+    "advance_below_minimum": {
+      "fail": "Der Vorschuss beträgt {percent} Prozent des Vertragswerts und liegt unter dem Mindestsatz von {limit} Prozent, den das Vergaberecht für diesen Auftragnehmer und Auftraggeber vorschreibt",
+      "suggestion": "Heben Sie den Vorschuss auf den Mindestsatz an oder erfassen Sie null, wenn der Auftragnehmer darauf verzichtet hat"
+    },
+    "advance_above_maximum": {
+      "fail": "Der Vorschuss beträgt {percent} Prozent des Vertragswerts und liegt über den {limit} Prozent, die das Vergaberecht als übliche Obergrenze festlegt",
+      "suggestion": "Prüfen Sie, ob die besonderen Vertragsbedingungen den höheren Vorschuss zulassen, und erfassen Sie die dafür verlangte Sicherheit"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Eine Verzugsstrafklausel berechnet {amount} pro Tag, die allgemeinen Vertragsbedingungen dagegen {expected} pro Tag, ein {divisor}stel des Vertragswerts",
+      "suggestion": "Behalten Sie den Tagessatz der allgemeinen Vertragsbedingungen bei oder führen Sie den abweichenden Satz unter den Abweichungen der besonderen Vertragsbedingungen auf"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Eine Verzugsstrafklausel ist auf {percent} Prozent des Vertragswerts begrenzt, mehr als die {limit} Prozent der allgemeinen Vertragsbedingungen",
+      "suggestion": "Senken Sie die Obergrenze auf den Wert der allgemeinen Vertragsbedingungen oder führen Sie sie unter den Abweichungen der besonderen Vertragsbedingungen auf"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Dieser Nachunternehmervertrag über {amount} erreicht die Schwelle von {limit} für die Direktzahlung durch den öffentlichen Auftraggeber, und der Vertrag schließt sie aus, was das Gesetz verbietet",
+      "suggestion": "Erfassen Sie, dass der öffentliche Auftraggeber den Nachunternehmer direkt bezahlt"
+    },
+    "direct_payment_unstated": {
+      "fail": "Dieser Nachunternehmervertrag über {amount} erreicht die Schwelle von {limit} für die Direktzahlung durch den öffentlichen Auftraggeber, und der Vertrag hält sie nicht fest",
+      "suggestion": "Erfassen Sie, ob der Nachunternehmer zugelassen ist und direkt vom öffentlichen Auftraggeber bezahlt wird"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Dieser Nachunternehmervertrag über private Bauleistungen enthält weder eine Bankbürgschaft noch eine Zahlungsanweisung an den Bauherrn, ohne die der Vertrag für nichtig erklärt werden kann",
+      "suggestion": "Erfassen Sie die Bankbürgschaft des Hauptunternehmers oder die Zahlungsanweisung an den Bauherrn"
+    },
+    "private_retention_above_limit": {
+      "fail": "Ein Einbehalt von {percent} Prozent liegt über den {limit} Prozent, die das Gesetz bei privaten Bauleistungen zulässt",
+      "suggestion": "Senken Sie den Einbehalt des Vertrags auf die gesetzliche Obergrenze"
     }
   },
   "vat_regime": {
