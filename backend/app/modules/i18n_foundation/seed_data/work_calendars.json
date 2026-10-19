@@ -952,5 +952,33 @@
       {"date": "2026-12-25", "name": {"en": "Christmas Day", "hu": "Karácsony"}, "type": "public_holiday"},
       {"date": "2026-12-26", "name": {"en": "Second Day of Christmas", "hu": "Karácsony másnapja"}, "type": "public_holiday"}
     ]
+  },
+  {
+    "country_code": "EG",
+    "name": "Egypt Public Holidays 2026 (Sun-Thu, announced Thursday moves applied)",
+    "name_translations": {
+      "en": "Egypt Public Holidays 2026 (Sun-Thu, announced Thursday moves applied)",
+      "ar": "العطلات الرسمية في مصر 2026 (من الأحد إلى الخميس، مع الترحيل المعلن إلى يوم الخميس)"
+    },
+    "year": "2026",
+    "work_hours_per_day": "8",
+    "work_days": [7, 1, 2, 3, 4],
+    "exceptions": [
+      {"date": "2026-01-07", "name": {"en": "Coptic Christmas", "ar": "عيد الميلاد المجيد"}, "type": "public_holiday"},
+      {"date": "2026-01-29", "name": {"en": "Revolution Day and Police Day (25 January, observed)", "ar": "عيد الشرطة وثورة 25 يناير"}, "type": "public_holiday"},
+      {"date": "2026-03-20", "name": {"en": "Eid al-Fitr Day 1", "ar": "عيد الفطر"}, "type": "public_holiday"},
+      {"date": "2026-03-21", "name": {"en": "Eid al-Fitr Day 2", "ar": "عيد الفطر"}, "type": "public_holiday"},
+      {"date": "2026-04-13", "name": {"en": "Sham el-Nessim", "ar": "شم النسيم"}, "type": "public_holiday"},
+      {"date": "2026-04-25", "name": {"en": "Sinai Liberation Day", "ar": "عيد تحرير سيناء"}, "type": "public_holiday"},
+      {"date": "2026-05-01", "name": {"en": "Labour Day", "ar": "عيد العمال"}, "type": "public_holiday"},
+      {"date": "2026-05-26", "name": {"en": "Arafat Day", "ar": "يوم عرفة"}, "type": "public_holiday"},
+      {"date": "2026-05-27", "name": {"en": "Eid al-Adha Day 1", "ar": "عيد الأضحى"}, "type": "public_holiday"},
+      {"date": "2026-05-28", "name": {"en": "Eid al-Adha Day 2", "ar": "عيد الأضحى"}, "type": "public_holiday"},
+      {"date": "2026-06-18", "name": {"en": "Islamic New Year (observed)", "ar": "رأس السنة الهجرية"}, "type": "public_holiday"},
+      {"date": "2026-07-02", "name": {"en": "June 30 Revolution (observed)", "ar": "ذكرى ثورة 30 يونيو"}, "type": "public_holiday"},
+      {"date": "2026-07-23", "name": {"en": "July 23 Revolution", "ar": "عيد ثورة 23 يوليو"}, "type": "public_holiday"},
+      {"date": "2026-08-27", "name": {"en": "Prophet's Birthday (observed)", "ar": "المولد النبوي الشريف"}, "type": "public_holiday"},
+      {"date": "2026-10-08", "name": {"en": "Armed Forces Day (6 October, observed)", "ar": "عيد القوات المسلحة"}, "type": "public_holiday"}
+    ]
   }
 ]

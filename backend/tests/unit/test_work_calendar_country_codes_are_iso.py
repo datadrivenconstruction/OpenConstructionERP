@@ -331,6 +331,8 @@ EXPECTED_CALENDAR_BY_COUNTRY = {
     "BH": "GULF",
     "KW": "GULF",
     "OM": "GULF",
+    # Egypt works Sunday to Thursday like the five, on an entry of its own.
+    "EG": "EGYPT",
     "CN": "CHINA",
     "IN": "INDIA",
     "IT": "ITALY",

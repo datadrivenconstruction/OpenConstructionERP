@@ -1,0 +1,79 @@
+[
+  {
+    "country": "EG",
+    "year": 2025,
+    "holiday": "revolution_30_june",
+    "statutory": ["2025-06-30"],
+    "observed": ["2025-07-03"],
+    "authority": "Prime Minister Decree No. 2130 of 2025",
+    "source_url": "https://erp.id.com.eg/vufind/Record/oai:dspace.id.com.eg:123456789-3853/Description",
+    "private_sector": "stated",
+    "note": "Monday moved to Thursday; press reports name ministries, public companies and the private sector."
+  },
+  {
+    "country": "EG",
+    "year": 2025,
+    "holiday": "armed_forces_day",
+    "statutory": ["2025-10-06"],
+    "observed": ["2025-10-09"],
+    "authority": "Prime Minister decree, October 2025",
+    "source_url": "https://www.cairo.gov.eg/en/news/news-eng/2025/4b6012afdea54aac811e086ee5b4e0ad",
+    "private_sector": "not_stated",
+    "note": "Monday moved to Thursday."
+  },
+  {
+    "country": "EG",
+    "year": 2026,
+    "holiday": "revolution_25_january",
+    "statutory": ["2026-01-25"],
+    "observed": ["2026-01-29"],
+    "authority": "Prime Minister Decree No. 199 of 2026, dated 18 January 2026",
+    "source_url": "https://dspace.id.com.eg/items/8e5d209a-b3f0-47b4-b904-edb81c6e4823/full",
+    "private_sector": "stated",
+    "note": "Sunday moved to Thursday."
+  },
+  {
+    "country": "EG",
+    "year": 2026,
+    "holiday": "hijri_new_year",
+    "statutory": ["2026-06-16"],
+    "observed": ["2026-06-18"],
+    "authority": "Prime Minister decree, June 2026",
+    "source_url": "https://www.cairo.gov.eg/en/news/2026/june/9_june/de4fb420b9864472ae90cbef4d019f05",
+    "private_sector": "not_stated",
+    "note": "The converter places 1 Muharram 1448 on 16 June; the decree observes it on Thursday 18 June."
+  },
+  {
+    "country": "EG",
+    "year": 2026,
+    "holiday": "revolution_30_june",
+    "statutory": ["2026-06-30"],
+    "observed": ["2026-07-02"],
+    "authority": "Prime Minister decree, June 2026",
+    "source_url": "https://www.cairo.gov.eg/en/news/2026/june/24/30_june/",
+    "private_sector": "not_stated",
+    "note": "Tuesday moved to Thursday."
+  },
+  {
+    "country": "EG",
+    "year": 2026,
+    "holiday": "prophets_birthday",
+    "statutory": ["2026-08-25"],
+    "observed": ["2026-08-27"],
+    "authority": "Prime Minister decree, August 2026",
+    "source_url": "https://arabfinance.com/en/news/newdetails/madbouly-declares-august-27-as-official-holiday-for-prophet-muhammad-birthday",
+    "private_sector": "not_stated",
+    "note": "The converter places 12 Rabi al-Awwal 1448 on 25 August; the decree observes it on Thursday 27 August."
+  },
+  {
+    "country": "EG",
+    "year": 2026,
+    "holiday": "armed_forces_day",
+    "statutory": ["2026-10-06"],
+    "observed": ["2026-10-08"],
+    "authority": "Prime Minister decree and Labour Minister decision under Labour Law 14/2025, October 2026",
+    "source_url": "https://arabfinance.com/en/news/newdetails/madbouly-declares-october-8-public-holiday-for-armed-forces-day",
+    "private_sector": "stated",
+    "note": "Tuesday moved to Thursday."
+  }
+]

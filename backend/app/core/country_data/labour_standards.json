@@ -1,0 +1,139 @@
+[
+  {
+    "country": "EG", "key": "max_hours_per_day", "value": "8", "unit": "hours",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025 (in force 2025-09-01), as summarised by law-firm commentary",
+    "source_url": "https://www.mondaq.com/employee-rights-labour-relations/1791586/egypt-labour-law-14-of-2025-%7C-workers-rights-employer-duties",
+    "confidence": "M", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "max_hours_per_week", "value": "48", "unit": "hours",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025, as summarised by law-firm commentary",
+    "source_url": "https://www.mondaq.com/employee-rights-labour-relations/1791586/egypt-labour-law-14-of-2025-%7C-workers-rights-employer-duties",
+    "confidence": "M", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "weekly_rest_hours_min", "value": "24", "unit": "hours",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025: at least 24 consecutive paid hours of weekly rest, Friday by custom",
+    "source_url": "https://global.lockton.com/us/en/news-insights/egypt-adopts-comprehensive-new-labor-law",
+    "confidence": "M", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "overtime_premium_day_pct", "value": "35", "unit": "percent of hourly wage",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Secondary HR-platform summary; article number not found, and another secondary source gives 25%",
+    "source_url": "https://remotepass.com/country/egypt/employment-laws",
+    "confidence": "M", "needs_expert_review": true,
+    "note": "UNCONFIRMED: 35% matches the 2003 law; Law 14/2025 premium must be read in the official text."
+  },
+  {
+    "country": "EG", "key": "overtime_premium_night_pct", "value": "70", "unit": "percent of hourly wage",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Secondary HR-platform summary; article number not found, and another secondary source gives 75%",
+    "source_url": "https://remotepass.com/country/egypt/employment-laws",
+    "confidence": "M", "needs_expert_review": true,
+    "note": "UNCONFIRMED: 70% matches the 2003 law; Law 14/2025 premium must be read in the official text."
+  },
+  {
+    "country": "EG", "key": "public_holiday_work_extra_pay_multiplier", "value": "2", "unit": "x the day's wage, on top of the regular wage",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Ministerial Decree 294/2025: double pay in addition to regular pay, or a compensatory day on written request",
+    "source_url": "https://www.mondaq.com/employee-rights-labour-relations/1733268/ministerial-decree-setting-official-paid-holidays-for-workers-no-294-of-2025",
+    "confidence": "M", "needs_expert_review": true,
+    "note": "Whether 'double pay in addition to regular pay' means 2x or 3x the day's wage in total needs an Egyptian labour lawyer."
+  },
+  {
+    "country": "EG", "key": "public_holiday_days", "value": "15", "unit": "days per year",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Ministerial Decree 294/2025: twelve occasions, Eid al-Fitr two days, Arafat and Eid al-Adha three days",
+    "source_url": "https://www.mondaq.com/employee-rights-labour-relations/1733268/ministerial-decree-setting-official-paid-holidays-for-workers-no-294-of-2025",
+    "confidence": "M", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "annual_leave_days_first_year", "value": "15", "unit": "days per year",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025",
+    "source_url": "https://www.ey.com/en_gl/technical/tax-alerts/egypt-enacts-new-labor-law-with-changes-affecting-employers-beginning-1-september-2025",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "annual_leave_days", "value": "21", "unit": "days per year",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025: after the first year of service",
+    "source_url": "https://www.ey.com/en_gl/technical/tax-alerts/egypt-enacts-new-labor-law-with-changes-affecting-employers-beginning-1-september-2025",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "annual_leave_days_long_service", "value": "30", "unit": "days per year",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025: after 10 years of service or from age 50",
+    "source_url": "https://www.ey.com/en_gl/technical/tax-alerts/egypt-enacts-new-labor-law-with-changes-affecting-employers-beginning-1-september-2025",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "annual_leave_days_disability", "value": "45", "unit": "days per year",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025: persons with disabilities",
+    "source_url": "https://www.clydeco.com/en/insights/2025/05/egypt-new-labour-law",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "emergency_leave_days", "value": "7", "unit": "days per year",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025: at most two consecutive days, deducted from annual leave",
+    "source_url": "https://www.clydeco.com/en/insights/2025/05/egypt-new-labour-law",
+    "confidence": "M", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "maternity_leave_days", "value": "120", "unit": "days",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025: fully paid, up to three times",
+    "source_url": "https://www.ey.com/en_gl/technical/tax-alerts/egypt-enacts-new-labor-law-with-changes-affecting-employers-beginning-1-september-2025",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "annual_increment_min_pct", "value": "3", "unit": "percent of insurable wage",
+    "effective_from": "2025-09-01", "effective_to": null,
+    "source": "Labour Law 14/2025",
+    "source_url": "https://www.ey.com/en_gl/technical/tax-alerts/egypt-enacts-new-labor-law-with-changes-affecting-employers-beginning-1-september-2025",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "annual_increment_min_monthly", "value": "250", "unit": "EGP/month",
+    "effective_from": "2025-03-01", "effective_to": null,
+    "source": "National Wages Council decision",
+    "source_url": "https://moic.gov.eg/news/1998",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "minimum_wage_monthly", "value": "7000", "unit": "EGP/month",
+    "effective_from": "2025-03-01", "effective_to": null,
+    "source": "National Wages Council decision, private sector, full time",
+    "source_url": "https://moic.gov.eg/news/1998",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "minimum_wage_hourly_part_time", "value": "28", "unit": "EGP/hour net",
+    "effective_from": "2025-03-01", "effective_to": null,
+    "source": "National Wages Council decision, private sector, part time",
+    "source_url": "https://moic.gov.eg/news/1998",
+    "confidence": "H", "needs_expert_review": false
+  },
+  {
+    "country": "EG", "key": "employer_social_insurance_pct", "value": "18.75", "unit": "percent of insurable wage",
+    "effective_from": "2020-01-01", "effective_to": null,
+    "source": "Social Insurance Law 148/2019, general scheme; insurable wage capped per year",
+    "source_url": "https://taxsummaries.pwc.com/egypt/corporate/other-taxes",
+    "confidence": "H", "needs_expert_review": false,
+    "note": "Construction contracts are also assessed on a deemed wage from contract value (Decree 152/2019, Table 8); that mechanism is not modelled."
+  },
+  {
+    "country": "EG", "key": "employee_social_insurance_pct", "value": "11", "unit": "percent of insurable wage",
+    "effective_from": "2020-01-01", "effective_to": null,
+    "source": "Social Insurance Law 148/2019, general scheme",
+    "source_url": "https://taxsummaries.pwc.com/egypt/corporate/other-taxes",
+    "confidence": "H", "needs_expert_review": false
+  }
+]

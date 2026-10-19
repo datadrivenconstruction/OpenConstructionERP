@@ -889,6 +889,27 @@ def _labour_regions(country: str) -> DimensionReport:
     )
 
 
+@_probe(
+    "labour.statutory_standards",
+    covers=("app/core/country_data/labour_standards.json",),
+)
+def _labour_standards(country: str) -> DimensionReport:
+    """Statutory hours, leave, minimum wage and social insurance, as sourced rows.
+
+    Covered means the catalogue holds at least one row for the country, not
+    that every fact is confirmed: rows flagged for expert review are counted,
+    because they are shown and editable, but no rule can enforce them.
+    """
+    from app.core.labour_standards import countries
+
+    return _keyed(
+        "labour.statutory_standards",
+        "app/core/country_data/labour_standards.json",
+        set(countries()),
+        country,
+    )
+
+
 # --------------------------------------------------------------------------- #
 # The axes the product claims per-country support on
 #
