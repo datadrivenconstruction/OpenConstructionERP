@@ -2435,7 +2435,6 @@ class ContractsService:
                 "status": contract.status,
                 "contract_type": contract.contract_type,
                 "counterparty_type": contract.counterparty_type,
-                "total_value": str(contract.total_value or 0),
                 "retention_percent": str(contract.retention_percent or 0),
                 "start_date": contract.start_date,
                 "end_date": contract.end_date,
@@ -2451,7 +2450,6 @@ class ContractsService:
                 "code": contract.code,
                 "country_code": await self.project_country(contract.project_id),
                 "signed_at": contract.signed_at,
-                "start_date": contract.start_date,
                 "is_subcontract": contract.counterparty_type == "subcontractor"
                 or contract.parent_contract_id is not None,
                 "total_value": str(contract.total_value) if contract.total_value is not None else None,
