@@ -1193,7 +1193,7 @@ async def update_meeting(
     """Update a meeting."""
     existing = await service.get_meeting(meeting_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    meeting = await service.update_meeting(meeting_id, data)
+    meeting = await service.update_meeting(meeting_id, data, user_id=str(user_id) if user_id else None)
     return _meeting_to_response(meeting)
 
 

@@ -163,8 +163,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "keys on. Nothing writes that key, so publishing from finance would not wake it either"
     ),
     "inspection.completed.passed": "qms subscribes to a pass-specific name; inspections publish a single completion event",
-    "inspection.scheduled": "nothing publishes when an inspection is scheduled",
-    "meeting.scheduled": "nothing publishes when a meeting is scheduled",
     "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
     "schedule_advanced.task.completed": (
         "bi_dashboards/events.py:104, inside the annotated _PROJECTION_INVALIDATING_EVENTS "

@@ -1275,11 +1275,15 @@ async def _notify_inspection_due(event: Event) -> None:
         title: str
         inspector_id: str (UUID)
         inspection_date: str
+        scheduled_by: str | None (UUID; an inspector who booked it is not told)
+
+    Published by ``InspectionService`` when an inspection is created as, or
+    becomes, scheduled, or is moved or reassigned while scheduled.
     """
     try:
         data = event.data
         inspector_id = data.get("inspector_id")
-        if not inspector_id:
+        if not inspector_id or str(inspector_id) == str(data.get("scheduled_by") or ""):
             return
 
         from app.database import async_session_factory
@@ -1327,10 +1331,15 @@ async def _notify_meeting_scheduled(event: Event) -> None:
         title: str
         meeting_date: str
         attendee_user_ids: list[str] (UUIDs of attendees)
+        scheduled_by: str | None (UUID; left out of the recipients)
+
+    Published by ``MeetingService`` when a meeting is created as, or becomes,
+    scheduled, or is moved to another day while scheduled.
     """
     try:
         data = event.data
-        attendee_ids = data.get("attendee_user_ids", [])
+        scheduled_by = str(data.get("scheduled_by") or "")
+        attendee_ids = [uid for uid in data.get("attendee_user_ids") or [] if str(uid) != scheduled_by]
         if not attendee_ids:
             return
 
