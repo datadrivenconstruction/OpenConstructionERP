@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "发票{number}与发票{other}的承包商、金额({amount})和日期({on})相同。",
       "suggestion": "请核对是不是同一张发票以另一个号码重复录入。"
+    },
+    "split_payment_annotation_missing": {
+      "fail": "发票{number}包含建筑工程或其他适用split payment的货物,且超过{threshold},但未带有注记“{annotation}”。",
+      "suggestion": "请供应商开具带注记的更正发票,并无论如何都通过split payment支付:以此方式付款的义务不取决于注记。"
+    },
+    "split_payment_not_used": {
+      "fail": "发票{number}适用split payment,但其付款以另一种方式记录。买方还需额外承担{sanction},即其增值税的30%。",
+      "suggestion": "此类发票应从增值税账户通过split payment支付,并在付款上将方式记录为split_payment。"
+    },
+    "split_payment_annex_unknown": {
+      "fail": "发票{number}超过{threshold},且未记录其是否包含split payment附件所列的货物或服务。",
+      "suggestion": "请在发票上记录其是否包含附件所列的货物或服务(annex_15)或其编码(pkwiu_codes),以便核查付款方式。"
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "发票{number}对全部价款按{rate}%计征增值税,但该住宅的使用面积为{area_m2} m2,优惠税率仅适用至{limit_m2} m2({reference})。",
+      "suggestion": "请对价款的{reduced_share_percent}%适用优惠税率,其余部分适用标准税率。"
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "发票{number}按{rate}%的住房优惠税率计征,但项目中未记录其对应哪套住宅及其使用面积({reference})。",
+      "suggestion": "请在项目中记录住宅类型和使用面积(vat_housing),以便核查税率及其面积上限。"
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "发票{number}对{object}按{rate}%的住房优惠税率计征,但其不符合适用条件({reference})。",
+      "suggestion": "请适用标准税率,或更正项目中记录的住宅。"
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "发票{number}对{count}个明细行适用反向征税,但建筑服务的国内反向征税在该国已经终止。",
+      "suggestion": "除非供应商设立于境外,否则请索取含增值税的发票;此类发票通过split payment支付。"
+    },
+    "payment_term_over_cap": {
+      "fail": "合同{contract}约定付款期限为{days}天,超过逾期付款法允许企业之间的{cap}天。",
+      "suggestion": "请将期限缩短至{cap}天,或记录为何明确约定较长期限且对分包商并非严重不公平。"
     }
   }
 }

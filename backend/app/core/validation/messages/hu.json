@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "A(z) {number} számla vállalkozója, összege ({amount}) és dátuma ({on}) megegyezik a(z) {other} számláéval.",
       "suggestion": "Ellenőrizze, hogy nem ugyanaz a számla szerepel-e kétszer, más számlaszámmal."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "A(z) {number} számla építési munkákat vagy más split payment alá tartozó árut tartalmaz, és meghaladja a(z) {threshold} összeget, de nem szerepel rajta a «{annotation}» megjegyzés.",
+      "suggestion": "Kérjen a szállítótól a megjegyzéssel javított számlát, és mindenképp split payment útján fizesse ki: az így fizetés kötelezettsége nem függ a megjegyzéstől."
+    },
+    "split_payment_not_used": {
+      "fail": "A(z) {number} számla split payment alá tartozik, de kifizetését más módszerrel rögzítették. A vevő emellett felel a következőért: {sanction}, az áfa 30 százaléka.",
+      "suggestion": "Az ilyen számlákat az áfaszámláról split payment útján fizesse, és a fizetésen a módszert split_payment-ként rögzítse."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "A(z) {number} számla meghaladja a(z) {threshold} összeget, és nincs rögzítve, hogy tartalmaz-e a split payment mellékletében szereplő árut vagy szolgáltatást.",
+      "suggestion": "Rögzítse a számlán, hogy tartalmaz-e a mellékletben szereplő árut vagy szolgáltatást (annex_15), vagy ezek kódjait (pkwiu_codes), hogy a fizetési mód ellenőrizhető legyen."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "A(z) {number} számla a teljes árra {rate} százalék áfát számít fel, de a lakás hasznos alapterülete {area_m2} m2, a kedvezményes kulcs pedig legfeljebb {limit_m2} m2-ig érvényes ({reference}).",
+      "suggestion": "A kedvezményes kulcsot az ár {reduced_share_percent} százalékára, az általános kulcsot a többire számítsa fel."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "A(z) {number} számla a {rate} százalékos kedvezményes lakásáfa-kulcsot számítja fel, de a projektben nincs rögzítve, melyik lakásra vonatkozik, sem a hasznos alapterülete ({reference}).",
+      "suggestion": "Rögzítse a projekten a lakás típusát és a hasznos alapterületet (vat_housing), hogy a kulcs és a területhatár ellenőrizhető legyen."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "A(z) {number} számla a {rate} százalékos kedvezményes lakásáfa-kulcsot a(z) {object} tételre számítja fel, amely nem jogosult rá ({reference}).",
+      "suggestion": "Számítsa fel az általános kulcsot, vagy javítsa a projekten rögzített lakást."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "A(z) {number} számla {count} soron alkalmaz fordított adózást, de az építési szolgáltatások belföldi fordított adózása ebben az országban megszűnt.",
+      "suggestion": "Ha a szállító nem külföldön letelepedett, kérjen áfás számlát; az ilyen számlákat split payment útján kell fizetni."
+    },
+    "payment_term_over_cap": {
+      "fail": "A(z) {contract} szerződés {days} napos fizetési határidőt köt ki, ami hosszabb a vállalkozások között a késedelmes fizetésről szóló törvény által megengedett {cap} napnál.",
+      "suggestion": "Rövidítse a határidőt {cap} napra, vagy rögzítse, miért állapodtak meg kifejezetten a hosszabb határidőben, és miért nem durván tisztességtelen az alvállalkozóval szemben."
     }
   }
 }

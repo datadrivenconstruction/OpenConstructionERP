@@ -624,7 +624,13 @@ RULE_NUMBERS: dict[str, str] = {
 
 
 def register_payment_release_rules() -> None:
-    """Register V11 to V14 and V16 to V18 into the ``payment_release`` rule set."""
-    for rule_cls in PAYMENT_RELEASE_RULES:
+    """Register V11 to V14 and V16 to V18 into the ``payment_release`` rule set.
+
+    The statutory rules V20 to V23 join the same set; they live in
+    ``statutory_rules`` because they read country data rather than the terms.
+    """
+    from app.modules.payment_release.statutory_rules import STATUTORY_RULES
+
+    for rule_cls in (*PAYMENT_RELEASE_RULES, *STATUTORY_RULES):
         rule_registry.register(rule_cls(), [RULE_SET])
     logger.debug("Registered payment release validation rules")

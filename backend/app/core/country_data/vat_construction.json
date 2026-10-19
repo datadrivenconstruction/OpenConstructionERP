@@ -1,0 +1,98 @@
+{
+  "_comment": "VAT rules a construction invoice meets beyond the rate itself, per country. Read by app/core/vat_construction.py. Rates are never stored here: a row names the tax_code of the dated tax seed (i18n_foundation/seed_data/tax_configurations.json) whose row in force supplies the rate. Every row carries its legal reference, source, dates and a confidence (H official text or two reliable sources agree, M one reliable secondary source or settled practice). review_status needs_expert_review means the row applies and is shown, and a local tax adviser has not confirmed it.",
+  "countries": {
+    "PL": {
+      "statute": "Ustawa z dnia 11 marca 2004 r. o podatku od towarów i usług (VAT Act)",
+      "currency": "PLN",
+      "split_payment": {
+        "name": "mechanizm podzielonej płatności (MPP)",
+        "effective_from": "2019-11-01",
+        "effective_to": null,
+        "effective_to_note": "The EU derogation that allows mandatory split payment was extended to 28 February 2028 (Commission consent of 14 January 2025, Council approval reported pending). The end date is not set here until it is confirmed.",
+        "threshold_gross": "15000.00",
+        "threshold_rule": "greater_than",
+        "threshold_basis": "invoice_total_gross",
+        "legal_reference": "art. 108a ust. 1a: the buyer pays by split payment for an invoice that lists goods or services of Annex 15 when the invoice total (kwota należności ogółem) exceeds PLN 15,000 or its equivalent; the threshold is the whole invoice, not the line, and one Annex 15 line on a mixed invoice is enough",
+        "annex": "Annex 15 to the VAT Act",
+        "annex_pkwiu_prefixes": ["41", "42", "43"],
+        "annex_note": "Construction works of PKWiU 2015 sections 41 (buildings), 42 (civil engineering) and 43 (specialised works: demolition, site preparation, installation, finishing). Annex 15 lists named positions within those sections and further goods relevant to sites (steel products, cables, and others) that are not modelled here; an invoice can state annex_15 directly.",
+        "annex_review_status": "needs_expert_review",
+        "invoice_annotation": "mechanizm podzielonej płatności",
+        "invoice_annotation_reference": "art. 106e ust. 1 pkt 18a",
+        "einvoice_field": "P_18A",
+        "einvoice_field_value": "1",
+        "payment_method": "split_payment",
+        "buyer_sanction_percent_of_vat": "30",
+        "buyer_sanction_reference": "art. 108a ust. 7",
+        "seller_sanction_percent_of_vat": "30",
+        "seller_sanction_reference": "art. 106e ust. 12",
+        "sources": [
+          "https://www.roedl.pl/en/good-to-know/good-to-know/split-payment-mechanism/split-payment-mandatory-until-2028",
+          "https://g.infor.pl/p/_files/523000/rewolucyjne-zmiany-vat-w-budownictwie-522599.pdf"
+        ],
+        "read_date": "2026-10-19",
+        "confidence": "H",
+        "confidence_note": "Threshold, annex and the 30 percent sanction H; the article numbers of the two sanctions and of the annotation M.",
+        "review_status": "needs_expert_review"
+      },
+      "domestic_reverse_charge": {
+        "activity": "construction_services",
+        "ended_on": "2019-11-01",
+        "legal_reference": "art. 17 ust. 1 pkt 8 and ust. 1h and Annex 14 repealed; Annexes 11 and 14 merged into Annex 15",
+        "note": "Domestic construction services are invoiced with VAT and paid by split payment since 1 November 2019. Reverse charge remains for services bought from a supplier established abroad (art. 17 ust. 1 pkt 4 with art. 28b) and for corrections of supplies made before that day.",
+        "sources": [
+          "https://g.infor.pl/p/_files/523000/rewolucyjne-zmiany-vat-w-budownictwie-522599.pdf",
+          "https://poradnikprzedsiebiorcy.pl/-uslugi-budowlane-wraz-z-materialem-a-odwrotne-obciazenie"
+        ],
+        "read_date": "2026-10-19",
+        "confidence": "H",
+        "review_status": "confirmed"
+      },
+      "reduced_rate_area_limits": {
+        "name": "budownictwo objęte społecznym programem mieszkaniowym",
+        "effective_from": "2011-01-01",
+        "effective_to": null,
+        "within_tax_code": "VAT_RED",
+        "excess_tax_code": "VAT",
+        "legal_reference": "art. 41 ust. 12, 12a, 12b and 12c",
+        "rule": "The reduced rate applies to the supply, construction, renovation, modernisation, thermal modernisation, conversion or maintenance of a residential building of PKOB class 11 or a flat. Above the area limit the reduced rate applies to the share of the price the limit area bears to the whole usable area and the standard rate to the rest (art. 41 ust. 12c).",
+        "object_kinds": {
+          "residential_building": {
+            "label": "Residential building (dom jednorodzinny)",
+            "pkob": ["111"],
+            "limit_m2": "300",
+            "eligible": true
+          },
+          "flat": {
+            "label": "Flat (lokal mieszkalny)",
+            "pkob": ["112", "113"],
+            "limit_m2": "150",
+            "eligible": true
+          },
+          "commercial_premises": {
+            "label": "Commercial premises in a residential building (lokal użytkowy)",
+            "pkob": [],
+            "limit_m2": null,
+            "eligible": false
+          },
+          "non_residential_building": {
+            "label": "Non-residential building",
+            "pkob": ["12"],
+            "limit_m2": null,
+            "eligible": false
+          }
+        },
+        "worked_example": "A 180 m2 flat: the reduced rate on 150/180 of the price and the standard rate on 30/180.",
+        "sources": [
+          "https://www.ifirma.pl/blog/stawki-vat-dla-budownictwa-mieszkaniowego-w-wyjasnieniach-mf",
+          "https://www.gazetaprawna.pl/podatki/artykuly/10775529,jak-sa-opodatkowane-uslugi-budowlane.html",
+          "https://api.sejm.gov.pl/sejm/term10/interpellations/attachment/ATTD9GGT8/i04544-o1.pdf"
+        ],
+        "read_date": "2026-10-19",
+        "confidence": "H",
+        "confidence_note": "Limits and pro-rata H; the exclusion of commercial premises and standalone garages M (Ministry of Finance explanations via a secondary source).",
+        "review_status": "confirmed"
+      }
+    }
+  }
+}

@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "La factura {number} tiene el mismo contratista, importe ({amount}) y fecha ({on}) que la factura {other}.",
       "suggestion": "Compruebe que no sea la misma factura registrada dos veces con otro número."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "La factura {number} incluye obras de construcción u otros bienes sujetos a split payment y supera {threshold}, pero no lleva la anotación «{annotation}».",
+      "suggestion": "Pida al proveedor una factura corregida con la anotación y págela en todo caso mediante split payment: la obligación de pagar así no depende de la anotación."
+    },
+    "split_payment_not_used": {
+      "fail": "La factura {number} está sujeta a split payment, pero se registró un pago con otro método. El comprador pasa a responder además de {sanction}, el 30 por ciento de su IVA.",
+      "suggestion": "Pague estas facturas desde la cuenta de IVA mediante split payment y registre el método en el pago como split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "La factura {number} supera {threshold} y no consta si incluye bienes o servicios del anexo de split payment.",
+      "suggestion": "Registre en la factura si incluye bienes o servicios del anexo (annex_15), o sus códigos (pkwiu_codes), para poder comprobar el método de pago."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "La factura {number} aplica un {rate} por ciento de IVA sobre todo el precio, pero la vivienda tiene {area_m2} m2 de superficie útil y el tipo reducido rige hasta {limit_m2} m2 ({reference}).",
+      "suggestion": "Aplique el tipo reducido al {reduced_share_percent} por ciento del precio y el tipo general al resto."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "La factura {number} aplica el tipo reducido de vivienda del {rate} por ciento, pero el proyecto no registra a qué vivienda corresponde ni su superficie útil ({reference}).",
+      "suggestion": "Registre el tipo de vivienda y la superficie útil en el proyecto (vat_housing) para poder comprobar el tipo y su límite de superficie."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "La factura {number} aplica el tipo reducido de vivienda del {rate} por ciento a {object}, que no cumple los requisitos ({reference}).",
+      "suggestion": "Aplique el tipo general o corrija la vivienda registrada en el proyecto."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "La factura {number} aplica inversión del sujeto pasivo a {count} línea(s), pero la inversión del sujeto pasivo nacional en servicios de construcción ha terminado en este país.",
+      "suggestion": "Salvo que el proveedor esté establecido en el extranjero, pida una factura con IVA; estas facturas se pagan mediante split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "El contrato {contract} acuerda un plazo de pago de {days} días, superior a los {cap} días que la ley de morosidad permite entre empresas.",
+      "suggestion": "Reduzca el plazo a {cap} días o registre por qué el plazo más largo se pactó expresamente y no es abusivo para el subcontratista."
     }
   }
 }

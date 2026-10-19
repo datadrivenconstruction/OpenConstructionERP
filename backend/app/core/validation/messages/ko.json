@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "청구서 {number}는 시공사, 금액({amount}), 날짜({on})가 청구서 {other}와 같습니다.",
       "suggestion": "같은 청구서를 다른 번호로 두 번 입력한 것이 아닌지 확인하세요."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "청구서 {number}에는 건설 공사 또는 split payment 대상인 다른 재화가 포함되어 있고 {threshold}를 초과하지만, 「{annotation}」 문구가 없습니다.",
+      "suggestion": "공급업체에 문구가 들어간 수정 청구서를 요청하고, 어떤 경우든 split payment로 지급하세요. 이 방식으로 지급할 의무는 문구에 좌우되지 않습니다."
+    },
+    "split_payment_not_used": {
+      "fail": "청구서 {number}는 split payment 대상인데 그 지급이 다른 방식으로 기록되었습니다. 매수인은 추가로 {sanction}, 즉 해당 부가세의 30퍼센트에 대한 책임을 집니다.",
+      "suggestion": "이런 청구서는 부가세 계좌에서 split payment로 지급하고, 지급의 방식을 split_payment로 기록하세요."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "청구서 {number}는 {threshold}를 초과하는데, split payment 부속서의 재화나 서비스가 포함되어 있는지 기록되어 있지 않습니다.",
+      "suggestion": "지급 방식을 확인할 수 있도록 청구서에 부속서의 재화나 서비스(annex_15) 또는 그 코드(pkwiu_codes)가 포함되어 있는지 기록하세요."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "청구서 {number}는 전체 금액에 부가세 {rate}퍼센트를 부과했지만, 주택의 전용 면적은 {area_m2} m2이고 감면 세율은 {limit_m2} m2까지만 적용됩니다({reference}).",
+      "suggestion": "감면 세율은 금액의 {reduced_share_percent}퍼센트에, 표준 세율은 나머지에 적용하세요."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "청구서 {number}는 주택 감면 세율 {rate}퍼센트를 부과했지만, 프로젝트에 어느 주택인지와 전용 면적이 기록되어 있지 않습니다({reference}).",
+      "suggestion": "세율과 면적 한도를 확인할 수 있도록 프로젝트에 주택 종류와 전용 면적을 기록하세요(vat_housing)."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "청구서 {number}는 {object}에 주택 감면 세율 {rate}퍼센트를 부과했지만, 이는 적용 대상이 아닙니다({reference}).",
+      "suggestion": "표준 세율을 적용하거나, 프로젝트에 기록된 주택을 수정하세요."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "청구서 {number}는 {count}개 항목에 리버스 차지를 적용했지만, 건설 서비스에 대한 국내 리버스 차지는 이 나라에서 종료되었습니다.",
+      "suggestion": "공급업체가 해외에 있지 않은 한 부가세가 포함된 청구서를 요청하세요. 이런 청구서는 split payment로 지급합니다."
+    },
+    "payment_term_over_cap": {
+      "fail": "계약 {contract}는 지급 기한을 {days}일로 정했는데, 이는 지급지연법이 사업자 간에 허용하는 {cap}일보다 깁니다.",
+      "suggestion": "기한을 {cap}일로 줄이거나, 더 긴 기한이 명시적으로 합의되었고 하도급업체에 현저히 불공정하지 않은 이유를 기록하세요."
     }
   }
 }

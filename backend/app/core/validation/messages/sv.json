@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "Faktura {number} har samma entreprenör, belopp ({amount}) och datum ({on}) som faktura {other}.",
       "suggestion": "Kontrollera att det inte är samma faktura som registrerats två gånger under ett annat nummer."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Faktura {number} innehåller byggarbeten eller andra varor under split payment och överstiger {threshold}, men saknar anteckningen «{annotation}».",
+      "suggestion": "Be leverantören om en korrigerad faktura med anteckningen och betala den i alla fall via split payment: skyldigheten att betala så beror inte på anteckningen."
+    },
+    "split_payment_not_used": {
+      "fail": "Faktura {number} omfattas av split payment, men en betalning av den registrerades med en annan metod. Köparen blir dessutom ansvarig för {sanction}, 30 procent av dess moms.",
+      "suggestion": "Betala sådana fakturor från momskontot via split payment och registrera metoden på betalningen som split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Faktura {number} överstiger {threshold}, och det är inte registrerat om den innehåller varor eller tjänster ur bilagan för split payment.",
+      "suggestion": "Registrera på fakturan om den innehåller varor eller tjänster ur bilagan (annex_15), eller deras koder (pkwiu_codes), så att betalningsmetoden kan kontrolleras."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Faktura {number} debiterar {rate} procent moms på hela priset, men bostaden har {area_m2} m2 användbar yta och den reducerade satsen gäller upp till {limit_m2} m2 ({reference}).",
+      "suggestion": "Debitera den reducerade satsen på {reduced_share_percent} procent av priset och normalsatsen på resten."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Faktura {number} debiterar den reducerade bostadssatsen {rate} procent, men projektet registrerar inte vilken bostad det gäller eller dess användbara yta ({reference}).",
+      "suggestion": "Registrera bostadstyp och användbar yta på projektet (vat_housing) så att satsen och dess ytgräns kan kontrolleras."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Faktura {number} debiterar den reducerade bostadssatsen {rate} procent på {object}, som inte uppfyller kraven ({reference}).",
+      "suggestion": "Debitera normalsatsen, eller rätta den bostad som är registrerad på projektet."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Faktura {number} tillämpar omvänd skattskyldighet på {count} rad(er), men den inhemska omvända skattskyldigheten för byggtjänster har upphört i det här landet.",
+      "suggestion": "Om inte leverantören är etablerad utomlands, be om en faktura med moms; sådana fakturor betalas via split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Avtal {contract} anger en betalningstid på {days} dagar, längre än de {cap} dagar som lagen om sena betalningar tillåter mellan företag.",
+      "suggestion": "Korta tiden till {cap} dagar, eller registrera varför den längre tiden uttryckligen avtalats och inte är grovt oskälig mot underentreprenören."
     }
   }
 }

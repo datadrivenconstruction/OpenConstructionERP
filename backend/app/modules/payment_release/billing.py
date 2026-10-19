@@ -73,6 +73,8 @@ SOURCE_RELEASE = "release_view"
 SOURCE_CLAIM = "claim"
 SOURCE_LINES = "lines"
 SOURCE_METADATA = "metadata"
+#: Invoice metadata keys the statutory VAT rules read (see ``statutory_rules``).
+VAT_FACT_KEYS: frozenset[str] = frozenset({"split_payment", "annex_15", "pkwiu_codes"})
 
 
 def _dec(raw: object) -> Decimal:
@@ -197,6 +199,12 @@ class InvoiceRecord:
     frozen: Release | None
     claim_retention: Decimal | None
     purchase_order_id: str | None
+    #: The keys of the invoice metadata the statutory VAT rules read, and only
+    #: those: ``split_payment``, ``annex_15``, ``pkwiu_codes``.
+    vat_facts: dict[str, Any] = field(default_factory=dict)
+    #: How each payment was made, from the payment's ``metadata.method``; an
+    #: empty string where none is recorded.
+    payment_methods: list[str] = field(default_factory=list)
 
     @property
     def paid_cash(self) -> Decimal:
@@ -264,6 +272,11 @@ class Billing:
     currency: str
     contracts: list[ContractRecord]
     loose_invoices: list[InvoiceRecord]
+    #: The project's country, works (public or private) and the dwelling its
+    #: VAT rate depends on (``metadata.vat_housing``), for the statutory rules.
+    country: str | None = None
+    works: str | None = None
+    housing: dict[str, Any] = field(default_factory=dict)
 
     def contract(self, contract_id: str) -> ContractRecord | None:
         return next((c for c in self.contracts if c.id == contract_id), None)
@@ -640,6 +653,8 @@ async def load_billing(session: AsyncSession, project_id: uuid.UUID) -> Billing:
             frozen=frozen_release(rel.snapshot) if rel is not None and rel.status == "released" else None,
             claim_retention=money(inv.retention_amount, ccy) if inv.source_claim_id is not None else None,
             purchase_order_id=str(inv.purchase_order_id) if inv.purchase_order_id else None,
+            vat_facts={k: v for k, v in (inv.metadata_ or {}).items() if k in VAT_FACT_KEYS},
+            payment_methods=[str((p.metadata_ or {}).get("method") or "") for p in inv.payments or []],
         )
         if contract_id is None:
             loose.append(record)
@@ -683,7 +698,18 @@ async def load_billing(session: AsyncSession, project_id: uuid.UUID) -> Billing:
             contract.terms, [invoice_entry(inv) for inv in contract.invoices], posting_entries(contract)
         )
     loose.sort(key=lambda i: (i.invoice_date or date.max, i.number, i.id))
-    return Billing(currency=base, contracts=list(contracts.values()), loose_invoices=loose)
+    from app.modules.projects.models import Project
+
+    project = await session.get(Project, project_id)
+    housing = (project.metadata_ or {}).get("vat_housing") if project is not None else None
+    return Billing(
+        currency=base,
+        contracts=list(contracts.values()),
+        loose_invoices=loose,
+        country=(project.country_code or None) if project is not None else None,
+        works=(project.works or None) if project is not None else None,
+        housing=housing if isinstance(housing, dict) else {},
+    )
 
 
 # ── Per schedule line and per cost line, for cost control ────────────────

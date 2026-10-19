@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "Faktura {number} ma tego samego wykonawcę, kwotę ({amount}) i datę ({on}) co faktura {other}.",
       "suggestion": "Sprawdź, czy to nie ta sama faktura wprowadzona dwa razy pod innym numerem."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Faktura {number} obejmuje roboty budowlane lub inne towary objęte mechanizmem podzielonej płatności i przekracza {threshold}, ale nie zawiera adnotacji „{annotation}”.",
+      "suggestion": "Poproś dostawcę o fakturę korygującą z adnotacją i zapłać ją w mechanizmie podzielonej płatności w każdym przypadku: obowiązek nie zależy od adnotacji."
+    },
+    "split_payment_not_used": {
+      "fail": "Faktura {number} podlega mechanizmowi podzielonej płatności, ale jej płatność zapisano inną metodą. Nabywcy grozi dodatkowe zobowiązanie {sanction}, czyli 30 procent podatku VAT z faktury.",
+      "suggestion": "Płać takie faktury w mechanizmie podzielonej płatności i zapisz metodę płatności jako split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Faktura {number} przekracza {threshold}, a nie zapisano, czy obejmuje towary lub usługi z załącznika nr 15.",
+      "suggestion": "Zapisz na fakturze, czy obejmuje towary lub usługi z załącznika (annex_15), albo ich kody PKWiU (pkwiu_codes), aby można było sprawdzić sposób zapłaty."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Faktura {number} stosuje stawkę {rate} procent do całej ceny, ale lokal ma {area_m2} m2 powierzchni użytkowej, a stawka obniżona obowiązuje do {limit_m2} m2 ({reference}).",
+      "suggestion": "Zastosuj stawkę obniżoną do {reduced_share_percent} procent ceny, a stawkę podstawową do reszty."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Faktura {number} stosuje obniżoną stawkę {rate} procent dla budownictwa mieszkaniowego, ale w projekcie nie zapisano rodzaju obiektu ani jego powierzchni użytkowej ({reference}).",
+      "suggestion": "Zapisz w projekcie rodzaj obiektu i powierzchnię użytkową (vat_housing), aby można było sprawdzić stawkę i limit powierzchni."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Faktura {number} stosuje obniżoną stawkę {rate} procent do obiektu {object}, który nie jest objęty tą stawką ({reference}).",
+      "suggestion": "Zastosuj stawkę podstawową albo popraw obiekt zapisany w projekcie."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Faktura {number} rozlicza w odwrotnym obciążeniu {count} pozycji, ale krajowe odwrotne obciążenie usług budowlanych zostało zniesione.",
+      "suggestion": "Jeśli dostawca nie ma siedziby za granicą, poproś o fakturę z VAT; takie faktury płaci się w mechanizmie podzielonej płatności."
+    },
+    "payment_term_over_cap": {
+      "fail": "Umowa {contract} przewiduje termin zapłaty {days} dni, dłuższy niż {cap} dni dopuszczalne między przedsiębiorcami w ustawie o przeciwdziałaniu nadmiernym opóźnieniom.",
+      "suggestion": "Skróć termin do {cap} dni albo zapisz, dlaczego dłuższy termin został wyraźnie uzgodniony i nie jest rażąco nieuczciwy wobec podwykonawcy."
     }
   }
 }

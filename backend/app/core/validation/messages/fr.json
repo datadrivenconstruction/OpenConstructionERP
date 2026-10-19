@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "La facture {number} a la même entreprise, le même montant ({amount}) et la même date ({on}) que la facture {other}.",
       "suggestion": "Vérifiez qu'il ne s'agit pas de la même facture saisie deux fois sous un autre numéro."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "La facture {number} porte sur des travaux de construction ou d'autres biens soumis au split payment et dépasse {threshold}, mais elle ne comporte pas la mention «{annotation}».",
+      "suggestion": "Demandez au fournisseur une facture corrigée avec la mention, et payez-la dans tous les cas par split payment : l'obligation de payer ainsi ne dépend pas de la mention."
+    },
+    "split_payment_not_used": {
+      "fail": "La facture {number} relève du split payment, mais un paiement a été enregistré avec un autre mode. L'acheteur devient redevable en plus de {sanction}, soit 30 pour cent de sa TVA.",
+      "suggestion": "Payez ces factures depuis le compte TVA par split payment et enregistrez le mode sur le paiement : split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "La facture {number} dépasse {threshold}, et il n'est pas indiqué si elle porte sur des biens ou services de l'annexe du split payment.",
+      "suggestion": "Indiquez sur la facture si elle porte sur des biens ou services de l'annexe (annex_15), ou leurs codes (pkwiu_codes), afin de pouvoir vérifier le mode de paiement."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "La facture {number} applique {rate} pour cent de TVA sur la totalité du prix, mais le logement a {area_m2} m2 de surface utile et le taux réduit vaut jusqu'à {limit_m2} m2 ({reference}).",
+      "suggestion": "Appliquez le taux réduit à {reduced_share_percent} pour cent du prix et le taux normal au reste."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "La facture {number} applique le taux réduit de {rate} pour cent pour le logement, mais le projet n'indique ni de quel logement il s'agit ni sa surface utile ({reference}).",
+      "suggestion": "Renseignez le type de logement et la surface utile sur le projet (vat_housing) afin de pouvoir vérifier le taux et sa limite de surface."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "La facture {number} applique le taux réduit de {rate} pour cent pour le logement à {object}, qui n'y est pas éligible ({reference}).",
+      "suggestion": "Appliquez le taux normal, ou corrigez le logement enregistré sur le projet."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "La facture {number} applique l'autoliquidation à {count} ligne(s), alors que l'autoliquidation nationale pour les travaux de construction a pris fin dans ce pays.",
+      "suggestion": "Sauf si le fournisseur est établi à l'étranger, demandez une facture avec TVA ; ces factures se paient par split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Le contrat {contract} convient d'un délai de paiement de {days} jours, plus long que les {cap} jours autorisés entre entreprises par la loi sur les retards de paiement.",
+      "suggestion": "Ramenez le délai à {cap} jours, ou consignez pourquoi le délai plus long est expressément convenu et non manifestement abusif envers le sous-traitant."
     }
   }
 }

@@ -598,6 +598,38 @@
     "is_default": false
   },
   {
+    "country_code": "PL",
+    "tax_name": "VAT Reduced 5%",
+    "tax_name_translations": {
+      "en": "VAT Reduced 5%",
+      "pl": "VAT obniżony 5%"
+    },
+    "tax_code": "VAT_5",
+    "rate_pct": "5.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2011-01-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "PL",
+    "tax_name": "VAT Zero",
+    "tax_name_translations": {
+      "en": "VAT Zero",
+      "pl": "VAT 0%"
+    },
+    "tax_code": "VAT_ZERO",
+    "rate_pct": "0.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2011-01-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
     "country_code": "CZ",
     "tax_name": "VAT Standard (DPH)",
     "tax_name_translations": {

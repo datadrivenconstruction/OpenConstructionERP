@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "A fatura {number} tem o mesmo empreiteiro, valor ({amount}) e data ({on}) da fatura {other}.",
       "suggestion": "Verifique que não é a mesma fatura lançada duas vezes com outro número."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "A fatura {number} inclui obras de construção ou outros bens sujeitos a split payment e excede {threshold}, mas não traz a anotação «{annotation}».",
+      "suggestion": "Peça ao fornecedor uma fatura corrigida com a anotação e pague-a em todo o caso por split payment: a obrigação de pagar assim não depende da anotação."
+    },
+    "split_payment_not_used": {
+      "fail": "A fatura {number} está sujeita a split payment, mas foi registado um pagamento seu com outro método. O comprador passa a responder ainda por {sanction}, 30 por cento do respetivo IVA.",
+      "suggestion": "Pague essas faturas a partir da conta de IVA por split payment e registe o método no pagamento como split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "A fatura {number} excede {threshold} e não está registado se inclui bens ou serviços do anexo de split payment.",
+      "suggestion": "Registe na fatura se inclui bens ou serviços do anexo (annex_15), ou os respetivos códigos (pkwiu_codes), para que o método de pagamento possa ser verificado."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "A fatura {number} aplica {rate} por cento de IVA sobre todo o preço, mas a habitação tem {area_m2} m2 de área útil e a taxa reduzida vale até {limit_m2} m2 ({reference}).",
+      "suggestion": "Aplique a taxa reduzida a {reduced_share_percent} por cento do preço e a taxa normal ao restante."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "A fatura {number} aplica a taxa reduzida de habitação de {rate} por cento, mas o projeto não regista a que habitação se refere nem a sua área útil ({reference}).",
+      "suggestion": "Registe o tipo de habitação e a área útil no projeto (vat_housing) para que a taxa e o seu limite de área possam ser verificados."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "A fatura {number} aplica a taxa reduzida de habitação de {rate} por cento a {object}, que não tem direito a ela ({reference}).",
+      "suggestion": "Aplique a taxa normal ou corrija a habitação registada no projeto."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "A fatura {number} aplica inversão do sujeito passivo a {count} linha(s), mas a inversão do sujeito passivo interna em serviços de construção terminou neste país.",
+      "suggestion": "Salvo se o fornecedor estiver estabelecido no estrangeiro, peça uma fatura com IVA; essas faturas pagam-se por split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "O contrato {contract} acorda um prazo de pagamento de {days} dias, superior aos {cap} dias que a lei dos atrasos de pagamento permite entre empresas.",
+      "suggestion": "Reduza o prazo para {cap} dias ou registe por que o prazo mais longo foi expressamente acordado e não é gravemente abusivo para o subempreiteiro."
     }
   }
 }

@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "Factuur {number} heeft dezelfde aannemer, hetzelfde bedrag ({amount}) en dezelfde datum ({on}) als factuur {other}.",
       "suggestion": "Controleer dat het niet dezelfde factuur is die onder een ander nummer dubbel is ingevoerd."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Factuur {number} bevat bouwwerken of andere goederen onder split payment en overschrijdt {threshold}, maar draagt niet de vermelding «{annotation}».",
+      "suggestion": "Vraag de leverancier om een gecorrigeerde factuur met de vermelding en betaal hem in elk geval via split payment: de verplichting om zo te betalen hangt niet af van de vermelding."
+    },
+    "split_payment_not_used": {
+      "fail": "Factuur {number} valt onder split payment, maar er is een betaling van geregistreerd met een andere methode. De koper is bovendien aansprakelijk voor {sanction}, 30 procent van de btw erop.",
+      "suggestion": "Betaal zulke facturen via split payment vanaf de btw-rekening en registreer de methode bij de betaling als split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Factuur {number} overschrijdt {threshold}, en er is niet vastgelegd of er goederen of diensten uit de bijlage voor split payment op staan.",
+      "suggestion": "Leg op de factuur vast of er goederen of diensten uit de bijlage op staan (annex_15), of hun codes (pkwiu_codes), zodat de betaalmethode kan worden gecontroleerd."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Factuur {number} berekent {rate} procent btw over de hele prijs, maar de woning heeft {area_m2} m2 bruikbare oppervlakte en het verlaagde tarief geldt tot {limit_m2} m2 ({reference}).",
+      "suggestion": "Reken het verlaagde tarief over {reduced_share_percent} procent van de prijs en het normale tarief over de rest."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Factuur {number} berekent het verlaagde woningtarief van {rate} procent, maar het project legt niet vast voor welke woning dat is of wat de bruikbare oppervlakte is ({reference}).",
+      "suggestion": "Leg het woningtype en de bruikbare oppervlakte vast op het project (vat_housing), zodat het tarief en de oppervlaktegrens kunnen worden gecontroleerd."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Factuur {number} berekent het verlaagde woningtarief van {rate} procent op {object}, dat daarvoor niet in aanmerking komt ({reference}).",
+      "suggestion": "Reken het normale tarief of corrigeer de woning die op het project is vastgelegd."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Factuur {number} verlegt de btw op {count} regel(s), maar de binnenlandse verlegging voor bouwdiensten is in dit land beëindigd.",
+      "suggestion": "Tenzij de leverancier in het buitenland is gevestigd, vraag een factuur met btw; zulke facturen worden via split payment betaald."
+    },
+    "payment_term_over_cap": {
+      "fail": "Contract {contract} spreekt een betalingstermijn af van {days} dagen, langer dan de {cap} dagen die de wet betalingsachterstand tussen bedrijven toestaat.",
+      "suggestion": "Verkort de termijn tot {cap} dagen, of leg vast waarom de langere termijn uitdrukkelijk is overeengekomen en niet grof onbillijk is voor de onderaannemer."
     }
   }
 }

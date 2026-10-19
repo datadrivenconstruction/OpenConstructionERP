@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "La fattura {number} ha lo stesso fornitore, importo ({amount}) e data ({on}) della fattura {other}.",
       "suggestion": "Verifichi che non sia la stessa fattura inserita due volte con un altro numero."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "La fattura {number} riporta lavori edili o altri beni soggetti a split payment e supera {threshold}, ma non reca la dicitura «{annotation}».",
+      "suggestion": "Chieda al fornitore una fattura corretta con la dicitura e la paghi comunque in split payment: l'obbligo di pagare così non dipende dalla dicitura."
+    },
+    "split_payment_not_used": {
+      "fail": "La fattura {number} rientra nello split payment, ma ne è stato registrato un pagamento con un altro metodo. L'acquirente diventa responsabile in più di {sanction}, il 30 per cento della relativa IVA.",
+      "suggestion": "Paghi tali fatture dal conto IVA in split payment e registri il metodo sul pagamento come split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "La fattura {number} supera {threshold} e non è registrato se riporta beni o servizi dell'allegato dello split payment.",
+      "suggestion": "Registri sulla fattura se riporta beni o servizi dell'allegato (annex_15), oppure i loro codici (pkwiu_codes), così da poter verificare il metodo di pagamento."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "La fattura {number} applica l'IVA al {rate} per cento sull'intero prezzo, ma l'abitazione ha {area_m2} m2 di superficie utile e l'aliquota ridotta vale fino a {limit_m2} m2 ({reference}).",
+      "suggestion": "Applichi l'aliquota ridotta al {reduced_share_percent} per cento del prezzo e quella ordinaria al resto."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "La fattura {number} applica l'aliquota ridotta del {rate} per cento per l'abitazione, ma il progetto non registra a quale abitazione si riferisce né la sua superficie utile ({reference}).",
+      "suggestion": "Registri sul progetto il tipo di abitazione e la superficie utile (vat_housing), così da poter verificare l'aliquota e il suo limite di superficie."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "La fattura {number} applica l'aliquota ridotta del {rate} per cento per l'abitazione a {object}, che non ne ha diritto ({reference}).",
+      "suggestion": "Applichi l'aliquota ordinaria, oppure corregga l'abitazione registrata sul progetto."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "La fattura {number} applica il reverse charge a {count} riga/righe, ma il reverse charge interno sui servizi di costruzione è terminato in questo paese.",
+      "suggestion": "Salvo che il fornitore sia stabilito all'estero, chieda una fattura con IVA; tali fatture si pagano in split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Il contratto {contract} concorda un termine di pagamento di {days} giorni, più lungo dei {cap} giorni consentiti tra imprese dalla legge sui ritardi di pagamento.",
+      "suggestion": "Riduca il termine a {cap} giorni, oppure registri perché il termine più lungo è stato espressamente concordato e non è gravemente iniquo per il subappaltatore."
     }
   }
 }

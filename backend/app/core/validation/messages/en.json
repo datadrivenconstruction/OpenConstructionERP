@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "Invoice {number} has the same contractor, amount ({amount}) and date ({on}) as invoice {other}.",
       "suggestion": "Check that it is not the same invoice entered twice under another number."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Invoice {number} lists construction works or other split payment goods and exceeds {threshold}, but it does not carry the annotation \"{annotation}\".",
+      "suggestion": "Ask the supplier for a corrected invoice with the annotation, and pay it by split payment in any case: the obligation to pay that way does not depend on the annotation."
+    },
+    "split_payment_not_used": {
+      "fail": "Invoice {number} falls under split payment, but a payment of it was recorded with another method. The buyer becomes liable for an additional {sanction}, 30 percent of its VAT.",
+      "suggestion": "Pay such invoices from the VAT account by split payment, and record the method on the payment as split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Invoice {number} exceeds {threshold}, and it is not recorded whether it lists goods or services of the split payment annex.",
+      "suggestion": "Record on the invoice whether it lists annex goods or services (annex_15), or their codes (pkwiu_codes), so the payment method can be checked."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Invoice {number} charges {rate} percent VAT on the whole price, but the dwelling has {area_m2} m2 of usable area and the reduced rate holds up to {limit_m2} m2 ({reference}).",
+      "suggestion": "Charge the reduced rate on {reduced_share_percent} percent of the price and the standard rate on the rest."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Invoice {number} charges the reduced {rate} percent housing rate, but the project does not record which dwelling it is for or its usable area ({reference}).",
+      "suggestion": "Record the dwelling kind and usable area on the project (vat_housing) so the rate and its area limit can be checked."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Invoice {number} charges the reduced {rate} percent housing rate on {object}, which does not qualify for it ({reference}).",
+      "suggestion": "Charge the standard rate, or correct the dwelling recorded on the project."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Invoice {number} reverse charges {count} line(s), but domestic reverse charge on construction services has ended in this country.",
+      "suggestion": "Unless the supplier is established abroad, ask for an invoice with VAT; such invoices are paid by split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Contract {contract} agrees a payment term of {days} days, longer than the {cap} days the late payment statute allows between businesses.",
+      "suggestion": "Shorten the term to {cap} days, or record why the longer term is expressly agreed and not grossly unfair to the subcontractor."
     }
   }
 }

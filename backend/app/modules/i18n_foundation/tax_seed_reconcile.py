@@ -252,6 +252,13 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     # window the other two Spanish rows share, for the reason given above for
     # the Turkish tier.
     ("ES", "IVA_SRED"): "2026-10-10",
+    # Poland's 5 % rate and its zero rate beside the 23 % and 8 % the seed
+    # already held, so a 5 % supply or an export has a rate to pick. Both
+    # open on 2011-01-01 with the other two Polish rows, for the reason given
+    # above for the Turkish tier (VAT Act art. 41 ust. 2a and 146ef, read
+    # 2026-10-19 in secondary sources quoting it).
+    ("PL", "VAT_5"): "2026-10-19",
+    ("PL", "VAT_ZERO"): "2026-10-19",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

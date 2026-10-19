@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "Račun {number} ima istog izvođača, iznos ({amount}) i datum ({on}) kao račun {other}.",
       "suggestion": "Provjerite da nije riječ o istom računu unesenom dvaput pod drugim brojem."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Račun {number} sadrži građevinske radove ili druge robe pod split paymentom i premašuje {threshold}, ali nema napomenu «{annotation}».",
+      "suggestion": "Zatražite od dobavljača ispravljen račun s napomenom i u svakom slučaju ga platite split paymentom: obveza plaćanja na taj način ne ovisi o napomeni."
+    },
+    "split_payment_not_used": {
+      "fail": "Račun {number} podliježe split paymentu, ali je njegovo plaćanje evidentirano drugom metodom. Kupac dodatno odgovara za {sanction}, 30 posto njegova PDV-a.",
+      "suggestion": "Takve račune plaćajte s PDV računa split paymentom, a metodu na plaćanju evidentirajte kao split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Račun {number} premašuje {threshold}, a nije evidentirano sadrži li robu ili usluge iz priloga split paymenta.",
+      "suggestion": "Evidentirajte na računu sadrži li robu ili usluge iz priloga (annex_15) ili njihove šifre (pkwiu_codes) kako bi se način plaćanja mogao provjeriti."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Račun {number} obračunava {rate} posto PDV-a na cijelu cijenu, ali stan ima {area_m2} m2 korisne površine, a snižena stopa vrijedi do {limit_m2} m2 ({reference}).",
+      "suggestion": "Obračunajte sniženu stopu na {reduced_share_percent} posto cijene, a opću stopu na ostatak."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Račun {number} obračunava sniženu stambenu stopu od {rate} posto, ali projekt ne evidentira za koji je stan niti njegovu korisnu površinu ({reference}).",
+      "suggestion": "Evidentirajte na projektu vrstu stana i korisnu površinu (vat_housing) kako bi se stopa i njezino ograničenje površine mogli provjeriti."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Račun {number} obračunava sniženu stambenu stopu od {rate} posto na {object}, što na nju nema pravo ({reference}).",
+      "suggestion": "Obračunajte opću stopu ili ispravite stan evidentiran na projektu."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Račun {number} primjenjuje prijenos porezne obveze na {count} stavki, ali je domaći prijenos porezne obveze za građevinske usluge u ovoj zemlji ukinut.",
+      "suggestion": "Osim ako je dobavljač sa sjedištem u inozemstvu, zatražite račun s PDV-om; takvi se računi plaćaju split paymentom."
+    },
+    "payment_term_over_cap": {
+      "fail": "Ugovor {contract} dogovara rok plaćanja od {days} dana, dulji od {cap} dana koje zakon o kašnjenju s plaćanjem dopušta među poduzetnicima.",
+      "suggestion": "Skratite rok na {cap} dana ili evidentirajte zašto je dulji rok izričito dogovoren i nije grubo nepravedan prema podizvođaču."
     }
   }
 }

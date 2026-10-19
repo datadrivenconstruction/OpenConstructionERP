@@ -1184,6 +1184,38 @@
     "possible_duplicate": {
       "fail": "Arvel {number} on sama töövõtja, summa ({amount}) ja kuupäev ({on}) mis arvel {other}.",
       "suggestion": "Kontrollige, et see pole sama arve, mis on sisestatud kaks korda teise numbriga."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Arve {number} sisaldab ehitustöid või muid split payment kaupu ja ületab piiri {threshold}, kuid sellel pole märget «{annotation}».",
+      "suggestion": "Küsige tarnijalt märkega parandatud arvet ja tasuge see igal juhul split payment'iga: sel viisil tasumise kohustus ei sõltu märkest."
+    },
+    "split_payment_not_used": {
+      "fail": "Arve {number} kuulub split payment alla, kuid selle tasumine registreeriti muul viisil. Ostja vastutab lisaks {sanction}, 30 protsendi eest selle käibemaksust.",
+      "suggestion": "Tasuge sellised arved käibemaksukontolt split payment'iga ja registreerige makse meetodiks split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Arve {number} ületab piiri {threshold} ning pole registreeritud, kas see sisaldab split payment lisa kaupu või teenuseid.",
+      "suggestion": "Registreerige arvel, kas see sisaldab lisa kaupu või teenuseid (annex_15) või nende koode (pkwiu_codes), et makseviisi saaks kontrollida."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Arve {number} arvestab käibemaksu {rate} protsenti kogu hinnalt, kuid eluruumi kasulik pind on {area_m2} m2 ja vähendatud määr kehtib kuni {limit_m2} m2 ({reference}).",
+      "suggestion": "Arvestage vähendatud määr {reduced_share_percent} protsendile hinnast ja üldmäär ülejäänule."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Arve {number} arvestab vähendatud eluruumi määra {rate} protsenti, kuid projektis pole registreeritud, millist eluruumi see puudutab ega selle kasulikku pinda ({reference}).",
+      "suggestion": "Registreerige projektis eluruumi liik ja kasulik pind (vat_housing), et määra ja selle pinnapiiri saaks kontrollida."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Arve {number} arvestab vähendatud eluruumi määra {rate} protsenti objektile {object}, mis sellele ei kvalifitseeru ({reference}).",
+      "suggestion": "Arvestage üldmäär või parandage projektis registreeritud eluruum."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Arve {number} rakendab pöördmaksustamist {count} real, kuid ehitusteenuste riigisisene pöördmaksustamine on selles riigis lõppenud.",
+      "suggestion": "Kui tarnija pole asutatud välismaal, küsige käibemaksuga arvet; selliseid arveid tasutakse split payment'iga."
+    },
+    "payment_term_over_cap": {
+      "fail": "Leping {contract} näeb ette maksetähtaja {days} päeva, mis on pikem kui {cap} päeva, mida maksehäirete seadus ettevõtete vahel lubab.",
+      "suggestion": "Lühendage tähtaeg {cap} päevani või registreerige, miks pikem tähtaeg on sõnaselgelt kokku lepitud ega ole alltöövõtjale ilmselgelt ebaõiglane."
     }
   }
 }
