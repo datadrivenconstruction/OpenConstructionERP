@@ -34,12 +34,15 @@ from typing import Any
 __all__ = [
     "DATA_PATH",
     "DEBTOR_KINDS",
+    "RATE_FIXINGS",
     "InterestPeriod",
     "LateInterest",
     "late_interest",
     "margin_percent",
     "payment_term_cap_days",
     "rate_unknown_reason",
+    "agreed_rate_floor_percent",
+    "rate_fixing",
     "recovery_compensation",
     "statutory_late_interest_rate",
     "term_exceeds_cap",
@@ -52,6 +55,12 @@ DATA_PATH = Path(__file__).resolve().parent / "country_data" / "late_payment.jso
 #: public-debtor article; ``public_medical`` the public medical entities some
 #: statutes treat apart.
 DEBTOR_KINDS: tuple[str, ...] = ("commercial", "public", "public_medical")
+
+#: How a margin row prices a delay that spans several reference-rate periods.
+#: ``per_period``: each day takes the rate of the period it falls in.
+#: ``at_delay_start``: the rate fixed on the first day of the half-year in which
+#: the delay started is held for the whole delay.
+RATE_FIXINGS: tuple[str, ...] = ("per_period", "at_delay_start")
 
 _CENT = Decimal("0.01")
 _HUNDRED = Decimal(100)
@@ -113,47 +122,72 @@ def _covers(row: dict[str, Any], on: date) -> bool:
     return (start is None or start <= on) and (end is None or on <= end)
 
 
-def margin_percent(country: str, debtor_kind: str, on: date) -> Decimal | None:
-    """Points over the reference rate for ``debtor_kind`` on ``on``, or ``None``."""
+def _margin_row(country: str, debtor_kind: str, on: date) -> dict[str, Any] | None:
     data = _country(country)
     kind = _kind(debtor_kind)
     if data is None:
         return None
-    for row in data.get("margins", []):
-        if row["debtor_kind"] == kind and _covers(row, on):
-            return Decimal(row["margin_percent"])
-    return None
+    return next((r for r in data.get("margins", []) if r["debtor_kind"] == kind and _covers(r, on)), None)
+
+
+def margin_percent(country: str, debtor_kind: str, on: date) -> Decimal | None:
+    """Points over the reference rate for ``debtor_kind`` on ``on``, or ``None``."""
+    row = _margin_row(country, debtor_kind, on)
+    return Decimal(row["margin_percent"]) if row else None
+
+
+def rate_fixing(country: str, debtor_kind: str, on: date) -> str:
+    """``per_period`` (default) or ``at_delay_start`` for the margin row in force on ``on``."""
+    row = _margin_row(country, debtor_kind, on)
+    return (row or {}).get("rate_fixing", "per_period")
+
+
+def _half_year_start(on: date) -> date:
+    return date(on.year, 1 if on.month <= 6 else 7, 1)
 
 
 def _period(data: dict[str, Any], on: date) -> dict[str, Any] | None:
     return next((p for p in data.get("reference_rate_periods", []) if _covers(p, on)), None)
 
 
-def rate_unknown_reason(country: str, debtor_kind: str, on: date) -> str | None:
+def _pricing_day(country: str, debtor_kind: str, on: date, delay_start: date | None) -> date:
+    """The day whose margin and reference rate price ``on``."""
+    if delay_start is not None and rate_fixing(country, debtor_kind, delay_start) == "at_delay_start":
+        return _half_year_start(delay_start)
+    return on
+
+
+def rate_unknown_reason(country: str, debtor_kind: str, on: date, delay_start: date | None = None) -> str | None:
     """Why there is no rate on ``on``, or ``None`` when there is one."""
     data = _country(country)
     kind = _kind(debtor_kind)
     if data is None:
         return "no_country_data"
-    if margin_percent(country, kind, on) is None:
+    day = _pricing_day(country, kind, on, delay_start)
+    if margin_percent(country, kind, day) is None:
         return "no_margin_for_debtor_kind"
-    if _period(data, on) is None:
+    if _period(data, day) is None:
         return "no_reference_rate_period"
     return None
 
 
-def statutory_late_interest_rate(country: str, debtor_kind: str, on: date) -> Decimal | None:
+def statutory_late_interest_rate(
+    country: str, debtor_kind: str, on: date, delay_start: date | None = None
+) -> Decimal | None:
     """Annual statutory late interest in percent on ``on``, or ``None`` when not known.
 
     The reference rate of the period holding ``on`` plus the debtor kind's
-    margin. Never extrapolated: see :func:`rate_unknown_reason`.
+    margin. Never extrapolated: see :func:`rate_unknown_reason`. When the
+    margin row says ``at_delay_start`` and ``delay_start`` is given, the rate
+    of the half-year in which the delay started applies to ``on`` as well.
     """
-    if rate_unknown_reason(country, debtor_kind, on) is not None:
+    if rate_unknown_reason(country, debtor_kind, on, delay_start) is not None:
         return None
     data = _country(country)
     assert data is not None
-    period = _period(data, on)
-    margin = margin_percent(country, debtor_kind, on)
+    day = _pricing_day(country, debtor_kind, on, delay_start)
+    period = _period(data, day)
+    margin = margin_percent(country, debtor_kind, day)
     assert period is not None and margin is not None
     return Decimal(period["reference_rate_percent"]) + margin
 
@@ -183,9 +217,10 @@ def late_interest(
         amount = (principal * rate / _HUNDRED * Decimal(days) / _DAYS_IN_YEAR).quantize(_CENT, ROUND_HALF_UP)
         periods.append(InterestPeriod(start, end, days, rate, amount))
 
-    day = due_date + timedelta(days=1)
+    delay_start = due_date + timedelta(days=1)
+    day = delay_start
     while day <= paid_date:
-        rate = statutory_late_interest_rate(country, debtor_kind, day)
+        rate = statutory_late_interest_rate(country, debtor_kind, day, delay_start)
         if rate is None:
             unknown += 1
             close(run)
@@ -199,6 +234,24 @@ def late_interest(
     close(run)
     total = sum((p.interest for p in periods), Decimal("0")).quantize(_CENT)
     return LateInterest(principal=principal, periods=tuple(periods), unknown_days=unknown, interest=total)
+
+
+def agreed_rate_floor_percent(country: str, debtor_kind: str, on: date) -> Decimal | None:
+    """Lowest contract late-interest rate the statute allows on ``on``, or ``None``.
+
+    Data: ``agreed_rate_floor`` holds a multiple of the legal interest rate
+    (``legal_interest_rates`` periods). ``None`` when the country has no floor
+    for that debtor kind or no legal rate is known for ``on``.
+    """
+    data = _country(country)
+    kind = _kind(debtor_kind)
+    floor = (data or {}).get("agreed_rate_floor")
+    if not floor or kind not in floor.get("debtor_kinds", []):
+        return None
+    period = next((p for p in data.get("legal_interest_rates", []) if _covers(p, on)), None)
+    if period is None:
+        return None
+    return Decimal(floor["multiple_of_legal_rate"]) * Decimal(period["rate_percent"])
 
 
 def _in_tier(tier: dict[str, Any], claim: Decimal) -> bool:
@@ -279,8 +332,12 @@ def validate_rows(data: dict[str, Any] | None = None) -> list[str]:
     for code, country in data.get("countries", {}).items():
         for i, row in enumerate(country.get("margins", [])):
             problems += _dated_problems(f"{code}.margins[{i}]", row)
+            if row.get("rate_fixing", "per_period") not in RATE_FIXINGS:
+                problems.append(f"{code}.margins[{i}]: unknown rate_fixing {row.get('rate_fixing')!r}")
             if row.get("debtor_kind") not in DEBTOR_KINDS:
                 problems.append(f"{code}.margins[{i}]: unknown debtor kind {row.get('debtor_kind')!r}")
+        for i, row in enumerate(country.get("legal_interest_rates", [])):
+            problems += _dated_problems(f"{code}.legal_interest_rates[{i}]", row)
         for i, row in enumerate(country.get("term_caps", [])):
             problems += _dated_problems(f"{code}.term_caps[{i}]", row)
         periods = sorted(country.get("reference_rate_periods", []), key=lambda p: p.get("effective_from") or "")

@@ -34,9 +34,8 @@ There is exactly one engine for dated statutory interest, term caps and recovery
 `payment_clock` module keeps only the notice regimes (which day is the final date), so the four French
 rows above stay here and nothing else. An earlier draft of this stream added a second engine
 (`payment_clock/reference_rates.py`, with a rate-fixing model and an agreed-term-cap rule); it was removed
-and the French interest row is data in `late_payment.json`, on branch `wip/fr-late-payment-20261019`.
-Open there: the public regime fixes one rate for the whole delay (R2192-31), which the per-period model
-cannot express, so no public margin is shipped; the agreed-term-cap rule is not re-created yet.
+and the French interest row is data in `late_payment.json`. The public regime's single rate for the
+whole delay (R2192-31) and the agreed-rate floor are described in `docs/design/france/late_payment.md`.
 
 ## 2. and 3. Works contracts, warranties and VAT
 
