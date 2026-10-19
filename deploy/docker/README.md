@@ -61,3 +61,7 @@ If real-time features stop working or the takeoff viewer comes up blank behind y
 ## Health endpoint
 
 Each image exposes `GET /api/health`, and the container `HEALTHCHECK` directive polls that route on a fixed interval. A healthy reply reports the running version, the loaded module count, and a flag for whether the database revision matches the current Alembic head.
+
+## Other deployment targets
+
+One isolated instance per company on the German cloud STACKIT (Kubernetes, managed PostgreSQL, object storage): see [deploy/terraform/stackit](../terraform/stackit/README.md).
