@@ -36,6 +36,7 @@ from app.modules.einvoice_zatca.client import FatooraClient
 from app.modules.einvoice_zatca.schemas import (
     ApiPathResponse,
     CsrRequest,
+    EinvoiceZatcaListResponse,
     EnvironmentResponse,
     MetaResponse,
     OtpRequest,
@@ -98,11 +99,17 @@ async def get_meta() -> MetaResponse:
 
 @router.get(
     "/units/",
-    response_model=list[UnitResponse],
+    response_model=EinvoiceZatcaListResponse,
     dependencies=[Depends(RequirePermission("einvoice_zatca.read"))],
 )
-async def list_units(session: SessionDep, profile_id: uuid.UUID = Query(...)) -> list[UnitResponse]:
-    return [_respond(u) for u in await service.list_units(session, profile_id)]
+async def list_units(
+    session: SessionDep,
+    profile_id: uuid.UUID = Query(...),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=200),
+) -> EinvoiceZatcaListResponse:
+    units, total = await service.page_units(session, profile_id, offset=offset, limit=limit)
+    return EinvoiceZatcaListResponse(items=[_respond(u) for u in units], total=total, offset=offset, limit=limit)
 
 
 @router.post(

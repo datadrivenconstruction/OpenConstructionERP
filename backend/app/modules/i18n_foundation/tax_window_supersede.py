@@ -212,7 +212,7 @@ REPAIR_ID: Final = "tax_window_supersede"
 #: derivation in ``tests/unit/test_tax_window_supersede_population.py``, so a
 #: seed file that supersedes something earlier cannot leave this saying the
 #: wrong month.
-EARLIEST_SUPERSEDED_FROM: Final = "2020-07-01"
+EARLIEST_SUPERSEDED_FROM: Final = "2017-07-01"
 
 
 def superseded_lines() -> dict[RateLine, list[dict]]:

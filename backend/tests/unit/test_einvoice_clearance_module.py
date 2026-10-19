@@ -943,7 +943,11 @@ class TestAdapterNamesTheAct:
         act_adapter.act = entry.additional_regimes[0]
         profile = await _profile(session, "FR", adapter_key=act_adapter.key)
         document, _ = await service.create_document(session, profile=profile, body=_body(profile))
-        document, _, _ = await service.submit_document(session, document=document, profile=profile)
+        # France's mentions catalogue warns about mentions an expert has not yet
+        # confirmed. That is waivable and says nothing about which act was recorded.
+        document, _, _ = await service.submit_document(
+            session, document=document, profile=profile, accept_warnings=True
+        )
         assert document.status == TERMINAL_SUCCESS[act_adapter.act]
         assert document.status != TERMINAL_SUCCESS[entry.regime]
 
@@ -951,7 +955,9 @@ class TestAdapterNamesTheAct:
         act_adapter.act = None
         profile = await _profile(session, "FR", adapter_key=act_adapter.key)
         document, _ = await service.create_document(session, profile=profile, body=_body(profile))
-        document, _, _ = await service.submit_document(session, document=document, profile=profile)
+        document, _, _ = await service.submit_document(
+            session, document=document, profile=profile, accept_warnings=True
+        )
         assert document.status == TERMINAL_SUCCESS[regimes.COUNTRY_REGIMES["FR"].regime]
 
     async def test_an_act_the_country_does_not_declare_is_ignored(self, session, act_adapter):

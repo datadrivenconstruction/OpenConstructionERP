@@ -70,7 +70,7 @@ def upgrade() -> None:
                 sa.ForeignKey(
                     "oe_einvoice_clearance_profile.id",
                     ondelete="CASCADE",
-                    name="fk_oe_einvoice_zatca_egs_unit_profile_id_oe_einvoice_clearance_profile",
+                    name="fk_oe_einvoice_zatca_egs_unit_profile_id",
                 ),
                 nullable=False,
             ),
@@ -108,7 +108,7 @@ def upgrade() -> None:
                 sa.ForeignKey(
                     f"{_UNIT}.id",
                     ondelete="CASCADE",
-                    name="fk_oe_einvoice_zatca_chain_entry_unit_id_oe_einvoice_zatca_egs_unit",
+                    name="fk_oe_einvoice_zatca_chain_entry_unit_id",
                 ),
                 nullable=False,
             ),

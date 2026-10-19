@@ -111,6 +111,23 @@ _SWISS_HISTORY_ADDED_IN_18_4 = {
 #: tax_history_backfill and by neither the reconciler nor the supersede repair.
 _SAUDI_HISTORY_ADDED_2026_10 = {("SA", "VAT", "2018-01-01")}
 
+#: Egypt's two rate lines, each with the closed window and the open one that
+#: replaced it. No old cohort holds an Egyptian row, so the reconciler delivers
+#: both lines whole, the Greek way: VAT fills the empty country-wide slot and the
+#: construction line joins it without changing what Egypt resolves to.
+_EGYPT_ADDED_2026_10 = {
+    ("EG", "VAT", "2016-09-08"),
+    ("EG", "VAT", "2017-07-01"),
+    ("EG", "VAT_CONSTR", "2016-09-08"),
+    ("EG", "VAT_CONSTR", "2025-07-18"),
+}
+_EGYPT_LINES = {"EG/VAT", "EG/VAT_CONSTR"}
+
+#: Poland's 5 % and zero tiers. Both old cohorts hold the 23 % standard rate, so
+#: they join a filled country-wide slot as tiers, the Croatian way.
+_POLISH_TIERS_ADDED_2026_10 = {("PL", "VAT_5", "2011-01-01"), ("PL", "VAT_ZERO", "2011-01-01")}
+_POLISH_TIERS = {"PL/VAT_5", "PL/VAT_ZERO"}
+
 #: The same four as delivery keys.
 _IRISH_AND_HUNGARIAN_TIERS = {"IE/VAT_RED_9", "IE/VAT_ZERO", "HU/AFA_18", "HU/AFA_5"}
 
@@ -164,6 +181,8 @@ _ADDED_AFTER_V15_4_0 = {
     *_SWISS_HISTORY_ADDED_IN_18_4,
     *_SAUDI_HISTORY_ADDED_2026_10,
     *_TURKISH_TIER_ADDED_2026_10,
+    *_EGYPT_ADDED_2026_10,
+    *_POLISH_TIERS_ADDED_2026_10,
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -205,6 +224,8 @@ _ADDED_AFTER_V15_9_1 = {
     *_SWISS_HISTORY_ADDED_IN_18_4,
     *_SAUDI_HISTORY_ADDED_2026_10,
     *_TURKISH_TIER_ADDED_2026_10,
+    *_EGYPT_ADDED_2026_10,
+    *_POLISH_TIERS_ADDED_2026_10,
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -266,6 +287,8 @@ _EXPECTED_DELIVERY = {
     *_IRISH_AND_HUNGARIAN_TIERS,
     # Türkiye's list (I) tier, on the same argument again.
     *_TURKISH_TIER,
+    *_EGYPT_LINES,
+    *_POLISH_TIERS,
 }
 
 #: What a v15.9.1 install is owed: the lines that shipped after it.
@@ -276,7 +299,14 @@ _EXPECTED_AFTER_V15_9_1 = {
     *_CROATIA_TIERS,
     *_IRISH_AND_HUNGARIAN_TIERS,
     *_TURKISH_TIER,
+    *_EGYPT_LINES,
+    *_POLISH_TIERS,
 }
+
+
+def _rows_in(lines: set[str]) -> int:
+    """How many seed rows these rate lines write. Egypt ships two windows per line."""
+    return sum(1 for row in load_tax_seed_rows() if f"{row['country_code']}/{row['tax_code']}" in lines)
 
 
 def _key(row: dict) -> tuple:
@@ -493,8 +523,8 @@ async def test_a_pre_v15_5_install_is_given_the_provinces_it_never_received(repa
 
     reconcile = _outcome(report, REPAIR_ID)
     assert reconcile.status == "applied"
-    assert reconcile.rows_changed == len(_EXPECTED_DELIVERY), (
-        f"expected {len(_EXPECTED_DELIVERY)} missing rates delivered, got {reconcile.rows_changed}"
+    assert reconcile.rows_changed == _rows_in(_EXPECTED_DELIVERY), (
+        f"expected {_rows_in(_EXPECTED_DELIVERY)} missing rates delivered, got {reconcile.rows_changed}"
     )
     assert await _deliveries(repair_factory) == _EXPECTED_DELIVERY
 
@@ -541,7 +571,7 @@ async def test_nova_scotia_is_not_this_repairs_to_deliver(repair_factory) -> Non
     deliveries = await _deliveries(repair_factory)
     assert "CA/HST_NS" not in deliveries, "the reconciler delivered a rate line that was already on file"
     assert deliveries == _EXPECTED_DELIVERY
-    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY), (
+    assert _outcome(report, REPAIR_ID).rows_changed == _rows_in(_EXPECTED_DELIVERY), (
         "the reconciler's own count moved, so it is doing something other than the rate lines it owns"
     )
 
@@ -564,7 +594,7 @@ async def test_a_second_boot_delivers_nothing(repair_factory) -> None:
     await _install(repair_factory, pre_v15_5_0(), "2026-06-01")
 
     first = _outcome(await run_data_repairs(repair_factory), REPAIR_ID)
-    assert first.rows_changed == len(_EXPECTED_DELIVERY)
+    assert first.rows_changed == _rows_in(_EXPECTED_DELIVERY)
     settled = await _count(repair_factory)
 
     second = _outcome(await run_data_repairs(repair_factory), REPAIR_ID)
@@ -577,7 +607,7 @@ async def test_a_second_boot_delivers_nothing(repair_factory) -> None:
             await session.execute(select(DataRepairLedger).where(DataRepairLedger.repair_id == REPAIR_ID))
         ).scalar_one()
     assert ledger.runs == 2, "the second boot has to be recorded, not skipped"
-    assert ledger.rows_changed_total == len(_EXPECTED_DELIVERY), "the second pass applied something after all"
+    assert ledger.rows_changed_total == _rows_in(_EXPECTED_DELIVERY), "the second pass applied something after all"
     assert len(await _deliveries(repair_factory)) == len(_EXPECTED_DELIVERY), "a delivery was recorded twice"
 
 
@@ -590,7 +620,7 @@ async def test_a_delivered_rate_the_customer_deletes_stays_deleted(repair_factor
     install.
     """
     await _install(repair_factory, pre_v15_5_0(), "2026-06-01")
-    assert _outcome(await run_data_repairs(repair_factory), REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY)
+    assert _outcome(await run_data_repairs(repair_factory), REPAIR_ID).rows_changed == _rows_in(_EXPECTED_DELIVERY)
 
     async with repair_factory() as session:
         await session.execute(
@@ -636,7 +666,7 @@ async def test_a_v15_9_1_install_that_deleted_a_rate_does_not_get_it_back(repair
     # Irish and Hungarian tiers, so it is owed those and nothing else. Pinned rather than counted, so a future
     # seed row cannot slip in here disguised as one of them.
     assert delivered == _EXPECTED_AFTER_V15_9_1
-    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_AFTER_V15_9_1)
+    assert _outcome(report, REPAIR_ID).rows_changed == _rows_in(_EXPECTED_AFTER_V15_9_1)
 
 
 async def test_a_v15_9_1_install_gets_only_what_shipped_after_it(repair_factory) -> None:
@@ -670,7 +700,7 @@ async def test_a_v15_9_1_install_gets_only_what_shipped_after_it(repair_factory)
     report = await run_data_repairs(repair_factory)
 
     assert _outcome(report, REPAIR_ID).status == "applied"
-    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_AFTER_V15_9_1)
+    assert _outcome(report, REPAIR_ID).rows_changed == _rows_in(_EXPECTED_AFTER_V15_9_1)
     assert await _deliveries(repair_factory) == _EXPECTED_AFTER_V15_9_1
 
     async with repair_factory() as session:
@@ -811,7 +841,7 @@ async def test_one_rate_re_entered_by_hand_does_not_freeze_the_seed_date(repair_
 
     report = await run_data_repairs(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY), (
+    assert _outcome(report, REPAIR_ID).rows_changed == _rows_in(_EXPECTED_DELIVERY), (
         "one shipped rate re-entered by hand withheld every rate this install was owed"
     )
     assert await _deliveries(repair_factory) == _EXPECTED_DELIVERY
@@ -862,7 +892,7 @@ async def test_a_country_that_typed_in_its_own_rate_is_not_given_a_second_one(re
     )
     assert ("NG", "VAT") not in await _lines(repair_factory)
 
-    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY) - 1, (
+    assert _outcome(report, REPAIR_ID).rows_changed == _rows_in(_EXPECTED_DELIVERY) - 1, (
         "one country holding its own rate must not withhold the other rate lines"
     )
 
@@ -901,7 +931,7 @@ async def test_a_province_that_has_a_hand_entered_rate_is_not_charged_twice(repa
 
     quebec = await _resolve_in(repair_factory, "CA", "CA-QC")
     assert quebec.combined_rate_pct == "14.975", "one province holding its own rate withheld the others"
-    assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_DELIVERY) - 1
+    assert _outcome(report, REPAIR_ID).rows_changed == _rows_in(_EXPECTED_DELIVERY) - 1
 
 
 async def test_the_reconciler_adds_rows_and_edits_none(repair_factory) -> None:
@@ -917,7 +947,7 @@ async def test_the_reconciler_adds_rows_and_edits_none(repair_factory) -> None:
     async with repair_factory() as session:
         after = await snapshot_table(session, _TAX_TABLE)
 
-    assert len(after) == len(before) + len(_EXPECTED_DELIVERY), (
+    assert len(after) == len(before) + _rows_in(_EXPECTED_DELIVERY), (
         "the pass under test did not deliver, so the check below is vacuous"
     )
     assert verify_additive_shape(repair, before, after) == ()

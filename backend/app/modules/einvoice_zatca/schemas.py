@@ -58,6 +58,13 @@ class UnitResponse(BaseModel):
     last_error: str
 
 
+class EinvoiceZatcaListResponse(BaseModel):
+    items: list[UnitResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class ApiPathResponse(BaseModel):
     name: str
     path: str

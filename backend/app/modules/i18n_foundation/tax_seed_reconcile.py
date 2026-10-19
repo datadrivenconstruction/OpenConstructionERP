@@ -411,7 +411,13 @@ def _claimed_jurisdictions(rows: Sequence[TaxRateRow]) -> set[str | None]:
     return claimed
 
 
-def _refusal(existing: Sequence[TaxRateRow], planned: Sequence[TaxRateRow], country: str) -> str:
+def _refusal(
+    existing: Sequence[TaxRateRow],
+    planned: Sequence[TaxRateRow],
+    country: str,
+    *,
+    held_before: Sequence[TaxRateRow] | None = None,
+) -> str:
     """Why this line must not be delivered into this database, or ``""``.
 
     An addition that is additive on the table can still be destructive on the
@@ -441,7 +447,7 @@ def _refusal(existing: Sequence[TaxRateRow], planned: Sequence[TaxRateRow], coun
     # reduced rate there answers as the standard one, so Croatia with its 25 %
     # deleted would start pricing at 13 %.
     if collisions <= {None} and _is_a_reduced_tier(planned):
-        return _tier_refusal(existing, planned, country)
+        return _tier_refusal(existing, planned, country, held_before=held_before)
     if collisions:
         return f"it already has a rate of its own in force for {', '.join(sorted(str(slot) for slot in collisions))}"
     return ""
@@ -513,7 +519,13 @@ def _dates_to_check(rows: Sequence[TaxRateRow], planned: Sequence[TaxRateRow], c
     return sorted(day for day in candidates if day >= start and (end is None or day <= end))
 
 
-def _tier_refusal(existing: Sequence[TaxRateRow], planned: Sequence[TaxRateRow], country: str) -> str:
+def _tier_refusal(
+    existing: Sequence[TaxRateRow],
+    planned: Sequence[TaxRateRow],
+    country: str,
+    *,
+    held_before: Sequence[TaxRateRow] | None = None,
+) -> str:
     """Why a reduced tier must not join a filled country-wide slot, or ``""``.
 
     Two conditions, and both are about the answer rather than the table,
@@ -527,11 +539,14 @@ def _tier_refusal(existing: Sequence[TaxRateRow], planned: Sequence[TaxRateRow],
 
     And the customer must not already carry that rate. A 13 % they typed in
     under their own code is the same tier, and a second 13 % in the list is a
-    choice between two identical rates that nobody can tell apart.
+    choice between two identical rates that nobody can tell apart. Only the
+    rows on file before this pass count as theirs (``held_before``): Egypt's
+    construction line reaches 14 % beside the standard 14 % delivered moments
+    earlier, exactly as the seed file ships both to a fresh install.
     """
     start = min((row.effective_from or "0001-01-01") for row in planned)
     held_rates = set()
-    for row in existing:
+    for row in existing if held_before is None else held_before:
         if row.country_code.strip().upper() != country or row.combination not in ("national", "federal"):
             continue
         if row.effective_to is not None and row.effective_to < start:
@@ -649,7 +664,7 @@ async def reconcile_shipped_tax_rows(session: AsyncSession) -> int:
         # Against the plan so far, not against the table as read: two lines
         # delivered in one pass can collide with each other as easily as with
         # something already on file.
-        refusal = _refusal(projected, rows, line[0])
+        refusal = _refusal(projected, rows, line[0], held_before=existing)
         if refusal:
             # No delivery recorded, deliberately. This is "not into this
             # database as it stands", not "handed over", and if the collision

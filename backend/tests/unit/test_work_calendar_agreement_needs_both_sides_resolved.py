@@ -87,7 +87,11 @@ UNMEASURED = "unmeasured"
 #: ES left at the same time. It was here because the planning table had a SPAIN
 #: calendar and core.calendar had no Spanish week; it now has one, so both sides
 #: resolve and the two can be compared. They name the same five days.
-_KNOWN_UNMEASURED: frozenset[str] = frozenset({"BG", "FR", "HU", "JP", "NG"})
+#:
+#: FR left when core.calendar gained the French holidays and Monday to Friday week
+#: (Code du travail L3121-27) beside the planning table's FRANCE calendar. Both sides
+#: name the same five days.
+_KNOWN_UNMEASURED: frozenset[str] = frozenset({"BG", "HU", "JP", "NG"})
 
 
 def _population(core_weeks: Mapping[str, Any], country_map: Mapping[str, Any]) -> list[str]:

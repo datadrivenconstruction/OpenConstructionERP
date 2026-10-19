@@ -31,7 +31,7 @@ import uuid
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.crypto import decrypt_secret, encrypt_secret
@@ -152,6 +152,25 @@ async def list_units(session: AsyncSession, profile_id: uuid.UUID) -> list[Zatca
         select(ZatcaEgsUnit).where(ZatcaEgsUnit.profile_id == profile_id).order_by(ZatcaEgsUnit.created_at)
     )
     return list(result.scalars())
+
+
+async def page_units(
+    session: AsyncSession, profile_id: uuid.UUID, *, offset: int, limit: int
+) -> tuple[list[ZatcaEgsUnit], int]:
+    """One page of a registration's units and how many it holds in all."""
+    total = (
+        await session.execute(
+            select(func.count()).select_from(ZatcaEgsUnit).where(ZatcaEgsUnit.profile_id == profile_id)
+        )
+    ).scalar_one()
+    result = await session.execute(
+        select(ZatcaEgsUnit)
+        .where(ZatcaEgsUnit.profile_id == profile_id)
+        .order_by(ZatcaEgsUnit.created_at)
+        .offset(offset)
+        .limit(limit)
+    )
+    return list(result.scalars()), total
 
 
 async def unit_for_document_uuid(session: AsyncSession, invoice_uuid: str) -> ZatcaEgsUnit | None:

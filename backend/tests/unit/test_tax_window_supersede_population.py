@@ -157,6 +157,21 @@ from app.modules.i18n_foundation.tax_window_supersede import (
 #: * ``EARLIEST_SUPERSEDED_FROM`` moves from 2020-09-01 to 2020-07-01. It is
 #:   derived from ``windows[1:]`` and Saudi Arabia's second window, the 15 %
 #:   one, starts on 2020-07-01. The date is documentation; nothing branches on it.
+#:
+#: ``EG/VAT`` and ``EG/VAT_CONSTR`` were added on 2026-10-19 with Egypt's VAT.
+#: What was looked at:
+#:
+#: * Egypt charged 13 % from 2016-09-08 and 14 % from 2017-07-01 (VAT Law
+#:   67/2016), and contracting works paid a 5 % schedule tax until 2025-07-17,
+#:   then the standard 14 % from 2025-07-18 (Law 157/2025). Each line ships a
+#:   closed window and the open one that replaced it.
+#: * What this repair will therefore do in the field: nothing. Both lines are
+#:   in ``LINE_FIRST_SHIPPED``, so no older install holds an Egyptian row to
+#:   carry forward; ``tax_seed_reconcile`` delivers each line whole, closed
+#:   window included, and an install given both windows has none open that the
+#:   file has closed.
+#: * ``EARLIEST_SUPERSEDED_FROM`` moves from 2020-07-01 to 2017-07-01, the start
+#:   of Egypt's 14 % window.
 EXPECTED_POPULATION = {
     ("CA", "HST_NS"),
     ("IL", "VAT"),
@@ -166,6 +181,8 @@ EXPECTED_POPULATION = {
     ("CH", "VAT_REDUCED"),
     ("CH", "VAT_SPECIAL"),
     ("SA", "VAT"),
+    ("EG", "VAT"),
+    ("EG", "VAT_CONSTR"),
 }
 
 

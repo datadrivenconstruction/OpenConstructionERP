@@ -85,7 +85,7 @@ async def test_two_apply_transactions_deliver_each_rate_once(factory, monkeypatc
 
         assert all(not isinstance(value, BaseException) for value in outcomes), outcomes
         assert len(outcomes) == 2
-        assert (outcomes[0].rows_added, outcomes[1].rows_added) == (4, 0)
+        assert (outcomes[0].rows_added, outcomes[1].rows_added) == (len(NEW_KEYS), 0)
         assert set(outcomes[1].skipped) == NEW_KEYS
         for key in NEW_KEYS:
             country, code = key.removeprefix("tax:").split("/")
@@ -106,7 +106,7 @@ async def test_two_apply_transactions_deliver_each_rate_once(factory, monkeypatc
                 DataRepairDelivery.delivery_key.in_(NEW_KEYS),
             )
         )
-        assert delivered == 4
+        assert delivered == len(NEW_KEYS)
 
 
 async def test_apply_waits_for_a_custom_rate_insert_then_rechecks_the_jurisdiction(factory):
