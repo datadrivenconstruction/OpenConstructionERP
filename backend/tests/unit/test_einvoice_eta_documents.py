@@ -420,7 +420,7 @@ class TestSharedRinCheck:
         return calls
 
     def test_an_invalid_rin_is_an_error_naming_the_party(self, monkeypatch):
-        calls = self._with(monkeypatch, {"valid": False, "message": "must have 9 digits"})
+        calls = self._with(monkeypatch, {"valid": False, "reason": "format", "details": {}})
         found = checks.check_eta_document(_text(_build()), profile_rin=RIN, now=NOW)
         assert {"issuer_rin_invalid", "receiver_rin_invalid"} <= {i.code for i in found}
         assert ("EG", "rin", RIN) in calls
@@ -428,8 +428,22 @@ class TestSharedRinCheck:
         assert issuer.group == "parties"
         assert "9 digits" in issuer.message
 
+    def test_a_rule_under_expert_review_only_warns(self, monkeypatch):
+        # The shape of party_identifiers.IdentifierCheck: reason, details.
+        verdict = type(
+            "IdentifierCheck",
+            (),
+            {"valid": False, "reason": "format", "details": {"needs_expert_review": "yes"}},
+        )()
+        self._with(monkeypatch, verdict)
+        found = [i for i in checks.check_eta_document(_text(_build()), profile_rin=RIN, now=NOW) if "rin" in i.code]
+        assert {(i.group, i.code) for i in found} == {
+            ("advisory", "issuer_rin_invalid"),
+            ("advisory", "receiver_rin_invalid"),
+        }
+
     def test_a_valid_rin_leaves_no_note(self, monkeypatch):
-        self._with(monkeypatch, type("Result", (), {"valid": True, "message": ""})())
+        self._with(monkeypatch, type("Result", (), {"valid": True, "reason": None, "details": {}})())
         assert _codes(_text(_build())) == set()
 
     def test_no_installed_check_is_a_warning_not_an_error(self, monkeypatch):

@@ -164,7 +164,8 @@ Stored in `EInvoiceProfile.settings["eta"]` (JSON, no migration):
 
 The RIN format itself is not checked here. It belongs to the shared party identifier package
 (`app.core.party_identifiers`, scheme `rin` for EG), which the checks call as `check("EG", "rin", value)`
-for the issuer and a B receiver. An invalid result is an error in `eta_parties`; where the package or the scheme
+for the issuer and a B receiver. An invalid result is an error in `eta_parties`, or a warning in `eta_advisory`
+while the shared check marks its rule `needs_expert_review`; where the package or the scheme
 is not installed the check returns nothing and `eta_advisory` says the format was not checked.
 
 Signer kinds: `pkcs11` (USB token or HSM through its PKCS#11 library), `external_http` (a signing service on the

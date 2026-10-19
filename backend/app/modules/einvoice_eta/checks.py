@@ -137,32 +137,48 @@ def _rin_checker() -> Any:
     return check
 
 
-def _rin_verdict(value: str) -> tuple[bool | None, str]:
-    """``(True, "")`` valid, ``(False, why)`` invalid, ``(None, "")`` not checked."""
+_RIN_REASONS = {
+    "empty": "it is empty",
+    "format": "an Egyptian RIN is 9 digits",
+}
+
+
+def _field(result: Any, name: str) -> Any:
+    return result.get(name) if isinstance(result, dict) else getattr(result, name, None)
+
+
+def _rin_verdict(value: str) -> tuple[bool | None, str, bool]:
+    """``(valid, why, firm)``; ``valid`` is ``None`` when nothing checked it.
+
+    ``firm`` is False when the shared check marks its own rule for expert review:
+    an unconfirmed rule warns and does not block.
+    """
     check = _rin_checker()
     result = check("EG", "rin", value) if check is not None else None
     if result is None:
-        return None, ""
-    valid = result.get("valid") if isinstance(result, dict) else getattr(result, "valid", None)
+        return None, "", False
+    valid = _field(result, "valid")
     if valid is None:
-        return None, ""
-    why = result.get("message", "") if isinstance(result, dict) else getattr(result, "message", "")
-    return bool(valid), str(why or "")
+        return None, "", False
+    reason = str(_field(result, "reason") or "")
+    why = _RIN_REASONS.get(reason, reason)
+    details = _field(result, "details")
+    review = details.get("needs_expert_review") if isinstance(details, dict) else None
+    firm = str(review).strip().lower() not in ("yes", "true", "1")
+    return bool(valid), why, firm
 
 
 def _check_rin(issues: list[EtaIssue], who: str, value: str, unchecked: list[str]) -> None:
-    valid, why = _rin_verdict(value)
+    valid, why, firm = _rin_verdict(value)
     if valid is None:
         unchecked.append(f"{who}.id")
     elif not valid:
-        issues.append(
-            EtaIssue(
-                GROUP_PARTIES,
-                f"{who}_rin_invalid",
-                f"{who}.id",
-                f"The {who} tax registration number {value} is not a valid Egyptian RIN" + (f": {why}" if why else "."),
-            )
+        message = f"The {who} tax registration number {value} is not a valid Egyptian RIN" + (
+            f": {why}." if why else "."
         )
+        if not firm:
+            message += " The format rule is awaiting expert review, so this is a warning."
+        issues.append(EtaIssue(GROUP_PARTIES if firm else GROUP_ADVISORY, f"{who}_rin_invalid", f"{who}.id", message))
 
 
 def _check_parties(issues: list[EtaIssue], doc: dict[str, Any], profile_rin: str) -> None:
