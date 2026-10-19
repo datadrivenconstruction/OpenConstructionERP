@@ -1330,3 +1330,16 @@ def test_no_pack_demo_id_collides_with_a_seed_row():
     assert len(pack_ids) > 20, f"the pack directory came back nearly empty ({len(pack_ids)}); nothing was measured"
     assert not (seed_ids & set(pack_ids)), f"a pack now shares a seed's demo_id: {sorted(seed_ids & set(pack_ids))}"
     assert len(pack_ids) == len(set(pack_ids)), "two packs share a demo_id, so only the first would reach the catalogue"
+
+
+def test_the_payment_tax_and_vat_regime_data_files_are_probed():
+    """Both tables are one data file per country, which the tree walk cannot see.
+
+    A distinguishing pair each: Turkey has withholding rows and no VAT regimes,
+    Egypt has both, Germany has neither.
+    """
+    assert _one("EG", "tax.payment_withholding").verdict == cc.COVERED
+    assert _one("TR", "tax.payment_withholding").verdict == cc.COVERED
+    assert _one("DE", "tax.payment_withholding").verdict == cc.MISSING
+    assert _one("EG", "tax.vat_regimes").verdict == cc.COVERED
+    assert _one("TR", "tax.vat_regimes").verdict == cc.MISSING

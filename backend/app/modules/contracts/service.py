@@ -24,7 +24,7 @@ from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import select as sa_select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.currency_registry import money_quantum
@@ -139,6 +139,7 @@ from app.modules.contracts.retention import (
 )
 from app.modules.contracts.retention import percent_complete as retention_percent_complete
 from app.modules.contracts.sov_adjustments import ADJUSTS_LINE_META_KEY
+from app.modules.contracts.vat_regime_rules import VAT_REGIME_CONTEXT_KEY, stated_regime
 
 logger = logging.getLogger(__name__)
 
@@ -1395,6 +1396,78 @@ class ContractsService:
             return None
         return normalise_country(getattr(project, "country_code", None)) or None
 
+    async def vat_regimes_for_project(self, project_id: uuid.UUID, on: date) -> dict[str, Any]:
+        """The VAT regimes a contract on this project may state on ``on``, with their rates.
+
+        The regimes and their conditions come from :mod:`app.core.vat_regimes`;
+        the nominal rate of each comes from the tax table row its ``tax_code``
+        names, in force on ``on``, so a tenant who corrects a rate there sees
+        the regime follow. No row in force leaves the rate empty.
+        """
+        from app.core.vat_regimes import in_force, regimes_for  # noqa: PLC0415
+        from app.modules.i18n_foundation.repository import TaxConfigRepository  # noqa: PLC0415
+        from app.modules.i18n_foundation.tax_rules import active_rows  # noqa: PLC0415
+        from app.modules.i18n_foundation.tax_rules import row_from_orm as tax_row_from_orm  # noqa: PLC0415
+
+        country = await self.project_country(project_id)
+        answer: dict[str, Any] = {"project_id": project_id, "country_code": country, "on": on, "regimes": []}
+        if not country:
+            return answer
+        regimes = regimes_for(country)
+        if not regimes:
+            return answer
+        try:
+            configs = await TaxConfigRepository(self.session).list(country_code=country)
+        except SQLAlchemyError:
+            logger.debug("Tax table unreadable for %s; VAT regimes are offered without rates", country)
+            configs = []
+        rows = [tax_row_from_orm(config) for config in configs]
+        live = active_rows(rows, country, on.isoformat())
+        offered: list[dict[str, Any]] = []
+        activities = sorted({regime.activity for regime in regimes})
+        for activity in activities:
+            for regime in in_force(regimes, country=country, activity=activity, on=on):
+                matching = [
+                    row
+                    for row in live
+                    if row.tax_code == regime.tax_code
+                    and row.combination in ("national", "federal")
+                    and not row.awaiting_confirmation
+                ]
+                nominal: Decimal | None = None
+                if len(matching) == 1:
+                    try:
+                        nominal = Decimal(matching[0].rate_pct)
+                    except (InvalidOperation, TypeError):
+                        nominal = None
+                rules = regime.eligibility
+                offered.append(
+                    {
+                        "code": regime.code,
+                        "labels": dict(regime.labels),
+                        "activity": regime.activity,
+                        "tax_code": regime.tax_code,
+                        "base_fraction": regime.base_fraction,
+                        "input_credit": regime.input_credit,
+                        "nominal_rate_pct": nominal,
+                        "effective_rate_pct": None if nominal is None else nominal * regime.base_fraction,
+                        "is_default": regime.is_default,
+                        "effective_from": regime.effective_from,
+                        "effective_to": regime.effective_to,
+                        "review_status": regime.review_status,
+                        "legal_reference": regime.legal_reference,
+                        "source_url": regime.source_url,
+                        "conditions": dict(regime.conditions),
+                        "contract_signed_before": rules.contract_signed_before if rules else None,
+                        "required_evidence": list(rules.required_evidence) if rules else [],
+                        "subcontract_evidence": list(rules.subcontract_evidence) if rules else [],
+                        "evidence_dated_before": rules.evidence_dated_before if rules else None,
+                        "scope_increase_ends_regime": bool(rules and rules.scope_increase_ends_regime),
+                    }
+                )
+        answer["regimes"] = offered
+        return answer
+
     async def project_subdivision(self, project_id: uuid.UUID) -> str | None:
         """The project's ISO 3166-2 subdivision as recorded, or None."""
         from app.modules.projects.models import Project  # noqa: PLC0415
@@ -2372,6 +2445,19 @@ class ContractsService:
                 # pair can only ever pass.
                 "template_code": contract.template_code,
                 "template_version": contract.template_version,
+                # What the VAT regime rules read: the regime's conditions are
+                # about when the contract was signed, whether it is a
+                # subcontract and how far its value has grown.
+                "code": contract.code,
+                "country_code": await self.project_country(contract.project_id),
+                "signed_at": contract.signed_at,
+                "start_date": contract.start_date,
+                "is_subcontract": contract.counterparty_type == "subcontractor"
+                or contract.parent_contract_id is not None,
+                "total_value": str(contract.total_value) if contract.total_value is not None else None,
+                "original_contract_value": (
+                    str(contract.original_contract_value) if contract.original_contract_value is not None else None
+                ),
             },
             "parties": party_rows,
             "securities": [
@@ -3832,6 +3918,11 @@ class ContractsService:
             "retention_cap": await self._claim_retention_cap_context(claim, contract),
             "schedule": await self._claim_schedule_context(contract, contract_lines),
         }
+        # The VAT regime the contract states, so a claim dated outside it is
+        # reported. Absent when the contract states none.
+        vat_regime = await self._claim_vat_regime_context(contract)
+        if vat_regime is not None:
+            context[VAT_REGIME_CONTEXT_KEY] = vat_regime
 
         # What other modules add (the subcontractor pay apps rolled into this
         # claim, when that module is installed). They register with
@@ -3845,6 +3936,13 @@ class ContractsService:
             raise RuntimeError(f"claim context providers may not replace core keys: {', '.join(clash)}")
         context.update(extra)
         return context
+
+    async def _claim_vat_regime_context(self, contract: Contract) -> dict[str, Any] | None:
+        """The regime the contract states and its project's country, or None."""
+        block = stated_regime(contract.terms)
+        if block is None:
+            return None
+        return {"code": str(block["code"]).strip(), "country_code": await self.project_country(contract.project_id)}
 
     async def _claim_retention_cap_context(self, claim: ProgressClaim, contract: Contract) -> dict[str, Any]:
         """The ceiling on retention, the figure it binds, and where there is none.

@@ -21976,6 +21976,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "未填写含增值税的全部工程价值。",
     "hakedis.reason.below_work_value": "不适用：工程价值（{{work_value}} {{currency}}）低于 {{threshold}} {{currency}}。",
     "hakedis.reason.below_threshold": "不适用：{{measured}} {{currency}} 低于起征点 {{threshold}} {{currency}}。",
+    "hakedis.reason.not_above_threshold": "不适用：{{measured}} {{currency}} 未超过起征点 {{threshold}} {{currency}}。",
+    "hakedis.reason.payee_exempt": "不适用：收款方已登记免税（{{exemption}}）。",
     "hakedis.reason.capped": "已限制在上限 {{cap}} {{currency}}（计算值为 {{computed}}）。",
     "hakedis.reason.cap_currency_mismatch": "上限以 {{cap_currency}} 表示，而文档为 {{document_currency}}，因此无法适用。",
     "hakedis.reason.override_reason_missing": "金额为手工填写且没有原因。请填写原因。",

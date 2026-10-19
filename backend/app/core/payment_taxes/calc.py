@@ -90,6 +90,8 @@ REASON_KEYS: tuple[str, ...] = (
     "work_value_unknown",
     "below_work_value",
     "below_threshold",
+    "not_above_threshold",
+    "payee_exempt",
     "threshold_currency_mismatch",
     "threshold_needs_year_total",
     "capped",
@@ -205,6 +207,10 @@ class PaymentTaxInput:
             withhold. ``None`` means nobody has said, never "no".
         work_value_incl_vat: Value of the whole work under the contract, VAT
             included, in the document currency. ``None`` means unknown.
+        payee_exemptions: Exemption schemes the payee holds on file, by code.
+            A row that names one of them in ``payee_exemption_codes`` does not
+            apply to this payee. Empty when the payee holds none or nobody has
+            recorded one; a payee is subject to the tax until somebody does.
     """
 
     country_code: str
@@ -218,6 +224,7 @@ class PaymentTaxInput:
     overrides: Mapping[str, Override] = field(default_factory=dict)
     buyer_is_designated: bool | None = None
     work_value_incl_vat: Decimal | None = None
+    payee_exemptions: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -361,6 +368,10 @@ def _check_input(inp: PaymentTaxInput) -> dict[str, Override]:
         _require_decimal(inp.work_value_incl_vat, "work_value_incl_vat")
     if inp.buyer_is_designated is not None and not isinstance(inp.buyer_is_designated, bool):
         raise TypeError("buyer_is_designated must be True, False or None")
+    if not isinstance(inp.payee_exemptions, frozenset) or any(
+        not isinstance(code, str) or not code.strip() for code in inp.payee_exemptions
+    ):
+        raise TypeError("payee_exemptions must be a frozenset of non-blank codes")
     for name in ("vat_withholding", "income_withholding", "stamp_duty"):
         choice: Choice = getattr(inp, name)
         if choice.state not in _CHOICE_STATES:
@@ -390,11 +401,15 @@ def _apply_override(
     rate_pct: Decimal | None = None,
     row: RateRow | None = None,
     code: str = "",
+    waived: str = "",
 ) -> Figure:
     """Put a person's amount in place of the computed one, or hold it.
 
     The basis of the computed figure stays on the result, so the reader sees
-    what was replaced and under which article.
+    what was replaced and under which article. ``waived`` names the reason the
+    row's own conditions would have given for the tax not arising here (a
+    threshold not reached, an exempt payee). The amount still stands, and the
+    reason travels in the params as ``waived`` so a rule can point at it.
     """
 
     def build(status: Literal["value", "held"], reason_key: str, params: Mapping[str, str]) -> Figure:
@@ -419,6 +434,8 @@ def _apply_override(
     params = {"reason": override.reason.strip(), "by": override.by}
     if computed is not None:
         params["computed"] = str(computed)
+    if waived:
+        params["waived"] = waived
     return build("value", "", params)
 
 
@@ -498,6 +515,14 @@ def _buyer_condition(run: _Run, row: RateRow) -> tuple[Literal["not_applicable",
     return ("not_applicable", "below_work_value", params)
 
 
+def _payee_condition(run: _Run, row: RateRow) -> tuple[Literal["not_applicable"], str, dict[str, str]] | None:
+    """Take the payee out of the tax when they hold an exemption the row recognises."""
+    held = sorted(set(row.payee_exemption_codes) & run.inp.payee_exemptions)
+    if not held:
+        return None
+    return ("not_applicable", "payee_exempt", {"exemption": held[0]})
+
+
 def _threshold_condition(
     run: _Run, row: RateRow, vat: Figure
 ) -> tuple[Literal["not_applicable", "held"], str, dict[str, str]] | None:
@@ -526,15 +551,33 @@ def _threshold_condition(
         if vat.amount is None:
             return ("held", "withholding_needs_vat", {})
         measured = net + vat.amount
+    params = {
+        "threshold": str(row.threshold_amount),
+        "currency": row_currency,
+        "measure": row.threshold_measure,
+        "measured": str(measured),
+    }
+    if row.threshold_applies == "above":
+        # Only an amount exceeding the threshold is taxed, so the threshold
+        # itself is untaxed and the reason says "does not exceed".
+        return ("not_applicable", "not_above_threshold", params) if measured <= row.threshold_amount else None
     if measured < row.threshold_amount:
-        params = {
-            "threshold": str(row.threshold_amount),
-            "currency": row_currency,
-            "measure": row.threshold_measure,
-            "measured": str(measured),
-        }
         return ("not_applicable", "below_threshold", params)
     return None
+
+
+def _waived(run: _Run, row: RateRow, vat: Figure) -> str:
+    """The reason the row's conditions would give for the tax not arising, or ``""``.
+
+    Only a definite answer counts. A condition that is itself held (a yearly
+    threshold, a buyer class nobody stated) says nothing either way.
+    """
+    if run.inp.net_amount == 0:
+        return ""
+    for outcome in (_payee_condition(run, row), _buyer_condition(run, row), _threshold_condition(run, row, vat)):
+        if outcome is not None:
+            return outcome[1] if outcome[0] == "not_applicable" else ""
+    return ""
 
 
 def _row_figure(run: _Run, kind: str, row_kind: str, choice: Choice, vat: Figure) -> Figure:
@@ -591,7 +634,7 @@ def _row_figure(run: _Run, kind: str, row_kind: str, choice: Choice, vat: Figure
         computed = run.round(exact)
 
     if override is not None:
-        return _apply_override(run, kind, override, computed, base=base, row=row)
+        return _apply_override(run, kind, override, computed, base=base, row=row, waived=_waived(run, row, vat))
     if computed is None:
         waiting = "vat_rate_unknown" if kind == "vat_withheld" and vat.reason_key == "vat_rate_unknown" else ""
         return _figure(kind, "held", row=row, reason_key=waiting or "withholding_needs_vat")
@@ -601,7 +644,7 @@ def _row_figure(run: _Run, kind: str, row_kind: str, choice: Choice, vat: Figure
         return _figure(kind, "value", amount=computed, base=base, row=row)
 
     # 4. Whether the tax arises for this buyer and this document.
-    for outcome in (_buyer_condition(run, row), _threshold_condition(run, row, vat)):
+    for outcome in (_payee_condition(run, row), _buyer_condition(run, row), _threshold_condition(run, row, vat)):
         if outcome is not None:
             status, reason_key, why = outcome
             return _figure(kind, status, base=base, row=row, reason_key=reason_key, params=why)

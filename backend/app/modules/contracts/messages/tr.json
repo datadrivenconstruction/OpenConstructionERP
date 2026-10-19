@@ -274,5 +274,53 @@
         "suggestion": "Toplamları bir veya daha az olacak şekilde katsayıları düşürün"
       }
     }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "{contract} sözleşmesi {regime} KDV rejimini belirtiyor, ancak {country} için böyle bir rejim yok",
+      "suggestion": "Proje ülkesi için sunulan KDV rejimlerinden birini seçin veya seçimi kaldırın"
+    },
+    "country_unknown": {
+      "fail": "{contract} sözleşmesi {regime} KDV rejimini belirtiyor, ancak projesinde ülke belirtilmemiş, bu nedenle rejim denetlenemiyor",
+      "suggestion": "Projenin ülkesini belirleyin"
+    },
+    "contract_date_missing": {
+      "fail": "{regime} KDV rejimi yalnızca {cutoff} tarihinden önce imzalanan sözleşmeler içindir ve bu sözleşmede ne imza ne de başlangıç tarihi kayıtlı",
+      "suggestion": "Sözleşmenin imzalandığı tarihi girin"
+    },
+    "contract_too_late": {
+      "fail": "{regime} KDV rejimi yalnızca {cutoff} tarihinden önce imzalanan sözleşmeler içindir ve bu sözleşme {contract_date} tarihli",
+      "suggestion": "Bu sözleşme için genel KDV rejimini seçin"
+    },
+    "evidence_missing": {
+      "fail": "{regime} KDV rejimi {evidence} gerektiriyor ve sözleşmede bu belge kayıtlı değil",
+      "suggestion": "Belgenin numarasını ve düzenlenme tarihini sözleşmenin KDV rejimine kaydedin"
+    },
+    "evidence_date_missing": {
+      "fail": "{regime} KDV rejimi için kaydedilen belgenin ({evidence}) düzenlenme tarihi yok, bu nedenle {cutoff} tarihinden önce olduğu gösterilemiyor",
+      "suggestion": "Belgenin düzenlendiği tarihi girin"
+    },
+    "evidence_too_late": {
+      "fail": "{regime} KDV rejimi için kaydedilen belge ({evidence}) {issued_on} tarihinde düzenlenmiş, rejim ise {cutoff} tarihinden önce düzenlenmiş bir belge gerektiriyor",
+      "suggestion": "Daha önceki bir belge kaydedin veya genel KDV rejimini seçin"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Sözleşme bedeli {original_value} tutarından {current_value} tutarına çıktı ve sözleşmede izin verilen artış belirtilmemiş, bu nedenle {regime} KDV rejiminin hâlâ geçerli olup olmadığı değerlendirilemiyor",
+      "suggestion": "Sözleşmenin izin verdiği iş artışını kaydedin"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Sözleşme bedeli {original_value} tutarından {current_value} tutarına, sözleşmenin izin verdiği yüzde {allowed_increase_pct} artışın üzerine çıktı; KDV bakımından bu yeni bir sözleşmedir ve {regime} KDV rejimi artık uygulanmaz",
+      "suggestion": "Sözleşmeyi genel KDV rejimine geçirin"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "kontrol mühendisince onaylanmış bir hakediş belgesi",
+      "einvoice": "bir e-fatura veya e-makbuz",
+      "main_contractor_certificate": "ana yüklenicinin proje için KDV ödendiğine dair belgesi"
+    },
+    "not_in_force": {
+      "before": "{claim} hakedişi {on} tarihli, {regime} KDV rejimi ise ancak {effective_from} tarihinden itibaren geçerli; o gün geçerli olanlar: {instead}",
+      "after": "{claim} hakedişi {on} tarihli, {regime} KDV rejimi ise {effective_to} tarihinde sona erdi; o gün geçerli olanlar: {instead}",
+      "suggestion": "Sözleşmenin KDV rejimini hakediş tarihinde geçerli olan bir rejimle değiştirin veya hakediş tarihini düzeltin"
+    }
   }
 }

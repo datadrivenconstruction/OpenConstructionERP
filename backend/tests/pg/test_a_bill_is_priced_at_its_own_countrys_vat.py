@@ -267,7 +267,7 @@ async def test_a_construction_tier_survives_its_countrys_headline_rate(pg_sessio
     answering the question rather than a table answering a different one.
     """
     await _install_tax_seed(pg_session)
-    assert set(CONSTRUCTION_TIER_COUNTRIES) == {"CN", "IE"}, (
+    assert set(CONSTRUCTION_TIER_COUNTRIES) == {"CN", "IE", "EG"}, (
         "a country was added to or removed from the construction-tier set without this test "
         "being told which rate its bill should carry"
     )
@@ -328,6 +328,33 @@ async def test_an_irish_bill_is_charged_the_construction_rate(pg_session, base_d
     )
     assert lines[0].metadata_["vat_rate_source"] == "country_seed"
     assert lines[0].metadata_["vat_override"] is True
+
+
+@pytest.mark.parametrize(
+    ("base_date", "expected"),
+    [
+        # The 5 percent schedule tax on contracting works, to its last day.
+        ("2025-07-17", "5"),
+        # Law No. 157 of 2025: construction is charged the standard rate.
+        ("2025-07-18", "14"),
+        ("2026-Q1", "14"),
+    ],
+)
+async def test_an_egyptian_bill_is_charged_the_construction_regime_of_its_date(pg_session, base_date, expected) -> None:
+    """Egypt has no stack of its own, so the bill gets one appended VAT line at the regime of its date."""
+    await _install_tax_seed(pg_session)
+    assert _seed_rate("EG") == Decimal("14"), "Egypt's standard rate moved, so this proves nothing"
+
+    boq = await _bill_for(pg_session, "EG", base_date=base_date)
+    await BOQService(pg_session).apply_default_markups(boq.id)
+    lines = await _tax_lines(pg_session, boq.id)
+    assert len(lines) == 1, f"an Egyptian bill seeded {len(lines)} tax lines, expected one"
+    assert lines[0].name == "VAT"
+    assert Decimal(lines[0].percentage) == Decimal(expected), (
+        f"an Egyptian bill dated {base_date!r} was charged {lines[0].percentage}; construction was charged "
+        f"5 percent until 2025-07-17 and 14 from 2025-07-18"
+    )
+    assert lines[0].metadata_["vat_rate_source"] == "country_seed"
 
 
 async def test_an_irish_project_that_states_its_rate_keeps_it(pg_session) -> None:

@@ -829,6 +829,7 @@ def _statutory_inputs(payload: StatutoryInputsBody) -> service.StatutoryInputs:
         vat_withholding=choice(payload.vat_withholding),
         income_withholding=choice(payload.income_withholding),
         stamp_duty=choice(payload.stamp_duty),
+        payee_exemption_code=payload.payee_exemption_code,
     )
 
 
@@ -850,6 +851,7 @@ def _inputs_body(inputs: service.StatutoryInputs) -> StatutoryInputsBody:
         vat_withholding=choice(inputs.vat_withholding),
         income_withholding=choice(inputs.income_withholding),
         stamp_duty=choice(inputs.stamp_duty),
+        payee_exemption_code=inputs.payee_exemption_code,
     )
 
 
@@ -1069,6 +1071,8 @@ async def list_statutory_categories(
             cap_amount=row.cap_amount,
             buyer_scope=row.buyer_scope,
             work_value_threshold=row.work_value_threshold,
+            threshold_applies=row.threshold_applies,
+            payee_exemption_codes=list(row.payee_exemption_codes),
             conditions=dict(row.conditions),
             effective_from=row.effective_from,
             effective_to=row.effective_to,

@@ -956,6 +956,58 @@ class StatutoryThresholdWasEvaluated(ValidationRule):
         return failures or [_result(self, True, "OK")]
 
 
+#: Why the row says the tax does not arise, in words, by the ``waived`` param
+#: the calculation puts on an overridden figure.
+_WAIVED_WHY = {
+    "below_threshold": "the document is below the row's threshold",
+    "not_above_threshold": "the document does not exceed the row's threshold",
+    "payee_exempt": "the payee holds a recorded exemption",
+    "below_work_value": "the value of the work is below the row's limit",
+    "buyer_not_designated": "the buyer is not of the class the row applies to",
+}
+
+
+class StatutoryOverrideWhereNotDue(ValidationRule):
+    rule_id = "tax_withholding.statutory_override_not_due"
+    name = "Amount Entered For A Tax That Does Not Arise"
+    standard = "tax_withholding"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "An amount entered by hand on a tax that the rate row says does not arise on this document, "
+        "such as withholding on a payment below the threshold or from an exempt payee."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is(context, RECORD_STATUTORY):
+            return []
+        failures: list[RuleResult] = []
+        for line in _lines(context):
+            if not line.get("overridden"):
+                continue
+            params = line.get("reason_params") if isinstance(line.get("reason_params"), dict) else {}
+            waived = _text(params.get("waived"))
+            amount = _amount(line.get("tax_amount"))
+            if not waived or amount is None or amount == 0:
+                continue
+            kind = _text(line.get("kind"))
+            why = _WAIVED_WHY.get(waived, waived)
+            failures.append(
+                _result(
+                    self,
+                    False,
+                    f"An amount was entered for '{kind}', but by its rate row the tax does not arise: {why}.",
+                    element_ref=kind or None,
+                    suggestion=(
+                        "Remove the override unless the reason recorded with it explains why the tax "
+                        "is due all the same."
+                    ),
+                    details={"kind": kind, "waived": waived, "amount": str(amount)},
+                )
+            )
+        return failures or [_result(self, True, "OK")]
+
+
 _TAX_WITHHOLDING_RULES: tuple[ValidationRule, ...] = (
     TaxableBaseIsCorrect(),
     WithheldWithinBase(),
@@ -969,6 +1021,7 @@ _TAX_WITHHOLDING_RULES: tuple[ValidationRule, ...] = (
     StatutoryOverrideHasReason(),
     StatutoryRateIsEffective(),
     StatutoryThresholdWasEvaluated(),
+    StatutoryOverrideWhereNotDue(),
 )
 
 

@@ -2853,6 +2853,13 @@ CONSTRUCTION_TIER_COUNTRIES: dict[str, str] = {
         "charged at the 13.5 reduced rate the seed carries as VAT_RED, per Revenue's VAT rates "
         "database. 13.5 is the one a bill of quantities asks"
     ),
+    "EG": (
+        "Egypt's standard VAT rate is 14, which is what the seed's is_default row carries, and "
+        "construction and contracting works were charged a 5 percent schedule tax without input "
+        "credit until 2025-07-17 and the standard 14 with input credit from 2025-07-18 (Law No. 157 "
+        "of 2025). The seed carries both windows as VAT_CONSTR, so a bill dated before the change "
+        "is charged 5 and one dated after it 14, which the standard row alone cannot say"
+    ),
 }
 
 #: Which seed row carries each construction tier, by ``tax_code``. Kept beside
@@ -2862,6 +2869,7 @@ CONSTRUCTION_TIER_COUNTRIES: dict[str, str] = {
 CONSTRUCTION_TIER_TAX_CODE: dict[str, str] = {
     "CN": "VAT_RED",
     "IE": "VAT_RED",
+    "EG": "VAT_CONSTR",
 }
 
 NON_SINGLE_TAX_REGIONS: dict[str, str] = {

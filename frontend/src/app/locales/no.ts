@@ -21950,6 +21950,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Verdien av hele arbeidet inkludert mva. er ikke lagt inn.",
     "hakedis.reason.below_work_value": "Gjelder ikke: arbeidets verdi ({{work_value}} {{currency}}) er under {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Gjelder ikke: {{measured}} {{currency}} er under terskelen på {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Gjelder ikke: {{measured}} {{currency}} overstiger ikke terskelen på {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Gjelder ikke: mottakeren har et registrert fritak ({{exemption}}).",
     "hakedis.reason.capped": "Begrenset til taket på {{cap}} {{currency}} (beregnet {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Taket er oppgitt i {{cap_currency}} og dokumentet i {{document_currency}}, så det kan ikke brukes.",
     "hakedis.reason.override_reason_missing": "Et beløp ble lagt inn for hånd uten årsak. Skriv inn årsaken.",

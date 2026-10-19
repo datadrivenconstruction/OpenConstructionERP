@@ -22606,6 +22606,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "İşin KDV dahil toplam bedeli girilmedi.",
     "hakedis.reason.below_work_value": "Uygulanmaz: işin bedeli ({{work_value}} {{currency}}) {{threshold}} {{currency}} sınırının altında.",
     "hakedis.reason.below_threshold": "Uygulanmaz: {{measured}} {{currency}}, {{threshold}} {{currency}} sınırının altında.",
+    "hakedis.reason.not_above_threshold": "Uygulanmaz: {{measured}} {{currency}}, {{threshold}} {{currency}} sınırını aşmıyor.",
+    "hakedis.reason.payee_exempt": "Uygulanmaz: ödeme alanın kayıtlı muafiyeti var ({{exemption}}).",
     "hakedis.reason.capped": "{{cap}} {{currency}} azami tutarıyla sınırlandı (hesaplanan {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Azami tutar {{cap_currency}} cinsinden, belge ise {{document_currency}} cinsinden olduğu için uygulanamıyor.",
     "hakedis.reason.override_reason_missing": "Tutar, gerekçe belirtilmeden elle girildi. Gerekçeyi girin.",

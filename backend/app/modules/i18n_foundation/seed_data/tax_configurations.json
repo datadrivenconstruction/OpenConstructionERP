@@ -1610,5 +1610,119 @@
     "effective_from": null,
     "effective_to": null,
     "is_default": true
+  },
+  {
+    "country_code": "EG",
+    "tax_name": "VAT Standard",
+    "tax_name_translations": {
+      "en": "VAT Standard",
+      "ar": "ضريبة القيمة المضافة - السعر العام"
+    },
+    "tax_code": "VAT",
+    "rate_pct": "13.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2016-09-08",
+    "effective_to": "2017-06-30",
+    "is_default": true,
+    "metadata": {
+      "source": {
+        "legal_reference": "Value Added Tax Law No. 67 of 2016 (13 percent for the fiscal year 2016/2017)",
+        "source_url": "https://taxsummaries.pwc.com/egypt/corporate/other-taxes",
+        "read_date": "2026-10-19"
+      },
+      "review": {
+        "status": "confirmed"
+      }
+    }
+  },
+  {
+    "country_code": "EG",
+    "tax_name": "VAT Standard",
+    "tax_name_translations": {
+      "en": "VAT Standard",
+      "ar": "ضريبة القيمة المضافة - السعر العام"
+    },
+    "tax_code": "VAT",
+    "rate_pct": "14.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2017-07-01",
+    "effective_to": null,
+    "is_default": true,
+    "metadata": {
+      "source": {
+        "legal_reference": "Value Added Tax Law No. 67 of 2016 (14 percent from the fiscal year 2017/2018)",
+        "source_url": "https://taxsummaries.pwc.com/egypt/corporate/other-taxes",
+        "read_date": "2026-10-19"
+      },
+      "review": {
+        "status": "confirmed"
+      },
+      "vat_treatment": {
+        "input_credit": true
+      }
+    }
+  },
+  {
+    "country_code": "EG",
+    "tax_name": "Schedule tax on contracting works",
+    "tax_name_translations": {
+      "en": "Schedule tax on contracting works",
+      "ar": "ضريبة الجدول على أعمال المقاولات"
+    },
+    "tax_code": "VAT_CONSTR",
+    "rate_pct": "5.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2016-09-08",
+    "effective_to": "2025-07-17",
+    "is_default": false,
+    "metadata": {
+      "source": {
+        "legal_reference": "Value Added Tax Law No. 67 of 2016, schedule tax on contracting works covering both supply and installation, replaced by Law No. 157 of 2025 from 2025-07-18",
+        "source_url": "https://eg.andersen.com/subcontractors-in-egypt/",
+        "read_date": "2026-10-19"
+      },
+      "review": {
+        "status": "needs_expert_review",
+        "note": "The 5 percent and its end on 2025-07-17 are read in professional summaries. The start on 2016-09-08 is the day Law No. 67 of 2016 took effect; no source stated when the 5 percent schedule rate on contracting began, so an Egyptian tax adviser should confirm it."
+      },
+      "vat_treatment": {
+        "input_credit": false
+      }
+    }
+  },
+  {
+    "country_code": "EG",
+    "tax_name": "VAT on construction and contracting works",
+    "tax_name_translations": {
+      "en": "VAT on construction and contracting works",
+      "ar": "ضريبة القيمة المضافة على أعمال المقاولات"
+    },
+    "tax_code": "VAT_CONSTR",
+    "rate_pct": "14.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2025-07-18",
+    "effective_to": null,
+    "is_default": false,
+    "metadata": {
+      "source": {
+        "legal_reference": "Law No. 157 of 2025 amending Value Added Tax Law No. 67 of 2016 (construction services moved to the standard rate with input credit); scope of construction services per Ministry of Finance Decree No. 417 of 2025",
+        "source_url": "https://taxnews.ey.com/news/2025-1554",
+        "read_date": "2026-10-19"
+      },
+      "review": {
+        "status": "confirmed"
+      },
+      "vat_treatment": {
+        "input_credit": true
+      }
+    }
   }
 ]

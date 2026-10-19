@@ -21571,6 +21571,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "ویلیو ایڈڈ ٹیکس سمیت پورے کام کی قدر درج نہیں۔",
     "hakedis.reason.below_work_value": "لاگو نہیں: کام کی قدر ({{work_value}} {{currency}}) {{threshold}} {{currency}} سے کم ہے۔",
     "hakedis.reason.below_threshold": "لاگو نہیں: {{measured}} {{currency}} حد {{threshold}} {{currency}} سے کم ہے۔",
+    "hakedis.reason.not_above_threshold": "لاگو نہیں: {{measured}} {{currency}} حد {{threshold}} {{currency}} سے زیادہ نہیں ہے۔",
+    "hakedis.reason.payee_exempt": "لاگو نہیں: وصول کنندہ کے پاس درج شدہ استثنا ہے ({{exemption}})۔",
     "hakedis.reason.capped": "بالائی حد {{cap}} {{currency}} پر محدود (حساب شدہ {{computed}})۔",
     "hakedis.reason.cap_currency_mismatch": "بالائی حد {{cap_currency}} میں بیان ہے اور دستاویز {{document_currency}} میں، اس لیے لاگو نہیں ہو سکتی۔",
     "hakedis.reason.override_reason_missing": "ایک رقم بغیر وجہ کے دستی درج کی گئی۔ وجہ درج کریں۔",

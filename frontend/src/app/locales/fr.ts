@@ -21521,6 +21521,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "La valeur de l'ensemble des travaux TVA comprise n'a pas été saisie.",
     "hakedis.reason.below_work_value": "Ne s'applique pas : la valeur des travaux ({{work_value}} {{currency}}) est inférieure à {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Ne s'applique pas : {{measured}} {{currency}} est inférieur au seuil de {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Ne s'applique pas : {{measured}} {{currency}} ne dépasse pas le seuil de {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Ne s'applique pas : le bénéficiaire dispose d'une exonération enregistrée ({{exemption}}).",
     "hakedis.reason.capped": "Limité au plafond de {{cap}} {{currency}} (calculé : {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Le plafond est exprimé en {{cap_currency}} et le document en {{document_currency}}, il ne peut donc pas être appliqué.",
     "hakedis.reason.override_reason_missing": "Un montant a été saisi à la main sans motif. Saisissez le motif.",

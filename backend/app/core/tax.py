@@ -90,6 +90,15 @@ Sources (cited in commit message, summarised here for reference):
 - ES: Ley 37/1992 art. 90 and 91 - standard 21 %, reduced 10 %, effective
   1 Sep 2012. The 4 % super-reduced rate is not in this table; see the comment
   at the entry. (BOE consolidated text, read 2026-10-10)
+- EG: Value Added Tax Law No. 67 of 2016 - standard 14 % since 1 Jul 2017
+  (13 % from 8 Sep 2016), exports zero-rated. Construction and contracting
+  works were taxed under a 5 % schedule tax without input credit until
+  17 Jul 2025 and at the standard 14 % with input credit from 18 Jul 2025
+  (Law No. 157 of 2025). This table has no date axis, so neither the
+  history nor the construction regimes are here: the dated rows are in the
+  tax seed and the per-contract regimes in :mod:`app.core.vat_regimes`.
+  (PwC Worldwide Tax Summaries - Egypt, other taxes, and EY Tax News
+  2025-1554, both read 2026-10-19)
 - ZA: Value-Added Tax Act 89 of 1991 - standard 15 %, zero-rated 0 %
   (SARS South Africa; standard rate raised from 14 % to 15 % on 1 Apr 2018.
   Note: ISO code ZA is South Africa, distinct from SA = Saudi Arabia above.)
@@ -227,6 +236,9 @@ _RAW: dict[str, dict[str, str]] = {
     # history lives in the tax seed and in property_dev/data/tax_rates.yaml.
     "RU": {"standard": "0.22", "reduced": "0.10", "zero": "0.00"},
     # ── Africa ────────────────────────────────────────────────────────────
+    # EG: standard 14 % since 2017-07-01, exports zero-rated. Today's rate
+    # only; see the module docstring for the construction regimes.
+    "EG": {"standard": "0.14", "zero": "0.00"},
     # ZA = South Africa (VAT Act 89 of 1991, SARS). Standard 15 % since
     # 1 Apr 2018. No reduced tier; basic foodstuffs and exports are zero-rated.
     "ZA": {"standard": "0.15", "zero": "0.00"},

@@ -2203,6 +2203,16 @@ class TestStatutoryRules:
         findings = await _stat_findings(lines)
         assert _severity_of(findings, "tax_withholding.statutory_threshold_unevaluated") == ["warning"]
 
+    @pytest.mark.parametrize("waived", ["below_threshold", "not_above_threshold", "payee_exempt"])
+    async def test_an_amount_entered_where_the_row_says_no_tax_arises_is_a_warning(self, waived):
+        rule = "tax_withholding.statutory_override_not_due"
+        entered = {"overridden": True, "override_reason": "Agreed", "reason_params": {"waived": waived}}
+        assert _severity_of(await _stat_findings(_stat_lines(income_withheld=entered)), rule) == ["warning"]
+        zero = {**entered, "tax_amount": Decimal("0.00")}
+        assert rule not in _ids(await _stat_findings(_stat_lines(income_withheld=zero)))
+        due = {**entered, "reason_params": {"reason": "Agreed"}}
+        assert rule not in _ids(await _stat_findings(_stat_lines(income_withheld=due)))
+
     async def test_the_rules_ignore_the_other_record_types(self):
         findings = await _findings(_deduction_request(), regime=_uk_regime(), party_status=_standing())
         assert not [f for f in findings if f.rule_id.startswith("tax_withholding.statutory_")]

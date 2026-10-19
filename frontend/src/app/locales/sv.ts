@@ -22142,6 +22142,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Värdet av hela arbetet inklusive moms har inte angetts.",
     "hakedis.reason.below_work_value": "Gäller inte: arbetets värde ({{work_value}} {{currency}}) är under {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Gäller inte: {{measured}} {{currency}} är under tröskeln på {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Gäller inte: {{measured}} {{currency}} överstiger inte tröskeln på {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Gäller inte: betalningsmottagaren har ett registrerat undantag ({{exemption}}).",
     "hakedis.reason.capped": "Begränsat till taket på {{cap}} {{currency}} (beräknat {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Taket anges i {{cap_currency}} och dokumentet i {{document_currency}}, så det kan inte tillämpas.",
     "hakedis.reason.override_reason_missing": "Ett belopp angavs för hand utan orsak. Ange orsaken.",

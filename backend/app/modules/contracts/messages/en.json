@@ -274,5 +274,53 @@
         "suggestion": "Lower the coefficients so that they add up to one or less"
       }
     }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Contract {contract} names VAT regime {regime}, which {country} does not have",
+      "suggestion": "Choose one of the VAT regimes offered for the project's country, or remove the choice"
+    },
+    "country_unknown": {
+      "fail": "Contract {contract} names VAT regime {regime}, but its project names no country, so the regime cannot be checked",
+      "suggestion": "Set the project's country"
+    },
+    "contract_date_missing": {
+      "fail": "VAT regime {regime} is only for contracts signed before {cutoff}, and this contract records neither a signature nor a start date",
+      "suggestion": "Enter the date the contract was signed"
+    },
+    "contract_too_late": {
+      "fail": "VAT regime {regime} is only for contracts signed before {cutoff}, and this contract dates from {contract_date}",
+      "suggestion": "Choose the standard VAT regime for this contract"
+    },
+    "evidence_missing": {
+      "fail": "VAT regime {regime} needs {evidence}, and the contract records none",
+      "suggestion": "Record the document's reference and issue date with the contract's VAT regime"
+    },
+    "evidence_date_missing": {
+      "fail": "The {evidence} recorded for VAT regime {regime} has no issue date, so it cannot be shown to predate {cutoff}",
+      "suggestion": "Enter the date the document was issued"
+    },
+    "evidence_too_late": {
+      "fail": "The {evidence} recorded for VAT regime {regime} was issued on {issued_on}, and the regime needs one issued before {cutoff}",
+      "suggestion": "Record an earlier document, or choose the standard VAT regime"
+    },
+    "scope_increase_unjudged": {
+      "fail": "The contract value rose from {original_value} to {current_value} and the contract states no allowed increase, so whether VAT regime {regime} still applies cannot be judged",
+      "suggestion": "Record the increase in scope the contract allows"
+    },
+    "scope_increase_new_contract": {
+      "fail": "The contract value rose from {original_value} to {current_value}, beyond the {allowed_increase_pct} percent increase the contract allows, so for VAT it is a new contract and VAT regime {regime} no longer applies",
+      "suggestion": "Move the contract to the standard VAT regime"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "a consultant-approved payment certificate",
+      "einvoice": "an e-invoice or e-receipt",
+      "main_contractor_certificate": "the main contractor's certificate that VAT was paid on the project"
+    },
+    "not_in_force": {
+      "before": "Claim {claim} is dated {on}, and VAT regime {regime} applies only from {effective_from}; in force that day: {instead}",
+      "after": "Claim {claim} is dated {on}, and VAT regime {regime} ended on {effective_to}; in force that day: {instead}",
+      "suggestion": "Change the contract's VAT regime to one in force on the claim date, or correct the claim date"
+    }
   }
 }

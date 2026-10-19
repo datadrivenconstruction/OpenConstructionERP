@@ -715,6 +715,9 @@ class StatutoryInputs:
         vat_withholding: The person's choice for the VAT withholding.
         income_withholding: The person's choice for the income tax withholding.
         stamp_duty: The person's choice for the stamp duty.
+        payee_exemption_code: An exemption scheme the payee holds on file. A
+            rate row that names it does not apply to this payee. Empty when
+            the payee holds none.
     """
 
     country_code: str
@@ -730,6 +733,7 @@ class StatutoryInputs:
     vat_withholding: Choice = Choice("unset")
     income_withholding: Choice = Choice("unset")
     stamp_duty: Choice = Choice("unset")
+    payee_exemption_code: str = ""
 
 
 @dataclass(frozen=True)
@@ -892,6 +896,7 @@ def build_tax_input(
         },
         buyer_is_designated=inputs.buyer_is_designated,
         work_value_incl_vat=inputs.work_value_incl_vat,
+        payee_exemptions=frozenset({code}) if (code := (inputs.payee_exemption_code or "").strip()) else frozenset(),
     )
 
 
@@ -1152,6 +1157,7 @@ def inputs_from_stored(calc: StatutoryTaxCalc, lines: Sequence[StatutoryTaxLine]
         work_value_note=calc.work_value_note or "",
         stamp_duty_base=money_as_stored(calc.stamp_duty_base, calc.currency_code),
         stamp_duty_base_same_as_net=bool(calc.stamp_duty_base_same_as_net),
+        payee_exemption_code=getattr(calc, "payee_exemption_code", "") or "",
         **choices,
     )
 
@@ -1468,6 +1474,7 @@ async def upsert_statutory(
     calc.work_value_note = (inputs.work_value_note or "").strip()
     calc.stamp_duty_base = inputs.stamp_duty_base
     calc.stamp_duty_base_same_as_net = inputs.stamp_duty_base_same_as_net
+    calc.payee_exemption_code = (inputs.payee_exemption_code or "").strip()
     lines = await _write_lines(session, calc, existing, result, inputs, overrides, rows)
     return calc, lines
 
@@ -1860,6 +1867,9 @@ async def certificate_tax_writer(
         vat_withholding=choice("vat_withholding"),
         income_withholding=choice("income_withholding"),
         stamp_duty=choice("stamp_duty"),
+        # The certificate screen does not ask for it; a payee's exemption
+        # recorded on the document stays when the certificate saves again.
+        payee_exemption_code=previous.payee_exemption_code if previous is not None else "",
     )
     try:
         calc, lines = await upsert_statutory(

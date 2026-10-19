@@ -435,6 +435,10 @@ class StatutoryTaxCalc(Base):
     stamp_duty_base_same_as_net: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="0"
     )
+    # An exemption scheme the payee holds on file, by code (for example a
+    # small-business regime whose members are outside withholding). Empty
+    # when the payee holds none or nobody has recorded one.
+    payee_exemption_code: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="")
     status: Mapped[str] = mapped_column(String(24), nullable=False, default="draft", server_default="draft")
     # Users are referenced by plain GUID: the sign-off has to outlive the
     # account that gave it.

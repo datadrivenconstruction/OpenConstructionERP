@@ -1124,6 +1124,42 @@ def _vat_rate_table(country: str) -> DimensionReport:
     return _keyed("tax.vat_rate_table", "app.core.tax._RAW", set(_RAW), country)
 
 
+@_probe("tax.payment_withholding")
+def _payment_withholding(country: str) -> DimensionReport:
+    """Whether a payment to a contractor is taxed at source here: withheld VAT, income tax, stamp duty.
+
+    The rows live in one data file per country (``payment_taxes/data_<cc>.py``),
+    so the population is read off the package directory rather than a dict the
+    tree walk could find. That is why this probe names no registry symbol.
+    """
+    from app.core.payment_taxes.tables import countries_with_rows
+
+    return _keyed(
+        "tax.payment_withholding",
+        "app.core.payment_taxes.tables.countries_with_rows",
+        set(countries_with_rows()),
+        country,
+    )
+
+
+@_probe("tax.vat_regimes")
+def _vat_regimes(country: str) -> DimensionReport:
+    """Whether a contract here can choose between VAT regimes (a reduced base, no input credit).
+
+    Read off ``vat_regimes/data_<cc>.py`` the same way as the withholding rows.
+    A country with no file taxes every contract on its seeded VAT row, which is
+    the common case and not a gap in itself.
+    """
+    from app.core.vat_regimes import countries_with_regimes
+
+    return _keyed(
+        "tax.vat_regimes",
+        "app.core.vat_regimes.countries_with_regimes",
+        set(countries_with_regimes()),
+        country,
+    )
+
+
 @_probe(
     "einvoice.clearance_regime",
     covers=("app.modules.einvoice_clearance.regimes.COUNTRY_REGIMES",),

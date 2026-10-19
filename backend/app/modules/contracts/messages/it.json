@@ -274,5 +274,53 @@
         "suggestion": "Ridurre i coefficienti in modo che sommino a uno o meno"
       }
     }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Il contratto {contract} indica il regime IVA {regime}, che non esiste in {country}",
+      "suggestion": "Scegli uno dei regimi IVA offerti per il paese del progetto oppure rimuovi la scelta"
+    },
+    "country_unknown": {
+      "fail": "Il contratto {contract} indica il regime IVA {regime}, ma il progetto non indica alcun paese, quindi il regime non può essere verificato",
+      "suggestion": "Imposta il paese del progetto"
+    },
+    "contract_date_missing": {
+      "fail": "Il regime IVA {regime} vale solo per i contratti firmati prima del {cutoff}, e questo contratto non riporta né la data di firma né quella di inizio",
+      "suggestion": "Inserisci la data di firma del contratto"
+    },
+    "contract_too_late": {
+      "fail": "Il regime IVA {regime} vale solo per i contratti firmati prima del {cutoff}, e questo contratto risale al {contract_date}",
+      "suggestion": "Scegli il regime IVA ordinario per questo contratto"
+    },
+    "evidence_missing": {
+      "fail": "Il regime IVA {regime} richiede {evidence}, e il contratto non ne riporta",
+      "suggestion": "Registra riferimento e data di emissione del documento nel regime IVA del contratto"
+    },
+    "evidence_date_missing": {
+      "fail": "Il documento {evidence} registrato per il regime IVA {regime} non ha data di emissione, quindi non si può dimostrare che sia anteriore al {cutoff}",
+      "suggestion": "Inserisci la data di emissione del documento"
+    },
+    "evidence_too_late": {
+      "fail": "Il documento {evidence} registrato per il regime IVA {regime} è stato emesso il {issued_on}, e il regime ne richiede uno emesso prima del {cutoff}",
+      "suggestion": "Registra un documento anteriore oppure scegli il regime IVA ordinario"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Il valore del contratto è passato da {original_value} a {current_value} e il contratto non indica alcun aumento consentito, quindi non si può stabilire se il regime IVA {regime} si applichi ancora",
+      "suggestion": "Registra l'aumento delle opere consentito dal contratto"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Il valore del contratto è passato da {original_value} a {current_value}, oltre l'aumento del {allowed_increase_pct} per cento consentito dal contratto, quindi ai fini IVA è un nuovo contratto e il regime IVA {regime} non si applica più",
+      "suggestion": "Sposta il contratto sul regime IVA ordinario"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "un certificato di pagamento approvato dal direttore dei lavori",
+      "einvoice": "una fattura o ricevuta elettronica",
+      "main_contractor_certificate": "il certificato dell'appaltatore principale che l'IVA è stata pagata sul progetto"
+    },
+    "not_in_force": {
+      "before": "Lo stato d'avanzamento {claim} è datato {on}, e il regime IVA {regime} vale solo dal {effective_from}; in vigore quel giorno: {instead}",
+      "after": "Lo stato d'avanzamento {claim} è datato {on}, e il regime IVA {regime} è terminato il {effective_to}; in vigore quel giorno: {instead}",
+      "suggestion": "Cambia il regime IVA del contratto con uno in vigore alla data dello stato d'avanzamento oppure correggi la data"
+    }
   }
 }

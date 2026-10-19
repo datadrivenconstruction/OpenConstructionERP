@@ -178,7 +178,10 @@ def tax_configuration_from_seed_row(row: dict) -> TaxConfiguration:
         effective_from=row.get("effective_from"),
         effective_to=row.get("effective_to"),
         is_default=row.get("is_default", False),
-        metadata_={},
+        # Where the rate was read and whether an expert still has to confirm
+        # it, carried with the row so a tenant sees the provenance of a
+        # shipped figure. Rows written before the key existed carry none.
+        metadata_=dict(row.get("metadata") or {}),
     )
 
 

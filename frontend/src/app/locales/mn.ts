@@ -22205,6 +22205,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Нэмэгдсэн өртгийн албан татвартай ажлын нийт өртгийг оруулаагүй байна.",
     "hakedis.reason.below_work_value": "Хамаарахгүй: ажлын өртөг ({{work_value}} {{currency}}) {{threshold}} {{currency}}-аас бага.",
     "hakedis.reason.below_threshold": "Хамаарахгүй: {{measured}} {{currency}} нь {{threshold}} {{currency}} босгоос бага.",
+    "hakedis.reason.not_above_threshold": "Хамаарахгүй: {{measured}} {{currency}} нь {{threshold}} {{currency}} босгоос хэтрэхгүй.",
+    "hakedis.reason.payee_exempt": "Хамаарахгүй: төлбөр хүлээн авагчид бүртгэлтэй чөлөөлөлт байна ({{exemption}}).",
     "hakedis.reason.capped": "{{cap}} {{currency}} дээд хязгаараар хязгаарлагдсан (тооцоолсон нь {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Дээд хязгаар {{cap_currency}}-ээр, баримт {{document_currency}}-ээр байгаа тул хэрэглэх боломжгүй.",
     "hakedis.reason.override_reason_missing": "Дүнг шалтгаангүйгээр гараар оруулсан. Шалтгааныг оруулна уу.",

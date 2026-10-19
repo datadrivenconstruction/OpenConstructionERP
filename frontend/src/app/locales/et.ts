@@ -22146,6 +22146,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Kogu töö väärtust käibemaksuga ei ole sisestatud.",
     "hakedis.reason.below_work_value": "Ei kohaldu: töö väärtus ({{work_value}} {{currency}}) on alla {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Ei kohaldu: {{measured}} {{currency}} on alla läve {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Ei kohaldu: {{measured}} {{currency}} ei ületa läve {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Ei kohaldu: makse saajal on registreeritud vabastus ({{exemption}}).",
     "hakedis.reason.capped": "Piiratud ülempiiriga {{cap}} {{currency}} (arvutatud {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Ülempiir on antud valuutas {{cap_currency}}, dokument aga valuutas {{document_currency}}, seega ei saa seda rakendada.",
     "hakedis.reason.override_reason_missing": "Summa sisestati käsitsi ilma põhjuseta. Sisestage põhjus.",

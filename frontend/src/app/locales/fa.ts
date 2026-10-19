@@ -21487,6 +21487,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "ارزش کل کار با مالیات بر ارزش افزوده وارد نشده است.",
     "hakedis.reason.below_work_value": "اعمال نمی‌شود: ارزش کار ({{work_value}} {{currency}}) کمتر از {{threshold}} {{currency}} است.",
     "hakedis.reason.below_threshold": "اعمال نمی‌شود: {{measured}} {{currency}} کمتر از آستانه {{threshold}} {{currency}} است.",
+    "hakedis.reason.not_above_threshold": "اعمال نمی‌شود: {{measured}} {{currency}} از آستانه {{threshold}} {{currency}} بیشتر نیست.",
+    "hakedis.reason.payee_exempt": "اعمال نمی‌شود: دریافت‌کننده وجه معافیت ثبت‌شده دارد ({{exemption}}).",
     "hakedis.reason.capped": "به سقف {{cap}} {{currency}} محدود شد (محاسبه‌شده {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "سقف بر حسب {{cap_currency}} و سند بر حسب {{document_currency}} است، پس قابل اعمال نیست.",
     "hakedis.reason.override_reason_missing": "مبلغی بدون دلیل دستی وارد شده است. دلیل را وارد کنید.",

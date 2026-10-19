@@ -21773,6 +21773,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Nilai seluruh pekerjaan termasuk PPN belum diisi.",
     "hakedis.reason.below_work_value": "Tidak berlaku: nilai pekerjaan ({{work_value}} {{currency}}) di bawah {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Tidak berlaku: {{measured}} {{currency}} di bawah ambang {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Tidak berlaku: {{measured}} {{currency}} tidak melebihi ambang {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Tidak berlaku: penerima pembayaran memiliki pembebasan yang tercatat ({{exemption}}).",
     "hakedis.reason.capped": "Dibatasi pada plafon {{cap}} {{currency}} (terhitung {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Plafon dinyatakan dalam {{cap_currency}} sedangkan dokumen dalam {{document_currency}}, sehingga tidak dapat diterapkan.",
     "hakedis.reason.override_reason_missing": "Sebuah jumlah diisi manual tanpa alasan. Masukkan alasannya.",

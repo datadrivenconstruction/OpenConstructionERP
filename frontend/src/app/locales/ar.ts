@@ -23040,6 +23040,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "لم تُدخل قيمة العمل كاملاً شاملة ضريبة القيمة المضافة.",
     "hakedis.reason.below_work_value": "لا ينطبق: قيمة العمل ({{work_value}} {{currency}}) أقل من {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "لا ينطبق: {{measured}} {{currency}} أقل من الحد {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "لا ينطبق: {{measured}} {{currency}} لا يتجاوز الحد {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "لا ينطبق: المستفيد لديه إعفاء مسجل ({{exemption}}).",
     "hakedis.reason.capped": "مقيَّد بالسقف {{cap}} {{currency}} (المحسوب {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "السقف مُعبَّر عنه بـ{{cap_currency}} والمستند بـ{{document_currency}}، فلا يمكن تطبيقه.",
     "hakedis.reason.override_reason_missing": "أُدخل مبلغ يدوياً بلا سبب. أدخل السبب.",

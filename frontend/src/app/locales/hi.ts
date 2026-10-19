@@ -22147,6 +22147,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "वैट सहित पूरे कार्य का मूल्य दर्ज नहीं है।",
     "hakedis.reason.below_work_value": "लागू नहीं: कार्य का मूल्य ({{work_value}} {{currency}}) {{threshold}} {{currency}} से कम है।",
     "hakedis.reason.below_threshold": "लागू नहीं: {{measured}} {{currency}} सीमा {{threshold}} {{currency}} से कम है।",
+    "hakedis.reason.not_above_threshold": "लागू नहीं: {{measured}} {{currency}} सीमा {{threshold}} {{currency}} से अधिक नहीं है।",
+    "hakedis.reason.payee_exempt": "लागू नहीं: भुगतान प्राप्तकर्ता के पास दर्ज छूट है ({{exemption}})।",
     "hakedis.reason.capped": "ऊपरी सीमा {{cap}} {{currency}} पर सीमित (गणना की गई {{computed}})।",
     "hakedis.reason.cap_currency_mismatch": "ऊपरी सीमा {{cap_currency}} में दी गई है और दस्तावेज़ {{document_currency}} में है, इसलिए लागू नहीं हो सकती।",
     "hakedis.reason.override_reason_missing": "एक राशि बिना कारण हाथ से दर्ज की गई। कारण दर्ज करें।",

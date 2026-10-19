@@ -21944,6 +21944,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "付加価値税込みの工事全体の価額が入力されていません。",
     "hakedis.reason.below_work_value": "適用なし: 工事の価額 ({{work_value}} {{currency}}) が {{threshold}} {{currency}} 未満です。",
     "hakedis.reason.below_threshold": "適用なし: {{measured}} {{currency}} は閾値 {{threshold}} {{currency}} 未満です。",
+    "hakedis.reason.not_above_threshold": "適用なし: {{measured}} {{currency}} は閾値 {{threshold}} {{currency}} を超えていません。",
+    "hakedis.reason.payee_exempt": "適用なし: 受取人に登録済みの免除があります ({{exemption}})。",
     "hakedis.reason.capped": "上限 {{cap}} {{currency}} に制限されました（計算値 {{computed}}）。",
     "hakedis.reason.cap_currency_mismatch": "上限は {{cap_currency}} で、文書は {{document_currency}} のため、適用できません。",
     "hakedis.reason.override_reason_missing": "金額が理由なしで手入力されています。理由を入力してください。",

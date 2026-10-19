@@ -17835,6 +17835,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "The VAT-inclusive value of the whole work has not been entered.",
     "hakedis.reason.below_work_value": "Does not apply: the value of the work ({{work_value}} {{currency}}) is below {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Does not apply: {{measured}} {{currency}} is below the threshold of {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Does not apply: {{measured}} {{currency}} does not exceed the threshold of {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Does not apply: the payee holds a recorded exemption ({{exemption}}).",
     "hakedis.reason.capped": "Limited to the ceiling of {{cap}} {{currency}} (computed {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "The ceiling is stated in {{cap_currency}} and the document is in {{document_currency}}, so it cannot be applied.",
     "hakedis.reason.override_reason_missing": "An amount was entered by hand without a reason. Enter the reason.",

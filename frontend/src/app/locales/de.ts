@@ -21848,6 +21848,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Der Wert des gesamten Werks inklusive Umsatzsteuer wurde nicht eingegeben.",
     "hakedis.reason.below_work_value": "Gilt nicht: Der Werkwert ({{work_value}} {{currency}}) liegt unter {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Gilt nicht: {{measured}} {{currency}} liegt unter der Schwelle von {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Gilt nicht: {{measured}} {{currency}} überschreitet die Schwelle von {{threshold}} {{currency}} nicht.",
+    "hakedis.reason.payee_exempt": "Gilt nicht: Für den Zahlungsempfänger ist eine Befreiung hinterlegt ({{exemption}}).",
     "hakedis.reason.capped": "Auf die Obergrenze von {{cap}} {{currency}} begrenzt (berechnet {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Die Obergrenze ist in {{cap_currency}} angegeben und das Dokument in {{document_currency}}, daher kann sie nicht angewendet werden.",
     "hakedis.reason.override_reason_missing": "Ein Betrag wurde ohne Grund von Hand eingegeben. Geben Sie den Grund ein.",

@@ -274,5 +274,53 @@
         "suggestion": "Senken Sie die Koeffizienten, sodass sie zusammen höchstens eins ergeben"
       }
     }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Vertrag {contract} nennt die Umsatzsteuerregelung {regime}, die es in {country} nicht gibt",
+      "suggestion": "Wählen Sie eine der für das Land des Projekts angebotenen Umsatzsteuerregelungen oder entfernen Sie die Auswahl"
+    },
+    "country_unknown": {
+      "fail": "Vertrag {contract} nennt die Umsatzsteuerregelung {regime}, aber sein Projekt nennt kein Land, daher kann die Regelung nicht geprüft werden",
+      "suggestion": "Legen Sie das Land des Projekts fest"
+    },
+    "contract_date_missing": {
+      "fail": "Die Umsatzsteuerregelung {regime} gilt nur für Verträge, die vor dem {cutoff} unterzeichnet wurden, und dieser Vertrag erfasst weder ein Unterschrifts- noch ein Beginndatum",
+      "suggestion": "Geben Sie das Datum der Vertragsunterzeichnung ein"
+    },
+    "contract_too_late": {
+      "fail": "Die Umsatzsteuerregelung {regime} gilt nur für Verträge, die vor dem {cutoff} unterzeichnet wurden, und dieser Vertrag stammt vom {contract_date}",
+      "suggestion": "Wählen Sie für diesen Vertrag die reguläre Umsatzsteuerregelung"
+    },
+    "evidence_missing": {
+      "fail": "Die Umsatzsteuerregelung {regime} verlangt {evidence}, und der Vertrag erfasst keinen solchen Nachweis",
+      "suggestion": "Erfassen Sie Referenz und Ausstellungsdatum des Dokuments bei der Umsatzsteuerregelung des Vertrags"
+    },
+    "evidence_date_missing": {
+      "fail": "Der Nachweis {evidence} zur Umsatzsteuerregelung {regime} hat kein Ausstellungsdatum, daher lässt sich nicht zeigen, dass er vor dem {cutoff} liegt",
+      "suggestion": "Geben Sie das Ausstellungsdatum des Dokuments ein"
+    },
+    "evidence_too_late": {
+      "fail": "Der Nachweis {evidence} zur Umsatzsteuerregelung {regime} wurde am {issued_on} ausgestellt, die Regelung verlangt jedoch einen vor dem {cutoff}",
+      "suggestion": "Erfassen Sie ein früheres Dokument oder wählen Sie die reguläre Umsatzsteuerregelung"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Der Vertragswert stieg von {original_value} auf {current_value}, und der Vertrag nennt keine zulässige Erhöhung, daher lässt sich nicht beurteilen, ob die Umsatzsteuerregelung {regime} noch gilt",
+      "suggestion": "Erfassen Sie die Leistungserweiterung, die der Vertrag zulässt"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Der Vertragswert stieg von {original_value} auf {current_value} und damit über die im Vertrag zugelassene Erhöhung von {allowed_increase_pct} Prozent, steuerlich ist es ein neuer Vertrag und die Umsatzsteuerregelung {regime} gilt nicht mehr",
+      "suggestion": "Stellen Sie den Vertrag auf die reguläre Umsatzsteuerregelung um"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "eine vom Bauüberwacher genehmigte Abschlagsrechnung",
+      "einvoice": "eine elektronische Rechnung oder Quittung",
+      "main_contractor_certificate": "die Bescheinigung des Hauptunternehmers, dass für das Projekt Umsatzsteuer gezahlt wurde"
+    },
+    "not_in_force": {
+      "before": "Abrechnung {claim} ist auf den {on} datiert, und die Umsatzsteuerregelung {regime} gilt erst ab dem {effective_from}; an diesem Tag gelten: {instead}",
+      "after": "Abrechnung {claim} ist auf den {on} datiert, und die Umsatzsteuerregelung {regime} endete am {effective_to}; an diesem Tag gelten: {instead}",
+      "suggestion": "Stellen Sie den Vertrag auf eine am Abrechnungsdatum geltende Umsatzsteuerregelung um oder korrigieren Sie das Datum"
+    }
   }
 }

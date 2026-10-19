@@ -18239,6 +18239,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Кошумча нарк салыгын кошкондогу иштин толук наркы киргизилген эмес.",
     "hakedis.reason.below_work_value": "Колдонулбайт: иштин наркы ({{work_value}} {{currency}}) {{threshold}} {{currency}} маанисинен төмөн.",
     "hakedis.reason.below_threshold": "Колдонулбайт: {{measured}} {{currency}} босого {{threshold}} {{currency}} маанисинен төмөн.",
+    "hakedis.reason.not_above_threshold": "Колдонулбайт: {{measured}} {{currency}} босого {{threshold}} {{currency}} маанисинен ашпайт.",
+    "hakedis.reason.payee_exempt": "Колдонулбайт: төлөмдү алуучуда катталган бошотуу бар ({{exemption}}).",
     "hakedis.reason.capped": "{{cap}} {{currency}} чегине чейин чектелди (эсептелгени {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Чек {{cap_currency}} валютасында берилген, ал эми документ {{document_currency}} валютасында, ошондуктан аны колдонууга болбойт.",
     "hakedis.reason.override_reason_missing": "Сумма себепсиз кол менен киргизилген. Себебин киргизиңиз.",

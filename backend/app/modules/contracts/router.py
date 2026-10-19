@@ -26,6 +26,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
+from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -160,6 +161,7 @@ from app.modules.contracts.schemas import (
     SovReconcileExclusion,
     TemplateCatalogueEntry,
     TemplateClauseSetRequest,
+    VatRegimesResponse,
 )
 from app.modules.contracts.service import PERCENT_REGRESSED_META_KEY, ContractsService
 
@@ -419,6 +421,25 @@ async def compute_price_adjustment(
     except PriceAdjustmentError as exc:
         raise refuse(exc.problem, str(exc), **exc.params) from exc
     return PriceAdjustmentComputeResponse.model_validate(result.as_dict())
+
+
+@router.get("/vat-regimes/", response_model=VatRegimesResponse)
+async def get_vat_regimes(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    on: date | None = Query(default=None, description="Day the regimes are asked about; today when omitted"),
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> VatRegimesResponse:
+    """The VAT regimes a contract on this project may state, with their conditions and rates.
+
+    A contract states its choice in ``terms.vat_regime``; the ``contracts``
+    rule set then checks the conditions. A country without regimes answers
+    an empty list, and its contracts are on the plain VAT rate.
+    """
+    await verify_project_access(project_id, user_id, session)
+    day = on or date.today()
+    return VatRegimesResponse.model_validate(await ContractsService(session).vat_regimes_for_project(project_id, day))
 
 
 @router.post("/contracts/", response_model=ContractResponse, status_code=201)

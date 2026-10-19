@@ -21905,6 +21905,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Qoʻshilgan qiymat soligʻini qoʻshgandagi ishning umumiy qiymati kiritilmagan.",
     "hakedis.reason.below_work_value": "Qoʻllanmaydi: ish qiymati ({{work_value}} {{currency}}) {{threshold}} {{currency}} dan past.",
     "hakedis.reason.below_threshold": "Qoʻllanmaydi: {{measured}} {{currency}} chegara {{threshold}} {{currency}} dan past.",
+    "hakedis.reason.not_above_threshold": "Qoʻllanmaydi: {{measured}} {{currency}} chegara {{threshold}} {{currency}} dan oshmaydi.",
+    "hakedis.reason.payee_exempt": "Qoʻllanmaydi: toʻlovni oluvchida qayd etilgan ozod qilish mavjud ({{exemption}}).",
     "hakedis.reason.capped": "{{cap}} {{currency}} yuqori chegara bilan cheklandi (hisoblangani {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Yuqori chegara {{cap_currency}} da berilgan, hujjat esa {{document_currency}} da, shuning uchun uni qoʻllab boʻlmaydi.",
     "hakedis.reason.override_reason_missing": "Summa sababsiz qoʻlda kiritilgan. Sababni kiriting.",

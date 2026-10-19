@@ -1963,6 +1963,17 @@ def register_contracts_validation_rules() -> None:
     rule_registry.register(EOTDaysRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(ContractTemplatePinnedRule(), [CONTRACTS_RULE_SET])
     rule_registry.register(ContractTemplateClausesRule(), [CONTRACTS_RULE_SET])
+    # The VAT regime a contract is taxed under, read against the country data
+    # in app.core.vat_regimes; their own file because they are about tax law.
+    from app.modules.contracts.vat_regime_rules import (  # noqa: PLC0415
+        ClaimVatRegimeInForceRule,
+        ContractVatRegimeEligibleRule,
+        ContractVatRegimeKnownRule,
+    )
+
+    rule_registry.register(ContractVatRegimeKnownRule(), [CONTRACTS_RULE_SET])
+    rule_registry.register(ContractVatRegimeEligibleRule(), [CONTRACTS_RULE_SET])
+    rule_registry.register(ClaimVatRegimeInForceRule(), [PAY_APPLICATION_RULE_SET])
     for rule_class in PAY_APPLICATION_RULES:
         rule_registry.register(rule_class(), [PAY_APPLICATION_RULE_SET])
     for rule_class in RETENTION_RELEASE_RULES:
@@ -1978,7 +1989,7 @@ def register_contracts_validation_rules() -> None:
     register_hakedis_rules()
     _register_claim_as_tax_source()
     logger.debug(
-        "contracts: registered 5 contract rules, %d payment application rules, %d retention release rules "
+        "contracts: registered 8 contract rules, %d payment application rules, %d retention release rules "
         "and %d payment plan rules",
         len(PAY_APPLICATION_RULES),
         len(RETENTION_RELEASE_RULES),
