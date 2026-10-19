@@ -108,6 +108,25 @@ class SubmissionOutcome:
     rejection_message: str = ""
     message: str = ""
     raw_response: dict[str, Any] = field(default_factory=dict)
+    # The platform took the document in but has not decided about it yet. Some
+    # platforms answer in two steps: a receipt with an identifier first, the
+    # verdict later. ``accepted`` is then true about the receipt only, and the
+    # document stays ``submitted`` with the identifier stored, until a poll
+    # reads the verdict. Defaults to false, so every adapter written before
+    # this field keeps meaning exactly what it meant.
+    pending: bool = False
+
+
+@dataclass(frozen=True)
+class PollRequest:
+    """A request to read the platform's verdict on a document it took in."""
+
+    country: str
+    regime: str
+    authority_identifier: str
+    profile: dict[str, Any] = field(default_factory=dict)
+    document: dict[str, Any] = field(default_factory=dict)
+    regime_spec: dict[str, Any] = field(default_factory=dict)
 
 
 @runtime_checkable
@@ -132,6 +151,22 @@ class ClearanceAdapter(Protocol):
     async def cancel(self, request: CancellationRequest) -> SubmissionOutcome:
         """Withdraw a document the platform has already accepted."""
         ...
+
+
+# An adapter whose platform answers in two steps also provides
+#
+#     async def poll(self, request: PollRequest) -> SubmissionOutcome
+#
+# returning ``accepted=True`` for a cleared document, ``accepted=False`` with
+# the platform's code for a refused one, and ``pending=True`` while the platform
+# is still deciding. It is not part of the Protocol on purpose: the adapters
+# that answer in one step have nothing to poll, and a required method they
+# would all implement as "not supported" is a method nobody can rely on.
+
+
+def supports_polling(adapter: object) -> bool:
+    """Whether an adapter can read a verdict after the submission returned."""
+    return callable(getattr(adapter, "poll", None))
 
 
 class AdapterRegistry:
@@ -268,7 +303,10 @@ class ReferenceAdapter:
                 rejection_message=("The offline reference adapter cannot cancel for a live profile."),
                 raw_response={"adapter": self.key, "sandbox": False},
             )
-        if request.regime_spec.get("cancellation_window_days") is None:
+        cancellable = request.regime_spec.get("is_cancellable")
+        if cancellable is None:
+            cancellable = request.regime_spec.get("cancellation_window_days") is not None
+        if not cancellable:
             correction = request.regime_spec.get("correction_mechanism") or "a correcting document"
             return SubmissionOutcome(
                 accepted=False,
@@ -325,9 +363,11 @@ __all__ = [
     "AdapterRegistry",
     "CancellationRequest",
     "ClearanceAdapter",
+    "PollRequest",
     "ReferenceAdapter",
     "SubmissionOutcome",
     "SubmissionRequest",
     "adapter_registry",
     "register_builtin_adapters",
+    "supports_polling",
 ]
