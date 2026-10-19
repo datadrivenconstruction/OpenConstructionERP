@@ -1,0 +1,29 @@
+project_id        = "00000000-0000-0000-0000-000000000000"
+letsencrypt_email = "ops@example.com"
+base_domain       = "erp.example.com"
+
+# Either point at an existing zone ...
+# dns_zone_id = "00000000-0000-0000-0000-000000000000"
+# ... or let Terraform create one named base_domain and delegate the domain to it.
+create_dns_zone = true
+
+# Output of: stackit postgresflex flavor list
+postgres_flavor_id = "REPLACE-WITH-A-FLAVOR-ID"
+
+# An explicit version, never "latest".
+image_tag = "20.5.1"
+
+# Restrict the Kubernetes API to your office or CI.
+api_allowed_cidrs = ["203.0.113.0/24"]
+
+companies = {
+  acme = {
+    display_name = "Acme Construction GmbH"
+    mode         = "production"
+  }
+  trial = {
+    display_name = "Trial sandbox"
+    mode         = "sandbox"
+    sandbox_days = 14
+  }
+}
