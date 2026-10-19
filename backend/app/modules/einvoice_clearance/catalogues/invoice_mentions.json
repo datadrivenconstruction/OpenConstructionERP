@@ -1,0 +1,176 @@
+{
+  "_comment": "Country-neutral catalogue of invoice mentions. Each country adds rows under 'mentions' and, when an obligation starts per company size, a block under 'phase_by_size'. Row fields: key, country (ISO-2), label, document_kinds, dated_by ('fixed' with effective_date, or 'issuer_phase'), when (clauses that make the row apply), satisfied_by (list of alternatives, each a list of clauses), legal_basis, source_url, needs_expert_review. A clause is {path, present|truthy|equals|in|not_in}.",
+  "phase_by_size": {
+    "FR": {
+      "sizes": {
+        "ge": "2026-09-01",
+        "eti": "2026-09-01",
+        "pme": "2027-09-01",
+        "micro": "2027-09-01"
+      },
+      "legal_basis": "Issuing and e-reporting wave by company size, assessed per legal unit",
+      "source_url": "https://entreprendre.service-public.gouv.fr/actualites/A15683"
+    }
+  },
+  "mentions": [
+    {
+      "key": "fr_customer_siren",
+      "country": "FR",
+      "label": "Customer SIREN",
+      "document_kinds": [
+        "invoice",
+        "credit_note"
+      ],
+      "dated_by": "issuer_phase",
+      "when": [
+        {
+          "path": "transaction_scope",
+          "not_in": [
+            "b2c",
+            "cross_border",
+            "export"
+          ]
+        }
+      ],
+      "satisfied_by": [
+        [
+          {
+            "path": "customer_siren",
+            "present": true
+          }
+        ]
+      ],
+      "legal_basis": "CGI art. 242 nonies A, as amended by decree 2022-1299",
+      "source_url": "https://entreprendre.service-public.gouv.fr/vosdroits/F31808",
+      "needs_expert_review": false
+    },
+    {
+      "key": "fr_delivery_address",
+      "country": "FR",
+      "label": "Delivery address when it differs from the billing address",
+      "document_kinds": [
+        "invoice",
+        "credit_note"
+      ],
+      "dated_by": "issuer_phase",
+      "when": [
+        {
+          "path": "transaction_scope",
+          "not_in": [
+            "b2c",
+            "cross_border",
+            "export"
+          ]
+        },
+        {
+          "path": "delivery_differs",
+          "truthy": true
+        }
+      ],
+      "satisfied_by": [
+        [
+          {
+            "path": "delivery_address",
+            "present": true
+          }
+        ]
+      ],
+      "legal_basis": "CGI art. 242 nonies A, as amended by decree 2022-1299",
+      "source_url": "https://entreprendre.service-public.gouv.fr/vosdroits/F31808",
+      "needs_expert_review": false
+    },
+    {
+      "key": "fr_operation_category",
+      "country": "FR",
+      "label": "Nature of the operation (goods, services or both)",
+      "document_kinds": [
+        "invoice",
+        "credit_note"
+      ],
+      "dated_by": "issuer_phase",
+      "when": [
+        {
+          "path": "transaction_scope",
+          "not_in": [
+            "b2c",
+            "cross_border",
+            "export"
+          ]
+        }
+      ],
+      "satisfied_by": [
+        [
+          {
+            "path": "operation_category",
+            "in": [
+              "goods",
+              "services",
+              "both"
+            ]
+          }
+        ]
+      ],
+      "legal_basis": "CGI art. 242 nonies A, as amended by decree 2022-1299",
+      "source_url": "https://entreprendre.service-public.gouv.fr/vosdroits/F31808",
+      "needs_expert_review": false
+    },
+    {
+      "key": "fr_vat_on_debits",
+      "country": "FR",
+      "label": "Option to pay VAT on debits",
+      "document_kinds": [
+        "invoice",
+        "credit_note"
+      ],
+      "dated_by": "issuer_phase",
+      "when": [
+        {
+          "path": "transaction_scope",
+          "not_in": [
+            "b2c",
+            "cross_border",
+            "export"
+          ]
+        },
+        {
+          "path": "settings.vat_on_debits_option",
+          "truthy": true
+        }
+      ],
+      "satisfied_by": [
+        [
+          {
+            "path": "vat_on_debits_mention",
+            "present": true
+          }
+        ]
+      ],
+      "legal_basis": "CGI art. 242 nonies A, as amended by decree 2022-1299",
+      "source_url": "https://entreprendre.service-public.gouv.fr/actualites/A15683",
+      "needs_expert_review": false
+    },
+    {
+      "key": "fr_professional_insurance",
+      "country": "FR",
+      "label": "Compulsory professional insurance details (insurer, coverage area)",
+      "document_kinds": [
+        "invoice",
+        "quote"
+      ],
+      "dated_by": "fixed",
+      "when": [],
+      "satisfied_by": [
+        [
+          {
+            "path": "insurance_mention",
+            "present": true
+          }
+        ]
+      ],
+      "legal_basis": "Law 96-603 art. 22-2; Code des assurances L243-2 (read from secondary guides only)",
+      "source_url": "https://entreprendre.service-public.gouv.fr/vosdroits/F31808",
+      "needs_expert_review": true,
+      "effective_date": null
+    }
+  ]
+}

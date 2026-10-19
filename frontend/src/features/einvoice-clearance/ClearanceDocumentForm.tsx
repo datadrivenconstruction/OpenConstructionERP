@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/Button';
 
 import type { ClearanceMeta, ClearanceProfile, DocumentCreateBody } from './api';
+import { documentInput } from './mentionFields';
 
 /**
  * `partita_iva_issuer` reads as a field name. `Partita iva issuer` reads as a
@@ -65,6 +66,7 @@ export function ClearanceDocumentForm({
     [meta, profile],
   );
   const nationalFields = country?.document_fields ?? [];
+  const mentionFields = country?.optional_document_fields ?? [];
 
   const ready =
     profileId !== '' &&
@@ -220,6 +222,79 @@ export function ClearanceDocumentForm({
                 />
               </label>
             ))}
+          </div>
+        </fieldset>
+      )}
+
+      {country && mentionFields.length > 0 && (
+        <fieldset className="space-y-2 rounded border border-border-light p-2">
+          <legend className="px-1 text-xs font-medium text-content-secondary">
+            {t('einvoice_clearance.mentions_title', {
+              defaultValue: 'Mentions the invoice should carry',
+            })}
+          </legend>
+          <p className="text-xs text-content-tertiary">
+            {t('einvoice_clearance.mentions_note', {
+              defaultValue:
+                'Optional here. The check tells you which of them the law requires on this invoice date.',
+            })}
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {mentionFields.map((field) => {
+              const input = documentInput(field);
+              const label = t(`einvoice_clearance.country_field.${field}`, {
+                defaultValue: humanise(field),
+              });
+              if (input.kind === 'checkbox') {
+                return (
+                  <label key={field} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={countryFields[field] === 'true'}
+                      onChange={(e) =>
+                        setCountryFields((prev) => ({
+                          ...prev,
+                          [field]: e.target.checked ? 'true' : '',
+                        }))
+                      }
+                    />
+                    {label}
+                  </label>
+                );
+              }
+              return (
+                <label key={field} className="flex flex-col gap-1 text-sm">
+                  {label}
+                  {input.kind === 'select' ? (
+                    <select
+                      value={countryFields[field] ?? ''}
+                      onChange={(e) =>
+                        setCountryFields((prev) => ({ ...prev, [field]: e.target.value }))
+                      }
+                      className="rounded border border-border-light bg-surface-primary p-2"
+                    >
+                      <option value="">
+                        {t('einvoice_clearance.option_unset', { defaultValue: 'Not set' })}
+                      </option>
+                      {input.options.map((o) => (
+                        <option key={o} value={o}>
+                          {t(`einvoice_clearance.option.${field}.${o}`, { defaultValue: humanise(o) })}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      value={countryFields[field] ?? ''}
+                      onChange={(e) =>
+                        setCountryFields((prev) => ({ ...prev, [field]: e.target.value }))
+                      }
+                      maxLength={255}
+                      className="rounded border border-border-light bg-surface-primary p-2"
+                    />
+                  )}
+                </label>
+              );
+            })}
           </div>
         </fieldset>
       )}

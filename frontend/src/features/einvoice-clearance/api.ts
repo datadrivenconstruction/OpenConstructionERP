@@ -59,6 +59,12 @@ export interface CountryRegime {
   en16931_profile: string;
   profile_fields: string[];
   document_fields: string[];
+  /** Fields a document may carry that no submission requires (invoice mentions). */
+  optional_document_fields?: string[];
+  /** Keys of the registration's settings this country's rules read. */
+  profile_setting_fields?: string[];
+  /** Company sizes the country dates its waves by, in the order to offer them. */
+  company_sizes?: string[];
   /** Null means the platform has no cancellation flow at all. */
   cancellation_window_days: number | null;
   is_cancellable: boolean;

@@ -38,6 +38,24 @@ function isProfileField(name: string): name is ProfileField {
   return (PROFILE_FIELD_ORDER as readonly string[]).includes(name);
 }
 
+function buildSettings(
+  previous: Record<string, unknown> | undefined,
+  offered: string[],
+  companySize: string,
+  vatOnDebits: boolean,
+): Record<string, unknown> {
+  const next: Record<string, unknown> = { ...(previous ?? {}) };
+  if (offered.includes('company_size')) {
+    if (companySize) next.company_size = companySize;
+    else delete next.company_size;
+  }
+  if (offered.includes('vat_on_debits_option')) {
+    if (vatOnDebits) next.vat_on_debits_option = true;
+    else delete next.vat_on_debits_option;
+  }
+  return next;
+}
+
 export function ClearanceRegistrationForm({
   meta,
   initial,
@@ -65,6 +83,10 @@ export function ClearanceRegistrationForm({
   const [sandbox, setSandbox] = useState(initial ? initial.sandbox : true);
   const [isActive, setIsActive] = useState(initial ? initial.is_active : true);
   const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [companySize, setCompanySize] = useState(
+    typeof initial?.settings?.company_size === 'string' ? initial.settings.company_size : '',
+  );
+  const [vatOnDebits, setVatOnDebits] = useState(initial?.settings?.vat_on_debits_option === true);
 
   const countries = meta?.countries ?? [];
 
@@ -98,6 +120,9 @@ export function ClearanceRegistrationForm({
       ),
     [meta, country],
   );
+
+  const settingFields = selected?.profile_setting_fields ?? [];
+  const companySizes = selected?.company_sizes ?? [];
 
   const values: Record<ProfileField, string> = {
     tax_registration_id: taxId,
@@ -145,6 +170,9 @@ export function ClearanceRegistrationForm({
           sandbox,
           is_active: isActive,
           notes: notes.trim(),
+          // Keep what the registration already stores, then set or clear the
+          // keys this country reads.
+          settings: buildSettings(initial?.settings, settingFields, companySize, vatOnDebits),
         });
       }}
     >
@@ -247,6 +275,45 @@ export function ClearanceRegistrationForm({
           />
         </label>
       ))}
+
+      {settingFields.includes('company_size') && (
+        <label className="flex flex-col gap-1 text-sm">
+          {t('einvoice_clearance.field_company_size', { defaultValue: 'Company size' })}
+          <select
+            value={companySize}
+            onChange={(e) => setCompanySize(e.target.value)}
+            className="rounded border border-border-light bg-surface-primary p-2"
+          >
+            <option value="">
+              {t('einvoice_clearance.option_unset', { defaultValue: 'Not set' })}
+            </option>
+            {companySizes.map((size) => (
+              <option key={size} value={size}>
+                {t(`einvoice_clearance.company_size.${size}`, { defaultValue: size })}
+              </option>
+            ))}
+          </select>
+          <span className="text-xs text-content-tertiary">
+            {t('einvoice_clearance.field_company_size_hint', {
+              defaultValue:
+                'The dated invoice mentions start on a day that depends on the size. While it is not set they only warn.',
+            })}
+          </span>
+        </label>
+      )}
+
+      {settingFields.includes('vat_on_debits_option') && (
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={vatOnDebits}
+            onChange={(e) => setVatOnDebits(e.target.checked)}
+          />
+          {t('einvoice_clearance.field_vat_on_debits_option', {
+            defaultValue: 'Pays VAT on debits (option)',
+          })}
+        </label>
+      )}
 
       <label className="flex flex-col gap-1 text-sm">
         {t('einvoice_clearance.field_adapter', { defaultValue: 'Adapter' })}

@@ -220,6 +220,13 @@ class CountryRegime:
     # National fields the EN 16931 semantic model has nowhere to put, carried on
     # the document in ``country_fields``.
     document_fields: tuple[str, ...] = ()
+    # Fields the user may fill in on a document that no submission requires, such
+    # as the dated invoice mentions the mentions catalogue checks. Kept apart from
+    # ``document_fields`` because those are mandatory for every document.
+    optional_document_fields: tuple[str, ...] = ()
+    # Keys of the registration's ``settings`` the country's rules read, such as
+    # the issuer's company size.
+    profile_setting_fields: tuple[str, ...] = ()
     # Days from clearance inside which a cancellation is still accepted. ``None``
     # means the platform has no cancellation flow at all and the only correction
     # is a further document - which is a different act with different accounting,
@@ -658,6 +665,16 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         en16931_profile="facturx",
         profile_fields=("network_participant_id",),
         document_fields=("service_code",),
+        optional_document_fields=(
+            "customer_siren",
+            "transaction_scope",
+            "operation_category",
+            "delivery_differs",
+            "delivery_address",
+            "vat_on_debits_mention",
+            "insurance_mention",
+        ),
+        profile_setting_fields=("company_size", "vat_on_debits_option"),
         # France does two acts, not one. The document is routed to the buyer
         # over a network, which is what decides the terminal state and is why
         # the deciding act is still network exchange; separately, transaction
@@ -1015,6 +1032,14 @@ def phase_as_dict(phase: CommencementPhase) -> dict[str, Any]:
     }
 
 
+def _company_sizes(country: str) -> tuple[str, ...]:
+    """The company sizes the mentions catalogue dates a country's waves by, in catalogue order."""
+    from app.modules.einvoice_clearance.mentions import load_catalogue
+
+    sizes = load_catalogue().get("phase_by_size", {}).get(country, {}).get("sizes") or {}
+    return tuple(sizes)
+
+
 def regime_as_dict(entry: CountryRegime) -> dict[str, Any]:
     """Flatten a regime for the validation context and the meta endpoint.
 
@@ -1032,6 +1057,9 @@ def regime_as_dict(entry: CountryRegime) -> dict[str, Any]:
         "en16931_profile": entry.en16931_profile,
         "profile_fields": list(entry.profile_fields),
         "document_fields": list(entry.document_fields),
+        "optional_document_fields": list(entry.optional_document_fields),
+        "profile_setting_fields": list(entry.profile_setting_fields),
+        "company_sizes": list(_company_sizes(entry.country)),
         "cancellation_window_days": entry.cancellation_window_days,
         "is_cancellable": entry.is_cancellable,
         "correction_mechanism": entry.correction_mechanism,
@@ -1044,6 +1072,9 @@ def regime_as_dict(entry: CountryRegime) -> dict[str, Any]:
         "cancellation_basis": entry.cancellation_basis,
         "scope": entry.scope,
         "commencement": [phase_as_dict(p) for p in entry.commencement],
+        # Country-specific facts that fit no shared column, such as the platform
+        # model, the accepted syntaxes or the fines. Empty for most countries.
+        "extra": dict(entry.extra),
     }
 
 
