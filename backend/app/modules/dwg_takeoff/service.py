@@ -269,7 +269,7 @@ def _remove_sidecar_xlsx(file_path: str) -> None:
 _DWG_MIN_SUPPORTED_VERSION_CODE = "AC1014"
 
 # Human-readable labels for the DWG magic-byte version codes we care
-# about. The mapping comes from Open Design Alliance's specs.
+# about. The mapping follows the public DWG version-code table.
 _DWG_VERSION_LABELS: dict[str, str] = {
     "AC1014": "DWG R14 (1997)",
     "AC1015": "DWG 2000 (R15)",

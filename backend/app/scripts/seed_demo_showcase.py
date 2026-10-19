@@ -10,7 +10,7 @@ End-to-end demo seed:
      currency + classification metadata.
   4. Upload 2 CAD files per project (RVT / IFC / DWG mix) via the real
      /bim_hub/upload-cad/ endpoint so every code path (converter preflight,
-     ODA/DDC bridge, DAE→GLB) runs as in production.
+     DDC bridge, DAE→GLB) runs as in production.
   5. Wait for models to reach status="ready".
   6. Create a BOQ per project with sections + ~20 positions, unit rates
      drawn from the seeded cost catalog.

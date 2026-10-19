@@ -8568,7 +8568,7 @@ MB IFC, 252 / 218 MB DWG, 252 / 217 MB DGN.
 
 - Files install into per-format directories
   (``~/.openestimator/converters/{ext}_windows/``) so each
-  converter's bundled Qt6 DLLs and Teigha format readers do not
+  converter's bundled Qt6 DLLs and format readers do not
   collide with other formats.
 - Downloads run in parallel via a ``ThreadPoolExecutor(max_workers=8)``
   - RVT goes from ~5 minutes sequential to ~30-60 seconds without

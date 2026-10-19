@@ -79,8 +79,8 @@ def proportional_timeout(
             converter startup itself takes 60-180 s regardless of
             input size. Default 600 s = 10 minutes.
         sec_per_mb: Linear growth rate.  Default 30 s/MB matches the
-            slowest real-world DDC converter (Revit shelling out to the
-            Teigha format readers on cold-cache).
+            slowest real-world DDC converter (Revit shelling out to its
+            format readers on cold-cache).
         max_sec: Optional hard ceiling.  ``None`` (default) means
             unbounded - relies on ``min_sec`` as the only floor and
             the per-MB rate to scale up.

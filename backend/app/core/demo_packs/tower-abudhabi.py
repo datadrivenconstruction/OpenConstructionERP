@@ -751,7 +751,7 @@ TEMPLATE = DemoTemplate(
             "HV/LV distribution, generators, ELV/security, fire alarm and lifts/escalators",
             "evaluating",
             [
-                ("ODA Crest / ODA M&E", "tenders@odacrest.example", 0.98),
+                ("Oryx Crest / Oryx M&E", "tenders@oryxcrest.example", 0.98),
                 ("Al-Nahzari Engineering", "estimation@alnahzari.example", 1.05),
                 ("Orvenda Middle East (lifts)", "bids@orvenda-me.example", 1.02),
             ],
