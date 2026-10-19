@@ -6,15 +6,12 @@ Imported at startup to register all handlers with the event bus.
 Each handler is thin: validates the event, calls the target module's service.
 
 Dataflows wired:
-   1. meeting.action_item.created   -> auto-create task
    2. safety.observation.high_risk  -> notify PM + safety officer
    3. inspection.completed.failed   -> punch suggestion event (punchlist creates the items)
    4. rfi.response.design_change    -> flag for variation (changeorders drafts a CO)
    5. ncr.closed_with_cost_impact   -> flag for variation (changeorders drafts a CO)
    6. document.revision.created     -> flag linked BOQ positions
    7. invoice.paid                  -> update project budget actuals
-   8. po.issued                     -> update project budget committed
-   9. estimate.approved             -> auto-populate project budget from BOQ
   10. schedule.activity.progress_updated -> today's EVM snapshot (one per project per day)
   11. bim_model.ready               -> apply quantity maps -> draft BOQ
   12. bim_model.new_version         -> diff -> flag affected BOQ positions
@@ -22,6 +19,12 @@ Dataflows wired:
   14. transmittal.issued            -> audit trail for distribution
   15. cde.container.promoted        -> audit + notify stakeholders
   15b. commissioning.system.commissioned -> audit trail for handover
+
+Retired handlers, each because the work happens elsewhere and reviving it would
+do the work twice: meeting.action_item.created (complete_meeting creates the
+tasks itself), po.issued (finance commits budget at PO approval, per budget
+line), estimate.approved (costmodel.budget.generated seeds the budget) and
+submittal.status_changed (notifications subscribes to each submittal outcome).
 """
 
 import logging
@@ -42,95 +45,6 @@ if TYPE_CHECKING:
     from app.modules.schedule.progress_math import WorkCalendar
 
 logger = logging.getLogger(__name__)
-
-
-async def _resolve_project_currency(
-    session: "AsyncSession",
-    project_id: "str | uuid.UUID",
-) -> str:
-    """Return the project's currency code, or "" when it cannot be read.
-
-    ``ProjectBudget.currency_code`` carries no DB default on purpose - the
-    model comment requires service code to supply it from the project
-    context so per-project rollups do not bias toward one currency. A
-    budget line written without it reaches the UI with no currency and
-    renders as an em-dash instead of money.
-
-    Mirrors ``FinanceService.create_budget``: best-effort, never raises.
-    An empty string is the honest "unknown", and a wrong hardcoded
-    currency is worse than a blank one.
-    """
-    from sqlalchemy import select
-
-    from app.modules.projects.models import Project
-
-    try:
-        row = await session.execute(select(Project.currency).where(Project.id == project_id))
-        return row.scalar_one_or_none() or ""
-    except Exception:  # noqa: BLE001 - lookup is non-critical, never fail the handler
-        logger.exception("Project-currency lookup failed for project %s", project_id)
-        return ""
-
-
-# ---------------------------------------------------------------------------
-# 1. meeting.action_item.created -> auto-create task
-# ---------------------------------------------------------------------------
-
-
-async def _handle_meeting_action_item_created(event: Event) -> None:
-    """Create a task for each open action item from a meeting.
-
-    Expected event.data:
-        project_id: str (UUID)
-        meeting_id: str (UUID)
-        action_items: list[dict] with keys:
-            description, owner_id, due_date, status
-        created_by: str (UUID, optional)
-    """
-    try:
-        data = event.data
-        project_id = data.get("project_id")
-        meeting_id = data.get("meeting_id")
-        action_items = data.get("action_items", [])
-        created_by = data.get("created_by")
-
-        if not project_id or not action_items:
-            logger.debug("meeting.action_item.created: missing project_id or action_items")
-            return
-
-        # Lazy import to avoid circular dependencies
-        from app.database import async_session_factory
-        from app.modules.tasks.schemas import TaskCreate
-        from app.modules.tasks.service import TaskService
-
-        async with async_session_factory() as session:
-            svc = TaskService(session)
-            created_count = 0
-            for item in action_items:
-                if item.get("status") != "open":
-                    continue
-                task_data = TaskCreate(
-                    project_id=project_id,
-                    task_type="task",
-                    title=item.get("description", "Action item from meeting")[:500],
-                    responsible_id=item.get("owner_id"),
-                    due_date=item.get("due_date"),
-                    meeting_id=str(meeting_id) if meeting_id else None,
-                    status="open",
-                    priority="normal",
-                    metadata={"source": "meeting_action_item", "meeting_id": str(meeting_id)},
-                )
-                await svc.create_task(task_data, user_id=created_by)
-                created_count += 1
-            await session.commit()
-
-        logger.info(
-            "meeting.action_item.created: created %d tasks for meeting %s",
-            created_count,
-            meeting_id,
-        )
-    except Exception:
-        logger.exception("Error handling meeting.action_item.created")
 
 
 # ---------------------------------------------------------------------------
@@ -573,173 +487,6 @@ async def _handle_invoice_paid(event: Event) -> None:
         )
     except Exception:
         logger.exception("Error handling invoice.paid")
-
-
-# ---------------------------------------------------------------------------
-# 8. po.issued -> update project budget committed
-# ---------------------------------------------------------------------------
-
-
-# Unpublished: procurement emits ``procurement.po.issued``, never ``po.issued``,
-# so this handler never runs. Do not revive it as it stands. It writes the
-# project's whole committed total onto every budget row, the same defect the
-# invoice.paid handler had, and it commits gross. Finance owns the
-# commitment (``finance/events.py``, ``finance/cost_position.py``).
-async def _handle_po_issued(event: Event) -> None:
-    """Recalculate project budget committed when a PO is issued.
-
-    Expected event.data:
-        project_id: str (UUID)
-        po_id: str (UUID)
-        amount_total: str (monetary value)
-        currency_code: str
-    """
-    try:
-        data = event.data
-        project_id = data.get("project_id")
-        po_id = data.get("po_id")
-
-        if not project_id:
-            logger.debug("po.issued: missing project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.finance.models import ProjectBudget
-        from app.modules.procurement.models import PurchaseOrder
-
-        async with async_session_factory() as session:
-            # Sum all issued POs for the project
-            result = await session.execute(
-                select(PurchaseOrder).where(
-                    PurchaseOrder.project_id == project_id,
-                    PurchaseOrder.status == "issued",
-                )
-            )
-            issued_pos = result.scalars().all()
-
-            total_committed = Decimal("0")
-            for po in issued_pos:
-                try:
-                    total_committed += Decimal(str(po.amount_total))
-                except (InvalidOperation, ValueError):
-                    continue
-
-            # Update budget lines for the project
-            budget_result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id))
-            budgets = budget_result.scalars().all()
-            for budget in budgets:
-                budget.committed = str(total_committed)
-
-            await session.commit()
-
-        logger.info(
-            "po.issued: updated budget committed for project %s (po %s, total_committed=%s)",
-            project_id,
-            po_id,
-            total_committed,
-        )
-    except Exception:
-        logger.exception("Error handling po.issued")
-
-
-# ---------------------------------------------------------------------------
-# 9. estimate.approved -> auto-populate project budget from BOQ
-# ---------------------------------------------------------------------------
-
-
-# Unpublished: no module emits ``estimate.approved``. A locked BOQ seeds the
-# finance budget through ``costmodel.budget.generated`` instead
-# (``FinanceService.seed_budget_from_boq``). Reviving this as well would seed
-# the same bill twice.
-async def _handle_estimate_approved(event: Event) -> None:
-    """BOQ approved -> create project_budgets.original_budget entries.
-
-    When a BOQ is locked/approved, auto-create ProjectBudget rows from BOQ
-    section totals grouped by WBS or parent position.
-
-    Expected event.data:
-        boq_id: str (UUID)
-        project_id: str (UUID)
-    """
-    try:
-        data = event.data
-        boq_id = data.get("boq_id")
-        project_id = data.get("project_id")
-
-        if not boq_id or not project_id:
-            logger.debug("estimate.approved: missing boq_id or project_id")
-            return
-
-        from decimal import Decimal, InvalidOperation
-
-        from sqlalchemy import select
-
-        from app.database import async_session_factory
-        from app.modules.boq.models import Position
-        from app.modules.finance.models import ProjectBudget
-
-        async with async_session_factory() as session:
-            # Load all positions for this BOQ
-            result = await session.execute(select(Position).where(Position.boq_id == boq_id))
-            positions = result.scalars().all()
-
-            if not positions:
-                logger.debug("estimate.approved: no positions for boq %s", boq_id)
-                return
-
-            # Group totals by wbs_id (or "general" if unassigned)
-            wbs_totals: dict[str, Decimal] = {}
-            for pos in positions:
-                wbs_key = pos.wbs_id or "general"
-                try:
-                    total = Decimal(str(pos.total))
-                except (InvalidOperation, ValueError):
-                    total = Decimal("0")
-                wbs_totals[wbs_key] = wbs_totals.get(wbs_key, Decimal("0")) + total
-
-            # Upsert budget lines for each WBS group
-            currency_code = await _resolve_project_currency(session, project_id)
-            created_count = 0
-            for wbs_key, total in wbs_totals.items():
-                existing = await session.execute(
-                    select(ProjectBudget).where(
-                        ProjectBudget.project_id == project_id,
-                        ProjectBudget.wbs_id == (wbs_key if wbs_key != "general" else None),
-                        ProjectBudget.category == "estimate",
-                    )
-                )
-                budget = existing.scalar_one_or_none()
-
-                if budget:
-                    budget.original_budget = str(total)
-                    budget.revised_budget = str(total)
-                else:
-                    session.add(
-                        ProjectBudget(
-                            project_id=project_id,
-                            wbs_id=wbs_key if wbs_key != "general" else None,
-                            category="estimate",
-                            currency_code=currency_code,
-                            original_budget=str(total),
-                            revised_budget=str(total),
-                        )
-                    )
-                    created_count += 1
-
-            await session.commit()
-
-        logger.info(
-            "estimate.approved: populated %d budget lines for project %s (boq %s)",
-            created_count,
-            project_id,
-            boq_id,
-        )
-    except Exception:
-        logger.exception("Error handling estimate.approved")
 
 
 # ---------------------------------------------------------------------------
@@ -1912,60 +1659,6 @@ async def _notify_inspection_due(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 20. submittal.status_changed -> notify the submitter
-# ---------------------------------------------------------------------------
-
-
-async def _notify_submittal_status_changed(event: Event) -> None:
-    """Notify the submitter when a submittal's review status changes.
-
-    Expected event.data:
-        project_id: str (UUID)
-        submittal_id: str (UUID)
-        submittal_number: str
-        title: str
-        new_status: str (approved / rejected / revise_resubmit)
-        submitted_by: str (UUID)
-        reviewer_name: str (optional)
-    """
-    try:
-        data = event.data
-        submitted_by = data.get("submitted_by")
-        if not submitted_by:
-            return
-
-        from app.database import async_session_factory
-        from app.modules.notifications.service import NotificationService
-
-        async with async_session_factory() as session:
-            svc = NotificationService(session)
-            await svc.create(
-                user_id=submitted_by,
-                notification_type="info",
-                entity_type="submittal",
-                entity_id=str(data.get("submittal_id", "")),
-                title_key="notification.submittal_status_changed_title",
-                body_key="notification.submittal_status_changed_body",
-                body_context={
-                    "submittal_number": data.get("submittal_number", ""),
-                    "title": str(data.get("title", ""))[:200],
-                    "new_status": data.get("new_status", ""),
-                },
-                action_url=f"/projects/{data.get('project_id')}/submittals",
-            )
-            await session.commit()
-
-        logger.info(
-            "notify: submittal %s status -> %s, notified submitter %s",
-            data.get("submittal_number"),
-            data.get("new_status"),
-            submitted_by,
-        )
-    except Exception:
-        logger.exception("Error in _notify_submittal_status_changed")
-
-
-# ---------------------------------------------------------------------------
 # 21. meeting.scheduled -> notify all attendees
 # ---------------------------------------------------------------------------
 
@@ -2207,7 +1900,7 @@ async def _dispatch_to_webhooks(event: Event) -> None:
 # Registration
 # ---------------------------------------------------------------------------
 
-_HANDLER_COUNT = 25
+_HANDLER_COUNT = 21
 
 
 def register_event_handlers() -> None:
@@ -2222,7 +1915,6 @@ def register_event_handlers() -> None:
     the same event pushed to every outgoing webhook twice.
     """
     # Original cross-module dataflow handlers (1–15)
-    event_bus.subscribe_once("meeting.action_item.created", _handle_meeting_action_item_created)
     event_bus.subscribe_once("safety.observation.high_risk", _handle_safety_observation_high_risk)
     event_bus.subscribe_once("safety.incident.created", _handle_safety_incident_created)
     event_bus.subscribe_once("inspection.completed.failed", _handle_inspection_completed_failed)
@@ -2232,8 +1924,6 @@ def register_event_handlers() -> None:
     # invoice.paid is NOT subscribed here any more: _handle_invoice_paid wrote the
     # total of every paid invoice onto EACH budget line, inflating actual N times.
     # FinanceService.pay_invoice buckets actual per (wbs, category, currency) itself.
-    event_bus.subscribe_once("po.issued", _handle_po_issued)
-    event_bus.subscribe_once("estimate.approved", _handle_estimate_approved)
     event_bus.subscribe_once("schedule.activity.progress_updated", _handle_schedule_progress)
     event_bus.subscribe_once("bim_model.ready", _handle_bim_model_ready)
     event_bus.subscribe_once("bim_model.new_version", _handle_bim_model_new_version)
@@ -2247,7 +1937,6 @@ def register_event_handlers() -> None:
     event_bus.subscribe_once("task.assigned", _notify_task_assigned)
     event_bus.subscribe_once("invoice.approved", _notify_invoice_approved)
     event_bus.subscribe_once("inspection.scheduled", _notify_inspection_due)
-    event_bus.subscribe_once("submittal.status_changed", _notify_submittal_status_changed)
     event_bus.subscribe_once("meeting.scheduled", _notify_meeting_scheduled)
     event_bus.subscribe_once("ncr.created", _notify_ncr_created)
     event_bus.subscribe_once("document.uploaded", _notify_document_uploaded)

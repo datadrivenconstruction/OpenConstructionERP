@@ -161,7 +161,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
     ),
     "documents.uploaded": "core/event_handlers.py:1834; the documents module publishes 'documents.document.created'",
     "erp_chat.message.deleted": "erp_chat subscribes to its own delete event that no service publishes",
-    "estimate.approved": "core/event_handlers.py:1831; no module publishes an estimate approval",
     "finance.invoice.created": (
         "property_dev/events.py:684; its only publisher was the duplicate claim-invoice "
         "subscriber removed from notifications/_wave5_cross_module_subscribers.py in "
@@ -170,11 +169,7 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
     ),
     "inspection.completed.passed": "qms subscribes to a pass-specific name; inspections publish a single completion event",
     "inspection.scheduled": "nothing publishes when an inspection is scheduled",
-    "meeting.action_item.created": (
-        "core/event_handlers.py:1827; meetings/service.py:470 publishes the plural 'meeting.action_items_created'"
-    ),
     "meeting.scheduled": "nothing publishes when a meeting is scheduled",
-    "po.issued": "core/event_handlers.py:1835; procurement/service.py:1588 publishes 'procurement.po.issued'",
     "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
     "schedule_advanced.task.completed": (
         "bi_dashboards/events.py:104, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
@@ -186,7 +181,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "twice (dashboards/events.py:31 and dashboards/sync_protocol.py:58) and published "
         "nowhere. sync_protocol.py:18 documents the refresh cascade as if it runs"
     ),
-    "submittal.status_changed": "nothing publishes a submittal status change",
     "validation.report.updated": "validation/events.py:72; validation publishes report creation, not update",
     "variations.completed": (
         "bi_dashboards/events.py:124, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
