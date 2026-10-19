@@ -105,7 +105,7 @@ not-keyed, which is the truth.
 | 2026 Prophet's Birthday on 27 Aug | | https://arabfinance.com/en/news/newdetails/madbouly-declares-august-27-as-official-holiday-for-prophet-muhammad-birthday | 2026 | M |
 | 2026 move 6 Oct to 8 Oct | | https://arabfinance.com/en/news/newdetails/madbouly-declares-october-8-public-holiday-for-armed-forces-day | 2026 | M |
 | Hours | 8/day, 48/week | Labour Law 14/2025 via https://www.mondaq.com/employee-rights-labour-relations/1791586/ | 2025-09-01 | M |
-| Overtime premium | 35% day, 70% night | secondary HR summaries disagree (35/70 vs 25/75), article number not found; 35/70 match the 2003 law | 2025-09-01 | UNCONFIRMED, shipped as review data |
+| Overtime premium | 35% day, 70% night | Ministry of Labour explanation via https://www.masrawy.com/news/news_egypt/details/2026/9/4/3043032 ; one transcription of the law (Art. 122) reads 25% by day; article number not found | 2025-09-01 | configurable default, flagged for review |
 | Holiday work | double pay on top of the day's wage, or a compensatory day on written request | Decree 294/2025 via Al Tamimi | 2025-09-01 | M, shipped as review data: 2x or 3x in total is unclear |
 | Annual leave | 15 first year, 21 after, 30 after 10 years or age 50, 45 with disability | Labour Law 14/2025, EY and Clyde & Co | 2025-09-01 | H |
 | Emergency leave | 7 days a year | Clyde & Co | 2025-09-01 | M |
@@ -113,6 +113,26 @@ not-keyed, which is the truth.
 | Minimum wage, private sector | EGP 7,000 a month | National Wages Council via https://moic.gov.eg/news/1998 | 2025-03-01 | H |
 | Annual increment | at least 3% of insurable wage, at least EGP 250 | EY; moic.gov.eg | 2025-09-01 | H |
 | Social insurance, general | employer 18.75%, employee 11% | Law 148/2019, PwC | 2020-01-01 | H |
+
+Also left out on purpose: an end-of-service gratuity (Law 14/2025 Art. 172 grants
+one only where social insurance does not apply, or on wage outside the insurable
+wage, so there is no general rate to ship) and the seven-working-day settlement
+of final dues (Art. 171), which has no verified source URL yet. No statutory
+private-sector Ramadan reduction exists, so none is encoded; a company that
+shortens Ramadan hours does it on its own calendar.
+
+**Per-country Eid spans.** `_gcc_eids` used to apply one placeholder span
+(three days of Eid al-Fitr, four of Eid al-Adha from 10 Dhu al-Hijjah) to all
+six Gulf states. The span is now a row per country in `_EID_SPANS`. Saudi
+Arabia gets its sourced row (Labour Law Implementing Regulations Art. 24: four
+days of Eid al-Fitr from 1 Shawwal, four of Eid al-Adha from the Day of Arafah)
+and an observance row for the 2026 Eid al-Fitr HRSD announced from 19 March,
+so the engine now equals the shipped 2026 Saudi calendar. Egypt gets the Decree
+294/2025 row. The UAE, Qatar, Kuwait, Bahrain and Oman keep the placeholder
+unchanged, because no source was checked for them, and still report it on the
+extent axis. One computational fix reaches all of them: an Eid that starts in
+late December now files its January days under the next year (the only case in
+the converter's window after 2006 is Eid al-Adha 2071/2072).
 
 The 2025 move of 23 July to 24 July is reported only by a schedule note and is
 not recorded. Moves before 2025-09 are not recorded either.

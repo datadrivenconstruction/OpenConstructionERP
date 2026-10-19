@@ -75,5 +75,16 @@
     "source_url": "https://arabfinance.com/en/news/newdetails/madbouly-declares-october-8-public-holiday-for-armed-forces-day",
     "private_sector": "stated",
     "note": "Tuesday moved to Thursday."
+  },
+  {
+    "country": "SA",
+    "year": 2026,
+    "holiday": "eid_al_fitr",
+    "statutory": ["2026-03-20", "2026-03-21", "2026-03-22", "2026-03-23"],
+    "observed": ["2026-03-19", "2026-03-20", "2026-03-21", "2026-03-22"],
+    "authority": "Ministry of Human Resources and Social Development, Eid al-Fitr holiday for the private and non-profit sectors",
+    "source_url": "https://gulfnews.com/world/gulf/saudi/saudi-arabia-announces-eid-al-fitr-holidays-for-private-and-non-profit-sectors-1.500462986",
+    "private_sector": "stated",
+    "note": "Four days from the end of work on Wednesday 18 March; the converter places 1 Shawwal 1447 on 20 March."
   }
 ]

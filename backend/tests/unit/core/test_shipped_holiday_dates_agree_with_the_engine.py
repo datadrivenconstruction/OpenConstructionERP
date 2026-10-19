@@ -272,17 +272,6 @@ _DIVERGENCES: dict[str, Divergence] = {
         ),
         seed_only=frozenset({"2026-03-09", "2026-05-11"}),
     ),
-    "SA": Divergence(
-        side=UNADJUDICATED,
-        why=(
-            "the Gulf family described under AE. Saudi Arabia differs from its neighbours in the "
-            "split: the seed gives Eid al-Fitr four days from the 19th and the engine three from "
-            "the 20th, and _holidays_sa's docstring already records that one shared span is too "
-            "short for Saudi Arabia, where both Eids routinely run longer."
-        ),
-        seed_only=frozenset({"2026-03-19", "2026-05-26"}),
-        engine_only=frozenset({"2026-05-30"}),
-    ),
 }
 
 #: Floors. These stop a future failure from being resolved by trimming the
@@ -414,7 +403,7 @@ def test_the_countries_that_agree_are_named() -> None:
     """
     agreeing = sorted(c for c in BOUND if c not in _DIVERGENCES)
     print(f"seed equals engine exactly for {len(agreeing)} of {len(BOUND)} bound countries: {agreeing}")
-    assert agreeing == ["BG", "DE", "EG", "HU", "IT", "NG", "PT", "TR", "US"], (
+    assert agreeing == ["BG", "DE", "EG", "HU", "IT", "NG", "PT", "SA", "TR", "US"], (
         f"the set of countries whose two sources agree exactly has changed, now {agreeing}. "
         f"A country that LEFT this list started disagreeing with the engine, and belongs in "
         f"_DIVERGENCES only with a reason. A country that JOINED it either had its divergence "

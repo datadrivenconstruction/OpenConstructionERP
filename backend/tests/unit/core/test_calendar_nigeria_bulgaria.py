@@ -203,3 +203,14 @@ def test_the_working_week_is_monday_to_friday(country: str) -> None:
     """
     assert country in cal._WORKING_WEEK, f"{country} needs its own _WORKING_WEEK entry, not the default by omission"
     assert cal._WORKING_WEEK[country] == frozenset({0, 1, 2, 3, 4})
+
+
+def test_bulgarian_easter_block_follows_the_orthodox_easter() -> None:
+    """Bulgaria keeps the Orthodox Easter: 12 April 2026, not the Western 5 April."""
+    from datetime import date
+
+    from app.core.calendar import resolve_holidays
+
+    dates = set(resolve_holidays("BG", 2026)["dates"])
+    assert {date(2026, 4, 10), date(2026, 4, 11), date(2026, 4, 12), date(2026, 4, 13)} <= dates
+    assert date(2026, 4, 3) not in dates
