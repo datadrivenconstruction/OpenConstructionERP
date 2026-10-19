@@ -252,6 +252,11 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     # window the other two Spanish rows share, for the reason given above for
     # the Turkish tier.
     ("ES", "IVA_SRED"): "2026-10-10",
+    # Egypt: the standard rate with its 2016/2017 window, and the construction
+    # line whose 5 percent schedule tax ended on 2025-07-17 when Law No. 157
+    # of 2025 moved contracting works to the standard rate.
+    ("EG", "VAT"): "2026-10-19",
+    ("EG", "VAT_CONSTR"): "2026-10-19",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

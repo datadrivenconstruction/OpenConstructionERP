@@ -185,6 +185,10 @@ _NOT_COMPARABLE: dict[str, str] = {
     "PST_SK": "Canadian provincial",
     "RST_MB": "Canadian provincial",
     "CA_SALES": "United States state sales tax; sub-national",
+    "VAT_CONSTR": (
+        "Egypt's construction line: a dated regime (5 % schedule tax to 2025-07-17, the standard 14 % "
+        "after), read by the bill as its construction tier; VAT is the standard rate compared"
+    ),
 }
 
 

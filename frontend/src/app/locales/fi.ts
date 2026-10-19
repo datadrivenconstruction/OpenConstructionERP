@@ -21881,6 +21881,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Koko työn arvoa ALV mukaan lukien ei ole syötetty.",
     "hakedis.reason.below_work_value": "Ei sovelleta: työn arvo ({{work_value}} {{currency}}) on alle {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Ei sovelleta: {{measured}} {{currency}} on alle kynnyksen {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Ei sovelleta: {{measured}} {{currency}} ei ylitä kynnystä {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Ei sovelleta: maksun saajalla on kirjattu vapautus ({{exemption}}).",
     "hakedis.reason.capped": "Rajattu kattoon {{cap}} {{currency}} (laskettu {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Katto on ilmoitettu valuutassa {{cap_currency}} ja asiakirja valuutassa {{document_currency}}, joten sitä ei voi soveltaa.",
     "hakedis.reason.override_reason_missing": "Summa syötettiin käsin ilman syytä. Syötä syy.",

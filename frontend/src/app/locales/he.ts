@@ -21687,6 +21687,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "שווי העבודה כולה כולל מע\"מ לא הוזן.",
     "hakedis.reason.below_work_value": "לא חל: שווי העבודה ({{work_value}} {{currency}}) מתחת ל-{{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "לא חל: {{measured}} {{currency}} מתחת לסף של {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "לא חל: {{measured}} {{currency}} אינו עולה על הסף של {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "לא חל: למקבל התשלום רשום פטור ({{exemption}}).",
     "hakedis.reason.capped": "הוגבל לתקרה של {{cap}} {{currency}} (חושב {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "התקרה מבוטאת ב-{{cap_currency}} והמסמך ב-{{document_currency}}, ולכן אי אפשר להחיל אותה.",
     "hakedis.reason.override_reason_missing": "סכום הוזן ידנית ללא סיבה. הזינו את הסיבה.",

@@ -21990,6 +21990,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "ยังไม่ได้ป้อนมูลค่างานทั้งหมดรวมภาษีมูลค่าเพิ่ม",
     "hakedis.reason.below_work_value": "ไม่เกี่ยวข้อง: มูลค่างาน ({{work_value}} {{currency}}) ต่ำกว่า {{threshold}} {{currency}}",
     "hakedis.reason.below_threshold": "ไม่เกี่ยวข้อง: {{measured}} {{currency}} ต่ำกว่าเกณฑ์ {{threshold}} {{currency}}",
+    "hakedis.reason.not_above_threshold": "ไม่เกี่ยวข้อง: {{measured}} {{currency}} ไม่เกินเกณฑ์ {{threshold}} {{currency}}",
+    "hakedis.reason.payee_exempt": "ไม่เกี่ยวข้อง: ผู้รับเงินมีการยกเว้นที่บันทึกไว้ ({{exemption}})",
     "hakedis.reason.capped": "จำกัดไว้ที่เพดาน {{cap}} {{currency}} (คำนวณได้ {{computed}})",
     "hakedis.reason.cap_currency_mismatch": "เพดานระบุเป็น {{cap_currency}} ส่วนเอกสารเป็น {{document_currency}} จึงใช้ไม่ได้",
     "hakedis.reason.override_reason_missing": "มีการป้อนยอดด้วยมือโดยไม่มีเหตุผล ป้อนเหตุผล",

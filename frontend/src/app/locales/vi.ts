@@ -21823,6 +21823,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Chưa nhập giá trị của toàn bộ công việc đã gồm VAT.",
     "hakedis.reason.below_work_value": "Không áp dụng: giá trị công việc ({{work_value}} {{currency}}) thấp hơn {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Không áp dụng: {{measured}} {{currency}} thấp hơn ngưỡng {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Không áp dụng: {{measured}} {{currency}} không vượt ngưỡng {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Không áp dụng: bên nhận thanh toán có miễn trừ đã được ghi nhận ({{exemption}}).",
     "hakedis.reason.capped": "Bị giới hạn ở mức trần {{cap}} {{currency}} (đã tính {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Mức trần được nêu bằng {{cap_currency}} còn chứng từ bằng {{document_currency}}, nên không áp dụng được.",
     "hakedis.reason.override_reason_missing": "Một số tiền được nhập thủ công mà không có lý do. Hãy nhập lý do.",

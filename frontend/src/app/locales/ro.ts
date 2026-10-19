@@ -22195,6 +22195,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Valoarea întregii lucrări cu TVA inclus nu a fost introdusă.",
     "hakedis.reason.below_work_value": "Nu se aplică: valoarea lucrării ({{work_value}} {{currency}}) este sub {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Nu se aplică: {{measured}} {{currency}} este sub pragul de {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Nu se aplică: {{measured}} {{currency}} nu depășește pragul de {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Nu se aplică: beneficiarul plății are o scutire înregistrată ({{exemption}}).",
     "hakedis.reason.capped": "Limitat la plafonul de {{cap}} {{currency}} (calculat {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Plafonul este exprimat în {{cap_currency}}, iar documentul în {{document_currency}}, deci nu poate fi aplicat.",
     "hakedis.reason.override_reason_missing": "O sumă a fost introdusă manual fără motiv. Introduceți motivul.",

@@ -21944,6 +21944,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "부가가치세 포함 전체 공사의 가치가 입력되지 않았습니다.",
     "hakedis.reason.below_work_value": "해당 없음: 공사 가치({{work_value}} {{currency}})가 {{threshold}} {{currency}} 미만입니다.",
     "hakedis.reason.below_threshold": "해당 없음: {{measured}} {{currency}}은(는) 기준 {{threshold}} {{currency}} 미만입니다.",
+    "hakedis.reason.not_above_threshold": "해당 없음: {{measured}} {{currency}}은(는) 기준 {{threshold}} {{currency}}을(를) 초과하지 않습니다.",
+    "hakedis.reason.payee_exempt": "해당 없음: 수취인에게 등록된 면제가 있습니다({{exemption}}).",
     "hakedis.reason.capped": "상한 {{cap}} {{currency}}(으)로 제한됨(계산값 {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "상한이 {{cap_currency}}로 표시되어 있고 문서는 {{document_currency}}이므로 적용할 수 없습니다.",
     "hakedis.reason.override_reason_missing": "금액이 사유 없이 수동으로 입력되었습니다. 사유를 입력하세요.",

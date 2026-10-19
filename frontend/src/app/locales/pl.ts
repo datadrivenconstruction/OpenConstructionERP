@@ -22492,6 +22492,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Nie wpisano wartości całych robót z VAT.",
     "hakedis.reason.below_work_value": "Nie dotyczy: wartość robót ({{work_value}} {{currency}}) jest niższa niż {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Nie dotyczy: {{measured}} {{currency}} jest poniżej progu {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Nie dotyczy: {{measured}} {{currency}} nie przekracza progu {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Nie dotyczy: odbiorca płatności ma zarejestrowane zwolnienie ({{exemption}}).",
     "hakedis.reason.capped": "Ograniczono do pułapu {{cap}} {{currency}} (obliczono {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Pułap podano w {{cap_currency}}, a dokument jest w {{document_currency}}, więc nie można go zastosować.",
     "hakedis.reason.override_reason_missing": "Kwotę wpisano ręcznie bez powodu. Wpisz powód.",

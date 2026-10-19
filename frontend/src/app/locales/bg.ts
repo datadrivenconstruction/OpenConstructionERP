@@ -22214,6 +22214,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Стойността на цялата работа с ДДС не е въведена.",
     "hakedis.reason.below_work_value": "Не се прилага: стойността на работата ({{work_value}} {{currency}}) е под {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Не се прилага: {{measured}} {{currency}} е под прага от {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Не се прилага: {{measured}} {{currency}} не надвишава прага от {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Не се прилага: получателят има вписано освобождаване ({{exemption}}).",
     "hakedis.reason.capped": "Ограничено до тавана от {{cap}} {{currency}} (изчислено {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Таванът е зададен във {{cap_currency}}, а документът е във {{document_currency}}, затова не може да се приложи.",
     "hakedis.reason.override_reason_missing": "Сума е въведена ръчно без причина. Въведете причината.",

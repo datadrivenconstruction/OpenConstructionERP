@@ -20919,6 +20919,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "No se ingresó el valor de toda la obra con IVA incluido.",
     "hakedis.reason.below_work_value": "No aplica: el valor de la obra ({{work_value}} {{currency}}) es inferior a {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "No aplica: {{measured}} {{currency}} es inferior al umbral de {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "No aplica: {{measured}} {{currency}} no supera el umbral de {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "No aplica: el beneficiario tiene una exención registrada ({{exemption}}).",
     "hakedis.reason.capped": "Limitado al tope de {{cap}} {{currency}} (calculado {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "El tope está expresado en {{cap_currency}} y el documento en {{document_currency}}, así que no se puede aplicar.",
     "hakedis.reason.override_reason_missing": "Se ingresó un importe a mano sin motivo. Ingrese el motivo.",

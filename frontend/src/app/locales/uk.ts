@@ -22236,6 +22236,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Вартість усієї роботи з ПДВ не введено.",
     "hakedis.reason.below_work_value": "Не застосовується: вартість роботи ({{work_value}} {{currency}}) нижча за {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Не застосовується: {{measured}} {{currency}} нижче порогу {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Не застосовується: {{measured}} {{currency}} не перевищує порогу {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Не застосовується: у отримувача платежу є зареєстроване звільнення ({{exemption}}).",
     "hakedis.reason.capped": "Обмежено стелею {{cap}} {{currency}} (обчислено {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Стелю задано в {{cap_currency}}, а документ у {{document_currency}}, тож її не можна застосувати.",
     "hakedis.reason.override_reason_missing": "Суму введено вручну без причини. Введіть причину.",

@@ -21559,6 +21559,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Η αξία του συνόλου του έργου με ΦΠΑ δεν έχει εισαχθεί.",
     "hakedis.reason.below_work_value": "Δεν εφαρμόζεται: η αξία του έργου ({{work_value}} {{currency}}) είναι κάτω από {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Δεν εφαρμόζεται: {{measured}} {{currency}} είναι κάτω από το κατώφλι των {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Δεν εφαρμόζεται: {{measured}} {{currency}} δεν υπερβαίνει το κατώφλι των {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Δεν εφαρμόζεται: ο δικαιούχος έχει καταχωρημένη απαλλαγή ({{exemption}}).",
     "hakedis.reason.capped": "Περιορίστηκε στο ανώτατο όριο των {{cap}} {{currency}} (υπολογίστηκε {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Το ανώτατο όριο εκφράζεται σε {{cap_currency}} και το έγγραφο σε {{document_currency}}, οπότε δεν μπορεί να εφαρμοστεί.",
     "hakedis.reason.override_reason_missing": "Ένα ποσό εισήχθη χειροκίνητα χωρίς λόγο. Εισαγάγετε τον λόγο.",

@@ -21970,6 +21970,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Vrijednost cijelog rada s PDV-om nije unesena.",
     "hakedis.reason.below_work_value": "Ne primjenjuje se: vrijednost rada ({{work_value}} {{currency}}) je ispod {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Ne primjenjuje se: {{measured}} {{currency}} je ispod praga od {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Ne primjenjuje se: {{measured}} {{currency}} ne premašuje prag od {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Ne primjenjuje se: primatelj plaćanja ima evidentirano oslobođenje ({{exemption}}).",
     "hakedis.reason.capped": "Ograničeno na gornju granicu od {{cap}} {{currency}} (izračunato {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Gornja granica navedena je u {{cap_currency}}, a dokument je u {{document_currency}}, pa se ne može primijeniti.",
     "hakedis.reason.override_reason_missing": "Iznos je unesen ručno bez razloga. Unesite razlog.",

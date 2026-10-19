@@ -1003,6 +1003,27 @@ def _scenarios() -> list[tuple[PaymentTaxInput, tuple[RateRow, ...]]]:
         (_inp(overrides={"vat_computed": no_reason}), ROWS),
         (_inp(overrides={"vat_payable": _override("5.00")}), ROWS),
         (_inp(overrides={"stamp_duty": _override("5.005")}), ROWS),
+        (
+            _inp(payee_exemptions=frozenset({"SB"})),
+            (ROWS[0], _pct_row("income_withholding", "I1", "5", payee_exemption_codes=("SB",)), ROWS[2]),
+        ),
+        (
+            _inp("300.00"),
+            (
+                ROWS[0],
+                _pct_row(
+                    "income_withholding",
+                    "I1",
+                    "1",
+                    threshold_amount=D("300"),
+                    threshold_currency="TRY",
+                    threshold_scope="per_document",
+                    threshold_measure="net",
+                    threshold_applies="above",
+                ),
+                ROWS[2],
+            ),
+        ),
     ]
 
 

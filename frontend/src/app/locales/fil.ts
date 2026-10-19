@@ -21270,6 +21270,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Hindi pa nailalagay ang halaga ng buong gawain kasama ang VAT.",
     "hakedis.reason.below_work_value": "Hindi naaangkop: mas mababa sa {{threshold}} {{currency}} ang halaga ng gawain ({{work_value}} {{currency}}).",
     "hakedis.reason.below_threshold": "Hindi naaangkop: {{measured}} {{currency}} ay mas mababa sa threshold na {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Hindi naaangkop: {{measured}} {{currency}} ay hindi lumalampas sa threshold na {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Hindi naaangkop: ang tatanggap ng bayad ay may nakatalang exemption ({{exemption}}).",
     "hakedis.reason.capped": "Nilimitahan sa cap na {{cap}} {{currency}} (kinuwenta {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Nakasaad sa {{cap_currency}} ang cap at sa {{document_currency}} ang dokumento, kaya hindi ito maipapatupad.",
     "hakedis.reason.override_reason_missing": "May halagang manu-manong inilagay nang walang dahilan. Ilagay ang dahilan.",

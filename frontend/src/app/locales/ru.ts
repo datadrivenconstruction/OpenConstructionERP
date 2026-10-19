@@ -22511,6 +22511,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Стоимость всего объёма работ с НДС не введена.",
     "hakedis.reason.below_work_value": "Не применяется: стоимость работ ({{work_value}} {{currency}}) ниже {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Не применяется: {{measured}} {{currency}} ниже порога {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Не применяется: {{measured}} {{currency}} не превышает порог {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Не применяется: у получателя платежа есть зарегистрированное освобождение ({{exemption}}).",
     "hakedis.reason.capped": "Ограничено предельным значением {{cap}} {{currency}} (рассчитано {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Предельное значение указано в {{cap_currency}}, а документ в {{document_currency}}, поэтому применить его нельзя.",
     "hakedis.reason.override_reason_missing": "Сумма введена вручную без причины. Введите причину.",

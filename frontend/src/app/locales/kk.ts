@@ -21510,6 +21510,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Қосылған құн салығын қоса алғандағы жұмыстың толық құны енгізілмеген.",
     "hakedis.reason.below_work_value": "Қолданылмайды: жұмыс құны ({{work_value}} {{currency}}) {{threshold}} {{currency}} мәнінен төмен.",
     "hakedis.reason.below_threshold": "Қолданылмайды: {{measured}} {{currency}} шекті {{threshold}} {{currency}} мәнінен төмен.",
+    "hakedis.reason.not_above_threshold": "Қолданылмайды: {{measured}} {{currency}} шекті {{threshold}} {{currency}} мәнінен аспайды.",
+    "hakedis.reason.payee_exempt": "Қолданылмайды: төлем алушыға тіркелген босату бар ({{exemption}}).",
     "hakedis.reason.capped": "{{cap}} {{currency}} жоғарғы шегімен шектелген (есептелгені {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Жоғарғы шек {{cap_currency}} валютасымен берілген, ал құжат {{document_currency}} валютасында, сондықтан оны қолдану мүмкін емес.",
     "hakedis.reason.override_reason_missing": "Сома себепсіз қолмен енгізілген. Себебін енгізіңіз.",

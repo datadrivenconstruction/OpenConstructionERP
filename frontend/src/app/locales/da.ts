@@ -22130,6 +22130,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Værdien af hele arbejdet inklusive moms er ikke indtastet.",
     "hakedis.reason.below_work_value": "Gælder ikke: arbejdets værdi ({{work_value}} {{currency}}) er under {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Gælder ikke: {{measured}} {{currency}} er under tærsklen på {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Gælder ikke: {{measured}} {{currency}} overstiger ikke tærsklen på {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Gælder ikke: modtageren har en registreret fritagelse ({{exemption}}).",
     "hakedis.reason.capped": "Begrænset til loftet på {{cap}} {{currency}} (beregnet {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Loftet er angivet i {{cap_currency}} og dokumentet i {{document_currency}}, så det kan ikke anvendes.",
     "hakedis.reason.override_reason_missing": "Et beløb blev indtastet manuelt uden årsag. Indtast årsagen.",

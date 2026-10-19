@@ -21264,6 +21264,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "ভ্যাটসহ পুরো কাজের মূল্য দেওয়া হয়নি।",
     "hakedis.reason.below_work_value": "প্রযোজ্য নয়: কাজের মূল্য ({{work_value}} {{currency}}) {{threshold}} {{currency}}-এর কম।",
     "hakedis.reason.below_threshold": "প্রযোজ্য নয়: {{measured}} {{currency}} সীমা {{threshold}} {{currency}}-এর কম।",
+    "hakedis.reason.not_above_threshold": "প্রযোজ্য নয়: {{measured}} {{currency}} সীমা {{threshold}} {{currency}} অতিক্রম করে না।",
+    "hakedis.reason.payee_exempt": "প্রযোজ্য নয়: প্রাপকের নথিভুক্ত অব্যাহতি রয়েছে ({{exemption}})।",
     "hakedis.reason.capped": "ঊর্ধ্বসীমা {{cap}} {{currency}}-এ সীমিত (গণনা করা {{computed}})।",
     "hakedis.reason.cap_currency_mismatch": "ঊর্ধ্বসীমা {{cap_currency}}-এ দেওয়া এবং নথি {{document_currency}}-এ, তাই প্রয়োগ করা যায় না।",
     "hakedis.reason.override_reason_missing": "একটি অঙ্ক কারণ ছাড়া হাতে দেওয়া হয়েছে। কারণ দিন।",

@@ -20,19 +20,26 @@ Standard library only. Nothing here may import from ``app.modules``.
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
+import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
+from importlib.resources import files
 from typing import Literal
 
 __all__ = [
     "BASES",
     "BUYER_SCOPES",
+    "DATA_MODULE_PREFIX",
     "KINDS",
+    "THRESHOLD_APPLIES",
     "OverlappingRowsError",
     "RateRow",
     "categories",
+    "countries_with_rows",
     "find_overlaps",
     "lookup",
     "rows_for",
@@ -47,6 +54,11 @@ BASES: tuple[str, ...] = ("vat", "net", "net_plus_vat")
 BUYER_SCOPES: tuple[str, ...] = ("", "any", "designated_only", "designated_or_work_value")
 _THRESHOLD_SCOPES: tuple[str, ...] = ("per_document", "per_payee_year")
 _THRESHOLD_MEASURES: tuple[str, ...] = ("net", "net_plus_vat")
+#: Whether an amount equal to the threshold is taxed. ``at_or_above`` reads a
+#: threshold as the first taxed amount, ``above`` as the last untaxed one. The
+#: wording of the law decides which: "payments exceeding EGP 300" leaves a
+#: payment of exactly 300 untaxed.
+THRESHOLD_APPLIES: tuple[str, ...] = ("at_or_above", "above")
 _REVIEW_STATUSES: tuple[str, ...] = ("confirmed", "unconfirmed")
 _HUNDRED = Decimal("100")
 
@@ -96,6 +108,13 @@ class RateRow:
             contract, never against one document.
         conditions: A short statement of the condition per locale, shown beside
             the figure so the person confirming it sees what was assumed.
+        threshold_applies: ``at_or_above`` when an amount equal to the
+            threshold is taxed, ``above`` when only an amount exceeding it is.
+            Meaningful only with a threshold.
+        payee_exemption_codes: Exemption schemes that take a payee out of this
+            tax altogether, for example a small-business regime whose members
+            are not subject to withholding. A payee who holds one of them on
+            file gets the figure as not applicable, with the scheme named.
     """
 
     country_code: str
@@ -120,6 +139,8 @@ class RateRow:
     buyer_scope: Literal["any", "designated_only", "designated_or_work_value", ""] = ""
     work_value_threshold: Decimal | None = None
     conditions: Mapping[str, str] = field(default_factory=dict)
+    threshold_applies: Literal["at_or_above", "above"] = "at_or_above"
+    payee_exemption_codes: tuple[str, ...] = ()
 
 
 class OverlappingRowsError(ValueError):
@@ -177,8 +198,23 @@ def lookup(rows: Sequence[RateRow], *, country: str, kind: str, code: str, on: d
     return found[0]
 
 
+#: A country's rows live in a module of this package named ``data_<cc>``, where
+#: ``<cc>`` is the lower-case ISO 3166-1 alpha-2 code, exporting ``ROWS``.
+#: Adding a country is adding that file; nothing here names a country.
+DATA_MODULE_PREFIX = "data_"
+_COUNTRY_RE = re.compile(r"^[A-Z]{2}$")
+
+
+def _data_module_name(country: str) -> str:
+    return f"{__package__}.{DATA_MODULE_PREFIX}{country.lower()}"
+
+
 def rows_for(country: str) -> tuple[RateRow, ...]:
     """Return the shipped data set of one country.
+
+    The rows are found by convention rather than by a list of countries: the
+    module ``data_<cc>`` of this package, when it exists, and its ``ROWS``.
+    A country is therefore a data file, not a branch in this function.
 
     Args:
         country: Country code; case and surrounding space are ignored.
@@ -187,15 +223,39 @@ def rows_for(country: str) -> tuple[RateRow, ...]:
         The rows that ship for the country, empty when none do. An empty
         result means every selected tax will be held, which is the intended
         outcome for a country nobody has researched.
+
+    Raises:
+        TypeError: A data module exists and its ``ROWS`` is not a tuple of
+            :class:`RateRow`. A malformed data file must not read as a
+            country with no rows.
     """
     wanted = _country(country)
-    if wanted == "TR":
-        # Imported here because the data module imports the row shape from
-        # this one.
-        from app.core.payment_taxes.data_tr import ROWS
+    if not _COUNTRY_RE.match(wanted):
+        return ()
+    name = _data_module_name(wanted)
+    if importlib.util.find_spec(name) is None:
+        return ()
+    rows = getattr(importlib.import_module(name), "ROWS", None)
+    if not isinstance(rows, tuple) or not all(isinstance(row, RateRow) for row in rows):
+        raise TypeError(f"{name}.ROWS must be a tuple of RateRow")
+    return rows
 
-        return ROWS
-    return ()
+
+def countries_with_rows() -> tuple[str, ...]:
+    """Every country that ships a data module, in code order.
+
+    Read off the package directory, so it answers the same question
+    :func:`rows_for` does without importing any data module.
+    """
+    found: list[str] = []
+    for entry in files(__package__).iterdir():
+        stem, _, suffix = entry.name.partition(".")
+        if suffix != "py" or not stem.startswith(DATA_MODULE_PREFIX):
+            continue
+        code = stem.removeprefix(DATA_MODULE_PREFIX).upper()
+        if _COUNTRY_RE.match(code):
+            found.append(code)
+    return tuple(sorted(found))
 
 
 def categories(rows: Sequence[RateRow], *, country: str, kind: str, on: date) -> list[RateRow]:
@@ -302,6 +362,14 @@ def _row_problems(row: RateRow) -> list[str]:
         problems.append(f"threshold measure {row.threshold_measure!r} is not one of {_THRESHOLD_MEASURES}")
     if row.cap_amount is not None and not (row.cap_amount.is_finite() and row.cap_amount >= 0):
         problems.append("cap must be a non-negative number")
+    if row.threshold_applies not in THRESHOLD_APPLIES:
+        problems.append(f"threshold_applies {row.threshold_applies!r} is not one of {THRESHOLD_APPLIES}")
+    elif row.threshold_applies != "at_or_above" and row.threshold_amount is None:
+        problems.append("threshold_applies 'above' is only meaningful with a threshold")
+    if not isinstance(row.payee_exemption_codes, tuple) or any(
+        not isinstance(code, str) or not code.strip() for code in row.payee_exemption_codes
+    ):
+        problems.append("payee_exemption_codes must be a tuple of non-blank codes")
 
     if row.buyer_scope not in BUYER_SCOPES:
         problems.append(f"buyer_scope {row.buyer_scope!r} is not one of {BUYER_SCOPES}")

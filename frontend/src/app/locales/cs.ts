@@ -22116,6 +22116,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "Hodnota celého díla včetně DPH nebyla zadána.",
     "hakedis.reason.below_work_value": "Neplatí: hodnota díla ({{work_value}} {{currency}}) je pod {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Neplatí: {{measured}} {{currency}} je pod prahem {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Neplatí: {{measured}} {{currency}} nepřekračuje práh {{threshold}} {{currency}}.",
+    "hakedis.reason.payee_exempt": "Neplatí: příjemce platby má evidovanou výjimku ({{exemption}}).",
     "hakedis.reason.capped": "Omezeno stropem {{cap}} {{currency}} (vypočteno {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Strop je uveden v {{cap_currency}} a dokument v {{document_currency}}, takže jej nelze použít.",
     "hakedis.reason.override_reason_missing": "Částka byla zadána ručně bez důvodu. Zadejte důvod.",

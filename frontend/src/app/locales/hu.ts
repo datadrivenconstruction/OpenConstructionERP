@@ -21667,6 +21667,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "A teljes munka áfával együtt vett értéke nincs megadva.",
     "hakedis.reason.below_work_value": "Nem alkalmazandó: a munka értéke ({{work_value}} {{currency}}) {{threshold}} {{currency}} alatt van.",
     "hakedis.reason.below_threshold": "Nem alkalmazandó: {{measured}} {{currency}} a(z) {{threshold}} {{currency}} küszöb alatt van.",
+    "hakedis.reason.not_above_threshold": "Nem alkalmazandó: {{measured}} {{currency}} nem haladja meg a(z) {{threshold}} {{currency}} küszöböt.",
+    "hakedis.reason.payee_exempt": "Nem alkalmazandó: a kedvezményezettnek nyilvántartott mentessége van ({{exemption}}).",
     "hakedis.reason.capped": "A(z) {{cap}} {{currency}} felső határra korlátozva (számított érték: {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "A felső határ {{cap_currency}} pénznemben van megadva, a dokumentum pedig {{document_currency}} pénznemben, így nem alkalmazható.",
     "hakedis.reason.override_reason_missing": "Egy összeget ok nélkül adtak meg kézzel. Adja meg az okot.",

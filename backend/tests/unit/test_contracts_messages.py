@@ -28,6 +28,7 @@ from app.modules.contracts import hakedis_rules as contracts_hakedis_rules
 from app.modules.contracts import messages as message_bundle
 from app.modules.contracts import service as contracts_service
 from app.modules.contracts import validators as contracts_validators
+from app.modules.contracts import vat_regime_rules as contracts_vat_regime_rules
 from app.modules.contracts.messages import is_key_present, translate
 
 MESSAGES_DIR = pathlib.Path(str(message_bundle.__file__)).parent
@@ -35,6 +36,7 @@ SOURCES = [
     pathlib.Path(str(contracts_validators.__file__)),
     pathlib.Path(str(contracts_service.__file__)),
     pathlib.Path(str(contracts_hakedis_rules.__file__)),
+    pathlib.Path(str(contracts_vat_regime_rules.__file__)),
 ]
 SHIPPED_LOCALES = sorted(path.stem for path in MESSAGES_DIR.glob("*.json"))
 TRANSLATED_LOCALES = [locale for locale in SHIPPED_LOCALES if locale != "en"]
@@ -57,6 +59,7 @@ KEY_PREFIXES = (
     "payment_plan.",
     "retention_release.",
     "sov_reconcile.",
+    "vat_regime.",
 )
 
 

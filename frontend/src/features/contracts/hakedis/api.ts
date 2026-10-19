@@ -370,6 +370,8 @@ export interface StatutoryInputs {
   buyer_is_designated: boolean | null;
   work_value_incl_vat: string | null;
   work_value_note: string;
+  /** An exemption scheme the payee holds on file; empty when none. */
+  payee_exemption_code?: string;
   stamp_duty_base: string | null;
   stamp_duty_base_same_as_net: boolean;
   vat_withholding: HakedisTaxChoice;
@@ -469,6 +471,10 @@ export interface StatutoryCategory {
   cap_amount: string | null;
   buyer_scope: string;
   work_value_threshold: string | null;
+  /** `above` when a payment exactly at the threshold is not withheld. */
+  threshold_applies?: 'at_or_above' | 'above';
+  /** Exemption schemes that take a payee out of this category. */
+  payee_exemption_codes?: string[];
   conditions: Record<string, string>;
   effective_from: string;
   effective_to: string | null;

@@ -21765,6 +21765,8 @@ const resource = {
     "hakedis.reason.work_value_unknown": "De waarde van het hele werk inclusief btw is niet ingevoerd.",
     "hakedis.reason.below_work_value": "Is niet van toepassing: de waarde van het werk ({{work_value}} {{currency}}) ligt onder {{threshold}} {{currency}}.",
     "hakedis.reason.below_threshold": "Is niet van toepassing: {{measured}} {{currency}} ligt onder de drempel van {{threshold}} {{currency}}.",
+    "hakedis.reason.not_above_threshold": "Is niet van toepassing: {{measured}} {{currency}} overschrijdt de drempel van {{threshold}} {{currency}} niet.",
+    "hakedis.reason.payee_exempt": "Is niet van toepassing: de begunstigde heeft een geregistreerde vrijstelling ({{exemption}}).",
     "hakedis.reason.capped": "Beperkt tot het plafond van {{cap}} {{currency}} (berekend {{computed}}).",
     "hakedis.reason.cap_currency_mismatch": "Het plafond is vermeld in {{cap_currency}} en het document in {{document_currency}}, dus het kan niet worden toegepast.",
     "hakedis.reason.override_reason_missing": "Een bedrag is zonder reden met de hand ingevoerd. Voer de reden in.",

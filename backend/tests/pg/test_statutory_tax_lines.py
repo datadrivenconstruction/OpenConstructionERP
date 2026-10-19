@@ -682,3 +682,63 @@ async def test_a_set_stored_before_its_document_changed_hands_is_unreachable(wor
             response = await client.request(method, target, **kwargs)
             assert response.status_code == 404, (method, target, response.text)
             assert response.json()["detail"] == NOT_FOUND, (method, target)
+
+
+# ── A payee exemption and a strict threshold ─────────────────────────────────
+
+EXEMPTION = "XX_SMALL_BUSINESS"
+EXEMPT_ROWS: tuple[RateRow, ...] = (
+    *ROWS[:2],
+    _row(
+        kind="income_withholding",
+        code="I1",
+        base="net",
+        rate_pct=Decimal("1"),
+        numerator=None,
+        denominator=None,
+        threshold_amount=Decimal("300"),
+        threshold_currency="EUR",
+        threshold_scope="per_document",
+        threshold_measure="net",
+        threshold_applies="above",
+        payee_exemption_codes=(EXEMPTION,),
+    ),
+    ROWS[3],
+)
+
+
+async def test_a_recorded_exemption_is_stored_and_takes_the_payee_out(world: World) -> None:
+    from app.modules.tax_withholding import router as tax_router
+
+    world.app.dependency_overrides[tax_router.statutory_row_source] = lambda: lambda country: EXEMPT_ROWS
+    exempt_id, plain_id = uuid.uuid4(), uuid.uuid4()
+    async with world.client() as client:
+        exempt = await client.put(
+            f"{BASE}/progress_claim/{exempt_id}", json=_body(world, payee_exemption_code=EXEMPTION)
+        )
+        plain = await client.put(f"{BASE}/progress_claim/{plain_id}", json=_body(world))
+        reread = await client.get(f"{BASE}/progress_claim/{exempt_id}", params={"project_id": str(world.project_id)})
+    assert exempt.status_code == 200, exempt.text
+    assert plain.status_code == 200, plain.text
+    income = _figures(exempt.json())["income_withheld"]
+    assert (income["status"], income["amount"], income["reason_key"]) == ("not_applicable", None, "payee_exempt")
+    assert _figures(plain.json())["income_withheld"]["amount"] == "1000.00"
+    assert reread.json()["inputs"]["payee_exemption_code"] == EXEMPTION
+    assert _figures(reread.json())["income_withheld"]["reason_key"] == "payee_exempt"
+
+
+async def test_a_payment_exactly_at_a_strict_threshold_is_not_withheld(world: World) -> None:
+    from app.modules.tax_withholding import router as tax_router
+
+    world.app.dependency_overrides[tax_router.statutory_row_source] = lambda: lambda country: EXEMPT_ROWS
+    async with world.client() as client:
+        at = await client.post(f"{BASE}/preview", json=_body(world, net_amount="300.00"))
+        over = await client.post(f"{BASE}/preview", json=_body(world, net_amount="300.01"))
+        categories = await client.get(
+            f"{BASE}/categories", params={"country": "XX", "kind": "income_withholding", "on": "2026-03-10"}
+        )
+    assert at.status_code == 200, at.text
+    assert _figures(at.json())["income_withheld"]["reason_key"] == "not_above_threshold"
+    assert _figures(over.json())["income_withheld"]["amount"] == "3.00"
+    row = categories.json()["items"][0]
+    assert (row["threshold_applies"], row["payee_exemption_codes"]) == ("above", [EXEMPTION])

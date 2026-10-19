@@ -555,6 +555,10 @@ class StatutoryInputsBody(BaseModel):
     vat_withholding: StatutoryChoice = Field(default_factory=StatutoryChoice)
     income_withholding: StatutoryChoice = Field(default_factory=StatutoryChoice)
     stamp_duty: StatutoryChoice = Field(default_factory=StatutoryChoice)
+    # An exemption scheme the payee holds on file, by the code the country's
+    # rate rows name (for example Egypt's small-business regime). Empty when
+    # the payee holds none.
+    payee_exemption_code: str = Field(default="", max_length=64)
 
     @field_validator("country_code")
     @classmethod
@@ -746,6 +750,12 @@ class StatutoryCategoryResponse(BaseModel):
     cap_amount: Decimal | None
     buyer_scope: str
     work_value_threshold: Decimal | None
+    #: ``at_or_above`` (the default) or ``above``: whether a payment exactly
+    #: at the threshold is already withheld.
+    threshold_applies: str = "at_or_above"
+    #: Exemption schemes that take a payee out of this row when recorded on
+    #: the document.
+    payee_exemption_codes: list[str] = Field(default_factory=list)
     conditions: dict[str, str]
     effective_from: date
     effective_to: date | None

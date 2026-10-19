@@ -218,6 +218,48 @@ class ContractResponse(BaseModel):
     updated_at: datetime
 
 
+class VatRegimeOption(BaseModel):
+    """One VAT regime a contract on this project may state, with its rate on the day asked about.
+
+    ``nominal_rate_pct`` is the rate of the tax seed row the regime names, in
+    force that day; ``effective_rate_pct`` is that rate times
+    ``base_fraction``, the rate on the full price. Both are None when no row
+    is on file for the day: the regime is then offered without a number rather
+    than with a guessed one.
+    """
+
+    code: str
+    labels: dict[str, str]
+    activity: str
+    tax_code: str
+    base_fraction: Decimal
+    input_credit: bool
+    nominal_rate_pct: Decimal | None = None
+    effective_rate_pct: Decimal | None = None
+    is_default: bool
+    effective_from: date
+    effective_to: date | None = None
+    review_status: str
+    legal_reference: str
+    source_url: str
+    conditions: dict[str, str] = Field(default_factory=dict)
+    # The conditions as data, for a form that asks for the evidence they need.
+    contract_signed_before: date | None = None
+    required_evidence: list[str] = Field(default_factory=list)
+    subcontract_evidence: list[str] = Field(default_factory=list)
+    evidence_dated_before: date | None = None
+    scope_increase_ends_regime: bool = False
+
+
+class VatRegimesResponse(BaseModel):
+    """The regimes a contract on this project may state on one day; empty when the country has none."""
+
+    project_id: UUID
+    country_code: str | None = None
+    on: date
+    regimes: list[VatRegimeOption] = Field(default_factory=list)
+
+
 class ContractCountryDefaultsResponse(BaseModel):
     """The payment terms a new contract on this project starts from.
 
