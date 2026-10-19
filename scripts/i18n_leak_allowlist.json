@@ -39,6 +39,11 @@
     "note": "Portable Document Format abbreviation, identical in every script and locale",
     "reason_category": "abbreviation"
   },
+  "analytics.perf.factor_times": {
+    "en_value": "x{{factor}}",
+    "note": "a multiplier marker beside a template variable (the cost index factor a record moved by), the same 'x' in every locale including ru, zh and ar; the words around it live in the translated provenance keys",
+    "reason_category": "template_placeholder"
+  },
   "analytics.perf.p25": {
     "en_value": "P25",
     "note": "percentile abbreviation in the performance benchmark table header, written the same way in every locale that carries the key, including ru",
