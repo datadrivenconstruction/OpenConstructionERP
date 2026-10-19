@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import re
 
+from app.core.validation.identifiers import normalise_digits, rule_for
 from app.modules.subcontractors.schemas import TaxIdValidationResponse
 
 # Country -> (standard_name, compiled regex).
@@ -119,10 +120,26 @@ def _tax_id_candidates(country: str, raw: str) -> tuple[str, list[str]]:
     typed against an unknown country were silently cut off.
     """
     country_u = country.upper()[:2]
-    cleaned = re.sub(r"[\s\-./,_]", "", raw or "").upper()
+    # Digits typed on an Arabic or Persian keyboard are the same digits.
+    cleaned = re.sub(r"[\s\-./,_]", "", normalise_digits(raw or "")).upper()
     if country_u and cleaned.startswith(country_u) and len(cleaned) > 2:
         return country_u, [cleaned[2:], cleaned]
     return country_u, [cleaned]
+
+
+def _rule_for(country: str) -> tuple[str, re.Pattern[str]] | None:
+    """This module's own row, else the sourced row in the identifier catalogue.
+
+    The catalogue (``app.core.validation.identifiers``) is where a country's
+    tax registration number is filed with its source and review status; a
+    country this table does not carry is answered from there, so the number has
+    one home rather than a copy here that could drift from it.
+    """
+    own = _TAX_ID_RULES.get(country)
+    if own is not None:
+        return own
+    filed = rule_for(country, "tax_registration")
+    return (filed.label, filed.pattern) if filed is not None else None
 
 
 def validate_tax_id(country: str, tax_id: str) -> TaxIdValidationResponse:
@@ -143,7 +160,7 @@ def validate_tax_id(country: str, tax_id: str) -> TaxIdValidationResponse:
             standard=None,
             reason="empty_after_normalisation",
         )
-    rule = _TAX_ID_RULES.get(country_u)
+    rule = _rule_for(country_u)
     if rule is None:
         return TaxIdValidationResponse(
             country=country_u,

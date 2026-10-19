@@ -42,14 +42,25 @@ the hooked canvas safely.
 Both libraries are small and have no dependencies of their own. If either is
 missing the hooks are not installed and PDFs print as before, with a single
 warning in the log, rather than failing.
+
+Tables are laid out right to left too, which is a layout question rather than a
+text one and so does not need either library. Inside :func:`table_direction`
+with ``"rtl"`` a reportlab ``Table`` reverses each row, its column widths and
+its style commands as it is built (:func:`mirror_table_commands`), and starts
+from right-aligned cells, so column one of an Arabic invoice is the rightmost
+column on paper. The shared form and register renderers enter the context from
+their own title's direction, which is why no generator has to ask for it.
 """
 
 from __future__ import annotations
 
+import inspect
 import logging
 import re
 import unicodedata
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from functools import lru_cache
 from threading import Lock
 from typing import Any
@@ -61,9 +72,12 @@ __all__ = [
     "VisualText",
     "has_rtl",
     "install_reportlab_rtl",
+    "install_table_mirroring",
     "is_rtl_locale",
+    "mirror_table_commands",
     "rtl_support_available",
     "shape_rtl",
+    "table_direction",
     "text_direction",
     "visual_text",
 ]
@@ -417,6 +431,148 @@ def _visual_blpara(paragraph: Any, bl_para: Any, direction: str | None) -> Any:
     return bl_para.clone(lines=lines)
 
 
+# -- Table layout ----------------------------------------------------------------
+
+_TABLE_DIRECTION: ContextVar[str | None] = ContextVar("oe_pdf_table_direction", default=None)
+
+_SWAPPED_ALIGNMENT = {"LEFT": "RIGHT", "RIGHT": "LEFT"}
+_SWAPPED_OPERATION = {"LINEBEFORE": "LINEAFTER", "LINEAFTER": "LINEBEFORE"}
+_ALIGN_OPERATIONS = frozenset({"ALIGN", "ALIGNMENT", "HALIGN"})
+
+_table_lock = Lock()
+_tables_hooked = False
+
+
+@contextmanager
+def table_direction(direction: str | None) -> Iterator[None]:
+    """Build the tables created inside this block in ``direction``.
+
+    ``"rtl"`` mirrors every reportlab ``Table`` constructed in the block;
+    anything else, ``None`` included, leaves tables as they are. Only
+    construction is affected, so a table built inside and drawn later stays
+    mirrored, and one built outside stays as it was.
+
+    Args:
+        direction: ``"rtl"``, ``"ltr"`` or ``None`` (from :func:`text_direction`).
+    """
+    install_table_mirroring()
+    token = _TABLE_DIRECTION.set("rtl" if direction == "rtl" else None)
+    try:
+        yield
+    finally:
+        _TABLE_DIRECTION.reset(token)
+
+
+def _mirrored_column(column: int, columns: int) -> int:
+    return columns - 1 - (column + columns if column < 0 else column)
+
+
+def mirror_table_commands(commands: Iterable[Any], columns: int) -> list[tuple[Any, ...]]:
+    """Table style commands for the same table with its columns reversed.
+
+    Column indexes are renumbered from the other edge (negative ones too) and
+    each range keeps its start before its end. ``LEFT`` and ``RIGHT`` swap in
+    alignment commands and ``LINEBEFORE`` and ``LINEAFTER`` swap, since the
+    left edge of a cell becomes its right edge. Rows, including the
+    ``splitfirst`` and ``splitlast`` keywords, are untouched.
+
+    Args:
+        commands: Style commands as reportlab takes them.
+        columns: How many columns the table has.
+
+    Returns:
+        The mirrored commands, in the same order.
+    """
+    mirrored: list[tuple[Any, ...]] = []
+    for raw in commands:
+        command = tuple(raw)
+        if len(command) < 3 or not isinstance(command[1], tuple | list) or not isinstance(command[2], tuple | list):
+            mirrored.append(command)
+            continue
+        operation, (start_col, start_row), (end_col, end_row), *rest = command
+        if isinstance(start_col, int) and isinstance(end_col, int):
+            start_col, end_col = _mirrored_column(end_col, columns), _mirrored_column(start_col, columns)
+        operation = _SWAPPED_OPERATION.get(operation, operation)
+        if operation in _ALIGN_OPERATIONS and rest and isinstance(rest[0], str):
+            rest[0] = _SWAPPED_ALIGNMENT.get(rest[0].upper(), rest[0])
+        mirrored.append((operation, (start_col, start_row), (end_col, end_row), *rest))
+    return mirrored
+
+
+#: Where a mirrored table starts: every cell right-aligned, the mirror of
+#: reportlab's left-aligned default. A table's own commands come after it.
+_RIGHT_ALIGNED_BASE = ("ALIGN", (0, 0), (-1, -1), "RIGHT")
+
+
+def install_table_mirroring() -> None:
+    """Teach reportlab's ``Table`` to honour :func:`table_direction`. Idempotent.
+
+    Wraps ``Table.__init__`` and ``Table.setStyle``. Outside a right-to-left
+    block both return straight to reportlab. A table reportlab rebuilds while
+    splitting it across pages arrives with ``normalizedData`` set and its
+    commands already mirrored, so it is passed through rather than mirrored a
+    second time.
+    """
+    global _tables_hooked
+    if _tables_hooked:
+        return
+    with _table_lock:
+        if _tables_hooked:
+            return
+        from reportlab.platypus.tables import Table, TableStyle
+
+        original_init = Table.__init__
+        original_set_style = Table.setStyle
+        signature = inspect.signature(original_init)
+
+        def init(self: Any, *args: Any, **kwargs: Any) -> None:
+            if _TABLE_DIRECTION.get() != "rtl":
+                original_init(self, *args, **kwargs)
+                return
+            bound = signature.bind(self, *args, **kwargs)
+            arguments = bound.arguments
+            rows = [list(row) for row in arguments.get("data") or ()]
+            columns = max((len(row) for row in rows), default=0)
+            if arguments.get("normalizedData") or columns == 0:
+                original_init(self, *args, **kwargs)
+                return
+            arguments["data"] = [row[::-1] for row in rows]
+            widths = arguments.get("colWidths")
+            if isinstance(widths, list | tuple):
+                arguments["colWidths"] = list(widths)[::-1]
+            self._oe_rtl_columns = columns
+            self._oe_rtl_based = False
+            original_init(*bound.args, **bound.kwargs)
+            if not self._oe_rtl_based:
+                self._oe_rtl_based = True
+                original_set_style(self, TableStyle([_RIGHT_ALIGNED_BASE]))
+
+        def set_style(self: Any, tblstyle: Any) -> None:
+            columns = getattr(self, "_oe_rtl_columns", None)
+            if not columns:
+                original_set_style(self, tblstyle)
+                return
+            is_style = isinstance(tblstyle, TableStyle)
+            commands = mirror_table_commands(tblstyle.getCommands() if is_style else tblstyle, columns)
+            if not getattr(self, "_oe_rtl_based", True):
+                self._oe_rtl_based = True
+                commands = [_RIGHT_ALIGNED_BASE, *commands]
+            mirrored = TableStyle(commands, **(tblstyle._opts if is_style else {}))
+            if is_style:
+                for name in ("spaceBefore", "spaceAfter"):
+                    if hasattr(tblstyle, name):
+                        setattr(mirrored, name, getattr(tblstyle, name))
+            original_set_style(self, mirrored)
+
+        init._oe_rtl = True  # type: ignore[attr-defined]
+        init.__wrapped__ = original_init  # type: ignore[attr-defined]
+        set_style._oe_rtl = True  # type: ignore[attr-defined]
+        set_style.__wrapped__ = original_set_style  # type: ignore[attr-defined]
+        Table.__init__ = init  # type: ignore[method-assign]
+        Table.setStyle = set_style  # type: ignore[method-assign]
+        _tables_hooked = True
+
+
 def install_reportlab_rtl(glyph_probe: Callable[[str, str], bool] | None = None) -> bool:
     """Teach reportlab to draw right-to-left text. Idempotent; never raises.
 
@@ -434,6 +590,11 @@ def install_reportlab_rtl(glyph_probe: Callable[[str, str], bool] | None = None)
         missing and nothing was changed.
     """
     global _installed, _glyph_probe
+    # Layout needs neither library, so tables mirror even where shaping cannot.
+    try:
+        install_table_mirroring()
+    except Exception as exc:  # noqa: BLE001 - a table that cannot mirror still prints
+        logger.warning("PDF RTL: could not hook reportlab tables for right-to-left layout (%s)", exc)
     if glyph_probe is not None:
         _glyph_probe = glyph_probe
         _shape_cached.cache_clear()

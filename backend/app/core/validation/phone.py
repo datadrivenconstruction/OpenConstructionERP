@@ -36,6 +36,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.core.provenance import Provenance, declared, fell_back
+from app.core.validation.identifiers import normalise_digits
 
 # ── Per-country phone rules ───────────────────────────────────────────────────
 #
@@ -150,6 +151,20 @@ _COUNTRY_PHONE_RULES: dict[str, dict[str, Any]] = {
         "format_template": "+966 {area} {number}",
         "strip_leading_zero": False,
     },
+    # ── Egypt ─────────────────────────────────────────────────────────────
+    # Mobile: 10, 11, 12 or 15 then 8 digits (11 digits nationally with the
+    # trunk 0). Landline: Cairo/Giza area 2 then 8 digits; Alexandria 3 then 7;
+    # other areas a 2-digit code then 7. Secondary source, awaiting review.
+    "EG": {
+        "dial_code": "20",
+        "national_regex": r"^(?:1[0125]\d{8}|2\d{8}|3\d{7}|(?:1[3-9]|[4-9]\d)\d{7})$",
+        "international_regex": r"^\+20(?:1[0125]\d{8}|2\d{8}|3\d{7}|(?:1[3-9]|[4-9]\d)\d{7})$",
+        "format_template": "+20 {area} {number}",
+        "strip_leading_zero": True,
+        "source": "Telephone numbering plan of Egypt as documented (secondary)",
+        "source_url": "https://en.wikipedia.org/wiki/Telephone_numbers_in_Egypt",
+        "needs_expert_review": True,
+    },
     # ── Japan ─────────────────────────────────────────────────────────────
     "JP": {
         "dial_code": "81",
@@ -242,8 +257,13 @@ class PhoneValidationResult:
 
 
 def _strip_formatting(phone: str) -> str:
-    """Remove spaces, dashes, dots, parentheses from a phone string."""
-    return re.sub(r"[\s\-\.\(\)\/]", "", phone)
+    """Remove spaces, dashes, dots, parentheses from a phone string.
+
+    Arabic-Indic and Persian digits become ASCII digits first: a number typed
+    on an Arabic keyboard is the same number, and an E.164 string built from
+    it must be dialable.
+    """
+    return re.sub(r"[\s\-\.\(\)\/]", "", normalise_digits(phone))
 
 
 def _already_e164(phone: str) -> bool:

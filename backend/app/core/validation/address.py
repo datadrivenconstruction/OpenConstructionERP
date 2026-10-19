@@ -121,6 +121,20 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
         "state_required": True,
     },
+    # ── Egypt ─────────────────────────────────────────────────────────────
+    # The UPU addressing sheet (07/2023) gives 7-digit postcodes; 5-digit codes
+    # are still printed widely. Both are accepted until an expert confirms.
+    "EG": {
+        "postcode_regex": r"^\d{5}(?:\d{2})?$",
+        "required_fields": ["street", "city", "country"],
+        "field_order": ["street", "city", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
+        "state_required": False,
+        "postcode_note": "Format: 5 or 7 digits, e.g. 11511",
+        "source": "UPU addressing sheet for Egypt, 07/2023",
+        "source_url": "https://www.upu.int/UPU/media/upu/PostalEntitiesFiles/addressingUnit/egyEn.pdf",
+        "needs_expert_review": True,
+    },
     # ── India ─────────────────────────────────────────────────────────────
     "IN": {
         "postcode_regex": r"^\d{6}$",

@@ -266907,6 +266907,11 @@
             {
               "name": "currency_code",
               "type": "str | None"
+            },
+            {
+              "name": "digit_system",
+              "type": "DigitSystem | None",
+              "default": "None"
             }
           ]
         },
@@ -266940,6 +266945,11 @@
             {
               "name": "currency_code",
               "type": "str"
+            },
+            {
+              "name": "digit_system",
+              "type": "str",
+              "default": "'auto'"
             }
           ]
         },

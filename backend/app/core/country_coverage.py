@@ -1771,6 +1771,95 @@ def _demo_catalogue(country: str) -> DimensionReport:
     )
 
 
+# --------------------------------------------------------------------------- #
+# Formatting and identifiers
+# --------------------------------------------------------------------------- #
+
+
+@_probe("locale.country_defaults", covers=("app.core.i18n_data.COUNTRY_DEFAULTS",))
+def _locale_country_defaults(country: str) -> DimensionReport:
+    """Whether documents of this country print with its own separators, date order and paper.
+
+    Without a row a document falls back to its currency's style and a
+    day-month-year order with dots, which is somebody else's convention.
+    """
+    from app.core.i18n_data import COUNTRY_DEFAULTS
+
+    return _keyed("locale.country_defaults", "app.core.i18n_data.COUNTRY_DEFAULTS", set(COUNTRY_DEFAULTS), country)
+
+
+@_probe("validation.phone", covers=("app.core.validation.phone._COUNTRY_PHONE_RULES",))
+def _validation_phone(country: str) -> DimensionReport:
+    """Whether a national phone number of this country can be checked and dialled.
+
+    The generic rule accepts six to fifteen digits and has no dial code, so a
+    national number for a country without a row is never normalised to E.164.
+    """
+    from app.core.validation.phone import _COUNTRY_PHONE_RULES
+
+    return _keyed(
+        "validation.phone",
+        "app.core.validation.phone._COUNTRY_PHONE_RULES",
+        set(_COUNTRY_PHONE_RULES),
+        country,
+        fallback_note="judged by the generic six-to-fifteen-digit rule with no dial code, so it is never normalised",
+    )
+
+
+@_probe("validation.postcode", covers=("app.core.validation.address._COUNTRY_RULES",))
+def _validation_postcode(country: str) -> DimensionReport:
+    """Whether an address of this country has its post code checked and its lines ordered."""
+    from app.core.validation.address import _COUNTRY_RULES
+
+    return _keyed(
+        "validation.postcode",
+        "app.core.validation.address._COUNTRY_RULES",
+        set(_COUNTRY_RULES),
+        country,
+        fallback_note="judged by the generic rules, which check no post code at all",
+    )
+
+
+@_probe("validation.tax_id", covers=("app.modules.subcontractors.tax_id._TAX_ID_RULES",))
+def _validation_tax_id(country: str) -> DimensionReport:
+    """Whether a company tax number of this country is format-checked.
+
+    Two homes answer, as the validator itself reads them: the subcontractor
+    table, and the sourced identifier catalogue for a country the table does
+    not carry. The population is their union because that is what the check
+    consults.
+    """
+    from app.core.validation.identifiers import IDENTIFIER_RULES
+    from app.modules.subcontractors.tax_id import _TAX_ID_RULES
+
+    filed = {code for code, kind in IDENTIFIER_RULES if kind == "tax_registration"}
+    return _keyed(
+        "validation.tax_id",
+        "app.modules.subcontractors.tax_id._TAX_ID_RULES + app.core.validation.identifiers.IDENTIFIER_RULES",
+        set(_TAX_ID_RULES) | filed,
+        country,
+        fallback_note="accepted unchecked: a country with no rule passes any tax number",
+    )
+
+
+@_probe("validation.national_identifiers")
+def _validation_national_identifiers(country: str) -> DimensionReport:
+    """Whether a national ID or company register number of this country can be checked.
+
+    Read from the sourced identifier catalogue, keyed by country and kind; a
+    country counts when it files either kind.
+    """
+    from app.core.validation.identifiers import IDENTIFIER_RULES
+
+    filed = {code for code, kind in IDENTIFIER_RULES if kind in {"national_id", "company_register"}}
+    return _keyed(
+        "validation.national_identifiers",
+        "app.core.validation.identifiers.IDENTIFIER_RULES",
+        filed,
+        country,
+    )
+
+
 def covered_symbols() -> frozenset[str]:
     """Every registry symbol some probe declares it reads."""
     return frozenset(symbol for symbols in _COVERS.values() for symbol in symbols)

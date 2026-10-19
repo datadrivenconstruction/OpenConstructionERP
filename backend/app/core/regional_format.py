@@ -31,11 +31,26 @@ Two characters worth naming
   78.3, where ``Intl.NumberFormat("de-CH")`` writes ``1'234'567.89``), so the
   PDF agrees with the amount the browser shows on screen. The typographic
   U+2019 that older CLDR releases printed is still read as a Swiss pattern.
+
+Digit shapes
+------------
+Which digits print is a separate question from which separators do. CLDR
+writes Arabic with Arabic-Indic digits, while Egyptian business documents are
+commonly printed with Western ones, and a Persian reader writes a third set.
+So a style also names a digit system (the CLDR ``nu`` value: ``latn``,
+``arab``, ``arabext``). A country row in ``COUNTRY_DEFAULTS`` may name one in
+``digit_system``; a request may override it for the documents it renders
+(:func:`set_document_digits`, set by the locale middleware from
+``X-Digit-System`` or ``?digits=``); an explicit argument beats both. A
+non-Latin system brings its own separators, the ones CLDR gives it, because a
+German grouping dot between Arabic-Indic digits reads as nothing in either
+script.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from contextvars import ContextVar, Token
+from dataclasses import dataclass, replace
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Final
@@ -57,11 +72,13 @@ class NumberStyle:
         decimal: Between the whole part and the fraction.
         indian_grouping: Group the whole part as lakh and crore
             (``12,34,567``) rather than by threes.
+        digits: The CLDR numbering system the digits print in.
     """
 
     group: str
     decimal: str
     indian_grouping: bool = False
+    digits: str = "latn"
 
 
 ANGLO: Final = NumberStyle(group=",", decimal=".")
@@ -69,6 +86,79 @@ CONTINENTAL: Final = NumberStyle(group=".", decimal=",")
 SPACED: Final = NumberStyle(group=NBSP, decimal=",")
 SWISS: Final = NumberStyle(group=SWISS_APOSTROPHE, decimal=".")
 INDIAN: Final = NumberStyle(group=",", decimal=".", indian_grouping=True)
+
+#: The digit systems a document can print in, as CLDR names them, with their
+#: zero and the separators CLDR gives them. ``latn`` keeps the market's own
+#: separators, so it carries none here.
+DIGIT_SYSTEMS: Final[dict[str, tuple[str, str, str] | None]] = {
+    "latn": None,
+    # Arabic-Indic digits U+0660..U+0669, Arabic thousands and decimal separators.
+    "arab": ("\u0660", "\u066c", "\u066b"),
+    # Extended Arabic-Indic digits U+06F0..U+06F9 (Persian, Urdu), same separators.
+    "arabext": ("\u06f0", "\u066c", "\u066b"),
+}
+
+_DOCUMENT_DIGITS: ContextVar[str | None] = ContextVar("oe_document_digits", default=None)
+
+
+def normalise_digit_system(value: str | None) -> str | None:
+    """A known digit system name, or ``None`` for anything else."""
+    code = (value or "").strip().lower()
+    return code if code in DIGIT_SYSTEMS else None
+
+
+def set_document_digits(value: str | None) -> Token[str | None]:
+    """Record the digit system the current request asked documents to print in.
+
+    An unknown value records ``None``, which leaves the market's choice alone.
+
+    Returns:
+        The token :func:`reset_document_digits` takes.
+    """
+    return _DOCUMENT_DIGITS.set(normalise_digit_system(value))
+
+
+def reset_document_digits(token: Token[str | None]) -> None:
+    """Undo :func:`set_document_digits`."""
+    _DOCUMENT_DIGITS.reset(token)
+
+
+def document_digits() -> str | None:
+    """The digit system the current request asked for, or ``None``."""
+    return _DOCUMENT_DIGITS.get()
+
+
+def digit_system_for_country(country_code: str | None) -> str | None:
+    """The digit system a country's row names, ``None`` when it names none."""
+    entry = COUNTRY_DEFAULTS.get((country_code or "").strip().upper()) or {}
+    return normalise_digit_system(entry.get("digit_system"))
+
+
+def _chosen_digits(country_code: str | None, digits: str | None) -> str | None:
+    """The argument first, then the request, then the country row."""
+    return normalise_digit_system(digits) or document_digits() or digit_system_for_country(country_code)
+
+
+def with_digits(style: NumberStyle, digits: str | None) -> NumberStyle:
+    """``style`` printed in ``digits``; an unknown or empty value returns it unchanged."""
+    code = normalise_digit_system(digits)
+    if code is None or code == style.digits:
+        return style
+    spec = DIGIT_SYSTEMS[code]
+    if spec is None:
+        return replace(style, digits=code)
+    _zero, group, decimal = spec
+    return replace(style, group=group, decimal=decimal, digits=code)
+
+
+def transliterate_digits(text: str, digits: str | None) -> str:
+    """Rewrite the ASCII digits of ``text`` in another digit system."""
+    spec = DIGIT_SYSTEMS.get(digits or "latn")
+    if spec is None:
+        return text
+    zero = ord(spec[0])
+    return text.translate({ord("0") + n: zero + n for n in range(10)})
+
 
 #: The display patterns ``COUNTRY_DEFAULTS`` and the account settings write,
 #: read as styles. Both Swiss spellings are accepted: the ASCII one is what
@@ -212,9 +302,25 @@ def style_for_currency(currency: str | None) -> NumberStyle:
     return ANGLO
 
 
-def number_style(country_code: str | None = None, currency: str | None = None) -> NumberStyle:
-    """The style to print with: the country's when it has one, the currency's otherwise."""
-    return style_for_country(country_code) or style_for_currency(currency)
+def number_style(
+    country_code: str | None = None,
+    currency: str | None = None,
+    *,
+    digits: str | None = None,
+) -> NumberStyle:
+    """The style to print with: the country's when it has one, the currency's otherwise.
+
+    Args:
+        country_code: ISO 3166-1 alpha-2 of the document's market.
+        currency: ISO 4217, the fallback when no country is on file.
+        digits: A digit system that beats both the request's choice and the
+            country row's (see the module notes on digit shapes).
+
+    Returns:
+        The separators, grouping and digit system to print with.
+    """
+    base = style_for_country(country_code) or style_for_currency(currency)
+    return with_digits(base, _chosen_digits(country_code, digits))
 
 
 def _group_indian(digits: str) -> list[str]:
@@ -262,7 +368,7 @@ def format_number(value: float | Decimal | int | str | None, decimals: int, styl
     # A negative zero after rounding is still zero on paper.
     if sign and set(body) <= set(f"0{style.group}{style.decimal}"):
         sign = ""
-    return f"{sign}{body}"
+    return f"{sign}{transliterate_digits(body, style.digits)}"
 
 
 #: The date order used when the country is not on file. It is the one the PDF
@@ -276,7 +382,13 @@ def date_format_for_country(country_code: str | None) -> str:
     return (entry or {}).get("date_format") or DEFAULT_DATE_FORMAT
 
 
-def format_date(value: date | datetime, country_code: str | None = None, pattern: str | None = None) -> str:
+def format_date(
+    value: date | datetime,
+    country_code: str | None = None,
+    pattern: str | None = None,
+    *,
+    digits: str | None = None,
+) -> str:
     """Write a date in the order and with the separators its country uses.
 
     Args:
@@ -284,6 +396,7 @@ def format_date(value: date | datetime, country_code: str | None = None, pattern
         country_code: ISO 3166-1 alpha-2 of the project's country.
         pattern: An explicit pattern in the ``DD``/``MM``/``YYYY`` tokens of
             ``COUNTRY_DEFAULTS``; overrides the country when given.
+        digits: A digit system that beats the request's and the country's.
 
     Returns:
         ``04/10/2026`` for Ireland, ``10/04/2026`` for the United States,
@@ -291,13 +404,15 @@ def format_date(value: date | datetime, country_code: str | None = None, pattern
     """
     day = value.date() if isinstance(value, datetime) else value
     chosen = pattern or date_format_for_country(country_code)
-    return chosen.replace("YYYY", f"{day.year:04d}").replace("MM", f"{day.month:02d}").replace("DD", f"{day.day:02d}")
+    text = chosen.replace("YYYY", f"{day.year:04d}").replace("MM", f"{day.month:02d}").replace("DD", f"{day.day:02d}")
+    return transliterate_digits(text, _chosen_digits(country_code, digits))
 
 
 __all__ = [
     "ANGLO",
     "CONTINENTAL",
     "DEFAULT_DATE_FORMAT",
+    "DIGIT_SYSTEMS",
     "INDIAN",
     "LEGACY_DEFAULT_COUNTRY",
     "NBSP",
@@ -308,10 +423,17 @@ __all__ = [
     "TYPOGRAPHIC_APOSTROPHE",
     "NumberStyle",
     "date_format_for_country",
+    "digit_system_for_country",
     "document_country",
+    "document_digits",
     "format_date",
     "format_number",
+    "normalise_digit_system",
     "number_style",
+    "reset_document_digits",
+    "set_document_digits",
     "style_for_country",
     "style_for_currency",
+    "transliterate_digits",
+    "with_digits",
 ]

@@ -357,6 +357,12 @@ class UserMeResponse(UserResponse):
     permissions: list[str] = Field(default_factory=list)
 
 
+#: Digit shapes a reader can ask for, as CLDR numbering systems, plus ``auto``
+#: (whatever the language and the market print). Mirrors the frontend's
+#: ``DIGIT_SYSTEMS`` and ``app.core.regional_format.DIGIT_SYSTEMS``.
+DigitSystem = Literal["auto", "latn", "arab", "arabext"]
+
+
 class UserPreferencesUpdate(BaseModel):
     """Update regional preferences only."""
 
@@ -366,6 +372,7 @@ class UserPreferencesUpdate(BaseModel):
     number_format: str | None = Field(default=None, max_length=20)
     date_format: str | None = Field(default=None, max_length=20)
     currency_code: str | None = Field(default=None, max_length=10)
+    digit_system: DigitSystem | None = None
 
 
 class UserPreferencesResponse(BaseModel):
@@ -379,6 +386,7 @@ class UserPreferencesResponse(BaseModel):
     number_format: str
     date_format: str
     currency_code: str
+    digit_system: str = "auto"
 
 
 class ChangePasswordRequest(BaseModel):

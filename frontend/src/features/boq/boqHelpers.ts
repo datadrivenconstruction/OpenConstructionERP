@@ -413,7 +413,34 @@ export function getCurrencySymbol(currencyStr?: string): string {
   if (match?.[1]) return match[1];
   // Try plain 3-letter code: "CAD", "EUR", "GBP"
   const code = currencyStr.trim().substring(0, 3).toUpperCase();
-  return CURRENCY_SYMBOLS[code] || code;
+  return arabicScriptSymbol(code) || CURRENCY_SYMBOLS[code] || code;
+}
+
+/** Bidi marks `Intl` wraps around an Arabic symbol; a header prints them as nothing. */
+const BIDI_MARKS = /[‎‏؜]/g;
+
+/**
+ * The symbol `Intl` writes for `code` in the locale amounts are printed in,
+ * when that symbol is in Arabic script, else null.
+ *
+ * The table above holds one Latin-script symbol per currency, so an Arabic
+ * reader saw `E£` over a column whose cells `Intl` printed with `ج.م.`. Asking
+ * `Intl` for the symbol only when it answers in Arabic script keeps every
+ * Latin reader's header exactly as it was and makes an Arabic one agree with
+ * its own cells (same locale, `getNumberLocale`), for every currency rather
+ * than a list of them.
+ */
+function arabicScriptSymbol(code: string): string | null {
+  if (!/^[A-Z]{3}$/.test(code)) return null;
+  try {
+    const part = new Intl.NumberFormat(getNumberLocale(), { style: 'currency', currency: code })
+      .formatToParts(0)
+      .find((p) => p.type === 'currency');
+    const symbol = part?.value.replace(BIDI_MARKS, '').trim();
+    return symbol && /[؀-ۿ]/.test(symbol) ? symbol : null;
+  } catch {
+    return null;
+  }
 }
 
 /* ── Currency Code Extraction ───────────────────────────────────────── */

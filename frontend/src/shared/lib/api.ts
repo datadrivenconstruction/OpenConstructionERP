@@ -15,6 +15,7 @@ import { useDemoReadOnlyStore } from '@/stores/useDemoReadOnlyStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { cacheResponse, getCachedResponse, queueMutation } from './offlineStore';
 import { logApiError, logError } from './errorLogger';
+import { getDigitSystem } from './intlLocale';
 
 const BASE_URL = '/api';
 
@@ -165,6 +166,21 @@ export function activeLanguageTag(): string | null {
   }
 }
 
+/**
+ * The digit system the reader chose, as the header the server reads for the
+ * documents it renders (see backend `app.core.regional_format`), or null when
+ * the reader left it on automatic and the document's market decides.
+ */
+export function digitSystemHeader(): string | null {
+  const digits = getDigitSystem();
+  return digits === 'auto' ? null : digits;
+}
+
+function setDigitSystemHeader(headers: Headers): void {
+  const digits = digitSystemHeader();
+  if (digits && !headers.has('X-Digit-System')) headers.set('X-Digit-System', digits);
+}
+
 /** Build common headers for every request. */
 function buildHeaders(extra?: HeadersInit): Headers {
   const headers = new Headers(extra);
@@ -190,6 +206,7 @@ function buildHeaders(extra?: HeadersInit): Headers {
     const base = activeLanguageTag();
     if (base) headers.set('Accept-Language', base);
   }
+  setDigitSystemHeader(headers);
 
   return headers;
 }
@@ -838,6 +855,7 @@ export async function fetchWithAuth(input: string, init: RequestInit = {}): Prom
     const headers = new Headers(init.headers);
     const token = getToken();
     if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`);
+    setDigitSystemHeader(headers);
     return fetch(input, { ...init, headers });
   };
   const response = await send();
@@ -887,6 +905,8 @@ export async function downloadWithAuth(url: string, fallbackFilename: string): P
   const token = getAuthToken();
   const headers: Record<string, string> = { Accept: 'application/octet-stream' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
+  const digits = digitSystemHeader();
+  if (digits) headers['X-Digit-System'] = digits;
 
   const response = await fetch(url, { method: 'GET', headers });
   if (!response.ok) {

@@ -70,18 +70,76 @@ export const LOCALE_MAP: Record<string, string> = {
   zh: 'zh-CN',
 };
 
+/* ── Digit shapes ──────────────────────────────────────────────────────────── */
+
+/**
+ * Which digits the reader wants, as a CLDR numbering system, or `'auto'` for
+ * whatever the locale prints.
+ *
+ * Separate from the locale because it is a separate question. Arabic prints
+ * Arabic-Indic digits by default, while Egyptian business documents commonly
+ * use Western ones; a Persian reader writes a third set. The preference store
+ * owns the value and pushes it here, the same way the market's number locale
+ * is pushed into `marketNumberLocale`, because this module is a leaf and the
+ * store imports it.
+ */
+export type DigitSystem = 'auto' | 'latn' | 'arab' | 'arabext';
+
+/** Every value `DigitSystem` may hold, for pickers and for validating server values. */
+export const DIGIT_SYSTEMS: readonly DigitSystem[] = ['auto', 'latn', 'arab', 'arabext'];
+
+let digitSystem: DigitSystem = 'auto';
+
+/**
+ * `tag` written in `digits`, as the BCP-47 `-u-nu-` extension `Intl` reads.
+ *
+ * Returns `tag` untouched for `'auto'` and when the locale already prints that
+ * system, so an English reader who asks for Western digits keeps the plain
+ * `en` every other check in the product compares against. Idempotent: a tag
+ * that already carries the extension resolves to the asked system and comes
+ * back as it is.
+ */
+export function withDigitSystem(tag: string, digits: DigitSystem = digitSystem): string {
+  if (digits === 'auto') return tag;
+  try {
+    if (new Intl.NumberFormat(tag).resolvedOptions().numberingSystem === digits) return tag;
+    const bare = tag.replace(/-nu-[a-z0-9]+/i, '').replace(/-u$/i, '');
+    const extended = /-u-/i.test(bare) ? `${bare}-nu-${digits}` : `${bare}-u-nu-${digits}`;
+    return new Intl.NumberFormat(extended).resolvedOptions().numberingSystem === digits ? extended : tag;
+  } catch {
+    return tag;
+  }
+}
+
+/** The digit system currently in force. */
+export function getDigitSystem(): DigitSystem {
+  return digitSystem;
+}
+
+/**
+ * Record the reader's digit system. Called by the preferences store whenever
+ * its value changes. A no-op when nothing changed, so it does not wake every
+ * surface on an unrelated preference write.
+ */
+export function setDigitSystem(next: DigitSystem): void {
+  const value = DIGIT_SYSTEMS.includes(next) ? next : 'auto';
+  if (value === digitSystem) return;
+  digitSystem = value;
+  notify();
+}
+
 /** Returns the Intl-compatible locale string for the current i18next language. */
 export function getIntlLocale(): string {
   const lang = i18next.language || 'en';
-  return LOCALE_MAP[lang] || lang;
+  return withDigitSystem(LOCALE_MAP[lang] || lang);
 }
 
 /* ── The same answer, as a subscription ───────────────────────────────────── */
 
 const listeners = new Set<() => void>();
-const notify = () => {
+function notify(): void {
   listeners.forEach((cb) => cb());
-};
+}
 
 // The default i18next export is the very instance `@/app/i18n` configures and
 // re-exports, so this listens to the same language switch the UI performs.

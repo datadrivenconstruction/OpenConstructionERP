@@ -91,7 +91,16 @@ from app.core.pdf_fonts import (
     pdf_table_paragraph_rows,
     register_pdf_fonts,
 )
-from app.core.regional_format import COUNTRY_DEFAULTS, NumberStyle, date_format_for_country, format_number, number_style
+from app.core.pdf_rtl import table_direction, text_direction
+from app.core.regional_format import (
+    COUNTRY_DEFAULTS,
+    NumberStyle,
+    date_format_for_country,
+    document_digits,
+    format_number,
+    number_style,
+    transliterate_digits,
+)
 
 __all__ = [
     "EMPTY",
@@ -609,7 +618,9 @@ def format_stored_date(value: Any, date_format: str) -> str:
     parsed = parse_stored_date(value)
     if parsed is None:
         return str(value).strip()
-    return parsed.strftime(date_format)
+    # Digits follow the reader's explicit choice for this request, the same
+    # choice the amounts beside the date print in (``number_style``).
+    return transliterate_digits(parsed.strftime(date_format), document_digits())
 
 
 def _as_decimal(value: Any) -> Decimal | None:
@@ -996,13 +1007,20 @@ def _build_twice(
     doc_type: str | None,
     running_title: str = "",
 ) -> bytes:
-    """Build the document, then build it again knowing how many pages it has."""
+    """Build the document, then build it again knowing how many pages it has.
+
+    The tables of the story are laid out in the direction of the document's own
+    title, which is written in the document's language: an Arabic, Persian,
+    Urdu or Hebrew form puts its first column on the right.
+    """
     page_width, page_height = pagesize
     meta = branded_doc_metadata()
     total_pages = 0
     output = b""
+    direction = text_direction(title)
     for _pass in range(2):
-        story, has_letterhead = make_story()
+        with table_direction(direction):
+            story, has_letterhead = make_story()
         buffer = io.BytesIO()
         doc = BaseDocTemplate(
             buffer,
