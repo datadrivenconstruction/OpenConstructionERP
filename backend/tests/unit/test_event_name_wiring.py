@@ -141,18 +141,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "counts slips straight from the activity rows"
     ),
     "schedule.task.scheduled": "geo_hub/events.py _SUBSCRIPTIONS; the schedule module has no task scheduling event",
-    "correspondence.outbound.delivered": (
-        "property_dev/events.py:407; property_dev/service.py:4568 publishes "
-        "'correspondence.outbound.requested' and nothing marks delivery"
-    ),
-    "documents.uploaded": "core/event_handlers.py:1834; the documents module publishes 'documents.document.created'",
-    "finance.invoice.created": (
-        "property_dev/events.py:684; its only publisher was the duplicate claim-invoice "
-        "subscriber removed from notifications/_wave5_cross_module_subscribers.py in "
-        "8b71dec65, and that one never sent the metadata.instalment_buyer_id the handler "
-        "keys on. Nothing writes that key, so publishing from finance would not wake it either"
-    ),
-    "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
 }
 
 
