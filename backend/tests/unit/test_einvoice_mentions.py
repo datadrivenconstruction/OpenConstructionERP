@@ -76,10 +76,12 @@ def test_row_silent_before_its_date():
     assert _run(issue_date="2026-08-31", company_size="large") == []
 
 
-def test_unknown_size_assumes_earliest_wave_and_says_so():
-    (f,) = _run()
-    assert f.key == "xx_tax_id" and f.size_assumed and f.severity == m.SEVERITY_ERROR
-    assert "earliest wave was assumed" in f.message
+def test_unknown_size_warns_and_asks_for_the_size():
+    row, ask = _run()
+    assert row.key == "xx_tax_id" and row.size_assumed and row.severity == m.SEVERITY_WARNING
+    assert ask.key == m.KEY_COMPANY_SIZE and ask.severity == m.SEVERITY_WARNING
+    assert ask.params == {"waves": {"large": "2026-09-01", "small": "2027-09-01"}}
+    assert _run(company_size="large")[0].severity == m.SEVERITY_ERROR
 
 
 def test_small_issuer_not_yet_bound():

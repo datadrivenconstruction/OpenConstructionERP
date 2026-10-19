@@ -40,15 +40,36 @@ def test_sme_bound_only_from_september_2027():
     assert "fr_customer_siren" in _keys(company_size="pme", issue_date="2027-09-01")
 
 
-def test_unknown_size_assumes_earliest_wave():
-    (f,) = [
-        x
-        for x in m.check_mentions(
+def test_unset_size_warns_instead_of_blocking():
+    found = {
+        f.key: f
+        for f in m.check_mentions(
             country="FR", document_kind="invoice", issue_date="2026-10-01", facts={"settings": {}}
         )
-        if x.key == "fr_customer_siren"
-    ]
-    assert f.size_assumed
+    }
+    assert found["fr_customer_siren"].severity == m.SEVERITY_WARNING and found["fr_customer_siren"].size_assumed
+    assert found[m.KEY_COMPANY_SIZE].params["waves"]["pme"] == "2027-09-01"
+    assert not [f for f in found.values() if f.severity == m.SEVERITY_ERROR]
+
+
+def test_unset_size_before_any_wave_is_silent():
+    assert "company_size" not in _keys(issue_date="2026-08-31")
+
+
+def test_rule_does_not_block_without_a_size():
+    ctx = _ctx({"country_fields": {}}, settings={"company_size": ""})
+    assert all(r.passed for r in asyncio.run(InvoiceMentionsRequired().validate(ctx)))
+    advisory = [r for r in asyncio.run(InvoiceMentionsUnconfirmed().validate(ctx)) if not r.passed]
+    assert "company_size" in {r.details["key"] for r in advisory}
+
+
+def test_set_size_blocks_ge_and_spares_pme():
+    ge = _ctx({"country_fields": {}}, settings={"company_size": "ge"})
+    assert any(not r.passed for r in asyncio.run(InvoiceMentionsRequired().validate(ge)))
+    pme = _ctx({"country_fields": {}}, settings={"company_size": "pme"})
+    assert all(r.passed for r in asyncio.run(InvoiceMentionsRequired().validate(pme)))
+    keys = {r.details["key"] for r in asyncio.run(InvoiceMentionsUnconfirmed().validate(pme)) if not r.passed}
+    assert keys == {"fr_professional_insurance"}
 
 
 def test_delivery_address_only_when_it_differs():

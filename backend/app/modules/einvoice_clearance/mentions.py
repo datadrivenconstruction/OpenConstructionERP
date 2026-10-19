@@ -15,7 +15,7 @@ unconfirmed reading of the law may inform a user but must not block an invoice.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -24,6 +24,8 @@ _CATALOGUE = Path(__file__).parent / "catalogues" / "invoice_mentions.json"
 
 SEVERITY_ERROR = "error"
 SEVERITY_WARNING = "warning"
+
+KEY_COMPANY_SIZE = "company_size"
 
 DATED_BY_ISSUER_PHASE = "issuer_phase"
 DATED_BY_FIXED = "fixed"
@@ -47,6 +49,9 @@ class MentionFinding:
     legal_basis: str
     source_url: str
     message: str
+    # Values for a translated message: for the company size finding, the wave
+    # dates keyed by size.
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @lru_cache(maxsize=1)
@@ -60,9 +65,9 @@ def issuer_phase_date(
 ) -> tuple[str | None, bool]:
     """The date the issuer's own wave opens, and whether the size was assumed.
 
-    An unknown size resolves to the earliest wave. Guessing a later one would
-    hide an obligation that may already apply; the finding then says the size
-    was assumed so the user can set it.
+    An unknown size resolves to the earliest wave, flagged as assumed. The
+    caller must not block on an assumed date: :func:`check_mentions` reports
+    such a row as a warning and asks the user to set the size.
     """
     phases = (catalogue or load_catalogue()).get("phase_by_size", {}).get(country.upper())
     if not phases:
@@ -130,13 +135,20 @@ def check_mentions(
     ``issue_date`` is a date or an ISO string; only its first ten characters
     are read. A row whose date has not arrived is silent. A row with no
     confirmed date applies at once, which the catalogue allows only for rows
-    flagged ``needs_expert_review``. ``catalogue`` replaces the shipped file,
+    flagged ``needs_expert_review``.
+
+    When the issuer's size is not set, a row dated by the issuer's wave is
+    still evaluated but only as a warning, and one extra finding keyed
+    ``company_size`` asks the user to set the size, carrying the wave dates in
+    ``params``. Assuming the earliest wave and blocking would stop invoices of a
+    company the law does not yet bind. ``catalogue`` replaces the shipped file,
     for tests and for callers that hold their own rows.
     """
     catalogue = catalogue if catalogue is not None else load_catalogue()
     country = (country or "").strip().upper()
     issued = _text(issue_date)[:10]
     found: list[MentionFinding] = []
+    ask_size = False
     for row in catalogue.get("mentions", []):
         if row["country"] != country or document_kind not in row["document_kinds"]:
             continue
@@ -150,11 +162,12 @@ def check_mentions(
             continue
         missing = tuple(c["path"] for c in alternatives[0] if not _clause_holds(c, facts))
         review = bool(row.get("needs_expert_review"))
+        ask_size = ask_size or assumed
         message = f"{row['label']} is required on this {document_kind} ({row['legal_basis']})"
         if starts:
             message += f" from {starts}"
         if assumed:
-            message += "; the company size is not set, so the earliest wave was assumed"
+            message += "; the company size is not set, so this is only a warning until it is"
         if review:
             message += "; this reading awaits expert confirmation"
         found.append(
@@ -162,7 +175,7 @@ def check_mentions(
                 key=row["key"],
                 country=country,
                 label=row["label"],
-                severity=SEVERITY_WARNING if review else SEVERITY_ERROR,
+                severity=SEVERITY_WARNING if (review or assumed) else SEVERITY_ERROR,
                 missing=missing,
                 effective_date=starts or "",
                 size_assumed=assumed,
@@ -170,6 +183,27 @@ def check_mentions(
                 legal_basis=row["legal_basis"],
                 source_url=row["source_url"],
                 message=message + ".",
+            )
+        )
+    if ask_size:
+        waves = dict((catalogue.get("phase_by_size", {}).get(country) or {}).get("sizes") or {})
+        found.append(
+            MentionFinding(
+                key=KEY_COMPANY_SIZE,
+                country=country,
+                label="Company size",
+                severity=SEVERITY_WARNING,
+                missing=("settings.company_size",),
+                effective_date=min(waves.values()) if waves else "",
+                size_assumed=True,
+                needs_expert_review=False,
+                legal_basis=(catalogue.get("phase_by_size", {}).get(country) or {}).get("legal_basis", ""),
+                source_url=(catalogue.get("phase_by_size", {}).get(country) or {}).get("source_url", ""),
+                message=(
+                    "Set the company size on the registration: the invoice mentions apply from a date that depends "
+                    "on it (" + ", ".join(f"{k}: {v}" for k, v in waves.items()) + ")."
+                ),
+                params={"waves": waves},
             )
         )
     return found
@@ -185,6 +219,7 @@ def facts_from_context(document: dict[str, Any], profile: dict[str, Any]) -> dic
 
 
 __all__ = [
+    "KEY_COMPANY_SIZE",
     "DATED_BY",
     "SEVERITY_ERROR",
     "SEVERITY_WARNING",

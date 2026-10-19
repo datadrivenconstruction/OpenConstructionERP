@@ -454,6 +454,7 @@ def _mention_results(rule: ValidationRule, context: ValidationContext, severity:
                 "effective_date": f.effective_date,
                 "size_assumed": f.size_assumed,
                 "needs_expert_review": f.needs_expert_review,
+                "params": f.params,
             },
         )
         for f in chosen
