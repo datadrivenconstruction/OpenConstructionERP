@@ -57,7 +57,7 @@ from app.core.validation.engine import (
     validation_engine,
 )
 from app.modules.einvoice_clearance.models import SETTLED_STATUSES
-from app.modules.einvoice_clearance.regimes import REGIME_CLEARANCE
+from app.modules.einvoice_clearance.regimes import CANCELLATION_BASIS_AUTHORITY, REGIME_CLEARANCE
 
 logger = logging.getLogger(__name__)
 
@@ -270,7 +270,13 @@ class CancellationAllowed(ValidationRule):
         if not reason:
             problems.append("no reason was given")
 
-        if window is None:
+        if window is None and _text(regime.get("cancellation_basis")) == CANCELLATION_BASIS_AUTHORITY:
+            # The platform publishes the window itself and refuses a late
+            # request with its own code; the adapter reads it when it cancels.
+            # Guessing a day count here would refuse cancellations the
+            # authority still allows, or let through ones it does not.
+            details["cancellation_basis"] = CANCELLATION_BASIS_AUTHORITY
+        elif window is None:
             correction = _text(regime.get("correction_mechanism")) or "a correcting document"
             problems.append(f"{country or 'this country'} has no cancellation flow (correct with {correction})")
             details["correction_mechanism"] = correction
@@ -474,11 +480,29 @@ async def hard_blockers(payload: dict[str, Any]) -> list[RuleResult]:
     """
     context = ValidationContext(data=payload)
     found: list[RuleResult] = []
-    for rule in _EINVOICE_CLEARANCE_RULES:
+    for rule in _gate_rules():
         if rule.severity != Severity.ERROR:
             continue
         found.extend(result for result in await rule.validate(context) if not result.passed)
     return found
+
+
+def _gate_rules() -> list[ValidationRule]:
+    """The module's own rules plus every rule a plugin registered into the set.
+
+    A country adapter package registers its
+    document rules into this rule set. If the hard gate ran only the module's
+    own tuple, those rules would show up as findings and still let the document
+    go, which is the one outcome the gate exists to prevent.
+    """
+    rules: list[ValidationRule] = list(_EINVOICE_CLEARANCE_RULES)
+    seen = {rule.rule_id for rule in rules}
+    registered = rule_registry.get_rules_for_sets([EINVOICE_CLEARANCE_RULE_SET])
+    for rule in sorted(registered, key=lambda r: r.rule_id):
+        if rule.rule_id not in seen:
+            seen.add(rule.rule_id)
+            rules.append(rule)
+    return rules
 
 
 def blocking_findings(results: list[RuleResult]) -> list[RuleResult]:
