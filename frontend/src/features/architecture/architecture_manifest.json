@@ -234991,7 +234991,9 @@
               "name": "site_area_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
-              "nullable": true
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_site_logistics_area.id"
             },
             {
               "name": "created_by",
@@ -235093,7 +235095,9 @@
               "name": "transport_id",
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
-              "nullable": true
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_site_logistics_transport.id"
             },
             {
               "name": "direction",

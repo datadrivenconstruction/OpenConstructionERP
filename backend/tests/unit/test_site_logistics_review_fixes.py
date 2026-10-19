@@ -787,29 +787,33 @@ def test_evidence_items_open_the_plan_of_their_project() -> None:
 # ── integration verdict of 2026-10-13 ───────────────────────────────────────
 
 
-def test_no_table_of_the_previous_release_points_at_a_new_table_by_foreign_key() -> None:
+def test_links_from_the_previous_release_to_a_new_table_are_keys_the_heal_defers() -> None:
     """The upgrade lane: the boot heal alters existing tables before the new ones exist.
 
     A foreign key from the gate, laydown zone or delivery table (all three shipped
-    in the previous release) to a table this release adds is refused on every
-    upgraded install and leaves ``schema_heal_incomplete`` true.
+    in the previous release) to a table v78 added is one the heal cannot issue
+    before ``create_all``; it defers it (``heal_deferred_foreign_keys``). Exactly
+    two such keys exist, both SET NULL, and v98 is the revision that adds them on
+    a database whose chain is walked by hand. Any other one needs the same care.
     """
     from app.modules.site_logistics import models as m
 
     shipped_before = {m.Gate.__tablename__, m.LaydownZone.__tablename__, m.DeliveryBooking.__tablename__}
     line_table = m.DeliveryLine.__tablename__
+    into_new = set()
     for model in (m.Gate, m.LaydownZone, m.DeliveryBooking):
         for fk in model.__table__.foreign_key_constraints:
             target = fk.elements[0].column.table.name
-            assert not target.startswith("oe_site_logistics_") or target in shipped_before | {line_table}, (
-                model.__tablename__,
-                fk.name,
-                target,
-            )
-    assert not m.LaydownZone.__table__.c.site_area_id.foreign_keys
-    assert not m.DeliveryBooking.__table__.c.transport_id.foreign_keys
-    migration = (MODULE.parents[2] / "alembic" / "versions" / "v78_site_logistics_ext.py").read_text(encoding="utf-8")
-    assert "fk_oe_site_zone_area" not in migration and "fk_oe_site_delivery_transport" not in migration
+            if target.startswith("oe_site_logistics_") and target not in shipped_before | {line_table}:
+                into_new.add((model.__tablename__, fk.name, target, fk.ondelete))
+    assert into_new == {
+        (m.LaydownZone.__tablename__, "fk_oe_site_zone_area", m.SiteArea.__tablename__, "SET NULL"),
+        (m.DeliveryBooking.__tablename__, "fk_oe_site_delivery_transport", m.Transport.__tablename__, "SET NULL"),
+    }
+    v78 = (MODULE.parents[2] / "alembic" / "versions" / "v78_site_logistics_ext.py").read_text(encoding="utf-8")
+    assert "fk_oe_site_zone_area" not in v78 and "fk_oe_site_delivery_transport" not in v78
+    v98 = (MODULE.parents[2] / "alembic" / "versions" / "v98_site_logistics_link_keys.py").read_text(encoding="utf-8")
+    assert "fk_oe_site_zone_area" in v98 and "fk_oe_site_delivery_transport" in v98
 
 
 def test_deleting_an_area_or_a_transport_unlinks_what_pointed_at_it() -> None:
