@@ -18,10 +18,11 @@ const ACCEPTANCE = '2026-03-01';
 
 describe('limitationRegime', () => {
   it('ships the four-year and five-year regimes and nothing else', () => {
-    expect(LIMITATION_REGIMES.map((r) => r.code)).toEqual(['de_vob_b', 'de_bgb', 'eg_civil_651']);
+    expect(LIMITATION_REGIMES.map((r) => r.code)).toEqual(['de_vob_b', 'de_bgb', 'eg_civil_651', 'sa_sbc_decennial']);
     expect(limitationRegime('de_vob_b')?.months).toBe(48);
     expect(limitationRegime('de_bgb')?.months).toBe(60);
     expect(limitationRegime('eg_civil_651')?.months).toBe(120);
+    expect(limitationRegime('sa_sbc_decennial')?.months).toBe(120);
   });
 
   it('treats no regime and an unknown regime alike, as no regime', () => {

@@ -43,7 +43,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from app.core.currency_registry import sentence_amount
-from app.core.day_basis import add_days, is_business_day
+from app.core.day_basis import add_days, is_business_day, working_week_for
 
 
 @dataclass(frozen=True)
@@ -202,6 +202,9 @@ def compute_schedule(
         A :class:`ClockSchedule`. A date the statute does not set is ``None``.
     """
     holiday_set = set(holidays)
+    # Business days are counted on the regime country's own week: Sunday to
+    # Thursday in Saudi Arabia, Monday to Friday where the table names none.
+    week = working_week_for(regime.get("country_code"))
     statute = str(regime.get("statute") or "the applicable statute")
     derivation: list[str] = []
 
@@ -209,7 +212,7 @@ def compute_schedule(
     due_days = _int_or_none(regime.get("due_date_days")) or 0
     due_day_basis = str(regime.get("due_date_day_basis") or "calendar")
     due_from = _basis_date(due_basis, application_date, period_end, None)
-    due_date = add_days(due_from, due_days, due_day_basis, holiday_set) if due_from else None
+    due_date = add_days(due_from, due_days, due_day_basis, holiday_set, week) if due_from else None
     if due_date is not None and due_from is not None:
         derivation.append(
             f"Due date {due_date.isoformat()}: {_after_phrase(due_days, due_day_basis, due_basis, due_from)} "
@@ -223,7 +226,7 @@ def compute_schedule(
         notice_day_basis = str(regime.get("payment_notice_day_basis") or "calendar")
         notice_from = _basis_date(notice_basis, application_date, period_end, due_date)
         if notice_from is not None:
-            notice_deadline = add_days(notice_from, notice_days, notice_day_basis, holiday_set)
+            notice_deadline = add_days(notice_from, notice_days, notice_day_basis, holiday_set, week)
             derivation.append(
                 f"Payment notice not later than {notice_deadline.isoformat()}: "
                 f"{_after_phrase(notice_days, notice_day_basis, notice_basis, notice_from)}."
@@ -236,7 +239,7 @@ def compute_schedule(
         final_day_basis = str(regime.get("final_date_day_basis") or "calendar")
         final_from = _basis_date(final_basis, application_date, period_end, due_date)
         if final_from is not None:
-            final_date = add_days(final_from, final_days, final_day_basis, holiday_set)
+            final_date = add_days(final_from, final_days, final_day_basis, holiday_set, week)
             derivation.append(
                 f"Final date for payment {final_date.isoformat()}: "
                 f"{_after_phrase(final_days, final_day_basis, final_basis, final_from)}."
@@ -248,7 +251,7 @@ def compute_schedule(
         pay_less_day_basis = str(regime.get("pay_less_day_basis") or "calendar")
         # Counted backwards from the final date, which is what "not later than
         # N days before the final date for payment" says.
-        pay_less_deadline = add_days(final_date, -pay_less_days, pay_less_day_basis, holiday_set)
+        pay_less_deadline = add_days(final_date, -pay_less_days, pay_less_day_basis, holiday_set, week)
         derivation.append(
             f"Pay-less notice not later than {pay_less_deadline.isoformat()}: "
             f"{_days_phrase(pay_less_days, pay_less_day_basis)} before the final date "

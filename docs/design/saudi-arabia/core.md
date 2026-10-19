@@ -151,6 +151,28 @@ Code Application Law (Royal Decree M/43) Art. 29. Mandatory inherent defects ins
 Resolution 509, from 2020-05-02, initially main cities of five regions) is a data row with its current
 scope flagged for review.
 
+## Implementation notes (as built)
+
+The Saudi regimes live in `contracts/public_procurement_sa.py` and are registered as
+`PUBLIC_WORKS_LIMIT_REGIMES["SA"]`; Egypt's single row in `PUBLIC_WORKS_LIMITS` is untouched. A figure
+may carry `needs_expert_review`, and `limit_value` answers `None` for such a figure, so the whole 2026
+regime is visible and never enforced. The rule reads the tender date from `terms.tender_date`, falls
+back to the contract start date (the latest day the tender can have been floated, which leans towards
+the unenforced regime and so never blocks wrongly), then to today.
+
+The Article 113 trigger is `PRICE_ADJUSTMENT_TRIGGERS["sa_gtpl_ir113"]` with `assess_trigger_claim`,
+kept apart from `PRICE_ADJUSTMENT_REGIMES` so the index formula endpoint and the coefficient rule never
+see it.
+
+The payment clock counted business days Monday to Friday only. `app.core.day_basis.add_days` now takes
+the working week, and `compute_schedule` passes the regime country's week from the table in
+`app.core.calendar` (read, not edited). Every business-day regime shipped before this is in a Monday to
+Friday country, so their dates do not move.
+
+Not built: a payment release gate for the zakat/tax and GOSI certificates of IR Art. 111. The gate
+applies to every contract of a country, Article 111 binds public contracts only, and no certificate
+type for a zakat/tax clearance exists yet. The certificates are named in the release note instead.
+
 ## Test plan (distinguishing cases)
 
 1. Markup: `resolve_region_lines(region_key_for_country("SA"))` has one tax line at 15, every other

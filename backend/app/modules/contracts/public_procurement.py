@@ -34,6 +34,7 @@ Pure data and pure helpers; no ORM, no I/O.
 from __future__ import annotations
 
 import copy
+from datetime import date
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -67,7 +68,22 @@ LIMIT_FIELDS: tuple[str, ...] = (
     "price_adjustment_min_duration_months",
 )
 
+#: Figures a row may carry when its law sets them and Egypt's does not. They
+#: are checked the same way when present and never required.
+OPTIONAL_LIMIT_FIELDS: tuple[str, ...] = (
+    "variation_max_increase_percent_of_contract",
+    "variation_max_decrease_percent_of_contract",
+    "final_invoice_percent_other_contracts",
+)
+
 _FIGURE_KEYS = frozenset({"value", "statute_reference", "source_url", "read_date", "effective_date", "note"})
+#: A figure may also say it ``needs_expert_review``: it is shown and never
+#: enforced, because :func:`limit_value` answers ``None`` for it.
+_OPTIONAL_FIGURE_KEYS = frozenset({"needs_expert_review"})
+
+#: The keys a dated regime carries besides its figures.
+_REGIME_KEYS = frozenset({"regime", "law", "tender_date_from", "tender_date_to", "confidence"})
+_CONFIDENCE = ("confirmed", "needs_expert_review")
 
 
 def _eg(value: Any, reference: str, note: str) -> dict[str, Any]:
@@ -192,6 +208,26 @@ PUBLIC_WORKS_LIMITS: dict[str, dict[str, Any]] = {
     },
 }
 
+#: Countries whose public works law changed: a list of regimes per country,
+#: each bounded by the dates its tenders were floated (``tender_date_from`` and
+#: ``tender_date_to``, inclusive ISO dates or ``None`` for open). The law in
+#: force when the tender was floated keeps governing the contract. A regime
+#: carries ``regime`` (its code), ``law``, ``confidence`` and the figures of
+#: :data:`LIMIT_FIELDS`; a regime known from secondary sources only marks every
+#: figure ``needs_expert_review``. A country lives in this table or in
+#: :data:`PUBLIC_WORKS_LIMITS`, never in both.
+PUBLIC_WORKS_LIMIT_REGIMES: dict[str, list[dict[str, Any]]] = {}
+
+
+def _register_dated_regimes() -> None:
+    # Imported here so the country file stays a plain data module.
+    from app.modules.contracts import public_procurement_sa  # noqa: PLC0415
+
+    PUBLIC_WORKS_LIMIT_REGIMES["SA"] = public_procurement_sa.REGIMES
+
+
+_register_dated_regimes()
+
 #: The price adjustment regime each country's public works use, a code of
 #: :data:`app.modules.contracts.price_adjustment.PRICE_ADJUSTMENT_REGIMES`.
 PUBLIC_WORKS_PRICE_ADJUSTMENT: dict[str, str] = {"EG": "eg_law182_art97"}
@@ -260,8 +296,10 @@ CONTRACTING_SOCIAL_INSURANCE: dict[str, dict[str, Any]] = {
 
 def _check_figure(country: str, field: str, figure: Any) -> None:
     where = f"{country}.{field}"
-    if not isinstance(figure, dict) or set(figure) != _FIGURE_KEYS:
+    if not isinstance(figure, dict) or not _FIGURE_KEYS <= set(figure) <= _FIGURE_KEYS | _OPTIONAL_FIGURE_KEYS:
         raise ValueError(f"{where} must be a figure with {sorted(_FIGURE_KEYS)}")
+    if not isinstance(figure.get("needs_expert_review", False), bool):
+        raise ValueError(f"{where}.needs_expert_review must be true or false")
     if not figure["statute_reference"] or not figure["source_url"] or not figure["note"]:
         raise ValueError(f"{where} must name its statute, source and note")
     value = figure["value"]
@@ -283,30 +321,107 @@ def _validate() -> None:
             raise ValueError(f"{country} must name its law")
         for field in LIMIT_FIELDS:
             _check_figure(country, field, row.get(field))
-        unknown = set(row) - {"law", *LIMIT_FIELDS}
+        for field in OPTIONAL_LIMIT_FIELDS:
+            if field in row:
+                _check_figure(country, field, row[field])
+        unknown = set(row) - {"law", *LIMIT_FIELDS, *OPTIONAL_LIMIT_FIELDS}
         if unknown:
             raise ValueError(f"{country} names fields the table does not have: {sorted(unknown)}")
     for country in PUBLIC_WORKS_PRICE_ADJUSTMENT:
         if country not in PUBLIC_WORKS_LIMITS:
             raise ValueError(f"price adjustment regime for {country!r}, which has no limits row")
+    problems = validate_limit_regimes(PUBLIC_WORKS_LIMIT_REGIMES)
+    if problems:
+        raise ValueError("; ".join(problems))
+
+
+def _iso(raw: Any) -> date | None:
+    return date.fromisoformat(raw) if raw else None
+
+
+def validate_limit_regimes(table: dict[str, list[dict[str, Any]]]) -> list[str]:
+    """Describe everything that makes the dated regimes unsafe to read; empty for a sound table."""
+    problems: list[str] = []
+    for country, regimes in table.items():
+        if len(country) != 2 or not country.isupper():
+            problems.append(f"country key {country!r} is not ISO 3166-1 alpha-2")
+        if country in PUBLIC_WORKS_LIMITS:
+            problems.append(f"{country} has both a single limits row and dated regimes")
+        spans: list[tuple[date, date, str]] = []
+        for regime in regimes:
+            where = f"{country}.{regime.get('regime') or '?'}"
+            if not regime.get("regime") or not regime.get("law"):
+                problems.append(f"{where} must name its code and its law")
+            if regime.get("confidence") not in _CONFIDENCE:
+                problems.append(f"{where}.confidence must be one of {_CONFIDENCE}")
+            try:
+                start = _iso(regime.get("tender_date_from")) or date.min
+                end = _iso(regime.get("tender_date_to")) or date.max
+            except (TypeError, ValueError):
+                problems.append(f"{where} has a tender date that is not an ISO date")
+                continue
+            if end < start:
+                problems.append(f"{where} ends before it starts")
+            spans.append((start, end, where))
+            for field in (*LIMIT_FIELDS, *(f for f in OPTIONAL_LIMIT_FIELDS if f in regime)):
+                try:
+                    _check_figure(where, field, regime.get(field))
+                except ValueError as exc:
+                    problems.append(str(exc))
+            if regime.get("confidence") == "needs_expert_review":
+                unflagged = [
+                    f
+                    for f in (*LIMIT_FIELDS, *OPTIONAL_LIMIT_FIELDS)
+                    if isinstance(regime.get(f), dict) and not regime[f].get("needs_expert_review")
+                ]
+                if unflagged:
+                    problems.append(f"{where} needs expert review but these figures are not flagged: {unflagged}")
+            unknown = set(regime) - _REGIME_KEYS - {*LIMIT_FIELDS, *OPTIONAL_LIMIT_FIELDS}
+            if unknown:
+                problems.append(f"{where} names fields the table does not have: {sorted(unknown)}")
+        spans.sort()
+        for (_, first_end, first), (second_start, _, second) in zip(spans, spans[1:], strict=False):
+            if second_start <= first_end:
+                problems.append(f"{first} and {second} overlap on tender dates")
+    return problems
 
 
 _validate()
 
 
-def public_works_limits(country_code: str | None) -> dict[str, Any] | None:
+def has_public_works_limits(country_code: str | None) -> bool:
+    """Whether ``country_code`` has statutory public works limits, in either table."""
+    code = (country_code or "").strip().upper()
+    return code in PUBLIC_WORKS_LIMITS or code in PUBLIC_WORKS_LIMIT_REGIMES
+
+
+def public_works_limits(country_code: str | None, tender_date: date | None = None) -> dict[str, Any] | None:
     """The statutory public works limits of ``country_code``, or ``None`` when the table has no row.
+
+    A country with dated regimes answers the regime whose tender dates hold
+    ``tender_date``; without a tender date, the regime in force today. A
+    country with a single row answers it for any date.
 
     Returns a copy, so a caller cannot edit the shipped figures.
     """
-    row = PUBLIC_WORKS_LIMITS.get((country_code or "").strip().upper())
+    code = (country_code or "").strip().upper()
+    regimes = PUBLIC_WORKS_LIMIT_REGIMES.get(code)
+    if regimes is not None:
+        when = tender_date or date.today()
+        for regime in regimes:
+            start = _iso(regime.get("tender_date_from")) or date.min
+            end = _iso(regime.get("tender_date_to")) or date.max
+            if start <= when <= end:
+                return copy.deepcopy(regime)
+        return None
+    row = PUBLIC_WORKS_LIMITS.get(code)
     return copy.deepcopy(row) if row is not None else None
 
 
 def limit_value(limits: dict[str, Any] | None, field: str) -> Decimal | None:
     """One figure of a limits row as a ``Decimal``, or ``None`` when the row or the value is absent."""
     figure = (limits or {}).get(field)
-    if not isinstance(figure, dict) or figure.get("value") is None:
+    if not isinstance(figure, dict) or figure.get("value") is None or figure.get("needs_expert_review"):
         return None
     return Decimal(str(figure["value"]))
 
@@ -315,8 +430,12 @@ __all__ = [
     "CONTRACTING_SOCIAL_INSURANCE",
     "CONTRACTOR_CLASSIFICATIONS",
     "LIMIT_FIELDS",
+    "OPTIONAL_LIMIT_FIELDS",
     "PUBLIC_WORKS_LIMITS",
+    "PUBLIC_WORKS_LIMIT_REGIMES",
     "PUBLIC_WORKS_PRICE_ADJUSTMENT",
+    "has_public_works_limits",
     "limit_value",
     "public_works_limits",
+    "validate_limit_regimes",
 ]
