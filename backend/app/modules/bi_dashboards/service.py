@@ -1785,7 +1785,12 @@ class BIDashboardsService:
 
     # ── Benchmark sets ────────────────────────────────────────────
 
-    async def validate_benchmark_definition(self, kpis: list[str], row_filters: list[dict[str, Any]]) -> None:
+    async def validate_benchmark_definition(
+        self,
+        kpis: list[str],
+        row_filters: list[dict[str, Any]],
+        split_by: str | None = None,
+    ) -> None:
         """Refuse a set whose KPIs do not exist or whose row filters do not fit them.
 
         Every KPI must be a preset id or a stored custom KPI code, and every
@@ -1810,6 +1815,7 @@ class BIDashboardsService:
                 )
             try:
                 performance.with_row_filters(spec, row_filters)
+                performance.resolve_split(spec, split_by)
             except _kpi_spec.KPISpecError as exc:
                 # Name the KPI the filter did not fit, keep the rest of the rejection.
                 exc.path = f"kpis.{code}.{exc.path}"
@@ -1836,7 +1842,7 @@ class BIDashboardsService:
     async def create_benchmark_set(
         self, payload: BenchmarkSetCreate, *, owner_user_id: uuid.UUID | None
     ) -> BenchmarkSet:
-        await self.validate_benchmark_definition(payload.kpis, payload.cohort.row_filters)
+        await self.validate_benchmark_definition(payload.kpis, payload.cohort.row_filters, payload.split_by)
         row = BenchmarkSet(
             name=payload.name,
             description=payload.description,
@@ -1848,6 +1854,8 @@ class BIDashboardsService:
             min_projects=payload.min_projects,
             min_records=payload.min_records,
             convert_units=payload.convert_units,
+            split_by=payload.split_by or None,
+            reporting_currency=payload.reporting_currency or None,
         )
         return await self.repo.create_benchmark_set(row)
 
@@ -1862,7 +1870,8 @@ class BIDashboardsService:
         cohort_filters = (
             payload.cohort.row_filters if payload.cohort is not None else (row.cohort_json or {}).get("row_filters", [])
         )
-        await self.validate_benchmark_definition(kpis, cohort_filters)
+        split_by = row.split_by if payload.split_by is None else (payload.split_by or None)
+        await self.validate_benchmark_definition(kpis, cohort_filters, split_by)
         changes = payload.model_dump(exclude_unset=True)
         for key in ("name", "description", "scope", "statistic", "min_projects", "min_records", "convert_units"):
             if key in changes and changes[key] is not None:
@@ -1871,6 +1880,11 @@ class BIDashboardsService:
             row.kpis_json = list(payload.kpis)
         if payload.cohort is not None:
             row.cohort_json = payload.cohort.model_dump(mode="json")
+        # An empty string clears either; absent leaves it as it was.
+        if payload.split_by is not None:
+            row.split_by = payload.split_by or None
+        if payload.reporting_currency is not None:
+            row.reporting_currency = payload.reporting_currency or None
         await self.session.flush()
         return row
 

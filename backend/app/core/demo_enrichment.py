@@ -232,6 +232,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.portal.seed import seed_portal_demo
         from app.modules.portfolio.seed import seed_portfolio_demo
         from app.modules.procurement_concept.seed import seed_procurement_concept_demo
+        from app.modules.progress.seed import seed_position_progress_demo
         from app.modules.project_handbook.seed import seed_project_handbook_demo
         from app.modules.qms.models import ITPPlan
         from app.modules.qms.seed import seed_qms
@@ -348,6 +349,10 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # boot before this list) so plant hours price off a real rental.
             # Self-guards per project on an existing timesheet.
             ("field_time", None, lambda s: seed_field_time_demo(s, _demo_pids)),
+            # Position-level progress for the positions field time just booked
+            # approved hours to, so hours per installed unit has a denominator
+            # on a fresh demo. Self-guards per project on an existing reading.
+            ("progress_positions", None, lambda s: seed_position_progress_demo(s, _demo_pids)),
             # ── Modules that shipped without any startup seeder at all ──
             # Each new seeder below is internally idempotent (it returns an
             # empty dict once its own marker rows already exist), so they are

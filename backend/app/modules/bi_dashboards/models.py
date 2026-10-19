@@ -738,6 +738,13 @@ class BenchmarkSet(Base):
     min_records: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     #: Convert readings in compatible units (m2 and ft2) into one group.
     convert_units: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    #: Split each project's reading by a project attribute (``client``,
+    #: ``region``, ...) or a row field such as ``classification.din276``;
+    #: unset reads one group per unit and currency.
+    split_by: Mapped[str | None] = mapped_column(String(129), nullable=True)
+    #: Restate money in this currency with the platform's FX rates; unset
+    #: keeps every currency apart.
+    reporting_currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
 
 
 __all__ = [

@@ -91,9 +91,21 @@ from app.modules.bi_dashboards.schemas import (
     PerformanceCheckRequest,
     PerformanceCheckResponse,
     PerformanceCohortOptions,
+    PerformanceCompareColumn,
+    PerformanceCompareRequest,
+    PerformanceCompareResponse,
     PerformanceConversion,
+    PerformanceCurrencyConversion,
+    PerformanceDataQualityRequest,
+    PerformanceDataQualityResponse,
+    PerformanceDrilldownRequest,
+    PerformanceDrilldownResponse,
+    PerformanceDrillRecord,
     PerformanceEvidence,
     PerformanceGroup,
+    PerformancePositionContextItem,
+    PerformancePositionContextRequest,
+    PerformancePositionContextResponse,
     PerformancePreset,
     PerformanceProjectLabel,
     PerformanceProjectRow,
@@ -403,7 +415,10 @@ async def performance_cohort_options(user_id: CurrentUserId, session: SessionDep
     of clients is not a list of everyone the company works for.
     """
     accessible = await accessible_project_ids(session, user_id, live_only=True)
-    return PerformanceCohortOptions(**await performance.cohort_options(session, accessible or set()))
+    return PerformanceCohortOptions(
+        **await performance.cohort_options(session, accessible or set()),
+        project_splits=list(performance.PROJECT_SPLITS),
+    )
 
 
 def _spec_error(exc: kpi_spec.KPISpecError) -> HTTPException:
@@ -443,13 +458,36 @@ async def _cohort_projects(session: SessionDep, user_id: str, cohort: BenchmarkC
     """The cohort's projects: requested, narrowed to what the caller may open, then filtered."""
     accessible = await accessible_project_ids(session, user_id, live_only=True)
     projects = performance.resolve_cohort(cohort.project_ids, accessible or set())
+    projects -= set(cohort.exclude_project_ids)
     return await performance.filter_projects(
         session,
         projects,
         clients=cohort.clients,
         regions=cohort.regions,
         project_types=cohort.project_types,
+        statuses=cohort.statuses,
     )
+
+
+def _split_or_error(spec: dict[str, Any], split_by: str | None) -> performance.Split | None:
+    try:
+        return performance.resolve_split(spec, split_by)
+    except kpi_spec.KPISpecError as exc:
+        raise _spec_error(exc) from exc
+
+
+async def _fx_or_none(
+    session: SessionDep, reporting_currency: str | None, on_date: Any = None
+) -> performance.FxRates | None:
+    if not reporting_currency:
+        return None
+    return await performance.load_fx_rates(session, reporting_currency, on_date=on_date)
+
+
+def _unconverted(groups: list[performance.BenchmarkGroup], fx: performance.FxRates | None) -> list[str]:
+    if fx is None:
+        return []
+    return sorted(performance.reading_currencies(groups) - {fx.to_currency})
 
 
 async def _run_benchmark(
@@ -463,8 +501,13 @@ async def _run_benchmark(
     min_projects: int,
     min_records: int,
     statistic: str,
+    split_by: str | None = None,
+    reporting_currency: str | None = None,
+    fx_date: Any = None,
 ) -> PerformanceBenchmarkResponse:
     """One benchmark, from a request or a saved set: the single place both run."""
+    split = _split_or_error(spec, split_by)
+    fx = await _fx_or_none(session, reporting_currency, fx_date)
     projects = await _cohort_projects(session, user_id, cohort)
     groups = await performance.benchmark(
         session,
@@ -473,8 +516,12 @@ async def _run_benchmark(
         period_start=cohort.period_start,
         period_end=cohort.period_end,
         convert=convert_units,
+        split=split,
+        fx=fx,
     )
+    kept, omitted = performance.cap_groups(groups)
     selected = len(projects)
+    with_data = {r.project_id for g in groups for r in g.readings}
     return PerformanceBenchmarkResponse(
         kpi=kpi,
         spec=spec,
@@ -482,13 +529,20 @@ async def _run_benchmark(
         projects_selected=selected,
         projects=[PerformanceProjectLabel(**p) for p in await performance.project_labels(session, projects)],
         groups=[
-            _performance_group(g, selected, statistic=statistic, min_projects=min_projects, min_records=min_records)
-            for g in groups
+            _performance_group(
+                g, selected, spec=spec, statistic=statistic, min_projects=min_projects, min_records=min_records
+            )
+            for g in kept
         ],
         convert_units=convert_units,
         min_projects=min_projects,
         min_records=min_records,
         statistic=statistic,
+        split_by=split.name if split else None,
+        reporting_currency=fx.to_currency if fx else None,
+        currencies_unconverted=_unconverted(groups, fx),
+        groups_omitted=omitted,
+        projects_without_data=max(0, selected - len(with_data)),
     )
 
 
@@ -537,13 +591,23 @@ async def performance_benchmark(
         min_projects=payload.min_projects,
         min_records=payload.min_records,
         statistic=payload.statistic,
+        split_by=payload.split_by,
+        reporting_currency=payload.reporting_currency,
+        fx_date=payload.fx_date,
     )
+
+
+def _variance(value: Decimal | None, lead: Decimal | None) -> Decimal | None:
+    if value is None or lead is None or lead == 0:
+        return None
+    return (value - lead) / lead
 
 
 def _performance_group(
     group: performance.BenchmarkGroup,
     selected: int,
     *,
+    spec: dict[str, Any] | None = None,
     statistic: str = "weighted",
     min_projects: int = 0,
     min_records: int = 0,
@@ -563,6 +627,11 @@ def _performance_group(
                 records=r.records,
                 unavailable_reason=r.unavailable_reason,
                 converted_from=list(r.converted_from),
+                variance=_variance(r.value, lead),
+                converted_from_currency=list(r.converted_from_currency),
+                original_value=r.original_value,
+                original_currency=r.original_currency,
+                fx_rate=r.fx_rate,
             )
             for r in group.readings
         ],
@@ -575,6 +644,10 @@ def _performance_group(
             p75=summary.p75,
             min=summary.minimum,
             max=summary.maximum,
+            p10=summary.p10,
+            p90=summary.p90,
+            stddev=summary.stddev,
+            cv=summary.cv,
         ),
         evidence=PerformanceEvidence(
             projects_with_data=summary.projects_with_data,
@@ -590,6 +663,18 @@ def _performance_group(
         conversions=[
             PerformanceConversion(from_unit=c.from_unit, to_unit=c.to_unit, factor=c.factor) for c in group.conversions
         ],
+        currency_conversions=[
+            PerformanceCurrencyConversion(
+                from_currency=c.from_currency,
+                to_currency=c.to_currency,
+                rate=c.rate,
+                as_of=c.as_of,
+                source=c.source,
+            )
+            for c in group.currency_conversions
+        ],
+        value_unit=performance.value_unit(spec, group.dimensions) if spec else None,
+        excluded=dict(summary.excluded),
         headline=lead,
         headline_statistic=used,
         sufficient=not shortfall,
@@ -613,6 +698,8 @@ def _benchmark_set_read(row: Any, viewer: uuid.UUID | None) -> BenchmarkSetRead:
         min_projects=row.min_projects,
         min_records=row.min_records,
         convert_units=bool(row.convert_units),
+        split_by=row.split_by,
+        reporting_currency=row.reporting_currency,
         is_owner=viewer is not None and row.owner_user_id == viewer,
         created_at=row.created_at,
         updated_at=row.updated_at,
@@ -779,6 +866,8 @@ async def evaluate_benchmark_set(
         min_projects=row.min_projects,
         min_records=row.min_records,
         statistic=row.statistic,
+        split_by=row.split_by,
+        reporting_currency=row.reporting_currency,
     )
 
 
@@ -797,8 +886,16 @@ async def _check_estimate(
     unit: str | None,
     currency: str | None,
     boq_position_id: uuid.UUID | None,
+    split_by: str | None = None,
+    split_value: str | None = None,
+    reporting_currency: str | None = None,
+    fx_date: Any = None,
 ) -> PerformanceCheckResponse:
-    """Place one estimate in a cohort's range: the single place both check routes run."""
+    """Place one estimate in a cohort's range: the single place both check routes run.
+
+    With a split the estimate is compared with the groups of ``split_value``
+    only (a check under the "330" card is against 330, not every m2 job).
+    """
     if boq_position_id is not None:
         accessible = await accessible_project_ids(session, user_id, live_only=True)
         found = await performance.position_estimate(session, boq_position_id, spec, accessible or set())
@@ -809,6 +906,8 @@ async def _check_estimate(
         value, unit, currency = found
     assert value is not None
 
+    split = _split_or_error(spec, split_by)
+    fx = await _fx_or_none(session, reporting_currency, fx_date)
     projects = await _cohort_projects(session, user_id, cohort)
     groups = await performance.benchmark(
         session,
@@ -817,7 +916,17 @@ async def _check_estimate(
         period_start=cohort.period_start,
         period_end=cohort.period_end,
         convert=convert_units,
+        split=split,
+        fx=fx,
     )
+    if split is not None:
+        wanted = split_value if split_value not in ("", kpi_spec.NULL_GROUP_KEY) else None
+        groups = [g for g in groups if g.dimensions.get(split.name) == wanted]
+    if fx is not None and currency and currency.strip().upper() in fx.rates:
+        # An estimate in another currency is compared in the reporting one.
+        rate = fx.rates[currency.strip().upper()]
+        value = value * rate if performance.currency_value_exponent(spec) == 1 else value
+        currency = fx.to_currency
     match = performance.find_group(groups, unit=unit, currency=currency)
     base = {"kpi": code, "input_value": value, "input_unit": unit, "input_currency": currency}
     if match is None:
@@ -839,6 +948,7 @@ async def _check_estimate(
         group=_performance_group(
             group,
             len(projects),
+            spec=spec,
             statistic=statistic,
             min_projects=min_projects,
             min_records=min_records,
@@ -927,7 +1037,273 @@ async def check_against_cohort(
         unit=payload.unit,
         currency=payload.currency,
         boq_position_id=payload.boq_position_id,
+        split_by=payload.split_by,
+        split_value=payload.split_value,
+        reporting_currency=payload.reporting_currency,
+        fx_date=payload.fx_date,
     )
+
+
+@router.post(
+    "/performance/compare",
+    response_model=PerformanceCompareResponse,
+    dependencies=[Depends(RequirePermission("bi.kpi.read"))],
+)
+async def compare_projects(
+    payload: PerformanceCompareRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> PerformanceCompareResponse:
+    """Several KPIs side by side, one row per project and one column per KPI group.
+
+    The cohort is resolved once (requested, narrowed to what the caller may
+    open, filtered) and every KPI is read over exactly that set with one
+    grouped query each, never once per project. A KPI spanning several units
+    or currencies gives one column per group, the largest first, at most
+    :data:`COMPARE_GROUPS_PER_KPI`; the rest are counted.
+    """
+    specs: list[tuple[str, dict[str, Any]]] = []
+    for code in payload.kpis:
+        specs.append(
+            (code, await _resolve_benchmark_spec(session, kpi=code, spec=None, row_filters=payload.row_filters))
+        )
+    fx = await _fx_or_none(session, payload.reporting_currency, payload.fx_date)
+    projects = await _cohort_projects(session, user_id, payload)
+    selected = len(projects)
+    columns: list[PerformanceCompareColumn] = []
+    omitted: dict[str, int] = {}
+    unconverted: set[str] = set()
+    for code, spec in specs:
+        groups = await performance.benchmark(
+            session,
+            spec=spec,
+            cohort=projects,
+            period_start=payload.period_start,
+            period_end=payload.period_end,
+            convert=payload.convert_units,
+            fx=fx,
+        )
+        unconverted.update(_unconverted(groups, fx))
+        kept, extra = performance.cap_groups(groups, COMPARE_GROUPS_PER_KPI)
+        if extra:
+            omitted[code] = extra
+        columns.extend(
+            PerformanceCompareColumn(
+                kpi=code,
+                aggregation=spec["aggregation"],
+                group=_performance_group(
+                    g,
+                    selected,
+                    spec=spec,
+                    statistic=payload.statistic,
+                    min_projects=payload.min_projects,
+                    min_records=payload.min_records,
+                ),
+            )
+            for g in kept
+        )
+    return PerformanceCompareResponse(
+        projects_selected=selected,
+        projects=[PerformanceProjectLabel(**p) for p in await performance.project_labels(session, projects)],
+        columns=columns,
+        groups_omitted=omitted,
+        reporting_currency=fx.to_currency if fx else None,
+        currencies_unconverted=sorted(unconverted),
+        statistic=payload.statistic,
+    )
+
+
+@router.post(
+    "/performance/data-quality",
+    response_model=PerformanceDataQualityResponse,
+    dependencies=[Depends(RequirePermission("bi.kpi.read"))],
+)
+async def performance_data_quality(
+    payload: PerformanceDataQualityRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> PerformanceDataQualityResponse:
+    """How much of the cohort's site data a productivity benchmark can use.
+
+    Counted hours and the share booked against a bill position, priced
+    positions and the share with reported progress, and, for a classification
+    standard, the share of positions carrying a code under it. Over the same
+    cohort a benchmark reads, so the figures describe the evidence behind it.
+    """
+    projects = await _cohort_projects(session, user_id, payload)
+    found = await performance.data_quality(
+        session,
+        projects,
+        period_start=payload.period_start,
+        period_end=payload.period_end,
+        classification_key=payload.classification_key,
+    )
+    return PerformanceDataQualityResponse(**found.__dict__)
+
+
+@router.post(
+    "/performance/drilldown",
+    response_model=PerformanceDrilldownResponse,
+    dependencies=[Depends(RequirePermission("bi.kpi.read"))],
+)
+async def performance_drilldown(
+    payload: PerformanceDrilldownRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> PerformanceDrilldownResponse:
+    """The records behind one project's reading, a page at a time, with totals that reconcile.
+
+    The project must be one the caller may open; any other id is a 404,
+    whether it exists or not. The totals are summed in SQL over every
+    matching record and restated into the group's unit and currency the way
+    the benchmark restated the reading, so they equal that reading's
+    numerator and denominator.
+    """
+    accessible = await accessible_project_ids(session, user_id, live_only=True)
+    if payload.project_id not in (accessible or set()):
+        raise _not_found("Project not found")
+    spec = await _resolve_benchmark_spec(session, kpi=payload.kpi, spec=payload.spec, row_filters=payload.row_filters)
+    split = _split_or_error(spec, payload.split_by)
+    fx = await _fx_or_none(session, payload.reporting_currency, payload.fx_date)
+    try:
+        found = await performance.drilldown(
+            session,
+            spec,
+            project_id=payload.project_id,
+            dimensions=payload.dimensions,
+            split=split,
+            target_unit=payload.target_unit or None,
+            fx=fx,
+            period_start=payload.period_start,
+            period_end=payload.period_end,
+            offset=payload.offset,
+            limit=payload.limit,
+        )
+    except ImportError:
+        found = performance.DrillResult(
+            records=[],
+            total_records=0,
+            numerator=None,
+            denominator=None,
+            value=None,
+            unavailable_reason=kpi_spec.UNAVAILABLE_NO_DATA,
+        )
+    group_dims: dict[str, str | None] = {}
+    if payload.target_unit:
+        group_dims[performance.UNIT_DIMENSION] = payload.target_unit
+    if fx is not None:
+        group_dims[performance.CURRENCY_DIMENSION] = fx.to_currency
+    elif payload.dimensions.get(performance.CURRENCY_DIMENSION):
+        group_dims[performance.CURRENCY_DIMENSION] = payload.dimensions[performance.CURRENCY_DIMENSION][0]
+    return PerformanceDrilldownResponse(
+        project_id=payload.project_id,
+        kpi=payload.kpi,
+        aggregation=spec["aggregation"],
+        total_records=found.total_records,
+        numerator=found.numerator,
+        denominator=found.denominator,
+        value=found.value,
+        unavailable_reason=found.unavailable_reason,
+        value_unit=performance.value_unit(spec, group_dims),
+        offset=payload.offset,
+        limit=payload.limit,
+        records=[
+            PerformanceDrillRecord(
+                record_id=r.record_id,
+                boq_id=_uuid_or_none(r.boq_id),
+                position_id=_uuid_or_none(r.position_id),
+                ref=r.ref,
+                description=r.description,
+                dimensions=r.dimensions,
+                numerator=r.numerator,
+                denominator=r.denominator,
+                counted_numerator=r.counted_numerator,
+                counted_denominator=r.counted_denominator,
+            )
+            for r in found.records
+        ],
+    )
+
+
+def _uuid_or_none(value: str | None) -> uuid.UUID | None:
+    if not value:
+        return None
+    try:
+        return uuid.UUID(str(value))
+    except ValueError:
+        return None
+
+
+@router.post(
+    "/performance/position-context",
+    response_model=PerformancePositionContextResponse,
+    dependencies=[Depends(RequirePermission("bi.kpi.read"))],
+)
+async def performance_position_context(
+    payload: PerformancePositionContextRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> PerformancePositionContextResponse:
+    """Historical context for bill positions, as an extra source of evidence beside market data.
+
+    Each position is compared with past positions carrying the same
+    classification code (under the standard the positions use most, unless one
+    is named) in a unit that is the same or converts, across the projects the
+    caller may open other than the positions' own. Read with one grouped query
+    whatever the number of positions. A position the caller may not open is
+    left out of the answer. Nothing is written: not the position, not its rate.
+    """
+    spec = await _resolve_benchmark_spec(session, kpi=payload.kpi, spec=None, row_filters=[])
+    accessible = await accessible_project_ids(session, user_id, live_only=True)
+    try:
+        key, contexts = await performance.position_context(
+            session,
+            spec,
+            position_ids=payload.position_ids,
+            accessible=accessible or set(),
+            classification_key=payload.classification_key,
+            include_own_projects=payload.include_own_projects,
+            convert=payload.convert_units,
+            statistic=payload.statistic,
+            min_projects=payload.min_projects,
+            min_records=payload.min_records,
+        )
+    except kpi_spec.KPISpecError as exc:
+        raise _spec_error(exc) from exc
+    items: list[PerformancePositionContextItem] = []
+    for ctx in contexts:
+        item = PerformancePositionContextItem(
+            position_id=ctx.position_id,
+            status=ctx.status,
+            classification_code=ctx.classification_code,
+            unit=ctx.unit,
+            currency=ctx.currency,
+            estimate=ctx.estimate,
+        )
+        check = ctx.check
+        if check is not None:
+            summary = check.group.summary or performance.summarise(check.group.readings, spec["aggregation"])
+            item.value = check.value
+            item.value_unit = performance.value_unit(spec, check.group.dimensions)
+            item.headline = check.headline
+            item.statistic = check.statistic
+            item.median = summary.median
+            item.p25 = summary.p25
+            item.p75 = summary.p75
+            item.variance = check.variance
+            item.percentile_rank = check.percentile_rank
+            item.band = check.band
+            item.confidence = check.confidence
+            item.projects = summary.projects_with_value
+            item.records = summary.records_with_value
+            item.shortfall = list(check.shortfall)
+        items.append(item)
+    return PerformancePositionContextResponse(kpi=payload.kpi, classification_key=key, items=items)
+
+
+#: Columns one KPI may contribute to a comparison; a KPI read in m2, m3, m
+#: and pcs is four columns already, and more stop being a comparison.
+COMPARE_GROUPS_PER_KPI = 4
 
 
 @router.post(

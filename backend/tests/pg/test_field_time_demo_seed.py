@@ -248,3 +248,51 @@ async def test_no_two_projects_get_the_same_register(pg_session) -> None:
             f"{name} and {clash} rendered the same register, which is the defect this seed exists to fix"
         )
         seen[key] = name
+
+
+async def test_seeded_hours_and_progress_feed_hours_per_installed_unit(pg_session) -> None:
+    """The field-time seed names positions and the progress seed measures them.
+
+    Together they are what the position-level productivity KPI reads, so a fresh
+    demo shows a value instead of an empty panel.
+    """
+    from app.modules.bi_dashboards import performance
+    from app.modules.progress.seed import seed_position_progress_demo
+
+    project_id = await _make_project(pg_session, "Plant")
+    await seed_field_time_demo(pg_session, [project_id])
+    await pg_session.flush()
+
+    positions = {
+        p.reference_code: p.id
+        for p in (
+            await pg_session.execute(
+                select(Position).join(BOQ, Position.boq_id == BOQ.id).where(BOQ.project_id == project_id)
+            )
+        ).scalars()
+    }
+    lines = (
+        (
+            await pg_session.execute(
+                select(FieldTimesheetLine)
+                .join(FieldTimesheet, FieldTimesheetLine.timesheet_id == FieldTimesheet.id)
+                .where(FieldTimesheet.project_id == project_id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    assert lines
+    for line in lines:
+        assert line.boq_position_id == positions[line.cost_code], "line not linked to the position of its cost code"
+
+    written = await seed_position_progress_demo(pg_session, [project_id])
+    await pg_session.flush()
+    assert written["entries"] >= 1
+
+    groups = await performance.benchmark(
+        pg_session,
+        spec=performance.VALIDATED_PRESETS["labour_hours_per_installed_unit"],
+        cohort={project_id},
+    )
+    assert any(g.summary is not None and g.summary.weighted is not None for g in groups), groups

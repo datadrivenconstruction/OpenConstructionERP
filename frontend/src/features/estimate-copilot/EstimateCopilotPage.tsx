@@ -32,6 +32,7 @@ import {
   PageHeader,
 } from '@/shared/ui';
 import { formatCurrency, toNum } from '@/shared/lib/money';
+import { HistoricalCostPerArea } from '@/features/analytics/HistoricalRange';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import {
@@ -682,6 +683,12 @@ function ConceptualResult({
         </p>
       )}
       {!compact && accuracy.note && <p className="mt-1 text-content-tertiary">{accuracy.note}</p>}
+      {/* Outturn history from your own completed projects, apart from the class range above. */}
+      {!compact && data.cost_per_m2 && data.currency && (
+        <div className="mt-2">
+          <HistoricalCostPerArea costPerArea={toNum(data.cost_per_m2)} currency={data.currency} />
+        </div>
+      )}
     </ResultShell>
   );
 }

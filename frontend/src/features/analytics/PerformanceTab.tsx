@@ -14,15 +14,43 @@
 // A benchmark set is the screen's controls saved under a name: loading one
 // fills the controls, saving stores them. The figures are always computed
 // fresh, over what the reader may open.
+//
+// A split (client, region, work type by classification, ...) turns each value
+// into its own block. Money can be restated in one reporting currency with the
+// platform's FX rates; the original value and the rate stay on every row. Each
+// value opens the records behind it, and the comparison below reads several
+// KPIs side by side for export.
 
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, RefreshCw, Search, Gauge, SlidersHorizontal, Save, Trash2, Scale } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Download,
+  Gauge,
+  ListTree,
+  Plus,
+  RefreshCw,
+  Save,
+  Scale,
+  Search,
+  SlidersHorizontal,
+  Trash2,
+} from 'lucide-react';
 import { Badge, Button, Card, ConfirmDialog, EmptyState, Skeleton } from '@/shared/ui';
 import { fmtList, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
 import { compareNames } from '@/shared/lib/collator';
 import { useToastStore } from '@/stores/useToastStore';
+import { listKpis } from '@/features/bi-dashboards/api';
+import { CustomKpiModal } from '@/features/bi-dashboards/CustomKpiModal';
+import { useProjectStatusLabel } from '@/features/projects/ProjectStatusBadge';
+import { PerformanceCompare } from './PerformanceCompare';
+import { PerformanceDataQuality } from './PerformanceDataQuality';
+import { PerformanceDrilldown, type DrillTarget } from './PerformanceDrilldown';
+import { fmtValue, fmtVariance, prettyUnit } from './performanceFormat';
 import {
   DEFAULT_READING,
   EMPTY_COHORT,
@@ -41,6 +69,7 @@ import {
   fetchPerformancePresets,
   pickKpi,
   rangeBand,
+  sortTableRows,
   tableRows,
   toNumber,
   updateBenchmarkSet,
@@ -48,10 +77,12 @@ import {
   type BenchmarkSet,
   type BenchmarkStatistic,
   type BenchmarkSetWrite,
-  type Decimalish,
   type PerformanceBenchmarkRequest,
   type PerformanceCheckResponse,
+  type PerformanceBenchmarkResponse,
   type PerformanceGroup,
+  type PerformanceProjectRow,
+  type RowSort,
 } from './performance';
 
 export interface PerformanceTabProject {
@@ -65,17 +96,11 @@ const STATISTICS: BenchmarkStatistic[] = ['weighted', 'mean', 'median'];
 const inputClass =
   'h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue';
 
-/** Up to four significant decimals: productivity ratios are small numbers. */
-function fmtValue(value: Decimalish | undefined): string | null {
-  const n = toNumber(value);
-  if (n === null) return null;
-  return fmtNumber(n, Math.abs(n) >= 100 ? 0 : Math.abs(n) >= 1 ? 2 : 4);
-}
-
-/** A unit as an estimator writes it: m2 -> m², m3 -> m³. */
-function prettyUnit(unit: string | null | undefined): string {
-  return (unit ?? '').replace(/(^|[a-z])2$/i, '$1²').replace(/(^|[a-z])3$/i, '$1³');
-}
+/** The select value standing for "split by a classification key", whose key is typed beside it. */
+const CLASSIFICATION_SPLIT = '__classification__';
+const CLASS_PREFIX = 'classification.';
+const CURRENCY_RE = /^[A-Z]{3}$/;
+const CLASS_KEY_RE = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;
 
 export function PerformanceTab({ projects }: { projects: PerformanceTabProject[] }) {
   const { t } = useTranslation();
@@ -101,6 +126,24 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
   const [saveName, setSaveName] = useState('');
   const [saveShared, setSaveShared] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [statuses, setStatuses] = useState<string[]>([]);
+  const [splitBy, setSplitBy] = useState('');
+  const [reportingCurrency, setReportingCurrency] = useState('');
+  const [minRecords, setMinRecords] = useState(DEFAULT_READING.min_records);
+  const [drill, setDrill] = useState<DrillTarget | null>(null);
+  const [kpiModalOpen, setKpiModalOpen] = useState(false);
+  const statusLabel = useProjectStatusLabel();
+
+  const customKpisQuery = useQuery({
+    queryKey: ['bi', 'kpis', 'for-benchmark'],
+    queryFn: () => listKpis(),
+    staleTime: 60_000,
+  });
+  // Only KPIs defined by a spec can be benchmarked; the built-in library is computed differently.
+  const customKpis = useMemo(
+    () => (customKpisQuery.data ?? []).filter((k) => k.formula_ref === 'spec'),
+    [customKpisQuery.data],
+  );
 
   const presetsQuery = useQuery({
     queryKey: ['analytics', 'performance', 'presets'],
@@ -125,22 +168,30 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
       clients,
       regions,
       project_types: projectTypes,
+      statuses,
       row_filters: classificationRowFilters(classKey, classCode),
       period_start: periodStart || null,
       period_end: periodEnd || null,
     }),
-    [selected, clients, regions, projectTypes, classKey, classCode, periodStart, periodEnd],
+    [selected, clients, regions, projectTypes, statuses, classKey, classCode, periodStart, periodEnd],
   );
+  // A half-typed split key or currency is not sent: the screen keeps reading the last valid one.
+  const splitKey = splitBy.startsWith(CLASS_PREFIX) ? splitBy.slice(CLASS_PREFIX.length) : '';
+  const validSplit = splitBy.startsWith(CLASS_PREFIX) ? (CLASS_KEY_RE.test(splitKey) ? splitBy : null) : splitBy || null;
+  const currency = reportingCurrency.trim().toUpperCase();
+  const validCurrency = CURRENCY_RE.test(currency) ? currency : null;
   const request: PerformanceBenchmarkRequest = useMemo(
     () => ({
       ...cohort,
       kpi,
       convert_units: convertUnits,
       min_projects: minProjects,
-      min_records: activeSet?.min_records ?? 0,
+      min_records: minRecords,
       statistic,
+      split_by: validSplit,
+      reporting_currency: validCurrency,
     }),
-    [cohort, kpi, convertUnits, minProjects, statistic, activeSet],
+    [cohort, kpi, convertUnits, minProjects, minRecords, statistic, validSplit, validCurrency],
   );
 
   const benchmarkQuery = useQuery({
@@ -160,13 +211,17 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
     setClients(c.clients);
     setRegions(c.regions);
     setProjectTypes(c.project_types);
+    setStatuses(c.statuses ?? []);
     setClassKey(cls.key);
     setClassCode(cls.code);
     setPeriodStart(c.period_start ?? '');
     setPeriodEnd(c.period_end ?? '');
     setConvertUnits(set.convert_units);
     setMinProjects(set.min_projects);
+    setMinRecords(set.min_records);
     setStatistic(set.statistic);
+    setSplitBy(set.split_by ?? '');
+    setReportingCurrency(set.reporting_currency ?? '');
   };
 
   const definition = (name: string, scope: 'personal' | 'shared', kpis: string[]): BenchmarkSetWrite => ({
@@ -176,8 +231,10 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
     cohort,
     convert_units: convertUnits,
     min_projects: minProjects,
-    min_records: activeSet?.min_records ?? 0,
+    min_records: minRecords,
     statistic,
+    split_by: validSplit,
+    reporting_currency: validCurrency,
   });
 
   const onError = (err: unknown) =>
@@ -205,7 +262,12 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
   const updateMut = useMutation({
     mutationFn: (set: BenchmarkSet) => {
       const kpis = set.kpis.includes(kpi) ? set.kpis : [...set.kpis, kpi].slice(0, 8);
-      const body = definition(set.name, set.scope, kpis);
+      // An empty string clears a saved split or currency; null would leave it as it was.
+      const body = {
+        ...definition(set.name, set.scope, kpis),
+        split_by: validSplit ?? '',
+        reporting_currency: validCurrency ?? '',
+      };
       return updateBenchmarkSet(set.id, body);
     },
     onSuccess: (updated) => {
@@ -239,9 +301,23 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
 
   const toggle = (id: string) =>
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const selectShown = () => setSelected((prev) => Array.from(new Set([...prev, ...visibleProjects.map((p) => p.id)])));
 
   const kpiLabel = useCallback(
-    (key: string) => t(`analytics.perf.kpi.${key}`, { defaultValue: key }),
+    (key: string) => {
+      const custom = customKpis.find((k) => k.code === key);
+      return custom ? custom.name : t(`analytics.perf.kpi.${key}`, { defaultValue: key });
+    },
+    [t, customKpis],
+  );
+  const splitLabel = useCallback(
+    (name: string) =>
+      name.startsWith(CLASS_PREFIX)
+        ? t('analytics.perf.split.classification_key', {
+            defaultValue: 'Work type ({{key}})',
+            key: name.slice(CLASS_PREFIX.length),
+          })
+        : t(`analytics.perf.split.${name}`, { defaultValue: name }),
     [t],
   );
   const statisticLabel = useCallback(
@@ -267,11 +343,13 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
             })
           : name === 'unit'
             ? prettyUnit(value)
-            : value,
+            : name === 'status'
+              ? statusLabel(value)
+              : value,
       );
       return parts.length ? parts.join(' / ') : t('analytics.perf.no_dimension', { defaultValue: 'All rows' });
     },
-    [t],
+    [t, statusLabel],
   );
 
   const data = benchmarkQuery.data;
@@ -296,9 +374,14 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
   }, [data, groupLabel, kpi, reasonLabel, t]);
 
   const presetKeys = presetsQuery.data?.map((p) => p.key) ?? [DEFAULT_KPI];
-  const kpiKeys = activeSet ? Array.from(new Set([...activeSet.kpis, ...presetKeys])) : presetKeys;
+  const allKeys = [...presetKeys, ...customKpis.map((k) => k.code)];
+  const kpiKeys = Array.from(new Set(activeSet ? [...activeSet.kpis, ...allKeys] : allKeys));
   const options = optionsQuery.data;
   const moreCount = activeFilterCount(cohort);
+  const projectSplits = options?.project_splits ?? [];
+  const splitSelect = splitBy.startsWith(CLASS_PREFIX) ? CLASSIFICATION_SPLIT : splitBy;
+  const splitName = validSplit ?? '';
+  const dataQualityKey = splitKey && CLASS_KEY_RE.test(splitKey) ? splitKey : classKey.trim() || null;
 
   return (
     <div className="space-y-4" data-testid="analytics-performance">
@@ -414,6 +497,75 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                 ))}
               </select>
             </label>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Plus size={14} />}
+              onClick={() => setKpiModalOpen(true)}
+              title={t('analytics.perf.new_kpi_hint', {
+                defaultValue: 'Define your own KPI from bill, schedule, timesheet or project fields. It appears in this list.',
+              })}
+            >
+              {t('analytics.perf.new_kpi', { defaultValue: 'New KPI' })}
+            </Button>
+            <label className="flex flex-col gap-1 text-xs text-content-secondary">
+              {t('analytics.perf.split_label', { defaultValue: 'Split by' })}
+              <select
+                value={splitSelect}
+                onChange={(e) =>
+                  setSplitBy(
+                    e.target.value === CLASSIFICATION_SPLIT
+                      ? `${CLASS_PREFIX}${classKey.trim() || 'din276'}`
+                      : e.target.value,
+                  )
+                }
+                className={inputClass}
+                data-testid="analytics-performance-split"
+              >
+                <option value="">{t('analytics.perf.split_none', { defaultValue: 'No split' })}</option>
+                {projectSplits.map((name) => (
+                  <option key={name} value={name}>
+                    {splitLabel(name)}
+                  </option>
+                ))}
+                <option value={CLASSIFICATION_SPLIT}>
+                  {t('analytics.perf.split.classification', { defaultValue: 'Work type (classification)' })}
+                </option>
+              </select>
+            </label>
+            {splitSelect === CLASSIFICATION_SPLIT && (
+              <label className="flex flex-col gap-1 text-xs text-content-secondary">
+                {t('analytics.perf.split_class_key', { defaultValue: 'Standard' })}
+                <input
+                  type="text"
+                  value={splitKey}
+                  maxLength={64}
+                  onChange={(e) => setSplitBy(`${CLASS_PREFIX}${e.target.value.trim()}`)}
+                  aria-invalid={!CLASS_KEY_RE.test(splitKey)}
+                  placeholder="din276"
+                  className={`${inputClass} w-28`}
+                />
+              </label>
+            )}
+            <label
+              className="flex flex-col gap-1 text-xs text-content-secondary"
+              title={t('analytics.perf.currency_hint', {
+                defaultValue:
+                  'Restate money in one currency with the FX rates in Settings. Leave empty to keep each currency apart. Currencies without a rate stay apart and are named.',
+              })}
+            >
+              {t('analytics.perf.currency_label', { defaultValue: 'Reporting currency' })}
+              <input
+                type="text"
+                value={reportingCurrency}
+                maxLength={3}
+                onChange={(e) => setReportingCurrency(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
+                placeholder={t('analytics.perf.currency_placeholder', { defaultValue: 'e.g. EUR' })}
+                aria-invalid={reportingCurrency !== '' && !validCurrency}
+                className={`${inputClass} w-20`}
+                data-testid="analytics-performance-currency"
+              />
+            </label>
             <label className="flex flex-col gap-1 text-xs text-content-secondary">
               {t('analytics.perf.statistic_label', { defaultValue: 'Lead with' })}
               <select
@@ -437,6 +589,17 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                 max={500}
                 value={minProjects}
                 onChange={(e) => setMinProjects(Math.max(0, Math.min(500, Number(e.target.value) || 0)))}
+                className={`${inputClass} w-20`}
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-content-secondary">
+              {t('analytics.perf.min_records', { defaultValue: 'Minimum records' })}
+              <input
+                type="number"
+                min={0}
+                max={1000000}
+                value={minRecords}
+                onChange={(e) => setMinRecords(Math.max(0, Math.min(1000000, Number(e.target.value) || 0)))}
                 className={`${inputClass} w-20`}
               />
             </label>
@@ -498,6 +661,14 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
                 options={options?.project_types ?? []}
                 value={projectTypes}
                 onChange={setProjectTypes}
+                empty={t('analytics.perf.filter_none_recorded', { defaultValue: 'None recorded on your projects' })}
+              />
+              <ValuePicker
+                label={t('analytics.perf.filter_statuses', { defaultValue: 'Project status' })}
+                options={options?.statuses ?? []}
+                value={statuses}
+                onChange={setStatuses}
+                format={statusLabel}
                 empty={t('analytics.perf.filter_none_recorded', { defaultValue: 'None recorded on your projects' })}
               />
               <div className="flex flex-col gap-1 text-xs text-content-secondary">
@@ -565,6 +736,17 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
               >
                 {t('analytics.perf.clear_selection', { defaultValue: 'Use all projects' })}
               </button>
+              <button
+                type="button"
+                className="text-oe-blue hover:underline disabled:opacity-40"
+                onClick={selectShown}
+                disabled={!visibleProjects.length}
+                title={t('analytics.perf.select_shown_hint', {
+                  defaultValue: 'Tick every project the search shows, to compare a cohort you can name.',
+                })}
+              >
+                {t('analytics.perf.select_shown', { defaultValue: 'Select all shown ({{count}})', count: visibleProjects.length })}
+              </button>
               <span className="relative ms-auto">
                 <Search size={12} className="pointer-events-none absolute start-2 top-1/2 -translate-y-1/2 text-content-tertiary" />
                 <input
@@ -588,8 +770,11 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
               </div>
             </div>
           </div>
+          <PerformanceDataQuality cohort={cohort} classificationKey={dataQualityKey} />
         </div>
       </Card>
+
+      {data && <BenchmarkNotices data={data} />}
 
       {benchmarkQuery.isLoading ? (
         <Card>
@@ -627,9 +812,18 @@ export function PerformanceTab({ projects }: { projects: PerformanceTabProject[]
             statisticLabel={statisticLabel}
             minProjects={minProjects}
             request={request}
+            splitName={splitName}
+            onDrill={(row, projectName) => setDrill({ group, row, projectName })}
           />
         ))
       )}
+
+      {kpiKeys.length > 0 && (
+        <PerformanceCompare key={kpi} kpiKeys={kpiKeys} kpiLabel={kpiLabel} request={request} initial={kpi} />
+      )}
+
+      <PerformanceDrilldown target={drill} request={request} kpiLabel={kpiLabel(kpi)} onClose={() => setDrill(null)} />
+      {kpiModalOpen && <CustomKpiModal onClose={() => setKpiModalOpen(false)} />}
 
       <ConfirmDialog
         open={confirmDelete && Boolean(activeSet)}
@@ -652,12 +846,15 @@ function ValuePicker({
   value,
   onChange,
   empty,
+  format,
 }: {
   label: string;
   options: string[];
   value: string[];
   onChange: (next: string[]) => void;
   empty: string;
+  /** Display text for a stored value, such as a translated status. */
+  format?: (value: string) => string;
 }) {
   // A value saved in a set that is no longer on any project the reader can
   // open still shows, ticked, so a filter is never silently dropped.
@@ -678,7 +875,7 @@ function ValuePicker({
                   onChange(value.includes(option) ? value.filter((v) => v !== option) : [...value, option])
                 }
               />
-              <span className="truncate">{option}</span>
+              <span className="truncate">{format ? format(option) : option}</span>
             </label>
           ))}
         </div>
@@ -696,6 +893,8 @@ function PerformanceGroupCard({
   statisticLabel,
   minProjects,
   request,
+  splitName,
+  onDrill,
 }: {
   group: PerformanceGroup;
   title: string;
@@ -705,8 +904,11 @@ function PerformanceGroupCard({
   statisticLabel: (s: BenchmarkStatistic) => string;
   minProjects: number;
   request: PerformanceBenchmarkRequest;
+  splitName: string;
+  onDrill: (row: PerformanceProjectRow, projectName: string) => void;
 }) {
   const { t } = useTranslation();
+  const [sort, setSort] = useState<RowSort>('name');
   const b = group.benchmark;
   const unavailable = t('analytics.perf.unavailable', { defaultValue: 'Unavailable' });
   const leadStat = group.headline_statistic ?? 'weighted';
@@ -716,7 +918,15 @@ function PerformanceGroupCard({
   const p25 = fmtValue(b.p25);
   const p75 = fmtValue(b.p75);
   const coverage = toNumber(group.coverage);
-  const rows = tableRows(group, projects);
+  const rows = sortTableRows(tableRows(group, projects), sort, compareNames);
+  const unit = group.value_unit ? prettyUnit(group.value_unit) : '';
+  const withUnit = (v: string | null) => (v !== null && unit ? `${v} ${unit}` : v);
+  const p10 = fmtValue(b.p10);
+  const p90 = fmtValue(b.p90);
+  const sd = fmtValue(b.stddev);
+  const cv = toNumber(b.cv);
+  const excluded = Object.entries(group.excluded ?? {}).filter(([, n]) => n > 0);
+  const nextSort: Record<RowSort, RowSort> = { name: 'value_desc', value_desc: 'value_asc', value_asc: 'name' };
   const min = toNumber(b.min);
   const max = toNumber(b.max);
   const insufficient = group.sufficient === false;
@@ -726,6 +936,11 @@ function PerformanceGroupCard({
       <div className="border-b border-border-light px-6 py-4">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-base font-semibold text-content-primary">{title}</h3>
+          {unit && (
+            <Badge variant="neutral" size="sm" data-testid="analytics-performance-value-unit">
+              {unit}
+            </Badge>
+          )}
           {insufficient && (
             <Badge variant="warning" size="sm">
               {t('analytics.perf.insufficient', {
@@ -747,11 +962,23 @@ function PerformanceGroupCard({
               .join('; ')}
           </p>
         )}
+        {group.currency_conversions && group.currency_conversions.length > 0 && (
+          <p className="mt-1 text-xs text-content-secondary" data-testid="analytics-performance-fx">
+            {t('analytics.perf.fx_converted', { defaultValue: 'Restated at FX rates:' })}{' '}
+            {group.currency_conversions
+              // Codes, a number, a date and a source name: nothing in it to translate.
+              .map(
+                (c) =>
+                  `1 ${c.from_currency} = ${fmtNumber(toNumber(c.rate) ?? 0, 6)} ${c.to_currency} (${c.as_of ?? '-'}, ${c.source || '-'})`,
+              )
+              .join('; ')}
+          </p>
+        )}
         <div className="mt-3 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
           <Figure
             label={statisticLabel(leadStat)}
             value={
-              lead ??
+              withUnit(lead) ??
               (leadStat === 'weighted'
                 ? `${unavailable} (${reasonLabel(b.weighted_unavailable_reason)})`
                 : unavailable)
@@ -786,15 +1013,56 @@ function PerformanceGroupCard({
             })}
           />
         </div>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-2xs text-content-tertiary" data-testid="analytics-performance-spread">
+          <span>
+            P10 - P90:{' '}
+            {p10 !== null && p90 !== null
+              ? `${p10} - ${p90}`
+              : t('analytics.perf.tails_need', { defaultValue: 'from 10 projects' })}
+          </span>
+          <span>
+            {t('analytics.perf.stddev', { defaultValue: 'Standard deviation' })}: {sd ?? '-'}
+          </span>
+          <span title={t('analytics.perf.cv_hint', { defaultValue: 'Standard deviation over the mean. Above 30 % the projects differ a lot.' })}>
+            {t('analytics.perf.cv', { defaultValue: 'Spread (CV)' })}: {cv === null ? '-' : fmtPercent(cv * 100)}
+          </span>
+          {min !== null && max !== null && (
+            <span>
+              {t('analytics.perf.min_max', { defaultValue: 'Min - max' })}: {fmtValue(b.min)} - {fmtValue(b.max)}
+            </span>
+          )}
+          {excluded.length > 0 && (
+            <span data-testid="analytics-performance-excluded">
+              {t('analytics.perf.excluded', { defaultValue: 'Left out:' })}{' '}
+              {fmtList(excluded.map(([reason, n]) => `${reasonLabel(reason)} ${n}`))}
+            </span>
+          )}
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border-light text-left text-xs text-content-tertiary">
               <th className="px-6 py-2 font-medium">{t('analytics.perf.col_project', { defaultValue: 'Project' })}</th>
-              <th className="px-3 py-2 text-right font-medium">{t('analytics.perf.col_value', { defaultValue: 'Value' })}</th>
+              <th className="px-3 py-2 text-right font-medium">
+                <button
+                  type="button"
+                  onClick={() => setSort(nextSort[sort])}
+                  className="inline-flex items-center gap-1 hover:text-content-primary"
+                  aria-label={t('analytics.perf.sort_by_value', { defaultValue: 'Sort by value' })}
+                >
+                  {t('analytics.perf.col_value', { defaultValue: 'Value' })}
+                  {sort === 'value_desc' ? <ArrowDown size={12} /> : sort === 'value_asc' ? <ArrowUp size={12} /> : <ArrowUpDown size={12} />}
+                </button>
+              </th>
+              <th className="px-3 py-2 text-right font-medium">
+                {t('analytics.perf.col_variance', { defaultValue: 'vs benchmark' })}
+              </th>
               <th className="px-3 py-2 font-medium">{t('analytics.perf.col_range', { defaultValue: 'Against the range' })}</th>
               <th className="px-3 py-2 text-right font-medium">{t('analytics.perf.col_records', { defaultValue: 'Records' })}</th>
+              <th className="px-3 py-2 font-medium">
+                <span className="sr-only">{t('analytics.perf.drill_open', { defaultValue: 'Show records' })}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -804,9 +1072,14 @@ function PerformanceGroupCard({
               const n = toNumber(row?.value);
               const pos = n !== null && min !== null && max !== null && max > min ? ((n - min) / (max - min)) * 100 : 50;
               const from = row?.converted_from ?? [];
+              const variance = fmtVariance(row?.variance);
               return (
                 <tr key={projectId} className="border-b border-border-light last:border-0">
-                  <td className="max-w-[18rem] truncate px-6 py-2 text-content-primary">{name}</td>
+                  <td className="max-w-[18rem] truncate px-6 py-2">
+                    <Link to={`/projects/${projectId}`} className="text-content-primary hover:text-oe-blue hover:underline">
+                      {name}
+                    </Link>
+                  </td>
                   <td className="px-3 py-2 text-right tabular-nums">
                     {value ?? (
                       <span className="text-content-tertiary" title={reasonLabel(row?.unavailable_reason ?? null)}>
@@ -822,7 +1095,18 @@ function PerformanceGroupCard({
                         })}
                       </div>
                     )}
+                    {row?.original_currency && row.original_value != null && (
+                      <div className="text-2xs text-content-tertiary">
+                        {t('analytics.perf.fx_original', {
+                          defaultValue: 'was {{value}} {{currency}} at {{rate}}',
+                          value: fmtValue(row.original_value) ?? '-',
+                          currency: row.original_currency,
+                          rate: fmtNumber(toNumber(row.fx_rate) ?? 0, 6),
+                        })}
+                      </div>
+                    )}
                   </td>
+                  <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{variance ?? '-'}</td>
                   <td className="px-3 py-2">
                     {band ? (
                       <div className="flex items-center gap-2">
@@ -843,13 +1127,25 @@ function PerformanceGroupCard({
                     )}
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{row?.records ?? 0}</td>
+                  <td className="px-3 py-2">
+                    {row && row.records > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        icon={<ListTree size={14} />}
+                        onClick={() => onDrill(row, name)}
+                        aria-label={t('analytics.perf.drill_open', { defaultValue: 'Show records' })}
+                        title={t('analytics.perf.drill_open', { defaultValue: 'Show records' })}
+                      />
+                    )}
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-      <EstimateCheck group={group} request={request} statisticLabel={statisticLabel} />
+      <EstimateCheck group={group} request={request} statisticLabel={statisticLabel} splitName={splitName} />
     </Card>
   );
 }
@@ -859,12 +1155,15 @@ function EstimateCheck({
   group,
   request,
   statisticLabel,
+  splitName,
 }: {
   group: PerformanceGroup;
   request: PerformanceBenchmarkRequest;
   statisticLabel: (s: BenchmarkStatistic) => string;
+  splitName: string;
 }) {
   const { t } = useTranslation();
+  const splitValue = splitName ? (group.dimensions[splitName] ?? null) : null;
   const groupUnit = group.dimensions.unit ?? null;
   const groupCurrency = group.dimensions.currency ?? null;
   const [value, setValue] = useState('');
@@ -876,6 +1175,7 @@ function EstimateCheck({
         value: value.trim().replace(',', '.'),
         unit: unit.trim() || null,
         currency: groupCurrency && groupCurrency !== NULL_GROUP_KEY ? groupCurrency : null,
+        split_value: splitValue === NULL_GROUP_KEY ? null : splitValue,
       }),
   });
   const parsed = Number(value.trim().replace(',', '.'));
@@ -1005,6 +1305,44 @@ function CheckResult({
             records: result.group.evidence.records,
           })}
         </span>
+      )}
+    </div>
+  );
+}
+
+/** What the response left out or could not convert, so a missing block is never a silent one. */
+function BenchmarkNotices({ data }: { data: PerformanceBenchmarkResponse }) {
+  const { t } = useTranslation();
+  const unconverted = data.currencies_unconverted ?? [];
+  const omitted = data.groups_omitted ?? 0;
+  const without = data.projects_without_data ?? 0;
+  if (!unconverted.length && !omitted && !without) return null;
+  return (
+    <div className="space-y-1 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-xs text-content-secondary">
+      {unconverted.length > 0 && (
+        <p>
+          {t('analytics.perf.fx_missing', {
+            defaultValue: 'No FX rate to {{to}} for {{currencies}}: those values stay in their own currency.',
+            to: data.reporting_currency ?? '',
+            currencies: fmtList(unconverted),
+          })}
+        </p>
+      )}
+      {omitted > 0 && (
+        <p>
+          {t('analytics.perf.groups_omitted', {
+            defaultValue: '{{count}} more groups are not shown. Narrow the projects or choose a coarser split.',
+            count: omitted,
+          })}
+        </p>
+      )}
+      {without > 0 && (
+        <p>
+          {t('analytics.perf.projects_without_data', {
+            defaultValue: '{{count}} selected projects have no records for this KPI.',
+            count: without,
+          })}
+        </p>
       )}
     </div>
   );

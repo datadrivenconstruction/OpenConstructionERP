@@ -100,6 +100,8 @@ export interface FeedbackFactor {
   observed_quantity: string;
   confidence: string;
   recommendation: string;
+  /** The bill position this factor reads; null for a line handed in without one. */
+  position_id?: string | null;
 }
 
 export interface ProductivityReport {

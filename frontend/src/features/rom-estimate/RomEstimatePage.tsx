@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent } from '@/shared/ui';
+import { HistoricalCostPerArea } from '@/features/analytics/HistoricalRange';
 import { formatCurrency, toNum } from '@/shared/lib/money';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import {
@@ -548,6 +549,14 @@ function RomResultView({
               })}
             </p>
           </div>
+
+          {/* Your own outturn history, kept apart from the accuracy band above.
+              Only with a real currency: the neutral reference basis is no money to compare. */}
+          {currency && (
+            <div className="mt-4">
+              <HistoricalCostPerArea costPerArea={toNum(result.cost_per_m2)} currency={currency} />
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -247,18 +247,22 @@ async def _project_plant(
 async def _project_cost_codes(
     session: AsyncSession,
     project_id: uuid.UUID,
-) -> list[tuple[str, str]]:
-    """Return ``(cost_code, description)`` drawn from the project's own BOQ.
+) -> list[tuple[str, str, uuid.UUID]]:
+    """Return ``(cost_code, description, position_id)`` drawn from the project's own BOQ.
 
     Uses the exact strings the field-time cost-code rule resolves against
     (``Position.reference_code`` falling back to ``Position.ordinal``), so a
-    seeded line codes to a position the estimate really priced.
+    seeded line codes to a position the estimate really priced. The position
+    id travels with the code so a line can also name the position it was
+    booked to, which is what the position-level productivity KPIs join on.
+    When two positions share a code the first by ordinal wins, the same one
+    the cost-code rule resolves to.
     """
     try:
         from app.modules.boq.models import BOQ, Position
 
         stmt = (
-            select(Position.reference_code, Position.ordinal, Position.description)
+            select(Position.id, Position.reference_code, Position.ordinal, Position.description)
             .join(BOQ, Position.boq_id == BOQ.id)
             .where(BOQ.project_id == project_id)
             .order_by(Position.ordinal)
@@ -267,14 +271,14 @@ async def _project_cost_codes(
     except Exception:
         logger.debug("BOQ lookup unavailable for project=%s", project_id)
         return []
-    out: list[tuple[str, str]] = []
+    out: list[tuple[str, str, uuid.UUID]] = []
     seen: set[str] = set()
-    for reference_code, ordinal, description in rows:
+    for position_id, reference_code, ordinal, description in rows:
         code = str(reference_code or ordinal or "").strip()
         if not code or code in seen:
             continue
         seen.add(code)
-        out.append((code, str(description or "").strip()))
+        out.append((code, str(description or "").strip(), position_id))
     return out
 
 
@@ -327,14 +331,16 @@ def _build_lines(
     day_index: int,
     workers: Sequence[tuple[uuid.UUID, str]],
     plant: Sequence[tuple[uuid.UUID, str]],
-    cost_codes: Sequence[tuple[str, str]],
+    cost_codes: Sequence[tuple[str, str, uuid.UUID]],
     variation_id: uuid.UUID | None,
 ) -> list[FieldTimesheetLineCreate]:
     """Build one day's labour and plant bookings.
 
     A worker books a whole day against one cost code, or splits it across two
     when the gang moved between activities - which is what makes the per-worker
-    daily total, and therefore overtime, worth computing.
+    daily total, and therefore overtime, worth computing. Every line also names
+    the BOQ position its cost code came from, so its hours count towards that
+    position's hours per installed unit.
     """
     lines: list[FieldTimesheetLineCreate] = []
     gang_size = min(len(workers), rng.randint(3, 5))
@@ -342,15 +348,16 @@ def _build_lines(
 
     for resource_id, _name in gang:
         hours = rng.choice(_DAY_HOURS)
-        code, description = rng.choice(cost_codes)
+        code, description, position_id = rng.choice(cost_codes)
         if hours >= Decimal("8") and rng.random() < 0.3:
             # Split the day across two activities: 3 hours on the second code.
-            second_code, second_description = rng.choice(cost_codes)
+            second_code, second_description, second_position_id = rng.choice(cost_codes)
             lines.append(
                 FieldTimesheetLineCreate(
                     resource_id=resource_id,
                     hours=hours - Decimal("3"),
                     cost_code=code,
+                    boq_position_id=position_id,
                     note=description[:200] or None,
                 ),
             )
@@ -359,6 +366,7 @@ def _build_lines(
                     resource_id=resource_id,
                     hours=Decimal("3"),
                     cost_code=second_code,
+                    boq_position_id=second_position_id,
                     note=second_description[:200] or None,
                 ),
             )
@@ -368,18 +376,20 @@ def _build_lines(
                 resource_id=resource_id,
                 hours=hours,
                 cost_code=code,
+                boq_position_id=position_id,
                 note=description[:200] or None,
             ),
         )
 
     if plant and rng.random() < 0.6:
         equipment_id, _plant_name = rng.choice(plant)
-        code, description = rng.choice(cost_codes)
+        code, description, position_id = rng.choice(cost_codes)
         lines.append(
             FieldTimesheetLineCreate(
                 equipment_id=equipment_id,
                 hours=rng.choice(_PLANT_HOURS),
                 cost_code=code,
+                boq_position_id=position_id,
                 note=description[:200] or None,
             ),
         )
@@ -388,12 +398,13 @@ def _build_lines(
     # approval mirrors it onto a signed daywork sheet in Variations.
     if variation_id is not None and day_index % 6 == 3:
         resource_id, _name = rng.choice(workers)
-        code, _description = rng.choice(cost_codes)
+        code, _description, position_id = rng.choice(cost_codes)
         lines.append(
             FieldTimesheetLineCreate(
                 resource_id=resource_id,
                 hours=Decimal("2.5"),
                 cost_code=code,
+                boq_position_id=position_id,
                 is_daywork=True,
                 variation_id=variation_id,
                 note="Instructed additional works, recorded as daywork.",
