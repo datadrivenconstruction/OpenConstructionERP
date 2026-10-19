@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.eac": "Двигател EAC v2",
     "modules.catalog.einvoice": "Електронна фактура",
     "modules.catalog.einvoice_clearance": "Валидиране на електронна фактура",
+    "modules.catalog.einvoice_eta": "Електронно фактуриране ETA (Египет)",
     "modules.catalog.enterprise_workflows": "Корпоративни работни процеси",
     "modules.catalog.equipment": "Управление на оборудване и автопарк",
     "modules.catalog.erp_chat": "ERP чат",

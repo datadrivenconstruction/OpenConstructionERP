@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 इंजन",
     "modules.catalog.einvoice": "ई-इनवॉइस",
     "modules.catalog.einvoice_clearance": "ई-इनवॉइस क्लीयरेंस",
+    "modules.catalog.einvoice_eta": "मिस्र ETA ई-इनवॉइसिंग",
     "modules.catalog.enterprise_workflows": "एंटरप्राइज़ वर्कफ़्लो",
     "modules.catalog.equipment": "उपकरण और बेड़ा प्रबंधन",
     "modules.catalog.erp_chat": "ERP चैट",

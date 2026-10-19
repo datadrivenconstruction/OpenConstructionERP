@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.eac": "Makina ng EAC v2",
     "modules.catalog.einvoice": "E-invoice",
     "modules.catalog.einvoice_clearance": "Pagpapatibay ng E-invoice",
+    "modules.catalog.einvoice_eta": "E-invoicing ng ETA (Egypt)",
     "modules.catalog.enterprise_workflows": "Daloy ng Trabaho ng Kumpanya",
     "modules.catalog.equipment": "Pamamahala ng Kagamitan at Sasakyan",
     "modules.catalog.erp_chat": "Usapang ERP",

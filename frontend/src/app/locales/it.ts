@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.eac": "Motore EAC v2",
     "modules.catalog.einvoice": "Fattura elettronica",
     "modules.catalog.einvoice_clearance": "Convalida fattura elettronica",
+    "modules.catalog.einvoice_eta": "Fatturazione elettronica ETA (Egitto)",
     "modules.catalog.enterprise_workflows": "Flussi di lavoro aziendali",
     "modules.catalog.equipment": "Gestione attrezzature e flotta",
     "modules.catalog.erp_chat": "Chat ERP",

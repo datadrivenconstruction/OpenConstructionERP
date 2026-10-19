@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2-motor",
     "modules.catalog.einvoice": "E-faktura",
     "modules.catalog.einvoice_clearance": "E-fakturavalidering",
+    "modules.catalog.einvoice_eta": "E-fakturering ETA (Egypten)",
     "modules.catalog.enterprise_workflows": "Företagsarbetsflöden",
     "modules.catalog.equipment": "Utrustnings- & fordonsflottshantering",
     "modules.catalog.erp_chat": "ERP-chatt",

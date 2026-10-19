@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 انجن",
     "modules.catalog.einvoice": "ای-انوائس",
     "modules.catalog.einvoice_clearance": "ای انوائس کلیئرنس",
+    "modules.catalog.einvoice_eta": "مصر ETA ای-انوائسنگ",
     "modules.catalog.enterprise_workflows": "انٹرپرائز ورک فلوز",
     "modules.catalog.equipment": "آلات اور فلیٹ کا انتظام",
     "modules.catalog.erp_chat": "ERP چیٹ",

@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.eac": "Движок EAC v2",
     "modules.catalog.einvoice": "Электронный счёт",
     "modules.catalog.einvoice_clearance": "Клиринг электронных счетов-фактур",
+    "modules.catalog.einvoice_eta": "Электронные счета ETA (Египет)",
     "modules.catalog.enterprise_workflows": "Корпоративные процессы",
     "modules.catalog.equipment": "Управление техникой и автопарком",
     "modules.catalog.erp_chat": "ERP-чат",

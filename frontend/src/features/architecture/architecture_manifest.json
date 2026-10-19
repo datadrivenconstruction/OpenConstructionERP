@@ -99148,6 +99148,12 @@
         },
         {
           "method": "POST",
+          "path": "/documents/{document_id}/refresh",
+          "handler": "refresh_clearance_document",
+          "response_model": "SubmissionResponse"
+        },
+        {
+          "method": "POST",
           "path": "/documents/{document_id}/resolve",
           "handler": "resolve_clearance_document",
           "response_model": "DocumentResponse",
@@ -99647,6 +99653,11 @@
             {
               "name": "findings",
               "type": "list[ClearanceFinding]"
+            },
+            {
+              "name": "pending",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -99858,6 +99869,11 @@
             {
               "name": "countries",
               "type": "list[str]"
+            },
+            {
+              "name": "can_poll",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -99907,6 +99923,45 @@
         "einvoice",
         "finance",
         "projects"
+      ]
+    },
+    {
+      "module_id": "einvoice_eta",
+      "module_label": "Egypt ETA e-invoicing",
+      "module_category": "integration",
+      "files": [
+        "__init__.py",
+        "adapter.py",
+        "builder.py",
+        "calculation.py",
+        "checks.py",
+        "client.py",
+        "codes.py",
+        "der.py",
+        "manifest.py",
+        "serialization.py",
+        "signing.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_einvoice_eta",
+        "version": "1.0.0",
+        "display_name": "Egypt ETA e-invoicing",
+        "description": "Clears invoices, credit notes and debit notes with the Egyptian Tax Authority. Builds the ETA v1.0 JSON document from a finance invoice with the published calculation rules, checks it before it leaves, signs it with the company's eSeal through a pluggable signer (USB token or HSM over PKCS#11, or an external signing service) and talks to the ETA API. A plugin of the e-invoice clearance module: it adds no tables and registers an adapter, a document builder and validation rules into that module's registries.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "integration",
+        "depends": [
+          "oe_einvoice_clearance"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [],
+      "routes": [],
+      "schemas": [],
+      "import_dependencies": [
+        "einvoice_clearance",
+        "finance"
       ]
     },
     {
@@ -274791,6 +274846,10 @@
       "finance",
       "projects"
     ],
+    "einvoice_eta": [
+      "einvoice_clearance",
+      "finance"
+    ],
     "engineering_brief": [
       "documents",
       "permits",
@@ -275765,14 +275824,14 @@
     ]
   },
   "statistics": {
-    "backend_modules": 212,
-    "modules_with_manifests": 210,
+    "backend_modules": 213,
+    "modules_with_manifests": 211,
     "total_models": 780,
     "total_columns": 9086,
     "total_relationships": 240,
-    "total_routes": 4592,
+    "total_routes": 4593,
     "total_schemas": 4071,
-    "total_python_files": 2739,
+    "total_python_files": 2751,
     "frontend_features": 209,
     "frontend_ts_files": 3551,
     "frontend_backend_mapped": 187

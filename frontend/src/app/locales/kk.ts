@@ -515,6 +515,7 @@ const resource = {
     "modules.catalog.eac": "EAC v2 қозғалтқышы",
     "modules.catalog.einvoice": "Электрондық шот-фактура",
     "modules.catalog.einvoice_clearance": "Электрондық шот-фактура клиренсі",
+    "modules.catalog.einvoice_eta": "Мысыр ETA электрондық шот-фактура",
     "modules.catalog.enterprise_workflows": "Кәсіпорын Жұмыс Ағындары",
     "modules.catalog.equipment": "Жабдық пен автопарк басқару",
     "modules.catalog.erp_chat": "ERP Чаты",
