@@ -115,7 +115,7 @@
       "reference_rate": {
         "name": "European Central Bank main refinancing operations rate",
         "fixed_on": "first_day_of_half_year",
-        "note": "Business to business (L441-10 II): the rate in force on 1 January applies to the first half-year and the rate in force on 1 July to the second, so this table is exact for commercial debtors. Public buyers (R2192-31) are fixed once, at the first day of the half-year in which interest started to run, and then held for the whole delay. This model cannot hold that, so no public margin is shipped and a public rate answers no_margin_for_debtor_kind until a reviewer decides how to express it."
+        "note": "Business to business (L441-10 II): the rate in force on 1 January applies to the first half-year and the rate in force on 1 July to the second, re-priced per period. Public buyers (R2192-31) are fixed once, at the first day of the half-year in which interest started to run, and held for the whole delay: their margin row says rate_fixing at_delay_start."
       },
       "margins": [
         {
@@ -127,6 +127,16 @@
           "source_url": "https://www.fntp.fr/?p=4008",
           "confidence": "M",
           "note": "Commencement date not read. The rate periods below bound where the figure is used."
+        },
+        {
+          "debtor_kind": "public",
+          "margin_percent": "8.00",
+          "rate_fixing": "at_delay_start",
+          "effective_from": "2019-04-01",
+          "effective_to": null,
+          "statute_reference": "Code de la commande publique R2192-31 (ECB main refinancing rate in force on the first day of the half-year in which the delay started, plus eight points, held for the whole delay)",
+          "source_url": "https://www.fntp.fr/?p=4008",
+          "confidence": "H"
         }
       ],
       "reference_rate_periods": [
@@ -135,7 +145,8 @@
           "effective_to": "2025-12-31",
           "reference_rate_percent": "2.15",
           "published_rates": {
-            "commercial": "12.15"
+            "commercial": "12.15",
+            "public": "10.15"
           },
           "source_url": "https://www.ecb.europa.eu/press/pr/date/2025/html/ecb.mp250605~3b5f67d007.en.html",
           "confidence": "H",
@@ -146,7 +157,8 @@
           "effective_to": "2026-06-30",
           "reference_rate_percent": "2.15",
           "published_rates": {
-            "commercial": "12.15"
+            "commercial": "12.15",
+            "public": "10.15"
           },
           "source_url": "https://www.ecb.europa.eu/press/pr/date/2025/html/ecb.mp250605~3b5f67d007.en.html",
           "confidence": "H"
@@ -156,13 +168,41 @@
           "effective_to": "2026-12-31",
           "reference_rate_percent": "2.40",
           "published_rates": {
-            "commercial": "12.40"
+            "commercial": "12.40",
+            "public": "10.40"
           },
           "source_url": "https://www.fntp.fr/?p=4008",
           "confidence": "M",
           "note": "ECB rate 2.40 percent since 17 June 2026, read in the public works federation half-yearly note (one secondary source), which states the resulting 12.40 percent."
         }
       ],
+      "legal_interest_rates": [
+        {
+          "rate_percent": "2.62",
+          "creditor": "professional",
+          "effective_from": "2026-01-01",
+          "effective_to": "2026-06-30",
+          "statute_reference": "Code monetaire et financier L313-2; half-yearly arrete",
+          "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/A15398",
+          "confidence": "M"
+        },
+        {
+          "rate_percent": "2.75",
+          "creditor": "professional",
+          "effective_from": "2026-07-01",
+          "effective_to": "2026-12-31",
+          "statute_reference": "Arrete of 26 June 2026 (JO 30 June 2026)",
+          "source_url": "https://www.service-public.gouv.fr/particuliers/vosdroits/A15398",
+          "confidence": "H"
+        }
+      ],
+      "agreed_rate_floor": {
+        "debtor_kinds": ["commercial"],
+        "multiple_of_legal_rate": "3",
+        "statute_reference": "Code de commerce L441-10 II: the agreed late payment rate may not be lower than three times the legal interest rate",
+        "source_url": "https://www.fntp.fr/?p=4008",
+        "confidence": "M"
+      },
       "term_caps": [
         {
           "debtor_kind": "commercial",
