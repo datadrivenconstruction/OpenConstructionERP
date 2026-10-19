@@ -36,11 +36,14 @@ async def test_a_regenerated_demo_plan_is_cost_loaded_and_honest_about_its_norms
     schedule = (await pg_session.execute(select(Schedule).where(Schedule.project_id == project_id))).scalars().first()
     assert boq is not None and schedule is not None, "the demo seeded no bill or no schedule"
 
+    # Read the ids before expire_all: an expired attribute would lazy-load
+    # outside the async context.
+    schedule_id, boq_id = schedule.id, boq.id
     service = ScheduleService(pg_session)
-    preview = await service.preview_generation(schedule.id, boq.id)
-    await service.generate_from_boq(schedule.id, boq.id, replace=True)
+    preview = await service.preview_generation(schedule_id, boq_id)
+    await service.generate_from_boq(schedule_id, boq_id, replace=True)
     pg_session.expire_all()
-    rows = list((await pg_session.execute(select(Activity).where(Activity.schedule_id == schedule.id))).scalars())
+    rows = list((await pg_session.execute(select(Activity).where(Activity.schedule_id == schedule_id))).scalars())
     tasks = [a for a in rows if a.activity_type == "task"]
     assert tasks
 
@@ -67,7 +70,7 @@ async def test_a_regenerated_demo_plan_is_cost_loaded_and_honest_about_its_norms
 
     # The S-curve and EVM have something to show the moment the plan exists.
     last_end = max(date.fromisoformat(a.end_date) for a in rows)
-    dashboard = await ScheduleDashboardService(pg_session).dashboard(schedule.id, last_end)
+    dashboard = await ScheduleDashboardService(pg_session).dashboard(schedule_id, last_end)
     assert dashboard.has_cost_data
     assert dashboard.s_curve_data and Decimal(str(dashboard.s_curve_data[-1]["planned_value"])) > 0
 
