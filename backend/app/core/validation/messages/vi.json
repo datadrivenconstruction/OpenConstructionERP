@@ -593,6 +593,20 @@
       "suggestion": "Giới hạn mức điều chỉnh từ -50% đến +200% để tránh giá lô đất không thực tế"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Hạng mục {ordinal} '{description}' ({amount}) đã có đơn giá trong bảng tiên lượng, nhưng không có công việc nào chứa nó, nên chi phí của nó không có trong tiến độ",
+      "suggestion": "Nhập khối lượng cho hạng mục hoặc liên kết với một công việc, rồi tạo lại tiến độ."
+    },
+    "cost_reconciliation": {
+      "fail": "Tiến độ chứa {planned} trong {bill} của bảng tiên lượng: {difference} khối lượng công việc đã có đơn giá không nằm trong công việc nào",
+      "suggestion": "Kiểm tra các hạng mục mà bước kiểm tra độ phủ liệt kê, rồi tạo lại tiến độ."
+    },
+    "duration_vs_norm": {
+      "fail": "Công việc '{activity}' kéo dài {duration} ngày làm việc, trong khi định mức nhân công và máy thi công cho {norm}",
+      "suggestion": "Kiểm tra khối lượng, tổ đội và giờ định mức của hạng mục, hoặc thời lượng đã sửa tay."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Công việc '{activity}' thiếu liên kết logic với {ends} (đầu hở / công việc không được liên kết đầy đủ)",

@@ -144,7 +144,9 @@
       "start_milestone": "Awal Proyek",
       "start_milestone_description": "Tonggak awal proyek",
       "completion_milestone": "Penyelesaian Proyek",
-      "completion_milestone_description": "Tonggak penyelesaian proyek"
+      "completion_milestone_description": "Tonggak penyelesaian proyek",
+      "labour_resource": "Tenaga kerja",
+      "machine_resource": "Alat berat"
     }
   },
   "cad": {

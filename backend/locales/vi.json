@@ -144,7 +144,9 @@
       "start_milestone": "Khởi công dự án",
       "start_milestone_description": "Mốc khởi công dự án",
       "completion_milestone": "Hoàn thành dự án",
-      "completion_milestone_description": "Mốc hoàn thành dự án"
+      "completion_milestone_description": "Mốc hoàn thành dự án",
+      "labour_resource": "Nhân công",
+      "machine_resource": "Máy thi công"
     }
   },
   "cad": {

@@ -144,7 +144,9 @@
       "start_milestone": "Начало проекта",
       "start_milestone_description": "Контрольная точка начала проекта",
       "completion_milestone": "Завершение проекта",
-      "completion_milestone_description": "Контрольная точка завершения проекта"
+      "completion_milestone_description": "Контрольная точка завершения проекта",
+      "labour_resource": "Трудозатраты",
+      "machine_resource": "Машины и механизмы"
     }
   },
   "cad": {

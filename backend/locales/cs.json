@@ -144,7 +144,9 @@
       "start_milestone": "Zahájení projektu",
       "start_milestone_description": "Milník zahájení projektu",
       "completion_milestone": "Dokončení projektu",
-      "completion_milestone_description": "Milník dokončení projektu"
+      "completion_milestone_description": "Milník dokončení projektu",
+      "labour_resource": "Pracovníci",
+      "machine_resource": "Stroje"
     }
   },
   "cad": {

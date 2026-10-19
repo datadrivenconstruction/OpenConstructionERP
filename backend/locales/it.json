@@ -144,7 +144,9 @@
       "start_milestone": "Inizio lavori",
       "start_milestone_description": "Milestone di inizio lavori",
       "completion_milestone": "Fine lavori",
-      "completion_milestone_description": "Milestone di fine lavori"
+      "completion_milestone_description": "Milestone di fine lavori",
+      "labour_resource": "Manodopera",
+      "machine_resource": "Mezzi d'opera"
     }
   },
   "cad": {

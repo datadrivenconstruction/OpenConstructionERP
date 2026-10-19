@@ -593,6 +593,20 @@
       "suggestion": "Gerçekçi olmayan parsel fiyatlarından kaçınmak için düzeltmeleri -%50 ile +%200 arasında sınırlayın"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "{ordinal} numaralı poz '{description}' ({amount}) metrajda fiyatlandırılmış, ancak hiçbir faaliyet onu taşımıyor; bu yüzden maliyeti programda yok",
+      "suggestion": "Poza bir miktar verin veya bir faaliyete bağlayın, ardından programı yeniden oluşturun."
+    },
+    "cost_reconciliation": {
+      "fail": "Program, metrajın {bill} tutarının {planned} kadarını taşıyor: fiyatlandırılmış işin {difference} tutarı hiçbir faaliyette yok",
+      "suggestion": "Kapsam kontrolünün listelediği pozları kontrol edin, ardından programı yeniden oluşturun."
+    },
+    "duration_vs_norm": {
+      "fail": "'{activity}' faaliyeti {duration} iş günü sürüyor, oysa işçilik ve makine normları {norm} veriyor",
+      "suggestion": "Pozun miktarını, ekibini ve norm saatlerini ya da elle değiştirilmiş süreyi kontrol edin."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "'{activity}' faaliyetinde {ends} bağlantısı yok (açık uç / bağlantısız faaliyet)",

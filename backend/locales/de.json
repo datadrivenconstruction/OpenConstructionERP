@@ -144,7 +144,9 @@
       "start_milestone": "Projektstart",
       "start_milestone_description": "Meilenstein für den Projektstart",
       "completion_milestone": "Projektabschluss",
-      "completion_milestone_description": "Meilenstein für den Projektabschluss"
+      "completion_milestone_description": "Meilenstein für den Projektabschluss",
+      "labour_resource": "Lohn",
+      "machine_resource": "Geräte"
     }
   },
   "cad": {

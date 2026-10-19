@@ -144,7 +144,9 @@
       "start_milestone": "प्रोजेक्ट प्रारंभ",
       "start_milestone_description": "प्रोजेक्ट प्रारंभ की माइलस्टोन",
       "completion_milestone": "प्रोजेक्ट समाप्ति",
-      "completion_milestone_description": "प्रोजेक्ट समाप्ति की माइलस्टोन"
+      "completion_milestone_description": "प्रोजेक्ट समाप्ति की माइलस्टोन",
+      "labour_resource": "श्रम",
+      "machine_resource": "मशीनें"
     }
   },
   "cad": {

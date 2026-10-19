@@ -144,7 +144,9 @@
       "start_milestone": "Démarrage du projet",
       "start_milestone_description": "Jalon de démarrage du projet",
       "completion_milestone": "Achèvement du projet",
-      "completion_milestone_description": "Jalon d'achèvement du projet"
+      "completion_milestone_description": "Jalon d'achèvement du projet",
+      "labour_resource": "Main-d'œuvre",
+      "machine_resource": "Matériel"
     }
   },
   "cad": {

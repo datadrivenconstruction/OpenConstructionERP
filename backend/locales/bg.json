@@ -144,7 +144,9 @@
       "start_milestone": "Начало на проекта",
       "start_milestone_description": "Крайъгълен камък за начало на проекта",
       "completion_milestone": "Завършване на проекта",
-      "completion_milestone_description": "Крайъгълен камък за завършване на проекта"
+      "completion_milestone_description": "Крайъгълен камък за завършване на проекта",
+      "labour_resource": "Труд",
+      "machine_resource": "Машини"
     }
   },
   "cad": {

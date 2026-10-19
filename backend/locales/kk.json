@@ -144,7 +144,9 @@
       "start_milestone": "Жобаның басталуы",
       "start_milestone_description": "Жобаның басталу кезеңі",
       "completion_milestone": "Жобаның аяқталуы",
-      "completion_milestone_description": "Жобаның аяқталу кезеңі"
+      "completion_milestone_description": "Жобаның аяқталу кезеңі",
+      "labour_resource": "Жұмыс күші",
+      "machine_resource": "Машиналар"
     }
   },
   "cad": {

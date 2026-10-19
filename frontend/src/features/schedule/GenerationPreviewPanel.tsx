@@ -2,11 +2,12 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Info } from 'lucide-react';
+import { AlertTriangle, CircleAlert, Info } from 'lucide-react';
 import type { TFunction } from 'i18next';
-import { fmtDate } from '@/shared/lib/formatters';
-import type { GenerationNote, GenerationPreview } from './api';
+import { fmtCurrency, fmtDate } from '@/shared/lib/formatters';
+import type { GenerationNote, GenerationPreview, PlanConfidence, PlanCost, PlanValidation } from './api';
 import { isParallelCrewsWarning } from './generateWindow';
+import { bandLabel, confidenceReasonText, formatScore } from './planConfidence';
 
 /** Estimate types that describe a budget rather than a bill to build from. */
 const BUDGET_ESTIMATE_TYPES = new Set(['budget', 'conceptual', 'order_of_magnitude', 'rom', 'preliminary']);
@@ -75,6 +76,16 @@ function noteText(t: TFunction, note: GenerationNote): string {
         defaultValue: '{{count}} working days, a default: no labour, quantity or price to go by.',
         count: days,
       });
+    case 'machine_bound': {
+      const b = note.basis;
+      return t('schedule.preview_note_machine_bound', {
+        defaultValue:
+          '{{days}} working days, set by about {{machineHours}} machine hours on {{machines}} machine(s), longer than the labour needs.',
+        days,
+        machineHours: Math.round(b?.machine_hours ?? 0),
+        machines: b?.machines ?? 1,
+      });
+    }
     case 'spans_works':
       return t('schedule.preview_note_spans_works', {
         defaultValue:
@@ -90,6 +101,155 @@ function noteText(t: TFunction, note: GenerationNote): string {
     default:
       return '';
   }
+}
+
+// How many low-confidence positions and findings are listed before "Show all".
+const REVIEW_SHOWN = 10;
+
+/** The plan's money against the bill: loaded in full, or what is missing. */
+function CostLine({ cost }: { cost: PlanCost }) {
+  const { t } = useTranslation();
+  const complete = cost.unscheduled_positions === 0 && Number(cost.planned_total) === Number(cost.boq_total);
+  return (
+    <p
+      className={`flex items-start gap-2 text-xs ${complete ? 'text-content-secondary' : 'text-semantic-warning'}`}
+      data-testid="generation-preview-cost"
+    >
+      {!complete && <AlertTriangle size={14} className="mt-0.5 shrink-0" />}
+      {complete
+        ? t('schedule.preview_cost_loaded', {
+            defaultValue:
+              'Cost loaded: {{planned}}, the priced total of the bill, spread over the activities. Markups are not included.',
+            planned: fmtCurrency(cost.planned_total, cost.currency),
+          })
+        : t('schedule.preview_cost_partial', {
+            defaultValue:
+              "Cost loaded: {{planned}} of the bill's {{total}}. Positions with a price that are not in the plan: {{missing}}.",
+            planned: fmtCurrency(cost.planned_total, cost.currency),
+            total: fmtCurrency(cost.boq_total, cost.currency),
+            missing: cost.unscheduled_positions,
+          })}
+    </p>
+  );
+}
+
+/** Plan confidence, its spread, and the positions to review first. */
+function ConfidenceSection({ confidence }: { confidence: PlanConfidence }) {
+  const { t } = useTranslation();
+  const [showAll, setShowAll] = useState(false);
+  const items = showAll ? confidence.low : confidence.low.slice(0, REVIEW_SHOWN);
+  const tone =
+    confidence.band === 'high'
+      ? 'text-semantic-success'
+      : confidence.band === 'low'
+        ? 'text-semantic-warning'
+        : 'text-content-primary';
+  return (
+    <div className="space-y-1" data-testid="generation-preview-confidence">
+      <p className="text-xs text-content-secondary">
+        <span className={`font-semibold ${tone}`}>
+          {t('schedule.preview_confidence', {
+            defaultValue: 'Plan confidence: {{score}} ({{band}}).',
+            score: formatScore(confidence.score),
+            band: bandLabel(t, confidence.band),
+          })}
+        </span>{' '}
+        {t('schedule.preview_confidence_counts', {
+          defaultValue: 'Activities by confidence: high {{high}}, medium {{medium}}, low {{low}}.',
+          high: confidence.counts.high,
+          medium: confidence.counts.medium,
+          low: confidence.counts.low,
+        })}{' '}
+        {t('schedule.preview_confidence_explain', {
+          defaultValue:
+            'It says how much of the plan rests on norms rather than rules of thumb, and that the sequence follows the bill. It is not a probability.',
+        })}
+      </p>
+      {confidence.low.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-medium text-content-secondary">
+            {t('schedule.preview_review_first', {
+              defaultValue: 'Review these first, lowest confidence and most money first ({{shown}} of {{total}}):',
+              shown: items.length,
+              total: confidence.low_total,
+            })}
+          </p>
+          <ul className="max-h-48 space-y-1 overflow-y-auto text-xs" data-testid="generation-preview-low-confidence">
+            {items.map((item) => {
+              const why = item.reasons.map((r) => confidenceReasonText(t, r)).find((r) => !!r);
+              return (
+                <li key={item.position_id} className="text-content-secondary">
+                  <span className="rounded bg-semantic-warning/15 px-1 font-mono text-semantic-warning">
+                    {formatScore(item.score)}
+                  </span>{' '}
+                  <span className="font-mono text-content-tertiary">{item.ordinal}</span>{' '}
+                  <span className="text-content-primary">{item.description}</span>
+                  {why ? `: ${why}` : ''}
+                </li>
+              );
+            })}
+          </ul>
+          {!showAll && confidence.low.length > REVIEW_SHOWN && (
+            <button
+              type="button"
+              onClick={() => setShowAll(true)}
+              className="mt-1 text-xs font-medium text-oe-blue hover:underline"
+            >
+              {t('schedule.preview_review_show_all', { defaultValue: 'Show all' })}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** The checks run on the plan before it is written; none of them blocks confirming. */
+function ChecksSection({ validation }: { validation: PlanValidation }) {
+  const { t } = useTranslation();
+  const [showAll, setShowAll] = useState(false);
+  const findings = showAll ? validation.findings : validation.findings.slice(0, REVIEW_SHOWN);
+  const clean = validation.errors === 0 && validation.warnings === 0;
+  return (
+    <div className="space-y-1" data-testid="generation-preview-checks">
+      <p className={`text-xs font-medium ${clean ? 'text-content-secondary' : 'text-content-primary'}`}>
+        {clean
+          ? t('schedule.preview_checks_clean', { defaultValue: 'Checks on the plan: nothing to fix.' })
+          : t('schedule.preview_checks', {
+              defaultValue: 'Checks on the plan. Errors: {{errors}}, warnings: {{warnings}}. They do not stop you confirming.',
+              errors: validation.errors,
+              warnings: validation.warnings,
+            })}
+      </p>
+      {findings.length > 0 && (
+        <ul className="max-h-48 space-y-1 overflow-y-auto text-xs" data-testid="generation-preview-findings">
+          {findings.map((f, i) => (
+            <li
+              key={`${f.rule_id}-${f.position_id ?? i}-${i}`}
+              className={`flex items-start gap-1.5 ${f.severity === 'error' ? 'text-semantic-error' : 'text-content-secondary'}`}
+              title={f.suggestion ?? undefined}
+            >
+              {f.severity === 'error' ? (
+                <CircleAlert size={12} className="mt-0.5 shrink-0" />
+              ) : (
+                <AlertTriangle size={12} className="mt-0.5 shrink-0 text-semantic-warning" />
+              )}
+              <span>{f.message}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {!showAll && validation.findings.length > REVIEW_SHOWN && (
+        <button
+          type="button"
+          onClick={() => setShowAll(true)}
+          className="text-xs font-medium text-oe-blue hover:underline"
+        >
+          {t('schedule.preview_review_show_all', { defaultValue: 'Show all' })}
+        </button>
+      )}
+    </div>
+  );
 }
 
 /**
@@ -238,6 +398,9 @@ export function GenerationPreviewPanel({ preview }: { preview: GenerationPreview
           </p>
         )
       )}
+      {preview.cost && <CostLine cost={preview.cost} />}
+      {preview.confidence && <ConfidenceSection confidence={preview.confidence} />}
+      {preview.validation && <ChecksSection validation={preview.validation} />}
       {preview.notes.length > 0 && (
         <div>
           <p className="mb-1 text-xs font-medium text-content-secondary">

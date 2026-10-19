@@ -144,7 +144,9 @@
       "start_milestone": "Início do projeto",
       "start_milestone_description": "Marco de início do projeto",
       "completion_milestone": "Conclusão do projeto",
-      "completion_milestone_description": "Marco de conclusão do projeto"
+      "completion_milestone_description": "Marco de conclusão do projeto",
+      "labour_resource": "Mão de obra",
+      "machine_resource": "Equipamentos"
     }
   },
   "cad": {

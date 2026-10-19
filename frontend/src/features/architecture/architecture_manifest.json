@@ -220336,6 +220336,7 @@
         "mspdi_export.py",
         "ordering.py",
         "permissions.py",
+        "plan_confidence.py",
         "progress_math.py",
         "progress_models.py",
         "progress_router.py",
@@ -222886,7 +222887,7 @@
             {
               "name": "note",
               "type": "str",
-              "description": "estimated_from_unit, cost_share, default_duration, skipped_zero_qty, empty_section_dropped or blank_row_dropped."
+              "description": "estimated_from_unit, cost_share, default_duration, machine_bound, spans_works, skipped_zero_qty, empty_section_dropped or blank_row_dropped."
             },
             {
               "name": "days",
@@ -222896,7 +222897,7 @@
             {
               "name": "basis",
               "type": "dict[str, Any] | None",
-              "description": "For estimated_from_unit: unit, rate (hours per unit), hours, gang (people), hours_per_day, and capped_by_price with hours_from_unit when the price held the guess down."
+              "description": "For estimated_from_unit: unit, rate (hours per unit), hours, gang (people), hours_per_day, and capped_by_price with hours_from_unit when the price held the guess down. For machine_bound: machine_hours, machines, labour_hours and hours_per_day."
             }
           ]
         },
@@ -223023,6 +223024,21 @@
             {
               "name": "notes",
               "type": "list[GenerationNote]"
+            },
+            {
+              "name": "confidence",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "cost",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "validation",
+              "type": "dict[str, Any] | None",
+              "default": "None"
             }
           ]
         },
@@ -273945,10 +273961,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 71,
+      "ts_files": 73,
       "css_files": 0,
-      "test_files": 30,
-      "total_files": 71
+      "test_files": 31,
+      "total_files": 73
     },
     {
       "name": "schedule-advanced",
@@ -275772,9 +275788,9 @@
     "total_relationships": 240,
     "total_routes": 4592,
     "total_schemas": 4071,
-    "total_python_files": 2739,
+    "total_python_files": 2740,
     "frontend_features": 209,
-    "frontend_ts_files": 3551,
+    "frontend_ts_files": 3553,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

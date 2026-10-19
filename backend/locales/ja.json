@@ -144,7 +144,9 @@
       "start_milestone": "プロジェクト開始",
       "start_milestone_description": "プロジェクト開始マイルストーン",
       "completion_milestone": "プロジェクト完了",
-      "completion_milestone_description": "プロジェクト完了マイルストーン"
+      "completion_milestone_description": "プロジェクト完了マイルストーン",
+      "labour_resource": "労務",
+      "machine_resource": "建設機械"
     }
   },
   "cad": {

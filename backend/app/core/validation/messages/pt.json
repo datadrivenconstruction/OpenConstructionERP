@@ -593,6 +593,20 @@
       "suggestion": "Limite os modificadores a valores entre -50% e +200% para evitar preços de terrenos irrealistas"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "A composição {ordinal} «{description}» ({amount}) está orçada na planilha, mas nenhuma atividade a carrega, então o custo dela não está no cronograma",
+      "suggestion": "Informe uma quantidade para a composição ou vincule-a a uma atividade e gere o cronograma novamente."
+    },
+    "cost_reconciliation": {
+      "fail": "O cronograma contém {planned} dos {bill} da planilha: {difference} dos serviços orçados não estão em nenhuma atividade",
+      "suggestion": "Confira as composições listadas pela verificação de cobertura e gere o cronograma novamente."
+    },
+    "duration_vs_norm": {
+      "fail": "A atividade «{activity}» dura {duration} dias úteis, enquanto os índices de mão de obra e equipamentos resultam em {norm}",
+      "suggestion": "Confira a quantidade, a equipe e as horas de índice da composição, ou uma duração alterada manualmente."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "A atividade «{activity}» não tem ligação lógica de {ends} (extremidade aberta / atividade desconectada)",

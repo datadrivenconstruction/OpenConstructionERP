@@ -593,6 +593,20 @@
       "suggestion": "Beperk prijsaanpassingen tot -50% tot +200% om onrealistische kavelprijzen te voorkomen"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Post {ordinal} '{description}' ({amount}) is geprijsd in het bestek, maar geen activiteit draagt hem, dus de kosten staan niet in de planning",
+      "suggestion": "Geef de post een hoeveelheid of koppel hem aan een activiteit en genereer de planning daarna opnieuw."
+    },
+    "cost_reconciliation": {
+      "fail": "De planning draagt {planned} van de {bill} van het bestek: {difference} van het geprijsde werk staat op geen enkele activiteit",
+      "suggestion": "Controleer de posten die de dekkingscontrole noemt en genereer de planning daarna opnieuw."
+    },
+    "duration_vs_norm": {
+      "fail": "Activiteit '{activity}' duurt {duration} werkdagen, terwijl de normen voor arbeid en materieel {norm} geven",
+      "suggestion": "Controleer hoeveelheid, ploeg en normuren van de post, of een met de hand gewijzigde duur."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Activiteit '{activity}' mist een logische relatie met een {ends} (open einde / losstaande activiteit)",

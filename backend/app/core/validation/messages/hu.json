@@ -593,6 +593,20 @@
       "suggestion": "Az irreális telekárak elkerüléséhez korlátozza a módosítókat -50% és +200% közé"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "A(z) {ordinal}. tétel „{description}” ({amount}) árazott a költségvetésben, de egyetlen tevékenység sem viszi, ezért a költsége nincs benne az ütemtervben",
+      "suggestion": "Adjon a tételnek mennyiséget, vagy kapcsolja tevékenységhez, majd generálja újra az ütemtervet."
+    },
+    "cost_reconciliation": {
+      "fail": "Az ütemterv a költségvetés {bill} összegéből {planned} összeget tartalmaz: az árazott munka {difference} összege egyetlen tevékenységen sincs",
+      "suggestion": "Ellenőrizze a lefedettségi vizsgálat által felsorolt tételeket, majd generálja újra az ütemtervet."
+    },
+    "duration_vs_norm": {
+      "fail": "A(z) „{activity}” tevékenység {duration} munkanapig tart, míg a munkaerő- és gépnormák {norm} napot adnak",
+      "suggestion": "Ellenőrizze a tétel mennyiségét, a brigádot és a normaidőt, vagy a kézzel módosított időtartamot."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "A(z) „{activity}” tevékenységhez hiányzik a következő logikai kapcsolat: {ends} (nyitott végű, be nem kötött tevékenység)",

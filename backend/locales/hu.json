@@ -144,7 +144,9 @@
       "start_milestone": "Projekt kezdete",
       "start_milestone_description": "A projekt kezdetének mérföldköve",
       "completion_milestone": "Projekt befejezése",
-      "completion_milestone_description": "A projekt befejezésének mérföldköve"
+      "completion_milestone_description": "A projekt befejezésének mérföldköve",
+      "labour_resource": "Munkaerő",
+      "machine_resource": "Gépek"
     }
   },
   "cad": {

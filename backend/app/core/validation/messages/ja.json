@@ -593,6 +593,20 @@
       "suggestion": "土地価格が非現実的にならないように、調整率を -50～+200% に制限してください"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "明細 {ordinal}「{description}」（{amount}）は内訳書で単価が付いていますが、どの作業にも割り当てられていないため、その費用が工程表に含まれていません",
+      "suggestion": "明細に数量を入力するか作業に関連付けてから、工程表を再生成してください。"
+    },
+    "cost_reconciliation": {
+      "fail": "工程表には内訳書の {bill} のうち {planned} が含まれています。単価の付いた工事のうち {difference} はどの作業にも載っていません",
+      "suggestion": "網羅チェックが挙げた明細を確認してから、工程表を再生成してください。"
+    },
+    "duration_vs_norm": {
+      "fail": "作業「{activity}」は {duration} 稼働日ですが、労務と機械の歩掛りからは {norm} になります",
+      "suggestion": "明細の数量、作業班、歩掛り時間、または手動で変更した期間を確認してください。"
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "作業「{activity}」に {ends} の論理関係がありません（開放端／未接続の作業）",

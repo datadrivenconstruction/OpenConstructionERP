@@ -9185,6 +9185,220 @@ class ScheduleMissingDuration(ValidationRule):
         return results
 
 
+# ── Schedule 5D (a schedule generated from the estimate, cost-loaded) ───────
+#
+# Registered into "schedule_5d", which ScheduleService._plan_validation passes
+# explicitly with "schedule_quality" on every generation preview and every
+# confirmed generation. The context carries the plan's ``activities`` and the
+# bill's priced positions as ``boq_positions`` (``id``, ``ordinal``,
+# ``description``, ``total`` as a decimal string). Design and thresholds:
+# docs/design/schedule_from_estimate.md, section 3.3.
+
+
+def _get_boq_positions(context: ValidationContext) -> list[dict[str, Any]]:
+    data = context.data
+    rows = data.get("boq_positions") if isinstance(data, dict) else None
+    return [r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
+
+
+def _money(value: Any) -> Decimal | None:
+    if value is None or value == "":
+        return None
+    try:
+        number = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError):
+        return None
+    return number if number.is_finite() else None
+
+
+def _is_task(act: dict[str, Any]) -> bool:
+    return str(act.get("activity_type") or "task").strip().lower() == "task"
+
+
+class Schedule5DBoqCoverage(ValidationRule):
+    """Flags priced bill positions that no activity of the schedule carries.
+
+    A position with money on it that no activity names in ``boq_position_ids``
+    is work the schedule neither times nor cost-loads: its money is missing
+    from BAC, the S-curve and EVM. One finding per such position.
+    """
+
+    rule_id = "schedule_5d.boq_coverage"
+    name = "Schedule BOQ Coverage"
+    standard = "schedule_5d"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags priced BOQ positions that no schedule activity carries, so their cost is not in the plan."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        positions = _get_boq_positions(context)
+        if not positions:
+            return []
+        scheduled: set[str] = set()
+        for act in _get_activities(context):
+            ids = act.get("boq_position_ids")
+            if isinstance(ids, list):
+                scheduled.update(str(pid) for pid in ids)
+        results: list[RuleResult] = []
+        for pos in positions:
+            total = _money(pos.get("total"))
+            if total is None or total == 0:
+                continue
+            pos_id = str(pos.get("id") or "")
+            passed = pos_id in scheduled
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_5d.boq_coverage.fail",
+                    locale=locale,
+                    ordinal=str(pos.get("ordinal") or "?"),
+                    description=str(pos.get("description") or "")[:80],
+                    amount=_fmt_decimal(float(total)),
+                )
+                suggestion = translate("schedule_5d.boq_coverage.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=pos_id,
+                    details={} if passed else {"total": str(total)},
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
+class Schedule5DCostReconciliation(ValidationRule):
+    """Flags a schedule whose task cost does not add up to the bill's priced total.
+
+    The sum of ``cost_planned`` over the tasks is BAC; it has to equal the sum
+    of the bill's priced positions within one cent. Summaries and milestones
+    are not counted: BAC is a plain sum over activities, and a rolled-up
+    summary would count its children twice.
+    """
+
+    rule_id = "schedule_5d.cost_reconciliation"
+    name = "Schedule Cost Reconciliation"
+    standard = "schedule_5d"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Checks that the schedule's planned cost equals the bill's priced total within one cent."
+
+    _TOLERANCE = Decimal("0.01")
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        positions = _get_boq_positions(context)
+        if not positions:
+            return []
+        bill = sum((_money(p.get("total")) or Decimal("0") for p in positions), Decimal("0"))
+        planned = sum(
+            (_money(a.get("cost_planned")) or Decimal("0") for a in _get_activities(context) if _is_task(a)),
+            Decimal("0"),
+        )
+        difference = planned - bill
+        passed = abs(difference) <= self._TOLERANCE
+        if passed:
+            message = _ok(locale)
+            suggestion = None
+        else:
+            message = translate(
+                "schedule_5d.cost_reconciliation.fail",
+                locale=locale,
+                planned=_fmt_decimal(float(planned)),
+                bill=_fmt_decimal(float(bill)),
+                difference=_fmt_decimal(float(abs(difference))),
+            )
+            suggestion = translate("schedule_5d.cost_reconciliation.suggestion", locale=locale)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=passed,
+                message=message,
+                element_ref=None,
+                details=({} if passed else {"planned": str(planned), "bill": str(bill), "difference": str(difference)}),
+                suggestion=suggestion,
+            )
+        ]
+
+
+class Schedule5DDurationVsNorm(ValidationRule):
+    """Flags tasks whose duration is far from what their norms give.
+
+    ``metadata.norm_days`` is the working days the labour and machine norms
+    give at the crew the plan uses, recorded when the plan is generated. A
+    duration more than twice or less than half of it, and more than two
+    working days away, is either squeezed or stretched past the norm, or was
+    changed by hand away from the estimate.
+    """
+
+    rule_id = "schedule_5d.duration_vs_norm"
+    name = "Schedule Duration vs Norm"
+    standard = "schedule_5d"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags tasks whose duration is more than twice or under half of the norm-derived duration."
+
+    _MAX_RATIO = 2.0
+    _MIN_RATIO = 0.5
+    _MIN_GAP_DAYS = 2
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for act in _get_activities(context):
+            if not _is_task(act):
+                continue
+            meta = act.get("metadata")
+            norm = _to_number(meta.get("norm_days")) if isinstance(meta, dict) else None
+            duration = _to_number(act.get("duration_days"))
+            if norm is None or norm is _NOT_A_NUMBER or duration is None or duration is _NOT_A_NUMBER:
+                continue
+            norm_val: float = norm  # type: ignore[assignment]
+            dur_val: float = duration  # type: ignore[assignment]
+            if norm_val <= 0:
+                continue
+            ratio = dur_val / norm_val
+            far = ratio > self._MAX_RATIO or ratio < self._MIN_RATIO
+            passed = not (far and abs(dur_val - norm_val) > self._MIN_GAP_DAYS)
+            if passed:
+                message = _ok(locale)
+                suggestion = None
+            else:
+                message = translate(
+                    "schedule_5d.duration_vs_norm.fail",
+                    locale=locale,
+                    activity=_activity_label(act),
+                    duration=_fmt_decimal(dur_val, places=0),
+                    norm=_fmt_decimal(norm_val, places=0),
+                )
+                suggestion = translate("schedule_5d.duration_vs_norm.suggestion", locale=locale)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=message,
+                    element_ref=act.get("id"),
+                    details={} if passed else {"duration_days": dur_val, "norm_days": norm_val},
+                    suggestion=suggestion,
+                )
+            )
+        return results
+
+
 # ── AI Takeoff (vision-LLM plan reading, issue #194) ────────────────────────
 #
 # The scale-plausibility, self-intersection and low-confidence rules that used
@@ -11747,6 +11961,12 @@ def register_builtin_rules() -> None:
         (ScheduleNegativeFloat(), None),
         (ScheduleHighFloat(), None),
         (ScheduleMissingDuration(), None),
+        # Schedule 5D (generation from the estimate). A set nobody passes never
+        # runs: ScheduleService._plan_validation passes "schedule_5d" on every
+        # generation preview and confirm, pinned by test.
+        (Schedule5DBoqCoverage(), ["schedule_5d"]),
+        (Schedule5DCostReconciliation(), ["schedule_5d"]),
+        (Schedule5DDurationVsNorm(), ["schedule_5d"]),
         # AI Takeoff (vision-LLM plan reading, issue #194)
         # Registered into ai_estimator as well as its own standard. The
         # ai_takeoff set has no caller anywhere in the backend, so a rule that

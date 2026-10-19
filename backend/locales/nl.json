@@ -144,7 +144,9 @@
       "start_milestone": "Projectstart",
       "start_milestone_description": "Mijlpaal voor projectstart",
       "completion_milestone": "Projectafronding",
-      "completion_milestone_description": "Mijlpaal voor projectafronding"
+      "completion_milestone_description": "Mijlpaal voor projectafronding",
+      "labour_resource": "Arbeid",
+      "machine_resource": "Materieel"
     }
   },
   "cad": {

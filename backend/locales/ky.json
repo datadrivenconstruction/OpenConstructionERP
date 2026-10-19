@@ -144,7 +144,9 @@
       "start_milestone": "Долбоордун башталышы",
       "start_milestone_description": "Долбоордун башталуу мезгили",
       "completion_milestone": "Долбоордун аякталышы",
-      "completion_milestone_description": "Долбоордун аяктоо мезгили"
+      "completion_milestone_description": "Долбоордун аяктоо мезгили",
+      "labour_resource": "Эмгек күчү",
+      "machine_resource": "Машиналар"
     }
   },
   "cad": {

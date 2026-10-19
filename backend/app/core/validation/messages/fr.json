@@ -593,6 +593,20 @@
       "suggestion": "Limitez les modificateurs entre -50% et +200% pour éviter des prix de parcelles irréalistes"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Le poste {ordinal} « {description} » ({amount}) est chiffré dans le bordereau, mais aucune activité ne le porte, son coût n'est donc pas dans le planning",
+      "suggestion": "Donnez une quantité au poste ou rattachez-le à une activité, puis régénérez le planning."
+    },
+    "cost_reconciliation": {
+      "fail": "Le planning porte {planned} sur {bill} du bordereau : {difference} des travaux chiffrés ne figurent dans aucune activité",
+      "suggestion": "Vérifiez les postes listés par le contrôle de couverture, puis régénérez le planning."
+    },
+    "duration_vs_norm": {
+      "fail": "L'activité « {activity} » dure {duration} jours ouvrés, alors que les normes de main-d'œuvre et de matériel donnent {norm}",
+      "suggestion": "Vérifiez la quantité, l'équipe et les heures normées du poste, ou une durée modifiée à la main."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "L'activité « {activity} » n'a pas de liaison logique de type {ends} (extrémité ouverte / activité non rattachée)",

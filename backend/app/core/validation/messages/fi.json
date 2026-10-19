@@ -593,6 +593,20 @@
       "suggestion": "Rajaa korjauskertoimet välille -50 % – +200 %, jotta tonttien hinnat pysyvät realistisina"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Nimike {ordinal} '{description}' ({amount}) on hinnoiteltu tarjouslaskennassa, mutta mikään tehtävä ei kanna sitä, joten sen kustannus ei ole aikataulussa",
+      "suggestion": "Anna nimikkeelle määrä tai kytke se tehtävään ja luo aikataulu uudelleen."
+    },
+    "cost_reconciliation": {
+      "fail": "Aikataulu sisältää {planned} määräluettelon {bill}: {difference} hinnoitellusta työstä ei ole millään tehtävällä",
+      "suggestion": "Tarkista kattavuustarkistuksen luettelemat nimikkeet ja luo aikataulu uudelleen."
+    },
+    "duration_vs_norm": {
+      "fail": "Tehtävä '{activity}' kestää {duration} työpäivää, kun työ- ja konenormit antavat {norm}",
+      "suggestion": "Tarkista nimikkeen määrä, työryhmä ja normitunnit tai käsin muutettu kesto."
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "Tehtävältä '{activity}' puuttuu {ends}-kytkentä (avoin pää / irrallinen tehtävä)",

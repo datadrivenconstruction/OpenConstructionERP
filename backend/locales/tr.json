@@ -144,7 +144,9 @@
       "start_milestone": "Proje Başlangıcı",
       "start_milestone_description": "Proje başlangıcı kilometre taşı",
       "completion_milestone": "Proje Tamamlanması",
-      "completion_milestone_description": "Proje tamamlanması kilometre taşı"
+      "completion_milestone_description": "Proje tamamlanması kilometre taşı",
+      "labour_resource": "İşçilik",
+      "machine_resource": "Makineler"
     }
   },
   "cad": {

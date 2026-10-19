@@ -593,6 +593,20 @@
       "suggestion": "请将调整幅度限制在 -50% 至 +200% 之间，避免地块价格失真。"
     }
   },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "清单项 {ordinal}“{description}”（{amount}）在工程量清单中已计价，但没有任何活动承载它，因此其费用不在进度计划中",
+      "suggestion": "为清单项填写工程量或将其关联到某个活动，然后重新生成进度计划。"
+    },
+    "cost_reconciliation": {
+      "fail": "进度计划承载了工程量清单 {bill} 中的 {planned}：已计价工程中有 {difference} 不在任何活动上",
+      "suggestion": "检查覆盖检查列出的清单项，然后重新生成进度计划。"
+    },
+    "duration_vs_norm": {
+      "fail": "活动“{activity}”持续 {duration} 个工作日，而人工和机械定额给出的是 {norm}",
+      "suggestion": "检查清单项的工程量、班组和定额工时，或手动修改过的工期。"
+    }
+  },
   "schedule_quality": {
     "open_ends": {
       "fail": "活动“{activity}”缺少{ends}逻辑关系，形成开口或悬空活动。",

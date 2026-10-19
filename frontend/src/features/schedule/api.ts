@@ -66,6 +66,7 @@ export interface GenerationNote {
     | 'estimated_from_unit'
     | 'cost_share'
     | 'default_duration'
+    | 'machine_bound'
     | 'spans_works'
     | 'skipped_zero_qty'
     | 'empty_section_dropped'
@@ -79,7 +80,73 @@ export interface GenerationNote {
     hours_per_day: number;
     capped_by_price?: boolean;
     hours_from_unit?: number;
+    /** machine_bound: the machine hours that set the length, and the labour beside them. */
+    machine_hours?: number;
+    machines?: number;
+    labour_hours?: number;
   } | null;
+}
+
+/** ``high`` from 0.7, ``medium`` from 0.5, ``low`` below. */
+export type ConfidenceBand = 'high' | 'medium' | 'low';
+
+/** One generated task's confidence, as stored on ``metadata.confidence``. */
+export interface ActivityConfidence {
+  score: number;
+  band: ConfidenceBand;
+  duration: number;
+  logic: number;
+  breakdown: number;
+  /** Stable codes: duration_<source>, capped_by_price, unverified_norm, shortened, logic_*, breakdown_*. */
+  reasons: string[];
+}
+
+/** A task the plan is least sure of, listed for review before confirming. */
+export interface LowConfidenceItem {
+  position_id: string;
+  ordinal: string;
+  description: string;
+  score: number;
+  reasons: string[];
+  /** The position's money, a decimal string. */
+  total: string | null;
+}
+
+/** How much of a generated plan is backed by data. Not a probability. */
+export interface PlanConfidence {
+  score: number;
+  band: ConfidenceBand;
+  counts: { high: number; medium: number; low: number };
+  low: LowConfidenceItem[];
+  low_total: number;
+}
+
+/** The plan's cost loading against the bill. Money as decimal strings. */
+export interface PlanCost {
+  boq_total: string;
+  planned_total: string;
+  loaded_tasks: number;
+  unscheduled_positions: number;
+  currency: string;
+}
+
+/** One failed check on the plan a generation would write. */
+export interface PlanFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info' | string;
+  message: string;
+  suggestion: string | null;
+  position_id: string | null;
+  ordinal: string;
+}
+
+/** schedule_quality and schedule_5d over the plan; findings never block confirming. */
+export interface PlanValidation {
+  rule_sets: string[];
+  errors: number;
+  warnings: number;
+  infos: number;
+  findings: PlanFinding[];
 }
 
 /** What generating from a bill would write; nothing is written until a person confirms. */
@@ -117,6 +184,9 @@ export interface GenerationPreview {
   /** Contract payment instalments that lose their milestone and go back to their contract dates. */
   instalments_unlinked?: number;
   notes: GenerationNote[];
+  confidence?: PlanConfidence | null;
+  cost?: PlanCost | null;
+  validation?: PlanValidation | null;
 }
 
 /** What deleting a schedule takes with it. */
