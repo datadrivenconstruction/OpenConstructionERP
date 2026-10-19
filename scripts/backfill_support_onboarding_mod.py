@@ -4,6 +4,7 @@ Source of truth: frontend/src/app/locales/en.ts (134 keys missing in each target
 Anchor for insertion: line containing "onboarding.mod_collaboration_desc" in each target.
 
 Run:  python scripts/backfill_support_onboarding_mod.py
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 from __future__ import annotations

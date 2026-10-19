@@ -1,4 +1,7 @@
-"""‌⁠‍Add users module translations to all 20 locale files."""
+"""‌⁠‍Add users module translations to all 20 locale files.
+
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
+"""
 
 import json
 import os

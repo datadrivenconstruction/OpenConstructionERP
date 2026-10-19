@@ -6,6 +6,7 @@ left sidebar and the breadcrumb.
 
 Idempotent: if the key is already present in a locale, that file is
 skipped. Backups are not made — this is a tracked file in git.
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 from __future__ import annotations

@@ -7,6 +7,7 @@ after pass 1. These are mostly:
   - "e.g." placeholders
   - "Showing {{count}} X" patterns
   - field names like "Inspector", "Chairperson"
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 from __future__ import annotations
 

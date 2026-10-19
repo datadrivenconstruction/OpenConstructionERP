@@ -9,6 +9,7 @@ Translations were sourced for the 6 languages where I have high confidence
 (en/de/ru/fr/es/pt/it/zh/ja already partially covered) and English-fallback
 strings were left in place for the rest with a `// TODO: translate` marker so
 they're easy to grep.
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 from __future__ import annotations

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """‌⁠‍Pass 5: Replace heavily-mixed long descriptive sentences with proper
 full Mongolian translations. These are mostly the marketing/landing
-paragraphs in the 'about' section and long descriptive labels."""
+paragraphs in the 'about' section and long descriptive labels.
+
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
+"""
 from __future__ import annotations
 
 import json

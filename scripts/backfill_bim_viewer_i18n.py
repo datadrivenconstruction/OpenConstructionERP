@@ -12,6 +12,7 @@ Usage:
 After running, verify:
     cd frontend && npx tsc --noEmit
     grep -c "bim.geometry_load_failed" frontend/src/app/locales/*.ts  # → 27
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 from __future__ import annotations

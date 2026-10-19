@@ -5,6 +5,7 @@ construction/UI dictionary. EN is already done in en.ts.
 
 Anchor: existing line `"match_elements.trade_filter":` — insert the
 six new lines RIGHT AFTER it so the file stays diff-friendly.
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 from __future__ import annotations

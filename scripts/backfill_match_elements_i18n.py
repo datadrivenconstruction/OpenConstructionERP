@@ -6,6 +6,7 @@ project-context bar, session resume picker, settings rail, confidence
 legend, trade filter, apply-to-BOQ flow, and a few group-row hints.
 
 Idempotent: skips keys already present in a locale file.
+Deprecated one-off: for new work use scripts/i18n.py (get/add/set/missing/rename/export/import).
 """
 
 from __future__ import annotations

@@ -195,6 +195,8 @@ English. Lint passes. The type check passes. The build passes. The tests pass. T
 When you add a string, add it to every locale, or use the translation tooling to do so, and
 verify by switching language rather than by watching a gate go green.
 
+Do not open or hand-edit the locale bundles; they run 4 to 9 MB each. Use `scripts/i18n.py`: `get KEY [--lang xx]`, `add KEY --en "..." [--de "..."]`, `set KEY --lang xx "..."`, `missing --lang xx [--prefix p]`, `rename OLD NEW`, and `export` / `import` for a translator working on a small JSON file instead of the bundle. It touches only the lines it changes, places a new key next to its namespace siblings, and leaves the rest of the file byte-identical.
+
 Counting the languages is worth doing carefully, because the obvious numbers disagree and every
 one of them is correct about something. There are 45 locale files in `frontend/src/app/locales/`,
 44 entries in the `SUPPORTED_LANGUAGES` list in `frontend/src/app/i18n.ts`, and 38 distinct
