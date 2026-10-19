@@ -120,3 +120,14 @@ def test_other_country_is_untouched():
         data={"document": {"invoice_date": "2026-10-01"}, "profile": {"country": "DE"}, "regime": {"country": "DE"}}
     )
     assert all(r.passed for r in asyncio.run(InvoiceMentionsRequired().validate(ctx)))
+
+
+def test_meta_offers_the_mention_inputs_without_making_them_mandatory():
+    from app.modules.einvoice_clearance import regimes
+
+    flat = regimes.regime_as_dict(regimes.COUNTRY_REGIMES["FR"])
+    assert {"customer_siren", "delivery_differs", "insurance_mention"} <= set(flat["optional_document_fields"])
+    assert not set(flat["optional_document_fields"]) & set(flat["document_fields"])
+    assert flat["profile_setting_fields"] == ["company_size", "vat_on_debits_option"]
+    assert flat["company_sizes"] == ["ge", "eti", "pme", "micro"]
+    assert regimes.regime_as_dict(regimes.COUNTRY_REGIMES["DE"])["optional_document_fields"] == []

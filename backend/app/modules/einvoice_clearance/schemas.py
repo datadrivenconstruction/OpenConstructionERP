@@ -393,6 +393,9 @@ class CountryRegimeResponse(BaseModel):
     en16931_profile: str
     profile_fields: list[str]
     document_fields: list[str]
+    optional_document_fields: list[str] = Field(default_factory=list)
+    profile_setting_fields: list[str] = Field(default_factory=list)
+    company_sizes: list[str] = Field(default_factory=list)
     cancellation_window_days: int | None
     is_cancellable: bool
     correction_mechanism: str
