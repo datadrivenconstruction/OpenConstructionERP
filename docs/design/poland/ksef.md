@@ -227,3 +227,11 @@ text ships next to them.
   payment creation is a change to the finance module and is left for a reviewed follow-up.
 * Many document rules read `country_fields.ksef`. Fields the operator never fills (an Annex 15
   flag, a PKWiU code) are not guessed, so the split payment rule only knows what it is told.
+* NIP checksums come from the shared `app.core.party_identifiers` check (scheme `nip`). Where it is
+  not installed, or its rule awaits expert review, `pl_ksef_nip_unchecked` warns and nothing blocks.
+* The finance invoice may carry a split payment marker in `metadata["split_payment"]`, written by
+  the Polish core pack. P_18A is still decided from the Annex 15 lines and the gross; the marker is a
+  cross-check, and a disagreement stops the build rather than picking a side.
+* The 2027 penalties are maximums (100% of VAT, 18.7% of gross where there is no VAT), stored on the
+  regime row under `extra["penalties"]`. The legal basis (VAT Act art. 106ni) is read from a Sejm
+  interpellation answer, not from the act itself.

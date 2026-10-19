@@ -22,6 +22,10 @@ the gate runs every rule of the set on every country.
       issued offline has to be in KSeF, and whether that day has passed.
 * ``einvoice_clearance.pl_ksef_annex_15_hint``   WARNING. A construction PKWiU
       on a line not marked Annex 15.
+* ``einvoice_clearance.pl_ksef_nip``            ERROR. The seller and buyer NIP
+      pass the shared party identifier check.
+* ``einvoice_clearance.pl_ksef_nip_unchecked``  WARNING. That check is not
+      installed, or its rule awaits expert review.
 
 One rule registers into the ``finance`` set:
 
@@ -275,6 +279,106 @@ class KsefStructure(_KsefRule):
                         element_ref=doc_id,
                         suggestion="Copy the KSeF number from the corrected invoice's UPO.",
                         details={"ksef_number": number},
+                    )
+                )
+        return found or [self._ok()]
+
+
+# ── NIP ──────────────────────────────────────────────────────────────────────
+
+
+def _nip_checker() -> Any:
+    """The shared party identifier check, or ``None`` where it is not installed.
+
+    The NIP checksum belongs to ``app.core.party_identifiers`` (scheme ``nip``
+    for PL), not to this module, so it is written once for every caller.
+    """
+    try:
+        from app.core.party_identifiers import check
+    except ImportError:
+        return None
+    return check
+
+
+def _field(result: Any, name: str) -> Any:
+    return result.get(name) if isinstance(result, dict) else getattr(result, name, None)
+
+
+def nip_verdict(value: str) -> tuple[bool | None, str, bool]:
+    """``(valid, why, firm)``; ``valid`` is ``None`` when nothing checked it.
+
+    ``firm`` is False when the shared check marks its own rule for expert
+    review: an unconfirmed rule warns and does not block.
+    """
+    check = _nip_checker()
+    result = check(COUNTRY, "nip", value) if check is not None else None
+    if result is None:
+        return None, "", False
+    valid = _field(result, "valid")
+    if valid is None:
+        return None, "", False
+    details = _field(result, "details")
+    review = details.get("needs_expert_review") if isinstance(details, dict) else None
+    firm = str(review).strip().lower() not in ("yes", "true", "1")
+    return bool(valid), str(_field(result, "reason") or ""), firm
+
+
+def _document_nips(context: ValidationContext) -> list[tuple[str, str]]:
+    text = _payload_text(context)
+    if not text:
+        return []
+    try:
+        summary = fa3.read_summary(text)
+    except fa3.Fa3BuildError:
+        return []
+    return [(who, nip) for who, nip in (("seller", summary.seller_nip), ("buyer", summary.buyer_nip)) if nip]
+
+
+class KsefNipValid(_KsefRule):
+    rule_id = "einvoice_clearance.pl_ksef_nip"
+    name = "Seller And Buyer NIP Are Valid"
+    severity = Severity.ERROR
+    category = RuleCategory.STRUCTURE
+    description = "KSeF refuses an invoice whose NIP fails its checksum."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is_polish(context) or _intent(context) == "cancel":
+            return [self._ok()]
+        found = []
+        for who, nip in _document_nips(context):
+            valid, why, firm = nip_verdict(nip)
+            if valid is False and firm:
+                found.append(
+                    self._fail(
+                        f"The {who} NIP {nip} is not valid{f': {why}' if why else ''}.",
+                        element_ref=_document_id(context),
+                        suggestion=f"Correct the {who}'s NIP and rebuild the document.",
+                        details={"party": who, "nip": nip, "reason": why},
+                    )
+                )
+        return found or [self._ok()]
+
+
+class KsefNipUnchecked(_KsefRule):
+    rule_id = "einvoice_clearance.pl_ksef_nip_unchecked"
+    name = "NIP Not Checked"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "No NIP check is installed, or its rule awaits expert review, so the NIP went unchecked."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        if not _is_polish(context) or _intent(context) == "cancel":
+            return [self._ok()]
+        found = []
+        for who, nip in _document_nips(context):
+            valid, why, firm = nip_verdict(nip)
+            if valid is None or (valid is False and not firm):
+                found.append(
+                    self._fail(
+                        f"The {who} NIP {nip} was not checked"
+                        + (f"; the check, still under review, says: {why}." if valid is False else "."),
+                        element_ref=_document_id(context),
+                        details={"party": who, "nip": nip},
                     )
                 )
         return found or [self._ok()]
@@ -543,6 +647,8 @@ _DOCUMENT_RULES: tuple[ValidationRule, ...] = (
     KsefNumberFormat(),
     KsefOfflineDeadline(),
     KsefAnnex15Hint(),
+    KsefNipValid(),
+    KsefNipUnchecked(),
 )
 _FINANCE_RULES: tuple[ValidationRule, ...] = (KsefNumberInPaymentTitle(),)
 
@@ -582,6 +688,8 @@ __all__ = [
     "KSEF_FORMATS",
     "RECORD_PAYMENT",
     "KsefAnnex15Hint",
+    "KsefNipUnchecked",
+    "KsefNipValid",
     "KsefNumberFormat",
     "KsefNumberInPaymentTitle",
     "KsefOfflineDeadline",
@@ -589,5 +697,6 @@ __all__ = [
     "KsefSplitPayment",
     "KsefStructure",
     "evaluate_payment",
+    "nip_verdict",
     "register_ksef_rules",
 ]

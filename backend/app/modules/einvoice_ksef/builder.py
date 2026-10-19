@@ -84,6 +84,12 @@ def _flag(value: Any) -> bool:
     return value is True or str(value).strip().lower() in ("1", "true", "yes")
 
 
+# The split payment marker the finance invoice may carry in its metadata. Kept
+# as a cross-check: P_18A is still decided from the lines, and a disagreement
+# stops the build instead of choosing one side.
+STORED_SPLIT_PAYMENT_KEY = "split_payment"
+
+
 def vat_code_for(rate: Decimal | None, category: str | None) -> str:
     """The FA(3) rate code for a finance line's rate and EN 16931 category."""
     code = (category or "").strip().upper()
@@ -204,6 +210,13 @@ def build_input_from_invoice(
     )
     if decision.verdict == split_payment.UNDECIDABLE:
         raise fa3.Fa3BuildError(f"split payment cannot be decided: {decision.reason}")
+    metadata = invoice.get("metadata") if isinstance(invoice.get("metadata"), dict) else {}
+    stored = metadata.get(STORED_SPLIT_PAYMENT_KEY)
+    if stored is not None and _flag(stored) != decision.required:
+        raise fa3.Fa3BuildError(
+            f"the invoice is recorded as split payment {'required' if _flag(stored) else 'not required'} but its "
+            f"lines say otherwise ({decision.reason}); mark the Annex 15 lines or correct the invoice"
+        )
 
     correction = None
     raw_correction = ksef_fields.get("correction") if isinstance(ksef_fields.get("correction"), dict) else None
@@ -325,6 +338,7 @@ async def build_from_invoice(
                 "currency_code": invoice.currency_code,
                 "amount_subtotal": invoice.amount_subtotal,
                 "tax_amount": invoice.tax_amount,
+                "metadata": dict(invoice.metadata_ or {}),
             },
             lines=[
                 {
@@ -349,4 +363,10 @@ async def build_from_invoice(
         raise ClearanceError(f"The FA(3) document cannot be built: {exc}") from exc
 
 
-__all__ = ["build_from_invoice", "build_input_from_invoice", "party_from_buyer", "vat_code_for"]
+__all__ = [
+    "STORED_SPLIT_PAYMENT_KEY",
+    "build_from_invoice",
+    "build_input_from_invoice",
+    "party_from_buyer",
+    "vat_code_for",
+]
