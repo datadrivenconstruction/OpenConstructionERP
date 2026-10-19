@@ -56,6 +56,12 @@ from app.core.validation.engine import (
     rule_registry,
     validation_engine,
 )
+from app.modules.einvoice_clearance.mentions import (
+    SEVERITY_ERROR,
+    SEVERITY_WARNING,
+    check_mentions,
+    facts_from_context,
+)
 from app.modules.einvoice_clearance.models import SETTLED_STATUSES
 from app.modules.einvoice_clearance.regimes import CANCELLATION_BASIS_AUTHORITY, REGIME_CLEARANCE
 
@@ -417,6 +423,67 @@ class SandboxProfileInUse(ValidationRule):
         ]
 
 
+def _mention_results(rule: ValidationRule, context: ValidationContext, severity: str) -> list[RuleResult]:
+    """Findings of the country mentions catalogue at one severity. Country-neutral."""
+    document = _section(context, "document")
+    profile = _section(context, "profile")
+    regime = _section(context, "regime")
+    country = _text(regime.get("country")) or _text(profile.get("country"))
+    facts = facts_from_context(document, profile)
+    findings = check_mentions(
+        country=country,
+        document_kind=_text(document.get("document_kind")) or "invoice",
+        issue_date=document.get("invoice_date"),
+        facts=facts,
+        company_size=_text(facts["settings"].get("company_size")) or None,
+    )
+    chosen = [f for f in findings if f.severity == severity]
+    if not chosen:
+        return [_result(rule, True, "OK")]
+    return [
+        _result(
+            rule,
+            False,
+            f.message,
+            element_ref=_text(document.get("id")) or None,
+            suggestion=f"Fill: {', '.join(f.missing)}. Source: {f.source_url}",
+            details={
+                "country": f.country,
+                "key": f.key,
+                "missing": list(f.missing),
+                "effective_date": f.effective_date,
+                "size_assumed": f.size_assumed,
+                "needs_expert_review": f.needs_expert_review,
+            },
+        )
+        for f in chosen
+    ]
+
+
+class InvoiceMentionsRequired(ValidationRule):
+    rule_id = "einvoice_clearance.invoice_mentions"
+    name = "Mandatory Invoice Mentions For The Country"
+    standard = "einvoice_clearance"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Mentions the country's catalogue confirms as mandatory on the issue date."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        return _mention_results(self, context, SEVERITY_ERROR)
+
+
+class InvoiceMentionsUnconfirmed(ValidationRule):
+    rule_id = "einvoice_clearance.invoice_mentions_unconfirmed"
+    name = "Invoice Mentions Awaiting Expert Confirmation"
+    standard = "einvoice_clearance"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Mentions the catalogue lists but a local expert has not yet confirmed. Never blocks."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        return _mention_results(self, context, SEVERITY_WARNING)
+
+
 _EINVOICE_CLEARANCE_RULES: tuple[ValidationRule, ...] = (
     ProfileComplete(),
     MandatoryFieldsPresent(),
@@ -425,6 +492,8 @@ _EINVOICE_CLEARANCE_RULES: tuple[ValidationRule, ...] = (
     PayloadNotReused(),
     IdentifierPresent(),
     SandboxProfileInUse(),
+    InvoiceMentionsRequired(),
+    InvoiceMentionsUnconfirmed(),
 )
 
 

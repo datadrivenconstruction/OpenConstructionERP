@@ -47,11 +47,23 @@ def _run(**kw):
     return m.check_mentions(**base)
 
 
-def test_shipped_catalogue_is_neutral_and_loads():
+def test_shipped_catalogue_loads_and_rows_are_complete():
     cat = m.load_catalogue()
-    assert cat["mentions"] == []
-    assert cat["phase_by_size"] == {}
-    assert _run(catalogue=cat) == []
+    needed = {
+        "key",
+        "country",
+        "label",
+        "document_kinds",
+        "dated_by",
+        "when",
+        "satisfied_by",
+        "legal_basis",
+        "source_url",
+    }
+    for row in cat["mentions"]:
+        assert needed <= set(row)
+        assert row["dated_by"] in m.DATED_BY
+    assert _run(catalogue={"mentions": []}) == []
 
 
 def test_issuer_phase_date_by_size_and_assumption():
