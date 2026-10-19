@@ -50,6 +50,8 @@ Sources:
   for the days and 97. § (2) for the week. The working-day rearrangement the
   minister decrees each year under 102. § (5) is not modelled (see
   _holidays_hu).
+- FR: Code du travail L3133-1 for the eleven national days, L3134-13 for the
+  two Alsace-Moselle days (subdivisions FR-57, FR-67, FR-68, FR-6AE).
 - ES: Real Decreto 2001/1983, art. 45, and Estatuto de los Trabajadores, art.
   37.2: the national days no autonomous community may replace. The days a
   community may replace, the community's own days and the two local days are
@@ -552,14 +554,63 @@ def _holidays_ca_mb(year: int) -> set[date]:
     return _ca_province(year, family_day=True, extra_fixed=(), truth_and_reconciliation=year >= 2023)
 
 
+def _holidays_fr(year: int) -> set[date]:
+    """France's eleven public holidays (Code du travail L3133-1).
+
+    Only 1 May is a non-working day for every employee by law (L3133-4); the
+    others are worked or not by collective agreement or usage. A construction
+    site is planned on all eleven, which is what the shipped French roster and
+    the building-trades agreements assume. Whit Monday is often the unpaid
+    journée de solidarité (L3133-7), set by agreement; the site is still closed
+    on it in the usual case, so it stays a holiday here.
+    """
+    e = easter(year)
+    return {
+        date(year, 1, 1),  # Jour de l'an
+        e + timedelta(days=1),  # Lundi de Pâques
+        date(year, 5, 1),  # Fête du Travail
+        date(year, 5, 8),  # Victoire 1945
+        e + timedelta(days=39),  # Ascension
+        e + timedelta(days=50),  # Lundi de Pentecôte
+        date(year, 7, 14),  # Fête nationale
+        date(year, 8, 15),  # Assomption
+        date(year, 11, 1),  # Toussaint
+        date(year, 11, 11),  # Armistice 1918
+        date(year, 12, 25),  # Noël
+    }
+
+
+def _holidays_fr_alsace_moselle(year: int) -> set[date]:
+    """Moselle, Bas-Rhin and Haut-Rhin: the national days plus Good Friday and 26 December.
+
+    Local law kept after 1918 (Code du travail L3134-13). Good Friday is in law
+    a holiday in communes with a Protestant church or a mixed church; in
+    practice it is observed across the three departments and the shipped
+    calendars treat it so, which is what this follows.
+    """
+    days = _holidays_fr(year)
+    days.add(easter(year) - timedelta(days=2))  # Vendredi saint
+    days.add(date(year, 12, 26))  # Saint-Étienne
+    return days
+
+
 #: ISO 3166-2 subdivisions with a holiday list of their own, which replaces the
 #: country's when a caller names the subdivision.
+#:
+#: France: FR-57 Moselle, FR-67 Bas-Rhin, FR-68 Haut-Rhin, and FR-6AE, the
+#: Collectivité européenne d'Alsace that has covered 67 and 68 since 2021. An
+#: address may resolve to either the department or the collectivity code, so
+#: both answer the same list.
 _SUBDIVISION_HOLIDAY_FUNCS: dict[str, Any] = {
     "CA-ON": _holidays_ca_on,
     "CA-QC": _holidays_ca_qc,
     "CA-BC": _holidays_ca_bc,
     "CA-AB": _holidays_ca_ab,
     "CA-MB": _holidays_ca_mb,
+    "FR-57": _holidays_fr_alsace_moselle,
+    "FR-67": _holidays_fr_alsace_moselle,
+    "FR-68": _holidays_fr_alsace_moselle,
+    "FR-6AE": _holidays_fr_alsace_moselle,
 }
 
 
@@ -1356,6 +1407,11 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     # https://www.boe.es/buscar/act.php?id=BOE-A-2015-11430
     "ES": frozenset({0, 1, 2, 3, 4}),
     "IT": frozenset({0, 1, 2, 3, 4}),
+    # France: 35 hours a week by law (Code du travail L3121-27), worked Monday
+    # to Friday at seven hours in the building trades and in the shipped
+    # French calendar. Sunday rest is the statute (L3132-3); Saturday is the
+    # convention, and a site working Saturdays sets its own calendar.
+    "FR": frozenset({0, 1, 2, 3, 4}),
 }
 
 _DEFAULT_WORKING_WEEK: frozenset[int] = frozenset({0, 1, 2, 3, 4})
@@ -1385,6 +1441,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "HU": _holidays_hu,
     "ES": _holidays_es,
     "IT": _holidays_it,
+    "FR": _holidays_fr,
 }
 
 

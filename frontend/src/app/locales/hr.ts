@@ -19899,7 +19899,7 @@ const resource = {
     "tour.boq.step.5.title": "Resurs sažetak",
     "tour.boq.step.5.body": "Živi zbroj svakog retka materijala, rada i opreme potrošenog u ovom troškovniku, količine, jedinični troškovi i ukupna potrošnja po resursu. Kliknite redak da vidite koje ga stavke koriste.",
     "tour.boq.step.6.title": "Oznake & VAT",
-    "tour.boq.step.6.body": "Dodaj režijski troškovi, dobit, porez, contingency, osiguranje ili bonds, izaberi regionalni predložak (DACH VOB, UK NRM, FR BATIPRIX, …) ili roll vaš vlastiti. Oznake stack na direct trošak.",
+    "tour.boq.step.6.body": "Dodaj režijski troškovi, dobit, porez, contingency, osiguranje ili bonds, izaberi regionalni predložak (DACH VOB, UK NRM, FR déboursé sec, …) ili roll vaš vlastiti. Oznake stack na direct trošak.",
     "tour.boq.step.7.title": "Kvaliteta rezultat",
     "tour.boq.step.7.body": "Traffic svijetlo driven po validacija cjevovod, green preko 80, amber 50-80, red ispod. Hover za razrada: opisi filled, količine postavi, stope postavi, oznake configured.",
     "tour.boq.step.8.title": "Izvezi anywhere",

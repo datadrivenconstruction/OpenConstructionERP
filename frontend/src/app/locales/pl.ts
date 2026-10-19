@@ -19289,7 +19289,7 @@ const resource = {
     "tour.boq.step.5.title": "Podsumowanie zasobów",
     "tour.boq.step.5.body": "Bieżące zestawienie każdego materiału, robocizny i sprzętu zużytego w tym kosztorysie, ilości, koszty jednostkowe i wydatek całkowity na zasób. Kliknij wiersz, aby zobaczyć, które pozycje go używają.",
     "tour.boq.step.6.title": "Narzuty i VAT",
-    "tour.boq.step.6.body": "Dodaj koszty pośrednie, zysk, podatki, rezerwy, ubezpieczenia lub gwarancje, wybierz szablon regionalny (DACH VOB, UK NRM, FR BATIPRIX, …) lub utwórz własny. Narzuty sumują się na koszcie bezpośrednim.",
+    "tour.boq.step.6.body": "Dodaj koszty pośrednie, zysk, podatki, rezerwy, ubezpieczenia lub gwarancje, wybierz szablon regionalny (DACH VOB, UK NRM, FR déboursé sec, …) lub utwórz własny. Narzuty sumują się na koszcie bezpośrednim.",
     "tour.boq.step.7.title": "Ocena jakości",
     "tour.boq.step.7.body": "Sygnalizacja świetlna oparta na pipeline walidacji, zielona powyżej 80, bursztynowa 50-80, czerwona poniżej. Najedź, aby zobaczyć szczegóły: opisy wypełnione, ilości, ceny i narzuty skonfigurowane.",
     "tour.boq.step.8.title": "Eksportuj wszędzie",

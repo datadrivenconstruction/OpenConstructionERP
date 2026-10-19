@@ -18855,7 +18855,7 @@ const resource = {
     "tour.boq.step.5.title": "Ressourcenübersicht",
     "tour.boq.step.5.body": "Live-Zusammenfassung jeder Material-, Lohn- und Geräteposition im LV, Mengen, Einheitspreise und Gesamtkosten pro Ressource. Klick eine Zeile, um zu sehen, welche Positionen sie verwenden.",
     "tour.boq.step.6.title": "Zuschläge & USt.",
-    "tour.boq.step.6.body": "Füge Gemeinkosten, Gewinn, Steuer, Wagnis, Versicherung oder Bürgschaften hinzu, wähle eine regionale Vorlage (DACH VOB, UK NRM, FR BATIPRIX, …) oder definiere eigene. Zuschläge addieren sich auf die direkten Kosten.",
+    "tour.boq.step.6.body": "Füge Gemeinkosten, Gewinn, Steuer, Wagnis, Versicherung oder Bürgschaften hinzu, wähle eine regionale Vorlage (DACH VOB, UK NRM, FR déboursé sec, …) oder definiere eigene. Zuschläge addieren sich auf die direkten Kosten.",
     "tour.boq.step.7.title": "Qualitätsbewertung",
     "tour.boq.step.7.body": "Ampel von der Validierungs-Pipeline gesteuert, grün über 80, gelb 50-80, rot darunter. Bewege den Mauszeiger für die Aufschlüsselung: Beschreibungen, Mengen, Preise, Zuschläge konfiguriert.",
     "tour.boq.step.8.title": "Überall hin exportieren",

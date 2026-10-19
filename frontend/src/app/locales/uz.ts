@@ -19101,7 +19101,7 @@ const resource = {
     "tour.boq.step.5.title": "Resurslar jamlanmasi",
     "tour.boq.step.5.body": "Bu BOQda ishlatilgan har bir material, ishchi kuchi va texnika qatorining jonli jamlanmasi, miqdorlar, birlik narxlari va har bir resurs boʻyicha jami xarajat. Qaysi pozitsiyalar uni ishlatishini koʻrish uchun qatorni bosing.",
     "tour.boq.step.6.title": "Ustamalar va QQS",
-    "tour.boq.step.6.body": "Umumiy xarajatlar, foyda, soliq, zaxira, sugʻurta yoki kafolatlarni qoʻshing, mintaqaviy andaza (DACH VOB, UK NRM, FR BATIPRIX va h.k.) tanlang yoki oʻzingiznikini yarating. Ustamalar toʻgʻridan-toʻgʻri xarajat ustiga qatlanadi.",
+    "tour.boq.step.6.body": "Umumiy xarajatlar, foyda, soliq, zaxira, sugʻurta yoki kafolatlarni qoʻshing, mintaqaviy andaza (DACH VOB, UK NRM, FR déboursé sec va h.k.) tanlang yoki oʻzingiznikini yarating. Ustamalar toʻgʻridan-toʻgʻri xarajat ustiga qatlanadi.",
     "tour.boq.step.7.title": "Sifat balli",
     "tour.boq.step.7.body": "Tekshiruv pipelinei asosidagi svetofor: 80 dan yuqori yashil, 50-80 sariq, pastrogʻi qizil. Tafsilotlarni koʻrish uchun sichqonchani ustiga olib boring: toʻldirilgan tavsiflar, oʻrnatilgan miqdorlar, oʻrnatilgan narxlar, sozlangan ustamalar.",
     "tour.boq.step.8.title": "Istalgan joyga eksport",

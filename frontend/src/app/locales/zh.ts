@@ -18692,7 +18692,7 @@ const resource = {
     "tour.boq.step.5.title": "资源汇总",
     "tour.boq.step.5.body": "本工程量清单中所有材料、人工和设备的实时汇总，数量、单价及每种资源的总支出。点击行可查看哪些子目使用了它。",
     "tour.boq.step.6.title": "取费与税金",
-    "tour.boq.step.6.body": "添加管理费、利润、税金、不可预见费、保险或保函，选择区域模板（DACH VOB、UK NRM、FR BATIPRIX、…）或自定义。取费按直接费叠加。",
+    "tour.boq.step.6.body": "添加管理费、利润、税金、不可预见费、保险或保函，选择区域模板（DACH VOB、UK NRM、FR déboursé sec、…）或自定义。取费按直接费叠加。",
     "tour.boq.step.7.title": "质量评分",
     "tour.boq.step.7.body": "由校验流水线驱动的红绿灯，80 以上为绿色，50-80 为琥珀色，以下为红色。悬停查看明细：说明填写率、数量、单价和取费配置。",
     "tour.boq.step.8.title": "导出到任何格式",

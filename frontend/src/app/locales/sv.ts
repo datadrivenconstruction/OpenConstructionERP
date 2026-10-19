@@ -20256,7 +20256,7 @@ const resource = {
     "tour.boq.step.5.title": "Resurssammanfattning",
     "tour.boq.step.5.body": "Levande summering av allt material, arbete och utrustning som förbrukats i denna BOQ - kvantiteter, enhetskostnader och totalkostnad per resurs. Klicka på en rad för att se vilka positioner som använder den.",
     "tour.boq.step.6.title": "Pålägg och moms",
-    "tour.boq.step.6.body": "Lägg till overheadkostnader, vinst, moms, oförutsett, försäkring eller garantier - välj en regional mall (DACH VOB, UK NRM, FR BATIPRIX, ...) eller bygg din egen. Pålägg staplas på direkt kostnad.",
+    "tour.boq.step.6.body": "Lägg till overheadkostnader, vinst, moms, oförutsett, försäkring eller garantier - välj en regional mall (DACH VOB, UK NRM, FR déboursé sec, ...) eller bygg din egen. Pålägg staplas på direkt kostnad.",
     "tour.boq.step.7.title": "Kvalitetspoäng",
     "tour.boq.step.7.body": "Trafikljus drivet av valideringspipelinen - grönt över 80, gult 50-80, rött under. Håll muspekaren för uppdelning: beskrivningar ifyllda, kvantiteter angivna, priser angivna, pålägg konfigurerade.",
     "tour.boq.step.8.title": "Exportera var som helst",

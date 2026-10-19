@@ -19024,7 +19024,7 @@ const resource = {
     "tour.boq.step.5.title": "Ressursside kokkuvõte",
     "tour.boq.step.5.body": "Reaalajas koond kõikidest selles mahutabelis kasutatud materjali-, tööjõu- ja seadmereadest, kogused, ühikuhinnad ja kogukulu ressursi kohta. Klõpsake real, et näha, millised positsioonid seda kasutavad.",
     "tour.boq.step.6.title": "Juurdehindlused ja käibemaks",
-    "tour.boq.step.6.body": "Lisage üldkulud, kasum, maks, reserv, kindlustus või tagatised, valige regionaalne mall (DACH VOB, UK NRM, FR BATIPRIX, …) või looge oma. Juurdehindlused lisanduvad otsekulule.",
+    "tour.boq.step.6.body": "Lisage üldkulud, kasum, maks, reserv, kindlustus või tagatised, valige regionaalne mall (DACH VOB, UK NRM, FR déboursé sec, …) või looge oma. Juurdehindlused lisanduvad otsekulule.",
     "tour.boq.step.7.title": "Kvaliteediskoor",
     "tour.boq.step.7.body": "Valideerimistoru poolt juhitud valgusfoor, roheline üle 80, kollane 50-80, punane alla selle. Hõljutage detailide nägemiseks: kirjeldused täidetud, kogused määratud, hinnad määratud, juurdehindlused seadistatud.",
     "tour.boq.step.8.title": "Ekspordi kõikjale",

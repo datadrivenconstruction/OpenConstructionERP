@@ -48,7 +48,7 @@ __all__ = [
 #
 # Based on industry standards for medium commercial building projects.
 # Percentages applied to direct cost unless noted; tax items are cumulative.
-# Sources: VOB/HOAI, NRM1/RICS, US cost index/AIA, BATIPRIX, FIDIC, CPWD, AIQS,
+# Sources: VOB/HOAI, NRM1/RICS, US cost index/AIA, French déboursé sec, FIDIC, CPWD, AIQS,
 # MLIT, TCU/SINAPI, Byggakademin, ГЭСН/МДС, 建标[2013]44号, 조달청.
 #
 # ``apply_to`` is NOT a stylistic choice and these templates deliberately do not
@@ -222,7 +222,16 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
         },
     ],
     # ── France ──────────────────────────────────────────────────────────
-    # Méthode du Déboursé Sec, BATIPRIX, Code des marchés publics
+    # Méthode du déboursé sec: frais de chantier, frais généraux, bénéfice et
+    # aléas on the direct cost. This is the ONE French stack: the methodology
+    # catalogue derives its France template from it and the Lyon hospital demo
+    # reads its lines from it, so the three cannot disagree again. None of the
+    # figures is regulated; they are typical starting points for a medium
+    # building contractor. French practice often states FG and B&A on the
+    # selling price (coefficient de vente K); this engine states them on the
+    # direct cost, which gives a slightly lower K for the same percentages.
+    # Bénéfice et aléas already carries the contractor's risk allowance, so a
+    # French bill adds no separate contingency line on top of it.
     "FR": [
         {
             "name": "Frais de chantier (FC)",

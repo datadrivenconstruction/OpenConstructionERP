@@ -26,7 +26,7 @@ const REGIONS: MarkupRegion[] = [
   // Europe
   { code: 'DACH', flag: '\ud83c\udde9\ud83c\uddea', countries: ['DE', 'AT', 'CH'], standard: 'VOB/HOAI' },
   { code: 'UK', flag: '\ud83c\uddec\ud83c\udde7', countries: ['GB'], standard: 'NRM/RICS' },
-  { code: 'FR', flag: '\ud83c\uddeb\ud83c\uddf7', standard: 'BATIPRIX' },
+  { code: 'FR', flag: '\ud83c\uddeb\ud83c\uddf7', standard: 'Déboursé sec' },
   { code: 'ES', flag: '\ud83c\uddea\ud83c\uddf8', standard: 'CTE' },
   // Italy has two stacks. A regional price list rate already includes general
   // expenses and profit, so the price-list stack adds only safety and VAT; the

@@ -18692,7 +18692,7 @@ const resource = {
     "tour.boq.step.5.title": "자원 요약",
     "tour.boq.step.5.body": "이 내역서에서 소비된 모든 자재, 인력, 장비의 실시간 집계, 수량, 단가, 자원별 총 지출. 행을 클릭하면 사용 중인 항목을 확인할 수 있습니다.",
     "tour.boq.step.6.title": "할증 및 부가세",
-    "tour.boq.step.6.body": "간접비, 이윤, 세금, 예비비, 보험, 보증금 추가, 지역 템플릿(DACH VOB, UK NRM, FR BATIPRIX, …)을 선택하거나 직접 작성. 할증은 직접비 위에 누적됩니다.",
+    "tour.boq.step.6.body": "간접비, 이윤, 세금, 예비비, 보험, 보증금 추가, 지역 템플릿(DACH VOB, UK NRM, FR déboursé sec, …)을 선택하거나 직접 작성. 할증은 직접비 위에 누적됩니다.",
     "tour.boq.step.7.title": "품질 점수",
     "tour.boq.step.7.body": "검증 파이프라인 기반의 신호등, 80 초과는 녹색, 50-80은 황색, 그 이하는 빨간색. 마우스를 올리면 세부: 설명 채움 비율, 수량/단가 설정 비율, 할증 구성.",
     "tour.boq.step.8.title": "어디로든 내보내기",

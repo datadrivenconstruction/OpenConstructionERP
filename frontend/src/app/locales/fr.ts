@@ -18019,7 +18019,7 @@ const resource = {
     "tour.boq.step.5.title": "Récapitulatif des ressources",
     "tour.boq.step.5.body": "Cumul en temps réel de chaque matériau, main-d'œuvre et matériel consommés dans ce DQE, quantités, coûts unitaires et dépense totale par ressource. Cliquez sur une ligne pour voir quels postes l'utilisent.",
     "tour.boq.step.6.title": "Frais généraux et TVA",
-    "tour.boq.step.6.body": "Ajoutez frais généraux, marge, taxes, aléas, assurance ou cautions, choisissez un modèle régional (DACH VOB, UK NRM, FR BATIPRIX, …) ou créez le vôtre. Les frais s'empilent sur le coût direct.",
+    "tour.boq.step.6.body": "Ajoutez frais généraux, marge, taxes, aléas, assurance ou cautions, choisissez un modèle régional (DACH VOB, UK NRM, FR déboursé sec, …) ou créez le vôtre. Les frais s'empilent sur le coût direct.",
     "tour.boq.step.7.title": "Score qualité",
     "tour.boq.step.7.body": "Feu tricolore piloté par la pipeline de validation, vert au-dessus de 80, ambre 50-80, rouge en dessous. Survolez pour le détail : descriptions remplies, quantités saisies, prix saisis, frais configurés.",
     "tour.boq.step.8.title": "Exportez partout",
