@@ -450,6 +450,7 @@ teach identifiers that were never rule sets at all.
 | `boq_quality` | Universal bill of quantities hygiene |
 | `estimate_audit` | Estimate-level audit checks |
 | `schedule_quality` | Programme quality |
+| `schedule_5d` | A programme generated from the bill against that bill: every priced position scheduled, planned cost equal to the bill total, durations near the norm |
 | `sheet_completeness` | Drawing index against issue register |
 | `project_completeness` | The project record itself: country and currency set, a priced bill in that currency, a base date on every bill, a classification standard, planned dates in order, a client, and a contract or tender once past estimating |
 | `classification_nudge` | Suggests a classification when none is set |

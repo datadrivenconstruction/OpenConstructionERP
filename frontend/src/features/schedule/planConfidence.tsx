@@ -7,6 +7,7 @@
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { AlertTriangle } from 'lucide-react';
+import { fmtFixed } from '@/shared/lib/formatters';
 import type { ActivityConfidence, ConfidenceBand } from './api';
 
 const BANDS: readonly ConfidenceBand[] = ['high', 'medium', 'low'];
@@ -35,9 +36,9 @@ export function confidenceBand(score: number): ConfidenceBand {
   return 'low';
 }
 
-/** "0.66" whatever the locale's digits, the way the score is documented. */
+/** Two decimals, with the reader's decimal separator ("0.66", "0,66"). */
 export function formatScore(score: number): string {
-  return score.toFixed(2);
+  return fmtFixed(score, 2);
 }
 
 export function bandLabel(t: TFunction, band: ConfidenceBand): string {
