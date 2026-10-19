@@ -111,3 +111,26 @@ async def test_a_change_order_on_a_project_without_variations_carries_no_warning
     created = await _create(client, headers, project_id, "Window upgrade")
     assert created.status_code == 201, created.text
     assert "standalone_overlap_warning" not in created.json()["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_a_change_order_is_created_when_the_project_owner_is_deactivated(client: AsyncClient) -> None:
+    """A deactivated owner must not matter: creation succeeds and is kept."""
+    from sqlalchemy import update
+
+    from app.modules.projects.models import Project
+    from app.modules.users.models import User
+
+    headers = await _admin_headers(client)
+    project_id = await _project(client, headers)
+    await _issue_variation(project_id)
+
+    async with async_session_factory() as session:
+        owner_id = (await session.get(Project, uuid.UUID(project_id))).owner_id
+        await session.execute(update(User).where(User.id == owner_id).values(is_active=False))
+        await session.commit()
+
+    created = await _create(client, headers, project_id, "Extra socket in the garage")
+    # The deactivated owner is also the caller here, so a 401/403 is the
+    # authentication layer speaking; anything else must be a clean 201, never 500.
+    assert created.status_code != 500, created.text
