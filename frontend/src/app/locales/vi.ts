@@ -20603,7 +20603,7 @@ const resource = {
     "tour.boq.step.4.title": "Công cụ chất lượng & AI",
     "tour.boq.step.5.body": "Tổng hợp trực tiếp tất cả dòng vật liệu, nhân công và thiết bị trong BOQ này, số lượng, đơn giá và tổng chi tiêu theo nguồn lực. Nhấn vào dòng để xem các vị trí sử dụng nó.",
     "tour.boq.step.5.title": "Tóm tắt nguồn lực",
-    "tour.boq.step.6.body": "Thêm chi phí chung, lợi nhuận, thuế, dự phòng, bảo hiểm hoặc bảo lãnh, chọn mẫu theo vùng (DACH VOB, UK NRM, FR BATIPRIX, …) hoặc tự tạo. Phụ phí cộng dồn lên chi phí trực tiếp.",
+    "tour.boq.step.6.body": "Thêm chi phí chung, lợi nhuận, thuế, dự phòng, bảo hiểm hoặc bảo lãnh, chọn mẫu theo vùng (DACH VOB, UK NRM, FR déboursé sec, …) hoặc tự tạo. Phụ phí cộng dồn lên chi phí trực tiếp.",
     "tour.boq.step.6.title": "Phụ phí & VAT",
     "tour.boq.step.7.body": "Đèn tín hiệu được điều khiển bởi quy trình xác nhận, xanh trên 80, vàng 50-80, đỏ dưới 50. Di chuột để xem chi tiết: mô tả đã điền, số lượng đã nhập, đơn giá đã nhập, phụ phí đã cấu hình.",
     "tour.boq.step.7.title": "Điểm chất lượng",

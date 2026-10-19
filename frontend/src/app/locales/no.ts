@@ -20094,7 +20094,7 @@ const resource = {
     "tour.boq.step.5.title": "Ressursoppsummering",
     "tour.boq.step.5.body": "Løpende oppsummering av alle material-, arbeids- og utstyrslinjer i denne BOQ-en, mengder, enhetskostnader og totalforbruk per ressurs. Klikk en rad for å se hvilke posisjoner som bruker den.",
     "tour.boq.step.6.title": "Påslag og MVA",
-    "tour.boq.step.6.body": "Legg til rigg, fortjeneste, MVA, usikkerhet, forsikring eller garantier, velg en regional mal (DACH VOB, UK NRM, FR BATIPRIX, …) eller bygg din egen. Påslag stables oppå direktekostnaden.",
+    "tour.boq.step.6.body": "Legg til rigg, fortjeneste, MVA, usikkerhet, forsikring eller garantier, velg en regional mal (DACH VOB, UK NRM, FR déboursé sec, …) eller bygg din egen. Påslag stables oppå direktekostnaden.",
     "tour.boq.step.7.title": "Kvalitetspoeng",
     "tour.boq.step.7.body": "Trafikklys styrt av valideringspipelinen, grønn over 80, gul 50-80, rød under. Hold over for spesifikasjon: beskrivelser fylt ut, mengder angitt, satser angitt, påslag konfigurert.",
     "tour.boq.step.8.title": "Eksporter overalt",

@@ -17450,7 +17450,7 @@ const resource = {
     "tour.boq.step.5.title": "Resumen de recursos",
     "tour.boq.step.5.body": "Acumulado en vivo de cada material, mano de obra y maquinaria consumido en este BOQ, cantidades, costos unitarios y gasto total por recurso. Haz clic en una fila para ver qué partidas lo usan.",
     "tour.boq.step.6.title": "Recargos e IVA",
-    "tour.boq.step.6.body": "Añade gastos generales, beneficio, impuestos, contingencias, seguros o avales, elige una plantilla regional (DACH VOB, UK NRM, FR BATIPRIX, …) o crea la tuya. Los recargos se acumulan sobre el costo directo.",
+    "tour.boq.step.6.body": "Añade gastos generales, beneficio, impuestos, contingencias, seguros o avales, elige una plantilla regional (DACH VOB, UK NRM, FR déboursé sec, …) o crea la tuya. Los recargos se acumulan sobre el costo directo.",
     "tour.boq.step.7.title": "Puntuación de calidad",
     "tour.boq.step.7.body": "Semáforo basado en la pipeline de validación, verde por encima de 80, ámbar entre 50-80, rojo por debajo. Pasa el ratón para ver el desglose: descripciones rellenas, cantidades, precios y recargos configurados.",
     "tour.boq.step.8.title": "Exporta a cualquier formato",

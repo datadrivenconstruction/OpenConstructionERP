@@ -20010,7 +20010,7 @@ const resource = {
     "tour.boq.step.4.title": "Kwaliteits- & AI-tools",
     "tour.boq.step.5.body": "Live totaaloverzicht van elk materiaal-, arbeids- en uitrustingsregel verbruikt in deze BOQ - hoeveelheden, eenheidskosten en totale uitgaven per resource. Klik op een rij om te zien welke posten het gebruiken.",
     "tour.boq.step.5.title": "Resource-samenvatting",
-    "tour.boq.step.6.body": "Voeg overhead, winst, belasting, contingentie, verzekering of borgsommen toe - kies een regionaal sjabloon (DACH VOB, UK NRM, FR BATIPRIX, ...) of maak uw eigen. Opslagen stapelen op de directe kosten.",
+    "tour.boq.step.6.body": "Voeg overhead, winst, belasting, contingentie, verzekering of borgsommen toe - kies een regionaal sjabloon (DACH VOB, UK NRM, FR déboursé sec, ...) of maak uw eigen. Opslagen stapelen op de directe kosten.",
     "tour.boq.step.6.title": "Opslagen & btw",
     "tour.boq.step.7.body": "Verkeerslicht aangestuurd door de validatiepijplijn - groen boven 80, oranje 50-80, rood eronder. Beweeg de muis voor de uitsplitsing: beschrijvingen ingevuld, hoeveelheden ingesteld, tarieven ingesteld, opslagen geconfigureerd.",
     "tour.boq.step.7.title": "Kwaliteitsscore",

@@ -18384,7 +18384,7 @@ const resource = {
     "tour.boq.step.5.title": "Riepilogo risorse",
     "tour.boq.step.5.body": "Consolidato in tempo reale di ogni materiale, manodopera e attrezzatura consumati in questo computo, quantità, costi unitari e spesa totale per risorsa. Clicca una riga per vedere quali voci la usano.",
     "tour.boq.step.6.title": "Spese generali e IVA",
-    "tour.boq.step.6.body": "Aggiungi spese generali, utile, imposte, contingenze, assicurazioni o fideiussioni, scegli un modello regionale (DACH VOB, UK NRM, FR BATIPRIX, …) o crea il tuo. Le maggiorazioni si sommano al costo diretto.",
+    "tour.boq.step.6.body": "Aggiungi spese generali, utile, imposte, contingenze, assicurazioni o fideiussioni, scegli un modello regionale (DACH VOB, UK NRM, FR déboursé sec, …) o crea il tuo. Le maggiorazioni si sommano al costo diretto.",
     "tour.boq.step.7.title": "Punteggio qualità",
     "tour.boq.step.7.body": "Semaforo guidato dalla pipeline di validazione, verde sopra 80, ambra 50-80, rosso sotto. Passa il mouse per il dettaglio: descrizioni compilate, quantità, prezzi e maggiorazioni configurate.",
     "tour.boq.step.8.title": "Esporta ovunque",

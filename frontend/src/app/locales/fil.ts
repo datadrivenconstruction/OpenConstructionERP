@@ -18105,7 +18105,7 @@ const resource = {
     "tour.boq.step.5.title": "Buod ng resource",
     "tour.boq.step.5.body": "Live na rollup ng bawat linya ng materyal, paggawa, at kagamitan na ginamit sa buong BOQ na ito, mga quantity, unit cost, at kabuuang gastos kada resource. I-click ang row para makita kung aling mga position ang gumagamit nito.",
     "tour.boq.step.6.title": "Markup at VAT",
-    "tour.boq.step.6.body": "Magdagdag ng overhead, tubo, buwis, contingency, insurance, o bond, pumili ng regional template (DACH VOB, UK NRM, FR BATIPRIX, …) o gumawa ng sarili mo. Nagsasapawan ang mga markup sa direktang gastos.",
+    "tour.boq.step.6.body": "Magdagdag ng overhead, tubo, buwis, contingency, insurance, o bond, pumili ng regional template (DACH VOB, UK NRM, FR déboursé sec, …) o gumawa ng sarili mo. Nagsasapawan ang mga markup sa direktang gastos.",
     "tour.boq.step.7.title": "Marka ng kalidad",
     "tour.boq.step.7.body": "Sinusundan ng traffic light ang validation pipeline, berde kung higit sa 80, kulay dilaw sa 50-80, pula sa mas mababa. I-hover para sa breakdown: napunang paglalarawan, naitakdang quantity, naitakdang rate, naka-configure na markup.",
     "tour.boq.step.8.title": "I-export saan man",

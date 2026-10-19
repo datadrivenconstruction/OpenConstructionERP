@@ -17128,7 +17128,7 @@ const resource = {
     "tour.boq.step.5.title": "Resumo de recursos",
     "tour.boq.step.5.body": "Consolidação ao vivo de cada material, mão de obra e equipamento consumido neste BOQ, quantidades, custos unitários e gasto total por recurso. Clique em uma linha para ver quais itens o usam.",
     "tour.boq.step.6.title": "BDI e impostos",
-    "tour.boq.step.6.body": "Adicione despesas indiretas, lucro, impostos, contingência, seguros ou cauções, escolha um modelo regional (DACH VOB, UK NRM, FR BATIPRIX, …) ou crie o seu. Os encargos somam-se ao custo direto.",
+    "tour.boq.step.6.body": "Adicione despesas indiretas, lucro, impostos, contingência, seguros ou cauções, escolha um modelo regional (DACH VOB, UK NRM, FR déboursé sec, …) ou crie o seu. Os encargos somam-se ao custo direto.",
     "tour.boq.step.7.title": "Pontuação de qualidade",
     "tour.boq.step.7.body": "Semáforo movido pelo pipeline de validação, verde acima de 80, âmbar 50-80, vermelho abaixo. Passe o mouse para ver o detalhamento: descrições preenchidas, quantidades, preços e BDI configurados.",
     "tour.boq.step.8.title": "Exporte para qualquer formato",

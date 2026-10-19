@@ -20550,7 +20550,7 @@ const resource = {
     "tour.boq.step.4.title": "Alat Kualitas & AI",
     "tour.boq.step.5.body": "Rekap langsung setiap baris material, tenaga kerja, dan peralatan yang digunakan di BOQ ini, kuantitas, biaya satuan, dan total pengeluaran per sumber daya. Klik baris untuk melihat posisi mana yang menggunakannya.",
     "tour.boq.step.5.title": "Ringkasan sumber daya",
-    "tour.boq.step.6.body": "Tambahkan overhead, laba, pajak, kontinjensi, asuransi, atau jaminan, pilih templat regional (DACH VOB, UK NRM, FR BATIPRIX, …) atau buat sendiri. Markup ditumpuk di atas biaya langsung.",
+    "tour.boq.step.6.body": "Tambahkan overhead, laba, pajak, kontinjensi, asuransi, atau jaminan, pilih templat regional (DACH VOB, UK NRM, FR déboursé sec, …) atau buat sendiri. Markup ditumpuk di atas biaya langsung.",
     "tour.boq.step.6.title": "Markup & PPN",
     "tour.boq.step.7.body": "Lampu lalu lintas digerakkan oleh pipeline validasi, hijau di atas 80, kuning 50-80, merah di bawah. Arahkan kursor untuk melihat rincian: deskripsi terisi, kuantitas diatur, tarif diatur, markup dikonfigurasi.",
     "tour.boq.step.7.title": "Skor kualitas",

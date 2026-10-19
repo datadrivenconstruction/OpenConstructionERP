@@ -20322,7 +20322,7 @@ const resource = {
     "tour.boq.step.5.title": "Ressourcesammenfatning",
     "tour.boq.step.5.body": "Live-sammenfatning af alle materialer, arbejdskraft og udstyrlinjer brugt i denne BOQ, mængder, enhedsomkostninger og samlet forbrug pr. ressource. Klik på en række for at se, hvilke positioner der bruger den.",
     "tour.boq.step.6.title": "Tillæg og moms",
-    "tour.boq.step.6.body": "Tilføj overhead, avance, skat, uforudsete udgifter, forsikring eller garantistillelse, vælg en regional skabelon (DACH VOB, UK NRM, FR BATIPRIX, …) eller opret din egen. Tillæg lægges oven på de direkte omkostninger.",
+    "tour.boq.step.6.body": "Tilføj overhead, avance, skat, uforudsete udgifter, forsikring eller garantistillelse, vælg en regional skabelon (DACH VOB, UK NRM, FR déboursé sec, …) eller opret din egen. Tillæg lægges oven på de direkte omkostninger.",
     "tour.boq.step.7.title": "Kvalitetsscore",
     "tour.boq.step.7.body": "Trafiklyspanel drevet af valideringspipeline, grøn over 80, gul 50-80, rød under. Hold musen over for specifikationen: beskrivelser udfyldt, mængder angivet, priser angivet, tillæg konfigureret.",
     "tour.boq.step.8.title": "Eksporter overalt",

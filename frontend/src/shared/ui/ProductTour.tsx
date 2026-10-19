@@ -671,7 +671,7 @@ const STEP_FALLBACKS: Record<string, string> = {
     'Live rollup of every material, labour and equipment line consumed across this BOQ - quantities, unit costs and total spend per resource. Click a row to see which positions use it.',
   'tour.boq.step.6.title': 'Markups & VAT',
   'tour.boq.step.6.body':
-    'Add overhead, profit, tax, contingency, insurance or bonds - pick a regional template (DACH VOB, UK NRM, FR BATIPRIX, …) or roll your own. Markups stack on the direct cost.',
+    'Add overhead, profit, tax, contingency, insurance or bonds - pick a regional template (DACH VOB, UK NRM, FR déboursé sec, …) or roll your own. Markups stack on the direct cost.',
   'tour.boq.step.7.title': 'Quality score',
   'tour.boq.step.7.body':
     'Traffic light driven by the validation pipeline - green over 80, amber 50-80, red below. Hover for the breakdown: descriptions filled, quantities set, rates set, markups configured.',

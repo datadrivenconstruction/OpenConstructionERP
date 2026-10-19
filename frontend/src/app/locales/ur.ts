@@ -18458,7 +18458,7 @@ const resource = {
     "tour.boq.step.5.title": "Resource خلاصہ",
     "tour.boq.step.5.body": "اس مقدار کا بل میں استعمال ہونے والے ہر مواد، مزدوری اور سازوسامان کی لائن کا live rollup، مقدار، فی اکائی لاگت اور فی resource کل خرچ۔ یہ دیکھنے کے لیے کہ کون سی پوزیشنیں اسے استعمال کرتی ہیں کسی قطار پر کلک کریں۔",
     "tour.boq.step.6.title": "Markups اور VAT",
-    "tour.boq.step.6.body": "اوور ہیڈ، منافع، ٹیکس، contingency، انشورنس یا bonds شامل کریں، ایک علاقائی ٹیمپلیٹ چنیں (DACH VOB، UK NRM، FR BATIPRIX، …) یا اپنا بنائیں۔ Markups براہِ راست لاگت پر stack ہوتے ہیں۔",
+    "tour.boq.step.6.body": "اوور ہیڈ، منافع، ٹیکس، contingency، انشورنس یا bonds شامل کریں، ایک علاقائی ٹیمپلیٹ چنیں (DACH VOB، UK NRM، FR déboursé sec، …) یا اپنا بنائیں۔ Markups براہِ راست لاگت پر stack ہوتے ہیں۔",
     "tour.boq.step.7.title": "معیار اسکور",
     "tour.boq.step.7.body": "Validation pipeline سے چلنے والی ٹریفک لائٹ، 80 سے اوپر سبز، 50-80 پیلا، اس سے نیچے سرخ۔ تفصیل کے لیے hover کریں: تفصیلات بھری ہوئیں، مقدار طے، شرحیں طے، markups ترتیب شدہ۔",
     "tour.boq.step.8.title": "کہیں بھی ایکسپورٹ کریں",

@@ -1873,6 +1873,150 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
             "review by a Spanish lawyer."
         ),
     },
+    # France. Four clocks because French law gives four periods: one for
+    # business-to-business invoices and three for public buyers by kind. The
+    # interest figures, the forty-euro indemnity and the cap on agreed terms are
+    # rows of app/core/country_data/late_payment.json (engine app/core/late_payment.py),
+    # keyed by country, because they are numbers that change by half-year and this
+    # table holds the shape of a law, not its current figures.
+    {
+        "code": "fr_com_l441_10",
+        "jurisdiction": "France (business to business)",
+        "country_code": "FR",
+        "statute": "Code de commerce, article L441-10 (loi de modernisation de l'économie 2008-776)",
+        "statute_reference": "Articles L441-10 I and II and D441-5",
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "reference_rate_plus_margin",
+        "interest_reference_rate": (
+            "European Central Bank rate on its most recent refinancing operation, the rate of 1 January for "
+            "the first half-year and of 1 July for the second"
+        ),
+        "interest_margin_percent": Decimal("10.000"),
+        "interest_fixed_percent": None,
+        "interest_statute": "Code de commerce L441-10 II",
+        "notes": (
+            "Where the contract is silent, payment is due thirty days after receipt of the goods or "
+            "performance of the service (L441-10 I), so enter that date as the application date. The "
+            "parties may agree a longer term, never more than sixty days from the invoice date or forty-five "
+            "days end of month (L441-10 I, second paragraph); the platform checks an agreed final date "
+            "against the later of the two, reading forty-five days end of month as the end of the invoice "
+            "month and then forty-five days. The default late rate is the ECB rate plus ten points; an "
+            "agreed rate may not be lower than three times the legal interest rate. A professional debtor "
+            "also owes a fixed forty euros per invoice for recovery costs (D441-5), and the invoice must "
+            "state the due date, the penalty rate and that indemnity. No notice sequence, so "
+            "no_notice_effect is none. The DGCCRF fines a breach of the payment terms up to two million "
+            "euros for a legal person (L441-16)."
+        ),
+    },
+    {
+        "code": "fr_ccp_r2192_10",
+        "jurisdiction": "France (public buyers: State, local authorities)",
+        "country_code": "FR",
+        "statute": "Code de la commande publique",
+        "statute_reference": "Articles R2192-10 and R2192-31 and following",
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "reference_rate_plus_margin",
+        "interest_reference_rate": (
+            "European Central Bank rate on its most recent main refinancing operation in force on the first "
+            "day of the half-year in which interest started to run"
+        ),
+        "interest_margin_percent": Decimal("8.000"),
+        "interest_fixed_percent": None,
+        "interest_statute": "Code de la commande publique R2192-31",
+        "notes": (
+            "The State, its public bodies other than industrial and commercial ones, and local authorities "
+            "pay within thirty days of receiving the payment request (R2192-10). Interest runs from the day "
+            "after the period ends without being claimed, at a rate fixed for the whole delay at the start "
+            "of the half-year in which it began, plus a fixed forty euros for recovery costs. Public health "
+            "establishments and public undertakings have their own periods: use fr_ccp_r2192_11_health or "
+            "fr_ccp_r2192_11_undertaking. Read through code-commande-publique.com and the FNTP rate note "
+            "(https://www.fntp.fr/?p=4008)."
+        ),
+    },
+    {
+        "code": "fr_ccp_r2192_11_health",
+        "jurisdiction": "France (public health establishments)",
+        "country_code": "FR",
+        "statute": "Code de la commande publique",
+        "statute_reference": "Articles R2192-11 and R2192-31 and following",
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 50,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "reference_rate_plus_margin",
+        "interest_reference_rate": (
+            "European Central Bank rate on its most recent main refinancing operation in force on the first "
+            "day of the half-year in which interest started to run"
+        ),
+        "interest_margin_percent": Decimal("8.000"),
+        "interest_fixed_percent": None,
+        "interest_statute": "Code de la commande publique R2192-31",
+        "notes": (
+            "Public health establishments pay within fifty days (R2192-11). Interest and the forty euros of "
+            "recovery costs as for the thirty-day public clock."
+        ),
+    },
+    {
+        "code": "fr_ccp_r2192_11_undertaking",
+        "jurisdiction": "France (public undertakings)",
+        "country_code": "FR",
+        "statute": "Code de la commande publique",
+        "statute_reference": "Articles R2192-11 and R2192-31 and following",
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 60,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "reference_rate_plus_margin",
+        "interest_reference_rate": (
+            "European Central Bank rate on its most recent main refinancing operation in force on the first "
+            "day of the half-year in which interest started to run"
+        ),
+        "interest_margin_percent": Decimal("8.000"),
+        "interest_fixed_percent": None,
+        "interest_statute": "Code de la commande publique R2192-31",
+        "notes": (
+            "Public undertakings pay within sixty days (R2192-11). Interest and the forty euros of recovery "
+            "costs as for the thirty-day public clock."
+        ),
+    },
     {
         "code": "pl_late_payment_b2b",
         "jurisdiction": "Poland",

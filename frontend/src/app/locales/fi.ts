@@ -20763,7 +20763,7 @@ const resource = {
     "tour.bim.step.6.title": "Linkitetty BOQ",
     "tour.bim.step.7.body": "Siirry Geo Hubiin tämä malli kiinnitettynä maapalloon, yhdistä useita malleja yhteentörmäysanalyysiin tai avaa poimittu data Data Explorerissa SQL-tyyliseen analysointiin.",
     "tour.bim.step.7.title": "Näytä kartalla ja federaatio",
-    "tour.boq.step.6.body": "Lisää yleiskulut, tuotto, vero, varaus, vakuutus tai takaus, valitse alueellinen malli (DACH VOB, UK NRM, FR BATIPRIX, …) tai luo oma. Lisät kertyvät suorien kustannusten päälle.",
+    "tour.boq.step.6.body": "Lisää yleiskulut, tuotto, vero, varaus, vakuutus tai takaus, valitse alueellinen malli (DACH VOB, UK NRM, FR déboursé sec, …) tai luo oma. Lisät kertyvät suorien kustannusten päälle.",
     "tour.boq.step.6.title": "Lisät ja ALV",
     "tour.boq.step.7.body": "Liikennevalot ohjaavat validointiputki, vihreä yli 80, oranssi 50-80, punainen alle. Vie hiiri erittelyn päälle: kuvaukset täytetty, määrät asetettu, hinnat asetettu, lisät konfiguroitu.",
     "tour.boq.step.7.title": "Laadun pisteet",

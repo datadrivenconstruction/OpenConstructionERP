@@ -20068,7 +20068,7 @@ const resource = {
     "tour.boq.step.5.title": "Zdroj souhrn",
     "tour.boq.step.5.body": "Živý souhrn každého řádku materiálu, práce a vybavení spotřebovaného v tomto výkazu výměr, množství, jednotkové náklady a celkové čerpání na zdroj. Kliknutím na řádek uvidíte, které položky jej používají.",
     "tour.boq.step.6.title": "Přirážky & VAT",
-    "tour.boq.step.6.body": "Přidat režie, zisk, daň, contingency, pojištění nebo bonds, vybrat regionální šablona (DACH VOB, UK NRM, FR BATIPRIX, …) nebo roll váš vlastní. Přirážky stack na direct náklad.",
+    "tour.boq.step.6.body": "Přidat režie, zisk, daň, contingency, pojištění nebo bonds, vybrat regionální šablona (DACH VOB, UK NRM, FR déboursé sec, …) nebo roll váš vlastní. Přirážky stack na direct náklad.",
     "tour.boq.step.7.title": "Kvalita skóre",
     "tour.boq.step.7.body": "Traffic světlý driven podle validace pipeline, green přes 80, amber 50-80, red pod. Hover pro rozpis: popisy filled, množství nastavit, sazby nastavit, přirážky configured.",
     "tour.boq.step.8.title": "Exportovat anywhere",

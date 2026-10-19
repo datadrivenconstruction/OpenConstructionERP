@@ -21432,7 +21432,7 @@ const resource = {
     "tour.boq.step.4.title": "Kalite ve YZ araçları",
     "tour.boq.step.5.body": "Bu BOQ genelinde kullanılan her malzeme, işçilik ve ekipman satırının canlı dökümü - kaynaklar bazında miktarlar, birim maliyetler ve toplam harcama. Hangi pozisyonların kullandığını görmek için bir satıra tıklayın.",
     "tour.boq.step.5.title": "Kaynak özeti",
-    "tour.boq.step.6.body": "Genel gider, kar, vergi, beklenmedik gider, sigorta veya teminat ekleyin - bölgesel bir şablon seçin (DACH VOB, UK NRM, FR BATIPRIX, ...) veya kendinizinkini oluşturun. Markuplar doğrudan maliyetin üzerine eklenir.",
+    "tour.boq.step.6.body": "Genel gider, kar, vergi, beklenmedik gider, sigorta veya teminat ekleyin - bölgesel bir şablon seçin (DACH VOB, UK NRM, FR déboursé sec, ...) veya kendinizinkini oluşturun. Markuplar doğrudan maliyetin üzerine eklenir.",
     "tour.boq.step.6.title": "Markuplar ve KDV",
     "tour.boq.step.7.body": "Doğrulama hattı tarafından yönlendirilen trafik ışığı - 80'in üzeri yeşil, 50-80 sarı, altı kırmızı. Döküm için üzerine gelin: açıklamalar dolduruldu, miktarlar girildi, birim fiyatlar girildi, markuplar ayarlandı.",
     "tour.boq.step.7.title": "Kalite skoru",

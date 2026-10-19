@@ -18204,7 +18204,7 @@ const resource = {
     "tour.boq.step.5.title": "Erőforrás-összesítő",
     "tour.boq.step.5.body": "Élő összesítés minden anyag-, munkadíj- és gépköltség-sorról, amit ez a költségvetés felhasznál: mennyiségek, egységköltségek és teljes ráfordítás erőforrásonként. Kattintson egy sorra, hogy lássa, mely tételek használják.",
     "tour.boq.step.6.title": "Felárak és ÁFA",
-    "tour.boq.step.6.body": "Adjon hozzá rezsit, hasznot, adót, tartalékkeretet, biztosítást vagy garanciákat, válasszon egy regionális sablont (DACH VOB, UK NRM, FR BATIPRIX, …), vagy állítsa össze a sajátját. A felárak a közvetlen költségre halmozódnak.",
+    "tour.boq.step.6.body": "Adjon hozzá rezsit, hasznot, adót, tartalékkeretet, biztosítást vagy garanciákat, válasszon egy regionális sablont (DACH VOB, UK NRM, FR déboursé sec, …), vagy állítsa össze a sajátját. A felárak a közvetlen költségre halmozódnak.",
     "tour.boq.step.7.title": "Minőségi pontszám",
     "tour.boq.step.7.body": "A validációs folyamat vezérli a jelzőlámpát: zöld 80 fölött, sárga 50–80, piros alatta. Vigye az egeret fölé a bontásért: leírások kitöltve, mennyiségek beállítva, egységárak beállítva, felárak konfigurálva.",
     "tour.boq.step.8.title": "Exportálás bárhová",

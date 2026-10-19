@@ -259,6 +259,31 @@ _WORKBOOK_FORMATS: tuple[ExchangeFormat, ...] = (
         header_language="fr",
         rule_packs=("dpgf",),
     ),
+    # The two documents of a French unit-price contract (marché à prix
+    # unitaires), listed after the DPGF so the lump-sum breakdown stays the
+    # default a French user lands on. Both are workbooks in French headings
+    # and travel through the same spreadsheet reader and writer as the DPGF;
+    # neither has a published standard, so ``standard`` stays empty.
+    ExchangeFormat(
+        format_id="fr_bpu",
+        name="BPU",
+        countries=("FR",),
+        extensions=(".xlsx", ".xls", ".csv"),
+        summary="The Bordereau des Prix Unitaires, the unit price of every item of a French unit-price contract.",
+        reader="excel",
+        writer="excel",
+        header_language="fr",
+    ),
+    ExchangeFormat(
+        format_id="fr_dqe",
+        name="DQE",
+        countries=("FR",),
+        extensions=(".xlsx", ".xls", ".csv"),
+        summary="The Détail Quantitatif Estimatif, the estimated quantities priced at the BPU rates to compare offers.",
+        reader="excel",
+        writer="excel",
+        header_language="fr",
+    ),
     ExchangeFormat(
         format_id="es_presupuesto",
         name="Presupuesto",

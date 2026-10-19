@@ -20135,7 +20135,7 @@ const resource = {
     "tour.boq.step.5.title": "Resursă rezumat",
     "tour.boq.step.5.body": "Centralizare în timp real a fiecărui rând de material, manoperă și echipament consumat în acest BOQ, cantități, costuri unitare și cheltuiala totală pe resursă. Apăsați pe un rând pentru a vedea ce poziții îl folosesc.",
     "tour.boq.step.6.title": "Marcaje & VAT",
-    "tour.boq.step.6.body": "Adaugă cheltuieli indirecte, profit, taxă, contingency, asigurare sau bonds, alege un regional șablon (DACH VOB, UK NRM, FR BATIPRIX, …) sau roll al tău propriu. Marcaje stack pe direct cost.",
+    "tour.boq.step.6.body": "Adaugă cheltuieli indirecte, profit, taxă, contingency, asigurare sau bonds, alege un regional șablon (DACH VOB, UK NRM, FR déboursé sec, …) sau roll al tău propriu. Marcaje stack pe direct cost.",
     "tour.boq.step.7.title": "Calitate scor",
     "tour.boq.step.7.body": "Traffic luminos driven după validare pipeline, green peste 80, amber 50-80, red sub. Hover pentru detaliere: descrieri filled, cantități setează, tarife setează, marcaje configured.",
     "tour.boq.step.8.title": "Exportă anywhere",

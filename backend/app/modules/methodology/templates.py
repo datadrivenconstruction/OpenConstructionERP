@@ -756,6 +756,11 @@ _COUNTRY_TEMPLATES: list[dict[str, Any]] = [
     {
         "slug": "france",
         "name": "France",
+        # These flat steps never ship: France is in REGION_BY_COUNTRY, so
+        # _reconcile_with_region_table replaces them with the French stack of
+        # app.modules.boq.markup_templates at import. The figures below are set
+        # to that stack (FC 10 + FG 15 as overhead, B&A 8) so the source does
+        # not state a second French convention.
         "description": "French flat estimate with site overhead, profit and TVA.",
         "country_code": "FR",
         "industry": None,
@@ -766,7 +771,7 @@ _COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         "column_preset": None,
         "base_mapping": _FLAT_BASE_MAPPING,
         "composites": _FLAT_COMPOSITES,
-        "cascade_steps": _flat_steps(overhead="12", profit="7", vat="20"),
+        "cascade_steps": _flat_steps(overhead="25", profit="8", vat="20"),
         "vat_rate": "20",
     },
     {
