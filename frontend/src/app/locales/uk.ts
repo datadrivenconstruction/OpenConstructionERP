@@ -48134,6 +48134,7 @@ const resource = {
     "modules.catalog.einvoice": "Електронний рахунок",
     "modules.catalog.einvoice_clearance": "Кліренс е-рахунків",
     "modules.catalog.einvoice_eta": "Електронні рахунки ETA (Єгипет)",
+    "modules.catalog.einvoice_zatca": "Електронні рахунки Саудівської Аравії (ZATCA)",
     "modules.catalog.equipment": "Управління технікою та парком машин",
     "modules.catalog.field_diary": "Щоденник об'єкта",
     "modules.catalog.file_approvals": "Погодження файлів",

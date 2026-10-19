@@ -518,6 +518,7 @@ const resource = {
     "modules.catalog.einvoice": "ই-ইনভয়েস",
     "modules.catalog.einvoice_clearance": "ই-ইনভয়েস ক্লিয়ারেন্স",
     "modules.catalog.einvoice_eta": "মিশর ETA ই-ইনভয়েসিং",
+    "modules.catalog.einvoice_zatca": "সৌদি আরবের ZATCA ই-ইনভয়েসিং",
     "modules.catalog.enterprise_workflows": "এন্টারপ্রাইজ ওয়ার্কফ্লো",
     "modules.catalog.equipment": "সরঞ্জাম ও বহর ব্যবস্থাপনা",
     "modules.catalog.erp_chat": "ERP চ্যাট",

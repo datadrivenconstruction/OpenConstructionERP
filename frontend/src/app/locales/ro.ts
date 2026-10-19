@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.einvoice": "Factură electronică",
     "modules.catalog.einvoice_clearance": "Validare factură electronică",
     "modules.catalog.einvoice_eta": "Facturare electronică ETA (Egipt)",
+    "modules.catalog.einvoice_zatca": "Facturare electronică Arabia Saudită (ZATCA)",
     "modules.catalog.enterprise_workflows": "Fluxuri de lucru pentru organizații",
     "modules.catalog.equipment": "Gestionarea echipamentelor și a flotei",
     "modules.catalog.erp_chat": "Chat ERP",

@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.einvoice": "E-számla",
     "modules.catalog.einvoice_clearance": "E-számla klíring",
     "modules.catalog.einvoice_eta": "ETA e-számlázás (Egyiptom)",
+    "modules.catalog.einvoice_zatca": "Szaúd-arábiai e-számlázás (ZATCA)",
     "modules.catalog.enterprise_workflows": "Vállalati munkafolyamatok",
     "modules.catalog.equipment": "Gépek és géppark",
     "modules.catalog.erp_chat": "ERP-csevegés",

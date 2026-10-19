@@ -900,6 +900,70 @@ class TestVerdictComesLater:
             await service.refresh_document(session, document=document, profile=profile)
 
 
+class TestAcceptedAct:
+    def test_the_adapter_may_name_an_act_the_country_declares(self):
+        fr = regimes.COUNTRY_REGIMES["FR"]
+        extra = fr.additional_regimes[0]
+        assert service._accepted_act(adapters.SubmissionOutcome(accepted=True, act=extra), fr) == extra
+
+    def test_no_act_and_an_undeclared_act_fall_back_to_the_deciding_one(self):
+        es = regimes.COUNTRY_REGIMES["ES"]
+        assert service._accepted_act(adapters.SubmissionOutcome(accepted=True), es) == es.regime
+        assert service._accepted_act(adapters.SubmissionOutcome(accepted=True, act="clearance"), es) == es.regime
+
+
+class _ActAdapter:
+    """An adapter that names the act an accepted document went through."""
+
+    key = "act_test_adapter"
+    label = "Hybrid platform"
+    countries: tuple[str, ...] = ("*",)
+    act: str | None = None
+
+    async def submit(self, request):
+        return adapters.SubmissionOutcome(accepted=True, authority_identifier="ACT-1", act=type(self).act)
+
+    async def cancel(self, request):
+        return adapters.SubmissionOutcome(accepted=True, authority_identifier=request.authority_identifier)
+
+
+@pytest.fixture
+def act_adapter():
+    adapters.adapter_registry.register(_ActAdapter())
+    yield _ActAdapter
+    adapters.adapter_registry._adapters.pop(_ActAdapter.key, None)
+    _ActAdapter.act = None
+
+
+@pytest.mark.asyncio
+class TestAdapterNamesTheAct:
+    async def test_a_hybrid_country_records_the_act_the_adapter_names(self, session, act_adapter):
+        entry = regimes.COUNTRY_REGIMES["FR"]
+        assert entry.additional_regimes
+        act_adapter.act = entry.additional_regimes[0]
+        profile = await _profile(session, "FR", adapter_key=act_adapter.key)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        document, _, _ = await service.submit_document(session, document=document, profile=profile)
+        assert document.status == TERMINAL_SUCCESS[act_adapter.act]
+        assert document.status != TERMINAL_SUCCESS[entry.regime]
+
+    async def test_no_act_keeps_the_deciding_act(self, session, act_adapter):
+        act_adapter.act = None
+        profile = await _profile(session, "FR", adapter_key=act_adapter.key)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        document, _, _ = await service.submit_document(session, document=document, profile=profile)
+        assert document.status == TERMINAL_SUCCESS[regimes.COUNTRY_REGIMES["FR"].regime]
+
+    async def test_an_act_the_country_does_not_declare_is_ignored(self, session, act_adapter):
+        # Spain only reports. An adapter naming clearance must not make a
+        # report read as a tax clearance.
+        act_adapter.act = "clearance"
+        profile = await _profile(session, "ES", adapter_key=act_adapter.key)
+        document, _ = await service.create_document(session, profile=profile, body=_body(profile))
+        document, _, _ = await service.submit_document(session, document=document, profile=profile)
+        assert document.status == "reported"
+
+
 @pytest.mark.asyncio
 class TestCancellation:
     async def test_a_cancellation_inside_the_window_is_accepted(self, session):

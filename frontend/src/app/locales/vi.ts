@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.einvoice": "Hóa đơn điện tử",
     "modules.catalog.einvoice_clearance": "Xác thực hóa đơn điện tử",
     "modules.catalog.einvoice_eta": "Hóa đơn điện tử ETA (Ai Cập)",
+    "modules.catalog.einvoice_zatca": "Hóa đơn điện tử Ả Rập Xê Út (ZATCA)",
     "modules.catalog.enterprise_workflows": "Quy trình doanh nghiệp",
     "modules.catalog.equipment": "Quản lý thiết bị & đội xe",
     "modules.catalog.erp_chat": "Chat ERP",

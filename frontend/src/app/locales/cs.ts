@@ -518,6 +518,7 @@ const resource = {
     "modules.catalog.einvoice": "E-faktura",
     "modules.catalog.einvoice_clearance": "Validace e-faktury",
     "modules.catalog.einvoice_eta": "Elektronická fakturace ETA (Egypt)",
+    "modules.catalog.einvoice_zatca": "E-fakturace v Saúdské Arábii (ZATCA)",
     "modules.catalog.enterprise_workflows": "Podnikové workflow",
     "modules.catalog.equipment": "Správa vybavení a vozového parku",
     "modules.catalog.erp_chat": "ERP chat",

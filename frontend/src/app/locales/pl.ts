@@ -518,6 +518,7 @@ const resource = {
     "modules.catalog.einvoice": "E-faktura",
     "modules.catalog.einvoice_clearance": "Walidacja e-faktury",
     "modules.catalog.einvoice_eta": "E-fakturowanie ETA (Egipt)",
+    "modules.catalog.einvoice_zatca": "E-faktury w Arabii Saudyjskiej (ZATCA)",
     "modules.catalog.enterprise_workflows": "Przepływy pracy enterprise",
     "modules.catalog.equipment": "Zarządzanie sprzętem i flotą",
     "modules.catalog.erp_chat": "Czat ERP",

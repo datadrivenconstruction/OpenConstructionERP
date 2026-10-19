@@ -37,13 +37,11 @@ Countries that do more than one of them
 A country can do two of these acts at once, and calling such a country by one
 of the three names alone states something false about it. France (FR) routes
 the document to the buyer over a network of accredited platforms and
-separately reports transaction and payment data to the DGFiP, and it is the
-registry's one hybrid entry today. Other countries pair acts the same way -
-Saudi Arabia (SA) reports its simplified invoices after issue where standard
-ones are cleared - but a row is classed by what it declares, and the SA row
-models the standard-invoice clearance path alone, as its notes say. Closing
-that gap is a second act in ``additional_regimes`` on the row, not a sentence
-here; this paragraph names every row the registry classes hybrid.
+separately reports transaction and payment data to the DGFiP. Saudi Arabia
+(SA) clears its standard tax invoices before they reach the buyer and has its
+simplified invoices reported within 24 hours of issue, so its row names
+clearance as the deciding act and reporting beside it. A row is classed by what
+it declares, and this paragraph names every row the registry classes hybrid.
 
 ``regime`` therefore keeps naming the act that decides what a successful answer
 means, and ``additional_regimes`` names the other acts the same country also
@@ -284,6 +282,83 @@ class CountryRegime:
         return tuple(sorted(matching, key=lambda p: (not p.is_dated, p.effective_date)))
 
 
+# Saudi Arabia's phase 2 integration waves. Each wave is keyed to VAT-subject
+# revenue in its reference years, and ZATCA notifies a taxpayer at least six
+# months before its window. The date of a phase is the END of the integration
+# window: the day by which every taxpayer in the wave must be integrated, which
+# is the date an operator plans to. Waves 1 to 24 are as EY reproduces ZATCA's
+# announcements (medium confidence, the wave 22 window especially); wave 25 is
+# read from EY and KPMG on ZATCA's announcement of 2026-07-24.
+# (wave, revenue threshold in SAR, reference years, window start, deadline)
+_SA_WAVES: tuple[tuple[int, str, str, str, str], ...] = (
+    (1, "3,000,000,000", "2021", "2023-01-01", "2023-06-30"),
+    (2, "500,000,000", "2021", "2023-07-01", "2023-12-31"),
+    (3, "250,000,000", "2021 or 2022", "2023-10-01", "2024-01-31"),
+    (4, "150,000,000", "2021 or 2022", "2023-11-01", "2024-02-29"),
+    (5, "100,000,000", "2021 or 2022", "2023-12-01", "2024-03-31"),
+    (6, "70,000,000", "2021 or 2022", "2024-01-01", "2024-04-30"),
+    (7, "50,000,000", "2021 or 2022", "2024-02-01", "2024-05-31"),
+    (8, "40,000,000", "2021 or 2022", "2024-03-01", "2024-06-30"),
+    (9, "30,000,000", "2021 or 2022", "2024-06-01", "2024-09-30"),
+    (10, "25,000,000", "2022 or 2023", "2024-10-01", "2024-12-31"),
+    (11, "15,000,000", "2022 or 2023", "2024-11-01", "2025-01-31"),
+    (12, "10,000,000", "2022 or 2023", "2024-12-01", "2025-02-28"),
+    (13, "7,000,000", "2022 or 2023", "2025-01-01", "2025-03-31"),
+    (14, "5,000,000", "2022 or 2023", "2025-02-01", "2025-04-30"),
+    (15, "4,000,000", "2022 or 2023", "2025-03-01", "2025-05-31"),
+    (16, "3,000,000", "2022 or 2023", "2025-04-01", "2025-06-30"),
+    (17, "2,500,000", "2022 or 2023", "2025-05-01", "2025-07-31"),
+    (18, "2,000,000", "2022 or 2023", "2025-06-01", "2025-08-31"),
+    (19, "1,750,000", "2022 or 2023", "2025-07-01", "2025-09-30"),
+    (20, "1,500,000", "2022 or 2023", "2025-08-01", "2025-10-31"),
+    (21, "1,250,000", "2022, 2023 or 2024", "2025-09-01", "2025-11-30"),
+    (22, "1,000,000", "2022, 2023 or 2024", "2025-10-01", "2025-12-31"),
+    (23, "750,000", "2022, 2023 or 2024", "2026-01-01", "2026-03-31"),
+    (24, "375,000", "2022, 2023 or 2024", "2026-04-01", "2026-06-30"),
+    (25, "187,500", "2022, 2023, 2024 or 2025", "", "2027-02-01"),
+)
+_SA_WAVE_SOURCE = (
+    "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration"
+)
+_SA_PHASES: tuple[CommencementPhase, ...] = (
+    CommencementPhase(
+        obligation=OBLIGATION_ISSUE,
+        effective_date="2021-12-04",
+        scope="Phase 1 (generation): every resident VAT taxpayer issues invoices from a compliant e-invoicing solution",
+        legal_status=LEGAL_STATUS_IN_FORCE,
+        source_url="https://zatca.gov.sa/en/E-Invoicing/Introduction/LawsAndRegulations/Documents/E-invoicing-Regulations.pdf",
+        read_date="2026-10-19",
+        notes="QR code mandatory on simplified invoices from this date; integration with Fatoora came in waves.",
+    ),
+    *(
+        CommencementPhase(
+            obligation=OBLIGATION_ISSUE,
+            effective_date=deadline,
+            scope=(
+                f"Phase 2 (integration) wave {wave}: clearance of standard and reporting of simplified invoices "
+                f"through Fatoora, for VAT-subject revenue above SAR {threshold} in {years}"
+            ),
+            legal_status=LEGAL_STATUS_ENACTED if wave == 25 else LEGAL_STATUS_IN_FORCE,
+            source_url=_SA_WAVE_SOURCE,
+            read_date="2026-10-19",
+            threshold=f"SAR {threshold} VAT-subject revenue in {years}",
+            notes=(f"Integration window {start} to {deadline}." if start else f"Integration deadline {deadline}.")
+            + (
+                ""
+                if wave == 25
+                else " As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+            )
+            + (
+                " Also reported by KPMG (2026-07). Whether further waves follow is not announced: needs expert review."
+                if wave == 25
+                else ""
+            ),
+        )
+        for wave, threshold, years, start, deadline in _SA_WAVES
+    ),
+)
+
+
 # The registry. One entry per country; adding a country is one entry and no code.
 #
 # The cancellation windows are the ones an accountant works to, and each is
@@ -431,13 +506,27 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         label="Saudi Arabia - ZATCA phase 2 integration",
         identifier_label="cryptographic stamp and QR",
         document_format="zatca_phase2",
+        # ``certificate_reference`` names the EGS unit that stamps the
+        # registration's documents.
         profile_fields=("tax_registration_id", "certificate_reference"),
-        document_fields=("vat_number_issuer", "invoice_hash", "qr_code"),
+        # None. The seller's VAT number, the invoice hash and the QR are inside
+        # the signed document, written by the package that builds it; asking
+        # the operator to type them into the document's fields as well would
+        # block every submission on values nobody can know before the stamp.
+        document_fields=(),
         cancellation_window_days=None,
-        correction_mechanism="credit note reported through the same integration",
+        correction_mechanism="credit note (381) or debit note (383) through the same integration",
+        additional_regimes=(REGIME_REPORTING,),
+        scope=(
+            "Phase 1 applies to every resident VAT taxpayer. Phase 2 has reached taxpayers through wave 24 "
+            "(revenue above SAR 375,000); wave 25 (above SAR 187,500 in any of 2022 to 2025) integrates by "
+            "2027-02-01."
+        ),
+        commencement=_SA_PHASES,
         notes=(
-            "Standard invoices are cleared before issue; simplified invoices are reported within 24 hours. "
-            "This registry models the standard-invoice clearance path."
+            "Standard tax invoices (KSA-2 01xxxxx, B2B and B2G) are cleared before they reach the buyer; "
+            "simplified invoices (02xxxxx, B2C) are stamped by the seller and reported within 24 hours. "
+            "Which act a document goes through is read from its own subtype."
         ),
     ),
     "IN": CountryRegime(

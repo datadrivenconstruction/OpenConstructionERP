@@ -750,7 +750,7 @@ async def submit_document(
     if outcome.accepted and outcome.pending:
         await _record_pending(session, document, outcome, regime=regime, actor_id=actor_id)
     elif outcome.accepted:
-        target = TERMINAL_SUCCESS.get(regime.regime, STATUS_SUBMITTED)
+        target = TERMINAL_SUCCESS.get(_accepted_act(outcome, regime), STATUS_SUBMITTED)
         document.authority_identifier = outcome.authority_identifier
         document.rejection_code = ""
         document.rejection_message = ""
@@ -782,6 +782,13 @@ async def submit_document(
         )
     await session.flush()
     return document, outcome, findings
+
+
+def _accepted_act(outcome: SubmissionOutcome, regime: CountryRegime) -> str:
+    """The act an accepted answer amounts to: the adapter's, if the regime declares it."""
+    if outcome.act and outcome.act in regime.regimes:
+        return outcome.act
+    return regime.regime
 
 
 async def _record_pending(
@@ -877,7 +884,7 @@ async def refresh_document(
             actor_id=actor_id,
         )
     elif outcome.accepted:
-        target = TERMINAL_SUCCESS.get(regime.regime, STATUS_CLEARED)
+        target = TERMINAL_SUCCESS.get(_accepted_act(outcome, regime), STATUS_CLEARED)
         if outcome.authority_identifier:
             document.authority_identifier = outcome.authority_identifier
         document.rejection_code = ""

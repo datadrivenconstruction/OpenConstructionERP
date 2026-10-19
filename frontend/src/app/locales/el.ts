@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.einvoice": "Ηλεκτρονικό τιμολόγιο",
     "modules.catalog.einvoice_clearance": "Εκκαθάριση ηλ. τιμολογίων",
     "modules.catalog.einvoice_eta": "Ηλεκτρονική τιμολόγηση ETA (Αίγυπτος)",
+    "modules.catalog.einvoice_zatca": "Ηλεκτρονική τιμολόγηση Σαουδικής Αραβίας (ZATCA)",
     "modules.catalog.enterprise_workflows": "Επιχειρησιακές Ροές Εργασίας",
     "modules.catalog.equipment": "Διαχείριση Εξοπλισμού & Στόλου",
     "modules.catalog.erp_chat": "Συνομιλία ERP",

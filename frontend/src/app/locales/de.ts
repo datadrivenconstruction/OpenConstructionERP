@@ -522,6 +522,7 @@ const resource = {
     "modules.catalog.einvoice": "E-Rechnung",
     "modules.catalog.einvoice_clearance": "E-Rechnungs-Clearing",
     "modules.catalog.einvoice_eta": "E-Rechnung ETA (Ägypten)",
+    "modules.catalog.einvoice_zatca": "E-Rechnung Saudi-Arabien (ZATCA)",
     "modules.catalog.enterprise_workflows": "Enterprise-Workflows",
     "modules.catalog.equipment": "Geräte- & Flottenmanagement",
     "modules.catalog.erp_chat": "ERP-Chat",

@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.einvoice": "電子請求書",
     "modules.catalog.einvoice_clearance": "電子請求書検証",
     "modules.catalog.einvoice_eta": "エジプト ETA 電子インボイス",
+    "modules.catalog.einvoice_zatca": "サウジアラビア電子請求書 (ZATCA)",
     "modules.catalog.enterprise_workflows": "エンタープライズワークフロー",
     "modules.catalog.equipment": "機材・車両管理",
     "modules.catalog.erp_chat": "ERP チャット",

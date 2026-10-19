@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.einvoice": "Verkkolasku",
     "modules.catalog.einvoice_clearance": "Verkkolaskun validointi",
     "modules.catalog.einvoice_eta": "Sähköinen laskutus ETA (Egypti)",
+    "modules.catalog.einvoice_zatca": "Saudi-Arabian verkkolaskutus (ZATCA)",
     "modules.catalog.enterprise_workflows": "Yritystason työnkulut",
     "modules.catalog.equipment": "Kaluston ja ajoneuvojen hallinta",
     "modules.catalog.erp_chat": "ERP-chat",

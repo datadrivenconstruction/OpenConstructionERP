@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.einvoice": "Электрондық шот-фактура",
     "modules.catalog.einvoice_clearance": "Электрондық шот-фактура клиренсі",
     "modules.catalog.einvoice_eta": "Мысыр ETA электрондық шот-фактура",
+    "modules.catalog.einvoice_zatca": "Сауд Арабиясының электрондық шот-фактурасы (ZATCA)",
     "modules.catalog.enterprise_workflows": "Кәсіпорын Жұмыс Ағындары",
     "modules.catalog.equipment": "Жабдық пен автопарк басқару",
     "modules.catalog.erp_chat": "ERP Чаты",

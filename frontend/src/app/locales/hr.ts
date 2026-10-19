@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.einvoice": "E-račun",
     "modules.catalog.einvoice_clearance": "Validacija e-računa",
     "modules.catalog.einvoice_eta": "E-fakturiranje ETA (Egipat)",
+    "modules.catalog.einvoice_zatca": "E-račun Saudijske Arabije (ZATCA)",
     "modules.catalog.enterprise_workflows": "Korporativni tijekovi rada",
     "modules.catalog.equipment": "Upravljanje opremom i voznim parkom",
     "modules.catalog.erp_chat": "ERP chat",

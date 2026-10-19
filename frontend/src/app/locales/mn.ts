@@ -518,6 +518,7 @@ const resource = {
     "modules.catalog.einvoice": "Цахим нэхэмжлэх",
     "modules.catalog.einvoice_clearance": "Цахим нэхэмжлэхийн зөвшөөрөл",
     "modules.catalog.einvoice_eta": "Египет ETA цахим нэхэмжлэх",
+    "modules.catalog.einvoice_zatca": "Саудын Арабын цахим нэхэмжлэх (ZATCA)",
     "modules.catalog.enterprise_workflows": "Байгууллагын ажлын урсгалууд",
     "modules.catalog.equipment": "Тоног төхөөрөмж ба автопаркийн удирдлага",
     "modules.catalog.erp_chat": "ERP чат",

@@ -518,6 +518,7 @@ const resource = {
     "modules.catalog.einvoice": "صورت‌حساب الکترونیکی",
     "modules.catalog.einvoice_clearance": "تأیید فاکتور الکترونیکی",
     "modules.catalog.einvoice_eta": "صورتحساب الکترونیکی ETA مصر",
+    "modules.catalog.einvoice_zatca": "فاکتور الکترونیکی عربستان سعودی (ZATCA)",
     "modules.catalog.enterprise_workflows": "جریان‌های کاری سازمانی",
     "modules.catalog.equipment": "مدیریت تجهیزات و ناوگان",
     "modules.catalog.erp_chat": "گفتگوی ERP",

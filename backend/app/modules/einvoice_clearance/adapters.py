@@ -115,6 +115,14 @@ class SubmissionOutcome:
     # reads the verdict. Defaults to false, so every adapter written before
     # this field keeps meaning exactly what it meant.
     pending: bool = False
+    # The act this answer is about, for a country that does more than one. A
+    # hybrid country (see ``CountryRegime.additional_regimes``) puts different
+    # documents through different acts, and only the adapter that read the
+    # document's own subtype knows which one it went through. ``None`` means the
+    # regime's deciding act, which is every adapter written before this field.
+    # A value the country's regime does not declare is ignored, so an adapter
+    # cannot record a delivery receipt as a tax clearance by naming it.
+    act: str | None = None
 
 
 @dataclass(frozen=True)

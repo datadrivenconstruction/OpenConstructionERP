@@ -516,6 +516,7 @@ const resource = {
     "modules.catalog.einvoice": "E-faktura",
     "modules.catalog.einvoice_clearance": "E-fakturavalidering",
     "modules.catalog.einvoice_eta": "E-fakturering ETA (Egypten)",
+    "modules.catalog.einvoice_zatca": "E-fakturering i Saudiarabien (ZATCA)",
     "modules.catalog.enterprise_workflows": "Företagsarbetsflöden",
     "modules.catalog.equipment": "Utrustnings- & fordonsflottshantering",
     "modules.catalog.erp_chat": "ERP-chatt",

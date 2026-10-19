@@ -517,6 +517,7 @@ const resource = {
     "modules.catalog.einvoice": "Faktur elektronik",
     "modules.catalog.einvoice_clearance": "Validasi Faktur Elektronik",
     "modules.catalog.einvoice_eta": "E-faktur ETA (Mesir)",
+    "modules.catalog.einvoice_zatca": "Faktur Elektronik Arab Saudi (ZATCA)",
     "modules.catalog.enterprise_workflows": "Alur Kerja Perusahaan",
     "modules.catalog.equipment": "Manajemen Peralatan & Armada",
     "modules.catalog.erp_chat": "Chat ERP",
