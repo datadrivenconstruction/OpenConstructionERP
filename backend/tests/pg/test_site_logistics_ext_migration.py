@@ -8,6 +8,9 @@ the revision must equal the one ``create_all`` produces (columns with types and
 nullability, module indexes, unique constraints, foreign keys), so a fresh
 install and an upgraded one cannot drift. Down must leave the three existing
 tables exactly as they were before the extension.
+
+v98 adds the two link keys v78 left out (zone to area, delivery to transport),
+so the chain compared with the models is v78 then v98, and down runs v98 first.
 """
 
 from __future__ import annotations
@@ -34,7 +37,28 @@ def _load(name: str):
     return module
 
 
-_rev = _load("v78_site_logistics_ext")
+_v78 = _load("v78_site_logistics_ext")
+_v98 = _load("v98_site_logistics_link_keys")
+
+
+class _Chain:
+    """v78 and the revision that adds its two link keys, run as one step."""
+
+    _TABLES = _v78._TABLES
+    _EXTEND = _v78._EXTEND
+
+    @staticmethod
+    def upgrade() -> None:
+        _v78.upgrade()
+        _v98.upgrade()
+
+    @staticmethod
+    def downgrade() -> None:
+        _v98.downgrade()
+        _v78.downgrade()
+
+
+_rev = _Chain
 NEW_TABLES = [t for t, _c, _i in _rev._TABLES]
 EXTENDED = sorted({t for t, _c, _f, _i in _rev._EXTEND})
 ADDED = {(t, c().name) for t, c, _f, _i in _rev._EXTEND}
