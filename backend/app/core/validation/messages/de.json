@@ -753,6 +753,18 @@
       "fail": "Position {line} wurde für einen Vorgang mit Beginn am {anchor} geplant, der Vorgang beginnt jetzt am {start}",
       "suggestion": "Prüfen Sie den Bedarfstermin der Position gegen den aktuellen Terminplan und ändern Sie ihn bei Bedarf"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Die Person, die Bedarfsanforderung {req} erstellt hat, ist zugleich ihr festgelegter Genehmiger Nummer {step}",
+      "suggestion": "Benennen Sie für diesen Schritt einen anderen Genehmiger, damit nicht der Anforderer selbst entscheidet"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Position {line} hat {ordered} {unit} in Bestellungen, mehr als die angeforderten {requested} {unit}",
+      "suggestion": "Prüfen Sie, ob die Mehrmenge gewollt ist, oder verringern Sie die Bestellposition"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Bestellung {order} führt Position {line} in {unit}, was sich nicht in die Einheit {line_unit} der Position umrechnen lässt",
+      "suggestion": "Korrigieren Sie die Einheit der Bestellposition, damit ihre Menge als bestellt zählt"
+    },
     "receipt_certificate_present": {
       "fail": "Position {line} wurde mit {required} bestellt, die Lieferung enthält aber {delivered}",
       "suggestion": "Fügen Sie das in der Bestellung geforderte Zeugnis bei oder weisen Sie die Position zurück, bis der Lieferant es nachreicht"

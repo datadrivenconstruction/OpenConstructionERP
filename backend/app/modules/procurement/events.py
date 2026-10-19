@@ -38,6 +38,13 @@ ends up with two purchase orders - whichever fires first wins, the second
 is an idempotent skip. Re-firing the same event (bus retry, manual
 replay) is likewise a no-op.
 
+Order owner
+-----------
+A project whose orders are placed in an external purchasing system
+(``procurement.order_owner.order_owner_for_project`` answers ``external``)
+gets no draft from any award: that system raises the order for the decision,
+and a local draft would be a second order for the same award (issue #516).
+
 Failure mode
 ------------
 Errors are logged and swallowed - the award itself must never be blocked
@@ -65,6 +72,7 @@ from app.modules.bid_management.models import (
 )
 from app.modules.procurement.cost_spine import resolve_cost_line_ids
 from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
+from app.modules.procurement.order_owner import EXTERNAL, order_owner_for_project
 from app.modules.procurement.repository import (
     POItemRepository,
     PurchaseOrderRepository,
@@ -180,6 +188,13 @@ async def _create_po_from_award(event: Event) -> None:
                     "tender.awarded handler: package=%s or bid=%s not found",
                     package_id,
                     bid_id,
+                )
+                return
+            if await order_owner_for_project(session, package.project_id) == EXTERNAL:
+                logger.info(
+                    "tender.awarded: project %s orders in an external purchasing system; no draft for package %s",
+                    package.project_id,
+                    package_id,
                 )
                 return
 
@@ -403,6 +418,14 @@ async def _create_po_from_bid_award(event: Event) -> None:
                     "bid_management.awarded handler: package=%s or bidder=%s not found",
                     package_id,
                     bidder_id,
+                )
+                return
+            if await order_owner_for_project(session, package.project_id) == EXTERNAL:
+                logger.info(
+                    "bid_management.awarded: project %s orders in an external purchasing system; "
+                    "no draft for package %s",
+                    package.project_id,
+                    package_id,
                 )
                 return
 

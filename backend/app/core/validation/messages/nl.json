@@ -753,6 +753,18 @@
       "fail": "Regel {line} was gepland voor een activiteit die begon op {anchor}, maar de activiteit begint nu op {start}",
       "suggestion": "Vergelijk de benodigd-op-datum van de regel met de huidige planning en pas hem zo nodig aan"
     },
+    "requisition_approver_not_requester": {
+      "fail": "De persoon die inkoopaanvraag {req} heeft aangemaakt, is ook de aangewezen goedkeurder nummer {step}",
+      "suggestion": "Wijs voor die stap een andere goedkeurder aan, zodat iemand anders dan de aanvrager beslist"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Regel {line} heeft {ordered} {unit} op orders staan, meer dan de aangevraagde {requested} {unit}",
+      "suggestion": "Controleer of de extra hoeveelheid bedoeld is, of verlaag de orderregel"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Order {order} bevat regel {line} in {unit}, wat niet naar de eenheid {line_unit} van de regel omgerekend kan worden",
+      "suggestion": "Corrigeer de eenheid op de orderregel zodat de hoeveelheid als besteld meetelt"
+    },
     "receipt_certificate_present": {
       "fail": "Regel {line} is besteld met {required}, maar de levering bevat {delivered}",
       "suggestion": "Voeg het certificaat toe dat de bestelling vraagt, of keur de regel af totdat de leverancier het stuurt"

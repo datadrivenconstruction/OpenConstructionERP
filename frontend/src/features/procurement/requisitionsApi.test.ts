@@ -8,8 +8,39 @@ import {
   lineToInput,
   mergeRequisitionLines,
   parseRequisitionRuleErrors,
+  plannedConvertLines,
+  isPositiveDecimal,
+  type Requisition,
   type RequisitionLineIn,
 } from './requisitionsApi';
+
+describe('plannedConvertLines', () => {
+  const item = (id: string, toOrder: string) =>
+    ({ id, quantity_to_order: toOrder, quantity_outstanding: toOrder }) as Requisition['items'][number];
+  const reqs = [{ items: [item('a', '71.4000'), item('b', '3.2500'), item('c', '0')] }];
+
+  it('sends nothing when every open line takes what is still to order', () => {
+    expect(plannedConvertLines(reqs, {})).toBeUndefined();
+    expect(plannedConvertLines(reqs, { a: '71.4' })).toBeUndefined();
+  });
+
+  it('names each line with its quantity once one is changed or left out', () => {
+    expect(plannedConvertLines(reqs, { a: '30' })).toEqual([
+      { requisition_item_id: 'a', quantity: '30' },
+      { requisition_item_id: 'b', quantity: '3.2500' },
+    ]);
+    expect(plannedConvertLines(reqs, { b: '' })).toEqual([{ requisition_item_id: 'a', quantity: '71.4000' }]);
+    expect(plannedConvertLines(reqs, { a: '0', b: '' })).toEqual([]);
+  });
+
+  it('reads a positive decimal strictly', () => {
+    expect(isPositiveDecimal('0.001')).toBe(true);
+    expect(isPositiveDecimal('0.000')).toBe(false);
+    expect(isPositiveDecimal('-1')).toBe(false);
+    expect(isPositiveDecimal('1e3')).toBe(false);
+    expect(isPositiveDecimal(null)).toBe(false);
+  });
+});
 
 const P1 = '11111111-1111-4111-8111-111111111111';
 const P2 = '22222222-2222-4222-8222-222222222222';

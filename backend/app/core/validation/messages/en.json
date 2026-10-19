@@ -753,6 +753,18 @@
       "fail": "Line {line} was planned for an activity starting {anchor}, but the activity now starts {start}",
       "suggestion": "Check the needed-by date of the line against the current schedule and change it if needed"
     },
+    "requisition_approver_not_requester": {
+      "fail": "The person who raised requisition {req} is also its designated approver number {step}",
+      "suggestion": "Name a different approver for that step, so someone other than the requester decides"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Line {line} has {ordered} {unit} on orders, more than the {requested} {unit} requested",
+      "suggestion": "Check whether the extra quantity is intended, or reduce the order line"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Order {order} holds line {line} in {unit}, which cannot be converted into the line's unit {line_unit}",
+      "suggestion": "Correct the unit on the order line so its quantity counts as ordered"
+    },
     "receipt_certificate_present": {
       "fail": "Line {line} was ordered with a {required}, but the delivery carries {delivered}",
       "suggestion": "Attach the certificate the order asks for, or reject the line until the supplier sends it"

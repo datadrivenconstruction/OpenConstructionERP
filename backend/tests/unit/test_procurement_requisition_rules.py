@@ -20,10 +20,13 @@ from typing import Any
 from app.core.validation.engine import ValidationContext, rule_registry
 from app.core.validation.messages import available_locales, is_key_present
 from app.core.validation.rules import (
+    ProcurementRequisitionApproverNotRequester,
     ProcurementRequisitionLineCostLine,
     ProcurementRequisitionLineNeededByNotPast,
+    ProcurementRequisitionLineOverOrdered,
     ProcurementRequisitionLineScheduleMoved,
     ProcurementRequisitionNeededByNotPast,
+    ProcurementRequisitionOrderUnitMismatch,
     ProcurementRequisitionQuantityPositive,
     ProcurementRequisitionSingleCurrency,
     ProcurementRequisitionSourceUnit,
@@ -62,6 +65,10 @@ RULES = [
     ProcurementRequisitionSuggestedVendorDiffers,
     ProcurementRequisitionLineNeededByNotPast,
     ProcurementRequisitionLineScheduleMoved,
+    # Issue #516, third slice: designated approvers and orders per line.
+    ProcurementRequisitionApproverNotRequester,
+    ProcurementRequisitionLineOverOrdered,
+    ProcurementRequisitionOrderUnitMismatch,
 ]
 
 
@@ -216,13 +223,21 @@ class TestBuyListSources:
             },
         ]
         bl = aggregate_material_buy_list(positions, currency="EUR")
-        [row] = bl.items
-        assert row.position_count == 2
-        assert row.quantity == Decimal("71.00")
-        assert [(s.position_id, s.resource_key, s.quantity, s.unit, s.catalog_item_id) for s in row.sources] == [
+        # A catalogue item and an uncoded line never share a row because their
+        # names agree: being called "concrete" is not proof of being the same
+        # material (issue #516).
+        rows = {row.sources[0].catalog_item_id: row for row in bl.items}
+        assert set(rows) == {None, "cat-1"}
+        uncoded, coded = rows[None], rows["cat-1"]
+        assert (uncoded.position_count, uncoded.quantity) == (1, Decimal("51.00"))
+        assert (coded.position_count, coded.quantity) == (1, Decimal("20"))
+        assert [(s.position_id, s.resource_key, s.quantity, s.unit, s.catalog_item_id) for s in uncoded.sources] == [
             ("p1", "1:C30", Decimal("51.00"), "m3", None),
+        ]
+        assert [(s.position_id, s.resource_key, s.quantity, s.unit, s.catalog_item_id) for s in coded.sources] == [
             ("p2", "res-7", Decimal("20"), "M3", "cat-1"),
         ]
+        row = uncoded
         # The serialised row keeps its old keys and adds the sources.
         as_dict = row.to_dict()
         assert {"name", "unit", "quantity", "cost", "position_count"} <= set(as_dict)

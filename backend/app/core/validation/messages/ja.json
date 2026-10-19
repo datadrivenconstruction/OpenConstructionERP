@@ -753,6 +753,18 @@
       "fail": "明細 {line} は {anchor} 開始の工程に合わせて計画されていましたが、工程は現在 {start} に開始します",
       "suggestion": "明細の納入希望日を現在の工程表と照らし合わせ、必要なら変更してください"
     },
+    "requisition_approver_not_requester": {
+      "fail": "購買依頼 {req} の起票者が、指定された承認者 {step} 番目も兼ねています",
+      "suggestion": "その承認段階には別の承認者を指定し、依頼者以外が判断するようにしてください"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "明細 {line} は発注済みが {ordered} {unit} で、依頼数量 {requested} {unit} を超えています",
+      "suggestion": "超過分が意図したものか確認し、必要なら発注明細を減らしてください"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "発注 {order} は明細 {line} を {unit} で保持しており、明細の単位 {line_unit} に換算できません",
+      "suggestion": "発注明細の単位を修正し、数量が発注済みとして集計されるようにしてください"
+    },
     "receipt_certificate_present": {
       "fail": "明細{line}は{required}付きで発注されましたが、納品には{delivered}が含まれています",
       "suggestion": "発注で求められた証明書を添付するか、サプライヤーから届くまで該当明細を保留してください"

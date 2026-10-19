@@ -342,6 +342,21 @@ async def test_the_same_award_delivered_twice_is_one_order(session: AsyncSession
     assert len(await items_of(session, po)) == 2
 
 
+async def test_no_draft_when_an_external_system_places_the_projects_orders(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """Issue #516: the external system orders for the award; a local draft would be a second order."""
+    from app.modules.procurement.models import ProcurementProjectSettings
+
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await priced_award(session, bidder=str(contact.id))
+    session.add(ProcurementProjectSettings(project_id=rfq.project_id, order_owner="external"))
+    await session.flush()
+
+    assert await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id)) is None
+    assert await orders(session, rfq.project_id) == []
+
+
 # ── Money ───────────────────────────────────────────────────────────────────
 
 

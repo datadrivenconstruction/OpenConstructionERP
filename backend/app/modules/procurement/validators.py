@@ -811,6 +811,79 @@ def check_requisition_line_schedule_moved(req: dict[str, Any]) -> list[Finding]:
     return findings
 
 
+# ── Material requisitions: approvers and orders (issue #516) ───────────────
+#
+# The payload also carries ``requester_id``, ``approval_chain`` (designated
+# approvers in order, user id strings) and, per line, ``quantity_ordered`` (live,
+# in the line's unit, from orders that are not cancelled and external order
+# lines) and ``order_unit_mismatches`` (order or external lines whose unit
+# cannot be restated in the line's unit, as ``{"ref", "unit"}``).
+
+
+def check_requisition_approver_not_requester(req: dict[str, Any]) -> list[Finding]:
+    """The person who raised a requisition may not be one of its designated approvers."""
+    requester = str(req.get("requester_id") or "")
+    chain = [str(a) for a in req.get("approval_chain") or [] if a]
+    if not requester or requester not in chain:
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"req": _req_ref(req), "step": str(chain.index(requester) + 1)},
+            details={"requester_id": requester, "approval_chain": chain},
+        )
+    ]
+
+
+def check_requisition_line_over_ordered(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line whose live orders hold more than it requested."""
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        requested = parse_money(item.get("quantity_requested"))
+        ordered = parse_money(item.get("quantity_ordered"))
+        if requested is None or ordered is None or ordered <= requested:
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={
+                    "line": line_label(index, item),
+                    "ordered": format(ordered, "f"),
+                    "requested": format(requested, "f"),
+                    "unit": str(item.get("unit") or ""),
+                },
+                details={"quantity_ordered": str(ordered), "quantity_requested": str(requested)},
+            )
+        )
+    return findings
+
+
+def check_requisition_order_unit_mismatch(req: dict[str, Any]) -> list[Finding]:
+    """Flag an order line in a unit that cannot be restated in the requisition line's unit.
+
+    Such a line is shown but left out of the ordered and received figures, so
+    the line reads as less ordered than it is until someone corrects the unit.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        for mismatch in item.get("order_unit_mismatches") or []:
+            if not isinstance(mismatch, dict):
+                continue
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={
+                        "line": line_label(index, item),
+                        "order": str(mismatch.get("ref") or "-"),
+                        "unit": str(mismatch.get("unit") or "-"),
+                        "line_unit": str(item.get("unit") or "-"),
+                    },
+                    details=dict(mismatch),
+                )
+            )
+    return findings
+
+
 # ── Goods receipts: material certificates (confirmation gate, BF-01) ─────────
 #
 # Payload shape, built by ``ProcurementService.receipt_validation_payload``:

@@ -753,6 +753,18 @@
       "fail": "Dòng {line} được lập kế hoạch cho công việc bắt đầu ngày {anchor}, nhưng công việc nay bắt đầu ngày {start}",
       "suggestion": "Đối chiếu ngày cần của dòng với tiến độ hiện tại và sửa nếu cần"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Người lập phiếu yêu cầu vật tư {req} cũng là người duyệt số {step} được chỉ định",
+      "suggestion": "Chỉ định người duyệt khác cho bước đó để người quyết định không phải là người yêu cầu"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Dòng {line} có {ordered} {unit} trong các đơn đặt hàng, nhiều hơn {requested} {unit} đã yêu cầu",
+      "suggestion": "Kiểm tra xem lượng vượt có chủ ý không, hoặc giảm dòng của đơn"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Đơn {order} ghi dòng {line} theo {unit}, không thể quy đổi sang đơn vị của dòng là {line_unit}",
+      "suggestion": "Sửa đơn vị trên dòng của đơn để khối lượng được tính là đã đặt"
+    },
     "receipt_certificate_present": {
       "fail": "Dòng {line} được đặt với {required}, nhưng đợt giao hàng lại có {delivered}",
       "suggestion": "Đính kèm chứng chỉ mà đơn đặt hàng yêu cầu, hoặc từ chối dòng này cho đến khi nhà cung cấp gửi chứng chỉ"

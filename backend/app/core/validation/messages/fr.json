@@ -753,6 +753,18 @@
       "fail": "La ligne {line} était prévue pour une tâche débutant le {anchor}, mais la tâche débute maintenant le {start}",
       "suggestion": "Comparez la date de besoin de la ligne au planning actuel et modifiez-la si nécessaire"
     },
+    "requisition_approver_not_requester": {
+      "fail": "La personne qui a créé la demande d'achat {req} est aussi son approbateur désigné numéro {step}",
+      "suggestion": "Désignez un autre approbateur pour cette étape, afin que la décision revienne à quelqu'un d'autre que le demandeur"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "La ligne {line} compte {ordered} {unit} en commandes, soit plus que les {requested} {unit} demandées",
+      "suggestion": "Vérifiez si la quantité excédentaire est voulue, ou réduisez la ligne de commande"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "La commande {order} reprend la ligne {line} en {unit}, ce qui ne peut pas être converti dans l'unité de la ligne {line_unit}",
+      "suggestion": "Corrigez l'unité sur la ligne de commande pour que sa quantité compte comme commandée"
+    },
     "receipt_certificate_present": {
       "fail": "La ligne {line} a été commandée avec {required}, mais la livraison comporte {delivered}",
       "suggestion": "Joignez le certificat exigé par la commande, ou refusez la ligne tant que le fournisseur ne l'a pas transmis"

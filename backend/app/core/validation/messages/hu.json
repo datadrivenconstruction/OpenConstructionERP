@@ -753,6 +753,18 @@
       "fail": "A(z) {line}. sort olyan tevékenységre tervezték, amely {anchor} napon kezdődött, de a tevékenység most {start} napon kezdődik",
       "suggestion": "Vesse össze a sor szükséglet-időpontját az aktuális ütemtervvel, és szükség esetén módosítsa"
     },
+    "requisition_approver_not_requester": {
+      "fail": "A(z) {req} anyagigénylést létrehozó személy egyben a kijelölt {step}. jóváhagyó is",
+      "suggestion": "Jelöljön ki más jóváhagyót ehhez a lépéshez, hogy ne az igénylő döntsön"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "A(z) {line}. sorból {ordered} {unit} szerepel megrendeléseken, több mint a kért {requested} {unit}",
+      "suggestion": "Ellenőrizze, hogy a többletmennyiség szándékos-e, vagy csökkentse a rendelési sort"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "A(z) {order} megrendelés a(z) {line}. sort {unit} egységben tartalmazza, amely nem váltható át a sor {line_unit} egységére",
+      "suggestion": "Javítsa a mértékegységet a rendelési soron, hogy a mennyisége megrendeltnek számítson"
+    },
     "receipt_certificate_present": {
       "fail": "A(z) {line} tétel megrendelésében {required} szerepelt, a szállítmányban viszont {delivered} van",
       "suggestion": "Csatolja a megrendelés által kért tanúsítványt, vagy utasítsa vissza a tételt, amíg a szállító be nem küldi"

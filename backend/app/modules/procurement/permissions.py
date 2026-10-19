@@ -32,6 +32,11 @@ def register_procurement_permissions() -> None:
             # tenant can hand it to a site manager without the right to
             # approve purchase orders, which commit budget.
             "procurement.approve_requisition": Role.MANAGER,
+            # Issue #516: where a project's orders are placed (here or in an
+            # external purchasing system) and who approves its requisitions
+            # by default. Switching to external stops automatic order drafts,
+            # so it sits with the people who approve.
+            "procurement.manage_settings": Role.MANAGER,
             "procurement.issue": Role.MANAGER,
             # Voiding a purchase order withdraws a commitment a supplier has
             # already been told about, so it sits at the same tier as making

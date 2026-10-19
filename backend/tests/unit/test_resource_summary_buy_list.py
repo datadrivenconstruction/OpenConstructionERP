@@ -346,3 +346,36 @@ def test_currency_falls_back_to_first_material_currency_when_base_unset():
     ]
     bl = aggregate_material_buy_list(positions, currency="")
     assert bl.currency == "GBP"
+
+
+def _coded(position_id: str, name: str, catalog_item_id: str | None, unit: str = "m3") -> dict:
+    resource = {"type": "material", "name": name, "unit": unit, "quantity": "1", "unit_rate": "10"}
+    if catalog_item_id is not None:
+        resource["catalog_item_id"] = catalog_item_id
+    return {"id": position_id, "quantity": "2", "metadata_": {"resources": [resource]}}
+
+
+def test_a_catalogue_item_groups_by_its_id_not_by_its_name():
+    """Issue #516: a shared name is not a shared material; the catalogue item is."""
+    bl = aggregate_material_buy_list(
+        [
+            _coded("p1", "Concrete C30/37", "item-a"),
+            _coded("p2", "Concrete C30/37", "item-b"),
+            _coded("p3", "Beton C30/37 (supplier wording)", "item-a"),
+            _coded("p4", "Concrete C30/37", None),
+        ],
+        currency="EUR",
+    )
+
+    rows = {(tuple(sorted({s.catalog_item_id or "-" for s in i.sources})), i.quantity) for i in bl.items}
+    assert rows == {(("item-a",), Decimal("4")), (("item-b",), Decimal("2")), (("-",), Decimal("2"))}
+    item_a = next(i for i in bl.items if i.sources[0].catalog_item_id == "item-a")
+    assert [s.position_id for s in item_a.sources] == ["p1", "p3"], "both sources stay traceable"
+
+
+def test_the_same_catalogue_item_in_two_units_stays_two_rows():
+    bl = aggregate_material_buy_list(
+        [_coded("p1", "Rebar", "item-r", unit="t"), _coded("p2", "Rebar", "item-r", unit="kg")],
+        currency="EUR",
+    )
+    assert sorted(i.unit for i in bl.items) == ["kg", "t"]

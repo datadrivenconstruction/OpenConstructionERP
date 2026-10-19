@@ -753,6 +753,18 @@
       "fail": "Ang linya {line} ay planado para sa activity na magsisimula sa {anchor}, pero magsisimula na ngayon ang activity sa {start}",
       "suggestion": "Suriin ang petsang kailangan ng linya laban sa kasalukuyang schedule at baguhin ito kung kinakailangan"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Ang gumawa ng requisition {req} ay siya ring itinalagang approver bilang {step}",
+      "suggestion": "Magtalaga ng ibang approver para sa hakbang na iyon, para ibang tao maliban sa humiling ang magpasya"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Ang linya {line} ay may {ordered} {unit} sa mga order, higit sa hiniling na {requested} {unit}",
+      "suggestion": "Suriin kung sinadya ang sobrang dami, o bawasan ang linya ng order"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Ang order na {order} ay may linya {line} sa {unit}, na hindi mako-convert sa unit ng linya na {line_unit}",
+      "suggestion": "Itama ang unit sa linya ng order para mabilang ang dami nito bilang na-order"
+    },
     "receipt_certificate_present": {
       "fail": "Ang linya {line} ay in-order na may {required}, pero ang delivery ay may {delivered}",
       "suggestion": "Ikabit ang certificate na hinihingi ng order, o tanggihan ang linya hanggang maipadala ito ng supplier"

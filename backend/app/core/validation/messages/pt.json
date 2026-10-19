@@ -753,6 +753,18 @@
       "fail": "A linha {line} foi planejada para uma atividade que começava em {anchor}, mas a atividade agora começa em {start}",
       "suggestion": "Compare a data de necessidade da linha com o cronograma atual e altere-a se preciso"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Quem criou a requisição {req} é também o aprovador designado número {step}",
+      "suggestion": "Indique outro aprovador para essa etapa, para que decida alguém diferente do solicitante"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "A linha {line} tem {ordered} {unit} em pedidos, mais do que as {requested} {unit} solicitadas",
+      "suggestion": "Verifique se a quantidade extra é intencional ou reduza a linha do pedido"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "O pedido {order} traz a linha {line} em {unit}, que não pode ser convertida para a unidade da linha {line_unit}",
+      "suggestion": "Corrija a unidade na linha do pedido para que sua quantidade conte como pedida"
+    },
     "receipt_certificate_present": {
       "fail": "A linha {line} foi pedida com {required}, mas a entrega traz {delivered}",
       "suggestion": "Anexe o certificado exigido no pedido ou recuse a linha até o fornecedor enviá-lo"

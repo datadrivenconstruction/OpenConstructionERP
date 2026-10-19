@@ -753,6 +753,18 @@
       "fail": "La riga {line} era pianificata per un'attività che iniziava il {anchor}, ma ora l'attività inizia il {start}",
       "suggestion": "Confronta la data di fabbisogno della riga con il cronoprogramma attuale e modificala se serve"
     },
+    "requisition_approver_not_requester": {
+      "fail": "La persona che ha creato la richiesta di acquisto {req} è anche il suo approvatore designato numero {step}",
+      "suggestion": "Indica un altro approvatore per quel passaggio, così che decida qualcuno diverso dal richiedente"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "La riga {line} ha {ordered} {unit} negli ordini, più delle {requested} {unit} richieste",
+      "suggestion": "Verifica se la quantità in più è voluta, oppure riduci la riga d'ordine"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "L'ordine {order} contiene la riga {line} in {unit}, che non può essere convertita nell'unità della riga {line_unit}",
+      "suggestion": "Correggi l'unità sulla riga d'ordine in modo che la sua quantità conti come ordinata"
+    },
     "receipt_certificate_present": {
       "fail": "La riga {line} è stata ordinata con {required}, ma la consegna riporta {delivered}",
       "suggestion": "Allegate il certificato richiesto dall'ordine, oppure respingete la riga finché il fornitore non lo invia"

@@ -753,6 +753,18 @@
       "fail": "Rida {line} oli planeeritud tegevusele, mis algas {anchor}, kuid tegevus algab nüüd {start}",
       "suggestion": "Võrrelge rea vajaduse kuupäeva praeguse ajakavaga ja muutke seda vajaduse korral"
     },
+    "requisition_approver_not_requester": {
+      "fail": "Materjalitaotluse {req} koostaja on ühtlasi selle määratud kinnitaja number {step}",
+      "suggestion": "Määrake sellele sammule teine kinnitaja, et otsustaks keegi peale taotleja"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Real {line} on tellimustes {ordered} {unit}, rohkem kui küsitud {requested} {unit}",
+      "suggestion": "Kontrollige, kas lisakogus on tahtlik, või vähendage tellimuserida"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Tellimus {order} sisaldab rida {line} ühikus {unit}, mida ei saa teisendada rea ühikuks {line_unit}",
+      "suggestion": "Parandage tellimuserea ühik, et selle kogus loetaks tellituks"
+    },
     "receipt_certificate_present": {
       "fail": "Rida {line} telliti koos {required}, kuid tarnes on {delivered}",
       "suggestion": "Lisage tellimuses nõutud sertifikaat või lükake rida tagasi, kuni tarnija selle saadab"
