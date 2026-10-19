@@ -19,7 +19,7 @@ the nullable columns. Every step is inspector-guarded, so a database that alread
 revision without error.
 
 Revision ID: v96_requisition_orders_approvals_feed
-Revises: v94_payment_release
+Revises: v95_costmodel_forecast_documentation
 Create Date: 2026-10-18
 """
 
@@ -33,7 +33,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "v96_requisition_orders_approvals_feed"
-down_revision: str | Sequence[str] | None = "v94_payment_release"
+down_revision: str | Sequence[str] | None = "v95_costmodel_forecast_documentation"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

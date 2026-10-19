@@ -21,7 +21,7 @@ savepoint, so a refusal leaves the column as v78 shipped it and the upgrade goes
 on.
 
 Revision ID: v98_site_logistics_link_keys
-Revises: v94_payment_release
+Revises: v97_bi_benchmark_set_split_currency
 Create Date: 2026-10-17
 """
 
@@ -34,7 +34,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v98_site_logistics_link_keys"
-down_revision: str | Sequence[str] | None = "v94_payment_release"
+down_revision: str | Sequence[str] | None = "v97_bi_benchmark_set_split_currency"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

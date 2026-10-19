@@ -13,7 +13,7 @@ Purely additive and inspector-guarded, so a database where ``create_all`` alread
 this revision and does nothing.
 
 Revision ID: v97_bi_benchmark_set_split_currency
-Revises: v94_payment_release
+Revises: v96_requisition_orders_approvals_feed
 Create Date: 2026-10-18
 """
 
@@ -25,7 +25,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v97_bi_benchmark_set_split_currency"
-down_revision: str | Sequence[str] | None = "v94_payment_release"
+down_revision: str | Sequence[str] | None = "v96_requisition_orders_approvals_feed"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

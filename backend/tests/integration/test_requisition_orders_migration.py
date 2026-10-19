@@ -82,7 +82,7 @@ def _matches_the_models(connection) -> None:
 def test_the_revision_chains_after_the_payment_release() -> None:
     migration = _load()
     assert migration.revision == "v96_requisition_orders_approvals_feed"
-    assert migration.down_revision == "v94_payment_release"
+    assert migration.down_revision == "v95_costmodel_forecast_documentation"
 
 
 @pytest.mark.asyncio
