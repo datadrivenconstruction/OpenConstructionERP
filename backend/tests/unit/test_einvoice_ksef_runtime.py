@@ -459,6 +459,24 @@ class TestBuilder:
     def test_same_invoice_without_the_flag_does_not(self):
         assert not self._build().split_payment
 
+    def test_a_stored_marker_that_disagrees_with_the_lines_stops_the_build(self):
+        def build(stored, annex):
+            return build_input_from_invoice(
+                invoice=_invoice(metadata={"split_payment": stored}),
+                lines=_lines(),
+                nip=SELLER_NIP,
+                settings={},
+                ksef_fields={"lines": [{"annex_15": annex}]},
+                buyer={"name": "X", "country_code": "PL", "vat_id": "7010001454"},
+            )
+
+        assert build(True, True).split_payment
+        assert not build(False, False).split_payment
+        with pytest.raises(fa3.Fa3BuildError, match="recorded as split payment required"):
+            build(True, False)
+        with pytest.raises(fa3.Fa3BuildError, match="not required"):
+            build(False, True)
+
     def test_stated_vat_that_the_lines_do_not_give_is_refused(self):
         with pytest.raises(fa3.Fa3BuildError, match="states VAT"):
             build_input_from_invoice(
@@ -595,6 +613,28 @@ class TestDocumentRules:
         found = await _failures(rules.KsefAnnex15Hint(), _context(**fields))
         assert len(found) == 1 and found[0].details["line"] == 1
 
+    async def test_nip_rules_follow_the_shared_check(self, monkeypatch):
+        verdicts = {}
+
+        def fake_check(country, scheme, value):
+            assert (country, scheme) == ("PL", "nip")
+            return verdicts.get(value)
+
+        monkeypatch.setattr(rules, "_nip_checker", lambda: fake_check)
+        context = _context(text=_fa3_xml())
+        # Nothing registered for this NIP: a warning, never a block.
+        assert not await _failures(rules.KsefNipValid(), context)
+        assert len(await _failures(rules.KsefNipUnchecked(), context)) == 2
+        verdicts["7010001454"] = {"valid": False, "reason": "checksum"}
+        found = await _failures(rules.KsefNipValid(), context)
+        assert len(found) == 1 and found[0].details["party"] == "buyer"
+        # A check still under expert review only warns.
+        verdicts["7010001454"] = {"valid": False, "reason": "checksum", "details": {"needs_expert_review": True}}
+        assert not await _failures(rules.KsefNipValid(), context)
+        verdicts[SELLER_NIP] = {"valid": True}
+        unchecked = await _failures(rules.KsefNipUnchecked(), context)
+        assert [r.details["party"] for r in unchecked] == ["buyer"]
+
     async def test_the_clearance_gate_runs_the_ksef_rules(self):
         from app.modules.einvoice_clearance.validators import hard_blockers
 
@@ -683,7 +723,11 @@ class TestRegimeRow:
         (old,) = regime.extra["historical_schemas"]
         assert old["key"] == FA2.key and old["valid_to"] == FA2.valid_to == "2026-01-31"
         assert regime.extra["token_auth_last_day"] == "2026-12-31"
-        assert regime.extra["penalties_from"] == "2027-01-01"
+        penalties = {p["key"]: p for p in regime.extra["penalties"]}
+        assert {p["effective_date"] for p in penalties.values()} == {"2027-01-01"}
+        assert "100%" in penalties["invoice_outside_ksef_vat"]["cap"]
+        assert "18.7%" in penalties["invoice_outside_ksef_no_vat"]["cap"]
+        assert all(p["source_url"] and p["read_date"] for p in penalties.values())
 
     def test_issue_phases_by_size_and_their_sources(self):
         phases = [p for p in get_country_regime("PL").commencement if p.obligation == "issue"]

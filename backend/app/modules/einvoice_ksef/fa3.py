@@ -526,6 +526,8 @@ class Summary:
     issue_date: str
     number: str
     seller_nip: str
+    # Empty when the buyer has no Polish NIP (EU VAT number, other id, or none).
+    buyer_nip: str
     currency: str
     kind: str
     gross: Decimal | None
@@ -583,6 +585,7 @@ def read_summary(text: str) -> Summary:
         issue_date=first(("Fa", "P_1")),
         number=first(("Fa", "P_2")),
         seller_nip=first(("Podmiot1", "DaneIdentyfikacyjne", "NIP")),
+        buyer_nip=first(("Podmiot2", "DaneIdentyfikacyjne", "NIP")),
         currency=first(("Fa", "KodWaluty")),
         kind=first(("Fa", "RodzajFaktury")),
         gross=gross,
