@@ -678,8 +678,9 @@ def test_the_unmapped_standards_are_labelled_and_unreachable_on_purpose() -> Non
     and the reason this is asserted rather than described in a comment.
     """
     unmapped = sorted(set(CLASSIFICATION_STANDARD_LABELS) - set(KNOWN_CLASSIFICATION_STANDARDS))
-    # bkp, bsab, knr, ns3451 and sfb_ccs are the national codings the Swiss,
-    # Swedish, Polish, Norwegian and Danish packs name as their own. They are
+    # bkp, bsab, ns3451 and sfb_ccs are the national codings the Swiss,
+    # Swedish, Norwegian and Danish packs name as their own. knr was on this
+    # list until Poland was mapped to it in 2026-10. They are
     # labelled so a pack's metadata names a standard the platform can print,
     # and deliberately left unmapped: which standard a country's projects
     # default to is a product decision, and none of them ships a cost-group
@@ -688,7 +689,6 @@ def test_the_unmapped_standards_are_labelled_and_unreachable_on_purpose() -> Non
         "bkp",
         "bsab",
         "gaeb",
-        "knr",
         "ns3451",
         "omniclass",
         "onorm",
@@ -781,7 +781,7 @@ STANDARD_PICKERS: dict[str, tuple[Path, str]] = {
 #: catches one that reads the wrong literal entirely and still finds a coherent
 #: handful. Changing a picker means changing the number here, deliberately.
 STANDARD_PICKER_OPTION_COUNTS: dict[str, int] = {
-    "CreateProjectPage.STANDARD_GROUPS": 15,
+    "CreateProjectPage.STANDARD_GROUPS": 16,
     "QuickEstimatePage.STANDARDS": 4,
     "CreateAssemblyPage.STANDARDS": 3,
 }

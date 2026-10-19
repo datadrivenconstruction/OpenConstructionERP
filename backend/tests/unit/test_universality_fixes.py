@@ -334,7 +334,7 @@ def test_classifier_hint_dict_includes_all_present_standards():
         ("CO", "masterformat"),
         ("PE", "masterformat"),
         # ── Eastern Europe (din276 fallback hierarchy) ──────────────
-        ("PL", "din276"),
+        ("PL", "knr"),  # Poland - KNR norm catalogues
         ("CZ", "din276"),
         ("BG", "din276"),
         ("RO", "din276"),

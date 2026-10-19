@@ -1281,6 +1281,7 @@ export function ProjectCard({
     kbim: 'KBIM',
     birimfiyat: 'Birim Fiyat',
     nlsfb: 'NL/SfB',
+    knr: 'KNR',
   };
 
   // Currency symbol icon — falls back to neutral DollarSign for unknown codes
