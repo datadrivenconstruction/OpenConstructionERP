@@ -1,0 +1,60 @@
+# Terraform lane for the STACKIT deployment (deploy/terraform/stackit).
+#
+# The modules are written without a local Terraform binary, so this lane is where
+# formatting, validation and the plan-level tests actually run. It needs no cloud
+# credentials: providers are mocked in the tests and `validate` only reads schemas.
+# It reports, it does not block; nothing here applies anything.
+
+name: Terraform (STACKIT)
+
+on:
+  push:
+    paths:
+      - "deploy/terraform/stackit/**"
+      - ".github/workflows/terraform-stackit.yml"
+  pull_request:
+    paths:
+      - "deploy/terraform/stackit/**"
+      - ".github/workflows/terraform-stackit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-stackit-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  terraform:
+    name: Terraform fmt, validate, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+          terraform_wrapper: false
+
+      - name: Format check
+        run: terraform fmt -check -recursive -diff deploy/terraform/stackit
+
+      - name: Validate modules and example
+        run: |
+          set -eu
+          for dir in modules/platform modules/company examples/two-companies; do
+            echo "::group::validate $dir"
+            terraform -chdir="deploy/terraform/stackit/$dir" init -backend=false -input=false
+            terraform -chdir="deploy/terraform/stackit/$dir" validate
+            echo "::endgroup::"
+          done
+
+      - name: Test company module
+        run: terraform -chdir=deploy/terraform/stackit/modules/company test
+
+      - name: Test platform module
+        run: terraform -chdir=deploy/terraform/stackit/modules/platform test
