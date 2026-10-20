@@ -237,3 +237,32 @@ async def test_element_context_empty_when_no_links(client: AsyncClient, auth: di
     assert body["linked_tasks"] == []
     assert body["linked_activities"] == []
     assert body["linked_requirements"] == []
+
+
+@pytest.mark.asyncio
+async def test_the_skeleton_listing_keeps_quantities_and_category(client: AsyncClient, auth: dict[str, str]) -> None:
+    """The filter panel sums and exports what the skeleton listing carries."""
+    project_id = await _create_project(client, auth)
+    m = await client.post(
+        "/api/v1/bim_hub/",
+        json={"project_id": project_id, "name": "Skel Model", "version": "1", "status": "ready"},
+        headers=auth,
+    )
+    model_id = m.json()["id"]
+    body = {
+        "elements": [
+            {
+                "stable_id": "w1",
+                "element_type": "Walls",
+                "properties": {"category": "OST_Walls", "comments": "long text"},
+                "quantities": {"Volume": 2.5},
+            }
+        ]
+    }
+    e = await client.post(f"/api/v1/bim_hub/models/{model_id}/elements/", json=body, headers=auth)
+    assert e.status_code == 201, e.text
+
+    listed = await client.get(f"/api/v1/bim_hub/models/{model_id}/elements/?skeleton=true", headers=auth)
+    (row,) = listed.json()["items"]
+    assert row["quantities"] == {"Volume": 2.5}
+    assert row["properties"] == {"category": "OST_Walls"}
