@@ -69,11 +69,11 @@ import { useToastStore } from '@/stores/useToastStore';
 
 const HIDDEN_GROUPS_KEY = 'oe_hidden_groups';
 
-function renderSidebar() {
+function renderSidebar(path = '/') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={['/']}>
+      <MemoryRouter initialEntries={[path]}>
         {/* The top bar's cap, which is where the card goes when hidden. */}
         <LearnTopBarButton />
         <Sidebar />
@@ -115,7 +115,7 @@ describe('the featured article', () => {
 });
 
 describe('the Learn card', () => {
-  it('opens the menu, above Pinned, with Videos and then Cases', () => {
+  it('opens the menu, above Pinned, with Videos, Cases and Packs', () => {
     localStorage.setItem('oce-pinned-routes', JSON.stringify(['/boq']));
     renderSidebar();
 
@@ -123,13 +123,21 @@ describe('the Learn card', () => {
     const hrefs = within(learn)
       .getAllByRole('link')
       .map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/videos', '/cases']);
+    expect(hrefs).toEqual(['/videos', '/cases', '/packs']);
 
     const firstLinks = within(nav())
       .getAllByRole('link')
-      .slice(0, 3)
+      .slice(0, 4)
       .map((a) => a.getAttribute('href'));
-    expect(firstLinks).toEqual(['/videos', '/cases', '/boq']);
+    expect(firstLinks).toEqual(['/videos', '/cases', '/packs', '/boq']);
+  });
+
+  it('marks Packs as the current page on a single pack too', () => {
+    renderSidebar('/packs/de-germany');
+    const packs = within(screen.getByTestId('sidebar-learn'))
+      .getAllByRole('link')
+      .find((a) => a.getAttribute('href') === '/packs');
+    expect(packs?.getAttribute('aria-current')).toBe('page');
   });
 
   it('explains on its header that it can be hidden and shown again', () => {
@@ -159,6 +167,7 @@ describe('the Learn card', () => {
       .map((a) => a.getAttribute('href'));
     expect(hrefs).not.toContain('/videos');
     expect(hrefs).not.toContain('/cases');
+    expect(hrefs).not.toContain('/packs');
     expect(storedHiddenGroups()).toEqual([LEARN_GROUP_ID]);
 
     const toast = useToastStore.getState().toasts.at(-1);
