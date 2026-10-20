@@ -2717,6 +2717,84 @@ class BIMHubService:
         )
         return link
 
+    async def create_links_bulk(
+        self,
+        boq_position_id: uuid.UUID,
+        elements: Sequence[BIMElement],
+        *,
+        link_type: str = "manual",
+        confidence: str | None = None,
+        user_id: str | None = None,
+    ) -> tuple[int, int]:
+        """Link many elements to one BOQ position in one transaction.
+
+        Elements already linked to the position are skipped, so the call is
+        idempotent. The ``cad_element_ids`` mirror and the quantity sync run
+        once for the whole batch instead of once per element.
+
+        Args:
+            boq_position_id: Target BOQ position (access already verified).
+            elements: Elements to link (access already verified).
+            link_type: Stored link type.
+            confidence: Stored confidence label.
+            user_id: Creator recorded on each link.
+
+        Returns:
+            ``(created, skipped)`` counts.
+        """
+        existing = {lnk.bim_element_id for lnk in await self.link_repo.list_by_boq_position(boq_position_id)}
+        created_elements: list[BIMElement] = []
+        skipped = 0
+        seen: set[uuid.UUID] = set()
+        for element in elements:
+            if element.id in existing or element.id in seen:
+                skipped += 1
+                continue
+            seen.add(element.id)
+            self.session.add(
+                BOQElementLink(
+                    boq_position_id=boq_position_id,
+                    bim_element_id=element.id,
+                    link_type=link_type,
+                    confidence=confidence,
+                    created_by=user_id,
+                )
+            )
+            created_elements.append(element)
+        if not created_elements:
+            return 0, skipped
+        try:
+            await self.session.flush()
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Some of these BIM elements were linked to that BOQ position at the same time; retry",
+            ) from exc
+
+        pos = await self.session.get(Position, boq_position_id)
+        if pos is not None:
+            current = list(pos.cad_element_ids or [])
+            known = set(current)
+            for element in created_elements:
+                elem_str = str(element.id)
+                if elem_str not in known:
+                    current.append(elem_str)
+                    known.add(elem_str)
+            pos.cad_element_ids = current
+            if getattr(pos, "cad_model_id", None) is None:
+                pos.cad_model_id = str(created_elements[0].model_id)
+            await self.session.flush()
+
+        await self._sync_boq_quantity_from_links(boq_position_id)
+        logger.info(
+            "BOQ-BIM bulk link: pos=%s created=%d skipped=%d",
+            boq_position_id,
+            len(created_elements),
+            skipped,
+        )
+        return len(created_elements), skipped
+
     async def delete_link(self, link_id: uuid.UUID) -> None:
         """Delete a BOQ-BIM link and drop the mirrored id from the position."""
         link = await self.link_repo.get(link_id)
