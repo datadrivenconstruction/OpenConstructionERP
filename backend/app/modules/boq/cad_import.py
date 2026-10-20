@@ -19,6 +19,7 @@ import logging
 import os
 import sys
 from collections.abc import Iterator
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
@@ -1002,6 +1003,26 @@ def invalidate_converter_health(extension: str | None = None) -> None:
         _HEALTH_CACHE.pop(extension, None)
 
 
+_last_failure: ContextVar[dict[str, str] | None] = ContextVar("cad_conversion_failure", default=None)
+
+
+def conversion_failed_detail(ext: str) -> str:
+    """User-facing reason for a failed ``convert_cad_to_excel`` call in this request.
+
+    Names the converter's own code and message when it gave one, so a timeout or a
+    refused file is not reported as a missing converter.
+    """
+    failure = _last_failure.get()
+    if failure:
+        return f"CAD conversion failed for .{ext} file. Converter report: {failure['code']} - {failure['message']}"
+    return f"CAD conversion failed for .{ext} file. Ensure the converter is properly installed and the file is valid."
+
+
+def _convert_timeout_s(fmt: str) -> float:
+    # DWG shares the drawing page's limit, so one file does not pass there and time out here.
+    return float(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "900")) if fmt == "dwg" else 600.0
+
+
 async def convert_cad_to_excel(
     input_path: Path,
     output_dir: Path,
@@ -1054,10 +1075,14 @@ async def convert_cad_to_excel(
     logger.info("Converting %s using %s", input_path.name, tool_label(fmt))
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    _last_failure.set(None)
+    timeout = _convert_timeout_s(fmt)
+    timeout_failure = {"code": "convert_timeout", "message": f"Conversion stopped at the {timeout:.0f}s limit."}
     try:
-        run = await asyncio.to_thread(run_converter, fmt, converter, input_path, output_dir, timeout=600)
+        run = await asyncio.to_thread(run_converter, fmt, converter, input_path, output_dir, timeout=timeout)
     except subprocess.TimeoutExpired:
-        logger.error("Converter timed out after 600s for %s", input_path.name)
+        logger.error("Converter timed out after %.0fs for %s", timeout, input_path.name)
+        _last_failure.set(timeout_failure)
         return None
     except Exception:
         logger.exception("Converter error for %s", input_path.name)
@@ -1071,6 +1096,11 @@ async def convert_cad_to_excel(
             input_path.name,
             (run.stderr or run.stdout)[:500],
         )
+        err = run.error or {}
+        if run.cancelled:
+            _last_failure.set(timeout_failure)
+        elif err.get("code"):
+            _last_failure.set({"code": str(err["code"]), "message": str(err.get("message_en") or "")})
         return None
 
     try:

@@ -368,3 +368,45 @@ def test_an_rvt_with_no_3d_elements_is_told_apart_from_a_failed_conversion(tmp_p
     )
     assert ifc_processor._converter_saw_no_meshes(SimpleNamespace(folder=tmp_path)) is False
     assert ifc_processor._converter_saw_no_meshes(SimpleNamespace(folder=tmp_path / "missing")) is False
+
+
+def _failing_dwg_run(stdout: str, seen: dict[str, float]) -> Any:
+    def _run(fmt: str, exe: Path, input_path: Path, work_dir: Path, *, timeout: float = 600) -> Any:
+        seen["timeout"] = timeout
+        return ddc_runner.ConverterRun(fmt=fmt, command=[], returncode=1, stdout=stdout, status="FAILED")
+
+    return _run
+
+
+@pytest.mark.parametrize(
+    ("error", "expected"),
+    [
+        ({"code": "DWG_DAMAGED", "message_en": "Bad file.", "detail": "ContainerError: Cancelled"}, "convert_timeout"),
+        ({"code": "DWG_DAMAGED", "message_en": "The DWG file is damaged.", "detail": "x"}, "DWG_DAMAGED - The DWG"),
+    ],
+)
+def test_a_failed_takeoff_conversion_names_the_converter_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error: dict[str, str], expected: str
+) -> None:
+    """A timeout or a refusal must not read as "ensure the converter is installed"."""
+    seen: dict[str, float] = {}
+
+    async def _ensure(_ext: str) -> Path:
+        return tmp_path / "dwg2excel.exe"
+
+    monkeypatch.setattr(cad_import, "ensure_converter_async", _ensure)
+    monkeypatch.setattr(ddc_runner, "run_converter", _failing_dwg_run(json.dumps({"error": error}), seen))
+    monkeypatch.delenv("OE_DWG_CONVERT_TIMEOUT_S", raising=False)
+    src = tmp_path / "plan.dwg"
+    src.write_bytes(b"AC1032")
+
+    async def _convert_then_explain() -> tuple[Any, str]:
+        table = await cad_import.convert_cad_to_excel(src, tmp_path / "out", "dwg")
+        return table, cad_import.conversion_failed_detail("dwg")
+
+    table, detail = asyncio.run(_convert_then_explain())
+
+    assert table is None
+    assert expected in detail
+    assert "installed" not in detail
+    assert seen["timeout"] == 900

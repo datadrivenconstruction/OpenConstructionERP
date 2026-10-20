@@ -1353,6 +1353,7 @@ async def cad_extract(
     from app.modules.boq.cad_import import (
         _CONVERTER_FORMAT_ALIASES,
         ConverterUnavailableError,
+        conversion_failed_detail,
         convert_cad_to_excel,
         converter_error_detail,
         ensure_converter_async,
@@ -1424,10 +1425,7 @@ async def cad_extract(
         if not excel_path:
             raise HTTPException(
                 status_code=502,
-                detail=(
-                    f"CAD conversion failed for .{ext} file. "
-                    "Ensure the converter is properly installed and the file is valid."
-                ),
+                detail=conversion_failed_detail(ext),
             )
 
         elements = parse_cad_excel(excel_path)
@@ -1631,6 +1629,7 @@ async def cad_columns(
     from app.modules.boq.cad_import import (
         _CONVERTER_FORMAT_ALIASES,
         ConverterUnavailableError,
+        conversion_failed_detail,
         convert_cad_to_excel,
         converter_error_detail,
         ensure_converter_async,
@@ -1693,10 +1692,7 @@ async def cad_columns(
         if not excel_path:
             raise HTTPException(
                 status_code=502,
-                detail=(
-                    f"CAD conversion failed for .{ext} file. "
-                    "Ensure the converter is properly installed and the file is valid."
-                ),
+                detail=conversion_failed_detail(ext),
             )
 
         elements = parse_cad_excel(excel_path)
