@@ -1891,7 +1891,17 @@ async def _process_cad_in_background(
                 stderr_tail = (ddc_failure.get("stderr") or "").strip()
                 cause = ddc_failure.get("cause") or "unknown"
 
-                if ext == ".rvt":
+                if ext == ".rvt" and ddc_failure.get("reason") == "no_model_elements":
+                    # The file was read; it holds views, legends or definitions only.
+                    model.status = "error"
+                    model.error_message = (
+                        "This Revit file opened, but it contains no 3D model elements "
+                        "(only views, legends or family definitions), so there is nothing to import."
+                    )
+                    meta["error_code"] = "zero_elements"  # the UI has translated copy for exactly this case
+                    meta["empty_reason"] = "no_model_elements"
+                    meta["converter_id"] = "rvt"
+                elif ext == ".rvt":
                     model.status = "needs_converter"
 
                     # Compose the message in pieces - every clause is added
