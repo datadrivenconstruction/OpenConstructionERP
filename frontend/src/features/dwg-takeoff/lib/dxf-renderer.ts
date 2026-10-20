@@ -365,9 +365,11 @@ function pathArc(ctx: CanvasRenderingContext2D, entity: DxfEntity, vp: ViewportS
   const r = entity.radius * vp.scale;
   const startAngle = entity.start_angle ?? 0;
   const endAngle = entity.end_angle ?? Math.PI * 2;
-  // DXF arcs are CCW; with Y-axis flipped in worldToScreen, negate angles and sweep CW
+  // DXF arcs run CCW in world space. worldToScreen flips Y, so the screen angles
+  // are negated and the sweep runs from -start down to -end: anticlockwise on canvas.
+  // Sweeping the other way drew the complement, a near-full circle for a short arc.
   ctx.moveTo(center.x + r * Math.cos(-startAngle), center.y + r * Math.sin(-startAngle));
-  ctx.arc(center.x, center.y, r, -startAngle, -endAngle, false);
+  ctx.arc(center.x, center.y, r, -startAngle, -endAngle, true);
 }
 
 function pathCircle(ctx: CanvasRenderingContext2D, entity: DxfEntity, vp: ViewportState): void {
