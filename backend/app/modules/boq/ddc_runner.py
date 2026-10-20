@@ -671,6 +671,30 @@ def _read_rvt_graph(properties_jsonl: Path, ids: set[int]) -> _RvtGraph:
     return g
 
 
+_AREA_WORDS = re.compile(r"\barea\b", re.I)
+_VOLUME_WORDS = re.compile(r"\bvolume\b", re.I)
+_LENGTH_WORDS = re.compile(
+    r"\b(length|height|width|thickness|depth|offset|elevation|radius|diameter|perimeter|"
+    r"extension|distance|size|cover|spacing)\b",
+    re.I,
+)
+_NOT_A_MEASURE = re.compile(r"\b(angle|slope|rotation|ratio|factor|count|number|coefficient|material)\b", re.I)
+_FT = 0.3048
+
+
+def _si_factor(label: str) -> float | None:
+    """Feet-based internal unit -> SI factor for a parameter name, or ``None`` when unsure."""
+    if _NOT_A_MEASURE.search(label):
+        return None
+    if _VOLUME_WORDS.search(label):
+        return _FT**3
+    if _AREA_WORDS.search(label):
+        return _FT**2
+    if _LENGTH_WORDS.search(label):
+        return _FT
+    return None
+
+
 def _read_graph_parameter(g: _RvtGraph, owner: int, rec: dict[str, Any]) -> None:
     label = rec.get("builtin_label") or rec.get("builtin_parameter")
     value = _param_value(rec.get("fields") or {}) if label else None
@@ -678,8 +702,14 @@ def _read_graph_parameter(g: _RvtGraph, owner: int, rec: dict[str, Any]) -> None
         return
     if isinstance(value, float):
         # Stored reals are in Revit internal units (feet and derived) and the
-        # graph does not say which; keep them out of the quantity columns.
-        label = f"{label} [internal units]"
+        # graph does not say which. A name that is plainly a length, area or
+        # volume is converted to SI; anything else keeps the marker so the
+        # take-off never sums it as metres.
+        factor = _si_factor(label)
+        if factor is None:
+            label = f"{label} [internal units]"
+        else:
+            value = round(value * factor, 6)
     if label not in g.columns:
         if len(g.columns) >= _MAX_PROPERTY_COLUMNS:
             return
