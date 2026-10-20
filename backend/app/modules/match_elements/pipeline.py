@@ -87,7 +87,7 @@ STAGE_META: dict[str, dict[str, Any]] = {
         "uses_llm": False,
         "prompt_key": None,
         "explainer": (
-            "The DDC cad2data converter normalises Revit, IFC, DWG and DGN "
+            "The DDC cad2data converter normalises Revit, IFC and DWG "
             "into one canonical element table. Nothing to tune here - this "
             "stage is a verification: the count below must match what the "
             "viewer reports, otherwise the parse silently truncated."

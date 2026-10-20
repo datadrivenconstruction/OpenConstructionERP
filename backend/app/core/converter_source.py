@@ -10,7 +10,7 @@ carries a ``SHA256SUMS.txt`` and this module pins the digest of every package
 it installs, so an install is a download of one named asset followed by a hash
 check, not a walk over a repository tree.
 
-Three packages are used (DGN is discontinued in this generation):
+Three packages are used (there is no DGN converter in this generation):
 
 ==========  ================================  ================================
 format      package                           command line
@@ -74,6 +74,11 @@ class ConverterPackage:
     include: tuple[str, ...] | None
     #: Files that must exist next to a healthy install besides the executable.
     companions: tuple[str, ...] = ()
+    #: Source-format versions the converter reads, as shown to people. The one
+    #: place a version range is written down; every screen reads it from the API.
+    format_range: str = ""
+    #: False for a converter that writes element tables and no 3D mesh.
+    produces_geometry: bool = True
 
 
 PACKAGES: dict[str, ConverterPackage] = {
@@ -87,6 +92,7 @@ PACKAGES: dict[str, ConverterPackage] = {
         exe_rel="cli/RVTconverter.exe",
         script_rel=None,
         include=("cli/", "licenses/", "EULA.txt"),
+        format_range="Revit 2019-2027",
     ),
     "ifc": ConverterPackage(
         fmt="ifc",
@@ -99,6 +105,8 @@ PACKAGES: dict[str, ConverterPackage] = {
         script_rel="sources/ifc-excel/converter.py",
         include=None,
         companions=("sources/ifc-excel/converter.py",),
+        format_range="IFC2x3, IFC4",
+        produces_geometry=False,
     ),
     "dwg": ConverterPackage(
         fmt="dwg",
@@ -110,6 +118,7 @@ PACKAGES: dict[str, ConverterPackage] = {
         exe_rel="cli/dwg2excel.exe",
         script_rel=None,
         include=("cli/", "licenses/", "EULA.txt"),
+        format_range="DWG R13-2018",
     ),
 }
 

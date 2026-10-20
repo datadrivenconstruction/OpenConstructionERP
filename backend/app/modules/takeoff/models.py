@@ -54,7 +54,7 @@ class CadExtractionSession(Base):
     session_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     user_id: Mapped[str] = mapped_column(String(255), default="")
     filename: Mapped[str] = mapped_column(String(500), nullable=False)
-    file_format: Mapped[str] = mapped_column(String(20), nullable=False)  # rvt, ifc, dwg, dgn
+    file_format: Mapped[str] = mapped_column(String(20), nullable=False)  # rvt, ifc, dwg
     element_count: Mapped[int] = mapped_column(Integer, default=0)
     extraction_time: Mapped[float] = mapped_column(Float, default=0)
     elements_data: Mapped[list] = mapped_column(  # type: ignore[assignment]

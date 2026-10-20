@@ -206,7 +206,7 @@ class CADImportResult(OEBase):
     """Result of a CAD file conversion."""
 
     format_version: str = "1.0"
-    source_type: str  # dwg, dgn, rvt, ifc, pdf
+    source_type: str  # dwg, rvt, ifc, pdf
     source_filename: str
     converter_version: str
     elements: list[CADElement]

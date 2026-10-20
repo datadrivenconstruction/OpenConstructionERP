@@ -189,12 +189,13 @@ class TestBimUploadConverterPreflight:
         import app.modules.boq.cad_import as cad_import_mod
 
         monkeypatch.setattr(cad_import_mod, "find_converter", lambda _ext: None)
+        monkeypatch.setattr(cad_import_mod, "converter_supported_here", lambda: True)
 
         # Deliberately NOT a valid RVT: the preflight short-circuits above
         # the magic-byte guard, so these bytes are never sniffed on this
         # path. If the guard is ever reordered ahead of the preflight this
         # upload starts failing with 400, which is the signal we want.
-        content = b"\x00" * 1024
+        content = _MINIMAL_RVT
         body = await _upload(
             preflight_client,
             preflight_auth,
@@ -264,6 +265,7 @@ class TestBimUploadConverterPreflight:
         import app.modules.boq.cad_import as cad_import_mod
 
         monkeypatch.setattr(cad_import_mod, "find_converter", lambda _ext: None)
+        monkeypatch.setattr(cad_import_mod, "converter_supported_here", lambda: True)
 
         resp = await preflight_client.post(
             "/api/v1/bim_hub/upload-cad/",
@@ -272,7 +274,7 @@ class TestBimUploadConverterPreflight:
                 "name": "linkcheck.rvt",
                 "discipline": "architecture",
             },
-            files={"file": ("linkcheck.rvt", io.BytesIO(b"\x00" * 512), "application/octet-stream")},
+            files={"file": ("linkcheck.rvt", io.BytesIO(_MINIMAL_RVT), "application/octet-stream")},
             headers=preflight_auth,
         )
         assert resp.status_code == 202, resp.text
@@ -302,6 +304,7 @@ class TestBimUploadConverterPreflight:
         import app.modules.boq.cad_import as cad_import_mod
 
         monkeypatch.setattr(cad_import_mod, "find_converter", lambda _ext: None)
+        monkeypatch.setattr(cad_import_mod, "converter_supported_here", lambda: True)
 
         body = await _upload(
             preflight_client,

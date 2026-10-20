@@ -10,7 +10,7 @@ The DDC converter installer (``takeoff/router.py``) downloads several
 hundred megabytes of native binaries from the public internet:
 
     * GitHub Contents API → ``raw.githubusercontent.com`` blobs
-      (DDC dwg/rvt/ifc/dgn converters)
+      (DDC dwg/rvt/ifc converters)
     * ``pkg.datadrivenconstruction.io`` Debian repository (Linux .debs)
     * Qdrant releases (vector DB, also pulled per platform)
     * PaddleOCR model archives (lazy, on first use)

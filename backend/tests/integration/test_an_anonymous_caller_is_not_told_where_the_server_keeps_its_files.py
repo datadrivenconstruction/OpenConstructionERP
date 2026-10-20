@@ -12,8 +12,7 @@ whoever runs the process, to anybody who can reach the port.
 The routes stay open. What they are for survives without the path: a caller
 asking whether a converter is installed is answered by ``installed``, and one
 asking whether a newer build exists is answered by two SHAs. An authenticated
-caller still gets the path, because the Settings panel and the BIM banner both
-print it and an operator repairing a broken install needs the folder name.
+caller is not given the path either: no screen prints it, so neither body carries it.
 
 What is asserted here is the **absence of the host path**, computed by walking
 every string in the body and asking whether it names a place on this machine,
@@ -245,7 +244,6 @@ def a_warm_version_check_cache(app_client, monkeypatch):
         "name": "RVT Parser",
         "exe": "RvtExporter.exe",
         "installed": True,
-        "installed_path": str(_FAKE_CONVERTER),
         "installed_size": 4096,
         "installed_sha": "a" * 40,
         "latest_size": 4096,
@@ -288,19 +286,19 @@ async def test_the_converter_listing_tells_an_anonymous_caller_nothing_about_the
     assert all(row["installed"] for row in body["converters"])
 
 
-async def test_the_converter_listing_still_tells_the_operator_where_the_binary_is(
+async def test_the_converter_listing_never_carries_the_binary_path_for_anyone(
     app_client,
     auth_headers,
     an_installed_converter,
 ):
-    """The fix is a redaction, not a deletion: the Settings panel still renders this."""
+    """No ``path`` key at all: nothing in the UI needs the exe location."""
     _app, client = app_client
     response = await client.get("/api/v1/takeoff/converters/", headers=auth_headers)
     assert response.status_code == 200, response.text
     body = response.json()
 
-    assert host_path_strings(body), "a signed-in operator must still be given the install path"
-    assert all(row["path"] == str(_FAKE_CONVERTER) for row in body["converters"])
+    assert host_path_strings(body) == []
+    assert all("path" not in row for row in body["converters"])
 
 
 async def test_a_failing_smoke_test_does_not_name_its_folder_to_an_anonymous_caller(
@@ -384,28 +382,18 @@ async def test_the_version_check_tells_an_anonymous_caller_nothing_about_the_dis
     assert body["converters"][0]["installed_sha"] == "a" * 40
 
 
-async def test_an_anonymous_version_check_does_not_empty_the_cache_for_the_operator(
+async def test_the_version_check_never_carries_the_binary_path_for_anyone(
     app_client,
     auth_headers,
     a_warm_version_check_cache,
 ):
-    """Redaction on a copy, asserted in both orders.
-
-    A fix that popped the field out of the cached dict passes when the operator
-    reads first and fails only on the second ordering; a fix that cached
-    whichever form warmed it passes the other way round. Neither survives both.
-    """
+    """Both orders against a warmed cache, signed in and not."""
     _app, client = app_client
 
-    anonymous_first = await client.get("/api/system/converters/version-check")
-    operator_second = await client.get("/api/system/converters/version-check", headers=auth_headers)
-    assert host_path_strings(anonymous_first.json()) == []
-    assert host_path_strings(operator_second.json()), "an anonymous read emptied the operator's answer"
-
-    operator_first = await client.get("/api/system/converters/version-check", headers=auth_headers)
-    anonymous_second = await client.get("/api/system/converters/version-check")
-    assert host_path_strings(operator_first.json())
-    assert host_path_strings(anonymous_second.json()) == [], "a warmed cache leaked the path to an anonymous read"
+    for headers in ({}, auth_headers):
+        body = (await client.get("/api/system/converters/version-check", headers=headers)).json()
+        assert host_path_strings(body) == []
+        assert all("installed_path" not in row for row in body["converters"])
 
 
 # ── The install-progress poll ────────────────────────────────────────────

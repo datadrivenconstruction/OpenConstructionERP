@@ -83,7 +83,6 @@ _EXT_CATEGORY: dict[str, str] = {
     "rvt": "cad",
     "ifc": "cad",
     "dwg": "cad",
-    "dgn": "cad",
     "rfa": "cad",
     "jpg": "image",
     "jpeg": "image",
@@ -576,7 +575,7 @@ async def file_estimate(
     """Generate a BOQ estimate from any uploaded file using AI.
 
     Accepted extensions: .pdf, .xlsx, .xls, .csv, .rvt, .rfa, .ifc, .dwg,
-    .dgn, .jpg, .jpeg, .png, .webp, .gif, .tiff, .bmp
+    .jpg, .jpeg, .png, .webp, .gif, .tiff, .bmp
 
     The file is analysed based on its extension:
     - **PDF**: Text and tables extracted, sent to AI for BOQ generation

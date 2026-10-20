@@ -10,7 +10,6 @@ rule tree that works for **any** CAD source the converter emits:
     - IFC      (IfcWall, IfcSlab, properties.* from PropertySets)
     - RVT/Revit  (Walls / Doors / Floors, properties.family / .type_name)
     - DWG      (properties.layer / .block / .object_class)
-    - DGN      (properties.level / .cell)
     - Photos   (CV-extracted properties.material / .confidence)
 
 The evaluator does not care which source produced an element: every
