@@ -462,3 +462,22 @@ def test_a_converter_that_wrote_nothing_falls_through_to_the_text_parser(
 def test_the_packages_the_runner_speaks_are_the_ones_the_installer_ships() -> None:
     for fmt in ("rvt", "ifc", "dwg"):
         assert ddc_runner.tool_label(fmt).startswith(PACKAGES[fmt].name)
+
+
+def test_a_missing_output_without_an_error_object_is_still_reported() -> None:
+    """CONVERTED_PARTIAL_OUTPUTS carries no ``error``; the page must still say what failed."""
+    stdout = json.dumps({"status": "CONVERTED_PARTIAL_OUTPUTS", "failed_outputs": ["dxf"], "exit_code": 4})
+    run = ddc_runner.ConverterRun(
+        fmt="dwg", command=[], returncode=4, stdout=stdout, status="CONVERTED_PARTIAL_OUTPUTS"
+    )
+    assert run.error is None
+    assert run.failure == {
+        "code": "CONVERTED_PARTIAL_OUTPUTS",
+        "message_en": "The converter could not write its DXF output.",
+    }
+
+
+def test_the_converter_error_object_wins_over_failed_outputs() -> None:
+    stdout = json.dumps({"error": {"code": "DWG_DAMAGED", "message_en": "Damaged."}, "failed_outputs": ["dxf"]})
+    run = ddc_runner.ConverterRun(fmt="dwg", command=[], returncode=3, stdout=stdout)
+    assert run.failure == {"code": "DWG_DAMAGED", "message_en": "Damaged."}
