@@ -17,9 +17,9 @@ match hot path).
 
 PDF text extraction reuses the libraries already shipped with the
 platform - ``pdfplumber`` first (best at table reconstruction), with
-``pymupdf`` as the plain-text fallback when pdfplumber cannot open the
-file. Both are existing dependencies (takeoff / boq / documents modules
-already import them); no new dependency is introduced.
+``pypdfium2`` (through :mod:`app.core.pdf_reader`) as the plain-text
+fallback when pdfplumber cannot open the file. Both are existing
+dependencies; no new dependency is introduced.
 
 Public surface:
 
@@ -37,7 +37,7 @@ Extraction strategy
 2. When a page has no tables, we fall back to per-line text parsing:
    each non-blank line that carries enough signal (a description plus an
    optional trailing ``<qty> <unit>`` pair) becomes one row.
-3. When ``pdfplumber`` cannot open the file at all, ``pymupdf`` extracts
+3. When ``pdfplumber`` cannot open the file at all, ``pypdfium2`` extracts
    plain text per page and we run the same per-line parser.
 
 The parser is deliberately forgiving: a scanned PDF with no text layer
@@ -309,25 +309,21 @@ def _extract_with_pdfplumber(content: bytes) -> list[dict[str, Any]]:
     return rows
 
 
-def _extract_with_pymupdf(content: bytes) -> list[dict[str, Any]]:
-    """Fallback extractor - plain text per page via pymupdf."""
-    import pymupdf
+def _extract_with_pdfium(content: bytes) -> list[dict[str, Any]]:
+    """Fallback extractor - plain text per page via pypdfium2."""
+    from app.core import pdf_reader
 
     rows: list[dict[str, Any]] = []
-    doc = pymupdf.open(stream=content, filetype="pdf")
-    try:
+    with pdf_reader.open_pdf(content) as doc:
         for page in doc:
-            text = page.get_text() or ""
-            rows.extend(_rows_from_text(text))
-    finally:
-        doc.close()
+            rows.extend(_rows_from_text(page.text() or ""))
     return rows
 
 
 def parse_boq_pdf(content: bytes) -> list[dict[str, Any]]:
     """Parse a PDF upload into a list of BoQ row dicts.
 
-    Tries ``pdfplumber`` (tables + text), then ``pymupdf`` (text only)
+    Tries ``pdfplumber`` (tables + text), then ``pypdfium2`` (text only)
     when pdfplumber cannot open the file. Returns rows ready to feed
     into :class:`SessionCreate.pdf_rows` and from there to
     :class:`PdfAdapter`.
@@ -357,15 +353,15 @@ def parse_boq_pdf(content: bytes) -> list[dict[str, Any]]:
         rows = _extract_with_pdfplumber(content)
     except Exception:
         logger.warning(
-            "match_elements.parse_boq_pdf: pdfplumber failed (size=%dB) - falling back to pymupdf",
+            "match_elements.parse_boq_pdf: pdfplumber failed (size=%dB) - falling back to pypdfium2",
             len(content),
             exc_info=True,
         )
         try:
-            rows = _extract_with_pymupdf(content)
+            rows = _extract_with_pdfium(content)
         except Exception as exc:
             logger.exception(
-                "match_elements.parse_boq_pdf: both pdfplumber and pymupdf failed (size=%dB)",
+                "match_elements.parse_boq_pdf: both pdfplumber and pypdfium2 failed (size=%dB)",
                 len(content),
             )
             raise ValueError(

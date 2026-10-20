@@ -1680,7 +1680,7 @@ class TakeoffService:
                 )
 
         if not parse_degraded and page_count == 0 and not page_data:
-            # The isolated parser ran cleanly but neither pdfplumber nor pymupdf
+            # The isolated parser ran cleanly but neither pdfplumber nor pypdfium2
             # could read a single page - the file is genuinely unreadable. This
             # is the ONLY definitive parse-failure case and it keeps the
             # historical 400. A DEGRADED parse (worker timeout / crash / OOM) is
@@ -1939,7 +1939,7 @@ class TakeoffService:
                     # Audit D4 - formula-injection defence.
                     #
                     # ``clean_desc`` and ``clean_unit`` come from PDF
-                    # table extraction (pdfplumber / pymupdf), which
+                    # table extraction (pdfplumber / pypdfium2), which
                     # faithfully preserves whatever the source document
                     # contained. An attacker who supplied the PDF can
                     # plant ``=cmd|'/c calc'!A1`` or HYPERLINK-style
@@ -2300,7 +2300,7 @@ class TakeoffService:
 
         Offline, deterministic complement to ``analyze_document`` (which
         sends text to an LLM): reads the stored PDF off disk, harvests the
-        page's vector drawings with PyMuPDF ``page.get_drawings()`` and runs
+        page's vector drawings with :meth:`app.core.pdf_reader.PdfPage.drawings` and runs
         the pure :mod:`app.modules.takeoff.recognize` detectors.
 
         Candidates are persisted as ``review_status='proposed'`` rows before
@@ -2311,7 +2311,7 @@ class TakeoffService:
         validation rule blocks a bill push while any are still pending.
 
         Returns ``{candidates, page, source, notes}``. Honest failure modes:
-        PyMuPDF unimportable -> a 400 naming a broken install, since PyMuPDF
+        The PDF reader unimportable -> a 400 naming a broken install, since it
         is a base dependency and not an optional extra; no vector layer and no
         raster fallback (a scanned/raster PDF) -> an empty candidate set with
         ``notes='no_vector_layer'`` rather than fabricated geometry, with a
@@ -2340,11 +2340,10 @@ class TakeoffService:
             )
 
         try:
-            import pymupdf  # noqa: PLC0415 - base dep; lazy-imported so a broken wheel degrades to a clear 400
+            from app.core import pdf_reader  # noqa: PLC0415 - lazy so a broken wheel degrades to a clear 400
         except ImportError as exc:
-            # This message already knew the bundle ships PyMuPDF; what it did
-            # not know is that "reinstall openconstructionerp" is a pip command
-            # a frozen reader cannot run. Same reading, routed.
+            # The bundle ships the PDF reader, and "reinstall openconstructionerp"
+            # is a pip command a frozen reader cannot run. Same reading, routed.
             #
             # Only the reinstall goes inside the call. ``repair_hint`` replaces
             # the whole of its argument on a frozen build, so the fallback would
@@ -2356,7 +2355,7 @@ class TakeoffService:
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    "Vector recognition could not load its PDF reader (PyMuPDF). It ships with "
+                    "Vector recognition could not load its PDF reader (pypdfium2). It ships with "
                     "the platform, so this usually means a broken install. "
                     + repair_hint("Reinstall openconstructionerp.")
                     + " Or use the online AI analysis instead."
@@ -2371,18 +2370,18 @@ class TakeoffService:
         page_w_pt = page_h_pt = 0.0
         try:
             content = file_path.read_bytes()
-            pdf = pymupdf.open(stream=content, filetype="pdf")
+            pdf = pdf_reader.open_pdf(content)
             try:
                 pg = pdf[page - 1]
-                drawings = pg.get_drawings()
+                drawings = pg.drawings()
                 page_w_pt = float(pg.rect.width)
                 page_h_pt = float(pg.rect.height)
                 # No vector layer => scanned/raster page. Rasterise it so the
                 # OpenCV-based detector can still find rooms and walls.
                 if not drawings:
                     try:
-                        pix = pg.get_pixmap(dpi=raster_dpi, alpha=False)
-                        raster_payload = (pix.samples, pix.h, pix.w, pix.n)
+                        pix = pg.render(dpi=raster_dpi)
+                        raster_payload = (pix.samples, pix.height, pix.width, pix.n)
                     except Exception:
                         logger.exception("takeoff.recognize raster render failed for doc %s page %s", doc_id, page)
                         raster_payload = None
@@ -2426,7 +2425,7 @@ class TakeoffService:
 
                 samples, height, width, channels = raster_payload
                 arr = np.frombuffer(samples, dtype=np.uint8).reshape(height, width, channels)
-                # PyMuPDF pixmaps are RGB(A); OpenCV wants contiguous BGR.
+                # The render is RGB; OpenCV wants contiguous BGR.
                 if channels >= 3:
                     image_bgr = np.ascontiguousarray(arr[:, :, 2::-1])
                 else:
@@ -2508,14 +2507,14 @@ class TakeoffService:
             )
 
         try:
-            import pymupdf  # noqa: PLC0415 - base dep; lazy-imported so a broken wheel degrades to a clear 400
+            from app.core import pdf_reader  # noqa: PLC0415 - lazy so a broken wheel degrades to a clear 400
         except ImportError as exc:
             from app.core.self_upgrade import repair_hint  # noqa: PLC0415
 
             raise HTTPException(
                 status_code=400,
                 detail=(
-                    "Symbol search could not load its PDF reader (PyMuPDF). It ships with "
+                    "Symbol search could not load its PDF reader (pypdfium2). It ships with "
                     "the platform, so this usually means a broken install. "
                     + repair_hint("Reinstall openconstructionerp.")
                 ),
@@ -2523,10 +2522,10 @@ class TakeoffService:
 
         try:
             content = file_path.read_bytes()
-            pdf = pymupdf.open(stream=content, filetype="pdf")
+            pdf = pdf_reader.open_pdf(content)
             try:
                 pg = pdf[page - 1]
-                drawings = pg.get_drawings()
+                drawings = pg.drawings()
             finally:
                 pdf.close()
         except HTTPException:
@@ -3886,7 +3885,7 @@ class TakeoffService:
             content = file_path.read_bytes()
             png, media_type, dpi, page_w_pt, page_h_pt = _pr.rasterize_page(content, run.page)
         except ImportError:
-            await self._fail_plan_read(run_id, "pymupdf_missing", start)
+            await self._fail_plan_read(run_id, "pdf_reader_missing", start)
             return
         except Exception:
             logger.exception("plan_read run %s rasterize failed", run_id)

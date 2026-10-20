@@ -3,7 +3,7 @@
 """Offline raster candidate detection for PDF takeoff (issue #194).
 
 This is the raster twin of :mod:`app.modules.takeoff.recognize`. The vector
-recognizer reads a page's drawing layer (``page.get_drawings()``); on a SCANNED
+recognizer reads a page's drawing layer (``PdfPage.drawings()``); on a SCANNED
 plan that layer is empty, so it correctly returns nothing. This module instead
 looks at the rendered raster image of the page with OpenCV and proposes the same
 candidate shape:

@@ -194,7 +194,7 @@ def _resolve_page_limit(total: int, max_pages: int | None) -> int:
 
 
 def count_pdf_pages(pdf_path: str, *, filename: str | None = None) -> int:
-    """Count the pages in a PDF - pdfplumber first, pymupdf as a fallback.
+    """Count the pages in a PDF - pdfplumber first, pypdfium2 as a fallback.
 
     Both failure paths log the input fingerprint so an operator can
     correlate the log line with the upload without leaking the bytes. Returns
@@ -209,53 +209,49 @@ def count_pdf_pages(pdf_path: str, *, filename: str | None = None) -> int:
             return len(pdf.pages)
     except Exception:
         logger.warning(
-            "takeoff.pdf_count pdfplumber failed (%s) - falling back to pymupdf",
+            "takeoff.pdf_count pdfplumber failed (%s) - falling back to pypdfium2",
             fp,
             exc_info=True,
         )
         try:
-            import pymupdf
+            from app.core import pdf_reader
 
-            doc = pymupdf.open(stream=Path(pdf_path).read_bytes(), filetype="pdf")
-            count = len(doc)
-            doc.close()
-            return count
+            return pdf_reader.page_count(Path(pdf_path).read_bytes())
         except Exception:
             logger.exception(
-                "takeoff.pdf_count both pdfplumber and pymupdf failed (%s) - reporting zero pages",
+                "takeoff.pdf_count both pdfplumber and pypdfium2 failed (%s) - reporting zero pages",
                 fp,
             )
             return 0
 
 
-def _extract_with_pymupdf(pdf_path: str, max_pages: int | None, fp: str) -> dict:
-    """Fallback extractor: pymupdf text-only (no tables).
+def _extract_with_pdfium(pdf_path: str, max_pages: int | None, fp: str) -> dict:
+    """Fallback extractor: pypdfium2 text-only (no tables).
 
-    Used when pdfplumber raises. Reads the file as a byte stream so the call
-    matches the shared ``pymupdf.open(stream=..., filetype="pdf")`` form.
-    Returns the same dict contract as :func:`extract_pdf_data`; on its own
-    failure the double-failure line is logged and an empty result returned.
+    Used when pdfplumber raises. PDFium is a different parser from pdfminer,
+    so a file pdfplumber cannot read often still opens here. Returns the same
+    dict contract as :func:`extract_pdf_data`; on its own failure the
+    double-failure line is logged and an empty result returned.
     """
     try:
-        import pymupdf
+        from app.core import pdf_reader
 
-        doc = pymupdf.open(stream=Path(pdf_path).read_bytes(), filetype="pdf")
-        total = len(doc)
-        limit = _resolve_page_limit(total, max_pages)
-        pages: list[dict] = []
-        empty = 0
-        for i, page in enumerate(doc):
-            if i >= limit:
-                break
-            text = page.get_text() or ""
-            has_text = bool(text.strip())
-            if not has_text:
-                empty += 1
-            pages.append({"page": i + 1, "text": text.strip(), "tables": [], "has_text": has_text})
-        doc.close()
+        with pdf_reader.open_pdf(Path(pdf_path).read_bytes()) as doc:
+            total = doc.page_count
+            limit = _resolve_page_limit(total, max_pages)
+            pages: list[dict] = []
+            empty = 0
+            for i in range(limit):
+                page = doc[i]
+                text = page.text() or ""
+                page.close()
+                has_text = bool(text.strip())
+                if not has_text:
+                    empty += 1
+                pages.append({"page": i + 1, "text": text.strip(), "tables": [], "has_text": has_text})
         if empty:
             logger.info(
-                "takeoff.pdf_extract pymupdf: %d of %d page(s) had no text layer "
+                "takeoff.pdf_extract pypdfium2: %d of %d page(s) had no text layer "
                 "(likely scanned - OCR needed to recover content) (%s)",
                 empty,
                 len(pages),
@@ -264,7 +260,7 @@ def _extract_with_pymupdf(pdf_path: str, max_pages: int | None, fp: str) -> dict
         return {"page_count": total, "pages": pages, "truncated": limit < total}
     except Exception as exc:
         logger.exception(
-            "takeoff.pdf_extract both pdfplumber and pymupdf failed (%s) - document will have no extracted pages",
+            "takeoff.pdf_extract both pdfplumber and pypdfium2 failed (%s) - document will have no extracted pages",
             fp,
         )
         # The traceback above goes to this child's stderr, which the parent
@@ -288,7 +284,7 @@ def extract_pdf_data(pdf_path: str, max_pages: int | None = None, *, filename: s
     :data:`VECTOR_DENSITY_LIMIT` the memory-hungry ``extract_tables`` call is
     skipped and only the plain text is taken (this is the exact operation
     that OOM-killed the server on dense CAD sheets). If pdfplumber raises,
-    the whole document falls back to pymupdf text extraction.
+    the whole document falls back to pypdfium2 text extraction.
 
     Args:
         pdf_path: Path to the PDF file on disk.
@@ -358,11 +354,11 @@ def extract_pdf_data(pdf_path: str, max_pages: int | None = None, *, filename: s
         return {"page_count": total, "pages": pages, "truncated": limit < total}
     except Exception:
         logger.warning(
-            "takeoff.pdf_extract pdfplumber failed (%s) - falling back to pymupdf",
+            "takeoff.pdf_extract pdfplumber failed (%s) - falling back to pypdfium2",
             fp,
             exc_info=True,
         )
-        return _extract_with_pymupdf(pdf_path, max_pages, fp)
+        return _extract_with_pdfium(pdf_path, max_pages, fp)
 
 
 # ── Entry point ─────────────────────────────────────────────────────────────

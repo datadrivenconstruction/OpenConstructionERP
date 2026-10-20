@@ -4342,7 +4342,7 @@ async def recognize_document(
     """Detect candidate measurements from a page's vector layer (offline).
 
     The deterministic, offline complement to ``analyze`` (which sends text to
-    an LLM): scans the PDF's vector drawings with PyMuPDF and proposes
+    an LLM): scans the PDF's vector drawings with PDFium and proposes
     confidence-scored area / length / count candidates.
 
     Candidates are stored as ``proposed`` rows and each carries its
