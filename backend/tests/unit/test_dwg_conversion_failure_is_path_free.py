@@ -180,3 +180,42 @@ def test_the_dwg_converter_gets_a_time_limit_below_ours(tmp_path: Path) -> None:
 
     cmd = build_command("dwg", tmp_path / "dwg2excel.exe", tmp_path / "a.dwg", tmp_path / "out", timeout=900)
     assert cmd[-2:] == ["--timeout", "885"]
+
+
+@pytest.mark.asyncio
+async def test_a_conversion_that_breaks_its_session_is_still_marked_failed(tmp_path: Path, monkeypatch) -> None:
+    # A connection dropped mid-conversion (idle-in-transaction timeout) used to leave
+    # the row in "processing"; the page then blamed a server restart.
+    marked: list[tuple[uuid.UUID, str]] = []
+
+    class _Session:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_a):
+            return False
+
+        async def commit(self):
+            return None
+
+        async def rollback(self):
+            return None
+
+    async def broken(self, _drawing_id, _path):
+        raise RuntimeError("Can't reconnect until invalid transaction is rolled back")
+
+    async def mark(self, drawing_id, code, _message):
+        marked.append((drawing_id, code))
+
+    async def no_beat(_drawing_id):
+        return None
+
+    monkeypatch.setattr(service_mod, "async_session_factory", _Session)
+    monkeypatch.setattr(service_mod, "_beat_while_converting", no_beat)
+    monkeypatch.setattr(DwgTakeoffService, "_handle_dwg", broken)
+    monkeypatch.setattr(DwgTakeoffService, "_mark_failed", mark)
+    drawing_id = uuid.uuid4()
+
+    await service_mod._run_dwg_conversion_in_background(drawing_id, str(tmp_path / "a.dwg"))
+
+    assert marked == [(drawing_id, "convert_failed")]
