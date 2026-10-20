@@ -9,14 +9,14 @@
  */
 
 import type { DxfEntity } from '../api';
-import { calculateArea, calculateDistance, calculatePerimeter } from './measurement';
+import { measureEntity } from './auto-quantify';
 
 export interface GroupAggregate {
-  /** Σ area over closed polylines + circles (m²). */
+  /** Σ area over closed polylines, circles, ellipses and hatches (m²). */
   area: number;
   /** Σ perimeter over closed polylines (m). */
   perimeter: number;
-  /** Σ length over LINEs + open polylines (m). */
+  /** Σ length over LINEs, open polylines and arcs (m). */
   length: number;
   /** Number of entities that contributed to any measurement. */
   count: number;
@@ -35,15 +35,11 @@ const EMPTY_AGGREGATE: GroupAggregate = Object.freeze({
 /**
  * Compute Σ measurements for a group of entities.
  *
- * Rules (derived directly from the existing per-entity panel logic in
- * ``DwgTakeoffPage.extractEntityMeasurement``):
- *   - Closed LWPOLYLINE → contributes its area AND its perimeter.
- *   - Open LWPOLYLINE → contributes its perimeter as length only.
- *   - LINE → contributes its length.
- *   - CIRCLE → contributes its area (π·r²).
- *   - ARC / ELLIPSE / HATCH / TEXT / INSERT / POINT → no quantitative
- *     contribution for now. Still counted in ``byType`` so the UI can
- *     show "3 walls, 1 ARC, 2 HATCH" even if it only sums the walls.
+ * Per-entity rules are {@link measureEntity}, shared with the per-layer
+ * auto-quantify so a selection, the Summary totals and the exports count
+ * the same geometry: closed polylines give area and perimeter, open
+ * polylines, lines and arcs give length, circles, ellipses and hatches give
+ * area. TEXT / INSERT / POINT are only counted in ``byType``.
  *
  * ``scale`` is the effective scale (drawing-scale ratio × unit-factor, e.g.
  * ``0.001`` for a millimetre drawing) that converts raw DXF units to real
@@ -63,23 +59,12 @@ export function aggregateEntities(entities: DxfEntity[], scale = 1): GroupAggreg
 
   for (const e of entities) {
     byType[e.type] = (byType[e.type] ?? 0) + 1;
-
-    if (e.type === 'LWPOLYLINE' && e.vertices && e.vertices.length >= 2) {
-      const closed = !!e.closed;
-      if (closed && e.vertices.length >= 3) {
-        area += calculateArea(e.vertices);
-        perimeter += calculatePerimeter(e.vertices, true);
-      } else {
-        length += calculatePerimeter(e.vertices, false);
-      }
-      count++;
-    } else if (e.type === 'LINE' && e.start && e.end) {
-      length += calculateDistance(e.start, e.end);
-      count++;
-    } else if (e.type === 'CIRCLE' && e.radius != null) {
-      area += Math.PI * e.radius * e.radius;
-      count++;
-    }
+    const m = measureEntity(e);
+    if (!m.measured) continue;
+    area += m.area;
+    perimeter += m.perimeter;
+    length += m.length;
+    count++;
   }
 
   const areaScale = scale * scale;

@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useDwgUploadStore, type DwgUploadJob } from '@/stores/useDwgUploadStore';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { conversionErrorText } from '@/features/dwg-takeoff/lib/conversion-error';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -243,7 +244,8 @@ function DwgJobRow({
 
         {isError && (
           <p className="text-[10px] text-red-500 mt-0.5 line-clamp-2">
-            {job.errorMessage || t('dwg_upload.failed', { defaultValue: 'Upload failed' })}
+            {conversionErrorText(job.errorCode, job.errorMessage, t) ||
+              t('dwg_upload.failed', { defaultValue: 'Upload failed' })}
           </p>
         )}
 

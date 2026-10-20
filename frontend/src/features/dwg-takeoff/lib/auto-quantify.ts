@@ -29,6 +29,8 @@ export interface LayerQuantity {
   area: number;
   /** Σ length (m) from lines, open polylines and arcs. */
   length: number;
+  /** Σ perimeter (m) of closed polylines. Not part of ``length``. */
+  perimeter: number;
   /** Number of entities on the layer (every type is counted). */
   count: number;
   /** The measure auto-selected as the headline quantity for this layer. */
@@ -81,6 +83,74 @@ function pickPrimary(area: number, length: number): QuantifyMeasure {
   return 'count';
 }
 
+/** Raw-unit measures of one entity. ``measured`` is false for entities that
+ *  carry no quantity (TEXT, INSERT, POINT ...). */
+export interface EntityMeasure {
+  area: number;
+  length: number;
+  perimeter: number;
+  measured: boolean;
+}
+
+/**
+ * The one per-entity measuring rule. The per-layer auto-quantify, the
+ * selection aggregate and therefore every Summary total and export go
+ * through it, so no two of them can count a different set of entities.
+ */
+export function measureEntity(e: DxfEntity): EntityMeasure {
+  const m: EntityMeasure = { area: 0, length: 0, perimeter: 0, measured: false };
+  switch (e.type) {
+    case 'LWPOLYLINE':
+      if (e.vertices && e.vertices.length >= 2) {
+        if (e.closed && e.vertices.length >= 3) {
+          m.area = calculateArea(e.vertices);
+          m.perimeter = calculatePerimeter(e.vertices, true);
+        } else {
+          m.length = calculatePerimeter(e.vertices, false);
+        }
+        m.measured = true;
+      }
+      break;
+    case 'HATCH':
+      // A hatch is a filled region - areal even when ``closed`` is unset.
+      if (e.vertices && e.vertices.length >= 3) {
+        m.area = calculateArea(e.vertices);
+        m.measured = true;
+      }
+      break;
+    case 'LINE':
+      if (e.start && e.end) {
+        m.length = calculateDistance(e.start, e.end);
+        m.measured = true;
+      }
+      break;
+    case 'CIRCLE':
+      if (e.radius != null) {
+        m.area = Math.PI * e.radius * e.radius;
+        m.measured = true;
+      }
+      break;
+    case 'ARC':
+      if (e.radius != null) {
+        m.length = e.radius * arcSweep(e.start_angle, e.end_angle);
+        m.measured = true;
+      }
+      break;
+    case 'ELLIPSE': {
+      const r = ellipseRadii(e);
+      if (r) {
+        m.area = Math.PI * r.a * r.b;
+        m.measured = true;
+      }
+      break;
+    }
+    // INSERT / TEXT / POINT contribute to ``count`` only.
+    default:
+      break;
+  }
+  return m;
+}
+
 /**
  * Roll every entity up by layer into area / length / count, then pick the
  * headline measure per layer.
@@ -90,53 +160,19 @@ function pickPrimary(area: number, length: number): QuantifyMeasure {
  * labels the canvas renders. Defaults to ``1`` (raw units).
  */
 export function quantifyByLayer(entities: DxfEntity[], scale = 1): LayerQuantity[] {
-  const buckets = new Map<string, { area: number; length: number; count: number }>();
-  const bucketFor = (layer: string) => {
+  const buckets = new Map<string, { area: number; length: number; perimeter: number; count: number }>();
+  for (const e of entities) {
+    const layer = e.layer || '0';
     let b = buckets.get(layer);
     if (!b) {
-      b = { area: 0, length: 0, count: 0 };
+      b = { area: 0, length: 0, perimeter: 0, count: 0 };
       buckets.set(layer, b);
     }
-    return b;
-  };
-
-  for (const e of entities) {
-    const b = bucketFor(e.layer || '0');
     b.count++;
-    switch (e.type) {
-      case 'LWPOLYLINE':
-        if (e.vertices && e.vertices.length >= 2) {
-          if (e.closed && e.vertices.length >= 3) {
-            b.area += calculateArea(e.vertices);
-          } else {
-            b.length += calculatePerimeter(e.vertices, false);
-          }
-        }
-        break;
-      case 'HATCH':
-        // A hatch is a filled region - areal even when ``closed`` is unset.
-        if (e.vertices && e.vertices.length >= 3) {
-          b.area += calculateArea(e.vertices);
-        }
-        break;
-      case 'LINE':
-        if (e.start && e.end) b.length += calculateDistance(e.start, e.end);
-        break;
-      case 'CIRCLE':
-        if (e.radius != null) b.area += Math.PI * e.radius * e.radius;
-        break;
-      case 'ARC':
-        if (e.radius != null) b.length += e.radius * arcSweep(e.start_angle, e.end_angle);
-        break;
-      case 'ELLIPSE': {
-        const r = ellipseRadii(e);
-        if (r) b.area += Math.PI * r.a * r.b;
-        break;
-      }
-      // INSERT / TEXT / POINT contribute to ``count`` only.
-      default:
-        break;
-    }
+    const m = measureEntity(e);
+    b.area += m.area;
+    b.length += m.length;
+    b.perimeter += m.perimeter;
   }
 
   const areaScale = scale * scale;
@@ -147,6 +183,7 @@ export function quantifyByLayer(entities: DxfEntity[], scale = 1): LayerQuantity
     .map(([layer, v]) => {
       const area = round(v.area * areaScale);
       const length = round(v.length * scale);
+      const perimeter = round(v.perimeter * scale);
       const count = v.count;
       const primary = pickPrimary(area, length);
       const available: QuantifyMeasure[] = [];
@@ -158,6 +195,7 @@ export function quantifyByLayer(entities: DxfEntity[], scale = 1): LayerQuantity
         layer,
         area,
         length,
+        perimeter,
         count,
         primary,
         quantity,
