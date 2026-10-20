@@ -266,7 +266,7 @@ def test_rvt_elements_are_the_ones_with_a_mesh(tmp_path: Path) -> None:
     assert [r["ID"] for r in rows] == [2645, 2870]
     wall, floor = rows
     assert (wall["Category"], wall["Category Name"], wall["Type Name"]) == ("OST_Walls", "Walls", "CL_W1")
-    assert wall["Family Name"] == "Basic Wall"
+    assert wall["Family"] == "Basic Wall"
     assert wall["Name"] == "CL_W1 2645"
     assert wall["Level"] == "Level 1"
     # No LevelName in the identity: the storey that contains the element.
