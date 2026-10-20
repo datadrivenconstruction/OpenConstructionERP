@@ -21,6 +21,13 @@ try:
     import ezdxf
     from ezdxf.addons.drawing import Frontend, RenderContext
     from ezdxf.addons.drawing import svg as ezdxf_svg
+    from ezdxf.lldxf.encoding import (
+        decode_dxf_unicode,
+        decode_mif_to_unicode,
+        has_dxf_unicode,
+        has_mif_encoding,
+    )
+    from ezdxf.tools.text import plain_mtext
 
     HAS_EZDXF = True
 except ImportError:
@@ -58,6 +65,90 @@ def _aci_to_hex(aci: int) -> str:
         9: "#c0c0c0",
     }
     return aci_map.get(aci, "#ffffff")
+
+
+def decode_dxf_text(value: Any) -> Any:
+    r"""Decode DXF in-string unicode escapes into real characters.
+
+    DXF files written as R2000 with an ANSI code page (what the DWG converter
+    emits) carry every non-ASCII character as ``\U+XXXX`` and East Asian
+    multibyte text as ``\M+NXXXX``. ezdxf leaves both untouched for these
+    versions, so layer names and text reached the UI as raw escapes. Non-string
+    values pass through unchanged.
+
+    Args:
+        value: A string read from the DXF, or anything else.
+
+    Returns:
+        The decoded string, or ``value`` itself when it is not a string.
+    """
+    if not isinstance(value, str) or "\\" not in value:
+        return value
+    try:
+        if has_mif_encoding(value):
+            value = decode_mif_to_unicode(value)
+        if has_dxf_unicode(value):
+            value = decode_dxf_unicode(value)
+    except Exception:  # noqa: BLE001 - a malformed escape keeps the raw text
+        logger.debug("Could not decode DXF escapes in %r", value[:80])
+    return value
+
+
+_TEXT_KEYS = ("text", "text_override", "block_name")
+
+
+def _decode_entity_strings(entity: dict[str, Any]) -> None:
+    """Decode the human-readable strings of one serialized entity in place."""
+    for key in ("layer", "block"):
+        if key in entity:
+            entity[key] = decode_dxf_text(entity[key])
+    geometry = entity.get("geometry_data")
+    if isinstance(geometry, dict):
+        for key in _TEXT_KEYS:
+            if key in geometry:
+                geometry[key] = decode_dxf_text(geometry[key])
+
+
+def _collect_xrefs(doc: Any, entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """List the external references the drawing depends on but does not contain.
+
+    An xref is a BLOCK whose flags carry bit 4 (attached) or 8 (overlay); its
+    geometry lives in another file, so a converted drawing shows only the host
+    sheet. An INSERT naming a block that is not defined at all is the same
+    situation seen from the other side, and is reported too.
+
+    Args:
+        doc: The open ezdxf document.
+        entities: Serialized entities, still carrying raw block names.
+
+    Returns:
+        One ``{"name", "path"}`` dict per unresolved reference, names decoded.
+    """
+    found: dict[str, dict[str, Any]] = {}
+    try:
+        for block in doc.blocks:
+            try:
+                flags = int(block.block.dxf.get("flags", 0) or 0)
+            except Exception:  # noqa: BLE001 - one unreadable BLOCK record
+                continue
+            if flags & (4 | 8):
+                path = block.block.dxf.get("xref_path", "") or ""
+                found[block.name] = {"name": decode_dxf_text(block.name), "path": decode_dxf_text(path) or None}
+    except Exception:  # noqa: BLE001 - no readable block table
+        logger.debug("Could not read the block table for xrefs")
+    for entity in entities:
+        if entity.get("entity_type") != "INSERT":
+            continue
+        name = entity.get("geometry_data", {}).get("block_name")
+        if not name or name in found:
+            continue
+        try:
+            missing = doc.blocks.get(name) is None
+        except Exception:  # noqa: BLE001
+            missing = True
+        if missing:
+            found[name] = {"name": decode_dxf_text(name), "path": None}
+    return sorted(found.values(), key=lambda x: str(x["name"]))
 
 
 def _serialize_entity(
@@ -145,7 +236,9 @@ def _serialize_entity(
         style_name = dxf.get("style", "Standard")
         result["geometry_data"] = {
             "insert": {"x": insert.x, "y": insert.y} if insert else {"x": 0, "y": 0},
-            "text": entity.plain_text() if hasattr(entity, "plain_text") else str(entity.text),
+            # Decode escapes before stripping format codes: plain_mtext would
+            # otherwise read a ``\M+`` sequence as an unknown format code.
+            "text": plain_mtext(decode_dxf_text(entity.text)),
             "height": dxf.get("char_height", 1.0),
             "style": style_name,
             "font": styles.get(style_name, ""),
@@ -264,7 +357,8 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
         file_path: Path to the DXF file on disk.
 
     Returns:
-        Dict with keys: layers, entities, extents, units, entity_count.
+        Dict with keys: layers, entities, extents, units, entity_count,
+        skipped_count, layouts, xrefs.
 
     Raises:
         ImportError: If ezdxf is not installed.
@@ -357,6 +451,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     # layer panel governs what a toggle removes, and a block's members are
     # governed by the INSERT that places them, not by their own layer.
     entities.extend(_serialize_block_definitions(doc, entities, layer_color_map, styles))
+    xrefs = _collect_xrefs(doc, entities)
 
     if total_count > 0 and skipped_count / total_count > 0.10:
         logger.warning(
@@ -421,6 +516,12 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     # Deduplicate and sort layout names, ensure "Model" comes first
     unique_layouts = list(dict.fromkeys(layout_names))
 
+    # Decode last: block lookups above need the raw names the file uses.
+    for entity in entities:
+        _decode_entity_strings(entity)
+    for layer_info in layers:
+        layer_info["name"] = decode_dxf_text(layer_info["name"])
+
     return {
         "layers": layers,
         "entities": entities,
@@ -429,6 +530,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
         "entity_count": len(entities),
         "skipped_count": skipped_count,
         "layouts": unique_layouts,
+        "xrefs": xrefs,
     }
 
 
