@@ -97,7 +97,7 @@ class CapturedInvoice(Base):
     )
 
     # ── Extraction provenance (AI-augmented, human-confirmed) ───────────────
-    # How the draft was produced: manual | plaintext | pymupdf | pytesseract |
+    # How the draft was produced: manual | plaintext | pdfium (pymupdf on older rows) | pytesseract |
     # xml | llm | none. Drives the confidence UI and the audit story.
     extraction_engine: Mapped[str] = mapped_column(String(40), nullable=False, default="manual")
     # First N chars of the extracted text, kept for provenance / re-review.

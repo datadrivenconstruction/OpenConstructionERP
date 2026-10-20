@@ -1049,12 +1049,13 @@ def check_optional_extras(data_dir: Path | None = None) -> list[Check]:
     # crashes on import does not take the diagnostic down with it.
     #
     # pdfplumber is checked first because it is the reader the upload path
-    # tries first; PyMuPDF is the fallback. Checking only the fallback was the
+    # tries first; pypdfium2 is the fallback, and it also renders pages and reads
+    # the vector layer for recognition. Checking only the fallback was the
     # second half of the same blind spot.
-    pdf_readers = [("pdfplumber", "primary reader"), ("pymupdf", "fallback reader")]
+    pdf_readers = [("pdfplumber", "primary reader"), ("pypdfium2", "fallback reader")]
     pdf_failures = [(mod, role, err) for mod, role in pdf_readers if (err := _import_error(mod)) is not None]
     if not pdf_failures:
-        out.append(Check("PDF takeoff", "ok", "pdfplumber + pymupdf import cleanly"))
+        out.append(Check("PDF takeoff", "ok", "pdfplumber + pypdfium2 import cleanly"))
     else:
         broken = "; ".join(f"{mod} ({role}): {err}" for mod, role, err in pdf_failures)
         # Losing only the fallback still leaves uploads working, so it is not

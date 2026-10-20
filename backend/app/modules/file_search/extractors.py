@@ -4,11 +4,11 @@
 
 Two engines:
 
-* :func:`_extract_pdf_text` - PyMuPDF (``fitz``). Pulls embedded vector
+* :func:`_extract_pdf_text` - pypdfium2 (PDFium). Pulls embedded vector
   text out of every page; the cheap path. Returns the full text and the
   page count.
 * :func:`_extract_ocr_text` - pytesseract. Rasterises the input bytes
-  (PIL.Image) and runs Tesseract OCR. Slow; only used when PyMuPDF
+  (PIL.Image) and runs Tesseract OCR. Slow; only used when the PDF
   reports zero embedded text, or for non-PDF mime types (jpg/png/tiff).
 
 The public entrypoint :func:`extract_text` picks the right engine for
@@ -37,7 +37,7 @@ MAX_CONTENT_CHARS: int = MAX_CONTENT_BYTES  # 1 char per byte upper bound
 # still fall through to OCR to get the real body.
 EMBEDDED_TEXT_FALLBACK_THRESHOLD: int = 32
 
-# OCR rasterisation caps. ``page.get_pixmap`` has no size ceiling of its own,
+# OCR rasterisation caps. A page render has no size ceiling of its own,
 # so a large-format sheet (an A0 drawing at 150 DPI is ~35 MP) or a
 # maliciously oversized page can make a single render allocate hundreds of MB
 # and OOM a 3 GB worker. We clamp every page render so its pixmap never exceeds
@@ -60,7 +60,7 @@ class ExtractionResult:
         page_count:  Number of pages the extractor saw, or ``None`` for
                      mime types that have no page concept.
         engine:      Which extractor produced the text - one of
-                     ``"pymupdf"``, ``"pytesseract"``, ``"none"``.
+                     ``"pdfium"``, ``"pytesseract"``, ``"none"``.
         language:    Detected language code (``"eng"``, ``"deu"``, ...),
                      or ``None`` if no language detection was performed.
     """
@@ -97,39 +97,39 @@ def _clamp_render_scale(width_pt: float, height_pt: float, dpi: int, max_pixels:
 
 
 def _extract_pdf_text(payload: bytes) -> tuple[str, int]:
-    """Pull embedded vector text out of a PDF using PyMuPDF.
+    """Pull embedded vector text out of a PDF using pypdfium2.
 
     Returns ``(text, page_count)``. Raises only on truly catastrophic
     extractor failure - graceful "no text" returns an empty string with
     the real page count.
     """
     try:
-        import fitz  # type: ignore[import-not-found]
-    except Exception:  # pragma: no cover - optional dep
-        logger.debug("PyMuPDF not installed - skipping embedded-text extraction")
+        from app.core import pdf_reader
+    except Exception:  # pragma: no cover - base dependency
+        logger.debug("PDF reader unavailable - skipping embedded-text extraction")
         return "", 0
 
     try:
-        with fitz.open(stream=payload, filetype="pdf") as doc:
+        with pdf_reader.open_pdf(payload) as doc:
             page_count = doc.page_count
             parts: list[str] = []
             for page in doc:
                 try:
-                    parts.append(page.get_text("text") or "")
+                    parts.append(page.text() or "")
                 except Exception:
-                    logger.exception("PyMuPDF page read failed; continuing")
+                    logger.exception("PDF page text read failed; continuing")
                     continue
             text = "\n".join(parts).strip()
             return text, page_count
     except Exception:
-        logger.exception("PyMuPDF failed to open PDF payload")
+        logger.exception("PDF reader failed to open PDF payload")
         return "", 0
 
 
 def _extract_ocr_text(payload: bytes, mime: str | None) -> tuple[str, int | None]:
     """Run Tesseract OCR over an image (or rasterised PDF).
 
-    For PDF inputs we render every page with PyMuPDF first (so we get a
+    For PDF inputs we render every page with pypdfium2 first (so we get a
     page-count) and then OCR each page image. For image inputs we run
     a single OCR pass and return ``page_count=None``.
 
@@ -147,13 +147,13 @@ def _extract_ocr_text(payload: bytes, mime: str | None) -> tuple[str, int | None
         try:
             from io import BytesIO
 
-            import fitz  # type: ignore[import-not-found]
-        except Exception:  # pragma: no cover - optional dep
-            logger.debug("PyMuPDF not installed - cannot rasterise PDF for OCR")
+            from app.core import pdf_reader
+        except Exception:  # pragma: no cover - base dependency
+            logger.debug("PDF reader unavailable - cannot rasterise PDF for OCR")
             return "", None
 
         try:
-            with fitz.open(stream=payload, filetype="pdf") as doc:
+            with pdf_reader.open_pdf(payload) as doc:
                 page_count = doc.page_count
                 parts: list[str] = []
                 for page_index, page in enumerate(doc):
@@ -167,9 +167,8 @@ def _extract_ocr_text(payload: bytes, mime: str | None) -> tuple[str, int | None
                     pix = None
                     try:
                         scale = _clamp_render_scale(page.rect.width, page.rect.height, OCR_RENDER_DPI, MAX_OCR_PIXELS)
-                        pix = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
-                        img_bytes = pix.tobytes("png")
-                        with Image.open(BytesIO(img_bytes)) as img:
+                        pix = page.render(zoom=scale)
+                        with Image.open(BytesIO(pix.png())) as img:
                             page_text = pytesseract.image_to_string(img) or ""
                         parts.append(page_text)
                     except Exception:
@@ -200,7 +199,7 @@ def extract_text(payload: bytes, mime: str | None) -> ExtractionResult:
     """Extract searchable text from a file payload.
 
     Routing:
-        * PDF:            PyMuPDF embedded text → fall back to OCR if
+        * PDF:            pypdfium2 embedded text → fall back to OCR if
                           the PDF is image-only.
         * jpg/png/tiff:   pytesseract OCR.
         * everything else: best-effort UTF-8 decode of the payload
@@ -224,7 +223,7 @@ def extract_text(payload: bytes, mime: str | None) -> ExtractionResult:
     # ── PDF ───────────────────────────────────────────────────────────
     if "pdf" in mime_lower:
         text, page_count = _extract_pdf_text(payload)
-        engine = "pymupdf"
+        engine = "pdfium"
         if len(text) < EMBEDDED_TEXT_FALLBACK_THRESHOLD:
             ocr_text, ocr_pages = _extract_ocr_text(payload, mime_lower)
             if len(ocr_text) > len(text):

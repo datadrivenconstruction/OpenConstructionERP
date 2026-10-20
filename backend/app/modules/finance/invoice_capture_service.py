@@ -8,7 +8,7 @@ composing existing platform primitives rather than duplicating them:
 * storage:   :mod:`app.core.storage` + :mod:`app.core.upload_streaming`
              (stream to temp, SHA-256 the bytes, put unaltered into the backend).
 * extraction: :func:`app.modules.file_search.extractors.extract_text`
-             (PyMuPDF text layer -> Tesseract OCR, both optional) with an
+             (PDFium text layer -> Tesseract OCR) with an
              optional LLM structuring pass; a pure heuristic fallback means the
              flow works with zero AI.
 * booking:   pure :mod:`app.modules.finance.invoice_capture_logic`, posted

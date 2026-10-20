@@ -782,10 +782,9 @@ async def _seed_project_document(
         size_bytes = dest_pdf.stat().st_size
         file_path = str(dest_pdf)
         try:
-            import fitz  # PyMuPDF - already a takeoff dependency
+            from app.core import pdf_reader
 
-            with fitz.open(dest_pdf) as opened:
-                pages = max(1, opened.page_count)
+            pages = max(1, pdf_reader.page_count(dest_pdf))
         except Exception:  # noqa: BLE001 - page count is cosmetic, never fatal
             pages = 1
     else:

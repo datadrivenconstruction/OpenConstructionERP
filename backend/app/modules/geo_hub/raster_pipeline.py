@@ -4,7 +4,7 @@
 Three pure functions take bytes in and return PNG bytes + dimensions
 out:
 
-* :func:`pdf_to_png` - PyMuPDF rasterises a single PDF page at a
+* :func:`pdf_to_png` - pypdfium2 rasterises a single PDF page at a
   reasonable DPI for a globe overlay.
 * :func:`dwg_top_view_to_png` - Pillow renders a DDC-canonical JSON's
   2D elements (lines + polygons) in orthographic top-down projection.
@@ -51,30 +51,31 @@ def pdf_to_png(
     caller can stash the page count on the overlay for "next page"
     affordances in the UI.
     """
-    import fitz  # PyMuPDF
+    from app.core import pdf_reader
 
     if page < 1:
         raise ValueError("PDF page must be >= 1")
 
-    with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+    try:
+        doc = pdf_reader.open_pdf(pdf_bytes)
+    except pdf_reader.PdfReaderError as exc:
+        raise ValueError(f"cannot open PDF: {exc}") from exc
+    with doc:
         page_count = doc.page_count
         if page_count == 0:
             raise ValueError("PDF has no pages")
         idx = min(page, page_count) - 1
-        pdf_page = doc.load_page(idx)
-        # ``Matrix`` scaler - fitz default is 72 DPI; scale_factor = dpi/72.
+        pdf_page = doc[idx]
+        # 72 DPI is zoom 1; scale_factor = dpi/72.
         scale = max(dpi, 36) / 72.0
-        # Cap the surface - fitz silently truncates instead of OOMing,
-        # but we'd rather fail explicit with a clear error.
+        # Cap the surface so a huge sheet fails explicit rather than OOMing.
         bbox = pdf_page.rect
         est_pixels = int(bbox.width * scale) * int(bbox.height * scale)
         if est_pixels > MAX_RASTER_PIXELS:
             # Recompute a scale that lands at the cap.
             scale = math.sqrt(MAX_RASTER_PIXELS / (bbox.width * bbox.height))
-        matrix = fitz.Matrix(scale, scale)
-        pix = pdf_page.get_pixmap(matrix=matrix, alpha=False)
-        png_bytes = pix.tobytes(output="png")
-        return png_bytes, pix.width, pix.height, page_count
+        rendered = pdf_page.render(zoom=scale)
+        return rendered.png(), rendered.width, rendered.height, page_count
 
 
 def dwg_top_view_to_png(
