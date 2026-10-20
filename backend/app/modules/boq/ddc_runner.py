@@ -9,8 +9,8 @@ element" workbook plus COLLADA file the platform was built around:
 ==========  =========================================================  =====================================
 format      command line                                               what it writes
 ==========  =========================================================  =====================================
-``rvt``     ``RVTconverter.exe <in> -o <dir> --properties``            ``native_graph.glb``, ``properties.jsonl``
-                                                                       (a graph of the stored objects),
+``rvt``     ``RVTconverter.exe <in> -o <dir> --ifc``                   ``native_graph.glb``, ``native_graph.ifc``
+                                                                       (identity, parameters, quantities),
                                                                        ``summary.json``, ``report.json``
 ``ifc``     ``python.exe converter.py <in> --output <dir> --glb``      a new sub-folder with ``<stem>.xlsx``
                                                                        (Objects / Properties / Quantities /
@@ -33,15 +33,11 @@ Honest limits, stated where the data comes from rather than papered over:
   ``extras.global_id`` = the GlobalId. Elements whose geometry the converter
   cannot read have no node. A converter build without ``--glb`` is run again
   without it and yields no geometry, as before.
-* RVT: ``properties.jsonl`` is the stored object graph, not a schedule. Only
-  elements that have a mesh in the GLB become rows. Category ids are mapped to
-  ``OST_`` and display names (:mod:`revit_categories`); level and type follow
-  the element's stored links to its ``Level`` and ``SymbolInfo`` objects.
-  Stored reals are in Revit's internal units (feet, square feet, ...) and keep
-  an ``[internal units]`` label, so the take-off never sums them as metres.
-  Area, volume, length, height and thickness are measured on the element's
-  mesh (:mod:`glb_quantities`): a beam's length is its cut length, not the
-  analytical length between joins.
+* RVT: identity, stored parameters (metres where the measure is known, else
+  labelled ``[internal units]``) and Revit's base quantities are read from the
+  converter's own ``native_graph.ifc`` (:mod:`rvt_ifc_reader`). Only elements
+  with a mesh in the GLB become rows; an element with no quantity set is
+  measured on its mesh (:mod:`glb_quantities`).
 * DWG: the converter's workbook is a record-by-record decoder log; the take-off
   table is read from the DXF it writes instead.
 """
@@ -62,6 +58,7 @@ from typing import Any
 from app.core.converter_source import PACKAGES, command_prefix
 from app.modules.boq.glb_quantities import MESH_QUANTITY_COLUMNS, glb_element_quantities
 from app.modules.boq.revit_categories import revit_category_label, revit_category_name
+from app.modules.boq.rvt_ifc_reader import RvtIfcElement, element_quantities, read_rvt_ifc
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +97,7 @@ def build_command(fmt: str, exe: Path, input_path: Path, out_dir: Path, *, glb: 
     prefix = command_prefix(fmt, exe)
     src = str(input_path.resolve())
     if fmt == "rvt":
-        return [*prefix, src, "-o", str(out_dir), "--properties"]
+        return [*prefix, src, "-o", str(out_dir), "--ifc"]
     if fmt == "ifc":
         cmd = [*prefix, src, "--output", str(out_dir)]
         return [*cmd, "--glb"] if glb else cmd
@@ -189,7 +186,7 @@ def _collect_outputs(run: ConverterRun, out_dir: Path, stem: str) -> None:
         run.folder = out_dir
         for role, name in (
             ("glb", "native_graph.glb"),
-            ("properties", "properties.jsonl"),
+            ("ifc", "native_graph.ifc"),
             ("report", "report.json"),
             ("summary", "summary.json"),
         ):
@@ -530,275 +527,59 @@ def orient_glb_for_viewer(glb_path: Path) -> bool:
     return True
 
 
-def _param_value(fields: dict[str, Any]) -> Any:
-    """The stored value of one ``parameter`` row, or ``None``."""
-    record = fields.get("record") if isinstance(fields, dict) else None
-    if not isinstance(record, dict):
-        return None
-    for key, val in record.items():
-        if not key.endswith(".m_value") or not isinstance(val, dict):
-            continue
-        if "text" in val:
-            return val["text"]
-        if "integer" in val:
-            try:
-                return int(val["integer"])
-            except (TypeError, ValueError):
-                return val["integer"]
-        if "number" in val:
-            return val["number"]
-        inner = val.get("record")
-        if isinstance(inner, dict):  # ElementId reference
-            for v in inner.values():
-                ident = (v or {}).get("record", {}) if isinstance(v, dict) else {}
-                for iv in ident.values():
-                    if isinstance(iv, dict) and "integer" in iv:
-                        return int(iv["integer"])
-    return None
-
-
-def _graph_ref(value: Any) -> int | None:
-    """The element id an ``ElementId`` field of the stored graph points at."""
-    cur = value
-    for _ in range(6):
-        if not isinstance(cur, dict):
-            return None
-        if "integer" in cur:
-            try:
-                return int(cur["integer"])
-            except (TypeError, ValueError):
-                return None
-        rec = cur.get("record")
-        if not isinstance(rec, dict) or not rec:
-            return None
-        cur = next(iter(rec.values()))
-    return None
-
-
-def _graph_text(fields: Any, key: str) -> str | None:
-    rec = fields.get("record") if isinstance(fields, dict) else None
-    val = rec.get(key) if isinstance(rec, dict) else None
-    text = val.get("text") if isinstance(val, dict) else None
-    if not isinstance(text, str):
-        return None
-    return text.strip() or None
-
-
-#: Fields of an element's own objects that name its level, in order of trust.
-_LEVEL_FIELDS = (
-    "Element.m_assocLevelId",
-    "FamilyInstance.m_scheduleOnlyLevelId",
-    "FamInstCurveDriver.m_refLevelId",
-    "RoomElem.m_levelId",
-    "RbsCurve.m_idLevelStart",
-    "Stairs.m_bottomId",
-    "FamilyElemRef.m_elemId",
-)
-#: Field-name endings of an element's own objects that point at its type.
-_TYPE_FIELD_ENDINGS = ("AttributesId", "TypeId", "typeId", "SymbolId", "symbolId", "SymId")
-_OWNER_RE = re.compile(r'"owner"\s*:\s*"(-?\d+)"')
-_ROW_RE = re.compile(r'"row"\s*:\s*"(\w+)"')
-_CLASS_RE = re.compile(r'"class_name"\s*:\s*"(?:Level|SymbolInfo)"')
-_GRAPH_HINTS = (
-    "TypeId",
-    "SymId",
-    "m_assocLevelId",
-    "m_scheduleOnlyLevelId",
-    "m_refLevelId",
-    "m_levelId",
-    "m_bottomId",
-    "m_idLevelStart",
-    "FamilyLevelRef",
-    "AttributesId",
-    "m_typeId",
-    "m_symbolId",
-)
-
-
-@dataclass
-class _RvtGraph:
-    categories: dict[int, int] = field(default_factory=dict)
-    params: dict[int, dict[str, Any]] = field(default_factory=dict)
-    columns: dict[str, None] = field(default_factory=dict)
-    level_refs: dict[int, dict[str, int]] = field(default_factory=dict)
-    type_refs: dict[int, list[tuple[int, int]]] = field(default_factory=dict)
-    level_names: dict[int, str] = field(default_factory=dict)
-    type_names: dict[int, str] = field(default_factory=dict)
-
-
-def _read_rvt_graph(properties_jsonl: Path, ids: set[int]) -> _RvtGraph:
-    """One streaming pass over ``properties.jsonl``: categories, parameters, level and type links.
-
-    The file is the converter's stored-object graph (often 10-20x the size of
-    the model), so lines are pre-filtered on cheap substrings before any JSON
-    is parsed.
-    """
-    g = _RvtGraph()
-    with properties_jsonl.open("r", encoding="utf-8") as fh:
-        for line in fh:
-            kind = _ROW_RE.search(line, 0, 64)
-            if kind is None:
-                continue
-            is_param = kind.group(1) == "parameter"
-            is_record = kind.group(1) == "record"
-            is_object = kind.group(1) == "object"
-            if not (is_param or is_record or is_object):
-                continue
-            m = _OWNER_RE.search(line)
-            if m is None:
-                continue
-            owner = int(m.group(1))
-            if is_object:
-                named = _CLASS_RE.search(line) is not None
-                linked = owner in ids and any(h in line for h in _GRAPH_HINTS)
-                if not (named or linked):
-                    continue
-            elif owner not in ids:
-                continue
-            try:
-                rec = json.loads(line)
-            except ValueError:
-                continue
-            if is_record:
-                try:
-                    g.categories[owner] = int(rec.get("category_id"))
-                except (TypeError, ValueError):
-                    pass
-            elif is_param:
-                _read_graph_parameter(g, owner, rec)
-            else:
-                _read_graph_object(g, owner, rec)
-    return g
-
-
-_AREA_WORDS = re.compile(r"\barea\b", re.I)
-_VOLUME_WORDS = re.compile(r"\bvolume\b", re.I)
-_LENGTH_WORDS = re.compile(
-    r"\b(length|height|width|thickness|depth|offset|elevation|radius|diameter|perimeter|"
-    r"extension|distance|size|cover|spacing)\b",
-    re.I,
-)
-_NOT_A_MEASURE = re.compile(r"\b(angle|slope|rotation|ratio|factor|count|number|coefficient|material)\b", re.I)
-_FT = 0.3048
-
-
-def _si_factor(label: str) -> float | None:
-    """Feet-based internal unit -> SI factor for a parameter name, or ``None`` when unsure."""
-    if _NOT_A_MEASURE.search(label):
-        return None
-    if _VOLUME_WORDS.search(label):
-        return _FT**3
-    if _AREA_WORDS.search(label):
-        return _FT**2
-    if _LENGTH_WORDS.search(label):
-        return _FT
-    return None
-
-
-def _read_graph_parameter(g: _RvtGraph, owner: int, rec: dict[str, Any]) -> None:
-    label = rec.get("builtin_label") or rec.get("builtin_parameter")
-    value = _param_value(rec.get("fields") or {}) if label else None
-    if value is None:
-        return
-    if isinstance(value, float):
-        # Stored reals are in Revit internal units (feet and derived) and the
-        # graph does not say which. A name that is plainly a length, area or
-        # volume is converted to SI; anything else keeps the marker so the
-        # take-off never sums it as metres.
-        factor = _si_factor(label)
-        if factor is None:
-            label = f"{label} [internal units]"
-        else:
-            value = round(value * factor, 6)
-    if label not in g.columns:
-        if len(g.columns) >= _MAX_PROPERTY_COLUMNS:
-            return
-        g.columns[label] = None
-    g.params.setdefault(owner, {})[label] = value
-
-
-def _read_graph_object(g: _RvtGraph, owner: int, rec: dict[str, Any]) -> None:
-    cls = rec.get("class_name")
-    fields = rec.get("fields") or {}
-    if cls == "Level":
-        name = _graph_text(fields, "DatumPlane.m_text")
-        if name:
-            g.level_names[owner] = name
-        return
-    if cls == "SymbolInfo":
-        name = _graph_text(fields, "SymbolInfo.m_name")
-        if name:
-            g.type_names[owner] = name
-        return
-    body = fields.get("record") if isinstance(fields, dict) else None
-    if not isinstance(body, dict):
-        return
-    for key, val in body.items():
-        if key in _LEVEL_FIELDS:
-            if key == "FamilyElemRef.m_elemId" and cls != "FamilyLevelRef":
-                continue
-            ref = _graph_ref(val)
-            if ref is not None and ref > 0:
-                g.level_refs.setdefault(owner, {}).setdefault(key, ref)
-        elif key.endswith(_TYPE_FIELD_ENDINGS):
-            ref = _graph_ref(val)
-            if ref is not None and ref > 0:
-                rank = 0 if key == "InstInfoBase.m_symbolId" else 1
-                g.type_refs.setdefault(owner, []).append((rank, ref))
-
-
-def _level_of(g: _RvtGraph, eid: int) -> str | None:
-    refs = g.level_refs.get(eid) or {}
-    for key in _LEVEL_FIELDS:
-        name = g.level_names.get(refs.get(key, 0))
-        if name:
-            return name
-    return None
-
-
-def _type_of(g: _RvtGraph, eid: int) -> str | None:
-    for _rank, ref in sorted(g.type_refs.get(eid) or []):
-        name = g.type_names.get(ref)
-        if name:
-            return name
-    return None
-
-
-def flatten_rvt_output(glb_path: Path, properties_jsonl: Path | None) -> tuple[list[str], list[dict[str, Any]]]:
+def flatten_rvt_output(glb_path: Path, ifc_path: Path | None) -> tuple[list[str], list[dict[str, Any]]]:
     """``(header, rows)`` for the elements of an RVT conversion that have a mesh.
 
-    Category, level and type come from the stored graph (``properties.jsonl``);
-    area, volume, length and height are measured on the element's mesh in the
-    GLB, in metres, because the stored graph holds no calculated quantities.
+    Identity (category, family, type, level, phase), stored parameters and
+    Revit's base quantities come from the converter's ``native_graph.ifc``.
+    Elements the IFC gives no quantity for are measured on their GLB mesh.
     """
     ids = read_glb_element_ids(glb_path)
-    g = _RvtGraph()
-    if properties_jsonl is not None and properties_jsonl.is_file():
-        g = _read_rvt_graph(properties_jsonl, ids)
+    info: dict[int, RvtIfcElement] = {}
+    if ifc_path is not None and ifc_path.is_file():
+        info = read_rvt_ifc(ifc_path)
+    else:
+        logger.warning("RVT conversion wrote no native_graph.ifc; rows carry ids and mesh quantities only")
+    if info:
+        # The IFC leaves out analytical-model elements (analytical walls, beams,
+        # nodes); the GLB draws them. They are not building quantities.
+        ids = (ids & set(info)) if ids else set(info)
     try:
         measured = glb_element_quantities(glb_path)
     except Exception:  # noqa: BLE001 - a mesh we cannot read still leaves the semantic table
         logger.warning("Could not measure the GLB meshes of %s", glb_path.name, exc_info=True)
         measured = {}
-    qty_cols = [c for c in MESH_QUANTITY_COLUMNS if any(c in q for q in measured.values())]
-    header = ["ID", "Category", "Category Name", "Name", "Type Name", "Level", *qty_cols, *g.columns]
+
+    columns: dict[str, None] = {}
     rows: list[dict[str, Any]] = []
     for eid in sorted(ids):
-        cat_id = g.categories.get(eid)
-        label = revit_category_label(cat_id)
-        type_name = _type_of(g, eid)
+        el = info.get(eid) or RvtIfcElement()
+        ident = el.identity
+        cat_id = ident.get("CategoryId") if isinstance(ident.get("CategoryId"), int) else None
+        label = ident.get("CategoryName") or revit_category_label(cat_id)
+        type_name = ident.get("TypeName")
         row: dict[str, Any] = {
             "ID": eid,
-            "Category": revit_category_name(cat_id),
+            "Category": revit_category_name(cat_id, label if ident.get("CategoryName") else None),
             "Category Name": label,
             "Name": f"{type_name} {eid}" if type_name else f"{label} {eid}",
+            "Family Name": ident.get("FamilyName"),
             "Type Name": type_name,
-            "Level": _level_of(g, eid),
+            "Level": ident.get("LevelName") or el.storey,
+            "Phase Created": ident.get("PhaseCreated"),
         }
         row.update(measured.get(eid, {}))
-        row.update(g.params.get(eid, {}))
+        row.update(element_quantities(el))
+        for key, value in el.values.items():
+            if key not in columns:
+                if len(columns) >= _MAX_PROPERTY_COLUMNS:
+                    continue
+                columns[key] = None
+            row[key] = value
         rows.append(row)
-    return header, rows
+    qty_cols = [c for c in MESH_QUANTITY_COLUMNS if any(c in r for r in rows)]
+    header = ["ID", "Category", "Category Name", "Name", "Family Name", "Type Name", "Level", "Phase Created"]
+    return [*header, *qty_cols, *columns], rows
 
 
 # ── Writing the flat workbook ──────────────────────────────────────────────
@@ -809,7 +590,7 @@ def write_flat_workbook(run: ConverterRun, out_xlsx: Path) -> Path:
     if run.fmt == "ifc":
         header, rows = flatten_ifc_workbook(run.outputs["xlsx"])
     elif run.fmt == "rvt":
-        header, rows = flatten_rvt_output(run.outputs["glb"], run.outputs.get("properties"))
+        header, rows = flatten_rvt_output(run.outputs["glb"], run.outputs.get("ifc"))
     else:
         raise ValueError(f"{run.fmt!r} output is already a flat table")
     import openpyxl
