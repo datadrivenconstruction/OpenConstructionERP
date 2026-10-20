@@ -1632,6 +1632,8 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
         # Check how many values are numeric
         numeric_count = 0
         for v in values:
+            if isinstance(v, bool):  # a yes/no flag is a grouping, never a quantity
+                continue
             try:
                 float(v)
                 numeric_count += 1
@@ -1650,7 +1652,10 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
         not_a_quantity = col_lower in _ID_COLUMNS or col_lower in _LABEL_COLUMNS or "[internal units]" in col_lower
 
         # Classify
-        if not not_a_quantity and numeric_ratio > 0.5 and (name_is_quantity or numeric_ratio == 1.0):
+        if "[internal units]" in col_lower:
+            # Raw feet-based reals: neither summed nor a sensible group key.
+            text_cols.append(col)
+        elif not not_a_quantity and numeric_ratio > 0.5 and (name_is_quantity or numeric_ratio == 1.0):
             quantity_cols.append(col)
         else:
             # Count unique string values to decide grouping vs text
