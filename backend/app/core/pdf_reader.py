@@ -26,6 +26,7 @@ import logging
 import math
 import struct
 import threading
+from array import array
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -497,7 +498,7 @@ class _Tracer:
             return
         if fill_mode:
             fill, alpha = self._color(pdfium_c.FPDFPageObj_GetFillColor, obj)
-            items, rect, _ = _trace(segs, ctm, stroke_path=False, closes=closes)
+            items, rect, fill_close = _trace(segs, ctm, stroke_path=False, closes=closes)
             if items:
                 pathdict: dict[str, Any] = {
                     "items": items,
@@ -509,6 +510,9 @@ class _Tracer:
                     "seqno": self.seqno,
                     "layer": "",
                 }
+                # A fill carries closePath only when a close reached the walker.
+                if fill_close is not None:
+                    pathdict["closePath"] = fill_close
                 self._append(pathdict)
             self.seqno += 1
         if stroke:
@@ -526,7 +530,7 @@ class _Tracer:
                     "width": factor * width,
                     "lineCap": (cap, cap, cap),
                     "lineJoin": float(pdfium_c.FPDFPageObj_GetLineJoin(obj)),
-                    "closePath": close_path,
+                    "closePath": bool(close_path),
                     "dashes": self._dashes(obj, factor),
                     "rect": rect,
                     "layer": "",
@@ -577,8 +581,11 @@ def _trace(  # noqa: C901
     ``re``; PDFium stores all three as the same points.
     """
     a, b, c, d, e, f = ctm
-    # Every point transformed once; the walk below works on indices.
-    pts = [Point(x * a + y * c + e, x * b + y * d + f) for _, x, y, _ in segs]
+    # Every point transformed once, then held in single precision like the
+    # previous reader, so lengths at a threshold fall on the same side.
+    xs = array("f", [x * a + y * c + e for _, x, y, _ in segs]).tolist()
+    ys = array("f", [x * b + y * d + f for _, x, y, _ in segs]).tolist()
+    pts = list(map(Point, xs, ys))
     items: list[tuple] = []
     used: list[Point] = []
     last = Point(0.0, 0.0)
