@@ -16,6 +16,7 @@
  * render time.
  */
 import { useEffect, useRef, useState } from 'react';
+import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { Box } from 'lucide-react';
 import * as THREE from 'three';
@@ -32,19 +33,24 @@ export interface BIMViewCubeProps {
 
 interface FaceDef {
   preset: ViewPreset;
-  label: string;
+  labelKey: string;
+  labelDefault: string;
   /** Normal in cube-local space (used to pick a face from a raycast). */
   normal: THREE.Vector3;
 }
 
 const FACE_DEFS: FaceDef[] = [
-  { preset: 'right', label: 'RIGHT', normal: new THREE.Vector3(1, 0, 0) },
-  { preset: 'left', label: 'LEFT', normal: new THREE.Vector3(-1, 0, 0) },
-  { preset: 'top', label: 'TOP', normal: new THREE.Vector3(0, 1, 0) },
-  { preset: 'bottom', label: 'BOTTOM', normal: new THREE.Vector3(0, -1, 0) },
-  { preset: 'front', label: 'FRONT', normal: new THREE.Vector3(0, 0, 1) },
-  { preset: 'back', label: 'BACK', normal: new THREE.Vector3(0, 0, -1) },
+  { preset: 'right', labelKey: 'bim.view_cube_right', labelDefault: 'Right', normal: new THREE.Vector3(1, 0, 0) },
+  { preset: 'left', labelKey: 'bim.view_cube_left', labelDefault: 'Left', normal: new THREE.Vector3(-1, 0, 0) },
+  { preset: 'top', labelKey: 'bim.view_cube_top', labelDefault: 'Top', normal: new THREE.Vector3(0, 1, 0) },
+  { preset: 'bottom', labelKey: 'bim.view_cube_bottom', labelDefault: 'Bottom', normal: new THREE.Vector3(0, -1, 0) },
+  { preset: 'front', labelKey: 'bim.view_cube_front', labelDefault: 'Front', normal: new THREE.Vector3(0, 0, 1) },
+  { preset: 'back', labelKey: 'bim.view_cube_back', labelDefault: 'Back', normal: new THREE.Vector3(0, 0, -1) },
 ];
+
+function faceLabel(t: TFunction, face: FaceDef): string {
+  return t(face.labelKey, { defaultValue: face.labelDefault }).toLocaleUpperCase();
+}
 
 /**
  * Paint a centred text label onto a 128×128 canvas — used as the texture
@@ -161,7 +167,7 @@ export function BIMViewCube({
       FACE_DEFS.find((f) => f.normal.z === 1)!,
       FACE_DEFS.find((f) => f.normal.z === -1)!,
     ];
-    const textures = orderedFaces.map((f) => makeFaceTexture(f.label));
+    const textures = orderedFaces.map((f) => makeFaceTexture(faceLabel(t, f)));
     const materials = textures.map(
       (tex) => new THREE.MeshBasicMaterial({ map: tex }),
     );
@@ -268,7 +274,7 @@ export function BIMViewCube({
       }
       renderer.dispose();
     };
-  }, [size]);
+  }, [size, t]);
 
   // Re-attach the subscription when the SceneManager changes (e.g. after
   // a model reload). The effect above closes over sceneManagerRef.current
@@ -342,7 +348,7 @@ export function BIMViewCube({
                 });
             }}
           >
-            {face.label}
+            {faceLabel(t, face)}
           </button>
         ))}
       </div>

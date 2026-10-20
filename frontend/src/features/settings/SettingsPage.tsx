@@ -76,6 +76,7 @@ import {
   type ToolCallingMode,
 } from '@/features/ai/api';
 import { BIMConverterStatusBanner } from '@/features/bim/BIMConverterStatusBanner';
+import { converterName, converterVersionLabel } from '@/features/bim/converterText';
 import { DataSecurityPanel } from '@/features/data-security';
 import { DeleteAccountDialog } from './DeleteAccountDialog';
 import { DemoLeftoversPanel } from './DemoLeftoversPanel';
@@ -2341,11 +2342,12 @@ interface ConverterRow {
   name: string;
   exe: string;
   installed: boolean;
-  installed_path: string | null;
-  installed_size: number | null;
+  installed_version: string | null;
   installed_sha: string | null;
+  latest_version: string;
   latest_size: number | null;
   latest_sha: string | null;
+  format_range: string;
   is_outdated: boolean;
   download_url: string | null;
   html_url: string | null;
@@ -2391,10 +2393,10 @@ function ConverterStatusPanel() {
 
       <Card>
       <CardHeader
-        title={t('settings.converters_title', { defaultValue: 'Converters' })}
+        title={t('settings.converters_title', { defaultValue: 'Release packages' })}
         subtitle={t('settings.converters_subtitle', {
           defaultValue:
-            'DDC Converters 2.0 pipeline - installed bridges and the latest source available on GitHub.',
+            'DDC converter release: the installed package and the latest one on GitHub.',
         })}
         action={
           <button
@@ -2420,7 +2422,7 @@ function ConverterStatusPanel() {
             <p className="text-2xs text-content-tertiary">
               {t('settings.converters_source_desc', {
                 defaultValue:
-                  'Open-source converters for Revit® (RVT), IFC and DWG, maintained by DataDrivenConstruction.',
+                  'Converters for Revit® (RVT), IFC and DWG, published by DataDrivenConstruction.',
               })}
             </p>
           </div>
@@ -2506,11 +2508,11 @@ function ConverterStatusPanel() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-semibold text-content-primary">
-                          {c.name}
+                          {converterName(t, c)}
                         </span>
-                        <span className="font-mono text-2xs text-content-tertiary">
-                          {c.exe}
-                        </span>
+                        {c.format_range && (
+                          <span className="text-2xs text-content-tertiary">{c.format_range}</span>
+                        )}
                         <span
                           className={['inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium', statusClass].join(' ')}
                         >
@@ -2523,31 +2525,21 @@ function ConverterStatusPanel() {
                           <dt className="font-medium uppercase tracking-wider">
                             {t('settings.converter_installed', { defaultValue: 'Installed' })}
                           </dt>
-                          <dd className="font-mono">
-                            {c.installed
-                              ? `${formatBytes(c.installed_size)} · ${c.installed_sha?.slice(0, 7) ?? '—'}`
-                              : '—'}
+                          <dd className="font-mono" title={c.installed_sha ?? undefined}>
+                            {c.installed ? converterVersionLabel(c.installed_version, c.latest_version) : '—'}
                           </dd>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <dt className="font-medium uppercase tracking-wider">
                             {t('settings.converter_latest', { defaultValue: 'Latest' })}
                           </dt>
-                          <dd className="font-mono">
-                            {c.latest_sha
-                              ? `${formatBytes(c.latest_size)} · ${c.latest_sha.slice(0, 7)}`
+                          <dd className="font-mono" title={c.latest_sha ?? undefined}>
+                            {c.latest_version
+                              ? `${converterVersionLabel(null, c.latest_version)} · ${formatBytes(c.latest_size)}`
                               : t('settings.converter_unknown', { defaultValue: 'Unknown' })}
                           </dd>
                         </div>
                       </dl>
-                      {c.installed_path && (
-                        <p
-                          className="mt-1 truncate font-mono text-2xs text-content-tertiary"
-                          title={c.installed_path}
-                        >
-                          {c.installed_path}
-                        </p>
-                      )}
                     </div>
                     <div className="flex shrink-0 flex-col gap-1.5">
                       {c.html_url && (

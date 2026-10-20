@@ -66,6 +66,7 @@ import {
 import { useLLMRun } from './hooks/useLLMRun';
 import { IntakePanel } from './intake';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { converterDescription, converterName } from '@/features/bim/converterText';
 
 // ── Tab types ────────────────────────────────────────────────────────────────
 
@@ -1506,13 +1507,13 @@ function CadConverterSection({
                   <FileInput size={18} strokeWidth={1.75} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-content-primary">{c.name}</h4>
+                  <h4 className="text-sm font-semibold text-content-primary">{converterName(t, c)}</h4>
                   <p className="text-2xs text-content-quaternary">{c.engine}</p>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="mt-2 text-xs text-content-tertiary leading-relaxed line-clamp-2">{c.description}</p>
+              <p className="mt-2 text-xs text-content-tertiary leading-relaxed line-clamp-2">{converterDescription(t, c)}</p>
 
               {/* Extensions */}
               <div className="mt-2 flex flex-wrap gap-1">
@@ -1701,7 +1702,7 @@ export function QuickEstimatePage() {
     version: string;
     size_mb: number;
     installed: boolean;
-    path: string | null;
+    format_range?: string;
   }
   const { data: convertersData } = useQuery<{
     converters: ConverterFull[];
@@ -3321,7 +3322,7 @@ export function QuickEstimatePage() {
                             : t('ai.converters_none', { defaultValue: 'No converters installed - install below to enable CAD/BIM import' })}
                         </p>
                         <p className="text-xs text-content-tertiary mt-0.5">
-                          {fmtList((convertersData.converters ?? []).filter((c: ConverterFull) => c.installed).map((c: ConverterFull) => c.name)) || t('ai.converters_hint', { defaultValue: 'Scroll down to install DDC converters for RVT, IFC, DWG' })}
+                          {fmtList((convertersData.converters ?? []).filter((c: ConverterFull) => c.installed).map((c: ConverterFull) => converterName(t, c))) || t('ai.converters_hint', { defaultValue: 'Scroll down to install DDC converters for RVT, IFC, DWG' })}
                         </p>
                       </div>
                     </div>
@@ -3391,7 +3392,7 @@ export function QuickEstimatePage() {
                           ) : (
                             <XCircle size={13} className="shrink-0 text-content-quaternary" />
                           )}
-                          <span className="font-medium truncate">{c.name}</span>
+                          <span className="font-medium truncate">{converterName(t, c)}</span>
                           <span className="ml-auto text-[10px] opacity-60">{fmtList(c.extensions)}</span>
                         </div>
                       ))}

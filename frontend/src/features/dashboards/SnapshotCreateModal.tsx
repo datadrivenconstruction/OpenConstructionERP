@@ -16,7 +16,7 @@ import { Button, Input } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 
 import { createSnapshot, type Snapshot, type SnapshotError } from './api';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { formatFileSize } from '@/shared/lib/formatters';
 
 const SUPPORTED_EXTENSIONS = ['ifc', 'rvt', 'dwg'] as const;
 const MAX_BYTES = 200 * 1024 * 1024;
@@ -199,7 +199,7 @@ export function SnapshotCreateModal({
                       <FileCog className="h-3 w-3 text-content-tertiary" />
                       <span className="flex-1 truncate">{f.name}</span>
                       <span className="tabular-nums text-content-tertiary">
-                        {fmtFixed(f.size / (1024 * 1024), 2)} MB
+                        {formatFileSize(f.size)}
                       </span>
                       <button
                         type="button"

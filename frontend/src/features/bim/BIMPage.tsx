@@ -117,6 +117,7 @@ import {
   type UploadTier,
 } from './uploadFormats';
 import type { BIMGroupFilterCriteria } from './api';
+import { useConverterRanges } from './useConverterRanges';
 import { Filter, Search } from 'lucide-react';
 import { SmartViewsPanel } from '@/features/smart_views/SmartViewsPanel';
 import { useSmartViewState } from '@/features/smart_views/useSmartViewState';
@@ -1559,6 +1560,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   onDeleteModel?: (id: string, name: string) => void;
 }) {
   const { t } = useTranslation();
+  const converterRanges = useConverterRanges(['rvt', 'ifc']);
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [meshImportFile, setMeshImportFile] = useState<File | null>(null);
@@ -1805,11 +1807,11 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                           is one value rather than assembled from fragments:
                           the version numbers stay put but the separator and
                           the order around them are a translator's call. */}
-                      <p className="text-[10px] text-content-quaternary leading-relaxed mt-1 text-center">
-                        {t('bim.landing_version_note', {
-                          defaultValue: 'RVT 2015–2026 · IFC 2x3, 4.0, 4.1, 4.3',
-                        })}
-                      </p>
+                      {converterRanges && (
+                        <p className="text-[10px] text-content-quaternary leading-relaxed mt-1 text-center">
+                          {converterRanges}
+                        </p>
+                      )}
                       <p className="text-[10px] text-content-quaternary leading-relaxed max-w-[20rem] text-center">
                         {t('bim.upload_format_note', {
                           defaultValue:
@@ -1914,8 +1916,8 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                       files, so 25 of 29 rendered a literal backslash-u-2013
                       rather than a dash. Keeping this line free of dashes,
                       middle dots and arrows means there is nothing left to
-                      double. Version specifics are not lost:
-                      bim.landing_version_note carries them on the same screen. */}
+                      double. Version ranges are shown on the same screen,
+                      read from the converter list. */}
                   {t('bim.landing_formats_detailed', { defaultValue: 'RVT and IFC models, 3D mesh formats, and element data as CSV or Excel. DWG and DXF drawings are routed to DWG Takeoff.' })}
                 </p>
                 <div className="mt-4 flex items-center justify-start">

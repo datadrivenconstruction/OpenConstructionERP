@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * BIMConverterStatusBanner — always-visible health panel for the four DDC
- * converters needed by the BIM Hub drag-and-drop (.rvt / .ifc / .dwg).
+ * converters needed by the BIM Hub drag-and-drop (.rvt / .ifc) and DWG Takeoff (.dwg).
  *
  * v2.6.23 architecture: the banner is the single source of truth for
  * converter state on /bim. It does three things the previous version did
@@ -58,6 +58,7 @@ import {
   type ConverterVersionCheck,
 } from './api';
 import { ConverterInstallProgressBar } from './ConverterInstallProgressBar';
+import { converterName, converterPlatformMessage, converterVersionLabel } from './converterText';
 import { useToastStore } from '@/stores/useToastStore';
 
 /** Ids of converters surfaced on the BIM page. IFC was previously missing
@@ -264,7 +265,7 @@ export function BIMConverterStatusBanner({
       const converterId = vars.converterId;
       const conv = data?.converters.find((c) => c.id === converterId);
       const sizeMb = conv?.size_mb ?? 0;
-      const name = conv?.name ?? converterId.toUpperCase();
+      const name = conv ? converterName(t, conv) : converterId.toUpperCase();
 
       if (result.installed) {
         addToast({
@@ -280,43 +281,13 @@ export function BIMConverterStatusBanner({
               size: sizeMb,
             }),
         });
-      } else if (result.platform_unsupported && result.platform === 'linux') {
-        // Linux IS supported via the apt repo at
-        // pkg.datadrivenconstruction.io. The backend already shaped a
-        // human-readable `instructions` block (one-liner if the apt
-        // source is present, two-step setup otherwise) and the
-        // expected binary path. Prefer those over a generic blurb.
-        const sourcePresent = Boolean(result.apt_source_present);
-        const title = sourcePresent
-          ? t('bim.converter_install_linux_short_title', {
-              defaultValue: 'One apt command to finish',
-            })
-          : t('bim.converter_install_linux_setup_title', {
-              defaultValue: 'One-time apt setup',
-            });
-        const instructions = result.instructions
-          ? `\n\n${result.instructions}`
-          : result.apt_package
-            ? `\n\nsudo apt install -y ${result.apt_package}`
-            : '';
-        addToast(
-          {
-            type: 'info',
-            title,
-            message:
-              (result.message || `Run apt commands to install ${name}`) +
-              instructions,
-          },
-          { duration: 45_000 },
-        );
       } else if (result.platform_unsupported) {
         addToast({
           type: 'warning',
           title: t('bim.converter_install_unsupported_title', {
             defaultValue: 'Auto-install not available',
           }),
-          message:
-            result.message || `${name} can't be auto-installed on this OS.`,
+          message: converterPlatformMessage(t, converterId),
         });
       } else {
         addToast({
@@ -349,7 +320,7 @@ export function BIMConverterStatusBanner({
             ? err.message
             : t('bim.converter_install_error_msg', {
                 defaultValue: 'Could not install {{name}}',
-                name: conv?.name ?? converterId.toUpperCase(),
+                name: conv ? converterName(t, conv) : converterId.toUpperCase(),
               }),
       });
     },
@@ -360,7 +331,7 @@ export function BIMConverterStatusBanner({
     mutationFn: (converterId: string) => verifyBIMConverter(converterId),
     onSuccess: (result, converterId) => {
       const conv = data?.converters.find((c) => c.id === converterId);
-      const name = conv?.name ?? converterId.toUpperCase();
+      const name = conv ? converterName(t, conv) : converterId.toUpperCase();
       if (result.health === 'ok') {
         addToast({
           type: 'success',
@@ -879,7 +850,7 @@ export function BIMConverterStatusBanner({
                 : allHealthy
                   ? t('bim.converter_panel_subtitle_ok', {
                       defaultValue:
-                        'Drag-and-drop of .rvt / .ifc / .dwg is ready.',
+                        'Converters are ready: RVT and IFC models open in BIM Hub, DWG drawings in DWG Takeoff.',
                     })
                   : /* Everything is installed and unchecked: there is
                        nothing to install, so the install nag below would be
@@ -1006,7 +977,7 @@ function CollapsedConverterPill({
         'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border tabular-nums',
         tone,
       )}
-      title={`${conv.name} - ${titleSuffix}`}
+      title={`${converterName(t, conv)} - ${titleSuffix}`}
     >
       {label}
     </span>
@@ -1165,7 +1136,7 @@ function ConverterRow({
       <div className="flex items-center gap-2.5">
         <span className="shrink-0">{icon}</span>
         <span className={clsx('font-semibold tracking-tight', labelTone)}>
-          {conv.name}
+          {converterName(t, conv)}
         </span>
         <span
           className={clsx(
@@ -1182,12 +1153,9 @@ function ConverterRow({
             size: conv.size_mb,
           })}
         </span>
-        {health === 'ok' && conv.path && (
-          <span
-            className="hidden xl:inline truncate max-w-[260px] text-[10px] text-content-quaternary font-mono opacity-60"
-            title={conv.path}
-          >
-            {conv.path}
+        {conv.format_range && (
+          <span className="hidden xl:inline truncate max-w-[200px] text-[10px] text-content-quaternary opacity-80">
+            {conv.format_range}
           </span>
         )}
         {/* Show the actual installed binary SHA (first 7 chars). When an
@@ -1195,15 +1163,23 @@ function ConverterRow({
             they have *and* what they would get without opening a tooltip.
             Falls back to nothing when the version-check hasn't resolved
             yet (offline / GitHub rate-limited / pre-Linux). */}
-        {versionEntry?.installed_sha && (
+        {conv.installed && (
           <span
             className="hidden lg:inline text-[10px] text-content-quaternary dark:text-zinc-400 font-mono"
-            title={`SHA-256 ${versionEntry.installed_sha}`}
+            title={
+              versionEntry?.installed_sha
+                ? t('bim.converter_sha_tooltip', {
+                    defaultValue:
+                      'Installed package SHA-256: {{sha}}. Compared with the package this version installs from the DDC converter release.',
+                    sha: versionEntry.installed_sha,
+                  })
+                : undefined
+            }
           >
-            v {versionEntry.installed_sha.slice(0, 7)}
-            {updateAvailable && versionEntry.latest_sha && (
+            {converterVersionLabel(versionEntry?.installed_version, conv.version)}
+            {updateAvailable && versionEntry?.latest_version && (
               <span className="text-sky-600 dark:text-sky-400">
-                {' '}→ {versionEntry.latest_sha.slice(0, 7)}
+                {' '}→ v{versionEntry.latest_version}
               </span>
             )}
           </span>
@@ -1215,8 +1191,7 @@ function ConverterRow({
             disabled={installing}
             title={t('bim.converter_update_tooltip', {
               defaultValue:
-                'A newer build of this converter is available. Click to download and replace the installed copy at {{path}}.',
-              path: versionEntry?.installed_path ?? '',
+                'A newer build of this converter is available. Click to download and replace the installed copy.',
             })}
             className="ms-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-sky-300 dark:border-sky-700 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 hover:bg-sky-200 dark:hover:bg-sky-900/50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
           >
