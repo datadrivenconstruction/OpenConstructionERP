@@ -2390,7 +2390,7 @@ function ConverterStatusPanel() {
         title={t('settings.converters_title', { defaultValue: 'Converters' })}
         subtitle={t('settings.converters_subtitle', {
           defaultValue:
-            'DDC cad2data pipeline - installed bridges and the latest source available on GitHub.',
+            'DDC Converters 2.0 pipeline - installed bridges and the latest source available on GitHub.',
         })}
         action={
           <button

@@ -57,7 +57,7 @@ const UNRELEASED: ChangelogEntry | null = {
   version: 'Unreleased',
   date: '2026-10-19',
   summary:
-    'CAD and BIM converters now come from the DDC converter release 2026.10, which reads RVT, IFC and DWG without any third-party CAD SDK. Windows only; DGN conversion is gone.',
+    'CAD and BIM conversion now uses DDC Converters 2.0 (release 2026.10) for RVT, IFC and DWG. Windows 10/11 x64; Linux and macOS are coming soon.',
 };
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so

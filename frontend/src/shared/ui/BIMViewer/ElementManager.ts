@@ -1078,7 +1078,7 @@ export class ElementManager {
       // it shares the same prefix. The viewer needs COLLADA DAE (which
       // is also XML but with a <COLLADA root) or a GLB binary.
       hint =
-        ' - The file is XML but not COLLADA. This usually means the DDC cad2data converter did not emit 3D geometry for this model (an older converter version, or a source format without geometry - e.g. .ifcXML / gbXML). Try re-running the conversion with the latest DDC cad2data (v0.3+) or upload the source as RVT/IFC/DWG to trigger geometry export.';
+        ' - The file is XML but not COLLADA. This usually means the DDC Converters 2.0 converter did not emit 3D geometry for this model (an older converter version, or a source format without geometry - e.g. .ifcXML / gbXML). Try re-running the conversion with the latest DDC Converters 2.0 (v0.3+) or upload the source as RVT/IFC/DWG to trigger geometry export.';
     } else if (asAscii.startsWith('<!doctype') || asAscii.startsWith('<html')) {
       // HTML — almost always an auth/redirect or error page.
       hint =

@@ -1,7 +1,7 @@
 # Bundled CAD/BIM converters (desktop installer)
 
 This directory is bundled into the desktop app as a read-only Tauri resource.
-The Windows release workflow downloads the DDC IFC converter, the
+The Windows release workflow downloads the DDC IFC to Excel 2.0 converter, the
 `DDC-IFC-to-Excel-0.3.1-preview-portable.zip` package of release `v2026.10.0` of
 the public repo `datadrivenconstruction/cad2data-Revit-IFC-DWG`, checks its
 SHA-256 against the digest pinned in the workflow and against the release's
@@ -19,13 +19,13 @@ non-Windows builds, and on Windows builds where the download step was skipped,
 this directory ships empty and the backend keeps its normal auto-download
 behaviour unchanged.
 
-The release carries no third-party CAD SDK. The package is a self-contained
-Python application: its own CPython runtime, the DDC IFC reader and openpyxl.
+The package is self-contained and needs no Excel, Python or CAD software on the
+machine.
 
 Layout the workflow produces here:
 
     ifc_windows/
-      runtime/python.exe          bundled CPython 3.13 runtime
+      runtime/python.exe          bundled runtime
       sources/ifc-excel/converter.py
       sources/ifc-independent/...
       .ddc-package.json           which release asset this folder came from

@@ -1413,7 +1413,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
     && (errorCode === 'ddc_not_found' || !!backendMessage)
       ? t('bim.overlay_converter_unavailable_calm', {
           defaultValue:
-            "We couldn't convert this {{format}} file. The CAD converter (DDC cad2data) isn't available in this environment - it's an optional, separate install. Add it, then retry the conversion.",
+            "We couldn't convert this {{format}} file. The CAD converter (DDC Converters 2.0) isn't available in this environment - it's an optional, separate install. Add it, then retry the conversion.",
           format: fmt || 'CAD',
         })
       : null;
@@ -1945,7 +1945,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                       rel="noopener noreferrer"
                       className="text-[10px] text-emerald-600/80 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-300 hover:underline whitespace-nowrap"
                     >
-                      {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                      {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC Converters 2.0' })}
                     </a>
                   </div>
                 </div>

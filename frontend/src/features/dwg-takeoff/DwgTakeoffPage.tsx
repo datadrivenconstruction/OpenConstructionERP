@@ -3398,7 +3398,7 @@ export function DwgTakeoffPage() {
                           rel="noopener noreferrer"
                           className="text-[10px] text-emerald-400/70 hover:text-emerald-300 hover:underline whitespace-nowrap"
                         >
-                          {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                          {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC Converters 2.0' })}
                         </a>
                       </div>
                     </div>
@@ -6542,7 +6542,7 @@ function ConversionProgressCard({
       }),
       hint: t('dwg_takeoff.conv_step_convert_hint', {
         defaultValue:
-          'DDC cad2data is parsing your drawing. This is the slow step - usually 3-8 minutes for a medium DWG, longer for large architectural sets.',
+          'DDC Converters 2.0 is parsing your drawing. This is the slow step - usually 3-8 minutes for a medium DWG, longer for large architectural sets.',
       }),
     },
     {
@@ -7039,7 +7039,7 @@ function NeedsConversionCard({
             <p className="text-xs text-content-secondary mt-3 leading-relaxed">
               {t('dwg_takeoff.needs_conv_message', {
                 defaultValue:
-                  'DWG is an open format and we open it directly once the cad2data converter is set up. This drawing has not been converted yet, and the converter is not installed on this server. Install it once and every DWG you open after will render here automatically. DXF files render without any converter.',
+                  'DWG is an open format and we open it directly once the DDC converter is set up. This drawing has not been converted yet, and the converter is not installed on this server. Install it once and every DWG you open after will render here automatically. DXF files render without any converter.',
               })}
             </p>
 

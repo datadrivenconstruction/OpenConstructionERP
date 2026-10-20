@@ -255,7 +255,7 @@ The entire UI ships in **44 languages**, including full right-to-left support fo
 <tr><td><b>UI languages</b></td><td align="center"><b>44</b></td><td align="center">5</td><td align="center">3</td><td align="center">2</td><td align="center">8</td></tr>
 <tr><td><b>Regional standards</b></td><td align="center"><b>30+</b></td><td align="center">4</td><td align="center">3</td><td align="center">2</td><td align="center">-</td></tr>
 <tr><td><b>BOQ editor</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG DGN</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">PDF only</td></tr>
+<tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">PDF only</td></tr>
 <tr><td><b>4D/5D planning</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Cost database included</b></td><td align="center">&#10004; 120K+ rates</td><td align="center">&#10006; extra</td><td align="center">&#10006; extra</td><td align="center">&#10006; extra</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Resource catalog</b></td><td align="center">&#10004; 7K+ priced</td><td align="center">&#10006; extra</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
@@ -305,7 +305,7 @@ A quick tour of the main workspaces. Every screen is the real application runnin
 <tr>
 <td align="center">
 <strong>3D BIM Viewer</strong><br/>
-<em>Federated models in the browser with a category and storey breakdown. Converted through DDC, no IfcOpenShell.</em><br/><br/>
+<em>Federated models in the browser with a category and storey breakdown. Converted with DDC Converters 2.0.</em><br/><br/>
 <img src="docs/screenshots/gallery/bim-3d-viewer.jpg" alt="3D BIM viewer with element summary" width="420" />
 </td>
 <td align="center">
@@ -383,10 +383,10 @@ Build professional cost estimates with a powerful BOQ editor. The full lifecycle
 
 Extract quantities from any source - drawings, models, text, or photos:
 
-<img src="docs/readme-diagrams/02-cad-bim-takeoff-ai.svg" alt="Takeoff flow: CAD and BIM files go through DDC cad2data into canonical elements, PDFs and photos go through OCR and computer vision, and both are matched to classifications and prices in the BOQ" width="900" />
+<img src="docs/readme-diagrams/02-cad-bim-takeoff-ai.svg" alt="Takeoff flow: CAD and BIM files go through DDC Converters 2.0 into canonical elements, PDFs and photos go through OCR and computer vision, and both are matched to classifications and prices in the BOQ" width="900" />
 
 
-- **CAD/BIM takeoff** - Upload RVT, IFC, DWG, or DGN files. DDC converters extract elements with volumes, areas, and lengths automatically
+- **CAD/BIM takeoff** - Upload RVT, IFC or DWG files. DDC converters extract elements with volumes, areas, and lengths automatically
 - **Interactive QTO** - Choose how to group extracted data: by Category, Type, Level, Family. Format-specific presets for RVT and IFC
 - **Linked geometry preview** - Click the BIM link badge on any BOQ position to see a 3D preview of linked elements with interactive rotate/zoom/pan controls
 - **BIM Quantity Picker** - Select quantities (area, volume, length) directly from linked BIM elements and apply them to BOQ positions. The source parameter name is shown next to the unit
@@ -544,7 +544,7 @@ Three demo accounts are created on first start. On a local install, sign in to a
 | UI | Tailwind CSS / AG Grid | Professional data grid, responsive design, dark mode |
 | AI | Any LLM via REST API | Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek |
 | Vector Search | LanceDB (embedded) / Qdrant | Semantic cost item search, 384d or 3072d embeddings |
-| CAD/BIM | [DDC cad2data](https://github.com/datadrivenconstruction) | RVT, IFC, DWG, DGN → structured quantities |
+| CAD/BIM | [DDC Converters 2.0](https://github.com/datadrivenconstruction) | RVT, IFC, DWG → structured quantities |
 | i18n | i18next | 44 languages, full RTL support |
 
 ## Architecture
@@ -555,9 +555,9 @@ Three demo accounts are created on first start. On a local install, sign in to a
 
 <img src="docs/screenshots/architecture-pipeline.jpg" alt="OpenConstructionERP - Digitalization of Processes: Pipelines for Automatic Data Creation" width="100%" />
 
-OpenConstructionERP is built around **seven cooperating pipelines** that turn closed CAD/BIM files (RVT, IFC, DWG, DGN) into structured, queryable ERP data - without locking you into a proprietary stack. Every module in the platform plugs into one or more of these stages:
+OpenConstructionERP is built around **seven cooperating pipelines** that turn closed CAD/BIM files (RVT, IFC, DWG) into structured, queryable ERP data - without locking you into a proprietary stack. Every module in the platform plugs into one or more of these stages:
 
-1. **Mining** - collect existing project data (CAD/BIM models, CDE drops, COBie deliverables) into a semi-structured pool. Handled by `cad`, `documents`, `bim_hub`, `file_search` modules + the **DDC cad2data** converters (RVT/IFC/DWG/DGN → canonical JSON).
+1. **Mining** - collect existing project data (CAD/BIM models, CDE drops, COBie deliverables) into a semi-structured pool. Handled by `cad`, `documents`, `bim_hub`, `file_search` modules + the **DDC Converters 2.0** (RVT/IFC/DWG → canonical JSON).
 2. **QTO Check & Quantity Take-off rules** - apply rule sets per discipline / family / type to extract quantities deterministically. Handled by `takeoff`, `requirements`, `validation`, and the rule editor in `match-elements`.
 3. **BlackBox (company standard)** - codify your firm's classifications, formulas, unit factors and assembly recipes as a single canonical rule book (COBie / CFIHOS / SQL / Excel / Access). Handled by `costs`, `assemblies`, `catalog`, `cost_intelligence`.
 4. **New project modeling** - apply the BlackBox to a fresh model: geometry → filtering → grouping → verification → BOQ. Handled by `boq`, `projects`, `match-elements`, `clash`.
@@ -592,7 +592,7 @@ The right-hand side of the diagram is the **automatic data retrieval** layer tha
 ├──────────────────────────────────────────────────┤
 │  Database (PostgreSQL, embedded in dev)          │
 │  Vector DB (LanceDB / Qdrant)                    │
-│  CAD Converters (DDC cad2data)                   │
+│  CAD Converters (DDC Converters 2.0)             │
 │  CV Pipeline (PaddleOCR + YOLOv11)               │
 └──────────────────────────────────────────────────┘
 ```

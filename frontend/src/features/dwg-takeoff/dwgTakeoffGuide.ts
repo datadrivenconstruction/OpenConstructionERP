@@ -24,7 +24,7 @@ export const dwgTakeoffGuide: ModuleGuideContent = {
       titleDefault: 'Upload a drawing',
       bodyKey: 'guide.dwg_takeoff.upload.body',
       bodyDefault:
-        'Drop a DWG or DXF file onto the upload area or click to browse. The file is converted to viewable entities on your own server through the DDC cad2data pipeline, so it never leaves your environment. DWG 2000 to 2025 and DXF R12 to R2025 are supported.',
+        'Drop a DWG or DXF file onto the upload area or click to browse. The file is converted to viewable entities on your own server through the DDC Converters 2.0 pipeline, so it never leaves your environment. DWG 2000 to 2025 and DXF R12 to R2025 are supported.',
     },
     {
       icon: 'Layers',

@@ -8,7 +8,7 @@ The point is to price and assess a design from the model itself, not from a re-m
 
 ## How models come in
 
-All CAD and BIM formats, including RVT, IFC, DWG and DGN, are converted through the DDC canonical pipeline into a single structured format. The platform does not parse IFC natively and does not depend on IfcOpenShell. IFC is treated as one more format to convert, which keeps the core light and consistent. The result is a federated model you can open in the browser, with a category and storey breakdown, and elements that carry quantities, properties and classification.
+All CAD and BIM formats, including RVT, IFC and DWG, are converted with DDC Converters 2.0 into a single structured format. The result is a federated model you can open in the browser, with a category and storey breakdown, and elements that carry quantities, properties and classification.
 
 ## The steps
 

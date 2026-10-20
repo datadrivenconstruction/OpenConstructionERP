@@ -249,22 +249,20 @@ Note: installs set up before the rename may still run under the legacy unit name
 ## 7. BIM/CAD converters (.rvt / .ifc / .dwg)
 
 Native CAD/BIM files are turned into element data (and, for RVT, 3D geometry) by
-the DDC converters of release 2026.10 (`datadrivenconstruction/cad2data-Revit-IFC-DWG`).
-That release is published for **Windows 10/11 x64 only**; the Linux and macOS
-builds are announced upstream but do not exist yet, so on Linux the app cannot
-install or run a converter. The 18.x `.deb` packages and the apt source that used
-to serve them are retired and are not used any more.
+DDC Converters 2.0 (`datadrivenconstruction/cad2data-Revit-IFC-DWG`, release 2026.10).
+They run on **Windows 10/11 x64**; Linux and macOS builds are coming soon, so on
+Linux the app cannot install or run a converter yet.
 
 What still works on Linux without a converter:
 
 - **DXF** drawings are read natively, with no binary.
-- **IFC** files import through the built-in text parser, with simplified
-  placeholder geometry instead of real meshes.
+- **IFC** files import with simplified placeholder geometry instead of real
+  meshes.
 - DWG, RVT and RFA files need the converter. Convert them to DXF or IFC on a
   Windows machine (or in your CAD application) and upload that instead, or run
   OpenConstructionERP on Windows.
 
-When a Linux build of the converters is published, this section will describe it.
+Linux builds of the converters are coming soon; this section will describe them when they are released.
 
 ---
 
@@ -280,6 +278,6 @@ When a Linux build of the converters is published, this section will describe it
 | `openconstructionerp: command not found` after pipx | Path not refreshed | `pipx ensurepath` then open a new shell |
 | The server stops answering while a country cost pack loads, nothing in the log | The kernel out of memory killer, not the application | Add swap and run 17.7.0 or newer (see "What the machine needs"), confirm with `dmesg \| grep -i "killed process"` |
 | Opens with `curl` on the server, unreachable from any other machine | The default bind is `127.0.0.1` | Start it as `openconstructionerp serve --host 0.0.0.0 --port 8080` (section 6) |
-| An RVT/DWG upload says the converter is not available | The 2026.10 converters are Windows-only | Upload DXF or IFC instead, or run on Windows (section 7) |
+| An RVT/DWG upload says the converter is not available | DDC Converters 2.0 run on Windows 10/11 x64 (Linux and macOS coming soon) | Upload DXF or IFC instead, or run on Windows (section 7) |
 
 If you still cannot install, run `openconstructionerp doctor` (or `python -m openconstructionerp doctor`) and open an issue with the full output: https://github.com/datadrivenconstruction/OpenConstructionERP/issues

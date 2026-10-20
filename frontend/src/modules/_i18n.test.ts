@@ -38,7 +38,7 @@ describe('isModuleI18nKey', () => {
       'PDF Takeoff Viewer',
       'Real-time Collaboration',
       'GAEB XML 3.3 Import / Export',
-      'DDC cad2data - IFC Converter',
+      'DDC Converters 2.0 - IFC Converter',
       'Risk Analysis (Monte Carlo)',
       'View PDFs and take measurements directly on drawings',
       'Pipeline Builder',

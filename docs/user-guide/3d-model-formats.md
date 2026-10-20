@@ -54,7 +54,7 @@ A mesh import is the right tool when you have geometry and need quantities from 
 
 ## If you upload a mesh to the wrong place
 
-The raw CAD upload endpoint accepts RVT, IFC, DWG and DGN. If you send it a mesh file it will not silently store something that can never render. It refuses with a message naming your file and pointing you at the 3D uploader, and it explains that the format carries geometry only. The file manager does the same: mesh files are stored as ordinary documents and you are pointed at the importer that can actually read them.
+The raw CAD upload endpoint accepts RVT, IFC and DWG. If you send it a mesh file it will not silently store something that can never render. It refuses with a message naming your file and pointing you at the 3D uploader, and it explains that the format carries geometry only. The file manager does the same: mesh files are stored as ordinary documents and you are pointed at the importer that can actually read them.
 
 ## Where this lives
 

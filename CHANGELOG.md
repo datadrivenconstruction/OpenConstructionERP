@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- CAD and BIM converters now come from the DDC converter release 2026.10 (`datadrivenconstruction/cad2data-Revit-IFC-DWG`), which reads RVT, IFC and DWG with DataDrivenConstruction's own readers and contains no third-party CAD SDK. The installer downloads one package per format from the release and checks its SHA-256 against the digest pinned in the build and the one published in the release's `SHA256SUMS.txt` before unpacking it. The converters are published for Windows 10/11 x64 only, so there is no converter install on Linux or macOS; DXF and IFC still import there without one.
+- CAD and BIM conversion now uses DDC Converters 2.0 (RVT Converter 2.0, RVT to IFC 2.0, IFC to Excel 2.0, DWG to Excel 2.0), published from `datadrivenconstruction/cad2data-Revit-IFC-DWG` in the 2026.10 release. The installer downloads one package per format from the release and checks its SHA-256 against the digest pinned in the build and the one published in the release's `SHA256SUMS.txt` before unpacking it. The converters run offline on Windows 10/11 x64; Linux and macOS are coming soon, and DXF and IFC still import there without a converter.
 - RVT models now come with the converter's GLB mesh and the stored element properties; IFC models come as property and quantity tables from the IFC converter (it writes no geometry, so the viewer shows placeholder boxes as before); DWG drawings are converted to DXF and go through the DXF path.
 - The converter version check compares the installed package with the one this version installs, offline.
 
