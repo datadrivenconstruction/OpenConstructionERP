@@ -13,7 +13,7 @@ import { isResolvedInsert } from './blocks';
 import type { TextDisplayState } from './text-display-store';
 import { DEFAULT_TEXT_DISPLAY } from './text-display-store';
 import type { ViewportState } from './viewport';
-import { worldToScreen } from './viewport';
+import { ellipseSweep, worldToScreen } from './viewport';
 
 /* ── CAD Color Index → CSS hex ─────────────────────────────────────── */
 
@@ -405,8 +405,16 @@ function pathEllipse(ctx: CanvasRenderingContext2D, entity: DxfEntity, vp: Viewp
 
   if (majorR < 0.5 || minorR < 0.5) return; // too small to draw
 
-  ctx.moveTo(center.x + majorR * Math.cos(rotation), center.y + majorR * Math.sin(rotation));
-  ctx.ellipse(center.x, center.y, majorR, minorR, rotation, 0, Math.PI * 2);
+  // Parameters run CCW in world space; with Y flipped they are negated and the
+  // sweep runs anticlockwise on the canvas, as for ARC.
+  const { start, sweep } = ellipseSweep(entity);
+  const t0 = -start;
+  const cr = Math.cos(rotation);
+  const sr = Math.sin(rotation);
+  const x0 = majorR * Math.cos(t0);
+  const y0 = minorR * Math.sin(t0);
+  ctx.moveTo(center.x + x0 * cr - y0 * sr, center.y + x0 * sr + y0 * cr);
+  ctx.ellipse(center.x, center.y, majorR, minorR, rotation, t0, t0 - sweep, true);
 }
 
 /**

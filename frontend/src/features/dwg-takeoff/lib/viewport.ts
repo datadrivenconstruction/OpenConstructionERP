@@ -69,6 +69,31 @@ export function arcExtents(
   }
 }
 
+/** Parameter sweep of an ELLIPSE in (0, 2*PI]. Equal start and end (also both
+ *  absent, as older rows store them) mean the whole ellipse. */
+export function ellipseSweep(e: { start_angle?: number; end_angle?: number }): { start: number; sweep: number } {
+  const TAU = Math.PI * 2;
+  const start = e.start_angle ?? 0;
+  let sweep = ((((e.end_angle ?? start) - start) % TAU) + TAU) % TAU;
+  if (sweep < 1e-9) sweep = TAU;
+  return { start, sweep };
+}
+
+/** Point of an ellipse at parameter `t` (world space). */
+export function ellipsePoint(
+  c: { x: number; y: number },
+  a: number,
+  b: number,
+  rotation: number,
+  t: number,
+): { x: number; y: number } {
+  const ca = Math.cos(rotation);
+  const sa = Math.sin(rotation);
+  const x = a * Math.cos(t);
+  const y = b * Math.sin(t);
+  return { x: c.x + x * ca - y * sa, y: c.y + x * sa + y * ca };
+}
+
 export function computeExtents(entities: DxfEntity[]): Extents {
   let minX = Infinity;
   let minY = Infinity;
@@ -101,7 +126,14 @@ export function computeExtents(entities: DxfEntity[]): Extents {
     }
     if (e.type === 'ELLIPSE' && e.start) {
       const r = Math.max(e.major_radius ?? 0, e.minor_radius ?? 0, e.radius ?? 0);
-      if (r > 0) {
+      const { start, sweep } = ellipseSweep(e);
+      if (r > 0 && e.major_radius != null && e.minor_radius != null && sweep < Math.PI * 2) {
+        // An elliptical arc spans its curve, not the whole ellipse.
+        for (let k = 0; k <= 32; k++) {
+          const p = ellipsePoint(e.start, e.major_radius, e.minor_radius, e.rotation ?? 0, start + (sweep * k) / 32);
+          expand(p.x, p.y);
+        }
+      } else if (r > 0) {
         expand(e.start.x - r, e.start.y - r);
         expand(e.start.x + r, e.start.y + r);
       }

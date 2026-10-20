@@ -20,6 +20,7 @@
 
 import type { DxfEntity } from '../api';
 import { calculateArea, calculateDistance, calculatePerimeter } from './measurement';
+import { ellipseSweep } from './viewport';
 
 export type QuantifyMeasure = 'area' | 'length' | 'count';
 
@@ -138,7 +139,8 @@ export function measureEntity(e: DxfEntity): EntityMeasure {
       break;
     case 'ELLIPSE': {
       const r = ellipseRadii(e);
-      if (r) {
+      // An elliptical arc (a door swing) is an open curve and encloses nothing.
+      if (r && ellipseSweep(e).sweep >= Math.PI * 2) {
         m.area = Math.PI * r.a * r.b;
         m.measured = true;
       }

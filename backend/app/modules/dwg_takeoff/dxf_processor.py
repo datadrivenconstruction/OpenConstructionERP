@@ -256,10 +256,21 @@ def _serialize_entity(
     elif entity_type == "ELLIPSE":
         center = dxf.get("center", None)
         major_axis = dxf.get("major_axis", None)
+        axis = (major_axis.x, major_axis.y) if major_axis else (1.0, 0.0)
+        ratio = dxf.get("ratio", 1.0)
+        major_r = math.hypot(*axis)
         result["geometry_data"] = {
             "center": {"x": center.x, "y": center.y} if center else {"x": 0, "y": 0},
-            "major_axis": ({"x": major_axis.x, "y": major_axis.y} if major_axis else {"x": 1, "y": 0}),
-            "ratio": dxf.get("ratio", 1.0),
+            "major_axis": {"x": axis[0], "y": axis[1]},
+            "ratio": ratio,
+            # Explicit radii and rotation so block placement scales them like any
+            # other shape; the parameter range keeps an elliptical arc an arc
+            # (drawn whole, a door swing in a furniture block became a giant oval).
+            "major_radius": major_r,
+            "minor_radius": major_r * ratio,
+            "rotation": math.atan2(axis[1], axis[0]),
+            "start_angle": float(dxf.get("start_param", 0.0)),
+            "end_angle": float(dxf.get("end_param", math.tau)),
         }
     elif entity_type == "SPLINE":
         try:
