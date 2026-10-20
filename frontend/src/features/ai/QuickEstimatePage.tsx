@@ -3352,7 +3352,7 @@ export function QuickEstimatePage() {
                   <CadConverterSection
                     converters={convertersData?.converters ?? []}
                     installedCount={convertersData?.installed_count ?? 0}
-                    totalCount={convertersData?.total_count ?? 4}
+                    totalCount={convertersData?.total_count ?? 3}
                     installingId={installingId}
                     installElapsed={installElapsed}
                     installResult={installResult}
