@@ -107,6 +107,9 @@ const resource = {
     "notifications.site_logistics.permit_expiring.body": "Permit {{reference}} is valid until {{valid_to}}.",
     "notifications.site_logistics.neighbour_issue_overdue.title": "A neighbour issue is overdue",
     "notifications.site_logistics.neighbour_issue_overdue.body": "A neighbour {{kind}} issue was due for a response by {{due}}.",
+    "dwg_takeoff.drawing_span": "Drawing size at this scale: {{w}} m x {{h}} m",
+    "dwg_takeoff.drawing_span_implausible": "That is unusual for a construction drawing, so the unit stored in the file may be wrong. Check it with Calibrate: pick two points and type their real distance.",
+    "dwg_takeoff.conv_converter_said": "Converter report",
   }
 } as { translation: Record<string, string> };
 

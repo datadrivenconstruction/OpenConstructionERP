@@ -177,6 +177,7 @@ import LinkDocumentToDwgModal from './LinkDocumentToDwgModal';
 import LinkActivityToDwgModal from './LinkActivityToDwgModal';
 import LinkRequirementToDwgModal from './LinkRequirementToDwgModal';
 import { fmtFixed, fmtPrecision, formatFileSize } from '@/shared/lib/formatters';
+import { computeExtents, isImplausibleSpan } from './lib/viewport';
 import { compareNames } from '@/shared/lib/collator';
 // boqApi / Position import removed - BOQ picker now handled via ElementInfoPopover callback
 
@@ -1122,6 +1123,14 @@ export function DwgTakeoffPage() {
     return unitFactorToMetres(knownUnits);
   }, [knownUnits, entitiesMaxDim]);
   const effectiveScale = drawingScale * unitFactor;
+  /** Width and height of the placed geometry in metres at the current scale,
+   *  so a wrong declared unit (a 14 cm "floor plan") is visible, not silent. */
+  const drawingSpanMetres = useMemo(() => {
+    const placed = entities.filter((e) => !e.block);
+    if (placed.length === 0) return null;
+    const ext = computeExtents(placed);
+    return { w: (ext.maxX - ext.minX) * effectiveScale, h: (ext.maxY - ext.minY) * effectiveScale };
+  }, [entities, effectiveScale]);
   /** Effective backend status. A terminal status (ready/error/empty) from
    *  EITHER the live poll or the cached drawings list wins, so a stale
    *  "processing" left over in one source after the other has already reached
@@ -1152,6 +1161,8 @@ export function DwgTakeoffPage() {
     liveDrawing?.error_message ?? selectedDrawingFromList?.error_message ?? null;
   const drawingErrorCode =
     liveDrawing?.metadata?.error_code ?? selectedDrawingFromList?.metadata?.error_code ?? null;
+  const drawingConverterError =
+    liveDrawing?.metadata?.converter_error ?? selectedDrawingFromList?.metadata?.converter_error ?? null;
   /** External references the converted drawing could not resolve. */
   const unresolvedXrefs = liveDrawing?.latest_version?.metadata?.xrefs ?? [];
 
@@ -3476,6 +3487,7 @@ export function DwgTakeoffPage() {
               drawingName={selectedDrawingFromList?.name || selectedDrawingFromList?.filename || ''}
               message={drawingErrorMessage}
               errorCode={drawingErrorCode}
+              converterError={drawingConverterError}
               onRetry={() => {
                 // Backend has no reconvert endpoint; "retry" means
                 // delete the failed row and reopen the upload modal
@@ -4920,6 +4932,7 @@ export function DwgTakeoffPage() {
                   onCancelCalibration={handleCancelCalibration}
                   dxfUnits={knownUnits}
                   effectiveScale={effectiveScale}
+                  spanMetres={drawingSpanMetres}
                 />
               )}
 
@@ -5603,6 +5616,8 @@ interface ScaleTabProps {
   /** drawingScale × unit-factor - the multiplier actually applied to raw
    *  DXF coordinates before they become display metres. */
   effectiveScale: number;
+  /** Size of the placed geometry in metres at the current scale. */
+  spanMetres?: { w: number; h: number } | null;
 }
 
 function ScaleTab({
@@ -5616,6 +5631,7 @@ function ScaleTab({
   onCancelCalibration,
   dxfUnits,
   effectiveScale,
+  spanMetres,
 }: ScaleTabProps) {
   const { t } = useTranslation();
   const isPreset = SCALE_PRESETS.some((p) => p.value === drawingScale);
@@ -5731,6 +5747,29 @@ function ScaleTab({
           × {fmtPrecision(effectiveScale, 4)}
         </span>
       </div>
+
+      {spanMetres && (
+        <div className="flex flex-col gap-1 text-[11px]" data-testid="dwg-scale-span">
+          <span className="text-content-secondary">
+            {t('dwg_takeoff.drawing_span', {
+              defaultValue: 'Drawing size at this scale: {{w}} m x {{h}} m',
+              w: fmtPrecision(spanMetres.w, 3),
+              h: fmtPrecision(spanMetres.h, 3),
+            })}
+          </span>
+          {isImplausibleSpan(spanMetres) && (
+            <span
+              className="rounded-md border border-amber-500/30 bg-amber-500/5 px-2.5 py-1.5 text-amber-700 dark:text-amber-300"
+              data-testid="dwg-scale-span-warning"
+            >
+              {t('dwg_takeoff.drawing_span_implausible', {
+                defaultValue:
+                  'That is unusual for a construction drawing, so the unit stored in the file may be wrong. Check it with Calibrate: pick two points and type their real distance.',
+              })}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Mode picker - 3 strategies */}
       <div className="flex flex-col gap-1.5">
@@ -6874,6 +6913,7 @@ function ConversionErrorCard({
   drawingName,
   message,
   errorCode,
+  converterError,
   onRetry,
   onDelete,
 }: {
@@ -6881,10 +6921,14 @@ function ConversionErrorCard({
   message: string | null;
   /** Stable failure code from ``metadata.error_code``. */
   errorCode?: string | null;
+  /** What the converter itself said, shown under our next step. */
+  converterError?: { code?: string; message_en?: string; message_ru?: string } | null;
   onRetry?: () => void;
   onDelete?: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const converterSays =
+    (i18n.language?.startsWith('ru') ? converterError?.message_ru : undefined) ?? converterError?.message_en;
   // Keeps the install CTA scoped - generic conversion failures (wrong
   // version, corrupt file) still show "Retry / Delete" without an Install
   // button that wouldn't help. Rows from before error codes match the text.
@@ -6926,6 +6970,13 @@ function ConversionErrorCard({
                       'The server could not parse this file. Try re-saving as a newer DWG/DXF version or upload a different file.',
                   })}
             </p>
+            {!isMissingConverter && converterError?.code && (
+              <p className="text-[11px] text-content-tertiary mt-2 leading-relaxed" data-testid="dwg-converter-error">
+                {t('dwg_takeoff.conv_converter_said', { defaultValue: 'Converter report' })}:{' '}
+                <span className="font-mono">{converterError.code}</span>
+                {converterSays ? ` - ${converterSays}` : ''}
+              </p>
+            )}
             {isMissingConverter && <InstallDwgConverterCTA onInstalled={onRetry} />}
             {(onRetry || onDelete) && (
               <div className="mt-4 flex items-center gap-2">
