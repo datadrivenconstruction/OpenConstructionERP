@@ -39,8 +39,10 @@ is often a cropped or simplified mark). Wherever this module draws a logo it
 prefers the document logo and falls back to the app logo, and a document logo
 that cannot be decoded falls back too rather than leaving the header empty. A
 workspace with no document logo therefore sees exactly what it saw before.
-Formal logos often arrive as SVG, which reportlab cannot read, so an SVG logo
-is rasterised through PyMuPDF (a base dependency) before it is drawn.
+Formal logos often arrive as SVG, which reportlab cannot read. The browser
+rasterises an SVG to PNG when it is uploaded and the PNG is stored next to it;
+documents print that PNG. An SVG stored before that has no PNG and is skipped,
+so the header falls back to the next logo or to the company name.
 
 Everything degrades gracefully and NEVER raises (mirrors the never-break
 contract of :mod:`app.core.pdf_stamp`): a logo that fails to decode falls
@@ -176,65 +178,20 @@ def _logo_candidates(branding: dict[str, Any], profile: dict[str, Any]) -> list[
     """The logos to try, best first: the document logo, then the app logo.
 
     Both are offered so a document logo that fails to decode still leaves the
-    app logo in the header instead of nothing.
+    app logo in the header instead of nothing. An SVG logo is offered as the
+    PNG the browser rasterised it to, and not at all when it has none.
     """
     candidates: list[str] = []
-    for value in (profile.get("document_logo_data_url"), branding.get("logo_data_url")):
+    pairs = (
+        (profile.get("document_logo_data_url"), profile.get("document_logo_png_data_url")),
+        (branding.get("logo_data_url"), branding.get("logo_png_data_url")),
+    )
+    for value, png in pairs:
+        if isinstance(value, str) and value.startswith("data:image/svg"):
+            value = png
         if isinstance(value, str) and value and value not in candidates:
             candidates.append(value)
     return candidates
-
-
-#: Longest side, in pixels, an SVG logo is rasterised to. The letterhead box is
-#: 60 mm wide, about 710 px at 300 dpi, so this prints sharp at that size, and a
-#: hostile SVG declaring a page the size of a building still costs one bounded
-#: pixmap rather than gigabytes.
-_SVG_RASTER_PX = 1200.0
-
-
-@functools.lru_cache(maxsize=2)
-def _rasterise_svg(svg: bytes) -> bytes | None:
-    """Render SVG bytes to a transparent PNG, or ``None`` when that fails.
-
-    Safe to run on an uploaded file because MuPDF, given an SVG as a stream,
-    ignores every external image reference (checked with ``file://`` URIs,
-    absolute paths and relative names): an SVG cannot pull a file off the
-    server into a PDF.
-
-    The bound is on the pixmap, not on the zoom. An SVG says how large its page
-    is in its own opening tag, a 146-byte file can claim a hundred thousand
-    units, and the pixels asked for grow with the square of that number, so a
-    zoom with a floor under it is not a bound at all: at the old floor of 0.05
-    such a file was rasterised to 5000 x 5000 px, 95 MiB of RGBA, and took
-    thirty seconds on a six-page export. The zoom is whatever puts the longest
-    side on :data:`_SVG_RASTER_PX`, and the result is checked in pixels before
-    it is asked for, because the zoom is a ratio and the pixmap is the cost.
-
-    Cached because the header logo is drawn on every page of a long export and
-    the same one or two logos are rasterised each time. Never raises.
-    """
-    try:
-        import pymupdf
-
-        with pymupdf.open(stream=svg, filetype="svg") as svg_doc:
-            page = svg_doc[0]
-            width, height = float(page.rect.width), float(page.rect.height)
-            longest = max(width, height)
-            if longest <= 0:
-                return None
-            zoom = min(16.0, _SVG_RASTER_PX / longest)
-            # Belt and braces: whatever the ratio worked out to, the pixmap
-            # itself is what costs the memory, so it is what gets checked.
-            asked = max(width * zoom, height * zoom)
-            if asked > _SVG_RASTER_PX:
-                zoom *= _SVG_RASTER_PX / asked
-            if zoom <= 0:
-                return None
-            pixmap = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=True)
-            return pixmap.tobytes("png")
-    except Exception:  # noqa: BLE001 - an undrawable logo falls back, never raises
-        logger.debug("Could not rasterise SVG logo", exc_info=True)
-        return None
 
 
 #: How many pixels of logo are kept per point it is drawn at. Three is 216 dpi,
@@ -251,9 +208,9 @@ _LOGO_PIXELS_PER_POINT = 3.0
 def _logo_raster_for_pdf(raw: bytes) -> bytes:
     """``raw``, re-encoded no larger than a PDF ever draws it. Never raises.
 
-    Cached for the reason :func:`_rasterise_svg` is: the header band redraws
-    the logo on every page, so on a six-page estimate an uncached shrink
-    decoded and resampled the same picture six times.
+    Cached because the header band redraws the logo on every page, so on a
+    six-page estimate an uncached shrink decoded and resampled the same
+    picture six times.
 
     The letterhead box is the largest any generator draws a logo in, so one
     raster at that size serves the letterhead and the smaller header band
@@ -292,9 +249,10 @@ def _logo_raster_for_pdf(raw: bytes) -> bytes:
 def _logo_image_bytes(data_url: Any) -> bytes | None:
     """Decode a ``data:image/...;base64,`` URL to bytes reportlab can read.
 
-    Raster types come back as decoded; SVG is rasterised first because
-    reportlab's image reader cannot read it. Returns ``None`` for anything that
-    is not an image data URL. A body that decodes but is not a readable image
+    Raster types come back as decoded. SVG returns ``None``: reportlab cannot
+    read it and the server does not rasterise it (the browser stores a PNG next
+    to every SVG it uploads). Returns ``None`` for anything that is not an
+    image data URL. A body that decodes but is not a readable image
     is the caller's to catch: it fails in the image reader.
     """
     if not (isinstance(data_url, str) and data_url.startswith("data:image/") and "base64," in data_url):
@@ -306,7 +264,7 @@ def _logo_image_bytes(data_url: Any) -> bytes | None:
     if not raw:
         return None
     if header.startswith("data:image/svg"):
-        return _rasterise_svg(raw)
+        return None
     return raw
 
 

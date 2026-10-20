@@ -48,6 +48,7 @@ MAX_LOGO_DATA_URL_CHARS = 4 * 1024 * 1024
 DEFAULT_BRANDING: dict[str, Any] = {
     "mode": "default",
     "logo_data_url": None,
+    "logo_png_data_url": None,
     "company_name": "",
 }
 
@@ -74,6 +75,17 @@ def sanitise(data: Any) -> dict[str, Any]:
     if not (isinstance(logo, str) and logo.startswith("data:image/") and len(logo) <= MAX_LOGO_DATA_URL_CHARS):
         logo = None
 
+    # PDFs print an SVG logo from the PNG the browser rasterised it to.
+    png = data.get("logo_png_data_url")
+    if not (
+        logo
+        and logo.startswith("data:image/svg+xml")
+        and isinstance(png, str)
+        and png.startswith("data:image/png;base64,")
+        and len(png) <= MAX_LOGO_DATA_URL_CHARS
+    ):
+        png = None
+
     name = data.get("company_name")
     name = name.strip()[:MAX_COMPANY_NAME] if isinstance(name, str) else ""
 
@@ -88,7 +100,7 @@ def sanitise(data: Any) -> dict[str, Any]:
     elif mode == "text" and not name:
         mode = "default"
 
-    return {"mode": mode, "logo_data_url": logo, "company_name": name}
+    return {"mode": mode, "logo_data_url": logo, "logo_png_data_url": png, "company_name": name}
 
 
 #: Process-local cache of the parsed branding, keyed by file path. A PDF export

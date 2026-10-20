@@ -99,6 +99,8 @@ class BrandingResponse(BaseModel):
 
     mode: str = "default"
     logo_data_url: str | None = None
+    #: PNG rasterised in the browser from an SVG logo; PDFs print this one.
+    logo_png_data_url: str | None = None
     company_name: str = ""
 
 
@@ -114,6 +116,7 @@ class BrandingUpdate(BaseModel):
 
     mode: str | None = None
     logo_data_url: str | None = None
+    logo_png_data_url: str | None = None
     company_name: str | None = Field(default=None, max_length=MAX_COMPANY_NAME)
 
 

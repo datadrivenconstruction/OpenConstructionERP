@@ -56,6 +56,12 @@ vi.mock('./documentTemplates', async () => {
   };
 });
 
+// jsdom has no canvas, so the browser-side rasteriser is replaced.
+vi.mock('./rasteriseSvg', async () => {
+  const actual = await vi.importActual<typeof import('./rasteriseSvg')>('./rasteriseSvg');
+  return { ...actual, rasteriseSvgToPng: vi.fn(async () => 'data:image/png;base64,UE5H') };
+});
+
 import { CompanyDocumentsSettings } from './CompanyDocumentsSettings';
 import * as profileApi from './companyProfile';
 import * as appearanceApi from '@/features/property-dev/api';
@@ -71,6 +77,7 @@ const sampleMock = vi.mocked(profileApi.fetchSampleDocumentPdf);
 
 const BLANK: profileApi.CompanyProfile = {
   document_logo_data_url: '',
+  document_logo_png_data_url: '',
   legal_name: '',
   address: '',
   registration_line: '',
@@ -132,7 +139,12 @@ describe('CompanyDocumentsSettings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     useAuthStore.setState({ userRole: 'admin' });
-    useBrandingStore.setState({ mode: 'default', logoDataUrl: null, companyName: '' });
+    useBrandingStore.setState({
+      mode: 'default',
+      logoDataUrl: null,
+      logoPngDataUrl: null,
+      companyName: '',
+    });
     getProfileMock.mockResolvedValue(BLANK);
     getOptionsMock.mockResolvedValue(OPTIONS);
     saveProfileMock.mockImplementation(async (patch) => ({ ...BLANK, ...patch }));
@@ -281,6 +293,33 @@ describe('CompanyDocumentsSettings', () => {
     const patch = saveProfileMock.mock.calls[0]![0];
     expect(Object.keys(patch)).toEqual(['document_logo_data_url']);
     expect(patch.document_logo_data_url).toMatch(/^data:image\/png;base64,/);
+  });
+
+  it('sends the SVG with its PNG copy, and asks for a re-upload when the PNG is missing', async () => {
+    renderPanel();
+    await documentSlotReady();
+
+    const svg = new File(['<svg xmlns="http://www.w3.org/2000/svg"/>'], 'logo.svg', {
+      type: 'image/svg+xml',
+    });
+    fireEvent.change(fileInputOf('logo-slot-document'), { target: { files: [svg] } });
+
+    await waitFor(() => expect(saveProfileMock).toHaveBeenCalledTimes(1));
+    const patch = saveProfileMock.mock.calls[0]![0];
+    expect(patch.document_logo_data_url).toMatch(/^data:image\/svg\+xml/);
+    expect(patch.document_logo_png_data_url).toBe('data:image/png;base64,UE5H');
+    expect(screen.queryByTestId('logo-slot-document-reupload')).toBeNull();
+  });
+
+  it('shows the re-upload line for a stored SVG that has no PNG copy', async () => {
+    getProfileMock.mockResolvedValue({
+      ...BLANK,
+      document_logo_data_url: 'data:image/svg+xml;base64,PHN2Zy8+',
+    });
+    renderPanel();
+
+    const line = await screen.findByTestId('logo-slot-document-reupload');
+    expect(line).toHaveTextContent('Upload this SVG logo again so it prints on your PDFs.');
   });
 
   it('says in the slot why the server refused a logo, in the words of the reader', async () => {
