@@ -192,6 +192,7 @@ def _rvt_output(folder: Path) -> tuple[Path, Path]:
         {"row": "record", "owner": "9999", "category_id": "-2000011"},  # no mesh: not a row
         param(2645, "Unconnected Height", "ParamValueDouble", "number", 11.5),
         param(2645, "Structural", "ParamValueInt", "integer", "1"),
+        param(2645, "Cross-Section Rotation", "ParamValueDouble", "number", 0.5),
         param(2870, "Comments", "ParamValueAString", "text", "slab"),
         param(9999, "Comments", "ParamValueAString", "text", "ignored"),
     ]
@@ -211,9 +212,11 @@ def test_rvt_elements_are_the_ones_with_a_mesh(tmp_path: Path) -> None:
     assert floor["Category"] == "OST_Floors"
     assert floor["Comments"] == "slab"
     assert wall["Structural"] == 1
-    # Stored reals are in Revit's internal units; they are not offered as a length.
-    assert wall["Unconnected Height [internal units]"] == 11.5
-    assert "Unconnected Height" not in header
+    # Stored reals are in Revit's internal units (feet): a plain length is converted,
+    # anything the name does not pin down keeps the marker and is not offered as a quantity.
+    assert wall["Unconnected Height"] == pytest.approx(11.5 * 0.3048)
+    assert wall["Cross-Section Rotation [internal units]"] == 0.5
+    assert "Cross-Section Rotation" not in header
 
 
 def test_an_unknown_revit_category_is_labelled_not_guessed(tmp_path: Path) -> None:
