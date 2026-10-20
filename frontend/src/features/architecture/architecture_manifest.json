@@ -20881,6 +20881,20 @@
           "request_schema": "BOQElementLinkCreate"
         },
         {
+          "method": "POST",
+          "path": "/links/bulk/",
+          "handler": "create_links_bulk",
+          "response_model": "BOQElementLinkBulkResponse",
+          "request_schema": "BOQElementLinkBulkCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/upload-duplicates/",
+          "handler": "find_upload_duplicates",
+          "response_model": "BIMUploadDuplicateListResponse",
+          "request_schema": "None"
+        },
+        {
           "method": "DELETE",
           "path": "/links/{link_id}",
           "handler": "delete_link",
@@ -22277,6 +22291,93 @@
               "name": "total",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BOQElementLinkBulkCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Link many BIM elements to one BOQ position in a single request.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "bim_element_ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "link_type",
+              "type": "str"
+            },
+            {
+              "name": "confidence",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "BOQElementLinkBulkResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Outcome of a bulk link call.\n\n``skipped`` counts elements already linked to the position, so a repeated\ncall is a no-op rather than an error.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "created",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "skipped",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMUploadDuplicate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An existing model in the project that was uploaded from the same file.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "version",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMUploadDuplicateListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Models whose source file matches a file about to be uploaded.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BIMUploadDuplicate]"
             }
           ]
         },
@@ -24704,6 +24805,7 @@
         "gaeb_exchange_router.py",
         "gaeb_x31.py",
         "gaeb_x89.py",
+        "glb_quantities.py",
         "import_append.py",
         "import_jobs.py",
         "importers/__init__.py",
@@ -24729,8 +24831,10 @@
         "resource_norms.py",
         "resource_review.py",
         "resource_review_router.py",
+        "revit_categories.py",
         "roundtrip.py",
         "router.py",
+        "rvt_ifc_reader.py",
         "schemas.py",
         "service.py",
         "supplier_suggestion.py",
@@ -30297,7 +30401,7 @@
         "name": "oe_cad",
         "version": "0.1.0",
         "display_name": "CAD Import",
-        "description": "CAD file import and conversion pipeline (DWG, DGN, RVT, IFC)",
+        "description": "CAD file import and conversion pipeline (DWG, RVT, IFC)",
         "author": "OpenConstructionERP Core Team",
         "category": "extension",
         "depends": [
@@ -116682,7 +116786,7 @@
         "name": "oe_file_search",
         "version": "0.1.0",
         "display_name": "File Search",
-        "description": "OCR-backed full-text content search across project documents, sheets, markups and reports. PyMuPDF + Tesseract extractors, Postgres tsvector / SQLite LIKE fallback.",
+        "description": "OCR-backed full-text content search across project documents, sheets, markups and reports. PDFium + Tesseract extractors, Postgres tsvector / SQLite LIKE fallback.",
         "author": "OpenConstructionERP Core Team",
         "category": "core",
         "depends": [
@@ -275633,10 +275737,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 126,
+      "ts_files": 135,
       "css_files": 0,
-      "test_files": 44,
-      "total_files": 127
+      "test_files": 49,
+      "total_files": 136
     },
     {
       "name": "bim_requirements",
@@ -275955,10 +276059,10 @@
     },
     {
       "name": "dwg-takeoff",
-      "ts_files": 50,
+      "ts_files": 56,
       "css_files": 0,
-      "test_files": 16,
-      "total_files": 50
+      "test_files": 20,
+      "total_files": 56
     },
     {
       "name": "eac",
@@ -276235,10 +276339,10 @@
     },
     {
       "name": "inbox",
-      "ts_files": 9,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 9
+      "test_files": 3,
+      "total_files": 10
     },
     {
       "name": "inside",
@@ -276354,10 +276458,10 @@
     },
     {
       "name": "modules",
-      "ts_files": 24,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 25
+      "test_files": 13,
+      "total_files": 35
     },
     {
       "name": "ncr",
@@ -276487,10 +276591,10 @@
     },
     {
       "name": "processes",
-      "ts_files": 11,
+      "ts_files": 12,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 11
+      "total_files": 12
     },
     {
       "name": "procurement",
@@ -276732,10 +276836,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 34,
+      "ts_files": 38,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 34
+      "test_files": 13,
+      "total_files": 38
     },
     {
       "name": "setup",
@@ -278548,11 +278652,11 @@
     "total_models": 788,
     "total_columns": 9170,
     "total_relationships": 240,
-    "total_routes": 4622,
-    "total_schemas": 4108,
-    "total_python_files": 2805,
+    "total_routes": 4624,
+    "total_schemas": 4112,
+    "total_python_files": 2808,
     "frontend_features": 209,
-    "frontend_ts_files": 3571,
+    "frontend_ts_files": 3599,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
