@@ -1691,7 +1691,7 @@ class DwgTakeoffService:
                     run.status,
                     (run.stderr or run.stdout or "").strip()[:2000],
                 )
-                await self._set_converter_error(drawing_id, run.error)
+                await self._set_converter_error(drawing_id, run.failure)
                 if run.cancelled:
                     await self._mark_failed(
                         drawing_id,

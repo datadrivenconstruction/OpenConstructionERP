@@ -620,3 +620,22 @@ def test_process_ifc_file_shows_the_converter_geometry(monkeypatch: pytest.Monke
     doc = ddc_runner._read_glb_json(Path(result["glb_path"]))
     assert [n["name"] for n in doc["nodes"][:2]] == ["16", "17"]  # node name == mesh_ref
     assert doc["extras"]["up_axis"] == "Z"
+
+
+def test_a_missing_output_without_an_error_object_is_still_reported() -> None:
+    """CONVERTED_PARTIAL_OUTPUTS carries no ``error``; the page must still say what failed."""
+    stdout = json.dumps({"status": "CONVERTED_PARTIAL_OUTPUTS", "failed_outputs": ["dxf"], "exit_code": 4})
+    run = ddc_runner.ConverterRun(
+        fmt="dwg", command=[], returncode=4, stdout=stdout, status="CONVERTED_PARTIAL_OUTPUTS"
+    )
+    assert run.error is None
+    assert run.failure == {
+        "code": "CONVERTED_PARTIAL_OUTPUTS",
+        "message_en": "The converter could not write its DXF output.",
+    }
+
+
+def test_the_converter_error_object_wins_over_failed_outputs() -> None:
+    stdout = json.dumps({"error": {"code": "DWG_DAMAGED", "message_en": "Damaged."}, "failed_outputs": ["dxf"]})
+    run = ddc_runner.ConverterRun(fmt="dwg", command=[], returncode=3, stdout=stdout)
+    assert run.failure == {"code": "DWG_DAMAGED", "message_en": "Damaged."}

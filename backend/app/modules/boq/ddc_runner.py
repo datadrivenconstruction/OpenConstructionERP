@@ -98,6 +98,20 @@ class ConverterRun:
         return err if isinstance(err, dict) else None
 
     @property
+    def failure(self) -> dict[str, Any] | None:
+        """The converter's ``error``, or a report built from ``failed_outputs`` when it gave no error object."""
+        if self.error:
+            return self.error
+        failed = (_last_json_line(self.stdout) or {}).get("failed_outputs")
+        if isinstance(failed, list) and failed:
+            names = ", ".join(str(f).upper() for f in failed)
+            return {
+                "code": str(self.status or "CONVERTED_PARTIAL_OUTPUTS"),
+                "message_en": f"The converter could not write its {names} output.",
+            }
+        return None
+
+    @property
     def cancelled(self) -> bool:
         """True when the converter stopped on its own time limit (it reports that as ``DWG_DAMAGED``)."""
         err = self.error or {}
