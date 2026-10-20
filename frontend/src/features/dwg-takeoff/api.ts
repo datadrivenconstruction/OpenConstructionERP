@@ -56,7 +56,11 @@ export interface DwgDrawing {
   error_message?: string | null;
   /** Server-side extras. ``error_code`` is the stable failure code the page
    *  translates instead of showing the English ``error_message``. */
-  metadata?: { error_code?: string | null } & Record<string, unknown>;
+  metadata?: {
+    error_code?: string | null;
+    /** The converter's own failure code and messages (its detail stays in the server log). */
+    converter_error?: { code?: string; message_en?: string; message_ru?: string } | null;
+  } & Record<string, unknown>;
   /** Latest parsed version. Only present on the single-drawing fetch
    *  ({@link fetchDrawing}); the LIST endpoint omits it. Carries the
    *  resolved/backfilled ``units`` the LIST response does not expose, so

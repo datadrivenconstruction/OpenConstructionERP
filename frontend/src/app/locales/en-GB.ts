@@ -93,6 +93,9 @@ const resource = {
     "about.team_linkedin": "DataDrivenConstruction on LinkedIn",
 
     "subcontractors.cert_type.license": "Licence",
+    "dwg_takeoff.drawing_span": "Drawing size at this scale: {{w}} m x {{h}} m",
+    "dwg_takeoff.drawing_span_implausible": "That is unusual for a construction drawing, so the unit stored in the file may be wrong. Check it with Calibrate: pick two points and type their real distance.",
+    "dwg_takeoff.conv_converter_said": "Converter report",
   }
 } as { translation: Record<string, string> };
 

@@ -242,3 +242,10 @@ export function applyPan(vp: ViewportState, dx: number, dy: number): ViewportSta
     offsetY: vp.offsetY + dy,
   };
 }
+
+/** A plan smaller than 1 m or larger than 100 km across almost always means the
+ *  file declares the wrong unit (a metre drawing stored as millimetres). */
+export function isImplausibleSpan(span: { w: number; h: number }): boolean {
+  const largest = Math.max(span.w, span.h);
+  return largest > 0 && (largest < 1 || largest > 100_000);
+}
