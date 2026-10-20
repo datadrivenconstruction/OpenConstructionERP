@@ -1529,6 +1529,8 @@ def group_cad_elements(elements: list[dict]) -> dict:
 
 #: Lowercase column names that hold identifiers, never quantities.
 _ID_COLUMNS = frozenset({"id", "element id", "elementid", "guid", "globalid", "uniqueid", "handle", "ordinal"})
+#: Lowercase label columns: a drawing whose layers are named "0", "1", ... still groups by them.
+_LABEL_COLUMNS = frozenset({"category", "layer", "type name", "level", "family", "material", "name", "mark"})
 
 
 def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dict[str, Any]:
@@ -1619,7 +1621,7 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
 
         # Identifiers are numbers, not quantities; reals in Revit internal units
         # (feet and derived) would be summed as metres.
-        not_a_quantity = col_lower in _ID_COLUMNS or "[internal units]" in col_lower
+        not_a_quantity = col_lower in _ID_COLUMNS or col_lower in _LABEL_COLUMNS or "[internal units]" in col_lower
 
         # Classify
         if not not_a_quantity and numeric_ratio > 0.5 and (name_is_quantity or numeric_ratio == 1.0):
