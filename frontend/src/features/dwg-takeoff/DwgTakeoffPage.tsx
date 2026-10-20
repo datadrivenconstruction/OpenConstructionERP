@@ -132,6 +132,8 @@ import {
   type QuantifyMeasure,
 } from './lib/auto-quantify';
 import { exportQuantifyToExcel } from './lib/dwg-quantify-export';
+import { annotationRealValue, annotationTotals, quantifyTotals } from './lib/takeoff-totals';
+import { conversionErrorText } from './lib/conversion-error';
 import { exportCanvasToPdf } from './lib/pdf-export';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
 import { CalibrationDialog, type CalibrationStep } from './components/CalibrationDialog';
@@ -882,7 +884,7 @@ export function DwgTakeoffPage() {
           addToast({
             type: 'error',
             title: t('dwg_takeoff.upload_error', { defaultValue: 'Upload failed' }),
-            message: job.errorMessage ?? undefined,
+            message: conversionErrorText(job.errorCode, job.errorMessage, t) ?? undefined,
           });
         }
       }
@@ -1155,6 +1157,10 @@ export function DwgTakeoffPage() {
   const isEmptyStatus = drawingStatus === 'empty';
   const drawingErrorMessage =
     liveDrawing?.error_message ?? selectedDrawingFromList?.error_message ?? null;
+  const drawingErrorCode =
+    liveDrawing?.metadata?.error_code ?? selectedDrawingFromList?.metadata?.error_code ?? null;
+  /** External references the converted drawing could not resolve. */
+  const unresolvedXrefs = liveDrawing?.latest_version?.metadata?.xrefs ?? [];
 
   // When the backend finishes conversion, invalidate the entities and
   // drawings list queries so the canvas renders the freshly-parsed
@@ -2206,43 +2212,6 @@ export function DwgTakeoffPage() {
     [filteredEntities, effectiveScale],
   );
 
-  /**
-   * Breakdown by DXF layer: count + Σ area + Σ length per layer, sorted
-   * by area descending so the visually dominant layer lands on top.
-   * Entities with zero measurable geometry still contribute to ``count``.
-   */
-  const summaryByLayer = useMemo(() => {
-    const buckets = new Map<string, { area: number; length: number; count: number }>();
-    for (const e of filteredEntities) {
-      const entry = buckets.get(e.layer) ?? { area: 0, length: 0, count: 0 };
-      entry.count++;
-      if (e.type === 'LWPOLYLINE' && e.vertices && e.vertices.length >= 2) {
-        const closed = !!e.closed;
-        if (closed && e.vertices.length >= 3) {
-          entry.area += calculateArea(e.vertices);
-        } else {
-          entry.length += calculatePerimeter(e.vertices, false);
-        }
-      } else if (e.type === 'LINE' && e.start && e.end) {
-        entry.length += calculateDistance(e.start, e.end);
-      } else if (e.type === 'CIRCLE' && e.radius != null) {
-        entry.area += Math.PI * e.radius * e.radius;
-      }
-      buckets.set(e.layer, entry);
-    }
-    // Convert raw DXF units to real metres (area × scale², length × scale)
-    // so the per-layer totals match the canvas labels and Σ panels.
-    const areaScale = effectiveScale * effectiveScale;
-    return Array.from(buckets.entries())
-      .map(([layer, v]) => ({
-        layer,
-        count: v.count,
-        area: v.area * areaScale,
-        length: v.length * effectiveScale,
-      }))
-      .sort((a, b) => (b.area || b.length || b.count) - (a.area || a.length || a.count));
-  }, [filteredEntities, effectiveScale]);
-
   /** Breakdown by DXF entity type, already computed by ``aggregateEntities``. */
   const summaryByType = useMemo(() => {
     const rows = Object.entries(summaryAggregate.byType)
@@ -2285,6 +2254,36 @@ export function DwgTakeoffPage() {
     [filteredEntities, effectiveScale],
   );
 
+  /** Drawing totals: the sum of the per-layer rows, printed identically by
+   *  the Summary tab, the CSV, the PDF and the XLSX. */
+  const summaryTotals = useMemo(() => quantifyTotals(layerQuantities), [layerQuantities]);
+
+  /** Calibration in the shape the shared value helpers take. */
+  const calibrationScale = useMemo(
+    () => (calibration ? { unitsPerPixel: calibration.unitsPerPixel, unit: calibration.unit } : null),
+    [calibration],
+  );
+
+  /** Manual Distance / Area / Count annotations in real-world units. */
+  const manualTotals = useMemo(
+    () => annotationTotals(annotations, effectiveScale, calibrationScale),
+    [annotations, effectiveScale, calibrationScale],
+  );
+
+  /** Manual measurement rows for the exports, real-world values. */
+  const manualRows = useMemo(
+    () =>
+      annotations
+        .map((a) => ({
+          type: a.type,
+          text: a.text ?? '',
+          value: annotationRealValue(a, effectiveScale, calibrationScale),
+          unit: a.type === 'count' ? 'nr' : (a.measurement_unit ?? ''),
+        }))
+        .filter((r): r is { type: DwgAnnotation['type']; text: string; value: number; unit: string } => r.value != null),
+    [annotations, effectiveScale, calibrationScale],
+  );
+
   /** CSV export of the summary (entity-type breakdown + totals).
    *  Human-facing download (not re-imported): the totals, the per-layer
    *  area/length values and the unit-bearing column headers are restated in
@@ -2296,13 +2295,16 @@ export function DwgTakeoffPage() {
     const lines: string[] = [
       '# DWG Summary Measurements',
       `# Entities: ${filteredEntities.length}`,
-      `# Total area (${areaUnit}): ${q.convert(summaryAggregate.area, 'm²').value.toFixed(3)}`,
-      `# Total perimeter (${lengthUnit}): ${q.convert(summaryAggregate.perimeter, 'm').value.toFixed(3)}`,
-      `# Total length (${lengthUnit}): ${q.convert(summaryAggregate.length, 'm').value.toFixed(3)}`,
+      `# Total area (${areaUnit}): ${q.convert(summaryTotals.area, 'm²').value.toFixed(3)}`,
+      `# Total perimeter (${lengthUnit}): ${q.convert(summaryTotals.perimeter, 'm').value.toFixed(3)}`,
+      `# Total length (${lengthUnit}): ${q.convert(summaryTotals.length, 'm').value.toFixed(3)}`,
+      `# Manual area (${areaUnit}): ${q.convert(manualTotals.area, 'm²').value.toFixed(3)}`,
+      `# Manual length (${lengthUnit}): ${q.convert(manualTotals.length, 'm').value.toFixed(3)}`,
+      `# Manual count (nr): ${manualTotals.count}`,
       '',
       `scope,key,count,area_${areaUnit},length_${lengthUnit}`,
     ];
-    for (const row of summaryByLayer) {
+    for (const row of layerQuantities) {
       lines.push([
         'layer',
         JSON.stringify(row.layer),
@@ -2320,6 +2322,17 @@ export function DwgTakeoffPage() {
         '',
       ].join(','));
     }
+    for (const row of manualRows) {
+      const area = row.type !== 'count' && row.unit.includes('²');
+      const value = row.type === 'count' ? row.value : q.convert(row.value, area ? 'm²' : 'm').value;
+      lines.push([
+        `manual_${row.type}`,
+        JSON.stringify(row.text),
+        row.type === 'count' ? value : '',
+        area ? value.toFixed(3) : '',
+        row.type !== 'count' && !area ? value.toFixed(3) : '',
+      ].join(','));
+    }
     const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -2333,8 +2346,10 @@ export function DwgTakeoffPage() {
     });
   }, [
     filteredEntities.length,
-    summaryAggregate,
-    summaryByLayer,
+    summaryTotals,
+    manualTotals,
+    manualRows,
+    layerQuantities,
     summaryByType,
     selectedDrawingId,
     q,
@@ -2365,9 +2380,9 @@ export function DwgTakeoffPage() {
     doc.text(`Entities: ${filteredEntities.length}`, margin, y);
     y += 5;
     // Totals restated in the user's measurement system (storage stays metric).
-    const sumArea = q.convert(summaryAggregate.area, 'm²');
-    const sumPerimeter = q.convert(summaryAggregate.perimeter, 'm');
-    const sumLength = q.convert(summaryAggregate.length, 'm');
+    const sumArea = q.convert(summaryTotals.area, 'm²');
+    const sumPerimeter = q.convert(summaryTotals.perimeter, 'm');
+    const sumLength = q.convert(summaryTotals.length, 'm');
     doc.text(`Σ area: ${fmtFixed(sumArea.value, 2)} ${sumArea.unit}`, margin, y);
     y += 5;
     doc.text(`Σ perimeter: ${fmtFixed(sumPerimeter.value, 2)} ${sumPerimeter.unit}`, margin, y);
@@ -2380,7 +2395,7 @@ export function DwgTakeoffPage() {
     y += 5;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    for (const row of summaryByLayer.slice(0, 40)) {
+    for (const row of layerQuantities.slice(0, 40)) {
       if (y > 270) {
         doc.addPage();
         y = margin;
@@ -2412,6 +2427,32 @@ export function DwgTakeoffPage() {
       y += 4;
     }
 
+    if (manualRows.length > 0) {
+      y += 4;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Manual measurements', margin, y);
+      y += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      for (const row of manualRows.slice(0, 80)) {
+        if (y > 270) {
+          doc.addPage();
+          y = margin;
+        }
+        const shown =
+          row.type === 'count'
+            ? { value: row.value, unit: 'nr' }
+            : q.convert(row.value, row.unit.includes('²') ? 'm²' : 'm');
+        doc.text(
+          `${row.type.padEnd(10)} ${row.text.slice(0, 40).padEnd(42)} ${fmtFixed(shown.value, 2)} ${shown.unit}`,
+          margin,
+          y,
+        );
+        y += 4;
+      }
+    }
+
     const file = `dwg-summary-${selectedDrawingId?.slice(0, 8) ?? 'drawing'}.pdf`;
     doc.save(file);
     addToast({
@@ -2420,8 +2461,9 @@ export function DwgTakeoffPage() {
     });
   }, [
     filteredEntities.length,
-    summaryAggregate,
-    summaryByLayer,
+    summaryTotals,
+    layerQuantities,
+    manualRows,
     summaryByType,
     drawings,
     selectedDrawingId,
@@ -2441,6 +2483,8 @@ export function DwgTakeoffPage() {
       await exportQuantifyToExcel({
         drawingName,
         layerQuantities,
+        totals: summaryTotals,
+        manualRows,
         byBlock: summaryByBlock,
         countTotal,
         measurementSystem,
@@ -2456,7 +2500,7 @@ export function DwgTakeoffPage() {
         message: err instanceof Error ? err.message : String(err),
       });
     }
-  }, [drawings, selectedDrawingId, layerQuantities, summaryByBlock, countTotal, measurementSystem, addToast, t]);
+  }, [drawings, selectedDrawingId, layerQuantities, summaryTotals, manualRows, summaryByBlock, countTotal, measurementSystem, addToast, t]);
 
   /**
    * Download the current viewport as a single-page A4-landscape PDF.
@@ -3438,6 +3482,7 @@ export function DwgTakeoffPage() {
             <ConversionErrorCard
               drawingName={selectedDrawingFromList?.name || selectedDrawingFromList?.filename || ''}
               message={drawingErrorMessage}
+              errorCode={drawingErrorCode}
               onRetry={() => {
                 // Backend has no reconvert endpoint; "retry" means
                 // delete the failed row and reopen the upload modal
@@ -3468,6 +3513,29 @@ export function DwgTakeoffPage() {
           ) : (
             <>
             <div className="relative flex-1 min-h-0" data-dwg-viewer-root>
+              {unresolvedXrefs.length > 0 && (
+                <div
+                  className="absolute left-3 right-3 top-3 z-20 rounded-md border border-amber-500/40 bg-amber-50/95 px-3 py-2 text-[11px] text-amber-900 shadow dark:bg-amber-950/90 dark:text-amber-100"
+                  role="status"
+                  data-testid="dwg-xref-notice"
+                >
+                  <div className="font-semibold">
+                    {t('dwg_takeoff.xref_notice_title', {
+                      defaultValue: 'This drawing references external files',
+                    })}
+                  </div>
+                  <div className="mt-0.5 leading-snug">
+                    {t('dwg_takeoff.xref_notice_body', {
+                      defaultValue:
+                        'Not loaded: {{names}}. Their content is missing from the canvas and from the quantities. Bind the references in your CAD application (XREF, Bind) and upload the drawing again, or upload the referenced drawings separately.',
+                      names: unresolvedXrefs
+                        .slice(0, 8)
+                        .map((x) => (x.path ? `${x.name} (${x.path.split(/[\\/]/).pop()})` : x.name))
+                        .join(', '),
+                    })}
+                  </div>
+                </div>
+              )}
               <DxfViewer
                 key={`${selectedDrawingId}:${selectedLayout ?? 'default'}`}
                 entities={viewerEntities}
@@ -4383,33 +4451,16 @@ export function DwgTakeoffPage() {
 
             {/* Summary bar - totals across current drawing */}
             {(entities.length > 0 || annotations.length > 0) && (() => {
-              // Persisted measurement_value is in raw DXF units; convert to
-              // real metres (area × scale², distance × scale) so the totals
-              // match the canvas labels.
-              const areaSum =
-                annotations
-                  .filter((a) => a.type === 'area' && a.measurement_value != null)
-                  .reduce((s, a) => s + (a.measurement_value ?? 0), 0) *
-                effectiveScale *
-                effectiveScale;
-              const distSum =
-                annotations
-                  .filter((a) => a.type === 'distance' && a.measurement_value != null)
-                  .reduce((s, a) => s + (a.measurement_value ?? 0), 0) * effectiveScale;
+              // Same real-world values the canvas labels show (takeoff-totals).
+              const areaSum = manualTotals.area;
+              const distSum = manualTotals.length;
               const handleExportCsv = () => {
                 const rows = [
                   ['type', 'text', 'value', 'unit', 'linked_boq_position_id'].join(','),
                   ...annotations.map((a) => {
-                    // Export real-metre values (raw DXF units × effectiveScale)
-                    // so the CSV's m / m² columns are meaningful.
-                    const isArea = (a.measurement_unit ?? '').includes('²');
-                    const scaled =
-                      a.measurement_value == null
-                        ? ''
-                        : (
-                            a.measurement_value *
-                            (isArea ? effectiveScale * effectiveScale : effectiveScale)
-                          ).toFixed(3);
+                    // Real-world values, the same the canvas and list show.
+                    const real = annotationRealValue(a, effectiveScale, calibrationScale);
+                    const scaled = real == null ? '' : real.toFixed(3);
                     return [
                       a.type,
                       JSON.stringify(a.text ?? ''),
@@ -4553,11 +4604,11 @@ export function DwgTakeoffPage() {
                           <span className="font-medium capitalize">{ann.type.replace('_', ' ')}</span>
                           {ann.text && <span className="ml-1 text-muted-foreground">- {ann.text}</span>}
                           {ann.measurement_value != null && (() => {
-                            // Restate the stored metric-canonical value + unit
-                            // in the user's measurement system (metric is a
-                            // pass-through; imperial scales + relabels). Storage
-                            // is untouched - this is display only.
-                            const dq = q.convert(ann.measurement_value, ann.measurement_unit ?? 'm');
+                            // The real-world value the canvas label shows,
+                            // restated in the user's measurement system.
+                            const real = annotationRealValue(ann, effectiveScale, calibrationScale);
+                            if (real == null) return null;
+                            const dq = q.convert(real, ann.measurement_unit ?? 'm');
                             return (
                               <span className="ml-1 text-muted-foreground">
                                 ({fmtFixed(dq.value, 2)} {dq.unit})
@@ -4882,7 +4933,8 @@ export function DwgTakeoffPage() {
               {rightTab === 'summary' && (
                 <SummaryTab
                   entityCount={filteredEntities.length}
-                  aggregate={summaryAggregate}
+                  totals={summaryTotals}
+                  manualTotals={manualTotals}
                   layerQuantities={layerQuantities}
                   byType={summaryByType}
                   byBlock={summaryByBlock}
@@ -5528,9 +5580,9 @@ function SummaryKpiCard({ label, value, unit, accent }: SummaryKpiCardProps) {
 
 /* ── Scale tab ─────────────────────────────────────────────────────────
  * Drawing scale selector lives here (moved out of a floating canvas
- * overlay).  Raw DXF units are treated as metres, so picking "1:50"
- * means every length reported on screen is divided by 50 (the drawing's
- * native unit is fifty times larger than the real-world one).  Presets
+ * overlay).  Raw DXF units are converted to metres from the header's
+ * $INSUNITS; picking "1:50" then multiplies every length by 50 (a drawing
+ * made at paper size).  Presets
  * cover the common architectural ratios; a "Custom" slot lets the user
  * type any positive integer. */
 const SCALE_PRESETS: { value: number; label: string }[] = [
@@ -5715,9 +5767,10 @@ function ScaleTab({
       {mode === 'preset' && (
         <>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            {t('dwg_takeoff.scale_explainer', {
+            {t('dwg_takeoff.scale_explainer_units', {
               defaultValue:
-                'Raw DXF units are treated as metres. A scale of 1:50 divides displayed measurements so a 50-metre raw span reads as 1 metre.',
+                'Drawing units come from the file header ({{units}}) and every measurement is converted to metres. Keep 1:1 for a drawing made at full size. For a drawing made at paper size, pick its ratio: 1:50 multiplies every measurement by 50.',
+              units: unitLabel || 'unitless',
             })}
           </p>
 
@@ -5921,7 +5974,8 @@ function ScaleTab({
 
 interface SummaryTabProps {
   entityCount: number;
-  aggregate: { area: number; perimeter: number; length: number; count: number };
+  totals: { area: number; perimeter: number; length: number; count: number };
+  manualTotals: { area: number; length: number; count: number };
   layerQuantities: LayerQuantity[];
   byType: { type: string; count: number }[];
   byBlock: { name: string; count: number }[];
@@ -5941,7 +5995,8 @@ interface SummaryTabProps {
  */
 function SummaryTab({
   entityCount,
-  aggregate,
+  totals,
+  manualTotals,
   layerQuantities,
   byType,
   byBlock,
@@ -5974,22 +6029,8 @@ function SummaryTab({
     return m;
   }, [layerQuantities, layerMeasure]);
 
-  // Grand totals across all visible layers, shown as the headline strip.
-  const quantifyTotals = useMemo(() => {
-    let area = 0;
-    let length = 0;
-    let count = 0;
-    for (const row of layerQuantities) {
-      area += row.area;
-      length += row.length;
-      count += row.count;
-    }
-    return {
-      area: Math.round(area * 100) / 100,
-      length: Math.round(length * 100) / 100,
-      count,
-    };
-  }, [layerQuantities]);
+  // Grand totals: the same object the exports print.
+  const quantifyTotals = totals;
 
   if (entityCount === 0) {
     return (
@@ -6064,20 +6105,20 @@ function SummaryTab({
         />
         <SummaryKpiCard
           label={t('dwg_takeoff.kpi_total_area', { defaultValue: 'Σ Area' })}
-          value={aggregate.area > 0 ? fmtFixed(q.convert(aggregate.area, 'm²').value, 2) : '—'}
-          unit={aggregate.area > 0 ? q.unitFor('m²') : undefined}
+          value={totals.area > 0 ? fmtFixed(q.convert(totals.area, 'm²').value, 2) : '—'}
+          unit={totals.area > 0 ? q.unitFor('m²') : undefined}
           accent="emerald"
         />
         <SummaryKpiCard
           label={t('dwg_takeoff.kpi_total_perimeter', { defaultValue: 'Σ Perimeter' })}
-          value={aggregate.perimeter > 0 ? fmtFixed(q.convert(aggregate.perimeter, 'm').value, 2) : '—'}
-          unit={aggregate.perimeter > 0 ? q.unitFor('m') : undefined}
+          value={totals.perimeter > 0 ? fmtFixed(q.convert(totals.perimeter, 'm').value, 2) : '—'}
+          unit={totals.perimeter > 0 ? q.unitFor('m') : undefined}
           accent="amber"
         />
         <SummaryKpiCard
           label={t('dwg_takeoff.kpi_total_length', { defaultValue: 'Σ Length' })}
-          value={aggregate.length > 0 ? fmtFixed(q.convert(aggregate.length, 'm').value, 2) : '—'}
-          unit={aggregate.length > 0 ? q.unitFor('m') : undefined}
+          value={totals.length > 0 ? fmtFixed(q.convert(totals.length, 'm').value, 2) : '—'}
+          unit={totals.length > 0 ? q.unitFor('m') : undefined}
           accent="violet"
         />
       </div>
@@ -6097,6 +6138,31 @@ function SummaryTab({
           {countTotal.toLocaleString(getNumberLocale())}
         </span>
       </div>
+
+      {/* Manual Distance / Area totals, the values the canvas labels show */}
+      {(manualTotals.area > 0 || manualTotals.length > 0) && (
+        <div
+          className="flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary/50 px-2.5 py-2 text-[11px]"
+          data-testid="dwg-summary-manual-totals"
+        >
+          <span className="font-medium text-content-secondary">
+            {t('dwg_takeoff.summary_manual_measurements', { defaultValue: 'Manual measurements' })}
+          </span>
+          <span className="tabular-nums font-semibold text-content-primary">
+            {manualTotals.area > 0 && (
+              <span data-testid="dwg-summary-manual-area">
+                {fmtFixed(q.convert(manualTotals.area, 'm²').value, 2)} {q.unitFor('m²')}
+              </span>
+            )}
+            {manualTotals.area > 0 && manualTotals.length > 0 && ' · '}
+            {manualTotals.length > 0 && (
+              <span data-testid="dwg-summary-manual-length">
+                {fmtFixed(q.convert(manualTotals.length, 'm').value, 2)} {q.unitFor('m')}
+              </span>
+            )}
+          </span>
+        </div>
+      )}
 
       {/* Auto-quantify by layer - DWG's signature edge over PDF takeoff: real
           quantities measured straight from the vectors, no manual tracing.
@@ -6820,20 +6886,24 @@ function InstallDwgConverterCTA({
 function ConversionErrorCard({
   drawingName,
   message,
+  errorCode,
   onRetry,
   onDelete,
 }: {
   drawingName: string;
   message: string | null;
+  /** Stable failure code from ``metadata.error_code``. */
+  errorCode?: string | null;
   onRetry?: () => void;
   onDelete?: () => void;
 }) {
   const { t } = useTranslation();
-  // Stable marker emitted by `_handle_dwg` when `find_converter('dwg')`
-  // returns None. Keeps the install CTA scoped - generic conversion
-  // failures (wrong version, corrupt file) should still show the
-  // "Retry / Delete" UX without an Install button that wouldn't help.
-  const isMissingConverter = !!message && message.includes('DDC DWG converter');
+  // Keeps the install CTA scoped - generic conversion failures (wrong
+  // version, corrupt file) still show "Retry / Delete" without an Install
+  // button that wouldn't help. Rows from before error codes match the text.
+  const isMissingConverter =
+    errorCode === 'converter_missing' || (!!message && message.includes('DDC DWG converter'));
+  const shownMessage = conversionErrorText(errorCode, message, t);
   return (
     <div className="flex flex-1 items-center justify-center p-6">
       <div
@@ -6863,7 +6933,7 @@ function ConversionErrorCard({
                     defaultValue:
                       'OpenConstructionERP needs the DDC DWG converter to read DWG files. Install it once - works for every DWG you upload after.',
                   })
-                : message ||
+                : shownMessage ||
                   t('dwg_takeoff.conv_error_default', {
                     defaultValue:
                       'The server could not parse this file. Try re-saving as a newer DWG/DXF version or upload a different file.',
