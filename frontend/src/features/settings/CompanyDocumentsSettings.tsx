@@ -43,6 +43,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { BRANDING_MAX_LOGO_BYTES, useBrandingStore } from '@/stores/useBrandingStore';
 import { ACCEPTED_IMAGE_TYPES, fileToDataUrl } from '@/app/layout/CustomBranding';
+import { isSvgDataUrl, rasteriseSvgToPng } from './rasteriseSvg';
 import { DocumentAppearancePanel } from '@/features/property-dev/DocumentAppearancePanel';
 import { DocumentTemplatesPanel } from './DocumentTemplatesPanel';
 import { getDocumentAppearance, type DocumentAppearance } from '@/features/property-dev/api';
@@ -229,6 +230,7 @@ export function CompanyDocumentsSettings() {
 
   const brandMode = useBrandingStore((s) => s.mode);
   const brandLogo = useBrandingStore((s) => s.logoDataUrl);
+  const brandLogoPng = useBrandingStore((s) => s.logoPngDataUrl);
   const setBrandLogo = useBrandingStore((s) => s.setLogo);
   const persistBranding = useBrandingStore((s) => s.persistToServer);
   const appLogo = brandMode === 'logo' ? brandLogo : null;
@@ -276,12 +278,16 @@ export function CompanyDocumentsSettings() {
   // lose the typed details along with the bad file. Failures are reported by
   // the caller, an upload in the slot and a removal as a toast.
   const logoM = useMutation({
-    mutationFn: (dataUrl: string) => saveCompanyProfile({ document_logo_data_url: dataUrl }),
+    mutationFn: (logo: { svg: string; png?: string }) =>
+      saveCompanyProfile({
+        document_logo_data_url: logo.svg,
+        ...(logo.png ? { document_logo_png_data_url: logo.png } : {}),
+      }),
     onSuccess: (stored, sent) => {
       qc.setQueryData(COMPANY_PROFILE_KEY, stored);
       addToast({
         type: 'success',
-        title: sent
+        title: sent.svg
           ? t('settings.company.doc_logo_saved', { defaultValue: 'Document logo saved' })
           : t('settings.company.doc_logo_removed', {
               defaultValue: 'Document logo removed. Documents use the app logo.',
@@ -294,7 +300,15 @@ export function CompanyDocumentsSettings() {
   const applyAppLogo = async (dataUrl: string | null) => {
     setAppLogoBusy(true);
     try {
-      setBrandLogo(dataUrl);
+      let png: string | null = null;
+      if (dataUrl && isSvgDataUrl(dataUrl)) {
+        try {
+          png = await rasteriseSvgToPng(dataUrl);
+        } catch {
+          png = null; // the SVG is still saved; the notice asks for a re-upload
+        }
+      }
+      setBrandLogo(dataUrl, png);
       const ok = await persistBranding();
       addToast(
         ok
@@ -408,6 +422,7 @@ export function CompanyDocumentsSettings() {
               defaultValue: 'Shown at the top left of the sidebar and on the sign-in page.',
             })}
             dataUrl={appLogo}
+            needsReupload={isSvgDataUrl(appLogo) && !brandLogoPng}
             accept={ACCEPTED_IMAGE_TYPES}
             maxBytes={BRANDING_MAX_LOGO_BYTES}
             canEdit={canEdit}
@@ -422,6 +437,7 @@ export function CompanyDocumentsSettings() {
               defaultValue: 'Your formal logo for printed documents. If empty, the app logo is used.',
             })}
             dataUrl={docLogo || null}
+            needsReupload={isSvgDataUrl(docLogo) && !profile?.document_logo_png_data_url}
             fallbackUrl={appLogo}
             accept={options?.logo_mime_types ?? null}
             maxBytes={docLogoMaxBytes}
@@ -434,7 +450,15 @@ export function CompanyDocumentsSettings() {
                 maxBytes: docLogoMaxBytes,
               });
               try {
-                await logoM.mutateAsync(dataUrl);
+                let png: string | undefined;
+                if (isSvgDataUrl(dataUrl)) {
+                  try {
+                    png = await rasteriseSvgToPng(dataUrl);
+                  } catch {
+                    png = undefined; // still saved; the notice asks for a re-upload
+                  }
+                }
+                await logoM.mutateAsync({ svg: dataUrl, png });
               } catch (e) {
                 // Thrown on as a plain message, which the slot shows under
                 // the drop zone, next to the file it is about.
@@ -447,7 +471,7 @@ export function CompanyDocumentsSettings() {
               }
             }}
             onRemove={() =>
-              logoM.mutate('', {
+              logoM.mutate({ svg: '' }, {
                 onError: (e) => addToast({ type: 'error', title: getErrorMessage(e) }),
               })
             }
@@ -699,6 +723,8 @@ interface LogoSlotProps {
   title: string;
   hint: string;
   dataUrl: string | null;
+  /** An SVG stored without its PNG copy, which PDFs need. */
+  needsReupload?: boolean;
   /** What prints while this slot is empty (the document logo's fallback). */
   fallbackUrl?: string | null;
   /** Accepted MIME types; `null` while the server's list is still loading. */
@@ -716,6 +742,7 @@ function LogoSlot({
   title,
   hint,
   dataUrl,
+  needsReupload = false,
   fallbackUrl = null,
   accept,
   maxBytes,
@@ -857,6 +884,14 @@ function LogoSlot({
       ) : (
         <p className="mt-3 text-sm text-content-tertiary">
           {t('settings.company.logo_none', { defaultValue: 'No logo set.' })}
+        </p>
+      )}
+
+      {dataUrl && needsReupload && (
+        <p className="mt-2 text-xs text-semantic-warning" data-testid={`${testId}-reupload`}>
+          {t('settings.company.logo_svg_reupload', {
+            defaultValue: 'Upload this SVG logo again so it prints on your PDFs.',
+          })}
         </p>
       )}
 

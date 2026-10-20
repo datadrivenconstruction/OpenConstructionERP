@@ -59,6 +59,7 @@ _LINE_CAPS = {
 
 _FULL_PROFILE = {
     "document_logo_data_url": _PNG,
+    "document_logo_png_data_url": "",
     "legal_name": "Acme Builders GmbH",
     "address": "Musterstrasse 1\n10115 Berlin\nGermany",
     "registration_line": "USt-IdNr. DE123456789 · HRB 12345",
