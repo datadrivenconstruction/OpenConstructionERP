@@ -29,7 +29,22 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { prettifyCategoryName } from './bimCategoryTaxonomy';
+import { bucketOf, isNoiseCategory, prettifyCategoryName } from './bimCategoryTaxonomy';
+
+describe('"Building elements only" leaves out IFC voids (TC-GRP-04)', () => {
+  it('treats openings and virtual elements as noise', () => {
+    for (const cat of ['IfcOpeningElement', 'IfcOpeningStandardCase', 'IfcVirtualElement', 'IfcVoidingFeature']) {
+      expect(isNoiseCategory(cat)).toBe(true);
+    }
+  });
+
+  it('keeps doors, windows and walls as building elements', () => {
+    for (const cat of ['IfcDoor', 'IfcWindow', 'IfcWall', 'IfcSlab', 'Doors', 'Windows']) {
+      expect(isNoiseCategory(cat)).toBe(false);
+    }
+    expect(bucketOf('IfcDoor')).toBe('openings');
+  });
+});
 
 describe('prettifyCategoryName - CamelCase categories (#179)', () => {
   it('spaces StructuralFoundation and StructuralBeam alike', () => {

@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const mocks = vi.hoisted(() => ({
   list: vi.fn(),
   get: vi.fn(),
-  createLink: vi.fn(),
+  createLinksBulk: vi.fn(),
   apiPost: vi.fn(),
 }));
 
@@ -27,7 +27,8 @@ vi.mock('@/shared/lib/api', async (importOriginal) => ({
 }));
 
 vi.mock('../api', () => ({
-  createLink: (...a: unknown[]) => mocks.createLink(...a),
+  createLinksBulk: (...a: unknown[]) => mocks.createLinksBulk(...a),
+  fetchBIMElementsByIds: vi.fn(),
   resolveElementUUID: (_modelId: string, el: { id: string }) => Promise.resolve(el.id),
 }));
 
@@ -54,7 +55,7 @@ beforeEach(() => {
           : [{ id: 'pos-x', ordinal: '01.010', description: 'Concrete', unit: 'm3', quantity: 0, parent_id: null }],
     }),
   );
-  mocks.createLink.mockResolvedValue({});
+  mocks.createLinksBulk.mockResolvedValue({ created: 2, skipped: 0 });
   mocks.apiPost.mockResolvedValue([]);
 });
 
@@ -79,8 +80,8 @@ describe('AddToBOQModal with a target position', () => {
     expect(target.textContent).toContain('02.020');
     expect(mocks.get).toHaveBeenCalledWith('boq-b');
     fireEvent.click(target);
-    await waitFor(() => expect(mocks.createLink).toHaveBeenCalledTimes(2));
-    expect(mocks.createLink.mock.calls.every((c) => c[0].boq_position_id === 'pos-2')).toBe(true);
+    await waitFor(() => expect(mocks.createLinksBulk).toHaveBeenCalledTimes(1));
+    expect(mocks.createLinksBulk).toHaveBeenCalledWith('pos-2', ['e1', 'e2']);
   });
 
   it('keeps the old behaviour without a target', async () => {
