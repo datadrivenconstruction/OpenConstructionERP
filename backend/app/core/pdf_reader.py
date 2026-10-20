@@ -10,7 +10,9 @@ origin at the top left of the page's crop box, y growing downwards, on the
 UNROTATED page. :meth:`PdfPage.drawings` returns the same dictionaries and
 item tuples as the reader this module replaced (``'l'``, ``'c'``, ``'re'``,
 ``'qu'`` items, ``rect``, ``color``, ``fill``, ``width``, ``type`` ...), so
-the recognizers that consume them did not change.
+the recognizers that consume them did not change. Two things PDFium's object
+model does not keep (pattern paints, and how a subpath was closed) are read
+from the content stream by :mod:`app.core.pdf_paint_scan`.
 
 PDFium is not thread safe and ctypes releases the GIL, so every call into it
 is serialised through one process-wide lock.
@@ -20,14 +22,19 @@ from __future__ import annotations
 
 import ctypes
 import io
+import logging
 import math
+import struct
 import threading
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any, NamedTuple
 
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
+
+from app.core import pdf_paint_scan
+from app.core.pdf_paint_scan import CLOSE_EXPLICIT, CLOSE_RECT
 
 __all__ = [
     "PdfDocument",
@@ -42,6 +49,7 @@ __all__ = [
 ]
 
 _LOCK = threading.RLock()
+logger = logging.getLogger(__name__)
 
 
 class PdfReaderError(Exception):
@@ -128,6 +136,31 @@ class PdfDocument:
             except pdfium.PdfiumError as exc:
                 raise PdfReaderError(str(exc)) from exc
         self._pages: list[PdfPage] = []
+        self._source = source
+        self._password = password
+        self._scan_reader: Any = None
+        self._scan_checked = False
+
+    def _paint_plan(self, index: int) -> pdf_paint_scan.PaintPlan | None:
+        """The content-stream plan of one page; ``None`` when it cannot be read."""
+        if not self._scan_checked:
+            self._scan_checked = True
+            try:
+                from pypdf import PdfReader
+
+                reader = PdfReader(io.BytesIO(self._source) if isinstance(self._source, bytes) else self._source)
+                if reader.is_encrypted:
+                    reader.decrypt(self._password or "")
+                self._scan_reader = reader
+            except Exception:  # noqa: BLE001 - without the plan the tracer keeps its defaults
+                logger.debug("pdf_reader: content scan unavailable", exc_info=True)
+        if self._scan_reader is None:
+            return None
+        try:
+            return pdf_paint_scan.page_plan(self._scan_reader, index)
+        except Exception:  # noqa: BLE001
+            logger.debug("pdf_reader: content scan failed on page %d", index, exc_info=True)
+            return None
 
     @property
     def page_count(self) -> int:
@@ -145,7 +178,7 @@ class PdfDocument:
             raise IndexError(f"page {index} out of range (document has {count} pages)")
         with _LOCK:
             try:
-                page = PdfPage(self._doc[index], index)
+                page = PdfPage(self._doc[index], index, self._paint_plan)
             except pdfium.PdfiumError as exc:
                 raise PdfReaderError(str(exc)) from exc
         self._pages.append(page)
@@ -165,6 +198,7 @@ class PdfDocument:
                 page.close()
             self._pages.clear()
             self._doc.close()
+        self._scan_reader = None
 
     def __enter__(self) -> PdfDocument:
         return self
@@ -176,9 +210,15 @@ class PdfDocument:
 class PdfPage:
     """One page of an open :class:`PdfDocument`."""
 
-    def __init__(self, page: pdfium.PdfPage, index: int) -> None:
+    def __init__(
+        self,
+        page: pdfium.PdfPage,
+        index: int,
+        paint_plan: Callable[[int], pdf_paint_scan.PaintPlan | None] | None = None,
+    ) -> None:
         self._page = page
         self.index = index
+        self._paint_plan = paint_plan
         self._closed = False
         self.rotation = page.get_rotation() % 360
         media = _norm_box(page.get_mediabox())
@@ -308,10 +348,13 @@ class PdfPage:
         ``width``, ``even_odd``, ``closePath``, ``dashes``, ``lineCap``,
         ``lineJoin``, ``fill_opacity``, ``stroke_opacity``, ``seqno`` and
         ``layer``. A fill immediately followed by a stroke of the same path
-        is merged into one ``'fs'`` entry.
+        is merged into one ``'fs'`` entry. Fills and strokes painted with a
+        pattern or a shading are left out, as hatching and gradients are not
+        drawn geometry.
         """
+        plan = self._paint_plan(self.index) if self._paint_plan else None
         with _LOCK:
-            return _Tracer(self._to_top_left()).run(self._page.raw)
+            return _Tracer(self._to_top_left()).run(self._page.raw, plan)
 
 
 def _norm_box(box: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
@@ -332,6 +375,13 @@ def _concat(m: Matrix, n: Matrix) -> Matrix:
 _SEG_LINE = pdfium_c.FPDF_SEGMENT_LINETO
 _SEG_BEZIER = pdfium_c.FPDF_SEGMENT_BEZIERTO
 _SEG_MOVE = pdfium_c.FPDF_SEGMENT_MOVETO
+_COUNT_SEGMENTS = pdfium_c.FPDFPath_CountSegments
+_SEG_CALLS = (
+    pdfium_c.FPDFPath_GetPathSegment,
+    pdfium_c.FPDFPathSegment_GetPoint,
+    pdfium_c.FPDFPathSegment_GetType,
+    pdfium_c.FPDFPathSegment_GetClose,
+)
 _OBJ_PATH = pdfium_c.FPDF_PAGEOBJ_PATH
 _OBJ_FORM = pdfium_c.FPDF_PAGEOBJ_FORM
 _MAX_FORM_DEPTH = 32
@@ -371,9 +421,9 @@ class _Tracer:
         self._rgba = [ctypes.c_uint() for _ in range(4)]
         self._w = ctypes.c_float()
 
-    def run(self, page: Any) -> list[dict[str, Any]]:
+    def run(self, page: Any, plan: pdf_paint_scan.PaintPlan | None = None) -> list[dict[str, Any]]:
         n = pdfium_c.FPDFPage_CountObjects(page)
-        self._walk((pdfium_c.FPDFPage_GetObject(page, i) for i in range(n)), self.page_ctm, 0)
+        self._walk([pdfium_c.FPDFPage_GetObject(page, i) for i in range(n)], self.page_ctm, 0, plan)
         for path in self.out:
             for k in _ALL_KEYS:
                 path.setdefault(k, None)
@@ -385,15 +435,29 @@ class _Tracer:
             return (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
         return (m.a, m.b, m.c, m.d, m.e, m.f)
 
-    def _walk(self, objs: Any, parent: Matrix, depth: int) -> None:
-        for obj in objs:
-            kind = pdfium_c.FPDFPageObj_GetType(obj)
+    def _walk(self, objs: list[Any], parent: Matrix, depth: int, plan: pdf_paint_scan.PaintPlan | None) -> None:
+        kinds = [pdfium_c.FPDFPageObj_GetType(obj) for obj in objs]
+        # The plan is trusted only when it lines up with PDFium's objects exactly.
+        if plan is not None and (
+            kinds.count(_OBJ_PATH) != len(plan.paints) or kinds.count(_OBJ_FORM) != len(plan.forms)
+        ):
+            logger.debug("pdf_reader: content plan does not line up with the page objects")
+            plan = None
+        paths = forms = 0
+        for obj, kind in zip(objs, kinds, strict=True):
             if kind == _OBJ_PATH:
-                self._path(obj, _concat(self._matrix(obj), parent))
-            elif kind == _OBJ_FORM and depth < _MAX_FORM_DEPTH:
-                ctm = _concat(self._matrix(obj), parent)
-                n = pdfium_c.FPDFFormObj_CountObjects(obj)
-                self._walk((pdfium_c.FPDFFormObj_GetObject(obj, i) for i in range(n)), ctm, depth + 1)
+                paint = plan.paints[paths] if plan is not None else None
+                paths += 1
+                self._path(obj, _concat(self._matrix(obj), parent), paint)
+            elif kind == _OBJ_FORM:
+                child = plan.forms[forms] if plan is not None else None
+                forms += 1
+                if depth < _MAX_FORM_DEPTH:
+                    ctm = _concat(self._matrix(obj), parent)
+                    n = pdfium_c.FPDFFormObj_CountObjects(obj)
+                    self._walk([pdfium_c.FPDFFormObj_GetObject(obj, i) for i in range(n)], ctm, depth + 1, child)
+                else:
+                    self.seqno += 1
             else:
                 self.seqno += 1
 
@@ -405,20 +469,27 @@ class _Tracer:
 
     def _segments(self, obj: Any) -> list[tuple[int, float, float, bool]]:
         x, y = self._x, self._y
+        get_seg, get_point, get_type, get_close = _SEG_CALLS
         segs = []
-        for i in range(pdfium_c.FPDFPath_CountSegments(obj)):
-            seg = pdfium_c.FPDFPath_GetPathSegment(obj, i)
-            pdfium_c.FPDFPathSegment_GetPoint(seg, x, y)
-            segs.append(
-                (pdfium_c.FPDFPathSegment_GetType(seg), x.value, y.value, bool(pdfium_c.FPDFPathSegment_GetClose(seg)))
-            )
+        append = segs.append
+        for i in range(_COUNT_SEGMENTS(obj)):
+            seg = get_seg(obj, i)
+            get_point(seg, x, y)
+            append((get_type(seg), x.value, y.value, get_close(seg) != 0))
         return segs
 
-    def _path(self, obj: Any, ctm: Matrix) -> None:
+    def _path(self, obj: Any, ctm: Matrix, paint: tuple[bool, bool, tuple[int, ...]] | None = None) -> None:
         fm, st = self._fm, self._st
         if not pdfium_c.FPDFPath_GetDrawMode(obj, fm, st):
             return
         fill_mode, stroke = fm.value, bool(st.value)
+        closes: tuple[int, ...] = ()
+        if paint is not None:
+            if paint[0]:
+                fill_mode = 0
+            if paint[1]:
+                stroke = False
+            closes = paint[2]
         if not fill_mode and not stroke:
             return
         segs = self._segments(obj)
@@ -426,7 +497,7 @@ class _Tracer:
             return
         if fill_mode:
             fill, alpha = self._color(pdfium_c.FPDFPageObj_GetFillColor, obj)
-            items, rect, _ = _trace(segs, ctm, stroke_path=False)
+            items, rect, _ = _trace(segs, ctm, stroke_path=False, closes=closes)
             if items:
                 pathdict: dict[str, Any] = {
                     "items": items,
@@ -442,7 +513,7 @@ class _Tracer:
             self.seqno += 1
         if stroke:
             color, alpha = self._color(pdfium_c.FPDFPageObj_GetStrokeColor, obj)
-            items, rect, close_path = _trace(segs, ctm, stroke_path=True)
+            items, rect, close_path = _trace(segs, ctm, stroke_path=True, closes=closes)
             if items:
                 factor = math.sqrt(abs(ctm[0] * ctm[3] - ctm[1] * ctm[2]))
                 width = self._w.value if pdfium_c.FPDFPageObj_GetStrokeWidth(obj, self._w) else 1.0
@@ -477,7 +548,12 @@ class _Tracer:
 
     def _append(self, pathdict: dict[str, Any]) -> None:
         out = self.out
-        if out and pathdict["type"] == "s" and out[-1]["type"] == "f" and out[-1]["items"] == pathdict["items"]:
+        if (
+            out
+            and pathdict["type"] == "s"
+            and out[-1]["type"] == "f"
+            and _same_items(out[-1]["items"], pathdict["items"])
+        ):
             prev = out[-1]
             for k, v in pathdict.items():
                 if k not in prev:
@@ -487,20 +563,24 @@ class _Tracer:
         out.append(pathdict)
 
 
-def _trace(
+def _trace(  # noqa: C901
     segs: list[tuple[int, float, float, bool]],
     ctm: Matrix,
     *,
     stroke_path: bool,
+    closes: tuple[int, ...] = (),
 ) -> tuple[list[tuple], Rect, bool | None]:
-    """Replay one PDFium path as path-walker calls and collect items."""
+    """Replay one PDFium path as path-walker calls and collect items.
+
+    ``closes`` says, for each subpath closed by a line back to its start,
+    whether it came from ``h``, from a line drawn before ``h`` or from
+    ``re``; PDFium stores all three as the same points.
+    """
     a, b, c, d, e, f = ctm
-
-    def tf(x: float, y: float) -> Point:
-        return Point(x * a + y * c + e, x * b + y * d + f)
-
+    # Every point transformed once; the walk below works on indices.
+    pts = [Point(x * a + y * c + e, x * b + y * d + f) for _, x, y, _ in segs]
     items: list[tuple] = []
-    rect: list[float] | None = None
+    used: list[Point] = []
     last = Point(0.0, 0.0)
     first = last
     have_move = False
@@ -510,26 +590,18 @@ def _trace(
     cur_u: tuple[float, float] | None = None
     start_u: tuple[float, float] | None = None
     last_cmd = ""
+    rect_op = False
 
-    def include(p: Point) -> None:
-        nonlocal rect
-        if rect is None:
-            rect = [p.x, p.y, p.x, p.y]
-        else:
-            rect[0] = min(rect[0], p.x)
-            rect[1] = min(rect[1], p.y)
-            rect[2] = max(rect[2], p.x)
-            rect[3] = max(rect[3], p.y)
-
-    def lineto(x: float, y: float) -> None:
+    def lineto(k: int) -> None:
         nonlocal last, linecount, cur_u, last_cmd
-        if last_cmd != "m" and cur_u == (x, y):
+        u = (segs[k][1], segs[k][2])
+        if last_cmd != "m" and cur_u == u and not rect_op:
             return
-        p = tf(x, y)
-        include(p)
+        p = pts[k]
+        used.append(p)
         items.append(("l", last, p))
         last = p
-        cur_u = (x, y)
+        cur_u = u
         last_cmd = "l"
         linecount += 1
         if linecount == 4 and stroke_path:
@@ -556,51 +628,68 @@ def _trace(
             close_path = True
         have_move = False
 
+    n_closes = len(closes)
+    close_at = 0
     i = 0
     n = len(segs)
-    pending_move: tuple[float, float] | None = None
+    pending_move = -1
     while i < n:
         kind, x, y, close = segs[i]
         if kind == _SEG_MOVE:
-            pending_move = (x, y)
+            pending_move = i
             i += 1
             continue
-        if pending_move is not None:
+        if pending_move >= 0:
             # Consecutive moves collapse into the last one.
-            p = tf(*pending_move)
-            if rect is None:
-                include(p)
+            p = pts[pending_move]
+            if not used:
+                used.append(p)
             last = first = p
             have_move = True
             linecount = 0
-            cur_u = start_u = pending_move
+            cur_u = start_u = (segs[pending_move][1], segs[pending_move][2])
             last_cmd = "m"
-            pending_move = None
+            pending_move = -1
+            # An ``re`` keeps its sides even when they have no length.
+            rect_op = (
+                close_at < n_closes
+                and closes[close_at] == CLOSE_RECT
+                and i + 3 < n
+                and segs[i][0] == segs[i + 1][0] == segs[i + 2][0] == segs[i + 3][0] == _SEG_LINE
+                and segs[i + 3][3]
+            )
         if kind == _SEG_LINE:
-            if close and start_u is not None and (x, y) == start_u:
+            if close and (x, y) == start_u:
+                explicit = close_at < n_closes and closes[close_at] == CLOSE_EXPLICIT
+                close_at += 1
+                rect_op = False
+                if explicit:
+                    lineto(i)
                 # ``h`` (or ``re``) closing back to the start: the close adds the line.
                 closepath()
             else:
-                lineto(x, y)
+                lineto(i)
                 if close:
                     closepath()
             i += 1
         elif kind == _SEG_BEZIER and i + 2 < n:
-            (_, x1, y1, _), (_, x2, y2, _), (_, x3, y3, close) = segs[i], segs[i + 1], segs[i + 2]
+            _, x1, y1, _ = segs[i]
+            _, x2, y2, _ = segs[i + 1]
+            _, x3, y3, close = segs[i + 2]
             x0, y0 = cur_u if cur_u is not None else (x1, y1)
             straight = (
-                ((x0, y0) == (x1, y1) and (x2, y2) == (x3, y3))
-                or ((x0, y0) == (x1, y1) == (x2, y2))
-                or ((x1, y1) == (x2, y2) == (x3, y3))
+                (x0 == x1 and y0 == y1 and x2 == x3 and y2 == y3)
+                or (x0 == x1 == x2 and y0 == y1 == y2)
+                or (x1 == x2 == x3 and y1 == y2 == y3)
             )
             if straight:
-                if not ((x0, y0) == (x1, y1) == (x2, y2) == (x3, y3) and last_cmd != "m"):
-                    lineto(x3, y3)
+                if not (x0 == x1 == x2 == x3 and y0 == y1 == y2 == y3 and last_cmd != "m"):
+                    lineto(i + 2)
             else:
-                p1, p2, p3 = tf(x1, y1), tf(x2, y2), tf(x3, y3)
-                include(p1)
-                include(p2)
-                include(p3)
+                p1, p2, p3 = pts[i], pts[i + 1], pts[i + 2]
+                used.append(p1)
+                used.append(p2)
+                used.append(p3)
                 items.append(("c", last, p1, p2, p3))
                 last = p3
                 cur_u = (x3, y3)
@@ -611,9 +700,44 @@ def _trace(
             i += 3
         else:
             i += 1
-    if rect is None:
-        rect = [0.0, 0.0, 0.0, 0.0]
-    return items, Rect(*rect), close_path
+    if not used:
+        return items, Rect(0.0, 0.0, 0.0, 0.0), close_path
+    xs = [p.x for p in used]
+    ys = [p.y for p in used]
+    return items, Rect(min(xs), min(ys), max(xs), max(ys)), close_path
+
+
+_F32 = struct.Struct("<f")
+
+
+def _f32(v: float) -> float:
+    return _F32.unpack(_F32.pack(v))[0]
+
+
+def _same_items(a: list[tuple], b: list[tuple]) -> bool:
+    """Equal items, allowing for the float noise of two separately placed objects.
+
+    The previous reader compared single-precision points, so a fill and a
+    stroke of one path drawn as two objects are equal when they agree in
+    single precision.
+    """
+    if a == b:
+        return True
+    if len(a) != len(b):
+        return False
+    for ia, ib in zip(a, b, strict=True):
+        if ia[0] != ib[0] or len(ia) != len(ib):
+            return False
+        for va, vb in zip(ia[1:], ib[1:], strict=True):
+            if isinstance(va, int):
+                if va != vb:
+                    return False
+                continue
+            fa = va if isinstance(va, Rect) else (va.ul + va.ur + va.ll + va.lr if isinstance(va, Quad) else va)
+            fb = vb if isinstance(vb, Rect) else (vb.ul + vb.ur + vb.ll + vb.lr if isinstance(vb, Quad) else vb)
+            if any(x != y and _f32(x) != _f32(y) for x, y in zip(fa, fb, strict=True)):
+                return False
+    return True
 
 
 def _check_quad(items: list[tuple]) -> None:

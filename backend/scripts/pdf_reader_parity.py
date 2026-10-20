@@ -28,7 +28,7 @@ import re
 import subprocess
 import sys
 import time
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +65,35 @@ def _close(a, b, tol: float) -> bool:
     return all(abs(x - y) <= tol for x, y in zip(a, b, strict=False)) and len(a) == len(b)
 
 
+def _sig(p: dict) -> tuple:
+    return (p["type"], tuple(it[0] for it in p["items"]))
+
+
+def _match(ref: list[dict], new: list[dict], key, tol: float) -> tuple[list[tuple[dict, dict]], list, list]:
+    """Pair paths with equal ``key`` whose rects agree within ``tol``."""
+    pool: dict[Any, list[dict]] = defaultdict(list)
+    for q in new:
+        pool[key(q)].append(q)
+    pairs, left = [], []
+    for p in ref:
+        cands = pool.get(key(p), [])
+        hit = next((k for k, q in enumerate(cands) if _close(tuple(p["rect"]), tuple(q["rect"]), tol)), None)
+        if hit is None:
+            left.append(p)
+        else:
+            pairs.append((p, cands.pop(hit)))
+    return pairs, left, [q for v in pool.values() for q in v]
+
+
 def compare_drawings(ref: list[dict], new: list[dict]) -> dict[str, Any]:
+    """Compare two vector layers path by path, pairing paths by shape and place.
+
+    Paths are paired by type, item kinds and bounding box (not by index, so one
+    missing path does not shift every later comparison); the attributes of each
+    pair are then compared. ``unmatched_*`` counts paths with no partner;
+    ``op_mismatch`` counts those left over that do have a partner of the same
+    type and place but with different items.
+    """
     out: dict[str, Any] = {
         "paths_ref": len(ref),
         "paths_new": len(new),
@@ -74,54 +102,53 @@ def compare_drawings(ref: list[dict], new: list[dict]) -> dict[str, Any]:
         "ops_ref": dict(Counter(it[0] for p in ref for it in p["items"])),
         "ops_new": dict(Counter(it[0] for p in new for it in p["items"])),
         "max_pt_err": 0.0,
+        "matched": 0,
+        "unmatched_ref": 0,
+        "unmatched_new": 0,
         "op_mismatch": 0,
-        "type_mismatch": 0,
         "color_mismatch": 0,
         "fill_mismatch": 0,
         "width_mismatch": 0,
-        "rect_mismatch": 0,
         "dash_mismatch": 0,
         "even_odd_mismatch": 0,
         "examples": [],
     }
-    for i, (a, b) in enumerate(zip(ref, new, strict=False)):
-        ops_a = [it[0] for it in a["items"]]
-        ops_b = [it[0] for it in b["items"]]
-        if ops_a != ops_b:
-            out["op_mismatch"] += 1
-            if len(out["examples"]) < 6:
-                out["examples"].append(
-                    {"path": i, "ref": [_fmt(it) for it in a["items"][:6]], "new": [_fmt(it) for it in b["items"][:6]]}
-                )
-            continue
+
+    def note(entry: dict) -> None:
+        if len(out["examples"]) < 6:
+            out["examples"].append(entry)
+
+    pairs, left_ref, left_new = _match(ref, new, _sig, PT_TOL)
+    op_pairs, left_ref, left_new = _match(left_ref, left_new, lambda p: p["type"], PT_TOL)
+    out["matched"] = len(pairs)
+    out["op_mismatch"] = len(op_pairs)
+    out["unmatched_ref"] = len(left_ref)
+    out["unmatched_new"] = len(left_new)
+    for a, b in op_pairs:
+        note({"ref": [_fmt(it) for it in a["items"][:6]], "new": [_fmt(it) for it in b["items"][:6]]})
+    for p in left_ref[:2]:
+        note({"only_ref": p["type"], "rect": [round(v, 2) for v in p["rect"]], "items": len(p["items"])})
+    for p in left_new[:2]:
+        note({"only_new": p["type"], "rect": [round(v, 2) for v in p["rect"]], "items": len(p["items"])})
+    for a, b in pairs:
         for ia, ib in zip(a["items"], b["items"], strict=True):
             for pa, pb in zip(_pts(ia), _pts(ib), strict=True):
                 out["max_pt_err"] = max(out["max_pt_err"], abs(pa[0] - pb[0]), abs(pa[1] - pb[1]))
-        if a["type"] != b["type"]:
-            out["type_mismatch"] += 1
         if not _close(a.get("color"), b.get("color"), 2.5 / 255):
             out["color_mismatch"] += 1
-            if len(out["examples"]) < 6:
-                out["examples"].append({"path": i, "color_ref": a.get("color"), "color_new": b.get("color")})
+            note({"color_ref": a.get("color"), "color_new": b.get("color")})
         if not _close(a.get("fill"), b.get("fill"), 2.5 / 255):
             out["fill_mismatch"] += 1
-            if len(out["examples"]) < 6:
-                out["examples"].append({"path": i, "fill_ref": a.get("fill"), "fill_new": b.get("fill")})
+            note({"fill_ref": a.get("fill"), "fill_new": b.get("fill")})
         wa, wb = a.get("width"), b.get("width")
         if (wa is None) != (wb is None) or (wa is not None and abs(wa - wb) > 1e-3 * max(1.0, abs(wa))):
             out["width_mismatch"] += 1
-            if len(out["examples"]) < 6:
-                out["examples"].append({"path": i, "width_ref": wa, "width_new": wb})
-        if not _close(tuple(a["rect"]), tuple(b["rect"]), PT_TOL):
-            out["rect_mismatch"] += 1
+            note({"width_ref": wa, "width_new": wb})
         if a.get("dashes") != b.get("dashes"):
             out["dash_mismatch"] += 1
-            if len(out["examples"]) < 6:
-                out["examples"].append({"path": i, "dash_ref": a.get("dashes"), "dash_new": b.get("dashes")})
+            note({"dash_ref": a.get("dashes"), "dash_new": b.get("dashes")})
         if a.get("even_odd") != b.get("even_odd"):
             out["even_odd_mismatch"] += 1
-    if len(ref) != len(new) and len(out["examples"]) < 6:
-        out["examples"].append({"count_ref": len(ref), "count_new": len(new)})
     return out
 
 
@@ -353,17 +380,18 @@ def summarise(results: list[dict[str, Any]]) -> dict[str, Any]:
             s["items_ref"] += d["items_ref"]
             s["items_new"] += d["items_new"]
             for k in (
+                "matched",
+                "unmatched_ref",
+                "unmatched_new",
                 "op_mismatch",
-                "type_mismatch",
                 "color_mismatch",
                 "fill_mismatch",
                 "width_mismatch",
-                "rect_mismatch",
                 "dash_mismatch",
                 "even_odd_mismatch",
             ):
                 s[k] += d[k]
-            s["pages_drawings_identical_ops"] += d["paths_ref"] == d["paths_new"] and d["op_mismatch"] == 0
+            s["pages_drawings_all_matched"] += d["matched"] == d["paths_ref"] == d["paths_new"]
             worst_pt = max(worst_pt, d["max_pt_err"])
             rec = p["recognition"]
             s["pages_candidates_equal"] += rec["candidates_equal"]
