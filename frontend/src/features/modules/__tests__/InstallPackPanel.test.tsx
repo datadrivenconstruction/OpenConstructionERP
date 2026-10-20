@@ -54,7 +54,7 @@ vi.mock('@/stores/useAuthStore', () => ({
 
 /* ── Import the component AFTER the mocks are registered ────────────────── */
 
-import { InstallPackPanel } from '../ModulesPage';
+import { InstallPackPanel } from '../packs/InstallPackPanel';
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 

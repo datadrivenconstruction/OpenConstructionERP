@@ -1,10 +1,9 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useMemo, useEffect, useCallback, useRef, useId } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { detectCountry } from '@/app/i18n';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, Navigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Search,
@@ -32,16 +31,6 @@ import {
   Users,
   Layers,
   Server,
-  ExternalLink,
-  Mail,
-  Power,
-  BookOpen,
-  Home,
-  HardHat,
-  Briefcase,
-  Box,
-  UploadCloud,
-  FileArchive,
   type LucideIcon,
 } from 'lucide-react';
 import { Card, Badge, Button, Input, InfoHint, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
@@ -49,23 +38,20 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { modulesGuide } from './modulesGuide';
 import { AdvancedModeNotice } from './AdvancedModeNotice';
 import { resolveModuleDisplayName } from './moduleDisplayName';
-import { profileDelta, profileShapes } from './profileDifference';
+import {
+  CompanyProfileCard,
+  ProfileSwitchDialog,
+  getPresetIcon,
+  sortPresets,
+  useCompanyProfiles,
+} from './companyProfiles';
 import {
   ALL_CATEGORIES,
   filterModules,
   tallyModuleCategories,
   type ModuleSearchContext,
 } from './moduleSearch';
-import { PackOwnCopyHint, PartnerPackApplyDialog } from './PartnerPackApplyDialog';
-import { PartnerPackDeactivateDialog } from './PartnerPackDeactivateDialog';
-import {
-  useAppliedPack,
-  useInstallPack,
-  useRescanPacks,
-  canInstallPacks,
-  MAX_PACK_UPLOAD_BYTES,
-} from './partnerPacks';
-import type { PackType } from '@/shared/hooks/usePartnerPack';
+import { PacksCatalog } from './packs/PacksCatalog';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
@@ -78,13 +64,9 @@ import {
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { type MeOnboarding } from '@/app/layout/useCompanyWorkspace';
-import { useMeOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 import { getModulesByCategory } from '@/modules/_registry';
 import { translateManifestText } from '@/modules/_i18n';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
-import { groupPacksByMarket, packNameSlug, packSummary, type PackMarketBand } from '@/shared/lib/regionalPack';
-import { PackEmblem } from '@/shared/ui/PackEmblem';
 import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -120,50 +102,6 @@ interface SystemModule {
   is_core: boolean;
 }
 
-interface CompanyPresetAPI {
-  key: string;
-  label: string;
-  description: string;
-  icon: string;
-  enabled_modules: string[];
-  module_count: number;
-}
-
-interface PartnerPackBranding {
-  primary_color: string;
-  accent_color: string | null;
-  has_logo: boolean;
-  has_favicon: boolean;
-  powered_by_text: string;
-}
-
-interface PartnerPackManifestAPI {
-  slug: string;
-  /** Pack type under the Packs umbrella. Older backends/manifests omit it;
-   *  the card falls back to ``partner`` (the historical type). */
-  type?: PackType;
-  partner_name: string;
-  partner_url: string | null;
-  pack_version: string;
-  description: string;
-  default_locale: string;
-  additional_locales: string[];
-  cwicr_regions: string[];
-  default_currency: string;
-  default_tax_template: string | null;
-  validation_rule_packs: string[];
-  default_modules: string[];
-  hidden_modules: string[];
-  branding: PartnerPackBranding;
-  has_onboarding_script: boolean;
-  metadata: Record<string, unknown>;
-}
-
-interface PartnerPacksResponse {
-  active_slug: string | null;
-  installed: PartnerPackManifestAPI[];
-}
-
 /* ── Tab definitions ───────────────────────────────────────────────────── */
 
 // The Packs tab keeps the internal key ``partner-packs`` so existing deep-links
@@ -185,24 +123,6 @@ function resolveTabParam(tab: string | null): TabKey | null {
   if (!tab) return null;
   if (tab === 'packs') return 'partner-packs';
   return (MODULE_TAB_IDS as readonly string[]).includes(tab) ? (tab as TabKey) : null;
-}
-
-/* ── Pack type badge config ────────────────────────────────────────────── */
-
-const PACK_TYPE_META: Record<
-  PackType,
-  { labelKey: string; defaultLabel: string; icon: LucideIcon; variant: 'blue' | 'neutral' | 'success' | 'warning' }
-> = {
-  country: { labelKey: 'modules.pack_type_country', defaultLabel: 'Country', icon: Globe, variant: 'blue' },
-  industry: { labelKey: 'modules.pack_type_industry', defaultLabel: 'Industry', icon: HardHat, variant: 'neutral' },
-  partner: { labelKey: 'modules.pack_type_partner', defaultLabel: 'Partner', icon: Building2, variant: 'success' },
-  showcase: { labelKey: 'modules.pack_type_showcase', defaultLabel: 'Showcase', icon: Sparkles, variant: 'warning' },
-};
-
-/** Pack type with a safe fallback to ``partner`` for older manifests/backends
- *  that do not send a ``type`` field. */
-function packTypeOf(pack: PartnerPackManifestAPI): PackType {
-  return pack.type ?? 'partner';
 }
 
 /* ── Marketplace category config ───────────────────────────────────────── */
@@ -318,17 +238,6 @@ function moduleCategoryLabel(
   return meta ? t(meta.labelKey, { defaultValue: meta.defaultLabel }) : category;
 }
 
-/* ── Preset icon mapping ───────────────────────────────────────────────── */
-
-const PRESET_ICON_MAP: Record<string, LucideIcon> = {
-  Building2, Calculator, ClipboardList, Pencil, Boxes,
-  Home, HardHat, Briefcase, Box,
-};
-
-function getPresetIcon(iconName: string): LucideIcon {
-  return PRESET_ICON_MAP[iconName] ?? Package;
-}
-
 /* ══════════════════════════════════════════════════════════════════════════ */
 /* ── Main component ──────────────────────────────────────────────────── */
 /* ══════════════════════════════════════════════════════════════════════════ */
@@ -336,17 +245,29 @@ function getPresetIcon(iconName: string): LucideIcon {
 export function ModulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   // Deep-link support: ``/modules?tab=packs`` (new) and the legacy
   // ``/modules?tab=partner-packs`` (dashboard co-brand banner) both open the
   // Packs tab directly. Falls back to Company Profiles.
   const [activeTab, setActiveTab] = useState<TabKey>(
     () => resolveTabParam(searchParams.get('tab')) ?? 'profiles',
   );
+  // The tab is written back to the URL so the Packs tab's filters, which live
+  // in the query string, survive a reload on the tab they belong to.
+  const selectTab = useCallback(
+    (tab: TabKey) => {
+      setActiveTab(tab);
+      setSearchParams(
+        tab === 'profiles' ? {} : { tab: tab === 'partner-packs' ? 'packs' : tab },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
   const onTabKeyDown = useTabKeyboardNav<TabKey>({
     ids: MODULE_TAB_IDS,
     activeId: activeTab,
-    onChange: setActiveTab,
+    onChange: selectTab,
     orientation: 'horizontal',
   });
 
@@ -359,8 +280,16 @@ export function ModulesPage() {
   const [moduleQuery, setModuleQuery] = useState('');
   const handleModuleQuery = (value: string): void => {
     setModuleQuery(value);
-    if (value.trim() && activeTab !== 'system') setActiveTab('system');
+    if (value.trim() && activeTab !== 'system') selectTab('system');
   };
+
+  // ``?tab=packs&pack=<slug>`` names one pack: a case page or the onboarding
+  // offer already knows which. Its home is now the pack's own page, which
+  // opens the same setup dialog the card used to.
+  const linkedPack = searchParams.get('pack');
+  if (linkedPack && resolveTabParam(searchParams.get('tab')) === 'partner-packs') {
+    return <Navigate to={`/packs/${encodeURIComponent(linkedPack)}?setup=1`} replace />;
+  }
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -464,7 +393,7 @@ export function ModulesPage() {
           return (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => selectTab(tab.key)}
               role="tab"
               id={`modules-tab-${tab.key}`}
               aria-selected={isActive}
@@ -491,7 +420,7 @@ export function ModulesPage() {
         aria-labelledby={`modules-tab-${activeTab}`}
       >
         {activeTab === 'profiles' && <CompanyProfilesTab />}
-        {activeTab === 'partner-packs' && <PartnerPacksTab />}
+        {activeTab === 'partner-packs' && <PacksCatalog embedded />}
         {activeTab === 'data-packages' && <DataPackagesTab />}
         {activeTab === 'system' && (
           <SystemModulesTab query={moduleQuery} onClearQuery={() => setModuleQuery('')} />
@@ -505,167 +434,12 @@ export function ModulesPage() {
 /* ── Tab 1: Company Profiles ─────────────────────────────────────────── */
 /* ══════════════════════════════════════════════════════════════════════════ */
 
-/**
- * The name a preset's module key wears on screen.
- *
- * Presets speak in bare keys (`supplier_catalogs`), the locale files carry
- * `modules.catalog.supplier_catalogs`, and `moduleDisplayNameKey` already
- * derives one from the other for the registry page. Reusing it means the
- * profile cards and the module registry cannot end up calling the same module
- * two different things.
- *
- * The fallback is the key with its underscores opened out rather than the raw
- * key, because a card reading "supplier_catalogs" tells a reader they are
- * looking at a bug.
- */
-function presetModuleName(
-  t: (key: string, options: { defaultValue: string }) => string,
-  language: string,
-  id: string,
-): string {
-  return resolveModuleDisplayName({ name: id, display_name: id.replace(/_/g, ' ') }, t, language);
-}
-
 function CompanyProfilesTab() {
-  const { t, i18n } = useTranslation();
-  const queryClient = useQueryClient();
-  const onboardingQueryKey = useMeOnboardingQueryKey();
-  const addToast = useToastStore((s) => s.addToast);
-  const { isModuleEnabled, setModuleEnabled, canDisable, getEnabledDependents, syncFromServer } =
-    useModuleStore();
-
-  const [switchingTo, setSwitchingTo] = useState<CompanyPresetAPI | null>(null);
-  const [isSwitching, setIsSwitching] = useState(false);
-
-  // Determine active profile from localStorage
-  const [activeProfileKey, setActiveProfileKey] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem('oe_company_type') ?? null;
-    } catch {
-      return null;
-    }
-  });
-
-  useEffect(() => {
-    void syncFromServer();
-  }, [syncFromServer]);
-
-  const {
-    data: presets,
-    isLoading: presetsLoading,
-    isError: presetsError,
-    refetch: refetchPresets,
-  } = useQuery({
-    queryKey: ['onboarding-presets'],
-    queryFn: () => apiGet<CompanyPresetAPI[]>('/v1/users/onboarding-presets/'),
-  });
-
-  // The modules no profile governs. Asked for rather than copied, because a
-  // copy here and the list in `onboarding_presets.py` would drift, and the
-  // direction it drifts in decides whether this page tells a reader they are
-  // about to lose Projects. An empty answer degrades to naming a few more
-  // modules in the delta, never to hiding one.
-  const { data: coreModules } = useQuery({
-    queryKey: ['onboarding-presets', 'core'],
-    queryFn: () =>
-      apiGet<{ core_modules: string[] }>('/v1/users/onboarding-presets/core/').then(
-        (r) => r.core_modules,
-      ),
-    staleTime: 60 * 60 * 1000,
-  });
-
-  // What each profile carries that few others do. Computed over the whole set
-  // because "particular to this one" is a claim about the other twenty-one,
-  // and there is no way to make it from a single card's own data.
-  const shapes = useMemo(
-    () => profileShapes(presets ?? [], coreModules ?? []),
-    [presets, coreModules],
-  );
-
-  const handleProfileClick = useCallback(
-    (preset: CompanyPresetAPI) => {
-      if (preset.key === activeProfileKey) return;
-      setSwitchingTo(preset);
-    },
-    [activeProfileKey],
-  );
-
-  const confirmSwitch = useCallback(async () => {
-    if (!switchingTo) return;
-    setIsSwitching(true);
-    try {
-      // ── Single authoritative write path ──────────────────────────────
-      // The onboarding endpoint persists company_type + completed AND syncs
-      // module_preferences server-side from `enabled_modules`. We deliberately
-      // do NOT optimistically loop setModuleEnabled() here: that scheduled a
-      // second, debounced PATCH to /me/module-preferences/ which raced this
-      // POST on the SAME metadata.module_preferences JSON (last writer won,
-      // sometimes with the stale store snapshot). One awaited write, then a
-      // read-back, keeps the two in lockstep.
-      const isFullEnterprise = switchingTo.key === 'full_enterprise';
-      const enabledModules = isFullEnterprise
-        ? Object.values(getModulesByCategory()).flatMap((mods) => mods.map((m) => m.id))
-        : switchingTo.enabled_modules;
-
-      // No `interface_mode`: the Simple / Advanced choice has its own per-user
-      // record (`/v1/users/me/view-mode/`), and this field used to be written
-      // as 'advanced' on every switch whatever mode the user was in. A user
-      // who never picked a mode gets the default the new profile implies
-      // (`app/layout/useViewModeDefault.ts`).
-      const saved = await apiPost<MeOnboarding>('/v1/users/me/onboarding/', {
-        company_type: switchingTo.key,
-        enabled_modules: enabledModules,
-        completed: true,
-      });
-      // The sidebar picks its Simple-mode workspace from the profile in this
-      // cache entry, so a switch reshapes the menu now, not after it goes stale.
-      queryClient.setQueryData(onboardingQueryKey, saved);
-
-      // Reconcile the local module store from the server's canonical
-      // module_preferences (set by the POST above). syncFromServer() updates
-      // localStorage + the reactive store WITHOUT scheduling another server
-      // write, so the sidebar reflects the new profile immediately and there
-      // is no trailing debounced PATCH to race. We await it before the toast
-      // so success only shows once everything has actually landed.
-      await syncFromServer();
-
-      // Store profile key locally
-      localStorage.setItem('oe_company_type', switchingTo.key);
-      setActiveProfileKey(switchingTo.key);
-
-      addToast({
-        type: 'success',
-        title: t('modules.profile_switched', {
-          defaultValue: 'Profile switched to {{name}}',
-          name: switchingTo.label,
-        }),
-      });
-    } catch (err) {
-      addToast({
-        type: 'error',
-        title: t('modules.profile_switch_failed', { defaultValue: 'Failed to switch profile' }),
-        message: err instanceof Error ? err.message : String(err),
-      });
-    } finally {
-      setIsSwitching(false);
-      setSwitchingTo(null);
-    }
-  }, [switchingTo, syncFromServer, addToast, t, queryClient, onboardingQueryKey]);
-
-  const activePreset = presets?.find((p) => p.key === activeProfileKey);
+  const { t } = useTranslation();
+  const { isModuleEnabled, setModuleEnabled, canDisable, getEnabledDependents } = useModuleStore();
+  const profiles = useCompanyProfiles();
+  const { presets, presetsLoading, presetsError, refetchPresets, shapes, activeProfileKey, activePreset } = profiles;
   const activeModuleCount = activePreset?.module_count ?? 0;
-
-  // What the pending switch would actually do. Computed against the profile in
-  // force, so an account that has never picked one gets "everything gained,
-  // nothing lost", which is the truth rather than a diff against an invented
-  // baseline.
-  const switchDelta = useMemo(
-    () =>
-      switchingTo
-        ? profileDelta(activePreset ?? null, switchingTo, coreModules ?? [])
-        : { gained: [], lost: [], kept: [] },
-    [switchingTo, activePreset, coreModules],
-  );
 
   return (
     <div className="animate-card-in" style={{ animationDelay: '60ms' }}>
@@ -738,86 +512,15 @@ function CompanyProfilesTab() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[...(presets ?? [])].sort((a, b) => (a.key === 'full_enterprise' ? -1 : b.key === 'full_enterprise' ? 1 : 0)).map((preset) => {
-            const Icon = getPresetIcon(preset.icon);
-            const isActive = preset.key === activeProfileKey;
-            const isFull = preset.key === 'full_enterprise';
-            return (
-              <button
-                key={preset.key}
-                onClick={() => handleProfileClick(preset)}
-                aria-label={`${t(`onboarding.company_${preset.key}`, { defaultValue: preset.label })} - ${preset.module_count} ${t('modules.modules_label', { defaultValue: 'modules' })}`}
-                aria-pressed={isActive}
-                className={clsx(
-                  'text-left rounded-xl border p-4 transition-all',
-                  isActive
-                    ? 'border-oe-blue bg-oe-blue-subtle ring-1 ring-oe-blue/30'
-                    : isFull
-                      ? 'border-emerald-300 bg-emerald-50/60 hover:border-emerald-400 hover:shadow-xs dark:border-emerald-700 dark:bg-emerald-950/30 dark:hover:border-emerald-600'
-                      : 'border-border-light bg-surface-elevated hover:border-border hover:shadow-xs',
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className={clsx(
-                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                      isActive ? 'bg-oe-blue/10 text-oe-blue' : isFull ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-surface-secondary text-content-secondary',
-                    )}
-                  >
-                    <Icon size={20} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-content-primary">{t(`onboarding.company_${preset.key}`, { defaultValue: preset.label })}</span>
-                      {isActive && (
-                        <Badge variant="success" size="sm">
-                          <Check size={10} className="mr-0.5" />
-                          {t('modules.active', { defaultValue: 'Active' })}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="mt-0.5 text-xs text-content-secondary line-clamp-2">
-                      {t(`onboarding.company_${preset.key}_desc`, { defaultValue: preset.description })}
-                    </p>
-                    <p className="mt-1.5 text-2xs text-content-tertiary font-medium">
-                      {preset.module_count} {t('modules.modules_label', { defaultValue: 'modules' })}
-                    </p>
-                    {/* What this profile is for, said in modules rather than in
-                        adjectives. Two names, because the point is to be read
-                        at a glance across a grid of twenty-two cards; the rest
-                        of the list is on the profile itself. */}
-                    {(() => {
-                      const rare = shapes.get(preset.key)?.rare ?? [];
-                      if (rare.length === 0) return null;
-                      const shown = rare.slice(0, 2).map((id) => presetModuleName(t, i18n.language, id));
-                      return (
-                        <p className="mt-1 text-2xs text-content-tertiary">
-                          <span className="font-medium">
-                            {t('modules.profile_particular', { defaultValue: 'Particular to it' })}:
-                          </span>{' '}
-                          {fmtList(shown)}
-                          {rare.length > shown.length && (
-                            <span className="text-content-tertiary">
-                              {' '}
-                              {/* `n`, not `count`. i18next reads `count` as a
-                                  plural selector, which would make this one
-                                  string owe every locale its own CLDR forms
-                                  for a number that only ever follows a plus
-                                  sign. */}
-                              {t('modules.profile_particular_more', {
-                                defaultValue: '+{{n}}',
-                                n: rare.length - shown.length,
-                              })}
-                            </span>
-                          )}
-                        </p>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+          {sortPresets(presets).map((preset) => (
+            <CompanyProfileCard
+              key={preset.key}
+              preset={preset}
+              isActive={preset.key === activeProfileKey}
+              shape={shapes.get(preset.key)}
+              onSelect={profiles.requestSwitch}
+            />
+          ))}
         </div>
       )}
 
@@ -831,794 +534,8 @@ function CompanyProfilesTab() {
         />
       </div>
 
-      {/* Confirm dialog */}
-      <ConfirmDialog
-        open={switchingTo !== null}
-        onConfirm={() => void confirmSwitch()}
-        onCancel={() => setSwitchingTo(null)}
-        title={t('modules.switch_profile_title', {
-          defaultValue: 'Switch Profile',
-        })}
-        message={t('modules.switch_profile_delta', {
-          // A new key rather than new wording on the old one. The old string is
-          // already translated into forty-one languages, and adding
-          // placeholders to the English alone would have left every other
-          // reader the sentence without the numbers, which no gate we own can
-          // see. Counts follow a colon so no language owes this string a plural
-          // form.
-          defaultValue:
-            'Switch to {{name}}? Turned on: {{gained}}. Turned off: {{lost}}. Kept: {{kept}}. Never changed by a profile: {{core}}.',
-          name: switchingTo
-            ? t(`onboarding.company_${switchingTo.key}`, { defaultValue: switchingTo.label })
-            : '',
-          gained: switchDelta.gained.length,
-          lost: switchDelta.lost.length,
-          kept: switchDelta.kept.length,
-          core: coreModules?.length ?? 0,
-        })}
-        confirmLabel={t('modules.switch_confirm', { defaultValue: 'Switch Profile' })}
-        variant="warning"
-        loading={isSwitching}
-      />
+      <ProfileSwitchDialog state={profiles} />
     </div>
-  );
-}
-
-/* ══════════════════════════════════════════════════════════════════════════ */
-/* ── Tab: Partner Packs ──────────────────────────────────────────────── */
-/* ══════════════════════════════════════════════════════════════════════════ */
-
-/**
- * The heading over each band of packs.
- *
- * One literal `t()` call per band rather than a computed
- * `modules.packs_band_${band}`, so every string this page can render is
- * greppable from the locale files and the orphan-key gate can see all seven.
- * A computed key would also have to spell `cross-region` with a hyphen, which
- * no other key in the family does.
- */
-function useBandLabels(): Record<PackMarketBand, string> {
-  const { t } = useTranslation();
-  return {
-    home: t('modules.packs_band_home', { defaultValue: 'Suggested for your region' }),
-    americas: t('modules.packs_band_americas', { defaultValue: 'Americas' }),
-    china: t('modules.packs_band_china', { defaultValue: 'China' }),
-    india: t('modules.packs_band_india', { defaultValue: 'India' }),
-    europe: t('modules.packs_band_europe', { defaultValue: 'Europe' }),
-    rest: t('modules.packs_band_rest', { defaultValue: 'Other markets' }),
-    'cross-region': t('modules.packs_band_cross_region', {
-      defaultValue: 'Industry and cross-region',
-    }),
-  };
-}
-
-function PartnerPacksTab() {
-  const { t, i18n } = useTranslation();
-
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ['partner-packs'],
-    queryFn: () => apiGet<PartnerPacksResponse>('/v1/partner-pack/installed'),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const applied = useAppliedPack();
-  const packs = data?.installed ?? [];
-  const activeSlug = data?.active_slug ?? null;
-  const activeSource = applied.data?.applied ? applied.data.source ?? null : null;
-
-  // ``/modules?tab=packs&pack=<slug>`` — a named pack, reached from somewhere
-  // that already knows which one it means. A case page says which pack carries
-  // its market's standards, and before this the only thing it could offer was
-  // the tab: eighteen cards, the right one somewhere in them, and the reader
-  // left to match a name they had just read. This scrolls that card into view
-  // and opens its setup dialog, which is where the dry-run preview and the
-  // confirm already live - so the deep link shortens the path without skipping
-  // the step that makes applying a pack safe.
-  const [packSearchParams] = useSearchParams();
-  const focusSlug = packSearchParams.get('pack');
-
-  // The order the cards are met in. The endpoint sorts by slug because a
-  // lookup wants a stable order; a reader wants the market that is theirs, and
-  // after that the ones that carry the most work. `detectCountry` is a hint
-  // and nothing here gates on it: a wrong guess only moves one card to the
-  // top, and every other pack stays exactly one click away.
-  const homeCountry = useMemo(() => detectCountry(), []);
-  const bandLabels = useBandLabels();
-  const banded = useMemo(
-    () =>
-      groupPacksByMarket(packs, {
-        homeCountry,
-        locale: i18n.language,
-        // Sort on the string the card renders, not on `partner_name` or the
-        // slug. Ordering a grid by a name nobody can see is the reason
-        // "Batimatech" used to sit between Austria and Belgium.
-        nameOf: (p) =>
-          t(`modules.pp_name_${packNameSlug(p.slug)}`, { defaultValue: p.partner_name }),
-      }),
-    [packs, homeCountry, i18n.language, t],
-  );
-  // Stagger the entrance across the whole page rather than restarting the
-  // delay inside every band, which would make the second band appear to load
-  // again after the first had settled.
-  const cardIndex = useMemo(() => {
-    const order = new Map<string, number>();
-    let n = 0;
-    for (const group of banded) for (const pack of group.packs) order.set(pack.slug, n++);
-    return order;
-  }, [banded]);
-
-  return (
-    <div className="animate-card-in" style={{ animationDelay: '60ms' }}>
-      <div className="mb-4">
-        <h2 className="text-sm font-semibold text-content-secondary uppercase tracking-wider mb-0.5">
-          {t('modules.packs_title', { defaultValue: 'Packs' })}
-        </h2>
-        <p className="text-xs text-content-tertiary">
-          {t('modules.packs_desc', {
-            defaultValue:
-              'A ready-made preset for a country, industry, partner or showcase: currency, tax template, validation standards, default modules and optional co-branding. Press Activate on a pack to apply it, and you can switch back any time.',
-          })}
-        </p>
-        <Link
-          to="/modules/developer-guide#partner-packs"
-          className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-oe-blue hover:underline"
-        >
-          <BookOpen size={13} />
-          {t('modules.packs_build_own', {
-            defaultValue: 'Build your own pack and share it with others',
-          })}
-        </Link>
-      </div>
-
-      {/* Install / rescan controls — admin only (gated inside the panel). */}
-      <InstallPackPanel onChanged={() => void refetch()} />
-
-      {/* A read-only account (the public demo keeps every account a viewer)
-          sees the packs and why it cannot install them, once, above the grid,
-          rather than a button that ends in a 403. */}
-      <ViewerPackNotice />
-
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse" padding="sm">
-              <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-lg bg-surface-secondary" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-2/3 rounded bg-surface-secondary" />
-                  <div className="h-3 w-full rounded bg-surface-secondary" />
-                  <div className="h-3 w-1/2 rounded bg-surface-secondary" />
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      ) : isError ? (
-        <div className="py-16 text-center">
-          <AlertTriangle size={40} className="mx-auto mb-3 text-semantic-warning" strokeWidth={1.5} />
-          <p className="text-sm font-medium text-content-secondary">
-            {t('modules.packs_load_failed', { defaultValue: 'Failed to load packs' })}
-          </p>
-          <p className="mt-1 text-xs text-content-tertiary">
-            {t('modules.packs_load_failed_hint', {
-              defaultValue: 'Check your connection and try again.',
-            })}
-          </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<RefreshCw size={14} />}
-            onClick={() => void refetch()}
-            className="mt-4"
-          >
-            {t('common.retry', { defaultValue: 'Retry' })}
-          </Button>
-        </div>
-      ) : packs.length === 0 ? (
-        <div className="py-16 text-center">
-          <Package size={40} className="mx-auto mb-3 text-content-tertiary" />
-          <p className="text-sm font-medium text-content-secondary">
-            {t('modules.no_packs', { defaultValue: 'No packs available' })}
-          </p>
-          <p className="mt-1 text-xs text-content-tertiary">
-            {t('modules.no_packs_hint', {
-              defaultValue:
-                'Packs ship pre-configured regional settings, validation standards, default modules and branding for a specific country, industry, partner or showcase.',
-            })}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {banded.map((group) => (
-            <section key={group.band}>
-              <div className="mb-3 flex items-baseline gap-2">
-                <h3 className="text-sm font-semibold text-content-primary">{bandLabels[group.band]}</h3>
-                <span className="text-2xs text-content-tertiary">{group.packs.length}</span>
-                {group.band === 'home' && (
-                  <span className="text-2xs text-content-tertiary">
-                    {t('modules.packs_band_home_hint', {
-                      defaultValue: 'Guessed from your browser. Any other pack is one click away.',
-                    })}
-                  </span>
-                )}
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {group.packs.map((pack) => (
-                  <PartnerPackCard
-                    key={pack.slug}
-                    pack={pack}
-                    index={cardIndex.get(pack.slug) ?? 0}
-                    isActive={activeSlug === pack.slug}
-                    activeSource={activeSlug === pack.slug ? activeSource : null}
-                    envPinned={activeSource === 'env'}
-                    focused={focusSlug === pack.slug}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Shown instead of the install controls to accounts that may only view packs. */
-function ViewerPackNotice() {
-  const { t } = useTranslation();
-  if (canInstallPacks(useAuthStore((s) => s.userRole))) return null;
-  return (
-    <div
-      role="note"
-      data-testid="pack-viewer-notice"
-      className="mb-4 flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3.5 py-3 text-sm text-content-secondary"
-    >
-      <ShieldCheck size={16} className="mt-0.5 shrink-0" />
-      <span>
-        {t('modules.pp_viewer_notice', {
-          defaultValue: 'This account can view packs but not install them. Installing a pack needs an administrator.',
-        })}
-        <PackOwnCopyHint />
-      </span>
-    </div>
-  );
-}
-
-/* ── Install / Rescan panel ────────────────────────────────────────────── */
-
-/**
- * Admin-only control strip for getting a partner pack onto this install:
- * upload a ``.zip`` (file picker or drag-and-drop) which POSTs to
- * ``/v1/partner-pack/install``, or Rescan ``<data-dir>/packs/`` for packs the
- * operator dropped in by hand. Non-admins see nothing — the underlying
- * endpoints are ``RequirePermission("admin")`` server-side, so we mirror that
- * gate here and never render a control that would only ever 403.
- *
- * ``onChanged`` is called after a successful install or rescan so the parent
- * tab can refetch the installed list; the install/rescan hooks also invalidate
- * the shared partner-pack query keys, so the grid updates immediately.
- */
-export function InstallPackPanel({ onChanged }: { onChanged: () => void }) {
-  const { t } = useTranslation();
-  const addToast = useToastStore((s) => s.addToast);
-  const isAdmin = canInstallPacks(useAuthStore((s) => s.userRole));
-
-  const install = useInstallPack();
-  const rescan = useRescanPacks();
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const dropDescId = useId();
-
-  // Only administrators can install or rescan packs (RequirePermission("admin")
-  // on the backend). Render nothing for everyone else.
-  if (!isAdmin) return null;
-
-  const busy = install.isPending || rescan.isPending;
-
-  /** Client-side guard: must be a .zip and under the 25 MiB cap before upload.
-   *  Returns a human-readable reason string when rejected, or null when OK. */
-  function rejectReason(file: File): string | null {
-    const isZip =
-      file.type === 'application/zip' ||
-      file.type === 'application/x-zip-compressed' ||
-      file.type === 'application/octet-stream' || // some browsers send this for .zip
-      file.name.toLowerCase().endsWith('.zip');
-    if (!isZip) {
-      return t('modules.pack_install_not_zip', {
-        defaultValue: 'Please choose a .zip file. Packs are distributed as a single .zip archive.',
-      });
-    }
-    if (file.size > MAX_PACK_UPLOAD_BYTES) {
-      return t('modules.pack_install_too_large', {
-        defaultValue: 'That file is {{size}} MB. Packs must be 25 MB or smaller.',
-        size: fmtFixed(file.size / (1024 * 1024), 1),
-      });
-    }
-    return null;
-  }
-
-  function handleFile(file: File | undefined | null) {
-    if (!file) return;
-    const reason = rejectReason(file);
-    if (reason) {
-      addToast({
-        type: 'error',
-        title: t('modules.pack_install_rejected', { defaultValue: "Can't install this file" }),
-        message: reason,
-      });
-      return;
-    }
-    install.mutate(file, {
-      onSuccess: (res) => {
-        addToast({
-          type: 'success',
-          title: t('modules.pack_install_ok', { defaultValue: 'Pack installed' }),
-          message: t('modules.pack_install_ok_msg', {
-            defaultValue: '{{name}} ({{slug}}) v{{version}} is now available. Press Activate to apply it.',
-            name: res.partner_name,
-            slug: res.slug,
-            version: res.pack_version,
-          }),
-        });
-        onChanged();
-      },
-      onError: (err) => {
-        // The backend ``detail`` is already user-safe; show it verbatim.
-        addToast({
-          type: 'error',
-          title: t('modules.pack_install_failed', { defaultValue: 'Install failed' }),
-          message: err instanceof Error ? err.message : String(err),
-        });
-      },
-    });
-  }
-
-  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    handleFile(e.target.files?.[0]);
-    // Reset so picking the same file again re-fires change.
-    e.target.value = '';
-  }
-
-  function onDrop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setIsDragging(false);
-    if (busy) return;
-    handleFile(e.dataTransfer.files?.[0]);
-  }
-
-  function handleRescan() {
-    rescan.mutate(undefined, {
-      onSuccess: (res) => {
-        addToast({
-          type: 'success',
-          title: t('modules.pack_rescan_ok', { defaultValue: 'Rescan complete' }),
-          message: t('modules.pack_rescan_count', {
-            defaultValue: 'Found {{count}} packs.',
-            count: res.count,
-          }),
-        });
-        onChanged();
-      },
-      onError: (err) => {
-        addToast({
-          type: 'error',
-          title: t('modules.pack_rescan_failed', { defaultValue: 'Rescan failed' }),
-          message: err instanceof Error ? err.message : String(err),
-        });
-      },
-    });
-  }
-
-  return (
-    <Card className="mb-6 animate-card-in" padding="md" style={{ animationDelay: '40ms' }}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        {/* Dropzone + file picker */}
-        <div className="min-w-0 flex-1">
-          <div
-            role="button"
-            tabIndex={busy ? -1 : 0}
-            aria-label={t('modules.pack_install_dropzone_label', {
-              defaultValue: 'Upload a pack .zip - click to choose a file or drop one here',
-            })}
-            aria-describedby={dropDescId}
-            aria-disabled={busy}
-            onClick={() => {
-              if (!busy) fileInputRef.current?.click();
-            }}
-            onKeyDown={(e) => {
-              if (busy) return;
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              if (!busy) setIsDragging(true);
-            }}
-            onDragLeave={() => setIsDragging(false)}
-            onDrop={onDrop}
-            className={clsx(
-              'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
-              isDragging
-                ? 'border-oe-blue bg-oe-blue/5'
-                : 'border-border hover:border-oe-blue/50 hover:bg-surface-secondary/40',
-              busy && 'cursor-not-allowed opacity-60',
-            )}
-          >
-            {install.isPending ? (
-              <Loader2 size={22} className="animate-spin text-oe-blue" />
-            ) : (
-              <UploadCloud size={22} className="text-content-tertiary" />
-            )}
-            <div>
-              <p className="text-sm font-medium text-content-primary">
-                {install.isPending
-                  ? t('modules.pack_install_uploading', { defaultValue: 'Installing pack…' })
-                  : t('modules.pack_install_cta', { defaultValue: 'Install a pack' })}
-              </p>
-              <p id={dropDescId} className="mt-0.5 text-xs text-content-tertiary">
-                {t('modules.pack_install_hint', {
-                  defaultValue: 'Click to choose a .zip, or drop one here. Max 25 MB. The pack is not activated until you Apply it.',
-                })}
-              </p>
-            </div>
-            {/* Hidden native input — the dropzone proxies clicks to it. */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".zip,application/zip,application/x-zip-compressed"
-              className="sr-only"
-              aria-label={t('modules.pack_install_input_label', {
-                defaultValue: 'Pack .zip file',
-              })}
-              disabled={busy}
-              onChange={onInputChange}
-            />
-          </div>
-        </div>
-
-        {/* Rescan + drop-folder helper */}
-        <div className="flex shrink-0 flex-col gap-2 sm:w-64">
-          <Button
-            variant="secondary"
-            size="md"
-            disabled={busy}
-            icon={
-              rescan.isPending ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <RefreshCw size={14} />
-              )
-            }
-            onClick={handleRescan}
-          >
-            {rescan.isPending
-              ? t('modules.pack_rescanning', { defaultValue: 'Rescanning…' })
-              : t('modules.pack_rescan', { defaultValue: 'Rescan packs' })}
-          </Button>
-          <p className="flex items-start gap-1.5 text-2xs text-content-tertiary leading-relaxed">
-            <FileArchive size={12} className="mt-0.5 shrink-0" />
-            <span>
-              {t('modules.pack_rescan_helper', {
-                defaultValue:
-                  'You can also drop a pack folder or .zip into your data dir under packs/ (next to the database), then click Rescan.',
-              })}
-            </span>
-          </p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-/* ── Partner Pack Card ─────────────────────────────────────────────────── */
-
-interface PartnerPackCardProps {
-  pack: PartnerPackManifestAPI;
-  index: number;
-  isActive: boolean;
-  /** When the pack is active, whether it was applied in-app (can be
-   *  deactivated from the UI) or pinned via the OE_PARTNER_PACK env var
-   *  (managed by the operator, not unappliable here). */
-  activeSource?: 'in-app' | 'env' | null;
-  /** True when ANY pack is currently pinned via the OE_PARTNER_PACK env var.
-   *  Activating a different pack from the UI then silently fails, so we warn
-   *  instead of opening the apply dialog. */
-  envPinned?: boolean;
-  /** This is the pack named by ``?pack=<slug>``. Scroll it into view and, when
-   *  there is something to do with it, open its setup dialog. */
-  focused?: boolean;
-}
-
-function asStringArray(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((v): v is string => typeof v === 'string');
-}
-
-function PartnerPackCard({
-  pack,
-  index,
-  isActive,
-  activeSource,
-  envPinned,
-  focused = false,
-}: PartnerPackCardProps) {
-  const { t } = useTranslation();
-  const addToast = useToastStore((s) => s.addToast);
-  // Activating and deactivating are RequireRole("admin") on the server. A
-  // viewer used to get the button, the dialog, and a 403 nobody explained.
-  const canInstall = canInstallPacks(useAuthStore((s) => s.userRole));
-  const [applyOpen, setApplyOpen] = useState(false);
-  const [deactivateOpen, setDeactivateOpen] = useState(false);
-  // Addressed by id rather than by a ref: `Card` spreads its extra props onto
-  // its div but does not forward a ref, and wrapping it in a ref-carrying div
-  // would make that div the grid item and hand the card a different height
-  // than its neighbours.
-  const cardId = `pack-card-${pack.slug}`;
-
-  // The deep-linked card brings itself into view, and opens its setup dialog
-  // only when opening it would mean anything: an already-active pack has
-  // nothing to apply, and an env-pinned deployment cannot be changed from the
-  // UI at all, so in both cases the scroll and the ring are the whole answer.
-  useEffect(() => {
-    if (!focused) return;
-    document.getElementById(cardId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    if (!isActive && !envPinned) setApplyOpen(true);
-  }, [focused, isActive, envPinned, cardId]);
-
-  // Activating from the UI cannot override an env-pinned pack — the backend
-  // keeps the OE_PARTNER_PACK selection. Warn and skip opening the dialog.
-  function handleActivateClick() {
-    if (envPinned) {
-      addToast({
-        type: 'warning',
-        title: t('modules.pack_active_via_env', {
-          defaultValue: 'Active via environment (OE_PACK)',
-        }),
-        message: t('modules.env_pinned_warning', {
-          defaultValue:
-            'A partner pack is pinned via the OE_PARTNER_PACK environment variable. Ask your administrator to change it.',
-        }),
-      });
-      return;
-    }
-    setApplyOpen(true);
-  }
-
-  const supportEmail =
-    typeof pack.metadata.support_email === 'string'
-      ? pack.metadata.support_email
-      : null;
-  const regulatorRefs = asStringArray(pack.metadata.regulator_refs);
-
-  // Prefer human-readable regulator refs; fall back to raw rule-pack slugs.
-  const standards = regulatorRefs.length > 0 ? regulatorRefs : pack.validation_rule_packs;
-
-  const accent = pack.branding.accent_color ?? pack.branding.primary_color;
-  // One line, not the whole paragraph: see packSummary for why the split is on
-  // the colon rather than a CSS clamp.
-  const summary = packSummary(
-    t(`modules.pp_desc_${packNameSlug(pack.slug)}`, { defaultValue: pack.description }),
-  );
-
-  const packType = packTypeOf(pack);
-  // Co-branding line stays a property of the ``partner`` type only.
-  const poweredBy =
-    packType === 'partner' && pack.branding.powered_by_text
-      ? pack.branding.powered_by_text
-      : null;
-
-  return (
-    <Card
-      hoverable
-      id={cardId}
-      data-pack-slug={pack.slug}
-      className={clsx(
-        'animate-card-in group relative overflow-hidden',
-        focused && 'ring-2 ring-oe-blue/40',
-      )}
-      style={{ animationDelay: `${80 + index * 30}ms` }}
-    >
-      {/* Brand accent — left border strip distinguishes each company */}
-      <span
-        aria-hidden
-        className="absolute inset-y-0 left-0 w-1 rounded-l-xl"
-        style={{ backgroundColor: pack.branding.primary_color }}
-      />
-
-      <div className="pl-2">
-        {/* Identity: the flag, the name, and the one line that says who the
-            pack is for. The name used to sit over a slug and a coloured
-            version chip, which read as three titles of similar weight before
-            the reader reached anything about the pack itself. */}
-        <div className="flex items-start gap-3.5">
-          <PackEmblem pack={pack} size={52} />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start gap-2">
-              <h3 className="min-w-0 flex-1 text-[15px] font-bold leading-snug text-content-primary">
-                {/* The translated name, the way the onboarding picker, the
-                    dashboard card and the cases strip all render it. This card
-                    printed `partner_name` raw, so the one screen whose whole
-                    job is choosing a market was the one screen that named the
-                    markets in English only. Written inline because
-                    `check_i18n_computed_keys.py` recognises `modules.pp_name_*`
-                    in this exact shape and nowhere else. */}
-                {t(`modules.pp_name_${packNameSlug(pack.slug)}`, {
-                  defaultValue: pack.partner_name,
-                })}
-              </h3>
-              {isActive && (
-                <Badge variant="success" size="sm" className="mt-0.5 shrink-0">
-                  <Check size={10} className="mr-0.5" />
-                  {t('modules.active', { defaultValue: 'Active' })}
-                </Badge>
-              )}
-            </div>
-            {summary && (
-              <p className="mt-1 text-xs leading-relaxed text-content-secondary">{summary}</p>
-            )}
-          </div>
-        </div>
-
-        {/* What the pack sets, in one quiet line. This was four badges of the
-            same weight as the Active one, so a currency code drew the eye as
-            hard as whether the pack was switched on. */}
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs text-content-tertiary">
-          {(() => {
-            const meta = PACK_TYPE_META[packType];
-            const TypeIcon = meta.icon;
-            return (
-              <span className="inline-flex items-center gap-1 font-semibold uppercase tracking-wide" style={{ color: accent }}>
-                <TypeIcon size={11} />
-                {t(meta.labelKey, { defaultValue: meta.defaultLabel })}
-              </span>
-            );
-          })()}
-          <span className="text-border">·</span>
-          <span className="font-mono">{pack.default_currency}</span>
-          {pack.default_tax_template && (
-            <>
-              <span className="text-border">·</span>
-              <span className="truncate font-mono">{pack.default_tax_template}</span>
-            </>
-          )}
-          <span className="text-border">·</span>
-          <span className="font-mono">v{pack.pack_version}</span>
-          <span className="text-border">·</span>
-          <span className="truncate font-mono">{pack.slug}</span>
-        </div>
-
-        {/* Co-branding line - partner-type packs only */}
-        {poweredBy && (
-          <p className="mt-2 text-2xs font-medium text-content-tertiary" style={{ color: accent }}>
-            {poweredBy}
-          </p>
-        )}
-
-        {/* Reference standards.
-            These come from the pack's documentation metadata (regulator_refs
-            or the raw validation_rule_pack slugs) and are NOT proof that the
-            engine enforces them - for most packs none of them map to a
-            registered rule set. Label them as reference-only and point at the
-            apply dialog, which lists the rule packs that genuinely run. */}
-        {standards.length > 0 && (
-          <div className="mt-3">
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <ShieldCheck size={12} className="text-content-tertiary" style={{ color: accent }} />
-              <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wider">
-                {t('modules.partner_pack_standards', { defaultValue: 'Reference standards' })}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 flex-wrap">
-              {standards.slice(0, 6).map((std) => (
-                <Badge key={std} variant="neutral" size="sm">{std}</Badge>
-              ))}
-              {standards.length > 6 && (
-                <Badge variant="neutral" size="sm">+{standards.length - 6}</Badge>
-              )}
-            </div>
-            <p className="mt-1.5 text-2xs text-content-tertiary leading-snug">
-              {t('modules.partner_pack_standards_note', {
-                defaultValue:
-                  'Listed for reference. Enforced validation rules are shown when you activate the pack.',
-              })}
-            </p>
-          </div>
-        )}
-
-        {/* Links */}
-        {(pack.partner_url || supportEmail) && (
-          <div className="mt-3 flex items-center gap-3 text-2xs">
-            {pack.partner_url && (
-              <a
-                href={pack.partner_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-medium hover:underline"
-                style={{ color: accent }}
-              >
-                <ExternalLink size={12} />
-                {t('modules.partner_pack_website', { defaultValue: 'Website' })}
-              </a>
-            )}
-            {supportEmail && (
-              <a
-                href={`mailto:${supportEmail}`}
-                className="inline-flex items-center gap-1 text-content-tertiary hover:text-content-secondary hover:underline"
-              >
-                <Mail size={12} />
-                {supportEmail}
-              </a>
-            )}
-          </div>
-        )}
-
-        {/* Activate / deactivate */}
-        <div className="mt-4 flex items-center gap-2 border-t border-border-light pt-3">
-          {isActive ? (
-            activeSource === 'env' ? (
-              <span className="inline-flex items-center gap-1.5 text-2xs text-content-tertiary">
-                <Info size={12} />
-                {t('modules.pack_active_via_env', {
-                  defaultValue: 'Active via environment (OE_PACK)',
-                })}
-              </span>
-            ) : (
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Power size={14} />}
-                onClick={() => setDeactivateOpen(true)}
-                disabled={!canInstall}
-              >
-                {t('modules.pack_deactivate', { defaultValue: 'Deactivate' })}
-              </Button>
-            )
-          ) : (
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Power size={14} />}
-              onClick={handleActivateClick}
-              disabled={!canInstall}
-            >
-              {t('modules.pack_activate', { defaultValue: 'Activate pack' })}
-            </Button>
-          )}
-        </div>
-        {!canInstall && !(isActive && activeSource === 'env') && (
-          <p
-            className="mt-1.5 inline-flex items-center gap-1.5 text-2xs text-content-tertiary"
-            data-testid="pack-admin-only"
-          >
-            <ShieldCheck size={12} className="shrink-0" />
-            {t('modules.pack_admin_only_card', {
-              defaultValue: 'Only an administrator can activate or deactivate a pack.',
-            })}
-          </p>
-        )}
-      </div>
-
-      <PartnerPackApplyDialog
-        open={applyOpen}
-        onClose={() => setApplyOpen(false)}
-        slug={pack.slug}
-        partnerName={pack.partner_name}
-      />
-      <PartnerPackDeactivateDialog
-        open={deactivateOpen}
-        onClose={() => setDeactivateOpen(false)}
-        partnerName={pack.partner_name}
-      />
-    </Card>
   );
 }
 

@@ -642,6 +642,13 @@ const SettingsPage = lazy(() =>
 const ModulesPage = lazy(() =>
   import('@/features/modules/ModulesPage').then((m) => ({ default: m.ModulesPage }))
 );
+// Packs - country and company-type packs, one page with filters and a page per pack.
+const PacksPage = lazy(() =>
+  import('@/features/modules/packs/PacksPage').then((m) => ({ default: m.PacksPage }))
+);
+const PackDetailPage = lazy(() =>
+  import('@/features/modules/packs/PackDetailPage').then((m) => ({ default: m.PackDetailPage }))
+);
 const ModuleDeveloperGuide = lazy(() =>
   import('@/features/modules/ModuleDeveloperGuide').then((m) => ({ default: m.ModuleDeveloperGuide }))
 );
@@ -1581,6 +1588,8 @@ export default function App() {
             /cases/new is declared before the stepper for readability only -
             the router ranks a static segment above a dynamic one regardless. */}
         <Route path="/videos" element={<P title="Videos"><VideosPage /></P>} />
+        <Route path="/packs" element={<P title="Packs"><PacksPage /></P>} />
+        <Route path="/packs/:slug" element={<P title="Packs"><PackDetailPage /></P>} />
         <Route path="/cases" element={<P title="Cases"><CasesPage /></P>} />
         <Route path="/cases/new" element={<P title="Cases"><CaseEditorPage /></P>} />
         <Route path="/cases/:playbookId/edit" element={<P title="Cases"><CaseEditorPage /></P>} />
