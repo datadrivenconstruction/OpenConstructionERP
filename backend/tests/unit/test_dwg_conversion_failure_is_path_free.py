@@ -109,3 +109,22 @@ async def test_a_new_revision_clears_the_previous_error_code() -> None:
     await svc._set_error_code(uuid.uuid4(), None)
 
     assert repo.row.metadata_ == {"keep": 1}
+
+
+@pytest.mark.asyncio
+async def test_parse_runs_after_the_processing_row_is_committed(tmp_path: Path, monkeypatch) -> None:
+    # The heartbeat updates the drawing row from another session; an open
+    # transaction here would block it for the whole parse and the drawing
+    # would read as orphaned while it was still being processed.
+    svc, _repo = _service()
+    order: list[str] = []
+    svc.session.commit = AsyncMock(side_effect=lambda: order.append("commit"))
+
+    def parse(*_a: Any) -> dict[str, Any]:
+        order.append("parse")
+        raise ValueError("stop here")
+
+    monkeypatch.setattr(service_mod, "_process_dxf_sync", parse)
+    await svc._process_drawing(uuid.uuid4(), str(tmp_path / "x.dxf"))
+
+    assert order[:2] == ["commit", "parse"]
