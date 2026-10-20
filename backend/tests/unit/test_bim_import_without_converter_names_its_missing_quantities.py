@@ -16,8 +16,10 @@ import pytest
 
 from app.modules.bim_hub.quantity_warning import (
     CONVERTER_ABSENT,
+    CONVERTER_FAILED,
     NO_QUANTITIES,
     NO_QUANTITIES_CONVERTER_ABSENT,
+    NO_QUANTITIES_CONVERTER_FAILED,
     QUANTITY_WARNING_CODES,
     quantity_warning,
 )
@@ -59,3 +61,16 @@ def test_the_frontend_mirrors_every_code() -> None:
     assert block is not None
     mirrored = set(re.findall(r"'([a-z_]+)'", block.group(1)))
     assert mirrored == set(QUANTITY_WARNING_CODES)
+
+
+@pytest.mark.parametrize(
+    ("no_quantities", "code"),
+    [(True, NO_QUANTITIES_CONVERTER_FAILED), (False, CONVERTER_FAILED)],
+)
+def test_an_installed_converter_that_failed_is_not_called_absent(no_quantities: bool, code: str) -> None:
+    # A timed-out or crashed conversion used to be reported as "converter not available".
+    warning = quantity_warning(converter_absent=True, no_quantities=no_quantities, converter_failed=True)
+    assert warning is not None
+    assert warning.code == code
+    assert "not available" not in warning.message
+    assert "did not finish" in warning.message

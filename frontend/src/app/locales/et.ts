@@ -10386,6 +10386,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Koguseid ei õnnestunud välja lugeda: DDC konverter pole sellel serveril saadaval. Elemendid imporditi ainult vaatamiseks ja sidumiseks. Paigaldage konverter ja korrake importi, et saada pindalad, mahud ja pikkused.",
     "bim.quantity_warning.converter_absent": "DDC konverter pole sellel serveril saadaval, seetõttu loeti kogused ainult faili sisseehitatud IFC põhikogustest ja need võivad olla puudulikud. Paigaldage konverter ja korrake importi täielike koguste saamiseks.",
     "bim.quantity_warning.no_quantities": "Sellest failist ei õnnestunud ühtegi kogust (pindala, maht, pikkus) välja lugeda. Elemendid imporditi ainult vaatamiseks ja sidumiseks.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Koguseid ei õnnestunud välja lugeda: DDC konverter on paigaldatud, kuid ei lõpetanud selle faili töötlemist (aeg sai täis või peatus veaga). Elemendid imporditi ainult vaatamiseks ja sidumiseks. Korrake importi, et konverter uuesti käivitada.",
+    "bim.quantity_warning.converter_failed": "DDC konverter on paigaldatud, kuid ei lõpetanud selle faili töötlemist (aeg sai täis või peatus veaga), seetõttu loeti kogused ainult faili sisseehitatud IFC põhikogustest ja need võivad olla puudulikud. Korrake importi täielike koguste saamiseks.",
     "bim_upload.stage_extracting": "Hoone elementide ekstraheerimine...",
     "bim_upload.stage_failed": "Üleslaadimine ebaõnnestus",
     "bim_upload.stage_finalizing": "Mudeli seadistuse viimistlemine...",

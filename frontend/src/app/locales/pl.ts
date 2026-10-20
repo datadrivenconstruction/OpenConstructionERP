@@ -15827,6 +15827,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Nie udało się wyodrębnić ilości: konwerter DDC nie jest dostępny na tym serwerze. Elementy zaimportowano tylko do podglądu i powiązywania. Zainstaluj konwerter i ponów import, aby uzyskać powierzchnie, objętości i długości.",
     "bim.quantity_warning.converter_absent": "Konwerter DDC nie jest dostępny na tym serwerze, dlatego ilości odczytano wyłącznie z bazowych ilości IFC zapisanych w pliku i mogą być niekompletne. Zainstaluj konwerter i ponów import, aby uzyskać pełne ilości.",
     "bim.quantity_warning.no_quantities": "Z tego pliku nie udało się wyodrębnić żadnych ilości (powierzchnia, objętość, długość). Elementy zaimportowano tylko do podglądu i powiązywania.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Nie udało się wyodrębnić ilości: konwerter DDC jest zainstalowany, ale nie zakończył przetwarzania tego pliku (przekroczono limit czasu lub zatrzymał się z błędem). Elementy zaimportowano tylko do podglądu i powiązywania. Ponów import, aby ponownie uruchomić konwerter.",
+    "bim.quantity_warning.converter_failed": "Konwerter DDC jest zainstalowany, ale nie zakończył przetwarzania tego pliku (przekroczono limit czasu lub zatrzymał się z błędem), dlatego ilości odczytano wyłącznie z bazowych ilości IFC zapisanych w pliku i mogą być niekompletne. Ponów import, aby uzyskać pełne ilości.",
     "bim_upload.stage_failed": "Przesłanie nie powiodło się",
     "bim_upload.stage_converter_required": "Wymagany konwerter",
     "bim_upload.stage_server_converting": "Konwersja na serwerze...",

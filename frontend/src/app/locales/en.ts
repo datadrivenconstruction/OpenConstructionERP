@@ -14255,6 +14255,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Quantities could not be extracted: the DDC converter is not available on this server. The elements were imported for viewing and linking only. Install the converter and retry the import to get areas, volumes and lengths.",
     "bim.quantity_warning.converter_absent": "The DDC converter is not available on this server, so quantities were read only from the file’s embedded IFC base quantities and may be incomplete. Install the converter and retry the import for complete quantities.",
     "bim.quantity_warning.no_quantities": "No quantities (area, volume, length) could be extracted from this file. The elements were imported for viewing and linking only.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Quantities could not be extracted: the DDC converter is installed but did not finish this file (it timed out or stopped with an error). The elements were imported for viewing and linking only. Retry the import to run the converter again.",
+    "bim.quantity_warning.converter_failed": "The DDC converter is installed but did not finish this file (it timed out or stopped with an error), so quantities were read only from the file’s embedded IFC base quantities and may be incomplete. Retry the import for complete quantities.",
     "bim_upload.stage_failed": "Upload failed",
     "bim_upload.stage_converter_required": "Converter required",
     "bim_upload.stage_server_converting": "Converting on the server...",

@@ -15358,6 +15358,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "无法提取工程量：此服务器上没有可用的 DDC 转换器。构件仅导入用于查看和关联。请安装转换器并重新导入，以获取面积、体积和长度。",
     "bim.quantity_warning.converter_absent": "此服务器上没有可用的 DDC 转换器，因此工程量仅从文件内嵌的 IFC 基本量中读取，可能不完整。请安装转换器并重新导入，以获取完整的工程量。",
     "bim.quantity_warning.no_quantities": "无法从此文件中提取任何工程量（面积、体积、长度）。构件仅导入用于查看和关联。",
+    "bim.quantity_warning.no_quantities_converter_failed": "无法提取工程量：DDC 转换器已安装，但未能处理完此文件（超时或因错误中止）。构件仅导入用于查看和关联。请重新导入以再次运行转换器。",
+    "bim.quantity_warning.converter_failed": "DDC 转换器已安装，但未能处理完此文件（超时或因错误中止），因此工程量仅从文件内嵌的 IFC 基本量中读取，可能不完整。请重新导入以获取完整的工程量。",
     "bim_upload.stage_failed": "上传失败",
     "bim_upload.stage_converter_required": "需要转换器",
     "bim_upload.stage_server_converting": "正在服务器上转换...",

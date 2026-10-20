@@ -15274,6 +15274,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Količine nije bilo moguće izdvojiti: DDC pretvornik nije dostupan na ovom poslužitelju. Elementi su uvezeni samo za pregled i povezivanje. Instalirajte pretvornik i ponovite uvoz kako biste dobili površine, volumene i duljine.",
     "bim.quantity_warning.converter_absent": "DDC pretvornik nije dostupan na ovom poslužitelju, pa su količine pročitane samo iz IFC osnovnih količina ugrađenih u datoteku i mogu biti nepotpune. Instalirajte pretvornik i ponovite uvoz za potpune količine.",
     "bim.quantity_warning.no_quantities": "Iz ove datoteke nije bilo moguće izdvojiti nijednu količinu (površina, volumen, duljina). Elementi su uvezeni samo za pregled i povezivanje.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Količine nije bilo moguće izdvojiti: DDC pretvornik je instaliran, ali nije dovršio obradu ove datoteke (istekla je vremenska granica ili se zaustavio zbog pogreške). Elementi su uvezeni samo za pregled i povezivanje. Ponovite uvoz kako biste ponovno pokrenuli pretvornik.",
+    "bim.quantity_warning.converter_failed": "DDC pretvornik je instaliran, ali nije dovršio obradu ove datoteke (istekla je vremenska granica ili se zaustavio zbog pogreške), pa su količine pročitane samo iz IFC osnovnih količina ugrađenih u datoteku i mogu biti nepotpune. Ponovite uvoz za potpune količine.",
     "bim_upload.stage_failed": "Učitavanje nije uspjelo",
     "bim_upload.stage_converter_required": "Konverter je obavezan",
     "bim_upload.stage_server_converting": "Pretvorba na poslužitelju...",

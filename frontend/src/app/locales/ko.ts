@@ -15357,6 +15357,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "수량을 추출할 수 없습니다. 이 서버에서는 DDC 변환기를 사용할 수 없습니다. 요소는 보기와 연결 용도로만 가져왔습니다. 면적, 체적, 길이를 얻으려면 변환기를 설치한 후 가져오기를 다시 실행하세요.",
     "bim.quantity_warning.converter_absent": "이 서버에서는 DDC 변환기를 사용할 수 없어, 수량을 파일에 내장된 IFC 기본 수량에서만 읽었으며 불완전할 수 있습니다. 전체 수량을 얻으려면 변환기를 설치한 후 가져오기를 다시 실행하세요.",
     "bim.quantity_warning.no_quantities": "이 파일에서 수량(면적, 체적, 길이)을 하나도 추출하지 못했습니다. 요소는 보기와 연결 용도로만 가져왔습니다.",
+    "bim.quantity_warning.no_quantities_converter_failed": "수량을 추출할 수 없습니다. DDC 변환기는 설치되어 있지만 이 파일을 끝까지 처리하지 못했습니다(시간 초과 또는 오류로 중단). 요소는 보기와 연결 용도로만 가져왔습니다. 변환기를 다시 실행하려면 가져오기를 다시 실행하세요.",
+    "bim.quantity_warning.converter_failed": "DDC 변환기는 설치되어 있지만 이 파일을 끝까지 처리하지 못해(시간 초과 또는 오류로 중단), 수량을 파일에 내장된 IFC 기본 수량에서만 읽었으며 불완전할 수 있습니다. 전체 수량을 얻으려면 가져오기를 다시 실행하세요.",
     "bim_upload.stage_failed": "업로드 실패",
     "bim_upload.stage_converter_required": "변환기가 필요합니다",
     "bim_upload.stage_server_converting": "서버에서 변환 중...",

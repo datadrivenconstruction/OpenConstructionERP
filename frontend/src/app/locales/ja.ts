@@ -15358,6 +15358,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "数量を抽出できませんでした。このサーバーでは DDC コンバーターを利用できません。要素は表示とリンク用にのみインポートされました。面積・体積・長さを取得するには、コンバーターをインストールしてインポートを再実行してください。",
     "bim.quantity_warning.converter_absent": "このサーバーでは DDC コンバーターを利用できないため、数量はファイルに埋め込まれた IFC の基本数量からのみ読み取られ、不完全な場合があります。完全な数量を取得するには、コンバーターをインストールしてインポートを再実行してください。",
     "bim.quantity_warning.no_quantities": "このファイルから数量（面積、体積、長さ）を抽出できませんでした。要素は表示とリンク用にのみインポートされました。",
+    "bim.quantity_warning.no_quantities_converter_failed": "数量を抽出できませんでした。DDC コンバーターはインストールされていますが、このファイルの処理を完了できませんでした（タイムアウトまたはエラーで停止）。要素は表示とリンク用にのみインポートされました。コンバーターを再実行するには、インポートをやり直してください。",
+    "bim.quantity_warning.converter_failed": "DDC コンバーターはインストールされていますが、このファイルの処理を完了できませんでした（タイムアウトまたはエラーで停止）。そのため数量はファイルに埋め込まれた IFC の基本数量からのみ読み取られ、不完全な場合があります。完全な数量を取得するには、インポートをやり直してください。",
     "bim_upload.stage_failed": "アップロードに失敗しました",
     "bim_upload.stage_converter_required": "コンバーターが必要です",
     "bim_upload.stage_server_converting": "サーバーで変換中...",

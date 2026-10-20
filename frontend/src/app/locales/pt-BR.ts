@@ -14316,6 +14316,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Não foi possível extrair os quantitativos: o conversor DDC não está disponível neste servidor. Os elementos foram importados apenas para visualização e vinculação. Instale o conversor e repita a importação para obter áreas, volumes e comprimentos.",
     "bim.quantity_warning.converter_absent": "O conversor DDC não está disponível neste servidor, por isso os quantitativos foram lidos apenas das quantidades base IFC incluídas no arquivo e podem estar incompletos. Instale o conversor e repita a importação para obter os quantitativos completos.",
     "bim.quantity_warning.no_quantities": "Nenhum quantitativo (área, volume, comprimento) pôde ser extraído deste arquivo. Os elementos foram importados apenas para visualização e vinculação.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Não foi possível extrair os quantitativos: o conversor DDC está instalado, mas não terminou de processar este arquivo (excedeu o tempo limite ou parou com erro). Os elementos foram importados apenas para visualização e vinculação. Repita a importação para executar o conversor novamente.",
+    "bim.quantity_warning.converter_failed": "O conversor DDC está instalado, mas não terminou de processar este arquivo (excedeu o tempo limite ou parou com erro), por isso os quantitativos foram lidos apenas das quantidades base IFC incluídas no arquivo e podem estar incompletos. Repita a importação para obter os quantitativos completos.",
     "bim_upload.stage_failed": "Falha no upload",
     "bim_upload.stage_converter_required": "Conversor necessário",
     "bim_upload.stage_server_converting": "Convertendo no servidor...",
