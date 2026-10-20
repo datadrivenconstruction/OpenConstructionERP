@@ -1411,6 +1411,10 @@ class DwgTakeoffService:
     async def _process_drawing(self, drawing_id: uuid.UUID, file_path: str) -> None:
         """Process a DXF file: parse layers/entities, generate thumbnail."""
         await self.drawing_repo.update_fields(drawing_id, status="processing")
+        # Release the row lock before the parse: the heartbeat writes to this row
+        # from its own session and would block for the whole parse, so a long one
+        # read as an orphaned conversion and the page said "interrupted by a restart".
+        await self.session.commit()
 
         # Prepare storage keys
         entities_key = f"{drawing_id}/entities.json"
