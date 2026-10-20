@@ -40,7 +40,7 @@ Raster detection that does work lives inside the takeoff module, not here:
 - Symbol signature matching for elements is in the match-elements module and
   works on extracted attributes rather than pixels.
 
-OpenCV and PyMuPDF are base dependencies, so both detectors run in every
+OpenCV and pypdfium2 are base dependencies, so both detectors run in every
 default install. Only the OCR engine, which reads dimension text, sits behind
 the optional `cv` extra.
 

@@ -365,6 +365,36 @@ def _empty_package_data_globs(root: str, tracked: list[str]) -> tuple[list[str],
     return dead, checked, len(pyprojects)
 
 
+#: AGPL readers the application must never import. PyMuPDF was a base
+#: dependency until it was replaced by pypdfium2 behind app/core/pdf_reader.py;
+#: one stray import would make every install ship an AGPL component again.
+_AGPL_IMPORT_RX = re.compile(
+    r"^\s*(?:import\s+(?:fitz|pymupdf)\b|from\s+(?:fitz|pymupdf)\b)"
+    r"|import_module\(\s*[\"'](?:fitz|pymupdf)[\"']",
+    re.MULTILINE,
+)
+#: Where shipped Python code lives. Tests and the parity harness under
+#: backend/scripts may use PyMuPDF as a reference; nothing a user installs may.
+_SHIPPED_CODE_PREFIXES = ("backend/app/", "packs/", "desktop/")
+
+
+def _agpl_imports(root: str, tracked: list[str]) -> list[str]:
+    """``path:line`` for every import of an AGPL PDF reader in shipped code."""
+    hits: list[str] = []
+    for rel in tracked:
+        if not (rel.endswith(".py") and rel.startswith(_SHIPPED_CODE_PREFIXES)):
+            continue
+        try:
+            with open(os.path.join(root, rel), encoding="utf-8", errors="replace") as fh:
+                text = fh.read()
+        except OSError:
+            continue
+        for match in _AGPL_IMPORT_RX.finditer(text):
+            line = text.count("\n", 0, match.start()) + 1
+            hits.append(f"{rel}:{line}: {match.group(0).strip()}")
+    return hits
+
+
 def _zip_names(path: str) -> list[str]:
     # Both release artifact shapes. `make build-wheel` runs `python -m build`
     # with no --wheel, so it emits an sdist alongside the wheel, and a local
@@ -437,15 +467,16 @@ def main() -> int:
 
     bad = _offending(names)
     dead_globs: list[str] = []
+    agpl_imports: list[str] = []
     patterns_checked = packs_checked = 0
     if not (args.zip or args.dir):
         # Paths from the repository root whatever the working directory, so a
         # run from a subdirectory reads the same packs as one from the root.
         root = _repo_root()
         if root is not None:
-            dead_globs, patterns_checked, packs_checked = _empty_package_data_globs(
-                root, sorted(_git_tracked_set(root))
-            )
+            tracked_sorted = sorted(_git_tracked_set(root))
+            dead_globs, patterns_checked, packs_checked = _empty_package_data_globs(root, tracked_sorted)
+            agpl_imports = _agpl_imports(root, tracked_sorted)
         if packs_checked == 0:
             print(
                 "ERROR: the pack package-data check read no packs/*/pyproject.toml, so it "
@@ -499,7 +530,19 @@ def main() -> int:
             "and out of build artifacts.",
             file=sys.stderr,
         )
-    if bad or untracked or dead_globs:
+    if agpl_imports:
+        print(
+            f"ERROR: shipped code imports an AGPL PDF reader ({len(agpl_imports)}):",
+            file=sys.stderr,
+        )
+        for hit in agpl_imports:
+            print(f"  {hit}", file=sys.stderr)
+        print(
+            "\nPyMuPDF (fitz) is AGPL-3.0. Read PDFs through app/core/pdf_reader.py, "
+            "which is built on pypdfium2 (Apache-2.0 / BSD-3-Clause).",
+            file=sys.stderr,
+        )
+    if bad or untracked or dead_globs or agpl_imports:
         return 1
 
     # Say what was checked, not just that it passed. A gate whose report does
@@ -509,6 +552,7 @@ def main() -> int:
         scope += ", every file tracked or a declared build output"
     if not (args.zip or args.dir):
         scope += f", {patterns_checked} package-data pattern(s) in {packs_checked} pack(s) each match a file"
+        scope += ", no AGPL PDF reader imported by shipped code"
     print(f"repo hygiene OK: {len(names)} files in {where}, {scope}")
     return 0
 

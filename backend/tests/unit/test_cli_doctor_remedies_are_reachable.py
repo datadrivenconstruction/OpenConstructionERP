@@ -79,7 +79,7 @@ def doctor_on_a_bundle(monkeypatch: pytest.MonkeyPatch):
             "lancedb",
             "sentence_transformers",
             "pdfplumber",
-            "pymupdf",
+            "pypdfium2",
             "paddleocr",
             "paddle",
             "pandas",

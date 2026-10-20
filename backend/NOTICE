@@ -7,9 +7,9 @@ or later (AGPL-3.0-or-later). See the LICENSE file for the full license text.
 
 A commercial licence is available that lifts the AGPL obligations on
 OpenConstructionERP itself. It cannot lift them on code we do not own, and
-one dependency present in every install, PyMuPDF, is separately AGPL: see
-"AGPL Cascade" below and section 4a of docs/legal/COMMERCIAL-LICENSE.md. Contact
-info@datadrivenconstruction.io.
+no dependency is AGPL, so there is no third-party AGPL code it would leave
+uncovered: see "AGPL Cascade" below and section 4a of
+docs/legal/COMMERCIAL-LICENSE.md. Contact info@datadrivenconstruction.io.
 
 ------------------------------------------------------------------------
 Third-Party Software
@@ -85,7 +85,9 @@ Backend (base install via `pip install openconstructionerp`):
                                           Apache-2.0, listed in the
                                           wheel's LICENSE-THIRD-PARTY.yml
   * Pillow .............................. MIT-CMU
-  * PyMuPDF (pymupdf) ................... AGPL-3.0-or-later  -- see "AGPL Cascade" below
+  * pypdfium2 ........................... Apache-2.0 / BSD-3-Clause; the wheel
+                                          carries PDFium and the libraries it
+                                          links, with their notices
   * opencv-python-headless .............. Apache-2.0 for OpenCV itself; the
                                           wheel also carries FFmpeg, which
                                           is LGPL-2.1-or-later, see the same
@@ -129,9 +131,9 @@ generated PDFs, and has its own row above; crc32c is still in no closure.
 The old rows were inherited rather than measured, and the sentence they supported, that
 [cv] is the one group adding copyleft the base install does not already
 carry, was wrong twice. It was wrong about the base, which carries LGPL
-through psycopg2-binary and AGPL through PyMuPDF with no extra selected
-at all. And it was wrong about the groups, because on declared licences
-the only copyleft any extra adds is tqdm, and six of the eleven add it.
+through psycopg2-binary with no extra selected at all (and, until
+PyMuPDF was removed after 18.7.0, AGPL too). And it was wrong about
+the groups, because on declared licences the only copyleft any extra adds is tqdm, and six of the eleven add it.
 What [cv] really adds is larger than what those two rows named and no
 package metadata shows it. paddleocr declares opencv-python and
 opencv-contrib-python, the non-headless builds of the package the base
@@ -200,83 +202,48 @@ with the commands at the top of this file rather than reading the release
 inventory.
 
 ------------------------------------------------------------------------
-AGPL Cascade -- PyMuPDF
+AGPL Cascade -- None Upstream
 ------------------------------------------------------------------------
 
 OpenConstructionERP itself is distributed under the GNU Affero General
-Public License v3.0 or later. One upstream Python package we depend on
-is also AGPL-3.0-or-later:
+Public License v3.0 or later. No package it depends on is AGPL, in the
+base install or in any optional group.
 
-  * PyMuPDF (Artifex Software, Inc.) -- AGPL-3.0-or-later
-    https://pymupdf.readthedocs.io/en/latest/about.html#license
+Releases up to and including 18.7.0 were different. They depended on
+PyMuPDF (Artifex Software, Inc., AGPL-3.0-or-later) as a base
+dependency, so it was present in every artefact: the wheel, the Docker
+image and every desktop installer. Anyone assessing an install of one of
+those releases should read this section as it stood in that release.
 
-PyMuPDF is a base dependency, declared in `[project] dependencies`. It
-is therefore present in every artefact we ship: the wheel, the Docker
-image and every desktop installer. It is not confined to an extra and
-there is no supported install that omits it.
+PyMuPDF has since been removed. Every feature that read PDFs through it
+now reads them through pypdfium2 (Apache-2.0 and BSD-3-Clause), which was
+already in every install underneath pdfplumber, behind one module,
+backend/app/core/pdf_reader.py:
 
-An earlier version of this section described PyMuPDF as living in the
-optional `[cv]` extra, and stated that users who installed without that
-extra did not pull in AGPL upstream packages. Both statements were
-wrong, and the second was a reassurance a reader could have relied on
-when assessing their own obligations. PyMuPDF moved to the base
-dependencies so that PDF takeoff works on a stock install.
+  * PDF drawing takeoff: vector recognition, the "find similar symbols"
+    count, page rendering for the raster detector and for the optional
+    online AI analysis, and page counting and text on upload.
+  * Bill of quantities import from PDF.
+  * File search: PDF text, and page rendering so OCR can read scans.
+  * Geo Hub: rasterising a PDF site plan for a map overlay.
 
-The same section also listed Ultralytics YOLO. That package is not a
-dependency of this project at all and the entry has been removed.
+The vector layer comes out in the same shape and the same page
+coordinates as before, so measurements taken on a drawing before the
+change still line up with it after. One former use did not move to
+pypdfium2 because it reads no PDF: rasterising an SVG company logo for
+generated documents. The browser now turns an SVG logo into a PNG when
+it is uploaded, the PNG is stored next to it, and documents print the
+PNG. The server reads no SVG.
 
-Because PyMuPDF is itself AGPL-3.0, a user who operates a modified
-version of OpenConstructionERP over a network is subject to AGPL-3.0
-obligations both from OpenConstructionERP and independently from
-Artifex. Commercial users who require a non-AGPL path must obtain a
-commercial licence directly from Artifex Software --
-OpenConstructionERP's commercial licence covers only
-OpenConstructionERP itself.
+Two checks keep it this way. scripts/check_repo_hygiene.py fails when
+shipped code imports fitz or pymupdf, and
+scripts/check_dependency_licences.py fails on any AGPL package in the
+environment it inspects; no entry on its accepted list can excuse one.
 
-Artifex sells PyMuPDF commercially alongside the AGPL offer and pursues
-commercial licensing actively, so this is a live question for a
-commercial deployment rather than a theoretical one. What that means for
-a customer, and what the options are, is written out in
-docs/legal/COMMERCIAL-LICENSE.md under "AGPL components inside the Software".
+No AGPL upstream is not the same as no copyleft upstream. The copyleft
+packages are named here, resolved from the dependency tree rather than
+read off this file's own lists:
 
-These are the features that read PDFs through PyMuPDF, so that a reader
-can tell whether their own deployment touches it at all:
-
-  * PDF drawing takeoff, vector recognition. Reading the vector geometry
-    off a drawing page to propose quantities, and the "find similar
-    symbols" count seeded from one symbol.
-  * PDF drawing takeoff, page rendering. Turning a page into an image,
-    both for the raster detector and for the optional online AI
-    analysis, and counting pages and pulling text on upload.
-  * Bill of quantities import from PDF. Counting pages before parsing to
-    reject an oversized file, and extracting text when the primary
-    reader (pdfplumber) cannot.
-  * File search. Indexing the text of uploaded PDFs, and rendering pages
-    of scanned PDFs so OCR can read them.
-  * Geo Hub. Rasterizing a PDF site plan so it can be georeferenced and
-    overlaid on a map.
-
-Everything else in the product, including every module that does not
-handle a PDF, is unaffected. Two further uses are not features: the demo
-seeder counts pages of sample documents, and `openestimate doctor`
-imports the package to report whether PDF takeoff will work.
-
-Replacing PyMuPDF is possible and the shape of the work is known. Page
-rendering, page counting and plain text extraction are ordinary
-operations that pypdfium2 (BSD-3-Clause and Apache-2.0, already present
-in every install underneath pdfplumber) performs directly. Vector
-recognition is the harder half: PyMuPDF hands us an already-decoded list
-of drawing paths, and the equivalent in pypdfium2 is a lower-level walk
-over page objects that has to compose the transformation matrices and
-flatten curves itself. It is new code rather than a swap of import
-lines. DataDrivenConstruction maintains a costed plan for this work;
-contact info@datadrivenconstruction.io if the timing of it matters to a
-purchasing decision.
-
-PyMuPDF is the only AGPL package upstream of us, and it is not the only
-copyleft one. Naming it alone was how the wrong reassurance above became
-possible, so the rest are named here, resolved from the dependency tree
-rather than read off this file's own lists:
 
   * psycopg2-binary -- LGPL-3.0-or-later with the OpenSSL exception. A base
     dependency, so it is in every artefact. We use it as an unmodified
@@ -641,8 +608,7 @@ opencv-python-headless carries 183 kB of third-party licence text in its
 dist-info, pypdfium2 carries eighteen separate licence files, numpy
 names OpenBLAS and the exact filenames it lands in as an appendix to its
 own licence, pyarrow ships a NOTICE beside its licence, Pillow's licence
-runs to 78 kB for this reason, and PyMuPDF ships the Artifex dual
-licence statement. Those ask nothing of us. The file is inside the wheel
+runs to 78 kB for this reason. Those ask nothing of us. The file is inside the wheel
 and travels wherever the wheel travels.
 
 The entries below are the cases examined in full: the ones whose
