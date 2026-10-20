@@ -657,7 +657,10 @@ class TestThroughTheClearanceModule:
         profile = await sa_profile(session)
         await onboarded(session, fake, profile)
         _install_adapter(session, fake)
-        text, _ = await build(session, profile, fields={"simplified": True}, buyer=None)
+        # Issued now: a simplified invoice older than the 24 hour reporting window carries a warning.
+        now = dt.datetime.now(RIYADH).replace(microsecond=0)
+        invoice = {**INVOICE, "invoice_date": now.date().isoformat()}
+        text, _ = await build(session, profile, fields={"simplified": True}, buyer=None, now=now, invoice=invoice)
         document = await clearance_document(session, profile, text)
         document, outcome, _ = await clearance.submit_document(session, document=document, profile=profile)
         assert outcome.accepted and document.status == "reported"
