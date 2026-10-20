@@ -138,10 +138,12 @@ export function useProcessAction() {
   });
 }
 
-export function useMinimalPreset() {
+export type ProcessPreset = 'minimal' | 'recommended' | 'all';
+
+export function useApplyPreset() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => apiPost<ProcessesSnapshot>('/v1/processes/preset', { preset: 'minimal' }),
+    mutationFn: (preset: ProcessPreset) => apiPost<ProcessesSnapshot>('/v1/processes/preset', { preset }),
     onSettled: () => qc.invalidateQueries({ queryKey: processesKey }),
   });
 }

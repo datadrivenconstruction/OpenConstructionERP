@@ -20,7 +20,6 @@ import {
   Check,
   ChevronDown,
   Copy,
-  Feather,
   Flame,
   Lock,
   Wrench,
@@ -42,19 +41,18 @@ import {
   isLoading,
   isOn,
   ramOf,
-  useMinimalPreset,
+  useApplyPreset,
   useProcessAction,
   useProcesses,
   type ProcessAction,
   type ProcessCategory,
   type ProcessInfo,
+  type ProcessPreset,
   type ProcessStatus,
 } from './api';
 import { formatMb, moduleLink, processName, processOffImpact, processPurpose, useIsProcessAdmin } from './labels';
+import { ProfilePicker, SERVER_BUDGET_MB } from './ProfilePicker';
 import { useProcessesUi } from './useProcessesUi';
-
-/** The memory floor the core is sized for (docs/INSTALL_LINUX.md): the bar reads against it. */
-const SERVER_BUDGET_MB = 3072;
 
 const CATEGORY_ICON: Record<ProcessCategory, LucideIcon> = {
   ai_model: Brain,
@@ -387,7 +385,7 @@ export function ProcessesPanel() {
   const isAdmin = useIsProcessAdmin();
   const { data, isLoading, isError, error, refetch } = useProcesses(open);
   const action = useProcessAction();
-  const minimal = useMinimalPreset();
+  const applyPreset = useApplyPreset();
   const addToast = useToastStore((s) => s.addToast);
   const panelRef = useRef<HTMLDivElement>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -446,6 +444,18 @@ export function ProcessesPanel() {
       },
     );
 
+  const choosePreset = (preset: ProcessPreset) =>
+    applyPreset.mutate(preset, {
+      onSuccess: () =>
+        addToast({ type: 'success', title: t('processes.profile_applied', { defaultValue: 'Profile applied' }) }),
+      onError: (err) =>
+        addToast({
+          type: 'error',
+          title: t('processes.profile_failed', { defaultValue: 'Could not apply the profile' }),
+          message: getErrorMessage(err),
+        }),
+    });
+
   const title = t('processes.title', { defaultValue: 'Background services' });
 
   return createPortal(
@@ -500,6 +510,12 @@ export function ProcessesPanel() {
 
           {data && (
             <>
+              <ProfilePicker
+                processes={processes}
+                isAdmin={isAdmin}
+                pending={applyPreset.isPending}
+                onApply={choosePreset}
+              />
               <section
                 aria-label={t('processes.summary_label', { defaultValue: 'Summary' })}
                 className="rounded-xl border border-border-light bg-surface-elevated p-3"
@@ -545,19 +561,6 @@ export function ProcessesPanel() {
                 </div>
                 {isAdmin ? (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => minimal.mutate()}
-                      disabled={minimal.isPending}
-                      data-testid="processes-minimal"
-                      title={t('processes.minimal_hint', {
-                        defaultValue: 'Keep only what the platform cannot run without',
-                      })}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary disabled:opacity-50"
-                    >
-                      <Feather size={12} aria-hidden />
-                      {t('processes.minimal', { defaultValue: 'Minimal mode' })}
-                    </button>
                     <button
                       type="button"
                       onClick={openWizard}

@@ -169,7 +169,85 @@ describe('ProcessesPanel', () => {
     expect(await screen.findByTestId('process-toggle')).toBeDisabled();
     expect(screen.queryByTestId('process-restart')).toBeNull();
     expect(screen.getByTestId('processes-readonly')).toBeInTheDocument();
-    expect(screen.queryByTestId('processes-minimal')).toBeNull();
+    expect(screen.queryByTestId('processes-profile-choose-minimal')).toBeNull();
+  });
+
+  describe('profiles', () => {
+    const core = (over) => proc({ id: 'core', required: true, default_enabled: true, enabled: true, ram_mb_estimate: 100, ...over });
+    const search = (over) => proc({ id: 'search', default_enabled: true, ram_mb_estimate: 400, ...over });
+    const heavy = (over) => proc({ id: 'heavy', ram_mb_estimate: 3000, ...over });
+
+    async function open(list) {
+      vi.mocked(apiGet).mockResolvedValue(snapshot(list));
+      useProcessesUi.setState({ panelOpen: true });
+      renderWith(<ProcessesPanel />);
+      await screen.findByTestId('processes-profiles');
+    }
+
+    it('marks the balanced profile and sums memory per profile', async () => {
+      await open([core(), search({ enabled: true }), heavy()]);
+      expect(screen.getByTestId('processes-profile-recommended')).toHaveAttribute('data-active', 'true');
+      expect(screen.getByTestId('processes-profile-minimal')).toHaveAttribute('data-active', 'false');
+      expect(screen.getByTestId('processes-profile-minimal')).toHaveTextContent('100 MB');
+      expect(screen.getByTestId('processes-profile-recommended')).toHaveTextContent('500 MB');
+      expect(screen.getByTestId('processes-profile-all')).toHaveTextContent('3.4 GB');
+      expect(screen.queryByTestId('processes-profile-custom')).toBeNull();
+    });
+
+    it('shows Custom when the mix matches no profile', async () => {
+      await open([core(), search({ enabled: false }), heavy({ enabled: true })]);
+      expect(screen.getByTestId('processes-profile-custom')).toBeInTheDocument();
+      for (const id of ['minimal', 'recommended', 'all']) {
+        expect(screen.getByTestId(`processes-profile-${id}`)).toHaveAttribute('data-active', 'false');
+      }
+    });
+
+    it('applies a profile and tells the user', async () => {
+      await open([core(), search({ enabled: true }), heavy()]);
+      fireEvent.click(screen.getByTestId('processes-profile-choose-minimal'));
+      await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/v1/processes/preset', { preset: 'minimal' }));
+      await waitFor(() => expect(toastTitles()).toContain('Profile applied'));
+    });
+
+    it('reports a failed apply', async () => {
+      await open([core(), search({ enabled: true }), heavy()]);
+      vi.mocked(apiPost).mockRejectedValueOnce(new Error('boom'));
+      fireEvent.click(screen.getByTestId('processes-profile-choose-minimal'));
+      await waitFor(() => expect(toastTitles()).toContain('Could not apply the profile'));
+    });
+
+    it('asks before turning on more than the server budget', async () => {
+      await open([core(), search({ enabled: true }), heavy()]);
+      fireEvent.click(screen.getByTestId('processes-profile-choose-all'));
+      expect(apiPost).not.toHaveBeenCalled();
+      expect(screen.getByRole('alert')).toHaveTextContent('3.4 GB');
+      fireEvent.click(screen.getByTestId('processes-profile-cancel'));
+      expect(apiPost).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByTestId('processes-profile-choose-all'));
+      fireEvent.click(screen.getByTestId('processes-profile-confirm'));
+      await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/v1/processes/preset', { preset: 'all' }));
+    });
+
+    it('applies all at once when it fits the budget', async () => {
+      await open([core(), search({ enabled: true }), heavy({ ram_mb_estimate: 200 })]);
+      fireEvent.click(screen.getByTestId('processes-profile-choose-all'));
+      await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/v1/processes/preset', { preset: 'all' }));
+    });
+
+    it('is read-only for a non-admin but still shows the active profile', async () => {
+      role = 'editor';
+      await open([core(), search({ enabled: true }), heavy()]);
+      expect(screen.getByTestId('processes-profile-recommended')).toHaveAttribute('data-active', 'true');
+      expect(screen.queryByTestId('processes-profile-choose-minimal')).toBeNull();
+      expect(screen.queryByTestId('processes-profile-choose-all')).toBeNull();
+    });
+
+    it('keeps locked services as they are and says how many', async () => {
+      await open([core(), search({ enabled: false, env_locked: true }), heavy()]);
+      expect(screen.getByTestId('processes-profile-locked')).toHaveTextContent('1');
+      expect(screen.getByTestId('processes-profile-recommended')).toHaveAttribute('data-active', 'true');
+      expect(screen.getByTestId('processes-profile-recommended')).toHaveTextContent('100 MB');
+    });
   });
 
   it('closes on Escape', async () => {
