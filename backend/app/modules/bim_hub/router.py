@@ -1762,7 +1762,10 @@ async def _process_cad_in_background(
                     )
                     session.add(el)
 
-                converter_absent = result_quality == "placeholder" and not result.get("converter_used")
+                fell_back = result_quality == "placeholder" and not result.get("converter_used")
+                # A recorded failure means the converter is installed and ran; only its absence is "absent".
+                converter_failed = fell_back and bool(ddc_failure.get("reason"))
+                converter_absent = fell_back and not converter_failed
                 no_quantities = not any_quantities
 
                 model.status = "ready"
@@ -1834,7 +1837,11 @@ async def _process_cad_in_background(
                 # state and populate a user-facing warning so the UI can show
                 # "imported, but no quantities - DDC converter required"
                 # instead of pretending the import fully succeeded.
-                warning = quantity_warning(converter_absent=converter_absent, no_quantities=no_quantities)
+                warning = quantity_warning(
+                    converter_absent=converter_absent,
+                    no_quantities=no_quantities,
+                    converter_failed=converter_failed,
+                )
                 if warning is not None:
                     model.status = "degraded"
                     meta_warn = dict(model.metadata_ or {})
@@ -1848,8 +1855,9 @@ async def _process_cad_in_background(
                     model.metadata_ = meta_warn
                     logger.warning(
                         "Background CAD processed but DEGRADED (converter_absent=%s "
-                        "no_quantities=%s): %d elements → model %s degraded",
+                        "converter_failed=%s no_quantities=%s): %d elements → model %s degraded",
                         converter_absent,
+                        converter_failed,
                         no_quantities,
                         element_count,
                         model_id,

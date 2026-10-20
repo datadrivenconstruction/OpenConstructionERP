@@ -15485,6 +15485,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Cantitățile nu au putut fi extrase: convertorul DDC nu este disponibil pe acest server. Elementele au fost importate doar pentru vizualizare și asociere. Instalați convertorul și repetați importul pentru a obține suprafețe, volume și lungimi.",
     "bim.quantity_warning.converter_absent": "Convertorul DDC nu este disponibil pe acest server, așa că cantitățile au fost citite doar din cantitățile de bază IFC încorporate în fișier și pot fi incomplete. Instalați convertorul și repetați importul pentru cantități complete.",
     "bim.quantity_warning.no_quantities": "Din acest fișier nu a putut fi extrasă nicio cantitate (suprafață, volum, lungime). Elementele au fost importate doar pentru vizualizare și asociere.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Cantitățile nu au putut fi extrase: convertorul DDC este instalat, dar nu a terminat procesarea acestui fișier (a expirat timpul sau s-a oprit cu o eroare). Elementele au fost importate doar pentru vizualizare și asociere. Repetați importul pentru a rula din nou convertorul.",
+    "bim.quantity_warning.converter_failed": "Convertorul DDC este instalat, dar nu a terminat procesarea acestui fișier (a expirat timpul sau s-a oprit cu o eroare), așa că cantitățile au fost citite doar din cantitățile de bază IFC încorporate în fișier și pot fi incomplete. Repetați importul pentru cantități complete.",
     "bim_upload.stage_failed": "Încărcarea a eșuat",
     "bim_upload.stage_converter_required": "Convertor necesar",
     "bim_upload.stage_server_converting": "Se convertește pe server...",

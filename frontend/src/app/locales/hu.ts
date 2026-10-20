@@ -14879,6 +14879,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "A mennyiségeket nem sikerült kinyerni: a DDC konverter nem érhető el ezen a szerveren. Az elemek csak megtekintésre és hozzárendelésre lettek importálva. Telepítse a konvertert, és ismételje meg az importálást a területek, térfogatok és hosszak megszerzéséhez.",
     "bim.quantity_warning.converter_absent": "A DDC konverter nem érhető el ezen a szerveren, ezért a mennyiségeket csak a fájlba ágyazott IFC alapmennyiségekből olvastuk be, és hiányosak lehetnek. Telepítse a konvertert, és ismételje meg az importálást a teljes mennyiségekhez.",
     "bim.quantity_warning.no_quantities": "Ebből a fájlból nem sikerült mennyiséget (terület, térfogat, hossz) kinyerni. Az elemek csak megtekintésre és hozzárendelésre lettek importálva.",
+    "bim.quantity_warning.no_quantities_converter_failed": "A mennyiségeket nem sikerült kinyerni: a DDC konverter telepítve van, de nem fejezte be a fájl feldolgozását (időtúllépés vagy hiba miatt leállt). Az elemek csak megtekintésre és hozzárendelésre lettek importálva. Ismételje meg az importálást, hogy a konverter újra lefusson.",
+    "bim.quantity_warning.converter_failed": "A DDC konverter telepítve van, de nem fejezte be a fájl feldolgozását (időtúllépés vagy hiba miatt leállt), ezért a mennyiségeket csak a fájlba ágyazott IFC alapmennyiségekből olvastuk be, és hiányosak lehetnek. Ismételje meg az importálást a teljes mennyiségekhez.",
     "bim_upload.stage_failed": "Feltöltés sikertelen",
     "bim_upload.stage_converter_required": "Konverter szükséges",
     "bim_upload.stage_server_converting": "Átalakítás a szerveren...",

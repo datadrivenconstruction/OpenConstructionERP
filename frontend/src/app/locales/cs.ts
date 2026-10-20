@@ -15501,6 +15501,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Množství se nepodařilo získat: konvertor DDC není na tomto serveru dostupný. Prvky byly naimportovány pouze pro zobrazení a propojení. Nainstalujte konvertor a import zopakujte, abyste získali plochy, objemy a délky.",
     "bim.quantity_warning.converter_absent": "Konvertor DDC není na tomto serveru dostupný, proto byla množství načtena pouze ze základních množství IFC vložených v souboru a mohou být neúplná. Nainstalujte konvertor a import zopakujte pro získání úplných množství.",
     "bim.quantity_warning.no_quantities": "Z tohoto souboru se nepodařilo získat žádná množství (plocha, objem, délka). Prvky byly naimportovány pouze pro zobrazení a propojení.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Množství se nepodařilo získat: konvertor DDC je nainstalován, ale tento soubor nedokončil (vypršel časový limit nebo skončil chybou). Prvky byly naimportovány pouze pro zobrazení a propojení. Import zopakujte, aby se konvertor spustil znovu.",
+    "bim.quantity_warning.converter_failed": "Konvertor DDC je nainstalován, ale tento soubor nedokončil (vypršel časový limit nebo skončil chybou), proto byla množství načtena pouze ze základních množství IFC vložených v souboru a mohou být neúplná. Import zopakujte pro získání úplných množství.",
     "bim_upload.stage_failed": "Nahrání selhalo",
     "bim_upload.stage_converter_required": "Konvertor je vyžadován",
     "bim_upload.stage_server_converting": "Probíhá převod na serveru...",
