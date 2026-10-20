@@ -677,6 +677,17 @@ def _extents_from_raw_entities(entities: list[dict[str, Any]]) -> dict[str, floa
     return model_space_extents(entities)
 
 
+_CONVERT_FAILED_MESSAGE = (
+    "The DWG converter could not read this file. It may be damaged or saved in a form "
+    "the converter does not support. Open it in your CAD application, save it as DXF "
+    "or as DWG 2018, and upload that file. You can delete this drawing."
+)
+_PARSE_FAILED_MESSAGE = (
+    "The drawing could not be read. Open it in your CAD application, save it as DXF "
+    "or as DWG 2018, and upload that file. You can delete this drawing."
+)
+
+
 def _process_dxf_sync(file_path: str, entities_key: str, thumbnail_key: str) -> dict[str, Any]:
     """Synchronous DXF processing - runs in a thread via asyncio.to_thread.
 
@@ -1144,6 +1155,7 @@ class DwgTakeoffService:
             status="uploaded",
             error_message=None,
         )
+        await self._set_error_code(drawing_id, None)
 
         logger.info(
             "Drawing revision uploaded: %s (%s, %d bytes) drawing=%s",
@@ -1428,7 +1440,7 @@ class DwgTakeoffService:
                 extents=result["extents"],
                 units=result["units"],
                 status="empty" if is_empty else "ready",
-                metadata_={},
+                metadata_={"xrefs": result["xrefs"]} if result.get("xrefs") else {},
             )
             await self.version_repo.create(version)
 
@@ -1443,6 +1455,7 @@ class DwgTakeoffService:
                     else None
                 ),
             )
+            await self._set_error_code(drawing_id, "empty" if is_empty else None)
 
             if is_empty:
                 logger.warning(
@@ -1459,20 +1472,40 @@ class DwgTakeoffService:
                 )
 
         except ImportError:
-            await self.drawing_repo.update_fields(
+            await self._mark_failed(
                 drawing_id,
-                status="error",
-                error_message="ezdxf is not installed - cannot process DXF files",
+                "ezdxf_missing",
+                "ezdxf is not installed - cannot process DXF files",
             )
             logger.error("ezdxf not installed - cannot process drawing %s", drawing_id)
 
         except Exception as exc:
-            await self.drawing_repo.update_fields(
-                drawing_id,
-                status="error",
-                error_message=str(exc)[:500],
-            )
+            # The exception text names server paths; it goes to the log only.
+            await self._mark_failed(drawing_id, "parse_failed", _PARSE_FAILED_MESSAGE)
             logger.exception("Failed to process drawing %s: %s", drawing_id, exc)
+
+    async def _set_error_code(self, drawing_id: uuid.UUID, code: str | None) -> None:
+        """Record (or clear) the stable failure code the page translates."""
+        drawing = await self.drawing_repo.get_by_id(drawing_id)
+        if drawing is None:
+            return
+        meta = dict(drawing.metadata_ or {})
+        if meta.get("error_code") == code:
+            return
+        if code is None:
+            meta.pop("error_code", None)
+        else:
+            meta["error_code"] = code
+        await self.drawing_repo.update_fields(drawing_id, metadata_=meta)
+
+    async def _mark_failed(self, drawing_id: uuid.UUID, code: str, message: str) -> None:
+        """Put a drawing in ``error`` with an English message and a stable code.
+
+        ``message`` is the API-level English text; the page shows the
+        translation keyed by ``code`` (``metadata.error_code``) instead.
+        """
+        await self.drawing_repo.update_fields(drawing_id, status="error", error_message=message[:500])
+        await self._set_error_code(drawing_id, code)
 
     async def _handle_dwg(self, drawing_id: uuid.UUID, file_path: str) -> None:
         """Process DWG via DDC DwgExporter → Excel → parse entities.
@@ -1492,25 +1525,21 @@ class DwgTakeoffService:
         """
         version_code, version_label = _sniff_dwg_version(file_path)
         if version_code is None:
-            await self.drawing_repo.update_fields(
+            await self._mark_failed(
                 drawing_id,
-                status="error",
-                error_message=(
-                    "This file does not look like a valid DWG. "
-                    "If you renamed a PDF or ZIP archive to .dwg, please "
-                    "upload the original CAD file instead."
-                ),
+                "not_dwg",
+                "This file does not look like a valid DWG. "
+                "If you renamed a PDF or ZIP archive to .dwg, please "
+                "upload the original CAD file instead.",
             )
             return
         if _dwg_version_too_old(version_code):
-            await self.drawing_repo.update_fields(
+            await self._mark_failed(
                 drawing_id,
-                status="error",
-                error_message=(
-                    f"{version_label} is older than the supported DWG "
-                    f"format. Re-save it in DWG 2010 (R18) format or "
-                    f"newer from your CAD application and upload again."
-                ),
+                "dwg_too_old",
+                f"{version_label} is older than the supported DWG "
+                f"format. Re-save it in DWG 2010 (R18) format or "
+                f"newer from your CAD application and upload again.",
             )
             return
 
@@ -1531,10 +1560,10 @@ class DwgTakeoffService:
             # same /v1/takeoff/converters/dwg/install/ endpoint).
             from app.core.converter_source import release_page_url
 
-            await self.drawing_repo.update_fields(
+            await self._mark_failed(
                 drawing_id,
-                status="error",
-                error_message=(
+                "converter_missing",
+                (
                     "DWG conversion requires the DDC DWG converter, "
                     "which was not found on this server. Click the "
                     '"Install converter" pill at the top right of /dwg-takeoff, '
@@ -1598,14 +1627,14 @@ class DwgTakeoffService:
                     timeout=convert_timeout_s,
                 )
             except subprocess.TimeoutExpired:
-                await self.drawing_repo.update_fields(
+                await self._mark_failed(
                     drawing_id,
-                    status="error",
+                    "convert_timeout",
                     # Name the limit and how to raise it. A large drawing from a
                     # real project can legitimately need longer than the default,
                     # and without this the message reads like a permanent verdict
                     # on the file, so people retry the same upload instead.
-                    error_message=(
+                    (
                         f"DWG conversion timed out after {convert_timeout_s}s. "
                         "Large drawings can need longer: raise the limit by setting "
                         "OE_DWG_CONVERT_TIMEOUT_S on the server, for example "
@@ -1614,30 +1643,22 @@ class DwgTakeoffService:
                 )
                 return
             except Exception as exc:
-                await self.drawing_repo.update_fields(
-                    drawing_id,
-                    status="error",
-                    error_message=f"DWG conversion error: {exc}"[:500],
-                )
+                logger.exception("DWG conversion error for %s: %s", drawing_id, exc)
+                await self._mark_failed(drawing_id, "convert_failed", _CONVERT_FAILED_MESSAGE)
                 return
 
             dxf_path = run.outputs.get("dxf")
             if not run.ok or dxf_path is None or not dxf_path.is_file():
-                detail = (run.stderr or run.stdout or "").strip()[:300]
-                nice_msg = (
-                    "The DWG converter could not process this file "
-                    f"(exit {run.returncode}{', ' + run.status if run.status else ''}). "
-                    "Try exporting the drawing as DXF from your CAD "
-                    "application (File, Save As, DXF) and upload that "
-                    "instead. DXF is handled directly without requiring the converter."
-                )
-                if detail:
-                    nice_msg = f"{nice_msg} Details: {detail}"
-                await self.drawing_repo.update_fields(
+                # The converter's output echoes the stored upload path, so it is
+                # logged for the operator and never shown to the user.
+                logger.warning(
+                    "DWG converter failed for %s (exit %s, %s): %s",
                     drawing_id,
-                    status="error",
-                    error_message=nice_msg[:500],
+                    run.returncode,
+                    run.status,
+                    (run.stderr or run.stdout or "").strip()[:2000],
                 )
+                await self._mark_failed(drawing_id, "convert_failed", _CONVERT_FAILED_MESSAGE)
                 return
 
             # The drawing may have been deleted while this ran, and telling
