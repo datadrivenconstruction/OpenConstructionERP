@@ -1338,7 +1338,7 @@ const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: strin
 // ── Full Converter Section (for /data-explorer) ──────────────────────────────
 
 interface CadConverterSectionProps {
-  converters: { id: string; name: string; description: string; engine: string; extensions: string[]; exe: string; version: string; size_mb: number; installed: boolean; path: string | null }[];
+  converters: { id: string; name: string; description: string; engine: string; extensions: string[]; exe: string; version: string; size_mb: number; installed: boolean; format_range?: string }[];
   installedCount: number;
   totalCount: number;
   installingId: string | null;
