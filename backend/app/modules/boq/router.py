@@ -8307,6 +8307,7 @@ async def _extract_from_cad(content: bytes, ext: str, filename: str) -> dict[str
     """
     from app.modules.boq.cad_import import (
         ConverterUnavailableError,
+        conversion_failed_detail,
         convert_cad_to_excel,
         ensure_converter_async,
         parse_cad_excel,
@@ -8356,10 +8357,7 @@ async def _extract_from_cad(content: bytes, ext: str, filename: str) -> dict[str
         excel_path = await convert_cad_to_excel(input_path, output_dir, ext)
         if not excel_path:
             return {
-                "text": (
-                    f"CAD conversion failed for .{ext} file. "
-                    "Check that the converter is properly installed and the file is valid."
-                ),
+                "text": conversion_failed_detail(ext),
                 "structured": False,
             }
 
