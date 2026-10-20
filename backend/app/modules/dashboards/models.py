@@ -120,7 +120,7 @@ class SnapshotSourceFile(Base):
         index=True,
     )
     original_name: Mapped[str] = mapped_column(String(500), nullable=False)
-    # Lower-cased extension without the dot: ``"ifc"``, ``"rvt"``, ``"dwg"``, ``"dgn"``.
+    # Lower-cased extension without the dot: ``"ifc"``, ``"rvt"``, ``"dwg"``.
     format: Mapped[str] = mapped_column(String(20), nullable=False)
     discipline: Mapped[str | None] = mapped_column(String(100), nullable=True)
     entity_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

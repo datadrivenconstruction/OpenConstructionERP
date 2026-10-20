@@ -8383,7 +8383,7 @@ async def _extract_from_cad(content: bytes, ext: str, filename: str) -> dict[str
 # to whoever uploaded something else.
 _SMART_IMPORT_EXCEL_EXTS: tuple[str, ...] = ("xlsx", "xls")
 _SMART_IMPORT_IMAGE_EXTS: tuple[str, ...] = ("jpg", "jpeg", "png", "tiff", "bmp")
-_SMART_IMPORT_CAD_EXTS: tuple[str, ...] = ("rvt", "ifc", "dwg", "dgn")
+_SMART_IMPORT_CAD_EXTS: tuple[str, ...] = ("rvt", "ifc", "dwg")
 _SMART_IMPORT_EXTS: frozenset[str] = frozenset(
     _SMART_IMPORT_EXCEL_EXTS + ("csv", "pdf") + _SMART_IMPORT_IMAGE_EXTS + _SMART_IMPORT_CAD_EXTS
 )
@@ -8466,7 +8466,7 @@ async def smart_import(
         ...,
         description=(
             "Any document file (Excel, CSV, PDF, image, or CAD/BIM). Accepted extensions: "
-            ".xlsx, .xls, .csv, .pdf, .jpg, .jpeg, .png, .tiff, .bmp, .rvt, .ifc, .dwg, .dgn"
+            ".xlsx, .xls, .csv, .pdf, .jpg, .jpeg, .png, .tiff, .bmp, .rvt, .ifc, .dwg"
         ),
     ),
     service: BOQService = Depends(_get_service),
@@ -8483,7 +8483,7 @@ async def smart_import(
         ``Deprecation: true`` response header.
 
     Accepted extensions: .xlsx, .xls, .csv, .pdf, .jpg, .jpeg, .png, .tiff,
-    .bmp, .rvt, .ifc, .dwg, .dgn
+    .bmp, .rvt, .ifc, .dwg
 
     For structured Excel/CSV with
     recognisable column headers, performs a direct import. For CAD/BIM
