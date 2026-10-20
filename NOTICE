@@ -548,6 +548,23 @@ Plus Jakarta Sans
     Copyright 2020 The Plus Jakarta Sans Project Authors. Licensed under
     the SIL Open Font License, Version 1.1, on the terms above.
 
+IBM Plex Sans
+    frontend/public/assets/vendor/fonts/webfonts/ibm-plex-sans-*.woff2
+    Licence text:
+    frontend/public/assets/vendor/fonts/licenses/ibm-plex-sans-OFL.txt
+
+    Copyright 2019 IBM Corp. Licensed under the SIL Open Font License,
+    Version 1.1, on the terms above. "Plex" is a Reserved Font Name.
+
+Source Sans 3
+    frontend/public/assets/vendor/fonts/webfonts/source-sans-3-*.woff2
+    Licence text:
+    frontend/public/assets/vendor/fonts/licenses/source-sans-3-OFL.txt
+
+    Copyright 2010-2020 Adobe (http://www.adobe.com/), with Reserved
+    Font Name "Source". Licensed under the SIL Open Font License,
+    Version 1.1, on the terms above.
+
 Noto Sans Thai
     backend/app/core/fonts/noto/NotoSansThai-Regular.ttf
     Licence text: backend/app/core/fonts/noto/NotoSansThai-OFL.txt
