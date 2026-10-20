@@ -169,6 +169,7 @@ const preloaders: Record<string, () => void> = {
   '/issues': () => void import('@/features/issues/IssuesHubPage'),
   '/cases': () => void import('@/features/cases'),
   '/videos': () => void import('@/features/videos'),
+  '/packs': () => void import('@/features/modules/packs/PacksPage'),
   '/requirements/matrix': () => void import('@/features/requirements/RequirementsMatrixPage'),
   '/validation': () => void import('@/features/validation'),
   '/workflows': () => void import('@/features/enterprise-workflows'),

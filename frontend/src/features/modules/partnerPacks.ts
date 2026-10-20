@@ -14,6 +14,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, API_BASE, getAuthToken, getErrorMessage } from '@/shared/lib/api';
+import type { PartnerPacksResponse } from './packs/packCatalog';
 
 export interface AppliedInfo {
   applied: boolean;
@@ -162,6 +163,15 @@ export const MAX_PACK_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 const KEY_APPLIED = 'partner-pack-applied';
 const KEY_INSTALLED = 'partner-packs';
+
+/** Every pack on this install plus the active slug, for the packs catalogue. */
+export function useInstalledPackList() {
+  return useQuery({
+    queryKey: [KEY_INSTALLED],
+    queryFn: () => apiGet<PartnerPacksResponse>('/v1/partner-pack/installed'),
+    staleTime: 5 * 60 * 1000,
+  });
+}
 
 export function useAppliedPack() {
   return useQuery({
