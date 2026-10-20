@@ -136,48 +136,53 @@ router = APIRouter(tags=["takeoff"])
 #
 # Converter metadata. The converters are the packages of the DDC converter
 # release (see ``app.core.converter_source``): one portable archive per format,
-# unpacked into ``~/.openestimator/converters/{format}_windows/``. The DGN
-# converter is discontinued in this generation and is not listed.
+# unpacked into ``~/.openestimator/converters/{format}_windows/``. There is no
+# DGN converter in this generation.
 _CONVERTER_META: list[dict[str, Any]] = [
     {
         "id": "dwg",
         "name": "DWG Converter",
-        "description": "Import DWG drawings (R13-2018). Extracts entities, layers and blocks into structured element tables for cost estimation, and a DXF for the drawing viewer.",
+        "description": f"Import DWG drawings ({PACKAGES['dwg'].format_range.removeprefix('DWG ')}). Extracts entities, layers and blocks into structured element tables for cost estimation, and a DXF for the drawing viewer.",
         "engine": "DDC DWG to Excel",
         "extensions": [".dwg"],
         "exe": "dwg2excel.exe",
         "version": PACKAGES["dwg"].version,
+        "format_range": PACKAGES["dwg"].format_range,
+        "produces_geometry": PACKAGES["dwg"].produces_geometry,
         "size_mb": round(PACKAGES["dwg"].size_bytes / 1024 / 1024, 1),
     },
     {
         "id": "rvt",
         "name": "RVT Converter",
-        "description": "Native RVT reader (Revit 2019-2027). Extracts saved element properties and 3D geometry (GLB) without a proprietary CAD vendor license. Preview: geometry completeness is not certified.",
+        "description": f"Native RVT reader ({PACKAGES['rvt'].format_range}). Extracts saved element properties and 3D geometry (GLB) without a proprietary CAD vendor license. Preview: geometry completeness is not certified.",
         "engine": "DDC RVT Converter",
         "extensions": [".rvt", ".rfa"],
         "exe": "RVTconverter.exe",
         "version": PACKAGES["rvt"].version,
+        "format_range": PACKAGES["rvt"].format_range,
+        "produces_geometry": PACKAGES["rvt"].produces_geometry,
         "size_mb": round(PACKAGES["rvt"].size_bytes / 1024 / 1024, 1),
     },
     {
         "id": "ifc",
         "name": "IFC Import",
-        "description": "Import IFC 2x3 and IFC4 files. Maps IFC entities to structured element tables with property and quantity set extraction. Preview: no geometry is produced.",
+        "description": f"Import {PACKAGES['ifc'].format_range} files. Maps IFC entities to structured element tables with property and quantity set extraction. Preview: no geometry is produced.",
         "engine": "DDC IFC to Excel",
         "extensions": [".ifc", ".ifczip"],
         "exe": "python.exe",
         "version": PACKAGES["ifc"].version,
+        "format_range": PACKAGES["ifc"].format_range,
+        "produces_geometry": PACKAGES["ifc"].produces_geometry,
         "size_mb": round(PACKAGES["ifc"].size_bytes / 1024 / 1024, 1),
     },
 ]
 
 
-#: What an anonymous caller may not read off a converter row. ``path`` is the
-#: exe's absolute location on the server's disk and ``health_message`` names
-#: the folder it lives in whenever the smoke test has something to report, so
-#: both carry the operator's home directory and account name. See
-#: ``app.core.host_disclosure`` for why the route stays open and these do not.
-_CONVERTER_ROW_ANONYMOUS_BLANKS = {"path": None, "health_message": ""}
+#: What an anonymous caller may not read off a converter row. ``health_message``
+#: names the folder the exe lives in whenever the smoke test has something to
+#: report, so it carries the operator's home directory and account name. The
+#: exe's own path is never part of the row. See ``app.core.host_disclosure``.
+_CONVERTER_ROW_ANONYMOUS_BLANKS = {"health_message": ""}
 
 #: The same rule over an install-progress record. ``path`` is where the exe
 #: landed, ``message`` quotes it back on success, ``error`` is an OS exception
@@ -196,9 +201,9 @@ async def list_converters(verify: bool = False, user: OptionalUserPayload = None
     BIM page asks for it before anyone has signed in.
 
     That the route is reachable anonymously is not a licence for the body to
-    describe the machine. ``path`` and ``health_message`` name the folder the
-    converter sits in, which on a default install is under the operator's home
-    directory and therefore carries their account name; both are emptied for a
+    describe the machine. The body never carries the exe's path, and
+    ``health_message`` can name the folder the converter sits in (under the
+    operator's home directory on a default install), so it is emptied for a
     caller who has not signed in. What the status check is *for* survives that
     untouched: ``installed``, ``health`` and ``suggested_actions`` say whether
     a converter is there and what to do about it, and none of them needs to say
@@ -270,7 +275,6 @@ async def list_converters(verify: bool = False, user: OptionalUserPayload = None
         entry: dict[str, Any] = {
             **meta,
             "installed": installed,
-            "path": str(path) if path else None,
         }
         if not installed:
             entry["health"] = "not_installed"
@@ -1350,6 +1354,7 @@ async def cad_extract(
         _CONVERTER_FORMAT_ALIASES,
         ConverterUnavailableError,
         convert_cad_to_excel,
+        converter_error_detail,
         ensure_converter_async,
         group_cad_elements,
         parse_cad_excel,
@@ -1362,9 +1367,13 @@ async def cad_extract(
     if ext not in _SUPPORTED_CAD_EXTS:
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"Unsupported file type: .{ext}. Accepted: {', '.join(f'.{e}' for e in sorted(_SUPPORTED_CAD_EXTS))}"
-            ),
+            detail={
+                "code": "unsupported_cad_extension",
+                "message": (
+                    f"Unsupported file type: .{ext}. Accepted: {', '.join(f'.{e}' for e in sorted(_SUPPORTED_CAD_EXTS))}"
+                ),
+                "params": {"ext": f".{ext}", "accepted": ", ".join(f".{e}" for e in sorted(_SUPPORTED_CAD_EXTS))},
+            },
         )
 
     # Normalise the upload extension to the converter that actually reads it
@@ -1389,7 +1398,7 @@ async def cad_extract(
         try:
             await ensure_converter_async(conv_ext)
         except ConverterUnavailableError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise HTTPException(status_code=400, detail=converter_error_detail(exc)) from exc
 
     content = await file.read()
     if not content:
@@ -1623,6 +1632,7 @@ async def cad_columns(
         _CONVERTER_FORMAT_ALIASES,
         ConverterUnavailableError,
         convert_cad_to_excel,
+        converter_error_detail,
         ensure_converter_async,
         get_available_columns,
         parse_cad_excel,
@@ -1635,9 +1645,13 @@ async def cad_columns(
     if ext not in _SUPPORTED_CAD_EXTS:
         raise HTTPException(
             status_code=400,
-            detail=(
-                f"Unsupported file type: .{ext}. Accepted: {', '.join(f'.{e}' for e in sorted(_SUPPORTED_CAD_EXTS))}"
-            ),
+            detail={
+                "code": "unsupported_cad_extension",
+                "message": (
+                    f"Unsupported file type: .{ext}. Accepted: {', '.join(f'.{e}' for e in sorted(_SUPPORTED_CAD_EXTS))}"
+                ),
+                "params": {"ext": f".{ext}", "accepted": ", ".join(f".{e}" for e in sorted(_SUPPORTED_CAD_EXTS))},
+            },
         )
 
     # Normalise the upload extension to the converter that actually reads it
@@ -1653,7 +1667,7 @@ async def cad_columns(
         try:
             await ensure_converter_async(conv_ext)
         except ConverterUnavailableError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise HTTPException(status_code=400, detail=converter_error_detail(exc)) from exc
 
     content = await file.read()
     if not content:

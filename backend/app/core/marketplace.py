@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
+from app.core.converter_source import PACKAGES
 from app.core.module_loader import module_loader
 from app.core.self_upgrade import repair_hint
 
@@ -750,15 +751,15 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         tags=["Italian", "Europe"],
         price="Free",
     ),
-    # ── Converters (4) ───────────────────────────────────────────────────
+    # ── Converters ───────────────────────────────────────────────────
     MarketplaceModule(
         id="converter-dwg",
         name="DWG/DXF Converter",
         description="Import DWG and DXF files. Extracts geometry, layers, blocks, and properties into structured element tables for cost estimation.",
         category="converter",
         icon="FileInput",
-        version="1.0.0",
-        size_mb=245.0,
+        version=PACKAGES["dwg"].version,
+        size_mb=round(PACKAGES["dwg"].size_bytes / 1024 / 1024, 1),
         author=_DDC,
         tags=["CAD", "DWG", "DXF"],
         requires=["oe_projects"],
@@ -770,8 +771,8 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         description="Native RVT file parser. No proprietary CAD vendor license required. Extracts families, parameters, quantities, and spatial structure.",
         category="converter",
         icon="FileInput",
-        version="0.5.0",
-        size_mb=128.0,
+        version=PACKAGES["rvt"].version,
+        size_mb=round(PACKAGES["rvt"].size_bytes / 1024 / 1024, 1),
         author=_DDC,
         tags=["BIM", "RVT"],
         requires=["oe_projects"],
@@ -783,23 +784,10 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         description="Import IFC 2x3 and IFC4 files. Maps IFC entities to structured element tables with full property set extraction and spatial decomposition.",
         category="converter",
         icon="FileInput",
-        version="1.0.0",
-        size_mb=195.0,
+        version=PACKAGES["ifc"].version,
+        size_mb=round(PACKAGES["ifc"].size_bytes / 1024 / 1024, 1),
         author=_DDC,
         tags=["BIM", "IFC", "buildingSMART"],
-        requires=["oe_projects"],
-        price="Free",
-    ),
-    MarketplaceModule(
-        id="converter-dgn",
-        name="DGN Converter",
-        description="Import DGN files. Extracts elements, levels, properties, and 3D geometry into structured tables.",
-        category="converter",
-        icon="FileInput",
-        version="1.0.0",
-        size_mb=180.0,
-        author=_DDC,
-        tags=["CAD", "DGN"],
         requires=["oe_projects"],
         price="Free",
     ),
