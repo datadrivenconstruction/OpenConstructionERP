@@ -37,6 +37,7 @@ import { SubscribeButton } from './SubscribeButton';
 import { ProjectJourneyButton } from './ProjectJourney';
 import { PresenceAvatarStack } from '@/features/global_presence';
 import { getRouteIcon } from './routeIcons';
+import { useIconOverridesVersion } from './menuIcons';
 import { resolveStaleProject } from './staleProject';
 import { isModuleI18nKey } from '@/modules/_i18n';
 
@@ -377,6 +378,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   // a small chip before the top-bar title so each module is identifiable at
   // the very top. `null` when the route has no sidebar entry (then nothing
   // renders and the layout is unchanged).
+  useIconOverridesVersion();
   const RouteIcon = getRouteIcon(location.pathname);
   const currentLang = getLanguageByCode(i18n.language) ?? { code: 'en', name: 'English (International)', flag: '', country: 'xx' };
   const openCommandPalette = useCallback(() => {

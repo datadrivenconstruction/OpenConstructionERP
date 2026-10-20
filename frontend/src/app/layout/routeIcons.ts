@@ -20,6 +20,11 @@
  * their parent module's icon (e.g. `/rfi/123` → the `/rfi` icon, and
  * `/bim/federations` beats `/bim`). Nested project routes
  * (`/projects/<id>/<feature>`) match on the trailing feature segment.
+ *
+ * A user's icon override for a menu route (Settings > Menu look) wins over
+ * both maps, so the chip, the sidebar row and the command palette agree.
+ * Components calling `getRouteIcon` in render subscribe with
+ * `useIconOverridesVersion()` from `./menuIcons`.
  */
 import {
   LayoutDashboard,
@@ -97,6 +102,7 @@ import {
   AlarmClock,
   type LucideIcon,
 } from 'lucide-react';
+import { getIconOverride } from './menuIcons';
 import { navGroups } from './navCatalog';
 
 /**
@@ -310,11 +316,11 @@ export function getRouteIcon(pathname: string): LucideIcon | null {
 
   for (const prefix of SORTED_ROUTE_PREFIXES) {
     if (prefix === '/') {
-      if (candidate === '/') return ROUTE_ICON_MAP['/']!;
+      if (candidate === '/') return getIconOverride('/') ?? ROUTE_ICON_MAP['/']!;
       continue;
     }
     if (candidate === prefix || candidate.startsWith(prefix + '/')) {
-      return ROUTE_ICON_MAP[prefix]!;
+      return getIconOverride(prefix) ?? ROUTE_ICON_MAP[prefix]!;
     }
   }
   return null;

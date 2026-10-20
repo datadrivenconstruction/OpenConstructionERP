@@ -11,7 +11,8 @@ This stores the workspace branding once on the server, in a small JSON file in
 the data dir::
 
     <data-dir>/app_branding.json   ->   {"mode": "logo", "logo_data_url": "...", "company_name": "",
-                                         "appearance": {"accent": "teal", "density": "compact"}}
+                                         "appearance": {"accent": "teal", "density": "compact",
+                                                        "menu": {"view": "compact", "color": "accent"}}}
 
 so every browser and every invited user sees the same brand. A PUBLIC endpoint
 reads it (the login page has no token yet) and an admin-only endpoint writes it.
@@ -55,6 +56,19 @@ APPEARANCE_OPTIONS: dict[str, tuple[str, ...]] = {
     "radius": ("standard", "sharp", "round"),
 }
 
+#: Allowed values of the workspace menu look (``appearance.menu``), one tuple
+#: per axis. Mirrors ``frontend/src/shared/lib/menuAppearance.ts``. Per-item
+#: icon overrides are personal and never stored here.
+MENU_OPTIONS: dict[str, tuple[str, ...]] = {
+    "view": ("classic", "compact", "comfortable", "rail", "floating"),
+    "active": ("bar", "pill", "tint"),
+    "headers": ("caps", "divider", "none"),
+    "stroke": ("light", "regular", "bold"),
+    "container": ("none", "tile", "circle"),
+    "color": ("mono", "accent", "sections"),
+    "icons": ("shown", "hidden"),
+}
+
 #: Shape returned when nothing has been customised.
 DEFAULT_BRANDING: dict[str, Any] = {
     "mode": "default",
@@ -65,15 +79,30 @@ DEFAULT_BRANDING: dict[str, Any] = {
 }
 
 
-def sanitise_appearance(data: Any) -> dict[str, str] | None:
+def _pick(data: dict[str, Any], options: dict[str, tuple[str, ...]]) -> dict[str, str]:
+    return {axis: data[axis] for axis, allowed in options.items() if data.get(axis) in allowed}
+
+
+def sanitise_menu(data: Any) -> dict[str, str] | None:
+    """Keep only known menu axes with allowed values; ``None`` when nothing is left."""
+    if not isinstance(data, dict):
+        return None
+    return _pick(data, MENU_OPTIONS) or None
+
+
+def sanitise_appearance(data: Any) -> dict[str, Any] | None:
     """Keep only known axes with allowed values; ``None`` when nothing is left.
 
     An axis left out means "platform default" for that axis, so a workspace can
-    pin the accent alone and leave the rest to each user's device.
+    pin the accent alone and leave the rest to each user's device. The menu
+    look rides along under ``menu`` with the same rule.
     """
     if not isinstance(data, dict):
         return None
-    clean = {axis: data[axis] for axis, allowed in APPEARANCE_OPTIONS.items() if data.get(axis) in allowed}
+    clean: dict[str, Any] = _pick(data, APPEARANCE_OPTIONS)
+    menu = sanitise_menu(data.get("menu"))
+    if menu:
+        clean["menu"] = menu
     return clean or None
 
 

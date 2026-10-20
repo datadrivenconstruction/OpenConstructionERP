@@ -71,8 +71,8 @@ interface ServerBranding {
   logo_data_url?: string | null;
   logo_png_data_url?: string | null;
   company_name?: string;
-  /** Workspace default UI appearance; see useAppearanceStore. */
-  appearance?: unknown;
+  /** Workspace default UI appearance (style axes plus `menu`); see useAppearanceStore. */
+  appearance?: { menu?: unknown } | null;
 }
 
 /** Coerce a server payload into a safe {@link Persisted} value. */
@@ -207,6 +207,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
       try {
         const r = await apiGet<ServerBranding>('/v1/branding/');
         useAppearanceStore.getState().setWorkspaceDefault(r.appearance ?? null);
+        useAppearanceStore.getState().setWorkspaceMenu(r.appearance?.menu ?? null);
         const next = fromServer(r);
         const current = get();
         if (

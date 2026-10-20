@@ -41,6 +41,7 @@ import { projectsApi, type Project } from '@/features/projects/api';
 import { boqApi, type BOQ } from '@/features/boq/api';
 import { apiGet } from '@/shared/lib/api';
 import { useModuleStore } from '@/stores/useModuleStore';
+import { getIconOverride, useIconOverridesVersion } from '@/app/layout/menuIcons';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -193,6 +194,7 @@ function pushRecent(entry: RecentEntry): void {
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const { t } = useTranslation();
+  useIconOverridesVersion();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -610,7 +612,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                 flatIndex += 1;
                 const isActive = flatIndex === activeIndex;
                 const idx = flatIndex;
-                const Icon = item.icon;
+                // A page row takes the icon the user gave that menu item.
+                const Icon = (item.type === 'page' && getIconOverride(item.path)) || item.icon;
                 const label = item.label ?? (item.labelKey ? t(item.labelKey) : '');
 
                 return (

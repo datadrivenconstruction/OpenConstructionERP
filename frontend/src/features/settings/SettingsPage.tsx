@@ -15,6 +15,7 @@ import { WebhookLeads } from './WebhookLeads';
 import { DesktopServerCard } from './DesktopServerCard';
 import { TextSizeSetting } from './TextSizeSetting';
 import { AppearanceStyleCard } from './AppearanceStyleCard';
+import { MenuAppearanceCard } from './MenuAppearanceCard';
 import VectorStatusCard from './VectorStatusCard';
 import SemanticModelSettings from './SemanticModelSettings';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -1825,6 +1826,7 @@ export function SettingsPage() {
               <AppearanceCard />
               <AppearanceStyleCard />
               <InterfaceModeCard />
+              <MenuAppearanceCard />
             </>
           )}
 
