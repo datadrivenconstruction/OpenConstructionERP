@@ -15213,6 +15213,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Kuantitas tidak dapat diekstrak: konverter DDC tidak tersedia di server ini. Elemen hanya diimpor untuk dilihat dan ditautkan. Instal konverter lalu ulangi impor untuk mendapatkan luas, volume, dan panjang.",
     "bim.quantity_warning.converter_absent": "Konverter DDC tidak tersedia di server ini, sehingga kuantitas hanya dibaca dari kuantitas dasar IFC yang tertanam di berkas dan mungkin tidak lengkap. Instal konverter lalu ulangi impor untuk mendapatkan kuantitas yang lengkap.",
     "bim.quantity_warning.no_quantities": "Tidak ada kuantitas (luas, volume, panjang) yang dapat diekstrak dari berkas ini. Elemen hanya diimpor untuk dilihat dan ditautkan.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Kuantitas tidak dapat diekstrak: konverter DDC sudah terinstal tetapi tidak menyelesaikan berkas ini (kehabisan waktu atau berhenti karena galat). Elemen hanya diimpor untuk dilihat dan ditautkan. Ulangi impor untuk menjalankan konverter lagi.",
+    "bim.quantity_warning.converter_failed": "Konverter DDC sudah terinstal tetapi tidak menyelesaikan berkas ini (kehabisan waktu atau berhenti karena galat), sehingga kuantitas hanya dibaca dari kuantitas dasar IFC yang tertanam di berkas dan mungkin tidak lengkap. Ulangi impor untuk mendapatkan kuantitas yang lengkap.",
     "bim_upload.stage_failed": "Pengunggahan gagal",
     "bim_upload.stage_converter_required": "Konverter diperlukan",
     "bim_upload.stage_server_converting": "Mengonversi di server...",

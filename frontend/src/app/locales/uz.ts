@@ -15187,6 +15187,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Hajmlarni ajratib olib bo\u0002bblmadi: DDC konvertori bu serverda mavjud emas. Elementlar faqat ko\u0002bbrish va bog\u0002bblash uchun import qilindi. Maydon, hajm va uzunliklarni olish uchun konvertorni o\u0002bbrnating va importni qayta bajaring.",
     "bim.quantity_warning.converter_absent": "DDC konvertori bu serverda mavjud emas, shuning uchun hajmlar faqat fayl ichiga joylangan IFC bazaviy miqdorlaridan o\u0002bbqildi va to\u0002bbliq bo\u0002bblmasligi mumkin. To\u0002bbliq hajmlarni olish uchun konvertorni o\u0002bbrnating va importni qayta bajaring.",
     "bim.quantity_warning.no_quantities": "Bu fayldan birorta ham hajm (maydon, hajm, uzunlik) ajratib olib bo\u0002bblmadi. Elementlar faqat ko\u0002bbrish va bog\u0002bblash uchun import qilindi.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Hajmlarni ajratib olib bo‘lmadi: DDC konvertori o‘rnatilgan, lekin bu faylni oxirigacha qayta ishlay olmadi (vaqt tugadi yoki xato bilan to‘xtadi). Elementlar faqat ko‘rish va bog‘lash uchun import qilindi. Konvertorni qayta ishga tushirish uchun importni qayta bajaring.",
+    "bim.quantity_warning.converter_failed": "DDC konvertori o‘rnatilgan, lekin bu faylni oxirigacha qayta ishlay olmadi (vaqt tugadi yoki xato bilan to‘xtadi), shuning uchun hajmlar faqat fayl ichiga joylangan IFC bazaviy miqdorlaridan o‘qildi va to‘liq bo‘lmasligi mumkin. To‘liq hajmlarni olish uchun importni qayta bajaring.",
     "bim_upload.stage_failed": "Yuklab boʻlmadi",
     "bim_upload.stage_converter_required": "Konvertor talab qilinadi",
     "bim_upload.stage_server_converting": "Serverda konvertatsiya qilinmoqda...",

@@ -15213,6 +15213,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Không thể trích xuất khối lượng: bộ chuyển đổi DDC không khả dụng trên máy chủ này. Các phần tử chỉ được nhập để xem và liên kết. Hãy cài đặt bộ chuyển đổi và nhập lại để lấy diện tích, thể tích và chiều dài.",
     "bim.quantity_warning.converter_absent": "Bộ chuyển đổi DDC không khả dụng trên máy chủ này, nên khối lượng chỉ được đọc từ các khối lượng cơ bản IFC nhúng trong tệp và có thể chưa đầy đủ. Hãy cài đặt bộ chuyển đổi và nhập lại để có khối lượng đầy đủ.",
     "bim.quantity_warning.no_quantities": "Không thể trích xuất khối lượng nào (diện tích, thể tích, chiều dài) từ tệp này. Các phần tử chỉ được nhập để xem và liên kết.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Không thể trích xuất khối lượng: bộ chuyển đổi DDC đã được cài đặt nhưng không xử lý xong tệp này (hết thời gian chờ hoặc dừng do lỗi). Các phần tử chỉ được nhập để xem và liên kết. Hãy nhập lại để chạy lại bộ chuyển đổi.",
+    "bim.quantity_warning.converter_failed": "Bộ chuyển đổi DDC đã được cài đặt nhưng không xử lý xong tệp này (hết thời gian chờ hoặc dừng do lỗi), nên khối lượng chỉ được đọc từ các khối lượng cơ bản IFC nhúng trong tệp và có thể chưa đầy đủ. Hãy nhập lại để có khối lượng đầy đủ.",
     "bim_upload.stage_failed": "Tải lên thất bại",
     "bim_upload.stage_converter_required": "Cần bộ chuyển đổi",
     "bim_upload.stage_server_converting": "Đang chuyển đổi trên máy chủ...",

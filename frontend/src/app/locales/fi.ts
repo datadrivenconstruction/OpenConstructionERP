@@ -15289,6 +15289,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Määrien poimiminen epäonnistui: DDC-muunnin ei ole käytettävissä tällä palvelimella. Elementit tuotiin vain katselua ja linkitystä varten. Asenna muunnin ja toista tuonti saadaksesi pinta-alat, tilavuudet ja pituudet.",
     "bim.quantity_warning.converter_absent": "DDC-muunnin ei ole käytettävissä tällä palvelimella, joten määrät luettiin vain tiedostoon upotetuista IFC-perusmääristä ja ne voivat olla puutteellisia. Asenna muunnin ja toista tuonti saadaksesi täydelliset määrät.",
     "bim.quantity_warning.no_quantities": "Tästä tiedostosta ei voitu poimia yhtään määrää (pinta-ala, tilavuus, pituus). Elementit tuotiin vain katselua ja linkitystä varten.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Määrien poimiminen epäonnistui: DDC-muunnin on asennettu, mutta se ei saanut tätä tiedostoa valmiiksi (aikakatkaisu tai pysähtyi virheeseen). Elementit tuotiin vain katselua ja linkitystä varten. Toista tuonti ajaaksesi muuntimen uudelleen.",
+    "bim.quantity_warning.converter_failed": "DDC-muunnin on asennettu, mutta se ei saanut tätä tiedostoa valmiiksi (aikakatkaisu tai pysähtyi virheeseen), joten määrät luettiin vain tiedostoon upotetuista IFC-perusmääristä ja ne voivat olla puutteellisia. Toista tuonti saadaksesi täydelliset määrät.",
     "bim_upload.stage_failed": "Lataus epäonnistui",
     "bim_upload.stage_converter_required": "Muunnin vaaditaan",
     "bim_upload.stage_server_converting": "Muunnetaan palvelimella...",

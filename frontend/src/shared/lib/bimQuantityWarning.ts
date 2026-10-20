@@ -17,6 +17,8 @@ export const BIM_QUANTITY_WARNING_CODES = [
   'no_quantities_converter_absent',
   'converter_absent',
   'no_quantities',
+  'no_quantities_converter_failed',
+  'converter_failed',
 ] as const;
 
 export type BimQuantityWarningCode = (typeof BIM_QUANTITY_WARNING_CODES)[number];
@@ -41,6 +43,16 @@ const TEXT: Record<BimQuantityWarningCode, BimQuantityWarningText> = {
     key: 'bim.quantity_warning.no_quantities',
     defaultValue:
       'No quantities (area, volume, length) could be extracted from this file. The elements were imported for viewing and linking only.',
+  },
+  no_quantities_converter_failed: {
+    key: 'bim.quantity_warning.no_quantities_converter_failed',
+    defaultValue:
+      'Quantities could not be extracted: the DDC converter is installed but did not finish this file (it timed out or stopped with an error). The elements were imported for viewing and linking only. Retry the import to run the converter again.',
+  },
+  converter_failed: {
+    key: 'bim.quantity_warning.converter_failed',
+    defaultValue:
+      'The DDC converter is installed but did not finish this file (it timed out or stopped with an error), so quantities were read only from the file’s embedded IFC base quantities and may be incomplete. Retry the import for complete quantities.',
   },
 };
 

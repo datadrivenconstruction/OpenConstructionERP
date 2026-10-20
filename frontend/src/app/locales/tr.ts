@@ -16045,6 +16045,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Miktarlar çıkarılamadı: DDC dönüştürücüsü bu sunucuda kullanılamıyor. Öğeler yalnızca görüntüleme ve bağlama amacıyla içe aktarıldı. Alanları, hacimleri ve uzunlukları almak için dönüştürücüyü kurun ve içe aktarmayı yeniden deneyin.",
     "bim.quantity_warning.converter_absent": "DDC dönüştürücüsü bu sunucuda kullanılamıyor; bu nedenle miktarlar yalnızca dosyaya gömülü IFC temel miktarlarından okundu ve eksik olabilir. Eksiksiz miktarlar için dönüştürücüyü kurun ve içe aktarmayı yeniden deneyin.",
     "bim.quantity_warning.no_quantities": "Bu dosyadan hiçbir miktar (alan, hacim, uzunluk) çıkarılamadı. Öğeler yalnızca görüntüleme ve bağlama amacıyla içe aktarıldı.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Miktarlar çıkarılamadı: DDC dönüştürücüsü kurulu, ancak bu dosyayı tamamlayamadı (zaman aşımına uğradı veya hatayla durdu). Öğeler yalnızca görüntüleme ve bağlama amacıyla içe aktarıldı. Dönüştürücüyü yeniden çalıştırmak için içe aktarmayı yeniden deneyin.",
+    "bim.quantity_warning.converter_failed": "DDC dönüştürücüsü kurulu, ancak bu dosyayı tamamlayamadı (zaman aşımına uğradı veya hatayla durdu); bu nedenle miktarlar yalnızca dosyaya gömülü IFC temel miktarlarından okundu ve eksik olabilir. Eksiksiz miktarlar için içe aktarmayı yeniden deneyin.",
     "bim_upload.stage_failed": "Yükleme başarısız",
     "bim_upload.stage_converter_required": "Dönüştürücü gerekli",
     "bim_upload.stage_server_converting": "Sunucuda dönüştürülüyor...",

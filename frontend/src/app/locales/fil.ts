@@ -9480,6 +9480,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Hindi nakuha ang mga dami: hindi available ang DDC converter sa server na ito. Na-import ang mga elemento para lamang sa pagtingin at pag-link. I-install ang converter at ulitin ang pag-import para makuha ang mga lawak, volume, at haba.",
     "bim.quantity_warning.converter_absent": "Hindi available ang DDC converter sa server na ito, kaya ang mga dami ay nabasa lamang mula sa mga batayang dami ng IFC na naka-embed sa file at maaaring hindi kumpleto. I-install ang converter at ulitin ang pag-import para sa kumpletong mga dami.",
     "bim.quantity_warning.no_quantities": "Walang nakuhang dami (lawak, volume, haba) mula sa file na ito. Na-import ang mga elemento para lamang sa pagtingin at pag-link.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Hindi nakuha ang mga dami: naka-install ang DDC converter pero hindi nito natapos ang file na ito (nag-timeout o huminto dahil sa error). Na-import ang mga elemento para lamang sa pagtingin at pag-link. Ulitin ang pag-import para patakbuhin muli ang converter.",
+    "bim.quantity_warning.converter_failed": "Naka-install ang DDC converter pero hindi nito natapos ang file na ito (nag-timeout o huminto dahil sa error), kaya ang mga dami ay nabasa lamang mula sa mga batayang dami ng IFC na naka-embed sa file at maaaring hindi kumpleto. Ulitin ang pag-import para sa kumpletong mga dami.",
     "bim_upload.stage_extracting": "Kinukuha ang mga elemento ng gusali...",
     "bim_upload.stage_failed": "Nabigo ang pag-upload",
     "bim_upload.stage_finalizing": "Fina-finalize ang setup ng modelo...",

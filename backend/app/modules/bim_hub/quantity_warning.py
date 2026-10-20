@@ -19,8 +19,12 @@ from typing import NamedTuple
 NO_QUANTITIES_CONVERTER_ABSENT = "no_quantities_converter_absent"
 CONVERTER_ABSENT = "converter_absent"
 NO_QUANTITIES = "no_quantities"
+NO_QUANTITIES_CONVERTER_FAILED = "no_quantities_converter_failed"
+CONVERTER_FAILED = "converter_failed"
 
-QUANTITY_WARNING_CODES: frozenset[str] = frozenset({NO_QUANTITIES_CONVERTER_ABSENT, CONVERTER_ABSENT, NO_QUANTITIES})
+QUANTITY_WARNING_CODES: frozenset[str] = frozenset(
+    {NO_QUANTITIES_CONVERTER_ABSENT, CONVERTER_ABSENT, NO_QUANTITIES, NO_QUANTITIES_CONVERTER_FAILED, CONVERTER_FAILED}
+)
 
 
 class QuantityWarning(NamedTuple):
@@ -30,14 +34,37 @@ class QuantityWarning(NamedTuple):
     message: str
 
 
-def quantity_warning(*, converter_absent: bool, no_quantities: bool) -> QuantityWarning | None:
+def quantity_warning(
+    *, converter_absent: bool, no_quantities: bool, converter_failed: bool = False
+) -> QuantityWarning | None:
     """Return the warning for an import, or ``None`` when quantities came through.
 
     Args:
         converter_absent: The DDC converter was not available, so the file was
             read by the fallback parser with placeholder geometry.
         no_quantities: Not one imported element carries a non-zero quantity.
+        converter_failed: The DDC converter is installed but this conversion
+            timed out or exited with an error, so the fallback parser ran.
+            Takes precedence over ``converter_absent``.
     """
+    if converter_failed and no_quantities:
+        return QuantityWarning(
+            NO_QUANTITIES_CONVERTER_FAILED,
+            "Geometry imported, but no quantities could be extracted: the DDC "
+            "converter is installed but did not finish this file (it timed out "
+            "or stopped with an error), and the file does not carry explicit IFC "
+            "BaseQuantities. Elements were imported for geometry/linking only. "
+            "Click Retry to run the converter again.",
+        )
+    if converter_failed:
+        return QuantityWarning(
+            CONVERTER_FAILED,
+            "Imported with placeholder geometry: the DDC converter is installed "
+            "but did not finish this file (it timed out or stopped with an "
+            "error), so quantities were read from the file's embedded IFC "
+            "BaseQuantities only and may be incomplete. Click Retry to run the "
+            "converter again.",
+        )
     if converter_absent and no_quantities:
         return QuantityWarning(
             NO_QUANTITIES_CONVERTER_ABSENT,

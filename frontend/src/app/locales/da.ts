@@ -18576,6 +18576,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "Mængderne kunne ikke udtrækkes: DDC-konverteren er ikke tilgængelig på denne server. Elementerne blev kun importeret til visning og kobling. Installer konverteren, og kør importen igen for at få arealer, rumfang og længder.",
     "bim.quantity_warning.converter_absent": "DDC-konverteren er ikke tilgængelig på denne server, så mængderne blev kun læst fra de IFC-basismængder, der er indlejret i filen, og kan være ufuldstændige. Installer konverteren, og kør importen igen for at få komplette mængder.",
     "bim.quantity_warning.no_quantities": "Der kunne ikke udtrækkes nogen mængder (areal, rumfang, længde) fra denne fil. Elementerne blev kun importeret til visning og kobling.",
+    "bim.quantity_warning.no_quantities_converter_failed": "Mængderne kunne ikke udtrækkes: DDC-konverteren er installeret, men blev ikke færdig med denne fil (tidsgrænsen blev overskredet, eller den stoppede med en fejl). Elementerne blev kun importeret til visning og kobling. Kør importen igen for at starte konverteren påny.",
+    "bim.quantity_warning.converter_failed": "DDC-konverteren er installeret, men blev ikke færdig med denne fil (tidsgrænsen blev overskredet, eller den stoppede med en fejl), så mængderne blev kun læst fra de IFC-basismængder, der er indlejret i filen, og kan være ufuldstændige. Kør importen igen for at få komplette mængder.",
     "bim_upload.stage_failed": "Upload mislykkedes",
     "bim_upload.stage_converter_required": "Konverter påkrævet",
     "bim_upload.stage_server_converting": "Konverterer på serveren...",

@@ -14551,6 +14551,8 @@ const resource = {
     "bim.quantity_warning.no_quantities_converter_absent": "De hoeveelheden konden niet worden uitgelezen: de DDC-converter is niet beschikbaar op deze server. De elementen zijn alleen geïmporteerd om te bekijken en te koppelen. Installeer de converter en voer de import opnieuw uit om oppervlakten, volumes en lengtes te krijgen.",
     "bim.quantity_warning.converter_absent": "De DDC-converter is niet beschikbaar op deze server, dus de hoeveelheden zijn alleen gelezen uit de in het bestand ingesloten IFC-basishoeveelheden en kunnen onvolledig zijn. Installeer de converter en voer de import opnieuw uit voor volledige hoeveelheden.",
     "bim.quantity_warning.no_quantities": "Uit dit bestand konden geen hoeveelheden (oppervlakte, volume, lengte) worden uitgelezen. De elementen zijn alleen geïmporteerd om te bekijken en te koppelen.",
+    "bim.quantity_warning.no_quantities_converter_failed": "De hoeveelheden konden niet worden uitgelezen: de DDC-converter is geïnstalleerd, maar heeft dit bestand niet afgemaakt (time-out of gestopt met een fout). De elementen zijn alleen geïmporteerd om te bekijken en te koppelen. Voer de import opnieuw uit om de converter opnieuw te draaien.",
+    "bim.quantity_warning.converter_failed": "De DDC-converter is geïnstalleerd, maar heeft dit bestand niet afgemaakt (time-out of gestopt met een fout), dus de hoeveelheden zijn alleen gelezen uit de in het bestand ingesloten IFC-basishoeveelheden en kunnen onvolledig zijn. Voer de import opnieuw uit voor volledige hoeveelheden.",
     "bim_upload.stage_failed": "Upload mislukt",
     "bim_upload.stage_converter_required": "Converter vereist",
     "bim_upload.stage_server_converting": "Converteren op de server...",
