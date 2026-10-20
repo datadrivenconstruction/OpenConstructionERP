@@ -50,7 +50,14 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, select
 
 from app.core.content_disposition import attachment_disposition
-from app.core.converter_package import PackageError, extract_package, read_stamp, verify_sha256, write_stamp
+from app.core.converter_package import (
+    ConverterPackageMissingError,
+    PackageError,
+    extract_package,
+    read_stamp,
+    verify_sha256,
+    write_stamp,
+)
 from app.core.converter_source import (
     CHECKSUMS_ASSET,
     DEFAULT_CONVERTER_REPO,
@@ -681,15 +688,17 @@ def _expected_package_digest(pkg: ConverterPackage, repo: str, tag: str) -> str:
     page nor a stale constant can pass a wrong file.
     """
     published = _fetch_release_checksums(repo, tag).get(pkg.asset)
+    if published is None:
+        # The release lists its assets in SHA256SUMS.txt; one it no longer
+        # lists was removed or replaced upstream.
+        raise ConverterPackageMissingError(pkg.asset, tag, repo)
     if tag == DEFAULT_CONVERTER_TAG and repo == DEFAULT_CONVERTER_REPO:
-        if published is not None and published != pkg.sha256:
+        if published != pkg.sha256:
             raise RuntimeError(
                 f"SHA256SUMS.txt of release {tag} lists {published} for {pkg.asset}, "
                 f"but this build pins {pkg.sha256}. Refusing to install."
             )
         return pkg.sha256
-    if published is None:
-        raise RuntimeError(f"Release {tag} of {repo} publishes no checksum for {pkg.asset}.")
     return published
 
 
@@ -711,6 +720,7 @@ def _download_converter_files_windows(converter_id: str, *, clean: bool = False)
     download, the digest check or the unpacking fails.
     """
     import shutil as _shutil
+    import urllib.error
     import uuid
 
     pkg = PACKAGES.get(converter_id)
@@ -743,7 +753,12 @@ def _download_converter_files_windows(converter_id: str, *, clean: bool = False)
     archive = _CONVERTER_CACHE_DIR / f"{pkg.asset}.part"
     _set_install_progress(converter_id, stage="downloading", current=1, total=2, file=pkg.asset)
     try:
-        written = _download_one_file(release_asset_url(pkg.asset, repo=repo, tag=tag), archive)
+        try:
+            written = _download_one_file(release_asset_url(pkg.asset, repo=repo, tag=tag), archive)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                raise ConverterPackageMissingError(pkg.asset, tag, repo) from exc
+            raise RuntimeError(f"Could not download {pkg.asset} of release {tag}: HTTP {exc.code}") from exc
         _set_install_progress(converter_id, bytes_done=written, stage="verifying", file=pkg.asset)
         try:
             verify_sha256(archive, expected)
@@ -1018,6 +1033,9 @@ async def _run_background_install(converter_id: str, force: bool, app: Any) -> N
             "message",
             "smoke_test_passed",
             "error",
+            "error_code",
+            "asset",
+            "tag",
             "instructions",
             "platform_unsupported",
             "platform",
@@ -1065,6 +1083,18 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
                     converter_id,
                     clean=force,
                 )
+            except ConverterPackageMissingError as exc:
+                logger.warning("Windows converter install failed for %s: %s", converter_id, exc)
+                return {
+                    "converter_id": converter_id,
+                    "installed": False,
+                    "platform": "windows",
+                    "error": str(exc),
+                    "error_code": exc.code,
+                    "asset": exc.asset,
+                    "tag": exc.tag,
+                    "message": f"{meta['name']}: {exc}",
+                }
             except RuntimeError as exc:
                 logger.warning("Windows converter install failed for %s: %s", converter_id, exc)
                 return {

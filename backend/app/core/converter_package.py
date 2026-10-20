@@ -28,6 +28,23 @@ class PackageError(RuntimeError):
     """The archive is corrupt, hostile or not the package we asked for."""
 
 
+class ConverterPackageMissingError(RuntimeError):
+    """The release no longer offers the asset this build pins.
+
+    Upstream can replace the assets of a published tag. Then no retry helps:
+    only a build that pins the new asset can install, so the error says so.
+    """
+
+    code = "converter_package_missing"
+
+    def __init__(self, asset: str, tag: str, repo: str) -> None:
+        self.asset, self.tag, self.repo = asset, tag, repo
+        super().__init__(
+            f"This version expects {asset} from {tag}, which the converter release no longer offers. "
+            "Update OpenConstructionERP."
+        )
+
+
 def sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as fh:

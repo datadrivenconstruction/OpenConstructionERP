@@ -32,12 +32,12 @@ def _installed_rvt(tmp_path: Path, *, stamp: dict[str, str] | None) -> Path:
 
 
 def test_version_comes_from_the_install_stamp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    exe = _installed_rvt(tmp_path, stamp={"version": "0.6.8", "tag": "v2026.10.0", "sha256": PACKAGES["rvt"].sha256})
+    exe = _installed_rvt(tmp_path, stamp={"version": "2.0.0", "tag": "v2026.10.0", "sha256": PACKAGES["rvt"].sha256})
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: exe)
 
     info = ifc_processor._detect_converter_version_safe("rvt")
 
-    assert info["version"] == "0.6.8"
+    assert info["version"] == "2.0.0"
     assert info["source"] == "release:v2026.10.0"
     assert info["binary_path"] == str(exe)
 
@@ -115,7 +115,7 @@ def test_excel_result_with_installed_converter_attaches_metadata(
     badge metadata in the exact shape the router expects."""
     out_dir = tmp_path / "work"
     out_dir.mkdir()
-    exe = _installed_rvt(tmp_path, stamp={"version": "0.6.8", "tag": "v2026.10.0"})
+    exe = _installed_rvt(tmp_path, stamp={"version": "2.0.0", "tag": "v2026.10.0"})
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: exe)
 
     raw = [{"category": "OST_Walls", "name": "W-01", "uniqueid": "abc", "level": "L1", "length": "5.0"}]
@@ -127,6 +127,6 @@ def test_excel_result_with_installed_converter_attaches_metadata(
     if conv_info.get("source"):
         result["converter_source"] = conv_info["source"]
 
-    assert result["converter_version"] == "0.6.8"
+    assert result["converter_version"] == "2.0.0"
     assert isinstance(result["converter_source"], str)
     assert result["converter_source"].startswith("release:")

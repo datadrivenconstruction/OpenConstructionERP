@@ -2,7 +2,7 @@
 
 This directory is bundled into the desktop app as a read-only Tauri resource.
 The Windows release workflow downloads the DDC IFC to Excel 2.0 converter, the
-`DDC-IFC-to-Excel-0.3.1-preview-portable.zip` package of release `v2026.10.0` of
+`DDC-IFC-to-Excel-2.0.0-portable.zip` package of release `v2026.10.0` of
 the public repo `datadrivenconstruction/cad2data-Revit-IFC-DWG`, checks its
 SHA-256 against the digest pinned in the workflow and against the release's
 `SHA256SUMS.txt`, and unpacks it into `ifc_windows/` here, before the Tauri build

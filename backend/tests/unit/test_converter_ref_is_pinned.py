@@ -45,6 +45,7 @@ _WORKFLOW_REPO = re.compile(
 )
 _WORKFLOW_ASSET = re.compile(r"^\s*OE_CONVERTER_IFC_ASSET:\s*(\S+)\s*$", re.MULTILINE)
 _WORKFLOW_SHA = re.compile(r"^\s*OE_CONVERTER_IFC_SHA256:\s*(\S+)\s*$", re.MULTILINE)
+_WORKFLOW_STAMP_VERSION = re.compile(r"fmt = 'ifc';[^\n]*?version = '([^']*)'")
 
 _FRONTEND_LINK = re.compile(r"github\.com/([^/\s'\"]+/[^/\s'\"]+)/releases/tag/([^/\s'\"]+)")
 
@@ -120,6 +121,7 @@ def test_the_release_workflow_pins_the_same_release_and_package_as_the_backend()
     assert _only(_WORKFLOW_REPO, text, "the OE_CONVERTER_REPO default") == cs.DEFAULT_CONVERTER_REPO
     assert _only(_WORKFLOW_ASSET, text, "OE_CONVERTER_IFC_ASSET") == ifc.asset
     assert _only(_WORKFLOW_SHA, text, "OE_CONVERTER_IFC_SHA256") == ifc.sha256
+    assert _only(_WORKFLOW_STAMP_VERSION, text, "the version in the IFC .ddc-package.json stamp") == ifc.version
 
 
 def test_the_workflow_bundles_from_a_release_asset_and_checks_the_digest() -> None:

@@ -15,8 +15,8 @@ Three packages are used (DGN is discontinued in this generation):
 ==========  ================================  ================================
 format      package                           command line
 ==========  ================================  ================================
-``rvt``     DDC RVT Converter 0.6.8           ``cli/RVTconverter.exe``
-``ifc``     DDC IFC to Excel 0.3.1 (preview)  ``runtime/python.exe`` running
+``rvt``     DDC RVT Converter 2.0.0           ``cli/RVTconverter.exe``
+``ifc``     DDC IFC to Excel 2.0.0            ``runtime/python.exe`` running
                                               ``sources/ifc-excel/converter.py``
 ``dwg``     DDC DWG to Excel 0.4.1            ``cli/dwg2excel.exe``
 ==========  ================================  ================================
@@ -80,10 +80,10 @@ PACKAGES: dict[str, ConverterPackage] = {
     "rvt": ConverterPackage(
         fmt="rvt",
         name="DDC RVT Converter",
-        version="0.6.8",
-        asset="DDC-RVT-Converter-0.6.8-portable.zip",
-        sha256="5e285e69202e698b950ee98611823af892d16ff8b6fd7e5025cd0a79cef8a365",
-        size_bytes=79087488,
+        version="2.0.0",
+        asset="DDC-RVT-Converter-2.0.0-portable.zip",
+        sha256="d7ac510251e396ffc6cefd0236eb10e5ea12dcfc6255721e7ce5a3a317767bd7",
+        size_bytes=79483317,
         exe_rel="cli/RVTconverter.exe",
         script_rel=None,
         include=("cli/", "licenses/", "EULA.txt"),
@@ -91,10 +91,10 @@ PACKAGES: dict[str, ConverterPackage] = {
     "ifc": ConverterPackage(
         fmt="ifc",
         name="DDC IFC to Excel",
-        version="0.3.1-preview",
-        asset="DDC-IFC-to-Excel-0.3.1-preview-portable.zip",
-        sha256="5776b6bd1a3f6ab75c5e8fb7902ae1688b1adbf40f8d1398913999a9a1ada57c",
-        size_bytes=35209146,
+        version="2.0.0",
+        asset="DDC-IFC-to-Excel-2.0.0-portable.zip",
+        sha256="0238bae0cf4cf5ae717c180d6f286e451189d6a78402068d9bb3b5e065061ea0",
+        size_bytes=35600175,
         exe_rel="runtime/python.exe",
         script_rel="sources/ifc-excel/converter.py",
         include=None,
