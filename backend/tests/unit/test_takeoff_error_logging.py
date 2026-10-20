@@ -1,7 +1,7 @@
 """Unit tests for takeoff PDF-parsing error logging (v2.4.0).
 
 Audit finding: :mod:`app.modules.takeoff.service` was swallowing
-``pdfplumber`` and ``pymupdf`` exceptions with a single generic
+``pdfplumber`` and ``pypdfium2`` exceptions with a single generic
 ``logger.warning("PDF extraction failed …")`` — no filename, no size,
 no stack, no extension, no magic-byte check.  Incidents in staging
 produced log lines that were impossible to correlate with the
@@ -45,7 +45,7 @@ def _install_fake_pdfplumber(raise_with: Exception | None) -> None:
     """Replace ``pdfplumber`` in ``sys.modules`` with a stub.
 
     If ``raise_with`` is not None the stub's ``open`` raises it; the
-    service helper's outer try/except then falls through to pymupdf.
+    service helper's outer try/except then falls through to pypdfium2.
     """
     fake = types.ModuleType("pdfplumber")
 
@@ -58,43 +58,55 @@ def _install_fake_pdfplumber(raise_with: Exception | None) -> None:
     sys.modules["pdfplumber"] = fake
 
 
-def _install_fake_pymupdf(raise_with: Exception | None, pages: int = 0) -> None:
-    """Replace ``pymupdf`` in ``sys.modules`` with a stub.
+def _install_fake_pdfium(monkeypatch, raise_with: Exception | None, pages: int = 0) -> None:
+    """Replace the ``pdf_reader`` entry points the fallback uses with a stub.
 
-    If ``raise_with`` is not None its ``open`` raises that exception;
-    otherwise ``open`` returns a handle with ``pages`` blank pages.
+    If ``raise_with`` is not None ``open_pdf`` and ``page_count`` raise that
+    exception; otherwise they report a document with ``pages`` blank pages.
     """
-    fake = types.ModuleType("pymupdf")
+    from app.core import pdf_reader
 
-    class _StubDoc:
-        def __init__(self, page_count: int) -> None:
-            self._pages = [MagicMock(get_text=MagicMock(return_value="")) for _ in range(page_count)]
-
-        def __iter__(self):
-            return iter(self._pages)
-
-        def __len__(self):
-            return len(self._pages)
+    class _StubPage:
+        def text(self):
+            return ""
 
         def close(self):
             return None
 
-    def _open(*, stream=None, filetype=None):  # pragma: no cover - stub only
+    class _StubDoc:
+        def __init__(self, page_count: int) -> None:
+            self.page_count = page_count
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+        def __getitem__(self, index: int) -> _StubPage:
+            return _StubPage()
+
+    def _open_pdf(*_args, **_kwargs):  # pragma: no cover - stub only
         if raise_with is not None:
             raise raise_with
         return _StubDoc(pages)
 
-    fake.open = _open  # type: ignore[attr-defined]
-    sys.modules["pymupdf"] = fake
+    def _page_count(*_args, **_kwargs):  # pragma: no cover - stub only
+        if raise_with is not None:
+            raise raise_with
+        return pages
+
+    monkeypatch.setattr(pdf_reader, "open_pdf", _open_pdf)
+    monkeypatch.setattr(pdf_reader, "page_count", _page_count)
 
 
 @pytest.fixture(autouse=True)
 def _restore_pdf_modules():
-    """Snapshot + restore pdfplumber / pymupdf entries around each test.
+    """Snapshot + restore the pdfplumber entry around each test.
 
     Keeps cross-test bleed to zero regardless of what a test stubs.
     """
-    snapshot = {name: sys.modules.get(name) for name in ("pdfplumber", "pymupdf")}
+    snapshot = {name: sys.modules.get(name) for name in ("pdfplumber",)}
     yield
     for name, mod in snapshot.items():
         if mod is None:
@@ -137,9 +149,9 @@ class TestDescribePdfInput:
 
 
 class TestExtractPdfPagesLogging:
-    def test_pdfplumber_failure_falls_back_and_logs_warning(self, caplog):
+    def test_pdfplumber_failure_falls_back_and_logs_warning(self, caplog, monkeypatch):
         _install_fake_pdfplumber(RuntimeError("pdfplumber-boom"))
-        _install_fake_pymupdf(None, pages=2)
+        _install_fake_pdfium(monkeypatch, None, pages=2)
 
         with caplog.at_level(logging.WARNING, logger="app.modules.takeoff.service"):
             pages = _extract_pdf_pages(b"%PDF-1.4 junk", filename="weird.pdf")
@@ -162,9 +174,9 @@ class TestExtractPdfPagesLogging:
         # exc_info propagates so operators get the full stack.
         assert matches[0].exc_info is not None
 
-    def test_both_parsers_failing_logs_exception(self, caplog):
+    def test_both_parsers_failing_logs_exception(self, caplog, monkeypatch):
         _install_fake_pdfplumber(RuntimeError("pdfplumber-boom"))
-        _install_fake_pymupdf(RuntimeError("pymupdf-boom"))
+        _install_fake_pdfium(monkeypatch, RuntimeError("pdfium-boom"))
 
         with caplog.at_level(logging.WARNING, logger="app.modules.takeoff.service"):
             pages = _extract_pdf_pages(b"not really a pdf", filename="garbage.bin")
@@ -173,7 +185,7 @@ class TestExtractPdfPagesLogging:
         assert pages == []
 
         # The EXCEPTION-level line is the headline ("both failed").
-        both_failed = [rec for rec in caplog.records if "both pdfplumber and pymupdf failed" in rec.getMessage()]
+        both_failed = [rec for rec in caplog.records if "both pdfplumber and pypdfium2 failed" in rec.getMessage()]
         assert both_failed, "double-failure log not emitted"
         msg = both_failed[0].getMessage()
         assert "garbage.bin" in msg
@@ -182,7 +194,7 @@ class TestExtractPdfPagesLogging:
         assert both_failed[0].exc_info is not None
 
     def test_pdfplumber_happy_path_does_not_log_at_warning(self, caplog):
-        """No pdfplumber failure, no pymupdf fallback — should be silent."""
+        """No pdfplumber failure, no pypdfium2 fallback — should be silent."""
 
         # Install a pdfplumber stub whose ``open`` returns a valid-ish
         # context manager so we exercise the success path.
@@ -220,9 +232,9 @@ class TestExtractPdfPagesLogging:
 
 
 class TestCountPdfPagesLogging:
-    def test_double_failure_returns_zero_and_logs(self, caplog):
+    def test_double_failure_returns_zero_and_logs(self, caplog, monkeypatch):
         _install_fake_pdfplumber(RuntimeError("count-boom"))
-        _install_fake_pymupdf(RuntimeError("count-boom"))
+        _install_fake_pdfium(monkeypatch, RuntimeError("count-boom"))
 
         with caplog.at_level(logging.WARNING, logger="app.modules.takeoff.service"):
             n = _count_pdf_pages(b"%PDF-garbage", filename="junk.pdf")
@@ -232,15 +244,15 @@ class TestCountPdfPagesLogging:
         both_failed = [
             rec
             for rec in caplog.records
-            if "takeoff.pdf_count" in rec.getMessage() and "both pdfplumber and pymupdf failed" in rec.getMessage()
+            if "takeoff.pdf_count" in rec.getMessage() and "both pdfplumber and pypdfium2 failed" in rec.getMessage()
         ]
         assert both_failed
         assert "junk.pdf" in both_failed[0].getMessage()
         assert both_failed[0].levelno == logging.ERROR
 
-    def test_fallback_to_pymupdf_emits_warning(self, caplog):
+    def test_fallback_to_pdfium_emits_warning(self, caplog, monkeypatch):
         _install_fake_pdfplumber(RuntimeError("count-boom"))
-        _install_fake_pymupdf(None, pages=7)
+        _install_fake_pdfium(monkeypatch, None, pages=7)
 
         with caplog.at_level(logging.WARNING, logger="app.modules.takeoff.service"):
             n = _count_pdf_pages(b"%PDF-something", filename="fallback.pdf")
@@ -306,7 +318,7 @@ class TestUploadDocumentErrorPath:
         assert isinstance(detail, str)
         assert "C:\\secret" not in detail
         assert "pdfplumber" not in detail
-        assert "pymupdf" not in detail
+        assert "pypdfium2" not in detail
         assert "Traceback" not in detail
         assert "Failed to parse" in detail
 

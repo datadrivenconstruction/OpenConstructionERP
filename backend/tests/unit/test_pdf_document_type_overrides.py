@@ -716,13 +716,13 @@ def test_a_footer_override_reaches_every_page_of_the_minutes_or_the_diary(
 
 def _header_logo_box(pdf: bytes) -> list[float]:
     """Page one's size and the box of the one image on it."""
-    import pymupdf
+    from app.core import pdf_reader
+    from tests._pdf_probe import image_boxes
 
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        page = doc[0]
-        images = [info["bbox"] for info in page.get_image_info()]
-        assert len(images) == 1, f"expected the one header logo on page one, found {len(images)}"
-        return [page.rect.width, page.rect.height, *images[0]]
+    images = image_boxes(pdf)
+    assert len(images) == 1, f"expected the one header logo on page one, found {len(images)}"
+    with pdf_reader.open_pdf(pdf) as doc:
+        return [doc[0].rect.width, doc[0].rect.height, *images[0]]
 
 
 @pytest.mark.parametrize("name", list(MINUTES_AND_DIARY))
@@ -790,15 +790,19 @@ def _layout(pdf: bytes) -> list[float]:
     The registration line is printed by the letterhead and nothing else, and it
     is ASCII, so the text search finds it whatever face the name is set in.
     """
-    import pymupdf
+    from app.core import pdf_reader
+    from tests._pdf_probe import image_boxes
 
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
+    images = image_boxes(pdf)
+    assert len(images) == 1, f"expected the one letterhead logo on page one, found {len(images)}"
+    with pdf_reader.open_pdf(pdf) as doc:
         page = doc[0]
-        images = [info["bbox"] for info in page.get_image_info()]
-        lines = page.search_for("HRB 123456 B")
-        assert len(images) == 1, f"expected the one letterhead logo on page one, found {len(images)}"
-        assert len(lines) == 1, "the letterhead's registration line is not on page one"
-        return [page.rect.width, page.rect.height, *images[0], *lines[0]]
+        words = page.words()
+        starts = [i for i in range(len(words)) if [w[4] for w in words[i : i + 3]] == ["HRB", "123456", "B"]]
+        assert len(starts) == 1, "the letterhead's registration line is not on page one"
+        run = words[starts[0] : starts[0] + 3]
+        line = [min(w[0] for w in run), min(w[1] for w in run), max(w[2] for w in run), max(w[3] for w in run)]
+        return [page.rect.width, page.rect.height, *images[0], *line]
 
 
 @pytest.mark.parametrize(

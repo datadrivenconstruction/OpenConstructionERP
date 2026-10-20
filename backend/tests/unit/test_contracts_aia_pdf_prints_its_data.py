@@ -20,13 +20,13 @@ from __future__ import annotations
 import io
 from typing import Any
 
-import pymupdf
 import pypdf
 import pytest
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import mm
 
 import app.modules.contracts.aia_pdf as aia_pdf
+from app.core import pdf_reader
 from app.core.paper_size import PAPER_SIZES
 
 # The probe and the suite must agree about which copy of the package they are
@@ -183,17 +183,17 @@ def test_the_continuation_sheet_columns_fit_the_frame(sheet: str) -> None:
 def test_nothing_on_the_payment_application_is_drawn_past_the_margins() -> None:
     """The rendered pages, not the arithmetic: every rule and fill the tables
     draw lies inside the margins, on the face and on every continuation page."""
-    document = pymupdf.open(stream=aia_pdf.render_aia_application_pdf(_large_application()), filetype="pdf")
-    assert document.page_count > 1, "expected a continuation page to measure"
-    for number, page in enumerate(document, start=1):
-        rects = [drawing["rect"] for drawing in page.get_drawings()]
-        assert rects, f"page {number} draws no table"
-        left = min(rect.x0 for rect in rects)
-        right = max(rect.x1 for rect in rects)
-        assert left >= SIDE_MARGIN, f"page {number}: drawn from {left:.1f}pt, the margin is at {SIDE_MARGIN:.1f}pt"
-        assert right <= page.rect.width - SIDE_MARGIN, (
-            f"page {number}: drawn to {right:.1f}pt, the margin is at {page.rect.width - SIDE_MARGIN:.1f}pt"
-        )
+    with pdf_reader.open_pdf(aia_pdf.render_aia_application_pdf(_large_application())) as document:
+        assert document.page_count > 1, "expected a continuation page to measure"
+        for number, page in enumerate(document, start=1):
+            rects = [drawing["rect"] for drawing in page.drawings()]
+            assert rects, f"page {number} draws no table"
+            left = min(rect.x0 for rect in rects)
+            right = max(rect.x1 for rect in rects)
+            assert left >= SIDE_MARGIN, f"page {number}: drawn from {left:.1f}pt, the margin is at {SIDE_MARGIN:.1f}pt"
+            assert right <= page.rect.width - SIDE_MARGIN, (
+                f"page {number}: drawn to {right:.1f}pt, the margin is at {page.rect.width - SIDE_MARGIN:.1f}pt"
+            )
 
 
 def test_the_largest_realistic_amounts_are_printed_on_one_line() -> None:

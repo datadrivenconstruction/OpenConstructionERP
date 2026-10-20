@@ -14,7 +14,7 @@ downstream 7-stage pipeline:
 * an oversized upload is streamed to a temp file, aborts past the byte cap, and
   surfaces a clean 413 (never a 500 / OOM) - proven by shrinking the cap;
 * a PDF with more pages than the cap is rejected 413 before any per-page table
-  extraction, and a file pymupdf cannot open is deferred, not blocked;
+  extraction, and a file the PDF reader cannot open is deferred, not blocked;
 * a normal .xlsx and a normal .pdf still parse to rows and reach create_session
   exactly as before (identical match semantics for good files).
 
@@ -31,7 +31,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 pytest.importorskip("openpyxl")
-pytest.importorskip("pymupdf")
 
 from fastapi import HTTPException  # noqa: E402
 
@@ -63,16 +62,15 @@ def _xlsx_bytes() -> bytes:
 
 
 def _pdf_bytes(n_pages: int) -> bytes:
-    import pymupdf
+    from reportlab.pdfgen import canvas
 
-    doc = pymupdf.open()
-    try:
-        for _ in range(n_pages):
-            page = doc.new_page()
-            page.insert_text((72, 72), "Reinforced concrete wall C30 12.5 m3")
-        return doc.tobytes()
-    finally:
-        doc.close()
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(595, 842))
+    for _ in range(n_pages):
+        c.drawString(72, 842 - 72, "Reinforced concrete wall C30 12.5 m3")
+        c.showPage()
+    c.save()
+    return buf.getvalue()
 
 
 def _stub_access_and_service(monkeypatch: pytest.MonkeyPatch) -> dict:
@@ -129,7 +127,7 @@ def test_pdf_page_guard_allows_under_cap() -> None:
 
 
 def test_pdf_page_guard_defers_unreadable_bytes() -> None:
-    # Bytes pymupdf cannot open must NOT be blocked here - the parser surfaces
+    # Bytes the PDF reader cannot open must NOT be blocked here - the parser surfaces
     # its own error for unreadable content.
     router._reject_if_too_many_pdf_pages(b"not a pdf at all")  # no raise
 

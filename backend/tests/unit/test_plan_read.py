@@ -410,7 +410,7 @@ def _patch_provider(monkeypatch, *, vision: bool = True, model: str = "claude-so
 
 
 def _patch_rasterize(monkeypatch) -> None:
-    """Stub rasterize_page so no PDF / PyMuPDF is needed."""
+    """Stub rasterize_page so no PDF / PDF reader is needed."""
 
     def _raster(_content, _page, *, target_long_edge_px=2000):  # noqa: ANN001, ANN202, ARG001
         return (b"\x89PNG-stub", "image/png", 150, A1_W_PT, A1_H_PT)

@@ -5,9 +5,9 @@
 Two instruments. The first half asks the helper directly, with expected
 strings written out codepoint by codepoint, so a regression in either library
 shows up as a different string rather than as a vague mismatch. The second half
-renders real PDFs and reads them back with PyMuPDF, glyph by glyph in the order
+renders real PDFs and reads them back with pypdfium2, glyph by glyph in the order
 they sit on the page from left to right. Text extraction alone is not enough
-for that: MuPDF runs its own bidi pass when it extracts, so a backwards line
+for that: readers run their own bidi pass when they extract, so a backwards line
 and a correct one can extract identically.
 """
 
@@ -16,7 +16,6 @@ from __future__ import annotations
 import io
 import unicodedata
 
-import pymupdf
 import pytest
 
 from app.core import pdf_fonts
@@ -31,6 +30,7 @@ from app.core.pdf_rtl import (
     text_direction,
     visual_text,
 )
+from tests._pdf_probe import drawn_strings, embedded_fonts, text_runs
 
 # شركة: sheen initial, reh final, kaf initial, teh marbuta final. Reh does not
 # join to the letter after it, so kaf starts a new joined group.
@@ -197,20 +197,9 @@ def test_every_shaped_glyph_is_one_the_chosen_face_can_draw(label: str, text: st
 def _visual_lines(pdf: bytes) -> list[str]:
     """Every baseline of every page, its glyphs in left-to-right page order."""
     rows: dict[tuple[int, int], list[tuple[float, str]]] = {}
-    with pymupdf.open(stream=pdf, filetype="pdf") as document:
-        for page_number, page in enumerate(document):
-            for block in page.get_text("rawdict")["blocks"]:
-                for line in block.get("lines", []):
-                    for span in line["spans"]:
-                        for char in span["chars"]:
-                            key = (page_number, round(char["origin"][1]))
-                            rows.setdefault(key, []).append((char["origin"][0], char["c"]))
-    return ["".join(ch for _, ch in sorted(chars)) for _, chars in sorted(rows.items())]
-
-
-def _embedded_fonts(pdf: bytes) -> list[tuple[str, str]]:
-    with pymupdf.open(stream=pdf, filetype="pdf") as document:
-        return [(font[3], font[1]) for page in document for font in page.get_fonts()]
+    for page_number, x, y, text in drawn_strings(pdf):
+        rows.setdefault((page_number, -round(y)), []).append((x, text))
+    return ["".join(text for _, text in sorted(parts)) for _, parts in sorted(rows.items())]
 
 
 def test_a_canvas_line_prints_joined_and_right_to_left() -> None:
@@ -242,9 +231,7 @@ def test_a_wrapped_arabic_paragraph_starts_at_the_right_and_reads_down() -> None
     last = _read_right_to_left(lines[-1])
     assert last.rstrip().endswith("البند 03"), last  # the digits read left to right, so 30 reverses to 03
 
-    with pymupdf.open(stream=buffer.getvalue(), filetype="pdf") as document:
-        spans = [s for b in document[0].get_text("dict")["blocks"] for ln in b.get("lines", []) for s in ln["spans"]]
-    right_edges = {round(span["bbox"][2]) for span in spans}
+    right_edges = {round(run.x1) for run in text_runs(buffer.getvalue()) if run.page == 1}
     assert max(right_edges) - min(right_edges) <= 2, f"the lines are not right-aligned: {sorted(right_edges)}"
 
 
@@ -283,5 +270,5 @@ def test_an_invoice_prints_an_arabic_counterparty_joined_and_in_order() -> None:
     assert not any(0x0600 <= ord(ch) <= 0x06FF for ch in run), "a letter was left in its unjoined form"
     assert run.endswith(SHARIKA_VISUAL), "the first word of the name must be drawn rightmost"
 
-    fonts = _embedded_fonts(pdf)
+    fonts = embedded_fonts(pdf)
     assert any("DejaVuSans" in name and ext == "ttf" for name, ext in fonts), f"Arabic face not embedded: {fonts}"

@@ -159,22 +159,17 @@ def test_the_wide_table_fix_still_holds_with_the_new_headings() -> None:
     is measured rather than assumed, because a text extractor happily
     reads a column that was drawn onto no paper at all.
     """
-    pymupdf = pytest.importorskip("pymupdf")
+    from app.core import pdf_reader
+
     rows = [dict(_EAC_ROW), {**_EAC_ROW, "kpi_code": "cpi", "breakdown__note": "x" * 120}]
     path, _size = build_pdf_report(report_name="wide_readable", rows=rows)
     try:
-        doc = pymupdf.open(path)
-        page = doc[0]
-        rightmost = max(
-            span["bbox"][2]
-            for block in page.get_text("dict")["blocks"]
-            for line in block.get("lines", [])
-            for span in line["spans"]
-        )
-        assert rightmost <= page.rect.x1, (
-            f"ink reaches {rightmost:.0f}pt on a {page.rect.x1:.0f}pt sheet, so a column is off the page"
-        )
-        doc.close()
+        with pdf_reader.open_pdf(path) as doc:
+            page = doc[0]
+            rightmost = max(word[2] for word in page.words())
+            assert rightmost <= page.rect.x1, (
+                f"ink reaches {rightmost:.0f}pt on a {page.rect.x1:.0f}pt sheet, so a column is off the page"
+            )
     finally:
         if os.path.exists(path):
             os.remove(path)

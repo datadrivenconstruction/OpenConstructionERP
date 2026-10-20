@@ -2,7 +2,7 @@
 """Unit tests for seeded similar-symbol search ("count by example").
 
 Exercises :func:`app.modules.takeoff.recognize.find_similar_symbols` with
-synthetic ``get_drawings()``-shaped input (plain tuples) - no PDF, PyMuPDF or
+synthetic ``get_drawings()``-shaped input (plain tuples) - no PDF, PDF reader or
 database needed. The user clicks one symbol on the page and we return every
 near-identical symbol so they can confirm them as a single count measurement;
 nothing is persisted here (CLAUDE.md rule 7).

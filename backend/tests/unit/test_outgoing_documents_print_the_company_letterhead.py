@@ -37,12 +37,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-import pymupdf
 import pypdf
 import pytest
 from PIL import Image
 
-from app.core import app_branding, company_profile, pdf_appearance
+from app.core import app_branding, company_profile, pdf_appearance, pdf_reader
 from app.modules.bi_dashboards.report_builder import build_pdf_report
 from app.modules.boq.pdf_export import generate_boq_pdf, generate_boq_pdf_simple
 from app.modules.daily_diary.pdf_export import generate_diary_pdf
@@ -462,8 +461,8 @@ def test_an_unbranded_tender_letter_keeps_its_document_properties(data_dir: Path
 def _horizontal_rules(pdf: bytes, page: int = 0) -> dict[tuple[float, float, float], tuple[float, float]]:
     """``colour -> (x0, x1)`` of every horizontal line on a page, page one by default."""
     rules: dict[tuple[float, float, float], tuple[float, float]] = {}
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        for drawing in doc[page].get_drawings():
+    with pdf_reader.open_pdf(pdf) as doc:
+        for drawing in doc[page].drawings():
             for item in drawing["items"]:
                 if item[0] == "l" and abs(item[1].y - item[2].y) < 0.1 and drawing.get("color"):
                     colour = tuple(round(channel, 2) for channel in drawing["color"])
@@ -500,9 +499,9 @@ def test_the_quarterly_disclosure_credits_the_developer_that_files_it(data_dir: 
 def test_the_diary_page_number_sits_at_the_right_margin(data_dir: Path) -> None:
     """A Paragraph wraps to the width it is offered, so offsetting by that width
     drew the page number at the left margin, over the supervisor line."""
-    with pymupdf.open(stream=_diary(), filetype="pdf") as doc:
+    with pdf_reader.open_pdf(_diary()) as doc:
         page = doc[0]
-        words = page.get_text("words")
+        words = page.words()
         page_word = next(word for word in words if word[4] == "Page")
         supervisor = next(word for word in words if word[4].startswith("Supervisor"))
         assert page_word[0] > page.rect.width / 2, f"the page number starts at {page_word[0]:.0f}pt"
@@ -514,11 +513,8 @@ def test_the_diary_page_number_sits_at_the_right_margin(data_dir: Path) -> None:
 
 def _footer_band(pdf: bytes) -> list[str]:
     """The text of each page's bottom 14 mm, where the footer line is drawn."""
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        return [
-            page.get_text("text", clip=pymupdf.Rect(0, page.rect.height - 40, page.rect.width, page.rect.height))
-            for page in doc
-        ]
+    with pdf_reader.open_pdf(pdf) as doc:
+        return [" ".join(word[4] for word in page.words() if word[1] >= page.rect.height - 40) for page in doc]
 
 
 def test_the_project_report_footer_names_the_firm_on_every_page(data_dir: Path) -> None:
@@ -557,19 +553,24 @@ def test_the_boq_cover_names_the_firm_once(name: str, data_dir: Path) -> None:
     assert cover.count(LEGAL_NAME) == 1, f"{name}: the cover names the firm {cover.count(LEGAL_NAME)} times"
 
 
-def _ink_centre(page: pymupdf.Page, first_word: str) -> float:
+def _ink_centre(page: pdf_reader.PdfPage, first_word: str) -> float:
     """The x-centre of the printed glyphs on the line that starts with ``first_word``.
 
-    Spaces, non-breaking ones included, are left out: a run of them is what
-    pushed these lines off the axis, and a measure that counted them would
-    call the old layout centred.
+    The line is the run of words level with the first one and no more than a
+    few points apart, so a column beside it is not part of it. Spaces,
+    non-breaking ones included, are not words: a run of them is what pushed
+    these lines off the axis, and a measure that counted them would call the
+    old layout centred.
     """
-    for block in page.get_text("rawdict")["blocks"]:
-        for line in block.get("lines", []):
-            chars = [char for span in line["spans"] for char in span["chars"]]
-            if "".join(char["c"] for char in chars).strip().startswith(first_word):
-                ink = [char["bbox"] for char in chars if not char["c"].isspace()]
-                return (min(box[0] for box in ink) + max(box[2] for box in ink)) / 2
+    words = sorted(page.words(), key=lambda word: word[0])
+    for first in words:
+        if not first[4].startswith(first_word):
+            continue
+        line = [first]
+        for word in words:
+            if word[0] >= line[-1][2] and abs(word[1] - first[1]) < 2 and word[0] - line[-1][2] < 12:
+                line.append(word)
+        return (min(word[0] for word in line) + max(word[2] for word in line)) / 2
     raise AssertionError(f"no line on the cover starts with {first_word!r}")
 
 
@@ -585,7 +586,7 @@ def test_the_boq_cover_centres_its_summary_heading_and_signature(name: str, lett
     are mirror images of each other about the middle of the page."""
     if letterhead:
         _write_profile(data_dir)
-    with pymupdf.open(stream=EXPORTERS[name](), filetype="pdf") as doc:
+    with pdf_reader.open_pdf(EXPORTERS[name]()) as doc:
         page = doc[0]
         axis = page.rect.width / 2
         centre = _ink_centre(page, "SUMMARY")
