@@ -280,7 +280,7 @@ export const BIM_VIEWER_FORMATS: readonly AcceptedFormat[] = [
  */
 export const DESIGN_OPTION_SOURCE_FORMATS: readonly AcceptedFormat[] = [
   // BIM/CAD — conversion-gated
-  ...(['.rvt', '.ifc', '.dwg', '.dxf', '.dgn', '.rfa'] as const).map(
+  ...(['.rvt', '.ifc', '.dwg', '.dxf', '.rfa'] as const).map(
     (ext) => ({ ext, needsConversion: true }) as AcceptedFormat,
   ),
   // Drawings / plans — direct documents, no conversion needed
@@ -303,7 +303,6 @@ export const CAD_EXPLORER_FORMATS: readonly AcceptedFormat[] = [
   '.rvt',
   '.ifc',
   '.dwg',
-  '.dgn',
   '.dxf',
   '.rfa',
 ].map((ext) => ({ ext, needsConversion: true }));

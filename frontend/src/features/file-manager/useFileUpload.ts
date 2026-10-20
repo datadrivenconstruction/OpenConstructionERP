@@ -19,6 +19,7 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { uuid } from '@/shared/lib/browser';
+import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
@@ -200,7 +201,7 @@ export function useFileUpload(projectId: string | null | undefined): UseFileUplo
               let detail = file.name;
               try {
                 const body = await res.json();
-                if (body?.detail) detail = body.detail;
+                detail = extractErrorMessageFromBody(body) ?? detail;
               } catch {
                 /* ignore — keep filename */
               }

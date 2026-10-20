@@ -31,6 +31,7 @@ import type { PropertyFilterValue } from './ruleOperators';
 /* ── Format helpers ────────────────────────────────────────────────────── */
 
 /** Source formats that are 2D drawings, not 3D models (no mesh ever). */
+// 'dgn' stays: models stored by earlier versions still carry it.
 const NON_3D_BIM_FORMATS = ['dwg', 'dxf', 'dgn'];
 
 /**
@@ -210,7 +211,7 @@ export type BIMConverterAction =
 /** Single DDC converter entry as returned by the backend
  *  `/v1/takeoff/converters/` endpoint. */
 export interface BIMConverterInfo {
-  /** Stable converter id — one of `'rvt'`, `'dwg'`, `'ifc'`, `'dgn'`. */
+  /** Stable converter id — one of `'rvt'`, `'dwg'`, `'ifc'`. */
   id: string;
   name: string;
   description: string;
@@ -218,9 +219,12 @@ export interface BIMConverterInfo {
   extensions: string[];
   exe: string;
   version: string;
+  /** Source-format versions the converter reads, e.g. `Revit 2019-2027`. */
+  format_range: string;
+  /** False when the converter writes element tables and no 3D mesh. */
+  produces_geometry: boolean;
   size_mb: number;
   installed: boolean;
-  path: string | null;
   /** Smoke-test result. Always present from v2.6.23+ (older servers omit
    *  the field — frontend treats missing as `'unknown'`). */
   health?: BIMConverterHealth;
@@ -354,11 +358,16 @@ export interface ConverterVersionEntry {
   name: string;
   exe: string;
   installed: boolean;
-  installed_path: string | null;
   installed_size: number | null;
   installed_sha: string | null;
+  /** Version stamped by the installer, e.g. `0.6.8`; null for an unstamped copy. */
+  installed_version: string | null;
   latest_size: number | null;
   latest_sha: string | null;
+  /** Version of the build the Update button installs. */
+  latest_version: string;
+  format_range: string;
+  produces_geometry: boolean;
   is_outdated: boolean;
   download_url: string | null;
   html_url: string | null;
@@ -1736,7 +1745,7 @@ export async function listActivitiesForElement(
   );
 }
 
-/** Upload a raw CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS) for background processing. */
+/** Upload a raw CAD file (RVT, IFC) for background processing. */
 export async function uploadCADFile(
   projectId: string,
   name: string,

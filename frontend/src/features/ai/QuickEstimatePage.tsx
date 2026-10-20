@@ -66,6 +66,7 @@ import {
 import { useLLMRun } from './hooks/useLLMRun';
 import { IntakePanel } from './intake';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { converterDescription, converterName } from '@/features/bim/converterText';
 
 // ── Tab types ────────────────────────────────────────────────────────────────
 
@@ -150,14 +151,14 @@ const ACCEPT_MAP: { [K in FileTab]: string } = {
   photo: '.jpg,.jpeg,.png,.tiff,.webp',
   pdf: '.pdf',
   excel: '.xlsx,.xls,.csv',
-  cad: '.rvt,.ifc,.dwg,.dgn',
+  cad: '.rvt,.ifc,.dwg',
 };
 
 const FORMAT_LABELS: { [K in FileTab]: string } = {
   photo: 'JPG, PNG, TIFF, WebP',
   pdf: 'PDF',
   excel: 'Excel (.xlsx), CSV (.csv)',
-  cad: 'Revit® (.rvt), IFC (.ifc), DWG (.dwg), DGN (.dgn)',
+  cad: 'Revit® (.rvt), IFC (.ifc), DWG (.dwg)',
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1183,7 +1184,7 @@ function FilePreview({
     if (ext === 'pdf') return <FileText size={20} className="text-red-500" />;
     if (['xlsx', 'xls', 'csv'].includes(ext))
       return <FileSpreadsheet size={20} className="text-green-600" />;
-    if (['rvt', 'ifc', 'dwg', 'dgn'].includes(ext))
+    if (['rvt', 'ifc', 'dwg'].includes(ext))
       return <FileArchive size={20} className="text-amber-600" />;
     return <FileText size={20} className="text-content-tertiary" />;
   };
@@ -1332,7 +1333,6 @@ const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: strin
   dwg: { bg: 'from-red-500/10 to-orange-500/10', border: 'border-red-200 dark:border-red-900/30', icon: 'bg-gradient-to-br from-red-500 to-orange-500' },
   rvt: { bg: 'from-blue-500/10 to-indigo-500/10', border: 'border-blue-200 dark:border-blue-900/30', icon: 'bg-gradient-to-br from-blue-500 to-indigo-500' },
   ifc: { bg: 'from-emerald-500/10 to-green-500/10', border: 'border-emerald-200 dark:border-emerald-900/30', icon: 'bg-gradient-to-br from-emerald-500 to-green-500' },
-  dgn: { bg: 'from-purple-500/10 to-violet-500/10', border: 'border-purple-200 dark:border-purple-900/30', icon: 'bg-gradient-to-br from-purple-500 to-violet-500' },
 };
 
 // ── Full Converter Section (for /data-explorer) ──────────────────────────────
@@ -1507,13 +1507,13 @@ function CadConverterSection({
                   <FileInput size={18} strokeWidth={1.75} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold text-content-primary">{c.name}</h4>
+                  <h4 className="text-sm font-semibold text-content-primary">{converterName(t, c)}</h4>
                   <p className="text-2xs text-content-quaternary">{c.engine}</p>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="mt-2 text-xs text-content-tertiary leading-relaxed line-clamp-2">{c.description}</p>
+              <p className="mt-2 text-xs text-content-tertiary leading-relaxed line-clamp-2">{converterDescription(t, c)}</p>
 
               {/* Extensions */}
               <div className="mt-2 flex flex-wrap gap-1">
@@ -1702,7 +1702,7 @@ export function QuickEstimatePage() {
     version: string;
     size_mb: number;
     installed: boolean;
-    path: string | null;
+    format_range?: string;
   }
   const { data: convertersData } = useQuery<{
     converters: ConverterFull[];
@@ -3322,7 +3322,7 @@ export function QuickEstimatePage() {
                             : t('ai.converters_none', { defaultValue: 'No converters installed - install below to enable CAD/BIM import' })}
                         </p>
                         <p className="text-xs text-content-tertiary mt-0.5">
-                          {fmtList((convertersData.converters ?? []).filter((c: ConverterFull) => c.installed).map((c: ConverterFull) => c.name)) || t('ai.converters_hint', { defaultValue: 'Scroll down to install DDC converters for RVT, IFC, DWG, DGN' })}
+                          {fmtList((convertersData.converters ?? []).filter((c: ConverterFull) => c.installed).map((c: ConverterFull) => converterName(t, c))) || t('ai.converters_hint', { defaultValue: 'Scroll down to install DDC converters for RVT, IFC, DWG' })}
                         </p>
                       </div>
                     </div>
@@ -3392,7 +3392,7 @@ export function QuickEstimatePage() {
                           ) : (
                             <XCircle size={13} className="shrink-0 text-content-quaternary" />
                           )}
-                          <span className="font-medium truncate">{c.name}</span>
+                          <span className="font-medium truncate">{converterName(t, c)}</span>
                           <span className="ml-auto text-[10px] opacity-60">{fmtList(c.extensions)}</span>
                         </div>
                       ))}

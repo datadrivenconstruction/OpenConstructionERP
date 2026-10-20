@@ -32,7 +32,7 @@ export const dashboardsGuide: ModuleGuideContent = {
       titleDefault: 'Create a snapshot',
       bodyKey: 'guide.dashboards.create.body',
       bodyDefault:
-        'Snapshots are scoped to a project, so pick one first. Click New snapshot and select the uploaded IFC, RVT, DWG or DGN files to freeze. The capture rolls every element and category into a dated parquet dataset that later dashboards can query.',
+        'Snapshots are scoped to a project, so pick one first. Click New snapshot and select the uploaded IFC, RVT or DWG files to freeze. The capture rolls every element and category into a dated parquet dataset that later dashboards can query.',
       spotlightSelector: '[data-testid="dashboards-new-snapshot-btn"]',
     },
     {

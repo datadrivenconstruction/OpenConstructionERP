@@ -286,7 +286,7 @@ export function SnapshotsPage() {
       >
         {t('dashboards.intro_body', {
           defaultValue:
-            'Pick a project, then freeze its uploaded IFC, RVT, DWG or DGN files into a dated parquet snapshot of every element and category. Compare two snapshots side by side to see exactly what changed between model revisions, and use the timeline to track growth over time. The frozen dataset is what later charts and the Data Explorer query.',
+            'Pick a project, then freeze its uploaded IFC, RVT or DWG files into a dated parquet snapshot of every element and category. Compare two snapshots side by side to see exactly what changed between model revisions, and use the timeline to track growth over time. The frozen dataset is what later charts and the Data Explorer query.',
         })}
       </DismissibleInfo>
 
@@ -413,7 +413,7 @@ export function SnapshotsPage() {
           })}
           description={t('dashboards.no_snapshots_desc', {
             defaultValue:
-              'Upload IFC, RVT, DWG or DGN files to freeze a parquet dataset that later dashboards can query.',
+              'Upload IFC, RVT or DWG files to freeze a parquet dataset that later dashboards can query.',
           })}
           action={
             <Button

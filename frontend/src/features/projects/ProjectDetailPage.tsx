@@ -1023,13 +1023,13 @@ function DropZone({
           {t('import.drop_or_browse', { defaultValue: 'Drop your file here, or click to browse' })}
         </p>
         <p className="mt-1 text-xs text-content-tertiary">
-          {t('import.supported_formats', { defaultValue: 'Supports Excel, CSV, PDF, photos, and CAD/BIM files (Revit®, IFC, DWG, DGN)' })}
+          {t('import.supported_formats', { defaultValue: 'Supports Excel, CSV, PDF, photos, and CAD/BIM files (Revit®, IFC, DWG)' })}
         </p>
       </div>
       <input
         ref={inputRef}
         type="file"
-        accept=".xlsx,.xls,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn"
+        accept=".xlsx,.xls,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg"
         className="hidden"
         onChange={handleChange}
         disabled={disabled}
@@ -1056,7 +1056,7 @@ function ImportDialog({
 
   const SUPPORTED_EXTENSIONS = [
     '.xlsx', '.xls', '.csv', '.pdf', '.jpg', '.jpeg', '.png', '.tiff',
-    '.rvt', '.ifc', '.dwg', '.dgn',
+    '.rvt', '.ifc', '.dwg',
   ];
 
   const mutation = useMutation({

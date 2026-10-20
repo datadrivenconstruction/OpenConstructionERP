@@ -17,7 +17,7 @@ import {
  * grouped into five high-level buckets so the chips stay scannable even
  * on projects that carry many different formats:
  *
- *   BIM     — rvt / ifc / dgn / nwd / nwc / dae        (3D models)
+ *   BIM     — rvt / ifc / nwd / nwc / dae        (3D models)
  *   DWG     — dwg / dxf                                (2D drawings)
  *   PDF     — pdf                                      (specs, takeoffs)
  *   Excel   — xlsx / xls / csv                         (schedules, BOQs)
@@ -54,7 +54,7 @@ export function FileTypeChips({ fileTypes, size = 'md', className }: FileTypeChi
   const buckets: Bucket[] = [
     {
       key: 'bim',
-      exts: ['rvt', 'ifc', 'dgn', 'nwd', 'nwc', 'dae'],
+      exts: ['rvt', 'ifc', 'nwd', 'nwc', 'dae'],
       label: t('projects.chip_bim', { defaultValue: 'BIM' }),
       icon: Box,
       color:

@@ -5,7 +5,7 @@
  *
  * Replaces the legacy IFC-biased "filter chips + property search" UI with a
  * canonical-format-aware rule builder that works for ANY CAD source
- * (RVT / IFC / DWG / DGN / PDF photo-takeoff).  Built around three pickers
+ * (RVT / IFC / DWG / PDF photo-takeoff).  Built around three pickers
  * (Property → Operator → Value) plus AND/OR groups that can nest.
  *
  * Backend wires:

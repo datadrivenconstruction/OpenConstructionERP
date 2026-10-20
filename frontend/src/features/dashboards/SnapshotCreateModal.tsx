@@ -16,9 +16,9 @@ import { Button, Input } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 
 import { createSnapshot, type Snapshot, type SnapshotError } from './api';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { formatFileSize } from '@/shared/lib/formatters';
 
-const SUPPORTED_EXTENSIONS = ['ifc', 'rvt', 'dwg', 'dgn'] as const;
+const SUPPORTED_EXTENSIONS = ['ifc', 'rvt', 'dwg'] as const;
 const MAX_BYTES = 200 * 1024 * 1024;
 const MAX_FILES = 16;
 
@@ -170,14 +170,14 @@ export function SnapshotCreateModal({
             >
               <UploadCloud className="h-4 w-4" />
               {t('dashboards.snapshot_drop_hint', {
-                defaultValue: 'Select IFC / RVT / DWG / DGN files',
+                defaultValue: 'Select IFC / RVT / DWG files',
               })}
             </button>
             <input
               ref={fileInputRef}
               type="file"
               multiple
-              accept=".ifc,.rvt,.dwg,.dgn"
+              accept=".ifc,.rvt,.dwg"
               className="hidden"
               onChange={(e) => pickFiles(e.target.files)}
               data-testid="snapshot-file-input"
@@ -199,7 +199,7 @@ export function SnapshotCreateModal({
                       <FileCog className="h-3 w-3 text-content-tertiary" />
                       <span className="flex-1 truncate">{f.name}</span>
                       <span className="tabular-nums text-content-tertiary">
-                        {fmtFixed(f.size / (1024 * 1024), 2)} MB
+                        {formatFileSize(f.size)}
                       </span>
                       <button
                         type="button"
@@ -219,7 +219,7 @@ export function SnapshotCreateModal({
               <p className="mt-2 text-xs text-rose-600">
                 {t('dashboards.snapshot_invalid_hint', {
                   defaultValue:
-                    'Remove unsupported or oversized files (IFC/RVT/DWG/DGN only, ≤ 200 MB each).',
+                    'Remove unsupported or oversized files (IFC/RVT/DWG only, ≤ 200 MB each).',
                 })}
               </p>
             )}

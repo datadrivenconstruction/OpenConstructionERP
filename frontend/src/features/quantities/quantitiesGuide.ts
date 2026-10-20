@@ -57,7 +57,7 @@ export const quantitiesGuide: ModuleGuideContent = {
       titleDefault: 'CAD and BIM converter modules',
       bodyKey: 'guide.quantities.converters.body',
       bodyDefault:
-        'To read DWG, RVT, IFC or DGN files you install the matching converter module, a one-time download per format. The module cards show what is installed, flag when a newer build is available to update, and let you uninstall any you no longer need.',
+        'To read DWG, RVT or IFC files you install the matching converter module, a one-time download per format. The module cards show what is installed, flag when a newer build is available to update, and let you uninstall any you no longer need.',
       spotlightSelector: '[data-guide="quantities-converters"]',
     },
     {
