@@ -91,6 +91,7 @@ import {
   Gauge,
   Wand2,
   PackageCheck,
+  PackageOpen,
   ScanEye,
   AlarmClock,
   Warehouse,
@@ -228,6 +229,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.videos', defaultLabel: 'Video guides', to: '/videos', icon: MonitorPlay },
       { labelKey: 'nav.cases', to: '/cases', icon: Route },
+      { labelKey: 'nav.packs', defaultLabel: 'Packs', to: '/packs', icon: PackageOpen },
     ],
   },
   // ── 1. OVERVIEW (always visible) ───────────────────────────────────
