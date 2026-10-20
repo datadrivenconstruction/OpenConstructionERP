@@ -101,7 +101,9 @@ class TestFrozenBuildIsNotProbedWithAChild:
         assert any("import pdfplumber" in cmd[2] for cmd in imports), (
             "pdfplumber is the primary reader and must be probed"
         )
-        assert any("import pymupdf" in cmd[2] for cmd in imports), "pymupdf is the fallback reader and must be probed"
+        assert any("import pypdfium2" in cmd[2] for cmd in imports), (
+            "pypdfium2 is the fallback reader and must be probed"
+        )
 
 
 class TestTheOcrExtraAnswersInBothDirections:

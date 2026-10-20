@@ -699,12 +699,11 @@ OpenConstructionERP itself so you can deploy it closed-source, see
 [COMMERCIAL-LICENSE.md](docs/legal/COMMERCIAL-LICENSE.md) or contact
 [info@datadrivenconstruction.io](mailto:info@datadrivenconstruction.io).
 
-Read section 4a of that file before you deploy. Our commercial license
-covers our own code and cannot cover anyone else's, and one dependency
-we ship in every install, PyMuPDF, is separately under the AGPL. A
-closed-source deployment has to deal with that component on its own
-terms. Section 4a names the features that use it and sets out the three
-options.
+No dependency we ship is under the AGPL, so the commercial license
+covers everything a closed-source deployment runs. Releases up to and
+including 18.7.0 shipped PyMuPDF, which is AGPL; PDF reading now goes
+through pypdfium2 (Apache-2.0 / BSD-3-Clause). Section 4a of that file
+has the details.
 
 ## Privacy and terms
 

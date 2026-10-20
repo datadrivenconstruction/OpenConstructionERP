@@ -60,8 +60,8 @@ The migration is `backend/alembic/versions/v3061_file_search_tags.py`.
 
 ## Extraction dependencies
 
-`pymupdf` and `opencv-python-headless` are base dependencies, not extras: an
-`ImportError` on either means a broken install, not a missing optional. Only
-`paddleocr` and `Pillow` sit behind the `cv` extra. Without them, image content
+`pypdfium2` (PDF text and page rendering) and `opencv-python-headless` are base
+dependencies, not extras: an `ImportError` on either means a broken install, not
+a missing optional. Only `paddleocr` and `Pillow` sit behind the `cv` extra. Without them, image content
 is not searchable but the file is still findable by name, and the endpoint
 reports `ocr_engine = 'none'` rather than failing.

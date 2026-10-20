@@ -73,15 +73,15 @@ hidden_imports = [
     # Heavy feature deps imported lazily / dynamically inside service methods,
     # so PyInstaller's static import graph never sees them and would omit the
     # modules from the frozen sidecar - silently breaking the feature on the
-    # DESKTOP build only (the wheel works because pip installs them). PyMuPDF
-    # exposes both the legacy "fitz" and the modern "pymupdf" import names and
-    # the code uses both. lazrs is the LAZ/COPC decompression backend that
-    # laspy imports dynamically, so it must be named explicitly or point-cloud
-    # LAZ reads fail at runtime. The cv2 / fitz / pymupdf binary payloads are
-    # collected by their pyinstaller-hooks-contrib hooks once the module is in
-    # the graph.
-    "fitz",  # PyMuPDF - PDF vector takeoff, raster render, text extract
-    "pymupdf",  # PyMuPDF modern import alias
+    # DESKTOP build only (the wheel works because pip installs them). pypdfium2
+    # is the PDF reader behind app.core.pdf_reader, and its native PDFium
+    # library lives in the separate pypdfium2_raw package. lazrs is the LAZ/COPC
+    # decompression backend that laspy imports dynamically, so it must be named
+    # explicitly or point-cloud LAZ reads fail at runtime. The cv2 / pypdfium2
+    # binary payloads are collected by their pyinstaller-hooks-contrib hooks once
+    # the module is in the graph.
+    "pypdfium2",  # PDF vector takeoff, raster render, text extract
+    "pypdfium2_raw",  # the PDFium shared library pypdfium2 binds
     "cv2",  # opencv-python-headless - raster room/wall detector
     "laspy",  # LAS/LAZ/COPC point-cloud reader
     "lazrs",  # laspy's LAZ/COPC decompression backend (dynamic import)
