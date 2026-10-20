@@ -48495,6 +48495,7 @@ const resource = {
   "bim.review_summary_still_open": "Одоо ч нээлттэй",
   "bim.review_summary_title": "Хяналт дууслаа",
   "bim.review_zoom_needs_model": "Энэ хадгалсан харагдац руу шилжихийн тулд загвар ачаална уу.",
+  "bim.converter_package_missing": "Энэ хувилбар {{tag}}-аас {{asset}}-г хүлээж байгаа ч хөрвүүлэгчийн хувилбар үүнийг цаашид санал болгохгүй. OpenConstructionERP-г шинэчилнэ үү.",
   "designOptions.dayDelta": "{{days}} өдөр",
   "designOptions.durationDays": "Үргэлжлэх хугацаа (өдөр)",
   "designOptions.embodiedCarbon": "Шингэсэн нүүрстөрөгч A1-A5",

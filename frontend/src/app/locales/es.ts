@@ -51610,6 +51610,7 @@ const resource = {
     "bim.review_summary_still_open": "Todavía abiertas",
     "bim.review_summary_title": "Revisión terminada",
     "bim.review_zoom_needs_model": "Cargue el modelo para volar hasta esta vista guardada.",
+    "bim.converter_package_missing": "Esta versión espera {{asset}} de {{tag}}, que la publicación de convertidores ya no ofrece. Actualice OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Duración (días)",
     "designOptions.embodiedCarbon": "Carbono incorporado A1-A5",

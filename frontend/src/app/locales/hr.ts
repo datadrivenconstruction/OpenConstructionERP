@@ -48956,6 +48956,7 @@ const resource = {
     "bim.review_summary_still_open": "Još otvoreno",
     "bim.review_summary_title": "Pregled završen",
     "bim.review_zoom_needs_model": "Učitajte model da biste doletjeli do ovog spremljenog prikaza.",
+    "bim.converter_package_missing": "Ova verzija očekuje {{asset}} iz {{tag}}, koji izdanje pretvarača više ne nudi. Ažurirajte OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Trajanje (dana)",
     "designOptions.embodiedCarbon": "Ugrađeni ugljik A1-A5",

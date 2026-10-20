@@ -51653,6 +51653,7 @@ const resource = {
     "bim.review_summary_still_open": "لا تزال مفتوحة",
     "bim.review_summary_title": "انتهت المراجعة",
     "bim.review_zoom_needs_model": "حمِّل النموذج للانتقال إلى هذا العرض المحفوظ.",
+    "bim.converter_package_missing": "يتوقع هذا الإصدار الملف {{asset}} من {{tag}}، لكن إصدار المحوّلات لم يعد يوفّره. حدّث OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} يوم",
     "designOptions.durationDays": "المدة (أيام)",
     "designOptions.embodiedCarbon": "الكربون الكامن A1-A5",

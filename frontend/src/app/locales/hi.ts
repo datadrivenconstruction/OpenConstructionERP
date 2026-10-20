@@ -48801,6 +48801,7 @@ const resource = {
   "bim.review_summary_still_open": "अभी भी खुला",
   "bim.review_summary_title": "समीक्षा समाप्त हुई",
   "bim.review_zoom_needs_model": "इस सहेजे गए दृश्य पर जाने के लिए मॉडल लोड करें।",
+  "bim.converter_package_missing": "यह संस्करण {{tag}} से {{asset}} की अपेक्षा करता है, जिसे कन्वर्टर रिलीज़ अब उपलब्ध नहीं कराती। OpenConstructionERP को अपडेट करें।",
   "designOptions.dayDelta": "{{days}} दिन",
   "designOptions.durationDays": "अवधि (दिन)",
   "designOptions.embodiedCarbon": "अंतर्निहित कार्बन A1-A5",

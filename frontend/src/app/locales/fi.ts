@@ -48698,6 +48698,7 @@ const resource = {
   "bim.review_summary_still_open": "Yhä avoinna",
   "bim.review_summary_title": "Katselmus valmis",
   "bim.review_zoom_needs_model": "Lataa malli siirtyäksesi tähän tallennettuun näkymään.",
+  "bim.converter_package_missing": "Tämä versio odottaa tiedostoa {{asset}} julkaisusta {{tag}}, jota muunninjulkaisu ei enää tarjoa. Päivitä OpenConstructionERP.",
   "designOptions.dayDelta": "{{days}} pv",
   "designOptions.durationDays": "Kesto (pv)",
   "designOptions.embodiedCarbon": "Sitoutunut hiili A1-A5",

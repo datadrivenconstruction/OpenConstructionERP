@@ -48639,6 +48639,7 @@ const resource = {
   "bim.review_summary_still_open": "ยังคงเปิดอยู่",
   "bim.review_summary_title": "การทบทวนเสร็จสิ้น",
   "bim.review_zoom_needs_model": "โหลดโมเดลเพื่อบินไปยังมุมมองที่บันทึกไว้นี้",
+  "bim.converter_package_missing": "เวอร์ชันนี้ต้องการ {{asset}} จาก {{tag}} ซึ่งรุ่นเผยแพร่ของตัวแปลงไม่มีให้แล้ว โปรดอัปเดต OpenConstructionERP",
   "designOptions.dayDelta": "{{days}} วัน",
   "designOptions.durationDays": "ระยะเวลา (วัน)",
   "designOptions.embodiedCarbon": "คาร์บอนแฝง A1-A5",

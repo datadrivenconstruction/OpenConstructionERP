@@ -51108,6 +51108,7 @@ const resource = {
   "bim.review_summary_still_open": "仍未解决",
   "bim.review_summary_title": "评审结束",
   "bim.review_zoom_needs_model": "加载模型以跳转到此已保存视图。",
+  "bim.converter_package_missing": "此版本需要 {{tag}} 中的 {{asset}}，但转换器发布已不再提供该文件。请更新 OpenConstructionERP。",
   "designOptions.dayDelta": "{{days}} 天",
   "designOptions.durationDays": "工期(天)",
   "designOptions.embodiedCarbon": "隐含碳 A1-A5",

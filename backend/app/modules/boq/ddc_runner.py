@@ -12,7 +12,7 @@ format      command line                                               what it w
 ``rvt``     ``RVTconverter.exe <in> -o <dir> --properties``            ``native_graph.glb``, ``properties.jsonl``
                                                                        (a graph of the stored objects),
                                                                        ``summary.json``, ``report.json``
-``ifc``     ``python.exe converter.py <in> --output <dir> --glb``      a new sub-folder with the workbook
+``ifc``     ``python.exe converter.py <in> --output <dir> --glb``      a new sub-folder with ``<stem>.xlsx``
                                                                        (Objects / Properties / Quantities /
                                                                        SpatialLinks ... sheets) and
                                                                        ``<stem>.glb`` (one node per element)
@@ -233,12 +233,20 @@ def _collect_outputs(run: ConverterRun, out_dir: Path, stem: str) -> None:
     if folder_path is None:
         return
     if run.fmt == "ifc":
-        for role, name in (("xlsx", "drawing.xlsx"), ("jsonl", "data.jsonl"), ("report", "result.json")):
+        for role, name in (("jsonl", "data.jsonl"), ("report", "result.json")):
             if (folder_path / name).is_file():
                 run.outputs[role] = folder_path / name
-        data = info.get("data")
-        if "xlsx" not in run.outputs and isinstance(data, str) and data and Path(data).is_file():
-            run.outputs["xlsx"] = Path(data)  # <stem>.xlsx in current builds
+        # 2.0.0 names the workbook after the model and reports it as ``data``;
+        # older builds wrote ``drawing.xlsx``.
+        reported = Path(info["data"]) if isinstance(info.get("data"), str) and info["data"] else None
+        for cand in (reported, folder_path / f"{stem}.xlsx", folder_path / "drawing.xlsx"):
+            if cand is not None and cand.is_file():
+                run.outputs["xlsx"] = cand
+                break
+        else:
+            found = sorted(folder_path.glob("*.xlsx"))
+            if len(found) == 1:
+                run.outputs["xlsx"] = found[0]
         glb = info.get("glb")
         glb_path = Path(glb) if isinstance(glb, str) and glb else None
         if glb_path is None or not glb_path.is_file():
@@ -309,7 +317,7 @@ def _sheet_rows(wb: Any, name: str) -> Any:
 
 
 def flatten_ifc_workbook(drawing_xlsx: Path) -> tuple[list[str], list[dict[str, Any]]]:
-    """Turn the IFC converter's ``drawing.xlsx`` into ``(header, rows)``, one row per occurrence."""
+    """Turn the IFC converter's workbook into ``(header, rows)``, one row per occurrence."""
     import openpyxl
 
     wb = openpyxl.load_workbook(drawing_xlsx, read_only=True, data_only=True)

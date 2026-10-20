@@ -41308,6 +41308,7 @@ const resource = {
   "bim.view_cube_unavailable": "El cubo de vista necesita su propio contexto gráfico 3D y no pudo obtener uno. La navegación por el modelo no se ve afectada.",
   "bim.view_cube_no_context": "sin contexto 3D",
   "bim.view_cube_label": "Cubo de vista",
+  "bim.converter_package_missing": "Esta versión espera {{asset}} de {{tag}}, que la publicación de convertidores ya no ofrece. Actualice OpenConstructionERP.",
     "pointcloud.cap_upcoming": "Aún no construido",
     "sidebar.module_count_label": "módulos",
     "sidebar.module_count_title": "Se muestran {{shown}} de {{total}} módulos en este menú",

@@ -21,6 +21,7 @@ import {
   API_BASE,
   type Page,
 } from '@/shared/lib/api';
+import i18next from 'i18next';
 import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
@@ -293,6 +294,29 @@ export interface BIMConverterInstallResult {
   already_running?: boolean;
   /** Initial background stage (``starting``) when ``async_install`` is true. */
   stage?: string;
+  /** Machine-readable failure, e.g. ``converter_package_missing``. */
+  error_code?: string;
+  /** With ``converter_package_missing``: the release asset and tag this build pins. */
+  asset?: string;
+  tag?: string;
+}
+
+/** The message to show for an install result, translated when the backend sent a known code. */
+export function converterInstallMessage(result: {
+  message?: string;
+  error_code?: string;
+  asset?: string;
+  tag?: string;
+}): string {
+  if (result.error_code === 'converter_package_missing') {
+    return i18next.t('bim.converter_package_missing', {
+      defaultValue:
+        'This version expects {{asset}} from {{tag}}, which the converter release no longer offers. Update OpenConstructionERP.',
+      asset: result.asset ?? '',
+      tag: result.tag ?? '',
+    });
+  }
+  return result.message ?? '';
 }
 
 const EMPTY_CONVERTERS: BIMConvertersResponse = {
@@ -458,7 +482,9 @@ export async function installBIMConverter(
 
   // Back-compat: an older backend ran the install inline and already returned
   // the terminal result; an "already installed" answer is terminal too.
-  if (!initial.async_install) return initial;
+  if (!initial.async_install) {
+    return initial.error_code ? { ...initial, message: converterInstallMessage(initial) } : initial;
+  }
 
   // Poll the background install to completion. Each poll is a cheap, fast GET
   // (its own short timeout), so no single request is ever held open for the
@@ -484,7 +510,12 @@ export async function installBIMConverter(
         converter_id: converterId,
         installed: Boolean(prog.installed),
         path: prog.path,
-        message: prog.message ?? initial.message ?? '',
+        message: prog.error_code
+          ? converterInstallMessage(prog)
+          : (prog.message ?? initial.message ?? ''),
+        error_code: prog.error_code,
+        asset: prog.asset,
+        tag: prog.tag,
         smoke_test_passed: prog.smoke_test_passed,
         platform: prog.platform,
         platform_unsupported: prog.platform_unsupported,
@@ -543,6 +574,9 @@ export interface BIMConverterInstallProgress {
   installed?: boolean;
   message?: string;
   error?: string;
+  error_code?: string;
+  asset?: string;
+  tag?: string;
   instructions?: string;
   apt_package?: string;
   apt_source_present?: boolean;

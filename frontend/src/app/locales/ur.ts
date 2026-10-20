@@ -48835,6 +48835,7 @@ const resource = {
   "bim.review_summary_still_open": "اب بھی کھلا",
   "bim.review_summary_title": "جائزہ مکمل ہوا",
   "bim.review_zoom_needs_model": "اس محفوظ شدہ منظر پر جانے کے لیے ماڈل لوڈ کریں۔",
+  "bim.converter_package_missing": "یہ ورژن {{tag}} سے {{asset}} کی توقع رکھتا ہے، جو کنورٹر ریلیز اب پیش نہیں کرتی۔ OpenConstructionERP کو اپ ڈیٹ کریں۔",
   "designOptions.dayDelta": "{{days}} دن",
   "designOptions.durationDays": "دورانیہ (دن)",
   "designOptions.embodiedCarbon": "شامل کاربن A1-A5",

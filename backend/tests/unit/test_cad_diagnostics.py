@@ -88,12 +88,12 @@ def test_detect_converter_version_reads_the_install_stamp(tmp_path: Path, monkey
     (root / "cli").mkdir(parents=True)
     fake_bin = root / "cli" / "RVTconverter.exe"
     fake_bin.write_bytes(b"x" * 2048)
-    (root / ".ddc-package.json").write_text('{"version": "0.6.8", "tag": "v2026.10.0"}', encoding="utf-8")
+    (root / ".ddc-package.json").write_text('{"version": "2.0.0", "tag": "v2026.10.0"}', encoding="utf-8")
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: fake_bin)
 
     info = cad_import.detect_converter_version("rvt")
 
-    assert info["version"] == "0.6.8"
+    assert info["version"] == "2.0.0"
     assert info["source"] == "release:v2026.10.0"
     assert info["binary_path"] == str(fake_bin)
 
@@ -110,5 +110,5 @@ def test_detect_converter_version_without_a_stamp_reports_the_declared_package_v
     info = cad_import.detect_converter_version("rvt")
 
     assert info["source"] == "package"
-    assert info["version"] == "0.6.8"
+    assert info["version"] == "2.0.0"
     assert info["binary_path"] == str(fake_bin)

@@ -50062,6 +50062,7 @@ const resource = {
   "bim.review_summary_still_open": "未対応のまま",
   "bim.review_summary_title": "レビュー終了",
   "bim.review_zoom_needs_model": "この保存済みビューへ移動するにはモデルを読み込んでください。",
+  "bim.converter_package_missing": "このバージョンは {{tag}} の {{asset}} を必要としますが、コンバーターのリリースでは提供されなくなりました。OpenConstructionERP を更新してください。",
   "designOptions.dayDelta": "{{days}}日",
   "designOptions.durationDays": "工期(日)",
   "designOptions.embodiedCarbon": "内包炭素 A1-A5",

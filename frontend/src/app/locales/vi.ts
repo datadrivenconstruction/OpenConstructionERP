@@ -48647,6 +48647,7 @@ const resource = {
   "bim.review_summary_still_open": "Vẫn còn mở",
   "bim.review_summary_title": "Đã kết thúc duyệt",
   "bim.review_zoom_needs_model": "Tải mô hình để bay tới chế độ xem đã lưu này.",
+  "bim.converter_package_missing": "Phiên bản này cần {{asset}} từ {{tag}}, nhưng bản phát hành bộ chuyển đổi không còn cung cấp. Hãy cập nhật OpenConstructionERP.",
   "designOptions.dayDelta": "{{days}} ngày",
   "designOptions.durationDays": "Thời lượng (ngày)",
   "designOptions.embodiedCarbon": "Carbon hàm chứa A1-A5",

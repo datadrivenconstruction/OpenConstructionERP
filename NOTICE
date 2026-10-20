@@ -1026,7 +1026,7 @@ Bundled Converter Inside the Windows Desktop Installer
 
 The Windows installer, and only the Windows installer, carries a second
 program of ours and the runtime it needs. The release job fetches the DDC
-IFC converter, the portable package `DDC-IFC-to-Excel-0.3.1-preview` of
+IFC converter, the portable package `DDC-IFC-to-Excel-2.0.0` of
 release `v2026.10.0` of the public repository
 `datadrivenconstruction/cad2data-Revit-IFC-DWG`, checks its SHA-256 against
 the digest pinned in the job and against the release's `SHA256SUMS.txt`, and

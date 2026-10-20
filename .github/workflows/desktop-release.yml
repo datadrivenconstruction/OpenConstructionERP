@@ -1366,8 +1366,8 @@ jobs:
           # case the digest comes from that release's SHA256SUMS.txt alone.
           OE_CONVERTER_REPO: ${{ vars.OE_CONVERTER_REPO || 'datadrivenconstruction/cad2data-Revit-IFC-DWG' }}
           OE_CONVERTER_TAG: ${{ vars.OE_CONVERTER_TAG || 'v2026.10.0' }}
-          OE_CONVERTER_IFC_ASSET: DDC-IFC-to-Excel-0.3.1-preview-portable.zip
-          OE_CONVERTER_IFC_SHA256: 5776b6bd1a3f6ab75c5e8fb7902ae1688b1adbf40f8d1398913999a9a1ada57c
+          OE_CONVERTER_IFC_ASSET: DDC-IFC-to-Excel-2.0.0-portable.zip
+          OE_CONVERTER_IFC_SHA256: 0238bae0cf4cf5ae717c180d6f286e451189d6a78402068d9bb3b5e065061ea0
         run: |
           $ErrorActionPreference = 'Stop'
           $repo  = $env:OE_CONVERTER_REPO
@@ -1424,7 +1424,7 @@ jobs:
           }
           # The same stamp the runtime installer writes, so the version check
           # recognises the bundled copy as this package.
-          @{ fmt = 'ifc'; asset = $asset; version = '0.3.1-preview'; sha256 = $actual; tag = $tag; repo = $repo } |
+          @{ fmt = 'ifc'; asset = $asset; version = '2.0.0'; sha256 = $actual; tag = $tag; repo = $repo } |
             ConvertTo-Json | Set-Content -Path (Join-Path $destRoot '.ddc-package.json') -Encoding utf8
 
           $totalMb = [math]::Round(((Get-ChildItem -Recurse -File $destRoot | Measure-Object -Property Length -Sum).Sum) / 1MB, 2)

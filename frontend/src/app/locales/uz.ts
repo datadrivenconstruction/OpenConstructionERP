@@ -49753,6 +49753,7 @@ const resource = {
     "bim.review_summary_still_open": "Hali ham ochiq",
     "bim.review_summary_title": "Koʻrik yakunlandi",
     "bim.review_zoom_needs_model": "Bu saqlangan koʻrinishga uchish uchun modelni yuklang.",
+    "bim.converter_package_missing": "Bu versiya {{tag}} dan {{asset}} ni kutadi, lekin konvertorlar relizi uni endi taklif qilmaydi. OpenConstructionERP ni yangilang.",
     "designOptions.dayDelta": "{{days}} kun",
     "designOptions.durationDays": "Davomiylik (kun)",
     "designOptions.embodiedCarbon": "Oʻzlashtirilgan uglerod A1-A5",

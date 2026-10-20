@@ -48770,6 +48770,7 @@ const resource = {
     "bim.review_summary_still_open": "Все още отворени",
     "bim.review_summary_title": "Прегледът приключи",
     "bim.review_zoom_needs_model": "Заредете модела, за да прелетите до този запазен изглед.",
+    "bim.converter_package_missing": "Тази версия очаква {{asset}} от {{tag}}, който изданието на конверторите вече не предлага. Обновете OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} д",
     "designOptions.durationDays": "Продължителност (дни)",
     "designOptions.embodiedCarbon": "Вложен въглерод A1-A5",

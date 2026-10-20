@@ -49029,6 +49029,7 @@ const resource = {
     "bim.review_summary_still_open": "Încă deschise",
     "bim.review_summary_title": "Revizie finalizată",
     "bim.review_zoom_needs_model": "Încărcați modelul pentru a ajunge la această vizualizare salvată.",
+    "bim.converter_package_missing": "Această versiune așteaptă {{asset}} din {{tag}}, pe care versiunea convertoarelor nu îl mai oferă. Actualizați OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} z",
     "designOptions.durationDays": "Durată (zile)",
     "designOptions.embodiedCarbon": "Carbon încorporat A1-A5",

@@ -48726,6 +48726,7 @@ const resource = {
     "bim.review_summary_still_open": "Ακόμη ανοιχτά",
     "bim.review_summary_title": "Η επισκόπηση ολοκληρώθηκε",
     "bim.review_zoom_needs_model": "Φορτώστε το μοντέλο για να πετάξετε σε αυτή την αποθηκευμένη προβολή.",
+    "bim.converter_package_missing": "Αυτή η έκδοση αναμένει το {{asset}} από το {{tag}}, το οποίο η έκδοση των μετατροπέων δεν προσφέρει πλέον. Ενημερώστε το OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} η",
     "designOptions.durationDays": "Διάρκεια (ημέρες)",
     "designOptions.embodiedCarbon": "Ενσωματωμένος άνθρακας A1-A5",

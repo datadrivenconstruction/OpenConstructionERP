@@ -298,6 +298,27 @@ def test_outputs_are_found_through_the_json_line_the_converter_prints(tmp_path: 
     assert run.folder == folder
 
 
+def test_the_2_0_workbook_named_after_the_model_is_found_through_data(tmp_path: Path) -> None:
+    """IFC to Excel 2.0.0 writes ``<stem>.xlsx`` (not ``drawing.xlsx``) and reports it as ``data``."""
+    out_dir = tmp_path / "ifc_out"
+    folder = out_dir / "01_AC20-FZK-Haus"
+    xlsx = folder / "01_AC20-FZK-Haus.xlsx"
+    _write_ifc_workbook(xlsx)
+    (folder / "result.json").write_text("{}", encoding="utf-8")
+    line = {"status": "CONVERTED_WITH_LIMITS", "folder": str(folder), "data": str(xlsx)}
+    run = ddc_runner.ConverterRun(fmt="ifc", command=[], returncode=0, stdout=json.dumps(line))
+    ddc_runner._collect_outputs(run, out_dir, "01_AC20-FZK-Haus")
+
+    assert run.ok
+    assert run.outputs["xlsx"] == xlsx
+    assert run.outputs["report"] == folder / "result.json"
+
+    # Without the ``data`` key the stem-named workbook is still found.
+    run2 = ddc_runner.ConverterRun(fmt="ifc", command=[], returncode=0, stdout=json.dumps({"folder": str(folder)}))
+    ddc_runner._collect_outputs(run2, out_dir, "01_AC20-FZK-Haus")
+    assert run2.outputs["xlsx"] == xlsx
+
+
 def test_a_failed_conversion_is_not_ok_even_if_a_file_exists(tmp_path: Path) -> None:
     out_dir = tmp_path / "ifc_out"
     folder = out_dir / "Model-abc123"

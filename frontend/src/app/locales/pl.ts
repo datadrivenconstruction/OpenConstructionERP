@@ -50161,6 +50161,7 @@ const resource = {
     "bim.review_summary_still_open": "Nadal otwarte",
     "bim.review_summary_title": "Przegląd zakończony",
     "bim.review_zoom_needs_model": "Wczytaj model, aby przejść do tego zapisanego widoku.",
+    "bim.converter_package_missing": "Ta wersja oczekuje {{asset}} z {{tag}}, którego wydanie konwerterów już nie oferuje. Zaktualizuj OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Czas trwania (dni)",
     "designOptions.embodiedCarbon": "Węgiel wbudowany A1-A5",
