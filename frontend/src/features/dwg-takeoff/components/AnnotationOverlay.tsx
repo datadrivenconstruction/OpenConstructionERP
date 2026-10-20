@@ -13,6 +13,7 @@ import type { ViewportState } from '../lib/viewport';
 import { worldToScreen } from '../lib/viewport';
 import { formatMeasurement } from '../lib/measurement';
 import { type CalibrationUnit, toMeters } from '../lib/calibration';
+import { isAreaUnit, scaleRawMeasurement } from '../lib/takeoff-totals';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { formatFeetInches } from '@/modules/pdf-takeoff/data/scale-helpers';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
@@ -86,14 +87,12 @@ function measurementLabel(
   fallbackUnit: string,
 ): string | null {
   if (ann.measurement_value == null) return ann.text ?? null;
-  const isArea =
-    ann.measurement_unit === 'm\u00B2' ||
-    ann.measurement_unit === 'm2' ||
-    (ann.measurement_unit ?? '').includes('\u00B2');
+  const isArea = isAreaUnit(ann.measurement_unit);
   if (cal) {
     return formatCalibrated(ann.measurement_value, isArea, cal);
   }
-  const scaled = scaleMeasurement(
+  // Same scaling the list, the Summary and the exports use (takeoff-totals).
+  const scaled = scaleRawMeasurement(
     ann.measurement_value,
     ann.measurement_unit,
     drawingScale,
@@ -116,26 +115,6 @@ function strokeWidth(ann: DwgAnnotation, isSelected: boolean): number {
         ? ann.line_width
         : 2;
   return isSelected ? Math.max(base + 1, base * 1.5) : base;
-}
-
-/**
- * Scale a persisted measurement value on the fly so changing the scale
- * tab visibly updates every annotation label without a round trip.
- * ``unit`` distinguishes linear (m) from areal (m²) scaling.
- */
-function scaleMeasurement(
-  value: number,
-  unit: string | null | undefined,
-  scale: number,
-): number {
-  if (!Number.isFinite(scale) || scale <= 0 || scale === 1) return value;
-  const normalised = (unit ?? '').trim();
-  const isArea =
-    normalised === 'm²' ||
-    normalised === 'm2' ||
-    normalised === '\u00B2' ||
-    normalised.includes('²');
-  return isArea ? value * scale * scale : value * scale;
 }
 
 /** Render all annotations onto the provided canvas context. */
