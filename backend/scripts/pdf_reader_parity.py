@@ -6,7 +6,7 @@ PyMuPDF is AGPL and is not a dependency of this project. This script needs it
 only as a reference and must be run in a throwaway environment, for example::
 
     cd backend
-    uv run --no-project --with pymupdf --with pypdfium2 --with pdfplumber \\
+    uv run --no-project --with pymupdf --with pypdfium2 --with pdfplumber --with pypdf \\
         --with opencv-python-headless --with numpy --with reportlab --with psutil \\
         python scripts/pdf_reader_parity.py [extra.pdf | folder ...]
 
