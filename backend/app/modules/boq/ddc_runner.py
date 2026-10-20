@@ -34,11 +34,16 @@ Honest limits, stated where the data comes from rather than papered over:
   cannot read have no node. A converter build without ``--glb`` is run again
   without it and yields no geometry, as before.
 * RVT: ``properties.jsonl`` is the stored object graph, not a schedule. Only
-  elements that have a mesh in the GLB become rows, parameters keep their
-  stored labels, and stored real numbers are in Revit's internal units (feet,
-  square feet, ...), so they are *not* offered under the length / area / volume
-  names the quantity take-off reads. Quantities for RVT come from geometry, not
-  from these columns.
+  elements that have a mesh in the GLB become rows. Category ids are mapped to
+  ``OST_`` and display names (:mod:`revit_categories`); level and type follow
+  the element's stored links to its ``Level`` and ``SymbolInfo`` objects.
+  Stored reals are in Revit's internal units (feet, square feet, ...) and keep
+  an ``[internal units]`` label, so the take-off never sums them as metres.
+  Area, volume, length, height and thickness are measured on the element's
+  mesh (:mod:`glb_quantities`): a beam's length is its cut length, not the
+  analytical length between joins.
+* DWG: the converter's workbook is a record-by-record decoder log; the take-off
+  table is read from the DXF it writes instead.
 """
 
 from __future__ import annotations
@@ -55,38 +60,13 @@ from pathlib import Path
 from typing import Any
 
 from app.core.converter_source import PACKAGES, command_prefix
+from app.modules.boq.glb_quantities import MESH_QUANTITY_COLUMNS, glb_element_quantities
+from app.modules.boq.revit_categories import revit_category_label, revit_category_name
 
 logger = logging.getLogger(__name__)
 
 #: Sheet of the flattened workbook ``parse_cad_excel`` reads (it takes the active sheet).
 FLAT_SHEET = "Elements"
-
-#: Revit built-in category ids that appear as ``category_id`` in the stored
-#: graph, with the ``OST_`` names the rest of the platform classifies on. Ids
-#: not listed here fall back to ``OST_Category<abs id>``, never to a guess.
-_REVIT_CATEGORIES: dict[int, str] = {
-    -2000011: "OST_Walls",
-    -2000014: "OST_Windows",
-    -2000023: "OST_Doors",
-    -2000032: "OST_Floors",
-    -2000035: "OST_Roofs",
-    -2000038: "OST_Ceilings",
-    -2000100: "OST_Columns",
-    -2000120: "OST_Stairs",
-    -2000126: "OST_Railings",
-    -2000151: "OST_GenericModel",
-    -2000160: "OST_Rooms",
-    -2000170: "OST_CurtainWallPanels",
-    -2000171: "OST_CurtainWallMullions",
-    -2001100: "OST_Furniture",
-    -2001300: "OST_StructuralFoundation",
-    -2001320: "OST_StructuralFraming",
-    -2001330: "OST_StructuralColumns",
-}
-
-#: Cheap pre-filter for the two row kinds read from ``properties.jsonl``; the
-#: file is dominated by object rows that are not looked at.
-_ROW_KIND = re.compile(r'"row"\s*:\s*"(?:record|parameter)"')
 
 #: An xlsx sheet holds 16384 columns; stay well below it.
 _MAX_PROPERTY_COLUMNS = 12000
@@ -274,19 +254,35 @@ def _collect_outputs(run: ConverterRun, out_dir: Path, stem: str) -> None:
 
 # ── Flattening: IFC ────────────────────────────────────────────────────────
 
+#: Tables of the IFC converter's semantic model that the flat table is built from.
+_IFC_TABLES = ("Objects", "SpatialLinks", "NormalizedMeasures", "Properties", "Quantities", "TypeLinks")
+
+#: A cell the converter could not write to Excel (too precise or out of range)
+#: holds this pointer to ``data.jsonl`` instead of the number.
+_XLSX_POINTER_PREFIX = "[See data.jsonl"
+
 
 def _unwrap(value: Any) -> Any:
-    """Reduce an IFC value record (``{"NominalValue": {"ifc_type": .., "value": ..}}``) to a scalar."""
+    """Reduce an IFC value record to a scalar.
+
+    Handles ``{"NominalValue": {"ifc_type": .., "value": ..}}`` (properties) and
+    ``{"LengthValue": 9.6, "Formula": null}`` (quantities).
+    """
     if isinstance(value, dict):
         if "NominalValue" in value:
             return _unwrap(value["NominalValue"])
         if "value" in value and "ifc_type" in value:
             return _unwrap(value["value"])
+        measures = [k for k in value if k.endswith("Value") and k != "NominalValue"]
+        if len(measures) == 1:
+            return _unwrap(value[measures[0]])
         if len(value) == 1:
             return _unwrap(next(iter(value.values())))
         return json.dumps(value, ensure_ascii=False)
     if isinstance(value, list):
         return json.dumps(value, ensure_ascii=False)
+    if isinstance(value, str) and value.startswith(_XLSX_POINTER_PREFIX):
+        return None
     return value
 
 
@@ -294,6 +290,8 @@ def _cell_value(raw: Any) -> Any:
     if raw is None:
         return None
     if isinstance(raw, str):
+        if raw.startswith(_XLSX_POINTER_PREFIX):
+            return None
         try:
             return _unwrap(json.loads(raw))
         except ValueError:
@@ -316,71 +314,118 @@ def _sheet_rows(wb: Any, name: str) -> Any:
         yield dict(zip(keys, row, strict=False))
 
 
-def flatten_ifc_workbook(drawing_xlsx: Path) -> tuple[list[str], list[dict[str, Any]]]:
-    """Turn the IFC converter's workbook into ``(header, rows)``, one row per occurrence."""
+_TABLE_RE = re.compile(r'"table"\s*:\s*"(\w+)"')
+
+
+def _ifc_tables_from_jsonl(data_jsonl: Path) -> dict[str, list[dict[str, Any]]]:
+    """The needed tables of ``data.jsonl``: exact values, no Excel cell limits, no openpyxl."""
+    tables: dict[str, list[dict[str, Any]]] = {t: [] for t in _IFC_TABLES}
+    with data_jsonl.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            m = _TABLE_RE.search(line, 0, 64)
+            table = m.group(1) if m else None
+            if table not in tables:
+                continue
+            try:
+                record = json.loads(line).get("record")
+            except ValueError:
+                continue
+            if isinstance(record, dict):
+                tables[table].append(record)
+    return tables
+
+
+def _ifc_tables_from_xlsx(drawing_xlsx: Path) -> dict[str, list[dict[str, Any]]]:
     import openpyxl
 
     wb = openpyxl.load_workbook(drawing_xlsx, read_only=True, data_only=True)
     try:
-        objects: dict[str, dict[str, Any]] = {}
-        for row in _sheet_rows(wb, "Objects"):
-            objects[str(row.get("ID"))] = row
-
-        parent: dict[str, str] = {}
-        for row in _sheet_rows(wb, "SpatialLinks"):
-            child, par = str(row.get("child_step_id")), str(row.get("parent_step_id"))
-            parent.setdefault(child, par)
-
-        def ancestor_name(step_id: str, category: str) -> str:
-            seen: set[str] = set()
-            cur = parent.get(step_id)
-            while cur is not None and cur not in seen:
-                seen.add(cur)
-                obj = objects.get(cur)
-                if obj and str(obj.get("Category")) == category:
-                    return str(obj.get("Name") or "")
-                cur = parent.get(cur)
-            return ""
-
-        si_values: dict[tuple[str, str], Any] = {}
-        for row in _sheet_rows(wb, "NormalizedMeasures"):
-            si = row.get("si_value")
-            if si is not None:
-                si_values[(str(row.get("owner_step_id")), str(row.get("property_step_id")))] = si
-
-        props: dict[str, dict[str, Any]] = {}
-        columns: dict[str, None] = {}
-        for sheet in ("Properties", "Quantities"):
-            for row in _sheet_rows(wb, sheet):
-                owner = str(row.get("owner_step_id"))
-                if str(row.get("scope")) not in {"OCCURRENCE", "None"}:
-                    continue
-                set_name = str(row.get("set_name") or "")
-                prop = str(row.get("property_name") or "")
-                if not prop:
-                    continue
-                key = f"[{set_name}] {prop}" if set_name else prop
-                if key not in columns:
-                    if len(columns) >= _MAX_PROPERTY_COLUMNS:
-                        continue
-                    columns[key] = None
-                value = si_values.get((owner, str(row.get("property_step_id"))))
-                if value is None:
-                    value = _cell_value(row.get("value"))
-                props.setdefault(owner, {})[key] = value
+        return {t: list(_sheet_rows(wb, t)) for t in _IFC_TABLES}
     finally:
         wb.close()
 
-    header = ["ID", "GlobalId", "Category", "Name", "Description", "Level", "Building", *columns]
+
+def flatten_ifc_workbook(drawing_xlsx: Path) -> tuple[list[str], list[dict[str, Any]]]:
+    """Turn the IFC converter's output into ``(header, rows)``, one row per occurrence.
+
+    ``data.jsonl`` next to the workbook is read when present: it carries the
+    same tables with full-precision values, where the workbook replaces a number
+    Excel cannot hold with a pointer string.
+    """
+    data_jsonl = drawing_xlsx.with_name("data.jsonl")
+    tables = None
+    if data_jsonl.is_file() and data_jsonl.stat().st_size > 2:
+        tables = _ifc_tables_from_jsonl(data_jsonl)
+        if not tables["Objects"]:
+            tables = None
+    if tables is None:
+        tables = _ifc_tables_from_xlsx(drawing_xlsx)
+
+    objects: dict[str, dict[str, Any]] = {}
+    for row in tables["Objects"]:
+        objects[str(row.get("ID"))] = row
+
+    parent: dict[str, str] = {}
+    for row in tables["SpatialLinks"]:
+        child, par = str(row.get("child_step_id")), str(row.get("parent_step_id"))
+        parent.setdefault(child, par)
+
+    def ancestor_name(step_id: str, category: str) -> str:
+        seen: set[str] = set()
+        cur = parent.get(step_id)
+        while cur is not None and cur not in seen:
+            seen.add(cur)
+            obj = objects.get(cur)
+            if obj and str(obj.get("Category")) == category:
+                return str(obj.get("Name") or "")
+            cur = parent.get(cur)
+        return ""
+
+    type_of: dict[str, str] = {}
+    for row in tables["TypeLinks"]:
+        type_of.setdefault(str(row.get("owner_step_id")), str(row.get("type_step_id")))
+
+    si_values: dict[tuple[str, str], Any] = {}
+    for row in tables["NormalizedMeasures"]:
+        si = row.get("si_value")
+        if isinstance(si, str) and si.startswith(_XLSX_POINTER_PREFIX):
+            si = None
+        if si is not None:
+            si_values[(str(row.get("owner_step_id")), str(row.get("property_step_id")))] = si
+
+    props: dict[str, dict[str, Any]] = {}
+    columns: dict[str, None] = {}
+    for sheet in ("Properties", "Quantities"):
+        for row in tables[sheet]:
+            owner = str(row.get("owner_step_id"))
+            if str(row.get("scope")) not in {"OCCURRENCE", "None"}:
+                continue
+            set_name = str(row.get("set_name") or "")
+            prop = str(row.get("property_name") or "")
+            if not prop:
+                continue
+            key = f"[{set_name}] {prop}" if set_name else prop
+            if key not in columns:
+                if len(columns) >= _MAX_PROPERTY_COLUMNS:
+                    continue
+                columns[key] = None
+            value = si_values.get((owner, str(row.get("property_step_id"))))
+            if value is None:
+                value = _cell_value(row.get("value"))
+            props.setdefault(owner, {})[key] = value
+
+    header = ["ID", "GlobalId", "Category", "Name", "Type Name", "Description", "Level", "Building", *columns]
     rows: list[dict[str, Any]] = []
     for step_id, obj in objects.items():
         if str(obj.get("IsType")).lower() == "true":
             continue
+        type_obj = objects.get(type_of.get(step_id, ""))
         row: dict[str, Any] = {
             "ID": int(step_id) if step_id.isdigit() else step_id,
             "GlobalId": obj.get("GlobalId"),
             "Category": obj.get("Category"),
             "Name": obj.get("Name"),
+            "Type Name": (type_obj.get("Name") if type_obj else None) or None,
             "Description": obj.get("Description"),
             "Level": ancestor_name(step_id, "IfcBuildingStorey") or None,
             "Building": ancestor_name(step_id, "IfcBuilding") or None,
@@ -512,58 +557,216 @@ def _param_value(fields: dict[str, Any]) -> Any:
     return None
 
 
-def flatten_rvt_output(glb_path: Path, properties_jsonl: Path | None) -> tuple[list[str], list[dict[str, Any]]]:
-    """``(header, rows)`` for the elements of an RVT conversion that have a mesh."""
-    ids = read_glb_element_ids(glb_path)
-    categories: dict[int, int] = {}
-    params: dict[int, dict[str, Any]] = {}
-    columns: dict[str, None] = {}
-    if properties_jsonl is not None and properties_jsonl.is_file():
-        with properties_jsonl.open("r", encoding="utf-8") as fh:
-            for line in fh:
-                if _ROW_KIND.search(line) is None:
+def _graph_ref(value: Any) -> int | None:
+    """The element id an ``ElementId`` field of the stored graph points at."""
+    cur = value
+    for _ in range(6):
+        if not isinstance(cur, dict):
+            return None
+        if "integer" in cur:
+            try:
+                return int(cur["integer"])
+            except (TypeError, ValueError):
+                return None
+        rec = cur.get("record")
+        if not isinstance(rec, dict) or not rec:
+            return None
+        cur = next(iter(rec.values()))
+    return None
+
+
+def _graph_text(fields: Any, key: str) -> str | None:
+    rec = fields.get("record") if isinstance(fields, dict) else None
+    val = rec.get(key) if isinstance(rec, dict) else None
+    text = val.get("text") if isinstance(val, dict) else None
+    if not isinstance(text, str):
+        return None
+    return text.strip() or None
+
+
+#: Fields of an element's own objects that name its level, in order of trust.
+_LEVEL_FIELDS = (
+    "Element.m_assocLevelId",
+    "FamilyInstance.m_scheduleOnlyLevelId",
+    "FamInstCurveDriver.m_refLevelId",
+    "RoomElem.m_levelId",
+    "RbsCurve.m_idLevelStart",
+    "Stairs.m_bottomId",
+    "FamilyElemRef.m_elemId",
+)
+#: Field-name endings of an element's own objects that point at its type.
+_TYPE_FIELD_ENDINGS = ("AttributesId", "TypeId", "typeId", "SymbolId", "symbolId", "SymId")
+_OWNER_RE = re.compile(r'"owner"\s*:\s*"(-?\d+)"')
+_ROW_RE = re.compile(r'"row"\s*:\s*"(\w+)"')
+_CLASS_RE = re.compile(r'"class_name"\s*:\s*"(?:Level|SymbolInfo)"')
+_GRAPH_HINTS = (
+    "TypeId",
+    "SymId",
+    "m_assocLevelId",
+    "m_scheduleOnlyLevelId",
+    "m_refLevelId",
+    "m_levelId",
+    "m_bottomId",
+    "m_idLevelStart",
+    "FamilyLevelRef",
+    "AttributesId",
+    "m_typeId",
+    "m_symbolId",
+)
+
+
+@dataclass
+class _RvtGraph:
+    categories: dict[int, int] = field(default_factory=dict)
+    params: dict[int, dict[str, Any]] = field(default_factory=dict)
+    columns: dict[str, None] = field(default_factory=dict)
+    level_refs: dict[int, dict[str, int]] = field(default_factory=dict)
+    type_refs: dict[int, list[tuple[int, int]]] = field(default_factory=dict)
+    level_names: dict[int, str] = field(default_factory=dict)
+    type_names: dict[int, str] = field(default_factory=dict)
+
+
+def _read_rvt_graph(properties_jsonl: Path, ids: set[int]) -> _RvtGraph:
+    """One streaming pass over ``properties.jsonl``: categories, parameters, level and type links.
+
+    The file is the converter's stored-object graph (often 10-20x the size of
+    the model), so lines are pre-filtered on cheap substrings before any JSON
+    is parsed.
+    """
+    g = _RvtGraph()
+    with properties_jsonl.open("r", encoding="utf-8") as fh:
+        for line in fh:
+            kind = _ROW_RE.search(line, 0, 64)
+            if kind is None:
+                continue
+            is_param = kind.group(1) == "parameter"
+            is_record = kind.group(1) == "record"
+            is_object = kind.group(1) == "object"
+            if not (is_param or is_record or is_object):
+                continue
+            m = _OWNER_RE.search(line)
+            if m is None:
+                continue
+            owner = int(m.group(1))
+            if is_object:
+                named = _CLASS_RE.search(line) is not None
+                linked = owner in ids and any(h in line for h in _GRAPH_HINTS)
+                if not (named or linked):
                     continue
+            elif owner not in ids:
+                continue
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            if is_record:
                 try:
-                    rec = json.loads(line)
-                except ValueError:
-                    continue
-                try:
-                    owner = int(rec.get("owner"))
+                    g.categories[owner] = int(rec.get("category_id"))
                 except (TypeError, ValueError):
-                    continue
-                if owner not in ids:
-                    continue
-                kind = rec.get("row")
-                if kind == "record":
-                    try:
-                        categories[owner] = int(rec.get("category_id"))
-                    except (TypeError, ValueError):
-                        pass
-                elif kind == "parameter":
-                    label = rec.get("builtin_label") or rec.get("builtin_parameter")
-                    if not label:
-                        continue
-                    value = _param_value(rec.get("fields") or {})
-                    if value is None:
-                        continue
-                    if isinstance(value, float):
-                        # Stored reals are in Revit internal units (feet and
-                        # derived); keep them out of the quantity column names.
-                        label = f"{label} [internal units]"
-                    if label not in columns:
-                        if len(columns) >= _MAX_PROPERTY_COLUMNS:
-                            continue
-                        columns[label] = None
-                    params.setdefault(owner, {})[label] = value
-    header = ["ID", "Category", "Name", *columns]
+                    pass
+            elif is_param:
+                _read_graph_parameter(g, owner, rec)
+            else:
+                _read_graph_object(g, owner, rec)
+    return g
+
+
+def _read_graph_parameter(g: _RvtGraph, owner: int, rec: dict[str, Any]) -> None:
+    label = rec.get("builtin_label") or rec.get("builtin_parameter")
+    value = _param_value(rec.get("fields") or {}) if label else None
+    if value is None:
+        return
+    if isinstance(value, float):
+        # Stored reals are in Revit internal units (feet and derived) and the
+        # graph does not say which; keep them out of the quantity columns.
+        label = f"{label} [internal units]"
+    if label not in g.columns:
+        if len(g.columns) >= _MAX_PROPERTY_COLUMNS:
+            return
+        g.columns[label] = None
+    g.params.setdefault(owner, {})[label] = value
+
+
+def _read_graph_object(g: _RvtGraph, owner: int, rec: dict[str, Any]) -> None:
+    cls = rec.get("class_name")
+    fields = rec.get("fields") or {}
+    if cls == "Level":
+        name = _graph_text(fields, "DatumPlane.m_text")
+        if name:
+            g.level_names[owner] = name
+        return
+    if cls == "SymbolInfo":
+        name = _graph_text(fields, "SymbolInfo.m_name")
+        if name:
+            g.type_names[owner] = name
+        return
+    body = fields.get("record") if isinstance(fields, dict) else None
+    if not isinstance(body, dict):
+        return
+    for key, val in body.items():
+        if key in _LEVEL_FIELDS:
+            if key == "FamilyElemRef.m_elemId" and cls != "FamilyLevelRef":
+                continue
+            ref = _graph_ref(val)
+            if ref is not None and ref > 0:
+                g.level_refs.setdefault(owner, {}).setdefault(key, ref)
+        elif key.endswith(_TYPE_FIELD_ENDINGS):
+            ref = _graph_ref(val)
+            if ref is not None and ref > 0:
+                rank = 0 if key == "InstInfoBase.m_symbolId" else 1
+                g.type_refs.setdefault(owner, []).append((rank, ref))
+
+
+def _level_of(g: _RvtGraph, eid: int) -> str | None:
+    refs = g.level_refs.get(eid) or {}
+    for key in _LEVEL_FIELDS:
+        name = g.level_names.get(refs.get(key, 0))
+        if name:
+            return name
+    return None
+
+
+def _type_of(g: _RvtGraph, eid: int) -> str | None:
+    for _rank, ref in sorted(g.type_refs.get(eid) or []):
+        name = g.type_names.get(ref)
+        if name:
+            return name
+    return None
+
+
+def flatten_rvt_output(glb_path: Path, properties_jsonl: Path | None) -> tuple[list[str], list[dict[str, Any]]]:
+    """``(header, rows)`` for the elements of an RVT conversion that have a mesh.
+
+    Category, level and type come from the stored graph (``properties.jsonl``);
+    area, volume, length and height are measured on the element's mesh in the
+    GLB, in metres, because the stored graph holds no calculated quantities.
+    """
+    ids = read_glb_element_ids(glb_path)
+    g = _RvtGraph()
+    if properties_jsonl is not None and properties_jsonl.is_file():
+        g = _read_rvt_graph(properties_jsonl, ids)
+    try:
+        measured = glb_element_quantities(glb_path)
+    except Exception:  # noqa: BLE001 - a mesh we cannot read still leaves the semantic table
+        logger.warning("Could not measure the GLB meshes of %s", glb_path.name, exc_info=True)
+        measured = {}
+    qty_cols = [c for c in MESH_QUANTITY_COLUMNS if any(c in q for q in measured.values())]
+    header = ["ID", "Category", "Category Name", "Name", "Type Name", "Level", *qty_cols, *g.columns]
     rows: list[dict[str, Any]] = []
     for eid in sorted(ids):
-        cat_id = categories.get(eid)
-        cat = _REVIT_CATEGORIES.get(cat_id) if cat_id is not None else None
-        if cat is None:
-            cat = f"OST_Category{abs(cat_id)}" if cat_id is not None else "OST_Unknown"
-        row: dict[str, Any] = {"ID": eid, "Category": cat, "Name": f"{cat[4:]} {eid}"}
-        row.update(params.get(eid, {}))
+        cat_id = g.categories.get(eid)
+        label = revit_category_label(cat_id)
+        type_name = _type_of(g, eid)
+        row: dict[str, Any] = {
+            "ID": eid,
+            "Category": revit_category_name(cat_id),
+            "Category Name": label,
+            "Name": f"{type_name} {eid}" if type_name else f"{label} {eid}",
+            "Type Name": type_name,
+            "Level": _level_of(g, eid),
+        }
+        row.update(measured.get(eid, {}))
+        row.update(g.params.get(eid, {}))
         rows.append(row)
     return header, rows
 

@@ -540,6 +540,9 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             # carry that status so the UI can tell the user.
             if run.status:
                 result_excel["converter_status"] = run.status
+            # Placeholder boxes after a converter run mean "this converter writes no
+            # geometry" (IFC), not "no converter": the router must not say the latter.
+            result_excel["converter_used"] = True
             return result_excel
     except ImportError:
         logger.debug("cad_import module not available")
@@ -710,6 +713,52 @@ _CATEGORY_COLUMN_ALIASES: tuple[str, ...] = (
     "entity_type",
     "entitytype",
 )
+
+
+#: Quantity-set property names (lowercase, no spaces) to the quantity they fill,
+#: in order of preference: a net figure beats a gross one.
+_QTO_PREFERENCE: dict[str, tuple[str, ...]] = {
+    "Area": ("netsidearea", "netarea", "netfloorarea", "grosssidearea", "grossarea", "grossfloorarea", "area"),
+    "Volume": ("netvolume", "grossvolume", "volume"),
+    "Length": ("length",),
+    "Width": ("width",),
+    "Height": ("height",),
+    "Depth": ("depth",),
+    "Perimeter": ("perimeter", "grossperimeter"),
+    "Weight": ("netweight", "grossweight", "weight"),
+}
+
+
+def _ifc_quantity_set_values(lc_row: dict[str, Any]) -> dict[str, float]:
+    """Quantities from ``[Qto_*BaseQuantities] <name>`` columns of a flattened IFC row.
+
+    IFC4 files name their base quantity sets ``Qto_WallBaseQuantities``,
+    ``Qto_SlabBaseQuantities`` and so on; the values are already SI (the
+    converter normalises them). Tessellation quantities the RVT converter adds
+    to its own IFC export count as well.
+    """
+    found: dict[str, float] = {}
+    for key, val in lc_row.items():
+        if not key.startswith("[") or "] " not in key:
+            continue
+        set_name, prop = key[1:].split("] ", 1)
+        if not (set_name.startswith("qto_") or "quantities" in set_name):
+            continue
+        try:
+            fval = float(val)
+        except (TypeError, ValueError):
+            continue
+        if fval and fval == fval:
+            found.setdefault(prop.replace(" ", "").replace("_", ""), fval)
+    out: dict[str, float] = {}
+    for dest, names in _QTO_PREFERENCE.items():
+        for name in names:
+            if name in found:
+                out[dest] = found[name]
+                break
+    if "Area" not in out and "surfacearea" in found:
+        out["Surface Area"] = found["surfacearea"]
+    return out
 
 
 def _excel_elements_to_bim_result(
@@ -1007,7 +1056,10 @@ def _excel_elements_to_bim_result(
         # CamelCase into words, and title-case the result so the
         # filter panel shows "Curtain Wall Mullions" instead of
         # "Curtainwallmullions".
-        if cat_lower.startswith("ost_"):
+        if lc_row.get("category name") and cat_lower.startswith("ost_"):
+            # The RVT flattener writes Revit's own display name beside the OST_ name.
+            etype = str(lc_row["category name"])
+        elif cat_lower.startswith("ost_"):
             raw_name = str(category)[4:]  # preserve original casing
             # Split CamelCase: "CurtainWallMullions" → "Curtain Wall Mullions"
             spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", raw_name)
@@ -1090,6 +1142,9 @@ def _excel_elements_to_bim_result(
                     quantities[dest_key] = fval
             except (ValueError, TypeError):
                 pass
+
+        for dest_key, value in _ifc_quantity_set_values(lc_row).items():
+            quantities.setdefault(dest_key, value)
 
         # Stable ID - prefer RVT uniqueid, fall back to type ifcguid, then row index
         stable_id = str(
