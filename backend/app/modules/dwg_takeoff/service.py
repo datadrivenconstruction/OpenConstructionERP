@@ -123,7 +123,7 @@ def _legacy_stale_cutoff_seconds() -> int:
     ``processing``, so anything running today has a non-NULL value from its
     first moment.
     """
-    convert_timeout = int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "300"))
+    convert_timeout = int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "900"))
     return max(convert_timeout * 2, 600)
 
 
@@ -1502,6 +1502,17 @@ class DwgTakeoffService:
             meta["error_code"] = code
         await self.drawing_repo.update_fields(drawing_id, metadata_=meta)
 
+    async def _set_converter_error(self, drawing_id: uuid.UUID, error: dict[str, Any] | None) -> None:
+        """Keep the converter's own code and messages (never its ``detail``) for the page to show."""
+        if not error:
+            return
+        drawing = await self.drawing_repo.get_by_id(drawing_id)
+        if drawing is None:
+            return
+        meta = dict(drawing.metadata_ or {})
+        meta["converter_error"] = {k: str(error[k])[:500] for k in ("code", "message_en", "message_ru") if error.get(k)}
+        await self.drawing_repo.update_fields(drawing_id, metadata_=meta)
+
     async def _mark_failed(self, drawing_id: uuid.UUID, code: str, message: str) -> None:
         """Put a drawing in ``error`` with an English message and a stable code.
 
@@ -1615,10 +1626,10 @@ class DwgTakeoffService:
         # uploaded DXF takes (ezdxf parse, layers, extents, units, thumbnail),
         # so a DWG and a DXF of the same drawing end up as the same entities.
         #
-        # DWG conversion can legitimately take minutes on large drawings, so
-        # match the 300s the CAD/BIM Data Explorer (boq.cad_import) already
-        # allows. Overridable via env for very large sets or slow boxes.
-        convert_timeout_s = int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "300"))
+        # DWG conversion can take minutes on a large drawing and longer on a busy
+        # server (a 1.3 MB plan: 177 s alone, about 290 s under load).
+        # Overridable via env for very large sets or slow boxes.
+        convert_timeout_s = int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "900"))
         work_dir = _Path(file_path).resolve().with_name(_Path(file_path).stem + "_dwg_work")
         try:
             try:
@@ -1642,7 +1653,7 @@ class DwgTakeoffService:
                         f"DWG conversion timed out after {convert_timeout_s}s. "
                         "Large drawings can need longer: raise the limit by setting "
                         "OE_DWG_CONVERT_TIMEOUT_S on the server, for example "
-                        "OE_DWG_CONVERT_TIMEOUT_S=900, and upload again."
+                        "OE_DWG_CONVERT_TIMEOUT_S=1800, and upload again."
                     ),
                 )
                 return
@@ -1662,7 +1673,16 @@ class DwgTakeoffService:
                     run.status,
                     (run.stderr or run.stdout or "").strip()[:2000],
                 )
-                await self._mark_failed(drawing_id, "convert_failed", _CONVERT_FAILED_MESSAGE)
+                await self._set_converter_error(drawing_id, run.error)
+                if run.cancelled:
+                    await self._mark_failed(
+                        drawing_id,
+                        "convert_timeout",
+                        f"DWG conversion stopped at the {convert_timeout_s}s limit. Raise OE_DWG_CONVERT_TIMEOUT_S "
+                        "on the server, or upload the drawing as DXF.",
+                    )
+                else:
+                    await self._mark_failed(drawing_id, "convert_failed", _CONVERT_FAILED_MESSAGE)
                 return
 
             # The drawing may have been deleted while this ran, and telling
