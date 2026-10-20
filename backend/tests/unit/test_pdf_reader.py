@@ -12,9 +12,9 @@ from __future__ import annotations
 
 import pytest
 
-from app.core import pdf_reader
+from app.core import pdf_paint_scan, pdf_reader
 from app.modules.takeoff import recognize
-from tests._pdf_samples import DRAWING, FORM_PAGE, FORMS, build_pdf
+from tests._pdf_samples import DRAWING, FORM_PAGE, FORMS, PATTERN_SPEC, build_pdf
 
 
 def _page_drawings(pdf: bytes, index: int = 0) -> list[dict]:
@@ -57,12 +57,64 @@ def test_re_operator_and_h_closed_lines_become_rectangles():
 def test_four_stroked_lines_back_to_start_are_a_quad_and_fills_are_not():
     drawings = _page_drawings(build_pdf([{"content": DRAWING}]))
     quads = [it for it in _items(drawings) if it[0] == "qu"]
-    assert len(quads) == 1
-    corners = sorted((round(p.x), round(p.y)) for p in quads[0][1])
-    assert corners == [(470, 202), (470, 232), (520, 202), (520, 232)]
+    # With h after the fourth line and without it.
+    assert len(quads) == 2
+    corners = sorted(sorted((round(p.x), round(p.y)) for p in q[1]) for q in quads)
+    assert corners[1] == [(470, 202), (470, 232), (520, 202), (520, 232)]
+    assert corners[0] == [(50, 242), (50, 392), (250, 242), (250, 392)]
     fill_only = [p for p in drawings if p["type"] == "f" and p["fill"] == pytest.approx((0.5, 0.5, 0.5), abs=0.01)]
     assert len(fill_only) == 1
-    assert "qu" not in [it[0] for it in fill_only[0]["items"]]
+    assert [it[0] for it in fill_only[0]["items"]] == ["l", "l", "l", "l"]
+
+
+def test_how_a_subpath_closes_decides_between_rectangle_and_lines():
+    content = "\n".join(
+        [
+            "0 g 10 10 m 60 10 l 60 40 l 10 40 l h f",
+            "0 g 110 10 m 160 10 l 160 40 l 110 40 l 110 10 l h f",
+            "0 g 210 10 0 0 re f",
+            "0 G 310 10 m 360 10 l 360 40 l 310 40 l h S",
+        ]
+    )
+    drawings = _page_drawings(build_pdf([{"content": content}]))
+    ops = [[it[0] for it in p["items"]] for p in drawings]
+    # h closing three lines is a rectangle; a fourth line drawn before h is not.
+    assert ops == [["re"], ["l", "l", "l", "l"], ["re"], ["re"]]
+    # An empty re keeps its rectangle.
+    assert tuple(drawings[2]["items"][0][1]) == (210.0, 782.0, 210.0, 782.0)
+
+
+def test_pattern_and_shading_paints_are_left_out():
+    drawings = _page_drawings(build_pdf([PATTERN_SPEC]))
+    # Two plain fills, and the plain fill of a path whose stroke is a pattern.
+    assert [(p["type"], round(p["rect"][0])) for p in drawings] == [("f", 10), ("f", 250), ("f", 310)]
+    assert drawings[0]["fill"] == pytest.approx((0.75, 0.75, 0.75), abs=0.01)
+
+
+def test_strings_and_inline_images_do_not_confuse_the_content_plan():
+    content = "\n".join(
+        [
+            r"BT /F1 12 Tf 50 700 Td (q 0 0 m 5 5 l S \) Q \( (nested) re f) Tj ET",
+            "q BI /W 2 /H 1 /BPC 8 /CS /G ID xx EI Q",
+            "0 G 10 10 m 60 10 l 60 40 l 10 40 l 10 10 l h S",
+        ]
+    )
+    with pdf_reader.open_pdf(build_pdf([{"content": content}])) as doc:
+        plan = doc._paint_plan(0)
+        drawings = doc[0].drawings()
+    assert plan is not None
+    assert plan.paints == [(False, False, (pdf_paint_scan.CLOSE_EXPLICIT,))]
+    assert [it[0] for it in drawings[0]["items"]] == ["qu"]
+
+
+def test_without_a_content_plan_the_paths_are_still_traced(monkeypatch):
+    def broken(*_args: object) -> None:
+        raise ValueError("unreadable")
+
+    monkeypatch.setattr(pdf_paint_scan, "page_plan", broken)
+    drawings = _page_drawings(build_pdf([PATTERN_SPEC]))
+    # Without the plan, PDFium's stand-in colours stay in and nothing breaks.
+    assert len(drawings) == 6
 
 
 def test_fill_then_stroke_merge_and_style_keys():
