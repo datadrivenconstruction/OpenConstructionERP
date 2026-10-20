@@ -31,6 +31,8 @@ export interface DwgUploadJob {
   stage: string;
   drawingId: string | null;
   errorMessage: string | null;
+  /** Stable failure code (``metadata.error_code``) the UI translates. */
+  errorCode?: string | null;
   startedAt: number;
   completedAt: number | null;
 }
@@ -157,6 +159,7 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
             progress: 0,
             stage: 'dwg_upload.stage_failed',
             errorMessage: drawing.error_message || 'Conversion failed',
+            errorCode: drawing.metadata?.error_code ?? null,
             completedAt: Date.now(),
           });
           return;

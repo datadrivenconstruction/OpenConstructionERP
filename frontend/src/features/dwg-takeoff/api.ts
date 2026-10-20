@@ -54,6 +54,9 @@ export interface DwgDrawing {
   status?: DwgDrawingStatus;
   /** Human-readable reason when ``status === 'error'`` or ``'empty'``. */
   error_message?: string | null;
+  /** Server-side extras. ``error_code`` is the stable failure code the page
+   *  translates instead of showing the English ``error_message``. */
+  metadata?: { error_code?: string | null } & Record<string, unknown>;
   /** Latest parsed version. Only present on the single-drawing fetch
    *  ({@link fetchDrawing}); the LIST endpoint omits it. Carries the
    *  resolved/backfilled ``units`` the LIST response does not expose, so
@@ -501,6 +504,12 @@ export async function deleteEntityGroup(groupId: string): Promise<void> {
 
 /* ── Revision compare (Item 17) ────────────────────────────────────────── */
 
+/** An external reference (xref) or an undefined block the drawing needs. */
+export interface DwgUnresolvedXref {
+  name: string;
+  path: string | null;
+}
+
 /** A parsed version of a drawing — the unit a revision compare diffs. */
 export interface DwgDrawingVersion {
   id: string;
@@ -509,6 +518,8 @@ export interface DwgDrawingVersion {
   entity_count: number;
   units: string | null;
   status: string;
+  /** ``xrefs``: external references the converted drawing could not resolve. */
+  metadata?: { xrefs?: DwgUnresolvedXref[] } & Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }

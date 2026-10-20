@@ -14,6 +14,7 @@
 
 import type * as ExcelJS from 'exceljs';
 import type { LayerQuantity } from './auto-quantify';
+import { quantifyTotals, type QuantifyTotals } from './takeoff-totals';
 import {
   toDisplayQuantity,
   displayUnitFor,
@@ -50,6 +51,11 @@ export interface QuantifyExportContext {
   drawingName: string;
   /** Per-layer auto-quantify rows (from ``quantifyByLayer``). */
   layerQuantities: LayerQuantity[];
+  /** Drawing totals the UI shows (``quantifyTotals``). Recomputed from
+   *  ``layerQuantities`` when omitted, never from a different rule. */
+  totals?: QuantifyTotals;
+  /** Manual Distance / Area / Count annotations, real-world values. */
+  manualRows?: { type: string; text: string; value: number; unit: string }[];
   /** Count-by-block rollup (INSERT entities), optional. */
   byBlock?: { name: string; count: number }[];
   /** Manual count-tool tally, optional. */
@@ -107,13 +113,8 @@ export async function buildQuantifyWorkbook(
   ];
   styleHeader(ws.getRow(1));
 
-  let totalArea = 0;
-  let totalLength = 0;
-  let totalEntities = 0;
+  const totals = ctx.totals ?? quantifyTotals(ctx.layerQuantities);
   for (const row of ctx.layerQuantities) {
-    totalArea += row.area;
-    totalLength += row.length;
-    totalEntities += row.count;
     // The per-row headline quantity carries its own unit ("m²"/"m"/"nr");
     // "nr" has no imperial mapping so it passes through unchanged.
     const q = toDisplayQuantity(row.quantity, row.unit, system);
@@ -133,9 +134,9 @@ export async function buildQuantifyWorkbook(
     measure: '',
     quantity: '',
     unit: '',
-    area: Math.round(toDisplayQuantity(totalArea, 'm²', system).value * 100) / 100,
-    length: Math.round(toDisplayQuantity(totalLength, 'm', system).value * 100) / 100,
-    entities: totalEntities,
+    area: round3(toDisplayQuantity(totals.area, 'm²', system).value),
+    length: round3(toDisplayQuantity(totals.length, 'm', system).value),
+    entities: totals.count,
   });
   totalRow.font = { bold: true };
   totalRow.border = { top: { style: 'thin' } };
@@ -143,6 +144,28 @@ export async function buildQuantifyWorkbook(
   if (ctx.countTotal && ctx.countTotal > 0) {
     const cRow = ws.addRow({ layer: 'Manual count items', measure: '', quantity: ctx.countTotal, unit: 'nr' });
     cRow.font = { italic: true };
+  }
+
+  /* ── Manual measurements ─────────────────────────────────────── */
+  if (ctx.manualRows && ctx.manualRows.length > 0) {
+    const wsM = wb.addWorksheet('Manual measurements');
+    wsM.columns = [
+      { header: 'Type', key: 'type', width: 12 },
+      { header: 'Label', key: 'label', width: 30 },
+      { header: 'Quantity', key: 'quantity', width: 14 },
+      { header: 'Unit', key: 'unit', width: 8 },
+    ];
+    styleHeader(wsM.getRow(1));
+    for (const r of ctx.manualRows) {
+      const metricUnit = r.type === 'count' ? 'nr' : r.unit.includes('²') ? 'm²' : 'm';
+      const q = toDisplayQuantity(r.value, metricUnit, system);
+      wsM.addRow({
+        type: r.type,
+        label: neutraliseFormula(r.text),
+        quantity: round3(q.value),
+        unit: q.unit,
+      });
+    }
   }
 
   /* ── Count by block ──────────────────────────────────────────── */
