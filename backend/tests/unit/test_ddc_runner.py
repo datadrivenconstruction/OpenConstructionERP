@@ -143,7 +143,7 @@ def test_flattened_ifc_table_is_read_by_the_platform_parser(tmp_path: Path) -> N
     assert result["geometry_quality"] == "placeholder"
 
 
-# ── RVT: GLB + properties.jsonl -> flat table ─────────────────────────────
+# ── RVT: GLB + native_graph.ifc -> flat table ─────────────────────────────
 
 
 def _glb(nodes: list[dict[str, Any]]) -> bytes:
@@ -164,6 +164,61 @@ def _glb(nodes: list[dict[str, Any]]) -> bytes:
     )
 
 
+def native_graph_ifc(elements: list[dict[str, Any]]) -> str:
+    """A minimal ``native_graph.ifc`` as ``RVTconverter --ifc`` writes it.
+
+    Each element: ``id``, ``identity`` (Revit_Identity values), optional ``params``
+    (name -> (ifc type, STEP value, description)), ``qto`` (set -> {name: (kind, value)})
+    and ``storey`` (name of the storey that contains it).
+    """
+    lines = ["ISO-10303-21;", "HEADER;", "ENDSEC;", "DATA;"]
+    n = [1000]
+
+    def rec(body: str) -> int:
+        n[0] += 1
+        lines.append(f"#{n[0]}={body};")
+        return n[0]
+
+    def lit(v: Any) -> str:
+        if isinstance(v, int):
+            return f"IFCINTEGER({v})"
+        if isinstance(v, float):
+            return f"IFCREAL({v!r})"
+        return "IFCLABEL('" + str(v).replace("'", "''") + "')"
+
+    def attach(product: int, name: str, members: list[int], quantities: bool = False) -> None:
+        refs = ",".join(f"#{m}" for m in members)
+        if quantities:
+            sid = rec(f"IFCELEMENTQUANTITY('g',#5,'{name}',$,$,({refs}))")
+        else:
+            sid = rec(f"IFCPROPERTYSET('g',#5,'{name}','desc',({refs}))")
+        rec(f"IFCRELDEFINESBYPROPERTIES('g',#5,$,$,(#{product}),#{sid})")
+
+    storeys: dict[str, int] = {}
+    for el in elements:
+        product = rec(f"IFCWALL('g',#5,'n',$,'t',$,$,'{el['id']}',.NOTDEFINED.)")
+        ident = {"ElementId": el["id"], **el.get("identity", {})}
+        attach(
+            product, "Revit_Identity", [rec(f"IFCPROPERTYSINGLEVALUE('{k}',$,{lit(v)},$)") for k, v in ident.items()]
+        )
+        if el.get("params"):
+            members = [
+                rec(f"IFCPROPERTYSINGLEVALUE('{k}','{desc}',{typ}({val}),$)")
+                for k, (typ, val, desc) in el["params"].items()
+            ]
+            attach(product, "Revit_Parameters", members)
+        for set_name, qtys in (el.get("qto") or {}).items():
+            members = [rec(f"IFCQUANTITY{kind}('{k}',$,$,{v!r},$)") for k, (kind, v) in qtys.items()]
+            attach(product, set_name, members, quantities=True)
+        if el.get("storey"):
+            name = el["storey"]
+            if name not in storeys:
+                storeys[name] = rec(f"IFCBUILDINGSTOREY('g',#5,'{name}',$,$,$,$,$,.ELEMENT.,0.)")
+            rec(f"IFCRELCONTAINEDINSPATIALSTRUCTURE('g',#5,$,$,(#{product}),#{storeys[name]})")
+    lines += ["ENDSEC;", "END-ISO-10303-21;"]
+    return "\n".join(lines) + "\n"
+
+
 def _rvt_output(folder: Path) -> tuple[Path, Path]:
     folder.mkdir(parents=True)
     glb = folder / "native_graph.glb"
@@ -175,55 +230,80 @@ def _rvt_output(folder: Path) -> tuple[Path, Path]:
             ]
         )
     )
-
-    def param(owner: int, label: str, storage: str, value_key: str, value: Any) -> dict[str, Any]:
-        return {
-            "row": "parameter",
-            "owner": str(owner),
-            "builtin_label": label,
-            "storage": storage,
-            "fields": {"record": {f"{storage}.m_value": {value_key: value}}},
-        }
-
-    rows: list[dict[str, Any]] = [
-        {"row": "document", "schema": "native_stored_properties/2"},
-        {"row": "record", "owner": "2645", "category_id": "-2000011"},
-        {"row": "record", "owner": "2870", "category_id": "-2000032"},
-        {"row": "record", "owner": "9999", "category_id": "-2000011"},  # no mesh: not a row
-        param(2645, "Unconnected Height", "ParamValueDouble", "number", 11.5),
-        param(2645, "Structural", "ParamValueInt", "integer", "1"),
-        param(2645, "Cross-Section Rotation", "ParamValueDouble", "number", 0.5),
-        param(2870, "Comments", "ParamValueAString", "text", "slab"),
-        param(9999, "Comments", "ParamValueAString", "text", "ignored"),
-    ]
-    props = folder / "properties.jsonl"
-    props.write_text("\n".join(json.dumps(r, separators=(",", ":")) for r in rows) + "\n", encoding="utf-8")
-    return glb, props
+    wall = {
+        "id": 2645,
+        "identity": {
+            "CategoryId": -2000011,
+            "CategoryName": "Walls",
+            "TypeName": "CL_W1",
+            "FamilyName": "Basic Wall",
+            "LevelName": "Level 1",
+        },
+        "params": {
+            "Unconnected Height": ("IFCLENGTHMEASURE", 3.5, "BuiltInParameter WALL_USER_HEIGHT_PARAM"),
+            "WALL_HEIGHT_PARAM": ("IFCREAL", 11.5, "BuiltInParameter, Revit internal units"),
+            "Structural": ("IFCINTEGER", 1, "x"),
+        },
+        "qto": {"Qto_WallBaseQuantities": {"Length": ("LENGTH", 4.0), "NetVolume": ("VOLUME", 2.5)}},
+    }
+    floor = {
+        "id": 2870,
+        "identity": {"CategoryId": -2000032, "CategoryName": "Floors", "TypeName": "Slab 200"},
+        "params": {"Comments": ("IFCLABEL", "'slab'", "x")},
+        "storey": "Level 2",
+    }
+    unmeshed = {"id": 9999, "identity": {"CategoryId": -2000011, "CategoryName": "Walls"}}
+    ifc = folder / "native_graph.ifc"
+    ifc.write_text(native_graph_ifc([wall, floor, unmeshed]), encoding="ascii")
+    return glb, ifc
 
 
 def test_rvt_elements_are_the_ones_with_a_mesh(tmp_path: Path) -> None:
-    glb, props = _rvt_output(tmp_path / "m.converted")
+    glb, ifc = _rvt_output(tmp_path / "m.converted")
 
-    header, rows = ddc_runner.flatten_rvt_output(glb, props)
+    header, rows = ddc_runner.flatten_rvt_output(glb, ifc)
 
     assert [r["ID"] for r in rows] == [2645, 2870]
     wall, floor = rows
-    assert wall["Category"] == "OST_Walls"
+    assert (wall["Category"], wall["Category Name"], wall["Type Name"]) == ("OST_Walls", "Walls", "CL_W1")
+    assert wall["Family Name"] == "Basic Wall"
+    assert wall["Name"] == "CL_W1 2645"
+    assert wall["Level"] == "Level 1"
+    # No LevelName in the identity: the storey that contains the element.
+    assert floor["Level"] == "Level 2"
     assert floor["Category"] == "OST_Floors"
-    assert floor["Comments"] == "slab"
-    assert wall["Structural"] == 1
-    # Stored reals are in Revit's internal units (feet): a plain length is converted,
-    # anything the name does not pin down keeps the marker and is not offered as a quantity.
-    assert wall["Unconnected Height"] == pytest.approx(11.5 * 0.3048)
-    assert wall["Cross-Section Rotation [internal units]"] == 0.5
-    assert "Cross-Section Rotation" not in header
+    assert floor["[Revit_Parameters] Comments"] == "slab"
+    assert wall["[Revit_Parameters] Structural"] == 1
+    # Parameters the converter resolved to metres are kept; raw internal units are labelled.
+    assert wall["[Revit_Parameters] Unconnected Height"] == 3.5
+    assert wall["[Revit_Parameters] WALL_HEIGHT_PARAM [internal units]"] == 11.5
+    assert "[Revit_Parameters] WALL_HEIGHT_PARAM" not in header
+    # Revit's base quantities feed the quantity columns.
+    assert (wall["Length"], wall["Volume"]) == (4.0, 2.5)
 
 
-def test_an_unknown_revit_category_is_labelled_not_guessed(tmp_path: Path) -> None:
-    glb, props = _rvt_output(tmp_path / "m.converted")
-    props.write_text(json.dumps({"row": "record", "owner": "2645", "category_id": "-2999999"}) + "\n", encoding="utf-8")
-    _, rows = ddc_runner.flatten_rvt_output(glb, props)
-    assert rows[0]["Category"] == "OST_Category2999999"
+def test_an_unknown_revit_category_takes_the_converters_name(tmp_path: Path) -> None:
+    glb, ifc = _rvt_output(tmp_path / "m.converted")
+    nodes = [{"id": 2645, "identity": {"CategoryId": -2999999, "CategoryName": "Analytical Nodes"}}]
+    ifc.write_text(native_graph_ifc(nodes), encoding="ascii")
+    _, rows = ddc_runner.flatten_rvt_output(glb, ifc)
+    assert rows[0]["Category"] == "Analytical Nodes"
+    assert rows[0]["Category Name"] == "Analytical Nodes"
+
+
+def test_analytical_elements_the_ifc_leaves_out_are_not_rows(tmp_path: Path) -> None:
+    glb, ifc = _rvt_output(tmp_path / "m.converted")
+    nodes = [{"name": f"element_{i}", "extras": {"element_id": i}} for i in (2645, 2870, 2646)]
+    glb.write_bytes(_glb(nodes))  # 2646: an analytical wall, drawn in the GLB, absent from the IFC
+    _, rows = ddc_runner.flatten_rvt_output(glb, ifc)
+    assert [r["ID"] for r in rows] == [2645, 2870]
+
+
+def test_rvt_without_an_ifc_still_lists_the_meshed_elements(tmp_path: Path) -> None:
+    glb, _ = _rvt_output(tmp_path / "m.converted")
+    _, rows = ddc_runner.flatten_rvt_output(glb, None)
+    assert [r["ID"] for r in rows] == [2645, 2870]
+    assert rows[0]["Category"] == "OST_Unknown"
 
 
 def test_glb_nodes_are_renamed_to_the_element_id(tmp_path: Path) -> None:
@@ -243,9 +323,9 @@ def test_glb_nodes_are_renamed_to_the_element_id(tmp_path: Path) -> None:
 
 
 def test_rvt_glb_is_used_as_the_model_geometry(tmp_path: Path) -> None:
-    glb, props = _rvt_output(tmp_path / "m.converted")
+    glb, ifc = _rvt_output(tmp_path / "m.converted")
     ddc_runner.normalize_glb_node_names(glb)
-    run = ddc_runner.ConverterRun(fmt="rvt", command=[], returncode=0, outputs={"glb": glb, "properties": props})
+    run = ddc_runner.ConverterRun(fmt="rvt", command=[], returncode=0, outputs={"glb": glb, "ifc": ifc})
     flat = ddc_runner.write_flat_workbook(run, tmp_path / "model.xlsx")
     raw = cad_import.parse_cad_excel(flat)
 
@@ -266,7 +346,7 @@ def test_each_format_gets_its_own_command_line(tmp_path: Path) -> None:
     src = tmp_path / "in" / "Model.x"
     out = tmp_path / "out"
     rvt = ddc_runner.build_command("rvt", tmp_path / "rvt_windows" / "cli" / "RVTconverter.exe", src, out)
-    assert rvt[1:] == [str(src.resolve()), "-o", str(out), "--properties"]
+    assert rvt[1:] == [str(src.resolve()), "-o", str(out), "--ifc"]
 
     dwg = ddc_runner.build_command("dwg", tmp_path / "dwg_windows" / "cli" / "dwg2excel.exe", src, out)
     assert dwg[1:] == [str(src.resolve()), "-o", str(out), "--json", "--no-svg"]

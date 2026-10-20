@@ -118,7 +118,7 @@ def test_the_node_matrix_scales_feet_to_metres(tmp_path: Path) -> None:
     assert q["Height"] == pytest.approx(0.3048, rel=1e-3)
 
 
-# ── RVT stored graph: categories, levels, types ─────────────────────────────
+# ── RVT: categories, levels, types from the converter IFC ─────────────────────────────
 
 
 def test_revit_category_ids_get_their_builtin_and_display_names() -> None:
@@ -128,53 +128,31 @@ def test_revit_category_ids_get_their_builtin_and_display_names() -> None:
     assert revit_category_label(-2999999) == "Category -2999999"
 
 
-def _ref(eid: int) -> dict[str, Any]:
-    return {"record": {"ElementId.m_id": {"record": {"Identifier.m_id": {"integer": str(eid)}}}}}
+def _rvt_ifc_output(folder: Path, qto: dict[str, Any] | None = None) -> tuple[Path, Path]:
+    from tests.unit.test_ddc_runner import native_graph_ifc
 
-
-def _rvt_graph_output(folder: Path) -> tuple[Path, Path]:
     folder.mkdir(parents=True)
     glb = folder / "native_graph.glb"
     glb.write_bytes(_glb_with_box(1.0))
-    doc = json.loads(glb.read_bytes()[20 : 20 + struct.unpack("<I", glb.read_bytes()[12:16])[0]])
-    assert doc["nodes"][0]["extras"]["element_id"] == 77
-    rows = [
-        {"row": "record", "owner": "77", "category_id": "-2008044"},
-        {
-            "row": "object",
-            "owner": "311",
-            "class_name": "Level",
-            "fields": {"record": {"DatumPlane.m_text": {"text": "Level 1"}}},
+    pipe = {
+        "id": 77,
+        "identity": {
+            "CategoryId": -2008044,
+            "CategoryName": "Pipes",
+            "TypeName": "Standard 50 mm",
+            "LevelName": "Level 1",
         },
-        {
-            "row": "object",
-            "owner": "500",
-            "class_name": "SymbolInfo",
-            "fields": {"record": {"SymbolInfo.m_name": {"text": "Standard 50 mm"}}},
-        },
-        # A pipe names its level on the curve start, not on Element.m_assocLevelId.
-        {
-            "row": "object",
-            "owner": "77",
-            "class_name": "RbsPipeCurve",
-            "fields": {
-                "record": {
-                    "Element.m_assocLevelId": _ref(-1),
-                    "RbsCurve.m_idLevelStart": _ref(311),
-                    "MEPCurve.m_typeId": _ref(500),
-                }
-            },
-        },
-    ]
-    props = folder / "properties.jsonl"
-    props.write_text("\n".join(json.dumps(r, separators=(",", ":")) for r in rows) + "\n", encoding="utf-8")
-    return glb, props
+        "qto": qto or {},
+    }
+    ifc = folder / "native_graph.ifc"
+    ifc.write_text(native_graph_ifc([pipe]), encoding="ascii")
+    return glb, ifc
 
 
 def test_rvt_rows_carry_level_type_category_and_measured_quantities(tmp_path: Path) -> None:
-    glb, props = _rvt_graph_output(tmp_path / "m.converted")
+    glb, ifc = _rvt_ifc_output(tmp_path / "m.converted")
 
-    header, rows = ddc_runner.flatten_rvt_output(glb, props)
+    header, rows = ddc_runner.flatten_rvt_output(glb, ifc)
 
     (pipe,) = rows
     assert pipe["Category"] == "OST_PipeCurves"
@@ -182,17 +160,32 @@ def test_rvt_rows_carry_level_type_category_and_measured_quantities(tmp_path: Pa
     assert pipe["Level"] == "Level 1"
     assert pipe["Type Name"] == "Standard 50 mm"
     assert pipe["Name"] == "Standard 50 mm 77"
+    # No quantity set in the IFC: measured on the mesh.
     assert pipe["Volume"] == pytest.approx(1.0)
     assert {"Volume", "Surface Area", "Height"} <= set(header)
 
 
-def test_the_graph_reader_accepts_spaced_json(tmp_path: Path) -> None:
-    glb, props = _rvt_graph_output(tmp_path / "m.converted")
-    lines = [json.loads(x) for x in props.read_text(encoding="utf-8").splitlines()]
-    props.write_text("\n".join(json.dumps(r) for r in lines) + "\n", encoding="utf-8")
-    _, rows = ddc_runner.flatten_rvt_output(glb, props)
-    assert rows[0]["Level"] == "Level 1"
-    assert rows[0]["Category"] == "OST_PipeCurves"
+def test_revit_base_quantities_win_over_the_mesh(tmp_path: Path) -> None:
+    qto = {
+        "Qto_PipeSegmentBaseQuantities": {"Length": ("LENGTH", 3.25)},
+        "RVT_TessellationQuantities": {"Volume": ("VOLUME", 0.9), "SurfaceArea": ("AREA", 5.5)},
+    }
+    glb, ifc = _rvt_ifc_output(tmp_path / "m.converted", qto)
+
+    _, (pipe,) = ddc_runner.flatten_rvt_output(glb, ifc)
+
+    assert pipe["Length"] == 3.25
+    assert pipe["Volume"] == 0.9
+    assert pipe["Surface Area"] == 5.5
+    assert pipe["[Qto_PipeSegmentBaseQuantities] Length"] == 3.25
+
+
+def test_step_strings_are_decoded() -> None:
+    from app.modules.boq.rvt_ifc_reader import _decode_step_string
+
+    assert _decode_step_string("m\\X2\\00B2\\X0\\") == "m²"
+    assert _decode_step_string("it''s") == "it's"
+    assert _decode_step_string("\\X2\\041F0435\\X0\\") == "Пе"
 
 
 def test_rvt_rows_show_revit_category_names_in_the_model(tmp_path: Path) -> None:
