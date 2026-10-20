@@ -404,14 +404,22 @@ class BIMElementRule:
 
 
 def _lookup_path(blob: dict[str, Any], path: str) -> Any:
-    """Resolve a dotted path inside ``blob``. Missing keys return ``None``."""
+    """Resolve a dotted path inside ``blob``. Missing keys return ``None``.
+
+    An exact key wins; otherwise the match ignores case, because converters
+    write ``Thickness`` / ``Area`` where rules name ``thickness`` / ``area``.
+    """
     if not isinstance(blob, dict) or not path:
         return None
     cur: Any = blob
     for part in path.split("."):
         if not isinstance(cur, dict):
             return None
-        cur = cur.get(part)
+        nxt = cur.get(part)
+        if nxt is None:
+            low = part.lower()
+            nxt = next((v for k, v in cur.items() if isinstance(k, str) and k.lower() == low), None)
+        cur = nxt
         if cur is None:
             return None
     return cur
