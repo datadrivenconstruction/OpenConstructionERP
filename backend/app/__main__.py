@@ -54,6 +54,8 @@ def main() -> None:
         log_level="info",
         # Proactor loop that survives a reset client on Windows, see app/core/server_loop.py.
         loop=uvicorn_loop_option(),
+        # See app/cli.py: the 5 s default drops reused connections under load.
+        timeout_keep_alive=75,
     )
 
 

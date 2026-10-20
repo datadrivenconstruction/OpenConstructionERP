@@ -1453,6 +1453,10 @@ def cmd_serve(args: argparse.Namespace) -> None:
             # waiting to be accepted, and the app then looks frozen. See
             # app/core/server_loop.py.
             loop=uvicorn_loop_option(),
+            # Uvicorn's 5 s default races a client reusing the connection: while a
+            # conversion keeps the loop busy for seconds the close wins and the
+            # client sees "server disconnected". Also above common proxy keep-alives.
+            timeout_keep_alive=75,
         )
     except KeyboardInterrupt:
         print()

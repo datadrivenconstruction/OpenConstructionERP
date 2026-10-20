@@ -122,5 +122,5 @@ fi
 export OE_DATA_DIR="${OE_DATA_DIR:-/data}"
 
 exec python -m uvicorn app.main:create_app \
-  --factory --host 0.0.0.0 --port 8080 \
+  --factory --host 0.0.0.0 --port 8080 --timeout-keep-alive 75 \
   --app-dir /app/backend
