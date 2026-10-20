@@ -389,6 +389,12 @@ const RULES: Rule[] = [
 
   // ── Analytical model (structural physics) ───────────────────────────
   { match: 'analytical', bucket: 'analytical' },
+  // IFC voids and virtual boundaries: cut-outs and space separators, not
+  // physical parts. Must come before the 'opening' rule (doors & windows).
+  { match: 'ifcopeningelement', bucket: 'analytical' },
+  { match: 'ifcopeningstandardcase', bucket: 'analytical' },
+  { match: 'ifcvoidingfeature', bucket: 'analytical' },
+  { match: 'ifcvirtualelement', bucket: 'analytical' },
 
   // ── Annotations / drafting / view-only categories ──────────────────
   //    Conservative — only patterns that are universally annotation-only
@@ -496,7 +502,6 @@ const RULES: Rule[] = [
   { match: 'opening', bucket: 'openings' },
   { match: 'ifcdoor', bucket: 'openings' },
   { match: 'ifcwindow', bucket: 'openings' },
-  { match: 'ifcopeningelement', bucket: 'openings' },
 
   // ── MEP (mechanical, electrical, plumbing) ────────────────────────
   { match: 'duct', bucket: 'mep' },

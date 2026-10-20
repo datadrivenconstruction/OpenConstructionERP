@@ -5,8 +5,8 @@
  * position.  Two tabs:
  *
  *   1. "Link to existing position" - searchable list of BOQ positions
- *      from the active project.  Click a row to create a link via
- *      `createLink`.
+ *      from the active project.  Click a row to link the whole selection
+ *      via `createLinksBulk` (one request).
  *   2. "Create new position" - a small form pre-filled from the selected
  *      element's quantities, classification and type.  Submitting
  *      creates a new position AND a link in one shot.
@@ -22,13 +22,14 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { X, Search, Plus, CheckCircle2, Loader2, Link2, Sparkles, AlertTriangle, Sigma } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { boqApi, type BOQ, type BOQWithPositions, type Position } from '@/features/boq/api';
-import { createLink, resolveElementUUID } from './api';
+import { createLinksBulk, fetchBIMElementsByIds, resolveElementUUID } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useToastStore } from '@/stores/useToastStore';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import {
   suggestQuantityFromBIM,
   formatSuggestionBadge,
+  normalizeUnit,
   type QuantitySuggestion,
 } from '@/features/boq/suggestQuantityFromBIM';
 import { fmtFixed, fmtList } from '@/shared/lib/formatters';
@@ -81,6 +82,49 @@ function pickInitialQuantity(elements: BIMElementData[]): {
   // and picks an inferredUnit that we use as the form's initial unit.
   const s = suggestQuantityFromBIM(elements, '');
   return { quantity: s.value, unit: s.inferredUnit || 'pcs', suggestion: s };
+}
+
+/** Quantity kinds the user can pick for the new position, in the order shown. */
+export const QUANTITY_KINDS = [
+  { unit: 'pcs', key: 'bim.qty_kind_count', label: 'Count' },
+  { unit: 'm', key: 'bim.qty_kind_length', label: 'Length' },
+  { unit: 'm2', key: 'bim.qty_kind_area', label: 'Area' },
+  { unit: 'm3', key: 'bim.qty_kind_volume', label: 'Volume' },
+] as const;
+
+/** The kinds the elements actually carry. Count is always available. */
+export function availableQuantityKinds(elements: BIMElementData[]): (typeof QUANTITY_KINDS)[number][] {
+  return QUANTITY_KINDS.filter(
+    (k) => k.unit === 'pcs' || suggestQuantityFromBIM(elements, k.unit).contributingElements > 0,
+  );
+}
+
+/** By-ids reads at most this many rows per call. */
+const BY_IDS_CHUNK = 100;
+/** Above this the quantities are not fetched; the list stays on count. */
+const MAX_QUANTITY_FETCH = 3000;
+
+/** The viewer's skeleton rows carry no quantities. Read the full rows in
+ *  chunks so length / area / volume can be offered. */
+async function fetchFullRows(modelId: string, elements: BIMElementData[]): Promise<BIMElementData[]> {
+  const ids = elements.map((e) => e.id);
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += BY_IDS_CHUNK) chunks.push(ids.slice(i, i + BY_IDS_CHUNK));
+  const rows: BIMElementData[] = [];
+  for (let i = 0; i < chunks.length; i += 4) {
+    const batch = await Promise.all(chunks.slice(i, i + 4).map((c) => fetchBIMElementsByIds(modelId, c)));
+    for (const res of batch) rows.push(...((res.items ?? []) as BIMElementData[]));
+  }
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return elements.map((e) => byId.get(e.id) ?? e);
+}
+
+/** Resolve stub ids to element UUIDs, then link them all in one request. */
+async function linkElements(modelId: string, positionId: string, elements: BIMElementData[]): Promise<number> {
+  const ids: string[] = [];
+  for (const el of elements) ids.push(await resolveElementUUID(modelId, el));
+  const res = await createLinksBulk(positionId, Array.from(new Set(ids)));
+  return res.created + res.skipped;
 }
 
 /** Build a default description from the element set. */
@@ -138,8 +182,25 @@ export default function AddToBOQModal({
   // first decision the user has to make before picking link-vs-create.
   const targetBoqRef = useRef<HTMLSelectElement>(null);
 
+  // Full rows (with quantities) for the selection; the viewer hands over
+  // skeleton rows, which would leave only "count" on offer.
+  const needsFullRows =
+    !!modelId &&
+    elements.length > 0 &&
+    elements.length <= MAX_QUANTITY_FETCH &&
+    elements.every((e) => !e.quantities || Object.keys(e.quantities).length === 0);
+  const fullRowsQuery = useQuery({
+    queryKey: ['bim-link-full-rows', modelId, elements.map((e) => e.id).join(',')],
+    queryFn: () => fetchFullRows(modelId, elements),
+    enabled: needsFullRows,
+    staleTime: 5 * 60 * 1000,
+  });
+  const qtyElements = fullRowsQuery.data ?? elements;
+  const quantityKinds = useMemo(() => availableQuantityKinds(qtyElements), [qtyElements]);
+  const [userPickedUnit, setUserPickedUnit] = useState(false);
+
   // ── New position form state ─────────────────────────────────────────
-  const defaultQty = useMemo(() => pickInitialQuantity(elements), [elements]);
+  const defaultQty = useMemo(() => pickInitialQuantity(qtyElements), [qtyElements]);
   const [description, setDescription] = useState(() => buildDefaultDescription(elements));
   const [unit, setUnit] = useState(defaultQty.unit);
   const [quantity, setQuantity] = useState(fmtFixed(defaultQty.quantity, 3));
@@ -157,9 +218,16 @@ export default function AddToBOQModal({
   //   2. the badge under the Quantity input,
   //   3. the low-confidence warning icon.
   const quantitySuggestion = useMemo<QuantitySuggestion>(
-    () => suggestQuantityFromBIM(elements, unit),
-    [elements, unit],
+    () => suggestQuantityFromBIM(qtyElements, unit),
+    [qtyElements, unit],
   );
+
+  // Once the full rows arrive, move to the best quantity they carry unless
+  // the user already chose a unit.
+  useEffect(() => {
+    if (!fullRowsQuery.data || userPickedUnit) return;
+    setUnit(pickInitialQuantity(fullRowsQuery.data).unit);
+  }, [fullRowsQuery.data, userPickedUnit]);
 
   // Auto-update the Quantity input when (elements / unit) change AND the
   // user hasn't typed in it yet.  Use the raw suggestion value, formatted
@@ -185,6 +253,7 @@ export default function AddToBOQModal({
     setUnitRate('0');
     setUserSelectedBOQId(null);
     setUserEditedQty(false);
+    setUserPickedUnit(false);
     // targetPositionId only steers the first tab; it is fixed for the
     // lifetime of one "Link from model" visit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -303,26 +372,9 @@ export default function AddToBOQModal({
 
   // ── Mutation: link to an existing position ──────────────────────────
   const linkExistingMut = useMutation({
-    mutationFn: async (positionId: string) => {
-      let createdCount = 0;
-      for (const el of elements) {
-        try {
-          const resolvedId = await resolveElementUUID(modelId, el);
-          await createLink({
-            boq_position_id: positionId,
-            bim_element_id: resolvedId,
-            link_type: 'manual',
-            confidence: 'high',
-          });
-          createdCount++;
-        } catch (e: unknown) {
-          // Duplicate links will 409 - swallow so bulk linking is idempotent
-          const err = e as { message?: string };
-          if (!err?.message?.includes('already')) throw e;
-        }
-      }
-      return createdCount;
-    },
+    // One request for the whole selection; already-linked elements are
+    // skipped on the server, so repeating the link is harmless.
+    mutationFn: (positionId: string) => linkElements(modelId, positionId, elements),
     onSuccess: (count) => {
       addToast({
         type: 'success',
@@ -333,6 +385,7 @@ export default function AddToBOQModal({
         }),
       });
       qc.invalidateQueries({ queryKey: ['bim-elements'] });
+      qc.invalidateQueries({ queryKey: ['bim-model-boq-links'] });
       onLinked?.();
       onClose();
     },
@@ -353,7 +406,7 @@ export default function AddToBOQModal({
       const rate = Number.parseFloat(unitRate) || 0;
       // Pick an auto-ordinal: last position ordinal + 1 (simple numeric suffix)
       const computedOrdinal = ordinal.trim() || buildAutoOrdinal(positions);
-      const classification = mergeClassification(elements);
+      const classification = mergeClassification(qtyElements);
       const newPos = await boqApi.addPosition({
         boq_id: selectedBOQId,
         ordinal: computedOrdinal,
@@ -363,23 +416,7 @@ export default function AddToBOQModal({
         unit_rate: rate,
         classification,
       });
-      // Link every element to the new position
-      let linkCount = 0;
-      for (const el of elements) {
-        try {
-          const resolvedId = await resolveElementUUID(modelId, el);
-          await createLink({
-            boq_position_id: newPos.id,
-            bim_element_id: resolvedId,
-            link_type: 'manual',
-            confidence: 'high',
-          });
-          linkCount++;
-        } catch (e: unknown) {
-          const err = e as { message?: string };
-          if (!err?.message?.includes('already')) throw e;
-        }
-      }
+      const linkCount = await linkElements(modelId, newPos.id, elements);
       return { position: newPos, linkCount };
     },
     onSuccess: ({ linkCount }) => {
@@ -392,6 +429,7 @@ export default function AddToBOQModal({
         }),
       });
       qc.invalidateQueries({ queryKey: ['bim-elements'] });
+      qc.invalidateQueries({ queryKey: ['bim-model-boq-links'] });
       qc.invalidateQueries({ queryKey: ['boq-positions-for-link', selectedBOQId] });
       qc.invalidateQueries({ queryKey: ['boq'] });
       onLinked?.();
@@ -406,7 +444,27 @@ export default function AddToBOQModal({
     },
   });
 
-  const busy = linkExistingMut.isPending || createNewMut.isPending;
+  // No BOQ in the project yet: create one here instead of sending the user
+  // away and losing the selection.
+  const createBoqMut = useMutation({
+    mutationFn: () =>
+      boqApi.create({
+        project_id: projectId,
+        name: t('bim.new_boq_default_name', { defaultValue: 'Bid schedule' }),
+      }),
+    onSuccess: (boq) => {
+      qc.setQueryData<BOQ[]>(['boqs-for-link', projectId], (prev) => [...(prev ?? []), boq]);
+      qc.invalidateQueries({ queryKey: ['boqs-for-link', projectId] });
+      qc.invalidateQueries({ queryKey: ['boqs'] });
+      setUserSelectedBOQId(boq.id);
+      setTab('new');
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error'), message: err.message || String(err) });
+    },
+  });
+
+  const busy = linkExistingMut.isPending || createNewMut.isPending || createBoqMut.isPending;
 
   return (
     <div
@@ -475,12 +533,23 @@ export default function AddToBOQModal({
             )}
           </select>
           {boqs.length === 0 && !boqsQuery.isLoading && (
-            <p className="text-[11px] text-rose-600 mt-1">
-              {t('bim.no_boqs_help', {
-                defaultValue:
-                  'Create a BOQ in this project first, then return here to link elements.',
-              })}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <p className="text-[11px] text-content-secondary">
+                {t('bim.no_boqs_create_hint', {
+                  defaultValue: 'This project has no bid schedule yet. Create one to link these elements.',
+                })}
+              </p>
+              <button
+                type="button"
+                data-testid="add-to-boq-create-boq"
+                onClick={() => createBoqMut.mutate()}
+                disabled={createBoqMut.isPending}
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark disabled:opacity-50"
+              >
+                {createBoqMut.isPending ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />}
+                {t('bim.create_boq_here', { defaultValue: 'Create bid schedule' })}
+              </button>
+            </div>
           )}
         </div>
 
@@ -626,9 +695,44 @@ export default function AddToBOQModal({
                   <input
                     type="text"
                     value={unit}
-                    onChange={(e) => setUnit(e.target.value)}
+                    onChange={(e) => {
+                      setUnit(e.target.value);
+                      setUserPickedUnit(true);
+                    }}
                     className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
                   />
+                </div>
+              </div>
+
+              <div>
+                <Label>{t('bim.qty_kind_label', { defaultValue: 'Quantity from' })}</Label>
+                <div className="flex flex-wrap gap-1" role="radiogroup" data-testid="add-to-boq-qty-kinds">
+                  {quantityKinds.map((k) => {
+                    const active = normalizeKindUnit(unit) === k.unit;
+                    return (
+                      <button
+                        key={k.unit}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => {
+                          setUnit(k.unit);
+                          setUserPickedUnit(true);
+                          setUserEditedQty(false);
+                        }}
+                        className={`px-2 py-0.5 text-[11px] rounded-md border transition-colors ${
+                          active
+                            ? 'border-oe-blue bg-oe-blue/10 text-oe-blue font-semibold'
+                            : 'border-border-light text-content-secondary hover:bg-surface-secondary'
+                        }`}
+                      >
+                        {t(k.key, { defaultValue: k.label })}
+                      </button>
+                    );
+                  })}
+                  {fullRowsQuery.isLoading && (
+                    <Loader2 size={12} className="animate-spin text-content-tertiary self-center" />
+                  )}
                 </div>
               </div>
 
@@ -791,6 +895,11 @@ export default function AddToBOQModal({
 }
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
+
+function normalizeKindUnit(unit: string): string {
+  const n = normalizeUnit(unit);
+  return n === '' ? unit : n;
+}
 
 function buildAutoOrdinal(positions: Position[]): string {
   // BIM-sourced positions use a "BIM-NNN" prefix so they can't collide

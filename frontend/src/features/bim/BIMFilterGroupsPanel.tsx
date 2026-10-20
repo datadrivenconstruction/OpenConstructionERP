@@ -27,6 +27,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Layers } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import BIMFilterPanel from './BIMFilterPanel';
@@ -177,7 +178,33 @@ export default function BIMFilterGroupsPanel(props: BIMFilterGroupsPanelProps) {
             onClearIsolation={props.onClearIsolation}
           />
         )}
-        {activeTab === 'groups' && (
+        {activeTab === 'groups' && groupsCount === 0 && !props.onCreateGroup && (
+          // BIMGroupsPanel renders nothing without groups, which collapsed
+          // the sidebar to a bare strip. Say what a group is and where to make one.
+          <div
+            data-testid="bim-groups-empty"
+            className="flex flex-col items-center text-center gap-2 px-5 py-8 w-[280px] bg-surface-primary"
+          >
+            <Layers size={22} className="text-content-quaternary" />
+            <p className="text-xs font-semibold text-content-primary">
+              {t('bim.groups_empty_title', { defaultValue: 'No saved groups yet' })}
+            </p>
+            <p className="text-[11px] text-content-tertiary">
+              {t('bim.groups_empty_desc', {
+                defaultValue:
+                  'Filter the model to the elements you need, then click "Save as group" to reuse the selection for linking and quantities.',
+              })}
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveTab('filters')}
+              className="mt-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark"
+            >
+              {t('bim.groups_empty_cta', { defaultValue: 'Open filters' })}
+            </button>
+          </div>
+        )}
+        {activeTab === 'groups' && (groupsCount > 0 || !!props.onCreateGroup) && (
           <BIMGroupsPanel
             savedGroups={props.savedGroups}
             elements={props.elements}
