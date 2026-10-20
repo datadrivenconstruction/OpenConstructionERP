@@ -11,6 +11,7 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { disciplineLabel } from '@/shared/lib/disciplineLabel';
 import { MatchSuggestionsPanel } from '@/features/match';
 import clsx from 'clsx';
 import {
@@ -4866,23 +4867,23 @@ export function BIMViewer({
             </div>
             <div className="space-y-2 text-xs">
               {[
-                ['F', 'Fit all elements'],
-                ['W', 'Toggle wireframe'],
-                ['G', 'Toggle grid'],
-                ['H', 'Hide selected'],
-                ['I', 'Isolate / exit isolation'],
-                ['1', 'Front view'],
-                ['2', 'Side view'],
-                ['3', 'Top view'],
-                ['0', 'Isometric view'],
-                ['Esc', 'Deselect / close panel'],
-                ['Click', 'Select element'],
-                ['Ctrl+Click', 'Multi-select (toggle)'],
-                ['Shift+Click', 'Add to selection'],
-                ['DblClick', 'Isolate element'],
-                ['DblClick empty', 'Exit isolation'],
-                ['Right-click', 'Context menu'],
-                ['?', 'Toggle this overlay'],
+                ['F', t('bim.shortcut_desc_fit', { defaultValue: 'Fit all elements' })],
+                ['W', t('bim.shortcut_desc_wireframe', { defaultValue: 'Toggle wireframe' })],
+                ['G', t('bim.shortcut_desc_grid', { defaultValue: 'Toggle grid' })],
+                ['H', t('bim.shortcut_desc_hide', { defaultValue: 'Hide selected' })],
+                ['I', t('bim.shortcut_desc_isolate', { defaultValue: 'Isolate / exit isolation' })],
+                ['1', t('bim.shortcut_desc_front', { defaultValue: 'Front view' })],
+                ['2', t('bim.shortcut_desc_side', { defaultValue: 'Side view' })],
+                ['3', t('bim.shortcut_desc_top', { defaultValue: 'Top view' })],
+                ['0', t('bim.shortcut_desc_iso', { defaultValue: 'Isometric view' })],
+                ['Esc', t('bim.shortcut_desc_esc', { defaultValue: 'Deselect / close panel' })],
+                ['Click', t('bim.shortcut_desc_click', { defaultValue: 'Select element' })],
+                ['Ctrl+Click', t('bim.shortcut_desc_multi', { defaultValue: 'Multi-select (toggle)' })],
+                ['Shift+Click', t('bim.shortcut_desc_add', { defaultValue: 'Add to selection' })],
+                ['DblClick', t('bim.shortcut_desc_dblclick', { defaultValue: 'Isolate element' })],
+                ['DblClick empty', t('bim.shortcut_desc_dblclick_empty', { defaultValue: 'Exit isolation' })],
+                ['Right-click', t('bim.shortcut_desc_context', { defaultValue: 'Context menu' })],
+                ['?', t('bim.shortcut_desc_toggle', { defaultValue: 'Toggle this overlay' })],
               ].map(([key, desc]) => (
                 <div key={key} className="flex items-center justify-between">
                   <span className="text-content-secondary">{desc}</span>
@@ -5012,7 +5013,9 @@ export function BIMViewer({
                             className="absolute inset-y-0 left-0 bg-emerald-500/10 rounded-md pointer-events-none"
                             style={{ width: `${pct}%` }}
                           />
-                          <span className="relative text-xs text-content-secondary truncate mr-2">{st}</span>
+                          <span className="relative text-xs text-content-secondary truncate mr-2">
+                            {st === 'Unassigned' ? t('bim.storey_unassigned', { defaultValue: 'Unassigned' }) : st}
+                          </span>
                           <span className="relative text-[11px] font-semibold text-content-primary tabular-nums shrink-0">
                             {count.toLocaleString(getNumberLocale())}
                           </span>
@@ -5250,17 +5253,17 @@ export function BIMViewer({
                 {t('bim.shortcuts', { defaultValue: 'Shortcuts' })}
               </h4>
               <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-content-tertiary">
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">F</kbd> Fit all</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">W</kbd> Wireframe</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">G</kbd> Grid</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">H</kbd> Hide</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">I</kbd> Isolate</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">Esc</kbd> Deselect</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">1</kbd> Front</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">2</kbd> Side</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">3</kbd> Top</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">0</kbd> Iso</span>
-                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">?</kbd> All shortcuts</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">F</kbd> {t('bim.shortcut_fit', { defaultValue: 'Fit all' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">W</kbd> {t('bim.shortcut_wireframe', { defaultValue: 'Wireframe' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">G</kbd> {t('bim.shortcut_grid', { defaultValue: 'Grid' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">H</kbd> {t('bim.shortcut_hide', { defaultValue: 'Hide' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">I</kbd> {t('bim.shortcut_isolate', { defaultValue: 'Isolate' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">Esc</kbd> {t('bim.shortcut_deselect', { defaultValue: 'Deselect' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">1</kbd> {t('bim.shortcut_front', { defaultValue: 'Front' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">2</kbd> {t('bim.shortcut_side', { defaultValue: 'Side' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">3</kbd> {t('bim.shortcut_top', { defaultValue: 'Top' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">0</kbd> {t('bim.shortcut_iso', { defaultValue: 'Iso' })}</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">?</kbd> {t('bim.shortcut_all', { defaultValue: 'All shortcuts' })}</span>
               </div>
             </div>
           </div>
@@ -5521,7 +5524,7 @@ export function BIMViewer({
                   />
                   <InfoRow
                     label={t('bim.prop_discipline', { defaultValue: 'Discipline' })}
-                    value={selectedElement.discipline}
+                    value={disciplineLabel(t, selectedElement.discipline)}
                   />
                   {selectedElement.storey && (
                     <InfoRow
@@ -6500,7 +6503,10 @@ function ColorModeLegend({
   const items: { label: string; hex: string }[] = (() => {
     if (mode === 'storey') {
       return ElementManager.buildColorByPalette(elements, (el) => el.storey || 'Unassigned')
-        .map(({ key, hex }) => ({ label: key, hex }));
+        .map(({ key, hex }) => ({
+          label: key === 'Unassigned' ? t('bim.storey_unassigned', { defaultValue: 'Unassigned' }) : key,
+          hex,
+        }));
     }
     if (mode === 'type') {
       return ElementManager.buildColorByPalette(elements, (el) => el.element_type || 'Unknown')
@@ -6609,7 +6615,7 @@ export function DisciplineToggle({
               <EyeOff size={14} className="text-content-tertiary" />
             )}
             <span className={clsx(isVisible ? 'text-content-primary' : 'text-content-tertiary')}>
-              {d}
+              {disciplineLabel(t, d)}
             </span>
           </button>
         );

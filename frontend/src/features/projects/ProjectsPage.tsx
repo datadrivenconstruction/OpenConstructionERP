@@ -502,7 +502,7 @@ export function ProjectsPage() {
     const regions = new Set(projects.map((p) => p.region).filter(Boolean));
     const currencies = new Set(projects.map((p) => p.currency).filter(Boolean));
 
-    const BIM_EXTS = new Set(['rvt', 'ifc', 'skp', 'nwc', 'nwd', 'dgn']);
+    const BIM_EXTS = new Set(['rvt', 'ifc', 'skp', 'nwc', 'nwd']);
     const bimProjectCount = fileTypesByProject
       ? projects.filter((p) =>
           (fileTypesByProject[p.id] ?? []).some((ext) =>
@@ -979,7 +979,7 @@ export function ProjectsPage() {
       ) : !projects || projects.length === 0 ? (
         <div className="space-y-4">
           {/* Surface the BIM converter status here so a fresh-install user
-           *  can see at a glance whether RVT/IFC/DWG/DGN drag-and-drop will
+           *  can see at a glance whether RVT/IFC/DWG drag-and-drop will
            *  work BEFORE creating the first project. Dismissible — once
            *  acknowledged it stays out of the way until the user resets
            *  the localStorage flag. */}

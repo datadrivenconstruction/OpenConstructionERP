@@ -84,13 +84,12 @@ describe('matchProjectFile', () => {
   });
 
   it('rejects a file whose extension looks right but is not in the set', () => {
-    /* A Revit family is a real CAD format and the CAD explorer does accept
-     * it - but the PDF takeoff module cannot open it. Offering
-     * it would hand the user a file that fails on load. */
-    expect(matchProjectFile(doc('Bridge.rfa'), PDF_TAKEOFF_FORMATS)).toBeNull();
-    expect(matchProjectFile(doc('Bridge.rfa'), DWG_TAKEOFF_FORMATS)).toBeNull();
-    /* ...and the very same file IS offered where it genuinely opens. */
-    expect(matchProjectFile(doc('Bridge.rfa'), CAD_EXPLORER_FORMATS)).not.toBeNull();
+    /* No converter ships for DGN, so no module offers it. */
+    expect(matchProjectFile(doc('Bridge.dgn'), PDF_TAKEOFF_FORMATS)).toBeNull();
+    expect(matchProjectFile(doc('Bridge.dgn'), DWG_TAKEOFF_FORMATS)).toBeNull();
+    expect(matchProjectFile(doc('Bridge.dgn'), CAD_EXPLORER_FORMATS)).toBeNull();
+    /* ...while an RVT model IS offered where it genuinely opens. */
+    expect(matchProjectFile(doc('Tower.rvt'), CAD_EXPLORER_FORMATS)).not.toBeNull();
   });
 
   it('ignores a null mime_type and decides on the name alone', () => {

@@ -446,7 +446,7 @@ const DOC_VIDEO_VIEW: ModuleTarget = {
 
 // Extensions that live under the `document` kind but are really BIM source
 // files needing on-demand conversion when opened from the File Manager.
-const DOC_BIM_EXTS = new Set(['ifc', 'rvt', 'dgn', 'glb', 'gltf']);
+const DOC_BIM_EXTS = new Set(['ifc', 'rvt', 'glb', 'gltf']);
 
 // Per-extension override for `document` since a PDF, IFC, RVT, DXF and
 // XLSX all live under the `document` kind but route to different
@@ -460,7 +460,6 @@ const EXT_PRIMARY_OVERRIDE: Record<string, ModuleTarget> = {
   pdf: DOC_PDF_INLINE_VIEW, // #284: read inline by default; Takeoff is opt-in
   ifc: DOC_BIM_VIEWER,
   rvt: DOC_BIM_VIEWER,
-  dgn: DOC_BIM_VIEWER,
   glb: DOC_BIM_VIEWER,
   gltf: DOC_BIM_VIEWER,
   dwg: DOC_DWG_TAKEOFF,
