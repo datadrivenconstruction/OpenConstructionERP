@@ -176,7 +176,7 @@ import CreateTaskFromDwgModal from './CreateTaskFromDwgModal';
 import LinkDocumentToDwgModal from './LinkDocumentToDwgModal';
 import LinkActivityToDwgModal from './LinkActivityToDwgModal';
 import LinkRequirementToDwgModal from './LinkRequirementToDwgModal';
-import { fmtFixed, fmtPrecision, formatFileSize } from '@/shared/lib/formatters';
+import { fmtFixed, fmtList, fmtPrecision, formatFileSize } from '@/shared/lib/formatters';
 import { computeExtents, isImplausibleSpan } from './lib/viewport';
 import { compareNames } from '@/shared/lib/collator';
 // boqApi / Position import removed - BOQ picker now handled via ElementInfoPopover callback
@@ -3533,10 +3533,11 @@ export function DwgTakeoffPage() {
                     {t('dwg_takeoff.xref_notice_body', {
                       defaultValue:
                         'Not loaded: {{names}}. Their content is missing from the canvas and from the quantities. Bind the references in your CAD application (XREF, Bind) and upload the drawing again, or upload the referenced drawings separately.',
-                      names: unresolvedXrefs
-                        .slice(0, 8)
-                        .map((x) => (x.path ? `${x.name} (${x.path.split(/[\\/]/).pop()})` : x.name))
-                        .join(', '),
+                      names: fmtList(
+                        unresolvedXrefs
+                          .slice(0, 8)
+                          .map((x) => (x.path ? `${x.name} (${x.path.split(/[\\/]/).pop()})` : x.name)),
+                      ),
                     })}
                   </div>
                 </div>
