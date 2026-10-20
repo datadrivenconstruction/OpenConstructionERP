@@ -77,6 +77,9 @@ export interface BIMBoundingBox {
 
 /** Brief of a BOQ position linked to this element, embedded in the element
  *  response by the backend. See `BOQElementLinkBrief` in `features/bim/api.ts`. */
+/** Id prefix of the stub rows made for meshes no model row claimed. */
+export const UNMATCHED_ID_PREFIX = '_unmatched_';
+
 export interface BIMBOQLinkBrief {
   id: string;
   boq_position_id: string;
@@ -1642,7 +1645,7 @@ export class ElementManager {
         ancestorNames?: string[];
       };
       if (!ud.elementId) {
-        const tempId = `_unmatched_${tempIdCounter++}`;
+        const tempId = `${UNMATCHED_ID_PREFIX}${tempIdCounter++}`;
         // Prefer the OUTERMOST numeric ancestor name as mesh_ref — that
         // matches the RVT ElementId a user would expect to see (same
         // value the Excel parquet row uses as its `id`). Falling through
@@ -2706,7 +2709,13 @@ export class ElementManager {
   /** Current count of hidden elements (driven by hide/isolate, not by
    *  filter or layer toggles). */
   hiddenCount(): number {
-    return this.hiddenElementIds.size;
+    // Meshes the model rows did not claim get `_unmatched_N` stub ids so they
+    // stay clickable; they are not elements, so they do not count as hidden.
+    let n = 0;
+    for (const id of this.hiddenElementIds) {
+      if (!id.startsWith(UNMATCHED_ID_PREFIX)) n += 1;
+    }
+    return n;
   }
 
   /** Subscribe to hidden-count changes. Returns an unsubscribe callback.

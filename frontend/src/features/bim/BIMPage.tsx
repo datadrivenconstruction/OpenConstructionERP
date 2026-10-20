@@ -16,7 +16,7 @@
 import { Fragment, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
@@ -63,6 +63,7 @@ import { Badge, EmptyState, Breadcrumb, ConfirmDialog, ModuleHelpButton, ModuleG
 import { BIM_VIEWER_FORMATS } from '@/shared/lib/projectFileFormats';
 import type { FileKind } from '@/features/file-manager/types';
 import { bimGuide } from './bimGuide';
+import { mergeBoqLinkRollup } from './bimLinkRollup';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
@@ -125,6 +126,15 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
+import {
+  BIMUploadDuplicatePrompt,
+  BIMUploadJobRow,
+  isUploadPanelOpenInNavState,
+  lookUpUploadDuplicates,
+  projectUploadJobs,
+  uploadPanelNavState,
+  type PendingDuplicateUpload,
+} from './BIMUploadPanelParts';
 import { useNameCollator } from '@/shared/lib/collator';
 import { isUsableModelStatus, versionParentOptions } from './modelVersions';
 import { QuantityRuleOfferBanner } from './QuantityRuleOfferBanner';
@@ -135,6 +145,7 @@ import { getNumberLocale } from '@/stores/usePreferencesStore';
 import {
   fetchBIMModels,
   fetchBIMModel,
+  fetchBIMModelBOQLinks,
   fetchBIMElements,
   fetchBIMElementProgress,
   fetchBIMConverters,
@@ -665,18 +676,8 @@ function UploadPanel({
 
   const startGlobalUpload = useBIMUploadStore((s) => s.startUpload);
   const globalJobs = useBIMUploadStore((s) => s.jobs);
-  const activeUploads = useMemo(() => {
-    const active: { id: string; fileName: string; status: string; stage: string; progress: number; elementCount: number }[] = [];
-    for (const [id, job] of globalJobs) {
-      if (job.projectId !== projectId) continue;
-      if (job.status === 'uploading' || job.status === 'converting') {
-        active.push({ id, fileName: job.fileName, status: job.status, stage: job.stage, progress: job.progress, elementCount: 0 });
-      } else if (job.status === 'ready') {
-        active.push({ id, fileName: job.fileName, status: 'ready', stage: '', progress: 100, elementCount: job.elementCount });
-      }
-    }
-    return active;
-  }, [globalJobs, projectId]);
+  const activeUploads = useMemo(() => projectUploadJobs(globalJobs, projectId), [globalJobs, projectId]);
+  const [pendingDuplicate, setPendingDuplicate] = useState<PendingDuplicateUpload | null>(null);
 
   // Auto-install the matching DDC converter the moment a native CAD/BIM file
   // is selected and its converter is missing - no extra click. The simple
@@ -771,24 +772,36 @@ function UploadPanel({
           }
 
           // Delegate to global store - upload survives navigation.
-          startGlobalUpload({
-            file,
-            projectId,
-            modelName: name,
-            discipline,
-            uploadType: 'cad',
-            conversionDepth,
-            generatePdfSheets,
-            parentModelId: parentModelId || null,
-          });
-          addToast({
-            type: 'info',
-            title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
-            message: t('bim.upload_background_msg', {
-              defaultValue: 'You can navigate to other pages - the upload will continue in the background.',
-            }),
-          });
-          resetForm();
+          const begin = (parent: string | null) => {
+            startGlobalUpload({
+              file,
+              projectId,
+              modelName: name,
+              discipline,
+              uploadType: 'cad',
+              conversionDepth,
+              generatePdfSheets,
+              parentModelId: parent,
+            });
+            addToast({
+              type: 'info',
+              title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
+              message: t('bim.upload_background_msg', {
+                defaultValue: 'You can navigate to other pages - the upload will continue in the background.',
+              }),
+            });
+            resetForm();
+          };
+          // The same file uploaded again silently made a second model with
+          // the same name; offer "new version of" first.
+          if (!parentModelId) {
+            const duplicates = await lookUpUploadDuplicates(projectId, file);
+            if (duplicates.length > 0) {
+              setPendingDuplicate({ fileName: file.name, duplicates, start: begin });
+              return;
+            }
+          }
+          begin(parentModelId || null);
         } else if (isDataFile(file.name)) {
           // Data file upload - delegate to global store
           startGlobalUpload({
@@ -892,32 +905,14 @@ function UploadPanel({
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+        {pendingDuplicate && (
+          <BIMUploadDuplicatePrompt pending={pendingDuplicate} onDone={() => setPendingDuplicate(null)} />
+        )}
         {/* Active uploads progress */}
         {activeUploads.length > 0 && (
           <div className="space-y-2">
             {activeUploads.map((job) => (
-              <div key={job.id} className={`rounded-xl border p-3 ${job.status === 'ready' ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20' : 'border-oe-blue/30 bg-oe-blue/5'}`}>
-                <div className="flex items-center gap-2 mb-1.5">
-                  {job.status === 'ready' ? (
-                    <CheckCircle2 size={14} className="text-green-500 shrink-0" />
-                  ) : (
-                    <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />
-                  )}
-                  <span className="text-xs font-medium text-content-primary truncate">{job.fileName}</span>
-                </div>
-                {job.status !== 'ready' ? (
-                  <>
-                    <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
-                      <div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out" style={{ width: `${job.progress}%` }} />
-                    </div>
-                    <p className="text-[10px] text-content-tertiary mt-1">{t(job.stage, { defaultValue: 'Processing...' })}</p>
-                  </>
-                ) : (
-                  <p className="text-[10px] text-green-600 dark:text-green-400">
-                    {t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}
-                  </p>
-                )}
-              </div>
+              <BIMUploadJobRow key={job.id} job={job} />
             ))}
             {activeUploads.some((j) => j.status !== 'ready') && (
               <p className="text-[10px] text-content-tertiary text-center py-1">
@@ -1577,18 +1572,8 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   const addToast = useToastStore((s) => s.addToast);
   const startGlobalUpload = useBIMUploadStore((s) => s.startUpload);
   const globalJobs = useBIMUploadStore((s) => s.jobs);
-  const activeUploads = useMemo(() => {
-    const active: { id: string; fileName: string; status: string; stage: string; progress: number; elementCount: number }[] = [];
-    for (const [id, job] of globalJobs) {
-      if (job.projectId !== projectId) continue;
-      if (job.status === 'uploading' || job.status === 'converting') {
-        active.push({ id, fileName: job.fileName, status: job.status, stage: job.stage, progress: job.progress, elementCount: 0 });
-      } else if (job.status === 'ready') {
-        active.push({ id, fileName: job.fileName, status: 'ready', stage: '', progress: 100, elementCount: job.elementCount });
-      }
-    }
-    return active;
-  }, [globalJobs, projectId]);
+  const activeUploads = useMemo(() => projectUploadJobs(globalJobs, projectId), [globalJobs, projectId]);
+  const [pendingDuplicate, setPendingDuplicate] = useState<PendingDuplicateUpload | null>(null);
 
   // Auto-install the matching converter as soon as a native CAD/BIM file is
   // picked here (landing dropzone holds only .rvt / .ifc; DWG/DXF redirect
@@ -1631,25 +1616,34 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     try {
       const name = modelName || file.name.replace(/\.[^.]+$/, '');
       const uploadType = isCADFile(file.name) ? 'cad' as const : 'data' as const;
-      startGlobalUpload({
-        file,
-        projectId,
-        modelName: name,
-        discipline: 'architecture',
-        uploadType,
-        // Both options only have an effect for native CAD uploads; the
-        // store ignores them for the CSV/XLSX path.
-        conversionDepth: uploadType === 'cad' ? conversionDepth : undefined,
-        generatePdfSheets: uploadType === 'cad' ? generatePdfSheets : false,
-      });
-      addToast({
-        type: 'info',
-        title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
-        message: t('bim.upload_background_msg', {
-          defaultValue: 'You can navigate to other pages - the upload will continue in the background.',
-        }),
-      });
-      resetForm();
+      const begin = (parent: string | null) => {
+        startGlobalUpload({
+          file,
+          projectId,
+          modelName: name,
+          discipline: 'architecture',
+          uploadType,
+          // Both options only have an effect for native CAD uploads; the
+          // store ignores them for the CSV/XLSX path.
+          conversionDepth: uploadType === 'cad' ? conversionDepth : undefined,
+          generatePdfSheets: uploadType === 'cad' ? generatePdfSheets : false,
+          parentModelId: parent,
+        });
+        addToast({
+          type: 'info',
+          title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
+          message: t('bim.upload_background_msg', {
+            defaultValue: 'You can navigate to other pages - the upload will continue in the background.',
+          }),
+        });
+        resetForm();
+      };
+      const duplicates = uploadType === 'cad' ? await lookUpUploadDuplicates(projectId, file) : [];
+      if (duplicates.length > 0) {
+        setPendingDuplicate({ fileName: file.name, duplicates, start: begin });
+        return;
+      }
+      begin(null);
     } catch (err) { setUploadError(err instanceof Error ? err.message : String(err)); }
     finally { setUploading(false); }
   }, [file, projectId, modelName, conversionDepth, generatePdfSheets, startGlobalUpload, addToast, t, resetForm]);
@@ -1881,24 +1875,16 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                 )}
               </div>
 
+              {pendingDuplicate && (
+                <div className="mt-3">
+                  <BIMUploadDuplicatePrompt pending={pendingDuplicate} onDone={() => setPendingDuplicate(null)} />
+                </div>
+              )}
               {/* Active upload progress */}
               {activeUploads.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {activeUploads.map((job) => (
-                    <div key={job.id} className={`rounded-xl border p-3.5 ${job.status === 'ready' ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20' : 'border-oe-blue/30 bg-white dark:bg-gray-900 shadow-sm'}`}>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        {job.status === 'ready' ? <CheckCircle2 size={14} className="text-green-500 shrink-0" /> : <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />}
-                        <span className="text-xs font-medium text-content-primary truncate">{job.fileName}</span>
-                      </div>
-                      {job.status !== 'ready' ? (
-                        <>
-                          <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500" style={{ width: `${job.progress}%` }} /></div>
-                          <p className="text-[11px] text-content-tertiary mt-1">{t(job.stage, { defaultValue: 'Processing...' })}</p>
-                        </>
-                      ) : (
-                        <p className="text-[11px] text-green-600 dark:text-green-400">{t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}</p>
-                      )}
-                    </div>
+                    <BIMUploadJobRow key={job.id} job={job} variant="landing" />
                   ))}
                 </div>
               )}
@@ -2297,7 +2283,13 @@ export function BIMPage() {
   const deepLinkElementId = searchParams.get('element');
   const deepLinkDocName = searchParams.get('docName');
   const deepLinkDocId = searchParams.get('docId');
-  const [uploadOpen, setUploadOpen] = useState(false);
+  // The shell remounts the page on every pathname change, and the page itself
+  // moves /bim to /bim/<model> once the models load. The open upload panel
+  // rides along in the navigation state so an early "Add Model" click survives.
+  const location = useLocation();
+  const [uploadOpen, setUploadOpen] = useState<boolean>(() => isUploadPanelOpenInNavState(location.state));
+  const uploadOpenRef = useRef(uploadOpen);
+  uploadOpenRef.current = uploadOpen;
   const [uploadConvertedName, setUploadConvertedName] = useState<string | null>(null);
   const [showUploadOverride, setShowUploadOverride] = useState<boolean | null>(null);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
@@ -2604,7 +2596,7 @@ export function BIMPage() {
     const basePath = urlProjectId ? `/projects/${urlProjectId}/bim` : '/bim';
     const targetPath = `${basePath}/${activeModelId}`;
     if (!window.location.pathname.endsWith(activeModelId)) {
-      navigate(targetPath, { replace: true });
+      navigate(targetPath, { replace: true, state: uploadPanelNavState(uploadOpenRef.current) });
     }
   }, [activeModelId, urlProjectId, navigate]);
 
@@ -2672,6 +2664,24 @@ export function BIMPage() {
   });
   const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
   const elementsTotal: number = elementsQuery.data?.total ?? 0;
+
+  // The skeleton rows carry no BOQ links, so the "Unlinked" chip counted
+  // every element and never moved after linking. Fold in the model-wide
+  // link roll-up (one call) for the filter panel and its smart filters.
+  const modelBoqLinksQuery = useQuery({
+    queryKey: ['bim-model-boq-links', activeModelId],
+    queryFn: () => fetchBIMModelBOQLinks(activeModelId!),
+    enabled: elementsQuery.isSuccess && !!activeModelId,
+    staleTime: 30_000,
+  });
+  const elementsWithLinks = useMemo(
+    () => mergeBoqLinkRollup(elements, modelBoqLinksQuery.data?.items),
+    [elements, modelBoqLinksQuery.data],
+  );
+  const linkedElementIds = useMemo(
+    () => new Set((modelBoqLinksQuery.data?.items ?? []).flatMap((r) => r.element_ids)),
+    [modelBoqLinksQuery.data],
+  );
 
   // BOQ progress per element - fetched ONLY while the "By progress" colour
   // mode is active (the skeleton element list carries no BOQ links, so
@@ -3059,7 +3069,9 @@ export function BIMPage() {
       const predicates: Record<typeof filterId, (el: BIMElementData) => boolean> = {
         errors: (el) => el.validation_status === 'error',
         warnings: (el) => el.validation_status === 'warning',
-        unlinked_boq: (el) => (el.boq_links?.length ?? 0) === 0,
+        // The viewer applies this predicate to its own skeleton rows, which
+        // carry no links, so ask the roll-up rather than `el.boq_links`.
+        unlinked_boq: (el) => !linkedElementIds.has(el.id) && (el.boq_links?.length ?? 0) === 0,
         has_tasks: (el) => (el.linked_tasks?.length ?? 0) > 0,
         has_docs: (el) => (el.linked_documents?.length ?? 0) > 0,
       };
@@ -3083,7 +3095,7 @@ export function BIMPage() {
         }),
       });
     },
-    [elements, t, addToast],
+    [elements, linkedElementIds, t, addToast],
   );
 
   const handleFilterElementClick = useCallback((elementId: string) => {
@@ -4118,7 +4130,7 @@ export function BIMPage() {
         {activeModelId && !isModelNonReady && elements.length > 0 && filterPanelOpen && (
           <div className="absolute top-0 start-0 h-full z-20 overflow-y-auto flex flex-col">
             <BIMFilterGroupsPanel
-              elements={elements}
+              elements={elementsWithLinks}
               savedGroups={savedGroups}
               projectId={projectId}
               modelId={activeModelId ?? undefined}
@@ -4603,6 +4615,7 @@ export function BIMPage() {
           onClose={() => setLinkCandidates(null)}
           onLinked={() => {
             queryClient.invalidateQueries({ queryKey: ['bim-elements', activeModelId] });
+            queryClient.invalidateQueries({ queryKey: ['bim-model-boq-links', activeModelId] });
           }}
         />
       )}
