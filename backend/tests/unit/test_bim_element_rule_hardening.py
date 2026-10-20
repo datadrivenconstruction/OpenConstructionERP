@@ -143,3 +143,15 @@ class TestScoreAlignment:
 
     def test_no_checks_is_one(self) -> None:
         assert compute_quality_score(0.0, 0.0, 0) == 1.0
+
+
+class TestConverterQuantityKeysMatchRulesIgnoringCase:
+    """Converter imports store ``Thickness`` / ``Width``; rules name ``thickness`` / ``width``."""
+
+    def test_a_revit_wall_with_capitalised_thickness_passes(self) -> None:
+        wall = _elem(element_type="Walls", quantities={"Thickness": 0.29, "Width": 0.28, "Area": 37.9})
+        assert WALL_HAS_THICKNESS.evaluate(wall) == []
+
+    def test_an_exact_key_still_wins_over_a_case_variant(self) -> None:
+        wall = _elem(quantities={"thickness": 0, "Thickness": 0.3})
+        assert len(WALL_HAS_THICKNESS.evaluate(wall)) == 1
