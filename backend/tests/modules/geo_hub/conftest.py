@@ -31,16 +31,18 @@ def _geocoding_already_allowed(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def make_tiny_pdf_bytes(text: str = "Site plan") -> bytes:
-    """Return a single-page PDF with a rectangle + caption via PyMuPDF."""
-    import fitz
+    """Return a single-page PDF with a rectangle + caption via reportlab."""
+    from reportlab.pdfgen import canvas
 
-    doc = fitz.open()
-    page = doc.new_page(width=595, height=842)  # A4 portrait
-    page.draw_rect(fitz.Rect(120, 200, 475, 500), color=(0.2, 0.4, 0.9), width=2)
-    page.insert_text((140, 230), text, fontsize=14, color=(0.1, 0.1, 0.1))
     buf = io.BytesIO()
-    doc.save(buf)
-    doc.close()
+    c = canvas.Canvas(buf, pagesize=(595, 842))  # A4 portrait
+    c.setStrokeColorRGB(0.2, 0.4, 0.9)
+    c.setLineWidth(2)
+    c.rect(120, 842 - 500, 355, 300)
+    c.setFillColorRGB(0.1, 0.1, 0.1)
+    c.setFont("Helvetica", 14)
+    c.drawString(140, 842 - 230, text)
+    c.save()
     return buf.getvalue()
 
 

@@ -399,10 +399,9 @@ class _FakePdfNoText:
 class TestScannedPdfNeedsOcr:
     @pytest.fixture(autouse=True)
     def _stub_pdfplumber(self):
-        """Stub pdfplumber + pymupdf to simulate a 3-page scanned PDF.
+        """Stub pdfplumber to simulate a 3-page scanned PDF.
 
-        pdfplumber returns pages with empty text + no tables;
-        pymupdf reports 3 pages for the count probe.  paddleocr is NOT
+        pdfplumber returns pages with empty text + no tables.  paddleocr is NOT
         installed so the OCR fallback returns []; upload should then
         persist with status="needs_ocr".
         """
@@ -411,31 +410,12 @@ class TestScannedPdfNeedsOcr:
         fake_pdfplumber.open = lambda _buf: _FakePdfNoText()  # type: ignore[attr-defined]
         sys.modules["pdfplumber"] = fake_pdfplumber
 
-        # pymupdf
-        fake_pymupdf = types.ModuleType("pymupdf")
-
-        class _StubDoc:
-            def __init__(self):
-                self._pages = [MagicMock(get_text=MagicMock(return_value="")) for _ in range(3)]
-
-            def __iter__(self):
-                return iter(self._pages)
-
-            def __len__(self):
-                return len(self._pages)
-
-            def close(self):
-                return None
-
-        fake_pymupdf.open = lambda **_kw: _StubDoc()  # type: ignore[attr-defined]
-        sys.modules["pymupdf"] = fake_pymupdf
-
         # Ensure paddleocr is NOT importable so the OCR fallback returns [].
         sys.modules.pop("paddleocr", None)
 
         yield
 
-        for name in ("pdfplumber", "pymupdf", "paddleocr"):
+        for name in ("pdfplumber", "paddleocr"):
             sys.modules.pop(name, None)
 
     @pytest.mark.asyncio
@@ -500,7 +480,7 @@ class TestBrokenReaderIsNotBlamedOnTheDocument:
         )
 
         async def _reader_never_loaded(*a, **k):
-            return (0, [], False, "ImportError: libmupdf.so.24: cannot open shared object file")
+            return (0, [], False, "ImportError: libpdfium.so: cannot open shared object file")
 
         monkeypatch.setattr(takeoff_service, "_parse_pdf_isolated", _reader_never_loaded)
         svc = _make_service()
@@ -517,7 +497,7 @@ class TestBrokenReaderIsNotBlamedOnTheDocument:
         assert excinfo.value.status_code == 500, "a broken install is not the client's fault"
         detail = str(excinfo.value.detail)
         assert "installation problem" in detail
-        assert "libmupdf.so.24" in detail, "the operator needs the underlying error"
+        assert "libpdfium.so" in detail, "the operator needs the underlying error"
         assert "check the file" not in detail.lower()
 
     @pytest.mark.asyncio
@@ -663,7 +643,7 @@ class TestParsePdfInProcess:
                 "page_count": 0,
                 "pages": [],
                 "truncated": False,
-                "reader_error": "ImportError: libmupdf.so.24: cannot open shared object file",
+                "reader_error": "ImportError: libpdfium.so: cannot open shared object file",
             },
         )
         pdf = tmp_path / "x.pdf"
@@ -673,7 +653,7 @@ class TestParsePdfInProcess:
             0,
             [],
             False,
-            "ImportError: libmupdf.so.24: cannot open shared object file",
+            "ImportError: libpdfium.so: cannot open shared object file",
         )
         assert takeoff_service._is_reader_import_failure(result[3]) is True
 
@@ -728,10 +708,10 @@ class TestReaderImportFailureClassification:
     @pytest.mark.parametrize(
         "reader_error",
         [
-            "ImportError: libmupdf.so.24: cannot open shared object file",
+            "ImportError: libpdfium.so: cannot open shared object file",
             "ModuleNotFoundError: No module named 'pdfplumber'",
             "ImportError: /lib/x86_64-linux-gnu/libstdc++.so.6: undefined symbol: _ZTVN10",
-            "ImportError: DLL load failed while importing _fitz",
+            "ImportError: DLL load failed while importing pypdfium2_raw",
         ],
     )
     def test_install_failures_are_recognised(self, reader_error):

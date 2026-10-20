@@ -3,7 +3,7 @@
 """Unit tests for tier-1 drawing-scale detection from the PDF text layer.
 
 These exercise :mod:`app.modules.takeoff.scale_detect` directly with plain
-strings, so no PDF, PyMuPDF or database is needed (mirrors
+strings, so no PDF, PDF reader or database is needed (mirrors
 ``test_takeoff_recognize``). They lock in the contract the calibration dialog
 relies on: explicit ratio notations and imperial equations are detected and
 converted to an equivalent ``1:N`` ratio, a "scale"-adjacent token outranks a

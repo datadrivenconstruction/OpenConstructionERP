@@ -8,7 +8,7 @@ in the leftmost column and the amount in the rightmost one, which is the mirror
 image of how the same invoice is laid out on paper in Cairo. And the only face
 that draws every Urdu letter had one weight, so bold Urdu printed regular.
 
-Positions are read back from the rendered PDF with PyMuPDF, because a table
+Positions are read back from the rendered PDF with pypdfium2, because a table
 whose data was reversed but whose widths or rules were not is still wrong on
 paper and right in memory.
 """
@@ -17,20 +17,20 @@ from __future__ import annotations
 
 import io
 
-import pymupdf
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 
-from app.core import pdf_fonts
+from app.core import pdf_fonts, pdf_reader
 from app.core.pdf_rtl import mirror_table_commands, table_direction
+from tests._pdf_probe import embedded_fonts
 
 URDU = "یہ ٹیکس ہے"
 
 
 def _words(pdf: bytes) -> list[tuple[int, float, float, str]]:
     """Every word as (page, x0, y0, text)."""
-    with pymupdf.open(stream=pdf, filetype="pdf") as document:
-        return [(n, w[0], w[1], w[4]) for n, page in enumerate(document) for w in page.get_text("words")]
+    with pdf_reader.open_pdf(pdf) as document:
+        return [(n, w[0], w[1], w[4]) for n, page in enumerate(document) for w in page.words()]
 
 
 def _x(words: list[tuple[int, float, float, str]], text: str, page: int = 0) -> float:
@@ -153,6 +153,5 @@ def test_bold_urdu_has_a_bold_face() -> None:
     pdf.setFont(pdf_fonts.pdf_font_for_text(URDU, bold=True), 12)
     pdf.drawString(72, 720, URDU)
     pdf.save()
-    with pymupdf.open(stream=buffer.getvalue(), filetype="pdf") as document:
-        names = [font[3] for page in document for font in page.get_fonts()]
+    names = [name for name, _kind in embedded_fonts(buffer.getvalue())]
     assert any("NotoNaskhArabic-Bold" in name for name in names), names

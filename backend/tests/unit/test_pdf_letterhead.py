@@ -143,10 +143,9 @@ def _image_draws(pdf: bytes, page: int = 0) -> list[tuple[int, int]]:
 
 def _image_boxes(pdf: bytes) -> list[tuple[float, float, float, float]]:
     """Bounding boxes (points, top-left origin) of the images on page one."""
-    import pymupdf
+    from tests._pdf_probe import image_boxes
 
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        return [tuple(info["bbox"]) for info in doc[0].get_image_info()]
+    return [tuple(box) for box in image_boxes(pdf)]
 
 
 # ── The RFI carries the letterhead ──────────────────────────────────────
@@ -239,13 +238,25 @@ def test_a_logo_without_a_name_is_still_a_letterhead(data_dir: Path) -> None:
     assert len(_pages(pdf)) == 1
 
 
-def test_an_svg_document_logo_is_drawn(data_dir: Path) -> None:
-    """The profile accepts SVG, so the PDF must draw it; reportlab alone cannot."""
+def test_an_svg_document_logo_is_drawn_as_the_png_the_browser_made_of_it(data_dir: Path) -> None:
+    """The server does not rasterise SVG: the PNG stored next to it is what prints."""
+    _profile(data_dir, document_logo_data_url=_svg(), document_logo_png_data_url=_png(60, 20))
+    assert _image_draws(_rfi_pdf()) == [(60, 20)]
+
+
+def test_an_svg_document_logo_without_a_png_prints_the_name_and_no_picture(data_dir: Path) -> None:
+    """An SVG saved before the PNG existed cannot be drawn; the letterhead still prints."""
     _profile(data_dir, document_logo_data_url=_svg())
-    draws = _image_draws(_rfi_pdf())
-    assert len(draws) == 1
-    width, height = draws[0]
-    assert width == pytest.approx(3 * height, rel=0.02)
+    pdf = _rfi_pdf()
+    assert _image_draws(pdf) == []
+    assert LEGAL_NAME in _text(pdf)
+    assert LETTERHEAD_ONLY in _text(pdf)
+
+
+def test_an_svg_document_logo_without_a_png_leaves_the_app_logo_in_the_header(data_dir: Path) -> None:
+    _app_logo(data_dir, _png(20, 5))
+    _profile(data_dir, document_logo_data_url=_svg())
+    assert _image_draws(_rfi_pdf()) == [(20, 5)]
 
 
 @pytest.mark.parametrize(

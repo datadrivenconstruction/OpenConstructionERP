@@ -218,28 +218,20 @@ def test_a_right_to_left_name_escalates_instead_of_boxing(label: str, text: str)
 def test_a_right_to_left_name_is_drawn_in_visual_order(label: str, text: str) -> None:
     """The replacement for the pinned bug. The glyphs on the page, read left to
     right by position, must be exactly what the helper produced. Extracted text
-    is no instrument for this: both pypdf and MuPDF reorder right-to-left runs
+    is no instrument for this: both pypdf and pdfium reorder right-to-left runs
     themselves when they extract, so a backwards line can extract correctly."""
-    import pymupdf
     from reportlab.lib.pagesizes import A4
     from reportlab.pdfgen import canvas
 
     from app.core.pdf_rtl import visual_text
+    from tests._pdf_probe import drawn_strings
 
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
     pdf.setFont(pdf_font_for_text(text, base="Helvetica"), 12)
     pdf.drawString(50, 700, text)
     pdf.save()
-    with pymupdf.open(stream=buffer.getvalue(), filetype="pdf") as document:
-        chars = [
-            (char["origin"][0], char["c"])
-            for block in document[0].get_text("rawdict")["blocks"]
-            for line in block.get("lines", [])
-            for span in line["spans"]
-            for char in span["chars"]
-        ]
-    on_page = "".join(ch for _, ch in sorted(chars))
+    on_page = "".join(text for page, _x, _y, text in drawn_strings(buffer.getvalue()) if page == 0)
     assert on_page == visual_text(text), f"{label} is not drawn in visual order: {on_page!r}"
     assert on_page != text
 

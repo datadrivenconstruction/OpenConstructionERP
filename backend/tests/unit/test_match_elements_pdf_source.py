@@ -6,8 +6,8 @@ Two layers under test:
 
 * :func:`app.modules.match_elements.pdf_import.parse_boq_pdf` - extracts
   line items from a real (in-memory) PDF. We build the fixtures with
-  ``pymupdf`` (already a platform dependency) so no test asset files are
-  needed and the parser exercises its pdfplumber-then-pymupdf path.
+  ``reportlab`` (a base dependency) so no test asset files are needed and
+  the parser exercises its pdfplumber-then-pypdfium2 path.
 * :class:`app.modules.match_elements.sources.pdf_adapter.PdfAdapter` -
   the thin session-scoped reader over ``MatchSession.metadata_["pdf_rows"]``.
   Mirrors the Text/BoQ adapter unit tests: a duck-typed session stub, a
@@ -21,6 +21,7 @@ Run:
 from __future__ import annotations
 
 import asyncio
+import io
 import uuid
 from types import SimpleNamespace
 
@@ -51,24 +52,20 @@ def _run(coro):
 def _pdf_with_lines(lines: list[str]) -> bytes:
     """Render text lines into a one-page PDF and return the bytes.
 
-    Uses pymupdf to build the fixture; the parser then reconstructs the
-    lines via its text path (a pymupdf-drawn page carries no extractable
-    table grid). pymupdf lives in the optional ``[cv]`` extra, not the
-    ``[dev]`` install the CI test job uses, so skip the tests that route
-    through this helper when it is absent rather than erroring at runtime.
+    Uses reportlab to build the fixture; the parser then reconstructs the
+    lines via its text path (a drawn page carries no extractable table grid).
     """
-    pytest.importorskip("pymupdf")
-    import pymupdf
+    from reportlab.pdfgen import canvas
 
-    doc = pymupdf.open()
-    page = doc.new_page()
-    y = 100
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(595, 842))
+    c.setFont("Helvetica", 11)
+    y = 842 - 100
     for line in lines:
-        page.insert_text((72, y), line)
-        y += 20
-    data = doc.tobytes()
-    doc.close()
-    return data
+        c.drawString(72, y, line)
+        y -= 20
+    c.save()
+    return buf.getvalue()
 
 
 # ── parse_boq_pdf ────────────────────────────────────────────────────────

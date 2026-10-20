@@ -54,17 +54,16 @@ def _real_pdf_on_disk(name: str) -> str:
     with permissions - and the test would pass even with the access check torn
     out. A real file makes the refusal attributable to the access check alone.
     """
-    import fitz
+    from reportlab.pdfgen import canvas
 
     from app.modules.documents.service import UPLOAD_BASE
 
     base = Path(UPLOAD_BASE)
     base.mkdir(parents=True, exist_ok=True)
     path = base / f"takeoff-src-test-{uuid.uuid4().hex}-{name}"
-    doc = fitz.open()
-    doc.new_page()
-    path.write_bytes(doc.tobytes())
-    doc.close()
+    c = canvas.Canvas(str(path), pagesize=(595, 842))
+    c.showPage()
+    c.save()
     return str(path)
 
 

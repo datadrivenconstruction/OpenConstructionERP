@@ -8,21 +8,23 @@ the labels with their diacritics, the amounts as ``1.234,56``, the dates as
 ``31.07.2026``, the fixture's own Turkish descriptions, the page furniture,
 and the draft banner, which has to be there exactly when a figure is not final.
 
-The text is read with PyMuPDF, a declared dependency. The fixture and its
+The text is read with the pypdfium2 reader of ``app.core.pdf_reader``. The fixture and its
 SYNTHETIC rates are those of ``test_hakedis_math``.
 """
 
 from __future__ import annotations
 
+import io
 import re
 from dataclasses import replace
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-import pymupdf
+import pypdf
 import pytest
 
 import app.modules.contracts.hakedis_pdf as hakedis_pdf
+from app.core import pdf_reader
 from app.modules.contracts.hakedis import (
     Certificate,
     CertificateParty,
@@ -49,15 +51,15 @@ D = Decimal
 
 def pages_of(pdf: bytes) -> list[str]:
     """The text of every page with its whitespace collapsed, so a wrapped label still reads."""
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        pages = [re.sub(r"\s+", " ", page.get_text()) for page in doc]
+    with pdf_reader.open_pdf(pdf) as doc:
+        pages = [re.sub(r"\s+", " ", page.text()) for page in doc]
     # No page of any test may show an unfilled placeholder.
     assert not any("{" in page or "}" in page for page in pages)
     return pages
 
 
 def sizes_of(pdf: bytes) -> list[tuple[int, int]]:
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
+    with pdf_reader.open_pdf(pdf) as doc:
         return [(round(page.rect.width), round(page.rect.height)) for page in doc]
 
 
@@ -624,10 +626,10 @@ def test_no_page_is_only_signatures_and_every_page_says_what_it_is(
             assert works_total in text, number
     assert (signed_portrait, signed_landscape) == (1, 1), "each part is signed once, on the page of its total"
 
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        words = {word[4] for page in doc for word in page.get_text("words")}
-        # The logo is on every sheet, the landscape ones included.
-        assert all(page.get_images() for page in doc)
+    with pdf_reader.open_pdf(pdf) as doc:
+        words = {word[4] for page in doc for word in page.words()}
+    # The logo is on every sheet, the landscape ones included.
+    assert all(page.images for page in pypdf.PdfReader(io.BytesIO(pdf)).pages)
     # No number is broken: every figure of the works list is one word on the page.
     _, rows = printed_works(cert, locale, settings)
     figures = {cell for row in rows for cell, value in zip(row.cells, row.values, strict=True) if value is not None}
@@ -645,8 +647,8 @@ def test_long_codes_and_large_unit_prices_stay_whole() -> None:
     lines[1] = replace(lines[1], unit_price=D("512.3456"), period_quantity=D("950.375"))
     cert = compute_certificate(replace(inp, lines=lines, taxes=None))
     pdf = render_hakedis_pdf(cert)
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        words = {word[4] for page in doc for word in page.get_text("words")}
+    with pdf_reader.open_pdf(pdf) as doc:
+        words = {word[4] for page in doc for word in page.words()}
     for figure in ("S-43.001/İZM-A-0001", "1.234.567.890,12", "512,3456", "950,375"):
         assert figure in words, figure
 
