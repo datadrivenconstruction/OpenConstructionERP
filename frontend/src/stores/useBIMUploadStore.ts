@@ -18,6 +18,7 @@ import {
   uploadBIMData,
   generateBIMPDFSheets,
   fetchBIMModel,
+  deleteBIMModel,
   type BIMCadUploadResponse,
 } from '@/features/bim/api';
 import { bimQuantityWarningCode, type BimQuantityWarningCode } from '@/shared/lib/bimQuantityWarning';
@@ -54,6 +55,10 @@ export interface BIMUploadJob {
 
   /** Converter id when status is 'converter_required'. */
   converterId: string | null;
+
+  /** True once the file is on the server and the dock is only waiting for
+   *  the background conversion. Cancel then deletes the server model. */
+  serverConverting?: boolean;
 
   /** Set when the model imported but its quantities could not be extracted
    *  (backend status `degraded`, typically the DDC converter is missing). The
@@ -211,6 +216,10 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
         lastPhaseIdx = phaseIdx;
         if (activeInterval) clearInterval(activeInterval);
         activeInterval = setInterval(tick, phases[phaseIdx]!.interval);
+        // Keep the map pointing at the live handle: clearStageTimer only
+        // reaches what is stored here, and a lost handle kept rewriting a
+        // finished job back to "converting".
+                activeIntervalTimers.set(jobId, activeInterval);
       }
     }, 100);
 
@@ -254,7 +263,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
 
       let model: Awaited<ReturnType<typeof fetchBIMModel>>;
       try {
-        model = await fetchBIMModel(modelId);
+        model = await fetchBIMModel(modelId, { suppressTimeoutToast: true });
       } catch {
         // Transient network blip — keep polling
         continue;
@@ -311,11 +320,19 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
 
       let model: Awaited<ReturnType<typeof fetchBIMModel>>;
       try {
-        model = await fetchBIMModel(modelId);
-      } catch {
-        // Transient network blip, keep polling.
+        // A busy server can let one poll time out; that is not a failed
+        // upload, so it must not raise the global "request timed out" toast.
+        model = await fetchBIMModel(modelId, { suppressTimeoutToast: true });
+      } catch (err) {
+        if ((err as { status?: number })?.status === 404) {
+          // Deleted on the server (cancelled here or elsewhere): stop waiting.
+          if (get().jobs.has(jobId)) get().dismissJob(jobId);
+          return;
+        }
+        // Transient network blip or a slow poll, keep polling.
         continue;
       }
+      if (!get().jobs.has(jobId)) return;
 
       if (model.status === 'ready' || model.status === 'degraded') {
         const quantitiesWarning = bimQuantityWarningCode(model);
@@ -409,8 +426,9 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
             patchJob(jobId, {
               status: 'converting',
               progress: 95,
-              stage: 'bim_upload.stage_finalizing',
+              stage: 'bim_upload.stage_server_converting',
               modelId: res.model_id,
+              serverConverting: true,
             });
             void reconcileModelStatus(jobId, res.model_id, params.generatePdfSheets ?? false);
           } else {
@@ -532,8 +550,14 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     },
 
     cancelUpload: (jobId) => {
+      const job = get().jobs.get(jobId);
       const ac = abortControllers.get(jobId);
       if (ac) ac.abort();
+      // The file already reached the server: drop the model there too, so a
+      // cancelled conversion leaves no half-imported model behind.
+      if (job?.modelId && (job.status === 'uploading' || job.status === 'converting')) {
+        void deleteBIMModel(job.modelId).catch(() => undefined);
+      }
       abortControllers.delete(jobId);
       clearStageTimer(jobId);
       jobFiles.delete(jobId);
@@ -580,6 +604,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
         status: 'uploading',
         progress: 5,
         stage: 'bim_upload.stage_sending',
+        serverConverting: false,
         errorMessage: null,
         converterId: null,
         pdfStatus: 'idle',

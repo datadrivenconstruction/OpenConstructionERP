@@ -191,7 +191,12 @@ export function GlobalUploadIndicator() {
           <p className="text-xs font-medium text-content-primary truncate">
             {primary.fileName}
           </p>
-          {isActive && (
+          {isActive && primary.serverConverting && (
+            <p className="text-[10px] text-content-tertiary mt-0.5 truncate">
+              {t('bim_upload.stage_server_converting', { defaultValue: 'Converting on the server...' })} — {elapsed(primary.startedAt)}
+            </p>
+          )}
+          {isActive && !primary.serverConverting && (
             <div className="flex items-center gap-2 mt-1">
               <div className="flex-1 h-1 rounded-full bg-surface-tertiary overflow-hidden">
                 <div
@@ -305,18 +310,36 @@ function JobRow({
           <div className="mt-1.5">
             <div className="flex items-center gap-2">
               <div className="flex-1 h-1.5 bg-surface-tertiary rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-oe-blue rounded-full transition-all duration-500"
-                  style={{ width: `${job.progress}%` }}
-                />
+                {job.serverConverting ? (
+                  // The server reports no percentage while it converts, so
+                  // show an honest indeterminate bar instead of a stuck 95%.
+                  <div
+                    data-testid="upload-server-converting"
+                    className="h-full w-full bg-oe-blue/60 rounded-full animate-pulse"
+                  />
+                ) : (
+                  <div
+                    className="h-full bg-oe-blue rounded-full transition-all duration-500"
+                    style={{ width: `${job.progress}%` }}
+                  />
+                )}
               </div>
-              <span className="text-[10px] text-oe-blue font-semibold tabular-nums w-8 text-right">
-                {job.progress}%
-              </span>
+              {!job.serverConverting && (
+                <span className="text-[10px] text-oe-blue font-semibold tabular-nums w-8 text-right">
+                  {job.progress}%
+                </span>
+              )}
             </div>
             <p className="text-[10px] text-content-quaternary mt-0.5">
               {t(job.stage, { defaultValue: 'Processing...' })} — {elapsed(job.startedAt)}
             </p>
+            {job.serverConverting && (
+              <p className="text-[10px] text-content-quaternary mt-0.5">
+                {t('bim_upload.server_converting_hint', {
+                  defaultValue: 'The file is uploaded. Large models can take several minutes; you can keep working.',
+                })}
+              </p>
+            )}
           </div>
         )}
 

@@ -19,6 +19,7 @@ import {
   triggerDownload,
   getAuthToken,
   API_BASE,
+  type ApiRequestInit,
   type Page,
 } from '@/shared/lib/api';
 import i18next from 'i18next';
@@ -625,8 +626,34 @@ export async function fetchQuantityRuleOffer(modelId: string): Promise<QuantityR
 }
 
 /** Fetch a single BIM model by ID (used for status polling). */
-export async function fetchBIMModel(modelId: string): Promise<BIMModelData> {
-  return apiGet<BIMModelData>(`/v1/bim_hub/${encodeURIComponent(modelId)}`);
+export async function fetchBIMModel(modelId: string, init?: ApiRequestInit): Promise<BIMModelData> {
+  return apiGet<BIMModelData>(`/v1/bim_hub/${encodeURIComponent(modelId)}`, init);
+}
+
+/** A model in the project that was uploaded from the same file. */
+export interface BIMUploadDuplicate {
+  model_id: string;
+  name: string;
+  version: string;
+  status: string;
+  created_at: string | null;
+}
+
+/** Models in the project uploaded from a file with this name and byte size. */
+export async function findUploadDuplicates(
+  projectId: string,
+  fileName: string,
+  fileSize: number,
+): Promise<BIMUploadDuplicate[]> {
+  const params = new URLSearchParams({
+    project_id: projectId,
+    file_name: fileName,
+    file_size: String(fileSize),
+  });
+  const res = await apiGet<{ items: BIMUploadDuplicate[] }>(
+    `/v1/bim_hub/upload-duplicates/?${params.toString()}`,
+  );
+  return res.items ?? [];
 }
 
 /** Re-schedule background CAD conversion for a model that previously failed.
@@ -1215,6 +1242,33 @@ export async function createLink(
     '/v1/bim_hub/links/',
     payload,
   );
+}
+
+/** Server cap for one bulk link call; bigger selections are split. */
+export const BULK_LINK_MAX_ELEMENTS = 5000;
+
+export interface BulkLinkResult {
+  created: number;
+  skipped: number;
+}
+
+/** Link many elements to one BOQ position with one request per 5000 ids. */
+export async function createLinksBulk(
+  boqPositionId: string,
+  elementIds: string[],
+): Promise<BulkLinkResult> {
+  const total: BulkLinkResult = { created: 0, skipped: 0 };
+  for (let i = 0; i < elementIds.length; i += BULK_LINK_MAX_ELEMENTS) {
+    const res = await apiPost<BulkLinkResult & { boq_position_id: string }>('/v1/bim_hub/links/bulk/', {
+      boq_position_id: boqPositionId,
+      bim_element_ids: elementIds.slice(i, i + BULK_LINK_MAX_ELEMENTS),
+      link_type: 'manual',
+      confidence: 'high',
+    });
+    total.created += res.created;
+    total.skipped += res.skipped;
+  }
+  return total;
 }
 
 /** Remove a BIM ↔ BOQ link by its row id. */
