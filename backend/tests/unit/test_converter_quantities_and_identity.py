@@ -264,6 +264,13 @@ def test_ids_and_internal_unit_reals_are_not_offered_as_quantities() -> None:
     assert cols["suggested_quantities"] == ["Volume"] or "Volume" in cols["quantity"]
 
 
+def test_numeric_layer_names_stay_a_grouping_column() -> None:
+    elements = [{"Category": str(i % 3), "Type Name": "LINE", "Length": 1.0 + i, "Count": 1} for i in range(6)]
+    cols = cad_import.get_available_columns(elements, "dwg")
+    assert "Category" in cols["grouping"]
+    assert "Category" not in cols["quantity"]
+
+
 def test_a_dwg_is_read_through_the_dxf_its_converter_writes(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     ezdxf = pytest.importorskip("ezdxf")
     out = tmp_path / "out"
