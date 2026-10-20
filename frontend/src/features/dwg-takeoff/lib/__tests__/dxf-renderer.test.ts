@@ -610,3 +610,24 @@ describe('ARC sweep direction', () => {
     expect(call?.args.slice(3)).toEqual([-0, -Math.PI / 2, true]);
   });
 });
+
+describe('ELLIPSE arcs', () => {
+  it('draws only the parameter range of an elliptical arc', () => {
+    const swing: DxfEntity = {
+      id: 'swing',
+      type: 'ELLIPSE',
+      layer: 'A-WALL',
+      color: 7,
+      start: { x: 0, y: 0 },
+      major_radius: 10,
+      minor_radius: 8,
+      rotation: 0,
+      start_angle: 0,
+      end_angle: Math.PI / 2,
+    };
+    const { ctx, calls } = stubCtx();
+    renderEntities(ctx, [swing], vp(1), new Set(['A-WALL']), null, 800, 600);
+    const call = calls.find((c) => c.op === 'ellipse');
+    expect(call?.args.slice(5)).toEqual([-0, -Math.PI / 2, true]);
+  });
+});

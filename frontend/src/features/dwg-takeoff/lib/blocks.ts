@@ -162,7 +162,20 @@ function placeEntity(member: DxfEntity, p: Placement, insert: DxfEntity, id: str
       break;
     case 'ARC': {
       if (member.radius == null) break;
-      if (!uniform) return null; // elliptical arc - no shape for it
+      if (!uniform) {
+        // An arc under an anisotropic scale is an elliptical arc: axes along the
+        // insert's own x and y, the circle angle becoming the ellipse parameter.
+        const t1 = placeAngle(p, member.start_angle ?? 0) - p.rot;
+        const t2 = placeAngle(p, member.end_angle ?? Math.PI * 2) - p.rot;
+        placed.type = 'ELLIPSE';
+        placed.major_radius = member.radius * Math.abs(p.xs);
+        placed.minor_radius = member.radius * Math.abs(p.ys);
+        placed.rotation = p.rot;
+        placed.start_angle = isMirrored(p) ? t2 : t1;
+        placed.end_angle = isMirrored(p) ? t1 : t2;
+        delete placed.radius;
+        break;
+      }
       placed.radius = member.radius * scale;
       const a1 = placeAngle(p, member.start_angle ?? 0);
       const a2 = placeAngle(p, member.end_angle ?? Math.PI * 2);
@@ -172,12 +185,23 @@ function placeEntity(member: DxfEntity, p: Placement, insert: DxfEntity, id: str
       placed.end_angle = isMirrored(p) ? a1 : a2;
       break;
     }
-    case 'ELLIPSE':
+    case 'ELLIPSE': {
       if (!uniform) return null;
       if (member.major_radius != null) placed.major_radius = member.major_radius * scale;
       if (member.minor_radius != null) placed.minor_radius = member.minor_radius * scale;
-      placed.rotation = (member.rotation ?? 0) + p.rot;
+      if (member.major_axis) {
+        const o = place(p, 0, 0);
+        const tip = place(p, member.major_axis.x, member.major_axis.y);
+        placed.major_axis = { x: tip.x - o.x, y: tip.y - o.y };
+      }
+      placed.rotation = placeAngle(p, member.rotation ?? 0);
+      if (isMirrored(p) && member.start_angle != null && member.end_angle != null) {
+        // A mirror reverses the parameter: t -> -t, and the CCW range swaps ends.
+        placed.start_angle = -member.end_angle;
+        placed.end_angle = -member.start_angle;
+      }
       break;
+    }
     case 'TEXT':
       // Text is never mirrored on screen even when its block is: a backwards
       // label carries less than a readable one, and this viewer is read.

@@ -346,3 +346,17 @@ class TestTheTwoExtentsFunctionsAgree:
             result = parsed(doc, f"{name}.dxf")
             recomputed = _extents_from_raw_entities(result["entities"])
             assert recomputed == result["extents"], name
+
+
+class TestEllipticalArcsKeepTheirRange:
+    """An ELLIPSE with a parameter range is an arc (a door swing), not a whole oval."""
+
+    def test_the_wire_entity_carries_radii_rotation_and_range(self, parsed) -> None:
+        doc = _new_doc()
+        doc.modelspace().add_ellipse((10, 20), major_axis=(0, 600), ratio=0.5, start_param=0.0, end_param=math.pi / 2)
+        entities = parsed(doc)["entities"]
+        (wire,) = [_normalize_entity(e, i) for i, e in enumerate(entities) if e["entity_type"] == "ELLIPSE"]
+        assert wire["major_radius"] == pytest.approx(600)
+        assert wire["minor_radius"] == pytest.approx(300)
+        assert wire["rotation"] == pytest.approx(math.pi / 2)
+        assert (wire["start_angle"], wire["end_angle"]) == (pytest.approx(0.0), pytest.approx(math.pi / 2))
