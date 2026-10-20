@@ -18,6 +18,7 @@ Identity mapping (DDC RvtExporter):
 """
 
 import hashlib
+import json
 import logging
 import re
 import xml.etree.ElementTree as ET  # noqa: S405 - tree building + types; all parsing goes through defusedxml
@@ -414,6 +415,21 @@ def _detect_converter_version_safe(extension: str) -> dict[str, str | None]:
         return {"version": None, "source": None, "binary_path": None}
 
 
+def _converter_saw_no_meshes(run: Any) -> bool:
+    """True when the RVT converter read the file fine and it simply holds no 3D elements.
+
+    ``summary.json`` counts the elements it inspected and the ones with a mesh;
+    a model of only views, legends and definitions has the first and not the
+    second. That is a property of the file, not a converter failure.
+    """
+    try:
+        summary = json.loads((run.folder / "summary.json").read_text(encoding="utf-8"))
+        totals = summary.get("totals") or {}
+        return bool(totals.get("active_elements")) and not totals.get("mesh_elements")
+    except (OSError, ValueError, AttributeError, TypeError):
+        return False
+
+
 def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "standard") -> dict[str, Any] | None:
     """Try to convert CAD files using DDC converters.
 
@@ -493,7 +509,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                 logger.warning("DDC conversion produced an empty table")
                 _record_ddc_failure(
                     ext,
-                    "empty_output",
+                    "no_model_elements" if _converter_saw_no_meshes(run) else "empty_output",
                     exit_code=run.returncode,
                     stderr=run.stderr,
                     ifc_path=ifc_path,
