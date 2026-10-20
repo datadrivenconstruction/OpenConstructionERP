@@ -71,7 +71,7 @@ const CHANGELOG: ChangelogEntry[] = [
     date: '2026-10-20',
     tag: 'NEW',
     summary:
-      'Choose how the platform looks: five ready styles, or your own accent colour, font, density and corners, saved for you or as the workspace default. Background services come in three ready profiles, from maximum speed to maximum features, CAD and BIM conversion moves to DDC Converters 2.0 for RVT, IFC and DWG, and permit and logistics notifications are translated.',
+      'Choose how the platform looks: five ready styles, or your own accent colour, font, density and corners, plus menu views, icon sets and your own icon for any menu item, saved for you or as the workspace default. Background services come in three ready profiles, packs get their own page with filters, PDF drawings open faster with a new reader, CAD and BIM conversion moves to DDC Converters 2.0 for RVT, IFC and DWG, and permit and logistics notifications are translated.',
   },
   {
     version: '18.7.0',
