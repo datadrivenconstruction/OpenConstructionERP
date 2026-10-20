@@ -228,9 +228,7 @@ describe('expandBlockReferences shapes', () => {
     expect(mirrored!.end_angle).toBeCloseTo(Math.PI);
   });
 
-  it('drops an arc it cannot draw rather than drawing it wrong', () => {
-    // An arc under an anisotropic scale is an elliptical arc, which the
-    // renderer has no shape for. Missing is visible; wrong is not.
+  it('draws an arc under an anisotropic scale as an elliptical arc', () => {
     const map = defs([
       member('DOOR-900', {
         type: 'ARC',
@@ -243,7 +241,33 @@ describe('expandBlockReferences shapes', () => {
       member('DOOR-900', { id: 'ln' }),
     ]);
     const placed = expandBlockReferences([insert({ x_scale: 3, y_scale: 1 })], map);
-    expect(placed.map((e) => e.id)).toEqual(['i/ln']); // the line survives
+    expect(placed.map((e) => e.id)).toEqual(['i/m', 'i/ln']);
+    const arc = placed[0]!;
+    expect(arc.type).toBe('ELLIPSE');
+    expect(arc.major_radius).toBeCloseTo(3);
+    expect(arc.minor_radius).toBeCloseTo(1);
+    expect(arc.start_angle).toBeCloseTo(0);
+    expect(arc.end_angle).toBeCloseTo(Math.PI / 2);
+  });
+
+  it('keeps an elliptical arc counter-clockwise under a mirror', () => {
+    const map = defs([
+      member('DOOR-900', {
+        type: 'ELLIPSE',
+        start: { x: 0, y: 0 },
+        end: undefined,
+        major_radius: 2,
+        minor_radius: 1,
+        rotation: 0,
+        start_angle: 0,
+        end_angle: Math.PI / 2,
+      }),
+    ]);
+    const [mirrored] = expandBlockReferences([insert({ x_scale: -1, y_scale: 1 })], map);
+    // The quarter in +x+y lands in -x+y: parameters -pi/2..0 with the major axis turned to pi.
+    expect(mirrored!.rotation).toBeCloseTo(Math.PI);
+    expect(mirrored!.start_angle).toBeCloseTo(-Math.PI / 2);
+    expect(mirrored!.end_angle).toBeCloseTo(0);
   });
 
   it('scales text height by the reference and keeps it readable side up', () => {
