@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - PDF drawings, scans and documents are read with a new engine (pypdfium2). Takeoff and recognition results stay the same, a large floor plan opens about eight times faster with less memory, and text from bills of quantities comes out cleaner. SVG logos print on PDF forms.
-- CAD and BIM conversion now uses DDC Converters 2.0 (RVT Converter 2.0, RVT to IFC 2.0, IFC to Excel 2.0, DWG to Excel 2.0), published from `datadrivenconstruction/cad2data-Revit-IFC-DWG` in the 2026.10 release. The installer downloads one package per format from the release and checks its SHA-256 against the digest pinned in the build and the one published in the release's `SHA256SUMS.txt` before unpacking it. The converters run offline on Windows 10/11 x64; Linux and macOS are coming soon, and DXF and IFC still import there without a converter.
-- RVT models now come with the converter's GLB mesh and the stored element properties; IFC models come as property and quantity tables from the IFC converter (it writes no geometry, so the viewer shows placeholder boxes as before); DWG drawings are converted to DXF and go through the DXF path.
+- CAD and BIM conversion now uses the new generation of DDC converters (RVT Converter 2.0, IFC to Excel 2.0, DWG to Excel 0.4.1), published from `datadrivenconstruction/cad2data-Revit-IFC-DWG` in the 2026.10 release. The installer downloads one package per format from the release and checks its SHA-256 against the digest pinned in the build and the one published in the release's `SHA256SUMS.txt` before unpacking it. The converters run offline on Windows 10/11 x64; Linux and macOS are coming soon, and DXF and IFC still import there without a converter.
+- RVT models now come with the converter's GLB mesh and an element table read from the converter's IFC output, with levels, types, parameters in metres and quantity sets; analytical model elements are left out; IFC models come as property and quantity tables from the IFC converter (it writes no geometry, so the viewer shows placeholder boxes as before); DWG drawings are converted to DXF and go through the DXF path.
 - The converter version check compares the installed package with the one this version installs, offline.
 
 ### Removed
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Converters install again after their packages were republished upstream, and a package missing from the release says so by name instead of failing as unavailable. A conversion that fails or times out says why, instead of reporting the converter as not installed.
 - Permit and site logistics notifications show translated text instead of raw keys, and dismissing a notification that is already gone no longer shows an error.
 
 ## [18.7.0] - 2026-10-19
