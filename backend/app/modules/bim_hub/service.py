@@ -845,6 +845,15 @@ def _element_matches_filters(element: Any, filters: dict) -> bool:
     return True
 
 
+#: Quantity-rule sources to the keys the converter paths store the same quantity under.
+_QUANTITY_SOURCE_ALIASES: dict[str, tuple[str, ...]] = {
+    "area_m2": ("Area", "area", "Net Area", "Gross Area"),
+    "volume_m3": ("Volume", "volume", "Net Volume", "Gross Volume"),
+    "length_m": ("Length", "length"),
+    "weight_kg": ("Weight", "weight"),
+}
+
+
 class BIMHubService:
     """Business logic for BIM Hub operations."""
 
@@ -4128,6 +4137,11 @@ class BIMHubService:
             return Decimal("1")
         else:
             value = quantities.get(source)
+            # Converter imports store ``Area`` / ``Volume`` / ``Length``, uploads ``area_m2`` ...
+            for alias in _QUANTITY_SOURCE_ALIASES.get(source, ()):
+                if value is not None:
+                    break
+                value = quantities.get(alias)
 
         if value is None:
             return None

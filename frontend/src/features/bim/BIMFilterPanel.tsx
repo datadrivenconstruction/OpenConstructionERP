@@ -1170,7 +1170,9 @@ export default function BIMFilterPanel({
                     : s;
                 };
                 const rows = visibleElements.map((el) => {
-                  const base = [el.id, el.name, el.element_type, el.discipline, el.storey ?? '', el.category ?? ''];
+                  // Converter imports keep the source category (OST_*, Ifc*) in properties only.
+                  const category = el.category ?? el.properties?.['category'] ?? '';
+                  const base = [el.id, el.name, el.element_type, el.discipline, el.storey ?? '', category];
                   const qtyVals = qtyArr.map((k) => (el.quantities?.[k] ?? ''));
                   return [...base, ...qtyVals].map(escCsv).join(',');
                 });

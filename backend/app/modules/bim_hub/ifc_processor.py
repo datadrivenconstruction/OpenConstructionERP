@@ -3111,6 +3111,18 @@ def _classify_discipline(ifc_type: str) -> str:
     # Check architecture first - curtainwall contains "wall" so must precede structural
     if any(x in t for x in ["door", "window", "curtainwall", "covering", "furnishing"]):
         return "architecture"
+    # Revit display names ("Structural Framing", "Curtain Wall Mullions", "Pipe Fittings", ...).
+    if any(x in t for x in ["curtain", "furniture", "ceiling", "casework", "room", "generic model", "wall sweep"]):
+        return "architecture"
+    if any(x in t for x in ["structural", "foundation", "framing", "floor", "rebar", "slab edge"]):
+        return "structural"
+    if any(
+        x in t
+        for x in ["fixture", "equipment", "sprinkler", "conduit", "fitting", "air terminal", "lighting", "mep space"]
+    ):
+        return "mep"
+    if any(x in t for x in ["topography", "planting", "parking", "building pad", "entourage"]):
+        return "civil"
     if any(
         x in t
         for x in [
