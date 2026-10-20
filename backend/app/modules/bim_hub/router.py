@@ -4867,17 +4867,19 @@ async def list_elements(
             offset=offset,
             limit=limit,
         )
-        # Skinny rows: drop the per-element `properties` / `quantities` /
+        # Skinny rows: drop the per-element `properties` /
         # `classification` / `metadata` payloads. These can weigh ~1.5 kB per
         # row on a typical RVT export (45+ RVT parameters × short value),
         # which adds up to a 16 MB JSON body for 7 000 elements. The viewer
         # pulls the full property set straight from Parquet on click, so
         # carrying it in the skeleton is pure overhead.
+        # Quantities (a handful of numbers) and the source category stay: the
+        # filter panel sums them and its CSV export writes them.
         skeleton_items: list[BIMElementResponse] = []
         for e in plain_items:
             resp = BIMElementResponse.model_validate(e)
-            resp.properties = {}
-            resp.quantities = {}
+            category = (resp.properties or {}).get("category")
+            resp.properties = {"category": category} if category else {}
             resp.metadata = {}
             skeleton_items.append(resp)
         return BIMElementListResponse(
