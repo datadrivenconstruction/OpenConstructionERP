@@ -38,15 +38,15 @@ from app.modules.takeoff.pdf_extract_worker import (
 
 
 def _make_tiny_pdf(path, *, texts: list[str] | None = None) -> None:
-    """Write a minimal, real PDF (one page per text) to ``path`` via pymupdf."""
-    import pymupdf
+    """Write a minimal, real PDF (one page per text) to ``path`` via reportlab."""
+    from reportlab.pdfgen import canvas
 
-    doc = pymupdf.open()
+    c = canvas.Canvas(str(path), pagesize=(595, 842))
     for text in texts or ["Hello Takeoff 12345"]:
-        page = doc.new_page()
-        page.insert_text((72, 72), text)
-    doc.save(str(path))
-    doc.close()
+        c.setFont("Helvetica", 11)
+        c.drawString(72, 842 - 72, text)
+        c.showPage()
+    c.save()
 
 
 def _make_service():

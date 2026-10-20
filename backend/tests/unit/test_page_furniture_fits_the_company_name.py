@@ -11,7 +11,7 @@ failures followed and both are asserted here on the rendered page:
   * The shared footer and the header band picked their face by name rather than
     by text, so a Chinese or Korean legal name came out as a row of empty
     boxes. The instrument is the glyph id: a character drawn as glyph zero is
-    the box, and ``page.get_texttrace()`` reports it, which the extracted text
+    the box, and the page's text objects report it, which the extracted text
     does not - the string comes back intact from a document that prints nothing
     but boxes.
   * A long name ran into the page number and off the right edge of the sheet.
@@ -33,7 +33,6 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, NamedTuple
 
-import pymupdf
 import pytest
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
@@ -51,6 +50,7 @@ from app.core.pdf_fonts import (
 from app.modules.finance.br_invoice_pdf import render_br_invoice_pdf
 from app.modules.meetings import router as meetings_router
 from app.modules.methodology.pdf_export import generate_methodology_pdf
+from tests._pdf_probe import text_runs
 from tests.unit.test_outgoing_documents_print_the_company_letterhead import EXPORTERS
 from tests.unit.test_pdf_document_type_overrides import _rfi
 
@@ -170,28 +170,21 @@ def _spans(pdf: bytes) -> list[Span]:
     is what a face without the script draws and the only way to tell a rendered
     name from a boxed one.
     """
-    out: list[Span] = []
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        for number, page in enumerate(doc, start=1):
-            height = page.rect.height
-            for span in page.get_texttrace():
-                chars = span.get("chars", ())
-                bbox = span.get("bbox", (0.0, 0.0, 0.0, 0.0))
-                out.append(
-                    Span(
-                        page=number,
-                        font=str(span.get("font")),
-                        size=float(span.get("size", 0.0)),
-                        text="".join(chr(char[0]) for char in chars),
-                        boxes=sum(1 for char in chars if char[1] == 0 and chr(char[0]) != " "),
-                        x0=float(bbox[0]),
-                        x1=float(bbox[2]),
-                        top_gap=float(bbox[1]),
-                        bottom_gap=height - float(bbox[3]),
-                        page_width=page.rect.width,
-                    )
-                )
-    return out
+    return [
+        Span(
+            page=run.page,
+            font=run.font,
+            size=run.size,
+            text=run.text,
+            boxes=run.boxes,
+            x0=run.x0,
+            x1=run.x1,
+            top_gap=run.top,
+            bottom_gap=run.bottom_gap,
+            page_width=run.page_width,
+        )
+        for run in text_runs(pdf)
+    ]
 
 
 @pytest.fixture

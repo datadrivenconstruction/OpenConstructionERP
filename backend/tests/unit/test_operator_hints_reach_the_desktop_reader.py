@@ -115,7 +115,7 @@ _HOMOGRAPHS = frozenset({"click", "all", "six", "wheel", "packaging", "requests"
 _ALIASES = {
     "sentence_transformers": "sentence-transformers",
     "qdrant_client": "qdrant-client",
-    "fitz": "pymupdf",
+    "PIL": "pillow",
 }
 
 
@@ -435,7 +435,7 @@ def test_a_diagnosis_is_not_mistaken_for_an_errand(tmp_path: Path) -> None:
     failure that reads exactly like a real one and is not.
     """
     rows = _census_of_source(
-        'def report():\n    return "Could not load its PDF reader (pymupdf). This usually means a broken install."\n',
+        'def report():\n    return "Could not load its PDF reader (pypdfium2). This usually means a broken install."\n',
         _Vocabulary(),
         tmp_path,
     )

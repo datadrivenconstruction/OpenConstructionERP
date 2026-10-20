@@ -2,7 +2,7 @@
 """Unit tests for the offline vector recognition detectors (issue #194).
 
 These exercise :mod:`app.modules.takeoff.recognize` directly with synthetic
-``get_drawings()``-shaped input (plain tuples), so no PDF, PyMuPDF or database
+``get_drawings()``-shaped input (plain tuples), so no PDF, PDF reader or database
 is needed. They lock in the contract the canvas relies on: rectangles become
 area candidates, long strokes become length candidates, repeated small shapes
 become a single count candidate, and nothing fabricates a value without a
