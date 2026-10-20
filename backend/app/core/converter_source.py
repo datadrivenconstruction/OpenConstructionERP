@@ -15,7 +15,7 @@ Three packages are used (there is no DGN converter in this generation):
 ==========  ================================  ================================
 format      package                           command line
 ==========  ================================  ================================
-``rvt``     DDC RVT Converter 0.6.8           ``cli/RVTconverter.exe``
+``rvt``     DDC RVT Converter 0.6.9           ``cli/RVTconverter.exe``
 ``ifc``     DDC IFC to Excel 0.3.1 (preview)  ``runtime/python.exe`` running
                                               ``sources/ifc-excel/converter.py``
 ``dwg``     DDC DWG to Excel 0.4.1            ``cli/dwg2excel.exe``
@@ -85,10 +85,10 @@ PACKAGES: dict[str, ConverterPackage] = {
     "rvt": ConverterPackage(
         fmt="rvt",
         name="DDC RVT Converter",
-        version="0.6.8",
-        asset="DDC-RVT-Converter-0.6.8-portable.zip",
-        sha256="5e285e69202e698b950ee98611823af892d16ff8b6fd7e5025cd0a79cef8a365",
-        size_bytes=79087488,
+        version="0.6.9",
+        asset="DDC-RVT-Converter-0.6.9-portable.zip",
+        sha256="7393483f0370d3b57f92ff12f8cb1182702dcfbdbfc5393078d87784df08a4b2",
+        size_bytes=78314538,
         exe_rel="cli/RVTconverter.exe",
         script_rel=None,
         include=("cli/", "licenses/", "EULA.txt"),
