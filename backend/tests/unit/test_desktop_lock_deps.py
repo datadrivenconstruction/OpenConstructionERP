@@ -88,7 +88,7 @@ _GPU_PREFIXES = ("nvidia-", "cuda-", "triton")
 # so were never exposed; the desktop channel installs from this file and then
 # runs pip install -e . --no-deps, which is what makes this list load bearing.
 _REQUIRED_BASE_DEPS = (
-    "pymupdf",
+    "pypdfium2",
     "opencv-python-headless",
     "laspy",
     "lazrs",

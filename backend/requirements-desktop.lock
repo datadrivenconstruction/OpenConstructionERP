@@ -216,14 +216,14 @@ pydantic-settings==2.14.1
     # via openconstructionerp (pyproject.toml)
 pygments==2.21.0
     # via rich
-pymupdf==1.27.2.3
-    # via openconstructionerp (pyproject.toml)
 pyparsing==3.3.2
     # via ezdxf
 pypdf==6.14.2
     # via openconstructionerp (pyproject.toml)
 pypdfium2==5.9.0
-    # via pdfplumber
+    # via
+    #   openconstructionerp (pyproject.toml)
+    #   pdfplumber
 python-bidi==0.6.11
     # via openconstructionerp (pyproject.toml)
 python-dateutil==2.9.0.post0

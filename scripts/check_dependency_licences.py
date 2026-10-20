@@ -8,8 +8,9 @@ It never ran and would not have caught anything if it had. It triggers on
 ``pull_request``, and this project commits directly to ``main``, so the event
 never occurs. Its denylist read ``GPL-2.0, GPL-3.0, LGPL-2.1, LGPL-3.0,
 AGPL-1.0``: it denied AGPL-1.0, which nothing anywhere uses, and omitted
-AGPL-3.0, which is the licence of the one genuinely AGPL package we ship. A
-denylist that omits the licence it exists to catch is not a control.
+AGPL-3.0, which was the licence of the one AGPL package we then shipped
+(PyMuPDF, since replaced by pypdfium2). A denylist that omits the licence it
+exists to catch is not a control.
 
 That workflow has been corrected, but it still only runs on an event this
 project does not produce, and it cannot be run locally at all: it needs the
@@ -39,10 +40,11 @@ What it is blind to, stated so nobody over-reads a green run
    half-built environment cannot pass silently.
 2. **Native libraries compiled into a wheel.** A package declares a licence for
    its own source. The C libraries statically linked into its extension module
-   arrive with the wheel and are described by no metadata anywhere. PyMuPDF is
-   exactly this case: its entire in-wheel licence disclosure is one line, and
-   MuPDF links further upstream code beneath it. ``NOTICE`` covers this layer by
-   hand, under "Native Binaries Inside Python Wheels", because no scanner can.
+   arrive with the wheel and are described by no metadata anywhere. pypdfium2
+   is this case: the PDFium library in its wheel links further upstream code
+   (FreeType, libjpeg-turbo, OpenJPEG, lcms2 and others). ``NOTICE`` covers this
+   layer by hand, under "Native Binaries Inside Python Wheels", because no
+   scanner can.
 3. **Metadata that disagrees with the shipped licence text.** We read the
    declaration, not the ``LICENSE`` file.
 4. **The frontend and the Rust desktop shell.** Python only.
@@ -50,7 +52,8 @@ What it is blind to, stated so nobody over-reads a green run
 Exit codes
 ----------
 0  every installed distribution is permissively licensed or explicitly accepted
-1  a copyleft licence was found that is not on the accepted list
+1  a copyleft licence was found that is not on the accepted list, or any AGPL
+   package at all (AGPL can never be accepted; see _NEVER_ACCEPTED)
 2  the environment could not be inspected, or a ``--require`` package is missing
 """
 
@@ -85,18 +88,16 @@ _COPYLEFT_PATTERNS: tuple[tuple[str, str], ...] = (
 _BLOCKING = {"AGPL", "LGPL", "GPL", "SSPL", "OSL"}
 _REPORT_ONLY = {"MPL", "EPL", "CDDL"}
 
+# Families no ACCEPTED entry can excuse. An AGPL package anywhere in the
+# resolved closure puts an AGPL component into every install, which our
+# commercial licence cannot cover; PyMuPDF was that package until it was
+# replaced, and this keeps a successor from arriving through an allowlist line.
+_NEVER_ACCEPTED = {"AGPL"}
+
 # Every entry needs a reason. An allowlist without reasons rots into a list of
 # things somebody once silenced, and the next reader cannot tell an accepted
 # risk from an unexamined one.
 ACCEPTED: dict[str, str] = {
-    "pymupdf": (
-        "AGPL-3.0-or-later, Artifex, dual sold. Accepted deliberately: it is a base "
-        "dependency so PDF takeoff works on a stock install. This is the exception the "
-        "whole gate exists to keep visible, not to hide. Documented for customers in "
-        "NOTICE 'AGPL Cascade' and docs/legal/COMMERCIAL-LICENSE.md section 4a, which tell a "
-        "commercial deployment it must either replace it or hold an Artifex licence. "
-        "Removing this entry is how you make the gate red on purpose to test it."
-    ),
     "psycopg2-binary": (
         "LGPL-3.0-or-later with the OpenSSL linking exception. Base dependency, used "
         "unmodified through its published Python API. Note the frozen desktop build "
@@ -129,7 +130,7 @@ ACCEPTED: dict[str, str] = {
 
 # Packages that must be present for a run to count. Without this a green result
 # from an environment where nothing is installed looks identical to a clean one.
-_REQUIRED_BY_DEFAULT = ("pymupdf", "pdfplumber", "fastapi", "sqlalchemy")
+_REQUIRED_BY_DEFAULT = ("pypdfium2", "pdfplumber", "fastapi", "sqlalchemy")
 
 # We are AGPL-3.0-or-later ourselves, and an editable install puts us in the
 # same environment we are inventorying. Our own licence is the premise of this
@@ -218,7 +219,9 @@ def main() -> int:
 
         family, matched = verdict
         row = (raw_name, family, matched)
-        if name in ACCEPTED:
+        if family in _NEVER_ACCEPTED:
+            blocking.append(row)
+        elif name in ACCEPTED:
             accepted.append(row)
         elif family in _BLOCKING:
             blocking.append(row)

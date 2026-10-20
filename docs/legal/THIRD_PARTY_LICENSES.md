@@ -98,12 +98,12 @@ reasons from a resolution, which is a different instrument and disagrees
 with the declared list in one place that matters.
 
 Resolving the base dependencies with no extras gives 79 packages on Linux
-and macOS and 78 on Windows. Four of them declare something other than a
+and macOS and 78 on Windows. Three of them declare something other than a
 permissive licence: `certifi` (MPL-2.0), `orjson` (MPL-2.0 AND (Apache-2.0
-OR MIT)), `psycopg2-binary` (LGPL with exceptions) and `pymupdf` (AGPL-3.0
-or an Artifex commercial licence). So copyleft, LGPL included, reaches a
-default install with no extra selected. Nothing else in the base closure
-declares copyleft.
+OR MIT)) and `psycopg2-binary` (LGPL with exceptions). So copyleft, LGPL
+included, reaches a default install with no extra selected. Nothing else in
+the base closure declares copyleft, and nothing in it is AGPL: `pymupdf`
+(AGPL-3.0) was a fourth until it was replaced by `pypdfium2` after 18.7.0.
 
 Every optional group was then resolved and subtracted from that base. The
 only copyleft package any group adds is `tqdm`, MPL-2.0 AND MIT, and six
