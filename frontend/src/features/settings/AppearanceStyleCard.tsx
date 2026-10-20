@@ -70,7 +70,7 @@ function StylePreview({ value, label, active }: { value: Appearance; label: stri
   );
 }
 
-function OptionRow({ label, children }: { label: string; children: ReactNode }) {
+export function OptionRow({ label, children }: { label: string; children: ReactNode }) {
   const id = useId();
   return (
     <div className="grid gap-2 sm:grid-cols-[9rem_1fr] sm:items-center">
@@ -84,18 +84,21 @@ function OptionRow({ label, children }: { label: string; children: ReactNode }) 
   );
 }
 
-function Choice({
+export function Choice({
   active,
   onSelect,
   label,
   children,
   style,
+  onPreview,
 }: {
   active: boolean;
   onSelect: () => void;
   label: string;
   children?: ReactNode;
   style?: CSSProperties;
+  /** Hover / focus preview: called with true on enter and false on leave. */
+  onPreview?: (on: boolean) => void;
 }) {
   return (
     <button
@@ -104,6 +107,10 @@ function Choice({
       aria-checked={active}
       aria-label={label}
       onClick={onSelect}
+      onMouseEnter={onPreview && (() => onPreview(true))}
+      onMouseLeave={onPreview && (() => onPreview(false))}
+      onFocus={onPreview && (() => onPreview(true))}
+      onBlur={onPreview && (() => onPreview(false))}
       style={style}
       className={`inline-flex min-h-[2.25rem] items-center gap-1.5 rounded-lg border-2 px-3 text-sm font-medium transition-colors duration-normal ease-oe ${
         active
@@ -147,7 +154,10 @@ export function AppearanceStyleCard() {
   const saveWorkspace = async (value: Appearance | null) => {
     setSaving(true);
     try {
-      await apiPut('/v1/branding/', { appearance: value });
+      // Axis by axis, so the workspace menu look saved beside it is kept.
+      await apiPut('/v1/branding/', {
+        appearance: value ?? { accent: null, font: null, density: null, radius: null },
+      });
       setWorkspaceDefault(value);
       useToastStore.getState().addToast({
         type: 'success',

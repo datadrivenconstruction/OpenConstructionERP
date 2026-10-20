@@ -86,8 +86,8 @@
          over one codepoint are in assets/vendor/fonts/README.txt. -->
     <link rel="stylesheet" href="/assets/vendor/fonts/fonts.css" />
 
-    <!-- Appearance boot: puts the saved style (accent, font, density, radius)
-         and the dark class on <html> before first paint, so a reload never
+    <!-- Appearance boot: puts the saved style (accent, font, density, radius),
+         the menu look and the dark class on <html> before first paint, so a reload never
          flashes the default look. Mirrors src/shared/lib/appearance.ts; the
          test src/shared/lib/__tests__/appearanceBoot.test.ts runs this script. -->
     <script id="oe-appearance-boot">
@@ -119,6 +119,32 @@
           link.setAttribute('data-oe-font', value.font);
           document.head.appendChild(link);
         }
+        // Menu look: same layering, painted as data-menu-* (shared/lib/menuAppearance.ts).
+        var menuAllowed = {
+          view: ['classic', 'compact', 'comfortable', 'rail', 'floating'],
+          active: ['bar', 'pill', 'tint'],
+          headers: ['caps', 'divider', 'none'],
+          stroke: ['light', 'regular', 'bold'],
+          container: ['none', 'tile', 'circle'],
+          color: ['mono', 'accent', 'sections'],
+          icons: ['shown', 'hidden']
+        };
+        var menu = {
+          view: 'classic', active: 'bar', headers: 'caps', stroke: 'regular',
+          container: 'none', color: 'mono', icons: 'shown'
+        };
+        function menuLayer(key) {
+          try {
+            var raw = JSON.parse(localStorage.getItem(key) || 'null');
+            if (!raw || typeof raw !== 'object') return;
+            for (var axis in menuAllowed) {
+              if (menuAllowed[axis].indexOf(raw[axis]) !== -1) menu[axis] = raw[axis];
+            }
+          } catch (e) { /* unreadable storage: keep what we have */ }
+        }
+        menuLayer('oe_workspace_menu_v1');
+        menuLayer('oe_menu_v1');
+        for (var m in menu) root.setAttribute('data-menu-' + m, menu[m]);
         try {
           var theme = localStorage.getItem('oe_theme');
           var dark = theme === 'dark' || (theme !== 'light' && window.matchMedia &&
