@@ -14190,7 +14190,7 @@ const resource = {
     "onboarding.mod_dwg_takeoff": "DWG টেকঅফ",
     "onboarding.mod_dwg_takeoff_desc": "DWG অঙ্কন থেকে সরাসরি পরিমাণ টেকঅফ",
     "onboarding.mod_cad": "CAD ইম্পোর্ট",
-    "onboarding.mod_cad_desc": "DDC Converters 2.0 পাইপলাইনের মাধ্যমে DWG/RVT/IFC ইমপোর্ট করুন",
+    "onboarding.mod_cad_desc": "DDC Converters 2.0 পাইপলাইনের মাধ্যমে DWG/RVT/IFC ইম্পোর্ট করুন",
     "onboarding.mod_bim_requirements": "BIM প্রয়োজনীয়তা",
     "onboarding.mod_bim_requirements_desc": "মডেল প্রয়োজনীয়তা সংজ্ঞায়িত ও যাচাই করুন (IDS / EIR)",
     "onboarding.mod_match_elements": "CAD-BIM ম্যাচ → কস্ট",
