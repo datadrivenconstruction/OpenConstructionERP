@@ -59740,7 +59740,7 @@ const resource = {
     "processes.profile_features_name": "Все функции",
     "processes.profile_features_promise": "Все службы включены, поэтому ничего не ждёт запуска. Нужен сервер с хорошим запасом ресурсов.",
     "processes.profile_recommended": "Рекомендуем",
-    "processes.profile_summary": "Около {{ram}} памяти, включено служб: {{services}}",
+    "processes.profile_summary": "Около {{ram}} памяти. Включено служб: {{services}}",
     "processes.profile_active": "Активен",
     "processes.profile_choose": "Использовать этот профиль",
     "processes.profile_custom": "Свой",

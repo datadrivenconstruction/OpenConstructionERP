@@ -57930,7 +57930,7 @@ const resource = {
     "processes.profile_features_name": "Funzionalità massime",
     "processes.profile_features_promise": "Tutti i servizi attivi, così nulla aspetta l'avvio. Richiede un server con buone risorse.",
     "processes.profile_recommended": "Consigliato",
-    "processes.profile_summary": "Circa {{ram}} di memoria, {{services}} servizi attivi",
+    "processes.profile_summary": "Circa {{ram}} di memoria. Servizi attivi: {{services}}",
     "processes.profile_active": "Attivo",
     "processes.profile_choose": "Usa questo profilo",
     "processes.profile_custom": "Personalizzato",

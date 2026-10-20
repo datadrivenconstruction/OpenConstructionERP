@@ -58245,7 +58245,7 @@ const resource = {
     "processes.profile_features_name": "Maksymalne funkcje",
     "processes.profile_features_promise": "Wszystkie usługi włączone, więc nic nie czeka na start. Wymaga mocnego serwera.",
     "processes.profile_recommended": "Zalecany",
-    "processes.profile_summary": "Około {{ram}} pamięci, włączonych usług: {{services}}",
+    "processes.profile_summary": "Około {{ram}} pamięci. Włączone usługi: {{services}}",
     "processes.profile_active": "Aktywny",
     "processes.profile_choose": "Użyj tego profilu",
     "processes.profile_custom": "Własny",

@@ -56684,7 +56684,7 @@ const resource = {
     "processes.profile_features_name": "زیادہ سے زیادہ فیچرز",
     "processes.profile_features_promise": "تمام سروسز آن ہیں، اس لیے کچھ شروع ہونے کا انتظار نہیں کرتا۔ کشادہ سرور درکار ہے۔",
     "processes.profile_recommended": "تجویز کردہ",
-    "processes.profile_summary": "تقریباً {{ram}} میموری، {{services}} سروسز آن",
+    "processes.profile_summary": "تقریباً {{ram}} میموری۔ فعال سروسز: {{services}}",
     "processes.profile_active": "فعال",
     "processes.profile_choose": "یہ پروفائل استعمال کریں",
     "processes.profile_custom": "حسبِ ضرورت",

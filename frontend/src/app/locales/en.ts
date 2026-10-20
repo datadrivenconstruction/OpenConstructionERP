@@ -50720,7 +50720,7 @@ const resource = {
     "processes.profile_features_name": "Maximum features",
     "processes.profile_features_promise": "Every service on, so nothing waits to start. Needs a roomy server.",
     "processes.profile_recommended": "Recommended",
-    "processes.profile_summary": "About {{ram}} of memory, {{services}} services on",
+    "processes.profile_summary": "About {{ram}} of memory. Services on: {{services}}",
     "processes.profile_active": "Active",
     "processes.profile_choose": "Use this profile",
     "processes.profile_custom": "Custom",

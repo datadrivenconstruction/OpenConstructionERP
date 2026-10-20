@@ -58950,7 +58950,7 @@ const resource = {
     "processes.profile_features_name": "最全功能",
     "processes.profile_features_promise": "所有服务全部开启,无需等待启动。需要配置较高的服务器。",
     "processes.profile_recommended": "推荐",
-    "processes.profile_summary": "约占用 {{ram}} 内存,已开启 {{services}} 项服务",
+    "processes.profile_summary": "约 {{ram}} 内存。已启用服务：{{services}}",
     "processes.profile_active": "当前使用",
     "processes.profile_choose": "使用此方案",
     "processes.profile_custom": "自定义",

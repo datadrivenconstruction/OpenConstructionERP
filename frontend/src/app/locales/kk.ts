@@ -56685,7 +56685,7 @@ const resource = {
     "processes.profile_features_name": "Ең көп мүмкіндік",
     "processes.profile_features_promise": "Барлық қызмет қосулы, ештеңе іске қосылуды күтпейді. Қуатты сервер қажет.",
     "processes.profile_recommended": "Ұсынылады",
-    "processes.profile_summary": "Шамамен {{ram}} жад, {{services}} қызмет қосулы",
+    "processes.profile_summary": "Шамамен {{ram}} жад. Қосылған қызметтер: {{services}}",
     "processes.profile_active": "Белсенді",
     "processes.profile_choose": "Осы профильді қолдану",
     "processes.profile_custom": "Реттелетін",

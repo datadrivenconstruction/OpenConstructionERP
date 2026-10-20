@@ -56841,7 +56841,7 @@ const resource = {
     "processes.profile_features_name": "Максималдуу мүмкүнчүлүк",
     "processes.profile_features_promise": "Бардык кызмат күйүк, эч нерсе иштетилүүнү күтпөйт. Кубаттуу сервер керек.",
     "processes.profile_recommended": "Сунушталат",
-    "processes.profile_summary": "Болжол менен {{ram}} эс тутум, {{services}} кызмат күйүк",
+    "processes.profile_summary": "Болжол менен {{ram}} эс-тутум. Иштеп жаткан кызматтар: {{services}}",
     "processes.profile_active": "Активдүү",
     "processes.profile_choose": "Бул профилди колдонуу",
     "processes.profile_custom": "Жеке",

@@ -58013,7 +58013,7 @@ const resource = {
     "processes.profile_features_name": "全機能",
     "processes.profile_features_promise": "すべてのサービスをオンにし、起動待ちをなくします。余裕のあるサーバーが必要です。",
     "processes.profile_recommended": "おすすめ",
-    "processes.profile_summary": "メモリ約{{ram}}、{{services}}個のサービスがオン",
+    "processes.profile_summary": "メモリは約{{ram}}。有効なサービス: {{services}}",
     "processes.profile_active": "使用中",
     "processes.profile_choose": "このプロファイルを使う",
     "processes.profile_custom": "カスタム",

@@ -56994,7 +56994,7 @@ const resource = {
     "processes.profile_features_name": "সর্বোচ্চ ফিচার",
     "processes.profile_features_promise": "সব সার্ভিস চালু, তাই কিছুই শুরুর অপেক্ষায় থাকে না। বড় সার্ভার দরকার।",
     "processes.profile_recommended": "প্রস্তাবিত",
-    "processes.profile_summary": "প্রায় {{ram}} মেমরি, {{services}}টি সার্ভিস চালু",
+    "processes.profile_summary": "প্রায় {{ram}} মেমরি। চালু সার্ভিস: {{services}}",
     "processes.profile_active": "সক্রিয়",
     "processes.profile_choose": "এই প্রোফাইল ব্যবহার করুন",
     "processes.profile_custom": "কাস্টম",

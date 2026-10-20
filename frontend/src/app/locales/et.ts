@@ -56674,7 +56674,7 @@ const resource = {
     "processes.profile_features_name": "Maksimaalsed funktsioonid",
     "processes.profile_features_promise": "Kõik teenused on sees, nii et miski ei oota käivitumist. Vajab võimsat serverit.",
     "processes.profile_recommended": "Soovitatud",
-    "processes.profile_summary": "Umbes {{ram}} mälu, {{services}} teenust sees",
+    "processes.profile_summary": "Umbes {{ram}} mälu. Sisselülitatud teenused: {{services}}",
     "processes.profile_active": "Aktiivne",
     "processes.profile_choose": "Kasuta seda profiili",
     "processes.profile_custom": "Kohandatud",

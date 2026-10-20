@@ -59771,7 +59771,7 @@ const resource = {
     "processes.profile_features_name": "أقصى الميزات",
     "processes.profile_features_promise": "كل الخدمات مفعّلة فلا شيء ينتظر البدء. يتطلب خادمًا واسع الموارد.",
     "processes.profile_recommended": "موصى به",
-    "processes.profile_summary": "حوالي {{ram}} من الذاكرة، {{services}} خدمات قيد التشغيل",
+    "processes.profile_summary": "حوالي {{ram}} من الذاكرة. الخدمات قيد التشغيل: {{services}}",
     "processes.profile_active": "نشط",
     "processes.profile_choose": "استخدام هذا الملف",
     "processes.profile_custom": "مخصص",

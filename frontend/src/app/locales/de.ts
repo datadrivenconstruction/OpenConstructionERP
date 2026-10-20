@@ -59182,7 +59182,7 @@ const resource = {
     "processes.profile_features_name": "Maximale Funktionen",
     "processes.profile_features_promise": "Alle Dienste an, damit nichts auf den Start warten muss. Braucht einen leistungsstarken Server.",
     "processes.profile_recommended": "Empfohlen",
-    "processes.profile_summary": "Etwa {{ram}} Speicher, {{services}} Dienste aktiv",
+    "processes.profile_summary": "Etwa {{ram}} Arbeitsspeicher. Aktive Dienste: {{services}}",
     "processes.profile_active": "Aktiv",
     "processes.profile_choose": "Dieses Profil verwenden",
     "processes.profile_custom": "Benutzerdefiniert",

@@ -56728,7 +56728,7 @@ const resource = {
     "processes.profile_features_name": "Максимални функции",
     "processes.profile_features_promise": "Всички услуги включени, така че нищо не чака да стартира. Изисква сървър с достатъчно ресурси.",
     "processes.profile_recommended": "Препоръчително",
-    "processes.profile_summary": "Около {{ram}} памет, включени услуги: {{services}}",
+    "processes.profile_summary": "Около {{ram}} памет. Включени услуги: {{services}}",
     "processes.profile_active": "Активен",
     "processes.profile_choose": "Използвай този профил",
     "processes.profile_custom": "Персонален",

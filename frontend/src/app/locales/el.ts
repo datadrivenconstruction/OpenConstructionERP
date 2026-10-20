@@ -56684,7 +56684,7 @@ const resource = {
     "processes.profile_features_name": "Μέγιστες λειτουργίες",
     "processes.profile_features_promise": "Όλες οι υπηρεσίες ενεργές, ώστε τίποτα να μην περιμένει την εκκίνηση. Απαιτεί ισχυρό διακομιστή.",
     "processes.profile_recommended": "Προτεινόμενο",
-    "processes.profile_summary": "Περίπου {{ram}} μνήμη, {{services}} ενεργές υπηρεσίες",
+    "processes.profile_summary": "Περίπου {{ram}} μνήμης. Ενεργές υπηρεσίες: {{services}}",
     "processes.profile_active": "Ενεργό",
     "processes.profile_choose": "Χρήση αυτού του προφίλ",
     "processes.profile_custom": "Προσαρμογή",

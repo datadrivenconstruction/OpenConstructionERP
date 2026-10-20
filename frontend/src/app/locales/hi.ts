@@ -56727,7 +56727,7 @@ const resource = {
     "processes.profile_features_name": "अधिकतम सुविधाएँ",
     "processes.profile_features_promise": "सभी सेवाएँ चालू, ताकि कुछ भी शुरू होने का इंतज़ार न करे। बड़े सर्वर की ज़रूरत है।",
     "processes.profile_recommended": "अनुशंसित",
-    "processes.profile_summary": "लगभग {{ram}} मेमोरी, {{services}} सेवाएँ चालू",
+    "processes.profile_summary": "लगभग {{ram}} मेमोरी। चालू सेवाएँ: {{services}}",
     "processes.profile_active": "सक्रिय",
     "processes.profile_choose": "यह प्रोफ़ाइल इस्तेमाल करें",
     "processes.profile_custom": "कस्टम",

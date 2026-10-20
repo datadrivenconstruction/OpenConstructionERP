@@ -57984,7 +57984,7 @@ const resource = {
     "processes.profile_features_name": "Maximum funkcí",
     "processes.profile_features_promise": "Všechny služby zapnuté, takže nic nečeká na spuštění. Vyžaduje dostatečně výkonný server.",
     "processes.profile_recommended": "Doporučeno",
-    "processes.profile_summary": "Asi {{ram}} paměti, zapnuto služeb: {{services}}",
+    "processes.profile_summary": "Přibližně {{ram}} paměti. Zapnuté služby: {{services}}",
     "processes.profile_active": "Aktivní",
     "processes.profile_choose": "Použít tento profil",
     "processes.profile_custom": "Vlastní",

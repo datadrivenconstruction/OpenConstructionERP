@@ -57003,7 +57003,7 @@ const resource = {
     "processes.profile_features_name": "מקסימום יכולות",
     "processes.profile_features_promise": "כל השירותים פועלים, כך שדבר לא ממתין להפעלה. דורש שרת חזק.",
     "processes.profile_recommended": "מומלץ",
-    "processes.profile_summary": "כ-{{ram}} זיכרון, {{services}} שירותים פועלים",
+    "processes.profile_summary": "בערך {{ram}} של זיכרון. שירותים פעילים: {{services}}",
     "processes.profile_active": "פעיל",
     "processes.profile_choose": "שימוש בפרופיל הזה",
     "processes.profile_custom": "מותאם אישית",

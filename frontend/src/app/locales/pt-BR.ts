@@ -53432,7 +53432,7 @@ const resource = {
     "processes.profile_features_name": "Recursos máximos",
     "processes.profile_features_promise": "Todos os serviços ligados, para que nada espere para iniciar. Exige um servidor com bastante capacidade.",
     "processes.profile_recommended": "Recomendado",
-    "processes.profile_summary": "Cerca de {{ram}} de memória, {{services}} serviços ligados",
+    "processes.profile_summary": "Cerca de {{ram}} de memória. Serviços ativos: {{services}}",
     "processes.profile_active": "Ativo",
     "processes.profile_choose": "Usar este perfil",
     "processes.profile_custom": "Personalizado",

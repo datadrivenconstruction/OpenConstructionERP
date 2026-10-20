@@ -56728,7 +56728,7 @@ const resource = {
     "processes.profile_features_name": "Kaikki ominaisuudet",
     "processes.profile_features_promise": "Kaikki palvelut päällä, joten mikään ei odota käynnistymistä. Vaatii tehokkaan palvelimen.",
     "processes.profile_recommended": "Suositeltu",
-    "processes.profile_summary": "Noin {{ram}} muistia, {{services}} palvelua päällä",
+    "processes.profile_summary": "Noin {{ram}} muistia. Käynnissä olevat palvelut: {{services}}",
     "processes.profile_active": "Aktiivinen",
     "processes.profile_choose": "Käytä tätä profiilia",
     "processes.profile_custom": "Mukautettu",

@@ -57339,7 +57339,7 @@ const resource = {
     "processes.profile_features_name": "Maximala funktioner",
     "processes.profile_features_promise": "Alla tjänster på, så inget väntar på start. Kräver en server med gott om resurser.",
     "processes.profile_recommended": "Rekommenderad",
-    "processes.profile_summary": "Cirka {{ram}} minne, {{services}} tjänster på",
+    "processes.profile_summary": "Cirka {{ram}} minne. Aktiva tjänster: {{services}}",
     "processes.profile_active": "Aktiv",
     "processes.profile_choose": "Använd den här profilen",
     "processes.profile_custom": "Anpassad",

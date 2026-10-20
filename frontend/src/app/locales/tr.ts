@@ -57605,7 +57605,7 @@ const resource = {
     "processes.profile_features_name": "Maksimum özellik",
     "processes.profile_features_promise": "Tüm hizmetler açık, böylece hiçbiri başlamayı beklemez. Geniş kapasiteli bir sunucu gerektirir.",
     "processes.profile_recommended": "Önerilen",
-    "processes.profile_summary": "Yaklaşık {{ram}} bellek, {{services}} hizmet açık",
+    "processes.profile_summary": "Yaklaşık {{ram}} bellek. Açık hizmetler: {{services}}",
     "processes.profile_active": "Etkin",
     "processes.profile_choose": "Bu profili kullan",
     "processes.profile_custom": "Özel",

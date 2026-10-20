@@ -57099,7 +57099,7 @@ const resource = {
     "processes.profile_features_name": "최대 기능",
     "processes.profile_features_promise": "모든 서비스를 켜서 시작을 기다리는 것이 없습니다. 여유 있는 서버가 필요합니다.",
     "processes.profile_recommended": "권장",
-    "processes.profile_summary": "메모리 약 {{ram}}, 서비스 {{services}}개 켜짐",
+    "processes.profile_summary": "메모리 약 {{ram}}. 켜진 서비스: {{services}}",
     "processes.profile_active": "사용 중",
     "processes.profile_choose": "이 프로필 사용",
     "processes.profile_custom": "사용자 지정",

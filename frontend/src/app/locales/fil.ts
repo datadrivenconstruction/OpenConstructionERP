@@ -56682,7 +56682,7 @@ const resource = {
     "processes.profile_features_name": "Pinakamaraming feature",
     "processes.profile_features_promise": "Bukas ang lahat ng serbisyo kaya walang naghihintay na magsimula. Kailangan ng malakas na server.",
     "processes.profile_recommended": "Inirerekomenda",
-    "processes.profile_summary": "Mga {{ram}} na memory, {{services}} serbisyo ang bukas",
+    "processes.profile_summary": "Mga {{ram}} ng memory. Mga serbisyong naka-on: {{services}}",
     "processes.profile_active": "Aktibo",
     "processes.profile_choose": "Gamitin ang profile na ito",
     "processes.profile_custom": "Custom",

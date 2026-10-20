@@ -56489,7 +56489,7 @@ const resource = {
     "processes.profile_features_name": "Đầy đủ tính năng",
     "processes.profile_features_promise": "Bật mọi dịch vụ nên không có gì phải chờ khởi động. Cần máy chủ cấu hình rộng rãi.",
     "processes.profile_recommended": "Khuyên dùng",
-    "processes.profile_summary": "Khoảng {{ram}} bộ nhớ, {{services}} dịch vụ đang bật",
+    "processes.profile_summary": "Khoảng {{ram}} bộ nhớ. Dịch vụ đang bật: {{services}}",
     "processes.profile_active": "Đang dùng",
     "processes.profile_choose": "Dùng hồ sơ này",
     "processes.profile_custom": "Tùy chỉnh",

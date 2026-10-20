@@ -59289,7 +59289,7 @@ const resource = {
     "processes.profile_features_name": "Maximális funkciók",
     "processes.profile_features_promise": "Minden szolgáltatás be, így semmi nem vár az indulásra. Erős szervert igényel.",
     "processes.profile_recommended": "Ajánlott",
-    "processes.profile_summary": "Kb. {{ram}} memória, {{services}} szolgáltatás bekapcsolva",
+    "processes.profile_summary": "Körülbelül {{ram}} memória. Bekapcsolt szolgáltatások: {{services}}",
     "processes.profile_active": "Aktív",
     "processes.profile_choose": "Profil használata",
     "processes.profile_custom": "Egyéni",

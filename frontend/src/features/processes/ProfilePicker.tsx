@@ -138,7 +138,7 @@ export function ProfilePicker({ processes, isAdmin, pending, onApply }: Props) {
               </p>
               <p className="mt-1.5 tabular-nums text-content-tertiary">
                 {t('processes.profile_summary', {
-                  defaultValue: 'About {{ram}} of memory, {{services}} services on',
+                  defaultValue: 'About {{ram}} of memory. Services on: {{services}}',
                   ram: formatMb(t, ram),
                   services: count,
                 })}

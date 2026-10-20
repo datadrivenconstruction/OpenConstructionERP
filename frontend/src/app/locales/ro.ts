@@ -57047,7 +57047,7 @@ const resource = {
     "processes.profile_features_name": "Funcții maxime",
     "processes.profile_features_promise": "Toate serviciile pornite, ca nimic să nu aștepte la pornire. Necesită un server cu resurse bune.",
     "processes.profile_recommended": "Recomandat",
-    "processes.profile_summary": "Aproximativ {{ram}} memorie, {{services}} servicii pornite",
+    "processes.profile_summary": "Aproximativ {{ram}} de memorie. Servicii pornite: {{services}}",
     "processes.profile_active": "Activ",
     "processes.profile_choose": "Folosește acest profil",
     "processes.profile_custom": "Personalizat",

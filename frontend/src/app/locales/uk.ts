@@ -58792,7 +58792,7 @@ const resource = {
     "processes.profile_features_name": "Максимум функцій",
     "processes.profile_features_promise": "Усі служби увімкнені, тож ніщо не чекає на запуск. Потрібен потужний сервер.",
     "processes.profile_recommended": "Рекомендовано",
-    "processes.profile_summary": "Близько {{ram}} пам'яті, увімкнено служб: {{services}}",
+    "processes.profile_summary": "Близько {{ram}} пам'яті. Увімкнені служби: {{services}}",
     "processes.profile_active": "Активний",
     "processes.profile_choose": "Використати цей профіль",
     "processes.profile_custom": "Власний",

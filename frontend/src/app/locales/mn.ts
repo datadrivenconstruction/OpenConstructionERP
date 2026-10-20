@@ -56402,7 +56402,7 @@ const resource = {
     "processes.profile_features_name": "Дээд боломж",
     "processes.profile_features_promise": "Бүх үйлчилгээ асаалттай тул юу ч эхлэхийг хүлээхгүй. Хүчирхэг сервер шаардана.",
     "processes.profile_recommended": "Санал болгох",
-    "processes.profile_summary": "Ойролцоогоор {{ram}} санах ой, {{services}} үйлчилгээ асаалттай",
+    "processes.profile_summary": "Ойролцоогоор {{ram}} санах ой. Идэвхтэй үйлчилгээ: {{services}}",
     "processes.profile_active": "Идэвхтэй",
     "processes.profile_choose": "Энэ профайлыг ашиглах",
     "processes.profile_custom": "Хувийн тохиргоо",

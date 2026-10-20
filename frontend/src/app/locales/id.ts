@@ -56480,7 +56480,7 @@ const resource = {
     "processes.profile_features_name": "Fitur maksimum",
     "processes.profile_features_promise": "Semua layanan aktif, sehingga tidak ada yang menunggu saat start. Butuh server yang lapang.",
     "processes.profile_recommended": "Direkomendasikan",
-    "processes.profile_summary": "Sekitar {{ram}} memori, {{services}} layanan aktif",
+    "processes.profile_summary": "Sekitar {{ram}} memori. Layanan aktif: {{services}}",
     "processes.profile_active": "Aktif",
     "processes.profile_choose": "Gunakan profil ini",
     "processes.profile_custom": "Kustom",

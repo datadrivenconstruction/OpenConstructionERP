@@ -57605,7 +57605,7 @@ const resource = {
     "processes.profile_features_name": "Maximale functies",
     "processes.profile_features_promise": "Alle services aan, zodat niets op de start hoeft te wachten. Vereist een ruime server.",
     "processes.profile_recommended": "Aanbevolen",
-    "processes.profile_summary": "Ongeveer {{ram}} geheugen, {{services}} services aan",
+    "processes.profile_summary": "Ongeveer {{ram}} geheugen. Diensten aan: {{services}}",
     "processes.profile_active": "Actief",
     "processes.profile_choose": "Dit profiel gebruiken",
     "processes.profile_custom": "Aangepast",

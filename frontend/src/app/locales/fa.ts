@@ -56684,7 +56684,7 @@ const resource = {
     "processes.profile_features_name": "حداکثر امکانات",
     "processes.profile_features_promise": "همه سرویس‌ها روشن‌اند و چیزی منتظر شروع نمی‌ماند. به سرور قدرتمند نیاز دارد.",
     "processes.profile_recommended": "پیشنهادی",
-    "processes.profile_summary": "حدود {{ram}} حافظه، {{services}} سرویس روشن",
+    "processes.profile_summary": "حدود {{ram}} حافظه. سرویس‌های روشن: {{services}}",
     "processes.profile_active": "فعال",
     "processes.profile_choose": "استفاده از این پروفایل",
     "processes.profile_custom": "سفارشی",

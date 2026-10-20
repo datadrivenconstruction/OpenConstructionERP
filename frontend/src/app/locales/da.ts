@@ -56724,7 +56724,7 @@ const resource = {
     "processes.profile_features_name": "Maksimale funktioner",
     "processes.profile_features_promise": "Alle tjenester er slået til, så intet venter på at starte. Kræver en server med god plads.",
     "processes.profile_recommended": "Anbefalet",
-    "processes.profile_summary": "Ca. {{ram}} hukommelse, {{services}} tjenester til",
+    "processes.profile_summary": "Ca. {{ram}} hukommelse. Tjenester slået til: {{services}}",
     "processes.profile_active": "Aktiv",
     "processes.profile_choose": "Brug denne profil",
     "processes.profile_custom": "Tilpasset",

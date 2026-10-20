@@ -56481,7 +56481,7 @@ const resource = {
     "processes.profile_features_name": "ฟีเจอร์สูงสุด",
     "processes.profile_features_promise": "เปิดทุกบริการ ไม่ต้องรอเริ่มทำงาน ต้องใช้เซิร์ฟเวอร์ที่แรง",
     "processes.profile_recommended": "แนะนำ",
-    "processes.profile_summary": "ใช้หน่วยความจำประมาณ {{ram}} เปิดอยู่ {{services}} บริการ",
+    "processes.profile_summary": "ใช้หน่วยความจำประมาณ {{ram}} บริการที่เปิดอยู่: {{services}}",
     "processes.profile_active": "ใช้งานอยู่",
     "processes.profile_choose": "ใช้โปรไฟล์นี้",
     "processes.profile_custom": "กำหนดเอง",

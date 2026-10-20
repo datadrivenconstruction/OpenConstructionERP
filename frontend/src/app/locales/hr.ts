@@ -57057,7 +57057,7 @@ const resource = {
     "processes.profile_features_name": "Maksimalne funkcije",
     "processes.profile_features_promise": "Sve usluge uključene, pa ništa ne čeka na pokretanje. Treba jači server.",
     "processes.profile_recommended": "Preporučeno",
-    "processes.profile_summary": "Oko {{ram}} memorije, uključeno {{services}} usluga",
+    "processes.profile_summary": "Oko {{ram}} memorije. Uključene usluge: {{services}}",
     "processes.profile_active": "Aktivno",
     "processes.profile_choose": "Koristi ovaj profil",
     "processes.profile_custom": "Prilagođeno",
