@@ -183,6 +183,16 @@ class DrawingRemovedDuringConversion(Exception):
     """
 
 
+async def _record_failure_on_fresh_session(drawing_id: uuid.UUID) -> None:
+    """Mark a conversion failed from a new session; never raises."""
+    try:
+        async with async_session_factory() as session:
+            await DwgTakeoffService(session)._mark_failed(drawing_id, "convert_failed", _CONVERT_FAILED_MESSAGE)
+            await session.commit()
+    except Exception:  # noqa: BLE001 - best effort after a failure already logged
+        logger.warning("Could not record the failed conversion of drawing %s", drawing_id, exc_info=True)
+
+
 async def _beat_while_converting(drawing_id: uuid.UUID) -> None:
     """Report the conversion alive until cancelled.
 
@@ -2952,6 +2962,9 @@ async def _run_dwg_conversion_in_background(
                 "Background DDC conversion failed for drawing %s",
                 drawing_id,
             )
+            # The failure may have broken this session (a dropped connection), and
+            # a row left in "processing" is later reported as a server restart.
+            await _record_failure_on_fresh_session(drawing_id)
         finally:
             beat.cancel()
             with suppress(asyncio.CancelledError):
