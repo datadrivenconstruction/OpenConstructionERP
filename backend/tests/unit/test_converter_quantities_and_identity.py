@@ -307,3 +307,41 @@ def test_a_dwg_is_read_through_the_dxf_its_converter_writes(monkeypatch: pytest.
     assert table is not None and table != log_xlsx
     elements = cad_import.parse_cad_excel(table)
     assert any(str(e.get("category") or e.get("Category")) == "A-WALL" for e in elements)
+
+
+# ── Quantity rules on converter imports ─────────────────────────────────────
+
+
+def test_a_quantity_rule_reads_the_keys_a_converter_import_stores() -> None:
+    from decimal import Decimal
+    from types import SimpleNamespace
+
+    from app.modules.bim_hub.service import BIMHubService
+
+    wall = SimpleNamespace(quantities={"Area": 15.0, "Volume": 3.0, "Length": 5.0}, properties={})
+    assert BIMHubService._extract_quantity(wall, "area_m2") == Decimal("15.0")
+    assert BIMHubService._extract_quantity(wall, "volume_m3") == Decimal("3.0")
+    assert BIMHubService._extract_quantity(wall, "weight_kg") is None
+
+
+@pytest.mark.parametrize(
+    ("element_type", "discipline"),
+    [
+        ("Structural Framing", "structural"),
+        ("Structural Foundations", "structural"),
+        ("Floors", "structural"),
+        ("Curtain Wall Mullions", "architecture"),
+        ("Furniture", "architecture"),
+        ("Pipe Fittings", "mep"),
+        ("Lighting Fixtures", "mep"),
+        ("Walls", "structural"),
+        ("IfcDoor", "architecture"),
+    ],
+)
+def test_revit_category_names_get_a_discipline(element_type: str, discipline: str) -> None:
+    assert ifc_processor._classify_discipline(element_type) == discipline
+
+
+def test_categories_outside_the_curated_list_still_get_their_builtin_name() -> None:
+    assert revit_category_name(-2005301) == "OST_BoundaryConditions"
+    assert revit_category_label(-2005301) == "Boundary Conditions"
