@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeExtents } from '../viewport';
+import { computeExtents, isImplausibleSpan } from '../viewport';
 import type { DxfEntity } from '../../api';
 
 describe('computeExtents with arcs', () => {
@@ -38,5 +38,14 @@ describe('computeExtents with arcs', () => {
     expect(ext.minY).toBeCloseTo(0);
     expect(ext.minX).toBeCloseTo(-10);
     expect(ext.maxX).toBeCloseTo(10);
+  });
+});
+
+describe('isImplausibleSpan', () => {
+  it('flags a plan that is centimetres or continents across', () => {
+    // 03_electrical: extents 2.8..145 units declared as mm = 0.14 m.
+    expect(isImplausibleSpan({ w: 0.142, h: 0.1 })).toBe(true);
+    expect(isImplausibleSpan({ w: 250_000, h: 10 })).toBe(true);
+    expect(isImplausibleSpan({ w: 42, h: 18 })).toBe(false);
   });
 });
