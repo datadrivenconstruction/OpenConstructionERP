@@ -4,7 +4,9 @@ An admin pins accent, font, density and radius once; users without a personal
 choice follow it. These tests hold the contract: only allowed values survive,
 a field left out of a PUT keeps its stored value (saving the appearance cannot
 drop the logo, saving the logo cannot drop the appearance), ``null`` clears it,
-and old payloads without the key still work.
+and old payloads without the key still work. The menu look rides along under
+``appearance.menu``; the style and the menu are saved apart, so each keeps
+the other when it is written.
 No database: the data dir is a tmp path via ``OE_DATA_DIR``.
 """
 
@@ -18,12 +20,13 @@ from pydantic import ValidationError
 from app.core.app_branding import (
     APPEARANCE_OPTIONS,
     DEFAULT_BRANDING,
+    MENU_OPTIONS,
     read_branding,
     sanitise,
     sanitise_appearance,
     write_branding,
 )
-from app.core.branding_router import BrandingUpdate, WorkspaceAppearance, put_branding
+from app.core.branding_router import BrandingUpdate, WorkspaceAppearance, WorkspaceMenu, put_branding
 
 
 @pytest.fixture(autouse=True)
@@ -82,3 +85,52 @@ def test_omitted_appearance_is_kept_and_null_clears_it() -> None:
 
     asyncio.run(put_branding(BrandingUpdate(mode="default", company_name="", appearance=None)))
     assert read_branding() == DEFAULT_BRANDING
+
+
+def test_sanitise_keeps_the_menu_look_and_drops_junk_in_it() -> None:
+    raw = {"accent": "teal", "menu": {"view": "rail", "color": "rainbow", "stroke": "bold", "icon_map": {"/": "X"}}}
+    assert sanitise_appearance(raw) == {"accent": "teal", "menu": {"view": "rail", "stroke": "bold"}}
+    assert sanitise_appearance({"menu": {"view": "sideways"}}) is None
+    assert sanitise_appearance({"menu": "rail"}) is None
+
+
+def test_menu_schema_mirrors_the_allowed_values() -> None:
+    for axis, allowed in MENU_OPTIONS.items():
+        for value in allowed:
+            WorkspaceMenu(**{axis: value})
+        with pytest.raises(ValidationError):
+            WorkspaceMenu(**{axis: "nope"})
+    with pytest.raises(ValidationError):
+        WorkspaceMenu(overrides={"/boq": "Truck"})
+
+
+def test_menu_alone_keeps_the_style_and_the_style_alone_keeps_the_menu() -> None:
+    write_branding({"mode": "default", "appearance": {"accent": "amber", "radius": "round"}})
+    menu = WorkspaceMenu(view="floating", active="tint", color="sections")
+    asyncio.run(put_branding(BrandingUpdate(appearance=WorkspaceAppearance(menu=menu))))
+    assert read_branding()["appearance"] == {
+        "accent": "amber",
+        "radius": "round",
+        "menu": {"view": "floating", "active": "tint", "color": "sections"},
+    }
+
+    style = WorkspaceAppearance(accent="teal", font="inter", density="compact", radius="sharp")
+    out = asyncio.run(put_branding(BrandingUpdate(appearance=style)))
+    assert out.appearance is not None
+    assert out.appearance.menu is not None
+    assert out.appearance.menu.view == "floating"
+    assert read_branding()["appearance"]["menu"] == {"view": "floating", "active": "tint", "color": "sections"}
+
+
+def test_null_clears_one_part_and_null_appearance_clears_all() -> None:
+    write_branding({"mode": "default", "appearance": {"accent": "amber", "menu": {"view": "compact"}}})
+    asyncio.run(put_branding(BrandingUpdate.model_validate({"appearance": {"menu": None}})))
+    assert read_branding()["appearance"] == {"accent": "amber"}
+
+    write_branding({"mode": "default", "appearance": {"accent": "amber", "menu": {"view": "compact"}}})
+    cleared_style = {"accent": None, "font": None, "density": None, "radius": None}
+    asyncio.run(put_branding(BrandingUpdate.model_validate({"appearance": cleared_style})))
+    assert read_branding()["appearance"] == {"menu": {"view": "compact"}}
+
+    asyncio.run(put_branding(BrandingUpdate.model_validate({"appearance": None})))
+    assert read_branding()["appearance"] is None

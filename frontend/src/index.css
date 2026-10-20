@@ -2081,3 +2081,140 @@ html[data-density='compact'] .ag-theme-quartz {
   --ag-header-height: 36px;
   --ag-cell-horizontal-padding: 6px;
 }
+
+/* ── Menu look ────────────────────────────────────────────────────────────
+   data-menu-* on <html>, painted by the boot script in index.html and kept in
+   step by stores/useAppearanceStore.ts (shared/lib/menuAppearance.ts). The
+   defaults (classic, bar, caps, regular, none, mono, shown) add nothing, so the
+   Classic menu is the sidebar as it was. `aside.oe-sidebar` because the fixed
+   wrapper in AppLayout carries the class too.
+
+   Section tones clear WCAG AA (4.5:1) on the sidebar surfaces, on the active
+   row tint and on the icon tiles in both themes; asserted in
+   src/shared/lib/__tests__/menuAppearance.test.ts against SECTION_TONES. */
+:root {
+  --oe-menu-stroke: 1.75;
+  --oe-tone-0: #1e40af;
+  --oe-tone-1: #115e59;
+  --oe-tone-2: #5b21b6;
+  --oe-tone-3: #92400e;
+  --oe-tone-4: #065f46;
+  --oe-tone-5: #9f1239;
+  --oe-tone-6: #155e75;
+  --oe-tone-7: #9a3412;
+}
+.dark {
+  --oe-tone-0: #93c5fd;
+  --oe-tone-1: #5eead4;
+  --oe-tone-2: #c4b5fd;
+  --oe-tone-3: #fcd34d;
+  --oe-tone-4: #6ee7b7;
+  --oe-tone-5: #fda4af;
+  --oe-tone-6: #67e8f9;
+  --oe-tone-7: #fdba74;
+}
+html[data-menu-stroke='light'] { --oe-menu-stroke: 1.25; }
+html[data-menu-stroke='bold'] { --oe-menu-stroke: 2.25; }
+
+aside.oe-sidebar .oe-nav-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--oe-nav-icon-color, currentColor);
+}
+aside.oe-sidebar .oe-nav-icon > svg { stroke-width: var(--oe-menu-stroke); }
+aside.oe-sidebar [data-active] .oe-nav-icon > svg { stroke-width: calc(var(--oe-menu-stroke) + 0.25); }
+aside.oe-sidebar .oe-nav-icon > svg.oe-nav-spinner { stroke-width: 2; }
+
+/* Icon colour */
+html[data-menu-color='accent'] aside.oe-sidebar .oe-nav-icon { --oe-nav-icon-color: var(--oe-blue-text); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon { --oe-nav-icon-color: var(--oe-blue-text); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='0'] { --oe-nav-icon-color: var(--oe-tone-0); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='1'] { --oe-nav-icon-color: var(--oe-tone-1); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='2'] { --oe-nav-icon-color: var(--oe-tone-2); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='3'] { --oe-nav-icon-color: var(--oe-tone-3); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='4'] { --oe-nav-icon-color: var(--oe-tone-4); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='5'] { --oe-nav-icon-color: var(--oe-tone-5); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='6'] { --oe-nav-icon-color: var(--oe-tone-6); }
+html[data-menu-color='sections'] aside.oe-sidebar .oe-nav-icon[data-tone='7'] { --oe-nav-icon-color: var(--oe-tone-7); }
+
+/* Icon container: a soft tile or a circle washed with the icon colour. */
+html[data-menu-container='tile'] aside.oe-sidebar .oe-nav-icon,
+html[data-menu-container='circle'] aside.oe-sidebar .oe-nav-icon {
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 7px;
+  background: var(--oe-bg-secondary);
+  background: color-mix(in srgb, var(--oe-nav-icon-color, currentColor) 12%, transparent);
+}
+html[data-menu-container='circle'] aside.oe-sidebar .oe-nav-icon { border-radius: 9999px; }
+html[data-menu-container='tile'][data-menu-view='compact'] aside.oe-sidebar .oe-nav-icon,
+html[data-menu-container='circle'][data-menu-view='compact'] aside.oe-sidebar .oe-nav-icon {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+html[data-menu-container='tile'][data-menu-view='comfortable'] aside.oe-sidebar .oe-nav-icon,
+html[data-menu-container='circle'][data-menu-view='comfortable'] aside.oe-sidebar .oe-nav-icon {
+  width: 1.875rem;
+  height: 1.875rem;
+}
+
+/* Labels only: full rows drop the icon; the rail always keeps it. */
+html[data-menu-icons='hidden'] aside.oe-sidebar .oe-nav-row .oe-nav-icon { display: none; }
+
+/* View: row height, type size and air between sections. */
+html[data-menu-view='compact'] aside.oe-sidebar .oe-nav-row {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  gap: 0.375rem;
+  font-size: 12px;
+}
+html[data-menu-view='compact'] aside.oe-sidebar .oe-nav-icon > svg { width: 14px; height: 14px; }
+html[data-menu-view='compact'] aside.oe-sidebar .oe-nav-group { margin-top: 0.375rem; }
+html[data-menu-view='comfortable'] aside.oe-sidebar .oe-nav-row {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  gap: 0.625rem;
+  font-size: 14px;
+}
+html[data-menu-view='comfortable'] aside.oe-sidebar .oe-nav-icon > svg { width: 18px; height: 18px; }
+html[data-menu-view='comfortable'] aside.oe-sidebar .oe-nav-group { margin-top: 1.125rem; }
+html[data-menu-view='comfortable'] aside.oe-sidebar nav ul > li + li { margin-top: 3px; }
+
+/* Floating: an inset rounded panel with a soft shadow, same footprint. */
+html[data-menu-view='floating'] aside.oe-sidebar {
+  margin: 10px;
+  height: calc(100% - 20px);
+  width: calc(var(--oe-sidebar-width) - 20px);
+  border: 1px solid var(--oe-border-light);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 32px -14px rgba(15, 23, 42, 0.22) !important;
+  overflow: hidden;
+}
+.dark[data-menu-view='floating'] aside.oe-sidebar {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 36px -14px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Active row: the 2px bar is the default; RTL puts it on the leading edge. */
+[dir='rtl'] aside.oe-sidebar .oe-nav-row {
+  border-left-width: 0;
+  border-right-width: 2px;
+}
+html[data-menu-active='tint'] aside.oe-sidebar .oe-nav-row[data-active] {
+  border-color: transparent;
+  color: var(--oe-blue-text);
+}
+html[data-menu-active='pill'] aside.oe-sidebar .oe-nav-row[data-active],
+html[data-menu-active='pill'] aside.oe-sidebar .oe-nav-rail-row[data-active] {
+  border-color: transparent;
+  background: var(--oe-blue);
+  color: var(--oe-on-accent);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+html[data-menu-active='pill'] aside.oe-sidebar .oe-nav-row[data-active] { border-radius: 9999px; }
+html[data-menu-active='pill'] aside.oe-sidebar [data-active] .oe-nav-icon {
+  --oe-nav-icon-color: currentColor;
+  background: transparent;
+}
+html[data-menu-active='pill'] aside.oe-sidebar .oe-nav-row[data-active] .oe-nav-trail { color: inherit; opacity: 0.85; }

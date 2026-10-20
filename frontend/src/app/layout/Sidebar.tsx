@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useCallback, useEffect, useMemo, useRef, Fragment } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, Fragment, Suspense, lazy } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { CustomBranding } from './CustomBranding';
@@ -33,6 +34,8 @@ import {
   Loader2,
   LayoutGrid,
   GraduationCap,
+  Palette,
+  RotateCcw,
   type LucideIcon,
 } from 'lucide-react';
 import { LEARN_GROUP_ID, navGroups, type NavGroup, type NavItem } from './navCatalog';
@@ -68,6 +71,35 @@ import {
   buildModuleGate,
 } from '@/features/projects/useProjectProfile';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { useAppearanceStore } from '@/stores/useAppearanceStore';
+import { sectionTone, useMenuIcon } from './menuIcons';
+
+// The picker carries the curated icon catalogue; both load on first use.
+const MenuIconPicker = lazy(() => import('./MenuIconPicker'));
+
+const WIDE_QUERY = '(min-width: 1024px)';
+
+/** True at the `lg` breakpoint and up, where the sidebar is docked. */
+function useWideScreen(): boolean {
+  const [wide, setWide] = useState(
+    () => typeof window === 'undefined' || !window.matchMedia || window.matchMedia(WIDE_QUERY).matches,
+  );
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const mq = window.matchMedia(WIDE_QUERY);
+    const onChange = () => setWide(mq.matches);
+    mq.addEventListener?.('change', onChange);
+    return () => mq.removeEventListener?.('change', onChange);
+  }, []);
+  return wide;
+}
+
+/** A menu row the user asked to give another icon. */
+interface IconTarget {
+  route: string;
+  label: string;
+  icon: LucideIcon;
+}
 
 
 
@@ -557,8 +589,27 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   }, [moreOpen]);
   const badgeCounts = useSidebarBadges();
   const openSearch = useGlobalSearchStore((s) => s.openModal);
-  const iconified = useSidebarCollapseStore((s) => s.iconified);
-  const toggleIconified = useSidebarCollapseStore((s) => s.toggle);
+  const collapsedToIcons = useSidebarCollapseStore((s) => s.iconified);
+  const toggleCollapsed = useSidebarCollapseStore((s) => s.toggle);
+  // The Rail menu view is the icon-only sidebar; its edge tab still opens the
+  // full menu for a moment without changing the chosen view.
+  // Phones keep the full drawer: a rail of bare icons is no help there.
+  const wideScreen = useWideScreen();
+  const railView = useAppearanceStore((s) => s.menu.view) === 'rail' && wideScreen;
+  const [railOpen, setRailOpen] = useState(false);
+  useEffect(() => {
+    if (!railView) setRailOpen(false);
+  }, [railView]);
+  const iconified = railView ? !railOpen : collapsedToIcons;
+  const toggleIconified = railView ? () => setRailOpen((open) => !open) : toggleCollapsed;
+  // Right-click on a row: small menu to change its icon, then the picker.
+  const [rowMenu, setRowMenu] = useState<(IconTarget & { x: number; y: number }) | null>(null);
+  const [iconTarget, setIconTarget] = useState<IconTarget | null>(null);
+  const iconOverrides = useAppearanceStore((s) => s.iconOverrides);
+  const setIconOverride = useAppearanceStore((s) => s.setIconOverride);
+  const openRowMenu = useCallback((target: IconTarget, x: number, y: number) => {
+    setRowMenu({ ...target, x, y });
+  }, []);
   const isRTL = useIsRTL();
   const userRole = useAuthStore((s) => s.userRole);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -1180,6 +1231,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           editMode={editMode}
           isItemHidden={editingHidden.includes(item.to)}
           onToggleHidden={toggleItemHidden}
+          onRowMenu={openRowMenu}
         />
       </li>
     );
@@ -1412,6 +1464,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                     editMode={editMode}
                     isItemHidden={editingHidden.includes(item.to)}
                     onToggleHidden={toggleItemHidden}
+                    onRowMenu={openRowMenu}
                   />
                 </li>
               ))}
@@ -1929,7 +1982,106 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         open={customModuleOpen}
         onClose={() => setCustomModuleOpen(false)}
       />
+      {rowMenu && (
+        <RowIconMenu
+          x={rowMenu.x}
+          y={rowMenu.y}
+          hasOverride={Boolean(iconOverrides[rowMenu.route])}
+          onCustomise={() => {
+            setIconTarget({ route: rowMenu.route, label: rowMenu.label, icon: rowMenu.icon });
+            setRowMenu(null);
+          }}
+          onReset={() => {
+            setIconOverride(rowMenu.route, null);
+            setRowMenu(null);
+          }}
+          onClose={() => setRowMenu(null)}
+        />
+      )}
+      {iconTarget && (
+        <Suspense fallback={null}>
+          <MenuIconPicker
+            route={iconTarget.route}
+            label={iconTarget.label}
+            defaultIcon={iconTarget.icon}
+            onClose={() => setIconTarget(null)}
+          />
+        </Suspense>
+      )}
     </aside>
+  );
+}
+
+/** The right-click menu of a sidebar row: change or reset its icon. Opened
+ *  by the context-menu key (Shift+F10) too; Shift+right-click keeps the
+ *  browser's own menu. */
+function RowIconMenu({
+  x,
+  y,
+  hasOverride,
+  onCustomise,
+  onReset,
+  onClose,
+}: {
+  x: number;
+  y: number;
+  hasOverride: boolean;
+  onCustomise: () => void;
+  onReset: () => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    ref.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    const onDown = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) onClose();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const items = Array.from(ref.current?.querySelectorAll<HTMLButtonElement>('button') ?? []);
+        const at = items.indexOf(document.activeElement as HTMLButtonElement);
+        const next = e.key === 'ArrowDown' ? at + 1 : at - 1;
+        items[(next + items.length) % items.length]?.focus();
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onClose);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onClose);
+    };
+  }, [onClose]);
+
+  const left = Math.max(8, Math.min(x, window.innerWidth - 228));
+  const top = Math.max(8, Math.min(y, window.innerHeight - 96));
+  const itemClass =
+    'flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-start text-sm text-content-primary hover:bg-surface-secondary focus-visible:bg-surface-secondary focus-visible:outline-none';
+  return createPortal(
+    <div
+      ref={ref}
+      role="menu"
+      aria-label={t('settings.menu_icons_row_menu', { defaultValue: 'Menu item icon' })}
+      className="fixed z-[70] w-52 rounded-lg border border-border-light bg-surface-elevated p-1 shadow-lg animate-fade-in"
+      style={{ left, top }}
+    >
+      <button type="button" role="menuitem" onClick={onCustomise} className={itemClass}>
+        <Palette size={14} aria-hidden className="shrink-0 text-content-tertiary" />
+        {t('settings.menu_icons_customise', { defaultValue: 'Customise icon…' })}
+      </button>
+      {hasOverride && (
+        <button type="button" role="menuitem" onClick={onReset} className={itemClass}>
+          <RotateCcw size={14} aria-hidden className="shrink-0 text-content-tertiary" />
+          {t('settings.menu_icons_reset_one', { defaultValue: 'Reset to default' })}
+        </button>
+      )}
+    </div>,
+    document.body,
   );
 }
 
@@ -1958,6 +2110,7 @@ function NavGroupSection({
   onToggleGroupHidden?: () => void;
 }) {
   const { t } = useTranslation();
+  const headers = useAppearanceStore((s) => s.menu.headers);
   // In icon-only mode there is no room for the group header chevron;
   // we surface group boundaries as a thin centred hairline and keep
   // the items always-expanded (per-group collapse is irrelevant when
@@ -1970,6 +2123,64 @@ function NavGroupSection({
       </div>
     );
   }
+  // Header style "none": sections run on with a little air and no header, so
+  // nothing can stay collapsed out of reach. The menu editor still needs the
+  // section toggle, so edit mode falls back to the divider header.
+  if (headers === 'none' && !editMode) {
+    return <div className="oe-nav-group mt-2.5">{children}</div>;
+  }
+  if (headers === 'divider' || headers === 'none') {
+    return (
+      <div className={clsx('oe-nav-group mt-3 mb-0.5', editMode && isGroupHidden && 'opacity-50')}>
+        <div className="mb-0.5 flex items-center gap-0.5">
+          <button
+            onClick={onToggle}
+            aria-expanded={!isCollapsed}
+            aria-label={
+              isCollapsed
+                ? t('common.expand_section', { defaultValue: 'Expand {{label}}', label })
+                : t('common.collapse_section', { defaultValue: 'Collapse {{label}}', label })
+            }
+            className={clsx(
+              'group flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-start',
+              'hover:bg-surface-secondary/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-oe-blue/40',
+              'transition-colors duration-150',
+            )}
+          >
+            {/* Sentence case as written: CSS uppercase maps the Turkish i wrongly. */}
+            <span className="max-w-[75%] truncate text-[11px] font-medium text-content-tertiary group-hover:text-content-secondary">
+              {label}
+            </span>
+            <span className="h-px min-w-[1rem] flex-1 bg-border-light" aria-hidden />
+            <ChevronDown
+              size={11}
+              strokeWidth={2}
+              className={clsx(
+                'shrink-0 text-content-quaternary transition-transform duration-200 group-hover:text-content-secondary',
+                isCollapsed && '-rotate-90 rtl:rotate-90',
+              )}
+              aria-hidden
+            />
+          </button>
+          {editMode && onToggleGroupHidden && (
+            <button
+              type="button"
+              onClick={onToggleGroupHidden}
+              aria-label={
+                isGroupHidden
+                  ? t('sidebar.show_group', { defaultValue: 'Show {{label}} section', label })
+                  : t('sidebar.hide_group', { defaultValue: 'Hide {{label}} section', label })
+              }
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-content-tertiary hover:bg-oe-blue/10 hover:text-oe-blue"
+            >
+              {isGroupHidden ? <EyeOff size={12} strokeWidth={2} /> : <Eye size={12} strokeWidth={2} />}
+            </button>
+          )}
+        </div>
+        {!isCollapsed && children}
+      </div>
+    );
+  }
   // Expanded sidebar — render a clear section header with a subtle dot
   // glyph on the leading edge (modern-SaaS-style "rest" indicator) so the
   // grouping reads as a list, not a wall of indistinguishable rows.
@@ -1977,7 +2188,7 @@ function NavGroupSection({
   // keyboard focus shows a clean ring without bleeding outside the
   // padded box.
   return (
-    <div className={clsx('mt-3 mb-0.5', editMode && isGroupHidden && 'opacity-50')}>
+    <div className={clsx('oe-nav-group mt-3 mb-0.5', editMode && isGroupHidden && 'opacity-50')}>
       {/* Header row — the collapse toggle plus, in Edit-menu mode, a
           section-level Eye / EyeOff control. Kept as sibling buttons (not
           nested) so both stay valid, focusable controls. */}
@@ -2215,6 +2426,7 @@ function SidebarItem({
   editMode,
   isItemHidden,
   onToggleHidden,
+  onRowMenu,
 }: {
   item: NavItem;
   label: string;
@@ -2232,9 +2444,21 @@ function SidebarItem({
   editMode?: boolean;
   isItemHidden?: boolean;
   onToggleHidden?: (route: string) => void;
+  /** Right-click (or the context-menu key): offer to change this row's icon. */
+  onRowMenu?: (target: IconTarget, x: number, y: number) => void;
 }) {
   const { t } = useTranslation();
-  const Icon = item.icon;
+  const Icon = useMenuIcon(item.to, item.icon);
+  const tone = sectionTone(item.to);
+  const handleContextMenu = (e: React.MouseEvent<HTMLElement>) => {
+    if (!onRowMenu || e.shiftKey) return;
+    e.preventDefault();
+    // The context-menu key fires with no pointer position: anchor to the row.
+    const r = e.currentTarget.getBoundingClientRect();
+    const keyboard = e.clientX === 0 && e.clientY === 0;
+    const target = { route: item.to, label, icon: item.icon };
+    onRowMenu(target, keyboard ? r.left + 24 : e.clientX, keyboard ? r.bottom : e.clientY);
+  };
   const kbdHint = KBD_HINTS[item.to];
   const tourTestId = PRODUCT_TOUR_NAV_TESTIDS[item.to];
   // Hover tooltip: label, plus the "when to use this" one-liner when the
@@ -2291,13 +2515,15 @@ function SidebarItem({
         onClick={onClick}
         title={titleText}
         aria-label={label}
+        onContextMenu={handleContextMenu}
+        data-active={isActive || undefined}
         onMouseEnter={() => preloadRouteOnHover(item.to)}
         onMouseLeave={() => cancelRoutePreload(item.to)}
         {...(item.tourId ? { 'data-tour': item.tourId } : {})}
         {...(tourTestId ? { 'data-testid': tourTestId } : {})}
         className={() =>
           clsx(
-            'relative mx-auto flex h-9 w-9 items-center justify-center rounded-md transition-colors duration-fast ease-oe',
+            'oe-nav-rail-row relative mx-auto flex h-9 w-9 items-center justify-center rounded-md transition-colors duration-fast ease-oe',
             isActive
               ? 'bg-oe-blue/[0.14] text-oe-blue shadow-[inset_0_0_0_1px_rgba(0,122,255,0.18)] dark:bg-oe-blue/25'
               : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
@@ -2305,11 +2531,13 @@ function SidebarItem({
           )
         }
       >
-        {isPendingTarget ? (
-          <Loader2 size={16} className="oe-nav-spinner text-oe-blue" />
-        ) : (
-          <Icon size={16} strokeWidth={isActive ? 2 : 1.75} />
-        )}
+        <span className="oe-nav-icon" data-tone={tone}>
+          {isPendingTarget ? (
+            <Loader2 size={16} className="oe-nav-spinner text-oe-blue" />
+          ) : (
+            <Icon size={16} strokeWidth={isActive ? 2 : 1.75} />
+          )}
+        </span>
         {hasBadge && (
           <span
             className={clsx(
@@ -2343,11 +2571,14 @@ function SidebarItem({
           onClick?.();
         }}
         title={titleText}
+        onContextMenu={handleContextMenu}
+        data-active={isActive || undefined}
         {...(item.tourId ? { 'data-tour': item.tourId } : {})}
         {...(tourTestId ? { 'data-testid': tourTestId } : {})}
         className={() => {
           const active = isActive;
           return clsx(
+            'oe-nav-row',
             // 2px transparent left border on every item — when active
             // it flips to oe-blue. No layout shift between states. The
             // accent bar is the entire visual change for "active",
@@ -2383,14 +2614,16 @@ function SidebarItem({
             {seq}
           </span>
         )}
-        {isPendingTarget ? (
-          <Loader2
-            size={compact ? 14 : 16}
-            className="oe-nav-spinner shrink-0 text-oe-blue"
-          />
-        ) : (
-          <Icon size={compact ? 14 : 16} strokeWidth={isActive ? 2 : 1.75} className="shrink-0" />
-        )}
+        <span className="oe-nav-icon" data-tone={tone}>
+          {isPendingTarget ? (
+            <Loader2
+              size={compact ? 14 : 16}
+              className="oe-nav-spinner shrink-0 text-oe-blue"
+            />
+          ) : (
+            <Icon size={compact ? 14 : 16} strokeWidth={isActive ? 2 : 1.75} className="shrink-0" />
+          )}
+        </span>
         {/* German compound words (Leistungsverzeichnisse, Element-Abnahme)
             overflow a single 264px line, so labels may wrap onto a second
             line instead of clipping mid-word. The title tooltip stays as
@@ -2406,7 +2639,7 @@ function SidebarItem({
             empty rows previously paid the same 26px tax for nothing,
             squeezing the label width and triggering avoidable
             ellipsis truncation. */}
-        <span className={clsx('ms-auto flex items-center shrink-0', compact ? 'gap-1 ps-1' : 'gap-1.5 ps-1.5')}>
+        <span className={clsx('oe-nav-trail ms-auto flex items-center shrink-0', compact ? 'gap-1 ps-1' : 'gap-1.5 ps-1.5')}>
           {!compact && (
             <span
               className={clsx(

@@ -97,6 +97,23 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["branding"])
 
 
+class WorkspaceMenu(BaseModel):
+    """Workspace default menu look. An omitted axis means platform default.
+
+    The literals mirror ``MENU_OPTIONS`` in :mod:`app.core.app_branding`.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    view: Literal["classic", "compact", "comfortable", "rail", "floating"] | None = None
+    active: Literal["bar", "pill", "tint"] | None = None
+    headers: Literal["caps", "divider", "none"] | None = None
+    stroke: Literal["light", "regular", "bold"] | None = None
+    container: Literal["none", "tile", "circle"] | None = None
+    color: Literal["mono", "accent", "sections"] | None = None
+    icons: Literal["shown", "hidden"] | None = None
+
+
 class WorkspaceAppearance(BaseModel):
     """Workspace default for the UI look. An omitted axis means platform default.
 
@@ -110,6 +127,7 @@ class WorkspaceAppearance(BaseModel):
     font: Literal["system", "inter", "ibm-plex-sans", "source-sans-3"] | None = None
     density: Literal["comfortable", "compact"] | None = None
     radius: Literal["standard", "sharp", "round"] | None = None
+    menu: WorkspaceMenu | None = None
 
 
 class BrandingResponse(BaseModel):
@@ -171,10 +189,31 @@ async def put_branding(body: BrandingUpdate) -> BrandingResponse:
     # so saving the appearance alone cannot drop the logo, and the reverse.
     payload = read_branding()
     for field in body.model_fields_set:
-        payload[field] = getattr(body, field)
-    if isinstance(payload.get("appearance"), WorkspaceAppearance):
-        payload["appearance"] = payload["appearance"].model_dump(exclude_none=True)
+        if field == "appearance" and body.appearance is not None:
+            payload["appearance"] = _merge_appearance(payload.get("appearance"), body.appearance)
+        else:
+            payload[field] = getattr(body, field)
     return BrandingResponse(**write_branding(payload))
+
+
+def _merge_appearance(stored: Any, update: WorkspaceAppearance) -> dict[str, Any]:
+    """Apply an appearance update axis by axis onto what is stored.
+
+    Same rule as the top-level fields: an axis the client sent replaces the
+    stored one, ``null`` clears it, and an axis left out keeps its value. So
+    the style card and the menu card each save their own part without dropping
+    the other's. ``menu`` is one value: sent whole, cleared with ``null``.
+    """
+    merged: dict[str, Any] = dict(stored) if isinstance(stored, dict) else {}
+    for axis in update.model_fields_set:
+        value = getattr(update, axis)
+        if value is None:
+            merged.pop(axis, None)
+        elif isinstance(value, WorkspaceMenu):
+            merged[axis] = value.model_dump(exclude_none=True)
+        else:
+            merged[axis] = value
+    return merged
 
 
 @router.delete(
