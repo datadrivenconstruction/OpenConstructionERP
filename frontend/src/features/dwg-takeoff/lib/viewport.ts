@@ -47,6 +47,28 @@ export interface Extents {
  * `expandBlockReferences` alongside the entities to have block content counted
  * where it actually sits.
  */
+/** Feed the box of a counter-clockwise arc (angles in radians) to `expand`:
+ *  its end points plus every axis extreme the sweep passes through. */
+export function arcExtents(
+  centre: { x: number; y: number },
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  expand: (x: number, y: number) => void,
+): void {
+  const TAU = Math.PI * 2;
+  const sa = ((startAngle % TAU) + TAU) % TAU;
+  let sweep = ((endAngle % TAU) + TAU) % TAU - sa;
+  if (sweep <= 0) sweep += TAU;
+  const at = (a: number) => expand(centre.x + radius * Math.cos(a), centre.y + radius * Math.sin(a));
+  at(sa);
+  at(sa + sweep);
+  for (let k = 0; k < 8; k++) {
+    const axis = (k * Math.PI) / 2;
+    if (axis > sa && axis < sa + sweep) at(axis);
+  }
+}
+
 export function computeExtents(entities: DxfEntity[]): Extents {
   let minX = Infinity;
   let minY = Infinity;
@@ -62,6 +84,12 @@ export function computeExtents(entities: DxfEntity[]): Extents {
 
   for (const e of entities) {
     if (e.type === 'TEXT' || e.block) continue;
+    if (e.type === 'ARC' && e.start && e.radius && e.start_angle != null && e.end_angle != null) {
+      // An ARC's `start` is its centre. A flat arc (radius 50 km, sweep 0.1 deg)
+      // is drawn as a short curve; its centre and full circle are nowhere near it.
+      arcExtents(e.start, e.radius, e.start_angle, e.end_angle, expand);
+      continue;
+    }
     if (e.start) expand(e.start.x, e.start.y);
     if (e.end) expand(e.end.x, e.end.y);
     if (e.vertices) {

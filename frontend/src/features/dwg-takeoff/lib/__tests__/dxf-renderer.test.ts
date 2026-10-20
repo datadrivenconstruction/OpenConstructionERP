@@ -588,3 +588,25 @@ describe('stroke batching in renderEntities', () => {
     expect(calls.filter((c) => c.op === 'beginPath')).toHaveLength(0);
   });
 });
+
+describe('ARC sweep direction', () => {
+  it('draws the short arc, not its complement', () => {
+    // A quarter arc from +x to +y in world space. With Y flipped on screen the
+    // canvas must sweep anticlockwise from 0 to -PI/2; clockwise would draw
+    // the other three quarters (a flat arc then shows as a giant circle).
+    const arc: DxfEntity = {
+      id: 'q',
+      type: 'ARC',
+      layer: 'A-WALL',
+      color: 7,
+      start: { x: 0, y: 0 },
+      radius: 10,
+      start_angle: 0,
+      end_angle: Math.PI / 2,
+    };
+    const { ctx, calls } = stubCtx();
+    renderEntities(ctx, [arc], vp(1), new Set(['A-WALL']), null, 800, 600);
+    const call = calls.find((c) => c.op === 'arc');
+    expect(call?.args.slice(3)).toEqual([-0, -Math.PI / 2, true]);
+  });
+});
