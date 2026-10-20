@@ -48772,6 +48772,7 @@ const resource = {
     "bim.review_summary_still_open": "Stadig åbne",
     "bim.review_summary_title": "Gennemgang afsluttet",
     "bim.review_zoom_needs_model": "Indlæs modellen for at flyve til denne gemte visning.",
+    "bim.converter_package_missing": "Denne version forventer {{asset}} fra {{tag}}, som konverter-udgivelsen ikke længere tilbyder. Opdater OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Varighed (dage)",
     "designOptions.embodiedCarbon": "Indlejret kulstof A1-A5",

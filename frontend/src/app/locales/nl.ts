@@ -49565,6 +49565,7 @@ const resource = {
     "bim.review_summary_still_open": "Nog open",
     "bim.review_summary_title": "Beoordeling afgerond",
     "bim.review_zoom_needs_model": "Laad het model om naar deze opgeslagen weergave te vliegen.",
+    "bim.converter_package_missing": "Deze versie verwacht {{asset}} uit {{tag}}, dat de converter-release niet meer aanbiedt. Werk OpenConstructionERP bij.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Duur (dagen)",
     "designOptions.embodiedCarbon": "Gebonden CO2 A1-A5",

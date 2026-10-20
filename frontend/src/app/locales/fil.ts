@@ -48682,6 +48682,7 @@ const resource = {
   "bim.review_summary_still_open": "Bukas pa rin",
   "bim.review_summary_title": "Tapos na ang review",
   "bim.review_zoom_needs_model": "I-load ang modelo para lumipad papunta sa naka-save na view na ito.",
+  "bim.converter_package_missing": "Inaasahan ng bersyong ito ang {{asset}} mula sa {{tag}}, na hindi na iniaalok ng release ng converter. I-update ang OpenConstructionERP.",
   "designOptions.dayDelta": "{{days}} araw",
   "designOptions.durationDays": "Tagal (araw)",
   "designOptions.embodiedCarbon": "Embodied carbon A1-A5",

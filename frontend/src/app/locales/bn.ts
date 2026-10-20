@@ -49123,6 +49123,7 @@ const resource = {
   "bim.review_summary_still_open": "এখনও খোলা",
   "bim.review_summary_title": "রিভিউ সম্পন্ন হয়েছে",
   "bim.review_zoom_needs_model": "এই সংরক্ষিত ভিউতে যেতে মডেল লোড করুন।",
+  "bim.converter_package_missing": "এই সংস্করণ {{tag}} থেকে {{asset}} আশা করে, যা কনভার্টার রিলিজ আর সরবরাহ করে না। OpenConstructionERP আপডেট করুন।",
   "designOptions.dayDelta": "{{days}} দিন",
   "designOptions.durationDays": "সময়কাল (দিন)",
   "designOptions.embodiedCarbon": "অন্তর্নিহিত কার্বন A1-A5",

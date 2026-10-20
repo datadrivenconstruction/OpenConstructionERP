@@ -48833,6 +48833,7 @@ const resource = {
   "bim.review_summary_still_open": "Endiselt avatud",
   "bim.review_summary_title": "Ülevaatus lõppes",
   "bim.review_zoom_needs_model": "Laadi mudel, et lennata sellele salvestatud vaatele.",
+  "bim.converter_package_missing": "See versioon ootab faili {{asset}} väljalaskest {{tag}}, mida konverterite väljalase enam ei paku. Uuendage OpenConstructionERP.",
   "designOptions.dayDelta": "{{days}} p",
   "designOptions.durationDays": "Kestus (päevad)",
   "designOptions.embodiedCarbon": "Talletatud süsinik A1-A5",

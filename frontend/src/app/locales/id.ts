@@ -48450,6 +48450,7 @@ const resource = {
   "bim.review_summary_still_open": "Masih terbuka",
   "bim.review_summary_title": "Tinjauan selesai",
   "bim.review_zoom_needs_model": "Muat model untuk terbang ke tampilan tersimpan ini.",
+  "bim.converter_package_missing": "Versi ini memerlukan {{asset}} dari {{tag}}, yang tidak lagi disediakan oleh rilis konverter. Perbarui OpenConstructionERP.",
   "designOptions.dayDelta": "{{days}} hr",
   "designOptions.durationDays": "Durasi (hari)",
   "designOptions.embodiedCarbon": "Karbon terkandung A1-A5",

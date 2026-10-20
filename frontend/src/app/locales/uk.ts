@@ -50702,6 +50702,7 @@ const resource = {
     "bim.review_summary_still_open": "Досі відкрито",
     "bim.review_summary_title": "Огляд завершено",
     "bim.review_zoom_needs_model": "Завантажте модель, щоб перейти до цього збереженого вигляду.",
+    "bim.converter_package_missing": "Ця версія очікує {{asset}} з {{tag}}, але випуск конвертерів його більше не пропонує. Оновіть OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} дн.",
     "designOptions.durationDays": "Тривалість (днів)",
     "designOptions.embodiedCarbon": "Втілений вуглець A1-A5",

@@ -43638,6 +43638,7 @@ const resource = {
     "bim.review_summary_still_open": "Still open",
     "bim.review_summary_title": "Review finished",
     "bim.review_zoom_needs_model": "Load the model to fly to this saved view.",
+    "bim.converter_package_missing": "This version expects {{asset}} from {{tag}}, which the converter release no longer offers. Update OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Duration (days)",
     "designOptions.embodiedCarbon": "Embodied carbon A1-A5",

@@ -48896,6 +48896,7 @@ const resource = {
   "bim.review_summary_still_open": "Дагы деле ачык",
   "bim.review_summary_title": "Карап чыгуу аяктады",
   "bim.review_zoom_needs_model": "Ушул сакталган көрүнүшкө өтүү үчүн модель жүктөңүз.",
+  "bim.converter_package_missing": "Бул версия {{tag}} ичинен {{asset}} күтөт, бирок конвертерлердин чыгарылышы аны мындан ары сунуштабайт. OpenConstructionERP жаңыртыңыз.",
   "designOptions.dayDelta": "{{days}} күн",
   "designOptions.durationDays": "Узактыгы (күн)",
   "designOptions.embodiedCarbon": "Камтылган көмүртек A1-A5",

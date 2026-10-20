@@ -49049,6 +49049,7 @@ const resource = {
     "bim.review_summary_still_open": "עדיין פתוח",
     "bim.review_summary_title": "הסקירה הסתיימה",
     "bim.review_zoom_needs_model": "טענו את המודל כדי לעבור לתצוגה השמורה הזו.",
+    "bim.converter_package_missing": "גרסה זו מצפה ל-{{asset}} מתוך {{tag}}, שמהדורת הממירים כבר אינה מציעה. עדכנו את OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} י׳",
     "designOptions.durationDays": "משך (ימים)",
     "designOptions.embodiedCarbon": "פחמן גלום A1-A5",

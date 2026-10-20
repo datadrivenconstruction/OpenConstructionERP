@@ -49387,6 +49387,7 @@ const resource = {
     "bim.review_summary_still_open": "Fortfarande öppna",
     "bim.review_summary_title": "Granskning avslutad",
     "bim.review_zoom_needs_model": "Ladda modellen för att flyga till denna sparade vy.",
+    "bim.converter_package_missing": "Den här versionen förväntar sig {{asset}} från {{tag}}, som konverterarversionen inte längre erbjuder. Uppdatera OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Varaktighet (dagar)",
     "designOptions.embodiedCarbon": "Inbyggt kol A1-A5",

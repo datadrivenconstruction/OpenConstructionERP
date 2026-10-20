@@ -48706,6 +48706,7 @@ const resource = {
   "bim.review_summary_still_open": "همچنان باز",
   "bim.review_summary_title": "بررسی به پایان رسید",
   "bim.review_zoom_needs_model": "برای رفتن به این نمای ذخیرهشده، مدل را بارگذاری کنید.",
+  "bim.converter_package_missing": "این نسخه انتظار {{asset}} از {{tag}} را دارد که انتشار مبدل‌ها دیگر آن را ارائه نمی‌دهد. OpenConstructionERP را به‌روزرسانی کنید.",
   "designOptions.dayDelta": "{{days}} روز",
   "designOptions.durationDays": "مدت (روز)",
   "designOptions.embodiedCarbon": "کربن نهفته A1-A5",

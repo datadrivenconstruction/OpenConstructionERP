@@ -51407,6 +51407,7 @@ const resource = {
     "bim.review_summary_still_open": "Всё ещё открыто",
     "bim.review_summary_title": "Обзор завершён",
     "bim.review_zoom_needs_model": "Загрузите модель, чтобы перейти к этому сохранённому виду.",
+    "bim.converter_package_missing": "Эта версия ожидает {{asset}} из {{tag}}, но выпуск конвертеров его больше не предлагает. Обновите OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} дн.",
     "designOptions.durationDays": "Длительность (дней)",
     "designOptions.embodiedCarbon": "Воплощённый углерод A1-A5",

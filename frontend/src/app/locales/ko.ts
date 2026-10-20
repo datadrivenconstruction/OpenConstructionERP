@@ -49169,6 +49169,7 @@ const resource = {
   "bim.review_summary_still_open": "여전히 미해결",
   "bim.review_summary_title": "검토 종료",
   "bim.review_zoom_needs_model": "이 저장된 뷰로 이동하려면 모델을 불러오세요.",
+  "bim.converter_package_missing": "이 버전은 {{tag}}의 {{asset}}이(가) 필요하지만 변환기 릴리스에서 더 이상 제공하지 않습니다. OpenConstructionERP를 업데이트하세요.",
   "designOptions.dayDelta": "{{days}}일",
   "designOptions.durationDays": "기간(일)",
   "designOptions.embodiedCarbon": "내재 탄소 A1-A5",

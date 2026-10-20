@@ -49900,6 +49900,7 @@ const resource = {
     "bim.review_summary_still_open": "Stále otevřeno",
     "bim.review_summary_title": "Revize dokončena",
     "bim.review_zoom_needs_model": "Nahrajte model, chcete-li přejít k tomuto uloženému pohledu.",
+    "bim.converter_package_missing": "Tato verze očekává {{asset}} z {{tag}}, který vydání převodníků již nenabízí. Aktualizujte OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Doba trvání (dny)",
     "designOptions.embodiedCarbon": "Zabudovaný uhlík A1-A5",

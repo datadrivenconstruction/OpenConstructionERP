@@ -48772,6 +48772,7 @@ const resource = {
     "bim.review_summary_still_open": "Fortsatt åpne",
     "bim.review_summary_title": "Gjennomgang fullført",
     "bim.review_zoom_needs_model": "Last inn modellen for å fly til denne lagrede visningen.",
+    "bim.converter_package_missing": "Denne versjonen forventer {{asset}} fra {{tag}}, som konverterutgivelsen ikke lenger tilbyr. Oppdater OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} d",
     "designOptions.durationDays": "Varighet (dager)",
     "designOptions.embodiedCarbon": "Innebygd karbon A1-A5",

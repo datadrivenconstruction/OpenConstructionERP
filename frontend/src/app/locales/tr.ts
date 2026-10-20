@@ -49748,6 +49748,7 @@ const resource = {
   "bim.review_summary_still_open": "Hâlâ açık",
   "bim.review_summary_title": "İnceleme tamamlandı",
   "bim.review_zoom_needs_model": "Bu kayıtlı görünüme gitmek için modeli yükleyin.",
+  "bim.converter_package_missing": "Bu sürüm {{tag}} içinden {{asset}} bekliyor, ancak dönüştürücü sürümü bunu artık sunmuyor. OpenConstructionERP'yi güncelleyin.",
   "designOptions.dayDelta": "{{days}} g",
   "designOptions.durationDays": "Süre (gün)",
   "designOptions.embodiedCarbon": "Gömülü karbon A1-A5",

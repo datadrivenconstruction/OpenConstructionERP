@@ -279,6 +279,63 @@ def test_a_release_page_that_disagrees_with_the_pin_is_refused(monkeypatch: pyte
         router._download_converter_files_windows("dwg")
 
 
+# ── The release no longer offers the pinned asset ─────────────────────────
+
+
+def test_an_asset_the_release_no_longer_lists_is_a_coded_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Upstream replaced the assets of the pinned tag: say which one and that only an update helps."""
+    monkeypatch.setattr(router, "_CONVERTER_INSTALL_DIR", tmp_path)
+    monkeypatch.setattr(router, "_fetch_release_checksums", lambda _r, _t: {"Some-Other-9.9.9-portable.zip": "f" * 64})
+    monkeypatch.setattr(router, "_download_one_file", lambda *_a: pytest.fail("must not download"))
+
+    with pytest.raises(converter_package.ConverterPackageMissingError) as info:
+        router._download_converter_files_windows("dwg")
+    err = info.value
+    assert err.code == "converter_package_missing"
+    assert err.asset == PACKAGES["dwg"].asset
+    assert err.tag == router._DDC_TAG
+    assert f"expects {PACKAGES['dwg'].asset} from {router._DDC_TAG}" in str(err)
+    assert "Update OpenConstructionERP" in str(err)
+    assert not (tmp_path / "dwg_windows").exists()
+
+
+def test_a_404_on_the_asset_is_the_same_coded_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    import urllib.error
+
+    monkeypatch.setattr(router, "_CONVERTER_INSTALL_DIR", tmp_path)
+    monkeypatch.setattr(router, "_CONVERTER_CACHE_DIR", tmp_path / "cache")
+    monkeypatch.setattr(
+        router, "_fetch_release_checksums", lambda _r, _t: {PACKAGES["dwg"].asset: PACKAGES["dwg"].sha256}
+    )
+
+    def _gone(url: str, _target: Path) -> int:
+        raise urllib.error.HTTPError(url, 404, "Not Found", {}, None)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(router, "_download_one_file", _gone)
+
+    with pytest.raises(converter_package.ConverterPackageMissingError):
+        router._download_converter_files_windows("dwg")
+    assert not (tmp_path / "dwg_windows").exists()
+
+
+async def test_the_install_result_carries_the_code_asset_and_tag(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The frontend translates by ``error_code``; ``asset`` and ``tag`` fill the sentence."""
+
+    def _missing(_converter_id: str, *, clean: bool = False) -> Path:
+        raise converter_package.ConverterPackageMissingError("X-1.0-portable.zip", "v2026.10.0", "o/r")
+
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setattr(router, "_download_converter_files_windows", _missing)
+
+    result = await router._install_converter_impl("rvt", False, None)
+
+    assert result["installed"] is False
+    assert result["error_code"] == "converter_package_missing"
+    assert result["asset"] == "X-1.0-portable.zip"
+    assert result["tag"] == "v2026.10.0"
+    assert "no longer offers" in result["message"]
+
+
 def test_a_32_bit_or_mangled_executable_fails_the_install_and_removes_it(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

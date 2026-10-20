@@ -41247,6 +41247,7 @@ const resource = {
   "bim.view_cube_unavailable": "El cubo de vista necesita su propio contexto gráfico 3D y no pudo obtenerlo. La navegación del modelo no se ve afectada.",
   "bim.view_cube_no_context": "sin contexto 3D",
   "bim.view_cube_label": "Cubo de vista",
+  "bim.converter_package_missing": "Esta versión espera {{asset}} de {{tag}}, que la publicación de convertidores ya no ofrece. Actualice OpenConstructionERP.",
     "subcontractors.insights.status_pending": "Pendiente",
     "subcontractors.insights.status_approved": "Aprobado",
     "subcontractors.insights.status_suspended": "Suspendido",

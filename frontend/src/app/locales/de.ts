@@ -50757,6 +50757,7 @@ const resource = {
     "bim.review_summary_still_open": "Noch offen",
     "bim.review_summary_title": "Prüfung abgeschlossen",
     "bim.review_zoom_needs_model": "Laden Sie das Modell, um zu dieser gespeicherten Ansicht zu fliegen.",
+    "bim.converter_package_missing": "Diese Version erwartet {{asset}} aus {{tag}}, das die Konverter-Veröffentlichung nicht mehr anbietet. Aktualisieren Sie OpenConstructionERP.",
     "designOptions.dayDelta": "{{days}} T",
     "designOptions.durationDays": "Dauer (Tage)",
     "designOptions.embodiedCarbon": "Graue Emissionen A1-A5",

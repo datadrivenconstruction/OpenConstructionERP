@@ -50653,6 +50653,7 @@ const resource = {
     "bim.review_summary_still_open": "Még nyitott",
     "bim.review_summary_title": "Ellenőrzés befejezve",
     "bim.review_zoom_needs_model": "Töltse be a modellt, hogy odarepüljön ehhez a mentett nézethez.",
+    "bim.converter_package_missing": "Ez a verzió a(z) {{asset}} csomagot várja a(z) {{tag}} kiadásból, amelyet a konverterkiadás már nem kínál. Frissítse az OpenConstructionERP-t.",
     "designOptions.dayDelta": "{{days}} nap",
     "designOptions.durationDays": "Időtartam (nap)",
     "designOptions.embodiedCarbon": "Beépített szén-dioxid A1-A5",

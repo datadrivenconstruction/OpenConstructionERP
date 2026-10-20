@@ -48740,6 +48740,7 @@ const resource = {
   "bim.review_summary_still_open": "Әлі ашық",
   "bim.review_summary_title": "Тексеру аяқталды",
   "bim.review_zoom_needs_model": "Осы сақталған көрініске өту үшін модель жүктеңіз.",
+  "bim.converter_package_missing": "Бұл нұсқа {{tag}} ішінен {{asset}} күтеді, бірақ түрлендіргіштер шығарылымы оны енді ұсынбайды. OpenConstructionERP жаңартыңыз.",
   "designOptions.dayDelta": "{{days}} күн",
   "designOptions.durationDays": "Ұзақтығы (күн)",
   "designOptions.embodiedCarbon": "Ендірілген көміртек A1-A5",
