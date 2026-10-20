@@ -19,8 +19,11 @@ def build_pdf(
 
     Args:
         pages: One dict per page with ``content`` (the content stream text) and
-            optional ``mediabox``, ``cropbox`` (4-tuples), ``rotate`` (int) and
-            ``xobjects`` (names of entries in ``forms`` the page uses).
+            optional ``mediabox``, ``cropbox`` (4-tuples), ``rotate`` (int),
+            ``xobjects`` (names of entries in ``forms`` the page uses) and
+            ``patterns`` (name to ``(dictionary entries, cell content or None)``;
+            with content it becomes a tiling pattern stream) and ``resources``
+            (further resource dictionary entries as text).
         forms: Form XObjects by name: ``(content, bbox, matrix)`` where
             ``matrix`` is the six numbers of ``/Matrix`` as text (may be empty)
             and ``content`` may itself use other forms by name.
@@ -56,6 +59,12 @@ def build_pdf(
     for page in pages:
         content_id = add(stream("", page["content"]))
         xo = " ".join(f"/{n} {form_ids[n]} 0 R" for n in page.get("xobjects", ()))
+        pattern_refs = []
+        for pname, (entries, cell) in page.get("patterns", {}).items():
+            pid = add(stream(entries, cell) if cell is not None else f"<< {entries} >>".encode())
+            pattern_refs.append(f"/{pname} {pid} 0 R")
+        pat = f" /Pattern << {' '.join(pattern_refs)} >>" if pattern_refs else ""
+        pat += f" {page['resources']}" if page.get("resources") else ""
         mb = " ".join(str(v) for v in page.get("mediabox", (0, 0, 612, 792)))
         extra = ""
         if "cropbox" in page:
@@ -64,7 +73,7 @@ def build_pdf(
             extra += f" /Rotate {page['rotate']}"
         body = (
             f"<< /Type /Page /Parent {pages_id_placeholder} 0 R /MediaBox [{mb}]{extra} "
-            f"/Resources << /Font << /F1 {font_id} 0 R >> /XObject << {xo} >> >> /Contents {content_id} 0 R >>"
+            f"/Resources << /Font << /F1 {font_id} 0 R >> /XObject << {xo} >>{pat} >> /Contents {content_id} 0 R >>"
         )
         kids.append(add(body.encode()))
     objs[pages_id_placeholder - 1] = (
@@ -124,6 +133,39 @@ DRAWING = "\n".join(
     ]
 )
 
+# Paths painted with patterns and shadings, between two plain fills.
+PATTERNS = {
+    "Hatch": (
+        "/Type /Pattern /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 10 10] /XStep 10 /YStep 10 /Resources << >>",
+        "0 0 m 10 10 l S",
+    ),
+    "Stencil": (
+        "/Type /Pattern /PatternType 1 /PaintType 2 /TilingType 1 /BBox [0 0 10 10] /XStep 10 /YStep 10 /Resources << >>",
+        "0 0 m 10 10 l S",
+    ),
+    "Ramp": (
+        "/Type /Pattern /PatternType 2 /Shading << /ShadingType 2 /ColorSpace /DeviceRGB /Coords [0 0 100 0] "
+        "/Function << /FunctionType 2 /Domain [0 1] /C0 [1 0 0] /C1 [0 0 1] /N 1 >> >>",
+        None,
+    ),
+}
+PATTERN_PAGE = "\n".join(
+    [
+        "0.75 g 10 10 50 50 re f",
+        "q /Pattern cs /Hatch scn 70 10 50 50 re f Q",
+        "q /PatternRGB cs 0 1 0 /Stencil scn 130 10 50 50 re f Q",
+        "q /Pattern cs /Ramp scn 190 10 50 50 re f Q",
+        "q /Pattern CS /Hatch SCN 3 w 1 0 0 rg 250 10 50 50 re B Q",
+        "0 0 1 rg 310 10 50 50 re f",
+    ]
+)
+
+PATTERN_SPEC = {
+    "content": PATTERN_PAGE,
+    "patterns": PATTERNS,
+    "resources": "/ColorSpace << /PatternRGB [/Pattern /DeviceRGB] >>",
+}
+
 FORM_INNER = "0 0 0 RG 1 w 0 0 m 30 0 l 30 20 l 0 20 l h S 0 0 m 30 20 l S"
 FORM_OUTER = "q 1 0 0 1 10 10 cm /Inner Do Q q 2 0 0 2 60 10 cm /Inner Do Q 0 0 1 RG 0 0 120 80 re S"
 FORMS = {
@@ -151,6 +193,7 @@ def sample_pages() -> list[tuple[str, bytes]]:
     out.append(
         ("forms_rotate_270", build_pdf([{"content": FORM_PAGE, "xobjects": ["Outer"], "rotate": 270}], forms=FORMS))
     )
+    out.append(("patterns", build_pdf([PATTERN_SPEC])))
     out.append(("empty", build_pdf([{"content": "BT /F1 12 Tf 72 720 Td (Scanned sheet) Tj ET"}])))
     out.append(
         (
