@@ -106,7 +106,11 @@ from app.modules.bim_hub.schemas import (
     BIMQuantityMapListResponse,
     BIMQuantityMapResponse,
     BIMQuantityMapUpdate,
+    BIMUploadDuplicate,
+    BIMUploadDuplicateListResponse,
     BOQElementLinkBrief,
+    BOQElementLinkBulkCreate,
+    BOQElementLinkBulkResponse,
     BOQElementLinkCreate,
     BOQElementLinkListResponse,
     BOQElementLinkResponse,
@@ -4036,6 +4040,108 @@ async def create_link(
     await _verify_model_access(service, element.model_id, user_id)
     link = await service.create_link(data, user_id=user_id)
     return BOQElementLinkResponse.model_validate(link)
+
+
+@router.post("/links/bulk/", response_model=BOQElementLinkBulkResponse, status_code=201)
+async def create_links_bulk(
+    data: BOQElementLinkBulkCreate,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> BOQElementLinkBulkResponse:
+    """Link a whole selection of BIM elements to one BOQ position in one call.
+
+    Linking a category of several hundred elements used to take one request
+    per element. Elements already linked to the position are skipped.
+    """
+    from app.modules.bim_hub.models import BIMElement
+
+    await _verify_boq_position_access(service, data.boq_position_id, user_id)
+    wanted = list(dict.fromkeys(data.bim_element_ids))
+    rows = (await service.session.execute(select(BIMElement).where(BIMElement.id.in_(wanted)))).scalars().all()
+    found = {el.id: el for el in rows}
+    missing = [eid for eid in wanted if eid not in found]
+    if missing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"{len(missing)} BIM element(s) not found",
+        )
+    for model_id in {el.model_id for el in rows}:
+        await _verify_model_access(service, model_id, user_id)
+    created, skipped = await service.create_links_bulk(
+        data.boq_position_id,
+        [found[eid] for eid in wanted],
+        link_type=data.link_type,
+        confidence=data.confidence,
+        user_id=user_id,
+    )
+    return BOQElementLinkBulkResponse(boq_position_id=data.boq_position_id, created=created, skipped=skipped)
+
+
+@router.get("/upload-duplicates/", response_model=BIMUploadDuplicateListResponse)
+async def find_upload_duplicates(
+    project_id: uuid.UUID = Query(...),
+    file_name: str = Query(..., min_length=1, max_length=500),
+    file_size: int = Query(..., ge=0),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMUploadDuplicateListResponse:
+    """List models in the project that were uploaded from the same file.
+
+    A file counts as the same when its name and byte size match the source
+    document recorded for an earlier CAD upload. The upload dialog uses this
+    to offer "new version of" instead of silently creating a duplicate.
+    """
+    from app.modules.bim_hub.models import BIMModel
+    from app.modules.documents.models import Document
+
+    await _verify_project_access(service.session, project_id, user_id or "")
+    docs = (
+        (
+            await service.session.execute(
+                select(Document).where(
+                    Document.project_id == project_id,
+                    Document.name == file_name,
+                    Document.file_size == file_size,
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    model_ids: list[uuid.UUID] = []
+    for doc in docs:
+        meta = doc.metadata_ or {}
+        if meta.get("source_module") != "bim_hub":
+            continue
+        with contextlib.suppress(TypeError, ValueError):
+            model_ids.append(uuid.UUID(str(meta.get("source_id"))))
+    if not model_ids:
+        return BIMUploadDuplicateListResponse()
+    models = (
+        (
+            await service.session.execute(
+                select(BIMModel)
+                .where(BIMModel.id.in_(model_ids), BIMModel.project_id == project_id)
+                .order_by(BIMModel.created_at.desc())
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return BIMUploadDuplicateListResponse(
+        items=[
+            BIMUploadDuplicate(
+                model_id=m.id,
+                name=m.name,
+                version=m.version,
+                status=m.status,
+                created_at=m.created_at,
+            )
+            for m in models
+        ]
+    )
 
 
 @router.delete("/links/{link_id}", status_code=204)

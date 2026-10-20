@@ -627,6 +627,50 @@ class BOQElementLinkListResponse(BaseModel):
     total: int = 0
 
 
+#: Upper bound for one bulk link call. A whole-category selection in a large
+#: model stays well under it; the client splits anything bigger.
+BULK_LINK_MAX_ELEMENTS = 5000
+
+
+class BOQElementLinkBulkCreate(BaseModel):
+    """Link many BIM elements to one BOQ position in a single request."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    boq_position_id: UUID
+    bim_element_ids: list[UUID] = Field(..., min_length=1, max_length=BULK_LINK_MAX_ELEMENTS)
+    link_type: str = Field(default="manual", max_length=50)
+    confidence: str | None = Field(default=None, max_length=10)
+
+
+class BOQElementLinkBulkResponse(BaseModel):
+    """Outcome of a bulk link call.
+
+    ``skipped`` counts elements already linked to the position, so a repeated
+    call is a no-op rather than an error.
+    """
+
+    boq_position_id: UUID
+    created: int = 0
+    skipped: int = 0
+
+
+class BIMUploadDuplicate(BaseModel):
+    """An existing model in the project that was uploaded from the same file."""
+
+    model_id: UUID
+    name: str
+    version: str
+    status: str
+    created_at: datetime | None = None
+
+
+class BIMUploadDuplicateListResponse(BaseModel):
+    """Models whose source file matches a file about to be uploaded."""
+
+    items: list[BIMUploadDuplicate] = Field(default_factory=list)
+
+
 class BIMModelBOQLinkAggregate(BaseModel):
     """Aggregated BOQ position + linked BIM element IDs for one model.
 
