@@ -704,7 +704,12 @@ def _process_dxf_sync(file_path: str, entities_key: str, thumbnail_key: str) -> 
     Parses the DXF file, saves entities JSON, and generates SVG thumbnail.
     Returns a dict with parse results and storage keys.
     """
-    from app.modules.dwg_takeoff.dxf_processor import generate_svg_thumbnail, parse_dxf
+    from app.modules.dwg_takeoff.dxf_processor import (
+        THUMBNAIL_RENDER_MAX_ENTITIES,
+        generate_svg_thumbnail,
+        parse_dxf,
+        svg_thumbnail_from_entities,
+    )
 
     result = parse_dxf(file_path)
 
@@ -715,7 +720,10 @@ def _process_dxf_sync(file_path: str, entities_key: str, thumbnail_key: str) -> 
         json.dump(result["entities"], f)
 
     # Generate and save SVG thumbnail
-    svg_content = generate_svg_thumbnail(file_path)
+    if len(result["entities"]) > THUMBNAIL_RENDER_MAX_ENTITIES:
+        svg_content = svg_thumbnail_from_entities(result["entities"])
+    else:
+        svg_content = generate_svg_thumbnail(file_path)
     thumb_dir = os.path.join(_dwg_data_base(), "dwg_thumbnails")
     thumb_path = os.path.join(thumb_dir, thumbnail_key)
     os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
