@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Leaf,
   Package,
+  PackageOpen,
   Settings,
   Sparkles,
   Wand2,
@@ -143,6 +144,7 @@ const PAGE_RESULTS: SearchResult[] = [
   { id: 'page-validation', type: 'page', labelKey: 'validation.title', icon: ShieldCheck, path: '/validation' },
   { id: 'page-sustainability', type: 'page', labelKey: 'nav.sustainability', icon: Leaf, path: '/sustainability', moduleKey: 'sustainability' },
   { id: 'page-modules', type: 'page', labelKey: 'modules.title', icon: Package, path: '/modules' },
+  { id: 'page-packs', type: 'page', labelKey: 'nav.packs', icon: PackageOpen, path: '/packs' },
   { id: 'page-settings', type: 'page', labelKey: 'nav.settings', icon: Settings, path: '/settings' },
   // Quick actions
   { id: 'action-new-project', type: 'page', labelKey: 'command_palette.action_new_project', description: 'Ctrl+N', icon: FolderPlus, path: '/projects/new' },
