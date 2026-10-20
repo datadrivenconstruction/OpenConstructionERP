@@ -257,6 +257,22 @@ def test_ids_and_internal_unit_reals_are_not_offered_as_quantities() -> None:
     assert cols["suggested_quantities"] == ["Volume"] or "Volume" in cols["quantity"]
 
 
+def test_flags_and_internal_unit_reals_are_neither_summed_nor_grouping_keys() -> None:
+    elements = [
+        {
+            "Category": "OST_Walls",
+            "Volume": 1.0 + i,
+            "[Pset_WallCommon] IsExternal": i % 2 == 0,
+            "[Revit_Parameters] Offset [internal units]": 0.5 * i,
+        }
+        for i in range(5)
+    ]
+    cols = cad_import.get_available_columns(elements, "rvt")
+    assert "[Pset_WallCommon] IsExternal" in cols["grouping"]
+    assert "[Pset_WallCommon] IsExternal" not in cols["quantity"]
+    assert "[Revit_Parameters] Offset [internal units]" not in cols["grouping"] + cols["quantity"]
+
+
 def test_numeric_layer_names_stay_a_grouping_column() -> None:
     elements = [{"Category": str(i % 3), "Type Name": "LINE", "Length": 1.0 + i, "Count": 1} for i in range(6)]
     cols = cad_import.get_available_columns(elements, "dwg")

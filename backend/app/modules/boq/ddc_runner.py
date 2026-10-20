@@ -584,7 +584,7 @@ def flatten_rvt_output(glb_path: Path, ifc_path: Path | None) -> tuple[list[str]
             "Category": revit_category_name(cat_id, label if ident.get("CategoryName") else None),
             "Category Name": label,
             "Name": f"{type_name} {eid}" if type_name else f"{label} {eid}",
-            "Family Name": ident.get("FamilyName"),
+            "Family": ident.get("FamilyName"),
             "Type Name": type_name,
             "Level": ident.get("LevelName") or el.storey,
             "Phase Created": ident.get("PhaseCreated"),
@@ -599,7 +599,7 @@ def flatten_rvt_output(glb_path: Path, ifc_path: Path | None) -> tuple[list[str]
             row[key] = value
         rows.append(row)
     qty_cols = [c for c in MESH_QUANTITY_COLUMNS if any(c in r for r in rows)]
-    header = ["ID", "Category", "Category Name", "Name", "Family Name", "Type Name", "Level", "Phase Created"]
+    header = ["ID", "Category", "Category Name", "Name", "Family", "Type Name", "Level", "Phase Created"]
     return [*header, *qty_cols, *columns], rows
 
 
