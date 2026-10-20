@@ -8,7 +8,7 @@ uploaded file and returns the detected format - or rejects mismatches
 against the allowed set.
 
 Covers the formats we actually accept across upload endpoints:
-BIM / CAD (RVT, IFC, DWG, DXF, GLB, DGN), Documents (PDF, PNG, JPEG,
+BIM / CAD (RVT, IFC, DWG, DXF, GLB), Documents (PDF, PNG, JPEG,
 ZIP-based Office: XLSX / DOCX / PPTX), tabular (CSV, plain XML).
 
 Design constraints:
@@ -166,7 +166,24 @@ def mime_for_signature(detected: str | None) -> str:
 
 
 class FileSignatureMismatch(ValueError):
-    """Raised when an upload's magic bytes don't match the allowed set."""
+    """Raised when an upload's magic bytes don't match the allowed set.
+
+    ``filename``, ``detected`` and ``allowed`` carry the facts behind the English
+    message so a caller can hand the UI a stable code and params instead.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        filename: str | None = None,
+        detected: str | None = None,
+        allowed: frozenset[str] = frozenset(),
+    ):
+        super().__init__(message)
+        self.filename = filename
+        self.detected = detected
+        self.allowed = allowed
 
 
 def require(head: bytes, allowed: frozenset[str], *, filename: str | None = None) -> str:
@@ -181,7 +198,10 @@ def require(head: bytes, allowed: frozenset[str], *, filename: str | None = None
         raise FileSignatureMismatch(
             f"Uploaded file content does not match any allowed format{label}. "
             f"Detected signature: {detected or 'unknown'}. "
-            f"Allowed: {', '.join(sorted(allowed))}"
+            f"Allowed: {', '.join(sorted(allowed))}",
+            filename=filename,
+            detected=detected,
+            allowed=allowed,
         )
     return detected
 

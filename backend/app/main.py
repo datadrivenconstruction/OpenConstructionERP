@@ -75,7 +75,6 @@ from app.core.demo_read_only import (
     read_only_refusal,
 )
 from app.core.deployment_posture import build_data_security_posture
-from app.core.host_disclosure import without_host_fields
 from app.core.module_loader import module_loader
 
 # How many CHECK and FOREIGN KEY constraints in this schema have never been
@@ -107,7 +106,7 @@ from app.core.self_upgrade import (
     runtime_upgrade_enabled,
     runtime_upgrade_refusal,
 )
-from app.dependencies import OptionalUserPayload, RequireRole, get_current_user_id, rls_request_context
+from app.dependencies import RequireRole, get_current_user_id, rls_request_context
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -3903,17 +3902,14 @@ def create_app() -> FastAPI:
         return {**job.as_dict(), **heal}
 
     @app.get("/api/system/converters/version-check", tags=["System"])
-    async def check_converter_versions(user: OptionalUserPayload = None) -> dict[str, Any]:
+    async def check_converter_versions() -> dict[str, Any]:
         """Compare each installed DDC converter against the build we would install.
 
-        Reachable without credentials, and ``installed_path`` is emptied for a
-        caller who has not signed in. That field is the absolute location of
-        the exe on the server's own disk, which on a default install sits under
-        the operator's home directory and so names their account. What the
-        endpoint is for - is the installed build the one the Update button
-        would fetch - is answered by the two SHAs and ``is_outdated``, none of
-        which say where anything lives. The Settings panel still prints the
-        path, and its reader is signed in.
+        Reachable without credentials, so nothing in the answer says where on
+        the server's disk a converter lives: the answer is the two versions, the
+        two SHAs and ``is_outdated``. The versions and the supported format range
+        come from ``app.core.converter_source.PACKAGES``, the one declaration every
+        screen reads.
 
         Reads the stamp the installer writes beside every converter package it
         unpacks and compares the package digest in it with the one this build
@@ -3976,29 +3972,9 @@ def create_app() -> FastAPI:
         tag = resolve_converter_tag()
         TTL = 6 * 3600
 
-        def visible_to_caller(payload: dict[str, Any]) -> dict[str, Any]:
-            """The answer as this caller may read it.
-
-            Redaction is done on a copy rather than on the payload, and this is
-            the reason the helper exists at all: the dict below is kept on
-            ``app.state`` for six hours and handed to every later reader, so
-            emptying it in place for one anonymous request would empty it for
-            the operator who asks next. One canonical body is cached; each
-            response is redacted on its way out.
-
-            ``converters`` and ``results`` are the same list under two names
-            (the second is a back-compat alias), so the redacted rows are built
-            once and shared, keeping the two views identical the way the
-            unredacted ones are.
-            """
-            if user is not None:
-                return payload
-            rows = [without_host_fields(row, {"installed_path": None}) for row in payload.get("converters", [])]
-            return {**payload, "converters": rows, "results": rows}
-
         cached = getattr(app.state, "_converter_version_cache", None)
         if cached and (time.time() - cached.get("checked_at_ts", 0)) < TTL:
-            return visible_to_caller(cached["data"])
+            return cached["data"]
 
         results: list[dict[str, Any]] = []
         any_outdated = False
@@ -4031,13 +4007,14 @@ def create_app() -> FastAPI:
                     "name": pkg.name,
                     "exe": Path(pkg.exe_rel).name,
                     "installed": installed,
-                    "installed_path": str(path) if path else None,
                     "installed_size": local_size,
                     "installed_sha": local_sha,
                     "installed_version": local_version,
                     "latest_size": pkg.size_bytes,
                     "latest_sha": pkg.sha256,
                     "latest_version": pkg.version,
+                    "format_range": pkg.format_range,
+                    "produces_geometry": pkg.produces_geometry,
                     "is_outdated": is_outdated,
                     "download_url": release_asset_url(pkg.asset, repo=repo, tag=tag),
                     "html_url": release_page_url(repo=repo, tag=tag),
@@ -4057,7 +4034,7 @@ def create_app() -> FastAPI:
             "ttl_seconds": TTL,
         }
         app.state._converter_version_cache = {"data": response, "checked_at_ts": time.time()}
-        return visible_to_caller(response)
+        return response
 
     @app.get("/api/system/modules", tags=["System"])
     async def list_modules(

@@ -62,7 +62,7 @@ def test_a_format_added_to_the_parameter_description_alone_goes_red(
     monkeypatch.setattr(
         marker,
         "description",
-        "Raw CAD upload. Accepted extensions: .rvt, .ifc, .dwg, .dgn, .fbx. Mesh files go elsewhere.",
+        "Raw CAD upload. Accepted extensions: .rvt, .ifc, .fbx. Mesh files go elsewhere.",
     )
 
     _assert_red(BIM_CAD_UPLOAD, mentioning="Advertised only: ['fbx']")
@@ -71,7 +71,7 @@ def test_a_format_added_to_the_parameter_description_alone_goes_red(
 def test_a_format_added_to_the_docstring_alone_goes_red(monkeypatch: pytest.MonkeyPatch) -> None:
     """The other published surface, moved on its own."""
     _module, route = _find_route(BIM_CAD_UPLOAD)
-    monkeypatch.setattr(route, "description", "Upload a CAD file.\n\nAccepted extensions: .rvt, .ifc, .dwg, .dgn, .obj")
+    monkeypatch.setattr(route, "description", "Upload a CAD file.\n\nAccepted extensions: .rvt, .ifc, .obj")
 
     _assert_red(BIM_CAD_UPLOAD, mentioning="Advertised only: ['obj']")
 

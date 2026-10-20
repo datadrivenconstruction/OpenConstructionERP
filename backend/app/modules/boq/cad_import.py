@@ -242,7 +242,7 @@ def find_converter(extension: str) -> Path | None:
 # Why this exists: ``find_converter`` only LOCATES an already-present
 # binary. Historically the user had to install the converter manually
 # (via the BIM/Quantities page Install button, which calls
-# ``takeoff.router.install_converter``) before any .rvt/.ifc/.dwg/.dgn
+# ``takeoff.router.install_converter``) before any .rvt/.ifc/.dwg
 # upload could be converted. ``ensure_converter`` closes that gap: when a
 # conversion is requested and the converter is missing, it downloads and
 # extracts it automatically, then returns the resolved exe path - no user
@@ -304,9 +304,38 @@ class ConverterUnavailableError(RuntimeError):
 
     Distinct from a transient download failure: this is the terminal,
     actionable state the conversion path surfaces to the user. The message
-    is human-readable and already contains the next step (install command
-    on Linux, manual-download URL otherwise).
+    is human-readable English and already contains the next step. ``code`` is
+    the stable id the UI maps to its own translated text; ``params`` fill the
+    placeholders of that text.
     """
+
+    def __init__(self, message: str, *, code: str = "converter_unavailable", params: dict[str, str] | None = None):
+        super().__init__(message)
+        self.code = code
+        self.params = params or {}
+
+
+def converter_supported_here() -> bool:
+    """True when the DDC converter release has a build for this host."""
+    return sys.platform == SUPPORTED_PLATFORM
+
+
+def converter_platform_error(fmt: str) -> ConverterUnavailableError:
+    """The error for a host that has no converter build, with the next step in it."""
+    fmt = fmt.lower().lstrip(".")
+    return ConverterUnavailableError(
+        f"The .{fmt.upper()} converter runs on Windows 10/11 x64 only; Linux and macOS builds are "
+        f"announced by DDC but not released yet. Run OpenConstructionERP on Windows to convert "
+        f".{fmt} files. DXF drawings are read on every platform, and IFC models open in BIM Hub "
+        f"with the built-in reader.",
+        code="converter_platform_unsupported",
+        params={"format": fmt.upper()},
+    )
+
+
+def converter_error_detail(exc: ConverterUnavailableError) -> dict[str, object]:
+    """The ``detail`` of an HTTP error for ``exc``: a code, the English text, the params."""
+    return {"code": exc.code, "message": str(exc), "params": exc.params}
 
 
 def _is_windows() -> bool:
@@ -451,7 +480,9 @@ def ensure_converter(fmt: str) -> Path:
     fmt = _CONVERTER_FORMAT_ALIASES.get(fmt, fmt)
     if fmt not in CONVERTERS:
         raise ConverterUnavailableError(
-            f"No DDC converter is defined for .{fmt} files. Supported formats: {', '.join(sorted(CONVERTERS))}."
+            f"No DDC converter is defined for .{fmt} files. Supported formats: {', '.join(sorted(CONVERTERS))}.",
+            code="converter_format_unknown",
+            params={"format": fmt.upper(), "supported": ", ".join(s.upper() for s in sorted(CONVERTERS))},
         )
 
     # Fast path - already installed.
@@ -461,13 +492,8 @@ def ensure_converter(fmt: str) -> Path:
 
     # The 2026.10 converters are published for Windows 10/11 x64 only; Linux
     # and macOS builds are announced upstream but do not exist yet.
-    if sys.platform != SUPPORTED_PLATFORM:
-        raise ConverterUnavailableError(
-            f"The .{fmt.upper()} converter is published for Windows 10/11 x64 only; "
-            f"Linux and macOS builds are not available yet. Run OpenConstructionERP on "
-            f"Windows to convert .{fmt} files, or convert the file to DXF (drawings) or "
-            f"IFC (models) first - both are read without a converter binary where supported."
-        )
+    if not converter_supported_here():
+        raise converter_platform_error(fmt)
 
     # Windows auto-downloads under a per-format lock so concurrent
     # uploads of the same format don't both fetch into the same directory. The

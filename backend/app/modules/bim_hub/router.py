@@ -1254,7 +1254,7 @@ async def upload_bim_data(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Direct CAD file upload (RVT, IFC, DWG, DGN)
+# Direct CAD file upload (RVT, IFC)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # The formats a server-side converter can actually turn into a canonical BIM
@@ -1266,12 +1266,78 @@ async def upload_bim_data(
 # importer, so the three were unreachable - they could never be accepted, yet
 # the rejection message kept advertising them to the next person who uploaded
 # something else. See ``mesh_formats.py``.
-_ALLOWED_CAD_EXTENSIONS = {".rvt", ".ifc", ".dwg", ".dgn"}
+_ALLOWED_CAD_EXTENSIONS = {".rvt", ".ifc"}
+
+# 2D drawings belong to DWG Takeoff. They are refused here before any model row
+# exists, with a message that points there.
+_DRAWING_EXTENSIONS = {".dwg", ".dxf"}
+
+
+def _refusal(code: str, message: str, **params: object) -> HTTPException:
+    """A 400 whose ``detail`` carries a code the UI translates.
+
+    ``message`` is the English fallback for API clients and logs; the UI maps
+    ``code`` to its own text and fills it from ``params``.
+    """
+    return HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail={"code": code, "message": message, "params": params},
+    )
+
+
+def _refuse_unsupported_upload(ext: str, filename: str) -> None:
+    """Raise the coded 400 for a file this endpoint cannot turn into a model."""
+    if is_mesh_geometry_ext(ext):
+        raise _refusal("mesh_use_3d_uploader", mesh_upload_hint(ext, filename), filename=filename, ext=ext)
+    if ext in _DRAWING_EXTENSIONS:
+        raise _refusal(
+            "drawing_use_dwg_takeoff",
+            f"'{filename}' is a 2D drawing. Upload it in DWG Takeoff, not in BIM Hub.",
+            filename=filename,
+            ext=ext,
+        )
+    if ext not in _ALLOWED_CAD_EXTENSIONS:
+        accepted = ", ".join(sorted(_ALLOWED_CAD_EXTENSIONS))
+        raise _refusal(
+            "unsupported_cad_file_type",
+            f"Unsupported file type '{ext}'. Accepted: {accepted}",
+            filename=filename,
+            ext=ext,
+            accepted=accepted,
+        )
+
+
+def _refuse_if_converter_cannot_run(ext: str) -> None:
+    """Raise the coded 400 when this host has no converter build for ``ext``.
+
+    The 202 "install the converter" answer is only true where an installer
+    exists. On a host without a build it sends people to an install that cannot
+    succeed and leaves a model row nobody can finish.
+    """
+    from app.modules.boq import cad_import
+
+    if not cad_import.converter_supported_here() and cad_import.find_converter(ext.lstrip(".")) is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=cad_import.converter_error_detail(cad_import.converter_platform_error(ext)),
+        )
+
+
+def _refuse_if_signature_mismatch(head: bytes, filename: str) -> None:
+    """Raise the coded 400 when the file content is not one of the CAD containers."""
+    from app.core.file_signature import ALLOWED_BIM_TYPES, FileSignatureMismatch
+    from app.core.file_signature import require as _require_sig
+
+    try:
+        _require_sig(head, ALLOWED_BIM_TYPES, filename=filename)
+    except FileSignatureMismatch as exc:
+        raise _refusal("file_content_mismatch", str(exc), filename=filename) from exc
+
 
 # Formats that require an external converter binary. IFC has a built-in
 # text fallback parser, so it's NOT in this set; XLSX/CSV go through a
 # separate upload endpoint and aren't relevant here.
-_NEEDS_CONVERTER_EXTS = {".rvt", ".dwg", ".dgn"}
+_NEEDS_CONVERTER_EXTS = {".rvt"}
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -2192,7 +2258,7 @@ async def upload_cad_file(
     file: UploadFile = File(
         ...,
         description=(
-            "Raw CAD upload. Accepted extensions: .rvt, .ifc, .dwg, .dgn. Geometry-only mesh files "
+            "Raw CAD upload. Accepted extensions: .rvt, .ifc. Geometry-only mesh files "
             "are read in the browser by the BIM Hub 3D uploader and posted back as GLB, so they are "
             "refused here."
         ),
@@ -2207,7 +2273,7 @@ async def upload_cad_file(
     and a BIMModel record is created with status="processing". A real CAD converter
     service would pick it up asynchronously; for now the model stays in processing state.
 
-    Accepted extensions: .rvt, .ifc, .dwg, .dgn
+    Accepted extensions: .rvt, .ifc
 
     Geometry-only mesh files (OBJ, STL, PLY, DAE, glTF/GLB, FBX, 3DS, LWO, USD)
     are refused with a 400 that points at the BIM Hub 3D uploader, which reads
@@ -2267,16 +2333,7 @@ async def upload_cad_file(
     # generic "unsupported" error (or a confusing magic-byte mismatch for the
     # few whose extension is in the CAD set), so nothing is stored as a dead,
     # never-converting model.
-    if is_mesh_geometry_ext(ext):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=mesh_upload_hint(ext, filename),
-        )
-    if ext not in _ALLOWED_CAD_EXTENSIONS:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(f"Unsupported file type '{ext}'. Accepted: {', '.join(sorted(_ALLOWED_CAD_EXTENSIONS))}"),
-        )
+    _refuse_unsupported_upload(ext, filename)
 
     # Stream the upload to a temp file in 1 MB chunks instead of buffering
     # the whole body in memory.  A 500 MB IFC used to cost ~500 MB of heap
@@ -2293,10 +2350,11 @@ async def upload_cad_file(
 
     async with stream_upload_to_temp(file, suffix=ext) as upload:
         if upload.size == 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Uploaded file is empty.",
-            )
+            raise _refusal("upload_empty", "Uploaded file is empty.", filename=filename)
+
+        # Content check first: a file that is not a CAD container must not
+        # leave a placeholder model row behind, whatever the converter state.
+        _refuse_if_signature_mismatch(upload.head, filename)
 
         # Preflight: when the required converter binary isn't installed on
         # this server, **persist** the upload and create a placeholder model
@@ -2311,6 +2369,7 @@ async def upload_cad_file(
         if ext in _NEEDS_CONVERTER_EXTS:
             from app.modules.boq.cad_import import find_converter
 
+            _refuse_if_converter_cannot_run(ext)
             if find_converter(ext.lstrip(".")) is None:
                 display_name = (name or pathlib.Path(filename).stem).strip() or filename
                 from app.modules.bim_hub.schemas import BIMModelCreate
@@ -2402,31 +2461,6 @@ async def upload_cad_file(
                         ),
                     },
                 )
-
-        # Magic-byte validation - filename extensions are attacker-controlled
-        # and we proceed to hand this file to a CAD converter that can be
-        # exploited by unexpected formats. Reject anything that doesn't look
-        # like one of our accepted CAD/BIM containers.  The streamed-upload
-        # helper has already kept the first 64 bytes around for us.
-        from app.core.file_signature import (
-            ALLOWED_CAD_TYPES,
-            FileSignatureMismatch,
-        )
-        from app.core.file_signature import (
-            require as _require_sig,
-        )
-
-        try:
-            _require_sig(
-                upload.head,
-                ALLOWED_CAD_TYPES,
-                filename=filename,
-            )
-        except FileSignatureMismatch as exc:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=str(exc),
-            ) from exc
 
         # Auto-fill model name from filename
         model_name = name or pathlib.Path(filename).stem
@@ -2537,29 +2571,19 @@ async def upload_cad_file(
     # vanished mid-conversion" intermittently.
     await service.session.commit()
 
-    processable = ext in (".ifc", ".rvt")
-    if processable:
-        background_tasks.add_task(
-            _process_cad_in_background,
-            project_id=project_id,
-            model_id=str(model_id),
-            cad_storage_key=saved_cad_key,
-            ext=ext,
-            conversion_depth=conversion_depth,
-        )
-        logger.info(
-            "CAD upload accepted, processing scheduled in background: %s → model %s",
-            filename,
-            model_id,
-        )
-    else:
-        # Non-processable format (DWG, DGN, FBX, etc.) - needs converter
-        model.status = "needs_converter"
-        model.error_message = (
-            f"{ext.upper().lstrip('.')} files require an external converter. Convert to IFC first, then re-upload."
-        )
-        await service.session.flush()
-        final_status = "needs_converter"
+    background_tasks.add_task(
+        _process_cad_in_background,
+        project_id=project_id,
+        model_id=str(model_id),
+        cad_storage_key=saved_cad_key,
+        ext=ext,
+        conversion_depth=conversion_depth,
+    )
+    logger.info(
+        "CAD upload accepted, processing scheduled in background: %s -> model %s",
+        filename,
+        model_id,
+    )
 
     return {
         "model_id": str(model_id),
@@ -2570,10 +2594,8 @@ async def upload_cad_file(
         "element_count": element_count,
         "error_message": model.error_message,
         "geometry_type": (model.metadata_ or {}).get("geometry_type", "unknown"),
-        "converter_id": ext.lstrip(".") if final_status == "needs_converter" else None,
-        "install_endpoint": (
-            f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/" if final_status == "needs_converter" else None
-        ),
+        "converter_id": None,
+        "install_endpoint": None,
     }
 
 
@@ -2636,19 +2658,9 @@ async def create_model_from_document(
     # Geometry-only mesh formats are read in-browser by the BIM Hub 3D
     # uploader, not converted on the server - point the user there instead of
     # creating a model that could never render (mirrors the upload-cad guard).
-    if is_mesh_geometry_ext(ext):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=mesh_upload_hint(ext, doc.name),
-        )
-    if ext not in _ALLOWED_CAD_EXTENSIONS:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"'{doc.name}' is not a convertible BIM/CAD file. Accepted: "
-                f"{', '.join(sorted(_ALLOWED_CAD_EXTENSIONS))}"
-            ),
-        )
+    _refuse_unsupported_upload(ext, doc.name)
+    if ext in _NEEDS_CONVERTER_EXTS:
+        _refuse_if_converter_cannot_run(ext)
 
     # Probe the stored document without reading it: a CAD file can be hundreds
     # of MB, and it is only ever copied to BIM storage, never parsed here.
@@ -2698,39 +2710,26 @@ async def create_model_from_document(
     project_id_str = str(doc.project_id)
     doc_id_for_log = doc.id
 
-    # Only IFC/RVT are processed inline by the background worker; the other
-    # accepted formats are stored and flagged for an external converter, the
-    # same way the direct CAD upload endpoint handles them.
-    processable = ext in (".ifc", ".rvt")
-    if processable:
-        final_status = "processing"
-        final_error: str | None = None
-    else:
-        final_status = "needs_converter"
-        final_error = (
-            f"{ext.upper().lstrip('.')} files require an external converter. Convert to IFC first, then re-upload."
-        )
-        model.status = final_status
-        model.error_message = final_error
+    final_status = "processing"
+    final_error: str | None = None
 
     # Commit before scheduling the background task: the worker opens its own
     # session and looks the model up by id, so the row must be durably visible.
     await service.session.commit()
 
-    if processable:
-        background_tasks.add_task(
-            _process_cad_in_background,
-            project_id=project_id_str,
-            model_id=str(model_id),
-            cad_storage_key=saved_cad_key,
-            ext=ext,
-            conversion_depth=body.conversion_depth,
-        )
-        logger.info(
-            "BIM model %s created from document %s, conversion scheduled",
-            model_id,
-            doc_id_for_log,
-        )
+    background_tasks.add_task(
+        _process_cad_in_background,
+        project_id=project_id_str,
+        model_id=str(model_id),
+        cad_storage_key=saved_cad_key,
+        ext=ext,
+        conversion_depth=body.conversion_depth,
+    )
+    logger.info(
+        "BIM model %s created from document %s, conversion scheduled",
+        model_id,
+        doc_id_for_log,
+    )
 
     return {
         "model_id": str(model_id),
