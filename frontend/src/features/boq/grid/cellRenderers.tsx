@@ -2095,7 +2095,7 @@ const BimLinkPopover = forwardRef<
                 onClick={() => setShowAllProps((v) => !v)}
                 className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
                   showAllProps
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-oe-blue text-white hover:bg-oe-blue-hover'
                     : 'bg-white dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/60'
                 }`}
                 title={

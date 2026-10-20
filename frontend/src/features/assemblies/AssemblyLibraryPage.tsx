@@ -157,7 +157,7 @@ export function AssemblyLibraryPage() {
             'assemblies.library.search_placeholder',
             'Search by name, tag, or translation…'
           )}
-          className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 ps-10 pe-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+          className="w-full rounded-lg border border-zinc-300 bg-white py-2.5 ps-10 pe-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
         />
         {search && (
           <button
@@ -181,7 +181,7 @@ export function AssemblyLibraryPage() {
             className={
               'rounded-full border px-3 py-1 text-sm transition-colors ' +
               (category === c.value
-                ? 'border-blue-600 bg-blue-600 text-white'
+                ? 'border-oe-blue bg-oe-blue text-white'
                 : 'border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-600')
             }
           >
@@ -666,7 +666,7 @@ function TemplateDrawer({
                 <select
                   value={projectId}
                   onChange={(e) => setProjectId(e.target.value)}
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 >
                   <option value="">
                     {t('assemblies.library.pick_project', '- pick a project -')}
@@ -688,7 +688,7 @@ function TemplateDrawer({
                   step="any"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                  className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 />
               </label>
               <Button

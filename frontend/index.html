@@ -85,6 +85,48 @@
          Provenance, licences and the reason the cyrillic-ext face is declared
          over one codepoint are in assets/vendor/fonts/README.txt. -->
     <link rel="stylesheet" href="/assets/vendor/fonts/fonts.css" />
+
+    <!-- Appearance boot: puts the saved style (accent, font, density, radius)
+         and the dark class on <html> before first paint, so a reload never
+         flashes the default look. Mirrors src/shared/lib/appearance.ts; the
+         test src/shared/lib/__tests__/appearanceBoot.test.ts runs this script. -->
+    <script id="oe-appearance-boot">
+      (function () {
+        var allowed = {
+          accent: ['blue', 'teal', 'violet', 'emerald', 'amber', 'graphite', 'crimson'],
+          font: ['system', 'inter', 'ibm-plex-sans', 'source-sans-3'],
+          density: ['comfortable', 'compact'],
+          radius: ['standard', 'sharp', 'round']
+        };
+        var value = { accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard' };
+        function layer(key) {
+          try {
+            var raw = JSON.parse(localStorage.getItem(key) || 'null');
+            if (!raw || typeof raw !== 'object') return;
+            for (var axis in allowed) {
+              if (allowed[axis].indexOf(raw[axis]) !== -1) value[axis] = raw[axis];
+            }
+          } catch (e) { /* unreadable storage: keep what we have */ }
+        }
+        layer('oe_workspace_appearance_v1');
+        layer('oe_appearance_v1');
+        var root = document.documentElement;
+        for (var k in value) root.setAttribute('data-' + k, value[k]);
+        if (value.font !== 'system') {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = '/assets/vendor/fonts/' + value.font + '.css';
+          link.setAttribute('data-oe-font', value.font);
+          document.head.appendChild(link);
+        }
+        try {
+          var theme = localStorage.getItem('oe_theme');
+          var dark = theme === 'dark' || (theme !== 'light' && window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) root.classList.add('dark');
+        } catch (e) { /* the theme store applies it after mount */ }
+      })();
+    </script>
   </head>
   <body class="bg-white text-neutral-900 dark:bg-surface-secondary dark:text-content-primary antialiased">
     <div id="root"></div>

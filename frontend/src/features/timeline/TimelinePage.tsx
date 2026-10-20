@@ -360,7 +360,7 @@ export function TimelinePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-lg border border-gray-200 bg-white py-2 ps-10 pe-4 text-sm
-                  focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500
+                  focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue
                   dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />
               {search && (
@@ -449,7 +449,7 @@ export function TimelinePage() {
                 <div className="flex items-end gap-2">
                   <button
                     onClick={applyFilters}
-                    className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    className="flex-1 rounded-lg bg-oe-blue px-3 py-2 text-sm font-medium text-white hover:bg-oe-blue-hover"
                   >
                     {t('timeline.apply_filters', { defaultValue: 'Apply' })}
                   </button>
@@ -584,7 +584,7 @@ export function TimelinePage() {
                   <div className="sm:col-span-2">
                     <button
                       onClick={() => { const r = entityRoute(selectedEntry); if (r) navigate(r); }}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue-hover"
                     >
                       <ExternalLink className="h-3.5 w-3.5" aria-hidden />
                       {t('timeline.go_to_entity', { defaultValue: 'Go to Record' })}

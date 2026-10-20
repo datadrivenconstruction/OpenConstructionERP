@@ -1342,7 +1342,7 @@ function UpdateFullModal({
                       onClick={(e) => void openDownload(e, installer.url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-sm font-semibold text-white transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue hover:bg-oe-blue-hover px-3 py-1.5 text-sm font-semibold text-white transition-colors"
                     >
                       <Download size={13} />
                       {t('update.download_installer')}

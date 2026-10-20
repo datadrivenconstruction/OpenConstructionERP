@@ -221,7 +221,7 @@ export function MarkupCommentsDrawer({ markupId, onClose }: Props): JSX.Element 
             defaultValue: 'Write a comment...',
           })}
           rows={3}
-          className="w-full resize-none rounded border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-zinc-600 dark:bg-zinc-800"
+          className="w-full resize-none rounded border border-zinc-300 px-3 py-2 text-sm focus:border-oe-blue focus:outline-none dark:border-zinc-600 dark:bg-zinc-800"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
               e.preventDefault();

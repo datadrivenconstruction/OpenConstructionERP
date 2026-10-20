@@ -193,7 +193,7 @@ export function CoordinationTradeMatrix({
             if (projectId) params.set('project', projectId);
             navigate(`/clash${params.toString() ? `?${params.toString()}` : ''}`);
           }}
-          className="mt-4 inline-flex h-9 items-center justify-center rounded-md bg-oe-blue px-4 text-sm font-medium text-white transition-colors hover:bg-oe-blue/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          className="mt-4 inline-flex h-9 items-center justify-center rounded-md bg-oe-blue px-4 text-sm font-medium text-white transition-colors hover:bg-oe-blue/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
         >
           {t('coordination.matrix_empty_cta', {
             defaultValue: 'Run clash detection',
@@ -283,7 +283,7 @@ export function CoordinationTradeMatrix({
             aria-pressed={weighting === 'count'}
             onClick={() => setWeighting('count')}
             className={clsx(
-              'px-3 py-1 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
+              'px-3 py-1 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
               weighting === 'count'
                 ? 'bg-oe-blue text-white'
                 : 'bg-surface text-content-secondary hover:bg-surface-secondary',
@@ -297,7 +297,7 @@ export function CoordinationTradeMatrix({
             aria-pressed={weighting === 'cost'}
             onClick={() => setWeighting('cost')}
             className={clsx(
-              'px-3 py-1 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
+              'px-3 py-1 font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
               weighting === 'cost'
                 ? 'bg-oe-blue text-white'
                 : 'bg-surface text-content-secondary hover:bg-surface-secondary',
@@ -482,7 +482,7 @@ function RowFragment({
                 fg,
                 isEmpty
                   ? 'cursor-default opacity-60'
-                  : 'hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
+                  : 'hover:border-border-strong focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
               )}
             >
               {isEmpty ? '—' : cellValue}

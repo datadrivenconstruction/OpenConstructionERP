@@ -77,3 +77,23 @@ serves them.
 
   Plus Jakarta Sans  (c) 2020 The Plus Jakarta Sans Project Authors
   Instrument Serif   (c) 2022 The Instrument Serif Project Authors
+
+
+UI FONTS FOR THE APPEARANCE STYLES
+
+inter.css, ibm-plex-sans.css and source-sans-3.css are the optional body
+fonts offered under Settings > General > Style. None is linked by default:
+the boot script in index.html and src/shared/lib/appearance.ts add the one
+stylesheet only after a user (or the workspace default) picks that font, so
+the default system stack downloads nothing.
+
+Each is the upright variable-weight build from the matching
+@fontsource-variable package (inter 5.3.0, ibm-plex-sans 5.3.0,
+source-sans-3 5.3.1), copied here rather than installed as a dependency so
+the core stays offline-capable and the bundle does not grow. Subsets:
+latin, latin-ext, cyrillic, cyrillic-ext (Plex has none), greek, greek-ext
+(Plex has none) and vietnamese, each behind its own unicode-range, so a
+reader only fetches the scripts on screen. Arabic, Hebrew, CJK, Devanagari,
+Bengali and Thai are deliberately not covered and fall through to the
+system stack declared after the family in src/index.css. Licences: SIL OFL
+1.1, in licenses/.

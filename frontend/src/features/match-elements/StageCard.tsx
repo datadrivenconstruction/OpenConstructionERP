@@ -151,7 +151,7 @@ export function StageCard({
       : stage.status === 'stale'
         ? 'bg-amber-500 text-white'
         : isRunning
-          ? 'bg-blue-500 text-white'
+          ? 'bg-oe-blue text-white'
           : 'bg-slate-200 dark:bg-slate-700 text-content-secondary';
 
   return (

@@ -1058,7 +1058,7 @@ export function AboutPage() {
               href="https://datadrivenconstruction.io/books/"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm"
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white hover:bg-oe-blue-hover transition-colors shadow-sm"
             >
               <BookOpen size={16} />
               {t('about.book_download', { defaultValue: 'Download Free' })}

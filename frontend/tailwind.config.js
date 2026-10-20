@@ -32,6 +32,8 @@ export default {
           // brighter hue in dark mode so the same class clears WCAG-AA
           // 4.5:1 in both themes. See index.css `--oe-blue-text`.
           'blue-text': 'var(--oe-blue-text)',
+          // Text on a solid accent fill, AA in both themes for every accent.
+          'on-accent': 'var(--oe-on-accent)',
           purple: ({ opacityValue }) =>
             opacityValue === undefined
               ? 'var(--oe-purple)'

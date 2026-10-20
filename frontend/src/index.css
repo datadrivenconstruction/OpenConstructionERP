@@ -52,6 +52,9 @@
      as "info blocks have no background"). MUST stay in sync with the
      hex values above/below. */
   --oe-blue-ch: 0 113 227;
+  /* Text on a solid accent fill. White in light mode; dark mode accents are
+     light tints, so the ink flips to the page colour to keep AA. */
+  --oe-on-accent: #ffffff;
 
   /* Purple — the status palette ran out of hues before it ran out of states.
      Seven invoice states share five badge variants, and the pair that had to
@@ -252,6 +255,7 @@
   --oe-blue-text: #93c5fd;
   /* Channel triplet - see the light-mode comment. Keep in sync. */
   --oe-blue-ch: 59 130 246;
+  --oe-on-accent: #0f1117;
 
   /* Purple — see the light-mode comment for why this family exists. Same
      shape as the blue pair: the tint becomes a translucent wash so it lifts
@@ -631,7 +635,7 @@ h4 {
   --ag-row-border-color: var(--oe-border-light);
   --ag-selected-row-background-color: var(--oe-blue-subtle);
   --ag-range-selection-border-color: var(--oe-blue);
-  --ag-range-selection-background-color: rgba(0, 113, 227, 0.08);
+  --ag-range-selection-background-color: rgb(var(--oe-blue-ch) / 0.08);
   --ag-cell-horizontal-padding: 8px;
 }
 
@@ -645,7 +649,7 @@ h4 {
   --ag-secondary-foreground-color: var(--oe-text-secondary);
   --ag-selected-row-background-color: var(--oe-blue-subtle);
   --ag-odd-row-background-color: var(--oe-bg-secondary);
-  --ag-range-selection-background-color: rgba(59, 130, 246, 0.1);
+  --ag-range-selection-background-color: rgb(var(--oe-blue-ch) / 0.1);
 }
 
 /* ── BOQ header density — shrink header text when many columns ─────────
@@ -877,7 +881,7 @@ h4 {
   --ag-secondary-foreground-color: var(--oe-text-secondary);
   --ag-selected-row-background-color: var(--oe-blue-subtle);
   --ag-odd-row-background-color: var(--oe-bg-secondary);
-  --ag-range-selection-background-color: rgba(59, 130, 246, 0.1);
+  --ag-range-selection-background-color: rgb(var(--oe-blue-ch) / 0.1);
 }
 
 /* ── Premium Visual Polish ──────────────────────────────────────────── */
@@ -1895,4 +1899,185 @@ html[data-ai-dock-resizing] * {
 }
 .fixed.inset-0.flex.items-center.justify-center > :not(.absolute):not(.fixed) {
   margin-block: auto;
+}
+
+/* ── Appearance styles ────────────────────────────────────────────────────
+   Set on <html> by the boot script in index.html before first paint and kept
+   in step by stores/useAppearanceStore.ts. Absent or default attributes leave
+   the tokens above untouched, so the Classic style is the platform as it was.
+
+   Accent: re-points the brand family. The token names stay `--oe-blue-*`
+   because 800+ files use them; read them as "accent". Each added accent (blue
+   is the original palette, unchanged) clears WCAG
+   AA (4.5:1) for white on base/hover/active/dark in light mode, page ink on
+   base/hover/active in dark mode, and `-text` and base as text on every
+   surface and on the `-subtle` pill; the table is asserted in
+   src/shared/lib/__tests__/appearance.test.ts. */
+html[data-accent='teal'] {
+  --oe-blue: #0f766e;
+  --oe-blue-hover: #0d6b64;
+  --oe-blue-active: #115e59;
+  --oe-blue-dark: #134e4a;
+  --oe-blue-text: #115e59;
+  --oe-blue-subtle: #effcf9;
+  --oe-blue-ch: 15 118 110;
+}
+html.dark[data-accent='teal'] {
+  --oe-blue: #2dd4bf;
+  --oe-blue-hover: #5eead4;
+  --oe-blue-active: #14b8a6;
+  --oe-blue-dark: #115e59;
+  --oe-blue-text: #99f6e4;
+  --oe-blue-subtle: rgba(45, 212, 191, 0.15);
+  --oe-blue-ch: 45 212 191;
+}
+html[data-accent='violet'] {
+  --oe-blue: #7c3aed;
+  --oe-blue-hover: #6d28d9;
+  --oe-blue-active: #5b21b6;
+  --oe-blue-dark: #4c1d95;
+  --oe-blue-text: #5b21b6;
+  --oe-blue-subtle: #f6f3ff;
+  --oe-blue-ch: 124 58 237;
+}
+html.dark[data-accent='violet'] {
+  --oe-blue: #a78bfa;
+  --oe-blue-hover: #c4b5fd;
+  --oe-blue-active: #9575f8;
+  --oe-blue-dark: #5b21b6;
+  --oe-blue-text: #ddd6fe;
+  --oe-blue-subtle: rgba(167, 139, 250, 0.15);
+  --oe-blue-ch: 167 139 250;
+}
+html[data-accent='emerald'] {
+  --oe-blue: #047857;
+  --oe-blue-hover: #036c4e;
+  --oe-blue-active: #065f46;
+  --oe-blue-dark: #064e3b;
+  --oe-blue-text: #065f46;
+  --oe-blue-subtle: #effdf6;
+  --oe-blue-ch: 4 120 87;
+}
+html.dark[data-accent='emerald'] {
+  --oe-blue: #34d399;
+  --oe-blue-hover: #6ee7b7;
+  --oe-blue-active: #10b981;
+  --oe-blue-dark: #065f46;
+  --oe-blue-text: #a7f3d0;
+  --oe-blue-subtle: rgba(52, 211, 153, 0.15);
+  --oe-blue-ch: 52 211 153;
+}
+html[data-accent='amber'] {
+  --oe-blue: #a84d08;
+  --oe-blue-hover: #964407;
+  --oe-blue-active: #843a0c;
+  --oe-blue-dark: #78350f;
+  --oe-blue-text: #92400e;
+  --oe-blue-subtle: #fffbeb;
+  --oe-blue-ch: 168 77 8;
+}
+html.dark[data-accent='amber'] {
+  --oe-blue: #fbbf24;
+  --oe-blue-hover: #fcd34d;
+  --oe-blue-active: #f59e0b;
+  --oe-blue-dark: #92400e;
+  --oe-blue-text: #fde68a;
+  --oe-blue-subtle: rgba(251, 191, 36, 0.15);
+  --oe-blue-ch: 251 191 36;
+}
+html[data-accent='graphite'] {
+  --oe-blue: #475569;
+  --oe-blue-hover: #3e4a5c;
+  --oe-blue-active: #334155;
+  --oe-blue-dark: #1e293b;
+  --oe-blue-text: #334155;
+  --oe-blue-subtle: #f3f5f8;
+  --oe-blue-ch: 71 85 105;
+}
+html.dark[data-accent='graphite'] {
+  --oe-blue: #cbd5e1;
+  --oe-blue-hover: #e2e8f0;
+  --oe-blue-active: #94a3b8;
+  --oe-blue-dark: #334155;
+  --oe-blue-text: #e2e8f0;
+  --oe-blue-subtle: rgba(203, 213, 225, 0.12);
+  --oe-blue-ch: 203 213 225;
+}
+html[data-accent='crimson'] {
+  --oe-blue: #be123c;
+  --oe-blue-hover: #a91035;
+  --oe-blue-active: #9f1239;
+  --oe-blue-dark: #881337;
+  --oe-blue-text: #9f1239;
+  --oe-blue-subtle: #fff1f3;
+  --oe-blue-ch: 190 18 60;
+}
+html.dark[data-accent='crimson'] {
+  --oe-blue: #fb7185;
+  --oe-blue-hover: #fda4af;
+  --oe-blue-active: #f43f5e;
+  --oe-blue-dark: #9f1239;
+  --oe-blue-text: #fecdd3;
+  --oe-blue-subtle: rgba(251, 113, 133, 0.15);
+  --oe-blue-ch: 251 113 133;
+}
+
+/* Light accents carry white text; dark accents are light tints, so an ad hoc
+   `bg-oe-blue text-white` pair would sink below AA there. The shared Button
+   already uses --oe-text-inverse. */
+.dark .bg-oe-blue.text-white,
+.dark .bg-oe-blue .text-white {
+  color: var(--oe-on-accent);
+}
+
+/* Font: self-hosted under public/assets/vendor/fonts, its stylesheet linked
+   only once the font is chosen. Each covers Latin, Cyrillic and Greek; scripts
+   they lack (Arabic, Hebrew, CJK, Devanagari, Thai, Bengali) fall through to
+   the system stack behind them. */
+html[data-font='inter'] {
+  --oe-font-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+html[data-font='ibm-plex-sans'] {
+  --oe-font-sans: 'IBM Plex Sans Variable', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+html[data-font='source-sans-3'] {
+  --oe-font-sans: 'Source Sans 3 Variable', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Radius: the five tokens behind the Tailwind `rounded-xs..xl` utilities. */
+html[data-radius='sharp'] {
+  --oe-radius-xs: 2px;
+  --oe-radius-sm: 3px;
+  --oe-radius-md: 4px;
+  --oe-radius-lg: 4px;
+  --oe-radius-xl: 6px;
+}
+html[data-radius='round'] {
+  --oe-radius-xs: 6px;
+  --oe-radius-sm: 8px;
+  --oe-radius-md: 12px;
+  --oe-radius-lg: 14px;
+  --oe-radius-xl: 18px;
+}
+
+/* Density: Tailwind spacing and control heights are rem, the type scale is px,
+   so a smaller root size tightens paddings, gaps and control heights by 10%
+   and leaves every letter where it was. Grids get shorter rows. */
+html[data-density='compact'] {
+  font-size: 13.5px;
+  --oe-space-1: 3px;
+  --oe-space-2: 6px;
+  --oe-space-3: 10px;
+  --oe-space-4: 14px;
+  --oe-space-5: 18px;
+  --oe-space-6: 21px;
+}
+html[data-density='compact'] .ag-theme-alpine,
+html[data-density='compact'] .ag-theme-quartz {
+  --ag-row-height: 32px;
+  --ag-header-height: 36px;
+  --ag-cell-horizontal-padding: 6px;
 }

@@ -170,7 +170,7 @@ function InlineProjectSwitcher({ excludeId }: { excludeId?: string | null }) {
         const next = options.find((p) => p.id === e.target.value);
         if (next) setActiveProject(next.id, next.name);
       }}
-      className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-surface px-3 text-sm font-medium text-content-primary transition-colors hover:border-oe-blue/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+      className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-surface px-3 text-sm font-medium text-content-primary transition-colors hover:border-oe-blue/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue"
     >
       <option value="" disabled>
         {t('coordination.switch_project', {
@@ -204,7 +204,7 @@ function QuickActionTile({
     <button
       type="button"
       onClick={() => navigate(to)}
-      className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/40 bg-white/40 px-3.5 py-3 text-left backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-oe-blue/40 hover:bg-white/70 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 dark:border-white/5 dark:bg-slate-900/40 dark:hover:bg-slate-800/60"
+      className="group relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/40 bg-white/40 px-3.5 py-3 text-left backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-oe-blue/40 hover:bg-white/70 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:border-white/5 dark:bg-slate-900/40 dark:hover:bg-slate-800/60"
     >
       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue transition-colors group-hover:bg-oe-blue group-hover:text-white">
         {icon}
@@ -450,7 +450,7 @@ export function CoordinationHubPage() {
                   data-testid="coordination-configure-thresholds"
                   type="button"
                   onClick={() => setThresholdEditorOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
                 >
                   <SlidersHorizontal size={13} />
                   {t('coordination_hub.configure_thresholds', {
@@ -463,7 +463,7 @@ export function CoordinationHubPage() {
                 type="button"
                 onClick={handleExport}
                 disabled={exporting}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
               >
                 <Download size={13} />
                 {t('coordination.export_csv', { defaultValue: 'Export CSV' })}
@@ -472,7 +472,7 @@ export function CoordinationHubPage() {
                 data-testid="coordination-refresh"
                 type="button"
                 onClick={handleRefresh}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/50 px-3 py-1.5 text-xs font-medium text-content-secondary backdrop-blur transition hover:border-oe-blue/40 hover:bg-white/80 hover:text-content-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue dark:border-white/5 dark:bg-slate-800/50 dark:hover:bg-slate-700/50"
               >
                 <RefreshCw size={13} />
                 {t('coordination.refresh', { defaultValue: 'Refresh' })}
@@ -664,8 +664,8 @@ export function CoordinationHubPage() {
                       onClick={() => setTimelineDays(d)}
                       className={
                         timelineDays === d
-                          ? 'bg-oe-blue px-3 py-1 font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400'
-                          : 'bg-surface px-3 py-1 font-medium text-content-secondary transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400'
+                          ? 'bg-oe-blue px-3 py-1 font-medium text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue'
+                          : 'bg-surface px-3 py-1 font-medium text-content-secondary transition-colors hover:bg-surface-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue'
                       }
                     >
                       {t('coordination.timeline_window_days', {

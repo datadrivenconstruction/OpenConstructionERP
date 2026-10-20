@@ -2866,7 +2866,7 @@ export function QuickEstimatePage() {
                 onClick={() => handleTabChange(tab.id)}
                 disabled={isPending}
                 className={clsx(
-                  'group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl px-2 py-3 text-center transition-all border backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
+                  'group relative flex flex-col items-center gap-1.5 overflow-hidden rounded-xl px-2 py-3 text-center transition-all border backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                   isActive
                     ? 'border-violet-300/60 bg-gradient-to-br from-violet-50/90 via-white/80 to-sky-50/70 shadow-md shadow-violet-500/10 ring-1 ring-violet-400/20 dark:border-violet-400/30 dark:from-violet-500/10 dark:via-slate-900/40 dark:to-sky-500/10'
                     : 'border-white/40 bg-white/50 hover:-translate-y-0.5 hover:border-violet-300/40 hover:bg-white/80 hover:shadow-lg dark:border-white/5 dark:bg-slate-900/40 dark:hover:bg-slate-800/60',

@@ -9,7 +9,10 @@ of the login page. These endpoints persist it once on the server:
     GET    /api/v1/branding/   - PUBLIC. The login page reads it before anyone
                                  signs in, so an invited user sees the workspace
                                  brand on the very first screen.
-    PUT    /api/v1/branding/   - admin only. Set the workspace brand.
+    PUT    /api/v1/branding/   - admin only. Set the workspace brand and,
+                                 optionally, the default UI appearance
+                                 (accent, font, density, radius) that users
+                                 without a personal choice follow.
     DELETE /api/v1/branding/   - admin only. Clear it and revert to default.
 
     GET    /api/v1/document-appearance/ - any signed-in user. The settings
@@ -52,7 +55,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, ConfigDict, Field
@@ -94,12 +97,28 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["branding"])
 
 
+class WorkspaceAppearance(BaseModel):
+    """Workspace default for the UI look. An omitted axis means platform default.
+
+    The literals mirror ``APPEARANCE_OPTIONS`` in :mod:`app.core.app_branding`,
+    which also guards the read path against a hand-edited file.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    accent: Literal["blue", "teal", "violet", "emerald", "amber", "graphite", "crimson"] | None = None
+    font: Literal["system", "inter", "ibm-plex-sans", "source-sans-3"] | None = None
+    density: Literal["comfortable", "compact"] | None = None
+    radius: Literal["standard", "sharp", "round"] | None = None
+
+
 class BrandingResponse(BaseModel):
     """The workspace brand. ``mode`` is one of default / logo / text."""
 
     mode: str = "default"
     logo_data_url: str | None = None
     company_name: str = ""
+    appearance: WorkspaceAppearance | None = None
 
 
 class BrandingUpdate(BaseModel):
@@ -115,6 +134,8 @@ class BrandingUpdate(BaseModel):
     mode: str | None = None
     logo_data_url: str | None = None
     company_name: str | None = Field(default=None, max_length=MAX_COMPANY_NAME)
+    #: Omitted keeps the stored value, like every field here; ``null`` clears it.
+    appearance: WorkspaceAppearance | None = None
 
 
 @router.get("/branding/", response_model=BrandingResponse)
@@ -143,7 +164,14 @@ async def get_branding() -> BrandingResponse:
 )
 async def put_branding(body: BrandingUpdate) -> BrandingResponse:
     """Admin: set the workspace brand so it persists for every browser and user."""
-    return BrandingResponse(**write_branding(body.model_dump()))
+    # Merge onto what is stored: a field the client left out keeps its value,
+    # so saving the appearance alone cannot drop the logo, and the reverse.
+    payload = read_branding()
+    for field in body.model_fields_set:
+        payload[field] = getattr(body, field)
+    if isinstance(payload.get("appearance"), WorkspaceAppearance):
+        payload["appearance"] = payload["appearance"].model_dump(exclude_none=True)
+    return BrandingResponse(**write_branding(payload))
 
 
 @router.delete(

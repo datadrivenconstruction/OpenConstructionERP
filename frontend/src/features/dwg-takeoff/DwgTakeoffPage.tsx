@@ -4105,7 +4105,7 @@ export function DwgTakeoffPage() {
                           className={clsx(
                             'flex-1 px-2 py-1 rounded-sm font-medium transition-colors',
                             linkPickerMode === 'pick'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-oe-blue text-white'
                               : 'bg-[#363636] text-slate-300 hover:bg-[#404040]',
                           )}
                         >
@@ -4118,7 +4118,7 @@ export function DwgTakeoffPage() {
                           className={clsx(
                             'flex-1 px-2 py-1 rounded-sm font-medium transition-colors disabled:opacity-50',
                             linkPickerMode === 'create'
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-oe-blue text-white'
                               : 'bg-[#363636] text-slate-300 hover:bg-[#404040]',
                           )}
                         >
@@ -4223,7 +4223,7 @@ export function DwgTakeoffPage() {
                             type="button"
                             onClick={() => handleCreateAndLink(selectedEntity.id)}
                             disabled={linkingInProgress || !linkPickerBoqId}
-                            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-sm text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                            className="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-sm text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-hover disabled:opacity-50 transition-colors"
                           >
                             {linkingInProgress && <Loader2 size={11} className="animate-spin" />}
                             {t('dwg_takeoff.create_and_link', {
@@ -5396,7 +5396,7 @@ function DrawingFilmstrip({
                   }
                 }}
                 className={clsx(
-                  'group relative shrink-0 w-36 h-[72px] text-start rounded-md border overflow-hidden flex flex-col cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50',
+                  'group relative shrink-0 w-36 h-[72px] text-start rounded-md border overflow-hidden flex flex-col cursor-pointer focus:outline-none focus:ring-2 focus:ring-oe-blue/50',
                   'transition-all duration-150',
                   activeDrawingId === d.id
                     ? 'border-blue-500/80 bg-blue-500/10 shadow shadow-blue-500/20'

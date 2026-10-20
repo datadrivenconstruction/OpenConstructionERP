@@ -10,7 +10,8 @@ default OpenConstructionERP brand instead of the workspace's own (issue #272).
 This stores the workspace branding once on the server, in a small JSON file in
 the data dir::
 
-    <data-dir>/app_branding.json   ->   {"mode": "logo", "logo_data_url": "...", "company_name": ""}
+    <data-dir>/app_branding.json   ->   {"mode": "logo", "logo_data_url": "...", "company_name": "",
+                                         "appearance": {"accent": "teal", "density": "compact"}}
 
 so every browser and every invited user sees the same brand. A PUBLIC endpoint
 reads it (the login page has no token yet) and an admin-only endpoint writes it.
@@ -44,12 +45,35 @@ MAX_COMPANY_NAME = 60
 #: hostile payload cannot bloat the file or the public response without limit.
 MAX_LOGO_DATA_URL_CHARS = 4 * 1024 * 1024
 
+#: Allowed values of the workspace UI appearance default, one tuple per axis.
+#: Mirrors ``frontend/src/stores/useAppearanceStore.ts``; the first value of
+#: each tuple is the platform default.
+APPEARANCE_OPTIONS: dict[str, tuple[str, ...]] = {
+    "accent": ("blue", "teal", "violet", "emerald", "amber", "graphite", "crimson"),
+    "font": ("system", "inter", "ibm-plex-sans", "source-sans-3"),
+    "density": ("comfortable", "compact"),
+    "radius": ("standard", "sharp", "round"),
+}
+
 #: Shape returned when nothing has been customised.
 DEFAULT_BRANDING: dict[str, Any] = {
     "mode": "default",
     "logo_data_url": None,
     "company_name": "",
+    "appearance": None,
 }
+
+
+def sanitise_appearance(data: Any) -> dict[str, str] | None:
+    """Keep only known axes with allowed values; ``None`` when nothing is left.
+
+    An axis left out means "platform default" for that axis, so a workspace can
+    pin the accent alone and leave the rest to each user's device.
+    """
+    if not isinstance(data, dict):
+        return None
+    clean = {axis: data[axis] for axis, allowed in APPEARANCE_OPTIONS.items() if data.get(axis) in allowed}
+    return clean or None
 
 
 def branding_path(data_dir: Path | None = None) -> Path:
@@ -88,7 +112,12 @@ def sanitise(data: Any) -> dict[str, Any]:
     elif mode == "text" and not name:
         mode = "default"
 
-    return {"mode": mode, "logo_data_url": logo, "company_name": name}
+    return {
+        "mode": mode,
+        "logo_data_url": logo,
+        "company_name": name,
+        "appearance": sanitise_appearance(data.get("appearance")),
+    }
 
 
 #: Process-local cache of the parsed branding, keyed by file path. A PDF export

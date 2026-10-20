@@ -31,6 +31,8 @@ import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { FloatingQueuePanel } from './layout/FloatingQueuePanel';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
+import { useAppearanceStore } from '@/stores/useAppearanceStore';
+import { applyAppearance } from '@/shared/lib/appearance';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { hydrateInfoBlocksFromServer } from '@/stores/useInfoBlockPrefsStore';
@@ -1019,6 +1021,9 @@ function GlobalShortcuts() {
 // Run once at module load — synchronous, before any render
 useAuthStore.getState().loadFromStorage();
 useThemeStore.getState().init();
+// The boot script in index.html already painted the style; this re-asserts it
+// from the store in case that script was stripped by a proxy or an embedder.
+applyAppearance(useAppearanceStore.getState().effective);
 
 // Refresh the authoritative role from the server so a user whose role was
 // changed by an admin sees the correct UI immediately on the next page load,

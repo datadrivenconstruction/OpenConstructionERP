@@ -88,7 +88,7 @@ interface Project {
 const INPUT_CLS =
   'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm ' +
   'text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none ' +
-  'focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40';
+  'focus:ring-2 focus:ring-oe-blue/30 dark:focus:ring-oe-blue/40';
 
 /** Current month as YYYY-MM, the natural default for a new CVR / cash point. */
 function currentPeriod(): string {
@@ -1335,7 +1335,7 @@ function PaymentApplicationsSection({
                       aria-label={t('cvr.payapp_status_label', { defaultValue: 'Payment application status' })}
                       className={
                         'cursor-pointer rounded-full border-0 px-2 py-1 text-2xs font-semibold ' +
-                        'focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:opacity-50 ' +
+                        'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 disabled:opacity-50 ' +
                         PAYAPP_STATUS_TONE[app.status]
                       }
                     >

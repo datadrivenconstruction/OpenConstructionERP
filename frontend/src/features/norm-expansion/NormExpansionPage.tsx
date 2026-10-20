@@ -70,7 +70,7 @@ import { useBuildAssembly } from './useBuildAssembly';
 const INPUT_CLS =
   'w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm ' +
   'text-content-primary placeholder:text-content-tertiary focus:border-oe-blue focus:outline-none ' +
-  'focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40';
+  'focus:ring-2 focus:ring-oe-blue/30 dark:focus:ring-oe-blue/40';
 
 const NORMS_KEY = ['norm-expansion-norms'];
 

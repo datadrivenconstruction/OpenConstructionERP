@@ -20,7 +20,8 @@
  * localStorage healthy).
  */
 import { create } from 'zustand';
-import { apiGet, apiPut, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPut } from '@/shared/lib/api';
+import { useAppearanceStore } from './useAppearanceStore';
 
 const STORAGE_KEY = 'oe_custom_branding_v1';
 const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB cap on base64 payload
@@ -67,6 +68,8 @@ interface ServerBranding {
   mode?: string;
   logo_data_url?: string | null;
   company_name?: string;
+  /** Workspace default UI appearance; see useAppearanceStore. */
+  appearance?: unknown;
 }
 
 /** Coerce a server payload into a safe {@link Persisted} value. */
@@ -185,6 +188,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
     hydrateFromServer: async () => {
       try {
         const r = await apiGet<ServerBranding>('/v1/branding/');
+        useAppearanceStore.getState().setWorkspaceDefault(r.appearance ?? null);
         const next = fromServer(r);
         const current = get();
         if (
@@ -203,15 +207,14 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
     persistToServer: async () => {
       const s = get();
       try {
-        if (s.mode === 'default') {
-          await apiDelete('/v1/branding/');
-        } else {
-          await apiPut('/v1/branding/', {
-            mode: s.mode,
-            logo_data_url: s.logoDataUrl,
-            company_name: s.companyName,
-          });
-        }
+        // Always a PUT: the server keeps fields this payload leaves out, so the
+        // workspace appearance default survives a brand reset. A default brand
+        // with no appearance removes the stored file, as DELETE did.
+        await apiPut('/v1/branding/', {
+          mode: s.mode,
+          logo_data_url: s.logoDataUrl,
+          company_name: s.companyName,
+        });
         return true;
       } catch {
         // Non-admin (403), pre-auth (401) or offline: the local change still

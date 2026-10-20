@@ -106,6 +106,8 @@ export function DashboardBackdrop({
   const a2 = (0.06 * effIntensity).toFixed(3);
   const isDefaultTint =
     effTint.r === APPLE_BLUE.r && effTint.g === APPLE_BLUE.g && effTint.b === APPLE_BLUE.b;
+  // The default tint follows the workspace accent (Settings > Style).
+  const wash = (alpha: string) => (isDefaultTint ? `rgb(var(--oe-blue-ch) / ${alpha})` : `rgba(${rgb},${alpha})`);
 
   return (
     <div
@@ -121,7 +123,7 @@ export function DashboardBackdrop({
       <div
         className="absolute inset-0"
         style={{
-          background: `radial-gradient(80% 55% at 50% -10%, rgba(${rgb},${a1}) 0%, rgba(${rgb},${a2}) 35%, rgba(${rgb},0) 65%)`,
+          background: `radial-gradient(80% 55% at 50% -10%, ${wash(a1)} 0%, ${wash(a2)} 35%, ${wash('0')} 65%)`,
         }}
       />
 
@@ -149,26 +151,21 @@ export function DashboardBackdrop({
         }}
       />
 
-      {/* Dark-mode overrides — only applied for the default Apple-blue tint.
-          Custom tints (passed via props) use the same RGB in both modes; the
-          intensity prop is the recommended knob for tuning brightness. */}
-      {isDefaultTint && (
-        <style>{`
-          [data-theme="dark"] .dash-backdrop > div:nth-child(2) {
-            background: radial-gradient(80% 55% at 50% -10%, rgba(59,130,246,0.18) 0%, rgba(59,130,246,0.05) 35%, rgba(59,130,246,0) 65%);
-          }
-          [data-theme="dark"] .dash-backdrop > div:nth-child(4) {
-            background-image: radial-gradient(circle, rgba(180,184,196,0.10) 0.9px, transparent 0.9px);
-          }
-        `}</style>
-      )}
-      {!isDefaultTint && (
-        <style>{`
-          [data-theme="dark"] .dash-backdrop > div:nth-child(4) {
-            background-image: radial-gradient(circle, rgba(180,184,196,0.10) 0.9px, transparent 0.9px);
-          }
-        `}</style>
-      )}
+      {/* Dark mode, keyed on the `dark` class of <html>. The halo override
+          applies to the default tint only; custom tints keep their RGB and the
+          intensity prop is the knob for brightness. */}
+      <style>{`
+        ${
+          isDefaultTint
+            ? `.dark .dash-backdrop > div:nth-child(2) {
+            background: radial-gradient(80% 55% at 50% -10%, rgb(var(--oe-blue-ch) / 0.18) 0%, rgb(var(--oe-blue-ch) / 0.05) 35%, rgb(var(--oe-blue-ch) / 0) 65%);
+          }`
+            : ''
+        }
+        .dark .dash-backdrop > div:nth-child(4) {
+          background-image: radial-gradient(circle, rgba(180,184,196,0.10) 0.9px, transparent 0.9px);
+        }
+      `}</style>
     </div>
   );
 }

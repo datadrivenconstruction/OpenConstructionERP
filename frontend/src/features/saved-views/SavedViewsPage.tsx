@@ -255,7 +255,7 @@ export function SavedViewsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-gray-200 bg-white py-2 pe-4 ps-10 text-sm
-              focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500
+              focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue
               dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           />
           {search && (

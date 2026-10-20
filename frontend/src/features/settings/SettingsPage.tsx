@@ -14,6 +14,7 @@ import { CompanyDocumentsSettings } from './CompanyDocumentsSettings';
 import { WebhookLeads } from './WebhookLeads';
 import { DesktopServerCard } from './DesktopServerCard';
 import { TextSizeSetting } from './TextSizeSetting';
+import { AppearanceStyleCard } from './AppearanceStyleCard';
 import VectorStatusCard from './VectorStatusCard';
 import SemanticModelSettings from './SemanticModelSettings';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -1172,7 +1173,7 @@ function ProfileCard({ profile, loading, editing, setEditing, formName, setFormN
           <div className="flex flex-col sm:flex-row sm:items-center gap-5">
             {/* Avatar */}
             <div
-              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue to-oe-blue-hover text-3xl font-bold text-white shadow-sm"
+              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue to-oe-blue-hover text-3xl font-bold text-oe-on-accent shadow-sm"
               aria-hidden="true"
             >
               {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
@@ -1822,6 +1823,7 @@ export function SettingsPage() {
                 onRetry={() => queryClient.invalidateQueries({ queryKey: ['me'] })}
               />
               <AppearanceCard />
+              <AppearanceStyleCard />
               <InterfaceModeCard />
             </>
           )}

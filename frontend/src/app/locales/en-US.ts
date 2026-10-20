@@ -1422,6 +1422,8 @@ const resource = {
     "service.asset_name_hint": "How site staff recognize this unit.",
     "backup.scope_note": "A backup currently includes your projects, estimates and bid schedule, schedules, cost data, documents, tenders and change orders. Site records such as daily diaries, takeoff measurements, inspections, safety and other module data are not part of the backup yet, full coverage is on the way.",
     "settings.team_subtitle": "Who shares this workspace and how access is organized",
+    "settings.style_subtitle": "Colors, font, spacing and corners. Pick a ready style or tune each part below.",
+    "settings.style_accent": "Accent color",
     "setup.vectorize_already_loaded": "Catalog already loaded - click the card to refresh and (re)build vectors.",
     "setup.vectorize_not_loaded": "Catalog not yet loaded - click the card to load and build vectors.",
     "setup.vectorize_target_title": "Click \"{{catalog}}\" to vectorize",

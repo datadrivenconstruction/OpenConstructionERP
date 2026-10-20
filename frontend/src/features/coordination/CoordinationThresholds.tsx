@@ -394,7 +394,7 @@ export function ThresholdEditorModal({
                     value={d.warn}
                     disabled={!d.enabled}
                     onChange={(e) => setField(r.metric, { warn: e.target.value })}
-                    className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-50"
+                    className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue disabled:opacity-50"
                   />
                 </WideModalField>
                 <WideModalField
@@ -409,7 +409,7 @@ export function ThresholdEditorModal({
                     value={d.error}
                     disabled={!d.enabled}
                     onChange={(e) => setField(r.metric, { error: e.target.value })}
-                    className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 disabled:opacity-50"
+                    className="h-9 rounded-lg border border-border bg-surface px-3 text-sm text-content-primary focus:border-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue disabled:opacity-50"
                   />
                 </WideModalField>
               </div>
