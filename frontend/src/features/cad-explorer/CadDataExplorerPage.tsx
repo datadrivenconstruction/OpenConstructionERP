@@ -80,6 +80,7 @@ import {
 } from './thresholds';
 import { ThresholdRulesModal } from './ThresholdRulesModal';
 import { cadExplorerGuide } from './cadExplorerGuide';
+import { useConverterRanges } from '@/features/bim/useConverterRanges';
 import { fmtList, fmtPercent, getIntlLocale } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -3112,7 +3113,7 @@ function UploadConvertZone({
   const handleFile = useCallback(async (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
     if (!['rvt', 'ifc', 'dwg', 'dxf', 'rfa'].includes(ext)) {
-      addToast({ type: 'warning', title: t('explorer.invalid_format', { defaultValue: 'Unsupported file format. Use RVT, IFC, or DWG.' }) });
+      addToast({ type: 'warning', title: t('explorer.invalid_format', { defaultValue: 'Unsupported file format. Use RVT, IFC or DWG.' }) });
       return;
     }
     const taskId = uuid();
@@ -3299,7 +3300,7 @@ function UploadConvertZone({
               </div>
               <div>
                 <p className="text-base font-bold text-content-primary mb-1">
-                  {t('explorer.drop_cad', { defaultValue: 'Drop your IFC, RVT, or DWG file here' })}
+                  {t('explorer.drop_cad', { defaultValue: 'Drop your IFC, RVT or DWG file here' })}
                 </p>
                 <p className="text-sm text-content-tertiary">
                   {t('explorer.or_click', { defaultValue: 'or click to browse your files' })}
@@ -3679,6 +3680,7 @@ function KpiStrip({ describe }: { describe: DescribeResponse }) {
 
 export function CadDataExplorerPage() {
   const { t } = useTranslation();
+  const converterRanges = useConverterRanges(['ifc', 'rvt', 'dwg']);
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const navigate = useNavigate();
@@ -4044,7 +4046,7 @@ export function CadDataExplorerPage() {
                     {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit® models.' })}
                   </p>
                   <p className="text-xs text-content-tertiary mt-3 leading-relaxed">
-                    IFC 2x3, 4.0, 4.1, 4.3 &middot; Revit® 2015–2026 &middot; DWG &middot; DXF &middot; RFA
+                    {converterRanges} &middot; DXF &middot; RFA
                   </p>
                   <div className="mt-4 flex items-center justify-start">
                     <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">

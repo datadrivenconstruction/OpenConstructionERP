@@ -164,8 +164,7 @@ function isCardClickable(doc: DocItem): boolean {
   return (
     lower.endsWith('.dwg') || lower.endsWith('.dxf') ||
     lower.endsWith('.rvt') || lower.endsWith('.ifc') ||
-    lower.endsWith('.nwd') || lower.endsWith('.nwc') ||
-    lower.endsWith('.dgn')
+    lower.endsWith('.nwd') || lower.endsWith('.nwc')
   );
 }
 
@@ -197,7 +196,7 @@ function routeForDocument(doc: DocItem): { path: string; module: 'takeoff' | 'dw
   }
 
   const lower = doc.name.toLowerCase();
-  if (lower.endsWith('.dwg') || lower.endsWith('.dxf') || lower.endsWith('.dgn')) {
+  if (lower.endsWith('.dwg') || lower.endsWith('.dxf')) {
     return {
       path: `/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`,
       module: 'dwg-takeoff',
@@ -1172,7 +1171,6 @@ export function DocumentsPage() {
                 RVT: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
                 IFC: 'bg-green-50 text-green-600 dark:bg-green-950/30 dark:text-green-400',
                 DWG: 'bg-orange-50 text-orange-500 dark:bg-orange-950/30 dark:text-orange-400',
-                DGN: 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400',
               };
               return (
                 <button
@@ -1494,7 +1492,7 @@ export function DocumentsPage() {
                                 {t('documents.open_in_takeoff', { defaultValue: 'Measure & Takeoff' })}
                               </button>
                             )}
-                            {(doc.name.toLowerCase().endsWith('.dwg') || doc.name.toLowerCase().endsWith('.dxf') || doc.name.toLowerCase().endsWith('.dgn')) && (
+                            {(doc.name.toLowerCase().endsWith('.dwg') || doc.name.toLowerCase().endsWith('.dxf')) && (
                               <button
                                 role="menuitem"
                                 onClick={() => { setOpenMenuId(null); navigate(`/dwg-takeoff?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`); }}

@@ -270,6 +270,13 @@ export function extractErrorMessageFromBody(body: unknown): string | null {
   // caller's `${detail}` / `new Error(detail)` renders "[object Object]".
   if (obj.detail && typeof obj.detail === 'object' && !Array.isArray(obj.detail)) {
     const d = obj.detail as Record<string, unknown>;
+    // A coded refusal `{code, message, params}`: the UI shows its own text for
+    // the code, filled from `params`. `message` is the English fallback for a
+    // code this build has no text for.
+    if (typeof d.code === 'string' && i18next.exists(`api_errors.${d.code}`)) {
+      const params = d.params && typeof d.params === 'object' ? (d.params as Record<string, unknown>) : {};
+      return i18next.t(`api_errors.${d.code}`, params);
+    }
     const msg = typeof d.message === 'string' && d.message.length > 0 ? d.message : null;
     const rem = typeof d.remediation === 'string' && d.remediation.length > 0 ? d.remediation : null;
     if (msg) return rem ? `${msg} ${rem}` : msg;

@@ -85,6 +85,8 @@ import { apiGet } from '@/shared/lib/api';
 import { boqApi, normalizePositions, type Position } from '@/features/boq/api';
 import { projectsApi } from '@/features/projects/api';
 import { installBIMConverter } from '@/features/bim/api';
+import { converterPlatformMessage } from '@/features/bim/converterText';
+import { useConverterRanges } from '@/features/bim/useConverterRanges';
 import { ConverterInstallProgressBar } from '@/features/bim/ConverterInstallProgressBar';
 import { AutoInstallConverterNotice } from '@/features/bim/AutoInstallConverterNotice';
 import { useAutoInstallConverter } from '@/features/bim/useAutoInstallConverter';
@@ -174,7 +176,7 @@ import CreateTaskFromDwgModal from './CreateTaskFromDwgModal';
 import LinkDocumentToDwgModal from './LinkDocumentToDwgModal';
 import LinkActivityToDwgModal from './LinkActivityToDwgModal';
 import LinkRequirementToDwgModal from './LinkRequirementToDwgModal';
-import { fmtFixed, fmtPrecision } from '@/shared/lib/formatters';
+import { fmtFixed, fmtPrecision, formatFileSize } from '@/shared/lib/formatters';
 import { compareNames } from '@/shared/lib/collator';
 // boqApi / Position import removed - BOQ picker now handled via ElementInfoPopover callback
 
@@ -481,24 +483,14 @@ function OfflineReadyBadge({
             }),
         });
         setShowHint(false);
-      } else if (result.platform_unsupported && result.platform === 'linux') {
-        const instructions = result.instructions
-          ? `\n\n${result.instructions}`
-          : result.apt_package
-            ? `\n\nsudo apt install -y ${result.apt_package}`
-            : '';
-        addToast(
-          {
-            type: 'info',
-            title: t('dwg_takeoff.converter_install_linux_title', {
-              defaultValue: 'Run apt to finish installing',
-            }),
-            message:
-              (result.message || 'Install via apt to enable .dwg uploads') +
-              instructions,
-          },
-          { duration: 45_000 },
-        );
+      } else if (result.platform_unsupported) {
+        addToast({
+          type: 'warning',
+          title: t('dwg_takeoff.converter_install_partial_title', {
+            defaultValue: 'Install needs attention',
+          }),
+          message: converterPlatformMessage(t, 'dwg'),
+        });
       } else {
         addToast({
           type: 'warning',
@@ -681,6 +673,7 @@ function OfflineReadyBadge({
 
 export function DwgTakeoffPage() {
   const { t } = useTranslation();
+  const dwgRange = useConverterRanges(['dwg']);
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   // Display measurement system for the auto-quantify Excel export (write-only
@@ -3375,11 +3368,11 @@ export function DwgTakeoffPage() {
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dwg</span>
                           <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dxf</span>
                         </div>
-                        <p className="text-[11px] text-gray-600 leading-relaxed mt-1 text-center">
-                          {t('dwg_takeoff.format_support', {
-                            defaultValue: 'DWG 2000–2025 · DXF R12–R2025',
-                          })}
-                        </p>
+                        {dwgRange && (
+                          <p className="text-[11px] text-gray-600 leading-relaxed mt-1 text-center">
+                            {dwgRange}
+                          </p>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -3401,11 +3394,11 @@ export function DwgTakeoffPage() {
                       <p className="text-base text-gray-400 mt-3 leading-relaxed">
                         {t('dwg_takeoff.hero_subtitle', { defaultValue: 'Open DWG/DXF drawings, measure areas and lengths, annotate directly on the drawing, and link measurements to your BOQ positions.' })}
                       </p>
-                      <p className="text-xs text-gray-600 mt-3 leading-relaxed">
-                        {t('dwg_takeoff.format_support_dwg', {
-                          defaultValue: 'DWG 2000–2025 · DXF R12–R2025',
-                        })}
-                      </p>
+                      {dwgRange && (
+                        <p className="text-xs text-gray-600 mt-3 leading-relaxed">
+                          {dwgRange}
+                        </p>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-3 mt-2">
                       {[
@@ -5044,7 +5037,7 @@ export function DwgTakeoffPage() {
                   </div>
                   <p className="text-sm font-semibold text-content-primary">{uploadFile.name}</p>
                   <p className="text-[11px] text-content-quaternary">
-                    {fmtFixed(uploadFile.size / 1024 / 1024, 1)} MB
+                    {formatFileSize(uploadFile.size)}
                   </p>
                 </>
               ) : (
@@ -6804,13 +6797,7 @@ function InstallDwgConverterCTA({
         });
         onInstalled?.();
       } else if (result.platform_unsupported) {
-        setUnsupportedMessage(
-          result.message ||
-            t('dwg_takeoff.conv_install_unsupported', {
-              defaultValue:
-                'The DDC DWG converter is available for Windows only. On other systems, upload a DXF instead.',
-            }),
-        );
+        setUnsupportedMessage(converterPlatformMessage(t, 'dwg'));
       } else {
         addToast({
           type: 'error',

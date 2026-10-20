@@ -40,6 +40,7 @@ import { takeoffApi, type TakeoffDocumentResponse } from '../takeoff/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { QuantitySummaryPanel } from './QuantitySummaryPanel';
 import { getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
+import { converterDescription, converterName, converterVersionLabel } from '@/features/bim/converterText';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -65,7 +66,7 @@ interface ConverterInfo {
   version: string;
   size_mb: number;
   installed: boolean;
-  path: string | null;
+  format_range?: string;
 }
 
 interface ConvertersResponse {
@@ -234,12 +235,8 @@ function ConverterCard({
   const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/10 to-gray-500/10', border: 'border-gray-200', icon: 'bg-gray-500' };
   const installed = converter.installed;
   const updateAvailable = installed && Boolean(versionEntry?.is_outdated);
-  const installedShortSha = versionEntry?.installed_sha
-    ? versionEntry.installed_sha.slice(0, 7)
-    : null;
-  const latestShortSha = versionEntry?.latest_sha
-    ? versionEntry.latest_sha.slice(0, 7)
-    : null;
+  const installedVersion = versionEntry?.installed_version || converter.version;
+  const latestVersion = versionEntry?.latest_version ?? null;
 
   return (
     <div
@@ -279,8 +276,8 @@ function ConverterCard({
             title={t('quantities.converter_update_tooltip', {
               defaultValue:
                 'A newer build is available on GitHub (installed: {{installed}}, latest: {{latest}}).',
-              installed: installedShortSha ?? '?',
-              latest: latestShortSha ?? '?',
+              installed: `v${installedVersion}`,
+              latest: latestVersion ? `v${latestVersion}` : '?',
             })}
           >
             <Download size={10} />
@@ -312,12 +309,12 @@ function ConverterCard({
       </div>
 
       {/* Name + engine */}
-      <h3 className="mt-3 text-sm font-semibold text-content-primary">{converter.name}</h3>
+      <h3 className="mt-3 text-sm font-semibold text-content-primary">{converterName(t, converter)}</h3>
       <p className="mt-0.5 text-2xs text-content-quaternary">{converter.engine}</p>
 
       {/* Description */}
       <p className="mt-2 text-xs text-content-tertiary leading-relaxed line-clamp-2">
-        {converter.description}
+        {converterDescription(t, converter)}
       </p>
 
       {/* Extensions */}
@@ -341,17 +338,11 @@ function ConverterCard({
           obvious without opening a tooltip. */}
       <div className="mt-3 flex items-center justify-between pt-2 border-t border-border-light">
         <span className="text-2xs text-content-quaternary font-mono">
-          {installed && installedShortSha ? (
-            <>
-              v {installedShortSha}
-              {updateAvailable && latestShortSha && (
-                <span className="text-sky-600 dark:text-sky-400">
-                  {' '}→ {latestShortSha}
-                </span>
-              )}
-            </>
-          ) : (
-            <>v{converter.version}</>
+          {installed ? converterVersionLabel(versionEntry?.installed_version, converter.version) : `v${converter.version}`}
+          {installed && updateAvailable && latestVersion && (
+            <span className="text-sky-600 dark:text-sky-400">
+              {' '}→ v{latestVersion}
+            </span>
           )}{' '}
           &middot;{' '}
           {converter.size_mb >= 1024
@@ -710,7 +701,7 @@ function InstalledConvertersTable({
           <tbody>
             {installed.map((c) => (
               <tr key={c.id} className="border-b border-border-light last:border-0">
-                <td className="py-2.5 pr-4 font-medium text-content-primary">{c.name}</td>
+                <td className="py-2.5 pr-4 font-medium text-content-primary">{converterName(t, c)}</td>
                 <td className="py-2.5 pr-4">
                   <div className="flex flex-wrap gap-1">
                     {c.extensions.map((ext) => (

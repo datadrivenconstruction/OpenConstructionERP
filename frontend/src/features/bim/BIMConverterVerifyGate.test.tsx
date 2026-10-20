@@ -60,7 +60,8 @@ function converter(id: string, name: string): BIMConverterInfo {
     version: '1.0.0',
     size_mb: 120,
     installed: true,
-    path: `C:/converters/${id}/${id}.exe`,
+    format_range: 'Range',
+    produces_geometry: true,
   };
 }
 
@@ -106,7 +107,10 @@ const DWG_OUTDATED: ConverterVersionCheck = {
       name: 'DWG converter',
       exe: 'dwg2excel.exe',
       installed: true,
-      installed_path: 'C:/converters/dwg/cli/dwg2excel.exe',
+      installed_version: '0.4.1',
+      latest_version: '0.4.2',
+      format_range: 'DWG R13-2018',
+      produces_geometry: true,
       installed_size: 120,
       installed_sha: 'def5678',
       latest_size: 121,
@@ -187,7 +191,7 @@ describe('An unchecked panel says so rather than guessing (#416)', () => {
 
     // With no verdicts, "working" is not a number the panel has. Reusing the
     // verified wording here printed "0/3 up to date" and the install nag on a
-    // machine where all four converters are present and fine.
+    // machine where all three converters are present and fine.
     expect(await screen.findByText('3/3 installed · not checked')).toBeInTheDocument();
     expect(screen.queryByText('3/3 up to date')).not.toBeInTheDocument();
     expect(

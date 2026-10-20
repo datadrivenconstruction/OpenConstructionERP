@@ -12,6 +12,7 @@
  * Slice 3 of BIM Federations.
  */
 import { useTranslation } from 'react-i18next';
+import { disciplineLabel } from '@/shared/lib/disciplineLabel';
 
 import { DISCIPLINE_PALETTE } from './FederatedViewerScene';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -69,7 +70,7 @@ export function FederatedViewerLegend({ disciplines, onToggleVisible }: Props) {
               />
               <span className="truncate font-medium">{d.modelName}</span>
               <span className="ml-auto rounded bg-slate-100 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-500">
-                {d.discipline}
+                {disciplineLabel(t, d.discipline)}
               </span>
               {typeof d.elementCount === 'number' ? (
                 <span className="font-mono text-[10px] text-slate-400">
