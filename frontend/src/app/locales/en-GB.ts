@@ -93,6 +93,20 @@ const resource = {
     "about.team_linkedin": "DataDrivenConstruction on LinkedIn",
 
     "subcontractors.cert_type.license": "Licence",
+    "notifications.permits.condition_assigned.title": "A permit condition was assigned to you",
+    "notifications.permits.condition_assigned.body": "Permit condition {{number}} is now yours to resolve.",
+    "notifications.permits.condition_breach.title": "A permit condition was breached",
+    "notifications.permits.condition_breach.body": "A permit condition you own has been marked as breached.",
+    "notifications.permits.condition_overdue.title": "A permit condition is overdue",
+    "notifications.permits.condition_overdue.body": "Permit condition {{number}} was due on {{due_date}} and is still open.",
+    "notifications.permits.condition_escalated.title": "A permit condition was escalated",
+    "notifications.permits.condition_escalated.body": "Permit condition {{number}} (due {{due_date}}) is overdue and has been escalated to your area.",
+    "notifications.site_logistics.permit_expired.title": "A logistics permit has expired",
+    "notifications.site_logistics.permit_expired.body": "Permit {{reference}} expired on {{valid_to}}.",
+    "notifications.site_logistics.permit_expiring.title": "A logistics permit is about to expire",
+    "notifications.site_logistics.permit_expiring.body": "Permit {{reference}} is valid until {{valid_to}}.",
+    "notifications.site_logistics.neighbour_issue_overdue.title": "A neighbour issue is overdue",
+    "notifications.site_logistics.neighbour_issue_overdue.body": "A neighbour {{kind}} issue was due for a response by {{due}}.",
   }
 } as { translation: Record<string, string> };
 

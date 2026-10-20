@@ -10,7 +10,7 @@
  * IDOR-safely to accessible projects. We READ existing per-module data - this
  * client introduces no new store.
  */
-import { apiDelete, apiGet, apiPost } from '@/shared/lib/api';
+import { ApiError, apiDelete, apiGet, apiPost } from '@/shared/lib/api';
 
 export type InboxKind = 'approval' | 'alert';
 export type InboxSeverity = 'info' | 'warning' | 'critical';
@@ -91,9 +91,30 @@ export interface InboxActionResponse {
 
 const ITEM_BASE = (itemId: string) => `/v1/dashboard/inbox/${encodeURIComponent(itemId)}`;
 
+/**
+ * A row that is already off the caller's list answers 404 to a second dismiss,
+ * acknowledge or undo (double click, another tab, an alert read elsewhere). The
+ * wanted end state holds, so that is success, not an error toast.
+ */
+async function idempotent(
+  itemId: string,
+  state: InboxState,
+  call: () => Promise<InboxActionResponse>,
+): Promise<InboxActionResponse> {
+  try {
+    return await call();
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      return { item_id: itemId, state, findings: [] };
+    }
+    throw error;
+  }
+}
+
 /** Mark a row seen. It stays in the list, flagged, and nothing else changes. */
 export function acknowledgeInboxItem(itemId: string): Promise<InboxActionResponse> {
-  return apiPost<InboxActionResponse>(`${ITEM_BASE(itemId)}/acknowledge`, {});
+  return idempotent(itemId, 'acknowledged', () =>
+    apiPost<InboxActionResponse>(`${ITEM_BASE(itemId)}/acknowledge`, {}));
 }
 
 /**
@@ -102,10 +123,12 @@ export function acknowledgeInboxItem(itemId: string): Promise<InboxActionRespons
  * owns it, which is triage, not a decision.
  */
 export function dismissInboxItem(itemId: string): Promise<InboxActionResponse> {
-  return apiPost<InboxActionResponse>(`${ITEM_BASE(itemId)}/dismiss`, {});
+  return idempotent(itemId, 'dismissed', () =>
+    apiPost<InboxActionResponse>(`${ITEM_BASE(itemId)}/dismiss`, {}));
 }
 
 /** Undo an acknowledge or a dismiss and put the row back on the list. */
 export function restoreInboxItem(itemId: string): Promise<InboxActionResponse> {
-  return apiDelete<InboxActionResponse>(`${ITEM_BASE(itemId)}/state`);
+  return idempotent(itemId, null, () =>
+    apiDelete<InboxActionResponse>(`${ITEM_BASE(itemId)}/state`));
 }

@@ -535,6 +535,8 @@ const resource = {
     "notifications.carbon.boq_position_assigned.body": "Bid schedule position {{boq_position_id}}: {{carbon_kg}} kg CO₂e ({{stage}}).",
     "notifications.subcontractors.retention_released.title": "Subcontractor retainage released",
     "notifications.subcontractors.retention_released.body": "{{amount}} {{currency}} retainage released.",
+    "notifications.site_logistics.neighbour_issue_overdue.title": "A neighbor issue is overdue",
+    "notifications.site_logistics.neighbour_issue_overdue.body": "A neighbor {{kind}} issue was due for a response by {{due}}.",
     "procurement.pipeline_cancelled": "Canceled",
     "reporting.info_body": "Live KPI dashboards for one project at a time, organized by role. For figures that span every project use Analytics; for downloadable PDF and Excel documents use Reports.",
     "reporting.no_boqs_title": "No Bid Schedules yet",
