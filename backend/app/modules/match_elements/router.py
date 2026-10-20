@@ -129,11 +129,11 @@ def _reject_if_too_many_pdf_pages(content: bytes) -> None:
 
     pdfplumber's ``extract_tables()`` runs per page and balloons memory on
     vector-dense CAD sheets, so a document with hundreds of pages can OOM the
-    worker before the import finishes. Counting pages with pymupdf is cheap - it
+    worker before the import finishes. Counting pages with PDFium is cheap - it
     reads the page tree and never decodes page content - so this is a fast
     front-door guard ahead of :func:`parse_boq_pdf`.
 
-    A file pymupdf cannot open (or a missing pymupdf) is deferred to the parser,
+    A file the reader cannot open (or a missing reader) is deferred to the parser,
     which surfaces its own error for unreadable bytes; this guard only rejects a
     validly-opened PDF whose page count exceeds ``_MAX_PDF_PAGES``.
 
@@ -141,18 +141,14 @@ def _reject_if_too_many_pdf_pages(content: bytes) -> None:
         HTTPException: 413 when the PDF has more than ``_MAX_PDF_PAGES`` pages.
     """
     try:
-        import pymupdf
+        from app.core import pdf_reader
     except Exception:
         return
 
     try:
-        doc = pymupdf.open(stream=content, filetype="pdf")
+        page_count = pdf_reader.page_count(content)
     except Exception:
         return
-    try:
-        page_count = int(doc.page_count)
-    finally:
-        doc.close()
 
     if page_count > _MAX_PDF_PAGES:
         raise HTTPException(

@@ -10,7 +10,7 @@ manifest = ModuleManifest(
     display_name="File Search",
     description=(
         "OCR-backed full-text content search across project documents, "
-        "sheets, markups and reports. PyMuPDF + Tesseract extractors, "
+        "sheets, markups and reports. PDFium + Tesseract extractors, "
         "Postgres tsvector / SQLite LIKE fallback."
     ),
     author="OpenConstructionERP Core Team",

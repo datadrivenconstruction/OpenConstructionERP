@@ -956,7 +956,7 @@ async def import_meeting_summary(
 
     # Magic-byte sniff - filename is hostile-supplied. Reject any payload
     # whose first bytes don't match the declared format before we hand
-    # the buffer to python-docx / PyMuPDF / VTT/SRT parsers. Plain-text
+    # the buffer to python-docx / PDF / VTT/SRT parsers. Plain-text
     # transcripts (txt/vtt/srt) have no canonical signature, so we use a
     # denylist of known-binary prefixes instead.
     head = content[:8]

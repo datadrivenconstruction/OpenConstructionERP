@@ -4,7 +4,7 @@
 
 The online counterpart is the LLM text analyzer (``POST /documents/{id}/analyze/``).
 This module is its offline, geometry-driven complement: it reads the vector
-drawing layer of a PDF page (PyMuPDF ``page.get_drawings()``) and proposes
+drawing layer of a PDF page (``PdfPage.drawings()`` in :mod:`app.core.pdf_reader`) and proposes
 candidate measurements:
 
 * rectangles and clean closed loops -> ``area`` candidates,
@@ -16,7 +16,7 @@ and a human-readable ``reason`` so the user confirms, edits or rejects it on
 the canvas (CLAUDE.md rule 7: AI-augmented, human-confirmed).
 
 The module is pure and DB-free so it unit-tests without a database or a real
-PDF. PyMuPDF is a base dependency and is imported lazily by the *caller*; this
+PDF. The PDF reader is a base dependency and is imported lazily by the *caller*; this
 module only consumes the already extracted primitives, accessing point-like /
 rect-like objects defensively so tests can feed plain tuples.
 """
@@ -26,7 +26,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-# Coordinates from get_drawings() are in PDF points - the same space the
+# Coordinates from drawings() are in PDF points - the same space the
 # frontend stores measurement points in, so they drop straight in with no
 # transform (see internal design note PDF_TAKEOFF_194_PLAN).
 
@@ -47,11 +47,11 @@ _MAX_CANDIDATES = 40
 Point = tuple[float, float]
 
 
-# ── point / rect extraction (defensive: fitz objects OR plain tuples) ───────
+# ── point / rect extraction (defensive: named tuples OR plain tuples) ───────
 
 
 def _xy(obj: Any) -> Point | None:
-    """Best-effort (x, y) from a fitz.Point, a (x, y) pair or a mapping."""
+    """Best-effort (x, y) from a Point, a (x, y) pair or a mapping."""
     try:
         if hasattr(obj, "x") and hasattr(obj, "y"):
             return (float(obj.x), float(obj.y))
@@ -65,7 +65,7 @@ def _xy(obj: Any) -> Point | None:
 
 
 def _rect_corners(obj: Any) -> list[Point] | None:
-    """Four corner points (CW) from a fitz.Rect-like or a 4-number bbox."""
+    """Four corner points (CW) from a Rect-like or a 4-number bbox."""
     try:
         if all(hasattr(obj, a) for a in ("x0", "y0", "x1", "y1")):
             x0, y0, x1, y1 = float(obj.x0), float(obj.y0), float(obj.x1), float(obj.y1)
@@ -146,7 +146,7 @@ def _segments_self_intersect(pts: list[Point]) -> bool:
     return False
 
 
-# ── primitive extraction from get_drawings() ────────────────────────────────
+# ── primitive extraction from drawings() ────────────────────────────────────
 
 
 class _Primitive:
@@ -160,7 +160,7 @@ class _Primitive:
 
 
 def primitives_from_drawings(drawings: list[Any]) -> list[_Primitive]:
-    """Normalize PyMuPDF ``page.get_drawings()`` output into primitives.
+    """Normalize ``PdfPage.drawings()`` output into primitives.
 
     Each path becomes zero or more primitives: an explicit ``re`` item is a
     rectangle; a run of connected ``l`` items that returns to its start is a
@@ -412,7 +412,7 @@ def find_similar_symbols(
     centroid proximity and scored by how closely they match the seed's size.
 
     Pure and DB-free: ``drawings`` is the already-extracted
-    ``page.get_drawings()`` output. Returns ``{"hits", "seed_found", "note"}``
+    ``PdfPage.drawings()`` output. Returns ``{"hits", "seed_found", "note"}``
     where ``note`` is ``"no_vector_layer"`` (page has no drawing layer, e.g. a
     scan), ``"no_symbol_at_point"`` (nothing small enough under the click) or
     ``None``. Each hit is ``{x, y, bbox_x0..y1, confidence, is_seed}`` in PDF

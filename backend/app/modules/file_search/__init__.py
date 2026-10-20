@@ -5,10 +5,10 @@
 OCR-extracted content index over every file kind in the file manager
 (documents, sheets, markups, takeoffs, reports). Wraps two extractors:
 
-* PyMuPDF (``fitz``) - pulls embedded vector text out of PDFs at zero
-  pixel-rendering cost. Used as the primary extractor for ``.pdf``.
+* pypdfium2 (PDFium, via :mod:`app.core.pdf_reader`) - pulls embedded
+  vector text out of PDFs at zero pixel-rendering cost. Used as the primary extractor for ``.pdf``.
 * pytesseract - falls back to OCR for image-only pages (scanned PDFs,
-  photos, markup raster overlays). Slow; only invoked when PyMuPDF
+  photos, markup raster overlays). Slow; only invoked when the PDF
   reports zero embedded text.
 
 Both extractors are optional dependencies. If neither library is

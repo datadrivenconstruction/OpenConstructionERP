@@ -8,7 +8,7 @@ path *looks at the pixels*, this path simply *reads the text the architect
 already typed on the sheet* - the explicit scale note (``SCALE 1:100``,
 ``1/4" = 1'-0"``) that almost every drawing carries in its title block.
 
-Nothing here calls a network, an AI provider, a database, or PyMuPDF. It is a
+Nothing here calls a network, an AI provider, a database, or a PDF reader. It is a
 pure string -> candidate function so it unit-tests with no dependency at all
 (mirrors :mod:`recognize` and :mod:`plan_read`). The service layer feeds it the
 per-page ``text`` already stored in ``TakeoffDocument.page_data`` and turns the

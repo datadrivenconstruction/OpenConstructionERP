@@ -10,15 +10,15 @@ test. The vision model only PROPOSES (a scale reference, room polygons, symbol
 centroids); this module turns those proposals into checked geometry, and the
 service layer turns checked geometry into human-confirmed measurements.
 
-Nothing here calls a network or an AI provider. PyMuPDF is a base dependency,
-but :func:`rasterize_page` imports it lazily so the rest of the module
+Nothing here calls a network or an AI provider. The PDF reader is a base
+dependency, but :func:`rasterize_page` imports it lazily so the rest of the module
 unit-tests with no dependency at all and a broken wheel surfaces as a clear
 error from one function rather than an import-time failure.
 
 Coordinate contract (matches the image, the canvas, and the PDF-point space):
 normalized ``[0, 1]``, origin top-left, ``x`` increases right, ``y`` increases
-down. No vertical flip - PDF pages in PyMuPDF already use a top-left origin via
-``page.rect``.
+down. No vertical flip - :mod:`app.core.pdf_reader` pages already use a
+top-left origin via ``page.rect``.
 """
 
 from __future__ import annotations
@@ -119,9 +119,8 @@ def rasterize_page(
 ) -> tuple[bytes, str, int, float, float]:
     """Render one PDF page to a single in-limit PNG for a vision call.
 
-    Uses the verified PyMuPDF idiom (``page.get_pixmap(dpi=N)`` ->
-    ``pix.tobytes("png")``). PNG is used over JPEG because JPEG smears thin
-    walls and dimension text. If the first render is over the byte guard the
+    Renders through :mod:`app.core.pdf_reader`. PNG is used over JPEG because
+    JPEG smears thin walls and dimension text. If the first render is over the byte guard the
     page is re-rendered at the smaller fallback long edge.
 
     Args:
@@ -135,13 +134,16 @@ def rasterize_page(
         coordinate mapping.
 
     Raises:
-        ImportError: PyMuPDF is unimportable. It ships with the platform, so
-            this means a broken install rather than a missing extra.
+        ImportError: The PDF reader (pypdfium2) is unimportable. It ships with
+            the platform, so this means a broken install.
         ValueError: The page is out of range or the PDF cannot be opened.
     """
-    import pymupdf  # noqa: PLC0415 - base dep; lazy so a broken wheel degrades to a clear error here
+    from app.core import pdf_reader  # noqa: PLC0415 - lazy so a broken wheel degrades to a clear error here
 
-    pdf = pymupdf.open(stream=content, filetype="pdf")
+    try:
+        pdf = pdf_reader.open_pdf(content)
+    except pdf_reader.PdfReaderError as exc:
+        raise ValueError(f"cannot open PDF: {exc}") from exc
     try:
         if page < 1 or page > pdf.page_count:
             msg = f"page {page} out of range (document has {pdf.page_count} pages)"
@@ -152,10 +154,10 @@ def rasterize_page(
         long_edge_pt = max(page_w_pt, page_h_pt)
 
         dpi = clamp_dpi(long_edge_pt, target_long_edge_px)
-        png = pg.get_pixmap(dpi=dpi, alpha=False).tobytes("png")
+        png = pg.render(dpi=dpi).png()
         if len(png) > _PNG_BYTE_GUARD and target_long_edge_px > FALLBACK_TARGET_LONG_EDGE_PX:
             dpi = clamp_dpi(long_edge_pt, FALLBACK_TARGET_LONG_EDGE_PX)
-            png = pg.get_pixmap(dpi=dpi, alpha=False).tobytes("png")
+            png = pg.render(dpi=dpi).png()
         return png, "image/png", dpi, page_w_pt, page_h_pt
     finally:
         pdf.close()
