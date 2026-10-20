@@ -345,3 +345,17 @@ def test_revit_category_names_get_a_discipline(element_type: str, discipline: st
 def test_categories_outside_the_curated_list_still_get_their_builtin_name() -> None:
     assert revit_category_name(-2005301) == "OST_BoundaryConditions"
     assert revit_category_label(-2005301) == "Boundary Conditions"
+
+
+def test_an_rvt_with_no_3d_elements_is_told_apart_from_a_failed_conversion(tmp_path: Path) -> None:
+    from types import SimpleNamespace
+
+    (tmp_path / "summary.json").write_text(
+        json.dumps({"totals": {"active_elements": 5047, "mesh_elements": 0}}), encoding="utf-8"
+    )
+    assert ifc_processor._converter_saw_no_meshes(SimpleNamespace(folder=tmp_path)) is True
+    (tmp_path / "summary.json").write_text(
+        json.dumps({"totals": {"active_elements": 5047, "mesh_elements": 12}}), encoding="utf-8"
+    )
+    assert ifc_processor._converter_saw_no_meshes(SimpleNamespace(folder=tmp_path)) is False
+    assert ifc_processor._converter_saw_no_meshes(SimpleNamespace(folder=tmp_path / "missing")) is False
