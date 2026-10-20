@@ -12,6 +12,8 @@ Revit API. An id not listed is labelled with its number, never guessed.
 
 from __future__ import annotations
 
+import re
+
 #: ``category_id -> (OST_ name, display name)``.
 REVIT_CATEGORIES: dict[int, tuple[str, str]] = {
     -2000011: ("OST_Walls", "Walls"),
@@ -74,12 +76,169 @@ REVIT_CATEGORIES: dict[int, tuple[str, str]] = {
 }
 
 
+#: Further ``category_id -> OST_ name`` pairs, read off the same elements in the
+#: 18.x converter's output. Their display name is the OST name split into words.
+REVIT_OST_NAMES: dict[int, str] = {
+    -2000045: "OST_SketchLines",
+    -2000051: "OST_Lines",
+    -2000066: "OST_RoomSeparationLines",
+    -2000067: "OST_StairsSketchBoundaryLines",
+    -2000068: "OST_StairsSketchRiserLines",
+    -2000069: "OST_StairsSketchRunLines",
+    -2000070: "OST_StairsSketchLandingCenterLines",
+    -2000079: "OST_AreaSchemeLines",
+    -2000091: "OST_IOSArrays",
+    -2000095: "OST_IOSModelGroups",
+    -2000096: "OST_IOSDetailGroups",
+    -2000110: "OST_IOS_GeoLocations",
+    -2000111: "OST_IOS_GeoSite",
+    -2000112: "OST_Phases",
+    -2000150: "OST_GenericAnnotation",
+    -2000182: "OST_Reveals",
+    -2000193: "OST_Matchline",
+    -2000264: "OST_SpotCoordinates",
+    -2000278: "OST_Views",
+    -2000279: "OST_Views",
+    -2000291: "OST_Divisions",
+    -2000301: "OST_SectionBox",
+    -2000320: "OST_CurtainGridsRoof",
+    -2000321: "OST_CurtainGridsWall",
+    -2000340: "OST_CurtaSystem",
+    -2000400: "OST_SectionHeads",
+    -2000460: "OST_DoorTags",
+    -2000485: "OST_MEPSpaceTags",
+    -2000530: "OST_CLines",
+    -2000535: "OST_Elev",
+    -2000538: "OST_CalloutHeads",
+    -2000550: "OST_ColorFillLegends",
+    -2000560: "OST_RasterImages",
+    -2000570: "OST_ScheduleGraphics",
+    -2000573: "OST_Schedules",
+    -2000575: "OST_LegendComponents",
+    -2000576: "OST_PreviewLegendComponents",
+    -2000700: "OST_Materials",
+    -2000710: "OST_ReferencePoints",
+    -2000831: "OST_MEPSpaceSeparationLines",
+    -2000921: "OST_StairsTrisers",
+    -2000930: "OST_StairsCutMarks",
+    -2000938: "OST_StairsPaths",
+    -2000946: "OST_RailingTopRail",
+    -2000947: "OST_RailingHandRail",
+    -2000948: "OST_RailingSupport",
+    -2000970: "OST_MultiReferenceAnnotations",
+    -2000977: "OST_CoordinateSystem",
+    -2000980: "OST_MultistoryStairs",
+    -2000985: "OST_MechanicalEquipmentSet",
+    -2000996: "OST_ShaftOpening",
+    -2000997: "OST_SWallRectOpening",
+    -2001265: "OST_SiteProperty",
+    -2001268: "OST_SitePropertyLineSegment",
+    -2001269: "OST_SitePropertyLineSegmentTags",
+    -2001271: "OST_ProjectBasePoint",
+    -2001272: "OST_SharedBasePoint",
+    -2001327: "OST_StructuralFramingSystem",
+    -2001342: "OST_TopographyContours",
+    -2001352: "OST_RvtLinks",
+    -2001390: "OST_Fascia",
+    -2001391: "OST_Gutter",
+    -2001393: "OST_RoofSoffit",
+    -2002000: "OST_DetailComponents",
+    -2003000: "OST_ProfileFamilies",
+    -2003100: "OST_Sheets",
+    -2003101: "OST_ProjectInformation",
+    -2003200: "OST_Areas",
+    -2003201: "OST_AreaSchemes",
+    -2003331: "OST_TilePatterns",
+    -2003403: "OST_MassFloor",
+    -2003404: "OST_MassForm",
+    -2003414: "OST_MassRoof",
+    -2003417: "OST_MassOpening",
+    -2003418: "OST_MassShade",
+    -2003421: "OST_MassWallsAll",
+    -2003422: "OST_MassFloorsAll",
+    -2003423: "OST_MassGlazingAll",
+    -2003500: "OST_StackedWalls",
+    -2005009: "OST_MechanicalEquipmentTags",
+    -2005020: "OST_AreaTags",
+    -2005027: "OST_MaterialTags",
+    -2005029: "OST_KeynoteTags",
+    -2005100: "OST_SpotElevSymbols",
+    -2005202: "OST_LineLoads",
+    -2005203: "OST_AreaLoads",
+    -2005301: "OST_BoundaryConditions",
+    -2006020: "OST_LevelHeads",
+    -2006040: "OST_GridHeads",
+    -2006045: "OST_ElevationMarks",
+    -2006060: "OST_RevisionClouds",
+    -2006070: "OST_Revisions",
+    -2006080: "OST_RevisionCloudTags",
+    -2006112: "OST_DesignOptionSets",
+    -2006114: "OST_DesignOptions",
+    -2008001: "OST_DuctCurves",
+    -2008003: "OST_DuctTags",
+    -2008004: "OST_FlexDuctTags",
+    -2008014: "OST_DuctTerminalTags",
+    -2008015: "OST_DuctSystem",
+    -2008021: "OST_FlexDuctCurves",
+    -2008037: "OST_ElectricalCircuit",
+    -2008039: "OST_Wire",
+    -2008040: "OST_ElectricalVoltage",
+    -2008041: "OST_ElecDistributionSys",
+    -2008043: "OST_PipingSystem",
+    -2008045: "OST_PipeCurves",
+    -2008047: "OST_PipeTags",
+    -2008066: "OST_DuctFitting",
+    -2008072: "OST_PipeFitting",
+    -2008102: "OST_EAConstructions",
+    -2008103: "OST_PipeConnections",
+    -2008104: "OST_PipeMaterials",
+    -2008105: "OST_PipeSchedules",
+    -2008106: "OST_Fluids",
+    -2008107: "OST_HVAC_Zones",
+    -2008111: "OST_WireMaterials",
+    -2008112: "OST_WireInsulations",
+    -2008113: "OST_WireTemperatureRatings",
+    -2008119: "OST_HVAC_Load_Space_Types",
+    -2008120: "OST_HVAC_Load_Building_Types",
+    -2008121: "OST_HVAC_Load_Schedules",
+    -2008122: "OST_PipeInsulations",
+    -2008123: "OST_DuctInsulations",
+    -2008124: "OST_DuctLinings",
+    -2008139: "OST_Conduit",
+    -2008141: "OST_ConduitFitting",
+    -2008142: "OST_ElectricalDemandFactorDefinitions",
+    -2008143: "OST_ElectricalLoadClassifications",
+    -2008144: "OST_ConduitStandards",
+    -2008145: "OST_BranchPanelScheduleTemplates",
+    -2008146: "OST_SwitchboardScheduleTemplates",
+    -2008147: "OST_DataPanelScheduleTemplates",
+    -2008148: "OST_ParamElemElectricalLoadClassification",
+    -2008149: "OST_ConduitRun",
+    -2008163: "OST_PipeSegments",
+    -2008165: "OST_DivisionProfile",
+    -2008190: "OST_DivisionRules",
+    -2009003: "OST_AreaRein",
+    -2009014: "OST_CoverType",
+    -2009016: "OST_FabricReinforcement",
+    -2009017: "OST_FabricAreas",
+    -2009609: "OST_SunStudy",
+    -2009630: "OST_BeamAnalytical",
+    -2009636: "OST_ColumnAnalytical",
+    -2009639: "OST_FloorAnalytical",
+    -2009640: "OST_WallAnalytical",
+    -2009641: "OST_IsolatedFoundationAnalytical",
+    -2009642: "OST_WallFoundationAnalytical",
+}
+
+
 def revit_category_name(category_id: int | None) -> str:
     """``OST_`` name of a category id; an unknown id is labelled with its number."""
     if category_id is None:
         return "OST_Unknown"
     known = REVIT_CATEGORIES.get(category_id)
-    return known[0] if known else f"OST_Category{abs(category_id)}"
+    if known:
+        return known[0]
+    return REVIT_OST_NAMES.get(category_id) or f"OST_Category{abs(category_id)}"
 
 
 def revit_category_label(category_id: int | None) -> str:
@@ -87,4 +246,10 @@ def revit_category_label(category_id: int | None) -> str:
     if category_id is None:
         return "Unknown"
     known = REVIT_CATEGORIES.get(category_id)
-    return known[1] if known else f"Category {category_id}"
+    if known:
+        return known[1]
+    ost = REVIT_OST_NAMES.get(category_id)
+    if ost is None:
+        return f"Category {category_id}"
+    words = re.sub(r"([a-z])([A-Z])", r"\1 \2", ost[4:])
+    return re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", words).replace("_", " ").strip()
