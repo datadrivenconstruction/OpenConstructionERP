@@ -85,6 +85,8 @@ _LOGO_PREFIX = re.compile(
     r"data:image/(?:" + "|".join(re.escape(kind) for kind in LOGO_IMAGE_TYPES) + r");base64,",
 )
 
+_PNG_PREFIX = "data:image/png;base64,"
+
 #: Runs of whitespace, collapsed to one space inside a line.
 _SPACES = re.compile(r"\s+")
 
@@ -93,6 +95,7 @@ _SPACES = re.compile(r"\s+")
 #: lines, and one shape for "unset" is one less branch in each of them.
 DEFAULT_COMPANY_PROFILE: dict[str, str] = {
     "document_logo_data_url": "",
+    "document_logo_png_data_url": "",
     "legal_name": "",
     "address": "",
     "registration_line": "",
@@ -167,6 +170,21 @@ def _logo(value: Any) -> str:
     return value
 
 
+def svg_companion_png(logo: str, value: Any) -> str:
+    """The PNG the browser rasterised an SVG ``logo`` to, or ``""``.
+
+    PDFs are drawn from this PNG: the server does not rasterise SVG. It is
+    kept only next to an SVG logo, so replacing the logo with a raster one
+    cannot leave a stale picture behind for the documents.
+    """
+    if not (isinstance(value, str) and logo.startswith("data:image/svg+xml")):
+        return ""
+    value = value.strip()
+    if len(value) > MAX_LOGO_DATA_URL_CHARS or not value.startswith(_PNG_PREFIX) or value == _PNG_PREFIX:
+        return ""
+    return value
+
+
 def sanitise(data: Any) -> dict[str, str]:
     """Coerce arbitrary stored / submitted data into a safe company profile.
 
@@ -178,8 +196,10 @@ def sanitise(data: Any) -> dict[str, str]:
     """
     if not isinstance(data, dict):
         return dict(DEFAULT_COMPANY_PROFILE)
+    logo = _logo(data.get("document_logo_data_url"))
     clean = {
-        "document_logo_data_url": _logo(data.get("document_logo_data_url")),
+        "document_logo_data_url": logo,
+        "document_logo_png_data_url": svg_companion_png(logo, data.get("document_logo_png_data_url")),
         "address": _address(data.get("address")),
     }
     for field, cap in _LINE_CAPS.items():

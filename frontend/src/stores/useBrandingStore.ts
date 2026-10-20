@@ -32,13 +32,15 @@ export interface BrandingState {
   mode: BrandingMode;
   /** Base64 data URL of the uploaded logo (only valid when mode='logo'). */
   logoDataUrl: string | null;
+  /** PNG copy of an SVG logo (made in the browser, printed on PDFs). */
+  logoPngDataUrl: string | null;
   /** Company display text (only valid when mode='text'). */
   companyName: string;
   /**
    * Replace the user's logo. Pass `null` to clear (mode falls back
    * to whichever of `text` / `default` is appropriate).
    */
-  setLogo: (dataUrl: string | null) => void;
+  setLogo: (dataUrl: string | null, pngDataUrl?: string | null) => void;
   /**
    * Set the company name and switch to `text` mode. Empty string
    * resets to `default`.
@@ -67,6 +69,7 @@ export interface BrandingState {
 interface ServerBranding {
   mode?: string;
   logo_data_url?: string | null;
+  logo_png_data_url?: string | null;
   company_name?: string;
   /** Workspace default UI appearance; see useAppearanceStore. */
   appearance?: unknown;
@@ -80,6 +83,10 @@ function fromServer(r: ServerBranding): Persisted {
       typeof r.logo_data_url === 'string' && r.logo_data_url.startsWith('data:image/')
         ? r.logo_data_url
         : null,
+    logoPngDataUrl:
+      typeof r.logo_png_data_url === 'string' && r.logo_png_data_url.startsWith('data:image/png')
+        ? r.logo_png_data_url
+        : null,
     companyName: typeof r.company_name === 'string' ? r.company_name.slice(0, 60) : '',
   };
 }
@@ -87,13 +94,14 @@ function fromServer(r: ServerBranding): Persisted {
 interface Persisted {
   mode: BrandingMode;
   logoDataUrl: string | null;
+  logoPngDataUrl: string | null;
   companyName: string;
 }
 
 function load(): Persisted {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { mode: 'default', logoDataUrl: null, companyName: '' };
+    if (!raw) return { mode: 'default', logoDataUrl: null, logoPngDataUrl: null, companyName: '' };
     const parsed = JSON.parse(raw) as Partial<Persisted>;
     const mode: BrandingMode =
       parsed.mode === 'logo' || parsed.mode === 'text' ? parsed.mode : 'default';
@@ -103,11 +111,17 @@ function load(): Persisted {
       parsed.logoDataUrl.length < MAX_LOGO_BYTES * 2 // base64 expansion
         ? parsed.logoDataUrl
         : null;
+    const logoPngDataUrl =
+      logoDataUrl &&
+      typeof parsed.logoPngDataUrl === 'string' &&
+      parsed.logoPngDataUrl.startsWith('data:image/png')
+        ? parsed.logoPngDataUrl
+        : null;
     const companyName =
       typeof parsed.companyName === 'string' ? parsed.companyName.slice(0, 60) : '';
-    return { mode, logoDataUrl, companyName };
+    return { mode, logoDataUrl, logoPngDataUrl, companyName };
   } catch {
-    return { mode: 'default', logoDataUrl: null, companyName: '' };
+    return { mode: 'default', logoDataUrl: null, logoPngDataUrl: null, companyName: '' };
   }
 }
 
@@ -135,6 +149,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
       if (
         fresh.mode === current.mode &&
         fresh.logoDataUrl === current.logoDataUrl &&
+        fresh.logoPngDataUrl === current.logoPngDataUrl &&
         fresh.companyName === current.companyName
       ) {
         return;
@@ -145,12 +160,13 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
 
   return {
     ...initial,
-    setLogo: (dataUrl) => {
+    setLogo: (dataUrl, pngDataUrl = null) => {
       const current = get();
       if (!dataUrl) {
         const next: Persisted = {
           mode: current.companyName ? 'text' : 'default',
           logoDataUrl: null,
+          logoPngDataUrl: null,
           companyName: current.companyName,
         };
         save(next);
@@ -160,6 +176,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
       const next: Persisted = {
         mode: 'logo',
         logoDataUrl: dataUrl,
+        logoPngDataUrl: pngDataUrl,
         companyName: current.companyName,
       };
       save(next);
@@ -175,13 +192,14 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
       const next: Persisted = {
         mode,
         logoDataUrl: current.logoDataUrl,
+        logoPngDataUrl: current.logoPngDataUrl,
         companyName: trimmed,
       };
       save(next);
       set(next);
     },
     reset: () => {
-      const next: Persisted = { mode: 'default', logoDataUrl: null, companyName: '' };
+      const next: Persisted = { mode: 'default', logoDataUrl: null, logoPngDataUrl: null, companyName: '' };
       save(next);
       set(next);
     },
@@ -194,6 +212,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
         if (
           next.mode === current.mode &&
           next.logoDataUrl === current.logoDataUrl &&
+          next.logoPngDataUrl === current.logoPngDataUrl &&
           next.companyName === current.companyName
         ) {
           return;
@@ -213,6 +232,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
         await apiPut('/v1/branding/', {
           mode: s.mode,
           logo_data_url: s.logoDataUrl,
+          logo_png_data_url: s.logoPngDataUrl,
           company_name: s.companyName,
         });
         return true;

@@ -27,6 +27,8 @@ import {
 /** The stored letterhead. Always complete; an unset field is `""`. */
 export interface CompanyProfile {
   document_logo_data_url: string;
+  /** PNG copy of an SVG logo, made in the browser; PDFs print this. `""` when unset. */
+  document_logo_png_data_url: string;
   legal_name: string;
   /** Up to three lines, newline separated. */
   address: string;

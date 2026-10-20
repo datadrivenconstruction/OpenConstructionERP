@@ -75,6 +75,7 @@ const WORKSPACE: appearanceApi.DocumentAppearance = {
 
 const PROFILE: profileApi.CompanyProfile = {
   document_logo_data_url: '',
+  document_logo_png_data_url: '',
   legal_name: 'Hochbau Nord GmbH',
   address: '',
   registration_line: '',

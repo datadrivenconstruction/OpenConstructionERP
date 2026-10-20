@@ -9,9 +9,10 @@ was whatever was uploaded, at its full resolution, and two shapes of that were
 expensive enough to be a denial of service by a signed-in user:
 
   * An SVG says how large its page is in its own opening tag. A 146-byte file
-    declaring a hundred thousand units passed the sanitiser, and the zoom that
-    was meant to bound the raster had a floor under it, so MuPDF was asked for
-    5000 x 5000 px - 95 MiB of RGBA. A six-page estimate took thirty seconds.
+    declaring a hundred thousand units passed the sanitiser, and the server
+    rasterised it to whatever it declared. The server no longer rasterises SVG
+    at all: the browser sends a PNG next to it, and that PNG is the logo the
+    documents see, shrunk like any other raster.
   * A 1000 x 1000 photograph is 3.82 MiB as a data URL, inside the upload
     limit, and went into the file at 1000 x 1000 to be drawn at 57 pt square.
     The RFI came out at 3.7 MB.
@@ -38,7 +39,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-import pymupdf
+import pypdf
 import pytest
 from PIL import Image
 
@@ -47,10 +48,9 @@ from app.core.pdf_branding import (
     _LETTERHEAD_LOGO_MAX_H,
     _LETTERHEAD_LOGO_MAX_W,
     _LOGO_PIXELS_PER_POINT,
-    _SVG_RASTER_PX,
-    _rasterise_svg,
     render_sample_pdf,
 )
+from tests._pdf_probe import image_boxes
 
 #: An SVG page this large is ordinary; the same file declaring the second is
 #: the attack. Both are the same handful of bytes and draw the same square.
@@ -103,25 +103,38 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-def _store(data_dir: Path, data_url: str) -> None:
-    """Store the logo the way the settings page does, through the real sanitiser."""
+def _store(data_dir: Path, data_url: str, png: str | None = None) -> None:
+    """Store the logo the way the settings page does, through the real sanitiser.
+
+    ``png`` is the raster the browser sends next to an SVG logo.
+    """
     stored = company_profile.write_company_profile(
-        {"legal_name": "Acme Bau GmbH", "address": "Hauptstrasse 12\n10115 Berlin", "document_logo_data_url": data_url},
+        {
+            "legal_name": "Acme Bau GmbH",
+            "address": "Hauptstrasse 12\n10115 Berlin",
+            "document_logo_data_url": data_url,
+            "document_logo_png_data_url": png or "",
+        },
         data_dir,
     )
     assert stored.get("document_logo_data_url"), (
         "the sanitiser rejected this logo, so the rest of the case would be measuring nothing"
     )
+    if png:
+        assert stored.get("document_logo_png_data_url"), "the sanitiser rejected the PNG companion"
 
 
 def _pictures(pdf: bytes) -> list[tuple[int, int, float, float]]:
-    """Every image on page one: ``(stored_px_w, stored_px_h, drawn_pt_w, drawn_pt_h)``."""
-    out = []
-    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        for info in doc[0].get_image_info(xrefs=True):
-            box = info["bbox"]
-            out.append((info["width"], info["height"], box[2] - box[0], box[3] - box[1]))
-    return out
+    """Every image on page one: ``(stored_px_w, stored_px_h, drawn_pt_w, drawn_pt_h)``, in drawing order."""
+    page = pypdf.PdfReader(io.BytesIO(pdf)).pages[0]
+    stored = [
+        (int(ref.get_object()["/Width"]), int(ref.get_object()["/Height"]))
+        for ref in (page["/Resources"].get("/XObject") or {}).values()
+        if ref.get_object().get("/Subtype") == "/Image"
+    ]
+    boxes = image_boxes(pdf)
+    assert len(stored) == len(boxes), f"{len(stored)} image resources but {len(boxes)} drawn"
+    return [(w, h, box.x1 - box.x0, box.y1 - box.y0) for (w, h), box in zip(stored, boxes, strict=True)]
 
 
 def _render(times: int = 1) -> tuple[bytes, float]:
@@ -143,37 +156,27 @@ def _render(times: int = 1) -> tuple[bytes, float]:
 # ── The raster a logo reaches the page as ─────────────────────────────────
 
 
-def test_a_hostile_svg_is_rasterised_to_the_same_pixmap_as_an_honest_one(data_dir: Path) -> None:
-    """The bound is on the pixels, so declaring a huge page buys nothing."""
-    sizes = {}
-    for label, side in (("ordinary", ORDINARY_SIDE), ("hostile", HOSTILE_SIDE)):
-        _rasterise_svg.cache_clear()
-        png = _rasterise_svg(_svg(side))
-        assert png is not None, f"the {label} SVG did not rasterise at all"
-        with Image.open(io.BytesIO(png)) as image:
-            sizes[label] = image.size
-        assert max(sizes[label]) <= _SVG_RASTER_PX, (
-            f"the {label} SVG rasterised to {sizes[label]}, past the {_SVG_RASTER_PX:.0f} px bound"
-        )
-    assert sizes["hostile"] == sizes["ordinary"], (
-        f"a page {HOSTILE_SIDE} units wide rasterised to {sizes['hostile']} "
-        f"while {ORDINARY_SIDE} gave {sizes['ordinary']}"
-    )
+def test_a_hostile_svg_without_a_png_costs_nothing(data_dir: Path) -> None:
+    """The server never reads the page an SVG declares, so declaring a huge one buys nothing."""
+    _store(data_dir, _data_url(_svg(HOSTILE_SIDE), "svg+xml"))
+    pdf, _ = _render()
+    assert pdf.startswith(b"%PDF")
+    assert _pictures(pdf) == [], "an SVG with no PNG next to it was drawn as something"
 
 
 @pytest.mark.parametrize(
     ("label", "logo"),
     [
-        ("svg", lambda: _data_url(_svg(ORDINARY_SIDE), "svg+xml")),
-        ("wide raster", lambda: _data_url(_png((4000, 1300)), "png")),
-        ("square photograph", lambda: _data_url(_png((1000, 1000), noise=True), "png")),
+        ("svg companion", lambda: (_data_url(_svg(ORDINARY_SIDE), "svg+xml"), _data_url(_png((4000, 1300)), "png"))),
+        ("wide raster", lambda: (_data_url(_png((4000, 1300)), "png"), None)),
+        ("square photograph", lambda: (_data_url(_png((1000, 1000), noise=True), "png"), None)),
     ],
 )
 def test_a_logo_goes_into_the_pdf_at_the_size_it_is_drawn_not_the_size_it_was_uploaded(
     label: str, logo: Any, data_dir: Path
 ) -> None:
     """No more than a few pixels per point, whatever was uploaded."""
-    _store(data_dir, logo())
+    _store(data_dir, *logo())
     pictures = _pictures(render_sample_pdf())
     assert pictures, f"{label}: no image on the sample's page, so there is nothing to measure"
     for width, height, drawn_w, drawn_h in pictures:
@@ -232,13 +235,13 @@ def test_shrinking_a_logo_does_not_move_the_box_it_is_drawn_in(data_dir: Path) -
     [
         (
             "svg",
-            lambda: _data_url(_svg(ORDINARY_SIDE), "svg+xml"),
-            lambda: _data_url(_svg(HOSTILE_SIDE), "svg+xml"),
+            lambda: (_data_url(_svg(ORDINARY_SIDE), "svg+xml"), _data_url(_png((360, 120)), "png")),
+            lambda: (_data_url(_svg(HOSTILE_SIDE), "svg+xml"), _data_url(_png((1000, 1000), noise=True), "png")),
         ),
         (
             "raster",
-            lambda: _data_url(_png((360, 120)), "png"),
-            lambda: _data_url(_png((1000, 1000), noise=True), "png"),
+            lambda: (_data_url(_png((360, 120)), "png"), None),
+            lambda: (_data_url(_png((1000, 1000), noise=True), "png"), None),
         ),
     ],
 )
@@ -246,9 +249,9 @@ def test_an_expensive_logo_costs_what_an_ordinary_one_costs(
     label: str, honest: Any, hostile: Any, data_dir: Path
 ) -> None:
     """Size and time, both measured against the honest logo rather than a constant."""
-    _store(data_dir, honest())
+    _store(data_dir, *honest())
     honest_pdf, honest_time = _render(times=3)
-    _store(data_dir, hostile())
+    _store(data_dir, *hostile())
     hostile_pdf, hostile_time = _render(times=3)
 
     assert len(hostile_pdf) < len(honest_pdf) * 4, (

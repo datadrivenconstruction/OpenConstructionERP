@@ -54,6 +54,8 @@ class CompanyProfileResponse(BaseModel):
     """The letterhead. Always complete and already sanitised; unset is ``""``."""
 
     document_logo_data_url: str = ""
+    #: PNG rasterised in the browser from an SVG logo; PDFs print this one.
+    document_logo_png_data_url: str = ""
     legal_name: str = ""
     address: str = ""
     registration_line: str = ""
@@ -90,6 +92,7 @@ class CompanyProfileUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     document_logo_data_url: str | None = None
+    document_logo_png_data_url: str | None = None
     legal_name: str | None = None
     address: str | None = None
     registration_line: str | None = None
@@ -202,6 +205,9 @@ async def put_company_profile(body: CompanyProfileUpdate) -> CompanyProfileRespo
     _refuse_an_unusable_logo(body.document_logo_data_url)
     current = read_company_profile()
     patch = {key: value for key, value in body.model_dump().items() if value is not None}
+    if "document_logo_data_url" in patch:
+        # A new logo replaces its PNG too, unless the same request carries one.
+        patch.setdefault("document_logo_png_data_url", "")
     current.update(patch)
     return CompanyProfileResponse(**write_company_profile(current))
 
