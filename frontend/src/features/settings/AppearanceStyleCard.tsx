@@ -47,10 +47,10 @@ function StylePreview({ value, label, active }: { value: Appearance; label: stri
   const gap = value.density === 'compact' ? 4 : 7;
   return (
     <div
-      className="w-full overflow-hidden border border-border-light bg-surface-elevated"
-      style={{ borderRadius: r + 2, fontFamily: FONT_STACK[value.font], padding: gap + 2 }}
+      className="flex h-[6.5rem] w-full flex-col justify-between overflow-hidden border border-border-light bg-surface-elevated p-2.5"
+      style={{ borderRadius: r + 2, fontFamily: FONT_STACK[value.font] }}
     >
-      <div className="flex items-center justify-between gap-1" style={{ marginBottom: gap }}>
+      <div className="flex h-5 items-center justify-between gap-1">
         <span className="truncate text-sm font-semibold leading-tight text-content-primary">{label}</span>
         {active ? (
           <Check size={14} className="shrink-0 text-oe-blue-text" />
@@ -58,11 +58,11 @@ function StylePreview({ value, label, active }: { value: Appearance; label: stri
           <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: accent }} />
         )}
       </div>
-      <div aria-hidden className="flex flex-col" style={{ gap: gap - 2 }}>
+      <div aria-hidden className="flex flex-col" style={{ gap: gap - 2, marginTop: gap }}>
         <span className="h-1.5 w-4/5 bg-border" style={{ borderRadius: r / 2 }} />
         <span className="h-1.5 w-3/5 bg-border" style={{ borderRadius: r / 2 }} />
       </div>
-      <div aria-hidden className="flex gap-1.5" style={{ marginTop: gap + 1 }}>
+      <div aria-hidden className="flex gap-1.5">
         <span className="h-4 w-12" style={{ background: accent, borderRadius: r }} />
         <span className="h-4 w-8 border border-border" style={{ borderRadius: r }} />
       </div>
@@ -177,7 +177,7 @@ export function AppearanceStyleCard() {
         <div
           role="radiogroup"
           aria-label={t('settings.style_title', { defaultValue: 'Style' })}
-          className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+          className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] items-stretch gap-3 pb-16"
         >
           {APPEARANCE_PRESETS.map((preset) => {
             const active = current === preset.id;
@@ -188,7 +188,7 @@ export function AppearanceStyleCard() {
                 role="radio"
                 aria-checked={active}
                 onClick={() => setAppearance(preset.value)}
-                className={`rounded-xl border-2 p-1.5 text-start transition-colors duration-normal ease-oe ${
+                className={`block h-full w-full rounded-xl border-2 p-1.5 text-start transition-colors duration-normal ease-oe ${
                   active ? 'border-oe-blue bg-oe-blue-subtle' : 'border-transparent hover:border-border'
                 }`}
               >
@@ -200,7 +200,7 @@ export function AppearanceStyleCard() {
             role="radio"
             aria-checked={current === null}
             aria-disabled={current !== null}
-            className={`rounded-xl border-2 border-dashed p-1.5 ${
+            className={`h-full rounded-xl border-2 border-dashed p-1.5 ${
               current === null ? 'border-oe-blue bg-oe-blue-subtle' : 'border-border-light opacity-60'
             }`}
           >
