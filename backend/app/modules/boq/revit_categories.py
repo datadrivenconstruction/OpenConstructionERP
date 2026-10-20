@@ -231,14 +231,21 @@ REVIT_OST_NAMES: dict[int, str] = {
 }
 
 
-def revit_category_name(category_id: int | None) -> str:
-    """``OST_`` name of a category id; an unknown id is labelled with its number."""
-    if category_id is None:
-        return "OST_Unknown"
-    known = REVIT_CATEGORIES.get(category_id)
+def revit_category_name(category_id: int | None, display_name: str | None = None) -> str:
+    """``OST_`` name of a category id.
+
+    An id outside the table falls back to the converter's display name, then to
+    the signed number; never to an invented ``OST_`` name.
+    """
+    known = REVIT_CATEGORIES.get(category_id) if category_id is not None else None
     if known:
         return known[0]
-    return REVIT_OST_NAMES.get(category_id) or f"OST_Category{abs(category_id)}"
+    ost = REVIT_OST_NAMES.get(category_id) if category_id is not None else None
+    if ost:
+        return ost
+    if display_name:
+        return display_name
+    return "OST_Unknown" if category_id is None else f"Category {category_id}"
 
 
 def revit_category_label(category_id: int | None) -> str:
