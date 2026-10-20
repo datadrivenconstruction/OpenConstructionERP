@@ -1096,7 +1096,7 @@ async def convert_cad_to_excel(
             input_path.name,
             (run.stderr or run.stdout)[:500],
         )
-        err = run.error or {}
+        err = run.failure or {}
         if run.cancelled:
             _last_failure.set(timeout_failure)
         elif err.get("code"):
