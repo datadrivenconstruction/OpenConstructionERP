@@ -87,9 +87,25 @@ class ConverterRun:
         needed = {"rvt": "glb", "ifc": "xlsx", "dwg": "xlsx"}[self.fmt]
         return needed in self.outputs and self.outputs[needed].is_file() and self.outputs[needed].stat().st_size > 0
 
+    @property
+    def error(self) -> dict[str, Any] | None:
+        """The converter's own ``error`` object (``code``, ``message_en``, ``message_ru``, ``detail``)."""
+        err = (_last_json_line(self.stdout) or {}).get("error")
+        return err if isinstance(err, dict) else None
 
-def build_command(fmt: str, exe: Path, input_path: Path, out_dir: Path) -> list[str]:
-    """The argv that converts ``input_path`` into ``out_dir`` for format ``fmt``."""
+    @property
+    def cancelled(self) -> bool:
+        """True when the converter stopped on its own time limit (it reports that as ``DWG_DAMAGED``)."""
+        err = self.error or {}
+        return "Cancelled" in str(err.get("detail") or "") or str(err.get("code") or "").upper() == "TIMEOUT"
+
+
+def build_command(fmt: str, exe: Path, input_path: Path, out_dir: Path, *, timeout: float | None = None) -> list[str]:
+    """The argv that converts ``input_path`` into ``out_dir`` for format ``fmt``.
+
+    For DWG, ``timeout`` (our own kill limit) is passed on a little lower so the
+    converter stops itself and reports, instead of being killed without a word.
+    """
     prefix = command_prefix(fmt, exe)
     src = str(input_path.resolve())
     if fmt == "rvt":
@@ -97,7 +113,10 @@ def build_command(fmt: str, exe: Path, input_path: Path, out_dir: Path) -> list[
     if fmt == "ifc":
         return [*prefix, src, "--output", str(out_dir)]
     if fmt == "dwg":
-        return [*prefix, src, "-o", str(out_dir), "--json", "--no-svg"]
+        cmd = [*prefix, src, "-o", str(out_dir), "--json", "--no-svg"]
+        if timeout:
+            cmd += ["--timeout", str(max(30, int(timeout) - 15))]
+        return cmd
     raise ValueError(f"No DDC converter command line for format {fmt!r}")
 
 
@@ -142,7 +161,7 @@ def run_converter(fmt: str, exe: Path, input_path: Path, work_dir: Path, *, time
     else:
         out_dir = work_dir / f"{fmt}_out"
         out_dir.mkdir(parents=True, exist_ok=True)
-    cmd = build_command(fmt, exe, input_path, out_dir)
+    cmd = build_command(fmt, exe, input_path, out_dir, timeout=timeout)
     kwargs: dict[str, Any] = {}
     if sys.platform == "win32":
         kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)

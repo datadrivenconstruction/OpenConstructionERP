@@ -128,3 +128,55 @@ async def test_parse_runs_after_the_processing_row_is_committed(tmp_path: Path, 
     await svc._process_drawing(uuid.uuid4(), str(tmp_path / "x.dxf"))
 
     assert order[:2] == ["commit", "parse"]
+
+
+def _failed_run(error: dict[str, Any]):
+    report = json.dumps({"status": "FAILED", "error": error, "exit_code": 3})
+
+    def fake_run(fmt: str, _converter: Path, _src: Path, _work: Path, timeout: int) -> ConverterRun:
+        return ConverterRun(fmt=fmt, command=["dwg2excel"], returncode=3, stdout=report, status="FAILED")
+
+    return fake_run
+
+
+@pytest.mark.asyncio
+async def test_a_converter_stopped_by_its_time_limit_reads_as_a_timeout(tmp_path: Path, monkeypatch) -> None:
+    # dwg2excel reports its own --timeout as DWG_DAMAGED with "Cancelled" in the detail.
+    error = {"code": "DWG_DAMAGED", "message_en": "The DWG file is damaged.", "detail": "ContainerError: Cancelled"}
+    monkeypatch.setattr("app.modules.boq.cad_import.find_converter", lambda _fmt: Path("dwg2excel.exe"))
+    monkeypatch.setattr("app.modules.boq.ddc_runner.run_converter", _failed_run(error))
+
+    svc, repo = _service()
+    await svc._handle_dwg(uuid.uuid4(), str(_dwg(tmp_path)))
+
+    assert repo.row.metadata_["error_code"] == "convert_timeout"
+    assert "damaged" not in repo.row.error_message
+
+
+@pytest.mark.asyncio
+async def test_the_converters_code_is_kept_without_its_detail(tmp_path: Path, monkeypatch) -> None:
+    error = {
+        "code": "DWG_DAMAGED",
+        "message_en": "The DWG file is damaged.",
+        "message_ru": "Файл DWG повреждён.",
+        "detail": f"ReaderRefusal at {tmp_path}",
+    }
+    monkeypatch.setattr("app.modules.boq.cad_import.find_converter", lambda _fmt: Path("dwg2excel.exe"))
+    monkeypatch.setattr("app.modules.boq.ddc_runner.run_converter", _failed_run(error))
+
+    svc, repo = _service()
+    await svc._handle_dwg(uuid.uuid4(), str(_dwg(tmp_path)))
+
+    assert repo.row.metadata_["error_code"] == "convert_failed"
+    assert repo.row.metadata_["converter_error"] == {
+        "code": "DWG_DAMAGED",
+        "message_en": "The DWG file is damaged.",
+        "message_ru": "Файл DWG повреждён.",
+    }
+
+
+def test_the_dwg_converter_gets_a_time_limit_below_ours(tmp_path: Path) -> None:
+    from app.modules.boq.ddc_runner import build_command
+
+    cmd = build_command("dwg", tmp_path / "dwg2excel.exe", tmp_path / "a.dwg", tmp_path / "out", timeout=900)
+    assert cmd[-2:] == ["--timeout", "885"]
