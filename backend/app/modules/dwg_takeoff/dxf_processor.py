@@ -545,6 +545,88 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     }
 
 
+#: Above this many parsed entities the ezdxf renderer takes many minutes
+#: (38 k entities: over ten), so the preview is drawn from the parsed geometry.
+THUMBNAIL_RENDER_MAX_ENTITIES = 5000
+_THUMBNAIL_MAX_PRIMITIVES = 20000
+
+
+def _xy(p: Any) -> tuple[float, float] | None:
+    if not isinstance(p, dict):
+        return None
+    try:
+        return float(p["x"]), float(p["y"])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _arc_points(c: tuple[float, float], r: float, a0: float, a1: float) -> list[tuple[float, float]]:
+    sweep = (a1 - a0) % math.tau or math.tau
+    n = max(4, int(sweep / (math.pi / 16)))
+    return [(c[0] + r * math.cos(a0 + sweep * i / n), c[1] + r * math.sin(a0 + sweep * i / n)) for i in range(n + 1)]
+
+
+def _entity_polyline(e: dict[str, Any]) -> list[tuple[float, float]] | None:
+    """Model-space outline of one parsed entity, or None when it has none to draw."""
+    g = e.get("geometry_data") or {}
+    kind = e.get("entity_type")
+    if kind == "LINE":
+        a, b = _xy(g.get("start")), _xy(g.get("end"))
+        return [a, b] if a and b else None
+    if kind in ("LWPOLYLINE", "POLYLINE"):
+        pts = [q for q in (_xy(p) for p in g.get("points") or []) if q]
+        if g.get("closed") and len(pts) > 2:
+            pts.append(pts[0])
+        return pts if len(pts) > 1 else None
+    if kind in ("CIRCLE", "ARC"):
+        c, r = _xy(g.get("center")), g.get("radius")
+        if not c or not isinstance(r, (int, float)) or r <= 0:
+            return None
+        if kind == "CIRCLE":
+            return _arc_points(c, r, 0.0, math.tau)
+        return _arc_points(c, r, float(g.get("start_angle") or 0.0), float(g.get("end_angle") or 0.0))
+    return None
+
+
+def svg_thumbnail_from_entities(entities: list[dict[str, Any]]) -> str:
+    """Draw a preview SVG from parsed model-space lines, polylines, arcs and circles.
+
+    Block contents are not expanded; the preview shows the drawing's own
+    linework, which is enough to recognise it in a list.
+    """
+    shapes: list[tuple[str, list[tuple[float, float]]]] = []
+    for e in entities:
+        if e.get("block") or e.get("layout", "Model") != "Model":
+            continue
+        pts = _entity_polyline(e)
+        if pts:
+            shapes.append((str(e.get("color") or "#cccccc"), pts))
+    if len(shapes) > _THUMBNAIL_MAX_PRIMITIVES:
+        step = math.ceil(len(shapes) / _THUMBNAIL_MAX_PRIMITIVES)
+        shapes = shapes[::step]
+    xs = [x for _, pts in shapes for x, _ in pts]
+    ys = [y for _, pts in shapes for _, y in pts]
+    if not xs:
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">'
+            '<rect width="800" height="600" fill="#1a1a2e" /></svg>'
+        )
+    min_x, max_x, min_y, max_y = min(xs), max(xs), min(ys), max(ys)
+    span = max(max_x - min_x, max_y - min_y) or 1.0
+    k = 1000.0 / span
+    w, h = max((max_x - min_x) * k, 1.0), max((max_y - min_y) * k, 1.0)
+    out = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w:.1f} {h:.1f}">',
+        f'<rect width="{w:.1f}" height="{h:.1f}" fill="#1a1a2e" />',
+        '<g fill="none" stroke-width="0.6">',
+    ]
+    for color, pts in shapes:
+        d = " ".join(f"{(x - min_x) * k:.1f},{(max_y - y) * k:.1f}" for x, y in pts)
+        out.append(f'<polyline stroke="{color}" points="{d}" />')
+    out.append("</g></svg>")
+    return "".join(out)
+
+
 def generate_svg_thumbnail(file_path: str) -> str:
     """Generate an SVG thumbnail from a DXF file.
 
