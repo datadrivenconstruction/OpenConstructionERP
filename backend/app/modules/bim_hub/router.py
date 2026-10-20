@@ -1692,7 +1692,7 @@ async def _process_cad_in_background(
                     )
                     session.add(el)
 
-                converter_absent = result_quality == "placeholder"
+                converter_absent = result_quality == "placeholder" and not result.get("converter_used")
                 no_quantities = not any_quantities
 
                 model.status = "ready"

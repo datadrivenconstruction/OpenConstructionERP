@@ -985,8 +985,8 @@ async def convert_cad_to_excel(
 
     The converter runs as a subprocess with a 10-minute timeout. What it writes
     depends on the format (see :mod:`app.modules.boq.ddc_runner`): IFC and RVT
-    output is flattened into an ``Elements`` workbook; a DWG's own ``Entities``
-    workbook is returned as it is.
+    output is flattened into an ``Elements`` workbook; a DWG is read through the
+    DXF its converter writes, like an uploaded DXF.
 
     Args:
         input_path: Path to the uploaded CAD file.
@@ -1049,6 +1049,16 @@ async def convert_cad_to_excel(
 
     try:
         if fmt == "dwg":
+            # The converter's own workbook is a decoder log (one row per stored
+            # record: block definitions, table entries, every attribute column).
+            # Its DXF is read like an uploaded DXF instead: modelspace entities,
+            # layer as category, lengths and areas in metres.
+            dxf = run.outputs.get("dxf")
+            if dxf is not None and dxf.is_file():
+                table = await asyncio.to_thread(convert_dxf_to_excel, dxf, output_dir)
+                if table is not None:
+                    return table
+                logger.warning("Could not read the DXF the DWG converter wrote for %s", input_path.name)
             return run.outputs["xlsx"]
         return await asyncio.to_thread(write_flat_workbook, run, output_dir / (input_path.stem + ".xlsx"))
     except Exception:
@@ -1517,6 +1527,10 @@ def group_cad_elements(elements: list[dict]) -> dict:
     }
 
 
+#: Lowercase column names that hold identifiers, never quantities.
+_ID_COLUMNS = frozenset({"id", "element id", "elementid", "guid", "globalid", "uniqueid", "handle", "ordinal"})
+
+
 def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dict[str, Any]:
     """Analyze elements and classify columns into grouping/quantity/text categories.
 
@@ -1603,8 +1617,12 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
         col_lower = col.lower()
         name_is_quantity = any(kw in col_lower for kw in quantity_keywords)
 
+        # Identifiers are numbers, not quantities; reals in Revit internal units
+        # (feet and derived) would be summed as metres.
+        not_a_quantity = col_lower in _ID_COLUMNS or "[internal units]" in col_lower
+
         # Classify
-        if numeric_ratio > 0.5 and (name_is_quantity or numeric_ratio == 1.0):
+        if not not_a_quantity and numeric_ratio > 0.5 and (name_is_quantity or numeric_ratio == 1.0):
             quantity_cols.append(col)
         else:
             # Count unique string values to decide grouping vs text
