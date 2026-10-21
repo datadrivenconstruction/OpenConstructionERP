@@ -140,3 +140,56 @@ async def test_the_tiles_below_admin_keep_working_next_to_a_real_administrator(s
 
     assert (await _service(session).demo_login(DEMO_MANAGER)).access_token
     assert (await _service(session).login(_form(DEMO_MANAGER))).access_token
+
+
+class _Peer:
+    def __init__(self, host: str) -> None:
+        self.host = host
+
+
+class _TileRequest:
+    """What the login page tile sends: a peer, its headers, the bound socket."""
+
+    def __init__(self, host: str = "127.0.0.1", headers: dict[str, str] | None = None) -> None:
+        self.client = _Peer(host)
+        self.headers = headers or {}
+        self.scope = {"server": (host, 8741)}
+
+
+async def _tile(session, request):
+    from app.modules.users.router import DemoLoginRequest, demo_login
+
+    return await demo_login(DemoLoginRequest(email=DEMO_ADMIN), request, _service(session))
+
+
+@pytest.mark.asyncio
+async def test_the_desktop_app_on_this_machine_always_has_a_way_in(session, monkeypatch) -> None:
+    """A desktop data dir that already holds an administrator must not lock its owner out.
+
+    The desktop backend listens on loopback only and its data directory lives in
+    the person's home, which survives an uninstall. A reinstall therefore finds
+    the administrator of an earlier install, often one nobody remembers the
+    password for, and the desktop has no mail for a reset.
+    """
+    monkeypatch.setenv("OE_DESKTOP", "1")
+    await _add_real_admin(session)
+
+    tokens = await _tile(session, _TileRequest())
+    assert tokens.access_token
+
+
+@pytest.mark.asyncio
+async def test_the_desktop_exception_needs_both_desktop_mode_and_a_local_caller(session, monkeypatch) -> None:
+    await _add_real_admin(session)
+
+    # A server install keeps the lock even for a caller on the same machine.
+    monkeypatch.delenv("OE_DESKTOP", raising=False)
+    with pytest.raises(HTTPException) as server:
+        await _tile(session, _TileRequest())
+    _assert_superseded(server.value)
+
+    # A desktop backend reached through a proxy is not the person at the keyboard.
+    monkeypatch.setenv("OE_DESKTOP", "1")
+    with pytest.raises(HTTPException) as proxied:
+        await _tile(session, _TileRequest(headers={"x-forwarded-for": "198.51.100.23"}))
+    _assert_superseded(proxied.value)

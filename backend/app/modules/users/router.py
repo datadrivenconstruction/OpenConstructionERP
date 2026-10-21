@@ -320,7 +320,9 @@ async def demo_login(
             headers={"Retry-After": "60"},
         )
 
-    return await service.demo_login(email)
+    from app.core.demo_admin import demo_admin_open_to_this_machine
+
+    return await service.demo_login(email, from_this_machine=demo_admin_open_to_this_machine(request))
 
 
 # ── Admin: public demo-login switch ─────────────────────────────────────────

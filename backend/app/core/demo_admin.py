@@ -20,12 +20,18 @@ same questions:
   demo login refuses an account that would sign in as admin, because anyone
   who can reach the port could otherwise take that session. The row itself is
   left alone: the operator may still sign in to it with its password.
+* The desktop app is the exception to that refusal, for a caller on the same
+  machine only. Its backend listens on loopback and keeps its data in the
+  person's home, which an uninstall leaves behind, so a reinstall can find the
+  administrator of an earlier install that nobody can sign in to, with no mail
+  for a reset. The person at the keyboard owns that data directory anyway.
 """
 
 from __future__ import annotations
 
 import logging
 
+from fastapi import Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -49,6 +55,14 @@ def demo_admin_promotion_allowed() -> bool:
     from app.core.demo_read_only import demo_read_only_enabled
 
     return not demo_mode_enabled() and not demo_read_only_enabled()
+
+
+def demo_admin_open_to_this_machine(request: Request) -> bool:
+    """True when the desktop app's own window asks: desktop mode and a direct loopback caller."""
+    from app.config import desktop_mode
+    from app.core.loopback import is_loopback_request
+
+    return desktop_mode() and is_loopback_request(request)
 
 
 async def reconcile_demo_admin_role(session: AsyncSession) -> bool:
