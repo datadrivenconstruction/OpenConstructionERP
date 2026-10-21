@@ -190,7 +190,7 @@ variable "retention_days" {
   default     = null
 
   validation {
-    condition     = var.retention_days == null || (var.retention_days >= 32 && var.retention_days <= 90 && floor(var.retention_days) == var.retention_days)
+    condition     = var.retention_days == null ? true : (var.retention_days >= 32 && var.retention_days <= 90 && floor(var.retention_days) == var.retention_days)
     error_message = "retention_days must be a whole number between 32 and 90."
   }
 }
