@@ -30,6 +30,8 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Loader2, GitMerge, Send, Undo2, Ban, Trash2, Check, X, ShoppingCart, Settings, ExternalLink } from 'lucide-react';
 import { Badge, Button, Card, EmptyState, SkeletonTable, WideModal, type BadgeVariant } from '@/shared/ui';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { QuantityDisplay } from '@/shared/ui/QuantityDisplay';
 import { apiGet, getErrorMessage } from '@/shared/lib/api';
@@ -44,6 +46,7 @@ import {
   rejectRequisition,
   cancelRequisition,
   getRequisition,
+  isPositiveDecimal,
   lineToInput,
   listRequisitions,
   mergeRequisitionLines,
@@ -775,6 +778,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
   const busy =
     save.isPending || submit.isPending || withdraw.isPending || cancel.isPending || approve.isPending || reject.isPending;
 
+  const { confirm: confirmMerge, ...mergeConfirm } = useConfirm();
   const editLine = (index: number, patch: Partial<RequisitionLineIn>) => {
     setLines((prev) => prev.map((l, i) => (i === index ? { ...l, ...patch } : l)));
     setDirty(true);
@@ -784,9 +788,28 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
     setSelected([]);
     setDirty(true);
   };
-  const mergeSelected = () => {
-    const merged = mergeRequisitionLines(lines, selected);
-    if (merged === null) {
+  const mergeSelected = async () => {
+    let merged = mergeRequisitionLines(lines, selected);
+    if (!merged.ok && merged.reason === 'needs_confirmation') {
+      const what = merged.conflicts.map((c) =>
+        t(`procurement.requisitions.merge_conflict_${c}`, {
+          defaultValue: c === 'unit_cost' ? 'unit cost' : c === 'currency' ? 'currency' : 'cost line',
+        }),
+      );
+      const ok = await confirmMerge({
+        title: t('procurement.requisitions.merge_conflict_title', { defaultValue: 'These lines are not alike' }),
+        message: t('procurement.requisitions.merge_conflict_message', {
+          defaultValue:
+            'The selected lines differ in {{what}}. Every source keeps its own cost line, and the merged line is priced at the mean cost only when the currency is the same. Merge anyway?',
+          what: fmtList(what),
+        }),
+        confirmLabel: t('procurement.requisitions.merge_conflict_confirm', { defaultValue: 'Merge anyway' }),
+        variant: 'warning',
+      });
+      if (!ok) return;
+      merged = mergeRequisitionLines(lines, selected, { confirmed: true });
+    }
+    if (!merged.ok) {
       addToast({
         type: 'error',
         title: t('procurement.requisitions.merge_unit_mismatch', {
@@ -795,7 +818,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
       });
       return;
     }
-    setLines(merged);
+    setLines(merged.lines);
     setSelected([]);
     setDirty(true);
   };
@@ -1072,7 +1095,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                   size="sm"
                   variant="secondary"
                   icon={<GitMerge size={14} />}
-                  onClick={mergeSelected}
+                  onClick={() => void mergeSelected()}
                   disabled={selected.length < 2}
                   title={t('procurement.requisitions.merge_hint', {
                     defaultValue: 'Combine the selected lines into one. Do this only when they are the same material.',
@@ -1090,6 +1113,14 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                     <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_material', { defaultValue: 'Material' })}</th>
                     <th className="py-1.5 pr-3 font-medium">{t('procurement.requisitions.col_unit', { defaultValue: 'Unit' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_requested', { defaultValue: 'Requested' })}</th>
+                    <th
+                      className="py-1.5 pr-3 text-right font-medium"
+                      title={t('procurement.requisitions.col_unit_cost_hint', {
+                        defaultValue: 'Indicative, from the BOQ rates. The price is agreed when the order is placed.',
+                      })}
+                    >
+                      {t('procurement.requisitions.col_unit_cost', { defaultValue: 'Estimated unit cost' })}
+                    </th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_ordered', { defaultValue: 'Ordered' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_to_order', { defaultValue: 'Still to order' })}</th>
                     <th className="py-1.5 pr-3 text-right font-medium">{t('procurement.requisitions.col_received', { defaultValue: 'Received' })}</th>
@@ -1146,6 +1177,17 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                           )}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                          {isPositiveDecimal(line.unit_cost) ? (
+                            <>
+                              {line.unit_cost} {line.currency_code ?? ''}
+                            </>
+                          ) : (
+                            <span className="text-xs text-content-tertiary">
+                              {t('procurement.requisitions.cost_unavailable', { defaultValue: 'Indicative cost unavailable' })}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
                           {stored ? <QuantityDisplay value={stored.quantity_ordered} unit={stored.unit ?? ''} precision={2} /> : '-'}
                         </td>
                         <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
@@ -1181,6 +1223,20 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
                               })}
                             </div>
                           ))}
+                          {isDraft && line.sources.length > 0 && (
+                            <input
+                              className={`${fieldCls} mt-1 text-xs`}
+                              value={line.over_allocation_reason ?? ''}
+                              maxLength={1000}
+                              aria-label={t('procurement.requisitions.over_allocation_reason', {
+                                defaultValue: 'Reason if this goes over the BOQ quantity (optional)',
+                              })}
+                              placeholder={t('procurement.requisitions.over_allocation_reason', {
+                                defaultValue: 'Reason if this goes over the BOQ quantity (optional)',
+                              })}
+                              onChange={(e) => editLine(index, { over_allocation_reason: e.target.value || null })}
+                            />
+                          )}
                           {stored && <LineOrderFlags line={stored} />}
                         </td>
                         <td className="py-1.5 pr-3">
@@ -1225,6 +1281,7 @@ function RequisitionDetailModal({ projectId, requisitionId, onClose }: DetailPro
           }}
         />
       )}
+      <ConfirmDialog {...mergeConfirm} />
       <DecisionModal
         mode={decision}
         busy={approve.isPending || reject.isPending}

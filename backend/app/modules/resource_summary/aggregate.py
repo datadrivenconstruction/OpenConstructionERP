@@ -322,9 +322,16 @@ class BuyListSource:
     catalog_item_id: str | None = None
     suggested_vendor_id: str | None = None
     suggested_vendor_origin: str | None = None
+    # The resource's own rate per ``unit`` and the currency it is priced in
+    # (empty when the resource names none), so a requisition raised from the row
+    # can carry an indicative cost. ``None`` when the resource carries no rate.
+    unit_rate: Decimal | None = None
+    currency: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "unit_rate": None if self.unit_rate is None else str(self.unit_rate),
+            "currency": self.currency,
             "suggested_vendor_id": self.suggested_vendor_id,
             "suggested_vendor_origin": self.suggested_vendor_origin,
             "position_id": self.position_id,
@@ -532,6 +539,8 @@ def aggregate_material_buy_list(
                     catalog_item_id=catalog_item_id,
                     suggested_vendor_id=str(suggested) if suggested else None,
                     suggested_vendor_origin=origin,
+                    unit_rate=_dec(res.get("unit_rate")) if res.get("unit_rate") not in (None, "") else None,
+                    currency=res_currency,
                 )
             )
             contributed = True

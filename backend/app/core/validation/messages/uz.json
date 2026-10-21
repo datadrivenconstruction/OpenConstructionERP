@@ -783,6 +783,14 @@
       "fail": "{order} buyurtmasida {line}-qator {unit} birligida, uni qatorning {line_unit} birligiga aylantirib boʻlmaydi",
       "suggestion": "Buyurtma qatoridagi birlikni tuzating, shunda uning miqdori buyurtma qilingan deb hisoblanadi"
     },
+    "requisition_sources_reconcile": {
+      "fail": "{line}-qator {quantity} {unit} so'raydi, ammo uning BOQ manbalari yig'indisi {sources} {unit}",
+      "suggestion": "Miqdorni manbalari yig'indisiga teng qiling yoki qator qamrab olmagan manbalarni olib tashlang"
+    },
+    "requisition_over_allocated": {
+      "fail": "{line}-qator BOQ ehtiyojidan {excess} {unit} ko'p talab qilmoqda ({demand} {unit} jami, shundan {covered} {unit} boshqa material so'rovlarida allaqachon band)",
+      "suggestion": "Miqdorni kamaytiring yoki ortiqcha miqdor ataylab bo'lsa, qatorga sabab yozing"
+    },
     "receipt_certificate_present": {
       "fail": "{line} pozitsiyasi {required} bilan buyurtma qilingan, ammo yetkazib berishda {delivered} bor",
       "suggestion": "Buyurtmada talab qilingan sertifikatni biriktiring yoki yetkazib beruvchi yubormaguncha pozitsiyani rad eting"

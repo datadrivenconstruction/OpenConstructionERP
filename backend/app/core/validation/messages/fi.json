@@ -783,6 +783,14 @@
       "fail": "Tilauksen {order} rivi {line} on yksikössä {unit}, jota ei voi muuntaa rivin yksikköön {line_unit}",
       "suggestion": "Korjaa tilausrivin yksikkö, jotta sen määrä lasketaan tilatuksi"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Rivi {line} pyytää {quantity} {unit}, mutta sen BOQ-lähteiden yhteissumma on {sources} {unit}",
+      "suggestion": "Aseta määrä lähteiden summaksi tai poista lähteet, joita rivi ei kata"
+    },
+    "requisition_over_allocated": {
+      "fail": "Rivi {line} vaatii {excess} {unit} enemmän kuin BOQ tarvitsee ({demand} {unit} yhteensä, josta {covered} {unit} on jo muiden hankintapyyntöjen varaama)",
+      "suggestion": "Pienennä määrää tai kirjaa rivillä syy, jos ylimäärä on tarkoituksellinen"
+    },
     "receipt_certificate_present": {
       "fail": "Rivi {line} tilattiin ehdolla {required}, mutta toimitus sisältää {delivered}",
       "suggestion": "Liitä tilauksen vaatima todistus tai hylkää rivi, kunnes toimittaja lähettää sen"

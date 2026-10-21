@@ -783,6 +783,14 @@
       "fail": "{order} siparişi {line}. satırı {unit} cinsinden tutuyor, bu satırın {line_unit} birimine dönüştürülemez",
       "suggestion": "Sipariş satırındaki birimi düzeltin, miktarı sipariş edilmiş olarak sayılsın"
     },
+    "requisition_sources_reconcile": {
+      "fail": "{line}. satır {quantity} {unit} istiyor, ancak BOQ kaynaklarının toplamı {sources} {unit}",
+      "suggestion": "Miktarı kaynaklarının toplamına eşitleyin veya satırın kapsamadığı kaynakları çıkarın"
+    },
+    "requisition_over_allocated": {
+      "fail": "{line}. satır, BOQ'un ihtiyacından {excess} {unit} fazla talep ediyor ({demand} {unit} toplam, bunun {covered} {unit} kadarı zaten diğer satın alma taleplerinde ayrılmış)",
+      "suggestion": "Miktarı azaltın veya fazlalık bilerekse satıra bir gerekçe yazın"
+    },
     "receipt_certificate_present": {
       "fail": "{line} numaralı kalem {required} ile sipariş edildi, ancak teslimat {delivered} içeriyor",
       "suggestion": "Siparişin istediği sertifikayı ekleyin veya tedarikçi göndermeden kalemi reddedin"

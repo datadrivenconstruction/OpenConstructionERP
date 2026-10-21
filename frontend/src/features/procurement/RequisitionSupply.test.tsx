@@ -259,8 +259,10 @@ describe('suggested supplier through the helpers', () => {
     const a: RequisitionLineIn = { description: 'Sand', unit: 't', quantity_requested: '1', suggested_vendor_id: V1, sources: [] };
     const b: RequisitionLineIn = { ...a, suggested_vendor_id: V2 };
     const c: RequisitionLineIn = { ...a };
-    expect(mergeRequisitionLines([a, b], [0, 1])![0]!.suggested_vendor_id).toBeNull();
-    expect(mergeRequisitionLines([a, c], [0, 1])![0]!.suggested_vendor_id).toBe(V1);
+    const ab = mergeRequisitionLines([a, b], [0, 1]);
+    expect(ab.ok && ab.lines[0]!.suggested_vendor_id).toBeNull();
+    const ac = mergeRequisitionLines([a, c], [0, 1]);
+    expect(ac.ok && ac.lines[0]!.suggested_vendor_id).toBe(V1);
   });
 
   it('counts days between two dates', () => {

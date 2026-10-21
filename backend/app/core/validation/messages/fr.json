@@ -783,6 +783,14 @@
       "fail": "La commande {order} reprend la ligne {line} en {unit}, ce qui ne peut pas être converti dans l'unité de la ligne {line_unit}",
       "suggestion": "Corrigez l'unité sur la ligne de commande pour que sa quantité compte comme commandée"
     },
+    "requisition_sources_reconcile": {
+      "fail": "La ligne {line} demande {quantity} {unit}, mais ses sources BOQ totalisent {sources} {unit}",
+      "suggestion": "Fixez la quantité à la somme de ses sources, ou retirez les sources que la ligne ne couvre pas"
+    },
+    "requisition_over_allocated": {
+      "fail": "La ligne {line} réclame {excess} {unit} de plus que le BOQ n'en requiert ({demand} {unit} au total, dont {covered} {unit} déjà retenus par d'autres demandes d'achat)",
+      "suggestion": "Réduisez la quantité, ou indiquez un motif sur la ligne si le surplus est voulu"
+    },
     "receipt_certificate_present": {
       "fail": "La ligne {line} a été commandée avec {required}, mais la livraison comporte {delivered}",
       "suggestion": "Joignez le certificat exigé par la commande, ou refusez la ligne tant que le fournisseur ne l'a pas transmis"

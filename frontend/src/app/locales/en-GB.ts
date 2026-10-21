@@ -112,6 +112,22 @@ const resource = {
     "dwg_takeoff.conv_converter_said": "Converter report",
     "demo_banner.strip_uploads_off": "Uploads are off here: please use the demo data only",
     "demo_uploads.refused": "Uploads are turned off on the public demo. Please use the demo projects and their example data, or install the platform to work with your own files.",
+    "procurement.requisitions.merge_conflict_unit_cost": "unit cost",
+    "procurement.requisitions.merge_conflict_currency": "currency",
+    "procurement.requisitions.merge_conflict_cost_line": "cost line",
+    "procurement.requisitions.merge_conflict_title": "These lines are not alike",
+    "procurement.requisitions.merge_conflict_message": "The selected lines differ in {{what}}. Every source keeps its own cost line, and the merged line is priced at the mean cost only when the currency is the same. Merge anyway?",
+    "procurement.requisitions.merge_conflict_confirm": "Merge anyway",
+    "procurement.requisitions.col_unit_cost": "Estimated unit cost",
+    "procurement.requisitions.col_unit_cost_hint": "Indicative, from the BOQ rates. The price is agreed when the order is placed.",
+    "procurement.requisitions.cost_unavailable": "Indicative cost unavailable",
+    "procurement.requisitions.over_allocation_reason": "Reason if this goes over the BOQ quantity (optional)",
+    "resourceSummary.buyList.col.covered": "On requisitions",
+    "resourceSummary.buyList.col.remaining": "Remaining",
+    "resourceSummary.requisition.use_remaining": "Request only what is not yet on a submitted requisition. Untick to request the whole BOQ quantity.",
+    "resourceSummary.requisition.nothing_left": "Everything selected is already on requisitions.",
+    "resourceSummary.requisition.col_unit_cost": "Estimated unit cost",
+    "resourceSummary.requisition.cost_unavailable": "Indicative cost unavailable",
   }
 } as { translation: Record<string, string> };
 

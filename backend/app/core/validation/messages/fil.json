@@ -783,6 +783,14 @@
       "fail": "Ang order na {order} ay may linya {line} sa {unit}, na hindi mako-convert sa unit ng linya na {line_unit}",
       "suggestion": "Itama ang unit sa linya ng order para mabilang ang dami nito bilang na-order"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Ang linya {line} ay humihingi ng {quantity} {unit}, pero ang kabuuan ng mga BOQ source nito ay {sources} {unit}",
+      "suggestion": "Itakda ang dami na katumbas ng kabuuan ng mga source nito, o alisin ang mga source na hindi sakop ng linya"
+    },
+    "requisition_over_allocated": {
+      "fail": "Ang linya {line} ay umaangkin ng {excess} {unit} na higit sa kailangan ng BOQ ({demand} {unit} sa kabuuan, {covered} {unit} dito ay nakalaan na sa ibang requisition)",
+      "suggestion": "Bawasan ang dami, o maglagay ng dahilan sa linya kung sinadya ang labis"
+    },
     "receipt_certificate_present": {
       "fail": "Ang linya {line} ay in-order na may {required}, pero ang delivery ay may {delivered}",
       "suggestion": "Ikabit ang certificate na hinihingi ng order, o tanggihan ang linya hanggang maipadala ito ng supplier"

@@ -9,7 +9,7 @@
  */
 
 import { apiGet, apiPatch, apiPost, apiPut } from '@/shared/lib/api';
-import { subtractDecimalStrings } from '@/shared/lib/exactDecimal';
+import { isDecimalString, subtractDecimalStrings, weightedMeanDecimalStrings } from '@/shared/lib/exactDecimal';
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -44,6 +44,11 @@ export interface RequisitionSourceIn {
    * it from the bill; sent (null included), it is kept as sent.
    */
   suggested_vendor_id?: string | null;
+  /**
+   * The cost line the source's position pointed at. Sent back on every edit so
+   * a draft keeps it; left out, the server resolves it from the position.
+   */
+  cost_line_id?: string | null;
 }
 
 export interface RequisitionLineIn {
@@ -65,6 +70,10 @@ export interface RequisitionLineIn {
   schedule_buffer_days?: number | null;
   /** The activity start the date was proposed from, echoed back unchanged. */
   schedule_anchor_date?: string | null;
+  /** The cost line of the line itself, echoed back unchanged on every edit. */
+  cost_line_id?: string | null;
+  /** Why the line goes over the BOQ demand, when it does. Answers the warning, never required. */
+  over_allocation_reason?: string | null;
   sources: RequisitionSourceIn[];
 }
 
@@ -113,6 +122,7 @@ export interface RequisitionLine {
   schedule_activity_start?: string | null;
   /** The activity starts on another day than the one the date was proposed from. */
   schedule_moved?: boolean;
+  over_allocation_reason?: string | null;
   sources: RequisitionSource[];
   /** Purchase order lines raised from this line by a conversion. */
   po_items?: RequisitionPOItemRef[];
@@ -575,6 +585,13 @@ export interface BuyListSourceLike {
   catalog_item_id?: string | null;
   /** The supplier the BOQ suggests for this resource or its position. */
   suggested_vendor_id?: string | null;
+  /** The resource's own rate per `unit`, and its currency. */
+  unit_rate?: string | null;
+  currency?: string | null;
+  /** Held by submitted and later requisitions, in `unit`; null when unknown. */
+  covered_quantity?: string | null;
+  /** `quantity` minus what is held; negative when more is held than the BOQ needs. */
+  remaining_quantity?: string | null;
 }
 
 /** A buy-list row: the name/unit grouping plus every source folded into it. */
@@ -598,6 +615,30 @@ function toSource(s: BuyListSourceLike): RequisitionSourceIn {
   };
 }
 
+/** The quantity a buy-list source still needs requisitioned: its remainder when known, else all of it. */
+function sourceQuantity(s: BuyListSourceLike, useRemaining: boolean): string {
+  if (useRemaining && s.remaining_quantity != null && isDecimalString(s.remaining_quantity)) {
+    return s.remaining_quantity;
+  }
+  return s.quantity;
+}
+
+/**
+ * The indicative unit cost of a group of sources: the mean of their rates
+ * weighted by the quantity taken from each, when every source carries a rate in
+ * one shared currency. Otherwise null, and the line stays without a cost.
+ */
+export function indicativeUnitCost(
+  group: { rate: string | null | undefined; currency: string | null | undefined; quantity: string }[],
+): { unit_cost: string; currency_code: string } | null {
+  if (group.length === 0) return null;
+  const currencies = new Set(group.map((g) => (g.currency ?? '').trim().toUpperCase()));
+  if (currencies.size !== 1) return null;
+  if (group.some((g) => g.rate == null || g.rate === '' || !isDecimalString(g.rate))) return null;
+  const unit_cost = weightedMeanDecimalStrings(group.map((g) => ({ weight: g.quantity, value: g.rate as string })));
+  return unit_cost == null ? null : { unit_cost, currency_code: [...currencies][0]! };
+}
+
 /**
  * Turn selected buy-list rows into requisition lines.
  *
@@ -606,14 +647,19 @@ function toSource(s: BuyListSourceLike): RequisitionSourceIn {
  * item become one line, and the others become one line each, unless the person
  * confirmed `combineUncoded`: then a row's uncoded sources become one line.
  * Every line keeps every source it was built from.
+ *
+ * By default each source asks for what is still uncovered (`remaining_quantity`),
+ * and a source with nothing left is skipped; `useRemaining: false` asks for the
+ * whole BOQ quantity. Each line carries an estimated unit cost from the BOQ
+ * rates when they share one currency (see `indicativeUnitCost`).
  */
 export function buildRequisitionLinesFromBuyList(
   rows: BuyListRowLike[],
-  { combineUncoded }: { combineUncoded: boolean },
+  { combineUncoded, useRemaining = true }: { combineUncoded: boolean; useRemaining?: boolean },
 ): RequisitionLineIn[] {
   const lines: RequisitionLineIn[] = [];
   for (const row of rows) {
-    const sources = row.sources ?? [];
+    const sources = (row.sources ?? []).filter((s) => !useRemaining || isPositiveDecimal(sourceQuantity(s, true)));
     const byCatalog = new Map<string, BuyListSourceLike[]>();
     const uncoded: BuyListSourceLike[] = [];
     for (const s of sources) {
@@ -621,13 +667,19 @@ export function buildRequisitionLinesFromBuyList(
       if (cat) byCatalog.set(cat, [...(byCatalog.get(cat) ?? []), s]);
       else uncoded.push(s);
     }
-    const line = (group: BuyListSourceLike[], catalog: string | null): RequisitionLineIn => ({
-      description: row.name,
-      unit: row.unit || null,
-      quantity_requested: sumQuantities(group.map((s) => s.quantity)),
-      catalog_item_id: catalog && UUID_RE.test(catalog) ? catalog : null,
-      sources: group.map(toSource),
-    });
+    const line = (group: BuyListSourceLike[], catalog: string | null): RequisitionLineIn => {
+      const cost = indicativeUnitCost(
+        group.map((s) => ({ rate: s.unit_rate, currency: s.currency, quantity: sourceQuantity(s, useRemaining) })),
+      );
+      return {
+        description: row.name,
+        unit: row.unit || null,
+        quantity_requested: sumQuantities(group.map((s) => sourceQuantity(s, useRemaining))),
+        ...(cost ?? {}),
+        catalog_item_id: catalog && UUID_RE.test(catalog) ? catalog : null,
+        sources: group.map((s) => ({ ...toSource(s), quantity: sourceQuantity(s, useRemaining) })),
+      };
+    };
     for (const [cat, group] of byCatalog) lines.push(line(group, cat));
     if (combineUncoded && uncoded.length) lines.push(line(uncoded, null));
     else for (const s of uncoded) lines.push(line([s], null));
@@ -635,22 +687,77 @@ export function buildRequisitionLinesFromBuyList(
   return lines;
 }
 
+/** What differs between lines picked for a merge, so the person can confirm it. */
+export type MergeConflict = 'unit_cost' | 'currency' | 'cost_line';
+
+export type MergeResult =
+  | { ok: true; lines: RequisitionLineIn[] }
+  | { ok: false; reason: 'unit_mismatch' }
+  | { ok: false; reason: 'needs_confirmation'; conflicts: MergeConflict[] };
+
+function costKey(raw: string | null | undefined): string {
+  const v = (raw ?? '').trim();
+  if (!v || !isDecimalString(v)) return '0';
+  return v.includes('.') ? v.replace(/\.?0+$/, '') || '0' : v;
+}
+
+/** The ways the lines at `indices` disagree on cost, currency or cost line. */
+export function mergeConflicts(lines: RequisitionLineIn[], indices: number[]): MergeConflict[] {
+  const picked = [...new Set(indices)].filter((i) => i >= 0 && i < lines.length).map((i) => lines[i]!);
+  const found: MergeConflict[] = [];
+  if (new Set(picked.map((l) => costKey(l.unit_cost))).size > 1) found.push('unit_cost');
+  if (new Set(picked.map((l) => (l.currency_code ?? '').trim().toUpperCase())).size > 1) found.push('currency');
+  const costLines = new Set(
+    picked.flatMap((l) => [l.cost_line_id ?? '', ...l.sources.map((s) => s.cost_line_id ?? '')]).filter((v) => v),
+  );
+  const unlinked = picked.some((l) => !l.cost_line_id && l.sources.every((s) => !s.cost_line_id));
+  if (costLines.size > 1 || (costLines.size === 1 && unlinked)) found.push('cost_line');
+  return found;
+}
+
 /**
  * Merge the lines at `indices` into the first of them, by an explicit choice
- * of the person editing the draft. Returns null when the lines are not in one
- * unit: summing metres and tonnes is never a merge.
+ * of the person editing the draft. Refused when the lines are not in one unit
+ * (summing metres and tonnes is never a merge), and refused until the person
+ * confirms when their unit costs, currencies or cost lines differ. A confirmed
+ * merge keeps every source with its own cost line, and prices the line at the
+ * quantity-weighted mean cost when the currency is one, otherwise leaves it
+ * unpriced.
  */
-export function mergeRequisitionLines(lines: RequisitionLineIn[], indices: number[]): RequisitionLineIn[] | null {
+export function mergeRequisitionLines(
+  lines: RequisitionLineIn[],
+  indices: number[],
+  { confirmed = false }: { confirmed?: boolean } = {},
+): MergeResult {
   const picked = [...new Set(indices)].sort((a, b) => a - b).filter((i) => i >= 0 && i < lines.length);
-  if (picked.length < 2) return lines;
+  if (picked.length < 2) return { ok: true, lines };
   const units = new Set(picked.map((i) => (lines[i]!.unit ?? '').trim().toLowerCase()));
-  if (units.size > 1) return null;
+  if (units.size > 1) return { ok: false, reason: 'unit_mismatch' };
+  const conflicts = mergeConflicts(lines, picked);
+  if (conflicts.length > 0 && !confirmed) return { ok: false, reason: 'needs_confirmation', conflicts };
   const first = lines[picked[0]!]!;
   const merged: RequisitionLineIn = {
     ...first,
     quantity_requested: sumQuantities(picked.map((i) => lines[i]!.quantity_requested)),
     sources: picked.flatMap((i) => lines[i]!.sources),
   };
+  if (conflicts.length > 0) {
+    const cost = conflicts.includes('currency')
+      ? null
+      : indicativeUnitCost(
+          picked.map((i) => ({
+            rate: lines[i]!.unit_cost,
+            currency: lines[i]!.currency_code,
+            quantity: lines[i]!.quantity_requested,
+          })),
+        );
+    merged.unit_cost = cost?.unit_cost ?? '0';
+    merged.currency_code = cost?.currency_code ?? '';
+    // Each source keeps its own cost line; the merged line has no single one.
+    if (conflicts.includes('cost_line')) merged.cost_line_id = null;
+  }
+  merged.over_allocation_reason =
+    picked.map((i) => lines[i]!.over_allocation_reason).find((r) => r && r.trim()) ?? null;
   // Lines that suggest different suppliers lose the suggestion on merge rather
   // than keeping the first one's: nobody chose it for the merged line.
   if (picked.some((i) => 'suggested_vendor_id' in lines[i]!)) {
@@ -662,7 +769,7 @@ export function mergeRequisitionLines(lines: RequisitionLineIn[], indices: numbe
     if (i === picked[0]) out.push(merged);
     else if (!picked.includes(i)) out.push(l);
   });
-  return out;
+  return { ok: true, lines: out };
 }
 
 /** The editable form of a stored line, sources included. */
@@ -674,6 +781,8 @@ export function lineToInput(line: RequisitionLine): RequisitionLineIn {
     unit_cost: line.unit_cost != null ? String(line.unit_cost) : '0',
     currency_code: line.currency_code ?? '',
     catalog_item_id: line.catalog_item_id,
+    cost_line_id: line.cost_line_id ?? null,
+    over_allocation_reason: line.over_allocation_reason ?? null,
     suggested_vendor_id: line.suggested_vendor_id ?? null,
     required_date: line.required_date ?? null,
     schedule_activity_id: line.schedule_activity_id ?? null,
@@ -684,6 +793,7 @@ export function lineToInput(line: RequisitionLine): RequisitionLineIn {
       resource_key: s.resource_key,
       quantity: s.quantity,
       unit: s.unit,
+      cost_line_id: s.cost_line_id ?? null,
       suggested_vendor_id: s.suggested_vendor_id ?? null,
     })),
   };

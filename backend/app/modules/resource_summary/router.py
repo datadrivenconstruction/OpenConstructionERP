@@ -105,11 +105,13 @@ async def get_material_buy_list(
 ) -> MaterialBuyListResponse:
     """Group the estimate's material resource lines into a procurement buy-list."""
     await verify_project_access(project_id, user_id, session)
-    buy_list, generated_at = await _service(session).generate_buy_list(project_id)
+    service = _service(session)
+    buy_list, generated_at = await service.generate_buy_list(project_id)
     return MaterialBuyListResponse.from_buy_list(
         buy_list,
         project_id=project_id,
         generated_at=generated_at,
+        covered=await service.requisition_coverage(project_id),
     )
 
 

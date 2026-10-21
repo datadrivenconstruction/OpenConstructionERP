@@ -783,6 +783,14 @@
       "fail": "L'ordine {order} contiene la riga {line} in {unit}, che non può essere convertita nell'unità della riga {line_unit}",
       "suggestion": "Correggi l'unità sulla riga d'ordine in modo che la sua quantità conti come ordinata"
     },
+    "requisition_sources_reconcile": {
+      "fail": "La riga {line} richiede {quantity} {unit}, ma le sue fonti BOQ sommano {sources} {unit}",
+      "suggestion": "Imposta la quantità uguale alla somma delle sue fonti, oppure elimina le fonti che la riga non copre"
+    },
+    "requisition_over_allocated": {
+      "fail": "La riga {line} rivendica {excess} {unit} in più rispetto al fabbisogno del BOQ ({demand} {unit} in totale, di cui {covered} {unit} già impegnati da altre richieste di acquisto)",
+      "suggestion": "Riduci la quantità, oppure indica un motivo sulla riga se l'eccedenza è voluta"
+    },
     "receipt_certificate_present": {
       "fail": "La riga {line} è stata ordinata con {required}, ma la consegna riporta {delivered}",
       "suggestion": "Allegate il certificato richiesto dall'ordine, oppure respingete la riga finché il fornitore non lo invia"

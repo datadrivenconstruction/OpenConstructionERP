@@ -449,6 +449,12 @@ function BuyListView({ query, projectId }: BuyListViewProps) {
                   {t('resourceSummary.buyList.col.quantity', { defaultValue: 'Total quantity' })}
                 </th>
                 <th className="py-1.5 pr-3 text-right font-medium">
+                  {t('resourceSummary.buyList.col.covered', { defaultValue: 'On requisitions' })}
+                </th>
+                <th className="py-1.5 pr-3 text-right font-medium">
+                  {t('resourceSummary.buyList.col.remaining', { defaultValue: 'Remaining' })}
+                </th>
+                <th className="py-1.5 pr-3 text-right font-medium">
                   {t('resourceSummary.buyList.col.cost', { defaultValue: 'Est. cost' })}
                 </th>
                 <th className="py-1.5 text-right font-medium">
@@ -476,6 +482,26 @@ function BuyListView({ query, projectId }: BuyListViewProps) {
                   <td className="py-1.5 pr-3 text-content-tertiary">{item.unit || '-'}</td>
                   <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
                     <QuantityDisplay value={item.quantity} unit={item.unit} precision={2} />
+                  </td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                    {item.covered_quantity != null ? (
+                      <QuantityDisplay value={item.covered_quantity} unit={item.unit} precision={2} />
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                  <td
+                    className={`py-1.5 pr-3 text-right tabular-nums ${
+                      item.remaining_quantity != null && item.remaining_quantity.startsWith('-')
+                        ? 'text-semantic-warning'
+                        : 'text-content-secondary'
+                    }`}
+                  >
+                    {item.remaining_quantity != null ? (
+                      <QuantityDisplay value={item.remaining_quantity} unit={item.unit} precision={2} />
+                    ) : (
+                      '-'
+                    )}
                   </td>
                   <td className="py-1.5 pr-3 text-right tabular-nums text-content-primary">
                     <MoneyDisplay amount={item.cost} currency={currency} />

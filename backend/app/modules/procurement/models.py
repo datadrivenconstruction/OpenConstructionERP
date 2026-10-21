@@ -546,6 +546,10 @@ class MaterialRequisitionItem(Base):
     schedule_activity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     schedule_buffer_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     schedule_anchor_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # Why this line goes over the BOQ demand once the quantity other submitted
+    # requisitions already hold is counted. Free text; it acknowledges the
+    # over-allocation warning and never blocks a submission.
+    over_allocation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationship
     requisition: Mapped["MaterialRequisition"] = relationship(back_populates="items")

@@ -783,6 +783,14 @@
       "fail": "発注 {order} は明細 {line} を {unit} で保持しており、明細の単位 {line_unit} に換算できません",
       "suggestion": "発注明細の単位を修正し、数量が発注済みとして集計されるようにしてください"
     },
+    "requisition_sources_reconcile": {
+      "fail": "明細 {line} は {quantity} {unit} を要求していますが、内訳書の参照元の合計は {sources} {unit} です",
+      "suggestion": "数量を参照元の合計に合わせるか、明細がカバーしていない参照元を削除してください"
+    },
+    "requisition_over_allocated": {
+      "fail": "明細 {line} は内訳書の必要量より {excess} {unit} 多く要求しています(合計 {demand} {unit} のうち {covered} {unit} はすでに他の購買依頼で確保済み)",
+      "suggestion": "数量を減らすか、超過分が意図的であれば明細に理由を記載してください"
+    },
     "receipt_certificate_present": {
       "fail": "明細{line}は{required}付きで発注されましたが、納品には{delivered}が含まれています",
       "suggestion": "発注で求められた証明書を添付するか、サプライヤーから届くまで該当明細を保留してください"

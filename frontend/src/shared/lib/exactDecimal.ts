@@ -55,3 +55,37 @@ export function sumMoneyStrings(values: readonly (string | null | undefined)[]):
   const clean = values.map((v) => (typeof v === 'string' && isDecimalString(v) ? v : '0'));
   return sumDecimalStrings(clean) ?? '0';
 }
+
+/**
+ * Mean of `value` weighted by `weight`, computed exactly and rounded half up to
+ * `digits` decimals (trailing zeros trimmed). Null when there is nothing to
+ * average (no entries, a non-positive total weight) or any operand is not a
+ * plain decimal.
+ */
+export function weightedMeanDecimalStrings(
+  entries: readonly { weight: string; value: string }[],
+  digits = 6,
+): string | null {
+  if (entries.length === 0) return null;
+  if (!entries.every((e) => isDecimalString(e.weight) && isDecimalString(e.value))) return null;
+  const wScale = Math.max(...entries.map((e) => e.weight.split('.')[1]?.length ?? 0));
+  const vScale = Math.max(...entries.map((e) => e.value.split('.')[1]?.length ?? 0));
+  let weighted = 0n;
+  let total = 0n;
+  for (const e of entries) {
+    const w = toScaled(e.weight, wScale);
+    weighted += w * toScaled(e.value, vScale);
+    total += w;
+  }
+  if (total <= 0n) return null;
+  // weighted / total is scaled by 10^vScale; bring it to `digits` and round half up.
+  const target = 10n ** BigInt(digits);
+  const numerator = weighted * target;
+  const denominator = total * 10n ** BigInt(vScale);
+  const negative = numerator < 0n;
+  const abs = negative ? -numerator : numerator;
+  let q = abs / denominator;
+  if ((abs % denominator) * 2n >= denominator) q += 1n;
+  const text = fromScaled(negative ? -q : q, digits);
+  return text.includes('.') ? text.replace(/\.?0+$/, '') : text;
+}

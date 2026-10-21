@@ -783,6 +783,14 @@
       "fail": "Ordre {order} indeholder linje {line} i {unit}, som ikke kan omregnes til linjens enhed {line_unit}",
       "suggestion": "Ret enheden på ordrelinjen, så dens mængde tæller som bestilt"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Linje {line} beder om {quantity} {unit}, men dens BOQ-kilder lægger sig sammen til {sources} {unit}",
+      "suggestion": "Sæt mængden til summen af kilderne, eller fjern de kilder linjen ikke dækker"
+    },
+    "requisition_over_allocated": {
+      "fail": "Linje {line} tager {excess} {unit} mere, end BOQ'en kræver ({demand} {unit} i alt, hvoraf {covered} {unit} allerede er reserveret af andre indkøbsanmodninger)",
+      "suggestion": "Reducer mængden, eller angiv en begrundelse på linjen, hvis det ekstra er tilsigtet"
+    },
     "receipt_certificate_present": {
       "fail": "Linje {line} er bestilt med {required}, men leveringen indeholder {delivered}",
       "suggestion": "Vedhæft certifikatet, som bestillingen kræver, eller afvis linjen, indtil leverandøren sender det"

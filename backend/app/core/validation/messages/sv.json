@@ -783,6 +783,14 @@
       "fail": "Order {order} har rad {line} i {unit}, som inte kan räknas om till radens enhet {line_unit}",
       "suggestion": "Rätta enheten på orderraden så att kvantiteten räknas som beställd"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Rad {line} begär {quantity} {unit}, men dess BOQ-källor summerar till {sources} {unit}",
+      "suggestion": "Sätt kvantiteten till summan av dess källor, eller ta bort de källor som raden inte täcker"
+    },
+    "requisition_over_allocated": {
+      "fail": "Rad {line} tar {excess} {unit} mer än BOQ:n behöver ({demand} {unit} totalt, varav {covered} {unit} redan är bundna av andra inköpsbegäranden)",
+      "suggestion": "Minska kvantiteten, eller ange en motivering på raden om överskottet är avsiktligt"
+    },
     "receipt_certificate_present": {
       "fail": "Rad {line} beställdes med {required}, men leveransen innehåller {delivered}",
       "suggestion": "Bifoga intyget som beställningen kräver, eller underkänn raden tills leverantören skickar det"

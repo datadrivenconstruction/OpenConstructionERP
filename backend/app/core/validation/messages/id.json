@@ -783,6 +783,14 @@
       "fail": "Pesanan {order} memuat baris {line} dalam {unit}, yang tidak dapat dikonversi ke satuan baris {line_unit}",
       "suggestion": "Perbaiki satuan pada baris pesanan agar kuantitasnya terhitung sebagai dipesan"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Baris {line} meminta {quantity} {unit}, tetapi sumber BOQ-nya berjumlah {sources} {unit}",
+      "suggestion": "Atur kuantitas sama dengan jumlah sumbernya, atau hapus sumber yang tidak dicakup baris ini"
+    },
+    "requisition_over_allocated": {
+      "fail": "Baris {line} mengklaim {excess} {unit} lebih dari yang dibutuhkan BOQ ({demand} {unit} seluruhnya, {covered} {unit} di antaranya sudah ditahan permintaan lain)",
+      "suggestion": "Kurangi kuantitasnya, atau tulis alasan di baris jika kelebihan itu disengaja"
+    },
     "receipt_certificate_present": {
       "fail": "Baris {line} dipesan dengan {required}, tetapi pengiriman membawa {delivered}",
       "suggestion": "Lampirkan sertifikat yang diminta pesanan, atau tolak baris ini sampai pemasok mengirimkannya"

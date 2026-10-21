@@ -783,6 +783,14 @@
       "fail": "Đơn {order} ghi dòng {line} theo {unit}, không thể quy đổi sang đơn vị của dòng là {line_unit}",
       "suggestion": "Sửa đơn vị trên dòng của đơn để khối lượng được tính là đã đặt"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Dòng {line} yêu cầu {quantity} {unit}, nhưng các nguồn BOQ của nó cộng lại là {sources} {unit}",
+      "suggestion": "Đặt khối lượng bằng tổng các nguồn của dòng, hoặc bỏ những nguồn mà dòng không bao phủ"
+    },
+    "requisition_over_allocated": {
+      "fail": "Dòng {line} đòi {excess} {unit} nhiều hơn mức BOQ cần ({demand} {unit} tổng cộng, trong đó {covered} {unit} đã được các phiếu yêu cầu khác giữ)",
+      "suggestion": "Giảm khối lượng, hoặc ghi lý do trên dòng nếu phần dư là có chủ đích"
+    },
     "receipt_certificate_present": {
       "fail": "Dòng {line} được đặt với {required}, nhưng đợt giao hàng lại có {delivered}",
       "suggestion": "Đính kèm chứng chỉ mà đơn đặt hàng yêu cầu, hoặc từ chối dòng này cho đến khi nhà cung cấp gửi chứng chỉ"

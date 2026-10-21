@@ -783,6 +783,14 @@
       "fail": "A(z) {order} megrendelés a(z) {line}. sort {unit} egységben tartalmazza, amely nem váltható át a sor {line_unit} egységére",
       "suggestion": "Javítsa a mértékegységet a rendelési soron, hogy a mennyisége megrendeltnek számítson"
     },
+    "requisition_sources_reconcile": {
+      "fail": "A(z) {line}. sor {quantity} {unit} mennyiséget kér, de a hozzá tartozó BOQ-források összesen {sources} {unit}",
+      "suggestion": "Állítsa a mennyiséget a források összegére, vagy vegye ki azokat a forrásokat, amelyeket a sor nem fed le"
+    },
+    "requisition_over_allocated": {
+      "fail": "A(z) {line}. sor {excess} {unit}-tal többet igényel, mint amennyit a BOQ igényel ({demand} {unit} összesen, ebből {covered} {unit} már más anyagigénylések foglalásában van)",
+      "suggestion": "Csökkentse a mennyiséget, vagy ha a többlet szándékos, indokolja meg a soron"
+    },
     "receipt_certificate_present": {
       "fail": "A(z) {line} tétel megrendelésében {required} szerepelt, a szállítmányban viszont {delivered} van",
       "suggestion": "Csatolja a megrendelés által kért tanúsítványt, vagy utasítsa vissza a tételt, amíg a szállító be nem küldi"

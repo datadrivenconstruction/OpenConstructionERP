@@ -19,6 +19,7 @@ Endpoints:
     GET    /requisitions/schedule-activities               - Activities a line can take its needed-by date from
     GET    /requisitions/settings          - The project's order owner and default approvers
     PUT    /requisitions/settings          - Change them (``procurement.manage_settings``)
+    GET    /requisitions/coverage          - What active requisitions hold of each BOQ resource, per unit
     GET    /requisitions/feed              - Replayable change feed of a project's requisitions (cursor)
     POST   /requisitions/{id}/external-orders - Reconcile an order an external purchasing system placed
 
@@ -50,6 +51,7 @@ from app.modules.procurement.schemas import (
     RequisitionCancel,
     RequisitionConvert,
     RequisitionConvertResponse,
+    RequisitionCoverageResponse,
     RequisitionCreate,
     RequisitionFeedPage,
     RequisitionListResponse,
@@ -213,6 +215,22 @@ async def convert_requisitions_to_po(
     """
     await verify_project_access(data.project_id, str(user_id), session)
     return await service.convert_to_purchase_order(data, user_id=str(user_id))
+
+
+@router.get(
+    "/coverage",
+    response_model=RequisitionCoverageResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
+async def get_requisition_coverage(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    service: RequisitionWorkflowService = Depends(_get_service),
+) -> RequisitionCoverageResponse:
+    """What submitted and later requisitions hold of each BOQ resource, per unit."""
+    await verify_project_access(project_id, str(user_id), session)
+    return await service.coverage(project_id)
 
 
 @router.get(
@@ -415,5 +433,5 @@ async def validate_requisition(
 ) -> RequisitionValidationResponse:
     """Run the requisition rules without changing anything."""
     req = await _load_guarded(service, requisition_id, user_id)
-    report = await service.validate(req)
+    report = await service.validate(req, operation="draft" if req.status == "draft" else "submit")
     return RequisitionValidationResponse(**ProcurementService._po_report_to_dict(report))

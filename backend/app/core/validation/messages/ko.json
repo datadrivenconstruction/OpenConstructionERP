@@ -783,6 +783,14 @@
       "fail": "주문 {order}에서 {line}행이 {unit} 단위로 되어 있어 행의 단위 {line_unit}(으)로 환산할 수 없습니다",
       "suggestion": "주문 행의 단위를 바로잡아 수량이 주문된 것으로 집계되게 하세요"
     },
+    "requisition_sources_reconcile": {
+      "fail": "{line}행은 {quantity} {unit}을(를) 요청하지만, 내역서 출처의 합계는 {sources} {unit}입니다",
+      "suggestion": "수량을 출처 합계와 같게 하거나, 해당 행이 포함하지 않는 출처를 삭제하세요"
+    },
+    "requisition_over_allocated": {
+      "fail": "{line}행이 내역서 소요량보다 {excess} {unit} 많이 요청되었습니다(전체 {demand} {unit} 중 {covered} {unit}은 다른 구매 요청에서 이미 확보됨)",
+      "suggestion": "수량을 줄이거나, 초과분이 의도된 것이라면 행에 사유를 적으세요"
+    },
     "receipt_certificate_present": {
       "fail": "{line} 항목의 발주 시 요구 사항은 {required}였으나 납품 내용은 {delivered}입니다",
       "suggestion": "발주서가 요구한 증명서를 첨부하거나, 공급업체가 보낼 때까지 해당 항목을 반려하세요"
