@@ -8569,7 +8569,7 @@
           "method": "POST",
           "path": "/import/",
           "handler": "import_assembly",
-          "response_model": "AssemblyResponse",
+          "response_model": "AssemblyImportResponse",
           "request_schema": "AssemblyImportRequest"
         },
         {
@@ -8951,6 +8951,10 @@
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
+            },
+            {
+              "name": "tags",
+              "type": "list[str] | None"
             }
           ]
         },
@@ -9335,6 +9339,19 @@
             {
               "name": "assembly",
               "type": "AssemblyExport"
+            }
+          ]
+        },
+        {
+          "class_name": "AssemblyImportResponse",
+          "bases": [
+            "AssemblyResponse"
+          ],
+          "docstring": "Imported assembly plus one warning per component imported unlinked.",
+          "fields": [
+            {
+              "name": "warnings",
+              "type": "list[str]"
             }
           ]
         },
@@ -20881,6 +20898,20 @@
           "request_schema": "BOQElementLinkCreate"
         },
         {
+          "method": "POST",
+          "path": "/links/bulk/",
+          "handler": "create_links_bulk",
+          "response_model": "BOQElementLinkBulkResponse",
+          "request_schema": "BOQElementLinkBulkCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/upload-duplicates/",
+          "handler": "find_upload_duplicates",
+          "response_model": "BIMUploadDuplicateListResponse",
+          "request_schema": "None"
+        },
+        {
           "method": "DELETE",
           "path": "/links/{link_id}",
           "handler": "delete_link",
@@ -21476,6 +21507,21 @@
               "name": "has_geometry",
               "type": "bool",
               "default": "False"
+            },
+            {
+              "name": "conversion_stage",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "conversion_started_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "conversion_timeout_s",
+              "type": "int | None",
+              "default": "None"
             },
             {
               "name": "created_by",
@@ -22277,6 +22323,93 @@
               "name": "total",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BOQElementLinkBulkCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Link many BIM elements to one BOQ position in a single request.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "bim_element_ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "link_type",
+              "type": "str"
+            },
+            {
+              "name": "confidence",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "BOQElementLinkBulkResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Outcome of a bulk link call.\n\n``skipped`` counts elements already linked to the position, so a repeated\ncall is a no-op rather than an error.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "created",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "skipped",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMUploadDuplicate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An existing model in the project that was uploaded from the same file.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "version",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMUploadDuplicateListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Models whose source file matches a file about to be uploaded.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BIMUploadDuplicate]"
             }
           ]
         },
@@ -24704,6 +24837,7 @@
         "gaeb_exchange_router.py",
         "gaeb_x31.py",
         "gaeb_x89.py",
+        "glb_quantities.py",
         "import_append.py",
         "import_jobs.py",
         "importers/__init__.py",
@@ -24729,8 +24863,10 @@
         "resource_norms.py",
         "resource_review.py",
         "resource_review_router.py",
+        "revit_categories.py",
         "roundtrip.py",
         "router.py",
+        "rvt_ifc_reader.py",
         "schemas.py",
         "service.py",
         "supplier_suggestion.py",
@@ -30297,7 +30433,7 @@
         "name": "oe_cad",
         "version": "0.1.0",
         "display_name": "CAD Import",
-        "description": "CAD file import and conversion pipeline (DWG, DGN, RVT, IFC)",
+        "description": "CAD file import and conversion pipeline (DWG, RVT, IFC)",
         "author": "OpenConstructionERP Core Team",
         "category": "extension",
         "depends": [
@@ -40969,6 +41105,13 @@
           "request_schema": "ChangeOrderService"
         },
         {
+          "method": "GET",
+          "path": "/standalone-preflight",
+          "handler": "standalone_preflight",
+          "response_model": "StandalonePreflightResponse",
+          "request_schema": "ChangeOrderService"
+        },
+        {
           "method": "POST",
           "path": "/",
           "handler": "create_change_order",
@@ -41094,6 +41237,74 @@
         }
       ],
       "schemas": [
+        {
+          "class_name": "StandalonePreflightRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One active variation order shown before a standalone change order is saved.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "linked_change_order_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "linked_change_order_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "can_link",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "StandalonePreflightResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every active variation order on the project; the list is never paged.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[StandalonePreflightRow]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
         {
           "class_name": "ChangeOrderCreate",
           "bases": [
@@ -116682,7 +116893,7 @@
         "name": "oe_file_search",
         "version": "0.1.0",
         "display_name": "File Search",
-        "description": "OCR-backed full-text content search across project documents, sheets, markups and reports. PyMuPDF + Tesseract extractors, Postgres tsvector / SQLite LIKE fallback.",
+        "description": "OCR-backed full-text content search across project documents, sheets, markups and reports. PDFium + Tesseract extractors, Postgres tsvector / SQLite LIKE fallback.",
         "author": "OpenConstructionERP Core Team",
         "category": "core",
         "depends": [
@@ -171431,6 +171642,7 @@
         "receiving.py",
         "repairs.py",
         "repository.py",
+        "requisition_coverage.py",
         "requisition_feed.py",
         "requisition_progress.py",
         "requisition_router.py",
@@ -172266,6 +172478,12 @@
               "name": "schedule_anchor_date",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "over_allocation_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
               "nullable": true
             }
           ],
@@ -174433,6 +174651,10 @@
               "default": "None"
             },
             {
+              "name": "over_allocation_reason",
+              "type": "str | None"
+            },
+            {
               "name": "sources",
               "type": "list[RequisitionItemSourceIn]"
             }
@@ -174842,6 +175064,49 @@
           ]
         },
         {
+          "class_name": "RequisitionCoverageSource",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "How much of one BOQ resource the active requisitions hold, in one unit.",
+          "fields": [
+            {
+              "name": "boq_position_id",
+              "type": "UUID"
+            },
+            {
+              "name": "resource_key",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "covered_quantity",
+              "type": "str",
+              "default": "'0'"
+            }
+          ]
+        },
+        {
+          "class_name": "RequisitionCoverageResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What submitted, approved and later requisitions hold per BOQ resource.\n\nDrafts, withdrawn, rejected and cancelled requisitions hold nothing. A\nresource held in two units appears as two rows: they are never added.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "sources",
+              "type": "list[RequisitionCoverageSource]"
+            }
+          ]
+        },
+        {
           "class_name": "RequisitionVendorRef",
           "bases": [
             "BaseModel"
@@ -175010,6 +175275,11 @@
               "name": "schedule_moved",
               "type": "bool",
               "default": "False"
+            },
+            {
+              "name": "over_allocation_reason",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "sources",
@@ -175843,6 +176113,7 @@
         "finance",
         "inspections",
         "projects",
+        "resource_summary",
         "rfq_bidding",
         "schedule",
         "subcontractors",
@@ -211045,6 +211316,26 @@
               "name": "suggested_vendor_origin",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "unit_rate",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "covered_quantity",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "remaining_quantity",
+              "type": "Decimal | None",
+              "default": "None"
             }
           ]
         },
@@ -211078,6 +211369,16 @@
             {
               "name": "currency",
               "type": "str"
+            },
+            {
+              "name": "covered_quantity",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "remaining_quantity",
+              "type": "Decimal | None",
+              "default": "None"
             },
             {
               "name": "sources",
@@ -211168,6 +211469,7 @@
       "import_dependencies": [
         "boq",
         "price_breakdown",
+        "procurement",
         "projects"
       ]
     },
@@ -271011,7 +271313,7 @@
           "path": "/variation-orders/{vo_id}/void",
           "handler": "void_variation_order",
           "response_model": "VariationOrderResponse",
-          "request_schema": "None"
+          "request_schema": "_VoidBody"
         },
         {
           "method": "POST",
@@ -275633,10 +275935,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 126,
+      "ts_files": 135,
       "css_files": 0,
-      "test_files": 44,
-      "total_files": 127
+      "test_files": 49,
+      "total_files": 136
     },
     {
       "name": "bim_requirements",
@@ -275955,10 +276257,10 @@
     },
     {
       "name": "dwg-takeoff",
-      "ts_files": 50,
+      "ts_files": 56,
       "css_files": 0,
-      "test_files": 16,
-      "total_files": 50
+      "test_files": 20,
+      "total_files": 56
     },
     {
       "name": "eac",
@@ -276354,10 +276656,10 @@
     },
     {
       "name": "modules",
-      "ts_files": 24,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 25
+      "test_files": 13,
+      "total_files": 35
     },
     {
       "name": "ncr",
@@ -276732,10 +277034,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 35,
+      "ts_files": 38,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 35
+      "test_files": 13,
+      "total_files": 38
     },
     {
       "name": "setup",
@@ -278059,6 +278361,7 @@
       "finance",
       "inspections",
       "projects",
+      "resource_summary",
       "rfq_bidding",
       "schedule",
       "subcontractors",
@@ -278254,6 +278557,7 @@
     "resource_summary": [
       "boq",
       "price_breakdown",
+      "procurement",
       "projects"
     ],
     "resources": [
@@ -278546,13 +278850,13 @@
     "backend_modules": 215,
     "modules_with_manifests": 213,
     "total_models": 788,
-    "total_columns": 9170,
+    "total_columns": 9171,
     "total_relationships": 240,
-    "total_routes": 4622,
-    "total_schemas": 4108,
-    "total_python_files": 2805,
+    "total_routes": 4625,
+    "total_schemas": 4117,
+    "total_python_files": 2809,
     "frontend_features": 209,
-    "frontend_ts_files": 3571,
+    "frontend_ts_files": 3599,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
