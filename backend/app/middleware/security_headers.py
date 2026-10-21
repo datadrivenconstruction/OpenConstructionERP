@@ -14,9 +14,37 @@ Also strips the `server: uvicorn` header that the ASGI server adds by default,
 to avoid leaking the underlying tech stack.
 """
 
+import logging
+import re
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+logger = logging.getLogger(__name__)
+
+_HTTPS_ORIGIN = re.compile(r"^https://[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?(?::\d{1,5})?$")
+_LOCAL_ORIGIN = re.compile(r"^http://localhost(?::\d{1,5})?$")
+
+
+def parse_csp_connect_extra(raw: str | None) -> list[str]:
+    """Return the vetted origins from a comma-separated ``connect-src`` extension.
+
+    Accepts ``https://host[:port]`` and ``http://localhost[:port]`` only: no
+    paths, no wildcards, no other plain-http hosts. Invalid entries are logged
+    and dropped.
+    """
+    origins: list[str] = []
+    for entry in (raw or "").split(","):
+        origin = entry.strip()
+        if not origin:
+            continue
+        if _HTTPS_ORIGIN.match(origin) or _LOCAL_ORIGIN.match(origin):
+            if origin not in origins:
+                origins.append(origin)
+        else:
+            logger.warning("OE_CSP_CONNECT_SRC_EXTRA: ignoring invalid origin %r", origin)
+    return origins
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -71,6 +99,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # precached the files with ``fetch()``, which connect-src governs).
         # Leaving them behind would keep permitting the third-party fetch the
         # self-hosting removed, so they came out with it.
+        extra_src = ""
+        if csp is None:
+            from app.config import get_settings
+
+            extra_src = "".join(f" {o}" for o in parse_csp_connect_extra(get_settings().csp_connect_src_extra))
         self._csp = csp or (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: "
@@ -97,7 +130,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # Open-Meteo (keyless, no vendor lock-in) straight from the
             # browser. Without these hosts on connect-src the fetch is
             # CSP-blocked and the weather silently renders nothing.
-            "https://api.open-meteo.com https://archive-api.open-meteo.com; "
+            f"https://api.open-meteo.com https://archive-api.open-meteo.com{extra_src}; "
             "frame-ancestors 'self'; "
             "base-uri 'self'; "
             "form-action 'self'"

@@ -518,6 +518,11 @@ def _raise_param_errors(errors: list[ParamError]) -> None:
         )
 
 
+def _clean_tags(tags: Sequence[str]) -> list[str]:
+    """Strip, lowercase, de-duplicate and drop empty tags, keeping order."""
+    return list(dict.fromkeys(t.strip().lower() for t in tags if isinstance(t, str) and t.strip()))
+
+
 class AssemblyService:
     """Business logic for Assembly and Component operations."""
 
@@ -656,9 +661,19 @@ class AssemblyService:
 
         fields = data.model_dump(exclude_unset=True)
 
-        # Map 'metadata' key to the model's 'metadata_' column
-        if "metadata" in fields:
-            fields["metadata_"] = fields.pop("metadata")
+        # ``metadata`` is merged into the stored dict (a key sent as null is
+        # removed); an explicit ``tags`` list then replaces ``metadata.tags``.
+        if "metadata" in fields or "tags" in fields:
+            merged = dict(assembly.metadata_) if isinstance(assembly.metadata_, dict) else {}
+            for key, value in (fields.pop("metadata", None) or {}).items():
+                if value is None:
+                    merged.pop(key, None)
+                else:
+                    merged[key] = value
+            tags_in = fields.pop("tags", None)
+            if tags_in is not None:
+                merged["tags"] = _clean_tags(tags_in)
+            fields["metadata_"] = merged
 
         # Convert bid_factor float to string for storage
         if "bid_factor" in fields:
@@ -1920,6 +1935,7 @@ class AssemblyService:
                     "unit": comp.unit,
                     "unit_cost": _str_to_float(comp.unit_cost),
                     "sort_order": comp.sort_order,
+                    "cost_item_id": str(comp.cost_item_id) if comp.cost_item_id else None,
                     "metadata": dict(comp.metadata_) if comp.metadata_ else {},
                 }
             )
@@ -1940,10 +1956,24 @@ class AssemblyService:
             "components": export_components,
         }
 
+    async def _resolve_import_cost_item(self, raw: object) -> uuid.UUID | None:
+        """Return the id of an active cost item named by an import row, else None."""
+        if not raw:
+            return None
+        try:
+            item_id = uuid.UUID(str(raw))
+        except ValueError:
+            return None
+        from app.modules.costs.models import CostItem
+
+        item = await self.session.get(CostItem, item_id)
+        return item.id if item is not None and item.is_active else None
+
     async def import_assembly(
         self,
         data: AssemblyExport,
         owner_id: str | None = None,
+        warnings: list[str] | None = None,
     ) -> Assembly:
         """Import an assembly from an exported JSON payload.
 
@@ -1953,6 +1983,8 @@ class AssemblyService:
         Args:
             data: Assembly export payload with components.
             owner_id: ID of the user importing the assembly.
+            warnings: Optional list that receives one line per component whose
+                ``cost_item_id`` could not be resolved (imported unlinked).
 
         Returns:
             The newly created Assembly.
@@ -1980,8 +2012,12 @@ class AssemblyService:
             # Issue #365 - carry the per-component quantity formula (empty -> NULL).
             qf_raw = comp_data.get("quantity_formula")
             quantity_formula = str(qf_raw).strip() if isinstance(qf_raw, str) and qf_raw.strip() else None
+            cost_item_id = await self._resolve_import_cost_item(comp_data.get("cost_item_id"))
+            if comp_data.get("cost_item_id") and cost_item_id is None and warnings is not None:
+                warnings.append(f"components[{idx}]: cost_item_id not found, imported unlinked")
             parsed_components.append(
                 {
+                    "cost_item_id": cost_item_id,
                     "description": str(comp_data.get("description", "") or ""),
                     "resource_type": res_type,
                     "factor": factor_dec,
@@ -2018,7 +2054,7 @@ class AssemblyService:
 
         metadata: dict = {}
         if data.tags:
-            metadata["tags"] = data.tags
+            metadata["tags"] = _clean_tags(data.tags)
         metadata["imported"] = True
 
         assembly = Assembly(
@@ -2051,6 +2087,7 @@ class AssemblyService:
             components_to_create.append(
                 Component(
                     assembly_id=assembly.id,
+                    cost_item_id=pc["cost_item_id"],
                     description=pc["description"],
                     resource_type=pc["resource_type"],
                     factor=str(pc["factor"]),
@@ -2115,7 +2152,7 @@ class AssemblyService:
         assembly = await self.get_assembly(assembly_id)
         metadata = dict(assembly.metadata_) if assembly.metadata_ else {}
         # Deduplicate and clean tags
-        clean_tags = list(dict.fromkeys(t.strip().lower() for t in tags if t.strip()))
+        clean_tags = _clean_tags(tags)
         metadata["tags"] = clean_tags
         await self.assembly_repo.update_fields(assembly_id, metadata_=metadata)
 

@@ -71,11 +71,25 @@ export function getAllModuleRoutes(): ModuleRoute[] {
   return MODULE_REGISTRY.flatMap((m) => m.routes);
 }
 
-/** Nav items for a specific sidebar group id. */
-export function getModuleNavItems(groupId: string): ModuleNavItem[] {
+/** A nav item together with the id of the manifest that registered it. */
+export type RegisteredNavItem = ModuleNavItem & { moduleId?: string };
+
+/** Nav items for a specific sidebar group id, each tagged with its manifest id. */
+export function getModuleNavItems(groupId: string): RegisteredNavItem[] {
   return MODULE_REGISTRY.flatMap((m) =>
-    m.navItems.filter((item) => item.group === groupId),
+    m.navItems
+      .filter((item) => item.group === groupId)
+      .map((item) => ({ ...item, moduleId: m.id })),
   );
+}
+
+/**
+ * Module id used for the enabled/disabled gate of a nav item: the id of the
+ * manifest that registered it, falling back to the labelKey segment and then
+ * to the route path only when no manifest id is known.
+ */
+export function navItemModuleId(item: RegisteredNavItem): string {
+  return item.moduleId ?? item.labelKey.split('.')[1] ?? item.to.slice(1);
 }
 
 /** Default enabled state for all modules (used by useModuleStore). */

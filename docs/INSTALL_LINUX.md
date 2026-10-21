@@ -246,6 +246,16 @@ Note: installs set up before the rename may still run under the legacy unit name
 
 ---
 
+## 6b. Allowing extra browser connections (CSP)
+
+The application sends a `Content-Security-Policy` header that limits which hosts the browser may call. To let the pages reach one more host, for example a self-hosted map tile server, set `OE_CSP_CONNECT_SRC_EXTRA` to a comma-separated list of origins (add it to `backend/.env` or to the `Environment=` lines of the service above):
+
+```bash
+OE_CSP_CONNECT_SRC_EXTRA=https://tiles.example.com,https://maps.example.com:8443
+```
+
+Only `https://host[:port]` origins and `http://localhost[:port]` are accepted. Paths, wildcards and other plain-http hosts are logged once at startup and dropped. Restart the service after changing it.
+
 ## 7. BIM/CAD converters (.rvt / .ifc / .dwg)
 
 Native CAD/BIM files are turned into element data (and, for RVT, 3D geometry) by

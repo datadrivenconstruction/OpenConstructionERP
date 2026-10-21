@@ -317,6 +317,11 @@ class Settings(BaseSettings):
     trusted_proxies: str = "127.0.0.0/8,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     allowed_origins: str = "http://localhost:5173"
+    # Extra origins appended to the CSP ``connect-src`` (comma-separated, e.g. a
+    # self-hosted tile server). Only ``https://host[:port]`` and
+    # ``http://localhost[:port]`` are accepted; others are logged and dropped.
+    # Env: OE_CSP_CONNECT_SRC_EXTRA.
+    csp_connect_src_extra: str = ""
     # Optional allowlist for self-hosted AI provider endpoints (Ollama / vLLM).
     # Empty (default) permits any loopback / private address so a local runtime
     # works out of the box, while link-local and cloud-metadata addresses stay

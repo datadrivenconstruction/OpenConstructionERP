@@ -9,7 +9,8 @@ No business logic - pure data access.
 import logging
 import uuid
 
-from sqlalchemy import String, delete, func, select, update
+from sqlalchemy import String, Text, cast, delete, func, select, update
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload, selectinload
@@ -18,6 +19,17 @@ from app.core.text_search import free_text_filter
 from app.modules.assemblies.models import Assembly, AssemblyTemplate, Component
 
 logger = logging.getLogger(__name__)
+
+
+def _has_tag(tags_json: object, tag: str):
+    """Exact, case-insensitive membership of ``tag`` in a JSON array of tags.
+
+    Lowercasing the serialised array keeps rows written before tags were
+    normalised matchable, and ``@>`` containment compares whole elements, so
+    ``ab`` never matches ``abc``.
+    """
+    lowered = func.lower(cast(tags_json, Text))
+    return cast(lowered, JSONB).contains([tag.strip().lower()])
 
 
 class AssemblyRepository:
@@ -99,10 +111,7 @@ class AssemblyRepository:
             base = base.where(Assembly.unit == unit)
 
         if tag:
-            # Filter by tag in metadata JSON - uses LIKE on the JSON string
-            # which works for both SQLite and PostgreSQL
-            tag_pattern = f"%{tag.strip().lower()}%"
-            base = base.where(Assembly.metadata_.cast(String).ilike(tag_pattern))
+            base = base.where(_has_tag(cast(Assembly.metadata_, JSONB)["tags"], tag))
 
         if project_id is not None:
             base = base.where(Assembly.project_id == project_id)
@@ -301,8 +310,7 @@ class AssemblyTemplateRepository:
             base = base.where(AssemblyTemplate.category == category)
 
         if tag:
-            tag_pattern = f"%{tag.strip()}%"
-            base = base.where(AssemblyTemplate.tags.cast(String).ilike(tag_pattern))
+            base = base.where(_has_tag(AssemblyTemplate.tags, tag))
 
         # Classification filters: DIN 276 KG and MasterFormat division
         # are stored as values in the JSON `classification` blob. LIKE on
