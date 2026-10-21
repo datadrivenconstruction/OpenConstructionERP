@@ -2808,7 +2808,7 @@ class VariationsService:
             clean_reason = (reason or "").strip()
             if len(clean_reason) < 3:
                 raise HTTPException(
-                    status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="A reason is required to void a variation order.",
                 )
             fields["metadata_"] = {
