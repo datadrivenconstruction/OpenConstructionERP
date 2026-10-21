@@ -481,7 +481,7 @@ Then enable it under Modules & Marketplace, System Modules.
 2. **No IfcOpenShell, no native IFC.** CAD/BIM is always converted through DDC cad2data into the canonical JSON format.
 3. **Validation is not optional.** Any module that ingests data must declare validation rules.
 4. **AI-augmented, human-confirmed.** AI suggestions must show a confidence score and require user confirmation before mutating data.
-5. **AGPL-3.0 compliance.** Contributions are dual-licensed (AGPL + Commercial). First-time contributors sign a CLA via bot.
+5. **AGPL-3.0 compliance.** The platform is dual-licensed (AGPL + Commercial). There is no CLA and no external pull requests: modules are distributed as their own packages.
 
 ---
 
@@ -548,9 +548,8 @@ zip -r ~/my-module-0.1.0.zip my_module
 # 2. Share the zip; recipients install with:
 openconstructionerp module install ~/my-module-0.1.0.zip
 
-# 3. Optional - publish on the marketplace by opening a PR against
-#    github.com/datadrivenconstruction/OpenConstructionERP-modules
-#    adding your zip URL + manifest summary
+# 3. Distribute the zip yourself (your own site or package index).
+#    There is no central module repository to submit to.
 ```
 
 Always bump `manifest.version` on every release; the installer uses it to decide when to upgrade an existing install.

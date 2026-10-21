@@ -51,7 +51,7 @@ import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useNavPendingStore } from '@/shared/lib/navigationProgress';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
-import { getModuleNavItems } from '@/modules/_registry';
+import { getModuleNavItems, navItemModuleId } from '@/modules/_registry';
 import { APP_VERSION } from '@/shared/lib/version';
 import { useSidebarBadges } from '@/shared/hooks/useSidebarBadges';
 import { useHiddenModules } from '@/shared/hooks/useHiddenModules';
@@ -849,7 +849,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       const groupHiddenInSimple = Boolean(group.hideInSimple) && !showAdvancedRows;
       const dynamicItems = getModuleNavItems(group.dynamicGroupKey ?? group.id).map((mi) => ({
         to: mi.to,
-        moduleKey: mi.to.slice(1),
+        moduleKey: navItemModuleId(mi),
         advancedOnly: mi.advancedOnly,
         adminOnly: false,
       }));
@@ -1080,14 +1080,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const groupItems = (group: NavGroup): NavItem[] => {
     const dynamicItems: NavItem[] = getModuleNavItems(group.dynamicGroupKey ?? group.id)
       .filter((mi) => {
-        const moduleId = mi.labelKey.split('.')[1] ?? mi.to.slice(1);
-        return isModuleEnabled(moduleId);
+        return isModuleEnabled(navItemModuleId(mi));
       })
       .map((mi) => ({
         labelKey: mi.labelKey,
         to: mi.to,
         icon: mi.icon,
-        moduleKey: mi.to.slice(1), // e.g. '/sustainability' → 'sustainability'
+        moduleKey: navItemModuleId(mi),
         advancedOnly: mi.advancedOnly,
       }));
     return [...group.items, ...dynamicItems];

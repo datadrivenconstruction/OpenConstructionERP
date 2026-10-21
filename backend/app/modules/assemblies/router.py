@@ -34,6 +34,7 @@ from app.modules.assemblies.schemas import (
     ApplyToBOQRequest,
     AssemblyCreate,
     AssemblyImportRequest,
+    AssemblyImportResponse,
     AssemblyResponse,
     AssemblySearchResponse,
     AssemblyTemplateResponse,
@@ -758,7 +759,7 @@ async def export_assembly(
 
 @router.post(
     "/import/",
-    response_model=AssemblyResponse,
+    response_model=AssemblyImportResponse,
     status_code=201,
     dependencies=[Depends(RequirePermission("assemblies.create"))],
 )
@@ -766,14 +767,18 @@ async def import_assembly(
     data: AssemblyImportRequest,
     user_id: CurrentUserId,
     service: AssemblyService = Depends(_get_service),
-) -> AssemblyResponse:
+) -> AssemblyImportResponse:
     """Import an assembly from a JSON payload.
 
     Creates a new assembly with all components from the exported format.
     If the code already exists, a suffix is appended to make it unique.
+    Components keep their cost item link when the item exists and is active;
+    otherwise they import unlinked and a line is added to ``warnings``.
     """
-    assembly = await service.import_assembly(data.assembly, owner_id=user_id)
-    return _assembly_to_response(assembly, component_count=await _component_count_of(service, assembly))
+    warnings: list[str] = []
+    assembly = await service.import_assembly(data.assembly, owner_id=user_id, warnings=warnings)
+    base = _assembly_to_response(assembly, component_count=await _component_count_of(service, assembly))
+    return AssemblyImportResponse(**base.model_dump(), warnings=warnings)
 
 
 # ── Tags ─────────────────────────────────────────────────────────────────────

@@ -340,7 +340,13 @@ class AssemblyUpdate(BaseModel):
     is_template: bool | None = None
     project_id: UUID | None = None
     is_active: bool | None = None
+    # Merged into the stored metadata key by key (a key sent as ``null`` is
+    # removed); it never replaces the whole object, so tags and import markers
+    # survive a PATCH of another key.
     metadata: dict[str, Any] | None = None
+    # When given, replaces ``metadata.tags``. Normalised on write: stripped,
+    # lowercased, de-duplicated, empty entries dropped.
+    tags: list[str] | None = Field(default=None, max_length=100)
 
     @field_validator("regional_factors", mode="before")
     @classmethod
@@ -534,6 +540,12 @@ class AssemblyImportRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     assembly: AssemblyExport
+
+
+class AssemblyImportResponse(AssemblyResponse):
+    """Imported assembly plus one warning per component imported unlinked."""
+
+    warnings: list[str] = Field(default_factory=list)
 
 
 # ── Assembly Library templates (v3.13.0 - Slice 1) ───────────────────────────

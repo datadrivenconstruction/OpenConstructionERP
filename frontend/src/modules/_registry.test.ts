@@ -4,6 +4,7 @@ import {
   MODULE_REGISTRY,
   getAllModuleRoutes,
   getModuleNavItems,
+  navItemModuleId,
   getModuleDefaults,
   getModulesByCategory,
 } from './_registry';
@@ -252,5 +253,27 @@ describe('getModulesByCategory', () => {
     expect(grouped['regional']!.length).toBeGreaterThanOrEqual(1);
     const ids = grouped['regional']!.map((m) => m.id);
     expect(ids).toContain('regional-exchange');
+  });
+});
+
+describe('navItemModuleId', () => {
+  it('prefers the id of the manifest that registered the item', () => {
+    const item = { labelKey: 'nav.my_feature', to: '/my-route', icon: null, group: 'grp_x', moduleId: 'my-module' };
+    expect(navItemModuleId(item)).toBe('my-module');
+  });
+
+  it('falls back to the labelKey segment, then to the route', () => {
+    expect(navItemModuleId({ labelKey: 'nav.sustainability', to: '/s', icon: null, group: 'g' })).toBe('sustainability');
+    expect(navItemModuleId({ labelKey: 'plain', to: '/route', icon: null, group: 'g' })).toBe('route');
+  });
+
+  it('tags every registered nav item with its manifest id', () => {
+    for (const m of MODULE_REGISTRY) {
+      for (const g of new Set(m.navItems.map((i) => i.group))) {
+        for (const item of getModuleNavItems(g).filter((i) => i.to === m.navItems[0].to)) {
+          expect(item.moduleId).toBeTruthy();
+        }
+      }
+    }
   });
 });

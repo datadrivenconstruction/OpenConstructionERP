@@ -33,7 +33,7 @@ import type { ModuleManifest } from '../_types';
 const MyFeatureModule = lazy(() => import('./MyFeatureModule'));
 
 export const manifest: ModuleManifest = {
-  id: 'my-feature',                               // unique, kebab-case
+  id: 'my-feature',                               // unique, kebab-case; the sidebar gates the row on this id
   name: 'My Feature',                             // display name
   description: 'Short description of what it does',
   version: '1.0.0',                               // semver
@@ -52,10 +52,10 @@ export const manifest: ModuleManifest = {
 
   navItems: [
     {
-      labelKey: 'nav.my_feature',                  // i18n key (MUST be registered — see Step 5)
+      labelKey: 'nav.my_feature',                  // i18n key (MUST exist in every locale file — see Step 5)
       to: '/my-feature',
       icon: Sparkles,
-      group: 'tools',                              // sidebar group
+      group: 'grp_estimating',                     // a sidebar group id: one of the `grp_*` ids in app/layout/navCatalog.ts
       advancedOnly: true,                          // only visible in Advanced mode
     },
   ],
@@ -123,23 +123,16 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
 ];
 ```
 
-Edit `frontend/src/app/i18n.ts` — add the nav key in each language's translation block:
+Add the nav key and the module's `name` and `description` keys to every locale file (`frontend/src/app/locales/<lng>.ts`). These bundles are several MB each, so never edit them by hand: use the CLI.
 
-```ts
-// English section (~line 900)
-'nav.my_feature': 'My Feature',
-
-// German section (~line 1390)
-'nav.my_feature': 'Meine Funktion',
-
-// French section (~line 1570)
-'nav.my_feature': 'Ma fonctionnalité',
-
-// Russian section (~line 2590)
-'nav.my_feature': 'Моя функция',
+```bash
+python scripts/i18n.py add nav.my_feature --en "My Feature" --de "Meine Funktion" --fr "Ma fonctionnalité"
+python scripts/i18n.py missing --lang de --prefix nav.my_feature   # check what is still untranslated
 ```
 
-> **Why both places?** The `translations` field in the manifest is loaded asynchronously via dynamic `import()`. The sidebar renders synchronously at startup. If the nav key isn't in `i18n.ts`, users see the raw key for a split second. Always add `nav.*` keys to `i18n.ts` directly.
+> **Why locale files and not only `translations`?** The `translations` field in the manifest is loaded asynchronously via dynamic `import()`. The sidebar renders synchronously at startup, so a `nav.*` key that exists only in the manifest shows as a raw key for a moment. The Modules page renders each card's name and description in every locale the page toggles, and `src/features/modules/__tests__/ModuleTogglesSection.i18n.test.tsx` fails when one is missing.
+
+> **Ids that must agree.** The sidebar enables or hides a module row by the `id` of the manifest that registered it. If a row never appears, check that the `id` is the one the Modules page toggles, and that `group` is a real `grp_*` id from `app/layout/navCatalog.ts`; an unknown group id drops the row silently. The `category` field is the Modules page tab, not the sidebar group.
 
 ### Step 6: Done!
 
@@ -324,8 +317,8 @@ const [activeTab, setActiveTab] = useState<'import' | 'export'>('import');
 
 | Key prefix | Where to define | Why |
 |-----------|----------------|-----|
-| `nav.*` | `i18n.ts` (main) | Sidebar renders synchronously at startup |
-| `modules.*` | `i18n.ts` (main) OR manifest `translations` | Module listing page |
+| `nav.*` | locale files (`app/locales/<lng>.ts`, via `scripts/i18n.py`) | Sidebar renders synchronously at startup |
+| `modules.*` | locale files OR manifest `translations` (every locale the Modules page offers) | Module listing page |
 | `yourmodule.*` | manifest `translations` | Module-specific strings |
 
 ### Minimum languages
@@ -403,7 +396,7 @@ Before submitting your module:
 - [ ] Page component uses `export default` (required for React.lazy)
 - [ ] `index.ts` exports manifest
 - [ ] Module registered in `_registry.ts`
-- [ ] `nav.*` key added to all 4 language blocks in `i18n.ts`
+- [ ] `nav.*` key and the module name/description keys added to every locale file with `scripts/i18n.py`
 - [ ] `defaultEnabled: false` (users opt-in)
 - [ ] `depends` lists any required modules
 - [ ] Tests pass: `npx vitest run src/modules/your-module`
