@@ -30,6 +30,7 @@ import {
 import { Button } from '@/shared/ui';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
 import { detectCountry } from '@/app/i18n';
+import { fmtDate, fmtList } from '@/shared/lib/formatters';
 import { packNameSlug, packSummary } from '@/shared/lib/regionalPack';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -220,14 +221,10 @@ function ActivePackSpotlight({
     if (!applied?.applied_at) return null;
     const d = new Date(applied.applied_at);
     if (Number.isNaN(d.getTime())) return null;
-    try {
-      return new Intl.DateTimeFormat(i18n.language || 'en', { dateStyle: 'medium' }).format(d);
-    } catch {
-      return null;
-    }
+    return fmtDate(applied.applied_at, { dateStyle: 'medium' });
   }, [applied?.applied_at, i18n.language]);
   const accent = pack.branding.accent_color ?? pack.branding.primary_color;
-  const languages = entry.languages.map((l) => languageName(l) ?? l.toUpperCase()).join(', ');
+  const languages = fmtList(entry.languages.map((l) => languageName(l) ?? l.toUpperCase()));
 
   return (
     <section

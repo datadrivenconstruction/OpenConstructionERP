@@ -125,9 +125,9 @@ const litHrefs = (): string[] =>
 
 const moreExpanded = () => screen.getByTestId('sidebar-more-modules').getAttribute('aria-expanded');
 
-// The Learn card (Videos, Cases) sits above everything else in every mode,
+// The Learn card (Videos, Cases, Packs) sits above everything else in every mode,
 // workspace included, until the user hides it.
-const LEARN = ['/videos', '/cases'];
+const LEARN = ['/videos', '/cases', '/packs'];
 
 const GC_WORKSPACE = [
   '/',
@@ -424,7 +424,8 @@ describe('without a workspace, or in Advanced mode', () => {
     expect(screen.queryByTestId('sidebar-workspace')).toBeNull();
     expect(screen.queryByTestId('sidebar-more-modules')).toBeNull();
     const hrefs = menuHrefs();
-    expect(hrefs.slice(0, 7)).toEqual([...LEARN, '/', '/projects', '/files', '/inbox', '/timeline']);
+    const head = [...LEARN, '/', '/projects', '/files', '/inbox', '/timeline'];
+    expect(hrefs.slice(0, head.length)).toEqual(head);
     for (const route of ['/subcontractors', '/changeorders', '/finance', '/fx', '/geo']) {
       expect(hrefs).toContain(route);
     }
