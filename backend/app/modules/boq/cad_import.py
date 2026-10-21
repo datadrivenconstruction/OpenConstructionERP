@@ -23,14 +23,15 @@ from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
 
-from app.core.converter_source import PACKAGES, SUPPORTED_PLATFORM
+from app.core.converter_source import PACKAGES, all_packages, host_packages, host_platform_key, install_dir_name
 
 logger = logging.getLogger(__name__)
 
-# Converter executables, relative to a format's install folder. The converters
-# are the packages of the DDC 2026.10 release (``app.core.converter_source``),
-# published for Windows 10/11 x64 only. The IFC package has no executable of its
-# own: its entry is the bundled Python, which runs ``converter.py``.
+# Converter executables of the Windows packages, relative to a format's install
+# folder. The converters are the packages of the DDC 2026.10 release
+# (``app.core.converter_source``); the Windows IFC package has no executable of
+# its own: its entry is the bundled Python, which runs ``converter.py``. The
+# Linux and macOS packages are found through ``host_packages``.
 CONVERTERS: dict[str, str] = {fmt: pkg.exe_rel for fmt, pkg in PACKAGES.items()}
 
 SUPPORTED_CAD_EXTENSIONS: set[str] = set(CONVERTERS.keys())
@@ -145,36 +146,39 @@ def missing_companion_files(exe_path: Path) -> list[str]:
     else. The check is per package: the IFC converter is a script run by the
     bundled Python, so its companion is that script.
     """
-    root = _install_root_of(exe_path)
-    if root is None:
+    match = _package_of(exe_path)
+    if match is None:
         return []
-    for pkg in PACKAGES.values():
-        if (
-            exe_path.name.lower() == Path(pkg.exe_rel).name.lower()
-            and exe_path.parent.name == Path(pkg.exe_rel).parent.name
-        ):
-            return [name for name in pkg.companions if not (root / name).exists()]
-    return []
+    root, pkg = match
+    return [name for name in pkg.companions if not (root / name).exists()]
+
+
+def _package_of(exe_path: Path) -> "tuple[Path, Any] | None":
+    """``(install folder, package)`` an executable belongs to, by its path below the folder."""
+    parts = [p.lower() for p in exe_path.parts]
+    for pkg in all_packages():
+        rel = [p.lower() for p in Path(pkg.exe_rel).parts]
+        if len(parts) > len(rel) and parts[-len(rel) :] == rel:
+            return exe_path.parents[len(rel) - 1], pkg
+    return None
 
 
 def _install_root_of(exe_path: Path) -> Path | None:
-    """Install folder (``<fmt>_windows``) an executable of a package belongs to."""
-    for pkg in PACKAGES.values():
-        rel = Path(pkg.exe_rel)
-        if exe_path.name.lower() == rel.name.lower() and exe_path.parent.name == rel.parent.name:
-            return exe_path.parents[len(rel.parts) - 1]
-    return None
+    """Install folder (``<fmt>_windows``, ``<fmt>_<os>-<arch>``) an executable of a package belongs to."""
+    match = _package_of(exe_path)
+    return match[0] if match else None
 
 
 def find_converter(extension: str) -> Path | None:
     """Find the converter executable for a given file extension.
 
-    Looks for the package's executable (``CONVERTERS[extension]``, a path
-    relative to the install folder) in, in order: ``OPENESTIMATOR_CONVERTERS_DIR``,
-    the desktop installer's bundled folder (``OE_BUNDLED_CONVERTERS_DIR``), the
-    per-format install folder the auto-installer writes
-    (``~/.openestimator/converters/{extension}_windows``), a DDC toolkit checkout,
-    and the other ``CONVERTER_SEARCH_PATHS``. A folder holding the executable
+    Looks for the executable of this host's package (on Linux and macOS
+    ``rvt-decode`` and friends, then the Windows layout ``CONVERTERS[extension]``),
+    a path relative to the install folder, in, in order: the per-format install
+    folder the auto-installer writes (``~/.openestimator/converters/{extension}_windows``
+    or ``{extension}_<os>-<arch>``), ``OPENESTIMATOR_CONVERTERS_DIR``, the desktop
+    installer's bundled folder (``OE_BUNDLED_CONVERTERS_DIR``), a DDC toolkit
+    checkout, and the other ``CONVERTER_SEARCH_PATHS``. A folder holding the executable
     without the files that belong beside it is a partial install and is returned
     only when there is nothing better, so this never answers ``None`` where it
     used to answer a path; reporting the partial folder is the health check's job.
@@ -191,6 +195,11 @@ def find_converter(extension: str) -> Path | None:
     exe_rel = CONVERTERS.get(extension)
     if not exe_rel:
         return None
+    host_key = host_platform_key()
+    host_pkg = host_packages(host_key).get(extension)
+    exe_rels = [exe_rel]
+    if host_pkg is not None and host_pkg.exe_rel != exe_rel:
+        exe_rels.insert(0, host_pkg.exe_rel)
 
     search_paths = list(CONVERTER_SEARCH_PATHS)
 
@@ -211,22 +220,30 @@ def find_converter(extension: str) -> Path | None:
     bundled_dir = os.environ.get("OE_BUNDLED_CONVERTERS_DIR")
     if bundled_dir:
         bundled_root = Path(bundled_dir)
-        for cand in (bundled_root, bundled_root / f"{extension}_windows"):
+        bundled = [bundled_root, bundled_root / f"{extension}_windows"]
+        if host_pkg is not None and host_key:
+            bundled.append(bundled_root / install_dir_name(extension, host_key))
+        for cand in bundled:
             if cand not in search_paths:
                 search_paths.insert(0, cand)
 
-    per_format_windows = Path.home() / ".openestimator" / "converters" / f"{extension}_windows"
-    if per_format_windows not in search_paths:
-        search_paths.insert(0, per_format_windows)
+    installed_root = Path.home() / ".openestimator" / "converters"
+    per_format = [installed_root / f"{extension}_windows"]
+    if host_pkg is not None and host_key:
+        per_format.append(installed_root / install_dir_name(extension, host_key))
+    for cand in per_format:
+        if cand not in search_paths:
+            search_paths.insert(0, cand)
 
     partial: Path | None = None
     for search_path in search_paths:
-        exe_path = search_path / exe_rel
-        if exe_path.exists() and exe_path.stat().st_size > 1024:
-            if not missing_companion_files(exe_path):
-                return exe_path
-            if partial is None:
-                partial = exe_path
+        for rel in exe_rels:
+            exe_path = search_path / rel
+            if exe_path.is_file() and exe_path.stat().st_size > 1024:
+                if not missing_companion_files(exe_path):
+                    return exe_path
+                if partial is None:
+                    partial = exe_path
 
     if partial is not None:
         logger.warning(
@@ -250,7 +267,7 @@ def find_converter(extension: str) -> Path | None:
 # action required.
 #
 # The actual download is delegated to the SAME hardened routine the
-# Install endpoint uses (``takeoff.router._download_converter_files_windows``)
+# Install endpoint uses (``takeoff.router._download_converter_package``)
 # so there is exactly one place that talks to the network, applies the
 # host allow-list / size caps, verifies the PE header, and rolls back a
 # partial download. ``ensure_converter`` adds the missing pieces on top:
@@ -317,18 +334,17 @@ class ConverterUnavailableError(RuntimeError):
 
 
 def converter_supported_here() -> bool:
-    """True when the DDC converter release has a build for this host."""
-    return sys.platform == SUPPORTED_PLATFORM
+    """True when the DDC converter release has a build for this host (Windows x64, Linux or macOS x64/arm64)."""
+    return bool(host_packages())
 
 
 def converter_platform_error(fmt: str) -> ConverterUnavailableError:
     """The error for a host that has no converter build, with the next step in it."""
     fmt = fmt.lower().lstrip(".")
     return ConverterUnavailableError(
-        f"The .{fmt.upper()} converter runs on Windows 10/11 x64 only; Linux and macOS builds are "
-        f"announced by DDC but not released yet. Run OpenConstructionERP on Windows to convert "
-        f".{fmt} files. DXF drawings are read on every platform, and IFC models open in BIM Hub "
-        f"with the built-in reader.",
+        f"There is no .{fmt.upper()} converter build for this server's operating system or processor. "
+        f"Builds exist for Windows x64, Linux x64 and arm64, and macOS x64 and arm64. DXF drawings are "
+        f"read on every platform, and IFC models open in BIM Hub with the built-in reader.",
         code="converter_platform_unsupported",
         params={"format": fmt.upper()},
     )
@@ -491,12 +507,11 @@ def ensure_converter(fmt: str) -> Path:
     if existing is not None:
         return existing
 
-    # The 2026.10 converters are published for Windows 10/11 x64 only; Linux
-    # and macOS builds are announced upstream but do not exist yet.
+    # The release has builds for Windows x64 and Linux / macOS x64 and arm64.
     if not converter_supported_here():
         raise converter_platform_error(fmt)
 
-    # Windows auto-downloads under a per-format lock so concurrent
+    # The download runs under a per-format lock so concurrent
     # uploads of the same format don't both fetch into the same directory. The
     # lock is cross-platform (Windows O_EXCL / POSIX flock).
     try:
@@ -516,7 +531,7 @@ def ensure_converter(fmt: str) -> Path:
             # cold-download path, is cheap and cycle-free.
             try:
                 from app.modules.takeoff.router import (
-                    _download_converter_files_windows as _download_converter,
+                    _download_converter_package as _download_converter,
                 )
             except Exception as exc:  # noqa: BLE001 - import failure must be actionable
                 raise ConverterUnavailableError(f"Could not load the converter installer for .{fmt}: {exc}") from exc
@@ -974,8 +989,9 @@ def detect_converter_version(extension: str) -> dict[str, str | None]:
     if exe is None:
         return result
     result["binary_path"] = str(exe)
-    pkg = PACKAGES.get(extension)
-    root = _install_root_of(exe)
+    match = _package_of(exe)
+    pkg = match[1] if match else PACKAGES.get(extension)
+    root = match[0] if match else None
     if root is not None:
         from app.core.converter_package import read_stamp
 

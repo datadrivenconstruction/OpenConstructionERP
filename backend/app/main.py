@@ -3929,12 +3929,14 @@ def create_app() -> FastAPI:
         """
         import sys
 
+        from app.core.converter_source import host_packages
         from app.modules.boq.cad_import import find_converter
 
-        # The converter release is published for Windows only, so there is
-        # nothing to compare elsewhere - return a benign, non-alarming result
-        # so the dashboard never shows a false "update available" banner.
-        if sys.platform != "win32":
+        # The release has builds for Windows x64 and Linux / macOS x64 and arm64.
+        # Any other host has nothing to compare - return a benign result so the
+        # dashboard never shows a false "update available" banner.
+        packages = host_packages()
+        if not packages:
             return {
                 "network_ok": True,
                 "any_outdated": False,
@@ -3945,10 +3947,7 @@ def create_app() -> FastAPI:
                 "converters": [],
                 "results": [],
                 "platform": sys.platform,
-                "note": (
-                    "The DDC converters are published for Windows 10/11 x64 only; "
-                    "this platform has no converter build to check."
-                ),
+                "note": "The DDC converter release has no build for this operating system or processor.",
             }
 
         # Repo, tag and the pinned packages come from
@@ -3961,7 +3960,6 @@ def create_app() -> FastAPI:
         # ships disabled in some configurations).
         from app.core.converter_package import read_stamp
         from app.core.converter_source import (
-            PACKAGES,
             release_asset_url,
             release_page_url,
             resolve_converter_repo,
@@ -3978,7 +3976,7 @@ def create_app() -> FastAPI:
 
         results: list[dict[str, Any]] = []
         any_outdated = False
-        for ext, pkg in PACKAGES.items():
+        for ext, pkg in packages.items():
             path = find_converter(ext)
             installed = path is not None
             local_sha: str | None = None

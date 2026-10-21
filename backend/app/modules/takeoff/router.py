@@ -63,8 +63,11 @@ from app.core.converter_source import (
     DEFAULT_CONVERTER_REPO,
     DEFAULT_CONVERTER_TAG,
     PACKAGES,
+    WINDOWS_KEY,
     ConverterPackage,
-    package_exe,
+    host_packages,
+    host_platform_key,
+    install_dir_name,
     parse_sha256sums,
     release_asset_url,
     release_page_url,
@@ -135,14 +138,36 @@ router = APIRouter(tags=["takeoff"])
 
 #
 # Converter metadata. The converters are the packages of the DDC converter
-# release (see ``app.core.converter_source``): one portable archive per format,
-# unpacked into ``~/.openestimator/converters/{format}_windows/``. There is no
-# DGN converter in this generation.
+# release (see ``app.core.converter_source``): one archive per format
+# and host, unpacked into ``~/.openestimator/converters/{format}_windows/`` on
+# Windows and ``{format}_<os>-<arch>/`` on Linux and macOS. There is no DGN
+# converter in this generation. The rows describe the Windows packages;
+# ``_host_meta`` overlays the package of the running host.
+_DESCRIPTIONS: dict[str, str] = {
+    "dwg": (
+        "Import DWG drawings ({range}). Extracts entities, layers and blocks into structured element tables "
+        "for cost estimation, and a DXF for the drawing viewer."
+    ),
+    "rvt": (
+        "Native RVT reader ({range}). Extracts saved element properties and 3D geometry (GLB) without a "
+        "proprietary CAD vendor license. Preview: geometry completeness is not certified."
+    ),
+    "ifc": (
+        "Import {range} files. Maps IFC entities to structured element tables with property and quantity set "
+        "extraction. Preview: no geometry is produced."
+    ),
+}
+
+
+def _describe(pkg: ConverterPackage) -> str:
+    return _DESCRIPTIONS[pkg.fmt].format(range=pkg.format_range.removeprefix("DWG "))
+
+
 _CONVERTER_META: list[dict[str, Any]] = [
     {
         "id": "dwg",
         "name": "DWG Converter",
-        "description": f"Import DWG drawings ({PACKAGES['dwg'].format_range.removeprefix('DWG ')}). Extracts entities, layers and blocks into structured element tables for cost estimation, and a DXF for the drawing viewer.",
+        "description": _describe(PACKAGES["dwg"]),
         "engine": "DDC DWG to Excel",
         "extensions": [".dwg"],
         "exe": "dwg2excel.exe",
@@ -154,7 +179,7 @@ _CONVERTER_META: list[dict[str, Any]] = [
     {
         "id": "rvt",
         "name": "RVT Converter",
-        "description": f"Native RVT reader ({PACKAGES['rvt'].format_range}). Extracts saved element properties and 3D geometry (GLB) without a proprietary CAD vendor license. Preview: geometry completeness is not certified.",
+        "description": _describe(PACKAGES["rvt"]),
         "engine": "DDC RVT Converter",
         "extensions": [".rvt", ".rfa"],
         "exe": "RVTconverter.exe",
@@ -166,7 +191,7 @@ _CONVERTER_META: list[dict[str, Any]] = [
     {
         "id": "ifc",
         "name": "IFC Import",
-        "description": f"Import {PACKAGES['ifc'].format_range} files. Maps IFC entities to structured element tables with property and quantity set extraction. Preview: no geometry is produced.",
+        "description": _describe(PACKAGES["ifc"]),
         "engine": "DDC IFC to Excel",
         "extensions": [".ifc", ".ifczip"],
         "exe": "python.exe",
@@ -190,6 +215,24 @@ _CONVERTER_ROW_ANONYMOUS_BLANKS = {"health_message": ""}
 #: snippet with directories in it. The counters and the stage are not host
 #: facts and stay.
 _INSTALL_PROGRESS_ANONYMOUS_BLANKS = {"path": None, "message": "", "error": "", "instructions": ""}
+
+
+def _host_meta(converter_id: str) -> dict[str, Any]:
+    """Facts of the package this host would install, and whether there is one."""
+    key = host_platform_key()
+    pkg = host_packages(key).get(converter_id)
+    if pkg is None:
+        return {"platform": key, "platform_supported": False}
+    return {
+        "platform": key,
+        "platform_supported": True,
+        "exe": Path(pkg.exe_rel).name,
+        "description": _describe(pkg),
+        "version": pkg.version,
+        "format_range": pkg.format_range,
+        "produces_geometry": pkg.produces_geometry,
+        "size_mb": round(pkg.size_bytes / 1024 / 1024, 1),
+    }
 
 
 @router.get("/converters/")
@@ -274,6 +317,7 @@ async def list_converters(verify: bool = False, user: OptionalUserPayload = None
         installed = path is not None
         entry: dict[str, Any] = {
             **meta,
+            **_host_meta(meta["id"]),
             "installed": installed,
         }
         if not installed:
@@ -369,8 +413,8 @@ async def verify_converter(converter_id: str) -> dict[str, Any]:
 # against the SHA-256 published with the release; see that module's docstring
 # for what is pinned and how to move the pin.
 #
-# The release is Windows 10/11 x64 only. Linux and macOS builds are announced
-# upstream but not published, so there is nothing to install on those hosts.
+# The release carries Windows x64 packages (``.zip``) and Linux / macOS x64 and
+# arm64 packages (``.tar.gz``); any other host has nothing to install.
 _DDC_DEFAULT_TAG = DEFAULT_CONVERTER_TAG
 _DDC_REPO = resolve_converter_repo()
 _DDC_TAG = resolve_converter_tag()
@@ -660,12 +704,12 @@ def _verify_pe_executable(path: Path) -> str | None:
 _MAX_REPORTED_FILES = 5
 
 
-def _fetch_release_checksums(repo: str, tag: str) -> dict[str, str]:
-    """Read ``SHA256SUMS.txt`` of the release into ``{asset: sha256}``."""
+def _fetch_release_checksums(repo: str, tag: str, asset: str = CHECKSUMS_ASSET) -> dict[str, str]:
+    """Read a checksum file of the release (``SHA256SUMS.txt`` by default) into ``{asset: sha256}``."""
     import urllib.error
     import urllib.request
 
-    url = release_asset_url(CHECKSUMS_ASSET, repo=repo, tag=tag)
+    url = release_asset_url(asset, repo=repo, tag=tag)
     _check_download_url_allowed(url)
     req = urllib.request.Request(url, headers={"User-Agent": "OpenConstructionERP-converter-installer"})
     try:
@@ -675,44 +719,71 @@ def _fetch_release_checksums(repo: str, tag: str) -> dict[str, str]:
                 _check_download_url_allowed(final_url)
             body = resp.read(1024 * 1024 + 1)
     except urllib.error.HTTPError as exc:
-        raise RuntimeError(f"Could not read {CHECKSUMS_ASSET} of release {tag}: HTTP {exc.code}") from exc
+        raise RuntimeError(f"Could not read {asset} of release {tag}: HTTP {exc.code}") from exc
     except (urllib.error.URLError, TimeoutError) as exc:
-        raise RuntimeError(f"Could not reach GitHub to read {CHECKSUMS_ASSET} of release {tag}: {exc}") from exc
+        raise RuntimeError(f"Could not reach GitHub to read {asset} of release {tag}: {exc}") from exc
     if len(body) > 1024 * 1024:
-        raise RuntimeError(f"{CHECKSUMS_ASSET} of release {tag} is implausibly large")
+        raise RuntimeError(f"{asset} of release {tag} is implausibly large")
     return parse_sha256sums(body.decode("utf-8", errors="replace"))
 
 
 def _expected_package_digest(pkg: ConverterPackage, repo: str, tag: str) -> str:
     """The SHA-256 a downloaded package must have.
 
-    The digest published in the release's ``SHA256SUMS.txt`` is authoritative
+    The digest published in the release's checksum file (``SHA256SUMS.txt`` for
+    Windows, ``SHA256SUMS-linux-macos.txt`` for Linux and macOS) is authoritative
     for a tag we do not pin. For the pinned tag it has to agree with the digest
     committed in ``converter_source`` as well, so that neither a tampered release
     page nor a stale constant can pass a wrong file.
     """
-    published = _fetch_release_checksums(repo, tag).get(pkg.asset)
+    published = _fetch_release_checksums(repo, tag, pkg.checksums_asset).get(pkg.asset)
     if published is None:
-        # The release lists its assets in SHA256SUMS.txt; one it no longer
+        # The release lists its assets in its checksum files; one it no longer
         # lists was removed or replaced upstream.
         raise ConverterPackageMissingError(pkg.asset, tag, repo)
     if tag == DEFAULT_CONVERTER_TAG and repo == DEFAULT_CONVERTER_REPO:
         if published != pkg.sha256:
             raise RuntimeError(
-                f"SHA256SUMS.txt of release {tag} lists {published} for {pkg.asset}, "
+                f"{pkg.checksums_asset} of release {tag} lists {published} for {pkg.asset}, "
                 f"but this build pins {pkg.sha256}. Refusing to install."
             )
         return pkg.sha256
     return published
 
 
-def _download_converter_files_windows(converter_id: str, *, clean: bool = False) -> Path:
-    """Install a Windows converter package into the per-format install folder.
+_ELF_MAGIC = b"\x7fELF"
+_MACHO_MAGICS = {
+    b"\xcf\xfa\xed\xfe",
+    b"\xce\xfa\xed\xfe",
+    b"\xfe\xed\xfa\xcf",
+    b"\xfe\xed\xfa\xce",
+    b"\xca\xfe\xba\xbe",
+}
 
-    Downloads the portable ``.zip`` of the converter from the pinned GitHub
-    release, checks its SHA-256 against the release's ``SHA256SUMS.txt``,
-    unpacks it into ``~/.openestimator/converters/{format}_windows/`` and
-    checks that the executable is a well-formed PE file.
+
+def _verify_posix_executable(path: Path, platform_key: str) -> str | None:
+    """Reason ``path`` is not an executable of ``platform_key`` (ELF on Linux, Mach-O on macOS), or ``None``."""
+    try:
+        with path.open("rb") as fh:
+            head = fh.read(4)
+    except OSError as exc:
+        return f"could not read the binary: {exc}"
+    if platform_key.startswith("linux"):
+        return None if head == _ELF_MAGIC else "is not an ELF executable"
+    return None if head in _MACHO_MAGICS else "is not a Mach-O executable"
+
+
+def _download_converter_package(converter_id: str, *, clean: bool = False, platform_key: str | None = None) -> Path:
+    """Install the converter package of this host into the per-format install folder.
+
+    Downloads the package of the converter for ``platform_key`` (default: this
+    host) from the pinned GitHub release: the portable ``.zip`` on Windows, the
+    ``.tar.gz`` on Linux and macOS. Checks its SHA-256 against the pin and the
+    release's checksum file, unpacks it into
+    ``~/.openestimator/converters/{format}_windows/`` (Windows) or
+    ``{format}_<os>-<arch>/`` (Linux, macOS) and checks the executable: a
+    well-formed PE file on Windows, an ELF or Mach-O file with the execute bit
+    set elsewhere.
 
     The new folder is built next to the old one and swapped in at the end, so a
     failed download or a bad archive never leaves a half-installed converter
@@ -721,15 +792,18 @@ def _download_converter_files_windows(converter_id: str, *, clean: bool = False)
     generation) is replaced. ``clean`` additionally replaces a current install.
 
     Returns the path to the installed executable. Raises ``RuntimeError`` if the
-    download, the digest check or the unpacking fails.
+    download, the digest check or the unpacking fails, or the host has no build.
     """
     import shutil as _shutil
     import urllib.error
     import uuid
 
-    pkg = PACKAGES.get(converter_id)
+    key = platform_key or host_platform_key()
+    if key is None:
+        raise RuntimeError("The DDC converter release has no build for this operating system or processor.")
+    pkg = host_packages(key).get(converter_id)
     if pkg is None:
-        raise RuntimeError(f"There is no DDC converter package for {converter_id!r}.")
+        raise RuntimeError(f"There is no DDC converter package for {converter_id!r} on {key}.")
     repo, tag = _DDC_REPO, _DDC_TAG
 
     _set_install_progress(
@@ -747,11 +821,11 @@ def _download_converter_files_windows(converter_id: str, *, clean: bool = False)
         _clear_install_progress(converter_id)
         raise
 
-    dest_root = (_CONVERTER_INSTALL_DIR / f"{converter_id}_windows").resolve()
+    dest_root = (_CONVERTER_INSTALL_DIR / install_dir_name(converter_id, key)).resolve()
     stamp = read_stamp(dest_root) if dest_root.exists() else None
-    if not clean and stamp and stamp.get("sha256") == expected and package_exe(dest_root, converter_id).exists():
+    if not clean and stamp and stamp.get("sha256") == expected and (dest_root / pkg.exe_rel).exists():
         # Already the pinned package: nothing to fetch.
-        return package_exe(dest_root, converter_id)
+        return dest_root / pkg.exe_rel
 
     _CONVERTER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     archive = _CONVERTER_CACHE_DIR / f"{pkg.asset}.part"
@@ -776,13 +850,17 @@ def _download_converter_files_windows(converter_id: str, *, clean: bool = False)
                 file_count = extract_package(archive, staging, pkg)
             except PackageError as exc:
                 raise RuntimeError(str(exc)) from exc
-            exe_new = package_exe(staging, converter_id)
+            exe_new = staging / pkg.exe_rel
             if not exe_new.exists():
                 raise RuntimeError(f"Unpacked {file_count} files from {pkg.asset} but {pkg.exe_rel} is not among them.")
             for companion in pkg.companions:
                 if not (staging / companion).exists():
                     raise RuntimeError(f"{pkg.asset} is missing {companion}.")
-            pe_problem = _verify_pe_executable(exe_new)
+            if key == WINDOWS_KEY:
+                pe_problem = _verify_pe_executable(exe_new)
+            else:
+                pe_problem = _verify_posix_executable(exe_new, key)
+                exe_new.chmod(0o755)
             if pe_problem is not None:
                 raise RuntimeError(
                     f"{converter_id} install verification failed: {Path(pkg.exe_rel).name} {pe_problem}."
@@ -815,7 +893,7 @@ def _download_converter_files_windows(converter_id: str, *, clean: bool = False)
         except OSError:
             pass
 
-    exe_path = package_exe(dest_root, converter_id)
+    exe_path = dest_root / pkg.exe_rel
     logger.info("Installed %s converter %s %s -> %s", converter_id, pkg.name, pkg.version, exe_path)
     return exe_path
 
@@ -900,18 +978,17 @@ async def install_converter(
     fallback. This endpoint therefore returns immediately:
 
     * already installed (and not ``force``) -> ``installed: true`` synchronously
-    * not Windows -> ``platform_unsupported: true`` synchronously
+    * a host the release has no build for -> ``platform_unsupported: true`` synchronously
     * otherwise -> ``async_install: true`` while :func:`_install_converter_impl`
       runs in a background task. The frontend (and ``installBIMConverter`` in
       the client) polls ``/install-progress/`` for the terminal ``done`` /
       ``error`` stage, which carries the same fields the inline result used to.
 
-    On Windows the worker downloads the converter's package from the pinned
+    The worker downloads the host's package of the converter from the pinned
     GitHub release, verifies its SHA-256 and unpacks it. The endpoint itself never
     raises for a failed download - failures are reported through the progress feed.
     """
     import asyncio
-    import sys
 
     from app.modules.boq.cad_import import find_converter, missing_companion_files
 
@@ -959,24 +1036,10 @@ async def install_converter(
             ),
         }
 
-    # The release is Windows 10/11 x64 only. Linux and macOS builds are
-    # announced upstream but not published, so there is nothing to download:
-    # answer synchronously rather than spinning up a background task.
-    platform = sys.platform
-    if platform != "win32":
-        return {
-            "converter_id": converter_id,
-            "installed": False,
-            "platform": platform,
-            "platform_unsupported": True,
-            "message": (
-                f"{meta['name']} is published for Windows 10/11 x64 only; "
-                f"Linux and macOS builds are not available yet. Run "
-                f"OpenConstructionERP on Windows to convert {', '.join(meta['extensions'])} files, "
-                f"or convert the file to DXF or IFC elsewhere and upload that. "
-                f"DXF is read natively on every platform."
-            ),
-        }
+    # A host the release has no build for has nothing to download: answer
+    # synchronously rather than spinning up a background task.
+    if not host_packages().get(converter_id):
+        return _platform_unsupported_result(converter_id, meta)
 
     # Launch the heavy download/extract/smoke OFF the request and return at
     # once. Holding the HTTP request open for a multi-minute, multi-hundred-MB
@@ -1005,6 +1068,23 @@ async def install_converter(
             f"Downloading {meta['name']} in the background. This can take a few "
             f"minutes on a slow connection - the converter panel updates "
             f"automatically when it finishes."
+        ),
+    }
+
+
+def _platform_unsupported_result(converter_id: str, meta: dict[str, Any]) -> dict[str, Any]:
+    import sys
+
+    return {
+        "converter_id": converter_id,
+        "installed": False,
+        "platform": host_platform_key() or sys.platform,
+        "platform_unsupported": True,
+        "error_code": "converter_platform_unsupported",
+        "message": (
+            f"{meta['name']} has no build for this operating system or processor. Builds exist for "
+            f"Windows x64, Linux x64 and arm64, and macOS x64 and arm64. Convert the file to DXF or IFC "
+            f"elsewhere and upload that; DXF is read natively on every platform."
         ),
     }
 
@@ -1071,28 +1151,25 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
     upload can never wipe a working converter on a flaky connection. The
     """
     import asyncio
-    import sys
 
     meta = _META_BY_ID[converter_id]
     try:
-        platform = sys.platform
-        if platform == "win32":
-            # Windows: download files from the upstream GitHub repo. The
-            # download walks ~30-50 small-to-medium files (~30-50 MB total)
-            # so we offload to a thread to keep the FastAPI event loop
-            # responsive.
+        key = host_platform_key()
+        if host_packages(key).get(converter_id):
+            # Download the host's package from the release; offloaded to a
+            # thread to keep the FastAPI event loop responsive.
             try:
                 exe_path = await asyncio.to_thread(
-                    _download_converter_files_windows,
+                    _download_converter_package,
                     converter_id,
                     clean=force,
                 )
             except ConverterPackageMissingError as exc:
-                logger.warning("Windows converter install failed for %s: %s", converter_id, exc)
+                logger.warning("Converter install failed for %s: %s", converter_id, exc)
                 return {
                     "converter_id": converter_id,
                     "installed": False,
-                    "platform": "windows",
+                    "platform": key,
                     "error": str(exc),
                     "error_code": exc.code,
                     "asset": exc.asset,
@@ -1100,11 +1177,11 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
                     "message": f"{meta['name']}: {exc}",
                 }
             except RuntimeError as exc:
-                logger.warning("Windows converter install failed for %s: %s", converter_id, exc)
+                logger.warning("Converter install failed for %s: %s", converter_id, exc)
                 return {
                     "converter_id": converter_id,
                     "installed": False,
-                    "platform": "windows",
+                    "platform": key,
                     "error": str(exc),
                     "message": (
                         f"Could not install {meta['name']}: {exc}. "
@@ -1142,21 +1219,13 @@ async def _install_converter_impl(converter_id: str, force: bool, app: Any) -> d
                 "path": str(exe_path),
                 "already_installed": False,
                 "size_bytes": size_bytes,
-                "platform": "windows",
+                "platform": key,
                 "smoke_test_passed": smoke_ok,
                 "message": smoke_message or (f"{meta['name']} installed successfully at {exe_path}"),
             }
 
-        # Not Windows: the release has no build for this platform.
-        return {
-            "converter_id": converter_id,
-            "installed": False,
-            "platform": platform,
-            "platform_unsupported": True,
-            "message": (
-                f"{meta['name']} is published for Windows 10/11 x64 only; Linux and macOS builds are not available yet."
-            ),
-        }
+        # The release has no build for this host.
+        return _platform_unsupported_result(converter_id, meta)
     except Exception as exc:  # noqa: BLE001 - last-ditch error envelope
         # Any uncaught exception (json.JSONDecodeError on a rate-limited GitHub
         # response, OSError on a permission-denied install dir, etc.) becomes a
@@ -1294,12 +1363,16 @@ async def uninstall_converter(
 
     removed = False
 
-    # The installer keeps each converter in its own folder
-    # (``{ext}_windows/``), so uninstalling is removing that folder.
-    per_format_root = _CONVERTER_INSTALL_DIR / f"{converter_id}_windows"
-    if per_format_root.exists() and per_format_root.is_dir():
-        import shutil as _shutil
+    # The installer keeps each converter in its own folder (``{ext}_windows/``
+    # or ``{ext}_<os>-<arch>/``), so uninstalling is removing that folder.
+    import shutil as _shutil
 
+    key = host_platform_key()
+    names = {f"{converter_id}_windows"} | ({install_dir_name(converter_id, key)} if key else set())
+    for name in sorted(names):
+        per_format_root = _CONVERTER_INSTALL_DIR / name
+        if not per_format_root.is_dir():
+            continue
         try:
             _shutil.rmtree(per_format_root)
             removed = True

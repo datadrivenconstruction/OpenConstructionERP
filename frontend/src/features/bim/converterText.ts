@@ -38,6 +38,6 @@ export function converterPlatformMessage(t: TFunction, converterId: string): str
   return t('api_errors.converter_platform_unsupported', {
     format: converterId.toUpperCase(),
     defaultValue:
-      'The {{format}} converter runs on Windows 10/11 x64 only. Run OpenConstructionERP on Windows to convert these files.',
+      "There is no {{format}} converter build for this server's operating system or processor. Builds exist for Windows x64, Linux x64 and ARM64, and macOS on Intel and Apple silicon. DXF drawings are read on every platform, and IFC models open in BIM Hub with the built-in reader.",
   });
 }
