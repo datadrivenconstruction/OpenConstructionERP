@@ -9,8 +9,8 @@ element" workbook plus COLLADA file the platform was built around:
 ==========  =========================================================  =====================================
 format      command line                                               what it writes
 ==========  =========================================================  =====================================
-``rvt``     ``RVTconverter.exe <in> -o <dir> --ifc``                   ``native_graph.glb``, ``native_graph.ifc``
-                                                                       (identity, parameters, quantities),
+``rvt``     ``RVTconverter.exe <in> -o <dir> --ifc``                   ``elements.csv`` (the element table),
+                                                                       ``native_graph.glb``, ``native_graph.ifc``,
                                                                        ``summary.json``, ``report.json``
 ``ifc``     ``python.exe converter.py <in> --output <dir> --glb``      a new sub-folder with ``<stem>.xlsx``
                                                                        (Objects / Properties / Quantities /
@@ -33,11 +33,11 @@ Honest limits, stated where the data comes from rather than papered over:
   ``extras.global_id`` = the GlobalId. Elements whose geometry the converter
   cannot read have no node. A converter build without ``--glb`` is run again
   without it and yields no geometry, as before.
-* RVT: identity, stored parameters (metres where the measure is known, else
-  labelled ``[internal units]``) and Revit's base quantities are read from the
-  converter's own ``native_graph.ifc`` (:mod:`rvt_ifc_reader`). Only elements
-  with a mesh in the GLB become rows; an element with no quantity set is
-  measured on its mesh (:mod:`glb_quantities`).
+* RVT: the rows are the converter's own element table ``elements.csv``
+  (category, family, type, level, SI quantities, every stored parameter); an
+  element with no quantity there is measured on its GLB mesh
+  (:mod:`glb_quantities`). Builds that write no ``elements.csv`` fall back to
+  reading ``native_graph.ifc`` (:mod:`rvt_ifc_reader`).
 * DWG: the converter's workbook is a record-by-record decoder log; the take-off
   table is read from the DXF it writes instead.
 """
@@ -221,6 +221,7 @@ def _collect_outputs(run: ConverterRun, out_dir: Path, stem: str) -> None:
         run.folder = out_dir
         for role, name in (
             ("glb", "native_graph.glb"),
+            ("elements", "elements.csv"),
             ("ifc", "native_graph.ifc"),
             ("report", "report.json"),
             ("summary", "summary.json"),
@@ -562,11 +563,108 @@ def orient_glb_for_viewer(glb_path: Path) -> bool:
     return True
 
 
+#: Quantity columns of ``elements.csv`` in order of preference, all SI.
+_CSV_QUANTITY_PREFERENCE: dict[str, tuple[str, ...]] = {
+    "Volume": ("NetVolume", "GrossVolume", "Volume"),
+    "Area": ("NetSideArea", "NetArea", "GrossSideArea", "GrossArea", "Area"),
+    "Length": ("Length",),
+    "Height": ("Height",),
+    "Surface Area": ("NetSurfaceArea",),
+}
+_CSV_IDENTITY = ("ElementId", "GlobalId", "Category", "IfcClass", "Family", "Type Name", "Level")
+_CSV_QUANTITY_SOURCES = {name for names in _CSV_QUANTITY_PREFERENCE.values() for name in names} | {
+    "Width",
+    "Perimeter",
+    "Depth",
+    "CrossSectionArea",
+}
+
+
+def _csv_value(raw: str) -> Any:
+    """A cell of ``elements.csv``: empty is ``None``, numbers become numbers."""
+    if raw == "":
+        return None
+    try:
+        num = float(raw)
+    except ValueError:
+        return raw
+    return int(num) if num.is_integer() and "." not in raw and "e" not in raw.lower() else num
+
+
+def _category_ost_by_label() -> dict[str, str]:
+    from app.modules.boq.revit_categories import REVIT_CATEGORIES
+
+    return {label: ost for ost, label in REVIT_CATEGORIES.values()}
+
+
+def flatten_rvt_elements_csv(csv_path: Path, glb_path: Path | None) -> tuple[list[str], list[dict[str, Any]]]:
+    """``(header, rows)`` from the converter's own element table ``elements.csv``.
+
+    The table is the converter's flat Revit export: one row per element with
+    category, family, type, level, SI quantities and every stored parameter.
+    Elements it gives no quantity for are measured on their GLB mesh.
+    """
+    import csv
+
+    with csv_path.open("r", encoding="utf-8-sig", newline="") as fh:
+        reader = csv.DictReader(fh)
+        source_rows = list(reader)
+        fields = list(reader.fieldnames or [])
+    measured: dict[int, dict[str, float]] = {}
+    if glb_path is not None and glb_path.is_file():
+        try:
+            measured = glb_element_quantities(glb_path)
+        except Exception:  # noqa: BLE001 - a mesh we cannot read still leaves the table
+            logger.warning("Could not measure the GLB meshes of %s", glb_path.name, exc_info=True)
+    ost_by_label = _category_ost_by_label()
+    params = [f for f in fields if f not in _CSV_IDENTITY and f not in _CSV_QUANTITY_SOURCES][:_MAX_PROPERTY_COLUMNS]
+
+    rows: list[dict[str, Any]] = []
+    for src in source_rows:
+        eid = _csv_value(src.get("ElementId", ""))
+        if eid is None:
+            continue
+        label = src.get("Category") or "Unknown"
+        type_name = src.get("Type Name") or None
+        row: dict[str, Any] = {
+            "ID": eid,
+            "Category": ost_by_label.get(label, label),
+            "Category Name": label,
+            "Name": f"{type_name} {eid}" if type_name else f"{label} {eid}",
+            "Family": src.get("Family") or None,
+            "Type Name": type_name,
+            "Level": src.get("Level") or None,
+            "GlobalId": src.get("GlobalId") or None,
+            "IfcClass": src.get("IfcClass") or None,
+        }
+        if isinstance(eid, int):
+            row.update(measured.get(eid, {}))
+        for column, names in _CSV_QUANTITY_PREFERENCE.items():
+            for name in names:
+                value = _csv_value(src.get(name, ""))
+                if isinstance(value, (int, float)) and value:
+                    row[column] = float(value)
+                    break
+        for extra in ("Width", "Perimeter", "Depth", "CrossSectionArea"):
+            value = _csv_value(src.get(extra, ""))
+            if value is not None:
+                row[extra] = value
+        for key in params:
+            value = _csv_value(src.get(key, ""))
+            if value is not None:
+                row[key] = value
+        rows.append(row)
+    qty_cols = [c for c in MESH_QUANTITY_COLUMNS if any(c in r for r in rows)]
+    extra_cols = [c for c in ("Width", "Perimeter", "Depth", "CrossSectionArea") if any(c in r for r in rows)]
+    header = ["ID", "Category", "Category Name", "Name", "Family", "Type Name", "Level", "GlobalId", "IfcClass"]
+    return [*header, *qty_cols, *extra_cols, *params], rows
+
+
 def flatten_rvt_output(glb_path: Path, ifc_path: Path | None) -> tuple[list[str], list[dict[str, Any]]]:
     """``(header, rows)`` for the elements of an RVT conversion that have a mesh.
 
-    Identity (category, family, type, level, phase), stored parameters and
-    Revit's base quantities come from the converter's ``native_graph.ifc``.
+    Fallback for converter builds that write no ``elements.csv``: identity,
+    stored parameters and Revit's base quantities come from ``native_graph.ifc``.
     Elements the IFC gives no quantity for are measured on their GLB mesh.
     """
     ids = read_glb_element_ids(glb_path)
@@ -624,6 +722,8 @@ def write_flat_workbook(run: ConverterRun, out_xlsx: Path) -> Path:
     """Write the one-row-per-element workbook for an IFC or RVT run; returns its path."""
     if run.fmt == "ifc":
         header, rows = flatten_ifc_workbook(run.outputs["xlsx"])
+    elif run.fmt == "rvt" and run.outputs.get("elements"):
+        header, rows = flatten_rvt_elements_csv(run.outputs["elements"], run.outputs.get("glb"))
     elif run.fmt == "rvt":
         header, rows = flatten_rvt_output(run.outputs["glb"], run.outputs.get("ifc"))
     else:
