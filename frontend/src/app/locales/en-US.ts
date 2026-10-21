@@ -374,7 +374,6 @@ const resource = {
     "project.widget.boq-list.description": "All Bid Schedule attached to this project",
     "demo.modal_subtitle": "Install a complete project with bid schedule, schedule, budget, and tendering",
     "demo_banner.modal_sample_data_body": "All projects, bid schedules, and figures shown here are sample data created for demonstration purposes only. Nothing here is real project data.",
-    "demo_banner.strip_uploads_off": "Uploads are off here: please use the demo data only",
     "login.benefit.allinone": "Bid Schedule + 4D + 5D + Tendering",
     "login.hero_desc": "Professional bid schedule, 4D scheduling, 5D cost model, and tendering - all in one open-source platform.",
     "marketplace.demo_installed_message": "{{name}} created with full bid schedule, schedule, budget, and tendering.",
@@ -1671,7 +1670,6 @@ const resource = {
     "tax_rates.status_harmonised": "Harmonized",
     "tax_rates.flow_intro": "Some countries have one sales tax rate and some do not. Canada has a federal rate that one province replaces with a single harmonized one, that several add their own to, and that four charge on its own. There is no Canadian rate, only a rate for a place on a date, so this page asks for both before it answers.",
     "schedule.tabular_import.match_none": "Not recognized",
-    "demo_uploads.refused": "Uploads are turned off on the public demo. Please use the demo projects and their example data, or install the platform to work with your own files.",
   }
 } as { translation: Record<string, string> };
 
