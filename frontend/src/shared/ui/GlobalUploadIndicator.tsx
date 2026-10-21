@@ -32,6 +32,8 @@ import {
 } from '@/stores/useBIMUploadStore';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { bimQuantityWarningText } from '@/shared/lib/bimQuantityWarning';
+import { BIM_STAGES, conversionErrorKind, conversionErrorText, limitMinutes } from '@/shared/lib/conversionStages';
+import { ConversionStages } from './ConversionStages';
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -40,14 +42,6 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${fmtFixed(bytes / 1024, 1)} KB`;
   if (bytes < 1024 * 1024 * 1024) return `${fmtFixed(bytes / (1024 * 1024), 1)} MB`;
   return `${fmtFixed(bytes / (1024 * 1024 * 1024), 1)} GB`;
-}
-
-function elapsed(startedAt: number): string {
-  const sec = Math.round((Date.now() - startedAt) / 1000);
-  if (sec < 60) return `${sec}s`;
-  const min = Math.floor(sec / 60);
-  const rem = sec % 60;
-  return `${min}m ${rem}s`;
 }
 
 function timeSince(ts: number, t: (key: string, opts?: Record<string, unknown>) => string): string {
@@ -191,22 +185,17 @@ export function GlobalUploadIndicator() {
           <p className="text-xs font-medium text-content-primary truncate">
             {primary.fileName}
           </p>
-          {isActive && primary.serverConverting && (
-            <p className="text-[10px] text-content-tertiary mt-0.5 truncate">
-              {t('bim_upload.stage_server_converting', { defaultValue: 'Converting on the server...' })} — {elapsed(primary.startedAt)}
-            </p>
-          )}
-          {isActive && !primary.serverConverting && (
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex-1 h-1 rounded-full bg-surface-tertiary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-oe-blue transition-all duration-300"
-                  style={{ width: `${primary.progress}%` }}
-                />
-              </div>
-              <span className="text-[10px] text-content-tertiary tabular-nums">
-                {primary.progress}%
-              </span>
+          {isActive && (
+            <div className="mt-1 text-start">
+              <ConversionStages
+                variant="compact"
+                stages={BIM_STAGES}
+                current={primary.serverConverting ? (primary.stageId ?? 'convert') : 'upload'}
+                format={primary.fileName.split('.').pop()?.toUpperCase()}
+                startedAt={primary.serverConverting ? (primary.serverStartedAt ?? primary.startedAt) : null}
+                limitS={primary.limitS}
+                uploadPercent={primary.progress}
+              />
             </div>
           )}
           {!isActive && primary.status === 'ready' && (
@@ -284,6 +273,10 @@ function JobRow({
   const isActive = job.status === 'uploading' || job.status === 'converting';
   const isDone = job.status === 'ready';
   const isError = job.status === 'error';
+  const errText = conversionErrorText(t, conversionErrorKind(job.errorCode), {
+    format: job.fileName.split('.').pop()?.toUpperCase(),
+    minutes: job.errorCode === 'ui_stalled' ? 45 : limitMinutes(job.limitS),
+  });
   const isConverterRequired = job.status === 'converter_required';
 
   return (
@@ -305,38 +298,22 @@ function JobRow({
           {formatFileSize(job.fileSize)}
         </p>
 
-        {/* Active: progress bar + elapsed */}
+        {/* Active: named stage, real upload percent, then elapsed time against the limit */}
         {isActive && (
           <div className="mt-1.5">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-surface-tertiary rounded-full overflow-hidden">
-                {job.serverConverting ? (
-                  // The server reports no percentage while it converts, so
-                  // show an honest indeterminate bar instead of a stuck 95%.
-                  <div
-                    data-testid="upload-server-converting"
-                    className="h-full w-full bg-oe-blue/60 rounded-full animate-pulse"
-                  />
-                ) : (
-                  <div
-                    className="h-full bg-oe-blue rounded-full transition-all duration-500"
-                    style={{ width: `${job.progress}%` }}
-                  />
-                )}
-              </div>
-              {!job.serverConverting && (
-                <span className="text-[10px] text-oe-blue font-semibold tabular-nums w-8 text-right">
-                  {job.progress}%
-                </span>
-              )}
-            </div>
-            <p className="text-[10px] text-content-quaternary mt-0.5">
-              {t(job.stage, { defaultValue: 'Processing...' })} — {elapsed(job.startedAt)}
-            </p>
+            <ConversionStages
+              variant="compact"
+              stages={BIM_STAGES}
+              current={job.serverConverting ? (job.stageId ?? 'convert') : 'upload'}
+              format={job.fileName.split('.').pop()?.toUpperCase()}
+              startedAt={job.serverConverting ? (job.serverStartedAt ?? job.startedAt) : null}
+              limitS={job.limitS}
+              uploadPercent={job.progress}
+            />
             {job.serverConverting && (
               <p className="text-[10px] text-content-quaternary mt-0.5">
-                {t('bim_upload.server_converting_hint', {
-                  defaultValue: 'The file is uploaded. Large models can take several minutes; you can keep working.',
+                {t('conv.dock_may_leave', {
+                  defaultValue: 'The file is uploaded. You can keep working: the server continues on its own.',
                 })}
               </p>
             )}
@@ -378,9 +355,18 @@ function JobRow({
 
         {/* Error */}
         {isError && (
-          <p className="text-[10px] text-red-500 mt-0.5 line-clamp-2">
-            {job.errorMessage || t('bim.upload_indicator_error', { defaultValue: 'Upload failed' })}
-          </p>
+          <div className="mt-0.5" role="alert">
+            {job.errorCode ? (
+              <>
+                <p className="text-[10px] font-medium text-red-500">{errText.title}</p>
+                <p className="text-[10px] text-content-tertiary">{errText.body}</p>
+              </>
+            ) : (
+              <p className="text-[10px] text-red-500 line-clamp-2">
+                {job.errorMessage || t('bim.upload_indicator_error', { defaultValue: 'Upload failed' })}
+              </p>
+            )}
+          </div>
         )}
 
         {/* Converter required */}

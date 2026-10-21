@@ -13,7 +13,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 from pydantic_core import PydanticCustomError
 
 from app.core.i18n import get_locale
@@ -268,10 +268,27 @@ class BIMModelResponse(BaseModel):
     # so the field is always present in the JSON response (frontend
     # treats undefined as false, which is correct but noisy).
     has_geometry: bool = False
+    # While ``status == "processing"``: the step the background conversion is on
+    # (``preparing_converter`` / ``converting`` / ``building_3d`` / ``reading_elements``),
+    # when it began (ISO 8601) and how many seconds one conversion may take.
+    conversion_stage: str | None = None
+    conversion_started_at: str | None = None
+    conversion_timeout_s: int | None = None
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    @model_validator(mode="after")
+    def _lift_conversion_progress(self) -> BIMModelResponse:
+        if self.status == "processing" and isinstance(self.metadata, dict):
+            stage = self.metadata.get("conversion_stage")
+            started = self.metadata.get("conversion_started_at")
+            limit = self.metadata.get("conversion_timeout_s")
+            self.conversion_stage = stage if isinstance(stage, str) else None
+            self.conversion_started_at = started if isinstance(started, str) else None
+            self.conversion_timeout_s = limit if isinstance(limit, int) else None
+        return self
 
 
 class BIMModelListResponse(BaseModel):

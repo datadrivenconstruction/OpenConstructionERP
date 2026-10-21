@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { ConverterReleaseNotice } from '@/shared/ui/ConverterReleaseNotice';
 import { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -2384,6 +2385,7 @@ function ConverterStatusPanel() {
 
   return (
     <div className="space-y-4">
+      <ConverterReleaseNotice />
       {/* Live health banner — same component used on /bim. Surfaces smoke
        *  tests (verify=true), one-click install / update / re-check actions
        *  with live progress, and a top-level "{{ok}}/{{total}} working"

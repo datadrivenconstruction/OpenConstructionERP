@@ -1487,6 +1487,37 @@ async def _ensure_model_artifacts(project_id: str, model_id: str) -> None:
         logger.warning("Artifact baking failed for model %s (non-fatal): %s", model_id, exc)
 
 
+async def _set_conversion_stage(model_uuid: uuid.UUID, stage: str, *, begin: bool = False, fmt: str = "") -> None:
+    """Record which step of the background conversion is running, for the progress UI.
+
+    Stored in ``metadata_`` (``conversion_stage``); ``begin`` also stamps the start time and the
+    time limit one conversion may use. Best-effort: a failed write never stops the import.
+    """
+    from datetime import UTC, datetime
+
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.bim_hub.models import BIMModel
+
+    try:
+        async with async_session_factory() as session:
+            model = (await session.execute(select(BIMModel).where(BIMModel.id == model_uuid))).scalar_one_or_none()
+            if model is None:
+                return
+            meta = dict(model.metadata_ or {})
+            meta["conversion_stage"] = stage
+            if begin:
+                from app.modules.boq.ddc_runner import convert_timeout_s
+
+                meta["conversion_started_at"] = datetime.now(UTC).isoformat()
+                meta["conversion_timeout_s"] = convert_timeout_s(fmt.lstrip(".").lower())
+            model.metadata_ = meta
+            await session.commit()
+    except Exception:  # noqa: BLE001 - progress hints must not break the import
+        logger.debug("conversion stage write failed for %s", model_uuid, exc_info=True)
+
+
 async def _process_cad_in_background(
     *,
     project_id: str,
@@ -1516,6 +1547,14 @@ async def _process_cad_in_background(
     from app.modules.bim_hub.models import BIMElement, BIMModel
 
     model_uuid = _uuid.UUID(model_id)
+
+    try:
+        from app.modules.boq.cad_import import find_converter as _find_conv
+
+        _first_stage = "converting" if _find_conv(ext.lstrip(".").lower()) else "preparing_converter"
+    except Exception:  # noqa: BLE001
+        _first_stage = "converting"
+    await _set_conversion_stage(model_uuid, _first_stage, begin=True, fmt=ext)
 
     # Pre-flight: check the converter binary up front so we can surface a
     # specific actionable error ("install the RVT converter") instead of the
@@ -1631,6 +1670,7 @@ async def _process_cad_in_background(
 
     try:
         content = await get_storage_backend().get(cad_storage_key)
+        await _set_conversion_stage(model_uuid, "converting")
 
         with tempfile.TemporaryDirectory(prefix="oe-bim-bg-") as _tmp_str:
             _tmp_dir = _Path(_tmp_str)
@@ -1651,6 +1691,7 @@ async def _process_cad_in_background(
                 result = await asyncio.to_thread(process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth)
                 ddc_failure = dict(_ddc_record)
             element_count = result["element_count"]
+            await _set_conversion_stage(model_uuid, "building_3d")
 
             geo_key: str | None = None
             geo_local = result.get("geometry_path")
@@ -1683,6 +1724,7 @@ async def _process_cad_in_background(
                     logger.info("GLB geometry saved: %s (%d bytes)", glb_key, _glb_size)
 
             raw_elements = result.get("raw_elements", [])
+            await _set_conversion_stage(model_uuid, "reading_elements")
             parquet_status, parquet_error = _record_parquet_attempt_init()
             if raw_elements:
                 try:

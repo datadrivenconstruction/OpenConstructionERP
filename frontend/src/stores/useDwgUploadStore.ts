@@ -13,6 +13,7 @@
  */
 
 import { create } from 'zustand';
+import { stageFromServer, type ConversionStageId } from '@/shared/lib/conversionStages';
 import { uuid } from '@/shared/lib/browser';
 import { fetchDrawing, uploadDrawing } from '@/features/dwg-takeoff/api';
 import type { DwgDrawing } from '@/features/dwg-takeoff/api';
@@ -33,6 +34,10 @@ export interface DwgUploadJob {
   errorMessage: string | null;
   /** Stable failure code (``metadata.error_code``) the UI translates. */
   errorCode?: string | null;
+  /** Stage the server reports while converting, its start (ms) and time limit (s). */
+  stageId?: ConversionStageId;
+  serverStartedAt?: number | null;
+  limitS?: number | null;
   startedAt: number;
   completedAt: number | null;
 }
@@ -55,6 +60,11 @@ interface DwgUploadState {
   completedJobs: () => DwgUploadJob[];
 }
 
+function parseIso(value: unknown): number | null {
+  const ms = typeof value === 'string' ? Date.parse(value) : NaN;
+  return Number.isFinite(ms) ? ms : null;
+}
+
 const abortControllers = new Map<string, AbortController>();
 const stageTimers = new Map<string, ReturnType<typeof setInterval>>();
 
@@ -67,38 +77,6 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
       jobs.set(jobId, { ...existing, ...patch });
       return { jobs };
     });
-  }
-
-  function startStageTimer(jobId: string) {
-    const phases = [
-      { status: 'uploading' as const, stage: 'dwg_upload.stage_uploading', target: 30, step: 2.0, interval: 200 },
-      { status: 'converting' as const, stage: 'dwg_upload.stage_converting', target: 70, step: 0.9, interval: 300 },
-      { status: 'converting' as const, stage: 'dwg_upload.stage_extracting', target: 90, step: 0.7, interval: 250 },
-      { status: 'converting' as const, stage: 'dwg_upload.stage_finalizing', target: 95, step: 1.5, interval: 200 },
-    ];
-
-    let phaseIdx = 0;
-    let currentPct = 5;
-
-    const tick = () => {
-      // Phases exhausted → self-terminate. Prior code only returned
-      // early, leaving setInterval firing every 300ms forever — the
-      // zombie timer Artem reported as "конвертация постоянно".
-      if (phaseIdx >= phases.length) {
-        clearStageTimer(jobId);
-        return;
-      }
-      const phase = phases[phaseIdx]!;
-      const remaining = phase.target - currentPct;
-      const increment = Math.max(0.2, Math.min(phase.step, remaining * 0.15));
-      currentPct = Math.min(phase.target, currentPct + increment);
-      patchJob(jobId, { status: phase.status, stage: phase.stage, progress: Math.round(currentPct) });
-      if (currentPct >= phase.target - 0.2) phaseIdx += 1;
-    };
-
-    tick();
-    const timer = setInterval(tick, 300);
-    stageTimers.set(jobId, timer);
   }
 
   function clearStageTimer(jobId: string) {
@@ -128,7 +106,8 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
     const FAST_POLL_MS = 3500;
     const MAX_POLL_MS = 15_000;
     const FAST_WINDOW_MS = 30_000;
-    const TIMEOUT_MS = 20 * 60 * 1000;
+    // The server stops a conversion at its own limit (30 minutes by default); wait a little longer than that.
+    const TIMEOUT_MS = 35 * 60 * 1000;
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < TIMEOUT_MS) {
@@ -158,8 +137,8 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
             status: 'error',
             progress: 0,
             stage: 'dwg_upload.stage_failed',
-            errorMessage: drawing.error_message || 'Conversion failed',
-            errorCode: drawing.metadata?.error_code ?? null,
+            errorMessage: drawing.error_message || null,
+            errorCode: drawing.metadata?.error_code ?? 'convert_failed',
             completedAt: Date.now(),
           });
           return;
@@ -171,6 +150,9 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
           drawingId,
           status: 'converting',
           stage: 'dwg_upload.stage_converting',
+          stageId: stageFromServer(drawing.metadata?.conversion_stage as string | undefined),
+          limitS: (drawing.metadata?.conversion_timeout_s as number | undefined) ?? null,
+          serverStartedAt: parseIso(drawing.metadata?.conversion_started_at),
         });
       } catch {
         // Transient network blip — keep polling. The 20-min ceiling
@@ -197,20 +179,20 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
       status: 'error',
       progress: 0,
       stage: 'dwg_upload.stage_stalled',
-      errorMessage:
-        'Conversion did not finish within 20 minutes. The DDC converter may need attention - try uploading a smaller file or restart the converter.',
+      errorMessage: null,
+      errorCode: 'ui_stalled',
       completedAt: Date.now(),
     });
   }
 
   async function executeUpload(jobId: string, params: StartDwgUploadParams) {
-    startStageTimer(jobId);
     try {
       const res: DwgDrawing = await uploadDrawing(
         params.projectId,
         params.file,
         params.modelName,
         params.discipline,
+        (percent) => patchJob(jobId, { progress: percent }),
       );
       // POST returned with the drawing row. For .dwg the backend
       // dispatches the actual conversion in a background task and
@@ -272,7 +254,7 @@ export const useDwgUploadStore = create<DwgUploadState>((set, get) => {
         modelName: params.modelName,
         discipline: params.discipline,
         status: 'uploading',
-        progress: 5,
+        progress: 0,
         stage: 'dwg_upload.stage_sending',
         drawingId: null,
         errorMessage: null,
@@ -376,9 +358,8 @@ if (typeof window !== 'undefined') {
         status: 'error',
         progress: 0,
         stage: 'dwg_upload.stage_stalled',
-        errorMessage:
-          job.errorMessage ??
-          'Upload abandoned after 45 min - reload to retry if the file is still needed.',
+        errorMessage: job.errorMessage,
+        errorCode: 'ui_stalled',
         completedAt: now,
       });
       dirty = true;

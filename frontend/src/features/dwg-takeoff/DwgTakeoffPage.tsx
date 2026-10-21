@@ -136,6 +136,9 @@ import {
 import { exportQuantifyToExcel } from './lib/dwg-quantify-export';
 import { annotationRealValue, annotationTotals, quantifyTotals } from './lib/takeoff-totals';
 import { conversionErrorText } from './lib/conversion-error';
+import { ConverterReleaseNotice } from '@/shared/ui/ConverterReleaseNotice';
+import { ConversionStages } from '@/shared/ui/ConversionStages';
+import { DWG_STAGES, stageFromServer, type ConversionStageId } from '@/shared/lib/conversionStages';
 import { exportCanvasToPdf } from './lib/pdf-export';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
 import { CalibrationDialog, type CalibrationStep } from './components/CalibrationDialog';
@@ -1154,6 +1157,12 @@ export function DwgTakeoffPage() {
   const isConverting =
     !!selectedDrawingId &&
     (drawingStatus === 'processing' || drawingStatus === 'uploaded');
+  // When the server began converting; the row's creation time is the honest fallback.
+  const dwgConversionStartedAt = (() => {
+    const iso = (selectedDrawingFromList?.metadata?.conversion_started_at as string | undefined) || selectedDrawingFromList?.created_at;
+    const ms = iso ? Date.parse(iso) : NaN;
+    return Number.isFinite(ms) ? ms : Date.now();
+  })();
   const isNeedsConversion = drawingStatus === 'needs_conversion';
   const isErrorStatus = drawingStatus === 'error';
   const isEmptyStatus = drawingStatus === 'empty';
@@ -3475,11 +3484,9 @@ export function DwgTakeoffPage() {
               drawingName={selectedDrawingFromList?.name || selectedDrawingFromList?.filename || ''}
               filename={selectedDrawingFromList?.filename || ''}
               status={drawingStatus}
-              startedAt={
-                selectedDrawingFromList?.created_at
-                  ? new Date(selectedDrawingFromList.created_at).getTime()
-                  : Date.now()
-              }
+              startedAt={dwgConversionStartedAt}
+              stageId={stageFromServer(selectedDrawingFromList?.metadata?.conversion_stage as string | undefined)}
+              limitS={(selectedDrawingFromList?.metadata?.conversion_timeout_s as number | undefined) ?? null}
               onCancel={() => setConfirmDeleteId(selectedDrawingId)}
             />
           ) : isErrorStatus ? (
@@ -5067,6 +5074,8 @@ export function DwgTakeoffPage() {
               )}
             </button>
 
+            <ConverterReleaseNotice format="DWG" className="mt-3" />
+
             {/* Second way in: a drawing already filed in this project. The
                 local upload above stays exactly as it was - this only saves
                 the user from hunting down (and re-uploading) a file the
@@ -6584,12 +6593,16 @@ function ConversionProgressCard({
   filename,
   status,
   startedAt,
+  stageId = 'convert',
+  limitS = null,
   onCancel,
 }: {
   drawingName: string;
   filename: string;
   status: string | null;
   startedAt: number;
+  stageId?: ConversionStageId;
+  limitS?: number | null;
   onCancel?: () => void;
 }) {
   const { t } = useTranslation();
@@ -6609,49 +6622,7 @@ function ConversionProgressCard({
   // second reads as a broken control.
   const elapsedLabel = formatDuration(t, elapsedSec, 's', { parts: 2, empty: '0s' });
 
-  // Step machine - drives the highlighted "current step".
-  //
-  // Three steps, not four, and the missing one is the point. Conversion and
-  // entity extraction used to be listed separately while the API reports a
-  // single `processing` for both, so the card marked "Converting" as current
-  // and left "Extracting" greyed out ahead of it for the whole run. That reads
-  // as knowledge we do not have. It cost us a real diagnosis: the reporter on
-  // issue #409 told us their conversion failed at step 2, which was the only
-  // thing the screen could ever have said, so it narrowed nothing.
-  //
-  // The two are one row until the backend can tell them apart. What actually
-  // failed is already in the drawing's error message, which names the phase,
-  // so nothing diagnostic is lost by not guessing here. The conv_step_extract
-  // keys are kept translated in all 29 locales for the day the backend can
-  // report the phase - they are unreferenced now, not abandoned.
-  const currentStep = status === 'uploaded' ? 1 : status === 'processing' ? 2 : 3;
-
-  const steps: { id: number; label: string; hint: string }[] = [
-    {
-      id: 1,
-      label: t('dwg_takeoff.conv_step_upload', { defaultValue: 'Upload received' }),
-      hint: t('dwg_takeoff.conv_step_upload_hint', {
-        defaultValue: 'File saved on the server.',
-      }),
-    },
-    {
-      id: 2,
-      label: t('dwg_takeoff.conv_step_convert', {
-        defaultValue: 'Converting DWG to canonical JSON',
-      }),
-      hint: t('dwg_takeoff.conv_step_convert_hint', {
-        defaultValue:
-          'DDC Converters 2.0 is parsing your drawing. This is the slow step - usually 3-8 minutes for a medium DWG, longer for large architectural sets.',
-      }),
-    },
-    {
-      id: 3,
-      label: t('dwg_takeoff.conv_step_render', { defaultValue: 'Opening the viewer' }),
-      hint: t('dwg_takeoff.conv_step_render_hint', {
-        defaultValue: 'You will see the drawing here as soon as the entities arrive.',
-      }),
-    },
-  ];
+  const currentStep = DWG_STAGES.indexOf(status === 'uploaded' ? 'upload' : stageId) + 1;
 
   // Live-region announcement: changes whenever the backend status flips
   // (uploaded → processing → ready/error). Screen readers hear "Converting
@@ -6659,9 +6630,10 @@ function ConversionProgressCard({
   // terse so it doesn't drone on. The total is spelled out in every locale
   // rather than interpolated, so it moves with the step list above.
   const liveAnnouncement = t('dwg_takeoff.conv_aria_live', {
-    defaultValue: 'Converting {{name}}, step {{step}} of 3, {{elapsed}} elapsed',
+    defaultValue: 'Converting {{name}}, step {{step}} of {{total}}, {{elapsed}} elapsed',
     name: drawingName || filename,
     step: currentStep,
+    total: DWG_STAGES.length,
     elapsed: elapsedLabel,
   });
 
@@ -6694,88 +6666,15 @@ function ConversionProgressCard({
           </span>
         </div>
 
-        {/* Indeterminate progress bar - honest motion without a fake %.
-            role="progressbar" with no aria-valuenow signals
-            "indeterminate" to assistive tech (per ARIA 1.2). */}
-        <div
-          className="mt-5 h-1.5 rounded-full bg-surface-tertiary overflow-hidden relative"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={t('dwg_takeoff.conv_progress_label', {
-            defaultValue: 'Conversion progress (indeterminate)',
-          })}
-        >
-          <div
-            className="absolute inset-y-0 w-1/3 rounded-full bg-oe-blue"
-            style={{
-              animation: 'oe-dwg-indeterminate 1.6s ease-in-out infinite',
-            }}
+        <div className="mt-5">
+          <ConversionStages
+            stages={DWG_STAGES}
+            current={status === 'uploaded' ? 'upload' : stageId}
+            format="DWG"
+            startedAt={startedAt}
+            limitS={limitS}
+            uploadPercent={100}
           />
-        </div>
-        <style>{`
-          @keyframes oe-dwg-indeterminate {
-            0%   { left: -33%; }
-            50%  { left: 50%; }
-            100% { left: 110%; }
-          }
-        `}</style>
-
-        {/* Step list - one row per pipeline phase, current step highlighted. */}
-        <ol className="mt-5 space-y-2">
-          {steps.map((step) => {
-            const isDone = step.id < currentStep;
-            const isCurrent = step.id === currentStep;
-            return (
-              <li
-                key={step.id}
-                className={clsx(
-                  'flex items-start gap-3 rounded-lg px-3 py-2 transition-colors',
-                  isCurrent && 'bg-oe-blue/5 border border-oe-blue/20',
-                  !isCurrent && 'border border-transparent',
-                )}
-              >
-                <div
-                  className={clsx(
-                    'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
-                    isDone && 'bg-emerald-500/15 text-emerald-500',
-                    isCurrent && 'bg-oe-blue/15 text-oe-blue',
-                    !isDone && !isCurrent && 'bg-surface-secondary text-content-quaternary',
-                  )}
-                >
-                  {isDone ? '✓' : step.id}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p
-                    className={clsx(
-                      'text-xs font-medium leading-tight',
-                      isCurrent ? 'text-content-primary' : 'text-content-secondary',
-                    )}
-                  >
-                    {step.label}
-                    {isCurrent && (
-                      <Loader2
-                        size={11}
-                        className="inline-block ml-1.5 text-oe-blue animate-spin align-[-1px]"
-                      />
-                    )}
-                  </p>
-                  {isCurrent && (
-                    <p className="text-[11px] text-content-tertiary leading-snug mt-0.5">
-                      {step.hint}
-                    </p>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-
-        <div className="mt-5 rounded-lg bg-amber-500/5 border border-amber-500/20 px-3 py-2.5 text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
-          {t('dwg_takeoff.conv_note', {
-            defaultValue:
-              'You can safely navigate to other pages - conversion runs on the server. The drawing will be ready here when you come back.',
-          })}
         </div>
 
         {/* Cancel - only when the parent wired a handler. Note that this

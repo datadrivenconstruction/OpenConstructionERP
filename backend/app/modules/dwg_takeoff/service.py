@@ -1526,6 +1526,18 @@ class DwgTakeoffService:
             meta["error_code"] = code
         await self.drawing_repo.update_fields(drawing_id, metadata_=meta)
 
+    async def _set_conversion_stage(self, drawing_id: uuid.UUID, stage: str, *, begin: bool = False) -> None:
+        """Record the running conversion step in ``metadata`` for the progress card."""
+        drawing = await self.drawing_repo.get_by_id(drawing_id)
+        if drawing is None:
+            return
+        meta = dict(drawing.metadata_ or {})
+        meta["conversion_stage"] = stage
+        if begin:
+            meta["conversion_started_at"] = datetime.now(UTC).isoformat()
+            meta["conversion_timeout_s"] = _dwg_convert_timeout_s()
+        await self.drawing_repo.update_fields(drawing_id, metadata_=meta)
+
     async def _set_converter_error(self, drawing_id: uuid.UUID, error: dict[str, Any] | None) -> None:
         """Keep the converter's own code and messages (never its ``detail``) for the page to show."""
         if not error:
@@ -1623,6 +1635,7 @@ class DwgTakeoffService:
             status="processing",
             conversion_heartbeat_at=datetime.now(UTC),
         )
+        await self._set_conversion_stage(drawing_id, "converting", begin=True)
         # Commit the transition before the conversion, not after it.
         #
         # Everything below can run for minutes, and until this session commits,
@@ -1716,6 +1729,7 @@ class DwgTakeoffService:
                 raise DrawingRemovedDuringConversion(str(drawing_id))
 
             logger.info("DWG converted via DDC: %s (%s)", drawing_id, run.status)
+            await self._set_conversion_stage(drawing_id, "reading_entities")
             await self._process_drawing(drawing_id, str(dxf_path))
         finally:
             shutil.rmtree(work_dir, ignore_errors=True)

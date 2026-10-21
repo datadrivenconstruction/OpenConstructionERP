@@ -26,20 +26,14 @@ import {
 import { useDwgUploadStore, type DwgUploadJob } from '@/stores/useDwgUploadStore';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { conversionErrorText } from '@/features/dwg-takeoff/lib/conversion-error';
+import { DWG_STAGES, conversionErrorText as conversionErrorTextCommon } from '@/shared/lib/conversionStages';
+import { ConversionStages } from './ConversionStages';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${fmtFixed(bytes / 1024, 1)} KB`;
   if (bytes < 1024 * 1024 * 1024) return `${fmtFixed(bytes / (1024 * 1024), 1)} MB`;
   return `${fmtFixed(bytes / (1024 * 1024 * 1024), 1)} GB`;
-}
-
-function elapsed(startedAt: number): string {
-  const sec = Math.round((Date.now() - startedAt) / 1000);
-  if (sec < 60) return `${sec}s`;
-  const min = Math.floor(sec / 60);
-  const rem = sec % 60;
-  return `${min}m ${rem}s`;
 }
 
 export function DwgUploadIndicator() {
@@ -134,16 +128,16 @@ export function DwgUploadIndicator() {
             {primary.fileName}
           </p>
           {isActive && (
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex-1 h-1 rounded-full bg-surface-tertiary overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-oe-blue transition-all duration-300"
-                  style={{ width: `${primary.progress}%` }}
-                />
-              </div>
-              <span className="text-[10px] text-content-tertiary tabular-nums">
-                {primary.progress}%
-              </span>
+            <div className="mt-1 text-start">
+              <ConversionStages
+                variant="compact"
+                stages={DWG_STAGES}
+                current={primary.status === 'converting' ? (primary.stageId ?? 'convert') : 'upload'}
+                format="DWG"
+                startedAt={primary.status === 'converting' ? (primary.serverStartedAt ?? primary.startedAt) : null}
+                limitS={primary.limitS}
+                uploadPercent={primary.progress}
+              />
             </div>
           )}
         </div>
@@ -210,6 +204,7 @@ function DwgJobRow({
   const isActive = job.status === 'uploading' || job.status === 'converting';
   const isDone = job.status === 'ready';
   const isError = job.status === 'error';
+  const stalledText = conversionErrorTextCommon(t, 'stalled', { minutes: 35 });
 
   return (
     <div className="px-4 py-3 flex items-start gap-3">
@@ -225,27 +220,31 @@ function DwgJobRow({
 
         {isActive && (
           <div className="mt-1.5">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-surface-tertiary rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-oe-blue rounded-full transition-all duration-500"
-                  style={{ width: `${job.progress}%` }}
-                />
-              </div>
-              <span className="text-[10px] text-oe-blue font-semibold tabular-nums w-8 text-right">
-                {job.progress}%
-              </span>
-            </div>
-            <p className="text-[10px] text-content-quaternary mt-0.5">
-              {t(job.stage, { defaultValue: 'Processing...' })} — {elapsed(job.startedAt)}
-            </p>
+            <ConversionStages
+              variant="compact"
+              stages={DWG_STAGES}
+              current={job.status === 'converting' ? (job.stageId ?? 'convert') : 'upload'}
+              format="DWG"
+              startedAt={job.status === 'converting' ? (job.serverStartedAt ?? job.startedAt) : null}
+              limitS={job.limitS}
+              uploadPercent={job.progress}
+            />
+            {job.status === 'converting' && (
+              <p className="text-[10px] text-content-quaternary mt-0.5">
+                {t('conv.dock_may_leave', {
+                  defaultValue: 'The file is uploaded. You can keep working: the server continues on its own.',
+                })}
+              </p>
+            )}
           </div>
         )}
 
         {isError && (
           <p className="text-[10px] text-red-500 mt-0.5 line-clamp-2">
-            {conversionErrorText(job.errorCode, job.errorMessage, t) ||
-              t('dwg_upload.failed', { defaultValue: 'Upload failed' })}
+            {job.errorCode === 'ui_stalled'
+              ? stalledText.body
+              : conversionErrorText(job.errorCode, job.errorMessage, t) ||
+                t('dwg_upload.failed', { defaultValue: 'Upload failed' })}
           </p>
         )}
 
