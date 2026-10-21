@@ -823,7 +823,7 @@ async def test_recompute_final_account_excludes_voided_vos() -> None:
             ),
         )
         # Drive the dead VO to voided through its real state machine.
-        await svc.transition_variation_order(dead.id, "voided")
+        await svc.transition_variation_order(dead.id, "voided", reason="Superseded by a revised instruction")
 
     fa = await svc.recompute_final_account(PROJECT_ID)
     assert fa is not None
@@ -929,7 +929,7 @@ async def test_dashboard_excludes_voided_vo_cost() -> None:
                 currency="EUR",
             ),
         )
-        await svc.transition_variation_order(dead.id, "voided")
+        await svc.transition_variation_order(dead.id, "voided", reason="Superseded by a revised instruction")
     summary = await svc.get_dashboard(PROJECT_ID)
     assert summary["cost_impact_total"] == Decimal("8000")
     assert summary["schedule_impact_days"] == 4
