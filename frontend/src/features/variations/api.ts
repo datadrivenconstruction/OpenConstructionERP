@@ -659,8 +659,8 @@ export function completeVO(id: string): Promise<VariationOrder> {
   return apiPost<VariationOrder>(`/v1/variations/variation-orders/${id}/complete`, {});
 }
 
-export function voidVO(id: string): Promise<VariationOrder> {
-  return apiPost<VariationOrder>(`/v1/variations/variation-orders/${id}/void`, {});
+export function voidVO(id: string, reason: string): Promise<VariationOrder> {
+  return apiPost<VariationOrder>(`/v1/variations/variation-orders/${id}/void`, { reason });
 }
 
 export function updateVO(

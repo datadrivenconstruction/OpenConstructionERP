@@ -63,7 +63,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RegisterExportButton, RecordPdfButton, type RegisterExportTarget } from '@/shared/ui/RegisterExport';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
-import { getErrorMessage } from '@/shared/lib/api';
+import { apiGet, getErrorMessage } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { onlyChangedFields } from '@/shared/lib/apiHelpers';
 import { useToastStore } from '@/stores/useToastStore';
@@ -2564,6 +2564,21 @@ export function DetailDrawer({
   // nullable property does not survive into a callback, and a plain const does.
   const linkedChangeOrderId = order?.reference_change_order_id ?? null;
   const linkedContractId = order?.affected_contract_id ?? null;
+  // A change order that was rejected, cancelled or withdrawn is dead: the
+  // variation order may take a replacement, and the old one stays listed.
+  const linkedCoQ = useQuery({
+    queryKey: ['variations', 'linked-co-status', linkedChangeOrderId],
+    queryFn: () => apiGet<{ status: string }>(`/v1/changeorders/${linkedChangeOrderId}`),
+    enabled: Boolean(linkedChangeOrderId) && order?.status !== 'voided',
+    retry: false,
+  });
+  const linkedCoDead = ['rejected', 'cancelled', 'withdrawn'].includes(linkedCoQ.data?.status ?? '');
+  const previousCoIds: string[] = Array.isArray(order?.metadata?.previous_change_order_ids)
+    ? (order?.metadata?.previous_change_order_ids as unknown[]).filter((x): x is string => typeof x === 'string')
+    : [];
+  const voidReasonText = typeof order?.metadata?.void_reason === 'string' ? order.metadata.void_reason : '';
+  const [voidOpen, setVoidOpen] = useState(false);
+  const [voidReason, setVoidReason] = useState('');
 
   const chainNotice = request
     ? notices.find((n) => n.id === request.notice_id) ?? null
@@ -2673,8 +2688,10 @@ export function DetailDrawer({
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
   const voidMut = useMutation({
-    mutationFn: () => voidVO(selected.id),
+    mutationFn: () => voidVO(selected.id, voidReason.trim()),
     onSuccess: () => {
+      setVoidOpen(false);
+      setVoidReason('');
       qc.invalidateQueries({ queryKey: ['variations'] });
       addToast({ type: 'success', title: t('variations.vo_voided', { defaultValue: 'Order voided' }) });
     },
@@ -2686,7 +2703,9 @@ export function DetailDrawer({
       qc.invalidateQueries({ queryKey: ['variations'] });
       addToast({
         type: 'success',
-        title: t('variations.linked_co_created', { defaultValue: 'Linked change order created' }),
+        title: linkedCoDead
+          ? t('variations.linked_co_replaced', { defaultValue: 'Replacement change order created' })
+          : t('variations.linked_co_created', { defaultValue: 'Linked change order created' }),
       });
     },
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
@@ -3074,6 +3093,7 @@ export function DetailDrawer({
                   >
                     <ArrowRight size={12} />
                     {t('variations.linked_change_order', { defaultValue: 'Change order' })}
+                    {linkedCoDead && linkedCoQ.data ? ` (${linkedCoQ.data.status})` : ''}
                   </button>
                 ) : order.status !== 'voided' ? (
                   <Button
@@ -3086,6 +3106,28 @@ export function DetailDrawer({
                     {t('variations.create_linked_co', { defaultValue: 'Create linked change order' })}
                   </Button>
                 ) : null}
+                {linkedChangeOrderId && linkedCoDead && order.status !== 'voided' && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon={<Plus size={12} />}
+                    onClick={() => createLinkedCOMut.mutate()}
+                    loading={createLinkedCOMut.isPending}
+                  >
+                    {t('variations.replace_linked_co', { defaultValue: 'Create replacement change order' })}
+                  </Button>
+                )}
+                {previousCoIds.map((coId) => (
+                  <button
+                    key={coId}
+                    type="button"
+                    className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-secondary px-2.5 py-1.5 text-xs text-content-secondary hover:bg-surface-tertiary transition-colors"
+                    onClick={() => navigate(changeOrderDeepLink(coId))}
+                  >
+                    <ArrowRight size={12} />
+                    {t('variations.superseded_change_order', { defaultValue: 'Superseded change order' })}
+                  </button>
+                ))}
                 {/* The contract register reads ?highlight= since Issue #435's
                     navigation pass, so this lands on the contract the order
                     amends rather than on the register it lives in. */}
@@ -3100,6 +3142,15 @@ export function DetailDrawer({
                   </button>
                 )}
               </div>
+
+              {order.status === 'voided' && voidReasonText && (
+                <div className="rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm">
+                  <div className="text-xs uppercase tracking-wide text-content-tertiary">
+                    {t('variations.void_reason_shown', { defaultValue: 'Void reason' })}
+                  </div>
+                  <p className="mt-1 whitespace-pre-wrap text-content-primary">{voidReasonText}</p>
+                </div>
+              )}
 
               <div className="flex flex-wrap gap-2 pt-2 border-t border-border-light">
                 {order.status === 'issued' && (
@@ -3125,11 +3176,63 @@ export function DetailDrawer({
                   <Button
                     variant="danger"
                     icon={<XCircle size={14} />}
-                    onClick={() => voidMut.mutate()}
-                    loading={voidMut.isPending}
+                    onClick={() => setVoidOpen(true)}
                   >
                     {t('variations.void', { defaultValue: 'Void' })}
                   </Button>
+                )}
+                {voidOpen && (
+                  <WideModal
+                    open
+                    onClose={() => setVoidOpen(false)}
+                    title={t('variations.void_title', { defaultValue: 'Void variation order {{code}}?', code: order.code })}
+                    size="md"
+                    busy={voidMut.isPending}
+                    footer={
+                      <>
+                        <Button variant="ghost" onClick={() => setVoidOpen(false)} disabled={voidMut.isPending}>
+                          {t('common.cancel', { defaultValue: 'Cancel' })}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          disabled={voidReason.trim().length < 3}
+                          loading={voidMut.isPending}
+                          onClick={() => voidMut.mutate()}
+                        >
+                          {t('variations.void_confirm', { defaultValue: 'Void permanently' })}
+                        </Button>
+                      </>
+                    }
+                  >
+                    <p className="text-sm font-medium text-semantic-error">
+                      {t('variations.void_permanent', {
+                        defaultValue:
+                          'Voiding is permanent. A voided variation order cannot be reopened and its status cannot be restored.',
+                      })}
+                    </p>
+                    <p className="mt-2 text-sm text-content-secondary">
+                      {t('variations.void_alternatives', {
+                        defaultValue:
+                          'If you only need a different change order, do not void this order. A rejected, cancelled or withdrawn change order can be replaced by a new linked one, and a standalone change order can be linked to this variation order.',
+                      })}
+                    </p>
+                    <WideModalField
+                      label={t('variations.void_reason_label', { defaultValue: 'Reason (required)' })}
+                      htmlFor="vo-void-reason"
+                    >
+                      <textarea
+                        id="vo-void-reason"
+                        value={voidReason}
+                        onChange={(e) => setVoidReason(e.target.value)}
+                        rows={3}
+                        maxLength={2000}
+                        placeholder={t('variations.void_reason_placeholder', {
+                          defaultValue: 'Why is this variation order being voided?',
+                        })}
+                        className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+                      />
+                    </WideModalField>
+                  </WideModal>
                 )}
               </div>
             </>

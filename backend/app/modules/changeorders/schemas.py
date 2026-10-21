@@ -72,6 +72,18 @@ def _decimal_to_str(v: object) -> object:
 # ── Change Order schemas ─────────────────────────────────────────────────────
 
 
+class StandalonePreflightRow(BaseModel):
+    """One active variation order shown before a standalone change order is saved."""
+
+    id: UUID
+    code: str
+    title: str = ""
+    status: str
+    linked_change_order_id: UUID | None = None
+    linked_change_order_status: str | None = None
+    can_link: bool = True
+
+
 class ChangeOrderCreate(BaseModel):
     """Create a new change order."""
 

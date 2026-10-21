@@ -52,7 +52,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { listContracts } from '@/features/contracts/api';
-import { contractDeepLink, linkedVariationDeepLink } from '@/shared/lib/changeChainLinks';
+import { createLinkedCO } from '@/features/variations/api';
+import { contractDeepLink, linkedVariationDeepLink, variationOrderDeepLink } from '@/shared/lib/changeChainLinks';
 import { boqDeepLink, changeOrderWriteback, FINANCE_BUDGETS_LINK } from '@/shared/lib/awardChainLinks';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { ProvabilityGauge, EvidenceThreadPanel } from '@/features/claims-evidence';
@@ -65,10 +66,12 @@ import {
   advanceApproval,
   downloadChangeOrderPdf,
   downloadChangeOrderRegister,
+  fetchStandalonePreflight,
   getApprovals,
   isWritebackRefusal,
   startApprovalChain,
   type ApprovalRow,
+  type StandalonePreflightRow,
 } from './api';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildChangeordersInsights } from './changeordersInsights';
@@ -311,6 +314,11 @@ function CreateDialog({
   // backend subscriber revises the linked contract's total_value.
   const [contractId, setContractId] = useState('');
   const addToast = useToastStore((s) => s.addToast);
+  // Before a standalone order is saved the author sees the project's active
+  // variation orders. It is a check, not a block: linking and continuing as
+  // standalone are both one click, and continuing is recorded with who and when.
+  const [checkRows, setCheckRows] = useState<StandalonePreflightRow[] | null>(null);
+  const [checking, setChecking] = useState(false);
 
   const contractsQ = useQuery({
     queryKey: ['changeorders', 'contract-options', projectId],
@@ -326,7 +334,7 @@ function CreateDialog({
   );
 
   const mutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (acknowledged: boolean) =>
       apiPost<ChangeOrder>('/v1/changeorders/', {
         project_id: projectId,
         title,
@@ -334,7 +342,14 @@ function CreateDialog({
         reason_category: reason,
         schedule_impact_days: scheduleDays,
         currency,
-        ...(contractId ? { metadata: { contract_id: contractId } } : {}),
+        ...(contractId || acknowledged
+          ? {
+              metadata: {
+                ...(contractId ? { contract_id: contractId } : {}),
+                ...(acknowledged ? { standalone_overlap_acknowledged: true } : {}),
+              },
+            }
+          : {}),
       }),
     onSuccess: () => {
       onCreated();
@@ -349,8 +364,108 @@ function CreateDialog({
     },
   });
 
+  const linkMutation = useMutation({
+    mutationFn: (voId: string) => createLinkedCO(voId),
+    onSuccess: (vo) => {
+      onCreated();
+      onClose();
+      addToast({
+        type: 'success',
+        title: t('changeorders.preflight_linked', {
+          defaultValue: 'Change order created and linked to {{code}}',
+          code: vo.code,
+        }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
+    },
+  });
+
+  const onCreateClick = async () => {
+    setChecking(true);
+    try {
+      const rows = await fetchStandalonePreflight(projectId);
+      if (rows.length > 0) {
+        setCheckRows(rows);
+        return;
+      }
+    } catch {
+      // The check is advisory: if it cannot run, saving goes ahead.
+    } finally {
+      setChecking(false);
+    }
+    mutation.mutate(false);
+  };
+
+  const busy = mutation.isPending || linkMutation.isPending || checking;
+
   const fieldCls =
     'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+
+  if (checkRows) {
+    return (
+      <WideModal
+        open
+        onClose={onClose}
+        title={t('changeorders.preflight_title', { defaultValue: 'Check before saving a standalone change order' })}
+        size="lg"
+        busy={busy}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setCheckRows(null)} disabled={busy}>
+              {t('changeorders.preflight_back', { defaultValue: 'Back to the form' })}
+            </Button>
+            <Button variant="primary" disabled={busy} onClick={() => mutation.mutate(true)}>
+              {t('changeorders.preflight_continue', { defaultValue: 'Continue as standalone' })}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-content-secondary">
+          {t('changeorders.preflight_intro', {
+            defaultValue:
+              'This project has active variation orders. This is only a check and nothing is blocked. If your change order covers the same scope, link it to one of them. Otherwise continue as standalone.',
+          })}
+        </p>
+        <ul className="mt-3 space-y-2">
+          {checkRows.map((r) => (
+            <li
+              key={r.id}
+              className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm"
+            >
+              <a
+                href={variationOrderDeepLink(r.id)}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-oe-blue hover:underline"
+              >
+                {r.code}
+              </a>
+              <span className="min-w-0 flex-1 truncate text-content-primary">{r.title}</span>
+              <Badge variant="neutral">{r.status}</Badge>
+              {r.can_link ? (
+                <Button size="sm" variant="secondary" disabled={busy} onClick={() => linkMutation.mutate(r.id)}>
+                  {t('changeorders.preflight_link', { defaultValue: 'Link to this variation' })}
+                </Button>
+              ) : (
+                <span className="text-xs text-content-tertiary">
+                  {t('changeorders.preflight_link_unavailable', {
+                    defaultValue: 'Already has a live change order',
+                  })}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-content-tertiary">
+          {t('changeorders.preflight_ack_note', {
+            defaultValue: 'If you continue, your choice is recorded with your name and the time.',
+          })}
+        </p>
+      </WideModal>
+    );
+  }
 
   return (
     <WideModal
@@ -358,18 +473,18 @@ function CreateDialog({
       onClose={onClose}
       title={t('changeorders.new', { defaultValue: 'New Change Order' })}
       size="lg"
-      busy={mutation.isPending}
+      busy={busy}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={mutation.isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button
             variant="primary"
-            disabled={!title.trim() || mutation.isPending}
-            onClick={() => mutation.mutate()}
+            disabled={!title.trim() || busy}
+            onClick={() => void onCreateClick()}
           >
-            {mutation.isPending
+            {busy
               ? t('common.creating', { defaultValue: 'Creating...' })
               : t('common.create', { defaultValue: 'Create' })}
           </Button>

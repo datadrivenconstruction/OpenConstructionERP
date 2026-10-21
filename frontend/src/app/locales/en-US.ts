@@ -1461,6 +1461,7 @@ const resource = {
     "variations.daywork_updated": "Time and materials sheet updated",
     "variations.daywork_created": "Time and materials sheet created",
     "variations.edit_daywork": "Edit Time and materials",
+    "variations.void_alternatives": "If you only need a different change order, do not void this order. A rejected, canceled or withdrawn change order can be replaced by a new linked one, and a standalone change order can be linked to this variation order.",
     "benchmarks.disclaimer_v2": "Values represent DIN 276 KG 300+400 (construction plus technical systems) costs per m2 GFA, compiled from recognized public cost sources per region (listed under How these benchmarks work). Actual costs vary by location, specification and market conditions.",
     "gaeb.subtitle": "Exchange Bid Schedule data in GAEB DA XML format (X81 / X83 / X84)",
     "gaeb.select_boq": "Select Bid Schedule",
