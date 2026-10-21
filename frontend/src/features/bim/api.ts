@@ -26,6 +26,7 @@ import i18next from 'i18next';
 import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
+import { postWithUploadProgress } from '@/shared/lib/uploadWithProgress';
 import type { SandboxMatchRow, SandboxRule, SandboxRunResult, SandboxSkipRow } from './ruleSandbox';
 import type { PropertyFilterValue } from './ruleOperators';
 
@@ -1789,6 +1790,7 @@ export async function uploadCADFile(
   signal?: AbortSignal,
   conversionDepth?: 'standard' | 'medium' | 'complete',
   parentModelId?: string | null,
+  onProgress?: (percent: number) => void,
 ): Promise<BIMCadUploadResponse> {
   const formData = new FormData();
   formData.append('file', file);
@@ -1809,12 +1811,11 @@ export async function uploadCADFile(
 
   let response: Response;
   try {
-    response = await fetch(`/api/v1/bim_hub/upload-cad/?${params.toString()}`, {
-      method: 'POST',
-      headers,
-      body: formData,
-      signal,
-    });
+    const url = `/api/v1/bim_hub/upload-cad/?${params.toString()}`;
+    // fetch cannot report how much of the body has left the browser; XHR can.
+    response = onProgress
+      ? await postWithUploadProgress(url, headers, formData, onProgress, signal)
+      : await fetch(url, { method: 'POST', headers, body: formData, signal });
   } catch (networkErr) {
     // Re-throw AbortError as-is so callers can distinguish cancellation
     if (networkErr instanceof DOMException && networkErr.name === 'AbortError') throw networkErr;

@@ -265,6 +265,11 @@ export interface BIMModelData {
   /** Stable error id surfaced as a top-level field by the backend
    *  (mirrors `metadata.error_code` for convenience).  Added in v2.6.29. */
   error_code?: string | null;
+  /** While `status === 'processing'`: the step the server conversion is on, when it began (ISO)
+   *  and the seconds one conversion may take. */
+  conversion_stage?: string | null;
+  conversion_started_at?: string | null;
+  conversion_timeout_s?: number | null;
   /** Disk usage of conversion artifacts (GLB/DAE/parquet/thumbnails)
    *  for this model, in megabytes.  `null` when the storage probe
    *  failed.  Added in v2.6.29. */
