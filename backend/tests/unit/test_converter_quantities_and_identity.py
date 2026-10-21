@@ -397,6 +397,7 @@ def test_a_failed_takeoff_conversion_names_the_converter_report(
     monkeypatch.setattr(cad_import, "ensure_converter_async", _ensure)
     monkeypatch.setattr(ddc_runner, "run_converter", _failing_dwg_run(json.dumps({"error": error}), seen))
     monkeypatch.delenv("OE_DWG_CONVERT_TIMEOUT_S", raising=False)
+    monkeypatch.delenv("OE_CONVERT_TIMEOUT_S", raising=False)
     src = tmp_path / "plan.dwg"
     src.write_bytes(b"AC1032")
 
@@ -409,4 +410,4 @@ def test_a_failed_takeoff_conversion_names_the_converter_report(
     assert table is None
     assert expected in detail
     assert "installed" not in detail
-    assert seen["timeout"] == 900
+    assert seen["timeout"] == 1800

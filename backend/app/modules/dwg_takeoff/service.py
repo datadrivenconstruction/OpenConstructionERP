@@ -123,8 +123,14 @@ def _legacy_stale_cutoff_seconds() -> int:
     ``processing``, so anything running today has a non-NULL value from its
     first moment.
     """
-    convert_timeout = int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "900"))
+    convert_timeout = _dwg_convert_timeout_s()
     return max(convert_timeout * 2, 600)
+
+
+def _dwg_convert_timeout_s() -> int:
+    from app.modules.boq.ddc_runner import convert_timeout_s
+
+    return convert_timeout_s("dwg")
 
 
 _STALE_CONVERSION_MESSAGE = (
@@ -1647,7 +1653,7 @@ class DwgTakeoffService:
         # DWG conversion can take minutes on a large drawing and longer on a busy
         # server (a 1.3 MB plan: 177 s alone, about 290 s under load).
         # Overridable via env for very large sets or slow boxes.
-        convert_timeout_s = int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "900"))
+        convert_timeout_s = _dwg_convert_timeout_s()
         work_dir = _Path(file_path).resolve().with_name(_Path(file_path).stem + "_dwg_work")
         try:
             try:
@@ -1670,8 +1676,8 @@ class DwgTakeoffService:
                     (
                         f"DWG conversion timed out after {convert_timeout_s}s. "
                         "Large drawings can need longer: raise the limit by setting "
-                        "OE_DWG_CONVERT_TIMEOUT_S on the server, for example "
-                        "OE_DWG_CONVERT_TIMEOUT_S=1800, and upload again."
+                        "OE_CONVERT_TIMEOUT_S on the server, for example "
+                        "OE_CONVERT_TIMEOUT_S=3600, and upload again."
                     ),
                 )
                 return
@@ -1696,7 +1702,7 @@ class DwgTakeoffService:
                     await self._mark_failed(
                         drawing_id,
                         "convert_timeout",
-                        f"DWG conversion stopped at the {convert_timeout_s}s limit. Raise OE_DWG_CONVERT_TIMEOUT_S "
+                        f"DWG conversion stopped at the {convert_timeout_s}s limit. Raise OE_CONVERT_TIMEOUT_S "
                         "on the server, or upload the drawing as DXF.",
                     )
                 else:
