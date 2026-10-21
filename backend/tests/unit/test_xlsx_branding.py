@@ -347,18 +347,38 @@ def test_the_app_logo_stands_in_when_the_document_logo_will_not_decode(use_profi
     assert (ws._images[0].width, ws._images[0].height) == (60, 60)
 
 
-def test_svg_logo_is_rasterised(use_profile) -> None:
-    use_profile({**_PROFILE, "document_logo_data_url": _svg_data_url(_SVG)})
+def test_svg_logo_prints_the_png_the_browser_made_of_it(use_profile) -> None:
+    use_profile(
+        {
+            **_PROFILE,
+            "document_logo_data_url": _svg_data_url(_SVG),
+            "document_logo_png_data_url": _png_data_url(200, 50),
+        }
+    )
     wb, ws = _sample()
 
     apply_company_header(ws, title="Log")
     blob = _save(wb)
 
     assert len(ws._images) == 1
+    assert (ws._images[0].width, ws._images[0].height) == (180, 45)
     with zipfile.ZipFile(io.BytesIO(blob)) as archive:
         media = [name for name in archive.namelist() if name.startswith("xl/media/")]
         assert media == ["xl/media/image1.png"]
         assert archive.read(media[0])[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def test_svg_logo_without_its_png_falls_back_to_the_app_logo(use_profile) -> None:
+    use_profile(
+        {**_PROFILE, "document_logo_data_url": _svg_data_url(_SVG)},
+        branding={"logo_data_url": _png_data_url(64, 64)},
+    )
+    wb, ws = _sample()
+
+    apply_company_header(ws, title="Log")
+
+    assert len(ws._images) == 1
+    assert (ws._images[0].width, ws._images[0].height) == (60, 60)
 
 
 def test_broken_svg_logo_is_skipped_and_the_text_still_prints(use_profile) -> None:
