@@ -470,6 +470,54 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
     },
     "AE": copy.deepcopy(_FIDIC_GULF),
     "SA": copy.deepcopy(_FIDIC_GULF),
+    "ZA": {
+        "standard_form": "JBCC PBA 6.2 / NEC3-NEC4 ECC / GCC 2015",
+        "retention_percent": _figure(
+            "5",
+            "industry_practice",
+            "JBCC PBA 6.2, clause 11.1.2 (not checked against the published agreement)",
+            "Five percent is held where the contractor elects the fixed guarantee together with a five percent "
+            "payment reduction; under the variable guarantee nothing is withheld, and without any security the "
+            "employer may withhold up to ten percent of the contract sum. NEC Option X16 and the GCC leave the "
+            "figure to the Contract Data. The JBCC clause numbers were not checked against the published agreement.",
+        ),
+        "retention_cap_percent": _figure(
+            "5",
+            "industry_practice",
+            "JBCC PBA 6.2, clause 11.1.2 (not checked against the published agreement)",
+            "The fixed guarantee route stops the payment reduction at five percent of the contract value. "
+            "The clause number was not checked against the published agreement.",
+        ),
+        "retention_release_split": _figure(
+            _split(("substantial_completion", "50"), ("final_completion", "100")),
+            "industry_practice",
+            "JBCC PBA 6.2, clause 25.12 (not checked against the published agreement); GCC 2015 retention money",
+            "As reported for the JBCC, the held money is released with the final payment certificate and not at "
+            "the end of the defects period; this split pays half at completion and the rest at final "
+            "completion. The clause number was not checked against the published agreement, and the other "
+            "forms release on their own Contract Data terms.",
+        ),
+        "payment_period_days": _figure(
+            14,
+            "industry_practice",
+            "JBCC PBA 6.2, clause 25.10 (not checked against the published agreement)",
+            "The JBCC pays a certificate within 14 days. NEC makes payment due three weeks after the "
+            "assessment date, and the GCC sets its own period in the Contract Data; neither figure was "
+            "checked against the published form.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "industry_practice",
+            "JBCC PBA 6.2, clause 25.2 and the Contract Data",
+            "The principal agent values the work at monthly intervals unless the Contract Data states another.",
+        ),
+        "certificate_name": _figure(
+            "Payment Certificate",
+            "industry_practice",
+            "JBCC PBA 6.2, clauses 25.2 and 25.7.1 (not checked against the published agreement)",
+            "The principal agent issues a payment certificate for each valuation.",
+        ),
+    },
     "IN": {
         "standard_form": None,
         "retention_percent": _figure(
