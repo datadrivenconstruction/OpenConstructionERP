@@ -49327,6 +49327,7 @@ const resource = {
     "onboarding.look_admin_note": "Администратор бол «Хэрэглэх» үүнийг ажлын талбарын өгөгдмөл болгон хадгална.",
     "onboarding.look_mock_header": "Төслийн тойм",
     "onboarding.look_mock_card": "Төсөв",
+    "onboarding.step_look": "Харагдах байдал",
     "modules.pp_name_aus": "Австралийн барилгын багц",
     "modules.pp_name_austria_at": "Барилгын багц: Австри",
     "modules.pp_name_brazil_sinapi": "Бразилийн барилгын багц",

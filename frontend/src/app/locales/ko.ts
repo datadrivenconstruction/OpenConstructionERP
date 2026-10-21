@@ -49987,6 +49987,7 @@ const resource = {
     "onboarding.look_admin_note": "관리자는 ‘적용’ 시 작업 공간의 기본값으로도 저장됩니다.",
     "onboarding.look_mock_header": "프로젝트 개요",
     "onboarding.look_mock_card": "예산",
+    "onboarding.step_look": "모양",
     "modules.pp_name_aus": "호주 건설 팩",
     "modules.pp_name_austria_at": "오스트리아 건설 팩",
     "modules.pp_name_brazil_sinapi": "브라질 건설 팩",

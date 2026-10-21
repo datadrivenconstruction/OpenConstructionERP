@@ -46820,6 +46820,7 @@ const resource = {
     "onboarding.ready_pack_other_markets": "Ou comece a partir de um modelo de mercado",
     "onboarding.ready_pack_set_up_here": "Configurar isso para mim",
     "onboarding.page_title": "Primeiros passos",
+    "onboarding.step_look": "Aparência",
     "modules.pp_name_aus": "Pacote de Construção da Austrália",
     "modules.pp_name_austria_at": "Pacote de Construção: Áustria",
     "modules.pp_name_brazil_sinapi": "Pacote de Construção do Brasil",

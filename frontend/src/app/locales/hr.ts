@@ -49904,6 +49904,7 @@ const resource = {
     "onboarding.look_admin_note": "Kao administrator, Primijeni ovo postavlja i kao zadano za vaš radni prostor.",
     "onboarding.look_mock_header": "Pregled projekta",
     "onboarding.look_mock_card": "Proračun",
+    "onboarding.step_look": "Izgled",
     "modules.pp_name_aus": "Građevinski paket Australija",
     "modules.pp_name_austria_at": "Građevinski paket Austrija",
     "modules.pp_name_brazil_sinapi": "Građevinski paket Brazil",

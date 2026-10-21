@@ -51124,6 +51124,7 @@ const resource = {
     "onboarding.look_admin_note": "Jako administrator, „Zastosuj” ustawia to także jako domyślne dla Twojego obszaru roboczego.",
     "onboarding.look_mock_header": "Przegląd projektu",
     "onboarding.look_mock_card": "Budżet",
+    "onboarding.step_look": "Wygląd",
     "modules.pp_name_aus": "Pakiet budowlany Australia",
     "modules.pp_name_austria_at": "Pakiet budowlany Austria",
     "modules.pp_name_brazil_sinapi": "Pakiet budowlany Brazylia",

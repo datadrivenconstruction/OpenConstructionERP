@@ -49728,6 +49728,7 @@ const resource = {
     "onboarding.look_admin_note": "Администратор катары «Колдонуу» муну жумуш мейкиндигинин демейки маанисине да айлантат.",
     "onboarding.look_mock_header": "Долбоорго сереп",
     "onboarding.look_mock_card": "Бюджет",
+    "onboarding.step_look": "Көрүнүш",
     "modules.pp_name_aus": "Австралия курулуш пакети",
     "modules.pp_name_austria_at": "Австрия курулуш пакети",
     "modules.pp_name_brazil_sinapi": "Бразилия курулуш пакети",

@@ -52148,6 +52148,7 @@ const resource = {
     "onboarding.look_admin_note": "Als Administrator machen Sie mit „Anwenden“ dies auch zum Standard für Ihren Arbeitsbereich.",
     "onboarding.look_mock_header": "Projektübersicht",
     "onboarding.look_mock_card": "Budget",
+    "onboarding.step_look": "Darstellung",
     "modules.pp_name_aus": "Australien-Baupaket",
     "modules.pp_name_austria_at": "Österreich-Baupaket",
     "modules.pp_name_brazil_sinapi": "Brasilien-Baupaket",

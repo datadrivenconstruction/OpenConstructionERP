@@ -49659,6 +49659,7 @@ const resource = {
     "onboarding.look_admin_note": "Ως διαχειριστής, η Εφαρμογή ορίζει αυτή την εμφάνιση και ως προεπιλογή του χώρου εργασίας σας.",
     "onboarding.look_mock_header": "Επισκόπηση έργου",
     "onboarding.look_mock_card": "Προϋπολογισμός",
+    "onboarding.step_look": "Εμφάνιση",
     "modules.pp_name_aus": "Πακέτο Κατασκευών Αυστραλίας",
     "modules.pp_name_austria_at": "Πακέτο Κατασκευών: Αυστρία",
     "modules.pp_name_brazil_sinapi": "Πακέτο Κατασκευών Βραζιλίας",

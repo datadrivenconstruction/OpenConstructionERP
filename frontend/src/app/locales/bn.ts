@@ -49955,6 +49955,7 @@ const resource = {
     "onboarding.look_admin_note": "প্রশাসক হিসেবে «প্রয়োগ করুন» এটিকে আপনার ওয়ার্কস্পেসের ডিফল্টও করে দেয়।",
     "onboarding.look_mock_header": "প্রকল্পের সারসংক্ষেপ",
     "onboarding.look_mock_card": "বাজেট",
+    "onboarding.step_look": "চেহারা",
     "modules.pp_name_aus": "অস্ট্রেলিয়া নির্মাণ প্যাক",
     "modules.pp_name_austria_at": "অস্ট্রিয়া নির্মাণ প্যাক",
     "modules.pp_name_brazil_sinapi": "ব্রাজিল নির্মাণ প্যাক",

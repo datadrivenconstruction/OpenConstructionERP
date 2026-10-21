@@ -50863,6 +50863,7 @@ const resource = {
     "onboarding.look_admin_note": "Jako správce také tlačítkem Použít nastavíte tento vzhled jako výchozí pro svůj pracovní prostor.",
     "onboarding.look_mock_header": "Přehled projektu",
     "onboarding.look_mock_card": "Rozpočet",
+    "onboarding.step_look": "Vzhled",
     "modules.pp_name_aus": "Stavební balíček Austrálie",
     "modules.pp_name_austria_at": "Stavební balíček Rakousko",
     "modules.pp_name_brazil_sinapi": "Stavební balíček Brazílie",

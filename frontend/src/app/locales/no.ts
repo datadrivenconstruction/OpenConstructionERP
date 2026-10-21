@@ -49705,6 +49705,7 @@ const resource = {
     "onboarding.look_admin_note": "Som administrator gjør Bruk dette også til standard for arbeidsområdet ditt.",
     "onboarding.look_mock_header": "Prosjektoversikt",
     "onboarding.look_mock_card": "Budsjett",
+    "onboarding.step_look": "Utseende",
     "modules.pp_name_aus": "Byggepakke Australia",
     "modules.pp_name_austria_at": "Byggepakke Østerrike",
     "modules.pp_name_brazil_sinapi": "Byggepakke Brasil",

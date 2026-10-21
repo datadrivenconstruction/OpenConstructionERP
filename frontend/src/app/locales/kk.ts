@@ -49572,6 +49572,7 @@ const resource = {
     "onboarding.look_admin_note": "Әкімші ретінде «Қолдану» мұны жұмыс аймағының әдепкі мәні етіп те сақтайды.",
     "onboarding.look_mock_header": "Жобаға шолу",
     "onboarding.look_mock_card": "Бюджет",
+    "onboarding.step_look": "Сыртқы түрі",
     "modules.pp_name_aus": "Австралия құрылыс пакеті",
     "modules.pp_name_austria_at": "Аустрия құрылыс пакеті",
     "modules.pp_name_brazil_sinapi": "Бразилия құрылыс пакеті",

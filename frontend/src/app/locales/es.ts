@@ -52558,6 +52558,7 @@ const resource = {
     "onboarding.look_admin_note": "Como administrador, «Aplicar» también lo establece como predeterminado de su espacio de trabajo.",
     "onboarding.look_mock_header": "Resumen del proyecto",
     "onboarding.look_mock_card": "Presupuesto",
+    "onboarding.step_look": "Apariencia",
     "modules.pp_name_aus": "Paquete de Construcción de Australia",
     "modules.pp_name_austria_at": "Paquete de Construcción de Austria",
     "modules.pp_name_brazil_sinapi": "Paquete de Construcción de Brasil",

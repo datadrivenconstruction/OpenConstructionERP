@@ -49703,6 +49703,7 @@ const resource = {
     "onboarding.look_admin_note": "Като администратор, „Приложи“ задава този вид и като подразбиране за работното ви пространство.",
     "onboarding.look_mock_header": "Преглед на проекта",
     "onboarding.look_mock_card": "Бюджет",
+    "onboarding.step_look": "Изглед",
     "modules.pp_name_aus": "Строителен пакет Австралия",
     "modules.pp_name_austria_at": "Строителен пакет Австрия",
     "modules.pp_name_brazil_sinapi": "Строителен пакет Бразилия",

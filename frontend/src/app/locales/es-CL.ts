@@ -47413,6 +47413,7 @@ const resource = {
     "onboarding.ready_pack_other_markets": "O empieza desde una plantilla de mercado",
     "onboarding.ready_pack_set_up_here": "Configurar esto por mí",
     "onboarding.page_title": "Primeros pasos",
+    "onboarding.step_look": "Apariencia",
     "modules.pp_name_aus": "Paquete de Construcción de Australia",
     "modules.pp_name_brazil_sinapi": "Paquete de Construcción de Brasil",
     "modules.pp_name_china_gbt50500": "Paquete de Construcción de China",

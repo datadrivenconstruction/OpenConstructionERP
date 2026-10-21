@@ -41504,6 +41504,7 @@ const resource = {
     "onboarding.look_admin_note": "As an administrator, Apply also makes this the default for your workspace.",
     "onboarding.look_mock_header": "Project overview",
     "onboarding.look_mock_card": "Budget",
+    "onboarding.step_look": "Appearance",
     "settings.semantic_title": "Semantic search",
     "settings.semantic_desc": "Finds cost items, positions and documents by meaning, not only by exact words. Off by default to keep the app fast and light.",
     "settings.semantic_memory": "Needs about {{required}} MB of free memory when on. Available now: {{available}} MB.",

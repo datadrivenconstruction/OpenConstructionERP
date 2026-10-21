@@ -51926,6 +51926,7 @@ const resource = {
     "onboarding.look_admin_note": "管理员点击“应用”时，也会将其设为工作区默认。",
     "onboarding.look_mock_header": "项目概览",
     "onboarding.look_mock_card": "预算",
+    "onboarding.step_look": "外观",
     "modules.pp_name_aus": "澳大利亚建筑数据包",
     "modules.pp_name_austria_at": "奥地利建筑数据包",
     "modules.pp_name_brazil_sinapi": "巴西建筑数据包",

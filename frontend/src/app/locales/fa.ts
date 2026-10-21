@@ -49538,6 +49538,7 @@ const resource = {
     "onboarding.look_admin_note": "به‌عنوان مدیر، «اعمال» این ظاهر را پیش‌فرض فضای کاری شما هم می‌کند.",
     "onboarding.look_mock_header": "نمای کلی پروژه",
     "onboarding.look_mock_card": "بودجه",
+    "onboarding.step_look": "ظاهر",
     "modules.pp_name_aus": "بسته ساخت‌وساز استرالیا",
     "modules.pp_name_austria_at": "بسته ساخت‌وساز اتریش",
     "modules.pp_name_brazil_sinapi": "بسته ساخت‌وساز برزیل",

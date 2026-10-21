@@ -50772,6 +50772,7 @@ const resource = {
     "onboarding.look_admin_note": "Come amministratore, «Applica» lo imposta anche come predefinito per il tuo spazio di lavoro.",
     "onboarding.look_mock_header": "Panoramica del progetto",
     "onboarding.look_mock_card": "Budget",
+    "onboarding.step_look": "Aspetto",
     "modules.pp_name_aus": "Pacchetto Costruzioni Australia",
     "modules.pp_name_austria_at": "Pacchetto Costruzioni Austria",
     "modules.pp_name_brazil_sinapi": "Pacchetto Costruzioni Brasile",

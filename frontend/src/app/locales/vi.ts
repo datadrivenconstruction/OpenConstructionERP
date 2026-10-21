@@ -49465,6 +49465,7 @@ const resource = {
     "onboarding.look_admin_note": "Với vai trò quản trị viên, Áp dụng cũng đặt đây làm mặc định cho không gian làm việc của bạn.",
     "onboarding.look_mock_header": "Tổng quan dự án",
     "onboarding.look_mock_card": "Ngân sách",
+    "onboarding.step_look": "Giao diện",
     "modules.pp_name_aus": "Gói Xây dựng Úc",
     "modules.pp_name_austria_at": "Gói Xây dựng Áo",
     "modules.pp_name_brazil_sinapi": "Gói Xây dựng Brazil",

@@ -52545,6 +52545,7 @@ const resource = {
     "onboarding.look_admin_note": "بصفتك مسؤولًا، يجعل «تطبيق» هذا المظهر أيضًا الإعداد الافتراضي لمساحة عملك.",
     "onboarding.look_mock_header": "نظرة عامة على المشروع",
     "onboarding.look_mock_card": "الميزانية",
+    "onboarding.step_look": "المظهر",
     "modules.pp_name_aus": "حزمة إنشاءات أستراليا",
     "modules.pp_name_austria_at": "حزمة إنشاءات النمسا",
     "modules.pp_name_brazil_sinapi": "حزمة إنشاءات البرازيل",

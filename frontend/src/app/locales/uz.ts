@@ -51060,6 +51060,7 @@ const resource = {
     "onboarding.look_admin_note": "Administrator sifatida «Qo‘llash» buni ish maydoningiz uchun standart qilib ham saqlaydi.",
     "onboarding.look_mock_header": "Loyiha sharhi",
     "onboarding.look_mock_card": "Byudjet",
+    "onboarding.step_look": "Ko‘rinish",
     "modules.pp_name_aus": "Avstraliya qurilish paketi",
     "modules.pp_name_austria_at": "Avstriya qurilish paketi",
     "modules.pp_name_brazil_sinapi": "Braziliya qurilish paketi",

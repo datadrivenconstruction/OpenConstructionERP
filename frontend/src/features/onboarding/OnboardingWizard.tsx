@@ -1170,6 +1170,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
     t('onboarding.step_start', { defaultValue: 'Start' }),
     t('onboarding.step_profile', { defaultValue: 'Profile' }),
     t('onboarding.step_modules', { defaultValue: 'Modules' }),
+    t('onboarding.step_look', { defaultValue: 'Appearance' }),
     t('onboarding.step_data', { defaultValue: 'Data' }),
     t('onboarding.step_finish', { defaultValue: 'Finish' }),
   ];

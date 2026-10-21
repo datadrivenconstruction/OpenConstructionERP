@@ -52548,6 +52548,7 @@ const resource = {
     "onboarding.look_admin_note": "Como administrador, «Aplicar» também define isto como predefinição do seu espaço de trabalho.",
     "onboarding.look_mock_header": "Visão geral do projeto",
     "onboarding.look_mock_card": "Orçamento",
+    "onboarding.step_look": "Aparência",
     "modules.pp_name_aus": "Pacote de Construção da Austrália",
     "modules.pp_name_austria_at": "Pacote de Construção: Áustria",
     "modules.pp_name_brazil_sinapi": "Pacote de Construção do Brasil",

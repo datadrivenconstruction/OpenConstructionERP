@@ -49362,6 +49362,7 @@ const resource = {
     "onboarding.look_admin_note": "Sebagai administrator, Terapkan juga menjadikannya default untuk ruang kerja Anda.",
     "onboarding.look_mock_header": "Ringkasan proyek",
     "onboarding.look_mock_card": "Anggaran",
+    "onboarding.step_look": "Tampilan",
     "modules.pp_name_aus": "Paket Konstruksi Australia",
     "modules.pp_name_austria_at": "Paket Konstruksi Austria",
     "modules.pp_name_brazil_sinapi": "Paket Konstruksi Brasil",

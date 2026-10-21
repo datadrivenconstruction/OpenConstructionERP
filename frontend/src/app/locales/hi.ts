@@ -49633,6 +49633,7 @@ const resource = {
     "onboarding.look_admin_note": "व्यवस्थापक के रूप में, «लागू करें» इसे आपके कार्यक्षेत्र का डिफ़ॉल्ट भी बना देता है।",
     "onboarding.look_mock_header": "प्रोजेक्ट अवलोकन",
     "onboarding.look_mock_card": "बजट",
+    "onboarding.step_look": "रूप",
     "modules.pp_name_aus": "ऑस्ट्रेलिया निर्माण पैक",
     "modules.pp_name_austria_at": "ऑस्ट्रिया निर्माण पैक",
     "modules.pp_name_brazil_sinapi": "ब्राज़ील निर्माण पैक",

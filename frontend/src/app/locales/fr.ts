@@ -52187,6 +52187,7 @@ const resource = {
     "onboarding.look_admin_note": "En tant qu’administrateur, « Appliquer » en fait aussi le réglage par défaut de votre espace de travail.",
     "onboarding.look_mock_header": "Vue d’ensemble du projet",
     "onboarding.look_mock_card": "Budget",
+    "onboarding.step_look": "Apparence",
     "modules.pp_name_aus": "Pack Construction Australie",
     "modules.pp_name_austria_at": "Pack Construction Autriche",
     "modules.pp_name_brazil_sinapi": "Pack Construction Brésil",

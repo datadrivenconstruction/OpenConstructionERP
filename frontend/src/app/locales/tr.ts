@@ -50580,6 +50580,7 @@ const resource = {
     "onboarding.look_admin_note": "Yönetici olarak Uygula, bunu çalışma alanınızın varsayılanı da yapar.",
     "onboarding.look_mock_header": "Proje genel bakışı",
     "onboarding.look_mock_card": "Bütçe",
+    "onboarding.step_look": "Görünüm",
     "modules.pp_name_aus": "Avustralya İnşaat Paketi",
     "modules.pp_name_austria_at": "Avusturya İnşaat Paketi",
     "modules.pp_name_brazil_sinapi": "Brezilya İnşaat Paketi",

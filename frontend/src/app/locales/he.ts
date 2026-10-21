@@ -49896,6 +49896,7 @@ const resource = {
     "onboarding.look_admin_note": "כמנהל מערכת, «החל» קובע זאת גם כברירת מחדל של סביבת העבודה.",
     "onboarding.look_mock_header": "סקירת פרויקט",
     "onboarding.look_mock_card": "תקציב",
+    "onboarding.step_look": "מראה",
     "modules.pp_name_aus": "חבילת בנייה לאוסטרליה",
     "modules.pp_name_austria_at": "חבילת בנייה לאוסטריה",
     "modules.pp_name_brazil_sinapi": "חבילת בנייה לברזיל",

@@ -49457,6 +49457,7 @@ const resource = {
     "onboarding.look_admin_note": "ในฐานะผู้ดูแลระบบ การนำไปใช้จะตั้งค่านี้เป็นค่าเริ่มต้นของพื้นที่ทำงานด้วย",
     "onboarding.look_mock_header": "ภาพรวมโครงการ",
     "onboarding.look_mock_card": "งบประมาณ",
+    "onboarding.step_look": "รูปลักษณ์",
     "modules.pp_name_aus": "แพ็กก่อสร้างออสเตรเลีย",
     "modules.pp_name_austria_at": "แพ็กก่อสร้างออสเตรีย",
     "modules.pp_name_brazil_sinapi": "แพ็กก่อสร้างบราซิล",

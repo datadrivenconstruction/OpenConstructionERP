@@ -50320,6 +50320,7 @@ const resource = {
     "onboarding.look_admin_note": "Som administratör gör Tillämpa detta även till standard för din arbetsyta.",
     "onboarding.look_mock_header": "Projektöversikt",
     "onboarding.look_mock_card": "Budget",
+    "onboarding.step_look": "Utseende",
     "modules.pp_name_aus": "Byggpaket Australien",
     "modules.pp_name_austria_at": "Byggpaket Österrike",
     "modules.pp_name_brazil_sinapi": "Byggpaket Brasilien",

@@ -51525,6 +51525,7 @@ const resource = {
     "onboarding.look_admin_note": "Adminisztrátorként az Alkalmazás a munkaterület alapértelmezésévé is teszi ezt.",
     "onboarding.look_mock_header": "Projektáttekintés",
     "onboarding.look_mock_card": "Költségvetés",
+    "onboarding.step_look": "Megjelenés",
     "modules.pp_name_aus": "Ausztrál építőipari csomag",
     "modules.pp_name_austria_at": "Építőipari csomag: Ausztria",
     "modules.pp_name_brazil_sinapi": "Brazil építőipari csomag",

@@ -49977,6 +49977,7 @@ const resource = {
     "onboarding.look_admin_note": "Ca administrator, Aplică stabilește acest aspect și ca implicit pentru spațiul dumneavoastră de lucru.",
     "onboarding.look_mock_header": "Prezentare generală a proiectului",
     "onboarding.look_mock_card": "Buget",
+    "onboarding.step_look": "Aspect",
     "modules.pp_name_aus": "Pachet de construcții Australia",
     "modules.pp_name_austria_at": "Pachet de construcții Austria",
     "modules.pp_name_brazil_sinapi": "Pachet de construcții Brazilia",

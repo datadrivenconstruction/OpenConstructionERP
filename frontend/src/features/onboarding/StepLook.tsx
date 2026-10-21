@@ -208,7 +208,7 @@ function CardRadio({
       aria-label={label}
       tabIndex={tabStop ? 0 : -1}
       onClick={onSelect}
-      className={`flex w-28 shrink-0 flex-col gap-1.5 rounded-lg border-2 p-2 text-start transition-colors ${RING} ${
+      className={`flex w-full shrink-0 flex-col gap-1.5 rounded-lg sm:w-28 border-2 p-2 text-start transition-colors ${RING} ${
         checked ? 'border-oe-blue bg-oe-blue-subtle' : 'border-border-light hover:border-border'
       }`}
     >
@@ -281,7 +281,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
         <div className="min-w-0 space-y-5">
           <section>
             <h3 className="mb-2 text-sm font-semibold text-content-primary">{stylesLabel}</h3>
-            <RadioRow label={stylesLabel} className="flex flex-wrap gap-2">
+            <RadioRow label={stylesLabel} className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {APPEARANCE_PRESETS.map((p, i) => (
                 <CardRadio
                   key={p.id}
@@ -305,7 +305,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
 
           <section>
             <h3 className="mb-2 text-sm font-semibold text-content-primary">{menusLabel}</h3>
-            <RadioRow label={menusLabel} className="flex flex-wrap gap-2">
+            <RadioRow label={menusLabel} className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {MENU_PRESETS.map((p, i) => (
                 <CardRadio
                   key={p.id}

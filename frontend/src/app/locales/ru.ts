@@ -52198,6 +52198,7 @@ const resource = {
     "onboarding.look_admin_note": "Администратору «Применить» также задаёт этот вид по умолчанию для всего рабочего пространства.",
     "onboarding.look_mock_header": "Обзор проекта",
     "onboarding.look_mock_card": "Бюджет",
+    "onboarding.step_look": "Оформление",
     "modules.pp_name_aus": "Строительный пакет: Австралия",
     "modules.pp_name_austria_at": "Строительный пакет: Австрия",
     "modules.pp_name_brazil_sinapi": "Строительный пакет: Бразилия",

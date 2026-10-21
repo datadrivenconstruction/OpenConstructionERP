@@ -51665,6 +51665,7 @@ const resource = {
     "onboarding.look_admin_note": "Адміністратору «Застосувати» також задає цей вигляд за замовчуванням для робочого простору.",
     "onboarding.look_mock_header": "Огляд проєкту",
     "onboarding.look_mock_card": "Бюджет",
+    "onboarding.step_look": "Вигляд",
     "modules.pp_name_aus": "Будівельний пакет Австралія",
     "modules.pp_name_austria_at": "Будівельний пакет Австрія",
     "modules.pp_name_brazil_sinapi": "Будівельний пакет Бразилія",

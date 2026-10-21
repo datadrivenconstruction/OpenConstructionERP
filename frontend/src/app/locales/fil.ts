@@ -49514,6 +49514,7 @@ const resource = {
     "onboarding.look_admin_note": "Bilang administrator, ginagawa rin ng Ilapat ito na default ng iyong workspace.",
     "onboarding.look_mock_header": "Pangkalahatang-tanaw ng proyekto",
     "onboarding.look_mock_card": "Badyet",
+    "onboarding.step_look": "Itsura",
     "modules.pp_name_aus": "Construction Pack ng Australia",
     "modules.pp_name_austria_at": "Construction Pack ng Austria",
     "modules.pp_name_brazil_sinapi": "Construction Pack ng Brazil",

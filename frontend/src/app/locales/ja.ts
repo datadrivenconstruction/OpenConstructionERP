@@ -50880,6 +50880,7 @@ const resource = {
     "onboarding.look_admin_note": "管理者の場合、「適用」はワークスペースの既定にもなります。",
     "onboarding.look_mock_header": "プロジェクト概要",
     "onboarding.look_mock_card": "予算",
+    "onboarding.step_look": "外観",
     "modules.pp_name_aus": "オーストラリア建設パック",
     "modules.pp_name_austria_at": "オーストリア建設パック",
     "modules.pp_name_brazil_sinapi": "ブラジル建設パック",

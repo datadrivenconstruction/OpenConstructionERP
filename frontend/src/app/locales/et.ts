@@ -49631,6 +49631,7 @@ const resource = {
     "onboarding.look_admin_note": "Administraatorina muudab Rakenda selle ka teie tööruumi vaikeseadeks.",
     "onboarding.look_mock_header": "Projekti ülevaade",
     "onboarding.look_mock_card": "Eelarve",
+    "onboarding.step_look": "Välimus",
     "modules.pp_name_aus": "Austraalia ehituspakett",
     "modules.pp_name_austria_at": "Ehituspakett: Austria",
     "modules.pp_name_brazil_sinapi": "Brasiilia ehituspakett",

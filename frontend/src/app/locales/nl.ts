@@ -50498,6 +50498,7 @@ const resource = {
     "onboarding.look_admin_note": "Als beheerder maakt Toepassen dit ook de standaard voor uw werkruimte.",
     "onboarding.look_mock_header": "Projectoverzicht",
     "onboarding.look_mock_card": "Budget",
+    "onboarding.step_look": "Weergave",
     "modules.pp_name_aus": "Bouwpakket Australië",
     "modules.pp_name_austria_at": "Bouwpakket Oostenrijk",
     "modules.pp_name_brazil_sinapi": "Bouwpakket Brazilië",

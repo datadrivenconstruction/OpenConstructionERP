@@ -49530,6 +49530,7 @@ const resource = {
     "onboarding.look_admin_note": "Ylläpitäjänä Ota käyttöön asettaa tämän myös työtilasi oletukseksi.",
     "onboarding.look_mock_header": "Projektin yleiskatsaus",
     "onboarding.look_mock_card": "Budjetti",
+    "onboarding.step_look": "Ulkoasu",
     "modules.pp_name_aus": "Australian rakennuspaketti",
     "modules.pp_name_austria_at": "Rakennuspaketti: Itävalta",
     "modules.pp_name_brazil_sinapi": "Brasilian rakennuspaketti",

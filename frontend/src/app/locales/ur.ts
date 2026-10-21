@@ -49667,6 +49667,7 @@ const resource = {
     "onboarding.look_admin_note": "بطور منتظم، «لاگو کریں» اسے آپ کے ورک اسپیس کا ڈیفالٹ بھی بنا دیتا ہے۔",
     "onboarding.look_mock_header": "پروجیکٹ کا جائزہ",
     "onboarding.look_mock_card": "بجٹ",
+    "onboarding.step_look": "ظاہری شکل",
     "modules.pp_name_aus": "آسٹریلیا تعمیراتی پیکج",
     "modules.pp_name_austria_at": "آسٹریا تعمیراتی پیکج",
     "modules.pp_name_brazil_sinapi": "برازیل تعمیراتی پیکج",
