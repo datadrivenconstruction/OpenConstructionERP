@@ -303,6 +303,19 @@ class TestChecks:
         _root, _stamp, text, _ = await stamped(make_input(simplified=simplified))
         assert codes_of(text) == []
 
+    @pytest.mark.parametrize(
+        ("checked_at", "future"),
+        [
+            # 21:30 UTC on the 18th is already 00:30 on the 19th in Riyadh.
+            (dt.datetime(2026, 10, 18, 21, 30, tzinfo=dt.UTC), False),
+            (dt.datetime(2026, 10, 18, 20, 30, tzinfo=dt.UTC), True),
+        ],
+    )
+    async def test_the_issue_date_is_read_on_the_riyadh_calendar(self, checked_at, future):
+        _root, _stamp, text, _ = await stamped(make_input())
+        found = [i.code for i in checks.check_document(text, profile_vat=SELLER_VAT, now=checked_at)]
+        assert ("BR-KSA-04" in found) is future
+
     async def test_tampering_with_an_amount_breaks_the_stamp(self):
         _root, _stamp, text, _ = await stamped(make_input())
         tampered = text.replace(

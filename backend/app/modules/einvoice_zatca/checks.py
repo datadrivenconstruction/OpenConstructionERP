@@ -70,6 +70,8 @@ GROUP_ADVISORY = "advisory"
 
 CENT = Decimal("0.01")
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+#: Kingdom time, a fixed +03:00 all year: the calendar an issue date is written in.
+_RIYADH = dt.timezone(dt.timedelta(hours=3))
 _TIME = re.compile(r"^\d{2}:\d{2}:\d{2}$")
 
 
@@ -226,6 +228,11 @@ class _Checker:
     def add(self, code: str, group: str, message: str, path: str = "") -> None:
         self.issues.append(ZatcaIssue(code=code, group=group, message=message, path=path))
 
+    def _riyadh_today(self) -> str:
+        """Today in Riyadh: from 21:00 UTC the Kingdom is already on the next day."""
+        now = self.now if self.now.tzinfo else self.now.replace(tzinfo=dt.UTC)
+        return now.astimezone(_RIYADH).date().isoformat()
+
     # Header ──────────────────────────────────────────────────────────────────
 
     def header(self) -> None:
@@ -243,7 +250,7 @@ class _Checker:
         issue_date = d.text(r, _cbc("IssueDate"))
         if not _DATE.match(issue_date):
             self.add("BR-KSA-F-01", g, f"The issue date {issue_date!r} must be YYYY-MM-DD.", "cbc:IssueDate")
-        elif issue_date > self.now.date().isoformat():
+        elif issue_date > self._riyadh_today():
             self.add("BR-KSA-04", g, f"The issue date {issue_date} is in the future.", "cbc:IssueDate")
         if not _TIME.match(d.text(r, _cbc("IssueTime"))):
             self.add("BR-KSA-70", g, "The issue time (KSA-25) must be hh:mm:ss.", "cbc:IssueTime")
@@ -851,8 +858,7 @@ def issue_moment(text: str) -> dt.datetime | None:
         doc = _Doc(root)
         day = doc.text(root, _cbc("IssueDate"))
         clock = doc.text(root, _cbc("IssueTime"))
-        zone = dt.timezone(dt.timedelta(hours=3))
-        return dt.datetime.fromisoformat(f"{day}T{clock}").replace(tzinfo=zone)
+        return dt.datetime.fromisoformat(f"{day}T{clock}").replace(tzinfo=_RIYADH)
     except (c14n.XmlError, ValueError):
         return None
 
