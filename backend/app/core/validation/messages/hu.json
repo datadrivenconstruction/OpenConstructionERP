@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "A(z) {agreement} alvállalkozói megállapodás és a(z) {contract} szerződés ugyanannak az alvállalkozásnak tűnik, így a pénzügyek kétszer számolhatják el",
       "suggestion": "Kapcsolja össze őket, ha ugyanarra az alvállalkozásra vonatkoznak, vagy jelölje őket különbözőként"
+    },
+    "contact_linked": {
+      "fail": "A {contact} kapcsolattartó nincs összekapcsolva a partnerlistával, ezért ugyanaz a személy kétszer is szerepelhet",
+      "suggestion": "Adjon e-mail-címet a kapcsolattartóhoz, hogy össze lehessen párosítani a listával"
     }
   },
   "submittal": {

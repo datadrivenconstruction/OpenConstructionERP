@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Der Nachunternehmervertrag {agreement} und der Vertrag {contract} scheinen derselbe Nachunternehmerauftrag zu sein, daher könnten die Finanzen ihn doppelt zählen",
       "suggestion": "Verknüpfen Sie beide, wenn es derselbe Auftrag ist, oder markieren Sie sie als verschieden"
+    },
+    "contact_linked": {
+      "fail": "Die Kontaktperson {contact} ist nicht mit dem Kontaktverzeichnis verknüpft, daher kann dieselbe Person doppelt erfasst sein",
+      "suggestion": "Hinterlegen Sie eine E-Mail-Adresse für die Kontaktperson, damit sie dem Verzeichnis zugeordnet werden kann"
     }
   },
   "submittal": {

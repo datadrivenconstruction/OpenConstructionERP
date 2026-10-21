@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Subkontrak {agreement} dan kontrak {contract} tampaknya merupakan subkontrak yang sama, sehingga keuangan mungkin menghitungnya dua kali",
       "suggestion": "Hubungkan jika keduanya merupakan subkontrak yang sama, atau tandai sebagai berbeda"
+    },
+    "contact_linked": {
+      "fail": "Kontak person {contact} belum terhubung dengan direktori kontak, sehingga orang yang sama bisa tercatat dua kali",
+      "suggestion": "Tambahkan alamat email pada kontak person agar dapat dicocokkan dengan direktori"
     }
   },
   "submittal": {

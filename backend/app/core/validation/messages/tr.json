@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "{agreement} alt yüklenici sözleşmesi ile {contract} sözleşmesi aynı işi temsil ediyor gibi görünüyor; finansal hesaplarda iki kez sayılabilir",
       "suggestion": "Aynı alt yüklenici sözleşmesiyse ilişkilendirin, değilse farklı olduklarını işaretleyin"
+    },
+    "contact_linked": {
+      "fail": "{contact} irtibat kişisi kişi rehberine bağlı değil, bu yüzden aynı kişi iki kez kaydedilmiş olabilir",
+      "suggestion": "Irtibat kişisine e-posta adresi ekleyin, böylece rehberle eşleştirilebilsin"
     }
   },
   "submittal": {

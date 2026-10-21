@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Onderaannemingsovereenkomst {agreement} en contract {contract} lijken dezelfde onderaanneming te betreffen, waardoor deze financieel dubbel kan worden geteld",
       "suggestion": "Koppel ze als het dezelfde onderaanneming betreft, of markeer ze als verschillend"
+    },
+    "contact_linked": {
+      "fail": "Contactpersoon {contact} is niet gekoppeld aan de contactenlijst, waardoor dezelfde persoon dubbel kan worden opgeslagen",
+      "suggestion": "Voeg een e-mailadres toe aan de contactpersoon zodat deze met de lijst kan worden gekoppeld"
     }
   },
   "submittal": {

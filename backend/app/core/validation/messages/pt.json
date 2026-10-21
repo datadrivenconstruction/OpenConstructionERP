@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "O subcontrato {agreement} e o contrato {contract} parecem representar o mesmo subcontrato; os valores financeiros podem ser contabilizados duas vezes",
       "suggestion": "Vincule-os se forem o mesmo subcontrato ou indique que são distintos"
+    },
+    "contact_linked": {
+      "fail": "O contacto {contact} não está associado ao diretório de contactos, pelo que a mesma pessoa pode ficar registada duas vezes",
+      "suggestion": "Adicione um endereço de e-mail ao contacto para que possa ser associado ao diretório"
     }
   },
   "submittal": {

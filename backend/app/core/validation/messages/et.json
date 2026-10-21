@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Alltöövõtt {agreement} ja leping {contract} näivad olevat sama alltöövõtt, seega võidakse seda finantsarvestuses kaks korda lugeda",
       "suggestion": "Siduge need, kui tegemist on sama alltöövõtuga, või märkige need erinevaks"
+    },
+    "contact_linked": {
+      "fail": "Kontaktisik {contact} ei ole seotud kontaktide kataloogiga, seega võib sama isik olla kirjas kaks korda",
+      "suggestion": "Lisage kontaktisikule e-posti aadress, et see saaks kataloogiga sobitada"
     }
   },
   "submittal": {

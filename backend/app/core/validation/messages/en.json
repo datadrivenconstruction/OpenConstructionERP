@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "The subcontract {agreement} and the contract {contract} look like the same subcontract, so the finances may count it twice",
       "suggestion": "Link them if they are the same subcontract, or mark them as different"
+    },
+    "contact_linked": {
+      "fail": "The contact person {contact} is not linked to the contacts directory, so the same person may be kept twice",
+      "suggestion": "Add an email address to the contact person so it can be matched to the directory"
     }
   },
   "submittal": {

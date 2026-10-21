@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Aliurakka {agreement} ja sopimus {contract} näyttävät samalta aliurakalta, joten taloustiedot voivat laskea sen kahdesti",
       "suggestion": "Yhdistä ne, jos ne ovat sama aliurakka, tai merkitse ne erillisiksi"
+    },
+    "contact_linked": {
+      "fail": "Yhteyshenkilö {contact} ei ole linkitetty yhteystietoluetteloon, joten sama henkilö voi olla tallennettu kahdesti",
+      "suggestion": "Lisää yhteyshenkilölle sähköpostiosoite, jotta hänet voidaan yhdistää luetteloon"
     }
   },
   "submittal": {

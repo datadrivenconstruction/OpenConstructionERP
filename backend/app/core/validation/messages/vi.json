@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Thỏa thuận thầu phụ {agreement} và hợp đồng {contract} có vẻ là cùng một hợp đồng thầu phụ nên dữ liệu tài chính có thể tính hai lần",
       "suggestion": "Liên kết chúng nếu cùng một hợp đồng thầu phụ hoặc đánh dấu là khác nhau"
+    },
+    "contact_linked": {
+      "fail": "Người liên hệ {contact} chưa được liên kết với danh bạ liên hệ, nên cùng một người có thể bị ghi trùng hai lần",
+      "suggestion": "Thêm địa chỉ email cho người liên hệ để có thể đối chiếu với danh bạ"
     }
   },
   "submittal": {

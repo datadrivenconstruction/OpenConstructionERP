@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Umowa podwykonawcza {agreement} i kontrakt {contract} wyglądają na tę samą umowę, więc jej wartości mogą zostać policzone dwukrotnie",
       "suggestion": "Powiąż je, jeśli dotyczą tej samej umowy podwykonawczej, lub oznacz jako różne"
+    },
+    "contact_linked": {
+      "fail": "Osoba kontaktowa {contact} nie jest powiązana z katalogiem kontaktów, więc ta sama osoba może zostać zapisana dwukrotnie",
+      "suggestion": "Dodaj osobie kontaktowej adres e-mail, aby można ją było dopasować do katalogu"
     }
   },
   "submittal": {

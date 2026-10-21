@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Podugovor {agreement} i ugovor {contract} izgledaju kao isti podugovor, pa ga financije mogu obračunati dvaput",
       "suggestion": "Povežite ih ako je riječ o istom podugovoru ili ih označite kao različite"
+    },
+    "contact_linked": {
+      "fail": "Kontakt osoba {contact} nije povezana s imenikom kontakata, pa ista osoba može biti upisana dvaput",
+      "suggestion": "Dodajte kontakt osobi e-adresu kako bi se mogla uskladiti s imenikom"
     }
   },
   "submittal": {

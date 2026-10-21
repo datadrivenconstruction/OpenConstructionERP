@@ -1216,6 +1216,7 @@ class TenderingService:
             company_name=str(raw.get("company_name", "")),
             email=str(raw.get("email", "")),
             subcontractor_id=raw.get("subcontractor_id"),
+            contact_id=raw.get("contact_id"),
             status=str(raw.get("status", "pending")),
             sent_at=raw.get("sent_at"),
             last_error=raw.get("last_error"),
@@ -1227,23 +1228,44 @@ class TenderingService:
         package = await self.get_package(package_id)
         return [self._recipient_to_response(r) for r in self._read_recipients(package)]
 
-    async def add_recipient(self, package_id: uuid.UUID, data: RecipientCreate) -> RecipientResponse:
+    async def add_recipient(
+        self,
+        package_id: uuid.UUID,
+        data: RecipientCreate,
+        tenant_id: str | None = None,
+    ) -> RecipientResponse:
         """Add a subcontractor to a package's distribution list.
 
         De-duplicates on a case-insensitive email match so the same firm is
         not invited twice; returns the existing entry if already present.
+
+        The entry carries ``contact_id`` of the directory contact: the one named
+        in ``data.contact_id`` (404 unless it belongs to ``tenant_id``), else the
+        same-tenant contact with that email (none is created: a recipient is a firm).
         """
+        from app.modules.contacts import bridge  # noqa: PLC0415
+
         package = await self.get_package(package_id)
         recipients = self._read_recipients(package)
         email_norm = data.email.strip().lower()
         for r in recipients:
             if str(r.get("email", "")).strip().lower() == email_norm:
                 return self._recipient_to_response(r)
+        contact_id: str | None = None
+        if data.contact_id is not None:
+            contact = await bridge.get_contact_in_tenant(self.session, data.contact_id, tenant_id=tenant_id)
+            if contact is None:
+                raise HTTPException(status_code=404, detail="Contact not found")
+            contact_id = str(contact.id)
+        else:
+            resolved = await bridge.find_contact_by_email(self.session, data.email, tenant_id=tenant_id)
+            contact_id = str(resolved.id) if resolved is not None else None
         entry = {
             "id": str(uuid.uuid4()),
             "company_name": data.company_name,
             "email": data.email,
             "subcontractor_id": data.subcontractor_id,
+            "contact_id": contact_id,
             "status": "pending",
             "sent_at": None,
             "last_error": None,

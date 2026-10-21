@@ -132,6 +132,13 @@ class SubcontractorContact(Base):
         nullable=False,
         index=True,
     )
+    # FK to oe_contacts_contact lives in the migration only (ON DELETE SET NULL),
+    # like Subcontractor.contact_id, to keep metadata free of cross-module coupling.
+    contact_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        nullable=True,
+        index=True,
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str | None] = mapped_column(String(120), nullable=True)
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)

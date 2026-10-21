@@ -11643,6 +11643,17 @@ class SubcontractUnlinkedContractTwin(_SubcontractRule):
     check_name = "check_unlinked_contract_twin"
 
 
+class SubcontractContactLinked(_SubcontractRule):
+    """A subcontractor contact person should be one record in the contacts directory."""
+
+    rule_id = "subcontract.contact_linked"
+    name = "Subcontractor Contact Linked"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a subcontractor contact person not linked to the contacts directory."
+    check_name = "check_contact_linked"
+
+
 # ── Submittals (submission gate) ────────────────────────────────────────────
 #
 # Submission is where a submittal stops being a draft and starts consuming
@@ -12183,6 +12194,7 @@ def register_builtin_rules() -> None:
         (SubcontractRetentionWithinBounds(), ["subcontract"]),
         (SubcontractInsuranceValidAtStart(), ["subcontract"]),
         (SubcontractUnlinkedContractTwin(), ["subcontract"]),
+        (SubcontractContactLinked(), ["subcontract"]),
         # Submittals (submission gate)
         # Registered into the "submittal" set, which
         # SubmittalService._validate_submittal passes on submit and on the

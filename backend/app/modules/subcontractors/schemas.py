@@ -321,6 +321,7 @@ class SubcontractorContactResponse(BaseModel):
 
     id: UUID
     subcontractor_id: UUID
+    contact_id: UUID | None = None
     name: str
     role: str | None = None
     email: str | None = None

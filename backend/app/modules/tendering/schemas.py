@@ -373,6 +373,9 @@ class RecipientCreate(BaseModel):
     # Optional link back to the Subcontractor Directory entry the recipient
     # was picked from, so the UI can cross-reference prequalification status.
     subcontractor_id: str | None = Field(default=None, max_length=64)
+    # Optional directory contact the recipient is. It must belong to the caller's
+    # tenant; without it the contact is resolved from the email.
+    contact_id: UUID | None = None
 
     @field_validator("email")
     @classmethod
@@ -389,6 +392,7 @@ class RecipientResponse(BaseModel):
     company_name: str
     email: str
     subcontractor_id: str | None = None
+    contact_id: str | None = None
     # "pending" before the first send, then "sent" or "failed".
     status: str = "pending"
     sent_at: str | None = None

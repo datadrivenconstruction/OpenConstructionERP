@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Underentreprenadavtalet {agreement} och kontraktet {contract} verkar avse samma underentreprenad, så ekonomin kan räkna den två gånger",
       "suggestion": "Koppla ihop dem om de avser samma underentreprenad eller markera dem som olika"
+    },
+    "contact_linked": {
+      "fail": "Kontaktpersonen {contact} är inte kopplad till kontaktregistret, så samma person kan finnas med två gånger",
+      "suggestion": "Lägg till en e-postadress för kontaktpersonen så att den kan matchas mot registret"
     }
   },
   "submittal": {

@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Subdodavatelská dohoda {agreement} a smlouva {contract} zřejmě představují tutéž subdodávku, takže finance ji mohou započítat dvakrát",
       "suggestion": "Propojte je, pokud jde o stejnou subdodávku, nebo je označte jako odlišné"
+    },
+    "contact_linked": {
+      "fail": "Kontaktní osoba {contact} není propojena s adresářem kontaktů, takže stejná osoba může být evidována dvakrát",
+      "suggestion": "Doplňte kontaktní osobě e-mailovou adresu, aby ji bylo možné spárovat s adresářem"
     }
   },
   "submittal": {

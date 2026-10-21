@@ -417,7 +417,7 @@ async def create_subcontractor_contact(
 ) -> SubcontractorContactResponse:
     """Add a contact under a subcontractor."""
     svc = SubcontractorService(session)
-    entity = await svc.create_contact(data)
+    entity = await svc.create_contact(data, tenant_id=str(_user))
     return SubcontractorContactResponse.model_validate(entity)
 
 
@@ -431,7 +431,7 @@ async def update_subcontractor_contact(
 ) -> SubcontractorContactResponse:
     """Update a subcontractor contact."""
     svc = SubcontractorService(session)
-    entity = await svc.update_contact(contact_id, data)
+    entity = await svc.update_contact(contact_id, data, tenant_id=str(_user))
     return SubcontractorContactResponse.model_validate(entity)
 
 

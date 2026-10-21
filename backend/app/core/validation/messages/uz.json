@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "{agreement} subpudrat kelishuvi va {contract} shartnomasi bir xil subpudratga oʻxshaydi, shu sababli moliyaviy hisobda u ikki marta hisoblanishi mumkin",
       "suggestion": "Agar ular bitta subpudratga tegishli boʻlsa, ularni bogʻlang; aks holda ularni alohida deb belgilang"
+    },
+    "contact_linked": {
+      "fail": "{contact} kontakt shaxsi kontaktlar katalogiga bog'lanmagan, shuning uchun bir xil shaxs ikki marta yozilishi mumkin",
+      "suggestion": "Kontakt shaxsga elektron pochta manzilini qo'shing, shunda u katalog bilan solishtirilishi mumkin"
     }
   },
   "submittal": {

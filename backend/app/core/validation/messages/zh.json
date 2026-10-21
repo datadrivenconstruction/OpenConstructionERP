@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "分包协议 {agreement} 与合同 {contract} 似乎对应同一分包，可能导致财务重复计入。",
       "suggestion": "如属同一分包，请将两者关联；否则请标记为不同分包。"
+    },
+    "contact_linked": {
+      "fail": "联系人 {contact} 未关联到联系人目录，因此同一人可能被重复录入",
+      "suggestion": "为联系人添加电子邮件地址，以便与目录进行匹配"
     }
   },
   "submittal": {

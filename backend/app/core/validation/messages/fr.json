@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Le contrat de sous-traitance {agreement} et le contrat {contract} semblent correspondre au même engagement ; celui-ci pourrait donc être comptabilisé deux fois",
       "suggestion": "Reliez-les s'il s'agit du même contrat de sous-traitance, ou indiquez qu'ils sont distincts"
+    },
+    "contact_linked": {
+      "fail": "Le contact {contact} n'est pas lié au répertoire des contacts, la même personne risque donc d'être saisie deux fois",
+      "suggestion": "Renseignez une adresse e-mail pour ce contact afin de pouvoir le rapprocher du répertoire"
     }
   },
   "submittal": {

@@ -786,6 +786,21 @@ def match_unlinked_twins(agreements: list[dict[str, Any]], contracts: list[dict[
     return pairs
 
 
+def check_contact_linked(agreement: dict[str, Any]) -> list[Finding]:
+    """A contact person of the subcontractor is not linked to the contacts directory.
+
+    Reads ``unlinked_contacts``, the names the service fills. One finding per person.
+    """
+    names = agreement.get("unlinked_contacts")
+    if not isinstance(names, list):
+        return []
+    return [
+        Finding(element_ref=str(name), params={"contact": str(name)}, details={"contact": str(name)})
+        for name in names
+        if name
+    ]
+
+
 def check_unlinked_contract_twin(agreement: dict[str, Any]) -> list[Finding]:
     """This agreement looks like a subcontract also written, unlinked, in contracts.
 

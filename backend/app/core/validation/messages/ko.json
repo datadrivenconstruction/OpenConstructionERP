@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "하도급 계약 {agreement}와 계약 {contract}가 같은 하도급 계약으로 보여 금액이 이중 집계될 수 있습니다",
       "suggestion": "같은 하도급 계약이면 연결하고, 다른 계약이면 서로 다름을 표시하세요"
+    },
+    "contact_linked": {
+      "fail": "담당자 {contact}이(가) 연락처 디렉터리와 연결되어 있지 않아 같은 사람이 두 번 기록될 수 있습니다",
+      "suggestion": "담당자에 이메일 주소를 추가하면 디렉터리와 대조할 수 있습니다"
     }
   },
   "submittal": {

@@ -78,7 +78,7 @@ import logging
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.contacts.models import Contact
@@ -163,8 +163,8 @@ async def _find_contact_by_email(
     """
     if not email:
         return None
-    normalised = email.lower()
-    stmt = select(Contact).where(Contact.primary_email == normalised).where(Contact.is_active.is_(True))
+    normalised = email.strip().lower()
+    stmt = select(Contact).where(func.lower(Contact.primary_email) == normalised).where(Contact.is_active.is_(True))
     if tenant_id is not None:
         owner = str(tenant_id)
         stmt = stmt.where(or_(Contact.tenant_id == owner, Contact.created_by == owner))
@@ -309,6 +309,65 @@ async def ensure_contact_for_buyer(
     )
     buyer.contact_id = contact.id
     return contact
+
+
+async def ensure_contact_for_subcontractor_person(
+    session: AsyncSession,
+    *,
+    name: str | None,
+    email: str | None,
+    phone: str | None,
+    tenant_id: str | None,
+) -> Contact | None:
+    """Link a subcontractor contact person to the directory, or return ``None``.
+
+    Without an email there is nothing to match on, so no contact is created and
+    the caller leaves its row unlinked. With one, an existing contact of the same
+    tenant with that email (case-insensitive) is reused; otherwise a
+    ``natural_person`` contact tagged ``subcontractor`` is created. Two existing
+    contacts are never merged. Never commits.
+    """
+    normalised = (email or "").strip().lower()
+    if not normalised:
+        return None
+    existed = await _find_contact_by_email(session, normalised, tenant_id=tenant_id) is not None
+    contact = await ensure_contact_for_person(
+        session,
+        full_name=name,
+        email=normalised,
+        phone=phone,
+        contact_type="subcontractor",
+        module_tag=SUBCONTRACTOR_TAG,
+        tenant_id=tenant_id,
+    )
+    if not existed and contact.party_kind is None:
+        contact.party_kind = "natural_person"
+        await session.flush()
+    return contact
+
+
+async def find_contact_by_email(
+    session: AsyncSession,
+    email: str | None,
+    *,
+    tenant_id: str | None,
+) -> Contact | None:
+    """Return the active contact of ``tenant_id`` with this email (case-insensitive), or ``None``."""
+    return await _find_contact_by_email(session, email or "", tenant_id=tenant_id)
+
+
+async def get_contact_in_tenant(
+    session: AsyncSession,
+    contact_id: uuid.UUID,
+    *,
+    tenant_id: str | None,
+) -> Contact | None:
+    """Return the contact when it belongs to ``tenant_id`` (None scope = any), else ``None``."""
+    stmt = select(Contact).where(Contact.id == contact_id)
+    if tenant_id is not None:
+        owner = str(tenant_id)
+        stmt = stmt.where(or_(Contact.tenant_id == owner, Contact.created_by == owner))
+    return (await session.execute(stmt)).scalar_one_or_none()
 
 
 async def _email_held_by_another(session: AsyncSession, email: str, contact_id: uuid.UUID) -> bool:

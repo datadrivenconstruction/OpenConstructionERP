@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Mukhang iisang subcontract ang {agreement} at ang kontratang {contract}, kaya maaaring madoble ang bilang nito sa pananalapi",
       "suggestion": "I-link ang mga ito kung iisang subcontract o markahang magkaiba"
+    },
+    "contact_linked": {
+      "fail": "Ang contact person na {contact} ay hindi naka-link sa directory ng mga contact, kaya maaaring doble ang pagkakatala ng iisang tao",
+      "suggestion": "Maglagay ng email address sa contact person upang maitugma ito sa directory"
     }
   },
   "submittal": {

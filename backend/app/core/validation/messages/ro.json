@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Subcontractul {agreement} și contractul {contract} par să reprezinte aceeași subcontractare, astfel încât finanțele o pot număra de două ori",
       "suggestion": "Legați-le dacă sunt aceeași subcontractare sau marcați-le ca diferite"
+    },
+    "contact_linked": {
+      "fail": "Persoana de contact {contact} nu este legată de registrul de contacte, așa că aceeași persoană poate fi înregistrată de două ori",
+      "suggestion": "Adăugați o adresă de e-mail persoanei de contact, ca să poată fi potrivită cu registrul"
     }
   },
   "submittal": {

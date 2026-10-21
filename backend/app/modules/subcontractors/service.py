@@ -916,6 +916,7 @@ class SubcontractorService:
     async def create_contact(
         self,
         data: SubcontractorContactCreate,
+        tenant_id: str | None = None,
     ) -> SubcontractorContact:
         entity = SubcontractorContact(
             subcontractor_id=data.subcontractor_id,
@@ -926,6 +927,7 @@ class SubcontractorService:
             primary=data.primary,
         )
         await self.contacts.create(entity)
+        await self._link_contact_person(entity, tenant_id)
         # PII-safe log line - never interpolate raw e-mail / phone.
         logger.info(
             "subcontractor_contact.created id=%s sub=%s role=%s email=%s phone=%s",
@@ -941,6 +943,7 @@ class SubcontractorService:
         self,
         contact_id: uuid.UUID,
         data: SubcontractorContactUpdate,
+        tenant_id: str | None = None,
     ) -> SubcontractorContact:
         entity = await self.contacts.get_by_id(contact_id)
         if entity is None:
@@ -949,6 +952,10 @@ class SubcontractorService:
         if fields:
             await self.contacts.update_fields(contact_id, **fields)
             await self.session.refresh(entity)
+            if "email" in fields:
+                entity.contact_id = None
+            if "email" in fields or entity.contact_id is None:
+                await self._link_contact_person(entity, tenant_id)
             # Log only field *names* - values may carry new PII the
             # operator should not see in centralised log storage.
             logger.info(
@@ -957,6 +964,30 @@ class SubcontractorService:
                 sorted(fields.keys()),
             )
         return entity
+
+    async def _link_contact_person(self, entity: SubcontractorContact, tenant_id: str | None) -> None:
+        """Point ``entity.contact_id`` at the directory contact with its email, in the caller's tenant.
+
+        No email leaves the row unlinked. A bridge failure never blocks the save.
+        """
+        if not (entity.email or "").strip():
+            entity.contact_id = None
+            return
+        from app.modules.contacts import bridge  # noqa: PLC0415
+
+        try:
+            async with self.session.begin_nested():
+                contact = await bridge.ensure_contact_for_subcontractor_person(
+                    self.session,
+                    name=entity.name,
+                    email=entity.email,
+                    phone=entity.phone,
+                    tenant_id=tenant_id,
+                )
+                entity.contact_id = contact.id if contact is not None else None
+        except Exception:  # noqa: BLE001
+            logger.exception("Contacts bridge failed for subcontractor contact %s; left unlinked", entity.id)
+        await self.session.flush()
 
     async def delete_contact(self, contact_id: uuid.UUID) -> None:
         await self.contacts.delete(contact_id)
@@ -1393,6 +1424,7 @@ class SubcontractorService:
             "as_of": datetime.now(UTC).date().isoformat(),
             "contract_id": str(agreement.contract_id) if agreement.contract_id else None,
             "twin_candidates": await self._twin_candidates_for(agreement),
+            "unlinked_contacts": await self._unlinked_contact_names(agreement.subcontractor_id),
             "work_packages": [
                 {
                     "name": package.name,
@@ -1403,6 +1435,17 @@ class SubcontractorService:
                 for package in packages
             ],
         }
+
+    async def _unlinked_contact_names(self, subcontractor_id: uuid.UUID) -> list[str]:
+        """Names of the subcontractor's contact persons not linked to the directory."""
+        lister = getattr(self.contacts, "list_by_subcontractor", None)
+        if lister is None:
+            return []
+        try:
+            rows = list(await lister(subcontractor_id))
+        except Exception:  # pragma: no cover - stub repositories in unit tests
+            return []
+        return [row.name for row in rows if getattr(row, "contact_id", None) is None]
 
     # ── One subcontract written twice ───────────────────────────────────
 

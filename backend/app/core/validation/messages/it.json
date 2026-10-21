@@ -844,6 +844,10 @@
     "unlinked_contract_twin": {
       "fail": "Il subappalto {agreement} e il contratto {contract} sembrano essere lo stesso subappalto, per cui la contabilità potrebbe contarlo due volte",
       "suggestion": "Collegarli se sono lo stesso subappalto, oppure contrassegnarli come diversi"
+    },
+    "contact_linked": {
+      "fail": "La persona di contatto {contact} non è collegata alla rubrica dei contatti, quindi la stessa persona potrebbe risultare registrata due volte",
+      "suggestion": "Aggiungi un indirizzo e-mail alla persona di contatto così può essere abbinata alla rubrica"
     }
   },
   "submittal": {
