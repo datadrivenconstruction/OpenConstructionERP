@@ -32,6 +32,7 @@ editor runs it on every visit (boq/change_review.py).
 """
 
 import logging
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING
 
 from app.core.events import Event, event_bus
@@ -40,7 +41,6 @@ if TYPE_CHECKING:
     import asyncio
     import uuid
     from collections.abc import Callable
-    from datetime import date
     from decimal import Decimal
     from typing import Any
 
@@ -735,6 +735,11 @@ async def _handle_schedule_progress(event: Event) -> None:
         logger.exception("Error handling schedule.activity.progress_updated")
 
 
+def _utc_today() -> date:
+    """Today on the UTC calendar: one day for every server, whatever its local zone."""
+    return datetime.now(UTC).date()
+
+
 async def _write_progress_snapshot(
     project_id: "uuid.UUID",
     *,
@@ -755,7 +760,6 @@ async def _write_progress_snapshot(
     and work orders through their ``selectin`` relationships, on every save,
     for schedules of thousands of activities.
     """
-    from datetime import date
     from decimal import Decimal
 
     from sqlalchemy import delete, select
@@ -769,7 +773,7 @@ async def _write_progress_snapshot(
     from app.modules.schedule.progress_math import WorkCalendar
     from app.modules.schedule.progress_service import ScheduleProgressService
 
-    today = date.today()
+    today = _utc_today()
 
     async with async_session_factory() as session:
         data_dates = [
