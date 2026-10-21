@@ -2129,3 +2129,15 @@ def test_the_seeder_is_exported_for_the_module_loader():
     # Imported by name in the service; a rename here would only show up at
     # runtime on a fresh deployment, which is the worst place to find it.
     assert callable(seed_payment_regimes)
+
+
+def test_south_african_public_fallback_regimes_load_with_a_thirty_day_clock():
+    by_code = {r["code"]: r for r in PAYMENT_REGIMES}
+    for code in ("za_pfma_tr_8_2_3", "za_mfma_s65"):
+        regime = by_code[code]
+        assert regime["country_code"] == "ZA"
+        assert regime["final_date_days"] == 30
+        assert regime["final_date_day_basis"] == "calendar"
+        assert regime["interest_fixed_percent"] is None
+        assert regime["interest_margin_percent"] is None
+        assert "not covered" in regime["notes"]

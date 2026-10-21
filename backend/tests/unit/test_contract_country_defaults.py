@@ -621,3 +621,35 @@ def test_an_unknown_or_foreign_subdivision_reads_the_country_row() -> None:
 
 def test_a_subdivision_never_lends_its_row_to_another_country() -> None:
     assert resolve_contract_defaults("US", "CA-MB")["subdivision_code"] is None
+
+
+# ── South Africa ───────────────────────────────────────────────────────
+
+
+def test_south_africa_has_its_own_row_and_sa_is_still_saudi_arabia() -> None:
+    za = resolve_contract_defaults("ZA")
+    assert za is not None
+    assert COUNTRY_CONTRACT_DEFAULTS["ZA"]["standard_form"] == "JBCC PBA 6.2 / NEC3-NEC4 ECC / GCC 2015"
+    assert za["values"]["retention_percent"] == "5"
+    assert za["values"]["retention_cap_percent"] == "5"
+    assert za["values"]["payment_period_days"] == 14
+    assert za["values"]["valuation_interval"] == "monthly"
+    assert za["values"]["certificate_name"] == "Payment Certificate"
+    sa = resolve_contract_defaults("SA")
+    assert sa is not None
+    assert COUNTRY_CONTRACT_DEFAULTS["SA"]["standard_form"] == "FIDIC Red Book 2017"
+    assert sa["values"]["payment_period_days"] == 56
+
+
+def test_south_african_release_events_are_canonical_and_clause_numbers_are_not_sold_as_read() -> None:
+    from app.modules.contracts.retention import CANONICAL_RELEASE_EVENTS
+
+    row = COUNTRY_CONTRACT_DEFAULTS["ZA"]
+    split = row["retention_release_split"]["value"]
+    assert {step["event"] for step in split} <= set(CANONICAL_RELEASE_EVENTS)
+    assert split[-1]["release_percent_of_held"] == "100"
+    for field in CONTRACT_DEFAULT_FIELDS:
+        figure = row[field]
+        assert figure["source"] == "industry_practice", field
+    for field in ("retention_percent", "retention_cap_percent", "payment_period_days"):
+        assert "checked against the published" in row[field]["note"], field

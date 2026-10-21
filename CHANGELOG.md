@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- South Africa contract payment defaults for the JBCC, NEC and GCC forms (retention, payment period, valuation interval, certificate name), with notes that mark the clause numbers not yet checked against the published agreements. The payment clock gets the 30 day fallback rules for national and provincial departments (PFMA) and for municipalities (MFMA).
+
 ## [18.8.0] - 2026-10-20
 
 ### Added

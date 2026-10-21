@@ -2759,6 +2759,77 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
             "statutory payment period."
         ),
     },
+    {
+        "code": "za_pfma_tr_8_2_3",
+        "jurisdiction": "South Africa (national and provincial departments)",
+        "country_code": "ZA",
+        "statute": "Public Finance Management Act 1 of 1999 and the Treasury Regulations",
+        "statute_reference": (
+            "Treasury Regulation 8.2.3; PFMA section 38(1)(f), https://www.treasury.gov.za/legislation/pfma/"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "contract",
+        "interest_reference_rate": "",
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "",
+        "notes": (
+            "The fallback clock for an invoice owed by a national or provincial department. The accounting "
+            "officer settles all payments within 30 days from receipt of the invoice, unless the contract or "
+            "another agreement determines otherwise, so enter the day the department received the invoice as "
+            "the application date. The 30 days are counted as calendar days. Public entities, public "
+            "universities and other bodies that fall under their own legislation are not covered, and "
+            "municipalities follow the Municipal Finance Management Act instead. The row sets no statutory "
+            "interest; interest follows the contract. Treasury reporting on late payment is taken from "
+            "National Treasury publications, not from the text of the regulation, which was not read in full."
+        ),
+    },
+    {
+        "code": "za_mfma_s65",
+        "jurisdiction": "South Africa (municipalities)",
+        "country_code": "ZA",
+        "statute": "Local Government: Municipal Finance Management Act 56 of 2003",
+        "statute_reference": ("section 65(2)(e), https://www.treasury.gov.za/legislation/mfma/"),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "contract",
+        "interest_reference_rate": "",
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "",
+        "notes": (
+            "The fallback clock for an invoice owed by a municipality. The accounting officer must take all "
+            "reasonable steps to ensure that all money owing by the municipality is paid within 30 days of "
+            "receiving the relevant invoice or statement, unless prescribed otherwise for certain categories "
+            "of expenditure, so enter the day the municipality received the invoice as the application date. "
+            "The 30 days are counted as calendar days. National and provincial departments follow the "
+            "Public Finance Management Act and its Treasury Regulations instead; municipal entities, public "
+            "universities and other bodies under their own legislation are not covered. The row sets no "
+            "statutory interest; interest follows the contract. The wording of the section is taken from "
+            "National Treasury replies to Parliament, not from the Act itself."
+        ),
+    },
 )
 
 REGIME_CODES: tuple[str, ...] = tuple(regime["code"] for regime in PAYMENT_REGIMES)
