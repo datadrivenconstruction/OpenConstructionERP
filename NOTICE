@@ -540,6 +540,23 @@ Inter
     under it and not use the reserved name; this subset is not
     distributed under the Inter name as a typeface.
 
+IBM Plex Sans
+    frontend/public/assets/vendor/fonts/webfonts/ibm-plex-sans-*.woff2
+    Licence text:
+    frontend/public/assets/vendor/fonts/licenses/ibm-plex-sans-OFL.txt
+
+    Copyright 2019 IBM Corp. All rights reserved. Licensed under the SIL
+    Open Font License, Version 1.1, on the terms above.
+
+Source Sans 3
+    frontend/public/assets/vendor/fonts/webfonts/source-sans-3-*.woff2
+    Licence text:
+    frontend/public/assets/vendor/fonts/licenses/source-sans-3-OFL.txt
+
+    Copyright 2010-2020 Adobe (http://www.adobe.com/), with Reserved Font
+    Name 'Source'. Licensed under the SIL Open Font License, Version 1.1,
+    on the terms above.
+
 Plus Jakarta Sans
     frontend/public/assets/vendor/fonts/webfonts/plus-jakarta-sans-*.woff2
     Licence text:

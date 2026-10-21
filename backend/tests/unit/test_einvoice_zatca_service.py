@@ -635,6 +635,13 @@ async def clearance_document(session, profile, text):
 
 @pytest.mark.asyncio
 class TestThroughTheClearanceModule:
+    @pytest.fixture(autouse=True)
+    def _clock_at_the_fixture_date(self, monkeypatch):
+        # The invoices are issued at NOW. The 24-hour reporting-deadline rule reads the
+        # wall clock, so without this the simplified invoice turns "late" two days on
+        # and the test starts failing for no change in the code under test.
+        monkeypatch.setattr(clearance, "_now", lambda: NOW.astimezone(dt.UTC))
+
     async def test_a_standard_invoice_is_cleared_and_keeps_the_stamped_xml(self, session, fake):
         profile = await sa_profile(session)
         await onboarded(session, fake, profile)

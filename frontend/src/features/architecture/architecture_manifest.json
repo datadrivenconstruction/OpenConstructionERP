@@ -276235,10 +276235,10 @@
     },
     {
       "name": "inbox",
-      "ts_files": 9,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 9
+      "test_files": 3,
+      "total_files": 10
     },
     {
       "name": "inside",
@@ -276487,10 +276487,10 @@
     },
     {
       "name": "processes",
-      "ts_files": 11,
+      "ts_files": 12,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 11
+      "total_files": 12
     },
     {
       "name": "procurement",
@@ -276732,10 +276732,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 34,
+      "ts_files": 35,
       "css_files": 0,
       "test_files": 12,
-      "total_files": 34
+      "total_files": 35
     },
     {
       "name": "setup",
@@ -278552,7 +278552,7 @@
     "total_schemas": 4108,
     "total_python_files": 2805,
     "frontend_features": 209,
-    "frontend_ts_files": 3568,
+    "frontend_ts_files": 3571,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

@@ -187,6 +187,7 @@ export function AppearanceStyleCard() {
                 type="button"
                 role="radio"
                 aria-checked={active}
+                aria-label={presetName(preset.id)}
                 onClick={() => setAppearance(preset.value)}
                 className={`block h-full w-full rounded-xl border-2 p-1.5 text-start transition-colors duration-normal ease-oe ${
                   active ? 'border-oe-blue bg-oe-blue-subtle' : 'border-transparent hover:border-border'
