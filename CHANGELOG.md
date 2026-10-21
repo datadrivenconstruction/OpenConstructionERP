@@ -7,16 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
-## [Unreleased]
-
-### Added
-
-- South Africa contract payment defaults for the JBCC, NEC and GCC forms (retention, payment period, valuation interval, certificate name), with notes that mark the clause numbers not yet checked against the published agreements. The payment clock gets the 30 day fallback rules for national and provincial departments (PFMA) and for municipalities (MFMA).
-
 ## [18.8.0] - 2026-10-20
 
 ### Added
 
+- South Africa contract payment defaults for the JBCC, NEC and GCC forms (retention, payment period, valuation interval, certificate name), with notes that mark the clause numbers not yet checked against the published agreements. The payment clock gets the 30 day fallback rules for national and provincial departments (PFMA) and for municipalities (MFMA).
 - Appearance styles in Settings. Five ready styles, plus your own choice of accent colour (seven, all readable in light and dark), font (Inter, IBM Plex Sans, Source Sans 3 or the system font), density and corners. The look applies at once and survives a reload without flashing, and an administrator can save it as the default for the whole workspace. The fonts ship with the platform, so it still works offline.
 - Ready profiles for background services: Maximum speed, Balanced and Maximum features, each with its estimated memory and number of services. The active profile is recognised, manual changes show as Custom, Maximum features warns when the server may not have enough memory, and only administrators can switch.
 - Menu look in Settings: five menu views (Classic, Compact, Comfortable, an icon rail and a floating panel), the active item shown as a bar, pill or tint, three icon weights, plain, tiled or circled icons in one colour, the accent or a colour per section, or labels only. Six ready sets (Classic, Studio, Blueprint, Site office, Executive, Focus) preview on hover, any menu item can take another icon from a searchable picker, and an administrator can save the look as the workspace default.
@@ -38,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Converters install again after their packages were republished upstream, and a package missing from the release says so by name instead of failing as unavailable. A conversion that fails or times out says why, instead of reporting the converter as not installed.
+- Assemblies keep the link to their cost items when imported, a PATCH of an assembly merges its metadata instead of wiping the tags, and the tag filter matches whole tags. Administrators can allow extra browser connection targets with `OE_CSP_CONNECT_SRC_EXTRA`.
 - The desktop app always lets you in through the Administrator tile on your own computer, also when it finds an administrator left behind by an earlier installation whose password nobody remembers. Server installs keep refusing the password-free login once a real administrator exists.
 - Permit and site logistics notifications show translated text instead of raw keys, and dismissing a notification that is already gone no longer shows an error.
 - A Saudi invoice dated today is no longer refused as dated in the future when it is submitted between midnight in Riyadh and midnight UTC, and IFC 4.3 deep foundations are filed under civil again.
