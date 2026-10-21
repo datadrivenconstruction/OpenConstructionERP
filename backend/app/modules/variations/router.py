@@ -109,6 +109,12 @@ class _DecisionBody(BaseModel):
     agreed_variance_note: str | None = None
 
 
+class _VoidBody(BaseModel):
+    """Voiding is permanent, so the reason is part of the request."""
+
+    reason: str = Field(min_length=3, max_length=2000)
+
+
 class _ConvertVOBody(BaseModel):
     title: str = ""
     # The two figures are nullable where the two strings are not, because nil
@@ -742,6 +748,7 @@ async def complete_variation_order(
 @router.post("/variation-orders/{vo_id}/void", response_model=VariationOrderResponse)
 async def void_variation_order(
     vo_id: uuid.UUID,
+    body: _VoidBody,
     session: SessionDep,
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("variations.delete")),
@@ -749,7 +756,7 @@ async def void_variation_order(
 ) -> VariationOrderResponse:
     existing = await service.get_order(vo_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    vo = await service.transition_variation_order(vo_id, "voided", user_id=user_id)
+    vo = await service.transition_variation_order(vo_id, "voided", user_id=user_id, reason=body.reason)
     return VariationOrderResponse.model_validate(vo)
 
 

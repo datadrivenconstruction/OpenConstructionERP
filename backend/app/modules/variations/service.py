@@ -2793,6 +2793,7 @@ class VariationsService:
         vo_id: uuid.UUID,
         to_status: str,
         user_id: str | None = None,
+        reason: str | None = None,
     ) -> VariationOrder:
         vo = await self.get_order(vo_id)
         if to_status not in allowed_vo_transitions(vo.status):
@@ -2802,6 +2803,20 @@ class VariationsService:
             )
         fields: dict[str, Any] = {"status": to_status}
         now = _now_iso()
+        if to_status == "voided":
+            # Voiding is permanent, so the record has to say why.
+            clean_reason = (reason or "").strip()
+            if len(clean_reason) < 3:
+                raise HTTPException(
+                    status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="A reason is required to void a variation order.",
+                )
+            fields["metadata_"] = {
+                **(vo.metadata_ or {}),
+                "void_reason": clean_reason,
+                "voided_by": str(user_id) if user_id else None,
+                "voided_at": now,
+            }
         if to_status == "in_progress":
             fields["implementation_started_at"] = now
         if to_status == "completed":
@@ -3085,17 +3100,26 @@ class VariationsService:
         """
         vo = await self.get_order(vo_id)
 
-        if vo.reference_change_order_id is not None:
-            raise HTTPException(
-                status_code=http_status.HTTP_409_CONFLICT,
-                detail="This variation order already has a linked change order.",
-            )
-
         if vo.status == "voided":
             raise HTTPException(
                 status_code=http_status.HTTP_409_CONFLICT,
                 detail="Cannot create a change order for a voided variation order.",
             )
+
+        # A linked change order that was rejected, cancelled or withdrawn is
+        # dead: the variation order may take a replacement, and the old one
+        # stays on the chain as superseded.
+        previous_co_id = vo.reference_change_order_id
+        old_co = None
+        if previous_co_id is not None:
+            from app.modules.changeorders.service import REPLACEABLE_CO_STATUSES, ChangeOrderService
+
+            old_co = await ChangeOrderService(self.session).repo.get_by_id(previous_co_id)
+            if old_co is not None and old_co.status not in REPLACEABLE_CO_STATUSES:
+                raise HTTPException(
+                    status_code=http_status.HTTP_409_CONFLICT,
+                    detail="This variation order already has a linked change order.",
+                )
 
         co_id: uuid.UUID | None = None
         try:
@@ -3114,14 +3138,27 @@ class VariationsService:
                 metadata={
                     "origin": "variations.create_linked_change_order",
                     "variation_order_id": str(vo.id),
+                    **({"supersedes_change_order_id": str(previous_co_id)} if previous_co_id else {}),
                 },
             )
             co = await co_service.create_order(co_payload)
             co_id = co.id
-            await self.vo_repo.update_fields(
-                vo.id,
-                reference_change_order_id=co_id,
-            )
+            link_fields: dict[str, Any] = {"reference_change_order_id": co_id}
+            if previous_co_id is not None:
+                vo_meta = dict(vo.metadata_ or {})
+                chain = [str(x) for x in vo_meta.get("previous_change_order_ids", [])]
+                chain.append(str(previous_co_id))
+                vo_meta["previous_change_order_ids"] = chain
+                link_fields["metadata_"] = vo_meta
+                if old_co is not None:
+                    await co_service.repo.update_fields(
+                        old_co.id,
+                        metadata_={
+                            **(old_co.metadata_ or {}),
+                            "superseded_by_change_order_id": str(co_id),
+                        },
+                    )
+            await self.vo_repo.update_fields(vo.id, **link_fields)
         except HTTPException:
             raise
         except Exception:
