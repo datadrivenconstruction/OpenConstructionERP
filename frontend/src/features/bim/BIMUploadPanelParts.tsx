@@ -6,10 +6,11 @@
  * prompt shown when the picked file was already uploaded to the project.
  */
 
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Copy, Loader2 } from 'lucide-react';
 import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
+import { ConversionStages } from '@/shared/ui/ConversionStages';
+import { BIM_STAGES } from '@/shared/lib/conversionStages';
 import { findUploadDuplicates, type BIMUploadDuplicate } from './api';
 
 /** Navigation state that keeps the upload panel open across the page's own
@@ -33,24 +34,10 @@ export function projectUploadJobs(jobs: Map<string, BIMUploadJob>, projectId: st
   return out;
 }
 
-function elapsedLabel(startedAt: number): string {
-  const sec = Math.max(0, Math.round((Date.now() - startedAt) / 1000));
-  if (sec < 60) return `${sec}s`;
-  return `${Math.floor(sec / 60)}m ${sec % 60}s`;
-}
-
 export function BIMUploadJobRow({ job, variant = 'panel' }: { job: BIMUploadJob; variant?: 'panel' | 'landing' }) {
   const { t } = useTranslation();
   const cancelUpload = useBIMUploadStore((s) => s.cancelUpload);
   const done = job.status === 'ready';
-  // Re-render once a second so the elapsed time keeps moving while the
-  // server converts and nothing else changes on the job.
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    if (done) return;
-    const iv = setInterval(() => setTick((n) => n + 1), 1000);
-    return () => clearInterval(iv);
-  }, [done]);
   const frame = done
     ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20'
     : variant === 'landing'
@@ -87,21 +74,15 @@ export function BIMUploadJobRow({ job, variant = 'panel' }: { job: BIMUploadJob;
           {t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}
         </p>
       ) : (
-        <>
-          <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
-            {job.serverConverting ? (
-              <div className="h-full w-full rounded-full bg-oe-blue/60 animate-pulse" />
-            ) : (
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out"
-                style={{ width: `${job.progress}%` }}
-              />
-            )}
-          </div>
-          <p className="text-[10px] text-content-tertiary mt-1">
-            {t(job.stage, { defaultValue: 'Processing...' })} · {elapsedLabel(job.startedAt)}
-          </p>
-        </>
+        <ConversionStages
+          stages={BIM_STAGES}
+          current={job.serverConverting ? (job.stageId ?? 'convert') : 'upload'}
+          format={job.fileName.split('.').pop()?.toUpperCase()}
+          startedAt={job.serverConverting ? (job.serverStartedAt ?? job.startedAt) : null}
+          limitS={job.limitS}
+          uploadPercent={job.progress}
+          variant={variant === 'landing' ? 'full' : 'compact'}
+        />
       )}
     </div>
   );

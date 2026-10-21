@@ -8,6 +8,7 @@
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { postWithUploadProgress } from '@/shared/lib/uploadWithProgress';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -264,6 +265,7 @@ export async function uploadDrawing(
   file: File,
   name: string,
   discipline: string,
+  onProgress?: (percent: number) => void,
 ): Promise<DwgDrawing> {
   const token = useAuthStore.getState().accessToken;
   const form = new FormData();
@@ -275,14 +277,15 @@ export async function uploadDrawing(
     ...(discipline ? { discipline } : {}),
   });
 
-  const res = await fetch(`/api/v1/dwg_takeoff/drawings/upload/?${params.toString()}`, {
-    method: 'POST',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      'X-DDC-Client': 'OE/1.0',
-    },
-    body: form,
-  });
+  const url = `/api/v1/dwg_takeoff/drawings/upload/?${params.toString()}`;
+  const headers = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    'X-DDC-Client': 'OE/1.0',
+  };
+  // fetch cannot report upload progress; XHR can.
+  const res = onProgress
+    ? await postWithUploadProgress(url, headers, form, onProgress)
+    : await fetch(url, { method: 'POST', headers, body: form });
   if (!res.ok) {
     const err = await res.text();
     throw new Error(err || res.statusText);

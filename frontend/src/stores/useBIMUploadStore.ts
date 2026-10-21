@@ -21,6 +21,7 @@ import {
   deleteBIMModel,
   type BIMCadUploadResponse,
 } from '@/features/bim/api';
+import { stageFromServer, type ConversionStageId } from '@/shared/lib/conversionStages';
 import { bimQuantityWarningCode, type BimQuantityWarningCode } from '@/shared/lib/bimQuantityWarning';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -55,6 +56,14 @@ export interface BIMUploadJob {
 
   /** Converter id when status is 'converter_required'. */
   converterId: string | null;
+
+  /** Stage the server reports while converting, and its time limit in seconds. */
+  stageId?: ConversionStageId;
+  limitS?: number | null;
+  /** When the server began converting (ms), for the elapsed line. */
+  serverStartedAt?: number | null;
+  /** Stable server error id, so the dock can say what happened in plain words. */
+  errorCode?: string | null;
 
   /** True once the file is on the server and the dock is only waiting for
    *  the background conversion. Cancel then deletes the server model. */
@@ -146,90 +155,6 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
       jobs.set(jobId, { ...existing, ...patch });
       return { jobs };
     });
-  }
-
-  /** Internal helper: advance through simulated stages on a timer.
-   *
-   *  Progress phases:
-   *    0-30%  : Upload phase (fast, ~3s)
-   *   30-60%  : Conversion phase (slower, steady increments, ~8s)
-   *   60-90%  : Element extraction (medium speed, ~6s)
-   *   90-95%  : Finalization (quick, ~2s)
-   *
-   *  The bar advances smoothly with small increments that slow down
-   *  near each phase boundary — mimicking real I/O behaviour. */
-  function startStageTimer(jobId: string) {
-    const phases: Array<{
-      status: BIMUploadStatus;
-      stage: string;
-      targetPct: number;
-      /** ms between ticks */
-      interval: number;
-      /** pct added per tick (capped at targetPct) */
-      step: number;
-    }> = [
-      { status: 'uploading',  stage: 'bim_upload.stage_uploading',    targetPct: 30, interval: 200, step: 1.8 },
-      { status: 'converting', stage: 'bim_upload.stage_converting',   targetPct: 50, interval: 400, step: 0.8 },
-      { status: 'converting', stage: 'bim_upload.stage_extracting',   targetPct: 75, interval: 300, step: 1.0 },
-      { status: 'converting', stage: 'bim_upload.stage_indexing',     targetPct: 88, interval: 250, step: 1.2 },
-      { status: 'converting', stage: 'bim_upload.stage_finalizing',   targetPct: 95, interval: 200, step: 1.5 },
-    ];
-
-    let phaseIdx = 0;
-    let currentPct = 5;
-
-    const tick = () => {
-      if (phaseIdx >= phases.length) return;
-      const phase = phases[phaseIdx]!;
-
-      // Slow down exponentially as we approach the phase boundary
-      const remaining = phase.targetPct - currentPct;
-      const increment = Math.max(0.15, Math.min(phase.step, remaining * 0.12));
-      currentPct = Math.min(phase.targetPct, currentPct + increment);
-
-      patchJob(jobId, {
-        status: phase.status,
-        stage: phase.stage,
-        progress: Math.round(currentPct),
-      });
-
-      if (currentPct >= phase.targetPct - 0.2) {
-        phaseIdx += 1;
-      }
-    };
-
-    // Use a dynamic interval: each phase can have its own tick rate
-    let activeInterval: ReturnType<typeof setInterval> | null = null;
-    let lastPhaseIdx = -1;
-
-    const masterTimer = setInterval(() => {
-      // Phases exhausted → self-terminate instead of polling the empty
-      // phase list every 100ms forever. Prior versions only returned
-      // early, leaving a zombie interval that kept firing long after the
-      // upload completed (visible in DevTools and — per Artem's report —
-      // presenting as "conversion keeps happening in the background").
-      if (phaseIdx >= phases.length) {
-        clearStageTimer(jobId);
-        return;
-      }
-      if (phaseIdx !== lastPhaseIdx) {
-        lastPhaseIdx = phaseIdx;
-        if (activeInterval) clearInterval(activeInterval);
-        activeInterval = setInterval(tick, phases[phaseIdx]!.interval);
-        // Keep the map pointing at the live handle: clearStageTimer only
-        // reaches what is stored here, and a lost handle kept rewriting a
-        // finished job back to "converting".
-                activeIntervalTimers.set(jobId, activeInterval);
-      }
-    }, 100);
-
-    // Start the first phase immediately
-    tick();
-    activeInterval = setInterval(tick, phases[0]!.interval);
-
-    // Store both timer handles so clearStageTimer can kill them.
-    stageTimers.set(jobId, masterTimer);
-    activeIntervalTimers.set(jobId, activeInterval!);
   }
 
   function clearStageTimer(jobId: string) {
@@ -364,18 +289,25 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
           progress: 0,
           stage: 'bim_upload.stage_failed',
           modelId,
-          errorMessage: 'Could not extract elements from this CAD file.',
+          errorMessage: null,
+          errorCode: model.error_code ?? 'convert_failed',
+          limitS: model.conversion_timeout_s ?? null,
           completedAt: Date.now(),
         });
         return;
       }
-      // Otherwise still processing, leave the dock at 95% and poll on.
+      // Still processing: show the step the server reports and its running time.
+      const startedMs = model.conversion_started_at ? Date.parse(model.conversion_started_at) : NaN;
+      patchJob(jobId, {
+        stageId: stageFromServer(model.conversion_stage),
+        limitS: model.conversion_timeout_s ?? null,
+        serverStartedAt: Number.isFinite(startedMs) ? startedMs : null,
+      });
     }
   }
 
   /** Run the actual upload. This is a plain async function, not a hook. */
   async function executeUpload(jobId: string, params: StartUploadParams) {
-    startStageTimer(jobId);
 
     try {
       const ac = abortControllers.get(jobId);
@@ -389,6 +321,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
           ac?.signal,
           params.conversionDepth,
           params.parentModelId,
+          (percent) => patchJob(jobId, { progress: percent }),
         );
 
         clearStageTimer(jobId);
@@ -460,7 +393,8 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
             progress: 0,
             stage: 'bim_upload.stage_failed',
             modelId: res.model_id,
-            errorMessage: res.error_message || 'Could not extract elements from this CAD file.',
+            errorMessage: null,
+            errorCode: 'convert_failed',
             completedAt: Date.now(),
           });
         }
@@ -520,7 +454,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
         discipline: params.discipline,
         parentModelId: params.parentModelId ?? null,
         status: 'uploading',
-        progress: 5,
+        progress: 0,
         stage: 'bim_upload.stage_sending',
         modelId: null,
         elementCount: 0,
@@ -602,10 +536,13 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
       // Reset job state
       patchJob(jobId, {
         status: 'uploading',
-        progress: 5,
+        progress: 0,
         stage: 'bim_upload.stage_sending',
         serverConverting: false,
         errorMessage: null,
+        errorCode: null,
+        stageId: undefined,
+        serverStartedAt: null,
         converterId: null,
         pdfStatus: 'idle',
         pdfError: null,
@@ -688,9 +625,8 @@ if (typeof window !== 'undefined') {
         status: 'error',
         progress: 0,
         stage: 'bim_upload.stage_stalled',
-        errorMessage:
-          job.errorMessage ??
-          'Upload abandoned after 45 min - reload to retry if the file is still needed.',
+        errorMessage: job.errorMessage,
+        errorCode: 'ui_stalled',
         completedAt: now,
       });
       dirty = true;

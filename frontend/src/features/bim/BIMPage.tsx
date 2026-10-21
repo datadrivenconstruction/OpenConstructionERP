@@ -88,6 +88,7 @@ import { useBIMViewerStore } from '@/stores/useBIMViewerStore';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
 import { InstallConverterPrompt } from './InstallConverterPrompt';
 import { AutoInstallConverterNotice } from './AutoInstallConverterNotice';
+import { ConverterReleaseNotice } from '@/shared/ui/ConverterReleaseNotice';
 import { useAutoInstallConverter, converterIdForFile } from './useAutoInstallConverter';
 import AddToBOQModal from './AddToBOQModal';
 import { LinkToPositionBanner } from './LinkToPositionBanner';
@@ -127,6 +128,14 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
+import { ConversionStages } from '@/shared/ui/ConversionStages';
+import {
+  BIM_STAGES,
+  conversionErrorKind,
+  conversionErrorText,
+  limitMinutes,
+  stageFromServer,
+} from '@/shared/lib/conversionStages';
 import {
   BIMUploadDuplicatePrompt,
   BIMUploadJobRow,
@@ -1142,6 +1151,7 @@ function UploadPanel({
         {/* Auto-install of the matching converter (background, no click). The
             notice only renders while installing or after a failed attempt;
             on success it disappears and the upload proceeds normally. */}
+        <ConverterReleaseNotice format={file?.name.split('.').pop()?.toUpperCase()} />
         <AutoInstallConverterNotice state={autoInstall} />
 
         {uploading && (
@@ -1252,6 +1262,21 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
   const errorCode = typeof meta.error_code === 'string' ? meta.error_code : null;
   const converterId = typeof meta.converter_id === 'string' ? meta.converter_id : null;
   const backendMessage = (model.error_message || '').trim();
+  // When the server began converting; the model's creation time is the honest fallback.
+  const processingStartedAt = (() => {
+    const iso = model.conversion_started_at || model.created_at;
+    const ms = iso ? Date.parse(iso) : NaN;
+    return Number.isFinite(ms) ? ms : Date.now();
+  })();
+  // A timeout or an unreadable file has its own plain-words text; the converter-missing copy would mislead there.
+  const errKind = conversionErrorKind(errorCode);
+  const kindText =
+    !isProcessing && (errKind === 'timeout' || errKind === 'unreadable')
+      ? conversionErrorText(t, errKind, {
+          format: fmt || 'CAD',
+          minutes: limitMinutes(typeof meta.conversion_timeout_s === 'number' ? meta.conversion_timeout_s : null),
+        })
+      : null;
 
   // Status → presentation map. Keyed by every status the backend
   // bim_hub processor can emit (`processing` / `needs_converter` / `error`
@@ -1415,7 +1440,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
       : null;
 
   const description =
-    cleanDescription ?? zeroElementsDescription ?? emptyModelDescription ?? calmFailureDescription ?? c.desc;
+    cleanDescription ?? kindText?.body ?? zeroElementsDescription ?? emptyModelDescription ?? calmFailureDescription ?? c.desc;
   // The raw backend message is now ALWAYS surfaced through the collapsible
   // disclosure (when present) rather than inline - both for the outdated
   // case and the generic failure case. For `no_products` (empty_model) the
@@ -1441,7 +1466,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
     ? t('bim.overlay_converter_outdated_title', {
         defaultValue: 'Converter is out of date',
       })
-    : c.title;
+    : kindText?.title ?? c.title;
   const installButtonLabel = isOutdatedConverter
     ? isInstalling
       ? t('bim.overlay_reinstall_in_progress', { defaultValue: 'Reinstalling…' })
@@ -1491,24 +1516,14 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete, onRetry, onInstal
         <p className="text-[11px] text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
 
         {isProcessing && (
-          <div className="mx-auto max-w-xs mb-6">
-            <style>{`
-              @keyframes oeBimIndeterminate {
-                0% { transform: translateX(-100%); }
-                100% { transform: translateX(400%); }
-              }
-            `}</style>
-            <div className="h-1.5 w-full rounded-full bg-blue-100 dark:bg-blue-900/30 overflow-hidden relative">
-              <div
-                className="absolute top-0 left-0 h-full w-1/4 rounded-full bg-gradient-to-r from-blue-400 to-blue-600"
-                style={{ animation: 'oeBimIndeterminate 1.6s ease-in-out infinite' }}
-              />
-            </div>
-            <p className="text-[11px] text-content-tertiary mt-2.5">
-              {t('bim.overlay_processing_hint', {
-                defaultValue: 'Backend is converting the file. This page will update automatically when ready - feel free to navigate away.',
-              })}
-            </p>
+          <div className="mx-auto max-w-sm mb-6" data-testid="bim-overlay-processing">
+            <ConversionStages
+              stages={BIM_STAGES}
+              current={stageFromServer(model.conversion_stage)}
+              format={fmt}
+              startedAt={processingStartedAt}
+              limitS={model.conversion_timeout_s}
+            />
           </div>
         )}
 
@@ -1866,6 +1881,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     )}
                     {/* Background converter auto-install (no click). Renders
                         only while installing or after a failed attempt. */}
+                    <ConverterReleaseNotice format={file?.name.split('.').pop()?.toUpperCase()} />
                     <AutoInstallConverterNotice state={autoInstall} />
                     {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
                     {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}

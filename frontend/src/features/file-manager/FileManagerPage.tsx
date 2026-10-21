@@ -8,6 +8,7 @@
  * preview pane) intact.
  */
 
+import { ConverterReleaseNotice } from '@/shared/ui/ConverterReleaseNotice';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -822,6 +823,7 @@ export function FileManagerPage() {
           projectName={ctxProjectName}
         />
       )}
+      <ConverterReleaseNotice className="mx-4 mt-3" />
       <div className="px-4 pt-3">
         <Breadcrumb
           items={[
