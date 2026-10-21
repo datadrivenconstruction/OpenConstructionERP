@@ -729,7 +729,7 @@ class UserService:
 
         return tokens
 
-    async def demo_login(self, email: str) -> TokenResponse:
+    async def demo_login(self, email: str, *, from_this_machine: bool = False) -> TokenResponse:
         """Issue tokens for a seeded demo account without a password check.
 
         Caller (router) is responsible for whitelisting the email to one of
@@ -769,10 +769,11 @@ class UserService:
                 ),
             )
 
-        if user.role == "admin" and await self.user_repo.has_admin():
+        if user.role == "admin" and not from_this_machine and await self.user_repo.has_admin():
             # A password-free admin session is for an install nobody has taken
             # over yet. Once a real administrator exists it would hand that
-            # role to anyone who can reach the port. See app.core.demo_admin.
+            # role to anyone who can reach the port. ``from_this_machine`` is
+            # the desktop app's own window. See app.core.demo_admin.
             from app.core.demo_admin import DEMO_ADMIN_SUPERSEDED, DEMO_ADMIN_SUPERSEDED_MESSAGE
 
             raise HTTPException(
