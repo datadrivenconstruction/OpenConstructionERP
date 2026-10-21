@@ -8052,6 +8052,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Pełny produkt działa na Twoim własnym komputerze w dwie minuty. Twoje dane pozostają na Twoim komputerze.",
     "demo_banner.modal_install_box_label": "Zainstaluj lokalnie - 3 polecenia",
     "demo_banner.modal_cta": "Rozumiem, kontynuuj",
+    "demo_banner.strip_uploads_off": "Przesyłanie plików jest tu wyłączone: korzystaj tylko z danych demonstracyjnych",
     "sidebar.video_news.title": "Uberyzacja budownictwa",
     "costs.category_field_hint": "Przypisz tę pozycję do grupy, np. \"Konstrukcje stalowe\". Później znajdziesz ją na liście kategorii.",
     "costs.category_field_label": "Kategoria",
@@ -59566,6 +59567,7 @@ const resource = {
     "converter_notice.report": "Zgłoś problem",
     "converter_notice.email": "Napisz do nas e-mailem",
     "converter_notice.dismiss": "Ukryj tę informację",
+    "demo_uploads.refused": "W publicznym demo przesyłanie plików jest wyłączone. Korzystaj z projektów demonstracyjnych i ich przykładowych danych albo zainstaluj platformę, aby pracować na własnych plikach.",
   }
 } as { translation: Record<string, string> };
 

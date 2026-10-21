@@ -7931,6 +7931,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Le produit complet fonctionne sur votre propre machine en deux minutes. Vos données restent sur votre ordinateur.",
     "demo_banner.modal_install_box_label": "Installer localement - 3 commands",
     "demo_banner.modal_cta": "Je comprends, continuer",
+    "demo_banner.strip_uploads_off": "Les envois de fichiers sont désactivés ici : utilisez uniquement les données de démonstration",
     "sidebar.video_news.title": "Uberisation de la construction",
     "costs.category_field_hint": "Regroupez cet article, par ex. « Charpente métallique ». Retrouvez-le ensuite dans la liste des catégories.",
     "costs.category_field_label": "Catégorie",
@@ -60948,6 +60949,7 @@ const resource = {
     "converter_notice.report": "Signaler un problème",
     "converter_notice.email": "Nous écrire par e-mail",
     "converter_notice.dismiss": "Masquer cet avis",
+    "demo_uploads.refused": "Les envois de fichiers sont désactivés sur la démo publique. Utilisez les projets de démonstration et leurs données d’exemple, ou installez la plateforme pour travailler avec vos propres fichiers.",
   }
 } as { translation: Record<string, string> };
 

@@ -2584,6 +2584,11 @@ def create_app() -> FastAPI:
 
     app.add_middleware(MaxBodySizeMiddleware, max_body_bytes=settings.max_request_body_bytes)
 
+    # Public demo: no file uploads at all, see app.middleware.demo_uploads.
+    from app.middleware.demo_uploads import DemoUploadBlockMiddleware
+
+    app.add_middleware(DemoUploadBlockMiddleware, enabled=settings.demo_block_uploads)
+
     # ── Global exception handler - return JSON for unhandled errors ────
     from fastapi import Request
     from fastapi.exceptions import RequestValidationError
@@ -3325,6 +3330,7 @@ def create_app() -> FastAPI:
             "ai": {"providers": []},
             "cache": {"status": "unknown"},
             "demo_mode": demo_mode,
+            "demo_uploads_disabled": settings.demo_block_uploads,
         }
 
         # Cache check

@@ -582,6 +582,13 @@ class Settings(BaseSettings):
     # never removed at any window. Env: ``OE_DEMO_UPLOADS_RETENTION_DAYS``.
     demo_uploads_retention_days: int = 0
 
+    # ── Public demo: no uploads ──────────────────────────────────────────
+    # When True, every multipart or octet-stream request answers 403 with
+    # ``{"error": "demo_uploads_disabled"}``: visitors of a shared public box
+    # use the seeded example data only. See :mod:`app.middleware.demo_uploads`.
+    # Env: ``OE_DEMO_BLOCK_UPLOADS``.
+    demo_block_uploads: bool = False
+
     # ── AI / Vector ──────────────────────────────────────────────────────
     # Default: Qdrant (CWICR v3 pipeline - BAAI/bge-m3 + 30 per-language
     # collections + parquet lookup). LanceDB remains as a legacy fallback

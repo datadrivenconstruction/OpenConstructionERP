@@ -7813,6 +7813,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "完整的产品可在两分钟内在您自己的机器上运行。您的数据将保留在您的计算机上。",
     "demo_banner.modal_install_box_label": "本地安装 - 3 commands",
     "demo_banner.modal_cta": "我已了解，继续",
+    "demo_banner.strip_uploads_off": "此处已关闭上传：请仅使用演示数据",
     "sidebar.video_news.title": "建筑业的优步化",
     "costs.category_field_hint": "为该项目分组，例如\"结构钢\"。之后可从分类列表中查找。",
     "costs.category_field_label": "分类",
@@ -60265,6 +60266,7 @@ const resource = {
     "converter_notice.report": "报告问题",
     "converter_notice.email": "给我们发邮件",
     "converter_notice.dismiss": "关闭此通知",
+    "demo_uploads.refused": "公开演示已关闭上传。请使用演示项目及其示例数据，或安装平台以处理您自己的文件。",
   }
 } as { translation: Record<string, string> };
 

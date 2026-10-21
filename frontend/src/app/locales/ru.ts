@@ -7910,6 +7910,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Полный продукт запускается на вашем собственном компьютере за две минуты. Ваши данные остаются на вашем компьютере.",
     "demo_banner.modal_install_box_label": "Установка локально - 3 commands",
     "demo_banner.modal_cta": "Я понимаю, продолжить",
+    "demo_banner.strip_uploads_off": "Загрузка файлов здесь отключена: используйте только демо-данные",
     "sidebar.video_news.title": "Уберизация строительства",
     "costs.category_field_hint": "Сгруппируйте эту позицию, например \"Металлоконструкции\". Позже её можно найти в списке категорий.",
     "costs.category_field_label": "Категория",
@@ -61234,6 +61235,7 @@ const resource = {
     "converter_notice.report": "Сообщить о проблеме",
     "converter_notice.email": "Написать нам на почту",
     "converter_notice.dismiss": "Скрыть это уведомление",
+    "demo_uploads.refused": "В публичном демо загрузка файлов отключена. Используйте демо-проекты и их примерные данные или установите платформу, чтобы работать со своими файлами.",
   }
 } as { translation: Record<string, string> };
 

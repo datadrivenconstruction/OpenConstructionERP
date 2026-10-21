@@ -7817,6 +7817,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Koko tuote toimii omalla koneellasi kahdessa minuutissa. Tietosi pysyvät tietokoneellasi.",
     "demo_banner.modal_install_box_label": "Asenna paikallisesti - 3 komentoa",
     "demo_banner.modal_cta": "Ymmärrän, jatka",
+    "demo_banner.strip_uploads_off": "Lataukset ovat tässä pois päältä: käytä vain demotietoja",
     "sidebar.video_news.title": "Rakentamisen uberisaatio",
     "costs.category_field_hint": "Ryhmittele tämä nimike, esim. \"Teräsrakenteet\". Voit selata sitä myöhemmin Kategoriat-luettelosta.",
     "costs.category_field_label": "Kategoria",
@@ -58045,6 +58046,7 @@ const resource = {
     "converter_notice.report": "Ilmoita ongelmasta",
     "converter_notice.email": "Kirjoita meille sähköpostilla",
     "converter_notice.dismiss": "Piilota tämä ilmoitus",
+    "demo_uploads.refused": "Lataukset ovat pois päältä julkisessa demossa. Käytä demoprojekteja ja niiden esimerkkitietoja tai asenna alusta omien tiedostojesi käsittelyyn.",
   }
 } as { translation: Record<string, string> };
 

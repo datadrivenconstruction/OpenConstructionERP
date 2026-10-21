@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Menu look in Settings: five menu views (Classic, Compact, Comfortable, an icon rail and a floating panel), the active item shown as a bar, pill or tint, three icon weights, plain, tiled or circled icons in one colour, the accent or a colour per section, or labels only. Six ready sets (Classic, Studio, Blueprint, Site office, Executive, Focus) preview on hover, any menu item can take another icon from a searchable picker, and an administrator can save the look as the workspace default.
 - A Packs page lists country packs and company type packs side by side, with search and filters by type, region, language and status. The two active packs show at the top, each can be changed, and a page per pack shows what activating it will change before you confirm.
 - Terraform modules for STACKIT that deploy one isolated platform instance per company (cluster, database, certificates), with an example for two companies, checks in CI and a deployment guide in English, German and Russian under `deploy/terraform/stackit/`.
+- `OE_DEMO_BLOCK_UPLOADS` for a public demo server: when it is on, file uploads are refused with a translated message and the demo banner asks visitors to use the demo data only. Off by default, so self-hosted and desktop installs upload as before.
 
 ### Changed
 

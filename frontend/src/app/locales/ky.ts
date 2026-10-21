@@ -6989,6 +6989,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Толук өнүм өз машинаңызда эки мүнөттө иштейт. Маалыматыңыз компьютериңизде калат.",
     "demo_banner.modal_install_box_label": "Жергиликтүү орнотуу - 3 команда",
     "demo_banner.modal_cta": "Түшүндүм, улантуу",
+    "demo_banner.strip_uploads_off": "Бул жерде жүктөө өчүрүлгөн: демо маалыматтарын гана колдонуңуз",
     "documents.title": "Документтер",
     "documents.subtitle": "Долбоор файлдарын, чиймелерин, келишимдерин, спецификацияларын жүктөп бериңиз жана башкарыңыз",
     "documents.upload": "Файлдарды жүктөп берүү",
@@ -58158,6 +58159,7 @@ const resource = {
     "converter_notice.report": "Маселе тууралуу кабарлоо",
     "converter_notice.email": "Бизге электрондук почта аркылуу жазуу",
     "converter_notice.dismiss": "Эскертмени жабуу",
+    "demo_uploads.refused": "Ачык демодо жүктөө өчүрүлгөн. Демо долбоорлорду жана алардын үлгү маалыматтарын колдонуңуз же өз файлдарыңыз менен иштөө үчүн платформаны орнотуңуз.",
   }
 } as { translation: Record<string, string> };
 

@@ -7887,6 +7887,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Potpuni proizvod radi na vašem računalu za dvije minute. Vaši podaci ostaju na vašem računalu.",
     "demo_banner.modal_install_box_label": "Instalirajte lokalno - 3 commands",
     "demo_banner.modal_cta": "Razumijem, nastavi",
+    "demo_banner.strip_uploads_off": "Učitavanje je ovdje isključeno: koristite samo demo podatke",
     "sidebar.video_news.title": "Uberizacija graditeljstva",
     "costs.category_field_hint": "Grupirajte ovu stavku, npr. \"Čelična konstrukcija\". Kasnije je pregledajte iz popisa kategorija.",
     "costs.category_field_label": "Kategorija",
@@ -58376,6 +58377,7 @@ const resource = {
     "converter_notice.report": "Prijavi problem",
     "converter_notice.email": "Pišite nam e-poštom",
     "converter_notice.dismiss": "Zatvori ovu obavijest",
+    "demo_uploads.refused": "U javnom demu učitavanje je isključeno. Koristite demo projekte i njihove primjere podataka ili instalirajte platformu za rad s vlastitim datotekama.",
   }
 } as { translation: Record<string, string> };
 

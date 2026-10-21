@@ -7925,6 +7925,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "O produto completo é executado na sua própria máquina em dois minutos. Os seus dados permanecem no seu computador.",
     "demo_banner.modal_install_box_label": "Instalar localmente - 3 comandos",
     "demo_banner.modal_cta": "Compreendo, continuar",
+    "demo_banner.strip_uploads_off": "Os carregamentos estão desativados aqui: utilize apenas os dados de demonstração",
     "sidebar.video_news.title": "Uberização da Construção",
     "costs.category_field_hint": "Agrupe este item, por exemplo \"Estrutura Metálica\". Consulte-o depois na lista de Categorias.",
     "costs.category_field_label": "Categoria",
@@ -60941,6 +60942,7 @@ const resource = {
     "converter_notice.report": "Reportar um problema",
     "converter_notice.email": "Escreva-nos por email",
     "converter_notice.dismiss": "Ocultar este aviso",
+    "demo_uploads.refused": "Os carregamentos estão desativados na demonstração pública. Utilize os projetos de demonstração e os respetivos dados de exemplo, ou instale a plataforma para trabalhar com os seus ficheiros.",
   }
 } as { translation: Record<string, string> };
 

@@ -7813,6 +7813,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Sản phẩm đầy đủ chạy trên máy của riêng bạn trong hai phút. Dữ liệu của bạn vẫn nằm trên máy tính của bạn.",
     "demo_banner.modal_install_box_label": "Cài đặt cục bộ - 3 commands",
     "demo_banner.modal_cta": "Tôi đã hiểu, tiếp tục",
+    "demo_banner.strip_uploads_off": "Tải lên đã bị tắt ở đây: vui lòng chỉ dùng dữ liệu demo",
     "sidebar.video_news.title": "Uber hóa ngành xây dựng",
     "costs.category_field_hint": "Nhóm hạng mục này, ví dụ \"Kết cấu thép\". Bạn có thể xem lại sau trong danh sách Danh mục.",
     "costs.category_field_label": "Danh mục",
@@ -57804,6 +57805,7 @@ const resource = {
     "converter_notice.report": "Báo cáo sự cố",
     "converter_notice.email": "Gửi email cho chúng tôi",
     "converter_notice.dismiss": "Ẩn thông báo này",
+    "demo_uploads.refused": "Tải lên đã bị tắt trên bản demo công khai. Hãy dùng các dự án demo và dữ liệu mẫu của chúng, hoặc cài đặt nền tảng để làm việc với tệp của bạn.",
   }
 } as { translation: Record<string, string> };
 

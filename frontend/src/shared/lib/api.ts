@@ -225,6 +225,8 @@ function buildHeaders(extra?: HeadersInit): Headers {
  */
 export function extractErrorMessageFromBody(body: unknown): string | null {
   if (body === null || body === undefined) return null;
+  // Raw-fetch uploads land here without a status; keep the server's English out.
+  if (isDemoUploadRefusal(403, body)) return demoUploadRefusalMessage();
 
   // Plain text body — accept short strings only (HTML error pages can be huge)
   if (typeof body === 'string') {
@@ -376,6 +378,30 @@ function demoRefusalMessage(): string {
 }
 
 /**
+ * The public demo refuses every file upload with
+ * `{"detail": {"error": "demo_uploads_disabled", ...}}`. Same narrow match as
+ * `isDemoReadOnlyRefusal`, so an ordinary 403 is never mistaken for it.
+ */
+export function isDemoUploadRefusal(status: number, body: unknown): boolean {
+  if (status !== 403) return false;
+  if (body === null || typeof body !== 'object') return false;
+  const detail = (body as Record<string, unknown>).detail;
+  if (detail === null || typeof detail !== 'object' || Array.isArray(detail)) return false;
+  return (detail as Record<string, unknown>).error === 'demo_uploads_disabled';
+}
+
+function demoUploadRefusalMessage(): string {
+  const fallback =
+    'Uploads are turned off on the public demo. Please use the demo projects and their example data, or install the platform to work with your own files.';
+  try {
+    const translated = i18next.t('demo_uploads.refused', { defaultValue: fallback });
+    return typeof translated === 'string' && translated.length > 0 ? translated : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
  * Translate an HTTP status code into a friendly fallback message.
  * Used when the response body has nothing actionable to show.
  */
@@ -430,7 +456,9 @@ export class ApiError extends Error {
     // anything that needs the raw answer.
     const fromBody = isDemoReadOnlyRefusal(status, body)
       ? demoRefusalMessage()
-      : extractErrorMessageFromBody(body);
+      : isDemoUploadRefusal(status, body)
+        ? demoUploadRefusalMessage()
+        : extractErrorMessageFromBody(body);
     super(fromBody ?? statusFallbackMessage(status));
     this.name = 'ApiError';
   }

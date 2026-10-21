@@ -110,6 +110,8 @@ const resource = {
     "dwg_takeoff.drawing_span": "Drawing size at this scale: {{w}} m x {{h}} m",
     "dwg_takeoff.drawing_span_implausible": "That is unusual for a construction drawing, so the unit stored in the file may be wrong. Check it with Calibrate: pick two points and type their real distance.",
     "dwg_takeoff.conv_converter_said": "Converter report",
+    "demo_banner.strip_uploads_off": "Uploads are off here: please use the demo data only",
+    "demo_uploads.refused": "Uploads are turned off on the public demo. Please use the demo projects and their example data, or install the platform to work with your own files.",
   }
 } as { translation: Record<string, string> };
 

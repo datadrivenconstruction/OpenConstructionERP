@@ -8522,6 +8522,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Das vollständige Produkt läuft in zwei Minuten auf Ihrem eigenen Rechner. Ihre Daten bleiben auf Ihrem Computer.",
     "demo_banner.modal_install_box_label": "Lokal installieren - 3 commands",
     "demo_banner.modal_cta": "Ich habe verstanden, weiter",
+    "demo_banner.strip_uploads_off": "Uploads sind hier deaktiviert: bitte nur die Demodaten verwenden",
     "sidebar.video_news.title": "Uberisierung des Bauwesens",
     "costs.category_field_hint": "Diese Position gruppieren, z. B. \"Konstruktionsstahl\". Später in der Kategorienliste wiederfinden.",
     "costs.category_field_label": "Kategorie",
@@ -60676,6 +60677,7 @@ const resource = {
     "converter_notice.report": "Problem melden",
     "converter_notice.email": "Per E-Mail schreiben",
     "converter_notice.dismiss": "Hinweis ausblenden",
+    "demo_uploads.refused": "In der öffentlichen Demo sind Uploads deaktiviert. Bitte nutzen Sie die Demoprojekte mit ihren Beispieldaten oder installieren Sie die Plattform, um mit eigenen Dateien zu arbeiten.",
   }
 } as { translation: Record<string, string> };
 

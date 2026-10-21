@@ -7813,6 +7813,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "전체 제품은 2분 만에 사용자 본인의 컴퓨터에서 실행됩니다. 데이터는 사용자의 컴퓨터에 그대로 남습니다.",
     "demo_banner.modal_install_box_label": "로컬에 설치 - 3 commands",
     "demo_banner.modal_cta": "이해했습니다, 계속하기",
+    "demo_banner.strip_uploads_off": "여기서는 업로드가 꺼져 있습니다. 데모 데이터만 사용하세요",
     "sidebar.video_news.title": "건설의 우버화",
     "costs.category_field_hint": "이 항목을 그룹으로 묶습니다. 예: \"구조용 강재\". 나중에 카테고리 목록에서 찾아볼 수 있습니다.",
     "costs.category_field_label": "카테고리",
@@ -58414,6 +58415,7 @@ const resource = {
     "converter_notice.report": "문제 신고",
     "converter_notice.email": "이메일로 문의하기",
     "converter_notice.dismiss": "이 안내 닫기",
+    "demo_uploads.refused": "공개 데모에서는 업로드가 꺼져 있습니다. 데모 프로젝트와 예시 데이터를 사용하거나, 직접 파일로 작업하려면 플랫폼을 설치하세요.",
   }
 } as { translation: Record<string, string> };
 

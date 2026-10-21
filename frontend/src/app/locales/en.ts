@@ -6600,6 +6600,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "The full product runs on your own machine in two minutes. Your data stays on your computer.",
     "demo_banner.modal_install_box_label": "Install locally - 3 commands",
     "demo_banner.modal_cta": "I understand, continue",
+    "demo_banner.strip_uploads_off": "Uploads are off here: please use the demo data only",
     "documents.title": "Documents",
     "documents.subtitle": "Upload and manage project files, drawings, contracts, specifications",
     "documents.upload": "Upload Files",
@@ -52225,6 +52226,7 @@ const resource = {
     "converter_notice.report": "Report a problem",
     "converter_notice.email": "Write to us by email",
     "converter_notice.dismiss": "Dismiss this notice",
+    "demo_uploads.refused": "Uploads are turned off on the public demo. Please use the demo projects and their example data, or install the platform to work with your own files.",
   }
 } as { translation: Record<string, string> };
 

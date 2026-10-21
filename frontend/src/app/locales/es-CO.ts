@@ -7541,6 +7541,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "El producto completo se ejecuta en tu propia máquina en dos minutos. Tus datos permanecen en tu computador.",
     "demo_banner.modal_install_box_label": "Instalar localmente - 3 commands",
     "demo_banner.modal_cta": "Lo entiendo, continuar",
+    "demo_banner.strip_uploads_off": "Las subidas están desactivadas aquí: usa solo los datos de demostración",
     "sidebar.video_news.title": "Uberización de la construcción",
     "costs.category_field_hint": "Agrupa este elemento, p. ej. \"Acero estructural\". Consúltalo más tarde desde la lista de Categorías.",
     "costs.category_field_label": "Categoría",
@@ -54470,6 +54471,7 @@ const resource = {
     "converter_notice.report": "Reportar un problema",
     "converter_notice.email": "Escríbenos por correo electrónico",
     "converter_notice.dismiss": "Ocultar este aviso",
+    "demo_uploads.refused": "Las subidas están desactivadas en la demo pública. Usa los proyectos de demostración y sus datos de ejemplo, o instala la plataforma para trabajar con tus propios archivos.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

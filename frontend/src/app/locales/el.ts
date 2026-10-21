@@ -6933,6 +6933,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Το πλήρες προϊόν τρέχει στο δικό σας μηχάνημα σε δύο λεπτά. Τα δεδομένα σας παραμένουν στον υπολογιστή σας.",
     "demo_banner.modal_install_box_label": "Τοπική εγκατάσταση - 3 εντολές",
     "demo_banner.modal_cta": "Το κατάλαβα, συνέχεια",
+    "demo_banner.strip_uploads_off": "Η μεταφόρτωση είναι απενεργοποιημένη εδώ: χρησιμοποιήστε μόνο τα δεδομένα επίδειξης",
     "sidebar.video_news.title": "Ο εκδημοκρατισμός της κατασκευής",
     "costs.category_field_hint": "Ομαδοποιήστε αυτό το είδος, π.χ. «Δομικός Χάλυβας». Περιηγηθείτε το αργότερα από τη λίστα Κατηγοριών.",
     "costs.category_field_label": "Κατηγορία",
@@ -58001,6 +58002,7 @@ const resource = {
     "converter_notice.report": "Αναφορά προβλήματος",
     "converter_notice.email": "Γράψτε μας με email",
     "converter_notice.dismiss": "Απόκρυψη αυτής της ειδοποίησης",
+    "demo_uploads.refused": "Η μεταφόρτωση είναι απενεργοποιημένη στη δημόσια επίδειξη. Χρησιμοποιήστε τα έργα επίδειξης και τα δεδομένα τους ή εγκαταστήστε την πλατφόρμα για να δουλέψετε με τα δικά σας αρχεία.",
   }
 } as { translation: Record<string, string> };
 

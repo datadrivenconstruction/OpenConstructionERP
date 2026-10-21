@@ -7944,6 +7944,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Kompletní produkt běží na vašem vlastním stroji během dvou minut. Vaše data zůstávají ve vašem počítači.",
     "demo_banner.modal_install_box_label": "Instalace lokálně - 3 commands",
     "demo_banner.modal_cta": "Rozumím, pokračovat",
+    "demo_banner.strip_uploads_off": "Nahrávání je zde vypnuté: používejte pouze ukázková data",
     "sidebar.video_news.title": "Uberizace stavebnictví",
     "costs.category_field_hint": "Zařaďte tuto položku, např. \"Ocelové konstrukce\". Později ji najdete v seznamu kategorií.",
     "costs.category_field_label": "Kategorie",
@@ -59305,6 +59306,7 @@ const resource = {
     "converter_notice.report": "Nahlásit problém",
     "converter_notice.email": "Napsat nám e-mailem",
     "converter_notice.dismiss": "Skrýt toto upozornění",
+    "demo_uploads.refused": "Ve veřejném demu je nahrávání vypnuté. Použijte ukázkové projekty a jejich data, nebo si platformu nainstalujte a pracujte s vlastními soubory.",
   }
 } as { translation: Record<string, string> };
 

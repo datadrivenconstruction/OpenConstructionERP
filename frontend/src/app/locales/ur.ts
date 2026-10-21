@@ -6934,6 +6934,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "مکمل پروڈکٹ آپ کی اپنی مشین پر دو منٹ میں چلتا ہے۔ آپ کا ڈیٹا آپ کے کمپیوٹر پر رہتا ہے۔",
     "demo_banner.modal_install_box_label": "مقامی طور پر انسٹال کریں - 3 کمانڈز",
     "demo_banner.modal_cta": "میں سمجھ گیا، جاری رکھیں",
+    "demo_banner.strip_uploads_off": "یہاں اپ لوڈ بند ہے: براہ کرم صرف ڈیمو ڈیٹا استعمال کریں",
     "sidebar.video_news.title": "تعمیرات کا Uberization",
     "costs.category_field_hint": "اس آئٹم کو گروپ کریں، مثلاً \"Structural Steel\"۔ بعد میں اسے Categories فہرست سے دیکھیں۔",
     "costs.category_field_label": "زمرہ",
@@ -58001,6 +58002,7 @@ const resource = {
     "converter_notice.report": "مسئلے کی اطلاع دیں",
     "converter_notice.email": "ہمیں ای میل لکھیں",
     "converter_notice.dismiss": "یہ نوٹس بند کریں",
+    "demo_uploads.refused": "عوامی ڈیمو میں اپ لوڈ بند ہے۔ ڈیمو پروجیکٹس اور ان کا مثالی ڈیٹا استعمال کریں، یا اپنی فائلوں کے ساتھ کام کرنے کے لیے پلیٹ فارم انسٹال کریں۔",
   }
 } as { translation: Record<string, string> };
 

@@ -7813,6 +7813,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "ผลิตภัณฑ์เต็มรูปแบบทำงานบนเครื่องของคุณเองภายในสองนาที ข้อมูลของคุณจะอยู่บนคอมพิวเตอร์ของคุณ",
     "demo_banner.modal_install_box_label": "ติดตั้งในเครื่อง - 3 commands",
     "demo_banner.modal_cta": "ฉันเข้าใจแล้ว ดำเนินการต่อ",
+    "demo_banner.strip_uploads_off": "ปิดการอัปโหลดไว้ที่นี่: โปรดใช้เฉพาะข้อมูลสาธิต",
     "sidebar.video_news.title": "การปฏิวัติงานก่อสร้างแบบ Uber",
     "costs.category_field_hint": "จัดกลุ่มรายการนี้ เช่น \"โครงสร้างเหล็ก\" สามารถเรียกดูภายหลังได้จากรายการหมวดหมู่",
     "costs.category_field_label": "หมวดหมู่",
@@ -57796,6 +57797,7 @@ const resource = {
     "converter_notice.report": "แจ้งปัญหา",
     "converter_notice.email": "ส่งอีเมลถึงเรา",
     "converter_notice.dismiss": "ปิดประกาศนี้",
+    "demo_uploads.refused": "ปิดการอัปโหลดในเดโมสาธารณะ โปรดใช้โครงการสาธิตและข้อมูลตัวอย่าง หรือติดตั้งแพลตฟอร์มเพื่อทำงานกับไฟล์ของคุณเอง",
   }
 } as { translation: Record<string, string> };
 

@@ -7891,6 +7891,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Het volledige product draait in twee minuten op je eigen machine. Je gegevens blijven op je computer.",
     "demo_banner.modal_install_box_label": "Lokaal installeren - 3 commands",
     "demo_banner.modal_cta": "Ik begrijp het, doorgaan",
+    "demo_banner.strip_uploads_off": "Uploaden staat hier uit: gebruik alleen de demogegevens",
     "sidebar.video_news.title": "Uberisering van de bouw",
     "costs.category_field_hint": "Groepeer dit item, bijv. \"Constructiestaal\". Bekijk het later via de lijst Categorieën.",
     "costs.category_field_label": "Categorie",
@@ -58922,6 +58923,7 @@ const resource = {
     "converter_notice.report": "Een probleem melden",
     "converter_notice.email": "Mail ons",
     "converter_notice.dismiss": "Deze melding sluiten",
+    "demo_uploads.refused": "Uploaden staat uit in de openbare demo. Gebruik de demoprojecten en hun voorbeeldgegevens, of installeer het platform om met je eigen bestanden te werken.",
   }
 } as { translation: Record<string, string> };
 

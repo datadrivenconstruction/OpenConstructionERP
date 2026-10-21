@@ -6951,6 +6951,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "המוצר המלא רץ על המחשב שלכם עצמכם תוך שתי דקות. הנתונים שלכם נשארים על המחשב שלכם.",
     "demo_banner.modal_install_box_label": "התקנה מקומית - 3 פקודות",
     "demo_banner.modal_cta": "אני מבין, המשך",
+    "demo_banner.strip_uploads_off": "העלאת קבצים כבויה כאן: השתמשו בנתוני ההדגמה בלבד",
     "sidebar.video_news.title": "האוברזציה של הבנייה",
     "costs.category_field_hint": "קבצו פריט זה, לדוגמה \"פלדת קונסטרוקציה\". עיינו בו מאוחר יותר מרשימת הקטגוריות.",
     "costs.category_field_label": "קטגוריה",
@@ -58322,6 +58323,7 @@ const resource = {
     "converter_notice.report": "דיווח על בעיה",
     "converter_notice.email": "כתבו לנו באימייל",
     "converter_notice.dismiss": "סגירת ההודעה",
+    "demo_uploads.refused": "העלאת קבצים כבויה בהדגמה הציבורית. השתמשו בפרויקטי ההדגמה ובנתוני הדוגמה שלהם, או התקינו את הפלטפורמה כדי לעבוד עם הקבצים שלכם.",
   }
 } as { translation: Record<string, string> };
 

@@ -7685,6 +7685,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Бүрэн бүтээгдэхүүн таны өөрийн компьютер дээр хоёр минутын дотор ажиллана. Таны өгөгдөл таны компьютер дээрээ хадгалагдана.",
     "demo_banner.modal_install_box_label": "Локалаар суулгах - 3 commands",
     "demo_banner.modal_cta": "Ойлголоо, үргэлжлүүлэх",
+    "demo_banner.strip_uploads_off": "Энд файл байршуулах унтраалттай: зөвхөн демо өгөгдлийг ашиглана уу",
     "sidebar.video_news.title": "Барилгын убержилт",
     "costs.category_field_hint": "Энэ зүйлийг бүлэглэх, жишээ нь \"Бүтцийн ган\". Дараа нь Ангиллын жагсаалтаас үзэх боломжтой.",
     "costs.category_field_label": "Ангилал",
@@ -57719,6 +57720,7 @@ const resource = {
     "converter_notice.report": "Асуудал мэдээлэх",
     "converter_notice.email": "Бидэнд имэйлээр бичих",
     "converter_notice.dismiss": "Энэ мэдэгдлийг хаах",
+    "demo_uploads.refused": "Нийтийн демод файл байршуулах унтраалттай. Демо төслүүд болон тэдгээрийн жишээ өгөгдлийг ашиглана уу, эсвэл өөрийн файлтай ажиллахын тулд платформыг суулгана уу.",
   }
 } as { translation: Record<string, string> };
 

@@ -8019,6 +8019,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Il prodotto completo funziona sulla tua macchina in due minuti. I tuoi dati restano sul tuo computer.",
     "demo_banner.modal_install_box_label": "Installa in locale - 3 commands",
     "demo_banner.modal_cta": "Ho capito, continua",
+    "demo_banner.strip_uploads_off": "I caricamenti sono disattivati qui: usa solo i dati demo",
     "sidebar.video_news.title": "Uberizzazione dell'edilizia",
     "costs.category_field_hint": "Raggruppa questa voce, ad es. \"Acciaio strutturale\". Potrai ritrovarla in seguito dall'elenco Categorie.",
     "costs.category_field_label": "Categoria",
@@ -59249,6 +59250,7 @@ const resource = {
     "converter_notice.report": "Segnala un problema",
     "converter_notice.email": "Scrivici via email",
     "converter_notice.dismiss": "Nascondi questo avviso",
+    "demo_uploads.refused": "Nella demo pubblica i caricamenti sono disattivati. Usa i progetti demo e i loro dati di esempio, oppure installa la piattaforma per lavorare con i tuoi file.",
   }
 } as { translation: Record<string, string> };
 

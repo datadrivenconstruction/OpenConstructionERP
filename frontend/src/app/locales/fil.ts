@@ -6912,6 +6912,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Tumatakbo ang buong produkto sa sarili mong makina sa loob ng dalawang minuto. Nananatili sa computer mo ang datos mo.",
     "demo_banner.modal_install_box_label": "I-install nang lokal - 3 command",
     "demo_banner.modal_cta": "Naiintindihan ko, magpatuloy",
+    "demo_banner.strip_uploads_off": "Naka-off ang pag-upload dito: demo data lang ang gamitin",
     "sidebar.video_news.title": "Uberization ng Construction",
     "costs.category_field_hint": "Ipangkat ang item na ito, hal. \"Structural Steel\". I-browse ito sa hinaharap mula sa listahan ng Categories.",
     "costs.category_field_label": "Kategorya",
@@ -57999,6 +58000,7 @@ const resource = {
     "converter_notice.report": "I-report ang problema",
     "converter_notice.email": "Mag-email sa amin",
     "converter_notice.dismiss": "Itago ang abiso na ito",
+    "demo_uploads.refused": "Naka-off ang pag-upload sa pampublikong demo. Gamitin ang mga demo project at ang halimbawang data nila, o i-install ang platform para magamit ang sarili mong mga file.",
   }
 } as { translation: Record<string, string> };
 

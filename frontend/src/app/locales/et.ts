@@ -7808,6 +7808,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Täielik toode töötab teie enda masinas kahe minutiga. Teie andmed jäävad teie arvutisse.",
     "demo_banner.modal_install_box_label": "Paigaldage lokaalselt - 3 käsku",
     "demo_banner.modal_cta": "Sain aru, jätka",
+    "demo_banner.strip_uploads_off": "Üleslaadimine on siin välja lülitatud: kasutage ainult demoandmeid",
     "sidebar.video_news.title": "Ehituse uberiseerimine",
     "costs.category_field_hint": "Rühmitage see kirje, nt \"Kandekonstruktsiooni teras\". Sirvige seda hiljem Kategooriate loendist.",
     "costs.category_field_label": "Kategooria",
@@ -57991,6 +57992,7 @@ const resource = {
     "converter_notice.report": "Teata probleemist",
     "converter_notice.email": "Kirjuta meile e-posti teel",
     "converter_notice.dismiss": "Peida see teade",
+    "demo_uploads.refused": "Avalikus demos on üleslaadimine välja lülitatud. Kasutage demoprojekte ja nende näidisandmeid või paigaldage platvorm, et töötada oma failidega.",
   }
 } as { translation: Record<string, string> };
 

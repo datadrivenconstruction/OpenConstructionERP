@@ -7813,6 +7813,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "完全な製品はお使いのマシン上で2分で動作します。データはご自身のコンピューターに保持されます。",
     "demo_banner.modal_install_box_label": "ローカルにインストール - 3 commands",
     "demo_banner.modal_cta": "理解しました、続行する",
+    "demo_banner.strip_uploads_off": "ここではアップロードは無効です。デモデータのみをご利用ください",
     "sidebar.video_news.title": "建設業のウーバー化",
     "costs.category_field_hint": "この項目をグループ化します。例:「構造用鋼材」。後でカテゴリ一覧から参照できます。",
     "costs.category_field_label": "カテゴリ",
@@ -59328,6 +59329,7 @@ const resource = {
     "converter_notice.report": "問題を報告",
     "converter_notice.email": "メールで問い合わせる",
     "converter_notice.dismiss": "このお知らせを閉じる",
+    "demo_uploads.refused": "公開デモではアップロードは無効です。デモプロジェクトとそのサンプルデータをご利用いただくか、ご自身のファイルを扱うにはプラットフォームをインストールしてください。",
   }
 } as { translation: Record<string, string> };
 

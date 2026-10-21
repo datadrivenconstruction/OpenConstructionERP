@@ -6898,6 +6898,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "محصول کامل روی ماشین خودتان در دو دقیقه اجرا می‌شود. داده شما روی رایانه شما می‌ماند.",
     "demo_banner.modal_install_box_label": "نصب محلی - 3 دستور",
     "demo_banner.modal_cta": "متوجه شدم، ادامه",
+    "demo_banner.strip_uploads_off": "بارگذاری در اینجا غیرفعال است: فقط از داده‌های نمایشی استفاده کنید",
     "sidebar.video_news.title": "اوبری‌شدن ساخت‌وساز",
     "costs.category_field_hint": "این قلم را گروه‌بندی کنید، مثلاً «سازه فولادی». بعداً از فهرست دسته‌ها آن را مرور کنید.",
     "costs.category_field_label": "دسته",
@@ -58001,6 +58002,7 @@ const resource = {
     "converter_notice.report": "گزارش مشکل",
     "converter_notice.email": "ارسال ایمیل به ما",
     "converter_notice.dismiss": "بستن این اعلان",
+    "demo_uploads.refused": "بارگذاری در نسخه نمایشی عمومی غیرفعال است. از پروژه‌های نمایشی و داده‌های نمونه آن‌ها استفاده کنید یا برای کار با فایل‌های خود، پلتفرم را نصب کنید.",
   }
 } as { translation: Record<string, string> };
 

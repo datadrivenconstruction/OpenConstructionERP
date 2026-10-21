@@ -7852,6 +7852,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "पूरा उत्पाद आपकी अपनी मशीन पर दो मिनट में चलता है। आपका डेटा आपके कंप्यूटर पर ही रहता है।",
     "demo_banner.modal_install_box_label": "स्थानीय रूप से इंस्टॉल करें - 3 commands",
     "demo_banner.modal_cta": "मैं समझ गया, जारी रखें",
+    "demo_banner.strip_uploads_off": "यहाँ अपलोड बंद है: कृपया केवल डेमो डेटा का उपयोग करें",
     "sidebar.video_news.title": "निर्माण का उबरीकरण",
     "costs.category_field_hint": "इस मद को समूहित करें, जैसे \"स्ट्रक्चरल स्टील\"। बाद में इसे श्रेणियाँ सूची से देखें।",
     "costs.category_field_label": "श्रेणी",
@@ -58044,6 +58045,7 @@ const resource = {
     "converter_notice.report": "समस्या बताएँ",
     "converter_notice.email": "हमें ईमेल लिखें",
     "converter_notice.dismiss": "यह सूचना बंद करें",
+    "demo_uploads.refused": "सार्वजनिक डेमो में अपलोड बंद है। डेमो प्रोजेक्ट और उनके उदाहरण डेटा का उपयोग करें, या अपनी फ़ाइलों के साथ काम करने के लिए प्लेटफ़ॉर्म इंस्टॉल करें।",
   }
 } as { translation: Record<string, string> };
 

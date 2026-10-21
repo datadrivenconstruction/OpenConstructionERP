@@ -7930,6 +7930,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "يعمل المنتج الكامل على جهازك الخاص في دقيقتين. تبقى بياناتك على حاسوبك.",
     "demo_banner.modal_install_box_label": "التثبيت محليًا - 3 أوامر",
     "demo_banner.modal_cta": "أفهم ذلك، متابعة",
+    "demo_banner.strip_uploads_off": "رفع الملفات معطّل هنا: يرجى استخدام البيانات التجريبية فقط",
     "sidebar.video_news.title": "أبرزة قطاع البناء",
     "costs.category_field_hint": "صنّف هذا البند، مثل \"الصلب الإنشائي\". يمكنك تصفحه لاحقًا من قائمة الفئات.",
     "costs.category_field_label": "الفئة",
@@ -61096,6 +61097,7 @@ const resource = {
     "converter_notice.report": "الإبلاغ عن مشكلة",
     "converter_notice.email": "راسلونا عبر البريد الإلكتروني",
     "converter_notice.dismiss": "إغلاق هذا الإشعار",
+    "demo_uploads.refused": "رفع الملفات معطّل في العرض التجريبي العام. استخدم المشاريع التجريبية وبياناتها، أو ثبّت المنصة للعمل على ملفاتك.",
   }
 } as { translation: Record<string, string> };
 

@@ -8350,6 +8350,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Повний продукт працює на вашій власній машині за дві хвилини. Ваші дані лишаються на вашому комп’ютері.",
     "demo_banner.modal_install_box_label": "Встановити локально - 3 команди",
     "demo_banner.modal_cta": "Розумію, продовжити",
+    "demo_banner.strip_uploads_off": "Завантаження файлів тут вимкнено: використовуйте лише демо-дані",
     "sidebar.video_news.title": "Уберизація будівництва",
     "costs.category_field_hint": "Згрупуйте цю позицію, наприклад «Сталеві конструкції». Переглядайте пізніше зі списку категорій.",
     "costs.category_field_label": "Категорія",
@@ -60113,6 +60114,7 @@ const resource = {
     "converter_notice.report": "Повідомити про проблему",
     "converter_notice.email": "Написати нам на пошту",
     "converter_notice.dismiss": "Приховати це сповіщення",
+    "demo_uploads.refused": "У публічному демо завантаження файлів вимкнено. Використовуйте демо-проєкти та їхні приклади даних або встановіть платформу, щоб працювати зі своїми файлами.",
   }
 } as { translation: Record<string, string> };
 

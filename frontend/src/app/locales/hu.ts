@@ -7737,6 +7737,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "A teljes termék két perc alatt fut a saját gépén. Az adatai az Ön számítógépén maradnak.",
     "demo_banner.modal_install_box_label": "Helyi telepítés - 3 parancs",
     "demo_banner.modal_cta": "Értem, tovább",
+    "demo_banner.strip_uploads_off": "A feltöltés itt ki van kapcsolva: csak a bemutató adatokat használja",
     "sidebar.video_news.title": "Az építőipar uberizációja",
     "costs.category_field_hint": "Csoportosítsa ezt a tételt, pl. „Acélszerkezet”. Később a Kategóriák listából böngészheti.",
     "costs.category_field_label": "Kategória",
@@ -60606,6 +60607,7 @@ const resource = {
     "converter_notice.report": "Probléma jelentése",
     "converter_notice.email": "Írjon nekünk e-mailben",
     "converter_notice.dismiss": "Üzenet elrejtése",
+    "demo_uploads.refused": "A nyilvános bemutatóban a feltöltés ki van kapcsolva. Használja a bemutató projekteket és mintaadataikat, vagy telepítse a platformot a saját fájljaihoz.",
   }
 } as { translation: Record<string, string> };
 

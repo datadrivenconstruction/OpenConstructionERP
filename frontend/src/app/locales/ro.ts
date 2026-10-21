@@ -7925,6 +7925,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Produsul complet rulează pe propriul computer în două minute. Datele dumneavoastră rămân pe computerul dumneavoastră.",
     "demo_banner.modal_install_box_label": "Instalați local - 3 commands",
     "demo_banner.modal_cta": "Am înțeles, continuați",
+    "demo_banner.strip_uploads_off": "Încărcările sunt dezactivate aici: folosiți doar datele demo",
     "sidebar.video_news.title": "Uberizarea construcțiilor",
     "costs.category_field_hint": "Grupați acest articol, de ex. \"Oțel structural\". Îl puteți regăsi ulterior din lista Categorii.",
     "costs.category_field_label": "Categorie",
@@ -58366,6 +58367,7 @@ const resource = {
     "converter_notice.report": "Raportează o problemă",
     "converter_notice.email": "Scrie-ne pe e-mail",
     "converter_notice.dismiss": "Ascunde această notificare",
+    "demo_uploads.refused": "În demo-ul public încărcările sunt dezactivate. Folosiți proiectele demo și datele lor de exemplu sau instalați platforma pentru a lucra cu propriile fișiere.",
   }
 } as { translation: Record<string, string> };
 

@@ -6932,6 +6932,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Толық өнім өз машинаңызда екі минутта жұмыс істейді. Деректеріңіз компьютеріңізде қалады.",
     "demo_banner.modal_install_box_label": "Жергілікті орнату - 3 команда",
     "demo_banner.modal_cta": "Түсіндім, жалғастыру",
+    "demo_banner.strip_uploads_off": "Мұнда жүктеу өшірілген: тек демо деректерін пайдаланыңыз",
     "sidebar.video_news.title": "Құрылыстың Uber-ленуі",
     "costs.category_field_hint": "Бұл позицияны топтастырыңыз, мысалы, «Конструктивтік болат». Оны кейін Санаттар тізімінен шолыңыз.",
     "costs.category_field_label": "Санат",
@@ -58002,6 +58003,7 @@ const resource = {
     "converter_notice.report": "Мәселе туралы хабарлау",
     "converter_notice.email": "Бізге электрондық пошта жазу",
     "converter_notice.dismiss": "Хабарландыруды жабу",
+    "demo_uploads.refused": "Ашық демода жүктеу өшірілген. Демо жобалар мен олардың үлгі деректерін пайдаланыңыз немесе өз файлдарыңызбен жұмыс істеу үшін платформаны орнатыңыз.",
   }
 } as { translation: Record<string, string> };
 

@@ -7931,6 +7931,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Пълният продукт работи на вашата собствена машина за две минути. Данните ви остават на вашия компютър.",
     "demo_banner.modal_install_box_label": "Инсталирайте локално - 3 команди",
     "demo_banner.modal_cta": "Разбирам, продължи",
+    "demo_banner.strip_uploads_off": "Качването е изключено тук: използвайте само демо данните",
     "sidebar.video_news.title": "Уберизация на строителството",
     "costs.category_field_hint": "Групирайте този елемент, напр. \"Стоманени конструкции\". По-късно можете да го намерите от списъка с категории.",
     "costs.category_field_label": "Категория",
@@ -58045,6 +58046,7 @@ const resource = {
     "converter_notice.report": "Докладвай проблем",
     "converter_notice.email": "Напишете ни по имейл",
     "converter_notice.dismiss": "Скрий това известие",
+    "demo_uploads.refused": "Качването е изключено в публичното демо. Използвайте демо проектите и техните примерни данни или инсталирайте платформата, за да работите със собствени файлове.",
   }
 } as { translation: Record<string, string> };
 

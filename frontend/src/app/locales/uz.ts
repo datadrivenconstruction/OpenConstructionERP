@@ -8458,6 +8458,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Toʻliq mahsulot ikki daqiqada oʻz mashinangizda ishlaydi. Maʼlumotingiz kompyuteringizda qoladi.",
     "demo_banner.modal_install_box_label": "Mahalliy oʻrnating - 3 buyruq",
     "demo_banner.modal_cta": "Tushundim, davom etaman",
+    "demo_banner.strip_uploads_off": "Bu yerda yuklash o‘chirilgan: faqat demo ma’lumotlaridan foydalaning",
     "sidebar.video_news.title": "Qurilishning uberizatsiyasi",
     "costs.category_field_hint": "Bu bandni guruhlang, masalan \"Metall konstruksiyalar\". Keyinroq uni Toifalar roʻyxatidan koʻrib chiqing.",
     "costs.category_field_label": "Toifa",
@@ -58974,6 +58975,7 @@ const resource = {
     "converter_notice.report": "Muammo haqida xabar berish",
     "converter_notice.email": "Bizga e-pochta orqali yozish",
     "converter_notice.dismiss": "Bildirishnomani yopish",
+    "demo_uploads.refused": "Ommaviy demoda yuklash o‘chirilgan. Demo loyihalar va ularning namunaviy ma’lumotlaridan foydalaning yoki o‘z fayllaringiz bilan ishlash uchun platformani o‘rnating.",
   }
 } as { translation: Record<string, string> };
 

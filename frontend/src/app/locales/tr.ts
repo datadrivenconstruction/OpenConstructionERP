@@ -7985,6 +7985,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Tam ürün kendi makinenizde iki dakikada çalışır. Verileriniz bilgisayarınızda kalır.",
     "demo_banner.modal_install_box_label": "Yerel olarak kurun - 3 commands",
     "demo_banner.modal_cta": "Anladım, devam et",
+    "demo_banner.strip_uploads_off": "Burada yükleme kapalı: lütfen yalnızca demo verilerini kullanın",
     "sidebar.video_news.title": "İnşaatın Uberleşmesi",
     "costs.category_field_hint": "Bu kalemi gruplayın, örn. \"Çelik Konstrüksiyon\". Daha sonra Kategoriler listesinden inceleyebilirsiniz.",
     "costs.category_field_label": "Kategori",
@@ -58922,6 +58923,7 @@ const resource = {
     "converter_notice.report": "Sorun bildir",
     "converter_notice.email": "E-posta ile yazın",
     "converter_notice.dismiss": "Bu bildirimi kapat",
+    "demo_uploads.refused": "Herkese açık demoda yükleme kapalı. Demo projelerini ve örnek verilerini kullanın ya da kendi dosyalarınızla çalışmak için platformu kurun.",
   }
 } as { translation: Record<string, string> };
 

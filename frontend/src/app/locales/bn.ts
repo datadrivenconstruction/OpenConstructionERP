@@ -6906,6 +6906,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "সম্পূর্ণ পণ্যটি দুই মিনিটে আপনার নিজের মেশিনে চলে। আপনার ডেটা আপনার কম্পিউটারে থাকে।",
     "demo_banner.modal_install_box_label": "স্থানীয়ভাবে ইনস্টল করুন - 3টি কমান্ড",
     "demo_banner.modal_cta": "আমি বুঝেছি, চালিয়ে যান",
+    "demo_banner.strip_uploads_off": "এখানে আপলোড বন্ধ: শুধু ডেমো ডেটা ব্যবহার করুন",
     "sidebar.video_news.title": "নির্মাণের উবারাইজেশন",
     "costs.category_field_hint": "এই আইটেমটি দলবদ্ধ করুন, যেমন \"Structural Steel\"। পরে Categories তালিকা থেকে এটি ব্রাউজ করুন।",
     "costs.category_field_label": "শ্রেণী",
@@ -58311,6 +58312,7 @@ const resource = {
     "converter_notice.report": "সমস্যা জানান",
     "converter_notice.email": "ইমেইলে আমাদের লিখুন",
     "converter_notice.dismiss": "এই বিজ্ঞপ্তি বন্ধ করুন",
+    "demo_uploads.refused": "পাবলিক ডেমোতে আপলোড বন্ধ। ডেমো প্রকল্প ও তাদের উদাহরণ ডেটা ব্যবহার করুন, অথবা নিজের ফাইল নিয়ে কাজ করতে প্ল্যাটফর্মটি ইনস্টল করুন।",
   }
 } as { translation: Record<string, string> };
 

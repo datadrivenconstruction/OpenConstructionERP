@@ -7891,6 +7891,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Hela produkten körs på din egen maskin på två minuter. Dina data stannar på din dator.",
     "demo_banner.modal_install_box_label": "Installera lokalt - 3 kommandon",
     "demo_banner.modal_cta": "Jag förstår, fortsätt",
+    "demo_banner.strip_uploads_off": "Uppladdning är avstängd här: använd endast demodata",
     "sidebar.video_news.title": "Uberisering av byggbranschen",
     "costs.category_field_hint": "Gruppera den här posten, t.ex. \"Konstruktionsstål\". Bläddra i den senare från kategorilistan.",
     "costs.category_field_label": "Kategori",
@@ -58656,6 +58657,7 @@ const resource = {
     "converter_notice.report": "Rapportera ett problem",
     "converter_notice.email": "Skriv till oss via e-post",
     "converter_notice.dismiss": "Dölj det här meddelandet",
+    "demo_uploads.refused": "Uppladdning är avstängd i den offentliga demon. Använd demoprojekten och deras exempeldata, eller installera plattformen för att arbeta med egna filer.",
   }
 } as { translation: Record<string, string> };
 

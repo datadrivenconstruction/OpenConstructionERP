@@ -19,7 +19,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Gauge, X, Download, ExternalLink } from 'lucide-react';
+import { AlertTriangle, Gauge, X, Download, ExternalLink, UploadCloud } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
 
 const SESSION_KEY = 'oe_demo_modal_dismissed';
@@ -32,13 +32,14 @@ export function DemoBanner() {
   // share a single network call instead of firing /api/system/status twice on
   // every page render. ``staleTime: Infinity`` is fine — demo_mode is fixed
   // for the life of the deployment and the query is invalidated on logout.
-  const { data } = useQuery<{ demo_mode?: boolean }>({
+  const { data } = useQuery<{ demo_mode?: boolean; demo_uploads_disabled?: boolean }>({
     queryKey: ['system-status'],
-    queryFn: () => apiGet<{ demo_mode?: boolean }>('/system/status'),
+    queryFn: () => apiGet<{ demo_mode?: boolean; demo_uploads_disabled?: boolean }>('/system/status'),
     retry: false,
     staleTime: Infinity,
   });
   const demoMode = data?.demo_mode === true;
+  const uploadsDisabled = data?.demo_uploads_disabled === true;
 
   useEffect(() => {
     if (demoMode && sessionStorage.getItem(SESSION_KEY) !== '1') {
@@ -73,6 +74,16 @@ export function DemoBanner() {
             {t('demo_banner.strip_perf_caveat')}
           </span>
         </span>
+        {uploadsDisabled && (
+          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-[12px]">
+            <UploadCloud size={12} className="shrink-0 text-amber-700 dark:text-amber-300" />
+            <span className="text-amber-900 dark:text-amber-200">
+              {t('demo_banner.strip_uploads_off', {
+                defaultValue: 'Uploads are off here: please use the demo data only',
+              })}
+            </span>
+          </span>
+        )}
         <code className="px-1.5 py-0.5 rounded bg-amber-900/15 text-amber-950 font-mono text-[11px] dark:bg-amber-100/10 dark:text-amber-100">
           pip install openconstructionerp
         </code>

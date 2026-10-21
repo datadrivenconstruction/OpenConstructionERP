@@ -7813,6 +7813,7 @@ const resource = {
     "demo_banner.modal_bullet_install_body": "Produk lengkap berjalan di komputer Anda sendiri dalam dua menit. Data Anda tetap berada di komputer Anda.",
     "demo_banner.modal_install_box_label": "Instal secara lokal - 3 commands",
     "demo_banner.modal_cta": "Saya mengerti, lanjutkan",
+    "demo_banner.strip_uploads_off": "Unggahan dinonaktifkan di sini: gunakan data demo saja",
     "sidebar.video_news.title": "Uberisasi Konstruksi",
     "costs.category_field_hint": "Kelompokkan item ini, mis. \"Baja Struktural\". Telusuri nanti dari daftar Kategori.",
     "costs.category_field_label": "Kategori",
@@ -57795,6 +57796,7 @@ const resource = {
     "converter_notice.report": "Laporkan masalah",
     "converter_notice.email": "Hubungi kami lewat email",
     "converter_notice.dismiss": "Tutup pemberitahuan ini",
+    "demo_uploads.refused": "Unggahan dinonaktifkan di demo publik. Gunakan proyek demo beserta data contohnya, atau pasang platform untuk bekerja dengan file Anda sendiri.",
   }
 } as { translation: Record<string, string> };
 
