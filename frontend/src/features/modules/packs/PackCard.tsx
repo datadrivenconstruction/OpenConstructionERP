@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { Boxes, Check, ChevronRight, FolderKanban, Languages, Power } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
+import { fmtList } from '@/shared/lib/formatters';
 import { packNameSlug, packSummary } from '@/shared/lib/regionalPack';
 import type { PackEntry } from './packCatalog';
 import { PACK_TYPE_META } from './packLabels';
@@ -151,7 +152,7 @@ function PackCardImpl({
         {extraStandards > 0 && (
           <span
             className="inline-flex h-5 items-center rounded-md border border-border-light px-1.5 text-2xs text-content-tertiary"
-            title={entry.standards.slice(STANDARDS_ON_CARD).join(', ')}
+            title={fmtList(entry.standards.slice(STANDARDS_ON_CARD))}
           >
             +{extraStandards}
           </span>
@@ -165,7 +166,7 @@ function PackCardImpl({
               <Languages size={12} aria-hidden />
               <span className="sr-only">{t('packs.languages', { defaultValue: 'Languages' })}</span>
             </dt>
-            <dd className="truncate">{languages.join(', ')}</dd>
+            <dd className="truncate">{fmtList(languages)}</dd>
           </div>
         )}
         <div className="flex min-w-0 items-center gap-1.5">

@@ -34,6 +34,7 @@ import {
 import { Breadcrumb, Button } from '@/shared/ui';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
 import { CountryFlag } from '@/shared/ui/CountryFlag';
+import { fmtList, fmtNumber } from '@/shared/lib/formatters';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -152,14 +153,6 @@ export function PackDetailPage() {
       { replace: true },
     );
   }, [wantsSetup, entry, canInstall, isActive, envPinned, setSearchParams]);
-
-  const fmtInt = useMemo(() => {
-    try {
-      return new Intl.NumberFormat(i18n.language || 'en');
-    } catch {
-      return new Intl.NumberFormat('en');
-    }
-  }, [i18n.language]);
 
   if (list.isLoading) {
     return (
@@ -333,7 +326,7 @@ export function PackDetailPage() {
                   <Fact label={t('packs.currency', { defaultValue: 'Currency' })}>
                     <span className="font-mono">{plan.default_currency}</span>
                   </Fact>
-                  <Fact label={t('packs.languages', { defaultValue: 'Languages' })}>{languageList.join(', ')}</Fact>
+                  <Fact label={t('packs.languages', { defaultValue: 'Languages' })}>{fmtList(languageList)}</Fact>
                   {plan.default_tax_template && (
                     <Fact label={t('packs.tax_template', { defaultValue: 'Tax template' })}>
                       <span className="font-mono text-xs">{plan.default_tax_template}</span>
@@ -427,7 +420,7 @@ export function PackDetailPage() {
                           </p>
                           {base.positions !== null && (
                             <p className="text-xs text-content-tertiary">
-                              {t('packs.work_items_n', { defaultValue: 'Work items: {{n}}', n: fmtInt.format(base.positions) })}
+                              {t('packs.work_items_n', { defaultValue: 'Work items: {{n}}', n: fmtNumber(base.positions, 0) })}
                             </p>
                           )}
                         </div>
@@ -463,7 +456,7 @@ export function PackDetailPage() {
                             plan.demo_project.currency,
                             plan.demo_project.classification_standard,
                             plan.demo_project.positions !== undefined
-                              ? t('packs.positions_n', { defaultValue: 'Positions: {{n}}', n: fmtInt.format(plan.demo_project.positions) })
+                              ? t('packs.positions_n', { defaultValue: 'Positions: {{n}}', n: fmtNumber(plan.demo_project.positions, 0) })
                               : null,
                           ]
                             .filter(Boolean)
@@ -507,9 +500,9 @@ export function PackDetailPage() {
               <Fact label={t('packs.currency', { defaultValue: 'Currency' })}>
                 <span className="font-mono">{pack.default_currency}</span>
               </Fact>
-              <Fact label={t('packs.languages', { defaultValue: 'Languages' })}>{languageList.join(', ')}</Fact>
+              <Fact label={t('packs.languages', { defaultValue: 'Languages' })}>{fmtList(languageList)}</Fact>
               {entry.standards.length > 0 && (
-                <Fact label={t('packs.standards', { defaultValue: 'Standards' })}>{entry.standards.join(', ')}</Fact>
+                <Fact label={t('packs.standards', { defaultValue: 'Standards' })}>{fmtList(entry.standards)}</Fact>
               )}
               <Fact label={t('packs.modules', { defaultValue: 'Modules' })}>
                 {entry.moduleCount === null

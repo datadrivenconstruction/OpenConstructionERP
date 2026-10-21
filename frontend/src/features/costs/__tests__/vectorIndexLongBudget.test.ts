@@ -402,9 +402,10 @@ describe('only the vector calls that own their reporting opt out of the toast', 
   // is the failure mode the closing sentence below asks a reader to avoid: a
   // number that names a population stops being true the moment the population
   // moves, and nothing about deleting dead code makes a census recount itself.
-  const EXPECTED_OPT_OUTS = 11;
+  // The two BIM model status polls retry on the next tick, so a slow poll has nothing to report.
+  const EXPECTED_OPT_OUTS = 13;
 
-  it('suppresses the global toast at exactly the eleven sites that replace it', () => {
+  it('suppresses the global toast at exactly the thirteen sites that replace it', () => {
     const sites: string[] = [];
     for (const file of productionFiles()) {
       const where = relative(SRC, file).split(sep).join('/');
@@ -421,7 +422,8 @@ describe('only the vector calls that own their reporting opt out of the toast', 
         'proving the index landed, the one match-elements readiness probe ' +
         'whose card renders nothing on failure by design, and the two ' +
         'snapshot-restore POSTs, which answer their own abort by saying the ' +
-        'restore is still running on the server. A new one belongs here only if ' +
+        'restore is still running on the server, and the two BIM model status ' +
+        'polls, which retry on the next tick. A new one belongs here only if ' +
         'it reports the timeout itself or has nothing to report; if it does, ' +
         'change this number deliberately.',
     ).toBe(EXPECTED_OPT_OUTS);
