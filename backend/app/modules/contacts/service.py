@@ -242,6 +242,28 @@ class ContactService:
             sort_order=sort_order,
         )
 
+    async def list_contacts_keyset(
+        self,
+        *,
+        contact_type: str | None = None,
+        country_code: str | None = None,
+        is_active: bool = True,
+        owner_id: str | None = None,
+        tags: list[str] | None = None,
+        limit: int = 50,
+        after: tuple[str, uuid.UUID] | None = None,
+    ) -> tuple[list[Contact], tuple[str, uuid.UUID] | None]:
+        """Keyset page of contacts, same tenant scope as :meth:`list_contacts`."""
+        return await self.repo.list_keyset(
+            contact_type=contact_type,
+            country_code=country_code,
+            is_active=is_active,
+            owner_id=owner_id,
+            tags=tags,
+            limit=limit,
+            after=after,
+        )
+
     async def tag_facets(
         self,
         *,

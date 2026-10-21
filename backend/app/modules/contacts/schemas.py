@@ -235,6 +235,7 @@ class ContactListResponse(BaseModel):
     total: int
     offset: int
     limit: int
+    next_cursor: str | None = None
 
 
 # ── Stats ────────────────────────────────────────────────────────────────

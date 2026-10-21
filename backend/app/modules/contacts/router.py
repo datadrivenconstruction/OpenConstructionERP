@@ -20,8 +20,11 @@ Module-bridge endpoints (see app.modules.contacts.bridge):
 """
 
 import asyncio
+import base64
+import binascii
 import csv
 import io
+import json
 import logging
 import re
 import uuid
@@ -125,6 +128,25 @@ async def _require_contact_access(
 # ── List ──────────────────────────────────────────────────────────────────────
 
 
+def _encode_cursor(sort_key: str, contact_id: uuid.UUID) -> str:
+    raw = json.dumps([sort_key, str(contact_id)], separators=(",", ":")).encode()
+    return base64.urlsafe_b64encode(raw).decode().rstrip("=")
+
+
+def _decode_cursor(cursor: str) -> tuple[str, uuid.UUID] | None:
+    """Decode an opaque cursor; empty means first page, malformed -> 422."""
+    if cursor == "":
+        return None
+    try:
+        raw = base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4))
+        key, cid = json.loads(raw)
+        if not isinstance(key, str) or not isinstance(cid, str):
+            raise ValueError
+        return key, uuid.UUID(cid)
+    except (ValueError, TypeError, binascii.Error) as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid cursor") from exc
+
+
 @router.get(
     "/",
     response_model=ContactListResponse,
@@ -152,6 +174,12 @@ async def list_contacts(
     limit: int = Query(default=50, ge=1, le=500),
     sort_by: str | None = Query(default=None, description="Sort field: name, email, created_at"),
     sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
+    cursor: str | None = Query(
+        default=None,
+        description="Opaque keyset cursor. Send an empty value (?cursor=) for the first page, "
+        "then the previous response's next_cursor. Keyset mode orders by display name then id "
+        "(ascending), ignores offset/sort_by/sort_order, and skips the total count (total=-1).",
+    ),
     _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactListResponse:
@@ -166,6 +194,24 @@ async def list_contacts(
     resolved_sort = _sort_aliases.get(sort_by, sort_by) if sort_by else None
 
     owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
+    if cursor is not None:
+        after = _decode_cursor(cursor)
+        page, nxt = await service.list_contacts_keyset(
+            contact_type=contact_type,
+            country_code=country_code,
+            is_active=is_active,
+            owner_id=owner_filter,
+            tags=tag,
+            limit=limit,
+            after=after,
+        )
+        return ContactListResponse(
+            items=[ContactResponse.model_validate(c) for c in page],
+            total=-1,
+            offset=0,
+            limit=limit,
+            next_cursor=_encode_cursor(*nxt) if nxt else None,
+        )
     items, total = await service.list_contacts(
         contact_type=contact_type,
         country_code=country_code,

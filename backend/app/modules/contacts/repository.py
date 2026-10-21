@@ -37,6 +37,18 @@ def _tenant_scope(owner_id: str):  # type: ignore[no-untyped-def]
     return or_(Contact.tenant_id == owner, Contact.created_by == owner)
 
 
+def name_sort_key():  # type: ignore[no-untyped-def]
+    """SQL expression the keyset list sorts on (case-insensitive display name)."""
+    return func.lower(
+        func.coalesce(
+            Contact.company_name,
+            Contact.last_name,
+            Contact.first_name,
+            "",
+        )
+    )
+
+
 class ContactRepository:
     """Data access for Contact model."""
 
@@ -62,29 +74,16 @@ class ContactRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def list(
-        self,
+    @staticmethod
+    def _filtered(  # type: ignore[no-untyped-def]
         *,
-        contact_type: str | None = None,
-        country_code: str | None = None,
-        search: str | None = None,
-        is_active: bool = True,
-        owner_id: str | None = None,
-        tags: list[str] | None = None,
-        limit: int = 50,
-        offset: int = 0,
-        sort_by: str | None = None,
-        sort_order: str = "desc",
-    ) -> tuple[list[Contact], int]:
-        """List contacts with filters and pagination.
-
-        ``owner_id`` scopes the result to contacts in the caller's
-        tenant (``tenant_id`` column, with a fallback to ``created_by``
-        for rows inserted before the v2.3.1 migration).  Pass ``None``
-        to skip the scope filter - only admins should ever do that.
-
-        Returns (contacts, total_count).
-        """
+        contact_type: str | None,
+        country_code: str | None,
+        search: str | None,
+        is_active: bool,
+        owner_id: str | None,
+        tags: list[str] | None,
+    ):
         base = select(Contact).where(Contact.is_active == is_active)
 
         if contact_type is not None:
@@ -113,6 +112,79 @@ class ContactRepository:
             tag_clauses = [metadata_text.ilike(f'%"{t}"%') for t in tags if t]
             if tag_clauses:
                 base = base.where(and_(*tag_clauses))
+        return base
+
+    async def list_keyset(
+        self,
+        *,
+        contact_type: str | None = None,
+        country_code: str | None = None,
+        is_active: bool = True,
+        owner_id: str | None = None,
+        tags: list[str] | None = None,
+        limit: int = 50,
+        after: tuple[str, uuid.UUID] | None = None,
+    ) -> tuple[list[Contact], tuple[str, uuid.UUID] | None]:
+        """Keyset page ordered by ``(name_sort_key, id)`` ascending.
+
+        Returns ``(contacts, next_after)``; ``next_after`` is ``None`` on the
+        last page. Rows inserted between pages are never duplicated or
+        skipped past the cursor position.
+        """
+        key = name_sort_key()
+        stmt = self._filtered(
+            contact_type=contact_type,
+            country_code=country_code,
+            search=None,
+            is_active=is_active,
+            owner_id=owner_id,
+            tags=tags,
+        )
+        if after is not None:
+            k, last_id = after
+            stmt = stmt.where(or_(key > k, and_(key == k, Contact.id > last_id)))
+        # The key is read back from the database so the cursor compares with
+        # exactly the value (and collation) the next query orders by.
+        stmt = stmt.add_columns(key.label("sort_key")).order_by(key.asc(), Contact.id.asc()).limit(limit + 1)
+        rows = list((await self.session.execute(stmt)).all())
+        has_more = len(rows) > limit
+        rows = rows[:limit]
+        contacts = [r[0] for r in rows]
+        if not has_more:
+            return contacts, None
+        return contacts, (rows[-1][1], contacts[-1].id)
+
+    async def list(
+        self,
+        *,
+        contact_type: str | None = None,
+        country_code: str | None = None,
+        search: str | None = None,
+        is_active: bool = True,
+        owner_id: str | None = None,
+        tags: list[str] | None = None,
+        limit: int = 50,
+        offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
+    ) -> tuple[list[Contact], int]:
+        """List contacts with filters and pagination.
+
+        ``owner_id`` scopes the result to contacts in the caller's
+        tenant (``tenant_id`` column, with a fallback to ``created_by``
+        for rows inserted before the v2.3.1 migration).  Pass ``None``
+        to skip the scope filter - only admins should ever do that.
+
+        Returns (contacts, total_count).
+        """
+        base = self._filtered(
+            contact_type=contact_type,
+            country_code=country_code,
+            search=search,
+            is_active=is_active,
+            owner_id=owner_id,
+            tags=tags,
+        )
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()

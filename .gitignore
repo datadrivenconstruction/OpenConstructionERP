@@ -530,3 +530,6 @@ email-delivery-failures*.jsonl
 
 # Locale bootstrap batches, see scripts/i18n_new_locale.py
 .i18n-work/
+
+# perf benchmark results (backend/tests/perf/bench_contacts_gaeb.py)
+backend/tests/perf/ledger.jsonl
