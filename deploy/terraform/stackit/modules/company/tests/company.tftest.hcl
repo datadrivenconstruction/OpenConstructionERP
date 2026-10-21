@@ -25,6 +25,13 @@ override_resource {
 }
 
 override_resource {
+  target = stackit_objectstorage_credentials_group.this
+  values = {
+    credentials_group_id = "22222222-2222-2222-2222-222222222222"
+  }
+}
+
+override_resource {
   target = stackit_objectstorage_credential.this
   values = {
     access_key        = "AKIAEXAMPLE"

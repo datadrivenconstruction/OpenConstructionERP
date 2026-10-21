@@ -84,6 +84,15 @@ class StandalonePreflightRow(BaseModel):
     can_link: bool = True
 
 
+class StandalonePreflightResponse(BaseModel):
+    """Every active variation order on the project; the list is never paged."""
+
+    items: list[StandalonePreflightRow]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class ChangeOrderCreate(BaseModel):
     """Create a new change order."""
 

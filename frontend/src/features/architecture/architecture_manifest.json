@@ -21492,6 +21492,21 @@
               "default": "False"
             },
             {
+              "name": "conversion_stage",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "conversion_started_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "conversion_timeout_s",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
               "name": "created_by",
               "type": "UUID | None",
               "default": "None"
@@ -41073,6 +41088,13 @@
           "request_schema": "ChangeOrderService"
         },
         {
+          "method": "GET",
+          "path": "/standalone-preflight",
+          "handler": "standalone_preflight",
+          "response_model": "StandalonePreflightResponse",
+          "request_schema": "ChangeOrderService"
+        },
+        {
           "method": "POST",
           "path": "/",
           "handler": "create_change_order",
@@ -41198,6 +41220,74 @@
         }
       ],
       "schemas": [
+        {
+          "class_name": "StandalonePreflightRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One active variation order shown before a standalone change order is saved.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "linked_change_order_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "linked_change_order_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "can_link",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "StandalonePreflightResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every active variation order on the project; the list is never paged.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[StandalonePreflightRow]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "50"
+            }
+          ]
+        },
         {
           "class_name": "ChangeOrderCreate",
           "bases": [
@@ -271115,7 +271205,7 @@
           "path": "/variation-orders/{vo_id}/void",
           "handler": "void_variation_order",
           "response_model": "VariationOrderResponse",
-          "request_schema": "None"
+          "request_schema": "_VoidBody"
         },
         {
           "method": "POST",
@@ -278652,8 +278742,8 @@
     "total_models": 788,
     "total_columns": 9170,
     "total_relationships": 240,
-    "total_routes": 4624,
-    "total_schemas": 4112,
+    "total_routes": 4625,
+    "total_schemas": 4114,
     "total_python_files": 2808,
     "frontend_features": 209,
     "frontend_ts_files": 3599,

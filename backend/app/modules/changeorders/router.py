@@ -45,6 +45,7 @@ from app.modules.changeorders.schemas import (
     ChangeOrderWithItems,
     SimulateImpactRequest,
     SimulateImpactResponse,
+    StandalonePreflightResponse,
     StandalonePreflightRow,
 )
 from app.modules.changeorders.service import ChangeOrderService
@@ -256,7 +257,7 @@ async def get_summary(
 
 @router.get(
     "/standalone-preflight",
-    response_model=list[StandalonePreflightRow],
+    response_model=StandalonePreflightResponse,
     dependencies=[Depends(RequirePermission("changeorders.read"))],
 )
 async def standalone_preflight(
@@ -264,11 +265,11 @@ async def standalone_preflight(
     user_id: CurrentUserId,
     session: SessionDep,
     service: ChangeOrderService = Depends(_get_service),
-) -> list[StandalonePreflightRow]:
+) -> StandalonePreflightResponse:
     """Active variation orders on the project. A check shown before saving, never a block."""
     await verify_project_access(project_id, str(user_id), session)
-    rows = await service.standalone_preflight(project_id)
-    return [StandalonePreflightRow(**r) for r in rows]
+    rows = [StandalonePreflightRow(**r) for r in await service.standalone_preflight(project_id)]
+    return StandalonePreflightResponse(items=rows, total=len(rows), limit=max(len(rows), 50))
 
 
 # ── Create ───────────────────────────────────────────────────────────────────
