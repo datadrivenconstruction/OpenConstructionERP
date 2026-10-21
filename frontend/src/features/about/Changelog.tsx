@@ -53,7 +53,13 @@ interface ChangelogEntry {
  * claims to be, so anything numeric-looking here would be read as a release
  * that nothing else in the tree has been bumped to.
  */
-const UNRELEASED: ChangelogEntry | null = null;
+const UNRELEASED: ChangelogEntry | null = {
+  version: 'Unreleased',
+  date: '',
+  tag: 'NEW',
+  summary:
+    'An optional step in first-run setup, \'How your platform will look\': pick a ready colour style and menu set, change the accent colour, and see a live preview before anything is applied. Skip keeps the defaults.',
+};
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.

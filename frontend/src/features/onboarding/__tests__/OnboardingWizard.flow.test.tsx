@@ -132,7 +132,7 @@ function renderWizard() {
 
 const heading = (name: string) => screen.findByRole('heading', { name });
 const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
-const stepLabel = () => screen.getByText(/^Step \d of 6$/).textContent;
+const stepLabel = () => screen.getByText(/^Step \d of 7$/).textContent;
 
 /** The module step's switch for one module, found through the search box and
  *  then by the switch's own name. Found by visible text instead, the finance
@@ -154,9 +154,11 @@ async function toProfileStep() {
   await screen.findByTestId('profile-card-general_contractor');
 }
 
-/** Module step -> data step -> summary, taking the data step's skip. */
+/** Module step -> look step -> data step -> summary, taking both skips. */
 async function fromModulesToSummary() {
   click('Continue');
+  await heading('How your platform will look');
+  click('Skip');
   await heading('Data Setup');
   click('Skip - set up later');
   await heading("You're All Set!");
@@ -221,13 +223,13 @@ describe('the onboarding wizard, first screen to the app', () => {
     const client = renderWizard();
 
     await heading('Welcome to OpenConstructionERP');
-    expect(stepLabel()).toBe('Step 1 of 6');
+    expect(stepLabel()).toBe('Step 1 of 7');
     click(/Get Started/);
     await heading('How would you like to start?');
-    expect(stepLabel()).toBe('Step 2 of 6');
+    expect(stepLabel()).toBe('Step 2 of 7');
     click(/Choose Your Profile/);
     await heading('What does your company do?');
-    expect(stepLabel()).toBe('Step 3 of 6');
+    expect(stepLabel()).toBe('Step 3 of 7');
 
     const card = await screen.findByTestId('profile-card-general_contractor');
     // One count for the profile everywhere it is printed: the card, the module
@@ -239,18 +241,21 @@ describe('the onboarding wizard, first screen to the app', () => {
     click('Continue');
 
     await heading('Your Modules');
-    expect(stepLabel()).toBe('Step 4 of 6');
+    expect(stepLabel()).toBe('Step 4 of 7');
     expect(screen.getByText(new RegExp(`^${expected} / ${ALL_MODULES.length}`))).toBeTruthy();
     expect(moduleSwitch('contracts').getAttribute('aria-checked')).toBe('true');
     expect(moduleSwitch('crm').getAttribute('aria-checked')).toBe('false');
 
     click('Continue');
+    await heading('How your platform will look');
+    expect(stepLabel()).toBe('Step 5 of 7');
+    click('Skip');
     await heading('Data Setup');
-    expect(stepLabel()).toBe('Step 5 of 6');
+    expect(stepLabel()).toBe('Step 6 of 7');
     click('Skip - set up later');
 
     await heading("You're All Set!");
-    expect(stepLabel()).toBe('Step 6 of 6');
+    expect(stepLabel()).toBe('Step 7 of 7');
     expect(screen.getByText('General Contractor')).toBeTruthy();
     expect(screen.getByText(`${expected} modules`)).toBeTruthy();
     // Nothing is saved before the last click.
@@ -293,6 +298,8 @@ describe('the onboarding wizard, first screen to the app', () => {
 
     click('Back');
     await heading('Data Setup');
+    click('Back');
+    await heading('How your platform will look');
     click('Back');
     await heading('Your Modules');
     expect(moduleSwitch('payroll').getAttribute('aria-checked')).toBe('true');
@@ -375,7 +382,7 @@ describe('the ways out of the wizard', () => {
     click(/Quick Start/);
 
     await heading('Data Setup');
-    expect(stepLabel()).toBe('Step 5 of 6');
+    expect(stepLabel()).toBe('Step 6 of 7');
     click('Back');
     await heading('How would you like to start?');
 

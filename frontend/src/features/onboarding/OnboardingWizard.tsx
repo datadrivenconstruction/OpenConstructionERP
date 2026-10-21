@@ -156,13 +156,14 @@ import {
   type OnboardingProvisionResult,
 } from './provisionOutcome';
 import { SemanticModelCard } from './SemanticModelCard';
+import { StepLook } from './StepLook';
 import { aiEstimatorApi } from '@/features/ai-estimator/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { fmtList } from '@/shared/lib/formatters';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
 
 // ── Language -> Region mapping ──────────────────────────────────────────────
 
@@ -4982,8 +4983,8 @@ export function OnboardingWizard() {
     // Set all modules enabled (full enterprise quick start)
     setEnabledModules(new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key)));
     setCompanyType('full_enterprise');
-    // Jump to step 4 (data setup) -- step indices: 0=welcome, 1=choice, 2=profile, 3=modules, 4=data, 5=finish
-    setStep(4);
+    // Jump to step 5 (data setup) -- step indices: 0=welcome, 1=choice, 2=profile, 3=modules, 4=look, 5=data, 6=finish
+    setStep(5);
   }, []);
 
   const handleChooseProfile = useCallback(() => {
@@ -5018,7 +5019,7 @@ export function OnboardingWizard() {
   const handleReadyPackInstalled = useCallback((slug: string) => {
     setPackInstalledSlug(slug);
     setReadyPackView(false);
-    setStep(5);
+    setStep(6);
   }, []);
 
   /** Install failed -> fall back to the normal multi-step flow (the picker
@@ -5040,7 +5041,7 @@ export function OnboardingWizard() {
     if (quickStart) {
       setStep(1); // back to start choice
     } else if (showModuleConfig) {
-      setStep(3); // back to module config
+      setStep(4); // back to the look step
     } else {
       setStep(2); // back to profile
     }
@@ -5194,20 +5195,21 @@ export function OnboardingWizard() {
                   onToggleModule={handleToggleModule}
                 />
               )}
-              {step === 4 && (
+              {step === 4 && <StepLook onNext={() => setStep(5)} onBack={() => setStep(3)} />}
+              {step === 5 && (
                 <StepDataSetup
                   onNext={() => {
                     // Move to finish — background loading happens inside StepDataSetup
-                    setStep(5);
+                    setStep(6);
                   }}
                   onBack={handleBackFromData}
                   selectedLang={selectedLang}
                   backgroundLoad
                 />
               )}
-              {step === 5 && (
+              {step === 6 && (
                 <StepFinish
-                  onBack={() => (packInstalledSlug ? setStep(1) : setStep(4))}
+                  onBack={() => (packInstalledSlug ? setStep(1) : setStep(5))}
                   companyType={companyType}
                   enabledModules={enabledModules}
                   presets={presets}

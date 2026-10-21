@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- An optional step in first-run setup, "How your platform will look": pick one of the ready colour styles and menu sets, change the accent colour, and see a live mini preview before anything is applied. Skip keeps the defaults, and an administrator can also save the choice as the workspace default.
+
 ## [18.8.0] - 2026-10-20
 
 ### Added
