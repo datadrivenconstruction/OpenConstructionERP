@@ -164,7 +164,24 @@ def _last_json_line(text: str) -> dict[str, Any] | None:
     return None
 
 
-def run_converter(fmt: str, exe: Path, input_path: Path, work_dir: Path, *, timeout: float = 600) -> ConverterRun:
+#: Default ceiling for one conversion: large Revit models take tens of minutes.
+DEFAULT_CONVERT_TIMEOUT_S = 1800
+
+
+def convert_timeout_s(fmt: str) -> int:
+    """Seconds one conversion may run: ``OE_CONVERT_TIMEOUT_S`` (all formats), default 30 minutes.
+
+    ``OE_DWG_CONVERT_TIMEOUT_S`` still overrides it for DWG, as before.
+    """
+    default = int(os.getenv("OE_CONVERT_TIMEOUT_S") or DEFAULT_CONVERT_TIMEOUT_S)
+    if fmt == "dwg":
+        return int(os.getenv("OE_DWG_CONVERT_TIMEOUT_S") or default)
+    return default
+
+
+def run_converter(
+    fmt: str, exe: Path, input_path: Path, work_dir: Path, *, timeout: float | None = None
+) -> ConverterRun:
     """Convert one file and collect its outputs. Raises ``subprocess.TimeoutExpired``.
 
     Never raises for a failed conversion: the caller reads :attr:`ConverterRun.ok`
@@ -182,6 +199,8 @@ def run_converter(fmt: str, exe: Path, input_path: Path, work_dir: Path, *, time
     else:
         out_dir = work_dir / f"{fmt}_out"
         out_dir.mkdir(parents=True, exist_ok=True)
+    if timeout is None:
+        timeout = convert_timeout_s(fmt)
     cmd = build_command(fmt, exe, input_path, out_dir, timeout=timeout)
     kwargs: dict[str, Any] = {}
     if sys.platform == "win32":

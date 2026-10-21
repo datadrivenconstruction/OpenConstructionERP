@@ -685,3 +685,15 @@ def test_the_converter_error_object_wins_over_failed_outputs() -> None:
     stdout = json.dumps({"error": {"code": "DWG_DAMAGED", "message_en": "Damaged."}, "failed_outputs": ["dxf"]})
     run = ddc_runner.ConverterRun(fmt="dwg", command=[], returncode=3, stdout=stdout)
     assert run.failure == {"code": "DWG_DAMAGED", "message_en": "Damaged."}
+
+
+def test_conversion_limit_is_thirty_minutes_and_configurable(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OE_CONVERT_TIMEOUT_S", raising=False)
+    monkeypatch.delenv("OE_DWG_CONVERT_TIMEOUT_S", raising=False)
+    assert ddc_runner.convert_timeout_s("rvt") == 1800
+    assert ddc_runner.convert_timeout_s("dwg") == 1800
+    monkeypatch.setenv("OE_CONVERT_TIMEOUT_S", "3600")
+    assert ddc_runner.convert_timeout_s("ifc") == 3600
+    monkeypatch.setenv("OE_DWG_CONVERT_TIMEOUT_S", "900")
+    assert ddc_runner.convert_timeout_s("dwg") == 900
+    assert ddc_runner.convert_timeout_s("rvt") == 3600

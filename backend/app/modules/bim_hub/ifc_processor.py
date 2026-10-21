@@ -477,7 +477,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             output_dir.mkdir(parents=True, exist_ok=True)
 
             try:
-                run = ddc_runner.run_converter(fmt, converter, ifc_path, output_dir, timeout=600)
+                run = ddc_runner.run_converter(fmt, converter, ifc_path, output_dir)
             except subprocess.TimeoutExpired:
                 logger.error("DDC conversion timed out for %s", ifc_path.name)
                 _record_ddc_failure(ext, "timeout", ifc_path=ifc_path)

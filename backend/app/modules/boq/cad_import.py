@@ -1019,8 +1019,10 @@ def conversion_failed_detail(ext: str) -> str:
 
 
 def _convert_timeout_s(fmt: str) -> float:
-    # DWG shares the drawing page's limit, so one file does not pass there and time out here.
-    return float(os.getenv("OE_DWG_CONVERT_TIMEOUT_S", "900")) if fmt == "dwg" else 600.0
+    # One limit for every page that converts, so a file does not pass on one and time out on another.
+    from app.modules.boq.ddc_runner import convert_timeout_s
+
+    return float(convert_timeout_s(fmt))
 
 
 async def convert_cad_to_excel(
@@ -1030,7 +1032,7 @@ async def convert_cad_to_excel(
 ) -> Path | None:
     """Run a DDC converter to transform a CAD file into a one-row-per-element Excel file.
 
-    The converter runs as a subprocess with a 10-minute timeout. What it writes
+    The converter runs as a subprocess with a 30-minute limit (``OE_CONVERT_TIMEOUT_S``). What it writes
     depends on the format (see :mod:`app.modules.boq.ddc_runner`): IFC and RVT
     output is flattened into an ``Elements`` workbook; a DWG is read through the
     DXF its converter writes, like an uploaded DXF.
