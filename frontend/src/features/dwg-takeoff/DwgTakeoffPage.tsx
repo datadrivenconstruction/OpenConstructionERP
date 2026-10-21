@@ -3520,7 +3520,7 @@ export function DwgTakeoffPage() {
             <div className="relative flex-1 min-h-0" data-dwg-viewer-root>
               {unresolvedXrefs.length > 0 && (
                 <div
-                  className="absolute left-3 right-3 top-3 z-20 rounded-md border border-amber-500/40 bg-amber-50/95 px-3 py-2 text-[11px] text-amber-900 shadow dark:bg-amber-950/90 dark:text-amber-100"
+                  className="absolute inset-x-3 top-3 z-20 rounded-md border border-amber-500/40 bg-amber-50/95 px-3 py-2 text-[11px] text-amber-900 shadow dark:bg-amber-950/90 dark:text-amber-100"
                   role="status"
                   data-testid="dwg-xref-notice"
                 >

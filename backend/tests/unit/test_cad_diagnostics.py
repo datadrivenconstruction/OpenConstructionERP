@@ -110,5 +110,5 @@ def test_detect_converter_version_without_a_stamp_reports_the_declared_package_v
     info = cad_import.detect_converter_version("rvt")
 
     assert info["source"] == "package"
-    assert info["version"] == "2.0.0"
+    assert info["version"] == "2.0.1"
     assert info["binary_path"] == str(fake_bin)
