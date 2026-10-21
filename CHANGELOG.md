@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- Four Saudi Arabia demo projects for different business models, each with its estimate, budget, procurement, subcontract, schedule and billing data: an engineering consultancy (villa compound, Riyadh), a building contractor (residential tower, Jeddah), site development and landscaping (community park, Dammam) and a full-service group project covering consultancy, construction, site works, landscaping, fit-out and FF&E supply (mixed-use hub, Riyadh).
+
 ## [18.8.0] - 2026-10-20
 
 ### Added
