@@ -164,7 +164,7 @@ async def test_the_mirror_of_a_voided_order_is_the_change_and_still_counts(sessi
     """
     pid = await _project(session)
     vo, mirror = await _promote(session, pid)
-    await VariationsService(session).transition_variation_order(vo.id, "voided")
+    await VariationsService(session).transition_variation_order(vo.id, "voided", reason="test void")
     await session.flush()
 
     run_rate = await build_change_run_rate(session, pid, now=NOW)

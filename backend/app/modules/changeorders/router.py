@@ -20,6 +20,7 @@ Endpoints:
 import logging
 import uuid
 from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import inspect as sa_inspect
@@ -44,6 +45,7 @@ from app.modules.changeorders.schemas import (
     ChangeOrderWithItems,
     SimulateImpactRequest,
     SimulateImpactResponse,
+    StandalonePreflightRow,
 )
 from app.modules.changeorders.service import ChangeOrderService
 
@@ -252,6 +254,23 @@ async def get_summary(
     return ChangeOrderSummary(**data)
 
 
+@router.get(
+    "/standalone-preflight",
+    response_model=list[StandalonePreflightRow],
+    dependencies=[Depends(RequirePermission("changeorders.read"))],
+)
+async def standalone_preflight(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ChangeOrderService = Depends(_get_service),
+) -> list[StandalonePreflightRow]:
+    """Active variation orders on the project. A check shown before saving, never a block."""
+    await verify_project_access(project_id, str(user_id), session)
+    rows = await service.standalone_preflight(project_id)
+    return [StandalonePreflightRow(**r) for r in rows]
+
+
 # ── Create ───────────────────────────────────────────────────────────────────
 
 
@@ -273,6 +292,12 @@ async def create_change_order(
     "not owned" so we don't leak existence either.
     """
     await verify_project_access(data.project_id, str(user_id), session)
+    if data.metadata.get("standalone_overlap_acknowledged"):
+        # Who and when come from the server, not from the client.
+        data.metadata["standalone_overlap_acknowledged"] = {
+            "by": str(user_id),
+            "at": datetime.now(UTC).isoformat(),
+        }
     try:
         order = await service.create_order(data)
         return await _order_response(session, order)

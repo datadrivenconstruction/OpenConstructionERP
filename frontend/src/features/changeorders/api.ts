@@ -271,3 +271,24 @@ export function downloadChangeOrderRegister(
 export function downloadChangeOrderPdf(id: string, locale: string, code?: string): Promise<void> {
   return downloadRecordPdf(`/v1/changeorders/${encodeURIComponent(id)}/export/pdf/`, locale, code || 'change-order');
 }
+
+/* ── Standalone preflight ──────────────────────────────────────────────── */
+
+/** One active variation order listed before a standalone change order is saved. */
+export interface StandalonePreflightRow {
+  id: string;
+  code: string;
+  title: string;
+  status: string;
+  linked_change_order_id: string | null;
+  linked_change_order_status: string | null;
+  /** False while the order already has a live change order, or when it is voided. */
+  can_link: boolean;
+}
+
+/** Active variation orders of a project (GET /standalone-preflight). A check, never a block. */
+export function fetchStandalonePreflight(projectId: string): Promise<StandalonePreflightRow[]> {
+  return apiGet<StandalonePreflightRow[]>(
+    `/v1/changeorders/standalone-preflight?project_id=${encodeURIComponent(projectId)}`,
+  );
+}

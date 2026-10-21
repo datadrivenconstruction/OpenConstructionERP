@@ -209,7 +209,7 @@ async def test_apply_variation_to_fa_rejects_voided_vo() -> None:
             ),
             user_id="u1",
         )
-        await svc.transition_variation_order(vo.id, "voided", user_id="u1")
+        await svc.transition_variation_order(vo.id, "voided", user_id="u1", reason="test void")
     with pytest.raises(HTTPException) as exc:
         await svc.apply_variation_to_final_account(vo.id, fa.id)
     assert exc.value.status_code == 409

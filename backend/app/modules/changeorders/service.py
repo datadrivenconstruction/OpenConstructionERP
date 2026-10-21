@@ -150,6 +150,15 @@ VALID_TRANSITIONS: dict[str, list[str]] = {
 }
 
 
+#: A change order in one of these states is dead: it will never carry money, so
+#: the variation order it was linked to may be given a replacement.
+REPLACEABLE_CO_STATUSES: frozenset[str] = frozenset({"rejected", "cancelled", "withdrawn"})
+
+#: Variation orders in these states do not count as "active" scope for the
+#: standalone-overlap check.
+INACTIVE_VO_STATUSES: tuple[str, ...] = ("rejected", "cancelled", "voided")
+
+
 # ── What-If impact simulator (TOP-30 #11) ────────────────────────────────────
 
 
@@ -691,6 +700,56 @@ class ChangeOrderService:
             ),
         ) from last_exc
 
+    async def standalone_preflight(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
+        """List the active variation orders a standalone change order could overlap.
+
+        Read-only check shown before a standalone change order is saved. Each
+        row says whether the order can take a (new) linked change order: it can
+        when it has none, or when the one it has is rejected, cancelled or
+        withdrawn.
+        """
+        from sqlalchemy import select
+
+        try:
+            from app.modules.variations.models import VariationOrder
+        except ImportError:
+            return []
+
+        vos = (
+            (
+                await self.session.execute(
+                    select(VariationOrder)
+                    .where(
+                        VariationOrder.project_id == project_id,
+                        VariationOrder.status.notin_(INACTIVE_VO_STATUSES),
+                    )
+                    .order_by(VariationOrder.code)
+                    .limit(100)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        rows: list[dict[str, Any]] = []
+        for vo in vos:
+            co_status: str | None = None
+            if vo.reference_change_order_id is not None:
+                co = await self.repo.get_by_id(vo.reference_change_order_id)
+                co_status = co.status if co is not None else None
+            linked = vo.reference_change_order_id is not None and co_status not in (None, *REPLACEABLE_CO_STATUSES)
+            rows.append(
+                {
+                    "id": vo.id,
+                    "code": vo.code,
+                    "title": vo.title or "",
+                    "status": vo.status,
+                    "linked_change_order_id": vo.reference_change_order_id,
+                    "linked_change_order_status": co_status,
+                    "can_link": vo.status != "voided" and not linked,
+                }
+            )
+        return rows
+
     async def _warn_standalone_overlap(
         self,
         order: ChangeOrder,
@@ -705,6 +764,8 @@ class ChangeOrderService:
         """
         if mirrored_variation_order_id(order):
             return  # This CO was created by VO conversion - no overlap concern.
+        if (order.metadata_ or {}).get("standalone_overlap_acknowledged"):
+            return  # The author saw the active variations in the preflight and chose to go on.
 
         from sqlalchemy import func, select
 
@@ -718,7 +779,7 @@ class ChangeOrderService:
             .select_from(VariationOrder)
             .where(
                 VariationOrder.project_id == order.project_id,
-                VariationOrder.status.notin_(["rejected", "cancelled", "voided"]),
+                VariationOrder.status.notin_(INACTIVE_VO_STATUSES),
             )
         )
         active_vo_count = (await self.session.execute(stmt)).scalar_one_or_none() or 0
