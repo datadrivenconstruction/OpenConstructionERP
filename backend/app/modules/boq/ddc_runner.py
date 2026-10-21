@@ -19,6 +19,21 @@ format      command line                                               what it w
                                                                        ``<stem>.dxf``, ``report.json``
 ==========  =========================================================  =====================================
 
+The Linux and macOS packages are other programs with the same outputs:
+
+==========  =============================================================  ==================================
+format      command line                                                   what it writes
+==========  =============================================================  ==================================
+``rvt``     ``rvt-decode native-graph <in> --out <dir> --ifc``             ``native_graph.glb``,
+                                                                           ``native_graph.ifc``, ``report.json``
+``ifc``     ``ifc2excel <in> --output <dir> --raw-tables``                 as on Windows; ``--raw-tables`` is
+                                                                           what makes 2.0.1 write ``data.jsonl``
+``dwg``     ``dwg2excel <in> -o <dir> --json``                             as on Windows
+==========  =============================================================  ==================================
+
+The command line is chosen by the executable's name, so a Windows install and a
+Linux or macOS install of the same format are read by the same code below.
+
 This module owns three things: building and running those command lines
 (:func:`run_converter`), flattening the IFC and RVT output into the
 one-row-per-element workbook the rest of the platform parses
@@ -119,12 +134,19 @@ def build_command(fmt: str, exe: Path, input_path: Path, out_dir: Path, *, timeo
 
     For DWG, ``timeout`` (our own kill limit) is passed on a little lower so the
     converter stops itself and reports, instead of being killed without a word.
+    The Linux and macOS executables (``rvt-decode``, ``ifc2excel``) take the
+    arguments their own command lines need; ``dwg2excel`` takes the Windows ones.
     """
     prefix = command_prefix(fmt, exe)
     src = str(input_path.resolve())
+    name = exe.name.lower()
     if fmt == "rvt":
+        if name == "rvt-decode":
+            return [*prefix, "native-graph", src, "--out", str(out_dir), "--ifc"]
         return [*prefix, src, "-o", str(out_dir), "--ifc"]
     if fmt == "ifc":
+        if name == "ifc2excel":
+            return [*prefix, src, "--output", str(out_dir), "--raw-tables"]
         return [*prefix, src, "--output", str(out_dir)]
     if fmt == "dwg":
         cmd = [*prefix, src, "-o", str(out_dir), "--json", "--no-svg"]

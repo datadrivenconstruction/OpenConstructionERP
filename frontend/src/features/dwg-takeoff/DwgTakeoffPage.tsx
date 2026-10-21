@@ -6805,9 +6805,8 @@ function ConversionProgressCard({
  * Mounted by ConversionErrorCard when the backend signals "converter
  * missing" via the stable substring `DDC DWG converter`. Calls the same
  * `POST /v1/takeoff/converters/dwg/install/` that /settings → Converters
- * uses, with a live progress bar (downloads ~150 MB of Qt6 DLLs on
- * Windows; Linux is unsupported and the response carries the apt-get
- * commands the user has to run themselves).
+ * uses, with a live progress bar. Packages exist for Windows x64 and for
+ * Linux and macOS on x64 / arm64; any other host gets the platform message.
  *
  * On successful install, the file the user already uploaded is
  * pre-processed via `onInstalled` (delete-and-reupload, matching the
@@ -6903,7 +6902,7 @@ function InstallDwgConverterCTA({
       <p className="mt-1.5 text-[10px] text-content-tertiary">
         {t('dwg_takeoff.conv_install_hint', {
           defaultValue:
-            'Downloads ~150 MB to ~/.openestimator/converters/ - Windows only. Takes 30-90 seconds.',
+            'Downloads 15-30 MB to ~/.openestimator/converters/ on Windows, Linux or macOS. Takes under a minute.',
         })}
       </p>
     </div>

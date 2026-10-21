@@ -249,20 +249,26 @@ Note: installs set up before the rename may still run under the legacy unit name
 ## 7. BIM/CAD converters (.rvt / .ifc / .dwg)
 
 Native CAD/BIM files are turned into element data (and, for RVT, 3D geometry) by
-DDC Converters 2.0 (`datadrivenconstruction/cad2data-Revit-IFC-DWG`, release 2026.10).
-They run on **Windows 10/11 x64**; Linux and macOS builds are coming soon, so on
-Linux the app cannot install or run a converter yet.
+the DDC converters (`datadrivenconstruction/cad2data-Revit-IFC-DWG`, release 2026.10).
+Linux builds exist for **x64 and arm64** (glibc), next to the Windows x64 and macOS builds:
 
-What still works on Linux without a converter:
+| Format | Linux package | What it produces |
+|---|---|---|
+| RVT (Revit 2019-2027) | `rvt-decode` 2.0.0 | GLB geometry and an IFC element table |
+| IFC (IFC2x3, IFC4, IFC4x3) | `ifc2excel` 2.0.1 | Property and quantity tables, no geometry |
+| DWG (R13-2018) | `dwg2excel` 2.0.0 | Element tables and a DXF for the drawing viewer |
 
-- **DXF** drawings are read natively, with no binary.
-- **IFC** files import with simplified placeholder geometry instead of real
-  meshes.
-- DWG, RVT and RFA files need the converter. Convert them to DXF or IFC on a
-  Windows machine (or in your CAD application) and upload that instead, or run
-  OpenConstructionERP on Windows.
+Install them from **Settings -> Converters** (or the install prompt shown on the first
+RVT/IFC/DWG upload). The server downloads the package for its own processor
+(7-30 MB each) into `~/.openestimator/converters/<format>_linux-<arch>/`, checks
+its SHA-256 against the digest pinned in the build and against the release's
+`SHA256SUMS-linux-macos.txt`, and unpacks it. No root, no package manager. For an
+offline server, copy those `<format>_linux-<arch>` folders from a machine that
+installed them.
 
-Linux builds of the converters are coming soon; this section will describe them when they are released.
+Without a converter, **DXF** drawings are still read natively and **IFC** files import
+with simplified placeholder geometry. A processor other than x64 or arm64 has no
+build; convert to DXF or IFC elsewhere and upload that.
 
 ---
 
@@ -278,6 +284,6 @@ Linux builds of the converters are coming soon; this section will describe them 
 | `openconstructionerp: command not found` after pipx | Path not refreshed | `pipx ensurepath` then open a new shell |
 | The server stops answering while a country cost pack loads, nothing in the log | The kernel out of memory killer, not the application | Add swap and run 17.7.0 or newer (see "What the machine needs"), confirm with `dmesg \| grep -i "killed process"` |
 | Opens with `curl` on the server, unreachable from any other machine | The default bind is `127.0.0.1` | Start it as `openconstructionerp serve --host 0.0.0.0 --port 8080` (section 6) |
-| An RVT/DWG upload says the converter is not available | DDC Converters 2.0 run on Windows 10/11 x64 (Linux and macOS coming soon) | Upload DXF or IFC instead, or run on Windows (section 7) |
+| An RVT/DWG upload says the converter is not installed | The converter package has not been downloaded yet | Install it from Settings -> Converters, or copy the installed folder onto an offline server (section 7) |
 
 If you still cannot install, run `openconstructionerp doctor` (or `python -m openconstructionerp doctor`) and open an issue with the full output: https://github.com/datadrivenconstruction/OpenConstructionERP/issues

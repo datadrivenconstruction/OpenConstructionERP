@@ -270,7 +270,7 @@ export interface BIMConverterInstallResult {
   already_installed?: boolean;
   size_bytes?: number;
   message: string;
-  /** Linux / macOS — the OS has no Windows-style auto-install path. */
+  /** The host has no converter build (not Windows x64, Linux or macOS on x64 / arm64). */
   platform_unsupported?: boolean;
   /** Linux only — apt package name and a copy-pasteable script. */
   apt_package?: string;
@@ -284,8 +284,9 @@ export interface BIMConverterInstallResult {
    *  (e.g. `RVTconverter.exe`). Surfaced in the toast so the user
    *  knows where the .deb will land before running apt. */
   expected_binary_path?: string | null;
-  /** Whether the post-install smoke test passed (Windows only). */
+  /** Whether the post-install smoke test passed. */
   smoke_test_passed?: boolean;
+  /** Package key of the host, e.g. ``windows-x64`` or ``linux-arm64``. */
   platform?: string;
   /** v8.8.0: the download now runs in the background so the request can't be
    *  aborted mid-download ("signal timed out") on slow servers / behind
@@ -563,8 +564,8 @@ export interface BIMConverterInstallProgress {
   active: boolean;
   /** Backend stages, in order: ``starting`` (background task spawned) →
    *  ``listing`` (resolving the file/package set) → ``downloading``
-   *  (fetching files) → ``extracting`` (Windows has none; Linux unpacks .deb
-   *  archives here) → ``verifying`` (post-install smoke test) → terminal
+   *  (fetching files) → ``extracting`` (unpacking the zip or tar.gz
+   *  package) → ``verifying`` (post-install smoke test) → terminal
    *  ``done`` / ``error``. The terminal stages carry the outcome so the
    *  frontend can finalize without holding the install request open. */
   stage?:

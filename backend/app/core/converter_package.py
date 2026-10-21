@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Verify and unpack a DDC converter package (a portable ``.zip`` of a release).
+"""Verify and unpack a DDC converter package (a ``.zip`` or ``.tar.gz`` of a release).
 
 Standard library only. The two steps the installer must not get wrong live
 here so they can be tested without a network: the digest check, and the
@@ -14,6 +14,7 @@ import hashlib
 import json
 import shutil
 import stat
+import tarfile
 import zipfile
 from pathlib import Path, PurePosixPath
 
@@ -85,10 +86,13 @@ def _wanted(rel: str, include: tuple[str, ...] | None) -> bool:
 def extract_package(archive: Path, dest: Path, pkg: ConverterPackage) -> int:
     """Unpack ``archive`` into the empty folder ``dest``; returns files written.
 
-    A single wrapper folder at the top of the archive (the DWG and RVT zips have
-    one, the IFC zip has none) is stripped. Entries that are absolute, climb with
-    ``..``, carry a drive, or are symlinks are refused before anything is written.
+    A single wrapper folder at the top of the archive (the DWG and RVT zips and
+    every ``.tar.gz`` have one, the IFC zip has none) is stripped. Entries that
+    are absolute, climb with ``..``, carry a drive, or are links or devices are
+    refused before anything is written.
     """
+    if pkg.archive_format == "tar.gz":
+        return _extract_tar(archive, dest.resolve(), pkg)
     dest = dest.resolve()
     dest.mkdir(parents=True, exist_ok=True)
     try:
@@ -123,6 +127,54 @@ def extract_package(archive: Path, dest: Path, pkg: ConverterPackage) -> int:
             target.parent.mkdir(parents=True, exist_ok=True)
             with zf.open(info) as src, target.open("wb") as out:
                 shutil.copyfileobj(src, out, 1024 * 1024)
+    return len(plan)
+
+
+def _plan_target(name: str, root: str, dest: Path, pkg: ConverterPackage) -> Path | None:
+    """Where an archive entry lands in ``dest``, ``None`` when it is not wanted."""
+    pure = PurePosixPath(name)
+    if pure.is_absolute() or ".." in pure.parts or (pure.parts and ":" in pure.parts[0]):
+        raise PackageError(f"Refused archive entry {name!r} (path traversal)")
+    rel = "/".join(pure.parts[1:]) if root else str(pure)
+    if not rel or not _wanted(rel, pkg.include):
+        return None
+    target = (dest / rel).resolve()
+    try:
+        target.relative_to(dest)
+    except ValueError as exc:
+        raise PackageError(f"Refused archive entry {name!r} (escapes install folder)") from exc
+    return target
+
+
+def _extract_tar(archive: Path, dest: Path, pkg: ConverterPackage) -> int:
+    """Unpack a ``.tar.gz`` package; an entry with any execute bit becomes ``0o755``."""
+    dest.mkdir(parents=True, exist_ok=True)
+    try:
+        tf = tarfile.open(archive, mode="r:gz")  # noqa: SIM115 - closed by the with below
+    except (tarfile.TarError, OSError) as exc:
+        raise PackageError(f"{archive.name} is not a valid tar.gz archive: {exc}") from exc
+    with tf:
+        try:
+            members = tf.getmembers()
+        except (tarfile.TarError, OSError, EOFError) as exc:
+            raise PackageError(f"{archive.name} is not a valid tar.gz archive: {exc}") from exc
+        for m in members:
+            if not (m.isfile() or m.isdir()):
+                raise PackageError(f"Refused archive entry {m.name!r} (link or special file)")
+        files = [m for m in members if m.isfile()]
+        total = sum(m.size for m in files)
+        if total > MAX_UNPACKED_BYTES:
+            raise PackageError(f"{archive.name} unpacks to {total} bytes, over the {MAX_UNPACKED_BYTES} byte cap")
+        root = _common_root([m.name for m in files], pkg.include)
+        plan = [(m, t) for m in files if (t := _plan_target(m.name, root, dest, pkg)) is not None]
+        for member, target in plan:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            src = tf.extractfile(member)
+            if src is None:
+                raise PackageError(f"Could not read {member.name!r} from {archive.name}")
+            with src, target.open("wb") as out:
+                shutil.copyfileobj(src, out, 1024 * 1024)
+            target.chmod(0o755 if member.mode & 0o111 else 0o644)
     return len(plan)
 
 

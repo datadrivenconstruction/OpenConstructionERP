@@ -53,7 +53,12 @@ interface ChangelogEntry {
  * claims to be, so anything numeric-looking here would be read as a release
  * that nothing else in the tree has been bumped to.
  */
-const UNRELEASED: ChangelogEntry | null = null;
+const UNRELEASED: ChangelogEntry | null = {
+  version: 'Unreleased',
+  date: '2026-10-21',
+  summary:
+    'RVT, IFC and DWG files now convert on Linux and macOS servers as well as Windows, on x64 and arm64, with the installer picking and checking the right package for the machine.',
+};
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.

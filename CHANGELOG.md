@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- RVT, IFC and DWG conversion on Linux (x64 and arm64) and macOS (Intel and Apple silicon). The installer picks the package for the server's operating system and processor from the same DDC release (RVT Converter 2.0.0, IFC to Excel 2.0.1, DWG to Excel 2.0.0), checks its SHA-256 against the digest pinned in the build and against `SHA256SUMS-linux-macos.txt`, and unpacks it with the right permissions. The Settings page and the install messages name the builds that exist, and a server without one is told so instead of being sent to Windows. IFC4x3 files that the earlier IFC converter refused now convert on these builds.
+
 ## [18.8.0] - 2026-10-20
 
 ### Added

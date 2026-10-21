@@ -36,8 +36,7 @@ async def test_install_converter_returns_immediately(monkeypatch: pytest.MonkeyP
 
     # The platform is pinned because the endpoint answers differently on one
     # that has no converter build: it returns synchronously and says so, and
-    # there is no background task to observe. The converters are published for
-    # Windows only. The other branch is pinned below.
+    # there is no background task to observe. The other branch is pinned below.
     monkeypatch.setattr("sys.platform", "win32")
 
     ran = asyncio.Event()
@@ -77,9 +76,9 @@ async def test_install_converter_on_a_platform_without_a_build_answers_at_once(
 ) -> None:
     """No native build means an answer, not a download that cannot happen.
 
-    This is the branch a macOS runner used to reach by accident while the test
-    above assumed the other one. Asserting it here means both answers are
-    pinned on every platform instead of depending on which machine ran them.
+    Linux and macOS have builds now, so the host is one the release has none
+    for. Asserting it here means both answers are pinned on every platform
+    instead of depending on which machine ran them.
     """
     from app.modules.boq import cad_import
 
@@ -88,7 +87,7 @@ async def test_install_converter_on_a_platform_without_a_build_answers_at_once(
     tk._clear_install_progress(cid)
 
     monkeypatch.setattr(cad_import, "find_converter", lambda _ext: None)
-    monkeypatch.setattr("sys.platform", "linux")
+    monkeypatch.setattr("sys.platform", "sunos5")
 
     async def _must_not_run(converter_id: str, force: bool, app: object) -> dict[str, object]:
         raise AssertionError("no background install may start where there is nothing to install")

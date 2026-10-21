@@ -24,6 +24,7 @@ from app.core import converter_package
 from app.core.converter_source import (
     INSTALL_STAMP_NAME,
     PACKAGES,
+    WINDOWS_KEY,
     command_prefix,
     package_exe,
     parse_sha256sums,
@@ -214,7 +215,9 @@ def _run_install(
     monkeypatch.setattr(router, "PACKAGES", PACKAGES)
     monkeypatch.setattr(router, "_CONVERTER_INSTALL_DIR", install_dir)
     monkeypatch.setattr(router, "_CONVERTER_CACHE_DIR", install_dir / "cache")
-    monkeypatch.setattr(router, "_fetch_release_checksums", lambda _repo, _tag: {pkg.asset: published_digest or digest})
+    monkeypatch.setattr(
+        router, "_fetch_release_checksums", lambda _repo, _tag, _asset=None: {pkg.asset: published_digest or digest}
+    )
 
     def _fake_download(url: str, target: Path) -> int:
         if downloads is not None:
@@ -224,7 +227,7 @@ def _run_install(
         return len(data)
 
     monkeypatch.setattr(router, "_download_one_file", _fake_download)
-    return router._download_converter_files_windows("dwg", clean=clean)
+    return router._download_converter_package("dwg", clean=clean, platform_key=WINDOWS_KEY)
 
 
 def test_an_install_unpacks_the_package_and_stamps_it(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -254,7 +257,7 @@ def test_a_package_that_is_not_the_published_one_is_not_installed(
     monkeypatch.setitem(PACKAGES, "dwg", pkg)
     monkeypatch.setattr(router, "_CONVERTER_INSTALL_DIR", tmp_path)
     monkeypatch.setattr(router, "_CONVERTER_CACHE_DIR", tmp_path / "cache")
-    monkeypatch.setattr(router, "_fetch_release_checksums", lambda _r, _t: {pkg.asset: pkg.sha256})
+    monkeypatch.setattr(router, "_fetch_release_checksums", lambda _r, _t, _a=None: {pkg.asset: pkg.sha256})
 
     def _tampered(url: str, target: Path) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -264,7 +267,7 @@ def test_a_package_that_is_not_the_published_one_is_not_installed(
     monkeypatch.setattr(router, "_download_one_file", _tampered)
 
     with pytest.raises(RuntimeError, match="SHA-256 mismatch"):
-        router._download_converter_files_windows("dwg")
+        router._download_converter_package("dwg", platform_key=WINDOWS_KEY)
     assert not (tmp_path / "dwg_windows").exists()
     assert list((tmp_path / "cache").glob("*.part")) == []
 
@@ -272,11 +275,11 @@ def test_a_package_that_is_not_the_published_one_is_not_installed(
 def test_a_release_page_that_disagrees_with_the_pin_is_refused(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """For the pinned tag the published digest must equal the one committed here."""
     monkeypatch.setattr(router, "_CONVERTER_INSTALL_DIR", tmp_path)
-    monkeypatch.setattr(router, "_fetch_release_checksums", lambda _r, _t: {PACKAGES["dwg"].asset: "f" * 64})
+    monkeypatch.setattr(router, "_fetch_release_checksums", lambda _r, _t, _a=None: {PACKAGES["dwg"].asset: "f" * 64})
     monkeypatch.setattr(router, "_download_one_file", lambda *_a: pytest.fail("must not download"))
 
     with pytest.raises(RuntimeError, match="Refusing to install"):
-        router._download_converter_files_windows("dwg")
+        router._download_converter_package("dwg", platform_key=WINDOWS_KEY)
 
 
 # ── The release no longer offers the pinned asset ─────────────────────────
@@ -285,11 +288,13 @@ def test_a_release_page_that_disagrees_with_the_pin_is_refused(monkeypatch: pyte
 def test_an_asset_the_release_no_longer_lists_is_a_coded_error(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Upstream replaced the assets of the pinned tag: say which one and that only an update helps."""
     monkeypatch.setattr(router, "_CONVERTER_INSTALL_DIR", tmp_path)
-    monkeypatch.setattr(router, "_fetch_release_checksums", lambda _r, _t: {"Some-Other-9.9.9-portable.zip": "f" * 64})
+    monkeypatch.setattr(
+        router, "_fetch_release_checksums", lambda _r, _t, _a=None: {"Some-Other-9.9.9-portable.zip": "f" * 64}
+    )
     monkeypatch.setattr(router, "_download_one_file", lambda *_a: pytest.fail("must not download"))
 
     with pytest.raises(converter_package.ConverterPackageMissingError) as info:
-        router._download_converter_files_windows("dwg")
+        router._download_converter_package("dwg", platform_key=WINDOWS_KEY)
     err = info.value
     assert err.code == "converter_package_missing"
     assert err.asset == PACKAGES["dwg"].asset
@@ -305,7 +310,7 @@ def test_a_404_on_the_asset_is_the_same_coded_error(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(router, "_CONVERTER_INSTALL_DIR", tmp_path)
     monkeypatch.setattr(router, "_CONVERTER_CACHE_DIR", tmp_path / "cache")
     monkeypatch.setattr(
-        router, "_fetch_release_checksums", lambda _r, _t: {PACKAGES["dwg"].asset: PACKAGES["dwg"].sha256}
+        router, "_fetch_release_checksums", lambda _r, _t, _a=None: {PACKAGES["dwg"].asset: PACKAGES["dwg"].sha256}
     )
 
     def _gone(url: str, _target: Path) -> int:
@@ -314,7 +319,7 @@ def test_a_404_on_the_asset_is_the_same_coded_error(monkeypatch: pytest.MonkeyPa
     monkeypatch.setattr(router, "_download_one_file", _gone)
 
     with pytest.raises(converter_package.ConverterPackageMissingError):
-        router._download_converter_files_windows("dwg")
+        router._download_converter_package("dwg", platform_key=WINDOWS_KEY)
     assert not (tmp_path / "dwg_windows").exists()
 
 
@@ -325,7 +330,7 @@ async def test_the_install_result_carries_the_code_asset_and_tag(monkeypatch: py
         raise converter_package.ConverterPackageMissingError("X-1.0-portable.zip", "v2026.10.0", "o/r")
 
     monkeypatch.setattr(sys, "platform", "win32")
-    monkeypatch.setattr(router, "_download_converter_files_windows", _missing)
+    monkeypatch.setattr(router, "_download_converter_package", _missing)
 
     result = await router._install_converter_impl("rvt", False, None)
 
@@ -409,7 +414,7 @@ async def test_the_update_button_asks_for_a_clean_download(monkeypatch: pytest.M
         raise RuntimeError("stubbed - the flag is what this test reads")
 
     monkeypatch.setattr(sys, "platform", "win32")
-    monkeypatch.setattr(router, "_download_converter_files_windows", _recorder)
+    monkeypatch.setattr(router, "_download_converter_package", _recorder)
 
     result = await router._install_converter_impl("dwg", True, None)
 
@@ -425,7 +430,7 @@ async def test_an_ordinary_install_does_not_ask_for_a_clean_download(monkeypatch
         raise RuntimeError("stubbed - the flag is what this test reads")
 
     monkeypatch.setattr(sys, "platform", "win32")
-    monkeypatch.setattr(router, "_download_converter_files_windows", _recorder)
+    monkeypatch.setattr(router, "_download_converter_package", _recorder)
 
     await router._install_converter_impl("dwg", False, None)
 
@@ -497,7 +502,7 @@ async def _ask_to_install(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
     The platform is forced to one with no converter build, so the answer comes
     back synchronously and nothing is downloaded or spawned.
     """
-    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setattr(sys, "platform", "sunos5")
     return await router.install_converter("ifc", None, "test-user", force=False)  # type: ignore[arg-type]
 
 
@@ -525,7 +530,7 @@ async def test_a_complete_folder_is_still_reported_as_already_installed(
     assert result["path"] == str(complete / "runtime" / "python.exe")
 
 
-async def test_off_windows_the_install_endpoint_says_there_is_no_build(
+async def test_on_a_host_without_a_build_the_install_endpoint_says_so(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     _isolate_search(monkeypatch, tmp_path / "home")

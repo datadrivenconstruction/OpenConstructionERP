@@ -4,11 +4,13 @@
 
 Three things are pinned here:
 
-* every version and format range the screens show comes from
-  ``converter_source.PACKAGES``, and no converter row names a path on the disk;
+* every version and format range the screens show comes from the package of
+  the running host (``converter_source.host_packages``), and no converter row
+  names a path on the disk;
 * a refused BIM Hub upload answers with ``{code, message, params}`` so the UI
   can translate it, and a drawing or a corrupt file never leaves a model row;
-* on a host without a converter build (Linux, macOS) every path that needs one
+* on a host without a converter build (not Windows x64, Linux or macOS on
+  x64 / arm64) every path that needs one
   says so with the same code and a next step, instead of offering an install
   that cannot succeed.
 """
@@ -24,7 +26,7 @@ import pytest
 from fastapi import BackgroundTasks, HTTPException, UploadFile
 from starlette.datastructures import Headers
 
-from app.core.converter_source import PACKAGES
+from app.core.converter_source import PACKAGES, host_packages
 from app.modules.bim_hub import router as bim_router
 from app.modules.boq import cad_import
 from app.modules.takeoff import router as takeoff_router
@@ -70,8 +72,8 @@ def _project_access_granted(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def linux_without_converters(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(sys, "platform", "linux")
+def host_without_a_build(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(sys, "platform", "sunos5")
     monkeypatch.setattr(cad_import, "find_converter", lambda _fmt: None)
 
 
@@ -100,7 +102,7 @@ async def test_the_converter_listing_reads_versions_and_ranges_from_the_packages
     rows = {row["id"]: row for row in body["converters"]}
 
     assert set(rows) == {"rvt", "ifc", "dwg"}
-    for fmt, pkg in PACKAGES.items():
+    for fmt, pkg in (host_packages() or PACKAGES).items():
         assert rows[fmt]["version"] == pkg.version
         assert rows[fmt]["format_range"] == pkg.format_range
         assert (
@@ -190,7 +192,7 @@ async def test_a_file_that_is_not_a_cad_container_leaves_no_row_whatever_the_con
 
 
 @pytest.mark.asyncio
-async def test_linux_rvt_upload_in_bim_hub_is_refused_with_the_platform_code(linux_without_converters) -> None:
+async def test_an_rvt_upload_in_bim_hub_without_a_build_is_refused_with_the_platform_code(host_without_a_build) -> None:
     service = _service()
     with pytest.raises(HTTPException) as exc:
         await _upload_cad("house.rvt", OLE, service)
@@ -198,7 +200,7 @@ async def test_linux_rvt_upload_in_bim_hub_is_refused_with_the_platform_code(lin
     detail = _detail(exc)
     assert detail["code"] == "converter_platform_unsupported"
     assert detail["params"] == {"format": "RVT"}
-    assert "Windows" in detail["message"]
+    assert "Linux" in detail["message"]
     assert "DXF" in detail["message"]
     service.create_model.assert_not_awaited()
 
@@ -208,7 +210,7 @@ def test_ifc_never_waits_for_a_converter_in_bim_hub() -> None:
     assert ".ifc" not in bim_router._NEEDS_CONVERTER_EXTS
 
 
-def test_ensure_converter_on_linux_raises_the_platform_code(linux_without_converters) -> None:
+def test_ensure_converter_without_a_build_raises_the_platform_code(host_without_a_build) -> None:
     for fmt in ("rvt", "ifc", "dwg"):
         with pytest.raises(cad_import.ConverterUnavailableError) as exc:
             cad_import.ensure_converter(fmt)
@@ -219,7 +221,7 @@ def test_ensure_converter_on_linux_raises_the_platform_code(linux_without_conver
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("name", "content"), [("house.rvt", OLE), ("model.ifc", IFC), ("plan.dwg", b"AC1027")])
-async def test_linux_cad_extract_answers_with_the_platform_code(linux_without_converters, name, content) -> None:
+async def test_cad_extract_without_a_build_answers_with_the_platform_code(host_without_a_build, name, content) -> None:
     with pytest.raises(HTTPException) as exc:
         await takeoff_router.cad_extract(file=_file(name, content))
     assert exc.value.status_code == 400
@@ -228,7 +230,7 @@ async def test_linux_cad_extract_answers_with_the_platform_code(linux_without_co
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("name", "content"), [("house.rvt", OLE), ("model.ifc", IFC), ("plan.dwg", b"AC1027")])
-async def test_linux_cad_columns_answers_with_the_platform_code(linux_without_converters, name, content) -> None:
+async def test_cad_columns_without_a_build_answers_with_the_platform_code(host_without_a_build, name, content) -> None:
     with pytest.raises(HTTPException) as exc:
         await takeoff_router.cad_columns(file=_file(name, content), session=None, user_id=None)
     assert exc.value.status_code == 400
