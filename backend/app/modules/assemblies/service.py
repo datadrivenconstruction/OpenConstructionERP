@@ -1964,9 +1964,9 @@ class AssemblyService:
             item_id = uuid.UUID(str(raw))
         except ValueError:
             return None
-        from app.modules.costs.models import CostItem
+        from app.core import cost_scope
 
-        item = await self.session.get(CostItem, item_id)
+        item = await cost_scope.get_cost_item(self.session, item_id)
         return item.id if item is not None and item.is_active else None
 
     async def import_assembly(
