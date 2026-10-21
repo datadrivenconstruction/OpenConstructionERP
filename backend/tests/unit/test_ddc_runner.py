@@ -339,6 +339,52 @@ def test_rvt_glb_is_used_as_the_model_geometry(tmp_path: Path) -> None:
     assert {e["mesh_ref"] for e in result["elements"]} == {"2645", "2870"}
 
 
+_ELEMENTS_CSV = (
+    "ElementId,GlobalId,Category,IfcClass,Family,Type Name,Level,Length,Width,Height,Area,Volume,"
+    "NetSideArea,NetVolume,Fire Rating,Room Name\n"
+    "2645,g1,Walls,IFCWALL,Basic Wall,Generic 200mm,Level 1,6.2,0.2,3,18.6,3.9,17.5,3.5,EI 60,\n"
+    "2870,g2,Floors,IFCSLAB,Floor,Generic 150mm,Level 1,,0.15,,105.906,15.8859,,,,\n"
+    "9001,g3,Rooms,IFCSPACE,,,Level 1,,,,24.5,,,,,Kitchen\n"
+)
+
+
+def test_rvt_rows_come_from_the_converters_element_table(tmp_path: Path) -> None:
+    glb, ifc = _rvt_output(tmp_path / "m.converted")
+    csv_path = glb.with_name("elements.csv")
+    csv_path.write_text(_ELEMENTS_CSV, encoding="utf-8")
+    _header, rows = ddc_runner.flatten_rvt_elements_csv(csv_path, glb)
+
+    by_id = {r["ID"]: r for r in rows}
+    # A room has no mesh but is still a row: the table, not the GLB, decides.
+    assert set(by_id) == {2645, 2870, 9001}
+    wall = by_id[2645]
+    assert wall["Category"] == "OST_Walls"
+    assert wall["Type Name"] == "Generic 200mm"
+    assert wall["Level"] == "Level 1"
+    # Net quantities win over gross ones.
+    assert wall["Area"] == pytest.approx(17.5)
+    assert wall["Volume"] == pytest.approx(3.5)
+    assert wall["Fire Rating"] == "EI 60"
+    assert by_id[2870]["Area"] == pytest.approx(105.906)
+    assert by_id[9001]["Room Name"] == "Kitchen"
+
+    run = ddc_runner.ConverterRun(
+        fmt="rvt", command=[], returncode=0, outputs={"glb": glb, "ifc": ifc, "elements": csv_path}
+    )
+    raw = cad_import.parse_cad_excel(ddc_runner.write_flat_workbook(run, tmp_path / "model.xlsx"))
+    result = ifc_processor._excel_elements_to_bim_result(raw, tmp_path / "work", real_glb_path=glb)
+    assert result["element_count"] == 3
+
+
+def test_rvt_output_collects_the_element_table(tmp_path: Path) -> None:
+    out = tmp_path / "m.converted"
+    _rvt_output(out)
+    (out / "elements.csv").write_text(_ELEMENTS_CSV, encoding="utf-8")
+    run = ddc_runner.ConverterRun(fmt="rvt", command=[], returncode=0)
+    ddc_runner._collect_outputs(run, out, "m")
+    assert run.outputs["elements"] == out / "elements.csv"
+
+
 # ── Running a converter ───────────────────────────────────────────────────
 
 
