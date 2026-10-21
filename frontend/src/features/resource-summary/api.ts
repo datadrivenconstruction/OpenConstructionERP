@@ -72,6 +72,13 @@ export interface MaterialBuyListSource {
   /** The supplier the BOQ suggests for this resource, or its position default. */
   suggested_vendor_id?: string | null;
   suggested_vendor_origin?: 'resource' | 'position' | null;
+  /** The resource's own rate per `unit`, and the currency it is priced in. */
+  unit_rate?: string | null;
+  currency?: string | null;
+  /** Held in `unit` by submitted and later requisitions; null when it could not be read. */
+  covered_quantity?: string | null;
+  /** `quantity` minus what is held; negative when more is held than the BOQ now needs. */
+  remaining_quantity?: string | null;
 }
 
 /** One material purchase line in the procurement buy-list. */
@@ -86,6 +93,9 @@ export interface MaterialBuyListItem {
   position_count: number;
   /** Currency of the cost, carried per line so a CSV export prints money verbatim. */
   currency: string;
+  /** Sums of the sources' covered and remaining quantities; null when unknown. */
+  covered_quantity?: string | null;
+  remaining_quantity?: string | null;
   /** Every BOQ resource line folded into this row. Absent from an older server. */
   sources?: MaterialBuyListSource[];
 }

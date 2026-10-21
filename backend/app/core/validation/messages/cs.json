@@ -783,6 +783,14 @@
       "fail": "Objednávka {order} obsahuje řádek {line} v {unit}, které nelze převést na jednotku řádku {line_unit}",
       "suggestion": "Opravte jednotku na řádku objednávky, aby se jeho množství započítalo jako objednané"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Řádek {line} žádá {quantity} {unit}, ale jeho zdroje BOQ činí dohromady {sources} {unit}",
+      "suggestion": "Nastavte množství rovné součtu jeho zdrojů, nebo odeberte zdroje, které řádek nepokrývá"
+    },
+    "requisition_over_allocated": {
+      "fail": "Řádek {line} uplatňuje o {excess} {unit} více, než BOQ potřebuje ({demand} {unit} celkem, z toho {covered} {unit} už drží jiné požadavky)",
+      "suggestion": "Snižte množství, nebo na řádku uveďte důvod, pokud je navíc záměrné"
+    },
     "receipt_certificate_present": {
       "fail": "Položka {line} byla objednána s {required}, ale dodávka obsahuje {delivered}",
       "suggestion": "Připojte certifikát požadovaný objednávkou, nebo položku odmítněte, dokud dodavatel certifikát nepošle"

@@ -783,6 +783,14 @@
       "fail": "Order {order} bevat regel {line} in {unit}, wat niet naar de eenheid {line_unit} van de regel omgerekend kan worden",
       "suggestion": "Corrigeer de eenheid op de orderregel zodat de hoeveelheid als besteld meetelt"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Regel {line} vraagt {quantity} {unit}, maar de BOQ-bronnen ervan tellen op tot {sources} {unit}",
+      "suggestion": "Stel de hoeveelheid gelijk aan de som van de bronnen, of haal de bronnen weg die de regel niet dekt"
+    },
+    "requisition_over_allocated": {
+      "fail": "Regel {line} claimt {excess} {unit} meer dan de BOQ nodig heeft ({demand} {unit} in totaal, waarvan {covered} {unit} al is vastgelegd door andere inkoopaanvragen)",
+      "suggestion": "Verlaag de hoeveelheid, of geef op de regel een reden als de extra hoeveelheid bedoeld is"
+    },
     "receipt_certificate_present": {
       "fail": "Regel {line} is besteld met {required}, maar de levering bevat {delivered}",
       "suggestion": "Voeg het certificaat toe dat de bestelling vraagt, of keur de regel af totdat de leverancier het stuurt"

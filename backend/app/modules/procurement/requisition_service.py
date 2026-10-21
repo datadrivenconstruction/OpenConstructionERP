@@ -80,6 +80,13 @@ from app.modules.procurement.order_owner import (
     effective_owner,
     load_settings,
 )
+from app.modules.procurement.requisition_coverage import (
+    Coverage,
+    boq_demand,
+    covered_by_source,
+    covered_in_unit,
+    unit_key,
+)
 from app.modules.procurement.requisition_feed import append_history, line_summary, note_change
 from app.modules.procurement.requisition_progress import (
     LineProgress,
@@ -103,6 +110,8 @@ from app.modules.procurement.schemas import (
     RequisitionApprovalStep,
     RequisitionConvert,
     RequisitionConvertResponse,
+    RequisitionCoverageResponse,
+    RequisitionCoverageSource,
     RequisitionCreate,
     RequisitionExternalLineResponse,
     RequisitionItemIn,
@@ -175,6 +184,7 @@ def merge_lines_by_catalog_item(items: list[RequisitionItemIn]) -> list[Requisit
             update={
                 "quantity_requested": format(total, "f"),
                 "sources": [*target.sources, *item.sources],
+                "over_allocation_reason": target.over_allocation_reason or item.over_allocation_reason,
             }
         )
     return merged
@@ -453,6 +463,7 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     schedule_activity_id=line.schedule_activity_id,
                     schedule_buffer_days=line.schedule_buffer_days if line.schedule_activity_id else None,
                     schedule_anchor_date=anchor,
+                    over_allocation_reason=(line.over_allocation_reason or "").strip() or None,
                     sort_order=index,
                     sources=sources,
                 )
@@ -1809,6 +1820,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         suggested_vendors: dict[uuid.UUID, VendorInfo] | None = None,
         activity_starts: dict[uuid.UUID, str] | None = None,
         progress: dict[uuid.UUID, LineProgress] | None = None,
+        covered: Coverage | None = None,
+        demand: dict[tuple[str, str], tuple[Decimal, str]] | None = None,
     ) -> dict[str, Any]:
         """The payload the ``procurement_requisition`` rules read.
 
@@ -1818,7 +1831,10 @@ class RequisitionWorkflowService(MaterialRequisitionService):
         ``suggested_vendors`` holds the directory entries of the lines'
         suggestions and ``activity_starts`` the current start of each linked
         schedule activity. ``progress`` carries each line's live ordered
-        quantity and the order lines whose unit cannot be restated.
+        quantity and the order lines whose unit cannot be restated. ``covered`` is
+        what the other requisitions hold per BOQ resource and ``demand`` what the
+        BOQ needs; both are left out of a source whose figures are unknown or in
+        another unit, so the over-allocation rule never compares unlike things.
         """
         known = suggested_vendors or {}
         starts = activity_starts or {}
@@ -1843,6 +1859,18 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 if ext.id in line.external_mismatch and ext.status != "cancelled"
             )
             return found
+
+        def _source(s: MaterialRequisitionItemSource) -> dict[str, Any]:
+            out: dict[str, Any] = {"unit": s.unit, "quantity": s.quantity, "resource_key": s.resource_key}
+            if covered is None or demand is None or s.boq_position_id is None or s.resource_key is None:
+                return out
+            need = demand.get((str(s.boq_position_id), s.resource_key))
+            if need is not None and unit_key(need[1]) == unit_key(s.unit):
+                out["demand"] = format(need[0], "f")
+                out["covered_other"] = format(
+                    covered_in_unit(covered, str(s.boq_position_id), s.resource_key, s.unit), "f"
+                )
+            return out
 
         def _vendor(vid: uuid.UUID | None) -> dict[str, Any] | None:
             info = known.get(vid) if vid is not None else None
@@ -1877,13 +1905,29 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                     "source_suggested_vendor_ids": sorted(
                         {str(s.suggested_vendor_id) for s in item.sources if s.suggested_vendor_id is not None}
                     ),
-                    "sources": [
-                        {"unit": s.unit, "quantity": s.quantity, "resource_key": s.resource_key} for s in item.sources
-                    ],
+                    "over_allocation_reason": item.over_allocation_reason,
+                    "sources": [_source(s) for s in item.sources],
                 }
                 for item in sorted(req.items, key=lambda i: i.sort_order)
             ],
         }
+
+    async def coverage(self, project_id: uuid.UUID) -> RequisitionCoverageResponse:
+        """What the project's submitted and later requisitions hold of each BOQ resource, per unit."""
+        covered = await covered_by_source(self.session, project_id)
+        return RequisitionCoverageResponse(
+            project_id=project_id,
+            sources=[
+                RequisitionCoverageSource(
+                    boq_position_id=uuid.UUID(position_id),
+                    resource_key=resource_key,
+                    unit=unit,
+                    covered_quantity=format(quantity, "f"),
+                )
+                for (position_id, resource_key), per_unit in sorted(covered.items())
+                for unit, quantity in sorted(per_unit.items())
+            ],
+        )
 
     async def validate(
         self,
@@ -1910,6 +1954,11 @@ class RequisitionWorkflowService(MaterialRequisitionService):
             req.project_id, {i.schedule_activity_id for i in req.items if i.schedule_activity_id is not None}
         )
         progress = await load_progress(self.session, list(req.items))
+        covered: Coverage | None = None
+        demand: dict[tuple[str, str], tuple[Decimal, str]] | None = None
+        if any(s.boq_position_id is not None for i in req.items for s in i.sources):
+            covered = await covered_by_source(self.session, req.project_id, exclude_requisition_id=req.id)
+            demand = await boq_demand(self.session, req.project_id)
         return await validation_engine.validate(
             data=self.validation_payload(
                 req,
@@ -1919,6 +1968,8 @@ class RequisitionWorkflowService(MaterialRequisitionService):
                 suggested_vendors=suggested,
                 activity_starts={aid: a.start_date for aid, a in activities.items()},
                 progress=progress,
+                covered=covered,
+                demand=demand,
             ),
             rule_sets=[REQUISITION_RULE_SET],
             target_type="material_requisition",
@@ -2215,6 +2266,7 @@ def requisition_to_response(req: MaterialRequisition, context: ResponseContext |
                 source_suggested_vendors=[_vendor_ref(vid, ctx) for vid in offered],
                 suggestion_conflict=len(offered) > 1,
                 **_line_dates_view(req, item, ctx),
+                over_allocation_reason=item.over_allocation_reason,
                 sources=[
                     RequisitionItemSourceResponse(
                         id=s.id,

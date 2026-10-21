@@ -783,6 +783,14 @@
       "fail": "Comanda {order} conține linia {line} în {unit}, care nu poate fi convertită în unitatea liniei {line_unit}",
       "suggestion": "Corectați unitatea de pe linia comenzii pentru ca cantitatea ei să fie numărată ca comandată"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Linia {line} cere {quantity} {unit}, dar sursele ei BOQ însumează {sources} {unit}",
+      "suggestion": "Setați cantitatea egală cu suma surselor sale sau scoateți sursele pe care linia nu le acoperă"
+    },
+    "requisition_over_allocated": {
+      "fail": "Linia {line} revendică {excess} {unit} în plus față de necesarul BOQ ({demand} {unit} în total, din care {covered} {unit} sunt deja rezervate de alte cereri de materiale)",
+      "suggestion": "Reduceți cantitatea sau treceți un motiv pe linie, dacă surplusul este intenționat"
+    },
     "receipt_certificate_present": {
       "fail": "Linia {line} a fost comandată cu {required}, dar livrarea conține {delivered}",
       "suggestion": "Atașați certificatul cerut de comandă sau refuzați linia până când furnizorul îl trimite"

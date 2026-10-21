@@ -783,6 +783,14 @@
       "fail": "الأمر {order} يحتوي السطر {line} بوحدة {unit}، ولا يمكن تحويلها إلى وحدة السطر {line_unit}",
       "suggestion": "صحّح الوحدة في سطر الأمر حتى تُحتسب كميته ضمن المطلوب بأمر الشراء"
     },
+    "requisition_sources_reconcile": {
+      "fail": "السطر {line} يطلب {quantity} {unit}، لكن مجموع مصادره من BOQ هو {sources} {unit}",
+      "suggestion": "اجعل الكمية مساوية لمجموع مصادره، أو احذف المصادر التي لا يغطيها السطر"
+    },
+    "requisition_over_allocated": {
+      "fail": "السطر {line} يطالب بزيادة قدرها {excess} {unit} على ما يحتاجه BOQ ({demand} {unit} في المجموع، منها {covered} {unit} محجوزة بالفعل في طلبات مواد أخرى)",
+      "suggestion": "قلّل الكمية، أو اذكر سببًا في السطر إذا كانت الزيادة مقصودة"
+    },
     "receipt_certificate_present": {
       "fail": "تم طلب البند {line} مع {required}، لكن التسليم يتضمن {delivered}",
       "suggestion": "أرفق الشهادة التي يطلبها أمر الشراء، أو ارفض البند حتى يرسل المورد الشهادة"

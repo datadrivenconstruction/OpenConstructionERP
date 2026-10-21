@@ -27,8 +27,10 @@ from app.core.validation.rules import (
     ProcurementRequisitionLineScheduleMoved,
     ProcurementRequisitionNeededByNotPast,
     ProcurementRequisitionOrderUnitMismatch,
+    ProcurementRequisitionOverAllocated,
     ProcurementRequisitionQuantityPositive,
     ProcurementRequisitionSingleCurrency,
+    ProcurementRequisitionSourcesReconcile,
     ProcurementRequisitionSourceUnit,
     ProcurementRequisitionSuggestedVendorActive,
     ProcurementRequisitionSuggestedVendorDiffers,
@@ -69,6 +71,9 @@ RULES = [
     ProcurementRequisitionApproverNotRequester,
     ProcurementRequisitionLineOverOrdered,
     ProcurementRequisitionOrderUnitMismatch,
+    # Issue #516, coverage.
+    ProcurementRequisitionSourcesReconcile,
+    ProcurementRequisitionOverAllocated,
 ]
 
 

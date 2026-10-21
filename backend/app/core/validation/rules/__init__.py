@@ -11009,7 +11009,7 @@ class _ProcurementRule(ValidationRule):
             RuleResult(
                 rule_id=self.rule_id,
                 rule_name=self.name,
-                severity=self.severity,
+                severity=Severity(finding.severity) if finding.severity else self.severity,
                 category=self.category,
                 passed=False,
                 message=translate(self._message_key("fail"), locale=locale, **finding.params),
@@ -11380,6 +11380,38 @@ class ProcurementRequisitionOrderUnitMismatch(_ProcurementRule):
         "line's unit, so it is left out of the ordered and received quantities."
     )
     check_name = "check_requisition_order_unit_mismatch"
+
+
+# Issue #516, coverage: what the other requisitions already hold of a BOQ
+# resource, and whether a line adds up to the sources it was raised from.
+
+
+class ProcurementRequisitionSourcesReconcile(_ProcurementRule):
+    """A requisition line must equal the sum of the BOQ source quantities it was raised from."""
+
+    rule_id = "procurement.requisition_sources_reconcile"
+    name = "Requisition Line Matches Its Sources"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags a requisition line whose quantity differs from the sum of its BOQ sources: an error when "
+        "submitting, a warning while the requisition is still a draft."
+    )
+    check_name = "check_requisition_sources_reconcile"
+
+
+class ProcurementRequisitionOverAllocated(_ProcurementRule):
+    """A requisition should not claim more of a BOQ resource than the estimate needs."""
+
+    rule_id = "procurement.requisition_over_allocated"
+    name = "Requisition Over-Allocates A BOQ Resource"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags a source whose quantity, added to what other submitted requisitions already hold, exceeds the "
+        "BOQ demand. Submitting stays possible; a stated reason on the line acknowledges it."
+    )
+    check_name = "check_requisition_over_allocated"
 
 
 # ── Goods receipts: material certificates (confirmation gate) ───────────────
@@ -12131,6 +12163,8 @@ def register_builtin_rules() -> None:
         (ProcurementRequisitionApproverNotRequester(), ["procurement_requisition"]),
         (ProcurementRequisitionLineOverOrdered(), ["procurement_requisition"]),
         (ProcurementRequisitionOrderUnitMismatch(), ["procurement_requisition"]),
+        (ProcurementRequisitionSourcesReconcile(), ["procurement_requisition"]),
+        (ProcurementRequisitionOverAllocated(), ["procurement_requisition"]),
         # Goods receipts (confirmation gate) and supplier invoice payment release.
         (ProcurementReceiptCertificatePresent(), ["goods_receipt"]),
         (ProcurementReceiptCertificateBatch(), ["goods_receipt"]),

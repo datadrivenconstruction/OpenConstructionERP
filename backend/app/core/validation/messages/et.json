@@ -783,6 +783,14 @@
       "fail": "Tellimus {order} sisaldab rida {line} ühikus {unit}, mida ei saa teisendada rea ühikuks {line_unit}",
       "suggestion": "Parandage tellimuserea ühik, et selle kogus loetaks tellituks"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Rida {line} küsib {quantity} {unit}, kuid selle BOQ allikad annavad kokku {sources} {unit}",
+      "suggestion": "Seadke kogus selle allikate summaks või eemaldage allikad, mida rida ei kata"
+    },
+    "requisition_over_allocated": {
+      "fail": "Rida {line} nõuab {excess} {unit} rohkem, kui BOQ vajab ({demand} {unit} kokku, neist {covered} {unit} on juba teiste materjalitaotluste all)",
+      "suggestion": "Vähendage kogust või märkige reale põhjus, kui lisakogus on tahtlik"
+    },
     "receipt_certificate_present": {
       "fail": "Rida {line} telliti koos {required}, kuid tarnes on {delivered}",
       "suggestion": "Lisage tellimuses nõutud sertifikaat või lükake rida tagasi, kuni tarnija selle saadab"

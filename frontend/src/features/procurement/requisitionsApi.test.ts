@@ -104,13 +104,17 @@ describe('mergeRequisitionLines', () => {
 
   it('merges the chosen lines into the first and keeps every source', () => {
     const merged = mergeRequisitionLines([line('4', 't'), line('1', 't'), line('6', 't')], [2, 0]);
-    expect(merged).not.toBeNull();
-    expect(merged!.map((l) => l.quantity_requested)).toEqual(['10', '1']);
-    expect(merged![0]!.sources.map((s) => s.resource_key)).toEqual(['4', '6']);
+    expect(merged.ok).toBe(true);
+    const lines = merged.ok ? merged.lines : [];
+    expect(lines.map((l) => l.quantity_requested)).toEqual(['10', '1']);
+    expect(lines[0]!.sources.map((s) => s.resource_key)).toEqual(['4', '6']);
   });
 
   it('refuses lines in different units', () => {
-    expect(mergeRequisitionLines([line('4', 't'), line('300', 'kg')], [0, 1])).toBeNull();
+    expect(mergeRequisitionLines([line('4', 't'), line('300', 'kg')], [0, 1])).toEqual({
+      ok: false,
+      reason: 'unit_mismatch',
+    });
   });
 });
 
@@ -164,8 +168,146 @@ describe('lineToInput', () => {
     });
     expect(input.unit_cost).toBe('845.50');
     expect(input.currency_code).toBe('EUR');
-    const merged = mergeRequisitionLines([input, { ...input, unit_cost: '900', quantity_requested: '1' }], [0, 1]);
-    expect(merged?.[0]?.unit_cost).toBe('845.50');
-    expect(merged?.[0]?.quantity_requested).toBe('13.5');
+    const other = { ...input, unit_cost: '900', quantity_requested: '1' };
+    expect(mergeRequisitionLines([input, other], [0, 1])).toMatchObject({ ok: false, reason: 'needs_confirmation' });
+    const merged = mergeRequisitionLines([input, other], [0, 1], { confirmed: true });
+    expect(merged.ok && merged.lines[0]?.quantity_requested).toBe('13.5');
+  });
+
+  it('carries the line and source cost lines, so editing a draft does not lose them', () => {
+    const input = lineToInput({
+      id: 'l1',
+      description: 'Rebar',
+      unit: 't',
+      quantity_requested: '2',
+      quantity_ordered: '0',
+      quantity_received: '0',
+      quantity_consumed: '0',
+      quantity_outstanding: '2',
+      catalog_item_id: null,
+      cost_line_id: 'cl-line',
+      sort_order: 0,
+      over_allocation_reason: 'Spare',
+      sources: [
+        { id: 's1', boq_position_id: 'p1', resource_key: '0', quantity: '2', unit: 't', cost_line_id: 'cl-src' },
+      ],
+    });
+    expect(input.cost_line_id).toBe('cl-line');
+    expect(input.sources[0]?.cost_line_id).toBe('cl-src');
+    expect(input.over_allocation_reason).toBe('Spare');
+  });
+});
+
+describe('merging lines that differ in cost, currency or cost line', () => {
+  const line = (over: Partial<RequisitionLineIn> = {}): RequisitionLineIn => ({
+    description: 'Rebar B500B',
+    unit: 't',
+    quantity_requested: '10',
+    unit_cost: '800',
+    currency_code: 'EUR',
+    sources: [{ boq_position_id: 'p1', resource_key: '0', quantity: '10', unit: 't', cost_line_id: 'c1' }],
+    ...over,
+  });
+  const foreign = () =>
+    line({
+      unit_cost: '900',
+      currency_code: 'USD',
+      sources: [{ boq_position_id: 'p2', resource_key: '0', quantity: '10', unit: 't', cost_line_id: 'c2' }],
+    });
+
+  it('merges lines that agree on cost, currency and cost line without asking', () => {
+    const merged = mergeRequisitionLines([line(), line({ quantity_requested: '5' })], [0, 1]);
+    expect(merged.ok && merged.lines).toHaveLength(1);
+    expect(merged.ok && merged.lines[0]?.quantity_requested).toBe('15');
+    expect(merged.ok && merged.lines[0]?.unit_cost).toBe('800');
+  });
+
+  it('refuses until confirmed when unit costs, currencies or cost lines differ, naming each', () => {
+    expect(mergeRequisitionLines([line(), foreign()], [0, 1])).toEqual({
+      ok: false,
+      reason: 'needs_confirmation',
+      conflicts: ['unit_cost', 'currency', 'cost_line'],
+    });
+  });
+
+  it('keeps every source with its own cost line once confirmed, and leaves a mixed-currency line unpriced', () => {
+    const merged = mergeRequisitionLines([line(), foreign()], [0, 1], { confirmed: true });
+    expect(merged.ok).toBe(true);
+    if (!merged.ok) return;
+    expect(merged.lines[0]?.sources.map((s) => s.cost_line_id)).toEqual(['c1', 'c2']);
+    expect(merged.lines[0]?.unit_cost).toBe('0');
+    expect(merged.lines[0]?.currency_code).toBe('');
+  });
+
+  it('prices a confirmed merge at the quantity-weighted mean when the currency is one', () => {
+    const merged = mergeRequisitionLines([line(), line({ unit_cost: '900', quantity_requested: '30' })], [0, 1], {
+      confirmed: true,
+    });
+    expect(merged.ok && merged.lines[0]?.unit_cost).toBe('875');
+    expect(merged.ok && merged.lines[0]?.currency_code).toBe('EUR');
+  });
+
+  it('never merges lines in different units, confirmed or not', () => {
+    expect(mergeRequisitionLines([line(), line({ unit: 'kg' })], [0, 1], { confirmed: true })).toEqual({
+      ok: false,
+      reason: 'unit_mismatch',
+    });
+  });
+});
+
+describe('buy list to requisition: remaining quantity and estimated cost', () => {
+  const P2 = '22222222-2222-4222-8222-222222222222';
+  const src = (over: Record<string, unknown> = {}) => ({
+    position_id: '11111111-1111-4111-8111-111111111111',
+    resource_key: '0:C30',
+    quantity: '51',
+    unit: 'm3',
+    unit_rate: '90',
+    currency: 'EUR',
+    covered_quantity: '0',
+    remaining_quantity: '51',
+    ...over,
+  });
+
+  it('asks for what is left, and skips a source with nothing left', () => {
+    const row = {
+      name: 'Concrete C30',
+      unit: 'm3',
+      sources: [
+        src({ covered_quantity: '30', remaining_quantity: '21' }),
+        src({ position_id: P2, remaining_quantity: '0' }),
+        src({ position_id: '33333333-3333-4333-8333-333333333333', remaining_quantity: '-4' }),
+      ],
+    };
+    const [line, ...rest] = buildRequisitionLinesFromBuyList([row], { combineUncoded: true });
+    expect(rest).toEqual([]);
+    expect(line?.quantity_requested).toBe('21');
+    expect(line?.sources).toHaveLength(1);
+    const whole = buildRequisitionLinesFromBuyList([row], { combineUncoded: true, useRemaining: false });
+    expect(whole[0]?.quantity_requested).toBe('153');
+  });
+
+  it('prices a line at the quantity-weighted mean of its source rates in one currency', () => {
+    const row = {
+      name: 'Concrete C30',
+      unit: 'm3',
+      sources: [
+        src({ quantity: '10', remaining_quantity: '10', unit_rate: '90' }),
+        src({ position_id: P2, quantity: '30', remaining_quantity: '30', unit_rate: '110' }),
+      ],
+    };
+    const [line] = buildRequisitionLinesFromBuyList([row], { combineUncoded: true });
+    expect(line?.unit_cost).toBe('105');
+    expect(line?.currency_code).toBe('EUR');
+  });
+
+  it('leaves the cost empty when a source has no rate or the currencies differ', () => {
+    const noRate = { name: 'C30', unit: 'm3', sources: [src(), src({ position_id: P2, unit_rate: null })] };
+    const mixed = { name: 'C30', unit: 'm3', sources: [src(), src({ position_id: P2, currency: 'USD' })] };
+    for (const row of [noRate, mixed]) {
+      const [line] = buildRequisitionLinesFromBuyList([row], { combineUncoded: true });
+      expect(line?.unit_cost).toBeUndefined();
+      expect(line?.currency_code).toBeUndefined();
+    }
   });
 });

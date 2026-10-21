@@ -783,6 +783,14 @@
       "fail": "订单 {order} 中第 {line} 行的单位是 {unit},无法换算为该行的单位 {line_unit}",
       "suggestion": "请更正订单行上的单位,使其数量计入已订购"
     },
+    "requisition_sources_reconcile": {
+      "fail": "第 {line} 行请购 {quantity} {unit},但其 BOQ 来源合计为 {sources} {unit}",
+      "suggestion": "将数量设为其来源之和,或删除该行未涵盖的来源"
+    },
+    "requisition_over_allocated": {
+      "fail": "第 {line} 行超出 BOQ 需求 {excess} {unit}(共需 {demand} {unit},其中 {covered} {unit} 已被其他请购单占用)",
+      "suggestion": "减少数量;若超量是有意为之,请在该行注明原因"
+    },
     "receipt_certificate_present": {
       "fail": "第{line}行订购的是{required}，但送货内容为{delivered}",
       "suggestion": "请附上订单要求的证书；若供应商尚未提供，请先拒收该行"

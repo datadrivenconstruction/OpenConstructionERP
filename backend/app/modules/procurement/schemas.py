@@ -1053,6 +1053,9 @@ class RequisitionItemIn(BaseModel):
     # The activity start the date was proposed from, echoed back by the editor
     # so a saved draft keeps it. Left out, the activity's start now is used.
     schedule_anchor_date: date | None = None
+    # Why the line goes over the BOQ demand, when it does. Acknowledges the
+    # ``procurement.requisition_over_allocated`` warning; never required.
+    over_allocation_reason: str | None = Field(default=None, max_length=1000)
     sources: list[RequisitionItemSourceIn] = Field(default_factory=list, max_length=1000)
 
     @field_validator("quantity_requested", "unit_cost")
@@ -1234,6 +1237,26 @@ class RequisitionItemSourceResponse(BaseModel):
     suggested_vendor_name: str | None = None
 
 
+class RequisitionCoverageSource(BaseModel):
+    """How much of one BOQ resource the active requisitions hold, in one unit."""
+
+    boq_position_id: UUID
+    resource_key: str
+    unit: str
+    covered_quantity: str = "0"
+
+
+class RequisitionCoverageResponse(BaseModel):
+    """What submitted, approved and later requisitions hold per BOQ resource.
+
+    Drafts, withdrawn, rejected and cancelled requisitions hold nothing. A
+    resource held in two units appears as two rows: they are never added.
+    """
+
+    project_id: UUID
+    sources: list[RequisitionCoverageSource] = Field(default_factory=list)
+
+
 class RequisitionVendorRef(BaseModel):
     """A Vendor directory entry as a requisition shows it."""
 
@@ -1290,6 +1313,7 @@ class RequisitionItemResponse(BaseModel):
     # since the date was proposed. The line's date is never rewritten for it.
     schedule_activity_start: str | None = None
     schedule_moved: bool = False
+    over_allocation_reason: str | None = None
     sources: list[RequisitionItemSourceResponse] = Field(default_factory=list)
     # The purchase order lines converted from this line (issue #516).
     po_items: list[RequisitionPOItemRef] = Field(default_factory=list)

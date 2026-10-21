@@ -783,6 +783,14 @@
       "fail": "Narudžba {order} sadrži stavku {line} u {unit}, što se ne može pretvoriti u jedinicu stavke {line_unit}",
       "suggestion": "Ispravite jedinicu na stavci narudžbe kako bi se njezina količina računala kao naručena"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Stavka {line} traži {quantity} {unit}, ali njezini BOQ izvori zbrojeni iznose {sources} {unit}",
+      "suggestion": "Postavite količinu na zbroj njezinih izvora ili uklonite izvore koje stavka ne pokriva"
+    },
+    "requisition_over_allocated": {
+      "fail": "Stavka {line} potražuje {excess} {unit} više nego što BOQ traži ({demand} {unit} ukupno, od čega je {covered} {unit} već zauzeto drugim zahtjevima za nabavu)",
+      "suggestion": "Smanjite količinu ili na stavci navedite razlog ako je višak namjeran"
+    },
     "receipt_certificate_present": {
       "fail": "Stavka {line} naručena je s {required}, ali isporuka sadrži {delivered}",
       "suggestion": "Priložite certifikat koji narudžbenica traži ili odbijte stavku dok dobavljač ne pošalje certifikat"

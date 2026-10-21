@@ -783,6 +783,14 @@
       "fail": "הזמנה {order} כוללת את שורה {line} ביחידת {unit}, שאי אפשר להמיר ליחידת השורה {line_unit}",
       "suggestion": "תקנו את היחידה בשורת ההזמנה כדי שהכמות שלה תיספר כמוזמנת"
     },
+    "requisition_sources_reconcile": {
+      "fail": "שורה {line} מבקשת {quantity} {unit}, אבל מקורות ה-BOQ שלה מסתכמים ב-{sources} {unit}",
+      "suggestion": "הגדירו את הכמות לסכום מקורותיה, או הסירו את המקורות שהשורה אינה מכסה"
+    },
+    "requisition_over_allocated": {
+      "fail": "שורה {line} תובעת {excess} {unit} יותר ממה שה-BOQ דורש ({demand} {unit} בסך הכול, מהם {covered} {unit} כבר שמורים בדרישות רכש אחרות)",
+      "suggestion": "הפחיתו את הכמות, או ציינו סיבה בשורה אם העודף מכוון"
+    },
     "receipt_certificate_present": {
       "fail": "שורה {line} הוזמנה עם {required}, אך המשלוח כולל {delivered}",
       "suggestion": "צרפו את התעודה שההזמנה דורשת, או דחו את השורה עד שהספק ישלח אותה"

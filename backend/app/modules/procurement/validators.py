@@ -69,6 +69,8 @@ class Finding:
     element_ref: str
     params: dict[str, str] = field(default_factory=dict)
     details: dict[str, Any] = field(default_factory=dict)
+    # ``"warning"`` lowers this finding below the rule's own severity; None keeps it.
+    severity: str | None = None
 
 
 def parse_money(raw: Any) -> Decimal | None:
@@ -879,6 +881,96 @@ def check_requisition_order_unit_mismatch(req: dict[str, Any]) -> list[Finding]:
                         "line_unit": str(item.get("unit") or "-"),
                     },
                     details=dict(mismatch),
+                )
+            )
+    return findings
+
+
+# ── Material requisitions: coverage and reconciliation (issue #516) ─────────
+#
+# Per source the payload may also carry ``demand`` (the BOQ quantity of that
+# resource, in the source's unit, or None when it is unknown or in another
+# unit) and ``covered_other`` (what other submitted or later requisitions
+# already hold of it, same unit). A line carries ``over_allocation_reason``.
+# ``operation`` is ``draft`` for the read-only check of a draft, where the
+# reconcile finding is only a warning.
+
+
+def _fmt_qty(value: Decimal) -> str:
+    text = format(value.normalize(), "f")
+    return text if "." not in text else text.rstrip("0").rstrip(".")
+
+
+def check_requisition_sources_reconcile(req: dict[str, Any]) -> list[Finding]:
+    """A line's quantity must equal the sum of the BOQ source quantities it was raised from.
+
+    Only sources in the line's own unit are summed; a source in another unit is
+    the unit rule's business and is never added in.
+    """
+    severity = "warning" if req.get("operation") == "draft" else None
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        sources = [s for s in item.get("sources") or [] if isinstance(s, dict)]
+        if not sources:
+            continue
+        line_unit = _unit_key(item.get("unit"))
+        if any(_unit_key(s.get("unit")) != line_unit for s in sources):
+            continue
+        quantity = parse_money(item.get("quantity_requested"))
+        amounts = [parse_money(s.get("quantity")) for s in sources]
+        if quantity is None or any(a is None for a in amounts):
+            continue
+        total = sum((a for a in amounts if a is not None), Decimal("0"))
+        if total == quantity:
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={
+                    "line": line_label(index, item),
+                    "quantity": _fmt_qty(quantity),
+                    "sources": _fmt_qty(total),
+                    "unit": str(item.get("unit") or ""),
+                },
+                details={"quantity_requested": str(quantity), "sources_total": str(total)},
+                severity=severity,
+            )
+        )
+    return findings
+
+
+def check_requisition_over_allocated(req: dict[str, Any]) -> list[Finding]:
+    """Flag a source whose quantity, added to what other requisitions hold, passes the BOQ demand.
+
+    Speaks softly: a line that carries an over-allocation reason has been
+    acknowledged by the requester and is not flagged.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        if str(item.get("over_allocation_reason") or "").strip():
+            continue
+        for source in item.get("sources") or []:
+            if not isinstance(source, dict):
+                continue
+            demand = parse_money(source.get("demand"))
+            covered = parse_money(source.get("covered_other"))
+            quantity = parse_money(source.get("quantity"))
+            if demand is None or covered is None or quantity is None:
+                continue
+            excess = covered + quantity - demand
+            if excess <= 0:
+                continue
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={
+                        "line": line_label(index, item),
+                        "excess": _fmt_qty(excess),
+                        "demand": _fmt_qty(demand),
+                        "covered": _fmt_qty(covered),
+                        "unit": str(source.get("unit") or ""),
+                    },
+                    details={"resource_key": source.get("resource_key"), "excess": str(excess)},
                 )
             )
     return findings

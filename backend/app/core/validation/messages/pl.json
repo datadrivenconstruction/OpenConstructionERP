@@ -783,6 +783,14 @@
       "fail": "Zamówienie {order} zawiera pozycję {line} w {unit}, której nie można przeliczyć na jednostkę pozycji {line_unit}",
       "suggestion": "Popraw jednostkę w pozycji zamówienia, aby jej ilość liczyła się jako zamówiona"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Pozycja {line} żąda {quantity} {unit}, ale jej źródła BOQ sumują się do {sources} {unit}",
+      "suggestion": "Ustaw ilość równą sumie jej źródeł albo usuń źródła, których pozycja nie obejmuje"
+    },
+    "requisition_over_allocated": {
+      "fail": "Pozycja {line} zgłasza o {excess} {unit} więcej, niż wynosi zapotrzebowanie BOQ ({demand} {unit} łącznie, z czego {covered} {unit} jest już zarezerwowane w innych zapotrzebowaniach)",
+      "suggestion": "Zmniejsz ilość albo podaj w pozycji powód, jeśli nadwyżka jest zamierzona"
+    },
     "receipt_certificate_present": {
       "fail": "Pozycja {line} zamówiona z {required}, ale dostawa zawiera {delivered}",
       "suggestion": "Dołącz certyfikat wymagany w zamówieniu lub wstrzymaj pozycję, dopóki dostawca go nie prześle"

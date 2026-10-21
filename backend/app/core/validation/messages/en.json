@@ -783,6 +783,14 @@
       "fail": "Order {order} holds line {line} in {unit}, which cannot be converted into the line's unit {line_unit}",
       "suggestion": "Correct the unit on the order line so its quantity counts as ordered"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Line {line} asks for {quantity} {unit}, but its BOQ sources add up to {sources} {unit}",
+      "suggestion": "Set the quantity to the sum of its sources, or take out the sources the line does not cover"
+    },
+    "requisition_over_allocated": {
+      "fail": "Line {line} claims {excess} {unit} more than the BOQ needs ({demand} {unit} in all, {covered} {unit} already held by other requisitions)",
+      "suggestion": "Reduce the quantity, or state a reason on the line if the extra is intended"
+    },
     "receipt_certificate_present": {
       "fail": "Line {line} was ordered with a {required}, but the delivery carries {delivered}",
       "suggestion": "Attach the certificate the order asks for, or reject the line until the supplier sends it"

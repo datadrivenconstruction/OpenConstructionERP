@@ -783,6 +783,14 @@
       "fail": "Bestellung {order} führt Position {line} in {unit}, was sich nicht in die Einheit {line_unit} der Position umrechnen lässt",
       "suggestion": "Korrigieren Sie die Einheit der Bestellposition, damit ihre Menge als bestellt zählt"
     },
+    "requisition_sources_reconcile": {
+      "fail": "Zeile {line} fordert {quantity} {unit} an, aber ihre LV-Quellen ergeben zusammen {sources} {unit}",
+      "suggestion": "Setzen Sie die Menge auf die Summe ihrer Quellen oder entfernen Sie die Quellen, die die Position nicht abdeckt"
+    },
+    "requisition_over_allocated": {
+      "fail": "Zeile {line} beansprucht {excess} {unit} mehr, als das LV benötigt ({demand} {unit} insgesamt, davon {covered} {unit} bereits in anderen Bedarfsanforderungen gebunden)",
+      "suggestion": "Verringern Sie die Menge, oder begründen Sie den Mehrbedarf in der Zeile, falls er beabsichtigt ist"
+    },
     "receipt_certificate_present": {
       "fail": "Position {line} wurde mit {required} bestellt, die Lieferung enthält aber {delivered}",
       "suggestion": "Fügen Sie das in der Bestellung geforderte Zeugnis bei oder weisen Sie die Position zurück, bis der Lieferant es nachreicht"

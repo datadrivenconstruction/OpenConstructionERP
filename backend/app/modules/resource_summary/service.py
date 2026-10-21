@@ -12,6 +12,7 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import UTC, datetime
+from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -111,6 +112,19 @@ class ResourceSummaryService:
             fx_rates=fx_map,
         )
         return buy_list, datetime.now(UTC)
+
+    async def requisition_coverage(self, project_id: uuid.UUID) -> dict[tuple[str, str], dict[str, Decimal]] | None:
+        """What active requisitions hold of each BOQ resource, or None when it cannot be read.
+
+        Procurement owns the figure; the buy list only shows it, so a build without
+        the procurement module leaves the columns empty.
+        """
+        try:
+            from app.modules.procurement.requisition_coverage import covered_by_source
+
+            return await covered_by_source(self.session, project_id)
+        except ImportError:
+            return None
 
     async def save_snapshot(self, project_id: uuid.UUID) -> ResourceStatementSnapshot:
         """Generate the current statement and store it as a snapshot row."""

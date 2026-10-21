@@ -19,6 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_serializer
 from app.modules.price_breakdown import ResourceKind, kind_i18n_key
 from app.modules.resource_summary.aggregate import (
     BuyListItem,
+    BuyListSource,
     MaterialBuyList,
     ResourceKindGroup,
     ResourceLine,
@@ -161,10 +162,20 @@ class MaterialBuyListSource(BaseModel):
     # position (``position``). Sources of one row may disagree (issue #516).
     suggested_vendor_id: str | None = None
     suggested_vendor_origin: str | None = None
+    # The resource's own rate per ``unit`` and its currency, for an indicative
+    # cost on a requisition line. ``unit_rate`` is null when the BOQ has none.
+    unit_rate: str | None = None
+    currency: str = ""
+    # What submitted and later requisitions already hold of this resource, in
+    # ``unit`` only (other units are never added in), and what is left of
+    # ``quantity``. Negative remaining means more is held than the BOQ now
+    # needs. Both null when coverage could not be read.
+    covered_quantity: Decimal | None = None
+    remaining_quantity: Decimal | None = None
 
-    @field_serializer("quantity", when_used="json")
-    def _ser_quantity(self, v: Decimal) -> str:
-        return _qty(v)
+    @field_serializer("quantity", "covered_quantity", "remaining_quantity", when_used="json")
+    def _ser_quantity(self, v: Decimal | None) -> str | None:
+        return None if v is None else _qty(v)
 
 
 class MaterialBuyListItem(BaseModel):
@@ -182,18 +193,37 @@ class MaterialBuyListItem(BaseModel):
     cost: Decimal
     position_count: int
     currency: str
+    # Sum of the sources' covered and remaining quantities; null when coverage
+    # could not be read.
+    covered_quantity: Decimal | None = None
+    remaining_quantity: Decimal | None = None
     sources: list[MaterialBuyListSource] = Field(default_factory=list)
 
     @field_serializer("quantity", when_used="json")
     def _ser_quantity(self, v: Decimal) -> str:
         return _qty(v)
 
+    @field_serializer("covered_quantity", "remaining_quantity", when_used="json")
+    def _ser_optional_quantity(self, v: Decimal | None) -> str | None:
+        return None if v is None else _qty(v)
+
     @field_serializer("cost", when_used="json")
     def _ser_cost(self, v: Decimal) -> str:
         return _money(v)
 
     @classmethod
-    def from_item(cls, item: BuyListItem, *, currency: str) -> MaterialBuyListItem:
+    def from_item(
+        cls, item: BuyListItem, *, currency: str, covered: dict[tuple[str, str], dict[str, Decimal]] | None = None
+    ) -> MaterialBuyListItem:
+        def _held(source: BuyListSource) -> Decimal | None:
+            if covered is None:
+                return None
+            return covered.get((source.position_id, source.resource_key), {}).get(
+                str(source.unit or "").strip().lower(), Decimal("0")
+            )
+
+        held = [_held(source) for source in item.sources]
+        known = covered is not None
         return cls(
             name=item.name,
             unit=item.unit,
@@ -201,6 +231,8 @@ class MaterialBuyListItem(BaseModel):
             cost=item.cost,
             position_count=item.position_count,
             currency=currency,
+            covered_quantity=sum((h for h in held if h is not None), Decimal("0")) if known else None,
+            remaining_quantity=item.quantity - sum((h for h in held if h is not None), Decimal("0")) if known else None,
             sources=[
                 MaterialBuyListSource(
                     position_id=source.position_id,
@@ -211,8 +243,12 @@ class MaterialBuyListItem(BaseModel):
                     catalog_item_id=source.catalog_item_id,
                     suggested_vendor_id=source.suggested_vendor_id,
                     suggested_vendor_origin=source.suggested_vendor_origin,
+                    unit_rate=None if source.unit_rate is None else str(source.unit_rate),
+                    currency=source.currency or currency,
+                    covered_quantity=held_qty,
+                    remaining_quantity=None if held_qty is None else source.quantity - held_qty,
                 )
-                for source in item.sources
+                for source, held_qty in zip(item.sources, held, strict=True)
             ],
         )
 
@@ -243,6 +279,7 @@ class MaterialBuyListResponse(BaseModel):
         *,
         project_id: uuid.UUID,
         generated_at: datetime,
+        covered: dict[tuple[str, str], dict[str, Decimal]] | None = None,
     ) -> MaterialBuyListResponse:
         return cls(
             project_id=project_id,
@@ -251,7 +288,10 @@ class MaterialBuyListResponse(BaseModel):
             total_cost=buy_list.total_cost,
             item_count=buy_list.item_count,
             position_count=buy_list.position_count,
-            items=[MaterialBuyListItem.from_item(item, currency=buy_list.currency) for item in buy_list.items],
+            items=[
+                MaterialBuyListItem.from_item(item, currency=buy_list.currency, covered=covered)
+                for item in buy_list.items
+            ],
         )
 
 

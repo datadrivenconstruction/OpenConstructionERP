@@ -38,8 +38,12 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
   const [title, setTitle] = useState('');
   const [neededBy, setNeededBy] = useState('');
   const [combine, setCombine] = useState(false);
+  const [useRemaining, setUseRemaining] = useState(true);
 
-  const lines = useMemo(() => buildRequisitionLinesFromBuyList(rows, { combineUncoded: combine }), [rows, combine]);
+  const lines = useMemo(
+    () => buildRequisitionLinesFromBuyList(rows, { combineUncoded: combine, useRemaining }),
+    [rows, combine, useRemaining],
+  );
 
   const create = useMutation({
     mutationFn: () =>
@@ -114,6 +118,29 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
           </span>
         </label>
 
+        <label className="flex items-start gap-2 text-sm text-content-secondary">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={useRemaining}
+            onChange={(e) => setUseRemaining(e.target.checked)}
+          />
+          <span>
+            {t('resourceSummary.requisition.use_remaining', {
+              defaultValue:
+                'Request only what is not yet on a submitted requisition. Untick to request the whole BOQ quantity.',
+            })}
+          </span>
+        </label>
+
+        {lines.length === 0 && (
+          <p className="text-sm text-content-tertiary">
+            {t('resourceSummary.requisition.nothing_left', {
+              defaultValue: 'Everything selected is already on requisitions.',
+            })}
+          </p>
+        )}
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -124,6 +151,9 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
                 <th className="py-1.5 pr-3 font-medium">{t('resourceSummary.col.unit', { defaultValue: 'Unit' })}</th>
                 <th className="py-1.5 pr-3 text-right font-medium">
                   {t('resourceSummary.requisition.col_quantity', { defaultValue: 'Quantity' })}
+                </th>
+                <th className="py-1.5 pr-3 text-right font-medium">
+                  {t('resourceSummary.requisition.col_unit_cost', { defaultValue: 'Estimated unit cost' })}
                 </th>
                 <th className="py-1.5 text-right font-medium">
                   {t('resourceSummary.requisition.col_sources', { defaultValue: 'BOQ sources' })}
@@ -137,6 +167,17 @@ export function CreateRequisitionModal({ open, projectId, rows, onClose, onCreat
                   <td className="py-1.5 pr-3 text-content-tertiary">{line.unit || '-'}</td>
                   <td className="py-1.5 pr-3 text-right tabular-nums">
                     <QuantityDisplay value={line.quantity_requested} unit={line.unit ?? ''} precision={2} />
+                  </td>
+                  <td className="py-1.5 pr-3 text-right tabular-nums text-content-secondary">
+                    {line.unit_cost ? (
+                      `${line.unit_cost} ${line.currency_code ?? ''}`.trim()
+                    ) : (
+                      <span className="text-xs text-content-tertiary">
+                        {t('resourceSummary.requisition.cost_unavailable', {
+                          defaultValue: 'Indicative cost unavailable',
+                        })}
+                      </span>
+                    )}
                   </td>
                   <td className="py-1.5 text-right tabular-nums text-content-tertiary">{line.sources.length}</td>
                 </tr>
