@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Converters install again after their packages were republished upstream, and a package missing from the release says so by name instead of failing as unavailable. A conversion that fails or times out says why, instead of reporting the converter as not installed.
+- The desktop app always lets you in through the Administrator tile on your own computer, also when it finds an administrator left behind by an earlier installation whose password nobody remembers. Server installs keep refusing the password-free login once a real administrator exists.
 - Permit and site logistics notifications show translated text instead of raw keys, and dismissing a notification that is already gone no longer shows an error.
 - A Saudi invoice dated today is no longer refused as dated in the future when it is submitted between midnight in Riyadh and midnight UTC, and IFC 4.3 deep foundations are filed under civil again.
 
