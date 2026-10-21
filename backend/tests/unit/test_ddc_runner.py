@@ -272,7 +272,9 @@ def test_each_format_gets_its_own_command_line(tmp_path: Path) -> None:
     ifc = ddc_runner.build_command("ifc", py, src, out)
     assert ifc[0] == str(py)
     assert Path(ifc[1]) == tmp_path / "ifc_windows" / "sources" / "ifc-excel" / "converter.py"
-    assert ifc[2:] == [str(src.resolve()), "--output", str(out)]
+    assert ifc[2:] == [str(src.resolve()), "--output", str(out), "--glb"]
+    plain = ddc_runner.build_command("ifc", py, src, out, glb=False)
+    assert plain[2:] == [str(src.resolve()), "--output", str(out)]
 
     with pytest.raises(ValueError):
         ddc_runner.build_command("dgn", py, src, out)
@@ -379,3 +381,138 @@ def test_a_converter_that_wrote_nothing_falls_through_to_the_text_parser(
 def test_the_packages_the_runner_speaks_are_the_ones_the_installer_ships() -> None:
     for fmt in ("rvt", "ifc", "dwg"):
         assert ddc_runner.tool_label(fmt).startswith(PACKAGES[fmt].name)
+
+
+# ── IFC geometry: the converter's GLB instead of placeholder boxes ────────
+
+
+def _ifc_glb(path: Path, ids: list[int]) -> Path:
+    """A Y-up GLB as the IFC converter writes it: one node per element, ids in extras."""
+    nodes = [
+        {"name": f"G{i}", "mesh": 0, "translation": [1.0, 2.0, -3.0], "extras": {"element_id": i, "global_id": f"G{i}"}}
+        for i in ids
+    ]
+    doc = {
+        "asset": {"version": "2.0"},
+        "nodes": nodes,
+        "scenes": [{"nodes": list(range(len(nodes)))}],
+        "scene": 0,
+        "extras": {"units": "m", "up_axis": "Y"},
+    }
+    js = json.dumps(doc).encode()
+    js += b" " * (-len(js) % 4)
+    binary = b"\x00\x00\x00\x00"
+    total = 12 + 8 + len(js) + 8 + len(binary)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(
+        b"glTF"
+        + struct.pack("<II", 2, total)
+        + struct.pack("<I", len(js))
+        + b"JSON"
+        + js
+        + struct.pack("<I", len(binary))
+        + b"BIN\x00"
+        + binary
+    )
+    return path
+
+
+def test_ifc_glb_and_workbook_are_found_through_the_json_line(tmp_path: Path) -> None:
+    out_dir = tmp_path / "ifc_out"
+    folder = out_dir / "Model"
+    _write_ifc_workbook(folder / "Model.xlsx")
+    glb = _ifc_glb(folder / "Model.glb", [16, 17])
+    line = {
+        "status": "CONVERTED_WITH_LIMITS",
+        "folder": str(folder),
+        "data": str(folder / "Model.xlsx"),
+        "glb": str(glb),
+    }
+    run = ddc_runner.ConverterRun(fmt="ifc", command=[], returncode=0, stdout=json.dumps(line))
+    ddc_runner._collect_outputs(run, out_dir, "Model")
+
+    assert run.ok
+    assert run.outputs["xlsx"] == folder / "Model.xlsx"
+    assert run.outputs["glb"] == glb
+
+
+def test_y_up_glb_is_wrapped_for_the_z_up_viewer(tmp_path: Path) -> None:
+    glb = _ifc_glb(tmp_path / "m.glb", [16, 17])
+
+    assert ddc_runner.orient_glb_for_viewer(glb) is True
+    assert ddc_runner.orient_glb_for_viewer(glb) is False, "idempotent"
+
+    doc = ddc_runner._read_glb_json(glb)
+    root = doc["nodes"][doc["scenes"][0]["nodes"][0]]
+    assert len(doc["scenes"][0]["nodes"]) == 1
+    assert root["children"] == [0, 1]
+    assert root["rotation"] == pytest.approx([0.70710678, 0.0, 0.0, 0.70710678])
+    assert doc["extras"]["up_axis"] == "Z"
+    data = glb.read_bytes()
+    assert struct.unpack("<I", data[8:12])[0] == len(data)
+    json_len = struct.unpack("<I", data[12:16])[0]
+    assert data[20 + json_len + 4 : 20 + json_len + 8] == b"BIN\x00"
+
+
+def test_rvt_glb_is_not_reoriented(tmp_path: Path) -> None:
+    glb, _ = _rvt_output(tmp_path / "m.converted")
+    before = glb.read_bytes()
+    assert ddc_runner.orient_glb_for_viewer(glb) is False
+    assert glb.read_bytes() == before
+
+
+def test_an_older_ifc_converter_without_the_glb_option_is_run_again(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls: list[list[str]] = []
+
+    class _Proc:
+        def __init__(self, returncode: int, stderr: bytes) -> None:
+            self.returncode, self.stdout, self.stderr = returncode, b"", stderr
+
+    def _fake(argv: list[str], **_kw: Any) -> _Proc:
+        calls.append(list(argv))
+        if "--glb" in argv:
+            return _Proc(2, b"converter.py: error: unrecognized arguments: --glb")
+        return _Proc(0, b"")
+
+    monkeypatch.setattr(ddc_runner.subprocess, "run", _fake)
+    py = tmp_path / "ifc_windows" / "runtime" / "python.exe"
+    run = ddc_runner.run_converter("ifc", py, tmp_path / "M.ifc", tmp_path / "work")
+
+    assert [("--glb" in c) for c in calls] == [True, False]
+    assert run.returncode == 0
+    assert "--glb" not in run.command
+
+
+def test_process_ifc_file_shows_the_converter_geometry(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    src = tmp_path / "Tiny.ifc"
+    src.write_text("ISO-10303-21;\nHEADER;\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n", encoding="utf-8")
+    fake_exe = tmp_path / "ifc_windows" / "runtime" / "python.exe"
+
+    def _fake_run(fmt: str, exe: Path, input_path: Path, work_dir: Path, *, timeout: float = 600) -> Any:
+        folder = work_dir / "ifc_out" / "Tiny"
+        _write_ifc_workbook(folder / "Tiny.xlsx")
+        glb = _ifc_glb(folder / "Tiny.glb", [16, 17])
+        return ddc_runner.ConverterRun(
+            fmt=fmt,
+            command=[],
+            returncode=0,
+            status="CONVERTED_WITH_LIMITS",
+            folder=folder,
+            outputs={"xlsx": folder / "Tiny.xlsx", "glb": glb},
+        )
+
+    monkeypatch.setattr(cad_import, "ensure_converter", lambda _ext: fake_exe)
+    monkeypatch.setattr(ddc_runner, "run_converter", _fake_run)
+
+    result = ifc_processor.process_ifc_file(src, tmp_path / "work")
+
+    assert result["element_count"] == 2
+    assert result["geometry_quality"] == "real"
+    assert result["glb_path"] and result["glb_path"].endswith("Tiny.glb")
+    assert not any(e.get("is_placeholder") for e in result["elements"])
+    assert {e["mesh_ref"] for e in result["elements"]} == {"16", "17"}
+    doc = ddc_runner._read_glb_json(Path(result["glb_path"]))
+    assert [n["name"] for n in doc["nodes"][:2]] == ["16", "17"]  # node name == mesh_ref
+    assert doc["extras"]["up_axis"] == "Z"

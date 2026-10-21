@@ -427,7 +427,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
     #
     # One converter run per file. What it writes depends on the format (see
     # ``app.modules.boq.ddc_runner``): RVT gives a GLB mesh plus a stored-object
-    # graph, IFC gives semantic tables and no geometry, DWG gives an entity table
+    # graph, IFC gives semantic tables plus a GLB mesh, DWG gives an entity table
     # and a DXF. The IFC and RVT output is flattened into the one-row-per-element
     # workbook that ``parse_cad_excel`` and ``_excel_elements_to_bim_result`` read,
     # so everything downstream of the converter is unchanged.
@@ -502,10 +502,12 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             logger.info("DDC converter extracted %d raw rows from %s", len(raw_elements), ifc_path.name)
 
             real_glb_path: Path | None = None
-            if fmt == "rvt":
+            if fmt in ("rvt", "ifc") and "glb" in run.outputs:
                 glb = run.outputs["glb"]
                 try:
                     ddc_runner.normalize_glb_node_names(glb)
+                    if fmt == "ifc":
+                        ddc_runner.orient_glb_for_viewer(glb)
                 except Exception as exc:  # noqa: BLE001 - the mesh is still usable by id
                     logger.warning("Could not normalise GLB node names: %s", exc)
                 ok, reason = _validate_geometry_file(glb)
@@ -518,9 +520,9 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                 raw_elements,
                 output_dir,
                 real_glb_path=real_glb_path,
-                # The DWG converter writes entities, not building geometry; the
-                # IFC converter writes no geometry either, so it keeps the box
-                # placeholders (flagged as such) the viewer has always had.
+                # The DWG converter writes entities, not building geometry. IFC
+                # uses the converter's GLB; a converter build without it keeps
+                # the box placeholders (flagged as such).
                 geometry_supported=fmt != "dwg",
             )
             # Surface the converter version so the frontend can render a

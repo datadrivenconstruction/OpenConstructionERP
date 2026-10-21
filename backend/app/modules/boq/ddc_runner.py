@@ -12,9 +12,10 @@ format      command line                                               what it w
 ``rvt``     ``RVTconverter.exe <in> -o <dir> --properties``            ``native_graph.glb``, ``properties.jsonl``
                                                                        (a graph of the stored objects),
                                                                        ``summary.json``, ``report.json``
-``ifc``     ``python.exe converter.py <in> --output <dir>``            a new sub-folder with ``drawing.xlsx``
+``ifc``     ``python.exe converter.py <in> --output <dir> --glb``      a new sub-folder with the workbook
                                                                        (Objects / Properties / Quantities /
-                                                                       SpatialLinks ... sheets), ``data.jsonl``
+                                                                       SpatialLinks ... sheets) and
+                                                                       ``<stem>.glb`` (one node per element)
 ``dwg``     ``dwg2excel.exe <in> -o <dir> --json``                     a sub-folder with ``<stem>.xlsx``,
                                                                        ``<stem>.dxf``, ``report.json``
 ==========  =========================================================  =====================================
@@ -22,13 +23,16 @@ format      command line                                               what it w
 This module owns three things: building and running those command lines
 (:func:`run_converter`), flattening the IFC and RVT output into the
 one-row-per-element workbook the rest of the platform parses
-(:func:`write_flat_workbook`), and renaming the GLB nodes of an RVT model to
-the plain element id the 3D viewer matches on (:func:`normalize_glb_node_names`).
+(:func:`write_flat_workbook`), and renaming the GLB nodes of an RVT or IFC model
+to the plain element id the 3D viewer matches on (:func:`normalize_glb_node_names`).
 
 Honest limits, stated where the data comes from rather than papered over:
 
-* IFC: the converter writes no geometry. Elements carry their properties and
-  quantity sets, not a mesh.
+* IFC: the geometry is the converter's own tessellation (``--glb``): metres,
+  glTF Y up, node ``extras.element_id`` = the STEP id (the ``ID`` column) and
+  ``extras.global_id`` = the GlobalId. Elements whose geometry the converter
+  cannot read have no node. A converter build without ``--glb`` is run again
+  without it and yields no geometry, as before.
 * RVT: ``properties.jsonl`` is the stored object graph, not a schedule. Only
   elements that have a mesh in the GLB become rows, parameters keep their
   stored labels, and stored real numbers are in Revit's internal units (feet,
@@ -111,14 +115,15 @@ class ConverterRun:
         return needed in self.outputs and self.outputs[needed].is_file() and self.outputs[needed].stat().st_size > 0
 
 
-def build_command(fmt: str, exe: Path, input_path: Path, out_dir: Path) -> list[str]:
+def build_command(fmt: str, exe: Path, input_path: Path, out_dir: Path, *, glb: bool = True) -> list[str]:
     """The argv that converts ``input_path`` into ``out_dir`` for format ``fmt``."""
     prefix = command_prefix(fmt, exe)
     src = str(input_path.resolve())
     if fmt == "rvt":
         return [*prefix, src, "-o", str(out_dir), "--properties"]
     if fmt == "ifc":
-        return [*prefix, src, "--output", str(out_dir)]
+        cmd = [*prefix, src, "--output", str(out_dir)]
+        return [*cmd, "--glb"] if glb else cmd
     if fmt == "dwg":
         return [*prefix, src, "-o", str(out_dir), "--json", "--no-svg"]
     raise ValueError(f"No DDC converter command line for format {fmt!r}")
@@ -169,17 +174,25 @@ def run_converter(fmt: str, exe: Path, input_path: Path, work_dir: Path, *, time
     kwargs: dict[str, Any] = {}
     if sys.platform == "win32":
         kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-    logger.debug("DDC call: %s", cmd)
-    proc = subprocess.run(  # noqa: S603 - argv list, no shell
-        cmd,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=str(work_dir),
-        env=_clean_env(fmt),
-        timeout=timeout,
-        **kwargs,
-    )
+
+    def _call(argv: list[str]) -> subprocess.CompletedProcess[bytes]:
+        logger.debug("DDC call: %s", argv)
+        return subprocess.run(  # noqa: S603 - argv list, no shell
+            argv,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=str(work_dir),
+            env=_clean_env(fmt),
+            timeout=timeout,
+            **kwargs,
+        )
+
+    proc = _call(cmd)
+    if fmt == "ifc" and proc.returncode == 2 and b"--glb" in (proc.stderr or b""):
+        # A converter build older than the 3D model option: tables only.
+        cmd = build_command(fmt, exe, input_path, out_dir, glb=False)
+        proc = _call(cmd)
     run = ConverterRun(
         fmt=fmt,
         command=cmd,
@@ -223,6 +236,16 @@ def _collect_outputs(run: ConverterRun, out_dir: Path, stem: str) -> None:
         for role, name in (("xlsx", "drawing.xlsx"), ("jsonl", "data.jsonl"), ("report", "result.json")):
             if (folder_path / name).is_file():
                 run.outputs[role] = folder_path / name
+        data = info.get("data")
+        if "xlsx" not in run.outputs and isinstance(data, str) and data and Path(data).is_file():
+            run.outputs["xlsx"] = Path(data)  # <stem>.xlsx in current builds
+        glb = info.get("glb")
+        glb_path = Path(glb) if isinstance(glb, str) and glb else None
+        if glb_path is None or not glb_path.is_file():
+            found = sorted(folder_path.glob("*.glb"))
+            glb_path = found[0] if len(found) == 1 else None
+        if glb_path is not None and glb_path.stat().st_size > 0:
+            run.outputs["glb"] = glb_path
         if info.get("status") == "FAILED":
             run.outputs.pop("xlsx", None)
     else:  # dwg
@@ -412,6 +435,46 @@ def normalize_glb_node_names(glb_path: Path) -> int:
     tmp.write_bytes(out)
     tmp.replace(glb_path)
     return renamed
+
+
+#: +90 degrees about X: turns a Y-up glTF scene into the Z-up frame the 3D viewer
+#: rotates back (it treats every GLB as Z-up, which is what the RVT output is).
+_Y_UP_TO_Z_UP = [0.7071067811865476, 0.0, 0.0, 0.7071067811865476]
+
+
+def orient_glb_for_viewer(glb_path: Path) -> bool:
+    """Wrap a Y-up GLB (``extras.up_axis == "Y"``, the IFC converter) in a Z-up root node.
+
+    Only the JSON chunk changes; returns True when the file was rewritten.
+    """
+    data = glb_path.read_bytes()
+    if data[:4] != b"glTF" or data[16:20] != b"JSON":
+        raise ValueError(f"{glb_path.name} is not a GLB file")
+    json_len = struct.unpack("<I", data[12:16])[0]
+    doc = json.loads(data[20 : 20 + json_len].decode("utf-8"))
+    extras = doc.get("extras") or {}
+    if str(extras.get("up_axis", "")).upper() != "Y":
+        return False
+    nodes = doc.setdefault("nodes", [])
+    scenes = doc.get("scenes") or [{"nodes": list(range(len(nodes)))}]
+    scene_index = doc.get("scene") if isinstance(doc.get("scene"), int) else 0
+    if not 0 <= scene_index < len(scenes):
+        scene_index = 0
+    roots = list(scenes[scene_index].get("nodes") or [])
+    nodes.append({"name": "ifc_model_root", "rotation": _Y_UP_TO_Z_UP, "children": roots})
+    scenes[scene_index]["nodes"] = [len(nodes) - 1]
+    doc["scenes"] = scenes
+    doc["scene"] = scene_index
+    doc["extras"] = {**extras, "up_axis": "Z", "source_up_axis": "Y"}
+    new_json = json.dumps(doc, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    new_json += b" " * (-len(new_json) % 4)
+    rest = data[20 + json_len :]
+    total = 12 + 8 + len(new_json) + len(rest)
+    out = data[:8] + struct.pack("<I", total) + struct.pack("<I", len(new_json)) + b"JSON" + new_json + rest
+    tmp = glb_path.with_suffix(".glb.tmp")
+    tmp.write_bytes(out)
+    tmp.replace(glb_path)
+    return True
 
 
 def _param_value(fields: dict[str, Any]) -> Any:
