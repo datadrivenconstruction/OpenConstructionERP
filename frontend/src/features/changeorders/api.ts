@@ -287,8 +287,9 @@ export interface StandalonePreflightRow {
 }
 
 /** Active variation orders of a project (GET /standalone-preflight). A check, never a block. */
-export function fetchStandalonePreflight(projectId: string): Promise<StandalonePreflightRow[]> {
-  return apiGet<StandalonePreflightRow[]>(
+export async function fetchStandalonePreflight(projectId: string): Promise<StandalonePreflightRow[]> {
+  const page = await apiGet<{ items: StandalonePreflightRow[]; total: number }>(
     `/v1/changeorders/standalone-preflight?project_id=${encodeURIComponent(projectId)}`,
   );
+  return page.items;
 }
