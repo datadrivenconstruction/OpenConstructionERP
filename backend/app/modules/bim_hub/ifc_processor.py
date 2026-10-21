@@ -3130,6 +3130,9 @@ def _classify_discipline(ifc_type: str) -> str:
     # Revit display names ("Structural Framing", "Curtain Wall Mullions", "Pipe Fittings", ...).
     if any(x in t for x in ["curtain", "furniture", "ceiling", "casework", "room", "generic model", "wall sweep"]):
         return "architecture"
+    # IfcDeepFoundation (IFC 4.3) is geotechnical civil work; the Revit "foundation" match below would take it.
+    if "deepfoundation" in t:
+        return "civil"
     if any(x in t for x in ["structural", "foundation", "framing", "floor", "rebar", "slab edge"]):
         return "structural"
     if any(
