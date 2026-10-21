@@ -49,7 +49,9 @@ from app.modules.users.models import User
 from tests._pg import isolated_engine
 
 _EVENT = "schedule.activity.progress_updated"
-TODAY = date.today()
+#: The handler's "today", pinned: a run that crosses midnight, or a machine
+#: whose local day is not the UTC one, must not see two different todays.
+TODAY = date(2026, 6, 17)
 
 #: A Monday well in the past. Planned value is counted in working days, so a
 #: test that asserts it pins its dates to known weekdays instead of today.
@@ -211,6 +213,29 @@ def test_the_handler_listens_for_the_name_the_schedule_module_publishes(monkeypa
 
 
 # ── Against PostgreSQL ──────────────────────────────────────────────────────
+
+
+_REAL_UTC_TODAY = event_handlers._utc_today
+
+
+def test_today_is_the_utc_day_whatever_the_server_zone(monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import UTC, datetime, timezone
+
+    class _Clock(datetime):
+        @classmethod
+        def now(cls, tz: Any = None) -> datetime:  # type: ignore[override]
+            # Five past midnight UTC is still the previous evening in New York.
+            moment = datetime(2026, 10, 21, 0, 5, tzinfo=UTC)
+            return moment.astimezone(tz or timezone(timedelta(hours=-4)))
+
+    monkeypatch.setattr(event_handlers, "datetime", _Clock)
+
+    assert _REAL_UTC_TODAY() == date(2026, 10, 21)
+
+
+@pytest.fixture(autouse=True)
+def _pinned_today(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(event_handlers, "_utc_today", lambda: TODAY)
 
 
 @pytest_asyncio.fixture(scope="module")
