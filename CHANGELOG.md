@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Four Saudi Arabia demo projects for different business models, each with its estimate, budget, procurement, subcontract, schedule and billing data: an engineering consultancy (villa compound, Riyadh), a building contractor (residential tower, Jeddah), site development and landscaping (community park, Dammam) and a full-service group project covering consultancy, construction, site works, landscaping, fit-out and FF&E supply (mixed-use hub, Riyadh).
+- Four Saudi Arabia demo projects for different business models, each with its estimate, budget, procurement, subcontract, schedule and billing data: an engineering consultancy (villa compound, Riyadh), a building contractor (residential tower, Jeddah), site development and landscaping (community park, Dammam) and a full-service group project covering consultancy, construction, site works, landscaping, fit-out and FF&E supply (mixed-use hub, Riyadh). Their subcontract shows a monthly progress billing history of three or four claims with retention that reconciles, and purchase requisitions per tender package drawn from the bill, in draft, submitted, approved and ordered states.
 
 ## [18.8.0] - 2026-10-20
 

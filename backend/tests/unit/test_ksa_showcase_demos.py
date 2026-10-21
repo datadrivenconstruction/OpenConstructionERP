@@ -131,3 +131,98 @@ async def test_install_fills_every_business_area(demo_id: str) -> None:
         schedules = (await session.execute(select(Schedule).where(Schedule.project_id == pid))).scalars().all()
         assert schedules
         assert await count(Activity, Activity.schedule_id == schedules[0].id) >= len(template.schedule_activities)
+
+
+@pytest.mark.parametrize("demo_id", KSA_SHOWCASE_IDS)
+async def test_billing_history_and_requisitions(demo_id: str) -> None:
+    from app.modules.boq.models import Position
+    from app.modules.procurement.models import MaterialRequisition
+    from app.modules.subcontractors.models import PaymentApplication, SubcontractAgreement
+    from tests._pg import transactional_session
+
+    template = DEMO_TEMPLATES[demo_id]
+    assert 3 <= len(template.progress_claims) <= 4
+    assert template.seed_requisitions
+    async with transactional_session() as session:
+        result = await install_demo_project(session, demo_id)
+        pid = uuid.UUID(result["project_id"])
+
+        agreement = (
+            await session.execute(select(SubcontractAgreement).where(SubcontractAgreement.project_id == pid))
+        ).scalar_one()
+        claims = (
+            (
+                await session.execute(
+                    select(PaymentApplication)
+                    .where(PaymentApplication.agreement_id == agreement.id)
+                    .order_by(PaymentApplication.application_number)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        assert len(claims) == len(template.progress_claims)
+        contract = Decimal(str(agreement.total_value))
+        cumulative = Decimal(0)
+        for claim, pct in zip(claims, template.progress_claims, strict=True):
+            gross = Decimal(str(claim.gross_amount))
+            retention = Decimal(str(claim.retention_amount))
+            assert gross > 0
+            assert Decimal(str(claim.net_amount)) == gross - retention
+            cumulative += gross
+            assert abs(cumulative - contract * Decimal(str(pct))) <= Decimal("0.01")
+            assert cumulative <= contract
+        assert abs(
+            sum((Decimal(str(c.retention_amount)) for c in claims), Decimal(0)) - cumulative * Decimal("0.05")
+        ) <= Decimal("0.01")
+        assert [c.period_start.month for c in claims] == [4, 5, 6, 7][: len(claims)]
+
+        reqs = (
+            (await session.execute(select(MaterialRequisition).where(MaterialRequisition.project_id == pid)))
+            .scalars()
+            .all()
+        )
+        assert len(reqs) == len(template.tender_packages)
+        assert {"ordered", "approved", "submitted", "draft"} >= {r.status for r in reqs}
+        positions = {p.id: p for p in (await session.execute(select(Position))).scalars().all() if p.unit != ""}
+        for req in reqs:
+            assert req.items
+            assert (req.status == "ordered") == (req.po_id is not None)
+            for item in req.items:
+                assert item.unit
+                assert item.required_date
+                source = item.sources[0]
+                position = positions[source.boq_position_id]
+                assert Decimal(source.quantity) == Decimal(item.quantity_requested)
+                assert 0 < Decimal(source.quantity) <= Decimal(str(position.quantity))
+
+
+async def test_template_without_the_new_fields_seeds_as_before() -> None:
+    from app.modules.procurement.models import MaterialRequisition
+    from app.modules.subcontractors.models import PaymentApplication, SubcontractAgreement
+    from tests._pg import transactional_session
+
+    template = DEMO_TEMPLATES["residential-berlin"]
+    assert template.progress_claims == ()
+    assert template.seed_requisitions is False
+    async with transactional_session() as session:
+        result = await install_demo_project(session, "residential-berlin")
+        pid = uuid.UUID(result["project_id"])
+        agreement = (
+            await session.execute(select(SubcontractAgreement).where(SubcontractAgreement.project_id == pid))
+        ).scalar_one()
+        claims = (
+            (await session.execute(select(PaymentApplication).where(PaymentApplication.agreement_id == agreement.id)))
+            .scalars()
+            .all()
+        )
+        assert [c.application_number for c in claims] == ["PA-001"]
+        assert Decimal(str(claims[0].gross_amount)) == (Decimal(str(agreement.total_value)) * Decimal("0.35")).quantize(
+            Decimal("0.01")
+        )
+        count = (
+            await session.execute(
+                select(func.count()).select_from(MaterialRequisition).where(MaterialRequisition.project_id == pid)
+            )
+        ).scalar_one()
+        assert count == 0

@@ -63,6 +63,8 @@ _ALLOWED_UNITS = {
     "pcs",
     "lsum",
     "hour",
+    "h",
+    "TR",
     "day",
     "month",
     "each",

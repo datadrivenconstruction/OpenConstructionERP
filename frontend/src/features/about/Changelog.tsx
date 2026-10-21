@@ -58,7 +58,7 @@ const UNRELEASED: ChangelogEntry | null = {
   date: '2026-10-22',
   tag: 'NEW',
   summary:
-    'Four Saudi Arabia demo projects, one per business model: engineering consultancy, building contractor, site development and landscaping, and a full-service group with fit-out and FF&E supply. Each has its estimate, budget, procurement, subcontract, schedule and billing data.',
+    'Four Saudi Arabia demo projects, one per business model: engineering consultancy, building contractor, site development and landscaping, and a full-service group with fit-out and FF&E supply. Each has its estimate, budget, procurement, subcontract, schedule and billing data. The subcontract carries three or four monthly progress claims with reconciling retention, and each tender package has a purchase requisition drawn from the bill.',
 };
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so

@@ -408,4 +408,6 @@ TEMPLATE = DemoTemplate(
         "vat_note": "All rates exclusive of VAT. KSA VAT of 15% is applied as a separate markup line.",
         "regulator": "Jeddah Municipality building permit; Saudi Civil Defense approval",
     },
+    progress_claims=(0.12, 0.3, 0.48, 0.66),
+    seed_requisitions=True,
 )

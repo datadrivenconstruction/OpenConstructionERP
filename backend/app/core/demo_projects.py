@@ -504,6 +504,13 @@ class DemoTemplate:
     # False seeds the project with its one bill only. The control budget is the same scope at
     # section level, so a project that wants a single total (and a single budget) leaves it out.
     with_budget_boq: bool = True
+    # Cumulative percent complete of the subcontract per progress claim, e.g. (0.15, 0.35, 0.55).
+    # Empty keeps the one PA-001 claim at 35 percent. Claims fall monthly from the schedule start.
+    progress_claims: tuple[float, ...] = ()
+    # Retention held on each progress claim, as a fraction of the claim's gross amount.
+    claim_retention: float = 0.05
+    # True seeds one purchase requisition per tender package, lines from that package's BOQ positions.
+    seed_requisitions: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -5356,6 +5363,12 @@ def _country_code_for(template: DemoTemplate) -> str:
     """Best-effort ISO-3166 alpha-2 from the template address country name."""
     addr = template.address or {}
     return _COUNTRY_ISO2.get(str(addr.get("country", "")), "")
+
+
+def _add_months(moment: datetime, months: int) -> datetime:
+    """``moment`` shifted by whole months, on the same day of the month (day 1 in the demos)."""
+    total = moment.month - 1 + months
+    return moment.replace(year=moment.year + total // 12, month=total % 12 + 1)
 
 
 def _period_label(base: datetime, offset_months: int) -> str:
@@ -12101,43 +12114,82 @@ async def _seed_module_data(
             name=f"{sub_trade} - package 1",
             scope=f"{sub_trade} works for {template.project_name}",
             planned_value=agr_value,
-            completion_percent=Decimal("35.00"),
+            completion_percent=(Decimal(str(template.progress_claims[-1])) * 100).quantize(Decimal("0.01"))
+            if template.progress_claims
+            else Decimal("35.00"),
             status="in_progress",
         )
         session.add(wp)
         await session.flush()
 
-        gross = (agr_value * Decimal("0.35")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        retention = (gross * Decimal("0.05")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        net = gross - retention
-        pay_app = PaymentApplication(
-            id=_id(),
-            agreement_id=agreement.id,
-            application_number="PA-001",
-            period_start=base.date(),
-            period_end=(base + timedelta(days=30)).date(),
-            gross_amount=gross,
-            retention_amount=retention,
-            net_amount=net,
-            currency=_ccy,
-            status="submitted",
-            submitted_at=base + timedelta(days=32),
-            created_by=owner_str,
-            metadata_={"demo_id": demo_id, "is_demo": True},
-        )
-        session.add(pay_app)
-        await session.flush()
-        session.add(
-            PaymentApplicationLine(
+        _claim_pcts = [Decimal(str(p)) for p in template.progress_claims] or [Decimal("0.35")]
+        _ret_rate = Decimal(str(template.claim_retention)) if template.progress_claims else Decimal("0.05")
+        _cent = Decimal("0.01")
+        _prev_gross = Decimal("0")
+        _prev_ret = Decimal("0")
+        for _k, _pct in enumerate(_claim_pcts):
+            cum_gross = (agr_value * _pct).quantize(_cent, rounding=ROUND_HALF_UP)
+            cum_ret = (cum_gross * _ret_rate).quantize(_cent, rounding=ROUND_HALF_UP)
+            gross = cum_gross - _prev_gross
+            retention = cum_ret - _prev_ret
+            net = gross - retention
+            _prev_gross, _prev_ret = cum_gross, cum_ret
+            _last = _k == len(_claim_pcts) - 1
+            if template.progress_claims:
+                _p_start = _add_months(base, _k)
+                _p_end = _add_months(base, _k + 1) - timedelta(days=1)
+                _submitted = _p_end + timedelta(days=2)
+                _status = "submitted" if _last else ("finance_approved" if _k == len(_claim_pcts) - 2 else "paid")
+            else:
+                _p_start, _p_end = base, base + timedelta(days=30)
+                _submitted, _status = base + timedelta(days=32), "submitted"
+            settled = _status in ("finance_approved", "paid")
+            pay_app = PaymentApplication(
                 id=_id(),
-                payment_application_id=pay_app.id,
-                work_package_id=wp.id,
-                claimed_amount=gross,
-                certified_amount=gross,
-                approved_amount=gross,
+                agreement_id=agreement.id,
+                application_number=f"PA-{_k + 1:03d}",
+                period_start=_p_start.date(),
+                period_end=_p_end.date(),
+                gross_amount=gross,
+                retention_amount=retention,
+                net_amount=net,
+                currency=_ccy,
+                status=_status,
+                submitted_at=_submitted,
+                foreman_approved_at=_submitted + timedelta(days=3) if settled else None,
+                finance_approved_at=_submitted + timedelta(days=7) if settled else None,
+                approved_gross_amount=gross if settled else None,
+                approved_retention_amount=retention if settled else None,
+                approved_net_amount=net if settled else None,
+                paid_at=_submitted + timedelta(days=21) if _status == "paid" else None,
+                created_by=owner_str,
+                metadata_={
+                    "demo_id": demo_id,
+                    "is_demo": True,
+                    **(
+                        {
+                            "cumulative_percent": str(_pct),
+                            "cumulative_gross": str(cum_gross),
+                            "cumulative_retention": str(cum_ret),
+                        }
+                        if template.progress_claims
+                        else {}
+                    ),
+                },
             )
-        )
-        await session.flush()
+            session.add(pay_app)
+            await session.flush()
+            session.add(
+                PaymentApplicationLine(
+                    id=_id(),
+                    payment_application_id=pay_app.id,
+                    work_package_id=wp.id,
+                    claimed_amount=gross,
+                    certified_amount=gross,
+                    approved_amount=gross,
+                )
+            )
+            await session.flush()
         results["subcontractors"] = 1
     except Exception:
         logger.debug("Subcontractors module not loaded, skipping demo chain", exc_info=True)
@@ -12252,6 +12304,118 @@ async def _seed_module_data(
 
     await session.flush()
     return results
+
+
+_REQUISITION_STATUSES = ("ordered", "approved", "submitted", "draft")
+# Share of the BOQ quantity a requisition asks for, by status: an order covers the line, a draft only part of it.
+_REQUISITION_SHARE = {
+    "ordered": Decimal("1"),
+    "approved": Decimal("0.75"),
+    "submitted": Decimal("0.5"),
+    "draft": Decimal("0.4"),
+}
+
+
+async def _seed_requisitions(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    owner_id: uuid.UUID,
+    demo_id: str,
+    template: DemoTemplate,
+    items: list[Position],
+) -> int:
+    """One purchase requisition per tender package, lines taken from the package's BOQ positions.
+
+    Each line keeps its BOQ source (position, quantity, unit) and a needed-by date. Statuses cycle through
+    ordered, approved, submitted and draft; an ordered requisition points at the purchase order the seeder made.
+    """
+    from app.modules.procurement.models import (
+        MaterialRequisition,
+        MaterialRequisitionItem,
+        MaterialRequisitionItemSource,
+        PurchaseOrder,
+    )
+
+    base = datetime(2026, 4, 1)
+    scopes = _package_scopes(template.tender_packages, items)
+    orders = (
+        (
+            await session.execute(
+                select(PurchaseOrder).where(PurchaseOrder.project_id == project_id).order_by(PurchaseOrder.po_number)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    owner_str = str(owner_id)
+    created = 0
+    for idx, ((pkg_name, _desc, _status, _bidders), scope) in enumerate(
+        zip(template.tender_packages, scopes, strict=False)
+    ):
+        lines = sorted(
+            (p for p in scope if Decimal(str(p.quantity or 0)) > 0),
+            key=lambda p: Decimal(str(p.quantity)) * Decimal(str(p.unit_rate or 0)),
+            reverse=True,
+        )[:6]
+        if not lines:
+            continue
+        status = _REQUISITION_STATUSES[idx % len(_REQUISITION_STATUSES)]
+        share = _REQUISITION_SHARE[status]
+        needed = base + timedelta(days=45 + 30 * idx)
+        stamp = (base + timedelta(days=14 + 10 * idx)).isoformat()
+        order = orders[idx % len(orders)] if status == "ordered" and orders else None
+        req = MaterialRequisition(
+            id=_id(),
+            project_id=project_id,
+            req_number=f"MR-{idx + 1:04d}",
+            requester_id=owner_str,
+            submitted_by=owner_str if status != "draft" else None,
+            decided_at=stamp if status in ("approved", "ordered") else None,
+            decision_comment="Approved against the tender scope." if status in ("approved", "ordered") else None,
+            status=status,
+            title=f"Materials - {pkg_name}",
+            required_date=needed.date().isoformat(),
+            lead_time_days=21,
+            estimated_delivery_date=order.delivery_date if order is not None else None,
+            po_id=order.id if order is not None else None,
+            order_owner="ocerp",
+            row_version=1,
+            metadata_={"demo_id": demo_id, "is_demo": True},
+        )
+        session.add(req)
+        await session.flush()
+        for line_no, pos in enumerate(lines):
+            qty_boq = Decimal(str(pos.quantity))
+            qty = (qty_boq * share).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+            rate = Decimal(str(pos.unit_rate or 0))
+            item = MaterialRequisitionItem(
+                id=_id(),
+                requisition_id=req.id,
+                description=pos.description,
+                unit=pos.unit,
+                quantity_requested=str(qty),
+                quantity_ordered=str(qty) if status == "ordered" else "0",
+                unit_cost=rate,
+                extended_cost=(qty * rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+                currency_code=template.currency,
+                sort_order=line_no + 1,
+                required_date=(needed + timedelta(days=7 * line_no)).date().isoformat(),
+            )
+            session.add(item)
+            await session.flush()
+            session.add(
+                MaterialRequisitionItemSource(
+                    id=_id(),
+                    item_id=item.id,
+                    boq_position_id=pos.id,
+                    quantity=str(qty),
+                    unit=pos.unit,
+                    sort_order=0,
+                )
+            )
+        created += 1
+    await session.flush()
+    return created
 
 
 async def install_demo_project(
@@ -14210,6 +14374,13 @@ async def install_demo_project(
         template,
     )
     logger.info("Demo module data for %s: %s", demo_id, module_data)
+    if template.seed_requisitions:
+        try:
+            module_data["requisitions"] = await _seed_requisitions(
+                session, project.id, owner_id, demo_id, template, items_list
+            )
+        except Exception:
+            logger.warning("Demo requisitions not seeded for %s", demo_id, exc_info=True)
 
     # ── 14. Real BIM geometry + downloadable PDF (baked assets, no convert) ─
     # Attach a real BIM model with real geometry and a real plan-set PDF from

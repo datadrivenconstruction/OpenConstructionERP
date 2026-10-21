@@ -319,4 +319,6 @@ TEMPLATE = DemoTemplate(
         "vat_note": "All rates exclusive of VAT. KSA VAT of 15% is applied as a separate markup line.",
         "regulator": "Eastern Province Municipality; Saudi Civil Defense for pavilions and service building",
     },
+    progress_claims=(0.2, 0.45, 0.7),
+    seed_requisitions=True,
 )
