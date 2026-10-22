@@ -1429,5 +1429,23 @@
       "fail": "{project} är aktivt men saknar kontrakt, faktura, beställning, underentreprenadavtal eller plan att prognostisera kassaflödet från.",
       "suggestion": "Ange kundkontraktet med betalningsplanen, eller ett planerat kassaflöde i kostnadsmodellen."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Budgeten innehåller ingen rad för IGV",
+      "suggestion": "Lägg till IGV som egen rad efter delsumman, med 18 procent (16 procent IGV plus 2 procent kommunal främjandeskatt)"
+    },
+    "igv_rate_18": {
+      "fail": "IGV-raden tar ut {percent} procent, inte den lagstadgade satsen på 18 procent",
+      "suggestion": "Sätt IGV-raden till 18 procent, eller bekräfta i avtalet att arbetet är undantaget eller beskattas annorlunda"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Budgeten har inte dessa rader som egna poster: {missing}",
+      "suggestion": "Lägg till gastos generales och utilidad som separata rader mellan direktkostnaden och IGV, så som en offentlig upphandling anger dem"
+    },
+    "partida_numbering": {
+      "fail": "Position {ordinal} är inte numrerad som partida (två siffror per nivå, till exempel 03.02 eller 03.02.01)",
+      "suggestion": "Numrera varje prissatt rad efter kapitel och post, så som en peruansk presupuesto listar sina partidas, till exempel 03.02"
+    }
   }
 }

@@ -1429,5 +1429,23 @@
       "fail": "{project} aktif, ancak nakit akışını tahmin edebileceğiniz bir sözleşme, fatura, sipariş, taşeron sözleşmesi veya plan yok.",
       "suggestion": "Müşteri sözleşmesini ödeme planıyla birlikte girin veya maliyet modeline planlanmış bir nakit akışı ekleyin."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Bütçede IGV satırı yok",
+      "suggestion": "IGV'yi ara toplamdan sonra ayrı bir satır olarak, yüzde 18 oranında ekleyin (yüzde 16 IGV artı yüzde 2 belediye tanıtım vergisi)"
+    },
+    "igv_rate_18": {
+      "fail": "IGV satırı yasal yüzde 18 yerine yüzde {percent} uyguluyor",
+      "suggestion": "IGV satırını yüzde 18 olarak ayarlayın veya işlerin muaf olduğunu ya da farklı vergilendirildiğini sözleşmede teyit edin"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Bütçe bu kalemleri ayrı satır olarak içermiyor: {missing}",
+      "suggestion": "Gastos generales ve utilidad'ı doğrudan maliyet ile IGV arasında ayrı satırlar olarak ekleyin, kamu ihalesinin belirttiği şekilde"
+    },
+    "partida_numbering": {
+      "fail": "{ordinal} numaralı pozisyon partida olarak numaralandırılmamış (her düzeyde iki hane, örneğin 03.02 veya 03.02.01)",
+      "suggestion": "Her fiyatlandırılmış satırı, bir Peru presupuesto'sunun partida'ları listelediği gibi bölüm ve kalem numarasıyla numaralandırın, örneğin 03.02"
+    }
   }
 }

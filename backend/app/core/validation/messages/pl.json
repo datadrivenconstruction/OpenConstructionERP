@@ -1429,5 +1429,23 @@
       "fail": "{project} jest aktywny, ale nie ma umowy, faktury, zamówienia, umowy podwykonawczej ani planu, na podstawie których można prognozować przepływy.",
       "suggestion": "Wprowadź umowę z klientem wraz z harmonogramem płatności lub planowany przepływ pieniężny w modelu kosztów."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Budżet nie zawiera pozycji IGV",
+      "suggestion": "Dodaj IGV jako osobną pozycję po podsumowaniu, według stawki 18 procent (16 procent IGV plus 2 procent podatek na promocję gmin)"
+    },
+    "igv_rate_18": {
+      "fail": "Pozycja IGV wynosi {percent} procent, a nie ustawowe 18 procent",
+      "suggestion": "Ustaw stawkę IGV na 18 procent albo potwierdź w umowie, że roboty są zwolnione lub opodatkowane inaczej"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Budżet nie zawiera osobno tych pozycji: {missing}",
+      "suggestion": "Dodaj gastos generales i utilidad jako odrębne pozycje między kosztem bezpośrednim a IGV, tak jak podaje je przetarg publiczny"
+    },
+    "partida_numbering": {
+      "fail": "Pozycja {ordinal} nie jest numerowana jako partida (po dwie cyfry na każdym poziomie, np. 03.02 lub 03.02.01)",
+      "suggestion": "Numeruj każdą wycenioną pozycję według działu i podpozycji, tak jak peruwiański presupuesto wykazuje partidas, np. 03.02"
+    }
   }
 }

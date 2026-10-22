@@ -135,6 +135,7 @@ def test_no_other_country_has_public_works_limits_by_accident() -> None:
         "EG": "eg_law182_art97",
         "FR": "fr_ccag_travaux_2021_art_10_5",
         "PK": "pk_pec_sbd_clause_70",
+        "PE": "pe_lgcp_formula_polinomica",
     }
 
 

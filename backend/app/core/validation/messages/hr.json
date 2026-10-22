@@ -1429,5 +1429,23 @@
       "fail": "{project} je aktivan, ali nema ugovor, račun, narudžbu, podugovor niti plan iz kojeg bi se mogao prognozirati novčani tok.",
       "suggestion": "Unesite ugovor s klijentom s planom plaćanja ili planirani novčani tok u modelu troškova."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Proračun nema stavku IGV-a",
+      "suggestion": "Dodajte IGV kao zasebnu stavku nakon međuzbroja, po stopi od 18 posto (16 posto IGV-a plus 2 posto općinskog poreza na promidžbu)"
+    },
+    "igv_rate_18": {
+      "fail": "Stavka IGV-a obračunava {percent} posto, a ne zakonskih 18 posto",
+      "suggestion": "Postavite stavku IGV-a na 18 posto ili u ugovoru potvrdite da su radovi oslobođeni ili oporezovani drugačije"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Proračun nema zasebne stavke za sljedeće: {missing}",
+      "suggestion": "Dodajte gastos generales i utilidad kao zasebne stavke između izravnih troškova i IGV-a, kako ih navodi javni natječaj"
+    },
+    "partida_numbering": {
+      "fail": "Pozicija {ordinal} nije označena kao partida (po dvije znamenke na svakoj razini, npr. 03.02 ili 03.02.01)",
+      "suggestion": "Označite svaku stavku s cijenom brojem poglavlja i stavke, kako je navedeno u peruanskom presupuestu, npr. 03.02"
+    }
   }
 }

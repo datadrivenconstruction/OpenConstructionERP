@@ -1429,5 +1429,23 @@
       "fail": "{project} on aktiivne, kuid sellel ei ole lepingut, arvet, tellimust, allhanget ega plaani, mille põhjal rahavoogu prognoosida.",
       "suggestion": "Sisestage kliendileping koos maksegraafikuga või planeeritud rahavoog kulumudelis."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Eelarves puudub IGV rida",
+      "suggestion": "Lisage IGV eraldi reana vahesumma järele, 18-protsendilise määraga (16 protsenti IGV pluss 2 protsenti munitsipaalne edendusmaks)"
+    },
+    "igv_rate_18": {
+      "fail": "IGV rida arvestab {percent} protsenti, mitte seadusest tuleneva 18 protsenti",
+      "suggestion": "Seadke IGV rida 18 protsendile või kinnitage lepingus, et tööd on maksuvabad või maksustatud teisiti"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Eelarves ei ole neid ridu eraldi: {missing}",
+      "suggestion": "Lisage gastos generales ja utilidad eraldi ridadena otsekulude ja IGV vahele, nagu riigihange need esitab"
+    },
+    "partida_numbering": {
+      "fail": "Positsioon {ordinal} ei ole nummerdatud partidana (kaks numbrit tasemel, näiteks 03.02 või 03.02.01)",
+      "suggestion": "Nummerdage iga hinnastatud rida peatüki ja punkti järgi, nagu Peruu presupuesto oma partidasid loetleb, näiteks 03.02"
+    }
   }
 }

@@ -1429,5 +1429,23 @@
       "fail": "{project} 已启动，但没有合同、发票、采购订单、分包合同或计划，无法据此预测现金流。",
       "suggestion": "录入客户合同及其付款计划，或在成本模型中录入计划现金流。"
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "预算中没有 IGV 行",
+      "suggestion": "在小计之后将 IGV 单列一行，税率 18%（IGV 16% 加市政推广税 2%）"
+    },
+    "igv_rate_18": {
+      "fail": "IGV 行按 {percent}% 计征，而非法定的 18%",
+      "suggestion": "将 IGV 行设为 18%，或在合同中确认该工程免税或适用其他税率"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "预算中没有单独列出以下项目：{missing}",
+      "suggestion": "在直接费用与 IGV 之间分别列出 gastos generales 和 utilidad，与公开招标文件的写法一致"
+    },
+    "partida_numbering": {
+      "fail": "第 {ordinal} 项未按 partida 编号（每级两位数字，如 03.02 或 03.02.01）",
+      "suggestion": "按章节和子项为每个计价行编号，与秘鲁 presupuesto 列示 partida 的方式一致，例如 03.02"
+    }
   }
 }

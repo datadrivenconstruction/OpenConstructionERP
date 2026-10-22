@@ -1429,5 +1429,23 @@
       "fail": "Aktibo ang {project} pero walang kontrata, invoice, order, subcontract o plano para pagtayahan ang cash flow.",
       "suggestion": "Ilagay ang kontrata ng kliyente kasama ang payment plan nito, o planong cash flow sa cost model."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Walang linya ng IGV ang badyet",
+      "suggestion": "Idagdag ang IGV bilang sariling linya pagkatapos ng subtotal, sa 18 porsiyento (16 porsiyentong IGV plus 2 porsiyentong municipal promotion tax)"
+    },
+    "igv_rate_18": {
+      "fail": "Naniningil ng {percent} porsiyento ang linya ng IGV, hindi ang itinakdang 18 porsiyento ng batas",
+      "suggestion": "Itakda ang linya ng IGV sa 18 porsiyento, o kumpirmahin sa kontrata na exempt ang mga gawain o iba ang buwis"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Hindi hiwalay na nakalista sa badyet ang mga linyang ito: {missing}",
+      "suggestion": "Idagdag ang gastos generales at utilidad bilang hiwalay na linya sa pagitan ng direktang gastos at IGV, gaya ng nakasaad sa pampublikong tender"
+    },
+    "partida_numbering": {
+      "fail": "Hindi naka-numero bilang partida ang posisyon {ordinal} (dalawang digit bawat antas, tulad ng 03.02 o 03.02.01)",
+      "suggestion": "I-numero ang bawat presyong linya ayon sa kabanata at item, gaya ng paglista ng presupuesto ng Peru sa mga partida nito, halimbawa 03.02"
+    }
   }
 }

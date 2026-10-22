@@ -1803,6 +1803,7 @@ const resource = {
     "auth_classic.docs": "Docs",
     "auth_classic.status": "Status",
     "auth_classic.privacy": "Privacy",
+    "einvoice.profile.ubl_pe": "SUNAT UBL 2.1 (factura electrónica)",
   }
 } as { translation: Record<string, string> };
 

@@ -678,6 +678,7 @@ const resource = {
     "quantities.method_pdf_desc": "Upload construction drawings (PDF) and extract quantities with AI takeoff. You review each quantity before it is used.",
     "costmodel.prereq_boq_desc": "Finish the bill of quantities first, then generate the project budget to see the 5D analytics.",
     "costmodel.prereq_desc": "Create a project and build its bill of quantities first. When the bill is ready, generate the project budget to open the 5D cost model and its analytics.",
+    "einvoice.profile.ubl_pe": "SUNAT UBL 2.1 (factura electrónica)",
   }
 } as { translation: Record<string, string> };
 
