@@ -47,10 +47,12 @@ SYNTAX_UBL = "ubl"
 #: UBL-TR 1.2 (e-Fatura / e-Arşiv Fatura). Not EN 16931: it never passes
 #: through ``build_einvoice`` or ``rules.check``.
 SYNTAX_UBL_TR = "ubl_tr"
+#: SUNAT UBL 2.1 factura (Peru), unsigned, for an OSE or PSE. Not EN 16931.
+SYNTAX_UBL_PE = "ubl_pe"
 
 #: The syntaxes the EN 16931 model can be written in.
 EN16931_SYNTAXES: frozenset[str] = frozenset({SYNTAX_CII, SYNTAX_UBL})
-SYNTAXES: frozenset[str] = EN16931_SYNTAXES | {SYNTAX_UBL_TR}
+SYNTAXES: frozenset[str] = EN16931_SYNTAXES | {SYNTAX_UBL_TR, SYNTAX_UBL_PE}
 
 #: UBL-TR's ``cbc:CustomizationID``. The published Schematron accepts "TR1.2"
 #: and "TR1.2.1", and every official sample writes this one.
@@ -145,6 +147,13 @@ PROFILES: dict[str, Profile] = {
         UBL_TR_CUSTOMIZATION,
         region="TR",
         label="UBL-TR 1.2 (e-Fatura / e-Arşiv Fatura, unsigned)",
+    ),
+    "ubl_pe": Profile(
+        "ubl_pe",
+        SYNTAX_UBL_PE,
+        "2.0",
+        region="PE",
+        label="SUNAT UBL 2.1 (factura electronica, unsigned)",
     ),
 }
 

@@ -1,0 +1,18 @@
+{
+  "rule_pack_id": "ley_contrataciones",
+  "name": "Public contracting law (Ley 32069)",
+  "name_es": "Ley General de Contrataciones Publicas (Ley 32069)",
+  "standard": "Ley 32069 and its Reglamento (D.S. 009-2025-EF)",
+  "jurisdiction": "PE",
+  "applies_to": ["tender", "estimate", "validation"],
+  "review_status": "unconfirmed. Reference only. Pending review by a Peruvian procurement specialist.",
+  "scope_note": "Applies to works let by public entities. A contractor working only for private owners is outside it.",
+  "description": "Public works are paid by monthly valorizaciones; the entity pays by the end of the month following the approval (art. 210 of the Reglamento, as quoted in an OECE opinion). The performance guarantee of 10 percent is retained from the valuations. The adelanto directo (up to 10 percent) and the adelanto de materiales (up to 20 percent) are amortised. Price adjustment follows a formula polinomica whose index values come from the tenant's own price index series; the pack ships none.",
+  "sources": [
+    "https://www.gob.pe/oece"
+  ],
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [],
+  "planned_not_built_note": "The advance limits and the guarantee are carried as figures in the contract defaults and flagged for expert review; no engine rule enforces them.",
+  "regulator": "OECE"
+}

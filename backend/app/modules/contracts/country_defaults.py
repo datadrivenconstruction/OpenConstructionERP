@@ -689,6 +689,54 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The progress payment report the site supervisor and the contractor sign.",
         ),
     },
+    # Peru. The row is the public works profile under Ley 32069, whose figures
+    # a private contract usually follows by agreement. The retention figure and
+    # its release are not read in the regulation text (see the public works
+    # regime pe_lgcp_2025, which flags them for review); the valuation interval,
+    # the certificate name and the payment rule were read in Art. 210 of the
+    # regulation as quoted by an OECE opinion.
+    "PE": {
+        "standard_form": "Ley General de Contrataciones Publicas (Ley 32069) y su Reglamento",
+        "retention_percent": _figure(
+            "10",
+            "industry_practice",
+            "Reglamento de la Ley 32069 (D.S. 009-2025-EF), garantia de fiel cumplimiento; article not read",
+            "Ten percent of the contract is the usual performance guarantee on works, held as a retention from "
+            "each valuation when no guarantee is lodged. Unconfirmed: check the article before relying on it.",
+        ),
+        "retention_cap_percent": _figure(
+            "10",
+            "industry_practice",
+            "Reglamento de la Ley 32069 (D.S. 009-2025-EF), garantia de fiel cumplimiento; article not read",
+            "The retention stops at the ten percent of the contract amount that the guarantee covers.",
+        ),
+        "retention_release_split": _figure(
+            _split(("final_completion", "100")),
+            "industry_practice",
+            "Reglamento de la Ley 32069 (D.S. 009-2025-EF), garantia de fiel cumplimiento; article not read",
+            "Released once the works are received and the final liquidation is approved.",
+        ),
+        "payment_period_days": _figure(
+            None,
+            "statute",
+            "Reglamento de la Ley 32069 (D.S. 009-2025-EF), art. 210.3",
+            "No number of days: the entity evaluates and pays the valuation by the last day of the month in which "
+            "it is presented. The payment clock regime pe_lgcp_art210 counts it.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "statute",
+            "Reglamento de la Ley 32069 (D.S. 009-2025-EF), art. 210",
+            "The contractor presents the valuation within the first three days of the month after the valued month.",
+        ),
+        "certificate_name": _figure(
+            "Valorizacion",
+            "statute",
+            "Reglamento de la Ley 32069 (D.S. 009-2025-EF), art. 210",
+            "The monthly valuation of the works, a payment on account, prepared jointly by the resident and the "
+            "supervisor.",
+        ),
+    },
     # Egypt. The row is the private profile: FIDIC is the form private and
     # donor-funded works use, and the form leaves the retention figures to the
     # Contract Data, so no Egyptian number stands in for them. Public works are
