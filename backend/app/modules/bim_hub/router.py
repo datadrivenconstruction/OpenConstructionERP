@@ -1518,6 +1518,16 @@ async def _set_conversion_stage(model_uuid: uuid.UUID, stage: str, *, begin: boo
         logger.debug("conversion stage write failed for %s", model_uuid, exc_info=True)
 
 
+def rvt_failure_status(cause: str) -> str:
+    """Model status after the installed RVT converter ran and produced nothing.
+
+    Only an outdated converter is fixed by (re)installing it. A file the converter
+    read and rejected (corrupt, truncated, unsupported version) is an ``error``:
+    labelling it "needs converter" sends the user to install what is already there.
+    """
+    return "needs_converter" if cause == "converter_outdated" else "error"
+
+
 async def _process_cad_in_background(
     *,
     project_id: str,
@@ -1952,7 +1962,7 @@ async def _process_cad_in_background(
                     meta["empty_reason"] = "no_model_elements"
                     meta["converter_id"] = "rvt"
                 elif ext == ".rvt":
-                    model.status = "needs_converter"
+                    model.status = rvt_failure_status(cause)
 
                     # Compose the message in pieces - every clause is added
                     # only when its underlying datum is non-empty so we never

@@ -332,8 +332,57 @@ def _collect_outputs(run: ConverterRun, out_dir: Path, stem: str) -> None:
 _IFC_TABLES = ("Objects", "SpatialLinks", "NormalizedMeasures", "Properties", "Quantities", "TypeLinks")
 
 #: A cell the converter could not write to Excel (too precise or out of range)
-#: holds this pointer to ``data.jsonl`` instead of the number.
-_XLSX_POINTER_PREFIX = "[See data.jsonl"
+#: holds a pointer such as ``[See data.jsonl ...]`` or ``[See overflow.jsonl: path=...]``
+#: instead of the number. The pointer carries a server path and must never reach a user.
+_XLSX_POINTER_PREFIX = "[See "
+
+#: Flat-table quantity column -> property names in preference order (lower case, no spaces).
+_IFC_QUANTITY_PREFERENCE: dict[str, tuple[str, ...]] = {
+    "Volume": ("netvolume", "grossvolume", "volume"),
+    "Area": ("netsidearea", "netarea", "netfloorarea", "grosssidearea", "grossarea", "grossfloorarea", "area"),
+    "Length": ("length",),
+    "Height": ("height",),
+}
+
+
+def _is_pointer(value: Any) -> bool:
+    return isinstance(value, str) and value.startswith(_XLSX_POINTER_PREFIX) and ".jsonl" in value[:40]
+
+
+def _measure_si(row: dict[str, Any]) -> float | None:
+    """SI value of a ``NormalizedMeasures`` row; ``exact_si_value`` stands in for a pointer cell."""
+    for column in ("si_value", "exact_si_value"):
+        value = row.get(column)
+        if isinstance(value, bool) or value is None or _is_pointer(value):
+            continue
+        if isinstance(value, (int, float)):
+            return float(value)
+        try:
+            return float(str(value))
+        except ValueError:
+            continue
+    return None
+
+
+def _ifc_quantities(measures: list[tuple[str, str, float]]) -> dict[str, float]:
+    """Area / Volume / Length / Height from an occurrence's SI measures.
+
+    Quantity sets (``Qto_*``, ``BaseQuantities``) win over property sets such as
+    ``Pset_Revit_Dimensions``, which many authoring tools export instead.
+    """
+    ranked = sorted(
+        (0 if s.startswith("Qto_") or s == "BaseQuantities" else 1, p.replace(" ", "").replace("_", "").lower(), v)
+        for s, p, v in measures
+        if v
+    )
+    out: dict[str, float] = {}
+    for column, names in _IFC_QUANTITY_PREFERENCE.items():
+        for name in names:
+            hit = next((v for _r, n, v in ranked if n == name), None)
+            if hit is not None:
+                out[column] = hit
+                break
+    return out
 
 
 def _unwrap(value: Any) -> Any:
@@ -355,7 +404,7 @@ def _unwrap(value: Any) -> Any:
         return json.dumps(value, ensure_ascii=False)
     if isinstance(value, list):
         return json.dumps(value, ensure_ascii=False)
-    if isinstance(value, str) and value.startswith(_XLSX_POINTER_PREFIX):
+    if _is_pointer(value):
         return None
     return value
 
@@ -364,7 +413,7 @@ def _cell_value(raw: Any) -> Any:
     if raw is None:
         return None
     if isinstance(raw, str):
-        if raw.startswith(_XLSX_POINTER_PREFIX):
+        if _is_pointer(raw):
             return None
         try:
             return _unwrap(json.loads(raw))
@@ -461,13 +510,12 @@ def flatten_ifc_workbook(drawing_xlsx: Path) -> tuple[list[str], list[dict[str, 
 
     si_values: dict[tuple[str, str], Any] = {}
     for row in tables["NormalizedMeasures"]:
-        si = row.get("si_value")
-        if isinstance(si, str) and si.startswith(_XLSX_POINTER_PREFIX):
-            si = None
+        si = _measure_si(row)
         if si is not None:
             si_values[(str(row.get("owner_step_id")), str(row.get("property_step_id")))] = si
 
     props: dict[str, dict[str, Any]] = {}
+    measures: dict[str, list[tuple[str, str, float]]] = {}
     columns: dict[str, None] = {}
     for sheet in ("Properties", "Quantities"):
         for row in tables[sheet]:
@@ -486,9 +534,23 @@ def flatten_ifc_workbook(drawing_xlsx: Path) -> tuple[list[str], list[dict[str, 
             value = si_values.get((owner, str(row.get("property_step_id"))))
             if value is None:
                 value = _cell_value(row.get("value"))
+            elif isinstance(value, (int, float)):
+                measures.setdefault(owner, []).append((set_name, prop, float(value)))
             props.setdefault(owner, {})[key] = value
 
-    header = ["ID", "GlobalId", "Category", "Name", "Type Name", "Description", "Level", "Building", *columns]
+    quantity_columns = [c for c in _IFC_QUANTITY_PREFERENCE if c not in columns]
+    header = [
+        "ID",
+        "GlobalId",
+        "Category",
+        "Name",
+        "Type Name",
+        "Description",
+        "Level",
+        "Building",
+        *quantity_columns,
+        *columns,
+    ]
     rows: list[dict[str, Any]] = []
     for step_id, obj in objects.items():
         if str(obj.get("IsType")).lower() == "true":
@@ -504,6 +566,7 @@ def flatten_ifc_workbook(drawing_xlsx: Path) -> tuple[list[str], list[dict[str, 
             "Level": ancestor_name(step_id, "IfcBuildingStorey") or None,
             "Building": ancestor_name(step_id, "IfcBuilding") or None,
         }
+        row.update(_ifc_quantities(measures.get(step_id, [])))
         row.update(props.get(step_id, {}))
         rows.append(row)
     return header, rows

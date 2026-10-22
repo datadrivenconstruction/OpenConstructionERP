@@ -143,6 +143,75 @@ def test_flattened_ifc_table_is_read_by_the_platform_parser(tmp_path: Path) -> N
     assert result["geometry_quality"] == "placeholder"
 
 
+def _write_pset_workbook(path: Path) -> None:
+    """A Revit-exported IFC: quantities live in property sets, some SI cells are overflow pointers."""
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    pointer = (
+        "[See overflow.jsonl: path=C:\\srv\tmp\\overflow.jsonl; table=NormalizedMeasures ordinal=3 field=si_value]"
+    )
+    for name, header, rows in (
+        (
+            "Objects",
+            ["ID", "GlobalId", "Category", "Name", "IsType"],
+            [
+                ["16", "W1", "IfcWallStandardCase", "Wall A", "False"],
+                ["17", "W2", "IfcSlab", "Slab B", "False"],
+            ],
+        ),
+        ("SpatialLinks", ["child_step_id", "parent_step_id"], []),
+        ("TypeLinks", ["owner_step_id", "type_step_id"], []),
+        (
+            "Properties",
+            ["owner_step_id", "scope", "set_name", "property_step_id", "property_name", "value"],
+            [
+                ["16", "OCCURRENCE", "PSet_Revit_Dimensions", "30", "Area", pointer],
+                ["16", "OCCURRENCE", "PSet_Revit_Dimensions", "31", "Volume", "2.5"],
+                ["17", "OCCURRENCE", "PSet_Revit_Dimensions", "32", "Area", "99"],
+            ],
+        ),
+        (
+            "Quantities",
+            ["owner_step_id", "scope", "set_name", "property_step_id", "property_name", "value"],
+            [
+                ["17", "OCCURRENCE", "Qto_SlabBaseQuantities", "33", "NetArea", '{"AreaValue":40.0}'],
+            ],
+        ),
+        (
+            "NormalizedMeasures",
+            ["owner_step_id", "scope", "property_step_id", "si_value", "exact_si_value"],
+            [
+                ["16", "OCCURRENCE", "30", pointer, "30.14164524999992"],
+                ["16", "OCCURRENCE", "31", 2.5, "2.5"],
+                ["17", "OCCURRENCE", "32", 99.0, "99"],
+                ["17", "OCCURRENCE", "33", 40.0, "40"],
+            ],
+        ),
+    ):
+        ws = wb.create_sheet(name)
+        ws.append(header)
+        for r in rows:
+            ws.append(r)
+    wb.save(path)
+
+
+def test_ifc_quantities_come_from_property_sets_and_overflow_pointers_never_leak(tmp_path: Path) -> None:
+    xlsx = tmp_path / "drawing.xlsx"
+    _write_pset_workbook(xlsx)
+
+    header, rows = ddc_runner.flatten_ifc_workbook(xlsx)
+
+    by_id = {r["ID"]: r for r in rows}
+    wall, slab = by_id[16], by_id[17]
+    assert wall["[PSet_Revit_Dimensions] Area"] == pytest.approx(30.14164524999992)
+    assert wall["Area"] == pytest.approx(30.14164524999992)
+    assert wall["Volume"] == 2.5
+    # A quantity set wins over a property set of the same element.
+    assert slab["Area"] == 40.0
+    assert "Area" in header and "Volume" in header
+    assert not any(isinstance(v, str) and "overflow.jsonl" in v for r in rows for v in r.values())
+
+
 # ── RVT: GLB + native_graph.ifc -> flat table ─────────────────────────────
 
 

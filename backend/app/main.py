@@ -3966,6 +3966,7 @@ def create_app() -> FastAPI:
         # ships disabled in some configurations).
         from app.core.converter_package import read_stamp
         from app.core.converter_source import (
+            package_tag,
             release_asset_url,
             release_page_url,
             resolve_converter_repo,
@@ -4020,8 +4021,8 @@ def create_app() -> FastAPI:
                     "format_range": pkg.format_range,
                     "produces_geometry": pkg.produces_geometry,
                     "is_outdated": is_outdated,
-                    "download_url": release_asset_url(pkg.asset, repo=repo, tag=tag),
-                    "html_url": release_page_url(repo=repo, tag=tag),
+                    "download_url": release_asset_url(pkg.asset, repo=repo, tag=package_tag(pkg)),
+                    "html_url": release_page_url(repo=repo, tag=package_tag(pkg)),
                 }
             )
 

@@ -29,9 +29,9 @@ and ``OE_CONVERTER_REPO`` point a fork or a newer release at the installer
 without a code change; for a tag other than the pinned one the digest comes
 from that release's ``SHA256SUMS.txt`` alone.
 
-Linux and macOS builds of the same converters ship in the same release as
+Linux and macOS builds of the same converters ship in a release of their own as
 ``.tar.gz`` archives (x64 and arm64), with their digests in
-``SHA256SUMS-linux-macos.txt``. They are other command lines with the same
+``SHA256SUMS.txt`` of :data:`POSIX_CONVERTER_TAG`. They are other command lines with the same
 outputs; :data:`PLATFORM_PACKAGES` maps a host key (``windows-x64``,
 ``linux-x64``, ``linux-arm64``, ``macos-x64``, ``macos-arm64``) to the
 packages that run there, and :func:`host_platform_key` names the host.
@@ -39,7 +39,7 @@ packages that run there, and :func:`host_platform_key` names the host.
 ==========  ==========================================  =======================================
 format      Linux / macOS package                       command line
 ==========  ==========================================  =======================================
-``rvt``     ``rvt-decode-2.0.0-<os>-<arch>.tar.gz``     ``rvt-decode native-graph <in> --ifc``
+``rvt``     ``rvt-decode-2.0.1-<os>-<arch>.tar.gz``     ``rvt-decode native-graph <in> --ifc``
 ``ifc``     ``ifc2excel-2.0.1-<os>-<arch>.tar.gz``      ``ifc2excel <in> --raw-tables``
 ``dwg``     ``dwg2excel-2.0.0-<os>-<arch>.tar.gz``      ``dwg2excel <in> --json``
 ==========  ==========================================  =======================================
@@ -66,7 +66,12 @@ DEFAULT_CONVERTER_TAG = "v2026.10.0"
 CHECKSUMS_ASSET = "SHA256SUMS.txt"
 
 #: Name of the checksum file of the Linux and macOS packages.
-POSIX_CHECKSUMS_ASSET = "SHA256SUMS-linux-macos.txt"
+POSIX_CHECKSUMS_ASSET = "SHA256SUMS.txt"
+
+#: Release the Linux and macOS packages are pinned to. Upstream ships them in a
+#: release of their own; the copies inside :data:`DEFAULT_CONVERTER_TAG` were
+#: re-uploaded with other digests, so the two sets are pinned separately.
+POSIX_CONVERTER_TAG = "v2026.10.1"
 
 #: Host key of the Windows packages.
 WINDOWS_KEY = "windows-x64"
@@ -108,6 +113,8 @@ class ConverterPackage:
     archive_format: str = "zip"
     #: Release asset that lists this package's digest.
     checksums_asset: str = CHECKSUMS_ASSET
+    #: Release this package is pinned to; empty means :data:`DEFAULT_CONVERTER_TAG`.
+    release_tag: str = ""
 
 
 PACKAGES: dict[str, ConverterPackage] = {
@@ -153,40 +160,61 @@ PACKAGES: dict[str, ConverterPackage] = {
 
 #: Linux and macOS packages: ``(format, tool, version, display name, range, geometry)``.
 _POSIX_TOOLS: tuple[tuple[str, str, str, str, str, bool], ...] = (
-    ("rvt", "rvt-decode", "2.0.0", "DDC RVT Converter", "Revit 2019-2027", True),
+    ("rvt", "rvt-decode", "2.0.1", "DDC RVT Converter", "Revit 2019-2027", True),
     ("ifc", "ifc2excel", "2.0.1", "DDC IFC to Excel", "IFC2x3, IFC4, IFC4x3", False),
     ("dwg", "dwg2excel", "2.0.0", "DDC DWG to Excel", "DWG R13-2018", True),
 )
 
 #: ``(sha256, size)`` of every Linux and macOS package, as listed in
-#: ``SHA256SUMS-linux-macos.txt`` of the pinned release.
+#: ``SHA256SUMS.txt`` of :data:`POSIX_CONVERTER_TAG`.
 _POSIX_DIGESTS: dict[str, tuple[str, int]] = {
-    "rvt-decode-2.0.0-linux-x64.tar.gz": ("fe23e99fd3572a55b2324f49712639d923949b34df66b50038ec352fe0e12d94", 6619889),
-    "rvt-decode-2.0.0-linux-arm64.tar.gz": (
-        "1a0517a101fa189fe4b9f53febda790fb87d2c5aac8071fc4792499b55f1e9f8",
-        5622598,
-    ),
-    "rvt-decode-2.0.0-macos-x64.tar.gz": ("9784d3839a16178dbf6de826a3822162e3d2d1ab4a2f2aded321c6a9669e596b", 6545149),
-    "rvt-decode-2.0.0-macos-arm64.tar.gz": (
-        "b8977f70f2b5d4060a87d5e7f0f4d0380788ad16ca141f70446fd82bb3809b14",
-        5403528,
-    ),
-    "ifc2excel-2.0.1-linux-x64.tar.gz": ("86fbe7dce93ffbde221189e9c02571a2f2ec7c1c7ee52020708c5ff333a53567", 23801503),
-    "ifc2excel-2.0.1-linux-arm64.tar.gz": (
-        "eaac4030ec723ced7aeba1fbf4b0ab35a17ca29fe6a108e1893be0d4ed36ede0",
-        22752184,
-    ),
-    "ifc2excel-2.0.1-macos-x64.tar.gz": ("8f955002784b00dd1d0f988f48dcf458d432e4a22d35a02d472fe1be18d88f54", 9479476),
-    "ifc2excel-2.0.1-macos-arm64.tar.gz": ("4f3b84f411256acd76f0db815b7360e09d1e5447db5dbba714c15073d6e19779", 8750861),
-    "dwg2excel-2.0.0-linux-x64.tar.gz": ("036553aefac3bddae1f340cb0ed6c94bbb67911302ec14de26911a9f7f5e78b0", 28654464),
     "dwg2excel-2.0.0-linux-arm64.tar.gz": (
-        "b63cdf502293bc4a98b72c9650a6e01fcc2a847a33d6d3359418ec04d0c5a9bd",
-        27039880,
+        "075df8e5c05de2a6b992029b83c5130097e91f2bbea5031f571892f4e1396fc5",
+        27211556,
     ),
-    "dwg2excel-2.0.0-macos-x64.tar.gz": ("6c05f382bf1777ad754edc157271e062af4d14fa64e3c48595c066fd8e925baa", 13942934),
+    "dwg2excel-2.0.0-linux-x64.tar.gz": (
+        "d4eba8e798ba98b2d5914f03f86fbfbf11928ff1337742f3492e813853b29051",
+        28829054,
+    ),
     "dwg2excel-2.0.0-macos-arm64.tar.gz": (
-        "2c1db99fe405fcd80b31e4af8ca669b02480bcb4784301f937c573b67967bdce",
-        12660786,
+        "d5747a914422560e28478d7e95b5b5b3fc140a6624999f18da8920be0331f396",
+        12791822,
+    ),
+    "dwg2excel-2.0.0-macos-x64.tar.gz": (
+        "3acf906cdd8a8532d6b240f7be02a09eafa3b9c9e03f350c83da94a1d65ce68b",
+        14080015,
+    ),
+    "ifc2excel-2.0.1-linux-arm64.tar.gz": (
+        "5a741249d1f5e456c36918fd3524896aa2bf1896570a98872e2e6ae2d4797118",
+        22890537,
+    ),
+    "ifc2excel-2.0.1-linux-x64.tar.gz": (
+        "54574db86ee38121db45c485288725e3cddbb675d1dc6d06f32928b3716a7b9f",
+        23951488,
+    ),
+    "ifc2excel-2.0.1-macos-arm64.tar.gz": (
+        "4ebe7eed52898277f2c20a351856d9803774036202dd7b76ee21179d7f5e585b",
+        8840850,
+    ),
+    "ifc2excel-2.0.1-macos-x64.tar.gz": (
+        "141998f72b104674c93d67a2f2782604485677362ab03fc89959ea65db43fff4",
+        9577374,
+    ),
+    "rvt-decode-2.0.1-linux-arm64.tar.gz": (
+        "b2622a9f61dfb633f40b04c58d84c7f02e73f327eb66b430aec1a4eb7d1e278c",
+        5629940,
+    ),
+    "rvt-decode-2.0.1-linux-x64.tar.gz": (
+        "fc176c46e27da129bec57783c0bfa9c25c20d4d8d603daf43d97bdbebed39550",
+        6632956,
+    ),
+    "rvt-decode-2.0.1-macos-arm64.tar.gz": (
+        "0157b03e2b57678d71c1e5c5348c91986646f17c75a4f4f2e7b23328e41ab2a1",
+        5409885,
+    ),
+    "rvt-decode-2.0.1-macos-x64.tar.gz": (
+        "bce61756354bcaa07fc015491c270fd10f5d13c3cb75f53e486355377c966984",
+        6556419,
     ),
 }
 
@@ -215,6 +243,7 @@ def _posix_packages(key: str) -> dict[str, ConverterPackage]:
             platform_key=key,
             archive_format="tar.gz",
             checksums_asset=POSIX_CHECKSUMS_ASSET,
+            release_tag=POSIX_CONVERTER_TAG,
         )
     return packages
 
@@ -276,6 +305,12 @@ def resolve_converter_tag(env: Mapping[str, str] | None = None) -> str:
     """
     source = os.environ if env is None else env
     return source.get("OE_CONVERTER_TAG") or DEFAULT_CONVERTER_TAG
+
+
+def package_tag(pkg: ConverterPackage, env: Mapping[str, str] | None = None) -> str:
+    """Release a package is downloaded from: the ``OE_CONVERTER_TAG`` override, then its own pin."""
+    source = os.environ if env is None else env
+    return source.get("OE_CONVERTER_TAG") or pkg.release_tag or DEFAULT_CONVERTER_TAG
 
 
 def release_asset_url(asset: str, *, repo: str | None = None, tag: str | None = None) -> str:

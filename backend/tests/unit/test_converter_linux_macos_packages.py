@@ -26,6 +26,7 @@ from app.core.converter_source import (
     PACKAGES,
     PLATFORM_PACKAGES,
     POSIX_CHECKSUMS_ASSET,
+    POSIX_CONVERTER_TAG,
     POSIX_KEYS,
     WINDOWS_KEY,
     command_prefix,
@@ -58,7 +59,7 @@ def test_every_linux_and_macos_host_has_all_three_formats() -> None:
 
 @pytest.mark.parametrize("key", POSIX_KEYS)
 def test_a_posix_package_names_its_release_asset_and_pins_its_digest(key: str) -> None:
-    tools = {"rvt": ("rvt-decode", "2.0.0"), "ifc": ("ifc2excel", "2.0.1"), "dwg": ("dwg2excel", "2.0.0")}
+    tools = {"rvt": ("rvt-decode", "2.0.1"), "ifc": ("ifc2excel", "2.0.1"), "dwg": ("dwg2excel", "2.0.0")}
     for fmt, pkg in PLATFORM_PACKAGES[key].items():
         tool, version = tools[fmt]
         assert pkg.asset == f"{tool}-{version}-{key}.tar.gz"
@@ -68,22 +69,23 @@ def test_a_posix_package_names_its_release_asset_and_pins_its_digest(key: str) -
         assert re.fullmatch(r"[0-9a-f]{64}", pkg.sha256)
         assert pkg.size_bytes > 1_000_000
         assert pkg.archive_format == "tar.gz"
-        assert pkg.checksums_asset == POSIX_CHECKSUMS_ASSET == "SHA256SUMS-linux-macos.txt"
+        assert pkg.checksums_asset == POSIX_CHECKSUMS_ASSET == "SHA256SUMS.txt"
+        assert pkg.release_tag == POSIX_CONVERTER_TAG == "v2026.10.1"
         assert pkg.platform_key == key
 
 
 def test_the_pins_are_the_published_digests() -> None:
-    """Spot checks against ``SHA256SUMS-linux-macos.txt`` of v2026.10.0."""
+    """Spot checks against ``SHA256SUMS.txt`` of v2026.10.1."""
     by_asset = {p.asset: p.sha256 for k in POSIX_KEYS for p in PLATFORM_PACKAGES[k].values()}
     assert len(set(by_asset.values())) == 12
-    assert by_asset["rvt-decode-2.0.0-linux-x64.tar.gz"] == (
-        "fe23e99fd3572a55b2324f49712639d923949b34df66b50038ec352fe0e12d94"
+    assert by_asset["rvt-decode-2.0.1-linux-x64.tar.gz"] == (
+        "fc176c46e27da129bec57783c0bfa9c25c20d4d8d603daf43d97bdbebed39550"
     )
     assert by_asset["ifc2excel-2.0.1-macos-arm64.tar.gz"] == (
-        "4f3b84f411256acd76f0db815b7360e09d1e5447db5dbba714c15073d6e19779"
+        "4ebe7eed52898277f2c20a351856d9803774036202dd7b76ee21179d7f5e585b"
     )
     assert by_asset["dwg2excel-2.0.0-linux-arm64.tar.gz"] == (
-        "b63cdf502293bc4a98b72c9650a6e01fcc2a847a33d6d3359418ec04d0c5a9bd"
+        "075df8e5c05de2a6b992029b83c5130097e91f2bbea5031f571892f4e1396fc5"
     )
 
 
@@ -259,7 +261,7 @@ def _tar_bytes(entries: dict[str, bytes], *, modes: dict[str, int] | None = None
 
 
 def _rvt_tar(key: str, exe: bytes = _ELF, exe_mode: int = 0o755) -> bytes:
-    top = f"rvt-decode-2.0.0-{key}"
+    top = f"rvt-decode-2.0.1-{key}"
     return _tar_bytes(
         {f"{top}/rvt-decode": exe, f"{top}/BUILD_INFO.json": b"{}", f"{top}/licenses/NOTICE.txt": b"n"},
         modes={f"{top}/rvt-decode": exe_mode},
@@ -337,10 +339,10 @@ def test_the_installer_fetches_the_package_of_the_given_host(monkeypatch: pytest
 
     assert exe == (tmp_path / "rvt_linux-arm64" / "rvt-decode").resolve()
     assert exe.read_bytes() == _ELF
-    assert seen["checksums"] == "SHA256SUMS-linux-macos.txt"
-    assert seen["url"].endswith("/v2026.10.0/rvt-decode-2.0.0-linux-arm64.tar.gz")
+    assert seen["checksums"] == "SHA256SUMS.txt"
+    assert seen["url"].endswith("/v2026.10.1/rvt-decode-2.0.1-linux-arm64.tar.gz")
     stamp = converter_package.read_stamp(exe.parent)
-    assert stamp is not None and stamp["asset"] == "rvt-decode-2.0.0-linux-arm64.tar.gz"
+    assert stamp is not None and stamp["asset"] == "rvt-decode-2.0.1-linux-arm64.tar.gz"
     if sys.platform != "win32":
         assert stat.S_IMODE(exe.stat().st_mode) & 0o111, "the installer sets the execute bit itself"
 
@@ -351,7 +353,7 @@ def test_the_installer_picks_the_running_host_when_none_is_given(
     _on_host(monkeypatch, "darwin", "arm64")
     seen: dict[str, Any] = {}
     data = _tar_bytes(
-        {"rvt-decode-2.0.0-macos-arm64/rvt-decode": _MACHO, "rvt-decode-2.0.0-macos-arm64/BUILD_INFO.json": b"{}"}
+        {"rvt-decode-2.0.1-macos-arm64/rvt-decode": _MACHO, "rvt-decode-2.0.1-macos-arm64/BUILD_INFO.json": b"{}"}
     )
     pkg = replace(PLATFORM_PACKAGES["macos-arm64"]["rvt"], sha256=hashlib.sha256(data).hexdigest())
     monkeypatch.setitem(PLATFORM_PACKAGES["macos-arm64"], "rvt", pkg)
@@ -368,7 +370,7 @@ def test_the_installer_picks_the_running_host_when_none_is_given(
     monkeypatch.setattr(router, "_download_one_file", _download)
     exe = router._download_converter_package("rvt")
     assert exe.parent.name == "rvt_macos-arm64"
-    assert seen["url"].endswith("rvt-decode-2.0.0-macos-arm64.tar.gz")
+    assert seen["url"].endswith("rvt-decode-2.0.1-macos-arm64.tar.gz")
 
 
 def test_a_binary_for_another_os_fails_the_install_and_leaves_nothing(
@@ -389,7 +391,7 @@ def test_a_digest_the_linux_checksum_file_does_not_confirm_is_refused(
         lambda _r, _t, _a=None: {PLATFORM_PACKAGES["linux-x64"]["dwg"].asset: "f" * 64},
     )
     monkeypatch.setattr(router, "_download_one_file", lambda *_a: pytest.fail("must not download"))
-    with pytest.raises(RuntimeError, match="SHA256SUMS-linux-macos.txt .* Refusing to install"):
+    with pytest.raises(RuntimeError, match="SHA256SUMS.txt of release v2026.10.1 .* Refusing to install"):
         router._download_converter_package("dwg", platform_key="linux-x64")
 
 
@@ -450,3 +452,12 @@ async def test_the_listing_describes_the_package_of_the_host(monkeypatch: pytest
     _on_host(monkeypatch, "sunos5", "i86pc")
     rows = {r["id"]: r for r in (await router.list_converters(verify=False, user=None))["converters"]}
     assert all(r["platform_supported"] is False for r in rows.values())
+
+
+def test_each_package_downloads_from_its_own_release() -> None:
+    from app.core.converter_source import DEFAULT_CONVERTER_TAG, package_tag
+
+    assert package_tag(PACKAGES["rvt"], env={}) == DEFAULT_CONVERTER_TAG
+    assert package_tag(PLATFORM_PACKAGES["linux-x64"]["rvt"], env={}) == POSIX_CONVERTER_TAG
+    override = {"OE_CONVERTER_TAG": "v9"}
+    assert package_tag(PLATFORM_PACKAGES["macos-arm64"]["ifc"], env=override) == "v9"
