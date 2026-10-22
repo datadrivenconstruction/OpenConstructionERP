@@ -131,7 +131,11 @@ def test_no_other_country_has_public_works_limits_by_accident() -> None:
     assert set(PUBLIC_WORKS_LIMITS) == {"EG", "FR"}
     assert public_works_limits("AE") is None
     assert public_works_limits(None) is None
-    assert PUBLIC_WORKS_PRICE_ADJUSTMENT == {"EG": "eg_law182_art97", "FR": "fr_ccag_travaux_2021_art_10_5"}
+    assert PUBLIC_WORKS_PRICE_ADJUSTMENT == {
+        "EG": "eg_law182_art97",
+        "FR": "fr_ccag_travaux_2021_art_10_5",
+        "PE": "pe_lgcp_formula_polinomica",
+    }
 
 
 def test_unconfirmed_figures_are_marked_for_expert_review_and_carry_no_number() -> None:

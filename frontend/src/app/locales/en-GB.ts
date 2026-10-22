@@ -128,6 +128,7 @@ const resource = {
     "resourceSummary.requisition.nothing_left": "Everything selected is already on requisitions.",
     "resourceSummary.requisition.col_unit_cost": "Estimated unit cost",
     "resourceSummary.requisition.cost_unavailable": "Indicative cost unavailable",
+    "einvoice.profile.ubl_pe": "SUNAT UBL 2.1 (factura electrónica)",
   }
 } as { translation: Record<string, string> };
 

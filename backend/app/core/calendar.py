@@ -1323,6 +1323,41 @@ def holidays_owing_a_day_off(country_code: str, year: int) -> list[date]:
     return sorted(d for d in _get_holidays(code, year) if d.weekday() == _SATURDAY_INDEX)
 
 
+def _holidays_pe(year: int) -> set[date]:
+    """Peru's national non-working days (feriados nacionales).
+
+    Fixed days: 1 January, 1 May, 7 June (Battle of Arica and Flag Day), 29
+    June, 23 July (Air Force Day), 28 and 29 July, 6 August (Battle of Junin),
+    30 August, 8 October, 1 November, 8 and 9 December and 25 December. Holy
+    Thursday and Good Friday move with Easter.
+
+    Left out on purpose: the extra bridge days (dias no laborables) that the
+    government declares year by year, and local holidays of a region or city.
+    A site on such a day counts it as worked here, never the other way round.
+    """
+    e = easter(year)
+    fixed = [
+        (1, 1),
+        (5, 1),
+        (6, 7),
+        (6, 29),
+        (7, 23),
+        (7, 28),
+        (7, 29),
+        (8, 6),
+        (8, 30),
+        (10, 8),
+        (11, 1),
+        (12, 8),
+        (12, 9),
+        (12, 25),
+    ]
+    days = {date(year, m, d) for m, d in fixed}
+    days.add(e - timedelta(days=3))
+    days.add(e - timedelta(days=2))
+    return days
+
+
 def _holidays_es(year: int) -> set[date]:
     """Spain's national holidays that no autonomous community may replace.
 
@@ -1741,6 +1776,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "IT": _holidays_it,
     "EG": _holidays_eg,
     "FR": _holidays_fr,
+    "PE": _holidays_pe,
 }
 
 

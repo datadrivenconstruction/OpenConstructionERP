@@ -1290,5 +1290,23 @@
     "employers_liability_clearance": "사용자 책임 면제 확인서",
     "insurance": "보험 증서",
     "license": "시공업자 면허"
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "예산에 IGV 항목이 없습니다",
+      "suggestion": "소계 다음에 IGV를 별도 항목으로 추가하고 세율은 18%로 하십시오 (IGV 16% 및 지방 홍보세 2%)"
+    },
+    "igv_rate_18": {
+      "fail": "IGV 항목이 법정 세율 18%가 아닌 {percent}%를 적용하고 있습니다",
+      "suggestion": "IGV 항목을 18%로 설정하거나, 계약서에서 공사가 면세이거나 다르게 과세됨을 확인하십시오"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "예산에 다음 항목이 별도 행으로 없습니다: {missing}",
+      "suggestion": "공공 입찰 문서처럼 gastos generales와 utilidad를 직접비와 IGV 사이에 별도 행으로 추가하십시오"
+    },
+    "partida_numbering": {
+      "fail": "{ordinal}번 항목이 partida 형식으로 번호가 매겨져 있지 않습니다 (단계마다 두 자리, 예: 03.02 또는 03.02.01)",
+      "suggestion": "페루 presupuesto의 partida처럼 각 단가 항목을 장과 세부 항목으로 번호 매기십시오. 예: 03.02"
+    }
   }
 }

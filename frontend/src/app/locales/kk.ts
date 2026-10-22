@@ -46446,6 +46446,7 @@ const resource = {
     "einvoice.profile.peppol_aunz": "Peppol A-NZ Billing 3.0 (Австралия / Жаңа Зеландия)",
     "einvoice.profile.peppol_sg": "Peppol SG Billing 3.0 (Сингапур)",
     "einvoice.profile.ubl_tr": "UBL-TR 1.2 (e-Fatura)",
+    "einvoice.profile.ubl_pe": "SUNAT UBL 2.1 (factura electrónica)",
     "einvoice.party.seller": "сатушы",
     "einvoice.party.buyer": "сатып алушы",
     "einvoice.rule.BR-1": "Белгісіз электрондық шот-фактура форматы {{profile}}.",

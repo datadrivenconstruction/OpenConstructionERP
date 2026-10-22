@@ -1290,5 +1290,23 @@
     "employers_liability_clearance": "certidão negativa de responsabilidade dos empregadores",
     "insurance": "certificado de seguro",
     "license": "licença do empreiteiro"
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "O orçamento não contém linha de IGV",
+      "suggestion": "Inclua o IGV como linha própria após o subtotal, à alíquota de 18 por cento (16 por cento de IGV mais 2 por cento de imposto de promoção municipal)"
+    },
+    "igv_rate_18": {
+      "fail": "A linha do IGV aplica {percent} por cento, e não os 18 por cento legais",
+      "suggestion": "Defina a linha do IGV em 18 por cento ou confirme no contrato que os serviços são isentos ou tributados de outra forma"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "O orçamento não apresenta em linhas próprias: {missing}",
+      "suggestion": "Inclua gastos generales e utilidad como linhas separadas entre o custo direto e o IGV, como o indica uma licitação pública"
+    },
+    "partida_numbering": {
+      "fail": "A posição {ordinal} não está numerada como partida (dois dígitos por nível, como 03.02 ou 03.02.01)",
+      "suggestion": "Numere cada item precificado pelo capítulo e pela subposição, como um presupuesto peruano lista suas partidas, por exemplo 03.02"
+    }
   }
 }

@@ -1290,5 +1290,23 @@
     "employers_liability_clearance": "surat keterangan bebas tanggung jawab pemberi kerja",
     "insurance": "sertifikat asuransi",
     "license": "izin kontraktor"
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Anggaran tidak memuat baris IGV",
+      "suggestion": "Tambahkan IGV sebagai baris tersendiri setelah subtotal, dengan tarif 18 persen (16 persen IGV ditambah 2 persen pajak promosi kota)"
+    },
+    "igv_rate_18": {
+      "fail": "Baris IGV mengenakan {percent} persen, bukan 18 persen sesuai ketentuan",
+      "suggestion": "Atur baris IGV menjadi 18 persen, atau pastikan dalam kontrak bahwa pekerjaan dibebaskan atau dikenakan pajak secara berbeda"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Anggaran tidak mencantumkan baris tersendiri untuk: {missing}",
+      "suggestion": "Tambahkan gastos generales dan utilidad sebagai baris terpisah di antara biaya langsung dan IGV, seperti yang dicantumkan dalam tender publik"
+    },
+    "partida_numbering": {
+      "fail": "Posisi {ordinal} tidak dinomori sebagai partida (dua digit per tingkat, misalnya 03.02 atau 03.02.01)",
+      "suggestion": "Beri nomor setiap baris berbiaya sesuai bab dan item, seperti partida dalam presupuesto Peru, misalnya 03.02"
+    }
   }
 }

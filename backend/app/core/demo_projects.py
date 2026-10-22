@@ -2455,6 +2455,7 @@ _COUNTRY_ISO2: dict[str, str] = {
     "Brazil": "BR",
     "India": "IN",
     "Mexico": "MX",
+    "Peru": "PE",
     "Netherlands": "NL",
     "Saudi Arabia": "SA",
     "South Africa": "ZA",
@@ -2735,6 +2736,9 @@ _DEMO_COST_LEVEL: dict[str, tuple[float, float]] = {
     "BRL": (5.20, 2.60),
     "ZAR": (17.00, 5.00),
     "MXN": (19.00, 3.20),
+    # Peru: about 4.2 soles to the euro in 2026. Materials are traded and track
+    # the conversion; a Lima operario earns roughly a tenth of a German tradesman.
+    "PEN": (4.30, 1.30),
     "INR": (55.00, 8.00),
     "HUF": (400.00, 140.00),
     "RUB": (100.00, 35.00),

@@ -27,7 +27,7 @@ MANIFEST = PartnerPackManifest(
         "peru_tributario",
         "ley_contrataciones",
     ],
-    validation_rule_sets=["peru"],
+    validation_rule_sets=["peru", "masterformat"],
     default_modules=[],
     hidden_modules=[],
     demo_template_ids=["hospital-lima", "school-arequipa"],

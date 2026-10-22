@@ -1290,5 +1290,23 @@
     "employers_liability_clearance": "certificato di liberatoria sulla responsabilità dei datori di lavoro",
     "insurance": "certificato assicurativo",
     "license": "licenza dell'appaltatore"
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Il preventivo non riporta una riga IGV",
+      "suggestion": "Aggiungi l'IGV come riga separata dopo il subtotale, al 18 per cento (16 per cento di IGV più 2 per cento di imposta comunale di promozione)"
+    },
+    "igv_rate_18": {
+      "fail": "La riga IGV applica il {percent} per cento, non il 18 per cento previsto dalla legge",
+      "suggestion": "Imposta la riga IGV al 18 per cento, oppure confermi nel contratto che i lavori sono esenti o tassati diversamente"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Il preventivo non riporta come righe autonome: {missing}",
+      "suggestion": "Aggiungi gastos generales e utilidad come righe separate tra costo diretto e IGV, come le indica una gara d'appalto pubblica"
+    },
+    "partida_numbering": {
+      "fail": "La voce {ordinal} non è numerata come partida (due cifre per livello, ad esempio 03.02 o 03.02.01)",
+      "suggestion": "Numera ogni voce prezzata per capitolo e voce, come fa un presupuesto peruviano con le sue partidas, ad esempio 03.02"
+    }
   }
 }

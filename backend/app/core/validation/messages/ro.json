@@ -1290,5 +1290,23 @@
     "employers_liability_clearance": "certificat de lipsă a restanțelor privind răspunderea angajatorilor",
     "insurance": "certificat de asigurare",
     "license": "licența antreprenorului"
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Devizul nu conține o linie pentru IGV",
+      "suggestion": "Adăugați IGV ca linie separată după subtotal, la cota de 18 la sută (16 la sută IGV plus 2 la sută impozit municipal de promovare)"
+    },
+    "igv_rate_18": {
+      "fail": "Linia IGV aplică {percent} la sută, nu cota legală de 18 la sută",
+      "suggestion": "Setați linia IGV la 18 la sută sau confirmați în contract că lucrările sunt scutite sau impozitate altfel"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Devizul nu conține separat aceste linii: {missing}",
+      "suggestion": "Adăugați gastos generales și utilidad ca linii separate între costul direct și IGV, așa cum le prevede o licitație publică"
+    },
+    "partida_numbering": {
+      "fail": "Poziția {ordinal} nu este numerotată ca partida (două cifre pe fiecare nivel, de exemplu 03.02 sau 03.02.01)",
+      "suggestion": "Numerotați fiecare linie evaluată după capitol și articol, așa cum un presupuesto peruan enumeră partidas, de exemplu 03.02"
+    }
   }
 }

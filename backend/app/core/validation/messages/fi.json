@@ -1290,5 +1290,23 @@
     "employers_liability_clearance": "työnantajan vastuun selvitystodistus",
     "insurance": "vakuutustodistus",
     "license": "urakoitsijan lupa"
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Budjetissa ei ole IGV-riviä",
+      "suggestion": "Lisää IGV omana rivinään välisumman jälkeen 18 prosentin verolla (16 prosenttia IGV ja 2 prosenttia kunnallinen markkinointivero)"
+    },
+    "igv_rate_18": {
+      "fail": "IGV-rivi veloittaa {percent} prosenttia lakisääteisen 18 prosentin sijaan",
+      "suggestion": "Aseta IGV-rivi 18 prosenttiin tai vahvista sopimuksessa, että työt ovat verovapaita tai verotetaan muulla tavalla"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Budjetissa ei ole näitä rivejä omina eriinään: {missing}",
+      "suggestion": "Lisää gastos generales ja utilidad omina riveinään suoran kustannuksen ja IGV:n väliin, niin kuin julkinen tarjouskilpailu ne esittää"
+    },
+    "partida_numbering": {
+      "fail": "Kohtaa {ordinal} ei ole numeroitu partidana (kaksi numeroa tasoa kohden, esimerkiksi 03.02 tai 03.02.01)",
+      "suggestion": "Numeroi jokainen hinnoiteltu rivi luvun ja kohdan mukaan, kuten perulainen presupuesto luettelee partidansa, esimerkiksi 03.02"
+    }
   }
 }
