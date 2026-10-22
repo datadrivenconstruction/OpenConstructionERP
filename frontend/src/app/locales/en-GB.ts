@@ -128,6 +128,13 @@ const resource = {
     "resourceSummary.requisition.nothing_left": "Everything selected is already on requisitions.",
     "resourceSummary.requisition.col_unit_cost": "Estimated unit cost",
     "resourceSummary.requisition.cost_unavailable": "Indicative cost unavailable",
+    "demo_switcher.label": "Demo projects",
+    "demo_switcher.not_installed": "Not installed on this server",
+    "demo_switcher.read_only": "Read-only demo: many functions are limited. Use demo data only, uploads are off.",
+    "demo_switcher.tab_consultancy_riyadh": "Consultancy, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Contractor, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Site development, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Full showcase, Riyadh",
   }
 } as { translation: Record<string, string> };
 

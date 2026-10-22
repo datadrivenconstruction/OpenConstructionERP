@@ -1670,6 +1670,13 @@ const resource = {
     "tax_rates.status_harmonised": "Harmonized",
     "tax_rates.flow_intro": "Some countries have one sales tax rate and some do not. Canada has a federal rate that one province replaces with a single harmonized one, that several add their own to, and that four charge on its own. There is no Canadian rate, only a rate for a place on a date, so this page asks for both before it answers.",
     "schedule.tabular_import.match_none": "Not recognized",
+    "demo_switcher.label": "Demo projects",
+    "demo_switcher.not_installed": "Not installed on this server",
+    "demo_switcher.read_only": "Read-only demo: many functions are limited. Use demo data only, uploads are off.",
+    "demo_switcher.tab_consultancy_riyadh": "Consultancy, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Contractor, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Site development, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Full showcase, Riyadh",
   }
 } as { translation: Record<string, string> };
 
