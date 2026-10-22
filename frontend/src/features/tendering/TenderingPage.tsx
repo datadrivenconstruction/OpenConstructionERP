@@ -34,6 +34,7 @@ import {
   Table2,
   Gavel,
   ShoppingCart,
+  Upload,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, RecoveryCard, DismissibleInfo, IntroRichText, SkeletonTable, Breadcrumb, ConfirmDialog, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -54,6 +55,7 @@ import { AddendumList } from './AddendumList';
 import { AwardRecordPanel } from './AwardRecordPanel';
 import { BidLinkCell, bidInvitationsQueryKey } from './BidLinkCell';
 import { BidPortalMarks } from './BidPortalMarks';
+import { RecipientImportDialog } from './RecipientImportDialog';
 import { LevelingMatrix } from './LevelingMatrix';
 import { cellRate, classifyCell, pricedRates, recommend, unpricedLineCount } from './analysis';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
@@ -1059,6 +1061,7 @@ function DistributionPanel({ packageId }: { packageId: string }) {
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [manualCompany, setManualCompany] = useState('');
   const [manualEmail, setManualEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -1189,6 +1192,14 @@ function DistributionPanel({ packageId }: { packageId: string }) {
             type="button"
           >
             {t('tendering.select_from_subs', 'Select from Subcontractors')}
+          </Button>
+          <Button
+            variant="ghost"
+            icon={<Upload size={14} />}
+            onClick={() => setImportOpen(true)}
+            type="button"
+          >
+            {t('tendering.import_recipients', { defaultValue: 'Import from file' })}
           </Button>
         </div>
 
@@ -1336,6 +1347,23 @@ function DistributionPanel({ packageId }: { packageId: string }) {
           </div>
         )}
       </Card>
+
+      <RecipientImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        packageId={packageId}
+        onImported={(result) => {
+          invalidate();
+          addToast({
+            type: 'success',
+            title: t('tendering.import_done', {
+              defaultValue: 'Recipients added: {{added}}, skipped: {{skipped}}',
+              added: result.added.length,
+              skipped: result.skipped.length,
+            }),
+          });
+        }}
+      />
 
       {pickerOpen && (
         <SubcontractorPickerModal

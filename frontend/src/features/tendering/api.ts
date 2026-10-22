@@ -6,7 +6,14 @@
  * Backed by /api/v1/tendering/ — see backend/app/modules/tendering/router.py
  */
 
-import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import {
+  API_BASE,
+  apiGet,
+  apiPost,
+  apiDelete,
+  extractErrorMessageFromBody,
+  fetchWithAuth,
+} from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -255,6 +262,7 @@ export interface Recipient {
   company_name: string;
   email: string;
   subcontractor_id: string | null;
+  contact_id: string | null;
   /** "pending" before the first send, then "sent" or "failed". */
   status: string;
   sent_at: string | null;
@@ -297,6 +305,46 @@ export function addRecipient(
     `/v1/tendering/packages/${packageId}/recipients/`,
     body,
   );
+}
+
+export interface RecipientImportRow {
+  line: number;
+  company: string;
+  contact_name: string;
+  email: string;
+  trade: string;
+  vat_id: string;
+  /** Stable codes: company_missing, email_invalid, duplicate_in_file, already_invited. */
+  issues: string[];
+  valid: boolean;
+}
+
+export interface RecipientImportPreview {
+  total: number;
+  valid: number;
+  rows: RecipientImportRow[];
+}
+
+export interface RecipientImportResult {
+  added: Recipient[];
+  skipped: RecipientImportRow[];
+  contacts_created: number;
+  contacts_linked: number;
+}
+
+/** Check a CSV/XLSX recipient file (`confirm` false) or add its valid rows (`confirm` true). */
+export async function importRecipients<T extends RecipientImportPreview | RecipientImportResult>(
+  packageId: string,
+  file: File,
+  confirm: boolean,
+): Promise<T> {
+  const body = new FormData();
+  body.append('file', file);
+  const url = `${API_BASE}/v1/tendering/packages/${packageId}/recipients/import/${confirm ? '' : 'preview/'}`;
+  const response = await fetchWithAuth(url, { method: 'POST', body });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(extractErrorMessageFromBody(payload) ?? `HTTP ${response.status}`);
+  return payload as T;
 }
 
 export function removeRecipient(

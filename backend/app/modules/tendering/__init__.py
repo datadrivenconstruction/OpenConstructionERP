@@ -13,5 +13,7 @@ async def on_startup() -> None:
     would treat the module as undefined).
     """
     from app.modules.tendering.permissions import register_tendering_permissions
+    from app.modules.tendering.recipient_import import register_recipient_import_rules
 
     register_tendering_permissions()
+    register_recipient_import_rules()

@@ -19,7 +19,7 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
 
 from app.core.content_disposition import attachment_disposition
@@ -31,6 +31,7 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.tendering.bid_portal import BidPortalService, enforce_rate_limit
+from app.modules.tendering.recipient_import import MAX_IMPORT_BYTES
 from app.modules.tendering.schemas import (
     AddendumAcknowledgeRequest,
     AddendumCreate,
@@ -58,6 +59,8 @@ from app.modules.tendering.schemas import (
     PackageUpdate,
     PackageWithBidsResponse,
     RecipientCreate,
+    RecipientImportPreview,
+    RecipientImportResult,
     RecipientResponse,
 )
 from app.modules.tendering.service import TenderingService
@@ -713,6 +716,45 @@ async def add_package_recipient(
     """Add a subcontractor to a package's distribution list."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
     return await service.add_recipient(package_id, data, tenant_id=str(user_id))
+
+
+@router.post(
+    "/packages/{package_id}/recipients/import/preview/",
+    response_model=RecipientImportPreview,
+)
+async def preview_recipient_import(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    file: UploadFile = File(...),
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> RecipientImportPreview:
+    """Check a CSV/XLSX recipient file row by row. Nothing is stored."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    content = await file.read(MAX_IMPORT_BYTES + 1)
+    return await service.preview_recipient_import(package_id, file.filename or "", content)
+
+
+@router.post(
+    "/packages/{package_id}/recipients/import/",
+    response_model=RecipientImportResult,
+    status_code=201,
+)
+async def import_package_recipients(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    file: UploadFile = File(...),
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> RecipientImportResult:
+    """Add the valid rows of a CSV/XLSX file to the distribution list."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    content = await file.read(MAX_IMPORT_BYTES + 1)
+    return await service.import_recipients(package_id, file.filename or "", content, tenant_id=str(user_id))
 
 
 @router.delete(
