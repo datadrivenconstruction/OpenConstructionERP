@@ -54,6 +54,7 @@ from app.modules.procurement_concept.schemas import (
     PackageStateIn,
     ProfileIn,
     ReferenceIn,
+    RuleOverrideIn,
     ScheduleConfirm,
     ScoresPut,
     SoundingIn,
@@ -407,6 +408,43 @@ async def threshold_check(
     """Threshold explanation with sources and the procedure picker (allowed + reason per procedure)."""
     await verify_project_access(project_id, user_id, session)
     return await _run(ProcurementConceptService(session).threshold_check(project_id, package_id, today=_today(today)))
+
+
+@router.get("/projects/{project_id}/packages/{package_id}/rule-snapshots", dependencies=[READ])
+async def rule_snapshots(
+    project_id: uuid.UUID, package_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId
+) -> dict[str, Any]:
+    """Frozen records of the rules each procedure of the package was set under, with their overrides."""
+    await verify_project_access(project_id, user_id, session)
+    return _page(await _run(ProcurementConceptService(session).rule_snapshots(project_id, package_id)))
+
+
+@router.post(
+    "/projects/{project_id}/packages/{package_id}/rule-snapshots/{snapshot_id}/overrides",
+    status_code=201,
+    dependencies=[EDIT],
+)
+async def override_rule(
+    project_id: uuid.UUID,
+    package_id: uuid.UUID,
+    snapshot_id: uuid.UUID,
+    body: RuleOverrideIn,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+) -> dict[str, Any]:
+    """Override one rule outcome of a snapshot; a reason is required and the snapshot itself is not changed."""
+    await verify_project_access(project_id, user_id, session)
+    return await _run(
+        ProcurementConceptService(session).override_rule(
+            project_id,
+            package_id,
+            snapshot_id,
+            body.model_dump(),
+            actor_id=_uid(user_id),
+            can_manage=await _manage(payload),
+        )
+    )
 
 
 @router.get("/projects/{project_id}/consistency", dependencies=[READ])

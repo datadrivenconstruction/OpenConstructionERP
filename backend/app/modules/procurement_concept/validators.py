@@ -179,6 +179,12 @@ PROCUREMENT_RULES: tuple[type[ValidationRule], ...] = (
         Severity.WARNING,
     ),
     _rule(
+        "rule_override_has_reason",
+        "Rule Override Has Reason",
+        "A manual override of a rule outcome carries a reason.",
+        ("rule_override_without_reason",),
+    ),
+    _rule(
         "concept_asked_at_a_gate",
         "Concept Asked At A Gate",
         "The phase model asks for the procurement concept at one gate at least.",

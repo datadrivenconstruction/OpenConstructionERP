@@ -28,6 +28,7 @@ import {
   type TenderBasis,
 } from './api';
 import { useMilestones } from '@/features/engineering_brief/hooks';
+import { RuleSnapshotPanel } from './RuleSnapshotPanel';
 import { refusalText, useAdvanceReleases, useCostSections, useThreshold } from './hooks';
 import {
   EVALUATION_METHOD,
@@ -315,6 +316,8 @@ export function PackageDialog({
             </div>
           )}
         </section>
+
+        {view.award?.procedure_code && <RuleSnapshotPanel projectId={projectId} packageId={cp.id} />}
 
         <section>
           <h3 className="mb-2 text-sm font-semibold text-content-primary">

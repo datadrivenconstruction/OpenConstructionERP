@@ -679,6 +679,8 @@ export const procurementKeys = {
   packages: (projectId: string) => ['procurement-concept', projectId, 'packages'] as const,
   threshold: (projectId: string, packageId: string) =>
     ['procurement-concept', projectId, 'threshold', packageId] as const,
+  ruleSnapshots: (projectId: string, packageId: string) =>
+    ['procurement-concept', projectId, 'rule-snapshots', packageId] as const,
   profiles: (projectId: string) => ['procurement-concept', projectId, 'profiles'] as const,
   candidates: (projectId: string, packageId: string) =>
     ['procurement-concept', projectId, 'candidates', packageId] as const,
@@ -950,3 +952,55 @@ export interface PermitLotRequirements {
 /** Permit conditions of module 2 that every open lot inherits as a requirement. */
 export const getPermitLotRequirements = (projectId: string) =>
   apiGet<PermitLotRequirements>(`/v1/procurement-concept/projects/${projectId}/permit-conditions`);
+
+export type RuleOutcome = 'pass' | 'warn' | 'fail';
+
+export interface RuleSnapshotRule {
+  id: string;
+  kind: 'threshold' | 'lot_rule' | 'procedure';
+  amount?: string;
+  currency?: string;
+  effect?: string;
+  source_url?: string | null;
+  review_status?: string;
+  valid_from?: string | null;
+  valid_to?: string | null;
+  position?: string;
+  compared_value?: string | null;
+}
+
+export interface RuleOverrideRecord {
+  id: string;
+  rule_code: string;
+  original_outcome: RuleOutcome;
+  override_outcome: RuleOutcome;
+  reason: string;
+  overridden_by: string | null;
+  overridden_at: string | null;
+}
+
+/** The frozen record of the rules a procedure was set under. Never edited; overrides are listed beside it. */
+export interface RuleSnapshot {
+  id: string;
+  package_id: string;
+  procedure_code: string;
+  catalogue: { source: string; id: string; version: number; review_status: string | null };
+  checked_on: string;
+  taken_at: string | null;
+  taken_by: string | null;
+  inputs: Record<string, string | number | boolean | null>;
+  rules: RuleSnapshotRule[];
+  result: {
+    status: string;
+    procedure_allowed: boolean;
+    findings: Finding[];
+    outcomes: Array<{ rule_code: string; outcome: RuleOutcome }>;
+  };
+  digest: string;
+  integrity_ok: boolean;
+  overrides: RuleOverrideRecord[];
+}
+
+export function listRuleSnapshots(projectId: string, packageId: string): Promise<Page<RuleSnapshot>> {
+  return apiGet<Page<RuleSnapshot>>(`/v1/procurement-concept/projects/${projectId}/packages/${packageId}/rule-snapshots`);
+}

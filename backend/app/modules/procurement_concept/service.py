@@ -47,6 +47,7 @@ from app.core.events import publish_after_commit
 from app.modules.procurement_concept import commitments
 from app.modules.procurement_concept import evaluator as ev
 from app.modules.procurement_concept import plan_source as plan
+from app.modules.procurement_concept import rule_snapshot as snap
 from app.modules.procurement_concept.catalogue import (
     CONTRACT_PACKAGE_KIND_MAP,
     DEFAULT_CATALOGUE_ID,
@@ -74,6 +75,8 @@ from app.modules.procurement_concept.models import (
     PrequalProfile,
     ProcurementConcept,
     ProjectReference,
+    RuleOverride,
+    RuleSnapshot,
 )
 from app.modules.project_governance.public import (
     project_areas,
@@ -792,6 +795,15 @@ class ProcurementConceptService:
                 )
             out += await self._prequal_findings(project_id, cat, p, rows[p.id], bp.award_date if bp else None)
         out += ev.consistency_findings(cat, facts.delivery_form, pkgs)
+        bare = await self.session.execute(
+            select(RuleSnapshot.package_id, RuleOverride.rule_code)
+            .join(RuleSnapshot, RuleSnapshot.id == RuleOverride.snapshot_id)
+            .where(RuleOverride.project_id == project_id, func.trim(RuleOverride.reason) == "")
+        )
+        code_of = {p.id: p.code for p in pkgs}
+        for pid, rule_code in bare.all():
+            ref = code_of.get(str(pid), str(pid))
+            out.append(ev.finding("rule_override_without_reason", ev.ERROR, ref, rule=rule_code))
         soundings = (
             (await self.session.execute(select(MarketSounding).where(MarketSounding.project_id == project_id)))
             .scalars()
@@ -1042,7 +1054,151 @@ class ProcurementConceptService:
         else:
             await self.session.flush()
         await self._audit(actor_id, "procurement_award_package", row.id, "created" if created else "updated")
+        if row.procedure_code and (created or row.procedure_code != procedure_before):
+            await self._take_snapshot(project_id, concept, cat, row, actor_id)
         return row
+
+    # ── rule snapshots and overrides ─────────────────────────────────────
+
+    async def _take_snapshot(
+        self,
+        project_id: uuid.UUID,
+        concept: ProcurementConcept,
+        cat: ProcurementCatalogue,
+        row: AwardPackage,
+        actor_id: Any,
+    ) -> RuleSnapshot:
+        """Freeze the rules the procedure was set under; later catalogue edits never touch the row."""
+        facts = await self._concept_facts(concept)
+        _cps, _rows, pkgs = await self._package_facts(project_id)
+        p = next(x for x in pkgs if x.id == str(row.id))
+        body = snap.build_snapshot(
+            cat,
+            facts,
+            p,
+            pkgs,
+            self._check_day(p, cat, datetime.now(UTC).date()),
+            catalogue_pin=(concept.catalogue_source, concept.catalogue_id, concept.catalogue_version),
+        )
+        shot = RuleSnapshot(project_id=project_id, package_id=row.id, taken_by=actor_id, **body)
+        self.session.add(shot)
+        await self.session.flush()
+        await self._audit(actor_id, "procurement_rule_snapshot", shot.id, "created", parent_entity_id=_s(row.id))
+        return shot
+
+    @staticmethod
+    def _override_out(o: RuleOverride) -> dict[str, Any]:
+        return {
+            "id": str(o.id),
+            "rule_code": o.rule_code,
+            "original_outcome": o.original_outcome,
+            "override_outcome": o.override_outcome,
+            "reason": o.reason,
+            "overridden_by": _s(o.overridden_by),
+            "overridden_at": o.overridden_at.isoformat() if o.overridden_at else None,
+        }
+
+    def _snapshot_out(self, shot: RuleSnapshot, overrides: list[RuleOverride]) -> dict[str, Any]:
+        return {
+            "id": str(shot.id),
+            "package_id": str(shot.package_id),
+            "procedure_code": shot.procedure_code,
+            "catalogue": {
+                "source": shot.catalogue_source,
+                "id": shot.catalogue_id,
+                "version": shot.catalogue_version,
+                "review_status": (shot.result or {}).get("catalogue_review_status"),
+            },
+            "checked_on": shot.checked_on,
+            "taken_at": shot.created_at.isoformat() if shot.created_at else None,
+            "taken_by": _s(shot.taken_by),
+            "inputs": shot.inputs,
+            "rules": shot.rules,
+            "result": shot.result,
+            "digest": shot.digest,
+            "integrity_ok": snap.digest_of(snap.content_of(shot)) == shot.digest,
+            "overrides": [self._override_out(o) for o in overrides],
+        }
+
+    async def rule_snapshots(self, project_id: uuid.UUID, package_id: uuid.UUID) -> list[dict[str, Any]]:
+        """Snapshots of one package, newest first, each with its overrides (read-only)."""
+        await self.get_concept(project_id)
+        await self._award(project_id, package_id)
+        q = (
+            select(RuleSnapshot)
+            .where(RuleSnapshot.project_id == project_id, RuleSnapshot.package_id == package_id)
+            .order_by(RuleSnapshot.created_at.desc(), RuleSnapshot.id)
+        )
+        shots = (await self.session.execute(q)).scalars().all()
+        by_shot: dict[uuid.UUID, list[RuleOverride]] = {x.id: [] for x in shots}
+        if by_shot:
+            oq = (
+                select(RuleOverride)
+                .where(RuleOverride.project_id == project_id, RuleOverride.snapshot_id.in_(list(by_shot)))
+                .order_by(RuleOverride.overridden_at)
+            )
+            for o in (await self.session.execute(oq)).scalars().all():
+                by_shot[o.snapshot_id].append(o)
+        return [self._snapshot_out(x, by_shot[x.id]) for x in shots]
+
+    async def override_rule(
+        self,
+        project_id: uuid.UUID,
+        package_id: uuid.UUID,
+        snapshot_id: uuid.UUID,
+        data: dict[str, Any],
+        *,
+        actor_id: uuid.UUID,
+        can_manage: bool,
+    ) -> dict[str, Any]:
+        """Record a reasoned override of one rule outcome of a snapshot; the snapshot itself stays as taken."""
+        await self._require_steer(project_id, actor_id, can_manage)
+        await self.get_concept(project_id)
+        await self._award(project_id, package_id)
+        q = select(RuleSnapshot).where(
+            RuleSnapshot.id == snapshot_id,
+            RuleSnapshot.project_id == project_id,
+            RuleSnapshot.package_id == package_id,
+        )
+        shot = (await self.session.execute(q)).scalars().first()
+        if shot is None:
+            raise not_found("snapshot_not_found")
+        reason = str(data.get("reason") or "").strip()
+        if not reason:
+            raise ProcurementError("override_reason_required", 422)
+        rule_code = str(data.get("rule_code") or "")
+        outcomes = (shot.result or {}).get("outcomes", [])
+        original = next((o["outcome"] for o in outcomes if o["rule_code"] == rule_code), None)
+        if original is None:
+            raise ProcurementError("override_rule_unknown", 422, detail=rule_code)
+        outcome = str(data.get("outcome") or "")
+        if outcome not in snap.OUTCOMES:
+            raise ProcurementError("override_outcome_invalid", 422, detail=outcome)
+        if outcome == original:
+            raise ProcurementError("override_outcome_unchanged", 422)
+        row = RuleOverride(
+            project_id=project_id,
+            snapshot_id=shot.id,
+            rule_code=rule_code,
+            original_outcome=original,
+            override_outcome=outcome,
+            reason=reason,
+            overridden_by=actor_id,
+            overridden_at=datetime.now(UTC),
+        )
+        self.session.add(row)
+        await self.session.flush()
+        await self._audit(
+            actor_id,
+            "procurement_rule_snapshot",
+            shot.id,
+            "rule_override",
+            from_status=original,
+            to_status=outcome,
+            reason=reason,
+            metadata={"rule_code": rule_code, "override_id": str(row.id)},
+        )
+        return self._override_out(row)
 
     async def set_package_state(
         self, project_id: uuid.UUID, package_id: uuid.UUID, action: str, *, actor_id: uuid.UUID, can_manage: bool

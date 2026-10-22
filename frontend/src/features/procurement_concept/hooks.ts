@@ -30,6 +30,7 @@ import {
   listTenderPackages,
   listPackages,
   listProfiles,
+  listRuleSnapshots,
   listSoundings,
   procurementErrorCode,
   procurementErrorMessage,
@@ -93,6 +94,14 @@ export function useThreshold(projectId: string, packageId: string | null) {
   return useQuery({
     queryKey: procurementKeys.threshold(projectId, packageId ?? ''),
     queryFn: () => getThreshold(projectId, packageId as string),
+    enabled: !!projectId && !!packageId,
+  });
+}
+
+export function useRuleSnapshots(projectId: string, packageId: string | null) {
+  return useQuery({
+    queryKey: procurementKeys.ruleSnapshots(projectId, packageId ?? ''),
+    queryFn: () => listRuleSnapshots(projectId, packageId as string),
     enabled: !!projectId && !!packageId,
   });
 }

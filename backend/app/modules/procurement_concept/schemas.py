@@ -190,6 +190,14 @@ class PackageStateIn(_In):
     reason: str = Field(default="", max_length=4000)
 
 
+class RuleOverrideIn(_In):
+    """Override one rule outcome of a snapshot. The reason is mandatory and checked by the service."""
+
+    rule_code: str = Field(min_length=1, max_length=64)
+    outcome: Literal["pass", "warn", "fail"]
+    reason: str = Field(default="", max_length=4000)
+
+
 # ── Prequalification ─────────────────────────────────────────────────────
 
 

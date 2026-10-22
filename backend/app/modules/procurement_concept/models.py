@@ -30,7 +30,19 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    event,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db_types import MoneyType
@@ -264,6 +276,60 @@ class FrameworkAgreement(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
     __mapper_args__ = {"version_id_col": version}
+
+
+class RuleSnapshot(Base):
+    """Frozen record of the rules evaluated when a package's procedure was set (never updated)."""
+
+    __tablename__ = "oe_procurement_concept_rule_snapshot"
+    __table_args__ = (Index("ix_oe_pcc_snapshot_package", "project_id", "package_id"),)
+
+    project_id: Mapped[uuid.UUID] = _project_fk("fk_oe_pcc_snapshot_project")
+    package_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    procedure_code: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalogue_source: Mapped[str] = mapped_column(String(20), nullable=False)
+    catalogue_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    catalogue_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    # The day the thresholds were tested on (the planned procedure start), ISO.
+    checked_on: Mapped[str] = mapped_column(String(40), nullable=False)
+    # Value, currency, contract kind, client, jurisdiction, procedure: what the rules were given.
+    inputs: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    # Every rule applied: id, source, review status, effective dates, figure.
+    rules: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False, default=list)
+    # Status, allowed procedures, findings and one outcome per rule.
+    result: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    # sha256 of the canonical content: a changed row is detectable.
+    digest: Mapped[str] = mapped_column(String(64), nullable=False)
+    taken_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+
+class RuleOverride(Base):
+    """A person's override of one rule outcome of a snapshot; the reason is mandatory."""
+
+    __tablename__ = "oe_procurement_concept_rule_override"
+    __table_args__ = (Index("ix_oe_pcc_override_snapshot", "snapshot_id"),)
+
+    project_id: Mapped[uuid.UUID] = _project_fk("fk_oe_pcc_override_project")
+    snapshot_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_procurement_concept_rule_snapshot.id", ondelete="CASCADE", name="fk_oe_pcc_override_snapshot"),
+        nullable=False,
+    )
+    rule_code: Mapped[str] = mapped_column(String(64), nullable=False)
+    original_outcome: Mapped[str] = mapped_column(String(20), nullable=False)
+    override_outcome: Mapped[str] = mapped_column(String(20), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    overridden_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    overridden_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+@event.listens_for(RuleSnapshot, "before_update")
+def _snapshot_is_frozen(*_: Any) -> None:
+    raise ValueError("a rule snapshot is frozen")
+
+
+# Not in ALL_MODELS: that tuple is what revision v72 builds.
+SNAPSHOT_MODELS: tuple[type[Base], ...] = (RuleSnapshot, RuleOverride)
 
 
 ALL_MODELS: tuple[type[Base], ...] = (
