@@ -57274,6 +57274,7 @@
         "permissions.py",
         "price_adjustment.py",
         "public_procurement.py",
+        "public_procurement_pe.py",
         "public_procurement_sa.py",
         "repairs.py",
         "repository.py",
@@ -99920,6 +99921,7 @@
         "tr_mapper.py",
         "tr_words.py",
         "ubl.py",
+        "ubl_pe.py",
         "ubl_tr.py"
       ],
       "manifest": {
@@ -264065,7 +264067,6 @@
         "models.py",
         "pdf_documents.py",
         "permissions.py",
-        "recipient_import.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -264428,20 +264429,6 @@
           "handler": "add_package_recipient",
           "response_model": "RecipientResponse",
           "request_schema": "RecipientCreate"
-        },
-        {
-          "method": "POST",
-          "path": "/packages/{package_id}/recipients/import/preview/",
-          "handler": "preview_recipient_import",
-          "response_model": "RecipientImportPreview",
-          "request_schema": "UploadFile"
-        },
-        {
-          "method": "POST",
-          "path": "/packages/{package_id}/recipients/import/",
-          "handler": "import_package_recipients",
-          "response_model": "RecipientImportResult",
-          "request_schema": "UploadFile"
         },
         {
           "method": "DELETE",
@@ -265315,101 +265302,6 @@
               "name": "created_at",
               "type": "str",
               "default": "''"
-            }
-          ]
-        },
-        {
-          "class_name": "RecipientImportRow",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "One file row with its findings; ``issues`` are stable codes the UI translates.",
-          "fields": [
-            {
-              "name": "line",
-              "type": "int"
-            },
-            {
-              "name": "company",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "contact_name",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "email",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "trade",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "vat_id",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "issues",
-              "type": "list[str]"
-            },
-            {
-              "name": "valid",
-              "type": "bool",
-              "default": "True"
-            }
-          ]
-        },
-        {
-          "class_name": "RecipientImportPreview",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "Dry run of a recipient file: nothing is stored.",
-          "fields": [
-            {
-              "name": "total",
-              "type": "int"
-            },
-            {
-              "name": "valid",
-              "type": "int"
-            },
-            {
-              "name": "rows",
-              "type": "list[RecipientImportRow]"
-            }
-          ]
-        },
-        {
-          "class_name": "RecipientImportResult",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "Outcome of a confirmed import.",
-          "fields": [
-            {
-              "name": "added",
-              "type": "list[RecipientResponse]"
-            },
-            {
-              "name": "skipped",
-              "type": "list[RecipientImportRow]"
-            },
-            {
-              "name": "contacts_created",
-              "type": "int",
-              "default": "0"
-            },
-            {
-              "name": "contacts_linked",
-              "type": "int",
-              "default": "0"
             }
           ]
         },
@@ -277325,10 +277217,10 @@
     },
     {
       "name": "tendering",
-      "ts_files": 23,
+      "ts_files": 21,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 23
+      "test_files": 7,
+      "total_files": 21
     },
     {
       "name": "timeline",
@@ -278990,11 +278882,11 @@
     "total_models": 788,
     "total_columns": 9172,
     "total_relationships": 240,
-    "total_routes": 4627,
-    "total_schemas": 4120,
-    "total_python_files": 2810,
+    "total_routes": 4625,
+    "total_schemas": 4117,
+    "total_python_files": 2811,
     "frontend_features": 209,
-    "frontend_ts_files": 3603,
+    "frontend_ts_files": 3601,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
