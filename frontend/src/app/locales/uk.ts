@@ -1082,6 +1082,7 @@ const resource = {
     "einvoice.profile.peppol_aunz": "Peppol A-NZ Billing 3.0 (Австралія / Нова Зеландія)",
     "einvoice.profile.peppol_sg": "Peppol SG Billing 3.0 (Сінгапур)",
     "einvoice.profile.ubl_tr": "UBL-TR 1.2 (e-Fatura)",
+    "einvoice.profile.ubl_pe": "SUNAT UBL 2.1 (factura electrónica)",
     "einvoice.party.seller": "продавець",
     "einvoice.party.buyer": "покупець",
     "einvoice.rule.BR-1": "Невідомий формат електронного рахунка {{profile}}.",
