@@ -1425,5 +1425,23 @@
       "fail": "{project} is actief, maar heeft geen contract, factuur, bestelling, onderaannemerscontract of planning waarop de cashflow kan worden voorspeld.",
       "suggestion": "Voer het opdrachtgeverscontract met betalingsschema in, of een geplande cashflow in het kostenmodel."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "De begroting bevat geen IGV-regel",
+      "suggestion": "Voeg de IGV toe als aparte regel na het subtotaal, tegen 18 procent (16 procent IGV plus 2 procent gemeentelijke promotiebelasting)"
+    },
+    "igv_rate_18": {
+      "fail": "De IGV-regel rekent {percent} procent, niet het wettelijke tarief van 18 procent",
+      "suggestion": "Stel de IGV-regel in op 18 procent, of bevestig in het contract dat de werkzaamheden vrijgesteld zijn of anders belast worden"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "De begroting bevat deze posten niet als eigen regels: {missing}",
+      "suggestion": "Voeg gastos generales en utilidad toe als afzonderlijke regels tussen de directe kosten en de IGV, zoals een publieke aanbesteding die vermeldt"
+    },
+    "partida_numbering": {
+      "fail": "Post {ordinal} is niet genummerd als partida (twee cijfers per niveau, zoals 03.02 of 03.02.01)",
+      "suggestion": "Nummer elke geprijsde regel naar hoofdstuk en post, zoals een Peruaanse presupuesto de partidas indeelt, bijvoorbeeld 03.02"
+    }
   }
 }

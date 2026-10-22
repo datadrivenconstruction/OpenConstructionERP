@@ -1425,5 +1425,23 @@
       "fail": "{project} đang hoạt động nhưng chưa có hợp đồng, hóa đơn, đơn đặt hàng, hợp đồng phụ hay kế hoạch nào để dự báo dòng tiền.",
       "suggestion": "Nhập hợp đồng với khách hàng cùng lịch thanh toán, hoặc dòng tiền kế hoạch trong mô hình chi phí."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Dự toán không có dòng IGV",
+      "suggestion": "Thêm IGV thành một dòng riêng sau tổng phụ, với thuế suất 18 phần trăm (IGV 16 phần trăm cộng thuế khuyến mãi đô thị 2 phần trăm)"
+    },
+    "igv_rate_18": {
+      "fail": "Dòng IGV đang tính {percent} phần trăm, không phải mức 18 phần trăm theo luật định",
+      "suggestion": "Đặt dòng IGV ở mức 18 phần trăm, hoặc xác nhận trong hợp đồng rằng công việc được miễn hoặc chịu thuế khác"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Dự toán không có riêng các dòng sau: {missing}",
+      "suggestion": "Thêm gastos generales và utilidad thành các dòng riêng giữa chi phí trực tiếp và IGV, như cách một gói thầu công khai quy định"
+    },
+    "partida_numbering": {
+      "fail": "Hạng mục {ordinal} chưa được đánh số như partida (hai chữ số cho mỗi cấp, ví dụ 03.02 hoặc 03.02.01)",
+      "suggestion": "Đánh số từng dòng đã có đơn giá theo chương và mục, như một presupuesto của Peru liệt kê các partida, ví dụ 03.02"
+    }
   }
 }

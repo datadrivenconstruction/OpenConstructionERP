@@ -1425,5 +1425,23 @@
       "fail": "{project} faol, lekin pul oqimini prognoz qilish uchun shartnoma, hisob-faktura, buyurtma, subpudrat yoki reja yo'q.",
       "suggestion": "Mijoz shartnomasini to'lov jadvali bilan kiriting yoki xarajat modelida rejalashtirilgan pul oqimini qo'shing."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Byudjetda IGV qatori yo'q",
+      "suggestion": "IGVni oraliq jamidan keyin alohida qator sifatida, 18 foiz stavkada qo'shing (16 foiz IGV va 2 foiz munitsipal targ'ibot soliqi)"
+    },
+    "igv_rate_18": {
+      "fail": "IGV qatori qonuniy 18 foiz o'rniga {percent} foiz hisoblamoqda",
+      "suggestion": "IGV qatorini 18 foizga o'rnating yoki shartnomada ishlarning soliqdan ozod yoki boshqacha soliqqa tortilganini tasdiqlang"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Byudjetda quyidagi qatorlar alohida ko'rsatilmagan: {missing}",
+      "suggestion": "Gastos generales va utilidadni to'g'ridan-to'g'ri xarajat bilan IGV o'rtasida alohida qatorlar sifatida qo'shing, ochiq tender ko'rsatganidek"
+    },
+    "partida_numbering": {
+      "fail": "{ordinal}-pozitsiya partida sifatida raqamlanmagan (har bir darajada ikki raqam, masalan 03.02 yoki 03.02.01)",
+      "suggestion": "Har bir narxlangan qatorni bob va band bo'yicha raqamlang, Peru presupuesto partidalarni ko'rsatganidek, masalan 03.02"
+    }
   }
 }

@@ -46776,6 +46776,7 @@ const resource = {
     "einvoice.profile.peppol_aunz": "Peppol A-NZ Billing 3.0 (استرالیا / نیوزیلند)",
     "einvoice.profile.peppol_sg": "Peppol SG Billing 3.0 (سنگاپور)",
     "einvoice.profile.ubl_tr": "UBL-TR 1.2 (e-Fatura)",
+    "einvoice.profile.ubl_pe": "SUNAT UBL 2.1 (factura electrónica)",
     "einvoice.party.seller": "فروشنده",
     "einvoice.party.buyer": "خریدار",
     "einvoice.rule.BR-1": "قالب صورتحساب الکترونیکی نامشخص {{profile}}.",

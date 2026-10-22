@@ -1425,5 +1425,23 @@
       "fail": "{project}は進行中ですが、キャッシュフローを予測するための契約・請求書・発注書・下請契約・計画がありません。",
       "suggestion": "支払計画を含む顧客契約を登録するか、原価モデルに予定キャッシュフローを入力してください。"
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "予算書にIGVの行がありません",
+      "suggestion": "小計の後にIGVを独立した行として追加し、税率は18%とします（IGV 16%と自治体振興税 2%）"
+    },
+    "igv_rate_18": {
+      "fail": "IGVの行は法定税率18%ではなく{percent}%が課されています",
+      "suggestion": "IGVの行を18%に設定するか、工事が免税または別の税区分であることを契約書で確認してください"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "予算書に次の項目が独立した行として記載されていません: {missing}",
+      "suggestion": "公共入札の書式に従い、gastos generales と utilidad を直接費とIGVの間に独立した行として追加してください"
+    },
+    "partida_numbering": {
+      "fail": "項目{ordinal}はpartidaとして番号付けされていません（各階層は2桁、例: 03.02 や 03.02.01）",
+      "suggestion": "ペルーのpresupuestoにあるpartidaのように、各単価行を章と項目で番号付けしてください。例: 03.02"
+    }
   }
 }

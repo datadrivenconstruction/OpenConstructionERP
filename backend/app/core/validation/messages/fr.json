@@ -1425,5 +1425,23 @@
       "fail": "{project} est actif mais n'a ni contrat, ni facture, ni commande, ni sous-traitance, ni planning à partir duquel prévoir la trésorerie.",
       "suggestion": "Saisir le contrat client avec son échéancier de paiement, ou un flux de trésorerie prévu dans le modèle de coût."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Le budget ne comporte aucune ligne IGV",
+      "suggestion": "Ajoutez l'IGV comme ligne distincte après le sous-total, au taux de 18 pour cent (16 pour cent d'IGV plus 2 pour cent de taxe municipale de promotion)"
+    },
+    "igv_rate_18": {
+      "fail": "La ligne IGV applique {percent} pour cent au lieu du taux légal de 18 pour cent",
+      "suggestion": "Réglez la ligne IGV à 18 pour cent, ou confirmez dans le contrat que les travaux sont exonérés ou soumis à un autre régime fiscal"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Le budget ne fait pas apparaître distinctement ces lignes : {missing}",
+      "suggestion": "Ajoutez gastos generales et utilidad comme lignes séparées entre le coût direct et l'IGV, comme l'indique un appel d'offres public"
+    },
+    "partida_numbering": {
+      "fail": "La position {ordinal} n'est pas numérotée en partida (deux chiffres par niveau, par exemple 03.02 ou 03.02.01)",
+      "suggestion": "Numérotez chaque ligne chiffrée par chapitre et article, comme le presupuesto péruvien énumère ses partidas, par exemple 03.02"
+    }
   }
 }

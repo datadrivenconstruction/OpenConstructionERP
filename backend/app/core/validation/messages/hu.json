@@ -1425,5 +1425,23 @@
       "fail": "A {project} aktív, de nincs szerződése, számlája, megrendelése, alvállalkozói szerződése vagy terve, amelyből a cash flow előrejelezhető lenne.",
       "suggestion": "Rögzítse az ügyfél szerződését a fizetési ütemezésével, vagy adjon meg tervezett cash flow-t a költségmodellben."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "A költségvetésben nincs IGV-tétel",
+      "suggestion": "Az IGV-t külön tételként vegye fel a részösszeg után, 18 százalékos kulccsal (16 százalék IGV és 2 százalék önkormányzati promóciós adó)"
+    },
+    "igv_rate_18": {
+      "fail": "Az IGV-tétel {percent} százalékot számít fel, nem a törvényes 18 százalékot",
+      "suggestion": "Állítsa az IGV-tételt 18 százalékra, vagy a szerződésben erősítse meg, hogy a munkák mentesek vagy más módon adóznak"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "A költségvetés nem tartalmazza külön tételként a következőket: {missing}",
+      "suggestion": "Vegye fel a gastos generales és az utilidad külön tételeit a közvetlen költség és az IGV közé, ahogyan azt a közbeszerzési kiírás is rögzíti"
+    },
+    "partida_numbering": {
+      "fail": "A(z) {ordinal}. pozíció nincs partidaként számozva (szintenként két számjegy, például 03.02 vagy 03.02.01)",
+      "suggestion": "Minden árazott tételt fejezete és tételszáma szerint számozzon, ahogy a perui presupuesto listázza a partidákat, például 03.02"
+    }
   }
 }

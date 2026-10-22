@@ -1425,5 +1425,23 @@
       "fail": "{project} ist aktiv, hat aber keinen Vertrag, keine Rechnung, keine Bestellung, keinen Nachunternehmervertrag und keinen Plan, aus dem der Cashflow prognostiziert werden kann.",
       "suggestion": "Vertrag mit Zahlungsplan erfassen oder einen geplanten Cashflow im Kostenmodell hinterlegen."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Das Budget enthält keine IGV-Zeile",
+      "suggestion": "Fügen Sie die IGV als eigene Zeile nach der Zwischensumme mit 18 Prozent hinzu (16 Prozent IGV plus 2 Prozent kommunale Förderabgabe)"
+    },
+    "igv_rate_18": {
+      "fail": "Die IGV-Zeile berechnet {percent} Prozent statt der gesetzlichen 18 Prozent",
+      "suggestion": "Setzen Sie die IGV-Zeile auf 18 Prozent oder bestätigen Sie im Vertrag, dass die Leistungen steuerbefreit oder anders besteuert sind"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Das Budget führt diese Posten nicht eigenständig auf: {missing}",
+      "suggestion": "Führen Sie gastos generales und utilidad als eigene Zeilen zwischen den Direktkosten und der IGV auf, wie es eine öffentliche Ausschreibung vorsieht"
+    },
+    "partida_numbering": {
+      "fail": "Position {ordinal} ist nicht als partida nummeriert (zwei Ziffern pro Ebene, z. B. 03.02 oder 03.02.01)",
+      "suggestion": "Nummerieren Sie jede bepreiste Zeile nach Kapitel und Posten, so wie ein peruanisches presupuesto seine partidas gliedert, z. B. 03.02"
+    }
   }
 }

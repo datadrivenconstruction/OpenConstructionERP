@@ -1425,5 +1425,23 @@
       "fail": "{project} er aktiv, men har ingen kontrakt, faktura, ordre, underentreprise eller plan at prognosticere likviditet ud fra.",
       "suggestion": "Indtast kundekontrakten med betalingsplanen, eller en planlagt cashflow i omkostningsmodellen."
     }
+  },
+  "peru": {
+    "igv_line_present": {
+      "fail": "Budgettet indeholder ingen IGV-linje",
+      "suggestion": "Tilføj IGV som en selvstændig linje efter subtotalen, med 18 procent (16 procent IGV plus 2 procent kommunal fremmeskat)"
+    },
+    "igv_rate_18": {
+      "fail": "IGV-linjen beregner {percent} procent, ikke de lovpligtige 18 procent",
+      "suggestion": "Sæt IGV-linjen til 18 procent, eller bekræft i kontrakten, at arbejdet er fritaget eller beskattet anderledes"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "Budgettet har ikke disse linjer som egne poster: {missing}",
+      "suggestion": "Tilføj gastos generales og utilidad som separate linjer mellem direkte omkostning og IGV, som et offentligt udbud angiver dem"
+    },
+    "partida_numbering": {
+      "fail": "Position {ordinal} er ikke nummereret som partida (to cifre pr. niveau, f.eks. 03.02 eller 03.02.01)",
+      "suggestion": "Nummerér hver prissat linje efter kapitel og post, sådan som et peruviansk presupuesto opfører sine partidas, f.eks. 03.02"
+    }
   }
 }
