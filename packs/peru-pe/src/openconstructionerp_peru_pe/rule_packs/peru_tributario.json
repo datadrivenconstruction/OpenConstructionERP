@@ -1,0 +1,21 @@
+{
+  "rule_pack_id": "peru_tributario",
+  "name": "Peruvian taxes on construction (IGV, detraccion, retencion)",
+  "name_es": "Impuestos peruanos en la construccion (IGV, detraccion, retencion)",
+  "standard": "TUO de la Ley del IGV; Decreto Legislativo 940; Resolucion de Superintendencia 183-2004/SUNAT; Resolucion de Superintendencia 037-2002/SUNAT",
+  "jurisdiction": "PE",
+  "applies_to": ["estimate", "invoice", "validation"],
+  "review_status": "unconfirmed. Drawn from the published legislation. Pending review by a Peruvian accountant.",
+  "scope_note": "IGV applies to every bill. The detraccion applies to construction invoices above the SUNAT threshold; the retencion applies only to buyers SUNAT has designated.",
+  "description": "IGV is 18 percent: 16 percent IGV plus 2 percent Impuesto de Promocion Municipal. A construction invoice carries the detraccion at 4 percent of the total, deposited to the supplier's account at the national bank (service code 030, threshold 700 soles). A designated buyer withholds 3 percent as retencion del IGV. The figures live in the payment taxes table and the validation rule set peru.",
+  "sources": [
+    "https://www.sunat.gob.pe/legislacion/igv/"
+  ],
+  "enables_rule_ids": [
+    "peru.igv_line_present",
+    "peru.igv_rate_18",
+    "peru.gastos_generales_utilidad_stated",
+    "peru.partida_numbering"
+  ],
+  "regulator": "SUNAT"
+}
