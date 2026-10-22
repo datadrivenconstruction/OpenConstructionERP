@@ -53827,6 +53827,7 @@ const resource = {
     "modules.catalog.hse_frame": "Khung HSE",
     "modules.catalog.project_handbook": "Sổ tay dự án",
     "modules.pp_desc_eleven_areas_framework": "Quản lý dự án từ phía chủ đầu tư gồm mười một lĩnh vực quản lý, chia hai giai đoạn là phát triển dự án và thi công xây dựng, giữa hai giai đoạn có một cổng kiểm soát và mỗi lĩnh vực có một tài liệu khung đã được phê duyệt.",
+    "modules.pp_name_peru_pe": "Gói xây dựng Peru",
     "notifications.stakeholders.commitment_overdue.body": "Cam kết {{code}} đến hạn vào {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Một cam kết đã quá hạn",
     "notifications.stakeholders.plan_overdue.body": "{{title}} đến hạn vào {{due}} và chưa được ghi nhận.",

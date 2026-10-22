@@ -56627,6 +56627,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE keretrendszer",
     "modules.catalog.project_handbook": "Projektkézikönyv",
     "modules.pp_desc_eleven_areas_framework": "Projektirányítás a megrendelő oldalán tizenegy irányítási területen, két szakaszban, a projektfejlesztés és a kivitelezés során, köztük egy kapuval és területenként egy jóváhagyott keretdokumentummal.",
+    "modules.pp_name_peru_pe": "Peru építési csomag",
     "notifications.stakeholders.commitment_overdue.body": "A(z) {{code}} vállalás határideje lejárt: {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Lejárt egy vállalás határideje",
     "notifications.stakeholders.plan_overdue.body": "{{title}}: a határidő {{due}} volt, és még nincs rögzítve.",

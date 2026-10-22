@@ -57088,6 +57088,7 @@ const resource = {
     "modules.catalog.hse_frame": "إطار الصحة والسلامة والبيئة",
     "modules.catalog.project_handbook": "دليل المشروع",
     "modules.pp_desc_eleven_areas_framework": "إطار إدارة المشروع من جهة المالك عبر أحد عشر مجالاً إدارياً على مرحلتين، هما تطوير المشروع وتنفيذ البناء، مع بوابة واحدة بينهما ووثيقة إطار معتمدة واحدة لكل مجال.",
+    "modules.pp_name_peru_pe": "حزمة إنشاءات بيرو",
     "notifications.stakeholders.commitment_overdue.body": "الالتزام {{code}} كان مستحقًا في {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "التزام تجاوز موعد استحقاقه",
     "notifications.stakeholders.plan_overdue.body": "{{title}} كان مستحقًا في {{due}} ولم يُسجَّل بعد.",

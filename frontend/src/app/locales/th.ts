@@ -53819,6 +53819,7 @@ const resource = {
     "modules.catalog.hse_frame": "กรอบงาน HSE",
     "modules.catalog.project_handbook": "คู่มือโครงการ",
     "modules.pp_desc_eleven_areas_framework": "การบริหารโครงการจากฝั่งเจ้าของใน 11 ด้านการจัดการ แบ่งเป็นสองระยะ ได้แก่การพัฒนาโครงการและการดำเนินการก่อสร้าง มีจุดตรวจสอบหนึ่งจุดคั่นกลาง และเอกสารกรอบที่ได้รับอนุมัติหนึ่งฉบับต่อด้าน",
+    "modules.pp_name_peru_pe": "แพ็กเกจก่อสร้างเปรู",
     "notifications.stakeholders.commitment_overdue.body": "ข้อผูกพัน {{code}} ครบกำหนดเมื่อ {{due}}",
     "notifications.stakeholders.commitment_overdue.title": "ข้อผูกพันเลยกำหนดแล้ว",
     "notifications.stakeholders.plan_overdue.body": "{{title}} ครบกำหนดเมื่อ {{due}} และยังไม่ได้บันทึก",

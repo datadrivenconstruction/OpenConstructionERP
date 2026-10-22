@@ -54943,6 +54943,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE-kader",
     "modules.catalog.project_handbook": "Projecthandboek",
     "modules.pp_desc_eleven_areas_framework": "Projectsturing vanuit de opdrachtgever in elf managementgebieden, in twee fasen, projectontwikkeling en uitvoering, met één go/no-go-moment ertussen en één goedgekeurd kaderdocument per gebied.",
+    "modules.pp_name_peru_pe": "Bouwpakket Peru",
     "notifications.stakeholders.commitment_overdue.body": "Toezegging {{code}} had uiterlijk {{due}} nagekomen moeten zijn.",
     "notifications.stakeholders.commitment_overdue.title": "Een toezegging is over de uiterste datum",
     "notifications.stakeholders.plan_overdue.body": "{{title}} was aan de beurt op {{due}} en is nog niet vastgelegd.",

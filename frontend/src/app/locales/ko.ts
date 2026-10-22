@@ -54437,6 +54437,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE 프레임워크",
     "modules.catalog.project_handbook": "프로젝트 핸드북",
     "modules.pp_desc_eleven_areas_framework": "발주자 측에서 수행하는 프로젝트 관리로, 프로젝트 개발과 시공 실행의 두 단계에 걸쳐 11개 관리 영역에서 진행됩니다. 두 단계 사이에는 게이트 하나가 있고, 영역마다 승인된 기본 문서가 하나씩 있습니다.",
+    "modules.pp_name_peru_pe": "페루 건설 패키지",
     "notifications.stakeholders.commitment_overdue.body": "약속 {{code}}의 기한은 {{due}}였습니다.",
     "notifications.stakeholders.commitment_overdue.title": "기한이 지난 약속이 있습니다",
     "notifications.stakeholders.plan_overdue.body": "{{title}}의 기한은 {{due}}였지만 아직 기록되지 않았습니다.",

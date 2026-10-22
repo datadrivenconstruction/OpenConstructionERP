@@ -54020,6 +54020,7 @@ const resource = {
     "modules.catalog.hse_frame": "Balangkas ng HSE",
     "modules.catalog.project_handbook": "Handbook ng proyekto",
     "modules.pp_desc_eleven_areas_framework": "Pamamahala ng proyekto sa panig ng may-ari sa labing-isang lugar ng pamamahala, sa dalawang yugto, ang pagpapaunlad ng proyekto at ang konstruksyon, na may isang gate sa pagitan at isang naaprubahang balangkas na dokumento sa bawat lugar.",
+    "modules.pp_name_peru_pe": "Pakete sa Konstruksyon ng Peru",
     "notifications.stakeholders.commitment_overdue.body": "Ang pangakong {{code}} ay due noong {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "May pangakong lampas na sa takdang petsa",
     "notifications.stakeholders.plan_overdue.body": "Ang {{title}} ay due noong {{due}} at hindi pa naitatala.",

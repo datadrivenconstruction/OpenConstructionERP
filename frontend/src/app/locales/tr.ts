@@ -54943,6 +54943,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE çerçevesi",
     "modules.catalog.project_handbook": "Proje el kitabı",
     "modules.pp_desc_eleven_areas_framework": "Proje yönetimi işveren tarafından on bir yönetim alanında, iki aşamada yürütülür: proje geliştirme ve yapım uygulaması. Aralarında bir kapı ve her alan için onaylanmış bir çerçeve belge bulunur.",
+    "modules.pp_name_peru_pe": "Peru İnşaat Paketi",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} taahhüdünün süresi {{due}} tarihinde doldu.",
     "notifications.stakeholders.commitment_overdue.title": "Bir taahhüdün süresi doldu",
     "notifications.stakeholders.plan_overdue.body": "{{title}}: süre {{due}} idi ve henüz kaydedilmedi.",

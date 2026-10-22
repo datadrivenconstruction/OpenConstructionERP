@@ -55575,6 +55575,7 @@ const resource = {
     "modules.catalog.hse_frame": "Ramy HSE (BHP)",
     "modules.catalog.project_handbook": "Podręcznik projektu",
     "modules.pp_desc_eleven_areas_framework": "Zarządzanie projektem po stronie inwestora w jedenastu obszarach zarządzania, w dwóch fazach, rozwoju projektu i realizacji budowy, z jedną bramką między nimi i jednym zatwierdzonym dokumentem ramowym dla każdego obszaru.",
+    "modules.pp_name_peru_pe": "Pakiet budowlany Peru",
     "notifications.stakeholders.commitment_overdue.body": "Zobowiązanie {{code}} miało termin {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Zobowiązanie jest po terminie",
     "notifications.stakeholders.plan_overdue.body": "{{title}} miało termin {{due}} i nie jest jeszcze zapisane.",

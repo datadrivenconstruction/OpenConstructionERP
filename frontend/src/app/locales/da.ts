@@ -54062,6 +54062,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE-ramme",
     "modules.catalog.project_handbook": "Projekthåndbog",
     "modules.pp_desc_eleven_areas_framework": "Bygherrens projektstyring i elleve styringsområder over to faser, projektudvikling og udførelse, med én gate imellem og ét godkendt rammedokument pr. område.",
+    "modules.pp_name_peru_pe": "Byggepakke Peru",
     "notifications.stakeholders.commitment_overdue.body": "Tilsagn {{code}} havde frist {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Et tilsagn har overskredet sin frist",
     "notifications.stakeholders.plan_overdue.body": "{{title}} skulle have været gjort {{due}} og er ikke registreret endnu.",

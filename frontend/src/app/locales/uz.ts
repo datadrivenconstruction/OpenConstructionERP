@@ -54995,6 +54995,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE tuzilmasi",
     "modules.catalog.project_handbook": "Loyiha qoʻllanmasi",
     "modules.pp_desc_eleven_areas_framework": "Loyihani buyurtmachi tomonidan oʻn bir boshqaruv sohasida, ikki bosqichda boshqarish: loyihani ishlab chiqish va qurilishni amalga oshirish. Ular orasida bitta gate va har bir soha uchun bitta tasdiqlangan ramka hujjati bor.",
+    "modules.pp_name_peru_pe": "Peru qurilish paketi",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} majburiyatining muddati {{due}} edi.",
     "notifications.stakeholders.commitment_overdue.title": "Majburiyatning muddati oʻtdi",
     "notifications.stakeholders.plan_overdue.body": "{{title}} muddati {{due}} edi, lekin hali yozilmagan.",

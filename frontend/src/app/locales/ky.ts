@@ -54179,6 +54179,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE алкагы",
     "modules.catalog.project_handbook": "Долбоордун колдонмосу",
     "modules.pp_desc_eleven_areas_framework": "Иеси тарабынан долбоорду башкаруу он бир башкаруу тармагында, эки этапта: долбоорду иштеп чыгуу жана курулушту аткаруу. Экөөнүн ортосунда бир дарбаза жана ар бир тармак үчүн бир бекитилген алкактык документ бар.",
+    "modules.pp_name_peru_pe": "Перу курулуш пакети",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} милдеттенмесинин мөөнөтү {{due}} болчу.",
     "notifications.stakeholders.commitment_overdue.title": "Милдеттенменин мөөнөтү өттү",
     "notifications.stakeholders.plan_overdue.body": "{{title}} мөөнөтү {{due}} болчу, бирок азырынча жазылган эмес.",
