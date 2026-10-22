@@ -259,6 +259,9 @@ from app.modules.tendering.schemas import (
     PackageScopeResponse,
     PackageUpdate,
     RecipientCreate,
+    RecipientImportPreview,
+    RecipientImportResult,
+    RecipientImportRow,
     RecipientResponse,
 )
 
@@ -1276,6 +1279,107 @@ class TenderingService:
         await self.repo.update_package_fields(package_id, metadata_=meta)
         logger.info("Tender recipient added: package=%s company=%s", package_id, data.company_name)
         return self._recipient_to_response(entry)
+
+    async def _checked_import_rows(self, package: TenderPackage, filename: str, content: bytes) -> list:
+        from app.modules.tendering.recipient_import import (  # noqa: PLC0415
+            RecipientFileError,
+            check_rows,
+            parse_recipient_file,
+        )
+
+        try:
+            rows = parse_recipient_file(filename, content)
+        except RecipientFileError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        existing = {str(r.get("email", "")) for r in self._read_recipients(package)}
+        return check_rows(rows, existing)
+
+    @staticmethod
+    def _import_row_response(row) -> RecipientImportRow:  # noqa: ANN001
+        return RecipientImportRow(
+            line=row.line,
+            company=row.company,
+            contact_name=row.contact_name,
+            email=row.email,
+            trade=row.trade,
+            vat_id=row.vat_id,
+            issues=list(row.issues),
+            valid=row.valid,
+        )
+
+    async def preview_recipient_import(
+        self, package_id: uuid.UUID, filename: str, content: bytes
+    ) -> RecipientImportPreview:
+        """Check a CSV/XLSX recipient file row by row; stores nothing."""
+        package = await self.get_package(package_id)
+        rows = await self._checked_import_rows(package, filename, content)
+        return RecipientImportPreview(
+            total=len(rows),
+            valid=sum(1 for r in rows if r.valid),
+            rows=[self._import_row_response(r) for r in rows],
+        )
+
+    async def import_recipients(
+        self, package_id: uuid.UUID, filename: str, content: bytes, tenant_id: str | None = None
+    ) -> RecipientImportResult:
+        """Add the valid rows of a recipient file; invalid rows are returned, not stored.
+
+        Each added firm goes through the contact bridge: a same-tenant contact
+        with that email is linked (its own fields are never overwritten), else a
+        contact is created from the row. Two contacts are never merged.
+        """
+        from app.modules.contacts import bridge  # noqa: PLC0415
+
+        package = await self.get_package(package_id)
+        rows = await self._checked_import_rows(package, filename, content)
+        recipients = self._read_recipients(package)
+        added: list[dict] = []
+        created = linked = 0
+        for row in rows:
+            if not row.valid:
+                continue
+            existing = await bridge.find_contact_by_email(self.session, row.email, tenant_id=tenant_id)
+            contact = await bridge.ensure_contact_for_person(
+                self.session,
+                full_name=row.contact_name or None,
+                email=row.email,
+                phone=None,
+                contact_type="subcontractor",
+                module_tag=bridge.SUBCONTRACTOR_TAG,
+                tenant_id=tenant_id,
+            )
+            if existing is None:
+                contact.company_name = row.company
+                contact.vat_number = row.vat_id or None
+                if row.trade:
+                    contact.custom_properties = {**(contact.custom_properties or {}), "trade": row.trade}
+                created += 1
+            else:
+                linked += 1
+            added.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "company_name": row.company,
+                    "email": row.email,
+                    "subcontractor_id": None,
+                    "contact_id": str(contact.id),
+                    "status": "pending",
+                    "sent_at": None,
+                    "last_error": None,
+                    "created_at": datetime.now(UTC).isoformat(),
+                }
+            )
+        if added:
+            meta = dict(package.metadata_ or {})
+            meta["recipients"] = [*recipients, *added]
+            await self.repo.update_package_fields(package_id, metadata_=meta)
+        logger.info("Tender recipients imported: package=%s added=%d", package_id, len(added))
+        return RecipientImportResult(
+            added=[self._recipient_to_response(a) for a in added],
+            skipped=[self._import_row_response(r) for r in rows if not r.valid],
+            contacts_created=created,
+            contacts_linked=linked,
+        )
 
     async def remove_recipient(self, package_id: uuid.UUID, recipient_id: str) -> None:
         """Remove a recipient from a package's distribution list."""

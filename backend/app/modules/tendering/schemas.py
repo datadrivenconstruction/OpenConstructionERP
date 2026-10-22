@@ -400,6 +400,36 @@ class RecipientResponse(BaseModel):
     created_at: str = ""
 
 
+class RecipientImportRow(BaseModel):
+    """One file row with its findings; ``issues`` are stable codes the UI translates."""
+
+    line: int
+    company: str = ""
+    contact_name: str = ""
+    email: str = ""
+    trade: str = ""
+    vat_id: str = ""
+    issues: list[str] = Field(default_factory=list)
+    valid: bool = True
+
+
+class RecipientImportPreview(BaseModel):
+    """Dry run of a recipient file: nothing is stored."""
+
+    total: int
+    valid: int
+    rows: list[RecipientImportRow]
+
+
+class RecipientImportResult(BaseModel):
+    """Outcome of a confirmed import."""
+
+    added: list[RecipientResponse]
+    skipped: list[RecipientImportRow]
+    contacts_created: int = 0
+    contacts_linked: int = 0
+
+
 class DistributeRequest(BaseModel):
     """Request body for distributing a package to its recipients.
 
