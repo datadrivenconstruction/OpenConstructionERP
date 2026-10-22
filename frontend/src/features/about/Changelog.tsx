@@ -53,7 +53,13 @@ interface ChangelogEntry {
  * claims to be, so anything numeric-looking here would be read as a release
  * that nothing else in the tree has been bumped to.
  */
-const UNRELEASED: ChangelogEntry | null = null;
+const UNRELEASED: ChangelogEntry | null = {
+  version: 'Unreleased',
+  date: '2026-10-22',
+  tag: 'NEW',
+  summary:
+    'Peru country pack. A budget with gastos generales, utilidad and IGV at 18 percent, the 4 percent detraccion and the IGV retention, monthly valorizaciones with the 10 percent retention, a public works payment deadline and formula polinomica price adjustment (no index values shipped), and a SUNAT UBL 2.1 invoice for an OSE or PSE. Two demo projects: a private hospital in Lima and a public school in Arequipa. Every figure is marked unconfirmed until a Peruvian specialist reviews it.',
+};
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.

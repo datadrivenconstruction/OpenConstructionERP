@@ -386,8 +386,9 @@ PUBLIC_WORKS_LIMIT_REGIMES: dict[str, list[dict[str, Any]]] = {}
 
 def _register_dated_regimes() -> None:
     # Imported here so the country file stays a plain data module.
-    from app.modules.contracts import public_procurement_sa  # noqa: PLC0415
+    from app.modules.contracts import public_procurement_pe, public_procurement_sa  # noqa: PLC0415
 
+    PUBLIC_WORKS_LIMIT_REGIMES["PE"] = public_procurement_pe.REGIMES
     PUBLIC_WORKS_LIMIT_REGIMES["SA"] = public_procurement_sa.REGIMES
 
 
@@ -395,7 +396,11 @@ _register_dated_regimes()
 
 #: The price adjustment regime each country's public works use, a code of
 #: :data:`app.modules.contracts.price_adjustment.PRICE_ADJUSTMENT_REGIMES`.
-PUBLIC_WORKS_PRICE_ADJUSTMENT: dict[str, str] = {"EG": "eg_law182_art97", "FR": "fr_ccag_travaux_2021_art_10_5"}
+PUBLIC_WORKS_PRICE_ADJUSTMENT: dict[str, str] = {
+    "EG": "eg_law182_art97",
+    "FR": "fr_ccag_travaux_2021_art_10_5",
+    "PE": "pe_lgcp_formula_polinomica",
+}
 
 #: The INSEE construction cost indices a French revision formula names (base
 #: 2010, monthly, published provisional and then definitive). Names only:
@@ -517,7 +522,7 @@ def _validate() -> None:
         if stray:
             raise ValueError(f"{country} calls derogable fields the table does not have: {sorted(stray)}")
     for country in PUBLIC_WORKS_PRICE_ADJUSTMENT:
-        if country not in PUBLIC_WORKS_LIMITS:
+        if country not in PUBLIC_WORKS_LIMITS and country not in PUBLIC_WORKS_LIMIT_REGIMES:
             raise ValueError(f"price adjustment regime for {country!r}, which has no limits row")
     problems = validate_limit_regimes(PUBLIC_WORKS_LIMIT_REGIMES)
     if problems:
