@@ -528,6 +528,12 @@ body {
   direction: rtl;
 }
 
+/* Text size: scales the root so every rem size follows. Factors mirror TEXT_SCALE. */
+html[data-text='small'] { font-size: 13.125px; }
+html[data-text='large'] { font-size: 16.875px; }
+html[data-text='larger'] { font-size: 18.75px; }
+html[data-text='largest'] { font-size: 20.625px; }
+
 /* Arabic font: use a system font stack that includes Arabic-script fonts */
 [dir='rtl'] body,
 [dir='rtl'] html {

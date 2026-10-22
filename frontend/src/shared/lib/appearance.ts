@@ -19,17 +19,30 @@ export const ACCENTS = ['blue', 'teal', 'violet', 'emerald', 'amber', 'graphite'
 export const FONTS = ['system', 'inter', 'ibm-plex-sans', 'source-sans-3'] as const;
 export const DENSITIES = ['comfortable', 'compact'] as const;
 export const RADII = ['standard', 'sharp', 'round'] as const;
+export const TEXT_SIZES = ['small', 'default', 'large', 'larger', 'largest'] as const;
+
+/** Root font-size multiplier per step; index.css carries the same factors. */
+export const TEXT_SCALE: Record<(typeof TEXT_SIZES)[number], number> = {
+  small: 0.875,
+  default: 1,
+  large: 1.125,
+  larger: 1.25,
+  largest: 1.375,
+};
 
 export type Accent = (typeof ACCENTS)[number];
 export type FontChoice = (typeof FONTS)[number];
 export type Density = (typeof DENSITIES)[number];
 export type Radius = (typeof RADII)[number];
+export type TextSize = (typeof TEXT_SIZES)[number];
 
 export interface Appearance {
   accent: Accent;
   font: FontChoice;
   density: Density;
   radius: Radius;
+  /** Root text size; scales every rem-based size. Personal choice. */
+  text: TextSize;
   /** Free company colour (#rrggbb); wins over `accent` while set. */
   accentHex?: string;
 }
@@ -41,6 +54,7 @@ export const AXIS_VALUES: { [K in AppearanceAxis]: readonly Appearance[K][] } = 
   font: FONTS,
   density: DENSITIES,
   radius: RADII,
+  text: TEXT_SIZES,
 };
 
 export const PLATFORM_APPEARANCE: Appearance = {
@@ -48,6 +62,7 @@ export const PLATFORM_APPEARANCE: Appearance = {
   font: 'system',
   density: 'comfortable',
   radius: 'standard',
+  text: 'default',
 };
 
 /** The user's own choice. Read by the boot script in index.html. */
@@ -88,17 +103,17 @@ export interface AppearancePreset {
 
 export const APPEARANCE_PRESETS: readonly AppearancePreset[] = [
   { id: 'classic', value: PLATFORM_APPEARANCE },
-  { id: 'studio', value: { accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round' } },
-  { id: 'engineering', value: { accent: 'teal', font: 'ibm-plex-sans', density: 'compact', radius: 'sharp' } },
-  { id: 'warm', value: { accent: 'amber', font: 'source-sans-3', density: 'comfortable', radius: 'round' } },
-  { id: 'executive', value: { accent: 'graphite', font: 'inter', density: 'comfortable', radius: 'standard' } },
+  { id: 'studio', value: { accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round', text: 'default' } },
+  { id: 'engineering', value: { accent: 'teal', font: 'ibm-plex-sans', density: 'compact', radius: 'sharp', text: 'default' } },
+  { id: 'warm', value: { accent: 'amber', font: 'source-sans-3', density: 'comfortable', radius: 'round', text: 'default' } },
+  { id: 'executive', value: { accent: 'graphite', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default' } },
 ];
 
 /** The preset an appearance matches exactly, or null for a custom mix. */
 export function matchPreset(a: Appearance): AppearancePreset['id'] | null {
   if (a.accentHex) return null;
   const hit = APPEARANCE_PRESETS.find((p) =>
-    (Object.keys(PLATFORM_APPEARANCE) as AppearanceAxis[]).every((k) => p.value[k] === a[k]),
+    (Object.keys(PLATFORM_APPEARANCE) as AppearanceAxis[]).every((k) => k === 'text' || p.value[k] === a[k]),
   );
   return hit ? hit.id : null;
 }
@@ -178,5 +193,6 @@ export function applyAppearance(a: Appearance, root: HTMLElement = document.docu
   root.dataset.font = a.font;
   root.dataset.density = a.density;
   root.dataset.radius = a.radius;
+  root.dataset.text = a.text;
   ensureFontLoaded(a.font);
 }

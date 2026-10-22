@@ -23,6 +23,8 @@ import {
   FONT_FAMILY_NAME,
   FONT_STACK,
   RADII,
+  TEXT_SCALE,
+  TEXT_SIZES,
   ensureFontLoaded,
   matchPreset,
   type Appearance,
@@ -79,6 +81,14 @@ function StylePreview({ value, label, active }: { value: Appearance; label: stri
     </div>
   );
 }
+
+const TEXT_LABEL: Record<(typeof TEXT_SIZES)[number], string> = {
+  small: 'Small, 87.5%',
+  default: 'Default, 100%',
+  large: 'Large, 112.5%',
+  larger: 'Larger, 125%',
+  largest: 'Largest, 137.5%',
+};
 
 export function OptionRow({ label, children }: { label: string; children: ReactNode }) {
   const id = useId();
@@ -253,7 +263,8 @@ export function AppearanceStyleCard() {
     setSaving(true);
     try {
       // Axis by axis, so the workspace menu look saved beside it is kept.
-      const { accentHex, ...axes } = value ?? ({} as Partial<Appearance>);
+      // Text size is personal: the workspace payload does not carry it.
+      const { accentHex, text: _text, ...axes } = value ?? ({} as Partial<Appearance>);
       await apiPut('/v1/branding/', {
         appearance: value
           ? { ...axes, accent_hex: accentHex ?? null }
@@ -299,7 +310,7 @@ export function AppearanceStyleCard() {
                 role="radio"
                 aria-checked={active}
                 aria-label={presetName(preset.id)}
-                onClick={() => setAppearance(preset.value)}
+                onClick={() => setAppearance({ ...preset.value, text: effective.text })}
                 className={`block h-full w-full rounded-xl border-2 p-1.5 text-start transition-colors duration-normal ease-oe ${
                   active ? 'border-oe-blue bg-oe-blue-subtle' : 'border-transparent hover:border-border'
                 }`}
@@ -370,6 +381,26 @@ export function AppearanceStyleCard() {
               />
             ))}
           </OptionRow>
+          <OptionRow label={t('settings.style_text', { defaultValue: 'Text size' })}>
+            {TEXT_SIZES.map((size) => (
+              <Choice
+                key={size}
+                active={effective.text === size}
+                onSelect={() => setAxis('text', size)}
+                label={t(`settings.style_text_${size}`, { defaultValue: TEXT_LABEL[size] })}
+              >
+                <span aria-hidden="true" style={{ fontSize: `${15 * TEXT_SCALE[size]}px`, lineHeight: 1 }}>
+                  Aa
+                </span>
+              </Choice>
+            ))}
+          </OptionRow>
+          <p
+            className="rounded-lg bg-surface-secondary/50 px-3 py-2 text-content-secondary"
+            style={{ fontSize: `${15 * TEXT_SCALE[effective.text]}px` }}
+          >
+            {t('settings.style_text_preview', { defaultValue: 'The quick brown fox: 1,250.00 m3 of concrete, C30/37.' })}
+          </p>
           <OptionRow label={t('settings.style_motion', { defaultValue: 'Motion' })}>
             {MOTIONS.map((motion) => (
               <Choice

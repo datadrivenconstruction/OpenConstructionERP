@@ -45294,6 +45294,13 @@ const resource = {
     "settings.style_custom_low_contrast": "White text on this colour is hard to read ({{ratio}}:1, needs 4.5:1).",
     "settings.style_custom_use_accessible": "Use {{hex}} instead",
     "settings.style_custom_hint": "Hover, pressed and dark mode shades are worked out from it.",
+    "settings.style_text": "Text size",
+    "settings.style_text_small": "Small, 87.5%",
+    "settings.style_text_default": "Default, 100%",
+    "settings.style_text_large": "Large, 112.5%",
+    "settings.style_text_larger": "Larger, 125%",
+    "settings.style_text_largest": "Largest, 137.5%",
+    "settings.style_text_preview": "The quick brown fox: 1,250.00 m3 of concrete, C30/37.",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

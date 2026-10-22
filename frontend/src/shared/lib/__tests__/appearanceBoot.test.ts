@@ -25,7 +25,7 @@ function boot() {
 
 function attrs() {
   const d = document.documentElement.dataset;
-  return { accent: d.accent, font: d.font, density: d.density, radius: d.radius };
+  return { accent: d.accent, font: d.font, density: d.density, radius: d.radius, text: d.text };
 }
 
 function menuAttrs() {
@@ -36,7 +36,7 @@ function menuAttrs() {
 beforeEach(() => {
   localStorage.clear();
   const root = document.documentElement;
-  for (const k of ['accent', 'font', 'density', 'radius']) root.removeAttribute(`data-${k}`);
+  for (const k of ['accent', 'font', 'density', 'radius', 'text']) root.removeAttribute(`data-${k}`);
   for (const k of MENU_AXES) root.removeAttribute(`data-menu-${k}`);
   root.classList.remove('dark');
   document.head.querySelectorAll('link[data-oe-font]').forEach((l) => l.remove());
@@ -45,6 +45,18 @@ beforeEach(() => {
 afterEach(() => localStorage.clear());
 
 describe('index.html appearance boot script', () => {
+  it('paints the saved text size before first paint', () => {
+    localStorage.setItem(USER_APPEARANCE_KEY, JSON.stringify({ text: 'largest' }));
+    boot();
+    expect(document.documentElement.dataset.text).toBe('largest');
+  });
+
+  it('ignores an unknown text size', () => {
+    localStorage.setItem(USER_APPEARANCE_KEY, JSON.stringify({ text: 'huge' }));
+    boot();
+    expect(document.documentElement.dataset.text).toBe('default');
+  });
+
   it('exists and runs before the app bundle', () => {
     expect(SCRIPT).not.toBe('');
     expect(HTML.indexOf('oe-appearance-boot')).toBeLessThan(HTML.indexOf('/src/main.tsx'));
@@ -75,7 +87,7 @@ describe('index.html appearance boot script', () => {
       JSON.stringify({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round' }),
     );
     boot();
-    expect(attrs()).toEqual({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round' });
+    expect(attrs()).toEqual({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round', text: 'default' });
     const link = document.head.querySelector<HTMLLinkElement>('link[data-oe-font="inter"]');
     expect(link?.getAttribute('href')).toBe(fontStylesheetHref('inter'));
   });

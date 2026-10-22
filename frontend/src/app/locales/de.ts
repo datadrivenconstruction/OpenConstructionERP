@@ -53192,6 +53192,13 @@ const resource = {
     "settings.style_custom_low_contrast": "Weißer Text auf dieser Farbe ist schwer lesbar ({{ratio}}:1, nötig sind 4,5:1).",
     "settings.style_custom_use_accessible": "Stattdessen {{hex}} verwenden",
     "settings.style_custom_hint": "Farbtöne für Hover, gedrückt und dunkles Design werden daraus abgeleitet.",
+    "settings.style_text": "Textgröße",
+    "settings.style_text_small": "Klein, 87,5 %",
+    "settings.style_text_default": "Standard, 100 %",
+    "settings.style_text_large": "Groß, 112,5 %",
+    "settings.style_text_larger": "Größer, 125 %",
+    "settings.style_text_largest": "Am größten, 137,5 %",
+    "settings.style_text_preview": "Beispieltext: 1.250,00 m3 Beton, C30/37.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",

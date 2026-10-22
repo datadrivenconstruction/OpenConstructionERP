@@ -53641,6 +53641,13 @@ const resource = {
     "settings.style_custom_low_contrast": "Белый текст на этом цвете плохо читается ({{ratio}}:1, нужно 4,5:1).",
     "settings.style_custom_use_accessible": "Использовать {{hex}}",
     "settings.style_custom_hint": "Оттенки для наведения, нажатия и тёмной темы вычисляются автоматически.",
+    "settings.style_text": "Размер текста",
+    "settings.style_text_small": "Мелкий, 87,5%",
+    "settings.style_text_default": "Стандартный, 100%",
+    "settings.style_text_large": "Крупный, 112,5%",
+    "settings.style_text_larger": "Ещё крупнее, 125%",
+    "settings.style_text_largest": "Максимальный, 137,5%",
+    "settings.style_text_preview": "Пример текста: 1 250,00 м3 бетона, C30/37.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",
