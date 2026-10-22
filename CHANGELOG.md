@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+### Added
+
+- Peru country pack: a budget with gastos generales, utilidad and IGV at 18 percent, the 4 percent detraccion and the IGV retention, monthly valorizaciones with the 10 percent retention, a public works payment deadline and formula polinomica price adjustment (no index values shipped), and a SUNAT UBL 2.1 invoice for an OSE or PSE. Two demo projects: a private hospital in Lima and a public school in Arequipa. Every figure is marked unconfirmed until a Peruvian specialist reviews it.
+
 ## [18.8.1] - 2026-10-22
 
 ### Added

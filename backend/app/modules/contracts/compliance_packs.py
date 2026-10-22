@@ -258,6 +258,15 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "birimfiyat"],
     },
+    "pe_compliance": {
+        "id": "pe_compliance",
+        "name": "Peru Compliance",
+        "description": "The IGV carried as a line of its own at 18 percent, and gastos generales and "
+        "utilidad stated as lines of their own, plus the universal quality baseline.",
+        "jurisdiction": "PE",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "peru"],
+    },
     # The three country packs of 2026-09. Each classifies against DIN 276, the
     # nearest hierarchy the product renders, and files every line under its own
     # national structure as well; the engine set is the country name, which is
@@ -488,6 +497,8 @@ PACK_BY_LABEL: dict[str, str] = {
     "france": "fr_compliance",
     "canada": "ca_compliance",
     "japan": "jp_compliance",
+    "peru": "pe_compliance",
+    "perú": "pe_compliance",
     "turkey": "tr_compliance",
     "türkiye": "tr_compliance",
     "romania": "ro_compliance",
