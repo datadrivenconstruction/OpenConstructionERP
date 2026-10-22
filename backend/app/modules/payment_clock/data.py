@@ -2871,6 +2871,48 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
             "surveyor."
         ),
     },
+    {
+        "code": "pe_lgcp_art210",
+        "jurisdiction": "Peru (public works)",
+        "country_code": "PE",
+        "statute": "Ley General de Contrataciones Publicas, Ley 32069, and its Reglamento, D.S. 009-2025-EF",
+        "statute_reference": (
+            "Reglamento article 210.3, as quoted in OECE opinion D000059-2026-OECE-DTN; "
+            "https://img.lpderecho.pe/wp-content/uploads/2026/07/D000059-2026-OECE-DTN-1.pdf"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": 5,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 27,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "contract",
+        "interest_reference_rate": "",
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "",
+        "notes": (
+            "The clock for a monthly valuation (valorizacion) of a public works contract under Ley 32069. "
+            "The contractor presents it to the supervisor and the entity within the first three days of the "
+            "month after the valued month; enter that day as the application date. The supervisor reports to "
+            "the entity within five days counted from the day after it was presented, which is the payment "
+            "notice here. The entity evaluates and pays by the last day of the month in which the valuation "
+            "was presented. The statute names a calendar day, not a number of days, so the final date is "
+            "approximated as 27 calendar days after the application date, the distance from the 3rd to the end "
+            "of a 30 day month; a valuation presented earlier has a later true deadline. Whether the five days "
+            "are calendar or working days was not confirmed. Observations are communicated to the supervisor "
+            "and the contractor, who answer; the entity then reviews within two working days of the answer "
+            "and goes on to payment. The opinion holds that the deadline stands even with observations, the "
+            "unquestioned amount being paid. Legal interest on a late payment follows the Civil Code; none is "
+            "set here. Pending review by a Peruvian quantity surveyor."
+        ),
+    },
 )
 
 REGIME_CODES: tuple[str, ...] = tuple(regime["code"] for regime in PAYMENT_REGIMES)

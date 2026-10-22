@@ -192,6 +192,35 @@ PRICE_ADJUSTMENT_REGIMES: dict[str, dict[str, Any]] = {
             "Statistics South Africa."
         ),
     },
+    "pe_lgcp_formula_polinomica": {
+        "code": "pe_lgcp_formula_polinomica",
+        "country_code": "PE",
+        "jurisdiction": "Peru (public works)",
+        "statute": (
+            "Ley 32069 and its Reglamento, D.S. 009-2025-EF; reajuste by the polynomial formula "
+            "(formula polinomica) the bidding documents state; OECE opinion D000059-2026-OECE-DTN"
+        ),
+        "source_url": "https://lpderecho.pe/procedimiento-calculo-reajustes-contratista-puede-optar-percibirlos-cada-valorizacion-liquidacion-contrato-intereses-legales-solo-reajustes-cuenta-montos-exigibles-opinion-d000059-2026/",
+        "read_date": "2026-10-22",
+        "effective_date": "2025-04-22",
+        "mandatory": False,
+        "period_months": 1,
+        "min_duration_months": None,
+        "coefficient_rule": "non_negative_sum_at_most_one",
+        "base_date": "offer_date",
+        "index_publisher": "INEI unified construction price indices (indices unificados de precios de la construccion)",
+        "variable_items_list": None,
+        "settlement_days": None,
+        "note": (
+            "The formula K = a x Jr/Jo + b x Mr/Mo + c x Er/Eo + d x GUr/GUo + e x Vr/Vo has monomials for "
+            "labour, materials, equipment, overheads and profit, and other items, whose coefficients sum to one; "
+            "the bidding documents state them. Each index is the unified index of INEI for the area of the works, "
+            "at the month of the valuation (r) and of the offer (o). The contractor may take the adjustment in "
+            "each valuation or in the final liquidation, as the OECE opinion states. The coefficients and the "
+            "index names were not read in the regulation: unconfirmed. Index values are not shipped; they belong "
+            "to the tenant's price index series."
+        ),
+    },
     "contract_indexation": {
         "code": "contract_indexation",
         "country_code": None,
