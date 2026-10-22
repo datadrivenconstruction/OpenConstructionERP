@@ -324,6 +324,7 @@ _COMMUNITY_PACKS = (
     "norway-no",
     "nzs",
     "pakistan-pk",
+    "peru-pe",
     "poland-pl",
     "portugal-pt",
     "renewables-epc",

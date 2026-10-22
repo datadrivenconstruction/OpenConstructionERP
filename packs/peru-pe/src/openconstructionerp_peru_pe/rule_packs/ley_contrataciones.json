@@ -12,7 +12,6 @@
     "https://www.gob.pe/oece"
   ],
   "enables_rule_ids": [],
-  "planned_not_built_rule_ids": [],
   "planned_not_built_note": "The advance limits and the guarantee are carried as figures in the contract defaults and flagged for expert review; no engine rule enforces them.",
   "regulator": "OECE"
 }
