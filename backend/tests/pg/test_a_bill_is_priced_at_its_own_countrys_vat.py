@@ -89,7 +89,6 @@ _NO_SEED_ROW: dict[str, str] = {
     "ID": "sole country of region ID, whose line carries Indonesia's own 11",
     "KE": "sole country of region KE, whose line carries Kenya's own 16",
     "MA": "sole country of region MA, whose line carries Morocco's own 20",
-    "PE": "sole country of region PE, whose line carries Peru's own 18",
     "PH": "sole country of region PH, whose line carries the Philippines' own 12",
     "TH": "sole country of region TH, whose line carries Thailand's own 7",
     "VN": "sole country of region VN, whose line carries Vietnam's own 10",

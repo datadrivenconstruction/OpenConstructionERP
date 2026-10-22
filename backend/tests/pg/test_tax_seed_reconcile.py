@@ -123,6 +123,11 @@ _EGYPT_ADDED_2026_10 = {
 }
 _EGYPT_LINES = {"EG/VAT", "EG/VAT_CONSTR"}
 
+#: Peru's IGV line, one open window. No old cohort holds a Peruvian row, so the
+#: reconciler delivers it whole, the Egyptian way.
+_PERU_ADDED_2026_10 = {("PE", "IGV", "2011-03-01")}
+_PERU_LINES = {"PE/IGV"}
+
 #: Poland's 5 % and zero tiers. Both old cohorts hold the 23 % standard rate, so
 #: they join a filled country-wide slot as tiers, the Croatian way.
 _POLISH_TIERS_ADDED_2026_10 = {("PL", "VAT_5", "2011-01-01"), ("PL", "VAT_ZERO", "2011-01-01")}
@@ -191,6 +196,7 @@ _ADDED_AFTER_V15_4_0 = {
     *_SAUDI_HISTORY_ADDED_2026_10,
     *_TURKISH_TIER_ADDED_2026_10,
     *_EGYPT_ADDED_2026_10,
+    *_PERU_ADDED_2026_10,
     *_POLISH_TIERS_ADDED_2026_10,
     *_PAKISTAN_ADDED_2026_10,
 }
@@ -235,6 +241,7 @@ _ADDED_AFTER_V15_9_1 = {
     *_SAUDI_HISTORY_ADDED_2026_10,
     *_TURKISH_TIER_ADDED_2026_10,
     *_EGYPT_ADDED_2026_10,
+    *_PERU_ADDED_2026_10,
     *_POLISH_TIERS_ADDED_2026_10,
     *_PAKISTAN_ADDED_2026_10,
 }
@@ -299,6 +306,7 @@ _EXPECTED_DELIVERY = {
     # Türkiye's list (I) tier, on the same argument again.
     *_TURKISH_TIER,
     *_EGYPT_LINES,
+    *_PERU_LINES,
     *_POLISH_TIERS,
     *_PAKISTAN_LINES,
 }
@@ -312,6 +320,7 @@ _EXPECTED_AFTER_V15_9_1 = {
     *_IRISH_AND_HUNGARIAN_TIERS,
     *_TURKISH_TIER,
     *_EGYPT_LINES,
+    *_PERU_LINES,
     *_POLISH_TIERS,
     *_PAKISTAN_LINES,
 }
