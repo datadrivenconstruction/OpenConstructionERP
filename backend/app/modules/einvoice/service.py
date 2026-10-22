@@ -30,7 +30,15 @@ from app.modules.einvoice.cii import (
     build_cii_xml,
     validate_rules,
 )
-from app.modules.einvoice.profiles import EN16931_SYNTAXES, SYNTAX_CII, SYNTAX_UBL, SYNTAX_UBL_TR, Profile, get_profile
+from app.modules.einvoice.profiles import (
+    EN16931_SYNTAXES,
+    SYNTAX_CII,
+    SYNTAX_UBL,
+    SYNTAX_UBL_PE,
+    SYNTAX_UBL_TR,
+    Profile,
+    get_profile,
+)
 from app.modules.einvoice.rules import DE_INVOICE_TYPE_CODES, FATAL, RuleViolation, money_decimals
 from app.modules.einvoice.tr_mapper import TrGroupTaxes, TrMapping, build_tr_invoice
 from app.modules.einvoice.ubl import build_ubl_xml
@@ -433,6 +441,8 @@ def _en16931_profile(profile: str) -> Profile:
             f"profile {profile!r} is UBL-TR, which is not an EN 16931 document; "
             "use render_tr_einvoice / tr_violations_for with the invoice's payment taxes"
         )
+    if prof.syntax == SYNTAX_UBL_PE:
+        raise EInvoiceError(f"profile {profile!r} is SUNAT UBL, not EN 16931; use render_pe_einvoice")
     if prof.syntax not in EN16931_SYNTAXES:
         raise EInvoiceError(f"profile {profile!r} has the syntax {prof.syntax!r}, which no writer here produces")
     return prof
@@ -687,6 +697,50 @@ def render_tr_einvoice(**kwargs: Any) -> tuple[str, str, bytes, list[RuleViolati
     number = mapping.invoice.document_id or str(kwargs["invoice"].get("invoice_number") or "")
     filename = f"einvoice_{_safe_token(number)}_ubl_tr.xml"
     return filename, "application/xml", xml, found
+
+
+def _pe_inputs(
+    invoice: dict[str, Any], line_items: list[dict[str, Any]], defaults: dict[str, Any] | None
+) -> tuple[EInvoice, Any]:
+    """The invoice model and the detraction block its e-invoice metadata names."""
+    from app.modules.einvoice.ubl_pe import CONSTRUCTION_DETRACTION_CODE, PeDetraction
+
+    model = build_einvoice(invoice=invoice, line_items=line_items, profile="ubl", defaults=defaults)
+    ei = _merge_defaults(dict((invoice.get("metadata") or {}).get("einvoice") or {}), defaults)
+    if not ei.get("pe_detraction"):
+        return model, None
+    return model, PeDetraction(
+        code=str(ei.get("pe_detraction_code") or CONSTRUCTION_DETRACTION_CODE),
+        percent=_dec(ei.get("pe_detraction_percent"), "4"),
+        account=str(ei.get("pe_detraction_account") or ""),
+    )
+
+
+def pe_violations_for(
+    *, invoice: dict[str, Any], line_items: list[dict[str, Any]], defaults: dict[str, Any] | None = None
+) -> list[RuleViolation]:
+    """Validate a SUNAT UBL invoice without rendering it."""
+    from app.modules.einvoice.ubl_pe import check_pe
+
+    model, detraction = _pe_inputs(invoice, line_items, defaults)
+    return check_pe(model, detraction)
+
+
+def render_pe_einvoice(
+    *, invoice: dict[str, Any], line_items: list[dict[str, Any]], defaults: dict[str, Any] | None = None
+) -> tuple[str, str, bytes]:
+    """Return ``(filename, media_type, xml_bytes)`` for an unsigned SUNAT UBL 2.1 factura.
+
+    The file is what the customer's OSE or PSE signs and sends to SUNAT.
+
+    Raises:
+        EInvoiceError: a fatal finding blocks the document.
+    """
+    from app.modules.einvoice.ubl_pe import build_ubl_pe_xml
+
+    model, detraction = _pe_inputs(invoice, line_items, defaults)
+    xml = build_ubl_pe_xml(model, detraction)
+    return f"einvoice_{_safe_token(model.invoice_number)}_ubl_pe.xml", "application/xml", xml
 
 
 def _safe_token(raw: str) -> str:

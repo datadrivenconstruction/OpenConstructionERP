@@ -448,6 +448,24 @@
       "suggestion": "Remove the general expenses and profit markups from this bill, or keep them only on lines priced by your own analysis (NP)."
     }
   },
+  "peru": {
+    "igv_line_present": {
+      "fail": "The budget carries no IGV line",
+      "suggestion": "Add the IGV as its own line after the subtotal, at 18 percent (16 percent IGV plus 2 percent municipal promotion tax)"
+    },
+    "igv_rate_18": {
+      "fail": "The IGV line charges {percent} percent, not the statutory 18 percent",
+      "suggestion": "Set the IGV line to 18 percent, or confirm in the contract that the works are exempt or taxed differently"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "The budget does not carry these lines of their own: {missing}",
+      "suggestion": "Add gastos generales and utilidad as separate lines between the direct cost and the IGV, as a public tender states them"
+    },
+    "partida_numbering": {
+      "fail": "Position {ordinal} is not numbered as a partida (two digits per level, such as 03.02 or 03.02.01)",
+      "suggestion": "Number each priced line by its chapter and item, the way a Peruvian presupuesto lists its partidas, for example 03.02"
+    }
+  },
   "romania": {
     "deviz_chapter_required": {
       "fail": "Position {ordinal} names no deviz general chapter",

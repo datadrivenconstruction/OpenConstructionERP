@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sealed tender submissions: bids stay hidden from staff, exports and backups until an audited opening after the deadline, with an optional two-person opening and a SHA-256 receipt for every bidder.
 - A procurement procedure keeps a frozen snapshot of the rules it was decided on, and overriding a rule outcome needs a written reason that is recorded.
 - Settings: workspace logo with an optional dark variant, a free company colour checked for contrast, start page after sign-in, first day of week, text size from 87.5% to 137.5%, and personal motion and contrast options.
+- Peru country pack: a budget with gastos generales, utilidad and IGV at 18 percent, the 4 percent detraccion and the IGV retention, monthly valorizaciones with the 10 percent retention, a public works payment deadline and formula polinomica price adjustment (no index values shipped), and a SUNAT UBL 2.1 invoice for an OSE or PSE. Two demo projects: a private hospital in Lima and a public school in Arequipa. Every figure is marked unconfirmed until a Peruvian specialist reviews it.
 
 ### Fixed
 

@@ -683,6 +683,7 @@ artifacts = ["app/scripts/flagship_assets/site_photos/*.jpg"]
 "../packs/spain-es/src" = "packs/spain-es/src"
 "../packs/sweden-se/src" = "packs/sweden-se/src"
 "../packs/switzerland-ch/src" = "packs/switzerland-ch/src"
+"../packs/peru-pe/src" = "packs/peru-pe/src"
 "../packs/turkey-tr/src" = "packs/turkey-tr/src"
 "../packs/turkey-tr-mep/src" = "packs/turkey-tr-mep/src"
 "../packs/uae-ae/src" = "packs/uae-ae/src"
