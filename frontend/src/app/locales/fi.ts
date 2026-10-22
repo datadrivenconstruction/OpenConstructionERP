@@ -54116,6 +54116,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE-kehikko",
     "modules.catalog.project_handbook": "Projektikäsikirja",
     "modules.pp_desc_eleven_areas_framework": "Hankkeen ohjaus tilaajan puolelta yhdessätoista ohjausalueessa kahdessa vaiheessa, hankkeen kehittämisessä ja rakentamisen toteutuksessa, niiden välissä yksi porttivaihe ja yksi hyväksytty kehysasiakirja kullekin alueelle.",
+    "modules.pp_name_peru_pe": "Perun rakennuspaketti",
     "notifications.stakeholders.commitment_overdue.body": "Sitoumuksen {{code}} määräpäivä oli {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Sitoumuksen määräpäivä on ohitettu",
     "notifications.stakeholders.plan_overdue.body": "{{title}} oli määrä tehdä {{due}}, eikä sitä ole vielä kirjattu.",

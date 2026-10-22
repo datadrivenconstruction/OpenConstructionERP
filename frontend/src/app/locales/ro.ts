@@ -54431,6 +54431,7 @@ const resource = {
     "modules.catalog.hse_frame": "Cadru HSE",
     "modules.catalog.project_handbook": "Manualul proiectului",
     "modules.pp_desc_eleven_areas_framework": "Managementul proiectului din partea beneficiarului în unsprezece arii de management, în două faze, dezvoltarea proiectului și execuția lucrărilor, cu o poartă între ele și un document-cadru aprobat pentru fiecare arie.",
+    "modules.pp_name_peru_pe": "Pachet construcții Peru",
     "notifications.stakeholders.commitment_overdue.body": "Angajamentul {{code}} avea termen la {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Un angajament a depășit termenul",
     "notifications.stakeholders.plan_overdue.body": "{{title}} avea termen la {{due}} și nu este încă înregistrată.",

@@ -485,6 +485,7 @@ teach identifiers that were never rule sets at all.
 | `gesn` | GESN (RU) |
 | `hungary` | Hungarian item orders, material and fee split (HU) |
 | `romania` | Deviz general chapters, HG 907/2016 (RO) |
+| `peru` | Peruvian presupuesto: IGV line and 18 percent rate, detraction, RUC (PE) |
 | `greece` | Unified price list (ΝΕΤ) articles (GR) |
 | `ukraine` | Summary estimate chapters, наказ Мінрегіону №281 (UA) |
 | `poland` | KNR and KNNR catalogue references of a kosztorys (PL) |

@@ -54382,6 +54382,7 @@ const resource = {
     "modules.catalog.hse_frame": "HSE কাঠামো",
     "modules.catalog.project_handbook": "প্রকল্প হ্যান্ডবুক",
     "modules.pp_desc_eleven_areas_framework": "মালিকপক্ষের প্রকল্প ব্যবস্থাপনা এগারোটি ব্যবস্থাপনা ক্ষেত্রে, দুটি পর্যায়ে - প্রকল্প উন্নয়ন ও নির্মাণ বাস্তবায়ন, এদের মাঝে একটি গেট এবং প্রতিটি ক্ষেত্রের জন্য একটি অনুমোদিত কাঠামো নথি।",
+    "modules.pp_name_peru_pe": "পেরু নির্মাণ প্যাক",
     "notifications.stakeholders.commitment_overdue.body": "প্রতিশ্রুতি {{code}} এর নির্ধারিত তারিখ ছিল {{due}}।",
     "notifications.stakeholders.commitment_overdue.title": "একটি প্রতিশ্রুতির নির্ধারিত তারিখ পেরিয়ে গেছে",
     "notifications.stakeholders.plan_overdue.body": "{{title}} এর নির্ধারিত তারিখ ছিল {{due}} এবং এটি এখনও নথিভুক্ত হয়নি।",

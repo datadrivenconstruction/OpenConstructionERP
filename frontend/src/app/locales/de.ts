@@ -56555,6 +56555,7 @@ const resource = {
     "modules.catalog.engineering_brief": "Planungsauftrag",
     "modules.catalog.hse_frame": "Arbeitsschutzrahmen (HSE)",
     "modules.catalog.project_handbook": "Projekthandbuch",
+    "modules.pp_name_peru_pe": "Peru-Baupaket",
     // stakeholders (module 8) frontend keys: start
     "notifications.stakeholders.commitment_overdue.body": "Zusage {{code}} war am {{due}} fällig.",
     "notifications.stakeholders.commitment_overdue.title": "Eine Zusage hat ihren Termin überschritten",

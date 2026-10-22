@@ -106,7 +106,9 @@ def detraction_amount(grand_total: Decimal, percent: Decimal) -> Decimal:
 
 
 def _ruc(party: Party) -> str:
-    return (party.vat_id or party.legal_id or party.tax_number or "").strip()
+    raw = (party.vat_id or party.legal_id or party.tax_number or "").strip()
+    # A VAT identifier carries the country prefix; the RUC is the eleven digits after it.
+    return raw[2:] if raw[:2].upper() == "PE" and raw[2:].isdigit() else raw
 
 
 def check_pe(inv: EInvoice, detraction: PeDetraction | None = None) -> list[RuleViolation]:

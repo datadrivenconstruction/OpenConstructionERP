@@ -53868,6 +53868,7 @@ const resource = {
     "modules.catalog.hse_frame": "Kerangka HSE",
     "modules.catalog.project_handbook": "Panduan proyek",
     "modules.pp_desc_eleven_areas_framework": "Manajemen proyek dari sisi pemilik dalam sebelas area manajemen, dalam dua fase, pengembangan proyek dan pelaksanaan konstruksi, dengan satu gerbang di antaranya dan satu dokumen kerangka yang disetujui untuk setiap area.",
+    "modules.pp_name_peru_pe": "Paket Konstruksi Peru",
     "notifications.stakeholders.commitment_overdue.body": "Komitmen {{code}} jatuh tempo pada {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Sebuah komitmen melewati tenggatnya",
     "notifications.stakeholders.plan_overdue.body": "{{title}} jatuh tempo pada {{due}} dan belum dicatat.",

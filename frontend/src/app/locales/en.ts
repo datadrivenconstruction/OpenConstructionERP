@@ -48105,6 +48105,7 @@ const resource = {
     "modules.catalog.engineering_brief": "Engineering brief",
     "modules.catalog.hse_frame": "HSE frame",
     "modules.catalog.project_handbook": "Project handbook",
+    "modules.pp_name_peru_pe": "Peru Construction Pack",
     // stakeholders (module 8) frontend keys: start
     "notifications.stakeholders.commitment_overdue.body": "Commitment {{code}} was due on {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "A commitment is past its due date",

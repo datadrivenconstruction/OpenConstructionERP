@@ -54072,6 +54072,7 @@ const resource = {
     "modules.catalog.hse_frame": "چارچوب HSE",
     "modules.catalog.project_handbook": "راهنمای پروژه",
     "modules.pp_desc_eleven_areas_framework": "مدیریت پروژه از سوی کارفرما در یازده حوزه مدیریتی و در دو فاز، توسعه پروژه و اجرای ساخت، با یک گیت میان آن‌ها و یک سند چارچوب تأییدشده برای هر حوزه.",
+    "modules.pp_name_peru_pe": "بسته ساخت‌وساز پرو",
     "notifications.stakeholders.commitment_overdue.body": "تعهد {{code}} در {{due}} سررسید شده بود.",
     "notifications.stakeholders.commitment_overdue.title": "موعد یک تعهد گذشته است",
     "notifications.stakeholders.plan_overdue.body": "{{title}} در {{due}} سررسید شده بود و هنوز ثبت نشده است.",
