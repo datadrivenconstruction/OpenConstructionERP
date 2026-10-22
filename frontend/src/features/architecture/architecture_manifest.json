@@ -57274,6 +57274,7 @@
         "permissions.py",
         "price_adjustment.py",
         "public_procurement.py",
+        "public_procurement_pe.py",
         "public_procurement_sa.py",
         "repairs.py",
         "repository.py",
@@ -99920,6 +99921,7 @@
         "tr_mapper.py",
         "tr_words.py",
         "ubl.py",
+        "ubl_pe.py",
         "ubl_tr.py"
       ],
       "manifest": {
@@ -278882,7 +278884,7 @@
     "total_relationships": 240,
     "total_routes": 4625,
     "total_schemas": 4117,
-    "total_python_files": 2809,
+    "total_python_files": 2811,
     "frontend_features": 209,
     "frontend_ts_files": 3601,
     "frontend_backend_mapped": 187
