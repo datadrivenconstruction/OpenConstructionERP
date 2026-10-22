@@ -50564,6 +50564,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Dilinize en yakın pazar",
     "dashboard.market_cases.all_for_market": "{{market}} için tüm vakalar ({{count}})",
     "dashboard.market_cases.empty": "Henüz hiçbir vaka bir pazar belirtmiyor. Tüm kitaplık tek tıklama uzağınızda.",
+    "dashboard.regional_pack_recommended": "Önerilen modüller",
     "cases.regional_pack_for_market": "Bölgesel paket: {{names}}",
     "onboarding.ready_pack_other_markets": "Ya da bir pazar ön ayarından başlayın",
     "onboarding.ready_pack_set_up_here": "Bunu benim için ayarla",

@@ -49311,6 +49311,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Таны хэлэнд хамгийн ойр зах зээл",
     "dashboard.market_cases.all_for_market": "{{market}} зах зээлийн бүх тохиолдол ({{count}})",
     "dashboard.market_cases.empty": "Одоогоор ямар ч тохиолдол зах зээл заагаагүй байна. Бүх сан нэг товшилтын зайд.",
+    "dashboard.regional_pack_recommended": "Санал болгосон модулиуд",
     "cases.regional_pack_for_market": "Бүсийн багц: {{names}}",
     "onboarding.ready_pack_other_markets": "Эсвэл зах зээлийн бэлэн загвараас эхлээрэй",
     "onboarding.ready_pack_set_up_here": "Үүнийг миний өмнөөс тохируулаад өгөөч",

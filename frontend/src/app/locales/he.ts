@@ -49880,6 +49880,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "השוק הקרוב ביותר לשפה שלך",
     "dashboard.market_cases.all_for_market": "כל התרחישים עבור {{market}} ({{count}})",
     "dashboard.market_cases.empty": "אף תרחיש עדיין לא מציין שוק. כל הספרייה במרחק לחיצה.",
+    "dashboard.regional_pack_recommended": "מודולים מומלצים",
     "cases.regional_pack_for_market": "חבילת אזור: {{names}}",
     "onboarding.ready_pack_other_markets": "או התחל מהגדרה מוכנה של שוק",
     "onboarding.ready_pack_set_up_here": "הגדר לי את זה",

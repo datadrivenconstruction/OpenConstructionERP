@@ -468,6 +468,12 @@ def _plan(
         warnings.append(
             f"{len(disable_missing)} module(s) the pack wants hidden are not installed: {', '.join(disable_missing)}"
         )
+    recommended_missing = [x for x in (m.recommended_modules or []) if not _module_exists(x)]
+    if recommended_missing:
+        warnings.append(
+            f"{len(recommended_missing)} module(s) the pack recommends are not installed: "
+            f"{', '.join(recommended_missing)}"
+        )
     if rules_docs_only:
         warnings.append(
             f"{len(rules_docs_only)} validation rule pack(s) are documentation-only (no built-in engine match): {', '.join(rules_docs_only)}"

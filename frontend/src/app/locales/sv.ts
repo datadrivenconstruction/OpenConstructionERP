@@ -50304,6 +50304,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Marknaden som ligger närmast ditt språk",
     "dashboard.market_cases.all_for_market": "Alla fall för {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Inget fall nämner någon marknad ännu. Hela biblioteket är ett klick bort.",
+    "dashboard.regional_pack_recommended": "Rekommenderade moduler",
     "cases.regional_pack_for_market": "Regionpaket: {{names}}",
     "onboarding.ready_pack_other_markets": "Eller börja med en marknadsmall",
     "onboarding.ready_pack_set_up_here": "Ställ in det här åt mig",

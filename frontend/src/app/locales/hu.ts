@@ -53444,6 +53444,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "A nyelvéhez legközelebbi piac",
     "dashboard.market_cases.all_for_market": "Minden eset erre: {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Még egyetlen eset sem nevez meg piacot. A teljes tár egy kattintásra van.",
+    "dashboard.regional_pack_recommended": "Ajánlott modulok",
     "cases.regional_pack_none_for_market": "Ehhez nincs telepítve regionális csomag: {{market}}",
     "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.atestar.in.boletim": "Boletim de medicao az időszakra",
     "cases.attest_the_boletim_de_medicao_and_invoice_the_period.step.atestar.in.fiscal": "Igazolásra kijelölt fiscal do contrato",

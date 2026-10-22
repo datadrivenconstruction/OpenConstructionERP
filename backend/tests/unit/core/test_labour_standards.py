@@ -11,6 +11,7 @@ enforces something must ask for a confirmed one and gets ``None`` instead.
 
 from __future__ import annotations
 
+import json
 from datetime import date
 from decimal import Decimal
 
@@ -143,3 +144,57 @@ def test_egyptian_templates_take_their_on_costs_from_the_catalogue(row) -> None:
     assert any(
         kind == "percentage" and value == provision.quantize(Decimal("0.01")) for kind, value in components.values()
     )
+
+
+def _row(**over):
+    base = {
+        "country": "US",
+        "key": "minimum_wage_hourly",
+        "value": "7.25",
+        "unit": "USD/h",
+        "effective_from": "2020-01-01",
+        "effective_to": None,
+        "source": "Federal statute",
+        "source_url": "https://example.org/x",
+        "confidence": "H",
+        "needs_expert_review": False,
+    }
+    base.update(over)
+    return base
+
+
+def _area(**over):
+    return _row(value="15.00", area_code="US-CA-LA", area_label="Los Angeles County", **over)
+
+
+@pytest.mark.unit
+def test_standard_prefers_exact_area_then_country(monkeypatch, tmp_path) -> None:
+    path = tmp_path / "labour_standards.json"
+    path.write_text(json.dumps([_row(), _area()]), encoding="utf-8")
+    monkeypatch.setattr(ls, "_DATA_PATH", path)
+    on = date(2026, 1, 1)
+    assert ls.standard("US", "minimum_wage_hourly", on, "US-CA-LA").value == Decimal("15.00")
+    assert ls.standard("US", "minimum_wage_hourly", on, "US-TX-X").value == Decimal("7.25")
+    assert ls.standard("US", "minimum_wage_hourly", on).value == Decimal("7.25")
+    assert ls.areas("US") == (("US-CA-LA", "Los Angeles County"),)
+
+
+@pytest.mark.unit
+def test_area_row_needs_country_sibling_or_note() -> None:
+    with pytest.raises(ValueError, match="country-level row"):
+        ls.parse_standards([_area()])
+    assert ls.parse_standards([_area(note="No national rate exists")])
+
+
+@pytest.mark.unit
+def test_area_code_and_label_come_together() -> None:
+    with pytest.raises(ValueError, match="together"):
+        ls.parse_standards([_row(), _row(area_code="X1")])
+
+
+@pytest.mark.unit
+def test_area_windows_are_separate_from_country_windows() -> None:
+    older = _area(effective_from="2019-01-01", effective_to="2019-12-31")
+    assert len(ls.parse_standards([_row(), _area(), older])) == 3
+    with pytest.raises(ValueError, match="overlap"):
+        ls.parse_standards([_row(), _area(), _area()])

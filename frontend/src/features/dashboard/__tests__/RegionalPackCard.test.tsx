@@ -230,6 +230,7 @@ const ACTIVE_PACK = {
     validation_rule_packs: ['din276-reference'],
     validation_rule_sets: ['din276', 'boq_quality'],
     default_modules: ['oe_boq', 'oe_validation'],
+    recommended_modules: ['oe_contracts'],
     metadata: { country: 'de' },
   },
 };
@@ -304,7 +305,9 @@ describe('RegionalPackCard, the compact tile layout', () => {
       'Validation rules',
       'Local tax rules',
       'Modules switched on',
+      'Recommended modules',
     ]);
+    expect(tileValue('Recommended modules').textContent).toBe('1');
     expect(tileValue('Currency').textContent).toBe('EUR');
     expect(tileValue('Local price databases').textContent).toBe('1');
     expect(tileValue('Modules switched on').textContent).toBe('2');

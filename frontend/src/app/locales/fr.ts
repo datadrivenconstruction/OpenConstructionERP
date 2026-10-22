@@ -52171,6 +52171,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Le marché le plus proche de votre langue",
     "dashboard.market_cases.all_for_market": "Tous les cas pour {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Aucun cas ne nomme encore de marché. Toute la bibliothèque est à un clic.",
+    "dashboard.regional_pack_recommended": "Modules recommandés",
     "cases.regional_pack_for_market": "Pack régional : {{names}}",
     "onboarding.ready_pack_other_markets": "Ou partir d'un préréglage de marché",
     "onboarding.ready_pack_set_up_here": "Configurer cela pour moi",

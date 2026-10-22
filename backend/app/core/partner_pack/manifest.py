@@ -221,6 +221,16 @@ class PartnerPackManifest(BaseModel):
             "reported as a warning at apply time."
         ),
     )
+    recommended_modules: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Backend module names (the manifest name, e.g. 'oe_contracts') the "
+            "pack suggests for its market. Advisory only: applying the pack "
+            "switches nothing on or off because of this list, and pack details "
+            "show it as a hint. A name that is not an installed module is "
+            "reported as a warning in the apply plan, never an error."
+        ),
+    )
     hidden_modules: list[str] = Field(
         default_factory=list,
         description=(
@@ -524,6 +534,7 @@ class PartnerPackManifest(BaseModel):
             "code_lists": self.code_lists,
             "demo_template_ids": self.demo_template_ids,
             "default_modules": self.default_modules,
+            "recommended_modules": self.recommended_modules,
             "hidden_modules": self.hidden_modules,
             "default_company_profile": self.default_company_profile,
             "branding": {

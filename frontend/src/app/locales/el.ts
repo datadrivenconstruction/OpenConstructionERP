@@ -49643,6 +49643,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Η αγορά που είναι πιο κοντά στη γλώσσα σας",
     "dashboard.market_cases.all_for_market": "Όλες οι περιπτώσεις για {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Καμία περίπτωση δεν ονομάζει ακόμη αγορά. Ολόκληρη η βιβλιοθήκη είναι ένα κλικ μακριά.",
+    "dashboard.regional_pack_recommended": "Προτεινόμενες ενότητες",
     "cases.regional_pack_for_market": "Περιφερειακό πακέτο: {{names}}",
     "onboarding.ready_pack_other_markets": "Ή ξεκινήστε από μια προεπιλογή αγοράς",
     "onboarding.ready_pack_set_up_here": "Ρύθμισέ το εσύ για μένα",

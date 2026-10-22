@@ -48,6 +48,8 @@ export interface PartnerPackManifest {
    *  checking my bills of quantities because of this pack". */
   validation_rule_sets: string[];
   default_modules: string[];
+  /** Advisory module suggestions; absent on older backends. */
+  recommended_modules?: string[];
   hidden_modules: string[];
   /** The company profile this pack's users start in, or null. Absent on older
    *  backends. Read by the sidebar as the profile of a user who has chosen

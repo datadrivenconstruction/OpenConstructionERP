@@ -49712,6 +49712,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Тилиңизге эң жакын рынок",
     "dashboard.market_cases.all_for_market": "{{market}} рыногу үчүн бардык мисалдар ({{count}})",
     "dashboard.market_cases.empty": "Азырынча бир да мисал рынокту көрсөтпөйт. Бүткүл китепкана бир басууда.",
+    "dashboard.regional_pack_recommended": "Сунушталган модулдар",
     "cases.regional_pack_for_market": "Аймактык пакет: {{names}}",
     "onboarding.ready_pack_other_markets": "Же даяр рынок үлгүсүнөн баштаңыз",
     "onboarding.ready_pack_set_up_here": "Муну мен үчүн жөндөп бериңиз",

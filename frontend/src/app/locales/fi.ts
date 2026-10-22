@@ -49514,6 +49514,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Kieltäsi lähinnä olevat markkinat",
     "dashboard.market_cases.all_for_market": "Kaikki markkinan {{market}} tapaukset ({{count}})",
     "dashboard.market_cases.empty": "Yksikään tapaus ei vielä nimeä markkinaa. Koko kirjasto on yhden klikkauksen päässä.",
+    "dashboard.regional_pack_recommended": "Suositellut moduulit",
     "cases.regional_pack_for_market": "Alueellinen paketti: {{names}}",
     "onboarding.ready_pack_other_markets": "Tai aloita markkinamallista",
     "onboarding.ready_pack_set_up_here": "Määritä tämä puolestani",

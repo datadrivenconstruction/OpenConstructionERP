@@ -49888,6 +49888,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Tržište najbliže vašem jeziku",
     "dashboard.market_cases.all_for_market": "Svi scenariji za tržište {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Nijedan scenarij još ne navodi tržište. Cijela je knjižnica na jedan klik.",
+    "dashboard.regional_pack_recommended": "Preporučeni moduli",
     "cases.regional_pack_for_market": "Regionalni paket: {{names}}",
     "onboarding.ready_pack_other_markets": "Ili počnite od unaprijed postavljenog tržišta",
     "onboarding.ready_pack_set_up_here": "Postavi to umjesto mene",

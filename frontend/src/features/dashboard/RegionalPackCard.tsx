@@ -351,6 +351,13 @@ export function RegionalPackCard() {
             value={manifest.default_modules.length}
           />
         )}
+        {(manifest.recommended_modules?.length ?? 0) > 0 && (
+          <PackTile
+            icon={Blocks}
+            label={t('dashboard.regional_pack_recommended', { defaultValue: 'Recommended modules' })}
+            value={manifest.recommended_modules?.length}
+          />
+        )}
       </ul>
 
       {validation.kind === 'many' && rulesOpen && (

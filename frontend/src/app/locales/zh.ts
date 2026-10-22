@@ -51910,6 +51910,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "与您的语言最接近的市场",
     "dashboard.market_cases.all_for_market": "{{market}}的全部案例（{{count}}）",
     "dashboard.market_cases.empty": "暂时还没有案例指明市场。整个案例库一键可达。",
+    "dashboard.regional_pack_recommended": "推荐的模块",
     "cases.regional_pack_for_market": "区域数据包：{{names}}",
     "onboarding.ready_pack_other_markets": "或从市场预设开始",
     "onboarding.ready_pack_set_up_here": "帮我设置好",
