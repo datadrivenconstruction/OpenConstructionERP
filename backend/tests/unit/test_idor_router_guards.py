@@ -750,6 +750,8 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "apply_tender_winner",
         "list_package_recipients",
         "add_package_recipient",
+        "preview_recipient_import",
+        "import_package_recipients",
         "remove_package_recipient",
         "distribute_package",
         "list_bid_invitations",
