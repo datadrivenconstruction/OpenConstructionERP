@@ -19,7 +19,7 @@
  * - 16k+ elements tested
  */
 
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Search,
@@ -42,6 +42,13 @@ import {
   Plus,
 } from 'lucide-react';
 import type { BIMElementGroup } from './api';
+import BIMPropertyFilterBar, { type FilterChip } from './BIMPropertyFilterBar';
+import {
+  decodeUrlFilter,
+  encodeUrlFilter,
+  matchesAll,
+  type PropertyCondition,
+} from './bimGrouping';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { getCategoryColor } from '@/shared/ui/BIMViewer/ElementManager';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
@@ -87,6 +94,8 @@ export interface BIMFilterState {
    *  true so first-time users see only real building elements. */
   buildingsOnly: boolean;
   groupBy: GroupBy;
+  /** Property conditions, AND-ed (equals / contains / numeric range). */
+  conditions?: PropertyCondition[];
 }
 
 interface BIMFilterPanelProps {
@@ -144,6 +153,14 @@ interface BIMFilterPanelProps {
    *  the "Clear" button on the isolation banner so the user can exit
    *  isolation from the same place where its scope is displayed. */
   onClearIsolation?: () => void;
+  /** Whether every parameter is loaded (not just the grouping subset). */
+  propertiesLoaded?: boolean;
+  propertiesLoading?: boolean;
+  onLoadProperties?: () => void;
+  /** Encoded filter from the URL (`?bf=`), applied once per model. */
+  urlFilter?: string | null;
+  /** Called with the encoded filter (or null) whenever it changes. */
+  onUrlFilterChange?: (encoded: string | null) => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -393,6 +410,11 @@ export default function BIMFilterPanel({
   onQuickTakeoff,
   visibleElementCount: _visibleElementCount,
   onSaveAsGroup,
+  propertiesLoaded,
+  propertiesLoading,
+  onLoadProperties,
+  urlFilter,
+  onUrlFilterChange,
   savedGroups,
   onApplyGroup,
   onLinkGroupToBOQ,
@@ -414,6 +436,7 @@ export default function BIMFilterPanel({
     types: new Set(),
     buildingsOnly: true,
     groupBy: 'type',
+    conditions: [],
   });
   /** Top-level grouping selector - defaults to "By Category" because
    *  it works equally well for RVT (categories) and IFC (entities)
@@ -449,12 +472,54 @@ export default function BIMFilterPanel({
       types: new Set(),
       buildingsOnly: true,
       groupBy: 'type',
+      conditions: [],
     });
     setExpandedCategories(new Set());
     setExpandedGroups(new Set());
     setExpandedBuckets(new Set(['structure', 'envelope', 'openings', 'mep']));
     setActiveGroupId(null);
   }, [modelId]);
+
+  // A shared link carries the filter in `?bf=`: apply it once per model,
+  // then mirror every change back so the address bar always reproduces it.
+  const urlAppliedFor = useRef<string | undefined | null>(null);
+  useEffect(() => {
+    if (urlAppliedFor.current === (modelId ?? '')) return;
+    urlAppliedFor.current = modelId ?? '';
+    const parsed = decodeUrlFilter(urlFilter);
+    if (!parsed) return;
+    setState((prev) => ({
+      ...prev,
+      search: parsed.search,
+      storeys: new Set(parsed.storeys),
+      types: new Set(parsed.types),
+      buildingsOnly: parsed.buildingsOnly,
+      conditions: parsed.conditions,
+    }));
+    // urlFilter is read only when the model changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modelId]);
+  useEffect(() => {
+    if (!onUrlFilterChange || urlAppliedFor.current !== (modelId ?? '')) return;
+    onUrlFilterChange(
+      encodeUrlFilter({
+        search: state.search,
+        storeys: [...state.storeys],
+        types: [...state.types],
+        buildingsOnly: state.buildingsOnly,
+        conditions: state.conditions ?? [],
+      }),
+    );
+  }, [state, onUrlFilterChange, modelId]);
+
+  // Ids passing the property conditions, evaluated on the panel's rows
+  // (which may carry every parameter) so the viewer's skinny rows can be
+  // tested by id.
+  const conditionIds = useMemo(() => {
+    const conds = state.conditions ?? [];
+    if (conds.length === 0) return null;
+    return new Set(elements.filter((el) => matchesAll(el, conds)).map((el) => el.id));
+  }, [elements, state.conditions]);
 
   // ── window.__oeBimFilter bridge (v3.12.0 / Stream D) ─────────────────
   // Saved-views need to capture the panel's filter state without forcing
@@ -774,6 +839,7 @@ export default function BIMFilterPanel({
         const tpe = getTypeKey(el, format);
         // Buildings-only toggle hides annotation/analytical noise
         if (s.buildingsOnly && isNoiseCategory(tpe)) return false;
+        if (conditionIds && !conditionIds.has(el.id)) return false;
         // Storey filter (empty set = show all).  Elements without a storey
         // are always visible - hiding them when the user picks a specific
         // level silently drops "unassigned" elements which is confusing.
@@ -810,7 +876,7 @@ export default function BIMFilterPanel({
       const count = elements.filter(predicate).length;
       onFilterChange(predicate, count);
     },
-    [elements, onFilterChange, format],
+    [elements, onFilterChange, format, conditionIds],
   );
 
   // Re-apply whenever state changes
@@ -840,7 +906,9 @@ export default function BIMFilterPanel({
       search: '',
       storeys: new Set(),
       types: new Set(),
+      conditions: [],
     }));
+    setActiveGroupId(null);
   }, []);
 
   const toggleBucket = useCallback((bucket: BIMCategoryBucket) => {
@@ -876,7 +944,32 @@ export default function BIMFilterPanel({
   }, []);
 
   const hasActiveFilters =
-    state.search.length > 0 || state.storeys.size > 0 || state.types.size > 0;
+    state.search.length > 0 ||
+    state.storeys.size > 0 ||
+    state.types.size > 0 ||
+    (state.conditions?.length ?? 0) > 0;
+
+  const baseChips: FilterChip[] = [
+    ...(state.search
+      ? [
+          {
+            id: 'search',
+            label: t('bim.pfilter.chip_search', { defaultValue: 'Search: {{query}}', query: state.search }),
+            onRemove: () => setState((p) => ({ ...p, search: '' })),
+          },
+        ]
+      : []),
+    ...[...state.storeys].map((st) => ({
+      id: `storey-${st}`,
+      label: st,
+      onRemove: () => toggleSet('storeys', st),
+    })),
+    ...[...state.types].map((tp) => ({
+      id: `type-${tp}`,
+      label: prettifyCategoryName(tp),
+      onRemove: () => toggleSet('types', tp),
+    })),
+  ];
 
   // ── Grouped element tree (for element explorer) ─────────────────────
   //
@@ -894,6 +987,7 @@ export default function BIMFilterPanel({
       if (isolationSet && !isolationSet.has(el.id)) return false;
       const tpe = getTypeKey(el, format);
       if (state.buildingsOnly && isNoiseCategory(tpe)) return false;
+      if (conditionIds && !conditionIds.has(el.id)) return false;
       // Mirror applyFilters()/the 3D viewport: a storey filter only narrows
       // elements that actually carry a storey, so storey-less elements stay
       // visible in the panel exactly as they do in the viewport. The two
@@ -929,7 +1023,7 @@ export default function BIMFilterPanel({
       }
       return true;
     });
-  }, [elements, state, format, isolationSet]);
+  }, [elements, state, format, isolationSet, conditionIds]);
 
   const groupedElements = useMemo(() => {
     const groups = new Map<string, BIMElementData[]>();
@@ -1084,6 +1178,20 @@ export default function BIMFilterPanel({
             })()}
           </div>
         )}
+
+        <BIMPropertyFilterBar
+          elements={elements}
+          conditions={state.conditions ?? []}
+          onChange={(next) => {
+            setState((p) => ({ ...p, conditions: next }));
+            setActiveGroupId(null);
+          }}
+          baseChips={baseChips}
+          onClearAll={clearAll}
+          propertiesLoaded={propertiesLoaded}
+          propertiesLoading={propertiesLoading}
+          onLoadProperties={onLoadProperties}
+        />
 
         {/* Visible count + clear */}
         <div className="flex items-center justify-between mt-2 text-[11px] text-content-tertiary">

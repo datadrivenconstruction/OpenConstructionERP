@@ -100,6 +100,10 @@ import {
   type LinkFromModelTarget,
 } from './quantityRuleLinks';
 import SaveGroupModal from './SaveGroupModal';
+import { URL_FILTER_PARAM, withResolvedMembers } from './bimGrouping';
+
+/** Models up to this many elements load every parameter for the sidebar at once. */
+const FULL_PROPS_AUTO_LIMIT = 3000;
 import CreateTaskFromBIMModal from './CreateTaskFromBIMModal';
 import LinkDocumentToBIMModal from './LinkDocumentToBIMModal';
 import LinkActivityToBIMModal from './LinkActivityToBIMModal';
@@ -2692,9 +2696,38 @@ export function BIMPage() {
     enabled: elementsQuery.isSuccess && !!activeModelId,
     staleTime: 30_000,
   });
-  const elementsWithLinks = useMemo(
-    () => mergeBoqLinkRollup(elements, modelBoqLinksQuery.data?.items),
-    [elements, modelBoqLinksQuery.data],
+  // Every parameter, for grouping and filtering by custom properties. Small
+  // models load it at once; large ones only when the sidebar asks for it.
+  const [fullPropsRequested, setFullPropsRequested] = useState(false);
+  const fullPropsQuery = useQuery({
+    queryKey: ['bim-elements', activeModelId, effectiveGroupId ?? 'all', 'skeleton', 'props'],
+    queryFn: () =>
+      fetchBIMElements(activeModelId!, {
+        groupId: effectiveGroupId,
+        skeleton: true,
+        includeProperties: true,
+      }),
+    enabled:
+      elementsQuery.isSuccess &&
+      !!activeModelId &&
+      (fullPropsRequested || elementsTotal <= FULL_PROPS_AUTO_LIMIT),
+    staleTime: 5 * 60_000,
+  });
+  const elementsWithLinks = useMemo(() => {
+    const full = fullPropsQuery.data?.items;
+    let rows = elements;
+    if (full && full.length > 0) {
+      const props = new Map(full.map((el) => [el.id, el.properties]));
+      rows = elements.map((el) => {
+        const p = props.get(el.id);
+        return p ? { ...el, properties: p } : el;
+      });
+    }
+    return mergeBoqLinkRollup(rows, modelBoqLinksQuery.data?.items);
+  }, [elements, fullPropsQuery.data, modelBoqLinksQuery.data]);
+  const filteredSidebarElements = useMemo(
+    () => (filterPredicate ? elementsWithLinks.filter(filterPredicate) : elementsWithLinks),
+    [elementsWithLinks, filterPredicate],
   );
   const linkedElementIds = useMemo(
     () => new Set((modelBoqLinksQuery.data?.items ?? []).flatMap((r) => r.element_ids)),
@@ -2838,7 +2871,12 @@ export function BIMPage() {
     queryFn: () => listElementGroups(projectId, activeModelId),
     enabled: !!projectId && !!activeModelId,
   });
-  const savedGroups: BIMElementGroup[] = groupsQuery.data ?? [];
+  // Resolve members against the loaded model: a dynamic group's server
+  // snapshot can be stale or empty, which read as "grouping does not work".
+  const savedGroups: BIMElementGroup[] = useMemo(
+    () => (groupsQuery.data ?? []).map((g) => withResolvedMembers(g, elements)),
+    [groupsQuery.data, elements],
+  );
 
   // Resolve the active group name for the lazy-load info bar.
   const activeGroupMeta = useMemo(() => {
@@ -3068,6 +3106,23 @@ export function BIMPage() {
     // re-subscribes (cheap) and flushes the new selection immediately.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeModelId, selectionSignature]);
+
+  // Mirror the sidebar filter into `?bf=` so a copied link reproduces the view.
+  const handleUrlFilterChange = useCallback(
+    (encoded: string | null) => {
+      setSearchParams(
+        (prev) => {
+          if ((prev.get(URL_FILTER_PARAM) ?? null) === encoded) return prev;
+          const next = new URLSearchParams(prev);
+          if (encoded) next.set(URL_FILTER_PARAM, encoded);
+          else next.delete(URL_FILTER_PARAM);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   // Stable callback for BIMFilterPanel - uses functional setState so it
   // doesn't need to track filterPredicate in its dependency list.
@@ -4169,6 +4224,16 @@ export function BIMPage() {
               onHighlightGroup={handleHighlightGroup}
               onNavigateToBOQ={handleNavigateToBOQ}
               onGroupUpdated={handleGroupUpdated}
+              filteredElements={filteredSidebarElements}
+              elementsLoading={elementsQuery.isLoading}
+              modelName={activeModel?.name}
+              onIsolateIds={(ids) => setIsolatedIds(ids.length > 0 ? ids : null)}
+              onSelectIds={setBIMSelection}
+              propertiesLoaded={!!fullPropsQuery.data}
+              propertiesLoading={fullPropsQuery.isFetching}
+              onLoadProperties={() => setFullPropsRequested(true)}
+              urlFilter={searchParams.get(URL_FILTER_PARAM)}
+              onUrlFilterChange={handleUrlFilterChange}
             />
 
           </div>

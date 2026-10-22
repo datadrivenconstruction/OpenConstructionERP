@@ -20,9 +20,8 @@
  *   - Tab button styling mirrors BIMRightPanelTabs (border-b-2,
  *     oe-blue active colour) so the two tab strips feel like the
  *     same component family.
- *   - The Groups tab is DISABLED (not hidden) when there are no
- *     saved groups — keeps the tab layout stable and signals the
- *     feature exists.
+ *   - The Groups tab always opens on ad hoc "Group by" over the
+ *     filtered elements; saved groups sit below it.
  */
 
 import { useState } from 'react';
@@ -32,6 +31,7 @@ import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import BIMFilterPanel from './BIMFilterPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
+import BIMGroupByPanel from './BIMGroupByPanel';
 import type { BIMElementGroup } from './api';
 import type { BIMFilterState } from './BIMFilterPanel';
 
@@ -76,6 +76,23 @@ export interface BIMFilterGroupsPanelProps {
   onGroupUpdated?: () => void;
   /** Open a new quantity rule fed by the group, for a BOQ position. */
   onUseGroupAsQuantity?: (g: BIMElementGroup) => void;
+
+  /* ── Ad hoc grouping ────────────────────────────────────────── */
+  /** Elements passing the active filters; defaults to `elements`. */
+  filteredElements?: BIMElementData[];
+  elementsLoading?: boolean;
+  modelName?: string;
+  /** Isolate ids in 3D (empty clears). Grouping is disabled without it. */
+  onIsolateIds?: (ids: string[]) => void;
+  /** Select ids in 3D (empty clears). */
+  onSelectIds?: (ids: string[]) => void;
+  /** Whether every parameter (not just the grouping subset) is loaded. */
+  propertiesLoaded?: boolean;
+  propertiesLoading?: boolean;
+  onLoadProperties?: () => void;
+  /** Encoded filter from the URL, applied once per model. */
+  urlFilter?: string | null;
+  onUrlFilterChange?: (encoded: string | null) => void;
 }
 
 export default function BIMFilterGroupsPanel(props: BIMFilterGroupsPanelProps) {
@@ -176,48 +193,72 @@ export default function BIMFilterGroupsPanel(props: BIMFilterGroupsPanelProps) {
             onSmartFilter={props.onSmartFilter}
             isolatedIds={props.isolatedIds}
             onClearIsolation={props.onClearIsolation}
+            propertiesLoaded={props.propertiesLoaded}
+            propertiesLoading={props.propertiesLoading}
+            onLoadProperties={props.onLoadProperties}
+            urlFilter={props.urlFilter}
+            onUrlFilterChange={props.onUrlFilterChange}
           />
         )}
-        {activeTab === 'groups' && groupsCount === 0 && !props.onCreateGroup && (
-          // BIMGroupsPanel renders nothing without groups, which collapsed
-          // the sidebar to a bare strip. Say what a group is and where to make one.
+        {activeTab === 'groups' && (
           <div
-            data-testid="bim-groups-empty"
-            className="flex flex-col items-center text-center gap-2 px-5 py-8 w-[280px] bg-surface-primary"
+            id="bim-filter-groups-panel-groups"
+            role="tabpanel"
+            aria-labelledby="bim-filter-groups-tab-groups"
+            className="flex-1 min-h-0 overflow-y-auto flex flex-col w-[320px] bg-surface-primary border-e border-border-light"
           >
-            <Layers size={22} className="text-content-quaternary" />
-            <p className="text-xs font-semibold text-content-primary">
-              {t('bim.groups_empty_title', { defaultValue: 'No saved groups yet' })}
-            </p>
-            <p className="text-[11px] text-content-tertiary">
-              {t('bim.groups_empty_desc', {
-                defaultValue:
-                  'Filter the model to the elements you need, then click "Save as group" to reuse the selection for linking and quantities.',
-              })}
-            </p>
-            <button
-              type="button"
-              onClick={() => setActiveTab('filters')}
-              className="mt-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark"
-            >
-              {t('bim.groups_empty_cta', { defaultValue: 'Open filters' })}
-            </button>
+            {props.onIsolateIds && (
+              <BIMGroupByPanel
+                elements={props.filteredElements ?? props.elements}
+                isLoading={props.elementsLoading}
+                modelName={props.modelName}
+                onIsolate={props.onIsolateIds}
+                onSelect={props.onSelectIds ?? (() => {})}
+                propertiesLoaded={props.propertiesLoaded}
+                propertiesLoading={props.propertiesLoading}
+                onLoadProperties={props.onLoadProperties}
+              />
+            )}
+            {groupsCount === 0 && !props.onCreateGroup ? (
+              // Say what a saved group is and where to make one.
+              <div
+                data-testid="bim-groups-empty"
+                className="flex flex-col items-center text-center gap-2 px-5 py-6"
+              >
+                <Layers size={20} className="text-content-quaternary" />
+                <p className="text-xs font-semibold text-content-primary">
+                  {t('bim.groups_empty_title', { defaultValue: 'No saved groups yet' })}
+                </p>
+                <p className="text-[11px] text-content-tertiary">
+                  {t('bim.groups_empty_desc', {
+                    defaultValue:
+                      'Filter the model to the elements you need, then click "Save as group" to reuse the selection for linking and quantities.',
+                  })}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('filters')}
+                  className="mt-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark"
+                >
+                  {t('bim.groups_empty_cta', { defaultValue: 'Open filters' })}
+                </button>
+              </div>
+            ) : (
+              <BIMGroupsPanel
+                savedGroups={props.savedGroups}
+                elements={props.elements}
+                projectId={props.projectId}
+                onIsolateGroup={props.onIsolateGroup}
+                onHighlightGroup={props.onHighlightGroup}
+                onLinkToBOQ={props.onLinkGroupToBOQ ?? (() => {})}
+                onNavigateToBOQ={props.onNavigateToBOQ}
+                onCreateGroup={props.onCreateGroup}
+                onDeleteGroup={props.onDeleteGroup}
+                onGroupUpdated={props.onGroupUpdated}
+                onUseAsQuantitySource={props.onUseGroupAsQuantity}
+              />
+            )}
           </div>
-        )}
-        {activeTab === 'groups' && (groupsCount > 0 || !!props.onCreateGroup) && (
-          <BIMGroupsPanel
-            savedGroups={props.savedGroups}
-            elements={props.elements}
-            projectId={props.projectId}
-            onIsolateGroup={props.onIsolateGroup}
-            onHighlightGroup={props.onHighlightGroup}
-            onLinkToBOQ={props.onLinkGroupToBOQ ?? (() => {})}
-            onNavigateToBOQ={props.onNavigateToBOQ}
-            onCreateGroup={props.onCreateGroup}
-            onDeleteGroup={props.onDeleteGroup}
-            onGroupUpdated={props.onGroupUpdated}
-            onUseAsQuantitySource={props.onUseGroupAsQuantity}
-          />
         )}
       </div>
     </div>

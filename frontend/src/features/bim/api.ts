@@ -733,6 +733,8 @@ export async function fetchBIMElements(
     offset?: number;
     groupId?: string | null;
     skeleton?: boolean;
+    /** Skeleton only: keep every property for grouping by custom parameters. */
+    includeProperties?: boolean;
   },
 ): Promise<BIMElementsResponse> {
   const skeleton = opts?.skeleton ?? false;
@@ -741,6 +743,7 @@ export async function fetchBIMElements(
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (opts?.groupId) params.set('group_id', opts.groupId);
   if (skeleton) params.set('skeleton', 'true');
+  if (skeleton && opts?.includeProperties) params.set('include_properties', 'true');
   return apiGet<BIMElementsResponse>(
     `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/?${params.toString()}`,
   );

@@ -25,7 +25,7 @@ from types import SimpleNamespace
 from typing import Any, NamedTuple
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload, selectinload
@@ -4382,18 +4382,30 @@ class BIMHubService:
     ) -> list[BIMElementGroupResponse]:
         """List element groups for a project, optionally scoped to one model.
 
-        For dynamic groups the cached ``element_ids`` snapshot is returned as
-        ``member_element_ids``; it is NOT re-resolved on list calls. Callers
-        that need up-to-the-second membership should PATCH the group (which
-        triggers a re-resolve) or fetch via the dedicated resolve endpoint.
+        With ``model_id`` the list also carries the project-wide groups
+        (``model_id`` NULL), because they span every model, this one included.
+
+        Dynamic groups are resolved on read: the cached snapshot goes stale as
+        soon as a model is added or re-imported, and a seeded group starts
+        empty. The live members are returned without being written back, so
+        the list stays a read on a read-only deployment.
         """
         stmt = select(BIMElementGroup).where(BIMElementGroup.project_id == project_id)
         if model_id is not None:
-            stmt = stmt.where(BIMElementGroup.model_id == model_id)
+            stmt = stmt.where(or_(BIMElementGroup.model_id == model_id, BIMElementGroup.model_id.is_(None)))
         stmt = stmt.order_by(BIMElementGroup.created_at.asc())
         result = await self.session.execute(stmt)
         groups = list(result.scalars().all())
-        return [self._group_to_response(g) for g in groups]
+        responses: list[BIMElementGroupResponse] = []
+        for group in groups:
+            response = self._group_to_response(group)
+            if group.is_dynamic and (group.filter_criteria or {}):
+                members = await self._resolve_members_for_group(group)
+                response = response.model_copy(
+                    update={"member_element_ids": members, "element_ids": members, "element_count": len(members)}
+                )
+            responses.append(response)
+        return responses
 
     async def get_element_group(self, group_id: uuid.UUID) -> BIMElementGroup:
         """Get a BIM element group by id. Raises 404 if not found."""

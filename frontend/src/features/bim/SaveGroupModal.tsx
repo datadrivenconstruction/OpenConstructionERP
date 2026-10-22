@@ -24,6 +24,7 @@ import {
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { GROUP_COLORS } from './BIMGroupsPanel';
 import { useToastStore } from '@/stores/useToastStore';
+import { ApiError, isDemoReadOnlyRefusal } from '@/shared/lib/api';
 import { Button } from '@/shared/ui';
 import {
   WideModal,
@@ -181,6 +182,20 @@ export default function SaveGroupModal({
       onClose();
     },
     onError: (err: Error) => {
+      // The public demo refuses every write; say what still works instead
+      // of a bare error, and close so ad hoc grouping stays in reach.
+      if (err instanceof ApiError && isDemoReadOnlyRefusal(err.status, err.body)) {
+        addToast({
+          type: 'info',
+          title: t('bim.save_as_group', { defaultValue: 'Save as group' }),
+          message: t('bim.groups_save_demo', {
+            defaultValue:
+              'Saved groups are not kept on the public demo. Grouping and filters still work here; install the platform to save groups.',
+          }),
+        });
+        onClose();
+        return;
+      }
       addToast({
         type: 'error',
         title: t('common.error', { defaultValue: 'Error' }),

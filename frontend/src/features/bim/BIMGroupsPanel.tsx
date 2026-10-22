@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import type { BIMElementGroup } from './api';
 import { updateElementGroup } from './api';
+import { quantityOf } from './bimGrouping';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -144,11 +145,10 @@ export default function BIMGroupsPanel({
       const memberIds = Array.isArray(group.member_element_ids) ? group.member_element_ids : [];
       for (const elId of memberIds) {
         const el = elementMap.get(elId);
-        if (el?.quantities) {
-          const q = el.quantities as Record<string, number>;
-          vol += q.volume_m3 ?? q.Volume ?? q.volume ?? 0;
-          area += q.area_m2 ?? q.Area ?? q.area ?? 0;
-          len += q.length_m ?? q.Length ?? q.length ?? 0;
+        if (el) {
+          vol += quantityOf(el, 'volume');
+          area += quantityOf(el, 'area');
+          len += quantityOf(el, 'length');
         }
       }
       result.set(group.id, { volume: vol, area: area, length: len });

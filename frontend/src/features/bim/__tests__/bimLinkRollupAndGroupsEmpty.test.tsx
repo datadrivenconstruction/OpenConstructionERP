@@ -10,6 +10,7 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 
 vi.mock('../BIMFilterPanel', () => ({ default: () => <div data-testid="filters-body" /> }));
 vi.mock('../BIMGroupsPanel', () => ({ default: () => <div data-testid="groups-body" /> }));
+vi.mock('../BIMGroupByPanel', () => ({ default: () => <div data-testid="groupby-body" /> }));
 
 import BIMFilterGroupsPanel from '../BIMFilterGroupsPanel';
 import { mergeBoqLinkRollup } from '../bimLinkRollup';
@@ -52,6 +53,13 @@ describe('BIMFilterGroupsPanel Groups tab', () => {
     expect(screen.queryByTestId('groups-body')).toBeNull();
     fireEvent.click(screen.getByText('Open filters'));
     expect(screen.getByTestId('filters-body')).toBeTruthy();
+  });
+
+  it('opens on ad hoc grouping even with no saved groups', () => {
+    render(<BIMFilterGroupsPanel {...props} onIsolateIds={vi.fn()} />);
+    fireEvent.click(screen.getByTestId('bim-filter-groups-tab-groups'));
+    expect(screen.getByTestId('groupby-body')).toBeTruthy();
+    expect(screen.getByTestId('bim-groups-empty')).toBeTruthy();
   });
 
   it('shows the groups list when there are groups', () => {

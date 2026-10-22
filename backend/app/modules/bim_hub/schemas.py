@@ -8,6 +8,7 @@ BOQ links, quantity maps, element groups, and model diffs.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
@@ -54,6 +55,50 @@ def _validate_property_filter(raw: dict[str, Any] | None) -> dict[str, Any] | No
             message.replace("{", "{{").replace("}", "}}"),
             {"code": exc.code, "key": exc.key, "op": exc.op},
         ) from exc
+
+
+_GROUP_LIST_KEYS = ("element_type", "category", "discipline", "storey")
+_HEX_COLOR = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
+
+
+def _validate_group_filter_criteria(raw: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Reject a saved-group filter the resolver would silently misread.
+
+    List keys take a string or a list of strings, ``name_contains`` a string,
+    ``property_filter`` the same conditions a quantity rule accepts.
+    """
+    if raw is None:
+        return None
+    for key in _GROUP_LIST_KEYS:
+        value = raw.get(key)
+        if value is None:
+            continue
+        items = value if isinstance(value, list) else [value]
+        if not all(isinstance(item, str) for item in items):
+            raise PydanticCustomError(
+                "bim_group_filter",
+                "Filter '{key}' must be a text value or a list of text values",
+                {"key": key},
+            )
+    name_contains = raw.get("name_contains")
+    if name_contains is not None and not isinstance(name_contains, str):
+        raise PydanticCustomError("bim_group_filter", "Filter '{key}' must be a text value", {"key": "name_contains"})
+    if raw.get("property_filter") is not None:
+        if not isinstance(raw["property_filter"], dict):
+            raise PydanticCustomError(
+                "bim_group_filter", "Filter '{key}' must be an object", {"key": "property_filter"}
+            )
+        raw = {**raw, "property_filter": _validate_property_filter(raw["property_filter"])}
+    return raw
+
+
+def _validate_group_color(raw: str | None) -> str | None:
+    """A group colour paints the 3D model, so it must be a CSS hex colour."""
+    if raw is None or raw == "":
+        return None
+    if not _HEX_COLOR.match(raw):
+        raise PydanticCustomError("bim_group_color", "Colour must be a hex value such as #2979ff", {})
+    return raw
 
 
 def _validate_multiplier(raw: str | None) -> str | None:
@@ -982,6 +1027,9 @@ class BIMElementGroupCreate(BaseModel):
     color: str | None = Field(default=None, max_length=20)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    _check_filter = field_validator("filter_criteria")(_validate_group_filter_criteria)
+    _check_color = field_validator("color")(_validate_group_color)
+
 
 class BIMElementGroupUpdate(BaseModel):
     """Partial update for a BIM element group.
@@ -1003,6 +1051,9 @@ class BIMElementGroupUpdate(BaseModel):
     element_ids: list[UUID] | None = None
     color: str | None = Field(default=None, max_length=20)
     metadata: dict[str, Any] | None = None
+
+    _check_filter = field_validator("filter_criteria")(_validate_group_filter_criteria)
+    _check_color = field_validator("color")(_validate_group_color)
 
 
 class BIMElementGroupResponse(BaseModel):

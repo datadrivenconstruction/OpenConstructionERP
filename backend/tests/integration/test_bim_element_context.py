@@ -254,7 +254,12 @@ async def test_the_skeleton_listing_keeps_quantities_and_category(client: AsyncC
             {
                 "stable_id": "w1",
                 "element_type": "Walls",
-                "properties": {"category": "OST_Walls", "comments": "long text"},
+                "properties": {
+                    "category": "OST_Walls",
+                    "comments": "long text",
+                    "Family": "Basic Wall",
+                    "Material": "Brick",
+                },
                 "quantities": {"Volume": 2.5},
             }
         ]
@@ -265,4 +270,10 @@ async def test_the_skeleton_listing_keeps_quantities_and_category(client: AsyncC
     listed = await client.get(f"/api/v1/bim_hub/models/{model_id}/elements/?skeleton=true", headers=auth)
     (row,) = listed.json()["items"]
     assert row["quantities"] == {"Volume": 2.5}
-    assert row["properties"] == {"category": "OST_Walls"}
+    # Grouping properties survive the skinny listing, free text does not.
+    assert row["properties"] == {"category": "OST_Walls", "Family": "Basic Wall", "Material": "Brick"}
+
+    full = await client.get(
+        f"/api/v1/bim_hub/models/{model_id}/elements/?skeleton=true&include_properties=true", headers=auth
+    )
+    assert full.json()["items"][0]["properties"]["comments"] == "long text"

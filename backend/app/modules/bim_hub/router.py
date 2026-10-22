@@ -4366,6 +4366,30 @@ async def _verify_group_access(
     return group
 
 
+#: Properties the skeleton element list keeps, matched lower-case: the ones the
+#: viewer sidebar groups and filters by without loading every parameter.
+_SKELETON_PROPERTY_KEYS = frozenset(
+    {
+        "category",
+        "[other] category",
+        "revit_category",
+        "family",
+        "family_name",
+        "type_name",
+        "family_and_type",
+        "family and type",
+        "objecttype",
+        "object_type",
+        "predefinedtype",
+        "material",
+        "materials",
+        "material_name",
+        "structural material",
+        "structural_material",
+    }
+)
+
+
 @router.get("/element-groups/", response_model=list[BIMElementGroupResponse])
 async def list_element_groups(
     project_id: uuid.UUID = Query(...),
@@ -4889,6 +4913,13 @@ async def list_elements(
             "matching, where those relations are not needed."
         ),
     ),
+    include_properties: bool = Query(
+        default=False,
+        description=(
+            "Skeleton mode only: keep every property instead of the grouping "
+            "subset, so the viewer can group and filter by custom parameters."
+        ),
+    ),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
@@ -4923,13 +4954,17 @@ async def list_elements(
         # which adds up to a 16 MB JSON body for 7 000 elements. The viewer
         # pulls the full property set straight from Parquet on click, so
         # carrying it in the skeleton is pure overhead.
-        # Quantities (a handful of numbers) and the source category stay: the
-        # filter panel sums them and its CSV export writes them.
+        # Quantities and the few properties the sidebar groups by (category,
+        # family, type, material) stay: the filter panel sums and groups them.
         skeleton_items: list[BIMElementResponse] = []
         for e in plain_items:
             resp = BIMElementResponse.model_validate(e)
-            category = (resp.properties or {}).get("category")
-            resp.properties = {"category": category} if category else {}
+            if not include_properties:
+                resp.properties = {
+                    key: value
+                    for key, value in (resp.properties or {}).items()
+                    if key.lower() in _SKELETON_PROPERTY_KEYS and value not in (None, "")
+                }
             resp.metadata = {}
             skeleton_items.append(resp)
         return BIMElementListResponse(
