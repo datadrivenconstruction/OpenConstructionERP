@@ -24,6 +24,7 @@ The module-scoped client + auth fixtures mirror
 from __future__ import annotations
 
 import asyncio
+import base64
 import uuid
 from contextlib import asynccontextmanager
 
@@ -170,21 +171,71 @@ class TestAppBranding:
         delete = await brand_client.delete("/api/v1/branding/", headers=brand_viewer)
         assert delete.status_code == 403, delete.text
 
-    async def test_bad_logo_is_sanitised(
+    async def test_bad_logo_is_rejected_with_its_rule(
         self,
         brand_client: AsyncClient,
         brand_admin: dict[str, str],
     ) -> None:
-        # A logo that is not an image data URL must not be stored; with no name
-        # either, the brand falls back to default.
         put = await brand_client.put(
             "/api/v1/branding/",
             json={"mode": "logo", "logo_data_url": "javascript:alert(1)", "company_name": ""},
             headers=brand_admin,
         )
+        assert put.status_code == 422, put.text
+        assert put.json()["detail"]["rule"] == "branding.logo.data_url"
+
+    async def test_svg_logo_is_stored_without_scripts(
+        self,
+        brand_client: AsyncClient,
+        brand_admin: dict[str, str],
+    ) -> None:
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script>'
+            '<rect width="4" height="4" onclick="x()"/></svg>'
+        )
+        url = "data:image/svg+xml;base64," + base64.b64encode(svg.encode()).decode()
+        put = await brand_client.put("/api/v1/branding/", json={"logo_data_url": url}, headers=brand_admin)
         assert put.status_code == 200, put.text
-        assert put.json()["mode"] == "default"
-        assert put.json()["logo_data_url"] is None
+        stored = base64.b64decode(put.json()["logo_data_url"].split(",", 1)[1]).decode()
+        assert "script" not in stored
+        assert "onload" not in stored
+        assert "onclick" not in stored
+        assert "rect" in stored
+        await brand_client.delete("/api/v1/branding/", headers=brand_admin)
+
+    async def test_png_with_wrong_bytes_is_rejected(
+        self,
+        brand_client: AsyncClient,
+        brand_admin: dict[str, str],
+    ) -> None:
+        fake = "data:image/png;base64," + base64.b64encode(b"<svg onload=1>").decode()
+        put = await brand_client.put("/api/v1/branding/", json={"logo_data_url": fake}, headers=brand_admin)
+        assert put.status_code == 422, put.text
+        assert put.json()["detail"]["rule"] == "branding.logo.content"
+
+    async def test_edit_button_toggle_is_admin_only(
+        self,
+        brand_client: AsyncClient,
+        brand_admin: dict[str, str],
+        brand_viewer: dict[str, str],
+    ) -> None:
+        denied = await brand_client.put("/api/v1/branding/", json={"show_logo_edit": False}, headers=brand_viewer)
+        assert denied.status_code == 403, denied.text
+        denied_colour = await brand_client.put(
+            "/api/v1/branding/", json={"appearance": {"accent_hex": "#123456"}}, headers=brand_viewer
+        )
+        assert denied_colour.status_code == 403, denied_colour.text
+
+        put = await brand_client.put(
+            "/api/v1/branding/",
+            json={"company_name": "Keep", "show_logo_edit": False, "appearance": {"accent_hex": "#1A2B3C"}},
+            headers=brand_admin,
+        )
+        assert put.status_code == 200, put.text
+        got = (await brand_client.get("/api/v1/branding/")).json()
+        assert got["show_logo_edit"] is False
+        assert got["appearance"]["accent_hex"] == "#1a2b3c"
+        await brand_client.delete("/api/v1/branding/", headers=brand_admin)
 
     async def test_admin_can_clear_brand(
         self,

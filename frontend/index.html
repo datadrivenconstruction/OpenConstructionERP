@@ -99,6 +99,7 @@
           radius: ['standard', 'sharp', 'round']
         };
         var value = { accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard' };
+        var customAccent = false;
         function layer(key) {
           try {
             var raw = JSON.parse(localStorage.getItem(key) || 'null');
@@ -106,12 +107,24 @@
             for (var axis in allowed) {
               if (allowed[axis].indexOf(raw[axis]) !== -1) value[axis] = raw[axis];
             }
+            if (raw.accent || raw.accentHex) customAccent = /^#[0-9a-f]{6}$/i.test(raw.accentHex || '');
           } catch (e) { /* unreadable storage: keep what we have */ }
         }
         layer('oe_workspace_appearance_v1');
         layer('oe_appearance_v1');
         var root = document.documentElement;
         for (var k in value) root.setAttribute('data-' + k, value[k]);
+        // A company colour: its stylesheet is cached by src/shared/lib/customAccent.ts.
+        try {
+          var accentCss = customAccent && localStorage.getItem('oe_custom_accent_css_v1');
+          if (accentCss) {
+            var accentStyle = document.createElement('style');
+            accentStyle.id = 'oe-custom-accent';
+            accentStyle.textContent = accentCss;
+            document.head.appendChild(accentStyle);
+            root.setAttribute('data-accent', 'custom');
+          }
+        } catch (e) { /* unreadable storage: keep the preset accent */ }
         if (value.font !== 'system') {
           var link = document.createElement('link');
           link.rel = 'stylesheet';

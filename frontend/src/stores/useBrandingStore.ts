@@ -28,6 +28,45 @@ const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB cap on base64 payload
 
 export type BrandingMode = 'default' | 'logo' | 'text';
 
+/** Workspace-only branding options; set by an admin, read from the server. */
+export interface BrandingOptions {
+  /** Logo variant drawn in dark mode, or null to use the main logo. */
+  logoDarkDataUrl: string | null;
+  /** Show the quick edit button beside the sidebar logo (to admins). */
+  showLogoEdit: boolean;
+  /** Write the company name next to an uploaded logo. */
+  showCompanyName: boolean;
+}
+
+const OPTIONS_KEY = 'oe_branding_options_v1';
+const DEFAULT_OPTIONS: BrandingOptions = { logoDarkDataUrl: null, showLogoEdit: true, showCompanyName: false };
+
+function sanitizeOptions(raw: unknown): BrandingOptions {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const dark = r.logoDarkDataUrl ?? r.logo_dark_data_url;
+  return {
+    logoDarkDataUrl: typeof dark === 'string' && dark.startsWith('data:image/') ? dark : null,
+    showLogoEdit: (r.showLogoEdit ?? r.show_logo_edit) !== false,
+    showCompanyName: (r.showCompanyName ?? r.show_company_name) === true,
+  };
+}
+
+function loadOptions(): BrandingOptions {
+  try {
+    return sanitizeOptions(JSON.parse(localStorage.getItem(OPTIONS_KEY) || 'null'));
+  } catch {
+    return { ...DEFAULT_OPTIONS };
+  }
+}
+
+function saveOptions(o: BrandingOptions): void {
+  try {
+    localStorage.setItem(OPTIONS_KEY, JSON.stringify(o));
+  } catch {
+    /* storage unavailable: options still apply for this session */
+  }
+}
+
 export interface BrandingState {
   mode: BrandingMode;
   /** Base64 data URL of the uploaded logo (only valid when mode='logo'). */
@@ -56,6 +95,10 @@ export interface BrandingState {
    * the login page does, so invited users see the workspace brand.
    */
   hydrateFromServer: () => Promise<void>;
+  /** Workspace-only options (dark logo, edit button, name beside logo). */
+  options: BrandingOptions;
+  /** Apply options the server accepted (or that came back from it). */
+  setOptions: (raw: unknown) => void;
   /**
    * Persist the current branding to the server so it follows the workspace to
    * every browser and to invited users. Admin only: a non-admin (or a pre-auth
@@ -71,6 +114,9 @@ interface ServerBranding {
   logo_data_url?: string | null;
   logo_png_data_url?: string | null;
   company_name?: string;
+  logo_dark_data_url?: string | null;
+  show_logo_edit?: boolean;
+  show_company_name?: boolean;
   /** Workspace default UI appearance (style axes plus `menu`); see useAppearanceStore. */
   appearance?: { menu?: unknown } | null;
 }
@@ -160,6 +206,12 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
 
   return {
     ...initial,
+    options: loadOptions(),
+    setOptions: (raw) => {
+      const options = sanitizeOptions(raw);
+      saveOptions(options);
+      set({ options });
+    },
     setLogo: (dataUrl, pngDataUrl = null) => {
       const current = get();
       if (!dataUrl) {
@@ -208,6 +260,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
         const r = await apiGet<ServerBranding>('/v1/branding/');
         useAppearanceStore.getState().setWorkspaceDefault(r.appearance ?? null);
         useAppearanceStore.getState().setWorkspaceMenu(r.appearance?.menu ?? null);
+        get().setOptions(r);
         const next = fromServer(r);
         const current = get();
         if (

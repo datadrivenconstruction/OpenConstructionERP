@@ -52,6 +52,8 @@ interface AppearanceState {
   setAppearance: (value: Appearance) => void;
   /** Change one axis; the rest keep their current effective value. */
   setAxis: <K extends AppearanceAxis>(axis: K, value: Appearance[K]) => void;
+  /** Use a free company colour (#rrggbb) as the personal accent. */
+  setAccentHex: (hex: string) => void;
   /** Drop the personal override and follow the workspace default again. */
   followWorkspace: () => void;
   /** Take the workspace default from the branding payload (unvalidated input). */
@@ -128,7 +130,14 @@ export const useAppearanceStore = create<AppearanceState>((set, get) => {
     },
 
     setAxis: (axis, value) => {
-      get().setAppearance({ ...get().effective, [axis]: value });
+      const next: Appearance = { ...get().effective, [axis]: value };
+      // Picking a preset accent replaces a custom colour.
+      if (axis === 'accent') delete next.accentHex;
+      get().setAppearance(next);
+    },
+
+    setAccentHex: (hex) => {
+      get().setAppearance({ ...get().effective, accentHex: hex });
     },
 
     followWorkspace: () => {

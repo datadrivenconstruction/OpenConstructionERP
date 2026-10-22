@@ -13,6 +13,8 @@
  * an admin set (cached from GET /api/v1/branding/), then the platform default.
  */
 
+import { applyCustomAccent, normalizeHex } from './customAccent';
+
 export const ACCENTS = ['blue', 'teal', 'violet', 'emerald', 'amber', 'graphite', 'crimson'] as const;
 export const FONTS = ['system', 'inter', 'ibm-plex-sans', 'source-sans-3'] as const;
 export const DENSITIES = ['comfortable', 'compact'] as const;
@@ -28,6 +30,8 @@ export interface Appearance {
   font: FontChoice;
   density: Density;
   radius: Radius;
+  /** Free company colour (#rrggbb); wins over `accent` while set. */
+  accentHex?: string;
 }
 
 export type AppearanceAxis = keyof Appearance;
@@ -92,6 +96,7 @@ export const APPEARANCE_PRESETS: readonly AppearancePreset[] = [
 
 /** The preset an appearance matches exactly, or null for a custom mix. */
 export function matchPreset(a: Appearance): AppearancePreset['id'] | null {
+  if (a.accentHex) return null;
   const hit = APPEARANCE_PRESETS.find((p) =>
     (Object.keys(PLATFORM_APPEARANCE) as AppearanceAxis[]).every((k) => p.value[k] === a[k]),
   );
@@ -103,12 +108,15 @@ export function sanitizeAppearance(raw: unknown): Partial<Appearance> | null {
   if (!raw || typeof raw !== 'object') return null;
   const src = raw as Record<string, unknown>;
   const out: Partial<Appearance> = {};
-  for (const axis of Object.keys(AXIS_VALUES) as AppearanceAxis[]) {
+  for (const axis of Object.keys(AXIS_VALUES) as (keyof typeof AXIS_VALUES)[]) {
     const v = src[axis];
     if (typeof v === 'string' && (AXIS_VALUES[axis] as readonly string[]).includes(v)) {
       (out as Record<string, string>)[axis] = v;
     }
   }
+  // The server spells it accent_hex; the device store accentHex.
+  const hex = normalizeHex(String(src.accentHex ?? src.accent_hex ?? ''));
+  if (hex) out.accentHex = hex;
   return Object.keys(out).length ? out : null;
 }
 
@@ -116,7 +124,13 @@ export function resolveAppearance(
   user: Partial<Appearance> | null,
   workspace: Partial<Appearance> | null,
 ): Appearance {
-  return { ...PLATFORM_APPEARANCE, ...(workspace ?? {}), ...(user ?? {}) };
+  const out: Appearance = { ...PLATFORM_APPEARANCE, ...(workspace ?? {}), ...(user ?? {}) };
+  // Accent and custom colour are one choice: take both from the same layer, so a
+  // personal preset accent is not overridden by the workspace's custom colour.
+  const accentLayer = user && (user.accent || user.accentHex) ? user : workspace;
+  if (accentLayer?.accentHex) out.accentHex = accentLayer.accentHex;
+  else delete out.accentHex;
+  return out;
 }
 
 export function readStoredAppearance(key: string): Partial<Appearance> | null {
@@ -159,7 +173,8 @@ export function ensureFontLoaded(font: FontChoice): void {
 
 /** Put an appearance on <html>. Mirrors the boot script in index.html. */
 export function applyAppearance(a: Appearance, root: HTMLElement = document.documentElement): void {
-  root.dataset.accent = a.accent;
+  applyCustomAccent(a.accentHex ?? null);
+  root.dataset.accent = a.accentHex ? 'custom' : a.accent;
   root.dataset.font = a.font;
   root.dataset.density = a.density;
   root.dataset.radius = a.radius;

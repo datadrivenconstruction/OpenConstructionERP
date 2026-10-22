@@ -16,6 +16,8 @@ import { WebhookLeads } from './WebhookLeads';
 import { DesktopServerCard } from './DesktopServerCard';
 import { TextSizeSetting } from './TextSizeSetting';
 import { AppearanceStyleCard } from './AppearanceStyleCard';
+import { WorkspaceBrandCard } from './WorkspaceBrandCard';
+import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
 import VectorStatusCard from './VectorStatusCard';
 import SemanticModelSettings from './SemanticModelSettings';
@@ -1832,6 +1834,8 @@ export function SettingsPage() {
               </div>
               <AppearanceStyleCard />
               <MenuAppearanceCard />
+              <WorkspaceBrandCard />
+              <WorkPrefsCard />
             </>
           )}
 

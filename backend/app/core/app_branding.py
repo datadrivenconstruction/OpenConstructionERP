@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -74,9 +75,17 @@ DEFAULT_BRANDING: dict[str, Any] = {
     "mode": "default",
     "logo_data_url": None,
     "logo_png_data_url": None,
+    #: Optional variant drawn when the UI is in dark mode.
+    "logo_dark_data_url": None,
     "company_name": "",
+    #: Whether the quick "edit" button beside the sidebar logo is shown (admins only).
+    "show_logo_edit": True,
+    #: Whether the company name is written next to an uploaded logo.
+    "show_company_name": False,
     "appearance": None,
 }
+
+_HEX = re.compile(r"^#[0-9a-f]{6}$")
 
 
 def _pick(data: dict[str, Any], options: dict[str, tuple[str, ...]]) -> dict[str, str]:
@@ -100,6 +109,9 @@ def sanitise_appearance(data: Any) -> dict[str, Any] | None:
     if not isinstance(data, dict):
         return None
     clean: dict[str, Any] = _pick(data, APPEARANCE_OPTIONS)
+    hex_value = data.get("accent_hex")
+    if isinstance(hex_value, str) and _HEX.match(hex_value.strip().lower()):
+        clean["accent_hex"] = hex_value.strip().lower()
     menu = sanitise_menu(data.get("menu"))
     if menu:
         clean["menu"] = menu
@@ -139,6 +151,10 @@ def sanitise(data: Any) -> dict[str, Any]:
     ):
         png = None
 
+    dark = data.get("logo_dark_data_url")
+    if not (logo and isinstance(dark, str) and dark.startswith("data:image/") and len(dark) <= MAX_LOGO_DATA_URL_CHARS):
+        dark = None
+
     name = data.get("company_name")
     name = name.strip()[:MAX_COMPANY_NAME] if isinstance(name, str) else ""
 
@@ -157,7 +173,10 @@ def sanitise(data: Any) -> dict[str, Any]:
         "mode": mode,
         "logo_data_url": logo,
         "logo_png_data_url": png,
+        "logo_dark_data_url": dark,
         "company_name": name,
+        "show_logo_edit": data.get("show_logo_edit") is not False,
+        "show_company_name": data.get("show_company_name") is True,
         "appearance": sanitise_appearance(data.get("appearance")),
     }
 

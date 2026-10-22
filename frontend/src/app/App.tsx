@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { landingPath } from '@/shared/lib/workPrefs';
 import { Suspense, lazy, useState, useCallback, useEffect, useLayoutEffect, useContext, createContext } from 'react';
 import { Routes, Route, Navigate, Outlet, useLocation, useMatch, useParams } from 'react-router-dom';
 import { AppLayout } from './layout';
@@ -1288,7 +1289,7 @@ export default function App() {
           path="/"
           element={
             isAuthenticated
-              ? <Navigate to="/dashboard" replace />
+              ? <Navigate to={landingPath()} replace />
               : <P title="Dashboard"><DashboardPage /></P>
           }
         />

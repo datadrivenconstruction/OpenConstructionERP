@@ -30,6 +30,7 @@ import {
   type FontChoice,
 } from '@/shared/lib/appearance';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
+import { checkAccent, normalizeHex } from '@/shared/lib/customAccent';
 import {
   CONTRASTS,
   DEFAULT_COMFORT,
@@ -132,6 +133,84 @@ export function Choice({
   );
 }
 
+/** Free company colour: hex input + native picker, with a WCAG AA check on white text. */
+function CustomColourRow() {
+  const { t } = useTranslation();
+  const effective = useAppearanceStore((s) => s.effective);
+  const setAccentHex = useAppearanceStore((s) => s.setAccentHex);
+  const [draft, setDraft] = useState(effective.accentHex ?? ACCENT_SWATCH[effective.accent]);
+  useEffect(() => {
+    setDraft(effective.accentHex ?? ACCENT_SWATCH[effective.accent]);
+  }, [effective.accentHex, effective.accent]);
+  const hex = normalizeHex(draft);
+  const check = hex ? checkAccent(hex) : null;
+  const apply = (value: string) => {
+    const next = normalizeHex(value);
+    setDraft(value);
+    if (next) setAccentHex(next);
+  };
+  return (
+    <div className="grid gap-2 sm:grid-cols-[9rem_1fr] sm:items-start">
+      <span className="pt-2 text-sm font-medium text-content-primary">
+        {t('settings.style_custom_colour', { defaultValue: 'Company colour' })}
+      </span>
+      <div className="flex flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="color"
+            value={hex ?? '#000000'}
+            onChange={(e) => apply(e.target.value)}
+            aria-label={t('settings.style_custom_colour', { defaultValue: 'Company colour' })}
+            className={`h-9 w-11 cursor-pointer rounded-lg border-2 bg-transparent p-0.5 ${
+              effective.accentHex ? 'border-oe-blue' : 'border-border-light'
+            }`}
+          />
+          <input
+            value={draft}
+            onChange={(e) => apply(e.target.value)}
+            maxLength={7}
+            spellCheck={false}
+            aria-label={t('settings.style_custom_hex', { defaultValue: 'Hex code' })}
+            aria-invalid={!hex}
+            className="h-9 w-28 rounded-lg border border-border bg-surface-primary px-2 font-mono text-sm uppercase text-content-primary"
+          />
+          {check && (
+            <span
+              className={`inline-flex h-7 items-center rounded-md px-2 text-xs font-semibold text-white`}
+              style={{ background: hex ?? undefined }}
+            >
+              {t('settings.style_custom_sample', { defaultValue: 'Button' })}
+            </span>
+          )}
+        </div>
+        {check && !check.passesAA && (
+          <p className="text-xs text-semantic-warning" role="status">
+            {t('settings.style_custom_low_contrast', {
+              defaultValue: 'White text on this colour is hard to read ({{ratio}}:1, needs 4.5:1).',
+              ratio: check.ratio.toFixed(1),
+            })}{' '}
+            <button
+              type="button"
+              className="font-medium underline"
+              onClick={() => apply(check.accessible)}
+            >
+              {t('settings.style_custom_use_accessible', {
+                defaultValue: 'Use {{hex}} instead',
+                hex: check.accessible.toUpperCase(),
+              })}
+            </button>
+          </p>
+        )}
+        <p className="text-xs text-content-tertiary">
+          {t('settings.style_custom_hint', {
+            defaultValue: 'Hover, pressed and dark mode shades are worked out from it.',
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function AppearanceStyleCard() {
   const { t } = useTranslation();
   const fontLabel = useFontLabel();
@@ -174,8 +253,11 @@ export function AppearanceStyleCard() {
     setSaving(true);
     try {
       // Axis by axis, so the workspace menu look saved beside it is kept.
+      const { accentHex, ...axes } = value ?? ({} as Partial<Appearance>);
       await apiPut('/v1/branding/', {
-        appearance: value ?? { accent: null, font: null, density: null, radius: null },
+        appearance: value
+          ? { ...axes, accent_hex: accentHex ?? null }
+          : { accent: null, font: null, density: null, radius: null, accent_hex: null },
       });
       setWorkspaceDefault(value);
       useToastStore.getState().addToast({
@@ -247,7 +329,7 @@ export function AppearanceStyleCard() {
             {ACCENTS.map((accent) => (
               <Choice
                 key={accent}
-                active={effective.accent === accent}
+                active={!effective.accentHex && effective.accent === accent}
                 onSelect={() => setAxis('accent', accent)}
                 label={t(`settings.style_accent_${accent}`, { defaultValue: accent })}
               >
@@ -256,6 +338,7 @@ export function AppearanceStyleCard() {
               </Choice>
             ))}
           </OptionRow>
+          <CustomColourRow />
           <OptionRow label={t('settings.style_font', { defaultValue: 'Font' })}>
             {FONTS.map((font) => (
               <Choice

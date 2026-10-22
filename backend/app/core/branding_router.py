@@ -66,6 +66,7 @@ from app.core.app_branding import (
     reset_branding,
     write_branding,
 )
+from app.core.logo_validation import LogoValidationError, validate_logo_data_url
 from app.core.pdf_appearance import (
     DEFAULT_APPEARANCE,
     DOCUMENT_TYPES,
@@ -127,6 +128,8 @@ class WorkspaceAppearance(BaseModel):
     font: Literal["system", "inter", "ibm-plex-sans", "source-sans-3"] | None = None
     density: Literal["comfortable", "compact"] | None = None
     radius: Literal["standard", "sharp", "round"] | None = None
+    #: A free company colour; wins over ``accent`` when set.
+    accent_hex: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
     menu: WorkspaceMenu | None = None
 
 
@@ -137,7 +140,10 @@ class BrandingResponse(BaseModel):
     logo_data_url: str | None = None
     #: PNG rasterised in the browser from an SVG logo; PDFs print this one.
     logo_png_data_url: str | None = None
+    logo_dark_data_url: str | None = None
     company_name: str = ""
+    show_logo_edit: bool = True
+    show_company_name: bool = False
     appearance: WorkspaceAppearance | None = None
 
 
@@ -154,7 +160,10 @@ class BrandingUpdate(BaseModel):
     mode: str | None = None
     logo_data_url: str | None = None
     logo_png_data_url: str | None = None
+    logo_dark_data_url: str | None = None
     company_name: str | None = Field(default=None, max_length=MAX_COMPANY_NAME)
+    show_logo_edit: bool | None = None
+    show_company_name: bool | None = None
     #: Omitted keeps the stored value, like every field here; ``null`` clears it.
     appearance: WorkspaceAppearance | None = None
 
@@ -188,7 +197,19 @@ async def put_branding(body: BrandingUpdate) -> BrandingResponse:
     # Merge onto what is stored: a field the client left out keeps its value,
     # so saving the appearance alone cannot drop the logo, and the reverse.
     payload = read_branding()
+    for field in ("logo_data_url", "logo_dark_data_url", "logo_png_data_url"):
+        value = getattr(body, field)
+        if field in body.model_fields_set and value:
+            try:
+                setattr(body, field, validate_logo_data_url(value))
+            except LogoValidationError as exc:
+                raise HTTPException(
+                    status_code=422,
+                    detail={"rule": exc.rule, "field": field, "message": exc.message},
+                ) from exc
     for field in body.model_fields_set:
+        if field in ("show_logo_edit", "show_company_name") and getattr(body, field) is None:
+            continue
         if field == "appearance" and body.appearance is not None:
             payload["appearance"] = _merge_appearance(payload.get("appearance"), body.appearance)
         else:

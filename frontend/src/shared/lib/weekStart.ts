@@ -47,6 +47,7 @@ import { useSyncExternalStore } from 'react';
 import i18next from 'i18next';
 
 import { getIntlLocale } from './intlLocale';
+import { subscribeWorkPrefs, weekStartOverride } from './workPrefs';
 
 /** CLDR first day of week: 1 = Monday through 7 = Sunday. Never 0. */
 export type CldrFirstDay = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -148,9 +149,9 @@ export function weekStartsOnFor(locale: string | undefined | null): WeekStartsOn
 /* ── The same answer for the current UI language ──────────────────────────── */
 
 const listeners = new Set<() => void>();
-i18next.on('languageChanged', () => {
-  listeners.forEach((cb) => cb());
-});
+const notify = () => listeners.forEach((cb) => cb());
+i18next.on('languageChanged', notify);
+subscribeWorkPrefs(notify);
 
 const subscribe = (cb: () => void) => {
   listeners.add(cb);
@@ -168,7 +169,7 @@ const subscribe = (cb: () => void) => {
  * the note at the top of this file.
  */
 export function getWeekStartsOn(): WeekStartsOn {
-  return weekStartsOnFor(getIntlLocale());
+  return weekStartOverride() ?? weekStartsOnFor(getIntlLocale());
 }
 
 /**

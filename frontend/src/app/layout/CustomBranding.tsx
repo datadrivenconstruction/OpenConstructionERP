@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next';
 import { Logo } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useThemeStore } from '@/stores/useThemeStore';
 import {
   useBrandingStore,
   BRANDING_MAX_LOGO_BYTES,
@@ -90,11 +91,15 @@ export async function fileToDataUrl(
 
 export function CustomBranding({ iconified }: CustomBrandingProps) {
   const { t } = useTranslation();
-  const { mode, logoDataUrl, companyName } = useBrandingStore();
-  // Only an admin can change the workspace-wide brand on the server; everyone
-  // else still gets the local editor (their change just stays on their device).
+  const { mode, logoDataUrl: lightLogo, companyName, options } = useBrandingStore();
+  const isDark = useThemeStore((s) => s.resolved) === 'dark';
+  const logoDataUrl = isDark && options.logoDarkDataUrl ? options.logoDarkDataUrl : lightLogo;
+  // The brand is a workspace setting: only an admin edits it, and only while
+  // the admin has the quick edit button switched on in Settings > General.
   const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
+  const canEdit = isAdmin && options.showLogoEdit;
   const [editing, setEditing] = useState(false);
+  const openEditor = canEdit ? () => setEditing(true) : undefined;
 
   // Iconified sidebar — render only the brand glyph (user logo if set,
   // otherwise the OE logo). No subtitle / company name in this mode.
@@ -103,8 +108,9 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
       return (
         <button
           type="button"
-          onClick={() => setEditing(true)}
-          className="hover:opacity-80 transition-opacity"
+          onClick={openEditor}
+          disabled={!canEdit}
+          className="hover:opacity-80 transition-opacity disabled:cursor-default disabled:hover:opacity-100"
           title={companyName || t('branding.edit', { defaultValue: 'Customise branding' })}
           aria-label={t('branding.edit', { defaultValue: 'Customise branding' })}
         >
@@ -146,18 +152,29 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
           {customised ? (
             <button
               type="button"
-              onClick={() => setEditing(true)}
-              className="block w-full text-left rounded-lg p-1 -m-1 hover:bg-surface-secondary/40 transition-colors"
+              onClick={openEditor}
+              disabled={!canEdit}
+              className="block w-full text-left rounded-lg p-1 -m-1 hover:bg-surface-secondary/40 transition-colors disabled:cursor-default disabled:hover:bg-transparent"
               aria-label={t('branding.edit', { defaultValue: 'Customise branding' })}
               title={t('branding.edit', { defaultValue: 'Customise branding' })}
             >
               {mode === 'logo' && logoDataUrl ? (
-                <img
-                  src={logoDataUrl}
-                  alt={companyName || 'Custom logo'}
-                  className="block max-h-[40px] w-auto max-w-full object-contain"
-                  draggable={false}
-                />
+                <span className="flex min-w-0 items-center gap-2">
+                  <img
+                    src={logoDataUrl}
+                    alt={companyName || 'Custom logo'}
+                    className="block max-h-[40px] w-auto max-w-full object-contain"
+                    draggable={false}
+                  />
+                  {options.showCompanyName && companyName && (
+                    <span
+                      className="truncate text-sm font-bold text-content-primary"
+                      data-testid="brand-company-name"
+                    >
+                      {companyName}
+                    </span>
+                  )}
+                </span>
               ) : (
                 <span
                   className="block truncate text-[17px] font-extrabold text-content-primary leading-none"
@@ -215,10 +232,10 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
           )}
         </div>
 
-        {/* RIGHT — always-visible edit button (36px square so it
-            doesn't crowd the wordmark). User asked for it to be
-            permanent (not hover-only) so discoverability of the
-            white-labelling feature is high. */}
+        {/* RIGHT — edit button (36px square so it doesn't crowd the
+            wordmark). Admins only, and only while switched on in
+            Settings > General. */}
+        {canEdit && (
         <button
           type="button"
           onClick={() => setEditing(true)}
@@ -237,12 +254,13 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
         >
           <Pencil size={13} strokeWidth={2.25} />
         </button>
+        )}
       </div>
 
       {editing && (
         <BrandingEditorModal
           onClose={() => setEditing(false)}
-          canPersist={isAdmin}
+          canPersist
           showDocumentsLink
         />
       )}

@@ -83,6 +83,7 @@ export function LoginPage() {
   // on the login card instead of the default OpenConstructionERP wordmark.
   const { mode: brandMode, logoDataUrl: brandLogo, companyName: brandName } =
     useBrandingStore();
+  const showLogoEdit = useBrandingStore((s) => s.options.showLogoEdit);
   const brandCustomised = brandMode === 'logo' || brandMode === 'text';
   // Pull the workspace brand from the server so an invited user sees it on this
   // very first (pre-auth) screen, not just the browser that set it (issue #272).
@@ -793,6 +794,7 @@ export function LoginPage() {
               {/* White-label trigger - same editor as the in-app sidebar
                   brand control, available pre-auth so a tenant can put
                   their own logo on the sign-in screen. */}
+              {showLogoEdit && (
               <button
                 type="button"
                 onClick={() => setBrandOpen(true)}
@@ -802,6 +804,7 @@ export function LoginPage() {
               >
                 <Pencil size={13} strokeWidth={2.25} />
               </button>
+              )}
             </div>
             <p className="mt-2 text-sm text-content-tertiary">
               {t('login.workspace_tagline', { defaultValue: 'Professional construction project workspace' })}
