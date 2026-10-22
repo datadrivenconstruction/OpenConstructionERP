@@ -1252,6 +1252,22 @@
     "is_default": true
   },
   {
+    "country_code": "PE",
+    "tax_name": "VAT Standard (IGV)",
+    "tax_name_translations": {
+      "en": "VAT Standard (16 percent IGV + 2 percent municipal promotion tax)",
+      "es": "IGV (16 % + 2 % de Impuesto de Promocion Municipal)"
+    },
+    "tax_code": "IGV",
+    "rate_pct": "18.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2011-03-01",
+    "effective_to": null,
+    "is_default": true
+  },
+  {
     "country_code": "RU",
     "tax_name": "VAT Standard (NDS)",
     "tax_name_translations": {

@@ -1149,6 +1149,41 @@ async def export_invoice_einvoice(
         invoice_direction=fresh.invoice_direction,
     )
 
+    if profile == "ubl_pe":
+        # SUNAT UBL 2.1 for Peru: the platform's invoice model, written in the SUNAT layout.
+        from app.modules.einvoice import pe_violations_for, render_pe_einvoice
+
+        if embed:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="ubl_pe is an XML document for an OSE to sign; it has no hybrid PDF (embed=true)",
+            )
+        if dry_run:
+            found = pe_violations_for(invoice=invoice_dict, line_items=line_items, defaults=defaults)
+            problems = [v.message for v in found if v.severity == FATAL]
+            return {
+                "format": profile,
+                "valid": not problems,
+                "problems": problems,
+                "violations": [
+                    {"rule_id": v.rule_id, "severity": v.severity, "message": v.message, "term": v.term} for v in found
+                ],
+            }
+        try:
+            filename, media_type, body = await asyncio.to_thread(
+                render_pe_einvoice, invoice=invoice_dict, line_items=line_items, defaults=defaults
+            )
+        except EInvoiceError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"invoice is not complete for {profile}: {exc}. Call with ?dry_run=true for the full list.",
+            ) from exc
+        return StreamingResponse(
+            io.BytesIO(body),
+            media_type=media_type,
+            headers={"Content-Disposition": attachment_disposition(filename)},
+        )
+
     if not is_en16931_profile(profile):
         # UBL-TR: its own model, its own rules, and taxes read from the shared
         # payment tax calculation. Branched before anything EN 16931 runs.

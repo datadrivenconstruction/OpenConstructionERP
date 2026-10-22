@@ -377,6 +377,7 @@ NATIONAL_RULE_SET_BY_COUNTRY: dict[str, str] = {
     "JP": "sekisan",
     "MX": "mexico",
     "PK": "pakistan",
+    "PE": "peru",
     "PL": "poland",
     "RO": "romania",
     "RU": "gesn",

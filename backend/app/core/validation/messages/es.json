@@ -448,6 +448,24 @@
       "suggestion": "Elimine los recargos de gastos generales y beneficio de este presupuesto, o manténgalos solo en las líneas con análisis de precio propio (NP)."
     }
   },
+  "peru": {
+    "igv_line_present": {
+      "fail": "El presupuesto no tiene una linea de IGV",
+      "suggestion": "Agregue el IGV como linea propia despues del subtotal, al 18 por ciento (16 por ciento de IGV mas 2 por ciento de Impuesto de Promocion Municipal)"
+    },
+    "igv_rate_18": {
+      "fail": "La linea de IGV cobra {percent} por ciento, no el 18 por ciento legal",
+      "suggestion": "Fije la linea de IGV en 18 por ciento, o confirme en el contrato que la obra esta exonerada o tiene otro tratamiento"
+    },
+    "gastos_generales_utilidad_stated": {
+      "fail": "El presupuesto no tiene como lineas propias: {missing}",
+      "suggestion": "Agregue gastos generales y utilidad como lineas separadas entre el costo directo y el IGV, como los declara una licitacion publica"
+    },
+    "partida_numbering": {
+      "fail": "La posicion {ordinal} no esta numerada como partida (dos digitos por nivel, como 03.02 o 03.02.01)",
+      "suggestion": "Numere cada linea valorizada por su capitulo y su item, como lista un presupuesto de obra peruano sus partidas, por ejemplo 03.02"
+    }
+  },
   "romania": {
     "deviz_chapter_required": {
       "fail": "La posición {ordinal} no indica ningún capítulo del deviz general",

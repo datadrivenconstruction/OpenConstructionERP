@@ -1,0 +1,31 @@
+# Peru Construction Pack - first-login onboarding wizard.
+version: 2
+locale: es
+title: "Welcome to OpenConstructionERP - Peru"
+title_es: "Bienvenido a OpenConstructionERP - Peru"
+subtitle: "Three steps to line the workspace up with Peruvian practice: RUC, the IGV and the detraccion, valorizaciones. Tres pasos para ajustar el espacio de trabajo a la practica peruana."
+
+steps:
+  - id: company_profile
+    title: "Company details / Datos de la empresa"
+    body: "Used on budgets, valuations and invoices. Se usa en presupuestos, valorizaciones y facturas."
+    fields:
+      - { key: company_name, label: "Company name / Razon social", type: text, required: true }
+      - { key: ruc, label: "Tax number / RUC (11 digits)", type: text, required: false, placeholder: "20123456789" }
+      - { key: head_office_city, label: "Head office / Sede", type: select, required: true, default: "Lima", options: ["Lima", "Arequipa", "Trujillo", "Cusco", "Piura", "Chiclayo", "Other / Otra"] }
+
+  - id: contract_type
+    title: "Type of client / Tipo de cliente"
+    body: "A public contract follows the contracting law: payment deadlines, advances and formula polinomica adjustment. A private contract follows its own terms. Un contrato publico sigue la ley de contrataciones."
+    fields:
+      - { key: works_in_public_procurement, label: "We build public works / Ejecutamos obras publicas", type: checkbox, default: false, help: "Switches on the public works references. The figures stay flagged for expert review." }
+      - { key: monthly_valuations, label: "Bill by monthly valuation / Valorizacion mensual", type: checkbox, default: true }
+      - { key: retention_percent, label: "Retention held on each valuation (percent) / Retencion por valorizacion", type: text, required: false, default: "10" }
+
+  - id: money
+    title: "Money / Moneda e impuestos"
+    body: "Peruvian sol at two decimals. IGV is 18 percent: 16 percent IGV and 2 percent municipal promotion tax. A construction invoice above the threshold carries the detraccion. Sol peruano, dos decimales."
+    fields:
+      - { key: currency, label: "Currency / Moneda", type: select, required: true, default: "PEN (S/)", options: ["PEN (S/)", "USD ($) - for contracts priced in dollars"] }
+      - { key: detraction_account, label: "Detraction account at the national bank / Cuenta de detracciones", type: text, required: false }
+      - { key: issues_electronic_invoices, label: "We issue electronic invoices through an OSE or PSE / Emitimos facturas electronicas", type: checkbox, default: true }
