@@ -61288,6 +61288,13 @@ const resource = {
     "converter_notice.email": "Написать нам на почту",
     "converter_notice.dismiss": "Скрыть это уведомление",
     "demo_uploads.refused": "В публичном демо загрузка файлов отключена. Используйте демо-проекты и их примерные данные или установите платформу, чтобы работать со своими файлами.",
+    "demo_switcher.label": "Демо-проекты",
+    "demo_switcher.not_installed": "Не установлен на этом сервере",
+    "demo_switcher.read_only": "Демо только для просмотра: многие функции ограничены. Используйте только демо-данные, загрузка файлов отключена.",
+    "demo_switcher.tab_consultancy_riyadh": "Проектное бюро, Эр-Рияд",
+    "demo_switcher.tab_contractor_jeddah": "Генподрядчик, Джидда",
+    "demo_switcher.tab_site_development_dammam": "Благоустройство, Даммам",
+    "demo_switcher.tab_full_showcase_riyadh": "Полная витрина, Эр-Рияд",
   }
 } as { translation: Record<string, string> };
 

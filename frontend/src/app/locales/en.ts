@@ -52285,6 +52285,13 @@ const resource = {
     "converter_notice.email": "Write to us by email",
     "converter_notice.dismiss": "Dismiss this notice",
     "demo_uploads.refused": "Uploads are turned off on the public demo. Please use the demo projects and their example data, or install the platform to work with your own files.",
+    "demo_switcher.label": "Demo projects",
+    "demo_switcher.not_installed": "Not installed on this server",
+    "demo_switcher.read_only": "Read-only demo: many functions are limited. Use demo data only, uploads are off.",
+    "demo_switcher.tab_consultancy_riyadh": "Consultancy, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Contractor, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Site development, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Full showcase, Riyadh",
   }
 } as { translation: Record<string, string> };
 

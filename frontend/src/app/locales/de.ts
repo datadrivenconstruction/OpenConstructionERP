@@ -60730,6 +60730,13 @@ const resource = {
     "converter_notice.email": "Per E-Mail schreiben",
     "converter_notice.dismiss": "Hinweis ausblenden",
     "demo_uploads.refused": "In der öffentlichen Demo sind Uploads deaktiviert. Bitte nutzen Sie die Demoprojekte mit ihren Beispieldaten oder installieren Sie die Plattform, um mit eigenen Dateien zu arbeiten.",
+    "demo_switcher.label": "Demoprojekte",
+    "demo_switcher.not_installed": "Auf diesem Server nicht installiert",
+    "demo_switcher.read_only": "Demo nur zum Ansehen: viele Funktionen sind eingeschränkt. Nur Demodaten verwenden, Uploads sind deaktiviert.",
+    "demo_switcher.tab_consultancy_riyadh": "Planungsbüro, Riad",
+    "demo_switcher.tab_contractor_jeddah": "Bauunternehmen, Dschidda",
+    "demo_switcher.tab_site_development_dammam": "Außenanlagen, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Gesamtschau, Riad",
   }
 } as { translation: Record<string, string> };
 

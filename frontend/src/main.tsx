@@ -9,7 +9,10 @@ import { initialLocaleReady } from './app/i18n';
 import { startAccountLanguageSync } from './app/accountLanguage';
 import { applyStoredUiScale } from '@/shared/lib/uiScale';
 import { retireStaleCaches } from './pwa/retireStaleCaches';
+import { captureDemoPick } from '@/shared/ui/DemoSwitcherBar';
 import './index.css';
+
+captureDemoPick();
 
 // Desktop only: put the saved text size back on the webview as early as
 // possible. The mount at the bottom of this file waits for it.

@@ -15,6 +15,7 @@ import { GlobalUploadIndicator } from '@/shared/ui/GlobalUploadIndicator';
 import { DwgUploadIndicator } from '@/shared/ui/DwgUploadIndicator';
 import { GlobalCatalogueInstallIndicator } from '@/shared/ui/GlobalCatalogueInstallIndicator';
 import { DemoBanner } from '@/shared/ui/DemoBanner';
+import { DemoSwitcherBar } from '@/shared/ui/DemoSwitcherBar';
 import { ReviewPromptCard } from '@/shared/ui/ReviewPromptCard';
 import { FloatingChatButton } from '@/features/erp-chat/FloatingChatButton';
 import { FloatingChatPanel } from '@/features/erp-chat/FloatingChatPanel';
@@ -166,6 +167,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
             normal web build. Sits above the Header so it reads as window
             chrome. */}
         <DesktopToolbar />
+        <DemoSwitcherBar />
         <Header
           title={title}
           onMenuClick={openSidebar}
