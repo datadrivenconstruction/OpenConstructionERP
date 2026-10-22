@@ -66,6 +66,7 @@ import {
 } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useToastStore } from '@/stores/useToastStore';
+import { FlagshipDemoCards } from './FlagshipDemoCards';
 import {
   useBackgroundInstallStore,
   type BgInstallStep,
@@ -4275,6 +4276,7 @@ export function StepDataSetup({
             actually read on arrival. The partner pack installer is offered
             to admins only, like the Ready-made Pack card on the start step. */}
         {canInstallPartnerPacks && <PartnerPackInstaller onActivateLocale={applyLocale} />}
+        <FlagshipDemoCards />
         <CountryPackCard
           packs={COUNTRY_PACKS}
           selectedPack={selectedPack}
