@@ -44249,6 +44249,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "The closest market to your language",
     "dashboard.market_cases.all_for_market": "All cases for {{market}} ({{count}})",
     "dashboard.market_cases.empty": "No case names a market yet. The whole library is one click away.",
+    "dashboard.regional_pack_recommended": "Recommended modules",
     "cases.regional_pack_for_market": "Regional pack: {{names}}",
     "modules.pack_chip_none": "No regional pack",
     "modules.pack_chip_none_hint": "No regional pack is applied. A pack sets the currency, tax template and validation standards for this workspace.",

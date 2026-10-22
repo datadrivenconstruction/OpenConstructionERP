@@ -49498,6 +49498,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Ang merkadong pinakamalapit sa inyong wika",
     "dashboard.market_cases.all_for_market": "Lahat ng kaso para sa {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Wala pang kasong nagtutukoy ng merkado. Isang pindot lang ang buong aklatan.",
+    "dashboard.regional_pack_recommended": "Mga inirerekomendang module",
     "cases.regional_pack_for_market": "Regional pack: {{names}}",
     "onboarding.ready_pack_other_markets": "O magsimula mula sa isang market preset",
     "onboarding.ready_pack_set_up_here": "Isaayos ito para sa akin",

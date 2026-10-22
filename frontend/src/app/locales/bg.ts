@@ -49687,6 +49687,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Най-близкият пазар до вашия език",
     "dashboard.market_cases.all_for_market": "Всички казуси за {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Все още нито един казус не посочва пазар. Цялата библиотека е на един клик.",
+    "dashboard.regional_pack_recommended": "Препоръчани модули",
     "cases.regional_pack_for_market": "Регионален пакет: {{names}}",
     "onboarding.ready_pack_other_markets": "Или започнете от готов пазарен шаблон",
     "onboarding.ready_pack_set_up_here": "Настрой това вместо мен",

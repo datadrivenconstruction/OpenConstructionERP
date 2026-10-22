@@ -49651,6 +49651,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "آپ کی زبان سے قریب ترین مارکیٹ",
     "dashboard.market_cases.all_for_market": "{{market}} کے تمام کیسز ({{count}})",
     "dashboard.market_cases.empty": "ابھی کوئی کیس کسی مارکیٹ کا نام نہیں دیتا۔ پوری لائبریری ایک کلک کی دوری پر ہے۔",
+    "dashboard.regional_pack_recommended": "تجویز کردہ ماڈیولز",
     "cases.regional_pack_for_market": "علاقائی پیکج: {{names}}",
     "onboarding.ready_pack_other_markets": "یا مارکیٹ پری سیٹ سے شروع کریں",
     "onboarding.ready_pack_set_up_here": "یہ میرے لیے سیٹ اپ کریں",

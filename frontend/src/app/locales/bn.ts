@@ -49939,6 +49939,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "আপনার ভাষার সবচেয়ে কাছের বাজার",
     "dashboard.market_cases.all_for_market": "{{market}}-এর সব কেস ({{count}})",
     "dashboard.market_cases.empty": "এখনও কোনো কেস কোনো বাজারের নাম বলে না। পুরো লাইব্রেরি এক ক্লিক দূরে।",
+    "dashboard.regional_pack_recommended": "প্রস্তাবিত মডিউল",
     "cases.regional_pack_for_market": "আঞ্চলিক প্যাক: {{names}}",
     "onboarding.ready_pack_other_markets": "অথবা একটি মার্কেট প্রিসেট থেকে শুরু করুন",
     "onboarding.ready_pack_set_up_here": "এটি আমার জন্য সেট আপ করুন",

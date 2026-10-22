@@ -49961,6 +49961,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Piața cea mai apropiată de limba dvs.",
     "dashboard.market_cases.all_for_market": "Toate cazurile pentru {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Niciun caz nu indică încă o piață. Întreaga bibliotecă este la un clic distanță.",
+    "dashboard.regional_pack_recommended": "Module recomandate",
     "cases.regional_pack_for_market": "Pachet regional: {{names}}",
     "onboarding.ready_pack_other_markets": "Sau porniți de la un preset de piață",
     "onboarding.ready_pack_set_up_here": "Configurează asta pentru mine",

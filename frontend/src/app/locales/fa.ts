@@ -49522,6 +49522,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "نزدیک‌ترین بازار به زبان شما",
     "dashboard.market_cases.all_for_market": "همهٔ سناریوهای {{market}} ({{count}})",
     "dashboard.market_cases.empty": "هنوز هیچ سناریویی بازاری را مشخص نکرده است. کل کتابخانه با یک کلیک در دسترس است.",
+    "dashboard.regional_pack_recommended": "ماژول‌های پیشنهادی",
     "cases.regional_pack_for_market": "بسته منطقه‌ای: {{names}}",
     "onboarding.ready_pack_other_markets": "یا از یک پیش‌تنظیم بازار شروع کنید",
     "onboarding.ready_pack_set_up_here": "این را برایم تنظیم کن",

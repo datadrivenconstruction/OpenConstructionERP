@@ -49971,6 +49971,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "사용 언어와 가장 가까운 시장",
     "dashboard.market_cases.all_for_market": "{{market}} 케이스 전체 ({{count}})",
     "dashboard.market_cases.empty": "아직 시장을 지정한 케이스가 없습니다. 전체 라이브러리는 클릭 한 번 거리입니다.",
+    "dashboard.regional_pack_recommended": "권장 모듈",
     "cases.regional_pack_for_market": "지역 팩: {{names}}",
     "onboarding.ready_pack_other_markets": "또는 시장 프리셋으로 시작하기",
     "onboarding.ready_pack_set_up_here": "대신 설정해 주세요",

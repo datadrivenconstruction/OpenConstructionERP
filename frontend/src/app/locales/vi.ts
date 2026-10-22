@@ -49449,6 +49449,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Thị trường gần nhất với ngôn ngữ của bạn",
     "dashboard.market_cases.all_for_market": "Tất cả tình huống cho {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Chưa có tình huống nào nêu thị trường. Toàn bộ thư viện chỉ cách một cú nhấp.",
+    "dashboard.regional_pack_recommended": "Các mô-đun được đề xuất",
     "cases.regional_pack_for_market": "Gói khu vực: {{names}}",
     "onboarding.ready_pack_other_markets": "Hoặc bắt đầu từ một mẫu thị trường có sẵn",
     "onboarding.ready_pack_set_up_here": "Thiết lập việc này giúp tôi",

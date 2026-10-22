@@ -51108,6 +51108,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Rynek najbliższy Twojemu językowi",
     "dashboard.market_cases.all_for_market": "Wszystkie scenariusze dla rynku {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Żaden scenariusz nie wskazuje jeszcze rynku. Cała biblioteka jest o jedno kliknięcie.",
+    "dashboard.regional_pack_recommended": "Zalecane moduły",
     "cases.regional_pack_for_market": "Pakiet regionalny: {{names}}",
     "onboarding.ready_pack_other_markets": "Albo zacznij od gotowego zestawu dla rynku",
     "onboarding.ready_pack_set_up_here": "Skonfiguruj to za mnie",

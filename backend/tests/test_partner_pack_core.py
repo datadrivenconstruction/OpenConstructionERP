@@ -306,3 +306,17 @@ class TestRouter:
         with patch("app.core.partner_pack.discovery.entry_points", return_value=[]):
             r = client.get("/api/v1/partner-pack/by-slug/nope")
             assert r.status_code == 404
+
+
+def test_recommended_modules_is_advisory_and_public() -> None:
+    m = PartnerPackManifest(slug="rec-pack", partner_name="XX", recommended_modules=["oe_boq"])
+    assert m.to_public_dict()["recommended_modules"] == ["oe_boq"]
+    assert PartnerPackManifest(slug="rec-pack", partner_name="XX").recommended_modules == []
+
+
+def test_unknown_recommended_module_warns_in_plan() -> None:
+    from app.core.partner_pack.apply import _plan
+
+    m = PartnerPackManifest(slug="rec-pack", partner_name="XX", recommended_modules=["oe_nope_missing"])
+    plan = _plan(m)
+    assert any("recommends" in w and "oe_nope_missing" in w for w in plan["warnings"])

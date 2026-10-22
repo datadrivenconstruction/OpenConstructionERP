@@ -52182,6 +52182,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Рынок, ближайший к вашему языку",
     "dashboard.market_cases.all_for_market": "Все кейсы для рынка {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Пока ни один кейс не указывает рынок. Вся библиотека в один клик.",
+    "dashboard.regional_pack_recommended": "Рекомендуемые модули",
     "cases.regional_pack_for_market": "Региональный пакет: {{names}}",
     "onboarding.ready_pack_other_markets": "Или начните с готового набора для рынка",
     "onboarding.ready_pack_set_up_here": "Настроить это за меня",

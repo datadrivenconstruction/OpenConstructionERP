@@ -52132,6 +52132,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Der Markt, der Ihrer Sprache am nächsten liegt",
     "dashboard.market_cases.all_for_market": "Alle Fallbeispiele für {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Noch nennt kein Fallbeispiel einen Markt. Die ganze Bibliothek ist einen Klick entfernt.",
+    "dashboard.regional_pack_recommended": "Empfohlene Module",
     "cases.regional_pack_for_market": "Regionales Paket: {{names}}",
     "onboarding.ready_pack_other_markets": "Oder mit einer Marktvorlage starten",
     "onboarding.ready_pack_set_up_here": "Das für mich einrichten",

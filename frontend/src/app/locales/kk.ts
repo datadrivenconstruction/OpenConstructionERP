@@ -49556,6 +49556,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Тіліңізге ең жақын нарық",
     "dashboard.market_cases.all_for_market": "{{market}} нарығының барлық кейстері ({{count}})",
     "dashboard.market_cases.empty": "Әзірге бірде-бір кейс нарықты көрсетпейді. Бүкіл кітапхана бір басу қашықтықта.",
+    "dashboard.regional_pack_recommended": "Ұсынылатын модульдер",
     "cases.regional_pack_for_market": "Аймақтық пакет: {{names}}",
     "onboarding.ready_pack_other_markets": "Немесе дайын нарық үлгісінен бастаңыз",
     "onboarding.ready_pack_set_up_here": "Мұны мен үшін баптап беріңіз",

@@ -49346,6 +49346,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Pasar yang paling dekat dengan bahasa Anda",
     "dashboard.market_cases.all_for_market": "Semua kasus untuk {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Belum ada kasus yang menyebut pasar. Seluruh pustaka hanya sejauh satu klik.",
+    "dashboard.regional_pack_recommended": "Modul yang direkomendasikan",
     "cases.regional_pack_for_market": "Paket regional: {{names}}",
     "onboarding.ready_pack_other_markets": "Atau mulai dari preset pasar",
     "onboarding.ready_pack_set_up_here": "Aturkan ini untuk saya",

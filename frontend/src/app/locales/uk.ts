@@ -51649,6 +51649,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Ринок, найближчий до вашої мови",
     "dashboard.market_cases.all_for_market": "Усі кейси для ринку {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Поки жоден кейс не вказує ринок. Уся бібліотека в один клік.",
+    "dashboard.regional_pack_recommended": "Рекомендовані модулі",
     "cases.regional_pack_for_market": "Регіональний пакет: {{names}}",
     "onboarding.ready_pack_other_markets": "Або почніть із готового набору для ринку",
     "onboarding.ready_pack_set_up_here": "Налаштувати це за мене",

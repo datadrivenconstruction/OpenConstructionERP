@@ -51044,6 +51044,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Tilingizga eng yaqin bozor",
     "dashboard.market_cases.all_for_market": "{{market}} bozorining barcha keyslari ({{count}})",
     "dashboard.market_cases.empty": "Hozircha birorta keys bozorni koʻrsatmaydi. Butun kutubxona bir bosish masofasida.",
+    "dashboard.regional_pack_recommended": "Tavsiya etilgan modullar",
     "cases.regional_pack_for_market": "Mintaqaviy paket: {{names}}",
     "onboarding.ready_pack_other_markets": "Yoki tayyor bozor namunasidan boshlang",
     "onboarding.ready_pack_set_up_here": "Buni men uchun sozlab bering",

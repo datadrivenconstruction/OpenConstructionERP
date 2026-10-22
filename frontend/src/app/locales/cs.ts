@@ -50847,6 +50847,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Trh nejbližší vašemu jazyku",
     "dashboard.market_cases.all_for_market": "Všechny případy pro trh {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Zatím žádný případ neuvádí trh. Celá knihovna je na jedno kliknutí.",
+    "dashboard.regional_pack_recommended": "Doporučené moduly",
     "cases.regional_pack_for_market": "Regionální balíček: {{names}}",
     "onboarding.ready_pack_other_markets": "Nebo začněte s předvolbou trhu",
     "onboarding.ready_pack_set_up_here": "Nastavit to za mě",

@@ -12,6 +12,11 @@ Two accessors, on purpose:
 
 * :func:`standard` returns whatever row is in force, reviewed or not, for a
   screen that shows the fact and lets a user correct it.
+Rows are country-wide unless they carry an ``area_code`` and ``area_label``
+(a US prevailing-wage area, a German Tarifgebiet, a South African bargaining
+council area). Lookup with ``area`` tries the exact area first and falls back
+to the country-level row.
+
 * :func:`hard_standard` returns only a row that does not need review, for any
   rule that enforces or derives something. A fact the research could not
   confirm can therefore be shown but never enforced.
@@ -63,6 +68,8 @@ class LabourStandard:
     confidence: str
     needs_expert_review: bool
     note: str = ""
+    area_code: str = ""
+    area_label: str = ""
 
     def in_force(self, on: date) -> bool:
         """Whether the row applies on ``on``; the end date is inclusive."""
@@ -119,6 +126,10 @@ def parse_standards(rows: Iterable[Mapping[str, Any]]) -> tuple[LabourStandard, 
             raise ValueError(f"{where}: needs_expert_review must be a boolean")
         if confidence == "L" and not review:
             raise ValueError(f"{where}: a low-confidence fact must be flagged needs_expert_review")
+        area_code = str(row.get("area_code") or "").strip()
+        area_label = str(row.get("area_label") or "").strip()
+        if bool(area_code) != bool(area_label):
+            raise ValueError(f"{where}: area_code and area_label must be given together")
         key = str(row["key"]).strip()
         unit = str(row["unit"]).strip()
         source = str(row["source"]).strip()
@@ -137,17 +148,25 @@ def parse_standards(rows: Iterable[Mapping[str, Any]]) -> tuple[LabourStandard, 
                 confidence=confidence,
                 needs_expert_review=review,
                 note=str(row.get("note", "")),
+                area_code=area_code,
+                area_label=area_label,
             )
         )
 
-    by_key: dict[tuple[str, str], list[LabourStandard]] = {}
+    by_key: dict[tuple[str, str, str], list[LabourStandard]] = {}
     for item in parsed:
-        by_key.setdefault((item.country, item.key), []).append(item)
-    for (country, key), windows in by_key.items():
+        by_key.setdefault((item.country, item.key, item.area_code), []).append(item)
+    for (country, key, area), windows in by_key.items():
+        if area and (country, key, "") not in by_key and not all(w.note.strip() for w in windows):
+            raise ValueError(
+                f"labour standard {country}/{key}/{area}: an area row needs a country-level row "
+                "for the same key, or a note saying why there is none"
+            )
         windows.sort(key=lambda w: w.effective_from)
         for earlier, later in zip(windows, windows[1:], strict=False):
             if earlier.effective_to is None or earlier.effective_to >= later.effective_from:
-                raise ValueError(f"labour standard {country}/{key}: effective windows overlap")
+                where = f"{country}/{key}" + (f"/{area}" if area else "")
+                raise ValueError(f"labour standard {where}: effective windows overlap")
     return tuple(parsed)
 
 
@@ -160,21 +179,37 @@ def load_standards() -> tuple[LabourStandard, ...]:
     return parse_standards(rows)
 
 
-def standard(country: str, key: str, on: date) -> LabourStandard | None:
-    """The row in force for ``country`` and ``key`` on ``on``, reviewed or not."""
+def standard(country: str, key: str, on: date, area: str | None = None) -> LabourStandard | None:
+    """The row in force for ``country`` and ``key`` on ``on``, reviewed or not.
+
+    With ``area`` the exact area row wins; without one, or when the area has no
+    row in force, the country-level row answers.
+    """
     code = (country or "").strip().upper()
-    for row in load_standards():
-        if row.country == code and row.key == key and row.in_force(on):
+    wanted = (area or "").strip()
+    rows = [r for r in load_standards() if r.country == code and r.key == key and r.in_force(on)]
+    if wanted:
+        for row in rows:
+            if row.area_code == wanted:
+                return row
+    for row in rows:
+        if not row.area_code:
             return row
     return None
 
 
-def hard_standard(country: str, key: str, on: date) -> LabourStandard | None:
+def areas(country: str) -> tuple[tuple[str, str], ...]:
+    """Sorted ``(area_code, area_label)`` pairs the catalogue holds for ``country``."""
+    code = (country or "").strip().upper()
+    return tuple(sorted({(r.area_code, r.area_label) for r in load_standards() if r.country == code and r.area_code}))
+
+
+def hard_standard(country: str, key: str, on: date, area: str | None = None) -> LabourStandard | None:
     """As :func:`standard`, but ``None`` for a row that still needs expert review.
 
     The accessor every rule that enforces or derives a number must use.
     """
-    row = standard(country, key, on)
+    row = standard(country, key, on, area)
     return None if row is None or row.needs_expert_review else row
 
 

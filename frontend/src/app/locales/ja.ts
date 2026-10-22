@@ -50864,6 +50864,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "使用中の言語に最も近い市場",
     "dashboard.market_cases.all_for_market": "{{market}}のケースをすべて表示（{{count}}）",
     "dashboard.market_cases.empty": "市場を指定したケースはまだありません。ライブラリ全体はワンクリックで開けます。",
+    "dashboard.regional_pack_recommended": "推奨モジュール",
     "cases.regional_pack_for_market": "地域パック: {{names}}",
     "onboarding.ready_pack_other_markets": "または市場プリセットから開始",
     "onboarding.ready_pack_set_up_here": "これを設定してもらう",

@@ -49615,6 +49615,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Teie keelele lähim turg",
     "dashboard.market_cases.all_for_market": "Kõik turu {{market}} juhtumid ({{count}})",
     "dashboard.market_cases.empty": "Ükski juhtum ei nimeta veel turgu. Kõik juhtumid on ühe kliki kaugusel.",
+    "dashboard.regional_pack_recommended": "Soovitatud moodulid",
     "cases.regional_pack_for_market": "Regionaalpakett: {{names}}",
     "onboarding.ready_pack_other_markets": "Või alustage turu eelseadistusest",
     "onboarding.ready_pack_set_up_here": "Seadista see minu eest",

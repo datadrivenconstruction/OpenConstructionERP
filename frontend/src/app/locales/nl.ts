@@ -50482,6 +50482,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "De markt die het dichtst bij uw taal ligt",
     "dashboard.market_cases.all_for_market": "Alle cases voor {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Nog geen enkele case noemt een markt. De hele bibliotheek is één klik verwijderd.",
+    "dashboard.regional_pack_recommended": "Aanbevolen modules",
     "cases.regional_pack_for_market": "Regiopakket: {{names}}",
     "onboarding.ready_pack_other_markets": "Of begin met een marktvoorinstelling",
     "onboarding.ready_pack_set_up_here": "Dit voor mij instellen",

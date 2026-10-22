@@ -49441,6 +49441,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "ตลาดที่ใกล้เคียงกับภาษาของคุณที่สุด",
     "dashboard.market_cases.all_for_market": "เคสทั้งหมดของ {{market}} ({{count}})",
     "dashboard.market_cases.empty": "ยังไม่มีเคสใดระบุตลาด คลังทั้งหมดอยู่ห่างเพียงคลิกเดียว",
+    "dashboard.regional_pack_recommended": "โมดูลที่แนะนำ",
     "cases.regional_pack_for_market": "แพ็กภูมิภาค: {{names}}",
     "onboarding.ready_pack_other_markets": "หรือเริ่มจากค่าตั้งต้นของตลาด",
     "onboarding.ready_pack_set_up_here": "ตั้งค่านี้ให้ฉันหน่อย",

@@ -49689,6 +49689,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "Det marked, der ligger tættest på dit sprog",
     "dashboard.market_cases.all_for_market": "Alle cases for {{market}} ({{count}})",
     "dashboard.market_cases.empty": "Ingen case nævner endnu et marked. Hele biblioteket er ét klik væk.",
+    "dashboard.regional_pack_recommended": "Anbefalede moduler",
     "cases.regional_pack_for_market": "Regional pakke: {{names}}",
     "onboarding.ready_pack_other_markets": "Eller start fra en markedsskabelon",
     "onboarding.ready_pack_set_up_here": "Sæt dette op for mig",

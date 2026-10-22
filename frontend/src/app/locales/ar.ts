@@ -52529,6 +52529,7 @@ const resource = {
     "dashboard.market_cases.source_nearest": "أقرب سوق إلى لغتك",
     "dashboard.market_cases.all_for_market": "كل الحالات العملية في {{market}} ({{count}})",
     "dashboard.market_cases.empty": "لا توجد حتى الآن حالة تحدد سوقًا. المكتبة كاملة على بُعد نقرة واحدة.",
+    "dashboard.regional_pack_recommended": "وحدات موصى بها",
     "cases.regional_pack_for_market": "الحزمة الإقليمية: {{names}}",
     "onboarding.ready_pack_other_markets": "أو ابدأ من إعداد سوق جاهز",
     "onboarding.ready_pack_set_up_here": "أعِدّ هذا نيابةً عني",
