@@ -57555,6 +57555,7 @@ const resource = {
     "modules.catalog.drawing_compare": "图纸修订对比",
     "modules.pp_desc_eleven_areas_framework": "业主方在十一个管理领域开展项目管理，分为项目开发和施工实施两个阶段，两阶段之间设一个关口，每个领域有一份经批准的框架文件。",
     "modules.pp_name_pakistan_pk": "巴基斯坦建筑数据包",
+    "modules.pp_name_peru_pe": "秘鲁建设包",
     "notifications.stakeholders.commitment_overdue.body": "承诺 {{code}} 已于 {{due}} 到期。",
     "notifications.stakeholders.commitment_overdue.title": "有一项承诺已超过到期日",
     "notifications.stakeholders.plan_overdue.body": "{{title}} 已于 {{due}} 到期，但尚未记录。",

@@ -58232,6 +58232,7 @@ const resource = {
     "modules.catalog.drawing_compare": "Comparaison des révisions de plans",
     "modules.pp_desc_eleven_areas_framework": "Pilotage du projet côté maître d'ouvrage sur onze domaines de management, en deux phases, développement du projet et exécution des travaux, avec un jalon de décision entre les deux et un document-cadre approuvé par domaine.",
     "modules.pp_name_pakistan_pk": "Pack Construction Pakistan",
+    "modules.pp_name_peru_pe": "Pack construction Pérou",
     "notifications.stakeholders.commitment_overdue.body": "L'engagement {{code}} était dû le {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Un engagement a dépassé son échéance",
     "notifications.stakeholders.plan_overdue.body": "{{title}} était prévue le {{due}} et n'est pas encore enregistrée.",

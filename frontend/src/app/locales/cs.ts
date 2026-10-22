@@ -56584,6 +56584,7 @@ const resource = {
     "modules.catalog.drawing_compare": "Porovnání revizí výkresů",
     "modules.pp_desc_eleven_areas_framework": "Řízení projektu ze strany investora v jedenácti oblastech řízení ve dvou fázích, vývoj projektu a realizace stavby, s jednou branou mezi nimi a jedním schváleným rámcovým dokumentem pro každou oblast.",
     "modules.pp_name_pakistan_pk": "Stavební balíček Pákistánu",
+    "modules.pp_name_peru_pe": "Stavební balíček Peru",
     "notifications.stakeholders.commitment_overdue.body": "Závazek {{code}} měl termín {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Závazek je po termínu",
     "notifications.stakeholders.plan_overdue.body": "{{title}} mělo proběhnout {{due}} a zatím není zaznamenáno.",

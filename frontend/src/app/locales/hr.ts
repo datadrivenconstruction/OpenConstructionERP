@@ -55660,6 +55660,7 @@ const resource = {
     "modules.catalog.drawing_compare": "Usporedba revizija nacrta",
     "modules.pp_desc_eleven_areas_framework": "Upravljanje projektom od strane investitora u jedanaest područja upravljanja u dvije faze, razvoj projekta i izvedba građenja, s jednom prekretnicom između njih i jednim odobrenim okvirnim dokumentom za svako područje.",
     "modules.pp_name_pakistan_pk": "Građevinski paket Pakistan",
+    "modules.pp_name_peru_pe": "Građevinski paket Peru",
     "notifications.stakeholders.commitment_overdue.body": "Rok obveze {{code}} istekao je {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Obvezi je istekao rok",
     "notifications.stakeholders.plan_overdue.body": "{{title}}: rok je bio {{due}}, a zapisa još nema.",

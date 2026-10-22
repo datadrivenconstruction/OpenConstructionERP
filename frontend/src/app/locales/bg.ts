@@ -55334,6 +55334,7 @@ const resource = {
     "modules.catalog.drawing_compare": "Сравнение на ревизии на чертежи",
     "modules.pp_desc_eleven_areas_framework": "Управление на проекта от страна на инвеститора в единадесет области на управление през два етапа - развитие на проекта и изпълнение на строителството, с един гейт между тях и по един одобрен рамков документ за всяка област.",
     "modules.pp_name_pakistan_pk": "Строителен пакет Пакистан",
+    "modules.pp_name_peru_pe": "Строителен пакет Перу",
     "notifications.stakeholders.commitment_overdue.body": "Срокът на ангажимент {{code}} изтече на {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Срокът на ангажимент е изтекъл",
     "notifications.stakeholders.plan_overdue.body": "{{title}}: срокът беше {{due}}, а още няма запис.",

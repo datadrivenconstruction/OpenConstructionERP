@@ -55296,6 +55296,7 @@ const resource = {
     "modules.catalog.drawing_compare": "ڈرائنگ ریوژن کا موازنہ",
     "modules.pp_desc_eleven_areas_framework": "مالک کی جانب سے گیارہ انتظامی شعبوں میں پروجیکٹ مینجمنٹ، دو مراحل میں: پروجیکٹ کی ترقی اور تعمیراتی عمل درآمد، ان کے درمیان ایک گیٹ اور ہر شعبے کے لیے ایک منظور شدہ فریم ورک دستاویز۔",
     "modules.pp_name_pakistan_pk": "پاکستان تعمیراتی پیکج",
+    "modules.pp_name_peru_pe": "پیرو تعمیراتی پیکیج",
     "notifications.stakeholders.commitment_overdue.body": "عہد {{code}} کی مقررہ تاریخ {{due}} تھی۔",
     "notifications.stakeholders.commitment_overdue.title": "ایک عہد کی مقررہ تاریخ گزر گئی",
     "notifications.stakeholders.plan_overdue.body": "{{title}} کی مقررہ تاریخ {{due}} تھی اور ابھی درج نہیں ہوا۔",

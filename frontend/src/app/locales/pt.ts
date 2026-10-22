@@ -58225,6 +58225,7 @@ const resource = {
     "modules.catalog.drawing_compare": "Comparação de Revisões de Desenhos",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do dono de obra em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre ambas e um documento-quadro aprovado para cada área.",
     "modules.pp_name_pakistan_pk": "Pacote de Construção: Paquistão",
+    "modules.pp_name_peru_pe": "Pacote de construção Peru",
     "notifications.stakeholders.commitment_overdue.body": "O compromisso {{code}} tinha prazo em {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Um compromisso passou o prazo",
     "notifications.stakeholders.plan_overdue.body": "{{title}} tinha prazo em {{due}} e ainda não está registada.",

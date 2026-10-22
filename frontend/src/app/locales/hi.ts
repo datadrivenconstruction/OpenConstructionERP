@@ -55333,6 +55333,7 @@ const resource = {
     "modules.catalog.drawing_compare": "ड्रॉइंग रिवीजन तुलना",
     "modules.pp_desc_eleven_areas_framework": "ग्यारह प्रबंधन क्षेत्रों में स्वामी की ओर से परियोजना प्रबंधन, दो चरणों में, परियोजना विकास और निर्माण निष्पादन, जिनके बीच एक गेट और प्रत्येक क्षेत्र के लिए एक स्वीकृत ढाँचा दस्तावेज़।",
     "modules.pp_name_pakistan_pk": "पाकिस्तान निर्माण पैक",
+    "modules.pp_name_peru_pe": "पेरू निर्माण पैक",
     "notifications.stakeholders.commitment_overdue.body": "प्रतिबद्धता {{code}} की नियत तारीख़ {{due}} थी।",
     "notifications.stakeholders.commitment_overdue.title": "एक प्रतिबद्धता की नियत तारीख़ निकल गई",
     "notifications.stakeholders.plan_overdue.body": "{{title}} की नियत तारीख़ {{due}} थी और वह अभी दर्ज नहीं है।",

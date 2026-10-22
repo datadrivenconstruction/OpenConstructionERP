@@ -567,7 +567,7 @@ TEMPLATE = DemoTemplate(
             "vat_rate": "18",
             "seller": {
                 "name": "Constructora Altamira Sur S.A.C.",
-                "vat_id": "20604812373",
+                "vat_id": "PE20604812373",
                 "country_code": "PE",
                 "line1": "Av. Javier Prado Este 4200",
                 "postcode": "15023",

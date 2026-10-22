@@ -55945,6 +55945,7 @@ const resource = {
     "modules.catalog.drawing_compare": "Jämförelse av ritningsrevisioner",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens projektstyrning i elva styrningsområden under två faser, projektutveckling och genomförande, med en gate mellan dem och ett godkänt ramdokument per område.",
     "modules.pp_name_pakistan_pk": "Byggpaket Pakistan",
+    "modules.pp_name_peru_pe": "Byggpaket Peru",
     "notifications.stakeholders.commitment_overdue.body": "Åtagande {{code}} förföll {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Ett åtagande har passerat sitt förfallodatum",
     "notifications.stakeholders.plan_overdue.body": "{{title}} skulle ha gjorts {{due}} och är ännu inte registrerad.",

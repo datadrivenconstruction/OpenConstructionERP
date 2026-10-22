@@ -125,6 +125,7 @@ _CLASS_OF: dict[str, str] = {
     "DPH": "standard",
     "FPA": "standard",
     "GST": "standard",
+    "IGV": "standard",
     "IVA": "standard",
     "KDV": "standard",
     "MOMS": "standard",
