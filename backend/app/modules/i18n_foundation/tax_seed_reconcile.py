@@ -270,6 +270,9 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     ("PK", "PRA_ST"): "2026-10-23",
     ("PK", "SRB_ST"): "2026-10-23",
     ("PK", "KPRA_ST"): "2026-10-23",
+    # Peru's IGV, 16 percent plus the 2 percent municipal promotion tax, at 18
+    # percent since 2011-03-01 (Ley 29666).
+    ("PE", "IGV"): "2026-10-22",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

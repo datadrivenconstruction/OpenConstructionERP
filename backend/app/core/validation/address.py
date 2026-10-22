@@ -195,6 +195,17 @@ _COUNTRY_RULES: dict[str, dict[str, Any]] = {
         "locality_shape": POSTCODE_BEFORE_CITY_AND_STATE,
         "state_required": False,
     },
+    # ── Peru ──────────────────────────────────────────────────────────────
+    # Reached by the ``ubl_pe`` profile. Serpost writes the district and city,
+    # then the five-digit code after the city: "Lima 15036".
+    "PE": {
+        "postcode_regex": r"^\d{5}$",
+        "required_fields": ["street", "city", "country"],
+        "field_order": ["street", "city", "state", "postcode", "country"],
+        "locality_shape": POSTCODE_AFTER_CITY_AND_STATE,
+        "state_required": False,
+        "postcode_optional": True,
+    },
     # ── Russia ────────────────────────────────────────────────────────────
     # The index closes a Russian address rather than opening it, which is the
     # one respect in which it does not follow its DACH neighbours.
