@@ -1118,7 +1118,7 @@ function AppearanceCard() {
         })}
       />
       <CardContent>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {THEME_OPTIONS.map((option) => {
             const isActive = theme === option.value;
             const Icon = option.icon;
@@ -1128,14 +1128,14 @@ function AppearanceCard() {
                 onClick={() => setTheme(option.value)}
                 aria-pressed={isActive}
                 aria-label={t(option.labelKey, { defaultValue: option.defaultLabel })}
-                className={`flex flex-col items-center gap-2.5 rounded-xl px-4 py-4 text-center transition-all duration-normal ease-oe ${
+                className={`flex min-w-0 items-center justify-center gap-2 rounded-lg px-2 py-2.5 text-center transition-all duration-normal ease-oe ${
                   isActive
                     ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue-text'
                     : 'border-2 border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
                 }`}
               >
-                <Icon size={22} strokeWidth={1.75} />
-                <span className="text-sm font-medium">
+                <Icon size={18} strokeWidth={1.75} className="shrink-0" />
+                <span className="truncate text-sm font-medium">
                   {t(option.labelKey, { defaultValue: option.defaultLabel })}
                 </span>
               </button>
@@ -1807,9 +1807,9 @@ export function SettingsPage() {
             </div>
           </div>
 
-          {/* Cards grid: 2 cols desktop, 1 col mobile. Cards can opt into
-              full-width via `lg:col-span-2`. */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 [&>*]:animate-card-in">
+          {/* Cards grid: 2 cols desktop, 1 col mobile, top-aligned so a short card
+              never stretches to its tall neighbour. Full width via `lg:col-span-2`. */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-5 [&>*]:animate-card-in">
 
           {/* ── GENERAL ──────────────────────────────────────────── */}
           {activeTab === 'general' && (
@@ -1825,9 +1825,12 @@ export function SettingsPage() {
                 saving={profileMutation.isPending}
                 onRetry={() => queryClient.invalidateQueries({ queryKey: ['me'] })}
               />
-              <AppearanceCard />
+              {/* Short cards stack on the left so the tall Style card has a partner column. */}
+              <div className="flex min-w-0 flex-col gap-5">
+                <AppearanceCard />
+                <InterfaceModeCard />
+              </div>
               <AppearanceStyleCard />
-              <InterfaceModeCard />
               <MenuAppearanceCard />
             </>
           )}

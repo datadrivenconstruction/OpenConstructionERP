@@ -33,6 +33,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { applyAppearance } from '@/shared/lib/appearance';
+import { applyComfort, readComfort } from '@/shared/lib/comfort';
 import { applyMenu } from '@/shared/lib/menuAppearance';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
@@ -1033,6 +1034,7 @@ useThemeStore.getState().init();
 // from the store in case that script was stripped by a proxy or an embedder.
 applyAppearance(useAppearanceStore.getState().effective);
 applyMenu(useAppearanceStore.getState().menu);
+applyComfort(readComfort());
 
 // Refresh the authoritative role from the server so a user whose role was
 // changed by an admin sees the correct UI immediately on the next page load,

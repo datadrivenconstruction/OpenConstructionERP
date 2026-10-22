@@ -2022,6 +2022,32 @@ html.dark[data-accent='crimson'] {
   --oe-blue-ch: 251 113 133;
 }
 
+/* Comfort options (shared/lib/comfort.ts), personal only.
+   High contrast darkens borders and secondary text; reduced motion stops
+   transitions and animations regardless of the OS setting. */
+html[data-contrast='high'] {
+  --oe-border: #8e8e96;
+  --oe-border-light: #b4b4bc;
+  --oe-border-default: #8e8e96;
+  --oe-text-secondary: #33353b;
+  --oe-text-tertiary: #44474f;
+}
+html.dark[data-contrast='high'] {
+  --oe-border: #6a6f88;
+  --oe-border-light: #4f5470;
+  --oe-border-default: #6a6f88;
+  --oe-text-secondary: #d4d6e2;
+  --oe-text-tertiary: #c0c3d0;
+}
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 /* Light accents carry white text; dark accents are light tints, so an ad hoc
    `bg-oe-blue text-white` pair would sink below AA there. The shared Button
    already uses --oe-text-inverse. */

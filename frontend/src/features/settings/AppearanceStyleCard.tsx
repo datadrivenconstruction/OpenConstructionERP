@@ -2,7 +2,8 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * "Style" card in Settings > General: a gallery of named styles with live
- * previews, then one control per axis (accent, font, density, corners).
+ * previews, then one control per axis (accent, font, density, corners), plus
+ * the personal comfort options (motion, contrast) and one reset.
  *
  * The choice is personal and kept on this device. Admins can also make the
  * current style the workspace default, stored with the workspace branding, which
@@ -29,6 +30,14 @@ import {
   type FontChoice,
 } from '@/shared/lib/appearance';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
+import {
+  CONTRASTS,
+  DEFAULT_COMFORT,
+  MOTIONS,
+  readComfort,
+  writeComfort,
+  type Comfort,
+} from '@/shared/lib/comfort';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -135,6 +144,16 @@ export function AppearanceStyleCard() {
   const setWorkspaceDefault = useAppearanceStore((s) => s.setWorkspaceDefault);
   const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
   const [saving, setSaving] = useState(false);
+  const [comfort, setComfortState] = useState<Comfort>(readComfort);
+  const setComfort = (next: Comfort) => {
+    writeComfort(next);
+    setComfortState(next);
+  };
+  const comfortChanged = comfort.motion !== DEFAULT_COMFORT.motion || comfort.contrast !== DEFAULT_COMFORT.contrast;
+  const resetAll = () => {
+    followWorkspace();
+    setComfort({ ...DEFAULT_COMFORT });
+  };
 
   // Previews draw each style in its own font, so fetch those few stylesheets.
   useEffect(() => {
@@ -187,7 +206,7 @@ export function AppearanceStyleCard() {
         <div
           role="radiogroup"
           aria-label={t('settings.style_title', { defaultValue: 'Style' })}
-          className="grid grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))] items-stretch gap-3 pb-16"
+          className="grid grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] items-stretch gap-2"
         >
           {APPEARANCE_PRESETS.map((preset) => {
             const active = current === preset.id;
@@ -223,7 +242,7 @@ export function AppearanceStyleCard() {
           </div>
         </div>
 
-        <div className="mt-5 flex flex-col gap-4 border-t border-border-light pt-4">
+        <div className="mt-4 flex flex-col gap-3 border-t border-border-light pt-4">
           <OptionRow label={t('settings.style_accent', { defaultValue: 'Accent colour' })}>
             {ACCENTS.map((accent) => (
               <Choice
@@ -268,6 +287,26 @@ export function AppearanceStyleCard() {
               />
             ))}
           </OptionRow>
+          <OptionRow label={t('settings.style_motion', { defaultValue: 'Motion' })}>
+            {MOTIONS.map((motion) => (
+              <Choice
+                key={motion}
+                active={comfort.motion === motion}
+                onSelect={() => setComfort({ ...comfort, motion })}
+                label={t(`settings.style_motion_${motion}`, { defaultValue: motion })}
+              />
+            ))}
+          </OptionRow>
+          <OptionRow label={t('settings.style_contrast', { defaultValue: 'Contrast' })}>
+            {CONTRASTS.map((contrast) => (
+              <Choice
+                key={contrast}
+                active={comfort.contrast === contrast}
+                onSelect={() => setComfort({ ...comfort, contrast })}
+                label={t(`settings.style_contrast_${contrast}`, { defaultValue: contrast })}
+              />
+            ))}
+          </OptionRow>
           <p className="text-xs text-content-tertiary">
             {t('settings.style_font_hint', {
               defaultValue: 'Arabic, Hebrew, Asian and Indic scripts always use the system font.',
@@ -277,9 +316,11 @@ export function AppearanceStyleCard() {
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-light pt-4">
           <p className="text-xs text-content-secondary">{source}</p>
-          {user && (
-            <Button variant="secondary" size="sm" onClick={followWorkspace}>
-              {t('settings.style_use_workspace', { defaultValue: 'Use workspace default' })}
+          {(user || comfortChanged) && (
+            <Button variant="secondary" size="sm" onClick={resetAll}>
+              {workspace
+                ? t('settings.style_use_workspace', { defaultValue: 'Use workspace default' })
+                : t('settings.style_reset', { defaultValue: 'Reset to default' })}
             </Button>
           )}
         </div>

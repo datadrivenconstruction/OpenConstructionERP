@@ -53595,6 +53595,13 @@ const resource = {
     "settings.menu_source_platform": "Вид по умолчанию для платформы.",
     "settings.menu_reset": "Сбросить по умолчанию",
     "settings.menu_workspace_desc": "Сделайте выбранный выше вид меню общим для всех в этом рабочем пространстве. Значки отдельных пунктов остаются личными, а те, кто выбрал свой вид, сохранят его.",
+    "settings.style_motion": "Анимация",
+    "settings.style_motion_full": "Полная",
+    "settings.style_motion_reduced": "Минимум",
+    "settings.style_contrast": "Контраст",
+    "settings.style_contrast_standard": "Обычный",
+    "settings.style_contrast_high": "Высокий",
+    "settings.style_reset": "Сбросить по умолчанию",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",

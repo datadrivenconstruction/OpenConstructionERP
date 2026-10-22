@@ -45248,6 +45248,13 @@ const resource = {
     "settings.menu_source_platform": "Platform default.",
     "settings.menu_reset": "Reset to default",
     "settings.menu_workspace_desc": "Make the menu look above the default for everyone in this workspace. Item icons stay personal, and people who picked their own look keep it.",
+    "settings.style_motion": "Motion",
+    "settings.style_motion_full": "Full",
+    "settings.style_motion_reduced": "Reduced",
+    "settings.style_contrast": "Contrast",
+    "settings.style_contrast_standard": "Standard",
+    "settings.style_contrast_high": "High",
+    "settings.style_reset": "Reset to default",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

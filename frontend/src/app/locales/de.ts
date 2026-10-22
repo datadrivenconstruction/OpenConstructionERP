@@ -53146,6 +53146,13 @@ const resource = {
     "settings.menu_source_platform": "Plattform-Standard.",
     "settings.menu_reset": "Auf Standard zurücksetzen",
     "settings.menu_workspace_desc": "Machen Sie die oben gewählte Menüdarstellung zum Standard für alle in diesem Arbeitsbereich. Einzelne Symbole bleiben persönlich, und wer seine eigene Darstellung gewählt hat, behält sie.",
+    "settings.style_motion": "Bewegung",
+    "settings.style_motion_full": "Voll",
+    "settings.style_motion_reduced": "Reduziert",
+    "settings.style_contrast": "Kontrast",
+    "settings.style_contrast_standard": "Standard",
+    "settings.style_contrast_high": "Hoch",
+    "settings.style_reset": "Auf Standard zurücksetzen",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",
