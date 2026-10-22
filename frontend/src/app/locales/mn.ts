@@ -55066,6 +55066,7 @@ const resource = {
     "modules.catalog.service_charges": "Үйлчилгээний төлбөр",
     "modules.pp_desc_eleven_areas_framework": "Захиалагчийн талаас төслийг арван нэгэн удирдлагын салбарт, хоёр үе шатанд удирдах: төслийн хөгжүүлэлт ба барилгын гүйцэтгэл. Хоёрын хооронд нэг гарц, салбар бүрт нэг батлагдсан төлөвлөгөөний баримт бичигтэй.",
     "modules.pp_name_pakistan_pk": "Барилгын багц: Пакистан",
+    "modules.pp_name_peru_pe": "Перугийн барилгын багц",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} амлалтын хугацаа {{due}} байсан.",
     "notifications.stakeholders.commitment_overdue.title": "Амлалтын хугацаа хэтэрлээ",
     "notifications.stakeholders.plan_overdue.body": "{{title}}-ын хугацаа {{due}} байсан бөгөөд хараахан бүртгээгүй байна.",

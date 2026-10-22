@@ -58379,6 +58379,7 @@ const resource = {
     "modules.catalog.service_charges": "Взносы на содержание",
     "modules.pp_desc_eleven_areas_framework": "Управление проектом со стороны заказчика в одиннадцати областях управления в два этапа: развитие проекта и строительное исполнение. Между ними один гейт, а на каждую область один утверждённый рамочный документ.",
     "modules.pp_name_pakistan_pk": "Строительный пакет: Пакистан",
+    "modules.pp_name_peru_pe": "Строительный пакет: Перу",
     "notifications.stakeholders.commitment_overdue.body": "Срок обязательства {{code}} истёк {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "У обязательства истёк срок",
     "notifications.stakeholders.plan_overdue.body": "{{title}}: срок был {{due}}, записи пока нет.",

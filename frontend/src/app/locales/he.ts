@@ -55664,6 +55664,7 @@ const resource = {
     "modules.catalog.service_charges": "מס ועד הבית",
     "modules.pp_desc_eleven_areas_framework": "ניהול הפרויקט מצד הבעלים באחד-עשר תחומי ניהול, בשני שלבים, פיתוח הפרויקט וביצוע הבנייה, עם שער החלטה אחד ביניהם ומסמך מסגרת מאושר אחד לכל תחום.",
     "modules.pp_name_pakistan_pk": "חבילת בנייה לפקיסטן",
+    "modules.pp_name_peru_pe": "חבילת בנייה פרו",
     "notifications.stakeholders.commitment_overdue.body": "מועד ההתחייבות {{code}} חלף ב-{{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "מועד של התחייבות חלף",
     "notifications.stakeholders.plan_overdue.body": "{{title}}: המועד היה {{due}} ועדיין אין רישום.",

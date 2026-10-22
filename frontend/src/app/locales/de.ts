@@ -57831,6 +57831,7 @@ const resource = {
     "modules.catalog.leasing": "Vermietung",
     "modules.catalog.service_charges": "Hausgeld",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
+    "modules.pp_name_peru_pe": "Peru-Baupaket",
     // stakeholders (module 8) frontend keys: start
     "notifications.stakeholders.commitment_overdue.body": "Zusage {{code}} war am {{due}} fällig.",
     "notifications.stakeholders.commitment_overdue.title": "Eine Zusage hat ihren Termin überschritten",

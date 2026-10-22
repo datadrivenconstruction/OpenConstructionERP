@@ -56591,6 +56591,7 @@ const resource = {
     "modules.catalog.service_charges": "Spese condominiali",
     "modules.pp_desc_eleven_areas_framework": "Gestione del progetto dal lato committente in undici ambiti gestionali su due fasi, sviluppo del progetto ed esecuzione dei lavori, con un gate tra le due e un documento quadro approvato per ciascun ambito.",
     "modules.pp_name_pakistan_pk": "Pacchetto Costruzioni Pakistan",
+    "modules.pp_name_peru_pe": "Pacchetto costruzioni Perù",
     "notifications.stakeholders.commitment_overdue.body": "L'impegno {{code}} scadeva il {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Un impegno ha superato la scadenza",
     "notifications.stakeholders.plan_overdue.body": "{{title}} scadeva il {{due}} e non è ancora registrata.",

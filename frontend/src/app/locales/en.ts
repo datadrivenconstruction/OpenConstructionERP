@@ -49386,6 +49386,7 @@ const resource = {
     "modules.catalog.leasing": "Leasing",
     "modules.catalog.service_charges": "Service Charges",
     "modules.pp_name_pakistan_pk": "Pakistan Construction Pack",
+    "modules.pp_name_peru_pe": "Peru Construction Pack",
     // stakeholders (module 8) frontend keys: start
     "notifications.stakeholders.commitment_overdue.body": "Commitment {{code}} was due on {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "A commitment is past its due date",
