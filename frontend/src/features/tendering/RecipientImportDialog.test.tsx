@@ -55,11 +55,11 @@ describe('recipient import dialog', () => {
     expect(screen.getByText('Invalid email')).toBeTruthy();
     expect(screen.getByText('Ready')).toBeTruthy();
     expect(vi.mocked(api.importRecipients)).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(api.importRecipients).mock.calls[0][2]).toBe(false);
+    expect(vi.mocked(api.importRecipients).mock.calls[0]![2]).toBe(false);
 
     fireEvent.click(screen.getByText('Add valid rows'));
     await waitFor(() => expect(onImported).toHaveBeenCalledTimes(1));
-    expect(vi.mocked(api.importRecipients).mock.calls[1][2]).toBe(true);
+    expect(vi.mocked(api.importRecipients).mock.calls[1]![2]).toBe(true);
   });
 
   it('keeps the confirm button off when no row is valid', async () => {
