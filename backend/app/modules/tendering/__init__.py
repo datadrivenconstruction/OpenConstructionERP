@@ -15,3 +15,7 @@ async def on_startup() -> None:
     from app.modules.tendering.permissions import register_tendering_permissions
 
     register_tendering_permissions()
+
+    from app.modules.tendering.validators import register_tendering_validation_rules
+
+    register_tendering_validation_rules()

@@ -34,5 +34,8 @@ def register_tendering_permissions() -> None:
             "tendering.addendum.acknowledge": Role.EDITOR,
             "tendering.leveling.read": Role.VIEWER,
             "tendering.leveling.run": Role.EDITOR,
+            # Opening sealed bids reveals every price at once: a manager act.
+            "tendering.sealed.open": Role.MANAGER,
+            "tendering.sealed.manage": Role.MANAGER,
         },
     )

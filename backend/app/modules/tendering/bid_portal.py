@@ -71,6 +71,7 @@ from app.modules.tendering.schemas import (
     BidPortalView,
     BidUpdate,
 )
+from app.modules.tendering.sealed import SealedTenderService
 
 logger = logging.getLogger(__name__)
 
@@ -591,6 +592,9 @@ class BidPortalService:
         lines: list[dict],
         priceable: dict,
         bid_amount: str | None = None,
+        *,
+        sealed: bool = False,
+        receipt: Any = None,
     ) -> BidPortalView:
         from app.core.company_profile import read_company_profile
 
@@ -626,6 +630,9 @@ class BidPortalService:
             ),
             submitted_at=_aware(invitation.submitted_at),
             bid_amount=bid_amount,
+            sealed=sealed,
+            receipt_sha256=receipt.content_sha256 if receipt is not None else None,
+            received_at=_aware(receipt.received_at) if receipt is not None else None,
             item_count=len(priceable),
             unpriced_count=sum(1 for pid in priceable if pid not in prices),
         )
@@ -651,15 +658,36 @@ class BidPortalService:
             invitation.opened_at = datetime.now(UTC)
             await self.session.flush()
         amount = self._submitted_amount(invitation)
-        return self._view(invitation, package, project_name, currency, lines, priceable, amount)
+        sealed = SealedTenderService(self.session)
+        sealing = await sealed.get(package.id)
+        receipt = None
+        if sealing is not None and invitation.submitted_at is not None and invitation.bid_id is not None:
+            receipt = await sealed.latest_receipt(invitation.bid_id)
+        return self._view(
+            invitation,
+            package,
+            project_name,
+            currency,
+            lines,
+            priceable,
+            amount,
+            sealed=sealing is not None,
+            receipt=receipt,
+        )
 
-    def _check_writable(
+    async def _check_writable(
         self, invitation: TenderBidInvitation, package: TenderPackage, currency: str, body: BidPortalPricesRequest
-    ) -> None:
+    ) -> bool:
+        """Refuse a write the link may not make; True when the package is sealed."""
         if invitation.submitted_at is not None:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="bid_already_submitted")
         if package.status in _CLOSED_PACKAGE_STATES:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="tender_closed")
+        # Sealed: the server clock decides, a late invitation does not exist.
+        sealed = SealedTenderService(self.session)
+        sealing = await sealed.get(package.id)
+        if sealing is not None:
+            sealed.check_submission_window(package, sealing)
         # A link made while the tender ran stops at the deadline. ``_resolve``
         # already answers so through the expiry; this says it where the write
         # is decided, so a change to the expiry rule cannot reopen late writes.
@@ -674,12 +702,13 @@ class BidPortalService:
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"code": "currency_mismatch", "expected": currency},
             )
+        return sealing is not None
 
     async def save_draft(self, token: str, body: BidPortalPricesRequest) -> BidPortalView:
         """Store the bidder's entries without submitting. Partial is fine."""
         invitation = await self._resolve(token, for_update=True)
         package, project_name, currency, lines, priceable = await self._context(invitation)
-        self._check_writable(invitation, package, currency, body)
+        await self._check_writable(invitation, package, currency, body)
         priced = validate_unit_prices(body.unit_prices, priceable)
         invitation.draft = {
             "unit_prices": {pid: format(value, "f") for pid, value in priced.items()},
@@ -718,7 +747,7 @@ class BidPortalService:
         """
         invitation = await self._resolve(token, for_update=True)
         package, project_name, currency, lines, priceable = await self._context(invitation)
-        self._check_writable(invitation, package, currency, body)
+        is_sealed = await self._check_writable(invitation, package, currency, body)
         priced = validate_unit_prices(body.unit_prices, priceable)
         if not priced:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="nothing_priced")
@@ -792,6 +821,7 @@ class BidPortalService:
                     line_items=line_items,
                     metadata=bid_meta,
                 ),
+                via_portal=True,
             )
         else:
             bid = await self.tendering.create_bid(
@@ -806,6 +836,7 @@ class BidPortalService:
                     line_items=line_items,
                     metadata=bid_meta,
                 ),
+                via_portal=True,
             )
 
         invitation.draft = {
@@ -819,6 +850,9 @@ class BidPortalService:
         if invitation.opened_at is None:
             invitation.opened_at = now
         await self.session.flush()
+        receipt = None
+        if is_sealed:
+            receipt = await SealedTenderService(self.session).issue_receipt(bid, invitation.id, now)
         logger.info(
             "Bid submitted through bidder link: package=%s recipient=%s priced=%s unpriced=%s",
             package.id,
@@ -826,4 +860,6 @@ class BidPortalService:
             len(priced),
             len(unpriced),
         )
-        return self._view(invitation, package, project_name, currency, lines, priceable, amount)
+        return self._view(
+            invitation, package, project_name, currency, lines, priceable, amount, sealed=is_sealed, receipt=receipt
+        )

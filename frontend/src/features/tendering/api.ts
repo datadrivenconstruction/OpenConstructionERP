@@ -6,7 +6,7 @@
  * Backed by /api/v1/tendering/ — see backend/app/modules/tendering/router.py
  */
 
-import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -316,4 +316,77 @@ export function distributePackage(
     `/v1/tendering/packages/${packageId}/distribute/`,
     body,
   );
+}
+
+/* ── Sealed submission mode ───────────────────────────────────────────── */
+
+export type SubmissionMode = 'informal' | 'sealed';
+export type SealedState = 'sealed' | 'awaiting_second' | 'opened';
+
+export interface SealedInfo {
+  state: SealedState;
+  dual_opening: boolean;
+  deadline_utc: string | null;
+  first_approver_id: string | null;
+  first_approved_at: string | null;
+  opened_at: string | null;
+  opened_by: string | null;
+}
+
+export interface SealedSubmission {
+  bid_id: string;
+  company_name: string;
+  received_at: string;
+  sha256: string;
+}
+
+export interface SealedStatus {
+  package_id: string;
+  mode: SubmissionMode;
+  state: SealedState;
+  dual_opening: boolean;
+  deadline_utc: string | null;
+  server_now: string;
+  deadline_passed: boolean;
+  first_approver_id: string | null;
+  first_approved_at: string | null;
+  opened_at: string | null;
+  opened_by: string | null;
+  submissions: SealedSubmission[];
+}
+
+export interface BidIntegrity {
+  bid_id: string;
+  receipt_sha256: string;
+  current_sha256: string;
+  received_at: string;
+  intact: boolean;
+}
+
+export function setSubmissionMode(
+  packageId: string,
+  body: { mode: SubmissionMode; dual_opening: boolean },
+): Promise<unknown> {
+  return apiPut<unknown>(`/v1/tendering/packages/${packageId}/submission-mode/`, body);
+}
+
+export function getSealedStatus(packageId: string): Promise<SealedStatus> {
+  return apiGet<SealedStatus>(`/v1/tendering/packages/${packageId}/sealed/`);
+}
+
+export function openSealedBids(packageId: string): Promise<SealedStatus> {
+  return apiPost<SealedStatus>(`/v1/tendering/packages/${packageId}/sealed/open/`, {});
+}
+
+export function getBidIntegrity(bidId: string): Promise<BidIntegrity> {
+  return apiGet<BidIntegrity>(`/v1/tendering/bids/${bidId}/integrity/`);
+}
+
+/** The backend error code (detail) of a failed call, or an empty string. */
+export function sealedErrorCode(err: unknown): string {
+  const body = (err as { body?: { detail?: unknown } } | null)?.body;
+  const d = body?.detail;
+  if (typeof d === 'string') return d;
+  if (d && typeof d === 'object' && 'code' in d) return String((d as { code: unknown }).code);
+  return '';
 }

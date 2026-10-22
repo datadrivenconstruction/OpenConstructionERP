@@ -13,6 +13,7 @@ import logging
 import uuid
 from datetime import UTC, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -261,6 +262,8 @@ from app.modules.tendering.schemas import (
     RecipientCreate,
     RecipientResponse,
 )
+from app.modules.tendering.sealed import SEALED_NOT_OPENED, SealedTenderService
+from app.modules.tendering.sealed import is_closed as sealed_is_closed
 
 logger = logging.getLogger(__name__)
 
@@ -545,6 +548,7 @@ class TenderingService:
         package = await self.get_package(package_id)
 
         fields = data.model_dump(exclude_unset=True)
+        await SealedTenderService(self.session).guard_package_update(package, fields)
 
         # Map schema field 'metadata' to model column 'metadata_'. Merge a
         # partial metadata patch into the existing column instead of replacing
@@ -617,8 +621,11 @@ class TenderingService:
 
     # ── Bids ─────────────────────────────────────────────────────────────
 
-    async def create_bid(self, package_id: uuid.UUID, data: BidCreate) -> TenderBid:
+    async def create_bid(self, package_id: uuid.UUID, data: BidCreate, *, via_portal: bool = False) -> TenderBid:
         """Create a new bid for a package.
+
+        On a sealed package only the bidder link (``via_portal``) may add a
+        bid; staff entry is refused until the opening.
 
         Raises:
             HTTPException 404: Package not found.
@@ -631,6 +638,9 @@ class TenderingService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Package is '{package.status}' and accepts no new bids",
             )
+        sealed_pkg = await self._sealing(package_id)
+        if sealed_pkg is not None and not via_portal:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=SEALED_NOT_OPENED)
 
         # v3 §10 - ``BidLineItem.unit_rate`` is Decimal; dump in JSON
         # mode so the serializer converts it to a string (the JSON DB
@@ -651,18 +661,18 @@ class TenderingService:
         )
         bid = await self.repo.create_bid(bid)
 
-        await _safe_publish(
-            "tendering.bid.created",
-            {
-                "bid_id": str(bid.id),
-                "package_id": str(package_id),
-                "company_name": bid.company_name,
-                "total_amount": bid.total_amount,
-                "currency": bid.currency,
-                "status": bid.status,
-            },
-            source_module="oe_tendering",
-        )
+        event: dict[str, Any] = {
+            "bid_id": str(bid.id),
+            "package_id": str(package_id),
+            "company_name": bid.company_name,
+            "status": bid.status,
+        }
+        if sealed_pkg is None:
+            event["total_amount"] = bid.total_amount
+            event["currency"] = bid.currency
+        else:
+            event["sealed"] = True
+        await _safe_publish("tendering.bid.created", event, source_module="oe_tendering")
 
         logger.info("Bid created: %s for package %s", bid.company_name, package_id)
         return bid
@@ -682,8 +692,11 @@ class TenderingService:
         await self.get_package(package_id)
         return await self.repo.list_bids_for_package(package_id)
 
-    async def update_bid(self, bid_id: uuid.UUID, data: BidUpdate) -> TenderBid:
+    async def update_bid(self, bid_id: uuid.UUID, data: BidUpdate, *, via_portal: bool = False) -> TenderBid:
         """Update bid fields.
+
+        A bid on a sealed package changes only through the bidder link until
+        the opening, and never after it: its receipt fixes the content.
 
         Raises:
             HTTPException 404: Bid not found.
@@ -691,6 +704,13 @@ class TenderingService:
                 would change the bid's total, currency or line items.
         """
         bid = await self.get_bid(bid_id)
+        sealed_pkg = await self._sealing(bid.package_id)
+        if sealed_pkg is not None and not via_portal:
+            if sealed_pkg.opened_at is None:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=SEALED_NOT_OPENED)
+            touched = set(data.model_dump(exclude_unset=True)) - {"status"}
+            if touched:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="sealed_bid_content_fixed")
 
         fields = data.model_dump(exclude_unset=True)
 
@@ -746,12 +766,29 @@ class TenderingService:
 
     # ── Comparison ───────────────────────────────────────────────────────
 
+    async def _sealing(self, package_id: uuid.UUID) -> Any:
+        """The sealing row of a package; None for informal or a session-less test double."""
+        if not hasattr(self.session, "execute"):
+            return None
+        return await SealedTenderService(self.session).get(package_id)
+
+    async def _closed_sealed_ids(self, package_ids: set[uuid.UUID]) -> set[uuid.UUID]:
+        if not hasattr(self.session, "execute"):
+            return set()
+        return await SealedTenderService(self.session).closed_package_ids(package_ids)
+
+    async def _ensure_unsealed(self, package_id: uuid.UUID) -> None:
+        """Refuse any computation over bid figures while the package is sealed."""
+        if sealed_is_closed(await self._sealing(package_id)):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=SEALED_NOT_OPENED)
+
     async def compare_bids(self, package_id: uuid.UUID) -> BidComparisonResponse:
         """Generate a side-by-side bid comparison for a package.
 
         Builds a matrix of positions vs. bids, computing totals and
         deviation percentages from the budget (first available BOQ rates).
         """
+        await self._ensure_unsealed(package_id)
         package = await self.get_package(package_id)
         bids = await self.repo.list_bids_for_package(package_id)
 
@@ -954,6 +991,7 @@ class TenderingService:
         The decision-maker identity and timestamp are stamped into the
         package metadata (no dedicated column exists in the schema).
         """
+        await self._ensure_unsealed(package_id)
         package = await self.get_package(package_id)
         bid = await self.get_bid(bid_id)
 
@@ -1572,6 +1610,7 @@ class TenderingService:
         """
         from app.modules.tendering.pdf_documents import generate_award_letter_pdf
 
+        await self._ensure_unsealed(package_id)
         package = await self.get_package(package_id)
         bid = await self.get_bid(bid_id)
         if bid.package_id != package_id:
@@ -1614,6 +1653,7 @@ class TenderingService:
         """
         from app.modules.tendering.pdf_documents import generate_rejection_letter_pdf
 
+        await self._ensure_unsealed(package_id)
         package = await self.get_package(package_id)
         bid = await self.get_bid(bid_id)
         if bid.package_id != package_id:
@@ -1885,6 +1925,8 @@ class TenderingService:
         """
         from app.modules.tendering.award_record import build_award_record
 
+        await self._ensure_unsealed(package_id)
+
         package = await self.get_package(package_id)
         bids = await self.repo.list_bids_for_package(package_id)
         project_name, currency = await self._project_name_and_currency(package)
@@ -2016,6 +2058,7 @@ class TenderingService:
     async def _build_leveling(
         self, package_id: uuid.UUID
     ) -> tuple[TenderPackage, list[LevelingMatrixRow], list[BidLevelingSummary], str, int]:
+        await self._ensure_unsealed(package_id)
         package = await self.get_package(package_id)
         all_bids = await self.repo.list_bids_for_package(package_id)
 
@@ -2262,6 +2305,9 @@ class TenderingService:
         )
         result = await self.session.execute(stmt)
         bids: list[TenderBid] = list(result.scalars().all())
+        # Sealed packages that are not opened yet stay out of every aggregate.
+        hidden = await self._closed_sealed_ids({b.package_id for b in bids})
+        bids = [b for b in bids if b.package_id not in hidden]
 
         if not bids:
             return BidAnalysisResponse()

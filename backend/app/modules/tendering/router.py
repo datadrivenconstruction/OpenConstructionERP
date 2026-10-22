@@ -40,6 +40,7 @@ from app.modules.tendering.schemas import (
     BidAnalysisResponse,
     BidComparisonResponse,
     BidCreate,
+    BidIntegrityResponse,
     BidInvitationCreated,
     BidInvitationListResponse,
     BidInvitationResponse,
@@ -59,7 +60,11 @@ from app.modules.tendering.schemas import (
     PackageWithBidsResponse,
     RecipientCreate,
     RecipientResponse,
+    SealedInfo,
+    SealedStatusResponse,
+    SubmissionModeUpdate,
 )
+from app.modules.tendering.sealed import SealedTenderService, is_closed, redacted_bid_fields, sealed_deadline, state_of
 from app.modules.tendering.service import TenderingService
 
 router = APIRouter(tags=["tendering"])
@@ -166,7 +171,25 @@ async def _verify_bid_access(
     return bid
 
 
-def _package_to_response(package: object) -> PackageResponse:
+def _sealed_info(package: object, sealing: object | None) -> dict:
+    """``submission_mode`` and ``sealed`` fields of a package response."""
+    if sealing is None:
+        return {"submission_mode": "informal", "sealed": None}
+    return {
+        "submission_mode": "sealed",
+        "sealed": SealedInfo(
+            state=state_of(sealing) or "sealed",  # type: ignore[arg-type]
+            dual_opening=bool(sealing.dual_opening),  # type: ignore[attr-defined]
+            deadline_utc=sealed_deadline(package.deadline),  # type: ignore[attr-defined]
+            first_approver_id=sealing.first_approver_id,  # type: ignore[attr-defined]
+            first_approved_at=sealing.first_approved_at,  # type: ignore[attr-defined]
+            opened_at=sealing.opened_at,  # type: ignore[attr-defined]
+            opened_by=sealing.opened_by,  # type: ignore[attr-defined]
+        ),
+    }
+
+
+def _package_to_response(package: object, sealing: object | None = None) -> PackageResponse:
     """Build a PackageResponse from a TenderPackage ORM object."""
     try:
         bids = list(package.bids)  # type: ignore[attr-defined]
@@ -184,11 +207,27 @@ def _package_to_response(package: object) -> PackageResponse:
         created_at=package.created_at,  # type: ignore[attr-defined]
         updated_at=package.updated_at,  # type: ignore[attr-defined]
         bid_count=len(bids),
+        **_sealed_info(package, sealing),
     )
 
 
-def _bid_to_response(bid: object) -> BidResponse:
-    """Build a BidResponse from a TenderBid ORM object."""
+def _bid_to_response(bid: object, sealed: bool = False) -> BidResponse:
+    """Build a BidResponse from a TenderBid ORM object; ``sealed`` withholds its content."""
+    if sealed:
+        hidden = redacted_bid_fields()
+        return BidResponse(
+            id=bid.id,  # type: ignore[attr-defined]
+            package_id=bid.package_id,  # type: ignore[attr-defined]
+            company_name=bid.company_name,  # type: ignore[attr-defined]
+            contact_email=bid.contact_email,  # type: ignore[attr-defined]
+            currency=bid.currency,  # type: ignore[attr-defined]
+            submitted_at=bid.submitted_at,  # type: ignore[attr-defined]
+            status=bid.status,  # type: ignore[attr-defined]
+            created_at=bid.created_at,  # type: ignore[attr-defined]
+            updated_at=bid.updated_at,  # type: ignore[attr-defined]
+            sealed=True,
+            **hidden,
+        )
     return BidResponse(
         id=bid.id,  # type: ignore[attr-defined]
         package_id=bid.package_id,  # type: ignore[attr-defined]
@@ -206,9 +245,10 @@ def _bid_to_response(bid: object) -> BidResponse:
     )
 
 
-def _package_with_bids(package: object) -> PackageWithBidsResponse:
+def _package_with_bids(package: object, sealing: object | None = None) -> PackageWithBidsResponse:
     """Build a PackageWithBidsResponse from a TenderPackage ORM object."""
     bids = getattr(package, "bids", []) or []
+    hide = is_closed(sealing)  # type: ignore[arg-type]
     return PackageWithBidsResponse(
         id=package.id,  # type: ignore[attr-defined]
         project_id=package.project_id,  # type: ignore[attr-defined]
@@ -221,7 +261,8 @@ def _package_with_bids(package: object) -> PackageWithBidsResponse:
         created_at=package.created_at,  # type: ignore[attr-defined]
         updated_at=package.updated_at,  # type: ignore[attr-defined]
         bid_count=len(bids),
-        bids=[_bid_to_response(b) for b in bids],
+        bids=[_bid_to_response(b, hide) for b in bids],
+        **_sealed_info(package, sealing),
     )
 
 
@@ -255,7 +296,8 @@ async def list_tenders_root(
         return []
     await _verify_tender_project_owner(session, project_id, user_id, payload)
     packages, _ = await service.list_packages(project_id=project_id, offset=offset, limit=limit)
-    return [_package_to_response(p) for p in packages]
+    sealings = await SealedTenderService(session).by_package(p.id for p in packages)
+    return [_package_to_response(p, sealings.get(p.id)) for p in packages]
 
 
 # ── Package Endpoints ────────────────────────────────────────────────────────
@@ -337,7 +379,8 @@ async def list_packages(
     """
     await _verify_tender_project_owner(session, project_id, user_id, payload)
     packages, _ = await service.list_packages(project_id=project_id, offset=offset, limit=limit)
-    return [_package_to_response(p) for p in packages]
+    sealings = await SealedTenderService(session).by_package(p.id for p in packages)
+    return [_package_to_response(p, sealings.get(p.id)) for p in packages]
 
 
 @router.get("/packages/{package_id}", response_model=PackageWithBidsResponse)
@@ -351,7 +394,10 @@ async def get_package(
 ) -> PackageWithBidsResponse:
     """Get a tender package with all bids."""
     package = await _verify_package_owner(service, session, package_id, user_id, payload)
-    return _package_with_bids(package)
+    sealed = SealedTenderService(session)
+    sealing = await sealed.get(package_id)
+    await sealed.record_read(package_id, user_id, "package")
+    return _package_with_bids(package, sealing)
 
 
 @router.get("/packages/{package_id}/scope", response_model=PackageScopeResponse)
@@ -385,7 +431,7 @@ async def update_package(
     """Update a tender package status or fields."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
     package = await service.update_package(package_id, data)
-    return _package_to_response(package)
+    return _package_to_response(package, await SealedTenderService(session).get(package_id))
 
 
 # ── Bid Endpoints ────────────────────────────────────────────────────────────
@@ -428,7 +474,10 @@ async def list_bids(
     """List all bids for a tender package."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
     bids = await service.list_bids(package_id)
-    return [_bid_to_response(b) for b in bids]
+    sealed = SealedTenderService(session)
+    hide = await sealed.is_closed(package_id)
+    await sealed.record_read(package_id, user_id, "bids")
+    return [_bid_to_response(b, hide) for b in bids]
 
 
 @router.patch("/bids/{bid_id}", response_model=BidResponse)
@@ -495,6 +544,7 @@ async def compare_bids(
 ) -> BidComparisonResponse:
     """Compare all bids for a package side-by-side."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="comparison")
     return await service.compare_bids(package_id)
 
 
@@ -534,6 +584,8 @@ async def export_bid_comparison_xlsx(
     from app.modules.tendering.xlsx_translations import resolve_xlsx_locale, xt
 
     package = await _verify_package_owner(service, session, package_id, user_id, payload)
+
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="comparison_export")
     comparison = await service.compare_bids(package_id)
     project_name, project_currency = await _project_name_and_currency(session, package.project_id)  # type: ignore[attr-defined]
     if not project_currency:
@@ -676,6 +728,7 @@ async def apply_tender_winner(
     the project budget reflects the actual contracted price.
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="apply_winner")
     return await service.apply_winner(package_id, bid_id, awarded_by=user_id)
 
 
@@ -965,6 +1018,7 @@ async def get_leveling_matrix(
 ) -> LevelingMatrixResponse:
     """Return the bid-leveling matrix (reference BOQ lines × bids)."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="leveling")
     return await service.get_leveling_matrix(package_id)
 
 
@@ -982,6 +1036,7 @@ async def level_package_bids(
 ) -> LevelBidsResponse:
     """Run bid leveling across a package's bids and return the rollup."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="leveling_run")
     return await service.level_bids(package_id)
 
 
@@ -1011,6 +1066,7 @@ async def get_award_record(
     that nothing has answered are returned as gaps rather than left blank.
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="award_record")
     return await service.award_record(package_id)
 
 
@@ -1033,6 +1089,7 @@ async def record_award_record_note(
     supersedes the earlier statement instead of erasing it.
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="award_record_note")
     return await service.record_award_note(package_id, data, actor_id=user_id)
 
 
@@ -1054,6 +1111,7 @@ async def export_award_record_pdf(
     that the rule exists to prevent.
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="award_record_pdf")
     try:
         pdf_bytes, filename = await service.build_award_record_pdf(package_id)
     except HTTPException:
@@ -1100,6 +1158,7 @@ async def export_tender_pdf(
     so that no extra dependencies (reportlab, etc.) are required.
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="tender_pdf")
     package = await service.get_package(package_id)
     comparison = await service.compare_bids(package_id)
 
@@ -1245,6 +1304,7 @@ async def export_award_letter_pdf(
     rendered Decimal-correct. Tenant-scoped via project access on the package.
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="award_letter")
     try:
         pdf_bytes, filename = await service.build_award_letter_pdf(package_id, bid_id)
     except HTTPException:
@@ -1283,6 +1343,7 @@ async def export_rejection_letter_pdf(
     bid's currency. Tenant-scoped via project access on the package.
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
+    await SealedTenderService(session).ensure_open(package_id, user_id=user_id, what="rejection_letter")
     try:
         pdf_bytes, filename = await service.build_rejection_letter_pdf(package_id, bid_id)
     except HTTPException:
@@ -1325,3 +1386,107 @@ async def get_bid_analysis(
     """Cross-package bid analysis for the Estimation Dashboard."""
     await verify_project_access(project_id, user_id, session)
     return await service.get_bid_analysis(project_id)
+
+
+# ── Sealed submission mode ───────────────────────────────────────────────────
+
+
+@router.put("/packages/{package_id}/submission-mode/", response_model=PackageResponse)
+async def set_submission_mode(
+    package_id: uuid.UUID,
+    data: SubmissionModeUpdate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.sealed.manage")),
+) -> PackageResponse:
+    """Switch a package between informal and sealed submissions (before any bid arrives)."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    sealing = await SealedTenderService(session).set_mode(
+        package,  # type: ignore[arg-type]
+        data.mode,
+        dual_opening=data.dual_opening,
+        user_id=user_id,
+    )
+    return _package_to_response(await service.get_package(package_id), sealing)
+
+
+@router.get("/packages/{package_id}/sealed/", response_model=SealedStatusResponse)
+async def get_sealed_status(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> SealedStatusResponse:
+    """Sealed state on the server clock, with who submitted and when (never what)."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    return SealedStatusResponse(**await SealedTenderService(session).status_view(package))  # type: ignore[arg-type]
+
+
+@router.post("/packages/{package_id}/sealed/open/", response_model=SealedStatusResponse)
+async def open_sealed_bids(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.sealed.open")),
+) -> SealedStatusResponse:
+    """One opening step after the deadline; a two-person opening needs a second, different user."""
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    sealed = SealedTenderService(session)
+    sealing = await sealed.open(package, str(user_id))  # type: ignore[arg-type]
+    if sealing.opened_at is not None:
+        from app.modules.tendering.service import _safe_publish
+
+        await _safe_publish("tendering.sealed.opened", {"package_id": str(package_id)}, source_module="oe_tendering")
+    return SealedStatusResponse(**await sealed.status_view(package))  # type: ignore[arg-type]
+
+
+@router.get("/packages/{package_id}/sealed/validation/")
+async def validate_sealed_package(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> dict:
+    """Run the ``tendering_sealed`` rule set over the package."""
+    from app.core.validation.engine import ValidationContext, rule_registry
+    from app.modules.tendering.validators import SEALED_RULE_SET
+
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    data = await SealedTenderService(session).validation_payload(package)  # type: ignore[arg-type]
+    context = ValidationContext(data=data, project_id=str(package.project_id))  # type: ignore[attr-defined]
+    results = []
+    for rule in rule_registry.get_rules_for_sets([SEALED_RULE_SET]):
+        for result in await rule.validate(context):
+            results.append(
+                {
+                    "rule_id": result.rule_id,
+                    "severity": str(result.severity),
+                    "passed": result.passed,
+                    "message": result.message,
+                    "element_ref": result.element_ref,
+                    "suggestion": result.suggestion,
+                }
+            )
+    return {"package_id": str(package_id), "passed": all(r["passed"] for r in results), "results": results}
+
+
+@router.get("/bids/{bid_id}/integrity/", response_model=BidIntegrityResponse)
+async def check_bid_integrity(
+    bid_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> BidIntegrityResponse:
+    """Recompute the SHA-256 of a bid's stored content and compare it with its receipt."""
+    bid = await _verify_bid_access(service, session, bid_id, user_id, payload)
+    return BidIntegrityResponse(**await SealedTenderService(session).verify(bid, user_id))  # type: ignore[arg-type]

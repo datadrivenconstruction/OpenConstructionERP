@@ -45,6 +45,10 @@ export interface BidPortalView {
   lines: BidPortalLine[];
   draft: BidPortalDraft;
   submitted_at: string | null;
+  /** Sealed tender: the content stays hidden until the opening. */
+  sealed?: boolean;
+  receipt_sha256?: string | null;
+  received_at?: string | null;
   bid_amount: string | null;
   item_count: number;
   unpriced_count: number;
@@ -86,6 +90,7 @@ const DETAIL_CODES: Record<string, BidPortalErrorCode> = {
   bid_link_expired: 'expired',
   bid_already_submitted: 'already_submitted',
   tender_closed: 'closed',
+  sealed_deadline_passed: 'closed',
   nothing_priced: 'nothing_priced',
   rate_limited: 'rate_limited',
   invalid_unit_prices: 'invalid_prices',

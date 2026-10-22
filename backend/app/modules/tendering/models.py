@@ -6,12 +6,14 @@ Tables:
     oe_tendering_package - tender/bid packages linked to a project and BOQ
     oe_tendering_bid - individual bids submitted against a package
     oe_tendering_bid_invitation - per-recipient price-entry links (token hashed)
+    oe_tendering_sealing - the sealed submission mode of a package and its opening
+    oe_tendering_bid_receipt - time stamp and SHA-256 of each sealed submission
 """
 
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -142,3 +144,55 @@ class TenderBidInvitation(Base):
 
     def __repr__(self) -> str:
         return f"<TenderBidInvitation {self.company_name} package={self.package_id}>"
+
+
+class TenderSealing(Base):
+    """A package tendered in sealed mode: one row per sealed package.
+
+    A package without a row is informal. Opening is recorded here; with
+    ``dual_opening`` the first authorised user is stored as the first approver
+    and a second, distinct user opens.
+    """
+
+    __tablename__ = "oe_tendering_sealing"
+
+    package_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tendering_package.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    dual_opening: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    first_approver_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    first_approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    opened_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+
+class TenderBidReceipt(Base):
+    """What a bidder was given when a sealed submission was accepted.
+
+    ``content_sha256`` is the digest of the canonical submission content
+    (``sealed.canonical_content``); the newest receipt of a bid is the one its
+    stored content is verified against.
+    """
+
+    __tablename__ = "oe_tendering_bid_receipt"
+
+    package_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tendering_package.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    bid_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tendering_bid.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    invitation_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

@@ -54,6 +54,8 @@ import { AddendumList } from './AddendumList';
 import { AwardRecordPanel } from './AwardRecordPanel';
 import { BidLinkCell, bidInvitationsQueryKey } from './BidLinkCell';
 import { BidPortalMarks } from './BidPortalMarks';
+import { BidIntegrityButton, SealedBidMark, SealedEmptyState, SealedTenderPanel, isSealedNotOpened } from './SealedTenderPanel';
+import type { SealedInfo, SubmissionMode } from './api';
 import { LevelingMatrix } from './LevelingMatrix';
 import { cellRate, classifyCell, pricedRates, recommend, unpricedLineCount } from './analysis';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
@@ -121,6 +123,8 @@ interface BidData {
   status: string;
   notes: string;
   line_items: LineItem[];
+  /** True while the bid's content is hidden until a sealed opening. */
+  sealed?: boolean;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -145,6 +149,8 @@ interface TenderPackage {
   deadline: string | null;
   metadata: Record<string, unknown>;
   bid_count: number;
+  submission_mode?: SubmissionMode;
+  sealed?: SealedInfo | null;
   created_at: string;
   updated_at: string;
 }
@@ -1442,6 +1448,7 @@ function PackageDetail({
     data: comparison,
     isLoading: comparisonLoading,
     isError: comparisonError,
+    error: comparisonErr,
   } = useQuery({
     queryKey: ['tendering-comparison', packageId],
     queryFn: () => apiGet<BidComparison>(`/v1/tendering/packages/${packageId}/comparison/`),
@@ -1973,6 +1980,8 @@ function PackageDetail({
       </div>
 
       {/* Bids list */}
+      {activeTab === 'bids' && <SealedTenderPanel packageId={packageId} pkg={pkg} />}
+
       {activeTab === 'bids' && pkg.bids.length > 0 && (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -2015,9 +2024,16 @@ function PackageDetail({
                   )}
                   <BidPortalMarks metadata={bid.metadata} />
                 </div>
-                <span className="text-sm font-semibold tabular-nums text-content-primary">
-                  {formatCurrency(bid.total_amount, bid.currency)}
-                </span>
+                {bid.sealed ? (
+                  <>
+                    <SealedBidMark />
+                    <BidIntegrityButton bidId={bid.id} />
+                  </>
+                ) : (
+                  <span className="text-sm font-semibold tabular-nums text-content-primary">
+                    {formatCurrency(bid.total_amount, bid.currency)}
+                  </span>
+                )}
                 <Badge variant={STATUS_COLORS[bid.status] || 'neutral'} size="sm">
                   {translateStatus(bid.status, t)}
                 </Badge>
@@ -2122,6 +2138,8 @@ function PackageDetail({
         </div>
         {comparisonLoading ? (
           <SkeletonTable rows={4} columns={4} />
+        ) : comparisonError && isSealedNotOpened(comparisonErr) ? (
+          <SealedEmptyState />
         ) : comparisonError ? (
           <EmptyState
             icon={<AlertTriangle size={28} strokeWidth={1.5} />}

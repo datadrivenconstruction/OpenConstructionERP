@@ -16,7 +16,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronRight, CheckCircle2, Clock, Lock, AlertTriangle } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, Clock, Copy, Lock, AlertTriangle } from 'lucide-react';
 
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
@@ -26,6 +26,7 @@ import { formatCurrency } from '@/shared/lib/money';
 import { formatDateValue } from '@/shared/lib/formatters';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import { parseMoneyInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
+import { copyToClipboard } from '@/shared/lib/browser';
 import { useNumberLocale } from '@/stores/usePreferencesStore';
 
 import {
@@ -273,6 +274,32 @@ export function BidPortalPage() {
             <p className="font-medium">
               {t('bid_portal.receipt.title', { defaultValue: 'Your bid has been submitted.' })}
             </p>
+            {v.sealed && v.receipt_sha256 ? (
+              <div className="space-y-1 text-content-secondary" data-testid="bid-portal-sealed-receipt">
+                <p>
+                  {t('tendering.sealed.receipt_received', {
+                    defaultValue: 'Received {{date}}',
+                    date: v.received_at ? new Date(v.received_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'medium' }) : '',
+                  })}
+                </p>
+                <p className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{t('tendering.sealed.col_hash', { defaultValue: 'SHA-256' })}</span>
+                  <code className="break-all font-mono text-xs">{v.receipt_sha256}</code>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded border border-border-light px-2 py-0.5 text-xs hover:bg-surface-secondary"
+                    onClick={() => void copyToClipboard(v.receipt_sha256 ?? '')}
+                  >
+                    <Copy size={12} aria-hidden />
+                    {t('tendering.sealed.copy', { defaultValue: 'Copy' })}
+                  </button>
+                </p>
+                <p>{t('tendering.sealed.receipt_sealed_note', { defaultValue: 'Your prices are sealed and will be read only at the opening.' })}</p>
+                <p className="font-medium text-content-primary">
+                  {t('tendering.sealed.receipt_keep', { defaultValue: 'Keep this receipt. The code proves what you submitted and when.' })}
+                </p>
+              </div>
+            ) : (
             <p className="text-content-secondary">
               {t('bid_portal.receipt.detail', {
                 defaultValue: 'Submitted {{date}}. Bid sum: {{amount}}. The prices below can no longer be changed.',
@@ -280,6 +307,7 @@ export function BidPortalPage() {
                 amount: money(v.bid_amount ?? sum),
               })}
             </p>
+            )}
           </div>
         </div>
       )}

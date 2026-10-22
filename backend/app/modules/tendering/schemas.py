@@ -9,7 +9,7 @@ v3 §10 - money fields are Decimal-as-string in JSON.
 import re
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
@@ -91,6 +91,9 @@ class PackageResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     bid_count: int = 0
+    # "informal" | "sealed"; ``sealed`` carries the opening state of a sealed package.
+    submission_mode: str = "informal"
+    sealed: "SealedInfo | None" = None
 
 
 class PackageWithBidsResponse(PackageResponse):
@@ -191,6 +194,66 @@ class BidResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    # True while the package is sealed and unopened: content fields are empty.
+    sealed: bool = False
+
+
+# ── Sealed mode ─────────────────────────────────────────────────────────────
+
+
+class SealedInfo(BaseModel):
+    """Opening state of a sealed package as listed with the package."""
+
+    state: str  # sealed | awaiting_second | opened
+    dual_opening: bool = False
+    deadline_utc: datetime | None = None
+    first_approver_id: str | None = None
+    first_approved_at: datetime | None = None
+    opened_at: datetime | None = None
+    opened_by: str | None = None
+
+
+class SubmissionModeUpdate(BaseModel):
+    """Switch a package between informal and sealed submissions."""
+
+    mode: Literal["informal", "sealed"]
+    dual_opening: bool = False
+
+
+class SealedSubmission(BaseModel):
+    """A received sealed submission: who and when, never what."""
+
+    bid_id: UUID
+    company_name: str
+    received_at: datetime
+    sha256: str
+
+
+class SealedStatusResponse(BaseModel):
+    """Sealed state of a package on the server clock."""
+
+    package_id: UUID
+    mode: str
+    state: str | None = None
+    dual_opening: bool = False
+    deadline_utc: datetime | None = None
+    server_now: datetime
+    deadline_passed: bool = False
+    first_approver_id: str | None = None
+    first_approved_at: datetime | None = None
+    opened_at: datetime | None = None
+    opened_by: str | None = None
+    submissions: list[SealedSubmission] = Field(default_factory=list)
+
+
+class BidIntegrityResponse(BaseModel):
+    """Recomputed digest of a bid against the digest on its receipt."""
+
+    bid_id: UUID
+    receipt_sha256: str | None = None
+    current_sha256: str
+    received_at: datetime | None = None
+    intact: bool
 
 
 # ── Comparison schema ────────────────────────────────────────────────────────
@@ -771,6 +834,10 @@ class BidPortalView(BaseModel):
     submitted_at: datetime | None = None
     # The bidder's own submitted sum, as a decimal string; set once submitted.
     bid_amount: str | None = None
+    # Sealed mode: the receipt of the submission (UTC time stamp, SHA-256).
+    sealed: bool = False
+    receipt_sha256: str | None = None
+    received_at: datetime | None = None
     item_count: int = 0
     unpriced_count: int = 0
 

@@ -217,6 +217,20 @@ class _BackupRegistry:
     owner_columns: dict[str, frozenset[str]]
 
 
+#: Tables holding bid content (amounts, unit prices) of tender packages.
+_SEALED_CONTENT_TABLES = frozenset({"oe_tendering_bid", "oe_tendering_bid_invitation"})
+
+
+async def _without_sealed_content(session: Any, rows: list[Any]) -> list[Any]:
+    """Drop rows of sealed tender packages that are not opened yet."""
+    try:
+        from app.modules.tendering.sealed import SealedTenderService
+    except ImportError:
+        return rows
+    hidden = await SealedTenderService(session).closed_package_ids({r.package_id for r in rows})
+    return [r for r in rows if r.package_id not in hidden]
+
+
 def _import_all_module_models() -> None:
     """Best-effort import of every module's models so the ORM registry is full.
 
@@ -482,6 +496,8 @@ async def build_backup(
                         rows = []
                     else:
                         rows = (await session.execute(select(model_cls).where(clause))).scalars().all()
+                    if rows and getattr(model_cls, "__tablename__", "") in _SEALED_CONTENT_TABLES:
+                        rows = await _without_sealed_content(session, rows)
                     # Reading the loaded rows stays here, next to the session
                     # that owns them. Encoding and deflating them is pure CPU
                     # that grows with the account, so it runs in a worker

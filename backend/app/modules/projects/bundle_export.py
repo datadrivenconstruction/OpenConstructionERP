@@ -315,6 +315,14 @@ async def _rows_for_table(
             .scalars()
             .all()
         )
+        try:
+            from app.modules.tendering.sealed import SealedTenderService
+
+            # Bids of a sealed package stay out of every export until it is opened.
+            hidden = await SealedTenderService(session).closed_package_ids(pkg_ids)
+            pkg_ids = [pid for pid in pkg_ids if pid not in hidden]
+        except ImportError:
+            pass
         if not pkg_ids:
             return []
         rows = (
