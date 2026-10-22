@@ -58376,6 +58376,13 @@ const resource = {
     "converter_notice.email": "כתבו לנו באימייל",
     "converter_notice.dismiss": "סגירת ההודעה",
     "demo_uploads.refused": "העלאת קבצים כבויה בהדגמה הציבורית. השתמשו בפרויקטי ההדגמה ובנתוני הדוגמה שלהם, או התקינו את הפלטפורמה כדי לעבוד עם הקבצים שלכם.",
+    "demo_switcher.label": "פרויקטים לדוגמה",
+    "demo_switcher.not_installed": "לא מותקן בשרת הזה",
+    "demo_switcher.read_only": "הדגמה לקריאה בלבד: פונקציות רבות מוגבלות. יש להשתמש בנתוני הדגמה בלבד, העלאות כבויות.",
+    "demo_switcher.tab_consultancy_riyadh": "משרד יועצים, ריאד",
+    "demo_switcher.tab_contractor_jeddah": "קבלן ראשי, ג'דה",
+    "demo_switcher.tab_site_development_dammam": "פיתוח אתרים, דמאם",
+    "demo_switcher.tab_full_showcase_riyadh": "תצוגה מלאה, ריאד",
   }
 } as { translation: Record<string, string> };
 

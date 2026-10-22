@@ -60995,6 +60995,13 @@ const resource = {
     "converter_notice.email": "Escreva-nos por email",
     "converter_notice.dismiss": "Ocultar este aviso",
     "demo_uploads.refused": "Os carregamentos estão desativados na demonstração pública. Utilize os projetos de demonstração e os respetivos dados de exemplo, ou instale a plataforma para trabalhar com os seus ficheiros.",
+    "demo_switcher.label": "Projetos de demonstração",
+    "demo_switcher.not_installed": "Não instalado neste servidor",
+    "demo_switcher.read_only": "Demo só de leitura: muitas funções estão limitadas. Use apenas dados de demonstração; os envios estão desativados.",
+    "demo_switcher.tab_consultancy_riyadh": "Gabinete de projetos, Riade",
+    "demo_switcher.tab_contractor_jeddah": "Empreiteiro, Jidá",
+    "demo_switcher.tab_site_development_dammam": "Infraestruturas exteriores, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Demonstração completa, Riade",
   }
 } as { translation: Record<string, string> };
 

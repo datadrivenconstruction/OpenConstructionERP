@@ -60167,6 +60167,13 @@ const resource = {
     "converter_notice.email": "Написати нам на пошту",
     "converter_notice.dismiss": "Приховати це сповіщення",
     "demo_uploads.refused": "У публічному демо завантаження файлів вимкнено. Використовуйте демо-проєкти та їхні приклади даних або встановіть платформу, щоб працювати зі своїми файлами.",
+    "demo_switcher.label": "Демо-проєкти",
+    "demo_switcher.not_installed": "Не встановлено на цьому сервері",
+    "demo_switcher.read_only": "Демо лише для перегляду: багато функцій обмежено. Використовуйте лише демо-дані, завантаження вимкнено.",
+    "demo_switcher.tab_consultancy_riyadh": "Проєктне бюро, Ер-Ріяд",
+    "demo_switcher.tab_contractor_jeddah": "Генпідрядник, Джидда",
+    "demo_switcher.tab_site_development_dammam": "Благоустрій майданчика, Дамам",
+    "demo_switcher.tab_full_showcase_riyadh": "Повна вітрина, Ер-Ріяд",
   }
 } as { translation: Record<string, string> };
 

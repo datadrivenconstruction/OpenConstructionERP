@@ -58099,6 +58099,13 @@ const resource = {
     "converter_notice.email": "Kirjoita meille sähköpostilla",
     "converter_notice.dismiss": "Piilota tämä ilmoitus",
     "demo_uploads.refused": "Lataukset ovat pois päältä julkisessa demossa. Käytä demoprojekteja ja niiden esimerkkitietoja tai asenna alusta omien tiedostojesi käsittelyyn.",
+    "demo_switcher.label": "Demoprojektit",
+    "demo_switcher.not_installed": "Ei asennettu tälle palvelimelle",
+    "demo_switcher.read_only": "Vain lukuoikeus: monet toiminnot on rajoitettu. Käytä vain demodataa, lataukset on poistettu käytöstä.",
+    "demo_switcher.tab_consultancy_riyadh": "Konsultointi, Riad",
+    "demo_switcher.tab_contractor_jeddah": "Urakoitsija, Jidda",
+    "demo_switcher.tab_site_development_dammam": "Piha-alueiden rakentaminen, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Täysi esittely, Riad",
   }
 } as { translation: Record<string, string> };
 

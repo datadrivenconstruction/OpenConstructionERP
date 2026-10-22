@@ -58212,6 +58212,13 @@ const resource = {
     "converter_notice.email": "Бизге электрондук почта аркылуу жазуу",
     "converter_notice.dismiss": "Эскертмени жабуу",
     "demo_uploads.refused": "Ачык демодо жүктөө өчүрүлгөн. Демо долбоорлорду жана алардын үлгү маалыматтарын колдонуңуз же өз файлдарыңыз менен иштөө үчүн платформаны орнотуңуз.",
+    "demo_switcher.label": "Демо долбоорлор",
+    "demo_switcher.not_installed": "Бул серверде орнотулган эмес",
+    "demo_switcher.read_only": "Окуу үчүн гана демо: көптөгөн функциялар чектелген. Демо маалыматтарын гана колдонуңуз, жүктөө өчүрүлгөн.",
+    "demo_switcher.tab_consultancy_riyadh": "Долбоорлоо бюросу, Эр-Рияд",
+    "demo_switcher.tab_contractor_jeddah": "Мердигер, Жидда",
+    "demo_switcher.tab_site_development_dammam": "Аймакты абаттандыруу, Даммам",
+    "demo_switcher.tab_full_showcase_riyadh": "Толук демо, Эр-Рияд",
   }
 } as { translation: Record<string, string> };
 

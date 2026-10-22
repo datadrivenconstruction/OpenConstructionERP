@@ -58976,6 +58976,13 @@ const resource = {
     "converter_notice.email": "E-posta ile yazın",
     "converter_notice.dismiss": "Bu bildirimi kapat",
     "demo_uploads.refused": "Herkese açık demoda yükleme kapalı. Demo projelerini ve örnek verilerini kullanın ya da kendi dosyalarınızla çalışmak için platformu kurun.",
+    "demo_switcher.label": "Demo projeler",
+    "demo_switcher.not_installed": "Bu sunucuda kurulu değil",
+    "demo_switcher.read_only": "Salt okunur demo: birçok işlev sınırlıdır. Yalnızca demo verilerini kullanın, yüklemeler kapalıdır.",
+    "demo_switcher.tab_consultancy_riyadh": "Danışmanlık, Riyad",
+    "demo_switcher.tab_contractor_jeddah": "Müteahhit, Cidde",
+    "demo_switcher.tab_site_development_dammam": "Arsa geliştirme, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Tam tanıtım, Riyad",
   }
 } as { translation: Record<string, string> };
 

@@ -58430,6 +58430,13 @@ const resource = {
     "converter_notice.email": "Pišite nam e-poštom",
     "converter_notice.dismiss": "Zatvori ovu obavijest",
     "demo_uploads.refused": "U javnom demu učitavanje je isključeno. Koristite demo projekte i njihove primjere podataka ili instalirajte platformu za rad s vlastitim datotekama.",
+    "demo_switcher.label": "Demo projekti",
+    "demo_switcher.not_installed": "Nije instalirano na ovom poslužitelju",
+    "demo_switcher.read_only": "Demo samo za čitanje: mnoge funkcije su ograničene. Koristite samo demo podatke, učitavanje je isključeno.",
+    "demo_switcher.tab_consultancy_riyadh": "Projektantski ured, Rijad",
+    "demo_switcher.tab_contractor_jeddah": "Izvođač radova, Džedah",
+    "demo_switcher.tab_site_development_dammam": "Uređenje gradilišta, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Potpuni prikaz, Rijad",
   }
 } as { translation: Record<string, string> };
 

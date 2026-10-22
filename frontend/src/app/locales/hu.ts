@@ -60660,6 +60660,13 @@ const resource = {
     "converter_notice.email": "Írjon nekünk e-mailben",
     "converter_notice.dismiss": "Üzenet elrejtése",
     "demo_uploads.refused": "A nyilvános bemutatóban a feltöltés ki van kapcsolva. Használja a bemutató projekteket és mintaadataikat, vagy telepítse a platformot a saját fájljaihoz.",
+    "demo_switcher.label": "Demó projektek",
+    "demo_switcher.not_installed": "Ezen a szerveren nincs telepítve",
+    "demo_switcher.read_only": "Csak olvasható demó: sok funkció korlátozott. Csak demóadatokat használjon, a feltöltés le van tiltva.",
+    "demo_switcher.tab_consultancy_riyadh": "Tervezőiroda, Rijád",
+    "demo_switcher.tab_contractor_jeddah": "Kivitelező, Dzsidda",
+    "demo_switcher.tab_site_development_dammam": "Területrendezés, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Teljes bemutató, Rijád",
   }
 } as { translation: Record<string, string> };
 

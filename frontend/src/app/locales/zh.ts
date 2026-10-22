@@ -60319,6 +60319,13 @@ const resource = {
     "converter_notice.email": "给我们发邮件",
     "converter_notice.dismiss": "关闭此通知",
     "demo_uploads.refused": "公开演示已关闭上传。请使用演示项目及其示例数据，或安装平台以处理您自己的文件。",
+    "demo_switcher.label": "演示项目",
+    "demo_switcher.not_installed": "未安装在此服务器上",
+    "demo_switcher.read_only": "只读演示：许多功能受限。请仅使用演示数据，已关闭上传。",
+    "demo_switcher.tab_consultancy_riyadh": "咨询公司，利雅得",
+    "demo_switcher.tab_contractor_jeddah": "承包商，吉达",
+    "demo_switcher.tab_site_development_dammam": "场地建设，达曼",
+    "demo_switcher.tab_full_showcase_riyadh": "完整展示，利雅得",
   }
 } as { translation: Record<string, string> };
 

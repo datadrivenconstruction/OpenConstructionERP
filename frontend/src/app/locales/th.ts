@@ -57850,6 +57850,13 @@ const resource = {
     "converter_notice.email": "ส่งอีเมลถึงเรา",
     "converter_notice.dismiss": "ปิดประกาศนี้",
     "demo_uploads.refused": "ปิดการอัปโหลดในเดโมสาธารณะ โปรดใช้โครงการสาธิตและข้อมูลตัวอย่าง หรือติดตั้งแพลตฟอร์มเพื่อทำงานกับไฟล์ของคุณเอง",
+    "demo_switcher.label": "โปรเจกต์ตัวอย่าง",
+    "demo_switcher.not_installed": "ยังไม่ได้ติดตั้งบนเซิร์ฟเวอร์นี้",
+    "demo_switcher.read_only": "เดโมแบบอ่านอย่างเดียว: หลายฟังก์ชันถูกจำกัด ใช้เฉพาะข้อมูลตัวอย่าง และปิดการอัปโหลดไฟล์",
+    "demo_switcher.tab_consultancy_riyadh": "บริษัทที่ปรึกษา, ริยาด",
+    "demo_switcher.tab_contractor_jeddah": "ผู้รับเหมา, เจดดาห์",
+    "demo_switcher.tab_site_development_dammam": "งานปรับพื้นที่ก่อสร้าง, ดัมมาม",
+    "demo_switcher.tab_full_showcase_riyadh": "สาธิตฉบับเต็ม, ริยาด",
   }
 } as { translation: Record<string, string> };
 

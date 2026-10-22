@@ -58055,6 +58055,13 @@ const resource = {
     "converter_notice.email": "ارسال ایمیل به ما",
     "converter_notice.dismiss": "بستن این اعلان",
     "demo_uploads.refused": "بارگذاری در نسخه نمایشی عمومی غیرفعال است. از پروژه‌های نمایشی و داده‌های نمونه آن‌ها استفاده کنید یا برای کار با فایل‌های خود، پلتفرم را نصب کنید.",
+    "demo_switcher.label": "پروژه‌های نمایشی",
+    "demo_switcher.not_installed": "روی این سرور نصب نشده است",
+    "demo_switcher.read_only": "نمایش فقط‌خواندنی: بسیاری از امکانات محدودند. فقط از داده‌های نمایشی استفاده کنید؛ بارگذاری غیرفعال است.",
+    "demo_switcher.tab_consultancy_riyadh": "دفتر مشاوره، ریاض",
+    "demo_switcher.tab_contractor_jeddah": "پیمانکار، جده",
+    "demo_switcher.tab_site_development_dammam": "محوطه‌سازی، دمام",
+    "demo_switcher.tab_full_showcase_riyadh": "نمایش کامل، ریاض",
   }
 } as { translation: Record<string, string> };
 

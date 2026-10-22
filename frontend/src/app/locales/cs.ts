@@ -59359,6 +59359,13 @@ const resource = {
     "converter_notice.email": "Napsat nám e-mailem",
     "converter_notice.dismiss": "Skrýt toto upozornění",
     "demo_uploads.refused": "Ve veřejném demu je nahrávání vypnuté. Použijte ukázkové projekty a jejich data, nebo si platformu nainstalujte a pracujte s vlastními soubory.",
+    "demo_switcher.label": "Demo projekty",
+    "demo_switcher.not_installed": "Na tomto serveru není nainstalováno",
+    "demo_switcher.read_only": "Demo pouze pro čtení: mnoho funkcí je omezeno. Používejte jen demo data, nahrávání je vypnuté.",
+    "demo_switcher.tab_consultancy_riyadh": "Projektová kancelář, Rijád",
+    "demo_switcher.tab_contractor_jeddah": "Zhotovitel, Džidda",
+    "demo_switcher.tab_site_development_dammam": "Areálové úpravy, Dammám",
+    "demo_switcher.tab_full_showcase_riyadh": "Plná ukázka, Rijád",
   }
 } as { translation: Record<string, string> };
 

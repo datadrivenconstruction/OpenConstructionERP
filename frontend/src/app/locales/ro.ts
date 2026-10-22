@@ -58420,6 +58420,13 @@ const resource = {
     "converter_notice.email": "Scrie-ne pe e-mail",
     "converter_notice.dismiss": "Ascunde această notificare",
     "demo_uploads.refused": "În demo-ul public încărcările sunt dezactivate. Folosiți proiectele demo și datele lor de exemplu sau instalați platforma pentru a lucra cu propriile fișiere.",
+    "demo_switcher.label": "Proiecte demo",
+    "demo_switcher.not_installed": "Nu este instalat pe acest server",
+    "demo_switcher.read_only": "Demo doar pentru citire: multe funcții sunt limitate. Folosiți doar date demo, încărcările sunt dezactivate.",
+    "demo_switcher.tab_consultancy_riyadh": "Birou de consultanță, Riad",
+    "demo_switcher.tab_contractor_jeddah": "Antreprenor, Djeddah",
+    "demo_switcher.tab_site_development_dammam": "Amenajări exterioare, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Prezentare completă, Riad",
   }
 } as { translation: Record<string, string> };
 

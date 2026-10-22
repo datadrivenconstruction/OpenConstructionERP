@@ -58976,6 +58976,13 @@ const resource = {
     "converter_notice.email": "Mail ons",
     "converter_notice.dismiss": "Deze melding sluiten",
     "demo_uploads.refused": "Uploaden staat uit in de openbare demo. Gebruik de demoprojecten en hun voorbeeldgegevens, of installeer het platform om met je eigen bestanden te werken.",
+    "demo_switcher.label": "Demoprojecten",
+    "demo_switcher.not_installed": "Niet geïnstalleerd op deze server",
+    "demo_switcher.read_only": "Alleen-lezen demo: veel functies zijn beperkt. Gebruik alleen demodata, uploads zijn uitgeschakeld.",
+    "demo_switcher.tab_consultancy_riyadh": "Adviesbureau, Riyad",
+    "demo_switcher.tab_contractor_jeddah": "Aannemer, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Terreinontwikkeling, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Volledige showcase, Riyad",
   }
 } as { translation: Record<string, string> };
 

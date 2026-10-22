@@ -58095,6 +58095,13 @@ const resource = {
     "converter_notice.email": "Skriv til oss på e-post",
     "converter_notice.dismiss": "Skjul denne meldingen",
     "demo_uploads.refused": "Opplasting er slått av i den offentlige demoen. Bruk demoprosjektene og eksempeldataene deres, eller installer plattformen for å jobbe med egne filer.",
+    "demo_switcher.label": "Demoprosjekter",
+    "demo_switcher.not_installed": "Ikke installert på denne serveren",
+    "demo_switcher.read_only": "Demo kun for visning: mange funksjoner er begrenset. Bruk bare demodata, opplastinger er av.",
+    "demo_switcher.tab_consultancy_riyadh": "Rådgivningsfirma, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Entreprenør, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Utomhusarbeid, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Full visning, Riyadh",
   }
 } as { translation: Record<string, string> };
 

@@ -59028,6 +59028,13 @@ const resource = {
     "converter_notice.email": "Bizga e-pochta orqali yozish",
     "converter_notice.dismiss": "Bildirishnomani yopish",
     "demo_uploads.refused": "Ommaviy demoda yuklash o‘chirilgan. Demo loyihalar va ularning namunaviy ma’lumotlaridan foydalaning yoki o‘z fayllaringiz bilan ishlash uchun platformani o‘rnating.",
+    "demo_switcher.label": "Demo loyihalar",
+    "demo_switcher.not_installed": "Bu serverda o‘rnatilmagan",
+    "demo_switcher.read_only": "Faqat o‘qish uchun demo: ko‘p funksiyalar cheklangan. Faqat demo ma’lumotlardan foydalaning, yuklash o‘chirilgan.",
+    "demo_switcher.tab_consultancy_riyadh": "Konsalting byurosi, Ar-Riyod",
+    "demo_switcher.tab_contractor_jeddah": "Pudratchi, Jidda",
+    "demo_switcher.tab_site_development_dammam": "Hudud obodonlashtirish, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "To‘liq namuna, Ar-Riyod",
   }
 } as { translation: Record<string, string> };
 

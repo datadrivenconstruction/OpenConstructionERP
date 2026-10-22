@@ -58365,6 +58365,13 @@ const resource = {
     "converter_notice.email": "ইমেইলে আমাদের লিখুন",
     "converter_notice.dismiss": "এই বিজ্ঞপ্তি বন্ধ করুন",
     "demo_uploads.refused": "পাবলিক ডেমোতে আপলোড বন্ধ। ডেমো প্রকল্প ও তাদের উদাহরণ ডেটা ব্যবহার করুন, অথবা নিজের ফাইল নিয়ে কাজ করতে প্ল্যাটফর্মটি ইনস্টল করুন।",
+    "demo_switcher.label": "ডেমো প্রজেক্ট",
+    "demo_switcher.not_installed": "এই সার্ভারে ইনস্টল করা নেই",
+    "demo_switcher.read_only": "শুধু-পড়ার ডেমো: অনেক ফাংশন সীমিত। শুধু ডেমো ডেটা ব্যবহার করুন, আপলোড বন্ধ আছে।",
+    "demo_switcher.tab_consultancy_riyadh": "পরামর্শক প্রতিষ্ঠান, রিয়াদ",
+    "demo_switcher.tab_contractor_jeddah": "ঠিকাদার, জেদ্দা",
+    "demo_switcher.tab_site_development_dammam": "সাইট উন্নয়ন, দাম্মাম",
+    "demo_switcher.tab_full_showcase_riyadh": "সম্পূর্ণ প্রদর্শনী, রিয়াদ",
   }
 } as { translation: Record<string, string> };
 

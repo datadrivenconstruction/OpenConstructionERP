@@ -61002,6 +61002,13 @@ const resource = {
     "converter_notice.email": "Nous écrire par e-mail",
     "converter_notice.dismiss": "Masquer cet avis",
     "demo_uploads.refused": "Les envois de fichiers sont désactivés sur la démo publique. Utilisez les projets de démonstration et leurs données d’exemple, ou installez la plateforme pour travailler avec vos propres fichiers.",
+    "demo_switcher.label": "Projets de démonstration",
+    "demo_switcher.not_installed": "Non installé sur ce serveur",
+    "demo_switcher.read_only": "Démo en lecture seule : de nombreuses fonctions sont limitées. Utilisez uniquement les données de démo, les envois de fichiers sont désactivés.",
+    "demo_switcher.tab_consultancy_riyadh": "Bureau d'études, Riyad",
+    "demo_switcher.tab_contractor_jeddah": "Entreprise générale, Djeddah",
+    "demo_switcher.tab_site_development_dammam": "Aménagements extérieurs, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Vitrine complète, Riyad",
   }
 } as { translation: Record<string, string> };
 

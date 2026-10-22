@@ -150,6 +150,13 @@ const resource = {
     "tendering.import_error_too_many_rows": "The file has too many rows (limit 1000).",
     "tendering.import_error_file_too_large": "The file is too large (limit 2 MB).",
     "tendering.import_error_unreadable_file": "The file could not be read.",
+    "demo_switcher.label": "Demo projects",
+    "demo_switcher.not_installed": "Not installed on this server",
+    "demo_switcher.read_only": "Read-only demo: many functions are limited. Use demo data only, uploads are off.",
+    "demo_switcher.tab_consultancy_riyadh": "Consultancy, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Contractor, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Site development, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Full showcase, Riyadh",
   }
 } as { translation: Record<string, string> };
 

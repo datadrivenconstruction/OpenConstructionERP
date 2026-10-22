@@ -58468,6 +58468,13 @@ const resource = {
     "converter_notice.email": "이메일로 문의하기",
     "converter_notice.dismiss": "이 안내 닫기",
     "demo_uploads.refused": "공개 데모에서는 업로드가 꺼져 있습니다. 데모 프로젝트와 예시 데이터를 사용하거나, 직접 파일로 작업하려면 플랫폼을 설치하세요.",
+    "demo_switcher.label": "데모 프로젝트",
+    "demo_switcher.not_installed": "이 서버에 설치되지 않음",
+    "demo_switcher.read_only": "읽기 전용 데모: 많은 기능이 제한됩니다. 데모 데이터만 사용하며 업로드는 꺼져 있습니다.",
+    "demo_switcher.tab_consultancy_riyadh": "설계 컨설팅, 리야드",
+    "demo_switcher.tab_contractor_jeddah": "시공사, 제다",
+    "demo_switcher.tab_site_development_dammam": "부지 조성, 담맘",
+    "demo_switcher.tab_full_showcase_riyadh": "전체 기능 쇼케이스, 리야드",
   }
 } as { translation: Record<string, string> };
 

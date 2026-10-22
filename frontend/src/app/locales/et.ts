@@ -58045,6 +58045,13 @@ const resource = {
     "converter_notice.email": "Kirjuta meile e-posti teel",
     "converter_notice.dismiss": "Peida see teade",
     "demo_uploads.refused": "Avalikus demos on üleslaadimine välja lülitatud. Kasutage demoprojekte ja nende näidisandmeid või paigaldage platvorm, et töötada oma failidega.",
+    "demo_switcher.label": "Demoprojektid",
+    "demo_switcher.not_installed": "Ei ole selles serveris installitud",
+    "demo_switcher.read_only": "Ainult lugemiseks mõeldud demo: paljud funktsioonid on piiratud. Kasutage ainult demoandmeid, failide üleslaadimine on välja lülitatud.",
+    "demo_switcher.tab_consultancy_riyadh": "Konsultatsioonibüroo, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Peatöövõtja, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Välisalade ehitus, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Täielik näidis, Riyadh",
   }
 } as { translation: Record<string, string> };
 

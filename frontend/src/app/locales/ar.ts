@@ -61150,6 +61150,13 @@ const resource = {
     "converter_notice.email": "راسلونا عبر البريد الإلكتروني",
     "converter_notice.dismiss": "إغلاق هذا الإشعار",
     "demo_uploads.refused": "رفع الملفات معطّل في العرض التجريبي العام. استخدم المشاريع التجريبية وبياناتها، أو ثبّت المنصة للعمل على ملفاتك.",
+    "demo_switcher.label": "مشاريع تجريبية",
+    "demo_switcher.not_installed": "غير مثبت على هذا الخادم",
+    "demo_switcher.read_only": "عرض تجريبي للقراءة فقط: العديد من الوظائف محدودة. استخدم بيانات العرض فقط، والرفع معطّل.",
+    "demo_switcher.tab_consultancy_riyadh": "مكتب استشاري، الرياض",
+    "demo_switcher.tab_contractor_jeddah": "مقاول تنفيذ، جدة",
+    "demo_switcher.tab_site_development_dammam": "تطوير المواقع، الدمام",
+    "demo_switcher.tab_full_showcase_riyadh": "العرض الكامل، الرياض",
   }
 } as { translation: Record<string, string> };
 

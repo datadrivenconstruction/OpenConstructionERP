@@ -58710,6 +58710,13 @@ const resource = {
     "converter_notice.email": "Skriv till oss via e-post",
     "converter_notice.dismiss": "Dölj det här meddelandet",
     "demo_uploads.refused": "Uppladdning är avstängd i den offentliga demon. Använd demoprojekten och deras exempeldata, eller installera plattformen för att arbeta med egna filer.",
+    "demo_switcher.label": "Demoprojekt",
+    "demo_switcher.not_installed": "Inte installerat på den här servern",
+    "demo_switcher.read_only": "Demo endast för läsning: många funktioner är begränsade. Använd endast demodata, uppladdningar är avstängda.",
+    "demo_switcher.tab_consultancy_riyadh": "Konsultbyrå, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Entreprenör, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Markarbeten, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Full presentation, Riyadh",
   }
 } as { translation: Record<string, string> };
 

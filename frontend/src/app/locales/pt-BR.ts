@@ -54210,6 +54210,13 @@ const resource = {
     "converter_notice.email": "Escreva para nós por e-mail",
     "converter_notice.dismiss": "Ocultar este aviso",
     "demo_uploads.refused": "Os envios estão desativados na demonstração pública. Use os projetos de demonstração e seus dados de exemplo, ou instale a plataforma para trabalhar com seus próprios arquivos.",
+    "demo_switcher.label": "Projetos de demonstração",
+    "demo_switcher.not_installed": "Não instalado neste servidor",
+    "demo_switcher.read_only": "Demo somente leitura: muitas funções são limitadas. Use apenas dados de demonstração; os envios estão desativados.",
+    "demo_switcher.tab_consultancy_riyadh": "Escritório de projetos, Riad",
+    "demo_switcher.tab_contractor_jeddah": "Construtora, Jidá",
+    "demo_switcher.tab_site_development_dammam": "Urbanização do terreno, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Demonstração completa, Riad",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

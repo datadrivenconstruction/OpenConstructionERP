@@ -58098,6 +58098,13 @@ const resource = {
     "converter_notice.email": "हमें ईमेल लिखें",
     "converter_notice.dismiss": "यह सूचना बंद करें",
     "demo_uploads.refused": "सार्वजनिक डेमो में अपलोड बंद है। डेमो प्रोजेक्ट और उनके उदाहरण डेटा का उपयोग करें, या अपनी फ़ाइलों के साथ काम करने के लिए प्लेटफ़ॉर्म इंस्टॉल करें।",
+    "demo_switcher.label": "डेमो प्रोजेक्ट",
+    "demo_switcher.not_installed": "इस सर्वर पर इंस्टॉल नहीं है",
+    "demo_switcher.read_only": "केवल-पठन डेमो: कई फ़ंक्शन सीमित हैं। केवल डेमो डेटा का उपयोग करें, अपलोड बंद हैं।",
+    "demo_switcher.tab_consultancy_riyadh": "परामर्श कार्यालय, रियाद",
+    "demo_switcher.tab_contractor_jeddah": "ठेकेदार, जेद्दा",
+    "demo_switcher.tab_site_development_dammam": "साइट विकास, दम्माम",
+    "demo_switcher.tab_full_showcase_riyadh": "पूर्ण प्रदर्शन, रियाद",
   }
 } as { translation: Record<string, string> };
 

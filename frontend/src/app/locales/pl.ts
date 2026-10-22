@@ -59620,6 +59620,13 @@ const resource = {
     "converter_notice.email": "Napisz do nas e-mailem",
     "converter_notice.dismiss": "Ukryj tę informację",
     "demo_uploads.refused": "W publicznym demo przesyłanie plików jest wyłączone. Korzystaj z projektów demonstracyjnych i ich przykładowych danych albo zainstaluj platformę, aby pracować na własnych plikach.",
+    "demo_switcher.label": "Projekty demo",
+    "demo_switcher.not_installed": "Nie zainstalowano na tym serwerze",
+    "demo_switcher.read_only": "Demo tylko do odczytu: wiele funkcji jest ograniczonych. Używaj wyłącznie danych demo, przesyłanie plików jest wyłączone.",
+    "demo_switcher.tab_consultancy_riyadh": "Biuro projektowe, Rijad",
+    "demo_switcher.tab_contractor_jeddah": "Generalny wykonawca, Dżudda",
+    "demo_switcher.tab_site_development_dammam": "Zagospodarowanie terenu, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Pełna prezentacja, Rijad",
   }
 } as { translation: Record<string, string> };
 

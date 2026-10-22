@@ -57858,6 +57858,13 @@ const resource = {
     "converter_notice.email": "Gửi email cho chúng tôi",
     "converter_notice.dismiss": "Ẩn thông báo này",
     "demo_uploads.refused": "Tải lên đã bị tắt trên bản demo công khai. Hãy dùng các dự án demo và dữ liệu mẫu của chúng, hoặc cài đặt nền tảng để làm việc với tệp của bạn.",
+    "demo_switcher.label": "Dự án demo",
+    "demo_switcher.not_installed": "Chưa được cài đặt trên máy chủ này",
+    "demo_switcher.read_only": "Demo chỉ đọc: nhiều chức năng bị hạn chế. Chỉ dùng dữ liệu demo, tải tệp lên đã bị tắt.",
+    "demo_switcher.tab_consultancy_riyadh": "Văn phòng tư vấn, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Nhà thầu thi công, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Phát triển mặt bằng, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Trình diễn đầy đủ, Riyadh",
   }
 } as { translation: Record<string, string> };
 

@@ -57849,6 +57849,13 @@ const resource = {
     "converter_notice.email": "Hubungi kami lewat email",
     "converter_notice.dismiss": "Tutup pemberitahuan ini",
     "demo_uploads.refused": "Unggahan dinonaktifkan di demo publik. Gunakan proyek demo beserta data contohnya, atau pasang platform untuk bekerja dengan file Anda sendiri.",
+    "demo_switcher.label": "Proyek demo",
+    "demo_switcher.not_installed": "Tidak terpasang di server ini",
+    "demo_switcher.read_only": "Demo hanya-baca: banyak fungsi dibatasi. Gunakan data demo saja, unggahan dinonaktifkan.",
+    "demo_switcher.tab_consultancy_riyadh": "Konsultan, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Kontraktor, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Pengembangan lokasi, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Showcase lengkap, Riyadh",
   }
 } as { translation: Record<string, string> };
 

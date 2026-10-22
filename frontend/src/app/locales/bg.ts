@@ -58099,6 +58099,13 @@ const resource = {
     "converter_notice.email": "Напишете ни по имейл",
     "converter_notice.dismiss": "Скрий това известие",
     "demo_uploads.refused": "Качването е изключено в публичното демо. Използвайте демо проектите и техните примерни данни или инсталирайте платформата, за да работите със собствени файлове.",
+    "demo_switcher.label": "Демо проекти",
+    "demo_switcher.not_installed": "Не е инсталиран на този сървър",
+    "demo_switcher.read_only": "Демо само за четене: много функции са ограничени. Използвайте само демо данни, качването е изключено.",
+    "demo_switcher.tab_consultancy_riyadh": "Проектантско бюро, Рияд",
+    "demo_switcher.tab_contractor_jeddah": "Строителна фирма, Джеда",
+    "demo_switcher.tab_site_development_dammam": "Благоустрояване, Дамам",
+    "demo_switcher.tab_full_showcase_riyadh": "Пълна витрина, Рияд",
   }
 } as { translation: Record<string, string> };
 

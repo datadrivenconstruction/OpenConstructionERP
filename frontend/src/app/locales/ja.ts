@@ -59382,6 +59382,13 @@ const resource = {
     "converter_notice.email": "メールで問い合わせる",
     "converter_notice.dismiss": "このお知らせを閉じる",
     "demo_uploads.refused": "公開デモではアップロードは無効です。デモプロジェクトとそのサンプルデータをご利用いただくか、ご自身のファイルを扱うにはプラットフォームをインストールしてください。",
+    "demo_switcher.label": "デモプロジェクト",
+    "demo_switcher.not_installed": "このサーバーにはインストールされていません",
+    "demo_switcher.read_only": "読み取り専用のデモ: 多くの機能が制限されています。デモデータのみを使用してください。アップロードは無効です。",
+    "demo_switcher.tab_consultancy_riyadh": "設計コンサルタント、リヤド",
+    "demo_switcher.tab_contractor_jeddah": "施工会社、ジェッダ",
+    "demo_switcher.tab_site_development_dammam": "外構・敷地整備、ダンマーム",
+    "demo_switcher.tab_full_showcase_riyadh": "フル機能デモ、リヤド",
   }
 } as { translation: Record<string, string> };
 

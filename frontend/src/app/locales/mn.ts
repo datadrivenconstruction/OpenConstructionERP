@@ -57773,6 +57773,13 @@ const resource = {
     "converter_notice.email": "Бидэнд имэйлээр бичих",
     "converter_notice.dismiss": "Энэ мэдэгдлийг хаах",
     "demo_uploads.refused": "Нийтийн демод файл байршуулах унтраалттай. Демо төслүүд болон тэдгээрийн жишээ өгөгдлийг ашиглана уу, эсвэл өөрийн файлтай ажиллахын тулд платформыг суулгана уу.",
+    "demo_switcher.label": "Демо төслүүд",
+    "demo_switcher.not_installed": "Энэ серверт суулгаагүй",
+    "demo_switcher.read_only": "Зөвхөн унших демо: олон функц хязгаарлагдмал. Зөвхөн демо өгөгдөл ашиглана уу, файл байршуулах боломжгүй.",
+    "demo_switcher.tab_consultancy_riyadh": "Зөвлөх компани, Риад",
+    "demo_switcher.tab_contractor_jeddah": "Гүйцэтгэгч, Жидда",
+    "demo_switcher.tab_site_development_dammam": "Талбайн засвар, Даммам",
+    "demo_switcher.tab_full_showcase_riyadh": "Бүрэн үзүүлэлт, Риад",
   }
 } as { translation: Record<string, string> };
 

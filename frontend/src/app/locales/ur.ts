@@ -58055,6 +58055,13 @@ const resource = {
     "converter_notice.email": "ہمیں ای میل لکھیں",
     "converter_notice.dismiss": "یہ نوٹس بند کریں",
     "demo_uploads.refused": "عوامی ڈیمو میں اپ لوڈ بند ہے۔ ڈیمو پروجیکٹس اور ان کا مثالی ڈیٹا استعمال کریں، یا اپنی فائلوں کے ساتھ کام کرنے کے لیے پلیٹ فارم انسٹال کریں۔",
+    "demo_switcher.label": "ڈیمو پروجیکٹس",
+    "demo_switcher.not_installed": "اس سرور پر انسٹال نہیں ہے",
+    "demo_switcher.read_only": "صرف مطالعہ کے لیے ڈیمو: کئی فنکشنز محدود ہیں۔ صرف ڈیمو ڈیٹا استعمال کریں، اپلوڈز بند ہیں۔",
+    "demo_switcher.tab_consultancy_riyadh": "کنسلٹنسی، ریاض",
+    "demo_switcher.tab_contractor_jeddah": "ٹھیکیدار، جدہ",
+    "demo_switcher.tab_site_development_dammam": "سائٹ ڈویلپمنٹ، دمام",
+    "demo_switcher.tab_full_showcase_riyadh": "مکمل نمائش، ریاض",
   }
 } as { translation: Record<string, string> };
 

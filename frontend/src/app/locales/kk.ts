@@ -58056,6 +58056,13 @@ const resource = {
     "converter_notice.email": "Бізге электрондық пошта жазу",
     "converter_notice.dismiss": "Хабарландыруды жабу",
     "demo_uploads.refused": "Ашық демода жүктеу өшірілген. Демо жобалар мен олардың үлгі деректерін пайдаланыңыз немесе өз файлдарыңызбен жұмыс істеу үшін платформаны орнатыңыз.",
+    "demo_switcher.label": "Демо жобалар",
+    "demo_switcher.not_installed": "Бұл серверде орнатылмаған",
+    "demo_switcher.read_only": "Тек оқуға арналған демо: көптеген функциялар шектеулі. Тек демо деректерін пайдаланыңыз, жүктеу өшірулі.",
+    "demo_switcher.tab_consultancy_riyadh": "Кеңес беру бюросы, Эр-Рияд",
+    "demo_switcher.tab_contractor_jeddah": "Мердігер, Джидда",
+    "demo_switcher.tab_site_development_dammam": "Учаскені абаттандыру, Даммам",
+    "demo_switcher.tab_full_showcase_riyadh": "Толық көрнекі демо, Эр-Рияд",
   }
 } as { translation: Record<string, string> };
 

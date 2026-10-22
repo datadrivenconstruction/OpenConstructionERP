@@ -58055,6 +58055,13 @@ const resource = {
     "converter_notice.email": "Γράψτε μας με email",
     "converter_notice.dismiss": "Απόκρυψη αυτής της ειδοποίησης",
     "demo_uploads.refused": "Η μεταφόρτωση είναι απενεργοποιημένη στη δημόσια επίδειξη. Χρησιμοποιήστε τα έργα επίδειξης και τα δεδομένα τους ή εγκαταστήστε την πλατφόρμα για να δουλέψετε με τα δικά σας αρχεία.",
+    "demo_switcher.label": "Demo έργα",
+    "demo_switcher.not_installed": "Δεν είναι εγκατεστημένο σε αυτόν τον διακομιστή",
+    "demo_switcher.read_only": "Demo μόνο για ανάγνωση: πολλές λειτουργίες είναι περιορισμένες. Χρησιμοποιείτε μόνο δεδομένα demo, η μεταφόρτωση είναι απενεργοποιημένη.",
+    "demo_switcher.tab_consultancy_riyadh": "Γραφείο μελετών, Ριάντ",
+    "demo_switcher.tab_contractor_jeddah": "Εργολάβος, Τζέντα",
+    "demo_switcher.tab_site_development_dammam": "Διαμόρφωση χώρου, Ντάμαμ",
+    "demo_switcher.tab_full_showcase_riyadh": "Πλήρης παρουσίαση, Ριάντ",
   }
 } as { translation: Record<string, string> };
 

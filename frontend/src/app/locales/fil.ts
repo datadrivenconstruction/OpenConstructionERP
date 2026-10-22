@@ -58053,6 +58053,13 @@ const resource = {
     "converter_notice.email": "Mag-email sa amin",
     "converter_notice.dismiss": "Itago ang abiso na ito",
     "demo_uploads.refused": "Naka-off ang pag-upload sa pampublikong demo. Gamitin ang mga demo project at ang halimbawang data nila, o i-install ang platform para magamit ang sarili mong mga file.",
+    "demo_switcher.label": "Mga demo project",
+    "demo_switcher.not_installed": "Hindi naka-install sa server na ito",
+    "demo_switcher.read_only": "Read-only na demo: limitado ang maraming function. Gumamit lamang ng demo data; naka-off ang mga upload.",
+    "demo_switcher.tab_consultancy_riyadh": "Konsultasyon, Riyadh",
+    "demo_switcher.tab_contractor_jeddah": "Kontraktor, Jeddah",
+    "demo_switcher.tab_site_development_dammam": "Pagpapaunlad ng lugar, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Buong showcase, Riyadh",
   }
 } as { translation: Record<string, string> };
 

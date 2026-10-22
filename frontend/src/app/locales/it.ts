@@ -59303,6 +59303,13 @@ const resource = {
     "converter_notice.email": "Scrivici via email",
     "converter_notice.dismiss": "Nascondi questo avviso",
     "demo_uploads.refused": "Nella demo pubblica i caricamenti sono disattivati. Usa i progetti demo e i loro dati di esempio, oppure installa la piattaforma per lavorare con i tuoi file.",
+    "demo_switcher.label": "Progetti demo",
+    "demo_switcher.not_installed": "Non installato su questo server",
+    "demo_switcher.read_only": "Demo in sola lettura: molte funzioni sono limitate. Usare solo dati demo, i caricamenti sono disattivati.",
+    "demo_switcher.tab_consultancy_riyadh": "Studio di progettazione, Riad",
+    "demo_switcher.tab_contractor_jeddah": "Impresa edile, Gedda",
+    "demo_switcher.tab_site_development_dammam": "Sistemazione esterna, Dammam",
+    "demo_switcher.tab_full_showcase_riyadh": "Vetrina completa, Riad",
   }
 } as { translation: Record<string, string> };
 
