@@ -326,6 +326,7 @@ describe('RegionalPackCard, the compact tile layout', () => {
         cwicr_regions: [],
         default_tax_template: null,
         default_modules: [],
+        recommended_modules: [],
         validation_rule_sets: ['boq_quality'],
       },
     });
