@@ -151,6 +151,7 @@ COPY packs/netherlands-nl/src/ packs/netherlands-nl/src/
 COPY packs/nigeria-ng/src/ packs/nigeria-ng/src/
 COPY packs/norway-no/src/ packs/norway-no/src/
 COPY packs/nzs/src/ packs/nzs/src/
+COPY packs/peru-pe/src/ packs/peru-pe/src/
 COPY packs/poland-pl/src/ packs/poland-pl/src/
 COPY packs/portugal-pt/src/ packs/portugal-pt/src/
 COPY packs/renewables-epc/src/ packs/renewables-epc/src/
