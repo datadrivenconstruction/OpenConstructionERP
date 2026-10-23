@@ -264,6 +264,12 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     # 2026-10-19 in secondary sources quoting it).
     ("PL", "VAT_5"): "2026-10-19",
     ("PL", "VAT_ZERO"): "2026-10-19",
+    # Pakistan: the federal sales tax on goods, 18 percent since 2023 (FBR Circular 01 of 2023), and the
+    # standard rate of the three provincial sales taxes on services that the pack covers.
+    ("PK", "GST"): "2026-10-23",
+    ("PK", "PRA_ST"): "2026-10-23",
+    ("PK", "SRB_ST"): "2026-10-23",
+    ("PK", "KPRA_ST"): "2026-10-23",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

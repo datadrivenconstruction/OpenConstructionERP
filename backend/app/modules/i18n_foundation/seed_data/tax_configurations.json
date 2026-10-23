@@ -1172,6 +1172,70 @@
     "is_default": true
   },
   {
+    "country_code": "PK",
+    "tax_name": "GST (federal, goods)",
+    "tax_name_translations": {
+      "en": "Sales Tax on goods (federal GST)",
+      "ur": "سیلز ٹیکس برائے اشیاء (وفاقی)"
+    },
+    "tax_code": "GST",
+    "rate_pct": "18.0",
+    "tax_type": "gst",
+    "combination": "federal",
+    "subdivision_code": null,
+    "effective_from": "2023-02-14",
+    "effective_to": null,
+    "is_default": true
+  },
+  {
+    "country_code": "PK",
+    "tax_name": "PRA (Punjab services)",
+    "tax_name_translations": {
+      "en": "Punjab sales tax on services (PRA), standard rate",
+      "ur": "پنجاب سیلز ٹیکس برائے خدمات (پی آر اے)، معیاری شرح"
+    },
+    "tax_code": "PRA_ST",
+    "rate_pct": "16.0",
+    "tax_type": "sales_tax",
+    "combination": "replaces_federal",
+    "subdivision_code": "PK-PB",
+    "effective_from": "2025-07-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "PK",
+    "tax_name": "SRB (Sindh services)",
+    "tax_name_translations": {
+      "en": "Sindh sales tax on services (SRB), standard rate",
+      "ur": "سندھ سیلز ٹیکس برائے خدمات (ایس آر بی)، معیاری شرح"
+    },
+    "tax_code": "SRB_ST",
+    "rate_pct": "15.0",
+    "tax_type": "sales_tax",
+    "combination": "replaces_federal",
+    "subdivision_code": "PK-SD",
+    "effective_from": "2024-07-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "PK",
+    "tax_name": "KPRA (Khyber Pakhtunkhwa services)",
+    "tax_name_translations": {
+      "en": "Khyber Pakhtunkhwa sales tax on services (KPRA), standard rate",
+      "ur": "خیبر پختونخوا سیلز ٹیکس برائے خدمات (کے پی آر اے)، معیاری شرح"
+    },
+    "tax_code": "KPRA_ST",
+    "rate_pct": "15.0",
+    "tax_type": "sales_tax",
+    "combination": "replaces_federal",
+    "subdivision_code": "PK-KP",
+    "effective_from": "2024-07-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
     "country_code": "RU",
     "tax_name": "VAT Standard (NDS)",
     "tax_name_translations": {

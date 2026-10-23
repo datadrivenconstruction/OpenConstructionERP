@@ -709,6 +709,18 @@ _EID_SPANS: dict[str, EidSpans] = {
         sourced=True,
         source="Egypt Ministerial Decree 294/2025",
     ),
+    # Pakistan: the Cabinet Division's yearly circular lists Eid-ul-Fitr and
+    # Eid-ul-Azha as three public holidays from the first day, 1 Shawwal and 10
+    # Dhu al-Hijjah. The Prime Minister extends them by press release in some
+    # years (four days in 2025 for Eid-ul-Azha); an extension is data.
+    "PK": EidSpans(
+        fitr_start=(10, 1),
+        fitr_days=3,
+        adha_start=(12, 10),
+        adha_days=3,
+        sourced=True,
+        source="Pakistan Cabinet Division yearly public holidays circular, press releases of 19 March and 2 June 2025",
+    ),
 }
 
 
@@ -1624,6 +1636,52 @@ def _holidays_eg(year: int) -> set[date]:
     return apply_observances("EG", year, _holidays_eg_statutory(year))
 
 
+def _holidays_pk_statutory(year: int) -> dict[str, set[date]]:
+    """Pakistan's federal public holidays before any announced move, by holiday key.
+
+    From the Cabinet Division's yearly circular on public and optional holidays
+    (2025 circular No. 10-01/2024-Min-II of 23 December 2024; the 2026 list was
+    read in press coverage of the circular of January 2026):
+
+    * Fixed days: Kashmir Solidarity Day (5 February), Pakistan Day (23 March),
+      Labour Day (1 May), Youm-e-Takbeer (28 May), Independence Day (14
+      August), Allama Iqbal Day (9 November) and Quaid-e-Azam Day (25
+      December).
+    * Islamic: Eid-ul-Fitr and Eid-ul-Azha (three days each, Pakistan's row in
+      ``_EID_SPANS``), Ashura (9 and 10 Muharram) and Eid Milad-un-Nabi (12
+      Rabi al-Awwal).
+
+    Left out on purpose: the optional holidays of minorities (for example 26
+    December), provincial and local days, and the bank holidays (1 January, 1
+    July). The Islamic days here come from the ``hijridate`` converter, which
+    follows Umm al-Qura; Pakistan's own moon committee often places a day one
+    or two days later, and the Cabinet Division announces the dates. An
+    announced date that differs is a row in ``holiday_observances.json``, not
+    an edit here.
+    """
+    return {
+        "kashmir_day": {date(year, 2, 5)},
+        "pakistan_day": {date(year, 3, 23)},
+        "labour_day": {date(year, 5, 1)},
+        "youm_e_takbeer": {date(year, 5, 28)},
+        "independence_day": {date(year, 8, 14)},
+        "iqbal_day": {date(year, 11, 9)},
+        "quaid_e_azam_day": {date(year, 12, 25)},
+        "ashura": _hijri_span(1, 9, 2, year),
+        "eid_milad_un_nabi": set(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year)),
+        **_eid_days("PK", year),
+    }
+
+
+def _holidays_pk(year: int) -> set[date]:
+    """Pakistan's federal public holidays as observed: the statutory days with announced moves applied.
+
+    The working week is Monday to Friday, the federal office week; a site that
+    works Saturday sets its own calendar: see ``_WORKING_WEEK``.
+    """
+    return apply_observances("PK", year, _holidays_pk_statutory(year))
+
+
 # ── Working-week definitions (date.weekday(): 0=Mon, 6=Sun) ──────────────────
 #
 # Standard Mon–Fri work week: {0, 1, 2, 3, 4}
@@ -1668,6 +1726,11 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     # Saturday; Sunday to Thursday is the government week and the common office
     # week. A site working Saturday to Thursday sets its own calendar.
     "EG": frozenset({6, 0, 1, 2, 3}),
+    # Pakistan: the Cabinet Division circulars distinguish offices that observe a
+    # five-day week from those on six days (the Eid-ul-Azha 2025 release names
+    # both), and the federal secretariat works Monday to Friday. Construction
+    # sites commonly work Saturday as well; a site sets its own calendar.
+    "PK": frozenset({0, 1, 2, 3, 4}),
     # Bulgaria: Labour Code Art. 136, 40 hours a week, 8 hours a day, a
     # direct statutory maximum rather than a convention.
     "BG": frozenset({0, 1, 2, 3, 4}),
@@ -1740,6 +1803,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "ES": _holidays_es,
     "IT": _holidays_it,
     "EG": _holidays_eg,
+    "PK": _holidays_pk,
     "FR": _holidays_fr,
 }
 

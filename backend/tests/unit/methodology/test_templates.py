@@ -68,6 +68,7 @@ _EXTRA_COUNTRY_SLUGS = {
     "chile",
     "colombia",
     "peru",
+    "pakistan",
 }
 _EXPECTED_SLUGS = (
     _COUNTRY_SLUGS

@@ -86,5 +86,27 @@
     "source_url": "https://gulfnews.com/world/gulf/saudi/saudi-arabia-announces-eid-al-fitr-holidays-for-private-and-non-profit-sectors-1.500462986",
     "private_sector": "stated",
     "note": "Four days from the end of work on Wednesday 18 March; the converter places 1 Shawwal 1447 on 20 March."
+  },
+  {
+    "country": "PK",
+    "year": 2025,
+    "holiday": "eid_al_fitr",
+    "statutory": ["2025-03-30", "2025-03-31", "2025-04-01"],
+    "observed": ["2025-03-31", "2025-04-01", "2025-04-02"],
+    "authority": "Cabinet Division press release No. 10-01/2025-Min-II of 19 March 2025",
+    "source_url": "https://download1.fbr.gov.pk/Docs/20253251132357396HolidayNotification.pdf",
+    "private_sector": "not_stated",
+    "note": "The Prime Minister declared 31 March to 2 April 2025 (Monday to Wednesday)."
+  },
+  {
+    "country": "PK",
+    "year": 2025,
+    "holiday": "eid_al_adha",
+    "statutory": ["2025-06-06", "2025-06-07", "2025-06-08"],
+    "observed": ["2025-06-06", "2025-06-07", "2025-06-08", "2025-06-09"],
+    "authority": "Cabinet Division press release No. 10-01/2025-Min-II of 2 June 2025",
+    "source_url": "https://www.cabinet.gov.pk/SiteImage/Misc/files/Press%20Release/Eid-ul-Azha-Holidays-02_06_25.pdf",
+    "private_sector": "not_stated",
+    "note": "Four days, 6 to 9 June 2025, for offices on both five and six day weeks."
   }
 ]

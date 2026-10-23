@@ -3623,6 +3623,8 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     "CL": ["masterformat"],
     "CO": ["masterformat"],
     "PE": ["masterformat"],
+    # No Pakistani classification has a rule set; the provincial schedules are chapter lists by trade.
+    "PK": ["pakistan", "masterformat"],
     # Without this row a Hungarian project created before the country pack
     # was switched on, or on an install that never activated it, imported
     # its bills with no Hungarian rule run at all.
