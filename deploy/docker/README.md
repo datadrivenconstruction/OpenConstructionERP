@@ -65,3 +65,5 @@ Each image exposes `GET /api/health`, and the container `HEALTHCHECK` directive 
 ## Other deployment targets
 
 One isolated instance per company on the German cloud STACKIT (Kubernetes, managed PostgreSQL, object storage): see [deploy/terraform/stackit](../terraform/stackit/README.md).
+
+Microsoft Azure (VM or Container Apps, Azure Database for PostgreSQL, Entra ID sign-in notes): see [docs/install/azure.md](../../docs/install/azure.md).

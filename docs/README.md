@@ -71,6 +71,7 @@ For developers extending or building on OpenConstructionERP.
 ## Install and run
 
 - [Linux install guide](./INSTALL_LINUX.md) - set up on a server.
+- [Microsoft Azure install guide](./install/azure.md) - VM or Container Apps with Azure Database for PostgreSQL, data residency, backups, and what works today for Entra ID sign-in (also in German and Russian).
 - [Desktop install guide](./desktop/INSTALL.md) - set up on a workstation.
 - [Installation help and troubleshooting](./INSTALL_TROUBLESHOOTING.md) - what a warning or error during install or start means and what to do about it (also in German and Russian).
 - [Desktop remote server](./desktop/REMOTE_SERVER.md) - point desktop installations at one server your organisation already runs, instead of a separate database per desk.
