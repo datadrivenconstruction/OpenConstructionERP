@@ -52,6 +52,12 @@ APPROVED_UNITS: Final[frozenset[str]] = frozenset(
         "cm2",
         "ft2",
         "yd2",
+        # South Asian land area units. Neither converts to square metres here: a
+        # marla is 272.25 sq ft in the revenue records and 225 sq ft in some
+        # housing schemes and in Islamabad, so a fixed factor would be wrong for
+        # one of them. A kanal is 20 marla.
+        "marla",
+        "kanal",
         # US roofing square (100 sq ft) - GitHub #320
         "sq",
         # volume
@@ -171,6 +177,18 @@ _UNIT_ALIASES: Final[dict[str, str]] = {
     "board feet": "bdft",
     "sqyd": "yd2",
     "sq.yd": "yd2",
+    # Pakistani and Indian trade spellings of square, cubic and running foot.
+    "sft": "ft2",
+    "s.ft": "ft2",
+    "cft": "ft3",
+    "c.ft": "ft3",
+    "rft": "ft",
+    "r.ft": "ft",
+    "running ft": "ft",
+    "running foot": "ft",
+    "running feet": "ft",
+    "marlas": "marla",
+    "kanals": "kanal",
     "square": "sq",
     "squares": "sq",
     # counts / lump synonyms

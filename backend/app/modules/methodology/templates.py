@@ -1449,6 +1449,16 @@ _MORE_COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         profit="8",
         tax_label="IGV",
     ),
+    _flat_country_template(
+        slug="pakistan",
+        name="Pakistan",
+        country_code="PK",
+        currency="PKR",
+        vat="16",
+        overhead="5",
+        profit="10",
+        tax_label="sales tax",
+    ),
 ]
 
 # The Uzbekistan cascading methodology - the canonical reference cascade from

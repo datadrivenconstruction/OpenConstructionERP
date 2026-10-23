@@ -128,6 +128,15 @@ _EGYPT_LINES = {"EG/VAT", "EG/VAT_CONSTR"}
 _POLISH_TIERS_ADDED_2026_10 = {("PL", "VAT_5", "2011-01-01"), ("PL", "VAT_ZERO", "2011-01-01")}
 _POLISH_TIERS = {"PL/VAT_5", "PL/VAT_ZERO"}
 
+#: Pakistan: the federal GST and three provincial services taxes, each one open window.
+_PAKISTAN_ADDED_2026_10 = {
+    ("PK", "GST", "2023-02-14"),
+    ("PK", "PRA_ST", "2025-07-01"),
+    ("PK", "SRB_ST", "2024-07-01"),
+    ("PK", "KPRA_ST", "2024-07-01"),
+}
+_PAKISTAN_LINES = {"PK/GST", "PK/PRA_ST", "PK/SRB_ST", "PK/KPRA_ST"}
+
 #: The same four as delivery keys.
 _IRISH_AND_HUNGARIAN_TIERS = {"IE/VAT_RED_9", "IE/VAT_ZERO", "HU/AFA_18", "HU/AFA_5"}
 
@@ -183,6 +192,7 @@ _ADDED_AFTER_V15_4_0 = {
     *_TURKISH_TIER_ADDED_2026_10,
     *_EGYPT_ADDED_2026_10,
     *_POLISH_TIERS_ADDED_2026_10,
+    *_PAKISTAN_ADDED_2026_10,
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -226,6 +236,7 @@ _ADDED_AFTER_V15_9_1 = {
     *_TURKISH_TIER_ADDED_2026_10,
     *_EGYPT_ADDED_2026_10,
     *_POLISH_TIERS_ADDED_2026_10,
+    *_PAKISTAN_ADDED_2026_10,
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -289,6 +300,7 @@ _EXPECTED_DELIVERY = {
     *_TURKISH_TIER,
     *_EGYPT_LINES,
     *_POLISH_TIERS,
+    *_PAKISTAN_LINES,
 }
 
 #: What a v15.9.1 install is owed: the lines that shipped after it.
@@ -301,6 +313,7 @@ _EXPECTED_AFTER_V15_9_1 = {
     *_TURKISH_TIER,
     *_EGYPT_LINES,
     *_POLISH_TIERS,
+    *_PAKISTAN_LINES,
 }
 
 

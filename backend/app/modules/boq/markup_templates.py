@@ -2112,6 +2112,35 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
             "sort_order": 2,
         },
     ],
+    # Pakistan. Pakistani estimating is built on the provincial Composite
+    # Schedules of Rates and the Pakistan Engineering Council bidding
+    # documents, and the rates in a schedule already carry the contractor's
+    # overhead and profit; this stack is for a bill priced from the contractor's
+    # own analysis. Both percentages are WORKING DEFAULTS, not sourced figures:
+    # no regulated number was read for them, and the founder decision on the
+    # rate database (separate step) may replace them.
+    #
+    # NO TAX LINE, deliberately, and Pakistan is in ``NON_SINGLE_TAX_REGIONS``
+    # with the reason: the federal sales tax is charged on goods and the tax on
+    # a construction service is provincial, at a rate each province sets and
+    # that is lower again for government civil works. The rate for a project
+    # comes from the dated tax seed by province (PK-PB, PK-SD, PK-KP).
+    "PK": [
+        {
+            "name": "Contractor's overhead",
+            "category": "overhead",
+            "percentage": "5.0",
+            "apply_to": "direct_cost",
+            "sort_order": 0,
+        },
+        {
+            "name": "Contractor's profit",
+            "category": "profit",
+            "percentage": "10.0",
+            "apply_to": "direct_cost",
+            "sort_order": 1,
+        },
+    ],
     # ── Philippines ─────────────────────────────────────────────────────
     # DPWH detailed unit price analysis and the Approved Budget for the
     # Contract guidelines. DPWH is a public works standard rather than a
@@ -2874,6 +2903,7 @@ REGION_BY_COUNTRY: dict[str, str] = {
     "CL": "CL",
     "CO": "CO",
     "PE": "PE",
+    "PK": "PK",
 }
 
 # Stacks no country is seeded with, because each is an explicitly chosen
@@ -2992,6 +3022,11 @@ NON_SINGLE_TAX_REGIONS: dict[str, str] = {
     "BR": (
         "PIS + COFINS is federal and ISS is municipal, two levies at two statutory rates, "
         "so one VAT number cannot stand in for both"
+    ),
+    "PK": (
+        "the federal sales tax is charged on goods while the tax on a construction service is provincial, "
+        "at a rate each province sets (16 percent in Punjab, 15 in Sindh and Khyber Pakhtunkhwa as read) "
+        "and lower again for government civil works, so no single number is right for every bill"
     ),
     "DEFAULT": (
         "the neutral stack names no jurisdiction, so it names no consumption tax either; a caller "
