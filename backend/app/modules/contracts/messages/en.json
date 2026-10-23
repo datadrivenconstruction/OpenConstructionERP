@@ -276,6 +276,18 @@
       "no_coefficients_advisory": {
         "fail": "Public works longer than {months} months carry a price revision clause where raw materials are a significant part of the cost, and the contract states no revision weights",
         "suggestion": "Enter the weights of the revision formula from the special conditions, or record that the price is firm"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "The price adjustment coefficients add up to {item}, while the formula requires them to add up to exactly one",
+        "suggestion": "Correct the weights from the contract data so that they add up to one"
+      },
+      "unknown_regime": {
+        "fail": "The contract names the price adjustment regime {item}, which the platform does not know",
+        "suggestion": "Choose one of the listed price adjustment regimes"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "The portion not subject to price adjustment, {item}, is not between zero and one",
+        "suggestion": "Enter the portion as a decimal from the contract data, for example 0.15"
       }
     },
     "advance_below_minimum": {

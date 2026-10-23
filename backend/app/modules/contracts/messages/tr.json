@@ -276,6 +276,18 @@
       "no_coefficients_advisory": {
         "fail": "Hammaddelerin maliyetin önemli bir kısmını oluşturduğu {months} aydan uzun kamu yapım işleri bir fiyat revizyonu maddesi içerir ve sözleşmede revizyon ağırlıkları belirtilmemiştir",
         "suggestion": "Revizyon formülünün ağırlıklarını özel şartlardan girin veya fiyatın sabit olduğunu kaydedin"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Fiyat farkı katsayılarının toplamı {item}, formül ise toplamın tam olarak bir olmasını gerektirir",
+        "suggestion": "Ağırlıkları sözleşme verilerine göre toplamları bir olacak şekilde düzeltin"
+      },
+      "unknown_regime": {
+        "fail": "Sözleşme, platformun tanımadığı {item} fiyat farkı rejimini belirtiyor",
+        "suggestion": "Listelenen fiyat farkı rejimlerinden birini seçin"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Fiyat farkına tabi olmayan pay {item} sıfır ile bir arasında değil",
+        "suggestion": "Payı sözleşme verilerinden ondalık olarak girin, örneğin 0.15"
       }
     },
     "advance_below_minimum": {

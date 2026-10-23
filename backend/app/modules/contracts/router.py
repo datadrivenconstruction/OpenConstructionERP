@@ -417,6 +417,7 @@ async def compute_price_adjustment(
             [(row.item, row.coefficient) for row in body.coefficients],
             base,
             current,
+            body.non_adjustable_portion,
         )
     except PriceAdjustmentError as exc:
         raise refuse(exc.problem, str(exc), **exc.params) from exc

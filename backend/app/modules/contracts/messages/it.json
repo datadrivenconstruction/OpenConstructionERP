@@ -276,6 +276,18 @@
       "no_coefficients_advisory": {
         "fail": "I lavori pubblici di durata superiore a {months} mesi prevedono una clausola di revisione dei prezzi quando le materie prime sono una parte rilevante del costo, e il contratto non indica i pesi della revisione",
         "suggestion": "Inserite i pesi della formula di revisione dalle condizioni particolari, oppure registrate che il prezzo è fisso"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "I coefficienti di revisione prezzi sommano a {item}, mentre la formula richiede esattamente uno",
+        "suggestion": "Correggere i pesi dai dati del contratto in modo che sommino a uno"
+      },
+      "unknown_regime": {
+        "fail": "Il contratto indica il regime di revisione prezzi {item}, sconosciuto alla piattaforma",
+        "suggestion": "Scegliere uno dei regimi di revisione prezzi elencati"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "La quota non soggetta a revisione, {item}, non è compresa tra zero e uno",
+        "suggestion": "Inserire la quota dai dati del contratto come decimale, ad esempio 0.15"
       }
     },
     "advance_below_minimum": {

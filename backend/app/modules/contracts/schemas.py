@@ -2019,6 +2019,9 @@ class PriceAdjustmentComputeRequest(BaseModel):
     coefficients: list[PriceAdjustmentCoefficientIn] = Field(..., min_length=1, max_length=50)
     base_period: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
     current_period: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}$")
+    #: The portion not subject to adjustment the contract data states, for a
+    #: regime that has one (South Africa's Haylett formula); its default otherwise.
+    non_adjustable_portion: Decimal | None = None
 
 
 class PriceAdjustmentComputeResponse(BaseModel):

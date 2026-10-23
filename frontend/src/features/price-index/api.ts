@@ -10,7 +10,7 @@
  * slash.
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete, fetchWithAuth, triggerDownload } from '@/shared/lib/api';
 
 const BASE = '/v1/price-index';
 
@@ -439,4 +439,31 @@ export async function listCostCategories(region?: string | null): Promise<string
   const qs = params.toString();
   const res = await apiGet<string[]>(`/v1/costs/categories/${qs ? `?${qs}` : ''}`);
   return Array.isArray(res) ? res : [];
+}
+
+/** Result of importing Stats SA P0151.1 Table 1 (one series per CPAP work group). */
+export interface P0151ImportResult {
+  series_created: number;
+  points_created: number;
+  points_updated: number;
+  points_unchanged: number;
+  series: string[];
+  skipped: string[];
+}
+
+/** Upload a Stats SA P0151.1 release (.xlsx or .csv); nothing is fetched from the web. */
+export async function importStatsSaP0151(file: File): Promise<P0151ImportResult> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetchWithAuth(`/api${BASE}/import/statssa-p0151/`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: form,
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail = (body as { detail?: { message?: string } | string }).detail;
+    throw new Error(typeof detail === 'string' ? detail : (detail?.message ?? res.statusText));
+  }
+  return body as P0151ImportResult;
 }

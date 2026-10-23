@@ -9,6 +9,7 @@ Endpoint groups:
     /series/{id}/points/             - period/value points under a series
     /location-factors/               - regional cost factors CRUD
     /adjust/                         - batch base-to-current adjustment
+    /import/statssa-p0151/           - Stats SA P0151.1 Table 1 upload (South Africa CPAP)
     /resource-index/...              - the resource-index method (Russia), see resource_index_router
 
 The reference data is platform-wide, so reads only require an authenticated
@@ -20,7 +21,7 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.price_index.models import CostIndexSeries
@@ -107,6 +108,44 @@ async def create_series(
     service = PriceIndexService(session)
     series = await service.create_series(data)
     return _series_response(series, 0)
+
+
+@router.post("/import/statssa-p0151/", dependencies=[_MANAGE])
+async def import_statssa_p0151(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    file: UploadFile = File(..., description="Stats SA P0151.1 release, .xlsx or .csv"),
+) -> dict[str, object]:
+    """Import Table 1 of Stats SA P0151.1 (CPAP work group indices) into cost-index series.
+
+    One series per work group, the Stats SA acknowledgement on each; a later
+    release adds new months and overwrites revised values. Cells that are not
+    a positive number are skipped and listed. Nothing is fetched from the web.
+    """
+    from app.modules.price_index.statssa_p0151 import (  # noqa: PLC0415
+        MAX_BYTES,
+        P0151ImportError,
+        import_p0151_table,
+        parse_p0151_table1,
+    )
+
+    content = await file.read(MAX_BYTES + 1)
+    try:
+        table = parse_p0151_table1(content, file.filename or "")
+    except P0151ImportError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"problem": exc.problem, "message": str(exc)},
+        ) from exc
+    summary = await import_p0151_table(session, table)
+    return {
+        "series_created": summary.series_created,
+        "points_created": summary.points_created,
+        "points_updated": summary.points_updated,
+        "points_unchanged": summary.points_unchanged,
+        "series": summary.series,
+        "skipped": summary.skipped[:200],
+    }
 
 
 @router.get("/series/{series_id}/", response_model=CostIndexSeriesDetail)

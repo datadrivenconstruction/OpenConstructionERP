@@ -2676,8 +2676,10 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # exclude, and because the base here is cumulative rather than the demos'
     # direct cost, 4.5 percent lands as about 5.4 percent of direct cost. Like
     # the AU "Escalation Allowance" it is a flat percentage standing in for
-    # time-based escalation; the price-index module holds the real date-to-date
-    # arithmetic.
+    # time-based escalation for the tender. The real monthly adjustment is the
+    # Haylett formula, regime ``za_cpap_haylett`` in
+    # ``contracts/price_adjustment.py``, worked on the work group indices
+    # imported from Stats SA P0151.1 (``price_index/statssa_p0151.py``).
     #
     # CPAP is contract-specific in a way the seed cannot know. JBCC runs both
     # with and without contract price adjustment, and a fixed price contract

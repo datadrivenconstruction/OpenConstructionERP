@@ -15,7 +15,11 @@ weighted index formula. The forms look different and are the same thing:
   together below one;
 * France's revision coefficient (CCAG-Travaux 2021, art. 10.5),
   ``C = a + sum(b_i * I_i / I0_i)`` applied monthly, which the regime rounds
-  up to the thousandth before it is applied (``coefficient_rounding``).
+  up to the thousandth before it is applied (``coefficient_rounding``);
+* South Africa's Haylett formula (JBCC and GCC contract price adjustment
+  provisions), ``CPA = (1 - x) * V * (sum(c_i * I_i,n / I_i,o) - 1)`` with
+  ``sum(c_i) = 1`` and ``x`` the portion not subject to adjustment
+  (``non_adjustable_portion``), which scales every item by ``1 - x``.
 
 Expanding the first gives the second: ``a + sum(b_i * I_n/I_o) - 1`` equals
 ``sum(b_i * (I_n - I_o) / I_o)`` once ``a = 1 - sum(b_i)``. So one function,
@@ -52,7 +56,13 @@ ONE = Decimal("1")
 #: ``positive_sum_below_one``: each above zero, their sum strictly below one
 #: (a fixed part always remains). ``non_negative_sum_at_most_one``: each zero
 #: or more, their sum at most one (a contract may index all of its price).
-COEFFICIENT_RULES: tuple[str, ...] = ("positive_sum_below_one", "non_negative_sum_at_most_one")
+#: ``non_negative_sum_equals_one``: each zero or more, their sum exactly one
+#: (the fixed part is carried by ``non_adjustable_portion`` instead).
+COEFFICIENT_RULES: tuple[str, ...] = (
+    "positive_sum_below_one",
+    "non_negative_sum_at_most_one",
+    "non_negative_sum_equals_one",
+)
 
 #: The regimes, keyed by code. Every figure carries its source.
 PRICE_ADJUSTMENT_REGIMES: dict[str, dict[str, Any]] = {
@@ -110,6 +120,41 @@ PRICE_ADJUSTMENT_REGIMES: dict[str, dict[str, Any]] = {
             "R2112-14); since 2021 the CCAG no longer falls back to BT01 or TP01 when the contract names no "
             "index. Index values are provisional at first and definitive later; both come from the tenant's "
             "price index series."
+        ),
+    },
+    "za_cpap_haylett": {
+        "code": "za_cpap_haylett",
+        "country_code": "ZA",
+        "jurisdiction": "South Africa (JBCC and GCC contracts with contract price adjustment)",
+        "statute": (
+            "Contract price adjustment provisions (Haylett formula) of the JBCC Principal Building Agreement "
+            "and the SAICE General Conditions of Contract for Construction Works, as the contract data states"
+        ),
+        "source_url": "https://www.statssa.gov.za/",
+        "read_date": "2026-10-23",
+        "effective_date": None,
+        "mandatory": False,
+        "period_months": 1,
+        "min_duration_months": None,
+        "coefficient_rule": "non_negative_sum_equals_one",
+        "non_adjustable_portion": "0.15",
+        "base_date": "contract_base_month",
+        "index_publisher": (
+            "Statistics South Africa, P0151.1 Construction Material Price Indices, Table 1 (work group "
+            "material indices); labour, plant and fuel indices as the contract data names them"
+        ),
+        "variable_items_list": None,
+        "settlement_days": None,
+        "needs_expert_review": True,
+        "note": (
+            "The value of work certified in the month, less the amounts the provisions exclude (for example "
+            "provisional sums and materials on site), is adjusted by (1 - x) x V x (a x L/Lo + b x P/Po + "
+            "c x M/Mo + d x F/Fo - 1), with a + b + c + d = 1 as the contract data weights labour, plant, the "
+            "work group material index and fuel, and x the portion not subject to adjustment. The default x "
+            "of 0.15 applies only where the contract data states no other figure. The base month is the one "
+            "the contract data names. Material indices M are imported from the Stats SA P0151.1 release into "
+            "cost-index series, one per work group; the indices are reproduced with acknowledgement of "
+            "Statistics South Africa."
         ),
     },
     "contract_indexation": {
@@ -287,13 +332,35 @@ def coefficient_problems(regime: dict[str, Any], coefficients: list[tuple[str, A
         total += value
         if rule == "positive_sum_below_one" and value <= ZERO:
             problems.append({"problem": "coefficient_not_positive", "item": key})
-        elif rule == "non_negative_sum_at_most_one" and value < ZERO:
+        elif rule != "positive_sum_below_one" and value < ZERO:
             problems.append({"problem": "coefficient_negative", "item": key})
     if rule == "positive_sum_below_one" and total >= ONE:
         problems.append({"problem": "coefficient_sum_not_below_one", "item": str(total)})
     elif rule == "non_negative_sum_at_most_one" and total > ONE:
         problems.append({"problem": "coefficient_sum_above_one", "item": str(total)})
+    elif rule == "non_negative_sum_equals_one" and total != ONE:
+        problems.append({"problem": "coefficient_sum_not_one", "item": str(total)})
     return problems
+
+
+def non_adjustable_portion_for(regime: dict[str, Any], override: Any = None) -> Decimal | None:
+    """The portion ``x`` of the value not subject to adjustment, or ``None`` where the regime has none.
+
+    ``override`` is the figure the contract data states; the regime's default
+    applies when it is ``None``.
+
+    Raises:
+        PriceAdjustmentError: ``x`` is not a number, or not in ``[0, 1)``.
+    """
+    raw = override if override is not None and str(override).strip() != "" else regime.get("non_adjustable_portion")
+    if raw is None:
+        return None
+    x = _decimal(raw, "non_adjustable_portion")
+    if x < ZERO or x >= ONE:
+        raise PriceAdjustmentError(
+            "non_adjustable_portion_out_of_range", f"non_adjustable_portion {x} is not in [0, 1)", item=str(x)
+        )
+    return x
 
 
 def compute_adjustment(
@@ -302,6 +369,7 @@ def compute_adjustment(
     coefficients: list[tuple[str, Any]],
     base_indices: dict[str, Any],
     current_indices: dict[str, Any],
+    non_adjustable_portion: Any = None,
 ) -> AdjustmentResult:
     """The compensation (positive) or deduction (negative) for one settlement.
 
@@ -312,6 +380,8 @@ def compute_adjustment(
         coefficients: ``(item, coefficient)`` pairs as the contract states them.
         base_indices: Index of each item at the regime's base date.
         current_indices: Index of each item at the settlement date.
+        non_adjustable_portion: The contract's ``x`` for a regime that has
+            one (South Africa); the regime's default when omitted.
 
     Raises:
         PriceAdjustmentError: An unknown regime, an invalid coefficient set,
@@ -325,6 +395,8 @@ def compute_adjustment(
         first = problems[0]
         raise PriceAdjustmentError(first["problem"], f"invalid coefficients: {problems}", item=first["item"])
     value = _decimal(value_subject, "value_subject")
+    x = non_adjustable_portion_for(regime, non_adjustable_portion)
+    scale = ONE if x is None else ONE - x
     items: list[AdjustmentItem] = []
     weights = ZERO
     for item, raw in coefficients:
@@ -337,7 +409,7 @@ def compute_adjustment(
         if base <= ZERO:
             raise PriceAdjustmentError("base_index_not_positive", f"base index of {key!r} must be above zero", item=key)
         change = (current - base) / base
-        amount = (value * coefficient * change).quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
+        amount = (value * scale * coefficient * change).quantize(MONEY_QUANTUM, rounding=ROUND_HALF_UP)
         items.append(AdjustmentItem(key, coefficient, base, current, change, amount))
         weights += coefficient
     items_total = sum((i.amount for i in items), ZERO)
@@ -346,7 +418,7 @@ def compute_adjustment(
         return AdjustmentResult(
             regime=str(regime["code"]),
             value_subject=value,
-            fixed_portion=ONE - weights,
+            fixed_portion=ONE - scale * weights,
             items=tuple(items),
             total=items_total,
         )

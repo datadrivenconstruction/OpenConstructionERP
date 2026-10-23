@@ -1785,6 +1785,22 @@ _PRICE_ADJUSTMENT_KEYS: dict[str, tuple[str, str]] = {
         "public_works.price_adjustment.no_coefficients_advisory.fail",
         "public_works.price_adjustment.no_coefficients_advisory.suggestion",
     ),
+    "coefficient_sum_not_one": (
+        "public_works.price_adjustment.coefficient_sum_not_one.fail",
+        "public_works.price_adjustment.coefficient_sum_not_one.suggestion",
+    ),
+    "unknown_regime": (
+        "public_works.price_adjustment.unknown_regime.fail",
+        "public_works.price_adjustment.unknown_regime.suggestion",
+    ),
+    "non_adjustable_portion_out_of_range": (
+        "public_works.price_adjustment.non_adjustable_portion_out_of_range.fail",
+        "public_works.price_adjustment.non_adjustable_portion_out_of_range.suggestion",
+    ),
+    "not_a_number": (
+        "public_works.price_adjustment.non_adjustable_portion_out_of_range.fail",
+        "public_works.price_adjustment.non_adjustable_portion_out_of_range.suggestion",
+    ),
 }
 _SUBCONTRACT_KEYS: dict[str, tuple[str, str]] = {
     "direct_payment_waived": (
@@ -2072,6 +2088,69 @@ class PriceAdjustmentTermsRule(_PublicWorksRule):
         return out
 
 
+class ContractPriceAdjustmentFormulaRule(_PublicWorksRule):
+    """A contract that names a price adjustment regime carries a formula that regime accepts.
+
+    Contract price adjustment is often chosen by the contract rather than
+    imposed by law (South Africa's CPAP, a FIDIC indexation clause). Where
+    ``terms.price_adjustment.regime`` names one, its coefficients and its
+    non-adjustable portion are checked. Public works already checked by
+    ``contracts.price_adjustment_terms`` under the same regime are skipped.
+    """
+
+    rule_id = "contracts.price_adjustment_formula"
+    name = "Price adjustment formula the named regime accepts"
+    severity = Severity.ERROR
+    description = (
+        "A contract that names a price adjustment regime states coefficients that regime accepts and, where "
+        "the regime has one, a portion not subject to adjustment between zero and one."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.contracts.price_adjustment import (  # noqa: PLC0415
+            PriceAdjustmentError,
+            coefficient_problems,
+            non_adjustable_portion_for,
+            regime_for,
+        )
+        from app.modules.contracts.public_procurement import PUBLIC_WORKS_PRICE_ADJUSTMENT  # noqa: PLC0415
+
+        contract = _contract(context)
+        terms = contract.get("terms") if isinstance(contract.get("terms"), dict) else {}
+        block = terms.get("price_adjustment") if isinstance(terms.get("price_adjustment"), dict) else {}
+        code = str(block.get("regime") or "").strip()
+        if not code or _truthy(block.get("firm_price")):
+            return []
+        if code == PUBLIC_WORKS_PRICE_ADJUSTMENT.get(_public_works_country(context) or ""):
+            return []
+        ref = str(contract.get("id", ""))
+        regime = regime_for(code)
+        problems: list[dict[str, str]]
+        if regime is None:
+            problems = [{"problem": "unknown_regime", "item": code}]
+        else:
+            rows = [r for r in block.get("coefficients") or [] if isinstance(r, dict)]
+            problems = coefficient_problems(regime, [(str(r.get("item") or ""), r.get("coefficient")) for r in rows])
+            try:
+                non_adjustable_portion_for(regime, block.get("non_adjustable_portion"))
+            except PriceAdjustmentError as exc:
+                problems.append({"problem": exc.problem, "item": str(block.get("non_adjustable_portion"))})
+        if not problems:
+            return [self._result(context, passed=True, element_ref=ref)]
+        return [
+            self._result(
+                context,
+                passed=False,
+                element_ref=ref,
+                fail_key=_PRICE_ADJUSTMENT_KEYS[p["problem"]][0],
+                suggestion_key=_PRICE_ADJUSTMENT_KEYS[p["problem"]][1],
+                months="",
+                item=p["item"],
+            )
+            for p in problems
+        ]
+
+
 # ── Subcontractors and private works ────────────────────────────────────────
 #
 # Three rules read :mod:`app.modules.contracts.subcontract_protection` and the
@@ -2228,6 +2307,7 @@ class PrivateWorksRetentionCapRule(_PublicWorksRule):
 PUBLIC_WORKS_RULES: tuple[type[ValidationRule], ...] = (
     PublicWorksLimitsRule,
     PriceAdjustmentTermsRule,
+    ContractPriceAdjustmentFormulaRule,
     SubcontractDirectPaymentRule,
     SubcontractPaymentGuaranteeRule,
     PrivateWorksRetentionCapRule,
