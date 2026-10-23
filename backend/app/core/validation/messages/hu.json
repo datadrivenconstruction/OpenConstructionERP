@@ -1327,5 +1327,19 @@
     "discount_basis": "Adjon meg kedvezményszázalékot vagy fix nettó árat (fix nettó árhoz tétel szükséges)",
     "attachment_not_found": "A melléklet nem található",
     "price_missing": "Nincs érvényes ár a(z) \"{line}\" sorhoz: adjon meg egységárat, vagy importálja a beszállító árlistáját"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "{ordinal}. tétel: {count} mennyiségi mérés adja a mennyiséget, de rajzrevíziót nem rögzít",
+      "suggestion": "Állítsa be a rajz revízióját a projektfájlokban, majd mérje újra vagy helyezze át a mérést, hogy rögzítse a lapot és a revíziót"
+    },
+    "superseded_revision": {
+      "fail": "{ordinal}. tétel: a mennyiséget a(z) {drawing} rajz rev. {revision} változatából vették, de most a rev. {current} érvényes",
+      "suggestion": "Hasonlítsa össze a két revíziót, és frissítse a mennyiséget, vagy a különbségre nyisson módosítási megrendelést"
+    },
+    "manual_ref_without_revision": {
+      "fail": "{ordinal}. tétel: a(z) {drawing} rajz revízió nélkül lett megadva",
+      "suggestion": "Adja meg annak a rajznak a revízióját, amelyből a mennyiséget árazták"
+    }
   }
 }

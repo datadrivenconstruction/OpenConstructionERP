@@ -1327,5 +1327,19 @@
     "discount_basis": "値引率か固定ネット単価のどちらかを指定してください(固定ネット単価には品目が必要です)",
     "attachment_not_found": "添付ファイルが見つかりません",
     "price_missing": "明細「{line}」に有効な単価がありません。単価を入力するか、業者の価格表を取り込んでください"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "項目 {ordinal}: 数量拾い{count}件は数量を示していますが、図面のリビジョンが記録されていません",
+      "suggestion": "プロジェクトファイルで図面のリビジョンを設定し、図面番号とリビジョンが記録されるよう拾いを取り直すか移動してください"
+    },
+    "superseded_revision": {
+      "fail": "項目 {ordinal}: 数量は図面 {drawing} リビジョン {revision} から拾われていますが、現在はリビジョン {current} が有効です",
+      "suggestion": "二つのリビジョンを比較して数量を更新するか、差分について変更指示書を発行してください"
+    },
+    "manual_ref_without_revision": {
+      "fail": "項目 {ordinal}: 図面 {drawing} がリビジョンなしで入力されています",
+      "suggestion": "数量の単価根拠となった図面のリビジョンを追加してください"
+    }
   }
 }

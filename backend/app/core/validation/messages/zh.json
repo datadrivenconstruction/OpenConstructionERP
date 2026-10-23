@@ -1327,5 +1327,19 @@
     "discount_basis": "请填写折扣百分比或固定净价（固定净价需要指定项目）",
     "attachment_not_found": "未找到附件",
     "price_missing": "清单行“{line}”没有当前有效价格：请输入单价或导入供应商价目表"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "清单项 {ordinal}：{count} 条算量记录给出了工程量，但未记录图纸修订版",
+      "suggestion": "在项目文件中设置图纸修订版，然后重新量取或调整该量取记录，使其记录图纸编号和修订版"
+    },
+    "superseded_revision": {
+      "fail": "清单项 {ordinal}：工程量取自图纸 {drawing} 修订版 {revision}，但当前有效版本已是 {current}",
+      "suggestion": "比对两个修订版并更新工程量，或就差额提出变更单"
+    },
+    "manual_ref_without_revision": {
+      "fail": "清单项 {ordinal}：图纸 {drawing} 录入时未填写修订版",
+      "suggestion": "补充该工程量据以计价的图纸修订版"
+    }
   }
 }

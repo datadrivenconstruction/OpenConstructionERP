@@ -1327,5 +1327,19 @@
     "discount_basis": "Zadejte buď procento slevy, nebo pevnou čistou cenu (pevná čistá cena vyžaduje položku)",
     "attachment_not_found": "Příloha nebyla nalezena",
     "price_missing": "Pro řádek \"{line}\" není platná cena: zadejte jednotkovou cenu nebo importujte ceník dodavatele"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Položka {ordinal}: {count} měření výkazu výměr udává množství, ale neuvádí revizi výkresu",
+      "suggestion": "Nastavte revizi výkresu v Projektových souborech a měření znovu pořiďte nebo přesuňte tak, aby se uložil list a revize"
+    },
+    "superseded_revision": {
+      "fail": "Položka {ordinal}: množství bylo odečteno z výkresu {drawing} rev. {revision}, ale nyní platí rev. {current}",
+      "suggestion": "Porovnejte obě revize a upravte množství, nebo vystavte změnový příkaz na rozdíl"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Položka {ordinal}: výkres {drawing} je zadán bez revize",
+      "suggestion": "Doplňte revizi výkresu, ze kterého bylo množství oceněno"
+    }
   }
 }

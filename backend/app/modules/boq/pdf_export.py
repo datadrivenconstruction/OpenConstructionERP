@@ -77,6 +77,7 @@ from app.core.pdf_branding import (
 _PDF_LABELS: dict[str, dict[str, str]] = {
     "en": {
         "ai_generated": "AI-generated",
+        "drawing": "Drawing",
         "cost_estimate": "COST ESTIMATE",
         "summary": "SUMMARY",
         "project": "Project:",
@@ -117,6 +118,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "de": {
         "ai_generated": "KI-generiert",
+        "drawing": "Zeichnung",
         "cost_estimate": "KOSTENSCHÄTZUNG",
         "summary": "ZUSAMMENFASSUNG",
         "project": "Projekt:",
@@ -157,6 +159,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "fr": {
         "ai_generated": "Généré par IA",
+        "drawing": "Plan",
         "cost_estimate": "ESTIMATION DES COÛTS",
         "summary": "RÉSUMÉ",
         "project": "Projet :",
@@ -197,6 +200,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "es": {
         "ai_generated": "Generado por IA",
+        "drawing": "Plano",
         "cost_estimate": "PRESUPUESTO",
         "summary": "RESUMEN",
         "project": "Proyecto:",
@@ -237,6 +241,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "ru": {
         "ai_generated": "Создано ИИ",
+        "drawing": "Чертёж",
         "cost_estimate": "СМЕТНЫЙ РАСЧЁТ",
         "summary": "ИТОГИ",
         "project": "Проект:",
@@ -277,6 +282,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "uk": {
         "ai_generated": "Створено ШІ",
+        "drawing": "Креслення",
         "cost_estimate": "КОШТОРИСНИЙ РОЗРАХУНОК",
         "summary": "ПІДСУМКИ",
         "project": "Проєкт:",
@@ -317,6 +323,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "hu": {
         "ai_generated": "MI által generált",
+        "drawing": "Rajz",
         "cost_estimate": "KÖLTSÉGBECSLÉS",
         "summary": "ÖSSZESÍTÉS",
         "project": "Projekt:",
@@ -357,6 +364,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "zh": {
         "ai_generated": "AI 生成",
+        "drawing": "图纸",
         "cost_estimate": "COST ESTIMATE",
         "summary": "SUMMARY",
         "project": "Project:",
@@ -381,6 +389,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "pt": {
         "ai_generated": "Gerado por IA",
+        "drawing": "Desenho",
         "cost_estimate": "ORÇAMENTO",
         "summary": "RESUMO",
         "project": "Projeto:",
@@ -421,6 +430,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
     },
     "tr": {
         "ai_generated": "Yapay zekâ ile üretildi",
+        "drawing": "Çizim",
         "cost_estimate": "MALİYET TAHMİNİ",
         "summary": "ÖZET",
         "project": "Proje:",
@@ -502,6 +512,7 @@ from app.core.regional_format import format_date, format_number, number_style
 from app.core.unit_conversion import convert as convert_units
 from app.core.unit_conversion import display_rate
 from app.modules.boq.ai_provenance import AI_MARK_TOKEN, ai_origin
+from app.modules.boq.drawing_refs import export_text as drawing_export_text
 
 # Register the bundled Unicode (DejaVu) faces with reportlab. Idempotent and
 # safe at import time because reportlab is imported at module level here.
@@ -1467,6 +1478,11 @@ def _build_boq_table(
                 desc_cell,
                 _safe_para(f"{lb.get('ai_generated', 'AI-generated')} ({ai_src})", styles["resource_cell"]),
             ]
+        drawing_text = drawing_export_text(pos)
+        if drawing_text:
+            # Source drawing and revision the quantity was taken from.
+            parts = desc_cell if isinstance(desc_cell, list) else [desc_cell]
+            desc_cell = [*parts, _safe_para(f"{lb.get('drawing', 'Drawing')}: {drawing_text}", styles["resource_cell"])]
         rows: list[list[Any]] = [
             [
                 _safe_para(pos.ordinal, styles["cell"]),

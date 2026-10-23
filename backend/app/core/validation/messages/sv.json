@@ -1327,5 +1327,19 @@
     "discount_basis": "Ange antingen en rabattprocent eller ett fast nettopris (fast nettopris kräver en artikel)",
     "attachment_not_found": "Bilagan hittades inte",
     "price_missing": "Inget aktuellt pris för raden \"{line}\": ange ett á-pris eller importera leverantörens prislista"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Post {ordinal}: {count} mätning(ar) ger kvantiteten men saknar ritningsrevision",
+      "suggestion": "Ange ritningens revision under projektfiler och mät om eller flytta mätningen så att blad och revision sparas"
+    },
+    "superseded_revision": {
+      "fail": "Post {ordinal}: kvantiteten togs från ritning {drawing} rev. {revision}, men rev. {current} gäller nu",
+      "suggestion": "Jämför de två revisionerna och uppdatera kvantiteten, eller registrera en ändringsorder för skillnaden"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Post {ordinal}: ritning {drawing} är angiven utan revision",
+      "suggestion": "Lägg till revisionen för ritningen som kvantiteten prissattes från"
+    }
   }
 }

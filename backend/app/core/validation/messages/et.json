@@ -1327,5 +1327,19 @@
     "discount_basis": "Sisestage kas allahindluse protsent või kindel netohind (kindel netohind nõuab toodet)",
     "attachment_not_found": "Manust ei leitud",
     "price_missing": "Real \"{line}\" puudub kehtiv hind: sisestage ühikuhind või importige tarnija hinnakiri"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Positsioon {ordinal}: {count} mõõtmine(d) annavad koguse, kuid joonise revisjoni ei ole salvestatud",
+      "suggestion": "Määrake joonise revisjon projektifailides ning mõõtke või teisaldage mõõtmine uuesti, et leht ja revisjon salvestuksid"
+    },
+    "superseded_revision": {
+      "fail": "Positsioon {ordinal}: kogus võeti joonisest {drawing} rev. {revision}, kuid kehtiv on nüüd rev. {current}",
+      "suggestion": "Võrrelge kahte revisjoni ja uuendage kogust või esitage erinevuse kohta muudatustellimus"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Positsioon {ordinal}: joonis {drawing} on sisestatud ilma revisjonita",
+      "suggestion": "Lisage joonise revisjon, mille järgi kogus hinnastati"
+    }
   }
 }

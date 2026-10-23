@@ -1327,5 +1327,19 @@
     "discount_basis": "Give either a discount percentage or a fixed net price (fixed net needs an item)",
     "attachment_not_found": "Attachment not found",
     "price_missing": "No current price for line \"{line}\": enter a unit price or import the vendor's price list"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Position {ordinal}: {count} takeoff measurement(s) give its quantity but record no drawing revision",
+      "suggestion": "Set the revision of the drawing in Project Files, then re-take or move the measurement so it records the sheet and revision"
+    },
+    "superseded_revision": {
+      "fail": "Position {ordinal}: the quantity was taken from drawing {drawing} rev {revision}, but rev {current} is now current",
+      "suggestion": "Compare the two revisions and update the quantity, or raise a change order for the difference"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Position {ordinal}: drawing {drawing} is entered without a revision",
+      "suggestion": "Add the revision of the drawing the quantity was priced from"
+    }
   }
 }

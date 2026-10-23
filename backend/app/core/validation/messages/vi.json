@@ -1327,5 +1327,19 @@
     "discount_basis": "Nhập tỷ lệ chiết khấu hoặc giá net cố định (giá net cố định cần có mặt hàng)",
     "attachment_not_found": "Không tìm thấy tệp đính kèm",
     "price_missing": "Không có giá hiện hành cho dòng \"{line}\": nhập đơn giá hoặc nhập bảng giá của nhà cung cấp"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Hạng mục {ordinal}: {count} lần đo khối lượng cho ra khối lượng nhưng chưa ghi bản sửa đổi của bản vẽ",
+      "suggestion": "Đặt bản sửa đổi của bản vẽ trong Tệp dự án, sau đó đo lại hoặc di chuyển phép đo để ghi lại tờ và bản sửa đổi"
+    },
+    "superseded_revision": {
+      "fail": "Hạng mục {ordinal}: khối lượng lấy từ bản vẽ {drawing} rev. {revision}, nhưng hiện bản rev. {current} đang có hiệu lực",
+      "suggestion": "So sánh hai bản sửa đổi rồi cập nhật khối lượng, hoặc lập lệnh thay đổi cho phần chênh lệch"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Hạng mục {ordinal}: bản vẽ {drawing} được nhập mà không có bản sửa đổi",
+      "suggestion": "Bổ sung bản sửa đổi của bản vẽ mà khối lượng đã được định giá theo"
+    }
   }
 }

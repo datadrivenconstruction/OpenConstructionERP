@@ -52,6 +52,9 @@ export interface PdfCompareDrawerProps {
   documents: TakeoffDocumentResponse[];
   /** The document currently open in the viewer (seeds the 'after' side). */
   currentDocumentId?: string | null;
+  /** Opens with this pair selected (e.g. from a BOQ line on a revised drawing). */
+  initialFromId?: string | null;
+  initialToId?: string | null;
 }
 
 const CHANGE_DOT: Record<TakeoffMeasurementDiffRow['change_type'], string> = {
@@ -87,6 +90,8 @@ export function PdfCompareDrawer({
   projectId,
   documents,
   currentDocumentId,
+  initialFromId,
+  initialToId,
 }: PdfCompareDrawerProps) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<CompareTab>('summary');
@@ -106,6 +111,12 @@ export function PdfCompareDrawer({
     setFromId((cur) => cur || baseline.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documents, currentDocumentId]);
+
+  useEffect(() => {
+    if (!open || !initialFromId || !initialToId) return;
+    setFromId(initialFromId);
+    setToId(initialToId);
+  }, [open, initialFromId, initialToId]);
 
   const canCompare = !!fromId && !!toId && fromId !== toId && !!projectId;
 

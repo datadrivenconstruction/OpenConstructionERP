@@ -14,9 +14,9 @@
 
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, X, AlertTriangle, CircleDollarSign, Hash, Sparkles } from 'lucide-react';
+import { Search, X, AlertTriangle, CircleDollarSign, Hash, Sparkles, FileClock } from 'lucide-react';
 
-export type BoqFilterKind = 'all' | 'errors' | 'no_price' | 'zero_qty' | 'ai';
+export type BoqFilterKind = 'all' | 'errors' | 'no_price' | 'zero_qty' | 'ai' | 'drawing_revised';
 
 export interface BOQFilterBarProps {
   search: string;
@@ -29,6 +29,11 @@ export interface BOQFilterBarProps {
   /** True when a search term or a non-default filter is active. */
   active: boolean;
   onClear: () => void;
+  /** Positions measured from a drawing that has since been revised; the chip shows only when above zero. */
+  outdatedDrawingCount?: number;
+  /** Visibility of the grid's Drawing column and its toggle. */
+  showDrawingColumn?: boolean;
+  onToggleDrawingColumn?: () => void;
 }
 
 export function BOQFilterBar({
@@ -40,6 +45,9 @@ export function BOQFilterBar({
   total,
   active,
   onClear,
+  outdatedDrawingCount = 0,
+  showDrawingColumn,
+  onToggleDrawingColumn,
 }: BOQFilterBarProps) {
   const { t } = useTranslation();
 
@@ -64,6 +72,18 @@ export function BOQFilterBar({
       label: t('boq.filter_ai', { defaultValue: 'AI added' }),
       icon: <Sparkles size={12} />,
     },
+    ...(outdatedDrawingCount > 0 || filter === 'drawing_revised'
+      ? [
+          {
+            key: 'drawing_revised' as const,
+            label: t('boq.filter_drawing_revised', {
+              defaultValue: 'On revised drawings ({{count}})',
+              count: outdatedDrawingCount,
+            }),
+            icon: <FileClock size={12} />,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -119,6 +139,20 @@ export function BOQFilterBar({
           );
         })}
       </div>
+
+      {onToggleDrawingColumn && (
+        <button
+          type="button"
+          onClick={onToggleDrawingColumn}
+          aria-pressed={!!showDrawingColumn}
+          data-testid="drawing-column-toggle"
+          className="text-2xs font-medium text-content-tertiary hover:text-content-primary hover:underline"
+        >
+          {showDrawingColumn
+            ? t('boq.drawing_ref.hide_column', { defaultValue: 'Hide drawing column' })
+            : t('boq.drawing_ref.show_column', { defaultValue: 'Show drawing column' })}
+        </button>
+      )}
 
       {/* Result count + clear */}
       {active && (

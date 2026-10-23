@@ -139,6 +139,11 @@ export interface BOQColumnContext {
    */
   showCostAllocation?: boolean;
   /**
+   * Read-only "Drawing" column: the sheet and revision a position was measured
+   * from. The references travel on the grid context (`drawingRefs`).
+   */
+  showDrawingRefs?: boolean;
+  /**
    * ── Imperial-units display seam (Issue #285).
    * Carries the measurement-system-aware quantity API (built once by
    * BOQGrid via ``useDisplayQuantity``). The Qty / Unit-rate value
@@ -1074,6 +1079,19 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',
     })),
+    {
+      headerName: t('boq.drawing_ref.column', { defaultValue: 'Drawing' }),
+      headerTooltip: t('boq.drawing_ref.column_tip', {
+        defaultValue: 'The drawing sheet and revision each line was measured from. Click a chip to open the sheet.',
+      }),
+      colId: 'drawing_ref',
+      width: 150,
+      hide: !context.showDrawingRefs,
+      editable: false,
+      sortable: false,
+      cellRenderer: 'drawingRefCellRenderer',
+      cellClass: 'text-xs !px-2',
+    },
     {
       headerName: t('boq.cost_allocation.column', { defaultValue: 'Cost allocation' }),
       headerTooltip: t('boq.cost_allocation.column_tip', {

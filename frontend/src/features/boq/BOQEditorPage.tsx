@@ -78,6 +78,10 @@ import { PriceAnalysisPanel } from './PriceAnalysisPanel';
 import { PositionActualsDrawer } from '@/features/costmodel/PositionActualsDrawer';
 import { costStructureApi, statusOf, type PositionAllocation } from '@/features/costmodel/structureApi';
 import { CostAllocationDrawer } from './CostAllocationDrawer';
+import { DrawingRefsDrawer } from './DrawingRefsDrawer';
+import { drawingRefViewerUrl, isOnOutdatedDrawing, useBoqDrawingRefs, type DrawingRef } from './drawingRefsApi';
+import { PdfCompareDrawer } from '@/features/takeoff/PdfCompareDrawer';
+import { takeoffApi } from '@/features/takeoff/api';
 import { CostAllocationCoverageBar, CostAllocationCoverageError } from './CostAllocationCoverage';
 import { PositionProcurementDrawer } from '@/features/procurement/PositionProcurementDrawer';
 import { MeasurementDrawer } from './MeasurementDrawer';
@@ -1279,6 +1283,47 @@ export function BOQEditorPage() {
   const [boqFilter, setBoqFilter] = useState<BoqFilterKind>('all');
   const filterActive = boqSearch.trim() !== '' || boqFilter !== 'all';
 
+  /* Drawing traceability: sheet and revision each line was measured from.
+   *  The column shows by default once the bill has any reference; the viewer
+   *  can override that, and the choice is a per-viewer preference. */
+  const DRAWING_COLUMN_KEY = 'oe_boq_drawing_column';
+  const {
+    byPosition: drawingRefs,
+    outdatedCount: outdatedDrawingCount,
+  } = useBoqDrawingRefs(boqId);
+  const [drawingColumnPref, setDrawingColumnPref] = useState<boolean | null>(() => {
+    try {
+      const v = localStorage.getItem(DRAWING_COLUMN_KEY);
+      return v === '1' ? true : v === '0' ? false : null;
+    } catch {
+      return null;
+    }
+  });
+  const showDrawingRefs = drawingColumnPref ?? drawingRefs.size > 0;
+  const toggleDrawingColumn = useCallback(() => {
+    setDrawingColumnPref(!showDrawingRefs);
+    try {
+      localStorage.setItem(DRAWING_COLUMN_KEY, showDrawingRefs ? '0' : '1');
+    } catch { /* localStorage unavailable - the choice lasts for this visit */ }
+  }, [showDrawingRefs]);
+  const [drawingPositionId, setDrawingPositionId] = useState<string | null>(null);
+  const [drawingCompare, setDrawingCompare] = useState<{ from: string; to: string } | null>(null);
+  const openDrawingRef = useCallback(
+    (ref: DrawingRef) => {
+      const url = drawingRefViewerUrl(ref);
+      if (url) navigate(url);
+    },
+    [navigate],
+  );
+  const compareDrawingRef = useCallback((ref: DrawingRef) => {
+    if (ref.compare) setDrawingCompare({ from: ref.compare.from_document_id, to: ref.compare.to_document_id });
+  }, []);
+  const compareDocsQuery = useQuery({
+    queryKey: ['takeoff-documents', boq?.project_id],
+    queryFn: () => takeoffApi.listDocuments(boq?.project_id),
+    enabled: drawingCompare !== null && !!boq?.project_id,
+  });
+
   const totalLeafCount = useMemo(
     () => (boq?.positions ?? []).filter((p) => !isSection(p)).length,
     [boq?.positions],
@@ -1310,6 +1355,8 @@ export function BOQEditorPage() {
           return !isSection(p) && (!p.quantity || p.quantity === 0);
         case 'ai':
           return typeof p.source === 'string' && p.source.toLowerCase().includes('ai');
+        case 'drawing_revised':
+          return !isSection(p) && isOnOutdatedDrawing(drawingRefs, p.id);
         default:
           return true;
       }
@@ -1357,7 +1404,7 @@ export function BOQEditorPage() {
       }
     }
     return { filteredGridPositions: all.filter((p) => keep.has(p.id)), filterKeepIds: keep };
-  }, [boq?.positions, boqFilter, boqSearch, filterActive]);
+  }, [boq?.positions, boqFilter, boqSearch, filterActive, drawingRefs]);
 
   const filteredLeafCount = useMemo(
     () => filteredGridPositions.filter((p) => !isSection(p)).length,
@@ -5570,6 +5617,9 @@ export function BOQEditorPage() {
           shown={filteredLeafCount}
           total={totalLeafCount}
           active={filterActive}
+          outdatedDrawingCount={outdatedDrawingCount}
+          showDrawingColumn={showDrawingRefs}
+          onToggleDrawingColumn={toggleDrawingColumn}
           onClear={() => {
             setBoqSearch('');
             setBoqFilter('all');
@@ -5651,6 +5701,11 @@ export function BOQEditorPage() {
           showCostAllocation={showCostAllocation}
           costAllocations={costAllocations}
           onOpenCostAllocation={setAllocationPositionId}
+          showDrawingRefs={showDrawingRefs}
+          drawingRefs={drawingRefs}
+          onOpenDrawingRef={openDrawingRef}
+          onCompareDrawingRef={compareDrawingRef}
+          onOpenDrawingRefs={setDrawingPositionId}
           boqVariables={boqVariables}
           bimModelId={bimModelId}
           onHighlightBIMElements={handleHighlightBIMElements}
@@ -6289,6 +6344,35 @@ export function BOQEditorPage() {
           />
         );
       })()}
+
+      {drawingPositionId && boq && boqId && (() => {
+        const pos = boq.positions.find((p) => p.id === drawingPositionId);
+        if (!pos) return null;
+        return (
+          <DrawingRefsDrawer
+            key={drawingPositionId}
+            boqId={boqId}
+            position={pos}
+            entry={drawingRefs.get(pos.id)}
+            readOnly={Boolean(boq.is_locked)}
+            onClose={() => setDrawingPositionId(null)}
+            onOpenRef={openDrawingRef}
+            onCompareRef={compareDrawingRef}
+          />
+        );
+      })()}
+
+      {drawingCompare && boq?.project_id && (
+        <PdfCompareDrawer
+          open
+          onClose={() => setDrawingCompare(null)}
+          projectId={boq.project_id}
+          documents={compareDocsQuery.data ?? []}
+          initialFromId={drawingCompare.from}
+          initialToId={drawingCompare.to}
+          currentDocumentId={drawingCompare.to}
+        />
+      )}
 
       <CostAllocationDrawer
         open={allocationPositionId !== null}

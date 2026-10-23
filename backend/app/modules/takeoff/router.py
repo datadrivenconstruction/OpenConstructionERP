@@ -4835,11 +4835,111 @@ def _measurement_to_response(item: object) -> TakeoffMeasurementResponse:
         count_value=item.count_value,  # type: ignore[attr-defined]
         scale_pixels_per_unit=item.scale_pixels_per_unit,  # type: ignore[attr-defined]
         linked_boq_position_id=item.linked_boq_position_id,  # type: ignore[attr-defined]
+        drawing_document_id=getattr(item, "drawing_document_id", None),
+        drawing_sheet_id=getattr(item, "drawing_sheet_id", None),
+        drawing_number=getattr(item, "drawing_number", None),
+        drawing_title=getattr(item, "drawing_title", None),
+        drawing_revision=getattr(item, "drawing_revision", None),
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
         created_by=item.created_by,  # type: ignore[attr-defined]
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
     )
+
+
+# ── Drawing traceability of BOQ lines ──────────────────────────────────
+
+
+class ManualDrawingRefRequest(BaseModel):
+    """A drawing reference typed by hand for a position not measured in takeoff."""
+
+    drawing_ref: str | None = Field(default=None, max_length=100)
+    drawing_revision: str | None = Field(default=None, max_length=50)
+
+
+async def _boq_project_for(session: Any, boq_id: _uuid.UUID, user_id: str) -> _uuid.UUID:
+    """The bill's project after the caller's access to it is checked; 404 otherwise."""
+    from app.modules.boq.models import BOQ  # noqa: PLC0415
+
+    boq = await session.get(BOQ, boq_id)
+    if boq is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+    await verify_project_access(boq.project_id, user_id, session)
+    return boq.project_id
+
+
+@router.get(
+    "/boq/{boq_id}/drawing-refs/",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def boq_drawing_refs(
+    boq_id: _uuid.UUID,
+    outdated_only: bool = Query(False, description="Only positions whose source drawing has a newer revision"),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Source drawings (number, title, revision, page) of every position of a bill.
+
+    A position lists one entry per drawing its linked takeoff measurements were taken on,
+    plus a manual reference when the estimator typed one. ``outdated`` is derived from the
+    documents register on every read.
+    """
+    from app.modules.boq.drawing_refs import drawing_refs_for_boq  # noqa: PLC0415
+
+    project_id = await _boq_project_for(session, boq_id, str(user_id))
+    refs = await drawing_refs_for_boq(session, boq_id, project_id)
+    items = [e.as_dict() for e in refs.values() if e.outdated or not outdated_only]
+    items.sort(key=lambda e: str(e["ordinal"]))
+    return {
+        "boq_id": str(boq_id),
+        "outdated_count": sum(1 for e in refs.values() if e.outdated),
+        "items": items,
+    }
+
+
+@router.put(
+    "/boq/{boq_id}/positions/{position_id}/drawing-ref/",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def set_position_drawing_ref(
+    boq_id: _uuid.UUID,
+    position_id: _uuid.UUID,
+    data: ManualDrawingRefRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Set or clear the manual drawing reference and revision of one position."""
+    from app.modules.boq.drawing_refs import (  # noqa: PLC0415
+        MANUAL_REF_KEY,
+        MANUAL_REV_KEY,
+        PositionDrawingRefs,
+        drawing_refs_for_boq,
+    )
+    from app.modules.boq.models import Position  # noqa: PLC0415
+    from app.modules.boq.service import BOQService  # noqa: PLC0415
+
+    project_id = await _boq_project_for(session, boq_id, str(user_id))
+    position = await session.get(Position, position_id)
+    if position is None or position.boq_id != boq_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await BOQService(session)._ensure_boq_writable(boq_id)  # noqa: SLF001 - the BOQ lock guard
+    ref = (data.drawing_ref or "").strip()
+    rev = (data.drawing_revision or "").strip()
+    meta = dict(position.metadata_ or {})
+    if ref:
+        meta[MANUAL_REF_KEY] = ref
+        if rev:
+            meta[MANUAL_REV_KEY] = rev
+        else:
+            meta.pop(MANUAL_REV_KEY, None)
+    else:
+        meta.pop(MANUAL_REF_KEY, None)
+        meta.pop(MANUAL_REV_KEY, None)
+    position.metadata_ = meta
+    await session.flush()
+    refs = await drawing_refs_for_boq(session, boq_id, project_id)
+    entry = refs.get(str(position_id)) or PositionDrawingRefs(position_id=str(position_id), ordinal=position.ordinal)
+    return entry.as_dict()
 
 
 # ── Revision compare (Item 17) ─────────────────────────────────────────

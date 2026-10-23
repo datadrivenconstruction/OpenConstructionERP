@@ -1327,5 +1327,19 @@
     "discount_basis": "Angiv enten en rabatprocent eller en fast nettopris (fast nettopris kræver en vare)",
     "attachment_not_found": "Bilaget blev ikke fundet",
     "price_missing": "Ingen gældende pris for linjen \"{line}\": indtast en enhedspris, eller importér leverandørens prisliste"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Post {ordinal}: {count} opmåling(er) giver mængden, men registrerer ingen tegningsrevision",
+      "suggestion": "Angiv tegningens revision under projektfiler, og mål igen eller flyt målingen, så plan og revision gemmes"
+    },
+    "superseded_revision": {
+      "fail": "Post {ordinal}: mængden er opmålt fra tegning {drawing} rev. {revision}, men rev. {current} er nu gældende",
+      "suggestion": "Sammenlign de to revisioner og opdater mængden, eller opret en ændringsordre for forskellen"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Post {ordinal}: tegning {drawing} er indtastet uden revision",
+      "suggestion": "Tilføj revisionen af den tegning, mængden blev prissat ud fra"
+    }
   }
 }

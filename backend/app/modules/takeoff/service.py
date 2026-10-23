@@ -2068,6 +2068,18 @@ class TakeoffService:
             detail="Document not found in this project",
         )
 
+    async def _stamp_drawing(self, measurement: TakeoffMeasurement) -> None:
+        """Record the drawing number, title and revision the quantity is taken from."""
+        from app.modules.boq.drawing_refs import resolve_provenance  # noqa: PLC0415
+
+        cache: dict[tuple, Any] = self.__dict__.setdefault("_drawing_cache", {})
+        key = (measurement.project_id, measurement.document_id, measurement.page)
+        if key not in cache:
+            cache[key] = await resolve_provenance(self.session, *key)
+        prov = cache[key]
+        for key, value in prov.as_columns().items():
+            setattr(measurement, key, value)
+
     async def create_measurement(
         self,
         data: TakeoffMeasurementCreate,
@@ -2132,6 +2144,7 @@ class TakeoffService:
             metadata_=data.metadata,
             created_by=created_by,
         )
+        await self._stamp_drawing(measurement)
         measurement = await self.measurement_repo.create(measurement)
         logger.info(
             "Measurement created: %s type=%s project=%s value=%s (client=%s)",
@@ -2285,6 +2298,8 @@ class TakeoffService:
                 )
             )
 
+        for row in rows:
+            await self._stamp_drawing(row)
         stored = await self.measurement_repo.create_bulk(rows)
         return [{**cand, "measurement_id": str(row.id)} for cand, row in zip(candidates, stored, strict=True)]
 
@@ -2802,6 +2817,27 @@ class TakeoffService:
                 client_volume=client_volume,
             )
 
+        if "document_id" in fields or "page" in fields:
+            # A measurement moved to another sheet takes that sheet's drawing with it.
+            probe = TakeoffMeasurement(
+                project_id=item.project_id,
+                document_id=fields.get("document_id", item.document_id),
+                page=fields.get("page", item.page),
+            )
+            await self._stamp_drawing(probe)
+            fields.update(
+                {
+                    k: getattr(probe, k)
+                    for k in (
+                        "drawing_document_id",
+                        "drawing_sheet_id",
+                        "drawing_number",
+                        "drawing_title",
+                        "drawing_revision",
+                    )
+                }
+            )
+
         if not fields:
             return item
 
@@ -2893,6 +2929,8 @@ class TakeoffService:
             )
             for data in items
         ]
+        for measurement in measurements:
+            await self._stamp_drawing(measurement)
         result = await self.measurement_repo.create_bulk(measurements)
         logger.info("Bulk created %d measurements (server-side recomputed)", len(result))
         return result
@@ -3957,6 +3995,8 @@ class TakeoffService:
             user_id=user_id,
         )
         if proposals:
+            for proposal in proposals:
+                await self._stamp_drawing(proposal)
             await self.measurement_repo.create_bulk(proposals)
 
         duration_ms = int((_time.monotonic() - start) * 1000)

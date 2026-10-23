@@ -1327,5 +1327,19 @@
     "discount_basis": "Isi persentase diskon atau harga neto tetap (harga neto tetap memerlukan item)",
     "attachment_not_found": "Lampiran tidak ditemukan",
     "price_missing": "Tidak ada harga berlaku untuk baris \"{line}\": masukkan harga satuan atau impor daftar harga vendor"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Pos {ordinal}: {count} pengukuran volume memberi kuantitas tetapi tidak mencatat revisi gambar",
+      "suggestion": "Atur revisi gambar di Berkas Proyek, lalu ukur ulang atau pindahkan pengukuran agar lembar dan revisi tercatat"
+    },
+    "superseded_revision": {
+      "fail": "Pos {ordinal}: kuantitas diambil dari gambar {drawing} rev. {revision}, tetapi rev. {current} kini berlaku",
+      "suggestion": "Bandingkan kedua revisi dan perbarui kuantitas, atau ajukan perintah perubahan untuk selisihnya"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Pos {ordinal}: gambar {drawing} dimasukkan tanpa revisi",
+      "suggestion": "Tambahkan revisi gambar yang menjadi dasar harga kuantitas"
+    }
   }
 }

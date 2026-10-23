@@ -1327,5 +1327,19 @@
     "discount_basis": "Indica una percentuale di sconto oppure un prezzo netto fisso (il prezzo netto fisso richiede un articolo)",
     "attachment_not_found": "Allegato non trovato",
     "price_missing": "Nessun prezzo in vigore per la voce \"{line}\": inserisci un prezzo unitario o importa il listino del fornitore"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Voce {ordinal}: {count} misura/e di computo danno la quantità ma non registrano la revisione del disegno",
+      "suggestion": "Indicare la revisione del disegno nei file di progetto, quindi ripetere o spostare la misura in modo che registri foglio e revisione"
+    },
+    "superseded_revision": {
+      "fail": "Voce {ordinal}: la quantità è stata ricavata dal disegno {drawing} rev. {revision}, ma ora è in vigore la rev. {current}",
+      "suggestion": "Confrontare le due revisioni e aggiornare la quantità, oppure emettere una variante per la differenza"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Voce {ordinal}: il disegno {drawing} è inserito senza revisione",
+      "suggestion": "Aggiungere la revisione del disegno da cui è stata prezzata la quantità"
+    }
   }
 }

@@ -1327,5 +1327,19 @@
     "discount_basis": "Geef een kortingspercentage of een vaste nettoprijs op (een vaste nettoprijs vereist een artikel)",
     "attachment_not_found": "Bijlage niet gevonden",
     "price_missing": "Geen actuele prijs voor regel \"{line}\": voer een eenheidsprijs in of importeer de prijslijst van de leverancier"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Post {ordinal}: {count} opmeting(en) leveren de hoeveelheid, maar er is geen tekeningrevisie vastgelegd",
+      "suggestion": "Stel de revisie van de tekening in bij Projectbestanden en meet opnieuw of verplaats de meting, zodat blad en revisie worden vastgelegd"
+    },
+    "superseded_revision": {
+      "fail": "Post {ordinal}: de hoeveelheid is opgemeten op tekening {drawing} rev. {revision}, maar rev. {current} is nu actueel",
+      "suggestion": "Vergelijk de twee revisies en pas de hoeveelheid aan, of dien een wijzigingsopdracht in voor het verschil"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Post {ordinal}: tekening {drawing} is ingevoerd zonder revisie",
+      "suggestion": "Voeg de revisie toe van de tekening waarop de hoeveelheid is geprijsd"
+    }
   }
 }

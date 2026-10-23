@@ -1327,5 +1327,19 @@
     "discount_basis": "Oppgi enten en rabattprosent eller en fast nettopris (fast nettopris krever en vare)",
     "attachment_not_found": "Vedlegget ble ikke funnet",
     "price_missing": "Ingen gjeldende pris for linjen \"{line}\": legg inn en enhetspris eller importer leverandørens prisliste"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Post {ordinal}: {count} mengdemåling(er) gir mengden, men registrerer ingen tegningsrevisjon",
+      "suggestion": "Angi tegningens revisjon under prosjektfiler, og mål på nytt eller flytt målingen slik at ark og revisjon lagres"
+    },
+    "superseded_revision": {
+      "fail": "Post {ordinal}: mengden er tatt fra tegning {drawing} rev. {revision}, men rev. {current} er nå gjeldende",
+      "suggestion": "Sammenlign de to revisjonene og oppdater mengden, eller opprett en endringsordre for differansen"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Post {ordinal}: tegning {drawing} er registrert uten revisjon",
+      "suggestion": "Legg til revisjonen av tegningen mengden ble prissatt fra"
+    }
   }
 }

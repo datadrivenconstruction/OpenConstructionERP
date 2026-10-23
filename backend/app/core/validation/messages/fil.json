@@ -1327,5 +1327,19 @@
     "discount_basis": "Maglagay ng porsyento ng diskwento o nakapirming net na presyo (kailangan ng item ang nakapirming net na presyo)",
     "attachment_not_found": "Hindi nahanap ang attachment",
     "price_missing": "Walang umiiral na presyo para sa linyang \"{line}\": maglagay ng unit price o i-import ang listahan ng presyo ng vendor"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Item {ordinal}: {count} sukat ng takeoff ang nagbibigay ng dami pero walang nakatalang rebisyon ng drowing",
+      "suggestion": "Itakda ang rebisyon ng drowing sa Project Files, pagkatapos ulitin o ilipat ang sukat upang maitala ang sheet at rebisyon"
+    },
+    "superseded_revision": {
+      "fail": "Item {ordinal}: kinuha ang dami mula sa drowing {drawing} rev. {revision}, ngunit rev. {current} na ang kasalukuyang bisa",
+      "suggestion": "Ikumpara ang dalawang rebisyon at i-update ang dami, o maglabas ng change order para sa pagkakaiba"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Item {ordinal}: inilagay ang drowing {drawing} nang walang rebisyon",
+      "suggestion": "Idagdag ang rebisyon ng drowing na pinagbatayan ng presyo ng dami"
+    }
   }
 }

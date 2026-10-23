@@ -1327,5 +1327,19 @@
     "discount_basis": "Geben Sie entweder einen Rabattprozentsatz oder einen festen Nettopreis an (fester Nettopreis erfordert einen Artikel)",
     "attachment_not_found": "Anhang nicht gefunden",
     "price_missing": "Kein aktueller Preis für Position \"{line}\": Einheitspreis eingeben oder die Preisliste des Lieferanten importieren"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Position {ordinal}: {count} Aufmaßmessung(en) liefern die Menge, enthalten aber keinen Planindex",
+      "suggestion": "Planindex in den Projektdateien erfassen, dann die Messung neu erfassen oder verschieben, damit Blatt und Index gespeichert werden"
+    },
+    "superseded_revision": {
+      "fail": "Position {ordinal}: Die Menge wurde aus Plan {drawing} Index {revision} ermittelt, aktuell gültig ist aber Index {current}",
+      "suggestion": "Beide Indizes vergleichen und die Menge anpassen oder für die Differenz eine Nachtragsvereinbarung stellen"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Position {ordinal}: Plan {drawing} ist ohne Planindex erfasst",
+      "suggestion": "Den Planindex des Plans ergänzen, aus dem die Menge kalkuliert wurde"
+    }
   }
 }

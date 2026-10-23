@@ -501,6 +501,108 @@ class UnitRateNotRederivedFromUntrustedBuildup(ValidationRule):
         return results
 
 
+# ── Drawing traceability rules ──────────────────────────────────────────────
+
+
+def _drawing_refs(context: ValidationContext) -> dict[str, dict[str, Any]]:
+    """Position id -> drawing refs as :func:`drawing_refs.drawing_refs_for_boq` serialises them."""
+    data = context.data
+    refs = data.get("drawing_refs") if isinstance(data, dict) else None
+    return refs if isinstance(refs, dict) else {}
+
+
+class _DrawingRule(ValidationRule):
+    """Shared plumbing: one finding per leaf position the predicate picks."""
+
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    message_key = ""
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        raise NotImplementedError
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Check every leaf position that has drawing refs."""
+        locale = _locale(context)
+        refs = _drawing_refs(context)
+        results: list[RuleResult] = []
+        for position in _leaf_positions(context):
+            entry = refs.get(str(position.get("id") or ""))
+            details = self._hit(entry) if entry else None
+            if details is None:
+                continue
+            ordinal = str(position.get("ordinal") or "?")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(f"{self.message_key}.fail", locale, ordinal=ordinal, **details),
+                    element_ref=str(position.get("id")),
+                    suggestion=translate(f"{self.message_key}.suggestion", locale),
+                    details=details,
+                )
+            )
+        return results
+
+
+class TakeoffQuantityWithoutDrawingRevision(_DrawingRule):
+    """The quantity comes from takeoff on a drawing whose revision was never recorded."""
+
+    rule_id = "boq.drawing.takeoff_without_revision"
+    name = "Takeoff quantity without a drawing revision"
+    description = "A takeoff measurement linked to this position records no drawing revision."
+    message_key = "boq_drawing.takeoff_without_revision"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        count = int(entry.get("unrevised_measurements") or 0)
+        return {"count": count} if count else None
+
+
+class PositionOnSupersededDrawing(_DrawingRule):
+    """A source drawing of the position has a newer revision in the register."""
+
+    rule_id = "boq.drawing.superseded_revision"
+    name = "Position based on a superseded drawing revision"
+    description = "The drawing this quantity was taken from has been revised since."
+    message_key = "boq_drawing.superseded_revision"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        for ref in entry.get("refs") or []:
+            if ref.get("outdated"):
+                return {
+                    "drawing": str(ref.get("drawing_number") or ref.get("drawing_title") or "?"),
+                    "revision": str(ref.get("revision") or "?"),
+                    "current": str(ref.get("current_revision") or "?"),
+                }
+        manual = entry.get("manual") or {}
+        if entry.get("manual_outdated"):
+            return {
+                "drawing": str(manual.get("drawing_ref") or "?"),
+                "revision": str(manual.get("drawing_revision") or "?"),
+                "current": "?",
+            }
+        return None
+
+
+class ManualDrawingRefWithoutRevision(_DrawingRule):
+    """A drawing reference typed by hand names no revision."""
+
+    rule_id = "boq.drawing.manual_ref_without_revision"
+    name = "Manual drawing reference without a revision"
+    description = "A drawing number was entered by hand without its revision."
+    message_key = "boq_drawing.manual_ref_without_revision"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        manual = entry.get("manual") or {}
+        if manual.get("drawing_ref") and not manual.get("drawing_revision"):
+            return {"drawing": str(manual["drawing_ref"])}
+        return None
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
@@ -513,6 +615,9 @@ _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
 _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
     UnitRateNotRederivedFromUntrustedBuildup(),
     EmbeddedExportRoundingGap(),
+    TakeoffQuantityWithoutDrawingRevision(),
+    PositionOnSupersededDrawing(),
+    ManualDrawingRefWithoutRevision(),
 )
 
 

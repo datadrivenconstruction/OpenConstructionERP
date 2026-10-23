@@ -1327,5 +1327,19 @@
     "discount_basis": "할인율 또는 고정 순단가 중 하나를 입력하세요(고정 순단가에는 품목이 필요합니다)",
     "attachment_not_found": "첨부 파일을 찾을 수 없습니다",
     "price_missing": "\"{line}\" 항목에 유효한 단가가 없습니다. 단가를 입력하거나 협력업체 단가표를 가져오세요"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "항목 {ordinal}: 수량 산출 측정 {count}건이 수량을 제공하지만 도면 리비전이 기록되지 않았습니다",
+      "suggestion": "프로젝트 파일에서 도면 리비전을 설정한 후, 시트와 리비전이 기록되도록 측정을 다시 하거나 이동하십시오"
+    },
+    "superseded_revision": {
+      "fail": "항목 {ordinal}: 수량은 도면 {drawing} 리비전 {revision}에서 산출되었으나, 현재 리비전 {current}이(가) 적용 중입니다",
+      "suggestion": "두 리비전을 비교해 수량을 갱신하거나 차이에 대해 설계변경 지시를 발행하십시오"
+    },
+    "manual_ref_without_revision": {
+      "fail": "항목 {ordinal}: 도면 {drawing}이(가) 리비전 없이 입력되었습니다",
+      "suggestion": "수량의 단가 근거가 된 도면의 리비전을 추가하십시오"
+    }
   }
 }

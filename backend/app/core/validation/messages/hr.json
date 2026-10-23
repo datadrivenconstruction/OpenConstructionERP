@@ -1327,5 +1327,19 @@
     "discount_basis": "Navedite postotak popusta ili fiksnu neto cijenu (fiksna neto cijena zahtijeva artikl)",
     "attachment_not_found": "Privitak nije pronađen",
     "price_missing": "Nema važeće cijene za stavku \"{line}\": unesite jediničnu cijenu ili uvezite cjenik dobavljača"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Stavka {ordinal}: {count} mjerenje(a) daju količinu, ali ne bilježe reviziju nacrta",
+      "suggestion": "Postavite reviziju nacrta u Projektnim datotekama, zatim ponovo izmjerite ili premjestite mjerenje kako bi se zabilježili list i revizija"
+    },
+    "superseded_revision": {
+      "fail": "Stavka {ordinal}: količina je uzeta iz nacrta {drawing} rev. {revision}, ali je sada važeća rev. {current}",
+      "suggestion": "Usporedite dvije revizije i ažurirajte količinu ili pokrenite nalog za promjenu za razliku"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Stavka {ordinal}: nacrt {drawing} unesen je bez revizije",
+      "suggestion": "Dodajte reviziju nacrta na temelju kojeg je količina obračunata"
+    }
   }
 }

@@ -1327,5 +1327,19 @@
     "discount_basis": "Podaj procent rabatu albo stałą cenę netto (stała cena netto wymaga wskazania pozycji)",
     "attachment_not_found": "Nie znaleziono załącznika",
     "price_missing": "Brak aktualnej ceny dla pozycji \"{line}\": wpisz cenę jednostkową lub zaimportuj cennik dostawcy"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Pozycja {ordinal}: {count} pomiar(ów) obmiarowych podaje ilość, ale nie zapisuje rewizji rysunku",
+      "suggestion": "Ustaw rewizję rysunku w Plikach projektu, a następnie powtórz lub przenieś pomiar, aby zapisał arkusz i rewizję"
+    },
+    "superseded_revision": {
+      "fail": "Pozycja {ordinal}: ilość pobrano z rysunku {drawing} rew. {revision}, ale obowiązuje już rew. {current}",
+      "suggestion": "Porównaj obie rewizje i zaktualizuj ilość albo zgłoś zlecenie zmiany na różnicę"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Pozycja {ordinal}: rysunek {drawing} wpisano bez rewizji",
+      "suggestion": "Dodaj rewizję rysunku, na podstawie którego wyceniono ilość"
+    }
   }
 }

@@ -1327,5 +1327,19 @@
     "discount_basis": "Anna joko alennusprosentti tai kiinteä nettohinta (kiinteä nettohinta vaatii tuotteen)",
     "attachment_not_found": "Liitettä ei löytynyt",
     "price_missing": "Riville \"{line}\" ei ole voimassa olevaa hintaa: syötä yksikköhinta tai tuo toimittajan hinnasto"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Kohta {ordinal}: {count} mittausta antaa määrän, mutta piirustuksen revisiota ei ole kirjattu",
+      "suggestion": "Aseta piirustuksen revisio projektitiedostoihin ja mittaa tai siirrä mittaus uudelleen, jotta arkki ja revisio tallentuvat"
+    },
+    "superseded_revision": {
+      "fail": "Kohta {ordinal}: määrä on otettu piirustuksesta {drawing} rev. {revision}, mutta rev. {current} on nyt voimassa",
+      "suggestion": "Vertaa kahta revisiota ja päivitä määrä tai tee muutostilaus erotuksesta"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Kohta {ordinal}: piirustus {drawing} on syötetty ilman revisiota",
+      "suggestion": "Lisää sen piirustuksen revisio, jonka mukaan määrä on hinnoiteltu"
+    }
   }
 }

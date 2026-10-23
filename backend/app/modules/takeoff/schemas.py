@@ -449,6 +449,12 @@ class TakeoffMeasurementResponse(BaseModel):
     # client never stated a source. Surfaces show that as "Unknown".
     scale_source: str | None = None
     linked_boq_position_id: str | None = None
+    # Drawing provenance recorded when the quantity was taken; NULL = not recorded.
+    drawing_document_id: str | None = None
+    drawing_sheet_id: str | None = None
+    drawing_number: str | None = None
+    drawing_title: str | None = None
+    drawing_revision: str | None = None
     is_deduction: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_by: str = ""

@@ -1327,5 +1327,19 @@
     "discount_basis": "Indicați fie un procent de discount, fie un preț net fix (prețul net fix necesită un articol)",
     "attachment_not_found": "Atașamentul nu a fost găsit",
     "price_missing": "Nu există preț curent pentru linia \"{line}\": introduceți un preț unitar sau importați lista de prețuri a furnizorului"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Poziția {ordinal}: {count} măsurătoare(i) de cantități dau cantitatea, dar nu înregistrează revizia planșei",
+      "suggestion": "Setați revizia planșei în Fișierele proiectului, apoi refaceți sau mutați măsurătoarea, astfel încât să se înregistreze foaia și revizia"
+    },
+    "superseded_revision": {
+      "fail": "Poziția {ordinal}: cantitatea a fost luată din planșa {drawing} rev. {revision}, dar acum este valabilă rev. {current}",
+      "suggestion": "Comparați cele două revizii și actualizați cantitatea sau emiteți un ordin de modificare pentru diferență"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Poziția {ordinal}: planșa {drawing} este introdusă fără revizie",
+      "suggestion": "Adăugați revizia planșei din care a fost prețuită cantitatea"
+    }
   }
 }

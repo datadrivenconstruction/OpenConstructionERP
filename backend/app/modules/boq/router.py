@@ -4056,7 +4056,12 @@ async def validate_boq(
             await with_project_context(
                 session,
                 boq_data.project_id,
-                {"positions": positions_data, "markups": markups_data, **markup_context},
+                {
+                    "positions": positions_data,
+                    "markups": markups_data,
+                    **markup_context,
+                    "drawing_refs": await _drawing_refs_for_rules(session, boq_id, boq_data.project_id),
+                },
             ),
             rule_sets,
         ),
@@ -4091,6 +4096,32 @@ async def validate_boq(
     )
 
     return summary
+
+
+async def _drawing_refs_for_rules(session: Any, boq_id: uuid.UUID, project_id: uuid.UUID) -> dict[str, Any]:
+    """Source drawings per position in the shape the ``boq.drawing.*`` rules read."""
+    from app.modules.boq.drawing_refs import drawing_refs_for_boq
+
+    refs = await drawing_refs_for_boq(session, boq_id, project_id)
+    return {pid: entry.as_dict() for pid, entry in refs.items()}
+
+
+DRAWING_COLUMN_HEADER = "Drawing (rev)"
+
+
+async def _stamp_drawing_refs(session: Any, boq_data: Any) -> None:
+    """Carry each position's source drawing line onto the in-memory export rows."""
+    from app.modules.boq.drawing_refs import drawing_refs_for_boq, stamp_export_text
+
+    stamp_export_text(boq_data, await drawing_refs_for_boq(session, boq_data.id, boq_data.project_id))
+
+
+async def _drawing_ref_texts(session: Any, boq_id: uuid.UUID, project_id: uuid.UUID) -> dict[str, str]:
+    """Position id -> ``A-101 rev C; S-200 rev 2`` for the exports."""
+    from app.modules.boq.drawing_refs import drawing_refs_for_boq
+
+    refs = await drawing_refs_for_boq(session, boq_id, project_id)
+    return {pid: text for pid, entry in refs.items() if (text := entry.export_text())}
 
 
 async def _store_editor_validation(
@@ -4835,6 +4866,7 @@ def _render_boq_xlsx(
     base_ccy: str,
     fx_map: Mapping[str, Any],
     exported_at: datetime | None = None,
+    drawing_refs: Mapping[str, str] | None = None,
 ) -> bytes:
     """Write the Excel export of a bill already read from the database.
 
@@ -4895,7 +4927,10 @@ def _render_boq_xlsx(
         ID_COLUMN_HEADER,
     ]
     custom_headers = [c.get("display_name", c.get("name", "")) for c in custom_columns]
-    headers = standard_headers + custom_headers
+    # Source drawing (number + revision) per position, after the custom columns so the
+    # round-trip column positions stay where re-import expects them.
+    drawing_header = [DRAWING_COLUMN_HEADER] if drawing_refs else []
+    headers = standard_headers + custom_headers + drawing_header
     n_standard = len(standard_headers)
     id_col = n_standard  # 1-based column index of the "Position ID" column
 
@@ -5087,6 +5122,12 @@ def _render_boq_xlsx(
                         cell.number_format = number_format
                     except (TypeError, ValueError):
                         pass
+        if drawing_refs:
+            ws.cell(
+                row=current_row,
+                column=n_standard + len(custom_columns) + 1,
+                value=neutralise_formula(drawing_refs.get(str(pos.id), "")),
+            )
 
         current_row += 1
 
@@ -5321,6 +5362,7 @@ async def export_boq_excel(
         project_line=project_line,
         base_ccy=base_ccy,
         fx_map=fx_map,
+        drawing_refs=await _drawing_ref_texts(session, boq_id, boq_data.project_id),
     )
 
     filename = f"{boq_data.name}.xlsx"
@@ -5423,6 +5465,7 @@ async def export_boq_pdf(
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
+    await _stamp_drawing_refs(session, boq_data)
     # The subtotals in ``boq_data`` were rolled up in the project's base
     # currency with this FX table; each printed line is converted with it too,
     # or a foreign-currency line prints a figure its section subtotal does not
@@ -5625,6 +5668,7 @@ async def export_boq_gaeb(
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
+    await _stamp_drawing_refs(session, boq_data)
 
     # Load project for label text + currency.
     project_repo = ProjectRepository(session)
@@ -5754,6 +5798,8 @@ def build_gaeb_xml(
     import xml.etree.ElementTree as ET
     from datetime import date
     from decimal import Decimal
+
+    from app.modules.boq.drawing_refs import export_text as drawing_export_text
 
     today = date.today().isoformat()
 
@@ -6114,14 +6160,20 @@ def build_gaeb_xml(
         # text; X84 restricts DetailTxt, so it goes into the optional BidComm.
         ai_src = ai_origin(pos)
         ai_line = ai_mark_text(ai_src) if ai_src else None
+        drawing_text = drawing_export_text(pos)
+        drawing_line = f"Drawing: {drawing_text}" if drawing_text else None
         description = str(getattr(pos, "description", "") or "")
         if ai_line and not is_priced:
             description = f"{description}\n{ai_line}"
+        if drawing_line and not is_priced:
+            description = f"{description}\n{drawing_line}"
         _set_description(item, description)
         # Schema order: BidComm follows Description in the X84 Item.
         comm_lines = _alt_rationale_lines(pos) if is_alternate_bid else []
         if ai_line and is_priced:
             comm_lines = [*comm_lines, ai_line]
+        if drawing_line and is_priced:
+            comm_lines = [*comm_lines, drawing_line]
         if comm_lines:
             _set_ml_text(item, "BidComm", "\n".join(comm_lines))
 

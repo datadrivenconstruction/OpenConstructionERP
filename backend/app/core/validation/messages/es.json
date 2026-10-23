@@ -1327,5 +1327,19 @@
     "discount_basis": "Indique un porcentaje de descuento o un precio neto fijo (el precio neto fijo requiere un artículo)",
     "attachment_not_found": "Adjunto no encontrado",
     "price_missing": "No hay precio vigente para la partida \"{line}\": introduzca un precio unitario o importe la lista de precios del proveedor"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Partida {ordinal}: {count} medición(es) de mediciones dan su cantidad pero no registran la revisión del plano",
+      "suggestion": "Indicar la revisión del plano en los archivos del proyecto y repetir o mover la medición para que registre la hoja y la revisión"
+    },
+    "superseded_revision": {
+      "fail": "Partida {ordinal}: la cantidad se tomó del plano {drawing} rev. {revision}, pero la rev. {current} es ya la vigente",
+      "suggestion": "Comparar ambas revisiones y actualizar la cantidad, o tramitar una orden de cambio por la diferencia"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Partida {ordinal}: el plano {drawing} se ha introducido sin revisión",
+      "suggestion": "Añadir la revisión del plano a partir del cual se calculó la cantidad"
+    }
   }
 }

@@ -1327,5 +1327,19 @@
     "discount_basis": "Chegirma foizini yoki qat'iy netto narxni ko'rsating (qat'iy netto narx uchun pozitsiya kerak)",
     "attachment_not_found": "Biriktirma topilmadi",
     "price_missing": "\"{line}\" qatori uchun amaldagi narx yo'q: birlik narxini kiriting yoki yetkazib beruvchining narxnomasini import qiling"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "{ordinal}-pozitsiya: {count} ta hajm o'lchovi miqdorni beradi, lekin chizma revizasiyasi yozilmagan",
+      "suggestion": "Loyiha fayllarida chizma revizasiyasini kiriting, so'ngra o'lchovni qayta oling yoki ko'chiring, shunda varaq va revizasiya saqlanadi"
+    },
+    "superseded_revision": {
+      "fail": "{ordinal}-pozitsiya: miqdor {drawing} chizmasining {revision} revizasiyasidan olingan, ammo hozir {current} revizasiyasi amalda",
+      "suggestion": "Ikki revizasiyani solishtiring va miqdorni yangilang yoki farq uchun o'zgartirish buyrug'ini rasmiylashtiring"
+    },
+    "manual_ref_without_revision": {
+      "fail": "{ordinal}-pozitsiya: {drawing} chizmasi revizasiyasiz kiritilgan",
+      "suggestion": "Miqdor narxlangan chizmaning revizasiyasini qo'shing"
+    }
   }
 }

@@ -516,6 +516,9 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "delete_measurement",
         "link_measurement_to_boq",
         "create_boq_position_from_measurement",
+        # Drawing traceability of BOQ lines, gated through _boq_project_for
+        "boq_drawing_refs",
+        "set_position_drawing_ref",
         "measurement_summary",
         "export_measurements",
         "create_measurement",
@@ -1225,6 +1228,9 @@ _GUARD_WRAPPERS = frozenset(
         # economics.router: the one place a handler gets its EconomicsService. It awaits
         # verify_project_access(project_id, user_id, session) before it returns the service.
         "_economics_svc",
+        # takeoff.router: _boq_project_for loads the bill and awaits verify_project_access on its
+        # project before the drawing-ref handlers read or write a position.
+        "_boq_project_for",
     }
 )
 

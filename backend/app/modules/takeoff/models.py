@@ -250,6 +250,13 @@ class TakeoffMeasurement(Base):
     #   inherited          taken from the page the measurement was drawn on
     scale_source: Mapped[str | None] = mapped_column(String(24), nullable=True)
     linked_boq_position_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Drawing provenance, stamped from the documents register when the quantity is taken
+    # (v201). NULL means "not recorded"; a later revision never rewrites these.
+    drawing_document_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
+    drawing_sheet_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
+    drawing_number: Mapped[str | None] = mapped_column(String(100), nullable=True, default=None)
+    drawing_title: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    drawing_revision: Mapped[str | None] = mapped_column(String(50), nullable=True, default=None)
     # ── Vision-LLM plan reading (issue #194) ───────────────────────────────
     # Provenance and review state. All three are additive with a server_default
     # so every existing row reads unchanged. A plan-read proposal lands as

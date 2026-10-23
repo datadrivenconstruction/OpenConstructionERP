@@ -1327,5 +1327,19 @@
     "discount_basis": "İskonto yüzdesi veya sabit net fiyat girin (sabit net fiyat için kalem gerekir)",
     "attachment_not_found": "Ek bulunamadı",
     "price_missing": "\"{line}\" satırı için geçerli fiyat yok: birim fiyat girin veya tedarikçinin fiyat listesini içe aktarın"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Kalem {ordinal}: {count} metraj ölçümü miktarı veriyor ancak çizim revizyonu kaydedilmemiş",
+      "suggestion": "Proje Dosyaları'nda çizim revizyonunu tanımlayın, ardından ölçümü yeniden alın veya taşıyın; böylece pafta ve revizyon kaydedilsin"
+    },
+    "superseded_revision": {
+      "fail": "Kalem {ordinal}: miktar {drawing} çiziminin rev. {revision} sürümünden alınmış, ancak artık rev. {current} geçerli",
+      "suggestion": "İki revizyonu karşılaştırın ve miktarı güncelleyin ya da fark için bir değişiklik emri düzenleyin"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Kalem {ordinal}: {drawing} çizimi revizyonsuz girilmiş",
+      "suggestion": "Miktarın birim fiyatlandığı çizimin revizyonunu ekleyin"
+    }
   }
 }

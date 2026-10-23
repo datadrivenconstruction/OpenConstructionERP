@@ -1327,5 +1327,19 @@
     "discount_basis": "Informe um percentual de desconto ou um preço líquido fixo (o preço líquido fixo exige um item)",
     "attachment_not_found": "Anexo não encontrado",
     "price_missing": "Não há preço vigente para a linha \"{line}\": informe um preço unitário ou importe a lista de preços do fornecedor"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Item {ordinal}: {count} medição(ões) de quantitativos fornecem a quantidade, mas não registram a revisão do desenho",
+      "suggestion": "Informar a revisão do desenho nos Arquivos do Projeto e refazer ou mover a medição para que registre a folha e a revisão"
+    },
+    "superseded_revision": {
+      "fail": "Item {ordinal}: a quantidade foi extraída do desenho {drawing} rev. {revision}, mas a rev. {current} é a vigente",
+      "suggestion": "Comparar as duas revisões e atualizar a quantidade, ou abrir uma ordem de mudança para a diferença"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Item {ordinal}: o desenho {drawing} foi lançado sem revisão",
+      "suggestion": "Incluir a revisão do desenho a partir do qual a quantidade foi orçada"
+    }
   }
 }

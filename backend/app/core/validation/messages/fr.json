@@ -1327,5 +1327,19 @@
     "discount_basis": "Indiquez soit un pourcentage de remise, soit un prix net fixe (un prix net fixe nécessite un article)",
     "attachment_not_found": "Pièce jointe introuvable",
     "price_missing": "Aucun prix en vigueur pour la ligne « {line} » : saisissez un prix unitaire ou importez la liste de prix du fournisseur"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Poste {ordinal} : {count} mesure(s) de métré donnent la quantité sans indice de plan enregistré",
+      "suggestion": "Renseigner l'indice du plan dans les fichiers du projet, puis refaire ou déplacer la mesure pour enregistrer la feuille et l'indice"
+    },
+    "superseded_revision": {
+      "fail": "Poste {ordinal} : la quantité a été relevée sur le plan {drawing} indice {revision}, mais l'indice {current} est désormais en vigueur",
+      "suggestion": "Comparer les deux indices et corriger la quantité, ou émettre un ordre de changement pour l'écart"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Poste {ordinal} : le plan {drawing} est saisi sans indice",
+      "suggestion": "Ajouter l'indice du plan à partir duquel la quantité a été chiffrée"
+    }
   }
 }
