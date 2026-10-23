@@ -11,8 +11,7 @@ on:
       - 'v*'
 
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 env:
   REGISTRY: ghcr.io
@@ -25,11 +24,14 @@ jobs:
   # to building the image — releases shouldn't be blocked by flaky
   # snapshot tests or lint debt that's tracked elsewhere.
   docker:
+    permissions:
+      contents: read
+      packages: write
     name: Docker Build & Push
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Repo hygiene - no internal-only files
         run: python3 scripts/check_repo_hygiene.py
@@ -50,17 +52,17 @@ jobs:
         run: echo "name=${REGISTRY}/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           file: deploy/docker/Dockerfile.unified
@@ -79,6 +81,8 @@ jobs:
 
   # ── Create GitHub Release ──────────────────────────────────────────
   release:
+    permissions:
+      contents: write
     name: GitHub Release
     needs: [docker]
     # Publish the GitHub Release even if the Docker push fails — a flaky
@@ -87,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -126,7 +130,7 @@ jobs:
           echo "Extracted $(printf '%s\n' "$CONTENT" | grep -c . || true) non-empty lines of notes for $VERSION."
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: ${{ github.ref_name }}
           name: "OpenConstructionERP ${{ github.ref_name }}"

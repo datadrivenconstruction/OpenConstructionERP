@@ -23,10 +23,12 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   generate:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     # One observation, 2.6 minutes on v14.5.0, so this is a backstop rather than
     # a measured ceiling. It installs the backend with its dev extra and runs
@@ -35,19 +37,19 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # An inventory of the default branch is not an inventory of the
           # release. Dependencies move between a tag and main.
           ref: ${{ inputs.tag }}
 
       - name: Setup Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
 
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
 
@@ -450,7 +452,7 @@ jobs:
           wc -l THIRD_PARTY_LICENSES.md
 
       - name: Upload artefacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: licenses-and-sbom
           path: |

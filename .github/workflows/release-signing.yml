@@ -59,8 +59,7 @@ concurrency:
   group: release-signing-${{ inputs.tag || github.event.workflow_run.head_branch || github.event.release.tag_name || github.ref }}
   cancel-in-progress: false
 permissions:
-  contents: write
-  id-token: write
+  contents: read
 
 jobs:
   resolve:
@@ -244,6 +243,9 @@ jobs:
       tag: ${{ needs.resolve.outputs.tag }}
 
   sign:
+    permissions:
+      contents: write
+      id-token: write
     name: Sign release artefacts
     needs: [resolve, sbom, inventory]
     # Signing proceeds even when the inventory job fails. A manifest over the
@@ -279,7 +281,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
         with:
           cosign-release: "v2.4.1"
 

@@ -45,7 +45,7 @@ on:
         default: ""
 
 permissions:
-  contents: write
+  contents: read
 
 # The tag this run is releasing. A tag push carries it in github.ref_name; a
 # repair run is dispatched from a branch and names the tag in an input, so the
@@ -116,7 +116,7 @@ jobs:
         include: ${{ fromJSON(inputs.build_only_windows && '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","ext":".exe"}]' || '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","ext":".exe"},{"os":"macos-latest","target":"aarch64-apple-darwin","ext":""},{"os":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu","ext":""}]') }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # The source comes from the tag, the pipeline from wherever this run
           # was started. On a tag push the two are the same commit and this
@@ -124,12 +124,12 @@ jobs:
           ref: ${{ env.RELEASE_REF }}
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: "npm"
@@ -1043,7 +1043,7 @@ jobs:
           fi
 
       - name: Upload sidecar artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ inputs.build_only_windows && format('sidecar-{0}-{1}-{2}', matrix.target, github.sha, github.run_attempt) || format('sidecar-{0}', matrix.target) }}
           path: desktop/src-tauri/binaries/
@@ -1059,7 +1059,7 @@ jobs:
 
       - name: Upload the tested diagnostic frontend
         if: inputs.build_only_windows
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: frontend-windows-${{ github.sha }}-${{ github.run_attempt }}
           path: desktop/frontend-artifact/
@@ -1067,6 +1067,8 @@ jobs:
           retention-days: 14
 
   build-tauri:
+    permissions:
+      contents: write
     name: Build Desktop (${{ matrix.os }})
     needs: build-sidecar
     # Normal bundling publishes and requires a version tag. Diagnostic mode
@@ -1108,7 +1110,7 @@ jobs:
         include: ${{ fromJSON(inputs.build_only_windows && '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","bundles":"--bundles nsis"}]' || '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","bundles":"--bundles nsis"},{"os":"macos-latest","target":"aarch64-apple-darwin","bundles":""},{"os":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu","bundles":"--bundles deb"}]') }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ env.RELEASE_REF }}
 
@@ -1212,7 +1214,7 @@ jobs:
           fi
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: "npm"
@@ -1237,20 +1239,20 @@ jobs:
 
       - name: Set up Python for diagnostic frontend verification
         if: inputs.build_only_windows
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
 
       - name: Download diagnostic sidecar before frontend verification
         if: inputs.build_only_windows
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: sidecar-${{ matrix.target }}-${{ github.sha }}-${{ github.run_attempt }}
           path: desktop/src-tauri/binaries/
 
       - name: Download the tested diagnostic frontend
         if: inputs.build_only_windows
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: frontend-windows-${{ github.sha }}-${{ github.run_attempt }}
           path: desktop/frontend-artifact/
@@ -1294,7 +1296,7 @@ jobs:
           echo "OK: the splash screen ships and still defines every function the launcher calls."
 
       - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
 
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
@@ -1304,7 +1306,7 @@ jobs:
 
       - name: Download sidecar
         if: ${{ !inputs.build_only_windows }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: sidecar-${{ matrix.target }}
           path: desktop/src-tauri/binaries/
@@ -1508,7 +1510,7 @@ jobs:
 
       - name: Build Tauri app
         if: ${{ !inputs.build_only_windows }}
-        uses: tauri-apps/tauri-action@v1
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Read by the signing plugin only when TAURI_SIGN_ARGS turned signing on.
@@ -1553,7 +1555,7 @@ jobs:
 
       - name: Upload Windows diagnostic installer
         if: inputs.build_only_windows
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-diagnostic-${{ github.sha }}-${{ github.run_attempt }}
           path: desktop/src-tauri/target/release/bundle/nsis/
@@ -1583,7 +1585,7 @@ jobs:
       - name: Bundle the AppImage
         if: matrix.os == 'ubuntu-22.04'
         continue-on-error: true
-        uses: tauri-apps/tauri-action@v1
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -1641,7 +1643,7 @@ jobs:
       # read, which under a gate is a red release caused by nothing.
       - name: Set up Python for the bundled sidecar census (macOS)
         if: runner.os == 'macOS'
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: "3.12"
 
@@ -1852,6 +1854,8 @@ jobs:
   # eventual completion starts it a second time so the manifest ends up
   # covering the rpm too.
   build-linux-rpm:
+    permissions:
+      contents: write
     name: Build Linux RPM
     needs: build-sidecar
     # Same condition as build-tauri, and for the same reason: this job also
@@ -1864,12 +1868,12 @@ jobs:
     timeout-minutes: 350
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ env.RELEASE_REF }}
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: "npm"
@@ -1882,7 +1886,7 @@ jobs:
           npm run build
 
       - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
 
       - name: Install Linux dependencies
         run: |
@@ -1890,7 +1894,7 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev
 
       - name: Download sidecar
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: sidecar-x86_64-unknown-linux-gnu
           path: desktop/src-tauri/binaries/
@@ -1920,7 +1924,7 @@ jobs:
           exit 1
 
       - name: Build the rpm
-        uses: tauri-apps/tauri-action@v1
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

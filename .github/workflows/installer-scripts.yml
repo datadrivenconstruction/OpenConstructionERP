@@ -67,7 +67,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       # Both shells, because they are different interpreters and the script has
       # to survive whichever one a reader has. Windows PowerShell 5.1 is the
@@ -112,7 +112,7 @@ jobs:
         os: [ubuntu-24.04, macos-15]
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: The script still parses
         run: bash -n scripts/install.sh

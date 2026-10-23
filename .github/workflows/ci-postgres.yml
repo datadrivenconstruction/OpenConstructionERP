@@ -67,6 +67,9 @@ concurrency:
   group: ci-postgres-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 jobs:
   backend-postgres:
     runs-on: ubuntu-latest
@@ -84,8 +87,8 @@ jobs:
     env:
       OE_TEST_DB: pg
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
           cache: pip
@@ -1096,8 +1099,8 @@ jobs:
     env:
       OE_TEST_DB: pg
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
       - name: Create empty frontend dist (hatchling force-include)
@@ -1577,8 +1580,8 @@ jobs:
         tests/pwa/manifest.test.ts
         tests/pwa/service-worker.test.ts
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -1877,8 +1880,8 @@ jobs:
     # would then be the second-most-obvious thing in the log. Skipping here
     # carries information rather than destroying it.
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
       - name: Create empty frontend dist (hatchling force-include)
@@ -1942,8 +1945,8 @@ jobs:
       OE_PACK_MATRIX: '1'
       OE_PACK_SHARD: ${{ matrix.shard }}/6
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
           cache: pip
@@ -1984,8 +1987,8 @@ jobs:
       OE_COST_BASE_MATRIX: '1'
       OE_COST_BASE_SHARD: ${{ matrix.shard }}/3
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
           cache: pip
@@ -2000,7 +2003,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev,server]"
       - name: Restore the downloaded cost bases
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.openestimator/cache
           key: cwicr-parquet-${{ matrix.shard }}-${{ hashFiles('backend/app/modules/costs/base_registry.py') }}
@@ -2021,8 +2024,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
           cache: pip
@@ -2068,8 +2071,8 @@ jobs:
       # per checkout) is unbounded: the demo seed's event handlers alone ran the cluster out of its 100 slots.
       OE_TEST_NULLPOOL: '0'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
           cache: pip
@@ -2093,7 +2096,7 @@ jobs:
           --timeout=2700 --timeout-method=thread
       - name: Upload the route report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: api-smoke-report
           path: ${{ runner.temp }}/api-smoke/
@@ -2110,8 +2113,8 @@ jobs:
       OE_TEST_DB: pg
       OE_API_SMOKE: '1'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         with:
           python-version: '3.12'
           cache: pip
@@ -2135,7 +2138,7 @@ jobs:
           -p no:cacheprovider --timeout=2700 --timeout-method=thread
       - name: Upload the report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: elf-qa-api-report
           path: ${{ runner.temp }}/api-smoke/
