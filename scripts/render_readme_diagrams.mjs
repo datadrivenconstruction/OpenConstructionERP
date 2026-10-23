@@ -38,6 +38,7 @@ for (let i = 0; i < lines.length; i++) {
   if (h) {
     heading = h[1]
       .replace(/<[^>]*>/g, '')
+      .replace(/[<>]/g, '')
       .replace(/[^A-Za-z0-9 ]+/g, ' ')
       .trim()
       .toLowerCase()

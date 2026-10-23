@@ -19,7 +19,7 @@ const order = { fail: 0, soft: 1, unresolved: 2, ok: 3 };
 rows.sort((a, b) => order[a.status] - order[b.status] || a.route.localeCompare(b.route));
 
 const count = (s) => rows.filter((r) => r.status === s).length;
-const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\s+/g, ' ').slice(0, 220);
+const cell = (s) => String(s).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\s+/g, ' ').slice(0, 220);
 
 const evidence = (r) => {
   const parts = [

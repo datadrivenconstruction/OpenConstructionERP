@@ -3481,7 +3481,7 @@ export function ClashDetectionPage() {
                       )}
                       {fPair && (
                         <FilterChip
-                          label={fPair.replace('|', ' ↔ ')}
+                          label={fPair.replaceAll('|', ' ↔ ')}
                           onClear={() => setFPair('')}
                         />
                       )}
@@ -5214,7 +5214,7 @@ function FacetRail({
         })}
         rows={facets.disc.map(([k, c]) => ({
           key: k,
-          label: k.replace('|', ' ↔ '),
+          label: k.replaceAll('|', ' ↔ '),
           count: c,
           on: fDiscPair.has(k),
           onToggle: () => onToggleDiscPair(k),
@@ -5226,7 +5226,7 @@ function FacetRail({
         })}
         rows={facets.level.map(([k, c]) => ({
           key: k,
-          label: k.replace('|', ' ↔ '),
+          label: k.replaceAll('|', ' ↔ '),
           count: c,
           on: fLevelPair.has(k),
           onToggle: () => onToggleLevelPair(k),

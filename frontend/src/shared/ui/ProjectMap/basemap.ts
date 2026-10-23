@@ -174,6 +174,7 @@ export const TILE_ATTRIBUTION_HTML =
  * system cannot drift from the value.
  */
 export const TILE_ATTRIBUTION_TEXT = TILE_ATTRIBUTION_HTML.replace(/<[^>]*>/g, '')
+  .replace(/[<>]/g, '')
   .replace(/&copy;/g, '©')
   .replace(/\s+/g, ' ')
   .trim();
