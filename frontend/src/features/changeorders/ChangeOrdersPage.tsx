@@ -80,6 +80,7 @@ import { CostLinePicker } from '@/features/costmodel/CostLinePicker';
 import { AccountChooser, overrideReason } from '@/features/costmodel/AccountChooser';
 import { OverrideReasonDialog } from '@/features/costmodel/OverrideReasonDialog';
 import { problemOf } from '@/features/costmodel/structureApi';
+import { VideoHint } from '@/features/videos/VideoHint';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -2709,6 +2710,7 @@ export function ChangeOrdersPage() {
               <Sparkles size={16} className="mr-1.5" />
               {t('changeorders.ai_draft', { defaultValue: 'AI Draft' })}
             </Button>
+            <VideoHint topic="change-order" className="self-center" />
             <Button variant="primary" onClick={() => setShowCreate(true)} disabled={!projectId}>
               <Plus size={16} className="mr-1.5" />
               {t('changeorders.new', { defaultValue: 'New Change Order' })}
