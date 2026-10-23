@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-pakistan-pk"
+version = "0.1.0"
+description = "Country pack for Pakistan: federal GST and provincial sales tax on services, income tax withheld from contractor payments, retention and mobilization advance under the PEC standard bidding documents, PPRA procurement, local units, public holidays, PKR."
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
+]
+keywords = [
+    "openconstructionerp",
+    "ocerp",
+    "country-pack",
+    "pakistan",
+    "pec",
+    "ppra",
+    "gst",
+    "fbr",
+    "marla",
+    "pkr",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: Urdu",
+    "Natural Language :: English",
+]
+dependencies = [
+    "openconstructionerp>=18.8.1",
+]
+
+[project.urls]
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.partner_packs"]
+pakistan-pk = "openconstructionerp_pakistan_pk:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+openconstructionerp_pakistan_pk = [
+    "onboarding.yaml",
+    "rule_packs/*.json",
+    "locales/*.json",
+]

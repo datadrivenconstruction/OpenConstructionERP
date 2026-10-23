@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "locale": "ur",
+    "name_native": "اردو",
+    "name_english": "Urdu",
+    "direction": "rtl",
+    "pack": "pakistan-pk",
+    "version": "0.1.0",
+    "note": "Partial override. The core 'ur' bundle supplies the rest; missing keys fall back to English."
+  },
+
+  "common.project": "پروجیکٹ",
+  "common.boq": "مقدار کا بل (BOQ)",
+  "common.save": "محفوظ کریں",
+  "common.cancel": "منسوخ کریں",
+  "common.delete": "حذف کریں",
+  "common.total": "کل",
+  "common.validation": "تصدیق",
+  "common.export": "ایکسپورٹ",
+  "common.search": "تلاش کریں",
+  "common.error": "خرابی"
+}

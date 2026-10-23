@@ -1,0 +1,18 @@
+{
+  "rule_pack_id": "pec_ppra",
+  "name": "PEC standard bidding documents and PPRA procurement rules",
+  "name_ur": "پی ای سی کے معیاری بولی دستاویزات اور پی پی آر اے کے خریداری قواعد",
+  "standard": "Public Procurement Rules 2004 (PPRA); Pakistan Engineering Council Standard Bidding Documents for Procurement of Works",
+  "jurisdiction": "PK",
+  "applies_to": ["tender", "estimate", "validation"],
+  "review_status": "unconfirmed. Reference only. Pending review by a Pakistani procurement specialist.",
+  "scope_note": "Applies to works let by public bodies. A contractor working only for private owners is outside it. The figures are the defaults of the standard form, which a procuring entity may change in the Appendix to Bid, not limits the Rules set.",
+  "description": "Interim payment certificates are paid within 28 days. Retention is 10 percent of each certificate up to 5 percent of the Contract Price. The mobilization advance is up to 15 percent against a guarantee. The performance security is 10 percent. Delay damages are capped at 10 percent. Prices are adjusted monthly by the Clause 70 formula where Appendix-C is filled in.",
+  "sources": [
+    "https://www.pkha.gov.pk/downloads/Other%20Doc/Standard%20Bidding%20Documents%20for%20Procurement%20of%20Works%20(Large%20Procurements).pdf",
+    "https://www.ppra.org.pk"
+  ],
+  "enables_rule_ids": [],
+  "planned_not_built_note": "The figures are carried in the contract defaults and the public works limits, every one flagged for expert review; no engine rule enforces them. The Public Procurement Rules 2004 were not read.",
+  "regulator": "PPRA; PEC"
+}

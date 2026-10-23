@@ -1,0 +1,87 @@
+{
+  "rule_pack_id": "pakistan_tax",
+  "name": "Pakistani taxes on construction (federal GST, provincial services tax, income tax withheld)",
+  "name_ur": "تعمیرات پر پاکستانی ٹیکس (وفاقی جی ایس ٹی، صوبائی سروسز ٹیکس، کٹوتی شدہ انکم ٹیکس)",
+  "standard": "Sales Tax Act, 1990; provincial sales tax on services laws; Income Tax Ordinance, 2001, section 153",
+  "jurisdiction": "PK",
+  "applies_to": ["estimate", "invoice", "validation"],
+  "review_status": "unconfirmed. Pending review by a Pakistani tax adviser. Rates marked provisional come from secondary sources and are not enforced.",
+  "scope_note": "Goods are taxed by the federation and services by the province, so a construction bill has no single national rate. The sales tax is a line of its own; the person confirming the bill picks the rate for the province and the payer.",
+  "description": "Federal sales tax on goods is 18 percent. Construction services are taxed by the province where they are rendered. Income tax is withheld from a payment under a works contract at 7.5 percent (company on the Active Taxpayer List), 15 percent (company off the list), 8 percent (other payee on the list) or 16 percent (other payee off the list), under section 153(1)(c) of the Income Tax Ordinance.",
+  "rates": [
+    {
+      "code": "GST",
+      "jurisdiction": "PK",
+      "rate_percent": 18,
+      "applies_to": "goods (federal)",
+      "status": "seeded in the tax table",
+      "source": "https://www.fbr.gov.pk"
+    },
+    {
+      "code": "PRA_ST",
+      "jurisdiction": "PK-PB",
+      "rate_percent": 16,
+      "applies_to": "construction services in Punjab",
+      "status": "provisional: from a secondary source, seeded in the tax table, not enforced",
+      "source": "https://pra.punjab.gov.pk"
+    },
+    {
+      "code": "PRA_ST_GOVT_CIVIL_WORKS",
+      "jurisdiction": "PK-PB",
+      "rate_percent": 5,
+      "applies_to": "government civil works in Punjab",
+      "status": "provisional: from a secondary source, not seeded",
+      "source": "https://pra.punjab.gov.pk"
+    },
+    {
+      "code": "SRB_ST",
+      "jurisdiction": "PK-SD",
+      "rate_percent": 15,
+      "applies_to": "construction services in Sindh",
+      "status": "provisional: from a secondary source, seeded in the tax table, not enforced",
+      "source": "https://www.srb.gos.pk"
+    },
+    {
+      "code": "SRB_ST_REDUCED",
+      "jurisdiction": "PK-SD",
+      "rate_percent": 5,
+      "applies_to": "reduced construction rate in Sindh",
+      "status": "provisional: from a secondary source, not seeded",
+      "source": "https://www.srb.gos.pk"
+    },
+    {
+      "code": "KPRA_ST",
+      "jurisdiction": "PK-KP",
+      "rate_percent": 15,
+      "applies_to": "construction services in Khyber Pakhtunkhwa",
+      "status": "provisional: from a secondary source, seeded in the tax table, not enforced",
+      "source": "https://kpra.kp.gov.pk"
+    },
+    {
+      "code": "KPRA_ST_GOVT_WORKS",
+      "jurisdiction": "PK-KP",
+      "rate_percent": 4,
+      "applies_to": "government funded works in Khyber Pakhtunkhwa",
+      "status": "read on the authority's own notification; not seeded",
+      "source": "https://kpra.kp.gov.pk"
+    }
+  ],
+  "not_shipped": [
+    "Balochistan: the Balochistan Revenue Authority rate was not read.",
+    "Sales tax withheld by the paying body (federal special procedure and provincial withholding rules).",
+    "Income tax on services under section 153(1)(b), minimum tax, exemption certificates under section 159.",
+    "Stamp duty on a contract (provincial)."
+  ],
+  "sources": [
+    "https://download1.fbr.gov.pk/Docs/202681113864992WithholdingTaxRatesCard2027.pdf",
+    "https://www.fbr.gov.pk",
+    "https://pra.punjab.gov.pk",
+    "https://www.srb.gos.pk",
+    "https://kpra.kp.gov.pk"
+  ],
+  "enables_rule_ids": [
+    "pakistan.sales_tax_line_present",
+    "pakistan.sales_tax_rate_known"
+  ],
+  "regulator": "FBR; PRA; SRB; KPRA"
+}
