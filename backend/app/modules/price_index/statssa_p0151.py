@@ -32,6 +32,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.csv_dialect import sniff_delimiter
 from app.modules.price_index.models import CostIndexPoint, CostIndexSeries
 
 SERIES_PREFIX = "ZA P0151.1 WG"
@@ -144,8 +145,7 @@ def _rows(content: bytes, filename: str) -> list[list[Any]]:
         return [list(r) for r in sheet.iter_rows(values_only=True)]
     if name.endswith((".csv", ".txt")):
         text = content.decode("utf-8-sig", errors="replace")
-        dialect = csv.Sniffer().sniff(text[:4096], delimiters=",;\t") if text.strip() else csv.excel
-        return [list(r) for r in csv.reader(io.StringIO(text), dialect)]
+        return [list(r) for r in csv.reader(io.StringIO(text), delimiter=sniff_delimiter(text))]
     raise P0151ImportError("unsupported_format", "upload the release as .xlsx or .csv")
 
 

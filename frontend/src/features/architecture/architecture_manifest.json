@@ -64659,6 +64659,11 @@
             {
               "name": "current_period",
               "type": "str | None"
+            },
+            {
+              "name": "non_adjustable_portion",
+              "type": "Decimal | None",
+              "default": "None"
             }
           ]
         },
@@ -170803,7 +170808,8 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "statssa_p0151.py"
       ],
       "manifest": {
         "name": "oe_price_index",
@@ -171024,6 +171030,12 @@
           "handler": "create_series",
           "response_model": "CostIndexSeriesResponse",
           "request_schema": "CostIndexSeriesCreate"
+        },
+        {
+          "method": "POST",
+          "path": "/import/statssa-p0151/",
+          "handler": "import_statssa_p0151",
+          "request_schema": "UploadFile"
         },
         {
           "method": "GET",
@@ -278990,9 +279002,9 @@
     "total_models": 788,
     "total_columns": 9172,
     "total_relationships": 240,
-    "total_routes": 4627,
+    "total_routes": 4628,
     "total_schemas": 4120,
-    "total_python_files": 2810,
+    "total_python_files": 2811,
     "frontend_features": 209,
     "frontend_ts_files": 3606,
     "frontend_backend_mapped": 187

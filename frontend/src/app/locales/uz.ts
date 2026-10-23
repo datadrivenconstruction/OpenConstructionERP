@@ -36348,7 +36348,7 @@ const resource = {
     "price_index.p0151.import": "Stats SA P0151.1 (Janubiy Afrika CPAP) ni import qilish",
     "price_index.p0151.hint": "Stats SA dan olingan reliz faylini yuklang. 1-jadval har bir ish guruhi uchun alohida qatorga aylanadi, Stats SA manbasi bilan.",
     "price_index.p0151.done": "Ish guruhi qatorlari: {{series}}, yangi qiymatlar: {{created}}, tuzatilgan qiymatlar: {{updated}}",
-    "price_index.p0151.skipped": "Raqamsiz {{count}} ta katak o'tkazib yuborildi",
+    "price_index.p0151.skipped": "Raqamsiz {{count}} ta katak oʻtkazib yuborildi",
     "procurement.delivery_note": "Yetkazib berish xati №",
     "procurement.delivery_note_placeholder": "Ixtiyoriy havola",
     "procurement.gr_confirm": "Tovar qabul qilishni tasdiqlash",
