@@ -930,6 +930,7 @@ class UserService:
         full_name: str,
         auto_create: bool = True,
         role_from_groups: str | None = None,
+        default_role: str = "viewer",
     ) -> TokenResponse:
         """Authenticate via OIDC: find or create user by oidc_sub, issue tokens.
 
@@ -962,23 +963,26 @@ class UserService:
                     email=email.lower().strip(),
                     hashed_password=hash_password(secrets.token_urlsafe(32)),
                     full_name=full_name,
-                    role=role_from_groups or "editor",
+                    role=role_from_groups or default_role,
                     is_active=True,
                     oidc_sub=oidc_sub,
                     oidc_issuer=oidc_issuer,
                 )
                 self.session.add(user)
                 await self.session.flush()
-        else:
-            # Existing OIDC user - sync role from groups on every login
-            if role_from_groups and user.role != role_from_groups:
-                user.role = role_from_groups
-                await self.session.flush()
             else:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No matching account found and auto-creation is disabled.",
+                    detail={
+                        "code": "account_not_found",
+                        "message_key": "auth.oidc_errors.account_not_found",
+                        "message": "No matching account found and auto-creation is disabled.",
+                    },
                 )
+        elif role_from_groups and user.role != role_from_groups:
+            # Existing OIDC user: sync role from groups on every login
+            user.role = role_from_groups
+            await self.session.flush()
 
         if not user.is_active:
             raise HTTPException(

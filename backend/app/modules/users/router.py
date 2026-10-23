@@ -441,18 +441,23 @@ async def oidc_config() -> dict:
     """Return OIDC configuration for the frontend login page.
 
     When OIDC is disabled, returns ``{"enabled": false}`` so the frontend
-    can hide the SSO button.
+    can hide the SSO button. The authorization endpoint is resolved from
+    the provider's discovery document, so any compliant provider works.
     """
     from app.config import get_settings
+    from app.modules.users.oidc import get_discovery
 
     s = get_settings()
     if not s.oidc_enabled or not s.oidc_issuer_url:
         return {"enabled": False}
+    disc = await get_discovery(s.oidc_issuer_url)
     return {
         "enabled": True,
         "issuer_url": s.oidc_issuer_url,
+        "authorization_endpoint": disc["authorization_endpoint"],
         "client_id": s.oidc_client_id,
         "scopes": s.oidc_scopes,
+        "pkce": True,
     }
 
 
@@ -463,16 +468,16 @@ async def oidc_callback(
 ) -> TokenResponse:
     """Exchange an OIDC authorization code for local JWT tokens.
 
-    The frontend redirects the user to the OIDC provider's authorization
-    endpoint. After consent, the provider redirects back with an authorization
-    code. The frontend POSTs that code here, and this endpoint:
-
-    1. Exchanges it for an ID token at the provider's token endpoint.
-    2. Validates the ID token signature and claims.
-    3. Finds or creates a local User matched by ``oidc_sub``.
-    4. Issues local JWT access + refresh tokens.
+    The frontend sends the user to the provider with ``state``, ``nonce`` and
+    a PKCE challenge, checks ``state`` on return, and POSTs ``code``,
+    ``code_verifier`` and ``nonce`` here. This endpoint exchanges the code,
+    verifies the ID token (JWKS signature, iss, aud, exp, nonce), reads roles
+    from the configured claims and issues local JWT tokens.
     """
+    import httpx
+
     from app.config import get_settings
+    from app.modules.users import oidc
 
     s = get_settings()
     if not s.oidc_enabled:
@@ -481,64 +486,61 @@ async def oidc_callback(
     body = await request.json()
     code = body.get("code", "")
     redirect_uri = body.get("redirect_uri", "")
+    code_verifier = body.get("code_verifier", "")
+    nonce = body.get("nonce", "")
     if not code:
         raise HTTPException(status_code=400, detail="Authorization code is required.")
+    if not nonce:
+        raise HTTPException(status_code=400, detail="Nonce is required.")
 
-    import httpx
+    disc = await oidc.get_discovery(s.oidc_issuer_url)
+    form = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": redirect_uri,
+        "client_id": s.oidc_client_id,
+    }
+    if s.oidc_client_secret:
+        form["client_secret"] = s.oidc_client_secret
+    if code_verifier:
+        form["code_verifier"] = code_verifier
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            token_resp = await client.post(disc["token_endpoint"], data=form)
+            if token_resp.status_code != 200:
+                raise oidc.oidc_error(401, "token_exchange_failed", "OIDC token exchange failed.")
+            tokens = token_resp.json()
+            if not tokens.get("id_token"):
+                raise oidc.oidc_error(401, "invalid_id_token", "OIDC provider returned no ID token.")
+            claims = await oidc.verify_id_token(
+                tokens["id_token"], discovery=disc, client_id=s.oidc_client_id, nonce=nonce
+            )
+            userinfo: dict = {}
+            if disc.get("userinfo_endpoint") and tokens.get("access_token"):
+                ui_resp = await client.get(
+                    disc["userinfo_endpoint"],
+                    headers={"Authorization": f"Bearer {tokens['access_token']}"},
+                )
+                if ui_resp.status_code == 200:
+                    userinfo = ui_resp.json()
+                    if userinfo.get("sub") != claims.get("sub"):
+                        userinfo = {}  # OIDC Core 5.3.2: mismatched sub must not be used
+    except httpx.HTTPError as exc:
+        raise oidc.oidc_error(502, "provider_unreachable", "Could not reach OIDC provider.") from exc
 
-    # Discover provider endpoints
-    async with httpx.AsyncClient(timeout=10) as client:
-        well_known = f"{s.oidc_issuer_url.rstrip('/')}/.well-known/openid-configuration"
-        disc_resp = await client.get(well_known)
-        if disc_resp.status_code != 200:
-            raise HTTPException(status_code=502, detail="Could not reach OIDC provider.")
-        disc = disc_resp.json()
-
-        # Exchange code for tokens
-        token_resp = await client.post(
-            disc["token_endpoint"],
-            data={
-                "grant_type": "authorization_code",
-                "code": code,
-                "redirect_uri": redirect_uri,
-                "client_id": s.oidc_client_id,
-                "client_secret": s.oidc_client_secret,
-            },
-        )
-        if token_resp.status_code != 200:
-            raise HTTPException(status_code=401, detail="OIDC token exchange failed.")
-        tokens = token_resp.json()
-
-        # Fetch userinfo
-        userinfo_resp = await client.get(
-            disc["userinfo_endpoint"],
-            headers={"Authorization": f"Bearer {tokens['access_token']}"},
-        )
-        if userinfo_resp.status_code != 200:
-            raise HTTPException(status_code=401, detail="Could not fetch user info from OIDC provider.")
-        userinfo = userinfo_resp.json()
-
-    sub = userinfo.get("sub", "")
-    email = userinfo.get("email", "")
-    name = userinfo.get("name", "") or userinfo.get("preferred_username", "")
-    groups: list[str] = userinfo.get("groups", [])
+    sub = claims.get("sub", "")
+    # Entra may omit "email" for accounts without a mailbox; preferred_username is the UPN.
+    email = (
+        claims.get("email")
+        or userinfo.get("email")
+        or (claims.get("preferred_username") if "@" in str(claims.get("preferred_username", "")) else "")
+    )
+    name = claims.get("name") or userinfo.get("name") or claims.get("preferred_username", "")
     if not sub or not email:
-        raise HTTPException(status_code=400, detail="OIDC provider did not return sub or email.")
+        raise oidc.oidc_error(400, "missing_claims", "OIDC provider did not return sub or email.")
 
-    # Resolve role from OIDC groups if a mapping is configured.
-    role_from_groups: str | None = None
-    if s.oidc_group_role_map:
-        import json
-
-        try:
-            group_map: dict[str, str] = json.loads(s.oidc_group_role_map)
-        except (json.JSONDecodeError, TypeError):
-            group_map = {}
-        for g in groups:
-            mapped = group_map.get(g)
-            if mapped:
-                role_from_groups = mapped
-                break
+    groups = oidc.extract_groups(s.oidc_role_claims, claims, userinfo)
+    role_from_groups = oidc.resolve_role(groups, s.oidc_group_role_map)
 
     return await service.oidc_login(
         oidc_sub=sub,
@@ -547,6 +549,7 @@ async def oidc_callback(
         full_name=name,
         auto_create=s.oidc_auto_create_users,
         role_from_groups=role_from_groups,
+        default_role=s.oidc_default_role,
     )
 
 

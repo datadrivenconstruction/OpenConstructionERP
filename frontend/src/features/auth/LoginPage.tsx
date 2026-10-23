@@ -31,6 +31,7 @@ import { safeNextPath } from './nextPath';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useThemeStore } from '@/stores/useThemeStore';
+import { beginOidcLogin } from './oidcPkce';
 
 /* Segmented theme switch (Light / Dark / System) for the login page. */
 function ThemeSwitch() {
@@ -241,6 +242,7 @@ export function LoginPage() {
   const [oidcConfig, setOidcConfig] = useState<{
     enabled: boolean;
     issuer_url: string;
+    authorization_endpoint?: string;
     client_id: string;
     scopes: string;
   } | null>(null);
@@ -910,14 +912,21 @@ export function LoginPage() {
                   size="lg"
                   className="w-full"
                   icon={<ShieldCheck size={16} />}
-                  onClick={() => {
+                  onClick={async () => {
+                    const { state, nonce, codeChallenge } = await beginOidcLogin();
                     const params = new URLSearchParams({
                       client_id: oidcConfig.client_id,
                       response_type: 'code',
                       scope: oidcConfig.scopes,
                       redirect_uri: `${window.location.origin}/auth/oidc/callback`,
+                      state,
+                      nonce,
+                      code_challenge: codeChallenge,
+                      code_challenge_method: 'S256',
                     });
-                    window.location.href = `${oidcConfig.issuer_url}/protocol/openid-connect/auth?${params}`;
+                    const authorize = oidcConfig.authorization_endpoint
+                      ?? `${oidcConfig.issuer_url.replace(/\/$/, '')}/protocol/openid-connect/auth`;
+                    window.location.href = `${authorize}?${params}`;
                   }}
                 >
                   {t('auth.sso_login', { defaultValue: 'Sign in with SSO' })}
