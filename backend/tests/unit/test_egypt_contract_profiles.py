@@ -128,16 +128,14 @@ def test_interim_payment_and_retention_add_up_to_the_work_executed() -> None:
 
 
 def test_no_other_country_has_public_works_limits_by_accident() -> None:
-    # A country pack may add its own row, so the set is bounded above and the two rows this file
-    # covers are required; either pack branch can land first.
-    assert {"EG", "FR"} <= set(PUBLIC_WORKS_LIMITS) <= {"EG", "FR", "PK"}
+    assert set(PUBLIC_WORKS_LIMITS) == {"EG", "FR", "PK"}
     assert public_works_limits("AE") is None
     assert public_works_limits(None) is None
-    assert {
+    assert PUBLIC_WORKS_PRICE_ADJUSTMENT == {
         "EG": "eg_law182_art97",
         "FR": "fr_ccag_travaux_2021_art_10_5",
-    }.items() <= PUBLIC_WORKS_PRICE_ADJUSTMENT.items()
-    assert set(PUBLIC_WORKS_PRICE_ADJUSTMENT) <= {"EG", "FR", "PK"}
+        "PK": "pk_pec_sbd_clause_70",
+    }
 
 
 def test_unconfirmed_figures_are_marked_for_expert_review_and_carry_no_number() -> None:
