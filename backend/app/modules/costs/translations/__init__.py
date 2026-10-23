@@ -97,7 +97,7 @@ def load_translations(locale: str) -> dict[str, str]:
         source value for every key" - never raises.
     """
     loc = (locale or "").strip().lower()
-    if not loc:
+    if loc not in SUPPORTED_LOCALES:
         return {}
 
     path = _LOCALES_DIR / f"{loc}.json"

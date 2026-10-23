@@ -5467,9 +5467,13 @@ def _resolve_safe_text_filename(
     the custom-templates directory or end up as a different extension
     than the content type says.
     """
-    raw = (name or doc_type or "template").strip()
-    # Drop any directory components and any leftover punctuation.
-    safe = "".join(c if c.isalnum() or c in {"-", "_", " "} else "_" for c in raw).strip("_") or doc_type or "template"
+
+    def _clean(value: str) -> str:
+        return "".join(c if c.isalnum() or c in {"-", "_", " "} else "_" for c in value).strip("_")
+
+    # Drop any directory components and any leftover punctuation; the
+    # fallbacks go through the same filter as ``name``.
+    safe = _clean((name or "").strip()) or _clean((doc_type or "").strip()) or "template"
     # Collapse whitespace.
     safe = "_".join(safe.split())[:80]  # 80 chars is plenty for a basename
     ext = _TEXT_EXT_FOR_CONTENT_TYPE.get(content_type, ".txt")

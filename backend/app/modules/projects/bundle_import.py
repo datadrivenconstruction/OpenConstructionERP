@@ -39,6 +39,7 @@ from sqlalchemy import delete as sa_delete
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.storage import resolve_within
 from app.modules.backup.router import deserialize_row
 from app.modules.projects.bundle_export import (
     _BUNDLE_TABLES_BIM,
@@ -198,6 +199,14 @@ def _remap_row(row: dict[str, Any], mapping: dict[str, str]) -> dict[str, Any]:
 # ── Attachment extraction ──────────────────────────────────────────────────
 
 
+def _within(base: Path, *parts: str) -> str | None:
+    """Return ``base/parts`` as a string, or None when it would escape ``base``."""
+    try:
+        return str(resolve_within(base, *parts))
+    except (OSError, ValueError):
+        return None
+
+
 def _target_path_for_attachment(
     arc_path: str,
     project_id: str,
@@ -228,8 +237,7 @@ def _target_path_for_attachment(
         except ImportError:
             return None
         doc_id = id_remap.get(rest[0], rest[0])
-        target_dir = UPLOAD_BASE / project_id
-        return str(target_dir / f"{doc_id}_{rest[-1]}")
+        return _within(UPLOAD_BASE, project_id, f"{doc_id}_{rest[-1]}")
 
     # Photos: attachments/photos/{photo_id}/{filename}
     #         attachments/photos/thumbs/{photo_id}.jpg
@@ -241,10 +249,9 @@ def _target_path_for_attachment(
         if rest[0] == "thumbs":
             stem = Path(rest[-1]).stem
             stem = id_remap.get(stem, stem)
-            target_dir = PHOTO_BASE / project_id / "thumbs"
-            return str(target_dir / f"{stem}{Path(rest[-1]).suffix}")
+            return _within(PHOTO_BASE, project_id, "thumbs", f"{stem}{Path(rest[-1]).suffix}")
         photo_id = id_remap.get(rest[0], rest[0])
-        return str(PHOTO_BASE / project_id / f"{photo_id}_{rest[-1]}")
+        return _within(PHOTO_BASE, project_id, f"{photo_id}_{rest[-1]}")
 
     # Sheets: attachments/sheets/thumbs/{sheet_id}.png
     if kind == "sheets":
@@ -255,7 +262,7 @@ def _target_path_for_attachment(
         if rest[0] == "thumbs":
             stem = Path(rest[-1]).stem
             stem = id_remap.get(stem, stem)
-            return str(SHEET_THUMB_BASE / project_id / f"{stem}{Path(rest[-1]).suffix}")
+            return _within(SHEET_THUMB_BASE, project_id, f"{stem}{Path(rest[-1]).suffix}")
         return None
 
     # BIM: attachments/bim/{model_id}/{filename}
@@ -265,9 +272,7 @@ def _target_path_for_attachment(
         except ImportError:
             return None
         model_id = id_remap.get(rest[0], rest[0])
-        return str(
-            _default_local_base_dir() / "bim" / project_id / model_id / rest[-1],
-        )
+        return _within(_default_local_base_dir(), "bim", project_id, model_id, rest[-1])
 
     # DWG: attachments/dwg/{drawing_id}/{filename}
     if kind == "dwg":
@@ -282,7 +287,7 @@ def _target_path_for_attachment(
             from app.core.storage import resolve_data_dir
         except ImportError:
             return None
-        return str(resolve_data_dir() / "dwg_uploads" / rest[-1])
+        return _within(resolve_data_dir(), "dwg_uploads", rest[-1])
 
     return None
 

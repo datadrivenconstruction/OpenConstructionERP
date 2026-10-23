@@ -1714,6 +1714,31 @@ def find_existing_upload(relative_path: str | Path, primary_root: Path | None = 
     return None
 
 
+def resolve_within(base: Path, *parts: str) -> Path:
+    """Join untrusted ``parts`` under ``base`` and prove the result stays inside it.
+
+    Rejects absolute parts, drive-qualified parts (``C:x`` on Windows), NUL
+    bytes and any ``..`` traversal or symlink that lands outside ``base``.
+
+    Args:
+        base: Trusted directory the result must stay within.
+        *parts: Untrusted path segments, e.g. names taken from an archive.
+
+    Returns:
+        The resolved path, which is ``base`` itself or a descendant of it.
+
+    Raises:
+        ValueError: when any part is unsafe or the result escapes ``base``.
+    """
+    root = base.resolve()
+    for part in parts:
+        if not part or "\x00" in part or ":" in part or Path(part).is_absolute() or part.startswith(("/", "\\")):
+            raise ValueError(f"unsafe path segment: {part!r}")
+    candidate = root.joinpath(*parts).resolve()
+    candidate.relative_to(root)
+    return candidate
+
+
 def safe_data_roots() -> list[Path]:
     """Return the set of directories the platform is allowed to serve files from.
 

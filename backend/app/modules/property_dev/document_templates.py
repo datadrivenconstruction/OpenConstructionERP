@@ -53,6 +53,7 @@ from __future__ import annotations
 import html
 import json
 import logging
+import re
 import uuid
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
@@ -382,6 +383,8 @@ def locale_override_exists(locale: str) -> bool:
 @lru_cache(maxsize=32)
 def _load_locale(locale: str) -> dict[str, Any]:
     """Load the locale JSON; user override > bundled > English fallback."""
+    if locale not in SUPPORTED_LOCALES:
+        locale = "en"
     override = _existing_override_locale_path(locale)
     if override is not None:
         try:
@@ -1232,6 +1235,9 @@ def render_reservation_receipt_pdf(
 # ════════════════════════════════════════════════════════════════════════
 
 
+_CLAUSE_CODE_RE = re.compile(r"[A-Za-z0-9_]{1,32}")
+
+
 @lru_cache(maxsize=64)
 def _load_clauses(regulator: str, locale: str) -> dict[str, Any]:
     """Pull jurisdiction clauses with graceful fall-through.
@@ -1241,6 +1247,11 @@ def _load_clauses(regulator: str, locale: str) -> dict[str, Any]:
     metadata (the migration to fully-uppercase canonical regulator IDs
     is still in progress).
     """
+    # Both values reach a filename; anything but a plain code falls back to NONE/en.
+    if not _CLAUSE_CODE_RE.fullmatch(regulator or ""):
+        regulator = "NONE"
+    if not _CLAUSE_CODE_RE.fullmatch(locale or ""):
+        locale = "en"
     compact = regulator.replace("_", "")
     candidates = [
         f"{regulator}_{locale}",
