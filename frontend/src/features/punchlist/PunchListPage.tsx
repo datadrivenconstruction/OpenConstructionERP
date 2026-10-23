@@ -111,6 +111,7 @@ function punchPinTone(item: PunchItem): FieldMapPin['tone'] {
 }
 import { isDateOnlyPast } from '@/shared/lib/dates';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
+import { VideoHint } from '@/features/videos/VideoHint';
 
 // The pin board pulls in the PDF renderer (pdfjs-dist), which is heavy. Keep it
 // off the punchlist page's initial chunk so users who only use the list and
@@ -1637,6 +1638,7 @@ export function PunchListPage() {
                 });
               }}
             />
+            <VideoHint topic="punch-list" className="self-center" />
             <Button
               variant="primary"
               size="sm"

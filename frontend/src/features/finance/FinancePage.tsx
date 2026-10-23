@@ -107,6 +107,7 @@ import { DEFAULT_FINANCE_TAB, isFinanceTab, type FinanceTab } from './financeTab
 import { UnlinkedTwinBanner } from '@/features/subcontractors/UnlinkedTwinBanner';
 import { fmtList, fmtPercent, fmtFixed, fmtNumberForInput } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
+import { VideoHint } from '@/features/videos/VideoHint';
 
 // English fallbacks for the computed `finance.payment_status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1661,6 +1662,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     <>
     {/* Explanatory text + module link */}
     <div className="flex items-start justify-between gap-3 mb-4">
+      <VideoHint topic="cost-report" className="order-last" />
       <p className="text-sm text-content-secondary">
         {t('finance.budgets_explanation', {
           defaultValue: 'Project budget tracks original vs actual costs by WBS category. Variance is highlighted green when under budget, red when over.',
@@ -2507,6 +2509,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
 
       {/* Sub-tabs: Payable / Receivable + Export */}
       <div className="flex items-center justify-between">
+        <VideoHint topic="payment-application" className="order-last ml-2" />
         <div className="flex items-center gap-2" title={t('finance.payable_receivable_tooltip', { defaultValue: 'Payable = invoices you owe to vendors. Receivable = invoices clients owe to you.' })}>
           <button
             onClick={() => setSubTab('payable')}
