@@ -53984,6 +53984,8 @@ const resource = {
     "videos.used_in_cases": "Usato in questi casi",
     "videos.more_cases": "+{{more}} altri",
     "videos.jump_to": "Da {{time}}: {{chapter}}",
+    "videos.hint.watch": "Guarda come",
+    "videos.hint.tooltip": "Video: {{title}}, da {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Inserimento prezzi",
     "bid_portal.language": "Lingua",

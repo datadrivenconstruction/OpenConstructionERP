@@ -53692,6 +53692,8 @@ const resource = {
     "videos.used_in_cases": "Gebruikt in deze cases",
     "videos.more_cases": "+{{more}} meer",
     "videos.jump_to": "Vanaf {{time}}: {{chapter}}",
+    "videos.hint.watch": "Bekijk hoe",
+    "videos.hint.tooltip": "Video: {{title}}, vanaf {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Prijsinvoer",
     "bid_portal.language": "Taal",

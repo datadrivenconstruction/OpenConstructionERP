@@ -52811,6 +52811,8 @@ const resource = {
     "videos.used_in_cases": "Brugt i disse cases",
     "videos.more_cases": "+{{more}} mere",
     "videos.jump_to": "Fra {{time}}: {{chapter}}",
+    "videos.hint.watch": "Se hvordan",
+    "videos.hint.tooltip": "Video: {{title}}, fra {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Prisindtastning",
     "bid_portal.language": "Sprog",

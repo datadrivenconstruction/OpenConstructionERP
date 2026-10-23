@@ -55039,6 +55039,8 @@ const resource = {
     "videos.used_in_cases": "已用于以下案例",
     "videos.more_cases": "+{{more}}个",
     "videos.jump_to": "从{{time}}:{{chapter}}",
+    "videos.hint.watch": "观看演示",
+    "videos.hint.tooltip": "视频: {{title}}, 从 {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "报价录入",

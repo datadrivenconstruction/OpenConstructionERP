@@ -53743,6 +53743,8 @@ const resource = {
     "videos.used_in_cases": "Ushbu keyslarda ishlatiladi",
     "videos.more_cases": "+yana {{more}} ta",
     "videos.jump_to": "{{time}}dan: {{chapter}}",
+    "videos.hint.watch": "Qanday qilishni ko‘ring",
+    "videos.hint.tooltip": "Video: {{title}}, boshlab {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Narx kiritish",

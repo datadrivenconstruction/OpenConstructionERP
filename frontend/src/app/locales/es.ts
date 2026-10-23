@@ -55688,6 +55688,8 @@ const resource = {
     "videos.used_in_cases": "Usado en estos casos prácticos",
     "videos.more_cases": "+{{more}} más",
     "videos.jump_to": "Desde {{time}}: {{chapter}}",
+    "videos.hint.watch": "Ver cómo",
+    "videos.hint.tooltip": "Vídeo: {{title}}, desde {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Ingreso de precios",
     "bid_portal.language": "Idioma",

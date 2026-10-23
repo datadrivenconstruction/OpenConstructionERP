@@ -54102,6 +54102,8 @@ const resource = {
     "videos.used_in_cases": "これらのケースで使用",
     "videos.more_cases": "+{{more}}件",
     "videos.jump_to": "{{time}}から: {{chapter}}",
+    "videos.hint.watch": "やり方を見る",
+    "videos.hint.tooltip": "動画: {{title}}, 開始 {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "価格入力",

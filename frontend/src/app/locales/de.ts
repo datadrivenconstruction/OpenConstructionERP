@@ -55254,6 +55254,8 @@ const resource = {
     "videos.used_in_cases": "Verwendet in diesen Fallbeispielen",
     "videos.more_cases": "+{{more}} weitere",
     "videos.jump_to": "Ab {{time}}: {{chapter}}",
+    "videos.hint.watch": "So geht’s",
+    "videos.hint.tooltip": "Video: {{title}}, ab {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Preiseingabe",
     "bid_portal.language": "Sprache",

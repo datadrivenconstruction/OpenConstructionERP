@@ -52771,6 +52771,8 @@ const resource = {
     "videos.used_in_cases": "Ginamit sa mga Case na ito",
     "videos.more_cases": "+{{more}} pa",
     "videos.jump_to": "Mula sa {{time}}: {{chapter}}",
+    "videos.hint.watch": "Panoorin kung paano",
+    "videos.hint.tooltip": "Video: {{title}}, mula {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Pag-encode ng Presyo",

@@ -54005,6 +54005,8 @@ const resource = {
     "videos.used_in_cases": "Použito v těchto případech",
     "videos.more_cases": "+{{more}} další",
     "videos.jump_to": "Od {{time}}: {{chapter}}",
+    "videos.hint.watch": "Jak na to",
+    "videos.hint.tooltip": "Video: {{title}}, od {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Zadávání cen",
     "bid_portal.language": "Jazyk",

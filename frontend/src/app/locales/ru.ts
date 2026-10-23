@@ -55742,6 +55742,8 @@ const resource = {
     "videos.used_in_cases": "Используется в этих кейсах",
     "videos.more_cases": "+ещё {{more}}",
     "videos.jump_to": "С {{time}}: {{chapter}}",
+    "videos.hint.watch": "Как это делается",
+    "videos.hint.tooltip": "Видео: {{title}}, с {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Ввод цен",

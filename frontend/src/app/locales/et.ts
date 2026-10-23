@@ -52761,6 +52761,8 @@ const resource = {
     "videos.used_in_cases": "Kasutatud nendes juhtumites",
     "videos.more_cases": "+{{more}} veel",
     "videos.jump_to": "Alates {{time}}: {{chapter}}",
+    "videos.hint.watch": "Vaata, kuidas",
+    "videos.hint.tooltip": "Video: {{title}}, alates {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Hindade sisestamine",
     "bid_portal.language": "Keel",
