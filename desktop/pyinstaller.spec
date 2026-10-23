@@ -315,6 +315,7 @@ _COMMUNITY_PACKS = (
     "japan-jp",
     "korea-kr",
     "mexico-mx",
+    "pakistan-pk",
     "modular-prefab",
     "netherlands-nl",
     "nigeria-ng",

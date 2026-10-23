@@ -145,6 +145,7 @@ COPY packs/italy-it/src/ packs/italy-it/src/
 COPY packs/japan-jp/src/ packs/japan-jp/src/
 COPY packs/korea-kr/src/ packs/korea-kr/src/
 COPY packs/mexico-mx/src/ packs/mexico-mx/src/
+COPY packs/pakistan-pk/src/ packs/pakistan-pk/src/
 COPY packs/modular-prefab/src/ packs/modular-prefab/src/
 COPY packs/netherlands-nl/src/ packs/netherlands-nl/src/
 COPY packs/nigeria-ng/src/ packs/nigeria-ng/src/

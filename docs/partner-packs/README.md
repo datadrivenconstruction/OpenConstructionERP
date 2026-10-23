@@ -476,6 +476,7 @@ teach identifiers that were never rule sets at all.
 | `dpgf` | DPGF (FR) |
 | `bc3` | FIEBDC-3 / BC3 (ES) |
 | `mexico` | Mexican estimating conventions |
+| `pakistan` | Pakistani sales tax line and known rates (federal GST, provincial services tax) (PK) |
 | `sinapi` | SINAPI codes (BR) |
 | `nbr` | ABNT NBR (BR) |
 | `cpwd` | CPWD and IS 1200 (IN) |

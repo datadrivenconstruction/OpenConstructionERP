@@ -2388,6 +2388,7 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "hungary-hu": "residential-budapest",
     "india-cpwd": "govt-building-delhi",
     "mexico-mx": "mixed-use-mexico-city",
+    "pakistan-pk": "bhu-punjab",
     "modular-prefab": "modular-housing",
     "renewables-epc": "solar-bess-epc",
     "retail-grocery-dach": "retail-market-heilbronn",
@@ -2455,6 +2456,7 @@ _COUNTRY_ISO2: dict[str, str] = {
     "Brazil": "BR",
     "India": "IN",
     "Mexico": "MX",
+    "Pakistan": "PK",
     "Netherlands": "NL",
     "Saudi Arabia": "SA",
     "South Africa": "ZA",
@@ -2601,6 +2603,8 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "commercial-denver": "Commercial",
     "commercial-sacramento": "Commercial",
     "hospital-lyon": "Healthcare",
+    "bhu-punjab": "Healthcare",
+    "school-karachi": "Education",
     "tower-abudhabi": "Mixed-use",
     "condo-toronto": "Residential",
     "data-center-melbourne": "Industrial",
@@ -2736,6 +2740,8 @@ _DEMO_COST_LEVEL: dict[str, tuple[float, float]] = {
     "ZAR": (17.00, 5.00),
     "MXN": (19.00, 3.20),
     "INR": (55.00, 8.00),
+    # Pakistan: about 320 rupees to the euro in 2026; labour is roughly a tenth of a German wage.
+    "PKR": (200.00, 28.00),
     "HUF": (400.00, 140.00),
     "RUB": (100.00, 35.00),
     # Added with the Rome, Barcelona, Amsterdam, Warsaw, Istanbul, Tokyo and

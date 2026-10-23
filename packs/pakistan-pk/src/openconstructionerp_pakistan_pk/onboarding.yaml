@@ -1,0 +1,30 @@
+# Pakistan Construction Pack - first-login onboarding wizard.
+version: 2
+locale: en
+title: "Welcome to OpenConstructionERP - Pakistan"
+subtitle: "Three steps to line the workspace up with Pakistani practice: province and tax status, payment terms, rupee."
+
+steps:
+  - id: company_profile
+    title: "Company details"
+    body: "Used on bills, payment certificates and invoices."
+    fields:
+      - { key: company_name, label: "Company name", type: text, required: true }
+      - { key: ntn, label: "National Tax Number (NTN)", type: text, required: false, placeholder: "1234567-8" }
+      - { key: province, label: "Province of the site", type: select, required: true, default: "Punjab", options: ["Punjab", "Sindh", "Khyber Pakhtunkhwa", "Balochistan", "Islamabad Capital Territory", "Azad Jammu and Kashmir", "Gilgit-Baltistan"], help: "The services tax on construction is levied by the province, so the rate follows the site." }
+      - { key: active_taxpayer, label: "We are on the Active Taxpayer List of the Federal Board of Revenue", type: checkbox, default: true, help: "A payee off the list has income tax withheld at twice the rate." }
+
+  - id: contract_type
+    title: "Type of client"
+    body: "A public contract follows the procurement rules and the standard bidding documents: interim payment certificates, retention, mobilization advance. A private contract follows its own terms."
+    fields:
+      - { key: works_in_public_procurement, label: "We build public works", type: checkbox, default: false, help: "Switches on the public works defaults of the standard bidding documents. They are shown for review, never enforced." }
+      - { key: monthly_valuations, label: "Bill by monthly interim payment certificate", type: checkbox, default: true }
+      - { key: retention_percent, label: "Retention held on each certificate (percent)", type: text, required: false, default: "10" }
+
+  - id: money
+    title: "Money"
+    body: "Pakistani rupee at two decimals. The sales tax is a line of its own on the bill: the federal GST applies to goods and the provincial tax to construction services."
+    fields:
+      - { key: currency, label: "Currency", type: select, required: true, default: "PKR (Rs)", options: ["PKR (Rs)", "USD ($) - for contracts priced in dollars"] }
+      - { key: sales_tax_registration, label: "Sales tax registration number", type: text, required: false }

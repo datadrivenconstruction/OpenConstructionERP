@@ -665,6 +665,7 @@ artifacts = ["app/scripts/flagship_assets/site_photos/*.jpg"]
 "../packs/japan-jp/src" = "packs/japan-jp/src"
 "../packs/korea-kr/src" = "packs/korea-kr/src"
 "../packs/mexico-mx/src" = "packs/mexico-mx/src"
+"../packs/pakistan-pk/src" = "packs/pakistan-pk/src"
 "../packs/modular-prefab/src" = "packs/modular-prefab/src"
 "../packs/netherlands-nl/src" = "packs/netherlands-nl/src"
 "../packs/nigeria-ng/src" = "packs/nigeria-ng/src"
