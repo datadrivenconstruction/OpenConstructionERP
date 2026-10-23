@@ -820,3 +820,37 @@ class BidPortalPricesRequest(BaseModel):
     unit_prices: dict[str, Any] = Field(default_factory=dict, max_length=50_000)
     notes: str = Field(default="", max_length=2000)
     currency: str | None = Field(default=None, max_length=10)
+
+
+# -- GAEB X84 bid return --------------------------------------------------------
+
+
+class X84LineCheck(BaseModel):
+    """One priced line of an X84 file, matched against the tender's bill."""
+
+    ordinal: str
+    position_id: str | None = None
+    description: str = ""
+    unit: str = ""
+    quantity: str = ""
+    unit_rate: str | None = None
+    # Stable codes: unknown_position, unit_mismatch, quantity_changed, unpriced, duplicate_position.
+    issues: list[str] = Field(default_factory=list)
+
+
+class X84ImportPreview(BaseModel):
+    """What importing an X84 file would put into the bid comparison."""
+
+    filename: str = ""
+    sha256: str = ""
+    da_kind: str = ""
+    currency: str = ""
+    tender_currency: str = ""
+    # File level codes: not_x84, currency_mismatch, no_bill, nothing_priced.
+    file_issues: list[str] = Field(default_factory=list)
+    lines: list[X84LineCheck] = Field(default_factory=list)
+    matched: int = 0
+    priced: int = 0
+    missing_ordinals: list[str] = Field(default_factory=list)
+    total_amount: str = "0.00"
+    blocking: bool = False

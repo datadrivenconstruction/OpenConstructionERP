@@ -632,6 +632,8 @@ class GAEBXMLImporter:
             provis = _text_of(item, "Provis").strip()
             if provis:
                 metadata["gaeb_provis"] = provis
+            if up_dec is not None:
+                metadata["gaeb_up"] = str(up_dec)
             if it_dec is not None:
                 # Authoritative binding total straight from the file.
                 metadata["gaeb_it"] = str(it_dec)

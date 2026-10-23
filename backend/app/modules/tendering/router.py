@@ -19,7 +19,7 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, Request, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
 
 from app.core.content_disposition import attachment_disposition
@@ -62,8 +62,10 @@ from app.modules.tendering.schemas import (
     RecipientImportPreview,
     RecipientImportResult,
     RecipientResponse,
+    X84ImportPreview,
 )
 from app.modules.tendering.service import TenderingService
+from app.modules.tendering.x84_import import MAX_X84_BYTES, X84BidImportService
 
 router = APIRouter(tags=["tendering"])
 logger = logging.getLogger(__name__)
@@ -417,6 +419,48 @@ async def create_bid(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create bid",
         )
+
+
+@router.post("/packages/{package_id}/bids/import-x84/preview/", response_model=X84ImportPreview)
+async def preview_x84_bid(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    file: UploadFile = File(...),
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.bid.create")),
+) -> X84ImportPreview:
+    """Check a priced GAEB X84 bid return against the package's bill. Nothing is stored."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    content = await file.read(MAX_X84_BYTES + 1)
+    preview, _, _ = await X84BidImportService(session).check(package_id, file.filename or "", content)
+    return preview
+
+
+@router.post("/packages/{package_id}/bids/import-x84/", response_model=BidResponse, status_code=201)
+async def import_x84_bid(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    file: UploadFile = File(...),
+    company_name: str = Form(..., min_length=1, max_length=255),
+    contact_email: str = Form(default="", max_length=255),
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.bid.create")),
+) -> BidResponse:
+    """Add a priced GAEB X84 file as a bid; refused while the check reports a blocking issue."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    content = await file.read(MAX_X84_BYTES + 1)
+    bid = await X84BidImportService(session).import_bid(
+        package_id,
+        file.filename or "",
+        content,
+        company_name=company_name.strip(),
+        contact_email=contact_email.strip(),
+    )
+    return _bid_to_response(bid)
 
 
 @router.get("/packages/{package_id}/bids/", response_model=list[BidResponse])
