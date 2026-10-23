@@ -11961,6 +11961,7 @@ def register_builtin_rules() -> None:
     # locale, position and currency helpers from this package, so a top-level
     # import would run before those names exist.
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
+    from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
     from app.core.validation.rules.project_completeness import PROJECT_COMPLETENESS_RULES
 
     rules: list[tuple[ValidationRule, list[str] | None]] = [
@@ -12232,6 +12233,8 @@ def register_builtin_rules() -> None:
         *((rule_class(), None) for rule_class in PROJECT_COMPLETENESS_RULES),
         # Italy (prezzario regionale voci, safety costs, labour share)
         *((rule_class(), None) for rule_class in ITALY_PREZZARIO_RULES),
+        # Pakistan (sales tax line and rate)
+        *((rule_class(), None) for rule_class in PAKISTAN_RULES),
     ]
 
     for rule, sets in rules:

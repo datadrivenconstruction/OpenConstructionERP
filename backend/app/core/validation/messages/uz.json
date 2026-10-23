@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "ish beruvchilar javobgarligi bo'yicha qarzi yo'qligi haqidagi ma'lumotnoma",
     "insurance": "sug'urta guvohnomasi",
     "license": "pudratchi litsenziyasi"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "{ordinal} pozitsiyasida tasnif kodi yoʻq, shu sababli u tegishli ish turi boʻyicha guruhlanmaydi",
+      "suggestion": "Pozitsiyaga tasnif kodini biriktiring (Pokiston uchun standart MasterFormat), shunda hajmlar ish turi boʻyicha jamlanadi"
+    },
+    "sales_tax_line_present": {
+      "fail": "Hisob-fakturada savdo solig'i uchun alohida qator yo'q",
+      "suggestion": "Savdo solig'ini oraliq jamidan keyin alohida qator sifatida qo'shing: qurilish shartnomasi uchun xizmatlarga viloyat solig'i yoki yetkazib berish uchun tovarlarga federal savdo solig'i"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Savdo solig'i qatori {percent} foiz undiradi, bu Pokistonda qurilish uchun amal qiladigan stavka emas",
+      "suggestion": "Stavkani viloyat va to'lovchiga ko'ra tekshiring, masalan, Panjobda 16 foiz yoki Sindda 15 foiz, davlat qurilish ishlari uchun pasaytirilgan stavka yoki tovarlarga 18 foiz federal savdo solig'i"
+    }
   }
 }

@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "klareringsattest for arbeidsgiveransvar",
     "insurance": "forsikringsbevis",
     "license": "entreprenørlisens"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Post {ordinal} mangler klassifikasjonskode, og kan derfor ikke grupperes under arbeidsklassen den tilhører",
+      "suggestion": "Tilordne posten en klassifikasjonskode (MasterFormat er standard for Pakistan), slik at mengdene summeres etter arbeidsklasse"
+    },
+    "sales_tax_line_present": {
+      "fail": "Regningen har ingen linje for salgsavgift",
+      "suggestion": "Legg til salgsavgiften som en egen linje etter delsummen: den provinsielle avgiften på tjenester for en byggekontrakt, eller den føderale salgsavgiften på varer for en leveranse"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Linjen for salgsavgift beregner {percent} prosent, som ikke er en sats som gjelder for bygg i Pakistan",
+      "suggestion": "Kontroller satsen for provinsen og betaleren, for eksempel 16 prosent i Punjab eller 15 prosent i Sindh, en redusert sats for offentlige anleggsarbeider, eller 18 prosent føderal salgsavgift på varer"
+    }
   }
 }

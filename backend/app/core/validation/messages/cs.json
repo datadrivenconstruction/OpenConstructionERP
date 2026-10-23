@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "potvrzení o bezdlužnosti u odpovědnosti zaměstnavatelů",
     "insurance": "pojistný certifikát",
     "license": "oprávnění zhotovitele"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Položka {ordinal} nemá klasifikační kód, a proto ji nelze zařadit do třídy prací, do které patří",
+      "suggestion": "Přiřaďte položce klasifikační kód (pro Pákistán je výchozí MasterFormat), aby se množství sčítala podle třídy prací"
+    },
+    "sales_tax_line_present": {
+      "fail": "Účet neobsahuje řádek s daní z prodeje",
+      "suggestion": "Přidejte daň z prodeje jako samostatný řádek za mezisoučet: provinční daň ze služeb u stavební smlouvy, nebo federální daň z prodeje zboží u dodávky"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Řádek daně z prodeje účtuje {percent} procent, což není sazba platná pro stavebnictví v Pákistánu",
+      "suggestion": "Ověřte sazbu podle provincie a plátce, například 16 procent v Paňdžábu nebo 15 procent v Sindhu, sníženou sazbu pro státní stavební práce, nebo 18 procent federální daň z prodeje zboží"
+    }
   }
 }

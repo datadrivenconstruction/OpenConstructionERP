@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "surat keterangan bebas tanggung jawab pemberi kerja",
     "insurance": "sertifikat asuransi",
     "license": "izin kontraktor"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Item {ordinal} belum memiliki kode klasifikasi, sehingga tidak dapat dikelompokkan ke dalam kelas pekerjaan yang sesuai",
+      "suggestion": "Tetapkan kode klasifikasi untuk item (MasterFormat adalah default untuk Pakistan) agar volume dijumlahkan per kelas pekerjaan"
+    },
+    "sales_tax_line_present": {
+      "fail": "Tagihan tidak memuat baris pajak penjualan",
+      "suggestion": "Tambahkan pajak penjualan sebagai baris tersendiri setelah subtotal: pajak provinsi atas jasa untuk kontrak konstruksi, atau pajak penjualan federal atas barang untuk pasokan"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Baris pajak penjualan mengenakan {percent} persen, yang bukan tarif yang berlaku untuk konstruksi di Pakistan",
+      "suggestion": "Periksa tarif menurut provinsi dan pembayar, misalnya 16 persen di Punjab atau 15 persen di Sindh, tarif terpotong untuk pekerjaan sipil pemerintah, atau pajak penjualan federal 18 persen atas barang"
+    }
   }
 }

@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "Unbedenklichkeitsbescheinigung zur Arbeitgeberhaftung",
     "insurance": "Versicherungsnachweis",
     "license": "Unternehmerlizenz"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Position {ordinal} hat keinen Klassifikationscode und kann daher keiner Leistungsklasse zugeordnet werden",
+      "suggestion": "Weisen Sie der Position einen Klassifikationscode zu (für Pakistan ist MasterFormat der Standard), damit Mengen nach Leistungsklasse zusammengefasst werden"
+    },
+    "sales_tax_line_present": {
+      "fail": "Die Rechnung enthält keine Zeile für Umsatzsteuer",
+      "suggestion": "Fügen Sie die Umsatzsteuer als eigene Zeile nach der Zwischensumme hinzu: die Provinzsteuer auf Dienstleistungen bei einem Bauvertrag oder die bundesweite Umsatzsteuer auf Waren bei einer Lieferung"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Die Umsatzsteuerzeile berechnet {percent} Prozent, was in Pakistan für Bauleistungen kein gültiger Satz ist",
+      "suggestion": "Prüfen Sie den Satz nach Provinz und Zahlungspflichtigem, zum Beispiel 16 Prozent in Punjab oder 15 Prozent in Sindh, einen ermäßigten Satz für staatliche Bauarbeiten oder 18 Prozent Bundes-Umsatzsteuer auf Waren"
+    }
   }
 }

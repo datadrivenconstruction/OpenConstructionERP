@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "사용자 책임 면제 확인서",
     "insurance": "보험 증서",
     "license": "시공업자 면허"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "항목 {ordinal}에 분류 코드가 없어 소속된 공종 구분에 묶을 수 없습니다",
+      "suggestion": "항목에 분류 코드를 지정하세요(파키스탄의 기본값은 MasterFormat). 그래야 수량이 공종 구분별로 집계됩니다"
+    },
+    "sales_tax_line_present": {
+      "fail": "청구서에 매출세 항목이 없습니다",
+      "suggestion": "소계 다음에 매출세를 별도 항목으로 추가하십시오. 건설 계약이면 용역에 대한 지방 용역세, 물품 공급이면 물품에 대한 연방 매출세를 적용합니다"
+    },
+    "sales_tax_rate_known": {
+      "fail": "매출세 항목이 {percent} 퍼센트를 적용하고 있으나, 이는 파키스탄 건설업에 적용되는 세율이 아닙니다",
+      "suggestion": "주와 납부자에 따라 세율을 확인하십시오. 예: 펀자브 16퍼센트, 신드 15퍼센트, 정부 토목공사는 경감세율, 물품은 연방 매출세 18퍼센트"
+    }
   }
 }
