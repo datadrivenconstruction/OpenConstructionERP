@@ -1,0 +1,22 @@
+{
+  "rule_pack_id": "vat_construction_law_157",
+  "name": "Value added tax on construction services - Law 157/2025",
+  "name_ar": "ضريبة القيمة المضافة على خدمات المقاولات - القانون رقم 157 لسنة 2025",
+  "standard": "Value Added Tax Law, amended by Law No. 157 of 2025; Ministry of Finance Decrees 417 and 418 of 2025",
+  "jurisdiction": "EG",
+  "applies_to": ["estimate", "finance", "contracts"],
+  "enables_rule_ids": [],
+  "why_no_rules": "The regime is resolved by document date in core (app.core.vat_regimes.data_eg and the VAT_CONSTR tax seed line), so a bill or invoice is priced correctly without a rule set. This document records what the platform applies.",
+  "regimes": [
+    {"id": "schedule_tax", "until": "2025-07-17", "rate_percent": "5", "input_credit": false},
+    {"id": "standard", "from": "2025-07-18", "rate_percent": "14", "input_credit": true},
+    {"id": "transitional_decree_418", "from": "2025-07-18", "effective_rate_percent": "5.04", "input_credit": false, "basis": "14 percent on 36 percent of the contract value, for contracts signed before 2025-07-18 that were already being billed"}
+  ],
+  "sources": [
+    "https://taxnews.ey.com/news/2025-2316-egypt-introduces-significant-updates-to-vat-provisions"
+  ],
+  "source_note": "Read in EY Tax News 2025-2316 on 2026-10-19. The scope of construction services is Decree 417 of 2025, effective 2025-10-24.",
+  "review_status": "Provisional. Open question for an Egyptian tax adviser: whether an invoice issued between 2025-07-18 and 2025-10-24 at 14 percent on the full value may be corrected onto the transitional regime.",
+  "regulator": "Egyptian Tax Authority",
+  "publication_year": 2025
+}

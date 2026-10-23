@@ -1,0 +1,39 @@
+# Egypt Construction Pack - first-login onboarding wizard.
+
+version: 2
+locale: en-GB
+title: "Welcome to OpenConstructionERP: Egypt Edition"
+title_ar: "OpenConstructionERP مرحبًا بك في - مصر"
+subtitle: "Three steps to align your workspace with Egyptian construction practice."
+
+steps:
+  - id: company_profile
+    title: "Company profile and registrations"
+    title_ar: "بيانات الشركة والتسجيلات"
+    body: "Enter your firm details so reports, contracts and e-invoices carry the correct attribution."
+    fields:
+      - { key: company_name, label: "Company name", type: text, required: true }
+      - { key: tax_registration_number, label: "Tax registration number", type: text, required: false, placeholder: "123-456-789", help: "Nine-digit number issued by the Egyptian Tax Authority; it identifies the issuer on e-invoices." }
+      - { key: commercial_register_number, label: "Commercial register number", type: text, required: false }
+      - { key: governorate, label: "Governorate of the head office", type: text, required: false, placeholder: "Cairo" }
+      - { key: contractor_grade, label: "Contractor classification grade (EFCBC)", type: select, options: ["Not classified", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7"], required: false, default: "Not classified", help: "The Egyptian Federation for Construction and Building Contractors classifies contractors from grade 1 (highest) to 7." }
+
+  - id: work_type
+    title: "Kind of work"
+    title_ar: "نوع الأعمال"
+    body: "Public works follow Law 182/2018 limits (retention, advance payment, delay damages). Private works follow their contract, usually FIDIC."
+    fields:
+      - { key: client_type, label: "Main client type", type: radio, options: ["Public body (Law 182/2018)", "Private owner (FIDIC or bespoke contract)", "Both"], required: true, default: "Both" }
+      - { key: enable_einvoicing, label: "Prepare e-invoices for the Egyptian Tax Authority", type: checkbox, default: true }
+
+  - id: review
+    title: "Review and finish"
+    title_ar: "المراجعة والإنهاء"
+    body: "We will create your workspace with MasterFormat classification, EGP currency and the Sunday to Thursday work week. VAT follows the project country and the document date. You can change everything later in Settings."
+    action:
+      label: "Create my Egypt workspace"
+      apply:
+        - set_default_currency: EGP
+        - enable_rule_sets:
+            - masterformat
+            - boq_quality

@@ -2437,6 +2437,7 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "romania-ro": "residential-cluj",
     "greece-gr": "residential-athens",
     "ukraine-ua": "residential-lviv",
+    "egypt-eg": "residential-cairo",
     # Not a country pack: it carries the eleven module catalogues and its own
     # placement data. It installs two owner projects of common types, a residential
     # quarter in Bavaria and a primary school in Baden-Wuerttemberg.
@@ -2493,6 +2494,7 @@ _COUNTRY_ISO2: dict[str, str] = {
     "Romania": "RO",
     "Greece": "GR",
     "Ukraine": "UA",
+    "Egypt": "EG",
 }
 
 # Who really receives a notice of commencement, per country. Named because a
@@ -2659,6 +2661,7 @@ _PACK_DEMO_TYPE: dict[str, str] = {
     "residential-surabaya": "Residential",
     "commercial-lagos": "Commercial",
     "residential-abuja": "Residential",
+    "residential-cairo": "Residential",
     "office-stockholm": "Commercial",
     "residential-gothenburg": "Residential",
     "office-oslo": "Commercial",

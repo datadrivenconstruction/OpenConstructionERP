@@ -1,0 +1,22 @@
+{
+  "rule_pack_id": "eta_einvoicing",
+  "name": "Egyptian Tax Authority e-invoicing",
+  "name_ar": "الفاتورة الإلكترونية - مصلحة الضرائب المصرية",
+  "standard": "Egyptian Tax Authority e-invoicing SDK, invoice v1.0",
+  "jurisdiction": "EG",
+  "applies_to": ["finance", "invoices"],
+  "enables_rule_ids": [],
+  "why_no_rules": "The ETA checks run inside the oe_einvoice_eta module as rules einvoice_clearance.eta_document_readable, eta_parties, eta_header, eta_lines, eta_totals, eta_advisory and eta_profile, on invoices that go to clearance. They are not part of a project rule set.",
+  "covers": [
+    "ETA v1.0 JSON document built from a finance invoice",
+    "Calculation rules checked before the document leaves",
+    "Issuer and receiver identification by tax registration number",
+    "Signing with the company eSeal through a pluggable signer"
+  ],
+  "sources": [
+    "https://sdk.invoicing.eta.gov.eg/documents/invoice-v1-0/"
+  ],
+  "source_note": "Facts ETA does not publish (the person receiver threshold, the EGS code format) are advisory checks and never block.",
+  "review_status": "Provisional. Tested against the SDK sample documents; not yet cleared against the live ETA environment by an Egyptian taxpayer.",
+  "regulator": "Egyptian Tax Authority"
+}

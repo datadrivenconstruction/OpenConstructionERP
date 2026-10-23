@@ -405,6 +405,7 @@ BUNDLE_MAP: dict[str, str] = {
     "residential-surabaya": "residential_ifc",
     "commercial-lagos": "commercial_rvt",
     "residential-abuja": "residential_ifc",
+    "residential-cairo": "residential_ifc",
     # Nordic packs: Sweden, Norway, Denmark.
     "office-stockholm": "commercial_rvt",
     "residential-gothenburg": "residential_ifc",

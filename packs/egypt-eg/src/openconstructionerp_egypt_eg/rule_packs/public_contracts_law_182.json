@@ -1,0 +1,31 @@
+{
+  "rule_pack_id": "public_contracts_law_182",
+  "name": "Public Contracts Law 182/2018 - limits on public works",
+  "name_ar": "قانون التعاقدات العامة رقم 182 لسنة 2018",
+  "standard": "Public Contracts Law No. 182 of 2018; Executive Regulations, Minister of Finance Decree 692/2019",
+  "jurisdiction": "EG",
+  "applies_to": ["contracts", "tender", "estimate"],
+  "enables_rule_ids": [],
+  "why_no_rules": "The limits below are enforced by the contracts module on every public works contract (app.modules.contracts.public_procurement), not by a rule set this pack switches on. This document records the figures so the operator can read them.",
+  "scope_note": "Applies to contracts of public bodies. A private owner's contract follows its own terms, usually FIDIC, and none of these limits bind it.",
+  "figures": {
+    "bid_security_max_percent": {"value": "1.5", "reference": "Art. 16"},
+    "performance_security_percent": {"value": "5", "reference": "Art. 40"},
+    "advance_payment_max_percent": {"value": "25", "reference": "Art. 44; Executive Regulations Art. 92"},
+    "advance_payment_max_percent_sme": {"value": "50", "reference": "Executive Regulations Art. 92"},
+    "interim_payment_percent": {"value": "95", "reference": "Executive Regulations Art. 93"},
+    "retention_percent": {"value": "5", "reference": "Executive Regulations Art. 93"},
+    "stored_materials_payment_percent": {"value": "75", "reference": "Executive Regulations Art. 93"},
+    "works_payment_days": {"value": "60", "reference": "Art. 45; Executive Regulations Art. 93"},
+    "variation_max_percent_per_item_works": {"value": "25", "reference": "Art. 46; Executive Regulations Art. 96"},
+    "delay_damages_cap_percent_works": {"value": "10", "reference": "Art. 48; Executive Regulations Art. 98"},
+    "delay_damages_cap_percent_works_long_delay": {"value": "15", "reference": "Art. 48"}
+  },
+  "sources": [
+    "https://eg.andersen.com/wp-content/uploads/2026/01/Law-No.-182-of-2018.pdf"
+  ],
+  "source_note": "Consolidated English translation of the law and its Executive Regulations, Andersen Egypt, January 2026, read 2026-10-19. Each figure is also carried, with its note, in app.modules.contracts.public_procurement.PUBLIC_WORKS_LIMITS.",
+  "review_status": "Provisional. Read from a translation, not the Arabic official gazette text. Pending review by an Egyptian lawyer or quantity surveyor.",
+  "regulator": "Ministry of Finance (Central Agency for Public Procurement)",
+  "publication_year": 2018
+}

@@ -190,6 +190,7 @@ def test_mapped_demo_ids_resolve_to_templates() -> None:
 #: office any more.
 PACKS_WITH_ONE_IN_MARKET_DEMO = frozenset(
     {
+        "egypt-eg",
         "japan-jp",
         "korea-kr",
         "poland-pl",

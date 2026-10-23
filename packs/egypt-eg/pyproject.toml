@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-egypt-eg"
+version = "0.1.0"
+description = "Country pack for the Egyptian market: MasterFormat classification, EGP currency, construction VAT by date, Public Contracts Law 182/2018 limits, FIDIC for private works, Egyptian Tax Authority e-invoicing and the Sunday to Thursday work week."
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
+]
+keywords = [
+    "openconstructionerp",
+    "ocerp",
+    "country-pack",
+    "egypt",
+    "cairo",
+    "masterformat",
+    "egp",
+    "vat",
+    "fidic",
+    "eta",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: Arabic",
+    "Natural Language :: English",
+]
+dependencies = [
+    "openconstructionerp>=5.5.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.partner_packs"]
+egypt-eg = "openconstructionerp_egypt_eg:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+openconstructionerp_egypt_eg = [
+    "onboarding.yaml",
+    "rule_packs/*.json",
+]

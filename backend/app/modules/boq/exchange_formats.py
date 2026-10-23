@@ -521,6 +521,16 @@ _WORKBOOK_FORMATS: tuple[ExchangeFormat, ...] = (
         header_language="en",
     ),
     ExchangeFormat(
+        format_id="eg_boq",
+        name="Bill of quantities (Egypt)",
+        countries=("EG",),
+        extensions=(".xlsx", ".xls", ".csv"),
+        summary="The Egyptian priced bill of quantities, a spreadsheet in English or Arabic.",
+        reader="excel",
+        writer="excel",
+        header_language="en",
+    ),
+    ExchangeFormat(
         format_id="jp_sekisan",
         name="積算内訳書",
         countries=("JP",),

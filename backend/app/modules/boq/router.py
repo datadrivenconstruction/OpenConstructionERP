@@ -3607,6 +3607,9 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     "KW": ["masterformat"],
     "BH": ["masterformat"],
     "OM": ["masterformat"],
+    # Egypt tenders in English against MasterFormat and has no national bill
+    # standard; the Egyptian compliance pack and the Cairo demo say the same.
+    "EG": ["masterformat"],
     "ID": ["masterformat"],
     # Spain tenders in BC3. MasterFormat was a second code rule no Spanish
     # bill is written in.
