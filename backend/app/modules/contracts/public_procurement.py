@@ -373,6 +373,103 @@ PUBLIC_WORKS_LIMITS["FR"] = {
         effective="2019-04-01",
     ),
 }
+
+
+_PK_SBD_URL = (
+    "https://www.pkha.gov.pk/downloads/Other%20Doc/"
+    "Standard%20Bidding%20Documents%20for%20Procurement%20of%20Works%20(Large%20Procurements).pdf"
+)
+_PK_READ_DATE = "2026-10-23"
+
+
+def _pk(value: Any, reference: str, note: str) -> dict[str, Any]:
+    """A Pakistani figure, always flagged for review and so shown, never enforced.
+
+    The values are entries of the Standard Bidding Documents for Procurement of Works (large contracts,
+    2015 edition, harmonized with the Pakistan Engineering Council and the provincial procurement rules).
+    They are the form's defaults, which a procuring entity may change in the Appendix to Bid, and not
+    limits the Public Procurement Rules 2004 set; the Rules themselves were not read.
+    """
+    return {
+        "value": value,
+        "statute_reference": reference,
+        "source_url": _PK_SBD_URL,
+        "read_date": _PK_READ_DATE,
+        "effective_date": "2015-01-01",
+        "needs_expert_review": True,
+        "note": note,
+    }
+
+
+def _pk_none(field: str, note: str) -> dict[str, Any]:
+    return _pk(None, "Standard Bidding Documents for Procurement of Works", f"{field}: {note}")
+
+
+PUBLIC_WORKS_LIMITS["PK"] = {
+    "law": (
+        "Public Procurement Rules 2004 (PPRA) and the provincial rules, with the Pakistan Engineering Council "
+        "Standard Bidding Documents for Works"
+    ),
+    "bid_security_max_percent": _pk_none(
+        "bid security",
+        "The form advises about 1 percent of the estimated cost for large contracts and up to 3 percent for small "
+        "ones (Instructions to Bidders 15.1). It is guidance, not a ceiling; the rule that caps it was not read.",
+    ),
+    "performance_security_percent": _pk(
+        "10",
+        "Appendix-A to Bid, item 2 (Conditions of Contract 10.1)",
+        "Ten percent of the Contract Price in the Letter of Acceptance, commonly a bank guarantee.",
+    ),
+    "performance_security_due_working_days": _pk_none(
+        "performance security due", "The Appendix states the period; no number of working days was read."
+    ),
+    "advance_payment_max_percent": _pk(
+        "15",
+        "Appendix-B to Bid, Alternative One (Conditions of Contract 60.12)",
+        "An interest-free Mobilization Advance of up to 15 percent of the Contract Price, in two equal parts "
+        "against a Mobilization Advance Guarantee from a scheduled bank. Alternative Two pays mobilization as a "
+        "bill item of at most 10 percent of the Tender Price.",
+    ),
+    "advance_payment_max_percent_sme": _pk_none("SME advance", "The form has no separate advance for small firms."),
+    "interim_payment_percent": _pk_none("interim payment", "An interim payment is the work measured less retention."),
+    "retention_percent": _pk(
+        "10",
+        "Appendix-A to Bid, item 9 (Conditions of Contract 60.2)",
+        "Ten percent of each Interim Payment Certificate, held until the total reaches 5 percent of the Contract "
+        "Price (item 10).",
+    ),
+    "stored_materials_payment_percent": _pk(
+        "75",
+        "Conditions of Contract 60.11 (a)(6)",
+        "A secured advance on non-perishable materials on site, against an indemnity bond, of at most 75 percent "
+        "of the landed cost, the ex-factory price or the market price.",
+    ),
+    "works_payment_days": _pk(
+        28,
+        "Appendix-A to Bid, item 12 (Conditions of Contract 60.10)",
+        "Payment within 28 days of the Engineer's Interim Payment Certificate in local currency (42 days for "
+        "foreign funded projects). A provincial edition counts 30 days after joint verification instead.",
+    ),
+    "supplies_payment_days": _pk_none("supplies payment", "The works form does not cover supplies."),
+    "variation_max_percent_per_item_works": _pk_none(
+        "variation per item", "No per-item limit was read; an emergency variation is capped at 2 percent (item 1)."
+    ),
+    "variation_max_percent_per_item_other": _pk_none("variation per item", "No entry in the works form."),
+    "delay_damages_cap_percent_works": _pk(
+        "10",
+        "Appendix-A to Bid, item 7(a) (Conditions of Contract 47.1)",
+        "Liquidated damages at a daily rate the entity states, capped at 10 percent of the Contract Price. The "
+        "bonus for early completion is capped at 5 percent (item 7(b)).",
+    ),
+    "delay_damages_cap_percent_works_long_delay": _pk_none("delay damages second tier", "The form has none."),
+    "delay_damages_cap_percent_other": _pk_none("delay damages, other contracts", "No entry in the works form."),
+    "delay_damages_cap_percent_other_long_delay": _pk_none("delay damages second tier", "The form has none."),
+    "delay_damages_long_delay_threshold_percent": _pk_none("delay damages threshold", "The form has no second tier."),
+    "price_adjustment_min_duration_months": _pk_none(
+        "price adjustment minimum duration",
+        "Clause 70 applies where Appendix-C to Bid is filled in; the form states no minimum duration.",
+    ),
+}
 #: Countries whose public works law changed: a list of regimes per country,
 #: each bounded by the dates its tenders were floated (``tender_date_from`` and
 #: ``tender_date_to``, inclusive ISO dates or ``None`` for open). The law in
@@ -395,7 +492,11 @@ _register_dated_regimes()
 
 #: The price adjustment regime each country's public works use, a code of
 #: :data:`app.modules.contracts.price_adjustment.PRICE_ADJUSTMENT_REGIMES`.
-PUBLIC_WORKS_PRICE_ADJUSTMENT: dict[str, str] = {"EG": "eg_law182_art97", "FR": "fr_ccag_travaux_2021_art_10_5"}
+PUBLIC_WORKS_PRICE_ADJUSTMENT: dict[str, str] = {
+    "EG": "eg_law182_art97",
+    "FR": "fr_ccag_travaux_2021_art_10_5",
+    "PK": "pk_pec_sbd_clause_70",
+}
 
 #: The INSEE construction cost indices a French revision formula names (base
 #: 2010, monthly, published provisional and then definitive). Names only:

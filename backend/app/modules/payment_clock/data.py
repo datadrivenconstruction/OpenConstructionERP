@@ -2830,6 +2830,47 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
             "National Treasury replies to Parliament, not from the Act itself."
         ),
     },
+    {
+        "code": "pk_pec_sbd_clause_60",
+        "jurisdiction": "Pakistan (public works)",
+        "country_code": "PK",
+        "statute": (
+            "Standard Bidding Documents for Procurement of Works (large contracts, 2015, harmonized with the "
+            "Pakistan Engineering Council and provincial procurement rules)"
+        ),
+        "statute_reference": (
+            "Conditions of Contract 60.10 and Appendix-A to Bid, item 12; "
+            "https://www.pkha.gov.pk/downloads/Other%20Doc/"
+            "Standard%20Bidding%20Documents%20for%20Procurement%20of%20Works%20(Large%20Procurements).pdf"
+        ),
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 28,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "contract",
+        "interest_reference_rate": "",
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "",
+        "notes": (
+            "The clock for an Interim Payment Certificate under the standard form: enter the day the Engineer "
+            "delivers the certificate to the Employer as the application date. Payment falls due 28 days after "
+            "it for local currency (42 days for foreign funded projects, which this regime does not model). "
+            "The form is a default the procuring entity may change in the Appendix to Bid, and a provincial "
+            "edition counts 30 days after joint verification of the certificate. The form sets no payment "
+            "notice and no pay-less notice, and the compensation for late payment was not confirmed from a "
+            "primary text, so the interest is left to the contract. Pending review by a Pakistani quantity "
+            "surveyor."
+        ),
+    },
 )
 
 REGIME_CODES: tuple[str, ...] = tuple(regime["code"] for regime in PAYMENT_REGIMES)

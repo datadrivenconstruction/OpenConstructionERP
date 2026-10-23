@@ -736,6 +736,45 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The Engineer certifies each interim payment on an IPC.",
         ),
     },
+    "PK": {
+        "standard_form": "Standard Bidding Documents for Procurement of Works (Pakistan Engineering Council)",
+        "retention_percent": _figure(
+            "10",
+            "standard_form",
+            "Appendix-A to Bid, item 9 (Conditions of Contract 60.2)",
+            "Ten percent of each Interim Payment Certificate is kept as retention, as the Standard Bidding Documents for Works set it; the procuring entity may change it in the Appendix to Bid.",
+        ),
+        "retention_cap_percent": _figure(
+            "5",
+            "standard_form",
+            "Appendix-A to Bid, item 10 (Conditions of Contract 60.2)",
+            "Retention stops at five percent of the Contract Price stated in the Letter of Acceptance.",
+        ),
+        "retention_release_split": _figure(
+            None,
+            "standard_form",
+            "Conditions of Contract 60.3",
+            "The form pays the retention back under Sub-Clause 60.3; its release events were not read, so no split is proposed.",
+        ),
+        "payment_period_days": _figure(
+            28,
+            "standard_form",
+            "Appendix-A to Bid, item 12 (Conditions of Contract 60.10)",
+            "Payment is due within 28 days of the Engineer's Interim Payment Certificate for local currency; a provincial edition counts 30 days after joint verification.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "standard_form",
+            "Conditions of Contract 60.1",
+            "The contractor submits a statement of the work done at the end of each month.",
+        ),
+        "certificate_name": _figure(
+            "Interim Payment Certificate (IPC)",
+            "standard_form",
+            "Conditions of Contract 60.1",
+            "The Engineer certifies each interim payment on an Interim Payment Certificate.",
+        ),
+    },
 }
 
 

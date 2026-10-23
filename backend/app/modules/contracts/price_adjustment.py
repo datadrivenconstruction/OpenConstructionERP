@@ -112,6 +112,41 @@ PRICE_ADJUSTMENT_REGIMES: dict[str, dict[str, Any]] = {
             "price index series."
         ),
     },
+    "pk_pec_sbd_clause_70": {
+        "code": "pk_pec_sbd_clause_70",
+        "country_code": "PK",
+        "jurisdiction": "Pakistan (public works)",
+        "statute": (
+            "Standard Bidding Documents for Procurement of Works (large contracts, 2015, harmonized with the "
+            "Pakistan Engineering Council and provincial procurement rules), Conditions of Contract Clause 70.1 "
+            "and Appendix-C to Bid"
+        ),
+        "source_url": (
+            "https://www.pkha.gov.pk/downloads/Other%20Doc/"
+            "Standard%20Bidding%20Documents%20for%20Procurement%20of%20Works%20(Large%20Procurements).pdf"
+        ),
+        "read_date": "2026-10-23",
+        "effective_date": "2015-01-01",
+        "mandatory": False,
+        "period_months": 1,
+        "min_duration_months": None,
+        "coefficient_rule": "non_negative_sum_at_most_one",
+        "base_date": "offer_date",
+        "index_publisher": "Pakistan Bureau of Statistics (the form names the Federal Bureau of Statistics)",
+        "variable_items_list": "Appendix-C to Bid: labour, cement, reinforcing steel, fuel, bricks, bitumen",
+        "settlement_days": None,
+        "note": (
+            "Each monthly statement is multiplied by Pn = A + b x Ln/Lo + c x Mn/Mo + d x En/Eo, where A is the "
+            "non-adjustable portion and A, b, c and d sum to one. The entity fills in the weightages and the index "
+            "of each cost element in Appendix-C; the sample fixed portion of 0.350 is for a typical road project. "
+            "Base indices are those 28 days before the latest day for bids and current indices those 28 days "
+            "before the last day of the billing period; a provisional index is corrected when the final one "
+            "appears, and after the time for completion the index more favourable to the entity is used. The "
+            "form is a standard document whose entries the entity may change and provincial editions differ, so "
+            "weightages and indices are the entity's and unconfirmed here. Index values belong to the tenant's "
+            "price index series."
+        ),
+    },
     "contract_indexation": {
         "code": "contract_indexation",
         "country_code": None,
