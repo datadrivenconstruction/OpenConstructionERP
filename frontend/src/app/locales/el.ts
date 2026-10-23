@@ -52728,6 +52728,8 @@ const resource = {
     "videos.used_in_cases": "Χρησιμοποιείται σε αυτές τις περιπτώσεις",
     "videos.more_cases": "+{{more}} ακόμη",
     "videos.jump_to": "Από {{time}}: {{chapter}}",
+    "videos.hint.watch": "Δείτε πώς",
+    "videos.hint.tooltip": "Βίντεο: {{title}}, από {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Καταχώριση τιμών",
     "bid_portal.language": "Γλώσσα",

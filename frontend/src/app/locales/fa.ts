@@ -52730,6 +52730,8 @@ const resource = {
     "videos.used_in_cases": "استفاده‌شده در این سناریوها",
     "videos.more_cases": "+{{more}} مورد دیگر",
     "videos.jump_to": "از {{time}}: {{chapter}}",
+    "videos.hint.watch": "ببینید چگونه",
+    "videos.hint.tooltip": "ویدیو: {{title}}, از {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "ثبت قیمت",

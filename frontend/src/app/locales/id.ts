@@ -52526,6 +52526,8 @@ const resource = {
     "videos.used_in_cases": "Digunakan dalam kasus-kasus ini",
     "videos.more_cases": "+{{more}} lagi",
     "videos.jump_to": "Dari {{time}}: {{chapter}}",
+    "videos.hint.watch": "Lihat caranya",
+    "videos.hint.tooltip": "Video: {{title}}, mulai {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Entri Harga",

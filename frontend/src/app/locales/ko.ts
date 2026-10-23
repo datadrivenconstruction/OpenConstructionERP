@@ -53143,6 +53143,8 @@ const resource = {
     "videos.used_in_cases": "이 케이스에서 사용됨",
     "videos.more_cases": "+{{more}}개 더",
     "videos.jump_to": "{{time}}부터: {{chapter}}",
+    "videos.hint.watch": "방법 보기",
+    "videos.hint.tooltip": "동영상: {{title}}, 시작 {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "가격 입력",

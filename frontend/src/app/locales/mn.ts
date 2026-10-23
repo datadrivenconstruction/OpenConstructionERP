@@ -52448,6 +52448,8 @@ const resource = {
     "videos.used_in_cases": "Эдгээр тохиолдолд ашигласан",
     "videos.more_cases": "+{{more}} өөр",
     "videos.jump_to": "{{time}}-с эхлэн: {{chapter}}",
+    "videos.hint.watch": "Хэрхэнийг үзэх",
+    "videos.hint.tooltip": "Видео: {{title}}, эхлэх {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Үнэ оруулах",

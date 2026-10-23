@@ -52768,6 +52768,8 @@ const resource = {
     "videos.used_in_cases": "Brukt i disse casene",
     "videos.more_cases": "+{{more}} til",
     "videos.jump_to": "Fra {{time}}: {{chapter}}",
+    "videos.hint.watch": "Se hvordan",
+    "videos.hint.tooltip": "Video: {{title}}, fra {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Prisinnlegging",
     "bid_portal.language": "Språk",

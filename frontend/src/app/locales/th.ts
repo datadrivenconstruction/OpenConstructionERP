@@ -52527,6 +52527,8 @@ const resource = {
     "videos.used_in_cases": "ใช้ในเคสเหล่านี้",
     "videos.more_cases": "+อีก {{more}}",
     "videos.jump_to": "จาก {{time}}: {{chapter}}",
+    "videos.hint.watch": "ดูวิธีทำ",
+    "videos.hint.tooltip": "วิดีโอ: {{title}}, เริ่มที่ {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "กรอกราคา",
