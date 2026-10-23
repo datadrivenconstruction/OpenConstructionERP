@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "certificat de lipsă a restanțelor privind răspunderea angajatorilor",
     "insurance": "certificat de asigurare",
     "license": "licența antreprenorului"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Poziției {ordinal} îi lipsește codul de clasificare, deci nu poate fi grupată în clasa de lucrări din care face parte",
+      "suggestion": "Atribuiți poziției un cod de clasificare (MasterFormat este valoarea implicită pentru Pakistan), astfel încât cantitățile să fie cumulate pe clasa de lucrări"
+    },
+    "sales_tax_line_present": {
+      "fail": "Factura nu are o linie pentru taxa pe vânzări",
+      "suggestion": "Adăugați taxa pe vânzări ca linie separată după subtotal: taxa provincială pe servicii pentru un contract de construcții sau taxa federală pe vânzări de bunuri pentru o livrare"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Linia de taxă pe vânzări aplică {percent} la sută, care nu este o cotă valabilă pentru construcții în Pakistan",
+      "suggestion": "Verificați cota în funcție de provincie și de plătitor, de exemplu 16 la sută în Punjab sau 15 la sută în Sindh, o cotă redusă pentru lucrările publice de construcții sau 18 la sută taxă federală pe vânzări de bunuri"
+    }
   }
 }

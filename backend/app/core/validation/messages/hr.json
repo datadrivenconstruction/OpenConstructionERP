@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "potvrda o ispunjenju odgovornosti poslodavaca",
     "insurance": "potvrda o osiguranju",
     "license": "licenca izvođača"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Stavci {ordinal} nedostaje klasifikacijska šifra, pa se ne može grupirati u radnu klasu kojoj pripada",
+      "suggestion": "Dodijelite stavci klasifikacijsku šifru (za Pakistan je zadani MasterFormat) kako bi se količine zbrajale po radnoj klasi"
+    },
+    "sales_tax_line_present": {
+      "fail": "Račun ne sadrži redak poreza na promet",
+      "suggestion": "Dodajte porez na promet kao zasebni redak nakon međuzbroja: pokrajinski porez na usluge za građevinski ugovor ili savezni porez na promet robe za isporuku"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Redak poreza na promet obračunava {percent} posto, što nije stopa važeća za građevinarstvo u Pakistanu",
+      "suggestion": "Provjerite stopu prema pokrajini i platitelju, na primjer 16 posto u Pandžabu ili 15 posto u Sindhu, sniženu stopu za državne građevinske radove ili 18 posto savezni porez na promet robe"
+    }
   }
 }

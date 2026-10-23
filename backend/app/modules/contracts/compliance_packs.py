@@ -88,6 +88,15 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "masterformat"],
     },
+    "pk_compliance": {
+        "id": "pk_compliance",
+        "name": "Pakistan Compliance",
+        "description": "The sales tax (federal GST or the provincial services tax) carried as a line of its own "
+        "at a rate the pack has read, each priced line classified, plus the universal quality baseline.",
+        "jurisdiction": "PK",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "pakistan"],
+    },
     "mx_compliance": {
         "id": "mx_compliance",
         "name": "Mexico Compliance",
@@ -469,6 +478,7 @@ PACK_BY_LABEL: dict[str, str] = {
     "magyarország": "hu_compliance",
     "poland": "pl_compliance",
     "polska": "pl_compliance",
+    "pakistan": "pk_compliance",
     "italy": "it_compliance",
     "italia": "it_compliance",
     "china": "cn_compliance",

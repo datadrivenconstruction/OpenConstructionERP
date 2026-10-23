@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "giấy xác nhận hoàn thành trách nhiệm của người sử dụng lao động",
     "insurance": "giấy chứng nhận bảo hiểm",
     "license": "giấy phép nhà thầu"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Công tác {ordinal} thiếu mã phân loại nên không thể gom nhóm vào loại công việc mà nó thuộc về",
+      "suggestion": "Gán mã phân loại cho công tác (MasterFormat là mặc định cho Pakistan) để khối lượng được tổng hợp theo loại công việc"
+    },
+    "sales_tax_line_present": {
+      "fail": "Hóa đơn không có dòng thuế bán hàng",
+      "suggestion": "Thêm thuế bán hàng thành một dòng riêng sau tổng phụ: thuế cấp tỉnh đối với dịch vụ cho hợp đồng xây dựng, hoặc thuế bán hàng liên bang đối với hàng hóa cho việc cung cấp"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Dòng thuế bán hàng đang thu {percent} phần trăm, không phải mức thuế áp dụng cho xây dựng tại Pakistan",
+      "suggestion": "Kiểm tra mức thuế theo tỉnh và bên thanh toán, ví dụ 16 phần trăm ở Punjab hoặc 15 phần trăm ở Sindh, mức thuế giảm cho công trình xây dựng công của chính phủ, hoặc 18 phần trăm thuế bán hàng liên bang đối với hàng hóa"
+    }
   }
 }

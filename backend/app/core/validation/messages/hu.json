@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "munkáltatói felelősségi tartozásmentességi igazolás",
     "insurance": "biztosítási igazolás",
     "license": "vállalkozói engedély"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a besorolási kód, ezért nem sorolható az őt megillető munkanemi osztály alá",
+      "suggestion": "Rendeljen a tételhez besorolási kódot (Pakisztánban alapértelmezett a MasterFormat), hogy a mennyiségek munkanemi osztályonként összesítődjenek"
+    },
+    "sales_tax_line_present": {
+      "fail": "A számlán nincs forgalmi adó sor",
+      "suggestion": "Adja hozzá a forgalmi adót külön sorként a részösszeg után: tartományi szolgáltatási adó építési szerződés esetén, vagy szövetségi forgalmi adó áruszállítás esetén"
+    },
+    "sales_tax_rate_known": {
+      "fail": "A forgalmi adó sor {percent} százalékot számít fel, ami nem Pakisztánban az építőipar számára érvényes kulcs",
+      "suggestion": "Ellenőrizze a kulcsot a tartomány és a fizető szerint, például 16 százalék Pandzsábban vagy 15 százalék Szindben, csökkentett kulcs az állami építési munkákra, vagy 18 százalék szövetségi forgalmi adó áruk után"
+    }
   }
 }

@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "sertipiko ng clearance sa pananagutan ng employer",
     "insurance": "sertipiko ng insurance",
     "license": "lisensya ng kontratista"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Walang classification code ang posisyong {ordinal}, kaya hindi ito maipapangkat sa klase ng gawaing kinabibilangan nito",
+      "suggestion": "Magtalaga ng classification code sa posisyon (MasterFormat ang default para sa Pakistan) para mapagsama-sama ang dami ayon sa klase ng gawain"
+    },
+    "sales_tax_line_present": {
+      "fail": "Walang linya ng buwis sa benta ang bill",
+      "suggestion": "Idagdag ang buwis sa benta bilang hiwalay na linya pagkatapos ng subtotal: ang probinsyal na buwis sa serbisyo para sa kontrata sa konstruksyon, o ang federal na buwis sa benta sa mga kalakal para sa suplay"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Naniningil ang linya ng buwis sa benta ng {percent} porsyento, na hindi rate na ginagamit sa konstruksyon sa Pakistan",
+      "suggestion": "Suriin ang rate ayon sa probinsya at nagbabayad, halimbawa 16 porsyento sa Punjab o 15 porsyento sa Sindh, mas mababang rate para sa gawaing sibil ng gobyerno, o 18 porsyento na federal na buwis sa benta sa mga kalakal"
+    }
   }
 }

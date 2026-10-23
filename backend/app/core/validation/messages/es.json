@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "certificado de cumplimiento de la responsabilidad del empleador",
     "insurance": "certificado de seguro",
     "license": "licencia de contratista"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "La partida {ordinal} no tiene código de clasificación, por lo que no se puede agrupar en la clase de unidad de obra a la que pertenece",
+      "suggestion": "Asigne un código de clasificación a la partida (MasterFormat es el valor por defecto para Pakistán) para que las cantidades se agrupen por clase de unidad de obra"
+    },
+    "sales_tax_line_present": {
+      "fail": "La factura no incluye ninguna línea de impuesto sobre las ventas",
+      "suggestion": "Añada el impuesto sobre las ventas como línea propia tras el subtotal: el impuesto provincial sobre servicios para un contrato de obra, o el impuesto federal sobre las ventas de bienes para un suministro"
+    },
+    "sales_tax_rate_known": {
+      "fail": "La línea de impuesto sobre las ventas aplica el {percent} por ciento, que no es un tipo vigente para la construcción en Pakistán",
+      "suggestion": "Revise el tipo según la provincia y el pagador, por ejemplo el 16 por ciento en Punyab o el 15 por ciento en Sindh, un tipo reducido para obras públicas o el 18 por ciento de impuesto federal sobre las ventas de bienes"
+    }
   }
 }

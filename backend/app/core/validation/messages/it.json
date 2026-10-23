@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "certificato di liberatoria sulla responsabilità dei datori di lavoro",
     "insurance": "certificato assicurativo",
     "license": "licenza dell'appaltatore"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Alla voce {ordinal} manca il codice di classificazione, quindi non può essere raggruppata nella classe di lavorazione a cui appartiene",
+      "suggestion": "Assegnare alla voce un codice di classificazione (MasterFormat è l'impostazione predefinita per il Pakistan) così che le quantità vengano aggregate per classe di lavorazione"
+    },
+    "sales_tax_line_present": {
+      "fail": "La fattura non riporta alcuna riga di imposta sulle vendite",
+      "suggestion": "Aggiungete l'imposta sulle vendite come riga separata dopo il subtotale: l'imposta provinciale sui servizi per un contratto di costruzione, oppure l'imposta federale sulle vendite di beni per una fornitura"
+    },
+    "sales_tax_rate_known": {
+      "fail": "La riga dell'imposta sulle vendite applica il {percent} per cento, che non è un'aliquota valida per l'edilizia in Pakistan",
+      "suggestion": "Verificate l'aliquota in base alla provincia e al pagatore, ad esempio il 16 per cento nel Punjab o il 15 per cento nel Sindh, un'aliquota ridotta per le opere pubbliche o il 18 per cento di imposta federale sulle vendite di beni"
+    }
   }
 }

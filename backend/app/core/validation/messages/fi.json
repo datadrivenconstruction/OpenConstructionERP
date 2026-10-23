@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "työnantajan vastuun selvitystodistus",
     "insurance": "vakuutustodistus",
     "license": "urakoitsijan lupa"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu luokituskoodi, joten sitä ei voi ryhmitellä siihen työlajiluokkaan, johon se kuuluu",
+      "suggestion": "Määritä nimikkeelle luokituskoodi (Pakistanissa oletus on MasterFormat), jotta määrät kootaan työlajiluokittain"
+    },
+    "sales_tax_line_present": {
+      "fail": "Laskulla ei ole myyntiveron riviä",
+      "suggestion": "Lisää myyntivero omalle rivilleen välisumman jälkeen: maakunnallinen palveluvero rakennussopimukselle tai liittovaltion myyntivero tavaroista toimitukselle"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Myyntiveron rivi veloittaa {percent} prosenttia, eikä se ole Pakistanin rakentamiselle voimassa oleva verokanta",
+      "suggestion": "Tarkista verokanta maakunnan ja maksajan mukaan, esimerkiksi 16 prosenttia Punjabissa tai 15 prosenttia Sindhissä, alennettu verokanta valtion rakennustöille tai 18 prosenttia liittovaltion myyntivero tavaroista"
+    }
   }
 }

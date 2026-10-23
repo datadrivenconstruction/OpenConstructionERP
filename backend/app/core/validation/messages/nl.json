@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "verklaring vrijwaring werkgeversaansprakelijkheid",
     "insurance": "verzekeringsbewijs",
     "license": "aannemersvergunning"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Post {ordinal} heeft geen classificatiecode, waardoor deze niet kan worden gegroepeerd onder de werkklasse waartoe hij behoort",
+      "suggestion": "Ken de post een classificatiecode toe (MasterFormat is de standaard voor Pakistan), zodat hoeveelheden per werkklasse worden samengevoegd"
+    },
+    "sales_tax_line_present": {
+      "fail": "De factuur bevat geen regel voor omzetbelasting",
+      "suggestion": "Voeg de omzetbelasting toe als aparte regel na het subtotaal: de provinciale belasting op diensten voor een bouwcontract, of de federale omzetbelasting op goederen voor een levering"
+    },
+    "sales_tax_rate_known": {
+      "fail": "De regel omzetbelasting rekent {percent} procent, wat geen tarief is dat voor de bouw in Pakistan geldt",
+      "suggestion": "Controleer het tarief per provincie en betaler, bijvoorbeeld 16 procent in Punjab of 15 procent in Sindh, een verlaagd tarief voor overheidsbouwwerken, of 18 procent federale omzetbelasting op goederen"
+    }
   }
 }

@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "雇主责任无欠费证明",
     "insurance": "保险证明",
     "license": "承包商执照"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "清单项 {ordinal} 缺少分类编码，因而无法归入其所属的工作项类别",
+      "suggestion": "为该清单项指定分类编码（巴基斯坦默认采用 MasterFormat），以便工程量按工作项类别汇总"
+    },
+    "sales_tax_line_present": {
+      "fail": "账单中没有销售税行",
+      "suggestion": "在小计之后将销售税单列为一行：建筑合同适用省级服务税，供货适用联邦商品销售税"
+    },
+    "sales_tax_rate_known": {
+      "fail": "销售税行按{percent}%计税，这不是巴基斯坦建筑业适用的税率",
+      "suggestion": "请按省份和付款方核对税率，例如旁遮普省16%、信德省15%，政府土木工程适用减免税率，或商品适用18%联邦销售税"
+    }
   }
 }

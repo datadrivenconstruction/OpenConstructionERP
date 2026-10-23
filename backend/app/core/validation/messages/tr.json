@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "işveren sorumluluğu borcu yoktur belgesi",
     "insurance": "sigorta belgesi",
     "license": "yüklenici ruhsatı"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "{ordinal} pozunda sınıflandırma kodu yok, bu nedenle ait olduğu iş sınıfı altında gruplanamıyor",
+      "suggestion": "Pozisyona bir sınıflandırma kodu atayın (Pakistan için varsayılan MasterFormat'tır), böylece miktarlar iş sınıfına göre toplansın"
+    },
+    "sales_tax_line_present": {
+      "fail": "Faturada satış vergisi satırı yok",
+      "suggestion": "Satış vergisini ara toplamdan sonra ayrı bir satır olarak ekleyin: bir inşaat sözleşmesi için hizmetlerde eyalet vergisi veya bir teslimat için mallarda federal satış vergisi"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Satış vergisi satırı {percent} yüzde uyguluyor; bu, Pakistan'da inşaat için geçerli bir oran değil",
+      "suggestion": "Oranı eyalete ve ödeyene göre kontrol edin: örneğin Pencap'ta yüzde 16, Sind'de yüzde 15, devlet inşaat işleri için indirimli oran veya mallarda yüzde 18 federal satış vergisi"
+    }
   }
 }

@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "zaświadczenie o rozliczeniu odpowiedzialności pracodawców",
     "insurance": "zaświadczenie ubezpieczeniowe",
     "license": "licencja wykonawcy"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Pozycja {ordinal} nie ma kodu klasyfikacyjnego, więc nie można jej przypisać do klasy robót, do której należy",
+      "suggestion": "Przypisz pozycji kod klasyfikacyjny (dla Pakistanu domyślnie MasterFormat), aby ilości sumowały się według klasy robót"
+    },
+    "sales_tax_line_present": {
+      "fail": "Rachunek nie zawiera pozycji podatku od sprzedaży",
+      "suggestion": "Dodaj podatek od sprzedaży jako osobną pozycję po sumie częściowej: prowincjonalny podatek od usług przy umowie budowlanej albo federalny podatek od sprzedaży towarów przy dostawie"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Pozycja podatku od sprzedaży nalicza {percent} procent, co nie jest stawką obowiązującą w budownictwie w Pakistanie",
+      "suggestion": "Sprawdź stawkę według prowincji i płatnika, na przykład 16 procent w Pendżabie lub 15 procent w Sindhu, obniżoną stawkę dla rządowych robót budowlanych albo 18 procent federalnego podatku od sprzedaży towarów"
+    }
   }
 }

@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "employers' liability clearance certificate",
     "insurance": "insurance certificate",
     "license": "contractor licence"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Position {ordinal} has no classification code, so it cannot be grouped under the work item class it belongs to",
+      "suggestion": "Assign a classification code to the position (MasterFormat is the default for Pakistan) so that quantities roll up by work item class"
+    },
+    "sales_tax_line_present": {
+      "fail": "The bill carries no sales tax line",
+      "suggestion": "Add the sales tax as its own line after the subtotal: the provincial tax on services for a construction contract, or the federal sales tax on goods for a supply"
+    },
+    "sales_tax_rate_known": {
+      "fail": "The sales tax line charges {percent} percent, which is not a rate read for construction in Pakistan",
+      "suggestion": "Check the rate for the province and the payer, for example 16 percent in Punjab or 15 percent in Sindh, a reduced rate for government civil works, or 18 percent federal sales tax on goods"
+    }
   }
 }

@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "attestation de régularité de la responsabilité des employeurs",
     "insurance": "attestation d'assurance",
     "license": "licence d'entrepreneur"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Le poste {ordinal} n'a pas de code de classification, il ne peut donc pas être regroupé dans la classe d'ouvrage à laquelle il appartient",
+      "suggestion": "Attribuez un code de classification au poste (MasterFormat est la valeur par défaut pour le Pakistan) afin que les quantités soient regroupées par classe d'ouvrage"
+    },
+    "sales_tax_line_present": {
+      "fail": "La facture ne comporte aucune ligne de taxe de vente",
+      "suggestion": "Ajoutez la taxe de vente sur une ligne distincte après le sous-total : la taxe provinciale sur les services pour un marché de travaux, ou la taxe fédérale de vente sur les biens pour une fourniture"
+    },
+    "sales_tax_rate_known": {
+      "fail": "La ligne de taxe de vente applique {percent} pour cent, ce qui n'est pas un taux applicable à la construction au Pakistan",
+      "suggestion": "Vérifiez le taux selon la province et le payeur, par exemple 16 pour cent au Pendjab ou 15 pour cent au Sind, un taux réduit pour les travaux publics de l'État, ou 18 pour cent de taxe fédérale de vente sur les biens"
+    }
   }
 }

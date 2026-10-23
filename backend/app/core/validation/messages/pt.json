@@ -1290,5 +1290,19 @@
     "employers_liability_clearance": "certidão negativa de responsabilidade dos empregadores",
     "insurance": "certificado de seguro",
     "license": "licença do empreiteiro"
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "O item {ordinal} não tem código de classificação, por isso não pode ser agrupado na classe de serviço a que pertence",
+      "suggestion": "Atribua um código de classificação ao item (o MasterFormat é o padrão para o Paquistão) para que as quantidades sejam totalizadas por classe de serviço"
+    },
+    "sales_tax_line_present": {
+      "fail": "A fatura não tem linha de imposto sobre vendas",
+      "suggestion": "Acrescente o imposto sobre vendas como linha própria após o subtotal: o imposto provincial sobre serviços para um contrato de obra, ou o imposto federal sobre vendas de bens para um fornecimento"
+    },
+    "sales_tax_rate_known": {
+      "fail": "A linha de imposto sobre vendas cobra {percent} por cento, que não é uma alíquota válida para a construção no Paquistão",
+      "suggestion": "Verifique a alíquota pela província e pelo pagador, por exemplo 16 por cento no Punjab ou 15 por cento no Sindh, uma alíquota reduzida para obras públicas, ou 18 por cento de imposto federal sobre vendas de bens"
+    }
   }
 }
