@@ -146,4 +146,6 @@ async def test_a_missing_vector_store_is_reported_rather_than_raised(
     response = await router.load_vector_from_github(db_id=DB_ID, session=None, _user_id=None)  # type: ignore[arg-type]
 
     assert response["indexed"] == 0
-    assert "LanceDB not available" in response["message"]
+    # The cause stays in the server log; the response names the condition without the exception text.
+    assert "LanceDB not available" not in response["message"]
+    assert "vector store" in response["message"]
