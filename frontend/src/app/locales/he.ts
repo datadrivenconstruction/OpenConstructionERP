@@ -52006,6 +52006,8 @@ const resource = {
     "videos.used_in_cases": "בשימוש בתרחישים האלה",
     "videos.more_cases": "+{{more}} עוד",
     "videos.jump_to": "החל מ-{{time}}: {{chapter}}",
+    "videos.hint.watch": "צפו איך",
+    "videos.hint.tooltip": "סרטון: {{title}}, מ־ {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "הזנת מחירים",

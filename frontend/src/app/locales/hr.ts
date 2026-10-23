@@ -52058,6 +52058,8 @@ const resource = {
     "videos.used_in_cases": "Korišteno u ovim scenarijima",
     "videos.more_cases": "+{{more}} više",
     "videos.jump_to": "Od {{time}}: {{chapter}}",
+    "videos.hint.watch": "Pogledajte kako",
+    "videos.hint.tooltip": "Video: {{title}}, od {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Unos cijena",
     "bid_portal.language": "Jezik",

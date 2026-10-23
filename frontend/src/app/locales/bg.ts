@@ -51763,6 +51763,8 @@ const resource = {
     "videos.used_in_cases": "Използвано в тези казуси",
     "videos.more_cases": "+{{more}} още",
     "videos.jump_to": "От {{time}}: {{chapter}}",
+    "videos.hint.watch": "Вижте как",
+    "videos.hint.tooltip": "Видео: {{title}}, от {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Въвеждане на цени",
     "bid_portal.language": "Език",

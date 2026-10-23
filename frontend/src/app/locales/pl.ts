@@ -53212,6 +53212,8 @@ const resource = {
     "videos.used_in_cases": "Wykorzystywane w tych scenariuszach",
     "videos.more_cases": "+{{more}} więcej",
     "videos.jump_to": "Od {{time}}: {{chapter}}",
+    "videos.hint.watch": "Zobacz jak",
+    "videos.hint.tooltip": "Wideo: {{title}}, od {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Wprowadzanie cen",
     "bid_portal.language": "Język",

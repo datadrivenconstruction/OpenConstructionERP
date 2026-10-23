@@ -51527,6 +51527,8 @@ const resource = {
     "videos.used_in_cases": "Được dùng trong các tình huống này",
     "videos.more_cases": "+{{more}} nữa",
     "videos.jump_to": "Từ {{time}}: {{chapter}}",
+    "videos.hint.watch": "Xem cách làm",
+    "videos.hint.tooltip": "Video: {{title}}, từ {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Nhập giá",

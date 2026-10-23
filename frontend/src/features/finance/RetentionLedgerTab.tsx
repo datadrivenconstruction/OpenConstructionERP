@@ -11,6 +11,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { ApiError } from '@/shared/lib/api';
 import { getRetentionLedger } from './api';
 import { fmtPercent } from '@/shared/lib/formatters';
+import { VideoHint } from '@/features/videos/VideoHint';
 
 /* ── Helpers ────────────────────────────────────────────────────────────── */
 
@@ -101,6 +102,7 @@ export function RetentionLedgerTab({ projectId }: { projectId: string }) {
     <div className="space-y-4">
       {/* Intro */}
       <div className="rounded-lg border border-oe-blue/15 bg-oe-blue/[0.03] p-3">
+        <VideoHint topic="retention" className="float-right ml-2" />
         <p className="text-sm text-content-secondary">
           {t('finance.retention_subtitle', {
             defaultValue:

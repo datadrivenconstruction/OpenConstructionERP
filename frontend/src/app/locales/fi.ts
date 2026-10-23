@@ -51763,6 +51763,8 @@ const resource = {
     "videos.used_in_cases": "Käytetty näissä tapauksissa",
     "videos.more_cases": "+{{more}} lisää",
     "videos.jump_to": "Alkaen {{time}}: {{chapter}}",
+    "videos.hint.watch": "Katso miten",
+    "videos.hint.tooltip": "Video: {{title}}, alkaen {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Hintojen syöttö",
     "bid_portal.language": "Kieli",

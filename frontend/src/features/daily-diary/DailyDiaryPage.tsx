@@ -130,6 +130,7 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildDailyDiaryInsights } from './dailyDiaryInsights';
 import { fmtList } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
+import { VideoHint } from '@/features/videos/VideoHint';
 
 type Tab = 'diaries' | 'today' | 'archive';
 
@@ -411,6 +412,7 @@ export function DailyDiaryPage() {
                 {t('geo_hub.view_on_map', { defaultValue: 'View on map' })}
               </Button>
             )}
+            <VideoHint topic="daily-diary" className="self-center" />
             <Button
               variant="primary"
               size="sm"

@@ -53759,6 +53759,8 @@ const resource = {
     "videos.used_in_cases": "Використовується в цих кейсах",
     "videos.more_cases": "+ще {{more}}",
     "videos.jump_to": "З {{time}}: {{chapter}}",
+    "videos.hint.watch": "Як це зробити",
+    "videos.hint.tooltip": "Відео: {{title}}, з {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Введення цін",

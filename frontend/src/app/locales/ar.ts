@@ -54667,6 +54667,8 @@ const resource = {
     "videos.used_in_cases": "مستخدَم في هذه الحالات العملية",
     "videos.more_cases": "+{{more}} أخرى",
     "videos.jump_to": "من {{time}}: {{chapter}}",
+    "videos.hint.watch": "شاهد كيف",
+    "videos.hint.tooltip": "فيديو: {{title}}, من {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "إدخال الأسعار",

@@ -51876,6 +51876,8 @@ const resource = {
     "videos.used_in_cases": "Ушул мисалдарда колдонулган",
     "videos.more_cases": "+{{more}} дагы",
     "videos.jump_to": "{{time}} тартып: {{chapter}}",
+    "videos.hint.watch": "Кантип экенин көрүү",
+    "videos.hint.tooltip": "Видео: {{title}}, баштап {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Баа киргизүү",

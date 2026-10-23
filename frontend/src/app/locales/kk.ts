@@ -51720,6 +51720,8 @@ const resource = {
     "videos.used_in_cases": "Осы кейстерде қолданылған",
     "videos.more_cases": "+{{more}} тағы",
     "videos.jump_to": "{{time}} бастап: {{chapter}}",
+    "videos.hint.watch": "Қалай екенін көру",
+    "videos.hint.tooltip": "Бейне: {{title}}, бастап {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Баға енгізу",

@@ -52640,6 +52640,8 @@ const resource = {
     "videos.used_in_cases": "Bu vakalarda kullanılıyor",
     "videos.more_cases": "+{{more}} daha",
     "videos.jump_to": "{{time}}’ten itibaren: {{chapter}}",
+    "videos.hint.watch": "Nasıl yapılır",
+    "videos.hint.tooltip": "Video: {{title}}, başlangıç {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Fiyat Girişi",

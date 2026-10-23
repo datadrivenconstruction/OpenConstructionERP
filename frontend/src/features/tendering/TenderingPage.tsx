@@ -85,6 +85,7 @@ import { useAwardOutcome } from '@/shared/hooks/useAwardOutcome';
 import { contractDeepLink } from '@/shared/lib/changeChainLinks';
 import { bidPackageDeepLink, boqDeepLink, PROCUREMENT_LINK, RFQ_LINK } from '@/shared/lib/awardChainLinks';
 import { listPackages as listBidPackages } from '@/features/bid-management/api';
+import { VideoHint } from '@/features/videos/VideoHint';
 
 // English fallbacks for the computed `tendering.prequal_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -2120,6 +2121,7 @@ function PackageDetail({
           <h4 className="text-sm font-semibold text-content-primary flex items-center gap-2">
             <BarChart3 size={16} className="text-oe-blue" />
             {t('tendering.bid_comparison', 'Bid Comparison')}
+            <VideoHint topic="bid-leveling" />
           </h4>
           <div className="flex items-center gap-1">
             <Button

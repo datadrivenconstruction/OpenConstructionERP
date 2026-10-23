@@ -51764,6 +51764,8 @@ const resource = {
     "videos.used_in_cases": "इन केस में उपयोग किया गया",
     "videos.more_cases": "+{{more}} और",
     "videos.jump_to": "{{time}} से: {{chapter}}",
+    "videos.hint.watch": "देखें कैसे",
+    "videos.hint.tooltip": "वीडियो: {{title}}, से {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "कीमत प्रविष्टि",

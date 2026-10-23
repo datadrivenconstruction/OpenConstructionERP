@@ -52048,6 +52048,8 @@ const resource = {
     "videos.used_in_cases": "Folosit în aceste cazuri",
     "videos.more_cases": "+{{more}} în plus",
     "videos.jump_to": "De la {{time}}: {{chapter}}",
+    "videos.hint.watch": "Vezi cum",
+    "videos.hint.tooltip": "Video: {{title}}, de la {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Introducere prețuri",
     "bid_portal.language": "Limbă",

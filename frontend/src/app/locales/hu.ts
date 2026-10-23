@@ -54324,6 +54324,8 @@ const resource = {
     "videos.used_in_cases": "Felhasználva ezekben az esettanulmányokban",
     "videos.more_cases": "+{{more}} további",
     "videos.jump_to": "Innen: {{time}}: {{chapter}}",
+    "videos.hint.watch": "Nézze meg, hogyan",
+    "videos.hint.tooltip": "Videó: {{title}}, ettől: {{clock}} ({{chapter}})",
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "Árak megadása",
     "bid_portal.language": "Nyelv",

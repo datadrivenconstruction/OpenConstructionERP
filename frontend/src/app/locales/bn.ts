@@ -52031,6 +52031,8 @@ const resource = {
     "videos.used_in_cases": "এই কেসগুলোতে ব্যবহৃত",
     "videos.more_cases": "+{{more}} আরও",
     "videos.jump_to": "{{time}} থেকে: {{chapter}}",
+    "videos.hint.watch": "কীভাবে দেখুন",
+    "videos.hint.tooltip": "ভিডিও: {{title}}, থেকে {{clock}} ({{chapter}})",
     // --- /Learn ---
     // --- Bidder price-entry link (public page + staff link cell) ---
     "bid_portal.brand": "দাম এন্ট্রি",
