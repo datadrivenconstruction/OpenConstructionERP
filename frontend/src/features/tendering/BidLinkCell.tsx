@@ -164,3 +164,52 @@ export function BidLinkCell({ packageId, recipientId }: { packageId: string; rec
     </div>
   );
 }
+
+export type InvitationTally = Record<BidInvitationStatus | 'no_link', number>;
+
+/** Count each recipient once, by the state of its newest link. */
+export function tallyInvitations(items: BidInvitation[], recipientIds: string[]): InvitationTally {
+  const tally: InvitationTally = { no_link: 0, not_opened: 0, opened: 0, submitted: 0, expired: 0, revoked: 0 };
+  for (const id of recipientIds) {
+    const latest = latestInvitation(items, id);
+    tally[latest ? latest.status : 'no_link'] += 1;
+  }
+  return tally;
+}
+
+/** One line over the distribution list: who has a link, who opened it, who priced. */
+export function InvitationSummary({ packageId, recipientIds }: { packageId: string; recipientIds: string[] }) {
+  const { t } = useTranslation();
+  const invitationsQ = useQuery({
+    queryKey: bidInvitationsQueryKey(packageId),
+    queryFn: () => listBidInvitations(packageId),
+    staleTime: 15_000,
+  });
+  if (recipientIds.length === 0 || !invitationsQ.data) return null;
+  const tally = tallyInvitations(invitationsQ.data.items, recipientIds);
+  const cells: { key: keyof InvitationTally; label: string; variant: BadgeVariant }[] = [
+    { key: 'no_link', label: t('tendering.bid_link.summary_no_link', { defaultValue: 'No link yet' }), variant: 'neutral' },
+    { key: 'not_opened', label: t('tendering.bid_link.status_not_opened', { defaultValue: 'Link not opened' }), variant: 'neutral' },
+    { key: 'opened', label: t('tendering.bid_link.status_opened', { defaultValue: 'Link opened' }), variant: 'blue' },
+    { key: 'submitted', label: t('tendering.bid_link.status_submitted', { defaultValue: 'Prices submitted' }), variant: 'success' },
+    { key: 'expired', label: t('tendering.bid_link.status_expired', { defaultValue: 'Link expired' }), variant: 'warning' },
+    { key: 'revoked', label: t('tendering.bid_link.status_revoked', { defaultValue: 'Link revoked' }), variant: 'neutral' },
+  ];
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="invitation-summary">
+      <span className="text-xs font-medium text-content-secondary">
+        {t('tendering.bid_link.summary_title', {
+          defaultValue: '{{count}} invited:',
+          count: recipientIds.length,
+        })}
+      </span>
+      {cells
+        .filter((c) => tally[c.key] > 0)
+        .map((c) => (
+          <Badge key={c.key} variant={c.variant}>
+            {c.label}: {tally[c.key]}
+          </Badge>
+        ))}
+    </div>
+  );
+}

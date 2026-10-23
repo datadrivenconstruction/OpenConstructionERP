@@ -365,3 +365,51 @@ export function distributePackage(
     body,
   );
 }
+
+/* ── GAEB X84 bid return ─────────────────────────────────────────────── */
+
+export interface X84LineCheck {
+  ordinal: string;
+  position_id: string | null;
+  description: string;
+  unit: string;
+  quantity: string;
+  unit_rate: string | null;
+  /** Stable codes: unknown_position, unit_mismatch, quantity_changed, unpriced, duplicate_position. */
+  issues: string[];
+}
+
+export interface X84ImportPreview {
+  filename: string;
+  sha256: string;
+  da_kind: string;
+  currency: string;
+  tender_currency: string;
+  /** Stable codes: not_x84, currency_mismatch, no_bill, nothing_priced. */
+  file_issues: string[];
+  lines: X84LineCheck[];
+  matched: number;
+  priced: number;
+  missing_ordinals: string[];
+  total_amount: string;
+  blocking: boolean;
+}
+
+/** Check a priced X84 against the package (no `company`) or add it as a bid. */
+export async function importX84Bid<T>(
+  packageId: string,
+  file: File,
+  company?: { name: string; email: string },
+): Promise<T> {
+  const body = new FormData();
+  body.append('file', file);
+  if (company) {
+    body.append('company_name', company.name);
+    body.append('contact_email', company.email);
+  }
+  const url = `${API_BASE}/v1/tendering/packages/${packageId}/bids/import-x84/${company ? '' : 'preview/'}`;
+  const response = await fetchWithAuth(url, { method: 'POST', body });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(extractErrorMessageFromBody(payload) ?? `HTTP ${response.status}`);
+  return payload as T;
+}

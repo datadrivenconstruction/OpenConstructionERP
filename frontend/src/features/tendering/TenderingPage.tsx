@@ -53,9 +53,10 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { BidComparisonChart } from './BidComparisonChart';
 import { AddendumList } from './AddendumList';
 import { AwardRecordPanel } from './AwardRecordPanel';
-import { BidLinkCell, bidInvitationsQueryKey } from './BidLinkCell';
+import { BidLinkCell, InvitationSummary, bidInvitationsQueryKey } from './BidLinkCell';
 import { BidPortalMarks } from './BidPortalMarks';
 import { RecipientImportDialog } from './RecipientImportDialog';
+import { X84ImportDialog } from './X84ImportDialog';
 import { LevelingMatrix } from './LevelingMatrix';
 import { cellRate, classifyCell, pricedRates, recommend, unpricedLineCount } from './analysis';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
@@ -1203,6 +1204,8 @@ function DistributionPanel({ packageId }: { packageId: string }) {
           </Button>
         </div>
 
+        <InvitationSummary packageId={packageId} recipientIds={recipients.map((r) => r.id)} />
+
         {/* Recipient rows */}
         <div className="mt-4">
           {recipientsQ.isLoading ? (
@@ -1407,6 +1410,7 @@ function PackageDetail({
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
   const [showAddBid, setShowAddBid] = useState(false);
+  const [showX84, setShowX84] = useState(false);
   // Sub-tab on the package detail view — bids/comparison ↔ distribution ↔
   // addenda ↔ leveling matrix ↔ award record. Defaults to "bids" so existing
   // muscle memory keeps working; the other tabs are additive. The award record
@@ -1844,6 +1848,17 @@ function PackageDetail({
                 {t('tendering.add_bid', 'Add Bid')}
               </Button>
             )}
+            {pkg.boq_id && pkg.status !== 'awarded' && pkg.status !== 'closed' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Upload size={14} />}
+                onClick={() => setShowX84(true)}
+                data-testid="x84-import-open"
+              >
+                {t('tendering.x84_open', { defaultValue: 'Import X84 bid' })}
+              </Button>
+            )}
             {/* The bill goes out to bidders in whichever format they work in:
                 a spreadsheet anyone can fill, or the GAEB exchange file. Both
                 are unpriced; neither is the default. */}
@@ -2265,6 +2280,12 @@ function PackageDetail({
           onCreated={handleBidCreated}
         />
       )}
+      <X84ImportDialog
+        open={showX84}
+        onClose={() => setShowX84(false)}
+        packageId={packageId}
+        onImported={handleBidCreated}
+      />
       <ConfirmDialog {...confirmProps} />
     </div>
   );
