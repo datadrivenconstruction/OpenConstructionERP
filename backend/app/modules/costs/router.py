@@ -2745,12 +2745,12 @@ async def load_vector_from_github(
             # unexplained 500. Report it the way the sibling /vector/index
             # endpoint does - a readable message the caller can act on - and
             # stop rather than failing once per batch for the whole file.
-            logger.warning("Vector indexing failed for %s: %s", db_id, exc)
+            logger.warning("Vector indexing failed for %s", db_id, exc_info=True)
             return {
                 "indexed": indexed,
                 "database": db_id,
                 "source": "github",
-                "message": f"Vector indexing failed: {exc}",
+                "message": "Vector indexing failed. The vector store may not be installed; see the server log.",
             }
 
     duration = round(time.monotonic() - start, 1)

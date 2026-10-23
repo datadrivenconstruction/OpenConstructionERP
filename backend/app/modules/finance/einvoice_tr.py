@@ -39,6 +39,7 @@ from dataclasses import dataclass, field, replace
 from decimal import Decimal
 from typing import Any
 
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -110,8 +111,14 @@ def read_tr_fields(metadata: Any) -> tuple[dict[str, Any], str]:
         return TrEInvoiceFields().model_dump(), ""
     try:
         return TrEInvoiceFields.model_validate(block).model_dump(), ""
-    except Exception as exc:  # noqa: BLE001 - pydantic's error, or a block that is not an object
-        return TrEInvoiceFields().model_dump(), str(exc)
+    except ValidationError as exc:
+        problems = "; ".join(
+            f"{'.'.join(str(part) for part in err['loc']) or 'block'}: {err['msg']}" for err in exc.errors()
+        )
+        return TrEInvoiceFields().model_dump(), problems
+    except Exception:  # noqa: BLE001 - a block that is not an object
+        logger.warning("Unreadable Turkish e-invoice block", exc_info=True)
+        return TrEInvoiceFields().model_dump(), "The stored e-invoice block is not readable."
 
 
 def agreement_problems(

@@ -343,10 +343,12 @@ async def test_ai_connection(
             "model": effective_model,
         }
     except Exception as exc:
-        logger.warning("AI test failed for %s: %s", provider, exc)
+        logger.warning("AI test failed for %s", provider, exc_info=True)
         return {
             "success": False,
-            "message": f"Connection failed: {str(exc)[:200]}",
+            "message": (
+                f"Connection to {provider} failed. Check the endpoint, key and model; the server log has details."
+            ),
             "latency_ms": None,
             "model": effective_model,
         }

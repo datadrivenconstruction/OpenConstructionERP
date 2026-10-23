@@ -1422,7 +1422,7 @@ def _surface_parquet_failure(
     # The error string stamped onto the model row stays short - the full
     # traceback is in the log event. The UI only needs enough to render
     # "ParquetWriteError: disk full" without exposing the whole stack.
-    short_error = f"{exc_type}: {exc_msg}"[:500]
+    short_error = f"{exc_type}: Parquet write failed, see the server log"
     return "failed", short_error
 
 
