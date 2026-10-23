@@ -97,13 +97,13 @@ KEY_LINE_WRAPPED = re.compile(r'^\s*"([^"]+)":\s*$')
 # between the colon and the opening quote so a wrapped value is not silently
 # treated as absent.
 KEY_VAL_MULTILINE = re.compile(
-    r"""^[ \t]*"([^"]+)":[ \t]*\r?\n?[ \t]*(['"])((?:\\.|(?!\2).)*)\2,?[ \t]*\r?$""",
+    r"""^[ \t]*"([^"]+)":[ \t]*\r?\n?[ \t]*(['"])((?:\\.|(?!\2)[^\\\n])*)\2,?[ \t]*\r?$""",
     re.MULTILINE,
 )
 
 # t('key', { ... defaultValue: 'text' ... }) with the options object brace-free.
 DEFAULT_VALUE = re.compile(
-    r"""['"]([A-Za-z0-9_.\-]+)['"]\s*,\s*\{[^{}]*?defaultValue:\s*(['"])((?:\\.|(?!\2).)*)\2""",
+    r"""['"]([A-Za-z0-9_.\-]+)['"]\s*,\s*\{[^{}]*?defaultValue:\s*(['"])((?:\\.|(?!\2)[^\\])*)\2""",
     re.DOTALL,
 )
 
@@ -111,7 +111,7 @@ DEFAULT_VALUE = re.compile(
 # same way defaultValue does, just on a JSX component instead of a t() call.
 # Stops at the next i18nKey so it can't bleed into a second Trans block.
 TRANS_DEFAULTS = re.compile(
-    r"""i18nKey\s*=\s*\{?\s*['"`]([\w.-]+)['"`](?:(?!i18nKey)[\s\S])*?\bdefaults\s*=\s*(['"])((?:\\.|(?!\2).)*)\2""",
+    r"""i18nKey\s*=\s*\{?\s*['"`]([\w.-]+)['"`](?:(?!i18nKey)[\s\S])*?\bdefaults\s*=\s*(['"])((?:\\.|(?!\2)[^\\\n])*)\2""",
 )
 
 # Data files name a key and its English text as two adjacent fields, and both the

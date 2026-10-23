@@ -187,7 +187,7 @@ def compare_revisions(a: str | None, b: str | None) -> int | None:
 # Two independent signals mark where the next field begins. A run of two or more
 # spaces is the column gap. A following label is the field name itself, and the
 # label carries no internal space so that "AS NOTED" is not mistaken for one.
-_FIELD_LABEL_BREAK = re.compile(r"[ \t]+(?=[A-Za-z][A-Za-z.]{0,14}[ \t]*[:=])")
+_FIELD_LABEL_BREAK = re.compile(r"(?<![ \t])[ \t]+(?=[A-Za-z][A-Za-z.]{0,14}[ \t]*[:=])")
 _COLUMN_GAP_BREAK = re.compile(r"[ \t]{2,}")
 
 
@@ -294,7 +294,7 @@ _NUMBER_LABEL = re.compile(
     r"|DRAWING[ \t]*(?:NO\.?|NUMBER)|TAVOLA|TAV\.?|ELABORATO|BLATT(?:[ \t]*NR\.?)?|PLAN[ \t-]*NR\.?"
     r"|PLANNUMMER|PLANO|PLANCHE|N[°º][ \t]*(?:DE[ \t]*)?PLAN(?:CHE|O)?)(?![^\W\d])"
     r"(?:[ \t]*(?i:n[°º]?|no|nr)\.?(?=[ \t:]*\w))?"
-    r"[ \t]*[:=]?[ \t]*"
+    r"[ \t]*(?:[:=][ \t]*)?"
     r"(?P<value>(?i:[A-Z0-9](?:[A-Z0-9._\-]{0,18}[A-Z0-9])?))(?![\w./-])"
 )
 # Codes printed without a label, tried after the labelled form. The first and
@@ -429,7 +429,7 @@ def _scale_from(text: str) -> str | None:
 # date whose day and month could swap is left unset rather than guessed.
 _DATE = re.compile(
     r"(?<!\w)(?P<label>(?i:DATA(?:[ \t]+(?:DI[ \t]+)?EMISSIONE)?|DATUM|DATE|FECHA|STAND))(?![^\W\d])"
-    r"[ \t]*[:=]?[ \t]*"
+    r"[ \t]*(?:[:=][ \t]*)?"
     r"(?:(?P<iy>\d{4})[-./](?P<im>\d{1,2})[-./](?P<id>\d{1,2})"
     r"|(?P<a>\d{1,2})[-./](?P<b>\d{1,2})[-./](?P<y>\d{4}|\d{2}))(?!\d)"
 )

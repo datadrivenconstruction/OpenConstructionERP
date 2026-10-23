@@ -369,7 +369,7 @@ async def demo_read_only_guard(connection: HTTPConnection) -> AsyncGenerator[Non
 # ── Layer 2: the database tripwire ──────────────────────────────────────────
 
 #: Leading keyword of a statement, past any leading whitespace or comment.
-_LEADING = re.compile(r"\A(?:\s+|--[^\n]*\n|/\*.*?\*/)*([A-Za-z_]+)", re.DOTALL)
+_LEADING = re.compile(r"\A(?:\s|--[^\n]*\n|/\*.*?\*/)*([A-Za-z_]+)", re.DOTALL)
 
 #: Statement kinds that move rows or change the schema. Deliberately not a
 #: catch-all: ``SET``/``SHOW``/``BEGIN``/``COMMIT``/``SAVEPOINT``/``DISCARD``/
