@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Upload } from 'lucide-react';
 import { Button, Badge, Input } from '@/shared/ui';
 import { WideModal } from '@/shared/ui/WideModal';
+import { fmtList } from '@/shared/lib/formatters';
 import { importX84Bid, type X84ImportPreview } from './api';
 
 const FILE_ISSUE_TEXT: Record<string, string> = {
@@ -157,7 +158,7 @@ export function X84ImportDialog({
               <p className="text-sm text-content-secondary">
                 {t('tendering.x84_missing', {
                   defaultValue: 'Not in the file, left unpriced: {{list}}',
-                  list: preview.missing_ordinals.slice(0, 20).join(', '),
+                  list: fmtList(preview.missing_ordinals.slice(0, 20)),
                 })}
               </p>
             )}

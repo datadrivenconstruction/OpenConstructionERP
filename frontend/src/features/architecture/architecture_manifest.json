@@ -264071,6 +264071,7 @@
         "schemas.py",
         "service.py",
         "workbooks.py",
+        "x84_import.py",
         "xlsx_translations.py"
       ],
       "manifest": {
@@ -264369,6 +264370,20 @@
           "handler": "create_bid",
           "response_model": "BidResponse",
           "request_schema": "BidCreate"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/bids/import-x84/preview/",
+          "handler": "preview_x84_bid",
+          "response_model": "X84ImportPreview",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/bids/import-x84/",
+          "handler": "import_x84_bid",
+          "response_model": "BidResponse",
+          "request_schema": "UploadFile"
         },
         {
           "method": "GET",
@@ -266303,6 +266318,114 @@
             {
               "name": "currency",
               "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "X84LineCheck",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One priced line of an X84 file, matched against the tender's bill.",
+          "fields": [
+            {
+              "name": "ordinal",
+              "type": "str"
+            },
+            {
+              "name": "position_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "unit",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "unit_rate",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "issues",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "X84ImportPreview",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What importing an X84 file would put into the bid comparison.",
+          "fields": [
+            {
+              "name": "filename",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "sha256",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "da_kind",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "tender_currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "file_issues",
+              "type": "list[str]"
+            },
+            {
+              "name": "lines",
+              "type": "list[X84LineCheck]"
+            },
+            {
+              "name": "matched",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "priced",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "missing_ordinals",
+              "type": "list[str]"
+            },
+            {
+              "name": "total_amount",
+              "type": "str",
+              "default": "'0.00'"
+            },
+            {
+              "name": "blocking",
+              "type": "bool",
+              "default": "False"
             }
           ]
         }
@@ -277325,10 +277448,10 @@
     },
     {
       "name": "tendering",
-      "ts_files": 23,
+      "ts_files": 25,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 23
+      "test_files": 9,
+      "total_files": 25
     },
     {
       "name": "timeline",
@@ -278990,11 +279113,11 @@
     "total_models": 788,
     "total_columns": 9172,
     "total_relationships": 240,
-    "total_routes": 4627,
-    "total_schemas": 4120,
-    "total_python_files": 2810,
+    "total_routes": 4629,
+    "total_schemas": 4122,
+    "total_python_files": 2811,
     "frontend_features": 209,
-    "frontend_ts_files": 3606,
+    "frontend_ts_files": 3608,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

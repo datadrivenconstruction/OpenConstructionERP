@@ -741,6 +741,8 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "get_package_scope",
         "update_package",
         "create_bid",
+        "preview_x84_bid",
+        "import_x84_bid",
         "list_bids",
         "update_bid",
         "compare_bids",
