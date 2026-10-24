@@ -136,3 +136,60 @@ describe('appearance values', () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 });
+
+describe('style presets with a theme', () => {
+  it('adds the site, night and presentation presets to the standard set', () => {
+    expect(APPEARANCE_PRESETS.map((p) => p.id)).toEqual([
+      'standard',
+      'classic',
+      'studio',
+      'engineering',
+      'warm',
+      'executive',
+      'site',
+      'night',
+      'presentation',
+    ]);
+  });
+
+  it('matches a preset only with its own theme', () => {
+    for (const p of APPEARANCE_PRESETS) expect(matchPreset(p.value, p.theme)).toBe(p.id);
+    const night = APPEARANCE_PRESETS.find((p) => p.id === 'night')!;
+    expect(matchPreset(night.value, 'light')).toBeNull();
+    expect(matchPreset(night.value, 'dark')).toBe('night');
+  });
+
+  it('the site preset sets a large text size and a light theme', () => {
+    const site = APPEARANCE_PRESETS.find((p) => p.id === 'site')!;
+    expect(site.text).toBe('larger');
+    expect(site.theme).toBe('light');
+  });
+});
+
+describe('high contrast tokens', () => {
+  const textKeys = ['text-primary', 'text-secondary', 'text-tertiary', 'text-quaternary'];
+
+  it('light text clears 7:1 on every light surface', () => {
+    const hc = block("html[data-contrast='high']");
+    for (const k of textKeys) {
+      for (const bg of ['#ffffff', '#f5f5f7', '#fbfbfd', hc['bg-page']!]) {
+        expect(ratio(hc[k]!, bg), `${k} on ${bg}`).toBeGreaterThanOrEqual(7);
+      }
+    }
+  });
+
+  it('dark text clears 7:1 on every dark surface', () => {
+    const hc = block("html.dark[data-contrast='high']");
+    for (const k of textKeys) {
+      for (const s of ['bg', 'bg-secondary', 'bg-tertiary', 'bg-elevated']) {
+        expect(ratio(hc[k]!, hc[s]!), `${k} on ${s}`).toBeGreaterThanOrEqual(7);
+      }
+    }
+  });
+
+  it('borders are visible: at least 3:1 against the surface', () => {
+    expect(ratio(block("html[data-contrast='high']").border!, '#ffffff')).toBeGreaterThanOrEqual(3);
+    const d = block("html.dark[data-contrast='high']");
+    expect(ratio(d.border!, d['bg-elevated']!)).toBeGreaterThanOrEqual(3);
+  });
+});

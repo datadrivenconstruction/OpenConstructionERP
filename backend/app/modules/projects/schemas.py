@@ -15,6 +15,14 @@ _DECIMAL_RE = re.compile(r"^[0-9]+(\.[0-9]+)?$")
 _UNIT_CODE_RE = re.compile(r"^[A-Za-z0-9._/²³-]{1,20}$")
 #: A project's works, the vocabulary of ``contracts.country_defaults.CEILING_WORKS``.
 _WORKS_PATTERN = r"^(public|private)$"
+_COLOR_PATTERN = r"^#[0-9a-fA-F]{6}$"
+_COLOR_DESCRIPTION = "Project colour as #rrggbb, shown to the whole team. Null clears it."
+
+
+def _normalise_color(v: str | None) -> str | None:
+    """Lower-case a valid hex colour so equal colours compare equal."""
+    return v.lower() if v else None
+
 
 # Valid date formats accepted by the platform (ISO 8601 preferred)
 _DATE_FORMATS = ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%d.%m.%Y", "%m/%d/%Y")
@@ -374,6 +382,12 @@ class ProjectCreate(BaseModel):
         "retention law follows the client (France), new contracts start from that law's terms. "
         "Omitted means not recorded, and the country's neutral figures apply.",
     )
+    color: str | None = Field(default=None, pattern=_COLOR_PATTERN, description=_COLOR_DESCRIPTION)
+
+    @field_validator("color", mode="after")
+    @classmethod
+    def _lower_color(cls, v: str | None) -> str | None:
+        return _normalise_color(v)
 
     @field_validator("country_code", mode="after")
     @classmethod
@@ -541,6 +555,12 @@ class ProjectUpdate(BaseModel):
     )
     # 'public' or 'private'; an explicit null clears it back to not recorded.
     works: str | None = Field(default=None, pattern=_WORKS_PATTERN)
+    color: str | None = Field(default=None, pattern=_COLOR_PATTERN, description=_COLOR_DESCRIPTION)
+
+    @field_validator("color", mode="after")
+    @classmethod
+    def _lower_color(cls, v: str | None) -> str | None:
+        return _normalise_color(v)
 
     @field_validator("country_code", mode="after")
     @classmethod
@@ -712,6 +732,7 @@ class ProjectResponse(BaseModel):
     # Set through the legal entities module, read-only here.
     legal_entity_id: UUID | None = None
     works: str | None = None
+    color: str | None = None
     contract_value: str | None = None
     planned_start_date: str | None = None
     planned_end_date: str | None = None
