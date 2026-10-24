@@ -628,6 +628,20 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             except Exception:
                 logger.warning("teams roster demo seed skipped for %s (non-fatal)", _pid, exc_info=True)
 
+        # Certified payroll runs only on the US showcases and guards itself on an
+        # existing wage determination, so other projects and re-runs are no-ops.
+        for _pid in _demo_pids:
+            try:
+                from app.modules.certified_payroll.seed import seed_certified_payroll
+
+                async with async_session_factory() as _cs:
+                    _written = await seed_certified_payroll(_cs, project_id=_pid)
+                    await _cs.commit()
+                    if _written:
+                        logger.info("certified payroll demo seed: %s", _written)
+            except Exception:
+                logger.warning("certified payroll demo seed skipped for %s (non-fatal)", _pid, exc_info=True)
+
         # QMS seeds one project at a time and is not internally idempotent; loop
         # the projects, skipping any that already carry an ITP plan so a re-run
         # never duplicates.
