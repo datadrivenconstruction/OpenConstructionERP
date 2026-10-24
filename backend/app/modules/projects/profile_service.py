@@ -337,6 +337,13 @@ async def ensure_default_profile(
     if existing is not None:
         return await _result(db, project_id)
 
+    from app.core.demo_read_only import demo_read_only_enabled
+
+    if demo_read_only_enabled():
+        # The read-only demo refuses the insert below, which turned every GET of an
+        # unprofiled project into a "this is a demonstration" dialog. Answer unsaved.
+        return default_profile_result(project_id)
+
     prof = ProjectProfile(
         project_id=project_id,
         preset="custom",
@@ -362,3 +369,38 @@ async def ensure_default_profile(
         )
     await db.flush()
     return await _result(db, project_id)
+
+
+def default_profile_result(project_id: uuid.UUID) -> schemas.ProjectProfileResult:
+    """Return the retrofit default profile without persisting it."""
+    modules = [
+        schemas.ProjectModuleRead(
+            module_name=name,
+            enabled=True,
+            tier="must",
+            score=100,
+            phase="setup",
+            source="core",
+            ordinal=i,
+            why="Retrofit default - all modules (focus mode off)",
+        )
+        for i, name in enumerate(discover_module_names(), start=1)
+    ]
+    return schemas.ProjectProfileResult(
+        profile=schemas.ProjectProfileRead(
+            project_id=project_id,
+            preset="custom",
+            activity=[],
+            phases=[],
+            role=None,
+            size=None,
+            region=None,
+            language=None,
+            extensions_enabled=[],
+            focus_mode_enabled=False,
+            setup_completion={},
+        ),
+        modules=modules,
+        enabled_count=len(modules),
+        must_count=len(modules),
+    )

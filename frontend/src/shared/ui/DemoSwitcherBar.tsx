@@ -94,7 +94,9 @@ export function DemoSwitcherBar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projects]);
 
-  if (!demoMode) return null;
+  // A tab whose project this account cannot see would only sit there greyed out.
+  const available = DEMO_SWITCHER_SLUGS.filter((slug) => bySlug.has(slug));
+  if (!demoMode || available.length === 0) return null;
 
   return (
     <nav
@@ -105,7 +107,7 @@ export function DemoSwitcherBar() {
         {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
       </span>
       <div role="tablist" className="flex flex-wrap gap-1">
-        {DEMO_SWITCHER_SLUGS.map((slug) => {
+        {available.map((slug) => {
           const p = bySlug.get(slug);
           const active = !!p && p.id === activeProjectId;
           return (
@@ -114,15 +116,13 @@ export function DemoSwitcherBar() {
               type="button"
               role="tab"
               aria-selected={active}
-              disabled={!p}
-              title={p ? p.name : t('demo_switcher.not_installed', { defaultValue: 'Not installed on this server' })}
+              title={p?.name}
               onClick={() => p && open(p)}
               className={clsx(
                 'rounded-full px-3 py-1 font-medium transition-colors',
                 active
                   ? 'bg-oe-blue text-white'
                   : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
-                !p && 'cursor-not-allowed opacity-40',
               )}
             >
               {t(`demo_switcher.tab_${slug.replace(/-/g, '_')}`)}

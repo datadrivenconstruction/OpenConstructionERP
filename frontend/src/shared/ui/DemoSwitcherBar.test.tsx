@@ -45,16 +45,22 @@ describe('DemoSwitcherBar', () => {
     expect(fetchProjectList).not.toHaveBeenCalled();
   });
 
-  it('shows four tabs and disables demos that are not installed', async () => {
+  it('shows only the demos this account can open', async () => {
     apiGet.mockResolvedValue({ demo_mode: true });
     fetchProjectList.mockResolvedValue(PROJECTS);
     renderBar();
     const tabs = await screen.findAllByRole('tab');
-    expect(tabs).toHaveLength(4);
-    await waitFor(() => expect(tabs[0]).not.toBeDisabled());
-    expect(tabs[1]).not.toBeDisabled();
-    expect(tabs[2]).toBeDisabled();
-    expect(tabs[3]).toBeDisabled();
+    expect(tabs).toHaveLength(2);
+    tabs.forEach((tab) => expect(tab).not.toBeDisabled());
+    expect(tabs.map((tab) => tab.getAttribute('title'))).toEqual(['Consultancy', 'Contractor']);
+  });
+
+  it('renders nothing when no demo project is visible', async () => {
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue([PROJECTS[2]]);
+    const { container } = renderBar();
+    await waitFor(() => expect(fetchProjectList).toHaveBeenCalled());
+    expect(container.querySelector('nav')).toBeNull();
   });
 
   it('applies a ?demo= deep link once projects load', async () => {
