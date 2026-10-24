@@ -35,6 +35,13 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "channel": "academy"
     },
     {
+      "id": "estimating-basics-en",
+      "title": "Estimating basics: from takeoff to bid",
+      "language": "en",
+      "market": null,
+      "channel": "academy"
+    },
+    {
       "id": "playbook-getting-started",
       "title": "Builder's Playbook USA: Construction Management with OpenConstructionERP",
       "language": "en",
@@ -1667,7 +1674,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "cost",
       "title": "Kostenrahmen nach DIN 276 erstellen",
-      "description": "Wie erstellen Sie einen belastbaren Kostenrahmen nach DIN 276? In diesem Tutorial richten Sie die Plattform ein, legen das Projekt an und bauen eine nachvollziehbare Grundlage für die weitere Planung auf.",
+      "description": "In diesem Video legen wir ein Bauprojekt in OpenConstructionERP an und erstellen den ersten Kostenrahmen nach DIN 276. Dazu richten wir die Plattform ein, erfassen das Budget und prüfen, ob Größenordnung und Projektumfang zusammenpassen.",
       "duration": 225,
       "cover": "https://i.ytimg.com/vi/9qsR7e77by0/maxresdefault.jpg",
       "chapters": [
@@ -1717,7 +1724,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "cost",
       "title": "Kostenschätzung nach DIN 276 erstellen | Kostenrahmen sicher vergleichen",
-      "description": "Erstellen Sie eine Kostenschätzung nach DIN 276 und vergleichen Sie sie sauber mit dem Kostenrahmen. Das Tutorial zeigt den Weg vom Vorentwurf bis zur belastbaren Entscheidungsgrundlage.",
+      "description": "Wir erstellen eine Kostenschätzung nach DIN 276 in OpenConstructionERP und vergleichen sie mit dem bisherigen Kostenrahmen. Dabei schauen wir auf die Abweichungen und bereiten die Zahlen für den nächsten Planungsbeschluss auf.",
       "duration": 208,
       "cover": "https://i.ytimg.com/vi/dbq7iB3qhF0/maxresdefault.jpg",
       "chapters": [
@@ -1768,7 +1775,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "cost",
       "title": "Kostenberechnung nach DIN 276 | Baubeschluss sicher vorbereiten",
-      "description": "So erstellen Sie eine Kostenberechnung nach DIN 276, vergleichen sie mit der Kostenschätzung und machen den Entwurf finanziell transparent.",
+      "description": "Wie verändert sich die Kostenplanung, wenn der Entwurf konkreter wird? Wir erstellen die Kostenberechnung nach DIN 276, stellen sie der Kostenschätzung gegenüber und bereiten die Unterlagen für den Baubeschluss vor.",
       "duration": 216,
       "cover": "https://i.ytimg.com/vi/s876HFnwlRs/maxresdefault.jpg",
       "chapters": [
@@ -1818,7 +1825,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "gaeb",
       "title": "Kostenvoranschlag und GAEB | Leistungsverzeichnis bepreisen",
-      "description": "Bepreisen Sie ein Leistungsverzeichnis für den Rohbau, erstellen Sie den Kostenvoranschlag und bereiten Sie die GAEB-Datei für die Bieter vor.",
+      "description": "Wir bepreisen ein Leistungsverzeichnis für den Rohbau und erstellen daraus den Kostenvoranschlag in OpenConstructionERP. Anschließend bereiten wir die GAEB-Datei für die Weitergabe an die Bieter vor.",
       "duration": 220,
       "cover": "https://i.ytimg.com/vi/buytHXRaav4/maxresdefault.jpg",
       "chapters": [
@@ -1867,7 +1874,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "award",
       "title": "Vergabe im Bauwesen | Angebote vergleichen und Auftrag vergeben",
-      "description": "Vergleichen Sie Angebote für den Rohbau im Preisspiegel, prüfen Sie auffällige Preise und bereiten Sie eine saubere Vergabeentscheidung vor.",
+      "description": "Die Rohbauangebote liegen vor. Wir vergleichen sie im Preisspiegel, prüfen auffällige Preise und halten offene Fragen fest, bevor der Auftrag vergeben wird. Das Beispiel zeigt die einzelnen Schritte in OpenConstructionERP.",
       "duration": 223,
       "cover": "https://i.ytimg.com/vi/U3YiFn9sEUs/maxresdefault.jpg",
       "chapters": [
@@ -1919,7 +1926,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "programme",
       "title": "Baubeginn organisieren | Bauzeitenplan und Bautagebuch anlegen",
-      "description": "Vom vergebenen Auftrag zur laufenden Baustelle: Legen Sie den Bauzeitenplan an und führen Sie das Bautagebuch ab dem ersten Bautag.",
+      "description": "Nach der Vergabe beginnt die Vorbereitung der Baustelle. In OpenConstructionERP legen wir einen Bauzeitenplan an, dokumentieren den Baubeginn und führen die ersten Einträge im Bautagebuch. Dabei geht es auch darum, welche Nachweise später noch gebraucht werden.",
       "duration": 207,
       "cover": "https://i.ytimg.com/vi/XSotB6IPhR0/maxresdefault.jpg",
       "chapters": [
@@ -1978,7 +1985,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "change",
       "title": "Nachträge und Abschlagsrechnungen prüfen | Baukosten sicher steuern",
-      "description": "Prüfen Sie Nachträge und Abschlagsrechnungen im Bauprojekt. Das Tutorial zeigt, wie Leistungen, Beträge und Sicherheitseinbehalt nachvollziehbar geprüft werden.",
+      "description": "Wir prüfen einen Nachtrag und zwei Abschlagsrechnungen in OpenConstructionERP. Dabei gleichen wir Leistungen und Beträge mit dem Vertrag ab und schauen uns an, wie der Sicherheitseinbehalt in der Prüfung berücksichtigt wird.",
       "duration": 242,
       "cover": "https://i.ytimg.com/vi/bDLHOMF6ZoE/maxresdefault.jpg",
       "chapters": [
@@ -2031,7 +2038,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "handover",
       "title": "Bauabnahme und Schlussrechnung | Mängel, Kosten und Abschluss im Griff",
-      "description": "Organisieren Sie die förmliche Abnahme, erfassen Sie Mängel, prüfen Sie die Schlussrechnung und schließen Sie die Kostenkette im Bauprojekt ab.",
+      "description": "Zum Projektabschluss stehen Abnahme, offene Mängel und Schlussrechnung an. Wir gehen diese Schritte in OpenConstructionERP durch und führen die Kostenplanung mit der Kostenfeststellung nach DIN 276 zu Ende.",
       "duration": 225,
       "cover": "https://i.ytimg.com/vi/yLdicouAJw0/maxresdefault.jpg",
       "chapters": [
@@ -2050,6 +2057,313 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         {
           "t": 145,
           "title": "Kosten feststellen"
+        }
+      ]
+    },
+    {
+      "id": "EB01",
+      "youtubeId": "hAtxO0Oy_W0",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "series": "estimating-basics-en",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor",
+        "project-manager"
+      ],
+      "cases": [
+        "estimate-from-cost-database",
+        "sense-check-an-estimate-with-benchmarks"
+      ],
+      "routes": [
+        "/cost-explorer",
+        "/boq",
+        "/assemblies",
+        "/validation"
+      ],
+      "result": "cost",
+      "title": "How to Read a Construction Estimate Line by Line",
+      "description": "Learn how to read a construction estimate, check quantities and unit rates, and spot missing scope before you trust the total. We work through a duplex example in OpenConstructionERP, from individual line items to overhead, profit and contingency.",
+      "duration": 510,
+      "cover": "https://i.ytimg.com/vi/hAtxO0Oy_W0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Why it matters"
+        },
+        {
+          "t": 43,
+          "title": "Read the estimate line by line"
+        },
+        {
+          "t": 204,
+          "title": "Markups and the total"
+        },
+        {
+          "t": 309,
+          "title": "Is the estimate complete?"
+        }
+      ]
+    },
+    {
+      "id": "EB02",
+      "youtubeId": "8eUJw4go52k",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "series": "estimating-basics-en",
+      "seriesOrder": 2,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "commercial-manager",
+        "finance-manager"
+      ],
+      "cases": [
+        "compile-the-tender-control-price-and-price-a-bid",
+        "sense-check-an-estimate-with-benchmarks"
+      ],
+      "routes": [
+        "/costs",
+        "/norm-expansion",
+        "/boq",
+        "/cost-explorer",
+        "/tendering",
+        "/validation"
+      ],
+      "result": "cost",
+      "title": "Markup vs Margin in Construction: 25% Markup Is 20% Margin",
+      "description": "Markup and margin use different bases. Add $25 to a $100 cost and the price is $125: a 25% markup, but a 20% margin.",
+      "duration": 456,
+      "cover": "https://i.ytimg.com/vi/8eUJw4go52k/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "25 percent is not 20 percent"
+        },
+        {
+          "t": 29,
+          "title": "Cost, price and the gap"
+        },
+        {
+          "t": 82,
+          "title": "Open the estimate"
+        },
+        {
+          "t": 132,
+          "title": "Margin and cost breakdown"
+        },
+        {
+          "t": 185,
+          "title": "How the mistake happens"
+        },
+        {
+          "t": 268,
+          "title": "Convert markup and margin"
+        },
+        {
+          "t": 302,
+          "title": "Work backwards from the margin"
+        },
+        {
+          "t": 347,
+          "title": "A percent of what?"
+        },
+        {
+          "t": 397,
+          "title": "Approximate numbers"
+        },
+        {
+          "t": 416,
+          "title": "Recap"
+        },
+        {
+          "t": 441,
+          "title": "Try it"
+        }
+      ]
+    },
+    {
+      "id": "EB03",
+      "youtubeId": "J6-iVD_Iw0Q",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "series": "estimating-basics-en",
+      "seriesOrder": 3,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor"
+      ],
+      "cases": [
+        "takeoff-quantities-from-a-pdf-plan",
+        "review-ai-takeoff-proposals"
+      ],
+      "routes": [
+        "/files",
+        "/takeoff",
+        "/quantities",
+        "/boq"
+      ],
+      "result": "bill",
+      "title": "How to Do a Quantity Takeoff from PDF Drawings (Free Software)",
+      "description": "Turn a PDF floor plan into measured quantities and a priced estimate in OpenConstructionERP. We calibrate the drawing, check a second dimension, measure room areas and count windows and doors.",
+      "duration": 434,
+      "cover": "https://i.ytimg.com/vi/J6-iVD_Iw0Q/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "The drawing"
+        },
+        {
+          "t": 71,
+          "title": "Measure it"
+        },
+        {
+          "t": 200,
+          "title": "How accurate"
+        },
+        {
+          "t": 317,
+          "title": "Into the estimate"
+        }
+      ]
+    },
+    {
+      "id": "EB04",
+      "youtubeId": "-WFhnoP0sM8",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "series": "estimating-basics-en",
+      "seriesOrder": 4,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "quantity-surveyor",
+        "design-lead"
+      ],
+      "cases": [
+        "quantities-from-bim",
+        "build-a-5d-cost-loaded-model"
+      ],
+      "routes": [
+        "/bim",
+        "/boq",
+        "/validation",
+        "/5d",
+        "/schedule"
+      ],
+      "result": "bill",
+      "title": "BIM to Cost Estimate: Revit IFC Quantities in Free Software",
+      "description": "Take an IFC model exported from Revit and turn its quantities into a cost estimate in OpenConstructionERP. We use a duplex model to inspect elements, extract quantities, apply unit rates and review what changes when the model is revised.",
+      "duration": 488,
+      "cover": "https://i.ytimg.com/vi/-WFhnoP0sM8/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Why IFC"
+        },
+        {
+          "t": 134,
+          "title": "Model to quantity"
+        },
+        {
+          "t": 293,
+          "title": "Quantity to price"
+        },
+        {
+          "t": 373,
+          "title": "Checks and next steps"
+        }
+      ]
+    },
+    {
+      "id": "EB05",
+      "youtubeId": "y_Ctlq5LzQ0",
+      "status": "published",
+      "channel": "academy",
+      "language": "en",
+      "series": "estimating-basics-en",
+      "seriesOrder": 5,
+      "stage": "estimate",
+      "roles": [
+        "estimator",
+        "commercial-manager"
+      ],
+      "cases": [
+        "estimate-from-cost-database",
+        "draft-an-estimate-with-ai-element-matching"
+      ],
+      "routes": [
+        "/cost-explorer",
+        "/boq",
+        "/assemblies",
+        "/validation",
+        "/match-elements",
+        "/ai-estimator"
+      ],
+      "result": "cost",
+      "title": "Excel vs Estimating Software: Same Job, Side by Side",
+      "description": "We estimate the same garage job in Excel and OpenConstructionERP, using the same quantities, unit rates and 15% markup. Five deliberately planted spreadsheet errors let us test what each workflow catches and what still needs a human check.",
+      "duration": 488,
+      "cover": "https://i.ytimg.com/vi/y_Ctlq5LzQ0/maxresdefault.jpg",
+      "chapters": [
+        {
+          "t": 0,
+          "title": "Same job, two programs"
+        },
+        {
+          "t": 35,
+          "title": "BOQ, unit rate and markup"
+        },
+        {
+          "t": 89,
+          "title": "The garage job"
+        },
+        {
+          "t": 106,
+          "title": "Where spreadsheets win"
+        },
+        {
+          "t": 124,
+          "title": "How the spreadsheet works"
+        },
+        {
+          "t": 179,
+          "title": "Five planted mistakes"
+        },
+        {
+          "t": 199,
+          "title": "Import the sheet into the app"
+        },
+        {
+          "t": 249,
+          "title": "The app recomputes every line"
+        },
+        {
+          "t": 310,
+          "title": "What the checks find"
+        },
+        {
+          "t": 366,
+          "title": "Fixing it in a few clicks"
+        },
+        {
+          "t": 394,
+          "title": "What nothing catches"
+        },
+        {
+          "t": 411,
+          "title": "Which one to use"
+        },
+        {
+          "t": 451,
+          "title": "Checks for every estimate"
         }
       ]
     },
@@ -2252,7 +2566,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "US"
       },
-      "description": "On bid day, three quotes land for the same job, and none of them line up. The lowest is not always the cheapest. In this lesson you level three framing bids in OpenConstructionERP and pick the right one.",
+      "description": "Compare three framing bids in OpenConstructionERP using the same scope of work. This bid-leveling example follows a trade package from the estimate through quotations and adjustments to the subcontractor award.",
       "duration": 190,
       "cover": "https://i.ytimg.com/vi/6tic-wT9gkY/maxresdefault.jpg",
       "chapters": [
@@ -2355,7 +2669,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "US"
       },
-      "description": "A schedule answers two questions: when does the job finish, and what cannot slip. Build it right and both are in front of you. This lesson builds one for the duplex in OpenConstructionERP.",
+      "description": "Build a construction schedule from an estimate in OpenConstructionERP. Using the duplex example, we connect tasks, set dependencies and lag, and check the critical path to see which delays would affect the finish date.",
       "duration": 183,
       "cover": "https://i.ytimg.com/vi/HXskOZ9gT8I/maxresdefault.jpg",
       "chapters": [
@@ -2459,7 +2773,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "US"
       },
-      "description": "The site tells you what happened today: who was on, what got done, what went wrong. This lesson walks one issue on the duplex from the daily log to signed off in OpenConstructionERP.",
+      "description": "Follow a site issue from the construction daily log through inspection, an NCR and a punch-list item in OpenConstructionERP. The duplex example shows how the team records the problem, assigns the corrective work and verifies the fix.",
       "duration": 178,
       "cover": "https://i.ytimg.com/vi/dYzCNLLfKBI/maxresdefault.jpg",
       "chapters": [
@@ -2506,7 +2820,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "US"
       },
-      "description": "When you run more than one job, you cannot watch them line by line. You need to see, at a glance, where to look today. This last lesson steps up from one job to the whole company in OpenConstructionERP.",
+      "description": "Use construction KPIs and project dashboards in OpenConstructionERP to see which jobs need attention. This lesson moves from one project’s cost, schedule and quality records to a comparison of the whole portfolio.",
       "duration": 155,
       "cover": "https://i.ytimg.com/vi/lXj3jik1hfE/maxresdefault.jpg",
       "chapters": [
@@ -2563,7 +2877,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "GB"
       },
-      "description": "Pricing a construction tender is not about adding a percentage at the end. It is about putting every cost in the right place and counting it once.",
+      "description": "We price a UK construction tender in OpenConstructionERP, starting with the bill of quantities and working through to the tender sum. The example follows an NRM 2 structure and includes measured work, subcontract quotes, preliminaries, risk, overheads and profit.",
       "duration": 353,
       "cover": "https://i.ytimg.com/vi/_uKAddpFo9Y/maxresdefault.jpg",
       "chapters": [
@@ -2618,7 +2932,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "GB"
       },
-      "description": "The lowest subcontractor quote is not always the lowest final cost. Missing scope, exclusions and different assumptions can change the result completely.",
+      "description": "We compare subcontractor bids for the same work package in OpenConstructionERP. Before looking at the totals, we check exclusions, missing scope and the assumptions behind each quotation.",
       "duration": 361,
       "cover": "https://i.ytimg.com/vi/WA5-cVKcD-E/maxresdefault.jpg",
       "chapters": [
@@ -2674,7 +2988,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "GB"
       },
-      "description": "An interim payment should show what has been earned, what is being withheld and why. If the valuation and retention are unclear, disputes become much more likely.",
+      "description": "This example follows an interim payment on a JCT-style building contract in OpenConstructionERP. We enter the contract terms, value the work completed and calculate retention before reviewing the amount due.",
       "duration": 385,
       "cover": "https://i.ytimg.com/vi/bmlDq86OSrg/maxresdefault.jpg",
       "chapters": [
@@ -2730,7 +3044,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "GB"
       },
-      "description": "A payment notice and a pay less notice are not interchangeable. The document, amount and deadline all matter.",
+      "description": "We follow a construction payment timeline in OpenConstructionERP, from the due date to the final date for payment. The example looks at payment notices, pay less notices and the record of when each notice was served.",
       "duration": 387,
       "cover": "https://i.ytimg.com/vi/1tstow0n_Ew/maxresdefault.jpg",
       "chapters": [
@@ -2782,7 +3096,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "GB"
       },
-      "description": "CIS and the domestic VAT reverse charge can apply to the same construction payment, but they do different jobs and use different amounts.",
+      "description": "We work through a subcontract payment in OpenConstructionERP with CIS deductions and the domestic VAT reverse charge. The example separates labour and materials, follows the invoice and shows how the payment is recorded.",
       "duration": 394,
       "cover": "https://i.ytimg.com/vi/SWwlmU4y-L4/maxresdefault.jpg",
       "chapters": [
@@ -2839,7 +3153,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "GB"
       },
-      "description": "A variation becomes much easier to manage when the instruction, scope, price and approval stay connected.",
+      "description": "We record an architect's instruction and work through the valuation of a variation in OpenConstructionERP. The example connects the changed scope, quantities, rates and supporting records with the review and agreement of the order.",
       "duration": 354,
       "cover": "https://i.ytimg.com/vi/KV-PbKMGISk/maxresdefault.jpg",
       "chapters": [
@@ -3790,7 +4104,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "invoice",
       "title": "Certificación de obra: del avance mensual al cobro",
-      "description": "¿Cuánto corresponde cobrar por la obra ejecutada este mes? En este tutorial de OpenConstructionERP registramos el avance, preparamos la certificación de obra y revisamos el importe antes de presentarla.",
+      "description": "Preparamos una certificación mensual de obra en OpenConstructionERP a partir del avance registrado. El ejemplo de un centro cívico permite seguir la medición a origen, descontar lo certificado anteriormente y revisar lo que corresponde certificar este mes.",
       "duration": 201,
       "cover": "https://i.ytimg.com/vi/6p-Fd4z8lJI/maxresdefault.jpg",
       "chapters": [
@@ -3839,7 +4153,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "bill",
       "title": "Importar BC3 y preparar una oferta de obra: PEM, gastos y baja",
-      "description": "¿El proyecto llega en BC3 y necesitas preparar una oferta? Importamos el presupuesto en OpenConstructionERP, revisamos el PEM y aplicamos gastos generales, beneficio industrial y una baja sin modificar el original.",
+      "description": "Importamos un presupuesto BC3 en OpenConstructionERP y lo utilizamos para preparar una oferta. Revisamos el PEM, incorporamos los gastos generales y el beneficio industrial y aplicamos la baja, conservando el presupuesto original.",
       "duration": 160,
       "cover": "https://i.ytimg.com/vi/7vpNLucFvRw/maxresdefault.jpg",
       "chapters": [
@@ -3886,7 +4200,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "award",
       "title": "Comparativo de ofertas de obra: precio, alcance y adjudicación",
-      "description": "La oferta más barata no siempre incluye todo lo que necesitas. En este ejemplo comparamos tres propuestas de subcontratación, detectamos un elemento que falta y homogeneizamos el alcance antes de adjudicar.",
+      "description": "Comparamos tres ofertas de subcontratación para un mismo paquete de obra. En OpenConstructionERP registramos las propuestas, detectamos una partida que falta y ajustamos el alcance para poder comparar los importes antes de adjudicar.",
       "duration": 130,
       "cover": "https://i.ytimg.com/vi/-MgaCjU3OUs/maxresdefault.jpg",
       "chapters": [
@@ -3939,7 +4253,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "change",
       "title": "Precio contradictorio: valorar y aprobar un cambio de obra",
-      "description": "Una unidad nueva necesita un precio acordado antes de ejecutarse. Preparamos un precio contradictorio, lo vinculamos a una orden de cambio y revisamos cómo afecta al importe del contrato en OpenConstructionERP.",
+      "description": "En el ejemplo aparece una unidad de obra que no estaba prevista. Preparamos su precio contradictorio, lo vinculamos a una orden de cambio y revisamos el efecto sobre el importe del contrato en OpenConstructionERP.",
       "duration": 129,
       "cover": "https://i.ytimg.com/vi/_FpWJUShp_8/maxresdefault.jpg",
       "chapters": [
@@ -3989,7 +4303,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "cost",
       "title": "Control de costes de obra: cierre de mes y margen real",
-      "description": "¿La obra está dejando el margen que esperabas? Cerramos el mes con los costes reales, la producción y los indirectos, y revisamos la previsión hasta el final del proyecto. El ejemplo muestra por qué margen actual y margen previsto no son lo mismo.",
+      "description": "Revisamos el cierre mensual de una obra en OpenConstructionERP: costes reales, producción e indirectos. Después actualizamos la previsión hasta el final del proyecto para comparar el margen del mes con el margen esperado al terminar.",
       "duration": 129,
       "cover": "https://i.ytimg.com/vi/qos-7di7F3k/maxresdefault.jpg",
       "chapters": [
@@ -4044,7 +4358,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "handover",
       "title": "Recepción y liquidación de obra: repasos, certificación y garantía",
-      "description": "Terminar los trabajos no significa que el contrato esté cerrado. Revisamos la recepción, los repasos pendientes, la certificación final y la garantía para preparar la liquidación de la obra con la documentación en orden.",
+      "description": "Repasamos el cierre de una obra, desde la recepción y los trabajos pendientes hasta la certificación final y la liquidación. El ejemplo muestra qué documentación revisamos en OpenConstructionERP y cómo queda reflejada la garantía.",
       "duration": 120,
       "cover": "https://i.ytimg.com/vi/0RGgbCbCID4/maxresdefault.jpg",
       "chapters": [
@@ -4093,7 +4407,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "invoice",
       "title": "Obra privada: certificación, retención del 5 % y factura",
-      "description": "¿Cómo cambia el cobro cuando el contrato privado retiene un 5 %? Seguimos una certificación de obra, calculamos la retención y revisamos la factura del ejemplo en OpenConstructionERP. La retención es un importe pendiente de recuperar, no un coste de ejecución.",
+      "description": "Seguimos una certificación de obra privada con una retención del 5 % en OpenConstructionERP. Revisamos el importe certificado, la factura y la cantidad retenida que queda pendiente de recuperar.",
       "duration": 163,
       "cover": "https://i.ytimg.com/vi/zaBq-81hY2M/maxresdefault.jpg",
       "chapters": [
@@ -4147,7 +4461,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "site",
       "title": "Diario de obra e inspecciones: órdenes y no conformidades",
-      "description": "Una anotación sirve de poco si nadie sigue lo que ocurrió después. En este tutorial conectamos el diario de obra, las órdenes, las inspecciones y las no conformidades para registrar una incidencia y comprobar su cierre.",
+      "description": "Registramos una incidencia de obra y seguimos su resolución en OpenConstructionERP. El recorrido conecta el diario, las órdenes, las inspecciones y las no conformidades para comprobar qué se hizo y si la incidencia quedó cerrada.",
       "duration": 113,
       "cover": "https://i.ytimg.com/vi/Zv92rqNlims/maxresdefault.jpg",
       "chapters": [
@@ -4503,7 +4817,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "handover",
       "title": "Fine lavori: collaudo e svincolo della ritenuta",
-      "description": "Il conto finale è di 2.595.800 euro, ma 129.790 euro di ritenuta di garanzia sono ancora trattenuti. Nell'ultima lezione segui il percorso dalla verifica dei lavori alla proposta di svincolo e alla preparazione della fattura.",
+      "description": "Collaudo dei lavori e svincolo della ritenuta di garanzia in OpenConstructionERP: segui la chiusura del cantiere, dalla verifica dei difetti alla preparazione della fattura. Nel caso didattico, il conto finale è di 2.595.800 euro e la ritenuta ancora trattenuta è di 129.790 euro.",
       "duration": 309,
       "cover": "https://i.ytimg.com/vi/CGd6du3bN2o/maxresdefault.jpg",
       "chapters": [
@@ -4960,7 +5274,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       ],
       "result": "site",
       "title": "Строителен дневник и проверки: забележки, срокове и проследяване",
-      "description": "Къде записваме какво е станало на обекта и кой трябва да отстрани забележката? Свързваме строителния дневник с проверките, сроковете и проследяването на отворените проблеми в OpenConstructionERP.",
+      "description": "Строителен дневник, проверки и проследяване на забележки в OpenConstructionERP. Записваме какво е станало на обекта, кой отговаря за отстраняването и в какъв срок трябва да приключи работата.",
       "duration": 123,
       "cover": "https://i.ytimg.com/vi/evHdLJ2kHjo/maxresdefault.jpg",
       "chapters": [
@@ -5012,7 +5326,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "HR"
       },
-      "description": "Ugovoreni troškovnik nije samo Excel datoteka. To je osnova za praćenje troškova, računa, situacija i promjena na projektu.",
+      "description": "Uvezite ugovoreni troškovnik iz Excela u OpenConstructionERP i provjerite količine, cijene i ukupni iznos. U primjeru otvaramo projekt za Hrvatsku, uređujemo grupe radova i spremamo ugovorenu verziju kao osnovu za praćenje projekta.",
       "duration": 250,
       "cover": "https://i.ytimg.com/vi/JzMC6xKNJlg/maxresdefault.jpg",
       "chapters": [
@@ -5069,7 +5383,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "HR"
       },
-      "description": "Ulazni račun daje pravu sliku projekta tek kada je povezan s radovima na koje se odnosi.",
+      "description": "Unesite ulazni račun dobavljača u OpenConstructionERP i povežite njegove stavke s ugovorenim troškovnikom. Provjeravamo iznose i PDV, prilažemo dokument te pratimo kako evidentirani trošak utječe na projekt.",
       "duration": 268,
       "cover": "https://i.ytimg.com/vi/Cu21eWYzXfU/maxresdefault.jpg",
       "chapters": [
@@ -5121,7 +5435,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "HR"
       },
-      "description": "Plaćanje podizvođača mora odgovarati ugovoru, stvarno izvedenim radovima i poreznom tretmanu.",
+      "description": "Pratite podizvođača u OpenConstructionERP od ugovora i troškovnika do situacije i plaćanja. U primjeru provjeravamo odobrene radove, zadržani iznos i dokumentaciju potrebnu za evidentiranje isplate.",
       "duration": 290,
       "cover": "https://i.ytimg.com/vi/PZ7jEsXjr-E/maxresdefault.jpg",
       "chapters": [
@@ -5177,7 +5491,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "HR"
       },
-      "description": "Dobra privremena situacija počinje na gradilištu, s potvrđenim količinama i jasnim dokazima o izvedenim radovima.",
+      "description": "Izradite privremenu situaciju iz izvedenih radova u OpenConstructionERP. Povezujemo plan, troškovnik i potvrđene količine, zatim provjeravamo prethodno, tekuće i kumulativno stanje prije slanja naručitelju.",
       "duration": 285,
       "cover": "https://i.ytimg.com/vi/UeL7oAzvX6E/maxresdefault.jpg",
       "chapters": [
@@ -5237,7 +5551,7 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
       "example": {
         "country": "HR"
       },
-      "description": "Je li projekt stvarno u plusu? Odgovor se ne vidi iz jednog računa, nego iz ugovorene vrijednosti, stvarnih troškova, naplate i odobrenih promjena.",
+      "description": "Provjerite financijsko stanje građevinskog projekta u OpenConstructionERP usporedbom ugovorene vrijednosti, troškova i naplate. U primjeru evidentiramo višak radova, pratimo njegovo odobrenje i pripremamo završni obračun.",
       "duration": 313,
       "cover": "https://i.ytimg.com/vi/WKWLfaofG94/maxresdefault.jpg",
       "chapters": [
@@ -5851,6 +6165,17 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/reports"
       ]
     },
+    "build-a-5d-cost-loaded-model": {
+      "titleKey": "cases.build_a_5d_cost_loaded_model.title",
+      "titleDefault": "Build a 5D cost-loaded model",
+      "region": null,
+      "stage": "estimate",
+      "routes": [
+        "/boq",
+        "/5d",
+        "/schedule"
+      ]
+    },
     "build-a-comprehensive-unit-rate-under-gb-50500": {
       "titleKey": "cases.build_a_comprehensive_unit_rate_under_gb_50500.title",
       "titleDefault": "Build a comprehensive unit rate under GB 50500",
@@ -6184,6 +6509,18 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/validation",
         "/estimate-basis",
         "/reports"
+      ]
+    },
+    "draft-an-estimate-with-ai-element-matching": {
+      "titleKey": "cases.draft_an_estimate_with_ai_element_matching.title",
+      "titleDefault": "Draft an estimate with AI element matching",
+      "region": null,
+      "stage": "estimate",
+      "routes": [
+        "/match-elements",
+        "/ai-estimator",
+        "/boq",
+        "/validation"
       ]
     },
     "earned-value-and-forecast": {
@@ -6724,6 +7061,16 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/boq",
         "/procurement",
         "/reports"
+      ]
+    },
+    "review-ai-takeoff-proposals": {
+      "titleKey": "cases.review_ai_takeoff_proposals.title",
+      "titleDefault": "Review what the AI read off the drawing",
+      "region": null,
+      "stage": "estimate",
+      "routes": [
+        "/takeoff",
+        "/boq"
       ]
     },
     "roll-subcontractor-pay-applications-into-your-pay-application": {

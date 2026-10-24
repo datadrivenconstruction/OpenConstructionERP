@@ -111,6 +111,13 @@
       "channel": "academy",
       "order": 10
     },
+    "estimating-basics-en": {
+      "title": "Estimating basics: from takeoff to bid",
+      "language": "en",
+      "market": null,
+      "channel": "academy",
+      "order": 15
+    },
     "playbook-getting-started": {
       "title": "Builder's Playbook USA: Construction Management with OpenConstructionERP",
       "language": "en",
@@ -1015,6 +1022,61 @@
       "cases": ["maengel-abnahme-and-verjaehrung", "agree-the-final-account-and-release-retention"],
       "result": "handover",
       "provenance": "videos-agent-2026-10-16"
+    },
+    "EB01": {
+      "youtubeId": "hAtxO0Oy_W0",
+      "series": "estimating-basics-en",
+      "seriesOrder": 1,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor", "project-manager"],
+      "market": null,
+      "cases": ["estimate-from-cost-database", "sense-check-an-estimate-with-benchmarks"],
+      "result": "cost",
+      "provenance": "videos-agent-2026-10-24"
+    },
+    "EB02": {
+      "youtubeId": "8eUJw4go52k",
+      "series": "estimating-basics-en",
+      "seriesOrder": 2,
+      "stage": "estimate",
+      "roles": ["estimator", "commercial-manager", "finance-manager"],
+      "market": null,
+      "cases": ["compile-the-tender-control-price-and-price-a-bid", "sense-check-an-estimate-with-benchmarks"],
+      "result": "cost",
+      "provenance": "videos-agent-2026-10-24"
+    },
+    "EB03": {
+      "youtubeId": "J6-iVD_Iw0Q",
+      "series": "estimating-basics-en",
+      "seriesOrder": 3,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor"],
+      "market": null,
+      "cases": ["takeoff-quantities-from-a-pdf-plan", "review-ai-takeoff-proposals"],
+      "result": "bill",
+      "provenance": "videos-agent-2026-10-24"
+    },
+    "EB04": {
+      "youtubeId": "-WFhnoP0sM8",
+      "series": "estimating-basics-en",
+      "seriesOrder": 4,
+      "stage": "estimate",
+      "roles": ["estimator", "quantity-surveyor", "design-lead"],
+      "market": null,
+      "cases": ["quantities-from-bim", "build-a-5d-cost-loaded-model"],
+      "result": "bill",
+      "provenance": "videos-agent-2026-10-24"
+    },
+    "EB05": {
+      "youtubeId": "y_Ctlq5LzQ0",
+      "series": "estimating-basics-en",
+      "seriesOrder": 5,
+      "stage": "estimate",
+      "roles": ["estimator", "commercial-manager"],
+      "market": null,
+      "cases": ["estimate-from-cost-database", "draft-an-estimate-with-ai-element-matching"],
+      "result": "cost",
+      "provenance": "videos-agent-2026-10-24"
     }
   },
   "extras": [
