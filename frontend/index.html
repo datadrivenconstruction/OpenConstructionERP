@@ -162,8 +162,18 @@
         for (var m in menu) root.setAttribute('data-menu-' + m, menu[m]);
         try {
           var theme = localStorage.getItem('oe_theme');
-          var dark = theme === 'dark' || (theme !== 'light' && window.matchMedia &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var dark;
+          if (theme === 'schedule') {
+            // Dark by time of day; same window rule as shared/lib/theme.ts isDarkHour.
+            var sch = JSON.parse(localStorage.getItem('oe_theme_schedule') || 'null') || {};
+            var from = typeof sch.darkFrom === 'number' ? sch.darkFrom : 19;
+            var to = typeof sch.darkTo === 'number' ? sch.darkTo : 7;
+            var h = new Date().getHours();
+            dark = from === to ? false : from < to ? h >= from && h < to : h >= from || h < to;
+          } else {
+            dark = theme === 'dark' || (theme !== 'light' && window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          }
           if (dark) root.classList.add('dark');
         } catch (e) { /* the theme store applies it after mount */ }
       })();

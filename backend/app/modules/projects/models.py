@@ -154,6 +154,9 @@ class Project(Base):
     # the contract defaults read it here. NULL means not recorded, not
     # private, and every reader keeps the country's neutral figures for it.
     works: Mapped[str | None] = mapped_column(String(16), nullable=True, default=None)
+    # Team-wide project colour, "#rrggbb". NULL means none chosen: the UI then
+    # derives a stable colour from the id, so the default is never stored.
+    color: Mapped[str | None] = mapped_column(String(7), nullable=True, default=None)
 
     # ── Phase 12 expansion fields (all nullable for backward compat) ─────
     project_code: Mapped[str | None] = mapped_column(String(50), nullable=True)

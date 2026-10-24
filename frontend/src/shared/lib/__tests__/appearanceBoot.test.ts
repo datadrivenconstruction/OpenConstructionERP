@@ -92,6 +92,18 @@ describe('index.html appearance boot script', () => {
     expect(link?.getAttribute('href')).toBe(fontStylesheetHref('inter'));
   });
 
+  it('paints dark by time of day with the same window rule as theme.ts', () => {
+    const hour = new Date().getHours();
+    localStorage.setItem('oe_theme', 'schedule');
+    localStorage.setItem('oe_theme_schedule', JSON.stringify({ darkFrom: hour, darkTo: (hour + 1) % 24 }));
+    boot();
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('oe_theme_schedule', JSON.stringify({ darkFrom: (hour + 1) % 24, darkTo: (hour + 2) % 24 }));
+    boot();
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+  });
+
   it('ignores junk in storage', () => {
     localStorage.setItem(USER_APPEARANCE_KEY, '{not json');
     localStorage.setItem(WORKSPACE_APPEARANCE_KEY, JSON.stringify({ accent: 'pink', font: '../../x' }));

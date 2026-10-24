@@ -36,6 +36,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { projectsApi, type Project, type ProjectFxRate } from './api';
 import { CURRENCY_GROUPS, CreateProjectModal } from './CreateProjectPage';
 import { ProjectWorksField } from './ProjectWorksField';
+import { ProjectColorField } from './ProjectColorField';
 import { getVatPercent } from '../boq/boqHelpers';
 import { TranslationSettingsTab } from '../translation';
 import { MethodologyActiveCard } from '../methodology/MethodologyActiveCard';
@@ -908,6 +909,16 @@ export function ProjectSettingsPage() {
             onChange={(next) => updateMutation.mutate({ works: next } as Partial<Project>)}
           />
         </div>
+      </Card>
+
+      {/* ── Project colour: stripe in the header, dot in project lists ─── */}
+      <Card padding="lg">
+        <ProjectColorField
+          projectId={project.id}
+          value={project.color}
+          disabled={updateMutation.isPending}
+          onChange={(next) => updateMutation.mutate({ color: next })}
+        />
       </Card>
 
       {/* ── Currencies — base + additional rates merged (#88, #105) ──────── */}
