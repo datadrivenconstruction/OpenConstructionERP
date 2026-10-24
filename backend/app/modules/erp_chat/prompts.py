@@ -182,6 +182,7 @@ def build_context_block(
     project_name: str | None = None,
     project_currency: str | None = None,
     route: str | None = None,
+    actions: tuple[str, ...] | list[str] = (),
 ) -> str:
     """The per-request facts appended to a system prompt.
 
@@ -193,6 +194,7 @@ def build_context_block(
         project_name: That project's name.
         project_currency: That project's currency code.
         route: The path the person is looking at.
+        actions: Palette action ids the browser can run, already validated.
 
     Returns:
         A Markdown section beginning with a blank line, for appending.
@@ -220,4 +222,11 @@ def build_context_block(
     cleaned_route = _clean_route(route) if route else ""
     if cleaned_route:
         lines.append(f"- Current page: {cleaned_route}")
+    if actions:
+        lines.append(
+            "- App actions the person can run with one click (ids): "
+            + ", ".join(actions)
+            + ". When the request is really one of these, call propose_ui_action with the id and an "
+            "honest confidence; the person confirms before it runs."
+        )
     return "\n".join(lines) + "\n"

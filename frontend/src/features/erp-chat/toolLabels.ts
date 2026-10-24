@@ -87,6 +87,8 @@ export function toolLabel(name: string, t: TFunction): string {
       return String(
         t('erp_chat.tool.propose_update_schedule_progress', { defaultValue: 'Update schedule progress' }),
       );
+    case 'propose_ui_action':
+      return String(t('erp_chat.tool.propose_ui_action', { defaultValue: 'Suggest an app action' }));
     // Legacy direct write, kept for conversations recorded before proposals.
     case 'create_boq_item':
       return String(t('erp_chat.tool.create_boq_item', { defaultValue: 'BOQ position created' }));

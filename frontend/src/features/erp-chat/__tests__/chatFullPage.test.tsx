@@ -211,7 +211,7 @@ describe('the /chat page, sending', () => {
       session_id: null,
       project_id: 'p-1',
       locale: 'de',
-      client_context: { route: '/chat/deep-link', project_id: 'p-1' },
+      client_context: { route: '/chat/deep-link', project_id: 'p-1', actions: expect.any(Array) },
     });
   });
 
@@ -219,7 +219,7 @@ describe('the /chat page, sending', () => {
     const stream = stubStream();
     const view = await mountHook();
     await send(view, 'Show all projects');
-    expect(stream.body().client_context).toEqual({ route: '/chat', project_id: null });
+    expect(stream.body().client_context).toEqual({ route: '/chat', project_id: null, actions: expect.any(Array) });
   });
 });
 

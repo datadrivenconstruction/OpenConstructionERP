@@ -364,7 +364,8 @@ describe('a message to the assistant', () => {
       session_id: null,
       project_id: 'p-1',
       locale: 'en',
-      client_context: { route: '/boq/boq-9', project_id: 'p-1' },
+      // The ids of the actions the palette can run ride along for propose_ui_action.
+      client_context: { route: '/boq/boq-9', project_id: 'p-1', actions: expect.any(Array) },
     });
     await stream.end();
   });

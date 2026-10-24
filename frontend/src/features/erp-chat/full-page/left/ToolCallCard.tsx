@@ -42,8 +42,10 @@ export default function ToolCallCard({ tool }: { tool: ToolCallInfo }) {
   // A prepared change is shown as its card, with Apply / Edit / Reject, the
   // same card as in the dock. It is the answer, not a detail to expand, and
   // its raw payload is no use to the reader.
-  const ProposalCard = RENDERER_REGISTRY.action_proposal;
-  if (tool.result?.renderer === 'action_proposal' && ProposalCard && tool.result.data !== undefined) {
+  const cardRenderer = tool.result?.renderer;
+  const ProposalCard =
+    cardRenderer === 'action_proposal' || cardRenderer === 'ui_action' ? RENDERER_REGISTRY[cardRenderer] : undefined;
+  if (ProposalCard && tool.result?.data !== undefined) {
     return (
       <div style={{ marginBottom: 6 }}>
         <ProposalCard data={tool.result.data} />

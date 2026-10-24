@@ -11,6 +11,7 @@ Endpoints:
                     callers can supply per-widget ``WidgetConfigItem`` overrides
                     (e.g. the dashboard customisation panel).  The same IDOR
                     posture and 422-validation flow as the GET path.
+    GET  /nav-badges/ - small per-menu-item counts for the caller (or one project).
     GET  /inbox/  - the caller's unified approvals/alerts list.
     POST /inbox/{item_id}/acknowledge - mark a row seen; it stays listed.
     POST /inbox/{item_id}/dismiss     - take a row off the list.
@@ -33,7 +34,7 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Header, HTTPException, Query, Response, status
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, SessionDep, accessible_project_ids, verify_project_access
 from app.modules.dashboard.inbox import compute_inbox
 from app.modules.dashboard.inbox_actions import (
     InboxActionInvalid,
@@ -41,6 +42,7 @@ from app.modules.dashboard.inbox_actions import (
     InboxItemNotFound,
 )
 from app.modules.dashboard.inbox_logic import STATE_ACKNOWLEDGED, STATE_DISMISSED
+from app.modules.dashboard.nav_badges import compute_nav_badges
 from app.modules.dashboard.schemas import (
     InboxActionResponse,
     InboxResponse,
@@ -362,3 +364,26 @@ async def restore_inbox_item(
         )
     await session.commit()
     return InboxActionResponse(item_id=item_id, state=None, findings=[])
+
+
+@router.get(
+    "/nav-badges/",
+    summary="Counts for the navigation menu badges",
+    description=(
+        "Open RFIs, punch items, NCRs, invoices awaiting approval, the caller's open tasks and tenders "
+        "due within two days, keyed by menu route. With ``project_id`` the counts cover that project "
+        "(404 when the caller cannot open it); without it, every live project the caller can open."
+    ),
+)
+async def get_nav_badges(
+    user_id: CurrentUserId,
+    session: SessionDep,
+    project_id: uuid.UUID | None = Query(default=None, description="Scope the counts to one project."),
+) -> dict:
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
+        scope = {project_id}
+    else:
+        scope = await accessible_project_ids(session, user_id, live_only=True) or set()
+    badges = await compute_nav_badges(session, scope, user_id)
+    return {"project_id": str(project_id) if project_id else None, "badges": badges}

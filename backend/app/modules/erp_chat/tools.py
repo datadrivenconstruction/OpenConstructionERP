@@ -620,10 +620,47 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["query"],
         },
     },
+    {
+        "name": "propose_ui_action",
+        "description": (
+            "Suggest one app action (from the ids listed in the request context) that does what the "
+            "user asked, such as opening a page, starting a new estimate or switching the theme. "
+            "Nothing runs: the user sees the suggestion with your confidence and confirms it."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "action_id": {"type": "string", "description": "One of the listed action ids"},
+                "confidence": {"type": "number", "description": "0..1, how sure you are this is what they meant"},
+                "reason": {"type": "string", "description": "One short sentence why"},
+            },
+            "required": ["action_id", "confidence"],
+        },
+    },
 ]
 
 
 # ── Tool handlers ────────────────────────────────────────────────────────────
+
+
+async def handle_propose_ui_action(session: AsyncSession, args: dict[str, Any], user_id: str) -> dict[str, Any]:
+    """Echo a validated action suggestion; the browser shows it and runs it only on the user's click."""
+    from app.modules.erp_chat.schemas import _ACTION_ID
+
+    action_id = str(args.get("action_id") or "").strip()
+    if not _ACTION_ID.fullmatch(action_id):
+        return {"renderer": "error", "data": None, "summary": "Unknown action id."}
+    try:
+        confidence = float(args.get("confidence", 0))
+    except (TypeError, ValueError):
+        confidence = 0.0
+    confidence = min(max(confidence, 0.0), 1.0)
+    reason = " ".join(str(args.get("reason") or "").split())[:200]
+    return {
+        "renderer": "ui_action",
+        "data": {"action_id": action_id, "confidence": round(confidence, 2), "reason": reason},
+        "summary": f"Suggested app action {action_id}; it runs only when the user confirms it.",
+    }
 
 
 async def handle_get_all_projects(session: AsyncSession, args: dict[str, Any], user_id: str) -> dict[str, Any]:
@@ -1379,6 +1416,7 @@ TOOL_PERMISSIONS: dict[str, ToolPermission] = {
     "search_submittals": "read",
     "search_correspondence": "read",
     "search_anything": "read",
+    "propose_ui_action": "read",
 }
 
 
@@ -1402,4 +1440,5 @@ TOOL_HANDLER_MAP: dict[str, Any] = {
     "search_submittals": handle_search_submittals,
     "search_correspondence": handle_search_correspondence,
     "search_anything": handle_search_anything,
+    "propose_ui_action": handle_propose_ui_action,
 }

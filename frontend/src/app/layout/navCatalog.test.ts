@@ -16,6 +16,7 @@ import { describe, expect, it } from 'vitest';
 import { navGroups } from './navCatalog';
 import { getRouteIcon } from './routeIcons';
 import { MODULE_REGISTRY } from '@/modules/_registry';
+import { CORE_ACTIONS } from '@/app/actions/coreActions';
 
 describe('the screen catalogue and the route-icon map', () => {
   it('agree on the icon for every screen the menu offers', () => {
@@ -134,29 +135,18 @@ describe('the screen catalogue and the routes that mount those screens', () => {
   });
 
   // The sidebar is not the only surface that offers a screen. The command
-  // palette keeps its own static page list and reaches the same routes, so the
-  // same rule has to hold there. It is checked here rather than beside the
-  // palette because this is the file that already knows which routes a module
-  // owns; the list is read out of the source because it is not exported.
+  // palette runs actions that open pages too, and the same rule has to hold
+  // there: a module-owned page is offered only under that module's key. Menu
+  // rows become actions straight from navGroups, so the core and module
+  // actions with their own path are what is left to check.
   it('lets the command palette offer no page its module has switched off', () => {
-    const source = readFileSync(
-      [
-        resolve(process.cwd(), 'src/shared/ui/CommandPalette.tsx'),
-        resolve(process.cwd(), 'frontend/src/shared/ui/CommandPalette.tsx'),
-      ].find(existsSync) ?? '',
-      'utf8',
-    );
-    const block = source.match(/const PAGE_RESULTS: SearchResult\[\] = \[([\s\S]*?)\n\];/)?.[1];
-    expect(block, 'PAGE_RESULTS not found, so this asserts nothing').toBeTruthy();
-
-    const entries = (block ?? '')
-      .split('\n')
-      .map((line) => ({
-        path: line.match(/\bpath:\s*'([^']+)'/)?.[1],
-        moduleKey: line.match(/\bmoduleKey:\s*'([^']+)'/)?.[1],
-      }))
-      .filter((entry): entry is { path: string; moduleKey: string | undefined } => Boolean(entry.path));
-    expect(entries.length).toBeGreaterThan(10);
+    const entries = [
+      ...CORE_ACTIONS,
+      ...MODULE_REGISTRY.flatMap((m) => (m.actions ?? []).map((a) => ({ ...a, moduleKey: a.moduleKey ?? m.id }))),
+    ]
+      .filter((a) => a.path && !a.path.includes(':projectId'))
+      .map((a) => ({ path: a.path as string, moduleKey: a.moduleKey }));
+    expect(entries.length).toBeGreaterThan(3);
 
     const silent: string[] = [];
     for (const entry of entries) {

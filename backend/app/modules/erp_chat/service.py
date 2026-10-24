@@ -291,6 +291,7 @@ class _TurnContext:
     project_currency: str | None = None
     route: str | None = None
     locale: str | None = None
+    actions: tuple[str, ...] = ()
 
 
 class ERPChatService:
@@ -466,7 +467,11 @@ class ERPChatService:
         even whether it exists.
         """
         client = request.client_context
-        dropped = _TurnContext(route=client.route if client else None, locale=request.locale)
+        dropped = _TurnContext(
+            route=client.route if client else None,
+            locale=request.locale,
+            actions=tuple(client.actions) if client else (),
+        )
         candidate = (client.project_id if client else None) or request.project_id
         if candidate is None:
             return dropped
@@ -497,6 +502,7 @@ class ERPChatService:
             project_currency=row[1],
             route=dropped.route,
             locale=dropped.locale,
+            actions=dropped.actions,
         )
 
     async def _commit_turn(self, chat_session: ChatSession) -> bool:
@@ -553,6 +559,7 @@ class ERPChatService:
                 project_name=turn.project_name,
                 project_currency=turn.project_currency,
                 route=turn.route,
+                actions=turn.actions,
             )
             self._system_prompt = SYSTEM_PROMPT + context_block
             self._system_prompt_no_tools = SYSTEM_PROMPT_NO_TOOLS + context_block

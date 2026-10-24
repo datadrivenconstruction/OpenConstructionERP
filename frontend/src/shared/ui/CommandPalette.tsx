@@ -2,32 +2,17 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import {
   Search,
-  LayoutDashboard,
   FolderOpen,
-  FolderPlus,
-  Globe2,
   Table2,
   Database,
-  Boxes,
-  Compass,
   CalendarDays,
-  TrendingUp,
   FileText,
-  FilePlus2,
-  FileBarChart,
-  ShieldCheck,
-  Leaf,
-  Package,
-  PackageOpen,
-  Settings,
   Sparkles,
-  Wand2,
-  Download,
   CornerDownLeft,
   Users,
   HelpCircle,
@@ -35,30 +20,54 @@ import {
   ClipboardList,
   AlertTriangle,
   Globe,
+  Keyboard,
+  RotateCcw,
+  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import { projectsApi, type Project } from '@/features/projects/api';
 import { boqApi, type BOQ } from '@/features/boq/api';
 import { apiGet } from '@/shared/lib/api';
-import { useModuleStore } from '@/stores/useModuleStore';
 import { getIconOverride, useIconOverridesVersion } from '@/app/layout/menuIcons';
+import { registerAppActions } from '@/app/actions/coreActions';
+import type { PaletteAction } from '@/shared/lib/actions/registry';
+import { MIN_SCORE, fuzzyScore, matchProject, splitProjectQuery } from '@/shared/lib/actions/fuzzy';
+import {
+  bindingOwners,
+  checkShortcut,
+  eventToChord,
+  formatShortcut,
+  SEQUENCE_TIMEOUT_MS,
+  useShortcutStore,
+  type ShortcutProblem,
+} from '@/shared/lib/actions/shortcuts';
+import {
+  loadRecentActions,
+  useActionRunner,
+  useActionShortcuts,
+  useAvailableActions,
+  useBindings,
+} from '@/shared/lib/actions/useActionRunner';
+import { askAi } from '@/shared/lib/actions/askAi';
+
+registerAppActions();
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
-interface SearchResult {
-  id: string;
-  type: 'page' | 'project' | 'boq' | 'recent' | 'global';
-  labelKey?: string;
-  label?: string;
-  description?: string;
-  icon: LucideIcon;
-  path: string;
-  /** Set when the screen behind `path` is mounted by a module manifest rather
-   *  than by a static Route in App.tsx. Such a screen exists only while its
-   *  module is enabled, so the entry is dropped when it is not. Mirrors
-   *  `NavItem.moduleKey` in navCatalog.ts, which gates the sidebar row. */
-  moduleKey?: string;
+/** A row: an action (maybe aimed at a project), a record link, or the AI hand-off. */
+type PaletteRow =
+  | { kind: 'action'; id: string; action: PaletteAction; project?: { id: string; name: string } | null; score: number }
+  | { kind: 'link'; id: string; label: string; description?: string; icon: LucideIcon; path: string }
+  | { kind: 'ask'; id: string; text: string };
+
+interface RowGroup {
+  title: string;
+  items: PaletteRow[];
 }
+
+/** Below this best score the typed text reads as a question, so "Ask AI" goes first. */
+const ASK_FIRST_BELOW = 0.55;
+const MAX_ACTION_ROWS = 10;
 
 interface GlobalSearchResult {
   module: string;
@@ -126,76 +135,20 @@ interface CommandPaletteProps {
   onClose: () => void;
 }
 
-/* ── Static page entries ───────────────────────────────────────────────── */
-
-const PAGE_RESULTS: SearchResult[] = [
-  { id: 'page-dashboard', type: 'page', labelKey: 'nav.dashboard', icon: LayoutDashboard, path: '/' },
-  { id: 'page-projects', type: 'page', labelKey: 'projects.title', icon: FolderOpen, path: '/projects' },
-  { id: 'page-boq', type: 'page', labelKey: 'boq.title', icon: Table2, path: '/boq' },
-  { id: 'page-exchange', type: 'page', labelKey: 'nav.exchange_hub', icon: Globe2, path: '/regional-exchange', moduleKey: 'regional-exchange' },
-  { id: 'page-costs', type: 'page', labelKey: 'costs.title', icon: Database, path: '/costs' },
-  { id: 'page-catalog', type: 'page', labelKey: 'catalog.title', icon: Boxes, path: '/catalog' },
-  { id: 'page-cost-explorer', type: 'page', labelKey: 'nav.cost_explorer', icon: Compass, path: '/cost-explorer' },
-  { id: 'page-ai-estimator', type: 'page', labelKey: 'nav.ai_estimator', icon: Wand2, path: '/ai-estimator' },
-  { id: 'page-ai-estimate', type: 'page', labelKey: 'nav.ai_estimate', icon: Sparkles, path: '/ai-estimate' },
-  { id: 'page-schedule', type: 'page', labelKey: 'schedule.title', icon: CalendarDays, path: '/schedule' },
-  { id: 'page-5d', type: 'page', labelKey: 'nav.5d_cost_model', icon: TrendingUp, path: '/5d' },
-  { id: 'page-tendering', type: 'page', labelKey: 'tendering.title', icon: FileText, path: '/tendering' },
-  { id: 'page-reports', type: 'page', labelKey: 'nav.reports', icon: FileBarChart, path: '/reports' },
-  { id: 'page-validation', type: 'page', labelKey: 'validation.title', icon: ShieldCheck, path: '/validation' },
-  { id: 'page-sustainability', type: 'page', labelKey: 'nav.sustainability', icon: Leaf, path: '/sustainability', moduleKey: 'sustainability' },
-  { id: 'page-modules', type: 'page', labelKey: 'modules.title', icon: Package, path: '/modules' },
-  { id: 'page-packs', type: 'page', labelKey: 'nav.packs', icon: PackageOpen, path: '/packs' },
-  { id: 'page-settings', type: 'page', labelKey: 'nav.settings', icon: Settings, path: '/settings' },
-  // Quick actions
-  { id: 'action-new-project', type: 'page', labelKey: 'command_palette.action_new_project', description: 'Ctrl+N', icon: FolderPlus, path: '/projects/new' },
-  { id: 'action-new-boq', type: 'page', labelKey: 'command_palette.action_new_boq', description: 'Ctrl+Shift+N', icon: FilePlus2, path: '/boq' },
-  { id: 'action-validate', type: 'page', labelKey: 'command_palette.action_run_validation', description: 'Ctrl+Shift+V', icon: ShieldCheck, path: '/validation' },
-  { id: 'action-import-db', type: 'page', labelKey: 'command_palette.action_import_database', icon: Download, path: '/costs/import' },
-];
-
-/* ── Recent items (stored in localStorage) ─────────────────────────────── */
-
-const RECENT_KEY = 'oe_command_palette_recent';
-const MAX_RECENT = 5;
-
-interface RecentEntry {
-  id: string;
-  label: string;
-  path: string;
-  type: 'page' | 'project' | 'boq';
-}
-
-function loadRecent(): RecentEntry[] {
-  try {
-    const raw = localStorage.getItem(RECENT_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as RecentEntry[];
-  } catch {
-    return [];
-  }
-}
-
-function saveRecent(entries: RecentEntry[]): void {
-  try {
-    localStorage.setItem(RECENT_KEY, JSON.stringify(entries.slice(0, MAX_RECENT)));
-  } catch {
-    // Silently ignore storage errors
-  }
-}
-
-function pushRecent(entry: RecentEntry): void {
-  const current = loadRecent().filter((r) => r.id !== entry.id);
-  current.unshift(entry);
-  saveRecent(current);
-}
-
 /* ── Component ─────────────────────────────────────────────────────────── */
 
+const SHORTCUT_PROBLEM_KEYS: Record<ShortcutProblem, [string, string]> = {
+  invalid: ['palette.shortcut.invalid', 'That key cannot be used.'],
+  reserved: ['palette.shortcut.reserved', 'The browser or the system already uses this key.'],
+  needs_modifier: ['palette.shortcut.needs_modifier', 'Use two keys in a row (G then B) or add Ctrl / Cmd.'],
+  conflict: ['palette.shortcut.conflict', 'Already used by "{{action}}".'],
+};
+
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   useIconOverridesVersion();
   const navigate = useNavigate();
+  const location = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -208,11 +161,29 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [globalResults, setGlobalResults] = useState<GlobalSearchResult[]>([]);
   const [globalSearchLoading, setGlobalSearchLoading] = useState(false);
   const globalSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Rebinding: which action is listening for keys, and why the last try was refused.
+  const [recordingFor, setRecordingFor] = useState<string | null>(null);
+  const [recordError, setRecordError] = useState<string | null>(null);
+  const recordFirst = useRef<{ key: string; timer: ReturnType<typeof setTimeout> } | null>(null);
 
-  // Debounced global search — fires 300ms after user stops typing
+  const actions = useAvailableActions();
+  const bindings = useBindings();
+  const overrides = useShortcutStore((s) => s.overrides);
+  const setBinding = useShortcutStore((s) => s.setBinding);
+  const resetBinding = useShortcutStore((s) => s.resetBinding);
+  const runAction = useActionRunner();
+  useActionShortcuts(open);
+
+  const lang = i18n.language;
+  const titleOf = useCallback(
+    (a: PaletteAction) => String(t(a.titleKey, { defaultValue: a.defaultTitle })),
+    [t],
+  );
+
+  // Debounced global search: fires 300ms after the user stops typing.
   useEffect(() => {
     if (!open) return;
-    const trimmed = query.trim();
+    const trimmed = (splitProjectQuery(query)?.action ?? query).trim();
     if (trimmed.length < 2) {
       setGlobalResults([]);
       return;
@@ -279,7 +250,6 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       ),
     ).then((results) => {
       if (!cancelled) {
-        // Flatten and take top 5 most recent
         const allBoqs = results
           .flat()
           .sort((a, b) => new Date(b.updated_at ?? b.created_at).getTime() - new Date(a.updated_at ?? a.created_at).getTime())
@@ -299,7 +269,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     if (!open) return;
     setQuery('');
     setActiveIndex(0);
-    // Small delay to let the portal mount, then focus.
+    setRecordingFor(null);
+    setRecordError(null);
     // Cancel on unmount / re-close so a queued frame can't fire focus()
     // against an unmounted ref.
     const rafId = requestAnimationFrame(() => {
@@ -308,170 +279,170 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     return () => cancelAnimationFrame(rafId);
   }, [open]);
 
-  const { isModuleEnabled } = useModuleStore();
+  const actionTargets = useCallback(
+    (a: PaletteAction) => {
+      const out = [titleOf(a)];
+      if (a.keywordsKey) out.push(String(t(a.keywordsKey, { defaultValue: a.defaultKeywords ?? '' })));
+      else if (a.defaultKeywords) out.push(a.defaultKeywords);
+      // The English title still finds the action for people who think in English.
+      if (a.defaultTitle && lang !== 'en') out.push(a.defaultTitle);
+      return out;
+    },
+    [t, titleOf, lang],
+  );
 
   // Build results
-  const results = useMemo(() => {
-    const lowerQuery = query.toLowerCase().trim();
-    const groups: { title: string; items: SearchResult[] }[] = [];
-    // Drop the pages whose module is switched off. Their route is unmounted
-    // with the module, so offering them here lands the reader on Not Found.
-    const pages = PAGE_RESULTS.filter((page) => !page.moduleKey || isModuleEnabled(page.moduleKey));
+  const results = useMemo((): RowGroup[] => {
+    const projectLink = (p: Project): PaletteRow => ({
+      kind: 'link',
+      id: `project-${p.id}`,
+      label: p.name,
+      description: p.description,
+      icon: FolderOpen,
+      path: `/projects/${p.id}`,
+    });
+    const boqLink = (b: BOQ & { projectName?: string }): PaletteRow => ({
+      kind: 'link',
+      id: `boq-${b.id}`,
+      label: b.name,
+      description: b.projectName,
+      icon: Table2,
+      path: `/boq/${b.id}`,
+    });
+    const trimmed = query.trim();
+    const groups: RowGroup[] = [];
+    const byId = new Map(actions.map((a) => [a.id, a]));
+    const recentIds = loadRecentActions();
 
-    if (!lowerQuery) {
-      // Show recent items when query is empty
-      const recent = loadRecent();
-      if (recent.length > 0) {
+    if (!trimmed) {
+      const recentRows: PaletteRow[] = [];
+      for (const r of recentIds) {
+        const a = byId.get(r.actionId);
+        if (!a) continue;
+        const project = r.projectId ? { id: r.projectId, name: r.projectName ?? '' } : null;
+        recentRows.push({ kind: 'action', id: `recent-${a.id}-${r.projectId ?? ''}`, action: a, project, score: 1 });
+      }
+      if (recentRows.length > 0) {
+        groups.push({ title: t('command_palette.recent', { defaultValue: 'Recent' }), items: recentRows });
+      }
+      const quick = actions
+        .filter((a) => a.group !== 'navigate' && a.group !== 'project')
+        .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+      if (quick.length > 0) {
         groups.push({
-          title: t('command_palette.recent', { defaultValue: 'Recent' }),
-          items: recent.map((r) => ({
-            id: `recent-${r.id}`,
-            type: 'recent' as const,
-            label: r.label,
-            icon: r.type === 'project' ? FolderOpen : r.type === 'boq' ? Table2 : LayoutDashboard,
-            path: r.path,
-          })),
+          title: t('palette.group.actions', { defaultValue: 'Actions' }),
+          items: quick.map((a): PaletteRow => ({ kind: 'action', id: a.id, action: a, score: 1 })),
         });
       }
-
-      // Show all pages
-      groups.push({
-        title: t('command_palette.pages', { defaultValue: 'Pages' }),
-        items: pages,
-      });
-
-      // Show recent projects (top 5 from API)
       if (projects.length > 0) {
         groups.push({
           title: t('command_palette.projects', { defaultValue: 'Projects' }),
-          items: projects.slice(0, 5).map(
-            (p): SearchResult => ({
-              id: `project-${p.id}`,
-              type: 'project',
-              label: p.name,
-              description: p.description,
-              icon: FolderOpen,
-              path: `/projects/${p.id}`,
-            }),
-          ),
+          items: projects.slice(0, 5).map(projectLink),
         });
       }
-
-      // Show recent BOQs (top 5 from API)
       if (boqs.length > 0) {
         groups.push({
           title: t('command_palette.boqs', { defaultValue: 'Bills of Quantities' }),
-          items: boqs.slice(0, 5).map(
-            (b): SearchResult => ({
-              id: `boq-${b.id}`,
-              type: 'boq',
-              label: b.name,
-              description: b.projectName,
-              icon: Table2,
-              path: `/boq/${b.id}`,
-            }),
-          ),
+          items: boqs.slice(0, 5).map(boqLink),
         });
       }
-
+      groups.push({
+        title: t('command_palette.pages', { defaultValue: 'Pages' }),
+        items: actions
+          .filter((a) => a.group === 'navigate')
+          .map((a): PaletteRow => ({ kind: 'action', id: a.id, action: a, score: 1 })),
+      });
       return groups;
     }
 
-    // Filter pages
-    const matchingPages = pages.filter((page) => {
-      const label = page.labelKey ? t(page.labelKey).toLowerCase() : '';
-      return label.includes(lowerQuery);
-    });
+    const recentBoost = new Set(recentIds.map((r) => r.actionId));
+    const ask: PaletteRow = { kind: 'ask', id: 'ask-ai', text: trimmed };
+    const aiGroup: RowGroup = { title: t('palette.group.ai', { defaultValue: 'AI assistant' }), items: [ask] };
+    const scoped = splitProjectQuery(trimmed);
 
-    if (matchingPages.length > 0) {
+    // "project Berlin > quantities": the project first, then its actions.
+    if (scoped) {
+      const project = matchProject(scoped.project, projects, lang);
+      if (project) {
+        const target = { id: project.id, name: project.name };
+        const rows = actions
+          .filter((a) => a.scope === 'project')
+          .map((a) => ({ a, s: scoped.action ? fuzzyScore(scoped.action, actionTargets(a), lang) : 0.5 }))
+          .filter(({ s }) => s >= MIN_SCORE)
+          .sort((x, y) => y.s - x.s || (y.a.priority ?? 0) - (x.a.priority ?? 0))
+          .map(({ a, s }): PaletteRow => ({ kind: 'action', id: `${a.id}@${project.id}`, action: a, project: target, score: s }));
+        groups.push({ title: project.name, items: rows });
+      } else {
+        groups.push({
+          title: t('command_palette.projects', { defaultValue: 'Projects' }),
+          items: projects
+            .filter((p) => fuzzyScore(scoped.project, [p.name], lang) >= MIN_SCORE)
+            .slice(0, 5)
+            .map(projectLink),
+        });
+      }
+      groups.push(aiGroup);
+      return groups.filter((g) => g.items.length > 0);
+    }
+
+    const scored = actions
+      .map((a) => ({ a, s: fuzzyScore(trimmed, actionTargets(a), lang) + (recentBoost.has(a.id) ? 0.05 : 0) }))
+      .filter(({ s }) => s >= MIN_SCORE)
+      .sort((x, y) => y.s - x.s || (y.a.priority ?? 0) - (x.a.priority ?? 0))
+      .slice(0, MAX_ACTION_ROWS);
+    const best = scored[0]?.s ?? 0;
+    if (best < ASK_FIRST_BELOW) groups.push(aiGroup);
+
+    if (scored.length > 0) {
       groups.push({
-        title: t('command_palette.pages', { defaultValue: 'Pages' }),
-        items: matchingPages,
+        title: t('palette.group.actions', { defaultValue: 'Actions' }),
+        items: scored.map(({ a, s }): PaletteRow => ({ kind: 'action', id: a.id, action: a, score: s })),
       });
     }
 
-    // Filter projects
     const matchingProjects = projects
-      .filter(
-        (p) =>
-          p.name.toLowerCase().includes(lowerQuery) ||
-          p.description?.toLowerCase().includes(lowerQuery),
-      )
+      .filter((p) => fuzzyScore(trimmed, [p.name, p.description ?? ''], lang) >= 0.6)
       .slice(0, 5)
-      .map(
-        (p): SearchResult => ({
-          id: `project-${p.id}`,
-          type: 'project',
-          label: p.name,
-          description: p.description,
-          icon: FolderOpen,
-          path: `/projects/${p.id}`,
-        }),
-      );
-
+      .map(projectLink);
     if (matchingProjects.length > 0) {
-      groups.push({
-        title: t('command_palette.projects', { defaultValue: 'Projects' }),
-        items: matchingProjects,
-      });
+      groups.push({ title: t('command_palette.projects', { defaultValue: 'Projects' }), items: matchingProjects });
     }
 
-    // Filter BOQs
     const matchingBoqs = boqs
-      .filter(
-        (b) =>
-          b.name.toLowerCase().includes(lowerQuery) ||
-          b.description?.toLowerCase().includes(lowerQuery) ||
-          b.projectName?.toLowerCase().includes(lowerQuery),
-      )
+      .filter((b) => fuzzyScore(trimmed, [b.name, b.description ?? '', b.projectName ?? ''], lang) >= 0.6)
       .slice(0, 5)
-      .map(
-        (b): SearchResult => ({
-          id: `boq-${b.id}`,
-          type: 'boq',
-          label: b.name,
-          description: b.projectName,
-          icon: Table2,
-          path: `/boq/${b.id}`,
-        }),
-      );
-
+      .map(boqLink);
     if (matchingBoqs.length > 0) {
-      groups.push({
-        title: t('command_palette.boqs', { defaultValue: 'Bills of Quantities' }),
-        items: matchingBoqs,
-      });
+      groups.push({ title: t('command_palette.boqs', { defaultValue: 'Bills of Quantities' }), items: matchingBoqs });
     }
 
-    // Global search results (from backend API)
+    // Global search results (from backend API), grouped by module.
     if (globalResults.length > 0) {
-      // Group by module for cleaner display
-      const moduleGroups = new Map<string, SearchResult[]>();
+      const moduleGroups = new Map<string, PaletteRow[]>();
       for (const gr of globalResults) {
-        const moduleName = gr.module;
-        if (!moduleGroups.has(moduleName)) moduleGroups.set(moduleName, []);
-        moduleGroups.get(moduleName)!.push({
+        if (!gr.url) continue;
+        if (!moduleGroups.has(gr.module)) moduleGroups.set(gr.module, []);
+        moduleGroups.get(gr.module)!.push({
+          kind: 'link',
           id: `global-${gr.type}-${gr.id}`,
-          type: 'global' as const,
           label: gr.title,
           description: gr.subtitle,
-          icon: GLOBAL_SEARCH_ICONS[moduleName] ?? Globe,
+          icon: GLOBAL_SEARCH_ICONS[gr.module] ?? Globe,
           path: gr.url,
         });
       }
       for (const [moduleName, items] of moduleGroups) {
         const moduleLabel = moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
         groups.push({
-          title: t(`command_palette.global_${moduleName}`, {
-            defaultValue: moduleLabel,
-          }),
+          title: t(`command_palette.global_${moduleName}`, { defaultValue: moduleLabel }),
           items,
         });
       }
     }
 
+    if (best >= ASK_FIRST_BELOW) groups.push(aiGroup);
     return groups;
-  }, [query, projects, boqs, globalResults, t, isModuleEnabled]);
+  }, [query, actions, projects, boqs, globalResults, t, lang, actionTargets]);
 
   // Flat list for keyboard navigation
   const flatResults = useMemo(() => results.flatMap((g) => g.items), [results]);
@@ -481,25 +452,89 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     setActiveIndex((prev) => Math.min(prev, Math.max(0, flatResults.length - 1)));
   }, [flatResults.length]);
 
-  // Navigate to a result
   const selectResult = useCallback(
-    (result: SearchResult) => {
-      const label = result.label ?? (result.labelKey ? t(result.labelKey) : '');
-      pushRecent({
-        id: result.id.replace(/^recent-/, ''),
-        label,
-        path: result.path,
-        type: result.type === 'project' ? 'project' : result.type === 'boq' ? 'boq' : result.type === 'global' ? 'page' : 'page',
-      });
-      navigate(result.path);
+    (row: PaletteRow) => {
       onClose();
+      if (row.kind === 'action') runAction(row.action, row.project ?? null);
+      else if (row.kind === 'link') navigate(row.path);
+      else askAi(row.text, { pathname: location.pathname, navigate });
     },
-    [navigate, onClose, t],
+    [navigate, onClose, runAction, location.pathname],
+  );
+
+  /* ── Rebinding ─────────────────────────────────────────────────────── */
+
+  const stopRecording = useCallback(() => {
+    if (recordFirst.current) clearTimeout(recordFirst.current.timer);
+    recordFirst.current = null;
+    setRecordingFor(null);
+    inputRef.current?.focus();
+  }, []);
+
+  const tryBind = useCallback(
+    (actionId: string, shortcut: string) => {
+      const problem = checkShortcut(shortcut, actionId, bindingOwners(bindings));
+      if (problem) {
+        const [key, fallback] = SHORTCUT_PROBLEM_KEYS[problem.problem];
+        const holder = problem.holder ? actions.find((a) => a.id === problem.holder) : undefined;
+        setRecordError(String(t(key, { defaultValue: fallback, action: holder ? titleOf(holder) : problem.holder })));
+        return;
+      }
+      setBinding(actionId, shortcut);
+      setRecordError(null);
+      stopRecording();
+    },
+    [bindings, actions, setBinding, stopRecording, t, titleOf],
+  );
+
+  const handleRecordKey = useCallback(
+    (e: React.KeyboardEvent): boolean => {
+      if (!recordingFor) return false;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.key === 'Escape') {
+        setRecordError(null);
+        stopRecording();
+        return true;
+      }
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        setBinding(recordingFor, null);
+        setRecordError(null);
+        stopRecording();
+        return true;
+      }
+      const chord = eventToChord(e.nativeEvent);
+      if (!chord) return true;
+      if (chord.includes('+') || !/^[A-Z0-9]$/.test(chord)) {
+        if (recordFirst.current) clearTimeout(recordFirst.current.timer);
+        recordFirst.current = null;
+        tryBind(recordingFor, chord);
+        return true;
+      }
+      const first = recordFirst.current;
+      if (first) {
+        clearTimeout(first.timer);
+        recordFirst.current = null;
+        tryBind(recordingFor, `${first.key} ${chord}`);
+        return true;
+      }
+      const forAction = recordingFor;
+      recordFirst.current = {
+        key: chord,
+        timer: setTimeout(() => {
+          recordFirst.current = null;
+          tryBind(forAction, chord);
+        }, SEQUENCE_TIMEOUT_MS),
+      };
+      return true;
+    },
+    [recordingFor, setBinding, stopRecording, tryBind],
   );
 
   // Keyboard handling
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (handleRecordKey(e)) return;
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
@@ -512,9 +547,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         case 'Enter': {
           e.preventDefault();
           const selected = flatResults[activeIndex];
-          if (selected) {
-            selectResult(selected);
-          }
+          if (selected) selectResult(selected);
           break;
         }
         case 'Escape':
@@ -523,7 +556,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           break;
       }
     },
-    [flatResults, activeIndex, selectResult, onClose],
+    [flatResults, activeIndex, selectResult, onClose, handleRecordKey],
   );
 
   // Scroll active item into view
@@ -531,7 +564,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     if (!listRef.current) return;
     const activeEl = listRef.current.querySelector('[data-active="true"]');
     if (activeEl) {
-      activeEl.scrollIntoView({ block: 'nearest' });
+      activeEl.scrollIntoView?.({ block: 'nearest' });
     }
   }, [activeIndex]);
 
@@ -539,6 +572,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
   // Count items to build flat index for rendering
   let flatIndex = -1;
+  const changeShortcutLabel = t('palette.shortcut.change', { defaultValue: 'Change shortcut' });
+  const resetShortcutLabel = t('palette.shortcut.reset', { defaultValue: 'Restore the default shortcut' });
 
   const dialog = (
     <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh]">
@@ -554,12 +589,12 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         aria-modal="true"
         aria-label={t('command_palette.title', { defaultValue: 'Command Palette' })}
         className={clsx(
-          'relative z-10 w-full max-w-lg mx-4',
+          'relative z-10 w-full max-w-xl mx-4',
           'rounded-2xl border border-border-light',
           'bg-surface-elevated shadow-xl',
           'animate-scale-in',
           'flex flex-col overflow-hidden',
-          'max-h-[min(480px,60vh)]',
+          'max-h-[min(520px,65vh)]',
         )}
         onKeyDown={handleKeyDown}
       >
@@ -574,9 +609,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
               setQuery(e.target.value);
               setActiveIndex(0);
             }}
-            placeholder={t('command_palette.placeholder', {
-              defaultValue: 'Search pages, projects, BOQs...',
+            placeholder={t('palette.placeholder', {
+              defaultValue: 'Type an action, a page or a question. "Project > page" works too',
             })}
+            aria-label={t('command_palette.title', { defaultValue: 'Command Palette' })}
             className={clsx(
               'flex-1 h-12 bg-transparent text-sm text-content-primary',
               'placeholder:text-content-tertiary',
@@ -589,6 +625,20 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             Esc
           </kbd>
         </div>
+
+        {recordingFor && (
+          <div
+            role="status"
+            className="px-4 py-2 text-xs border-b border-border-light bg-oe-blue-subtle text-oe-blue-text"
+            data-testid="palette-recording"
+          >
+            {recordError ??
+              t('palette.shortcut.recording', {
+                defaultValue:
+                  'Press the new shortcut: two keys in a row (G then B) or Ctrl / Cmd with a key. Esc cancels, Backspace removes it.',
+              })}
+          </div>
+        )}
 
         {/* Results */}
         <div ref={listRef} className="overflow-y-auto px-2 py-2">
@@ -612,37 +662,104 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                 flatIndex += 1;
                 const isActive = flatIndex === activeIndex;
                 const idx = flatIndex;
-                // A page row takes the icon the user gave that menu item.
-                const Icon = (item.type === 'page' && getIconOverride(item.path)) || item.icon;
-                const label = item.label ?? (item.labelKey ? t(item.labelKey) : '');
+                let Icon: LucideIcon;
+                let label: string;
+                let description: string | undefined;
+                let shortcut: string | undefined;
+                if (item.kind === 'action') {
+                  const a = item.action;
+                  // A menu row takes the icon the user gave that menu item.
+                  Icon = (a.path && a.group === 'navigate' && getIconOverride(a.path)) || a.icon || Zap;
+                  label = item.project ? `${item.project.name} › ${titleOf(a)}` : titleOf(a);
+                  shortcut = bindings.get(a.id);
+                  if (a.scope === 'project' && !item.project) {
+                    description = t('palette.project_scoped_hint', {
+                      defaultValue: 'For the active project. Type "project name > {{title}}" for another one',
+                      title: titleOf(a),
+                    });
+                  }
+                } else if (item.kind === 'link') {
+                  Icon = item.icon;
+                  label = item.label;
+                  description = item.description;
+                } else {
+                  Icon = Sparkles;
+                  label = t('palette.ask_ai', { defaultValue: 'Ask AI: "{{text}}"', text: item.text });
+                  description = t('palette.ask_ai_hint', {
+                    defaultValue:
+                      'Opens the assistant with this text and the current page. Nothing is sent until you press Enter there.',
+                  });
+                }
+                const actionId = item.kind === 'action' ? item.action.id : null;
+                const overridden = actionId !== null && actionId in overrides;
 
                 return (
-                  <button
+                  <div
                     key={item.id}
                     data-active={isActive}
-                    onClick={() => selectResult(item)}
+                    data-testid={`palette-row-${item.id}`}
                     onMouseEnter={() => setActiveIndex(idx)}
                     className={clsx(
-                      'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left',
-                      'text-sm transition-colors',
+                      'group flex w-full items-center gap-1 rounded-lg pe-1 text-sm transition-colors',
                       isActive
                         ? 'bg-oe-blue-subtle text-oe-blue-text'
                         : 'text-content-primary hover:bg-surface-secondary',
                     )}
                   >
-                    <Icon size={16} strokeWidth={1.75} className="shrink-0 opacity-70" />
-                    <div className="flex-1 min-w-0">
-                      <span className="truncate block">{label}</span>
-                      {item.description && (
-                        <span className="truncate block text-xs text-content-tertiary">
-                          {item.description}
-                        </span>
+                    <button
+                      type="button"
+                      onClick={() => selectResult(item)}
+                      title={shortcut ? `${label} (${formatShortcut(shortcut)})` : label}
+                      className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-left"
+                    >
+                      <Icon size={16} strokeWidth={1.75} className="shrink-0 opacity-70" />
+                      <div className="flex-1 min-w-0">
+                        <span className="truncate block">{label}</span>
+                        {description && (
+                          <span className="truncate block text-xs text-content-tertiary">{description}</span>
+                        )}
+                      </div>
+                      {shortcut && (
+                        <kbd className="shrink-0 font-mono text-2xs text-content-tertiary bg-surface-secondary border border-border-light rounded px-1.5 py-0.5">
+                          {formatShortcut(shortcut)}
+                        </kbd>
                       )}
-                    </div>
-                    {isActive && (
-                      <CornerDownLeft size={14} className="shrink-0 text-content-tertiary" />
+                      {isActive && !actionId && (
+                        <CornerDownLeft size={14} className="shrink-0 text-content-tertiary" />
+                      )}
+                    </button>
+                    {actionId && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label={`${changeShortcutLabel}: ${label}`}
+                          title={changeShortcutLabel}
+                          data-testid={`palette-rebind-${actionId}`}
+                          onClick={() => {
+                            setRecordError(null);
+                            setRecordingFor(actionId);
+                          }}
+                          className={clsx(
+                            'shrink-0 rounded p-1 text-content-tertiary hover:text-content-primary focus:opacity-100',
+                            recordingFor === actionId || isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+                          )}
+                        >
+                          <Keyboard size={14} />
+                        </button>
+                        {overridden && (
+                          <button
+                            type="button"
+                            aria-label={resetShortcutLabel}
+                            title={resetShortcutLabel}
+                            onClick={() => resetBinding(actionId)}
+                            className="shrink-0 rounded p-1 text-content-tertiary hover:text-content-primary opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          >
+                            <RotateCcw size={13} />
+                          </button>
+                        )}
+                      </>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -650,7 +767,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         </div>
 
         {/* Footer hints */}
-        <div className="border-t border-border-light px-4 py-2 flex items-center gap-4 text-2xs text-content-tertiary">
+        <div className="border-t border-border-light px-4 py-2 flex flex-wrap items-center gap-4 text-2xs text-content-tertiary">
           <span className="flex items-center gap-1">
             <kbd className="font-mono bg-surface-secondary border border-border-light rounded px-1 py-0.5">
               &uarr;
@@ -664,7 +781,11 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             <kbd className="font-mono bg-surface-secondary border border-border-light rounded px-1 py-0.5">
               &crarr;
             </kbd>
-            {t('command_palette.hint_open', { defaultValue: 'open' })}
+            {t('palette.hint_run', { defaultValue: 'run' })}
+          </span>
+          <span className="flex items-center gap-1">
+            <Keyboard size={11} />
+            {t('palette.hint_rebind', { defaultValue: 'change shortcut' })}
           </span>
           <span className="flex items-center gap-1">
             <kbd className="font-mono bg-surface-secondary border border-border-light rounded px-1 py-0.5">

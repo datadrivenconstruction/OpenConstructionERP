@@ -32,6 +32,7 @@ import ProjectSummaryRendererC from './ProjectSummaryRenderer';
 import SemanticSearchRendererC from './SemanticSearchRenderer';
 import BOQItemCreatedRendererC from './BOQItemCreatedRenderer';
 import { ActionProposalRenderer } from '../../../actions/ActionProposalCard';
+import { UiActionCard } from '../../../actions/UiActionCard';
 
 export const RENDERER_REGISTRY: Record<string, FC<{ data: unknown }>> = {
   // Backend renderer names (the source of truth).
@@ -47,6 +48,8 @@ export const RENDERER_REGISTRY: Record<string, FC<{ data: unknown }>> = {
   boq_item_created: BOQItemCreatedRendererC,
   // A proposed change waiting for a person to apply it (erp_chat propose_* tools).
   action_proposal: ActionProposalRenderer,
+  // An app action the assistant suggests; runs only on the person's click (propose_ui_action).
+  ui_action: UiActionCard,
   semantic_search: SemanticSearchRendererC,
   generic_table: GenericTableRendererC,
   // Legacy aliases (kept so old persisted messages keep rendering).

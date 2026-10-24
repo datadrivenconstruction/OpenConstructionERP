@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { lazy } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, FileInput } from 'lucide-react';
 import type { ModuleManifest } from '../_types';
 
 const GAEBExchangeModule = lazy(() => import('./GAEBExchangeModule'));
@@ -30,6 +30,24 @@ export const manifest: ModuleManifest = {
   // BOQ on the query string. Move or rename either one and this module goes
   // back to being reachable only by typing its URL.
   navItems: [],
+  actions: [
+    {
+      id: 'gaeb.import',
+      titleKey: 'palette.action.gaeb_import',
+      defaultTitle: 'Import GAEB file',
+      keywordsKey: 'palette.keywords.gaeb_import',
+      defaultKeywords: 'gaeb, x81, x83, x84, lv, tender file, import',
+      group: 'import',
+      icon: FileInput,
+      defaultShortcut: 'I G',
+      run: (ctx) =>
+        ctx.navigate(
+          ctx.projectId
+            ? `/gaeb-exchange?project_id=${encodeURIComponent(ctx.projectId)}&tab=import`
+            : '/gaeb-exchange?tab=import',
+        ),
+    },
+  ],
   translations: {
     en: {
       'nav.gaeb_exchange': 'GAEB Exchange',

@@ -82393,6 +82393,7 @@
         "inbox_logic.py",
         "manifest.py",
         "models.py",
+        "nav_badges.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -82497,6 +82498,11 @@
           "path": "/inbox/{item_id}/state",
           "handler": "restore_inbox_item",
           "response_model": "InboxActionResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/nav-badges/",
+          "handler": "get_nav_badges"
         }
       ],
       "schemas": [
@@ -83881,15 +83887,19 @@
         "file_approvals",
         "finance",
         "hse_advanced",
+        "ncr",
         "notifications",
         "procurement",
         "projects",
+        "punchlist",
         "qms",
         "rfi",
         "risk",
         "safety",
         "schedule",
+        "tasks",
         "teams",
+        "tendering",
         "users",
         "validation",
         "variations"
@@ -107589,6 +107599,11 @@
               "name": "project_id",
               "type": "UUID | None",
               "description": "Project open in the app, if any."
+            },
+            {
+              "name": "actions",
+              "type": "list[str]",
+              "description": "Ids of the palette actions this browser can run; the assistant may propose one."
             }
           ]
         },
@@ -276443,10 +276458,10 @@
     },
     {
       "name": "erp-chat",
-      "ts_files": 73,
+      "ts_files": 74,
       "css_files": 2,
       "test_files": 14,
-      "total_files": 75
+      "total_files": 76
     },
     {
       "name": "esg",
@@ -277880,15 +277895,19 @@
       "file_approvals",
       "finance",
       "hse_advanced",
+      "ncr",
       "notifications",
       "procurement",
       "projects",
+      "punchlist",
       "qms",
       "rfi",
       "risk",
       "safety",
       "schedule",
+      "tasks",
       "teams",
+      "tendering",
       "users",
       "validation",
       "variations"
@@ -278990,11 +279009,11 @@
     "total_models": 788,
     "total_columns": 9172,
     "total_relationships": 240,
-    "total_routes": 4627,
+    "total_routes": 4628,
     "total_schemas": 4120,
-    "total_python_files": 2810,
+    "total_python_files": 2811,
     "frontend_features": 209,
-    "frontend_ts_files": 3606,
+    "frontend_ts_files": 3607,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

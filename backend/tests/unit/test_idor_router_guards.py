@@ -1130,6 +1130,9 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "export",
         "list_permit_conditions",
     ],
+    # The menu badge counts: with ?project_id= the handler checks that project
+    # first; without it the counts cover accessible_project_ids only.
+    "dashboard": ["get_nav_badges"],
 }
 
 
@@ -1349,6 +1352,11 @@ def _is_object_scoped(paths: set[str]) -> bool:
 # codebase means removing its line here, test_exclusions_name_a_live_route
 # fails on a stale entry rather than letting it shadow a future handler.
 _NOT_ROUTER_GATED: dict[str, str] = {
+    # Inbox rows belong to a user, not a project: InboxActionService resolves the
+    # id inside the caller's own inbox and answers 404 for anybody else's.
+    "dashboard.acknowledge_inbox_item": "User-owned inbox row, resolved in the caller's own inbox; others 404.",
+    "dashboard.dismiss_inbox_item": "User-owned inbox row, resolved in the caller's own inbox; others 404.",
+    "dashboard.restore_inbox_item": "User-owned inbox row, resolved in the caller's own inbox; others 404.",
     "commitment_release.get_schedule": "catalogue_id names a tenant authority schedule, not a project record; the service resolves it under the caller's tenant",
     "commitment_release.update_schedule": "catalogue_id names a tenant authority schedule, not a project record; the service resolves it under the caller's tenant",
     "commitment_release.publish_schedule": "catalogue_id names a tenant authority schedule, not a project record; the service resolves it under the caller's tenant",

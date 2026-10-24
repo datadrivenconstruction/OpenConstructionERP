@@ -10,6 +10,7 @@
  */
 
 import type { LucideIcon } from 'lucide-react';
+import type { PaletteAction } from '@/shared/lib/actions/registry';
 import type { LazyExoticComponent, ComponentType } from 'react';
 
 /* ── Route registered by a module ──────────────────────────────────── */
@@ -67,6 +68,12 @@ export interface ModuleManifest {
   navItems: ModuleNavItem[];
   /** Whether the module is enabled by default for new users */
   defaultEnabled: boolean;
+  /**
+   * Palette actions this module offers ("Import GAEB file"). Registered while
+   * the module is enabled; see shared/lib/actions/registry.ts. Ids carry the
+   * module's prefix so they never clash with core ones.
+   */
+  actions?: PaletteAction[];
   /** Module IDs this module depends on (e.g. ['boq', 'costs']) */
   depends?: string[];
   /**

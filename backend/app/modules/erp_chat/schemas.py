@@ -13,6 +13,9 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 _LOCALE_TAG = re.compile(r"[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*")
 MAX_LOCALE_LENGTH = 16
 MAX_ROUTE_LENGTH = 200
+#: Palette action ids the browser can run, e.g. "boq.new" or "nav./finance".
+_ACTION_ID = re.compile(r"[a-z0-9][a-z0-9._/:-]{0,63}")
+MAX_CLIENT_ACTIONS = 120
 
 
 class ChatClientContext(BaseModel):
@@ -26,6 +29,18 @@ class ChatClientContext(BaseModel):
 
     route: str | None = Field(default=None, description="Current path in the app; cut to 200 characters.")
     project_id: UUID | None = Field(default=None, description="Project open in the app, if any.")
+    actions: list[str] = Field(
+        default_factory=list,
+        description="Ids of the palette actions this browser can run; the assistant may propose one.",
+    )
+
+    @field_validator("actions", mode="before")
+    @classmethod
+    def _keep_action_ids(cls, value: Any) -> list[str]:
+        if not isinstance(value, list):
+            return []
+        ids = [v for v in value if isinstance(v, str) and _ACTION_ID.fullmatch(v)]
+        return list(dict.fromkeys(ids))[:MAX_CLIENT_ACTIONS]
 
     @field_validator("route", mode="before")
     @classmethod

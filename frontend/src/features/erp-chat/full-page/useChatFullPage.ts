@@ -15,6 +15,8 @@ import {
 import { isProposalTool } from '../toolLabels';
 import { toolCallsFromPersisted, type PersistedChatMessage } from '../transcript';
 import type { ChatMessage, ChatSession, DataPanelEntry, ToolCallInfo } from '../types';
+import { assistantActionIds } from '@/shared/lib/actions/askAi';
+import { useModuleStore } from '@/stores/useModuleStore';
 
 /** Shape of a persisted message row from GET /sessions/{id}/messages/. */
 interface PersistedMessage {
@@ -336,6 +338,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
               client_context: {
                 route: window.location.pathname,
                 project_id: activeProjectId ?? null,
+                actions: assistantActionIds(useModuleStore.getState().isModuleEnabled),
               },
             }),
             signal: controller.signal,

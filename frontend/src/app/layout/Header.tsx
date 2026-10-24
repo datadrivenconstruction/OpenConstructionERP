@@ -4,7 +4,8 @@ import { useState, useRef, useEffect, useCallback, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, useMatch } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ChevronDown, ChevronRight, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload, HelpCircle, GraduationCap, Mail, ExternalLink, Github, Sun, Moon, Monitor, Globe } from 'lucide-react';
+import { openAiPanel } from '@/shared/lib/actions/askAi';
+import { Search, ChevronDown, ChevronRight, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload, HelpCircle, GraduationCap, Mail, ExternalLink, Github, Sun, Moon, Monitor, Globe, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode, changeLanguage } from '../i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
@@ -372,6 +373,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   const packData = usePartnerPack().data;
   const showCoBrand = packData?.active === true && packData.manifest?.type === 'partner';
   const location = useLocation();
+  const navigate = useNavigate();
   const translatedTitle = title
     ? t(resolvePageTitleKey(title) ?? title, { defaultValue: title })
     : undefined;
@@ -545,6 +547,22 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           )}
         >
           <Search size={16} />
+        </button>
+
+        {/* The AI assistant dock, also reachable from the palette ("Ask AI"). */}
+        <button
+          type="button"
+          onClick={() => openAiPanel({ pathname: location.pathname, navigate })}
+          aria-label={t('header.ask_ai', { defaultValue: 'Ask AI' })}
+          title={t('header.ask_ai', { defaultValue: 'Ask AI' })}
+          data-testid="header-ask-ai"
+          className={clsx(
+            'flex h-8 items-center gap-1.5 rounded-lg px-2 text-content-secondary',
+            'hover:bg-surface-secondary hover:text-content-primary transition-colors',
+          )}
+        >
+          <Sparkles size={16} strokeWidth={1.75} />
+          <span className="hidden xl:inline text-sm">{t('header.ask_ai', { defaultValue: 'Ask AI' })}</span>
         </button>
 
         {/* Hairline divider between Zone 2 and Zone 3. */}

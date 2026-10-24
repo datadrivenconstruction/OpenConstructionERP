@@ -98,6 +98,8 @@ import {
 } from './useFloatingChat';
 import { fetchChatSessions, fetchSessionMessages } from './api';
 import type { ChatMessage, ChatSession, ToolCallInfo } from './types';
+import { assistantActionIds } from '@/shared/lib/actions/askAi';
+import { useModuleStore } from '@/stores/useModuleStore';
 import { DockTabsRow, dockTabId, dockTabPanelId, type DockTab } from './DockTabsRow';
 import { isProposalTool, toolLabel, toolRefusalText } from './toolLabels';
 import { proposalsInTranscript, transcriptFromPersisted } from './transcript';
@@ -491,7 +493,7 @@ function ToolCallEntry({ tool }: { tool: ToolCallInfo }) {
   const legacyWrite = tool.name === 'create_boq_item';
   const [open, setOpen] = useState(legacyWrite);
 
-  if (renderer === 'action_proposal' && RendererComp && data !== undefined) {
+  if ((renderer === 'action_proposal' || renderer === 'ui_action') && RendererComp && data !== undefined) {
     return (
       <div className="my-2">
         <RendererComp data={data} />
@@ -1872,6 +1874,8 @@ export function FloatingChatPanel() {
               client_context: {
                 route: location.pathname,
                 project_id: activeProjectId ?? null,
+                // What the palette can run here, so a proposal names a real action.
+                actions: assistantActionIds(useModuleStore.getState().isModuleEnabled),
               },
             }),
             signal: controller.signal,
