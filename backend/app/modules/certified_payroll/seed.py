@@ -36,7 +36,7 @@ _SITES: dict[str, dict[str, str]] = {
         "locality": "Denver County, Colorado",
         "jurisdiction": "US-CO",
         "identifier": "CO20260012",
-        "contractor": "Front Range Builders LLC",
+        "contractor": "Pinecrest Mesa Builders LLC",
         "address": "1550 Wewatta St, Denver, CO 80202",
         "contract": "GS-08P-26-DEN-0147",
     },
@@ -124,7 +124,7 @@ async def seed_certified_payroll(
             decision_date=(first_day - timedelta(days=60)).isoformat(),
             effective_date=(first_day - timedelta(days=30)).isoformat(),
             statute_reference="Davis-Bacon Act, 40 U.S.C. 3141-3148; 29 CFR Parts 1, 3, 5",
-            source_note="Demo data: rates are representative, not the published decision.",
+            source_note="Rates are representative, not the published decision.",
             currency="USD",
             classifications=[
                 WageClassificationCreate(code=c, title=t, basic_hourly_rate=b, fringe_rate=f, ordinal=i)
@@ -159,7 +159,7 @@ async def seed_certified_payroll(
         period_end=week_end.isoformat(),
         status="approved",
         currency="USD",
-        notes="Demo payroll from the daily field reports.",
+        notes="Payroll from the daily field reports.",
     )
     session.add(batch)
     await session.flush()
