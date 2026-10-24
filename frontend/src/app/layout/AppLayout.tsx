@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { Sidebar, FloatingRecentButton } from './Sidebar';
+import { MenuBottomNav } from './MenuBottomNav';
 import { Header, resolvePageTitleKey } from './Header';
 import { DesktopToolbar } from './DesktopToolbar';
 import { FeedbackDialog } from '@/shared/ui';
@@ -175,6 +176,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
         <main className="px-4 pt-6 pb-4 sm:px-7">
           {children}
         </main>
+        <MenuBottomNav onMore={openSidebar} />
       </div>
 
       <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />

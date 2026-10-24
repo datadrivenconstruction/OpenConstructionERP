@@ -73,6 +73,12 @@ import {
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { sectionTone, useMenuIcon } from './menuIcons';
+import { applyOrder, modeItems } from './menuLayout';
+import { useMenuLayoutStore } from './useMenuLayoutStore';
+import { suggestMenuChanges } from './menuUsage';
+import { NavItemBadge } from './NavItemBadge';
+import { MenuModeBar, MenuSuggestionCard, RailFlyoutGroup } from './MenuModeBar';
+import { MenuOrganizer } from './MenuOrganizer';
 
 // The picker carries the curated icon catalogue; both load on first use.
 const MenuIconPicker = lazy(() => import('./MenuIconPicker'));
@@ -537,6 +543,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // re-render whenever a bundle is merged; the returned value is unused.
   useI18nReady();
   const navigate = useNavigate();
+  const menuLayout = useMenuLayoutStore((s) => s.layout);
+  const dispatchMenu = useMenuLayoutStore((s) => s.dispatch);
+  const menuUsage = useMenuLayoutStore((s) => s.usage);
+  const recordMenuVisit = useMenuLayoutStore((s) => s.recordVisit);
+  const dismissMenuSuggestion = useMenuLayoutStore((s) => s.dismiss);
+  const [organizerOpen, setOrganizerOpen] = useState(false);
   const location = useLocation();
   const { isModuleEnabled } = useModuleStore();
   // Subscribed separately so the module-count summary at the foot of the nav
@@ -1138,7 +1150,8 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     // shows dimmed via `editingHiddenGroups` (see NavGroupSection) with
     // an eye control to switch it back on.
     if (effectiveHiddenGroups.includes(group.id)) return [];
-    return groupItems(group).filter(
+    const rows = applyOrder(groupItems(group), menuLayout.order[group.id], (item) => item.to);
+    return rows.filter(
       (item) =>
         passesRowGates(item) &&
         (!item.advancedOnly || showAdvancedRows) &&
@@ -1159,7 +1172,25 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const learnLabel = learnGroup
     ? t(learnGroup.labelKey, { defaultValue: learnGroup.defaultLabel ?? learnGroup.id })
     : '';
-  const loopGroups = navGroups.filter((group) => group.id !== LEARN_GROUP_ID);
+  const loopGroups = applyOrder(
+    navGroups.filter((group) => group.id !== LEARN_GROUP_ID),
+    menuLayout.groupOrder,
+    (group) => group.id,
+  );
+  // A work mode replaces the workspace and the groups with its own short
+  // list; "More modules" still opens everything else underneath.
+  const activeModeRoutes = modeItems(menuLayout, menuLayout.activeMode);
+  const modeActive = activeModeRoutes != null;
+  const modeRows = (activeModeRoutes ?? [])
+    .map((route) => ALL_NAV_ITEMS[route])
+    .filter((item): item is NavItem => item != null && passesRowGates(item) && !pinned.includes(item.to));
+  const userGroupRows = menuLayout.userGroups.map((group) => ({
+    group,
+    rows: group.items
+      .map((route) => ALL_NAV_ITEMS[route])
+      .filter((item): item is NavItem => item != null && passesRowGates(item)),
+  }));
+  const railFlyouts = iconified && menuLayout.rail === 'rail';
   // Hidden, the card folds into a graduation cap in the top bar
   // (`LearnTopBarButton`), and a ghost of the cap flies there so the reader
   // sees where it went. The start is measured before the card unmounts.
@@ -1189,11 +1220,34 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // Edit mode opens "More modules" so a row hidden in there can be found and
   // switched back on.
   const moreExpanded = moreOpen || editMode;
-  const moreCount = workspaceActive
+  const moreCount = workspaceActive || modeActive
     ? loopGroups.reduce((sum, group) => sum + visibleGroupItems(group).length, 0)
     : 0;
 
-  const renderRow = (item: NavItem, i: number) => {
+  // Local usage counts feed the suggestion card; nothing changes until Accept.
+  useEffect(() => {
+    if (activeRoute && ALL_NAV_ITEMS[activeRoute]) recordMenuVisit(activeRoute);
+  }, [activeRoute, recordMenuVisit]);
+  const menuSuggestion =
+    editMode || iconified
+      ? undefined
+      : suggestMenuChanges({
+          usage: menuUsage,
+          now: Date.now(),
+          visibleRoutes: loopGroups.flatMap((group) => visibleGroupItems(group).map((item) => item.to)),
+          pinned,
+          maxPinned: MAX_PINNED,
+          keep: PACK_MENU_KEEP_ROUTES,
+        })[0];
+  const acceptMenuSuggestion = () => {
+    if (!menuSuggestion) return;
+    if (menuSuggestion.kind === 'hide') setHiddenModules([...hiddenModules, menuSuggestion.route]);
+    else togglePin(menuSuggestion.route);
+    dismissMenuSuggestion(menuSuggestion.key);
+  };
+
+  const renderRow = (item: NavItem, i: number) => renderRowAs(item, i, iconified);
+  const renderRowAs = (item: NavItem, i: number, iconified: boolean) => {
     // In-place project-focus annotation (no reorder):
     //   g === null      → route not profile-constrained →
     //                      render exactly as the default.
@@ -1402,6 +1456,40 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         </button>
       </div>
 
+      {!iconified && (
+        <MenuModeBar
+          mode={menuLayout.activeMode}
+          onMode={(mode) => dispatchMenu({ type: 'setMode', mode })}
+          onArrange={() => setOrganizerOpen(true)}
+        />
+      )}
+      {menuSuggestion && ALL_NAV_ITEMS[menuSuggestion.route] && (
+        <MenuSuggestionCard
+          suggestion={menuSuggestion}
+          label={t(ALL_NAV_ITEMS[menuSuggestion.route]!.labelKey, {
+            defaultValue: ALL_NAV_ITEMS[menuSuggestion.route]!.defaultLabel,
+          })}
+          onAccept={acceptMenuSuggestion}
+          onDismiss={() => dismissMenuSuggestion(menuSuggestion.key)}
+        />
+      )}
+      {organizerOpen && (
+        <MenuOrganizer
+          groups={loopGroups.map((group) => ({
+            id: group.id,
+            label: t(group.labelKey, { defaultValue: group.defaultLabel ?? group.id }),
+            items: applyOrder(groupItems(group), menuLayout.order[group.id], (item) => item.to).map((item) => ({
+              to: item.to,
+              label: t(item.labelKey, { defaultValue: item.defaultLabel }),
+            })),
+          }))}
+          allItems={Object.values(ALL_NAV_ITEMS)
+            .filter(passesRowGates)
+            .map((item) => ({ to: item.to, label: t(item.labelKey, { defaultValue: item.defaultLabel }) }))}
+          onClose={() => setOrganizerOpen(false)}
+        />
+      )}
+
       {/* Main navigation — grouped with collapsible headers.
           role="navigation" + aria-label make this an addressable
           landmark for screen readers; previously the sidebar was just
@@ -1477,7 +1565,33 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             order, as one flat list. A workspace is a sequence (the monthly
             billing cycle for a general contractor), so it is not spread
             across the thematic groups below. */}
-        {workspaceActive && workspace && visibleWorkspaceItems.length > 0 && (
+        {userGroupRows.map(({ group, rows }) =>
+          rows.length === 0 ? null : (
+            <div key={`user:${group.id}`} data-testid="sidebar-user-group">
+              <NavGroupSection
+                label={group.label}
+                isCollapsed={collapsed[`user:${group.id}`] ?? false}
+                onToggle={() => toggleGroup(`user:${group.id}`)}
+                iconified={iconified}
+              >
+                <ul className="space-y-0.5">{rows.map(renderRow)}</ul>
+              </NavGroupSection>
+            </div>
+          ),
+        )}
+        {modeActive && modeRows.length > 0 && (
+          <div data-testid="sidebar-mode">
+            <NavGroupSection
+              label={t(`menu_layout.mode_${menuLayout.activeMode}`, { defaultValue: menuLayout.activeMode })}
+              isCollapsed={collapsed['mode'] ?? false}
+              onToggle={() => toggleGroup('mode')}
+              iconified={iconified}
+            >
+              <ul className="space-y-0.5">{modeRows.map(renderRow)}</ul>
+            </NavGroupSection>
+          </div>
+        )}
+        {workspaceActive && !modeActive && workspace && visibleWorkspaceItems.length > 0 && (
           <div data-testid="sidebar-workspace">
             <NavGroupSection
               label={t(workspace.labelKey, { defaultValue: workspace.defaultLabel })}
@@ -1520,7 +1634,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             menu to Advanced was the other way to offer the rest, and it is
             the worse one for somebody new: the workspace would drown in the
             full catalogue and the way back is a setting they have not met. */}
-        {workspaceActive && moreCount > 0 && (
+        {(workspaceActive || modeActive) && moreCount > 0 && (
           <div className={clsx('mt-3', iconified ? 'flex justify-center' : '')}>
             <button
               type="button"
@@ -1564,7 +1678,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             reordering. Each row is only annotated: needed → sequence
             number; not needed → smaller + greyed; unconstrained → as
             default. Focus OFF / no profile → every row is default. */}
-        {(!workspaceActive || moreExpanded) && loopGroups.map((group) => {
+        {(!(workspaceActive || modeActive) || moreExpanded) && loopGroups.map((group) => {
           const visibleItems = visibleGroupItems(group);
 
           // Skip group if no visible items. In normal mode this means
@@ -1575,6 +1689,19 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           if (visibleItems.length === 0) return null;
 
           const isCollapsed = collapsed[group.id] ?? false;
+
+          if (railFlyouts) {
+            const FirstIcon = visibleItems[0]!.icon;
+            return (
+              <RailFlyoutGroup
+                key={group.id}
+                label={t(group.labelKey, { defaultValue: group.defaultLabel ?? group.id })}
+                icon={<FirstIcon size={16} strokeWidth={1.75} aria-hidden />}
+              >
+                <ul className="space-y-0.5">{visibleItems.map((item, i) => renderRowAs(item, i, false))}</ul>
+              </RailFlyoutGroup>
+            );
+          }
 
           return (
             <Fragment key={group.id}>
@@ -2667,6 +2794,7 @@ function SidebarItem({
               {numericBadge > 99 ? '99+' : numericBadge}
             </span>
           )}
+          <NavItemBadge itemId={item.to} />
           {item.badge && (
             <span
               className={clsx(
