@@ -54,6 +54,8 @@ APPEARANCE_OPTIONS: dict[str, tuple[str, ...]] = {
     "font": ("system", "inter", "ibm-plex-sans", "source-sans-3"),
     "density": ("comfortable", "compact"),
     "radius": ("standard", "sharp", "round"),
+    "text": ("standard", "large", "xlarge"),
+    "contrast": ("standard", "high"),
 }
 
 #: Allowed values of the workspace menu look (``appearance.menu``), one tuple

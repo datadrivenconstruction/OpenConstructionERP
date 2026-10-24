@@ -63,10 +63,10 @@ describe('<StepLook>', () => {
     expect(preview().dataset.view).toBe(PLATFORM_MENU.view);
 
     const styleGroup = screen.getByRole('radiogroup', { name: 'Colour style' });
-    fireEvent.click(styleGroup.querySelector('[aria-label="Studio"]')!);
-    expect(preview().dataset.accent).toBe('violet');
+    fireEvent.click(styleGroup.querySelector('[aria-label="Office"]')!);
+    expect(preview().dataset.accent).toBe('graphite');
     expect(preview().dataset.font).toBe('inter');
-    expect(preview().dataset.radius).toBe('round');
+    expect(preview().dataset.radius).toBe('sharp');
 
     const menus = screen.getByRole('radiogroup', { name: 'Menu view' });
     fireEvent.click(menus.querySelector('[aria-label="Executive"]')!);

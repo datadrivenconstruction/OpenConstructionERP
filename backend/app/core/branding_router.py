@@ -127,6 +127,8 @@ class WorkspaceAppearance(BaseModel):
     font: Literal["system", "inter", "ibm-plex-sans", "source-sans-3"] | None = None
     density: Literal["comfortable", "compact"] | None = None
     radius: Literal["standard", "sharp", "round"] | None = None
+    text: Literal["standard", "large", "xlarge"] | None = None
+    contrast: Literal["standard", "high"] | None = None
     menu: WorkspaceMenu | None = None
 
 

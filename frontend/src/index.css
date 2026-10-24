@@ -358,7 +358,8 @@
 }
 
 html {
-  font-size: 15px;
+  /* Root size times the text-size choice; density moves the root, data-text the scale. */
+  font-size: calc(var(--oe-root-size, 15px) * var(--oe-text-scale, 1));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -626,7 +627,7 @@ h4 {
 
 .ag-theme-alpine {
   --ag-font-family: var(--oe-font-sans);
-  --ag-font-size: 13px;
+  --ag-font-size: calc(13px * var(--oe-text-scale, 1));
   --ag-row-height: 40px;
   --ag-header-height: 44px;
   --ag-header-foreground-color: var(--oe-text-secondary);
@@ -2067,7 +2068,7 @@ html[data-radius='round'] {
    so a smaller root size tightens paddings, gaps and control heights by 10%
    and leaves every letter where it was. Grids get shorter rows. */
 html[data-density='compact'] {
-  font-size: 13.5px;
+  --oe-root-size: 13.5px;
   --oe-space-1: 3px;
   --oe-space-2: 6px;
   --oe-space-3: 10px;
@@ -2080,6 +2081,71 @@ html[data-density='compact'] .ag-theme-quartz {
   --ag-row-height: 32px;
   --ag-header-height: 36px;
   --ag-cell-horizontal-padding: 6px;
+}
+
+/* Text size: the Tailwind type scale and the root size multiply by this, so
+   letters, controls and grid rows grow together for tablets and big screens. */
+html[data-text='large'] {
+  --oe-text-scale: 1.125;
+}
+html[data-text='xlarge'] {
+  --oe-text-scale: 1.25;
+}
+html[data-text='large'] .ag-theme-alpine,
+html[data-text='large'] .ag-theme-quartz {
+  --ag-row-height: 46px;
+  --ag-header-height: 48px;
+}
+html[data-text='xlarge'] .ag-theme-alpine,
+html[data-text='xlarge'] .ag-theme-quartz {
+  --ag-row-height: 52px;
+  --ag-header-height: 54px;
+}
+
+/* High contrast: text at or near 7:1 on every surface, borders a user can see
+   in sunlight, and a heavy focus ring. Works on top of light and dark; the
+   accent stays the user's own. */
+html[data-contrast='high'] {
+  --oe-text-primary: #000000;
+  --oe-text-secondary: #1d1d1f;
+  --oe-text-tertiary: #2e3036;
+  --oe-text-quaternary: #3a3d45;
+  --oe-border: #6e6e73;
+  --oe-border-light: #8e8e93;
+  --oe-border-default: #6e6e73;
+  --oe-bg-page: #e4e4e9;
+  --oe-bg-page-ch: 228 228 233;
+}
+html.dark[data-contrast='high'] {
+  --oe-bg: #000000;
+  --oe-bg-secondary: #0b0b0f;
+  --oe-bg-tertiary: #121218;
+  --oe-bg-elevated: #16161d;
+  --oe-bg-page: #000000;
+  --oe-bg-ch: 0 0 0;
+  --oe-bg-secondary-ch: 11 11 15;
+  --oe-bg-tertiary-ch: 18 18 24;
+  --oe-bg-elevated-ch: 22 22 29;
+  --oe-bg-page-ch: 0 0 0;
+  --oe-text-primary: #ffffff;
+  --oe-text-secondary: #e6e6ec;
+  --oe-text-tertiary: #d2d4dc;
+  --oe-text-quaternary: #c6c8d0;
+  --oe-border: #8a8d9e;
+  --oe-border-light: #6b6e80;
+  --oe-border-default: #8a8d9e;
+}
+html[data-contrast='high'] :focus-visible {
+  outline: 3px solid var(--oe-border-focus);
+  outline-offset: 2px;
+}
+html[data-contrast='high'] .ag-theme-alpine,
+html[data-contrast='high'] .ag-theme-quartz {
+  --ag-border-color: var(--oe-border);
+  --ag-row-border-color: var(--oe-border-light);
+  --ag-foreground-color: var(--oe-text-primary);
+  --ag-header-foreground-color: var(--oe-text-primary);
+  --ag-secondary-foreground-color: var(--oe-text-secondary);
 }
 
 /* ── Menu look ────────────────────────────────────────────────────────────

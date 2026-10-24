@@ -1,7 +1,8 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * UI appearance styles: accent colour, font, density and corner radius.
+ * UI appearance styles: accent colour, font, density, corner radius, text size
+ * and contrast.
  *
  * Each axis is a `data-*` attribute on <html> that index.css turns into token
  * overrides. The boot script in index.html applies the same attributes from
@@ -17,17 +18,23 @@ export const ACCENTS = ['blue', 'teal', 'violet', 'emerald', 'amber', 'graphite'
 export const FONTS = ['system', 'inter', 'ibm-plex-sans', 'source-sans-3'] as const;
 export const DENSITIES = ['comfortable', 'compact'] as const;
 export const RADII = ['standard', 'sharp', 'round'] as const;
+export const TEXT_SIZES = ['standard', 'large', 'xlarge'] as const;
+export const CONTRASTS = ['standard', 'high'] as const;
 
 export type Accent = (typeof ACCENTS)[number];
 export type FontChoice = (typeof FONTS)[number];
 export type Density = (typeof DENSITIES)[number];
 export type Radius = (typeof RADII)[number];
+export type TextSize = (typeof TEXT_SIZES)[number];
+export type Contrast = (typeof CONTRASTS)[number];
 
 export interface Appearance {
   accent: Accent;
   font: FontChoice;
   density: Density;
   radius: Radius;
+  text: TextSize;
+  contrast: Contrast;
 }
 
 export type AppearanceAxis = keyof Appearance;
@@ -37,6 +44,8 @@ export const AXIS_VALUES: { [K in AppearanceAxis]: readonly Appearance[K][] } = 
   font: FONTS,
   density: DENSITIES,
   radius: RADII,
+  text: TEXT_SIZES,
+  contrast: CONTRASTS,
 };
 
 export const PLATFORM_APPEARANCE: Appearance = {
@@ -44,6 +53,8 @@ export const PLATFORM_APPEARANCE: Appearance = {
   font: 'system',
   density: 'comfortable',
   radius: 'standard',
+  text: 'standard',
+  contrast: 'standard',
 };
 
 /** The user's own choice. Read by the boot script in index.html. */
@@ -77,23 +88,49 @@ export const FONT_STACK: Record<FontChoice, string> = {
   'source-sans-3': '"Source Sans 3 Variable", -apple-system, BlinkMacSystemFont, Arial, sans-serif',
 };
 
+/**
+ * Named styles, one click each. A preset only sets existing axes and the theme,
+ * so anything it does can also be reached by hand below the gallery.
+ */
 export interface AppearancePreset {
-  id: 'classic' | 'studio' | 'engineering' | 'warm' | 'executive';
+  id: 'classic' | 'office' | 'site' | 'night' | 'presentation';
   value: Appearance;
+  theme: 'light' | 'dark';
 }
 
+const base = PLATFORM_APPEARANCE;
 export const APPEARANCE_PRESETS: readonly AppearancePreset[] = [
-  { id: 'classic', value: PLATFORM_APPEARANCE },
-  { id: 'studio', value: { accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round' } },
-  { id: 'engineering', value: { accent: 'teal', font: 'ibm-plex-sans', density: 'compact', radius: 'sharp' } },
-  { id: 'warm', value: { accent: 'amber', font: 'source-sans-3', density: 'comfortable', radius: 'round' } },
-  { id: 'executive', value: { accent: 'graphite', font: 'inter', density: 'comfortable', radius: 'standard' } },
+  { id: 'classic', value: base, theme: 'light' },
+  {
+    id: 'office',
+    value: { ...base, accent: 'graphite', font: 'inter', density: 'compact', radius: 'sharp' },
+    theme: 'light',
+  },
+  // Tablet in sunlight: big letters, strong contrast, generous touch targets.
+  {
+    id: 'site',
+    value: { ...base, accent: 'amber', density: 'comfortable', radius: 'round', text: 'xlarge', contrast: 'high' },
+    theme: 'light',
+  },
+  { id: 'night', value: { ...base, accent: 'teal', font: 'inter' }, theme: 'dark' },
+  // A client looking at a big screen from across the table.
+  {
+    id: 'presentation',
+    value: { ...base, accent: 'blue', font: 'inter', radius: 'round', text: 'large' },
+    theme: 'light',
+  },
 ];
 
-/** The preset an appearance matches exactly, or null for a custom mix. */
-export function matchPreset(a: Appearance): AppearancePreset['id'] | null {
-  const hit = APPEARANCE_PRESETS.find((p) =>
-    (Object.keys(PLATFORM_APPEARANCE) as AppearanceAxis[]).every((k) => p.value[k] === a[k]),
+const AXES = Object.keys(PLATFORM_APPEARANCE) as AppearanceAxis[];
+
+/**
+ * The preset an appearance matches exactly, or null for a custom mix. With a
+ * theme mode given the preset's theme must match too; `system` and `schedule`
+ * never match, since no preset picks them.
+ */
+export function matchPreset(a: Appearance, theme?: string): AppearancePreset['id'] | null {
+  const hit = APPEARANCE_PRESETS.find(
+    (p) => AXES.every((k) => p.value[k] === a[k]) && (theme === undefined || p.theme === theme),
   );
   return hit ? hit.id : null;
 }
@@ -163,5 +200,7 @@ export function applyAppearance(a: Appearance, root: HTMLElement = document.docu
   root.dataset.font = a.font;
   root.dataset.density = a.density;
   root.dataset.radius = a.radius;
+  root.dataset.text = a.text;
+  root.dataset.contrast = a.contrast;
   ensureFontLoaded(a.font);
 }

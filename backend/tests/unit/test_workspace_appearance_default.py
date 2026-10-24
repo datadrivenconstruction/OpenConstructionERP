@@ -43,6 +43,13 @@ def test_sanitise_keeps_only_allowed_values() -> None:
     assert sanitise_appearance("teal") is None
 
 
+def test_text_size_and_contrast_are_workspace_axes() -> None:
+    assert sanitise_appearance({"text": "large", "contrast": "high"}) == {"text": "large", "contrast": "high"}
+    assert sanitise_appearance({"text": "huge", "contrast": "max"}) is None
+    with pytest.raises(ValidationError):
+        WorkspaceAppearance(text="huge")
+
+
 def test_old_payload_without_appearance_reads_as_none() -> None:
     clean = sanitise({"mode": "text", "company_name": "Acme"})
     assert clean["appearance"] is None

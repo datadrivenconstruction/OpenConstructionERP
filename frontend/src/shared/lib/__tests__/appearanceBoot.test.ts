@@ -25,7 +25,7 @@ function boot() {
 
 function attrs() {
   const d = document.documentElement.dataset;
-  return { accent: d.accent, font: d.font, density: d.density, radius: d.radius };
+  return { accent: d.accent, font: d.font, density: d.density, radius: d.radius, text: d.text, contrast: d.contrast };
 }
 
 function menuAttrs() {
@@ -36,7 +36,7 @@ function menuAttrs() {
 beforeEach(() => {
   localStorage.clear();
   const root = document.documentElement;
-  for (const k of ['accent', 'font', 'density', 'radius']) root.removeAttribute(`data-${k}`);
+  for (const k of ['accent', 'font', 'density', 'radius', 'text', 'contrast']) root.removeAttribute(`data-${k}`);
   for (const k of MENU_AXES) root.removeAttribute(`data-menu-${k}`);
   root.classList.remove('dark');
   document.head.querySelectorAll('link[data-oe-font]').forEach((l) => l.remove());
@@ -75,9 +75,27 @@ describe('index.html appearance boot script', () => {
       JSON.stringify({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round' }),
     );
     boot();
-    expect(attrs()).toEqual({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round' });
+    expect(attrs()).toEqual({
+      ...PLATFORM_APPEARANCE,
+      accent: 'violet',
+      font: 'inter',
+      density: 'comfortable',
+      radius: 'round',
+    });
     const link = document.head.querySelector<HTMLLinkElement>('link[data-oe-font="inter"]');
     expect(link?.getAttribute('href')).toBe(fontStylesheetHref('inter'));
+  });
+
+  it('paints dark by time of day with the same window rule as theme.ts', () => {
+    const hour = new Date().getHours();
+    localStorage.setItem('oe_theme', 'schedule');
+    localStorage.setItem('oe_theme_schedule', JSON.stringify({ darkFrom: hour, darkTo: (hour + 1) % 24 }));
+    boot();
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('oe_theme_schedule', JSON.stringify({ darkFrom: (hour + 1) % 24, darkTo: (hour + 2) % 24 }));
+    boot();
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
 
   it('ignores junk in storage', () => {

@@ -23,6 +23,7 @@ import {
 import { MENU_PRESETS, matchMenuPreset, type MenuLook } from '@/shared/lib/menuAppearance';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
 
 const RADIUS_PX: Record<Appearance['radius'], number> = { sharp: 2, standard: 6, round: 12 };
@@ -30,9 +31,11 @@ const RADIUS_PX: Record<Appearance['radius'], number> = { sharp: 2, standard: 6,
 const PRESET_NAME: Record<string, string> = {
   classic: 'Classic',
   studio: 'Studio',
-  engineering: 'Engineering',
-  warm: 'Warm',
   executive: 'Executive',
+  office: 'Office',
+  site: 'Site',
+  night: 'Night',
+  presentation: 'Presentation',
   blueprint: 'Blueprint',
   site_office: 'Site office',
   focus: 'Focus',
@@ -242,6 +245,9 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
   const apply = async () => {
     const store = useAppearanceStore.getState();
     store.setAppearance(style);
+    // A preset carries its theme (Night is dark); a custom mix keeps the current one.
+    const preset = APPEARANCE_PRESETS.find((p) => p.id === styleId);
+    if (preset) useThemeStore.getState().setTheme(preset.theme);
     store.setMenu(menu);
     if (isAdmin) {
       setSaving(true);

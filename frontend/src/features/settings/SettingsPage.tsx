@@ -33,6 +33,7 @@ import {
   Sun,
   Moon,
   Monitor,
+  Clock,
   Pencil,
   Save,
   Lock,
@@ -1020,7 +1021,44 @@ const THEME_OPTIONS = [
   { value: 'light' as const, icon: Sun, labelKey: 'settings.theme_light', defaultLabel: 'Light' },
   { value: 'dark' as const, icon: Moon, labelKey: 'settings.theme_dark', defaultLabel: 'Dark' },
   { value: 'system' as const, icon: Monitor, labelKey: 'settings.theme_system', defaultLabel: 'System' },
+  { value: 'schedule' as const, icon: Clock, labelKey: 'settings.theme_schedule', defaultLabel: 'By time of day' },
 ];
+
+const HOURS = Array.from({ length: 24 }, (_, h) => h);
+
+/** Hours of the dark window for the time-of-day theme. */
+function ThemeScheduleSetting() {
+  const { t, i18n } = useTranslation();
+  const schedule = useThemeStore((s) => s.schedule);
+  const setSchedule = useThemeStore((s) => s.setSchedule);
+  const hourLabel = (h: number) =>
+    new Date(2000, 0, 1, h).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' });
+  const select = (key: 'darkFrom' | 'darkTo', label: string) => (
+    <label className="flex items-center gap-2 text-sm text-content-secondary">
+      {label}
+      <select
+        value={schedule[key]}
+        onChange={(e) => setSchedule({ ...schedule, [key]: Number(e.target.value) })}
+        className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-sm text-content-primary"
+      >
+        {HOURS.map((h) => (
+          <option key={h} value={h}>
+            {hourLabel(h)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-4 rounded-lg bg-surface-secondary/50 px-3 py-2">
+      <span className="text-sm font-medium text-content-primary">
+        {t('settings.theme_schedule_dark', { defaultValue: 'Dark' })}
+      </span>
+      {select('darkFrom', t('settings.theme_schedule_from', { defaultValue: 'from' }))}
+      {select('darkTo', t('settings.theme_schedule_to', { defaultValue: 'until' }))}
+    </div>
+  );
+}
 
 function InterfaceModeCard() {
   const { t } = useTranslation();
@@ -1118,7 +1156,7 @@ function AppearanceCard() {
         })}
       />
       <CardContent>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {THEME_OPTIONS.map((option) => {
             const isActive = theme === option.value;
             const Icon = option.icon;
@@ -1142,6 +1180,7 @@ function AppearanceCard() {
             );
           })}
         </div>
+        {theme === 'schedule' && <ThemeScheduleSetting />}
         <TextSizeSetting />
       </CardContent>
     </Card>
