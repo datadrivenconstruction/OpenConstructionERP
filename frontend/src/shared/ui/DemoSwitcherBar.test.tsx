@@ -12,6 +12,8 @@ vi.mock('@/shared/lib/projectList', () => ({ fetchProjectList: () => fetchProjec
 
 import { DemoSwitcherBar, captureDemoPick } from './DemoSwitcherBar';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAppearanceStore } from '@/stores/useAppearanceStore';
+import { useModuleStore } from '@/stores/useModuleStore';
 
 function renderBar() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -71,5 +73,27 @@ describe('DemoSwitcherBar', () => {
     renderBar();
     await waitFor(() => expect(useProjectContextStore.getState().activeProjectId).toBe('p2'));
     expect(sessionStorage.getItem('oe_demo_pick')).toBeNull();
+  });
+
+  it('gives the contractor demo its own look and a shorter menu', async () => {
+    useAppearanceStore.getState().setAppearance({ accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard' });
+    useModuleStore.getState().setHiddenGroups([]);
+    captureDemoPick('?demo=contractor-jeddah');
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    renderBar();
+    await waitFor(() => expect(sessionStorage.getItem('oe_demo_chosen')).toBe('contractor-jeddah'));
+    expect(useAppearanceStore.getState().effective.accent).toBe('amber');
+    const hidden = useModuleStore.getState().hiddenGroups;
+    expect(hidden).toContain('grp_real_estate');
+    expect(hidden).not.toContain('grp_estimating');
+    expect(hidden).not.toContain('grp_learn');
+  });
+
+  it('sends a visitor who has not chosen yet to the picker', async () => {
+    apiGet.mockResolvedValue({ demo_mode: true });
+    fetchProjectList.mockResolvedValue(PROJECTS);
+    renderBar();
+    await waitFor(() => expect(screen.queryByRole('tablist')).toBeNull());
   });
 });

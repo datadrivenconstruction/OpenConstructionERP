@@ -189,6 +189,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Governance': 'sidebar.admin_grid.governance',
   'Modules': 'nav.modules',
   'Packs': 'nav.packs',
+  'Demo projects': 'demo_switcher.label',
   // A module installed from the catalogue renders under a route that titles
   // every one of them "Module". The word was translated everywhere already, as
   // a filter label over in quantities, but a page heading has no business

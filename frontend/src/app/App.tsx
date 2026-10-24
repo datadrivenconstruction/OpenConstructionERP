@@ -647,6 +647,9 @@ const ModulesPage = lazy(() =>
 const PacksPage = lazy(() =>
   import('@/features/modules/packs/PacksPage').then((m) => ({ default: m.PacksPage }))
 );
+const DemoChooserPage = lazy(() =>
+  import('@/features/demo/DemoChooserPage').then((m) => ({ default: m.DemoChooserPage }))
+);
 const PackDetailPage = lazy(() =>
   import('@/features/modules/packs/PackDetailPage').then((m) => ({ default: m.PackDetailPage }))
 );
@@ -1592,6 +1595,7 @@ export default function App() {
         <Route path="/videos" element={<P title="Videos"><VideosPage /></P>} />
         <Route path="/packs" element={<P title="Packs"><PacksPage /></P>} />
         <Route path="/packs/:slug" element={<P title="Packs"><PackDetailPage /></P>} />
+        <Route path="/demo/choose" element={<P title="Demo projects"><DemoChooserPage /></P>} />
         <Route path="/cases" element={<P title="Cases"><CasesPage /></P>} />
         <Route path="/cases/new" element={<P title="Cases"><CaseEditorPage /></P>} />
         <Route path="/cases/:playbookId/edit" element={<P title="Cases"><CaseEditorPage /></P>} />
