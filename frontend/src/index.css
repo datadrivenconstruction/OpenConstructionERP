@@ -2028,22 +2028,52 @@ html.dark[data-accent='crimson'] {
   --oe-blue-ch: 251 113 133;
 }
 
-/* Comfort options (shared/lib/comfort.ts), personal only.
-   High contrast darkens borders and secondary text; reduced motion stops
+/* Comfort options (shared/lib/comfort.ts), personal only. Reduced motion stops
    transitions and animations regardless of the OS setting. */
+/* High contrast (comfort option): text at or near 7:1 on every surface, borders a user can see
+   in sunlight, and a heavy focus ring. Works on top of light and dark; the
+   accent stays the user's own. */
 html[data-contrast='high'] {
-  --oe-border: #8e8e96;
-  --oe-border-light: #b4b4bc;
-  --oe-border-default: #8e8e96;
-  --oe-text-secondary: #33353b;
-  --oe-text-tertiary: #44474f;
+  --oe-text-primary: #000000;
+  --oe-text-secondary: #1d1d1f;
+  --oe-text-tertiary: #2e3036;
+  --oe-text-quaternary: #3a3d45;
+  --oe-border: #6e6e73;
+  --oe-border-light: #8e8e93;
+  --oe-border-default: #6e6e73;
+  --oe-bg-page: #e4e4e9;
+  --oe-bg-page-ch: 228 228 233;
 }
 html.dark[data-contrast='high'] {
-  --oe-border: #6a6f88;
-  --oe-border-light: #4f5470;
-  --oe-border-default: #6a6f88;
-  --oe-text-secondary: #d4d6e2;
-  --oe-text-tertiary: #c0c3d0;
+  --oe-bg: #000000;
+  --oe-bg-secondary: #0b0b0f;
+  --oe-bg-tertiary: #121218;
+  --oe-bg-elevated: #16161d;
+  --oe-bg-page: #000000;
+  --oe-bg-ch: 0 0 0;
+  --oe-bg-secondary-ch: 11 11 15;
+  --oe-bg-tertiary-ch: 18 18 24;
+  --oe-bg-elevated-ch: 22 22 29;
+  --oe-bg-page-ch: 0 0 0;
+  --oe-text-primary: #ffffff;
+  --oe-text-secondary: #e6e6ec;
+  --oe-text-tertiary: #d2d4dc;
+  --oe-text-quaternary: #c6c8d0;
+  --oe-border: #8a8d9e;
+  --oe-border-light: #6b6e80;
+  --oe-border-default: #8a8d9e;
+}
+html[data-contrast='high'] :focus-visible {
+  outline: 3px solid var(--oe-border-focus);
+  outline-offset: 2px;
+}
+html[data-contrast='high'] .ag-theme-alpine,
+html[data-contrast='high'] .ag-theme-quartz {
+  --ag-border-color: var(--oe-border);
+  --ag-row-border-color: var(--oe-border-light);
+  --ag-foreground-color: var(--oe-text-primary);
+  --ag-header-foreground-color: var(--oe-text-primary);
+  --ag-secondary-foreground-color: var(--oe-text-secondary);
 }
 html[data-motion='reduced'] *,
 html[data-motion='reduced'] *::before,

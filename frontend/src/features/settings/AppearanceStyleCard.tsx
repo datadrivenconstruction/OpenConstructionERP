@@ -44,9 +44,27 @@ import {
   type Comfort,
 } from '@/shared/lib/comfort';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { BoqStylePreview } from './BoqStylePreview';
+import { StyleTransfer } from './StyleTransfer';
 
 const PREVIEW_RADIUS: Record<Appearance['radius'], number> = { sharp: 3, standard: 8, round: 14 };
+
+/** Fixed colours so a card shows its own theme, whatever theme the page is in. */
+const PREVIEW_PAINT = {
+  light: { bg: '#ffffff', ink: '#1d1d1f', bar: '#d2d2d7', line: '#e8e8ed' },
+  dark: { bg: '#1e2130', ink: '#f0f0f5', bar: '#3a3e55', line: '#2a2d3e' },
+  lightHigh: { bg: '#ffffff', ink: '#000000', bar: '#6e6e73', line: '#6e6e73' },
+  darkHigh: { bg: '#000000', ink: '#ffffff', bar: '#8a8d9e', line: '#8a8d9e' },
+};
+
+/** Presets that also set the theme or the text size say so on their card. */
+const PRESET_HINT: Partial<Record<AppearancePreset['id'], string>> = {
+  site: 'Big and bold, for tablets outdoors',
+  night: 'Dark, easy on the eyes',
+  presentation: 'Large, for showing a client',
+};
 
 function useFontLabel() {
   const { t } = useTranslation();
@@ -54,31 +72,59 @@ function useFontLabel() {
     font === 'system' ? t('settings.style_font_system', { defaultValue: 'System' }) : FONT_FAMILY_NAME[font];
 }
 
-/** A miniature window drawn with the style's own accent, font, radius and density. */
-function StylePreview({ value, label, active }: { value: Appearance; label: string; active: boolean }) {
+/** A miniature window drawn with the style's own accent, font, radius, density and text size. */
+function StylePreview({
+  value,
+  label,
+  active,
+  theme,
+  hint,
+  high = false,
+}: {
+  value: Appearance;
+  label: string;
+  active: boolean;
+  /** Draw it as the personal high-contrast option paints the page. */
+  high?: boolean;
+  /** Paint the card in this theme; omitted, it follows the page. */
+  theme?: 'light' | 'dark';
+  hint?: string;
+}) {
   const r = PREVIEW_RADIUS[value.radius];
   const accent = ACCENT_SWATCH[value.accent];
   const gap = value.density === 'compact' ? 4 : value.density === 'normal' ? 5 : 7;
+  const paint = theme ? PREVIEW_PAINT[high ? (`${theme}High` as const) : theme] : null;
+  const bar = paint?.bar ?? 'var(--oe-border)';
   return (
     <div
-      className="flex h-[6.5rem] w-full flex-col justify-between overflow-hidden border border-border-light bg-surface-elevated p-2.5"
-      style={{ borderRadius: r + 2, fontFamily: FONT_STACK[value.font] }}
+      className={`flex h-[7.5rem] w-full flex-col justify-between overflow-hidden border p-2.5 ${
+        paint ? '' : 'border-border-light bg-surface-elevated text-content-primary'
+      }`}
+      style={{
+        borderRadius: r + 2,
+        fontFamily: FONT_STACK[value.font],
+        borderWidth: high ? 2 : 1,
+        ...(paint ? { background: paint.bg, color: paint.ink, borderColor: paint.line } : {}),
+      }}
     >
-      <div className="flex h-5 items-center justify-between gap-1">
-        <span className="truncate text-sm font-semibold leading-tight text-content-primary">{label}</span>
+      <div className="flex items-center justify-between gap-1">
+        <span className="truncate font-semibold leading-tight" style={{ fontSize: Math.round(14 * TEXT_SCALE[value.text]) }}>
+          {label}
+        </span>
         {active ? (
-          <Check size={14} className="shrink-0 text-oe-blue-text" />
+          <Check size={14} className="shrink-0" style={{ color: accent }} />
         ) : (
           <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: accent }} />
         )}
       </div>
-      <div aria-hidden className="flex flex-col" style={{ gap: gap - 2, marginTop: gap }}>
-        <span className="h-1.5 w-4/5 bg-border" style={{ borderRadius: r / 2 }} />
-        <span className="h-1.5 w-3/5 bg-border" style={{ borderRadius: r / 2 }} />
+      {hint && <span className="truncate text-2xs opacity-80">{hint}</span>}
+      <div aria-hidden className="flex flex-col" style={{ gap: gap - 2, marginTop: gap / 2 }}>
+        <span className="h-1.5 w-4/5" style={{ borderRadius: r / 2, background: bar }} />
+        <span className="h-1.5 w-3/5" style={{ borderRadius: r / 2, background: bar }} />
       </div>
       <div aria-hidden className="flex gap-1.5">
         <span className="h-4 w-12" style={{ background: accent, borderRadius: r }} />
-        <span className="h-4 w-8 border border-border" style={{ borderRadius: r }} />
+        <span className="h-4 w-8 border" style={{ borderRadius: r, borderColor: bar }} />
       </div>
     </div>
   );
@@ -234,6 +280,8 @@ export function AppearanceStyleCard() {
   const followWorkspace = useAppearanceStore((s) => s.followWorkspace);
   const setWorkspaceDefault = useAppearanceStore((s) => s.setWorkspaceDefault);
   const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
+  const theme = useThemeStore((s) => s.theme);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const [saving, setSaving] = useState(false);
   const [comfort, setComfortState] = useState<Comfort>(readComfort);
   const setComfort = (next: Comfort) => {
@@ -251,7 +299,7 @@ export function AppearanceStyleCard() {
     for (const font of FONTS) ensureFontLoaded(font);
   }, []);
 
-  const current = matchPreset(effective);
+  const current = matchPreset(effective, theme);
   const presetName = (id: AppearancePreset['id']) =>
     t(`settings.style_preset_${id}`, { defaultValue: id.charAt(0).toUpperCase() + id.slice(1) });
 
@@ -293,8 +341,8 @@ export function AppearanceStyleCard() {
     <Card>
       <CardHeader
         title={t('settings.style_title', { defaultValue: 'Style' })}
-        subtitle={t('settings.style_subtitle', {
-          defaultValue: 'Colours, font, spacing and corners. Pick a ready style or tune each part below.',
+        subtitle={t('settings.style_subtitle_v2', {
+          defaultValue: 'Colours, font, size, contrast and theme. Pick a ready style or tune each part below.',
         })}
       />
       <CardContent>
@@ -323,6 +371,8 @@ export function AppearanceStyleCard() {
         >
           {APPEARANCE_PRESETS.map((preset) => {
             const active = current === preset.id;
+            const hintText = PRESET_HINT[preset.id];
+            const hint = hintText ? t(`settings.style_preset_${preset.id}_hint`, { defaultValue: hintText }) : undefined;
             return (
               <button
                 key={preset.id}
@@ -330,12 +380,23 @@ export function AppearanceStyleCard() {
                 role="radio"
                 aria-checked={active}
                 aria-label={presetName(preset.id)}
-                onClick={() => setAppearance({ ...preset.value, text: effective.text })}
+                title={hint}
+                onClick={() => {
+                  setAppearance({ ...preset.value, text: preset.text ?? effective.text });
+                  if (preset.theme) setTheme(preset.theme);
+                }}
                 className={`block h-full w-full rounded-xl border-2 p-1.5 text-start transition-colors duration-normal ease-oe ${
                   active ? 'border-oe-blue bg-oe-blue-subtle' : 'border-transparent hover:border-border'
                 }`}
               >
-                <StylePreview value={preset.value} label={presetName(preset.id)} active={active} />
+                <StylePreview
+                  value={{ ...preset.value, text: preset.text ?? 'default' }}
+                  label={presetName(preset.id)}
+                  active={active}
+                  theme={preset.theme}
+                  hint={hint}
+                  high={comfort.contrast === 'high'}
+                />
               </button>
             );
           })}
@@ -351,6 +412,8 @@ export function AppearanceStyleCard() {
               value={effective}
               label={t('settings.style_custom', { defaultValue: 'Custom' })}
               active={current === null}
+              hint={t('settings.style_custom_mix_hint', { defaultValue: 'Your own mix' })}
+              high={comfort.contrast === 'high'}
             />
           </div>
         </div>
@@ -448,6 +511,10 @@ export function AppearanceStyleCard() {
           </p>
         </div>
 
+        <div className="mt-5 border-t border-border-light pt-4">
+          <BoqStylePreview />
+        </div>
+
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-light pt-4">
           <p className="text-xs text-content-secondary">{source}</p>
           {(user || comfortChanged) && (
@@ -458,6 +525,8 @@ export function AppearanceStyleCard() {
             </Button>
           )}
         </div>
+
+        <StyleTransfer />
 
         {isAdmin && (
           <div className="mt-4 rounded-lg border border-border-light bg-surface-secondary/50 p-3">

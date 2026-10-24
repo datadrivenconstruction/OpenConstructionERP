@@ -103,9 +103,17 @@ export const FONT_STACK: Record<FontChoice, string> = {
   'source-sans-3': '"Source Sans 3 Variable", -apple-system, BlinkMacSystemFont, Arial, sans-serif',
 };
 
+/**
+ * Named styles, one click each. A preset only sets existing axes, and optionally
+ * the theme and a text size, so anything it does can also be reached by hand.
+ */
 export interface AppearancePreset {
-  id: 'standard' | 'classic' | 'studio' | 'engineering' | 'warm' | 'executive';
+  id: 'standard' | 'classic' | 'studio' | 'engineering' | 'warm' | 'executive' | 'site' | 'night' | 'presentation';
   value: Appearance;
+  /** Theme the preset switches to; omitted, the user's theme stays. */
+  theme?: 'light' | 'dark';
+  /** Text size the preset sets; omitted, the user's own size stays (it is personal). */
+  text?: TextSize;
 }
 
 export const APPEARANCE_PRESETS: readonly AppearancePreset[] = [
@@ -115,13 +123,24 @@ export const APPEARANCE_PRESETS: readonly AppearancePreset[] = [
   { id: 'engineering', value: { accent: 'teal', font: 'ibm-plex-sans', density: 'compact', radius: 'sharp', look: 'standard', text: 'default' } },
   { id: 'warm', value: { accent: 'amber', font: 'source-sans-3', density: 'comfortable', radius: 'round', look: 'standard', text: 'default' } },
   { id: 'executive', value: { accent: 'graphite', font: 'inter', density: 'comfortable', radius: 'standard', look: 'standard', text: 'default' } },
+  // Tablet in sunlight: big letters and generous touch targets.
+  { id: 'site', value: { accent: 'amber', font: 'system', density: 'comfortable', radius: 'round', look: 'standard', text: 'default' }, theme: 'light', text: 'larger' },
+  { id: 'night', value: { accent: 'teal', font: 'inter', density: 'comfortable', radius: 'standard', look: 'standard', text: 'default' }, theme: 'dark' },
+  // A client looking at a big screen from across the table.
+  { id: 'presentation', value: { accent: 'blue', font: 'inter', density: 'comfortable', radius: 'round', look: 'standard', text: 'default' }, theme: 'light', text: 'large' },
 ];
 
-/** The preset an appearance matches exactly, or null for a custom mix. */
-export function matchPreset(a: Appearance): AppearancePreset['id'] | null {
+/**
+ * The preset an appearance matches exactly, or null for a custom mix. Text size
+ * is personal and never decides a match. With a theme mode given, a preset that
+ * sets a theme must match it too.
+ */
+export function matchPreset(a: Appearance, theme?: string): AppearancePreset['id'] | null {
   if (a.accentHex) return null;
-  const hit = APPEARANCE_PRESETS.find((p) =>
-    (Object.keys(PLATFORM_APPEARANCE) as AppearanceAxis[]).every((k) => k === 'text' || p.value[k] === a[k]),
+  const hit = APPEARANCE_PRESETS.find(
+    (p) =>
+      (Object.keys(PLATFORM_APPEARANCE) as AppearanceAxis[]).every((k) => k === 'text' || p.value[k] === a[k]) &&
+      (p.theme === undefined || theme === undefined || p.theme === theme),
   );
   return hit ? hit.id : null;
 }

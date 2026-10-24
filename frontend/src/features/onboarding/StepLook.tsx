@@ -24,6 +24,7 @@ import { MENU_PRESETS, matchMenuPreset, type MenuLook } from '@/shared/lib/menuA
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
+import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { BrandDraftSection, type BrandDraft } from './BrandDraft';
 
@@ -35,6 +36,9 @@ export const PRESET_NAME: Record<string, string> = {
   engineering: 'Engineering',
   warm: 'Warm',
   executive: 'Executive',
+  site: 'Site',
+  night: 'Night',
+  presentation: 'Presentation',
   blueprint: 'Blueprint',
   site_office: 'Site office',
   focus: 'Focus',
@@ -291,6 +295,9 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
   const apply = async () => {
     const store = useAppearanceStore.getState();
     store.setAppearance(style);
+    // A preset carries its theme (Night is dark); a custom mix keeps the current one.
+    const preset = APPEARANCE_PRESETS.find((p) => p.id === styleId);
+    if (preset?.theme) useThemeStore.getState().setTheme(preset.theme);
     store.setMenu(menu);
     if (isAdmin) {
       setSaving(true);

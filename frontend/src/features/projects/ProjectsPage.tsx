@@ -1,5 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { ProjectColorDot } from './ProjectColorField';
+import { projectColor } from '@/shared/lib/projectColor';
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -1518,8 +1520,9 @@ export function ProjectCard({
           </div>
         )}
 
-        <h3 className="mt-4 text-base font-semibold tracking-tight text-content-primary truncate">
-          {project.name}
+        <h3 className="mt-4 flex items-center gap-2 text-base font-semibold tracking-tight text-content-primary">
+          <ProjectColorDot color={projectColor(project)} />
+          <span className="truncate">{project.name}</span>
         </h3>
         {isArchived && (
           <div

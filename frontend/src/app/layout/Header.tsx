@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation, useMatch } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { openAiPanel } from '@/shared/lib/actions/askAi';
-import { Search, ChevronDown, ChevronRight, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload, HelpCircle, GraduationCap, Mail, ExternalLink, Github, Sun, Moon, Monitor, Globe, Sparkles } from 'lucide-react';
+import { Search, ChevronDown, ChevronRight, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload, HelpCircle, GraduationCap, Mail, ExternalLink, Github, Sun, Moon, Monitor, Globe, Sparkles, Clock } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode, changeLanguage } from '../i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
@@ -21,6 +21,8 @@ import { ProcessesButton } from '@/features/processes/ProcessesButton';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
 import { ModuleBuilderButton } from '@/features/module-builder';
 import { fetchProjectList } from '@/shared/lib/projectList';
+import { projectColor } from '@/shared/lib/projectColor';
+import { useActiveProjectColor } from '@/shared/hooks/useActiveProjectColor';
 import { copyToClipboard } from '@/shared/lib/browser';
 import { triggerDownload } from '@/shared/lib/api';
 import {
@@ -366,6 +368,7 @@ interface HeaderProps {
 }
 
 export function Header({ title, onMenuClick }: HeaderProps) {
+  const projectStripe = useActiveProjectColor();
   const { t, i18n } = useTranslation();
   // Header mounts at app boot, before lazy-loaded locale chunks arrive.
   // ``useTranslation`` doesn't always pick up bundle-added events under
@@ -421,6 +424,15 @@ export function Header({ title, onMenuClick }: HeaderProps) {
       {/* Soft hairline at the bottom — replaces a hard 1px border for
           a calmer modern-SaaS-style separation from the page below. */}
       <div className="absolute bottom-0 start-0 end-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      {/* Project colour: a thin stripe tells at a glance which project this screen belongs to. */}
+      {projectStripe && (
+        <div
+          aria-hidden
+          data-testid="project-color-stripe"
+          className="absolute top-0 start-0 end-0 h-[3px]"
+          style={{ background: projectStripe }}
+        />
+      )}
 
       {/* ── Zone 1 (Workspace): mobile menu + project breadcrumb + title ── */}
       <div className="flex items-center gap-3 min-w-0 shrink">
@@ -650,13 +662,15 @@ function ThemeToggle() {
     else setTheme('light');
   };
 
-  const Icon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
+  const Icon = theme === 'light' ? Sun : theme === 'dark' ? Moon : theme === 'schedule' ? Clock : Monitor;
   const label =
     theme === 'light'
       ? t('settings.theme_light', { defaultValue: 'Light theme' })
       : theme === 'dark'
         ? t('settings.theme_dark', { defaultValue: 'Dark theme' })
-        : t('settings.theme_system', { defaultValue: 'System theme' });
+        : theme === 'schedule'
+          ? t('settings.theme_schedule', { defaultValue: 'By time of day' })
+          : t('settings.theme_system', { defaultValue: 'System theme' });
 
   return (
     <button
@@ -1744,7 +1758,7 @@ function ProjectSwitcher() {
   // ['projects'] may cache a partial list or an empty one on error.
   const { data: projects, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => fetchProjectList<Array<{ id: string; name: string }>>(),
+    queryFn: () => fetchProjectList<Array<{ id: string; name: string; color?: string | null }>>(),
     staleTime: 60_000,
     // Enabled as soon as the component mounts — the Header is always on
     // screen after login, so the list is warm by the time the user clicks.
@@ -1890,8 +1904,16 @@ function ProjectSwitcher() {
           {/* Leading icon square — colored tile in active mode; pulsing
               dot in CTA mode so the eye is drawn to "act here". */}
           {activeProjectId ? (
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-oe-blue/15 shrink-0">
+            <span className="relative flex h-6 w-6 items-center justify-center rounded-md bg-oe-blue/15 shrink-0">
               <FolderOpen size={13} strokeWidth={2} />
+              <span
+                aria-hidden
+                className="absolute -bottom-0.5 -end-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-surface-elevated"
+                style={{
+                  background:
+                    projectColor(projects?.find((p) => p.id === activeProjectId) ?? { id: activeProjectId }) ?? undefined,
+                }}
+              />
             </span>
           ) : (
             <span aria-hidden className="flex h-6 w-6 items-center justify-center shrink-0">
@@ -2004,6 +2026,11 @@ function ProjectSwitcher() {
                 )}>
                   <FolderOpen size={14} className="shrink-0" />
                 </div>
+                <span
+                  aria-hidden
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ background: projectColor(p) ?? undefined }}
+                />
                 <span className="truncate">{p.name}</span>
                 {p.id === activeProjectId && (
                   <span className="ml-auto text-2xs text-oe-blue font-normal shrink-0">

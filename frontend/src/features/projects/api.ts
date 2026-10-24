@@ -47,6 +47,8 @@ export interface Project {
   subdivision_code?: string | null;
   /** Whether the client is a public buyer; null when not recorded. */
   works?: ProjectWorks | null;
+  /** Team-wide project colour "#rrggbb"; null derives one from the id. */
+  color?: string | null;
   /**
    * True when this project may use AIA G702/G703 payment applications
    * (US/CA/AU only). Computed server-side from the project country; the
