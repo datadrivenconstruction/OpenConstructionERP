@@ -56988,6 +56988,8 @@ const resource = {
     "processes.profile_locked": "با تنظیمات سرور قفل شده‌اند و پروفایل آن‌ها را تغییر نمی‌دهد: {{services}}",
     "processes.profile_applied": "پروفایل اعمال شد",
     "processes.profile_failed": "اعمال پروفایل ممکن نشد",
+    "processes.profile_search_name": "متعادل + جستجوی هوشمند",
+    "processes.profile_search_promise": "متعادل، به‌علاوه جستجو بر اساس معنا: موارد مشابه را حتی با کلمات متفاوت پیدا می‌کند.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "پیش‌نویس آماده‌سازی برای وام‌دهنده",
     "contracts.lender_preparation.notice": "نسخهٔ کاری فقط‌خواندنی. این نسخه به معنای ارائه به وام‌دهنده، گواهی یا پرداخت تسهیلات نیست. سوابق مبدأ جداگانه خوانده می‌شوند و ممکن است تغییر کنند.",

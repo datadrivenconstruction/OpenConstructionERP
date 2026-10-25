@@ -57307,6 +57307,8 @@ const resource = {
     "processes.profile_locked": "נעולים בהגדרות השרת, פרופיל לא משנה אותם: {{services}}",
     "processes.profile_applied": "הפרופיל הוחל",
     "processes.profile_failed": "לא ניתן להחיל את הפרופיל",
+    "processes.profile_search_name": "מאוזן + חיפוש AI",
+    "processes.profile_search_promise": "מאוזן, ובנוסף חיפוש לפי משמעות: מוצא פריטים דומים גם כשהמילים שונות.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "טיוטת הכנה למלווה",
     "contracts.lender_preparation.notice": "עותק עבודה לקריאה בלבד. אין זו הגשה למלווה, אישור סכום או העברת כספים. רשומות המקור נקראות בנפרד ועשויות להשתנות.",

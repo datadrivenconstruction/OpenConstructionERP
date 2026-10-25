@@ -51016,6 +51016,8 @@ const resource = {
     "processes.profile_locked": "Locked by the server settings, a profile does not change them: {{services}}",
     "processes.profile_applied": "Profile applied",
     "processes.profile_failed": "Could not apply the profile",
+    "processes.profile_search_name": "Balanced + AI search",
+    "processes.profile_search_promise": "Balanced, plus search by meaning: finds similar items even when the words differ.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Draft lender preparation",
     "contracts.lender_preparation.notice": "Read-only working copy. This is not a lender submission, certification or disbursement. Source records are read separately and may change.",

@@ -56986,6 +56986,8 @@ const resource = {
     "processes.profile_locked": "Naka-lock ng mga setting ng server, hindi binabago ng profile ang mga ito: {{services}}",
     "processes.profile_applied": "Nailapat ang profile",
     "processes.profile_failed": "Hindi mailapat ang profile",
+    "processes.profile_search_name": "Balanse + AI na paghahanap",
+    "processes.profile_search_promise": "Balanse, kasama ang paghahanap ayon sa kahulugan: nahahanap ang magkakatulad na item kahit iba ang mga salita.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Burador ng paghahanda para sa nagpapautang",
     "contracts.lender_preparation.notice": "Kopyang pantrabaho na mababasa lamang. Hindi ito pagsusumite sa nagpapautang, sertipikasyon, o paglabas ng pondo. Hiwalay na binabasa ang mga pinagmulang tala at maaaring magbago ang mga ito.",

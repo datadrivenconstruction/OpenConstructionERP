@@ -56988,6 +56988,8 @@ const resource = {
     "processes.profile_locked": "سرور کی سیٹنگز نے لاک کر رکھا ہے، پروفائل انہیں تبدیل نہیں کرتا: {{services}}",
     "processes.profile_applied": "پروفائل لاگو ہو گیا",
     "processes.profile_failed": "پروفائل لاگو نہیں ہو سکا",
+    "processes.profile_search_name": "متوازن + AI تلاش",
+    "processes.profile_search_promise": "متوازن، ساتھ میں معنی کے لحاظ سے تلاش: الفاظ مختلف ہوں تب بھی ملتی جلتی اشیاء ڈھونڈتی ہے۔",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "قرض دہندہ کے لیے تیاری کا مسودہ",
     "contracts.lender_preparation.notice": "صرف پڑھنے کے لیے عملی نقل۔ یہ قرض دہندہ کو جمع کرائی گئی درخواست، تصدیق یا رقم کا اجرا نہیں ہے۔ ماخذ ریکارڈ الگ الگ پڑھے جاتے ہیں اور بدل سکتے ہیں۔",

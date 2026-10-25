@@ -57145,6 +57145,8 @@ const resource = {
     "processes.profile_locked": "Сервердин жөндөөлөрү менен кулпуланган, профиль аларды өзгөртпөйт: {{services}}",
     "processes.profile_applied": "Профиль колдонулду",
     "processes.profile_failed": "Профилди колдонуу мүмкүн болгон жок",
+    "processes.profile_search_name": "Тең салмактуу + AI издөө",
+    "processes.profile_search_promise": "Тең салмактуу, кошумча маани боюнча издөө: сөздөр башка болсо да окшош позицияларды табат.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Насыя берүүчү үчүн даярдыктын долбоору",
     "contracts.lender_preparation.notice": "Окуу үчүн гана жумушчу көчүрмө. Бул насыя берүүчүгө тапшыруу, күбөлөндүрүү же каражат берүү эмес. Булак жазуулары өз-өзүнчө окулат жана өзгөрүшү мүмкүн.",

@@ -57909,6 +57909,8 @@ const resource = {
     "processes.profile_locked": "Vergrendeld door de serverinstellingen, het profiel wijzigt ze niet: {{services}}",
     "processes.profile_applied": "Profiel toegepast",
     "processes.profile_failed": "Profiel kon niet worden toegepast",
+    "processes.profile_search_name": "Gebalanceerd + AI-zoeken",
+    "processes.profile_search_promise": "Gebalanceerd, plus zoeken op betekenis: vindt vergelijkbare posten, ook als de woorden verschillen.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Conceptvoorbereiding voor de kredietverstrekker",
     "contracts.lender_preparation.notice": "Alleen-lezen werkkopie. Dit is geen indiening bij de kredietverstrekker, certificering of uitbetaling. De brongegevens worden afzonderlijk gelezen en kunnen veranderen.",

@@ -12,7 +12,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { Check, X } from 'lucide-react';
+import { Check, Feather, Scale, Search, Sparkles, X, type LucideIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
@@ -24,6 +24,65 @@ import { sendFirstRun } from './ProcessesStartWatch';
 const HEAVY = new Set<ProcessCategory>(['ai_model', 'vector_index']);
 import { formatMb, moduleLink, processName, useIsProcessAdmin } from './labels';
 import { useProcessesUi } from './useProcessesUi';
+
+export interface ModulePreset {
+  key: string;
+  icon: LucideIcon;
+  name: string;
+  promise: string;
+  ids: string[];
+}
+
+/**
+ * Ready-made picks for the first steps, named like the profiles in the panel:
+ * nothing extra, every module without AI, that plus search by meaning, or
+ * everything. A pick that would tick the same modules as an earlier one is left out.
+ */
+export function modulePresets(modules: { id: string; heavyMb: number }[]): ModulePreset[] {
+  const light = modules.filter((m) => m.heavyMb === 0).map((m) => m.id);
+  const withSearch = modules.some((m) => m.id === 'search' && m.heavyMb > 0) ? [...light, 'search'] : light;
+  const candidates: ModulePreset[] = [
+    {
+      key: 'speed',
+      icon: Feather,
+      name: 'Maximum speed',
+      promise: 'Fastest start, least memory. AI search and background sync stay off until you need them.',
+      ids: [],
+    },
+    {
+      key: 'balanced',
+      icon: Scale,
+      name: 'Balanced',
+      promise: 'What most teams need: search and the usual helpers on, heavy extras off.',
+      ids: light,
+    },
+    {
+      key: 'search',
+      icon: Search,
+      name: 'Balanced + AI search',
+      promise: 'Balanced, plus search by meaning: finds similar items even when the words differ.',
+      ids: withSearch,
+    },
+    {
+      key: 'features',
+      icon: Sparkles,
+      name: 'Maximum features',
+      promise: 'Every service on, so nothing waits to start. Needs a roomy server.',
+      ids: modules.map((m) => m.id),
+    },
+  ];
+  const seen = new Set<string>();
+  return candidates.filter((c) => {
+    const sig = [...c.ids].sort().join('|');
+    if (seen.has(sig)) return false;
+    seen.add(sig);
+    return true;
+  });
+}
+
+function sameSet(a: Set<string>, ids: string[]): boolean {
+  return a.size === ids.length && ids.every((id) => a.has(id));
+}
 
 export function ProcessesWizard() {
   const { t } = useTranslation();
@@ -52,6 +111,7 @@ export function ProcessesWizard() {
       })
       .sort((a, b) => a.heavyMb - b.heavyMb || compareNames(a.label, b.label));
   }, [processes, t]);
+  const presets = useMemo(() => modulePresets(modules), [modules]);
 
   // Seed the ticks once per opening, not on every poll, or a refresh would
   // undo what the user just clicked. First run: light modules on, anything
@@ -127,6 +187,56 @@ export function ProcessesWizard() {
         </header>
 
         <div className="grid flex-1 gap-4 overflow-y-auto overflow-x-hidden px-4 py-4 sm:grid-cols-[1fr_16rem] sm:px-6">
+          {presets.length > 1 && (
+            <fieldset className="sm:col-span-2" data-testid="wizard-presets">
+              <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
+                {t('processes.profile_title', { defaultValue: 'Choose a profile' })}
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {presets.map(({ key, icon: Icon, name, promise, ids }) => {
+                  const active = sameSet(picked, ids);
+                  const mb = processesForModules(processes, ids).reduce((s, p) => s + ramOf(p), 0);
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setPicked(new Set(ids))}
+                      data-testid={`wizard-preset-${key}`}
+                      className={clsx(
+                        'flex min-w-0 flex-col rounded-xl border p-3 text-left text-sm transition-colors',
+                        active ? 'border-oe-blue bg-oe-blue/5' : 'border-border-light hover:bg-surface-secondary',
+                      )}
+                    >
+                      <span className="flex w-full items-center gap-1.5">
+                        <Icon size={14} className="shrink-0 text-oe-blue" aria-hidden />
+                        <span className="min-w-0 flex-1 break-words font-semibold text-content-primary">
+                          {t(`processes.profile_${key}_name`, { defaultValue: name })}
+                        </span>
+                        <span className="shrink-0 text-xs tabular-nums text-content-tertiary">{formatMb(t, mb)}</span>
+                      </span>
+                      {key === 'balanced' && (
+                        <span className="mt-1 w-fit rounded-full bg-oe-blue/10 px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
+                          {t('processes.profile_recommended', { defaultValue: 'Recommended' })}
+                        </span>
+                      )}
+                      <span className="mt-1 text-xs text-content-secondary">
+                        {t(`processes.profile_${key}_promise`, { defaultValue: promise })}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {!presets.some((p) => sameSet(picked, p.ids)) && (
+                <p className="mt-2 text-xs text-content-secondary" data-testid="wizard-preset-custom">
+                  <span className="font-semibold">{t('processes.profile_custom', { defaultValue: 'Custom' })}</span>
+                  {': '}
+                  {t('processes.profile_custom_hint', { defaultValue: 'You changed services by hand.' })}
+                </p>
+              )}
+            </fieldset>
+          )}
+
           <fieldset>
             <legend className="mb-2 text-xs font-semibold uppercase tracking-wide text-content-tertiary">
               {t('processes.wizard.modules', { defaultValue: 'Modules' })}

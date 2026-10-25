@@ -57351,6 +57351,8 @@ const resource = {
     "processes.profile_locked": "Blocat de setările serverului, profilul nu le modifică: {{services}}",
     "processes.profile_applied": "Profil aplicat",
     "processes.profile_failed": "Profilul nu a putut fi aplicat",
+    "processes.profile_search_name": "Echilibrat + căutare AI",
+    "processes.profile_search_promise": "Echilibrat, plus căutare după sens: găsește poziții similare chiar și când cuvintele diferă.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Ciornă de pregătire pentru creditor",
     "contracts.lender_preparation.notice": "Copie de lucru doar pentru citire. Nu reprezintă o depunere la creditor, o certificare sau o debursare. Înregistrările sursă sunt citite separat și se pot modifica.",

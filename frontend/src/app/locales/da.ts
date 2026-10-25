@@ -57028,6 +57028,8 @@ const resource = {
     "processes.profile_locked": "Låst af serverindstillingerne, så profilen ændrer dem ikke: {{services}}",
     "processes.profile_applied": "Profil anvendt",
     "processes.profile_failed": "Profilen kunne ikke anvendes",
+    "processes.profile_search_name": "Balanceret + AI-søgning",
+    "processes.profile_search_promise": "Balanceret plus søgning efter betydning: finder lignende poster, selv når ordene er forskellige.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Udkast til materiale til långiveren",
     "contracts.lender_preparation.notice": "Skrivebeskyttet arbejdskopi. Dette er hverken en indsendelse til långiveren, en attestering eller en udbetaling. Kildeposterne læses separat og kan ændre sig.",

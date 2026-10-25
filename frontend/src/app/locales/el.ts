@@ -56988,6 +56988,8 @@ const resource = {
     "processes.profile_locked": "Κλειδωμένο από τις ρυθμίσεις του διακομιστή, το προφίλ δεν τις αλλάζει: {{services}}",
     "processes.profile_applied": "Το προφίλ εφαρμόστηκε",
     "processes.profile_failed": "Δεν ήταν δυνατή η εφαρμογή του προφίλ",
+    "processes.profile_search_name": "Ισορροπημένο + αναζήτηση AI",
+    "processes.profile_search_promise": "Ισορροπημένο, συν αναζήτηση με βάση το νόημα: βρίσκει παρόμοια στοιχεία ακόμη κι όταν οι λέξεις διαφέρουν.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Προσχέδιο προετοιμασίας για τον δανειστή",
     "contracts.lender_preparation.notice": "Αντίγραφο εργασίας μόνο για ανάγνωση. Δεν αποτελεί υποβολή στον δανειστή, πιστοποίηση ή εκταμίευση. Οι εγγραφές πηγής διαβάζονται χωριστά και ενδέχεται να αλλάξουν.",

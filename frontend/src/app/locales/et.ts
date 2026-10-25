@@ -56978,6 +56978,8 @@ const resource = {
     "processes.profile_locked": "Serveri seadetega lukustatud, profiil neid ei muuda: {{services}}",
     "processes.profile_applied": "Profiil rakendatud",
     "processes.profile_failed": "Profiili ei õnnestunud rakendada",
+    "processes.profile_search_name": "Tasakaalustatud + AI-otsing",
+    "processes.profile_search_promise": "Tasakaalustatud pluss tähenduspõhine otsing: leiab sarnased kirjed ka siis, kui sõnad erinevad.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Laenuandjale ettevalmistatava materjali mustand",
     "contracts.lender_preparation.notice": "Kirjutuskaitstud töökoopia. See ei ole laenuandjale esitatav taotlus, kinnitamine ega väljamakse. Lähtekirjed loetakse eraldi ja võivad muutuda.",

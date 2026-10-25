@@ -56793,6 +56793,8 @@ const resource = {
     "processes.profile_locked": "Bị khóa bởi cài đặt máy chủ, hồ sơ không thay đổi được: {{services}}",
     "processes.profile_applied": "Đã áp dụng hồ sơ",
     "processes.profile_failed": "Không áp dụng được hồ sơ",
+    "processes.profile_search_name": "Cân bằng + tìm kiếm AI",
+    "processes.profile_search_promise": "Cân bằng, thêm tìm kiếm theo ý nghĩa: tìm các mục tương tự ngay cả khi từ ngữ khác nhau.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Bản nháp chuẩn bị cho bên cho vay",
     "contracts.lender_preparation.notice": "Bản làm việc chỉ đọc. Đây không phải hồ sơ nộp cho bên cho vay, chứng nhận hay giải ngân. Các bản ghi nguồn được đọc riêng và có thể thay đổi.",

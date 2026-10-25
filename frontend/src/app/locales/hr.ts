@@ -57361,6 +57361,8 @@ const resource = {
     "processes.profile_locked": "Zaključano postavkama servera, profil ih ne mijenja: {{services}}",
     "processes.profile_applied": "Profil primijenjen",
     "processes.profile_failed": "Profil se nije mogao primijeniti",
+    "processes.profile_search_name": "Uravnoteženo + AI pretraživanje",
+    "processes.profile_search_promise": "Uravnoteženo uz pretraživanje po značenju: pronalazi slične stavke i kad se riječi razlikuju.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Nacrt pripreme za zajmodavca",
     "contracts.lender_preparation.notice": "Radna kopija samo za čitanje. Ovo nije podnošenje zajmodavcu, ovjera ni isplata. Izvorni zapisi čitaju se odvojeno i mogu se promijeniti.",

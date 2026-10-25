@@ -60075,6 +60075,8 @@ const resource = {
     "processes.profile_locked": "مقفلة بإعدادات الخادم ولا يغيّرها ملف التعريف: {{services}}",
     "processes.profile_applied": "تم تطبيق ملف التعريف",
     "processes.profile_failed": "تعذّر تطبيق ملف التعريف",
+    "processes.profile_search_name": "متوازن + بحث ذكي",
+    "processes.profile_search_promise": "الإعداد المتوازن مع البحث حسب المعنى: يجد العناصر المتشابهة حتى عندما تختلف الكلمات.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "مسودة التحضير للمُقرض",
     "contracts.lender_preparation.notice": "نسخة عمل للقراءة فقط. لا تمثل تقديمًا إلى المُقرض أو تصديقًا أو صرفًا. تُقرأ سجلات المصدر كلٌّ على حدة وقد تتغير.",

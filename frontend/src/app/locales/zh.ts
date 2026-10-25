@@ -59254,6 +59254,8 @@ const resource = {
     "processes.profile_locked": "已被服务器设置锁定,配置方案不会更改:{{services}}",
     "processes.profile_applied": "配置方案已应用",
     "processes.profile_failed": "无法应用配置方案",
+    "processes.profile_search_name": "均衡 + AI 搜索",
+    "processes.profile_search_promise": "均衡，外加语义搜索：即使用词不同，也能找到相似条目。",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "贷款方资料准备草稿",
     "contracts.lender_preparation.notice": "只读工作副本。这不是向贷款方提交的申请、认证或放款。源记录分别读取，可能发生变化。",

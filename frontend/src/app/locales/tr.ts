@@ -57909,6 +57909,8 @@ const resource = {
     "processes.profile_locked": "Sunucu ayarlarınca kilitli, profil bunları değiştirmez: {{services}}",
     "processes.profile_applied": "Profil uygulandı",
     "processes.profile_failed": "Profil uygulanamadı",
+    "processes.profile_search_name": "Dengeli + yapay zekâ araması",
+    "processes.profile_search_promise": "Dengeli, artı anlama göre arama: kelimeler farklı olsa bile benzer kalemleri bulur.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Kredi veren için hazırlık taslağı",
     "contracts.lender_preparation.notice": "Salt okunur çalışma kopyasıdır. Kredi verene başvuru, tutar onayı veya kredi kullandırımı değildir. Kaynak kayıtlar ayrı ayrı okunur ve değişebilir.",

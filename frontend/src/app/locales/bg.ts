@@ -57032,6 +57032,8 @@ const resource = {
     "processes.profile_locked": "Заключено от настройките на сървъра, профилът не ги променя: {{services}}",
     "processes.profile_applied": "Профилът е приложен",
     "processes.profile_failed": "Профилът не можа да се приложи",
+    "processes.profile_search_name": "Балансиран + AI търсене",
+    "processes.profile_search_promise": "Балансиран плюс търсене по смисъл: намира сходни позиции, дори когато думите са различни.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Чернова на подготовката за кредитора",
     "contracts.lender_preparation.notice": "Работно копие само за четене. Това не е подаване до кредитора, удостоверяване или отпускане на транш. Изходните записи се четат поотделно и може да се променят.",

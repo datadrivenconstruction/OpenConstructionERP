@@ -57031,6 +57031,8 @@ const resource = {
     "processes.profile_locked": "सर्वर सेटिंग से लॉक हैं, प्रोफ़ाइल इन्हें नहीं बदलती: {{services}}",
     "processes.profile_applied": "प्रोफ़ाइल लागू हो गई",
     "processes.profile_failed": "प्रोफ़ाइल लागू नहीं हो सकी",
+    "processes.profile_search_name": "संतुलित + AI खोज",
+    "processes.profile_search_promise": "संतुलित, साथ में अर्थ से खोज: शब्द अलग होने पर भी मिलते-जुलते आइटम ढूंढती है।",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "ऋणदाता के लिए तैयारी का मसौदा",
     "contracts.lender_preparation.notice": "केवल पढ़ने योग्य कार्य प्रति। यह ऋणदाता को प्रस्तुत आवेदन, प्रमाणन या ऋण वितरण नहीं है। स्रोत रिकॉर्ड अलग-अलग पढ़े जाते हैं और बदल सकते हैं।",

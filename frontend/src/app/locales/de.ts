@@ -59472,6 +59472,8 @@ const resource = {
     "processes.profile_locked": "Durch die Servereinstellungen gesperrt, das Profil ändert sie nicht: {{services}}",
     "processes.profile_applied": "Profil angewendet",
     "processes.profile_failed": "Profil konnte nicht angewendet werden",
+    "processes.profile_search_name": "Ausgewogen + KI-Suche",
+    "processes.profile_search_promise": "Ausgewogen plus Suche nach Bedeutung: findet ähnliche Positionen, auch wenn die Wörter abweichen.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Entwurf zur Vorbereitung für den Kreditgeber",
     "contracts.lender_preparation.notice": "Schreibgeschützte Arbeitskopie. Dies ist weder eine Einreichung beim Kreditgeber noch eine Bescheinigung oder Auszahlung. Die Quelldatensätze werden getrennt gelesen und können sich ändern.",

@@ -56785,6 +56785,8 @@ const resource = {
     "processes.profile_locked": "ถูกล็อกโดยการตั้งค่าเซิร์ฟเวอร์ โปรไฟล์ไม่เปลี่ยนค่าเหล่านี้: {{services}}",
     "processes.profile_applied": "ใช้โปรไฟล์แล้ว",
     "processes.profile_failed": "ใช้โปรไฟล์ไม่สำเร็จ",
+    "processes.profile_search_name": "สมดุล + ค้นหาด้วย AI",
+    "processes.profile_search_promise": "สมดุล พร้อมค้นหาตามความหมาย: พบรายการที่คล้ายกันแม้ใช้คำต่างกัน",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "ร่างเตรียมข้อมูลสำหรับผู้ให้กู้",
     "contracts.lender_preparation.notice": "สำเนาทำงานแบบอ่านอย่างเดียว ไม่ใช่การยื่นต่อผู้ให้กู้ การรับรอง หรือการเบิกจ่าย ข้อมูลต้นทางถูกอ่านแยกกันและอาจเปลี่ยนแปลงได้",

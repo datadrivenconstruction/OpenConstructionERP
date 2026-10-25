@@ -59593,6 +59593,8 @@ const resource = {
     "processes.profile_locked": "A szerverbeállítások zárolták, a profil nem módosítja: {{services}}",
     "processes.profile_applied": "Profil alkalmazva",
     "processes.profile_failed": "A profilt nem sikerült alkalmazni",
+    "processes.profile_search_name": "Kiegyensúlyozott + MI-keresés",
+    "processes.profile_search_promise": "Kiegyensúlyozott, plusz jelentés szerinti keresés: akkor is megtalálja a hasonló tételeket, ha a szavak eltérnek.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Tervezet a hitelezőnek szánt előkészítéshez",
     "contracts.lender_preparation.notice": "Csak olvasható munkapéldány. Ez nem a hitelezőnek benyújtott kérelem, igazolás vagy folyósítás. A forrásrekordok külön kerülnek beolvasásra, és változhatnak.",

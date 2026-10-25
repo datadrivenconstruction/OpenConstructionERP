@@ -56784,6 +56784,8 @@ const resource = {
     "processes.profile_locked": "Dikunci oleh pengaturan server, profil tidak mengubahnya: {{services}}",
     "processes.profile_applied": "Profil diterapkan",
     "processes.profile_failed": "Profil tidak dapat diterapkan",
+    "processes.profile_search_name": "Seimbang + pencarian AI",
+    "processes.profile_search_promise": "Seimbang, ditambah pencarian berdasarkan makna: menemukan item serupa meski kata-katanya berbeda.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Draf persiapan untuk pemberi pinjaman",
     "contracts.lender_preparation.notice": "Salinan kerja hanya baca. Ini bukan pengajuan kepada pemberi pinjaman, sertifikasi, atau pencairan. Catatan sumber dibaca secara terpisah dan dapat berubah.",

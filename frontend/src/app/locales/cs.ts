@@ -58288,6 +58288,8 @@ const resource = {
     "processes.profile_locked": "Uzamčeno nastavením serveru, profil je nemění: {{services}}",
     "processes.profile_applied": "Profil byl použit",
     "processes.profile_failed": "Profil se nepodařilo použít",
+    "processes.profile_search_name": "Vyvážený + AI vyhledávání",
+    "processes.profile_search_promise": "Vyvážený plus vyhledávání podle významu: najde podobné položky, i když se slova liší.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Pracovní návrh pro věřitele",
     "contracts.lender_preparation.notice": "Pracovní kopie pouze pro čtení. Nejde o podání věřiteli, osvědčení ani čerpání úvěru. Zdrojové záznamy se načítají samostatně a mohou se měnit.",

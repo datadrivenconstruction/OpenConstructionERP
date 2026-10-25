@@ -56989,6 +56989,8 @@ const resource = {
     "processes.profile_locked": "Сервер баптауларымен бұғатталған, профиль оларды өзгертпейді: {{services}}",
     "processes.profile_applied": "Профиль қолданылды",
     "processes.profile_failed": "Профильді қолдану мүмкін болмады",
+    "processes.profile_search_name": "Теңгерімді + AI іздеу",
+    "processes.profile_search_promise": "Теңгерімді, оған қоса мағына бойынша іздеу: сөздер әртүрлі болса да ұқсас позицияларды табады.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Несие берушіге арналған дайындық жобасы",
     "contracts.lender_preparation.notice": "Тек оқуға арналған жұмыс көшірмесі. Бұл несие берушіге өтінім беру, куәландыру немесе қаражат беру емес. Бастапқы жазбалар бөлек оқылады және өзгеруі мүмкін.",

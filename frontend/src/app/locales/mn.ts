@@ -56706,6 +56706,8 @@ const resource = {
     "processes.profile_locked": "Серверийн тохиргоогоор түгжигдсэн, профайл өөрчлөхгүй: {{services}}",
     "processes.profile_applied": "Профайл хэрэгжлээ",
     "processes.profile_failed": "Профайлыг хэрэгжүүлж чадсангүй",
+    "processes.profile_search_name": "Тэнцвэртэй + AI хайлт",
+    "processes.profile_search_promise": "Тэнцвэртэй, нэмээд утгаар хайх: үг өөр байсан ч ижил төстэй зүйлсийг олно.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Зээлдүүлэгчид зориулсан бэлтгэл ноорог",
     "contracts.lender_preparation.notice": "Зөвхөн унших зориулалттай ажлын хуулбар. Энэ нь зээлдүүлэгчид хүргүүлсэн хүсэлт, төлбөрийн дүнгийн баталгаажуулалт эсвэл санхүүжилт олголт биш. Эх бүртгэлүүдийг тус тусад нь унших тул өөрчлөгдсөн байж болно.",

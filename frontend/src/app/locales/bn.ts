@@ -57298,6 +57298,8 @@ const resource = {
     "processes.profile_locked": "সার্ভারের সেটিংসে লক করা, প্রোফাইল এগুলো বদলায় না: {{services}}",
     "processes.profile_applied": "প্রোফাইল প্রয়োগ হয়েছে",
     "processes.profile_failed": "প্রোফাইল প্রয়োগ করা যায়নি",
+    "processes.profile_search_name": "ভারসাম্যপূর্ণ + AI অনুসন্ধান",
+    "processes.profile_search_promise": "ভারসাম্যপূর্ণ, সঙ্গে অর্থভিত্তিক অনুসন্ধান: শব্দ আলাদা হলেও একই রকম আইটেম খুঁজে পায়।",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "ঋণদাতার জন্য প্রস্তুতির খসড়া",
     "contracts.lender_preparation.notice": "শুধু পড়ার জন্য কাজের অনুলিপি। এটি ঋণদাতার কাছে জমা দেওয়া আবেদন, প্রত্যয়ন বা অর্থ ছাড় নয়। উৎস রেকর্ডগুলো আলাদাভাবে পড়া হয় এবং পরিবর্তিত হতে পারে।",

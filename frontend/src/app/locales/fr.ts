@@ -59933,6 +59933,8 @@ const resource = {
     "processes.profile_locked": "Verrouillé par les paramètres du serveur, le profil ne les modifie pas : {{services}}",
     "processes.profile_applied": "Profil appliqué",
     "processes.profile_failed": "Impossible d'appliquer le profil",
+    "processes.profile_search_name": "Équilibré + recherche IA",
+    "processes.profile_search_promise": "Équilibré, plus la recherche par le sens : trouve des éléments similaires même quand les mots diffèrent.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Brouillon de préparation pour le prêteur",
     "contracts.lender_preparation.notice": "Copie de travail en lecture seule. Il ne s’agit ni d’un dépôt auprès du prêteur, ni d’une certification, ni d’un décaissement. Les données sources sont lues séparément et peuvent changer.",

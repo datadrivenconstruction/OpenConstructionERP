@@ -58317,6 +58317,8 @@ const resource = {
     "processes.profile_locked": "サーバー設定でロックされており、プロファイルでは変更されません: {{services}}",
     "processes.profile_applied": "プロファイルを適用しました",
     "processes.profile_failed": "プロファイルを適用できませんでした",
+    "processes.profile_search_name": "バランス + AI検索",
+    "processes.profile_search_promise": "バランスに意味検索を追加：言葉が違っても似た項目を見つけます。",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "貸し手向け準備資料の下書き",
     "contracts.lender_preparation.notice": "読み取り専用の作業用コピーです。貸し手への提出、証明、融資実行を行うものではありません。元の記録は個別に読み取られ、変更される場合があります。",

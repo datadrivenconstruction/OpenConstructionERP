@@ -57643,6 +57643,8 @@ const resource = {
     "processes.profile_locked": "Låst av serverinställningarna, profilen ändrar dem inte: {{services}}",
     "processes.profile_applied": "Profil tillämpad",
     "processes.profile_failed": "Profilen kunde inte tillämpas",
+    "processes.profile_search_name": "Balanserad + AI-sökning",
+    "processes.profile_search_promise": "Balanserad plus sökning efter betydelse: hittar liknande poster även när orden skiljer sig.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Utkast till underlag för långivaren",
     "contracts.lender_preparation.notice": "Skrivskyddad arbetskopia. Detta är ingen inlämning till långivaren, attestering eller utbetalning. Källposterna läses separat och kan ändras.",

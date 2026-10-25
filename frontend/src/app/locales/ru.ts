@@ -60030,6 +60030,8 @@ const resource = {
     "processes.profile_locked": "Заблокировано настройками сервера, профиль их не меняет: {{services}}",
     "processes.profile_applied": "Профиль применён",
     "processes.profile_failed": "Не удалось применить профиль",
+    "processes.profile_search_name": "Сбалансированный + AI-поиск",
+    "processes.profile_search_promise": "Сбалансированный плюс поиск по смыслу: находит похожие позиции, даже если слова отличаются.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Черновик подготовки для кредитора",
     "contracts.lender_preparation.notice": "Рабочая копия только для чтения. Это не подача кредитору, не подтверждение суммы и не выдача транша. Исходные записи читаются отдельно и могут изменяться.",

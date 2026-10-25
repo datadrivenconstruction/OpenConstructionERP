@@ -57961,6 +57961,8 @@ const resource = {
     "processes.profile_locked": "Server sozlamalari bilan qulflangan, profil ularni oʻzgartirmaydi: {{services}}",
     "processes.profile_applied": "Profil qoʻllandi",
     "processes.profile_failed": "Profilni qoʻllab boʻlmadi",
+    "processes.profile_search_name": "Muvozanatli + AI qidiruv",
+    "processes.profile_search_promise": "Muvozanatli, qo'shimcha ma'no bo'yicha qidiruv: so'zlar boshqacha bo'lsa ham o'xshash pozitsiyalarni topadi.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Kredit beruvchi uchun tayyorgarlik qoralamasi",
     "contracts.lender_preparation.notice": "Faqat oʻqish uchun ishchi nusxa. Bu kredit beruvchiga ariza topshirish, tasdiqlash yoki mablagʻ ajratish emas. Manba yozuvlari alohida oʻqiladi va oʻzgarishi mumkin.",

@@ -57032,6 +57032,8 @@ const resource = {
     "processes.profile_locked": "Palvelinasetukset lukitsevat tämän, profiili ei muuta niitä: {{services}}",
     "processes.profile_applied": "Profiili otettu käyttöön",
     "processes.profile_failed": "Profiilin käyttöönotto epäonnistui",
+    "processes.profile_search_name": "Tasapainotettu + tekoälyhaku",
+    "processes.profile_search_promise": "Tasapainotettu sekä merkityshaku: löytää samankaltaiset nimikkeet, vaikka sanat poikkeaisivat.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Luonnos rahoittajalle valmisteltavasta aineistosta",
     "contracts.lender_preparation.notice": "Vain luku -muotoinen työkopio. Tämä ei ole hakemus rahoittajalle, maksun varmennus eikä lainan nosto. Lähdetiedot luetaan erikseen, ja ne voivat muuttua.",

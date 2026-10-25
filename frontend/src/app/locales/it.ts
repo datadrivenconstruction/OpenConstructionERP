@@ -58234,6 +58234,8 @@ const resource = {
     "processes.profile_locked": "Bloccato dalle impostazioni del server, il profilo non le modifica: {{services}}",
     "processes.profile_applied": "Profilo applicato",
     "processes.profile_failed": "Impossibile applicare il profilo",
+    "processes.profile_search_name": "Bilanciato + ricerca IA",
+    "processes.profile_search_promise": "Bilanciato, più la ricerca per significato: trova voci simili anche quando le parole sono diverse.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "Bozza di preparazione per il finanziatore",
     "contracts.lender_preparation.notice": "Copia di lavoro in sola lettura. Non costituisce una presentazione al finanziatore, una certificazione o un'erogazione. I dati di origine vengono letti separatamente e possono cambiare.",

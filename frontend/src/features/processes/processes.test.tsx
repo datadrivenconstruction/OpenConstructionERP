@@ -294,6 +294,44 @@ describe('ProcessesWizard', () => {
     );
   });
 
+  it('offers ready-made profiles and marks the one that matches the ticks', async () => {
+    vi.mocked(apiGet).mockResolvedValue(
+      snapshot(
+        [
+          proc({ id: 'emb', category: 'ai_model', modules: ['search', 'costs'], ram_mb_estimate: 450 }),
+          proc({ id: 'rank', category: 'ai_model', modules: ['costs'], ram_mb_estimate: 800 }),
+          proc({ id: 'kpi', category: 'scheduler', modules: ['reporting'], ram_mb_estimate: 5 }),
+        ],
+        { first_run_done: false },
+      ),
+    );
+    vi.mocked(apiPost).mockResolvedValue(snapshot([]));
+    renderWith(<ProcessesButton />);
+    await screen.findByTestId('processes-wizard', {}, { timeout: 5000 });
+    const ticked = (id) => screen.getByTestId(`wizard-module-${id}`).querySelector('input').checked;
+    // The first-run ticks are the balanced profile.
+    await waitFor(() => expect(screen.getByTestId('wizard-preset-balanced')).toHaveAttribute('aria-pressed', 'true'));
+    expect(screen.getByTestId('wizard-preset-search')).toHaveTextContent('455 MB');
+    fireEvent.click(screen.getByTestId('wizard-preset-speed'));
+    expect(ticked('reporting')).toBe(false);
+    expect(screen.getByTestId('wizard-total')).toHaveTextContent('0 MB');
+    fireEvent.click(screen.getByTestId('wizard-preset-search'));
+    expect([ticked('reporting'), ticked('search'), ticked('costs')]).toEqual([true, true, false]);
+    fireEvent.click(screen.getByTestId('wizard-preset-features'));
+    expect(screen.getByTestId('wizard-total')).toHaveTextContent('1.2 GB');
+    // A tick by hand leaves the profiles: none is marked.
+    fireEvent.click(screen.getByTestId('wizard-module-reporting').querySelector('input'));
+    expect(screen.getByTestId('wizard-preset-custom')).toBeInTheDocument();
+    expect(screen.getByTestId('wizard-preset-features')).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(screen.getByTestId('wizard-start'));
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith('/v1/processes/first-run', {
+        module_ids: expect.arrayContaining(['search', 'costs']),
+        start_now: true,
+      }),
+    );
+  });
+
   it('closes at once and does not wait for the services to start', async () => {
     vi.mocked(apiGet).mockResolvedValue(snapshot([proc({ id: 'kpi', modules: ['reporting'] })], { first_run_done: false }));
     // The server never answers: the wizard must be gone anyway.

@@ -57403,6 +57403,8 @@ const resource = {
     "processes.profile_locked": "서버 설정으로 잠겨 있어 프로필이 바꾸지 않습니다: {{services}}",
     "processes.profile_applied": "프로필을 적용했습니다",
     "processes.profile_failed": "프로필을 적용하지 못했습니다",
+    "processes.profile_search_name": "균형 + AI 검색",
+    "processes.profile_search_promise": "균형에 의미 검색 추가: 단어가 달라도 비슷한 항목을 찾습니다.",
     // --- Draft lender preparation ---
     "contracts.lender_preparation.title": "대출기관 제출 준비 초안",
     "contracts.lender_preparation.notice": "읽기 전용 작업 사본입니다. 대출기관 제출, 금액 인증 또는 대출 실행이 아닙니다. 원본 기록은 개별적으로 읽으며 변경될 수 있습니다.",
