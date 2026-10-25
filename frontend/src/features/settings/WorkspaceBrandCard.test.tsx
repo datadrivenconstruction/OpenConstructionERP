@@ -7,6 +7,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 const apiPut = vi.fn();
 vi.mock('@/shared/lib/api', async (orig) => ({
@@ -37,7 +38,11 @@ afterEach(() => useAuthStore.setState({ userRole: null } as never));
 describe('<WorkspaceBrandCard>', () => {
   it('shows no controls to a non-admin', () => {
     useAuthStore.setState({ userRole: 'editor' } as never);
-    render(<WorkspaceBrandCard />);
+    render(
+      <MemoryRouter>
+        <WorkspaceBrandCard />
+      </MemoryRouter>,
+    );
     expect(screen.queryByRole('switch')).toBeNull();
     expect(screen.queryByRole('button', { name: /Upload/ })).toBeNull();
     expect(screen.getByText(/Only an administrator/)).toBeInTheDocument();
@@ -46,10 +51,56 @@ describe('<WorkspaceBrandCard>', () => {
   it('lets an admin hide the edit button next to the logo', async () => {
     useAuthStore.setState({ userRole: 'admin' } as never);
     apiPut.mockResolvedValue({ show_logo_edit: false });
-    render(<WorkspaceBrandCard />);
+    render(
+      <MemoryRouter>
+        <WorkspaceBrandCard />
+      </MemoryRouter>,
+    );
     fireEvent.click(screen.getByRole('switch', { name: 'Edit button next to the logo' }));
     await waitFor(() => expect(apiPut).toHaveBeenCalledWith('/v1/branding/', { show_logo_edit: false }));
     await waitFor(() => expect(useBrandingStore.getState().options.showLogoEdit).toBe(false));
+  });
+
+  it('is the one place the app logo is managed: it uploads through the branding store', async () => {
+    useAuthStore.setState({ userRole: 'admin' } as never);
+    useBrandingStore.setState({ mode: 'default', logoDataUrl: null, logoPngDataUrl: null } as never);
+    const persist = vi.fn().mockResolvedValue(true);
+    useBrandingStore.setState({ persistToServer: persist } as never);
+    const { container } = render(
+      <MemoryRouter>
+        <WorkspaceBrandCard />
+      </MemoryRouter>,
+    );
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [new File(['PNGDATA'], 'logo.png', { type: 'image/png' })] } });
+    await waitFor(() => expect(persist).toHaveBeenCalled());
+    expect(useBrandingStore.getState().logoDataUrl).toMatch(/^data:image\/png;base64,/);
+  });
+
+  it('points to the document logo and lets an owner manage the logo', () => {
+    useAuthStore.setState({ userRole: 'owner' } as never);
+    render(
+      <MemoryRouter>
+        <WorkspaceBrandCard />
+      </MemoryRouter>,
+    );
+    expect(screen.getAllByRole('button', { name: /Upload/ }).length).toBeGreaterThan(0);
+    expect(screen.getByTestId('brand-documents-link')).toHaveAttribute('href', '/settings?tab=company');
+  });
+
+  it('asks for a re-upload of an SVG logo that has no PNG copy', () => {
+    useAuthStore.setState({ userRole: 'admin' } as never);
+    useBrandingStore.setState({
+      mode: 'logo',
+      logoDataUrl: 'data:image/svg+xml;base64,PHN2Zy8+',
+      logoPngDataUrl: null,
+    } as never);
+    render(
+      <MemoryRouter>
+        <WorkspaceBrandCard />
+      </MemoryRouter>,
+    );
+    expect(screen.getByTestId('brand-logo-reupload')).toBeInTheDocument();
   });
 });
 

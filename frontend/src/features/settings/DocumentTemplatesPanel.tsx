@@ -44,6 +44,7 @@ import {
   type DocumentAppearance,
   type DocumentAppearanceOptions,
 } from '@/features/property-dev/api';
+import { withAppearanceDefaults } from '@/features/property-dev/documentPreviewLayout';
 import { COMPANY_PROFILE_KEY, getCompanyProfile, hasLetterhead } from './companyProfile';
 import {
   DOCUMENT_TYPES_KEY,
@@ -299,7 +300,7 @@ function DocumentTypeRow({ entry, workspace, options, letterhead, canEdit }: Doc
       return next;
     });
 
-  const setValue = (field: DocumentTypeField, value: string | boolean) =>
+  const setValue = (field: DocumentTypeField, value: string | boolean | number) =>
     setDraft((prev) => ({ ...prev, [field]: value }));
 
   const save = () => {
@@ -313,6 +314,8 @@ function DocumentTypeRow({ entry, workspace, options, letterhead, canEdit }: Doc
   };
 
   const hasLetterheadField = fields.some((f) => LETTERHEAD_FIELDS.includes(f));
+  // The workspace look with the newer settings filled in, for a server that omits them.
+  const inheritedLook = withAppearanceDefaults(workspace);
 
   return (
     <li data-testid={`doc-type-row-${entry.key}`}>
@@ -375,7 +378,7 @@ function DocumentTypeRow({ entry, workspace, options, letterhead, canEdit }: Doc
                   typeKey={entry.key}
                   field={field}
                   pinned={pinned}
-                  value={draft[field] ?? workspace[field]}
+                  value={draft[field] ?? inheritedLook[field]}
                   options={options}
                   pinDisabled={!canEdit || busy || (inert && !pinned)}
                   controlDisabled={!canEdit || busy || !pinned || inert}
@@ -545,12 +548,12 @@ interface FieldEditorProps {
   field: DocumentTypeField;
   pinned: boolean;
   /** The pinned value, or the inherited one when the field is not pinned. */
-  value: string | boolean;
+  value: string | boolean | number;
   options: DocumentAppearanceOptions | undefined;
   pinDisabled: boolean;
   controlDisabled: boolean;
   onPin: (pinned: boolean) => void;
-  onChange: (value: string | boolean) => void;
+  onChange: (value: string | boolean | number) => void;
 }
 
 function FieldEditor({
@@ -585,6 +588,20 @@ function FieldEditor({
         return t('property_dev.doc_appearance.page_numbers', { defaultValue: 'Show page numbers' });
       case 'watermark_text':
         return t('property_dev.doc_appearance.watermark', { defaultValue: 'Watermark' });
+      case 'watermark_opacity':
+        return t('property_dev.doc_appearance.watermark_opacity', {
+          defaultValue: 'Watermark strength (%)',
+        });
+      case 'watermark_layout':
+        return t('property_dev.doc_appearance.watermark_layout', {
+          defaultValue: 'Watermark direction',
+        });
+      case 'print_stamp':
+        return t('property_dev.doc_appearance.print_stamp', { defaultValue: 'Print date and time' });
+      case 'footer_show_registration':
+        return t('property_dev.doc_appearance.footer_show_registration', {
+          defaultValue: 'Registration numbers in the footer',
+        });
     }
   })();
 
@@ -599,6 +616,7 @@ function FieldEditor({
     switch (field) {
       case 'show_letterhead':
       case 'show_page_numbers':
+      case 'footer_show_registration':
         return (
           <Toggle
             checked={Boolean(value)}
@@ -650,6 +668,64 @@ function FieldEditor({
             })}
             aria-labelledby={labelId}
           />
+        );
+      case 'watermark_opacity':
+        return (
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min={options?.min_watermark_opacity ?? 5}
+              max={options?.max_watermark_opacity ?? 40}
+              value={Number(value)}
+              disabled={controlDisabled}
+              onChange={(e) => onChange(Number(e.target.value))}
+              className="w-full disabled:opacity-60"
+              aria-labelledby={labelId}
+            />
+            <code className="w-8 shrink-0 text-right text-[11px] text-content-secondary">{Number(value)}</code>
+          </div>
+        );
+      case 'watermark_layout':
+        return (
+          <select
+            value={String(value)}
+            disabled={controlDisabled}
+            onChange={(e) => onChange(e.target.value)}
+            className={SELECT_CLS}
+            aria-labelledby={labelId}
+          >
+            {(options?.watermark_layouts ?? [String(value)]).map((l) => (
+              <option key={l} value={l}>
+                {l === 'horizontal'
+                  ? t('property_dev.doc_appearance.watermark_layout_horizontal', { defaultValue: 'Horizontal' })
+                  : t('property_dev.doc_appearance.watermark_layout_diagonal', { defaultValue: 'Diagonal' })}
+              </option>
+            ))}
+          </select>
+        );
+      case 'print_stamp':
+        return (
+          <select
+            value={String(value)}
+            disabled={controlDisabled}
+            onChange={(e) => onChange(e.target.value)}
+            className={SELECT_CLS}
+            aria-labelledby={labelId}
+          >
+            {(options?.print_stamps ?? [String(value)]).map((m) => (
+              <option key={m} value={m}>
+                {m === 'none'
+                  ? t('property_dev.doc_appearance.print_stamp_none', { defaultValue: 'No date' })
+                  : m === 'date'
+                    ? t('property_dev.doc_appearance.print_stamp_date', { defaultValue: 'Print date' })
+                    : m === 'datetime'
+                      ? t('property_dev.doc_appearance.print_stamp_datetime', { defaultValue: 'Print date and time' })
+                      : t('property_dev.doc_appearance.print_stamp_auto', {
+                          defaultValue: 'Default (date in the footer line)',
+                        })}
+              </option>
+            ))}
+          </select>
         );
       case 'watermark_text':
         return (

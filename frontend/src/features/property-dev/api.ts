@@ -3549,6 +3549,27 @@ export interface DocumentAppearance {
    * none. A server older than the field omits it, so readers default it to ''.
    */
   watermark_text: string;
+  /*
+   * The page, header, footer and watermark settings added later. Optional
+   * because an older server omits them; read them through `withAppearanceDefaults`
+   * (documentPreviewLayout.ts), which fills in what the server would have sent.
+   */
+  /** Watermark strength in percent. */
+  watermark_opacity?: number;
+  /** `diagonal` (corner to corner) or `horizontal`. */
+  watermark_layout?: string;
+  /** `portrait` or `landscape`, for documents laid out on the workspace paper size. */
+  page_orientation?: string;
+  /** Company address and contact line in the header band, opposite the logo. */
+  header_show_contact?: boolean;
+  /** The thin rule under the header band. */
+  header_rule?: boolean;
+  /** `page_of`, `page`, `short` or `number`. */
+  page_number_format?: string;
+  /** `auto` (the date in the default footer line), `none`, `date` or `datetime`. */
+  print_stamp?: string;
+  /** The registration line from the company details, under the footer. */
+  footer_show_registration?: boolean;
 }
 
 /**
@@ -3568,6 +3589,13 @@ export interface DocumentAppearanceOptions {
   max_footer_text: number;
   /** Older servers omit the field. */
   max_watermark_text?: number;
+  /** Older servers omit the fields below. */
+  min_watermark_opacity?: number;
+  max_watermark_opacity?: number;
+  page_orientations?: string[];
+  page_number_formats?: string[];
+  print_stamps?: string[];
+  watermark_layouts?: string[];
   defaults: DocumentAppearance;
 }
 

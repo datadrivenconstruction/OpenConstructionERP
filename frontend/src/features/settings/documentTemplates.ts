@@ -36,6 +36,10 @@ export const DOCUMENT_TYPE_FIELDS = [
   'footer_color',
   'show_page_numbers',
   'watermark_text',
+  'watermark_opacity',
+  'watermark_layout',
+  'print_stamp',
+  'footer_show_registration',
 ] as const;
 
 export type DocumentTypeField = (typeof DOCUMENT_TYPE_FIELDS)[number];

@@ -6,9 +6,14 @@
  * PUT /v1/branding/); this card adds the dark-mode variant, whether that edit
  * button is shown, and whether the company name sits next to the logo.
  * Admins change it; everyone else sees the current logo read-only.
+ *
+ * This is the one place the app logo is managed. Company & documents only reads
+ * it (printed documents fall back to it until a separate document logo is set)
+ * and links here.
  */
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Upload, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button } from '@/shared/ui';
 import { apiPut } from '@/shared/lib/api';
@@ -130,9 +135,21 @@ function LogoSlot({
 
 export function WorkspaceBrandCard() {
   const { t } = useTranslation();
-  const { logoDataUrl, companyName, options, setLogo, setCompanyName, reset, persistToServer, setOptions } =
-    useBrandingStore();
-  const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
+  const {
+    logoDataUrl,
+    logoPngDataUrl,
+    companyName,
+    options,
+    setLogo,
+    setCompanyName,
+    reset,
+    persistToServer,
+    setOptions,
+  } = useBrandingStore();
+  // The roles the server's admin gate lets through: superuser and owner are
+  // aliases of admin there.
+  const userRole = useAuthStore((s) => s.userRole);
+  const isAdmin = userRole === 'admin' || userRole === 'superuser' || userRole === 'owner';
   const [busy, setBusy] = useState(false);
   const [name, setName] = useState(companyName);
   const toast = useToastStore.getState().addToast;
@@ -223,6 +240,27 @@ export function WorkspaceBrandCard() {
           {t('settings.brand_rules', {
             defaultValue: 'SVG, PNG, WebP or JPEG, up to 2 MB. Scripts and external links are removed from SVG files.',
           })}
+        </p>
+        {/* PDFs cannot draw an SVG, so an SVG stored without its PNG copy prints
+            as the company name until it is uploaded again. */}
+        {isSvgDataUrl(logoDataUrl) && !logoPngDataUrl && (
+          <p className="mt-2 text-xs text-semantic-warning" data-testid="brand-logo-reupload">
+            {t('settings.company.logo_svg_reupload', {
+              defaultValue: 'Upload this SVG logo again so it prints on your PDFs.',
+            })}
+          </p>
+        )}
+        <p className="mt-2 text-xs text-content-tertiary" data-testid="brand-documents-note">
+          {t('settings.brand_documents_note', {
+            defaultValue: 'Printed documents use this logo until you add a separate one for documents.',
+          })}{' '}
+          <Link
+            to="/settings?tab=company"
+            className="font-medium text-oe-blue hover:underline"
+            data-testid="brand-documents-link"
+          >
+            {t('settings.tab_company', { defaultValue: 'Company & documents' })}
+          </Link>
         </p>
 
         {isAdmin ? (

@@ -15,6 +15,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 // Partial mock, as in EInvoiceSettings.test.tsx: the shared UI barrel drags in
 // components that read API_BASE or ApiError at module-eval time. The branding
@@ -118,9 +119,11 @@ const APPEARANCE: appearanceApi.DocumentAppearance = {
 function renderPanel() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={client}>
-      <CompanyDocumentsSettings />
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={client}>
+        <CompanyDocumentsSettings />
+      </QueryClientProvider>
+    </MemoryRouter>,
   );
 }
 
@@ -166,26 +169,46 @@ describe('CompanyDocumentsSettings', () => {
     vi.restoreAllMocks();
   });
 
-  it('shows both logo slots, the app one and the document one', async () => {
+  it('shows only the document logo slot: the app logo is managed in General settings', async () => {
     renderPanel();
 
-    const app = await screen.findByTestId('logo-slot-app');
-    const doc = screen.getByTestId('logo-slot-document');
-    expect(within(app).getByText('Logo in the app (sidebar)')).toBeInTheDocument();
-    expect(within(doc).getByText('Logo on documents')).toBeInTheDocument();
+    const doc = await screen.findByTestId('logo-slot-document');
+    expect(screen.queryByTestId('logo-slot-app')).toBeNull();
+    expect(screen.queryByText('Logo in the app (sidebar)')).toBeNull();
     expect(
       within(doc).getByText('Your formal logo for printed documents. If empty, the app logo is used.'),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'The formal logo printed on your documents. The logo in the app menu is set in General settings.',
+      ),
+    ).toBeInTheDocument();
   });
 
-  it('says the app logo prints while the document slot is empty', async () => {
+  it('says the app logo prints while the document slot is empty, and links to where it lives', async () => {
     useBrandingStore.setState({ mode: 'logo', logoDataUrl: 'data:image/png;base64,QUJD' });
     renderPanel();
 
     const doc = await screen.findByTestId('logo-slot-document');
     expect(
-      within(doc).getByText('Documents print the app logo until you add one here.'),
+      within(doc).getByText('Documents print the app logo until you add one here.', { exact: false }),
     ).toBeInTheDocument();
+    expect(within(doc).getByTestId('doc-logo-app-logo-link')).toHaveAttribute(
+      'href',
+      '/settings?tab=general',
+    );
+  });
+
+  it('leaves the app logo alone when a document logo is uploaded', async () => {
+    useBrandingStore.setState({ mode: 'logo', logoDataUrl: 'data:image/png;base64,QUJD' });
+    renderPanel();
+    await documentSlotReady();
+
+    const png = new File(['PNGDATA'], 'logo.png', { type: 'image/png' });
+    fireEvent.change(fileInputOf('logo-slot-document'), { target: { files: [png] } });
+
+    await waitFor(() => expect(saveProfileMock).toHaveBeenCalledTimes(1));
+    expect(useBrandingStore.getState().logoDataUrl).toBe('data:image/png;base64,QUJD');
   });
 
   it('saves only the fields that changed', async () => {
@@ -420,5 +443,47 @@ describe('CompanyDocumentsSettings', () => {
     const appearance = await screen.findByTestId('doc-appearance-panel');
     expect(appearance.compareDocumentPosition(types) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(within(types).getByText('Request for information')).toBeInTheDocument();
+  });
+
+  it('draws the footer, the page number format and the watermark in the letterhead preview', async () => {
+    vi.mocked(appearanceApi.getDocumentAppearance).mockResolvedValue({
+      ...APPEARANCE,
+      page_number_format: 'short',
+      print_stamp: 'date',
+      footer_show_registration: true,
+      watermark_text: 'DRAFT',
+      watermark_opacity: 30,
+      page_orientation: 'landscape',
+    });
+    getProfileMock.mockResolvedValue({
+      ...BLANK,
+      legal_name: 'Hochbau Nord GmbH',
+      registration_line: 'HRB 123',
+    });
+    renderPanel();
+
+    const preview = await screen.findByTestId('letterhead-preview');
+    await waitFor(() =>
+      expect(within(preview).getByTestId('letterhead-preview-page-number')).toHaveTextContent('1 / 3'),
+    );
+    expect(within(preview).getByTestId('letterhead-preview-registration')).toHaveTextContent('HRB 123');
+    expect(within(preview).getByTestId('letterhead-preview-stamp')).toHaveTextContent('Printed: 2026-01-01');
+    const mark = within(preview).getByTestId('letterhead-preview-watermark');
+    expect(mark).toHaveTextContent('DRAFT');
+    expect((mark.firstElementChild as HTMLElement).style.opacity).toBe('0.3');
+    // Landscape turns the sheet.
+    expect(parseFloat(preview.style.aspectRatio)).toBeGreaterThan(1);
+  });
+
+  it('shows the plain footer for the default settings', async () => {
+    getProfileMock.mockResolvedValue({ ...BLANK, legal_name: 'Hochbau Nord GmbH' });
+    renderPanel();
+
+    const preview = await screen.findByTestId('letterhead-preview');
+    await waitFor(() =>
+      expect(within(preview).getByTestId('letterhead-preview-page-number')).toHaveTextContent('Page 1 of 3'),
+    );
+    expect(within(preview).queryByTestId('letterhead-preview-stamp')).toBeNull();
+    expect(within(preview).queryByTestId('letterhead-preview-watermark')).toBeNull();
   });
 });
