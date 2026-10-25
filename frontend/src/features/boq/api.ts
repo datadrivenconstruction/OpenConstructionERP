@@ -1431,6 +1431,8 @@ export interface QuantityLink {
   quantity_field: string;
   target_field: string;
   aggregation: string;
+  projection_mode?: 'field' | 'formula';
+  formula?: string | null;
   status: string;
   source_model_version: string | null;
   last_applied_quantity: string | null;
@@ -1443,9 +1445,12 @@ export interface QuantityLink {
 export interface CreateQuantityLinkData {
   model_id: string;
   element_stable_ids: string[];
-  quantity_field: string;
+  /** Required in 'field' mode, ignored in 'formula' mode. */
+  quantity_field?: string;
   target_field?: 'quantity';
   aggregation?: QuantityAggregation;
+  projection_mode?: 'field' | 'formula';
+  formula?: string;
 }
 
 /** One per-position review row produced by the refresh probe. */

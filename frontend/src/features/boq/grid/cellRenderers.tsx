@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import type { ICellRendererParams, Column, GridApi } from 'ag-grid-community';
 import type { Position } from '../api';
+import { LinkedFormulaPanel } from './LinkedFormulaPanel';
 import {
   ChevronDown,
   ChevronRight,
@@ -1795,6 +1796,7 @@ const BimLinkPopover = forwardRef<
   const [glbOk, setGlbOk] = useState(true);
   const [showAllProps, setShowAllProps] = useState(false);
   const [showAllSums, setShowAllSums] = useState(false);
+  const [applyTab, setApplyTab] = useState<'sums' | 'formula'>('sums');
   const { data, isLoading } = useQuery({
     queryKey: ['bim-link-preview', modelId, ...elementIds],
     queryFn: () => fetchBIMElementsByIds(modelId, elementIds),
@@ -1878,17 +1880,37 @@ const BimLinkPopover = forwardRef<
 
   const isEnriching = parquetFetches.some((q) => q.isLoading);
 
+  const formulaElements = useMemo(
+    () =>
+      elements.map((el) => ({
+        id: el.id,
+        label: el.name || el.element_type || el.id,
+        quantities: el.quantities as Record<string, unknown> | null | undefined,
+        properties: { ...(parquetByElementId[el.id] ?? {}), ...(el.properties ?? {}) } as Record<string, unknown>,
+      })),
+    [elements, parquetByElementId],
+  );
+
   const currentQuantity = typeof positionData?.quantity === 'number' ? positionData.quantity : 0;
   const canApply = !!positionData?.id && !!onUpdatePosition;
 
   const handleUseQuantity = useCallback(
-    (value: number, source: string) => {
+    (value: number, source: string, extraMeta?: Record<string, unknown>) => {
       if (!positionData?.id || !onUpdatePosition) return;
       const id = positionData.id as string;
       const oldMeta = (positionData.metadata ?? {}) as Record<string, unknown>;
       onUpdatePosition(
         id,
-        { quantity: value, metadata: { ...oldMeta, bim_qty_source: source } },
+        {
+          quantity: value,
+          metadata: {
+            ...oldMeta,
+            bim_qty_source: source,
+            ...(extraMeta
+              ? { bim_qty_formula: extraMeta.formula, bim_qty_formula_aggregation: extraMeta.aggregation }
+              : {}),
+          },
+        },
         { ...positionData, quantity: currentQuantity },
       );
     },
@@ -2319,7 +2341,38 @@ const BimLinkPopover = forwardRef<
                 <ChevronDown size={10} className={`transition-transform ${showAllSums ? 'rotate-180' : ''}`} />
               </button>
             </div>
-            <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="flex shrink-0 border-b border-border-light/50 text-[10px] font-semibold">
+              {(['sums', 'formula'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setApplyTab(tab)}
+                  className={`flex-1 px-2 py-1 ${applyTab === tab ? 'border-b-2 border-emerald-600 text-emerald-700' : 'text-content-tertiary'}`}
+                  data-testid={`apply-tab-${tab}`}
+                >
+                  {tab === 'sums'
+                    ? t('boq.apply_tab_sums', { defaultValue: 'Property sums' })
+                    : t('boq.apply_tab_formula', { defaultValue: 'Formula' })}
+                </button>
+              ))}
+            </div>
+            {applyTab === 'formula' && (
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <LinkedFormulaPanel
+                  elements={formulaElements}
+                  modelId={modelId}
+                  elementStableIds={elements.map((el) => el.stable_id || el.id)}
+                  boqId={positionData?.boq_id as string | undefined}
+                  positionId={positionData?.id as string}
+                  currentQuantity={currentQuantity}
+                  onSetQuantity={(value, formula, aggregation) =>
+                    handleUseQuantity(value, `BIM formula (${aggregation}): ${formula}`, { formula, aggregation })
+                  }
+                  onLinked={onClose}
+                />
+              </div>
+            )}
+            <div className={`flex-1 min-h-0 overflow-y-auto ${applyTab === 'formula' ? 'hidden' : ''}`}>
               {isLoading && (
                 <div className="flex items-center justify-center gap-2 py-4">
                   <Loader2 size={12} className="animate-spin text-content-tertiary" />
