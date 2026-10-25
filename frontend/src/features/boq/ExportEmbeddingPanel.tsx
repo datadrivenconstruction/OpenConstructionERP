@@ -1,4 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNumberLocale } from '@/stores/usePreferencesStore';
+import { isDecimalString } from '@/shared/lib/exactDecimal';
+import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
+import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { boqApi } from './api';
 
 export interface ExportEmbeddingPanelProps {
@@ -6,7 +11,20 @@ export interface ExportEmbeddingPanelProps {
   boqId: string;
   /** The bill's `metadata.export_embed_markups`. */
   enabled: boolean;
+  /** ISO 4217 code of the bill's base currency; the preview amounts are in it. */
+  currency?: string;
   readOnly?: boolean;
+}
+
+/** A factor with four decimals; the decimal string goes to Intl as is, never through a float. */
+function formatFactor(k: string, locale: string): string {
+  if (!isDecimalString(k)) return k;
+  try {
+    return (new Intl.NumberFormat(locale, { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+      .format as (v: string) => string)(k);
+  } catch {
+    return k;
+  }
 }
 
 /**
@@ -14,8 +32,9 @@ export interface ExportEmbeddingPanelProps {
  * rate, only tax left as its own line. The setting lives on the bill, so every
  * format downloads the same way; the stored rates never change.
  */
-export function ExportEmbeddingPanel({ t, boqId, enabled, readOnly = false }: ExportEmbeddingPanelProps) {
+export function ExportEmbeddingPanel({ t, boqId, enabled, currency, readOnly = false }: ExportEmbeddingPanelProps) {
   const queryClient = useQueryClient();
+  const numberLocale = useNumberLocale();
   const preview = useQuery({
     queryKey: ['boq-embedding-preview', boqId],
     queryFn: () => boqApi.embeddingPreview(boqId),
@@ -34,7 +53,20 @@ export function ExportEmbeddingPanel({ t, boqId, enabled, readOnly = false }: Ex
       boqApi.updateMarkup(boqId, id, { metadata: { include_in_unit_rates: include } }),
     onSuccess: refresh,
   });
+  const tolerance = useMutation({
+    mutationFn: (value: string) => boqApi.update(boqId, { metadata: { export_embed_tolerance: value } }),
+    onSuccess: refresh,
+  });
   const data = preview.data;
+  const [toleranceDraft, setToleranceDraft] = useState('');
+  useEffect(() => {
+    if (data) setToleranceDraft(data.tolerance);
+  }, [data?.tolerance]); // eslint-disable-line react-hooks/exhaustive-deps
+  const draftValue = toDecimalPayloadString(toleranceDraft, '');
+  const draftValid = isDecimalString(draftValue) && !draftValue.startsWith('-');
+  const saveTolerance = () => {
+    if (data && draftValid && draftValue !== data.tolerance) tolerance.mutate(draftValue);
+  };
 
   return (
     <div className="border-b border-border-light px-3 py-2.5 text-xs" data-testid="export-embedding-panel">
@@ -94,19 +126,36 @@ export function ExportEmbeddingPanel({ t, boqId, enabled, readOnly = false }: Ex
                       count: b.position_count,
                     })}
               </span>
-              <span className="tabular-nums">k = {b.k}</span>
+              <span className="tabular-nums">k = {formatFactor(b.k, numberLocale)}</span>
             </div>
           ))}
           <div className="flex justify-between text-content-primary">
             <span>{t('boq.export_embed_sale_net', { defaultValue: 'Net at sale rates' })}</span>
-            <span className="tabular-nums">{data.sale_net}</span>
+            <MoneyDisplay amount={data.sale_net} currency={currency} className="tabular-nums" />
           </div>
+          <label className="flex items-center justify-between gap-2 text-content-secondary">
+            <span>{t('boq.export_embed_tolerance', { defaultValue: 'Rounding tolerance' })}</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              className={`w-24 rounded border px-1.5 py-0.5 text-right tabular-nums ${draftValid ? 'border-border-light' : 'border-semantic-error'}`}
+              value={toleranceDraft}
+              disabled={readOnly || tolerance.isPending}
+              onChange={(e) => setToleranceDraft(e.target.value)}
+              onBlur={saveTolerance}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveTolerance();
+              }}
+              aria-invalid={!draftValid}
+              data-testid="export-embed-tolerance"
+            />
+          </label>
           <div
             className={`flex justify-between ${data.within_tolerance ? 'text-content-secondary' : 'text-semantic-warning'}`}
             data-testid="export-embedding-gap"
           >
             <span>{t('boq.export_embed_gap', { defaultValue: 'Rounding gap vs. editor' })}</span>
-            <span className="tabular-nums">{data.rounding_gap}</span>
+            <MoneyDisplay amount={data.rounding_gap} currency={currency} className="tabular-nums" />
           </div>
           {!data.within_tolerance && (
             <p className="text-semantic-warning" role="status">

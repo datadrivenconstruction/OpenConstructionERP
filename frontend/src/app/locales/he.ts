@@ -58085,6 +58085,7 @@ const resource = {
     "boq.export_embed_sale_net": "נטו במחירי מכירה",
     "boq.export_embed_gap": "פער עיגול מול העורך",
     "boq.export_embed_gap_warning": "הפער גבוה מהסובלנות של {{tolerance}}.",
+    "boq.export_embed_tolerance": "סטיית עיגול מותרת",
     "guide.cost_control.title": "בקרת עלויות",
     "guide.cost_control.intro": "בקרת עלויות עונה על שאלה אחת: כמה הפרויקט יעלה בסוף, ולמה. היא קוראת את התקציב, האומדן, החוזים, השינויים, העבודה שנמדדה והחשבוניות שכבר נמצאים במודולים שלהם, כך שאין הקלדה כפולה.",
     "guide.cost_control.methods.title": "ארבע דרכים לקרוא את התחזית",

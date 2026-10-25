@@ -58177,6 +58177,7 @@ const resource = {
     "boq.export_embed_sale_net": "판매 단가 기준 순액",
     "boq.export_embed_gap": "편집기 대비 반올림 차이",
     "boq.export_embed_gap_warning": "차이가 허용 오차 {{tolerance}}를 초과합니다.",
+    "boq.export_embed_tolerance": "반올림 허용 오차",
     "guide.cost_control.title": "원가 관리",
     "guide.cost_control.intro": "원가 관리는 한 가지 질문에 답합니다. 프로젝트가 결국 얼마가 들고, 그 이유는 무엇인가. 예산, 견적, 계약, 변경, 실측 물량, 청구서는 각자의 모듈에 이미 있는 것을 읽어 오므로 두 번 입력할 필요가 없습니다.",
     "guide.cost_control.methods.title": "예측을 보는 네 가지 방법",

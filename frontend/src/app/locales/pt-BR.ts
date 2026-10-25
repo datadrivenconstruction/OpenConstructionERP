@@ -48617,6 +48617,7 @@ const resource = {
     "boq.export_embed_sale_net": "Líquido a preços de venda",
     "boq.export_embed_gap": "Diferença de arredondamento em relação ao editor",
     "boq.export_embed_gap_warning": "A diferença excede a tolerância de {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolerância de arredondamento",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",

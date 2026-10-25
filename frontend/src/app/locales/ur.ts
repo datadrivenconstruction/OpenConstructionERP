@@ -57764,6 +57764,7 @@ const resource = {
     "boq.export_embed_sale_net": "فروخت کی شرحوں پر خالص",
     "boq.export_embed_gap": "ایڈیٹر کے مقابلے میں راؤنڈنگ کا فرق",
     "boq.export_embed_gap_warning": "فرق {{tolerance}} کی حد سے زیادہ ہے۔",
+    "boq.export_embed_tolerance": "راؤنڈنگ کی حد",
     "guide.cost_control.title": "لاگت کنٹرول",
     "guide.cost_control.intro": "لاگت کنٹرول ایک سوال کا جواب دیتا ہے: پروجیکٹ کی آخر میں لاگت کیا ہوگی، اور کیوں۔ یہ بجٹ، تخمینہ، کنٹریکٹس، تبدیلیاں، ناپا ہوا کام اور انوائسز پڑھتا ہے جو پہلے ہی اپنے ماڈیولز میں موجود ہیں، اس لیے کچھ دو بار نہیں لکھنا پڑتا۔",
     "guide.cost_control.methods.title": "پیش گوئی پڑھنے کے چار طریقے",

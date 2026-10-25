@@ -58074,6 +58074,7 @@ const resource = {
     "boq.export_embed_sale_net": "বিক্রয় দরে নিট",
     "boq.export_embed_gap": "সম্পাদকের তুলনায় রাউন্ডিং পার্থক্য",
     "boq.export_embed_gap_warning": "পার্থক্য {{tolerance}} সহনসীমার বেশি।",
+    "boq.export_embed_tolerance": "রাউন্ডিং সহনসীমা",
     "guide.cost_control.title": "খরচ নিয়ন্ত্রণ",
     "guide.cost_control.intro": "খরচ নিয়ন্ত্রণ একটি প্রশ্নের উত্তর দেয়: শেষে প্রকল্পের খরচ কত হবে, এবং কেন। এটি বাজেট, প্রাক্কলন, চুক্তি, পরিবর্তন, মাপা কাজ ও চালান পড়ে, যা আগে থেকেই নিজ নিজ মডিউলে আছে, তাই কিছু দুবার লিখতে হয় না।",
     "guide.cost_control.methods.title": "পূর্বাভাস পড়ার চারটি উপায়",

@@ -59012,6 +59012,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto a prezzi di vendita",
     "boq.export_embed_gap": "Differenza di arrotondamento rispetto all'editor",
     "boq.export_embed_gap_warning": "La differenza supera la tolleranza di {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolleranza di arrotondamento",
     "guide.cost_control.title": "Controllo dei costi",
     "guide.cost_control.intro": "Il controllo dei costi risponde a una domanda: quanto costerà il progetto alla fine e perché. Legge budget, stima, contratti, varianti, lavori misurati e fatture che vivono già nei loro moduli, così nulla viene scritto due volte.",
     "guide.cost_control.methods.title": "Quattro modi di leggere la previsione",

@@ -48919,6 +48919,7 @@ const resource = {
     "boq.export_embed_sale_net": "Neto a precios de venta",
     "boq.export_embed_gap": "Diferencia de redondeo con el editor",
     "boq.export_embed_gap_warning": "La diferencia supera la tolerancia de {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolerancia de redondeo",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
     "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",

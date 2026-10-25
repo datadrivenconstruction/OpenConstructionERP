@@ -57807,6 +57807,7 @@ const resource = {
     "boq.export_embed_sale_net": "बिक्री दरों पर शुद्ध",
     "boq.export_embed_gap": "संपादक की तुलना में राउंडिंग अंतर",
     "boq.export_embed_gap_warning": "अंतर {{tolerance}} की सहनशीलता से अधिक है।",
+    "boq.export_embed_tolerance": "पूर्णांकन सहनसीमा",
     "guide.cost_control.title": "लागत नियंत्रण",
     "guide.cost_control.intro": "लागत नियंत्रण एक सवाल का जवाब देता है: अंत में प्रोजेक्ट की लागत क्या होगी, और क्यों। यह बजट, अनुमान, अनुबंध, बदलाव, मापा गया काम और चालान पढ़ता है जो पहले से अपने-अपने मॉड्यूल में हैं, इसलिए कुछ भी दो बार नहीं भरना पड़ता।",
     "guide.cost_control.methods.title": "पूर्वानुमान पढ़ने के चार तरीके",

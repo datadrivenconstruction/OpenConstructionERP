@@ -57558,6 +57558,7 @@ const resource = {
     "boq.export_embed_sale_net": "Neto dengan harga jual",
     "boq.export_embed_gap": "Selisih pembulatan terhadap editor",
     "boq.export_embed_gap_warning": "Selisih melebihi toleransi {{tolerance}}.",
+    "boq.export_embed_tolerance": "Toleransi pembulatan",
     "guide.cost_control.title": "Pengendalian biaya",
     "guide.cost_control.intro": "Pengendalian biaya menjawab satu pertanyaan: berapa biaya proyek pada akhirnya, dan mengapa. Modul ini membaca anggaran, estimasi, kontrak, perubahan, pekerjaan terukur, dan faktur yang sudah ada di modulnya masing-masing, sehingga tidak ada yang diketik dua kali.",
     "guide.cost_control.methods.title": "Empat cara membaca prakiraan",

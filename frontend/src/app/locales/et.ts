@@ -57754,6 +57754,7 @@ const resource = {
     "boq.export_embed_sale_net": "Neto müügihindades",
     "boq.export_embed_gap": "Ümardamise vahe redaktoriga",
     "boq.export_embed_gap_warning": "Vahe ületab lubatud hälbe {{tolerance}}.",
+    "boq.export_embed_tolerance": "Ümardamistolerants",
     "guide.cost_control.title": "Kuluseire",
     "guide.cost_control.intro": "Kuluseire vastab ühele küsimusele: mis saab projekt lõpuks maksma ja miks. See loeb eelarvet, hinnangut, lepinguid, muudatusi, mõõdetud tööd ja arveid, mis juba asuvad oma moodulites, nii et midagi ei sisestata kaks korda.",
     "guide.cost_control.methods.title": "Neli viisi prognoosi lugeda",

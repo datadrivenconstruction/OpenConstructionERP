@@ -60711,6 +60711,7 @@ const resource = {
     "boq.export_embed_sale_net": "Net aux prix de vente",
     "boq.export_embed_gap": "Écart d'arrondi avec l'éditeur",
     "boq.export_embed_gap_warning": "L'écart dépasse la tolérance de {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolérance d'arrondi",
     "guide.cost_control.title": "Contrôle des coûts",
     "guide.cost_control.intro": "Le contrôle des coûts répond à une question : combien le projet coûtera-t-il à la fin, et pourquoi. Il lit le budget, l'estimation, les contrats, les avenants, les travaux métrés et les factures qui vivent déjà dans leurs propres modules, rien n'est saisi deux fois.",
     "guide.cost_control.methods.title": "Quatre façons de lire la prévision",

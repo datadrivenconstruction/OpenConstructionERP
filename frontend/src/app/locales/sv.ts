@@ -58419,6 +58419,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto till försäljningspriser",
     "boq.export_embed_gap": "Avrundningsdifferens mot redigeraren",
     "boq.export_embed_gap_warning": "Differensen överstiger toleransen {{tolerance}}.",
+    "boq.export_embed_tolerance": "Avrundningstolerans",
     "guide.cost_control.title": "Kostnadsstyrning",
     "guide.cost_control.intro": "Kostnadsstyrningen svarar på en fråga: vad kommer projektet att kosta till slut, och varför. Den läser budget, kalkyl, kontrakt, ändringar, uppmätt arbete och fakturor som redan finns i sina egna moduler, så ingenting skrivs in två gånger.",
     "guide.cost_control.methods.title": "Fyra sätt att läsa prognosen",

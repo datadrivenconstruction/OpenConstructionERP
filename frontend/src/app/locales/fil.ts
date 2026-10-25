@@ -57762,6 +57762,7 @@ const resource = {
     "boq.export_embed_sale_net": "Net sa presyong pambenta",
     "boq.export_embed_gap": "Agwat ng rounding kumpara sa editor",
     "boq.export_embed_gap_warning": "Lampas ang agwat sa tolerance na {{tolerance}}.",
+    "boq.export_embed_tolerance": "Toleransya sa pag-round",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Isang tanong ang sinasagot ng cost control: magkano ang aabutin ng proyekto sa huli, at bakit. Binabasa nito ang budget, estimate, mga kontrata, mga pagbabago, nasukat na trabaho at mga invoice na nasa sarili nilang module na, kaya walang tina-type nang dalawang beses.",
     "guide.cost_control.methods.title": "Apat na paraan ng pagbasa sa forecast",

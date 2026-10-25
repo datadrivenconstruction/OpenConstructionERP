@@ -57808,6 +57808,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto myyntihinnoin",
     "boq.export_embed_gap": "Pyöristysero editoriin",
     "boq.export_embed_gap_warning": "Ero ylittää toleranssin {{tolerance}}.",
+    "boq.export_embed_tolerance": "Pyöristystoleranssi",
     "guide.cost_control.title": "Kustannusseuranta",
     "guide.cost_control.intro": "Kustannusseuranta vastaa yhteen kysymykseen: paljonko hanke maksaa lopulta ja miksi. Se lukee budjetin, kustannusarvion, sopimukset, muutokset, mitatun työn ja laskut, jotka ovat jo omissa moduuleissaan, joten mitään ei kirjata kahdesti.",
     "guide.cost_control.methods.title": "Neljä tapaa lukea ennuste",

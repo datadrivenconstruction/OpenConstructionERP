@@ -528,7 +528,7 @@ export function BOQToolbar({
                   className="w-72 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in"
                   data-portal="boq-export-menu"
                 >
-                  <ExportEmbeddingPanel t={t} boqId={boqId} enabled={exportEmbedMarkups} readOnly={readOnly} />
+                  <ExportEmbeddingPanel t={t} boqId={boqId} enabled={exportEmbedMarkups} currency={summary?.currencyCode} readOnly={readOnly} />
                   <button role="menuitem" onClick={() => handleExportItem('excel')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                     <FileSpreadsheet size={15} className="text-content-tertiary" />
                     {t('boq.export_format_excel', { defaultValue: 'Excel (.xlsx)' })}

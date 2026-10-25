@@ -51985,6 +51985,7 @@ const resource = {
     "boq.export_embed_sale_net": "Net at sale rates",
     "boq.export_embed_gap": "Rounding gap vs. editor",
     "boq.export_embed_gap_warning": "The gap is above the tolerance of {{tolerance}}.",
+    "boq.export_embed_tolerance": "Rounding tolerance",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Cost control answers one question: what will the project cost in the end, and why. It reads the budget, the estimate, contracts, changes, measured work and invoices that already live in their own modules, so nothing is typed in twice.",
     "guide.cost_control.methods.title": "Four ways to read the forecast",

@@ -59329,6 +59329,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto w cenach sprzedaży",
     "boq.export_embed_gap": "Różnica zaokrągleń względem edytora",
     "boq.export_embed_gap_warning": "Różnica przekracza tolerancję {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolerancja zaokrąglenia",
     "guide.cost_control.title": "Kontrola kosztów",
     "guide.cost_control.intro": "Kontrola kosztów odpowiada na jedno pytanie: ile projekt będzie kosztował na koniec i dlaczego. Czyta budżet, kosztorys, umowy, zmiany, roboty obmierzone i faktury, które już są w swoich modułach, więc nic nie jest wpisywane dwa razy.",
     "guide.cost_control.methods.title": "Cztery sposoby odczytu prognozy",

@@ -15,6 +15,8 @@ export interface BOQ {
   status: string;
   estimate_type: string | null;
   is_locked: boolean;
+  /** Free-form bill settings, e.g. `export_embed_markups`, `export_embed_tolerance`. */
+  metadata?: Record<string, unknown>;
   /** Set when this BOQ was created via "Create revision" — points at the
    *  BOQ it was cloned from. Drives the baseline pick in the compare UI. */
   parent_estimate_id?: string | null;

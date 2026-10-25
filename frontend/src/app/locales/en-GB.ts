@@ -81,6 +81,7 @@ const resource = {
     "boq.export_embed_sale_net": "Net at sale rates",
     "boq.export_embed_gap": "Rounding gap vs. editor",
     "boq.export_embed_gap_warning": "The gap is above the tolerance of {{tolerance}}.",
+    "boq.export_embed_tolerance": "Rounding tolerance",
     "auth.or": "or",
     "auth.sso_login": "Sign in with SSO",
     "schedule.activate": "Activate",

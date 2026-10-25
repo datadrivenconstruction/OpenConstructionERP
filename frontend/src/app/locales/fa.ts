@@ -57764,6 +57764,7 @@ const resource = {
     "boq.export_embed_sale_net": "خالص با نرخ فروش",
     "boq.export_embed_gap": "اختلاف گرد کردن با ویرایشگر",
     "boq.export_embed_gap_warning": "اختلاف از رواداری {{tolerance}} بیشتر است.",
+    "boq.export_embed_tolerance": "حد مجاز گرد کردن",
     "guide.cost_control.title": "کنترل هزینه",
     "guide.cost_control.intro": "کنترل هزینه به یک پرسش پاسخ می‌دهد: پروژه در پایان چقدر هزینه خواهد داشت و چرا. بودجه، برآورد، قراردادها، تغییرات، کار اندازه‌گیری‌شده و صورتحساب‌هایی را می‌خواند که از پیش در ماژول‌های خودشان هستند، پس چیزی دوبار وارد نمی‌شود.",
     "guide.cost_control.methods.title": "چهار روش برای خواندن پیش‌بینی",

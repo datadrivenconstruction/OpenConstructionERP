@@ -57804,6 +57804,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto til salgspriser",
     "boq.export_embed_gap": "Afrundingsforskel mod editoren",
     "boq.export_embed_gap_warning": "Forskellen er over tolerancen på {{tolerance}}.",
+    "boq.export_embed_tolerance": "Afrundingstolerance",
     "guide.cost_control.title": "Omkostningsstyring",
     "guide.cost_control.intro": "Omkostningsstyring svarer på ét spørgsmål: hvad kommer projektet til at koste til sidst, og hvorfor. Den læser budget, kalkulation, kontrakter, ændringer, opmålt arbejde og fakturaer, som allerede ligger i deres egne moduler, så intet skrives ind to gange.",
     "guide.cost_control.methods.title": "Fire måder at læse prognosen på",

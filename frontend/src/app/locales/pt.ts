@@ -60704,6 +60704,7 @@ const resource = {
     "boq.export_embed_sale_net": "Líquido a preços de venda",
     "boq.export_embed_gap": "Diferença de arredondamento face ao editor",
     "boq.export_embed_gap_warning": "A diferença excede a tolerância de {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolerância de arredondamento",
     "guide.cost_control.title": "Controlo de custos",
     "guide.cost_control.intro": "O controlo de custos responde a uma pergunta: quanto vai custar o projeto no fim e porquê. Lê o orçamento, a estimativa, os contratos, as alterações, o trabalho medido e as faturas que já vivem nos seus módulos, por isso nada é escrito duas vezes.",
     "guide.cost_control.methods.title": "Quatro formas de ler a previsão",

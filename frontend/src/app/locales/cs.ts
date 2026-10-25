@@ -59068,6 +59068,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto v prodejních cenách",
     "boq.export_embed_gap": "Rozdíl zaokrouhlení oproti editoru",
     "boq.export_embed_gap_warning": "Rozdíl překračuje toleranci {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolerance zaokrouhlení",
     "guide.cost_control.title": "Řízení nákladů",
     "guide.cost_control.intro": "Řízení nákladů odpovídá na jednu otázku: kolik bude projekt nakonec stát a proč. Čte rozpočet, odhad, smlouvy, změny, naměřené práce a faktury, které už jsou ve svých modulech, takže se nic nezadává dvakrát.",
     "guide.cost_control.methods.title": "Čtyři způsoby, jak číst prognózu",

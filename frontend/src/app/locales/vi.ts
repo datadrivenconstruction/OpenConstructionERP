@@ -57567,6 +57567,7 @@ const resource = {
     "boq.export_embed_sale_net": "Giá trị thuần theo đơn giá bán",
     "boq.export_embed_gap": "Chênh lệch làm tròn so với trình soạn thảo",
     "boq.export_embed_gap_warning": "Chênh lệch vượt dung sai {{tolerance}}.",
+    "boq.export_embed_tolerance": "Dung sai làm tròn",
     "guide.cost_control.title": "Kiểm soát chi phí",
     "guide.cost_control.intro": "Kiểm soát chi phí trả lời một câu hỏi: cuối cùng dự án sẽ tốn bao nhiêu, và vì sao. Nó đọc ngân sách, dự toán, hợp đồng, thay đổi, khối lượng đã đo và hóa đơn vốn đã nằm trong các module riêng, nên không phải nhập hai lần.",
     "guide.cost_control.methods.title": "Bốn cách đọc dự báo",

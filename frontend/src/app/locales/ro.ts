@@ -58129,6 +58129,7 @@ const resource = {
     "boq.export_embed_sale_net": "Net la prețuri de vânzare",
     "boq.export_embed_gap": "Diferență de rotunjire față de editor",
     "boq.export_embed_gap_warning": "Diferența depășește toleranța de {{tolerance}}.",
+    "boq.export_embed_tolerance": "Toleranță de rotunjire",
     "guide.cost_control.title": "Controlul costurilor",
     "guide.cost_control.intro": "Controlul costurilor răspunde la o singură întrebare: cât va costa proiectul la final și de ce. Citește bugetul, devizul, contractele, modificările, lucrările măsurate și facturile care există deja în modulele lor, așa că nimic nu se introduce de două ori.",
     "guide.cost_control.methods.title": "Patru moduri de a citi prognoza",

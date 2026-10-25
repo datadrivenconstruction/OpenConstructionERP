@@ -58139,6 +58139,7 @@ const resource = {
     "boq.export_embed_sale_net": "Neto po prodajnim cijenama",
     "boq.export_embed_gap": "Razlika zaokruživanja u odnosu na uređivač",
     "boq.export_embed_gap_warning": "Razlika prelazi toleranciju od {{tolerance}}.",
+    "boq.export_embed_tolerance": "Tolerancija zaokruživanja",
     "guide.cost_control.title": "Kontrola troškova",
     "guide.cost_control.intro": "Kontrola troškova odgovara na jedno pitanje: koliko će projekt na kraju koštati i zašto. Čita proračun, troškovnik, ugovore, izmjene, izmjerene radove i račune koji već postoje u svojim modulima, pa se ništa ne unosi dvaput.",
     "guide.cost_control.methods.title": "Četiri načina čitanja prognoze",

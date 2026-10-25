@@ -58685,6 +58685,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto tegen verkoopprijzen",
     "boq.export_embed_gap": "Afrondingsverschil met de editor",
     "boq.export_embed_gap_warning": "Het verschil ligt boven de tolerantie van {{tolerance}}.",
+    "boq.export_embed_tolerance": "Afrondingstolerantie",
     "guide.cost_control.title": "Kostenbeheersing",
     "guide.cost_control.intro": "Kostenbeheersing beantwoordt één vraag: wat gaat het project uiteindelijk kosten, en waarom. Het leest budget, raming, contracten, wijzigingen, opgemeten werk en facturen uit de modules waar ze al staan, dus niets wordt dubbel ingevoerd.",
     "guide.cost_control.methods.title": "Vier manieren om de prognose te lezen",

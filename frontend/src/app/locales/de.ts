@@ -60439,6 +60439,7 @@ const resource = {
     "boq.export_embed_sale_net": "Netto zu Verkaufspreisen",
     "boq.export_embed_gap": "Rundungsdifferenz zum Editor",
     "boq.export_embed_gap_warning": "Die Differenz liegt über der Toleranz von {{tolerance}}.",
+    "boq.export_embed_tolerance": "Rundungstoleranz",
     "guide.cost_control.title": "Kostenkontrolle",
     "guide.cost_control.intro": "Die Kostenkontrolle beantwortet eine Frage: Was kostet das Projekt am Ende, und warum. Sie liest Budget, Kostenschätzung, Verträge, Änderungen, aufgemessene Leistungen und Rechnungen aus den Modulen, in denen sie ohnehin liegen. Nichts wird doppelt erfasst.",
     "guide.cost_control.methods.title": "Vier Arten, die Prognose zu lesen",
