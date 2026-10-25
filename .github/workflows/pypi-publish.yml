@@ -82,6 +82,9 @@ jobs:
           cd frontend
           npm ci
           npm run build
+          # xz-pack the large assets in place; app/cli_static.py expands each one
+          # on its first request. Takes about 14 MiB off the wheel.
+          python ../scripts/pack_frontend_dist.py dist
           # NOTE: do NOT copy dist into backend/app/_frontend_dist here.
           # backend/pyproject.toml already declares
           #   [tool.hatch.build.targets.wheel.force-include]
@@ -130,7 +133,10 @@ jobs:
           # for that one release. 18.6.1 packs the catalogues against one shared
           # key list (frontend/vite.locale-key-index.ts), which takes roughly 14 MiB
           # out of the wheel, and the budget is back at 95.
-          LIMIT_MIB = 95
+          # 18.8.3 (2026-10-25): large frontend assets ship xz-packed
+          # (scripts/pack_frontend_dist.py), the wheel fell to about 75 MiB and the
+          # budget is that plus 6.
+          LIMIT_MIB = 81
           HARD_CAP_MIB = 100
 
           whl = sorted(glob.glob("dist/*.whl"))

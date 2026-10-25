@@ -10,8 +10,14 @@ Frontend is found in two locations (checked in order):
 2. ../frontend/dist/   - development mode (repo checkout)
 """
 
+import hashlib
 import logging
+import lzma
 import mimetypes
+import os
+import shutil
+import tempfile
+import threading
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -196,6 +202,49 @@ def get_frontend_dir() -> Path:
     )
 
 
+def _packed_cache_dir(base: Path) -> Path:
+    key = hashlib.sha256(str(base.resolve()).encode("utf-8")).hexdigest()[:16]
+    return Path(tempfile.gettempdir()) / "openconstructionerp-ui" / key
+
+
+def expand_packed_asset(base: Path, relative: str) -> Path | None:
+    """Return a plain copy of ``<base>/<relative>`` when only its ``.xz`` is shipped.
+
+    The release wheel carries large assets xz-packed (scripts/pack_frontend_dist.py)
+    to stay inside PyPI's project quota. They are expanded once, on first request,
+    into a temp cache rather than next to the package, so site-packages stays
+    read-only and pip uninstall leaves nothing behind. A dist without ``.xz`` files
+    never reaches the cache.
+
+    Args:
+        base: Directory the request path is relative to.
+        relative: Request path below ``base``.
+
+    Returns:
+        Path of the expanded file, or None when there is no packed copy or it
+        cannot be expanded.
+    """
+    if not relative:
+        return None
+    root = base.resolve()
+    packed = (base / f"{relative}.xz").resolve()
+    if os.path.commonpath([packed, root]) != str(root) or not packed.is_file():
+        return None
+    target = _packed_cache_dir(base) / packed.relative_to(root).with_suffix("")
+    try:
+        if target.is_file() and target.stat().st_mtime >= packed.stat().st_mtime:
+            return target
+        target.parent.mkdir(parents=True, exist_ok=True)
+        tmp = target.with_name(f"{target.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+        with lzma.open(packed) as src, tmp.open("wb") as dst:
+            shutil.copyfileobj(src, dst, 1 << 20)
+        os.replace(tmp, target)
+    except (OSError, lzma.LZMAError):
+        logger.exception("Could not expand packed frontend asset %s", packed)
+        return None
+    return target
+
+
 def _mount_api_only_404(app: FastAPI) -> None:
     """Answer UI paths with a 404 that says this server has no bundle.
 
@@ -296,6 +345,14 @@ def mount_frontend(app: FastAPI) -> None:
             if not Path(str(self.directory)).is_dir():
                 _note_bundle_loss()
 
+        def lookup_path(self, path: str) -> tuple[str, os.stat_result | None]:
+            full_path, stat = super().lookup_path(path)
+            if stat is None:
+                expanded = expand_packed_asset(assets_dir, path)
+                if expanded is not None:
+                    return str(expanded), expanded.stat()
+            return full_path, stat
+
         async def get_response(self, path: str, scope):  # noqa: ANN001, ANN202
             response = await super().get_response(path, scope)
             if response.status_code == 200:
@@ -378,6 +435,12 @@ def mount_frontend(app: FastAPI) -> None:
             candidate = frontend_dir / relative
             if candidate.is_file() and candidate.suffix in _root_static_extensions:
                 return FileResponse(str(candidate))
+            if candidate.suffix in _root_static_extensions:
+                from starlette.concurrency import run_in_threadpool
+
+                expanded = await run_in_threadpool(expand_packed_asset, frontend_dir, relative)
+                if expanded is not None:
+                    return FileResponse(str(expanded))
 
             # A request that asks for a FILE and does not get one is a 404, and
             # saying so is the whole point. Falling through to index.html sends
