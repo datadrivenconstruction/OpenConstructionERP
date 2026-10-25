@@ -267419,6 +267419,7 @@
         "__init__.py",
         "manifest.py",
         "models.py",
+        "oidc.py",
         "permissions.py",
         "repository.py",
         "router.py",
@@ -276023,10 +276024,10 @@
     },
     {
       "name": "auth",
-      "ts_files": 20,
+      "ts_files": 21,
       "css_files": 0,
       "test_files": 7,
-      "total_files": 20
+      "total_files": 21
     },
     {
       "name": "authority-submission",
@@ -278992,9 +278993,9 @@
     "total_relationships": 240,
     "total_routes": 4627,
     "total_schemas": 4120,
-    "total_python_files": 2810,
+    "total_python_files": 2811,
     "frontend_features": 209,
-    "frontend_ts_files": 3606,
+    "frontend_ts_files": 3607,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {

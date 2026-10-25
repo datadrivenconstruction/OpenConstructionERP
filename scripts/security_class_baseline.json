@@ -308,7 +308,9 @@
     "backend/app/modules/takeoff/router.py::_INSTALL_PROGRESS",
     "backend/app/modules/takeoff/router.py::_INSTALL_TASKS",
     "backend/app/modules/takeoff/router.py::_cad_sessions",
-    "backend/app/modules/tax_withholding/source_owners.py::_resolvers"
+    "backend/app/modules/tax_withholding/source_owners.py::_resolvers",
+    "backend/app/modules/users/oidc.py::_discovery_cache",
+    "backend/app/modules/users/oidc.py::_jwks_cache"
   ],
   "outbound_url_safety": [
     "backend/app/core/email/smtp.py",
@@ -335,6 +337,7 @@
     "backend/app/modules/phonelog/transcription.py",
     "backend/app/modules/takeoff/manifest_verifier.py",
     "backend/app/modules/takeoff/router.py",
+    "backend/app/modules/users/oidc.py",
     "backend/app/modules/users/router.py",
     "backend/app/scripts/seed_demo.py",
     "backend/app/scripts/seed_demo_finish.py",
