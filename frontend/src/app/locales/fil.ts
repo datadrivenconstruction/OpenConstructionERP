@@ -51370,7 +51370,7 @@ const resource = {
     "settings.work_mode_field": "Field / Touch",
     "settings.work_mode_field_hint": "Malaking teksto at malalaking touch target para sa tablet sa site.",
     "settings.style_preset_office": "Opisina",
-    "settings.style_preset_site": "Site",
+    "settings.style_preset_site": "Lugar ng proyekto",
     "settings.style_preset_night": "Gabi",
     "settings.style_preset_presentation": "Presentasyon",
     "settings.style_preset_classic_hint": "Karaniwang itsura",
