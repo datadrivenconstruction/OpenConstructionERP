@@ -45,6 +45,8 @@ def wrap(
     action_label: str = "View",
     *,
     footer: str | None = None,
+    lang: str | None = None,
+    rtl: bool = False,
 ) -> str:
     """Wrap *body* in the standard email shell (brand line, title, CTA, footer).
 
@@ -52,7 +54,8 @@ def wrap(
     shows when a mail client blocks images, and closes with the brand name.
     ``footer`` is an extra line above that closing line, such as why the mail
     came; ``None`` or an empty string adds none. It is inserted as given, so
-    escape it.
+    escape it. ``lang`` sets the document language and ``rtl`` the reading
+    direction for a right-to-left language (Arabic, Persian, Hebrew, Urdu).
     """
     btn = ""
     if action_url:
@@ -62,8 +65,9 @@ def wrap(
             f"background:#0071e3; color:#fff; border-radius:8px; text-decoration:none; "
             f'font-weight:600;">{action_label}</a></p>'
         )
+    html_attrs = (f' lang="{lang}"' if lang else "") + (' dir="rtl"' if rtl else "")
     return (
-        f"<!DOCTYPE html><html><head><meta charset='utf-8'></head>"
+        f"<!DOCTYPE html><html{html_attrs}><head><meta charset='utf-8'></head>"
         f'<body style="{_base_style()}">'
         f"{brand_header()}"
         f"<h2 style='margin:0 0 12px;'>{title}</h2>"

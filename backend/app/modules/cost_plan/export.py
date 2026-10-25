@@ -22,6 +22,7 @@ from typing import Any
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
+from app.core.document_catalogue import is_rtl, merge_missing
 from app.core.document_locale import translate
 from app.core.xlsx_branding import apply_company_header
 from app.core.xlsx_text import store_strings_as_text
@@ -163,6 +164,9 @@ _LABELS: dict[str, dict[str, str]] = {
         "truncated": "Список сокращен до первых {shown} из {count} позиций; итог учитывает все.",
     },
 }
+
+# The platform's other languages come from ``core/document_catalogues`` (section ``cost_plan``).
+merge_missing(_LABELS, "cost_plan")
 
 #: The languages this workbook can be written in.
 EXPORT_LOCALES: frozenset[str] = frozenset(_LABELS)
@@ -309,6 +313,7 @@ def build_cost_plan_workbook(plan: CostPlanResponse, *, locale: str = DEFAULT_LO
     wb = Workbook()
     ws = wb.active
     ws.title = label(locale, "sheet_plan")[:31]
+    ws.sheet_view.rightToLeft = is_rtl(locale)
 
     gifa_note = label(locale, f"gifa_{plan.gifa_source}")
     ws.append([label(locale, "title")])
@@ -425,6 +430,7 @@ def _write_unallocated_sheet(wb: Workbook, plan: CostPlanResponse, locale: str) 
     if not block.position_count:
         return
     ws = wb.create_sheet(label(locale, "sheet_unallocated")[:31])
+    ws.sheet_view.rightToLeft = is_rtl(locale)
     header = [
         label(locale, "col_ordinal"),
         label(locale, "col_position"),

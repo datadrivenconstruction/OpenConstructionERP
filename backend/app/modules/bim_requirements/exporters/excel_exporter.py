@@ -12,28 +12,116 @@ import io
 import logging
 from typing import Any
 
+from app.core.document_catalogue import is_rtl, merge_missing
+from app.core.document_locale import normalize_document_locale, translate
 from app.modules.bim_requirements.parsers.base import UniversalRequirement
 
 logger = logging.getLogger(__name__)
 
-# Header definitions: (column letter, EN header, DE header, width)
-_COLUMNS = [
-    ("A", "Element / IFC Class", "Bauteil / IFC-Klasse", 25),
-    ("B", "Classification", "Klassifikation", 20),
-    ("C", "Property Group", "Merkmalsgruppe", 22),
-    ("D", "Property Name", "Merkmal", 25),
-    ("E", "Data Type", "Datentyp", 15),
-    ("F", "Required", "Erforderlich", 13),
-    ("G", "Allowed Values", "Zulaessige Werte", 30),
-    ("H", "Min", "Min-Wert", 10),
-    ("I", "Max", "Max-Wert", 10),
-    ("J", "Unit", "Einheit", 10),
-    ("K", "Pattern", "Muster (Regex)", 20),
-    ("L", "Phase", "Leistungsphase", 15),
-    ("M", "Actor", "Akteur", 18),
-    ("N", "Use Case", "Anwendungsfall", 20),
-    ("O", "Source", "Quelle", 18),
-]
+# Column widths, in the order of the ``h01`` ... ``h15`` header strings.
+_COLUMN_WIDTHS = (25, 20, 22, 25, 15, 13, 30, 10, 10, 10, 20, 15, 18, 20, 18)
+_COLUMN_COUNT = len(_COLUMN_WIDTHS)
+
+# Workbook text per language. English and German live here; the platform's other
+# languages come from ``core/document_catalogues`` (section ``bim_requirements_excel``).
+# ``h01`` ... ``h15`` are the column headers, ``d01`` ... ``d14`` the legend lines
+# (the Min and Max columns share one line).
+_STRINGS: dict[str, dict[str, str]] = {
+    "en": {
+        "sheet_requirements": "Requirements",
+        "sheet_summary": "Summary",
+        "sheet_legend": "Legend",
+        "summary_element": "Element",
+        "summary_count": "Requirements Count",
+        "summary_total": "Total",
+        "legend_column": "Column",
+        "legend_description": "Description",
+        "unspecified": "Unspecified",
+        "h01": "Element / IFC Class",
+        "h02": "Classification",
+        "h03": "Property Group",
+        "h04": "Property Name",
+        "h05": "Data Type",
+        "h06": "Required",
+        "h07": "Allowed Values",
+        "h08": "Min",
+        "h09": "Max",
+        "h10": "Unit",
+        "h11": "Pattern",
+        "h12": "Phase",
+        "h13": "Actor",
+        "h14": "Use Case",
+        "h15": "Source",
+        "d01": "IFC entity class (e.g. IFCWALL, IFCBEAM)",
+        "d02": "Classification system and code (e.g. Uniclass 2015: EF_25_10)",
+        "d03": "Property set name (e.g. Pset_WallCommon)",
+        "d04": "Name of the required property or attribute",
+        "d05": "IFC data type (IFCLABEL, IFCREAL, IFCBOOLEAN, etc.)",
+        "d06": "Cardinality: required, optional, or prohibited",
+        "d07": "Semicolon-separated list of permitted values",
+        "d08": "Numeric range boundaries",
+        "d09": "Unit of measurement (m, m2, kg, etc.)",
+        "d10": "Regular expression pattern for value validation",
+        "d11": "Project phase or milestone (LP3, RIBA Stage 3, etc.)",
+        "d12": "Responsible party (Architect, Structural Engineer, etc.)",
+        "d13": "Purpose or use case for the requirement",
+        "d14": "Source standard or document",
+    },
+    "de": {
+        "sheet_requirements": "Anforderungen",
+        "sheet_summary": "Zusammenfassung",
+        "sheet_legend": "Legende",
+        "summary_element": "Bauteil",
+        "summary_count": "Anzahl Anforderungen",
+        "summary_total": "Gesamt",
+        "legend_column": "Spalte",
+        "legend_description": "Beschreibung",
+        "unspecified": "Nicht angegeben",
+        "h01": "Bauteil / IFC-Klasse",
+        "h02": "Klassifikation",
+        "h03": "Merkmalsgruppe",
+        "h04": "Merkmal",
+        "h05": "Datentyp",
+        "h06": "Erforderlich",
+        "h07": "Zulaessige Werte",
+        "h08": "Min-Wert",
+        "h09": "Max-Wert",
+        "h10": "Einheit",
+        "h11": "Muster (Regex)",
+        "h12": "Leistungsphase",
+        "h13": "Akteur",
+        "h14": "Anwendungsfall",
+        "h15": "Quelle",
+        "d01": "IFC-Entitätsklasse (z. B. IFCWALL, IFCBEAM)",
+        "d02": "Klassifikationssystem und Code (z. B. Uniclass 2015: EF_25_10)",
+        "d03": "Name des Merkmalsatzes (z. B. Pset_WallCommon)",
+        "d04": "Name des geforderten Merkmals oder Attributs",
+        "d05": "IFC-Datentyp (IFCLABEL, IFCREAL, IFCBOOLEAN usw.)",
+        "d06": "Kardinalität: erforderlich, optional oder verboten",
+        "d07": "Semikolon-getrennte Liste zulässiger Werte",
+        "d08": "Grenzen des Zahlenbereichs",
+        "d09": "Maßeinheit (m, m2, kg usw.)",
+        "d10": "Regulärer Ausdruck zur Wertprüfung",
+        "d11": "Projektphase oder Meilenstein (LP3, RIBA-Stufe 3 usw.)",
+        "d12": "Verantwortliche Stelle (Architekt, Tragwerksplaner usw.)",
+        "d13": "Zweck oder Anwendungsfall der Anforderung",
+        "d14": "Quellnorm oder Quelldokument",
+    },
+}
+merge_missing(_STRINGS, "bim_requirements_excel")
+
+#: The languages the workbook can be written in.
+EXPORT_LANGUAGES: tuple[str, ...] = tuple(_STRINGS)
+
+
+def workbook_language(language: str | None) -> str:
+    """The workbook language for a request: a catalogue language, English for anything else."""
+    return normalize_document_locale(language, EXPORT_LANGUAGES, "en")
+
+
+def _text(language: str, key: str) -> str:
+    return translate(_STRINGS, language, key, "en")
+
 
 # Color constants (RGB hex without #)
 _HEADER_BG = "1F3864"
@@ -54,7 +142,8 @@ def export_excel(
     Args:
         requirements: List of universal requirements to export.
         title: Title shown on the Summary sheet.
-        language: 'en' or 'de' for header language.
+        language: Any platform language code; the workbook text is written in it, English when the
+            language has no catalogue.
 
     Returns:
         Excel file content as bytes.
@@ -63,11 +152,14 @@ def export_excel(
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
     from openpyxl.utils import get_column_letter
 
+    language = workbook_language(language)
+    rtl = is_rtl(language)
     wb = openpyxl.Workbook()
 
     # ── Sheet 1: Requirements ──────────────────────────────────────────
     ws = wb.active
     ws.title = "Requirements"  # type: ignore[union-attr]
+    ws.sheet_view.rightToLeft = rtl  # type: ignore[union-attr]
 
     header_fill = PatternFill(start_color=_HEADER_BG, end_color=_HEADER_BG, fill_type="solid")
     header_font = Font(bold=True, color=_HEADER_FG, size=11)
@@ -84,9 +176,9 @@ def export_excel(
     prohib_fill = PatternFill(start_color=_PROHIBITED_BG, end_color=_PROHIBITED_BG, fill_type="solid")
 
     # Write headers
-    for col_idx, (_, en_name, de_name, width) in enumerate(_COLUMNS, start=1):
+    for col_idx, width in enumerate(_COLUMN_WIDTHS, start=1):
         cell = ws.cell(row=1, column=col_idx)  # type: ignore[union-attr]
-        cell.value = en_name if language == "en" else de_name
+        cell.value = _text(language, f"h{col_idx:02d}")
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_align
@@ -100,7 +192,7 @@ def export_excel(
     ws.freeze_panes = "B2"  # type: ignore[union-attr]
 
     # Auto-filter
-    ws.auto_filter.ref = f"A1:{get_column_letter(len(_COLUMNS))}1"  # type: ignore[union-attr]
+    ws.auto_filter.ref = f"A1:{get_column_letter(_COLUMN_COUNT)}1"  # type: ignore[union-attr]
 
     # Write data rows
     for row_idx, req in enumerate(requirements, start=2):
@@ -146,26 +238,27 @@ def export_excel(
 
     # ── Sheet 2: Summary ───────────────────────────────────────────────
     ws_summary = wb.create_sheet("Summary")
-    ws_summary.cell(row=1, column=1).value = "Summary"
+    ws_summary.sheet_view.rightToLeft = rtl
+    ws_summary.cell(row=1, column=1).value = _text(language, "sheet_summary")
     ws_summary.cell(row=1, column=1).font = Font(bold=True, size=14)
     ws_summary.cell(row=2, column=1).value = title
 
     # Element summary
     element_counts: dict[str, int] = {}
     for req in requirements:
-        ifc_class = (req.element_filter or {}).get("ifc_class", "Unspecified")
+        ifc_class = (req.element_filter or {}).get("ifc_class", _text(language, "unspecified"))
         element_counts[ifc_class] = element_counts.get(ifc_class, 0) + 1
 
-    ws_summary.cell(row=4, column=1).value = "Element"
+    ws_summary.cell(row=4, column=1).value = _text(language, "summary_element")
     ws_summary.cell(row=4, column=1).font = Font(bold=True)
-    ws_summary.cell(row=4, column=2).value = "Requirements Count"
+    ws_summary.cell(row=4, column=2).value = _text(language, "summary_count")
     ws_summary.cell(row=4, column=2).font = Font(bold=True)
 
     for i, (element, count) in enumerate(sorted(element_counts.items()), start=5):
         ws_summary.cell(row=i, column=1).value = element
         ws_summary.cell(row=i, column=2).value = count
 
-    ws_summary.cell(row=len(element_counts) + 6, column=1).value = "Total"
+    ws_summary.cell(row=len(element_counts) + 6, column=1).value = _text(language, "summary_total")
     ws_summary.cell(row=len(element_counts) + 6, column=1).font = Font(bold=True)
     ws_summary.cell(row=len(element_counts) + 6, column=2).value = len(requirements)
     ws_summary.column_dimensions["A"].width = 30
@@ -173,26 +266,20 @@ def export_excel(
 
     # ── Sheet 3: Legend ────────────────────────────────────────────────
     ws_legend = wb.create_sheet("Legend")
-    ws_legend.cell(row=1, column=1).value = "Legend"
+    ws_legend.sheet_view.rightToLeft = rtl
+    ws_legend.cell(row=1, column=1).value = _text(language, "sheet_legend")
     ws_legend.cell(row=1, column=1).font = Font(bold=True, size=14)
 
-    legend_rows = [
-        ("Column", "Description"),
-        ("Element / IFC Class", "IFC entity class (e.g. IFCWALL, IFCBEAM)"),
-        ("Classification", "Classification system and code (e.g. Uniclass 2015: EF_25_10)"),
-        ("Property Group", "Property set name (e.g. Pset_WallCommon)"),
-        ("Property Name", "Name of the required property or attribute"),
-        ("Data Type", "IFC data type (IFCLABEL, IFCREAL, IFCBOOLEAN, etc.)"),
-        ("Required", "Cardinality: required, optional, or prohibited"),
-        ("Allowed Values", "Semicolon-separated list of permitted values"),
-        ("Min / Max", "Numeric range boundaries"),
-        ("Unit", "Unit of measurement (m, m2, kg, etc.)"),
-        ("Pattern", "Regular expression pattern for value validation"),
-        ("Phase", "Project phase or milestone (LP3, RIBA Stage 3, etc.)"),
-        ("Actor", "Responsible party (Architect, Structural Engineer, etc.)"),
-        ("Use Case", "Purpose or use case for the requirement"),
-        ("Source", "Source standard or document"),
-    ]
+    # The Min and Max columns share one legend line.
+    legend_columns = [*(f"h{n:02d}" for n in range(1, 8)), None, *(f"h{n:02d}" for n in range(10, 16))]
+    legend_rows = [(_text(language, "legend_column"), _text(language, "legend_description"))]
+    for number, header_key in enumerate(legend_columns, start=1):
+        name = (
+            f"{_text(language, 'h08')} / {_text(language, 'h09')}"
+            if header_key is None
+            else _text(language, header_key)
+        )
+        legend_rows.append((name, _text(language, f"d{number:02d}")))
 
     for i, (col_name, desc) in enumerate(legend_rows, start=3):
         ws_legend.cell(row=i, column=1).value = col_name

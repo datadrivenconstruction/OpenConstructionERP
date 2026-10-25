@@ -26,6 +26,7 @@ from datetime import datetime
 from typing import Literal
 from urllib.parse import quote
 
+from app.core.document_catalogue import is_rtl, merge_missing
 from app.core.document_locale import normalize_document_locale, translate
 
 logger = logging.getLogger(__name__)
@@ -251,6 +252,9 @@ _TABLES: dict[str, dict[str, str]] = {
     },
 }
 
+# The platform's other languages come from ``core/document_catalogues`` (section ``portal_login``).
+merge_missing(_TABLES, "portal_login")
+
 #: Languages the email can be written in.
 SUPPORTED_LOCALES: tuple[str, ...] = tuple(_TABLES)
 
@@ -327,7 +331,15 @@ def login_html(
     # The body already says why the mail came and what to do if it was not
     # expected, in the reader's language; the shell's English footer about
     # notification preferences would only contradict it.
-    return wrap(heading, "".join(parts), html.escape(action_url, quote=True), cta, footer="")
+    return wrap(
+        heading,
+        "".join(parts),
+        html.escape(action_url, quote=True),
+        cta,
+        footer="",
+        lang=email_locale(locale),
+        rtl=is_rtl(locale),
+    )
 
 
 def sender_name() -> str:

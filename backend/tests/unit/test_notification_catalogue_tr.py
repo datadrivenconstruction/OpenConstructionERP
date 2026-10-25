@@ -222,13 +222,13 @@ def test_a_language_without_a_catalogue_is_answered_in_english_and_says_so_once(
     monkeypatch.setattr(localized, "_FALLBACK_LOGGED", set())
     key = "notifications.changeorder.approved.title"
     with caplog.at_level(logging.INFO, logger=localized.__name__):
-        first = render(key, _CONTEXT, "de")
-        second = render(key, _CONTEXT, "de-AT")
-        render(key, _CONTEXT, "hu")
+        first = render(key, _CONTEXT, "xx")
+        second = render(key, _CONTEXT, "xx-YY")
+        render(key, _CONTEXT, "zz")
     assert first == second == render(key, _CONTEXT, "en") == "Change order approved: VR-012"
     named = [r.getMessage() for r in caplog.records if "no message catalogue" in r.getMessage()]
     assert len(named) == 2, named
-    assert "'de'" in named[0] and "'hu'" in named[1]
+    assert "'xx'" in named[0] and "'zz'" in named[1]
 
 
 def test_an_unknown_key_comes_back_as_the_key_in_any_language() -> None:

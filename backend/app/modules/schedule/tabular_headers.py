@@ -27,6 +27,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Final
 
+from app.core.document_catalogue import section
 from app.modules.boq.importers.excel import normalise_label
 
 #: The fields a sheet column can map to, in template column order.
@@ -46,8 +47,16 @@ FIELDS: Final[tuple[str, ...]] = (
     "client_visible",
 )
 
+_BASE_LANGUAGES: Final[tuple[str, ...]] = ("en", "de", "es", "fr", "ru", "pt", "it", "nl", "pl", "tr")
+
+#: The platform's other languages, from ``core/document_catalogues`` (section ``schedule_headers``): per
+#: language the header words of every field, the yes and no words and the template's example names.
+_CATALOGUE: Final[dict[str, dict]] = {
+    lang: payload for lang, payload in section("schedule_headers").items() if lang not in _BASE_LANGUAGES
+}
+
 #: Languages the synonym table covers.
-LANGUAGES: Final[tuple[str, ...]] = ("en", "de", "es", "fr", "ru", "pt", "it", "nl", "pl", "tr")
+LANGUAGES: Final[tuple[str, ...]] = (*_BASE_LANGUAGES, *_CATALOGUE)
 
 CONFIDENCE_EXACT: Final[float] = 1.0
 CONFIDENCE_SYNONYM: Final[float] = 0.8
@@ -213,6 +222,9 @@ HEADER_SYNONYMS: Final[dict[str, dict[str, tuple[str, ...]]]] = {
         "tr": ("Müşteriye Görünür", "Müşteri Görünür"),
     },
 }
+for _lang, _payload in _CATALOGUE.items():
+    for _field, _words in _payload["headers"].items():
+        HEADER_SYNONYMS[_field][_lang] = tuple(_words)
 
 #: Headers the platform's own schedule CSV export writes; they read back exactly.
 EXPORT_HEADERS: Final[dict[str, str]] = {
@@ -294,11 +306,11 @@ RELATIONSHIP_TYPE_ALIASES: Final[dict[str, str]] = {
 YES_WORDS: Final[frozenset[str]] = frozenset({
     "yes", "y", "true", "1", "x", "✓", "✔", "ja", "j", "wahr", "si", "s", "oui", "o", "vrai",
     "да", "д", "истина", "sim", "verdadeiro", "vero", "waar", "tak", "t", "prawda", "evet", "e", "dogru",
-})
+}) | frozenset(word for _payload in _CATALOGUE.values() for word in _payload["yes_words"])
 NO_WORDS: Final[frozenset[str]] = frozenset({
     "no", "n", "false", "0", "-", "nein", "falsch", "non", "faux", "нет", "н", "ложь", "nao", "falso",
     "nee", "onwaar", "nie", "falsz", "hayir", "h",
-})
+}) | frozenset(word for _payload in _CATALOGUE.values() for word in _payload["no_words"])
 # fmt: on
 
 
@@ -536,6 +548,7 @@ TEMPLATE_YES_NO: Final[dict[str, tuple[str, str]]] = {
     "nl": ("ja", "nee"),
     "pl": ("tak", "nie"),
     "tr": ("evet", "hayır"),
+    **{lang: (payload["yes_words"][0], payload["no_words"][0]) for lang, payload in _CATALOGUE.items()},
 }
 
 #: Example activity names the template's sample rows carry, per language:
@@ -551,6 +564,7 @@ TEMPLATE_EXAMPLE_NAMES: Final[dict[str, tuple[str, str, str, str]]] = {
     "nl": ("Ruwbouw", "Grondwerk", "Funderingen", "Oplevering funderingen"),
     "pl": ("Stan surowy", "Roboty ziemne", "Fundamenty", "Odbiór fundamentów"),
     "tr": ("Kaba inşaat", "Kazı", "Temeller", "Temel kabulü"),
+    **{lang: tuple(payload["example_names"]) for lang, payload in _CATALOGUE.items()},
 }
 
 

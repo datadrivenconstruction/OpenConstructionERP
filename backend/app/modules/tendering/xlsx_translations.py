@@ -17,6 +17,7 @@ Excel formats them in the reader's own regional settings.
 
 from __future__ import annotations
 
+from app.core.document_catalogue import merge_missing
 from app.core.document_locale import resolve_document_locale, translate
 
 __all__ = ["DEFAULT_XLSX_LOCALE", "SUPPORTED_XLSX_LOCALES", "resolve_xlsx_locale", "xt"]
@@ -539,6 +540,9 @@ _STRINGS: dict[str, dict[str, str]] = {
         ),
     },
 }
+
+# The platform's other languages come from ``core/document_catalogues`` (section ``tender_xlsx``).
+merge_missing(_STRINGS, "tender_xlsx")
 
 SUPPORTED_XLSX_LOCALES: tuple[str, ...] = tuple(_STRINGS)
 

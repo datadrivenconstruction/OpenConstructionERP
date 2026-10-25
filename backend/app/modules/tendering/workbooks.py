@@ -34,6 +34,7 @@ from decimal import Decimal
 from typing import Any
 
 from app.core.csv_safety import neutralise_formula
+from app.core.document_catalogue import is_rtl
 from app.modules.tendering.xlsx_translations import xt
 
 __all__ = [
@@ -204,6 +205,7 @@ def render_comparison_xlsx(
     wb = Workbook()
     ws = wb.active
     ws.title = xt(locale, "comparison_sheet")[:31]
+    ws.sheet_view.rightToLeft = is_rtl(locale)
 
     bold = Font(bold=True)
     header_fill = PatternFill(start_color=_HEADER_FILL, end_color=_HEADER_FILL, fill_type="solid")
@@ -531,6 +533,7 @@ def render_bidder_xlsx(
     wb = Workbook()
     ws = wb.active
     ws.title = xt(locale, "bidder_sheet")[:31]
+    ws.sheet_view.rightToLeft = is_rtl(locale)
 
     bold = Font(bold=True)
     header_fill = PatternFill(start_color=_HEADER_FILL, end_color=_HEADER_FILL, fill_type="solid")

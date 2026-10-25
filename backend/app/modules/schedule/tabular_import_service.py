@@ -63,7 +63,13 @@ _HOLIDAY_YEARS_BACK = 5
 _HOLIDAY_YEARS_AHEAD = 10
 #: Languages whose spreadsheets use the decimal comma, so a CSV template is
 #: written with ``;`` the way their Excel reads it.
-_SEMICOLON_LANGUAGES = frozenset({"de", "es", "fr", "ru", "pt", "it", "nl", "pl", "tr"})
+# Languages that write a decimal comma, so a CSV in them separates fields with a semicolon.
+_SEMICOLON_LANGUAGES = frozenset(
+    {
+        "de", "es", "fr", "ru", "pt", "it", "nl", "pl", "tr", "cs", "hu", "sv", "no", "da", "fi", "bg", "hr",
+        "id", "ro", "vi", "uk", "uz", "et", "ky", "kk", "el",
+    }
+)  # fmt: skip
 
 ImportTarget = Literal["new", "replace"]
 

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import html
 
+from app.core.document_catalogue import is_rtl, merge_missing
 from app.core.document_locale import normalize_document_locale, translate
 
 DEFAULT_LOCALE = "en"
@@ -190,6 +191,9 @@ _TABLES: dict[str, dict[str, str]] = {
     },
 }
 
+# The platform's other languages come from ``core/document_catalogues`` (section ``tender_invite``).
+merge_missing(_TABLES, "tender_invite")
+
 #: Languages the email can be written in.
 SUPPORTED_LOCALES: tuple[str, ...] = tuple(_TABLES)
 
@@ -222,6 +226,9 @@ def invitation_html(
 ) -> str:
     """Render the invitation body through the shared email shell."""
     from app.core.email import wrap
+
+    lang = email_locale(locale)
+    rtl = is_rtl(lang)
 
     def strong(value: str) -> str:
         return f"<strong>{html.escape(value)}</strong>"
@@ -262,6 +269,13 @@ def invitation_html(
     if action_url:
         parts.append(f"<p>{sentence('link_help')}</p>")
         parts.append(f"<p style='font-size:13px; color:#6e6e73;'>{sentence('link_personal')}</p>")
-        return wrap(heading, "".join(parts), html.escape(action_url, quote=True), html.escape(_t(locale, "cta")))
+        return wrap(
+            heading,
+            "".join(parts),
+            html.escape(action_url, quote=True),
+            html.escape(_t(locale, "cta")),
+            lang=lang,
+            rtl=rtl,
+        )
     parts.append(f"<p style='font-size:13px; color:#6e6e73;'>{sentence('no_link')}</p>")
-    return wrap(heading, "".join(parts))
+    return wrap(heading, "".join(parts), lang=lang, rtl=rtl)

@@ -45,6 +45,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from app.core.document_catalogue import section
 from app.modules.module_builder.links import LINK_TARGETS
 from app.modules.module_builder.schemas import Suggestion, SuggestionPatch
 from app.modules.module_builder.spec import (
@@ -60,7 +61,15 @@ from app.modules.module_builder.spec import (
 
 logger = logging.getLogger(__name__)
 
-LANGUAGES = ("en", "de", "fr", "es", "it", "pt", "nl", "pl", "ru", "uk", "tr", "zh", "ja")
+_BASE_LANGUAGES = ("en", "de", "fr", "es", "it", "pt", "nl", "pl", "ru", "uk", "tr", "zh", "ja")
+
+# The platform's other languages, from ``core/document_catalogues`` (section ``module_suggest``): per language
+# the keywords of every concept, the label of every link target and the three status labels.
+_CATALOGUE: dict[str, dict] = {
+    lang: payload for lang, payload in section("module_suggest").items() if lang not in _BASE_LANGUAGES
+}
+
+LANGUAGES = (*_BASE_LANGUAGES, *_CATALOGUE)
 
 # ── keyword tables ──────────────────────────────────────────────────────────
 #
@@ -158,6 +167,9 @@ KEYWORDS: dict[str, dict[str, tuple[str, ...]]] = {
         "ja": ("期限", "締切", "締め切り", "有効期限", "納期"),
     },
 }
+for _lang, _payload in _CATALOGUE.items():
+    for _concept, _words in _payload["keywords"].items():
+        KEYWORDS[_concept][_lang] = tuple(_words)
 
 NEGATIVE: dict[str, tuple[str, ...]] = {
     # A contractor is a company (a contact), and a subcontract is a different
@@ -221,6 +233,9 @@ LINK_LABELS: dict[str, dict[str, str]] = {
         "uk": "Відповідальний", "tr": "Sorumlu", "zh": "负责人", "ja": "担当者",
     },
 }  # fmt: skip
+for _lang, _payload in _CATALOGUE.items():
+    for _concept, _label in _payload["link_labels"].items():
+        LINK_LABELS[_concept][_lang] = _label
 
 # The three states a suggested status starts with: open, in progress, done.
 STATE_LABELS: dict[str, tuple[str, str, str]] = {
@@ -237,6 +252,7 @@ STATE_LABELS: dict[str, tuple[str, str, str]] = {
     "tr": ("Açık", "Devam ediyor", "Tamamlandı"),
     "zh": ("待处理", "进行中", "已完成"),
     "ja": ("未着手", "進行中", "完了"),
+    **{lang: tuple(payload["state_labels"]) for lang, payload in _CATALOGUE.items()},
 }
 STATE_CODES = ("open", "in_progress", "done")
 
@@ -270,7 +286,12 @@ def link_label(target: str, locale: str | None) -> str:
 # ── matching ────────────────────────────────────────────────────────────────
 
 _CJK = re.compile(r"[぀-ヿ㐀-鿿豈-﫿]")
-_WORD = re.compile(r"[^\W_]+", re.UNICODE)
+# Letters and digits, plus the combining marks and joiners that belong inside a word: Devanagari, Bengali and Thai
+# vowel signs, the virama, and the Persian half-space. ``\w`` alone would cut those words apart.
+_WORD = re.compile(
+    r"(?:[^\W_]|[\u0300-\u036f\u0591-\u05c7\u0610-\u061a\u064b-\u065f\u0900-\u0dff\u0e31-\u0e3a\u0e47-\u0e4e\u200c\u200d])+",
+    re.UNICODE,
+)
 
 
 def _normalise(text: str) -> str:
