@@ -159,8 +159,12 @@ export function useCompanyProfiles() {
   );
   const cancelSwitch = useCallback(() => setSwitchingTo(null), []);
 
-  const confirmSwitch = useCallback(async () => {
-    if (!switchingTo) return;
+  // Write a profile for the reader. `confirmSwitch` is the dialog's button;
+  // `switchProfile` is the same write for a caller that already holds the
+  // reader's choice (the onboarding wizard asks for it beside a pack and has
+  // nothing left to confirm). Resolves true when the profile was saved.
+  const switchProfile = useCallback(async (target: CompanyPresetAPI): Promise<boolean> => {
+    const switchingTo = target;
     setIsSwitching(true);
     try {
       // ── Single authoritative write path ──────────────────────────────
@@ -215,11 +219,17 @@ export function useCompanyProfiles() {
         title: t('modules.profile_switch_failed', { defaultValue: 'Failed to switch profile' }),
         message: err instanceof Error ? err.message : String(err),
       });
+      return false;
     } finally {
       setIsSwitching(false);
       setSwitchingTo(null);
     }
-  }, [switchingTo, syncFromServer, addToast, t, queryClient, onboardingQueryKey]);
+    return true;
+  }, [syncFromServer, addToast, t, queryClient, onboardingQueryKey]);
+
+  const confirmSwitch = useCallback(async () => {
+    if (switchingTo) await switchProfile(switchingTo);
+  }, [switchingTo, switchProfile]);
 
   const activePreset = presets?.find((p) => p.key === activeProfileKey);
 
@@ -250,6 +260,7 @@ export function useCompanyProfiles() {
     requestSwitch,
     cancelSwitch,
     confirmSwitch,
+    switchProfile,
     profileName,
   };
 }

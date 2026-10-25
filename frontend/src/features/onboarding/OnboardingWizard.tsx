@@ -53,6 +53,8 @@ import {
   Leaf,
   Building,
   Landmark,
+  Palette,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 import { Logo, Button, CountryFlag, Badge } from '@/shared/ui';
@@ -67,6 +69,9 @@ import {
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useToastStore } from '@/stores/useToastStore';
 import { FlagshipDemoCards } from './FlagshipDemoCards';
+import { ReadyPackBrowser } from './ReadyPackBrowser';
+import { foldText } from '@/features/modules/packs/packCatalog';
+import { useCompanyProfiles, type CompanyPresetAPI } from '@/features/modules/companyProfiles';
 import {
   useBackgroundInstallStore,
   type BgInstallStep,
@@ -1528,17 +1533,41 @@ export function ReadyPackPicker({
   onInstalled,
   onFallback,
   onBack,
+  installingSlug = null,
+  installedSlug: doneSlug = null,
+  onInstallStarted,
+  onInstallAborted,
+  onCompanyApplied,
+  onAdjustAppearance,
+  onFinish,
 }: {
   /** Activate the pack's locale client-side (shared with the wizard). */
   onActivateLocale: (locale: string) => void;
-  /** Called once the pack is fully installed; the wizard records the slug
-   *  and advances to the Finish step. */
+  /** Called once the pack's language is ready; the wizard records the slug.
+   *  It does not move the reader: they choose between adjusting the look and
+   *  finishing (``onAdjustAppearance`` / ``onFinish``). */
   onInstalled: (slug: string) => void;
   /** Called when install fails so the wizard can drop back to the normal
    *  multi-step flow with a clear message. */
   onFallback: () => void;
   /** Return to the start-choice cards. */
   onBack: () => void;
+  /** The install the wizard already knows about. The picker can be left and
+   *  reopened while it runs, so the lock on a second install lives with the
+   *  wizard, not in this component's state. */
+  installingSlug?: string | null;
+  /** Slug recorded once the install's language was ready. */
+  installedSlug?: string | null;
+  /** An install began (``slug`` is ``country:<id>`` for a market preset). */
+  onInstallStarted?: (slug: string) => void;
+  /** An install that began failed before it could be used. */
+  onInstallAborted?: () => void;
+  /** The company type chosen beside the pack was written for the reader. */
+  onCompanyApplied?: (preset: CompanyPresetAPI) => void;
+  /** After the install: open the appearance step. */
+  onAdjustAppearance?: () => void;
+  /** After the install: go to the Finish step. */
+  onFinish?: () => void;
 }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
@@ -1551,9 +1580,16 @@ export function ReadyPackPicker({
 
   const packs: InstalledPartnerPack[] = data?.installed ?? [];
 
+  const companies = useCompanyProfiles();
+  const [companyKey, setCompanyKey] = useState<string | null>(null);
+
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
-  const [installing, setInstalling] = useState(false);
-  const [installedSlug, setInstalledSlug] = useState<string | null>(null);
+  const [localInstalling, setInstalling] = useState(false);
+  const [localInstalledSlug, setInstalledSlug] = useState<string | null>(null);
+  // An install the wizard already tracks locks this picker too, including after
+  // the reader left the step and came back to it.
+  const installing = localInstalling || installingSlug !== null;
+  const installedSlug = localInstalledSlug ?? doneSlug;
   // Which curated country pack (if any) is being set up right now, so its card
   // shows a spinner. Country packs are the always-available fallback when no
   // pip-installed partner pack ships with this deployment.
@@ -1607,6 +1643,18 @@ export function ReadyPackPicker({
   }, [packs, selectedSlug, detectedCountry]);
 
   const selectedPack = packs.find((p) => p.slug === selectedSlug) ?? null;
+  const chosenCompany = companyKey ? ((companies.presets ?? []).find((p) => p.key === companyKey) ?? null) : null;
+  // The name the progress panel gives the running install: the pack the wizard
+  // knows by slug (the picker may have been reopened), or a market preset.
+  const runningSlug = installingSlug ?? localInstalledSlug ?? selectedSlug;
+  const installName = (() => {
+    if (runningSlug?.startsWith('country:')) {
+      const preset = getCountryPack(runningSlug.slice('country:'.length));
+      return preset ? t(preset.labelKey, { defaultValue: preset.labelDefault }) : '';
+    }
+    const running = packs.find((p) => p.slug === runningSlug) ?? selectedPack;
+    return running ? packDisplayName(t, running) : '';
+  })();
 
   const handleSelect = useCallback(
     (slug: string) => {
@@ -1621,6 +1669,7 @@ export function ReadyPackPicker({
       if (installing) return;
       setInstalling(true);
       setInstalledSlug(null);
+      onInstallStarted?.(pack.slug);
 
       // Kick off the background install. This applies the pack and the LANGUAGE
       // first and fast, then keeps loading the cost databases and sample
@@ -1646,10 +1695,15 @@ export function ReadyPackPicker({
               country: packDisplayName(t, pack),
             }),
           });
-          // Brief pause so the language/checklist tick is visible, then hand
-          // control back to the wizard which records the slug and jumps to
-          // Finish. The rest of the install keeps running in the background.
-          window.setTimeout(() => onInstalled(pack.slug), 700);
+          // A company type chosen beside the pack is written now, through the
+          // same switch the Modules page uses, so the menu already follows it
+          // when the reader lands in the app. A failure toasts on its own and
+          // leaves the pack as installed.
+          const chosen = companyKey ? (companies.presets ?? []).find((p) => p.key === companyKey) : undefined;
+          if (chosen && (await companies.switchProfile(chosen))) onCompanyApplied?.(chosen);
+          // The rest of the install keeps running in the background and the
+          // reader stays here to pick the next step.
+          onInstalled(pack.slug);
         } else {
           // Apply failed before language could be applied -- fall back to the
           // normal multi-step flow. The background banner already shows the
@@ -1667,6 +1721,7 @@ export function ReadyPackPicker({
           // with a failed install while the user does step-by-step setup.
           useBackgroundInstallStore.getState().dismiss();
           setInstalling(false);
+          onInstallAborted?.();
           onFallback();
         }
       } catch (err) {
@@ -1681,10 +1736,23 @@ export function ReadyPackPicker({
         });
         useBackgroundInstallStore.getState().dismiss();
         setInstalling(false);
+        onInstallAborted?.();
         onFallback();
       }
     },
-    [installing, onActivateLocale, onInstalled, onFallback, addToast, t],
+    [
+      installing,
+      onActivateLocale,
+      onInstalled,
+      onFallback,
+      onInstallStarted,
+      onInstallAborted,
+      onCompanyApplied,
+      companyKey,
+      companies,
+      addToast,
+      t,
+    ],
   );
 
   // Install a curated Country Pack (no pip pack required): apply the language
@@ -1693,10 +1761,11 @@ export function ReadyPackPicker({
   // demo path the step-by-step Data Setup uses, surfaced here so the ready-made
   // pack picker is never an empty dead end on a plain install.
   const handleInstallCountry = useCallback(
-    async (pack: CountryPack) => {
+    async (pack: CountryPack, withCompany: string | null = null) => {
       if (installing) return;
       setInstalling(true);
       setCountryInstallingId(pack.id);
+      onInstallStarted?.(`country:${pack.id}`);
 
       // Language first so the app is usable right away, mirroring the partner
       // pack flow.
@@ -1723,6 +1792,9 @@ export function ReadyPackPicker({
         // install and advances to Finish, whatever the outcome: the language
         // is set and the user can load a cost base later. The rest keeps
         // loading in the banner.
+        setInstalledSlug(`country:${pack.id}`);
+        const chosen = withCompany ? (companies.presets ?? []).find((p) => p.key === withCompany) : undefined;
+        if (chosen && (await companies.switchProfile(chosen))) onCompanyApplied?.(chosen);
         onInstalled(`country:${pack.id}`);
       } catch (err) {
         addToast({
@@ -1734,10 +1806,38 @@ export function ReadyPackPicker({
         });
         setInstalling(false);
         setCountryInstallingId(null);
+        onInstallAborted?.();
       }
     },
-    [installing, onActivateLocale, onInstalled, addToast, t],
+    [installing, onActivateLocale, onInstalled, onInstallStarted, onInstallAborted, onCompanyApplied, companies, addToast, t],
   );
+
+  const renderPresetTile = (pack: CountryPack, withCompany: string | null) => {
+    const label = t(pack.labelKey, { defaultValue: pack.labelDefault });
+    return (
+      <button
+        key={pack.id}
+        type="button"
+        onClick={() => handleInstallCountry(pack, withCompany)}
+        title={label}
+        data-testid={`ready-pack-preset-${pack.id}`}
+        className="group relative flex min-w-0 flex-col items-center gap-2 rounded-xl bg-surface-secondary/70 p-3 text-center ring-1 ring-transparent transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-secondary hover:shadow-sm"
+      >
+        <CountryFlag code={pack.flagId} size={30} className="rounded-sm shadow-sm" />
+        <span className="line-clamp-2 min-w-0 break-words text-sm font-semibold text-content-primary">{label}</span>
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
+          <span className="inline-flex items-center gap-1">
+            <Languages size={11} />
+            {pack.locale.toUpperCase()}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Database size={11} />
+            {pack.classification}
+          </span>
+        </div>
+      </button>
+    );
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -1788,44 +1888,32 @@ export function ReadyPackPicker({
         </div>
       )}
 
-      {/* Pack icon grid — tidy square tiles, one per pack. */}
-      {!isLoading && packs.length > 0 && (
-        <div className="mt-7 grid w-full max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {packs.map((pack) => {
-            const isSelected = selectedSlug === pack.slug;
+      {/* Browse: search, type chips, packs grouped by market band and by type,
+          then the company types as a second optional choice. Hidden once an
+          install runs: the reader keeps setting up in the other steps and the
+          pack they chose is not swapped under a running install. */}
+      {!isLoading && !installing && packs.length > 0 && (
+        <ReadyPackBrowser
+          packs={packs}
+          selectedSlug={selectedSlug}
+          onSelect={handleSelect}
+          renderTile={(entry) => {
+            const pack = entry.pack as unknown as InstalledPartnerPack;
             // The tile used to be titled packCountryName(pack). See
             // packDisplayName above for what that field was and why three of
-            // these tiles read "United States" until now. This grid went
-            // English-only the moment 16.2.0 made packs real, because the
-            // fully translated curated grid below was the packs.length === 0
-            // alternative and stopped rendering.
-            const name = packDisplayName(t, pack);
+            // these tiles read "United States" until now. entry.name is the
+            // same translated string.
             const flag = packCountryCode(pack);
             return (
-              <button
-                key={pack.slug}
-                type="button"
-                onClick={() => handleSelect(pack.slug)}
-                disabled={installing}
-                aria-pressed={isSelected}
-                className={clsx(
-                  'group relative flex flex-col items-center gap-2.5 rounded-xl p-4 text-center transition-all duration-200',
-                  isSelected
-                    ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/45 shadow-sm'
-                    : 'bg-surface-secondary/70 ring-1 ring-transparent hover:bg-surface-secondary hover:shadow-sm hover:-translate-y-0.5',
-                  installing && 'opacity-60 cursor-not-allowed',
-                )}
-              >
-                {isSelected && (
-                  <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white shadow-sm">
-                    <Check size={12} strokeWidth={3} />
-                  </span>
-                )}
+              <>
                 <PackLogo pack={pack} />
-                <div className="flex items-center gap-1.5">
-                  {flag && <CountryFlag code={flag} size={14} className="shrink-0" />}
-                  <span className="truncate text-sm font-semibold text-content-primary">
-                    {name}
+                <div className="flex w-full min-w-0 items-start justify-center gap-1.5">
+                  {flag && <CountryFlag code={flag} size={14} className="mt-0.5 shrink-0" />}
+                  <span
+                    className="line-clamp-2 min-w-0 break-words text-sm font-semibold text-content-primary"
+                    title={entry.name}
+                  >
+                    {entry.name}
                   </span>
                 </div>
                 <PackVariantBadge pack={pack} />
@@ -1839,178 +1927,191 @@ export function ReadyPackPicker({
                     {pack.default_currency}
                   </span>
                 </div>
-              </button>
+              </>
             );
-          })}
-        </div>
+          }}
+          companies={companies}
+          companyKey={companyKey}
+          onCompanyChange={(preset) => setCompanyKey(preset?.key ?? null)}
+        >
+          {(query, typeFilter) => {
+            // Curated market presets for the countries no pack serves. They
+            // follow the search text and sit with the country packs; a filter
+            // on another pack type or on company types leaves them out.
+            if (typeFilter !== 'all' && typeFilter !== 'country') return null;
+            const shownPresets = presetsWithoutPack.filter((preset) =>
+              query
+                ? foldText(
+                    `${t(preset.labelKey, { defaultValue: preset.labelDefault })} ${preset.locale} ${preset.classification}`,
+                  ).includes(query)
+                : true,
+            );
+            if (shownPresets.length === 0) return null;
+            return (
+              <section aria-labelledby="ready-pack-presets-title" data-testid="ready-pack-presets">
+                <h3 id="ready-pack-presets-title" className="mb-3 text-sm font-semibold text-content-primary">
+                  {t('onboarding.ready_pack_other_markets', { defaultValue: 'Or start from a market preset' })}
+                </h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {shownPresets.map((pack) => renderPresetTile(pack, companyKey))}
+                </div>
+              </section>
+            );
+          }}
+        </ReadyPackBrowser>
       )}
 
-      {/* Curated country packs: the always-available ready-made set. Each card
-          sets the language and loads that market's CWICR cost database in one
-          click.
-
-          This used to render only when packs.length === 0, described in its own
-          comment as "the common case". That stopped being true in 16.2.0, when
-          the wheel fix made discovery find fifteen packs on every install and
-          eighteen in a checkout. The count was never zero again, so this block
-          - twenty-one market names translated into every language we ship -
-          became unreachable, and the picker fell through to the pack grid whose
-          tiles were titled in English. We did not lose a translation, we routed
-          around one.
-
-          It is a complement now rather than an alternative, because "detect the
-          country and offer that country's pack" has no answer in Germany,
-          Canada or Spain. The community wheel deliberately holds back
-          bimhessen-de and batimatech-ca under partnership agreements and Spain
-          has never had a pack, while all three are among the markets with the
-          most case studies. A designed state for "no pack for your country" is
-          required, not an edge case.
-
-          Guarded on the filtered list rather than on COUNTRY_PACKS, so a
-          deployment whose installed packs happen to cover every curated market
-          shows no heading over an empty grid. With no packs at all the filter
-          removes nothing, so the no-pack deployment still gets all of them and
-          still gets the Back row below. */}
-      {!isLoading && presetsWithoutPack.length > 0 && (
+      {/* No pack at all on this deployment: the curated presets are the whole
+          step, and the Back row below is theirs. */}
+      {!isLoading && packs.length === 0 && !installing && presetsWithoutPack.length > 0 && (
         <div className="mt-7 w-full max-w-5xl">
-          {packs.length > 0 && (
-            <h3 className="mb-3 text-center text-sm font-semibold text-content-secondary">
-              {t('onboarding.ready_pack_other_markets', {
-                defaultValue: 'Or start from a market preset',
-              })}
-            </h3>
-          )}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {presetsWithoutPack.map((pack) => {
-              const busy = countryInstallingId === pack.id;
-              const label = t(pack.labelKey, { defaultValue: pack.labelDefault });
-              return (
-                <button
-                  key={pack.id}
-                  type="button"
-                  onClick={() => handleInstallCountry(pack)}
-                  disabled={installing}
-                  aria-busy={busy}
-                  className={clsx(
-                    'group relative flex flex-col items-center gap-2.5 rounded-xl p-4 text-center transition-all duration-200',
-                    busy
-                      ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/45 shadow-sm'
-                      : 'bg-surface-secondary/70 ring-1 ring-transparent hover:bg-surface-secondary hover:shadow-sm hover:-translate-y-0.5',
-                    installing && !busy && 'opacity-50 cursor-not-allowed',
-                  )}
-                >
-                  {busy && (
-                    <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white shadow-sm">
-                      <Loader2 size={12} className="animate-spin" />
-                    </span>
-                  )}
-                  <CountryFlag code={pack.flagId} size={30} className="rounded-sm shadow-sm" />
-                  <span className="truncate text-sm font-semibold text-content-primary">
-                    {label}
-                  </span>
-                  <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
-                    <span className="inline-flex items-center gap-1">
-                      <Languages size={11} />
-                      {pack.locale.toUpperCase()}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Database size={11} />
-                      {pack.classification}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
+            {presetsWithoutPack.map((pack) => renderPresetTile(pack, null))}
           </div>
-
-          {countryInstallingId && (
-            <p className="mt-4 text-center text-xs text-content-tertiary">
-              {t('onboarding.ready_pack_installing_country', {
-                defaultValue:
-                  'Setting up {{country}}. The language is applied first, the cost database keeps loading in the background.',
-                country: t(
-                  getCountryPack(countryInstallingId)?.labelKey ?? '',
-                  { defaultValue: getCountryPack(countryInstallingId)?.labelDefault ?? '' },
-                ),
-              })}
-            </p>
-          )}
-
-          {/* Only when there is no pack grid above. With packs present the
-              confirm panel below owns Back, and rendering a second one here
-              would put two Back buttons on one screen. */}
-          {packs.length === 0 && (
           <div className="mt-6 flex items-center justify-center gap-3">
-            <Button variant="ghost" onClick={onBack} disabled={installing} icon={<ArrowLeft size={16} />}>
+            <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
               {t('common.back', { defaultValue: 'Back' })}
             </Button>
-            <Button
-              variant="ghost"
-              onClick={onFallback}
-              disabled={installing}
-              icon={<ArrowRight size={16} />}
-              iconPosition="right"
-            >
+            <Button variant="ghost" onClick={onFallback} icon={<ArrowRight size={16} />} iconPosition="right">
               {t('onboarding.ready_pack_continue_steps', { defaultValue: 'Set up step by step' })}
             </Button>
           </div>
-          )}
         </div>
       )}
 
-      {/* Install confirm / progress for the chosen pack. The progress block is
-          deliberately large and legible (tall progress bar, prominent percent,
-          big step rows) so setup status is unmistakable. It reads live from the
-          background-install store, so it keeps showing real per-step progress
-          even though the heavy steps finish in the background. */}
-      {!isLoading && selectedPack && (
-        <div className="mt-6 w-full max-w-lg">
+      {/* A market preset is installing: say so in the same words as before. */}
+      {countryInstallingId && (
+        <p className="mt-4 text-center text-xs text-content-tertiary">
+          {t('onboarding.ready_pack_installing_country', {
+            defaultValue:
+              'Setting up {{country}}. The language is applied first, the cost database keeps loading in the background.',
+            country: t(getCountryPack(countryInstallingId)?.labelKey ?? '', {
+              defaultValue: getCountryPack(countryInstallingId)?.labelDefault ?? '',
+            }),
+          })}
+        </p>
+      )}
+
+      {/* The chosen pack and company type, with the action. Sticky so the
+          button stays in reach however far the reader scrolled the grid. Once
+          an install runs it becomes the progress panel and the two ways on. */}
+      {!isLoading && (selectedPack || installing) && (
+        <div
+          className={clsx(
+            'mt-6 w-full max-w-lg',
+            !installing &&
+              'sticky bottom-3 z-[5] rounded-2xl bg-surface-primary/95 p-3 shadow-lg ring-1 ring-border-light backdrop-blur',
+          )}
+          data-testid="ready-pack-confirm"
+        >
           {installing && (
             <ReadyPackProgressPanel
               install={bgInstall}
-              country={packDisplayName(t, selectedPack)}
+              country={installName}
               languageReady={installedSlug !== null}
             />
           )}
 
-          <Button
-            variant="primary"
-            onClick={() => handleInstall(selectedPack)}
-            loading={installing}
-            disabled={installing}
-            icon={installedSlug ? <CheckCircle2 size={16} /> : <Rocket size={16} />}
-            className="w-full"
-          >
-            {installedSlug
-              ? t('onboarding.pp_continue_to_app', {
-                  defaultValue: 'Continue to {{country}}',
-                  country: packDisplayName(t, selectedPack),
-                })
-              : installing
-                ? t('onboarding.pp_preparing', {
-                    defaultValue: 'Preparing {{country}}…',
-                    country: packDisplayName(t, selectedPack),
-                  })
-                : t('onboarding.ready_pack_install', {
-                    defaultValue: 'Set up {{country}}',
-                    country: packDisplayName(t, selectedPack),
+          {installing ? (
+            <div className="space-y-2">
+              <p className="text-center text-xs text-content-tertiary">
+                {t('onboarding.ready_pack_keep_going', {
+                  defaultValue:
+                    'You can keep going while it finishes. Progress stays visible in the corner of the page.',
+                })}
+              </p>
+              {(onAdjustAppearance || onFinish) && (
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {onAdjustAppearance && (
+                    <Button
+                      variant="secondary"
+                      onClick={onAdjustAppearance}
+                      icon={<Palette size={16} />}
+                      className="w-full"
+                      data-testid="ready-pack-adjust-look"
+                    >
+                      {t('onboarding.ready_pack_adjust_look', { defaultValue: 'Adjust appearance' })}
+                    </Button>
+                  )}
+                  {onFinish && (
+                    <Button
+                      variant="primary"
+                      onClick={onFinish}
+                      disabled={installedSlug === null}
+                      icon={<CheckCircle2 size={16} />}
+                      className="w-full"
+                      data-testid="ready-pack-finish"
+                    >
+                      {t('onboarding.step_finish', { defaultValue: 'Finish' })}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            selectedPack && (
+              <>
+                {chosenCompany && (
+                  <p className="mb-2 flex items-center justify-center gap-1.5 text-xs text-content-secondary">
+                    <Briefcase size={13} aria-hidden />
+                    <span className="min-w-0 truncate" title={companies.profileName(chosenCompany)}>
+                      {t('onboarding.ready_pack_company_chosen', {
+                        defaultValue: 'Company type: {{name}}',
+                        name: companies.profileName(chosenCompany),
+                      })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCompanyKey(null)}
+                      aria-label={t('onboarding.ready_pack_company_clear', { defaultValue: 'Clear company type' })}
+                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                    >
+                      <X size={12} aria-hidden />
+                    </button>
+                  </p>
+                )}
+                <Button
+                  variant="primary"
+                  onClick={() => handleInstall(selectedPack)}
+                  icon={<Rocket size={16} />}
+                  className="w-full"
+                  data-testid="ready-pack-install"
+                >
+                  {chosenCompany
+                    ? t('onboarding.ready_pack_install_with_company', {
+                        defaultValue: 'Set up {{country}} and {{company}}',
+                        country: packDisplayName(t, selectedPack),
+                        company: companies.profileName(chosenCompany),
+                      })
+                    : t('onboarding.ready_pack_install', {
+                        defaultValue: 'Set up {{country}}',
+                        country: packDisplayName(t, selectedPack),
+                      })}
+                </Button>
+                <p className="mt-2 text-center text-2xs text-content-tertiary">
+                  {t('onboarding.ready_pack_install_hint_bg', {
+                    defaultValue:
+                      'The language is applied first so you can start right away. Cost databases and sample projects keep loading in the background.',
                   })}
-          </Button>
-
-          {!installing && (
-            <p className="mt-2 text-center text-2xs text-content-tertiary">
-              {t('onboarding.ready_pack_install_hint_bg', {
-                defaultValue:
-                  'The language is applied first so you can start right away. Cost databases and sample projects keep loading in the background.',
-              })}
-            </p>
+                </p>
+                <PackOneClickNotes pack={selectedPack} packs={packs} />
+              </>
+            )
           )}
-
-          {!installing && <PackOneClickNotes pack={selectedPack} packs={packs} />}
         </div>
       )}
 
-      {!installing && (
+      {/* A company type without a pack: it needs a market to go with. */}
+      {!isLoading && !installing && !selectedPack && chosenCompany && (
+        <p className="mt-4 max-w-md text-center text-xs text-content-secondary" data-testid="ready-pack-company-needs-pack">
+          {t('onboarding.ready_pack_company_needs_pack', {
+            defaultValue: 'Now pick a market or industry pack to set up together with {{company}}.',
+            company: companies.profileName(chosenCompany),
+          })}
+        </p>
+      )}
+
+      {(packs.length > 0 || installing) && (
         <div className="mt-5">
           <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
             {t('common.back', { defaultValue: 'Back' })}
