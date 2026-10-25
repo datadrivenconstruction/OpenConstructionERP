@@ -70,6 +70,7 @@ import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useToastStore } from '@/stores/useToastStore';
 import { FlagshipDemoCards } from './FlagshipDemoCards';
 import { ReadyPackBrowser } from './ReadyPackBrowser';
+import { OnboardingStepper, STEP, nextStep, previousStep, STEP_COUNT } from './OnboardingStepper';
 import { foldText } from '@/features/modules/packs/packCatalog';
 import { useCompanyProfiles, type CompanyPresetAPI } from '@/features/modules/companyProfiles';
 import {
@@ -169,7 +170,7 @@ import { fmtList } from '@/shared/lib/formatters';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = STEP_COUNT;
 
 // ── Language -> Region mapping ──────────────────────────────────────────────
 
@@ -1164,76 +1165,6 @@ function ToggleSwitch({
         {enabled && <Check size={11} className="text-oe-blue" strokeWidth={3} />}
       </span>
     </button>
-  );
-}
-
-// ── Progress Bar ─────────────────────────────────────────────────────────────
-
-function ProgressBar({ current, total }: { current: number; total: number }) {
-  const { t } = useTranslation();
-  const stepLabels = [
-    t('onboarding.step_welcome', { defaultValue: 'Welcome' }),
-    t('onboarding.step_start', { defaultValue: 'Start' }),
-    t('onboarding.step_profile', { defaultValue: 'Profile' }),
-    t('onboarding.step_modules', { defaultValue: 'Modules' }),
-    t('onboarding.step_look', { defaultValue: 'Appearance' }),
-    t('onboarding.step_data', { defaultValue: 'Data' }),
-    t('onboarding.step_finish', { defaultValue: 'Finish' }),
-  ];
-
-  // Percent of the track filled. Anchors the animated progress line
-  // independent of how the dots themselves are laid out so that the
-  // bar is continuous even on narrow viewports where labels wrap.
-  const pct = total > 1 ? (current / (total - 1)) * 100 : 0;
-
-  return (
-    <div className="w-full">
-      <div className="relative">
-        {/* Track behind everything — continuous line. */}
-        <div className="absolute top-[14px] start-[14px] end-[14px] h-[3px] rounded-full bg-border-light dark:bg-white/10" />
-        {/* Filled portion — animates on step change. */}
-        <div
-          className="absolute top-[14px] start-[14px] h-[3px] rounded-full bg-gradient-to-r from-oe-blue via-blue-500 to-purple-500 transition-[width] duration-500 ease-oe"
-          style={{ width: `calc(${pct}% - ${pct === 0 ? 0 : 14}px)` }}
-          aria-hidden
-        />
-        {/* Step dots + labels */}
-        <div className="relative flex items-start justify-between">
-          {Array.from({ length: total }).map((_, i) => {
-            const done = i < current;
-            const here = i === current;
-            return (
-              <div key={i} className="flex flex-col items-center gap-1.5 min-w-0 flex-1">
-                <div
-                  className={clsx(
-                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold transition-all duration-500 ease-oe',
-                    done
-                      ? 'bg-oe-blue text-white shadow-sm'
-                      : here
-                        ? 'bg-white dark:bg-surface-elevated text-oe-blue ring-2 ring-oe-blue shadow-[0_0_0_4px_rgba(37,99,235,0.18)] scale-110'
-                        : 'bg-surface-secondary text-content-tertiary',
-                  )}
-                >
-                  {done ? <Check size={13} strokeWidth={3} /> : i + 1}
-                </div>
-                <span
-                  className={clsx(
-                    'text-[10px] font-medium transition-colors whitespace-nowrap hidden sm:block',
-                    here
-                      ? 'text-oe-blue'
-                      : done
-                        ? 'text-content-secondary'
-                        : 'text-content-quaternary',
-                  )}
-                >
-                  {stepLabels[i] ?? ''}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -4671,7 +4602,13 @@ export function StepFinish({
   presets,
   packInstalled = false,
   installedPackSlug = null,
+  packProfileMode = 'pack-default',
 }: {
+  /** Which profile a pack install saves for the reader: the one the pack names
+   *  (``pack-default``), the one chosen beside the pack, already saved
+   *  (``keep``), or what the reader set on the Profile and Modules steps
+   *  after the install (``wizard``). */
+  packProfileMode?: 'pack-default' | 'keep' | 'wizard';
   onBack: () => void;
   companyType: string | null;
   enabledModules: Set<string>;
@@ -4734,11 +4671,18 @@ export function StepFinish({
       // the installation's module state the pack just set. A pack that names
       // no profile saves nothing, as before.
       try {
-        const current = await apiGet<PartnerPackResponse>('/v1/partner-pack/current');
-        const toSave = packProfileToSave(
-          current.active ? current.manifest?.default_company_profile : null,
-          presets,
-        );
+        let toSave: { company_type: string | null; enabled_modules: string[] } | null = null;
+        if (packProfileMode === 'wizard') {
+          // The reader changed the profile or the modules after the install:
+          // that is the last word, saved the way the step-by-step path saves it.
+          toSave = { company_type: savedCompanyType, enabled_modules: Array.from(enabledModules) };
+        } else if (packProfileMode === 'pack-default') {
+          const current = await apiGet<PartnerPackResponse>('/v1/partner-pack/current');
+          toSave = packProfileToSave(
+            current.active ? current.manifest?.default_company_profile : null,
+            presets,
+          );
+        }
         if (toSave) {
           const saved = await apiPost<MeOnboarding>('/v1/users/me/onboarding/', {
             ...toSave,
@@ -4747,7 +4691,8 @@ export function StepFinish({
           queryClient.setQueryData(onboardingQueryKey, saved);
           await syncFromServer();
           try {
-            localStorage.setItem(COMPANY_TYPE_STORAGE_KEY, toSave.company_type);
+            if (toSave.company_type) localStorage.setItem(COMPANY_TYPE_STORAGE_KEY, toSave.company_type);
+            else localStorage.removeItem(COMPANY_TYPE_STORAGE_KEY);
           } catch {
             // Storage unavailable -- the server copy above is the one that counts.
           }
@@ -4806,6 +4751,7 @@ export function StepFinish({
     enabledModules,
     navigate,
     packInstalled,
+    packProfileMode,
     presets,
     queryClient,
     onboardingQueryKey,
@@ -5021,15 +4967,35 @@ export function OnboardingWizard() {
   }, [alreadyCompleted, canInstallPacks, packProfile, navigate, passQueryClient, passOnboardingKey]);
 
   // Track whether user chose "Quick Start" (skip profile + modules, go to data)
-  const [quickStart, setQuickStart] = useState(false);
+  const [, setQuickStart] = useState(false);
   // Track whether module config step should be shown
-  const [showModuleConfig, setShowModuleConfig] = useState(false);
+  const [, setShowModuleConfig] = useState(false);
   // Ready-made pack flow: when true, step 1 swaps its choice cards for the
   // pack picker. ``packInstalledSlug`` records the slug once a pack is fully
   // installed so the Finish step shows pack-appropriate copy and does not
   // overwrite the modules the pack just configured.
   const [readyPackView, setReadyPackView] = useState(false);
   const [packInstalledSlug, setPackInstalledSlug] = useState<string | null>(null);
+  // The pack install the reader started, from the moment it begins. It is the
+  // wizard's, not the picker's, so leaving the step and coming back neither
+  // loses it nor offers a second install. Set while the install runs and after
+  // it, cleared only if it failed.
+  const [packInstallingSlug, setPackInstallingSlug] = useState<string | null>(null);
+  // The company type applied beside the pack, and whether the reader has since
+  // changed the profile or the modules on their own steps.
+  const [packCompanyKey, setPackCompanyKey] = useState<string | null>(null);
+  const [profileTouched, setProfileTouched] = useState(false);
+  const packFlow = packInstallingSlug !== null;
+  const packReady = packInstalledSlug !== null;
+
+  // Which steps the reader has been on. The stepper opens those, and Back
+  // returns to the nearest earlier one.
+  const [maxReached, setMaxReached] = useState(0);
+  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set([0]));
+  useEffect(() => {
+    setMaxReached((m) => Math.max(m, step));
+    setVisited((v) => (v.has(step) ? v : new Set(v).add(step)));
+  }, [step]);
 
   // Persistent escape hatch (top-right, every step): switch the whole app to
   // English, mark the language choice as explicit so the locale auto-detect
@@ -5046,13 +5012,16 @@ export function OnboardingWizard() {
     navigate('/dashboard');
   }, [navigate]);
 
+  // Next and Back walk the same order the stepper shows. Next skips Data
+  // after a pack install (the pack brings its own); Back returns to the
+  // nearest earlier step the reader was actually on.
   const goNext = useCallback(() => {
-    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
-  }, []);
+    setStep((s) => nextStep(s, packFlow));
+  }, [packFlow]);
 
   const goBack = useCallback(() => {
-    setStep((s) => Math.max(s - 1, 0));
-  }, []);
+    setStep((s) => previousStep(s, visited, packFlow));
+  }, [visited, packFlow]);
 
   const handleLanguageChange = useCallback((lang: string) => {
     setSelectedLang(lang);
@@ -5061,6 +5030,7 @@ export function OnboardingWizard() {
   const handleSelectCompanyType = useCallback(
     (key: string) => {
       setCompanyType(key);
+      setProfileTouched(true);
       // Apply the preset's module set (full_enterprise = every non-core module).
       const preset = presets.find((p) => p.key === key);
       if (preset) setEnabledModules(presetModuleSet(preset));
@@ -5069,6 +5039,7 @@ export function OnboardingWizard() {
   );
 
   const handleToggleModule = useCallback((key: string) => {
+    setProfileTouched(true);
     setEnabledModules((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
@@ -5116,20 +5087,44 @@ export function OnboardingWizard() {
     setReadyPackView(true);
   }, []);
 
-  /** Pack fully installed -> record the slug and jump straight to Finish.
-   *  ``markOnboardingCompleted`` (and its tour-gating event) runs from the
-   *  Finish step's primary action, so the completion path matches the normal
-   *  flow exactly. */
+  /** The pack's language is ready -> record the slug. The reader stays where
+   *  they are: the picker offers Adjust appearance and Finish, and the stepper
+   *  opens the rest. ``markOnboardingCompleted`` (and its tour-gating event)
+   *  runs from the Finish step's primary action, so the completion path
+   *  matches the normal flow exactly. */
   const handleReadyPackInstalled = useCallback((slug: string) => {
     setPackInstalledSlug(slug);
-    setReadyPackView(false);
-    setStep(6);
   }, []);
+
+  const handleInstallStarted = useCallback((slug: string) => {
+    setPackInstallingSlug(slug);
+  }, []);
+
+  const handleInstallAborted = useCallback(() => {
+    setPackInstallingSlug(null);
+    setPackInstalledSlug(null);
+    setPackCompanyKey(null);
+  }, []);
+
+  /** The company type chosen beside the pack was saved for the reader; show it
+   *  as the profile step's selection too. */
+  const handleCompanyApplied = useCallback(
+    (preset: CompanyPresetAPI) => {
+      setPackCompanyKey(preset.key);
+      setCompanyType(preset.key);
+      const known = presets.find((p) => p.key === preset.key);
+      if (known) setEnabledModules(presetModuleSet(known));
+    },
+    [presets],
+  );
 
   /** Install failed -> fall back to the normal multi-step flow (the picker
    *  already surfaced a clear toast explaining the fallback). */
   const handleReadyPackFallback = useCallback(() => {
     setReadyPackView(false);
+    setPackInstallingSlug(null);
+    setPackInstalledSlug(null);
+    setPackCompanyKey(null);
     setQuickStart(false);
     setShowModuleConfig(false);
     setStep(2); // company profile
@@ -5139,17 +5134,6 @@ export function OnboardingWizard() {
     setShowModuleConfig(true);
     setStep(3);
   }, []);
-
-  // Handle back from step 4 (data) -- depends on quick start
-  const handleBackFromData = useCallback(() => {
-    if (quickStart) {
-      setStep(1); // back to start choice
-    } else if (showModuleConfig) {
-      setStep(4); // back to the look step
-    } else {
-      setStep(2); // back to profile
-    }
-  }, [quickStart, showModuleConfig]);
 
   // Handle next from step 2 (profile) -- ALWAYS show modules so user can review/customize
   const handleNextFromProfile = useCallback(() => {
@@ -5228,7 +5212,7 @@ export function OnboardingWizard() {
                   total: TOTAL_STEPS,
                 })}
               </span>
-              {step > 0 && step < TOTAL_STEPS - 1 && (
+              {step > 0 && step < TOTAL_STEPS - 1 && (!packFlow || packReady) && (
                 <button
                   type="button"
                   onClick={() => setStep(TOTAL_STEPS - 1)}
@@ -5250,7 +5234,10 @@ export function OnboardingWizard() {
               </button>
             </div>
           </div>
-          <ProgressBar current={step} total={TOTAL_STEPS} />
+          <OnboardingStepper
+            reach={{ current: step, maxReached, packFlow, packReady }}
+            onGo={setStep}
+          />
         </div>
       </div>
 
@@ -5265,7 +5252,7 @@ export function OnboardingWizard() {
               {step === 0 && (
                 <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />
               )}
-              {step === 1 && !readyPackView && (
+              {step === 1 && !readyPackView && !packFlow && (
                 <StepStartChoice
                   onQuickStart={handleQuickStart}
                   onChooseProfile={handleChooseProfile}
@@ -5273,18 +5260,25 @@ export function OnboardingWizard() {
                   onBack={goBack}
                 />
               )}
-              {step === 1 && readyPackView && (
+              {step === 1 && (readyPackView || packFlow) && (
                 <ReadyPackPicker
                   onActivateLocale={applyLocale}
                   onInstalled={handleReadyPackInstalled}
                   onFallback={handleReadyPackFallback}
-                  onBack={() => setReadyPackView(false)}
+                  onBack={() => (packFlow ? goBack() : setReadyPackView(false))}
+                  installingSlug={packInstallingSlug}
+                  installedSlug={packInstalledSlug}
+                  onInstallStarted={handleInstallStarted}
+                  onInstallAborted={handleInstallAborted}
+                  onCompanyApplied={handleCompanyApplied}
+                  onAdjustAppearance={() => setStep(STEP.look)}
+                  onFinish={() => setStep(STEP.finish)}
                 />
               )}
               {step === 2 && (
                 <StepCompanyProfile
                   onNext={handleNextFromProfile}
-                  onBack={() => setStep(1)}
+                  onBack={goBack}
                   presets={presets}
                   selectedType={companyType}
                   onSelectType={handleSelectCompanyType}
@@ -5293,27 +5287,28 @@ export function OnboardingWizard() {
               )}
               {step === 3 && (
                 <StepModuleConfig
-                  onNext={() => setStep(4)}
-                  onBack={() => setStep(2)}
+                  onNext={goNext}
+                  onBack={goBack}
                   enabledModules={enabledModules}
                   onToggleModule={handleToggleModule}
                 />
               )}
-              {step === 4 && <StepLook onNext={() => setStep(5)} onBack={() => setStep(3)} />}
+              {step === 4 && <StepLook onNext={goNext} onBack={goBack} />}
               {step === 5 && (
                 <StepDataSetup
                   onNext={() => {
                     // Move to finish — background loading happens inside StepDataSetup
                     setStep(6);
                   }}
-                  onBack={handleBackFromData}
+                  onBack={goBack}
                   selectedLang={selectedLang}
                   backgroundLoad
                 />
               )}
               {step === 6 && (
                 <StepFinish
-                  onBack={() => (packInstalledSlug ? setStep(1) : setStep(5))}
+                  onBack={goBack}
+                  packProfileMode={profileTouched ? 'wizard' : packCompanyKey ? 'keep' : 'pack-default'}
                   companyType={companyType}
                   enabledModules={enabledModules}
                   presets={presets}
