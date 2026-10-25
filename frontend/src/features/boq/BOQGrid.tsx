@@ -1914,12 +1914,21 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // Section subtotal = Σ rebased line totals of every descendant
     // position, recursing through any number of nested sub-sections.
     const subtotalCache = new Map<string, number>();
+    // A position may carry child positions ("Add child partida"); the server's
+    // direct cost counts them, so the section subtotal does too.
+    const leafTotalOf = (pos: Position): number => {
+      let sum = rebase(pos);
+      for (const child of childrenOf.get(pos.id) ?? []) {
+        sum += isSection(child) ? subtotalOf(child) : leafTotalOf(child);
+      }
+      return sum;
+    };
     const subtotalOf = (sec: Position): number => {
       const cached = subtotalCache.get(sec.id);
       if (cached !== undefined) return cached;
       let sum = 0;
       for (const child of childrenOf.get(sec.id) ?? []) {
-        sum += isSection(child) ? subtotalOf(child) : rebase(child);
+        sum += isSection(child) ? subtotalOf(child) : leafTotalOf(child);
       }
       subtotalCache.set(sec.id, sum);
       return sum;
@@ -1945,6 +1954,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           for (const c of collectFxWarnings(child)) codes.add(c);
         }
       } else {
+        for (const child of childrenOf.get(pos.id) ?? []) {
+          for (const c of collectFxWarnings(child)) codes.add(c);
+        }
         const meta = (pos.metadata ?? null) as Record<string, unknown> | null;
         const resources = meta?.resources;
         if (Array.isArray(resources)) {
@@ -2008,6 +2020,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             total: 0,
           } as GridRow);
         }
+        for (const child of sortSiblings(childrenOf.get(pos.id) ?? [])) emit(child, depth + 1);
       }
     };
 
@@ -3236,20 +3249,19 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           <div className="fixed inset-0 z-[9998]" onClick={closeContextMenu} onContextMenu={(e) => { e.preventDefault(); closeContextMenu(); }} />
           {/* Menu — flip to the left if it would overflow the viewport (Bug 11). */}
           <div
-            className="fixed z-[9999] min-w-[200px] rounded-lg border border-border-light bg-surface-elevated shadow-lg py-1"
-            style={(() => {
-              const MENU_WIDTH = 240;
-              const MENU_HEIGHT_EST = 360;
-              const overflowX = contextMenu.x + MENU_WIDTH > window.innerWidth - 8;
-              const overflowY = contextMenu.y + MENU_HEIGHT_EST > window.innerHeight - 8;
-              const left = overflowX
-                ? Math.max(8, contextMenu.x - MENU_WIDTH)
-                : contextMenu.x;
-              const top = overflowY
-                ? Math.max(8, contextMenu.y - MENU_HEIGHT_EST)
-                : contextMenu.y;
-              return { left, top };
-            })()}
+            className="fixed z-[9999] min-w-[200px] rounded-lg border border-border-light bg-surface-elevated shadow-lg py-1 overflow-y-auto"
+            // Measured before paint: the real menu has 25+ items, so a fixed
+            // height guess let it run off the bottom of the viewport.
+            ref={(el) => {
+              if (!el) return;
+              const maxH = window.innerHeight - 16;
+              el.style.maxHeight = `${maxH}px`;
+              const w = el.offsetWidth;
+              const h = Math.min(el.offsetHeight, maxH);
+              el.style.left = `${Math.max(8, Math.min(contextMenu.x, window.innerWidth - 8 - w))}px`;
+              el.style.top = `${Math.max(8, Math.min(contextMenu.y, window.innerHeight - 8 - h))}px`;
+            }}
+            style={{ left: contextMenu.x, top: contextMenu.y, maxHeight: window.innerHeight - 16 }}
           >
             {/* — Position context menu — */}
             {contextMenu.type === 'position' && (() => {

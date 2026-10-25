@@ -2608,15 +2608,28 @@ export function BIMPage() {
     setActiveModelId(models[0]!.id);
   }, [models, activeModelId, urlModelId]);
 
+  // A project switch from the top bar does not remount this page, so the
+  // previous project's model would stay active. A switch caused by a deep link
+  // (auto-detect moving the context to the model's project) keeps its model.
+  const prevProjectIdRef = useRef(projectId);
+  useEffect(() => {
+    const prev = prevProjectIdRef.current;
+    prevProjectIdRef.current = projectId;
+    if (!prev || prev === projectId || urlModelId) return;
+    setActiveModelId(null);
+  }, [projectId, urlModelId]);
+
   // Sync URL when active model changes
   useEffect(() => {
     if (!activeModelId) return;
+    // Never write a model that is not in this project's list into the URL.
+    if (activeModelId !== urlModelId && !models.some((m) => m.id === activeModelId)) return;
     const basePath = urlProjectId ? `/projects/${urlProjectId}/bim` : '/bim';
     const targetPath = `${basePath}/${activeModelId}`;
     if (!window.location.pathname.endsWith(activeModelId)) {
       navigate(targetPath, { replace: true, state: uploadPanelNavState(uploadOpenRef.current) });
     }
-  }, [activeModelId, urlProjectId, navigate]);
+  }, [activeModelId, urlProjectId, urlModelId, models, navigate]);
 
   // Reset transient viewer state when switching between models - covers the
   // auto-pick + deep-link paths above which only set activeModelId without

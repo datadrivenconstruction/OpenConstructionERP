@@ -87,7 +87,7 @@ export function BIMViewCube({
 }: BIMViewCubeProps) {
   const { t } = useTranslation();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const hostRef = useRef<HTMLDivElement | null>(null);
   /**
    * True once this widget knows it cannot paint - either the renderer never
    * constructed, or the GL context went away underneath it. Either way the
@@ -100,8 +100,16 @@ export function BIMViewCube({
   sceneManagerRef.current = sceneManager;
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const host = hostRef.current;
+    if (!host) return;
+    // The cleanup force-loses the GL context, which never comes back on that
+    // canvas; every effect run (StrictMode, resize) therefore gets a fresh one.
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    canvas.style.cssText = `width:${size}px;height:${size}px;display:block`;
+    canvas.setAttribute('aria-label', t('bim.view_cube_label', { defaultValue: 'View cube' }));
+    host.appendChild(canvas);
 
     // Creating the renderer spins up a WebGL context, which can fail: WebGL may
     // be disabled or on a blocklisted GPU, or the browser's per-page context
@@ -128,6 +136,7 @@ export function BIMViewCube({
     } catch (err) {
       console.warn('[BIMViewCube] WebGL unavailable, hiding the view cube', err);
       setGlUnavailable(true);
+      canvas.remove();
       return;
     }
     setGlUnavailable(false);
@@ -273,6 +282,7 @@ export function BIMViewCube({
         /* context already lost */
       }
       renderer.dispose();
+      canvas.remove();
     };
   }, [size, t]);
 
@@ -322,13 +332,7 @@ export function BIMViewCube({
           </span>
         </div>
       ) : (
-        <canvas
-          ref={canvasRef}
-          width={size}
-          height={size}
-          style={{ width: size, height: size, display: 'block' }}
-          aria-label={t('bim.view_cube_label', { defaultValue: 'View cube' })}
-        />
+        <div ref={hostRef} style={{ width: size, height: size }} />
       )}
       {/* Hidden but accessible buttons for testing + keyboard users.
           They overlay the canvas and call setViewPreset directly. The

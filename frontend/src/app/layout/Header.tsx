@@ -1640,15 +1640,27 @@ function UserMenu() {
  *       list-plus-detail modules → redirect to the module list `/<module>`
  *   everything else → stay on the same URL
  */
+const UUID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Cut a path at its first UUID segment, so a record owned by the old project is not kept. */
+function dropRecordSegments(path: string): string {
+  const parts = path.split('/');
+  const i = parts.findIndex((seg) => UUID_SEGMENT.test(seg));
+  return i < 0 ? path : parts.slice(0, i).join('/');
+}
+
 export function resolveRouteAfterProjectSwitch(
   pathname: string,
   newProjectId: string,
 ): string | null {
   const projectSub = pathname.match(/^\/projects\/[^/]+(\/.*)?$/);
   if (projectSub) {
-    const suffix = projectSub[1] ?? '';
-    return `/projects/${newProjectId}${suffix}`;
+    return `/projects/${newProjectId}${dropRecordSegments(projectSub[1] ?? '')}`;
   }
+  // Any other route carrying a record id (/schedule/:id, /accommodation/:id,
+  // claims, staffing files) belongs to the previous project: land on the list.
+  const bare = dropRecordSegments(pathname);
+  if (bare !== pathname) return bare || '/';
   // Module-scoped detail routes.  The list lives at /<module>.
   const entityRoutes: Array<[RegExp, string]> = [
     [/^\/boq\/[^/]+/, '/boq'],

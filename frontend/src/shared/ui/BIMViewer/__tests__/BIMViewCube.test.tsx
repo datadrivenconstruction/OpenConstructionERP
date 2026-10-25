@@ -226,3 +226,28 @@ describe('BIMViewCube when it cannot paint (#172)', () => {
     expect(container.querySelector('canvas')).toBeNull();
   });
 });
+
+describe('BIMViewCube canvas lifecycle', () => {
+  afterEach(() => cleanup());
+
+  it('uses a fresh canvas for each effect run and leaves exactly one mounted (StrictMode)', async () => {
+    const { StrictMode } = await import('react');
+    const seen: Element[] = [];
+    const original = document.createElement.bind(document);
+    const spy = vi.spyOn(document, 'createElement').mockImplementation(((tag: string, o?: ElementCreationOptions) => {
+      const el = original(tag, o);
+      if (tag === 'canvas') seen.push(el);
+      return el;
+    }) as typeof document.createElement);
+    const { container } = render(
+      <StrictMode>
+        <BIMViewCube sceneManager={null} size={80} />
+      </StrictMode>,
+    );
+    spy.mockRestore();
+    const viewCanvases = seen.filter((c) => (c as HTMLCanvasElement).width === 80);
+    expect(viewCanvases.length).toBeGreaterThanOrEqual(2);
+    expect(container.querySelectorAll('canvas')).toHaveLength(1);
+    expect(container.querySelector('canvas')).toBe(viewCanvases[viewCanvases.length - 1]);
+  });
+});

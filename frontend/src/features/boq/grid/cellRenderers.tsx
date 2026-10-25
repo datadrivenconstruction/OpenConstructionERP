@@ -1604,11 +1604,15 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
 
   if (!hasBimLink && !hasPdfLink && !hasDwgLink) return null;
 
+  // Opened centred at the top: the popover is taller than most row anchors
+  // leave room for, so anchoring it to the row pushed its lower half off screen.
   const popoverStyle = anchorRect
     ? {
         position: 'fixed' as const,
-        left: Math.min(anchorRect.right + 8, window.innerWidth - 660),
-        top: Math.max(8, Math.min(anchorRect.top - 40, window.innerHeight - 520)),
+        left: Math.max(8, Math.round((window.innerWidth - 660) / 2)),
+        top: 8,
+        maxHeight: window.innerHeight - 16,
+        overflowY: 'auto' as const,
         zIndex: 9999,
       }
     : undefined;

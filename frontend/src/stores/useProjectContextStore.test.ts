@@ -88,3 +88,15 @@ describe('useProjectContextStore', () => {
     expect(pinnedProjectIds).toContain('proj-3');
   });
 });
+
+describe('useProjectContextStore project switch', () => {
+  it('resets the active BOQ when the project changes, keeps it when unchanged', () => {
+    const { setActiveProject, setActiveBOQ } = useProjectContextStore.getState();
+    setActiveProject('proj-a', 'A');
+    setActiveBOQ('boq-a');
+    setActiveProject('proj-a', 'A renamed');
+    expect(useProjectContextStore.getState().activeBOQId).toBe('boq-a');
+    setActiveProject('proj-b', 'B');
+    expect(useProjectContextStore.getState().activeBOQId).toBeNull();
+  });
+});

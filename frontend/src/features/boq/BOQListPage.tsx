@@ -618,6 +618,13 @@ export function BOQListPage() {
     staleTime: 5 * 60_000,
   });
 
+  // A persisted project filter can name a project that no longer exists
+  // (deleted, demo reinstalled); it would hide every estimate. Drop it.
+  useEffect(() => {
+    if (!projectFilter || !Array.isArray(projects)) return;
+    if (!projects.some((p) => p.id === projectFilter)) setProjectFilter('');
+  }, [projects, projectFilter]);
+
   const { data: fileTypesByProject } = useQuery({
     queryKey: ['projects-file-types'],
     queryFn: () => apiGet<Record<string, string[]>>('/v1/documents/file-types-by-project/'),

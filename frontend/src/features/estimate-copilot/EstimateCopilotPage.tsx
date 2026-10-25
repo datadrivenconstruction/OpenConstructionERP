@@ -7,7 +7,7 @@
 // estimator confirm before moving on. Pure frontend orchestration: every step
 // is an existing HTTP endpoint, human-confirmed, nothing auto-applied.
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AlertTriangle,
@@ -76,6 +76,12 @@ export function EstimateCopilotPage() {
 
   const [projectId, setProjectId] = useState<string | null>(ctxProjectId);
   const [boqId, setBoqId] = useState<string | null>(ctxBoqId);
+
+  // Follow the top-bar project switcher: the store drops the BOQ of the old project.
+  useEffect(() => {
+    setProjectId(ctxProjectId);
+    setBoqId(useProjectContextStore.getState().activeBOQId);
+  }, [ctxProjectId]);
 
   const inputsReady = Boolean(projectId && boqId);
 

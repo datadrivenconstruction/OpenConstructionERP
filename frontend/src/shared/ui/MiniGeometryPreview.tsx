@@ -130,7 +130,7 @@ export function MiniGeometryPreview({
   className,
   onError,
 }: MiniGeometryPreviewProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -168,8 +168,15 @@ export function MiniGeometryPreview({
     loadingRef.current = true;
     errorRef.current = false;
 
-    const canvas = canvasRef.current;
-    if (!canvas || !modelId || elementIds.length === 0) return;
+    const host = hostRef.current;
+    if (!host || !modelId || elementIds.length === 0) return;
+    // forceContextLoss() in the cleanup kills the context of that canvas for
+    // good, and StrictMode / resize re-run this effect: each run gets its own.
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.cssText = `display:block;width:${width}px;height:${height}px`;
+    host.appendChild(canvas);
 
     // --- Init Three.js ---
     // Creating the renderer can throw when WebGL is unavailable or the browser's
@@ -189,6 +196,7 @@ export function MiniGeometryPreview({
       loadingRef.current = false;
       errorRef.current = true;
       onError?.();
+      canvas.remove();
       return;
     }
     renderer.setPixelRatio(1);
@@ -357,6 +365,7 @@ export function MiniGeometryPreview({
     return () => {
       mountedRef.current = false;
       dispose();
+      canvas.remove();
     };
   }, [modelId, elementIds.join(','), width, height, dispose]);
 
@@ -365,12 +374,7 @@ export function MiniGeometryPreview({
       className={className}
       style={{ width, height, borderRadius: 6, overflow: 'hidden', position: 'relative' }}
     >
-      <canvas
-        ref={canvasRef}
-        width={width}
-        height={height}
-        style={{ display: 'block', width, height }}
-      />
+      <div ref={hostRef} style={{ width, height }} />
     </div>
   );
 }
