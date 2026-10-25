@@ -1152,5 +1152,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Halaman {page} dari {total}",
+    "page": "Halaman {page}",
+    "printed": "Dicetak: {timestamp}",
+    "generated": "Dibuat: {date}"
   }
 }

@@ -1152,5 +1152,11 @@
         "site_record": "현장 기록"
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "{total}쪽 중 {page}쪽",
+    "page": "{page}쪽",
+    "printed": "인쇄: {timestamp}",
+    "generated": "생성일: {date}"
   }
 }

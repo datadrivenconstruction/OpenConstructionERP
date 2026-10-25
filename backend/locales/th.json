@@ -1152,5 +1152,11 @@
         "site_record": "บันทึกหน้างาน"
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "หน้า {page} จาก {total}",
+    "page": "หน้า {page}",
+    "printed": "พิมพ์เมื่อ: {timestamp}",
+    "generated": "สร้างเมื่อ: {date}"
   }
 }

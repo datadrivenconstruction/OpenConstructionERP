@@ -1152,5 +1152,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Side {page} af {total}",
+    "page": "Side {page}",
+    "printed": "Udskrevet: {timestamp}",
+    "generated": "Genereret: {date}"
   }
 }

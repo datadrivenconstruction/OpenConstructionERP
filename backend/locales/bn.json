@@ -618,5 +618,11 @@
       "draft": "খসড়া",
       "frozen": "ফ্রিজ করা"
     }
+  },
+  "pdf_footer": {
+    "page_of": "পৃষ্ঠা {page} / {total}",
+    "page": "পৃষ্ঠা {page}",
+    "printed": "মুদ্রিত: {timestamp}",
+    "generated": "তৈরি: {date}"
   }
 }

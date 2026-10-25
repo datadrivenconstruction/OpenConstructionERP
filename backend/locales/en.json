@@ -1297,5 +1297,11 @@
       "draft": "Draft",
       "frozen": "Frozen"
     }
+  },
+  "pdf_footer": {
+    "page_of": "Page {page} of {total}",
+    "page": "Page {page}",
+    "printed": "Printed: {timestamp}",
+    "generated": "Generated: {date}"
   }
 }

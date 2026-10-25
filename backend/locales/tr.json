@@ -1128,5 +1128,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Sayfa {page} / {total}",
+    "page": "Sayfa {page}",
+    "printed": "Yazdırıldı: {timestamp}",
+    "generated": "Oluşturuldu: {date}"
   }
 }

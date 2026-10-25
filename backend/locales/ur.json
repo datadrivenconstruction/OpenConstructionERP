@@ -1297,5 +1297,11 @@
       "draft": "ڈرافٹ",
       "frozen": "منجمد"
     }
+  },
+  "pdf_footer": {
+    "page_of": "صفحہ {page} از {total}",
+    "page": "صفحہ {page}",
+    "printed": "طباعت: {timestamp}",
+    "generated": "تیار کردہ: {date}"
   }
 }

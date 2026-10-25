@@ -531,7 +531,7 @@ def _draw_page_furniture(
             # others print it on the line below, or not at all.
             if (appearance.get("print_stamp") or "auto") == "auto":
                 generated = datetime.now(tz=UTC).strftime("%Y-%m-%d")
-                suffix = f"  |  Generated: {generated}"
+                suffix = f"  |  {furniture_text('generated', date=generated)}"
         else:
             footer_left = ""
         face, size = BODY_FONT, 7.0
@@ -564,21 +564,50 @@ def _draw_page_furniture(
             pass
 
 
+def furniture_text(key: str, **values: Any) -> str:
+    """One of the generic footer phrases, in the language of the request.
+
+    The phrases live in the locale files under ``pdf_footer`` (``page_of``,
+    ``page``, ``printed``, ``generated``) and are resolved with the request's
+    locale, English where a language has not translated one. A language the PDF
+    layer cannot print (:data:`app.core.document_forms_i18n.REGISTER_UNRENDERABLE`)
+    gets English instead of boxes.
+    """
+    from app.core import i18n
+
+    if not i18n.is_locale_loaded("en"):
+        i18n.load_translations()
+    locale = i18n.get_locale()
+    try:
+        from app.core.document_forms_i18n import REGISTER_UNRENDERABLE
+
+        if i18n.locale_candidates(locale)[-1] in REGISTER_UNRENDERABLE:
+            locale = "en"
+    except Exception:  # noqa: BLE001 - the furniture must never break a PDF export
+        logger.debug("could not check the unrenderable languages", exc_info=True)
+    return i18n.t(f"{_FURNITURE_GROUP}.{key}", locale=locale, **values)
+
+
+_FURNITURE_GROUP = "pdf_footer"
+
+
 def page_number_text(fmt: Any, *, page: int, total: int = 0) -> str:
     """The page number as the footer writes it, for a ``page_number_format``.
 
     ``page_of`` (the default, and what an unknown value falls back to) is the
     line the footer has always printed: "Page 3 of 7", or "Page 3" while the
-    page count is not known. ``total`` is zero or less when it is not. Shared by
-    the page furniture and any generator that draws its own English footer.
+    page count is not known, in the language of the request. ``total`` is zero
+    or less when it is not known. The ``short`` ("3 / 7") and ``number`` ("3")
+    formats are language neutral. Shared by the page furniture and any
+    generator that draws its own footer.
     """
     if fmt == "number":
         return str(page)
     if fmt == "short":
         return f"{page} / {total}" if total > 0 else str(page)
     if fmt == "page" or total <= 0:
-        return f"Page {page}"
-    return f"Page {page} of {total}"
+        return furniture_text("page", page=page)
+    return furniture_text("page_of", page=page, total=total)
 
 
 def _print_stamp_text(mode: Any, template: str | None = None) -> str:
@@ -587,7 +616,7 @@ def _print_stamp_text(mode: Any, template: str | None = None) -> str:
     ``template`` is the caller's own wording with a ``{timestamp}`` field, for a
     document written in a language of its own choosing (a record form says
     "Erstellt {timestamp}" in German whatever language the request used);
-    without one the stamp reads "Printed: ...".
+    without one the phrase comes from the locale files.
     """
     now = datetime.now(tz=UTC)
     if mode == "date":
@@ -598,7 +627,7 @@ def _print_stamp_text(mode: Any, template: str | None = None) -> str:
         return ""
     if template:
         return template.format(timestamp=stamp)
-    return f"Printed: {stamp}"
+    return furniture_text("printed", timestamp=stamp)
 
 
 def draw_furniture_line(
@@ -1453,6 +1482,7 @@ __all__ = [
     "branded_letterhead",
     "draw_footer_second_line",
     "draw_furniture_line",
+    "furniture_text",
     "draw_watermark",
     "page_number_text",
     "render_sample_pdf",

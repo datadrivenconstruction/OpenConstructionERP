@@ -1273,5 +1273,11 @@
       "draft": "Entwurf",
       "frozen": "Eingefroren"
     }
+  },
+  "pdf_footer": {
+    "page_of": "Seite {page} von {total}",
+    "page": "Seite {page}",
+    "printed": "Gedruckt: {timestamp}",
+    "generated": "Erstellt: {date}"
   }
 }

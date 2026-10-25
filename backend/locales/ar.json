@@ -1297,5 +1297,11 @@
       "draft": "مسودة",
       "frozen": "مجمّدة"
     }
+  },
+  "pdf_footer": {
+    "page_of": "الصفحة {page} من {total}",
+    "page": "الصفحة {page}",
+    "printed": "تاريخ الطباعة: {timestamp}",
+    "generated": "تاريخ الإنشاء: {date}"
   }
 }

@@ -1297,5 +1297,11 @@
       "draft": "טיוטה",
       "frozen": "מוקפאת"
     }
+  },
+  "pdf_footer": {
+    "page_of": "עמוד {page} מתוך {total}",
+    "page": "עמוד {page}",
+    "printed": "הודפס: {timestamp}",
+    "generated": "נוצר: {date}"
   }
 }

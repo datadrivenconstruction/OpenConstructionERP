@@ -1297,5 +1297,11 @@
       "draft": "پیش‌نویس",
       "frozen": "قفل‌شده"
     }
+  },
+  "pdf_footer": {
+    "page_of": "صفحه {page} از {total}",
+    "page": "صفحه {page}",
+    "printed": "تاریخ چاپ: {timestamp}",
+    "generated": "تاریخ تولید: {date}"
   }
 }

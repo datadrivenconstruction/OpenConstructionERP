@@ -1152,5 +1152,11 @@
         "site_record": "Hồ sơ công trường"
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Trang {page} / {total}",
+    "page": "Trang {page}",
+    "printed": "Đã in: {timestamp}",
+    "generated": "Tạo ngày: {date}"
   }
 }

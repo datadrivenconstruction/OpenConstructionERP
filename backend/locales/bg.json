@@ -1152,5 +1152,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Страница {page} от {total}",
+    "page": "Страница {page}",
+    "printed": "Отпечатано: {timestamp}",
+    "generated": "Създадено: {date}"
   }
 }

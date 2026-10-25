@@ -1273,5 +1273,11 @@
       "draft": "Черновик",
       "frozen": "Заморожен"
     }
+  },
+  "pdf_footer": {
+    "page_of": "Страница {page} из {total}",
+    "page": "Страница {page}",
+    "printed": "Напечатано: {timestamp}",
+    "generated": "Сформировано: {date}"
   }
 }

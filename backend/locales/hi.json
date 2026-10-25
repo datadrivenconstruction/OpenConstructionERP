@@ -1152,5 +1152,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "पृष्ठ {page} / {total}",
+    "page": "पृष्ठ {page}",
+    "printed": "मुद्रित: {timestamp}",
+    "generated": "तैयार किया गया: {date}"
   }
 }

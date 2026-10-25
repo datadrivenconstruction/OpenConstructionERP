@@ -1152,5 +1152,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Pagina {page} van {total}",
+    "page": "Pagina {page}",
+    "printed": "Afgedrukt: {timestamp}",
+    "generated": "Gegenereerd: {date}"
   }
 }

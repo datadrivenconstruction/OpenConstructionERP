@@ -1152,5 +1152,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Strana {page} z {total}",
+    "page": "Strana {page}",
+    "printed": "Vytištěno: {timestamp}",
+    "generated": "Vygenerováno: {date}"
   }
 }

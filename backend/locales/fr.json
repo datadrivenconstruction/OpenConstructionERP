@@ -1152,5 +1152,11 @@
         }
       }
     }
+  },
+  "pdf_footer": {
+    "page_of": "Page {page} sur {total}",
+    "page": "Page {page}",
+    "printed": "Imprimé : {timestamp}",
+    "generated": "Généré : {date}"
   }
 }
