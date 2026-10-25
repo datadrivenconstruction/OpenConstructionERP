@@ -70,6 +70,7 @@ from app.core.pdf_branding import (
     branded_doc_metadata,
     branded_header_logo,
     branded_letterhead,
+    draw_footer_second_line,
     draw_watermark,
 )
 from app.core.pdf_fonts import (
@@ -319,6 +320,9 @@ def _make_page_callback(
     page_box = 40 * mm
     custom_footer = str(look.get("footer_text") or "").strip()
     show_page_numbers = look.get("show_page_numbers", True) is not False
+    # A saved print stamp is drawn on the line under the footer, so the
+    # default line stops carrying the generated time as well.
+    default_stamp = (look.get("print_stamp") or "auto") == "auto"
 
     def _draw(canvas: Any, doc: Any) -> None:
         canvas.saveState()
@@ -335,7 +339,9 @@ def _make_page_callback(
         left_text, _left_face, left_size = pdf_fit_line(
             custom_footer or branded_cover_brand(),
             USABLE_WIDTH - page_box - 2 * mm,
-            suffix="" if custom_footer else f"  |  {tr(locale, 'footer_generated', timestamp=generated)}",
+            suffix=""
+            if custom_footer or not default_stamp
+            else f"  |  {tr(locale, 'footer_generated', timestamp=generated)}",
             base=BODY_FONT,
         )
         left = Paragraph(html.escape(left_text, quote=True), pdf_fitted_style(footer_left, left_text, left_size))
@@ -346,6 +352,7 @@ def _make_page_callback(
             right = Paragraph(html.escape(page_text, quote=True), pdf_style_for_text(footer_right, page_text))
             _, right_h = right.wrapOn(canvas, page_box, 20)
             right.drawOn(canvas, PAGE_WIDTH - MARGIN_RIGHT - page_box, 9 * mm - right_h + 2)
+        draw_footer_second_line(canvas, look, left=MARGIN_LEFT, right_x=PAGE_WIDTH - MARGIN_RIGHT)
         if running_title and doc.page > 1:
             head_text, _head_face, head_size = pdf_fit_line(
                 running_title, USABLE_WIDTH - 50 * mm, size=8.0, bold=True, base=BOLD_FONT

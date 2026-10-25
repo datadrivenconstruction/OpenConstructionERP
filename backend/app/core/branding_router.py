@@ -74,11 +74,17 @@ from app.core.pdf_appearance import (
     MAX_FONT_SIZE,
     MAX_FOOTER_TEXT,
     MAX_MARGIN_MM,
+    MAX_WATERMARK_OPACITY,
     MAX_WATERMARK_TEXT,
     MIN_FONT_SIZE,
     MIN_MARGIN_MM,
+    MIN_WATERMARK_OPACITY,
+    PAGE_NUMBER_FORMATS,
+    PAGE_ORIENTATIONS,
     PAGE_SIZES,
+    PRINT_STAMPS,
     USER_PAPER,
+    WATERMARK_LAYOUTS,
     DocumentType,
     read_appearance,
     read_hidden_sections,
@@ -274,6 +280,14 @@ class DocumentAppearanceResponse(BaseModel):
     show_page_numbers: bool = DEFAULT_APPEARANCE["show_page_numbers"]
     show_letterhead: bool = DEFAULT_APPEARANCE["show_letterhead"]
     watermark_text: str = DEFAULT_APPEARANCE["watermark_text"]
+    watermark_opacity: int = DEFAULT_APPEARANCE["watermark_opacity"]
+    watermark_layout: str = DEFAULT_APPEARANCE["watermark_layout"]
+    page_orientation: str = DEFAULT_APPEARANCE["page_orientation"]
+    header_show_contact: bool = DEFAULT_APPEARANCE["header_show_contact"]
+    header_rule: bool = DEFAULT_APPEARANCE["header_rule"]
+    page_number_format: str = DEFAULT_APPEARANCE["page_number_format"]
+    print_stamp: str = DEFAULT_APPEARANCE["print_stamp"]
+    footer_show_registration: bool = DEFAULT_APPEARANCE["footer_show_registration"]
 
 
 class DocumentAppearanceOptions(BaseModel):
@@ -293,16 +307,24 @@ class DocumentAppearanceOptions(BaseModel):
     max_margin_mm: int
     max_footer_text: int
     max_watermark_text: int
+    min_watermark_opacity: int
+    max_watermark_opacity: int
+    page_orientations: list[str]
+    page_number_formats: list[str]
+    print_stamps: list[str]
+    watermark_layouts: list[str]
     defaults: DocumentAppearanceResponse
 
 
 class DocumentAppearanceUpdate(BaseModel):
     """Admin payload. All fields optional so a client can send just what changed.
 
-    Deliberately untyped beyond the basics: bounds and enums are enforced by
-    :func:`app.core.pdf_appearance.sanitise`, which also guards the read path,
-    so there is exactly one definition of what a legal appearance is. A value
-    rejected here would otherwise still have to be rejected there.
+    Deliberately untyped beyond the basics for the original fields: bounds and
+    enums are enforced by :func:`app.core.pdf_appearance.sanitise`, which also
+    guards the read path, so there is exactly one definition of what a legal
+    appearance is. The fields added with the page, header and footer settings
+    are typed here as well, so a request with a value outside the choices or
+    bounds is answered 422 instead of being saved as the default.
     """
 
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -317,6 +339,14 @@ class DocumentAppearanceUpdate(BaseModel):
     show_page_numbers: bool | None = None
     show_letterhead: bool | None = None
     watermark_text: str | None = Field(default=None, max_length=MAX_WATERMARK_TEXT)
+    watermark_opacity: int | None = Field(default=None, ge=MIN_WATERMARK_OPACITY, le=MAX_WATERMARK_OPACITY, strict=True)
+    watermark_layout: Literal["diagonal", "horizontal"] | None = None
+    page_orientation: Literal["portrait", "landscape"] | None = None
+    header_show_contact: bool | None = None
+    header_rule: bool | None = None
+    page_number_format: Literal["page_of", "page", "short", "number"] | None = None
+    print_stamp: Literal["auto", "none", "date", "datetime"] | None = None
+    footer_show_registration: bool | None = None
 
 
 @router.get(
@@ -357,6 +387,12 @@ async def get_document_appearance_options() -> DocumentAppearanceOptions:
         max_margin_mm=MAX_MARGIN_MM,
         max_footer_text=MAX_FOOTER_TEXT,
         max_watermark_text=MAX_WATERMARK_TEXT,
+        min_watermark_opacity=MIN_WATERMARK_OPACITY,
+        max_watermark_opacity=MAX_WATERMARK_OPACITY,
+        page_orientations=list(PAGE_ORIENTATIONS),
+        page_number_formats=list(PAGE_NUMBER_FORMATS),
+        print_stamps=list(PRINT_STAMPS),
+        watermark_layouts=list(WATERMARK_LAYOUTS),
         defaults=DocumentAppearanceResponse(**DEFAULT_APPEARANCE),
     )
 
@@ -502,6 +538,11 @@ _VALUE_HINTS = {
     "accent_color": "a hex colour such as #1a1a2e",
     "footer_color": "a hex colour such as #999999",
     "logo_align": "one of: " + ", ".join(LOGO_ALIGNMENTS),
+    "page_orientation": "one of: " + ", ".join(PAGE_ORIENTATIONS),
+    "page_number_format": "one of: " + ", ".join(PAGE_NUMBER_FORMATS),
+    "print_stamp": "one of: " + ", ".join(PRINT_STAMPS),
+    "watermark_layout": "one of: " + ", ".join(WATERMARK_LAYOUTS),
+    "watermark_opacity": f"a whole number from {MIN_WATERMARK_OPACITY} to {MAX_WATERMARK_OPACITY}",
 }
 
 
