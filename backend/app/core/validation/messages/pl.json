@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "zaświadczenie o rozliczeniu odpowiedzialności pracodawców",
     "insurance": "zaświadczenie ubezpieczeniowe",
     "license": "licencja wykonawcy"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Eksport z cenami sprzedaży różni się od sumy w edytorze o {gap}, więcej niż tolerancja {tolerance}",
+      "suggestion": "Sprawdź zaokrąglenia w podglądzie eksportu lub zwiększ tolerancję dla tego kosztorysu"
+    }
   }
 }

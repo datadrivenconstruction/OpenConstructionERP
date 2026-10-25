@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "certificat de lipsă a restanțelor privind răspunderea angajatorilor",
     "insurance": "certificat de asigurare",
     "license": "licența antreprenorului"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Exportul cu prețuri de vânzare diferă de totalul din editor cu {gap}, peste toleranța de {tolerance}",
+      "suggestion": "Verificați rotunjirea în previzualizarea exportului sau măriți toleranța pentru acest deviz"
+    }
   }
 }

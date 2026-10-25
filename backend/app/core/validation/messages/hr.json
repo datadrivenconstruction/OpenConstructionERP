@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "potvrda o ispunjenju odgovornosti poslodavaca",
     "insurance": "potvrda o osiguranju",
     "license": "licenca izvođača"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Izvoz s prodajnim cijenama razlikuje se od zbroja u uređivaču za {gap}, više od tolerancije {tolerance}",
+      "suggestion": "Provjerite zaokruživanje u pregledu izvoza ili povećajte toleranciju za ovaj troškovnik"
+    }
   }
 }

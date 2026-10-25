@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "ish beruvchilar javobgarligi bo'yicha qarzi yo'qligi haqidagi ma'lumotnoma",
     "insurance": "sug'urta guvohnomasi",
     "license": "pudratchi litsenziyasi"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Sotuv narxlari bilan eksport muharrir jamidan {gap} ga farq qiladi, bu {tolerance} chegarasidan ko'p",
+      "suggestion": "Eksport oldindan ko'rishida yaxlitlashni tekshiring yoki ushbu smeta chegarasini oshiring"
+    }
   }
 }

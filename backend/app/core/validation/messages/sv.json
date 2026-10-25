@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "intyg om arbetsgivaransvar",
     "insurance": "försäkringsbevis",
     "license": "entreprenörslicens"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Exporten med försäljningspriser avviker från redigerarens summa med {gap}, mer än toleransen {tolerance}",
+      "suggestion": "Granska avrundningen i exportförhandsvisningen eller höj toleransen för denna kalkyl"
+    }
   }
 }

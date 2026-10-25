@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "udtalelse om arbejdsgiveransvar",
     "insurance": "forsikringsbevis",
     "license": "entreprenørlicens"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Eksporten med salgspriser afviger fra editorens total med {gap}, mere end tolerancen på {tolerance}",
+      "suggestion": "Gennemgå afrundingen i eksportvisningen, eller hæv tolerancen for dette overslag"
+    }
   }
 }

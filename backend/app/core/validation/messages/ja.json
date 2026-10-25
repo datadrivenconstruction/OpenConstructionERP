@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "使用者責任に関する無債務証明書",
     "insurance": "保険証券",
     "license": "請負業者免許"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "販売単価でのエクスポートはエディターの合計と {gap} 異なり、許容差 {tolerance} を超えています",
+      "suggestion": "エクスポートのプレビューで端数処理を確認するか、この内訳書の許容差を引き上げてください"
+    }
   }
 }

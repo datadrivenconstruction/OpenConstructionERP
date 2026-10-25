@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "işveren sorumluluğu borcu yoktur belgesi",
     "insurance": "sigorta belgesi",
     "license": "yüklenici ruhsatı"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Satış fiyatlı dışa aktarım düzenleyici toplamından {gap} farklı, {tolerance} toleransından fazla",
+      "suggestion": "Dışa aktarım önizlemesindeki yuvarlamayı kontrol edin veya bu keşif için toleransı artırın"
+    }
   }
 }

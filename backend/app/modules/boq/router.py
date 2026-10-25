@@ -4021,6 +4021,11 @@ async def validate_boq(
     from app.modules.boq.markup_rule_inputs import markup_amounts_for_rules
 
     markup_context = await markup_amounts_for_rules(service, boq_id, markups_data)
+    from app.modules.boq.embedding import embed_enabled
+
+    # The sale-rate export's rounding gap, for boq.export.embedding_rounding_gap.
+    if embed_enabled(getattr(boq_data, "metadata", None)):
+        markup_context["export_embedding"] = await service.get_embedding_preview(boq_id)
 
     # Determine rule sets from project config. Empty classification /
     # region means "no preference"; the rule registry resolves to a
@@ -4682,6 +4687,26 @@ def _render_boq_csv(structured: Any, base_ccy: str, fx_map: Mapping[str, Any]) -
     return content
 
 
+@router.get(
+    "/boqs/{boq_id}/export/embedding-preview/",
+    summary="Preview an export with markups embedded in the unit rates",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def export_embedding_preview(
+    boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Per-bucket factor k, the sale net and its rounding gap against the editor total.
+
+    Read only: the stored bill is never modified by an embedded export.
+    """
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    return await service.get_embedding_preview(boq_id)
+
+
 # BUG-EXPORT-TRAILING-SLASH: every export route is registered under both
 # the trailing-slash and bare forms because the app sets
 # ``redirect_slashes=False`` (see ``app/main.py``) - without these aliases,
@@ -4704,6 +4729,11 @@ async def export_boq_csv(
     payload: CurrentUserPayload,
     session: SessionDep,
     service: BOQService = Depends(_get_service),
+    embed_markups: bool | None = Query(
+        None,
+        description="Fold markups into the unit rates (sale rates); only non-embedded lines such as tax stay visible. "
+        "Omitted: the bill's own export_embed_markups setting decides.",
+    ),
 ) -> StreamingResponse:
     """Export BOQ positions as a CSV file.
 
@@ -4716,7 +4746,7 @@ async def export_boq_csv(
     # exports must do the same before fetching any priced data.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     # Use structured data to include markups in the grand total
-    structured = await service.get_boq_structured_for_export(boq_id)
+    structured = await service.get_boq_structured_for_export(boq_id, embed_markups)
     # Issue #111 - freeze the project FX table into the exported artifact so
     # the base-currency totals are auditable and a later rate edit cannot
     # retroactively rewrite a delivered BOQ.
@@ -5225,6 +5255,11 @@ async def export_boq_excel(
     payload: CurrentUserPayload,
     session: SessionDep,
     service: BOQService = Depends(_get_service),
+    embed_markups: bool | None = Query(
+        None,
+        description="Fold markups into the unit rates (sale rates); only non-embedded lines such as tax stay visible. "
+        "Omitted: the bill's own export_embed_markups setting decides.",
+    ),
 ) -> StreamingResponse:
     """Export BOQ positions as an Excel (xlsx) file with formatting.
 
@@ -5239,9 +5274,15 @@ async def export_boq_excel(
     # IDOR guard: scope the export to the project owner/member, matching
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    from app.modules.boq.embedding import embed_enabled, embed_positions
+
     boq_data = await service.get_boq_with_positions(boq_id)
     boq_obj = await service.get_boq(boq_id)
-    structured_data = await service.get_boq_structured_for_export(boq_id)
+    structured_data = await service.get_boq_structured_for_export(boq_id, False)
+    if embed_markups if embed_markups is not None else embed_enabled(structured_data.metadata):
+        embedded, plan = await service.embed_markups_in_export(structured_data)
+        structured_data = embedded.payload
+        boq_data.positions = embed_positions(boq_data.positions, plan)
     # Issue #111 - structured_data totals are FX-converted into the project
     # base currency; boq_data.grand_total is a raw position sum (wrong for
     # mixed-currency BOQs). Source the aggregate cells from structured_data
@@ -5335,6 +5376,11 @@ async def export_boq_pdf(
             "rows) prints its lines without the build-up and says so on the page."
         ),
     ),
+    embed_markups: bool | None = Query(
+        None,
+        description="Fold markups into the unit rates (sale rates); only non-embedded lines such as tax stay visible. "
+        "Omitted: the bill's own export_embed_markups setting decides.",
+    ),
 ) -> StreamingResponse:
     """Export BOQ as a professional PDF cost estimate report.
 
@@ -5371,7 +5417,7 @@ async def export_boq_pdf(
     # IDOR guard: scope the export to the project owner/member, matching
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
-    boq_data = await service.get_boq_structured_for_export(boq_id)
+    boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
     # The subtotals in ``boq_data`` were rolled up in the project's base
     # currency with this FX table; each printed line is converted with it too,
     # or a foreign-currency line prints a figure its section subtotal does not
@@ -5534,6 +5580,11 @@ async def export_boq_gaeb(
             "(Bieter Kommentar). Ignored for X83."
         ),
     ),
+    embed_markups: bool | None = Query(
+        None,
+        description="Fold markups into the unit rates (sale rates); only non-embedded lines such as tax stay visible. "
+        "Omitted: the bill's own export_embed_markups setting decides.",
+    ),
 ) -> StreamingResponse:
     """Export BOQ as a schema-valid GAEB DA XML 3.3 file.
 
@@ -5568,7 +5619,7 @@ async def export_boq_gaeb(
     # IDOR guard: scope the export to the project owner/member, matching
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
-    boq_data = await service.get_boq_structured_for_export(boq_id)
+    boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
 
     # Load project for label text + currency.
     project_repo = ProjectRepository(session)
@@ -5617,6 +5668,11 @@ async def export_boq_bc3(
     payload: CurrentUserPayload,
     session: SessionDep,
     service: BOQService = Depends(_get_service),
+    embed_markups: bool | None = Query(
+        None,
+        description="Fold markups into the unit rates (sale rates); only non-embedded lines such as tax stay visible. "
+        "Omitted: the bill's own export_embed_markups setting decides.",
+    ),
 ) -> StreamingResponse:
     """Export the BOQ as a FIEBDC-3 (BC3) budget file.
 
@@ -5639,7 +5695,7 @@ async def export_boq_bc3(
     # IDOR guard: scope the export to the project owner/member, matching every
     # other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
-    boq_data = await service.get_boq_structured_for_export(boq_id)
+    boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
 
     # Load project for label text + currency.
     project_repo = ProjectRepository(session)

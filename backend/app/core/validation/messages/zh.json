@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "雇主责任无欠费证明",
     "insurance": "保险证明",
     "license": "承包商执照"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "销售单价导出与编辑器总额相差 {gap}，超过容差 {tolerance}",
+      "suggestion": "请在导出预览中检查舍入，或提高此清单的容差"
+    }
   }
 }

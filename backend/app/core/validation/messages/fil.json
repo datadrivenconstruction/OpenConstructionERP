@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "sertipiko ng clearance sa pananagutan ng employer",
     "insurance": "sertipiko ng insurance",
     "license": "lisensya ng kontratista"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Ang export na may presyong pambenta ay naiiba ng {gap} sa kabuuan ng editor, higit sa tolerance na {tolerance}",
+      "suggestion": "Suriin ang rounding sa preview ng export, o taasan ang tolerance para sa estimate na ito"
+    }
   }
 }

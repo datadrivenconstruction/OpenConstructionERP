@@ -354,6 +354,49 @@ class MarkupCumulativeBaseIsSettled(ValidationRule):
         return results
 
 
+class EmbeddedExportRoundingGap(ValidationRule):
+    """A sale-rate export whose cent rounding drifts from the editor total."""
+
+    rule_id = "boq.export.embedding_rounding_gap"
+    name = "Sale-rate export stays within the rounding tolerance"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "With markups embedded in the unit rates each sale rate is rounded to the cent, so the "
+        "exported net can drift from the editor's net plus markups. Reported above the bill's tolerance."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag the gap when it exceeds the tolerance the preview carries."""
+        data = context.data if isinstance(context.data, dict) else {}
+        preview = data.get("export_embedding")
+        if not isinstance(preview, dict):
+            return []
+        try:
+            gap = Decimal(str(preview.get("rounding_gap", "0")))
+            tolerance = Decimal(str(preview.get("tolerance", "0")))
+        except (InvalidOperation, ValueError):
+            return []
+        if abs(gap) <= tolerance:
+            return []
+        locale = _locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_export.embedding_rounding_gap.fail", locale, gap=f"{gap}", tolerance=f"{tolerance}"
+                ),
+                suggestion=translate("boq_export.embedding_rounding_gap.suggestion", locale),
+                details={"rounding_gap": str(gap), "tolerance": str(tolerance)},
+            )
+        ]
+
+
 # ── Resource buildup rules ──────────────────────────────────────────────────
 
 
@@ -467,7 +510,10 @@ _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
     MarkupCumulativeBaseIsSettled(),
 )
 
-_BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (UnitRateNotRederivedFromUntrustedBuildup(),)
+_BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
+    UnitRateNotRederivedFromUntrustedBuildup(),
+    EmbeddedExportRoundingGap(),
+)
 
 
 def register_boq_markup_rules() -> None:

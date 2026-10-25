@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "certidão negativa de responsabilidade dos empregadores",
     "insurance": "certificado de seguro",
     "license": "licença do empreiteiro"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "A exportação com preços de venda difere do total do editor em {gap}, acima da tolerância de {tolerance}",
+      "suggestion": "Reveja o arredondamento na pré-visualização da exportação ou aumente a tolerância deste orçamento"
+    }
   }
 }

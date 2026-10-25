@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "attestation de régularité de la responsabilité des employeurs",
     "insurance": "attestation d'assurance",
     "license": "licence d'entrepreneur"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "L'export aux prix de vente diffère du total de l'éditeur de {gap}, au-delà de la tolérance de {tolerance}",
+      "suggestion": "Vérifiez l'arrondi dans l'aperçu d'export ou augmentez la tolérance de ce devis"
+    }
   }
 }

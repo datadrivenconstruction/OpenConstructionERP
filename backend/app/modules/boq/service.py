@@ -8203,7 +8203,9 @@ class BOQService:
             grand_total=_round_currency(net_total),
         )
 
-    async def get_boq_structured_for_export(self, boq_id: uuid.UUID) -> BOQWithSections:
+    async def get_boq_structured_for_export(
+        self, boq_id: uuid.UUID, embed_markups: bool | None = False
+    ) -> BOQWithSections:
         """:meth:`get_boq_structured` with the unfilled placeholder rows removed.
 
         Every export format reads the structured payload, and none of them may
@@ -8220,7 +8222,41 @@ class BOQService:
         structured.positions = exportable_positions(structured.positions)
         for section in structured.sections:
             section.positions = exportable_positions(section.positions)
+        if embed_markups is None:
+            from app.modules.boq.embedding import embed_enabled
+
+            embed_markups = embed_enabled(structured.metadata)
+        if embed_markups:
+            return (await self.embed_markups_in_export(structured))[0].payload
         return structured
+
+    async def embed_markups_in_export(self, structured: BOQWithSections) -> tuple[Any, Any]:
+        """Rewrite an export payload into sale rates (issue #535). Nothing is stored.
+
+        Returns ``(EmbeddingResult, EmbeddingPlan)``; the plan's ``rates`` map
+        lets a caller reprice another list of the same positions.
+        """
+        from app.modules.boq.embedding import apply_embedding, plan_embedding
+
+        boq_id = structured.id
+        positions = await self.position_repo.list_all_for_boq(boq_id)
+        markups = await self.markup_repo.list_for_boq(boq_id)
+        fx_base, fx_map = await self._resolve_project_fx(boq_id)
+        plan = plan_embedding(
+            positions,
+            markups,
+            lambda p: _leaf_total_base_with_resources(p, fx_map, fx_base),
+            (await self._resolve_escalation_factors(markups)).factors,
+        )
+        return apply_embedding(structured, plan), plan
+
+    async def get_embedding_preview(self, boq_id: uuid.UUID) -> dict[str, Any]:
+        """Per-bucket factor, sale net and rounding gap of an embedded export."""
+        from app.modules.boq.embedding import embed_tolerance, preview_dict
+
+        structured = await self.get_boq_structured_for_export(boq_id)
+        result, plan = await self.embed_markups_in_export(structured)
+        return preview_dict(result, plan, embed_tolerance(structured.metadata))
 
     async def get_export_fx(
         self,

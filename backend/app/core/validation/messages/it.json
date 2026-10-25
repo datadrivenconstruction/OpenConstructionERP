@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "certificato di liberatoria sulla responsabilità dei datori di lavoro",
     "insurance": "certificato assicurativo",
     "license": "licenza dell'appaltatore"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "L'esportazione a prezzi di vendita differisce dal totale dell'editor di {gap}, oltre la tolleranza di {tolerance}",
+      "suggestion": "Controlla l'arrotondamento nell'anteprima di esportazione o aumenta la tolleranza per questo computo"
+    }
   }
 }

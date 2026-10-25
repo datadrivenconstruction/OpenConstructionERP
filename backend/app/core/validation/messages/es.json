@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "certificado de cumplimiento de la responsabilidad del empleador",
     "insurance": "certificado de seguro",
     "license": "licencia de contratista"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "La exportación con precios de venta difiere del total del editor en {gap}, más que la tolerancia de {tolerance}",
+      "suggestion": "Revise el redondeo en la vista previa de exportación o aumente la tolerancia de este presupuesto"
+    }
   }
 }

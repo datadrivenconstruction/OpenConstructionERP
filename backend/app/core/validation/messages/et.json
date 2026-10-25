@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "tööandja vastutuse võlgnevuse puudumise tõend",
     "insurance": "kindlustustõend",
     "license": "töövõtja tegevusluba"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Müügihindadega eksport erineb redaktori kogusummast {gap} võrra, rohkem kui lubatud hälve {tolerance}",
+      "suggestion": "Kontrollige ümardamist ekspordi eelvaates või suurendage selle eelarve lubatud hälvet"
+    }
   }
 }

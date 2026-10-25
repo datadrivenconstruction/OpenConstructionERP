@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "verklaring vrijwaring werkgeversaansprakelijkheid",
     "insurance": "verzekeringsbewijs",
     "license": "aannemersvergunning"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "De export met verkoopprijzen wijkt {gap} af van het totaal in de editor, meer dan de tolerantie van {tolerance}",
+      "suggestion": "Controleer de afronding in het exportvoorbeeld of verhoog de tolerantie voor deze begroting"
+    }
   }
 }

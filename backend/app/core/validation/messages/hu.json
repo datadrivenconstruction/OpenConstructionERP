@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "munkáltatói felelősségi tartozásmentességi igazolás",
     "insurance": "biztosítási igazolás",
     "license": "vállalkozói engedély"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Az eladási áras export {gap} értékkel tér el a szerkesztő végösszegétől, ami nagyobb a(z) {tolerance} tűréshatárnál",
+      "suggestion": "Ellenőrizze a kerekítést az export előnézetében, vagy növelje a tűréshatárt ennél a költségvetésnél"
+    }
   }
 }

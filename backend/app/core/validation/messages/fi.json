@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "työnantajan vastuun selvitystodistus",
     "insurance": "vakuutustodistus",
     "license": "urakoitsijan lupa"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Myyntihintavienti poikkeaa editorin summasta {gap}, enemmän kuin toleranssi {tolerance}",
+      "suggestion": "Tarkista pyöristys viennin esikatselussa tai nosta tämän laskelman toleranssia"
+    }
   }
 }

@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "giấy xác nhận hoàn thành trách nhiệm của người sử dụng lao động",
     "insurance": "giấy chứng nhận bảo hiểm",
     "license": "giấy phép nhà thầu"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Bản xuất theo đơn giá bán chênh lệch {gap} so với tổng trong trình soạn thảo, vượt dung sai {tolerance}",
+      "suggestion": "Kiểm tra việc làm tròn trong bản xem trước xuất, hoặc tăng dung sai cho dự toán này"
+    }
   }
 }

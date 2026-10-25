@@ -5441,6 +5441,7 @@ export function BOQEditorPage() {
           t={t}
           projectId={boq.project_id}
           boqId={boq.id}
+          exportEmbedMarkups={boq.metadata?.export_embed_markups === true}
           canUndo={canUndo}
           canRedo={canRedo}
           onUndo={handleUndo}

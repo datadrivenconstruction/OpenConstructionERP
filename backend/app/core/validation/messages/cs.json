@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "potvrzení o bezdlužnosti u odpovědnosti zaměstnavatelů",
     "insurance": "pojistný certifikát",
     "license": "oprávnění zhotovitele"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Export s prodejními cenami se liší od součtu v editoru o {gap}, více než tolerance {tolerance}",
+      "suggestion": "Zkontrolujte zaokrouhlení v náhledu exportu nebo zvyšte toleranci pro tento rozpočet"
+    }
   }
 }

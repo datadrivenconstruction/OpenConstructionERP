@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "employers' liability clearance certificate",
     "insurance": "insurance certificate",
     "license": "contractor licence"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "The sale-rate export differs from the editor total by {gap}, more than the tolerance of {tolerance}",
+      "suggestion": "Review the rounding in the export preview, or raise the tolerance for this bill"
+    }
   }
 }

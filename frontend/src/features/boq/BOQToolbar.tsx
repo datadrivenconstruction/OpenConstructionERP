@@ -28,6 +28,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
+import { ExportEmbeddingPanel } from './ExportEmbeddingPanel';
 import {
   Plus,
   Download,
@@ -80,6 +81,8 @@ export interface BOQToolbarProps {
    */
   projectId: string;
   boqId: string;
+  /** The bill's `metadata.export_embed_markups`: exports carry sale rates. */
+  exportEmbedMarkups?: boolean;
   // Undo / redo
   canUndo: boolean;
   canRedo: boolean;
@@ -207,6 +210,7 @@ export function BOQToolbar({
   t,
   projectId,
   boqId,
+  exportEmbedMarkups = false,
   canUndo,
   canRedo,
   onUndo,
@@ -521,10 +525,11 @@ export function BOQToolbar({
                   ref={exportMenuRef}
                   role="menu"
                   style={{ position: 'fixed', top: exportMenuPos.top, left: exportMenuPos.left, zIndex: 1000 }}
-                  className="w-44 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in"
+                  className="w-72 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in"
                   data-portal="boq-export-menu"
                 >
-                  <button role="menuitem" onClick={() => handleExportItem('excel')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-t-lg">
+                  <ExportEmbeddingPanel t={t} boqId={boqId} enabled={exportEmbedMarkups} readOnly={readOnly} />
+                  <button role="menuitem" onClick={() => handleExportItem('excel')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                     <FileSpreadsheet size={15} className="text-content-tertiary" />
                     {t('boq.export_format_excel', { defaultValue: 'Excel (.xlsx)' })}
                   </button>

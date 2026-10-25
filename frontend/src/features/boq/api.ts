@@ -557,6 +557,26 @@ export interface RestoreFieldResponse {
   new_log_id: string | null;
 }
 
+/** Sale-rate export preview (issue #535). Money arrives as decimal strings. */
+export interface EmbeddingPreview {
+  buckets: {
+    scope_position_ids: string[];
+    direct_cost: string;
+    embedded_amount: string;
+    k: string;
+    sale_net: string;
+    position_count: number;
+  }[];
+  editor_net: string;
+  sale_net: string;
+  rounding_gap: string;
+  tolerance: string;
+  within_tolerance: boolean;
+  visible_markups: { id: string; name: string; category: string; amount: string }[];
+  grand_total: string;
+  markups: { id: string; name: string; category: string; include_in_unit_rates: boolean }[];
+}
+
 /* ── Normalize backend metadata_ → metadata ─────────────────────── */
 
 /**
@@ -1855,8 +1875,11 @@ export const boqApi = {
   /* BOQ CRUD */
   list: (projectId: string) => apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${projectId}`),
   /** Rename an estimate or change its description. */
-  update: (boqId: string, data: { name?: string; description?: string }) =>
+  update: (boqId: string, data: { name?: string; description?: string; metadata?: Record<string, unknown> }) =>
     apiPatch<BOQ>(`/v1/boq/boqs/${boqId}`, data),
+  /** What an export with markups folded into the unit rates would carry. Read only. */
+  embeddingPreview: (boqId: string) =>
+    apiGet<EmbeddingPreview>(`/v1/boq/boqs/${boqId}/export/embedding-preview/`),
   /**
    * The bill register of several projects in one request, keyed by project id.
    * Each project's rows are what `GET /boqs/?project_id=` returns for it, with

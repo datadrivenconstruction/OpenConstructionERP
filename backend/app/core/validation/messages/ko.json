@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "사용자 책임 면제 확인서",
     "insurance": "보험 증서",
     "license": "시공업자 면허"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "판매 단가 내보내기가 편집기 합계와 {gap}만큼 달라 허용 오차 {tolerance}를 초과합니다",
+      "suggestion": "내보내기 미리보기에서 반올림을 확인하거나 이 내역서의 허용 오차를 높이세요"
+    }
   }
 }

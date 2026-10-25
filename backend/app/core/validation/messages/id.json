@@ -1290,5 +1290,11 @@
     "employers_liability_clearance": "surat keterangan bebas tanggung jawab pemberi kerja",
     "insurance": "sertifikat asuransi",
     "license": "izin kontraktor"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Ekspor dengan harga jual berbeda {gap} dari total editor, melebihi toleransi {tolerance}",
+      "suggestion": "Periksa pembulatan di pratinjau ekspor, atau naikkan toleransi untuk RAB ini"
+    }
   }
 }
