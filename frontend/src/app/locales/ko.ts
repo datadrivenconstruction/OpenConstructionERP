@@ -45280,6 +45280,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "이 축척에서의 도면 크기: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "건축 도면치고는 이례적인 값이므로 파일에 저장된 단위가 잘못되었을 수 있습니다. 보정 기능으로 확인하세요: 두 점을 찍고 실제 거리를 입력하세요.",
   "dwg_takeoff.conv_converter_said": "변환기 보고서",
+  "dwg_takeoff.open_side_panel": "레이어 및 상세",
+  "dwg_takeoff.close_side_panel": "도면으로 돌아가기",
     "match_wizard.available_label": "설치 가능 ({{n}})",
     "match_wizard.install_aria": "설치 {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} 사용 준비가 되었습니다.",

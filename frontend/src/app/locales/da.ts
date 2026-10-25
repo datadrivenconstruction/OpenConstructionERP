@@ -45511,6 +45511,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Tegningsstørrelse i denne skala: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Det er usædvanligt for en byggetegning, så enheden gemt i filen kan være forkert. Kontrollér den med Kalibrer: vælg to punkter og skriv deres reelle afstand.",
   "dwg_takeoff.conv_converter_said": "Konverterrapport",
+  "dwg_takeoff.open_side_panel": "Lag og detaljer",
+  "dwg_takeoff.close_side_panel": "Tilbage til tegningen",
     "match_wizard.available_label": "Tilgængelig til installation ({{n}})",
     "match_wizard.install_aria": "Installer {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} er klar til brug.",

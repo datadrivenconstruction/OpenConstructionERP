@@ -45397,6 +45397,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Piirustuksen koko tässä mittakaavassa: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Tämä on epätavallista rakennuspiirustukselle, joten tiedostoon tallennettu yksikkö voi olla väärin. Tarkista se Kalibroi-painikkeella: valitse kaksi pistettä ja kirjoita niiden todellinen etäisyys.",
   "dwg_takeoff.conv_converter_said": "Muuntimen raportti",
+  "dwg_takeoff.open_side_panel": "Tasot ja tiedot",
+  "dwg_takeoff.close_side_panel": "Takaisin piirustukseen",
     "match_wizard.available_label": "Asennettavissa ({{n}})",
     "match_wizard.install_aria": "Asenna {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} on käyttövalmis.",

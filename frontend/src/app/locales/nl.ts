@@ -45504,6 +45504,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Tekengrootte op deze schaal: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Dat is ongebruikelijk voor een bouwtekening, dus de eenheid die in het bestand is opgeslagen, klopt mogelijk niet. Controleer dit met Kalibreren: kies twee punten en typ de werkelijke afstand ertussen.",
   "dwg_takeoff.conv_converter_said": "Converterrapport",
+  "dwg_takeoff.open_side_panel": "Lagen en details",
+  "dwg_takeoff.close_side_panel": "Terug naar de tekening",
     "match_wizard.available_label": "Beschikbaar om te installeren ({{n}})",
     "match_wizard.install_aria": "Installeer {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} is klaar voor gebruik.",

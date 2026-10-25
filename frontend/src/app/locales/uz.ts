@@ -45419,6 +45419,8 @@ const resource = {
     "dwg_takeoff.drawing_span": "Chizmaning bu masshtabdagi oʻlchami: {{w}} m x {{h}} m",
     "dwg_takeoff.drawing_span_implausible": "Bu qurilish chizmasi uchun odatdan tashqari, shuning uchun fayldagi oʻlchov birligi notoʻgʻri boʻlishi mumkin. Kalibrlash orqali tekshiring: ikkita nuqtani tanlang va ularning haqiqiy masofasini kiriting.",
     "dwg_takeoff.conv_converter_said": "Konverter hisoboti",
+    "dwg_takeoff.open_side_panel": "Qatlamlar va tafsilotlar",
+    "dwg_takeoff.close_side_panel": "Chizmaga qaytish",
     "match_wizard.available_label": "Oʻrnatish uchun mavjud ({{n}})",
     "match_wizard.install_aria": "{{region}} ni oʻrnatish",
     "match_wizard.install_toast_ok_msg": "{{label}} foydalanishga tayyor.",

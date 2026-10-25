@@ -414,6 +414,20 @@ class UserService:
 
     # ── Registration ───────────────────────────────────────────────────
 
+    async def registration_status(self) -> dict[str, object]:
+        """Whether the public sign-up form would accept a new account right now.
+
+        Mirrors the policy in :meth:`register`: ``closed`` refuses everyone except
+        the very first real user of a fresh install, who must be able to get in.
+        """
+        from app.config import get_settings as _get_settings
+
+        mode = getattr(_get_settings(), "registration_mode", "open") or "open"
+        if mode != "closed":
+            return {"mode": mode, "open": True}
+        bootstrap = not await self.user_repo.has_admin() and not await self.user_repo.has_real_user()
+        return {"mode": mode, "open": bootstrap}
+
     async def register(
         self,
         data: UserCreate,

@@ -45353,6 +45353,8 @@ const resource = {
     "dwg_takeoff.drawing_span": "Joonise suurus selles mõõtkavas: {{w}} m x {{h}} m",
     "dwg_takeoff.drawing_span_implausible": "See on ehitusjoonise kohta ebatavaline, seega võib failis salvestatud ühik olla vale. Kontrollige seda nupuga Kalibreeri: valige kaks punkti ja sisestage nende tegelik kaugus.",
     "dwg_takeoff.conv_converter_said": "Konverteri aruanne",
+    "dwg_takeoff.open_side_panel": "Kihid ja üksikasjad",
+    "dwg_takeoff.close_side_panel": "Tagasi joonise juurde",
     "cases.adopt_a_cde_approval_preset.longdesc": "CDE värav on ainult nii hea kui selle taga olev ülevaatuse töövoog. Selle asemel, et ehitada kinnitusmarsruut tühjalt vormilt, alusta valmis ISO 19650 eelseadest, võta see kasutusele oma projektis muudetava marsruudina ja häälesta see enne, kui tegelik töö selle kaudu jookseb.",
     "cases.classify_the_delivery_route_for_a_work_package.longdesc": "Kaks sarnase väljanägemisega tööpaketti võivad vajada täiesti erinevaid kinnitusmarsruute, olenevalt mahust, kasutusest ja asukohast. Marsruudi klassifitseerimine enne, kui projekt või ajakava on lukku löödud, hoiab ära, et meeskond avastaks tegeliku marsruudi alles poole peal.",
     "cases.get_a_key_document_signed_off.longdesc": "Valminud tõend või üleandmisavaldus ilma puhta allkirjajäljeta on vaidluses vähe väärt. Allkirjastamise läbiviimine ühe jälgitava seansina, dokumendi valikust kuni allalaaditud manifestini, on see, mis paneb selle hiljem vastu pidama.",

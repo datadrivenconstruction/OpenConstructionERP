@@ -45238,6 +45238,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Энэ масштабт зургийн хэмжээ: {{w}} м x {{h}} м",
   "dwg_takeoff.drawing_span_implausible": "Энэ нь барилгын зурагт ер бусын тул файлд хадгалагдсан нэгж буруу байж магадгүй. Калибр товчоор шалгана уу: хоёр цэг сонгож, тэдгээрийн бодит зайг оруулна уу.",
   "dwg_takeoff.conv_converter_said": "Хөрвүүлэгчийн тайлан",
+  "dwg_takeoff.open_side_panel": "Давхарга ба дэлгэрэнгүй",
+  "dwg_takeoff.close_side_panel": "Зураг руу буцах",
     "match_wizard.available_label": "Суулгахад бэлэн ({{n}})",
     "match_wizard.install_aria": "{{region}} суулгах",
     "match_wizard.install_toast_ok_msg": "{{label}} ашиглахад бэлэн боллоо.",

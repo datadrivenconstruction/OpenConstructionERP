@@ -45334,6 +45334,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Kích thước bản vẽ ở tỉ lệ này: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Điều này bất thường với bản vẽ xây dựng, nên đơn vị lưu trong tệp có thể sai. Hãy kiểm tra bằng Hiệu chỉnh: chọn hai điểm và nhập khoảng cách thực tế giữa chúng.",
   "dwg_takeoff.conv_converter_said": "Báo cáo bộ chuyển đổi",
+  "dwg_takeoff.open_side_panel": "Lớp và chi tiết",
+  "dwg_takeoff.close_side_panel": "Quay lại bản vẽ",
     "match_wizard.available_label": "Có sẵn để cài đặt ({{n}})",
     "match_wizard.install_aria": "Cài đặt {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} đã sẵn sàng để sử dụng.",

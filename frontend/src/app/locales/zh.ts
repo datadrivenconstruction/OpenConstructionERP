@@ -45328,6 +45328,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "该比例下的图纸尺寸：{{w}} 米 x {{h}} 米",
   "dwg_takeoff.drawing_span_implausible": "这对于建筑图纸来说不正常，文件中保存的单位可能有误。请用校准功能核对：选取两个点并输入它们的实际距离。",
   "dwg_takeoff.conv_converter_said": "转换器报告",
+  "dwg_takeoff.open_side_panel": "图层与详情",
+  "dwg_takeoff.close_side_panel": "返回图纸",
     "match_wizard.available_label": "可安装 ({{n}})",
     "match_wizard.install_aria": "安装 {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} 已准备就绪。",

@@ -213,6 +213,13 @@ async def test_export_excel_contains_position_id_column(
     assert pid in stamped, f"exported id column {stamped} missing position {pid}"
     wb.close()
 
+    # The ids stay readable for re-import but the column is hidden from readers.
+    from openpyxl.utils import get_column_letter
+
+    full = load_workbook(io.BytesIO(resp.content))
+    assert full.active.column_dimensions[get_column_letter(id_col + 1)].hidden is True
+    full.close()
+
 
 # ── The workbook itself goes back in, with and without a letterhead ─────────
 

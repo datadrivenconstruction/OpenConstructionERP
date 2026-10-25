@@ -45182,6 +45182,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Ukuran gambar pada skala ini: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Ini tidak lazim untuk gambar konstruksi, jadi satuan yang tersimpan di file mungkin salah. Periksa dengan Kalibrasi: pilih dua titik lalu ketik jarak sebenarnya.",
   "dwg_takeoff.conv_converter_said": "Laporan konverter",
+  "dwg_takeoff.open_side_panel": "Lapisan dan detail",
+  "dwg_takeoff.close_side_panel": "Kembali ke gambar",
     "match_wizard.available_label": "Tersedia untuk diinstal ({{n}})",
     "match_wizard.install_aria": "Instal {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} siap digunakan.",

@@ -45280,6 +45280,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "この縮尺での図面サイズ: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "建設図面としては通常ではないため、ファイルに保存された単位が誤っている可能性があります。キャリブレーションで確認してください: 2 点を指定し、実際の距離を入力します。",
   "dwg_takeoff.conv_converter_said": "コンバーターのレポート",
+  "dwg_takeoff.open_side_panel": "レイヤーと詳細",
+  "dwg_takeoff.close_side_panel": "図面に戻る",
     "match_wizard.available_label": "インストール可能 ({{n}})",
     "match_wizard.install_aria": "{{region}} をインストール",
     "match_wizard.install_toast_ok_msg": "{{label}} を使用する準備ができました。",

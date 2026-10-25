@@ -247,6 +247,17 @@ export function LoginPage() {
     client_id: string;
     scopes: string;
   } | null>(null);
+  // Hide "Create account" when the server refuses self-registration. Any
+  // failure keeps the link: the register page explains a refusal itself.
+  const [registrationOpen, setRegistrationOpen] = useState(true);
+  useEffect(() => {
+    fetch('/api/v1/users/auth/registration/')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { open?: boolean } | null) => {
+        if (d && d.open === false) setRegistrationOpen(false);
+      })
+      .catch(() => {});
+  }, []);
   useEffect(() => {
     fetch('/api/v1/users/auth/oidc/config/')
       .then((r) => r.json())
@@ -937,12 +948,14 @@ export function LoginPage() {
               </div>
             )}
 
-            <div className="mt-4 border-t border-border-light pt-3.5 animate-stagger-in" style={{ animationDelay: '460ms' }}>
-              <p className="text-center text-xs text-content-secondary">
-                {t('auth.no_account', "Don't have an account?")}{' '}
-                <Link to="/register" className="font-medium text-oe-blue hover:text-oe-blue-hover transition-colors">{t('auth.create_account', 'Create account')}</Link>
-              </p>
-            </div>
+            {registrationOpen && (
+              <div className="mt-4 border-t border-border-light pt-3.5 animate-stagger-in" style={{ animationDelay: '460ms' }}>
+                <p className="text-center text-xs text-content-secondary">
+                  {t('auth.no_account', "Don't have an account?")}{' '}
+                  <Link to="/register" className="font-medium text-oe-blue hover:text-oe-blue-hover transition-colors">{t('auth.create_account', 'Create account')}</Link>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Demo Access - shown by default. Hidden only when the server

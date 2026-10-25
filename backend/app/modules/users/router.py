@@ -436,6 +436,12 @@ async def refresh(
 # ── OIDC / Keycloak authentication ─────────────────────────────────────────
 
 
+@router.get("/auth/registration/")
+async def registration_status(service: UserService = Depends(_get_service)) -> dict[str, Any]:
+    """Public: whether self-registration is open, so the login page can hide "Create account"."""
+    return await service.registration_status()
+
+
 @router.get("/auth/oidc/config/")
 async def oidc_config() -> dict:
     """Return OIDC configuration for the frontend login page.

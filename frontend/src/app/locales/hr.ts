@@ -45695,6 +45695,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Veličina crteža pri ovom mjerilu: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "To je neuobičajeno za građevinski crtež, pa jedinica spremljena u datoteci može biti kriva. Provjerite je pomoću Kalibriranje: odaberite dvije točke i upišite njihovu stvarnu udaljenost.",
   "dwg_takeoff.conv_converter_said": "Izvještaj pretvarača",
+  "dwg_takeoff.open_side_panel": "Slojevi i detalji",
+  "dwg_takeoff.close_side_panel": "Natrag na crtež",
     "match_wizard.available_label": "Dostupno za instalaciju ({{n}})",
     "match_wizard.install_aria": "Instaliraj {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} je spreman za upotrebu.",

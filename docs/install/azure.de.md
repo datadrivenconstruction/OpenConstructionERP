@@ -4,7 +4,7 @@
 
 So betreiben Sie OpenConstructionERP auf Azure, mit Daten in der Region Ihrer Wahl, und was für die Anmeldung mit Microsoft Entra ID heute funktioniert. Es gibt keinen Azure-spezifischen Code: Die Plattform läuft als ein Docker-Container gegen PostgreSQL, alles Folgende ist Konfiguration.
 
-**Was geprüft wurde.** Alle unten genannten Einstellungen wurden gegen den Quellcode der Version 18.8.2 geprüft (`backend/app/config.py`, `backend/app/modules/users/`, `deploy/docker/`). Die Schritte im Azure-Portal und in der CLI stammen aus der Azure-Dokumentation und wurden **nicht** auf einem echten Abonnement ausgeführt. Betrachten Sie die erste Installation als Test und lesen Sie "Anmeldung mit Entra ID", bevor Sie Single Sign-on zusagen.
+**Was geprüft wurde.** Alle unten genannten Einstellungen wurden gegen den Quellcode der Versionen 18.8.2 und 18.8.3 geprüft (`backend/app/config.py`, `backend/app/modules/users/`, `deploy/docker/`). Die Schritte im Azure-Portal und in der CLI stammen aus der Azure-Dokumentation und wurden **nicht** auf einem echten Abonnement ausgeführt. Betrachten Sie die erste Installation als Test und lesen Sie "Anmeldung mit Entra ID", bevor Sie Single Sign-on zusagen.
 
 ## Variante wählen
 
@@ -144,35 +144,39 @@ Lassen Sie `STORAGE_BACKEND` auf dem Standard (`local`): Dateien liegen in `/dat
 
 ## Anmeldung mit Entra ID
 
-So funktioniert die Anmeldung in 18.8.2: Setzen Sie `OIDC_ENABLED`, `OIDC_ISSUER_URL`, `OIDC_CLIENT_ID` und `OIDC_CLIENT_SECRET` (optional: `OIDC_SCOPES`, Standard `openid email profile`; `OIDC_AUTO_CREATE_USERS`, Standard true; `OIDC_GROUP_ROLE_MAP`). Die Anmeldeseite zeigt dann "Sign in with SSO". Der Browser wechselt zum Anbieter und kehrt zu `https://<Ihr Host>/auth/oidc/callback` zurück. Der Server tauscht den Code, liest die Benutzerinfo des Anbieters (`sub`, `email`, `name`, `groups`) und stellt eigene Token aus.
+Einstellungen: `OIDC_ENABLED`, `OIDC_ISSUER_URL`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`; optional `OIDC_SCOPES` (Standard `openid email profile`), `OIDC_AUTO_CREATE_USERS` (Standard true), `OIDC_ROLE_CLAIMS` (Standard `groups,roles`), `OIDC_GROUP_ROLE_MAP` und `OIDC_DEFAULT_ROLE` (Standard `viewer`). Die Anmeldeseite zeigt dann "Sign in with SSO", der Browser wechselt zum Anbieter und kehrt zu `https://<Ihr Host>/auth/oidc/callback` zurück.
 
-**Die direkte Anmeldung gegen Entra ID funktioniert noch nicht.** Zwei Dinge im Code stehen im Weg:
+**Die laufende Version bestimmt die Einrichtung.**
 
-1. Die Anmeldeseite bildet die Autorisierungsadresse als `<issuer>/protocol/openid-connect/auth`. Das ist der Pfad von Keycloak. Entra ID nutzt `https://login.microsoftonline.com/<tenant>/oauth2/v2.0/authorize`.
-2. Rollen werden aus einem `groups`-Claim der Benutzerinfo gelesen. Der Entra-Endpunkt liefert keine Gruppen, daher kann `OIDC_GROUP_ROLE_MAP` nicht direkt aus Entra gespeist werden.
+- **18.8.3 und neuer: direkt mit Entra ID.** Der Server liest das Discovery-Dokument des Anbieters, die Adressen für Autorisierung, Token und Schlüssel stammen also von Entra selbst. Das ID-Token wird geprüft (Signatur gegen die veröffentlichten Schlüssel, Aussteller, Zielgruppe, Ablauf, Nonce), die Anmeldung nutzt State und PKCE, und Rollen werden aus den Claims `groups` und `roles` des ID-Tokens gelesen.
+- **18.8.2 und älter: Keycloak als Vermittler.** Diese Versionen bilden die Autorisierungsadresse in der Keycloak-Form und lesen Gruppen nur aus der Antwort der Benutzerinfo, die Entra nicht füllt. Schalten Sie Keycloak zwischen Plattform und Entra (siehe Ende dieses Abschnitts) oder aktualisieren Sie.
 
-Der Server prüft außerdem das ID-Token nicht; er verlässt sich auf die über TLS geholte Benutzerinfo. Beschränken Sie, wer sich anmelden darf, in Entra selbst (Schritt 4).
+### Direkte Einrichtung (18.8.3 und neuer)
 
-**Was heute funktioniert: Keycloak als Vermittler.** Betreiben Sie Keycloak (eigener Container oder VM, hier nicht behandelt), binden Sie Entra ID dort als Identity Provider ein und richten Sie die Plattform auf den Keycloak-Realm. Die Plattform sieht ein normales Keycloak, Entra übernimmt Passwörter und Multi-Faktor-Abfragen, und der Gruppen-Mapper von Keycloak liefert den `groups`-Claim.
-
-1. **App-Registrierung in Entra ID** (Microsoft Entra Admin Center, App-Registrierungen, Neue Registrierung): Name `OpenConstructionERP`, Kontotyp "nur dieses Organisationsverzeichnis", Umleitungs-URI vom Typ **Web**: `https://<Keycloak-Host>/realms/<realm>/broker/<alias>/endpoint`. Notieren Sie **Anwendungs-ID (Client)** und **Verzeichnis-ID (Mandant)**.
-2. Zertifikate und Geheimnisse, Neuer geheimer Clientschlüssel. Kopieren Sie den **Wert** sofort (er wird nur einmal angezeigt) und notieren Sie das Ablaufdatum; mit Ablauf endet die Anmeldung.
-3. API-Berechtigungen: `openid`, `email`, `profile` (delegiert, Microsoft Graph). Unter Tokenkonfiguration den optionalen Claim `email` hinzufügen, und einen Gruppen-Claim, wenn Rollen aus Gruppen kommen sollen.
-4. Unternehmensanwendungen, Ihre App, Eigenschaften: "Zuweisung erforderlich" auf Ja und die erlaubten Personen oder Gruppen zuweisen. Ohne das kann sich jeder Benutzer Ihres Mandanten anmelden.
-5. **Keycloak:** Identity Providers, "OpenID Connect v1.0" hinzufügen mit dem Discovery-Endpunkt `https://login.microsoftonline.com/<Mandanten-ID>/v2.0/.well-known/openid-configuration` sowie Client-ID und Geheimnis aus Schritt 1 und 2. Legen Sie im Realm einen Client `openconstructionerp` mit der gültigen Umleitungs-URI `https://erp.example.com/auth/oidc/callback` an, dazu einen Client-Scope mit Gruppenmitgliedschafts-Mapper (Claim-Name `groups`, in der Benutzerinfo enthalten).
-6. **Plattform:** in `.env` ergänzen und neu starten.
+1. **App-Registrierung** (Microsoft Entra Admin Center, App-Registrierungen, Neue Registrierung): Name `OpenConstructionERP`, Kontotyp "nur dieses Organisationsverzeichnis", Umleitungs-URI vom Typ **Web**: `https://erp.example.com/auth/oidc/callback`. Notieren Sie **Anwendungs-ID (Client)** und **Verzeichnis-ID (Mandant)**.
+2. Zertifikate und Geheimnisse, Neuer geheimer Clientschlüssel. Kopieren Sie den **Wert** sofort (er wird nur einmal angezeigt) und notieren Sie das Ablaufdatum; mit Ablauf des Geheimnisses endet die Anmeldung.
+3. API-Berechtigungen: `openid`, `email`, `profile` (delegiert, Microsoft Graph). Unter Tokenkonfiguration den optionalen Claim `email` hinzufügen. Für Rollen entweder einen Gruppen-Claim ("Sicherheitsgruppen", das ID-Token enthält dann die Objekt-IDs der Gruppen) hinzufügen oder App-Rollen definieren und zuweisen (der Claim `roles` enthält deren Werte).
+4. Unternehmensanwendungen, Ihre App, Eigenschaften: "Zuweisung erforderlich" auf Ja setzen und die Personen oder Gruppen zuweisen, die sich anmelden dürfen. Ohne das kann sich jeder Benutzer Ihres Mandanten anmelden.
+5. **Plattform:** in `.env` ergänzen und neu starten.
 
 ```bash
 OIDC_ENABLED=true
-OIDC_ISSUER_URL=https://<Keycloak-Host>/realms/<realm>
-OIDC_CLIENT_ID=openconstructionerp
-OIDC_CLIENT_SECRET=<Keycloak-Client-Geheimnis>
-OIDC_GROUP_ROLE_MAP={"oce-admins":"admin","oce-estimators":"editor","oce-viewers":"viewer"}
+OIDC_ISSUER_URL=https://login.microsoftonline.com/<tenant id>/v2.0
+OIDC_CLIENT_ID=<application (client) id>
+OIDC_CLIENT_SECRET=<client secret value>
+# Schlüssel sind Objekt-IDs von Gruppen (Claim groups) oder Werte von App-Rollen (Claim roles).
+OIDC_GROUP_ROLE_MAP={"<admins group id>":"admin","<estimators group id>":"editor","Viewer":"viewer"}
 ```
 
-Die zugeordnete Rolle gilt bei jeder Anmeldung; die erste passende Gruppe gewinnt. Wer ohne zugeordnete Gruppe kommt, wird als `editor` angelegt (nicht mit dem Standard `viewer` der Selbstregistrierung); lassen Sie daher "Zuweisung erforderlich" eingeschaltet. Ein vorhandenes lokales Konto mit gleicher E-Mail-Adresse wird bei der ersten SSO-Anmeldung mit der Identität verknüpft.
+Die zugeordnete Rolle gilt bei jeder Anmeldung; passt eine Person auf mehrere Einträge, gewinnt die Rolle mit den meisten Rechten. Wer ohne zugeordnete Gruppe oder Rolle kommt, wird mit `OIDC_DEFAULT_ROLE` angelegt. Ein vorhandenes lokales Konto mit gleicher E-Mail-Adresse wird bei der ersten SSO-Anmeldung mit der Identität verknüpft. Mit `OIDC_AUTO_CREATE_USERS=false` werden Personen ohne Konto mit einer klaren Meldung abgewiesen, statt angelegt zu werden.
 
-**Bekannte Probleme in 18.8.2, die jeden Anbieter betreffen** (bei der Prüfung dieser Anleitung gefunden, im Code zu beheben): Ein bereits verknüpfter Benutzer, der sich mit unveränderter Rolle erneut anmeldet, erhält "403 No matching account found"; und mit `OIDC_AUTO_CREATE_USERS=false` erhält ein unbekannter Benutzer einen Serverfehler statt einer sauberen Ablehnung. Testen Sie bis zur Korrektur vor dem Rollout eine zweite Anmeldung derselben Person und steuern Sie den Zugang über "Zuweisung erforderlich" statt über `OIDC_AUTO_CREATE_USERS`.
+Entra nimmt Gruppen-IDs nur bis zu einer Grenze ins Token auf (200 in einem ID-Token); darüber sendet es statt der Liste einen Überlauf-Marker. Weisen Sie der App wenige eigene Gruppen zu oder nutzen Sie App-Rollen, damit der Claim klein bleibt.
+
+### Keycloak als Vermittler (18.8.2 und älter)
+
+Betreiben Sie Keycloak (eigener Container oder VM, hier nicht behandelt) und binden Sie Entra ID dort als Identity Provider "OpenID Connect v1.0" ein, mit dem Discovery-Endpunkt `https://login.microsoftonline.com/<tenant id>/v2.0/.well-known/openid-configuration`. In der Entra-App-Registrierung lautet die Umleitungs-URI dann `https://<keycloak host>/realms/<realm>/broker/<alias>/endpoint`. Legen Sie im Realm einen Client `openconstructionerp` mit der gültigen Umleitungs-URI `https://erp.example.com/auth/oidc/callback` an, dazu einen Client-Scope mit Gruppenmitgliedschafts-Mapper (Claim-Name `groups`, in der Benutzerinfo enthalten). Richten Sie die Plattform auf den Realm: `OIDC_ISSUER_URL=https://<keycloak host>/realms/<realm>`, `OIDC_CLIENT_ID=openconstructionerp`, das Keycloak-Client-Geheimnis und `OIDC_GROUP_ROLE_MAP` mit den Gruppennamen aus Keycloak als Schlüsseln.
+
+Zwei Probleme von 18.8.2 betreffen jeden Anbieter und sind in 18.8.3 behoben: Ein verknüpfter Benutzer, der sich mit unveränderter Rolle erneut anmeldet, erhält "403 No matching account found", und mit `OIDC_AUTO_CREATE_USERS=false` erhält ein unbekannter Benutzer einen Serverfehler. Testen Sie unter 18.8.2 vor dem Rollout eine zweite Anmeldung derselben Person und steuern Sie den Zugang über "Zuweisung erforderlich".
 
 ## Datensicherung
 

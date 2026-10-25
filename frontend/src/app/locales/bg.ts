@@ -45520,6 +45520,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Размер на чертежа при този мащаб: {{w}} м x {{h}} м",
   "dwg_takeoff.drawing_span_implausible": "Това е необичайно за строителен чертеж, така че мерната единица, записана във файла, може да е грешна. Проверете с Калибриране: посочете две точки и въведете реалното разстояние между тях.",
   "dwg_takeoff.conv_converter_said": "Доклад от конвертора",
+  "dwg_takeoff.open_side_panel": "Слоеве и детайли",
+  "dwg_takeoff.close_side_panel": "Обратно към чертежа",
     "match_wizard.available_label": "Налични за инсталиране ({{n}})",
     "match_wizard.install_aria": "Инсталирай {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} е готов за употреба.",

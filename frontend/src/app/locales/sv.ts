@@ -45547,6 +45547,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Ritningens storlek i denna skala: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Det är ovanligt för en byggritning, så enheten som lagrats i filen kan vara fel. Kontrollera med Kalibrera: välj två punkter och skriv in deras verkliga avstånd.",
   "dwg_takeoff.conv_converter_said": "Konverterarrapport",
+  "dwg_takeoff.open_side_panel": "Lager och detaljer",
+  "dwg_takeoff.close_side_panel": "Tillbaka till ritningen",
     "match_wizard.available_label": "Tillgänglig för installation ({{n}})",
     "match_wizard.install_aria": "Installera {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} är redo att användas.",
