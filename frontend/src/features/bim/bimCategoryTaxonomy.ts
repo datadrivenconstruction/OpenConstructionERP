@@ -603,3 +603,12 @@ export function bucketOf(rawCategory: string | undefined): BIMCategoryBucket {
 export function isNoiseCategory(rawCategory: string | undefined): boolean {
   return BUCKETS[bucketOf(rawCategory)].noise;
 }
+
+/** True when the "Building elements only" toggle hides this element: an
+ *  annotation/analytical category, or a Revit family-type definition row. */
+export function isHiddenByBuildingsOnly(
+  el: { is_type_definition?: boolean },
+  rawCategory: string | undefined,
+): boolean {
+  return el.is_type_definition === true || isNoiseCategory(rawCategory);
+}

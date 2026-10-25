@@ -395,3 +395,13 @@ describe('fnmatchCI whitespace', () => {
     expect(fnmatchCI('Fase  1', 'Fase 1')).toBe(false);
   });
 });
+
+describe('lookupPropertyKey type-parameter fallback', () => {
+  it('reads [Type] <key> when the plain key is missing or empty', async () => {
+    const { lookupPropertyKey } = await import('./ruleSandbox');
+    expect(lookupPropertyKey({ '[Type] si_volume': 2.5 }, 'si_volume')).toBe(2.5);
+    expect(lookupPropertyKey({ si_volume: '', '[type] SI_Volume': 3 }, 'si_volume')).toBe(3);
+    expect(lookupPropertyKey({ si_volume: 1, '[Type] si_volume': 3 }, 'si_volume')).toBe(1);
+    expect(lookupPropertyKey({}, 'si_volume')).toBeUndefined();
+  });
+});

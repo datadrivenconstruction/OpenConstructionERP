@@ -203,6 +203,8 @@ export interface BIMElementData {
   mesh_ref?: string;
   properties?: Record<string, unknown>;
   quantities?: Record<string, number>;
+  /** Server flag: a Revit family-type row, not a building element. */
+  is_type_definition?: boolean;
   classification?: Record<string, string>;
   /** Links to BOQ positions — populated by the backend with every element
    *  fetch so the viewer can render link state without a second round-trip. */

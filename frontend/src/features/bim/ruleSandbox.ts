@@ -166,8 +166,20 @@ export function ruleMatchesElement(rule: SandboxRule, element: SandboxElement): 
 
 /** Value under a property key the way the server resolves it: exact key first,
  *  then trimmed and case-insensitive, so a rule naming "Phase Created" reads
- *  the "phase created" key the DDC import stored. */
+ *  the "phase created" key the DDC import stored. A missing or empty value
+ *  falls back to the Revit type parameter `[Type] <key>`. */
 export function lookupPropertyKey(props: Record<string, unknown>, key: string): unknown {
+  const direct = lookupPlainKey(props, key);
+  if (!isEmptyValue(direct)) return direct;
+  const typed = lookupPlainKey(props, `[Type] ${key.trim()}`);
+  return isEmptyValue(typed) ? direct : typed;
+}
+
+function isEmptyValue(v: unknown): boolean {
+  return v === undefined || v === null || (typeof v === 'string' && v.trim() === '');
+}
+
+function lookupPlainKey(props: Record<string, unknown>, key: string): unknown {
   if (Object.prototype.hasOwnProperty.call(props, key)) return props[key];
   const wanted = key.trim().toLowerCase();
   for (const [k, v] of Object.entries(props)) {

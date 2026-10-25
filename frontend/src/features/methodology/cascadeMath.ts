@@ -246,3 +246,13 @@ export function resolveBasesFromResourceTotals(
   }
   return out;
 }
+
+const DEFAULT_SAMPLE_TYPES = ['labor', 'material', 'machinery', 'equipment', 'subcontractor'];
+
+/** Resource types the sample inputs offer: exactly those the base mapping
+ *  consumes, so a field never counts for nothing. */
+export function sampleResourceTypes(baseMapping: Record<string, string[]>): string[] {
+  const seen = new Set<string>();
+  for (const types of Object.values(baseMapping)) for (const t of types) seen.add(t);
+  return seen.size > 0 ? [...seen] : DEFAULT_SAMPLE_TYPES;
+}

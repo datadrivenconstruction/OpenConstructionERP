@@ -23,11 +23,10 @@ import {
   computeCascadePreview,
   resolveBasesFromResourceTotals,
   CascadePreviewError,
+  sampleResourceTypes,
   type PreviewResult,
 } from './cascadeMath';
 import type { ComputeEstimateResponse, MarkupStep } from './types';
-
-const SAMPLE_RESOURCE_TYPES = ['labor', 'material', 'machinery', 'equipment', 'subcontractor'];
 
 interface CascadePreviewProps {
   projectId: string;
@@ -64,6 +63,7 @@ export function CascadePreview({
   const [sample, setSample] = useState<Record<string, string>>(DEFAULT_SAMPLE);
   const [serverResult, setServerResult] = useState<ComputeEstimateResponse | null>(null);
 
+  const sampleTypes = useMemo(() => sampleResourceTypes(baseMapping), [baseMapping]);
   const resourceTotals = useMemo(() => {
     const out: Record<string, number> = {};
     for (const [k, v] of Object.entries(sample)) out[k] = toNum(v);
@@ -111,7 +111,7 @@ export function CascadePreview({
           })}
         </p>
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {SAMPLE_RESOURCE_TYPES.map((type) => (
+          {sampleTypes.map((type) => (
             <label key={type} className="flex flex-col gap-1">
               <span className="text-2xs font-medium text-content-secondary">{type}</span>
               <input

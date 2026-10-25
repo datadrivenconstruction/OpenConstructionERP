@@ -29,7 +29,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { bucketOf, isNoiseCategory, prettifyCategoryName } from './bimCategoryTaxonomy';
+import { bucketOf, isHiddenByBuildingsOnly, isNoiseCategory, prettifyCategoryName } from './bimCategoryTaxonomy';
 
 describe('"Building elements only" leaves out IFC voids (TC-GRP-04)', () => {
   it('treats openings and virtual elements as noise', () => {
@@ -146,5 +146,13 @@ describe('the summary panel names categories through the helper (#179)', () => {
     // screen with the contains check above still green.
     expect(VIEWER).toContain('${prettifyCategoryName(part.category)}');
     expect(VIEWER).toContain('selectionParts.map(selectionPartLabel)');
+  });
+});
+
+describe('isHiddenByBuildingsOnly', () => {
+  it('hides Revit type definitions even in a building category', () => {
+    expect(isHiddenByBuildingsOnly({ is_type_definition: true }, 'Structural Foundations')).toBe(true);
+    expect(isHiddenByBuildingsOnly({ is_type_definition: false }, 'Structural Foundations')).toBe(false);
+    expect(isHiddenByBuildingsOnly({}, 'Structural Foundations')).toBe(false);
   });
 });
