@@ -276372,6 +276372,13 @@
       "total_files": 26
     },
     {
+      "name": "demo",
+      "ts_files": 1,
+      "css_files": 0,
+      "test_files": 0,
+      "total_files": 1
+    },
+    {
       "name": "design-options",
       "ts_files": 5,
       "css_files": 0,
@@ -278993,8 +279000,8 @@
     "total_routes": 4627,
     "total_schemas": 4120,
     "total_python_files": 2810,
-    "frontend_features": 209,
-    "frontend_ts_files": 3606,
+    "frontend_features": 210,
+    "frontend_ts_files": 3607,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
@@ -279060,6 +279067,7 @@
     "deadlines": "deadlines",
     "defects-liability": "defects_liability",
     "delivery_model": "delivery_model",
+    "demo": null,
     "design-options": "design_options",
     "design_management": "design_management",
     "documents": "documents",

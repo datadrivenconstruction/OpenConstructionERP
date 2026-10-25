@@ -8,7 +8,7 @@
  *
  * Each demo is a company type with its own look and a menu cut to its work
  * (`demoProfiles.ts`). After sign-in the visitor first picks one on
- * `/demo/choose`; a `?demo=<slug>` link from the website skips the picker.
+ * `/onboarding/demo`; a `?demo=<slug>` link from the website skips the picker.
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
@@ -35,7 +35,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 export const DEMO_SWITCHER_SLUGS = DEMO_PROFILES.map((p) => p.slug);
 
-export const DEMO_CHOOSER_PATH = '/demo/choose';
+export const DEMO_CHOOSER_PATH = '/onboarding/demo';
 
 const PICK_KEY = 'oe_demo_pick';
 
