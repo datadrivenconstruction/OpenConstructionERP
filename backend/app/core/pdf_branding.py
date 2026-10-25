@@ -546,14 +546,12 @@ def _draw_page_furniture(
                 suffix=suffix,
                 base=BODY_FONT,
             )
-        canvas.setFont(face, size)
-        canvas.setFillColor(colors.HexColor(appearance.get("footer_color") or _FOOTER_COLOR))
+        footer_color = appearance.get("footer_color") or _FOOTER_COLOR
+        canvas.setFillColor(colors.HexColor(footer_color))
         if footer_left:
-            canvas.drawString(left, 10.0 * MM, footer_left)
+            draw_furniture_line(canvas, footer_left, x=left, y=10.0 * MM, size=size, color=footer_color)
         if page_text:
-            if (face, size) != (BODY_FONT, 7.0):
-                canvas.setFont(BODY_FONT, 7)
-            canvas.drawRightString(right_x, 10.0 * MM, page_text)
+            draw_furniture_line(canvas, page_text, x=right_x, y=10.0 * MM, size=7.0, color=footer_color, align="right")
 
         canvas.restoreState()
         draw_footer_second_line(canvas, appearance, left=left, right_x=right_x)
@@ -583,17 +581,108 @@ def page_number_text(fmt: Any, *, page: int, total: int = 0) -> str:
     return f"Page {page} of {total}"
 
 
-def _print_stamp_text(mode: Any) -> str:
-    """The "Printed: ..." text for a ``print_stamp`` mode, empty when none is wanted."""
+def _print_stamp_text(mode: Any, template: str | None = None) -> str:
+    """The "Printed: ..." text for a ``print_stamp`` mode, empty when none is wanted.
+
+    ``template`` is the caller's own wording with a ``{timestamp}`` field, for a
+    document written in a language of its own choosing (a record form says
+    "Erstellt {timestamp}" in German whatever language the request used);
+    without one the stamp reads "Printed: ...".
+    """
     now = datetime.now(tz=UTC)
     if mode == "date":
-        return f"Printed: {now:%Y-%m-%d}"
-    if mode == "datetime":
-        return f"Printed: {now:%Y-%m-%d %H:%M} UTC"
-    return ""
+        stamp = f"{now:%Y-%m-%d}"
+    elif mode == "datetime":
+        stamp = f"{now:%Y-%m-%d %H:%M} UTC"
+    else:
+        return ""
+    if template:
+        return template.format(timestamp=stamp)
+    return f"Printed: {stamp}"
 
 
-def draw_footer_second_line(canvas: Any, appearance: dict[str, Any], *, left: float, right_x: float) -> bool:
+def draw_furniture_line(
+    canvas: Any,
+    text: str,
+    *,
+    x: float,
+    y: float,
+    size: float,
+    color: str,
+    align: str = "left",
+    base: str | None = None,
+) -> None:
+    """Draw one line of page furniture with its baseline at ``y``.
+
+    A string the body face covers is drawn straight onto the canvas, exactly as
+    the footer always was. Anything else (Chinese, Korean, Thai, Devanagari,
+    Arabic and Urdu, or a mix of scripts) goes through a Paragraph, because only
+    a Paragraph picks the face for the script, runs the shaper for Thai and
+    Devanagari and the right-to-left reordering for Arabic, Persian, Urdu and
+    Hebrew; ``canvas.drawString`` does none of that for the complex scripts.
+
+    Args:
+        canvas: The page's canvas.
+        text: The line, already fitted into its room.
+        x: Left edge, or right edge when ``align`` is ``"right"``.
+        y: Baseline, in points.
+        size: Font size.
+        color: Fill colour as a hex string.
+        align: ``"left"`` or ``"right"``.
+        base: The face the generator draws furniture in; the body face by default.
+    """
+    if not text:
+        return
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_LEFT, TA_RIGHT
+    from reportlab.lib.styles import ParagraphStyle
+    from reportlab.platypus import Paragraph
+
+    from app.core.pdf_fonts import BODY_FONT, font_can_draw_all, pdf_markup, pdf_style_for_text, pdf_text_width
+
+    face = base or BODY_FONT
+    if font_can_draw_all(face, text):
+        canvas.setFont(face, size)
+        if align == "right":
+            canvas.drawRightString(x, y, text)
+        else:
+            canvas.drawString(x, y, text)
+        return
+    style = ParagraphStyle(
+        "PageFurniture",
+        fontName=face,
+        fontSize=size,
+        leading=size * 1.25,
+        textColor=colors.HexColor(color),
+        alignment=TA_RIGHT if align == "right" else TA_LEFT,
+    )
+    style = pdf_style_for_text(style, text, base=face)
+    paragraph = Paragraph(pdf_markup(text, base=face), style)
+    # The box is the measured line plus slack, never wider: a Paragraph that
+    # reads right to left aligns itself to the far edge of its box, and a box
+    # as wide as the page would move the line away from ``x``.
+    width = pdf_text_width(text, size, base=face) * 1.1 + 6.0
+    _, height = paragraph.wrapOn(canvas, width, size * 6)
+    if height > style.leading * 1.5:
+        # Wrapped: the measure was short for this script. Give it the room
+        # rather than print a second line on the edge of the sheet.
+        width *= 2.0
+        _, height = paragraph.wrapOn(canvas, width, size * 6)
+    blpara = getattr(paragraph, "blPara", None)
+    lines = getattr(blpara, "lines", None) or []
+    ascent = float(getattr(lines[0], "ascent", size)) if lines and getattr(blpara, "kind", 0) == 1 else size
+    paragraph.drawOn(canvas, x - width if align == "right" else x, y - height + ascent)
+
+
+def draw_footer_second_line(
+    canvas: Any,
+    appearance: dict[str, Any],
+    *,
+    left: float,
+    right_x: float,
+    stamp_template: str | None = None,
+    baseline: float | None = None,
+) -> bool:
     """Print the registration line and the print stamp under the footer.
 
     Two optional pieces share one baseline: the company profile's registration
@@ -608,13 +697,20 @@ def draw_footer_second_line(canvas: Any, appearance: dict[str, Any], *, left: fl
         appearance: The resolved appearance of the document being drawn.
         left: Left edge of the text, in points.
         right_x: Right edge of the text, in points.
+        stamp_template: The document's own wording of the stamp, with a
+            ``{timestamp}`` field, when it is written in a language other than
+            the request's (a record form's "Generated {timestamp}"). Without
+            one the stamp reads "Printed: ..." in the request's language.
+        baseline: Where the line sits, in points from the foot of the sheet;
+            a footer that already stands lower than the generic one passes a
+            lower line so the two do not touch.
 
     Returns:
         Whether anything was drawn. ``False`` when both pieces are off or empty;
         never raises, like the rest of the page furniture.
     """
     try:
-        stamp = _print_stamp_text(appearance.get("print_stamp"))
+        stamp = _print_stamp_text(appearance.get("print_stamp"), stamp_template)
         registration = ""
         if appearance.get("footer_show_registration"):
             registration = _profile_text(_read_company_profile(), "registration_line")
@@ -627,20 +723,20 @@ def draw_footer_second_line(canvas: Any, appearance: dict[str, Any], *, left: fl
 
         canvas.saveState()
         try:
-            canvas.setFillColor(colors.HexColor(appearance.get("footer_color") or _FOOTER_COLOR))
+            color = appearance.get("footer_color") or _FOOTER_COLOR
+            canvas.setFillColor(colors.HexColor(color))
             size = _FOOTER_SECOND_LINE_SIZE
+            y = _FOOTER_SECOND_LINE_Y if baseline is None else baseline
             if stamp:
-                canvas.setFont(BODY_FONT, size)
-                canvas.drawRightString(right_x, _FOOTER_SECOND_LINE_Y, stamp)
+                draw_furniture_line(canvas, stamp, x=right_x, y=y, size=size, color=color, align="right")
             if registration:
-                text, face, fitted = pdf_fit_line(
+                text, _face, fitted = pdf_fit_line(
                     registration[:160],
                     pdf_room_beside(right_x - left, stamp, size=size),
                     size=size,
                     base=BODY_FONT,
                 )
-                canvas.setFont(face, fitted)
-                canvas.drawString(left, _FOOTER_SECOND_LINE_Y, text)
+                draw_furniture_line(canvas, text, x=left, y=y, size=fitted, color=color)
         finally:
             canvas.restoreState()
     except Exception:  # noqa: BLE001 - the footer's second line must never break a PDF export
@@ -1356,6 +1452,7 @@ __all__ = [
     "branded_header_logo",
     "branded_letterhead",
     "draw_footer_second_line",
+    "draw_furniture_line",
     "draw_watermark",
     "page_number_text",
     "render_sample_pdf",

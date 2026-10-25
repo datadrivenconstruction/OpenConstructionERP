@@ -410,9 +410,10 @@ _FOOTER_FIELDS = (
 #: The second footer line (the registration line and the print stamp), drawn by
 #: :func:`app.core.pdf_branding.draw_footer_second_line`. Listed apart from
 #: :data:`_FOOTER_FIELDS` because only the generators that call that helper
-#: honour it (the RFI and the meeting minutes). The daily report already prints
-#: a second footer line of its own, and a record form built by
-#: ``register_export`` joins the list when its footer makes the call.
+#: honour it: the RFI, the meeting minutes and the register and record forms
+#: that ``register_export`` builds (the purchase order, goods receipt, invoice
+#: and payment). The daily report already prints a second footer line of its
+#: own.
 _FOOTER_EXTRA_FIELDS = ("print_stamp", "footer_show_registration")
 
 #: The sheet of :func:`app.core.register_export.build_record_pdf`: portrait A4,
@@ -496,7 +497,7 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             "purchase_order",
             "Purchase order",
             "settings.document_templates.types.purchase_order",
-            _LETTERHEAD_FIELDS + _FOOTER_FIELDS,
+            _LETTERHEAD_FIELDS + _FOOTER_FIELDS + _FOOTER_EXTRA_FIELDS,
             _RECORD_FORM_SHEET,
             sections=("line_items", "totals", "terms", "supplier_confirmation", "notes", "signatures"),
         ),
@@ -504,7 +505,7 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             "goods_receipt",
             "Goods receipt",
             "settings.document_templates.types.goods_receipt",
-            _LETTERHEAD_FIELDS + _FOOTER_FIELDS,
+            _LETTERHEAD_FIELDS + _FOOTER_FIELDS + _FOOTER_EXTRA_FIELDS,
             _RECORD_FORM_SHEET,
             sections=("line_items", "rejections", "notes", "signatures"),
         ),
@@ -512,7 +513,7 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             "invoice",
             "Invoice",
             "settings.document_templates.types.invoice",
-            _LETTERHEAD_FIELDS + _FOOTER_FIELDS,
+            _LETTERHEAD_FIELDS + _FOOTER_FIELDS + _FOOTER_EXTRA_FIELDS,
             _RECORD_FORM_SHEET,
             sections=("line_items", "totals", "payments", "notes", "signatures"),
         ),
@@ -520,7 +521,7 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             "payment",
             "Payment",
             "settings.document_templates.types.payment",
-            _LETTERHEAD_FIELDS + _FOOTER_FIELDS,
+            _LETTERHEAD_FIELDS + _FOOTER_FIELDS + _FOOTER_EXTRA_FIELDS,
             _RECORD_FORM_SHEET,
             sections=("invoice", "withholding", "signatures"),
         ),

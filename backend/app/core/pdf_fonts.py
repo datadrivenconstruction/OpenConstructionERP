@@ -135,7 +135,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-from app.core.pdf_rtl import install_reportlab_rtl, text_direction
+from app.core.pdf_rtl import install_reportlab_rtl, text_direction, visual_text
 
 logger = logging.getLogger(__name__)
 
@@ -921,15 +921,29 @@ def pdf_room_beside(width: float, reserved: str | None, *, size: float = 7.0, ga
     """The width left for a line of furniture beside ``reserved`` on one baseline.
 
     ``reserved`` is what the renderer draws at the other end of the band, in
-    practice the page number, measured in the body face because that is what
-    every page number in the app is drawn in. Returns the whole ``width`` when
-    nothing shares the baseline.
+    practice the page number, measured in the face that will actually draw it:
+    a translated page number can be Chinese, Korean, Thai or Arabic, and each of
+    those is a different width from the same words in the body face. Returns the
+    whole ``width`` when nothing shares the baseline.
     """
     if not reserved:
         return width
+    return max(0.0, width - pdf_text_width(reserved, size) - gap)
+
+
+def pdf_text_width(text: str, size: float, *, bold: bool = False, base: str | None = None) -> float:
+    """The width of ``text`` in points, in the face :func:`pdf_font_for_text` picks for it.
+
+    Right-to-left text is measured in the shape it is drawn in (joined letters,
+    visual order), because the joined forms are not the width of the isolated
+    ones.
+    """
     from reportlab.pdfbase.pdfmetrics import stringWidth
 
-    return max(0.0, width - stringWidth(reserved, BODY_FONT, size) - gap)
+    if not text:
+        return 0.0
+    face = pdf_font_for_text(text, bold=bold, base=base or (BOLD_FONT if bold else BODY_FONT))
+    return float(stringWidth(visual_text(text, face=face), face, size))
 
 
 def pdf_style_for_text(style: Any, text: str | None, *, base: str | None = None) -> Any:
@@ -971,6 +985,14 @@ def pdf_style_for_text(style: Any, text: str | None, *, base: str | None = None)
     if shaping:
         return style.clone(name, fontName=face, shaping=1)
     return style.clone(name, fontName=face)
+
+
+def pdf_markup(text: str | None, *, base: str | None = None, bold: bool = False) -> str:
+    """Paragraph markup for ``text``: escaped, ready for ``Paragraph(markup, style)``.
+
+    Pair it with :func:`pdf_style_for_text` for the same string.
+    """
+    return html.escape(text or "", quote=True)
 
 
 def pdf_fitted_style(style: Any, text: str | None, size: float, *, base: str | None = None) -> Any:
@@ -1591,8 +1613,10 @@ __all__ = [
     "has_cjk",
     "pdf_font",
     "pdf_font_for_text",
+    "pdf_markup",
     "pdf_shaping_for_text",
     "pdf_style_for_text",
+    "pdf_text_width",
     "pdf_table_available_width",
     "pdf_table_column_widths",
     "pdf_table_font_commands",

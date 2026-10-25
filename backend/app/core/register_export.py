@@ -72,12 +72,14 @@ from reportlab.platypus import (
 )
 
 from app.core.document_locale import normalize_document_locale, resolve_document_locale, translate
+from app.core.pdf_appearance import DOCUMENT_TYPES
 from app.core.pdf_branding import (
     branded_appearance,
     branded_cover_brand,
     branded_doc_metadata,
     branded_header_logo,
     branded_letterhead,
+    draw_footer_second_line,
     draw_watermark,
 )
 from app.core.pdf_fonts import (
@@ -919,6 +921,10 @@ def _printed_columns(document: RegisterDocument) -> list[int]:
     ]
 
 
+#: Baseline of the footer's second line on a register or record form.
+_SECOND_LINE_BASELINE = 3.5 * mm
+
+
 def _footer_callback(
     *,
     page_label: str,
@@ -956,6 +962,13 @@ def _footer_callback(
     custom_footer = str(look.get("footer_text") or "").strip()
     show_page_numbers = look.get("show_page_numbers", True) is not False
     usable = page_width - 2 * margin_side
+    # Only a type that lists the two second-line settings among its fields
+    # honours them (the record forms and the RFI log); a register without a type
+    # prints no second line whatever the workspace saved. A saved stamp is drawn
+    # on that line, so the main line stops carrying the generated time as well.
+    form_type = DOCUMENT_TYPES.get(doc_type or "")
+    second_line = form_type is not None and "print_stamp" in form_type.fields
+    default_stamp = not second_line or (look.get("print_stamp") or "auto") == "auto"
 
     def _draw(canvas: Any, doc: Any) -> None:
         canvas.saveState()
@@ -969,7 +982,7 @@ def _footer_callback(
         left_text, _face, left_size = pdf_fit_line(
             custom_footer or branded_cover_brand(),
             pdf_room_beside(usable, page_text),
-            suffix="" if custom_footer else f"  |  {generated_label.format(timestamp=generated)}",
+            suffix="" if custom_footer or not default_stamp else f"  |  {generated_label.format(timestamp=generated)}",
             base=BODY_FONT,
         )
         left = Paragraph(html.escape(left_text, quote=True), pdf_fitted_style(style, left_text, left_size))
@@ -988,6 +1001,18 @@ def _footer_callback(
             _, head_h = head.wrapOn(canvas, usable, 20)
             head.drawOn(canvas, margin_side, page_height - _RUNNING_TITLE_TOP - head_h)
         canvas.restoreState()
+        if second_line:
+            # Under the main line, which stands at 9 mm here, so the stamp and
+            # the registration line sit at 3.5 mm: clear of its descenders and
+            # inside the 18 mm bottom margin.
+            draw_footer_second_line(
+                canvas,
+                look,
+                left=margin_side,
+                right_x=page_width - margin_side,
+                stamp_template=generated_label,
+                baseline=_SECOND_LINE_BASELINE,
+            )
         if not (letterhead_on_first_page and doc.page == 1):
             branded_header_logo(canvas, doc)
 

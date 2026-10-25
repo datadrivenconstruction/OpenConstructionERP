@@ -352,7 +352,13 @@ def _make_page_callback(
             right = Paragraph(html.escape(page_text, quote=True), pdf_style_for_text(footer_right, page_text))
             _, right_h = right.wrapOn(canvas, page_box, 20)
             right.drawOn(canvas, PAGE_WIDTH - MARGIN_RIGHT - page_box, 9 * mm - right_h + 2)
-        draw_footer_second_line(canvas, look, left=MARGIN_LEFT, right_x=PAGE_WIDTH - MARGIN_RIGHT)
+        draw_footer_second_line(
+            canvas,
+            look,
+            left=MARGIN_LEFT,
+            right_x=PAGE_WIDTH - MARGIN_RIGHT,
+            stamp_template=tr(locale, "footer_generated", timestamp="{timestamp}"),
+        )
         if running_title and doc.page > 1:
             head_text, _head_face, head_size = pdf_fit_line(
                 running_title, USABLE_WIDTH - 50 * mm, size=8.0, bold=True, base=BOLD_FONT
