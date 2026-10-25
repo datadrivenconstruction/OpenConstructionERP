@@ -50584,6 +50584,10 @@ const resource = {
     "settings.work_week_saturday": "วันเสาร์",
     "settings.work_week_start": "สัปดาห์เริ่มวัน",
     "settings.work_week_sunday": "วันอาทิตย์",
+    "settings.footer_title": "ส่วนท้ายของแถบด้านข้าง",
+    "settings.footer_subtitle": "เลือกปุ่มที่จะแสดงที่ด้านล่างของเมนูด้านซ้าย",
+    "settings.footer_show": "แสดง {{label}} ที่ส่วนท้ายของแถบด้านข้าง",
+    "settings.footer_note": "แม้ซ่อนปุ่มการตั้งค่า ก็ยังเปิดการตั้งค่าได้จากเมนูโปรไฟล์ที่มุมขวาบน",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "คำสั่งเปลี่ยนแปลง",
     "approvalRoutes.kind_contract": "สัญญา",

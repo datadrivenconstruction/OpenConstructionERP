@@ -50830,6 +50830,10 @@ const resource = {
     "settings.work_week_saturday": "Lauantai",
     "settings.work_week_start": "Viikko alkaa",
     "settings.work_week_sunday": "Sunnuntai",
+    "settings.footer_title": "Sivupalkin alareuna",
+    "settings.footer_subtitle": "Valitse, mitkä painikkeet näkyvät vasemman valikon alaosassa.",
+    "settings.footer_show": "Näytä {{label}} sivupalkin alareunassa",
+    "settings.footer_note": "Asetukset pysyvät käytettävissä oikean yläkulman profiilivalikosta, vaikka sen painike olisi piilotettu.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Muutostilaus",
     "approvalRoutes.kind_contract": "Sopimus",

@@ -52187,6 +52187,10 @@ const resource = {
     "settings.work_week_saturday": "Shanba",
     "settings.work_week_start": "Hafta boshlanishi",
     "settings.work_week_sunday": "Yakshanba",
+    "settings.footer_title": "Yon panelning pastki qismi",
+    "settings.footer_subtitle": "Chap menyuning pastida qaysi tugmalar ko‘rinishini tanlang.",
+    "settings.footer_show": "Yon panel pastida {{label}} ko‘rsatilsin",
+    "settings.footer_note": "Sozlamalar tugmasi yashirilgan bo‘lsa ham, yuqori o‘ngdagi profil menyusidan Sozlamalarni ochish mumkin.",
     // --- /Settings → Company & documents ---
     "boq.import_preview.back": "Orqaga",
     "boq.import_preview.cancel": "Bekor qilish",

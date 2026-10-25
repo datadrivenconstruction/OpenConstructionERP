@@ -50794,6 +50794,10 @@ const resource = {
     "settings.work_week_saturday": "ہفتہ",
     "settings.work_week_start": "ہفتہ شروع ہوتا ہے",
     "settings.work_week_sunday": "اتوار",
+    "settings.footer_title": "سائیڈ بار کا نچلا حصہ",
+    "settings.footer_subtitle": "منتخب کریں کہ بائیں مینو کے نیچے کون سے بٹن نظر آئیں۔",
+    "settings.footer_show": "سائیڈ بار کے نچلے حصے میں {{label}} دکھائیں",
+    "settings.footer_note": "ترتیبات کا بٹن چھپا ہو تب بھی اوپر دائیں جانب پروفائل مینو سے ترتیبات کھل سکتی ہیں۔",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "تبدیلی آرڈر",
     "approvalRoutes.kind_contract": "کنٹریکٹ",

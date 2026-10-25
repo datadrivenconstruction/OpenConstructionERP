@@ -45378,6 +45378,10 @@ const resource = {
     "settings.style_text_largest": "Largest, 137.5%",
     "settings.style_text_preview": "The quick brown fox: 1,250.00 m3 of concrete, C30/37.",
     "settings.window_zoom_title": "Window zoom",
+    "settings.footer_title": "Sidebar footer",
+    "settings.footer_subtitle": "Choose which buttons appear at the bottom of the left menu.",
+    "settings.footer_show": "Show {{label}} in the sidebar footer",
+    "settings.footer_note": "Settings stays available from the profile menu at the top right, even when its button is hidden.",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

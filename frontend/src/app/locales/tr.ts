@@ -51707,6 +51707,10 @@ const resource = {
     "settings.work_week_saturday": "Cumartesi",
     "settings.work_week_start": "Hafta başlangıcı",
     "settings.work_week_sunday": "Pazar",
+    "settings.footer_title": "Kenar çubuğu alt bölümü",
+    "settings.footer_subtitle": "Sol menünün altında hangi düğmelerin görüneceğini seçin.",
+    "settings.footer_show": "{{label}} öğesini kenar çubuğu alt bölümünde göster",
+    "settings.footer_note": "Düğmesi gizlenmiş olsa bile Ayarlar, sağ üstteki profil menüsünden erişilebilir kalır.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Değişiklik emri",
     "approvalRoutes.kind_contract": "Sözleşme",

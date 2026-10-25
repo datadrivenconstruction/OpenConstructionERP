@@ -50943,6 +50943,10 @@ const resource = {
     "settings.work_week_saturday": "Ишемби",
     "settings.work_week_start": "Апта башталат",
     "settings.work_week_sunday": "Жекшемби",
+    "settings.footer_title": "Каптал тактанын төмөнкү бөлүгү",
+    "settings.footer_subtitle": "Сол жактагы менюнун ылдый жагында кайсы баскычтар көрүнөрүн тандаңыз.",
+    "settings.footer_show": "Каптал тактанын төмөнкү бөлүгүндө {{label}} көрсөтүү",
+    "settings.footer_note": "Жөндөөлөр баскычы жашырылса да, жогорку оң жактагы профиль менюсунан жеткиликтүү болот.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгөртүү буйругу",
     "approvalRoutes.kind_contract": "Келишим",

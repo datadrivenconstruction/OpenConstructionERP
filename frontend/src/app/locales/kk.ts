@@ -50787,6 +50787,10 @@ const resource = {
     "settings.work_week_saturday": "Сенбі",
     "settings.work_week_start": "Апта басталады",
     "settings.work_week_sunday": "Жексенбі",
+    "settings.footer_title": "Бүйір тақтасының төменгі бөлігі",
+    "settings.footer_subtitle": "Сол жақ мәзірдің төменгі жағында қандай түймелер көрінетінін таңдаңыз.",
+    "settings.footer_show": "Бүйір тақтасының төменгі бөлігінде {{label}} көрсету",
+    "settings.footer_note": "Параметрлер түймесі жасырылса да, оң жақ жоғарыдағы профиль мәзірінен қолжетімді болады.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгеріс бұйрығы",
     "approvalRoutes.kind_contract": "Келісімшарт",

@@ -50786,6 +50786,10 @@ const resource = {
     "settings.work_week_saturday": "Σάββατο",
     "settings.work_week_start": "Η εβδομάδα αρχίζει την",
     "settings.work_week_sunday": "Κυριακή",
+    "settings.footer_title": "Υποσέλιδο πλαϊνής στήλης",
+    "settings.footer_subtitle": "Επιλέξτε ποια κουμπιά εμφανίζονται στο κάτω μέρος του αριστερού μενού.",
+    "settings.footer_show": "Εμφάνιση του «{{label}}» στο υποσέλιδο της πλαϊνής στήλης",
+    "settings.footer_note": "Οι Ρυθμίσεις παραμένουν διαθέσιμες από το μενού προφίλ πάνω δεξιά, ακόμη και όταν το κουμπί τους είναι κρυμμένο.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Εντολή αλλαγής",
     "approvalRoutes.kind_contract": "Σύμβαση",

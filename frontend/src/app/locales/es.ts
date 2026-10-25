@@ -53687,6 +53687,10 @@ const resource = {
     "settings.work_week_saturday": "Sábado",
     "settings.work_week_start": "La semana empieza el",
     "settings.work_week_sunday": "Domingo",
+    "settings.footer_title": "Pie de la barra lateral",
+    "settings.footer_subtitle": "Elija qué botones aparecen en la parte inferior del menú izquierdo.",
+    "settings.footer_show": "Mostrar {{label}} en el pie de la barra lateral",
+    "settings.footer_note": "Ajustes sigue disponible en el menú de perfil, arriba a la derecha, aunque su botón esté oculto.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Orden de cambio",
     "approvalRoutes.kind_contract": "Contrato",

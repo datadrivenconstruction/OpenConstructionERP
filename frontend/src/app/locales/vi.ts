@@ -50592,6 +50592,10 @@ const resource = {
     "settings.work_week_saturday": "Thứ Bảy",
     "settings.work_week_start": "Tuần bắt đầu từ",
     "settings.work_week_sunday": "Chủ Nhật",
+    "settings.footer_title": "Chân thanh bên",
+    "settings.footer_subtitle": "Chọn các nút hiển thị ở cuối menu bên trái.",
+    "settings.footer_show": "Hiện {{label}} ở chân thanh bên",
+    "settings.footer_note": "Cài đặt vẫn truy cập được từ menu hồ sơ ở góc trên bên phải, kể cả khi nút của nó bị ẩn.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Lệnh thay đổi",
     "approvalRoutes.kind_contract": "Hợp đồng",

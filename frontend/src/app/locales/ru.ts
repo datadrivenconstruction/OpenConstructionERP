@@ -53726,6 +53726,10 @@ const resource = {
     "settings.style_text_largest": "Максимальный, 137,5%",
     "settings.style_text_preview": "Пример текста: 1 250,00 м3 бетона, C30/37.",
     "settings.window_zoom_title": "Масштаб окна",
+    "settings.footer_title": "Низ боковой панели",
+    "settings.footer_subtitle": "Выберите, какие кнопки показывать внизу левого меню.",
+    "settings.footer_show": "Показывать «{{label}}» внизу боковой панели",
+    "settings.footer_note": "Настройки остаются доступны из меню профиля в правом верхнем углу, даже если их кнопка скрыта.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",

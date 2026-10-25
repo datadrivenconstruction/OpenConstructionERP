@@ -52255,6 +52255,10 @@ const resource = {
     "settings.work_week_saturday": "Sobota",
     "settings.work_week_start": "Tydzień zaczyna się w",
     "settings.work_week_sunday": "Niedziela",
+    "settings.footer_title": "Stopka paska bocznego",
+    "settings.footer_subtitle": "Wybierz, które przyciski pojawiają się na dole lewego menu.",
+    "settings.footer_show": "Pokaż {{label}} w stopce paska bocznego",
+    "settings.footer_note": "Ustawienia pozostają dostępne z menu profilu w prawym górnym rogu, nawet gdy ich przycisk jest ukryty.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Zlecenie zmiany",
     "approvalRoutes.kind_contract": "Umowa",

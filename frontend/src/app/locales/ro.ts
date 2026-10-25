@@ -51106,6 +51106,10 @@ const resource = {
     "settings.work_week_saturday": "Sâmbătă",
     "settings.work_week_start": "Săptămâna începe cu",
     "settings.work_week_sunday": "Duminică",
+    "settings.footer_title": "Subsolul barei laterale",
+    "settings.footer_subtitle": "Alegeți ce butoane apar în partea de jos a meniului din stânga.",
+    "settings.footer_show": "Afișează {{label}} în subsolul barei laterale",
+    "settings.footer_note": "Setările rămân accesibile din meniul de profil din dreapta sus, chiar dacă butonul lor este ascuns.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Dispoziție de modificare",
     "approvalRoutes.kind_contract": "Contract",

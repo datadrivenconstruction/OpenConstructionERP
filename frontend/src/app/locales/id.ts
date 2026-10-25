@@ -50577,6 +50577,10 @@ const resource = {
     "settings.work_week_saturday": "Sabtu",
     "settings.work_week_start": "Minggu dimulai pada",
     "settings.work_week_sunday": "Minggu",
+    "settings.footer_title": "Footer sidebar",
+    "settings.footer_subtitle": "Pilih tombol mana yang muncul di bagian bawah menu kiri.",
+    "settings.footer_show": "Tampilkan {{label}} di footer sidebar",
+    "settings.footer_note": "Pengaturan tetap tersedia dari menu profil di kanan atas, meskipun tombolnya disembunyikan.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Perintah perubahan",
     "approvalRoutes.kind_contract": "Kontrak",

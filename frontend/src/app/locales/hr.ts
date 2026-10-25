@@ -51110,6 +51110,10 @@ const resource = {
     "settings.work_week_saturday": "Subota",
     "settings.work_week_start": "Tjedan počinje",
     "settings.work_week_sunday": "Nedjelja",
+    "settings.footer_title": "Podnožje bočne trake",
+    "settings.footer_subtitle": "Odaberite koji se gumbi prikazuju na dnu lijevog izbornika.",
+    "settings.footer_show": "Prikaži {{label}} u podnožju bočne trake",
+    "settings.footer_note": "Postavke ostaju dostupne iz izbornika profila gore desno, čak i kad je njihov gumb skriven.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Nalog za izmjenu",
     "approvalRoutes.kind_contract": "Ugovor",

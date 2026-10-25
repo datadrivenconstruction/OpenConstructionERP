@@ -51064,6 +51064,10 @@ const resource = {
     "settings.work_week_saturday": "שבת",
     "settings.work_week_start": "השבוע מתחיל ב־",
     "settings.work_week_sunday": "ראשון",
+    "settings.footer_title": "תחתית סרגל הצד",
+    "settings.footer_subtitle": "בחרו אילו לחצנים יופיעו בתחתית התפריט השמאלי.",
+    "settings.footer_show": "הצג את {{label}} בתחתית סרגל הצד",
+    "settings.footer_note": "ההגדרות נשארות זמינות מתפריט הפרופיל בפינה הימנית העליונה, גם כשהלחצן שלהן מוסתר.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "צו שינוי",
     "approvalRoutes.kind_contract": "חוזה",

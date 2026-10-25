@@ -50758,6 +50758,10 @@ const resource = {
     "settings.work_week_saturday": "Laupäev",
     "settings.work_week_start": "Nädal algab",
     "settings.work_week_sunday": "Pühapäev",
+    "settings.footer_title": "Külgriba jalus",
+    "settings.footer_subtitle": "Valige, millised nupud kuvatakse vasaku menüü allosas.",
+    "settings.footer_show": "Kuva {{label}} külgriba jaluses",
+    "settings.footer_note": "Seaded on endiselt kättesaadavad paremas ülanurgas olevast profiilimenüüst, isegi kui nende nupp on peidetud.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Muudatuskorraldus",
     "approvalRoutes.kind_contract": "Leping",

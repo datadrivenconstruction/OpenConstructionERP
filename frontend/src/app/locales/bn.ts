@@ -51082,6 +51082,10 @@ const resource = {
     "settings.work_week_saturday": "শনিবার",
     "settings.work_week_start": "সপ্তাহ শুরু হয়",
     "settings.work_week_sunday": "রবিবার",
+    "settings.footer_title": "সাইডবারের নিচের অংশ",
+    "settings.footer_subtitle": "বাম মেনুর নিচে কোন বোতামগুলো দেখা যাবে তা বেছে নিন।",
+    "settings.footer_show": "সাইডবারের নিচের অংশে {{label}} দেখান",
+    "settings.footer_note": "বোতাম লুকানো থাকলেও উপরে ডানদিকের প্রোফাইল মেনু থেকে সেটিংস পাওয়া যাবে।",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "পরিবর্তন আদেশ",
     "approvalRoutes.kind_contract": "চুক্তি",

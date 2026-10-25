@@ -53688,6 +53688,10 @@ const resource = {
     "settings.work_week_saturday": "Samedi",
     "settings.work_week_start": "La semaine commence le",
     "settings.work_week_sunday": "Dimanche",
+    "settings.footer_title": "Pied de la barre latérale",
+    "settings.footer_subtitle": "Choisissez les boutons affichés en bas du menu de gauche.",
+    "settings.footer_show": "Afficher {{label}} dans le pied de la barre latérale",
+    "settings.footer_note": "Les paramètres restent accessibles depuis le menu du profil en haut à droite, même si leur bouton est masqué.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordre de modification",
     "approvalRoutes.kind_contract": "Contrat",

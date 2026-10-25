@@ -50830,6 +50830,10 @@ const resource = {
     "settings.work_week_saturday": "Събота",
     "settings.work_week_start": "Седмицата започва в",
     "settings.work_week_sunday": "Неделя",
+    "settings.footer_title": "Долна част на страничната лента",
+    "settings.footer_subtitle": "Изберете кои бутони да се показват най-долу в лявото меню.",
+    "settings.footer_show": "Показване на {{label}} в долната част на страничната лента",
+    "settings.footer_note": "Настройките остават достъпни от менюто на профила горе вдясно, дори когато бутонът им е скрит.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Заповед за промяна",
     "approvalRoutes.kind_contract": "Договор",

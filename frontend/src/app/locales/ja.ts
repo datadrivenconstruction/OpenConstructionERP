@@ -52116,6 +52116,10 @@ const resource = {
     "settings.work_week_saturday": "土曜日",
     "settings.work_week_start": "週の始まり",
     "settings.work_week_sunday": "日曜日",
+    "settings.footer_title": "サイドバーのフッター",
+    "settings.footer_subtitle": "左メニューの下部に表示するボタンを選びます。",
+    "settings.footer_show": "サイドバーのフッターに{{label}}を表示",
+    "settings.footer_note": "設定ボタンを非表示にしても、右上のプロフィールメニューから設定を開けます。",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "変更指示",
     "approvalRoutes.kind_contract": "契約",

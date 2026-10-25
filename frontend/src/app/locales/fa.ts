@@ -50794,6 +50794,10 @@ const resource = {
     "settings.work_week_saturday": "شنبه",
     "settings.work_week_start": "هفته شروع می‌شود از",
     "settings.work_week_sunday": "یکشنبه",
+    "settings.footer_title": "پایین نوار کناری",
+    "settings.footer_subtitle": "انتخاب کنید کدام دکمه‌ها در پایین منوی سمت چپ نمایش داده شوند.",
+    "settings.footer_show": "نمایش «{{label}}» در پایین نوار کناری",
+    "settings.footer_note": "حتی اگر دکمه تنظیمات پنهان باشد، از منوی نمایه در بالا سمت راست در دسترس می‌ماند.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "دستور تغییر",
     "approvalRoutes.kind_contract": "قرارداد",

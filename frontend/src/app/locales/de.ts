@@ -53277,6 +53277,10 @@ const resource = {
     "settings.style_text_largest": "Am größten, 137,5 %",
     "settings.style_text_preview": "Beispieltext: 1.250,00 m3 Beton, C30/37.",
     "settings.window_zoom_title": "Fensterzoom",
+    "settings.footer_title": "Seitenleisten-Fuß",
+    "settings.footer_subtitle": "Wählen Sie, welche Schaltflächen unten im linken Menü erscheinen.",
+    "settings.footer_show": "{{label}} im Fuß der Seitenleiste anzeigen",
+    "settings.footer_note": "Die Einstellungen bleiben über das Profilmenü oben rechts erreichbar, auch wenn ihre Schaltfläche ausgeblendet ist.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",

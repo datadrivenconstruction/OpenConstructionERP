@@ -51202,6 +51202,10 @@ const resource = {
     "settings.work_week_saturday": "토요일",
     "settings.work_week_start": "주 시작 요일",
     "settings.work_week_sunday": "일요일",
+    "settings.footer_title": "사이드바 하단",
+    "settings.footer_subtitle": "왼쪽 메뉴 하단에 표시할 버튼을 선택하세요.",
+    "settings.footer_show": "사이드바 하단에 {{label}} 표시",
+    "settings.footer_note": "설정 버튼을 숨겨도 오른쪽 위의 프로필 메뉴에서 설정을 열 수 있습니다.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "변경 지시",
     "approvalRoutes.kind_contract": "계약",

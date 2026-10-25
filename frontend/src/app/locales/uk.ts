@@ -52796,6 +52796,10 @@ const resource = {
     "settings.work_week_saturday": "Субота",
     "settings.work_week_start": "Тиждень починається з",
     "settings.work_week_sunday": "Неділя",
+    "settings.footer_title": "Низ бічної панелі",
+    "settings.footer_subtitle": "Виберіть, які кнопки показувати внизу лівого меню.",
+    "settings.footer_show": "Показувати «{{label}}» внизу бічної панелі",
+    "settings.footer_note": "Налаштування залишаються доступними з меню профілю у правому верхньому куті, навіть якщо їхню кнопку приховано.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Розпорядження про зміни",
     "approvalRoutes.kind_contract": "Договір",

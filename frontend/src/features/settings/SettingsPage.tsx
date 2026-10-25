@@ -19,6 +19,7 @@ import { AppearanceStyleCard } from './AppearanceStyleCard';
 import { WorkspaceBrandCard } from './WorkspaceBrandCard';
 import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
+import { SidebarFooterCard } from './SidebarFooterCard';
 import VectorStatusCard from './VectorStatusCard';
 import SemanticModelSettings from './SemanticModelSettings';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -1836,6 +1837,7 @@ export function SettingsPage() {
               <MenuAppearanceCard />
               <WorkspaceBrandCard />
               <WorkPrefsCard />
+              <SidebarFooterCard />
             </>
           )}
 

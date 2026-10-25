@@ -50770,6 +50770,10 @@ const resource = {
     "settings.work_week_saturday": "Sabado",
     "settings.work_week_start": "Nagsisimula ang linggo sa",
     "settings.work_week_sunday": "Linggo",
+    "settings.footer_title": "Ibaba ng sidebar",
+    "settings.footer_subtitle": "Piliin kung aling mga button ang lalabas sa ibaba ng kaliwang menu.",
+    "settings.footer_show": "Ipakita ang {{label}} sa ibaba ng sidebar",
+    "settings.footer_note": "Mananatiling available ang Settings sa profile menu sa kanang itaas, kahit nakatago ang button nito.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Change order",
     "approvalRoutes.kind_contract": "Kontrata",

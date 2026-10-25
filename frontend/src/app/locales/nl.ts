@@ -51713,6 +51713,10 @@ const resource = {
     "settings.work_week_saturday": "Zaterdag",
     "settings.work_week_start": "De week begint op",
     "settings.work_week_sunday": "Zondag",
+    "settings.footer_title": "Voet van de zijbalk",
+    "settings.footer_subtitle": "Kies welke knoppen onderaan het linkermenu staan.",
+    "settings.footer_show": "{{label}} tonen in de voet van de zijbalk",
+    "settings.footer_note": "Instellingen blijft bereikbaar via het profielmenu rechtsboven, ook als de knop verborgen is.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Wijzigingsopdracht",
     "approvalRoutes.kind_contract": "Contract",

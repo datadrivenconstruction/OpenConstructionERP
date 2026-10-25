@@ -50484,6 +50484,10 @@ const resource = {
     "settings.work_week_saturday": "Бямба",
     "settings.work_week_start": "Долоо хоног эхлэх өдөр",
     "settings.work_week_sunday": "Ням",
+    "settings.footer_title": "Хажуу самбарын доод хэсэг",
+    "settings.footer_subtitle": "Зүүн цэсийн доор ямар товчнууд харагдахыг сонгоно уу.",
+    "settings.footer_show": "Хажуу самбарын доод хэсэгт {{label}} харуулах",
+    "settings.footer_note": "Тохиргооны товч нуугдсан ч баруун дээд булангийн профайл цэснээс Тохиргоо нээгдэнэ.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өөрчлөлтийн тушаал",
     "approvalRoutes.kind_contract": "Гэрээ",

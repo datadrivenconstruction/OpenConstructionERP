@@ -53053,6 +53053,10 @@ const resource = {
     "settings.work_week_saturday": "星期六",
     "settings.work_week_start": "每周始于",
     "settings.work_week_sunday": "星期日",
+    "settings.footer_title": "侧边栏底部",
+    "settings.footer_subtitle": "选择在左侧菜单底部显示哪些按钮。",
+    "settings.footer_show": "在侧边栏底部显示{{label}}",
+    "settings.footer_note": "即使隐藏了设置按钮，仍可通过右上角的个人资料菜单打开设置。",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "变更单",
     "approvalRoutes.kind_contract": "合同",

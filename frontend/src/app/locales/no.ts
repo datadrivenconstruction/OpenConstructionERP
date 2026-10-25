@@ -50832,6 +50832,10 @@ const resource = {
     "settings.work_week_saturday": "Lørdag",
     "settings.work_week_start": "Uken starter på",
     "settings.work_week_sunday": "Søndag",
+    "settings.footer_title": "Bunn av sidefeltet",
+    "settings.footer_subtitle": "Velg hvilke knapper som vises nederst i venstremenyen.",
+    "settings.footer_show": "Vis {{label}} nederst i sidefeltet",
+    "settings.footer_note": "Innstillinger er fortsatt tilgjengelig fra profilmenyen øverst til høyre, selv om knappen er skjult.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Endringsordre",
     "approvalRoutes.kind_contract": "Kontrakt",

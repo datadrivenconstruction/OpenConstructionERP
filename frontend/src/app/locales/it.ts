@@ -51989,6 +51989,10 @@ const resource = {
     "settings.work_week_saturday": "Sabato",
     "settings.work_week_start": "La settimana inizia il",
     "settings.work_week_sunday": "Domenica",
+    "settings.footer_title": "Piè di pagina della barra laterale",
+    "settings.footer_subtitle": "Scegli quali pulsanti compaiono in fondo al menu di sinistra.",
+    "settings.footer_show": "Mostra {{label}} nel piè di pagina della barra laterale",
+    "settings.footer_note": "Le impostazioni restano raggiungibili dal menu del profilo in alto a destra, anche se il loro pulsante è nascosto.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordine di modifica",
     "approvalRoutes.kind_contract": "Contratto",

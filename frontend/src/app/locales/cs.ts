@@ -51994,6 +51994,10 @@ const resource = {
     "settings.work_week_saturday": "Sobota",
     "settings.work_week_start": "Týden začíná",
     "settings.work_week_sunday": "Neděle",
+    "settings.footer_title": "Patička postranního panelu",
+    "settings.footer_subtitle": "Vyberte, která tlačítka se zobrazí dole v levé nabídce.",
+    "settings.footer_show": "Zobrazit {{label}} v patičce postranního panelu",
+    "settings.footer_note": "Nastavení zůstanou dostupná z nabídky profilu vpravo nahoře, i když je jejich tlačítko skryté.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Změnový příkaz",
     "approvalRoutes.kind_contract": "Smlouva",

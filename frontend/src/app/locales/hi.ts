@@ -50837,6 +50837,10 @@ const resource = {
     "settings.work_week_saturday": "शनिवार",
     "settings.work_week_start": "सप्ताह शुरू होता है",
     "settings.work_week_sunday": "रविवार",
+    "settings.footer_title": "साइडबार का निचला भाग",
+    "settings.footer_subtitle": "चुनें कि बाएँ मेनू के नीचे कौन से बटन दिखें।",
+    "settings.footer_show": "साइडबार के निचले भाग में {{label}} दिखाएँ",
+    "settings.footer_note": "सेटिंग्स का बटन छिपा होने पर भी ऊपर दाईं ओर प्रोफ़ाइल मेनू से सेटिंग्स उपलब्ध रहती हैं।",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "परिवर्तन आदेश",
     "approvalRoutes.kind_contract": "अनुबंध",

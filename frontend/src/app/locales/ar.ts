@@ -53680,6 +53680,10 @@ const resource = {
     "settings.work_week_saturday": "السبت",
     "settings.work_week_start": "بداية الأسبوع",
     "settings.work_week_sunday": "الأحد",
+    "settings.footer_title": "تذييل الشريط الجانبي",
+    "settings.footer_subtitle": "اختر الأزرار التي تظهر في أسفل القائمة اليسرى.",
+    "settings.footer_show": "إظهار {{label}} في تذييل الشريط الجانبي",
+    "settings.footer_note": "تبقى الإعدادات متاحة من قائمة الملف الشخصي في أعلى اليمين حتى لو أُخفي زرها.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "أمر تغيير",
     "approvalRoutes.kind_contract": "عقد",
