@@ -277008,10 +277008,10 @@
     },
     {
       "name": "projects",
-      "ts_files": 40,
+      "ts_files": 39,
       "css_files": 0,
       "test_files": 17,
-      "total_files": 40
+      "total_files": 39
     },
     {
       "name": "property-dev",
@@ -277190,10 +277190,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 40,
+      "ts_files": 38,
       "css_files": 0,
       "test_files": 13,
-      "total_files": 40
+      "total_files": 38
     },
     {
       "name": "setup",
@@ -277400,10 +277400,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 27,
+      "ts_files": 31,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 27
+      "test_files": 8,
+      "total_files": 31
     },
     {
       "name": "voice",
@@ -279102,7 +279102,7 @@
     "total_schemas": 4191,
     "total_python_files": 2811,
     "frontend_features": 212,
-    "frontend_ts_files": 3609,
+    "frontend_ts_files": 3610,
     "frontend_backend_mapped": 189
   },
   "frontend_backend_mapping": {
