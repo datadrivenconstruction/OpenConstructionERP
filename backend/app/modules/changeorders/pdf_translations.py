@@ -7,8 +7,12 @@ asked for, what the engineer assessed, what was approved and the time each
 one costs. Its fixed strings live here, next to the renderer, the way
 :mod:`app.modules.rfi.pdf_translations` keeps the RFI's.
 
-English and Turkish are in the catalogue; any other request renders in
-English and the route says so in ``Content-Language``. The status, reason and
+The strings live in ``backend/locales/<code>.json`` under ``document_forms.changeorders``
+and are built into a catalogue by :func:`app.core.document_forms_i18n.document_form_catalogue`,
+so the document can be printed in every language a PDF can draw. A key a
+language has not translated reads English, and a language outside the
+catalogue (Bengali and Urdu, see ``REGISTER_UNRENDERABLE``) renders in English
+with the route saying so in ``Content-Language``. The status, reason and
 type words are short register words, not the explanatory sentences of
 :mod:`app.modules.changeorders.intl`, which are written for a tooltip and
 would not fit a column.
@@ -20,7 +24,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.register_export import DocumentCatalogue, export_filename
+from app.core.document_forms_i18n import register_form_catalogue
+from app.core.register_export import export_filename
 
 __all__ = [
     "CATALOGUE",
@@ -35,131 +40,9 @@ __all__ = [
 
 DEFAULT_PDF_LOCALE = "en"
 
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "register_title": "Change Order Register",
-        "doc_title": "Change Order",
-        "col_code": "Code",
-        "col_title": "Title",
-        "col_reason": "Reason",
-        "col_instrument": "Instrument",
-        "col_submitted": "Date submitted",
-        "col_contractor_amount": "Contractor amount",
-        "col_engineer_amount": "Engineer amount",
-        "col_approved_amount": "Approved amount",
-        "col_cost_impact": "Cost impact",
-        "col_time_impact": "Time impact (days)",
-        "col_approved_time": "Approved time (days)",
-        "time_impact": "Time impact",
-        "approved_time": "Approved time",
-        "col_approved": "Date approved",
-        "submitted_by": "Submitted by",
-        "approved_by": "Approved by",
-        "description": "Description",
-        "no_description": "No description recorded.",
-        "items": "Change items",
-        "item_description": "Description",
-        "item_change": "Change",
-        "item_unit": "Unit",
-        "item_original_quantity": "Original qty",
-        "item_new_quantity": "New qty",
-        "item_original_rate": "Original rate",
-        "item_new_rate": "New rate",
-        "item_cost_delta": "Cost difference",
-        "register_filename": "change-order-register",
-    },
-    "tr": {
-        "register_title": "Değişiklik Emirleri Kayıt Listesi",
-        "doc_title": "Değişiklik Emri",
-        "col_code": "Kod",
-        "col_title": "Başlık",
-        "col_reason": "Neden",
-        "col_instrument": "Belge türü",
-        "col_submitted": "Gönderilme tarihi",
-        "col_contractor_amount": "Yüklenici talebi",
-        "col_engineer_amount": "Mühendis değerlendirmesi",
-        "col_approved_amount": "Onaylanan tutar",
-        "col_cost_impact": "Maliyet etkisi",
-        "col_time_impact": "Süre etkisi (gün)",
-        "col_approved_time": "Onaylanan süre (gün)",
-        "time_impact": "Süre etkisi",
-        "approved_time": "Onaylanan süre",
-        "col_approved": "Onay tarihi",
-        "submitted_by": "Gönderen",
-        "approved_by": "Onaylayan",
-        "description": "Açıklama",
-        "no_description": "Açıklama kaydedilmedi.",
-        "items": "Değişiklik kalemleri",
-        "item_description": "Açıklama",
-        "item_change": "Değişiklik",
-        "item_unit": "Birim",
-        "item_original_quantity": "Önceki miktar",
-        "item_new_quantity": "Yeni miktar",
-        "item_original_rate": "Önceki birim fiyat",
-        "item_new_rate": "Yeni birim fiyat",
-        "item_cost_delta": "Maliyet farkı",
-        "register_filename": "degisiklik-emirleri-kayit-listesi",
-    },
-}
-
-# One entry per value in ``intl.CHANGE_ORDER_STATUSES``, ``intl.REASON_CATEGORIES``,
-# ``intl.VARIATION_TYPES`` and ``intl.CHANGE_TYPE_LABELS``.
-_LABELS: dict[str, dict[str, dict[str, str]]] = {
-    "status": {
-        "en": {
-            "draft": "Draft",
-            "submitted": "Submitted",
-            "approved": "Approved",
-            "rejected": "Rejected",
-            "executed": "Executed",
-        },
-        "tr": {
-            "draft": "Taslak",
-            "submitted": "Gönderildi",
-            "approved": "Onaylandı",
-            "rejected": "Reddedildi",
-            "executed": "Uygulandı",
-        },
-    },
-    "reason": {
-        "en": {
-            "client_request": "Client request",
-            "design_change": "Design change",
-            "unforeseen": "Unforeseen conditions",
-            "regulatory": "Regulatory",
-            "error": "Error or omission",
-            "non_conformance": "Non-conformance",
-            "value_engineering": "Value engineering",
-        },
-        "tr": {
-            "client_request": "İşveren talebi",
-            "design_change": "Tasarım değişikliği",
-            "unforeseen": "Öngörülemeyen koşullar",
-            "regulatory": "Mevzuat",
-            "error": "Hata veya eksiklik",
-            "non_conformance": "Uygunsuzluk",
-            "value_engineering": "Değer mühendisliği",
-        },
-    },
-    "instrument": {
-        "en": {
-            "works_change": "Instructed change",
-            "site_confirmation": "Site confirmation",
-            "claim": "Claim",
-        },
-        "tr": {
-            "works_change": "İş değişikliği talimatı",
-            "site_confirmation": "Saha tespit tutanağı",
-            "claim": "Hak talebi",
-        },
-    },
-    "change": {
-        "en": {"added": "Added", "removed": "Removed", "modified": "Modified"},
-        "tr": {"added": "Eklendi", "removed": "Kaldırıldı", "modified": "Değiştirildi"},
-    },
-}
-
-CATALOGUE = DocumentCatalogue(_STRINGS, _LABELS, default=DEFAULT_PDF_LOCALE)
+#: Strings and code tables come from ``backend/locales/<code>.json`` under
+#: ``document_forms.changeorders``; English is the fallback for any gap.
+CATALOGUE = register_form_catalogue("changeorders")
 
 #: Languages the change order documents can render; anything else is English.
 SUPPORTED_PDF_LOCALES: tuple[str, ...] = CATALOGUE.supported

@@ -91,7 +91,7 @@ async def get_vocabulary(
 
     The discipline list is the default one. The field accepts any lower-case
     code, so a client may offer these and still let a project type its own.
-    English and Turkish labels exist; any other language reads the English.
+    Every document language has labels; any other language reads the English.
     """
     language = resolve_pdf_locale(locale, accept_language)
     return SubmittalVocabulary(

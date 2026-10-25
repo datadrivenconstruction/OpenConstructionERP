@@ -316,7 +316,13 @@ def test_the_landscape_sheet_cuts_no_number_date_or_code() -> None:
         layout = register_layout(document)
         assert layout.overflow == (), (locale, [document.columns[i].header for i in layout.overflow])
         assert layout.cut_words == ()
-        assert layout.font_size == 8.0, locale
+        # English and Turkish are set at the full size. A language with longer
+        # words may step down to the renderer's smallest readable size, but
+        # never cuts a word or lets a number or date overflow its column.
+        if locale in ("en", "tr"):
+            assert layout.font_size == 8.0, locale
+        else:
+            assert layout.font_size >= 6.5, locale
         by_key = {column.header: column for column in document.columns}
         for key in ("col_number", "col_review_code", "col_rev", "col_lead_time"):
             assert by_key[tr(locale, key)].keeps_together, key

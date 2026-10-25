@@ -8,13 +8,13 @@ and it has no PDF form. This module describes the same twelve columns once,
 translated, for both a workbook and a printable PDF with the project, the
 generation date and "page x of y" on it.
 
-The log's strings are kept here rather than added to the single-RFI
-catalogue in :mod:`app.modules.rfi.pdf_translations`: that catalogue is held
-to every one of its thirty-three languages by its tests, and the log is
-translated into English and Turkish so far. Status words still come from
-:mod:`app.modules.rfi.intl`, asked in the log's own language, so a heading
-and a status never disagree. Any other request renders in English and the
-route says so in ``Content-Language``.
+The log's strings live in ``backend/locales/<code>.json`` under
+``document_forms.rfi_register``, with the status words in the same block, so a
+heading and a status never disagree and the log can be printed in every
+language a PDF can draw. The single-RFI form keeps its own catalogue in
+:mod:`app.modules.rfi.pdf_translations`. A key a language has not translated
+reads English, and a language outside the catalogue renders in English with
+the route saying so in ``Content-Language``.
 
 The builder is pure: RFI rows plus already-resolved names in, a register
 description out.
@@ -26,9 +26,9 @@ from collections.abc import Mapping, Sequence
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from app.core.document_forms_i18n import register_form_catalogue
 from app.core.regional_format import NBSP
 from app.core.register_export import (
-    DocumentCatalogue,
     ProjectHeader,
     RegisterColumn,
     RegisterDocument,
@@ -47,44 +47,11 @@ __all__ = [
     "rfi_register_filename",
 ]
 
-# "Yes" and the amount or the days in brackets are one fact: the space between
-# them does not break, so the bracket never starts a line of its own.
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "register_title": "RFI Log",
-        "col_number": "RFI #",
-        "col_subject": "Subject",
-        "col_raised_by": "Raised By",
-        "col_assigned_to": "Assigned To",
-        "col_ball_in_court": "Ball-in-Court",
-        "col_date_required": "Date Required",
-        "col_response_due": "Response Due",
-        "col_days_open": "Days Open",
-        "col_cost_impact": "Cost Impact",
-        "col_schedule_impact": "Schedule Impact",
-        "col_response": "Response",
-        "yes_with": f"Yes{NBSP}({{detail}})",
-        "register_filename": "rfi_log",
-    },
-    "tr": {
-        "register_title": "Bilgi Talepleri Kayıt Listesi (RFI)",
-        "col_number": "RFI no.",
-        "col_subject": "Konu",
-        "col_raised_by": "Oluşturan",
-        "col_assigned_to": "Atanan",
-        "col_ball_in_court": "Sıradaki sorumlu",
-        "col_date_required": "İhtiyaç tarihi",
-        "col_response_due": "Yanıt son tarihi",
-        "col_days_open": "Açık gün sayısı",
-        "col_cost_impact": "Maliyet etkisi",
-        "col_schedule_impact": "Süre etkisi",
-        "col_response": "Yanıt",
-        "yes_with": f"Evet{NBSP}({{detail}})",
-        "register_filename": "bilgi-talepleri-kayit-listesi",
-    },
-}
-
-CATALOGUE = DocumentCatalogue(_STRINGS)
+#: Strings and the status words come from ``backend/locales/<code>.json`` under
+#: ``document_forms.rfi_register``; English is the fallback for any gap. "Yes" and
+#: the amount or the days in brackets are one fact, so ``yes_with`` joins them with
+#: a no-break space and the bracket never starts a line of its own.
+CATALOGUE = register_form_catalogue("rfi_register")
 
 #: Languages the RFI log can render; anything else is English.
 SUPPORTED_REGISTER_LOCALES: tuple[str, ...] = CATALOGUE.supported
@@ -98,6 +65,12 @@ def resolve_register_locale(locale_param: str | None, accept_language: str | Non
 def rfi_register_filename(locale: str, extension: str) -> str:
     """Download filename for the log; the English name is the one it always had."""
     return export_filename(CATALOGUE.tr(locale, "register_filename"), "rfi_log", extension)
+
+
+def _status_word(status: Any, locale: str) -> str:
+    """The status in the log's language; a code outside the log's table reads like the RFI screens do in English."""
+    code = str(status or "draft").strip().lower()
+    return CATALOGUE.labels["status"][locale].get(code) or localize_status(code, "en")
 
 
 def _impact(flag: Any, detail: str | None, locale: str) -> str:
@@ -174,7 +147,7 @@ def rfi_register(
             [
                 getattr(item, "rfi_number", ""),
                 getattr(item, "subject", ""),
-                localize_status(str(getattr(item, "status", "") or "draft"), locale),
+                _status_word(getattr(item, "status", None), locale),
                 person_name(getattr(item, "raised_by", None), people),
                 person_name(getattr(item, "assigned_to", None), people),
                 person_name(getattr(item, "ball_in_court", None), people),

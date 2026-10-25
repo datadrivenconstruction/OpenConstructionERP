@@ -8,8 +8,12 @@ it came back. Its fixed strings live here, next to the renderer, the way
 :mod:`app.modules.rfi.pdf_translations` keeps the RFI's, and the rule that
 picks a language is the shared one in :mod:`app.core.document_locale`.
 
-English and Turkish are in the catalogue. Any other request renders in
-English and the route says so in ``Content-Language``. The status and type
+The strings live in ``backend/locales/<code>.json`` under ``document_forms.submittals``
+and are built into a catalogue by :func:`app.core.document_forms_i18n.document_form_catalogue`,
+so the document can be printed in every language a PDF can draw. A key a
+language has not translated reads English, and a language outside the
+catalogue (Bengali and Urdu, see ``REGISTER_UNRENDERABLE``) renders in English
+with the route saying so in ``Content-Language``. The status and type
 words are held here rather than read from :mod:`app.modules.submittals.intl`
 because a heading in one language over a status word in another is the
 defect a catalogue exists to prevent, and the two tables there cover a
@@ -40,8 +44,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.register_export import DocumentCatalogue, export_filename
-from app.modules.submittals.tracking import DISCIPLINES
+from app.core.document_forms_i18n import register_form_catalogue
+from app.core.register_export import export_filename
 
 __all__ = [
     "CATALOGUE",
@@ -58,182 +62,9 @@ __all__ = [
 
 DEFAULT_PDF_LOCALE = "en"
 
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "register_title": "Submittal Register",
-        "doc_title": "Submittal",
-        "doc_title_product_data": "Material Approval Form",
-        "col_number": "Submittal no.",
-        "col_title": "Title",
-        "col_type": "Type",
-        "col_spec": "Spec section",
-        "col_rev": "Rev.",
-        "col_date_submitted": "Date submitted",
-        "col_date_required": "Date required",
-        "col_date_returned": "Date returned",
-        "col_reviewer": "Reviewer",
-        "col_approver": "Approver",
-        "col_ball_in_court": "Ball in court",
-        "submitted_by_org": "Submitting company",
-        "review_notes": "Reviewer comments",
-        "no_review_notes": "No reviewer comments recorded.",
-        "sig_submitted": "Submitted by",
-        "sig_reviewed": "Reviewed by",
-        "sig_approved": "Approved by",
-        "register_filename": "submittal-register",
-        "register_title_shop_drawing": "Shop Drawing Register",
-        "register_title_product_data": "Material Approval Register",
-        "register_title_method_statement": "Method Statement Register",
-        "register_filename_shop_drawing": "shop-drawing-register",
-        "register_filename_product_data": "material-approval-register",
-        "register_filename_method_statement": "method-statement-register",
-        "col_discipline": "Discipline",
-        "col_manufacturer": "Manufacturer / brand",
-        "col_model": "Model / reference",
-        "col_origin": "Country of origin",
-        "col_supplier": "Supplier",
-        "col_product": "Maker / model / origin",
-        "col_review_code": "Review code",
-        "col_outcome": "Review outcome",
-        "col_review_period": "Review period (days)",
-        "col_review_due": "Review due",
-        "col_days_in_review": "Days in review",
-        "col_days_in_review_print": "Days in review",
-        "col_review_overdue": "Days overdue",
-        "col_required_on_site": "Required on site",
-        "col_long_lead": "Long lead",
-        "col_lead_time": "Lead time (weeks)",
-        "col_needed_by": "Approval needed by",
-        "col_approval_late": "Days past needed-by",
-        "col_drawings": "Linked drawings",
-        "col_submitted_returned": "Submitted / returned",
-        "col_on_site_needed_by": "On site / approval by",
-        "resubmit_for_record": "Corrected copy to be resubmitted for record",
-        "review_history": "Review history",
-        "hist_submitted": "Submitted",
-        "hist_returned": "Returned",
-        "drawings_missing_one": "{n} linked drawing is no longer available",
-        "drawings_missing_other": "{n} linked drawings are no longer available",
-        "weeks_one": "{n} week",
-        "weeks_other": "{n} weeks",
-    },
-    "tr": {
-        "register_title": "Onay Belgeleri Kayıt Listesi",
-        "doc_title": "Onay Belgesi",
-        "doc_title_product_data": "Malzeme Onay Formu",
-        "col_number": "Belge no.",
-        "col_title": "Başlık",
-        "col_type": "Tür",
-        "col_spec": "Şartname bölümü",
-        "col_rev": "Rev.",
-        "col_date_submitted": "Sunulma tarihi",
-        "col_date_required": "Yanıt son tarihi",
-        "col_date_returned": "İade tarihi",
-        "col_reviewer": "İnceleyen",
-        "col_approver": "Onaylayan",
-        "col_ball_in_court": "Sıradaki sorumlu",
-        "submitted_by_org": "Sunan firma",
-        "review_notes": "İnceleyen yorumları",
-        "no_review_notes": "İnceleyen yorumu kaydedilmedi.",
-        "sig_submitted": "Sunan",
-        "sig_reviewed": "İnceleyen",
-        "sig_approved": "Onaylayan",
-        "register_filename": "onay-belgeleri-kayit-listesi",
-        "register_title_shop_drawing": "İmalat Çizimleri Kayıt Listesi",
-        "register_title_product_data": "Malzeme Onay Kayıt Listesi",
-        "register_title_method_statement": "Metot Beyanları Kayıt Listesi",
-        "register_filename_shop_drawing": "imalat-cizimleri-kayit-listesi",
-        "register_filename_product_data": "malzeme-onay-kayit-listesi",
-        "register_filename_method_statement": "metot-beyanlari-kayit-listesi",
-        "col_discipline": "Disiplin",
-        "col_manufacturer": "Üretici / Marka",
-        "col_model": "Model / Referans",
-        "col_origin": "Menşei",
-        "col_supplier": "Tedarikçi",
-        "col_product": "Üretici / Model / Menşei",
-        "col_review_code": "Onay Kodu",
-        "col_outcome": "İnceleme sonucu",
-        "col_review_period": "İnceleme süresi (gün)",
-        "col_review_due": "İnceleme son tarihi",
-        "col_days_in_review": "İncelemede geçen gün",
-        "col_days_in_review_print": "İnceleme gün sayısı",
-        "col_review_overdue": "Geciken gün",
-        "col_required_on_site": "Şantiyede Gerekli Tarih",
-        "col_long_lead": "Uzun temin süreli",
-        "col_lead_time": "Temin Süresi (hafta)",
-        "col_needed_by": "Onay için son tarih",
-        "col_approval_late": "Onayda geciken gün",
-        "col_drawings": "İlgili çizimler",
-        "col_submitted_returned": "Sunulma / iade",
-        "col_on_site_needed_by": "Şantiye / onay son tarihi",
-        "resubmit_for_record": "Düzeltilmiş nüsha kayıt için yeniden sunulacak",
-        "review_history": "İnceleme geçmişi",
-        "hist_submitted": "Sunuldu",
-        "hist_returned": "İade edildi",
-        "drawings_missing_one": "{n} ilgili çizim artık mevcut değil",
-        "drawings_missing_other": "{n} ilgili çizim artık mevcut değil",
-        "weeks_one": "{n} hafta",
-        "weeks_other": "{n} hafta",
-    },
-}
-
-# One entry per value in ``intl.SUBMITTAL_STATUSES`` and ``schemas.SUBMITTAL_TYPES``.
-# The register prints the module's own review vocabulary: a review outcome is
-# one of the four decision statuses and is printed with the same word, and the
-# code beside it is the mark the reviewer stamped, printed as stored.
-# The discipline table is built from ``tracking.DISCIPLINES``; a discipline a
-# project adds on its own prints as stored.
-_LABELS: dict[str, dict[str, dict[str, str]]] = {
-    "status": {
-        "en": {
-            "draft": "Draft",
-            "submitted": "Submitted",
-            "under_review": "Under review",
-            "approved": "Approved",
-            "approved_as_noted": "Approved as noted",
-            "revise_and_resubmit": "Revise and resubmit",
-            "rejected": "Rejected",
-            "closed": "Closed",
-        },
-        "tr": {
-            "draft": "Taslak",
-            "submitted": "Sunuldu",
-            "under_review": "İncelemede",
-            "approved": "Onaylandı",
-            "approved_as_noted": "Notlarla onaylandı",
-            "revise_and_resubmit": "Revize edip yeniden sunun",
-            "rejected": "Reddedildi",
-            "closed": "Kapatıldı",
-        },
-    },
-    "type": {
-        "en": {
-            "shop_drawing": "Shop drawing",
-            "product_data": "Product data",
-            "sample": "Sample",
-            "mock_up": "Mock-up",
-            "test_report": "Test report",
-            "calculation": "Calculation",
-            "method_statement": "Method statement",
-            "certificate": "Certificate",
-            "warranty": "Warranty",
-        },
-        "tr": {
-            "shop_drawing": "İmalat çizimi",
-            "product_data": "Ürün verisi",
-            "sample": "Numune",
-            "mock_up": "Maket",
-            "test_report": "Test raporu",
-            "calculation": "Hesap",
-            "method_statement": "Metot beyanı",
-            "certificate": "Sertifika",
-            "warranty": "Garanti",
-        },
-    },
-    "discipline": {language: {item.code: item.labels[language] for item in DISCIPLINES} for language in ("en", "tr")},
-}
-
-CATALOGUE = DocumentCatalogue(_STRINGS, _LABELS, default=DEFAULT_PDF_LOCALE)
+#: Strings and code tables come from ``backend/locales/<code>.json`` under
+#: ``document_forms.submittals``; English is the fallback for any gap.
+CATALOGUE = register_form_catalogue("submittals")
 
 #: Languages the submittal documents can render; anything else is English.
 SUPPORTED_PDF_LOCALES: tuple[str, ...] = CATALOGUE.supported
@@ -262,7 +93,7 @@ def submittal_pdf_filename(submittal_number: str | None) -> str:
 def _typed_key(prefix: str, submittal_type: str | None) -> str:
     """The key of a per-type string when the catalogue has one, else the general key."""
     typed = f"{prefix}_{submittal_type}" if submittal_type else prefix
-    return typed if typed in _STRINGS[DEFAULT_PDF_LOCALE] else prefix
+    return typed if typed in CATALOGUE.strings[DEFAULT_PDF_LOCALE] else prefix
 
 
 def register_title(locale: str, submittal_type: str | None = None) -> str:

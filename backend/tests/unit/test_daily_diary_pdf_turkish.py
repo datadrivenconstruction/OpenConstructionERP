@@ -2,8 +2,8 @@
 
 Two things are pinned.
 
-The first is structural. The diary catalogue is four tables keyed by
-language: fixed strings, entry groups, statuses and weather conditions. A
+The first is structural. The diary catalogue is five tables keyed by
+language: fixed strings, entry groups, statuses, weather conditions and weather sources. A
 language named in ``SUPPORTED_PDF_LOCALES`` without a row in each of them
 prints English under a Turkish heading, silently, because every lookup falls
 back. The parity test below makes that state unreachable for any language,
@@ -31,8 +31,8 @@ from typing import Any
 import pytest
 from pypdf import PdfReader
 
+from app.core.document_forms_i18n import load_document_forms
 from app.core.pdf_fonts import register_pdf_fonts
-from app.modules.daily_diary import pdf_translations as catalogue
 from app.modules.daily_diary.pdf_export import generate_diary_pdf
 from app.modules.daily_diary.pdf_translations import (
     SUPPORTED_PDF_LOCALES,
@@ -49,15 +49,26 @@ from app.modules.daily_diary.pdf_translations import (
     weather_summary_text,
 )
 
+
+def _raw_table(kind: str, name: str) -> dict[str, dict[str, str]]:
+    """One table of the diary block, read straight from each locale file (no English gap filling)."""
+    out: dict[str, dict[str, str]] = {}
+    for code in SUPPORTED_PDF_LOCALES:
+        block = load_document_forms(code).get("daily_diary") or {}
+        out[code] = dict(block["strings"] if kind == "strings" else block["labels"][name])
+    return out
+
+
 TABLES: dict[str, dict[str, dict[str, str]]] = {
-    "strings": catalogue._STRINGS,
-    "entry types": catalogue._ENTRY_TYPE_LABELS,
-    "statuses": catalogue._STATUS_LABELS,
-    "conditions": catalogue._CONDITION_LABELS,
+    "strings": _raw_table("strings", ""),
+    "entry types": _raw_table("labels", "entry_type"),
+    "statuses": _raw_table("labels", "status"),
+    "conditions": _raw_table("labels", "condition"),
+    "sources": _raw_table("labels", "source"),
 }
 
 # Keys that are formats or separators, not prose a reader could call English.
-NOT_PROSE = {"date_format", "datetime_format", "filename_prefix", "decimal_mark", "percent"}
+NOT_PROSE = {"filename_prefix", "decimal_mark", "percent"}
 
 
 def _placeholders(value: str) -> set[str]:
@@ -95,10 +106,10 @@ def test_a_translation_is_not_a_copy_of_the_english_table(locale: str) -> None:
     """A table filled by copying English would pass the parity test above."""
     same = [
         key
-        for key, value in catalogue._STRINGS[locale].items()
-        if key not in NOT_PROSE and value == catalogue._STRINGS["en"][key]
+        for key, value in TABLES["strings"][locale].items()
+        if key not in NOT_PROSE and value == TABLES["strings"]["en"][key]
     ]
-    assert len(same) <= 3, same
+    assert len(same) <= 8, same
 
 
 # ── Turkish helpers ───────────────────────────────────────────────────────

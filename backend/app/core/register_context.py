@@ -52,7 +52,13 @@ __all__ = [
 #: ``?locale=`` on an export route: forces the document language.
 LocaleQuery = Annotated[
     str | None,
-    Query(max_length=10, description="Force the document language (e.g. 'tr'). Overrides Accept-Language."),
+    Query(
+        max_length=35,
+        description=(
+            "Force the document language (e.g. 'tr'). Overrides Accept-Language. A language the document "
+            "does not exist in is rendered in English, never refused."
+        ),
+    ),
 ]
 #: The raw ``Accept-Language`` header, read when ``?locale=`` is absent.
 AcceptLanguageHeader = Annotated[str | None, Header(alias="accept-language")]

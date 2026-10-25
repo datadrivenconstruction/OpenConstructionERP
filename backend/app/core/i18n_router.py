@@ -23,6 +23,7 @@ Module translations are merged with core translations.
 
 from fastapi import APIRouter, HTTPException, status
 
+from app.core.document_forms_i18n import document_form_locales
 from app.core.i18n import (
     SUPPORTED_LOCALES,
     get_all_translations,
@@ -79,6 +80,18 @@ def _meta_for(locale: str) -> dict[str, object]:
 async def list_locales() -> dict:
     """List all available languages."""
     return {"locales": get_available_locales()}
+
+
+@router.get("/document-locales")
+async def list_document_locales() -> dict:
+    """The languages each printed document form can be rendered in.
+
+    ``forms`` maps a form name (``submittals``, ``variations``, ``procurement``
+    and so on) to the language codes its PDF and workbook exist in; every code
+    is a member of ``SUPPORTED_LOCALES``. A request for any other language, or
+    for a supported one a form does not list, is rendered in English.
+    """
+    return {"forms": {name: list(codes) for name, codes in document_form_locales().items()}}
 
 
 @router.get("/locales/{locale}/messages")

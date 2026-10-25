@@ -124,6 +124,16 @@ _ENTRY_TYPE_ORDER: tuple[str, ...] = (
 )
 
 
+def _label(text: str, style: Any, *, bold: bool = False) -> Paragraph:
+    """A fixed catalogue string as a paragraph, in the face its script needs.
+
+    The registers and forms do this for every string; the diary only did for the
+    free text, which was enough while its catalogue held Latin scripts alone.
+    """
+    markup = html.escape(text, quote=True)
+    return Paragraph(f"<b>{markup}</b>" if bold else markup, pdf_style_for_text(style, text))
+
+
 def _safe_para(text: Any, style: ParagraphStyle) -> Paragraph:
     """Construct a ``Paragraph`` from possibly-untrusted user input.
 
@@ -494,8 +504,8 @@ def _build_workforce(
         return []
     rows: list[list[Any]] = [
         [
-            Paragraph(tr(locale, "workforce_company"), styles["cell_head"]),
-            Paragraph(tr(locale, "workforce_count"), styles["cell_head_right"]),
+            _label(tr(locale, "workforce_company"), styles["cell_head"]),
+            _label(tr(locale, "workforce_count"), styles["cell_head_right"]),
         ]
     ]
     for company, count in sorted(by_company.items(), key=lambda pair: (-pair[1], pair[0])):
@@ -504,13 +514,13 @@ def _build_workforce(
     if unassigned > 0:
         rows.append(
             [
-                Paragraph(tr(locale, "workforce_unassigned"), styles["cell"]),
+                _label(tr(locale, "workforce_unassigned"), styles["cell"]),
                 Paragraph(str(unassigned), styles["cell_right"]),
             ]
         )
     rows.append(
         [
-            Paragraph(f"<b>{html.escape(tr(locale, 'workforce_total'))}</b>", styles["cell"]),
+            _label(tr(locale, "workforce_total"), styles["cell"], bold=True),
             Paragraph(f"<b>{labour}</b>", styles["cell_right"]),
         ]
     )
@@ -530,7 +540,7 @@ def _build_workforce(
             ]
         )
     )
-    return [KeepTogether([Paragraph(tr(locale, "workforce"), styles["section"]), table])]
+    return [KeepTogether([_label(tr(locale, "workforce"), styles["section"]), table])]
 
 
 def _looks_like_a_name(value: Any) -> bool:
@@ -598,11 +608,9 @@ def _build_signatures(
         [tr(locale, "sig_prepared"), prepared, "", supervisor_date, ""],
         [tr(locale, "sig_approved"), approved, "", owner_date, ""],
     ]
-    rows: list[list[Any]] = [[Paragraph(html.escape(text), styles["sig_head"]) for text in head]]
+    rows: list[list[Any]] = [[_label(text, styles["sig_head"]) for text in head]]
     for line in body:
-        rows.append(
-            [Paragraph(html.escape(line[0]), styles["label"])] + [_safe_para(text, styles["cell"]) for text in line[1:]]
-        )
+        rows.append([_label(line[0], styles["label"])] + [_safe_para(text, styles["cell"]) for text in line[1:]])
     table = Table(
         rows,
         colWidths=[USABLE_WIDTH * share for share in (0.24, 0.24, 0.18, 0.14, 0.2)],
@@ -620,7 +628,7 @@ def _build_signatures(
             ]
         )
     )
-    block: list[Any] = [Paragraph(tr(locale, "signatures"), styles["section"]), table]
+    block: list[Any] = [_label(tr(locale, "signatures"), styles["section"]), table]
     signers = [
         f"{name}, {stamp}" if stamp else name
         for name, stamp in ((supervisor_signed, supervisor_date), (owner_signed, owner_date))
@@ -652,15 +660,15 @@ def _build_overview(
 
     rows = [
         [
-            Paragraph(tr(locale, "site_supervisor"), styles["label"]),
+            _label(tr(locale, "site_supervisor"), styles["label"]),
             _safe_para(supervisor_name or tr(locale, "not_recorded"), styles["value"]),
-            Paragraph(tr(locale, "labour_on_site"), styles["label"]),
+            _label(tr(locale, "labour_on_site"), styles["label"]),
             Paragraph(str(labour), styles["value"]),
         ],
         [
-            Paragraph(tr(locale, "completeness"), styles["label"]),
+            _label(tr(locale, "completeness"), styles["label"]),
             Paragraph(completeness_text, styles["value"]),
-            Paragraph(tr(locale, "equipment_on_site"), styles["label"]),
+            _label(tr(locale, "equipment_on_site"), styles["label"]),
             Paragraph(str(equipment), styles["value"]),
         ],
     ]
@@ -680,7 +688,7 @@ def _build_overview(
             ]
         )
     )
-    return [Paragraph(tr(locale, "overview"), styles["section"]), table]
+    return [_label(tr(locale, "overview"), styles["section"]), table]
 
 
 def _build_weather(
@@ -697,19 +705,19 @@ def _build_weather(
     sentence fragment (never raw dictionary keys), and finally to an
     empty-state line.
     """
-    flow: list[Any] = [Paragraph(tr(locale, "weather"), styles["section"])]
+    flow: list[Any] = [_label(tr(locale, "weather"), styles["section"])]
 
     def _number(value: Any) -> str:
         return _fmt_number(value, locale=locale, decimal_mark=decimal_mark)
 
     if weather_records:
         header = [
-            Paragraph(tr(locale, "weather_time"), styles["cell_head"]),
-            Paragraph(tr(locale, "weather_source"), styles["cell_head"]),
-            Paragraph(tr(locale, "weather_temp"), styles["cell_head"]),
-            Paragraph(tr(locale, "weather_wind"), styles["cell_head"]),
-            Paragraph(tr(locale, "weather_precip"), styles["cell_head"]),
-            Paragraph(tr(locale, "weather_conditions"), styles["cell_head"]),
+            _label(tr(locale, "weather_time"), styles["cell_head"]),
+            _label(tr(locale, "weather_source"), styles["cell_head"]),
+            _label(tr(locale, "weather_temp"), styles["cell_head"]),
+            _label(tr(locale, "weather_wind"), styles["cell_head"]),
+            _label(tr(locale, "weather_precip"), styles["cell_head"]),
+            _label(tr(locale, "weather_conditions"), styles["cell_head"]),
         ]
         data: list[list[Any]] = [header]
         for rec in weather_records:
@@ -759,7 +767,7 @@ def _build_weather(
     if summary_line:
         flow.append(Paragraph(html.escape(summary_line, quote=True), pdf_style_for_text(styles["body"], summary_line)))
     else:
-        flow.append(Paragraph(tr(locale, "weather_empty"), styles["empty"]))
+        flow.append(_label(tr(locale, "weather_empty"), styles["empty"]))
     return flow
 
 
@@ -769,9 +777,9 @@ def _build_entries(
     locale: str,
 ) -> list[Any]:
     """Build the grouped diary-entry sections (work, deliveries, etc.)."""
-    heading = Paragraph(tr(locale, "site_record"), styles["section"])
+    heading = _label(tr(locale, "site_record"), styles["section"])
     if not entries:
-        return [heading, Paragraph(tr(locale, "entries_empty"), styles["empty"])]
+        return [heading, _label(tr(locale, "entries_empty"), styles["empty"])]
     # The section heading travels with the first group: on its own it was left
     # as the last line of a page with every entry on the next one.
     flow: list[Any] = []
@@ -794,7 +802,7 @@ def _build_entries(
         block.append(
             Paragraph(
                 f"<b>{html.escape(label)}</b> ({len(bucket)})",
-                styles["body"],
+                pdf_style_for_text(styles["body"], label),
             )
         )
         rows: list[list[Any]] = []
@@ -841,13 +849,13 @@ def _build_entries(
 def _build_notes(diary: Any, styles: dict[str, ParagraphStyle], locale: str) -> list[Any]:
     """Build the free-text notes block."""
     notes = (getattr(diary, "notes", None) or "").strip()
-    flow: list[Any] = [Paragraph(tr(locale, "notes"), styles["section"])]
+    flow: list[Any] = [_label(tr(locale, "notes"), styles["section"])]
     if notes:
         # Preserve author line breaks as <br/> after escaping.
         escaped = html.escape(notes).replace("\n", "<br/>")
         flow.append(Paragraph(escaped, pdf_style_for_text(styles["body"], notes)))
     else:
-        flow.append(Paragraph(tr(locale, "notes_empty"), styles["empty"]))
+        flow.append(_label(tr(locale, "notes_empty"), styles["empty"]))
     return flow
 
 

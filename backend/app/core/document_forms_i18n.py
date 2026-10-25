@@ -34,15 +34,35 @@ a furniture table prints ISO dates unless the project's country decides.
 from __future__ import annotations
 
 import json
+from collections.abc import Collection
 from functools import cache
 from typing import Any
 
 from app.core.i18n import LOCALES_DIR, SUPPORTED_LOCALES
 from app.core.register_export import FORM_FURNITURE, FURNITURE, DocumentCatalogue
 
-__all__ = ["document_form_catalogue", "load_document_forms"]
+__all__ = [
+    "REGISTER_UNRENDERABLE",
+    "document_form_catalogue",
+    "document_form_locales",
+    "load_document_forms",
+    "register_form_catalogue",
+]
 
 _ROOT = "document_forms"
+
+#: Languages the register and record forms deliberately print in English, and
+#: why. Bengali has no translation because no bundled face carries its script.
+#: Urdu is translated in the locale files but not offered: its letters need the
+#: bundled Naskh face, which has digits and Arabic only (no brackets, slash,
+#: hyphen, percent or Latin letters), while the Unicode face lacks two of its
+#: commonest letters; the font ladder picks one face per string, so every
+#: heading with a bracket and every footer ("... UTC") would print boxes. It
+#: returns when text can fall back per run instead of per string.
+REGISTER_UNRENDERABLE: dict[str, str] = {
+    "bn": "no bundled PDF face carries Bengali glyphs",
+    "ur": "Naskh lacks punctuation and Latin, the Unicode face lacks two Urdu letters; one face per string",
+}
 _DATE_KEYS = ("date_format", "datetime_format")
 
 
@@ -70,12 +90,13 @@ def _furniture_for(code: str, default: str) -> dict[str, str]:
     return {key: (english[key] if key in _DATE_KEYS else own.get(key, english[key])) for key in english}
 
 
-def document_form_catalogue(form: str, *, default: str = "en") -> DocumentCatalogue:
+def document_form_catalogue(form: str, *, default: str = "en", skip: Collection[str] = ()) -> DocumentCatalogue:
     """Build the catalogue of one printed form from the locale files.
 
     Args:
         form: The block name under ``document_forms``, e.g. ``"finance"``.
         default: The fallback language; its file must define every string.
+        skip: Languages left out although their file translates the form.
 
     Returns:
         A complete :class:`DocumentCatalogue` covering the default language and
@@ -96,7 +117,7 @@ def document_form_catalogue(form: str, *, default: str = "en") -> DocumentCatalo
     for code in SUPPORTED_LOCALES:
         block = load_document_forms(code).get(form) or {}
         own = _text_map(block.get("strings"))
-        if code != default and not any(key in own for key in english):
+        if code in skip or (code != default and not any(key in own for key in english)):
             continue
         strings[code] = {key: own.get(key, value) for key, value in english.items()}
         own_labels = block.get("labels") or {}
@@ -106,3 +127,25 @@ def document_form_catalogue(form: str, *, default: str = "en") -> DocumentCatalo
         if code not in FURNITURE and code not in furniture:
             furniture[code] = _furniture_for(code, default)
     return DocumentCatalogue(strings, labels, default=default, furniture=furniture)
+
+
+def document_form_locales(default: str = "en") -> dict[str, tuple[str, ...]]:
+    """The languages each printed form can be rendered in, keyed by form name.
+
+    Reads the same locale files :func:`document_form_catalogue` does, so the
+    answer is what a request for that language really gets. A form missing
+    from the default language's file is not listed.
+    """
+    forms = [name for name in load_document_forms(default) if name != "furniture"]
+    return {name: _catalogue_of(name, default).supported for name in sorted(forms)}
+
+
+def register_form_catalogue(form: str) -> DocumentCatalogue:
+    """The catalogue of a register or record form: every language but :data:`REGISTER_UNRENDERABLE`."""
+    return document_form_catalogue(form, skip=REGISTER_UNRENDERABLE)
+
+
+def _catalogue_of(form: str, default: str) -> DocumentCatalogue:
+    if form in ("procurement", "finance"):
+        return document_form_catalogue(form, default=default)
+    return document_form_catalogue(form, default=default, skip=REGISTER_UNRENDERABLE)

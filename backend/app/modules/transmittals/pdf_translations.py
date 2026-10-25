@@ -8,8 +8,12 @@ register lists every transmittal of a project. Their fixed strings live
 here, next to the renderer, the way :mod:`app.modules.rfi.pdf_translations`
 keeps the RFI's.
 
-English and Turkish are in the catalogue; any other request renders in
-English and the route says so in ``Content-Language``. The status and purpose
+The strings live in ``backend/locales/<code>.json`` under ``document_forms.transmittals``
+and are built into a catalogue by :func:`app.core.document_forms_i18n.document_form_catalogue`,
+so the document can be printed in every language a PDF can draw. A key a
+language has not translated reads English, and a language outside the
+catalogue (Bengali and Urdu, see ``REGISTER_UNRENDERABLE``) renders in English
+with the route saying so in ``Content-Language``. The status and purpose
 words are capitalised register words, held here because the tables in
 :mod:`app.modules.transmittals.intl` are lower-case fragments for a sentence
 and cover a different set of languages.
@@ -22,7 +26,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.register_export import DocumentCatalogue, export_filename
+from app.core.document_forms_i18n import register_form_catalogue
+from app.core.register_export import export_filename
 
 __all__ = [
     "CATALOGUE",
@@ -37,88 +42,9 @@ __all__ = [
 
 DEFAULT_PDF_LOCALE = "en"
 
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "register_title": "Transmittal Register",
-        "doc_title": "Transmittal",
-        "col_number": "Transmittal no.",
-        "col_subject": "Subject",
-        "col_purpose": "Purpose",
-        "col_issued": "Date issued",
-        "col_response_due": "Response due",
-        "col_recipients": "Recipients",
-        "col_item_count": "Items",
-        "sender": "Sender",
-        "cover_note": "Cover note",
-        "no_cover_note": "No cover note.",
-        "recipients": "Recipients",
-        "recipient": "Recipient",
-        "action_required": "Action required",
-        "acknowledged": "Receipt acknowledged",
-        "responded": "Date responded",
-        "items": "Items transmitted",
-        "item_no": "No.",
-        "item_description": "Description",
-        "item_notes": "Notes",
-        "sig_issued": "Issued by",
-        "sig_received": "Received by",
-        "register_filename": "transmittal-register",
-    },
-    "tr": {
-        "register_title": "İletim Yazıları Kayıt Listesi",
-        "doc_title": "İletim Yazısı",
-        "col_number": "İletim no.",
-        "col_subject": "Konu",
-        "col_purpose": "Amaç",
-        "col_issued": "Gönderilme tarihi",
-        "col_response_due": "Yanıt son tarihi",
-        "col_recipients": "Alıcılar",
-        "col_item_count": "Kalem sayısı",
-        "sender": "Gönderen",
-        "cover_note": "Kapak notu",
-        "no_cover_note": "Kapak notu yok.",
-        "recipients": "Alıcılar",
-        "recipient": "Alıcı",
-        "action_required": "İstenen işlem",
-        "acknowledged": "Teslim alma teyidi",
-        "responded": "Yanıt tarihi",
-        "items": "İletilen kalemler",
-        "item_no": "Sıra no.",
-        "item_description": "Açıklama",
-        "item_notes": "Notlar",
-        "sig_issued": "Gönderen",
-        "sig_received": "Teslim alan",
-        "register_filename": "iletim-yazilari-kayit-listesi",
-    },
-}
-
-# One entry per value in ``logic.VALID_STATUSES`` and ``logic.PURPOSE_CODES``.
-_LABELS: dict[str, dict[str, dict[str, str]]] = {
-    "status": {
-        "en": {"draft": "Draft", "issued": "Issued", "responded": "Responded"},
-        "tr": {"draft": "Taslak", "issued": "Gönderildi", "responded": "Yanıtlandı"},
-    },
-    "purpose": {
-        "en": {
-            "for_approval": "For approval",
-            "for_review": "For review",
-            "for_information": "For information",
-            "for_construction": "For construction",
-            "for_tender": "For tender",
-            "for_record": "For record",
-        },
-        "tr": {
-            "for_approval": "Onay için",
-            "for_review": "İnceleme için",
-            "for_information": "Bilgi için",
-            "for_construction": "Yapım için",
-            "for_tender": "İhale için",
-            "for_record": "Kayıt için",
-        },
-    },
-}
-
-CATALOGUE = DocumentCatalogue(_STRINGS, _LABELS, default=DEFAULT_PDF_LOCALE)
+#: Strings and code tables come from ``backend/locales/<code>.json`` under
+#: ``document_forms.transmittals``; English is the fallback for any gap.
+CATALOGUE = register_form_catalogue("transmittals")
 
 #: Languages the transmittal documents can render; anything else is English.
 SUPPORTED_PDF_LOCALES: tuple[str, ...] = CATALOGUE.supported

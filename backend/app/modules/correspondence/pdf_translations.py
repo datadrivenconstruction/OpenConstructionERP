@@ -7,8 +7,12 @@ keeps: reference number, date, who wrote to whom, the subject and when a
 reply is due. Its fixed strings live here, next to the renderer, the way
 :mod:`app.modules.rfi.pdf_translations` keeps the RFI's.
 
-English and Turkish are in the catalogue; any other request renders in
-English and the route says so in ``Content-Language``. The status printed is
+The strings live in ``backend/locales/<code>.json`` under ``document_forms.correspondence``
+and are built into a catalogue by :func:`app.core.document_forms_i18n.document_form_catalogue`,
+so the document can be printed in every language a PDF can draw. A key a
+language has not translated reads English, and a language outside the
+catalogue (Bengali and Urdu, see ``REGISTER_UNRENDERABLE``) renders in English
+with the route saying so in ``Content-Language``. The status printed is
 the stored one (``open``, ``awaiting_response``, ``responded``, ``closed``),
 not the derived reply status of :mod:`app.modules.correspondence.intl`,
 because the register shows the record as it was filed.
@@ -20,7 +24,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.register_export import DocumentCatalogue, export_filename
+from app.core.document_forms_i18n import register_form_catalogue
+from app.core.register_export import export_filename
 
 __all__ = [
     "CATALOGUE",
@@ -35,79 +40,9 @@ __all__ = [
 
 DEFAULT_PDF_LOCALE = "en"
 
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "register_title": "Correspondence Log",
-        "doc_title": "Correspondence",
-        "col_reference": "Reference no.",
-        "col_direction": "Direction",
-        "col_type": "Type",
-        "col_subject": "Subject",
-        "col_from": "From",
-        "col_to": "To",
-        "col_date_sent": "Date sent",
-        "col_date_received": "Date received",
-        "col_response_due": "Response required by",
-        "col_clause": "Contract clause",
-        "notes": "Notes",
-        "no_notes": "No notes recorded.",
-        "attachments": "Attached files",
-        "linked_documents": "Linked documents",
-        "sig_prepared": "Prepared by",
-        "sig_received": "Received by",
-        "register_filename": "correspondence-log",
-    },
-    "tr": {
-        "register_title": "Yazışmalar Kayıt Listesi",
-        "doc_title": "Yazışma",
-        "col_reference": "Referans no.",
-        "col_direction": "Yön",
-        "col_type": "Tür",
-        "col_subject": "Konu",
-        "col_from": "Gönderen",
-        "col_to": "Alıcı",
-        "col_date_sent": "Gönderilme tarihi",
-        "col_date_received": "Alınma tarihi",
-        "col_response_due": "Yanıt son tarihi",
-        "col_clause": "Sözleşme maddesi",
-        "notes": "Notlar",
-        "no_notes": "Not kaydedilmedi.",
-        "attachments": "Ekli dosyalar",
-        "linked_documents": "Bağlantılı belgeler",
-        "sig_prepared": "Hazırlayan",
-        "sig_received": "Teslim alan",
-        "register_filename": "yazismalar-kayit-listesi",
-    },
-}
-
-# One entry per stored value: ``schemas.CORRESPONDENCE_TYPES``, the two
-# directions and the four stored statuses.
-_LABELS: dict[str, dict[str, dict[str, str]]] = {
-    "direction": {
-        "en": {"incoming": "Incoming", "outgoing": "Outgoing"},
-        "tr": {"incoming": "Gelen", "outgoing": "Giden"},
-    },
-    "type": {
-        "en": {"letter": "Letter", "email": "Email", "notice": "Notice", "memo": "Memo", "report": "Report"},
-        "tr": {"letter": "Mektup", "email": "E-posta", "notice": "Bildirim", "memo": "Not", "report": "Rapor"},
-    },
-    "status": {
-        "en": {
-            "open": "Open",
-            "awaiting_response": "Awaiting response",
-            "responded": "Responded",
-            "closed": "Closed",
-        },
-        "tr": {
-            "open": "Açık",
-            "awaiting_response": "Yanıt bekleniyor",
-            "responded": "Yanıtlandı",
-            "closed": "Kapandı",
-        },
-    },
-}
-
-CATALOGUE = DocumentCatalogue(_STRINGS, _LABELS, default=DEFAULT_PDF_LOCALE)
+#: Strings and code tables come from ``backend/locales/<code>.json`` under
+#: ``document_forms.correspondence``; English is the fallback for any gap.
+CATALOGUE = register_form_catalogue("correspondence")
 
 #: Languages the correspondence documents can render; anything else is English.
 SUPPORTED_PDF_LOCALES: tuple[str, ...] = CATALOGUE.supported
