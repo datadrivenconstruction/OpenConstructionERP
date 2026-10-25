@@ -3,62 +3,40 @@
 /**
  * ``/packs``: everything that sets the platform up in one step.
  *
- * Two families, and the page says how they combine. A country pack localises
- * the whole platform for a market (currency, tax, standards, language, cost
- * data, demo projects) and keeps every module. A company-type pack is a
- * company profile: the modules, and with them the menu, a kind of company
- * works with. One of each is the reader's setup, shown at the top as two
- * slots. Industry, partner and showcase packs sit in the first family as
- * filterable types, because they take the same single pack slot.
+ * One catalogue of packs, filtered by type. A country pack localises the
+ * whole platform for a market (currency, tax, standards, language, cost data,
+ * demo projects) and keeps every module; industry, partner and showcase packs
+ * take the same slot. A company-type pack is a company profile: the modules,
+ * and with them the menu, a kind of company works with. One of each is the
+ * reader's setup, shown at the top as two slots.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
-import {
-  AlertTriangle,
-  ArrowUpRight,
-  BookOpen,
-  Building2,
-  Globe2,
-  Layers3,
-  Plus,
-  Power,
-  RefreshCw,
-  Search,
-  SearchX,
-  Users,
-  X,
-} from 'lucide-react';
-import { Breadcrumb, Button } from '@/shared/ui';
+import { ArrowUpRight, BookOpen, Building2, Globe2, Layers3, Plus, Power } from 'lucide-react';
+import { Breadcrumb } from '@/shared/ui';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
-import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { PartnerPackDeactivateDialog } from '../PartnerPackDeactivateDialog';
 import { canInstallPacks } from '../partnerPacks';
 import {
-  CompanyProfileCard,
   FULL_PROFILE_KEY,
   ProfileSwitchDialog,
   getPresetIcon,
-  sortPresets,
   useCompanyProfiles,
   type CompanyProfilesState,
 } from '../companyProfiles';
-import { foldText, PACK_FILTER_PARAMS, type PackEntry } from './packCatalog';
+import { EMPTY_PACK_FILTERS, parsePackFilters, writePackFilters, type PackEntry } from './packCatalog';
 import { PacksCatalog, usePackCatalogData } from './PacksCatalog';
 import { PACK_TYPE_META, useBandLabels } from './packLabels';
 
-const FAMILIES = ['country', 'company'] as const;
-type Family = (typeof FAMILIES)[number];
+/** The two kinds of pack a setup slot asks for. */
+type SlotKind = 'country' | 'company';
 
-function familyOf(params: URLSearchParams): Family {
-  return params.get('family') === 'company' ? 'company' : 'country';
-}
-
-function scrollToFamilies() {
-  const el = document.getElementById('packs-families');
+function scrollToCatalog() {
+  const el = document.getElementById('packs-catalog');
   if (!el) return;
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
   el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
@@ -322,169 +300,52 @@ function HowPacksWork() {
   );
 }
 
-/* ── Company types ──────────────────────────────────────────────────────── */
-
-function CompanyTypesPanel({ profiles }: { profiles: CompanyProfilesState }) {
-  const { t } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { presets, presetsLoading, presetsError, refetchPresets, shapes, activeProfileKey, profileName } = profiles;
-  const [q, setQ] = useState(searchParams.get('q') ?? '');
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
-  const onSearch = (value: string) => {
-    setQ(value);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          if (value) next.set('q', value);
-          else next.delete('q');
-          return next;
-        },
-        { replace: true },
-      );
-    }, 250);
-  };
-
-  const sorted = useMemo(() => sortPresets(presets ?? []), [presets]);
-  const shown = useMemo(() => {
-    const needle = foldText(q.trim());
-    if (!needle) return sorted;
-    return sorted.filter((p) =>
-      needle
-        .split(/\s+/)
-        .every((tok) =>
-          foldText(
-            [profileName(p), p.label, p.description, t(`onboarding.company_${p.key}_desc`, { defaultValue: p.description }), ...(p.tags ?? [])].join(' '),
-          ).includes(tok),
-        ),
-    );
-  }, [sorted, q, profileName, t]);
-
-  return (
-    <div className="space-y-4" data-testid="packs-company-types">
-      <p className="max-w-3xl text-sm text-content-secondary">
-        {t('packs.company_intro', {
-          defaultValue:
-            'Each company type is a preset: the modules your kind of company uses, and in Simple mode the menu built from them. Switching changes only which modules are on; your projects and data stay as they are.',
-        })}
-      </p>
-      <div className="relative max-w-md">
-        <Search size={16} aria-hidden className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => onSearch(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape' && q) {
-              e.preventDefault();
-              onSearch('');
-            }
-          }}
-          aria-label={t('packs.company_search_label', { defaultValue: 'Search company types' })}
-          placeholder={t('packs.company_search_placeholder', { defaultValue: 'For example contractor, developer or estimator' })}
-          data-testid="packs-company-search"
-          className="h-10 w-full rounded-lg border border-border bg-surface-primary pe-3 ps-9 text-sm text-content-primary placeholder:text-content-tertiary focus:border-oe-blue/60 focus:outline-none focus:ring-2 focus:ring-oe-blue/25"
-        />
-      </div>
-
-      {presetsLoading ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-[7.5rem] animate-pulse rounded-xl border border-border-light bg-surface-elevated" />
-          ))}
-        </div>
-      ) : presetsError ? (
-        <div role="alert" className="rounded-xl border border-border-light bg-surface-elevated py-12 text-center">
-          <AlertTriangle size={36} className="mx-auto mb-3 text-semantic-warning" strokeWidth={1.5} aria-hidden />
-          <p className="text-sm font-medium text-content-primary">
-            {t('modules.profiles_load_failed', { defaultValue: 'Failed to load profiles' })}
-          </p>
-          <Button variant="secondary" size="sm" icon={<RefreshCw size={14} />} onClick={() => void refetchPresets()} className="mt-3">
-            {t('common.retry', { defaultValue: 'Retry' })}
-          </Button>
-        </div>
-      ) : sorted.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border py-12 text-center">
-          <Users size={36} className="mx-auto mb-3 text-content-tertiary" aria-hidden />
-          <p className="text-sm font-medium text-content-secondary">
-            {t('modules.no_profiles', { defaultValue: 'No company profiles available' })}
-          </p>
-        </div>
-      ) : shown.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border py-12 text-center" data-testid="packs-company-empty">
-          <SearchX size={36} className="mx-auto mb-3 text-content-tertiary" strokeWidth={1.5} aria-hidden />
-          <p className="text-sm font-medium text-content-primary">
-            {t('packs.company_empty', { defaultValue: 'No company type matches this search' })}
-          </p>
-          <Button variant="secondary" size="sm" icon={<X size={14} />} onClick={() => onSearch('')} className="mt-3">
-            {t('packs.search_clear', { defaultValue: 'Clear search' })}
-          </Button>
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {shown.map((preset) => (
-            <CompanyProfileCard
-              key={preset.key}
-              preset={preset}
-              isActive={preset.key === activeProfileKey}
-              shape={shapes.get(preset.key)}
-              onSelect={profiles.requestSwitch}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /* ── Page ───────────────────────────────────────────────────────────────── */
 
 export function PacksPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const family = familyOf(searchParams);
   const canInstall = canInstallPacks(useAuthStore((s) => s.userRole));
   const { list, entries, activeSlug, activeSource } = usePackCatalogData();
   const profiles = useCompanyProfiles();
   const [deactivateOpen, setDeactivateOpen] = useState(false);
 
   const activeEntry = useMemo(() => entries.find((e) => e.slug === activeSlug) ?? null, [entries, activeSlug]);
-  const countryCount = useMemo(() => entries.filter((e) => e.type === 'country').length, [entries]);
   const countries = useMemo(() => new Set(entries.map((e) => e.country).filter(Boolean)).size, [entries]);
   const languages = useMemo(() => new Set(entries.flatMap((e) => e.languages)).size, [entries]);
-  const companyCount = profiles.presets?.length ?? 0;
+  const packCount = entries.length + (profiles.presets?.length ?? 0);
 
-  const selectFamily = useCallback(
-    (next: Family) => {
-      // Each family has its own filters; carrying one family's into the other
-      // would filter a list by fields it does not have.
+  // Links from before the single catalogue carried ``family=company``; read
+  // it once as the company-type filter so they still land on the right list.
+  const legacyFamily = searchParams.get('family');
+  useEffect(() => {
+    if (legacyFamily === null) return;
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev);
+        params.delete('family');
+        return legacyFamily === 'company' ? writePackFilters(params, { ...parsePackFilters(params), company: true }) : params;
+      },
+      { replace: true },
+    );
+  }, [legacyFamily, setSearchParams]);
+
+  // A slot's Choose and Change buttons open the catalogue on that kind of pack.
+  const showKind = useCallback(
+    (kind: SlotKind) => {
       setSearchParams(
-        (prev) => {
-          const params = new URLSearchParams(prev);
-          for (const key of PACK_FILTER_PARAMS) params.delete(key);
-          if (next === 'company') params.set('family', 'company');
-          else params.delete('family');
-          return params;
-        },
+        (prev) =>
+          writePackFilters(prev, {
+            ...EMPTY_PACK_FILTERS,
+            sort: parsePackFilters(prev).sort,
+            ...(kind === 'company' ? { company: true } : { types: ['country'] }),
+          }),
         { replace: true },
       );
+      requestAnimationFrame(scrollToCatalog);
     },
     [setSearchParams],
   );
-  const onTabKeyDown = useTabKeyboardNav<Family>({
-    ids: FAMILIES,
-    activeId: family,
-    onChange: selectFamily,
-    orientation: 'horizontal',
-  });
-  const goTo = (next: Family) => {
-    selectFamily(next);
-    requestAnimationFrame(scrollToFamilies);
-  };
 
   const stat = (value: number | string, label: string) => (
     <div className="min-w-[5.5rem]">
@@ -492,23 +353,6 @@ export function PacksPage() {
       <dt className="text-xs text-content-tertiary">{label}</dt>
     </div>
   );
-
-  const tabs: { key: Family; icon: typeof Globe2; title: string; hint: string; count: number }[] = [
-    {
-      key: 'country',
-      icon: Globe2,
-      title: t('packs.family_country', { defaultValue: 'Country packs' }),
-      hint: t('packs.family_country_hint', { defaultValue: 'The full platform for a market, plus industry and partner packs' }),
-      count: entries.length,
-    },
-    {
-      key: 'company',
-      icon: Building2,
-      title: t('packs.family_company', { defaultValue: 'Company-type packs' }),
-      hint: t('packs.family_company_hint', { defaultValue: 'Module and menu presets for a kind of company' }),
-      count: companyCount,
-    },
-  ];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -534,8 +378,7 @@ export function PacksPage() {
           </div>
         </div>
         <dl className="flex flex-wrap gap-x-6 gap-y-3" aria-label={t('packs.stats_label', { defaultValue: 'Packs at a glance' })}>
-          {stat(list.isLoading ? '–' : countryCount, t('packs.stat_country_packs', { defaultValue: 'Country packs' }))}
-          {stat(profiles.presetsLoading ? '–' : companyCount, t('packs.stat_company_types', { defaultValue: 'Company types' }))}
+          {stat(list.isLoading || profiles.presetsLoading ? '–' : packCount, t('nav.packs', { defaultValue: 'Packs' }))}
           {stat(list.isLoading ? '–' : countries, t('packs.stat_countries', { defaultValue: 'Countries' }))}
           {stat(list.isLoading ? '–' : languages, t('packs.stat_languages', { defaultValue: 'Languages' }))}
         </dl>
@@ -552,7 +395,7 @@ export function PacksPage() {
             loading={list.isLoading}
             envPinned={activeSource === 'env'}
             canInstall={canInstall}
-            onChange={() => goTo('country')}
+            onChange={() => showKind('country')}
             onDeactivate={() => setDeactivateOpen(true)}
           />
           <div className="flex items-center justify-center" aria-hidden>
@@ -560,69 +403,15 @@ export function PacksPage() {
               <Plus size={16} />
             </span>
           </div>
-          <CompanySlot profiles={profiles} onChange={() => goTo('company')} />
+          <CompanySlot profiles={profiles} onChange={() => showKind('company')} />
         </div>
       </section>
 
       <HowPacksWork />
 
-      {/* The two families */}
-      <section id="packs-families" className="scroll-mt-[calc(var(--oe-header-height)+16px)] space-y-5">
-        <div
-          role="tablist"
-          aria-label={t('packs.families_label', { defaultValue: 'Pack families' })}
-          className="grid gap-2 sm:grid-cols-2"
-          onKeyDown={onTabKeyDown}
-        >
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const selected = family === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                role="tab"
-                id={`packs-tab-${tab.key}`}
-                aria-selected={selected}
-                aria-controls={`packs-panel-${tab.key}`}
-                tabIndex={selected ? 0 : -1}
-                onClick={() => selectFamily(tab.key)}
-                data-testid={`packs-family-${tab.key}`}
-                className={clsx(
-                  'flex items-center gap-3 rounded-xl border p-3.5 text-start transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
-                  selected
-                    ? 'border-oe-blue bg-oe-blue/5 shadow-xs'
-                    : 'border-border-light bg-surface-elevated hover:border-border',
-                )}
-              >
-                <span
-                  className={clsx(
-                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-                    selected ? 'bg-oe-blue text-content-inverse' : 'bg-surface-secondary text-content-secondary',
-                  )}
-                >
-                  <Icon size={19} aria-hidden />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className={clsx('text-sm font-semibold', selected ? 'text-oe-blue' : 'text-content-primary')}>
-                      {tab.title}
-                    </span>
-                    <span className="rounded-full bg-surface-secondary px-1.5 text-2xs tabular-nums text-content-secondary">
-                      {tab.count}
-                    </span>
-                  </span>
-                  <span className="mt-0.5 block truncate text-xs text-content-tertiary">{tab.hint}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div role="tabpanel" id={`packs-panel-${family}`} aria-labelledby={`packs-tab-${family}`}>
-          {family === 'country' ? <PacksCatalog spotlight={false} /> : <CompanyTypesPanel profiles={profiles} />}
-        </div>
+      {/* Every pack in one catalogue: country, industry, partner, showcase and company type. */}
+      <section id="packs-catalog" className="scroll-mt-[calc(var(--oe-header-height)+16px)]">
+        <PacksCatalog spotlight={false} companies={profiles} />
       </section>
 
       {activeEntry && (

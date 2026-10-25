@@ -17,6 +17,7 @@ import clsx from 'clsx';
 import {
   AlertTriangle,
   ArrowUpRight,
+  Briefcase,
   ChevronDown,
   Package,
   PackageOpen,
@@ -37,9 +38,12 @@ import { useToastStore } from '@/stores/useToastStore';
 import { PartnerPackApplyDialog } from '../PartnerPackApplyDialog';
 import { PartnerPackDeactivateDialog } from '../PartnerPackDeactivateDialog';
 import { canInstallPacks, useAppliedPack, useInstalledPackList, type AppliedInfo } from '../partnerPacks';
+import { CompanyProfileCard, sortPresets, type CompanyPresetAPI, type CompanyProfilesState } from '../companyProfiles';
 import {
   buildPackEntries,
+  companyPackMatches,
   filterPackEntries,
+  foldText,
   groupPackEntries,
   hasActivePackFilters,
   packFacetCounts,
@@ -51,6 +55,7 @@ import {
   PACK_SORTS,
   PACK_STATUSES,
   PACK_TYPES,
+  type CompanyPackEntry,
   type PackEntry,
   type PackFilters,
   type PackGroup,
@@ -336,6 +341,12 @@ function CardSkeleton() {
 
 const CARD_GRID = 'grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,17.5rem),1fr))]';
 
+const COMPANY_SECTION_ID = 'packs-section-company';
+
+interface CompanyCatalogEntry extends CompanyPackEntry {
+  preset: CompanyPresetAPI;
+}
+
 /* ── Catalogue ──────────────────────────────────────────────────────────── */
 
 export interface PacksCatalogProps {
@@ -344,9 +355,12 @@ export interface PacksCatalogProps {
   /** Pin the active pack above the sections. The packs page shows it in its
    *  "your setup" strip instead, so it passes false. */
   spotlight?: boolean;
+  /** Company types to list as one more kind of pack, beside the installed
+   *  ones. Left out, the catalogue shows installed packs only. */
+  companies?: CompanyProfilesState;
 }
 
-export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embedded }: PacksCatalogProps) {
+export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embedded, companies }: PacksCatalogProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -402,9 +416,58 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
       ),
     [filtered, spotlight, filters.sort, names.locale],
   );
-  const sectionIds = useMemo(() => groups.map((g) => packSectionId(g.id)), [groups]);
+  const presets = companies?.presets;
+  const profileName = companies?.profileName;
+  const activeProfileKey = companies?.activeProfileKey ?? null;
+  const companyEntries = useMemo<CompanyCatalogEntry[]>(
+    () =>
+      profileName
+        ? sortPresets(presets ?? []).map((p) => ({
+            preset: p,
+            key: p.key,
+            haystack: foldText(
+              [
+                profileName(p),
+                p.label,
+                p.description,
+                t(`onboarding.company_${p.key}_desc`, { defaultValue: p.description }),
+                ...(p.tags ?? []),
+              ].join(' '),
+            ),
+          }))
+        : [],
+    [presets, profileName, t],
+  );
+  const shownCompanies = useMemo(
+    () => companyEntries.filter((e) => companyPackMatches(e, filters, activeProfileKey)),
+    [companyEntries, filters, activeProfileKey],
+  );
+  const companyCount = useMemo(
+    () => companyEntries.filter((e) => companyPackMatches(e, filters, activeProfileKey, 'type')).length,
+    [companyEntries, filters, activeProfileKey],
+  );
+  const companyStatusCounts = useMemo(() => {
+    const n = { active: 0, available: 0 };
+    for (const e of companyEntries) {
+      if (companyPackMatches(e, filters, activeProfileKey, 'status')) n[e.key === activeProfileKey ? 'active' : 'available'] += 1;
+    }
+    return n;
+  }, [companyEntries, filters, activeProfileKey]);
+
+  const companiesLabel = t('packs.stat_company_types', { defaultValue: 'Company types' });
+  const sections = useMemo(() => {
+    // ``group: null`` is the company-type section, which is not a market band.
+    const list: { id: string; group: PackGroup['id'] | null; count: number }[] = groups.map((g) => ({
+      id: packSectionId(g.id),
+      group: g.id,
+      count: g.entries.length,
+    }));
+    if (shownCompanies.length) list.push({ id: COMPANY_SECTION_ID, group: null, count: shownCompanies.length });
+    return list;
+  }, [groups, shownCompanies.length]);
+  const sectionIds = useMemo(() => sections.map((s) => s.id), [sections]);
   const spied = useScrollSpy(sectionIds);
-  const showNav = groups.length > 1;
+  const showNav = sections.length > 1;
 
   const languageOptions = useMemo(() => {
     const all = new Set<string>();
@@ -446,14 +509,26 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
   const installRegionId = useId();
   const backTo = `${location.pathname}${location.search}`;
 
-  const typeChip = (key: 'all' | PackEntry['type']) => {
-    const selected = key === 'all' ? filters.types.length === 0 : filters.types.includes(key);
-    const count = key === 'all' ? PACK_TYPES.reduce((n, k) => n + counts.types[k], 0) : counts.types[key];
-    const meta = key === 'all' ? null : PACK_TYPE_META[key];
-    const Icon = meta?.icon ?? Package;
+  const typeChip = (key: 'all' | 'company' | PackEntry['type']) => {
+    const selected =
+      key === 'all'
+        ? filters.types.length === 0 && !filters.company
+        : key === 'company'
+          ? filters.company
+          : filters.types.includes(key);
+    const count =
+      key === 'all'
+        ? PACK_TYPES.reduce((n, k) => n + counts.types[k], 0) + companyCount
+        : key === 'company'
+          ? companyCount
+          : counts.types[key];
+    const meta = key === 'all' || key === 'company' ? null : PACK_TYPE_META[key];
+    const Icon = key === 'company' ? Briefcase : meta?.icon ?? Package;
     const label = meta
       ? t(meta.labelKey, { defaultValue: meta.defaultLabel })
-      : t('packs.type_all', { defaultValue: 'All types' });
+      : key === 'company'
+        ? t('packs.slot_company', { defaultValue: 'Company type' })
+        : t('packs.type_all', { defaultValue: 'All types' });
     return (
       <button
         key={key}
@@ -462,7 +537,8 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
         data-testid={`packs-type-${key}`}
         disabled={key !== 'all' && count === 0 && !selected}
         onClick={() => {
-          if (key === 'all') setFilters({ types: [] });
+          if (key === 'all') setFilters({ types: [], company: false });
+          else if (key === 'company') setFilters({ company: !selected });
           else
             setFilters({
               types: selected ? filters.types.filter((x) => x !== key) : [...filters.types, key],
@@ -493,7 +569,8 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
 
   const loading = list.isLoading;
   const failed = list.isError && !list.data;
-  const total = entries.length;
+  const total = entries.length + companyEntries.length;
+  const shownTotal = filtered.length + shownCompanies.length;
 
   return (
     <div className="space-y-5" data-testid="packs-catalog">
@@ -603,6 +680,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
         >
           {typeChip('all')}
           {PACK_TYPES.map((k) => typeChip(k))}
+          {companies && typeChip('company')}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -644,7 +722,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
             <option value="">{t('packs.status_all', { defaultValue: 'Any status' })}</option>
             {PACK_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {`${statusLabels[s]} (${counts.status[s]})`}
+                {`${statusLabels[s]} (${counts.status[s] + companyStatusCounts[s]})`}
               </option>
             ))}
           </FilterSelect>
@@ -670,7 +748,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
             : filtering
               ? t('packs.shown_of', {
                   defaultValue: 'Shown: {{shown}} of {{total}}',
-                  shown: filtered.length,
+                  shown: shownTotal,
                   total,
                 })
               : t('packs.total_n', { defaultValue: 'Packs: {{n}}', n: total })}
@@ -684,9 +762,9 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
               data-testid="packs-jump"
               className="h-9 max-w-[16rem] cursor-pointer rounded-lg border border-border bg-surface-primary px-2.5 text-sm text-content-primary"
             >
-              {groups.map((g) => (
-                <option key={g.id} value={packSectionId(g.id)}>
-                  {`${groupLabel(g.id)} (${g.entries.length})`}
+              {sections.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {`${s.group ? groupLabel(s.group) : companiesLabel} (${s.count})`}
                 </option>
               ))}
             </select>
@@ -733,7 +811,7 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
             })}
           </p>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : shownTotal === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-14 text-center" data-testid="packs-empty">
           <SearchX size={36} className="mx-auto mb-3 text-content-tertiary" strokeWidth={1.5} aria-hidden />
           <p className="text-sm font-medium text-content-primary">
@@ -760,11 +838,10 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
                 style={{ top: 'calc(var(--oe-header-height) + 16px)' }}
                 data-testid="packs-section-nav"
               >
-                {groups.map((g) => {
-                  const id = packSectionId(g.id);
+                {sections.map(({ id, group, count }) => {
                   const current = spied === id;
                   return (
-                    <li key={g.id}>
+                    <li key={id}>
                       <a
                         href={`#${id}`}
                         aria-current={current ? 'location' : undefined}
@@ -780,8 +857,8 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
                             : 'border-transparent text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
                         )}
                       >
-                        <span className="truncate">{groupLabel(g.id)}</span>
-                        <span className="text-2xs tabular-nums text-content-tertiary">{g.entries.length}</span>
+                        <span className="truncate">{group ? groupLabel(group) : companiesLabel}</span>
+                        <span className="text-2xs tabular-nums text-content-tertiary">{count}</span>
                       </a>
                     </li>
                   );
@@ -842,6 +919,39 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
                 </section>
               );
             })}
+            {companies && shownCompanies.length > 0 && (
+              <section
+                id={COMPANY_SECTION_ID}
+                aria-labelledby={`${COMPANY_SECTION_ID}-title`}
+                className="scroll-mt-[calc(var(--oe-header-height)+16px)]"
+                data-testid="packs-company-types"
+              >
+                <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <h2
+                    id={`${COMPANY_SECTION_ID}-title`}
+                    tabIndex={-1}
+                    className="text-base font-semibold text-content-primary focus:outline-none"
+                  >
+                    {companiesLabel}
+                  </h2>
+                  <span className="text-xs tabular-nums text-content-tertiary">{shownCompanies.length}</span>
+                  <span className="text-xs text-content-tertiary">
+                    {t('packs.family_company_hint', { defaultValue: 'Module and menu presets for a kind of company' })}
+                  </span>
+                </div>
+                <div className={CARD_GRID}>
+                  {shownCompanies.map(({ preset }) => (
+                    <CompanyProfileCard
+                      key={preset.key}
+                      preset={preset}
+                      isActive={preset.key === activeProfileKey}
+                      shape={companies.shapes.get(preset.key)}
+                      onSelect={companies.requestSwitch}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       )}

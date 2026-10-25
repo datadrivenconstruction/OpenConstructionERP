@@ -16,6 +16,7 @@ vi.mock('@/stores/useAuthStore', () => ({
 }));
 
 import { PacksCatalog } from './PacksCatalog';
+import type { CompanyProfilesState } from '../companyProfiles';
 
 function pack(slug: string, over: Partial<PackManifest>): PackManifest {
   return {
@@ -136,5 +137,43 @@ describe('PacksCatalog', () => {
     const alert = await screen.findByRole('alert');
     expect(within(alert).getByRole('button')).toBeTruthy();
     expect(cardNames()).toEqual([]);
+  });
+
+  it('lists company types as one more kind of pack', async () => {
+    const preset = (key: string, label: string) => ({
+      key,
+      label,
+      description: '',
+      icon: 'Building2',
+      enabled_modules: [],
+      module_count: 12,
+    });
+    const requestSwitch = vi.fn();
+    const companies = {
+      presets: [preset('general_contractor', 'General contractor'), preset('developer', 'Developer')],
+      profileName: (p: { label: string }) => p.label,
+      activeProfileKey: 'developer',
+      shapes: new Map(),
+      requestSwitch,
+    } as unknown as CompanyProfilesState;
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={['/packs']}>
+          <PacksCatalog companies={companies} />
+          <LocationProbe />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(cardNames()).toContain('Germany pack'));
+    // Four installed packs plus two company types in one catalogue.
+    expect(screen.getByTestId('packs-type-all')).toHaveTextContent('6');
+    expect(screen.getByTestId('packs-company-types')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('packs-type-company'));
+    await waitFor(() => expect(lastSearch).toContain('type=company'));
+    expect(cardNames()).not.toContain('Germany pack');
+    expect(screen.getByTestId('packs-result-count')).toHaveTextContent('2');
+    fireEvent.click(screen.getByRole('button', { name: /General contractor/ }));
+    expect(requestSwitch).toHaveBeenCalledWith(expect.objectContaining({ key: 'general_contractor' }));
   });
 });
