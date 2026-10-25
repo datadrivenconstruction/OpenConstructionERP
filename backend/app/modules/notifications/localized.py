@@ -11,9 +11,11 @@ row can be read in any language. Two places turn that into text on the server:
   for a locale file that lacks the key, rendered at read time for the reader.
 
 Both go through :func:`render`. English is ``templates._TEMPLATES``, the
-existing source of truth; Turkish is ``templates_tr.TEMPLATES_TR``, held to the
-same keys and placeholders by a test. Every other locale answers in English,
-and says so in the log once per locale rather than on every message.
+existing source of truth; Turkish is ``templates_tr.TEMPLATES_TR`` and every
+other platform language is the ``notification_templates`` section of
+``core/document_catalogues``, all held to the same keys and placeholders by a
+test. A locale the platform does not carry answers in English, and says so in
+the log once per locale rather than on every message.
 
 Dates are params too. :func:`localize_context` rewrites ``due_date_display``
 from ``due_date_iso`` in the format the person uses, so a date stored for a
@@ -27,6 +29,7 @@ import logging
 from datetime import date, datetime
 from typing import Any
 
+from app.core.document_catalogue import merge_missing
 from app.core.regional_format import format_date
 from app.modules.notifications.templates import english_template
 from app.modules.notifications.templates import render as render_english
@@ -36,16 +39,29 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_LOCALE = "en"
 
+_CATALOGUES: dict[str, dict[str, str]] = {"tr": TEMPLATES_TR}
+merge_missing(_CATALOGUES, "notification_templates")
+
 #: Locales with a notification catalogue of their own. Anything else falls
 #: back to English through :func:`catalogue_locale`.
-CATALOGUE_LOCALES: tuple[str, ...] = ("en", "tr")
-
-_CATALOGUES: dict[str, dict[str, str]] = {"tr": TEMPLATES_TR}
+CATALOGUE_LOCALES: tuple[str, ...] = ("en", *_CATALOGUES)
 
 #: Date order a language writes when the person has not picked one. English is
 #: ISO because "10/04/2026" is April in one English-speaking country and
-#: October in another, and a deadline is the wrong place to guess.
-_LOCALE_DATE_PATTERN: dict[str, str] = {"en": "YYYY-MM-DD", "tr": "DD.MM.YYYY"}
+#: October in another, and a deadline is the wrong place to guess. A language
+#: whose usual order is not settled (Filipino, Persian, Swedish) reads ISO too.
+_LOCALE_DATE_PATTERN: dict[str, str] = {
+    **dict.fromkeys(
+        ("de", "ru", "tr", "pl", "cs", "hr", "bg", "uk", "kk", "ky", "uz", "fi", "no", "da", "et", "ro", "he"),
+        "DD.MM.YYYY",
+    ),
+    **dict.fromkeys(("fr", "es", "pt", "it", "el", "vi", "id", "ar", "hi", "bn", "th", "ur"), "DD/MM/YYYY"),
+    "nl": "DD-MM-YYYY",
+    "hu": "YYYY.MM.DD",
+    "ko": "YYYY.MM.DD",
+    **dict.fromkeys(("ja", "zh"), "YYYY/MM/DD"),
+}
+_DEFAULT_DATE_PATTERN = "YYYY-MM-DD"
 
 #: ``User.date_format`` values that mean "never chose". ``DD.MM.YYYY`` is the
 #: column's old default, and the frontend store reads it the same way.
@@ -133,7 +149,7 @@ def date_pattern(locale: str | None, date_format: str | None = None) -> str:
     chosen = (date_format or "").strip()
     if chosen not in _UNCHOSEN_DATE_FORMATS and all(token in chosen for token in ("DD", "MM", "YYYY")):
         return chosen
-    return _LOCALE_DATE_PATTERN[catalogue_locale(locale)]
+    return _LOCALE_DATE_PATTERN.get(catalogue_locale(locale), _DEFAULT_DATE_PATTERN)
 
 
 def _parse_day(value: Any) -> date | None:

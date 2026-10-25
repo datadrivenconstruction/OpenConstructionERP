@@ -247,13 +247,17 @@ async def export_excel(
     set_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
-    language: str = Query(default="en", pattern="^(en|de)$"),
+    language: str = Query(default="en", max_length=16, description="Workbook language, any platform language code."),
     service: BIMRequirementService = Depends(_get_service),
 ) -> Response:
     """Export a BIM requirement set as a formatted Excel file."""
     req_set = await service.get_set(set_id)
     await verify_project_access(req_set.project_id, str(user_id), session)
-    content = await service.export_excel(set_id, language=language)
+    from app.modules.bim_requirements.exporters.excel_exporter import workbook_language
+
+    # A language without a catalogue is written in English, and the response says so.
+    written = workbook_language(language)
+    content = await service.export_excel(set_id, language=written)
     safe_name = _sanitize_filename(req_set.name)
 
     return Response(
@@ -261,6 +265,7 @@ async def export_excel(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
             "Content-Disposition": attachment_disposition(f"{safe_name}.xlsx"),
+            "Content-Language": written,
         },
     )
 

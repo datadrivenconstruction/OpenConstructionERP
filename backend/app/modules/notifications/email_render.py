@@ -13,8 +13,8 @@ the mail goes out without a button.
 
 The text around the notification (greeting, button, footer, digest subject)
 is written in the recipient's language (``User.locale``) through the shared
-:func:`app.core.document_locale.translate`, in the languages the portal and
-tender invitation emails speak, falling back to English key by key. Values are
+:func:`app.core.document_locale.translate`, in every platform language the
+catalogue carries, falling back to English key by key. Values are
 plain text and every one is escaped where it is spliced in.
 """
 
@@ -24,6 +24,7 @@ import html
 import re
 from urllib.parse import SplitResult, urlsplit
 
+from app.core.document_catalogue import is_rtl, merge_missing
 from app.core.document_locale import normalize_document_locale, translate
 
 DEFAULT_LOCALE = "en"
@@ -126,6 +127,9 @@ _TABLES: dict[str, dict[str, str]] = {
         "digest_heading": "Son bildirimler:",
     },
 }
+
+# The platform's other languages come from ``core/document_catalogues`` (section ``notification_email``).
+merge_missing(_TABLES, "notification_email")
 
 #: Languages the notification email can be written in.
 SUPPORTED_LOCALES: tuple[str, ...] = tuple(_TABLES)
@@ -243,4 +247,6 @@ def render_notification_email(
         html.escape(link, quote=True) if link else None,
         html.escape(_t(locale, "cta")),
         footer=html.escape(_t(locale, "footer")),
+        lang=email_locale(locale),
+        rtl=is_rtl(locale),
     )
