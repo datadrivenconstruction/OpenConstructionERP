@@ -84,6 +84,7 @@ vi.mock('@/stores/useAuthStore', () => ({
 
 import { ChangeOrdersPage } from './ChangeOrdersPage';
 import { useToastStore } from '@/stores/useToastStore';
+import { pickDocumentLanguage } from '@/test/pickDocumentLanguage';
 
 const ORDER = {
   id: 'co-1',
@@ -173,7 +174,7 @@ describe('exporting the change order register', () => {
     expect(screen.getByText(/The whole register is exported/)).toBeTruthy();
     // The CSV the page builds from the rows on screen is kept, and named for what it is.
     expect(screen.getByTestId('changeorders-export-item-csv-view').textContent).toContain('CSV of the rows shown');
-    fireEvent.click(screen.getByTestId('changeorders-export-lang-tr'));
+    pickDocumentLanguage('changeorders-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('changeorders-export-item-register-xlsx'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
@@ -226,7 +227,7 @@ describe('printing one change order', () => {
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
 
     fireEvent.click(screen.getByTestId('changeorder-pdf-more'));
-    fireEvent.click(screen.getByTestId('changeorder-pdf-lang-tr'));
+    pickDocumentLanguage('changeorder-pdf', 'Türkçe');
     fireEvent.click(screen.getByTestId('changeorder-pdf-item-pdf'));
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(2));
 

@@ -38,6 +38,7 @@ vi.mock('@/features/tasks', () => ({ CreateTaskFromSourceDialog: () => null }));
 import { CorrespondencePage } from './CorrespondencePage';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { pickDocumentLanguage } from '@/test/pickDocumentLanguage';
 
 const PROJECT = { id: 'p-1', name: 'İstanbul Veri Merkezi' };
 
@@ -120,7 +121,7 @@ describe('exporting the correspondence log', () => {
     fireEvent.click(screen.getByTestId('correspondence-export-more'));
     // The route takes no filter, and the control says so.
     expect(screen.getByText(/The whole register is exported/)).toBeTruthy();
-    fireEvent.click(screen.getByTestId('correspondence-export-lang-tr'));
+    pickDocumentLanguage('correspondence-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('correspondence-export-item-register-xlsx'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
@@ -176,7 +177,7 @@ describe('printing one correspondence entry', () => {
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
 
     fireEvent.click(screen.getByTestId('correspondence-pdf-c-1-more'));
-    fireEvent.click(screen.getByTestId('correspondence-pdf-c-1-lang-tr'));
+    pickDocumentLanguage('correspondence-pdf-c-1', 'Türkçe');
     fireEvent.click(screen.getByTestId('correspondence-pdf-c-1-item-pdf'));
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(2));
 

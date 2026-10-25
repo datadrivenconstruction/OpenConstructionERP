@@ -15,7 +15,7 @@
  * panel is portaled with fixed coordinates because it is mounted inside page
  * headers, drawers and expandable rows, several of which clip their overflow.
  */
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
@@ -24,8 +24,10 @@ import { ChevronDown, Download, FileDown, FileSpreadsheet, FileText, Loader2 } f
 import {
   REGISTER_DOCUMENT_LOCALES,
   defaultDocumentLocale,
+  documentLocaleEnglishName,
   documentLocaleName,
 } from '@/shared/lib/documentExport';
+import { SearchableSelect } from '@/shared/ui/SearchableSelect';
 import { useToastStore } from '@/stores/useToastStore';
 
 export interface DocumentExportItem {
@@ -69,6 +71,12 @@ export interface DocumentExportMenuProps {
   guide?: string;
 }
 
+/**
+ * Up to this many languages the choice is a row of buttons; beyond it the row
+ * would not fit the menu and the choice is a searchable list.
+ */
+const RADIO_LOCALES_MAX = 4;
+
 const ITEM_ICONS = { pdf: FileDown, xlsx: FileSpreadsheet, other: FileText } as const;
 
 const SIZE_STYLES = {
@@ -111,11 +119,24 @@ export function DocumentExportMenu({
       ? pickedLocale
       : defaultDocumentLocale(locales, i18n.language || null);
 
+  // Each language under its own name; the English name and the code are searchable too.
+  const localeOptions = useMemo(
+    () =>
+      locales.map((code) => ({
+        value: code,
+        label: documentLocaleName(code),
+        hint: code,
+        keywords: documentLocaleEnglishName(code),
+      })),
+    [locales],
+  );
+
   const moreRef = useRef<HTMLButtonElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
   const languageLabelId = useId();
+  const languageSelectId = useId();
 
   useLayoutEffect(() => {
     if (!open) {
@@ -150,6 +171,8 @@ export function DocumentExportMenu({
     // close on Escape themselves, and one Escape should close one thing.
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
+      // An open language list takes the first Escape itself.
+      if (menuRef.current?.querySelector('[role="combobox"][aria-expanded="true"]')) return;
       e.stopPropagation();
       setOpen(false);
       moreRef.current?.focus();
@@ -246,30 +269,45 @@ export function DocumentExportMenu({
           >
             {locales.length > 1 && (
               <div className="border-b border-border-light px-3 pb-2.5 pt-2">
-                <p id={languageLabelId} className="mb-1.5 text-2xs font-medium uppercase tracking-wide text-content-tertiary">
+                <label
+                  id={languageLabelId}
+                  htmlFor={languageSelectId}
+                  className="mb-1.5 block text-2xs font-medium uppercase tracking-wide text-content-tertiary"
+                >
                   {t('doc_export.language', { defaultValue: 'Document language' })}
-                </p>
-                <div role="radiogroup" aria-labelledby={languageLabelId} className="flex gap-1">
-                  {locales.map((code) => (
-                    <button
-                      key={code}
-                      type="button"
-                      role="radio"
-                      aria-checked={code === locale}
-                      lang={code}
-                      onClick={() => setPickedLocale(code)}
-                      className={clsx(
-                        'flex-1 rounded-md border px-2 py-1 text-xs font-medium transition-colors',
-                        code === locale
-                          ? 'border-oe-blue bg-oe-blue/10 text-oe-blue-text'
-                          : 'border-border-light text-content-secondary hover:bg-surface-secondary',
-                      )}
-                      data-testid={`${testId}-lang-${code}`}
-                    >
-                      {documentLocaleName(code)}
-                    </button>
-                  ))}
-                </div>
+                </label>
+                {locales.length > RADIO_LOCALES_MAX ? (
+                  <SearchableSelect
+                    value={locale}
+                    onChange={setPickedLocale}
+                    options={localeOptions}
+                    searchThreshold={0}
+                    id={languageSelectId}
+                    data-testid={`${testId}-lang`}
+                  />
+                ) : (
+                  <div role="radiogroup" aria-labelledby={languageLabelId} className="flex gap-1">
+                    {locales.map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        role="radio"
+                        aria-checked={code === locale}
+                        lang={code}
+                        onClick={() => setPickedLocale(code)}
+                        className={clsx(
+                          'flex-1 rounded-md border px-2 py-1 text-xs font-medium transition-colors',
+                          code === locale
+                            ? 'border-oe-blue bg-oe-blue/10 text-oe-blue-text'
+                            : 'border-border-light text-content-secondary hover:bg-surface-secondary',
+                        )}
+                        data-testid={`${testId}-lang-${code}`}
+                      >
+                        {documentLocaleName(code)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             {items.map((item, index) => {

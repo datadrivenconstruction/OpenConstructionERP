@@ -45,6 +45,7 @@ import { DetailDrawer, VariationsPage } from './VariationsPage';
 import type { VariationRequest } from './api';
 import { DEFAULT_VARIATIONS_TAB, VARIATIONS_EOT_TAB, VARIATIONS_TABS, isVariationsTab } from './variationsTabs';
 import { useToastStore } from '@/stores/useToastStore';
+import { pickDocumentLanguage } from '@/test/pickDocumentLanguage';
 
 const PROJECT = { id: 'p-1', name: 'İstanbul Veri Merkezi', currency: 'TRY' };
 
@@ -233,7 +234,7 @@ describe('exporting the variation registers', () => {
 
     expect(screen.getAllByRole('menuitem')).toHaveLength(6);
     expect(screen.getByText(/The whole register is exported/)).toBeTruthy();
-    fireEvent.click(screen.getByTestId('variations-export-lang-tr'));
+    pickDocumentLanguage('variations-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('variations-export-item-variation-xlsx'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
@@ -287,7 +288,7 @@ describe('printing one variation request', () => {
     );
 
     fireEvent.click(screen.getByTestId('variation-request-pdf-more'));
-    fireEvent.click(screen.getByTestId('variation-request-pdf-lang-tr'));
+    pickDocumentLanguage('variation-request-pdf', 'Türkçe');
     fireEvent.click(screen.getByTestId('variation-request-pdf-item-pdf'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));

@@ -10,6 +10,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 
 import { DocumentExportMenu, type DocumentExportItem } from './DocumentExportMenu';
+import { REGISTER_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
 import { useToastStore } from '@/stores/useToastStore';
 
 const runPdf = vi.fn<(locale: string) => Promise<void>>();
@@ -21,6 +22,9 @@ function items(): DocumentExportItem[] {
     { id: 'xlsx', label: 'Excel workbook (.xlsx)', kind: 'xlsx', run: runXlsx },
   ];
 }
+
+// jsdom has no layout, so the list cannot scroll a row into view.
+Element.prototype.scrollIntoView = vi.fn();
 
 beforeEach(() => {
   runPdf.mockResolvedValue(undefined);
@@ -48,7 +52,7 @@ describe('DocumentExportMenu', () => {
   });
 
   it('offers exactly the languages the documents exist in, with the current one marked', () => {
-    render(<DocumentExportMenu label="Export register" items={items()} testId="exp" />);
+    render(<DocumentExportMenu label="Export register" items={items()} locales={['en', 'tr']} testId="exp" />);
     fireEvent.click(screen.getByTestId('exp-more'));
     const radios = screen.getAllByRole('radio');
     expect(radios.map((r) => r.textContent)).toEqual(['English', 'Türkçe']);
@@ -57,7 +61,7 @@ describe('DocumentExportMenu', () => {
   });
 
   it('downloads in the other language once it is picked, from the menu and from the main half', async () => {
-    render(<DocumentExportMenu label="Export register" items={items()} testId="exp" />);
+    render(<DocumentExportMenu label="Export register" items={items()} locales={['en', 'tr']} testId="exp" />);
     fireEvent.click(screen.getByTestId('exp-more'));
     fireEvent.click(screen.getByTestId('exp-lang-tr'));
     // Choosing a language is not a download and does not close the menu.
@@ -160,5 +164,53 @@ describe('DocumentExportMenu', () => {
     fireEvent.mouseDown(document.body);
     expect(screen.queryByTestId('exp-menu')).toBeNull();
     expect(rowClick).not.toHaveBeenCalled();
+  });
+
+  describe('with the long language list of the registers', () => {
+    it('offers a searchable list of every register language, each under its own name', () => {
+      render(<DocumentExportMenu label="Export register" items={items()} testId="exp" />);
+      fireEvent.click(screen.getByTestId('exp-more'));
+      // Too many for a row of buttons.
+      expect(screen.queryByRole('radiogroup')).toBeNull();
+      const trigger = screen.getByTestId('exp-lang');
+      expect(trigger.textContent).toContain('English');
+      fireEvent.click(trigger);
+      const options = screen.getAllByRole('option');
+      expect(options).toHaveLength(REGISTER_DOCUMENT_LOCALES.length);
+      const names = options.map((o) => o.textContent ?? '');
+      for (const own of ['Deutsch', 'Türkçe', 'Français', 'Русский', 'العربية', 'עברית']) {
+        expect(names.some((n) => n.includes(own)), own).toBe(true);
+      }
+      // No language is named by its bare code.
+      expect(names.some((n) => /^[A-Z]{2,3}$/.test(n))).toBe(false);
+    });
+
+    it('finds a language by its own name or its English name and downloads in it', async () => {
+      render(<DocumentExportMenu label="Export register" items={items()} testId="exp" />);
+      fireEvent.click(screen.getByTestId('exp-more'));
+      fireEvent.click(screen.getByTestId('exp-lang'));
+      const search = screen.getByRole('textbox');
+      fireEvent.change(search, { target: { value: 'german' } });
+      expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([expect.stringContaining('Deutsch')]);
+      fireEvent.change(search, { target: { value: 'türk' } });
+      expect(screen.getAllByRole('option')).toHaveLength(1);
+      fireEvent.click(screen.getAllByRole('option')[0]!);
+      // Choosing a language is not a download.
+      expect(runPdf).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByTestId('exp-item-xlsx'));
+      await waitFor(() => expect(runXlsx).toHaveBeenCalledWith('tr'));
+    });
+
+    it('lets one Escape close the language list and the next close the menu', () => {
+      render(<DocumentExportMenu label="Export register" items={items()} testId="exp" />);
+      fireEvent.click(screen.getByTestId('exp-more'));
+      fireEvent.click(screen.getByTestId('exp-lang'));
+      expect(screen.getByRole('listbox')).toBeTruthy();
+      fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' });
+      expect(screen.queryByRole('listbox')).toBeNull();
+      expect(screen.getByTestId('exp-menu')).toBeTruthy();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(screen.queryByTestId('exp-menu')).toBeNull();
+    });
   });
 });

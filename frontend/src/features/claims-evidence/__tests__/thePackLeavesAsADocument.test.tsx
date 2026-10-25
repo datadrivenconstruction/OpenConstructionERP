@@ -29,6 +29,7 @@ import { ClaimsEvidencePage } from '../ClaimsEvidencePage';
 import { EvidenceThreadPanel } from '../EvidenceThreadPanel';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { pickDocumentLanguage } from '@/test/pickDocumentLanguage';
 
 const PROJECT = { id: 'p-1', name: 'İstanbul Veri Merkezi' };
 
@@ -114,7 +115,7 @@ describe('exporting the project evidence pack', () => {
     fireEvent.click(screen.getByTestId('claims-evidence-export-more'));
     // The data file is still offered beside the two documents.
     expect(screen.getByTestId('claims-evidence-export-item-json').textContent).toContain('JSON data file');
-    fireEvent.click(screen.getByTestId('claims-evidence-export-lang-tr'));
+    pickDocumentLanguage('claims-evidence-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('claims-evidence-export-item-xlsx'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
@@ -161,7 +162,7 @@ describe('exporting the evidence thread of one change', () => {
     fireEvent.click(screen.getByText(/Reconstruct evidence thread/i));
 
     fireEvent.click(await screen.findByTestId('evidence-thread-export-more'));
-    fireEvent.click(screen.getByTestId('evidence-thread-export-lang-tr'));
+    pickDocumentLanguage('evidence-thread-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('evidence-thread-export-item-pdf'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));

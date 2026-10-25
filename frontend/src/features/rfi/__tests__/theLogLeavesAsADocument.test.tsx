@@ -39,6 +39,7 @@ vi.mock('@/features/approval-routes', () => ({ ApprovalTargetBadge: () => null }
 import { RFIPage } from '../RFIPage';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { pickDocumentLanguage } from '@/test/pickDocumentLanguage';
 
 const PROJECT = { id: 'p-1', name: 'İstanbul Veri Merkezi' };
 
@@ -146,7 +147,7 @@ describe('exporting the RFI log', () => {
     fireEvent.click(screen.getByTestId('rfi-export-more'));
     // The route takes no filter, and the control says so.
     expect(screen.getByText(/The whole register is exported/)).toBeTruthy();
-    fireEvent.click(screen.getByTestId('rfi-export-lang-tr'));
+    pickDocumentLanguage('rfi-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('rfi-export-item-register-xlsx'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));

@@ -40,6 +40,7 @@ vi.mock('@/features/approval-routes', () => ({
 import { SubmittalsPage } from './SubmittalsPage';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { pickDocumentLanguage } from '@/test/pickDocumentLanguage';
 
 const PROJECT = { id: 'p-1', name: 'İstanbul Veri Merkezi' };
 
@@ -121,7 +122,7 @@ describe('exporting the submittal register', () => {
     fireEvent.click(screen.getByTestId('submittals-export-more'));
     // The route takes no filter, and the control says so.
     expect(screen.getByText(/The whole register is exported/)).toBeTruthy();
-    fireEvent.click(screen.getByTestId('submittals-export-lang-tr'));
+    pickDocumentLanguage('submittals-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('submittals-export-item-register-xlsx'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
@@ -177,7 +178,7 @@ describe('printing one submittal', () => {
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
 
     fireEvent.click(screen.getByTestId('submittal-pdf-s-1-more'));
-    fireEvent.click(screen.getByTestId('submittal-pdf-s-1-lang-tr'));
+    pickDocumentLanguage('submittal-pdf-s-1', 'Türkçe');
     fireEvent.click(screen.getByTestId('submittal-pdf-s-1-item-pdf'));
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(2));
 

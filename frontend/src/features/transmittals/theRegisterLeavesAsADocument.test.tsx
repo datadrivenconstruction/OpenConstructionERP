@@ -37,6 +37,7 @@ vi.mock('@/features/insights', () => ({
 import { TransmittalsPage } from './TransmittalsPage';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { pickDocumentLanguage } from '@/test/pickDocumentLanguage';
 
 const PROJECT = { id: 'p-1', name: 'İstanbul Veri Merkezi' };
 
@@ -120,7 +121,7 @@ describe('exporting the transmittal register', () => {
     fireEvent.click(screen.getByTestId('transmittals-export-more'));
     // The route takes no filter, and the control says so.
     expect(screen.getByText(/The whole register is exported/)).toBeTruthy();
-    fireEvent.click(screen.getByTestId('transmittals-export-lang-tr'));
+    pickDocumentLanguage('transmittals-export', 'Türkçe');
     fireEvent.click(screen.getByTestId('transmittals-export-item-register-xlsx'));
 
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
@@ -176,7 +177,7 @@ describe('printing the cover sheet of an issued transmittal', () => {
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(1));
 
     fireEvent.click(screen.getByTestId('transmittal-pdf-t-1-more'));
-    fireEvent.click(screen.getByTestId('transmittal-pdf-t-1-lang-tr'));
+    pickDocumentLanguage('transmittal-pdf-t-1', 'Türkçe');
     fireEvent.click(screen.getByTestId('transmittal-pdf-t-1-item-pdf'));
     await waitFor(() => expect(api.downloadWithAuth).toHaveBeenCalledTimes(2));
 

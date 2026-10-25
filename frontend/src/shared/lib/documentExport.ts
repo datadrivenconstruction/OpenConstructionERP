@@ -9,50 +9,67 @@
  * `downloadWithAuth`, which sends no `Accept-Language`, so the language always
  * travels as `?locale=`; without it a Turkish reader gets an English register.
  *
- * A document catalogue is narrower than the interface's language list, so the
- * languages a control may offer are listed here per document family and have
- * to be kept in step with the backend catalogue named beside each list.
+ * Which languages a document exists in is decided by the server. The lists
+ * below are the single place the web client keeps them, one per document
+ * family, and `test_register_documents_speak_every_language.py` fails when a
+ * list stops matching the catalogues it names (`GET /api/v1/i18n/document-locales`
+ * reports the same sets).
  */
+import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { API_BASE, activeLanguageTag, downloadWithAuth } from './api';
 
 export type DocumentFormat = 'pdf' | 'xlsx';
 
 /**
  * Languages of the registers and record forms built on
- * `backend/app/core/register_export.py` (`DocumentCatalogue.supported` of the
- * rfi register, submittals, correspondence, changeorders, transmittals,
- * variations and claims_evidence catalogues).
+ * `backend/app/core/document_forms_i18n.py` (the submittals, rfi log, correspondence,
+ * changeorders, transmittals, variations and claims_evidence catalogues): every
+ * language the backend runs in except Bengali and Urdu, which the PDF printer cannot draw
+ * correctly yet (`REGISTER_UNRENDERABLE` in `document_forms_i18n.py`).
  */
-export const REGISTER_DOCUMENT_LOCALES: readonly string[] = ['en', 'tr'];
+export const REGISTER_DOCUMENT_LOCALES: readonly string[] = [
+  'en', 'de', 'ru', 'fr', 'es', 'pt', 'it', 'nl', 'pl', 'cs', 'hu', 'tr', 'ar', 'zh', 'ja', 'ko', 'hi', 'sv', 'no',
+  'da', 'fi', 'bg', 'hr', 'id', 'ro', 'th', 'vi', 'uk', 'uz', 'et', 'ky', 'kk', 'fil', 'fa', 'he', 'el',
+];
 
-/**
- * Languages of the daily diary PDF (`SUPPORTED_PDF_LOCALES` in
- * `backend/app/modules/daily_diary/pdf_translations.py`).
- */
-export const DIARY_DOCUMENT_LOCALES: readonly string[] = ['en', 'de', 'tr'];
+/** Languages of the daily diary PDF: the same set as the registers. */
+export const DIARY_DOCUMENT_LOCALES: readonly string[] = REGISTER_DOCUMENT_LOCALES;
 
 /**
  * Languages of the purchase order, goods receipt, invoice and payment forms
- * (`SUPPORTED_PDF_LOCALES` in `backend/app/modules/procurement/pdf_translations.py`
- * and `backend/app/modules/finance/pdf_translations.py`).
+ * (`procurement` and `finance` in `document_forms_i18n.py`).
  */
-export const PURCHASING_DOCUMENT_LOCALES: readonly string[] = ['en', 'de', 'ru'];
+export const PURCHASING_DOCUMENT_LOCALES: readonly string[] = ['en', 'de', 'ru', 'ar', 'ur', 'fa', 'he'];
 
 /**
- * Each language under its own name, which is how a reader looks for it in a
- * list. These are data, like the names in the language picker, and are not
- * translated.
+ * A language under its own name, which is how a reader looks for it in a
+ * list. The names are the ones in the interface's language picker
+ * (`SUPPORTED_LANGUAGES`) without the regional qualifier, so "English
+ * (International)" reads "English"; a code the picker does not list is named
+ * by the runtime's own language names, and last of all by its upper-case code.
  */
-const LOCALE_ENDONYMS: Record<string, string> = {
-  en: 'English',
-  de: 'Deutsch',
-  ru: 'Русский',
-  tr: 'Türkçe',
-};
-
-/** The name a language goes by in a document-language choice. */
 export function documentLocaleName(locale: string): string {
-  return LOCALE_ENDONYMS[locale] ?? locale.toUpperCase();
+  const entry = SUPPORTED_LANGUAGES.find((l) => l.code === locale);
+  if (entry) return entry.name.replace(/\s*\(.*\)\s*$/, '');
+  // A combined code such as the hakedis `tr-en` is not a language: it keeps its upper-case spelling.
+  if (!/^[a-z]{2,3}$/.test(locale)) return locale.toUpperCase();
+  try {
+    return new Intl.DisplayNames([locale], { type: 'language' }).of(locale) ?? locale.toUpperCase();
+  } catch {
+    return locale.toUpperCase();
+  }
+}
+
+/** The same language in English, which the search box also matches ("German" finds Deutsch). */
+export function documentLocaleEnglishName(locale: string): string {
+  const entry = SUPPORTED_LANGUAGES.find((l) => l.code === locale);
+  if (entry && 'english' in entry && typeof entry.english === 'string') return entry.english.replace(/\s*\(.*\)\s*$/, '');
+  if (locale === 'en') return 'English';
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'language' }).of(locale) ?? locale;
+  } catch {
+    return locale;
+  }
 }
 
 /**
