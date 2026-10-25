@@ -113,7 +113,10 @@ Right-to-left scripts. Arabic, Persian, Urdu and Hebrew escalate to the
 bundled Unicode face like any other script the base face cannot draw, and that
 face has their glyphs, including the Arabic presentation forms, except two
 Urdu letters (heh goal and yeh barree); an Urdu string escalates one rung
-further, to the bundled Noto Naskh Arabic, which has all of them. Shaping and
+further, to the bundled Noto Naskh Arabic, which has all of them. Naskh has
+Arabic letters and digits only, so an Urdu string with a bracket, a slash or a
+Latin word is set in runs (:func:`pdf_font_runs`), Naskh for the letters and the
+Unicode face for the rest. Shaping and
 order are handled by :mod:`app.core.pdf_rtl`, which this module installs into
 reportlab at import: letters are joined into their positional forms, each line
 is put into visual order by the Unicode Bidirectional Algorithm, and an
@@ -130,6 +133,7 @@ from __future__ import annotations
 
 import html
 import logging
+import unicodedata
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from threading import Lock
@@ -728,13 +732,10 @@ def _face_ladder(base: str | None, *, bold: bool) -> tuple[list[str], str]:
     That rule has a sharp edge worth knowing, because it keeps the string whole
     at the cost of the script. Neither bundled Noto face carries the superscript
     digits or the micro sign, so a single ``m2`` written with a superscript two
-    beside a Thai description drops the whole string to the Unicode face and the
-    Thai renders as boxes, while the same text with a plain digit renders
-    correctly. Devanagari behaves the same way. Degree, en dash, euro and the
-    multiplication sign are present in both faces and are unaffected, and CJK is
-    unaffected because the CID face covers those symbols itself. Fixing it means
-    choosing a face per run rather than per string, which is a larger change
-    than this function.
+    beside a Thai description leaves no single face for the string, and this
+    function settles for the Unicode face. A caller that sets text in a
+    Paragraph does not have to settle: :func:`pdf_font_runs` splits such a
+    string by the faces on this same ladder and :func:`pdf_markup` tags each run.
     """
     want_bold = bold or (base or "") in _BOLD_FACES
     widest = pdf_font(BOLD_FONT if want_bold else BODY_FONT, bold=want_bold)
@@ -847,6 +848,154 @@ def pdf_shaping_for_text(text: str | None, *, bold: bool = False, base: str | No
     return font_needs_shaping(pdf_font_for_text(text, bold=bold, base=base))
 
 
+# Arabic script, as the blocks a face has to carry whole. The letters of a word
+# are joined to each other, and a join cannot cross from one face to another, so
+# a run of them is given one face rather than one per letter.
+_ARABIC_BLOCKS: tuple[tuple[int, int], ...] = (
+    (0x0600, 0x06FF),
+    (0x0750, 0x077F),
+    (0x08A0, 0x08FF),
+    (0xFB50, 0xFDFF),
+    (0xFE70, 0xFEFF),
+)
+_JOINERS = frozenset("\u200c\u200d")
+
+
+def _is_arabic_script(ch: str) -> bool:
+    code = ord(ch)
+    return any(low <= code <= high for low, high in _ARABIC_BLOCKS)
+
+
+def _arabic_units(text: str) -> list[tuple[int, int]]:
+    """Spans ``(start, end)`` of the Arabic-script letters in ``text``, joiners and marks included."""
+    spans: list[tuple[int, int]] = []
+    start: int | None = None
+    for index, ch in enumerate(text):
+        inside = (_is_arabic_script(ch) and unicodedata.category(ch)[0] in "LM") or (
+            start is not None and (ch in _JOINERS or unicodedata.category(ch)[0] == "M")
+        )
+        if inside and start is None:
+            start = index
+        elif not inside and start is not None:
+            spans.append((start, index))
+            start = None
+    if start is not None:
+        spans.append((start, len(text)))
+    return spans
+
+
+def _keep_words_whole(value: str, assigned: list[str | None], ladder: list[str], lowest: Callable[[str], str]) -> None:
+    """Give each space-separated word one face when a single face can draw all of it.
+
+    reportlab shapes a word as one unit in the face of its first fragment, so a
+    Thai or Devanagari word split between two faces is shaped with the wrong
+    one and prints as junk; a bracket stuck to the previous run's face is how
+    that happens. The word takes the face its letters need (the shaping face
+    when one of them needs it), when that face has every character of the word.
+    A word no single face can draw stays split. Arabic-script words are left to
+    the rule that keeps their letters in one face, and are not shaped by
+    reportlab's shaper in any case.
+    """
+    index = 0
+    while index < len(value):
+        if value[index].isspace():
+            index += 1
+            continue
+        end = index
+        while end < len(value) and not value[end].isspace():
+            end += 1
+        word = value[index:end]
+        if len({assigned[i] for i in range(index, end)}) > 1 and not any(_is_arabic_script(ch) for ch in word):
+            needed = [lowest(ch) for ch in word if unicodedata.category(ch)[0] in "LMN"]
+            target = next((face for face in needed if font_needs_shaping(face)), None)
+            if target is None:
+                target = next((face for face in ladder if font_can_draw_all(face, word)), None)
+            if target is not None and font_can_draw_all(target, word):
+                for i in range(index, end):
+                    assigned[i] = target
+        index = end
+
+
+def pdf_font_runs(text: str | None, *, bold: bool = False, base: str | None = None) -> list[tuple[str, str]]:
+    """Split ``text`` into runs, each with the lowest face on the ladder that draws all of it.
+
+    :func:`pdf_font_for_text` picks one face for a whole string, which is wrong
+    for a string no single face can draw: an Urdu label with a bracket or a Latin
+    word needs the Naskh face for its letters (the Unicode face lacks two of
+    them) and the Unicode face for the bracket (Naskh has digits and Arabic
+    only). This picks per run instead, so every character gets a face that has
+    its glyph.
+
+    A string one face covers comes back as a single run, so nothing that
+    rendered before changes. Otherwise:
+
+    * the Arabic-script letters of the string share one face when any face
+      covers them all, and are never split mid-word, because a join cannot cross
+      faces;
+    * other letters take the lowest face that draws them;
+    * digits take the lowest face that draws them, so a number stays whole;
+    * any other neutral character (space, punctuation, symbol) and a combining
+      mark stay in the face of the run they follow when it has their glyph, so
+      a string splits only where it has to.
+
+    Args:
+        text: The string to split.
+        bold: Whether the escalation rungs use the bold weight.
+        base: Where the ladder starts, as :func:`pdf_font_for_text` means it.
+
+    Returns:
+        ``[(face, text), ...]`` covering ``text`` in order; empty for an empty string.
+    """
+    value = text or ""
+    if not value:
+        return []
+    ladder, widest = _face_ladder(base, bold=bold)
+    drawn = "".join(ch for ch in value if ch not in _NEVER_DRAWN)
+    for face in ladder:
+        if font_can_draw_all(face, drawn):
+            return [(face, value)]
+
+    def lowest(ch: str) -> str:
+        return next((face for face in ladder if font_can_draw(face, ch)), widest)
+
+    assigned: list[str | None] = [None] * len(value)
+    units = _arabic_units(value)
+    arabic = "".join(value[a:b] for a, b in units)
+    shared = next((face for face in ladder if font_can_draw_all(face, arabic)), None)
+    for a, b in units:
+        unit = value[a:b]
+        face = shared or next((f for f in ladder if font_can_draw_all(f, unit)), None)
+        for index in range(a, b):
+            assigned[index] = face or lowest(value[index])
+    current: str | None = None
+    for index, ch in enumerate(value):
+        face = assigned[index]
+        if face is None:
+            category = unicodedata.category(ch)[0]
+            if ch in _NEVER_DRAWN:
+                face = current or ladder[0]
+            elif category == "L" or unicodedata.category(ch) == "Nd":
+                # Digits take the lowest face like letters do, so a number
+                # ("10.10.2026") is never cut between two faces: each run is
+                # reordered on its own, and a number split across runs would
+                # come out with its parts in the wrong order.
+                face = lowest(ch)
+            elif current is not None and font_can_draw(current, ch):
+                face = current
+            else:
+                face = lowest(ch)
+        current = face
+        assigned[index] = face
+    _keep_words_whole(value, assigned, ladder, lowest)
+    runs: list[tuple[str, str]] = []
+    for ch, face in zip(value, assigned, strict=True):
+        if runs and runs[-1][0] == face:
+            runs[-1] = (face, runs[-1][1] + ch)
+        else:
+            runs.append((str(face), ch))
+    return runs
+
+
 #: The smallest size a line of page furniture is set in before it is cut short.
 #: Below six points a footer stops being readable on an office printer, so a
 #: name longer than that allows loses its tail rather than its legibility.
@@ -895,11 +1044,9 @@ def pdf_fit_line(
         ``(line, face, size)``: the whole line to draw, the face to draw it in
         and the size to draw it at.
     """
-    from reportlab.pdfbase.pdfmetrics import stringWidth
-
     line = f"{text}{suffix}"
     face = pdf_font_for_text(line, bold=bold, base=base)
-    natural = stringWidth(line, face, size)
+    natural = pdf_text_width(line, size, bold=bold, base=base)
     if natural <= width or natural <= 0:
         return line, face, size
     smallest = min(size, MIN_FURNITURE_SIZE)
@@ -908,7 +1055,7 @@ def pdf_fit_line(
     # Still too wide at the smallest size, so the name is what has to give.
     ellipsis = "…" if font_can_draw(face, "…") else "..."
     cut = text
-    while cut and stringWidth(f"{cut.rstrip()}{ellipsis}{suffix}", face, smallest) > width:
+    while cut and pdf_text_width(f"{cut.rstrip()}{ellipsis}{suffix}", smallest, bold=bold, base=base) > width:
         cut = cut[:-1]
     return f"{cut.rstrip()}{ellipsis}{suffix}", face, smallest
 
@@ -932,7 +1079,7 @@ def pdf_room_beside(width: float, reserved: str | None, *, size: float = 7.0, ga
 
 
 def pdf_text_width(text: str, size: float, *, bold: bool = False, base: str | None = None) -> float:
-    """The width of ``text`` in points, in the face :func:`pdf_font_for_text` picks for it.
+    """The width of ``text`` in points, run by run in the faces :func:`pdf_font_runs` picks for it.
 
     Right-to-left text is measured in the shape it is drawn in (joined letters,
     visual order), because the joined forms are not the width of the isolated
@@ -942,8 +1089,8 @@ def pdf_text_width(text: str, size: float, *, bold: bool = False, base: str | No
 
     if not text:
         return 0.0
-    face = pdf_font_for_text(text, bold=bold, base=base or (BOLD_FONT if bold else BODY_FONT))
-    return float(stringWidth(visual_text(text, face=face), face, size))
+    runs = pdf_font_runs(text, bold=bold, base=base or (BOLD_FONT if bold else BODY_FONT))
+    return float(sum(stringWidth(visual_text(chunk, face=face), face, size) for face, chunk in runs))
 
 
 def pdf_style_for_text(style: Any, text: str | None, *, base: str | None = None) -> Any:
@@ -970,7 +1117,22 @@ def pdf_style_for_text(style: Any, text: str | None, *, base: str | None = None)
         The same style, or a clone of it faced for the string.
     """
     start = base or getattr(style, "fontName", None) or BODY_FONT
-    face = pdf_font_for_text(text, base=start)
+    runs = pdf_font_runs(text, bold=start in _BOLD_FACES, base=start)
+    if len(runs) > 1:
+        # No one face draws the string, so it is set in runs (see
+        # :func:`pdf_markup`). The style keeps its own face for the runs that
+        # face draws, unless a run needs the shaper: reportlab decides whether
+        # to shape a Paragraph from the style's own face, so such a string takes
+        # its first shapable face as the style's and the other runs are tagged;
+        # without one the style takes the widest face, as it always did.
+        anchor = _run_anchor(runs, text or "", start)
+        if anchor == start:
+            return style
+        faced = {"fontName": anchor}
+        if font_needs_shaping(anchor):
+            faced["shaping"] = 1
+        return style.clone(f"{getattr(style, 'name', 'Style')}-{anchor}", **faced)
+    face = runs[0][0] if runs else pdf_font_for_text(text, base=start)
     shaping = font_needs_shaping(face)
     if face == start:
         # The style already names the right face. It still needs shaping turned
@@ -987,12 +1149,73 @@ def pdf_style_for_text(style: Any, text: str | None, *, base: str | None = None)
     return style.clone(name, fontName=face)
 
 
-def pdf_markup(text: str | None, *, base: str | None = None, bold: bool = False) -> str:
-    """Paragraph markup for ``text``: escaped, ready for ``Paragraph(markup, style)``.
+def _run_anchor(runs: list[tuple[str, str]], text: str, start: str) -> str:
+    """The face a mixed string's style carries, and the one run that needs no ``<font>`` tag.
 
-    Pair it with :func:`pdf_style_for_text` for the same string.
+    The first run face that shapes, else the face :func:`pdf_font_for_text`
+    settles for when no face draws the whole string (the widest one). So a
+    caller that does not tag the runs gets exactly what it always got.
     """
-    return html.escape(text or "", quote=True)
+    shaping = next((face for face, _chunk in runs if font_needs_shaping(face)), None)
+    return shaping or pdf_font_for_text(text, bold=start in _BOLD_FACES, base=start)
+
+
+def _tag(face: str, chunk: str, anchor: str) -> str:
+    """``chunk`` escaped, in a ``<font>`` tag unless it is in the anchor face. Spaces always get one."""
+    text = html.escape(chunk, quote=True)
+    if face == anchor and chunk.strip():
+        return text
+    return f'<font name="{html.escape(face, quote=True)}">{text}</font>'
+
+
+def pdf_markup(text: str | None, style: Any = None, *, base: str | None = None, line_breaks: bool = False) -> str:
+    """Paragraph markup for ``text``: escaped, with a ``<font>`` per run when one face is not enough.
+
+    Pair it with :func:`pdf_style_for_text` for the same string and style. A
+    string one face draws is only escaped, as it always was. A string that needs
+    several (Urdu with a bracket, Thai with a superscript, Chinese beside a
+    Hindi name) comes back with the runs that are not in the style's own face
+    wrapped in ``<font name="...">``, so each character is drawn by a face that
+    has its glyph.
+
+    Args:
+        text: The string.
+        style: The paragraph style the markup will be set in; its face is where
+            the ladder starts and the face that needs no tag.
+        base: Start the ladder at this face instead of the style's own.
+        line_breaks: Turn newlines into ``<br/>``.
+    """
+    value = text or ""
+    start = base or getattr(style, "fontName", None) or BODY_FONT
+    runs = pdf_font_runs(value, bold=start in _BOLD_FACES, base=start)
+    anchor = _run_anchor(runs, value, start) if len(runs) > 1 else start
+    if len(runs) <= 1:
+        markup = html.escape(value, quote=True)
+    else:
+        pieces: list[str] = []
+        last = len(runs) - 1
+        for index, (face, chunk) in enumerate(runs):
+            core = chunk
+            lead = trail = ""
+            # A space at the edge of a run is a fragment of its own, set in the
+            # anchor face. Reordering a right-to-left run treats its edge
+            # whitespace as the end of a line, and a space left inside a run
+            # lands on the wrong side of it or is drawn with no width.
+            if index > 0:
+                core = core.lstrip(" ")
+                lead = chunk[: len(chunk) - len(core)]
+            if index < last:
+                stripped = core.rstrip(" ")
+                trail = core[len(stripped) :]
+                core = stripped
+            if lead:
+                pieces.append(_tag(anchor, lead, anchor))
+            if core:
+                pieces.append(_tag(face, core, anchor))
+            if trail:
+                pieces.append(_tag(anchor, trail, anchor))
+        markup = "".join(pieces)
+    return markup.replace("\n", "<br/>") if line_breaks else markup
 
 
 def pdf_fitted_style(style: Any, text: str | None, size: float, *, base: str | None = None) -> Any:
@@ -1578,7 +1801,7 @@ def pdf_table_paragraph_rows(
                 chosen = style_for(row_index, col_index)
                 if chosen is not None:
                     cell_style = chosen
-            markup = html.escape(cell).replace(chr(10), "<br/>")
+            markup = pdf_markup(cell, cell_style, line_breaks=True)
             wrapped[row_index][col_index] = Paragraph(markup, pdf_style_for_text(cell_style, cell))
     return wrapped
 
@@ -1613,6 +1836,7 @@ __all__ = [
     "has_cjk",
     "pdf_font",
     "pdf_font_for_text",
+    "pdf_font_runs",
     "pdf_markup",
     "pdf_shaping_for_text",
     "pdf_style_for_text",

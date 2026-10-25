@@ -16,9 +16,9 @@ import {
   documentLocaleName,
 } from './documentExport';
 
-// Bengali and Urdu are backend languages the PDF printer cannot draw correctly yet,
-// so the server answers them in English and the menu does not offer them.
-const NOT_RENDERABLE = new Set(['bn', 'ur']);
+// Bengali is a backend language no bundled PDF face can draw, so the server answers it
+// in English and the menu does not offer it. Urdu is set in runs of faces and is offered.
+const NOT_RENDERABLE = new Set(['bn']);
 
 // The interface also ships regional variants of a language (en-GB, pt-BR ...);
 // a document language is the base language.

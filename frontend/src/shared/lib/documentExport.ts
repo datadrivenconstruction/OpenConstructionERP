@@ -24,11 +24,11 @@ export type DocumentFormat = 'pdf' | 'xlsx';
  * Languages of the registers and record forms built on
  * `backend/app/core/document_forms_i18n.py` (the submittals, rfi log, correspondence,
  * changeorders, transmittals, variations and claims_evidence catalogues): every
- * language the backend runs in except Bengali and Urdu, which the PDF printer cannot draw
- * correctly yet (`REGISTER_UNRENDERABLE` in `document_forms_i18n.py`).
+ * language the backend runs in except Bengali, which no bundled PDF face can draw
+ * (`REGISTER_UNRENDERABLE` in `document_forms_i18n.py`).
  */
 export const REGISTER_DOCUMENT_LOCALES: readonly string[] = [
-  'en', 'de', 'ru', 'fr', 'es', 'pt', 'it', 'nl', 'pl', 'cs', 'hu', 'tr', 'ar', 'zh', 'ja', 'ko', 'hi', 'sv', 'no',
+  'en', 'de', 'ru', 'fr', 'es', 'pt', 'it', 'nl', 'pl', 'cs', 'hu', 'tr', 'ar', 'ur', 'zh', 'ja', 'ko', 'hi', 'sv', 'no',
   'da', 'fi', 'bg', 'hr', 'id', 'ro', 'th', 'vi', 'uk', 'uz', 'et', 'ky', 'kk', 'fil', 'fa', 'he', 'el',
 ];
 

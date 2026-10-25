@@ -94,7 +94,8 @@ def test_every_renderable_language_is_in_the_catalogue(form: str) -> None:
     catalogue = register_form_catalogue(form)
     assert set(catalogue.supported) == set(DOCUMENT_LOCALES)
     assert catalogue.supported[0] == "en"
-    assert "ur" in UNRENDERABLE  # translated in the files, not offered; see REGISTER_UNRENDERABLE
+    assert "ur" in catalogue.supported  # set in runs of faces; see pdf_font_runs
+    assert "bn" in UNRENDERABLE  # no bundled face carries Bengali; see REGISTER_UNRENDERABLE
     for code, reason in UNRENDERABLE.items():
         assert code not in catalogue.supported, reason
         assert catalogue.normalize(code) == "en"
@@ -260,15 +261,15 @@ def _walk(value: object, path: str = ""):
 
 @pytest.mark.parametrize("code", DOCUMENT_LOCALES)
 def test_the_face_the_printer_picks_can_draw_every_string(code: str) -> None:
-    """A string no single face draws prints boxes; the printer picks one face per string."""
-    from app.core.pdf_fonts import font_can_draw_all, pdf_font_for_text, register_pdf_fonts
+    """Every character of every string has a face that draws it, run by run where one face is not enough."""
+    from app.core.pdf_fonts import font_can_draw_all, pdf_font_runs, register_pdf_fonts
 
     assert register_pdf_fonts() is True
     blocks = load_document_forms(code)
     bad = []
     for path, text in _walk({k: v for k, v in blocks.items() if k in (*REGISTER_FORMS, "furniture")}):
         for bold in (False, True):
-            face = pdf_font_for_text(text, bold=bold)
-            if not font_can_draw_all(face, text):
-                bad.append((path, face, text))
+            for face, chunk in pdf_font_runs(text, bold=bold):
+                if not font_can_draw_all(face, chunk.replace(chr(10), "")):
+                    bad.append((path, face, chunk))
     assert not bad, bad[:5]

@@ -52,16 +52,13 @@ __all__ = [
 _ROOT = "document_forms"
 
 #: Languages the register and record forms deliberately print in English, and
-#: why. Bengali has no translation because no bundled face carries its script.
-#: Urdu is translated in the locale files but not offered: its letters need the
-#: bundled Naskh face, which has digits and Arabic only (no brackets, slash,
-#: hyphen, percent or Latin letters), while the Unicode face lacks two of its
-#: commonest letters; the font ladder picks one face per string, so every
-#: heading with a bracket and every footer ("... UTC") would print boxes. It
-#: returns when text can fall back per run instead of per string.
+#: why. Bengali is translated in the locale files but not offered, because no
+#: bundled face carries its script. Urdu is offered: its letters need the
+#: bundled Naskh face, which has digits and Arabic only, while brackets, slashes
+#: and Latin letters need the Unicode face, and the PDF layer now sets such a
+#: string in runs, one face per run (``app.core.pdf_fonts.pdf_font_runs``).
 REGISTER_UNRENDERABLE: dict[str, str] = {
     "bn": "no bundled PDF face carries Bengali glyphs",
-    "ur": "Naskh lacks punctuation and Latin, the Unicode face lacks two Urdu letters; one face per string",
 }
 _DATE_KEYS = ("date_format", "datetime_format")
 

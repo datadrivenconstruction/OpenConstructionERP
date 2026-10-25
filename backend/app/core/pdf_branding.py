@@ -686,7 +686,7 @@ def draw_furniture_line(
         alignment=TA_RIGHT if align == "right" else TA_LEFT,
     )
     style = pdf_style_for_text(style, text, base=face)
-    paragraph = Paragraph(pdf_markup(text, base=face), style)
+    paragraph = Paragraph(pdf_markup(text, style), style)
     # The box is the measured line plus slack, never wider: a Paragraph that
     # reads right to left aligns itself to the far edge of its box, and a box
     # as wide as the page would move the line away from ``x``.

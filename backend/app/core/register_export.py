@@ -42,7 +42,6 @@ the second pass costs less than a wrong "page 1" on a three page log.
 
 from __future__ import annotations
 
-import html
 import io
 import logging
 import re
@@ -88,6 +87,7 @@ from app.core.pdf_fonts import (
     pdf_fit_line,
     pdf_fitted_style,
     pdf_font_for_text,
+    pdf_markup,
     pdf_room_beside,
     pdf_style_for_text,
     pdf_table_paragraph_rows,
@@ -985,11 +985,11 @@ def _footer_callback(
             suffix="" if custom_footer or not default_stamp else f"  |  {generated_label.format(timestamp=generated)}",
             base=BODY_FONT,
         )
-        left = Paragraph(html.escape(left_text, quote=True), pdf_fitted_style(style, left_text, left_size))
+        left = Paragraph(pdf_markup(left_text, style), pdf_fitted_style(style, left_text, left_size))
         _, left_h = left.wrapOn(canvas, usable, 20)
         left.drawOn(canvas, margin_side, 9 * mm - left_h + 2)
         if page_text:
-            right = Paragraph(html.escape(page_text, quote=True), pdf_style_for_text(right_style, page_text))
+            right = Paragraph(pdf_markup(page_text, right_style), pdf_style_for_text(right_style, page_text))
             _, right_h = right.wrapOn(canvas, usable, 20)
             right.drawOn(canvas, margin_side, 9 * mm - right_h + 2)
         if running_title and doc.page > 1 and page_height:
@@ -997,7 +997,9 @@ def _footer_callback(
             head_text, _head_face, head_size = pdf_fit_line(
                 running_title, usable - _RUNNING_TITLE_LOGO_ROOM, size=8.0, bold=True, base=BOLD_FONT
             )
-            head = Paragraph(html.escape(head_text, quote=True), pdf_fitted_style(running_style, head_text, head_size))
+            head = Paragraph(
+                pdf_markup(head_text, running_style), pdf_fitted_style(running_style, head_text, head_size)
+            )
             _, head_h = head.wrapOn(canvas, usable, 20)
             head.drawOn(canvas, margin_side, page_height - _RUNNING_TITLE_TOP - head_h)
         canvas.restoreState()
@@ -1155,8 +1157,7 @@ def _styles() -> dict[str, ParagraphStyle]:
 def _para(text: Any, style: ParagraphStyle) -> Paragraph:
     """A Paragraph for user-supplied text: escaped, newlines kept, face per script."""
     rendered = "" if text is None else str(text)
-    markup = html.escape(rendered, quote=True).replace("\n", "<br/>")
-    return Paragraph(markup, pdf_style_for_text(style, rendered))
+    return Paragraph(pdf_markup(rendered, style, line_breaks=True), pdf_style_for_text(style, rendered))
 
 
 def _label_value_table(rows: Sequence[Sequence[str]], styles: dict[str, ParagraphStyle], widths: list[float]) -> Table:
@@ -1931,7 +1932,7 @@ _SIGNATURE_SHARES: dict[int, tuple[float, ...]] = {
 def _block_flowables(
     block: RecordBlock, usable: float, styles: dict[str, ParagraphStyle], frame_height: float = 0.0
 ) -> list[Any]:
-    heading = Paragraph(html.escape(block.title), pdf_style_for_text(styles["section"], block.title))
+    heading = Paragraph(pdf_markup(block.title, styles["section"]), pdf_style_for_text(styles["section"], block.title))
     if block.kind == "grid":
         columns = max((len(row) for row in block.rows), default=2)
         if columns >= 4:
