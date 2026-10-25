@@ -58110,7 +58110,7 @@ const resource = {
     "palette.shortcut.reset": "Әдепкі жылдам тіркесті қалпына келтіру",
     "palette.shortcut.recording": "Жаңа жылдам тіркесті басыңыз: қатарынан екі перне (G then B) немесе Ctrl / Cmd және бір перне. Esc бас тартады, Backspace жояды.",
     "palette.shortcut.invalid": "Бұл перне пайдаланылмайды.",
-    "palette.shortcut.reserved": "Бұл перненi браузер немесе жүйе қазірдің өзінде пайдаланады.",
+    "palette.shortcut.reserved": "Бұл пернені браузер немесе жүйе қазірдің өзінде пайдаланады.",
     "palette.shortcut.needs_modifier": "Қатарынан екі перне басыңыз (G then B) немесе Ctrl / Cmd қосыңыз.",
     "palette.shortcut.conflict": "«{{action}}» әрекетіне бұрын тағайындалған.",
     "palette.action.new_project": "Жаңа жоба",

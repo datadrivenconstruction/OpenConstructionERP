@@ -102,14 +102,14 @@ export const CORE_ACTIONS: PaletteAction[] = [
   },
   {
     id: 'validation.run',
+    moduleKey: 'validation',
+    path: '/validation',
+    group: 'create',
+    icon: ShieldCheck,
     titleKey: 'palette.action.run_validation',
     defaultTitle: 'Run validation',
     keywordsKey: 'palette.keywords.run_validation',
     defaultKeywords: 'check, rules, errors, quality',
-    group: 'create',
-    icon: ShieldCheck,
-    moduleKey: 'validation',
-    path: '/validation',
     defaultShortcut: 'R V',
   },
   {
