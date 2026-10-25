@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "使用者責任に関する無債務証明書",
     "insurance": "保険証券",
     "license": "請負業者免許"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "価格表が見つかりません",
+    "catalog_item_not_found": "カタログ品目が見つかりません",
+    "entry_not_found": "選択した業者の単価は存在しません",
+    "entry_other_vendor": "選択した単価は別の業者の価格表のものです",
+    "price_list_expired": "価格表「{name}」は {valid_to} に失効しました。最新の価格表を取り込むか、合意した単価を手入力してください。",
+    "import_unreadable": "ファイルを価格表として読み取れません ({reason})",
+    "import_needs_price_column": "単価が入っている列を選択してください",
+    "duplicate_vendor_sku": "次の業者品番がファイル内で複数回出現しています: {skus}",
+    "valid_to_before_valid_from": "終了日が開始日より前です",
+    "category_not_found": "品目分類が見つかりません",
+    "net_above_gross": "ネット単価 {net} が定価 {gross} を上回っています",
+    "discount_not_found": "値引き協定が見つかりません",
+    "discount_basis": "値引率か固定ネット単価のどちらかを指定してください(固定ネット単価には品目が必要です)",
+    "attachment_not_found": "添付ファイルが見つかりません",
+    "price_missing": "明細「{line}」に有効な単価がありません。単価を入力するか、業者の価格表を取り込んでください"
   }
 }

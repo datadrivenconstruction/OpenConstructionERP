@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "giấy xác nhận hoàn thành trách nhiệm của người sử dụng lao động",
     "insurance": "giấy chứng nhận bảo hiểm",
     "license": "giấy phép nhà thầu"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Không tìm thấy bảng giá",
+    "catalog_item_not_found": "Không tìm thấy mục trong danh mục",
+    "entry_not_found": "Giá nhà cung cấp đã chọn không tồn tại",
+    "entry_other_vendor": "Giá đã chọn thuộc bảng giá của nhà cung cấp khác",
+    "price_list_expired": "Bảng giá \"{name}\" đã hết hạn vào {valid_to}. Hãy nhập bảng giá hiện hành hoặc tự nhập giá đã thỏa thuận.",
+    "import_unreadable": "Không thể đọc tệp này như một bảng giá ({reason})",
+    "import_needs_price_column": "Chọn cột chứa giá",
+    "duplicate_vendor_sku": "Các mã hàng của nhà cung cấp sau xuất hiện nhiều lần trong tệp: {skus}",
+    "valid_to_before_valid_from": "Ngày kết thúc trước ngày bắt đầu",
+    "category_not_found": "Không tìm thấy nhóm hàng",
+    "net_above_gross": "Giá net {net} cao hơn giá niêm yết {gross}",
+    "discount_not_found": "Không tìm thấy thỏa thuận chiết khấu",
+    "discount_basis": "Nhập tỷ lệ chiết khấu hoặc giá net cố định (giá net cố định cần có mặt hàng)",
+    "attachment_not_found": "Không tìm thấy tệp đính kèm",
+    "price_missing": "Không có giá hiện hành cho dòng \"{line}\": nhập đơn giá hoặc nhập bảng giá của nhà cung cấp"
   }
 }

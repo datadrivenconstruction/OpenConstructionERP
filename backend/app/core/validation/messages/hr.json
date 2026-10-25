@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "potvrda o ispunjenju odgovornosti poslodavaca",
     "insurance": "potvrda o osiguranju",
     "license": "licenca izvođača"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Cjenik nije pronađen",
+    "catalog_item_not_found": "Stavka kataloga nije pronađena",
+    "entry_not_found": "Odabrana cijena dobavljača ne postoji",
+    "entry_other_vendor": "Odabrana cijena pripada cjeniku drugog dobavljača",
+    "price_list_expired": "Cjenik \"{name}\" istekao je {valid_to}. Uvezite aktualni cjenik ili ručno unesite dogovorenu cijenu.",
+    "import_unreadable": "Datoteku nije moguće pročitati kao cjenik ({reason})",
+    "import_needs_price_column": "Odaberite stupac s cijenom",
+    "duplicate_vendor_sku": "Ove šifre artikala dobavljača pojavljuju se u datoteci više puta: {skus}",
+    "valid_to_before_valid_from": "Datum završetka je prije datuma početka",
+    "category_not_found": "Kategorija artikla nije pronađena",
+    "net_above_gross": "Neto cijena {net} viša je od cjenikove cijene {gross}",
+    "discount_not_found": "Ugovor o popustu nije pronađen",
+    "discount_basis": "Navedite postotak popusta ili fiksnu neto cijenu (fiksna neto cijena zahtijeva artikl)",
+    "attachment_not_found": "Privitak nije pronađen",
+    "price_missing": "Nema važeće cijene za stavku \"{line}\": unesite jediničnu cijenu ili uvezite cjenik dobavljača"
   }
 }

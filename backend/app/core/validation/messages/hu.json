@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "munkáltatói felelősségi tartozásmentességi igazolás",
     "insurance": "biztosítási igazolás",
     "license": "vállalkozói engedély"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Az árlista nem található",
+    "catalog_item_not_found": "A katalógustétel nem található",
+    "entry_not_found": "A kiválasztott beszállítói ár nem létezik",
+    "entry_other_vendor": "A kiválasztott ár másik beszállító árlistájához tartozik",
+    "price_list_expired": "A(z) \"{name}\" árlista lejárt: {valid_to}. Importálja az aktuális árlistát, vagy adja meg kézzel a megállapodás szerinti árat.",
+    "import_unreadable": "A fájl nem olvasható árlistaként ({reason})",
+    "import_needs_price_column": "Válassza ki az árat tartalmazó oszlopot",
+    "duplicate_vendor_sku": "Ezek a beszállítói cikkszámok többször szerepelnek a fájlban: {skus}",
+    "valid_to_before_valid_from": "A záró dátum korábbi, mint a kezdő dátum",
+    "category_not_found": "A tételkategória nem található",
+    "net_above_gross": "A nettó ár ({net}) magasabb a listaárnál ({gross})",
+    "discount_not_found": "A kedvezménymegállapodás nem található",
+    "discount_basis": "Adjon meg kedvezményszázalékot vagy fix nettó árat (fix nettó árhoz tétel szükséges)",
+    "attachment_not_found": "A melléklet nem található",
+    "price_missing": "Nincs érvényes ár a(z) \"{line}\" sorhoz: adjon meg egységárat, vagy importálja a beszállító árlistáját"
   }
 }

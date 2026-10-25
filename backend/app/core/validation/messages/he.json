@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "אישור העדר חבות של מעסיקים",
     "insurance": "אישור ביטוח",
     "license": "רישיון קבלן"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "מחירון לא נמצא",
+    "catalog_item_not_found": "פריט הקטלוג לא נמצא",
+    "entry_not_found": "מחיר הספק שנבחר אינו קיים",
+    "entry_other_vendor": "המחיר שנבחר שייך למחירון של ספק אחר",
+    "price_list_expired": "תוקף המחירון \"{name}\" פג ב-{valid_to}. ייבאו את המחירון העדכני או הזינו ידנית את המחיר שהוסכם.",
+    "import_unreadable": "לא ניתן לקרוא את הקובץ כמחירון ({reason})",
+    "import_needs_price_column": "בחרו את העמודה שמכילה את המחיר",
+    "duplicate_vendor_sku": "מק\"טי הספק הבאים מופיעים בקובץ יותר מפעם אחת: {skus}",
+    "valid_to_before_valid_from": "תאריך הסיום מוקדם מתאריך ההתחלה",
+    "category_not_found": "קטגוריית הפריט לא נמצאה",
+    "net_above_gross": "המחיר נטו {net} גבוה ממחיר המחירון {gross}",
+    "discount_not_found": "הסכם ההנחה לא נמצא",
+    "discount_basis": "ציינו אחוז הנחה או מחיר נטו קבוע (מחיר נטו קבוע דורש פריט)",
+    "attachment_not_found": "הקובץ המצורף לא נמצא",
+    "price_missing": "אין מחיר בתוקף לשורה \"{line}\": הזינו מחיר ליחידה או ייבאו את מחירון הספק"
   }
 }

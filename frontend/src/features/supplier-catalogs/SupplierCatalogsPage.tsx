@@ -75,12 +75,13 @@ import {
   type VendorStatus,
 } from './api';
 import { supplierCatalogsGuide } from './supplierCatalogsGuide';
+import { ItemDocumentsModal, ItemLinks, PriceListsPanel } from './PriceListsPanel';
 
 // CONN-46: the old prs / pos / match tabs were three dead tabs that each
 // only rendered a hand-off banner (this module has no list endpoints for
 // those records and they never surface in /procurement). They are demoted to
 // a single 'procurement' tab carrying one consolidated banner.
-type Tab = 'vendors' | 'catalog' | 'procurement' | 'warehouses';
+type Tab = 'vendors' | 'catalog' | 'pricelists' | 'procurement' | 'warehouses';
 
 const VENDOR_VARIANT: Record<VendorStatus, 'neutral' | 'blue' | 'success' | 'warning' | 'error'> = {
   active: 'success',
@@ -240,7 +241,7 @@ export function SupplierCatalogsPage({ embeddedTab }: SupplierCatalogsPageProps 
   const vendorsQ = useQuery({
     queryKey: ['sc', 'vendors', statusFilter],
     queryFn: () => listVendors({ status: statusFilter || undefined, limit: 200 }),
-    enabled: tab === 'vendors' || tab === 'catalog',
+    enabled: tab === 'vendors' || tab === 'catalog' || tab === 'pricelists',
   });
   const itemsQ = useQuery({
     queryKey: ['sc', 'items', search],
@@ -538,6 +539,8 @@ export function SupplierCatalogsPage({ embeddedTab }: SupplierCatalogsPageProps 
             onEdit={(it) => setEditItem(it)}
             onDelete={(it) => setDeleteTarget({ kind: 'catalog', id: it.id, label: `${it.sku} - ${it.name}` })}
           />
+        ) : tab === 'pricelists' ? (
+          <PriceListsPanel vendors={vendorsArr} />
         ) : tab === 'procurement' ? (
           <ProcurementHandoffPanel />
         ) : (
@@ -610,6 +613,7 @@ function tabsDef(t: (k: string, opts?: Record<string, unknown>) => string) {
     // CONN-46: one Procurement tab replaces the three dead PR / PO / Match
     // tabs. It is a hand-off banner into the /procurement module, which owns
     // the live requisition, purchase order and three-way-match workflows.
+    { id: 'pricelists' as const, label: t('supplier_catalogs.tab_pricelists', { defaultValue: 'Price lists' }), icon: Boxes },
     { id: 'procurement' as const, label: t('supplier_catalogs.tab_procurement', { defaultValue: 'Procurement' }), icon: ShoppingCart },
     { id: 'warehouses' as const, label: t('supplier_catalogs.tab_warehouses', { defaultValue: 'Warehouses' }), icon: WarehouseIcon },
   ];
@@ -842,6 +846,7 @@ function CatalogTable({
   onDelete: (item: CatalogItem) => void;
 }) {
   const { t } = useTranslation();
+  const [docsItem, setDocsItem] = useState<CatalogItem | null>(null);
   if (rows.length === 0) {
     return (
       <EmptyState
@@ -864,6 +869,7 @@ function CatalogTable({
             <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.uom', { defaultValue: 'UoM' })}</th>
             <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.manufacturer', { defaultValue: 'Manufacturer' })}</th>
             <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.reorder', { defaultValue: 'Reorder' })}</th>
+            <th className="px-4 py-2.5 text-left">{t('supplier_catalogs.links', { defaultValue: 'Links' })}</th>
             <th className="px-4 py-2.5 text-right">{t('supplier_catalogs.actions', { defaultValue: 'Actions' })}</th>
           </tr>
         </thead>
@@ -887,6 +893,13 @@ function CatalogTable({
               <td className="px-4 py-2 text-content-secondary text-xs">{r.unit_of_measure}</td>
               <td className="px-4 py-2 text-content-secondary text-xs">{r.manufacturer || '—'}</td>
               <td className="px-4 py-2 text-right text-xs tabular-nums">{String(r.reorder_point)}</td>
+              <td className="px-4 py-2">
+                <ItemLinks
+                  productUrl={r.product_url}
+                  attachmentCount={r.attachment_count}
+                  onOpenDocuments={() => setDocsItem(r)}
+                />
+              </td>
               <td className="px-4 py-2 text-right">
                 <div className="flex items-center justify-end gap-1 whitespace-nowrap">
                   <Button variant="ghost" size="sm" onClick={() => onSelectPrice(r)}>
@@ -904,6 +917,7 @@ function CatalogTable({
           ))}
         </tbody>
       </table>
+      {docsItem && <ItemDocumentsModal item={docsItem} onClose={() => setDocsItem(null)} />}
     </div>
   );
 }
@@ -1165,7 +1179,7 @@ function PriceComparisonModal({
       vendor: row.vendor_name || row.vendor_code || '',
       line_desc: `${item.sku} - ${item.name}`.trim(),
       line_unit: item.unit_of_measure || '',
-      line_rate: String(row.unit_price ?? ''),
+      line_rate: String(row.net_price ?? row.unit_price ?? ''),
       currency: row.currency || '',
     });
     onClose();
@@ -1194,7 +1208,7 @@ function PriceComparisonModal({
     return rows.reduce<PriceComparisonRow | null>((best, r) => {
       if (!best) return r;
       // Decimal-serialized strings: wrap in Number() before comparing.
-      return Number(r.unit_price) < Number(best.unit_price) ? r : best;
+      return Number(r.net_price ?? r.unit_price) < Number(best.net_price ?? best.unit_price) ? r : best;
     }, null);
   }, [rows, singleCurrency]);
 
@@ -1269,11 +1283,18 @@ function PriceComparisonModal({
                   <div className="space-y-1.5">
                     <div>
                       <p className="text-xs uppercase tracking-wide text-content-tertiary">
-                        {t('supplier_catalogs.unit_price', { defaultValue: 'Unit price' })}
+                        {t('supplier_catalogs.net_price', { defaultValue: 'Net price' })}
                       </p>
                       <p className="text-xl font-bold text-content-primary">
-                        <MoneyDisplay amount={Number(r.unit_price)} currency={r.currency} />
+                        <MoneyDisplay amount={String(r.net_price ?? r.unit_price)} currency={r.currency} />
                       </p>
+                      {r.discount_source && r.discount_source !== 'none' && (
+                        <p className="text-xs text-content-tertiary">
+                          {t('supplier_catalogs.list_price', { defaultValue: 'List price' })}{' '}
+                          <MoneyDisplay amount={String(r.gross_price ?? r.unit_price)} currency={r.currency} />
+                          {r.discount_pct != null ? ` · -${Number(r.discount_pct)} %` : ''}
+                        </p>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
@@ -1748,6 +1769,8 @@ function EditItemModal({ item, onClose }: { item: CatalogItem; onClose: () => vo
     unit_of_measure: item.unit_of_measure ?? '',
     manufacturer: item.manufacturer ?? '',
     mpn: item.mpn ?? '',
+    gtin: item.gtin ?? '',
+    product_url: item.product_url ?? '',
     reorder_point: String(item.reorder_point ?? ''),
     active: item.active !== false,
   });
@@ -1759,6 +1782,8 @@ function EditItemModal({ item, onClose }: { item: CatalogItem; onClose: () => vo
         description: form.description,
         manufacturer: form.manufacturer,
         mpn: form.mpn,
+        gtin: form.gtin.trim() || undefined,
+        product_url: form.product_url.trim(),
         unit_of_measure: form.unit_of_measure.trim() || undefined,
         reorder_point: form.reorder_point.trim() || undefined,
         active: form.active,
@@ -1832,6 +1857,21 @@ function EditItemModal({ item, onClose }: { item: CatalogItem; onClose: () => vo
           <input
             value={form.mpn}
             onChange={(e) => setForm({ ...form, mpn: e.target.value })}
+            className={inputCls}
+          />
+        </WideModalField>
+        <WideModalField label={t('supplier_catalogs.f_gtin', { defaultValue: 'GTIN / EAN' })}>
+          <input value={form.gtin} onChange={(e) => setForm({ ...form, gtin: e.target.value })} className={inputCls} />
+        </WideModalField>
+        <WideModalField
+          label={t('supplier_catalogs.product_url', { defaultValue: 'Product page (https link)' })}
+          span={2}
+        >
+          <input
+            type="url"
+            value={form.product_url}
+            onChange={(e) => setForm({ ...form, product_url: e.target.value })}
+            placeholder="https://"
             className={inputCls}
           />
         </WideModalField>

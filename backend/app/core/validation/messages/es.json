@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "certificado de cumplimiento de la responsabilidad del empleador",
     "insurance": "certificado de seguro",
     "license": "licencia de contratista"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Lista de precios no encontrada",
+    "catalog_item_not_found": "Artículo del catálogo no encontrado",
+    "entry_not_found": "El precio de proveedor elegido no existe",
+    "entry_other_vendor": "El precio elegido pertenece a la lista de precios de otro proveedor",
+    "price_list_expired": "La lista de precios \"{name}\" venció el {valid_to}. Importe la lista vigente o introduzca a mano el precio acordado.",
+    "import_unreadable": "El archivo no se puede leer como lista de precios ({reason})",
+    "import_needs_price_column": "Elija la columna que contiene el precio",
+    "duplicate_vendor_sku": "Estas referencias de proveedor aparecen más de una vez en el archivo: {skus}",
+    "valid_to_before_valid_from": "La fecha de fin es anterior a la fecha de inicio",
+    "category_not_found": "Categoría de artículo no encontrada",
+    "net_above_gross": "El precio neto {net} es superior al precio de lista {gross}",
+    "discount_not_found": "Acuerdo de descuento no encontrado",
+    "discount_basis": "Indique un porcentaje de descuento o un precio neto fijo (el precio neto fijo requiere un artículo)",
+    "attachment_not_found": "Adjunto no encontrado",
+    "price_missing": "No hay precio vigente para la partida \"{line}\": introduzca un precio unitario o importe la lista de precios del proveedor"
   }
 }

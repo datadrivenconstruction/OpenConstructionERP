@@ -23,6 +23,8 @@ Tables (prefix ``oe_supplier_catalogs_``):
     tolerance_profile   - per-tenant configurable 3-way match tolerance bands
     kyc_document        - region-aware vendor KYC docs with expiry
     scorecard           - vendor performance scorecard (weighted multi-criteria)
+    discount_agreement  - contractor discount on a vendor's list prices
+    item_attachment     - datasheet / drawing of a catalog item (a documents row)
 """
 
 from __future__ import annotations
@@ -180,6 +182,8 @@ class CatalogItem(Base):
         server_default="unspsc",
     )
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # Vendor webshop page of the product; http/https only (validators.check_url).
+    product_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
     def __repr__(self) -> str:
         return f"<CatalogItem {self.sku}>"
@@ -257,6 +261,12 @@ class CatalogEntry(Base):
     lead_time_days: Mapped[int] = mapped_column(Integer, nullable=False, default=7)
     last_purchased_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # ``unit_price`` is the vendor's list (gross) price. The net below is what the
+    # contractor pays after its discount agreements, kept with where it came from.
+    net_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    discount_pct: Mapped[Decimal | None] = mapped_column(Numeric(7, 4), nullable=True)
+    discount_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    discount_agreement_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     price_list: Mapped[PriceList] = relationship(back_populates="entries")
 
@@ -331,6 +341,9 @@ class PRLine(Base):
         nullable=False,
         default=Decimal("0"),
     )
+
+    gross_unit_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    discount_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
     pr: Mapped[PurchaseRequisition] = relationship(back_populates="lines")
 
@@ -436,6 +449,13 @@ class POLine(Base):
         nullable=False,
         default=Decimal("0"),
     )
+
+    # Price basis frozen when the line was created: a later agreement change
+    # never rewrites an order already placed.
+    gross_unit_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    discount_pct: Mapped[Decimal | None] = mapped_column(Numeric(7, 4), nullable=True)
+    discount_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    catalog_entry_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
 
     po: Mapped[SupplierPurchaseOrder] = relationship(back_populates="lines")
 
@@ -1151,6 +1171,84 @@ class VendorScorecard(Base):
 
     def __repr__(self) -> str:
         return f"<VendorScorecard vendor={self.vendor_id} score={self.composite_score}>"
+
+
+# ── Contractor discounts and item documents ─────────────────────────────────
+
+
+class DiscountAgreement(Base):
+    """A contractor's negotiated discount on one vendor's list prices.
+
+    Scope narrows from the whole vendor, to one price list, to one item
+    category, to one item. The most specific agreement in force wins (see
+    ``pricing.resolve_net``). An item agreement may name a fixed net price
+    instead of a percentage.
+    """
+
+    __tablename__ = "oe_supplier_catalogs_discount_agreement"
+
+    vendor_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_supplier_catalogs_vendor.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    price_list_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_supplier_catalogs_price_list.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    category_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_supplier_catalogs_item_category.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_supplier_catalogs_catalog_item.id", ondelete="CASCADE"),
+        nullable=True,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    reference: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    discount_pct: Mapped[Decimal | None] = mapped_column(Numeric(7, 4), nullable=True)
+    fixed_net_price: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    valid_from: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    valid_to: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<DiscountAgreement {self.name} vendor={self.vendor_id}>"
+
+
+class CatalogItemAttachment(Base):
+    """A datasheet or drawing of a catalog item, stored as a documents row.
+
+    The file lives in the documents module (project scoped); this row only
+    links it, so download keeps the documents access check.
+    """
+
+    __tablename__ = "oe_supplier_catalogs_item_attachment"
+    __table_args__ = (
+        UniqueConstraint(
+            "catalog_item_id",
+            "document_id",
+            name="uq_supplier_catalogs_item_attachment_doc",
+        ),
+    )
+
+    catalog_item_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_supplier_catalogs_catalog_item.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    document_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default="datasheet")
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    added_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
 
 # ── Public aliases ───────────────────────────────────────────────────────────

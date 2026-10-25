@@ -9,9 +9,26 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.modules.supplier_catalogs.models import COST_STATE_UNKNOWN
+from app.modules.supplier_catalogs.validators import discount_out_of_range, url_problem
+
+ATTACHMENT_KINDS: tuple[str, ...] = ("datasheet", "drawing", "certificate", "other")
+
+
+def _checked_url(value: str | None) -> str | None:
+    """Empty to ``None``; anything but an http(s) address with a host is refused."""
+    if value is None:
+        return None
+    value = value.strip()
+    if not value:
+        return None
+    problem = url_problem(value)
+    if problem:
+        raise ValueError(f"product_url_unsafe:{problem}")
+    return value
+
 
 VALID_KYC_DOC_TYPES: tuple[str, ...] = (
     "w9",
@@ -167,6 +184,12 @@ class CatalogItemCreate(BaseModel):
     gtin: str | None = Field(default=None, max_length=20)
     commodity_code: str | None = Field(default=None, max_length=32)
     commodity_scheme: str = Field(default="unspsc", max_length=16)
+    product_url: str | None = Field(default=None, max_length=1000)
+
+    @field_validator("product_url")
+    @classmethod
+    def _url(cls, v: str | None) -> str | None:
+        return _checked_url(v)
 
 
 class CatalogItemUpdate(BaseModel):
@@ -195,6 +218,12 @@ class CatalogItemUpdate(BaseModel):
     commodity_code: str | None = Field(default=None, max_length=32)
     commodity_scheme: str | None = Field(default=None, max_length=16)
     active: bool | None = None
+    product_url: str | None = Field(default=None, max_length=1000)
+
+    @field_validator("product_url")
+    @classmethod
+    def _url(cls, v: str | None) -> str | None:
+        return _checked_url(v)
 
 
 class CatalogItemResponse(BaseModel):
@@ -216,6 +245,8 @@ class CatalogItemResponse(BaseModel):
     commodity_code: str | None = None
     commodity_scheme: str = "unspsc"
     active: bool
+    product_url: str | None = None
+    attachment_count: int = 0
 
 
 class CatalogItemListResponse(BaseModel):
@@ -271,6 +302,202 @@ class PriceListResponse(BaseModel):
     currency: str
     status: str
     uploaded_by: str | None = None
+    entry_count: int = 0
+    expired: bool = False
+
+
+class PriceListEntryRow(BaseModel):
+    """One vendor price as the estimator reads it: list price, discount, net."""
+
+    entry_id: UUID
+    catalog_item_id: UUID
+    sku: str
+    name: str
+    unit_of_measure: str
+    vendor_sku: str | None = None
+    mpn: str | None = None
+    gtin: str | None = None
+    gross_price: Decimal
+    net_price: Decimal
+    discount_pct: Decimal | None = None
+    discount_source: str
+    discount_agreement_id: UUID | None = None
+    min_order_qty: Decimal
+    lead_time_days: int
+    product_url: str | None = None
+    attachment_count: int = 0
+
+
+class PriceListEntriesResponse(BaseModel):
+    price_list: PriceListResponse
+    items: list[PriceListEntryRow]
+    total: int
+    offset: int
+    limit: int
+
+
+class ImportPresetResponse(BaseModel):
+    """A column-mapping preset: the header spellings it recognises per field."""
+
+    name: str
+    fields: dict[str, list[str]]
+
+
+class ImportRowResult(BaseModel):
+    """What the import does with one row of the file."""
+
+    row: int
+    action: str  # create | update | unchanged | unmatched | error
+    matched_by: str | None = None
+    catalog_item_id: UUID | None = None
+    sku: str | None = None
+    item_name: str | None = None
+    vendor_sku: str | None = None
+    old_price: Decimal | None = None
+    new_price: Decimal | None = None
+    currency: str | None = None
+    errors: list[str] = Field(default_factory=list)
+
+
+class PriceListImportPreview(BaseModel):
+    """Dry run of an import: nothing is written."""
+
+    preset: str
+    sheet: str
+    headers: list[str]
+    mapping: dict[str, str]
+    sample: list[list[str]]
+    total_rows: int
+    counts: dict[str, int]
+    duplicate_vendor_skus: list[str] = Field(default_factory=list)
+    valid_from: str | None = None
+    valid_to: str | None = None
+    currencies: list[str] = Field(default_factory=list)
+    rows: list[ImportRowResult]
+    rows_truncated: bool = False
+
+
+class PriceListImportCommitResult(BaseModel):
+    price_list_id: UUID
+    counts: dict[str, int]
+    unmatched: list[ImportRowResult] = Field(default_factory=list)
+    changed: list[ImportRowResult] = Field(default_factory=list)
+
+
+# ── Discounts ────────────────────────────────────────────────────────────────
+
+
+def _pct_checked(v: Decimal | None) -> Decimal | None:
+    if v is not None and discount_out_of_range(v):
+        raise ValueError("discount_out_of_range")
+    return v
+
+
+class DiscountAgreementCreate(BaseModel):
+    """A discount on the vendor's list prices.
+
+    Leave ``price_list_id``, ``category_id`` and ``catalog_item_id`` empty for
+    an overall discount. ``fixed_net_price`` (a net price per unit instead of a
+    percentage) needs ``catalog_item_id``.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(..., min_length=1, max_length=255)
+    reference: str | None = Field(default=None, max_length=100)
+    price_list_id: UUID | None = None
+    category_id: UUID | None = None
+    catalog_item_id: UUID | None = None
+    discount_pct: Decimal | None = None
+    fixed_net_price: Decimal | None = Field(default=None, ge=0)
+    valid_from: date | None = None
+    valid_to: date | None = None
+    active: bool = True
+    notes: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("discount_pct")
+    @classmethod
+    def _pct(cls, v: Decimal | None) -> Decimal | None:
+        return _pct_checked(v)
+
+    @model_validator(mode="after")
+    def _one_basis(self) -> DiscountAgreementCreate:
+        if (self.discount_pct is None) == (self.fixed_net_price is None):
+            raise ValueError("discount_basis_one_of_pct_or_fixed_net")
+        if self.fixed_net_price is not None and self.catalog_item_id is None:
+            raise ValueError("fixed_net_needs_item")
+        if self.category_id is not None and self.catalog_item_id is not None:
+            raise ValueError("discount_scope_category_or_item")
+        if self.valid_from and self.valid_to and self.valid_to < self.valid_from:
+            raise ValueError("valid_to_before_valid_from")
+        return self
+
+
+class DiscountAgreementUpdate(BaseModel):
+    """Patch an agreement. The scope (price list, category, item) is fixed."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    reference: str | None = Field(default=None, max_length=100)
+    discount_pct: Decimal | None = None
+    fixed_net_price: Decimal | None = Field(default=None, ge=0)
+    valid_from: date | None = None
+    valid_to: date | None = None
+    active: bool | None = None
+    notes: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("discount_pct")
+    @classmethod
+    def _pct(cls, v: Decimal | None) -> Decimal | None:
+        return _pct_checked(v)
+
+
+class DiscountAgreementResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    vendor_id: UUID
+    name: str
+    reference: str | None = None
+    price_list_id: UUID | None = None
+    category_id: UUID | None = None
+    catalog_item_id: UUID | None = None
+    discount_pct: Decimal | None = None
+    fixed_net_price: Decimal | None = None
+    valid_from: str | None = None
+    valid_to: str | None = None
+    active: bool
+    notes: str | None = None
+
+
+# ── Item documents ───────────────────────────────────────────────────────────
+
+
+class ItemAttachmentCreate(BaseModel):
+    """Link a file already in Documents to a catalog item."""
+
+    document_id: UUID
+    kind: str = Field(default="datasheet")
+    title: str | None = Field(default=None, max_length=255)
+
+    @field_validator("kind")
+    @classmethod
+    def _kind(cls, v: str) -> str:
+        if v not in ATTACHMENT_KINDS:
+            raise ValueError("attachment_kind_unknown")
+        return v
+
+
+class ItemAttachmentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    catalog_item_id: UUID
+    document_id: UUID
+    project_id: UUID
+    kind: str
+    title: str
 
 
 class PriceListImportResult(BaseModel):
@@ -294,6 +521,12 @@ class PriceComparisonRow(BaseModel):
     lead_time_days: int
     price_list_id: UUID
     rating: int | None = None
+    gross_price: Decimal | None = None
+    net_price: Decimal | None = None
+    discount_pct: Decimal | None = None
+    discount_source: str | None = None
+    entry_id: UUID | None = None
+    valid_to: str | None = None
 
 
 # ── Purchase requisition ─────────────────────────────────────────────────────
@@ -304,7 +537,8 @@ class PRLineCreate(BaseModel):
     description: str = Field(..., min_length=1, max_length=500)
     quantity: Decimal = Field(..., gt=0)
     unit_of_measure: str = Field(default="pcs", max_length=20)
-    estimated_unit_price: Decimal = Field(default=Decimal("0"), ge=0)
+    # Omitted with a catalog item: the lowest current net price of any vendor.
+    estimated_unit_price: Decimal | None = Field(default=None, ge=0)
 
 
 class PRCreate(BaseModel):
@@ -327,6 +561,8 @@ class PRLineResponse(BaseModel):
     unit_of_measure: str
     estimated_unit_price: Decimal
     estimated_total: Decimal
+    gross_unit_price: Decimal | None = None
+    discount_source: str | None = None
 
 
 class PRResponse(BaseModel):
@@ -354,7 +590,10 @@ class POLineCreate(BaseModel):
     description: str = Field(..., min_length=1, max_length=500)
     ordered_qty: Decimal = Field(..., gt=0)
     unit_of_measure: str = Field(default="pcs", max_length=20)
-    unit_price: Decimal = Field(..., ge=0)
+    # Omitted: the net price of ``catalog_entry_id``, or of the vendor's current
+    # price list for ``catalog_item_id``. Given: a hand-agreed price.
+    unit_price: Decimal | None = Field(default=None, ge=0)
+    catalog_entry_id: UUID | None = None
 
 
 class POCreateExt(BaseModel):
@@ -385,6 +624,10 @@ class POLineResponse(BaseModel):
     line_total: Decimal
     received_qty: Decimal
     invoiced_qty: Decimal
+    gross_unit_price: Decimal | None = None
+    discount_pct: Decimal | None = None
+    discount_source: str | None = None
+    catalog_entry_id: UUID | None = None
 
 
 class POResponseExt(BaseModel):

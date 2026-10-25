@@ -7,22 +7,32 @@ Mounted at ``/api/v1/supplier-catalogs/`` by the module loader.
 
 from __future__ import annotations
 
+import json
 import uuid
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from app.core.i18n import get_locale
+from app.core.validation.engine import ValidationContext
 from app.core.validation.messages import translate
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.supplier_catalogs import validators as sc_rules
+from app.modules.supplier_catalogs.price_import import PRESETS
 from app.modules.supplier_catalogs.schemas import (
     CatalogItemCreate,
     CatalogItemListResponse,
     CatalogItemResponse,
     CatalogItemUpdate,
     CommodityCodeResponse,
+    DiscountAgreementCreate,
+    DiscountAgreementResponse,
+    DiscountAgreementUpdate,
     GoodsReceiptCreate,
     GRResponse,
+    ImportPresetResponse,
+    ItemAttachmentCreate,
+    ItemAttachmentResponse,
     ItemCategoryCreate,
     ItemCategoryResponse,
     KYCDocumentCreate,
@@ -34,6 +44,9 @@ from app.modules.supplier_catalogs.schemas import (
     PRCreate,
     PriceComparisonRow,
     PriceListCreate,
+    PriceListEntriesResponse,
+    PriceListImportCommitResult,
+    PriceListImportPreview,
     PriceListImportResult,
     PriceListResponse,
     PRResponse,
@@ -222,6 +235,24 @@ async def rate_vendor(
 # ── Catalog ──────────────────────────────────────────────────────────────────
 
 
+@router.get(
+    "/categories",
+    response_model=list[ItemCategoryResponse],
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.read"))],
+)
+async def list_categories(
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> list[ItemCategoryResponse]:
+    """Every item category, by code (discount agreements are scoped to one)."""
+    from sqlalchemy import select  # noqa: PLC0415
+
+    from app.modules.supplier_catalogs.models import ItemCategory  # noqa: PLC0415
+
+    rows = (await session.execute(select(ItemCategory).order_by(ItemCategory.code).limit(2000))).scalars().all()
+    return [ItemCategoryResponse.model_validate(c) for c in rows]
+
+
 @router.post(
     "/categories",
     response_model=ItemCategoryResponse,
@@ -272,8 +303,14 @@ async def list_catalog_items(
         offset=offset,
         limit=limit,
     )
+    counts = await service.attachment_counts([it.id for it in items])
+    rows = []
+    for it in items:
+        row = CatalogItemResponse.model_validate(it)
+        row.attachment_count = counts.get(it.id, 0)
+        rows.append(row)
     return CatalogItemListResponse(
-        items=[CatalogItemResponse.model_validate(it) for it in items],
+        items=rows,
         total=total,
         offset=offset,
         limit=limit,
@@ -369,6 +406,315 @@ async def import_price_list(
         currency=currency,
         user_id=user_id,
     )
+
+
+# Upload ceiling for a vendor price list file (Excel/CSV); keeps the import inside the 3 GB server budget.
+_MAX_IMPORT_BYTES = 25 * 1024 * 1024
+
+
+def _mapping_from_form(raw: str | None) -> dict[str, str] | None:
+    if not raw:
+        return None
+    try:
+        data = json.loads(raw)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="mapping must be a JSON object") from exc
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=422, detail="mapping must be a JSON object")
+    return {str(k): str(v) for k, v in data.items() if v}
+
+
+async def _read_upload(file: UploadFile) -> bytes:
+    raw = await file.read(_MAX_IMPORT_BYTES + 1)
+    if len(raw) > _MAX_IMPORT_BYTES:
+        raise HTTPException(status_code=413, detail="File is larger than 25 MB")
+    return raw
+
+
+@router.get(
+    "/price-list-import-presets",
+    response_model=list[ImportPresetResponse],
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.read"))],
+)
+async def list_import_presets(user_id: CurrentUserId) -> list[ImportPresetResponse]:
+    """Column-mapping presets for the price list import (generic, SAP condition export)."""
+    return [ImportPresetResponse(name=n, fields={k: list(v) for k, v in f.items()}) for n, f in PRESETS.items()]
+
+
+@router.post(
+    "/price-lists/{vendor_id}/import/preview",
+    response_model=PriceListImportPreview,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.write"))],
+)
+async def preview_price_list_import(
+    vendor_id: uuid.UUID,
+    user_id: CurrentUserId,
+    file: UploadFile = File(...),
+    mapping: str | None = Form(default=None),
+    preset: str | None = Form(default=None),
+    price_list_id: uuid.UUID | None = Form(default=None),
+    currency: str | None = Form(default=None),
+    service: SupplierCatalogsService = Depends(_svc),
+) -> PriceListImportPreview:
+    """Dry run of a price list import: mapping, matches and changes. Writes nothing."""
+    raw = await _read_upload(file)
+    return await service.preview_price_list_import(
+        vendor_id,
+        file.filename or "upload.csv",
+        raw,
+        mapping=_mapping_from_form(mapping),
+        preset=preset,
+        price_list_id=price_list_id,
+        currency=currency,
+    )
+
+
+@router.post(
+    "/price-lists/{vendor_id}/import/commit",
+    response_model=PriceListImportCommitResult,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.write"))],
+)
+async def commit_price_list_import(
+    vendor_id: uuid.UUID,
+    user_id: CurrentUserId,
+    file: UploadFile = File(...),
+    mapping: str | None = Form(default=None),
+    preset: str | None = Form(default=None),
+    price_list_id: uuid.UUID | None = Form(default=None),
+    name: str | None = Form(default=None),
+    currency: str | None = Form(default=None),
+    valid_from: str | None = Form(default=None),
+    valid_to: str | None = Form(default=None),
+    service: SupplierCatalogsService = Depends(_svc),
+) -> PriceListImportCommitResult:
+    """Import the file into a new price list, or update ``price_list_id``."""
+    raw = await _read_upload(file)
+    return await service.commit_price_list_import(
+        vendor_id,
+        file.filename or "upload.csv",
+        raw,
+        mapping=_mapping_from_form(mapping),
+        preset=preset,
+        price_list_id=price_list_id,
+        name=name,
+        currency=currency,
+        valid_from=valid_from or None,
+        valid_to=valid_to or None,
+        user_id=user_id,
+    )
+
+
+@router.get(
+    "/vendors/{vendor_id}/price-lists",
+    response_model=list[PriceListResponse],
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.read"))],
+)
+async def list_vendor_price_lists(
+    vendor_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> list[PriceListResponse]:
+    return await service.list_price_lists(vendor_id)
+
+
+@router.get(
+    "/price-lists/{price_list_id}/entries",
+    response_model=PriceListEntriesResponse,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.read"))],
+)
+async def list_price_list_entries(
+    price_list_id: uuid.UUID,
+    user_id: CurrentUserId,
+    search: str | None = Query(default=None, max_length=200),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=200),
+    service: SupplierCatalogsService = Depends(_svc),
+) -> PriceListEntriesResponse:
+    """One page of a price list: list price, discount, net price and item links."""
+    return await service.list_price_list_entries(price_list_id, search=search, offset=offset, limit=limit)
+
+
+@router.get(
+    "/price-lists/{price_list_id}/validation",
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.read"))],
+)
+async def validate_price_list(
+    price_list_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> dict:
+    """Run the supplier_catalogs rule set over one price list and its items."""
+    page = await service.list_price_list_entries(price_list_id, offset=0, limit=200)
+    total, offset, rows = page.total, 200, list(page.items)
+    while offset < total:
+        nxt = await service.list_price_list_entries(price_list_id, offset=offset, limit=200)
+        rows.extend(nxt.items)
+        offset += 200
+    agreements = await service.list_discounts(page.price_list.vendor_id)
+    data = {
+        "prices": [{"ref": r.sku, "gross": r.gross_price, "net": r.net_price} for r in rows],
+        "discounts": [{"ref": a.name, "discount_pct": a.discount_pct} for a in agreements],
+        "price_list_rows": [{"ref": r.sku, "vendor_sku": r.vendor_sku} for r in rows],
+        "urls": [{"ref": r.sku, "url": r.product_url} for r in rows if r.product_url],
+        "po_price_lists": [],
+    }
+    ctx = ValidationContext(data=data)
+    results = []
+    for rule_cls in sc_rules.RULES:
+        for res in await rule_cls().validate(ctx):
+            results.append(
+                {
+                    "rule_id": res.rule_id,
+                    "severity": str(res.severity),
+                    "passed": res.passed,
+                    "message": res.message,
+                    "element_ref": res.element_ref,
+                }
+            )
+    return {
+        "price_list_id": str(price_list_id),
+        "expired": page.price_list.expired,
+        "passed": all(r["passed"] for r in results),
+        "results": results,
+    }
+
+
+# ── Contractor discounts ─────────────────────────────────────────────────────
+
+
+@router.get(
+    "/vendors/{vendor_id}/discounts",
+    response_model=list[DiscountAgreementResponse],
+    dependencies=[Depends(RequirePermission("supplier_catalogs.discount.read"))],
+)
+async def list_vendor_discounts(
+    vendor_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> list[DiscountAgreementResponse]:
+    return [DiscountAgreementResponse.model_validate(a) for a in await service.list_discounts(vendor_id)]
+
+
+@router.post(
+    "/vendors/{vendor_id}/discounts",
+    response_model=DiscountAgreementResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.discount.manage"))],
+)
+async def create_vendor_discount(
+    vendor_id: uuid.UUID,
+    data: DiscountAgreementCreate,
+    user_id: CurrentUserId,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> DiscountAgreementResponse:
+    """Agree a discount: overall, per price list, per item category or per item."""
+    return DiscountAgreementResponse.model_validate(await service.create_discount(vendor_id, data))
+
+
+@router.patch(
+    "/discounts/{agreement_id}",
+    response_model=DiscountAgreementResponse,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.discount.manage"))],
+)
+async def update_vendor_discount(
+    agreement_id: uuid.UUID,
+    data: DiscountAgreementUpdate,
+    user_id: CurrentUserId,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> DiscountAgreementResponse:
+    return DiscountAgreementResponse.model_validate(await service.update_discount(agreement_id, data))
+
+
+@router.delete(
+    "/discounts/{agreement_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.discount.manage"))],
+)
+async def delete_vendor_discount(
+    agreement_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> None:
+    await service.delete_discount(agreement_id)
+
+
+# ── Item documents (datasheets, drawings) ────────────────────────────────────
+#
+# The files stay in the Documents module, which is project scoped. Linking,
+# listing and unlinking check the caller may reach the document's project, and
+# downloading goes through /api/v1/documents/{id}/download with its own check.
+
+
+@router.get(
+    "/catalog-items/{item_id}/attachments",
+    response_model=list[ItemAttachmentResponse],
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.read"))],
+)
+async def list_item_attachments(
+    item_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> list[ItemAttachmentResponse]:
+    """Datasheets and drawings of an item, only those in projects the caller can open."""
+    allowed: dict[uuid.UUID, bool] = {}
+    out = []
+    for att in await service.list_item_attachments(item_id):
+        if att.project_id not in allowed:
+            try:
+                await verify_project_access(att.project_id, str(user_id), session)
+                allowed[att.project_id] = True
+            except HTTPException:
+                allowed[att.project_id] = False
+        if allowed[att.project_id]:
+            out.append(ItemAttachmentResponse.model_validate(att))
+    return out
+
+
+@router.post(
+    "/catalog-items/{item_id}/attachments",
+    response_model=ItemAttachmentResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.write"))],
+)
+async def add_item_attachment(
+    item_id: uuid.UUID,
+    data: ItemAttachmentCreate,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> ItemAttachmentResponse:
+    """Link a document (upload it in Documents first) to the item as datasheet or drawing."""
+    project_id, doc_name = await service.document_project(data.document_id)
+    await verify_project_access(project_id, str(user_id), session)
+    att = await service.add_item_attachment(
+        item_id,
+        document_id=data.document_id,
+        project_id=project_id,
+        kind=data.kind,
+        title=data.title or doc_name,
+        user_id=str(user_id),
+    )
+    return ItemAttachmentResponse.model_validate(att)
+
+
+@router.delete(
+    "/catalog-items/{item_id}/attachments/{attachment_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("supplier_catalogs.catalog.write"))],
+)
+async def delete_item_attachment(
+    item_id: uuid.UUID,
+    attachment_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: SupplierCatalogsService = Depends(_svc),
+) -> None:
+    """Unlink a document from the item. The document itself stays in Documents."""
+    att = await service.get_item_attachment(item_id, attachment_id)
+    await verify_project_access(att.project_id, str(user_id), session)
+    await service.delete_item_attachment(att)
 
 
 # ── Purchase Requisition ──────────────────────────────────────────────────────

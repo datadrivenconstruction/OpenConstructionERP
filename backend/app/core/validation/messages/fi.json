@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "työnantajan vastuun selvitystodistus",
     "insurance": "vakuutustodistus",
     "license": "urakoitsijan lupa"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Hinnastoa ei löytynyt",
+    "catalog_item_not_found": "Luettelon tuotetta ei löytynyt",
+    "entry_not_found": "Valittua toimittajan hintaa ei ole olemassa",
+    "entry_other_vendor": "Valittu hinta kuuluu toisen toimittajan hinnastoon",
+    "price_list_expired": "Hinnasto \"{name}\" vanheni {valid_to}. Tuo voimassa oleva hinnasto tai syötä sovittu hinta käsin.",
+    "import_unreadable": "Tiedostoa ei voi lukea hinnastona ({reason})",
+    "import_needs_price_column": "Valitse hinnan sisältävä sarake",
+    "duplicate_vendor_sku": "Nämä toimittajan tuotenumerot esiintyvät tiedostossa useammin kuin kerran: {skus}",
+    "valid_to_before_valid_from": "Päättymispäivä on ennen alkamispäivää",
+    "category_not_found": "Tuoteryhmää ei löytynyt",
+    "net_above_gross": "Nettohinta {net} on korkeampi kuin listahinta {gross}",
+    "discount_not_found": "Alennussopimusta ei löytynyt",
+    "discount_basis": "Anna joko alennusprosentti tai kiinteä nettohinta (kiinteä nettohinta vaatii tuotteen)",
+    "attachment_not_found": "Liitettä ei löytynyt",
+    "price_missing": "Riville \"{line}\" ei ole voimassa olevaa hintaa: syötä yksikköhinta tai tuo toimittajan hinnasto"
   }
 }

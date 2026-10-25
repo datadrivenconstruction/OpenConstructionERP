@@ -5,7 +5,8 @@
 Extends procurement with:
     - Vendor master + contacts
     - Item categories + catalog items
-    - Vendor price lists
+    - Vendor price lists, imported from Excel/CSV/SAP exports with a preview
+    - Contractor discount agreements and net prices
     - Purchase requisitions with approval chain
     - Extended POs (linked to PRs and contracts)
     - Goods receipts with batch/serial tracking and stock posting
@@ -20,6 +21,8 @@ async def on_startup() -> None:
     from app.modules.supplier_catalogs.permissions import (
         register_supplier_catalogs_permissions,
     )
+    from app.modules.supplier_catalogs.validators import register_supplier_catalogs_rules
 
     register_supplier_catalogs_permissions()
+    register_supplier_catalogs_rules()
     register_subscribers()

@@ -14,6 +14,7 @@ import io
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
+from datetime import date as _date_cls
 from decimal import Decimal, InvalidOperation
 from importlib import resources
 from typing import Any
@@ -59,6 +60,8 @@ from app.modules.supplier_catalogs.peppol import (
     PeppolParseError,
     parse_peppol_invoice,
 )
+from app.modules.supplier_catalogs.pricelist_service import PriceListOps
+from app.modules.supplier_catalogs.pricing import SOURCE_MANUAL
 from app.modules.supplier_catalogs.repository import (
     CatalogItemRepository,
     CommodityCodeRepository,
@@ -146,6 +149,10 @@ async def _safe_publish(name: str, data: dict[str, Any]) -> None:
 
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat()
+
+
+def _now_date() -> _date_cls:
+    return datetime.now(UTC).date()
 
 
 def _to_decimal(value: Any, default: str = "0") -> Decimal:
@@ -369,7 +376,7 @@ def _in_use_conflict(
     )
 
 
-class SupplierCatalogsService:
+class SupplierCatalogsService(PriceListOps):
     """High-level facade exposing all supplier-catalogs business operations."""
 
     def __init__(self, session: AsyncSession) -> None:
@@ -688,6 +695,8 @@ class SupplierCatalogsService:
             hazard_class=data.hazard_class,
             shelf_life_days=data.shelf_life_days,
             reorder_point=data.reorder_point,
+            gtin=data.gtin,
+            product_url=data.product_url,
             active=True,
         )
         created = await self.items.create(item)
@@ -832,6 +841,8 @@ class SupplierCatalogsService:
                 )
             )
         await self.session.flush()
+        if data.entries:
+            await self.recompute_net_prices(vendor_id, pl.id)
         return pl
 
     async def import_price_list(
@@ -921,6 +932,7 @@ class SupplierCatalogsService:
             )
             imported += 1
         await self.session.flush()
+        await self.recompute_net_prices(vendor_id, pl.id)
 
         await _safe_publish(
             ev.PRICE_LIST_IMPORTED,
@@ -942,9 +954,13 @@ class SupplierCatalogsService:
         self,
         catalog_item_id: uuid.UUID,
     ) -> list[dict[str, Any]]:
-        """Return active-price comparison rows for an item, sorted by unit price."""
-        rows = await self.price_lists.list_entries_for_item(catalog_item_id)
-        results = [
+        """Price comparison rows for an item from price lists in force today, cheapest net first.
+
+        ``unit_price`` stays the list price for older callers; ``net_price`` is
+        what this contractor pays after its discount agreements.
+        """
+        rows = await self.current_entries_for_item(catalog_item_id)
+        return [
             {
                 "vendor_id": vendor.id,
                 "vendor_code": vendor.code,
@@ -955,10 +971,30 @@ class SupplierCatalogsService:
                 "lead_time_days": entry.lead_time_days,
                 "price_list_id": pl.id,
                 "rating": vendor.rating,
+                "gross_price": np.gross,
+                "net_price": np.net,
+                "discount_pct": np.discount_pct,
+                "discount_source": np.source,
+                "entry_id": entry.id,
+                "valid_to": pl.valid_to,
             }
-            for entry, pl, vendor in rows
+            for entry, pl, vendor, np in rows
         ]
-        return sorted(results, key=lambda r: (r["unit_price"], r["lead_time_days"]))
+
+    async def _priced_pr_lines(self, lines: list[Any]) -> list[tuple[Any, Decimal, Decimal | None, str | None]]:
+        """``(line, unit price, gross, source)``: an omitted estimate takes the lowest current net."""
+        out = []
+        for line in lines:
+            if line.estimated_unit_price is not None:
+                out.append((line, Decimal(line.estimated_unit_price), None, SOURCE_MANUAL))
+                continue
+            best = await self.current_entries_for_item(line.catalog_item_id) if line.catalog_item_id else []
+            if best:
+                np = best[0][3]
+                out.append((line, np.net, np.gross, np.source))
+            else:
+                out.append((line, Decimal("0"), None, None))
+        return out
 
     # ── Purchase Requisition ──────────────────────────────────────────────────
 
@@ -971,9 +1007,10 @@ class SupplierCatalogsService:
         # access to ``data.project_id`` - not merely hold the global
         # ``supplier_catalogs.pr.create`` permission.
         await self._guard_project(data.project_id, user_id)
+        priced = await self._priced_pr_lines(list(data.lines))
         number = await self.prs.next_number()
         total_estimate = sum(
-            (line.quantity * line.estimated_unit_price for line in data.lines),
+            (line.quantity * price for line, price, _, _ in priced),
             Decimal("0"),
         )
         pr = PurchaseRequisition(
@@ -990,7 +1027,7 @@ class SupplierCatalogsService:
         )
         pr = await self.prs.create(pr)
         pr_id = pr.id
-        for line in data.lines:
+        for line, price, gross, source in priced:
             self.session.add(
                 PRLine(
                     pr_id=pr_id,
@@ -998,8 +1035,10 @@ class SupplierCatalogsService:
                     description=line.description,
                     quantity=line.quantity,
                     unit_of_measure=line.unit_of_measure,
-                    estimated_unit_price=line.estimated_unit_price,
-                    estimated_total=line.quantity * line.estimated_unit_price,
+                    estimated_unit_price=price,
+                    estimated_total=line.quantity * price,
+                    gross_unit_price=gross,
+                    discount_source=source,
                 )
             )
         await self.session.flush()
@@ -1177,8 +1216,17 @@ class SupplierCatalogsService:
 
         po_currency = currency or pr.currency
         po_tax = Decimal(tax) if tax is not None else Decimal("0")
+        # The chosen vendor's own net price replaces the requisition's estimate
+        # where it quotes the item; otherwise the estimate carries over.
+        on = _now_date()
+        line_prices: list[tuple[Any, Decimal, Any]] = []
+        for line in pr.lines:
+            quote = await self.price_for_order_line(
+                vendor_id=vendor_id, catalog_item_id=line.catalog_item_id, catalog_entry_id=None, on=on, strict=False
+            )
+            line_prices.append((line, quote[1].net if quote else Decimal(line.estimated_unit_price), quote))
         subtotal = sum(
-            (line.quantity * line.estimated_unit_price for line in pr.lines),
+            (line.quantity * price for line, price, _ in line_prices),
             Decimal("0"),
         )
         number = await self.pos.next_number()
@@ -1195,7 +1243,7 @@ class SupplierCatalogsService:
             total=subtotal + po_tax,
         )
         po = await self.pos.create(po)
-        for line in pr.lines:
+        for line, price, quote in line_prices:
             self.session.add(
                 POLine(
                     po_id=po.id,
@@ -1203,8 +1251,12 @@ class SupplierCatalogsService:
                     description=line.description,
                     ordered_qty=line.quantity,
                     unit_of_measure=line.unit_of_measure,
-                    unit_price=line.estimated_unit_price,
-                    line_total=line.quantity * line.estimated_unit_price,
+                    unit_price=price,
+                    line_total=line.quantity * price,
+                    gross_unit_price=quote[1].gross if quote else line.gross_unit_price,
+                    discount_pct=quote[1].discount_pct if quote else None,
+                    discount_source=quote[1].source if quote else line.discount_source,
+                    catalog_entry_id=quote[0].id if quote else None,
                 )
             )
         await self.session.flush()
@@ -1252,8 +1304,33 @@ class SupplierCatalogsService:
                 status_code=400,
                 detail=f"Cannot order from vendor in status '{vendor.status}'",
             )
+        on = _now_date()
+        if data.order_date:
+            try:
+                on = datetime.fromisoformat(str(data.order_date)[:10]).date()
+            except ValueError:
+                on = _now_date()
+        priced: list[tuple[Any, Decimal, Any]] = []
+        for line in data.lines:
+            quote = await self.price_for_order_line(
+                vendor_id=data.vendor_id,
+                catalog_item_id=line.catalog_item_id,
+                catalog_entry_id=line.catalog_entry_id,
+                on=on,
+                strict=line.unit_price is None,
+            )
+            if line.unit_price is not None:
+                price = Decimal(line.unit_price)
+            elif quote is not None:
+                price = quote[1].net
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=translate("supplier_catalogs.price_missing", locale=get_locale(), line=line.description),
+                )
+            priced.append((line, price, quote))
         subtotal = sum(
-            (line.ordered_qty * line.unit_price for line in data.lines),
+            (line.ordered_qty * price for line, price, _ in priced),
             Decimal("0"),
         )
         tax = Decimal(data.tax)
@@ -1274,7 +1351,9 @@ class SupplierCatalogsService:
             terms=data.terms,
         )
         po = await self.pos.create(po)
-        for line in data.lines:
+        for line, price, quote in priced:
+            np = quote[1] if quote else None
+            manual = line.unit_price is not None and (np is None or price != np.net)
             self.session.add(
                 POLine(
                     po_id=po.id,
@@ -1282,8 +1361,12 @@ class SupplierCatalogsService:
                     description=line.description,
                     ordered_qty=line.ordered_qty,
                     unit_of_measure=line.unit_of_measure,
-                    unit_price=line.unit_price,
-                    line_total=line.ordered_qty * line.unit_price,
+                    unit_price=price,
+                    line_total=line.ordered_qty * price,
+                    gross_unit_price=np.gross if np else None,
+                    discount_pct=None if manual or np is None else np.discount_pct,
+                    discount_source=SOURCE_MANUAL if manual else (np.source if np else None),
+                    catalog_entry_id=quote[0].id if quote else None,
                 )
             )
         await self.session.flush()

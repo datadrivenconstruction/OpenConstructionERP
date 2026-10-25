@@ -17,6 +17,9 @@ def register_supplier_catalogs_permissions() -> None:
             # Catalog & price lists
             "supplier_catalogs.catalog.read": Role.VIEWER,
             "supplier_catalogs.catalog.write": Role.EDITOR,
+            # Contractor discount agreements are commercial terms
+            "supplier_catalogs.discount.read": Role.EDITOR,
+            "supplier_catalogs.discount.manage": Role.MANAGER,
             # Purchase requisition
             "supplier_catalogs.pr.create": Role.EDITOR,
             "supplier_catalogs.pr.approve": Role.MANAGER,

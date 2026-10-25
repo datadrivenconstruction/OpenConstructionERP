@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "사용자 책임 면제 확인서",
     "insurance": "보험 증서",
     "license": "시공업자 면허"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "단가표를 찾을 수 없습니다",
+    "catalog_item_not_found": "카탈로그 품목을 찾을 수 없습니다",
+    "entry_not_found": "선택한 협력업체 단가가 존재하지 않습니다",
+    "entry_other_vendor": "선택한 단가는 다른 협력업체의 단가표에 속합니다",
+    "price_list_expired": "단가표 \"{name}\"이(가) {valid_to}에 만료되었습니다. 최신 단가표를 가져오거나 합의한 단가를 직접 입력하세요.",
+    "import_unreadable": "파일을 단가표로 읽을 수 없습니다 ({reason})",
+    "import_needs_price_column": "단가가 들어 있는 열을 선택하세요",
+    "duplicate_vendor_sku": "다음 협력업체 품번이 파일에 두 번 이상 나옵니다: {skus}",
+    "valid_to_before_valid_from": "종료일이 시작일보다 앞섭니다",
+    "category_not_found": "품목 분류를 찾을 수 없습니다",
+    "net_above_gross": "순단가 {net}이(가) 정가 {gross}보다 높습니다",
+    "discount_not_found": "할인 계약을 찾을 수 없습니다",
+    "discount_basis": "할인율 또는 고정 순단가 중 하나를 입력하세요(고정 순단가에는 품목이 필요합니다)",
+    "attachment_not_found": "첨부 파일을 찾을 수 없습니다",
+    "price_missing": "\"{line}\" 항목에 유효한 단가가 없습니다. 단가를 입력하거나 협력업체 단가표를 가져오세요"
   }
 }

@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "intyg om arbetsgivaransvar",
     "insurance": "försäkringsbevis",
     "license": "entreprenörslicens"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Prislistan hittades inte",
+    "catalog_item_not_found": "Katalogartikeln hittades inte",
+    "entry_not_found": "Det valda leverantörspriset finns inte",
+    "entry_other_vendor": "Det valda priset tillhör en annan leverantörs prislista",
+    "price_list_expired": "Prislistan \"{name}\" gick ut {valid_to}. Importera den aktuella listan eller ange det avtalade priset manuellt.",
+    "import_unreadable": "Filen kan inte läsas som prislista ({reason})",
+    "import_needs_price_column": "Välj kolumnen som innehåller priset",
+    "duplicate_vendor_sku": "Dessa leverantörsartikelnummer förekommer flera gånger i filen: {skus}",
+    "valid_to_before_valid_from": "Slutdatumet ligger före startdatumet",
+    "category_not_found": "Artikelkategorin hittades inte",
+    "net_above_gross": "Nettopriset {net} är högre än listpriset {gross}",
+    "discount_not_found": "Rabattavtalet hittades inte",
+    "discount_basis": "Ange antingen en rabattprocent eller ett fast nettopris (fast nettopris kräver en artikel)",
+    "attachment_not_found": "Bilagan hittades inte",
+    "price_missing": "Inget aktuellt pris för raden \"{line}\": ange ett á-pris eller importera leverantörens prislista"
   }
 }

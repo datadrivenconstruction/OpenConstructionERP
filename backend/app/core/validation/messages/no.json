@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "klareringsattest for arbeidsgiveransvar",
     "insurance": "forsikringsbevis",
     "license": "entreprenørlisens"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Prislisten ble ikke funnet",
+    "catalog_item_not_found": "Katalogvaren ble ikke funnet",
+    "entry_not_found": "Den valgte leverandørprisen finnes ikke",
+    "entry_other_vendor": "Den valgte prisen tilhører en annen leverandørs prisliste",
+    "price_list_expired": "Prislisten \"{name}\" gikk ut {valid_to}. Importer gjeldende liste eller legg inn avtalt pris manuelt.",
+    "import_unreadable": "Filen kan ikke leses som prisliste ({reason})",
+    "import_needs_price_column": "Velg kolonnen som inneholder prisen",
+    "duplicate_vendor_sku": "Disse leverandørens varenumre forekommer flere ganger i filen: {skus}",
+    "valid_to_before_valid_from": "Sluttdatoen ligger før startdatoen",
+    "category_not_found": "Varekategorien ble ikke funnet",
+    "net_above_gross": "Nettoprisen {net} er høyere enn listeprisen {gross}",
+    "discount_not_found": "Rabattavtalen ble ikke funnet",
+    "discount_basis": "Oppgi enten en rabattprosent eller en fast nettopris (fast nettopris krever en vare)",
+    "attachment_not_found": "Vedlegget ble ikke funnet",
+    "price_missing": "Ingen gjeldende pris for linjen \"{line}\": legg inn en enhetspris eller importer leverandørens prisliste"
   }
 }

@@ -71,6 +71,14 @@ from pathlib import Path
 import pytest
 
 ROUTER_HANDLERS: dict[str, list[str]] = {
+    # Vendors, catalog items, price lists and discounts are tenant master data with no
+    # project (see _NOT_ROUTER_GATED). The item document routes reach Documents rows,
+    # which are project scoped, so the router checks the document's project.
+    "supplier_catalogs": [
+        "list_item_attachments",
+        "add_item_attachment",
+        "delete_item_attachment",
+    ],
     # Every route of the plant register is project scoped; the handlers reach the
     # project check through _plant_read, _plant_edit or _plant_manage, the site
     # plant ones call it directly.
@@ -1349,6 +1357,45 @@ def _is_object_scoped(paths: set[str]) -> bool:
 # codebase means removing its line here, test_exclusions_name_a_live_route
 # fails on a stale entry rather than letting it shadow a future handler.
 _NOT_ROUTER_GATED: dict[str, str] = {
+    # supplier_catalogs: master data has no project; project records are checked in the service.
+    "supplier_catalogs.get_vendor": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.update_vendor": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.delete_vendor": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.suspend_vendor": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.blacklist_vendor": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.rate_vendor": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.list_vendor_kyc": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.add_vendor_kyc": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.recompute_vendor_scorecard": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.list_vendor_scorecards": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.vendor key.",
+    "supplier_catalogs.update_catalog_item": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.delete_catalog_item": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.price_comparison": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.create_price_list": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.import_price_list": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.preview_price_list_import": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.commit_price_list_import": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.list_vendor_price_lists": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.list_price_list_entries": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.validate_price_list": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.catalog key.",
+    "supplier_catalogs.list_vendor_discounts": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.discount key.",
+    "supplier_catalogs.create_vendor_discount": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.discount key.",
+    "supplier_catalogs.update_vendor_discount": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.discount key.",
+    "supplier_catalogs.delete_vendor_discount": "names supplier master data (vendor, catalog item, price list or discount agreement), which has no owning project; gated by RequirePermission on the supplier_catalogs.discount key.",
+    "supplier_catalogs.update_tolerance_profile": "names a tenant 3-way-match tolerance profile, not a project record; gated by supplier_catalogs.vendor.admin.",
+    "supplier_catalogs.delete_tolerance_profile": "names a tenant 3-way-match tolerance profile, not a project record; gated by supplier_catalogs.vendor.admin.",
+    "supplier_catalogs.submit_pr": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.approve_pr": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.reject_pr": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.convert_pr_to_po": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.send_po": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.acknowledge_po": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.close_po": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.match_invoice": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.update_warehouse": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.delete_warehouse": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.list_warehouse_balances": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
+    "supplier_catalogs.stocktake": "Addresses a project record whose project the service resolves from the row and checks with SupplierCatalogsService._guard_project (verify_project_access) before acting.",
     "commitment_release.get_schedule": "catalogue_id names a tenant authority schedule, not a project record; the service resolves it under the caller's tenant",
     "commitment_release.update_schedule": "catalogue_id names a tenant authority schedule, not a project record; the service resolves it under the caller's tenant",
     "commitment_release.publish_schedule": "catalogue_id names a tenant authority schedule, not a project record; the service resolves it under the caller's tenant",

@@ -6,7 +6,15 @@
  * Backed by /api/v1/supplier-catalogs/ — see backend/app/modules/supplier_catalogs/router.py
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
+import {
+  apiGet,
+  apiPost,
+  apiPatch,
+  apiDelete,
+  extractErrorMessageFromBody,
+  fetchWithAuth,
+  type Page,
+} from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -84,6 +92,9 @@ export interface CatalogItem {
   shelf_life_days: number | null;
   reorder_point: number | string;
   active: boolean;
+  gtin?: string | null;
+  product_url?: string | null;
+  attachment_count?: number;
 }
 
 export interface PriceList {
@@ -95,6 +106,8 @@ export interface PriceList {
   currency: string;
   status: string;
   uploaded_by: string | null;
+  entry_count?: number;
+  expired?: boolean;
 }
 
 export interface PriceComparisonRow {
@@ -107,6 +120,12 @@ export interface PriceComparisonRow {
   lead_time_days: number;
   price_list_id: string;
   rating: number | null;
+  gross_price?: number | string | null;
+  net_price?: number | string | null;
+  discount_pct?: number | string | null;
+  discount_source?: DiscountSource | null;
+  entry_id?: string | null;
+  valid_to?: string | null;
 }
 
 export interface PRLine {
@@ -234,6 +253,8 @@ export interface CreateCatalogItemPayload {
   hazard_class?: string;
   shelf_life_days?: number;
   reorder_point?: number | string;
+  gtin?: string;
+  product_url?: string;
 }
 
 /* The three Update payloads below deliberately drop the record's business key,
@@ -271,6 +292,7 @@ export interface UpdateCatalogItemPayload {
   commodity_code?: string;
   commodity_scheme?: string;
   active?: boolean;
+  product_url?: string;
 }
 
 export interface UpdateWarehousePayload {
@@ -751,6 +773,240 @@ export interface PeppolIngestResult {
   currency: string;
   exception_reason: string | null;
   peppol_message_id: string | null;
+}
+
+/* ── Price lists, import, discounts, item documents ───────────────────── */
+
+/** Where a net price came from, most specific first. */
+export type DiscountSource =
+  | 'item_fixed'
+  | 'item'
+  | 'category'
+  | 'overall'
+  | 'none'
+  | 'manual';
+
+export interface PriceListEntryRow {
+  entry_id: string;
+  catalog_item_id: string;
+  sku: string;
+  name: string;
+  unit_of_measure: string;
+  vendor_sku: string | null;
+  mpn: string | null;
+  gtin: string | null;
+  gross_price: number | string;
+  net_price: number | string;
+  discount_pct: number | string | null;
+  discount_source: DiscountSource;
+  discount_agreement_id: string | null;
+  min_order_qty: number | string;
+  lead_time_days: number;
+  product_url: string | null;
+  attachment_count: number;
+}
+
+export interface PriceListEntriesPage {
+  price_list: PriceList;
+  items: PriceListEntryRow[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
+export type ImportField =
+  | 'vendor_sku'
+  | 'mpn'
+  | 'gtin'
+  | 'sku'
+  | 'unit_price'
+  | 'price_unit'
+  | 'currency'
+  | 'valid_from'
+  | 'valid_to'
+  | 'min_order_qty'
+  | 'lead_time_days'
+  | 'unit'
+  | 'discount_pct'
+  | 'name'
+  | 'notes';
+
+export type ImportAction = 'create' | 'update' | 'unchanged' | 'unmatched' | 'error';
+
+export interface ImportRowResult {
+  row: number;
+  action: ImportAction;
+  matched_by: string | null;
+  catalog_item_id: string | null;
+  sku: string | null;
+  item_name: string | null;
+  vendor_sku: string | null;
+  old_price: number | string | null;
+  new_price: number | string | null;
+  currency: string | null;
+  errors: string[];
+}
+
+export interface ImportPreview {
+  preset: string;
+  sheet: string;
+  headers: string[];
+  mapping: Partial<Record<ImportField, string>>;
+  sample: string[][];
+  total_rows: number;
+  counts: Record<ImportAction, number>;
+  duplicate_vendor_skus: string[];
+  valid_from: string | null;
+  valid_to: string | null;
+  currencies: string[];
+  rows: ImportRowResult[];
+  rows_truncated: boolean;
+}
+
+export interface ImportCommitResult {
+  price_list_id: string;
+  counts: Record<ImportAction, number>;
+  unmatched: ImportRowResult[];
+  changed: ImportRowResult[];
+}
+
+export interface ImportOptions {
+  mapping?: Partial<Record<ImportField, string>>;
+  preset?: string;
+  priceListId?: string;
+  currency?: string;
+  name?: string;
+  validFrom?: string;
+  validTo?: string;
+}
+
+export interface DiscountAgreement {
+  id: string;
+  vendor_id: string;
+  name: string;
+  reference: string | null;
+  price_list_id: string | null;
+  category_id: string | null;
+  catalog_item_id: string | null;
+  discount_pct: number | string | null;
+  fixed_net_price: number | string | null;
+  valid_from: string | null;
+  valid_to: string | null;
+  active: boolean;
+  notes: string | null;
+}
+
+export interface CreateDiscountPayload {
+  name: string;
+  reference?: string;
+  price_list_id?: string;
+  category_id?: string;
+  catalog_item_id?: string;
+  discount_pct?: number | string;
+  fixed_net_price?: number | string;
+  valid_from?: string;
+  valid_to?: string;
+  active?: boolean;
+}
+
+export interface ItemAttachment {
+  id: string;
+  catalog_item_id: string;
+  document_id: string;
+  project_id: string;
+  kind: 'datasheet' | 'drawing' | 'certificate' | 'other';
+  title: string;
+}
+
+export function listVendorPriceLists(vendorId: string): Promise<PriceList[]> {
+  return apiGet<PriceList[]>(`/v1/supplier-catalogs/vendors/${vendorId}/price-lists`);
+}
+
+export function listPriceListEntries(
+  priceListId: string,
+  params?: { search?: string; offset?: number; limit?: number },
+): Promise<PriceListEntriesPage> {
+  return apiGet<PriceListEntriesPage>(
+    `/v1/supplier-catalogs/price-lists/${priceListId}/entries?${query({ ...params })}`,
+  );
+}
+
+async function postImport<T>(vendorId: string, step: 'preview' | 'commit', file: File, o: ImportOptions): Promise<T> {
+  const fd = new FormData();
+  fd.append('file', file);
+  if (o.mapping && Object.keys(o.mapping).length) fd.append('mapping', JSON.stringify(o.mapping));
+  if (o.preset) fd.append('preset', o.preset);
+  if (o.priceListId) fd.append('price_list_id', o.priceListId);
+  if (o.currency) fd.append('currency', o.currency);
+  if (step === 'commit') {
+    if (o.name) fd.append('name', o.name);
+    if (o.validFrom) fd.append('valid_from', o.validFrom);
+    if (o.validTo) fd.append('valid_to', o.validTo);
+  }
+  const res = await fetchWithAuth(`/api/v1/supplier-catalogs/price-lists/${vendorId}/import/${step}`, {
+    method: 'POST',
+    body: fd,
+  });
+  const body: unknown = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(extractErrorMessageFromBody(body) ?? `HTTP ${res.status}`);
+  return body as T;
+}
+
+export function previewPriceListImport(vendorId: string, file: File, o: ImportOptions = {}): Promise<ImportPreview> {
+  return postImport<ImportPreview>(vendorId, 'preview', file, o);
+}
+
+export function commitPriceListImport(
+  vendorId: string,
+  file: File,
+  o: ImportOptions = {},
+): Promise<ImportCommitResult> {
+  return postImport<ImportCommitResult>(vendorId, 'commit', file, o);
+}
+
+export function listVendorDiscounts(vendorId: string): Promise<DiscountAgreement[]> {
+  return apiGet<DiscountAgreement[]>(`/v1/supplier-catalogs/vendors/${vendorId}/discounts`);
+}
+
+export function createVendorDiscount(vendorId: string, data: CreateDiscountPayload): Promise<DiscountAgreement> {
+  return apiPost<DiscountAgreement>(`/v1/supplier-catalogs/vendors/${vendorId}/discounts`, data);
+}
+
+export function updateVendorDiscount(
+  id: string,
+  data: Partial<CreateDiscountPayload>,
+): Promise<DiscountAgreement> {
+  return apiPatch<DiscountAgreement>(`/v1/supplier-catalogs/discounts/${id}`, data);
+}
+
+export function deleteVendorDiscount(id: string): Promise<void> {
+  return apiDelete(`/v1/supplier-catalogs/discounts/${id}`);
+}
+
+export function listItemAttachments(itemId: string): Promise<ItemAttachment[]> {
+  return apiGet<ItemAttachment[]>(`/v1/supplier-catalogs/catalog-items/${itemId}/attachments`);
+}
+
+export function addItemAttachment(
+  itemId: string,
+  data: { document_id: string; kind: ItemAttachment['kind']; title?: string },
+): Promise<ItemAttachment> {
+  return apiPost<ItemAttachment>(`/v1/supplier-catalogs/catalog-items/${itemId}/attachments`, data);
+}
+
+export function deleteItemAttachment(itemId: string, attachmentId: string): Promise<void> {
+  return apiDelete(`/v1/supplier-catalogs/catalog-items/${itemId}/attachments/${attachmentId}`);
+}
+
+/** Only http(s) links are ever rendered as clickable; mirrors the backend rule. */
+export function isSafeProductUrl(url: string | null | undefined): url is string {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return (u.protocol === 'https:' || u.protocol === 'http:') && !!u.hostname;
+  } catch {
+    return false;
+  }
 }
 
 export async function ingestPeppolInvoice(

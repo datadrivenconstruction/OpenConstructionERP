@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "potvrzení o bezdlužnosti u odpovědnosti zaměstnavatelů",
     "insurance": "pojistný certifikát",
     "license": "oprávnění zhotovitele"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Ceník nebyl nalezen",
+    "catalog_item_not_found": "Položka katalogu nebyla nalezena",
+    "entry_not_found": "Zvolená cena dodavatele neexistuje",
+    "entry_other_vendor": "Zvolená cena patří do ceníku jiného dodavatele",
+    "price_list_expired": "Ceník \"{name}\" vypršel {valid_to}. Importujte aktuální ceník nebo zadejte dohodnutou cenu ručně.",
+    "import_unreadable": "Soubor nelze přečíst jako ceník ({reason})",
+    "import_needs_price_column": "Vyberte sloupec s cenou",
+    "duplicate_vendor_sku": "Tato čísla položek dodavatele se v souboru vyskytují vícekrát: {skus}",
+    "valid_to_before_valid_from": "Datum konce je před datem začátku",
+    "category_not_found": "Kategorie položky nebyla nalezena",
+    "net_above_gross": "Čistá cena {net} je vyšší než katalogová cena {gross}",
+    "discount_not_found": "Slevová dohoda nebyla nalezena",
+    "discount_basis": "Zadejte buď procento slevy, nebo pevnou čistou cenu (pevná čistá cena vyžaduje položku)",
+    "attachment_not_found": "Příloha nebyla nalezena",
+    "price_missing": "Pro řádek \"{line}\" není platná cena: zadejte jednotkovou cenu nebo importujte ceník dodavatele"
   }
 }

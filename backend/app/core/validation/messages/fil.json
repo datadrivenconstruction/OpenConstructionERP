@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "sertipiko ng clearance sa pananagutan ng employer",
     "insurance": "sertipiko ng insurance",
     "license": "lisensya ng kontratista"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Hindi nahanap ang listahan ng presyo",
+    "catalog_item_not_found": "Hindi nahanap ang item sa katalogo",
+    "entry_not_found": "Walang ganitong napiling presyo ng vendor",
+    "entry_other_vendor": "Ang napiling presyo ay pag-aari ng listahan ng presyo ng ibang vendor",
+    "price_list_expired": "Nag-expire ang listahan ng presyo na \"{name}\" noong {valid_to}. I-import ang kasalukuyang listahan o manu-manong ilagay ang napagkasunduang presyo.",
+    "import_unreadable": "Hindi mabasa ang file bilang listahan ng presyo ({reason})",
+    "import_needs_price_column": "Piliin ang column na may presyo",
+    "duplicate_vendor_sku": "Lumilitaw nang higit sa isang beses sa file ang mga SKU ng vendor na ito: {skus}",
+    "valid_to_before_valid_from": "Mas maaga ang petsa ng pagtatapos kaysa sa petsa ng simula",
+    "category_not_found": "Hindi nahanap ang kategorya ng item",
+    "net_above_gross": "Ang net na presyo na {net} ay mas mataas kaysa sa list price na {gross}",
+    "discount_not_found": "Hindi nahanap ang kasunduan sa diskwento",
+    "discount_basis": "Maglagay ng porsyento ng diskwento o nakapirming net na presyo (kailangan ng item ang nakapirming net na presyo)",
+    "attachment_not_found": "Hindi nahanap ang attachment",
+    "price_missing": "Walang umiiral na presyo para sa linyang \"{line}\": maglagay ng unit price o i-import ang listahan ng presyo ng vendor"
   }
 }

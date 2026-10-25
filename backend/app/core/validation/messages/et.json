@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "tööandja vastutuse võlgnevuse puudumise tõend",
     "insurance": "kindlustustõend",
     "license": "töövõtja tegevusluba"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Hinnakirja ei leitud",
+    "catalog_item_not_found": "Kataloogi toodet ei leitud",
+    "entry_not_found": "Valitud tarnija hinda ei ole olemas",
+    "entry_other_vendor": "Valitud hind kuulub teise tarnija hinnakirja",
+    "price_list_expired": "Hinnakiri \"{name}\" aegus {valid_to}. Importige kehtiv hinnakiri või sisestage kokkulepitud hind käsitsi.",
+    "import_unreadable": "Faili ei saa hinnakirjana lugeda ({reason})",
+    "import_needs_price_column": "Valige hinda sisaldav veerg",
+    "duplicate_vendor_sku": "Need tarnija tootekoodid esinevad failis mitu korda: {skus}",
+    "valid_to_before_valid_from": "Lõppkuupäev on enne alguskuupäeva",
+    "category_not_found": "Tootekategooriat ei leitud",
+    "net_above_gross": "Netohind {net} on kõrgem kui hinnakirja hind {gross}",
+    "discount_not_found": "Allahindluslepingut ei leitud",
+    "discount_basis": "Sisestage kas allahindluse protsent või kindel netohind (kindel netohind nõuab toodet)",
+    "attachment_not_found": "Manust ei leitud",
+    "price_missing": "Real \"{line}\" puudub kehtiv hind: sisestage ühikuhind või importige tarnija hinnakiri"
   }
 }

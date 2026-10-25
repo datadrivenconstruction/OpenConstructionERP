@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "employers' liability clearance certificate",
     "insurance": "insurance certificate",
     "license": "contractor licence"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Price list not found",
+    "catalog_item_not_found": "Catalog item not found",
+    "entry_not_found": "The chosen vendor price does not exist",
+    "entry_other_vendor": "The chosen price belongs to another vendor's price list",
+    "price_list_expired": "Price list \"{name}\" expired on {valid_to}. Import the current list or enter the agreed price by hand.",
+    "import_unreadable": "The file cannot be read as a price list ({reason})",
+    "import_needs_price_column": "Choose the column that holds the price",
+    "duplicate_vendor_sku": "These vendor SKUs appear more than once in the file: {skus}",
+    "valid_to_before_valid_from": "The end date lies before the start date",
+    "category_not_found": "Item category not found",
+    "net_above_gross": "Net price {net} is higher than the list price {gross}",
+    "discount_not_found": "Discount agreement not found",
+    "discount_basis": "Give either a discount percentage or a fixed net price (fixed net needs an item)",
+    "attachment_not_found": "Attachment not found",
+    "price_missing": "No current price for line \"{line}\": enter a unit price or import the vendor's price list"
   }
 }

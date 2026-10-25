@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "certidão negativa de responsabilidade dos empregadores",
     "insurance": "certificado de seguro",
     "license": "licença do empreiteiro"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Lista de preços não encontrada",
+    "catalog_item_not_found": "Item do catálogo não encontrado",
+    "entry_not_found": "O preço de fornecedor escolhido não existe",
+    "entry_other_vendor": "O preço escolhido pertence à lista de preços de outro fornecedor",
+    "price_list_expired": "A lista de preços \"{name}\" expirou em {valid_to}. Importe a lista atual ou informe manualmente o preço acordado.",
+    "import_unreadable": "Não foi possível ler o arquivo como lista de preços ({reason})",
+    "import_needs_price_column": "Escolha a coluna que contém o preço",
+    "duplicate_vendor_sku": "Estes códigos de fornecedor aparecem mais de uma vez no arquivo: {skus}",
+    "valid_to_before_valid_from": "A data final é anterior à data inicial",
+    "category_not_found": "Categoria do item não encontrada",
+    "net_above_gross": "O preço líquido {net} é superior ao preço de tabela {gross}",
+    "discount_not_found": "Acordo de desconto não encontrado",
+    "discount_basis": "Informe um percentual de desconto ou um preço líquido fixo (o preço líquido fixo exige um item)",
+    "attachment_not_found": "Anexo não encontrado",
+    "price_missing": "Não há preço vigente para a linha \"{line}\": informe um preço unitário ou importe a lista de preços do fornecedor"
   }
 }

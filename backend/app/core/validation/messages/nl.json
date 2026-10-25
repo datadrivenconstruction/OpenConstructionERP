@@ -1290,5 +1290,22 @@
     "employers_liability_clearance": "verklaring vrijwaring werkgeversaansprakelijkheid",
     "insurance": "verzekeringsbewijs",
     "license": "aannemersvergunning"
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Prijslijst niet gevonden",
+    "catalog_item_not_found": "Catalogusartikel niet gevonden",
+    "entry_not_found": "De gekozen leveranciersprijs bestaat niet",
+    "entry_other_vendor": "De gekozen prijs hoort bij de prijslijst van een andere leverancier",
+    "price_list_expired": "Prijslijst \"{name}\" is verlopen op {valid_to}. Importeer de actuele lijst of voer de afgesproken prijs handmatig in.",
+    "import_unreadable": "Het bestand kan niet als prijslijst worden gelezen ({reason})",
+    "import_needs_price_column": "Kies de kolom met de prijs",
+    "duplicate_vendor_sku": "Deze artikelnummers van de leverancier komen meerdere keren in het bestand voor: {skus}",
+    "valid_to_before_valid_from": "De einddatum ligt vóór de startdatum",
+    "category_not_found": "Artikelcategorie niet gevonden",
+    "net_above_gross": "Nettoprijs {net} is hoger dan de lijstprijs {gross}",
+    "discount_not_found": "Kortingsafspraak niet gevonden",
+    "discount_basis": "Geef een kortingspercentage of een vaste nettoprijs op (een vaste nettoprijs vereist een artikel)",
+    "attachment_not_found": "Bijlage niet gevonden",
+    "price_missing": "Geen actuele prijs voor regel \"{line}\": voer een eenheidsprijs in of importeer de prijslijst van de leverancier"
   }
 }
