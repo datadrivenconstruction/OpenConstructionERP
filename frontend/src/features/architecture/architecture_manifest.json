@@ -277381,10 +277381,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 27,
+      "ts_files": 31,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 27
+      "test_files": 8,
+      "total_files": 31
     },
     {
       "name": "voice",
@@ -278994,7 +278994,7 @@
     "total_schemas": 4120,
     "total_python_files": 2810,
     "frontend_features": 209,
-    "frontend_ts_files": 3606,
+    "frontend_ts_files": 3610,
     "frontend_backend_mapped": 187
   },
   "frontend_backend_mapping": {
