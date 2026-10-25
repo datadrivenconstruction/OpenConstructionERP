@@ -7,23 +7,26 @@
  * this tab gathers everything a printed document carries in one place, top to
  * bottom in the order a site manager thinks about it:
  *
- *   1. two logos, because they do different jobs: the app logo sits in the
- *      sidebar and is often a cropped mark, the document logo is the formal
- *      artwork for paper (and falls back to the app logo when empty);
+ *   1. the document logo, the formal artwork for paper. It falls back to the app
+ *      logo when empty; that logo (the sidebar mark, often a cropped one) is
+ *      managed in General settings (WorkspaceBrandCard), not here, so there is
+ *      one place to change it;
  *   2. the company details printed under or beside that logo, with a live
  *      preview of the top of page one and a real sample PDF one click away;
  *   3. the document appearance panel, reused from property development;
  *   4. the per-document look, for a kind of document that should differ from
  *      the look above (DocumentTemplatesPanel).
  *
- * The app logo keeps living in the branding store and its endpoint; the rest
- * is the company profile (/api/v1/company-profile/). Admins edit; everyone
+ * The app logo lives in the branding store and its endpoint and is only read
+ * here, for the fallback note and the preview; the rest is the company profile
+ * (/api/v1/company-profile/). Admins edit; everyone
  * else sees the same tab read-only, because knowing what documents print is
  * useful even when you cannot change it.
  */
 
 import { useRef, useState, type DragEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -41,12 +44,18 @@ import { ApiError, getErrorMessage, triggerDownload } from '@/shared/lib/api';
 import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
-import { BRANDING_MAX_LOGO_BYTES, useBrandingStore } from '@/stores/useBrandingStore';
-import { ACCEPTED_IMAGE_TYPES, fileToDataUrl } from '@/app/layout/CustomBranding';
+import { useBrandingStore } from '@/stores/useBrandingStore';
+import { fileToDataUrl } from '@/app/layout/CustomBranding';
 import { isSvgDataUrl, rasteriseSvgToPng } from './rasteriseSvg';
 import { DocumentAppearancePanel } from '@/features/property-dev/DocumentAppearancePanel';
 import { DocumentTemplatesPanel } from './DocumentTemplatesPanel';
 import { getDocumentAppearance, type DocumentAppearance } from '@/features/property-dev/api';
+import {
+  pageNumberSample,
+  printStampSample,
+  sheetMm,
+  withAppearanceDefaults,
+} from '@/features/property-dev/documentPreviewLayout';
 import {
   COMPANY_PROFILE_KEY,
   COMPANY_PROFILE_OPTIONS_KEY,
@@ -69,19 +78,6 @@ const EMPTY_FORM: CompanyForm = {
   phone: '',
   email: '',
   website: '',
-};
-
-/** Aspect ratios of the preview sheet, matching the appearance panel's. */
-const PAGE_RATIO: Record<string, number> = {
-  A4: 210 / 297,
-  LETTER: 216 / 279,
-  LEGAL: 216 / 356,
-};
-
-const PAGE_WIDTH_MM: Record<string, number> = {
-  A4: 210,
-  LETTER: 216,
-  LEGAL: 216,
 };
 
 /** Short names for the accepted image types. Notation, the same in every language. */
@@ -230,9 +226,6 @@ export function CompanyDocumentsSettings() {
 
   const brandMode = useBrandingStore((s) => s.mode);
   const brandLogo = useBrandingStore((s) => s.logoDataUrl);
-  const brandLogoPng = useBrandingStore((s) => s.logoPngDataUrl);
-  const setBrandLogo = useBrandingStore((s) => s.setLogo);
-  const persistBranding = useBrandingStore((s) => s.persistToServer);
   const appLogo = brandMode === 'logo' ? brandLogo : null;
 
   const profile = profileQ.data;
@@ -295,43 +288,6 @@ export function CompanyDocumentsSettings() {
       });
     },
   });
-
-  const [appLogoBusy, setAppLogoBusy] = useState(false);
-  const applyAppLogo = async (dataUrl: string | null) => {
-    setAppLogoBusy(true);
-    try {
-      let png: string | null = null;
-      if (dataUrl && isSvgDataUrl(dataUrl)) {
-        try {
-          png = await rasteriseSvgToPng(dataUrl);
-        } catch {
-          png = null; // the SVG is still saved; the notice asks for a re-upload
-        }
-      }
-      setBrandLogo(dataUrl, png);
-      const ok = await persistBranding();
-      addToast(
-        ok
-          ? {
-              type: 'success',
-              title: dataUrl
-                ? t('branding.logo_saved', { defaultValue: 'Logo updated' })
-                : t('settings.company.app_logo_removed', { defaultValue: 'App logo removed' }),
-              message: t('branding.saved_workspace', {
-                defaultValue: 'Applied across this workspace.',
-              }),
-            }
-          : {
-              type: 'warning',
-              title: t('settings.company.app_logo_local_only', {
-                defaultValue: 'Changed in this browser only. The server did not accept it.',
-              }),
-            },
-      );
-    } finally {
-      setAppLogoBusy(false);
-    }
-  };
 
   const [sampleBusy, setSampleBusy] = useState(false);
   const openSample = async () => {
@@ -402,37 +358,19 @@ export function CompanyDocumentsSettings() {
         </div>
       )}
 
-      {/* ── Logos ── */}
+      {/* ── Logo on documents ── */}
       <Card padding="md">
         <SectionHeader
           icon={<ImageIcon size={16} />}
-          title={t('settings.company.logos_title', { defaultValue: 'Logos' })}
-          subtitle={t('settings.company.logos_subtitle', {
+          title={t('settings.company.doc_logo_title', { defaultValue: 'Logo on documents' })}
+          subtitle={t('settings.company.doc_logo_section_subtitle', {
             defaultValue:
-              'Two logos, two jobs: one sits in the app sidebar, the other prints on your documents.',
+              'The formal logo printed on your documents. The logo in the app menu is set in General settings.',
           })}
         />
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <LogoSlot
-            testId="logo-slot-app"
-            title={t('settings.company.app_logo_title', {
-              defaultValue: 'Logo in the app (sidebar)',
-            })}
-            hint={t('settings.company.app_logo_hint', {
-              defaultValue: 'Shown at the top left of the sidebar and on the sign-in page.',
-            })}
-            dataUrl={appLogo}
-            needsReupload={isSvgDataUrl(appLogo) && !brandLogoPng}
-            accept={ACCEPTED_IMAGE_TYPES}
-            maxBytes={BRANDING_MAX_LOGO_BYTES}
-            canEdit={canEdit}
-            busy={appLogoBusy}
-            onFile={async (file) => applyAppLogo(await fileToDataUrl(file))}
-            onRemove={() => void applyAppLogo(null)}
-          />
+        <div className="mt-4 max-w-xl">
           <LogoSlot
             testId="logo-slot-document"
-            title={t('settings.company.doc_logo_title', { defaultValue: 'Logo on documents' })}
             hint={t('settings.company.doc_logo_hint', {
               defaultValue: 'Your formal logo for printed documents. If empty, the app logo is used.',
             })}
@@ -720,7 +658,6 @@ function SectionHeader({
 
 interface LogoSlotProps {
   testId: string;
-  title: string;
   hint: string;
   dataUrl: string | null;
   /** An SVG stored without its PNG copy, which PDFs need. */
@@ -739,7 +676,6 @@ interface LogoSlotProps {
 
 function LogoSlot({
   testId,
-  title,
   hint,
   dataUrl,
   needsReupload = false,
@@ -802,8 +738,7 @@ function LogoSlot({
       onDragLeave={() => setDragging(false)}
       onDrop={ready ? onDrop : undefined}
     >
-      <h3 className="text-sm font-semibold text-content-primary">{title}</h3>
-      <p className="mt-0.5 text-xs text-content-secondary">{hint}</p>
+      <p className="text-xs text-content-secondary">{hint}</p>
 
       <input
         ref={fileRef}
@@ -914,9 +849,20 @@ function LogoSlot({
             className="h-5 w-10 rounded border border-border-light bg-white object-contain"
             draggable={false}
           />
-          {t('settings.company.doc_logo_fallback', {
-            defaultValue: 'Documents print the app logo until you add one here.',
-          })}
+          <span>
+            {t('settings.company.doc_logo_fallback', {
+              defaultValue: 'Documents print the app logo until you add one here.',
+            })}{' '}
+            <Link
+              to="/settings?tab=general"
+              className="font-medium text-oe-blue hover:underline"
+              data-testid="doc-logo-app-logo-link"
+            >
+              {t('settings.company.doc_logo_fallback_link', {
+                defaultValue: 'Change the app logo in General settings',
+              })}
+            </Link>
+          </span>
         </div>
       )}
 
@@ -978,16 +924,28 @@ function LetterheadPreview({
   appearance: DocumentAppearance | null;
 }) {
   const { t } = useTranslation();
-  const pageSize = appearance?.page_size ?? 'A4';
-  const ratio = PAGE_RATIO[pageSize] ?? PAGE_RATIO.A4;
-  const pageWidthMm = PAGE_WIDTH_MM[pageSize] ?? 210;
-  const marginMm = appearance?.margin_mm ?? 20;
+  const look = appearance ? withAppearanceDefaults(appearance) : null;
+  const pageSize = look?.page_size ?? 'A4';
+  const sheet = sheetMm(pageSize, look?.page_orientation);
+  const ratio = sheet.w / sheet.h;
+  const pageWidthMm = sheet.w;
+  const marginMm = look?.margin_mm ?? 20;
   const contentMm = Math.max(1, pageWidthMm - 2 * marginMm);
   const pct = (mm: number) => `${(mm / contentMm) * 100}%`;
   const align = appearance?.logo_align ?? 'left';
   const centred = align === 'center';
   const accent = appearance?.accent_color ?? '#1a1a2e';
   const switchedOn = appearance?.show_letterhead !== false;
+  // The footer as the PDF prints it, which is English whatever the interface
+  // language: the page number in its chosen format, the saved footer line or
+  // the company name, and under it the optional registration and print stamp.
+  const stamp = printStampSample(look?.print_stamp ?? 'auto');
+  const footerLeft =
+    look?.footer_text ||
+    (look?.print_stamp && look.print_stamp !== 'auto'
+      ? form.legal_name.trim()
+      : [form.legal_name.trim(), 'Generated 2026-01-01'].filter(Boolean).join(' | '));
+  const registration = look?.footer_show_registration ? form.registration_line.trim() : '';
   const printable = hasLetterhead({
     legal_name: form.legal_name,
     document_logo_data_url: documentLogo,
@@ -1034,6 +992,27 @@ function LetterheadPreview({
       style={{ aspectRatio: String(ratio) }}
       data-testid="letterhead-preview"
     >
+      {look?.watermark_text && (
+        <div
+          className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
+          aria-hidden="true"
+          data-testid="letterhead-preview-watermark"
+        >
+          <span
+            className="whitespace-nowrap font-bold text-[#6b7280]"
+            style={{
+              opacity: look.watermark_opacity / 100,
+              fontSize: `${Math.max(10, Math.min(28, 220 / Math.max(4, look.watermark_text.length)))}px`,
+              transform:
+                look.watermark_layout === 'horizontal'
+                  ? undefined
+                  : `rotate(-${Math.round((Math.atan(1 / (ratio || 1)) * 180) / Math.PI)}deg)`,
+            }}
+          >
+            {look.watermark_text}
+          </span>
+        </div>
+      )}
       <div className="flex h-full flex-col" style={{ padding: `${(marginMm / pageWidthMm) * 100}%` }}>
         {!switchedOn ? (
           notice(
@@ -1111,6 +1090,34 @@ function LetterheadPreview({
             <div key={i} className="h-1 rounded-sm bg-[#e5e7eb]" style={{ width: `${w}%` }} />
           ))}
         </div>
+
+        {look && (
+          <div
+            className="flex flex-col gap-px text-[7px] leading-tight"
+            style={{ color: look.footer_color }}
+            aria-hidden="true"
+            data-testid="letterhead-preview-footer"
+          >
+            <div className="flex items-end justify-between gap-2">
+              <span className="truncate">{footerLeft}</span>
+              {look.show_page_numbers && (
+                <span className="shrink-0" data-testid="letterhead-preview-page-number">
+                  {pageNumberSample(look.page_number_format)}
+                </span>
+              )}
+            </div>
+            {(registration || stamp) && (
+              <div className="flex items-end justify-between gap-2 text-[6px]">
+                <span className="truncate" data-testid="letterhead-preview-registration">
+                  {registration}
+                </span>
+                <span className="shrink-0" data-testid="letterhead-preview-stamp">
+                  {stamp}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
