@@ -2259,8 +2259,8 @@ export const ACADEMY_CATALOG: AcademyCatalog = {
         "/schedule"
       ],
       "result": "bill",
-      "title": "BIM to Cost Estimate: Revit IFC Quantities in Free Software",
-      "description": "Take an IFC model exported from Revit and turn its quantities into a cost estimate in OpenConstructionERP. We use a duplex model to inspect elements, extract quantities, apply unit rates and review what changes when the model is revised.",
+      "title": "BIM to Cost Estimate: Revit® IFC Quantities in Free Software",
+      "description": "Take an IFC model exported from Revit® and turn its quantities into a cost estimate in OpenConstructionERP. We use a duplex model to inspect elements, extract quantities, apply unit rates and review what changes when the model is revised.",
       "duration": 488,
       "cover": "https://i.ytimg.com/vi/-WFhnoP0sM8/maxresdefault.jpg",
       "chapters": [

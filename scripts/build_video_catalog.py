@@ -260,6 +260,11 @@ CHANNEL_PREFIX = re.compile(r"^(?:[^|]*•[^|]*\|\s*|\d{2}/\d{2}\s*·\s*)")
 CHANNEL_SUFFIX = re.compile(r"\s*\|\s*(?:OpenConstructionERP(?: Tutorial)?|Builder's Playbook)\s*$")
 
 
+def mark_trademarks(text: str) -> str:
+    """Put the registered sign on the first mention of a named CAD tool."""
+    return re.sub(r"Revit(?!®)", "Revit®", text, count=1)
+
+
 def clean_title(title: str) -> str:
     """The topic of a channel title, without the shelf prefix and suffix."""
     cleaned = CHANNEL_SUFFIX.sub("", CHANNEL_PREFIX.sub("", title)).strip()
@@ -679,7 +684,14 @@ def build(args: argparse.Namespace) -> None:
             }
             for sid, s in sorted(series_meta.items(), key=lambda kv: kv[1]["order"])
         ],
-        "videos": [{k: v[k] for k in field_order if k in v and v[k] is not None} for v in videos],
+        "videos": [
+            {
+                k: mark_trademarks(v[k]) if k in ("title", "titleEn", "description") else v[k]
+                for k in field_order
+                if k in v and v[k] is not None
+            }
+            for v in videos
+        ],
         "cases": {c: cases[c] for c in used_cases},
     }
     body = json.dumps(catalog, ensure_ascii=False, indent=2)
