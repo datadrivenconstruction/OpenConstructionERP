@@ -1500,14 +1500,33 @@ def _excel_elements_to_bim_result(
     }
 
 
+_BBox = tuple[float, float, float, float, float, float]
+
+
+def _transform_bbox(bb: _BBox, matrix: Any) -> _BBox:
+    """Axis-aligned bbox of *bb* after the 4x4 row-major *matrix* (column vectors)."""
+    import numpy as np  # noqa: PLC0415
+
+    xs = (bb[0], bb[3])
+    ys = (bb[1], bb[4])
+    zs = (bb[2], bb[5])
+    corners = np.array([[x, y, z, 1.0] for x in xs for y in ys for z in zs])
+    world = corners @ np.asarray(matrix, dtype=float).T
+    lo = world[:, :3].min(axis=0)
+    hi = world[:, :3].max(axis=0)
+    return (float(lo[0]), float(lo[1]), float(lo[2]), float(hi[0]), float(hi[1]), float(hi[2]))
+
+
 def _dae_element_bboxes(
     dae_path: Path,
-) -> tuple[dict[str, tuple[float, float, float, float, float, float]], dict[str, str]]:
-    """Parse a DDC COLLADA file and return per-element bounding boxes.
+) -> tuple[list[tuple[str, _BBox]], dict[str, str]]:
+    """Parse a DDC COLLADA file and return world bounding boxes per element shape.
 
     Returns:
-        element_bboxes: ``{element_id: (min_x, min_y, min_z, max_x, max_y, max_z)}``
-        element_to_shape: ``{element_id: shape_id}`` (for diagnostics).
+        element_bboxes: ``[(element_id, (min_x, min_y, min_z, max_x, max_y, max_z)), ...]``,
+            one entry per ``<instance_geometry>`` with the node's ``<matrix>`` applied, so
+            identical family instances (same local shape) stay distinguishable.
+        element_to_shape: ``{element_id: first shape_id}`` (for diagnostics).
 
     The DDC ``RvtExporter`` writes one top-level
     ``<visual_scene>/<node id="{RvtElementId}">`` per element, each with a
@@ -1518,7 +1537,7 @@ def _dae_element_bboxes(
     (it's derived from coordinate extrema), which makes it a stable
     fingerprint for matching DAE shapes back to GLB meshes.
     """
-    element_bboxes: dict[str, tuple[float, float, float, float, float, float]] = {}
+    element_bboxes: list[tuple[str, _BBox]] = []
     element_to_shape: dict[str, str] = {}
     try:
         tree = safe_ET.parse(str(dae_path))
@@ -1555,17 +1574,26 @@ def _dae_element_bboxes(
         # Only numeric ids - RVT ElementId. Lights/cameras/named nodes skipped.
         if not nid.isdigit():
             continue
-        ig = node.find("c:instance_geometry", ns)
-        if ig is None:
-            continue
-        shape_id = (ig.get("url", "") or "").lstrip("#")
-        if not shape_id:
-            continue
-        bb = _shape_bbox(shape_id)
-        if bb is None:
-            continue
-        element_bboxes[nid] = bb
-        element_to_shape[nid] = shape_id
+        matrix = None
+        mx = node.find("c:matrix", ns)
+        if mx is not None and mx.text:
+            try:
+                vals = [float(x) for x in mx.text.split()]
+            except ValueError:
+                vals = []
+            if len(vals) == 16:
+                matrix = [vals[0:4], vals[4:8], vals[8:12], vals[12:16]]
+        for ig in node.findall("c:instance_geometry", ns):
+            shape_id = (ig.get("url", "") or "").lstrip("#")
+            if not shape_id:
+                continue
+            bb = _shape_bbox(shape_id)
+            if bb is None:
+                continue
+            if matrix is not None:
+                bb = _transform_bbox(bb, matrix)
+            element_bboxes.append((nid, bb))
+            element_to_shape.setdefault(nid, shape_id)
 
     return element_bboxes, element_to_shape
 
@@ -1636,6 +1664,48 @@ def _validate_geometry_file(geom_path: Path) -> tuple[bool, str]:
         return True, "ok"
 
     return True, "unknown extension; skipped checks"
+
+
+def _gltf_node_matrix(node: dict[str, Any]) -> Any:
+    """Local 4x4 transform of one glTF node (``matrix`` or TRS), row-major."""
+    import numpy as np  # noqa: PLC0415
+
+    if "matrix" in node and len(node["matrix"]) == 16:
+        return np.asarray(node["matrix"], dtype=float).reshape(4, 4).T  # glTF is column-major
+    t = np.eye(4)
+    t[:3, 3] = node.get("translation", [0.0, 0.0, 0.0])
+    x, y, z, w = node.get("rotation", [0.0, 0.0, 0.0, 1.0])
+    r = np.eye(4)
+    r[:3, :3] = [
+        [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+        [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+        [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+    ]
+    s = np.diag([*node.get("scale", [1.0, 1.0, 1.0]), 1.0])
+    return t @ r @ s
+
+
+def _gltf_world_matrices(gltf: dict[str, Any]) -> dict[int, Any]:
+    """World transform of every glTF node reachable from the scenes (parents applied)."""
+    import numpy as np  # noqa: PLC0415
+
+    nodes = gltf.get("nodes", [])
+    out: dict[int, Any] = {}
+    roots: list[int] = []
+    for scene in gltf.get("scenes", []):
+        roots.extend(scene.get("nodes", []))
+    if not roots:
+        children = {c for n in nodes for c in n.get("children", [])}
+        roots = [i for i in range(len(nodes)) if i not in children]
+    stack = [(i, np.eye(4)) for i in roots]
+    while stack:
+        idx, parent = stack.pop()
+        if idx in out or idx >= len(nodes):
+            continue
+        world = parent @ _gltf_node_matrix(nodes[idx])
+        out[idx] = world
+        stack.extend((c, world) for c in nodes[idx].get("children", []))
+    return out
 
 
 def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
@@ -1860,9 +1930,9 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                     cz = (bb[2] + bb[5]) * 0.5
                     return (int(cx * 2), int(cy * 2), int(cz * 2))
 
-                buckets: dict[tuple[int, int, int], list[str]] = {}
-                for eid, bb in element_bboxes.items():
-                    buckets.setdefault(_key(bb), []).append(eid)
+                buckets: dict[tuple[int, int, int], list[int]] = {}
+                for idx, (_eid, bb) in enumerate(element_bboxes):
+                    buckets.setdefault(_key(bb), []).append(idx)
 
                 def _score(
                     a: tuple[float, float, float, float, float, float],
@@ -1885,11 +1955,11 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                                 neighbors = buckets.get((k[0] + dx, k[1] + dy, k[2] + dz))
                                 if not neighbors:
                                     continue
-                                for eid in neighbors:
-                                    s = _score(bb, element_bboxes[eid])
+                                for idx in neighbors:
+                                    s = _score(bb, element_bboxes[idx][1])
                                     if s < best_score:
                                         best_score = s
-                                        best_eid = eid
+                                        best_eid = element_bboxes[idx][0]
                     return best_eid, best_score
 
                 # Tolerance: trimesh preserves coordinates exactly, so a
@@ -1900,7 +1970,8 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                 total_mesh_nodes = 0
                 mesh_bbox_read = 0
                 assigned_mesh: set[int] = set()
-                for node in glb_nodes:
+                world_matrices = _gltf_world_matrices(gltf)
+                for node_idx, node in enumerate(glb_nodes):
                     if "mesh" not in node:
                         continue
                     total_mesh_nodes += 1
@@ -1908,6 +1979,9 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                     mb = _mesh_bbox(mi)
                     if mb is None:
                         continue
+                    world = world_matrices.get(node_idx)
+                    if world is not None:
+                        mb = _transform_bbox(mb, world)
                     mesh_bbox_read += 1
                     eid, s = _find_element(mb)
                     if eid is not None and s <= match_tol:

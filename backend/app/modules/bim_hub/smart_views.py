@@ -282,15 +282,23 @@ def _lookup_key(mapping: dict[str, Any], key: str) -> Any:
     """Value under *key*: exact key first, then trimmed and case-insensitive.
 
     The exact key wins so a mapping holding both ``Mark`` and ``mark`` still
-    answers each by its own name.
+    answers each by its own name. A Revit type parameter exists on instances only
+    as ``[Type] <key>``, so that is the last resort.
     """
     if key in mapping:
         return mapping[key]
     wanted = key.strip().lower()
+    type_wanted = f"[type] {wanted}"
+    type_value = None
     for k, v in mapping.items():
-        if isinstance(k, str) and k.strip().lower() == wanted:
+        if not isinstance(k, str):
+            continue
+        norm = k.strip().lower()
+        if norm == wanted:
             return v
-    return None
+        if type_value is None and norm == type_wanted:
+            type_value = v
+    return type_value
 
 
 def _resolve_field(element: Any, field: str) -> Any:

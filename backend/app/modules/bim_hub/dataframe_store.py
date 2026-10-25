@@ -904,13 +904,23 @@ def read_element_cells(
         if id_column is None:
             return {}, {}
         columns: dict[str, str] = {}
+        # Revit type parameters reach instances only as "[Type] <key>"; the plain
+        # column is filled on the type's own row, so it backs up empty plain cells.
+        type_columns: dict[str, str] = {}
         for key in keys:
             column = _resolve_column(key, names)
+            type_column = _resolve_column(f"[Type] {key.strip()}", names)
+            if type_column == id_column:
+                type_column = None
             if column is not None and column != id_column:
                 columns[key] = column
+                if type_column is not None and type_column != column:
+                    type_columns[column] = type_column
+            elif type_column is not None:
+                columns[key] = type_column
         if not columns:
             return {}, {}
-        read = list(dict.fromkeys(columns.values()))
+        read = list(dict.fromkeys([*columns.values(), *type_columns.values()]))
         wanted = pa.array(sorted({str(i).strip() for i in ids}), type=pa.string())
         rows: list[dict[str, Any]] = []
         # Filter each batch before converting, so only the wanted rows ever
@@ -926,5 +936,9 @@ def read_element_cells(
     cells: dict[str, dict[str, Any]] = {}
     for row in rows:
         row_id = str(row.pop(id_column)).strip()
+        for column, type_column in type_columns.items():
+            plain = row.get(column)
+            if plain is None or not str(plain).strip():
+                row[column] = row.get(type_column)
         cells.setdefault(row_id, row)
     return columns, cells

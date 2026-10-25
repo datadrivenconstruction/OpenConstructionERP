@@ -471,6 +471,23 @@ class RequirementBrief(BaseModel):
     verification_method: str = ""
 
 
+_TYPE_ONLY_PARAMETERS = frozenset({"export type to ifc", "export type to ifc as"})
+
+
+def is_revit_type_definition(
+    properties: dict[str, Any] | None,
+    storey: str | None,
+    bounding_box: dict[str, Any] | None,
+) -> bool:
+    """True for a Revit family-type row: a type-only parameter, no level, no bbox."""
+    if storey or bounding_box or not properties:
+        return False
+    for key, value in properties.items():
+        if isinstance(key, str) and key.strip().lower() in _TYPE_ONLY_PARAMETERS and value not in (None, ""):
+            return True
+    return False
+
+
 class BIMElementResponse(BaseModel):
     """BIM element returned from the API."""
 
@@ -509,8 +526,18 @@ class BIMElementResponse(BaseModel):
     # element info panel show "65% as of <date>". ``None`` when there is no
     # linked progress or the winning entry has no recorded date.
     current_pct_date: str | None = None
+    # A Revit family type exported as a row of its own (DDC gives it the
+    # instances' category). Computed here, before the skeleton listing drops
+    # ``properties``, so element counts and filters can leave it out.
+    is_type_definition: bool = False
     created_at: datetime
     updated_at: datetime
+
+    @model_validator(mode="after")
+    def _flag_type_definition(self) -> BIMElementResponse:
+        if not self.is_type_definition:
+            self.is_type_definition = is_revit_type_definition(self.properties, self.storey, self.bounding_box)
+        return self
 
 
 class BIMElementListResponse(BaseModel):

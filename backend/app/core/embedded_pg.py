@@ -1724,18 +1724,18 @@ def _point_library_at(bin_dir: Path) -> None:
 def _remove_unless_running(entry: Path) -> None:
     """Delete an old copy, unless a postmaster still runs from it.
 
-    The copy is renamed first and only deleted once the rename worked: Windows
-    refuses to rename a directory while a program inside it is running, so a copy
-    still serving an older instance stays intact rather than being half deleted
-    underneath it.
+    Windows lets a directory be renamed while a program inside it runs, but
+    refuses to delete a running executable. So ``postgres.exe`` is deleted first:
+    if that fails the copy still serves an older instance (whose backends
+    re-execute it by path) and is left untouched.
     """
-    doomed = entry.with_name(f"{entry.name}.old") if not entry.name.endswith(".old") else entry
-    if doomed != entry:
+    exe = entry / "bin" / ("postgres.exe" if os.name == "nt" else "postgres")
+    if os.name == "nt" and exe.exists():
         try:
-            entry.rename(doomed)
+            exe.unlink()
         except OSError:
             return
-    shutil.rmtree(doomed, ignore_errors=True)
+    shutil.rmtree(entry, ignore_errors=True)
 
 
 def _copy_to_private_home(install: Path, home: Path) -> Path:

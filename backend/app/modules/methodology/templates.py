@@ -118,7 +118,7 @@ class TemplateError(ValueError):
 _FLAT_BASE_MAPPING: dict[str, list[str]] = {
     "labor": ["labor"],
     "materials": ["material"],
-    "equipment": ["equipment"],
+    "equipment": ["equipment", "machinery"],
     "subcontract": ["subcontractor"],
 }
 _FLAT_COMPOSITES: dict[str, list[str]] = {
