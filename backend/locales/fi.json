@@ -618,5 +618,539 @@
       "draft": "Luonnos",
       "frozen": "Lukittu"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Hanke",
+      "project_no": "Hankenro",
+      "generated_on": "Laadittu",
+      "records": "Tietueet",
+      "currency": "Valuutta",
+      "status": "Tila",
+      "name": "Nimi",
+      "signature": "Allekirjoitus",
+      "date": "Päivämäärä",
+      "signatures": "Allekirjoitukset",
+      "yes": "Kyllä",
+      "no": "Ei",
+      "days_one": "{n} päivä",
+      "days_other": "{n} päivää",
+      "empty_register": "Ei tietueita.",
+      "total": "Yhteensä",
+      "signer_title": "Titteli",
+      "sig_prepared_by": "Laadinta",
+      "sig_checked_by": "Tarkastus",
+      "sig_approved_by": "Hyväksyntä",
+      "footer_generated": "Laadittu {timestamp}",
+      "footer_page": "Sivu {page}/{total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Hyväksyntärekisteri",
+        "doc_title": "Hyväksyntäpyyntö",
+        "doc_title_product_data": "Materiaalin hyväksyntälomake",
+        "col_number": "Hyväksyntänro",
+        "col_title": "Nimike",
+        "col_type": "Tyyppi",
+        "col_spec": "Selostuksen kohta",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Jätetty",
+        "col_date_required": "Toivottu pvm",
+        "col_date_returned": "Palautettu",
+        "col_reviewer": "Tarkastaja",
+        "col_approver": "Hyväksyjä",
+        "col_ball_in_court": "Vuorossa",
+        "submitted_by_org": "Toimittava yritys",
+        "review_notes": "Tarkastajan huomautukset",
+        "no_review_notes": "Tarkastajan huomautuksia ei ole kirjattu.",
+        "sig_submitted": "Toimitus",
+        "sig_reviewed": "Tarkastus",
+        "sig_approved": "Hyväksyntä",
+        "register_filename": "hyvaksyntarekisteri",
+        "register_title_shop_drawing": "Työpiirustusrekisteri",
+        "register_title_product_data": "Materiaalihyväksyntärekisteri",
+        "register_title_method_statement": "Työselitysrekisteri",
+        "register_filename_shop_drawing": "tyopiirustusrekisteri",
+        "register_filename_product_data": "materiaalihyvaksyntarekisteri",
+        "register_filename_method_statement": "tyoselitysrekisteri",
+        "col_discipline": "Suunnittelualue",
+        "col_manufacturer": "Valmistaja / merkki",
+        "col_model": "Malli / tyyppi",
+        "col_origin": "Alkuperämaa",
+        "col_supplier": "Toimittaja",
+        "col_product": "Valmistaja / malli / alkuperä",
+        "col_review_code": "Tarkastuskoodi",
+        "col_outcome": "Tarkastuksen tulos",
+        "col_review_period": "Tarkastusaika (pv)",
+        "col_review_due": "Tarkastus viimeistään",
+        "col_days_in_review": "Päiviä tarkastuksessa",
+        "col_days_in_review_print": "Päiviä tarkastuksessa",
+        "col_review_overdue": "Päiviä myöhässä",
+        "col_required_on_site": "Tarvitaan työmaalla",
+        "col_long_lead": "Pitkä toimitusaika",
+        "col_lead_time": "Toimitusaika (vk)",
+        "col_needed_by": "Hyväksyntä viimeistään",
+        "col_approval_late": "Päiviä määräajan jälkeen",
+        "col_drawings": "Liitetyt piirustukset",
+        "col_submitted_returned": "Jätetty / palautettu",
+        "col_on_site_needed_by": "Työmaalla / hyväksyntä viim.",
+        "resubmit_for_record": "Korjattu kappale toimitettava uudelleen arkistoitavaksi",
+        "review_history": "Tarkastushistoria",
+        "hist_submitted": "Jätetty",
+        "hist_returned": "Palautettu",
+        "drawings_missing_one": "{n} liitetty piirustus ei ole enää saatavilla",
+        "drawings_missing_other": "{n} liitettyä piirustusta ei ole enää saatavilla",
+        "weeks_one": "{n} viikko",
+        "weeks_other": "{n} viikkoa"
+      },
+      "labels": {
+        "status": {
+          "draft": "Luonnos",
+          "submitted": "Jätetty",
+          "under_review": "Tarkastuksessa",
+          "approved": "Hyväksytty",
+          "approved_as_noted": "Hyväksytty huomautuksin",
+          "revise_and_resubmit": "Korjattava ja toimitettava uudelleen",
+          "rejected": "Hylätty",
+          "closed": "Suljettu"
+        },
+        "type": {
+          "shop_drawing": "Työpiirustus",
+          "product_data": "Tuotetiedot",
+          "sample": "Näyte",
+          "mock_up": "Mallikappale",
+          "test_report": "Koestusraportti",
+          "calculation": "Laskelma",
+          "method_statement": "Työselitys",
+          "certificate": "Sertifikaatti",
+          "warranty": "Takuu"
+        },
+        "discipline": {
+          "mechanical": "Konepajatekniikka",
+          "hvac": "LVI-ilmanvaihto",
+          "plumbing": "Vesi ja viemäri",
+          "fire_protection": "Palontorjunta",
+          "electrical": "Sähkö",
+          "lighting": "Valaistus",
+          "elv": "Heikkovirta",
+          "bms": "Rakennusautomaatio",
+          "architectural": "Arkkitehti",
+          "structural": "Rakenne",
+          "civil": "Maa- ja pohjarakenteet"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Muutostyömääräysrekisteri",
+        "doc_title": "Muutostyömääräys",
+        "col_code": "Koodi",
+        "col_title": "Nimike",
+        "col_reason": "Syy",
+        "col_instrument": "Laji",
+        "col_submitted": "Jätetty",
+        "col_contractor_amount": "Urakoitsijan summa",
+        "col_engineer_amount": "Suunnittelijan summa",
+        "col_approved_amount": "Hyväksytty summa",
+        "col_cost_impact": "Kustannusvaikutus",
+        "col_time_impact": "Aikavaikutus (pv)",
+        "col_approved_time": "Hyväksytty aika (pv)",
+        "time_impact": "Aikavaikutus",
+        "approved_time": "Hyväksytty aika",
+        "col_approved": "Hyväksytty",
+        "submitted_by": "Jättäminen",
+        "approved_by": "Hyväksyntä",
+        "description": "Kuvaus",
+        "no_description": "Kuvausta ei ole kirjattu.",
+        "items": "Muutoskohdat",
+        "item_description": "Kuvaus",
+        "item_change": "Muutos",
+        "item_unit": "Yksikkö",
+        "item_original_quantity": "Alk. määrä",
+        "item_new_quantity": "Uusi määrä",
+        "item_original_rate": "Alk. yksikköhinta",
+        "item_new_rate": "Uusi yksikköhinta",
+        "item_cost_delta": "Kustannusero",
+        "register_filename": "muutostyomaaraysrekisteri"
+      },
+      "labels": {
+        "status": {
+          "draft": "Luonnos",
+          "submitted": "Jätetty",
+          "approved": "Hyväksytty",
+          "rejected": "Hylätty",
+          "executed": "Toteutettu"
+        },
+        "reason": {
+          "client_request": "Tilaajan pyyntö",
+          "design_change": "Suunnittelumuutos",
+          "unforeseen": "Ennakoimattomat olosuhteet",
+          "regulatory": "Viranomaisvaatimus",
+          "error": "Virhe tai puute",
+          "non_conformance": "Poikkeama",
+          "value_engineering": "Arvoanalyysi"
+        },
+        "instrument": {
+          "works_change": "Määrätty muutos",
+          "site_confirmation": "Työmaavahvistus",
+          "claim": "Vaatimus"
+        },
+        "change": {
+          "added": "Lisätty",
+          "removed": "Poistettu",
+          "modified": "Muutettu"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Todistuspaketti",
+        "subject": "Aihe",
+        "basis": "Peruste",
+        "period_from": "Varhaisin tietue",
+        "period_to": "Uusin tietue",
+        "digest": "Eheyskoodi (SHA-256, 16 ensimmäistä merkkiä)",
+        "col_row": "Nro",
+        "col_record_id": "Tietueen tunnus",
+        "col_section": "Osio",
+        "col_date": "Pvm",
+        "col_kind": "Tietueen laji",
+        "col_title": "Nimike",
+        "col_summary": "Yhteenveto",
+        "col_reference": "Viite",
+        "register_filename": "todistuspaketti"
+      },
+      "labels": {
+        "section": {
+          "notices": "Ilmoitukset",
+          "correspondence": "Kirjeenvaihto",
+          "rfis": "Tietopyynnöt (RFI)",
+          "variations": "Muutokset",
+          "approvals": "Hyväksynnät",
+          "delay": "Viivästys",
+          "timeline": "Aikajana",
+          "other": "Muu"
+        },
+        "kind": {
+          "notice": "Ilmoitus",
+          "variation_notice": "Muutosilmoitus",
+          "variation_request": "Muutospyyntö",
+          "variation_order": "Muutostyömääräys",
+          "change_order": "Muutostyömääräys",
+          "moc_entry": "Muutoskirjaus",
+          "correspondence": "Kirjeenvaihto"
+        },
+        "basis": {
+          "dispute": "Riita",
+          "valuation": "Arvonmääritys",
+          "delay": "Viivästys / määräajan pidennys",
+          "general": "Yleinen tietue"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Kirjeenvaihtoloki",
+        "doc_title": "Kirjeenvaihto",
+        "col_reference": "Viitenro",
+        "col_direction": "Suunta",
+        "col_type": "Tyyppi",
+        "col_subject": "Aihe",
+        "col_from": "Lähettäjä",
+        "col_to": "Vastaanottaja",
+        "col_date_sent": "Lähetetty",
+        "col_date_received": "Vastaanotettu",
+        "col_response_due": "Vastattava viim.",
+        "col_clause": "Sopimuskohta",
+        "notes": "Huomautukset",
+        "no_notes": "Huomautuksia ei ole kirjattu.",
+        "attachments": "Liitetiedostot",
+        "linked_documents": "Liittyvät asiakirjat",
+        "sig_prepared": "Laadinta",
+        "sig_received": "Vastaanotto",
+        "register_filename": "kirjeenvaihtoloki"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Saapuva",
+          "outgoing": "Lähtevä"
+        },
+        "type": {
+          "letter": "Kirje",
+          "email": "Sähköposti",
+          "notice": "Ilmoitus",
+          "memo": "Muistio",
+          "report": "Raportti"
+        },
+        "status": {
+          "open": "Avoin",
+          "awaiting_response": "Odottaa vastausta",
+          "responded": "Vastattu",
+          "closed": "Suljettu"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Lähetterekisteri",
+        "doc_title": "Lähete",
+        "col_number": "Lähetenro",
+        "col_subject": "Aihe",
+        "col_purpose": "Tarkoitus",
+        "col_issued": "Annettu",
+        "col_response_due": "Vastattava viim.",
+        "col_recipients": "Vastaanottajat",
+        "col_item_count": "Kohteita",
+        "sender": "Lähettäjä",
+        "cover_note": "Saate",
+        "no_cover_note": "Ei saatetta.",
+        "recipients": "Vastaanottajat",
+        "recipient": "Vastaanottaja",
+        "action_required": "Toimenpide vaaditaan",
+        "acknowledged": "Vastaanotto kuitattu",
+        "responded": "Vastauspäivä",
+        "items": "Lähetetyt asiakirjat",
+        "item_no": "Nro",
+        "item_description": "Kuvaus",
+        "item_notes": "Huomautukset",
+        "sig_issued": "Laadinta",
+        "sig_received": "Vastaanotto",
+        "register_filename": "lahetterekisteri"
+      },
+      "labels": {
+        "status": {
+          "draft": "Luonnos",
+          "issued": "Annettu",
+          "responded": "Vastattu"
+        },
+        "purpose": {
+          "for_approval": "Hyväksyttäväksi",
+          "for_review": "Tarkastettavaksi",
+          "for_information": "Tiedoksi",
+          "for_construction": "Rakentamista varten",
+          "for_tender": "Tarjousta varten",
+          "for_record": "Arkistoitavaksi"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Muutosrekisteri",
+        "claim_register_title": "Vaaderekisteri",
+        "notice_register_title": "Ilmoitusrekisteri",
+        "doc_title": "Muutospyyntö",
+        "doc_title_credit": "Muutospyyntö (vähennys)",
+        "time_impact": "Aikavaikutus",
+        "col_code": "Koodi",
+        "col_title": "Nimike",
+        "col_classification": "Tyyppi",
+        "col_urgency": "Kiireellisyys",
+        "col_requested": "Pyydetty",
+        "col_claimed_amount": "Vaadittu summa",
+        "col_agreed_amount": "Sovittu summa",
+        "col_time_impact": "Aikavaikutus (pv)",
+        "col_response_due": "Vastattava viim.",
+        "col_clause": "Sopimuskohta",
+        "col_row": "Nro",
+        "col_claim_type": "Vaatimuksen laji",
+        "col_raised": "Esitetty",
+        "col_period_start": "Jakso alkaen",
+        "col_period_end": "Jakso päättyen",
+        "col_description": "Kuvaus",
+        "col_decided_amount": "Päätetty summa",
+        "col_days_requested": "Vaaditut päivät",
+        "col_days_granted": "Myönnetyt päivät",
+        "col_recipient_type": "Osoitettu",
+        "col_recipient": "Vastaanottaja",
+        "col_target_response": "Odotettu vastaus",
+        "col_response_received": "Vastaus saapunut",
+        "requested_by": "Pyyntö",
+        "decided_by": "Päätös",
+        "date_submitted": "Jätetty",
+        "date_decided": "Päätetty",
+        "description": "Kuvaus",
+        "no_description": "Kuvausta ei ole kirjattu.",
+        "decision_notes": "Päätöksen huomautukset",
+        "no_decision_notes": "Päätöstä ei ole vielä kirjattu.",
+        "variation_register_filename": "muutosrekisteri",
+        "claim_register_filename": "vaaderekisteri",
+        "notice_register_filename": "ilmoitusrekisteri"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Luonnos",
+          "submitted": "Jätetty",
+          "under_review": "Tarkastuksessa",
+          "approved": "Hyväksytty",
+          "rejected": "Hylätty",
+          "converted_to_vo": "Muutettu määräykseksi"
+        },
+        "claim_status": {
+          "draft": "Luonnos",
+          "submitted": "Jätetty",
+          "under_review": "Tarkastuksessa",
+          "agreed": "Sovittu",
+          "granted": "Myönnetty",
+          "rejected": "Hylätty"
+        },
+        "notice_status": {
+          "issued": "Annettu",
+          "acknowledged": "Kuitattu",
+          "responded": "Vastattu",
+          "closed": "Suljettu"
+        },
+        "classification": {
+          "scope_change": "Laajuuden muutos",
+          "unforeseen": "Ennakoimaton olosuhde",
+          "owner_change": "Tilaajan muutos",
+          "design_dev": "Suunnittelun kehitys",
+          "regulatory": "Viranomaisvaatimus",
+          "other": "Muu"
+        },
+        "urgency": {
+          "low": "Matala",
+          "med": "Normaali",
+          "high": "Korkea"
+        },
+        "claim_type": {
+          "disruption": "Häiriö",
+          "eot": "Määräajan pidennys"
+        },
+        "recipient_type": {
+          "owner": "Tilaaja",
+          "contractor": "Urakoitsija",
+          "architect": "Arkkitehti",
+          "engineer": "Insinööri",
+          "consultant": "Konsultti"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Työmaapäiväkirja",
+        "overview": "Yleiskatsaus",
+        "site_supervisor": "Työmaapäällikkö",
+        "not_recorded": "Ei kirjattu",
+        "labour_on_site": "Työvoima työmaalla",
+        "equipment_on_site": "Kalusto työmaalla",
+        "completeness": "Täydellisyys",
+        "weather": "Sää",
+        "weather_time": "Aika",
+        "weather_source": "Lähde",
+        "weather_temp": "Lämpöt. (°C)",
+        "weather_wind": "Tuuli (km/h)",
+        "weather_precip": "Sade (mm)",
+        "weather_conditions": "Olosuhteet",
+        "weather_empty": "Tälle päivälle ei ole kirjattu säätä.",
+        "site_record": "Työmaakirjaus",
+        "entries_empty": "Tähän päiväkirjaan ei ole kirjattu merkintöjä.",
+        "notes": "Huomautukset",
+        "notes_empty": "Ei lisähuomautuksia.",
+        "footer_supervisor": "Työmaapäällikkö: {name}",
+        "footer_supervisor_missing": "Työmaapäällikkö: ei kirjattu",
+        "footer_generated": "Laadittu: {timestamp}",
+        "footer_page": "Sivu {page}/{total}",
+        "workforce": "Työvoima yrityksittäin",
+        "workforce_company": "Yritys",
+        "workforce_count": "Henkilöä",
+        "workforce_unassigned": "Ei yritykseen kohdennettu",
+        "workforce_total": "Yhteensä",
+        "signatures": "Allekirjoitukset",
+        "sig_prepared": "Laadinta (työmaapäällikkö)",
+        "sig_approved": "Hyväksyntä (tilaajan edustaja)",
+        "sig_name": "Nimi",
+        "sig_title": "Titteli",
+        "sig_date": "Päivämäärä",
+        "sig_signature": "Allekirjoitus",
+        "signed_note": "Allekirjoitettu järjestelmässä: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "tyomaapaivakirja",
+        "summary_wind": "tuuli {value} km/h",
+        "summary_precipitation": "sade {value} mm",
+        "summary_humidity": "ilmankosteus {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Vierailijat",
+          "event": "Tapahtumat",
+          "delivery": "Toimitetut materiaalit",
+          "completion": "Tehty työ",
+          "incident_summary": "Turvallisuus ja poikkeamat",
+          "inspection_summary": "Tarkastukset",
+          "photo_note": "Valokuvamuistiinpanot",
+          "general": "Yleiset muistiinpanot"
+        },
+        "status": {
+          "open": "Avoin",
+          "closed": "Suljettu",
+          "signed": "Allekirjoitettu",
+          "archived": "Arkistoitu"
+        },
+        "condition": {
+          "clear": "selkeää",
+          "mainly_clear": "enimmäkseen selkeää",
+          "partly_cloudy": "puolipilvistä",
+          "cloudy": "pilvistä",
+          "overcast": "täysin pilvistä",
+          "fog": "sumua",
+          "fog_rime": "huurretta muodostava sumu",
+          "drizzle_light": "heikko tihkusade",
+          "drizzle_moderate": "kohtalainen tihkusade",
+          "drizzle_dense": "sankka tihkusade",
+          "rain": "sadetta",
+          "rain_light": "heikko sade",
+          "rain_moderate": "kohtalainen sade",
+          "rain_heavy": "kova sade",
+          "freezing_rain_light": "heikko jäätävä sade",
+          "freezing_rain_heavy": "kova jäätävä sade",
+          "snow": "lumisadetta",
+          "snow_light": "heikko lumisade",
+          "snow_moderate": "kohtalainen lumisade",
+          "snow_heavy": "kova lumisade",
+          "rain_showers_light": "heikkoja sadekuuroja",
+          "rain_showers_moderate": "kohtalaisia sadekuuroja",
+          "rain_showers_violent": "voimakkaita sadekuuroja",
+          "snow_showers_light": "heikkoja lumikuuroja",
+          "snow_showers_heavy": "voimakkaita lumikuuroja",
+          "thunderstorm": "ukkosta",
+          "thunderstorm_hail_light": "ukkosta ja heikkoa rakeilua",
+          "thunderstorm_hail_heavy": "ukkosta ja kovaa rakeilua"
+        },
+        "source": {
+          "manual": "Manuaalinen kirjaus",
+          "open_meteo": "Säähavaintopalvelu",
+          "sensor": "Työmaan anturi"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Tietopyyntöloki",
+        "col_number": "RFI-nro",
+        "col_subject": "Aihe",
+        "col_raised_by": "Esittäjä",
+        "col_assigned_to": "Vastuuhenkilö",
+        "col_ball_in_court": "Vuorossa",
+        "col_date_required": "Toivottu pvm",
+        "col_response_due": "Vastattava viim.",
+        "col_days_open": "Päiviä auki",
+        "col_cost_impact": "Kustannusvaikutus",
+        "col_schedule_impact": "Aikatauluvaikutus",
+        "col_response": "Vastaus",
+        "yes_with": "Kyllä ({detail})",
+        "register_filename": "tietopyyntoloki"
+      },
+      "labels": {
+        "status": {
+          "draft": "Luonnos",
+          "open": "Avoin",
+          "answered": "Vastattu",
+          "closed": "Suljettu",
+          "void": "Mitätöity"
+        }
+      }
+    }
   }
 }

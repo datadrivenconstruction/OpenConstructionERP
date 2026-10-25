@@ -618,5 +618,539 @@
       "draft": "Utkast",
       "frozen": "Fryst"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Projektnr",
+      "generated_on": "Framtagen",
+      "records": "Poster",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Namn",
+      "signature": "Underskrift",
+      "date": "Datum",
+      "signatures": "Underskrifter",
+      "yes": "Ja",
+      "no": "Nej",
+      "days_one": "{n} dag",
+      "days_other": "{n} dagar",
+      "empty_register": "Inga poster.",
+      "total": "Summa",
+      "signer_title": "Titel",
+      "sig_prepared_by": "Upprättande",
+      "sig_checked_by": "Kontroll",
+      "sig_approved_by": "Godkännande",
+      "footer_generated": "Framtagen {timestamp}",
+      "footer_page": "Sida {page} av {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Inlämningsregister",
+        "doc_title": "Inlämning för godkännande",
+        "doc_title_product_data": "Materialgodkännande",
+        "col_number": "Inlämningsnr",
+        "col_title": "Benämning",
+        "col_type": "Typ",
+        "col_spec": "Beskrivningsavsnitt",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Inlämnad",
+        "col_date_required": "Önskat datum",
+        "col_date_returned": "Återlämnad",
+        "col_reviewer": "Granskare",
+        "col_approver": "Godkännare",
+        "col_ball_in_court": "Bollen hos",
+        "submitted_by_org": "Inlämnande företag",
+        "review_notes": "Granskningskommentarer",
+        "no_review_notes": "Inga granskningskommentarer registrerade.",
+        "sig_submitted": "Inlämning",
+        "sig_reviewed": "Granskning",
+        "sig_approved": "Godkännande",
+        "register_filename": "inlamningsregister",
+        "register_title_shop_drawing": "Register över verkstadsritningar",
+        "register_title_product_data": "Register över materialgodkännanden",
+        "register_title_method_statement": "Register över metodbeskrivningar",
+        "register_filename_shop_drawing": "register-over-verkstadsritningar",
+        "register_filename_product_data": "register-over-materialgodkannanden",
+        "register_filename_method_statement": "register-over-metodbeskrivningar",
+        "col_discipline": "Disciplin",
+        "col_manufacturer": "Fabrikat / märke",
+        "col_model": "Modell / typ",
+        "col_origin": "Ursprungsland",
+        "col_supplier": "Leverantör",
+        "col_product": "Fabrikat / modell / ursprung",
+        "col_review_code": "Granskningskod",
+        "col_outcome": "Granskningsresultat",
+        "col_review_period": "Granskningstid (dagar)",
+        "col_review_due": "Granskning senast",
+        "col_days_in_review": "Dagar i granskning",
+        "col_days_in_review_print": "Dagar i granskning",
+        "col_review_overdue": "Dagar över tiden",
+        "col_required_on_site": "Behövs på plats",
+        "col_long_lead": "Lång leveranstid",
+        "col_lead_time": "Leveranstid (veckor)",
+        "col_needed_by": "Godkännande senast",
+        "col_approval_late": "Dagar efter sista datum",
+        "col_drawings": "Länkade ritningar",
+        "col_submitted_returned": "Inlämnad / återlämnad",
+        "col_on_site_needed_by": "På plats / godkännande senast",
+        "resubmit_for_record": "Rättat exemplar ska lämnas in på nytt för arkivering",
+        "review_history": "Granskningshistorik",
+        "hist_submitted": "Inlämnad",
+        "hist_returned": "Återlämnad",
+        "drawings_missing_one": "{n} länkad ritning är inte längre tillgänglig",
+        "drawings_missing_other": "{n} länkade ritningar är inte längre tillgängliga",
+        "weeks_one": "{n} vecka",
+        "weeks_other": "{n} veckor"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "under_review": "Under granskning",
+          "approved": "Godkänd",
+          "approved_as_noted": "Godkänd med anmärkning",
+          "revise_and_resubmit": "Revidera och lämna in på nytt",
+          "rejected": "Underkänd",
+          "closed": "Avslutad"
+        },
+        "type": {
+          "shop_drawing": "Arbetsritning",
+          "product_data": "Produktdata",
+          "sample": "Prov",
+          "mock_up": "Mock-up",
+          "test_report": "Provningsrapport",
+          "calculation": "Beräkning",
+          "method_statement": "Metodbeskrivning",
+          "certificate": "Certifikat",
+          "warranty": "Garanti"
+        },
+        "discipline": {
+          "mechanical": "Mekanik",
+          "hvac": "VVS-teknik",
+          "plumbing": "Vatten och avlopp",
+          "fire_protection": "Brandskydd",
+          "electrical": "El",
+          "lighting": "Belysning",
+          "elv": "Svagström",
+          "bms": "Byggautomation",
+          "architectural": "Arkitekt",
+          "structural": "Konstruktion",
+          "civil": "Mark och anläggning"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Ändringsorderregister",
+        "doc_title": "Ändringsorder",
+        "col_code": "Kod",
+        "col_title": "Benämning",
+        "col_reason": "Orsak",
+        "col_instrument": "Typ",
+        "col_submitted": "Inlämnad",
+        "col_contractor_amount": "Entreprenörens belopp",
+        "col_engineer_amount": "Konsultens belopp",
+        "col_approved_amount": "Godkänt belopp",
+        "col_cost_impact": "Kostnadspåverkan",
+        "col_time_impact": "Tidspåverkan (dagar)",
+        "col_approved_time": "Godkänd tid (dagar)",
+        "time_impact": "Tidspåverkan",
+        "approved_time": "Godkänd tid",
+        "col_approved": "Godkänd",
+        "submitted_by": "Inlämning",
+        "approved_by": "Godkännande",
+        "description": "Beskrivning",
+        "no_description": "Ingen beskrivning registrerad.",
+        "items": "Ändringsposter",
+        "item_description": "Beskrivning",
+        "item_change": "Ändring",
+        "item_unit": "Enhet",
+        "item_original_quantity": "Urspr. mängd",
+        "item_new_quantity": "Ny mängd",
+        "item_original_rate": "Urspr. à-pris",
+        "item_new_rate": "Nytt à-pris",
+        "item_cost_delta": "Kostnadsskillnad",
+        "register_filename": "andringsorderregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "approved": "Godkänd",
+          "rejected": "Avslagen",
+          "executed": "Genomförd"
+        },
+        "reason": {
+          "client_request": "Beställarens önskemål",
+          "design_change": "Projekteringsändring",
+          "unforeseen": "Oförutsedda förhållanden",
+          "regulatory": "Myndighetskrav",
+          "error": "Fel eller utelämnande",
+          "non_conformance": "Avvikelse",
+          "value_engineering": "Värdeoptimering"
+        },
+        "instrument": {
+          "works_change": "Beordrad ändring",
+          "site_confirmation": "Platsbekräftelse",
+          "claim": "Krav"
+        },
+        "change": {
+          "added": "Tillagd",
+          "removed": "Borttagen",
+          "modified": "Ändrad"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Underlagspaket",
+        "subject": "Ärende",
+        "basis": "Grund",
+        "period_from": "Tidigaste post",
+        "period_to": "Senaste post",
+        "digest": "Integritetskod (SHA-256, första 16 tecknen)",
+        "col_row": "Nr",
+        "col_record_id": "Post-ID",
+        "col_section": "Avsnitt",
+        "col_date": "Datum",
+        "col_kind": "Posttyp",
+        "col_title": "Benämning",
+        "col_summary": "Sammanfattning",
+        "col_reference": "Referens",
+        "register_filename": "underlagspaket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Meddelanden",
+          "correspondence": "Korrespondens",
+          "rfis": "Förfrågningar (RFI)",
+          "variations": "Ändringar",
+          "approvals": "Godkännanden",
+          "delay": "Försening",
+          "timeline": "Tidslinje",
+          "other": "Övrigt"
+        },
+        "kind": {
+          "notice": "Meddelande",
+          "variation_notice": "Meddelande om ändring",
+          "variation_request": "Begäran om ändring",
+          "variation_order": "Ändringsorder",
+          "change_order": "Ändringsorder",
+          "moc_entry": "Ändringspost",
+          "correspondence": "Korrespondens"
+        },
+        "basis": {
+          "dispute": "Tvist",
+          "valuation": "Värdering",
+          "delay": "Försening / tidsförlängning",
+          "general": "Allmän post"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Korrespondenslogg",
+        "doc_title": "Korrespondens",
+        "col_reference": "Referensnr",
+        "col_direction": "Riktning",
+        "col_type": "Typ",
+        "col_subject": "Ärende",
+        "col_from": "Från",
+        "col_to": "Till",
+        "col_date_sent": "Skickad",
+        "col_date_received": "Mottagen",
+        "col_response_due": "Svar senast",
+        "col_clause": "Avtalspunkt",
+        "notes": "Anteckningar",
+        "no_notes": "Inga anteckningar registrerade.",
+        "attachments": "Bifogade filer",
+        "linked_documents": "Länkade handlingar",
+        "sig_prepared": "Upprättande",
+        "sig_received": "Mottagande",
+        "register_filename": "korrespondenslogg"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Inkommande",
+          "outgoing": "Utgående"
+        },
+        "type": {
+          "letter": "Brev",
+          "email": "E-post",
+          "notice": "Meddelande",
+          "memo": "PM",
+          "report": "Rapport"
+        },
+        "status": {
+          "open": "Öppen",
+          "awaiting_response": "Väntar på svar",
+          "responded": "Besvarad",
+          "closed": "Avslutad"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Översändningsregister",
+        "doc_title": "Översändning",
+        "col_number": "Översändningsnr",
+        "col_subject": "Ärende",
+        "col_purpose": "Syfte",
+        "col_issued": "Utfärdad",
+        "col_response_due": "Svar senast",
+        "col_recipients": "Mottagare",
+        "col_item_count": "Poster",
+        "sender": "Avsändare",
+        "cover_note": "Följebrev",
+        "no_cover_note": "Inget följebrev.",
+        "recipients": "Mottagare",
+        "recipient": "Mottagare",
+        "action_required": "Åtgärd krävs",
+        "acknowledged": "Mottagande bekräftat",
+        "responded": "Besvarad",
+        "items": "Översända handlingar",
+        "item_no": "Nr",
+        "item_description": "Beskrivning",
+        "item_notes": "Anteckningar",
+        "sig_issued": "Utfärdande",
+        "sig_received": "Mottagande",
+        "register_filename": "oversandningsregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "issued": "Utfärdad",
+          "responded": "Besvarad"
+        },
+        "purpose": {
+          "for_approval": "För godkännande",
+          "for_review": "För granskning",
+          "for_information": "För kännedom",
+          "for_construction": "För utförande",
+          "for_tender": "För anbud",
+          "for_record": "För arkivering"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Ändringsregister",
+        "claim_register_title": "Kravregister",
+        "notice_register_title": "Meddelanderegister",
+        "doc_title": "Begäran om ändring",
+        "doc_title_credit": "Begäran om ändring (avdrag)",
+        "time_impact": "Tidspåverkan",
+        "col_code": "Kod",
+        "col_title": "Benämning",
+        "col_classification": "Typ",
+        "col_urgency": "Brådska",
+        "col_requested": "Begärd",
+        "col_claimed_amount": "Yrkat belopp",
+        "col_agreed_amount": "Överenskommet belopp",
+        "col_time_impact": "Tidspåverkan (dagar)",
+        "col_response_due": "Svar senast",
+        "col_clause": "Avtalspunkt",
+        "col_row": "Nr",
+        "col_claim_type": "Kravtyp",
+        "col_raised": "Framställd",
+        "col_period_start": "Period från",
+        "col_period_end": "Period till",
+        "col_description": "Beskrivning",
+        "col_decided_amount": "Beslutat belopp",
+        "col_days_requested": "Begärda dagar",
+        "col_days_granted": "Beviljade dagar",
+        "col_recipient_type": "Riktat till",
+        "col_recipient": "Mottagare",
+        "col_target_response": "Förväntat svar",
+        "col_response_received": "Svar mottaget",
+        "requested_by": "Begäran",
+        "decided_by": "Beslut",
+        "date_submitted": "Inlämnad",
+        "date_decided": "Beslutad",
+        "description": "Beskrivning",
+        "no_description": "Ingen beskrivning registrerad.",
+        "decision_notes": "Beslutsanteckningar",
+        "no_decision_notes": "Inget beslut registrerat ännu.",
+        "variation_register_filename": "andringsregister",
+        "claim_register_filename": "kravregister",
+        "notice_register_filename": "meddelanderegister"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "under_review": "Under granskning",
+          "approved": "Godkänd",
+          "rejected": "Avslagen",
+          "converted_to_vo": "Omvandlad till order"
+        },
+        "claim_status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "under_review": "Under granskning",
+          "agreed": "Överenskommet",
+          "granted": "Beviljat",
+          "rejected": "Avslaget"
+        },
+        "notice_status": {
+          "issued": "Utfärdat",
+          "acknowledged": "Bekräftat",
+          "responded": "Besvarat",
+          "closed": "Avslutat"
+        },
+        "classification": {
+          "scope_change": "Ändrad omfattning",
+          "unforeseen": "Oförutsett förhållande",
+          "owner_change": "Beställarändring",
+          "design_dev": "Projektutveckling",
+          "regulatory": "Myndighetskrav",
+          "other": "Övrigt"
+        },
+        "urgency": {
+          "low": "Låg",
+          "med": "Medel",
+          "high": "Hög"
+        },
+        "claim_type": {
+          "disruption": "Störning",
+          "eot": "Tidsförlängning"
+        },
+        "recipient_type": {
+          "owner": "Beställare",
+          "contractor": "Entreprenör",
+          "architect": "Arkitekt",
+          "engineer": "Ingenjör",
+          "consultant": "Konsult"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Byggdagbok",
+        "overview": "Översikt",
+        "site_supervisor": "Platschef",
+        "not_recorded": "Ej registrerat",
+        "labour_on_site": "Arbetskraft på plats",
+        "equipment_on_site": "Maskiner på plats",
+        "completeness": "Fullständighet",
+        "weather": "Väder",
+        "weather_time": "Tid",
+        "weather_source": "Källa",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vind (km/h)",
+        "weather_precip": "Nederbörd (mm)",
+        "weather_conditions": "Förhållanden",
+        "weather_empty": "Inget väder registrerat för denna dag.",
+        "site_record": "Platsnotering",
+        "entries_empty": "Inga anteckningar registrerade i denna dagbok.",
+        "notes": "Anteckningar",
+        "notes_empty": "Inga ytterligare anteckningar.",
+        "footer_supervisor": "Platschef: {name}",
+        "footer_supervisor_missing": "Platschef: ej registrerat",
+        "footer_generated": "Framtagen: {timestamp}",
+        "footer_page": "Sida {page} av {total}",
+        "workforce": "Personal per företag",
+        "workforce_company": "Företag",
+        "workforce_count": "Personer",
+        "workforce_unassigned": "Ej knuten till företag",
+        "workforce_total": "Summa",
+        "signatures": "Underskrifter",
+        "sig_prepared": "Upprättande (platschef)",
+        "sig_approved": "Godkännande (beställarens representant)",
+        "sig_name": "Namn",
+        "sig_title": "Titel",
+        "sig_date": "Datum",
+        "sig_signature": "Underskrift",
+        "signed_note": "Signerat i systemet: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "byggdagbok",
+        "summary_wind": "vind {value} km/h",
+        "summary_precipitation": "nederbörd {value} mm",
+        "summary_humidity": "luftfuktighet {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Besökare",
+          "event": "Händelser",
+          "delivery": "Levererade material",
+          "completion": "Utfört arbete",
+          "incident_summary": "Säkerhet och incidenter",
+          "inspection_summary": "Besiktningar",
+          "photo_note": "Fotoanteckningar",
+          "general": "Allmänna anteckningar"
+        },
+        "status": {
+          "open": "Öppen",
+          "closed": "Avslutad",
+          "signed": "Signerad",
+          "archived": "Arkiverad"
+        },
+        "condition": {
+          "clear": "klart",
+          "mainly_clear": "mestadels klart",
+          "partly_cloudy": "delvis molnigt",
+          "cloudy": "molnigt",
+          "overcast": "mulet",
+          "fog": "dimma",
+          "fog_rime": "underkyld dimma",
+          "drizzle_light": "lätt duggregn",
+          "drizzle_moderate": "måttligt duggregn",
+          "drizzle_dense": "kraftigt duggregn",
+          "rain": "regn",
+          "rain_light": "lätt regn",
+          "rain_moderate": "måttligt regn",
+          "rain_heavy": "kraftigt regn",
+          "freezing_rain_light": "lätt underkylt regn",
+          "freezing_rain_heavy": "kraftigt underkylt regn",
+          "snow": "snö",
+          "snow_light": "lätt snöfall",
+          "snow_moderate": "måttligt snöfall",
+          "snow_heavy": "kraftigt snöfall",
+          "rain_showers_light": "lätta regnskurar",
+          "rain_showers_moderate": "måttliga regnskurar",
+          "rain_showers_violent": "kraftiga regnskurar",
+          "snow_showers_light": "lätta snöbyar",
+          "snow_showers_heavy": "kraftiga snöbyar",
+          "thunderstorm": "åska",
+          "thunderstorm_hail_light": "åska med lätt hagel",
+          "thunderstorm_hail_heavy": "åska med kraftigt hagel"
+        },
+        "source": {
+          "manual": "Manuell registrering",
+          "open_meteo": "Vädertjänst",
+          "sensor": "Sensor på plats"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "RFI-logg",
+        "col_number": "RFI-nr",
+        "col_subject": "Ärende",
+        "col_raised_by": "Ställd av",
+        "col_assigned_to": "Tilldelad",
+        "col_ball_in_court": "Bollen hos",
+        "col_date_required": "Önskat datum",
+        "col_response_due": "Svar senast",
+        "col_days_open": "Dagar öppen",
+        "col_cost_impact": "Kostnadspåverkan",
+        "col_schedule_impact": "Tidspåverkan",
+        "col_response": "Svar",
+        "yes_with": "Ja ({detail})",
+        "register_filename": "rfi-logg"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "open": "Öppen",
+          "answered": "Besvarad",
+          "closed": "Stängd",
+          "void": "Ogiltig"
+        }
+      }
+    }
   }
 }

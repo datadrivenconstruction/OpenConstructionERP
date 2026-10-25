@@ -618,5 +618,539 @@
       "draft": "Жоба нұсқасы",
       "frozen": "Қатырылған"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Жоба",
+      "project_no": "Жоба №",
+      "generated_on": "Жасалған күні",
+      "records": "Жазбалар",
+      "currency": "Валюта",
+      "status": "Мәртебесі",
+      "name": "Аты",
+      "signature": "Қолы",
+      "date": "Күні",
+      "signatures": "Қолтаңбалар",
+      "yes": "Иә",
+      "no": "Жоқ",
+      "days_one": "{n} күн",
+      "days_other": "{n} күн",
+      "empty_register": "Жазбалар жоқ.",
+      "total": "Барлығы",
+      "signer_title": "Лауазымы",
+      "sig_prepared_by": "Әзірлеген",
+      "sig_checked_by": "Тексерген",
+      "sig_approved_by": "Бекіткен",
+      "footer_generated": "Жасалған уақыты: {timestamp}",
+      "footer_page": "{page} / {total} бет"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Келісуге жіберілген құжаттар тізілімі",
+        "doc_title": "Келісуге жіберілген құжат",
+        "doc_title_product_data": "Материалды бекіту парағы",
+        "col_number": "Құжат №",
+        "col_title": "Атауы",
+        "col_type": "Түрі",
+        "col_spec": "Спецификация бөлімі",
+        "col_rev": "Нұсқа",
+        "col_date_submitted": "Жіберілген күні",
+        "col_date_required": "Талап етілетін күні",
+        "col_date_returned": "Қайтарылған күні",
+        "col_reviewer": "Қарастырушы",
+        "col_approver": "Бекітуші",
+        "col_ball_in_court": "Келесі әрекет етуші",
+        "submitted_by_org": "Жіберуші компания",
+        "review_notes": "Қарастырушының ескертулері",
+        "no_review_notes": "Қарастырушының ескертулері тіркелмеген.",
+        "sig_submitted": "Жіберген",
+        "sig_reviewed": "Қарастырған",
+        "sig_approved": "Бекіткен",
+        "register_filename": "kelisuge-zhiberilgen-qujattar-tizilimi",
+        "register_title_shop_drawing": "Жұмыс сызбалары тізілімі",
+        "register_title_product_data": "Материалдарды бекіту тізілімі",
+        "register_title_method_statement": "Жұмыс жүргізу әдістемелері тізілімі",
+        "register_filename_shop_drawing": "zhumys-syzbalary-tizilimi",
+        "register_filename_product_data": "materialdardy-bekitu-tizilimi",
+        "register_filename_method_statement": "zhumys-adistemeleri-tizilimi",
+        "col_discipline": "Бөлім",
+        "col_manufacturer": "Өндіруші / бренд",
+        "col_model": "Үлгі / артикул",
+        "col_origin": "Шыққан елі",
+        "col_supplier": "Жеткізуші",
+        "col_product": "Өндіруші / үлгі / шыққан елі",
+        "col_review_code": "Қарау коды",
+        "col_outcome": "Қарау нәтижесі",
+        "col_review_period": "Қарау мерзімі (күн)",
+        "col_review_due": "Қарау мерзімінің соңы",
+        "col_days_in_review": "Қарауда өткен күн",
+        "col_days_in_review_print": "Қарауда өткен күн",
+        "col_review_overdue": "Кешіккен күн",
+        "col_required_on_site": "Алаңда қажет",
+        "col_long_lead": "Ұзақ жеткізілім",
+        "col_lead_time": "Жеткізу мерзімі (апта)",
+        "col_needed_by": "Бекіту мерзімі",
+        "col_approval_late": "Мерзімнен кешіккен күн",
+        "col_drawings": "Байланысты сызбалар",
+        "col_submitted_returned": "Жіберілді / қайтарылды",
+        "col_on_site_needed_by": "Алаңда / бекіту мерзімі",
+        "resubmit_for_record": "Түзетілген данасын тіркеу үшін қайта жіберу керек",
+        "review_history": "Қарау тарихы",
+        "hist_submitted": "Жіберілді",
+        "hist_returned": "Қайтарылды",
+        "drawings_missing_one": "Байланысты {n} сызба енді қолжетімді емес",
+        "drawings_missing_other": "Байланысты {n} сызба енді қолжетімді емес",
+        "weeks_one": "{n} апта",
+        "weeks_other": "{n} апта"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "under_review": "Қарауда",
+          "approved": "Бекітілді",
+          "approved_as_noted": "Ескертулермен бекітілді",
+          "revise_and_resubmit": "Түзетіп қайта жіберу",
+          "rejected": "Қабылданбады",
+          "closed": "Жабылды"
+        },
+        "type": {
+          "shop_drawing": "Жұмыс сызбасы",
+          "product_data": "Өнім деректері",
+          "sample": "Үлгі",
+          "mock_up": "Макет",
+          "test_report": "Сынақ есебі",
+          "calculation": "Есептеу",
+          "method_statement": "Жұмыс жүргізу әдістемесі",
+          "certificate": "Сертификат",
+          "warranty": "Кепілдік"
+        },
+        "discipline": {
+          "mechanical": "Механика",
+          "hvac": "Жылыту және желдету",
+          "plumbing": "Сумен жабдықтау және кәріз",
+          "fire_protection": "Өрттен қорғау",
+          "electrical": "Электр жабдықтары",
+          "lighting": "Жарықтандыру",
+          "elv": "Әлсіз токты жүйелер",
+          "bms": "Ғимарат автоматикасы",
+          "architectural": "Сәулет",
+          "structural": "Құрылымдық бөлім",
+          "civil": "Құрылыс-инженерлік бөлім"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Өзгерту бұйрықтарының тізілімі",
+        "doc_title": "Өзгерту бұйрығы",
+        "col_code": "Коды",
+        "col_title": "Атауы",
+        "col_reason": "Себебі",
+        "col_instrument": "Құжат түрі",
+        "col_submitted": "Жіберілген күні",
+        "col_contractor_amount": "Мердігер сомасы",
+        "col_engineer_amount": "Инженер сомасы",
+        "col_approved_amount": "Бекітілген сома",
+        "col_cost_impact": "Құнға әсері",
+        "col_time_impact": "Мерзімге әсері (күн)",
+        "col_approved_time": "Бекітілген мерзім (күн)",
+        "time_impact": "Мерзімге әсері",
+        "approved_time": "Бекітілген мерзім",
+        "col_approved": "Бекітілген күні",
+        "submitted_by": "Жіберген",
+        "approved_by": "Бекіткен",
+        "description": "Сипаттамасы",
+        "no_description": "Сипаттама тіркелмеген.",
+        "items": "Өзгеріс позициялары",
+        "item_description": "Сипаттамасы",
+        "item_change": "Өзгеріс",
+        "item_unit": "Өлшем бірлігі",
+        "item_original_quantity": "Бастапқы саны",
+        "item_new_quantity": "Жаңа саны",
+        "item_original_rate": "Бастапқы баға",
+        "item_new_rate": "Жаңа баға",
+        "item_cost_delta": "Құн айырмасы",
+        "register_filename": "ozgertu-buiryqtary-tizilimi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "approved": "Бекітілді",
+          "rejected": "Қабылданбады",
+          "executed": "Орындалды"
+        },
+        "reason": {
+          "client_request": "Тапсырыс берушінің сұрауы",
+          "design_change": "Жобаның өзгеруі",
+          "unforeseen": "Күтпеген жағдайлар",
+          "regulatory": "Нормативтік талап",
+          "error": "Қате немесе қалып кету",
+          "non_conformance": "Сәйкессіздік",
+          "value_engineering": "Құнды инжиниринг"
+        },
+        "instrument": {
+          "works_change": "Нұсқау бойынша өзгеріс",
+          "site_confirmation": "Алаңдағы растау",
+          "claim": "Талап"
+        },
+        "change": {
+          "added": "Қосылды",
+          "removed": "Алынып тасталды",
+          "modified": "Өзгертілді"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Дәлелдемелер жиынтығы",
+        "subject": "Тақырыбы",
+        "basis": "Негіздеме",
+        "period_from": "Ең ерте жазба",
+        "period_to": "Ең соңғы жазба",
+        "digest": "Тұтастық коды (SHA-256, алғашқы 16 таңба)",
+        "col_row": "№",
+        "col_record_id": "Жазба ID",
+        "col_section": "Бөлім",
+        "col_date": "Күні",
+        "col_kind": "Жазба түрі",
+        "col_title": "Атауы",
+        "col_summary": "Қысқаша мазмұны",
+        "col_reference": "Сілтеме",
+        "register_filename": "dalelderemeler-zhiyntygy"
+      },
+      "labels": {
+        "section": {
+          "notices": "Хабарламалар",
+          "correspondence": "Хат-хабар",
+          "rfis": "Ақпарат сұраулары (RFI)",
+          "variations": "Өзгерістер",
+          "approvals": "Бекітулер",
+          "delay": "Кешігу",
+          "timeline": "Хронология",
+          "other": "Басқа"
+        },
+        "kind": {
+          "notice": "Хабарлама",
+          "variation_notice": "Өзгеріс туралы хабарлама",
+          "variation_request": "Өзгеріс сұрауы",
+          "variation_order": "Өзгеріс бұйрығы",
+          "change_order": "Өзгерту бұйрығы",
+          "moc_entry": "Өзгеріс жазбасы",
+          "correspondence": "Хат-хабар"
+        },
+        "basis": {
+          "dispute": "Дау",
+          "valuation": "Бағалау",
+          "delay": "Кешігу / мерзімді ұзарту",
+          "general": "Жалпы жазба"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Хат-хабар журналы",
+        "doc_title": "Хат-хабар",
+        "col_reference": "Сілтеме №",
+        "col_direction": "Бағыты",
+        "col_type": "Түрі",
+        "col_subject": "Тақырыбы",
+        "col_from": "Кімнен",
+        "col_to": "Кімге",
+        "col_date_sent": "Жіберілген күні",
+        "col_date_received": "Алынған күні",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_clause": "Шарт тармағы",
+        "notes": "Ескертпелер",
+        "no_notes": "Ескертпелер тіркелмеген.",
+        "attachments": "Тіркелген файлдар",
+        "linked_documents": "Байланысты құжаттар",
+        "sig_prepared": "Әзірлеген",
+        "sig_received": "Қабылдаған",
+        "register_filename": "hat-habar-zhurnaly"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Кіріс",
+          "outgoing": "Шығыс"
+        },
+        "type": {
+          "letter": "Хат",
+          "email": "Эл. пошта",
+          "notice": "Хабарлама",
+          "memo": "Қызметтік жазба",
+          "report": "Есеп"
+        },
+        "status": {
+          "open": "Ашық",
+          "awaiting_response": "Жауап күтілуде",
+          "responded": "Жауап берілді",
+          "closed": "Жабылды"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Жолдама хаттар тізілімі",
+        "doc_title": "Жолдама хат",
+        "col_number": "Жолдама хат №",
+        "col_subject": "Тақырыбы",
+        "col_purpose": "Мақсаты",
+        "col_issued": "Берілген күні",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_recipients": "Алушылар",
+        "col_item_count": "Позициялар",
+        "sender": "Жіберуші",
+        "cover_note": "Ілеспе хат",
+        "no_cover_note": "Ілеспе хат жоқ.",
+        "recipients": "Алушылар",
+        "recipient": "Алушы",
+        "action_required": "Қажетті әрекет",
+        "acknowledged": "Алғаны расталды",
+        "responded": "Жауап берілген күні",
+        "items": "Жолданған құжаттар",
+        "item_no": "№",
+        "item_description": "Сипаттамасы",
+        "item_notes": "Ескертпелер",
+        "sig_issued": "Берген",
+        "sig_received": "Қабылдаған",
+        "register_filename": "zholdama-hattar-tizilimi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "issued": "Берілді",
+          "responded": "Жауап берілді"
+        },
+        "purpose": {
+          "for_approval": "Бекіту үшін",
+          "for_review": "Қарау үшін",
+          "for_information": "Мәлімет үшін",
+          "for_construction": "Құрылыс үшін",
+          "for_tender": "Тендер үшін",
+          "for_record": "Тіркеу үшін"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Өзгерістер тізілімі",
+        "claim_register_title": "Талаптар тізілімі",
+        "notice_register_title": "Хабарламалар тізілімі",
+        "doc_title": "Өзгеріс сұрауы",
+        "doc_title_credit": "Өзгеріс сұрауы (жұмыс көлемін азайту)",
+        "time_impact": "Мерзімге әсері",
+        "col_code": "Коды",
+        "col_title": "Атауы",
+        "col_classification": "Түрі",
+        "col_urgency": "Шұғылдығы",
+        "col_requested": "Сұралған күні",
+        "col_claimed_amount": "Талап етілген сома",
+        "col_agreed_amount": "Келісілген сома",
+        "col_time_impact": "Мерзімге әсері (күн)",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_clause": "Шарт тармағы",
+        "col_row": "№",
+        "col_claim_type": "Талап түрі",
+        "col_raised": "Мәлімделген күні",
+        "col_period_start": "Кезең басы",
+        "col_period_end": "Кезең соңы",
+        "col_description": "Сипаттамасы",
+        "col_decided_amount": "Шешілген сома",
+        "col_days_requested": "Сұралған күн",
+        "col_days_granted": "Берілген күн",
+        "col_recipient_type": "Кімге арналған",
+        "col_recipient": "Алушы",
+        "col_target_response": "Күтілетін жауап",
+        "col_response_received": "Жауап алынды",
+        "requested_by": "Сұраған",
+        "decided_by": "Шешім қабылдаған",
+        "date_submitted": "Жіберілген күні",
+        "date_decided": "Шешім күні",
+        "description": "Сипаттамасы",
+        "no_description": "Сипаттама тіркелмеген.",
+        "decision_notes": "Шешім ескертпелері",
+        "no_decision_notes": "Шешім әлі қабылданбаған.",
+        "variation_register_filename": "ozgerister-tizilimi",
+        "claim_register_filename": "talaptar-tizilimi",
+        "notice_register_filename": "habarlamalar-tizilimi"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "under_review": "Қарауда",
+          "approved": "Бекітілді",
+          "rejected": "Қабылданбады",
+          "converted_to_vo": "Бұйрыққа айналдырылды"
+        },
+        "claim_status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "under_review": "Қарауда",
+          "agreed": "Келісілді",
+          "granted": "Қанағаттандырылды",
+          "rejected": "Қабылданбады"
+        },
+        "notice_status": {
+          "issued": "Берілді",
+          "acknowledged": "Алғаны расталды",
+          "responded": "Жауап берілді",
+          "closed": "Жабылды"
+        },
+        "classification": {
+          "scope_change": "Көлемнің өзгеруі",
+          "unforeseen": "Күтпеген жағдай",
+          "owner_change": "Тапсырыс берушінің өзгерісі",
+          "design_dev": "Жобаны пысықтау",
+          "regulatory": "Нормативтік талап",
+          "other": "Басқа"
+        },
+        "urgency": {
+          "low": "Төмен",
+          "med": "Орташа",
+          "high": "Жоғары"
+        },
+        "claim_type": {
+          "disruption": "Жұмыс барысының бұзылуы",
+          "eot": "Мерзімді ұзарту"
+        },
+        "recipient_type": {
+          "owner": "Тапсырыс беруші",
+          "contractor": "Мердігер",
+          "architect": "Сәулетші",
+          "engineer": "Инженер",
+          "consultant": "Кеңесші"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Құрылыс алаңының күнделігі",
+        "overview": "Шолу",
+        "site_supervisor": "Алаң жетекшісі",
+        "not_recorded": "Тіркелмеген",
+        "labour_on_site": "Алаңдағы жұмыс күші",
+        "equipment_on_site": "Алаңдағы техника",
+        "completeness": "Толықтығы",
+        "weather": "Ауа райы",
+        "weather_time": "Уақыты",
+        "weather_source": "Дереккөз",
+        "weather_temp": "Темп. (C)",
+        "weather_wind": "Жел (км/сағ)",
+        "weather_precip": "Жауын-шашын (мм)",
+        "weather_conditions": "Жағдайы",
+        "weather_empty": "Осы күнге ауа райы тіркелмеген.",
+        "site_record": "Алаң жазбасы",
+        "entries_empty": "Осы күнделікте жазбалар жоқ.",
+        "notes": "Ескертпелер",
+        "notes_empty": "Қосымша ескертпелер жоқ.",
+        "footer_supervisor": "Жетекші: {name}",
+        "footer_supervisor_missing": "Алаң жетекшісі: тіркелмеген",
+        "footer_generated": "Жасалған уақыты: {timestamp}",
+        "footer_page": "{page} / {total} бет",
+        "workforce": "Компаниялар бойынша жұмыс күші",
+        "workforce_company": "Компания",
+        "workforce_count": "Адам саны",
+        "workforce_unassigned": "Компанияға бекітілмеген",
+        "workforce_total": "Барлығы",
+        "signatures": "Қолтаңбалар",
+        "sig_prepared": "Әзірлеген (алаң басшысы)",
+        "sig_approved": "Бекіткен (жұмыс берушінің өкілі)",
+        "sig_name": "Аты-жөні",
+        "sig_title": "Лауазымы",
+        "sig_date": "Күні",
+        "sig_signature": "Қолы",
+        "signed_note": "Жүйеде қол қойылды: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "kundelik",
+        "summary_wind": "жел {value} км/сағ",
+        "summary_precipitation": "жауын-шашын {value} мм",
+        "summary_humidity": "ылғалдылық {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Келушілер",
+          "event": "Оқиғалар",
+          "delivery": "Жеткізілген материалдар",
+          "completion": "Орындалған жұмыстар",
+          "incident_summary": "Қауіпсіздік және оқиғалар",
+          "inspection_summary": "Тексерулер",
+          "photo_note": "Фото ескертпелер",
+          "general": "Жалпы ескертпелер"
+        },
+        "status": {
+          "open": "Ашық",
+          "closed": "Жабық",
+          "signed": "Қол қойылған",
+          "archived": "Мұрағатталған"
+        },
+        "condition": {
+          "clear": "ашық",
+          "mainly_clear": "негізінен ашық",
+          "partly_cloudy": "ауыспалы бұлтты",
+          "cloudy": "бұлтты",
+          "overcast": "қалың бұлтты",
+          "fog": "тұман",
+          "fog_rime": "қырау түсіретін тұман",
+          "drizzle_light": "әлсіз сіркіреген жаңбыр",
+          "drizzle_moderate": "орташа сіркіреген жаңбыр",
+          "drizzle_dense": "қою сіркіреген жаңбыр",
+          "rain": "жаңбыр",
+          "rain_light": "әлсіз жаңбыр",
+          "rain_moderate": "орташа жаңбыр",
+          "rain_heavy": "қатты жаңбыр",
+          "freezing_rain_light": "әлсіз қатқан жаңбыр",
+          "freezing_rain_heavy": "қатты қатқан жаңбыр",
+          "snow": "қар",
+          "snow_light": "әлсіз қар",
+          "snow_moderate": "орташа қар",
+          "snow_heavy": "қалың қар",
+          "rain_showers_light": "әлсіз қысқа жаңбыр",
+          "rain_showers_moderate": "орташа қысқа жаңбыр",
+          "rain_showers_violent": "қатты нөсер",
+          "snow_showers_light": "әлсіз қысқа мерзімді қар",
+          "snow_showers_heavy": "қалың қысқа мерзімді қар",
+          "thunderstorm": "найзағай",
+          "thunderstorm_hail_light": "әлсіз бұршақты найзағай",
+          "thunderstorm_hail_heavy": "қатты бұршақты найзағай"
+        },
+        "source": {
+          "manual": "Қолмен енгізілген",
+          "open_meteo": "Метеорологиялық қызмет",
+          "sensor": "Алаңдағы датчик"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Ақпарат сұраулары журналы (RFI)",
+        "col_number": "RFI №",
+        "col_subject": "Тақырыбы",
+        "col_raised_by": "Жіберген",
+        "col_assigned_to": "Жауапты",
+        "col_ball_in_court": "Келесі әрекет етуші",
+        "col_date_required": "Талап етілетін күні",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_days_open": "Ашық күн саны",
+        "col_cost_impact": "Құнға әсері",
+        "col_schedule_impact": "Кестеге әсері",
+        "col_response": "Жауап",
+        "yes_with": "Иә ({detail})",
+        "register_filename": "rfi-zhurnaly"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "open": "Ашық",
+          "answered": "Жауап берілді",
+          "closed": "Жабылды",
+          "void": "Күші жойылды"
+        }
+      }
+    }
   }
 }

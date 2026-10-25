@@ -618,5 +618,539 @@
       "draft": "Nacrt",
       "frozen": "Zamrznut"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Br. projekta",
+      "generated_on": "Datum izrade",
+      "records": "Zapisi",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Ime i prezime",
+      "signature": "Potpis",
+      "date": "Datum",
+      "signatures": "Potpisi",
+      "yes": "Da",
+      "no": "Ne",
+      "days_one": "{n} dan",
+      "days_other": "{n} dana",
+      "empty_register": "Nema zapisa.",
+      "total": "Ukupno",
+      "signer_title": "Funkcija",
+      "sig_prepared_by": "Izrada",
+      "sig_checked_by": "Provjera",
+      "sig_approved_by": "Odobrenje",
+      "footer_generated": "Izrađeno {timestamp}",
+      "footer_page": "Stranica {page} od {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Evidencija zahtjeva za odobrenje",
+        "doc_title": "Zahtjev za odobrenje",
+        "doc_title_product_data": "Obrazac odobrenja materijala",
+        "col_number": "Br. zahtjeva",
+        "col_title": "Naziv",
+        "col_type": "Vrsta",
+        "col_spec": "Poglavlje specifikacije",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Datum predaje",
+        "col_date_required": "Traženi datum",
+        "col_date_returned": "Datum vraćanja",
+        "col_reviewer": "Pregledavatelj",
+        "col_approver": "Odobravatelj",
+        "col_ball_in_court": "Na potezu",
+        "submitted_by_org": "Tvrtka podnositelj",
+        "review_notes": "Primjedbe pregleda",
+        "no_review_notes": "Nema zabilježenih primjedbi pregleda.",
+        "sig_submitted": "Predaja",
+        "sig_reviewed": "Pregled",
+        "sig_approved": "Odobrenje",
+        "register_filename": "evidencija-zahtjeva-za-odobrenje",
+        "register_title_shop_drawing": "Evidencija radioničkih nacrta",
+        "register_title_product_data": "Evidencija odobrenja materijala",
+        "register_title_method_statement": "Evidencija izjava o metodi rada",
+        "register_filename_shop_drawing": "evidencija-radionickih-nacrta",
+        "register_filename_product_data": "evidencija-odobrenja-materijala",
+        "register_filename_method_statement": "evidencija-izjava-o-metodi-rada",
+        "col_discipline": "Struka",
+        "col_manufacturer": "Proizvođač / marka",
+        "col_model": "Model / oznaka",
+        "col_origin": "Zemlja porijekla",
+        "col_supplier": "Dobavljač",
+        "col_product": "Proizvođač / model / porijeklo",
+        "col_review_code": "Oznaka ocjene",
+        "col_outcome": "Ishod pregleda",
+        "col_review_period": "Rok pregleda (dani)",
+        "col_review_due": "Pregled do",
+        "col_days_in_review": "Dana u pregledu",
+        "col_days_in_review_print": "Dana u pregledu",
+        "col_review_overdue": "Dana kašnjenja",
+        "col_required_on_site": "Potrebno na gradilištu",
+        "col_long_lead": "Dug rok isporuke",
+        "col_lead_time": "Rok isporuke (tjedni)",
+        "col_needed_by": "Odobrenje potrebno do",
+        "col_approval_late": "Dana nakon roka",
+        "col_drawings": "Povezani nacrti",
+        "col_submitted_returned": "Predano / vraćeno",
+        "col_on_site_needed_by": "Na gradilištu / odobrenje do",
+        "resubmit_for_record": "Ispravljeni primjerak predati ponovno u evidenciju",
+        "review_history": "Povijest pregleda",
+        "hist_submitted": "Predano",
+        "hist_returned": "Vraćeno",
+        "drawings_missing_one": "{n} povezani nacrt više nije dostupan",
+        "drawings_missing_other": "{n} povezanih nacrta više nije dostupno",
+        "weeks_one": "{n} tjedan",
+        "weeks_other": "{n} tj."
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "under_review": "U pregledu",
+          "approved": "Odobreno",
+          "approved_as_noted": "Odobreno uz primjedbe",
+          "revise_and_resubmit": "Izmijeniti i ponovno predati",
+          "rejected": "Odbijeno",
+          "closed": "Zatvoreno"
+        },
+        "type": {
+          "shop_drawing": "Radionički nacrt",
+          "product_data": "Podaci o proizvodu",
+          "sample": "Uzorak",
+          "mock_up": "Probni model",
+          "test_report": "Izvješće o ispitivanju",
+          "calculation": "Proračun",
+          "method_statement": "Izjava o metodi rada",
+          "certificate": "Certifikat",
+          "warranty": "Jamstvo"
+        },
+        "discipline": {
+          "mechanical": "Strojarstvo",
+          "hvac": "Grijanje, ventilacija i klimatizacija",
+          "plumbing": "Vodovod i odvodnja",
+          "fire_protection": "Zaštita od požara",
+          "electrical": "Elektroinstalacije",
+          "lighting": "Rasvjeta",
+          "elv": "Slaba struja",
+          "bms": "Automatika zgrade",
+          "architectural": "Arhitektura",
+          "structural": "Konstrukcija",
+          "civil": "Građevinski radovi"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Evidencija naloga za izmjenu",
+        "doc_title": "Nalog za izmjenu",
+        "col_code": "Šifra",
+        "col_title": "Naziv",
+        "col_reason": "Razlog",
+        "col_instrument": "Instrument",
+        "col_submitted": "Datum predaje",
+        "col_contractor_amount": "Iznos izvođača",
+        "col_engineer_amount": "Iznos nadzora",
+        "col_approved_amount": "Odobreni iznos",
+        "col_cost_impact": "Utjecaj na trošak",
+        "col_time_impact": "Utjecaj na rok (dani)",
+        "col_approved_time": "Odobreni rok (dani)",
+        "time_impact": "Utjecaj na rok",
+        "approved_time": "Odobreni rok",
+        "col_approved": "Datum odobrenja",
+        "submitted_by": "Predaja",
+        "approved_by": "Odobrenje",
+        "description": "Opis",
+        "no_description": "Nema zabilježenog opisa.",
+        "items": "Stavke izmjene",
+        "item_description": "Opis",
+        "item_change": "Izmjena",
+        "item_unit": "Jed. mjere",
+        "item_original_quantity": "Izvorna kol.",
+        "item_new_quantity": "Nova kol.",
+        "item_original_rate": "Izvorna cijena",
+        "item_new_rate": "Nova cijena",
+        "item_cost_delta": "Razlika troška",
+        "register_filename": "evidencija-naloga-za-izmjenu"
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "approved": "Odobreno",
+          "rejected": "Odbijeno",
+          "executed": "Izvršeno"
+        },
+        "reason": {
+          "client_request": "Zahtjev naručitelja",
+          "design_change": "Izmjena projekta",
+          "unforeseen": "Nepredviđeni uvjeti",
+          "regulatory": "Zakonski zahtjev",
+          "error": "Greška ili propust",
+          "non_conformance": "Neusklađenost",
+          "value_engineering": "Optimizacija troška"
+        },
+        "instrument": {
+          "works_change": "Naložena izmjena",
+          "site_confirmation": "Potvrda na gradilištu",
+          "claim": "Potraživanje"
+        },
+        "change": {
+          "added": "Dodano",
+          "removed": "Uklonjeno",
+          "modified": "Izmijenjeno"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dokazni paket",
+        "subject": "Predmet",
+        "basis": "Osnova",
+        "period_from": "Najraniji zapis",
+        "period_to": "Najnoviji zapis",
+        "digest": "Kontrolni kod (SHA-256, prvih 16 znakova)",
+        "col_row": "Br.",
+        "col_record_id": "ID zapisa",
+        "col_section": "Odjeljak",
+        "col_date": "Datum",
+        "col_kind": "Vrsta zapisa",
+        "col_title": "Naziv",
+        "col_summary": "Sažetak",
+        "col_reference": "Referenca",
+        "register_filename": "dokazni-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Obavijesti",
+          "correspondence": "Korespondencija",
+          "rfis": "Upiti (RFI)",
+          "variations": "Izmjene",
+          "approvals": "Odobrenja",
+          "delay": "Kašnjenje",
+          "timeline": "Vremenski slijed",
+          "other": "Ostalo"
+        },
+        "kind": {
+          "notice": "Obavijest",
+          "variation_notice": "Obavijest o izmjeni",
+          "variation_request": "Zahtjev za izmjenu",
+          "variation_order": "Nalog za izmjenu",
+          "change_order": "Nalog za promjenu",
+          "moc_entry": "Zapis o promjeni",
+          "correspondence": "Korespondencija"
+        },
+        "basis": {
+          "dispute": "Spor",
+          "valuation": "Vrednovanje",
+          "delay": "Kašnjenje / produljenje roka",
+          "general": "Opći zapis"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Evidencija korespondencije",
+        "doc_title": "Korespondencija",
+        "col_reference": "Br. dokumenta",
+        "col_direction": "Smjer",
+        "col_type": "Vrsta",
+        "col_subject": "Predmet",
+        "col_from": "Od",
+        "col_to": "Za",
+        "col_date_sent": "Datum slanja",
+        "col_date_received": "Datum primitka",
+        "col_response_due": "Odgovor do",
+        "col_clause": "Članak ugovora",
+        "notes": "Napomene",
+        "no_notes": "Nema zabilježenih napomena.",
+        "attachments": "Priložene datoteke",
+        "linked_documents": "Povezani dokumenti",
+        "sig_prepared": "Izrada",
+        "sig_received": "Primitak",
+        "register_filename": "evidencija-korespondencije"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Dolazna",
+          "outgoing": "Odlazna"
+        },
+        "type": {
+          "letter": "Dopis",
+          "email": "E-pošta",
+          "notice": "Obavijest",
+          "memo": "Bilješka",
+          "report": "Izvješće"
+        },
+        "status": {
+          "open": "Otvoreno",
+          "awaiting_response": "Čeka odgovor",
+          "responded": "Odgovoreno",
+          "closed": "Zatvoreno"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Evidencija dostavnica",
+        "doc_title": "Dostavnica",
+        "col_number": "Br. dostavnice",
+        "col_subject": "Predmet",
+        "col_purpose": "Svrha",
+        "col_issued": "Datum izdavanja",
+        "col_response_due": "Odgovor do",
+        "col_recipients": "Primatelji",
+        "col_item_count": "Stavke",
+        "sender": "Pošiljatelj",
+        "cover_note": "Popratna napomena",
+        "no_cover_note": "Nema popratne napomene.",
+        "recipients": "Primatelji",
+        "recipient": "Primatelj",
+        "action_required": "Potrebna radnja",
+        "acknowledged": "Potvrda primitka",
+        "responded": "Datum odgovora",
+        "items": "Dostavljene stavke",
+        "item_no": "Br.",
+        "item_description": "Opis",
+        "item_notes": "Napomene",
+        "sig_issued": "Izdavanje",
+        "sig_received": "Primitak",
+        "register_filename": "evidencija-dostavnica"
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "issued": "Izdano",
+          "responded": "Odgovoreno"
+        },
+        "purpose": {
+          "for_approval": "Na odobrenje",
+          "for_review": "Na pregled",
+          "for_information": "Na znanje",
+          "for_construction": "Za građenje",
+          "for_tender": "Za natječaj",
+          "for_record": "Za evidenciju"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Evidencija izmjena",
+        "claim_register_title": "Evidencija potraživanja",
+        "notice_register_title": "Evidencija obavijesti",
+        "doc_title": "Zahtjev za izmjenu",
+        "doc_title_credit": "Zahtjev za izmjenu (umanjenje)",
+        "time_impact": "Utjecaj na rok",
+        "col_code": "Šifra",
+        "col_title": "Naziv",
+        "col_classification": "Vrsta",
+        "col_urgency": "Hitnost",
+        "col_requested": "Datum zahtjeva",
+        "col_claimed_amount": "Traženi iznos",
+        "col_agreed_amount": "Dogovoreni iznos",
+        "col_time_impact": "Utjecaj na rok (dani)",
+        "col_response_due": "Odgovor do",
+        "col_clause": "Članak ugovora",
+        "col_row": "Br.",
+        "col_claim_type": "Vrsta potraživanja",
+        "col_raised": "Datum podnošenja",
+        "col_period_start": "Razdoblje od",
+        "col_period_end": "Razdoblje do",
+        "col_description": "Opis",
+        "col_decided_amount": "Utvrđeni iznos",
+        "col_days_requested": "Traženi dani",
+        "col_days_granted": "Odobreni dani",
+        "col_recipient_type": "Upućeno",
+        "col_recipient": "Primatelj",
+        "col_target_response": "Očekivani odgovor",
+        "col_response_received": "Primljen odgovor",
+        "requested_by": "Zahtjev",
+        "decided_by": "Odluka",
+        "date_submitted": "Datum predaje",
+        "date_decided": "Datum odluke",
+        "description": "Opis",
+        "no_description": "Nema zabilježenog opisa.",
+        "decision_notes": "Napomene uz odluku",
+        "no_decision_notes": "Odluka još nije zabilježena.",
+        "variation_register_filename": "evidencija-izmjena",
+        "claim_register_filename": "evidencija-potrazivanja",
+        "notice_register_filename": "evidencija-obavijesti"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "under_review": "U pregledu",
+          "approved": "Odobreno",
+          "rejected": "Odbijeno",
+          "converted_to_vo": "Pretvoreno u nalog"
+        },
+        "claim_status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "under_review": "U pregledu",
+          "agreed": "Dogovoreno",
+          "granted": "Odobreno",
+          "rejected": "Odbijeno"
+        },
+        "notice_status": {
+          "issued": "Izdano",
+          "acknowledged": "Potvrđeno",
+          "responded": "Odgovoreno",
+          "closed": "Zatvoreno"
+        },
+        "classification": {
+          "scope_change": "Promjena opsega",
+          "unforeseen": "Nepredviđeni uvjet",
+          "owner_change": "Izmjena naručitelja",
+          "design_dev": "Razrada projekta",
+          "regulatory": "Zakonski zahtjev",
+          "other": "Ostalo"
+        },
+        "urgency": {
+          "low": "Niska",
+          "med": "Srednja",
+          "high": "Visoka"
+        },
+        "claim_type": {
+          "disruption": "Poremećaj radova",
+          "eot": "Produljenje roka"
+        },
+        "recipient_type": {
+          "owner": "Naručitelj",
+          "contractor": "Izvođač",
+          "architect": "Arhitekt",
+          "engineer": "Inženjer",
+          "consultant": "Konzultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Dnevnik gradilišta",
+        "overview": "Pregled",
+        "site_supervisor": "Voditelj gradilišta",
+        "not_recorded": "Nije zabilježeno",
+        "labour_on_site": "Radna snaga na gradilištu",
+        "equipment_on_site": "Oprema na gradilištu",
+        "completeness": "Potpunost",
+        "weather": "Vrijeme",
+        "weather_time": "Sat",
+        "weather_source": "Izvor",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vjetar (km/h)",
+        "weather_precip": "Oborine (mm)",
+        "weather_conditions": "Uvjeti",
+        "weather_empty": "Nema zabilježenog vremena za ovaj dan.",
+        "site_record": "Zapis s gradilišta",
+        "entries_empty": "Nema unosa u ovom dnevniku.",
+        "notes": "Napomene",
+        "notes_empty": "Nema dodatnih napomena.",
+        "footer_supervisor": "Voditelj: {name}",
+        "footer_supervisor_missing": "Voditelj gradilišta: nije zabilježeno",
+        "footer_generated": "Izrađeno: {timestamp}",
+        "footer_page": "Stranica {page} od {total}",
+        "workforce": "Radnici po tvrtkama",
+        "workforce_company": "Tvrtka",
+        "workforce_count": "Osobe",
+        "workforce_unassigned": "Nije dodijeljeno tvrtki",
+        "workforce_total": "Ukupno",
+        "signatures": "Potpisi",
+        "sig_prepared": "Izrada (voditelj gradilišta)",
+        "sig_approved": "Odobrenje (predstavnik naručitelja)",
+        "sig_name": "Ime i prezime",
+        "sig_title": "Funkcija",
+        "sig_date": "Datum",
+        "sig_signature": "Potpis",
+        "signed_note": "Potpisano u sustavu: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "dnevnik",
+        "summary_wind": "vjetar {value} km/h",
+        "summary_precipitation": "oborine {value} mm",
+        "summary_humidity": "vlaga {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Posjetitelji",
+          "event": "Događaji",
+          "delivery": "Isporučeni materijal",
+          "completion": "Izvedeni radovi",
+          "incident_summary": "Sigurnost i incidenti",
+          "inspection_summary": "Inspekcije",
+          "photo_note": "Foto bilješke",
+          "general": "Opće bilješke"
+        },
+        "status": {
+          "open": "Otvoreno",
+          "closed": "Zatvoreno",
+          "signed": "Potpisano",
+          "archived": "Arhivirano"
+        },
+        "condition": {
+          "clear": "vedro",
+          "mainly_clear": "pretežno vedro",
+          "partly_cloudy": "djelomično oblačno",
+          "cloudy": "oblačno",
+          "overcast": "prekriveno",
+          "fog": "magla",
+          "fog_rime": "ledena magla",
+          "drizzle_light": "slaba rosulja",
+          "drizzle_moderate": "umjerena rosulja",
+          "drizzle_dense": "jaka rosulja",
+          "rain": "kiša",
+          "rain_light": "slaba kiša",
+          "rain_moderate": "umjerena kiša",
+          "rain_heavy": "jaka kiša",
+          "freezing_rain_light": "slaba ledena kiša",
+          "freezing_rain_heavy": "jaka ledena kiša",
+          "snow": "snijeg",
+          "snow_light": "slab snijeg",
+          "snow_moderate": "umjeren snijeg",
+          "snow_heavy": "jak snijeg",
+          "rain_showers_light": "slabi pljuskovi kiše",
+          "rain_showers_moderate": "umjereni pljuskovi kiše",
+          "rain_showers_violent": "jaki pljuskovi kiše",
+          "snow_showers_light": "slabi pljuskovi snijega",
+          "snow_showers_heavy": "jaki pljuskovi snijega",
+          "thunderstorm": "grmljavina",
+          "thunderstorm_hail_light": "grmljavina sa slabom tučom",
+          "thunderstorm_hail_heavy": "grmljavina s jakom tučom"
+        },
+        "source": {
+          "manual": "Ručni unos",
+          "open_meteo": "Meteorološka služba",
+          "sensor": "Senzor na gradilištu"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Evidencija upita (RFI)",
+        "col_number": "Br. RFI",
+        "col_subject": "Predmet",
+        "col_raised_by": "Podnositelj",
+        "col_assigned_to": "Dodijeljeno",
+        "col_ball_in_court": "Na potezu",
+        "col_date_required": "Traženi datum",
+        "col_response_due": "Odgovor do",
+        "col_days_open": "Dana otvoreno",
+        "col_cost_impact": "Utjecaj na trošak",
+        "col_schedule_impact": "Utjecaj na rok",
+        "col_response": "Odgovor",
+        "yes_with": "Da ({detail})",
+        "register_filename": "evidencija-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "open": "Otvoreno",
+          "answered": "Odgovoreno",
+          "closed": "Zatvoreno",
+          "void": "Ništavno"
+        }
+      }
+    }
   }
 }

@@ -618,5 +618,539 @@
       "draft": "작성 중",
       "frozen": "확정"
     }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "급배수위생",
+          "fire_protection": "소방",
+          "civil": "토목",
+          "bms": "건물자동제어",
+          "hvac": "공조환기",
+          "lighting": "조명",
+          "mechanical": "기계",
+          "architectural": "건축",
+          "electrical": "전기",
+          "structural": "구조",
+          "elv": "약전"
+        },
+        "type": {
+          "sample": "샘플",
+          "method_statement": "시공계획서",
+          "shop_drawing": "시공도",
+          "mock_up": "목업",
+          "certificate": "증명서",
+          "test_report": "시험성적서",
+          "calculation": "계산서",
+          "product_data": "제품자료",
+          "warranty": "보증서"
+        },
+        "status": {
+          "draft": "작성중",
+          "approved_as_noted": "조건부 승인",
+          "revise_and_resubmit": "수정 후 재제출",
+          "rejected": "반려",
+          "under_review": "검토중",
+          "closed": "종결",
+          "submitted": "제출됨",
+          "approved": "승인"
+        }
+      },
+      "strings": {
+        "review_history": "검토 이력",
+        "submitted_by_org": "제출 회사",
+        "doc_title": "승인요청서",
+        "col_on_site_needed_by": "현장 반입 / 승인기한",
+        "col_drawings": "연관 도면",
+        "col_approval_late": "기한 초과일",
+        "col_needed_by": "승인 필요일",
+        "col_lead_time": "납기(주)",
+        "sig_reviewed": "검토",
+        "col_model": "모델 / 참조",
+        "col_discipline": "공종",
+        "col_date_submitted": "제출일",
+        "col_reviewer": "검토자",
+        "col_required_on_site": "현장 필요일",
+        "register_title_method_statement": "시공계획서 대장",
+        "col_supplier": "공급업체",
+        "hist_returned": "회신",
+        "col_review_code": "검토 코드",
+        "col_origin": "원산지",
+        "register_filename_method_statement": "sigong-gyehoekseo-daejang",
+        "sig_submitted": "제출",
+        "col_long_lead": "장납기",
+        "drawings_missing_other": "연관 도면 {n}건을 사용할 수 없음",
+        "col_product": "제조사 / 모델 / 원산지",
+        "col_outcome": "검토 결과",
+        "col_number": "승인요청 번호",
+        "register_filename_product_data": "jajae-seungin-daejang",
+        "col_manufacturer": "제조사 / 브랜드",
+        "col_rev": "개정",
+        "register_filename_shop_drawing": "sigongdo-daejang",
+        "col_type": "유형",
+        "col_review_overdue": "초과일수",
+        "weeks_other": "{n}주",
+        "hist_submitted": "제출",
+        "doc_title_product_data": "자재승인요청서",
+        "col_approver": "승인자",
+        "col_date_required": "필요일",
+        "col_title": "제목",
+        "col_ball_in_court": "조치 주체",
+        "no_review_notes": "기록된 검토 의견이 없습니다.",
+        "sig_approved": "승인",
+        "register_title": "승인요청 대장",
+        "register_filename": "seungin-yocheong-daejang",
+        "col_submitted_returned": "제출 / 회신",
+        "col_date_returned": "회신일",
+        "col_review_due": "검토 기한",
+        "col_spec": "시방서 항목",
+        "col_days_in_review_print": "검토일수",
+        "drawings_missing_one": "연관 도면 {n}건을 사용할 수 없음",
+        "register_title_product_data": "자재승인 대장",
+        "review_notes": "검토 의견",
+        "resubmit_for_record": "정정본을 기록용으로 재제출할 것",
+        "col_days_in_review": "검토일수",
+        "weeks_one": "{n}주",
+        "register_title_shop_drawing": "시공도 대장",
+        "col_review_period": "검토 기간(일)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "시공용",
+          "for_approval": "승인용",
+          "for_review": "검토용",
+          "for_information": "참고용",
+          "for_record": "기록용",
+          "for_tender": "입찰용"
+        },
+        "status": {
+          "draft": "작성중",
+          "responded": "회신됨",
+          "issued": "발행됨"
+        }
+      },
+      "strings": {
+        "col_purpose": "목적",
+        "col_subject": "제목",
+        "doc_title": "문서 송부서",
+        "cover_note": "송부 메모",
+        "acknowledged": "수령 확인됨",
+        "sig_issued": "발행",
+        "col_response_due": "회신 기한",
+        "col_recipients": "수신처",
+        "col_item_count": "건수",
+        "item_description": "내용",
+        "col_issued": "발행일",
+        "sender": "발신자",
+        "register_title": "문서 송부서 대장",
+        "recipients": "수신처",
+        "responded": "회신일",
+        "items": "송부 문서",
+        "item_no": "번호",
+        "item_notes": "비고",
+        "col_number": "송부서 번호",
+        "recipient": "수신자",
+        "action_required": "필요 조치",
+        "no_cover_note": "송부 메모가 없습니다.",
+        "register_filename": "songbuseo-daejang",
+        "sig_received": "수령"
+      }
+    },
+    "furniture": {
+      "records": "기록",
+      "project_no": "공사 번호",
+      "sig_prepared_by": "작성",
+      "signer_title": "직위",
+      "total": "합계",
+      "date": "날짜",
+      "footer_generated": "생성 {timestamp}",
+      "sig_checked_by": "확인",
+      "project": "공사명",
+      "status": "상태",
+      "currency": "통화",
+      "yes": "예",
+      "signature": "서명",
+      "signatures": "서명",
+      "days_one": "{n}일",
+      "footer_page": "{page} / {total} 쪽",
+      "sig_approved_by": "승인",
+      "no": "아니오",
+      "days_other": "{n}일",
+      "empty_register": "기록이 없습니다.",
+      "name": "성명",
+      "generated_on": "생성일"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "오류 또는 누락",
+          "regulatory": "법규",
+          "unforeseen": "예측 불가 조건",
+          "non_conformance": "부적합",
+          "design_change": "설계 변경",
+          "client_request": "발주자 요청",
+          "value_engineering": "VE 제안"
+        },
+        "instrument": {
+          "claim": "클레임",
+          "works_change": "변경 지시",
+          "site_confirmation": "현장 확인서"
+        },
+        "change": {
+          "modified": "변경",
+          "added": "추가",
+          "removed": "삭제"
+        },
+        "status": {
+          "draft": "작성중",
+          "executed": "이행됨",
+          "rejected": "반려",
+          "submitted": "제출됨",
+          "approved": "승인"
+        }
+      },
+      "strings": {
+        "time_impact": "공기 영향",
+        "item_original_rate": "당초 단가",
+        "doc_title": "변경지시서",
+        "col_code": "코드",
+        "approved_by": "승인",
+        "col_approved_time": "승인 공기(일)",
+        "item_new_rate": "변경 단가",
+        "col_approved": "승인일",
+        "col_contractor_amount": "시공사 금액",
+        "col_engineer_amount": "감리 금액",
+        "no_description": "기록된 내용이 없습니다.",
+        "col_submitted": "제출일",
+        "approved_time": "승인 공기",
+        "col_cost_impact": "비용 영향",
+        "item_description": "내용",
+        "item_cost_delta": "비용 차액",
+        "col_title": "제목",
+        "submitted_by": "제출",
+        "register_title": "변경지시서 대장",
+        "item_original_quantity": "당초 수량",
+        "items": "변경 항목",
+        "col_instrument": "구분",
+        "col_time_impact": "공기 영향(일)",
+        "col_reason": "사유",
+        "item_change": "변경",
+        "col_approved_amount": "승인 금액",
+        "item_new_quantity": "변경 수량",
+        "register_filename": "byeongyeong-jisiseo-daejang",
+        "description": "내용",
+        "item_unit": "단위"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "회신됨",
+          "acknowledged": "수령 확인됨",
+          "closed": "종결",
+          "issued": "발행됨"
+        },
+        "request_status": {
+          "draft": "작성중",
+          "rejected": "반려",
+          "converted_to_vo": "변경지시로 전환",
+          "under_review": "검토중",
+          "submitted": "제출됨",
+          "approved": "승인"
+        },
+        "claim_type": {
+          "eot": "공기연장",
+          "disruption": "공정 방해"
+        },
+        "recipient_type": {
+          "owner": "발주자",
+          "consultant": "컨설턴트",
+          "contractor": "시공사",
+          "architect": "건축사",
+          "engineer": "엔지니어"
+        },
+        "urgency": {
+          "low": "낮음",
+          "med": "보통",
+          "high": "높음"
+        },
+        "classification": {
+          "other": "기타",
+          "regulatory": "법규",
+          "unforeseen": "예측 불가 조건",
+          "owner_change": "발주자 변경",
+          "design_dev": "설계 구체화",
+          "scope_change": "범위 변경"
+        },
+        "claim_status": {
+          "draft": "작성중",
+          "granted": "인용",
+          "rejected": "반려",
+          "agreed": "합의됨",
+          "under_review": "검토중",
+          "submitted": "제출됨"
+        }
+      },
+      "strings": {
+        "col_row": "번호",
+        "time_impact": "공기 영향",
+        "doc_title": "변경요청서",
+        "col_code": "코드",
+        "date_decided": "결정일",
+        "col_decided_amount": "결정 금액",
+        "variation_register_title": "변경 대장",
+        "notice_register_title": "통보 대장",
+        "decision_notes": "결정 사항",
+        "col_classification": "유형",
+        "requested_by": "요청",
+        "col_agreed_amount": "합의 금액",
+        "col_recipient": "수신처",
+        "col_response_due": "회신 기한",
+        "no_description": "기록된 내용이 없습니다.",
+        "decided_by": "결정",
+        "variation_register_filename": "byeongyeong-daejang",
+        "claim_register_title": "클레임 대장",
+        "col_days_granted": "인용 일수",
+        "col_title": "제목",
+        "date_submitted": "제출일",
+        "col_clause": "계약 조항",
+        "col_raised": "제기일",
+        "col_description": "내용",
+        "col_period_end": "기간 종료",
+        "col_requested": "요청일",
+        "claim_register_filename": "keulleim-daejang",
+        "col_response_received": "회신 수령",
+        "doc_title_credit": "변경요청서(감액)",
+        "col_time_impact": "공기 영향(일)",
+        "col_claimed_amount": "청구 금액",
+        "col_period_start": "기간 시작",
+        "notice_register_filename": "tongbo-daejang",
+        "description": "내용",
+        "no_decision_notes": "아직 기록된 결정이 없습니다.",
+        "col_recipient_type": "수신 구분",
+        "col_target_response": "회신 예정",
+        "col_days_requested": "요청 일수",
+        "col_claim_type": "클레임 유형",
+        "col_urgency": "긴급도"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "발신",
+          "incoming": "수신"
+        },
+        "type": {
+          "letter": "공문",
+          "notice": "통보",
+          "memo": "메모",
+          "report": "보고서",
+          "email": "이메일"
+        },
+        "status": {
+          "awaiting_response": "회신 대기",
+          "closed": "종결",
+          "responded": "회신됨",
+          "open": "진행중"
+        }
+      },
+      "strings": {
+        "col_to": "수신",
+        "no_notes": "기록된 비고가 없습니다.",
+        "col_subject": "제목",
+        "doc_title": "공문",
+        "register_title": "공문 대장",
+        "col_clause": "계약 조항",
+        "linked_documents": "연관 문서",
+        "col_reference": "문서 번호",
+        "col_date_received": "수신일",
+        "notes": "비고",
+        "col_response_due": "회신 기한",
+        "sig_prepared": "작성",
+        "attachments": "첨부 파일",
+        "col_date_sent": "발신일",
+        "col_direction": "구분",
+        "register_filename": "gongmun-daejang",
+        "col_from": "발신",
+        "col_type": "유형",
+        "sig_received": "수령"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "지연 / 공기연장",
+          "valuation": "금액 산정",
+          "dispute": "분쟁",
+          "general": "일반 기록"
+        },
+        "section": {
+          "delay": "지연",
+          "rfis": "질의서(RFI)",
+          "variations": "변경",
+          "other": "기타",
+          "notices": "통보",
+          "approvals": "승인",
+          "correspondence": "공문",
+          "timeline": "시계열"
+        },
+        "kind": {
+          "notice": "통보",
+          "variation_notice": "변경 통보",
+          "correspondence": "공문",
+          "variation_order": "변경지시",
+          "moc_entry": "변경 기록",
+          "change_order": "변경지시서",
+          "variation_request": "변경요청"
+        }
+      },
+      "strings": {
+        "col_row": "번호",
+        "col_date": "날짜",
+        "basis": "근거",
+        "col_summary": "요약",
+        "register_title": "증빙 자료집",
+        "period_to": "최신 기록",
+        "period_from": "최초 기록",
+        "col_kind": "기록 유형",
+        "subject": "제목",
+        "col_title": "제목",
+        "register_filename": "jeungbin-jaryojip",
+        "col_reference": "문서 번호",
+        "col_section": "구분",
+        "col_record_id": "기록 ID",
+        "digest": "무결성 코드(SHA-256, 앞 16자)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "제목",
+        "register_title": "질의서(RFI) 대장",
+        "yes_with": "예 ({detail})",
+        "col_raised_by": "제기자",
+        "col_schedule_impact": "공정 영향",
+        "col_date_required": "필요일",
+        "col_assigned_to": "담당자",
+        "col_ball_in_court": "조치 주체",
+        "col_response_due": "회신 기한",
+        "col_number": "RFI 번호",
+        "col_days_open": "미결 일수",
+        "col_cost_impact": "비용 영향",
+        "register_filename": "rfi-daejang",
+        "col_response": "회신"
+      },
+      "labels": {
+        "status": {
+          "draft": "초안",
+          "open": "미결",
+          "answered": "답변됨",
+          "closed": "종료됨",
+          "void": "무효"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "거센 소나기",
+          "drizzle_moderate": "보통 이슬비",
+          "fog": "안개",
+          "overcast": "흐림",
+          "snow_moderate": "보통 눈",
+          "snow_heavy": "폭설",
+          "rain_showers_moderate": "보통 소나기",
+          "snow_showers_light": "약한 소낙눈",
+          "rain_showers_light": "약한 소나기",
+          "snow": "눈",
+          "fog_rime": "어는 안개",
+          "partly_cloudy": "구름 조금",
+          "thunderstorm": "뇌우",
+          "snow_light": "약한 눈",
+          "freezing_rain_heavy": "강한 어는 비",
+          "drizzle_light": "약한 이슬비",
+          "rain_light": "약한 비",
+          "thunderstorm_hail_heavy": "큰 우박을 동반한 뇌우",
+          "drizzle_dense": "짙은 이슬비",
+          "rain": "비",
+          "mainly_clear": "대체로 맑음",
+          "clear": "맑음",
+          "rain_heavy": "폭우",
+          "rain_moderate": "보통 비",
+          "thunderstorm_hail_light": "작은 우박을 동반한 뇌우",
+          "cloudy": "구름 많음",
+          "snow_showers_heavy": "강한 소낙눈",
+          "freezing_rain_light": "약한 어는 비"
+        },
+        "source": {
+          "open_meteo": "기상 서비스",
+          "sensor": "현장 센서",
+          "manual": "수동 입력"
+        },
+        "entry_type": {
+          "incident_summary": "안전 및 사고",
+          "event": "행사",
+          "visitor": "방문자",
+          "inspection_summary": "검사",
+          "completion": "시행 작업",
+          "delivery": "반입 자재",
+          "photo_note": "사진 메모",
+          "general": "일반 사항"
+        },
+        "status": {
+          "closed": "종결",
+          "archived": "보관됨",
+          "signed": "서명됨",
+          "open": "작성중"
+        }
+      },
+      "strings": {
+        "summary_wind": "풍속 {value} km/h",
+        "weather_temp": "기온(°C)",
+        "doc_title": "공사일지",
+        "summary_precipitation": "강수량 {value} mm",
+        "site_supervisor": "현장소장",
+        "weather_precip": "강수량(mm)",
+        "summary_humidity": "습도 {value} %",
+        "footer_supervisor": "현장소장: {name}",
+        "sig_name": "성명",
+        "footer_supervisor_missing": "현장소장: 미기록",
+        "footer_generated": "생성: {timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "합계",
+        "overview": "개요",
+        "workforce": "업체별 투입 인원",
+        "workforce_count": "인원",
+        "not_recorded": "미기록",
+        "sig_prepared": "작성(현장소장)",
+        "decimal_mark": ".",
+        "sig_approved": "승인(발주자 대리인)",
+        "completeness": "작성률",
+        "sig_signature": "서명",
+        "signatures": "서명",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "업체",
+        "notes_empty": "특이사항이 없습니다.",
+        "sig_title": "직위",
+        "weather": "날씨",
+        "weather_wind": "풍속(km/h)",
+        "weather_time": "시각",
+        "weather_empty": "이 날의 날씨가 기록되지 않았습니다.",
+        "footer_page": "{page} / {total} 쪽",
+        "equipment_on_site": "현장 장비",
+        "weather_source": "출처",
+        "workforce_unassigned": "업체 미배정",
+        "sig_date": "날짜",
+        "filename_prefix": "gongsa-ilji",
+        "labour_on_site": "현장 투입 인원",
+        "weather_conditions": "날씨 상태",
+        "signed_note": "시스템에서 서명됨: {signers}",
+        "notes": "비고",
+        "entries_empty": "이 일지에 기록된 항목이 없습니다.",
+        "site_record": "현장 기록"
+      }
+    }
   }
 }

@@ -618,5 +618,539 @@
       "draft": "Nháp",
       "frozen": "Đã khóa"
     }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "Cấp thoát nước",
+          "fire_protection": "PCCC",
+          "civil": "Xây dựng",
+          "bms": "Tự động hóa tòa nhà",
+          "hvac": "Điều hòa thông gió",
+          "lighting": "Chiếu sáng",
+          "mechanical": "Cơ khí",
+          "architectural": "Kiến trúc",
+          "electrical": "Điện",
+          "structural": "Kết cấu",
+          "elv": "Điện nhẹ"
+        },
+        "type": {
+          "sample": "Mẫu vật liệu",
+          "method_statement": "Biện pháp thi công",
+          "shop_drawing": "Bản vẽ thi công",
+          "mock_up": "Mô hình mẫu",
+          "certificate": "Chứng chỉ",
+          "test_report": "Báo cáo thử nghiệm",
+          "calculation": "Bản tính",
+          "product_data": "Hồ sơ sản phẩm",
+          "warranty": "Phiếu bảo hành"
+        },
+        "status": {
+          "draft": "Nháp",
+          "approved_as_noted": "Duyệt có ghi chú",
+          "revise_and_resubmit": "Sửa và trình lại",
+          "rejected": "Từ chối",
+          "under_review": "Đang xem xét",
+          "closed": "Đã đóng",
+          "submitted": "Đã trình",
+          "approved": "Đã duyệt"
+        }
+      },
+      "strings": {
+        "review_history": "Lịch sử xem xét",
+        "submitted_by_org": "Đơn vị trình",
+        "doc_title": "Hồ sơ trình duyệt",
+        "col_on_site_needed_by": "Vào công trường / hạn duyệt",
+        "col_drawings": "Bản vẽ liên quan",
+        "col_approval_late": "Số ngày quá hạn",
+        "col_needed_by": "Hạn cần duyệt",
+        "col_lead_time": "Thời gian đặt hàng (tuần)",
+        "sig_reviewed": "Người xem xét",
+        "col_model": "Mẫu mã / tham chiếu",
+        "col_discipline": "Chuyên ngành",
+        "col_date_submitted": "Ngày trình",
+        "col_reviewer": "Người xem xét",
+        "col_required_on_site": "Ngày cần tại công trường",
+        "register_title_method_statement": "Sổ theo dõi biện pháp thi công",
+        "col_supplier": "Nhà cung cấp",
+        "hist_returned": "Trả lại",
+        "col_review_code": "Mã xem xét",
+        "col_origin": "Xuất xứ",
+        "register_filename_method_statement": "so-theo-doi-bien-phap-thi-cong",
+        "sig_submitted": "Người trình",
+        "col_long_lead": "Đặt hàng dài ngày",
+        "drawings_missing_other": "{n} bản vẽ liên quan không còn khả dụng",
+        "col_product": "Hãng / mẫu / xuất xứ",
+        "col_outcome": "Kết quả xem xét",
+        "col_number": "Số hồ sơ",
+        "register_filename_product_data": "so-theo-doi-duyet-vat-tu",
+        "col_manufacturer": "Nhà sản xuất / nhãn hiệu",
+        "col_rev": "Lần sửa",
+        "register_filename_shop_drawing": "so-theo-doi-ban-ve-thi-cong",
+        "col_type": "Loại",
+        "col_review_overdue": "Số ngày quá hạn",
+        "weeks_other": "{n} tuần",
+        "hist_submitted": "Đã trình",
+        "doc_title_product_data": "Phiếu duyệt vật tư",
+        "col_approver": "Người duyệt",
+        "col_date_required": "Ngày yêu cầu",
+        "col_title": "Tiêu đề",
+        "col_ball_in_court": "Bên xử lý",
+        "no_review_notes": "Chưa có ý kiến xem xét.",
+        "sig_approved": "Người duyệt",
+        "register_title": "Sổ theo dõi hồ sơ trình duyệt",
+        "register_filename": "so-theo-doi-ho-so-trinh-duyet",
+        "col_submitted_returned": "Trình / trả lại",
+        "col_date_returned": "Ngày trả lại",
+        "col_review_due": "Hạn xem xét",
+        "col_spec": "Mục chỉ dẫn kỹ thuật",
+        "col_days_in_review_print": "Số ngày xem xét",
+        "drawings_missing_one": "{n} bản vẽ liên quan không còn khả dụng",
+        "register_title_product_data": "Sổ theo dõi duyệt vật tư",
+        "review_notes": "Ý kiến xem xét",
+        "resubmit_for_record": "Trình lại bản đã chỉnh sửa để lưu hồ sơ",
+        "col_days_in_review": "Số ngày xem xét",
+        "weeks_one": "{n} tuần",
+        "register_title_shop_drawing": "Sổ theo dõi bản vẽ thi công",
+        "col_review_period": "Thời hạn xem xét (ngày)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "Để thi công",
+          "for_approval": "Để phê duyệt",
+          "for_review": "Để xem xét",
+          "for_information": "Để biết",
+          "for_record": "Để lưu hồ sơ",
+          "for_tender": "Để đấu thầu"
+        },
+        "status": {
+          "draft": "Nháp",
+          "responded": "Đã phản hồi",
+          "issued": "Đã phát hành"
+        }
+      },
+      "strings": {
+        "col_purpose": "Mục đích",
+        "col_subject": "Chủ đề",
+        "doc_title": "Phiếu chuyển tài liệu",
+        "cover_note": "Ghi chú kèm theo",
+        "acknowledged": "Đã xác nhận nhận",
+        "sig_issued": "Người phát hành",
+        "col_response_due": "Hạn phản hồi",
+        "col_recipients": "Nơi nhận",
+        "col_item_count": "Số mục",
+        "item_description": "Mô tả",
+        "col_issued": "Ngày phát hành",
+        "sender": "Người gửi",
+        "register_title": "Sổ theo dõi phiếu chuyển tài liệu",
+        "recipients": "Nơi nhận",
+        "responded": "Ngày phản hồi",
+        "items": "Tài liệu chuyển",
+        "item_no": "STT",
+        "item_notes": "Ghi chú",
+        "col_number": "Số phiếu chuyển",
+        "recipient": "Người nhận",
+        "action_required": "Việc cần thực hiện",
+        "no_cover_note": "Không có ghi chú kèm theo.",
+        "register_filename": "so-theo-doi-phieu-chuyen-tai-lieu",
+        "sig_received": "Người nhận"
+      }
+    },
+    "furniture": {
+      "records": "Bản ghi",
+      "project_no": "Mã dự án",
+      "sig_prepared_by": "Lập bởi",
+      "signer_title": "Chức vụ",
+      "total": "Tổng",
+      "date": "Ngày",
+      "footer_generated": "Tạo lúc {timestamp}",
+      "sig_checked_by": "Kiểm tra bởi",
+      "project": "Dự án",
+      "status": "Trạng thái",
+      "currency": "Tiền tệ",
+      "yes": "Có",
+      "signature": "Chữ ký",
+      "signatures": "Chữ ký",
+      "days_one": "{n} ngày",
+      "footer_page": "Trang {page} / {total}",
+      "sig_approved_by": "Duyệt bởi",
+      "no": "Không",
+      "days_other": "{n} ngày",
+      "empty_register": "Không có bản ghi.",
+      "name": "Họ tên",
+      "generated_on": "Ngày tạo"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "Sai sót hoặc thiếu sót",
+          "regulatory": "Quy định pháp lý",
+          "unforeseen": "Điều kiện không lường trước",
+          "non_conformance": "Không phù hợp",
+          "design_change": "Thay đổi thiết kế",
+          "client_request": "Yêu cầu của chủ đầu tư",
+          "value_engineering": "Tối ưu giá trị (VE)"
+        },
+        "instrument": {
+          "claim": "Yêu cầu bồi thường",
+          "works_change": "Lệnh thay đổi",
+          "site_confirmation": "Xác nhận hiện trường"
+        },
+        "change": {
+          "modified": "Sửa đổi",
+          "added": "Bổ sung",
+          "removed": "Loại bỏ"
+        },
+        "status": {
+          "draft": "Nháp",
+          "executed": "Đã thực hiện",
+          "rejected": "Từ chối",
+          "submitted": "Đã trình",
+          "approved": "Đã duyệt"
+        }
+      },
+      "strings": {
+        "time_impact": "Tác động thời gian",
+        "item_original_rate": "Đơn giá gốc",
+        "doc_title": "Lệnh thay đổi",
+        "col_code": "Mã",
+        "approved_by": "Duyệt bởi",
+        "col_approved_time": "Thời gian duyệt (ngày)",
+        "item_new_rate": "Đơn giá mới",
+        "col_approved": "Ngày duyệt",
+        "col_contractor_amount": "Giá trị nhà thầu",
+        "col_engineer_amount": "Giá trị tư vấn",
+        "no_description": "Chưa có mô tả.",
+        "col_submitted": "Ngày trình",
+        "approved_time": "Thời gian được duyệt",
+        "col_cost_impact": "Tác động chi phí",
+        "item_description": "Mô tả",
+        "item_cost_delta": "Chênh lệch chi phí",
+        "col_title": "Tiêu đề",
+        "submitted_by": "Trình bởi",
+        "register_title": "Sổ theo dõi lệnh thay đổi",
+        "item_original_quantity": "SL gốc",
+        "items": "Hạng mục thay đổi",
+        "col_instrument": "Loại văn bản",
+        "col_time_impact": "Tác động thời gian (ngày)",
+        "col_reason": "Lý do",
+        "item_change": "Thay đổi",
+        "col_approved_amount": "Giá trị được duyệt",
+        "item_new_quantity": "SL mới",
+        "register_filename": "so-theo-doi-lenh-thay-doi",
+        "description": "Mô tả",
+        "item_unit": "Đơn vị"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "Đã phản hồi",
+          "acknowledged": "Đã xác nhận nhận",
+          "closed": "Đã đóng",
+          "issued": "Đã phát hành"
+        },
+        "request_status": {
+          "draft": "Nháp",
+          "rejected": "Từ chối",
+          "converted_to_vo": "Đã chuyển thành lệnh",
+          "under_review": "Đang xem xét",
+          "submitted": "Đã trình",
+          "approved": "Đã duyệt"
+        },
+        "claim_type": {
+          "eot": "Gia hạn thời gian",
+          "disruption": "Gián đoạn thi công"
+        },
+        "recipient_type": {
+          "owner": "Chủ đầu tư",
+          "consultant": "Tư vấn",
+          "contractor": "Nhà thầu",
+          "architect": "Kiến trúc sư",
+          "engineer": "Kỹ sư"
+        },
+        "urgency": {
+          "low": "Thấp",
+          "med": "Trung bình",
+          "high": "Cao"
+        },
+        "classification": {
+          "other": "Khác",
+          "regulatory": "Quy định pháp lý",
+          "unforeseen": "Điều kiện không lường trước",
+          "owner_change": "Chủ đầu tư thay đổi",
+          "design_dev": "Phát triển thiết kế",
+          "scope_change": "Thay đổi phạm vi"
+        },
+        "claim_status": {
+          "draft": "Nháp",
+          "granted": "Chấp thuận",
+          "rejected": "Từ chối",
+          "agreed": "Đã thống nhất",
+          "under_review": "Đang xem xét",
+          "submitted": "Đã trình"
+        }
+      },
+      "strings": {
+        "col_row": "STT",
+        "time_impact": "Tác động thời gian",
+        "doc_title": "Đề nghị phát sinh",
+        "col_code": "Mã",
+        "date_decided": "Ngày quyết định",
+        "col_decided_amount": "Giá trị quyết định",
+        "variation_register_title": "Sổ theo dõi phát sinh",
+        "notice_register_title": "Sổ theo dõi thông báo",
+        "decision_notes": "Ghi chú quyết định",
+        "col_classification": "Loại",
+        "requested_by": "Đề nghị bởi",
+        "col_agreed_amount": "Giá trị thống nhất",
+        "col_recipient": "Người nhận",
+        "col_response_due": "Hạn phản hồi",
+        "no_description": "Chưa có mô tả.",
+        "decided_by": "Quyết định bởi",
+        "variation_register_filename": "so-theo-doi-phat-sinh",
+        "claim_register_title": "Sổ theo dõi yêu cầu bồi thường",
+        "col_days_granted": "Số ngày chấp thuận",
+        "col_title": "Tiêu đề",
+        "date_submitted": "Ngày trình",
+        "col_clause": "Điều khoản HĐ",
+        "col_raised": "Ngày đưa ra",
+        "col_description": "Mô tả",
+        "col_period_end": "Đến ngày",
+        "col_requested": "Ngày đề nghị",
+        "claim_register_filename": "so-theo-doi-yeu-cau-boi-thuong",
+        "col_response_received": "Phản hồi nhận được",
+        "doc_title_credit": "Đề nghị phát sinh (giảm trừ)",
+        "col_time_impact": "Tác động thời gian (ngày)",
+        "col_claimed_amount": "Giá trị yêu cầu",
+        "col_period_start": "Từ ngày",
+        "notice_register_filename": "so-theo-doi-thong-bao",
+        "description": "Mô tả",
+        "no_decision_notes": "Chưa ghi nhận quyết định.",
+        "col_recipient_type": "Gửi đến",
+        "col_target_response": "Dự kiến phản hồi",
+        "col_days_requested": "Số ngày đề nghị",
+        "col_claim_type": "Loại yêu cầu",
+        "col_urgency": "Mức khẩn"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "Đi",
+          "incoming": "Đến"
+        },
+        "type": {
+          "letter": "Công văn",
+          "notice": "Thông báo",
+          "memo": "Bản ghi nhớ",
+          "report": "Báo cáo",
+          "email": "Email"
+        },
+        "status": {
+          "awaiting_response": "Chờ phản hồi",
+          "closed": "Đã đóng",
+          "responded": "Đã phản hồi",
+          "open": "Đang mở"
+        }
+      },
+      "strings": {
+        "col_to": "Gửi đến",
+        "no_notes": "Chưa có ghi chú.",
+        "col_subject": "Chủ đề",
+        "doc_title": "Công văn trao đổi",
+        "register_title": "Sổ công văn",
+        "col_clause": "Điều khoản HĐ",
+        "linked_documents": "Tài liệu liên quan",
+        "col_reference": "Số hiệu",
+        "col_date_received": "Ngày nhận",
+        "notes": "Ghi chú",
+        "col_response_due": "Hạn phản hồi",
+        "sig_prepared": "Lập bởi",
+        "attachments": "Tệp đính kèm",
+        "col_date_sent": "Ngày gửi",
+        "col_direction": "Hướng",
+        "register_filename": "so-cong-van",
+        "col_from": "Từ",
+        "col_type": "Loại",
+        "sig_received": "Người nhận"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "Chậm tiến độ / gia hạn thời gian",
+          "valuation": "Định giá",
+          "dispute": "Tranh chấp",
+          "general": "Hồ sơ chung"
+        },
+        "section": {
+          "delay": "Chậm tiến độ",
+          "rfis": "RFI",
+          "variations": "Phát sinh",
+          "other": "Khác",
+          "notices": "Thông báo",
+          "approvals": "Phê duyệt",
+          "correspondence": "Công văn trao đổi",
+          "timeline": "Dòng thời gian"
+        },
+        "kind": {
+          "notice": "Thông báo",
+          "variation_notice": "Thông báo phát sinh",
+          "correspondence": "Công văn trao đổi",
+          "variation_order": "Lệnh phát sinh",
+          "moc_entry": "Ghi nhận thay đổi",
+          "change_order": "Lệnh thay đổi",
+          "variation_request": "Đề nghị phát sinh"
+        }
+      },
+      "strings": {
+        "col_row": "STT",
+        "col_date": "Ngày",
+        "basis": "Cơ sở",
+        "col_summary": "Tóm tắt",
+        "register_title": "Bộ chứng cứ",
+        "period_to": "Bản ghi mới nhất",
+        "period_from": "Bản ghi sớm nhất",
+        "col_kind": "Loại bản ghi",
+        "subject": "Chủ đề",
+        "col_title": "Tiêu đề",
+        "register_filename": "bo-chung-cu",
+        "col_reference": "Số hiệu",
+        "col_section": "Phần",
+        "col_record_id": "Mã bản ghi",
+        "digest": "Mã toàn vẹn (SHA-256, 16 ký tự đầu)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "Chủ đề",
+        "register_title": "Sổ theo dõi RFI",
+        "yes_with": "Có ({detail})",
+        "col_raised_by": "Người nêu",
+        "col_schedule_impact": "Tác động tiến độ",
+        "col_date_required": "Ngày yêu cầu",
+        "col_assigned_to": "Người phụ trách",
+        "col_ball_in_court": "Bên xử lý",
+        "col_response_due": "Hạn phản hồi",
+        "col_number": "Số RFI",
+        "col_days_open": "Số ngày tồn",
+        "col_cost_impact": "Tác động chi phí",
+        "register_filename": "so-theo-doi-rfi",
+        "col_response": "Phản hồi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bản nháp",
+          "open": "Đang mở",
+          "answered": "Đã trả lời",
+          "closed": "Đã đóng",
+          "void": "Vô hiệu"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "mưa rào rất to",
+          "drizzle_moderate": "mưa phùn vừa",
+          "fog": "sương mù",
+          "overcast": "u ám",
+          "snow_moderate": "tuyết vừa",
+          "snow_heavy": "tuyết dày",
+          "rain_showers_moderate": "mưa rào vừa",
+          "snow_showers_light": "tuyết rơi nhẹ từng đợt",
+          "rain_showers_light": "mưa rào nhẹ",
+          "snow": "tuyết",
+          "fog_rime": "sương mù đóng băng",
+          "partly_cloudy": "có mây rải rác",
+          "thunderstorm": "dông",
+          "snow_light": "tuyết nhẹ",
+          "freezing_rain_heavy": "mưa băng nặng",
+          "drizzle_light": "mưa phùn nhẹ",
+          "rain_light": "mưa nhẹ",
+          "thunderstorm_hail_heavy": "dông kèm mưa đá lớn",
+          "drizzle_dense": "mưa phùn dày",
+          "rain": "mưa",
+          "mainly_clear": "phần lớn quang đãng",
+          "clear": "quang đãng",
+          "rain_heavy": "mưa to",
+          "rain_moderate": "mưa vừa",
+          "thunderstorm_hail_light": "dông kèm mưa đá nhỏ",
+          "cloudy": "nhiều mây",
+          "snow_showers_heavy": "tuyết rơi dày từng đợt",
+          "freezing_rain_light": "mưa băng nhẹ"
+        },
+        "source": {
+          "open_meteo": "Dịch vụ thời tiết",
+          "sensor": "Cảm biến công trường",
+          "manual": "Nhập tay"
+        },
+        "entry_type": {
+          "incident_summary": "An toàn và sự cố",
+          "event": "Sự kiện",
+          "visitor": "Khách thăm",
+          "inspection_summary": "Kiểm tra",
+          "completion": "Công việc đã làm",
+          "delivery": "Vật tư nhập về",
+          "photo_note": "Ghi chú ảnh",
+          "general": "Ghi chú chung"
+        },
+        "status": {
+          "closed": "Đã đóng",
+          "archived": "Đã lưu trữ",
+          "signed": "Đã ký",
+          "open": "Đang mở"
+        }
+      },
+      "strings": {
+        "summary_wind": "gió {value} km/h",
+        "weather_temp": "Nhiệt độ (°C)",
+        "doc_title": "Nhật ký công trường",
+        "summary_precipitation": "lượng mưa {value} mm",
+        "site_supervisor": "Chỉ huy trưởng",
+        "weather_precip": "Mưa (mm)",
+        "summary_humidity": "độ ẩm {value} %",
+        "footer_supervisor": "Chỉ huy trưởng: {name}",
+        "sig_name": "Họ tên",
+        "footer_supervisor_missing": "Chỉ huy trưởng: chưa ghi nhận",
+        "footer_generated": "Tạo lúc: {timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "Tổng",
+        "overview": "Tổng quan",
+        "workforce": "Nhân lực theo đơn vị",
+        "workforce_count": "Số người",
+        "not_recorded": "Chưa ghi nhận",
+        "sig_prepared": "Lập bởi (chỉ huy trưởng)",
+        "decimal_mark": ",",
+        "sig_approved": "Duyệt bởi (đại diện chủ đầu tư)",
+        "completeness": "Mức đầy đủ",
+        "sig_signature": "Chữ ký",
+        "signatures": "Chữ ký",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "Đơn vị",
+        "notes_empty": "Không có ghi chú bổ sung.",
+        "sig_title": "Chức vụ",
+        "weather": "Thời tiết",
+        "weather_wind": "Gió (km/h)",
+        "weather_time": "Giờ",
+        "weather_empty": "Chưa ghi nhận thời tiết cho ngày này.",
+        "footer_page": "Trang {page} / {total}",
+        "equipment_on_site": "Thiết bị tại công trường",
+        "weather_source": "Nguồn",
+        "workforce_unassigned": "Chưa gán đơn vị",
+        "sig_date": "Ngày",
+        "filename_prefix": "nhat-ky",
+        "labour_on_site": "Lao động tại công trường",
+        "weather_conditions": "Tình trạng",
+        "signed_note": "Đã ký trong hệ thống: {signers}",
+        "notes": "Ghi chú",
+        "entries_empty": "Nhật ký này chưa có mục ghi nào.",
+        "site_record": "Hồ sơ công trường"
+      }
+    }
   }
 }

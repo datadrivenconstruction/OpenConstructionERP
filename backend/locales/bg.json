@@ -618,5 +618,539 @@
       "draft": "Чернова",
       "frozen": "Замразен"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Проект",
+      "project_no": "№ на проекта",
+      "generated_on": "Дата на генериране",
+      "records": "Записи",
+      "currency": "Валута",
+      "status": "Статус",
+      "name": "Име",
+      "signature": "Подпис",
+      "date": "Дата",
+      "signatures": "Подписи",
+      "yes": "Да",
+      "no": "Не",
+      "days_one": "{n} ден",
+      "days_other": "{n} дн.",
+      "empty_register": "Няма записи.",
+      "total": "Общо",
+      "signer_title": "Длъжност",
+      "sig_prepared_by": "Изготвено от",
+      "sig_checked_by": "Проверено от",
+      "sig_approved_by": "Одобрено от",
+      "footer_generated": "Генерирано на {timestamp}",
+      "footer_page": "Страница {page} от {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Регистър на документите за одобрение",
+        "doc_title": "Документ за одобрение",
+        "doc_title_product_data": "Бланка за одобрение на материали",
+        "col_number": "№ на документа",
+        "col_title": "Заглавие",
+        "col_type": "Вид",
+        "col_spec": "Раздел от спецификацията",
+        "col_rev": "Ред.",
+        "col_date_submitted": "Дата на внасяне",
+        "col_date_required": "Необходим до",
+        "col_date_returned": "Дата на връщане",
+        "col_reviewer": "Проверяващ",
+        "col_approver": "Одобряващ",
+        "col_ball_in_court": "Следващо действие от",
+        "submitted_by_org": "Внасяща фирма",
+        "review_notes": "Бележки на проверяващия",
+        "no_review_notes": "Няма записани бележки на проверяващия.",
+        "sig_submitted": "Внесено от",
+        "sig_reviewed": "Проверено от",
+        "sig_approved": "Одобрено от",
+        "register_filename": "registar-na-dokumentite-za-odobrenie",
+        "register_title_shop_drawing": "Регистър на работните чертежи",
+        "register_title_product_data": "Регистър на одобренията на материали",
+        "register_title_method_statement": "Регистър на методиките за изпълнение",
+        "register_filename_shop_drawing": "registar-na-rabotnite-chertezhi",
+        "register_filename_product_data": "registar-na-odobreniyata-na-materiali",
+        "register_filename_method_statement": "registar-na-metodikite-za-izpalnenie",
+        "col_discipline": "Част",
+        "col_manufacturer": "Производител / марка",
+        "col_model": "Модел / референция",
+        "col_origin": "Страна на произход",
+        "col_supplier": "Доставчик",
+        "col_product": "Производител / модел / произход",
+        "col_review_code": "Код на проверката",
+        "col_outcome": "Резултат от проверката",
+        "col_review_period": "Срок за проверка (дни)",
+        "col_review_due": "Проверка до",
+        "col_days_in_review": "Дни в проверка",
+        "col_days_in_review_print": "Дни в проверка",
+        "col_review_overdue": "Дни просрочие",
+        "col_required_on_site": "Необходим на обекта",
+        "col_long_lead": "Дълъг срок на доставка",
+        "col_lead_time": "Срок на доставка (седм.)",
+        "col_needed_by": "Одобрение необходимо до",
+        "col_approval_late": "Дни след срока",
+        "col_drawings": "Свързани чертежи",
+        "col_submitted_returned": "Внесен / върнат",
+        "col_on_site_needed_by": "На обекта / одобрение до",
+        "resubmit_for_record": "Коригираното копие да се внесе отново за архива",
+        "review_history": "История на проверките",
+        "hist_submitted": "Внесен",
+        "hist_returned": "Върнат",
+        "drawings_missing_one": "{n} свързан чертеж вече не е наличен",
+        "drawings_missing_other": "Недостъпни свързани чертежи: {n}",
+        "weeks_one": "{n} седмица",
+        "weeks_other": "{n} седм."
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "submitted": "Внесен",
+          "under_review": "В проверка",
+          "approved": "Одобрен",
+          "approved_as_noted": "Одобрен с бележки",
+          "revise_and_resubmit": "За преработка и повторно внасяне",
+          "rejected": "Отхвърлен",
+          "closed": "Приключен"
+        },
+        "type": {
+          "shop_drawing": "Работен чертеж",
+          "product_data": "Технически данни на продукта",
+          "sample": "Образец",
+          "mock_up": "Мостра (мокъп)",
+          "test_report": "Протокол от изпитване",
+          "calculation": "Изчисление",
+          "method_statement": "Методика за изпълнение",
+          "certificate": "Сертификат",
+          "warranty": "Гаранция"
+        },
+        "discipline": {
+          "mechanical": "Механична",
+          "hvac": "ОВК",
+          "plumbing": "ВиК",
+          "fire_protection": "Пожарна безопасност",
+          "electrical": "Електрическа",
+          "lighting": "Осветление",
+          "elv": "Слаботокова",
+          "bms": "Автоматизация на сгради",
+          "architectural": "Архитектурна",
+          "structural": "Конструктивна",
+          "civil": "Строителна"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Регистър на нарежданията за промяна",
+        "doc_title": "Нареждане за промяна",
+        "col_code": "Код",
+        "col_title": "Заглавие",
+        "col_reason": "Причина",
+        "col_instrument": "Основание",
+        "col_submitted": "Дата на внасяне",
+        "col_contractor_amount": "Сума на изпълнителя",
+        "col_engineer_amount": "Сума на инженера",
+        "col_approved_amount": "Одобрена сума",
+        "col_cost_impact": "Ефект върху цената",
+        "col_time_impact": "Ефект върху срока (дни)",
+        "col_approved_time": "Одобрен срок (дни)",
+        "time_impact": "Ефект върху срока",
+        "approved_time": "Одобрен срок",
+        "col_approved": "Дата на одобрение",
+        "submitted_by": "Внесено от",
+        "approved_by": "Одобрено от",
+        "description": "Описание",
+        "no_description": "Няма записано описание.",
+        "items": "Позиции на промяната",
+        "item_description": "Описание",
+        "item_change": "Промяна",
+        "item_unit": "Мярка",
+        "item_original_quantity": "Перв. к-во",
+        "item_new_quantity": "Ново к-во",
+        "item_original_rate": "Перв. цена",
+        "item_new_rate": "Нова цена",
+        "item_cost_delta": "Разлика в стойността",
+        "register_filename": "registar-na-narezhdaniyata-za-promyana"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "submitted": "Внесено",
+          "approved": "Одобрено",
+          "rejected": "Отхвърлено",
+          "executed": "Изпълнено"
+        },
+        "reason": {
+          "client_request": "Искане на възложителя",
+          "design_change": "Промяна в проекта",
+          "unforeseen": "Непредвидени условия",
+          "regulatory": "Нормативни изисквания",
+          "error": "Грешка или пропуск",
+          "non_conformance": "Несъответствие",
+          "value_engineering": "Оптимизиране на стойността (VE)"
+        },
+        "instrument": {
+          "works_change": "Наредена промяна",
+          "site_confirmation": "Потвърждение на обекта",
+          "claim": "Претенция"
+        },
+        "change": {
+          "added": "Добавено",
+          "removed": "Премахнато",
+          "modified": "Променено"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Доказателствен пакет",
+        "subject": "Предмет",
+        "basis": "Основание",
+        "period_from": "Най-ранен запис",
+        "period_to": "Най-пресен запис",
+        "digest": "Код за цялост (SHA-256, първите 16 знака)",
+        "col_row": "№",
+        "col_record_id": "ID на записа",
+        "col_section": "Раздел",
+        "col_date": "Дата",
+        "col_kind": "Вид запис",
+        "col_title": "Заглавие",
+        "col_summary": "Резюме",
+        "col_reference": "Референция",
+        "register_filename": "dokazatelstven-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Уведомления",
+          "correspondence": "Кореспонденция",
+          "rfis": "Запитвания за информация (RFI)",
+          "variations": "Промени",
+          "approvals": "Одобрения",
+          "delay": "Забава",
+          "timeline": "Хронология",
+          "other": "Други"
+        },
+        "kind": {
+          "notice": "Уведомление",
+          "variation_notice": "Уведомление за промяна",
+          "variation_request": "Искане за промяна",
+          "variation_order": "Заповед за промяна",
+          "change_order": "Нареждане за промяна",
+          "moc_entry": "Запис за промяна",
+          "correspondence": "Кореспонденция"
+        },
+        "basis": {
+          "dispute": "Спор",
+          "valuation": "Остойностяване",
+          "delay": "Забава / удължаване на срока",
+          "general": "Общ запис"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Дневник на кореспонденцията",
+        "doc_title": "Кореспонденция",
+        "col_reference": "Референтен №",
+        "col_direction": "Посока",
+        "col_type": "Вид",
+        "col_subject": "Относно",
+        "col_from": "От",
+        "col_to": "До",
+        "col_date_sent": "Дата на изпращане",
+        "col_date_received": "Дата на получаване",
+        "col_response_due": "Срок за отговор",
+        "col_clause": "Клауза от договора",
+        "notes": "Бележки",
+        "no_notes": "Няма записани бележки.",
+        "attachments": "Приложени файлове",
+        "linked_documents": "Свързани документи",
+        "sig_prepared": "Изготвено от",
+        "sig_received": "Получено от",
+        "register_filename": "dnevnik-na-korespondentsiyata"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Входяща",
+          "outgoing": "Изходяща"
+        },
+        "type": {
+          "letter": "Писмо",
+          "email": "Имейл",
+          "notice": "Уведомление",
+          "memo": "Вътрешна бележка",
+          "report": "Доклад"
+        },
+        "status": {
+          "open": "Отворена",
+          "awaiting_response": "Очаква отговор",
+          "responded": "Отговорено",
+          "closed": "Приключена"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Регистър на предаванията на документи",
+        "doc_title": "Предаване на документи",
+        "col_number": "№ на предаването",
+        "col_subject": "Относно",
+        "col_purpose": "Цел",
+        "col_issued": "Дата на издаване",
+        "col_response_due": "Срок за отговор",
+        "col_recipients": "Получатели",
+        "col_item_count": "Позиции",
+        "sender": "Изпращач",
+        "cover_note": "Придружително писмо",
+        "no_cover_note": "Няма придружително писмо.",
+        "recipients": "Получатели",
+        "recipient": "Получател",
+        "action_required": "Необходимо действие",
+        "acknowledged": "Потвърдено получаване",
+        "responded": "Дата на отговор",
+        "items": "Предадени документи",
+        "item_no": "№",
+        "item_description": "Описание",
+        "item_notes": "Бележки",
+        "sig_issued": "Издадено от",
+        "sig_received": "Получено от",
+        "register_filename": "registar-na-predavaniyata-na-dokumenti"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "issued": "Издадено",
+          "responded": "Отговорено"
+        },
+        "purpose": {
+          "for_approval": "За одобрение",
+          "for_review": "За проверка",
+          "for_information": "За сведение",
+          "for_construction": "За изпълнение",
+          "for_tender": "За тръжна процедура",
+          "for_record": "За архив"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Регистър на промените",
+        "claim_register_title": "Регистър на претенциите",
+        "notice_register_title": "Регистър на уведомленията",
+        "doc_title": "Искане за промяна",
+        "doc_title_credit": "Искане за промяна (отпаднали работи)",
+        "time_impact": "Ефект върху срока",
+        "col_code": "Код",
+        "col_title": "Заглавие",
+        "col_classification": "Вид",
+        "col_urgency": "Спешност",
+        "col_requested": "Дата на искането",
+        "col_claimed_amount": "Претендирана сума",
+        "col_agreed_amount": "Договорена сума",
+        "col_time_impact": "Ефект върху срока (дни)",
+        "col_response_due": "Срок за отговор",
+        "col_clause": "Клауза от договора",
+        "col_row": "№",
+        "col_claim_type": "Вид претенция",
+        "col_raised": "Дата на предявяване",
+        "col_period_start": "Период от",
+        "col_period_end": "Период до",
+        "col_description": "Описание",
+        "col_decided_amount": "Присъдена сума",
+        "col_days_requested": "Поискани дни",
+        "col_days_granted": "Признати дни",
+        "col_recipient_type": "Адресирано до",
+        "col_recipient": "Получател",
+        "col_target_response": "Очакван отговор",
+        "col_response_received": "Получен отговор",
+        "requested_by": "Поискано от",
+        "decided_by": "Решено от",
+        "date_submitted": "Дата на внасяне",
+        "date_decided": "Дата на решението",
+        "description": "Описание",
+        "no_description": "Няма записано описание.",
+        "decision_notes": "Мотиви към решението",
+        "no_decision_notes": "Все още няма записано решение.",
+        "variation_register_filename": "registar-na-promenite",
+        "claim_register_filename": "registar-na-pretentsiite",
+        "notice_register_filename": "registar-na-uvedomleniyata"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Чернова",
+          "submitted": "Внесено",
+          "under_review": "В проверка",
+          "approved": "Одобрено",
+          "rejected": "Отхвърлено",
+          "converted_to_vo": "Преобразувано в заповед"
+        },
+        "claim_status": {
+          "draft": "Чернова",
+          "submitted": "Внесена",
+          "under_review": "В проверка",
+          "agreed": "Договорена",
+          "granted": "Уважена",
+          "rejected": "Отхвърлена"
+        },
+        "notice_status": {
+          "issued": "Издадено",
+          "acknowledged": "Получаването е потвърдено",
+          "responded": "Отговорено",
+          "closed": "Приключено"
+        },
+        "classification": {
+          "scope_change": "Промяна в обхвата",
+          "unforeseen": "Непредвидено условие",
+          "owner_change": "Промяна по искане на възложителя",
+          "design_dev": "Доразработване на проекта",
+          "regulatory": "Нормативни изисквания",
+          "other": "Друго"
+        },
+        "urgency": {
+          "low": "Ниска",
+          "med": "Средна",
+          "high": "Висока"
+        },
+        "claim_type": {
+          "disruption": "Нарушаване на хода на работите",
+          "eot": "Удължаване на срока"
+        },
+        "recipient_type": {
+          "owner": "Възложител",
+          "contractor": "Изпълнител",
+          "architect": "Архитект",
+          "engineer": "Инженер",
+          "consultant": "Консултант"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Дневен отчет от строителния обект",
+        "overview": "Общ преглед",
+        "site_supervisor": "Ръководител на обекта",
+        "not_recorded": "Не е записано",
+        "labour_on_site": "Работна ръка на обекта",
+        "equipment_on_site": "Техника на обекта",
+        "completeness": "Пълнота",
+        "weather": "Времето",
+        "weather_time": "Час",
+        "weather_source": "Източник",
+        "weather_temp": "Темп. (°C)",
+        "weather_wind": "Вятър (км/ч)",
+        "weather_precip": "Валежи (мм)",
+        "weather_conditions": "Условия",
+        "weather_empty": "Няма записани метеорологични данни за този ден.",
+        "site_record": "Запис от обекта",
+        "entries_empty": "Няма записани вписвания за този отчет.",
+        "notes": "Бележки",
+        "notes_empty": "Няма допълнителни бележки.",
+        "footer_supervisor": "Ръководител на обекта: {name}",
+        "footer_supervisor_missing": "Ръководител на обекта: не е записан",
+        "footer_generated": "Генерирано: {timestamp}",
+        "footer_page": "Страница {page} от {total}",
+        "workforce": "Персонал по фирми",
+        "workforce_company": "Фирма",
+        "workforce_count": "Хора",
+        "workforce_unassigned": "Без определена фирма",
+        "workforce_total": "Общо",
+        "signatures": "Подписи",
+        "sig_prepared": "Изготвено от (ръководител на обекта)",
+        "sig_approved": "Одобрено от (представител на възложителя)",
+        "sig_name": "Име",
+        "sig_title": "Длъжност",
+        "sig_date": "Дата",
+        "sig_signature": "Подпис",
+        "signed_note": "Подписано в системата: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "dneven-otchet",
+        "summary_wind": "вятър {value} км/ч",
+        "summary_precipitation": "валежи {value} мм",
+        "summary_humidity": "влажност {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Посетители",
+          "event": "Събития",
+          "delivery": "Доставени материали",
+          "completion": "Изпълнени работи",
+          "incident_summary": "Безопасност и инциденти",
+          "inspection_summary": "Проверки",
+          "photo_note": "Снимкови бележки",
+          "general": "Общи бележки"
+        },
+        "status": {
+          "open": "Отворен",
+          "closed": "Приключен",
+          "signed": "Подписан",
+          "archived": "Архивиран"
+        },
+        "condition": {
+          "clear": "ясно",
+          "mainly_clear": "предимно ясно",
+          "partly_cloudy": "частична облачност",
+          "cloudy": "облачно",
+          "overcast": "мрачно",
+          "fog": "мъгла",
+          "fog_rime": "студена мъгла с измръзване",
+          "drizzle_light": "слаб ръмеж",
+          "drizzle_moderate": "умерен ръмеж",
+          "drizzle_dense": "силен ръмеж",
+          "rain": "дъжд",
+          "rain_light": "слаб дъжд",
+          "rain_moderate": "умерен дъжд",
+          "rain_heavy": "силен дъжд",
+          "freezing_rain_light": "слаб леден дъжд",
+          "freezing_rain_heavy": "силен леден дъжд",
+          "snow": "сняг",
+          "snow_light": "слаб сняг",
+          "snow_moderate": "умерен сняг",
+          "snow_heavy": "силен снеговалеж",
+          "rain_showers_light": "слаби превалявания",
+          "rain_showers_moderate": "умерени превалявания",
+          "rain_showers_violent": "поройни превалявания",
+          "snow_showers_light": "слаби превалявания от сняг",
+          "snow_showers_heavy": "силни превалявания от сняг",
+          "thunderstorm": "гръмотевична буря",
+          "thunderstorm_hail_light": "гръмотевична буря със слаб град",
+          "thunderstorm_hail_heavy": "гръмотевична буря със силен град"
+        },
+        "source": {
+          "manual": "Ръчно въвеждане",
+          "open_meteo": "Метеорологична услуга",
+          "sensor": "Сензор на обекта"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Регистър на запитванията за информация (RFI)",
+        "col_number": "№ на RFI",
+        "col_subject": "Относно",
+        "col_raised_by": "Иницииран от",
+        "col_assigned_to": "Възложен на",
+        "col_ball_in_court": "Следващо действие от",
+        "col_date_required": "Необходим до",
+        "col_response_due": "Срок за отговор",
+        "col_days_open": "Дни отворен",
+        "col_cost_impact": "Ефект върху цената",
+        "col_schedule_impact": "Ефект върху графика",
+        "col_response": "Отговор",
+        "yes_with": "Да ({detail})",
+        "register_filename": "registar-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "open": "Отворено",
+          "answered": "Отговорено",
+          "closed": "Затворено",
+          "void": "Анулирано"
+        }
+      }
+    }
   }
 }

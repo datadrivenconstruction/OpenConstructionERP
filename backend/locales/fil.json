@@ -618,5 +618,539 @@
       "draft": "Draft",
       "frozen": "Naka-lock"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Proyekto",
+      "project_no": "Blg. ng proyekto",
+      "generated_on": "Petsa ng paglikha",
+      "records": "Mga tala",
+      "currency": "Pera",
+      "status": "Katayuan",
+      "name": "Pangalan",
+      "signature": "Lagda",
+      "date": "Petsa",
+      "signatures": "Mga lagda",
+      "yes": "Oo",
+      "no": "Hindi",
+      "days_one": "{n} araw",
+      "days_other": "{n} araw",
+      "empty_register": "Walang tala.",
+      "total": "Kabuuan",
+      "signer_title": "Posisyon",
+      "sig_prepared_by": "Inihanda ni/ng",
+      "sig_checked_by": "Sinuri ni/ng",
+      "sig_approved_by": "Inaprubahan ni/ng",
+      "footer_generated": "Nilikha {timestamp}",
+      "footer_page": "Pahina {page} ng {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Rehistro ng Submittal",
+        "doc_title": "Submittal",
+        "doc_title_product_data": "Porma ng Pag-apruba ng Materyales",
+        "col_number": "Blg. ng submittal",
+        "col_title": "Pamagat",
+        "col_type": "Uri",
+        "col_spec": "Seksyon ng spec",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Petsa ng pagsumite",
+        "col_date_required": "Petsang kailangan",
+        "col_date_returned": "Petsa ng pagbalik",
+        "col_reviewer": "Tagasuri",
+        "col_approver": "Tagapag-apruba",
+        "col_ball_in_court": "Susunod na kikilos",
+        "submitted_by_org": "Kumpanyang nagsumite",
+        "review_notes": "Mga komento ng tagasuri",
+        "no_review_notes": "Walang naitalang komento ng tagasuri.",
+        "sig_submitted": "Pagsumite",
+        "sig_reviewed": "Pagsusuri",
+        "sig_approved": "Pag-apruba",
+        "register_filename": "rehistro-ng-submittal",
+        "register_title_shop_drawing": "Rehistro ng Shop Drawing",
+        "register_title_product_data": "Rehistro ng Pag-apruba ng Materyales",
+        "register_title_method_statement": "Rehistro ng Method Statement",
+        "register_filename_shop_drawing": "rehistro-ng-shop-drawing",
+        "register_filename_product_data": "rehistro-ng-pag-apruba-ng-materyales",
+        "register_filename_method_statement": "rehistro-ng-method-statement",
+        "col_discipline": "Disiplina",
+        "col_manufacturer": "Manufacturer / tatak",
+        "col_model": "Modelo / sanggunian",
+        "col_origin": "Bansang pinagmulan",
+        "col_supplier": "Supplier",
+        "col_product": "Gumawa / modelo / pinagmulan",
+        "col_review_code": "Code ng pagsusuri",
+        "col_outcome": "Resulta ng pagsusuri",
+        "col_review_period": "Panahon ng pagsusuri (araw)",
+        "col_review_due": "Takdang petsa ng pagsusuri",
+        "col_days_in_review": "Araw sa pagsusuri",
+        "col_days_in_review_print": "Araw sa pagsusuri",
+        "col_review_overdue": "Araw na huli",
+        "col_required_on_site": "Kailangan sa site",
+        "col_long_lead": "Mahabang lead time",
+        "col_lead_time": "Lead time (linggo)",
+        "col_needed_by": "Kailangan ang apruba bago",
+        "col_approval_late": "Araw na lampas sa takdang petsa",
+        "col_drawings": "Kaugnay na drawing",
+        "col_submitted_returned": "Isinumite / ibinalik",
+        "col_on_site_needed_by": "Sa site / apruba bago",
+        "resubmit_for_record": "Isumite muli ang naitamang kopya para sa talaan",
+        "review_history": "Kasaysayan ng pagsusuri",
+        "hist_submitted": "Isinumite",
+        "hist_returned": "Ibinalik",
+        "drawings_missing_one": "{n} kaugnay na drawing ay hindi na available",
+        "drawings_missing_other": "{n} kaugnay na drawing ay hindi na available",
+        "weeks_one": "{n} linggo",
+        "weeks_other": "{n} linggo"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "submitted": "Isinumite",
+          "under_review": "Sinusuri",
+          "approved": "Aprubado",
+          "approved_as_noted": "Aprubado na may mga puna",
+          "revise_and_resubmit": "Rebisahin at isumite muli",
+          "rejected": "Tinanggihan",
+          "closed": "Sarado"
+        },
+        "type": {
+          "shop_drawing": "Shop drawing",
+          "product_data": "Product data",
+          "sample": "Sample",
+          "mock_up": "Mock-up",
+          "test_report": "Ulat ng pagsubok",
+          "calculation": "Kalkulasyon",
+          "method_statement": "Method statement",
+          "certificate": "Sertipiko",
+          "warranty": "Warranty"
+        },
+        "discipline": {
+          "mechanical": "Mekanikal",
+          "hvac": "HVAC",
+          "plumbing": "Tubo at paagusan",
+          "fire_protection": "Proteksyon sa sunog",
+          "electrical": "Elektrikal",
+          "lighting": "Ilaw",
+          "elv": "Low current",
+          "bms": "Building automation",
+          "architectural": "Arkitektural",
+          "structural": "Istruktural",
+          "civil": "Sibil"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Rehistro ng Change Order",
+        "doc_title": "Change Order",
+        "col_code": "Code",
+        "col_title": "Pamagat",
+        "col_reason": "Dahilan",
+        "col_instrument": "Uri ng dokumento",
+        "col_submitted": "Petsa ng pagsumite",
+        "col_contractor_amount": "Halaga ng kontratista",
+        "col_engineer_amount": "Halaga ng inhinyero",
+        "col_approved_amount": "Aprubadong halaga",
+        "col_cost_impact": "Epekto sa gastos",
+        "col_time_impact": "Epekto sa oras (araw)",
+        "col_approved_time": "Aprubadong oras (araw)",
+        "time_impact": "Epekto sa oras",
+        "approved_time": "Aprubadong oras",
+        "col_approved": "Petsa ng pag-apruba",
+        "submitted_by": "Pagsumite",
+        "approved_by": "Pag-apruba",
+        "description": "Paglalarawan",
+        "no_description": "Walang naitalang paglalarawan.",
+        "items": "Mga aytem ng pagbabago",
+        "item_description": "Paglalarawan",
+        "item_change": "Pagbabago",
+        "item_unit": "Yunit",
+        "item_original_quantity": "Orihinal na dami",
+        "item_new_quantity": "Bagong dami",
+        "item_original_rate": "Orihinal na halaga bawat yunit",
+        "item_new_rate": "Bagong halaga bawat yunit",
+        "item_cost_delta": "Pagkakaiba sa gastos",
+        "register_filename": "rehistro-ng-change-order"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "submitted": "Isinumite",
+          "approved": "Aprubado",
+          "rejected": "Tinanggihan",
+          "executed": "Naisakatuparan"
+        },
+        "reason": {
+          "client_request": "Hiling ng kliyente",
+          "design_change": "Pagbabago sa disenyo",
+          "unforeseen": "Mga di-inaasahang kondisyon",
+          "regulatory": "Regulasyon",
+          "error": "Pagkakamali o pagkaligta",
+          "non_conformance": "Hindi pagsunod sa espesipikasyon",
+          "value_engineering": "Value engineering"
+        },
+        "instrument": {
+          "works_change": "Iniatas na pagbabago",
+          "site_confirmation": "Kumpirmasyon sa site",
+          "claim": "Claim"
+        },
+        "change": {
+          "added": "Idinagdag",
+          "removed": "Inalis",
+          "modified": "Binago"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Evidence Pack",
+        "subject": "Paksa",
+        "basis": "Batayan",
+        "period_from": "Pinakamatandang tala",
+        "period_to": "Pinakabagong tala",
+        "digest": "Integrity code (SHA-256, unang 16 karakter)",
+        "col_row": "Blg.",
+        "col_record_id": "ID ng tala",
+        "col_section": "Seksyon",
+        "col_date": "Petsa",
+        "col_kind": "Uri ng tala",
+        "col_title": "Pamagat",
+        "col_summary": "Buod",
+        "col_reference": "Sanggunian",
+        "register_filename": "evidence-pack"
+      },
+      "labels": {
+        "section": {
+          "notices": "Mga abiso",
+          "correspondence": "Korespondensya",
+          "rfis": "Mga RFI",
+          "variations": "Mga variation",
+          "approvals": "Mga pag-apruba",
+          "delay": "Pagkaantala",
+          "timeline": "Timeline",
+          "other": "Iba pa"
+        },
+        "kind": {
+          "notice": "Abiso",
+          "variation_notice": "Abiso ng variation",
+          "variation_request": "Hiling ng variation",
+          "variation_order": "Variation order",
+          "change_order": "Change order",
+          "moc_entry": "Tala ng pagbabago",
+          "correspondence": "Korespondensya"
+        },
+        "basis": {
+          "dispute": "Hindi pagkakaunawaan",
+          "valuation": "Pagtataya ng halaga",
+          "delay": "Pagkaantala / extension of time",
+          "general": "Pangkalahatang tala"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Log ng Korespondensya",
+        "doc_title": "Korespondensya",
+        "col_reference": "Blg. ng sanggunian",
+        "col_direction": "Direksyon",
+        "col_type": "Uri",
+        "col_subject": "Paksa",
+        "col_from": "Mula kay/sa",
+        "col_to": "Para kay/sa",
+        "col_date_sent": "Petsa ng pagpapadala",
+        "col_date_received": "Petsa ng pagtanggap",
+        "col_response_due": "Kailangan ang tugon bago",
+        "col_clause": "Clause ng kontrata",
+        "notes": "Mga tala",
+        "no_notes": "Walang naitalang tala.",
+        "attachments": "Mga kalakip na file",
+        "linked_documents": "Mga kaugnay na dokumento",
+        "sig_prepared": "Paghahanda",
+        "sig_received": "Pagtanggap",
+        "register_filename": "log-ng-korespondensya"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Papasok",
+          "outgoing": "Palabas"
+        },
+        "type": {
+          "letter": "Liham",
+          "email": "Email",
+          "notice": "Abiso",
+          "memo": "Memo",
+          "report": "Ulat"
+        },
+        "status": {
+          "open": "Bukas",
+          "awaiting_response": "Naghihintay ng tugon",
+          "responded": "Natugunan",
+          "closed": "Sarado"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Rehistro ng Transmittal",
+        "doc_title": "Transmittal",
+        "col_number": "Blg. ng transmittal",
+        "col_subject": "Paksa",
+        "col_purpose": "Layunin",
+        "col_issued": "Petsa ng paglabas",
+        "col_response_due": "Takdang tugon",
+        "col_recipients": "Mga tatanggap",
+        "col_item_count": "Mga aytem",
+        "sender": "Nagpadala",
+        "cover_note": "Cover note",
+        "no_cover_note": "Walang cover note.",
+        "recipients": "Mga tatanggap",
+        "recipient": "Tatanggap",
+        "action_required": "Kailangan ng aksyon",
+        "acknowledged": "Natanggap at kinilala",
+        "responded": "Petsa ng tugon",
+        "items": "Mga ipinadalang aytem",
+        "item_no": "Blg.",
+        "item_description": "Paglalarawan",
+        "item_notes": "Mga tala",
+        "sig_issued": "Paglabas",
+        "sig_received": "Pagtanggap",
+        "register_filename": "rehistro-ng-transmittal"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "issued": "Inilabas",
+          "responded": "Natugunan"
+        },
+        "purpose": {
+          "for_approval": "Para sa pag-apruba",
+          "for_review": "Para sa pagsusuri",
+          "for_information": "Para sa kaalaman",
+          "for_construction": "Para sa konstruksyon",
+          "for_tender": "Para sa tender",
+          "for_record": "Para sa talaan"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Rehistro ng Variation",
+        "claim_register_title": "Rehistro ng mga Claim",
+        "notice_register_title": "Rehistro ng mga Abiso",
+        "doc_title": "Hiling ng Variation",
+        "doc_title_credit": "Hiling ng Variation (bawas)",
+        "time_impact": "Epekto sa oras",
+        "col_code": "Code",
+        "col_title": "Pamagat",
+        "col_classification": "Uri",
+        "col_urgency": "Pagkaapurahan",
+        "col_requested": "Petsa ng hiling",
+        "col_claimed_amount": "Halagang ki-claim",
+        "col_agreed_amount": "Napagkasunduang halaga",
+        "col_time_impact": "Epekto sa oras (araw)",
+        "col_response_due": "Takdang tugon",
+        "col_clause": "Clause ng kontrata",
+        "col_row": "Blg.",
+        "col_claim_type": "Uri ng claim",
+        "col_raised": "Petsa ng paghain",
+        "col_period_start": "Panahon mula",
+        "col_period_end": "Panahon hanggang",
+        "col_description": "Paglalarawan",
+        "col_decided_amount": "Pinal na halaga",
+        "col_days_requested": "Hiniling na araw",
+        "col_days_granted": "Ipinagkaloob na araw",
+        "col_recipient_type": "Para kay/sa",
+        "col_recipient": "Tatanggap",
+        "col_target_response": "Inaasahang tugon",
+        "col_response_received": "Natanggap na tugon",
+        "requested_by": "Humiling",
+        "decided_by": "Nagpasya",
+        "date_submitted": "Petsa ng pagsumite",
+        "date_decided": "Petsa ng desisyon",
+        "description": "Paglalarawan",
+        "no_description": "Walang naitalang paglalarawan.",
+        "decision_notes": "Mga tala sa desisyon",
+        "no_decision_notes": "Wala pang naitalang desisyon.",
+        "variation_register_filename": "rehistro-ng-variation",
+        "claim_register_filename": "rehistro-ng-claim",
+        "notice_register_filename": "rehistro-ng-abiso"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Draft",
+          "submitted": "Isinumite",
+          "under_review": "Sinusuri",
+          "approved": "Aprubado",
+          "rejected": "Tinanggihan",
+          "converted_to_vo": "Ginawang order"
+        },
+        "claim_status": {
+          "draft": "Draft",
+          "submitted": "Isinumite",
+          "under_review": "Sinusuri",
+          "agreed": "Napagkasunduan",
+          "granted": "Ipinagkaloob",
+          "rejected": "Tinanggihan"
+        },
+        "notice_status": {
+          "issued": "Inilabas",
+          "acknowledged": "Kinilala ang pagtanggap",
+          "responded": "Natugunan",
+          "closed": "Sarado"
+        },
+        "classification": {
+          "scope_change": "Pagbabago sa saklaw",
+          "unforeseen": "Di-inaasahang kondisyon",
+          "owner_change": "Pagbabago ng may-ari",
+          "design_dev": "Pagpapaunlad ng disenyo",
+          "regulatory": "Regulasyon",
+          "other": "Iba pa"
+        },
+        "urgency": {
+          "low": "Mababa",
+          "med": "Katamtaman",
+          "high": "Mataas"
+        },
+        "claim_type": {
+          "disruption": "Pagkagambala sa trabaho",
+          "eot": "Extension of time"
+        },
+        "recipient_type": {
+          "owner": "May-ari",
+          "contractor": "Kontratista",
+          "architect": "Arkitekto",
+          "engineer": "Inhinyero",
+          "consultant": "Konsultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Araw-araw na Talaan ng Site",
+        "overview": "Pangkalahatang-tanaw",
+        "site_supervisor": "Supervisor ng site",
+        "not_recorded": "Hindi naitala",
+        "labour_on_site": "Manggagawa sa site",
+        "equipment_on_site": "Kagamitan sa site",
+        "completeness": "Pagkakumpleto",
+        "weather": "Panahon",
+        "weather_time": "Oras",
+        "weather_source": "Pinagmulan",
+        "weather_temp": "Temp (°C)",
+        "weather_wind": "Hangin (km/h)",
+        "weather_precip": "Ulan (mm)",
+        "weather_conditions": "Kondisyon",
+        "weather_empty": "Walang naitalang panahon para sa araw na ito.",
+        "site_record": "Talaan ng site",
+        "entries_empty": "Walang naitalang entry sa talaang ito.",
+        "notes": "Mga tala",
+        "notes_empty": "Walang karagdagang tala.",
+        "footer_supervisor": "Supervisor: {name}",
+        "footer_supervisor_missing": "Supervisor ng site: hindi naitala",
+        "footer_generated": "Nilikha: {timestamp}",
+        "footer_page": "Pahina {page} ng {total}",
+        "workforce": "Lakas-paggawa ayon sa kumpanya",
+        "workforce_company": "Kumpanya",
+        "workforce_count": "Bilang ng tao",
+        "workforce_unassigned": "Walang nakatalagang kumpanya",
+        "workforce_total": "Kabuuan",
+        "signatures": "Mga lagda",
+        "sig_prepared": "Paghahanda (site manager)",
+        "sig_approved": "Pag-apruba (kinatawan ng may-ari)",
+        "sig_name": "Pangalan",
+        "sig_title": "Posisyon",
+        "sig_date": "Petsa",
+        "sig_signature": "Lagda",
+        "signed_note": "Nilagdaan sa sistema: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "talaan-ng-site",
+        "summary_wind": "hangin {value} km/h",
+        "summary_precipitation": "pag-ulan {value} mm",
+        "summary_humidity": "halumigmig {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Mga bisita",
+          "event": "Mga pangyayari",
+          "delivery": "Mga materyales na naihatid",
+          "completion": "Mga gawaing naisagawa",
+          "incident_summary": "Kaligtasan at mga insidente",
+          "inspection_summary": "Mga inspeksyon",
+          "photo_note": "Mga tala sa litrato",
+          "general": "Pangkalahatang tala"
+        },
+        "status": {
+          "open": "Bukas",
+          "closed": "Sarado",
+          "signed": "Nilagdaan",
+          "archived": "Naka-archive"
+        },
+        "condition": {
+          "clear": "maaliwalas",
+          "mainly_clear": "halos maaliwalas",
+          "partly_cloudy": "bahagyang maulap",
+          "cloudy": "maulap",
+          "overcast": "makapal na ulap",
+          "fog": "hamog",
+          "fog_rime": "nagyeyelong hamog",
+          "drizzle_light": "mahinang ambon",
+          "drizzle_moderate": "katamtamang ambon",
+          "drizzle_dense": "malakas na ambon",
+          "rain": "ulan",
+          "rain_light": "mahinang ulan",
+          "rain_moderate": "katamtamang ulan",
+          "rain_heavy": "malakas na ulan",
+          "freezing_rain_light": "mahinang nagyeyelong ulan",
+          "freezing_rain_heavy": "malakas na nagyeyelong ulan",
+          "snow": "niyebe",
+          "snow_light": "mahinang niyebe",
+          "snow_moderate": "katamtamang niyebe",
+          "snow_heavy": "malakas na niyebe",
+          "rain_showers_light": "mahinang buhos ng ulan",
+          "rain_showers_moderate": "katamtamang buhos ng ulan",
+          "rain_showers_violent": "matinding buhos ng ulan",
+          "snow_showers_light": "mahinang buhos ng niyebe",
+          "snow_showers_heavy": "malakas na buhos ng niyebe",
+          "thunderstorm": "bagyong may kulog at kidlat",
+          "thunderstorm_hail_light": "bagyong may kulog at mahinang graniso",
+          "thunderstorm_hail_heavy": "bagyong may kulog at malakas na graniso"
+        },
+        "source": {
+          "manual": "Manwal na pagpasok",
+          "open_meteo": "Serbisyo ng panahon",
+          "sensor": "Sensor sa site"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Log ng mga RFI",
+        "col_number": "Blg. ng RFI",
+        "col_subject": "Paksa",
+        "col_raised_by": "Naghain",
+        "col_assigned_to": "Itinalaga kay/sa",
+        "col_ball_in_court": "Susunod na kikilos",
+        "col_date_required": "Petsang kailangan",
+        "col_response_due": "Takdang tugon",
+        "col_days_open": "Araw na bukas",
+        "col_cost_impact": "Epekto sa gastos",
+        "col_schedule_impact": "Epekto sa iskedyul",
+        "col_response": "Tugon",
+        "yes_with": "Oo ({detail})",
+        "register_filename": "log-ng-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borador",
+          "open": "Bukas",
+          "answered": "Nasagot",
+          "closed": "Sarado",
+          "void": "Walang Bisa"
+        }
+      }
+    }
   }
 }

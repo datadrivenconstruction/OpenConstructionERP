@@ -648,6 +648,514 @@
           "refunded": "Refunded"
         }
       }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Submittal Register",
+        "doc_title": "Submittal",
+        "doc_title_product_data": "Material Approval Form",
+        "col_number": "Submittal no.",
+        "col_title": "Title",
+        "col_type": "Type",
+        "col_spec": "Spec section",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Date submitted",
+        "col_date_required": "Date required",
+        "col_date_returned": "Date returned",
+        "col_reviewer": "Reviewer",
+        "col_approver": "Approver",
+        "col_ball_in_court": "Ball in court",
+        "submitted_by_org": "Submitting company",
+        "review_notes": "Reviewer comments",
+        "no_review_notes": "No reviewer comments recorded.",
+        "sig_submitted": "Submitted by",
+        "sig_reviewed": "Reviewed by",
+        "sig_approved": "Approved by",
+        "register_filename": "submittal-register",
+        "register_title_shop_drawing": "Shop Drawing Register",
+        "register_title_product_data": "Material Approval Register",
+        "register_title_method_statement": "Method Statement Register",
+        "register_filename_shop_drawing": "shop-drawing-register",
+        "register_filename_product_data": "material-approval-register",
+        "register_filename_method_statement": "method-statement-register",
+        "col_discipline": "Discipline",
+        "col_manufacturer": "Manufacturer / brand",
+        "col_model": "Model / reference",
+        "col_origin": "Country of origin",
+        "col_supplier": "Supplier",
+        "col_product": "Maker / model / origin",
+        "col_review_code": "Review code",
+        "col_outcome": "Review outcome",
+        "col_review_period": "Review period (days)",
+        "col_review_due": "Review due",
+        "col_days_in_review": "Days in review",
+        "col_days_in_review_print": "Days in review",
+        "col_review_overdue": "Days overdue",
+        "col_required_on_site": "Required on site",
+        "col_long_lead": "Long lead",
+        "col_lead_time": "Lead time (weeks)",
+        "col_needed_by": "Approval needed by",
+        "col_approval_late": "Days past needed-by",
+        "col_drawings": "Linked drawings",
+        "col_submitted_returned": "Submitted / returned",
+        "col_on_site_needed_by": "On site / approval by",
+        "resubmit_for_record": "Corrected copy to be resubmitted for record",
+        "review_history": "Review history",
+        "hist_submitted": "Submitted",
+        "hist_returned": "Returned",
+        "drawings_missing_one": "{n} linked drawing is no longer available",
+        "drawings_missing_other": "{n} linked drawings are no longer available",
+        "weeks_one": "{n} week",
+        "weeks_other": "{n} weeks"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "submitted": "Submitted",
+          "under_review": "Under review",
+          "approved": "Approved",
+          "approved_as_noted": "Approved as noted",
+          "revise_and_resubmit": "Revise and resubmit",
+          "rejected": "Rejected",
+          "closed": "Closed"
+        },
+        "type": {
+          "shop_drawing": "Shop drawing",
+          "product_data": "Product data",
+          "sample": "Sample",
+          "mock_up": "Mock-up",
+          "test_report": "Test report",
+          "calculation": "Calculation",
+          "method_statement": "Method statement",
+          "certificate": "Certificate",
+          "warranty": "Warranty"
+        },
+        "discipline": {
+          "mechanical": "Mechanical",
+          "hvac": "HVAC",
+          "plumbing": "Plumbing and drainage",
+          "fire_protection": "Fire protection",
+          "electrical": "Electrical",
+          "lighting": "Lighting",
+          "elv": "Low current",
+          "bms": "Building automation",
+          "architectural": "Architectural",
+          "structural": "Structural",
+          "civil": "Civil"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Change Order Register",
+        "doc_title": "Change Order",
+        "col_code": "Code",
+        "col_title": "Title",
+        "col_reason": "Reason",
+        "col_instrument": "Instrument",
+        "col_submitted": "Date submitted",
+        "col_contractor_amount": "Contractor amount",
+        "col_engineer_amount": "Engineer amount",
+        "col_approved_amount": "Approved amount",
+        "col_cost_impact": "Cost impact",
+        "col_time_impact": "Time impact (days)",
+        "col_approved_time": "Approved time (days)",
+        "time_impact": "Time impact",
+        "approved_time": "Approved time",
+        "col_approved": "Date approved",
+        "submitted_by": "Submitted by",
+        "approved_by": "Approved by",
+        "description": "Description",
+        "no_description": "No description recorded.",
+        "items": "Change items",
+        "item_description": "Description",
+        "item_change": "Change",
+        "item_unit": "Unit",
+        "item_original_quantity": "Original qty",
+        "item_new_quantity": "New qty",
+        "item_original_rate": "Original rate",
+        "item_new_rate": "New rate",
+        "item_cost_delta": "Cost difference",
+        "register_filename": "change-order-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "submitted": "Submitted",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "executed": "Executed"
+        },
+        "reason": {
+          "client_request": "Client request",
+          "design_change": "Design change",
+          "unforeseen": "Unforeseen conditions",
+          "regulatory": "Regulatory",
+          "error": "Error or omission",
+          "non_conformance": "Non-conformance",
+          "value_engineering": "Value engineering"
+        },
+        "instrument": {
+          "works_change": "Instructed change",
+          "site_confirmation": "Site confirmation",
+          "claim": "Claim"
+        },
+        "change": {
+          "added": "Added",
+          "removed": "Removed",
+          "modified": "Modified"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Evidence Pack",
+        "subject": "Subject",
+        "basis": "Basis",
+        "period_from": "Earliest record",
+        "period_to": "Latest record",
+        "digest": "Integrity code (SHA-256, first 16 characters)",
+        "col_row": "No.",
+        "col_record_id": "Record ID",
+        "col_section": "Section",
+        "col_date": "Date",
+        "col_kind": "Record type",
+        "col_title": "Title",
+        "col_summary": "Summary",
+        "col_reference": "Reference",
+        "register_filename": "evidence-pack"
+      },
+      "labels": {
+        "section": {
+          "notices": "Notices",
+          "correspondence": "Correspondence",
+          "rfis": "RFIs",
+          "variations": "Variations",
+          "approvals": "Approvals",
+          "delay": "Delay",
+          "timeline": "Timeline",
+          "other": "Other"
+        },
+        "kind": {
+          "notice": "Notice",
+          "variation_notice": "Variation notice",
+          "variation_request": "Variation request",
+          "variation_order": "Variation order",
+          "change_order": "Change order",
+          "moc_entry": "Change record",
+          "correspondence": "Correspondence"
+        },
+        "basis": {
+          "dispute": "Dispute",
+          "valuation": "Valuation",
+          "delay": "Delay / extension of time",
+          "general": "General record"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Correspondence Log",
+        "doc_title": "Correspondence",
+        "col_reference": "Reference no.",
+        "col_direction": "Direction",
+        "col_type": "Type",
+        "col_subject": "Subject",
+        "col_from": "From",
+        "col_to": "To",
+        "col_date_sent": "Date sent",
+        "col_date_received": "Date received",
+        "col_response_due": "Response required by",
+        "col_clause": "Contract clause",
+        "notes": "Notes",
+        "no_notes": "No notes recorded.",
+        "attachments": "Attached files",
+        "linked_documents": "Linked documents",
+        "sig_prepared": "Prepared by",
+        "sig_received": "Received by",
+        "register_filename": "correspondence-log"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Incoming",
+          "outgoing": "Outgoing"
+        },
+        "type": {
+          "letter": "Letter",
+          "email": "Email",
+          "notice": "Notice",
+          "memo": "Memo",
+          "report": "Report"
+        },
+        "status": {
+          "open": "Open",
+          "awaiting_response": "Awaiting response",
+          "responded": "Responded",
+          "closed": "Closed"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Transmittal Register",
+        "doc_title": "Transmittal",
+        "col_number": "Transmittal no.",
+        "col_subject": "Subject",
+        "col_purpose": "Purpose",
+        "col_issued": "Date issued",
+        "col_response_due": "Response due",
+        "col_recipients": "Recipients",
+        "col_item_count": "Items",
+        "sender": "Sender",
+        "cover_note": "Cover note",
+        "no_cover_note": "No cover note.",
+        "recipients": "Recipients",
+        "recipient": "Recipient",
+        "action_required": "Action required",
+        "acknowledged": "Receipt acknowledged",
+        "responded": "Date responded",
+        "items": "Items transmitted",
+        "item_no": "No.",
+        "item_description": "Description",
+        "item_notes": "Notes",
+        "sig_issued": "Issued by",
+        "sig_received": "Received by",
+        "register_filename": "transmittal-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "issued": "Issued",
+          "responded": "Responded"
+        },
+        "purpose": {
+          "for_approval": "For approval",
+          "for_review": "For review",
+          "for_information": "For information",
+          "for_construction": "For construction",
+          "for_tender": "For tender",
+          "for_record": "For record"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Variation Register",
+        "claim_register_title": "Claims Register",
+        "notice_register_title": "Notice Register",
+        "doc_title": "Variation Request",
+        "doc_title_credit": "Variation Request (omission)",
+        "time_impact": "Time impact",
+        "col_code": "Code",
+        "col_title": "Title",
+        "col_classification": "Type",
+        "col_urgency": "Urgency",
+        "col_requested": "Date requested",
+        "col_claimed_amount": "Claimed amount",
+        "col_agreed_amount": "Agreed amount",
+        "col_time_impact": "Time impact (days)",
+        "col_response_due": "Response due",
+        "col_clause": "Contract clause",
+        "col_row": "No.",
+        "col_claim_type": "Claim type",
+        "col_raised": "Date raised",
+        "col_period_start": "Period from",
+        "col_period_end": "Period to",
+        "col_description": "Description",
+        "col_decided_amount": "Decided amount",
+        "col_days_requested": "Days requested",
+        "col_days_granted": "Days granted",
+        "col_recipient_type": "Addressed to",
+        "col_recipient": "Recipient",
+        "col_target_response": "Response expected",
+        "col_response_received": "Response received",
+        "requested_by": "Requested by",
+        "decided_by": "Decided by",
+        "date_submitted": "Date submitted",
+        "date_decided": "Date decided",
+        "description": "Description",
+        "no_description": "No description recorded.",
+        "decision_notes": "Decision notes",
+        "no_decision_notes": "No decision recorded yet.",
+        "variation_register_filename": "variation-register",
+        "claim_register_filename": "claims-register",
+        "notice_register_filename": "notice-register"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Draft",
+          "submitted": "Submitted",
+          "under_review": "Under review",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "converted_to_vo": "Converted to order"
+        },
+        "claim_status": {
+          "draft": "Draft",
+          "submitted": "Submitted",
+          "under_review": "Under review",
+          "agreed": "Agreed",
+          "granted": "Granted",
+          "rejected": "Rejected"
+        },
+        "notice_status": {
+          "issued": "Issued",
+          "acknowledged": "Acknowledged",
+          "responded": "Responded",
+          "closed": "Closed"
+        },
+        "classification": {
+          "scope_change": "Scope change",
+          "unforeseen": "Unforeseen condition",
+          "owner_change": "Owner change",
+          "design_dev": "Design development",
+          "regulatory": "Regulatory",
+          "other": "Other"
+        },
+        "urgency": {
+          "low": "Low",
+          "med": "Medium",
+          "high": "High"
+        },
+        "claim_type": {
+          "disruption": "Disruption",
+          "eot": "Extension of time"
+        },
+        "recipient_type": {
+          "owner": "Owner",
+          "contractor": "Contractor",
+          "architect": "Architect",
+          "engineer": "Engineer",
+          "consultant": "Consultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Daily Site Diary",
+        "overview": "Overview",
+        "site_supervisor": "Site supervisor",
+        "not_recorded": "Not recorded",
+        "labour_on_site": "Labour on site",
+        "equipment_on_site": "Equipment on site",
+        "completeness": "Completeness",
+        "weather": "Weather",
+        "weather_time": "Time",
+        "weather_source": "Source",
+        "weather_temp": "Temp (C)",
+        "weather_wind": "Wind (km/h)",
+        "weather_precip": "Precip (mm)",
+        "weather_conditions": "Conditions",
+        "weather_empty": "No weather recorded for this day.",
+        "site_record": "Site record",
+        "entries_empty": "No entries recorded for this diary.",
+        "notes": "Notes",
+        "notes_empty": "No additional notes.",
+        "footer_supervisor": "Supervisor: {name}",
+        "footer_supervisor_missing": "Site supervisor: not recorded",
+        "footer_generated": "Generated: {timestamp}",
+        "footer_page": "Page {page} of {total}",
+        "workforce": "Workforce by company",
+        "workforce_company": "Company",
+        "workforce_count": "People",
+        "workforce_unassigned": "Not assigned to a company",
+        "workforce_total": "Total",
+        "signatures": "Signatures",
+        "sig_prepared": "Prepared by (site manager)",
+        "sig_approved": "Approved by (employer's representative)",
+        "sig_name": "Name",
+        "sig_title": "Title",
+        "sig_date": "Date",
+        "sig_signature": "Signature",
+        "signed_note": "Signed in the system: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "diary",
+        "summary_wind": "wind {value} km/h",
+        "summary_precipitation": "precipitation {value} mm",
+        "summary_humidity": "humidity {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Visitors",
+          "event": "Events",
+          "delivery": "Materials delivered",
+          "completion": "Work performed",
+          "incident_summary": "Safety and incidents",
+          "inspection_summary": "Inspections",
+          "photo_note": "Photo notes",
+          "general": "General notes"
+        },
+        "status": {
+          "open": "Open",
+          "closed": "Closed",
+          "signed": "Signed",
+          "archived": "Archived"
+        },
+        "condition": {
+          "clear": "clear",
+          "mainly_clear": "mainly clear",
+          "partly_cloudy": "partly cloudy",
+          "cloudy": "cloudy",
+          "overcast": "overcast",
+          "fog": "fog",
+          "fog_rime": "freezing fog",
+          "drizzle_light": "light drizzle",
+          "drizzle_moderate": "moderate drizzle",
+          "drizzle_dense": "heavy drizzle",
+          "rain": "rain",
+          "rain_light": "light rain",
+          "rain_moderate": "moderate rain",
+          "rain_heavy": "heavy rain",
+          "freezing_rain_light": "light freezing rain",
+          "freezing_rain_heavy": "heavy freezing rain",
+          "snow": "snow",
+          "snow_light": "light snow",
+          "snow_moderate": "moderate snow",
+          "snow_heavy": "heavy snow",
+          "rain_showers_light": "light rain showers",
+          "rain_showers_moderate": "moderate rain showers",
+          "rain_showers_violent": "violent rain showers",
+          "snow_showers_light": "light snow showers",
+          "snow_showers_heavy": "heavy snow showers",
+          "thunderstorm": "thunderstorm",
+          "thunderstorm_hail_light": "thunderstorm with light hail",
+          "thunderstorm_hail_heavy": "thunderstorm with heavy hail"
+        },
+        "source": {
+          "manual": "Manual entry",
+          "open_meteo": "Weather service",
+          "sensor": "Site sensor"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "RFI Log",
+        "col_number": "RFI #",
+        "col_subject": "Subject",
+        "col_raised_by": "Raised By",
+        "col_assigned_to": "Assigned To",
+        "col_ball_in_court": "Ball-in-Court",
+        "col_date_required": "Date Required",
+        "col_response_due": "Response Due",
+        "col_days_open": "Days Open",
+        "col_cost_impact": "Cost Impact",
+        "col_schedule_impact": "Schedule Impact",
+        "col_response": "Response",
+        "yes_with": "Yes ({detail})",
+        "register_filename": "rfi_log"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draft",
+          "open": "Open",
+          "answered": "Answered",
+          "closed": "Closed",
+          "void": "Void"
+        }
+      }
     }
   },
   "cost_control": {

@@ -618,5 +618,539 @@
       "draft": "Долбоор түрү",
       "frozen": "Тоңдурулган"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Долбоор",
+      "project_no": "Долбоор №",
+      "generated_on": "Түзүлгөн күнү",
+      "records": "Жазуулар",
+      "currency": "Валюта",
+      "status": "Абалы",
+      "name": "Аты",
+      "signature": "Кол тамга",
+      "date": "Күнү",
+      "signatures": "Кол тамгалар",
+      "yes": "Ооба",
+      "no": "Жок",
+      "days_one": "{n} күн",
+      "days_other": "{n} күн",
+      "empty_register": "Жазуулар жок.",
+      "total": "Жыйынтыгы",
+      "signer_title": "Кызматы",
+      "sig_prepared_by": "Түзгөн",
+      "sig_checked_by": "Текшерген",
+      "sig_approved_by": "Бекиткен",
+      "footer_generated": "Түзүлгөн убактысы: {timestamp}",
+      "footer_page": "{page} / {total} бет"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Макулдашууга берилген документтер реестри",
+        "doc_title": "Макулдашууга берилген документ",
+        "doc_title_product_data": "Материалды бекитүү барагы",
+        "col_number": "Документ №",
+        "col_title": "Аталышы",
+        "col_type": "Түрү",
+        "col_spec": "Спецификация бөлүмү",
+        "col_rev": "Редакция",
+        "col_date_submitted": "Берилген күнү",
+        "col_date_required": "Талап кылынган күнү",
+        "col_date_returned": "Кайтарылган күнү",
+        "col_reviewer": "Карап чыгуучу",
+        "col_approver": "Бекитүүчү",
+        "col_ball_in_court": "Кийинки аракет кылуучу",
+        "submitted_by_org": "Берүүчү компания",
+        "review_notes": "Карап чыгуучунун эскертмелери",
+        "no_review_notes": "Карап чыгуучунун эскертмелери катталган жок.",
+        "sig_submitted": "Берген",
+        "sig_reviewed": "Карап чыккан",
+        "sig_approved": "Бекиткен",
+        "register_filename": "makuldashuuga-berilgen-dokumentter-reestri",
+        "register_title_shop_drawing": "Иш чиймелеринин реестри",
+        "register_title_product_data": "Материалдарды бекитүү реестри",
+        "register_title_method_statement": "Иштерди аткаруу методикаларынын реестри",
+        "register_filename_shop_drawing": "ish-chiymelerinin-reestri",
+        "register_filename_product_data": "materialdardy-bekituu-reestri",
+        "register_filename_method_statement": "metodikalardyn-reestri",
+        "col_discipline": "Бөлүм",
+        "col_manufacturer": "Өндүрүүчү / бренд",
+        "col_model": "Модель / артикул",
+        "col_origin": "Чыккан өлкөсү",
+        "col_supplier": "Жеткирүүчү",
+        "col_product": "Өндүрүүчү / модель / чыккан өлкөсү",
+        "col_review_code": "Кароо коду",
+        "col_outcome": "Кароо жыйынтыгы",
+        "col_review_period": "Кароо мөөнөтү (күн)",
+        "col_review_due": "Кароо мөөнөтүнүн акыры",
+        "col_days_in_review": "Кароодо өткөн күн",
+        "col_days_in_review_print": "Кароодо өткөн күн",
+        "col_review_overdue": "Кечиккен күн",
+        "col_required_on_site": "Аянтта керек",
+        "col_long_lead": "Узак жеткирүү",
+        "col_lead_time": "Жеткирүү мөөнөтү (апта)",
+        "col_needed_by": "Бекитүү мөөнөтү",
+        "col_approval_late": "Мөөнөттөн кечиккен күн",
+        "col_drawings": "Байланышкан чиймелер",
+        "col_submitted_returned": "Берилди / кайтарылды",
+        "col_on_site_needed_by": "Аянтта / бекитүү мөөнөтү",
+        "resubmit_for_record": "Оңдолгон нускасын каттоо үчүн кайра берүү керек",
+        "review_history": "Кароо тарыхы",
+        "hist_submitted": "Берилди",
+        "hist_returned": "Кайтарылды",
+        "drawings_missing_one": "Байланышкан {n} чийме мындан ары жеткиликсиз",
+        "drawings_missing_other": "Байланышкан {n} чийме мындан ары жеткиликсиз",
+        "weeks_one": "{n} апта",
+        "weeks_other": "{n} апта"
+      },
+      "labels": {
+        "status": {
+          "draft": "Долбоор",
+          "submitted": "Берилди",
+          "under_review": "Кароодо",
+          "approved": "Бекитилди",
+          "approved_as_noted": "Эскертмелер менен бекитилди",
+          "revise_and_resubmit": "Оңдоп кайра берүү",
+          "rejected": "Четке кагылды",
+          "closed": "Жабылды"
+        },
+        "type": {
+          "shop_drawing": "Иш чийме",
+          "product_data": "Продукт маалыматтары",
+          "sample": "Үлгү",
+          "mock_up": "Макет",
+          "test_report": "Сыноо отчету",
+          "calculation": "Эсептөө",
+          "method_statement": "Иштерди аткаруу методикасы",
+          "certificate": "Сертификат",
+          "warranty": "Кепилдик"
+        },
+        "discipline": {
+          "mechanical": "Механика",
+          "hvac": "Жылытуу жана шамалдатуу",
+          "plumbing": "Суу менен жабдуу жана канализация",
+          "fire_protection": "Өрттөн коргоо",
+          "electrical": "Электр жабдуулары",
+          "lighting": "Жарыктандыруу",
+          "elv": "Начар токтуу системалар",
+          "bms": "Имарат автоматикасы",
+          "architectural": "Архитектура",
+          "structural": "Конструкциялар",
+          "civil": "Курулуш-инженердик бөлүм"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Өзгөртүү буйруктарынын реестри",
+        "doc_title": "Өзгөртүү буйругу",
+        "col_code": "Коду",
+        "col_title": "Аталышы",
+        "col_reason": "Себеби",
+        "col_instrument": "Документ түрү",
+        "col_submitted": "Берилген күнү",
+        "col_contractor_amount": "Подрядчынын суммасы",
+        "col_engineer_amount": "Инженердин суммасы",
+        "col_approved_amount": "Бекитилген сумма",
+        "col_cost_impact": "Наркка таасири",
+        "col_time_impact": "Мөөнөткө таасири (күн)",
+        "col_approved_time": "Бекитилген мөөнөт (күн)",
+        "time_impact": "Мөөнөткө таасири",
+        "approved_time": "Бекитилген мөөнөт",
+        "col_approved": "Бекитилген күнү",
+        "submitted_by": "Берген",
+        "approved_by": "Бекиткен",
+        "description": "Сүрөттөмөсү",
+        "no_description": "Сүрөттөмө катталган жок.",
+        "items": "Өзгөрүү позициялары",
+        "item_description": "Сүрөттөмөсү",
+        "item_change": "Өзгөрүү",
+        "item_unit": "Өлчөө бирдиги",
+        "item_original_quantity": "Баштапкы саны",
+        "item_new_quantity": "Жаңы саны",
+        "item_original_rate": "Баштапкы баасы",
+        "item_new_rate": "Жаңы баасы",
+        "item_cost_delta": "Нарк айырмасы",
+        "register_filename": "ozgortuu-buyruktarynyn-reestri"
+      },
+      "labels": {
+        "status": {
+          "draft": "Долбоор",
+          "submitted": "Берилди",
+          "approved": "Бекитилди",
+          "rejected": "Четке кагылды",
+          "executed": "Аткарылды"
+        },
+        "reason": {
+          "client_request": "Буйрутмачынын өтүнүчү",
+          "design_change": "Долбоордун өзгөрүшү",
+          "unforeseen": "Күтүлбөгөн жагдайлар",
+          "regulatory": "Ченемдик талап",
+          "error": "Ката же калтырылган жер",
+          "non_conformance": "Дал келбестик",
+          "value_engineering": "Баалуулук инженериясы"
+        },
+        "instrument": {
+          "works_change": "Тапшырма боюнча өзгөрүү",
+          "site_confirmation": "Аянттагы ырастоо",
+          "claim": "Талап"
+        },
+        "change": {
+          "added": "Кошулду",
+          "removed": "Алынып салынды",
+          "modified": "Өзгөртүлдү"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Далилдер жыйнагы",
+        "subject": "Темасы",
+        "basis": "Негиздеме",
+        "period_from": "Эң эрте жазуу",
+        "period_to": "Эң акыркы жазуу",
+        "digest": "Бүтүндүк коду (SHA-256, биринчи 16 белги)",
+        "col_row": "№",
+        "col_record_id": "Жазуу ID",
+        "col_section": "Бөлүм",
+        "col_date": "Күнү",
+        "col_kind": "Жазуу түрү",
+        "col_title": "Аталышы",
+        "col_summary": "Кыскача мазмуну",
+        "col_reference": "Шилтеме",
+        "register_filename": "dalilder-zhyynagy"
+      },
+      "labels": {
+        "section": {
+          "notices": "Билдирмелер",
+          "correspondence": "Кат алышуу",
+          "rfis": "Маалымат сурамдары (RFI)",
+          "variations": "Өзгөрмөлөр",
+          "approvals": "Бекитүүлөр",
+          "delay": "Кечигүү",
+          "timeline": "Хронология",
+          "other": "Башка"
+        },
+        "kind": {
+          "notice": "Билдирме",
+          "variation_notice": "Өзгөрмө жөнүндө билдирме",
+          "variation_request": "Өзгөрмө сурамы",
+          "variation_order": "Өзгөрмө буйругу",
+          "change_order": "Өзгөртүү буйругу",
+          "moc_entry": "Өзгөрүү жазуусу",
+          "correspondence": "Кат алышуу"
+        },
+        "basis": {
+          "dispute": "Талаш",
+          "valuation": "Баалоо",
+          "delay": "Кечигүү / мөөнөттү узартуу",
+          "general": "Жалпы жазуу"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Кат алышуу журналы",
+        "doc_title": "Кат алышуу",
+        "col_reference": "Шилтеме №",
+        "col_direction": "Багыты",
+        "col_type": "Түрү",
+        "col_subject": "Темасы",
+        "col_from": "Кимден",
+        "col_to": "Кимге",
+        "col_date_sent": "Жөнөтүлгөн күнү",
+        "col_date_received": "Алынган күнү",
+        "col_response_due": "Жооп берүү мөөнөтү",
+        "col_clause": "Келишим пункту",
+        "notes": "Эскертмелер",
+        "no_notes": "Эскертмелер катталган жок.",
+        "attachments": "Тиркелген файлдар",
+        "linked_documents": "Байланышкан документтер",
+        "sig_prepared": "Түзгөн",
+        "sig_received": "Кабыл алган",
+        "register_filename": "kat-alyshuu-zhurnaly"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Кирүүчү",
+          "outgoing": "Чыгуучу"
+        },
+        "type": {
+          "letter": "Кат",
+          "email": "Электрондук почта",
+          "notice": "Билдирме",
+          "memo": "Кызматтык кат",
+          "report": "Отчет"
+        },
+        "status": {
+          "open": "Ачык",
+          "awaiting_response": "Жооп күтүлүүдө",
+          "responded": "Жооп берилди",
+          "closed": "Жабылды"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Коштоо каттар реестри",
+        "doc_title": "Коштоо кат",
+        "col_number": "Коштоо кат №",
+        "col_subject": "Темасы",
+        "col_purpose": "Максаты",
+        "col_issued": "Берилген күнү",
+        "col_response_due": "Жооп берүү мөөнөтү",
+        "col_recipients": "Алуучулар",
+        "col_item_count": "Позициялар",
+        "sender": "Жөнөтүүчү",
+        "cover_note": "Коштоо билдирүү",
+        "no_cover_note": "Коштоо билдирүү жок.",
+        "recipients": "Алуучулар",
+        "recipient": "Алуучу",
+        "action_required": "Талап кылынган аракет",
+        "acknowledged": "Алганы ырасталды",
+        "responded": "Жооп берилген күнү",
+        "items": "Жөнөтүлгөн документтер",
+        "item_no": "№",
+        "item_description": "Сүрөттөмөсү",
+        "item_notes": "Эскертмелер",
+        "sig_issued": "Берген",
+        "sig_received": "Кабыл алган",
+        "register_filename": "koshtoo-kattar-reestri"
+      },
+      "labels": {
+        "status": {
+          "draft": "Долбоор",
+          "issued": "Берилди",
+          "responded": "Жооп берилди"
+        },
+        "purpose": {
+          "for_approval": "Бекитүү үчүн",
+          "for_review": "Кароо үчүн",
+          "for_information": "Маалымат үчүн",
+          "for_construction": "Курулуш үчүн",
+          "for_tender": "Тендер үчүн",
+          "for_record": "Каттоо үчүн"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Өзгөрмөлөр реестри",
+        "claim_register_title": "Талаптар реестри",
+        "notice_register_title": "Билдирмелер реестри",
+        "doc_title": "Өзгөрмө сурамы",
+        "doc_title_credit": "Өзгөрмө сурамы (иш көлөмүн кыскартуу)",
+        "time_impact": "Мөөнөткө таасири",
+        "col_code": "Коду",
+        "col_title": "Аталышы",
+        "col_classification": "Түрү",
+        "col_urgency": "Шашылыштыгы",
+        "col_requested": "Сурам күнү",
+        "col_claimed_amount": "Талап кылынган сумма",
+        "col_agreed_amount": "Макулдашылган сумма",
+        "col_time_impact": "Мөөнөткө таасири (күн)",
+        "col_response_due": "Жооп берүү мөөнөтү",
+        "col_clause": "Келишим пункту",
+        "col_row": "№",
+        "col_claim_type": "Талап түрү",
+        "col_raised": "Билдирилген күнү",
+        "col_period_start": "Мезгил башы",
+        "col_period_end": "Мезгил аягы",
+        "col_description": "Сүрөттөмөсү",
+        "col_decided_amount": "Чечилген сумма",
+        "col_days_requested": "Сураган күн",
+        "col_days_granted": "Берилген күн",
+        "col_recipient_type": "Кимге арналган",
+        "col_recipient": "Алуучу",
+        "col_target_response": "Күтүлгөн жооп",
+        "col_response_received": "Жооп алынды",
+        "requested_by": "Сураган",
+        "decided_by": "Чечим чыгарган",
+        "date_submitted": "Берилген күнү",
+        "date_decided": "Чечим күнү",
+        "description": "Сүрөттөмөсү",
+        "no_description": "Сүрөттөмө катталган жок.",
+        "decision_notes": "Чечим эскертмелери",
+        "no_decision_notes": "Чечим азырынча чыккан жок.",
+        "variation_register_filename": "ozgormolor-reestri",
+        "claim_register_filename": "talaptar-reestri",
+        "notice_register_filename": "bildirmeler-reestri"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Долбоор",
+          "submitted": "Берилди",
+          "under_review": "Кароодо",
+          "approved": "Бекитилди",
+          "rejected": "Четке кагылды",
+          "converted_to_vo": "Буйрукка айландырылды"
+        },
+        "claim_status": {
+          "draft": "Долбоор",
+          "submitted": "Берилди",
+          "under_review": "Кароодо",
+          "agreed": "Макулдашылды",
+          "granted": "Канааттандырылды",
+          "rejected": "Четке кагылды"
+        },
+        "notice_status": {
+          "issued": "Берилди",
+          "acknowledged": "Алганы ырасталды",
+          "responded": "Жооп берилди",
+          "closed": "Жабылды"
+        },
+        "classification": {
+          "scope_change": "Көлөмдүн өзгөрүшү",
+          "unforeseen": "Күтүлбөгөн жагдай",
+          "owner_change": "Буйрутмачынын өзгөртүүсү",
+          "design_dev": "Долбоорду иштеп чыгуу",
+          "regulatory": "Ченемдик талап",
+          "other": "Башка"
+        },
+        "urgency": {
+          "low": "Төмөн",
+          "med": "Орто",
+          "high": "Жогору"
+        },
+        "claim_type": {
+          "disruption": "Иштин жүрүшүнүн бузулушу",
+          "eot": "Мөөнөттү узартуу"
+        },
+        "recipient_type": {
+          "owner": "Буйрутмачы",
+          "contractor": "Подрядчы",
+          "architect": "Архитектор",
+          "engineer": "Инженер",
+          "consultant": "Консультант"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Курулуш аянтынын күндөлүгү",
+        "overview": "Сереп",
+        "site_supervisor": "Аянт башчысы",
+        "not_recorded": "Катталган жок",
+        "labour_on_site": "Аянттагы жумушчу күчү",
+        "equipment_on_site": "Аянттагы техника",
+        "completeness": "Толуктугу",
+        "weather": "Аба ырайы",
+        "weather_time": "Убактысы",
+        "weather_source": "Булагы",
+        "weather_temp": "Темп. (C)",
+        "weather_wind": "Шамал (км/с)",
+        "weather_precip": "Жаан-чачын (мм)",
+        "weather_conditions": "Шарттар",
+        "weather_empty": "Бул күн үчүн аба ырайы катталган жок.",
+        "site_record": "Аянт жазуусу",
+        "entries_empty": "Бул күндөлүктө жазуулар жок.",
+        "notes": "Эскертмелер",
+        "notes_empty": "Кошумча эскертмелер жок.",
+        "footer_supervisor": "Башчы: {name}",
+        "footer_supervisor_missing": "Аянт башчысы: катталган жок",
+        "footer_generated": "Түзүлгөн убактысы: {timestamp}",
+        "footer_page": "{page} / {total} бет",
+        "workforce": "Компаниялар боюнча жумушчу күчү",
+        "workforce_company": "Компания",
+        "workforce_count": "Адам саны",
+        "workforce_unassigned": "Компанияга бекитилбеген",
+        "workforce_total": "Жыйынтыгы",
+        "signatures": "Кол тамгалар",
+        "sig_prepared": "Түзгөн (аянт башчысы)",
+        "sig_approved": "Бекиткен (иш берүүчүнүн өкүлү)",
+        "sig_name": "Аты-жөнү",
+        "sig_title": "Кызматы",
+        "sig_date": "Күнү",
+        "sig_signature": "Кол тамга",
+        "signed_note": "Системада кол коюлду: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "kundoluk",
+        "summary_wind": "шамал {value} км/с",
+        "summary_precipitation": "жаан-чачын {value} мм",
+        "summary_humidity": "нымдуулук {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Конокторлор",
+          "event": "Окуялар",
+          "delivery": "Жеткирилген материалдар",
+          "completion": "Аткарылган иштер",
+          "incident_summary": "Коопсуздук жана окуялар",
+          "inspection_summary": "Текшерүүлөр",
+          "photo_note": "Сүрөт эскертмелери",
+          "general": "Жалпы эскертмелер"
+        },
+        "status": {
+          "open": "Ачык",
+          "closed": "Жабык",
+          "signed": "Кол коюлган",
+          "archived": "Архивделген"
+        },
+        "condition": {
+          "clear": "ачык",
+          "mainly_clear": "негизинен ачык",
+          "partly_cloudy": "жарым-жартылай булуттуу",
+          "cloudy": "булуттуу",
+          "overcast": "каптал булуттуу",
+          "fog": "туман",
+          "fog_rime": "ызгаар түшүүчү туман",
+          "drizzle_light": "алсыз себелеген жамгыр",
+          "drizzle_moderate": "орточо себелеген жамгыр",
+          "drizzle_dense": "күчтүү себелеген жамгыр",
+          "rain": "жамгыр",
+          "rain_light": "алсыз жамгыр",
+          "rain_moderate": "орточо жамгыр",
+          "rain_heavy": "күчтүү жамгыр",
+          "freezing_rain_light": "алсыз тоңдурган жамгыр",
+          "freezing_rain_heavy": "күчтүү тоңдурган жамгыр",
+          "snow": "кар",
+          "snow_light": "алсыз кар",
+          "snow_moderate": "орточо кар",
+          "snow_heavy": "калың кар",
+          "rain_showers_light": "алсыз нөшөр",
+          "rain_showers_moderate": "орточо нөшөр",
+          "rain_showers_violent": "күчтүү нөшөр",
+          "snow_showers_light": "алсыз кыска мөөнөттүү кар",
+          "snow_showers_heavy": "калың кыска мөөнөттүү кар",
+          "thunderstorm": "чагылган менен күн күркүрөө",
+          "thunderstorm_hail_light": "алсыз мөндүрлүү күн күркүрөө",
+          "thunderstorm_hail_heavy": "күчтүү мөндүрлүү күн күркүрөө"
+        },
+        "source": {
+          "manual": "Кол менен киргизилген",
+          "open_meteo": "Метеорологиялык кызмат",
+          "sensor": "Аянттагы сенсор"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Маалымат сурамдары журналы (RFI)",
+        "col_number": "RFI №",
+        "col_subject": "Темасы",
+        "col_raised_by": "Берген",
+        "col_assigned_to": "Жооптуу",
+        "col_ball_in_court": "Кийинки аракет кылуучу",
+        "col_date_required": "Талап кылынган күнү",
+        "col_response_due": "Жооп берүү мөөнөтү",
+        "col_days_open": "Ачык күн саны",
+        "col_cost_impact": "Наркка таасири",
+        "col_schedule_impact": "Графикке таасири",
+        "col_response": "Жооп",
+        "yes_with": "Ооба ({detail})",
+        "register_filename": "rfi-zhurnaly"
+      },
+      "labels": {
+        "status": {
+          "draft": "Долбоор",
+          "open": "Ачык",
+          "answered": "Жооп берилди",
+          "closed": "Жабылды",
+          "void": "Күчүн жоготту"
+        }
+      }
+    }
   }
 }

@@ -618,5 +618,539 @@
       "draft": "Ciornă",
       "frozen": "Înghețat"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Proiect",
+      "project_no": "Nr. proiect",
+      "generated_on": "Data generării",
+      "records": "Înregistrări",
+      "currency": "Monedă",
+      "status": "Stare",
+      "name": "Nume",
+      "signature": "Semnătură",
+      "date": "Data",
+      "signatures": "Semnături",
+      "yes": "Da",
+      "no": "Nu",
+      "days_one": "{n} zi",
+      "days_other": "{n} zile",
+      "empty_register": "Nicio înregistrare.",
+      "total": "Total",
+      "signer_title": "Funcția",
+      "sig_prepared_by": "Întocmit de",
+      "sig_checked_by": "Verificat de",
+      "sig_approved_by": "Aprobat de",
+      "footer_generated": "Generat {timestamp}",
+      "footer_page": "Pagina {page} din {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Registru de documente pentru aprobare",
+        "doc_title": "Document pentru aprobare",
+        "doc_title_product_data": "Fișă de aprobare a materialelor",
+        "col_number": "Nr. document",
+        "col_title": "Titlu",
+        "col_type": "Tip",
+        "col_spec": "Capitol din specificații",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Data depunerii",
+        "col_date_required": "Necesar până la",
+        "col_date_returned": "Data returnării",
+        "col_reviewer": "Verificator",
+        "col_approver": "Aprobator",
+        "col_ball_in_court": "Acțiune la",
+        "submitted_by_org": "Firma depunătoare",
+        "review_notes": "Observații verificator",
+        "no_review_notes": "Nicio observație a verificatorului.",
+        "sig_submitted": "Depus de",
+        "sig_reviewed": "Verificat de",
+        "sig_approved": "Aprobat de",
+        "register_filename": "registru-documente-pentru-aprobare",
+        "register_title_shop_drawing": "Registru de desene de execuție",
+        "register_title_product_data": "Registru de aprobare a materialelor",
+        "register_title_method_statement": "Registru de metodologii de execuție",
+        "register_filename_shop_drawing": "registru-desene-de-executie",
+        "register_filename_product_data": "registru-aprobare-materiale",
+        "register_filename_method_statement": "registru-metodologii-de-executie",
+        "col_discipline": "Specialitate",
+        "col_manufacturer": "Producător / marcă",
+        "col_model": "Model / referință",
+        "col_origin": "Țara de origine",
+        "col_supplier": "Furnizor",
+        "col_product": "Producător / model / origine",
+        "col_review_code": "Cod verificare",
+        "col_outcome": "Rezultat verificare",
+        "col_review_period": "Termen verificare (zile)",
+        "col_review_due": "Verificare până la",
+        "col_days_in_review": "Zile în verificare",
+        "col_days_in_review_print": "Zile în verificare",
+        "col_review_overdue": "Zile întârziere",
+        "col_required_on_site": "Necesar pe șantier",
+        "col_long_lead": "Livrare îndelungată",
+        "col_lead_time": "Termen livrare (săpt.)",
+        "col_needed_by": "Aprobare necesară până la",
+        "col_approval_late": "Zile peste termen",
+        "col_drawings": "Desene asociate",
+        "col_submitted_returned": "Depus / returnat",
+        "col_on_site_needed_by": "Pe șantier / aprobare până la",
+        "resubmit_for_record": "Exemplar corectat de redepus pentru evidență",
+        "review_history": "Istoric verificări",
+        "hist_submitted": "Depus",
+        "hist_returned": "Returnat",
+        "drawings_missing_one": "{n} desen asociat nu mai este disponibil",
+        "drawings_missing_other": "{n} desene asociate nu mai sunt disponibile",
+        "weeks_one": "{n} săptămână",
+        "weeks_other": "{n} săpt."
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "under_review": "În verificare",
+          "approved": "Aprobat",
+          "approved_as_noted": "Aprobat cu observații",
+          "revise_and_resubmit": "De revizuit și redepus",
+          "rejected": "Respins",
+          "closed": "Închis"
+        },
+        "type": {
+          "shop_drawing": "Desen de execuție",
+          "product_data": "Fișă tehnică produs",
+          "sample": "Mostră",
+          "mock_up": "Machetă de probă",
+          "test_report": "Raport de încercări",
+          "calculation": "Calcul",
+          "method_statement": "Metodologie de execuție",
+          "certificate": "Certificat",
+          "warranty": "Garanție"
+        },
+        "discipline": {
+          "mechanical": "Mecanică",
+          "hvac": "HVAC",
+          "plumbing": "Instalații sanitare și canalizare",
+          "fire_protection": "Protecție la incendiu",
+          "electrical": "Electrică",
+          "lighting": "Iluminat",
+          "elv": "Curenți slabi",
+          "bms": "Automatizare clădiri",
+          "architectural": "Arhitectură",
+          "structural": "Structură",
+          "civil": "Construcții civile"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Registru de ordine de modificare",
+        "doc_title": "Ordin de modificare",
+        "col_code": "Cod",
+        "col_title": "Titlu",
+        "col_reason": "Motiv",
+        "col_instrument": "Instrument",
+        "col_submitted": "Data depunerii",
+        "col_contractor_amount": "Valoare antreprenor",
+        "col_engineer_amount": "Valoare inginer",
+        "col_approved_amount": "Valoare aprobată",
+        "col_cost_impact": "Impact asupra costului",
+        "col_time_impact": "Impact asupra duratei (zile)",
+        "col_approved_time": "Durată aprobată (zile)",
+        "time_impact": "Impact asupra duratei",
+        "approved_time": "Durată aprobată",
+        "col_approved": "Data aprobării",
+        "submitted_by": "Depus de",
+        "approved_by": "Aprobat de",
+        "description": "Descriere",
+        "no_description": "Nicio descriere înregistrată.",
+        "items": "Articole modificate",
+        "item_description": "Descriere",
+        "item_change": "Modificare",
+        "item_unit": "UM",
+        "item_original_quantity": "Cant. inițială",
+        "item_new_quantity": "Cant. nouă",
+        "item_original_rate": "Tarif inițial",
+        "item_new_rate": "Tarif nou",
+        "item_cost_delta": "Diferență de cost",
+        "register_filename": "registru-ordine-de-modificare"
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "approved": "Aprobat",
+          "rejected": "Respins",
+          "executed": "Executat"
+        },
+        "reason": {
+          "client_request": "Solicitarea beneficiarului",
+          "design_change": "Modificare de proiect",
+          "unforeseen": "Condiții neprevăzute",
+          "regulatory": "Cerințe legale",
+          "error": "Eroare sau omisiune",
+          "non_conformance": "Neconformitate",
+          "value_engineering": "Inginerie valorică"
+        },
+        "instrument": {
+          "works_change": "Modificare dispusă",
+          "site_confirmation": "Confirmare pe șantier",
+          "claim": "Revendicare"
+        },
+        "change": {
+          "added": "Adăugat",
+          "removed": "Eliminat",
+          "modified": "Modificat"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dosar de probe",
+        "subject": "Subiect",
+        "basis": "Temei",
+        "period_from": "Cea mai veche înregistrare",
+        "period_to": "Cea mai recentă înregistrare",
+        "digest": "Cod de integritate (SHA-256, primele 16 caractere)",
+        "col_row": "Nr.",
+        "col_record_id": "ID înregistrare",
+        "col_section": "Secțiune",
+        "col_date": "Data",
+        "col_kind": "Tip înregistrare",
+        "col_title": "Titlu",
+        "col_summary": "Rezumat",
+        "col_reference": "Referință",
+        "register_filename": "dosar-de-probe"
+      },
+      "labels": {
+        "section": {
+          "notices": "Notificări",
+          "correspondence": "Corespondență",
+          "rfis": "Cereri de informații (RFI)",
+          "variations": "Modificări",
+          "approvals": "Aprobări",
+          "delay": "Întârziere",
+          "timeline": "Cronologie",
+          "other": "Altele"
+        },
+        "kind": {
+          "notice": "Notificare",
+          "variation_notice": "Notificare de modificare",
+          "variation_request": "Cerere de modificare",
+          "variation_order": "Dispoziție de modificare",
+          "change_order": "Ordin de modificare",
+          "moc_entry": "Înregistrare de modificare",
+          "correspondence": "Corespondență"
+        },
+        "basis": {
+          "dispute": "Litigiu",
+          "valuation": "Evaluare",
+          "delay": "Întârziere / prelungire de termen",
+          "general": "Înregistrare generală"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Registru de corespondență",
+        "doc_title": "Corespondență",
+        "col_reference": "Nr. de referință",
+        "col_direction": "Sens",
+        "col_type": "Tip",
+        "col_subject": "Subiect",
+        "col_from": "De la",
+        "col_to": "Către",
+        "col_date_sent": "Data trimiterii",
+        "col_date_received": "Data primirii",
+        "col_response_due": "Răspuns până la",
+        "col_clause": "Clauză contractuală",
+        "notes": "Observații",
+        "no_notes": "Nicio observație înregistrată.",
+        "attachments": "Fișiere atașate",
+        "linked_documents": "Documente asociate",
+        "sig_prepared": "Întocmit de",
+        "sig_received": "Primit de",
+        "register_filename": "registru-corespondenta"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Intrare",
+          "outgoing": "Ieșire"
+        },
+        "type": {
+          "letter": "Scrisoare",
+          "email": "E-mail",
+          "notice": "Notificare",
+          "memo": "Notă internă",
+          "report": "Raport"
+        },
+        "status": {
+          "open": "Deschis",
+          "awaiting_response": "În așteptarea răspunsului",
+          "responded": "Răspuns primit",
+          "closed": "Închis"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Registru de transmitere a documentelor",
+        "doc_title": "Fișă de transmitere",
+        "col_number": "Nr. transmitere",
+        "col_subject": "Subiect",
+        "col_purpose": "Scop",
+        "col_issued": "Data emiterii",
+        "col_response_due": "Răspuns până la",
+        "col_recipients": "Destinatari",
+        "col_item_count": "Articole",
+        "sender": "Expeditor",
+        "cover_note": "Adresă de însoțire",
+        "no_cover_note": "Fără adresă de însoțire.",
+        "recipients": "Destinatari",
+        "recipient": "Destinatar",
+        "action_required": "Acțiune necesară",
+        "acknowledged": "Primire confirmată",
+        "responded": "Data răspunsului",
+        "items": "Documente transmise",
+        "item_no": "Nr.",
+        "item_description": "Descriere",
+        "item_notes": "Observații",
+        "sig_issued": "Emis de",
+        "sig_received": "Primit de",
+        "register_filename": "registru-transmitere-documente"
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "issued": "Emis",
+          "responded": "Răspuns primit"
+        },
+        "purpose": {
+          "for_approval": "Pentru aprobare",
+          "for_review": "Pentru verificare",
+          "for_information": "Pentru informare",
+          "for_construction": "Pentru execuție",
+          "for_tender": "Pentru ofertare",
+          "for_record": "Pentru evidență"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Registru de modificări",
+        "claim_register_title": "Registru de revendicări",
+        "notice_register_title": "Registru de notificări",
+        "doc_title": "Cerere de modificare",
+        "doc_title_credit": "Cerere de modificare (lucrări eliminate)",
+        "time_impact": "Impact asupra duratei",
+        "col_code": "Cod",
+        "col_title": "Titlu",
+        "col_classification": "Tip",
+        "col_urgency": "Urgență",
+        "col_requested": "Data solicitării",
+        "col_claimed_amount": "Valoare revendicată",
+        "col_agreed_amount": "Valoare convenită",
+        "col_time_impact": "Impact asupra duratei (zile)",
+        "col_response_due": "Răspuns până la",
+        "col_clause": "Clauză contractuală",
+        "col_row": "Nr.",
+        "col_claim_type": "Tip revendicare",
+        "col_raised": "Data formulării",
+        "col_period_start": "Perioada de la",
+        "col_period_end": "Perioada până la",
+        "col_description": "Descriere",
+        "col_decided_amount": "Valoare stabilită",
+        "col_days_requested": "Zile solicitate",
+        "col_days_granted": "Zile acordate",
+        "col_recipient_type": "Adresat",
+        "col_recipient": "Destinatar",
+        "col_target_response": "Răspuns așteptat",
+        "col_response_received": "Răspuns primit",
+        "requested_by": "Solicitat de",
+        "decided_by": "Decis de",
+        "date_submitted": "Data depunerii",
+        "date_decided": "Data deciziei",
+        "description": "Descriere",
+        "no_description": "Nicio descriere înregistrată.",
+        "decision_notes": "Motivarea deciziei",
+        "no_decision_notes": "Nicio decizie înregistrată încă.",
+        "variation_register_filename": "registru-modificari",
+        "claim_register_filename": "registru-revendicari",
+        "notice_register_filename": "registru-notificari"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "under_review": "În verificare",
+          "approved": "Aprobat",
+          "rejected": "Respins",
+          "converted_to_vo": "Transformat în dispoziție"
+        },
+        "claim_status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "under_review": "În verificare",
+          "agreed": "Convenit",
+          "granted": "Acordat",
+          "rejected": "Respins"
+        },
+        "notice_status": {
+          "issued": "Emis",
+          "acknowledged": "Primire confirmată",
+          "responded": "Răspuns primit",
+          "closed": "Închis"
+        },
+        "classification": {
+          "scope_change": "Modificare de domeniu",
+          "unforeseen": "Condiție neprevăzută",
+          "owner_change": "Modificare a beneficiarului",
+          "design_dev": "Detaliere de proiect",
+          "regulatory": "Cerințe legale",
+          "other": "Altele"
+        },
+        "urgency": {
+          "low": "Scăzută",
+          "med": "Medie",
+          "high": "Ridicată"
+        },
+        "claim_type": {
+          "disruption": "Perturbarea lucrărilor",
+          "eot": "Prelungire de termen"
+        },
+        "recipient_type": {
+          "owner": "Beneficiar",
+          "contractor": "Antreprenor",
+          "architect": "Arhitect",
+          "engineer": "Inginer",
+          "consultant": "Consultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Jurnal zilnic de șantier",
+        "overview": "Prezentare generală",
+        "site_supervisor": "Șef de șantier",
+        "not_recorded": "Neînregistrat",
+        "labour_on_site": "Forță de muncă pe șantier",
+        "equipment_on_site": "Utilaje pe șantier",
+        "completeness": "Grad de completare",
+        "weather": "Vreme",
+        "weather_time": "Ora",
+        "weather_source": "Sursa",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vânt (km/h)",
+        "weather_precip": "Precip. (mm)",
+        "weather_conditions": "Condiții",
+        "weather_empty": "Nicio informație meteo înregistrată pentru această zi.",
+        "site_record": "Evidență de șantier",
+        "entries_empty": "Nicio intrare înregistrată pentru acest jurnal.",
+        "notes": "Observații",
+        "notes_empty": "Nicio observație suplimentară.",
+        "footer_supervisor": "Șef de șantier: {name}",
+        "footer_supervisor_missing": "Șef de șantier: neînregistrat",
+        "footer_generated": "Generat: {timestamp}",
+        "footer_page": "Pagina {page} din {total}",
+        "workforce": "Personal pe firme",
+        "workforce_company": "Firma",
+        "workforce_count": "Persoane",
+        "workforce_unassigned": "Neatribuit unei firme",
+        "workforce_total": "Total",
+        "signatures": "Semnături",
+        "sig_prepared": "Întocmit de (șef de șantier)",
+        "sig_approved": "Aprobat de (reprezentantul beneficiarului)",
+        "sig_name": "Nume",
+        "sig_title": "Funcția",
+        "sig_date": "Data",
+        "sig_signature": "Semnătură",
+        "signed_note": "Semnat în sistem: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "jurnal-zilnic",
+        "summary_wind": "vânt {value} km/h",
+        "summary_precipitation": "precipitații {value} mm",
+        "summary_humidity": "umiditate {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Vizitatori",
+          "event": "Evenimente",
+          "delivery": "Materiale livrate",
+          "completion": "Lucrări executate",
+          "incident_summary": "Securitate și incidente",
+          "inspection_summary": "Inspecții",
+          "photo_note": "Note foto",
+          "general": "Observații generale"
+        },
+        "status": {
+          "open": "Deschis",
+          "closed": "Închis",
+          "signed": "Semnat",
+          "archived": "Arhivat"
+        },
+        "condition": {
+          "clear": "senin",
+          "mainly_clear": "predominant senin",
+          "partly_cloudy": "parțial noros",
+          "cloudy": "noros",
+          "overcast": "cer acoperit",
+          "fog": "ceață",
+          "fog_rime": "ceață cu depunere de chiciură",
+          "drizzle_light": "burniță slabă",
+          "drizzle_moderate": "burniță moderată",
+          "drizzle_dense": "burniță intensă",
+          "rain": "ploaie",
+          "rain_light": "ploaie slabă",
+          "rain_moderate": "ploaie moderată",
+          "rain_heavy": "ploaie torențială",
+          "freezing_rain_light": "ploaie înghețată slabă",
+          "freezing_rain_heavy": "ploaie înghețată puternică",
+          "snow": "ninsoare",
+          "snow_light": "ninsoare slabă",
+          "snow_moderate": "ninsoare moderată",
+          "snow_heavy": "ninsoare abundentă",
+          "rain_showers_light": "averse slabe de ploaie",
+          "rain_showers_moderate": "averse moderate de ploaie",
+          "rain_showers_violent": "averse violente de ploaie",
+          "snow_showers_light": "averse slabe de ninsoare",
+          "snow_showers_heavy": "averse puternice de ninsoare",
+          "thunderstorm": "furtună",
+          "thunderstorm_hail_light": "furtună cu grindină mică",
+          "thunderstorm_hail_heavy": "furtună cu grindină puternică"
+        },
+        "source": {
+          "manual": "Introducere manuală",
+          "open_meteo": "Serviciu meteo",
+          "sensor": "Senzor de șantier"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Registru de cereri de informații (RFI)",
+        "col_number": "Nr. RFI",
+        "col_subject": "Subiect",
+        "col_raised_by": "Inițiat de",
+        "col_assigned_to": "Atribuit",
+        "col_ball_in_court": "Acțiune la",
+        "col_date_required": "Necesar până la",
+        "col_response_due": "Răspuns până la",
+        "col_days_open": "Zile deschis",
+        "col_cost_impact": "Impact asupra costului",
+        "col_schedule_impact": "Impact asupra graficului",
+        "col_response": "Răspuns",
+        "yes_with": "Da ({detail})",
+        "register_filename": "registru-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "open": "Deschis",
+          "answered": "Răspuns",
+          "closed": "Închis",
+          "void": "Anulat"
+        }
+      }
+    }
   }
 }

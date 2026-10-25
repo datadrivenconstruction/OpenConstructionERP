@@ -618,5 +618,539 @@
       "draft": "Rozpracovaný",
       "frozen": "Zmrazený"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Č. projektu",
+      "generated_on": "Datum vygenerování",
+      "records": "Záznamy",
+      "currency": "Měna",
+      "status": "Stav",
+      "name": "Jméno",
+      "signature": "Podpis",
+      "date": "Datum",
+      "signatures": "Podpisy",
+      "yes": "Ano",
+      "no": "Ne",
+      "days_one": "{n} den",
+      "days_other": "{n} dní",
+      "empty_register": "Žádné záznamy.",
+      "total": "Celkem",
+      "signer_title": "Funkce",
+      "sig_prepared_by": "Zpracoval(a)",
+      "sig_checked_by": "Zkontroloval(a)",
+      "sig_approved_by": "Schválil(a)",
+      "footer_generated": "Vygenerováno {timestamp}",
+      "footer_page": "Strana {page} z {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Evidence dokumentů ke schválení",
+        "doc_title": "Dokument ke schválení",
+        "doc_title_product_data": "Formulář schválení materiálu",
+        "col_number": "Č. dokumentu",
+        "col_title": "Název",
+        "col_type": "Typ",
+        "col_spec": "Část specifikace",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Datum předložení",
+        "col_date_required": "Požadováno do",
+        "col_date_returned": "Datum vrácení",
+        "col_reviewer": "Posuzovatel",
+        "col_approver": "Schvalovatel",
+        "col_ball_in_court": "Na tahu",
+        "submitted_by_org": "Předkládající firma",
+        "review_notes": "Připomínky posuzovatele",
+        "no_review_notes": "Žádné připomínky posuzovatele.",
+        "sig_submitted": "Předložil(a)",
+        "sig_reviewed": "Posoudil(a)",
+        "sig_approved": "Schválil(a)",
+        "register_filename": "evidence-dokumentu-ke-schvaleni",
+        "register_title_shop_drawing": "Evidence dílenské dokumentace",
+        "register_title_product_data": "Evidence schválení materiálů",
+        "register_title_method_statement": "Evidence technologických postupů",
+        "register_filename_shop_drawing": "evidence-dilenske-dokumentace",
+        "register_filename_product_data": "evidence-schvaleni-materialu",
+        "register_filename_method_statement": "evidence-technologickych-postupu",
+        "col_discipline": "Profese",
+        "col_manufacturer": "Výrobce / značka",
+        "col_model": "Model / označení",
+        "col_origin": "Země původu",
+        "col_supplier": "Dodavatel",
+        "col_product": "Výrobce / model / původ",
+        "col_review_code": "Kód posouzení",
+        "col_outcome": "Výsledek posouzení",
+        "col_review_period": "Lhůta posouzení (dny)",
+        "col_review_due": "Posouzení do",
+        "col_days_in_review": "Dny v posuzování",
+        "col_days_in_review_print": "Dny v posuzování",
+        "col_review_overdue": "Dny po lhůtě",
+        "col_required_on_site": "Potřeba na stavbě",
+        "col_long_lead": "Dlouhá dodací lhůta",
+        "col_lead_time": "Dodací lhůta (týdny)",
+        "col_needed_by": "Schválení potřeba do",
+        "col_approval_late": "Dny po termínu",
+        "col_drawings": "Propojené výkresy",
+        "col_submitted_returned": "Předloženo / vráceno",
+        "col_on_site_needed_by": "Na stavbě / schválení do",
+        "resubmit_for_record": "Opravený výtisk předložit znovu do evidence",
+        "review_history": "Historie posouzení",
+        "hist_submitted": "Předloženo",
+        "hist_returned": "Vráceno",
+        "drawings_missing_one": "{n} propojený výkres již není dostupný",
+        "drawings_missing_other": "Nedostupné propojené výkresy: {n}",
+        "weeks_one": "{n} týden",
+        "weeks_other": "{n} týd."
+      },
+      "labels": {
+        "status": {
+          "draft": "Koncept",
+          "submitted": "Předloženo",
+          "under_review": "V posuzování",
+          "approved": "Schváleno",
+          "approved_as_noted": "Schváleno s připomínkami",
+          "revise_and_resubmit": "Přepracovat a předložit znovu",
+          "rejected": "Zamítnuto",
+          "closed": "Uzavřeno"
+        },
+        "type": {
+          "shop_drawing": "Dílenský výkres",
+          "product_data": "Technický list výrobku",
+          "sample": "Vzorek",
+          "mock_up": "Vzorová sestava",
+          "test_report": "Protokol o zkoušce",
+          "calculation": "Výpočet",
+          "method_statement": "Technologický postup",
+          "certificate": "Certifikát",
+          "warranty": "Záruka"
+        },
+        "discipline": {
+          "mechanical": "Strojní",
+          "hvac": "VZT a vytápění",
+          "plumbing": "Zdravotechnika",
+          "fire_protection": "Požární ochrana",
+          "electrical": "Elektro",
+          "lighting": "Osvětlení",
+          "elv": "Slaboproud",
+          "bms": "Měření a regulace",
+          "architectural": "Architektura",
+          "structural": "Statika",
+          "civil": "Pozemní stavby"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Evidence změnových listů",
+        "doc_title": "Změnový list",
+        "col_code": "Kód",
+        "col_title": "Název",
+        "col_reason": "Důvod",
+        "col_instrument": "Nástroj",
+        "col_submitted": "Datum předložení",
+        "col_contractor_amount": "Částka zhotovitele",
+        "col_engineer_amount": "Částka inženýra",
+        "col_approved_amount": "Schválená částka",
+        "col_cost_impact": "Dopad na náklady",
+        "col_time_impact": "Dopad na čas (dny)",
+        "col_approved_time": "Schválený čas (dny)",
+        "time_impact": "Dopad na čas",
+        "approved_time": "Schválený čas",
+        "col_approved": "Datum schválení",
+        "submitted_by": "Předložil(a)",
+        "approved_by": "Schválil(a)",
+        "description": "Popis",
+        "no_description": "Žádný popis.",
+        "items": "Položky změny",
+        "item_description": "Popis",
+        "item_change": "Změna",
+        "item_unit": "MJ",
+        "item_original_quantity": "Původní množ.",
+        "item_new_quantity": "Nové množ.",
+        "item_original_rate": "Původní sazba",
+        "item_new_rate": "Nová sazba",
+        "item_cost_delta": "Rozdíl nákladů",
+        "register_filename": "evidence-zmenovych-listu"
+      },
+      "labels": {
+        "status": {
+          "draft": "Koncept",
+          "submitted": "Předloženo",
+          "approved": "Schváleno",
+          "rejected": "Zamítnuto",
+          "executed": "Provedeno"
+        },
+        "reason": {
+          "client_request": "Požadavek objednatele",
+          "design_change": "Změna projektu",
+          "unforeseen": "Nepředvídané podmínky",
+          "regulatory": "Legislativní důvody",
+          "error": "Chyba nebo opomenutí",
+          "non_conformance": "Neshoda",
+          "value_engineering": "Optimalizace nákladů (VE)"
+        },
+        "instrument": {
+          "works_change": "Nařízená změna",
+          "site_confirmation": "Potvrzení na stavbě",
+          "claim": "Nárok"
+        },
+        "change": {
+          "added": "Přidáno",
+          "removed": "Odebráno",
+          "modified": "Upraveno"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Důkazní soubor",
+        "subject": "Předmět",
+        "basis": "Základ",
+        "period_from": "Nejstarší záznam",
+        "period_to": "Nejnovější záznam",
+        "digest": "Kontrolní kód (SHA-256, prvních 16 znaků)",
+        "col_row": "Č.",
+        "col_record_id": "ID záznamu",
+        "col_section": "Sekce",
+        "col_date": "Datum",
+        "col_kind": "Druh záznamu",
+        "col_title": "Název",
+        "col_summary": "Shrnutí",
+        "col_reference": "Odkaz",
+        "register_filename": "dukazni-soubor"
+      },
+      "labels": {
+        "section": {
+          "notices": "Oznámení",
+          "correspondence": "Korespondence",
+          "rfis": "Žádosti o informace (RFI)",
+          "variations": "Změny",
+          "approvals": "Schválení",
+          "delay": "Zpoždění",
+          "timeline": "Časová osa",
+          "other": "Ostatní"
+        },
+        "kind": {
+          "notice": "Oznámení",
+          "variation_notice": "Oznámení změny",
+          "variation_request": "Žádost o změnu",
+          "variation_order": "Příkaz ke změně",
+          "change_order": "Změnový list",
+          "moc_entry": "Záznam o změně",
+          "correspondence": "Korespondence"
+        },
+        "basis": {
+          "dispute": "Spor",
+          "valuation": "Ocenění",
+          "delay": "Zpoždění / prodloužení lhůty",
+          "general": "Obecný záznam"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Evidence korespondence",
+        "doc_title": "Korespondence",
+        "col_reference": "Č. jednací",
+        "col_direction": "Směr",
+        "col_type": "Typ",
+        "col_subject": "Předmět",
+        "col_from": "Od",
+        "col_to": "Komu",
+        "col_date_sent": "Datum odeslání",
+        "col_date_received": "Datum přijetí",
+        "col_response_due": "Odpověď do",
+        "col_clause": "Článek smlouvy",
+        "notes": "Poznámky",
+        "no_notes": "Žádné poznámky.",
+        "attachments": "Přiložené soubory",
+        "linked_documents": "Propojené dokumenty",
+        "sig_prepared": "Zpracoval(a)",
+        "sig_received": "Převzal(a)",
+        "register_filename": "evidence-korespondence"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Příchozí",
+          "outgoing": "Odchozí"
+        },
+        "type": {
+          "letter": "Dopis",
+          "email": "E-mail",
+          "notice": "Oznámení",
+          "memo": "Interní sdělení",
+          "report": "Zpráva"
+        },
+        "status": {
+          "open": "Otevřeno",
+          "awaiting_response": "Čeká na odpověď",
+          "responded": "Zodpovězeno",
+          "closed": "Uzavřeno"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Evidence předávacích listů",
+        "doc_title": "Předávací list",
+        "col_number": "Č. předání",
+        "col_subject": "Předmět",
+        "col_purpose": "Účel",
+        "col_issued": "Datum vystavení",
+        "col_response_due": "Odpověď do",
+        "col_recipients": "Příjemci",
+        "col_item_count": "Položky",
+        "sender": "Odesílatel",
+        "cover_note": "Průvodní dopis",
+        "no_cover_note": "Bez průvodního dopisu.",
+        "recipients": "Příjemci",
+        "recipient": "Příjemce",
+        "action_required": "Vyžadovaná akce",
+        "acknowledged": "Potvrzení přijetí",
+        "responded": "Datum odpovědi",
+        "items": "Předávané dokumenty",
+        "item_no": "Č.",
+        "item_description": "Popis",
+        "item_notes": "Poznámky",
+        "sig_issued": "Vystavil(a)",
+        "sig_received": "Převzal(a)",
+        "register_filename": "evidence-predavacich-listu"
+      },
+      "labels": {
+        "status": {
+          "draft": "Koncept",
+          "issued": "Vystaveno",
+          "responded": "Zodpovězeno"
+        },
+        "purpose": {
+          "for_approval": "Ke schválení",
+          "for_review": "K posouzení",
+          "for_information": "Pro informaci",
+          "for_construction": "Pro provedení stavby",
+          "for_tender": "Pro výběrové řízení",
+          "for_record": "Do evidence"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Evidence změn",
+        "claim_register_title": "Evidence nároků",
+        "notice_register_title": "Evidence oznámení",
+        "doc_title": "Žádost o změnu",
+        "doc_title_credit": "Žádost o změnu (méněpráce)",
+        "time_impact": "Dopad na čas",
+        "col_code": "Kód",
+        "col_title": "Název",
+        "col_classification": "Typ",
+        "col_urgency": "Naléhavost",
+        "col_requested": "Datum žádosti",
+        "col_claimed_amount": "Uplatněná částka",
+        "col_agreed_amount": "Dohodnutá částka",
+        "col_time_impact": "Dopad na čas (dny)",
+        "col_response_due": "Odpověď do",
+        "col_clause": "Článek smlouvy",
+        "col_row": "Č.",
+        "col_claim_type": "Druh nároku",
+        "col_raised": "Datum uplatnění",
+        "col_period_start": "Období od",
+        "col_period_end": "Období do",
+        "col_description": "Popis",
+        "col_decided_amount": "Rozhodnutá částka",
+        "col_days_requested": "Požadované dny",
+        "col_days_granted": "Přiznané dny",
+        "col_recipient_type": "Adresováno",
+        "col_recipient": "Příjemce",
+        "col_target_response": "Očekávaná odpověď",
+        "col_response_received": "Odpověď přijata",
+        "requested_by": "Požádal(a)",
+        "decided_by": "Rozhodl(a)",
+        "date_submitted": "Datum předložení",
+        "date_decided": "Datum rozhodnutí",
+        "description": "Popis",
+        "no_description": "Žádný popis.",
+        "decision_notes": "Odůvodnění rozhodnutí",
+        "no_decision_notes": "Rozhodnutí zatím nebylo zaznamenáno.",
+        "variation_register_filename": "evidence-zmen",
+        "claim_register_filename": "evidence-naroku",
+        "notice_register_filename": "evidence-oznameni"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Koncept",
+          "submitted": "Předloženo",
+          "under_review": "V posuzování",
+          "approved": "Schváleno",
+          "rejected": "Zamítnuto",
+          "converted_to_vo": "Převedeno na příkaz"
+        },
+        "claim_status": {
+          "draft": "Koncept",
+          "submitted": "Předloženo",
+          "under_review": "V posuzování",
+          "agreed": "Dohodnuto",
+          "granted": "Uznáno",
+          "rejected": "Zamítnuto"
+        },
+        "notice_status": {
+          "issued": "Vystaveno",
+          "acknowledged": "Přijetí potvrzeno",
+          "responded": "Zodpovězeno",
+          "closed": "Uzavřeno"
+        },
+        "classification": {
+          "scope_change": "Změna rozsahu",
+          "unforeseen": "Nepředvídaná podmínka",
+          "owner_change": "Změna objednatele",
+          "design_dev": "Rozpracování projektu",
+          "regulatory": "Legislativní důvody",
+          "other": "Jiné"
+        },
+        "urgency": {
+          "low": "Nízká",
+          "med": "Střední",
+          "high": "Vysoká"
+        },
+        "claim_type": {
+          "disruption": "Narušení postupu prací",
+          "eot": "Prodloužení lhůty"
+        },
+        "recipient_type": {
+          "owner": "Objednatel",
+          "contractor": "Zhotovitel",
+          "architect": "Architekt",
+          "engineer": "Inženýr",
+          "consultant": "Konzultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Denní záznam ze stavby",
+        "overview": "Přehled",
+        "site_supervisor": "Stavbyvedoucí",
+        "not_recorded": "Nezaznamenáno",
+        "labour_on_site": "Pracovní síla na stavbě",
+        "equipment_on_site": "Technika na stavbě",
+        "completeness": "Úplnost",
+        "weather": "Počasí",
+        "weather_time": "Čas",
+        "weather_source": "Zdroj",
+        "weather_temp": "Teplota (°C)",
+        "weather_wind": "Vítr (km/h)",
+        "weather_precip": "Srážky (mm)",
+        "weather_conditions": "Podmínky",
+        "weather_empty": "Pro tento den není zaznamenáno žádné počasí.",
+        "site_record": "Záznam ze stavby",
+        "entries_empty": "Pro tento záznam nejsou zapsány žádné položky.",
+        "notes": "Poznámky",
+        "notes_empty": "Žádné další poznámky.",
+        "footer_supervisor": "Stavbyvedoucí: {name}",
+        "footer_supervisor_missing": "Stavbyvedoucí: nezaznamenáno",
+        "footer_generated": "Vygenerováno: {timestamp}",
+        "footer_page": "Strana {page} z {total}",
+        "workforce": "Pracovníci podle firem",
+        "workforce_company": "Firma",
+        "workforce_count": "Osoby",
+        "workforce_unassigned": "Nepřiřazeno k firmě",
+        "workforce_total": "Celkem",
+        "signatures": "Podpisy",
+        "sig_prepared": "Zpracoval(a) (stavbyvedoucí)",
+        "sig_approved": "Schválil(a) (zástupce objednatele)",
+        "sig_name": "Jméno",
+        "sig_title": "Funkce",
+        "sig_date": "Datum",
+        "sig_signature": "Podpis",
+        "signed_note": "Podepsáno v systému: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "denni-zaznam",
+        "summary_wind": "vítr {value} km/h",
+        "summary_precipitation": "srážky {value} mm",
+        "summary_humidity": "vlhkost {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Návštěvy",
+          "event": "Události",
+          "delivery": "Dodaný materiál",
+          "completion": "Provedené práce",
+          "incident_summary": "BOZP a incidenty",
+          "inspection_summary": "Kontroly",
+          "photo_note": "Fotopoznámky",
+          "general": "Obecné poznámky"
+        },
+        "status": {
+          "open": "Otevřeno",
+          "closed": "Uzavřeno",
+          "signed": "Podepsáno",
+          "archived": "Archivováno"
+        },
+        "condition": {
+          "clear": "jasno",
+          "mainly_clear": "převážně jasno",
+          "partly_cloudy": "polojasno",
+          "cloudy": "oblačno",
+          "overcast": "zataženo",
+          "fog": "mlha",
+          "fog_rime": "namrzající mlha",
+          "drizzle_light": "slabé mrholení",
+          "drizzle_moderate": "mírné mrholení",
+          "drizzle_dense": "silné mrholení",
+          "rain": "déšť",
+          "rain_light": "slabý déšť",
+          "rain_moderate": "mírný déšť",
+          "rain_heavy": "silný déšť",
+          "freezing_rain_light": "slabý mrznoucí déšť",
+          "freezing_rain_heavy": "silný mrznoucí déšť",
+          "snow": "sníh",
+          "snow_light": "slabé sněžení",
+          "snow_moderate": "mírné sněžení",
+          "snow_heavy": "silné sněžení",
+          "rain_showers_light": "slabé dešťové přeháňky",
+          "rain_showers_moderate": "mírné dešťové přeháňky",
+          "rain_showers_violent": "prudké dešťové přeháňky",
+          "snow_showers_light": "slabé sněhové přeháňky",
+          "snow_showers_heavy": "silné sněhové přeháňky",
+          "thunderstorm": "bouřka",
+          "thunderstorm_hail_light": "bouřka s drobným krupobitím",
+          "thunderstorm_hail_heavy": "bouřka se silným krupobitím"
+        },
+        "source": {
+          "manual": "Ruční zadání",
+          "open_meteo": "Meteorologická služba",
+          "sensor": "Čidlo na stavbě"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Evidence žádostí o informace (RFI)",
+        "col_number": "Č. RFI",
+        "col_subject": "Předmět",
+        "col_raised_by": "Zadal(a)",
+        "col_assigned_to": "Přiděleno",
+        "col_ball_in_court": "Na tahu",
+        "col_date_required": "Požadováno do",
+        "col_response_due": "Odpověď do",
+        "col_days_open": "Dny otevřeno",
+        "col_cost_impact": "Dopad na náklady",
+        "col_schedule_impact": "Dopad na harmonogram",
+        "col_response": "Odpověď",
+        "yes_with": "Ano ({detail})",
+        "register_filename": "evidence-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Koncept",
+          "open": "Otevřeno",
+          "answered": "Zodpovězeno",
+          "closed": "Uzavřeno",
+          "void": "Neplatné"
+        }
+      }
+    }
   }
 }

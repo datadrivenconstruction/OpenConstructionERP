@@ -618,5 +618,515 @@
       "draft": "Taslak",
       "frozen": "Dondurulmuş"
     }
+  },
+  "document_forms": {
+    "submittals": {
+      "strings": {
+        "register_title": "Onay Belgeleri Kayıt Listesi",
+        "doc_title": "Onay Belgesi",
+        "doc_title_product_data": "Malzeme Onay Formu",
+        "col_number": "Belge no.",
+        "col_title": "Başlık",
+        "col_type": "Tür",
+        "col_spec": "Şartname bölümü",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Sunulma tarihi",
+        "col_date_required": "Yanıt son tarihi",
+        "col_date_returned": "İade tarihi",
+        "col_reviewer": "İnceleyen",
+        "col_approver": "Onaylayan",
+        "col_ball_in_court": "Sıradaki sorumlu",
+        "submitted_by_org": "Sunan firma",
+        "review_notes": "İnceleyen yorumları",
+        "no_review_notes": "İnceleyen yorumu kaydedilmedi.",
+        "sig_submitted": "Sunan",
+        "sig_reviewed": "İnceleyen",
+        "sig_approved": "Onaylayan",
+        "register_filename": "onay-belgeleri-kayit-listesi",
+        "register_title_shop_drawing": "İmalat Çizimleri Kayıt Listesi",
+        "register_title_product_data": "Malzeme Onay Kayıt Listesi",
+        "register_title_method_statement": "Metot Beyanları Kayıt Listesi",
+        "register_filename_shop_drawing": "imalat-cizimleri-kayit-listesi",
+        "register_filename_product_data": "malzeme-onay-kayit-listesi",
+        "register_filename_method_statement": "metot-beyanlari-kayit-listesi",
+        "col_discipline": "Disiplin",
+        "col_manufacturer": "Üretici / Marka",
+        "col_model": "Model / Referans",
+        "col_origin": "Menşei",
+        "col_supplier": "Tedarikçi",
+        "col_product": "Üretici / Model / Menşei",
+        "col_review_code": "Onay Kodu",
+        "col_outcome": "İnceleme sonucu",
+        "col_review_period": "İnceleme süresi (gün)",
+        "col_review_due": "İnceleme son tarihi",
+        "col_days_in_review": "İncelemede geçen gün",
+        "col_days_in_review_print": "İnceleme gün sayısı",
+        "col_review_overdue": "Geciken gün",
+        "col_required_on_site": "Şantiyede Gerekli Tarih",
+        "col_long_lead": "Uzun temin süreli",
+        "col_lead_time": "Temin Süresi (hafta)",
+        "col_needed_by": "Onay için son tarih",
+        "col_approval_late": "Onayda geciken gün",
+        "col_drawings": "İlgili çizimler",
+        "col_submitted_returned": "Sunulma / iade",
+        "col_on_site_needed_by": "Şantiye / onay son tarihi",
+        "resubmit_for_record": "Düzeltilmiş nüsha kayıt için yeniden sunulacak",
+        "review_history": "İnceleme geçmişi",
+        "hist_submitted": "Sunuldu",
+        "hist_returned": "İade edildi",
+        "drawings_missing_one": "{n} ilgili çizim artık mevcut değil",
+        "drawings_missing_other": "{n} ilgili çizim artık mevcut değil",
+        "weeks_one": "{n} hafta",
+        "weeks_other": "{n} hafta"
+      },
+      "labels": {
+        "status": {
+          "draft": "Taslak",
+          "submitted": "Sunuldu",
+          "under_review": "İncelemede",
+          "approved": "Onaylandı",
+          "approved_as_noted": "Notlarla onaylandı",
+          "revise_and_resubmit": "Revize edip yeniden sunun",
+          "rejected": "Reddedildi",
+          "closed": "Kapatıldı"
+        },
+        "type": {
+          "shop_drawing": "İmalat çizimi",
+          "product_data": "Ürün verisi",
+          "sample": "Numune",
+          "mock_up": "Maket",
+          "test_report": "Test raporu",
+          "calculation": "Hesap",
+          "method_statement": "Metot beyanı",
+          "certificate": "Sertifika",
+          "warranty": "Garanti"
+        },
+        "discipline": {
+          "mechanical": "Mekanik",
+          "hvac": "İklimlendirme",
+          "plumbing": "Sıhhi tesisat",
+          "fire_protection": "Yangın tesisatı",
+          "electrical": "Elektrik",
+          "lighting": "Aydınlatma",
+          "elv": "Zayıf akım",
+          "bms": "Bina otomasyonu",
+          "architectural": "Mimari",
+          "structural": "Statik",
+          "civil": "İnşaat"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Değişiklik Emirleri Kayıt Listesi",
+        "doc_title": "Değişiklik Emri",
+        "col_code": "Kod",
+        "col_title": "Başlık",
+        "col_reason": "Neden",
+        "col_instrument": "Belge türü",
+        "col_submitted": "Gönderilme tarihi",
+        "col_contractor_amount": "Yüklenici talebi",
+        "col_engineer_amount": "Mühendis değerlendirmesi",
+        "col_approved_amount": "Onaylanan tutar",
+        "col_cost_impact": "Maliyet etkisi",
+        "col_time_impact": "Süre etkisi (gün)",
+        "col_approved_time": "Onaylanan süre (gün)",
+        "time_impact": "Süre etkisi",
+        "approved_time": "Onaylanan süre",
+        "col_approved": "Onay tarihi",
+        "submitted_by": "Gönderen",
+        "approved_by": "Onaylayan",
+        "description": "Açıklama",
+        "no_description": "Açıklama kaydedilmedi.",
+        "items": "Değişiklik kalemleri",
+        "item_description": "Açıklama",
+        "item_change": "Değişiklik",
+        "item_unit": "Birim",
+        "item_original_quantity": "Önceki miktar",
+        "item_new_quantity": "Yeni miktar",
+        "item_original_rate": "Önceki birim fiyat",
+        "item_new_rate": "Yeni birim fiyat",
+        "item_cost_delta": "Maliyet farkı",
+        "register_filename": "degisiklik-emirleri-kayit-listesi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Taslak",
+          "submitted": "Gönderildi",
+          "approved": "Onaylandı",
+          "rejected": "Reddedildi",
+          "executed": "Uygulandı"
+        },
+        "reason": {
+          "client_request": "İşveren talebi",
+          "design_change": "Tasarım değişikliği",
+          "unforeseen": "Öngörülemeyen koşullar",
+          "regulatory": "Mevzuat",
+          "error": "Hata veya eksiklik",
+          "non_conformance": "Uygunsuzluk",
+          "value_engineering": "Değer mühendisliği"
+        },
+        "instrument": {
+          "works_change": "İş değişikliği talimatı",
+          "site_confirmation": "Saha tespit tutanağı",
+          "claim": "Hak talebi"
+        },
+        "change": {
+          "added": "Eklendi",
+          "removed": "Kaldırıldı",
+          "modified": "Değiştirildi"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Kanıt Paketi",
+        "subject": "Konu",
+        "basis": "Dayanak",
+        "period_from": "İlk kayıt",
+        "period_to": "Son kayıt",
+        "digest": "Doğrulama kodu (SHA-256, ilk 16 karakter)",
+        "col_row": "Sıra no.",
+        "col_record_id": "Kayıt kimliği",
+        "col_section": "Bölüm",
+        "col_date": "Tarih",
+        "col_kind": "Kayıt türü",
+        "col_title": "Başlık",
+        "col_summary": "Özet",
+        "col_reference": "Referans",
+        "register_filename": "kanit-paketi"
+      },
+      "labels": {
+        "section": {
+          "notices": "Bildirimler",
+          "correspondence": "Yazışmalar",
+          "rfis": "Bilgi Talepleri",
+          "variations": "İlave İşler",
+          "approvals": "Onaylar",
+          "delay": "Gecikme",
+          "timeline": "Zaman Çizelgesi",
+          "other": "Diğer"
+        },
+        "kind": {
+          "notice": "Bildirim",
+          "variation_notice": "İlave iş bildirimi",
+          "variation_request": "İlave iş talebi",
+          "variation_order": "İlave iş emri",
+          "change_order": "Değişiklik emri",
+          "moc_entry": "Değişiklik kaydı",
+          "correspondence": "Yazışma"
+        },
+        "basis": {
+          "dispute": "Uyuşmazlık",
+          "valuation": "Değerlendirme",
+          "delay": "Gecikme / süre uzatımı",
+          "general": "Genel kayıt"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Yazışmalar Kayıt Listesi",
+        "doc_title": "Yazışma",
+        "col_reference": "Referans no.",
+        "col_direction": "Yön",
+        "col_type": "Tür",
+        "col_subject": "Konu",
+        "col_from": "Gönderen",
+        "col_to": "Alıcı",
+        "col_date_sent": "Gönderilme tarihi",
+        "col_date_received": "Alınma tarihi",
+        "col_response_due": "Yanıt son tarihi",
+        "col_clause": "Sözleşme maddesi",
+        "notes": "Notlar",
+        "no_notes": "Not kaydedilmedi.",
+        "attachments": "Ekli dosyalar",
+        "linked_documents": "Bağlantılı belgeler",
+        "sig_prepared": "Hazırlayan",
+        "sig_received": "Teslim alan",
+        "register_filename": "yazismalar-kayit-listesi"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Gelen",
+          "outgoing": "Giden"
+        },
+        "type": {
+          "letter": "Mektup",
+          "email": "E-posta",
+          "notice": "Bildirim",
+          "memo": "Not",
+          "report": "Rapor"
+        },
+        "status": {
+          "open": "Açık",
+          "awaiting_response": "Yanıt bekleniyor",
+          "responded": "Yanıtlandı",
+          "closed": "Kapandı"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "İletim Yazıları Kayıt Listesi",
+        "doc_title": "İletim Yazısı",
+        "col_number": "İletim no.",
+        "col_subject": "Konu",
+        "col_purpose": "Amaç",
+        "col_issued": "Gönderilme tarihi",
+        "col_response_due": "Yanıt son tarihi",
+        "col_recipients": "Alıcılar",
+        "col_item_count": "Kalem sayısı",
+        "sender": "Gönderen",
+        "cover_note": "Kapak notu",
+        "no_cover_note": "Kapak notu yok.",
+        "recipients": "Alıcılar",
+        "recipient": "Alıcı",
+        "action_required": "İstenen işlem",
+        "acknowledged": "Teslim alma teyidi",
+        "responded": "Yanıt tarihi",
+        "items": "İletilen kalemler",
+        "item_no": "Sıra no.",
+        "item_description": "Açıklama",
+        "item_notes": "Notlar",
+        "sig_issued": "Gönderen",
+        "sig_received": "Teslim alan",
+        "register_filename": "iletim-yazilari-kayit-listesi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Taslak",
+          "issued": "Gönderildi",
+          "responded": "Yanıtlandı"
+        },
+        "purpose": {
+          "for_approval": "Onay için",
+          "for_review": "İnceleme için",
+          "for_information": "Bilgi için",
+          "for_construction": "Yapım için",
+          "for_tender": "İhale için",
+          "for_record": "Kayıt için"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "İlave İşler Kayıt Listesi",
+        "claim_register_title": "Hak Talepleri Kayıt Listesi",
+        "notice_register_title": "Bildirimler Kayıt Listesi",
+        "doc_title": "İlave İş Talebi",
+        "doc_title_credit": "İş Eksilişi Talebi",
+        "time_impact": "Süre etkisi",
+        "col_code": "Kod",
+        "col_title": "Başlık",
+        "col_classification": "Tür",
+        "col_urgency": "Aciliyet",
+        "col_requested": "Talep tarihi",
+        "col_claimed_amount": "Talep edilen tutar",
+        "col_agreed_amount": "Üzerinde anlaşılan tutar",
+        "col_time_impact": "Süre etkisi (gün)",
+        "col_response_due": "Yanıt son tarihi",
+        "col_clause": "Sözleşme maddesi",
+        "col_row": "Sıra no.",
+        "col_claim_type": "Talep türü",
+        "col_raised": "Düzenlenme tarihi",
+        "col_period_start": "Dönem başlangıcı",
+        "col_period_end": "Dönem bitişi",
+        "col_description": "Açıklama",
+        "col_decided_amount": "Karara bağlanan tutar",
+        "col_days_requested": "İstenen gün",
+        "col_days_granted": "Verilen gün",
+        "col_recipient_type": "Muhatap",
+        "col_recipient": "Alıcı",
+        "col_target_response": "Yanıt son tarihi",
+        "col_response_received": "Yanıtın alındığı tarih",
+        "requested_by": "Talep eden",
+        "decided_by": "Karar veren",
+        "date_submitted": "Gönderilme tarihi",
+        "date_decided": "Karar tarihi",
+        "description": "Açıklama",
+        "no_description": "Açıklama kaydedilmedi.",
+        "decision_notes": "Karar notları",
+        "no_decision_notes": "Henüz karar kaydedilmedi.",
+        "variation_register_filename": "ilave-isler-kayit-listesi",
+        "claim_register_filename": "hak-talepleri-kayit-listesi",
+        "notice_register_filename": "bildirimler-kayit-listesi"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Taslak",
+          "submitted": "Gönderildi",
+          "under_review": "İnceleniyor",
+          "approved": "Onaylandı",
+          "rejected": "Reddedildi",
+          "converted_to_vo": "Emre dönüştürüldü"
+        },
+        "claim_status": {
+          "draft": "Taslak",
+          "submitted": "Gönderildi",
+          "under_review": "İnceleniyor",
+          "agreed": "Mutabık kalındı",
+          "granted": "Verildi",
+          "rejected": "Reddedildi"
+        },
+        "notice_status": {
+          "issued": "Yayımlandı",
+          "acknowledged": "Teyit edildi",
+          "responded": "Yanıtlandı",
+          "closed": "Kapandı"
+        },
+        "classification": {
+          "scope_change": "Kapsam değişikliği",
+          "unforeseen": "Öngörülemeyen durum",
+          "owner_change": "İşveren değişikliği",
+          "design_dev": "Tasarım geliştirme",
+          "regulatory": "Mevzuat",
+          "other": "Diğer"
+        },
+        "urgency": {
+          "low": "Düşük",
+          "med": "Orta",
+          "high": "Yüksek"
+        },
+        "claim_type": {
+          "disruption": "İş aksaması",
+          "eot": "Süre uzatımı"
+        },
+        "recipient_type": {
+          "owner": "İşveren",
+          "contractor": "Yüklenici",
+          "architect": "Mimar",
+          "engineer": "Mühendis",
+          "consultant": "Müşavir"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Şantiye Günlük Raporu",
+        "overview": "Genel bilgiler",
+        "site_supervisor": "Şantiye şefi",
+        "not_recorded": "Kaydedilmedi",
+        "labour_on_site": "Sahadaki iş gücü",
+        "equipment_on_site": "Sahadaki ekipman",
+        "completeness": "Rapor tamamlanma oranı",
+        "weather": "Hava durumu",
+        "weather_time": "Saat",
+        "weather_source": "Kaynak",
+        "weather_temp": "Sıcaklık (°C)",
+        "weather_wind": "Rüzgar (km/sa)",
+        "weather_precip": "Yağış (mm)",
+        "weather_conditions": "Koşullar",
+        "weather_empty": "Bu gün için hava durumu kaydedilmedi.",
+        "site_record": "Şantiye kayıtları",
+        "entries_empty": "Bu rapor için kayıt girilmedi.",
+        "notes": "Notlar",
+        "notes_empty": "Ek not yok.",
+        "footer_supervisor": "Şantiye şefi: {name}",
+        "footer_supervisor_missing": "Şantiye şefi: kaydedilmedi",
+        "footer_generated": "Oluşturulma: {timestamp}",
+        "footer_page": "Sayfa {page} / {total}",
+        "workforce": "Firmalara göre iş gücü",
+        "workforce_company": "Firma",
+        "workforce_count": "Kişi sayısı",
+        "workforce_unassigned": "Firmaya atanmamış",
+        "workforce_total": "Toplam",
+        "signatures": "İmzalar",
+        "sig_prepared": "Hazırlayan (şantiye şefi)",
+        "sig_approved": "Onaylayan (işveren temsilcisi)",
+        "sig_name": "Adı Soyadı",
+        "sig_title": "Görevi",
+        "sig_date": "Tarih",
+        "sig_signature": "İmza",
+        "signed_note": "Sistemde imzalandı: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "santiye-gunluk-raporu",
+        "summary_wind": "rüzgar {value} km/sa",
+        "summary_precipitation": "yağış {value} mm",
+        "summary_humidity": "nem %{value}",
+        "percent": "%{value}",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Ziyaretçiler",
+          "event": "Olaylar",
+          "delivery": "Malzeme teslimatları",
+          "completion": "Yapılan işler",
+          "incident_summary": "İş güvenliği ve olaylar",
+          "inspection_summary": "Denetimler",
+          "photo_note": "Fotoğraf notları",
+          "general": "Genel notlar"
+        },
+        "status": {
+          "open": "Açık",
+          "closed": "Kapatıldı",
+          "signed": "İmzalandı",
+          "archived": "Arşivlendi"
+        },
+        "condition": {
+          "clear": "açık",
+          "mainly_clear": "çoğunlukla açık",
+          "partly_cloudy": "parçalı bulutlu",
+          "cloudy": "bulutlu",
+          "overcast": "kapalı",
+          "fog": "sis",
+          "fog_rime": "kırağılı sis",
+          "drizzle_light": "hafif çisenti",
+          "drizzle_moderate": "orta şiddette çisenti",
+          "drizzle_dense": "yoğun çisenti",
+          "rain": "yağmur",
+          "rain_light": "hafif yağmur",
+          "rain_moderate": "orta şiddette yağmur",
+          "rain_heavy": "kuvvetli yağmur",
+          "freezing_rain_light": "hafif dondurucu yağmur",
+          "freezing_rain_heavy": "kuvvetli dondurucu yağmur",
+          "snow": "kar",
+          "snow_light": "hafif kar yağışı",
+          "snow_moderate": "orta şiddette kar yağışı",
+          "snow_heavy": "yoğun kar yağışı",
+          "rain_showers_light": "hafif sağanak yağış",
+          "rain_showers_moderate": "orta şiddette sağanak yağış",
+          "rain_showers_violent": "şiddetli sağanak yağış",
+          "snow_showers_light": "hafif kar sağanağı",
+          "snow_showers_heavy": "kuvvetli kar sağanağı",
+          "thunderstorm": "gök gürültülü sağanak yağış",
+          "thunderstorm_hail_light": "hafif dolu ile gök gürültülü sağanak yağış",
+          "thunderstorm_hail_heavy": "kuvvetli dolu ile gök gürültülü sağanak yağış"
+        },
+        "source": {
+          "manual": "Elle giriş",
+          "open_meteo": "Meteoroloji servisi",
+          "sensor": "Şantiye sensörü"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Bilgi Talepleri Kayıt Listesi (RFI)",
+        "col_number": "RFI no.",
+        "col_subject": "Konu",
+        "col_raised_by": "Oluşturan",
+        "col_assigned_to": "Atanan",
+        "col_ball_in_court": "Sıradaki sorumlu",
+        "col_date_required": "İhtiyaç tarihi",
+        "col_response_due": "Yanıt son tarihi",
+        "col_days_open": "Açık gün sayısı",
+        "col_cost_impact": "Maliyet etkisi",
+        "col_schedule_impact": "Süre etkisi",
+        "col_response": "Yanıt",
+        "yes_with": "Evet ({detail})",
+        "register_filename": "bilgi-talepleri-kayit-listesi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Taslak",
+          "open": "Açık",
+          "answered": "Yanıtlandı",
+          "closed": "Kapalı",
+          "void": "Geçersiz"
+        }
+      }
+    }
   }
 }

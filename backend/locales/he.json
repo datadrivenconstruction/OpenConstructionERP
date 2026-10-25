@@ -648,6 +648,514 @@
           "refunded": "הוחזר"
         }
       }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "רשימת הגשות לאישור",
+        "doc_title": "הגשה לאישור",
+        "doc_title_product_data": "טופס אישור חומרים",
+        "col_number": "מס' הגשה",
+        "col_title": "כותרת",
+        "col_type": "סוג",
+        "col_spec": "סעיף במפרט",
+        "col_rev": "מהדורה",
+        "col_date_submitted": "תאריך הגשה",
+        "col_date_required": "תאריך נדרש",
+        "col_date_returned": "תאריך החזרה",
+        "col_reviewer": "בודק",
+        "col_approver": "מאשר",
+        "col_ball_in_court": "בטיפול",
+        "submitted_by_org": "חברה מגישה",
+        "review_notes": "הערות הבודק",
+        "no_review_notes": "לא נרשמו הערות בודק.",
+        "sig_submitted": "הגשה",
+        "sig_reviewed": "בדיקה",
+        "sig_approved": "אישור",
+        "register_filename": "reshimat-hagashot",
+        "register_title_shop_drawing": "רשימת תוכניות ייצור",
+        "register_title_product_data": "רשימת אישורי חומרים",
+        "register_title_method_statement": "רשימת מפרטי שיטת ביצוע",
+        "register_filename_shop_drawing": "reshimat-tochniot-yitzur",
+        "register_filename_product_data": "reshimat-ishurei-chomarim",
+        "register_filename_method_statement": "reshimat-shitot-bitzua",
+        "col_discipline": "תחום",
+        "col_manufacturer": "יצרן / מותג",
+        "col_model": "דגם / מק\"ט",
+        "col_origin": "ארץ ייצור",
+        "col_supplier": "ספק",
+        "col_product": "יצרן / דגם / מקור",
+        "col_review_code": "קוד בדיקה",
+        "col_outcome": "תוצאת בדיקה",
+        "col_review_period": "תקופת בדיקה (ימים)",
+        "col_review_due": "מועד בדיקה",
+        "col_days_in_review": "ימים בבדיקה",
+        "col_days_in_review_print": "ימים בבדיקה",
+        "col_review_overdue": "ימי איחור",
+        "col_required_on_site": "נדרש באתר",
+        "col_long_lead": "זמן אספקה ארוך",
+        "col_lead_time": "זמן אספקה (שבועות)",
+        "col_needed_by": "אישור נדרש עד",
+        "col_approval_late": "ימי איחור מהמועד",
+        "col_drawings": "תוכניות מקושרות",
+        "col_submitted_returned": "הוגש / הוחזר",
+        "col_on_site_needed_by": "באתר / אישור עד",
+        "resubmit_for_record": "יש להגיש מחדש עותק מתוקן לתיעוד",
+        "review_history": "היסטוריית בדיקות",
+        "hist_submitted": "הוגש",
+        "hist_returned": "הוחזר",
+        "drawings_missing_one": "{n} תוכנית מקושרת אינה זמינה עוד",
+        "drawings_missing_other": "{n} תוכניות מקושרות אינן זמינות עוד",
+        "weeks_one": "{n} שבוע",
+        "weeks_other": "{n} שבועות"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "submitted": "הוגש",
+          "under_review": "בבדיקה",
+          "approved": "אושר",
+          "approved_as_noted": "אושר עם הערות",
+          "revise_and_resubmit": "לתקן ולהגיש מחדש",
+          "rejected": "נדחה",
+          "closed": "סגור"
+        },
+        "type": {
+          "shop_drawing": "תוכנית ייצור",
+          "product_data": "נתוני מוצר",
+          "sample": "דוגמה",
+          "mock_up": "דוגמת ביצוע",
+          "test_report": "דו\"ח בדיקה",
+          "calculation": "חישוב",
+          "method_statement": "מפרט שיטת ביצוע",
+          "certificate": "תעודה",
+          "warranty": "אחריות"
+        },
+        "discipline": {
+          "mechanical": "מכונות",
+          "hvac": "מיזוג אוויר",
+          "plumbing": "אינסטלציה וביוב",
+          "fire_protection": "כיבוי אש",
+          "electrical": "חשמל",
+          "lighting": "תאורה",
+          "elv": "זרם חלש",
+          "bms": "בקרת מבנה",
+          "architectural": "אדריכלות",
+          "structural": "קונסטרוקציה",
+          "civil": "הנדסה אזרחית"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "רשימת הוראות שינוי",
+        "doc_title": "הוראת שינוי",
+        "col_code": "קוד",
+        "col_title": "כותרת",
+        "col_reason": "סיבה",
+        "col_instrument": "סוג המסמך",
+        "col_submitted": "תאריך הגשה",
+        "col_contractor_amount": "סכום הקבלן",
+        "col_engineer_amount": "סכום המהנדס",
+        "col_approved_amount": "סכום מאושר",
+        "col_cost_impact": "השפעה על העלות",
+        "col_time_impact": "השפעה על הזמן (ימים)",
+        "col_approved_time": "זמן מאושר (ימים)",
+        "time_impact": "השפעה על הזמן",
+        "approved_time": "זמן מאושר",
+        "col_approved": "תאריך אישור",
+        "submitted_by": "הגשה",
+        "approved_by": "אישור",
+        "description": "תיאור",
+        "no_description": "לא נרשם תיאור.",
+        "items": "סעיפי השינוי",
+        "item_description": "תיאור",
+        "item_change": "שינוי",
+        "item_unit": "יחידה",
+        "item_original_quantity": "כמות מקורית",
+        "item_new_quantity": "כמות חדשה",
+        "item_original_rate": "מחיר מקורי",
+        "item_new_rate": "מחיר חדש",
+        "item_cost_delta": "הפרש עלות",
+        "register_filename": "reshimat-hora-ot-shinui"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "submitted": "הוגש",
+          "approved": "אושר",
+          "rejected": "נדחה",
+          "executed": "בוצע"
+        },
+        "reason": {
+          "client_request": "בקשת לקוח",
+          "design_change": "שינוי תכנון",
+          "unforeseen": "תנאים בלתי צפויים",
+          "regulatory": "דרישה רגולטורית",
+          "error": "טעות או השמטה",
+          "non_conformance": "אי-התאמה",
+          "value_engineering": "הנדסת ערך"
+        },
+        "instrument": {
+          "works_change": "שינוי בהוראה",
+          "site_confirmation": "אישור באתר",
+          "claim": "תביעה"
+        },
+        "change": {
+          "added": "נוסף",
+          "removed": "הוסר",
+          "modified": "שונה"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "חבילת ראיות",
+        "subject": "נושא",
+        "basis": "בסיס",
+        "period_from": "הרישום המוקדם ביותר",
+        "period_to": "הרישום האחרון",
+        "digest": "קוד תקינות (SHA-256, 16 התווים הראשונים)",
+        "col_row": "מס'",
+        "col_record_id": "מזהה רישום",
+        "col_section": "פרק",
+        "col_date": "תאריך",
+        "col_kind": "סוג רישום",
+        "col_title": "כותרת",
+        "col_summary": "תקציר",
+        "col_reference": "סימוכין",
+        "register_filename": "chavilat-re-ayot"
+      },
+      "labels": {
+        "section": {
+          "notices": "הודעות",
+          "correspondence": "התכתבויות",
+          "rfis": "בקשות למידע (RFI)",
+          "variations": "הוראות שינוי",
+          "approvals": "אישורים",
+          "delay": "עיכוב",
+          "timeline": "ציר זמן",
+          "other": "אחר"
+        },
+        "kind": {
+          "notice": "הודעה",
+          "variation_notice": "הודעת שינוי",
+          "variation_request": "בקשת שינוי",
+          "variation_order": "הוראת שינוי",
+          "change_order": "הוראת שינוי",
+          "moc_entry": "רישום שינוי",
+          "correspondence": "התכתבות"
+        },
+        "basis": {
+          "dispute": "מחלוקת",
+          "valuation": "שומה",
+          "delay": "עיכוב / הארכת זמן",
+          "general": "רישום כללי"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "יומן התכתבויות",
+        "doc_title": "התכתבות",
+        "col_reference": "מס' סימוכין",
+        "col_direction": "כיוון",
+        "col_type": "סוג",
+        "col_subject": "נושא",
+        "col_from": "מאת",
+        "col_to": "אל",
+        "col_date_sent": "תאריך שליחה",
+        "col_date_received": "תאריך קבלה",
+        "col_response_due": "מועד נדרש למענה",
+        "col_clause": "סעיף בחוזה",
+        "notes": "הערות",
+        "no_notes": "לא נרשמו הערות.",
+        "attachments": "קבצים מצורפים",
+        "linked_documents": "מסמכים מקושרים",
+        "sig_prepared": "הכנה",
+        "sig_received": "קבלה",
+        "register_filename": "yoman-hitkatvuyot"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "נכנס",
+          "outgoing": "יוצא"
+        },
+        "type": {
+          "letter": "מכתב",
+          "email": "דוא\"ל",
+          "notice": "הודעה",
+          "memo": "מזכר",
+          "report": "דו\"ח"
+        },
+        "status": {
+          "open": "פתוח",
+          "awaiting_response": "ממתין למענה",
+          "responded": "נענה",
+          "closed": "סגור"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "רשימת תעודות משלוח מסמכים",
+        "doc_title": "תעודת משלוח מסמכים",
+        "col_number": "מס' תעודה",
+        "col_subject": "נושא",
+        "col_purpose": "מטרה",
+        "col_issued": "תאריך הנפקה",
+        "col_response_due": "מועד למענה",
+        "col_recipients": "נמענים",
+        "col_item_count": "פריטים",
+        "sender": "שולח",
+        "cover_note": "מכתב מלווה",
+        "no_cover_note": "אין מכתב מלווה.",
+        "recipients": "נמענים",
+        "recipient": "נמען",
+        "action_required": "נדרשת פעולה",
+        "acknowledged": "אישור קבלה",
+        "responded": "תאריך מענה",
+        "items": "פריטים שנשלחו",
+        "item_no": "מס'",
+        "item_description": "תיאור",
+        "item_notes": "הערות",
+        "sig_issued": "הנפקה",
+        "sig_received": "קבלה",
+        "register_filename": "reshimat-te-udot-mishlo-ach"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "issued": "הונפק",
+          "responded": "נענה"
+        },
+        "purpose": {
+          "for_approval": "לאישור",
+          "for_review": "לבדיקה",
+          "for_information": "לידיעה",
+          "for_construction": "לביצוע",
+          "for_tender": "למכרז",
+          "for_record": "לתיעוד"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "רשימת הוראות שינוי",
+        "claim_register_title": "רשימת תביעות",
+        "notice_register_title": "רשימת הודעות",
+        "doc_title": "בקשת שינוי",
+        "doc_title_credit": "בקשת שינוי (הפחתה)",
+        "time_impact": "השפעה על הזמן",
+        "col_code": "קוד",
+        "col_title": "כותרת",
+        "col_classification": "סוג",
+        "col_urgency": "דחיפות",
+        "col_requested": "תאריך הבקשה",
+        "col_claimed_amount": "סכום נתבע",
+        "col_agreed_amount": "סכום מוסכם",
+        "col_time_impact": "השפעה על הזמן (ימים)",
+        "col_response_due": "מועד למענה",
+        "col_clause": "סעיף בחוזה",
+        "col_row": "מס'",
+        "col_claim_type": "סוג התביעה",
+        "col_raised": "תאריך הגשה",
+        "col_period_start": "תקופה מ-",
+        "col_period_end": "תקופה עד",
+        "col_description": "תיאור",
+        "col_decided_amount": "סכום שנקבע",
+        "col_days_requested": "ימים מבוקשים",
+        "col_days_granted": "ימים שאושרו",
+        "col_recipient_type": "מופנה אל",
+        "col_recipient": "נמען",
+        "col_target_response": "מענה צפוי",
+        "col_response_received": "מענה שהתקבל",
+        "requested_by": "בקשה",
+        "decided_by": "החלטה",
+        "date_submitted": "תאריך הגשה",
+        "date_decided": "תאריך החלטה",
+        "description": "תיאור",
+        "no_description": "לא נרשם תיאור.",
+        "decision_notes": "הערות להחלטה",
+        "no_decision_notes": "טרם נרשמה החלטה.",
+        "variation_register_filename": "reshimat-hora-ot-shinui",
+        "claim_register_filename": "reshimat-tviot",
+        "notice_register_filename": "reshimat-hoda-ot"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "טיוטה",
+          "submitted": "הוגשה",
+          "under_review": "בבדיקה",
+          "approved": "אושרה",
+          "rejected": "נדחתה",
+          "converted_to_vo": "הומרה להוראת שינוי"
+        },
+        "claim_status": {
+          "draft": "טיוטה",
+          "submitted": "הוגשה",
+          "under_review": "בבדיקה",
+          "agreed": "מוסכמת",
+          "granted": "אושרה",
+          "rejected": "נדחתה"
+        },
+        "notice_status": {
+          "issued": "הונפקה",
+          "acknowledged": "אושרה קבלה",
+          "responded": "נענתה",
+          "closed": "סגורה"
+        },
+        "classification": {
+          "scope_change": "שינוי בהיקף העבודות",
+          "unforeseen": "תנאי בלתי צפוי",
+          "owner_change": "שינוי מצד המזמין",
+          "design_dev": "פיתוח תכנון",
+          "regulatory": "דרישה רגולטורית",
+          "other": "אחר"
+        },
+        "urgency": {
+          "low": "נמוכה",
+          "med": "בינונית",
+          "high": "גבוהה"
+        },
+        "claim_type": {
+          "disruption": "שיבוש עבודה",
+          "eot": "הארכת זמן"
+        },
+        "recipient_type": {
+          "owner": "מזמין",
+          "contractor": "קבלן",
+          "architect": "אדריכל",
+          "engineer": "מהנדס",
+          "consultant": "יועץ"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "יומן עבודה",
+        "overview": "סקירה כללית",
+        "site_supervisor": "מנהל עבודה",
+        "not_recorded": "לא נרשם",
+        "labour_on_site": "כוח אדם באתר",
+        "equipment_on_site": "ציוד באתר",
+        "completeness": "שלמות",
+        "weather": "מזג אוויר",
+        "weather_time": "שעה",
+        "weather_source": "מקור",
+        "weather_temp": "טמפ' (°C)",
+        "weather_wind": "רוח (קמ\"ש)",
+        "weather_precip": "משקעים (מ\"מ)",
+        "weather_conditions": "תנאים",
+        "weather_empty": "לא נרשם מזג אוויר ליום זה.",
+        "site_record": "רישום האתר",
+        "entries_empty": "לא נרשמו רשומות ביומן זה.",
+        "notes": "הערות",
+        "notes_empty": "אין הערות נוספות.",
+        "footer_supervisor": "מנהל עבודה: {name}",
+        "footer_supervisor_missing": "מנהל עבודה: לא נרשם",
+        "footer_generated": "הופק: {timestamp}",
+        "footer_page": "עמוד {page} מתוך {total}",
+        "workforce": "כוח אדם לפי חברה",
+        "workforce_company": "חברה",
+        "workforce_count": "אנשים",
+        "workforce_unassigned": "לא משויכים לחברה",
+        "workforce_total": "סה\"כ",
+        "signatures": "חתימות",
+        "sig_prepared": "הכנה (מנהל האתר)",
+        "sig_approved": "אישור (נציג המזמין)",
+        "sig_name": "שם",
+        "sig_title": "תפקיד",
+        "sig_date": "תאריך",
+        "sig_signature": "חתימה",
+        "signed_note": "נחתם במערכת: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "yoman-avoda",
+        "summary_wind": "רוח {value} קמ\"ש",
+        "summary_precipitation": "משקעים {value} מ\"מ",
+        "summary_humidity": "לחות {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "מבקרים",
+          "event": "אירועים",
+          "delivery": "חומרים שסופקו",
+          "completion": "עבודות שבוצעו",
+          "incident_summary": "בטיחות ואירועים",
+          "inspection_summary": "בדיקות ופיקוח",
+          "photo_note": "הערות צילום",
+          "general": "הערות כלליות"
+        },
+        "status": {
+          "open": "פתוח",
+          "closed": "סגור",
+          "signed": "חתום",
+          "archived": "בארכיון"
+        },
+        "condition": {
+          "clear": "בהיר",
+          "mainly_clear": "בהיר ברובו",
+          "partly_cloudy": "מעונן חלקית",
+          "cloudy": "מעונן",
+          "overcast": "מעונן לחלוטין",
+          "fog": "ערפל",
+          "fog_rime": "ערפל קפוא",
+          "drizzle_light": "טפטוף קל",
+          "drizzle_moderate": "טפטוף בינוני",
+          "drizzle_dense": "טפטוף כבד",
+          "rain": "גשם",
+          "rain_light": "גשם קל",
+          "rain_moderate": "גשם בינוני",
+          "rain_heavy": "גשם כבד",
+          "freezing_rain_light": "גשם קפוא קל",
+          "freezing_rain_heavy": "גשם קפוא כבד",
+          "snow": "שלג",
+          "snow_light": "שלג קל",
+          "snow_moderate": "שלג בינוני",
+          "snow_heavy": "שלג כבד",
+          "rain_showers_light": "ממטרי גשם קלים",
+          "rain_showers_moderate": "ממטרי גשם בינוניים",
+          "rain_showers_violent": "ממטרי גשם עזים",
+          "snow_showers_light": "ממטרי שלג קלים",
+          "snow_showers_heavy": "ממטרי שלג כבדים",
+          "thunderstorm": "סופת רעמים",
+          "thunderstorm_hail_light": "סופת רעמים עם ברד קל",
+          "thunderstorm_hail_heavy": "סופת רעמים עם ברד כבד"
+        },
+        "source": {
+          "manual": "הזנה ידנית",
+          "open_meteo": "שירות מזג אוויר",
+          "sensor": "חיישן באתר"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "יומן בקשות למידע (RFI)",
+        "col_number": "מס' RFI",
+        "col_subject": "נושא",
+        "col_raised_by": "הוגש על ידי",
+        "col_assigned_to": "מוקצה ל",
+        "col_ball_in_court": "בטיפול",
+        "col_date_required": "תאריך נדרש",
+        "col_response_due": "מועד למענה",
+        "col_days_open": "ימים פתוח",
+        "col_cost_impact": "השפעה על העלות",
+        "col_schedule_impact": "השפעה על לוח הזמנים",
+        "col_response": "מענה",
+        "yes_with": "כן ({detail})",
+        "register_filename": "yoman-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "open": "פתוח",
+          "answered": "נענה",
+          "closed": "סגור",
+          "void": "בוטל"
+        }
+      }
     }
   },
   "cost_control": {

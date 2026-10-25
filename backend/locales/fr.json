@@ -618,5 +618,539 @@
       "draft": "Brouillon",
       "frozen": "Figé"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projet",
+      "project_no": "N° de projet",
+      "generated_on": "Date d'édition",
+      "records": "Enregistrements",
+      "currency": "Devise",
+      "status": "Statut",
+      "name": "Nom",
+      "signature": "Signature",
+      "date": "Date",
+      "signatures": "Signatures",
+      "yes": "Oui",
+      "no": "Non",
+      "days_one": "{n} jour",
+      "days_other": "{n} jours",
+      "empty_register": "Aucun enregistrement.",
+      "total": "Total",
+      "signer_title": "Fonction",
+      "sig_prepared_by": "Établi par",
+      "sig_checked_by": "Vérifié par",
+      "sig_approved_by": "Approuvé par",
+      "footer_generated": "Édité le {timestamp}",
+      "footer_page": "Page {page} sur {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Registre des documents soumis à visa",
+        "doc_title": "Document soumis à visa",
+        "doc_title_product_data": "Fiche d'agrément de matériau",
+        "col_number": "N° du document",
+        "col_title": "Intitulé",
+        "col_type": "Type",
+        "col_spec": "Article du CCTP",
+        "col_rev": "Ind.",
+        "col_date_submitted": "Date de remise",
+        "col_date_required": "Date requise",
+        "col_date_returned": "Date de retour",
+        "col_reviewer": "Vérificateur",
+        "col_approver": "Approbateur",
+        "col_ball_in_court": "Action de",
+        "submitted_by_org": "Entreprise émettrice",
+        "review_notes": "Observations du vérificateur",
+        "no_review_notes": "Aucune observation enregistrée.",
+        "sig_submitted": "Soumis par",
+        "sig_reviewed": "Examiné par",
+        "sig_approved": "Approuvé par",
+        "register_filename": "registre-documents-soumis-a-visa",
+        "register_title_shop_drawing": "Registre des plans d'atelier",
+        "register_title_product_data": "Registre des agréments de matériaux",
+        "register_title_method_statement": "Registre des méthodologies d'exécution",
+        "register_filename_shop_drawing": "registre-plans-atelier",
+        "register_filename_product_data": "registre-agrements-materiaux",
+        "register_filename_method_statement": "registre-methodologies-execution",
+        "col_discipline": "Lot",
+        "col_manufacturer": "Fabricant / marque",
+        "col_model": "Modèle / référence",
+        "col_origin": "Pays d'origine",
+        "col_supplier": "Fournisseur",
+        "col_product": "Fabricant / modèle / origine",
+        "col_review_code": "Code de visa",
+        "col_outcome": "Résultat de l'examen",
+        "col_review_period": "Délai d'examen (jours)",
+        "col_review_due": "Examen avant le",
+        "col_days_in_review": "Jours en examen",
+        "col_days_in_review_print": "Jours en examen",
+        "col_review_overdue": "Jours de retard",
+        "col_required_on_site": "Besoin sur site",
+        "col_long_lead": "Délai long",
+        "col_lead_time": "Délai d'appro. (sem.)",
+        "col_needed_by": "Approbation requise le",
+        "col_approval_late": "Jours après échéance",
+        "col_drawings": "Plans liés",
+        "col_submitted_returned": "Remis / retourné",
+        "col_on_site_needed_by": "Sur site / approbation le",
+        "resubmit_for_record": "Exemplaire corrigé à resoumettre pour archivage",
+        "review_history": "Historique d'examen",
+        "hist_submitted": "Remis",
+        "hist_returned": "Retourné",
+        "drawings_missing_one": "{n} plan lié n'est plus disponible",
+        "drawings_missing_other": "{n} plans liés ne sont plus disponibles",
+        "weeks_one": "{n} semaine",
+        "weeks_other": "{n} semaines"
+      },
+      "labels": {
+        "status": {
+          "draft": "Brouillon",
+          "submitted": "Remis",
+          "under_review": "En cours d'examen",
+          "approved": "Approuvé",
+          "approved_as_noted": "Approuvé avec observations",
+          "revise_and_resubmit": "À réviser et resoumettre",
+          "rejected": "Refusé",
+          "closed": "Clos"
+        },
+        "type": {
+          "shop_drawing": "Plan d'atelier",
+          "product_data": "Fiche technique",
+          "sample": "Échantillon",
+          "mock_up": "Prototype",
+          "test_report": "Rapport d'essai",
+          "calculation": "Note de calcul",
+          "method_statement": "Méthodologie d'exécution",
+          "certificate": "Certificat",
+          "warranty": "Garantie"
+        },
+        "discipline": {
+          "mechanical": "Mécanique",
+          "hvac": "CVC",
+          "plumbing": "Plomberie et assainissement",
+          "fire_protection": "Protection incendie",
+          "electrical": "Électricité",
+          "lighting": "Éclairage",
+          "elv": "Courants faibles",
+          "bms": "GTB",
+          "architectural": "Architecture",
+          "structural": "Structure",
+          "civil": "Génie civil"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Registre des avenants",
+        "doc_title": "Avenant",
+        "col_code": "Code",
+        "col_title": "Intitulé",
+        "col_reason": "Motif",
+        "col_instrument": "Instrument",
+        "col_submitted": "Date de remise",
+        "col_contractor_amount": "Montant entreprise",
+        "col_engineer_amount": "Montant ingénieur",
+        "col_approved_amount": "Montant approuvé",
+        "col_cost_impact": "Incidence financière",
+        "col_time_impact": "Incidence délai (jours)",
+        "col_approved_time": "Délai approuvé (jours)",
+        "time_impact": "Incidence délai",
+        "approved_time": "Délai approuvé",
+        "col_approved": "Date d'approbation",
+        "submitted_by": "Soumis par",
+        "approved_by": "Approuvé par",
+        "description": "Description",
+        "no_description": "Aucune description enregistrée.",
+        "items": "Postes modifiés",
+        "item_description": "Désignation",
+        "item_change": "Modification",
+        "item_unit": "Unité",
+        "item_original_quantity": "Qté initiale",
+        "item_new_quantity": "Qté nouvelle",
+        "item_original_rate": "Prix initial",
+        "item_new_rate": "Prix nouveau",
+        "item_cost_delta": "Écart de coût",
+        "register_filename": "registre-avenants"
+      },
+      "labels": {
+        "status": {
+          "draft": "Brouillon",
+          "submitted": "Soumis",
+          "approved": "Approuvé",
+          "rejected": "Refusé",
+          "executed": "Exécuté"
+        },
+        "reason": {
+          "client_request": "Demande du maître d'ouvrage",
+          "design_change": "Modification de conception",
+          "unforeseen": "Conditions imprévues",
+          "regulatory": "Exigence réglementaire",
+          "error": "Erreur ou omission",
+          "non_conformance": "Non-conformité",
+          "value_engineering": "Ingénierie de la valeur"
+        },
+        "instrument": {
+          "works_change": "Ordre de modification",
+          "site_confirmation": "Confirmation sur site",
+          "claim": "Réclamation"
+        },
+        "change": {
+          "added": "Ajouté",
+          "removed": "Supprimé",
+          "modified": "Modifié"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dossier de preuves",
+        "subject": "Objet",
+        "basis": "Fondement",
+        "period_from": "Pièce la plus ancienne",
+        "period_to": "Pièce la plus récente",
+        "digest": "Code d'intégrité (SHA-256, 16 premiers caractères)",
+        "col_row": "N°",
+        "col_record_id": "ID de pièce",
+        "col_section": "Rubrique",
+        "col_date": "Date",
+        "col_kind": "Type de pièce",
+        "col_title": "Intitulé",
+        "col_summary": "Résumé",
+        "col_reference": "Référence",
+        "register_filename": "dossier-de-preuves"
+      },
+      "labels": {
+        "section": {
+          "notices": "Notifications",
+          "correspondence": "Correspondance",
+          "rfis": "Demandes d'information (RFI)",
+          "variations": "Modifications",
+          "approvals": "Approbations",
+          "delay": "Retard",
+          "timeline": "Chronologie",
+          "other": "Autre"
+        },
+        "kind": {
+          "notice": "Notification",
+          "variation_notice": "Avis de modification",
+          "variation_request": "Demande de modification",
+          "variation_order": "Ordre de modification",
+          "change_order": "Avenant",
+          "moc_entry": "Fiche de modification",
+          "correspondence": "Correspondance"
+        },
+        "basis": {
+          "dispute": "Litige",
+          "valuation": "Évaluation",
+          "delay": "Retard / prolongation de délai",
+          "general": "Dossier général"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Registre du courrier",
+        "doc_title": "Courrier",
+        "col_reference": "N° de référence",
+        "col_direction": "Sens",
+        "col_type": "Type",
+        "col_subject": "Objet",
+        "col_from": "De",
+        "col_to": "À",
+        "col_date_sent": "Date d'envoi",
+        "col_date_received": "Date de réception",
+        "col_response_due": "Réponse attendue avant le",
+        "col_clause": "Article du contrat",
+        "notes": "Remarques",
+        "no_notes": "Aucune remarque enregistrée.",
+        "attachments": "Pièces jointes",
+        "linked_documents": "Documents liés",
+        "sig_prepared": "Rédigé par",
+        "sig_received": "Reçu par",
+        "register_filename": "registre-courrier"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Arrivée",
+          "outgoing": "Départ"
+        },
+        "type": {
+          "letter": "Lettre",
+          "email": "E-mail",
+          "notice": "Notification",
+          "memo": "Note",
+          "report": "Rapport"
+        },
+        "status": {
+          "open": "Ouvert",
+          "awaiting_response": "En attente de réponse",
+          "responded": "Répondu",
+          "closed": "Clos"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Registre des bordereaux d'envoi",
+        "doc_title": "Bordereau d'envoi",
+        "col_number": "N° du bordereau",
+        "col_subject": "Objet",
+        "col_purpose": "Motif d'envoi",
+        "col_issued": "Date d'émission",
+        "col_response_due": "Réponse attendue le",
+        "col_recipients": "Destinataires",
+        "col_item_count": "Pièces",
+        "sender": "Expéditeur",
+        "cover_note": "Lettre d'accompagnement",
+        "no_cover_note": "Aucune lettre d'accompagnement.",
+        "recipients": "Destinataires",
+        "recipient": "Destinataire",
+        "action_required": "Action requise",
+        "acknowledged": "Réception accusée",
+        "responded": "Date de réponse",
+        "items": "Pièces transmises",
+        "item_no": "N°",
+        "item_description": "Désignation",
+        "item_notes": "Remarques",
+        "sig_issued": "Émis par",
+        "sig_received": "Reçu par",
+        "register_filename": "registre-bordereaux-envoi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Brouillon",
+          "issued": "Émis",
+          "responded": "Répondu"
+        },
+        "purpose": {
+          "for_approval": "Pour approbation",
+          "for_review": "Pour examen",
+          "for_information": "Pour information",
+          "for_construction": "Pour exécution",
+          "for_tender": "Pour appel d'offres",
+          "for_record": "Pour archivage"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Registre des modifications",
+        "claim_register_title": "Registre des réclamations",
+        "notice_register_title": "Registre des notifications",
+        "doc_title": "Demande de modification",
+        "doc_title_credit": "Demande de modification (moins-value)",
+        "time_impact": "Incidence délai",
+        "col_code": "Code",
+        "col_title": "Intitulé",
+        "col_classification": "Type",
+        "col_urgency": "Urgence",
+        "col_requested": "Date de demande",
+        "col_claimed_amount": "Montant réclamé",
+        "col_agreed_amount": "Montant convenu",
+        "col_time_impact": "Incidence délai (jours)",
+        "col_response_due": "Réponse attendue le",
+        "col_clause": "Article du contrat",
+        "col_row": "N°",
+        "col_claim_type": "Type de réclamation",
+        "col_raised": "Date d'émission",
+        "col_period_start": "Période du",
+        "col_period_end": "Période au",
+        "col_description": "Description",
+        "col_decided_amount": "Montant arrêté",
+        "col_days_requested": "Jours demandés",
+        "col_days_granted": "Jours accordés",
+        "col_recipient_type": "Adressée à",
+        "col_recipient": "Destinataire",
+        "col_target_response": "Réponse attendue",
+        "col_response_received": "Réponse reçue",
+        "requested_by": "Demandé par",
+        "decided_by": "Décision de",
+        "date_submitted": "Date de remise",
+        "date_decided": "Date de décision",
+        "description": "Description",
+        "no_description": "Aucune description enregistrée.",
+        "decision_notes": "Motifs de la décision",
+        "no_decision_notes": "Aucune décision enregistrée pour l'instant.",
+        "variation_register_filename": "registre-modifications",
+        "claim_register_filename": "registre-reclamations",
+        "notice_register_filename": "registre-notifications"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Brouillon",
+          "submitted": "Soumise",
+          "under_review": "En cours d'examen",
+          "approved": "Approuvée",
+          "rejected": "Refusée",
+          "converted_to_vo": "Convertie en ordre"
+        },
+        "claim_status": {
+          "draft": "Brouillon",
+          "submitted": "Soumise",
+          "under_review": "En cours d'examen",
+          "agreed": "Convenue",
+          "granted": "Accordée",
+          "rejected": "Refusée"
+        },
+        "notice_status": {
+          "issued": "Émise",
+          "acknowledged": "Accusée réception",
+          "responded": "Répondue",
+          "closed": "Close"
+        },
+        "classification": {
+          "scope_change": "Modification du périmètre",
+          "unforeseen": "Condition imprévue",
+          "owner_change": "Modification du maître d'ouvrage",
+          "design_dev": "Évolution de la conception",
+          "regulatory": "Exigence réglementaire",
+          "other": "Autre"
+        },
+        "urgency": {
+          "low": "Faible",
+          "med": "Moyenne",
+          "high": "Élevée"
+        },
+        "claim_type": {
+          "disruption": "Perturbation",
+          "eot": "Prolongation de délai"
+        },
+        "recipient_type": {
+          "owner": "Maître d'ouvrage",
+          "contractor": "Entreprise",
+          "architect": "Architecte",
+          "engineer": "Ingénieur",
+          "consultant": "Consultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Journal de chantier",
+        "overview": "Synthèse",
+        "site_supervisor": "Conducteur de travaux",
+        "not_recorded": "Non renseigné",
+        "labour_on_site": "Main-d'œuvre sur site",
+        "equipment_on_site": "Matériel sur site",
+        "completeness": "Taux de renseignement",
+        "weather": "Météo",
+        "weather_time": "Heure",
+        "weather_source": "Source",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vent (km/h)",
+        "weather_precip": "Précip. (mm)",
+        "weather_conditions": "Conditions",
+        "weather_empty": "Aucune donnée météo pour cette journée.",
+        "site_record": "Relevé de chantier",
+        "entries_empty": "Aucune entrée enregistrée pour ce journal.",
+        "notes": "Remarques",
+        "notes_empty": "Aucune remarque complémentaire.",
+        "footer_supervisor": "Conducteur de travaux : {name}",
+        "footer_supervisor_missing": "Conducteur de travaux : non renseigné",
+        "footer_generated": "Édité le : {timestamp}",
+        "footer_page": "Page {page} sur {total}",
+        "workforce": "Effectifs par entreprise",
+        "workforce_company": "Entreprise",
+        "workforce_count": "Personnes",
+        "workforce_unassigned": "Sans entreprise affectée",
+        "workforce_total": "Total",
+        "signatures": "Signatures",
+        "sig_prepared": "Établi par (responsable de chantier)",
+        "sig_approved": "Approuvé par (représentant du maître d'ouvrage)",
+        "sig_name": "Nom",
+        "sig_title": "Fonction",
+        "sig_date": "Date",
+        "sig_signature": "Signature",
+        "signed_note": "Signé dans le système : {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "journal-chantier",
+        "summary_wind": "vent {value} km/h",
+        "summary_precipitation": "précipitations {value} mm",
+        "summary_humidity": "humidité {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Visiteurs",
+          "event": "Événements",
+          "delivery": "Matériaux livrés",
+          "completion": "Travaux réalisés",
+          "incident_summary": "Sécurité et incidents",
+          "inspection_summary": "Contrôles",
+          "photo_note": "Notes photo",
+          "general": "Remarques générales"
+        },
+        "status": {
+          "open": "Ouvert",
+          "closed": "Clos",
+          "signed": "Signé",
+          "archived": "Archivé"
+        },
+        "condition": {
+          "clear": "dégagé",
+          "mainly_clear": "ciel peu nuageux",
+          "partly_cloudy": "éclaircies",
+          "cloudy": "nuageux",
+          "overcast": "couvert",
+          "fog": "brouillard",
+          "fog_rime": "brouillard givrant",
+          "drizzle_light": "bruine légère",
+          "drizzle_moderate": "bruine modérée",
+          "drizzle_dense": "bruine dense",
+          "rain": "pluie",
+          "rain_light": "pluie faible",
+          "rain_moderate": "pluie modérée",
+          "rain_heavy": "pluie forte",
+          "freezing_rain_light": "pluie verglaçante faible",
+          "freezing_rain_heavy": "pluie verglaçante forte",
+          "snow": "neige",
+          "snow_light": "neige faible",
+          "snow_moderate": "neige modérée",
+          "snow_heavy": "neige forte",
+          "rain_showers_light": "averses de pluie faibles",
+          "rain_showers_moderate": "averses de pluie modérées",
+          "rain_showers_violent": "averses de pluie violentes",
+          "snow_showers_light": "averses de neige faibles",
+          "snow_showers_heavy": "averses de neige fortes",
+          "thunderstorm": "orage",
+          "thunderstorm_hail_light": "orage avec grêle faible",
+          "thunderstorm_hail_heavy": "orage avec grêle forte"
+        },
+        "source": {
+          "manual": "Saisie manuelle",
+          "open_meteo": "Service météo",
+          "sensor": "Capteur de chantier"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Registre des demandes d'information (RFI)",
+        "col_number": "N° RFI",
+        "col_subject": "Objet",
+        "col_raised_by": "Émise par",
+        "col_assigned_to": "Affectée à",
+        "col_ball_in_court": "Action de",
+        "col_date_required": "Date requise",
+        "col_response_due": "Réponse attendue le",
+        "col_days_open": "Jours ouverts",
+        "col_cost_impact": "Incidence financière",
+        "col_schedule_impact": "Incidence planning",
+        "col_response": "Réponse",
+        "yes_with": "Oui ({detail})",
+        "register_filename": "registre-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Brouillon",
+          "open": "Ouvert",
+          "answered": "Répondu",
+          "closed": "Clôturé",
+          "void": "Annulé"
+        }
+      }
+    }
   }
 }

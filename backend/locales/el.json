@@ -618,5 +618,539 @@
       "draft": "Πρόχειρο",
       "frozen": "Παγωμένο"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Έργο",
+      "project_no": "Αρ. έργου",
+      "generated_on": "Ημερομηνία έκδοσης",
+      "records": "Εγγραφές",
+      "currency": "Νόμισμα",
+      "status": "Κατάσταση",
+      "name": "Όνομα",
+      "signature": "Υπογραφή",
+      "date": "Ημερομηνία",
+      "signatures": "Υπογραφές",
+      "yes": "Ναι",
+      "no": "Όχι",
+      "days_one": "{n} ημέρα",
+      "days_other": "{n} ημέρες",
+      "empty_register": "Δεν υπάρχουν εγγραφές.",
+      "total": "Σύνολο",
+      "signer_title": "Ιδιότητα",
+      "sig_prepared_by": "Σύνταξη",
+      "sig_checked_by": "Έλεγχος",
+      "sig_approved_by": "Έγκριση",
+      "footer_generated": "Εκδόθηκε {timestamp}",
+      "footer_page": "Σελίδα {page} από {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Μητρώο υποβολών προς έγκριση",
+        "doc_title": "Υποβολή προς έγκριση",
+        "doc_title_product_data": "Έντυπο έγκρισης υλικού",
+        "col_number": "Αρ. υποβολής",
+        "col_title": "Τίτλος",
+        "col_type": "Τύπος",
+        "col_spec": "Ενότητα προδιαγραφών",
+        "col_rev": "Αναθ.",
+        "col_date_submitted": "Ημ. υποβολής",
+        "col_date_required": "Απαιτούμενη ημ.",
+        "col_date_returned": "Ημ. επιστροφής",
+        "col_reviewer": "Ελεγκτής",
+        "col_approver": "Εγκρίνων",
+        "col_ball_in_court": "Υπεύθυνος ενέργειας",
+        "submitted_by_org": "Εταιρεία υποβολής",
+        "review_notes": "Σχόλια ελεγκτή",
+        "no_review_notes": "Δεν έχουν καταχωριστεί σχόλια ελεγκτή.",
+        "sig_submitted": "Υποβολή",
+        "sig_reviewed": "Έλεγχος",
+        "sig_approved": "Έγκριση",
+        "register_filename": "mitroo-ypovolon-egkrisis",
+        "register_title_shop_drawing": "Μητρώο εργοταξιακών σχεδίων",
+        "register_title_product_data": "Μητρώο εγκρίσεων υλικών",
+        "register_title_method_statement": "Μητρώο μεθοδολογιών εργασιών",
+        "register_filename_shop_drawing": "mitroo-ergotaxiakon-schedion",
+        "register_filename_product_data": "mitroo-egkriseon-ylikon",
+        "register_filename_method_statement": "mitroo-methodologion-ergasion",
+        "col_discipline": "Ειδικότητα",
+        "col_manufacturer": "Κατασκευαστής / μάρκα",
+        "col_model": "Μοντέλο / κωδικός",
+        "col_origin": "Χώρα προέλευσης",
+        "col_supplier": "Προμηθευτής",
+        "col_product": "Κατασκευαστής / μοντέλο / προέλευση",
+        "col_review_code": "Κωδικός ελέγχου",
+        "col_outcome": "Αποτέλεσμα ελέγχου",
+        "col_review_period": "Διάρκεια ελέγχου (ημέρες)",
+        "col_review_due": "Προθεσμία ελέγχου",
+        "col_days_in_review": "Ημέρες σε έλεγχο",
+        "col_days_in_review_print": "Ημέρες σε έλεγχο",
+        "col_review_overdue": "Ημέρες καθυστέρησης",
+        "col_required_on_site": "Απαιτείται στο έργο",
+        "col_long_lead": "Μεγάλος χρόνος παράδοσης",
+        "col_lead_time": "Χρόνος παράδοσης (εβδομάδες)",
+        "col_needed_by": "Έγκριση έως",
+        "col_approval_late": "Ημέρες πέραν προθεσμίας",
+        "col_drawings": "Συνδεδεμένα σχέδια",
+        "col_submitted_returned": "Υποβλήθηκε / επιστράφηκε",
+        "col_on_site_needed_by": "Στο έργο / έγκριση έως",
+        "resubmit_for_record": "Να υποβληθεί εκ νέου διορθωμένο αντίγραφο για το αρχείο",
+        "review_history": "Ιστορικό ελέγχου",
+        "hist_submitted": "Υποβλήθηκε",
+        "hist_returned": "Επιστράφηκε",
+        "drawings_missing_one": "{n} συνδεδεμένο σχέδιο δεν είναι πλέον διαθέσιμο",
+        "drawings_missing_other": "{n} συνδεδεμένα σχέδια δεν είναι πλέον διαθέσιμα",
+        "weeks_one": "{n} εβδομάδα",
+        "weeks_other": "{n} εβδομάδες"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "under_review": "Υπό έλεγχο",
+          "approved": "Εγκρίθηκε",
+          "approved_as_noted": "Εγκρίθηκε με παρατηρήσεις",
+          "revise_and_resubmit": "Αναθεώρηση και επανυποβολή",
+          "rejected": "Απορρίφθηκε",
+          "closed": "Κλειστό"
+        },
+        "type": {
+          "shop_drawing": "Εργοταξιακό σχέδιο",
+          "product_data": "Τεχνικό φυλλάδιο προϊόντος",
+          "sample": "Δείγμα",
+          "mock_up": "Πρότυπο δείγμα (mock-up)",
+          "test_report": "Έκθεση δοκιμών",
+          "calculation": "Υπολογισμός",
+          "method_statement": "Μεθοδολογία εργασιών",
+          "certificate": "Πιστοποιητικό",
+          "warranty": "Εγγύηση"
+        },
+        "discipline": {
+          "mechanical": "Μηχανολογικά",
+          "hvac": "Κλιματισμός και αερισμός",
+          "plumbing": "Ύδρευση και αποχέτευση",
+          "fire_protection": "Πυροπροστασία",
+          "electrical": "Ηλεκτρολογικά",
+          "lighting": "Φωτισμός",
+          "elv": "Ασθενή ρεύματα",
+          "bms": "Αυτοματισμός κτιρίου",
+          "architectural": "Αρχιτεκτονικά",
+          "structural": "Στατικά",
+          "civil": "Πολιτικά έργα"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Μητρώο εντολών αλλαγής",
+        "doc_title": "Εντολή αλλαγής",
+        "col_code": "Κωδικός",
+        "col_title": "Τίτλος",
+        "col_reason": "Αιτία",
+        "col_instrument": "Τύπος εγγράφου",
+        "col_submitted": "Ημ. υποβολής",
+        "col_contractor_amount": "Ποσό αναδόχου",
+        "col_engineer_amount": "Ποσό μηχανικού",
+        "col_approved_amount": "Εγκεκριμένο ποσό",
+        "col_cost_impact": "Επίπτωση κόστους",
+        "col_time_impact": "Επίπτωση χρόνου (ημέρες)",
+        "col_approved_time": "Εγκεκριμένος χρόνος (ημέρες)",
+        "time_impact": "Επίπτωση χρόνου",
+        "approved_time": "Εγκεκριμένος χρόνος",
+        "col_approved": "Ημ. έγκρισης",
+        "submitted_by": "Υποβολή από",
+        "approved_by": "Έγκριση από",
+        "description": "Περιγραφή",
+        "no_description": "Δεν έχει καταχωριστεί περιγραφή.",
+        "items": "Στοιχεία αλλαγής",
+        "item_description": "Περιγραφή",
+        "item_change": "Αλλαγή",
+        "item_unit": "Μονάδα",
+        "item_original_quantity": "Αρχ. ποσότητα",
+        "item_new_quantity": "Νέα ποσότητα",
+        "item_original_rate": "Αρχ. τιμή",
+        "item_new_rate": "Νέα τιμή",
+        "item_cost_delta": "Διαφορά κόστους",
+        "register_filename": "mitroo-entolon-allagis"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "approved": "Εγκρίθηκε",
+          "rejected": "Απορρίφθηκε",
+          "executed": "Εκτελέστηκε"
+        },
+        "reason": {
+          "client_request": "Αίτημα κυρίου του έργου",
+          "design_change": "Αλλαγή μελέτης",
+          "unforeseen": "Απρόβλεπτες συνθήκες",
+          "regulatory": "Κανονιστική απαίτηση",
+          "error": "Σφάλμα ή παράλειψη",
+          "non_conformance": "Μη συμμόρφωση",
+          "value_engineering": "Βελτιστοποίηση κόστους (value engineering)"
+        },
+        "instrument": {
+          "works_change": "Εντολή αλλαγής εργασιών",
+          "site_confirmation": "Επιβεβαίωση στο έργο",
+          "claim": "Απαίτηση"
+        },
+        "change": {
+          "added": "Προστέθηκε",
+          "removed": "Αφαιρέθηκε",
+          "modified": "Τροποποιήθηκε"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Φάκελος τεκμηρίωσης",
+        "subject": "Θέμα",
+        "basis": "Βάση",
+        "period_from": "Παλαιότερη εγγραφή",
+        "period_to": "Πιο πρόσφατη εγγραφή",
+        "digest": "Κωδικός ακεραιότητας (SHA-256, πρώτοι 16 χαρακτήρες)",
+        "col_row": "Αρ.",
+        "col_record_id": "ID εγγραφής",
+        "col_section": "Ενότητα",
+        "col_date": "Ημερομηνία",
+        "col_kind": "Τύπος εγγραφής",
+        "col_title": "Τίτλος",
+        "col_summary": "Περίληψη",
+        "col_reference": "Αναφορά",
+        "register_filename": "fakelos-tekmiriosis"
+      },
+      "labels": {
+        "section": {
+          "notices": "Ειδοποιήσεις",
+          "correspondence": "Αλληλογραφία",
+          "rfis": "Αιτήματα πληροφόρησης (RFI)",
+          "variations": "Τροποποιήσεις",
+          "approvals": "Εγκρίσεις",
+          "delay": "Καθυστέρηση",
+          "timeline": "Χρονολόγιο",
+          "other": "Λοιπά"
+        },
+        "kind": {
+          "notice": "Ειδοποίηση",
+          "variation_notice": "Ειδοποίηση τροποποίησης",
+          "variation_request": "Αίτημα τροποποίησης",
+          "variation_order": "Εντολή τροποποίησης",
+          "change_order": "Εντολή αλλαγής",
+          "moc_entry": "Εγγραφή αλλαγής",
+          "correspondence": "Αλληλογραφία"
+        },
+        "basis": {
+          "dispute": "Διαφορά",
+          "valuation": "Αποτίμηση",
+          "delay": "Καθυστέρηση / παράταση προθεσμίας",
+          "general": "Γενική καταγραφή"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Μητρώο αλληλογραφίας",
+        "doc_title": "Αλληλογραφία",
+        "col_reference": "Αρ. αναφοράς",
+        "col_direction": "Κατεύθυνση",
+        "col_type": "Τύπος",
+        "col_subject": "Θέμα",
+        "col_from": "Από",
+        "col_to": "Προς",
+        "col_date_sent": "Ημ. αποστολής",
+        "col_date_received": "Ημ. παραλαβής",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_clause": "Άρθρο σύμβασης",
+        "notes": "Σημειώσεις",
+        "no_notes": "Δεν υπάρχουν σημειώσεις.",
+        "attachments": "Συνημμένα αρχεία",
+        "linked_documents": "Συνδεδεμένα έγγραφα",
+        "sig_prepared": "Σύνταξη",
+        "sig_received": "Παραλαβή",
+        "register_filename": "mitroo-allilografias"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Εισερχόμενο",
+          "outgoing": "Εξερχόμενο"
+        },
+        "type": {
+          "letter": "Επιστολή",
+          "email": "Email",
+          "notice": "Ειδοποίηση",
+          "memo": "Υπηρεσιακό σημείωμα",
+          "report": "Έκθεση"
+        },
+        "status": {
+          "open": "Ανοιχτό",
+          "awaiting_response": "Αναμονή απάντησης",
+          "responded": "Απαντήθηκε",
+          "closed": "Κλειστό"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Μητρώο διαβιβαστικών",
+        "doc_title": "Διαβιβαστικό",
+        "col_number": "Αρ. διαβιβαστικού",
+        "col_subject": "Θέμα",
+        "col_purpose": "Σκοπός",
+        "col_issued": "Ημ. έκδοσης",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_recipients": "Παραλήπτες",
+        "col_item_count": "Στοιχεία",
+        "sender": "Αποστολέας",
+        "cover_note": "Συνοδευτική σημείωση",
+        "no_cover_note": "Δεν υπάρχει συνοδευτική σημείωση.",
+        "recipients": "Παραλήπτες",
+        "recipient": "Παραλήπτης",
+        "action_required": "Απαιτούμενη ενέργεια",
+        "acknowledged": "Επιβεβαίωση παραλαβής",
+        "responded": "Ημ. απάντησης",
+        "items": "Διαβιβαζόμενα στοιχεία",
+        "item_no": "Αρ.",
+        "item_description": "Περιγραφή",
+        "item_notes": "Σημειώσεις",
+        "sig_issued": "Έκδοση",
+        "sig_received": "Παραλαβή",
+        "register_filename": "mitroo-diavivastikon"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "issued": "Εκδόθηκε",
+          "responded": "Απαντήθηκε"
+        },
+        "purpose": {
+          "for_approval": "Για έγκριση",
+          "for_review": "Για έλεγχο",
+          "for_information": "Για ενημέρωση",
+          "for_construction": "Για κατασκευή",
+          "for_tender": "Για διαγωνισμό",
+          "for_record": "Για το αρχείο"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Μητρώο τροποποιήσεων",
+        "claim_register_title": "Μητρώο απαιτήσεων",
+        "notice_register_title": "Μητρώο ειδοποιήσεων",
+        "doc_title": "Αίτημα τροποποίησης",
+        "doc_title_credit": "Αίτημα τροποποίησης (αφαίρεση εργασιών)",
+        "time_impact": "Επίπτωση χρόνου",
+        "col_code": "Κωδικός",
+        "col_title": "Τίτλος",
+        "col_classification": "Τύπος",
+        "col_urgency": "Επείγον",
+        "col_requested": "Ημ. αιτήματος",
+        "col_claimed_amount": "Αιτούμενο ποσό",
+        "col_agreed_amount": "Συμφωνηθέν ποσό",
+        "col_time_impact": "Επίπτωση χρόνου (ημέρες)",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_clause": "Άρθρο σύμβασης",
+        "col_row": "Αρ.",
+        "col_claim_type": "Τύπος απαίτησης",
+        "col_raised": "Ημ. υποβολής",
+        "col_period_start": "Περίοδος από",
+        "col_period_end": "Περίοδος έως",
+        "col_description": "Περιγραφή",
+        "col_decided_amount": "Ποσό απόφασης",
+        "col_days_requested": "Αιτούμενες ημέρες",
+        "col_days_granted": "Εγκεκριμένες ημέρες",
+        "col_recipient_type": "Απευθύνεται σε",
+        "col_recipient": "Παραλήπτης",
+        "col_target_response": "Αναμενόμενη απάντηση",
+        "col_response_received": "Ληφθείσα απάντηση",
+        "requested_by": "Αίτηση από",
+        "decided_by": "Απόφαση από",
+        "date_submitted": "Ημ. υποβολής",
+        "date_decided": "Ημ. απόφασης",
+        "description": "Περιγραφή",
+        "no_description": "Δεν έχει καταχωριστεί περιγραφή.",
+        "decision_notes": "Σημειώσεις απόφασης",
+        "no_decision_notes": "Δεν έχει ληφθεί ακόμη απόφαση.",
+        "variation_register_filename": "mitroo-tropopoiiseon",
+        "claim_register_filename": "mitroo-apaitiseon",
+        "notice_register_filename": "mitroo-eidopoiiseon"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "under_review": "Υπό έλεγχο",
+          "approved": "Εγκρίθηκε",
+          "rejected": "Απορρίφθηκε",
+          "converted_to_vo": "Μετατράπηκε σε εντολή"
+        },
+        "claim_status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "under_review": "Υπό έλεγχο",
+          "agreed": "Συμφωνήθηκε",
+          "granted": "Εγκρίθηκε",
+          "rejected": "Απορρίφθηκε"
+        },
+        "notice_status": {
+          "issued": "Εκδόθηκε",
+          "acknowledged": "Επιβεβαιώθηκε η λήψη",
+          "responded": "Απαντήθηκε",
+          "closed": "Κλειστό"
+        },
+        "classification": {
+          "scope_change": "Αλλαγή αντικειμένου",
+          "unforeseen": "Απρόβλεπτη συνθήκη",
+          "owner_change": "Αλλαγή κυρίου του έργου",
+          "design_dev": "Εξέλιξη μελέτης",
+          "regulatory": "Κανονιστική απαίτηση",
+          "other": "Λοιπά"
+        },
+        "urgency": {
+          "low": "Χαμηλή",
+          "med": "Μέτρια",
+          "high": "Υψηλή"
+        },
+        "claim_type": {
+          "disruption": "Διατάραξη προόδου",
+          "eot": "Παράταση προθεσμίας"
+        },
+        "recipient_type": {
+          "owner": "Κύριος του έργου",
+          "contractor": "Ανάδοχος",
+          "architect": "Αρχιτέκτονας",
+          "engineer": "Μηχανικός",
+          "consultant": "Σύμβουλος"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Ημερολόγιο έργου",
+        "overview": "Επισκόπηση",
+        "site_supervisor": "Επιβλέπων έργου",
+        "not_recorded": "Δεν καταχωρίστηκε",
+        "labour_on_site": "Εργατικό δυναμικό στο έργο",
+        "equipment_on_site": "Εξοπλισμός στο έργο",
+        "completeness": "Πληρότητα",
+        "weather": "Καιρός",
+        "weather_time": "Ώρα",
+        "weather_source": "Πηγή",
+        "weather_temp": "Θερμ. (C)",
+        "weather_wind": "Άνεμος (km/h)",
+        "weather_precip": "Υετός (mm)",
+        "weather_conditions": "Συνθήκες",
+        "weather_empty": "Δεν έχει καταχωριστεί καιρός για αυτή την ημέρα.",
+        "site_record": "Καταγραφή έργου",
+        "entries_empty": "Δεν υπάρχουν καταχωρίσεις σε αυτό το ημερολόγιο.",
+        "notes": "Σημειώσεις",
+        "notes_empty": "Δεν υπάρχουν πρόσθετες σημειώσεις.",
+        "footer_supervisor": "Επιβλέπων: {name}",
+        "footer_supervisor_missing": "Επιβλέπων έργου: δεν καταχωρίστηκε",
+        "footer_generated": "Εκδόθηκε: {timestamp}",
+        "footer_page": "Σελίδα {page} από {total}",
+        "workforce": "Εργατικό δυναμικό ανά εταιρεία",
+        "workforce_company": "Εταιρεία",
+        "workforce_count": "Άτομα",
+        "workforce_unassigned": "Χωρίς ανάθεση σε εταιρεία",
+        "workforce_total": "Σύνολο",
+        "signatures": "Υπογραφές",
+        "sig_prepared": "Σύνταξη (υπεύθυνος έργου)",
+        "sig_approved": "Έγκριση (εκπρόσωπος εργοδότη)",
+        "sig_name": "Όνομα",
+        "sig_title": "Ιδιότητα",
+        "sig_date": "Ημερομηνία",
+        "sig_signature": "Υπογραφή",
+        "signed_note": "Υπογράφηκε στο σύστημα: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "imerologio",
+        "summary_wind": "άνεμος {value} km/h",
+        "summary_precipitation": "υετός {value} mm",
+        "summary_humidity": "υγρασία {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Επισκέπτες",
+          "event": "Συμβάντα",
+          "delivery": "Υλικά που παραδόθηκαν",
+          "completion": "Εργασίες που εκτελέστηκαν",
+          "incident_summary": "Ασφάλεια και περιστατικά",
+          "inspection_summary": "Επιθεωρήσεις",
+          "photo_note": "Σημειώσεις φωτογραφιών",
+          "general": "Γενικές σημειώσεις"
+        },
+        "status": {
+          "open": "Ανοιχτό",
+          "closed": "Κλειστό",
+          "signed": "Υπογεγραμμένο",
+          "archived": "Αρχειοθετημένο"
+        },
+        "condition": {
+          "clear": "αίθριος",
+          "mainly_clear": "κυρίως αίθριος",
+          "partly_cloudy": "μερική συννεφιά",
+          "cloudy": "νεφελώδης",
+          "overcast": "σκεπασμένος",
+          "fog": "ομίχλη",
+          "fog_rime": "παγωμένη ομίχλη",
+          "drizzle_light": "ασθενής ψιχάλα",
+          "drizzle_moderate": "μέτρια ψιχάλα",
+          "drizzle_dense": "έντονη ψιχάλα",
+          "rain": "βροχή",
+          "rain_light": "ασθενής βροχή",
+          "rain_moderate": "μέτρια βροχή",
+          "rain_heavy": "ισχυρή βροχή",
+          "freezing_rain_light": "ασθενής παγωμένη βροχή",
+          "freezing_rain_heavy": "ισχυρή παγωμένη βροχή",
+          "snow": "χιόνι",
+          "snow_light": "ασθενής χιονόπτωση",
+          "snow_moderate": "μέτρια χιονόπτωση",
+          "snow_heavy": "ισχυρή χιονόπτωση",
+          "rain_showers_light": "ασθενείς μπόρες",
+          "rain_showers_moderate": "μέτριες μπόρες",
+          "rain_showers_violent": "ισχυρές καταιγιδοφόρες μπόρες",
+          "snow_showers_light": "ασθενείς χιονοπτώσεις με διαλείμματα",
+          "snow_showers_heavy": "ισχυρές χιονοπτώσεις με διαλείμματα",
+          "thunderstorm": "καταιγίδα",
+          "thunderstorm_hail_light": "καταιγίδα με ασθενή χαλάζι",
+          "thunderstorm_hail_heavy": "καταιγίδα με ισχυρό χαλάζι"
+        },
+        "source": {
+          "manual": "Χειροκίνητη καταχώριση",
+          "open_meteo": "Μετεωρολογική υπηρεσία",
+          "sensor": "Αισθητήρας έργου"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Μητρώο αιτημάτων πληροφόρησης (RFI)",
+        "col_number": "RFI αρ.",
+        "col_subject": "Θέμα",
+        "col_raised_by": "Υποβολή από",
+        "col_assigned_to": "Ανάθεση σε",
+        "col_ball_in_court": "Υπεύθυνος ενέργειας",
+        "col_date_required": "Απαιτούμενη ημ.",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_days_open": "Ημέρες ανοιχτό",
+        "col_cost_impact": "Επίπτωση κόστους",
+        "col_schedule_impact": "Επίπτωση χρονοδιαγράμματος",
+        "col_response": "Απάντηση",
+        "yes_with": "Ναι ({detail})",
+        "register_filename": "mitroo-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "open": "Ανοιχτό",
+          "answered": "Απαντήθηκε",
+          "closed": "Έκλεισε",
+          "void": "Άκυρο"
+        }
+      }
+    }
   }
 }

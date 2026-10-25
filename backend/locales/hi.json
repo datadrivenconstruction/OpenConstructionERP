@@ -618,5 +618,539 @@
       "draft": "ड्राफ़्ट",
       "frozen": "फ़्रीज़ किया गया"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "परियोजना",
+      "project_no": "परियोजना क्र.",
+      "generated_on": "तैयार करने की तिथि",
+      "records": "रिकॉर्ड",
+      "currency": "मुद्रा",
+      "status": "स्थिति",
+      "name": "नाम",
+      "signature": "हस्ताक्षर",
+      "date": "तिथि",
+      "signatures": "हस्ताक्षर",
+      "yes": "हाँ",
+      "no": "नहीं",
+      "days_one": "{n} दिन",
+      "days_other": "{n} दिन",
+      "empty_register": "कोई रिकॉर्ड नहीं।",
+      "total": "कुल",
+      "signer_title": "पदनाम",
+      "sig_prepared_by": "तैयारकर्ता",
+      "sig_checked_by": "जाँचकर्ता",
+      "sig_approved_by": "अनुमोदनकर्ता",
+      "footer_generated": "तैयार किया गया {timestamp}",
+      "footer_page": "पृष्ठ {page} / {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "सबमिटल रजिस्टर",
+        "doc_title": "सबमिटल",
+        "doc_title_product_data": "सामग्री अनुमोदन फ़ॉर्म",
+        "col_number": "सबमिटल क्र.",
+        "col_title": "शीर्षक",
+        "col_type": "प्रकार",
+        "col_spec": "विनिर्देश अनुभाग",
+        "col_rev": "संशो.",
+        "col_date_submitted": "प्रस्तुति तिथि",
+        "col_date_required": "आवश्यक तिथि",
+        "col_date_returned": "वापसी तिथि",
+        "col_reviewer": "समीक्षक",
+        "col_approver": "अनुमोदक",
+        "col_ball_in_court": "कार्रवाई किसकी",
+        "submitted_by_org": "प्रस्तुतकर्ता कंपनी",
+        "review_notes": "समीक्षक की टिप्पणियाँ",
+        "no_review_notes": "समीक्षक की कोई टिप्पणी दर्ज नहीं।",
+        "sig_submitted": "प्रस्तुतकर्ता",
+        "sig_reviewed": "समीक्षा",
+        "sig_approved": "अनुमोदन",
+        "register_filename": "submittal-register",
+        "register_title_shop_drawing": "शॉप ड्रॉइंग रजिस्टर",
+        "register_title_product_data": "सामग्री अनुमोदन रजिस्टर",
+        "register_title_method_statement": "कार्यविधि विवरण रजिस्टर",
+        "register_filename_shop_drawing": "shop-drawing-register",
+        "register_filename_product_data": "samagri-anumodan-register",
+        "register_filename_method_statement": "karyavidhi-vivaran-register",
+        "col_discipline": "विषय-क्षेत्र",
+        "col_manufacturer": "निर्माता / ब्रांड",
+        "col_model": "मॉडल / संदर्भ",
+        "col_origin": "उत्पत्ति देश",
+        "col_supplier": "आपूर्तिकर्ता",
+        "col_product": "निर्माता / मॉडल / उत्पत्ति",
+        "col_review_code": "समीक्षा कोड",
+        "col_outcome": "समीक्षा परिणाम",
+        "col_review_period": "समीक्षा अवधि (दिन)",
+        "col_review_due": "समीक्षा देय",
+        "col_days_in_review": "समीक्षा में दिन",
+        "col_days_in_review_print": "समीक्षा में दिन",
+        "col_review_overdue": "विलंब के दिन",
+        "col_required_on_site": "साइट पर आवश्यक",
+        "col_long_lead": "लंबी आपूर्ति अवधि",
+        "col_lead_time": "आपूर्ति अवधि (सप्ताह)",
+        "col_needed_by": "अनुमोदन आवश्यक तिथि",
+        "col_approval_late": "निर्धारित तिथि के बाद दिन",
+        "col_drawings": "संबद्ध ड्रॉइंग",
+        "col_submitted_returned": "प्रस्तुत / वापस",
+        "col_on_site_needed_by": "साइट पर / अनुमोदन तक",
+        "resubmit_for_record": "रिकॉर्ड हेतु सुधारी हुई प्रति पुनः प्रस्तुत की जाए",
+        "review_history": "समीक्षा इतिहास",
+        "hist_submitted": "प्रस्तुत",
+        "hist_returned": "वापस",
+        "drawings_missing_one": "{n} संबद्ध ड्रॉइंग अब उपलब्ध नहीं है",
+        "drawings_missing_other": "{n} संबद्ध ड्रॉइंग अब उपलब्ध नहीं हैं",
+        "weeks_one": "{n} सप्ताह",
+        "weeks_other": "{n} सप्ताह"
+      },
+      "labels": {
+        "status": {
+          "draft": "प्रारूप",
+          "submitted": "प्रस्तुत",
+          "under_review": "समीक्षाधीन",
+          "approved": "अनुमोदित",
+          "approved_as_noted": "टिप्पणियों सहित अनुमोदित",
+          "revise_and_resubmit": "संशोधित कर पुनः प्रस्तुत करें",
+          "rejected": "अस्वीकृत",
+          "closed": "बंद"
+        },
+        "type": {
+          "shop_drawing": "शॉप ड्रॉइंग",
+          "product_data": "उत्पाद डेटा",
+          "sample": "नमूना",
+          "mock_up": "मॉक-अप",
+          "test_report": "परीक्षण रिपोर्ट",
+          "calculation": "गणना",
+          "method_statement": "कार्यविधि विवरण",
+          "certificate": "प्रमाणपत्र",
+          "warranty": "वारंटी"
+        },
+        "discipline": {
+          "mechanical": "यांत्रिक",
+          "hvac": "एचवीएसी",
+          "plumbing": "प्लंबिंग एवं जल निकासी",
+          "fire_protection": "अग्नि सुरक्षा",
+          "electrical": "विद्युत",
+          "lighting": "प्रकाश व्यवस्था",
+          "elv": "लो करंट",
+          "bms": "बिल्डिंग ऑटोमेशन",
+          "architectural": "वास्तु",
+          "structural": "संरचनात्मक",
+          "civil": "सिविल"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "परिवर्तन आदेश रजिस्टर",
+        "doc_title": "परिवर्तन आदेश",
+        "col_code": "कोड",
+        "col_title": "शीर्षक",
+        "col_reason": "कारण",
+        "col_instrument": "दस्तावेज़ प्रकार",
+        "col_submitted": "प्रस्तुति तिथि",
+        "col_contractor_amount": "ठेकेदार की राशि",
+        "col_engineer_amount": "इंजीनियर की राशि",
+        "col_approved_amount": "अनुमोदित राशि",
+        "col_cost_impact": "लागत प्रभाव",
+        "col_time_impact": "समय प्रभाव (दिन)",
+        "col_approved_time": "अनुमोदित समय (दिन)",
+        "time_impact": "समय प्रभाव",
+        "approved_time": "अनुमोदित समय",
+        "col_approved": "अनुमोदन तिथि",
+        "submitted_by": "प्रस्तुतकर्ता",
+        "approved_by": "अनुमोदनकर्ता",
+        "description": "विवरण",
+        "no_description": "कोई विवरण दर्ज नहीं।",
+        "items": "परिवर्तन मदें",
+        "item_description": "विवरण",
+        "item_change": "परिवर्तन",
+        "item_unit": "इकाई",
+        "item_original_quantity": "मूल मात्रा",
+        "item_new_quantity": "नई मात्रा",
+        "item_original_rate": "मूल दर",
+        "item_new_rate": "नई दर",
+        "item_cost_delta": "लागत अंतर",
+        "register_filename": "parivartan-adesh-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "प्रारूप",
+          "submitted": "प्रस्तुत",
+          "approved": "अनुमोदित",
+          "rejected": "अस्वीकृत",
+          "executed": "निष्पादित"
+        },
+        "reason": {
+          "client_request": "ग्राहक का अनुरोध",
+          "design_change": "डिज़ाइन परिवर्तन",
+          "unforeseen": "अप्रत्याशित परिस्थितियाँ",
+          "regulatory": "नियामकीय",
+          "error": "त्रुटि या चूक",
+          "non_conformance": "अननुरूपता",
+          "value_engineering": "वैल्यू इंजीनियरिंग"
+        },
+        "instrument": {
+          "works_change": "निर्देशित परिवर्तन",
+          "site_confirmation": "साइट पुष्टि",
+          "claim": "दावा"
+        },
+        "change": {
+          "added": "जोड़ा गया",
+          "removed": "हटाया गया",
+          "modified": "संशोधित"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "साक्ष्य पैक",
+        "subject": "विषय",
+        "basis": "आधार",
+        "period_from": "सबसे पुराना रिकॉर्ड",
+        "period_to": "सबसे नया रिकॉर्ड",
+        "digest": "अखंडता कोड (SHA-256, पहले 16 अक्षर)",
+        "col_row": "क्र.",
+        "col_record_id": "रिकॉर्ड आईडी",
+        "col_section": "अनुभाग",
+        "col_date": "तिथि",
+        "col_kind": "रिकॉर्ड प्रकार",
+        "col_title": "शीर्षक",
+        "col_summary": "सारांश",
+        "col_reference": "संदर्भ",
+        "register_filename": "saakshya-pack"
+      },
+      "labels": {
+        "section": {
+          "notices": "नोटिस",
+          "correspondence": "पत्राचार",
+          "rfis": "सूचना अनुरोध (RFI)",
+          "variations": "परिवर्तन आदेश",
+          "approvals": "अनुमोदन",
+          "delay": "विलंब",
+          "timeline": "समय-रेखा",
+          "other": "अन्य"
+        },
+        "kind": {
+          "notice": "नोटिस",
+          "variation_notice": "परिवर्तन नोटिस",
+          "variation_request": "परिवर्तन अनुरोध",
+          "variation_order": "परिवर्तन आदेश",
+          "change_order": "परिवर्तन आदेश",
+          "moc_entry": "परिवर्तन रिकॉर्ड",
+          "correspondence": "पत्राचार"
+        },
+        "basis": {
+          "dispute": "विवाद",
+          "valuation": "मूल्यांकन",
+          "delay": "विलंब / समय विस्तार",
+          "general": "सामान्य रिकॉर्ड"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "पत्राचार लॉग",
+        "doc_title": "पत्राचार",
+        "col_reference": "संदर्भ क्र.",
+        "col_direction": "दिशा",
+        "col_type": "प्रकार",
+        "col_subject": "विषय",
+        "col_from": "प्रेषक",
+        "col_to": "प्राप्तकर्ता",
+        "col_date_sent": "भेजने की तिथि",
+        "col_date_received": "प्राप्ति तिथि",
+        "col_response_due": "उत्तर अपेक्षित तिथि",
+        "col_clause": "अनुबंध खंड",
+        "notes": "टिप्पणियाँ",
+        "no_notes": "कोई टिप्पणी दर्ज नहीं।",
+        "attachments": "संलग्न फ़ाइलें",
+        "linked_documents": "संबद्ध दस्तावेज़",
+        "sig_prepared": "तैयारकर्ता",
+        "sig_received": "प्राप्तकर्ता",
+        "register_filename": "patrachar-log"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "आवक",
+          "outgoing": "जावक"
+        },
+        "type": {
+          "letter": "पत्र",
+          "email": "ईमेल",
+          "notice": "नोटिस",
+          "memo": "ज्ञापन",
+          "report": "रिपोर्ट"
+        },
+        "status": {
+          "open": "खुला",
+          "awaiting_response": "उत्तर की प्रतीक्षा",
+          "responded": "उत्तर दिया गया",
+          "closed": "बंद"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "ट्रांसमिटल रजिस्टर",
+        "doc_title": "ट्रांसमिटल",
+        "col_number": "ट्रांसमिटल क्र.",
+        "col_subject": "विषय",
+        "col_purpose": "उद्देश्य",
+        "col_issued": "जारी करने की तिथि",
+        "col_response_due": "उत्तर देय",
+        "col_recipients": "प्राप्तकर्ता",
+        "col_item_count": "मदें",
+        "sender": "प्रेषक",
+        "cover_note": "कवर नोट",
+        "no_cover_note": "कोई कवर नोट नहीं।",
+        "recipients": "प्राप्तकर्ता",
+        "recipient": "प्राप्तकर्ता",
+        "action_required": "कार्रवाई अपेक्षित",
+        "acknowledged": "प्राप्ति की पावती",
+        "responded": "उत्तर की तिथि",
+        "items": "प्रेषित मदें",
+        "item_no": "क्र.",
+        "item_description": "विवरण",
+        "item_notes": "टिप्पणियाँ",
+        "sig_issued": "जारीकर्ता",
+        "sig_received": "प्राप्तकर्ता",
+        "register_filename": "transmittal-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "प्रारूप",
+          "issued": "जारी",
+          "responded": "उत्तर दिया गया"
+        },
+        "purpose": {
+          "for_approval": "अनुमोदन हेतु",
+          "for_review": "समीक्षा हेतु",
+          "for_information": "सूचना हेतु",
+          "for_construction": "निर्माण हेतु",
+          "for_tender": "निविदा हेतु",
+          "for_record": "रिकॉर्ड हेतु"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "परिवर्तन आदेश रजिस्टर",
+        "claim_register_title": "दावा रजिस्टर",
+        "notice_register_title": "नोटिस रजिस्टर",
+        "doc_title": "परिवर्तन अनुरोध",
+        "doc_title_credit": "परिवर्तन अनुरोध (कटौती)",
+        "time_impact": "समय प्रभाव",
+        "col_code": "कोड",
+        "col_title": "शीर्षक",
+        "col_classification": "प्रकार",
+        "col_urgency": "तात्कालिकता",
+        "col_requested": "अनुरोध तिथि",
+        "col_claimed_amount": "दावा की गई राशि",
+        "col_agreed_amount": "सहमत राशि",
+        "col_time_impact": "समय प्रभाव (दिन)",
+        "col_response_due": "उत्तर देय",
+        "col_clause": "अनुबंध खंड",
+        "col_row": "क्र.",
+        "col_claim_type": "दावे का प्रकार",
+        "col_raised": "प्रस्तुति तिथि",
+        "col_period_start": "अवधि से",
+        "col_period_end": "अवधि तक",
+        "col_description": "विवरण",
+        "col_decided_amount": "निर्णित राशि",
+        "col_days_requested": "अनुरोधित दिन",
+        "col_days_granted": "स्वीकृत दिन",
+        "col_recipient_type": "संबोधित",
+        "col_recipient": "प्राप्तकर्ता",
+        "col_target_response": "अपेक्षित उत्तर",
+        "col_response_received": "प्राप्त उत्तर",
+        "requested_by": "अनुरोधकर्ता",
+        "decided_by": "निर्णयकर्ता",
+        "date_submitted": "प्रस्तुति तिथि",
+        "date_decided": "निर्णय तिथि",
+        "description": "विवरण",
+        "no_description": "कोई विवरण दर्ज नहीं।",
+        "decision_notes": "निर्णय टिप्पणियाँ",
+        "no_decision_notes": "अभी तक कोई निर्णय दर्ज नहीं।",
+        "variation_register_filename": "parivartan-adesh-register",
+        "claim_register_filename": "dava-register",
+        "notice_register_filename": "notice-register"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "प्रारूप",
+          "submitted": "प्रस्तुत",
+          "under_review": "समीक्षाधीन",
+          "approved": "अनुमोदित",
+          "rejected": "अस्वीकृत",
+          "converted_to_vo": "आदेश में परिवर्तित"
+        },
+        "claim_status": {
+          "draft": "प्रारूप",
+          "submitted": "प्रस्तुत",
+          "under_review": "समीक्षाधीन",
+          "agreed": "सहमत",
+          "granted": "स्वीकृत",
+          "rejected": "अस्वीकृत"
+        },
+        "notice_status": {
+          "issued": "जारी",
+          "acknowledged": "पावती प्राप्त",
+          "responded": "उत्तर दिया गया",
+          "closed": "बंद"
+        },
+        "classification": {
+          "scope_change": "कार्यक्षेत्र परिवर्तन",
+          "unforeseen": "अप्रत्याशित स्थिति",
+          "owner_change": "स्वामी द्वारा परिवर्तन",
+          "design_dev": "डिज़ाइन विकास",
+          "regulatory": "नियामकीय",
+          "other": "अन्य"
+        },
+        "urgency": {
+          "low": "कम",
+          "med": "मध्यम",
+          "high": "उच्च"
+        },
+        "claim_type": {
+          "disruption": "कार्य में बाधा",
+          "eot": "समय विस्तार"
+        },
+        "recipient_type": {
+          "owner": "स्वामी",
+          "contractor": "ठेकेदार",
+          "architect": "आर्किटेक्ट",
+          "engineer": "इंजीनियर",
+          "consultant": "सलाहकार"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "दैनिक साइट डायरी",
+        "overview": "अवलोकन",
+        "site_supervisor": "साइट सुपरवाइज़र",
+        "not_recorded": "दर्ज नहीं",
+        "labour_on_site": "साइट पर श्रमिक",
+        "equipment_on_site": "साइट पर उपकरण",
+        "completeness": "पूर्णता",
+        "weather": "मौसम",
+        "weather_time": "समय",
+        "weather_source": "स्रोत",
+        "weather_temp": "तापमान (°C)",
+        "weather_wind": "हवा (km/h)",
+        "weather_precip": "वर्षा (mm)",
+        "weather_conditions": "स्थिति",
+        "weather_empty": "इस दिन का मौसम दर्ज नहीं।",
+        "site_record": "साइट रिकॉर्ड",
+        "entries_empty": "इस डायरी में कोई प्रविष्टि दर्ज नहीं।",
+        "notes": "टिप्पणियाँ",
+        "notes_empty": "कोई अतिरिक्त टिप्पणी नहीं।",
+        "footer_supervisor": "सुपरवाइज़र: {name}",
+        "footer_supervisor_missing": "साइट सुपरवाइज़र: दर्ज नहीं",
+        "footer_generated": "तैयार किया गया: {timestamp}",
+        "footer_page": "पृष्ठ {page} / {total}",
+        "workforce": "कंपनी के अनुसार कार्यबल",
+        "workforce_company": "कंपनी",
+        "workforce_count": "व्यक्ति",
+        "workforce_unassigned": "किसी कंपनी से संबद्ध नहीं",
+        "workforce_total": "कुल",
+        "signatures": "हस्ताक्षर",
+        "sig_prepared": "तैयारकर्ता (साइट मैनेजर)",
+        "sig_approved": "अनुमोदनकर्ता (नियोक्ता का प्रतिनिधि)",
+        "sig_name": "नाम",
+        "sig_title": "पदनाम",
+        "sig_date": "तिथि",
+        "sig_signature": "हस्ताक्षर",
+        "signed_note": "सिस्टम में हस्ताक्षरित: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "dainik-diary",
+        "summary_wind": "हवा {value} km/h",
+        "summary_precipitation": "वर्षा {value} mm",
+        "summary_humidity": "आर्द्रता {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "आगंतुक",
+          "event": "घटनाएँ",
+          "delivery": "प्राप्त सामग्री",
+          "completion": "किया गया कार्य",
+          "incident_summary": "सुरक्षा एवं घटनाएँ",
+          "inspection_summary": "निरीक्षण",
+          "photo_note": "फ़ोटो टिप्पणियाँ",
+          "general": "सामान्य टिप्पणियाँ"
+        },
+        "status": {
+          "open": "खुली",
+          "closed": "बंद",
+          "signed": "हस्ताक्षरित",
+          "archived": "संग्रहीत"
+        },
+        "condition": {
+          "clear": "साफ़",
+          "mainly_clear": "अधिकतर साफ़",
+          "partly_cloudy": "आंशिक रूप से बादल",
+          "cloudy": "बादल छाए",
+          "overcast": "घने बादल",
+          "fog": "कोहरा",
+          "fog_rime": "जमने वाला कोहरा",
+          "drizzle_light": "हल्की फुहार",
+          "drizzle_moderate": "मध्यम फुहार",
+          "drizzle_dense": "घनी फुहार",
+          "rain": "वर्षा",
+          "rain_light": "हल्की वर्षा",
+          "rain_moderate": "मध्यम वर्षा",
+          "rain_heavy": "भारी वर्षा",
+          "freezing_rain_light": "हल्की जमने वाली वर्षा",
+          "freezing_rain_heavy": "भारी जमने वाली वर्षा",
+          "snow": "बर्फ़बारी",
+          "snow_light": "हल्की बर्फ़बारी",
+          "snow_moderate": "मध्यम बर्फ़बारी",
+          "snow_heavy": "भारी बर्फ़बारी",
+          "rain_showers_light": "हल्की बौछारें",
+          "rain_showers_moderate": "मध्यम बौछारें",
+          "rain_showers_violent": "तेज़ बौछारें",
+          "snow_showers_light": "हल्की बर्फ़ की बौछारें",
+          "snow_showers_heavy": "भारी बर्फ़ की बौछारें",
+          "thunderstorm": "आंधी-तूफ़ान",
+          "thunderstorm_hail_light": "हल्के ओलों के साथ आंधी-तूफ़ान",
+          "thunderstorm_hail_heavy": "भारी ओलों के साथ आंधी-तूफ़ान"
+        },
+        "source": {
+          "manual": "मैन्युअल प्रविष्टि",
+          "open_meteo": "मौसम सेवा",
+          "sensor": "साइट सेंसर"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "सूचना अनुरोध (RFI) लॉग",
+        "col_number": "RFI क्र.",
+        "col_subject": "विषय",
+        "col_raised_by": "अनुरोधकर्ता",
+        "col_assigned_to": "नियत व्यक्ति",
+        "col_ball_in_court": "कार्रवाई किसकी",
+        "col_date_required": "आवश्यक तिथि",
+        "col_response_due": "उत्तर देय",
+        "col_days_open": "खुले दिन",
+        "col_cost_impact": "लागत प्रभाव",
+        "col_schedule_impact": "समय-सारणी प्रभाव",
+        "col_response": "उत्तर",
+        "yes_with": "हाँ ({detail})",
+        "register_filename": "rfi-log"
+      },
+      "labels": {
+        "status": {
+          "draft": "मसौदा",
+          "open": "खुला",
+          "answered": "उत्तरित",
+          "closed": "बंद",
+          "void": "अमान्य"
+        }
+      }
+    }
   }
 }

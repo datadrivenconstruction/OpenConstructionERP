@@ -648,6 +648,514 @@
           "refunded": "مستردة"
         }
       }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "سجل المستندات المقدمة للاعتماد",
+        "doc_title": "مستند مقدم للاعتماد",
+        "doc_title_product_data": "نموذج اعتماد المواد",
+        "col_number": "رقم المستند",
+        "col_title": "العنوان",
+        "col_type": "النوع",
+        "col_spec": "بند المواصفات",
+        "col_rev": "المراجعة",
+        "col_date_submitted": "تاريخ التقديم",
+        "col_date_required": "تاريخ المطلوب",
+        "col_date_returned": "تاريخ الإعادة",
+        "col_reviewer": "المراجع",
+        "col_approver": "المعتمد",
+        "col_ball_in_court": "الجهة المطلوب منها الإجراء",
+        "submitted_by_org": "الشركة المقدمة",
+        "review_notes": "ملاحظات المراجع",
+        "no_review_notes": "لا توجد ملاحظات مسجلة من المراجع.",
+        "sig_submitted": "تقديم",
+        "sig_reviewed": "مراجعة",
+        "sig_approved": "اعتماد",
+        "register_filename": "sijil-mustanadat-muqaddama",
+        "register_title_shop_drawing": "سجل مخططات التنفيذ",
+        "register_title_product_data": "سجل اعتماد المواد",
+        "register_title_method_statement": "سجل بيانات طريقة التنفيذ",
+        "register_filename_shop_drawing": "sijil-mukhattatat-tanfidh",
+        "register_filename_product_data": "sijil-itimad-mawad",
+        "register_filename_method_statement": "sijil-tariqat-tanfidh",
+        "col_discipline": "التخصص",
+        "col_manufacturer": "الشركة المصنعة / العلامة",
+        "col_model": "الطراز / المرجع",
+        "col_origin": "بلد المنشأ",
+        "col_supplier": "المورّد",
+        "col_product": "الصانع / الطراز / المنشأ",
+        "col_review_code": "رمز المراجعة",
+        "col_outcome": "نتيجة المراجعة",
+        "col_review_period": "مدة المراجعة (أيام)",
+        "col_review_due": "موعد المراجعة",
+        "col_days_in_review": "أيام المراجعة",
+        "col_days_in_review_print": "أيام المراجعة",
+        "col_review_overdue": "أيام التأخير",
+        "col_required_on_site": "مطلوب في الموقع",
+        "col_long_lead": "مدة توريد طويلة",
+        "col_lead_time": "مدة التوريد (أسابيع)",
+        "col_needed_by": "الاعتماد مطلوب قبل",
+        "col_approval_late": "أيام التأخر عن الموعد",
+        "col_drawings": "المخططات المرتبطة",
+        "col_submitted_returned": "التقديم / الإعادة",
+        "col_on_site_needed_by": "في الموقع / الاعتماد قبل",
+        "resubmit_for_record": "يُعاد تقديم النسخة المصححة للسجل",
+        "review_history": "سجل المراجعات",
+        "hist_submitted": "تم التقديم",
+        "hist_returned": "تمت الإعادة",
+        "drawings_missing_one": "{n} مخطط مرتبط لم يعد متاحاً",
+        "drawings_missing_other": "{n} من المخططات المرتبطة لم تعد متاحة",
+        "weeks_one": "{n} أسبوع",
+        "weeks_other": "{n} أسابيع"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّم",
+          "under_review": "قيد المراجعة",
+          "approved": "معتمد",
+          "approved_as_noted": "معتمد مع الملاحظات",
+          "revise_and_resubmit": "يُعدَّل ويُعاد تقديمه",
+          "rejected": "مرفوض",
+          "closed": "مغلق"
+        },
+        "type": {
+          "shop_drawing": "مخطط تنفيذي",
+          "product_data": "بيانات المنتج",
+          "sample": "عينة",
+          "mock_up": "نموذج تجريبي",
+          "test_report": "تقرير اختبار",
+          "calculation": "حسابات",
+          "method_statement": "بيان طريقة التنفيذ",
+          "certificate": "شهادة",
+          "warranty": "ضمان"
+        },
+        "discipline": {
+          "mechanical": "ميكانيكا",
+          "hvac": "التكييف والتهوية",
+          "plumbing": "السباكة والصرف",
+          "fire_protection": "مكافحة الحريق",
+          "electrical": "كهرباء",
+          "lighting": "إنارة",
+          "elv": "التيار الخفيف",
+          "bms": "أتمتة المباني",
+          "architectural": "عمارة",
+          "structural": "إنشائي",
+          "civil": "أعمال مدنية"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "سجل أوامر التغيير",
+        "doc_title": "أمر تغيير",
+        "col_code": "الرمز",
+        "col_title": "العنوان",
+        "col_reason": "السبب",
+        "col_instrument": "أداة التغيير",
+        "col_submitted": "تاريخ التقديم",
+        "col_contractor_amount": "مبلغ المقاول",
+        "col_engineer_amount": "مبلغ المهندس",
+        "col_approved_amount": "المبلغ المعتمد",
+        "col_cost_impact": "الأثر على التكلفة",
+        "col_time_impact": "الأثر على المدة (أيام)",
+        "col_approved_time": "المدة المعتمدة (أيام)",
+        "time_impact": "الأثر على المدة",
+        "approved_time": "المدة المعتمدة",
+        "col_approved": "تاريخ الاعتماد",
+        "submitted_by": "تقديم",
+        "approved_by": "اعتماد",
+        "description": "الوصف",
+        "no_description": "لا يوجد وصف مسجل.",
+        "items": "بنود التغيير",
+        "item_description": "الوصف",
+        "item_change": "التغيير",
+        "item_unit": "الوحدة",
+        "item_original_quantity": "الكمية الأصلية",
+        "item_new_quantity": "الكمية الجديدة",
+        "item_original_rate": "السعر الأصلي",
+        "item_new_rate": "السعر الجديد",
+        "item_cost_delta": "فرق التكلفة",
+        "register_filename": "sijil-awamir-taghyir"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّم",
+          "approved": "معتمد",
+          "rejected": "مرفوض",
+          "executed": "منفَّذ"
+        },
+        "reason": {
+          "client_request": "طلب العميل",
+          "design_change": "تغيير في التصميم",
+          "unforeseen": "ظروف غير متوقعة",
+          "regulatory": "متطلبات تنظيمية",
+          "error": "خطأ أو سهو",
+          "non_conformance": "عدم مطابقة",
+          "value_engineering": "هندسة القيمة"
+        },
+        "instrument": {
+          "works_change": "تغيير مُوجَّه",
+          "site_confirmation": "تأكيد من الموقع",
+          "claim": "مطالبة"
+        },
+        "change": {
+          "added": "مضاف",
+          "removed": "محذوف",
+          "modified": "معدَّل"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "حزمة الأدلة",
+        "subject": "الموضوع",
+        "basis": "الأساس",
+        "period_from": "أقدم سجل",
+        "period_to": "أحدث سجل",
+        "digest": "رمز التحقق (SHA-256، أول 16 حرفاً)",
+        "col_row": "م",
+        "col_record_id": "معرّف السجل",
+        "col_section": "القسم",
+        "col_date": "التاريخ",
+        "col_kind": "نوع السجل",
+        "col_title": "العنوان",
+        "col_summary": "الملخص",
+        "col_reference": "المرجع",
+        "register_filename": "hizmat-adilla"
+      },
+      "labels": {
+        "section": {
+          "notices": "الإشعارات",
+          "correspondence": "المراسلات",
+          "rfis": "طلبات المعلومات (RFI)",
+          "variations": "أوامر التغيير",
+          "approvals": "الاعتمادات",
+          "delay": "التأخير",
+          "timeline": "الجدول الزمني",
+          "other": "أخرى"
+        },
+        "kind": {
+          "notice": "إشعار",
+          "variation_notice": "إشعار تغيير",
+          "variation_request": "طلب تغيير",
+          "variation_order": "أمر تغيير",
+          "change_order": "أمر تغيير",
+          "moc_entry": "سجل تغيير",
+          "correspondence": "مراسلة"
+        },
+        "basis": {
+          "dispute": "نزاع",
+          "valuation": "تقييم",
+          "delay": "تأخير / تمديد المدة",
+          "general": "سجل عام"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "سجل المراسلات",
+        "doc_title": "مراسلة",
+        "col_reference": "الرقم المرجعي",
+        "col_direction": "الاتجاه",
+        "col_type": "النوع",
+        "col_subject": "الموضوع",
+        "col_from": "من",
+        "col_to": "إلى",
+        "col_date_sent": "تاريخ الإرسال",
+        "col_date_received": "تاريخ الاستلام",
+        "col_response_due": "موعد الرد المطلوب",
+        "col_clause": "بند العقد",
+        "notes": "ملاحظات",
+        "no_notes": "لا توجد ملاحظات مسجلة.",
+        "attachments": "الملفات المرفقة",
+        "linked_documents": "المستندات المرتبطة",
+        "sig_prepared": "إعداد",
+        "sig_received": "استلام",
+        "register_filename": "sijil-murasalat"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "وارد",
+          "outgoing": "صادر"
+        },
+        "type": {
+          "letter": "خطاب",
+          "email": "بريد إلكتروني",
+          "notice": "إشعار",
+          "memo": "مذكرة",
+          "report": "تقرير"
+        },
+        "status": {
+          "open": "مفتوح",
+          "awaiting_response": "بانتظار الرد",
+          "responded": "تم الرد",
+          "closed": "مغلق"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "سجل المراسلات الناقلة",
+        "doc_title": "مراسلة ناقلة",
+        "col_number": "رقم الناقلة",
+        "col_subject": "الموضوع",
+        "col_purpose": "الغرض",
+        "col_issued": "تاريخ الإصدار",
+        "col_response_due": "موعد الرد",
+        "col_recipients": "المستلمون",
+        "col_item_count": "البنود",
+        "sender": "المُرسِل",
+        "cover_note": "مذكرة مرفقة",
+        "no_cover_note": "لا توجد مذكرة مرفقة.",
+        "recipients": "المستلمون",
+        "recipient": "المستلم",
+        "action_required": "الإجراء المطلوب",
+        "acknowledged": "إقرار الاستلام",
+        "responded": "تاريخ الرد",
+        "items": "المستندات المرسلة",
+        "item_no": "م",
+        "item_description": "الوصف",
+        "item_notes": "ملاحظات",
+        "sig_issued": "إصدار",
+        "sig_received": "استلام",
+        "register_filename": "sijil-murasalat-naqila"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "issued": "صادر",
+          "responded": "تم الرد"
+        },
+        "purpose": {
+          "for_approval": "للاعتماد",
+          "for_review": "للمراجعة",
+          "for_information": "للعلم",
+          "for_construction": "للتنفيذ",
+          "for_tender": "للمناقصة",
+          "for_record": "للحفظ في السجل"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "سجل أوامر التغيير",
+        "claim_register_title": "سجل المطالبات",
+        "notice_register_title": "سجل الإشعارات",
+        "doc_title": "طلب تغيير",
+        "doc_title_credit": "طلب تغيير (حذف)",
+        "time_impact": "الأثر على المدة",
+        "col_code": "الرمز",
+        "col_title": "العنوان",
+        "col_classification": "النوع",
+        "col_urgency": "الأولوية",
+        "col_requested": "تاريخ الطلب",
+        "col_claimed_amount": "المبلغ المطالب به",
+        "col_agreed_amount": "المبلغ المتفق عليه",
+        "col_time_impact": "الأثر على المدة (أيام)",
+        "col_response_due": "موعد الرد",
+        "col_clause": "بند العقد",
+        "col_row": "م",
+        "col_claim_type": "نوع المطالبة",
+        "col_raised": "تاريخ الرفع",
+        "col_period_start": "الفترة من",
+        "col_period_end": "الفترة إلى",
+        "col_description": "الوصف",
+        "col_decided_amount": "المبلغ المقرر",
+        "col_days_requested": "الأيام المطلوبة",
+        "col_days_granted": "الأيام الممنوحة",
+        "col_recipient_type": "الموجَّه إلى",
+        "col_recipient": "المستلم",
+        "col_target_response": "الرد المتوقع",
+        "col_response_received": "الرد المستلم",
+        "requested_by": "تقديم الطلب",
+        "decided_by": "اتخاذ القرار",
+        "date_submitted": "تاريخ التقديم",
+        "date_decided": "تاريخ القرار",
+        "description": "الوصف",
+        "no_description": "لا يوجد وصف مسجل.",
+        "decision_notes": "ملاحظات القرار",
+        "no_decision_notes": "لم يُسجَّل قرار بعد.",
+        "variation_register_filename": "sijil-awamir-taghyir",
+        "claim_register_filename": "sijil-mutalabat",
+        "notice_register_filename": "sijil-ishearat"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّم",
+          "under_review": "قيد المراجعة",
+          "approved": "معتمد",
+          "rejected": "مرفوض",
+          "converted_to_vo": "حُوِّل إلى أمر"
+        },
+        "claim_status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّمة",
+          "under_review": "قيد المراجعة",
+          "agreed": "متفق عليها",
+          "granted": "ممنوحة",
+          "rejected": "مرفوضة"
+        },
+        "notice_status": {
+          "issued": "صادر",
+          "acknowledged": "تم الإقرار بالاستلام",
+          "responded": "تم الرد",
+          "closed": "مغلق"
+        },
+        "classification": {
+          "scope_change": "تغيير في نطاق العمل",
+          "unforeseen": "ظرف غير متوقع",
+          "owner_change": "تغيير من المالك",
+          "design_dev": "تطوير التصميم",
+          "regulatory": "متطلبات تنظيمية",
+          "other": "أخرى"
+        },
+        "urgency": {
+          "low": "منخفضة",
+          "med": "متوسطة",
+          "high": "عالية"
+        },
+        "claim_type": {
+          "disruption": "تعطيل سير الأعمال",
+          "eot": "تمديد المدة"
+        },
+        "recipient_type": {
+          "owner": "المالك",
+          "contractor": "المقاول",
+          "architect": "المهندس المعماري",
+          "engineer": "المهندس",
+          "consultant": "الاستشاري"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "اليومية الموقعية",
+        "overview": "نظرة عامة",
+        "site_supervisor": "مشرف الموقع",
+        "not_recorded": "غير مسجل",
+        "labour_on_site": "العمالة في الموقع",
+        "equipment_on_site": "المعدات في الموقع",
+        "completeness": "اكتمال البيانات",
+        "weather": "الطقس",
+        "weather_time": "الوقت",
+        "weather_source": "المصدر",
+        "weather_temp": "الحرارة (°م)",
+        "weather_wind": "الرياح (كم/س)",
+        "weather_precip": "الهطول (مم)",
+        "weather_conditions": "الحالة",
+        "weather_empty": "لا توجد بيانات طقس مسجلة لهذا اليوم.",
+        "site_record": "سجل الموقع",
+        "entries_empty": "لا توجد بنود مسجلة في هذه اليومية.",
+        "notes": "ملاحظات",
+        "notes_empty": "لا توجد ملاحظات إضافية.",
+        "footer_supervisor": "المشرف: {name}",
+        "footer_supervisor_missing": "مشرف الموقع: غير مسجل",
+        "footer_generated": "تاريخ الإنشاء: {timestamp}",
+        "footer_page": "صفحة {page} من {total}",
+        "workforce": "القوى العاملة حسب الشركة",
+        "workforce_company": "الشركة",
+        "workforce_count": "العدد",
+        "workforce_unassigned": "غير مسندين إلى شركة",
+        "workforce_total": "الإجمالي",
+        "signatures": "التوقيعات",
+        "sig_prepared": "إعداد (مدير الموقع)",
+        "sig_approved": "اعتماد (ممثل صاحب العمل)",
+        "sig_name": "الاسم",
+        "sig_title": "المسمى الوظيفي",
+        "sig_date": "التاريخ",
+        "sig_signature": "التوقيع",
+        "signed_note": "تم التوقيع في النظام: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "alyawmiya-almawqiiya",
+        "summary_wind": "الرياح {value} كم/س",
+        "summary_precipitation": "الهطول {value} مم",
+        "summary_humidity": "الرطوبة {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "الزوار",
+          "event": "الأحداث",
+          "delivery": "المواد الموردة",
+          "completion": "الأعمال المنفذة",
+          "incident_summary": "السلامة والحوادث",
+          "inspection_summary": "أعمال الفحص",
+          "photo_note": "ملاحظات الصور",
+          "general": "ملاحظات عامة"
+        },
+        "status": {
+          "open": "مفتوحة",
+          "closed": "مغلقة",
+          "signed": "موقّعة",
+          "archived": "مؤرشفة"
+        },
+        "condition": {
+          "clear": "صافٍ",
+          "mainly_clear": "صافٍ في الغالب",
+          "partly_cloudy": "غائم جزئياً",
+          "cloudy": "غائم",
+          "overcast": "ملبّد بالغيوم",
+          "fog": "ضباب",
+          "fog_rime": "ضباب متجمد",
+          "drizzle_light": "رذاذ خفيف",
+          "drizzle_moderate": "رذاذ متوسط",
+          "drizzle_dense": "رذاذ كثيف",
+          "rain": "مطر",
+          "rain_light": "مطر خفيف",
+          "rain_moderate": "مطر متوسط",
+          "rain_heavy": "مطر غزير",
+          "freezing_rain_light": "مطر متجمد خفيف",
+          "freezing_rain_heavy": "مطر متجمد غزير",
+          "snow": "ثلج",
+          "snow_light": "ثلج خفيف",
+          "snow_moderate": "ثلج متوسط",
+          "snow_heavy": "ثلج كثيف",
+          "rain_showers_light": "زخات مطر خفيفة",
+          "rain_showers_moderate": "زخات مطر متوسطة",
+          "rain_showers_violent": "زخات مطر عنيفة",
+          "snow_showers_light": "زخات ثلج خفيفة",
+          "snow_showers_heavy": "زخات ثلج كثيفة",
+          "thunderstorm": "عاصفة رعدية",
+          "thunderstorm_hail_light": "عاصفة رعدية مع برَد خفيف",
+          "thunderstorm_hail_heavy": "عاصفة رعدية مع برَد كثيف"
+        },
+        "source": {
+          "manual": "إدخال يدوي",
+          "open_meteo": "خدمة الطقس",
+          "sensor": "حساس الموقع"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "سجل طلبات المعلومات (RFI)",
+        "col_number": "رقم RFI",
+        "col_subject": "الموضوع",
+        "col_raised_by": "مقدم الطلب",
+        "col_assigned_to": "المسند إليه",
+        "col_ball_in_court": "الجهة المطلوب منها الإجراء",
+        "col_date_required": "تاريخ المطلوب",
+        "col_response_due": "موعد الرد",
+        "col_days_open": "أيام الفتح",
+        "col_cost_impact": "الأثر على التكلفة",
+        "col_schedule_impact": "الأثر على الجدول الزمني",
+        "col_response": "الرد",
+        "yes_with": "نعم ({detail})",
+        "register_filename": "sijil-talabat-maelumat"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "open": "مفتوح",
+          "answered": "تمت الإجابة",
+          "closed": "مغلق",
+          "void": "ملغى"
+        }
+      }
     }
   },
   "cost_control": {

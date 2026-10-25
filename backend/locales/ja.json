@@ -618,5 +618,539 @@
       "draft": "下書き",
       "frozen": "確定済み"
     }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "給排水衛生",
+          "fire_protection": "消防",
+          "civil": "土木",
+          "bms": "ビル自動制御",
+          "hvac": "空調換気",
+          "lighting": "照明",
+          "mechanical": "機械",
+          "architectural": "建築",
+          "electrical": "電気",
+          "structural": "構造",
+          "elv": "弱電"
+        },
+        "type": {
+          "sample": "サンプル",
+          "method_statement": "施工計画書",
+          "shop_drawing": "施工図",
+          "mock_up": "モックアップ",
+          "certificate": "証明書",
+          "test_report": "試験成績書",
+          "calculation": "計算書",
+          "product_data": "製品資料",
+          "warranty": "保証書"
+        },
+        "status": {
+          "draft": "下書き",
+          "approved_as_noted": "条件付承認",
+          "revise_and_resubmit": "修正再提出",
+          "rejected": "却下",
+          "under_review": "審査中",
+          "closed": "完了",
+          "submitted": "提出済",
+          "approved": "承認"
+        }
+      },
+      "strings": {
+        "review_history": "審査履歴",
+        "submitted_by_org": "提出会社",
+        "doc_title": "承認申請書",
+        "col_on_site_needed_by": "現場搬入 / 承認期限",
+        "col_drawings": "関連図面",
+        "col_approval_late": "期限超過日数",
+        "col_needed_by": "承認必要日",
+        "col_lead_time": "納期(週)",
+        "sig_reviewed": "審査",
+        "col_model": "型番 / 参照",
+        "col_discipline": "工種",
+        "col_date_submitted": "提出日",
+        "col_reviewer": "審査者",
+        "col_required_on_site": "現場必要日",
+        "register_title_method_statement": "施工計画書一覧表",
+        "col_supplier": "納入業者",
+        "hist_returned": "返却",
+        "col_review_code": "審査コード",
+        "col_origin": "原産国",
+        "register_filename_method_statement": "sekou-keikakusho-ichiran",
+        "sig_submitted": "提出",
+        "col_long_lead": "長納期",
+        "drawings_missing_other": "関連図面{n}件が利用できません",
+        "col_product": "メーカー / 型式 / 原産",
+        "col_outcome": "審査結果",
+        "col_number": "申請番号",
+        "register_filename_product_data": "zairyo-shounin-ichiran",
+        "col_manufacturer": "メーカー / ブランド",
+        "col_rev": "版",
+        "register_filename_shop_drawing": "sekouzu-ichiran",
+        "col_type": "種別",
+        "col_review_overdue": "超過日数",
+        "weeks_other": "{n}週",
+        "hist_submitted": "提出",
+        "doc_title_product_data": "材料承認申請書",
+        "col_approver": "承認者",
+        "col_date_required": "必要日",
+        "col_title": "件名",
+        "col_ball_in_court": "対応担当",
+        "no_review_notes": "審査コメントの記録はありません。",
+        "sig_approved": "承認",
+        "register_title": "承認申請一覧表",
+        "register_filename": "shounin-shinsei-ichiran",
+        "col_submitted_returned": "提出 / 返却",
+        "col_date_returned": "返却日",
+        "col_review_due": "審査期限",
+        "col_spec": "仕様書項目",
+        "col_days_in_review_print": "審査日数",
+        "drawings_missing_one": "関連図面{n}件が利用できません",
+        "register_title_product_data": "材料承認一覧表",
+        "review_notes": "審査コメント",
+        "resubmit_for_record": "修正済の写しを記録用に再提出のこと",
+        "col_days_in_review": "審査日数",
+        "weeks_one": "{n}週",
+        "register_title_shop_drawing": "施工図一覧表",
+        "col_review_period": "審査期間(日)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "施工用",
+          "for_approval": "承認用",
+          "for_review": "審査用",
+          "for_information": "参考用",
+          "for_record": "記録用",
+          "for_tender": "入札用"
+        },
+        "status": {
+          "draft": "下書き",
+          "responded": "回答済",
+          "issued": "発行済"
+        }
+      },
+      "strings": {
+        "col_purpose": "目的",
+        "col_subject": "件名",
+        "doc_title": "文書送付票",
+        "cover_note": "添え状",
+        "acknowledged": "受領確認済",
+        "sig_issued": "発行",
+        "col_response_due": "回答期限",
+        "col_recipients": "宛先",
+        "col_item_count": "件数",
+        "item_description": "内容",
+        "col_issued": "発行日",
+        "sender": "発信者",
+        "register_title": "文書送付票一覧表",
+        "recipients": "宛先",
+        "responded": "回答日",
+        "items": "送付書類",
+        "item_no": "番号",
+        "item_notes": "備考",
+        "col_number": "送付票番号",
+        "recipient": "宛先",
+        "action_required": "要対応事項",
+        "no_cover_note": "添え状はありません。",
+        "register_filename": "soufuhyou-ichiran",
+        "sig_received": "受領"
+      }
+    },
+    "furniture": {
+      "records": "記録",
+      "project_no": "工事番号",
+      "sig_prepared_by": "作成",
+      "signer_title": "役職",
+      "total": "合計",
+      "date": "日付",
+      "footer_generated": "作成日時 {timestamp}",
+      "sig_checked_by": "確認",
+      "project": "工事名",
+      "status": "状況",
+      "currency": "通貨",
+      "yes": "はい",
+      "signature": "署名",
+      "signatures": "署名",
+      "days_one": "{n}日",
+      "footer_page": "{page} / {total} ページ",
+      "sig_approved_by": "承認",
+      "no": "いいえ",
+      "days_other": "{n}日",
+      "empty_register": "記録はありません。",
+      "name": "氏名",
+      "generated_on": "作成日"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "誤記または脱漏",
+          "regulatory": "法規制",
+          "unforeseen": "予見不能な条件",
+          "non_conformance": "不適合",
+          "design_change": "設計変更",
+          "client_request": "発注者要望",
+          "value_engineering": "VE提案"
+        },
+        "instrument": {
+          "claim": "クレーム",
+          "works_change": "変更指示",
+          "site_confirmation": "現場確認書"
+        },
+        "change": {
+          "modified": "変更",
+          "added": "追加",
+          "removed": "削除"
+        },
+        "status": {
+          "draft": "下書き",
+          "executed": "実施済",
+          "rejected": "却下",
+          "submitted": "提出済",
+          "approved": "承認"
+        }
+      },
+      "strings": {
+        "time_impact": "工期への影響",
+        "item_original_rate": "当初単価",
+        "doc_title": "変更指示書",
+        "col_code": "コード",
+        "approved_by": "承認",
+        "col_approved_time": "承認工期(日)",
+        "item_new_rate": "変更後単価",
+        "col_approved": "承認日",
+        "col_contractor_amount": "請負者金額",
+        "col_engineer_amount": "監理者金額",
+        "no_description": "内容の記録はありません。",
+        "col_submitted": "提出日",
+        "approved_time": "承認工期",
+        "col_cost_impact": "費用への影響",
+        "item_description": "内容",
+        "item_cost_delta": "費用差額",
+        "col_title": "件名",
+        "submitted_by": "提出",
+        "register_title": "変更指示書一覧表",
+        "item_original_quantity": "当初数量",
+        "items": "変更項目",
+        "col_instrument": "区分",
+        "col_time_impact": "工期への影響(日)",
+        "col_reason": "理由",
+        "item_change": "変更",
+        "col_approved_amount": "承認金額",
+        "item_new_quantity": "変更後数量",
+        "register_filename": "henkou-shijisho-ichiran",
+        "description": "内容",
+        "item_unit": "単位"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "回答済",
+          "acknowledged": "受領確認済",
+          "closed": "完了",
+          "issued": "発行済"
+        },
+        "request_status": {
+          "draft": "下書き",
+          "rejected": "却下",
+          "converted_to_vo": "変更指示に移行",
+          "under_review": "審査中",
+          "submitted": "提出済",
+          "approved": "承認"
+        },
+        "claim_type": {
+          "eot": "工期延長",
+          "disruption": "施工阻害"
+        },
+        "recipient_type": {
+          "owner": "発注者",
+          "consultant": "コンサルタント",
+          "contractor": "請負者",
+          "architect": "設計者",
+          "engineer": "技術者"
+        },
+        "urgency": {
+          "low": "低",
+          "med": "中",
+          "high": "高"
+        },
+        "classification": {
+          "other": "その他",
+          "regulatory": "法規制",
+          "unforeseen": "予見不能な条件",
+          "owner_change": "発注者変更",
+          "design_dev": "設計進展",
+          "scope_change": "範囲変更"
+        },
+        "claim_status": {
+          "draft": "下書き",
+          "granted": "認容",
+          "rejected": "却下",
+          "agreed": "合意済",
+          "under_review": "審査中",
+          "submitted": "提出済"
+        }
+      },
+      "strings": {
+        "col_row": "番号",
+        "time_impact": "工期への影響",
+        "doc_title": "変更申請書",
+        "col_code": "コード",
+        "date_decided": "決定日",
+        "col_decided_amount": "決定金額",
+        "variation_register_title": "変更一覧表",
+        "notice_register_title": "通知一覧表",
+        "decision_notes": "決定事項",
+        "col_classification": "種別",
+        "requested_by": "申請",
+        "col_agreed_amount": "合意金額",
+        "col_recipient": "宛先",
+        "col_response_due": "回答期限",
+        "no_description": "内容の記録はありません。",
+        "decided_by": "決定",
+        "variation_register_filename": "henkou-ichiran",
+        "claim_register_title": "クレーム一覧表",
+        "col_days_granted": "認容日数",
+        "col_title": "件名",
+        "date_submitted": "提出日",
+        "col_clause": "契約条項",
+        "col_raised": "発生日",
+        "col_description": "内容",
+        "col_period_end": "期間終了",
+        "col_requested": "申請日",
+        "claim_register_filename": "kureemu-ichiran",
+        "col_response_received": "回答受領",
+        "doc_title_credit": "変更申請書(減額)",
+        "col_time_impact": "工期への影響(日)",
+        "col_claimed_amount": "請求金額",
+        "col_period_start": "期間開始",
+        "notice_register_filename": "tsuuchi-ichiran",
+        "description": "内容",
+        "no_decision_notes": "決定はまだ記録されていません。",
+        "col_recipient_type": "宛先区分",
+        "col_target_response": "回答予定",
+        "col_days_requested": "申請日数",
+        "col_claim_type": "クレーム種別",
+        "col_urgency": "緊急度"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "発信",
+          "incoming": "受信"
+        },
+        "type": {
+          "letter": "書簡",
+          "notice": "通知",
+          "memo": "メモ",
+          "report": "報告書",
+          "email": "メール"
+        },
+        "status": {
+          "awaiting_response": "回答待ち",
+          "closed": "完了",
+          "responded": "回答済",
+          "open": "未完了"
+        }
+      },
+      "strings": {
+        "col_to": "宛先",
+        "no_notes": "備考の記録はありません。",
+        "col_subject": "件名",
+        "doc_title": "往復文書",
+        "register_title": "往復文書台帳",
+        "col_clause": "契約条項",
+        "linked_documents": "関連文書",
+        "col_reference": "文書番号",
+        "col_date_received": "受信日",
+        "notes": "備考",
+        "col_response_due": "回答期限",
+        "sig_prepared": "作成",
+        "attachments": "添付ファイル",
+        "col_date_sent": "発信日",
+        "col_direction": "区分",
+        "register_filename": "oufuku-bunsho-daichou",
+        "col_from": "発信元",
+        "col_type": "種別",
+        "sig_received": "受領"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "遅延 / 工期延長",
+          "valuation": "金額評価",
+          "dispute": "紛争",
+          "general": "一般記録"
+        },
+        "section": {
+          "delay": "遅延",
+          "rfis": "質疑書(RFI)",
+          "variations": "変更",
+          "other": "その他",
+          "notices": "通知",
+          "approvals": "承認",
+          "correspondence": "往復文書",
+          "timeline": "時系列"
+        },
+        "kind": {
+          "notice": "通知",
+          "variation_notice": "変更通知",
+          "correspondence": "往復文書",
+          "variation_order": "変更指示",
+          "moc_entry": "変更記録",
+          "change_order": "変更指示書",
+          "variation_request": "変更申請"
+        }
+      },
+      "strings": {
+        "col_row": "番号",
+        "col_date": "日付",
+        "basis": "根拠",
+        "col_summary": "概要",
+        "register_title": "証拠資料集",
+        "period_to": "最新の記録",
+        "period_from": "最古の記録",
+        "col_kind": "記録種別",
+        "subject": "件名",
+        "col_title": "件名",
+        "register_filename": "shouko-shiryoushuu",
+        "col_reference": "文書番号",
+        "col_section": "区分",
+        "col_record_id": "記録ID",
+        "digest": "完全性コード(SHA-256 先頭16文字)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "件名",
+        "register_title": "質疑書(RFI)台帳",
+        "yes_with": "はい ({detail})",
+        "col_raised_by": "提起者",
+        "col_schedule_impact": "工程への影響",
+        "col_date_required": "必要日",
+        "col_assigned_to": "担当者",
+        "col_ball_in_court": "対応担当",
+        "col_response_due": "回答期限",
+        "col_number": "RFI番号",
+        "col_days_open": "未回答日数",
+        "col_cost_impact": "費用への影響",
+        "register_filename": "rfi-daichou",
+        "col_response": "回答"
+      },
+      "labels": {
+        "status": {
+          "draft": "下書き",
+          "open": "未対応",
+          "answered": "回答済み",
+          "closed": "クローズ",
+          "void": "無効"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "激しいにわか雨",
+          "drizzle_moderate": "並の霧雨",
+          "fog": "霧",
+          "overcast": "曇天",
+          "snow_moderate": "並の雪",
+          "snow_heavy": "大雪",
+          "rain_showers_moderate": "並のにわか雨",
+          "snow_showers_light": "弱いにわか雪",
+          "rain_showers_light": "弱いにわか雨",
+          "snow": "雪",
+          "fog_rime": "着氷性の霧",
+          "partly_cloudy": "一部曇り",
+          "thunderstorm": "雷雨",
+          "snow_light": "小雪",
+          "freezing_rain_heavy": "強い着氷性の雨",
+          "drizzle_light": "弱い霧雨",
+          "rain_light": "小雨",
+          "thunderstorm_hail_heavy": "大粒のひょうを伴う雷雨",
+          "drizzle_dense": "濃い霧雨",
+          "rain": "雨",
+          "mainly_clear": "おおむね晴れ",
+          "clear": "晴れ",
+          "rain_heavy": "大雨",
+          "rain_moderate": "並の雨",
+          "thunderstorm_hail_light": "小粒のひょうを伴う雷雨",
+          "cloudy": "曇り",
+          "snow_showers_heavy": "激しいにわか雪",
+          "freezing_rain_light": "弱い着氷性の雨"
+        },
+        "source": {
+          "open_meteo": "気象サービス",
+          "sensor": "現場センサー",
+          "manual": "手入力"
+        },
+        "entry_type": {
+          "incident_summary": "安全と事故",
+          "event": "出来事",
+          "visitor": "来訪者",
+          "inspection_summary": "検査",
+          "completion": "実施作業",
+          "delivery": "搬入材料",
+          "photo_note": "写真メモ",
+          "general": "一般記事"
+        },
+        "status": {
+          "closed": "完了",
+          "archived": "保管済",
+          "signed": "署名済",
+          "open": "記入中"
+        }
+      },
+      "strings": {
+        "summary_wind": "風速 {value} km/h",
+        "weather_temp": "気温(°C)",
+        "doc_title": "作業日報",
+        "summary_precipitation": "降水量 {value} mm",
+        "site_supervisor": "現場代理人",
+        "weather_precip": "降水量(mm)",
+        "summary_humidity": "湿度 {value} %",
+        "footer_supervisor": "現場代理人: {name}",
+        "sig_name": "氏名",
+        "footer_supervisor_missing": "現場代理人: 未記録",
+        "footer_generated": "作成: {timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "合計",
+        "overview": "概要",
+        "workforce": "会社別作業員数",
+        "workforce_count": "人数",
+        "not_recorded": "未記録",
+        "sig_prepared": "作成(現場代理人)",
+        "decimal_mark": ".",
+        "sig_approved": "承認(発注者代表)",
+        "completeness": "記入率",
+        "sig_signature": "署名",
+        "signatures": "署名",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "会社",
+        "notes_empty": "特記事項はありません。",
+        "sig_title": "役職",
+        "weather": "天候",
+        "weather_wind": "風速(km/h)",
+        "weather_time": "時刻",
+        "weather_empty": "この日の天候は記録されていません。",
+        "footer_page": "{page} / {total} ページ",
+        "equipment_on_site": "現場の機械",
+        "weather_source": "情報源",
+        "workforce_unassigned": "会社未割当",
+        "sig_date": "日付",
+        "filename_prefix": "sagyou-nippou",
+        "labour_on_site": "現場の作業員",
+        "weather_conditions": "天候状況",
+        "signed_note": "システム上で署名済: {signers}",
+        "notes": "備考",
+        "entries_empty": "この日報に記入事項はありません。",
+        "site_record": "現場記録"
+      }
+    }
   }
 }

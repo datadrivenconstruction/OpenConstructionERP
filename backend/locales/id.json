@@ -618,5 +618,539 @@
       "draft": "Draf",
       "frozen": "Beku"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Proyek",
+      "project_no": "No. proyek",
+      "generated_on": "Tanggal dibuat",
+      "records": "Catatan",
+      "currency": "Mata uang",
+      "status": "Status",
+      "name": "Nama",
+      "signature": "Tanda tangan",
+      "date": "Tanggal",
+      "signatures": "Tanda tangan",
+      "yes": "Ya",
+      "no": "Tidak",
+      "days_one": "{n} hari",
+      "days_other": "{n} hari",
+      "empty_register": "Tidak ada catatan.",
+      "total": "Total",
+      "signer_title": "Jabatan",
+      "sig_prepared_by": "Disusun oleh",
+      "sig_checked_by": "Diperiksa oleh",
+      "sig_approved_by": "Disetujui oleh",
+      "footer_generated": "Dibuat {timestamp}",
+      "footer_page": "Halaman {page} dari {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Daftar submittal",
+        "doc_title": "Submittal",
+        "doc_title_product_data": "Formulir persetujuan material",
+        "col_number": "No. submittal",
+        "col_title": "Judul",
+        "col_type": "Jenis",
+        "col_spec": "Seksi spesifikasi",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Tgl. diajukan",
+        "col_date_required": "Tgl. dibutuhkan",
+        "col_date_returned": "Tgl. dikembalikan",
+        "col_reviewer": "Pemeriksa",
+        "col_approver": "Pemberi persetujuan",
+        "col_ball_in_court": "Pihak penindak lanjut",
+        "submitted_by_org": "Perusahaan pengaju",
+        "review_notes": "Komentar pemeriksa",
+        "no_review_notes": "Belum ada komentar pemeriksa.",
+        "sig_submitted": "Diajukan oleh",
+        "sig_reviewed": "Diperiksa oleh",
+        "sig_approved": "Disetujui oleh",
+        "register_filename": "daftar-submittal",
+        "register_title_shop_drawing": "Daftar gambar kerja",
+        "register_title_product_data": "Daftar persetujuan material",
+        "register_title_method_statement": "Daftar metode kerja",
+        "register_filename_shop_drawing": "daftar-gambar-kerja",
+        "register_filename_product_data": "daftar-persetujuan-material",
+        "register_filename_method_statement": "daftar-metode-kerja",
+        "col_discipline": "Disiplin",
+        "col_manufacturer": "Pabrikan / merek",
+        "col_model": "Model / referensi",
+        "col_origin": "Negara asal",
+        "col_supplier": "Pemasok",
+        "col_product": "Pabrikan / model / asal",
+        "col_review_code": "Kode review",
+        "col_outcome": "Hasil review",
+        "col_review_period": "Masa review (hari)",
+        "col_review_due": "Batas review",
+        "col_days_in_review": "Hari dalam review",
+        "col_days_in_review_print": "Hari dalam review",
+        "col_review_overdue": "Hari terlambat",
+        "col_required_on_site": "Dibutuhkan di lokasi",
+        "col_long_lead": "Pengadaan lama",
+        "col_lead_time": "Waktu pengadaan (minggu)",
+        "col_needed_by": "Persetujuan dibutuhkan",
+        "col_approval_late": "Hari melewati batas",
+        "col_drawings": "Gambar terkait",
+        "col_submitted_returned": "Diajukan / dikembalikan",
+        "col_on_site_needed_by": "Di lokasi / persetujuan",
+        "resubmit_for_record": "Salinan yang telah dikoreksi harus diajukan kembali sebagai arsip",
+        "review_history": "Riwayat review",
+        "hist_submitted": "Diajukan",
+        "hist_returned": "Dikembalikan",
+        "drawings_missing_one": "{n} gambar terkait tidak lagi tersedia",
+        "drawings_missing_other": "{n} gambar terkait tidak lagi tersedia",
+        "weeks_one": "{n} minggu",
+        "weeks_other": "{n} minggu"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draf",
+          "submitted": "Diajukan",
+          "under_review": "Dalam review",
+          "approved": "Disetujui",
+          "approved_as_noted": "Disetujui dengan catatan",
+          "revise_and_resubmit": "Revisi dan ajukan ulang",
+          "rejected": "Ditolak",
+          "closed": "Ditutup"
+        },
+        "type": {
+          "shop_drawing": "Gambar kerja",
+          "product_data": "Data produk",
+          "sample": "Sampel",
+          "mock_up": "Mock-up",
+          "test_report": "Laporan pengujian",
+          "calculation": "Perhitungan",
+          "method_statement": "Metode kerja",
+          "certificate": "Sertifikat",
+          "warranty": "Garansi"
+        },
+        "discipline": {
+          "mechanical": "Mekanikal",
+          "hvac": "HVAC",
+          "plumbing": "Plambing dan drainase",
+          "fire_protection": "Proteksi kebakaran",
+          "electrical": "Elektrikal",
+          "lighting": "Pencahayaan",
+          "elv": "Arus lemah",
+          "bms": "Otomasi gedung",
+          "architectural": "Arsitektur",
+          "structural": "Struktur",
+          "civil": "Sipil"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Daftar perintah perubahan",
+        "doc_title": "Perintah perubahan",
+        "col_code": "Kode",
+        "col_title": "Judul",
+        "col_reason": "Alasan",
+        "col_instrument": "Jenis dokumen",
+        "col_submitted": "Tgl. diajukan",
+        "col_contractor_amount": "Nilai kontraktor",
+        "col_engineer_amount": "Nilai konsultan",
+        "col_approved_amount": "Nilai disetujui",
+        "col_cost_impact": "Dampak biaya",
+        "col_time_impact": "Dampak waktu (hari)",
+        "col_approved_time": "Waktu disetujui (hari)",
+        "time_impact": "Dampak waktu",
+        "approved_time": "Waktu disetujui",
+        "col_approved": "Tgl. disetujui",
+        "submitted_by": "Diajukan oleh",
+        "approved_by": "Disetujui oleh",
+        "description": "Uraian",
+        "no_description": "Belum ada uraian.",
+        "items": "Item perubahan",
+        "item_description": "Uraian",
+        "item_change": "Perubahan",
+        "item_unit": "Satuan",
+        "item_original_quantity": "Vol. awal",
+        "item_new_quantity": "Vol. baru",
+        "item_original_rate": "Harga awal",
+        "item_new_rate": "Harga baru",
+        "item_cost_delta": "Selisih biaya",
+        "register_filename": "daftar-perintah-perubahan"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draf",
+          "submitted": "Diajukan",
+          "approved": "Disetujui",
+          "rejected": "Ditolak",
+          "executed": "Dilaksanakan"
+        },
+        "reason": {
+          "client_request": "Permintaan pemilik",
+          "design_change": "Perubahan desain",
+          "unforeseen": "Kondisi tak terduga",
+          "regulatory": "Peraturan",
+          "error": "Kesalahan atau kelalaian",
+          "non_conformance": "Ketidaksesuaian",
+          "value_engineering": "Rekayasa nilai"
+        },
+        "instrument": {
+          "works_change": "Perubahan atas instruksi",
+          "site_confirmation": "Konfirmasi lapangan",
+          "claim": "Klaim"
+        },
+        "change": {
+          "added": "Ditambah",
+          "removed": "Dikurangi",
+          "modified": "Diubah"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Berkas bukti",
+        "subject": "Perihal",
+        "basis": "Dasar",
+        "period_from": "Catatan paling awal",
+        "period_to": "Catatan paling akhir",
+        "digest": "Kode integritas (SHA-256, 16 karakter pertama)",
+        "col_row": "No.",
+        "col_record_id": "ID catatan",
+        "col_section": "Bagian",
+        "col_date": "Tanggal",
+        "col_kind": "Jenis catatan",
+        "col_title": "Judul",
+        "col_summary": "Ringkasan",
+        "col_reference": "Referensi",
+        "register_filename": "berkas-bukti"
+      },
+      "labels": {
+        "section": {
+          "notices": "Pemberitahuan",
+          "correspondence": "Korespondensi",
+          "rfis": "Permintaan informasi (RFI)",
+          "variations": "Variasi",
+          "approvals": "Persetujuan",
+          "delay": "Keterlambatan",
+          "timeline": "Kronologi",
+          "other": "Lainnya"
+        },
+        "kind": {
+          "notice": "Pemberitahuan",
+          "variation_notice": "Pemberitahuan variasi",
+          "variation_request": "Permintaan variasi",
+          "variation_order": "Perintah variasi",
+          "change_order": "Perintah perubahan",
+          "moc_entry": "Catatan perubahan",
+          "correspondence": "Korespondensi"
+        },
+        "basis": {
+          "dispute": "Sengketa",
+          "valuation": "Penilaian",
+          "delay": "Keterlambatan / perpanjangan waktu",
+          "general": "Catatan umum"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Log korespondensi",
+        "doc_title": "Korespondensi",
+        "col_reference": "No. referensi",
+        "col_direction": "Arah",
+        "col_type": "Jenis",
+        "col_subject": "Perihal",
+        "col_from": "Dari",
+        "col_to": "Kepada",
+        "col_date_sent": "Tgl. kirim",
+        "col_date_received": "Tgl. terima",
+        "col_response_due": "Batas jawaban",
+        "col_clause": "Pasal kontrak",
+        "notes": "Catatan",
+        "no_notes": "Belum ada catatan.",
+        "attachments": "Berkas terlampir",
+        "linked_documents": "Dokumen terkait",
+        "sig_prepared": "Disusun oleh",
+        "sig_received": "Diterima oleh",
+        "register_filename": "log-korespondensi"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Masuk",
+          "outgoing": "Keluar"
+        },
+        "type": {
+          "letter": "Surat",
+          "email": "Email",
+          "notice": "Pemberitahuan",
+          "memo": "Memo",
+          "report": "Laporan"
+        },
+        "status": {
+          "open": "Terbuka",
+          "awaiting_response": "Menunggu jawaban",
+          "responded": "Sudah dijawab",
+          "closed": "Ditutup"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Daftar transmittal",
+        "doc_title": "Transmittal",
+        "col_number": "No. transmittal",
+        "col_subject": "Perihal",
+        "col_purpose": "Tujuan",
+        "col_issued": "Tgl. terbit",
+        "col_response_due": "Batas jawaban",
+        "col_recipients": "Penerima",
+        "col_item_count": "Item",
+        "sender": "Pengirim",
+        "cover_note": "Catatan pengantar",
+        "no_cover_note": "Tidak ada catatan pengantar.",
+        "recipients": "Penerima",
+        "recipient": "Penerima",
+        "action_required": "Tindakan yang diperlukan",
+        "acknowledged": "Penerimaan dikonfirmasi",
+        "responded": "Tgl. dijawab",
+        "items": "Item yang dikirim",
+        "item_no": "No.",
+        "item_description": "Uraian",
+        "item_notes": "Catatan",
+        "sig_issued": "Diterbitkan oleh",
+        "sig_received": "Diterima oleh",
+        "register_filename": "daftar-transmittal"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draf",
+          "issued": "Diterbitkan",
+          "responded": "Sudah dijawab"
+        },
+        "purpose": {
+          "for_approval": "Untuk persetujuan",
+          "for_review": "Untuk review",
+          "for_information": "Untuk informasi",
+          "for_construction": "Untuk konstruksi",
+          "for_tender": "Untuk tender",
+          "for_record": "Untuk arsip"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Daftar variasi",
+        "claim_register_title": "Daftar klaim",
+        "notice_register_title": "Daftar pemberitahuan",
+        "doc_title": "Permintaan variasi",
+        "doc_title_credit": "Permintaan variasi (pengurangan pekerjaan)",
+        "time_impact": "Dampak waktu",
+        "col_code": "Kode",
+        "col_title": "Judul",
+        "col_classification": "Jenis",
+        "col_urgency": "Urgensi",
+        "col_requested": "Tgl. permintaan",
+        "col_claimed_amount": "Nilai diklaim",
+        "col_agreed_amount": "Nilai disepakati",
+        "col_time_impact": "Dampak waktu (hari)",
+        "col_response_due": "Batas jawaban",
+        "col_clause": "Pasal kontrak",
+        "col_row": "No.",
+        "col_claim_type": "Jenis klaim",
+        "col_raised": "Tgl. diajukan",
+        "col_period_start": "Periode dari",
+        "col_period_end": "Periode sampai",
+        "col_description": "Uraian",
+        "col_decided_amount": "Nilai diputuskan",
+        "col_days_requested": "Hari diminta",
+        "col_days_granted": "Hari diberikan",
+        "col_recipient_type": "Ditujukan kepada",
+        "col_recipient": "Penerima",
+        "col_target_response": "Jawaban diharapkan",
+        "col_response_received": "Jawaban diterima",
+        "requested_by": "Diminta oleh",
+        "decided_by": "Diputuskan oleh",
+        "date_submitted": "Tgl. diajukan",
+        "date_decided": "Tgl. keputusan",
+        "description": "Uraian",
+        "no_description": "Belum ada uraian.",
+        "decision_notes": "Catatan keputusan",
+        "no_decision_notes": "Belum ada keputusan.",
+        "variation_register_filename": "daftar-variasi",
+        "claim_register_filename": "daftar-klaim",
+        "notice_register_filename": "daftar-pemberitahuan"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Draf",
+          "submitted": "Diajukan",
+          "under_review": "Dalam review",
+          "approved": "Disetujui",
+          "rejected": "Ditolak",
+          "converted_to_vo": "Dijadikan perintah"
+        },
+        "claim_status": {
+          "draft": "Draf",
+          "submitted": "Diajukan",
+          "under_review": "Dalam review",
+          "agreed": "Disepakati",
+          "granted": "Dikabulkan",
+          "rejected": "Ditolak"
+        },
+        "notice_status": {
+          "issued": "Diterbitkan",
+          "acknowledged": "Penerimaan dikonfirmasi",
+          "responded": "Sudah dijawab",
+          "closed": "Ditutup"
+        },
+        "classification": {
+          "scope_change": "Perubahan lingkup",
+          "unforeseen": "Kondisi tak terduga",
+          "owner_change": "Perubahan dari pemilik",
+          "design_dev": "Pengembangan desain",
+          "regulatory": "Peraturan",
+          "other": "Lainnya"
+        },
+        "urgency": {
+          "low": "Rendah",
+          "med": "Sedang",
+          "high": "Tinggi"
+        },
+        "claim_type": {
+          "disruption": "Gangguan pekerjaan",
+          "eot": "Perpanjangan waktu"
+        },
+        "recipient_type": {
+          "owner": "Pemilik",
+          "contractor": "Kontraktor",
+          "architect": "Arsitek",
+          "engineer": "Insinyur",
+          "consultant": "Konsultan"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Laporan harian proyek",
+        "overview": "Ringkasan",
+        "site_supervisor": "Pengawas lapangan",
+        "not_recorded": "Belum dicatat",
+        "labour_on_site": "Tenaga kerja di lokasi",
+        "equipment_on_site": "Peralatan di lokasi",
+        "completeness": "Kelengkapan",
+        "weather": "Cuaca",
+        "weather_time": "Waktu",
+        "weather_source": "Sumber",
+        "weather_temp": "Suhu (C)",
+        "weather_wind": "Angin (km/jam)",
+        "weather_precip": "Curah hujan (mm)",
+        "weather_conditions": "Kondisi",
+        "weather_empty": "Tidak ada data cuaca untuk hari ini.",
+        "site_record": "Catatan lapangan",
+        "entries_empty": "Belum ada entri pada laporan ini.",
+        "notes": "Catatan",
+        "notes_empty": "Tidak ada catatan tambahan.",
+        "footer_supervisor": "Pengawas: {name}",
+        "footer_supervisor_missing": "Pengawas lapangan: belum dicatat",
+        "footer_generated": "Dibuat: {timestamp}",
+        "footer_page": "Halaman {page} dari {total}",
+        "workforce": "Tenaga kerja per perusahaan",
+        "workforce_company": "Perusahaan",
+        "workforce_count": "Jumlah orang",
+        "workforce_unassigned": "Belum ditetapkan ke perusahaan",
+        "workforce_total": "Total",
+        "signatures": "Tanda tangan",
+        "sig_prepared": "Disusun oleh (manajer lapangan)",
+        "sig_approved": "Disetujui oleh (wakil pemberi tugas)",
+        "sig_name": "Nama",
+        "sig_title": "Jabatan",
+        "sig_date": "Tanggal",
+        "sig_signature": "Tanda tangan",
+        "signed_note": "Ditandatangani di sistem: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "laporan-harian",
+        "summary_wind": "angin {value} km/jam",
+        "summary_precipitation": "curah hujan {value} mm",
+        "summary_humidity": "kelembapan {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Pengunjung",
+          "event": "Kejadian",
+          "delivery": "Material diterima",
+          "completion": "Pekerjaan dilaksanakan",
+          "incident_summary": "K3 dan insiden",
+          "inspection_summary": "Inspeksi",
+          "photo_note": "Catatan foto",
+          "general": "Catatan umum"
+        },
+        "status": {
+          "open": "Terbuka",
+          "closed": "Ditutup",
+          "signed": "Ditandatangani",
+          "archived": "Diarsipkan"
+        },
+        "condition": {
+          "clear": "cerah",
+          "mainly_clear": "cerah berawan tipis",
+          "partly_cloudy": "berawan sebagian",
+          "cloudy": "berawan",
+          "overcast": "mendung",
+          "fog": "kabut",
+          "fog_rime": "kabut beku",
+          "drizzle_light": "gerimis ringan",
+          "drizzle_moderate": "gerimis sedang",
+          "drizzle_dense": "gerimis lebat",
+          "rain": "hujan",
+          "rain_light": "hujan ringan",
+          "rain_moderate": "hujan sedang",
+          "rain_heavy": "hujan lebat",
+          "freezing_rain_light": "hujan beku ringan",
+          "freezing_rain_heavy": "hujan beku lebat",
+          "snow": "salju",
+          "snow_light": "salju ringan",
+          "snow_moderate": "salju sedang",
+          "snow_heavy": "salju lebat",
+          "rain_showers_light": "hujan singkat ringan",
+          "rain_showers_moderate": "hujan singkat sedang",
+          "rain_showers_violent": "hujan singkat deras",
+          "snow_showers_light": "salju singkat ringan",
+          "snow_showers_heavy": "salju singkat lebat",
+          "thunderstorm": "badai petir",
+          "thunderstorm_hail_light": "badai petir dengan hujan es ringan",
+          "thunderstorm_hail_heavy": "badai petir dengan hujan es lebat"
+        },
+        "source": {
+          "manual": "Input manual",
+          "open_meteo": "Layanan cuaca",
+          "sensor": "Sensor lokasi"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Log permintaan informasi (RFI)",
+        "col_number": "No. RFI",
+        "col_subject": "Perihal",
+        "col_raised_by": "Diajukan oleh",
+        "col_assigned_to": "Ditugaskan kepada",
+        "col_ball_in_court": "Pihak penindak lanjut",
+        "col_date_required": "Tgl. dibutuhkan",
+        "col_response_due": "Batas jawaban",
+        "col_days_open": "Hari terbuka",
+        "col_cost_impact": "Dampak biaya",
+        "col_schedule_impact": "Dampak jadwal",
+        "col_response": "Jawaban",
+        "yes_with": "Ya ({detail})",
+        "register_filename": "log-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Draf",
+          "open": "Terbuka",
+          "answered": "Terjawab",
+          "closed": "Ditutup",
+          "void": "Batal"
+        }
+      }
+    }
   }
 }

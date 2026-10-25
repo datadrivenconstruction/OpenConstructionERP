@@ -618,5 +618,539 @@
       "draft": "Kladde",
       "frozen": "Frosset"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Projektnr.",
+      "generated_on": "Udarbejdet den",
+      "records": "Poster",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Navn",
+      "signature": "Underskrift",
+      "date": "Dato",
+      "signatures": "Underskrifter",
+      "yes": "Ja",
+      "no": "Nej",
+      "days_one": "{n} dag",
+      "days_other": "{n} dage",
+      "empty_register": "Ingen poster.",
+      "total": "I alt",
+      "signer_title": "Titel",
+      "sig_prepared_by": "Udarbejdelse",
+      "sig_checked_by": "Kontrol",
+      "sig_approved_by": "Godkendelse",
+      "footer_generated": "Udarbejdet {timestamp}",
+      "footer_page": "Side {page} af {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Indsendelsesregister",
+        "doc_title": "Indsendelse til godkendelse",
+        "doc_title_product_data": "Materialegodkendelse",
+        "col_number": "Indsendelsesnr.",
+        "col_title": "Titel",
+        "col_type": "Type",
+        "col_spec": "Beskrivelsesafsnit",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Indsendt",
+        "col_date_required": "Ønsket dato",
+        "col_date_returned": "Returneret",
+        "col_reviewer": "Gennemgang",
+        "col_approver": "Godkender",
+        "col_ball_in_court": "Bolden hos",
+        "submitted_by_org": "Indsendende firma",
+        "review_notes": "Bemærkninger til gennemgang",
+        "no_review_notes": "Ingen bemærkninger registreret.",
+        "sig_submitted": "Indsendelse",
+        "sig_reviewed": "Gennemgang",
+        "sig_approved": "Godkendelse",
+        "register_filename": "indsendelsesregister",
+        "register_title_shop_drawing": "Register over værkstedstegninger",
+        "register_title_product_data": "Register over materialegodkendelser",
+        "register_title_method_statement": "Register over metodebeskrivelser",
+        "register_filename_shop_drawing": "register-over-vaerkstedstegninger",
+        "register_filename_product_data": "register-over-materialegodkendelser",
+        "register_filename_method_statement": "register-over-metodebeskrivelser",
+        "col_discipline": "Fag",
+        "col_manufacturer": "Fabrikat / mærke",
+        "col_model": "Model / type",
+        "col_origin": "Oprindelsesland",
+        "col_supplier": "Leverandør",
+        "col_product": "Fabrikat / model / oprindelse",
+        "col_review_code": "Gennemgangskode",
+        "col_outcome": "Resultat af gennemgang",
+        "col_review_period": "Gennemgangsfrist (dage)",
+        "col_review_due": "Gennemgang senest",
+        "col_days_in_review": "Dage i gennemgang",
+        "col_days_in_review_print": "Dage i gennemgang",
+        "col_review_overdue": "Dage over frist",
+        "col_required_on_site": "Behov på byggepladsen",
+        "col_long_lead": "Lang leveringstid",
+        "col_lead_time": "Leveringstid (uger)",
+        "col_needed_by": "Godkendelse senest",
+        "col_approval_late": "Dage efter frist",
+        "col_drawings": "Tilknyttede tegninger",
+        "col_submitted_returned": "Indsendt / returneret",
+        "col_on_site_needed_by": "På pladsen / godkendelse senest",
+        "resubmit_for_record": "Rettet eksemplar skal genindsendes til arkivering",
+        "review_history": "Gennemgangshistorik",
+        "hist_submitted": "Indsendt",
+        "hist_returned": "Returneret",
+        "drawings_missing_one": "{n} tilknyttet tegning er ikke længere tilgængelig",
+        "drawings_missing_other": "{n} tilknyttede tegninger er ikke længere tilgængelige",
+        "weeks_one": "{n} uge",
+        "weeks_other": "{n} uger"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "under_review": "Under gennemgang",
+          "approved": "Godkendt",
+          "approved_as_noted": "Godkendt med forbehold",
+          "revise_and_resubmit": "Rettes og genindsendes",
+          "rejected": "Afvist",
+          "closed": "Lukket"
+        },
+        "type": {
+          "shop_drawing": "Tegning",
+          "product_data": "Produktdata",
+          "sample": "Prøve",
+          "mock_up": "Mock-up",
+          "test_report": "Prøvningsrapport",
+          "calculation": "Beregning",
+          "method_statement": "Metodebeskrivelse",
+          "certificate": "Certifikat",
+          "warranty": "Garanti"
+        },
+        "discipline": {
+          "mechanical": "Mekanisk",
+          "hvac": "Ventilation og klima",
+          "plumbing": "VVS",
+          "fire_protection": "Brandsikring",
+          "electrical": "El",
+          "lighting": "Belysning",
+          "elv": "Svagstrøm",
+          "bms": "CTS-anlæg",
+          "architectural": "Arkitekt",
+          "structural": "Konstruktion",
+          "civil": "Anlæg"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Ændringsordreregister",
+        "doc_title": "Ændringsordre",
+        "col_code": "Kode",
+        "col_title": "Titel",
+        "col_reason": "Årsag",
+        "col_instrument": "Type",
+        "col_submitted": "Indsendt",
+        "col_contractor_amount": "Entreprenørens beløb",
+        "col_engineer_amount": "Rådgiverens beløb",
+        "col_approved_amount": "Godkendt beløb",
+        "col_cost_impact": "Økonomisk konsekvens",
+        "col_time_impact": "Tidskonsekvens (dage)",
+        "col_approved_time": "Godkendt tid (dage)",
+        "time_impact": "Tidskonsekvens",
+        "approved_time": "Godkendt tid",
+        "col_approved": "Godkendt den",
+        "submitted_by": "Indsendelse",
+        "approved_by": "Godkendelse",
+        "description": "Beskrivelse",
+        "no_description": "Ingen beskrivelse registreret.",
+        "items": "Ændringsposter",
+        "item_description": "Beskrivelse",
+        "item_change": "Ændring",
+        "item_unit": "Enhed",
+        "item_original_quantity": "Oprindeligt antal",
+        "item_new_quantity": "Nyt antal",
+        "item_original_rate": "Oprindelig pris",
+        "item_new_rate": "Ny pris",
+        "item_cost_delta": "Prisforskel",
+        "register_filename": "aendringsordreregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "approved": "Godkendt",
+          "rejected": "Afvist",
+          "executed": "Gennemført"
+        },
+        "reason": {
+          "client_request": "Bygherrens ønske",
+          "design_change": "Projektændring",
+          "unforeseen": "Uforudsete forhold",
+          "regulatory": "Myndighedskrav",
+          "error": "Fejl eller mangel",
+          "non_conformance": "Afvigelse",
+          "value_engineering": "Værdioptimering"
+        },
+        "instrument": {
+          "works_change": "Pålagt ændring",
+          "site_confirmation": "Byggepladsbekræftelse",
+          "claim": "Krav"
+        },
+        "change": {
+          "added": "Tilføjet",
+          "removed": "Fjernet",
+          "modified": "Ændret"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dokumentationspakke",
+        "subject": "Emne",
+        "basis": "Grundlag",
+        "period_from": "Tidligste post",
+        "period_to": "Seneste post",
+        "digest": "Integritetskode (SHA-256, første 16 tegn)",
+        "col_row": "Nr.",
+        "col_record_id": "Post-ID",
+        "col_section": "Afsnit",
+        "col_date": "Dato",
+        "col_kind": "Posttype",
+        "col_title": "Titel",
+        "col_summary": "Resumé",
+        "col_reference": "Reference",
+        "register_filename": "dokumentationspakke"
+      },
+      "labels": {
+        "section": {
+          "notices": "Varsler",
+          "correspondence": "Korrespondance",
+          "rfis": "Afklaringsspørgsmål (RFI)",
+          "variations": "Tillægsarbejder",
+          "approvals": "Godkendelser",
+          "delay": "Forsinkelse",
+          "timeline": "Tidslinje",
+          "other": "Andet"
+        },
+        "kind": {
+          "notice": "Varsel",
+          "variation_notice": "Varsel om tillægsarbejde",
+          "variation_request": "Anmodning om tillægsarbejde",
+          "variation_order": "Tillægsarbejdsordre",
+          "change_order": "Ændringsordre",
+          "moc_entry": "Ændringspost",
+          "correspondence": "Korrespondance"
+        },
+        "basis": {
+          "dispute": "Tvist",
+          "valuation": "Værdiansættelse",
+          "delay": "Forsinkelse / tidsfristforlængelse",
+          "general": "Generel post"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Korrespondancelog",
+        "doc_title": "Korrespondance",
+        "col_reference": "Referencenr.",
+        "col_direction": "Retning",
+        "col_type": "Type",
+        "col_subject": "Emne",
+        "col_from": "Fra",
+        "col_to": "Til",
+        "col_date_sent": "Sendt",
+        "col_date_received": "Modtaget",
+        "col_response_due": "Svar senest",
+        "col_clause": "Kontraktbestemmelse",
+        "notes": "Bemærkninger",
+        "no_notes": "Ingen bemærkninger registreret.",
+        "attachments": "Vedhæftede filer",
+        "linked_documents": "Tilknyttede dokumenter",
+        "sig_prepared": "Udarbejdelse",
+        "sig_received": "Modtagelse",
+        "register_filename": "korrespondancelog"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Indgående",
+          "outgoing": "Udgående"
+        },
+        "type": {
+          "letter": "Brev",
+          "email": "E-mail",
+          "notice": "Varsel",
+          "memo": "Notat",
+          "report": "Rapport"
+        },
+        "status": {
+          "open": "Åben",
+          "awaiting_response": "Afventer svar",
+          "responded": "Besvaret",
+          "closed": "Lukket"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Fremsendelsesregister",
+        "doc_title": "Fremsendelse",
+        "col_number": "Fremsendelsesnr.",
+        "col_subject": "Emne",
+        "col_purpose": "Formål",
+        "col_issued": "Udstedt",
+        "col_response_due": "Svar senest",
+        "col_recipients": "Modtagere",
+        "col_item_count": "Poster",
+        "sender": "Afsender",
+        "cover_note": "Følgenotat",
+        "no_cover_note": "Intet følgenotat.",
+        "recipients": "Modtagere",
+        "recipient": "Modtager",
+        "action_required": "Handling påkrævet",
+        "acknowledged": "Modtagelse bekræftet",
+        "responded": "Besvaret den",
+        "items": "Fremsendte poster",
+        "item_no": "Nr.",
+        "item_description": "Beskrivelse",
+        "item_notes": "Bemærkninger",
+        "sig_issued": "Udstedelse",
+        "sig_received": "Modtagelse",
+        "register_filename": "fremsendelsesregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "issued": "Udstedt",
+          "responded": "Besvaret"
+        },
+        "purpose": {
+          "for_approval": "Til godkendelse",
+          "for_review": "Til gennemgang",
+          "for_information": "Til orientering",
+          "for_construction": "Til udførelse",
+          "for_tender": "Til udbud",
+          "for_record": "Til arkivering"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Register over tillægsarbejder",
+        "claim_register_title": "Kravregister",
+        "notice_register_title": "Varselsregister",
+        "doc_title": "Anmodning om tillægsarbejde",
+        "doc_title_credit": "Anmodning om tillægsarbejde (fradrag)",
+        "time_impact": "Tidskonsekvens",
+        "col_code": "Kode",
+        "col_title": "Titel",
+        "col_classification": "Type",
+        "col_urgency": "Hastegrad",
+        "col_requested": "Anmodet den",
+        "col_claimed_amount": "Krævet beløb",
+        "col_agreed_amount": "Aftalt beløb",
+        "col_time_impact": "Tidskonsekvens (dage)",
+        "col_response_due": "Svar senest",
+        "col_clause": "Kontraktbestemmelse",
+        "col_row": "Nr.",
+        "col_claim_type": "Kravtype",
+        "col_raised": "Rejst den",
+        "col_period_start": "Periode fra",
+        "col_period_end": "Periode til",
+        "col_description": "Beskrivelse",
+        "col_decided_amount": "Afgjort beløb",
+        "col_days_requested": "Krævede dage",
+        "col_days_granted": "Tildelte dage",
+        "col_recipient_type": "Stilet til",
+        "col_recipient": "Modtager",
+        "col_target_response": "Forventet svar",
+        "col_response_received": "Svar modtaget",
+        "requested_by": "Anmodning",
+        "decided_by": "Afgørelse",
+        "date_submitted": "Indsendt den",
+        "date_decided": "Afgjort den",
+        "description": "Beskrivelse",
+        "no_description": "Ingen beskrivelse registreret.",
+        "decision_notes": "Bemærkninger til afgørelsen",
+        "no_decision_notes": "Ingen afgørelse registreret endnu.",
+        "variation_register_filename": "register-over-tillaegsarbejder",
+        "claim_register_filename": "kravregister",
+        "notice_register_filename": "varselsregister"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "under_review": "Under gennemgang",
+          "approved": "Godkendt",
+          "rejected": "Afvist",
+          "converted_to_vo": "Omdannet til ordre"
+        },
+        "claim_status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "under_review": "Under gennemgang",
+          "agreed": "Aftalt",
+          "granted": "Imødekommet",
+          "rejected": "Afvist"
+        },
+        "notice_status": {
+          "issued": "Udstedt",
+          "acknowledged": "Bekræftet",
+          "responded": "Besvaret",
+          "closed": "Lukket"
+        },
+        "classification": {
+          "scope_change": "Ændret omfang",
+          "unforeseen": "Uforudset forhold",
+          "owner_change": "Bygherreændring",
+          "design_dev": "Projektudvikling",
+          "regulatory": "Myndighedskrav",
+          "other": "Andet"
+        },
+        "urgency": {
+          "low": "Lav",
+          "med": "Middel",
+          "high": "Høj"
+        },
+        "claim_type": {
+          "disruption": "Forstyrrelse",
+          "eot": "Tidsfristforlængelse"
+        },
+        "recipient_type": {
+          "owner": "Bygherre",
+          "contractor": "Entreprenør",
+          "architect": "Arkitekt",
+          "engineer": "Ingeniør",
+          "consultant": "Rådgiver"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Byggedagbog",
+        "overview": "Oversigt",
+        "site_supervisor": "Byggeleder",
+        "not_recorded": "Ikke registreret",
+        "labour_on_site": "Arbejdskraft på pladsen",
+        "equipment_on_site": "Materiel på pladsen",
+        "completeness": "Fuldstændighed",
+        "weather": "Vejr",
+        "weather_time": "Tid",
+        "weather_source": "Kilde",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vind (km/t)",
+        "weather_precip": "Nedbør (mm)",
+        "weather_conditions": "Forhold",
+        "weather_empty": "Intet vejr registreret for denne dag.",
+        "site_record": "Pladsregistrering",
+        "entries_empty": "Ingen indførsler registreret i denne dagbog.",
+        "notes": "Bemærkninger",
+        "notes_empty": "Ingen yderligere bemærkninger.",
+        "footer_supervisor": "Byggeleder: {name}",
+        "footer_supervisor_missing": "Byggeleder: ikke registreret",
+        "footer_generated": "Udarbejdet: {timestamp}",
+        "footer_page": "Side {page} af {total}",
+        "workforce": "Mandskab pr. firma",
+        "workforce_company": "Firma",
+        "workforce_count": "Personer",
+        "workforce_unassigned": "Ikke tilknyttet et firma",
+        "workforce_total": "I alt",
+        "signatures": "Underskrifter",
+        "sig_prepared": "Udarbejdelse (byggeleder)",
+        "sig_approved": "Godkendelse (bygherrens repræsentant)",
+        "sig_name": "Navn",
+        "sig_title": "Titel",
+        "sig_date": "Dato",
+        "sig_signature": "Underskrift",
+        "signed_note": "Underskrevet i systemet: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "byggedagbog",
+        "summary_wind": "vind {value} km/t",
+        "summary_precipitation": "nedbør {value} mm",
+        "summary_humidity": "luftfugtighed {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Besøgende",
+          "event": "Hændelser",
+          "delivery": "Leverede materialer",
+          "completion": "Udført arbejde",
+          "incident_summary": "Sikkerhed og hændelser",
+          "inspection_summary": "Inspektioner",
+          "photo_note": "Fotonoter",
+          "general": "Generelle noter"
+        },
+        "status": {
+          "open": "Åben",
+          "closed": "Lukket",
+          "signed": "Underskrevet",
+          "archived": "Arkiveret"
+        },
+        "condition": {
+          "clear": "klart",
+          "mainly_clear": "overvejende klart",
+          "partly_cloudy": "delvist skyet",
+          "cloudy": "skyet",
+          "overcast": "overskyet",
+          "fog": "tåge",
+          "fog_rime": "isslettende tåge",
+          "drizzle_light": "let støvregn",
+          "drizzle_moderate": "moderat støvregn",
+          "drizzle_dense": "kraftig støvregn",
+          "rain": "regn",
+          "rain_light": "let regn",
+          "rain_moderate": "moderat regn",
+          "rain_heavy": "kraftig regn",
+          "freezing_rain_light": "let isslag",
+          "freezing_rain_heavy": "kraftigt isslag",
+          "snow": "sne",
+          "snow_light": "let snefald",
+          "snow_moderate": "moderat snefald",
+          "snow_heavy": "kraftigt snefald",
+          "rain_showers_light": "lette regnbyger",
+          "rain_showers_moderate": "moderate regnbyger",
+          "rain_showers_violent": "kraftige regnbyger",
+          "snow_showers_light": "lette snebyger",
+          "snow_showers_heavy": "kraftige snebyger",
+          "thunderstorm": "tordenvejr",
+          "thunderstorm_hail_light": "tordenvejr med let hagl",
+          "thunderstorm_hail_heavy": "tordenvejr med kraftigt hagl"
+        },
+        "source": {
+          "manual": "Manuel indtastning",
+          "open_meteo": "Vejrtjeneste",
+          "sensor": "Sensor på pladsen"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "RFI-log",
+        "col_number": "RFI-nr.",
+        "col_subject": "Emne",
+        "col_raised_by": "Rejst af",
+        "col_assigned_to": "Tildelt",
+        "col_ball_in_court": "Bolden hos",
+        "col_date_required": "Ønsket dato",
+        "col_response_due": "Svar senest",
+        "col_days_open": "Dage åben",
+        "col_cost_impact": "Økonomisk konsekvens",
+        "col_schedule_impact": "Tidskonsekvens",
+        "col_response": "Svar",
+        "yes_with": "Ja ({detail})",
+        "register_filename": "rfi-log"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "open": "Åben",
+          "answered": "Besvaret",
+          "closed": "Lukket",
+          "void": "Ugyldig"
+        }
+      }
+    }
   }
 }

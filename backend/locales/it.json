@@ -618,5 +618,539 @@
       "draft": "Bozza",
       "frozen": "Congelato"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Progetto",
+      "project_no": "N. progetto",
+      "generated_on": "Data di emissione",
+      "records": "Registrazioni",
+      "currency": "Valuta",
+      "status": "Stato",
+      "name": "Nome",
+      "signature": "Firma",
+      "date": "Data",
+      "signatures": "Firme",
+      "yes": "Sì",
+      "no": "No",
+      "days_one": "{n} giorno",
+      "days_other": "{n} giorni",
+      "empty_register": "Nessuna registrazione.",
+      "total": "Totale",
+      "signer_title": "Qualifica",
+      "sig_prepared_by": "Redazione",
+      "sig_checked_by": "Verifica",
+      "sig_approved_by": "Approvazione",
+      "footer_generated": "Generato il {timestamp}",
+      "footer_page": "Pagina {page} di {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Registro dei documenti da approvare",
+        "doc_title": "Documento da approvare",
+        "doc_title_product_data": "Scheda di approvazione materiali",
+        "col_number": "N. documento",
+        "col_title": "Titolo",
+        "col_type": "Tipo",
+        "col_spec": "Sezione capitolato",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Data consegna",
+        "col_date_required": "Data richiesta",
+        "col_date_returned": "Data restituzione",
+        "col_reviewer": "Revisore",
+        "col_approver": "Approvatore",
+        "col_ball_in_court": "A carico di",
+        "submitted_by_org": "Impresa trasmittente",
+        "review_notes": "Commenti del revisore",
+        "no_review_notes": "Nessun commento del revisore registrato.",
+        "sig_submitted": "Presentato da",
+        "sig_reviewed": "Revisionato da",
+        "sig_approved": "Approvato da",
+        "register_filename": "registro-documenti-da-approvare",
+        "register_title_shop_drawing": "Registro dei disegni costruttivi",
+        "register_title_product_data": "Registro approvazione materiali",
+        "register_title_method_statement": "Registro delle metodologie esecutive",
+        "register_filename_shop_drawing": "registro-disegni-costruttivi",
+        "register_filename_product_data": "registro-approvazione-materiali",
+        "register_filename_method_statement": "registro-metodologie-esecutive",
+        "col_discipline": "Disciplina",
+        "col_manufacturer": "Produttore / marca",
+        "col_model": "Modello / codice",
+        "col_origin": "Paese di origine",
+        "col_supplier": "Fornitore",
+        "col_product": "Produttore / modello / origine",
+        "col_review_code": "Codice di revisione",
+        "col_outcome": "Esito della revisione",
+        "col_review_period": "Termine di revisione (gg)",
+        "col_review_due": "Revisione entro",
+        "col_days_in_review": "Giorni in revisione",
+        "col_days_in_review_print": "Giorni in revisione",
+        "col_review_overdue": "Giorni di ritardo",
+        "col_required_on_site": "Necessario in cantiere",
+        "col_long_lead": "Lunga consegna",
+        "col_lead_time": "Tempo di consegna (sett.)",
+        "col_needed_by": "Approvazione necessaria entro",
+        "col_approval_late": "Giorni oltre scadenza",
+        "col_drawings": "Disegni collegati",
+        "col_submitted_returned": "Consegnato / restituito",
+        "col_on_site_needed_by": "In cantiere / approvazione entro",
+        "resubmit_for_record": "Copia corretta da ripresentare agli atti",
+        "review_history": "Storico revisioni",
+        "hist_submitted": "Consegnato",
+        "hist_returned": "Restituito",
+        "drawings_missing_one": "{n} disegno collegato non è più disponibile",
+        "drawings_missing_other": "{n} disegni collegati non sono più disponibili",
+        "weeks_one": "{n} settimana",
+        "weeks_other": "{n} settimane"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bozza",
+          "submitted": "Consegnato",
+          "under_review": "In revisione",
+          "approved": "Approvato",
+          "approved_as_noted": "Approvato con commenti",
+          "revise_and_resubmit": "Rivedere e ripresentare",
+          "rejected": "Respinto",
+          "closed": "Chiuso"
+        },
+        "type": {
+          "shop_drawing": "Disegno costruttivo",
+          "product_data": "Scheda tecnica",
+          "sample": "Campione",
+          "mock_up": "Mock-up",
+          "test_report": "Rapporto di prova",
+          "calculation": "Calcolo",
+          "method_statement": "Metodologia esecutiva",
+          "certificate": "Certificato",
+          "warranty": "Garanzia"
+        },
+        "discipline": {
+          "mechanical": "Meccanico",
+          "hvac": "Climatizzazione",
+          "plumbing": "Idrico-sanitario e scarichi",
+          "fire_protection": "Antincendio",
+          "electrical": "Elettrico",
+          "lighting": "Illuminazione",
+          "elv": "Correnti deboli",
+          "bms": "Automazione edificio",
+          "architectural": "Architettonico",
+          "structural": "Strutture",
+          "civil": "Opere civili"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Registro degli ordini di modifica",
+        "doc_title": "Ordine di modifica",
+        "col_code": "Codice",
+        "col_title": "Titolo",
+        "col_reason": "Motivo",
+        "col_instrument": "Strumento",
+        "col_submitted": "Data presentazione",
+        "col_contractor_amount": "Importo appaltatore",
+        "col_engineer_amount": "Importo progettista",
+        "col_approved_amount": "Importo approvato",
+        "col_cost_impact": "Impatto sui costi",
+        "col_time_impact": "Impatto sui tempi (gg)",
+        "col_approved_time": "Tempo approvato (gg)",
+        "time_impact": "Impatto sui tempi",
+        "approved_time": "Tempo approvato",
+        "col_approved": "Data approvazione",
+        "submitted_by": "Presentato da",
+        "approved_by": "Approvato da",
+        "description": "Descrizione",
+        "no_description": "Nessuna descrizione registrata.",
+        "items": "Voci modificate",
+        "item_description": "Descrizione",
+        "item_change": "Modifica",
+        "item_unit": "Unità",
+        "item_original_quantity": "Q.tà originale",
+        "item_new_quantity": "Q.tà nuova",
+        "item_original_rate": "Prezzo originale",
+        "item_new_rate": "Prezzo nuovo",
+        "item_cost_delta": "Differenza di costo",
+        "register_filename": "registro-ordini-di-modifica"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bozza",
+          "submitted": "Presentato",
+          "approved": "Approvato",
+          "rejected": "Respinto",
+          "executed": "Eseguito"
+        },
+        "reason": {
+          "client_request": "Richiesta del committente",
+          "design_change": "Modifica progettuale",
+          "unforeseen": "Condizioni impreviste",
+          "regulatory": "Prescrizione normativa",
+          "error": "Errore od omissione",
+          "non_conformance": "Non conformità",
+          "value_engineering": "Value engineering"
+        },
+        "instrument": {
+          "works_change": "Ordine di servizio",
+          "site_confirmation": "Conferma in cantiere",
+          "claim": "Riserva"
+        },
+        "change": {
+          "added": "Aggiunto",
+          "removed": "Stralciato",
+          "modified": "Modificato"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Fascicolo probatorio",
+        "subject": "Oggetto",
+        "basis": "Presupposto",
+        "period_from": "Registrazione più remota",
+        "period_to": "Registrazione più recente",
+        "digest": "Codice di integrità (SHA-256, primi 16 caratteri)",
+        "col_row": "N.",
+        "col_record_id": "ID registrazione",
+        "col_section": "Sezione",
+        "col_date": "Data",
+        "col_kind": "Tipo di registrazione",
+        "col_title": "Titolo",
+        "col_summary": "Sintesi",
+        "col_reference": "Riferimento",
+        "register_filename": "fascicolo-probatorio"
+      },
+      "labels": {
+        "section": {
+          "notices": "Comunicazioni formali",
+          "correspondence": "Corrispondenza",
+          "rfis": "Richieste di informazioni (RFI)",
+          "variations": "Varianti",
+          "approvals": "Approvazioni",
+          "delay": "Ritardo",
+          "timeline": "Cronologia",
+          "other": "Altro"
+        },
+        "kind": {
+          "notice": "Comunicazione formale",
+          "variation_notice": "Preavviso di variante",
+          "variation_request": "Richiesta di variante",
+          "variation_order": "Ordine di variante",
+          "change_order": "Ordine di modifica",
+          "moc_entry": "Registro delle modifiche",
+          "correspondence": "Corrispondenza"
+        },
+        "basis": {
+          "dispute": "Controversia",
+          "valuation": "Valutazione economica",
+          "delay": "Ritardo / proroga dei termini",
+          "general": "Registrazione generale"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Registro della corrispondenza",
+        "doc_title": "Corrispondenza",
+        "col_reference": "N. protocollo",
+        "col_direction": "Direzione",
+        "col_type": "Tipo",
+        "col_subject": "Oggetto",
+        "col_from": "Da",
+        "col_to": "A",
+        "col_date_sent": "Data invio",
+        "col_date_received": "Data ricezione",
+        "col_response_due": "Risposta richiesta entro",
+        "col_clause": "Articolo di contratto",
+        "notes": "Note",
+        "no_notes": "Nessuna nota registrata.",
+        "attachments": "File allegati",
+        "linked_documents": "Documenti collegati",
+        "sig_prepared": "Redatto da",
+        "sig_received": "Ricevuto da",
+        "register_filename": "registro-corrispondenza"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "In arrivo",
+          "outgoing": "In partenza"
+        },
+        "type": {
+          "letter": "Lettera",
+          "email": "E-mail",
+          "notice": "Comunicazione formale",
+          "memo": "Promemoria",
+          "report": "Relazione"
+        },
+        "status": {
+          "open": "Aperto",
+          "awaiting_response": "In attesa di risposta",
+          "responded": "Risposto",
+          "closed": "Chiuso"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Registro delle distinte di trasmissione",
+        "doc_title": "Distinta di trasmissione",
+        "col_number": "N. distinta",
+        "col_subject": "Oggetto",
+        "col_purpose": "Finalità",
+        "col_issued": "Data emissione",
+        "col_response_due": "Risposta entro",
+        "col_recipients": "Destinatari",
+        "col_item_count": "Elementi",
+        "sender": "Mittente",
+        "cover_note": "Lettera di accompagnamento",
+        "no_cover_note": "Nessuna lettera di accompagnamento.",
+        "recipients": "Destinatari",
+        "recipient": "Destinatario",
+        "action_required": "Azione richiesta",
+        "acknowledged": "Ricezione confermata",
+        "responded": "Data risposta",
+        "items": "Documenti trasmessi",
+        "item_no": "N.",
+        "item_description": "Descrizione",
+        "item_notes": "Note",
+        "sig_issued": "Emesso da",
+        "sig_received": "Ricevuto da",
+        "register_filename": "registro-distinte-di-trasmissione"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bozza",
+          "issued": "Emessa",
+          "responded": "Risposta"
+        },
+        "purpose": {
+          "for_approval": "Per approvazione",
+          "for_review": "Per revisione",
+          "for_information": "Per informazione",
+          "for_construction": "Per esecuzione",
+          "for_tender": "Per gara",
+          "for_record": "Per archivio"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Registro delle varianti",
+        "claim_register_title": "Registro delle riserve",
+        "notice_register_title": "Registro delle comunicazioni formali",
+        "doc_title": "Richiesta di variante",
+        "doc_title_credit": "Richiesta di variante (riduzione)",
+        "time_impact": "Impatto sui tempi",
+        "col_code": "Codice",
+        "col_title": "Titolo",
+        "col_classification": "Tipo",
+        "col_urgency": "Urgenza",
+        "col_requested": "Data richiesta",
+        "col_claimed_amount": "Importo richiesto",
+        "col_agreed_amount": "Importo concordato",
+        "col_time_impact": "Impatto sui tempi (gg)",
+        "col_response_due": "Risposta entro",
+        "col_clause": "Articolo di contratto",
+        "col_row": "N.",
+        "col_claim_type": "Tipo di riserva",
+        "col_raised": "Data di iscrizione",
+        "col_period_start": "Periodo dal",
+        "col_period_end": "Periodo al",
+        "col_description": "Descrizione",
+        "col_decided_amount": "Importo deciso",
+        "col_days_requested": "Giorni richiesti",
+        "col_days_granted": "Giorni concessi",
+        "col_recipient_type": "Indirizzata a",
+        "col_recipient": "Destinatario",
+        "col_target_response": "Risposta prevista",
+        "col_response_received": "Risposta ricevuta",
+        "requested_by": "Richiesto da",
+        "decided_by": "Deciso da",
+        "date_submitted": "Data presentazione",
+        "date_decided": "Data decisione",
+        "description": "Descrizione",
+        "no_description": "Nessuna descrizione registrata.",
+        "decision_notes": "Motivazione della decisione",
+        "no_decision_notes": "Nessuna decisione ancora registrata.",
+        "variation_register_filename": "registro-varianti",
+        "claim_register_filename": "registro-riserve",
+        "notice_register_filename": "registro-comunicazioni-formali"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Bozza",
+          "submitted": "Presentata",
+          "under_review": "In esame",
+          "approved": "Approvata",
+          "rejected": "Respinta",
+          "converted_to_vo": "Convertita in ordine"
+        },
+        "claim_status": {
+          "draft": "Bozza",
+          "submitted": "Presentata",
+          "under_review": "In esame",
+          "agreed": "Concordata",
+          "granted": "Accolta",
+          "rejected": "Respinta"
+        },
+        "notice_status": {
+          "issued": "Emessa",
+          "acknowledged": "Ricevuta",
+          "responded": "Riscontrata",
+          "closed": "Chiusa"
+        },
+        "classification": {
+          "scope_change": "Modifica dell'ambito",
+          "unforeseen": "Condizione imprevista",
+          "owner_change": "Modifica del committente",
+          "design_dev": "Sviluppo progettuale",
+          "regulatory": "Prescrizione normativa",
+          "other": "Altro"
+        },
+        "urgency": {
+          "low": "Bassa",
+          "med": "Media",
+          "high": "Alta"
+        },
+        "claim_type": {
+          "disruption": "Perturbazione dei lavori",
+          "eot": "Proroga dei termini"
+        },
+        "recipient_type": {
+          "owner": "Committente",
+          "contractor": "Appaltatore",
+          "architect": "Architetto",
+          "engineer": "Ingegnere",
+          "consultant": "Consulente"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Giornale dei lavori",
+        "overview": "Quadro generale",
+        "site_supervisor": "Capocantiere",
+        "not_recorded": "Non registrato",
+        "labour_on_site": "Manodopera in cantiere",
+        "equipment_on_site": "Attrezzature in cantiere",
+        "completeness": "Completezza",
+        "weather": "Meteo",
+        "weather_time": "Ora",
+        "weather_source": "Fonte",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vento (km/h)",
+        "weather_precip": "Precip. (mm)",
+        "weather_conditions": "Condizioni",
+        "weather_empty": "Nessun dato meteo registrato per questo giorno.",
+        "site_record": "Registro di cantiere",
+        "entries_empty": "Nessuna annotazione registrata per questo giornale.",
+        "notes": "Note",
+        "notes_empty": "Nessuna nota aggiuntiva.",
+        "footer_supervisor": "Capocantiere: {name}",
+        "footer_supervisor_missing": "Capocantiere: non registrato",
+        "footer_generated": "Generato: {timestamp}",
+        "footer_page": "Pagina {page} di {total}",
+        "workforce": "Maestranze per impresa",
+        "workforce_company": "Impresa",
+        "workforce_count": "Persone",
+        "workforce_unassigned": "Non assegnate a un'impresa",
+        "workforce_total": "Totale",
+        "signatures": "Firme",
+        "sig_prepared": "Redatto da (direttore di cantiere)",
+        "sig_approved": "Approvato da (rappresentante del committente)",
+        "sig_name": "Nome",
+        "sig_title": "Qualifica",
+        "sig_date": "Data",
+        "sig_signature": "Firma",
+        "signed_note": "Firmato nel sistema: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "giornale-lavori",
+        "summary_wind": "vento {value} km/h",
+        "summary_precipitation": "precipitazioni {value} mm",
+        "summary_humidity": "umidità {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Visitatori",
+          "event": "Eventi",
+          "delivery": "Materiali consegnati",
+          "completion": "Lavori eseguiti",
+          "incident_summary": "Sicurezza e incidenti",
+          "inspection_summary": "Ispezioni",
+          "photo_note": "Note fotografiche",
+          "general": "Note generali"
+        },
+        "status": {
+          "open": "Aperto",
+          "closed": "Chiuso",
+          "signed": "Firmato",
+          "archived": "Archiviato"
+        },
+        "condition": {
+          "clear": "sereno",
+          "mainly_clear": "prevalentemente sereno",
+          "partly_cloudy": "parzialmente nuvoloso",
+          "cloudy": "nuvoloso",
+          "overcast": "coperto",
+          "fog": "nebbia",
+          "fog_rime": "nebbia con brina",
+          "drizzle_light": "pioggerella leggera",
+          "drizzle_moderate": "pioggerella moderata",
+          "drizzle_dense": "pioggerella intensa",
+          "rain": "pioggia",
+          "rain_light": "pioggia leggera",
+          "rain_moderate": "pioggia moderata",
+          "rain_heavy": "pioggia forte",
+          "freezing_rain_light": "pioggia gelata leggera",
+          "freezing_rain_heavy": "pioggia gelata forte",
+          "snow": "neve",
+          "snow_light": "neve leggera",
+          "snow_moderate": "neve moderata",
+          "snow_heavy": "neve abbondante",
+          "rain_showers_light": "rovesci leggeri",
+          "rain_showers_moderate": "rovesci moderati",
+          "rain_showers_violent": "rovesci violenti",
+          "snow_showers_light": "rovesci di neve leggeri",
+          "snow_showers_heavy": "rovesci di neve forti",
+          "thunderstorm": "temporale",
+          "thunderstorm_hail_light": "temporale con grandine leggera",
+          "thunderstorm_hail_heavy": "temporale con grandine forte"
+        },
+        "source": {
+          "manual": "Inserimento manuale",
+          "open_meteo": "Servizio meteo",
+          "sensor": "Sensore di cantiere"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Registro delle richieste di informazioni (RFI)",
+        "col_number": "N. RFI",
+        "col_subject": "Oggetto",
+        "col_raised_by": "Emessa da",
+        "col_assigned_to": "Assegnata a",
+        "col_ball_in_court": "A carico di",
+        "col_date_required": "Data richiesta",
+        "col_response_due": "Risposta entro",
+        "col_days_open": "Giorni aperta",
+        "col_cost_impact": "Impatto sui costi",
+        "col_schedule_impact": "Impatto sui tempi",
+        "col_response": "Risposta",
+        "yes_with": "Sì ({detail})",
+        "register_filename": "registro-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bozza",
+          "open": "Aperto",
+          "answered": "Risposto",
+          "closed": "Chiuso",
+          "void": "Nullo"
+        }
+      }
+    }
   }
 }

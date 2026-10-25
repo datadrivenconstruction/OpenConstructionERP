@@ -648,6 +648,514 @@
           "refunded": "مسترد‌شده"
         }
       }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "فهرست مدارک ارسالی برای تأیید",
+        "doc_title": "مدرک ارسالی برای تأیید",
+        "doc_title_product_data": "فرم تأیید مصالح",
+        "col_number": "شماره مدرک",
+        "col_title": "عنوان",
+        "col_type": "نوع",
+        "col_spec": "بخش مشخصات فنی",
+        "col_rev": "بازنگری",
+        "col_date_submitted": "تاریخ ارسال",
+        "col_date_required": "تاریخ مورد نیاز",
+        "col_date_returned": "تاریخ بازگشت",
+        "col_reviewer": "بررسی‌کننده",
+        "col_approver": "تأییدکننده",
+        "col_ball_in_court": "متولی اقدام بعدی",
+        "submitted_by_org": "شرکت ارسال‌کننده",
+        "review_notes": "توضیحات بررسی‌کننده",
+        "no_review_notes": "توضیحی از بررسی‌کننده ثبت نشده است.",
+        "sig_submitted": "ارسال",
+        "sig_reviewed": "بررسی",
+        "sig_approved": "تأیید",
+        "register_filename": "fehrest-madarek-ersali",
+        "register_title_shop_drawing": "فهرست نقشه‌های کارگاهی",
+        "register_title_product_data": "فهرست تأیید مصالح",
+        "register_title_method_statement": "فهرست دستورالعمل‌های اجرایی",
+        "register_filename_shop_drawing": "fehrest-naghsheh-kargahi",
+        "register_filename_product_data": "fehrest-taeid-masaleh",
+        "register_filename_method_statement": "fehrest-dastoorolamal-ejraei",
+        "col_discipline": "رشته",
+        "col_manufacturer": "سازنده / برند",
+        "col_model": "مدل / شناسه",
+        "col_origin": "کشور سازنده",
+        "col_supplier": "تأمین‌کننده",
+        "col_product": "سازنده / مدل / مبدأ",
+        "col_review_code": "کد بررسی",
+        "col_outcome": "نتیجه بررسی",
+        "col_review_period": "مهلت بررسی (روز)",
+        "col_review_due": "سررسید بررسی",
+        "col_days_in_review": "روز در بررسی",
+        "col_days_in_review_print": "روز در بررسی",
+        "col_review_overdue": "روز تأخیر",
+        "col_required_on_site": "نیاز در کارگاه",
+        "col_long_lead": "زمان تأمین طولانی",
+        "col_lead_time": "زمان تأمین (هفته)",
+        "col_needed_by": "تأیید لازم تا",
+        "col_approval_late": "روز تأخیر از موعد نیاز",
+        "col_drawings": "نقشه‌های مرتبط",
+        "col_submitted_returned": "ارسال / بازگشت",
+        "col_on_site_needed_by": "در کارگاه / تأیید تا",
+        "resubmit_for_record": "نسخه اصلاح‌شده برای بایگانی دوباره ارسال شود",
+        "review_history": "سوابق بررسی",
+        "hist_submitted": "ارسال شد",
+        "hist_returned": "بازگردانده شد",
+        "drawings_missing_one": "{n} نقشه مرتبط دیگر در دسترس نیست",
+        "drawings_missing_other": "{n} نقشه مرتبط دیگر در دسترس نیستند",
+        "weeks_one": "{n} هفته",
+        "weeks_other": "{n} هفته"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "under_review": "در حال بررسی",
+          "approved": "تأییدشده",
+          "approved_as_noted": "تأیید با اعمال ملاحظات",
+          "revise_and_resubmit": "اصلاح و ارسال مجدد",
+          "rejected": "ردشده",
+          "closed": "بسته"
+        },
+        "type": {
+          "shop_drawing": "نقشه کارگاهی",
+          "product_data": "مشخصات محصول",
+          "sample": "نمونه",
+          "mock_up": "ماکت اجرایی",
+          "test_report": "گزارش آزمایش",
+          "calculation": "محاسبات",
+          "method_statement": "دستورالعمل اجرایی",
+          "certificate": "گواهی‌نامه",
+          "warranty": "گارانتی"
+        },
+        "discipline": {
+          "mechanical": "مکانیک",
+          "hvac": "تأسیسات تهویه مطبوع",
+          "plumbing": "لوله‌کشی و فاضلاب",
+          "fire_protection": "اطفای حریق",
+          "electrical": "برق",
+          "lighting": "روشنایی",
+          "elv": "برق ضعیف",
+          "bms": "اتوماسیون ساختمان",
+          "architectural": "معماری",
+          "structural": "سازه",
+          "civil": "عمران"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "فهرست دستورهای تغییر",
+        "doc_title": "دستور تغییر",
+        "col_code": "کد",
+        "col_title": "عنوان",
+        "col_reason": "دلیل",
+        "col_instrument": "سند تغییر",
+        "col_submitted": "تاریخ ارسال",
+        "col_contractor_amount": "مبلغ پیمانکار",
+        "col_engineer_amount": "مبلغ مهندس",
+        "col_approved_amount": "مبلغ تأییدشده",
+        "col_cost_impact": "اثر بر هزینه",
+        "col_time_impact": "اثر بر زمان (روز)",
+        "col_approved_time": "زمان تأییدشده (روز)",
+        "time_impact": "اثر بر زمان",
+        "approved_time": "زمان تأییدشده",
+        "col_approved": "تاریخ تأیید",
+        "submitted_by": "ارسال",
+        "approved_by": "تأیید",
+        "description": "شرح",
+        "no_description": "شرحی ثبت نشده است.",
+        "items": "اقلام تغییر",
+        "item_description": "شرح",
+        "item_change": "تغییر",
+        "item_unit": "واحد",
+        "item_original_quantity": "مقدار اولیه",
+        "item_new_quantity": "مقدار جدید",
+        "item_original_rate": "نرخ اولیه",
+        "item_new_rate": "نرخ جدید",
+        "item_cost_delta": "اختلاف هزینه",
+        "register_filename": "fehrest-dastoor-taghir"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "approved": "تأییدشده",
+          "rejected": "ردشده",
+          "executed": "اجراشده"
+        },
+        "reason": {
+          "client_request": "درخواست کارفرما",
+          "design_change": "تغییر طراحی",
+          "unforeseen": "شرایط پیش‌بینی‌نشده",
+          "regulatory": "الزامات قانونی",
+          "error": "اشتباه یا نقص",
+          "non_conformance": "عدم انطباق",
+          "value_engineering": "مهندسی ارزش"
+        },
+        "instrument": {
+          "works_change": "تغییر ابلاغی",
+          "site_confirmation": "تأییدیه کارگاهی",
+          "claim": "ادعا"
+        },
+        "change": {
+          "added": "افزوده",
+          "removed": "حذف‌شده",
+          "modified": "اصلاح‌شده"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "مجموعه مستندات",
+        "subject": "موضوع",
+        "basis": "مبنا",
+        "period_from": "قدیمی‌ترین سابقه",
+        "period_to": "جدیدترین سابقه",
+        "digest": "کد صحت (SHA-256، 16 نویسه اول)",
+        "col_row": "ردیف",
+        "col_record_id": "شناسه سابقه",
+        "col_section": "بخش",
+        "col_date": "تاریخ",
+        "col_kind": "نوع سابقه",
+        "col_title": "عنوان",
+        "col_summary": "خلاصه",
+        "col_reference": "مرجع",
+        "register_filename": "majmoeh-mostanadat"
+      },
+      "labels": {
+        "section": {
+          "notices": "اخطارها",
+          "correspondence": "مکاتبات",
+          "rfis": "درخواست‌های اطلاعات (RFI)",
+          "variations": "دستورهای تغییر",
+          "approvals": "تأییدیه‌ها",
+          "delay": "تأخیر",
+          "timeline": "خط زمانی",
+          "other": "سایر"
+        },
+        "kind": {
+          "notice": "اخطار",
+          "variation_notice": "اخطار تغییر",
+          "variation_request": "درخواست تغییر",
+          "variation_order": "دستور تغییر",
+          "change_order": "دستور تغییر",
+          "moc_entry": "سابقه تغییر",
+          "correspondence": "مکاتبه"
+        },
+        "basis": {
+          "dispute": "اختلاف",
+          "valuation": "ارزیابی",
+          "delay": "تأخیر / تمدید مدت",
+          "general": "سابقه عمومی"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "دفتر مکاتبات",
+        "doc_title": "مکاتبه",
+        "col_reference": "شماره مرجع",
+        "col_direction": "جهت",
+        "col_type": "نوع",
+        "col_subject": "موضوع",
+        "col_from": "از",
+        "col_to": "به",
+        "col_date_sent": "تاریخ ارسال",
+        "col_date_received": "تاریخ دریافت",
+        "col_response_due": "مهلت پاسخ",
+        "col_clause": "بند قرارداد",
+        "notes": "یادداشت‌ها",
+        "no_notes": "یادداشتی ثبت نشده است.",
+        "attachments": "فایل‌های پیوست",
+        "linked_documents": "مدارک مرتبط",
+        "sig_prepared": "تنظیم",
+        "sig_received": "دریافت",
+        "register_filename": "daftar-mokatebat"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "وارده",
+          "outgoing": "صادره"
+        },
+        "type": {
+          "letter": "نامه",
+          "email": "ایمیل",
+          "notice": "اخطار",
+          "memo": "یادداشت داخلی",
+          "report": "گزارش"
+        },
+        "status": {
+          "open": "باز",
+          "awaiting_response": "در انتظار پاسخ",
+          "responded": "پاسخ داده شد",
+          "closed": "بسته"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "فهرست ترنسمیتال‌ها",
+        "doc_title": "ترنسمیتال",
+        "col_number": "شماره ترنسمیتال",
+        "col_subject": "موضوع",
+        "col_purpose": "هدف",
+        "col_issued": "تاریخ صدور",
+        "col_response_due": "مهلت پاسخ",
+        "col_recipients": "گیرندگان",
+        "col_item_count": "اقلام",
+        "sender": "فرستنده",
+        "cover_note": "یادداشت همراه",
+        "no_cover_note": "یادداشت همراهی وجود ندارد.",
+        "recipients": "گیرندگان",
+        "recipient": "گیرنده",
+        "action_required": "اقدام لازم",
+        "acknowledged": "تأیید دریافت",
+        "responded": "تاریخ پاسخ",
+        "items": "مدارک ارسال‌شده",
+        "item_no": "ردیف",
+        "item_description": "شرح",
+        "item_notes": "یادداشت‌ها",
+        "sig_issued": "صدور",
+        "sig_received": "دریافت",
+        "register_filename": "fehrest-transmittal"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "issued": "صادرشده",
+          "responded": "پاسخ داده شد"
+        },
+        "purpose": {
+          "for_approval": "برای تأیید",
+          "for_review": "برای بررسی",
+          "for_information": "برای اطلاع",
+          "for_construction": "برای اجرا",
+          "for_tender": "برای مناقصه",
+          "for_record": "برای بایگانی"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "فهرست دستورهای تغییر",
+        "claim_register_title": "فهرست ادعاها",
+        "notice_register_title": "فهرست اخطارها",
+        "doc_title": "درخواست تغییر",
+        "doc_title_credit": "درخواست تغییر (کاهش)",
+        "time_impact": "اثر بر زمان",
+        "col_code": "کد",
+        "col_title": "عنوان",
+        "col_classification": "نوع",
+        "col_urgency": "فوریت",
+        "col_requested": "تاریخ درخواست",
+        "col_claimed_amount": "مبلغ ادعا‌شده",
+        "col_agreed_amount": "مبلغ توافق‌شده",
+        "col_time_impact": "اثر بر زمان (روز)",
+        "col_response_due": "مهلت پاسخ",
+        "col_clause": "بند قرارداد",
+        "col_row": "ردیف",
+        "col_claim_type": "نوع ادعا",
+        "col_raised": "تاریخ طرح",
+        "col_period_start": "دوره از",
+        "col_period_end": "دوره تا",
+        "col_description": "شرح",
+        "col_decided_amount": "مبلغ مصوب",
+        "col_days_requested": "روزهای درخواستی",
+        "col_days_granted": "روزهای پذیرفته‌شده",
+        "col_recipient_type": "خطاب به",
+        "col_recipient": "گیرنده",
+        "col_target_response": "پاسخ مورد انتظار",
+        "col_response_received": "پاسخ دریافتی",
+        "requested_by": "درخواست",
+        "decided_by": "تصمیم‌گیری",
+        "date_submitted": "تاریخ ارسال",
+        "date_decided": "تاریخ تصمیم",
+        "description": "شرح",
+        "no_description": "شرحی ثبت نشده است.",
+        "decision_notes": "ملاحظات تصمیم",
+        "no_decision_notes": "هنوز تصمیمی ثبت نشده است.",
+        "variation_register_filename": "fehrest-dastoor-taghir",
+        "claim_register_filename": "fehrest-edaaha",
+        "notice_register_filename": "fehrest-ekhtarha"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "under_review": "در حال بررسی",
+          "approved": "تأییدشده",
+          "rejected": "ردشده",
+          "converted_to_vo": "تبدیل به دستور تغییر"
+        },
+        "claim_status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "under_review": "در حال بررسی",
+          "agreed": "توافق‌شده",
+          "granted": "پذیرفته‌شده",
+          "rejected": "ردشده"
+        },
+        "notice_status": {
+          "issued": "صادرشده",
+          "acknowledged": "رسید تأیید شده",
+          "responded": "پاسخ داده شد",
+          "closed": "بسته"
+        },
+        "classification": {
+          "scope_change": "تغییر دامنه کار",
+          "unforeseen": "شرایط پیش‌بینی‌نشده",
+          "owner_change": "تغییر از سوی کارفرما",
+          "design_dev": "تکمیل طراحی",
+          "regulatory": "الزامات قانونی",
+          "other": "سایر"
+        },
+        "urgency": {
+          "low": "کم",
+          "med": "متوسط",
+          "high": "زیاد"
+        },
+        "claim_type": {
+          "disruption": "اختلال در پیشرفت کار",
+          "eot": "تمدید مدت"
+        },
+        "recipient_type": {
+          "owner": "کارفرما",
+          "contractor": "پیمانکار",
+          "architect": "معمار",
+          "engineer": "مهندس",
+          "consultant": "مشاور"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "گزارش روزانه کارگاه",
+        "overview": "نمای کلی",
+        "site_supervisor": "سرپرست کارگاه",
+        "not_recorded": "ثبت نشده",
+        "labour_on_site": "نیروی انسانی در کارگاه",
+        "equipment_on_site": "تجهیزات در کارگاه",
+        "completeness": "میزان تکمیل",
+        "weather": "آب‌وهوا",
+        "weather_time": "ساعت",
+        "weather_source": "منبع",
+        "weather_temp": "دما (°C)",
+        "weather_wind": "باد (km/h)",
+        "weather_precip": "بارش (mm)",
+        "weather_conditions": "وضعیت",
+        "weather_empty": "برای این روز آب‌وهوایی ثبت نشده است.",
+        "site_record": "سوابق کارگاه",
+        "entries_empty": "برای این گزارش موردی ثبت نشده است.",
+        "notes": "یادداشت‌ها",
+        "notes_empty": "یادداشت دیگری وجود ندارد.",
+        "footer_supervisor": "سرپرست: {name}",
+        "footer_supervisor_missing": "سرپرست کارگاه: ثبت نشده",
+        "footer_generated": "تاریخ تولید: {timestamp}",
+        "footer_page": "صفحه {page} از {total}",
+        "workforce": "نیروی انسانی به تفکیک شرکت",
+        "workforce_company": "شرکت",
+        "workforce_count": "تعداد نفرات",
+        "workforce_unassigned": "بدون شرکت",
+        "workforce_total": "جمع",
+        "signatures": "امضاها",
+        "sig_prepared": "تنظیم (مدیر کارگاه)",
+        "sig_approved": "تأیید (نماینده کارفرما)",
+        "sig_name": "نام",
+        "sig_title": "سمت",
+        "sig_date": "تاریخ",
+        "sig_signature": "امضا",
+        "signed_note": "امضا‌شده در سامانه: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "gozaresh-roozaneh",
+        "summary_wind": "باد {value} km/h",
+        "summary_precipitation": "بارش {value} mm",
+        "summary_humidity": "رطوبت {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "بازدیدکنندگان",
+          "event": "رویدادها",
+          "delivery": "مصالح تحویلی",
+          "completion": "کارهای انجام‌شده",
+          "incident_summary": "ایمنی و حوادث",
+          "inspection_summary": "بازرسی‌ها",
+          "photo_note": "یادداشت‌های تصویری",
+          "general": "یادداشت‌های عمومی"
+        },
+        "status": {
+          "open": "باز",
+          "closed": "بسته",
+          "signed": "امضاشده",
+          "archived": "بایگانی‌شده"
+        },
+        "condition": {
+          "clear": "صاف",
+          "mainly_clear": "عمدتاً صاف",
+          "partly_cloudy": "نیمه‌ابری",
+          "cloudy": "ابری",
+          "overcast": "کاملاً ابری",
+          "fog": "مه",
+          "fog_rime": "مه یخ‌زده",
+          "drizzle_light": "نمنم باران ضعیف",
+          "drizzle_moderate": "نمنم باران متوسط",
+          "drizzle_dense": "نمنم باران شدید",
+          "rain": "باران",
+          "rain_light": "باران ضعیف",
+          "rain_moderate": "باران متوسط",
+          "rain_heavy": "باران شدید",
+          "freezing_rain_light": "باران یخ‌زده ضعیف",
+          "freezing_rain_heavy": "باران یخ‌زده شدید",
+          "snow": "برف",
+          "snow_light": "برف ضعیف",
+          "snow_moderate": "برف متوسط",
+          "snow_heavy": "برف سنگین",
+          "rain_showers_light": "رگبار ضعیف",
+          "rain_showers_moderate": "رگبار متوسط",
+          "rain_showers_violent": "رگبار شدید",
+          "snow_showers_light": "بارش برف ضعیف و پراکنده",
+          "snow_showers_heavy": "بارش برف شدید و پراکنده",
+          "thunderstorm": "طوفان تندری",
+          "thunderstorm_hail_light": "طوفان تندری با تگرگ ضعیف",
+          "thunderstorm_hail_heavy": "طوفان تندری با تگرگ شدید"
+        },
+        "source": {
+          "manual": "ورود دستی",
+          "open_meteo": "سرویس هواشناسی",
+          "sensor": "حسگر کارگاه"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "فهرست درخواست‌های اطلاعات (RFI)",
+        "col_number": "شماره RFI",
+        "col_subject": "موضوع",
+        "col_raised_by": "درخواست‌کننده",
+        "col_assigned_to": "ارجاع به",
+        "col_ball_in_court": "متولی اقدام بعدی",
+        "col_date_required": "تاریخ مورد نیاز",
+        "col_response_due": "مهلت پاسخ",
+        "col_days_open": "روزهای باز",
+        "col_cost_impact": "اثر بر هزینه",
+        "col_schedule_impact": "اثر بر برنامه زمانی",
+        "col_response": "پاسخ",
+        "yes_with": "بله ({detail})",
+        "register_filename": "fehrest-darkhast-etelaat"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "open": "باز",
+          "answered": "پاسخ داده شد",
+          "closed": "بسته",
+          "void": "ابطال‌شده"
+        }
+      }
     }
   },
   "cost_control": {

@@ -618,5 +618,539 @@
       "draft": "Borrador",
       "frozen": "Congelada"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Proyecto",
+      "project_no": "N.º de proyecto",
+      "generated_on": "Fecha de emisión",
+      "records": "Registros",
+      "currency": "Moneda",
+      "status": "Estado",
+      "name": "Nombre",
+      "signature": "Firma",
+      "date": "Fecha",
+      "signatures": "Firmas",
+      "yes": "Sí",
+      "no": "No",
+      "days_one": "{n} día",
+      "days_other": "{n} días",
+      "empty_register": "Sin registros.",
+      "total": "Total",
+      "signer_title": "Cargo",
+      "sig_prepared_by": "Elaborado por",
+      "sig_checked_by": "Revisado por",
+      "sig_approved_by": "Aprobado por",
+      "footer_generated": "Generado el {timestamp}",
+      "footer_page": "Página {page} de {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Registro de documentos para aprobación",
+        "doc_title": "Documento para aprobación",
+        "doc_title_product_data": "Ficha de aprobación de materiales",
+        "col_number": "N.º de documento",
+        "col_title": "Título",
+        "col_type": "Tipo",
+        "col_spec": "Apartado del pliego",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Fecha de presentación",
+        "col_date_required": "Fecha requerida",
+        "col_date_returned": "Fecha de devolución",
+        "col_reviewer": "Revisor",
+        "col_approver": "Aprobador",
+        "col_ball_in_court": "Pendiente de",
+        "submitted_by_org": "Empresa remitente",
+        "review_notes": "Comentarios del revisor",
+        "no_review_notes": "No se registraron comentarios del revisor.",
+        "sig_submitted": "Presentado por",
+        "sig_reviewed": "Revisado por",
+        "sig_approved": "Aprobado por",
+        "register_filename": "registro-documentos-para-aprobacion",
+        "register_title_shop_drawing": "Registro de planos de taller",
+        "register_title_product_data": "Registro de aprobación de materiales",
+        "register_title_method_statement": "Registro de procedimientos de ejecución",
+        "register_filename_shop_drawing": "registro-planos-de-taller",
+        "register_filename_product_data": "registro-aprobacion-de-materiales",
+        "register_filename_method_statement": "registro-procedimientos-de-ejecucion",
+        "col_discipline": "Disciplina",
+        "col_manufacturer": "Fabricante / marca",
+        "col_model": "Modelo / referencia",
+        "col_origin": "País de origen",
+        "col_supplier": "Proveedor",
+        "col_product": "Fabricante / modelo / origen",
+        "col_review_code": "Código de revisión",
+        "col_outcome": "Resultado de la revisión",
+        "col_review_period": "Plazo de revisión (días)",
+        "col_review_due": "Revisión antes del",
+        "col_days_in_review": "Días en revisión",
+        "col_days_in_review_print": "Días en revisión",
+        "col_review_overdue": "Días de retraso",
+        "col_required_on_site": "Necesario en obra",
+        "col_long_lead": "Plazo largo",
+        "col_lead_time": "Plazo de entrega (sem.)",
+        "col_needed_by": "Aprobación necesaria antes del",
+        "col_approval_late": "Días fuera de plazo",
+        "col_drawings": "Planos vinculados",
+        "col_submitted_returned": "Presentado / devuelto",
+        "col_on_site_needed_by": "En obra / aprobación antes del",
+        "resubmit_for_record": "Copia corregida a presentar de nuevo para archivo",
+        "review_history": "Historial de revisión",
+        "hist_submitted": "Presentado",
+        "hist_returned": "Devuelto",
+        "drawings_missing_one": "{n} plano vinculado ya no está disponible",
+        "drawings_missing_other": "{n} planos vinculados ya no están disponibles",
+        "weeks_one": "{n} semana",
+        "weeks_other": "{n} semanas"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "submitted": "Presentado",
+          "under_review": "En revisión",
+          "approved": "Aprobado",
+          "approved_as_noted": "Aprobado con observaciones",
+          "revise_and_resubmit": "Corregir y volver a presentar",
+          "rejected": "Rechazado",
+          "closed": "Cerrado"
+        },
+        "type": {
+          "shop_drawing": "Plano de taller",
+          "product_data": "Ficha técnica",
+          "sample": "Muestra",
+          "mock_up": "Maqueta",
+          "test_report": "Informe de ensayo",
+          "calculation": "Cálculo",
+          "method_statement": "Procedimiento de ejecución",
+          "certificate": "Certificado",
+          "warranty": "Garantía"
+        },
+        "discipline": {
+          "mechanical": "Mecánica",
+          "hvac": "Climatización",
+          "plumbing": "Fontanería y saneamiento",
+          "fire_protection": "Protección contra incendios",
+          "electrical": "Electricidad",
+          "lighting": "Iluminación",
+          "elv": "Corrientes débiles",
+          "bms": "Automatización del edificio",
+          "architectural": "Arquitectura",
+          "structural": "Estructuras",
+          "civil": "Obra civil"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Registro de órdenes de cambio",
+        "doc_title": "Orden de cambio",
+        "col_code": "Código",
+        "col_title": "Título",
+        "col_reason": "Motivo",
+        "col_instrument": "Instrumento",
+        "col_submitted": "Fecha de presentación",
+        "col_contractor_amount": "Importe del contratista",
+        "col_engineer_amount": "Importe del ingeniero",
+        "col_approved_amount": "Importe aprobado",
+        "col_cost_impact": "Impacto en coste",
+        "col_time_impact": "Impacto en plazo (días)",
+        "col_approved_time": "Plazo aprobado (días)",
+        "time_impact": "Impacto en plazo",
+        "approved_time": "Plazo aprobado",
+        "col_approved": "Fecha de aprobación",
+        "submitted_by": "Presentado por",
+        "approved_by": "Aprobado por",
+        "description": "Descripción",
+        "no_description": "No se registró descripción.",
+        "items": "Partidas modificadas",
+        "item_description": "Descripción",
+        "item_change": "Cambio",
+        "item_unit": "Unidad",
+        "item_original_quantity": "Cant. original",
+        "item_new_quantity": "Cant. nueva",
+        "item_original_rate": "Precio original",
+        "item_new_rate": "Precio nuevo",
+        "item_cost_delta": "Diferencia de coste",
+        "register_filename": "registro-ordenes-de-cambio"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "submitted": "Presentada",
+          "approved": "Aprobada",
+          "rejected": "Rechazada",
+          "executed": "Ejecutada"
+        },
+        "reason": {
+          "client_request": "Solicitud del cliente",
+          "design_change": "Cambio de diseño",
+          "unforeseen": "Condiciones imprevistas",
+          "regulatory": "Requisito normativo",
+          "error": "Error u omisión",
+          "non_conformance": "No conformidad",
+          "value_engineering": "Ingeniería de valor"
+        },
+        "instrument": {
+          "works_change": "Orden de modificación",
+          "site_confirmation": "Confirmación en obra",
+          "claim": "Reclamación"
+        },
+        "change": {
+          "added": "Añadido",
+          "removed": "Eliminado",
+          "modified": "Modificado"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dossier probatorio",
+        "subject": "Asunto",
+        "basis": "Fundamento",
+        "period_from": "Registro más antiguo",
+        "period_to": "Registro más reciente",
+        "digest": "Código de integridad (SHA-256, primeros 16 caracteres)",
+        "col_row": "N.º",
+        "col_record_id": "ID de registro",
+        "col_section": "Sección",
+        "col_date": "Fecha",
+        "col_kind": "Tipo de registro",
+        "col_title": "Título",
+        "col_summary": "Resumen",
+        "col_reference": "Referencia",
+        "register_filename": "dossier-probatorio"
+      },
+      "labels": {
+        "section": {
+          "notices": "Notificaciones",
+          "correspondence": "Correspondencia",
+          "rfis": "Solicitudes de información (RFI)",
+          "variations": "Modificaciones",
+          "approvals": "Aprobaciones",
+          "delay": "Retraso",
+          "timeline": "Cronología",
+          "other": "Otros"
+        },
+        "kind": {
+          "notice": "Notificación",
+          "variation_notice": "Aviso de modificación",
+          "variation_request": "Solicitud de modificación",
+          "variation_order": "Orden de modificación",
+          "change_order": "Orden de cambio",
+          "moc_entry": "Registro de cambio",
+          "correspondence": "Correspondencia"
+        },
+        "basis": {
+          "dispute": "Disputa",
+          "valuation": "Valoración",
+          "delay": "Retraso / ampliación de plazo",
+          "general": "Registro general"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Registro de correspondencia",
+        "doc_title": "Correspondencia",
+        "col_reference": "N.º de referencia",
+        "col_direction": "Sentido",
+        "col_type": "Tipo",
+        "col_subject": "Asunto",
+        "col_from": "De",
+        "col_to": "Para",
+        "col_date_sent": "Fecha de envío",
+        "col_date_received": "Fecha de recepción",
+        "col_response_due": "Respuesta requerida antes del",
+        "col_clause": "Cláusula contractual",
+        "notes": "Observaciones",
+        "no_notes": "No se registraron observaciones.",
+        "attachments": "Archivos adjuntos",
+        "linked_documents": "Documentos vinculados",
+        "sig_prepared": "Elaborado por",
+        "sig_received": "Recibido por",
+        "register_filename": "registro-correspondencia"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Entrada",
+          "outgoing": "Salida"
+        },
+        "type": {
+          "letter": "Carta",
+          "email": "Correo electrónico",
+          "notice": "Notificación",
+          "memo": "Memorando",
+          "report": "Informe"
+        },
+        "status": {
+          "open": "Abierto",
+          "awaiting_response": "Pendiente de respuesta",
+          "responded": "Respondido",
+          "closed": "Cerrado"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Registro de remisiones de documentos",
+        "doc_title": "Remisión de documentos",
+        "col_number": "N.º de remisión",
+        "col_subject": "Asunto",
+        "col_purpose": "Finalidad",
+        "col_issued": "Fecha de emisión",
+        "col_response_due": "Respuesta antes del",
+        "col_recipients": "Destinatarios",
+        "col_item_count": "Documentos",
+        "sender": "Remitente",
+        "cover_note": "Nota de envío",
+        "no_cover_note": "Sin nota de envío.",
+        "recipients": "Destinatarios",
+        "recipient": "Destinatario",
+        "action_required": "Acción requerida",
+        "acknowledged": "Recepción confirmada",
+        "responded": "Fecha de respuesta",
+        "items": "Documentos remitidos",
+        "item_no": "N.º",
+        "item_description": "Descripción",
+        "item_notes": "Observaciones",
+        "sig_issued": "Emitido por",
+        "sig_received": "Recibido por",
+        "register_filename": "registro-remisiones"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "issued": "Emitida",
+          "responded": "Respondida"
+        },
+        "purpose": {
+          "for_approval": "Para aprobación",
+          "for_review": "Para revisión",
+          "for_information": "Para información",
+          "for_construction": "Para construcción",
+          "for_tender": "Para licitación",
+          "for_record": "Para archivo"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Registro de modificaciones",
+        "claim_register_title": "Registro de reclamaciones",
+        "notice_register_title": "Registro de notificaciones",
+        "doc_title": "Solicitud de modificación",
+        "doc_title_credit": "Solicitud de modificación (reducción)",
+        "time_impact": "Impacto en plazo",
+        "col_code": "Código",
+        "col_title": "Título",
+        "col_classification": "Tipo",
+        "col_urgency": "Urgencia",
+        "col_requested": "Fecha de solicitud",
+        "col_claimed_amount": "Importe reclamado",
+        "col_agreed_amount": "Importe acordado",
+        "col_time_impact": "Impacto en plazo (días)",
+        "col_response_due": "Respuesta antes del",
+        "col_clause": "Cláusula contractual",
+        "col_row": "N.º",
+        "col_claim_type": "Tipo de reclamación",
+        "col_raised": "Fecha de presentación",
+        "col_period_start": "Periodo desde",
+        "col_period_end": "Periodo hasta",
+        "col_description": "Descripción",
+        "col_decided_amount": "Importe resuelto",
+        "col_days_requested": "Días solicitados",
+        "col_days_granted": "Días concedidos",
+        "col_recipient_type": "Dirigida a",
+        "col_recipient": "Destinatario",
+        "col_target_response": "Respuesta prevista",
+        "col_response_received": "Respuesta recibida",
+        "requested_by": "Solicitado por",
+        "decided_by": "Resuelto por",
+        "date_submitted": "Fecha de presentación",
+        "date_decided": "Fecha de resolución",
+        "description": "Descripción",
+        "no_description": "No se registró descripción.",
+        "decision_notes": "Motivación de la decisión",
+        "no_decision_notes": "Aún no se ha registrado ninguna decisión.",
+        "variation_register_filename": "registro-modificaciones",
+        "claim_register_filename": "registro-reclamaciones",
+        "notice_register_filename": "registro-notificaciones"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Borrador",
+          "submitted": "Presentada",
+          "under_review": "En revisión",
+          "approved": "Aprobada",
+          "rejected": "Rechazada",
+          "converted_to_vo": "Convertida en orden"
+        },
+        "claim_status": {
+          "draft": "Borrador",
+          "submitted": "Presentada",
+          "under_review": "En revisión",
+          "agreed": "Acordada",
+          "granted": "Concedida",
+          "rejected": "Rechazada"
+        },
+        "notice_status": {
+          "issued": "Emitida",
+          "acknowledged": "Acuse de recibo",
+          "responded": "Respondida",
+          "closed": "Cerrada"
+        },
+        "classification": {
+          "scope_change": "Cambio de alcance",
+          "unforeseen": "Condición imprevista",
+          "owner_change": "Cambio del propietario",
+          "design_dev": "Desarrollo del diseño",
+          "regulatory": "Requisito normativo",
+          "other": "Otro"
+        },
+        "urgency": {
+          "low": "Baja",
+          "med": "Media",
+          "high": "Alta"
+        },
+        "claim_type": {
+          "disruption": "Alteración del ritmo de obra",
+          "eot": "Ampliación de plazo"
+        },
+        "recipient_type": {
+          "owner": "Propietario",
+          "contractor": "Contratista",
+          "architect": "Arquitecto",
+          "engineer": "Ingeniero",
+          "consultant": "Consultor"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Parte diario de obra",
+        "overview": "Resumen",
+        "site_supervisor": "Jefe de obra",
+        "not_recorded": "No registrado",
+        "labour_on_site": "Mano de obra en obra",
+        "equipment_on_site": "Maquinaria en obra",
+        "completeness": "Grado de cumplimentación",
+        "weather": "Clima",
+        "weather_time": "Hora",
+        "weather_source": "Fuente",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Viento (km/h)",
+        "weather_precip": "Precip. (mm)",
+        "weather_conditions": "Condiciones",
+        "weather_empty": "No se registró el clima de este día.",
+        "site_record": "Registro de obra",
+        "entries_empty": "No hay anotaciones registradas en este parte.",
+        "notes": "Observaciones",
+        "notes_empty": "Sin observaciones adicionales.",
+        "footer_supervisor": "Jefe de obra: {name}",
+        "footer_supervisor_missing": "Jefe de obra: no registrado",
+        "footer_generated": "Generado: {timestamp}",
+        "footer_page": "Página {page} de {total}",
+        "workforce": "Personal por empresa",
+        "workforce_company": "Empresa",
+        "workforce_count": "Personas",
+        "workforce_unassigned": "Sin empresa asignada",
+        "workforce_total": "Total",
+        "signatures": "Firmas",
+        "sig_prepared": "Elaborado por (jefe de obra)",
+        "sig_approved": "Aprobado por (representante de la propiedad)",
+        "sig_name": "Nombre",
+        "sig_title": "Cargo",
+        "sig_date": "Fecha",
+        "sig_signature": "Firma",
+        "signed_note": "Firmado en el sistema: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "parte-diario",
+        "summary_wind": "viento {value} km/h",
+        "summary_precipitation": "precipitación {value} mm",
+        "summary_humidity": "humedad {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Visitas",
+          "event": "Eventos",
+          "delivery": "Materiales recibidos",
+          "completion": "Trabajos realizados",
+          "incident_summary": "Seguridad e incidencias",
+          "inspection_summary": "Inspecciones",
+          "photo_note": "Notas fotográficas",
+          "general": "Observaciones generales"
+        },
+        "status": {
+          "open": "Abierto",
+          "closed": "Cerrado",
+          "signed": "Firmado",
+          "archived": "Archivado"
+        },
+        "condition": {
+          "clear": "despejado",
+          "mainly_clear": "mayormente despejado",
+          "partly_cloudy": "parcialmente nublado",
+          "cloudy": "nublado",
+          "overcast": "cubierto",
+          "fog": "niebla",
+          "fog_rime": "niebla engelante",
+          "drizzle_light": "llovizna ligera",
+          "drizzle_moderate": "llovizna moderada",
+          "drizzle_dense": "llovizna intensa",
+          "rain": "lluvia",
+          "rain_light": "lluvia ligera",
+          "rain_moderate": "lluvia moderada",
+          "rain_heavy": "lluvia intensa",
+          "freezing_rain_light": "lluvia engelante ligera",
+          "freezing_rain_heavy": "lluvia engelante intensa",
+          "snow": "nieve",
+          "snow_light": "nevada ligera",
+          "snow_moderate": "nevada moderada",
+          "snow_heavy": "nevada intensa",
+          "rain_showers_light": "chubascos ligeros",
+          "rain_showers_moderate": "chubascos moderados",
+          "rain_showers_violent": "chubascos violentos",
+          "snow_showers_light": "chubascos de nieve ligeros",
+          "snow_showers_heavy": "chubascos de nieve intensos",
+          "thunderstorm": "tormenta",
+          "thunderstorm_hail_light": "tormenta con granizo ligero",
+          "thunderstorm_hail_heavy": "tormenta con granizo fuerte"
+        },
+        "source": {
+          "manual": "Entrada manual",
+          "open_meteo": "Servicio meteorológico",
+          "sensor": "Sensor de obra"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Registro de solicitudes de información (RFI)",
+        "col_number": "N.º de RFI",
+        "col_subject": "Asunto",
+        "col_raised_by": "Emitida por",
+        "col_assigned_to": "Asignada a",
+        "col_ball_in_court": "Pendiente de",
+        "col_date_required": "Fecha requerida",
+        "col_response_due": "Respuesta antes del",
+        "col_days_open": "Días abierta",
+        "col_cost_impact": "Impacto en coste",
+        "col_schedule_impact": "Impacto en plazo",
+        "col_response": "Respuesta",
+        "yes_with": "Sí ({detail})",
+        "register_filename": "registro-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "open": "Abierto",
+          "answered": "Respondido",
+          "closed": "Cerrado",
+          "void": "Anulado"
+        }
+      }
+    }
   }
 }

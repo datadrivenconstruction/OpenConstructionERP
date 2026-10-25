@@ -618,5 +618,539 @@
       "draft": "Mustand",
       "frozen": "Külmutatud"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Projekti nr",
+      "generated_on": "Koostamise kuupäev",
+      "records": "Kirjeid",
+      "currency": "Valuuta",
+      "status": "Staatus",
+      "name": "Nimi",
+      "signature": "Allkiri",
+      "date": "Kuupäev",
+      "signatures": "Allkirjad",
+      "yes": "Jah",
+      "no": "Ei",
+      "days_one": "{n} päev",
+      "days_other": "{n} päeva",
+      "empty_register": "Kirjeid ei ole.",
+      "total": "Kokku",
+      "signer_title": "Ametikoht",
+      "sig_prepared_by": "Koostaja",
+      "sig_checked_by": "Kontrollija",
+      "sig_approved_by": "Kinnitaja",
+      "footer_generated": "Koostatud {timestamp}",
+      "footer_page": "Lk {page} / {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Kooskõlastusdokumentide register",
+        "doc_title": "Kooskõlastusdokument",
+        "doc_title_product_data": "Materjali kinnitusleht",
+        "col_number": "Dokumendi nr",
+        "col_title": "Pealkiri",
+        "col_type": "Liik",
+        "col_spec": "Spetsifikatsiooni osa",
+        "col_rev": "Red.",
+        "col_date_submitted": "Esitamise kp",
+        "col_date_required": "Nõutav kp",
+        "col_date_returned": "Tagastamise kp",
+        "col_reviewer": "Läbivaataja",
+        "col_approver": "Kinnitaja",
+        "col_ball_in_court": "Järgmine tegutseja",
+        "submitted_by_org": "Esitav ettevõte",
+        "review_notes": "Läbivaataja märkused",
+        "no_review_notes": "Läbivaataja märkusi ei ole.",
+        "sig_submitted": "Esitamine",
+        "sig_reviewed": "Läbivaatus",
+        "sig_approved": "Kinnitamine",
+        "register_filename": "kooskolastusdokumentide-register",
+        "register_title_shop_drawing": "Tööjooniste register",
+        "register_title_product_data": "Materjalikinnituste register",
+        "register_title_method_statement": "Töömetoodikate register",
+        "register_filename_shop_drawing": "toojooniste-register",
+        "register_filename_product_data": "materjalikinnituste-register",
+        "register_filename_method_statement": "toometoodikate-register",
+        "col_discipline": "Eriala",
+        "col_manufacturer": "Tootja / kaubamärk",
+        "col_model": "Mudel / tähis",
+        "col_origin": "Päritoluriik",
+        "col_supplier": "Tarnija",
+        "col_product": "Tootja / mudel / päritolu",
+        "col_review_code": "Hinnangu kood",
+        "col_outcome": "Läbivaatuse tulemus",
+        "col_review_period": "Läbivaatuse aeg (päeva)",
+        "col_review_due": "Läbivaatuse tähtaeg",
+        "col_days_in_review": "Päevi läbivaatusel",
+        "col_days_in_review_print": "Päevi läbivaatusel",
+        "col_review_overdue": "Päevi hilinenud",
+        "col_required_on_site": "Vaja objektil",
+        "col_long_lead": "Pikk tarneaeg",
+        "col_lead_time": "Tarneaeg (nädalat)",
+        "col_needed_by": "Kinnitus vajalik",
+        "col_approval_late": "Päevi üle tähtaja",
+        "col_drawings": "Seotud joonised",
+        "col_submitted_returned": "Esitatud / tagastatud",
+        "col_on_site_needed_by": "Objektil / kinnitus",
+        "resubmit_for_record": "Parandatud eksemplar esitada uuesti arhiveerimiseks",
+        "review_history": "Läbivaatuse ajalugu",
+        "hist_submitted": "Esitatud",
+        "hist_returned": "Tagastatud",
+        "drawings_missing_one": "{n} seotud joonis ei ole enam saadaval",
+        "drawings_missing_other": "{n} seotud joonist ei ole enam saadaval",
+        "weeks_one": "{n} nädal",
+        "weeks_other": "{n} nädalat"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "under_review": "Läbivaatusel",
+          "approved": "Kinnitatud",
+          "approved_as_noted": "Kinnitatud märkustega",
+          "revise_and_resubmit": "Parandada ja esitada uuesti",
+          "rejected": "Tagasi lükatud",
+          "closed": "Suletud"
+        },
+        "type": {
+          "shop_drawing": "Tööjoonis",
+          "product_data": "Tootekirjeldus",
+          "sample": "Näidis",
+          "mock_up": "Prototüüp",
+          "test_report": "Katseprotokoll",
+          "calculation": "Arvutus",
+          "method_statement": "Töömetoodika",
+          "certificate": "Sertifikaat",
+          "warranty": "Garantii"
+        },
+        "discipline": {
+          "mechanical": "Mehaanika",
+          "hvac": "Küte ja ventilatsioon",
+          "plumbing": "Vesi ja kanalisatsioon",
+          "fire_protection": "Tuleohutus",
+          "electrical": "Elektrisüsteemid",
+          "lighting": "Valgustus",
+          "elv": "Nõrkvool",
+          "bms": "Hoone automaatika",
+          "architectural": "Arhitektuur",
+          "structural": "Konstruktsioonid",
+          "civil": "Ehitus ja rajatised"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Muudatuskorralduste register",
+        "doc_title": "Muudatuskorraldus",
+        "col_code": "Kood",
+        "col_title": "Pealkiri",
+        "col_reason": "Põhjus",
+        "col_instrument": "Dokumendi liik",
+        "col_submitted": "Esitamise kp",
+        "col_contractor_amount": "Töövõtja summa",
+        "col_engineer_amount": "Inseneri summa",
+        "col_approved_amount": "Kinnitatud summa",
+        "col_cost_impact": "Mõju maksumusele",
+        "col_time_impact": "Mõju ajale (päeva)",
+        "col_approved_time": "Kinnitatud aeg (päeva)",
+        "time_impact": "Mõju ajale",
+        "approved_time": "Kinnitatud aeg",
+        "col_approved": "Kinnitamise kp",
+        "submitted_by": "Esitaja",
+        "approved_by": "Kinnitaja",
+        "description": "Kirjeldus",
+        "no_description": "Kirjeldust ei ole.",
+        "items": "Muudatuse read",
+        "item_description": "Kirjeldus",
+        "item_change": "Muudatus",
+        "item_unit": "Ühik",
+        "item_original_quantity": "Algkogus",
+        "item_new_quantity": "Uus kogus",
+        "item_original_rate": "Algühikuhind",
+        "item_new_rate": "Uus ühikuhind",
+        "item_cost_delta": "Maksumuse vahe",
+        "register_filename": "muudatuskorralduste-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "approved": "Kinnitatud",
+          "rejected": "Tagasi lükatud",
+          "executed": "Täidetud"
+        },
+        "reason": {
+          "client_request": "Tellija soov",
+          "design_change": "Projekti muudatus",
+          "unforeseen": "Ettenägematud asjaolud",
+          "regulatory": "Regulatiivne nõue",
+          "error": "Viga või puudujääk",
+          "non_conformance": "Mittevastavus",
+          "value_engineering": "Väärtusinseneeria"
+        },
+        "instrument": {
+          "works_change": "Korraldatud muudatus",
+          "site_confirmation": "Objektil kinnitatud muudatus",
+          "claim": "Nõue"
+        },
+        "change": {
+          "added": "Lisatud",
+          "removed": "Eemaldatud",
+          "modified": "Muudetud"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Tõendite kogu",
+        "subject": "Teema",
+        "basis": "Alus",
+        "period_from": "Varaseim kirje",
+        "period_to": "Hiliseim kirje",
+        "digest": "Terviklikkuse kood (SHA-256, esimesed 16 märki)",
+        "col_row": "Nr",
+        "col_record_id": "Kirje ID",
+        "col_section": "Jaotis",
+        "col_date": "Kuupäev",
+        "col_kind": "Kirje liik",
+        "col_title": "Pealkiri",
+        "col_summary": "Kokkuvõte",
+        "col_reference": "Viide",
+        "register_filename": "toendite-kogu"
+      },
+      "labels": {
+        "section": {
+          "notices": "Teated",
+          "correspondence": "Kirjavahetus",
+          "rfis": "Teabepäringud (RFI)",
+          "variations": "Muudatused",
+          "approvals": "Kinnitused",
+          "delay": "Viivitus",
+          "timeline": "Ajajoon",
+          "other": "Muu"
+        },
+        "kind": {
+          "notice": "Teade",
+          "variation_notice": "Muudatusteade",
+          "variation_request": "Muudatustaotlus",
+          "variation_order": "Muudatuse korraldus",
+          "change_order": "Muudatuskorraldus",
+          "moc_entry": "Muudatuse kirje",
+          "correspondence": "Kirjavahetus"
+        },
+        "basis": {
+          "dispute": "Vaidlus",
+          "valuation": "Hindamine",
+          "delay": "Viivitus / tähtaja pikendamine",
+          "general": "Üldine kirje"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Kirjavahetuse register",
+        "doc_title": "Kirjavahetus",
+        "col_reference": "Viite nr",
+        "col_direction": "Suund",
+        "col_type": "Liik",
+        "col_subject": "Teema",
+        "col_from": "Saatja",
+        "col_to": "Adressaat",
+        "col_date_sent": "Saatmise kp",
+        "col_date_received": "Saabumise kp",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_clause": "Lepingu punkt",
+        "notes": "Märkused",
+        "no_notes": "Märkusi ei ole.",
+        "attachments": "Lisatud failid",
+        "linked_documents": "Seotud dokumendid",
+        "sig_prepared": "Koostaja",
+        "sig_received": "Vastuvõtja",
+        "register_filename": "kirjavahetuse-register"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Sissetulev",
+          "outgoing": "Väljaminev"
+        },
+        "type": {
+          "letter": "Kiri",
+          "email": "E-kiri",
+          "notice": "Teade",
+          "memo": "Märgukiri",
+          "report": "Aruanne"
+        },
+        "status": {
+          "open": "Avatud",
+          "awaiting_response": "Vastust oodatakse",
+          "responded": "Vastatud",
+          "closed": "Suletud"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Saatelehtede register",
+        "doc_title": "Saateleht",
+        "col_number": "Saatelehe nr",
+        "col_subject": "Teema",
+        "col_purpose": "Eesmärk",
+        "col_issued": "Väljastamise kp",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_recipients": "Saajad",
+        "col_item_count": "Kirjeid",
+        "sender": "Saatja",
+        "cover_note": "Saatekiri",
+        "no_cover_note": "Saatekirja ei ole.",
+        "recipients": "Saajad",
+        "recipient": "Saaja",
+        "action_required": "Vajalik tegevus",
+        "acknowledged": "Kättesaamine kinnitatud",
+        "responded": "Vastamise kp",
+        "items": "Edastatud dokumendid",
+        "item_no": "Nr",
+        "item_description": "Kirjeldus",
+        "item_notes": "Märkused",
+        "sig_issued": "Väljastaja",
+        "sig_received": "Vastuvõtja",
+        "register_filename": "saatelehtede-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kavand",
+          "issued": "Väljastatud",
+          "responded": "Vastatud"
+        },
+        "purpose": {
+          "for_approval": "Kinnitamiseks",
+          "for_review": "Läbivaatamiseks",
+          "for_information": "Teadmiseks",
+          "for_construction": "Ehitamiseks",
+          "for_tender": "Pakkumiseks",
+          "for_record": "Arhiveerimiseks"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Muudatuste register",
+        "claim_register_title": "Nõuete register",
+        "notice_register_title": "Teadete register",
+        "doc_title": "Muudatustaotlus",
+        "doc_title_credit": "Muudatustaotlus (töö vähendamine)",
+        "time_impact": "Mõju ajale",
+        "col_code": "Kood",
+        "col_title": "Pealkiri",
+        "col_classification": "Liik",
+        "col_urgency": "Kiireloomulisus",
+        "col_requested": "Taotlemise kp",
+        "col_claimed_amount": "Nõutav summa",
+        "col_agreed_amount": "Kokkulepitud summa",
+        "col_time_impact": "Mõju ajale (päeva)",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_clause": "Lepingu punkt",
+        "col_row": "Nr",
+        "col_claim_type": "Nõude liik",
+        "col_raised": "Esitamise kp",
+        "col_period_start": "Periood alates",
+        "col_period_end": "Periood kuni",
+        "col_description": "Kirjeldus",
+        "col_decided_amount": "Otsustatud summa",
+        "col_days_requested": "Taotletud päevi",
+        "col_days_granted": "Lubatud päevi",
+        "col_recipient_type": "Adressaat",
+        "col_recipient": "Saaja",
+        "col_target_response": "Oodatav vastus",
+        "col_response_received": "Vastus saadud",
+        "requested_by": "Taotleja",
+        "decided_by": "Otsustaja",
+        "date_submitted": "Esitamise kp",
+        "date_decided": "Otsuse kp",
+        "description": "Kirjeldus",
+        "no_description": "Kirjeldust ei ole.",
+        "decision_notes": "Otsuse märkused",
+        "no_decision_notes": "Otsust pole veel tehtud.",
+        "variation_register_filename": "muudatuste-register",
+        "claim_register_filename": "nouete-register",
+        "notice_register_filename": "teadete-register"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "under_review": "Läbivaatusel",
+          "approved": "Kinnitatud",
+          "rejected": "Tagasi lükatud",
+          "converted_to_vo": "Muudetud korralduseks"
+        },
+        "claim_status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "under_review": "Läbivaatusel",
+          "agreed": "Kokku lepitud",
+          "granted": "Rahuldatud",
+          "rejected": "Tagasi lükatud"
+        },
+        "notice_status": {
+          "issued": "Väljastatud",
+          "acknowledged": "Kättesaamine kinnitatud",
+          "responded": "Vastatud",
+          "closed": "Suletud"
+        },
+        "classification": {
+          "scope_change": "Mahu muudatus",
+          "unforeseen": "Ettenägematu asjaolu",
+          "owner_change": "Tellija muudatus",
+          "design_dev": "Projekti arendus",
+          "regulatory": "Regulatiivne nõue",
+          "other": "Muu"
+        },
+        "urgency": {
+          "low": "Madal",
+          "med": "Keskmine",
+          "high": "Kõrge"
+        },
+        "claim_type": {
+          "disruption": "Töö häirimine",
+          "eot": "Tähtaja pikendamine"
+        },
+        "recipient_type": {
+          "owner": "Tellija",
+          "contractor": "Töövõtja",
+          "architect": "Arhitekt",
+          "engineer": "Insener",
+          "consultant": "Konsultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Ehituspäevik",
+        "overview": "Ülevaade",
+        "site_supervisor": "Objektijuht",
+        "not_recorded": "Märkimata",
+        "labour_on_site": "Tööjõud objektil",
+        "equipment_on_site": "Tehnika objektil",
+        "completeness": "Täielikkus",
+        "weather": "Ilm",
+        "weather_time": "Kellaaeg",
+        "weather_source": "Allikas",
+        "weather_temp": "Temp (C)",
+        "weather_wind": "Tuul (km/h)",
+        "weather_precip": "Sademed (mm)",
+        "weather_conditions": "Ilmastik",
+        "weather_empty": "Selle päeva ilma ei ole märgitud.",
+        "site_record": "Objekti kirje",
+        "entries_empty": "Sellesse päevikusse ei ole kirjeid tehtud.",
+        "notes": "Märkused",
+        "notes_empty": "Lisamärkusi ei ole.",
+        "footer_supervisor": "Objektijuht: {name}",
+        "footer_supervisor_missing": "Objektijuht: märkimata",
+        "footer_generated": "Koostatud: {timestamp}",
+        "footer_page": "Lk {page} / {total}",
+        "workforce": "Tööjõud ettevõtete kaupa",
+        "workforce_company": "Ettevõte",
+        "workforce_count": "Inimesi",
+        "workforce_unassigned": "Ettevõttele määramata",
+        "workforce_total": "Kokku",
+        "signatures": "Allkirjad",
+        "sig_prepared": "Koostaja (objektijuht)",
+        "sig_approved": "Kinnitaja (tellija esindaja)",
+        "sig_name": "Nimi",
+        "sig_title": "Ametikoht",
+        "sig_date": "Kuupäev",
+        "sig_signature": "Allkiri",
+        "signed_note": "Allkirjastatud süsteemis: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "ehituspaevik",
+        "summary_wind": "tuul {value} km/h",
+        "summary_precipitation": "sademed {value} mm",
+        "summary_humidity": "õhuniiskus {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Külastajad",
+          "event": "Sündmused",
+          "delivery": "Tarnitud materjalid",
+          "completion": "Tehtud tööd",
+          "incident_summary": "Tööohutus ja vahejuhtumid",
+          "inspection_summary": "Kontrollid",
+          "photo_note": "Fotomärkmed",
+          "general": "Üldmärkused"
+        },
+        "status": {
+          "open": "Avatud",
+          "closed": "Suletud",
+          "signed": "Allkirjastatud",
+          "archived": "Arhiveeritud"
+        },
+        "condition": {
+          "clear": "selge",
+          "mainly_clear": "enamasti selge",
+          "partly_cloudy": "vahelduv pilvisus",
+          "cloudy": "pilvine",
+          "overcast": "tihe pilvisus",
+          "fog": "udu",
+          "fog_rime": "härmatav udu",
+          "drizzle_light": "nõrk uduvihm",
+          "drizzle_moderate": "mõõdukas uduvihm",
+          "drizzle_dense": "tihe uduvihm",
+          "rain": "vihm",
+          "rain_light": "nõrk vihm",
+          "rain_moderate": "mõõdukas vihm",
+          "rain_heavy": "tugev vihm",
+          "freezing_rain_light": "nõrk jäävihm",
+          "freezing_rain_heavy": "tugev jäävihm",
+          "snow": "lumi",
+          "snow_light": "nõrk lumesadu",
+          "snow_moderate": "mõõdukas lumesadu",
+          "snow_heavy": "tugev lumesadu",
+          "rain_showers_light": "nõrgad hoovihmad",
+          "rain_showers_moderate": "mõõdukad hoovihmad",
+          "rain_showers_violent": "tugevad hoovihmad",
+          "snow_showers_light": "nõrgad lumehood",
+          "snow_showers_heavy": "tugevad lumehood",
+          "thunderstorm": "äikesetorm",
+          "thunderstorm_hail_light": "äikesetorm nõrga rahega",
+          "thunderstorm_hail_heavy": "äikesetorm tugeva rahega"
+        },
+        "source": {
+          "manual": "Käsitsi sisestatud",
+          "open_meteo": "Ilmateenistus",
+          "sensor": "Objekti andur"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Teabepäringute logi (RFI)",
+        "col_number": "RFI nr",
+        "col_subject": "Teema",
+        "col_raised_by": "Esitaja",
+        "col_assigned_to": "Määratud",
+        "col_ball_in_court": "Järgmine tegutseja",
+        "col_date_required": "Nõutav kp",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_days_open": "Päevi avatud",
+        "col_cost_impact": "Mõju maksumusele",
+        "col_schedule_impact": "Mõju ajakavale",
+        "col_response": "Vastus",
+        "yes_with": "Jah ({detail})",
+        "register_filename": "rfi-logi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Mustand",
+          "open": "Avatud",
+          "answered": "Vastatud",
+          "closed": "Suletud",
+          "void": "Kehtetu"
+        }
+      }
+    }
   }
 }

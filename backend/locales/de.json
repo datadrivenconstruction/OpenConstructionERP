@@ -624,6 +624,514 @@
           "refunded": "Erstattet"
         }
       }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Bautagebuch",
+        "overview": "Übersicht",
+        "site_supervisor": "Bauleiter",
+        "not_recorded": "Nicht erfasst",
+        "labour_on_site": "Arbeitskräfte vor Ort",
+        "equipment_on_site": "Geräte vor Ort",
+        "completeness": "Vollständigkeit",
+        "weather": "Wetter",
+        "weather_time": "Uhrzeit",
+        "weather_source": "Quelle",
+        "weather_temp": "Temp (°C)",
+        "weather_wind": "Wind (km/h)",
+        "weather_precip": "Niederschlag (mm)",
+        "weather_conditions": "Bedingungen",
+        "weather_empty": "Für diesen Tag wurde kein Wetter erfasst.",
+        "site_record": "Tagesprotokoll",
+        "entries_empty": "Für dieses Bautagebuch wurden keine Einträge erfasst.",
+        "notes": "Notizen",
+        "notes_empty": "Keine weiteren Notizen.",
+        "footer_supervisor": "Bauleiter: {name}",
+        "footer_supervisor_missing": "Bauleiter: nicht erfasst",
+        "footer_generated": "Erstellt: {timestamp}",
+        "footer_page": "Seite {page} von {total}",
+        "workforce": "Personal nach Firma",
+        "workforce_company": "Firma",
+        "workforce_count": "Personen",
+        "workforce_unassigned": "Keiner Firma zugeordnet",
+        "workforce_total": "Gesamt",
+        "signatures": "Unterschriften",
+        "sig_prepared": "Aufgestellt (Bauleiter)",
+        "sig_approved": "Anerkannt (Vertreter des Auftraggebers)",
+        "sig_name": "Name",
+        "sig_title": "Funktion",
+        "sig_date": "Datum",
+        "sig_signature": "Unterschrift",
+        "signed_note": "Im System unterzeichnet: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "bautagebuch",
+        "summary_wind": "Wind {value} km/h",
+        "summary_precipitation": "Niederschlag {value} mm",
+        "summary_humidity": "Luftfeuchte {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Besucher",
+          "event": "Ereignisse",
+          "delivery": "Materiallieferungen",
+          "completion": "Ausgeführte Arbeiten",
+          "incident_summary": "Sicherheit und Vorfälle",
+          "inspection_summary": "Prüfungen",
+          "photo_note": "Fotonotizen",
+          "general": "Allgemeine Notizen"
+        },
+        "status": {
+          "open": "Offen",
+          "closed": "Geschlossen",
+          "signed": "Unterzeichnet",
+          "archived": "Archiviert"
+        },
+        "condition": {
+          "clear": "klar",
+          "mainly_clear": "überwiegend klar",
+          "partly_cloudy": "wechselnd bewölkt",
+          "cloudy": "bewölkt",
+          "overcast": "bedeckt",
+          "fog": "Nebel",
+          "fog_rime": "gefrierender Nebel",
+          "drizzle_light": "leichter Nieselregen",
+          "drizzle_moderate": "mäßiger Nieselregen",
+          "drizzle_dense": "starker Nieselregen",
+          "rain": "Regen",
+          "rain_light": "leichter Regen",
+          "rain_moderate": "mäßiger Regen",
+          "rain_heavy": "starker Regen",
+          "freezing_rain_light": "leichter gefrierender Regen",
+          "freezing_rain_heavy": "starker gefrierender Regen",
+          "snow": "Schnee",
+          "snow_light": "leichter Schneefall",
+          "snow_moderate": "mäßiger Schneefall",
+          "snow_heavy": "starker Schneefall",
+          "rain_showers_light": "leichte Regenschauer",
+          "rain_showers_moderate": "mäßige Regenschauer",
+          "rain_showers_violent": "heftige Regenschauer",
+          "snow_showers_light": "leichte Schneeschauer",
+          "snow_showers_heavy": "starke Schneeschauer",
+          "thunderstorm": "Gewitter",
+          "thunderstorm_hail_light": "Gewitter mit leichtem Hagel",
+          "thunderstorm_hail_heavy": "Gewitter mit starkem Hagel"
+        },
+        "source": {
+          "manual": "Manuelle Eingabe",
+          "open_meteo": "Wetterdienst",
+          "sensor": "Baustellensensor"
+        }
+      }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Register der Freigabeeinreichungen",
+        "doc_title": "Freigabeeinreichung",
+        "doc_title_product_data": "Materialfreigabe",
+        "col_number": "Einreichung Nr.",
+        "col_title": "Titel",
+        "col_type": "Art",
+        "col_spec": "Leistungsverz.-Abschnitt",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Eingereicht am",
+        "col_date_required": "Benötigt bis",
+        "col_date_returned": "Zurück am",
+        "col_reviewer": "Prüfer",
+        "col_approver": "Freigebende Stelle",
+        "col_ball_in_court": "Am Zug",
+        "submitted_by_org": "Einreichende Firma",
+        "review_notes": "Prüfvermerke",
+        "no_review_notes": "Keine Prüfvermerke erfasst.",
+        "sig_submitted": "Eingereicht (Auftragnehmer)",
+        "sig_reviewed": "Geprüft",
+        "sig_approved": "Freigegeben",
+        "register_filename": "register-freigabeeinreichungen",
+        "register_title_shop_drawing": "Register der Werkstattpläne",
+        "register_title_product_data": "Register der Materialfreigaben",
+        "register_title_method_statement": "Register der Verfahrensbeschreibungen",
+        "register_filename_shop_drawing": "register-werkstattplaene",
+        "register_filename_product_data": "register-materialfreigaben",
+        "register_filename_method_statement": "register-verfahrensbeschreibungen",
+        "col_discipline": "Gewerk",
+        "col_manufacturer": "Hersteller / Marke",
+        "col_model": "Modell / Typ",
+        "col_origin": "Herkunftsland",
+        "col_supplier": "Lieferant",
+        "col_product": "Hersteller / Typ / Herkunft",
+        "col_review_code": "Prüfcode",
+        "col_outcome": "Prüfergebnis",
+        "col_review_period": "Prüffrist (Tage)",
+        "col_review_due": "Prüfung fällig",
+        "col_days_in_review": "Tage in Prüfung",
+        "col_days_in_review_print": "Tage in Prüfung",
+        "col_review_overdue": "Tage überfällig",
+        "col_required_on_site": "Bedarf auf der Baustelle",
+        "col_long_lead": "Lange Lieferzeit",
+        "col_lead_time": "Lieferzeit (Wochen)",
+        "col_needed_by": "Freigabe benötigt bis",
+        "col_approval_late": "Tage nach Termin",
+        "col_drawings": "Verknüpfte Pläne",
+        "col_submitted_returned": "Eingereicht / zurück",
+        "col_on_site_needed_by": "Auf Baustelle / Freigabe bis",
+        "resubmit_for_record": "Korrigierte Fassung zur Dokumentation erneut einzureichen",
+        "review_history": "Prüfverlauf",
+        "hist_submitted": "Eingereicht",
+        "hist_returned": "Zurückgegeben",
+        "drawings_missing_one": "{n} verknüpfter Plan nicht mehr verfügbar",
+        "drawings_missing_other": "{n} verknüpfte Pläne nicht mehr verfügbar",
+        "weeks_one": "{n} Woche",
+        "weeks_other": "{n} Wochen"
+      },
+      "labels": {
+        "status": {
+          "draft": "Entwurf",
+          "submitted": "Eingereicht",
+          "under_review": "In Prüfung",
+          "approved": "Freigegeben",
+          "approved_as_noted": "Freigegeben mit Anmerkungen",
+          "revise_and_resubmit": "Überarbeiten und erneut einreichen",
+          "rejected": "Abgelehnt",
+          "closed": "Abgeschlossen"
+        },
+        "type": {
+          "shop_drawing": "Werkstattplan",
+          "product_data": "Produktdatenblatt",
+          "sample": "Muster",
+          "mock_up": "Musterstück",
+          "test_report": "Prüfbericht",
+          "calculation": "Berechnung",
+          "method_statement": "Verfahrensbeschreibung",
+          "certificate": "Zertifikat",
+          "warranty": "Gewährleistung"
+        },
+        "discipline": {
+          "mechanical": "Maschinentechnik",
+          "hvac": "Lüftung/Klima",
+          "plumbing": "Sanitär und Entwässerung",
+          "fire_protection": "Brandschutz",
+          "electrical": "Elektro",
+          "lighting": "Beleuchtung",
+          "elv": "Schwachstrom",
+          "bms": "Gebäudeautomation",
+          "architectural": "Architektur",
+          "structural": "Tragwerk",
+          "civil": "Tiefbau"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Änderungsauftragsregister",
+        "doc_title": "Änderungsauftrag",
+        "col_code": "Code",
+        "col_title": "Titel",
+        "col_reason": "Grund",
+        "col_instrument": "Instrument",
+        "col_submitted": "Eingereicht am",
+        "col_contractor_amount": "Betrag Auftragnehmer",
+        "col_engineer_amount": "Betrag Fachplaner",
+        "col_approved_amount": "Freigegebener Betrag",
+        "col_cost_impact": "Kostenauswirkung",
+        "col_time_impact": "Terminauswirkung (Tage)",
+        "col_approved_time": "Bewilligte Zeit (Tage)",
+        "time_impact": "Terminauswirkung",
+        "approved_time": "Bewilligte Zeit",
+        "col_approved": "Freigegeben am",
+        "submitted_by": "Eingereicht",
+        "approved_by": "Freigegeben",
+        "description": "Beschreibung",
+        "no_description": "Keine Beschreibung erfasst.",
+        "items": "Änderungspositionen",
+        "item_description": "Beschreibung",
+        "item_change": "Änderung",
+        "item_unit": "Einheit",
+        "item_original_quantity": "Menge alt",
+        "item_new_quantity": "Menge neu",
+        "item_original_rate": "Preis alt",
+        "item_new_rate": "Preis neu",
+        "item_cost_delta": "Kostendifferenz",
+        "register_filename": "aenderungsauftraege-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Entwurf",
+          "submitted": "Eingereicht",
+          "approved": "Freigegeben",
+          "rejected": "Abgelehnt",
+          "executed": "Ausgeführt"
+        },
+        "reason": {
+          "client_request": "Wunsch des Auftraggebers",
+          "design_change": "Planänderung",
+          "unforeseen": "Unvorhergesehene Bedingungen",
+          "regulatory": "Behördliche Auflagen",
+          "error": "Fehler oder Auslassung",
+          "non_conformance": "Mangel",
+          "value_engineering": "Wertanalyse"
+        },
+        "instrument": {
+          "works_change": "Anordnung",
+          "site_confirmation": "Baustellenbestätigung",
+          "claim": "Nachforderung"
+        },
+        "change": {
+          "added": "Hinzugefügt",
+          "removed": "Entfallen",
+          "modified": "Geändert"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Nachweispaket",
+        "subject": "Betreff",
+        "basis": "Grundlage",
+        "period_from": "Frühester Eintrag",
+        "period_to": "Spätester Eintrag",
+        "digest": "Prüfsumme (SHA-256, erste 16 Zeichen)",
+        "col_row": "Nr.",
+        "col_record_id": "Eintrags-ID",
+        "col_section": "Bereich",
+        "col_date": "Datum",
+        "col_kind": "Eintragsart",
+        "col_title": "Titel",
+        "col_summary": "Zusammenfassung",
+        "col_reference": "Referenz",
+        "register_filename": "nachweispaket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Anzeigen",
+          "correspondence": "Schriftverkehr",
+          "rfis": "Anfragen (RFI)",
+          "variations": "Nachträge",
+          "approvals": "Freigaben",
+          "delay": "Verzug",
+          "timeline": "Zeitleiste",
+          "other": "Sonstiges"
+        },
+        "kind": {
+          "notice": "Anzeige",
+          "variation_notice": "Nachtragsankündigung",
+          "variation_request": "Nachtragsantrag",
+          "variation_order": "Nachtragsauftrag",
+          "change_order": "Änderungsauftrag",
+          "moc_entry": "Änderungsvermerk",
+          "correspondence": "Schriftverkehr"
+        },
+        "basis": {
+          "dispute": "Streitfall",
+          "valuation": "Bewertung",
+          "delay": "Verzug / Fristverlängerung",
+          "general": "Allgemeine Dokumentation"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Schriftverkehrsverzeichnis",
+        "doc_title": "Schriftverkehr",
+        "col_reference": "Aktenzeichen",
+        "col_direction": "Richtung",
+        "col_type": "Art",
+        "col_subject": "Betreff",
+        "col_from": "Von",
+        "col_to": "An",
+        "col_date_sent": "Versanddatum",
+        "col_date_received": "Eingangsdatum",
+        "col_response_due": "Antwort erforderlich bis",
+        "col_clause": "Vertragsklausel",
+        "notes": "Anmerkungen",
+        "no_notes": "Keine Anmerkungen erfasst.",
+        "attachments": "Anlagen",
+        "linked_documents": "Verknüpfte Dokumente",
+        "sig_prepared": "Erstellt",
+        "sig_received": "Empfangen",
+        "register_filename": "schriftverkehrsverzeichnis"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Eingang",
+          "outgoing": "Ausgang"
+        },
+        "type": {
+          "letter": "Brief",
+          "email": "E-Mail",
+          "notice": "Anzeige",
+          "memo": "Aktennotiz",
+          "report": "Bericht"
+        },
+        "status": {
+          "open": "Offen",
+          "awaiting_response": "Antwort ausstehend",
+          "responded": "Beantwortet",
+          "closed": "Abgeschlossen"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Transmittal-Register",
+        "doc_title": "Transmittal",
+        "col_number": "Transmittal Nr.",
+        "col_subject": "Betreff",
+        "col_purpose": "Zweck",
+        "col_issued": "Ausgabedatum",
+        "col_response_due": "Antwort fällig",
+        "col_recipients": "Empfänger",
+        "col_item_count": "Positionen",
+        "sender": "Absender",
+        "cover_note": "Begleitschreiben",
+        "no_cover_note": "Kein Begleitschreiben.",
+        "recipients": "Empfänger",
+        "recipient": "Empfänger",
+        "action_required": "Maßnahme erforderlich",
+        "acknowledged": "Empfang bestätigt",
+        "responded": "Beantwortet am",
+        "items": "Übermittelte Unterlagen",
+        "item_no": "Nr.",
+        "item_description": "Beschreibung",
+        "item_notes": "Anmerkungen",
+        "sig_issued": "Ausgegeben",
+        "sig_received": "Empfangen",
+        "register_filename": "transmittal-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Entwurf",
+          "issued": "Ausgegeben",
+          "responded": "Beantwortet"
+        },
+        "purpose": {
+          "for_approval": "Zur Freigabe",
+          "for_review": "Zur Prüfung",
+          "for_information": "Zur Information",
+          "for_construction": "Zur Ausführung",
+          "for_tender": "Zur Ausschreibung",
+          "for_record": "Zur Dokumentation"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Nachtragsregister",
+        "claim_register_title": "Register der Nachforderungen",
+        "notice_register_title": "Anzeigenregister",
+        "doc_title": "Nachtragsantrag",
+        "doc_title_credit": "Nachtragsantrag (Minderleistung)",
+        "time_impact": "Terminauswirkung",
+        "col_code": "Code",
+        "col_title": "Titel",
+        "col_classification": "Art",
+        "col_urgency": "Dringlichkeit",
+        "col_requested": "Beantragt am",
+        "col_claimed_amount": "Geforderter Betrag",
+        "col_agreed_amount": "Vereinbarter Betrag",
+        "col_time_impact": "Terminauswirkung (Tage)",
+        "col_response_due": "Antwort fällig",
+        "col_clause": "Vertragsklausel",
+        "col_row": "Nr.",
+        "col_claim_type": "Art der Forderung",
+        "col_raised": "Erhoben am",
+        "col_period_start": "Zeitraum von",
+        "col_period_end": "Zeitraum bis",
+        "col_description": "Beschreibung",
+        "col_decided_amount": "Entschiedener Betrag",
+        "col_days_requested": "Beantragte Tage",
+        "col_days_granted": "Bewilligte Tage",
+        "col_recipient_type": "Adressiert an",
+        "col_recipient": "Empfänger",
+        "col_target_response": "Antwort erwartet",
+        "col_response_received": "Antwort erhalten",
+        "requested_by": "Beantragt",
+        "decided_by": "Entschieden",
+        "date_submitted": "Eingereicht am",
+        "date_decided": "Entschieden am",
+        "description": "Beschreibung",
+        "no_description": "Keine Beschreibung erfasst.",
+        "decision_notes": "Entscheidungsvermerke",
+        "no_decision_notes": "Noch keine Entscheidung erfasst.",
+        "variation_register_filename": "nachtragsregister",
+        "claim_register_filename": "nachforderungsregister",
+        "notice_register_filename": "anzeigenregister"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Entwurf",
+          "submitted": "Eingereicht",
+          "under_review": "In Prüfung",
+          "approved": "Genehmigt",
+          "rejected": "Abgelehnt",
+          "converted_to_vo": "In Auftrag überführt"
+        },
+        "claim_status": {
+          "draft": "Entwurf",
+          "submitted": "Eingereicht",
+          "under_review": "In Prüfung",
+          "agreed": "Vereinbart",
+          "granted": "Stattgegeben",
+          "rejected": "Abgelehnt"
+        },
+        "notice_status": {
+          "issued": "Ausgegeben",
+          "acknowledged": "Bestätigt",
+          "responded": "Beantwortet",
+          "closed": "Abgeschlossen"
+        },
+        "classification": {
+          "scope_change": "Leistungsänderung",
+          "unforeseen": "Unvorhergesehene Bedingung",
+          "owner_change": "Änderung durch Bauherrn",
+          "design_dev": "Planungsfortschreibung",
+          "regulatory": "Behördliche Auflagen",
+          "other": "Sonstiges"
+        },
+        "urgency": {
+          "low": "Niedrig",
+          "med": "Mittel",
+          "high": "Hoch"
+        },
+        "claim_type": {
+          "disruption": "Behinderung",
+          "eot": "Fristverlängerung"
+        },
+        "recipient_type": {
+          "owner": "Bauherr",
+          "contractor": "Auftragnehmer",
+          "architect": "Architekt",
+          "engineer": "Ingenieur",
+          "consultant": "Berater"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "RFI-Verzeichnis",
+        "col_number": "RFI-Nr.",
+        "col_subject": "Betreff",
+        "col_raised_by": "Gestellt von",
+        "col_assigned_to": "Zugewiesen an",
+        "col_ball_in_court": "Am Zug",
+        "col_date_required": "Benötigt bis",
+        "col_response_due": "Antwort fällig",
+        "col_days_open": "Tage offen",
+        "col_cost_impact": "Kostenauswirkung",
+        "col_schedule_impact": "Terminauswirkung",
+        "col_response": "Antwort",
+        "yes_with": "Ja ({detail})",
+        "register_filename": "rfi-verzeichnis"
+      },
+      "labels": {
+        "status": {
+          "draft": "Entwurf",
+          "open": "Offen",
+          "answered": "Beantwortet",
+          "closed": "Geschlossen",
+          "void": "Ungültig"
+        }
+      }
     }
   },
   "cost_control": {

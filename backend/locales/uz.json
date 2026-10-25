@@ -618,5 +618,539 @@
       "draft": "Qoralama",
       "frozen": "Muzlatilgan"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Loyiha",
+      "project_no": "Loyiha raqami",
+      "generated_on": "Yaratilgan sana",
+      "records": "Yozuvlar",
+      "currency": "Valyuta",
+      "status": "Holati",
+      "name": "Nomi",
+      "signature": "Imzo",
+      "date": "Sana",
+      "signatures": "Imzolar",
+      "yes": "Ha",
+      "no": "Yoʻq",
+      "days_one": "{n} kun",
+      "days_other": "{n} kun",
+      "empty_register": "Yozuvlar yoʻq.",
+      "total": "Jami",
+      "signer_title": "Lavozimi",
+      "sig_prepared_by": "Tayyorlagan",
+      "sig_checked_by": "Tekshirgan",
+      "sig_approved_by": "Tasdiqlagan",
+      "footer_generated": "Yaratilgan vaqt: {timestamp}",
+      "footer_page": "{page} / {total}-bet"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Tasdiqlash uchun hujjatlar reyestri",
+        "doc_title": "Tasdiqlash uchun hujjat",
+        "doc_title_product_data": "Materialni tasdiqlash varaqasi",
+        "col_number": "Hujjat raqami",
+        "col_title": "Nomi",
+        "col_type": "Turi",
+        "col_spec": "Spetsifikatsiya boʻlimi",
+        "col_rev": "Tahr.",
+        "col_date_submitted": "Topshirilgan sana",
+        "col_date_required": "Talab etilgan sana",
+        "col_date_returned": "Qaytarilgan sana",
+        "col_reviewer": "Koʻrib chiquvchi",
+        "col_approver": "Tasdiqlovchi",
+        "col_ball_in_court": "Navbatdagi ijrochi",
+        "submitted_by_org": "Topshiruvchi kompaniya",
+        "review_notes": "Koʻrib chiquvchi izohlari",
+        "no_review_notes": "Koʻrib chiquvchi izohlari qayd etilmagan.",
+        "sig_submitted": "Topshirish",
+        "sig_reviewed": "Koʻrib chiqish",
+        "sig_approved": "Tasdiqlash",
+        "register_filename": "tasdiqlash-hujjatlari-reyestri",
+        "register_title_shop_drawing": "Ishchi chizmalar reyestri",
+        "register_title_product_data": "Materiallarni tasdiqlash reyestri",
+        "register_title_method_statement": "Ish bajarish uslubiyotlari reyestri",
+        "register_filename_shop_drawing": "ishchi-chizmalar-reyestri",
+        "register_filename_product_data": "materiallarni-tasdiqlash-reyestri",
+        "register_filename_method_statement": "ish-bajarish-uslubiyotlari-reyestri",
+        "col_discipline": "Yoʻnalish",
+        "col_manufacturer": "Ishlab chiqaruvchi / brend",
+        "col_model": "Model / artikul",
+        "col_origin": "Ishlab chiqarilgan davlat",
+        "col_supplier": "Yetkazib beruvchi",
+        "col_product": "Ishlab chiqaruvchi / model / davlat",
+        "col_review_code": "Koʻrib chiqish kodi",
+        "col_outcome": "Koʻrib chiqish natijasi",
+        "col_review_period": "Koʻrib chiqish muddati (kun)",
+        "col_review_due": "Koʻrib chiqish muddati tugashi",
+        "col_days_in_review": "Koʻrib chiqishdagi kunlar",
+        "col_days_in_review_print": "Koʻrib chiqishdagi kunlar",
+        "col_review_overdue": "Kechikkan kunlar",
+        "col_required_on_site": "Obyektda kerak",
+        "col_long_lead": "Uzoq yetkazish muddati",
+        "col_lead_time": "Yetkazish muddati (hafta)",
+        "col_needed_by": "Tasdiqlash muddati",
+        "col_approval_late": "Muddatdan oshgan kunlar",
+        "col_drawings": "Bogʻliq chizmalar",
+        "col_submitted_returned": "Topshirildi / qaytarildi",
+        "col_on_site_needed_by": "Obyektda / tasdiqlash muddati",
+        "resubmit_for_record": "Tuzatilgan nusxa roʻyxatga olish uchun qayta topshirilsin",
+        "review_history": "Koʻrib chiqish tarixi",
+        "hist_submitted": "Topshirildi",
+        "hist_returned": "Qaytarildi",
+        "drawings_missing_one": "Bogʻliq {n} ta chizma endi mavjud emas",
+        "drawings_missing_other": "Bogʻliq {n} ta chizma endi mavjud emas",
+        "weeks_one": "{n} hafta",
+        "weeks_other": "{n} hafta"
+      },
+      "labels": {
+        "status": {
+          "draft": "Qoralama",
+          "submitted": "Topshirildi",
+          "under_review": "Koʻrib chiqilmoqda",
+          "approved": "Tasdiqlandi",
+          "approved_as_noted": "Izohlar bilan tasdiqlandi",
+          "revise_and_resubmit": "Tuzatib qayta topshirish",
+          "rejected": "Rad etildi",
+          "closed": "Yopildi"
+        },
+        "type": {
+          "shop_drawing": "Ishchi chizma",
+          "product_data": "Mahsulot maʼlumotlari",
+          "sample": "Namuna",
+          "mock_up": "Maket",
+          "test_report": "Sinov bayonnomasi",
+          "calculation": "Hisob-kitob",
+          "method_statement": "Ish bajarish uslubiyoti",
+          "certificate": "Sertifikat",
+          "warranty": "Kafolat"
+        },
+        "discipline": {
+          "mechanical": "Mexanika",
+          "hvac": "Isitish va shamollatish",
+          "plumbing": "Suv taʼminoti va kanalizatsiya",
+          "fire_protection": "Yongʻindan himoya",
+          "electrical": "Elektr jihozlari",
+          "lighting": "Yoritish",
+          "elv": "Past kuchlanishli tizimlar",
+          "bms": "Bino avtomatikasi",
+          "architectural": "Arxitektura",
+          "structural": "Konstruksiyalar",
+          "civil": "Qurilish-muhandislik qismi"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Oʻzgartirish buyruqlari reyestri",
+        "doc_title": "Oʻzgartirish buyrugʻi",
+        "col_code": "Kodi",
+        "col_title": "Nomi",
+        "col_reason": "Sababi",
+        "col_instrument": "Hujjat turi",
+        "col_submitted": "Topshirilgan sana",
+        "col_contractor_amount": "Pudratchi summasi",
+        "col_engineer_amount": "Muhandis summasi",
+        "col_approved_amount": "Tasdiqlangan summa",
+        "col_cost_impact": "Qiymatga taʼsiri",
+        "col_time_impact": "Muddatga taʼsiri (kun)",
+        "col_approved_time": "Tasdiqlangan muddat (kun)",
+        "time_impact": "Muddatga taʼsiri",
+        "approved_time": "Tasdiqlangan muddat",
+        "col_approved": "Tasdiqlangan sana",
+        "submitted_by": "Topshirgan",
+        "approved_by": "Tasdiqlagan",
+        "description": "Tavsifi",
+        "no_description": "Tavsif qayd etilmagan.",
+        "items": "Oʻzgarish bandlari",
+        "item_description": "Tavsifi",
+        "item_change": "Oʻzgarish",
+        "item_unit": "Oʻlchov birligi",
+        "item_original_quantity": "Dastlabki miqdor",
+        "item_new_quantity": "Yangi miqdor",
+        "item_original_rate": "Dastlabki narx",
+        "item_new_rate": "Yangi narx",
+        "item_cost_delta": "Qiymat farqi",
+        "register_filename": "ozgartirish-buyruqlari-reyestri"
+      },
+      "labels": {
+        "status": {
+          "draft": "Qoralama",
+          "submitted": "Topshirildi",
+          "approved": "Tasdiqlandi",
+          "rejected": "Rad etildi",
+          "executed": "Bajarildi"
+        },
+        "reason": {
+          "client_request": "Buyurtmachi talabi",
+          "design_change": "Loyiha oʻzgarishi",
+          "unforeseen": "Kutilmagan holatlar",
+          "regulatory": "Meʼyoriy talab",
+          "error": "Xato yoki kamchilik",
+          "non_conformance": "Nomuvofiqlik",
+          "value_engineering": "Qiymat muhandisligi"
+        },
+        "instrument": {
+          "works_change": "Topshiriq boʻyicha oʻzgarish",
+          "site_confirmation": "Obyektda tasdiqlash",
+          "claim": "Daʼvo talabi"
+        },
+        "change": {
+          "added": "Qoʻshildi",
+          "removed": "Chiqarildi",
+          "modified": "Oʻzgartirildi"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dalillar toʻplami",
+        "subject": "Mavzu",
+        "basis": "Asos",
+        "period_from": "Eng dastlabki yozuv",
+        "period_to": "Eng oxirgi yozuv",
+        "digest": "Yaxlitlik kodi (SHA-256, dastlabki 16 belgi)",
+        "col_row": "№",
+        "col_record_id": "Yozuv ID",
+        "col_section": "Boʻlim",
+        "col_date": "Sana",
+        "col_kind": "Yozuv turi",
+        "col_title": "Nomi",
+        "col_summary": "Qisqacha mazmuni",
+        "col_reference": "Havola",
+        "register_filename": "dalillar-toplami"
+      },
+      "labels": {
+        "section": {
+          "notices": "Xabarnomalar",
+          "correspondence": "Yozishmalar",
+          "rfis": "Axborot soʻrovlari (RFI)",
+          "variations": "Oʻzgartirishlar",
+          "approvals": "Tasdiqlashlar",
+          "delay": "Kechikish",
+          "timeline": "Xronologiya",
+          "other": "Boshqa"
+        },
+        "kind": {
+          "notice": "Xabarnoma",
+          "variation_notice": "Oʻzgartirish xabarnomasi",
+          "variation_request": "Oʻzgartirish soʻrovi",
+          "variation_order": "Oʻzgartirish buyrugʻi",
+          "change_order": "Oʻzgarishlar buyrugʻi",
+          "moc_entry": "Oʻzgarish yozuvi",
+          "correspondence": "Yozishma"
+        },
+        "basis": {
+          "dispute": "Nizo",
+          "valuation": "Baholash",
+          "delay": "Kechikish / muddatni uzaytirish",
+          "general": "Umumiy yozuv"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Yozishmalar jurnali",
+        "doc_title": "Yozishma",
+        "col_reference": "Havola raqami",
+        "col_direction": "Yoʻnalishi",
+        "col_type": "Turi",
+        "col_subject": "Mavzu",
+        "col_from": "Kimdan",
+        "col_to": "Kimga",
+        "col_date_sent": "Yuborilgan sana",
+        "col_date_received": "Qabul qilingan sana",
+        "col_response_due": "Javob muddati",
+        "col_clause": "Shartnoma bandi",
+        "notes": "Izohlar",
+        "no_notes": "Izohlar qayd etilmagan.",
+        "attachments": "Biriktirilgan fayllar",
+        "linked_documents": "Bogʻliq hujjatlar",
+        "sig_prepared": "Tayyorlagan",
+        "sig_received": "Qabul qilgan",
+        "register_filename": "yozishmalar-jurnali"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Kiruvchi",
+          "outgoing": "Chiquvchi"
+        },
+        "type": {
+          "letter": "Xat",
+          "email": "Elektron pochta",
+          "notice": "Xabarnoma",
+          "memo": "Xizmat yozuvi",
+          "report": "Hisobot"
+        },
+        "status": {
+          "open": "Ochiq",
+          "awaiting_response": "Javob kutilmoqda",
+          "responded": "Javob berildi",
+          "closed": "Yopildi"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Yuboruv xatlari reyestri",
+        "doc_title": "Yuboruv xati",
+        "col_number": "Yuboruv xati raqami",
+        "col_subject": "Mavzu",
+        "col_purpose": "Maqsadi",
+        "col_issued": "Berilgan sana",
+        "col_response_due": "Javob muddati",
+        "col_recipients": "Qabul qiluvchilar",
+        "col_item_count": "Bandlar",
+        "sender": "Yuboruvchi",
+        "cover_note": "Hamroh xat",
+        "no_cover_note": "Hamroh xat yoʻq.",
+        "recipients": "Qabul qiluvchilar",
+        "recipient": "Qabul qiluvchi",
+        "action_required": "Talab etilgan harakat",
+        "acknowledged": "Qabul qilingani tasdiqlandi",
+        "responded": "Javob sanasi",
+        "items": "Yuborilgan hujjatlar",
+        "item_no": "№",
+        "item_description": "Tavsifi",
+        "item_notes": "Izohlar",
+        "sig_issued": "Bergan",
+        "sig_received": "Qabul qilgan",
+        "register_filename": "yuboruv-xatlari-reyestri"
+      },
+      "labels": {
+        "status": {
+          "draft": "Qoralama",
+          "issued": "Berildi",
+          "responded": "Javob berildi"
+        },
+        "purpose": {
+          "for_approval": "Tasdiqlash uchun",
+          "for_review": "Koʻrib chiqish uchun",
+          "for_information": "Maʼlumot uchun",
+          "for_construction": "Qurilish uchun",
+          "for_tender": "Tender uchun",
+          "for_record": "Roʻyxatga olish uchun"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Oʻzgartirishlar reyestri",
+        "claim_register_title": "Daʼvolar reyestri",
+        "notice_register_title": "Xabarnomalar reyestri",
+        "doc_title": "Oʻzgartirish soʻrovi",
+        "doc_title_credit": "Oʻzgartirish soʻrovi (ish hajmini qisqartirish)",
+        "time_impact": "Muddatga taʼsiri",
+        "col_code": "Kodi",
+        "col_title": "Nomi",
+        "col_classification": "Turi",
+        "col_urgency": "Shoshilinchligi",
+        "col_requested": "Soʻralgan sana",
+        "col_claimed_amount": "Talab qilingan summa",
+        "col_agreed_amount": "Kelishilgan summa",
+        "col_time_impact": "Muddatga taʼsiri (kun)",
+        "col_response_due": "Javob muddati",
+        "col_clause": "Shartnoma bandi",
+        "col_row": "№",
+        "col_claim_type": "Daʼvo turi",
+        "col_raised": "Bildirilgan sana",
+        "col_period_start": "Davr boshi",
+        "col_period_end": "Davr oxiri",
+        "col_description": "Tavsifi",
+        "col_decided_amount": "Qaror qilingan summa",
+        "col_days_requested": "Soʻralgan kunlar",
+        "col_days_granted": "Berilgan kunlar",
+        "col_recipient_type": "Kimga qaratilgan",
+        "col_recipient": "Qabul qiluvchi",
+        "col_target_response": "Kutilayotgan javob",
+        "col_response_received": "Javob olingan",
+        "requested_by": "Soʻragan",
+        "decided_by": "Qaror qabul qilgan",
+        "date_submitted": "Topshirilgan sana",
+        "date_decided": "Qaror sanasi",
+        "description": "Tavsifi",
+        "no_description": "Tavsif qayd etilmagan.",
+        "decision_notes": "Qaror izohlari",
+        "no_decision_notes": "Qaror hali qabul qilinmagan.",
+        "variation_register_filename": "ozgartirishlar-reyestri",
+        "claim_register_filename": "davolar-reyestri",
+        "notice_register_filename": "xabarnomalar-reyestri"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Qoralama",
+          "submitted": "Topshirildi",
+          "under_review": "Koʻrib chiqilmoqda",
+          "approved": "Tasdiqlandi",
+          "rejected": "Rad etildi",
+          "converted_to_vo": "Buyruqqa aylantirildi"
+        },
+        "claim_status": {
+          "draft": "Qoralama",
+          "submitted": "Topshirildi",
+          "under_review": "Koʻrib chiqilmoqda",
+          "agreed": "Kelishildi",
+          "granted": "Qanoatlantirildi",
+          "rejected": "Rad etildi"
+        },
+        "notice_status": {
+          "issued": "Berildi",
+          "acknowledged": "Qabul qilingani tasdiqlandi",
+          "responded": "Javob berildi",
+          "closed": "Yopildi"
+        },
+        "classification": {
+          "scope_change": "Hajm oʻzgarishi",
+          "unforeseen": "Kutilmagan holat",
+          "owner_change": "Buyurtmachi oʻzgartirishi",
+          "design_dev": "Loyihani ishlab chiqish",
+          "regulatory": "Meʼyoriy talab",
+          "other": "Boshqa"
+        },
+        "urgency": {
+          "low": "Past",
+          "med": "Oʻrta",
+          "high": "Yuqori"
+        },
+        "claim_type": {
+          "disruption": "Ish jarayonining buzilishi",
+          "eot": "Muddatni uzaytirish"
+        },
+        "recipient_type": {
+          "owner": "Buyurtmachi",
+          "contractor": "Pudratchi",
+          "architect": "Arxitektor",
+          "engineer": "Muhandis",
+          "consultant": "Maslahatchi"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Qurilish maydoni kundaligi",
+        "overview": "Umumiy koʻrinish",
+        "site_supervisor": "Obyekt rahbari",
+        "not_recorded": "Qayd etilmagan",
+        "labour_on_site": "Obyektdagi ishchi kuchi",
+        "equipment_on_site": "Obyektdagi texnika",
+        "completeness": "Toʻliqlik",
+        "weather": "Ob-havo",
+        "weather_time": "Vaqti",
+        "weather_source": "Manba",
+        "weather_temp": "Harorat (C)",
+        "weather_wind": "Shamol (km/soat)",
+        "weather_precip": "Yogʻin (mm)",
+        "weather_conditions": "Holati",
+        "weather_empty": "Bu kun uchun ob-havo qayd etilmagan.",
+        "site_record": "Obyekt yozuvi",
+        "entries_empty": "Bu kundalikda yozuvlar yoʻq.",
+        "notes": "Izohlar",
+        "notes_empty": "Qoʻshimcha izohlar yoʻq.",
+        "footer_supervisor": "Rahbar: {name}",
+        "footer_supervisor_missing": "Obyekt rahbari: qayd etilmagan",
+        "footer_generated": "Yaratilgan vaqt: {timestamp}",
+        "footer_page": "{page} / {total}-bet",
+        "workforce": "Kompaniyalar kesimida ishchi kuchi",
+        "workforce_company": "Kompaniya",
+        "workforce_count": "Kishi soni",
+        "workforce_unassigned": "Kompaniyaga biriktirilmagan",
+        "workforce_total": "Jami",
+        "signatures": "Imzolar",
+        "sig_prepared": "Tayyorlagan (obyekt rahbari)",
+        "sig_approved": "Tasdiqlagan (buyurtmachi vakili)",
+        "sig_name": "F.I.Sh.",
+        "sig_title": "Lavozimi",
+        "sig_date": "Sana",
+        "sig_signature": "Imzo",
+        "signed_note": "Tizimda imzolandi: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "kundalik",
+        "summary_wind": "shamol {value} km/soat",
+        "summary_precipitation": "yogʻin {value} mm",
+        "summary_humidity": "namlik {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Tashrif buyuruvchilar",
+          "event": "Voqealar",
+          "delivery": "Yetkazilgan materiallar",
+          "completion": "Bajarilgan ishlar",
+          "incident_summary": "Xavfsizlik va hodisalar",
+          "inspection_summary": "Tekshiruvlar",
+          "photo_note": "Foto izohlar",
+          "general": "Umumiy izohlar"
+        },
+        "status": {
+          "open": "Ochiq",
+          "closed": "Yopiq",
+          "signed": "Imzolangan",
+          "archived": "Arxivlangan"
+        },
+        "condition": {
+          "clear": "ochiq",
+          "mainly_clear": "asosan ochiq",
+          "partly_cloudy": "qisman bulutli",
+          "cloudy": "bulutli",
+          "overcast": "qalin bulutli",
+          "fog": "tuman",
+          "fog_rime": "qirovli tuman",
+          "drizzle_light": "yengil mayda yomgʻir",
+          "drizzle_moderate": "oʻrtacha mayda yomgʻir",
+          "drizzle_dense": "kuchli mayda yomgʻir",
+          "rain": "yomgʻir",
+          "rain_light": "yengil yomgʻir",
+          "rain_moderate": "oʻrtacha yomgʻir",
+          "rain_heavy": "kuchli yomgʻir",
+          "freezing_rain_light": "yengil muzlovchi yomgʻir",
+          "freezing_rain_heavy": "kuchli muzlovchi yomgʻir",
+          "snow": "qor",
+          "snow_light": "yengil qor",
+          "snow_moderate": "oʻrtacha qor",
+          "snow_heavy": "qalin qor",
+          "rain_showers_light": "yengil jala",
+          "rain_showers_moderate": "oʻrtacha jala",
+          "rain_showers_violent": "kuchli jala",
+          "snow_showers_light": "yengil qisqa muddatli qor",
+          "snow_showers_heavy": "qalin qisqa muddatli qor",
+          "thunderstorm": "momaqaldiroq",
+          "thunderstorm_hail_light": "yengil doʻlli momaqaldiroq",
+          "thunderstorm_hail_heavy": "kuchli doʻlli momaqaldiroq"
+        },
+        "source": {
+          "manual": "Qoʻlda kiritilgan",
+          "open_meteo": "Ob-havo xizmati",
+          "sensor": "Obyekt datchigi"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Axborot soʻrovlari jurnali (RFI)",
+        "col_number": "RFI raqami",
+        "col_subject": "Mavzu",
+        "col_raised_by": "Yuborgan",
+        "col_assigned_to": "Masʼul",
+        "col_ball_in_court": "Navbatdagi ijrochi",
+        "col_date_required": "Talab etilgan sana",
+        "col_response_due": "Javob muddati",
+        "col_days_open": "Ochiq kunlar",
+        "col_cost_impact": "Qiymatga taʼsiri",
+        "col_schedule_impact": "Jadvalga taʼsiri",
+        "col_response": "Javob",
+        "yes_with": "Ha ({detail})",
+        "register_filename": "rfi-jurnali"
+      },
+      "labels": {
+        "status": {
+          "draft": "Qoralama",
+          "open": "Ochiq",
+          "answered": "Javob berilgan",
+          "closed": "Yopilgan",
+          "void": "Bekor qilingan"
+        }
+      }
+    }
   }
 }

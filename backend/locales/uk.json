@@ -618,5 +618,539 @@
       "draft": "Чернетка",
       "frozen": "Заморожено"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Проєкт",
+      "project_no": "№ проєкту",
+      "generated_on": "Дата формування",
+      "records": "Записи",
+      "currency": "Валюта",
+      "status": "Статус",
+      "name": "ПІБ",
+      "signature": "Підпис",
+      "date": "Дата",
+      "signatures": "Підписи",
+      "yes": "Так",
+      "no": "Ні",
+      "days_one": "{n} дн.",
+      "days_other": "{n} дн.",
+      "empty_register": "Записів немає.",
+      "total": "Разом",
+      "signer_title": "Посада",
+      "sig_prepared_by": "Підготовка",
+      "sig_checked_by": "Перевірка",
+      "sig_approved_by": "Затвердження",
+      "footer_generated": "Сформовано {timestamp}",
+      "footer_page": "Сторінка {page} з {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Реєстр подань на погодження",
+        "doc_title": "Подання на погодження",
+        "doc_title_product_data": "Бланк погодження матеріалу",
+        "col_number": "№ подання",
+        "col_title": "Назва",
+        "col_type": "Тип",
+        "col_spec": "Розділ специфікації",
+        "col_rev": "Ред.",
+        "col_date_submitted": "Дата подання",
+        "col_date_required": "Потрібна дата",
+        "col_date_returned": "Дата повернення",
+        "col_reviewer": "Рецензент",
+        "col_approver": "Погоджувач",
+        "col_ball_in_court": "Хід за",
+        "submitted_by_org": "Компанія-заявник",
+        "review_notes": "Зауваження рецензента",
+        "no_review_notes": "Зауважень рецензента не зафіксовано.",
+        "sig_submitted": "Подання",
+        "sig_reviewed": "Розгляд",
+        "sig_approved": "Погодження",
+        "register_filename": "reiestr-podan-na-pohodzhennia",
+        "register_title_shop_drawing": "Реєстр робочих креслень",
+        "register_title_product_data": "Реєстр погодження матеріалів",
+        "register_title_method_statement": "Реєстр методик виконання робіт",
+        "register_filename_shop_drawing": "reiestr-robochykh-kreslen",
+        "register_filename_product_data": "reiestr-pohodzhennia-materialiv",
+        "register_filename_method_statement": "reiestr-metodyk-vykonannia-robit",
+        "col_discipline": "Розділ",
+        "col_manufacturer": "Виробник / марка",
+        "col_model": "Модель / артикул",
+        "col_origin": "Країна походження",
+        "col_supplier": "Постачальник",
+        "col_product": "Виробник / модель / походження",
+        "col_review_code": "Код розгляду",
+        "col_outcome": "Результат розгляду",
+        "col_review_period": "Термін розгляду (дні)",
+        "col_review_due": "Розгляд до",
+        "col_days_in_review": "Днів на розгляді",
+        "col_days_in_review_print": "Днів на розгляді",
+        "col_review_overdue": "Днів прострочення",
+        "col_required_on_site": "Потрібно на об'єкті",
+        "col_long_lead": "Тривала поставка",
+        "col_lead_time": "Термін поставки (тижні)",
+        "col_needed_by": "Погодити до",
+        "col_approval_late": "Днів після строку",
+        "col_drawings": "Пов'язані креслення",
+        "col_submitted_returned": "Подано / повернено",
+        "col_on_site_needed_by": "На об'єкті / погодити до",
+        "resubmit_for_record": "Виправлений примірник подати повторно для обліку",
+        "review_history": "Історія розгляду",
+        "hist_submitted": "Подано",
+        "hist_returned": "Повернено",
+        "drawings_missing_one": "{n} пов'язане креслення більше недоступне",
+        "drawings_missing_other": "{n} пов'язаних креслень більше недоступні",
+        "weeks_one": "{n} тиждень",
+        "weeks_other": "{n} тиж."
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "under_review": "На розгляді",
+          "approved": "Погоджено",
+          "approved_as_noted": "Погоджено із зауваженнями",
+          "revise_and_resubmit": "Доопрацювати й подати повторно",
+          "rejected": "Відхилено",
+          "closed": "Закрито"
+        },
+        "type": {
+          "shop_drawing": "Робоче креслення",
+          "product_data": "Технічні дані виробу",
+          "sample": "Зразок",
+          "mock_up": "Макет",
+          "test_report": "Протокол випробувань",
+          "calculation": "Розрахунок",
+          "method_statement": "Методика виконання робіт",
+          "certificate": "Сертифікат",
+          "warranty": "Гарантія"
+        },
+        "discipline": {
+          "mechanical": "Механічні системи",
+          "hvac": "ОВК",
+          "plumbing": "Водопостачання та водовідведення",
+          "fire_protection": "Пожежний захист",
+          "electrical": "Електрика",
+          "lighting": "Освітлення",
+          "elv": "Слабкострумові системи",
+          "bms": "Автоматизація будівлі",
+          "architectural": "Архітектура",
+          "structural": "Конструкції",
+          "civil": "Загальнобудівельні роботи"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Реєстр розпоряджень про зміну",
+        "doc_title": "Розпорядження про зміну",
+        "col_code": "Код",
+        "col_title": "Назва",
+        "col_reason": "Причина",
+        "col_instrument": "Інструмент",
+        "col_submitted": "Дата подання",
+        "col_contractor_amount": "Сума підрядника",
+        "col_engineer_amount": "Сума інженера",
+        "col_approved_amount": "Погоджена сума",
+        "col_cost_impact": "Вплив на вартість",
+        "col_time_impact": "Вплив на строки (дні)",
+        "col_approved_time": "Погоджений строк (дні)",
+        "time_impact": "Вплив на строки",
+        "approved_time": "Погоджений строк",
+        "col_approved": "Дата погодження",
+        "submitted_by": "Подання",
+        "approved_by": "Погодження",
+        "description": "Опис",
+        "no_description": "Опису не зафіксовано.",
+        "items": "Позиції зміни",
+        "item_description": "Опис",
+        "item_change": "Зміна",
+        "item_unit": "Од. вим.",
+        "item_original_quantity": "Початк. к-сть",
+        "item_new_quantity": "Нова к-сть",
+        "item_original_rate": "Початкова ціна",
+        "item_new_rate": "Нова ціна",
+        "item_cost_delta": "Різниця вартості",
+        "register_filename": "reiestr-rozporiadzhen-pro-zminu"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "approved": "Погоджено",
+          "rejected": "Відхилено",
+          "executed": "Виконано"
+        },
+        "reason": {
+          "client_request": "Запит замовника",
+          "design_change": "Зміна проєкту",
+          "unforeseen": "Непередбачені умови",
+          "regulatory": "Вимоги регуляторів",
+          "error": "Помилка або упущення",
+          "non_conformance": "Невідповідність",
+          "value_engineering": "Оптимізація вартості"
+        },
+        "instrument": {
+          "works_change": "Доручена зміна",
+          "site_confirmation": "Підтвердження на об'єкті",
+          "claim": "Претензія"
+        },
+        "change": {
+          "added": "Додано",
+          "removed": "Вилучено",
+          "modified": "Змінено"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Доказовий пакет",
+        "subject": "Предмет",
+        "basis": "Підстава",
+        "period_from": "Найраніший запис",
+        "period_to": "Найпізніший запис",
+        "digest": "Код цілісності (SHA-256, перші 16 символів)",
+        "col_row": "№",
+        "col_record_id": "ID запису",
+        "col_section": "Розділ",
+        "col_date": "Дата",
+        "col_kind": "Тип запису",
+        "col_title": "Назва",
+        "col_summary": "Зміст",
+        "col_reference": "Посилання",
+        "register_filename": "dokazovyi-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Повідомлення",
+          "correspondence": "Листування",
+          "rfis": "Запити (RFI)",
+          "variations": "Зміни",
+          "approvals": "Погодження",
+          "delay": "Затримка",
+          "timeline": "Хронологія",
+          "other": "Інше"
+        },
+        "kind": {
+          "notice": "Повідомлення",
+          "variation_notice": "Повідомлення про зміну",
+          "variation_request": "Запит на зміну",
+          "variation_order": "Розпорядження про зміну",
+          "change_order": "Наказ про зміну",
+          "moc_entry": "Запис про зміну",
+          "correspondence": "Листування"
+        },
+        "basis": {
+          "dispute": "Спір",
+          "valuation": "Оцінка вартості",
+          "delay": "Затримка / продовження строку",
+          "general": "Загальний запис"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Журнал листування",
+        "doc_title": "Листування",
+        "col_reference": "№ документа",
+        "col_direction": "Напрям",
+        "col_type": "Тип",
+        "col_subject": "Тема",
+        "col_from": "Від",
+        "col_to": "Кому",
+        "col_date_sent": "Дата відправлення",
+        "col_date_received": "Дата отримання",
+        "col_response_due": "Відповісти до",
+        "col_clause": "Пункт договору",
+        "notes": "Примітки",
+        "no_notes": "Приміток не зафіксовано.",
+        "attachments": "Додані файли",
+        "linked_documents": "Пов'язані документи",
+        "sig_prepared": "Підготовка",
+        "sig_received": "Отримання",
+        "register_filename": "zhurnal-lystuvannia"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Вхідний",
+          "outgoing": "Вихідний"
+        },
+        "type": {
+          "letter": "Лист",
+          "email": "Ел. лист",
+          "notice": "Повідомлення",
+          "memo": "Службова записка",
+          "report": "Звіт"
+        },
+        "status": {
+          "open": "Відкрито",
+          "awaiting_response": "Очікує відповіді",
+          "responded": "Відповідь надано",
+          "closed": "Закрито"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Реєстр передавальних відомостей",
+        "doc_title": "Передавальна відомість",
+        "col_number": "№ відомості",
+        "col_subject": "Тема",
+        "col_purpose": "Призначення",
+        "col_issued": "Дата видачі",
+        "col_response_due": "Відповісти до",
+        "col_recipients": "Адресати",
+        "col_item_count": "Позицій",
+        "sender": "Відправник",
+        "cover_note": "Супровідна примітка",
+        "no_cover_note": "Супровідної примітки немає.",
+        "recipients": "Адресати",
+        "recipient": "Адресат",
+        "action_required": "Потрібна дія",
+        "acknowledged": "Отримання підтверджено",
+        "responded": "Дата відповіді",
+        "items": "Передані позиції",
+        "item_no": "№",
+        "item_description": "Опис",
+        "item_notes": "Примітки",
+        "sig_issued": "Видача",
+        "sig_received": "Отримання",
+        "register_filename": "reiestr-peredavalnykh-vidomostei"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "issued": "Видано",
+          "responded": "Відповідь надано"
+        },
+        "purpose": {
+          "for_approval": "На погодження",
+          "for_review": "На розгляд",
+          "for_information": "До відома",
+          "for_construction": "До виконання робіт",
+          "for_tender": "Для тендеру",
+          "for_record": "Для обліку"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Реєстр змін",
+        "claim_register_title": "Реєстр претензій",
+        "notice_register_title": "Реєстр повідомлень",
+        "doc_title": "Запит на зміну",
+        "doc_title_credit": "Запит на зміну (зменшення)",
+        "time_impact": "Вплив на строки",
+        "col_code": "Код",
+        "col_title": "Назва",
+        "col_classification": "Тип",
+        "col_urgency": "Терміновість",
+        "col_requested": "Дата запиту",
+        "col_claimed_amount": "Заявлена сума",
+        "col_agreed_amount": "Узгоджена сума",
+        "col_time_impact": "Вплив на строки (дні)",
+        "col_response_due": "Відповісти до",
+        "col_clause": "Пункт договору",
+        "col_row": "№",
+        "col_claim_type": "Вид претензії",
+        "col_raised": "Дата подання",
+        "col_period_start": "Період з",
+        "col_period_end": "Період по",
+        "col_description": "Опис",
+        "col_decided_amount": "Визначена сума",
+        "col_days_requested": "Запитано днів",
+        "col_days_granted": "Надано днів",
+        "col_recipient_type": "Адресовано",
+        "col_recipient": "Адресат",
+        "col_target_response": "Очікувана відповідь",
+        "col_response_received": "Відповідь отримано",
+        "requested_by": "Запит",
+        "decided_by": "Рішення",
+        "date_submitted": "Дата подання",
+        "date_decided": "Дата рішення",
+        "description": "Опис",
+        "no_description": "Опису не зафіксовано.",
+        "decision_notes": "Примітки до рішення",
+        "no_decision_notes": "Рішення ще не зафіксовано.",
+        "variation_register_filename": "reiestr-zmin",
+        "claim_register_filename": "reiestr-pretenzii",
+        "notice_register_filename": "reiestr-povidomlen"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "under_review": "На розгляді",
+          "approved": "Погоджено",
+          "rejected": "Відхилено",
+          "converted_to_vo": "Перетворено на розпорядження"
+        },
+        "claim_status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "under_review": "На розгляді",
+          "agreed": "Узгоджено",
+          "granted": "Задоволено",
+          "rejected": "Відхилено"
+        },
+        "notice_status": {
+          "issued": "Видано",
+          "acknowledged": "Підтверджено",
+          "responded": "Відповідь надано",
+          "closed": "Закрито"
+        },
+        "classification": {
+          "scope_change": "Зміна обсягу",
+          "unforeseen": "Непередбачена умова",
+          "owner_change": "Зміна від замовника",
+          "design_dev": "Розвиток проєкту",
+          "regulatory": "Вимоги регуляторів",
+          "other": "Інше"
+        },
+        "urgency": {
+          "low": "Низька",
+          "med": "Середня",
+          "high": "Висока"
+        },
+        "claim_type": {
+          "disruption": "Порушення ходу робіт",
+          "eot": "Продовження строку"
+        },
+        "recipient_type": {
+          "owner": "Замовник",
+          "contractor": "Підрядник",
+          "architect": "Архітектор",
+          "engineer": "Інженер",
+          "consultant": "Консультант"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Журнал щоденних робіт",
+        "overview": "Загальні відомості",
+        "site_supervisor": "Керівник будівництва",
+        "not_recorded": "Не зафіксовано",
+        "labour_on_site": "Працівники на об'єкті",
+        "equipment_on_site": "Техніка на об'єкті",
+        "completeness": "Повнота",
+        "weather": "Погода",
+        "weather_time": "Час",
+        "weather_source": "Джерело",
+        "weather_temp": "Темп. (°C)",
+        "weather_wind": "Вітер (км/год)",
+        "weather_precip": "Опади (мм)",
+        "weather_conditions": "Умови",
+        "weather_empty": "Погоду за цей день не зафіксовано.",
+        "site_record": "Запис по об'єкту",
+        "entries_empty": "У цьому журналі записів немає.",
+        "notes": "Примітки",
+        "notes_empty": "Додаткових приміток немає.",
+        "footer_supervisor": "Керівник: {name}",
+        "footer_supervisor_missing": "Керівник будівництва: не зафіксовано",
+        "footer_generated": "Сформовано: {timestamp}",
+        "footer_page": "Сторінка {page} з {total}",
+        "workforce": "Працівники за компаніями",
+        "workforce_company": "Компанія",
+        "workforce_count": "Осіб",
+        "workforce_unassigned": "Без закріплення за компанією",
+        "workforce_total": "Разом",
+        "signatures": "Підписи",
+        "sig_prepared": "Підготовка (керівник будівництва)",
+        "sig_approved": "Затвердження (представник замовника)",
+        "sig_name": "ПІБ",
+        "sig_title": "Посада",
+        "sig_date": "Дата",
+        "sig_signature": "Підпис",
+        "signed_note": "Підписано в системі: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "zhurnal",
+        "summary_wind": "вітер {value} км/год",
+        "summary_precipitation": "опади {value} мм",
+        "summary_humidity": "вологість {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Відвідувачі",
+          "event": "Події",
+          "delivery": "Доставлені матеріали",
+          "completion": "Виконані роботи",
+          "incident_summary": "Безпека та інциденти",
+          "inspection_summary": "Перевірки",
+          "photo_note": "Фотонотатки",
+          "general": "Загальні примітки"
+        },
+        "status": {
+          "open": "Відкрито",
+          "closed": "Закрито",
+          "signed": "Підписано",
+          "archived": "В архіві"
+        },
+        "condition": {
+          "clear": "ясно",
+          "mainly_clear": "переважно ясно",
+          "partly_cloudy": "мінлива хмарність",
+          "cloudy": "хмарно",
+          "overcast": "похмуро",
+          "fog": "туман",
+          "fog_rime": "паморозний туман",
+          "drizzle_light": "слабка мряка",
+          "drizzle_moderate": "помірна мряка",
+          "drizzle_dense": "сильна мряка",
+          "rain": "дощ",
+          "rain_light": "слабкий дощ",
+          "rain_moderate": "помірний дощ",
+          "rain_heavy": "сильний дощ",
+          "freezing_rain_light": "слабкий крижаний дощ",
+          "freezing_rain_heavy": "сильний крижаний дощ",
+          "snow": "сніг",
+          "snow_light": "слабкий сніг",
+          "snow_moderate": "помірний сніг",
+          "snow_heavy": "сильний сніг",
+          "rain_showers_light": "слабка злива",
+          "rain_showers_moderate": "помірна злива",
+          "rain_showers_violent": "сильна злива",
+          "snow_showers_light": "слабкий снігопад",
+          "snow_showers_heavy": "сильний снігопад",
+          "thunderstorm": "гроза",
+          "thunderstorm_hail_light": "гроза зі слабким градом",
+          "thunderstorm_hail_heavy": "гроза із сильним градом"
+        },
+        "source": {
+          "manual": "Ручне введення",
+          "open_meteo": "Метеослужба",
+          "sensor": "Датчик на об'єкті"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Журнал запитів (RFI)",
+        "col_number": "№ RFI",
+        "col_subject": "Тема",
+        "col_raised_by": "Ініціатор",
+        "col_assigned_to": "Виконавець",
+        "col_ball_in_court": "Хід за",
+        "col_date_required": "Потрібна дата",
+        "col_response_due": "Відповісти до",
+        "col_days_open": "Днів відкрито",
+        "col_cost_impact": "Вплив на вартість",
+        "col_schedule_impact": "Вплив на строки",
+        "col_response": "Відповідь",
+        "yes_with": "Так ({detail})",
+        "register_filename": "zhurnal-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "open": "Відкрито",
+          "answered": "Відповідь надано",
+          "closed": "Закрито",
+          "void": "Анульовано"
+        }
+      }
+    }
   }
 }

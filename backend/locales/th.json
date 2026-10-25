@@ -618,5 +618,539 @@
       "draft": "ฉบับร่าง",
       "frozen": "ล็อกแล้ว"
     }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "ระบบสุขาภิบาล",
+          "fire_protection": "ระบบป้องกันอัคคีภัย",
+          "civil": "โยธา",
+          "bms": "ระบบอาคารอัตโนมัติ",
+          "hvac": "ระบบปรับอากาศ",
+          "lighting": "ระบบแสงสว่าง",
+          "mechanical": "เครื่องกล",
+          "architectural": "สถาปัตยกรรม",
+          "electrical": "ไฟฟ้า",
+          "structural": "โครงสร้าง",
+          "elv": "ระบบไฟฟ้ากระแสต่ำ"
+        },
+        "type": {
+          "sample": "ตัวอย่างวัสดุ",
+          "method_statement": "วิธีการทำงาน",
+          "shop_drawing": "แบบ Shop Drawing",
+          "mock_up": "Mock-up",
+          "certificate": "ใบรับรอง",
+          "test_report": "รายงานผลทดสอบ",
+          "calculation": "รายการคำนวณ",
+          "product_data": "ข้อมูลผลิตภัณฑ์",
+          "warranty": "ใบรับประกัน"
+        },
+        "status": {
+          "draft": "ฉบับร่าง",
+          "approved_as_noted": "อนุมัติตามหมายเหตุ",
+          "revise_and_resubmit": "แก้ไขและส่งใหม่",
+          "rejected": "ไม่อนุมัติ",
+          "under_review": "อยู่ระหว่างตรวจสอบ",
+          "closed": "ปิดแล้ว",
+          "submitted": "ส่งแล้ว",
+          "approved": "อนุมัติ"
+        }
+      },
+      "strings": {
+        "review_history": "ประวัติการตรวจสอบ",
+        "submitted_by_org": "บริษัทผู้ยื่น",
+        "doc_title": "เอกสารขออนุมัติ",
+        "col_on_site_needed_by": "เข้าไซต์ / อนุมัติภายใน",
+        "col_drawings": "แบบที่เกี่ยวข้อง",
+        "col_approval_late": "เกินกำหนด (วัน)",
+        "col_needed_by": "ต้องอนุมัติภายใน",
+        "col_lead_time": "ระยะเวลาสั่งของ (สัปดาห์)",
+        "sig_reviewed": "ผู้ตรวจสอบ",
+        "col_model": "รุ่น / อ้างอิง",
+        "col_discipline": "สาขางาน",
+        "col_date_submitted": "วันที่ส่ง",
+        "col_reviewer": "ผู้ตรวจสอบ",
+        "col_required_on_site": "วันที่ต้องใช้ในไซต์",
+        "register_title_method_statement": "ทะเบียนวิธีการทำงาน",
+        "col_supplier": "ผู้จัดจำหน่าย",
+        "hist_returned": "ส่งคืน",
+        "col_review_code": "รหัสผลตรวจ",
+        "col_origin": "ประเทศผู้ผลิต",
+        "register_filename_method_statement": "tabian-withi-kan-tham-ngan",
+        "sig_submitted": "ผู้ยื่น",
+        "col_long_lead": "สั่งนาน",
+        "drawings_missing_other": "แบบที่เกี่ยวข้อง {n} รายการไม่สามารถใช้งานได้",
+        "col_product": "ผู้ผลิต / รุ่น / แหล่งผลิต",
+        "col_outcome": "ผลการตรวจสอบ",
+        "col_number": "เลขที่เอกสาร",
+        "register_filename_product_data": "tabian-anumat-wasadu",
+        "col_manufacturer": "ผู้ผลิต / ยี่ห้อ",
+        "col_rev": "ครั้งที่แก้ไข",
+        "register_filename_shop_drawing": "tabian-shop-drawing",
+        "col_type": "ประเภท",
+        "col_review_overdue": "เกินกำหนด (วัน)",
+        "weeks_other": "{n} สัปดาห์",
+        "hist_submitted": "ส่งเอกสาร",
+        "doc_title_product_data": "ใบขออนุมัติวัสดุ",
+        "col_approver": "ผู้อนุมัติ",
+        "col_date_required": "วันที่ต้องการ",
+        "col_title": "เรื่อง",
+        "col_ball_in_court": "ผู้ต้องดำเนินการ",
+        "no_review_notes": "ไม่มีความเห็นของผู้ตรวจสอบ",
+        "sig_approved": "ผู้อนุมัติ",
+        "register_title": "ทะเบียนเอกสารขออนุมัติ",
+        "register_filename": "tabian-ekasan-kho-anumat",
+        "col_submitted_returned": "ส่ง / ส่งคืน",
+        "col_date_returned": "วันที่ส่งคืน",
+        "col_review_due": "กำหนดตรวจสอบ",
+        "col_spec": "หมวดข้อกำหนด",
+        "col_days_in_review_print": "จำนวนวันตรวจสอบ",
+        "drawings_missing_one": "แบบที่เกี่ยวข้อง {n} รายการไม่สามารถใช้งานได้",
+        "register_title_product_data": "ทะเบียนขออนุมัติวัสดุ",
+        "review_notes": "ความเห็นของผู้ตรวจสอบ",
+        "resubmit_for_record": "ส่งฉบับที่แก้ไขแล้วอีกครั้งเพื่อเก็บเป็นบันทึก",
+        "col_days_in_review": "จำนวนวันตรวจสอบ",
+        "weeks_one": "{n} สัปดาห์",
+        "register_title_shop_drawing": "ทะเบียนแบบ Shop Drawing",
+        "col_review_period": "ระยะเวลาตรวจ (วัน)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "เพื่อก่อสร้าง",
+          "for_approval": "เพื่ออนุมัติ",
+          "for_review": "เพื่อตรวจสอบ",
+          "for_information": "เพื่อทราบ",
+          "for_record": "เพื่อเก็บบันทึก",
+          "for_tender": "เพื่อประกวดราคา"
+        },
+        "status": {
+          "draft": "ฉบับร่าง",
+          "responded": "ตอบกลับแล้ว",
+          "issued": "ออกแล้ว"
+        }
+      },
+      "strings": {
+        "col_purpose": "วัตถุประสงค์",
+        "col_subject": "เรื่อง",
+        "doc_title": "ใบนำส่งเอกสาร",
+        "cover_note": "หมายเหตุนำส่ง",
+        "acknowledged": "ยืนยันการรับแล้ว",
+        "sig_issued": "ผู้ออก",
+        "col_response_due": "กำหนดตอบกลับ",
+        "col_recipients": "ผู้รับ",
+        "col_item_count": "รายการ",
+        "item_description": "รายละเอียด",
+        "col_issued": "วันที่ออก",
+        "sender": "ผู้ส่ง",
+        "register_title": "ทะเบียนใบนำส่งเอกสาร",
+        "recipients": "ผู้รับ",
+        "responded": "วันที่ตอบกลับ",
+        "items": "เอกสารที่นำส่ง",
+        "item_no": "ลำดับ",
+        "item_notes": "หมายเหตุ",
+        "col_number": "เลขที่ใบนำส่ง",
+        "recipient": "ผู้รับ",
+        "action_required": "สิ่งที่ต้องดำเนินการ",
+        "no_cover_note": "ไม่มีหมายเหตุนำส่ง",
+        "register_filename": "tabian-bai-nam-song-ekasan",
+        "sig_received": "ผู้รับเอกสาร"
+      }
+    },
+    "furniture": {
+      "records": "รายการ",
+      "project_no": "เลขที่โครงการ",
+      "sig_prepared_by": "ผู้จัดทำ",
+      "signer_title": "ตำแหน่ง",
+      "total": "รวม",
+      "date": "วันที่",
+      "footer_generated": "สร้างเมื่อ {timestamp}",
+      "sig_checked_by": "ผู้ตรวจสอบ",
+      "project": "โครงการ",
+      "status": "สถานะ",
+      "currency": "สกุลเงิน",
+      "yes": "ใช่",
+      "signature": "ลายมือชื่อ",
+      "signatures": "ลายมือชื่อ",
+      "days_one": "{n} วัน",
+      "footer_page": "หน้า {page} จาก {total}",
+      "sig_approved_by": "ผู้อนุมัติ",
+      "no": "ไม่ใช่",
+      "days_other": "{n} วัน",
+      "empty_register": "ไม่มีรายการ",
+      "name": "ชื่อ-สกุล",
+      "generated_on": "วันที่สร้าง"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "ข้อผิดพลาดหรือตกหล่น",
+          "regulatory": "ข้อกำหนดทางกฎหมาย",
+          "unforeseen": "สภาพที่คาดไม่ถึง",
+          "non_conformance": "งานไม่เป็นไปตามข้อกำหนด",
+          "design_change": "เปลี่ยนแปลงแบบ",
+          "client_request": "เจ้าของงานร้องขอ",
+          "value_engineering": "วิศวกรรมคุณค่า"
+        },
+        "instrument": {
+          "claim": "การเรียกร้อง",
+          "works_change": "คำสั่งเปลี่ยนแปลงงาน",
+          "site_confirmation": "ใบยืนยันหน้างาน"
+        },
+        "change": {
+          "modified": "แก้ไข",
+          "added": "เพิ่ม",
+          "removed": "ลบ"
+        },
+        "status": {
+          "draft": "ฉบับร่าง",
+          "executed": "ดำเนินการแล้ว",
+          "rejected": "ไม่อนุมัติ",
+          "submitted": "ส่งแล้ว",
+          "approved": "อนุมัติ"
+        }
+      },
+      "strings": {
+        "time_impact": "ผลกระทบด้านเวลา",
+        "item_original_rate": "ราคาต่อหน่วยเดิม",
+        "doc_title": "ใบสั่งเปลี่ยนแปลงงาน",
+        "col_code": "รหัส",
+        "approved_by": "ผู้อนุมัติ",
+        "col_approved_time": "เวลาที่อนุมัติ (วัน)",
+        "item_new_rate": "ราคาต่อหน่วยใหม่",
+        "col_approved": "วันที่อนุมัติ",
+        "col_contractor_amount": "ยอดผู้รับเหมา",
+        "col_engineer_amount": "ยอดวิศวกร",
+        "no_description": "ไม่มีรายละเอียด",
+        "col_submitted": "วันที่ส่ง",
+        "approved_time": "เวลาที่อนุมัติ",
+        "col_cost_impact": "ผลกระทบด้านต้นทุน",
+        "item_description": "รายละเอียด",
+        "item_cost_delta": "ส่วนต่างราคา",
+        "col_title": "เรื่อง",
+        "submitted_by": "ผู้ส่ง",
+        "register_title": "ทะเบียนใบสั่งเปลี่ยนแปลงงาน",
+        "item_original_quantity": "ปริมาณเดิม",
+        "items": "รายการเปลี่ยนแปลง",
+        "col_instrument": "ประเภทเอกสาร",
+        "col_time_impact": "ผลกระทบด้านเวลา (วัน)",
+        "col_reason": "เหตุผล",
+        "item_change": "การเปลี่ยนแปลง",
+        "col_approved_amount": "ยอดที่อนุมัติ",
+        "item_new_quantity": "ปริมาณใหม่",
+        "register_filename": "tabian-bai-sang-plian-plaeng-ngan",
+        "description": "รายละเอียด",
+        "item_unit": "หน่วย"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "ตอบกลับแล้ว",
+          "acknowledged": "ยืนยันการรับแล้ว",
+          "closed": "ปิดแล้ว",
+          "issued": "ออกแล้ว"
+        },
+        "request_status": {
+          "draft": "ฉบับร่าง",
+          "rejected": "ไม่อนุมัติ",
+          "converted_to_vo": "แปลงเป็นใบสั่งแล้ว",
+          "under_review": "อยู่ระหว่างตรวจสอบ",
+          "submitted": "ส่งแล้ว",
+          "approved": "อนุมัติ"
+        },
+        "claim_type": {
+          "eot": "ขยายระยะเวลา",
+          "disruption": "การรบกวนงาน"
+        },
+        "recipient_type": {
+          "owner": "เจ้าของโครงการ",
+          "consultant": "ที่ปรึกษา",
+          "contractor": "ผู้รับเหมา",
+          "architect": "สถาปนิก",
+          "engineer": "วิศวกร"
+        },
+        "urgency": {
+          "low": "ต่ำ",
+          "med": "ปานกลาง",
+          "high": "สูง"
+        },
+        "classification": {
+          "other": "อื่น ๆ",
+          "regulatory": "ข้อกำหนดทางกฎหมาย",
+          "unforeseen": "สภาพที่คาดไม่ถึง",
+          "owner_change": "เจ้าของโครงการเปลี่ยนแปลง",
+          "design_dev": "พัฒนาแบบ",
+          "scope_change": "เปลี่ยนแปลงขอบเขตงาน"
+        },
+        "claim_status": {
+          "draft": "ฉบับร่าง",
+          "granted": "อนุญาต",
+          "rejected": "ไม่อนุมัติ",
+          "agreed": "ตกลงแล้ว",
+          "under_review": "อยู่ระหว่างตรวจสอบ",
+          "submitted": "ส่งแล้ว"
+        }
+      },
+      "strings": {
+        "col_row": "ลำดับ",
+        "time_impact": "ผลกระทบด้านเวลา",
+        "doc_title": "คำขอเปลี่ยนแปลงงาน",
+        "col_code": "รหัส",
+        "date_decided": "วันที่ตัดสิน",
+        "col_decided_amount": "ยอดที่ตัดสิน",
+        "variation_register_title": "ทะเบียนงานเปลี่ยนแปลง",
+        "notice_register_title": "ทะเบียนหนังสือแจ้ง",
+        "decision_notes": "หมายเหตุการตัดสิน",
+        "col_classification": "ประเภท",
+        "requested_by": "ผู้ขอ",
+        "col_agreed_amount": "ยอดที่ตกลง",
+        "col_recipient": "ผู้รับ",
+        "col_response_due": "กำหนดตอบกลับ",
+        "no_description": "ไม่มีรายละเอียด",
+        "decided_by": "ผู้ตัดสิน",
+        "variation_register_filename": "tabian-ngan-plian-plaeng",
+        "claim_register_title": "ทะเบียนการเรียกร้อง",
+        "col_days_granted": "จำนวนวันที่อนุญาต",
+        "col_title": "เรื่อง",
+        "date_submitted": "วันที่ส่ง",
+        "col_clause": "ข้อสัญญา",
+        "col_raised": "วันที่ยื่น",
+        "col_description": "รายละเอียด",
+        "col_period_end": "ถึงวันที่",
+        "col_requested": "วันที่ขอ",
+        "claim_register_filename": "tabian-kan-riak-rong",
+        "col_response_received": "วันที่ได้รับตอบ",
+        "doc_title_credit": "คำขอเปลี่ยนแปลงงาน (งานลด)",
+        "col_time_impact": "ผลกระทบด้านเวลา (วัน)",
+        "col_claimed_amount": "ยอดที่เรียกร้อง",
+        "col_period_start": "ตั้งแต่วันที่",
+        "notice_register_filename": "tabian-nangsue-chaeng",
+        "description": "รายละเอียด",
+        "no_decision_notes": "ยังไม่มีการบันทึกการตัดสิน",
+        "col_recipient_type": "ส่งถึง",
+        "col_target_response": "คาดว่าจะตอบ",
+        "col_days_requested": "จำนวนวันที่ขอ",
+        "col_claim_type": "ประเภทการเรียกร้อง",
+        "col_urgency": "ความเร่งด่วน"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "ส่งออก",
+          "incoming": "รับเข้า"
+        },
+        "type": {
+          "letter": "หนังสือ",
+          "notice": "หนังสือแจ้ง",
+          "memo": "บันทึกข้อความ",
+          "report": "รายงาน",
+          "email": "อีเมล"
+        },
+        "status": {
+          "awaiting_response": "รอตอบกลับ",
+          "closed": "ปิดแล้ว",
+          "responded": "ตอบกลับแล้ว",
+          "open": "เปิดอยู่"
+        }
+      },
+      "strings": {
+        "col_to": "ถึง",
+        "no_notes": "ไม่มีหมายเหตุ",
+        "col_subject": "เรื่อง",
+        "doc_title": "หนังสือโต้ตอบ",
+        "register_title": "ทะเบียนหนังสือโต้ตอบ",
+        "col_clause": "ข้อสัญญา",
+        "linked_documents": "เอกสารที่เกี่ยวข้อง",
+        "col_reference": "เลขที่หนังสือ",
+        "col_date_received": "วันที่รับ",
+        "notes": "หมายเหตุ",
+        "col_response_due": "กำหนดตอบกลับ",
+        "sig_prepared": "ผู้จัดทำ",
+        "attachments": "ไฟล์แนบ",
+        "col_date_sent": "วันที่ส่ง",
+        "col_direction": "ทิศทาง",
+        "register_filename": "tabian-nangsue-totop",
+        "col_from": "จาก",
+        "col_type": "ประเภท",
+        "sig_received": "ผู้รับ"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "ความล่าช้า / ขยายระยะเวลา",
+          "valuation": "การประเมินมูลค่า",
+          "dispute": "ข้อพิพาท",
+          "general": "บันทึกทั่วไป"
+        },
+        "section": {
+          "delay": "ความล่าช้า",
+          "rfis": "RFI",
+          "variations": "งานเปลี่ยนแปลง",
+          "other": "อื่น ๆ",
+          "notices": "หนังสือแจ้ง",
+          "approvals": "การอนุมัติ",
+          "correspondence": "หนังสือโต้ตอบ",
+          "timeline": "ลำดับเหตุการณ์"
+        },
+        "kind": {
+          "notice": "หนังสือแจ้ง",
+          "variation_notice": "หนังสือแจ้งงานเปลี่ยนแปลง",
+          "correspondence": "หนังสือโต้ตอบ",
+          "variation_order": "ใบสั่งเปลี่ยนแปลงงาน",
+          "moc_entry": "บันทึกการเปลี่ยนแปลง",
+          "change_order": "ใบสั่งเปลี่ยนแปลง",
+          "variation_request": "คำขอเปลี่ยนแปลงงาน"
+        }
+      },
+      "strings": {
+        "col_row": "ลำดับ",
+        "col_date": "วันที่",
+        "basis": "ฐานการเรียกร้อง",
+        "col_summary": "สรุป",
+        "register_title": "ชุดหลักฐาน",
+        "period_to": "บันทึกล่าสุด",
+        "period_from": "บันทึกแรกสุด",
+        "col_kind": "ประเภทบันทึก",
+        "subject": "เรื่อง",
+        "col_title": "เรื่อง",
+        "register_filename": "chut-lakthan",
+        "col_reference": "เลขที่อ้างอิง",
+        "col_section": "หมวด",
+        "col_record_id": "รหัสบันทึก",
+        "digest": "รหัสตรวจสอบความถูกต้อง (SHA-256 16 อักขระแรก)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "เรื่อง",
+        "register_title": "ทะเบียน RFI",
+        "yes_with": "ใช่ ({detail})",
+        "col_raised_by": "ผู้ยื่น",
+        "col_schedule_impact": "ผลกระทบด้านแผนงาน",
+        "col_date_required": "วันที่ต้องการ",
+        "col_assigned_to": "ผู้รับผิดชอบ",
+        "col_ball_in_court": "ผู้ต้องดำเนินการ",
+        "col_response_due": "กำหนดตอบกลับ",
+        "col_number": "เลขที่ RFI",
+        "col_days_open": "จำนวนวันที่ค้าง",
+        "col_cost_impact": "ผลกระทบด้านต้นทุน",
+        "register_filename": "tabian-rfi",
+        "col_response": "คำตอบ"
+      },
+      "labels": {
+        "status": {
+          "draft": "ร่าง",
+          "open": "เปิดอยู่",
+          "answered": "ตอบแล้ว",
+          "closed": "ปิดแล้ว",
+          "void": "เป็นโมฆะ"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "ฝนตกหนักมากเป็นช่วง ๆ",
+          "drizzle_moderate": "ฝนละอองปานกลาง",
+          "fog": "หมอก",
+          "overcast": "ครึ้ม",
+          "snow_moderate": "หิมะปานกลาง",
+          "snow_heavy": "หิมะตกหนัก",
+          "rain_showers_moderate": "ฝนปานกลางเป็นช่วง ๆ",
+          "snow_showers_light": "หิมะเบาบางเป็นช่วง ๆ",
+          "rain_showers_light": "ฝนเล็กน้อยเป็นช่วง ๆ",
+          "snow": "หิมะ",
+          "fog_rime": "หมอกน้ำค้างแข็ง",
+          "partly_cloudy": "มีเมฆบางส่วน",
+          "thunderstorm": "พายุฝนฟ้าคะนอง",
+          "snow_light": "หิมะเล็กน้อย",
+          "freezing_rain_heavy": "ฝนเยือกแข็งหนัก",
+          "drizzle_light": "ฝนละอองเล็กน้อย",
+          "rain_light": "ฝนเล็กน้อย",
+          "thunderstorm_hail_heavy": "พายุฝนฟ้าคะนองและลูกเห็บขนาดใหญ่",
+          "drizzle_dense": "ฝนละอองหนา",
+          "rain": "ฝน",
+          "mainly_clear": "แจ่มใสเป็นส่วนใหญ่",
+          "clear": "แจ่มใส",
+          "rain_heavy": "ฝนตกหนัก",
+          "rain_moderate": "ฝนปานกลาง",
+          "thunderstorm_hail_light": "พายุฝนฟ้าคะนองและลูกเห็บขนาดเล็ก",
+          "cloudy": "มีเมฆมาก",
+          "snow_showers_heavy": "หิมะตกหนักเป็นช่วง ๆ",
+          "freezing_rain_light": "ฝนเยือกแข็งเล็กน้อย"
+        },
+        "source": {
+          "open_meteo": "บริการข้อมูลอากาศ",
+          "sensor": "เซนเซอร์ในไซต์",
+          "manual": "กรอกเอง"
+        },
+        "entry_type": {
+          "incident_summary": "ความปลอดภัยและอุบัติเหตุ",
+          "event": "เหตุการณ์",
+          "visitor": "ผู้มาเยือน",
+          "inspection_summary": "การตรวจสอบ",
+          "completion": "งานที่ทำ",
+          "delivery": "วัสดุที่ส่งเข้า",
+          "photo_note": "บันทึกภาพถ่าย",
+          "general": "บันทึกทั่วไป"
+        },
+        "status": {
+          "closed": "ปิดแล้ว",
+          "archived": "เก็บถาวร",
+          "signed": "ลงนามแล้ว",
+          "open": "เปิดอยู่"
+        }
+      },
+      "strings": {
+        "summary_wind": "ลม {value} km/h",
+        "weather_temp": "อุณหภูมิ (°C)",
+        "doc_title": "รายงานประจำวันหน้างาน",
+        "summary_precipitation": "ปริมาณน้ำฝน {value} mm",
+        "site_supervisor": "ผู้ควบคุมงานหน้างาน",
+        "weather_precip": "น้ำฝน (mm)",
+        "summary_humidity": "ความชื้น {value} %",
+        "footer_supervisor": "ผู้ควบคุมงาน: {name}",
+        "sig_name": "ชื่อ-สกุล",
+        "footer_supervisor_missing": "ผู้ควบคุมงานหน้างาน: ไม่ได้บันทึก",
+        "footer_generated": "สร้างเมื่อ: {timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "รวม",
+        "overview": "ภาพรวม",
+        "workforce": "กำลังคนแยกตามบริษัท",
+        "workforce_count": "จำนวนคน",
+        "not_recorded": "ไม่ได้บันทึก",
+        "sig_prepared": "ผู้จัดทำ (ผู้ควบคุมงานหน้างาน)",
+        "decimal_mark": ".",
+        "sig_approved": "ผู้อนุมัติ (ตัวแทนเจ้าของโครงการ)",
+        "completeness": "ความครบถ้วน",
+        "sig_signature": "ลายมือชื่อ",
+        "signatures": "ลายมือชื่อ",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "บริษัท",
+        "notes_empty": "ไม่มีหมายเหตุเพิ่มเติม",
+        "sig_title": "ตำแหน่ง",
+        "weather": "สภาพอากาศ",
+        "weather_wind": "ลม (km/h)",
+        "weather_time": "เวลา",
+        "weather_empty": "ไม่มีบันทึกสภาพอากาศของวันนี้",
+        "footer_page": "หน้า {page} จาก {total}",
+        "equipment_on_site": "เครื่องจักรในไซต์",
+        "weather_source": "แหล่งข้อมูล",
+        "workforce_unassigned": "ไม่ระบุบริษัท",
+        "sig_date": "วันที่",
+        "filename_prefix": "raingan-prachamwan",
+        "labour_on_site": "แรงงานในไซต์",
+        "weather_conditions": "สภาพ",
+        "signed_note": "ลงนามในระบบแล้ว: {signers}",
+        "notes": "หมายเหตุ",
+        "entries_empty": "ไม่มีรายการบันทึกในรายงานนี้",
+        "site_record": "บันทึกหน้างาน"
+      }
+    }
   }
 }

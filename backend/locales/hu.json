@@ -618,5 +618,539 @@
       "draft": "Piszkozat",
       "frozen": "Lezárt"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Projektszám",
+      "generated_on": "Létrehozva",
+      "records": "Rekordok",
+      "currency": "Pénznem",
+      "status": "Állapot",
+      "name": "Név",
+      "signature": "Aláírás",
+      "date": "Dátum",
+      "signatures": "Aláírások",
+      "yes": "Igen",
+      "no": "Nem",
+      "days_one": "{n} nap",
+      "days_other": "{n} nap",
+      "empty_register": "Nincs rekord.",
+      "total": "Összesen",
+      "signer_title": "Beosztás",
+      "sig_prepared_by": "Készítette",
+      "sig_checked_by": "Ellenőrizte",
+      "sig_approved_by": "Jóváhagyta",
+      "footer_generated": "Létrehozva: {timestamp}",
+      "footer_page": "{page}. oldal / {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Jóváhagyandó dokumentumok nyilvántartása",
+        "doc_title": "Jóváhagyandó dokumentum",
+        "doc_title_product_data": "Anyagjóváhagyási lap",
+        "col_number": "Dok. száma",
+        "col_title": "Megnevezés",
+        "col_type": "Típus",
+        "col_spec": "Specifikációs fejezet",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Benyújtás dátuma",
+        "col_date_required": "Szükséges ekkorra",
+        "col_date_returned": "Visszaküldés dátuma",
+        "col_reviewer": "Felülvizsgáló",
+        "col_approver": "Jóváhagyó",
+        "col_ball_in_court": "Soron következő fél",
+        "submitted_by_org": "Benyújtó cég",
+        "review_notes": "Felülvizsgálói megjegyzések",
+        "no_review_notes": "Nincs rögzített felülvizsgálói megjegyzés.",
+        "sig_submitted": "Benyújtotta",
+        "sig_reviewed": "Felülvizsgálta",
+        "sig_approved": "Jóváhagyta",
+        "register_filename": "jovahagyando-dokumentumok-nyilvantartasa",
+        "register_title_shop_drawing": "Műhelyrajzok nyilvántartása",
+        "register_title_product_data": "Anyagjóváhagyások nyilvántartása",
+        "register_title_method_statement": "Technológiai leírások nyilvántartása",
+        "register_filename_shop_drawing": "muhelyrajzok-nyilvantartasa",
+        "register_filename_product_data": "anyagjovahagyasok-nyilvantartasa",
+        "register_filename_method_statement": "technologiai-leirasok-nyilvantartasa",
+        "col_discipline": "Szakág",
+        "col_manufacturer": "Gyártó / márka",
+        "col_model": "Típus / azonosító",
+        "col_origin": "Származási ország",
+        "col_supplier": "Szállító",
+        "col_product": "Gyártó / típus / származás",
+        "col_review_code": "Elbírálási kód",
+        "col_outcome": "Elbírálás eredménye",
+        "col_review_period": "Elbírálási idő (nap)",
+        "col_review_due": "Elbírálás határideje",
+        "col_days_in_review": "Elbírálásban töltött napok",
+        "col_days_in_review_print": "Elbírálásban töltött napok",
+        "col_review_overdue": "Késés (nap)",
+        "col_required_on_site": "Szükséges a helyszínen",
+        "col_long_lead": "Hosszú szállítási idő",
+        "col_lead_time": "Szállítási idő (hét)",
+        "col_needed_by": "Jóváhagyás szükséges eddig",
+        "col_approval_late": "Határidő túllépése (nap)",
+        "col_drawings": "Kapcsolt rajzok",
+        "col_submitted_returned": "Benyújtva / visszaküldve",
+        "col_on_site_needed_by": "Helyszínen / jóváhagyás eddig",
+        "resubmit_for_record": "A javított példányt újra be kell nyújtani nyilvántartásra",
+        "review_history": "Elbírálási előzmények",
+        "hist_submitted": "Benyújtva",
+        "hist_returned": "Visszaküldve",
+        "drawings_missing_one": "{n} kapcsolt rajz már nem elérhető",
+        "drawings_missing_other": "{n} kapcsolt rajz már nem elérhető",
+        "weeks_one": "{n} hét",
+        "weeks_other": "{n} hét"
+      },
+      "labels": {
+        "status": {
+          "draft": "Piszkozat",
+          "submitted": "Benyújtva",
+          "under_review": "Elbírálás alatt",
+          "approved": "Jóváhagyva",
+          "approved_as_noted": "Jóváhagyva megjegyzésekkel",
+          "revise_and_resubmit": "Átdolgozandó és újra benyújtandó",
+          "rejected": "Elutasítva",
+          "closed": "Lezárva"
+        },
+        "type": {
+          "shop_drawing": "Műhelyrajz",
+          "product_data": "Termékadatlap",
+          "sample": "Minta",
+          "mock_up": "Mintaelem",
+          "test_report": "Vizsgálati jegyzőkönyv",
+          "calculation": "Számítás",
+          "method_statement": "Technológiai leírás",
+          "certificate": "Tanúsítvány",
+          "warranty": "Garancia"
+        },
+        "discipline": {
+          "mechanical": "Gépészet",
+          "hvac": "Fűtés-hűtés-szellőzés",
+          "plumbing": "Víz- és csatornaszerelés",
+          "fire_protection": "Tűzvédelem",
+          "electrical": "Villamosság",
+          "lighting": "Világítás",
+          "elv": "Gyengeáram",
+          "bms": "Épületautomatika",
+          "architectural": "Építészet",
+          "structural": "Tartószerkezet",
+          "civil": "Általános építőmérnöki"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Módosítási megbízások nyilvántartása",
+        "doc_title": "Módosítási megbízás",
+        "col_code": "Kód",
+        "col_title": "Megnevezés",
+        "col_reason": "Ok",
+        "col_instrument": "Jogcím",
+        "col_submitted": "Benyújtás dátuma",
+        "col_contractor_amount": "Vállalkozói összeg",
+        "col_engineer_amount": "Mérnöki összeg",
+        "col_approved_amount": "Jóváhagyott összeg",
+        "col_cost_impact": "Költséghatás",
+        "col_time_impact": "Időhatás (nap)",
+        "col_approved_time": "Jóváhagyott idő (nap)",
+        "time_impact": "Időhatás",
+        "approved_time": "Jóváhagyott idő",
+        "col_approved": "Jóváhagyás dátuma",
+        "submitted_by": "Benyújtotta",
+        "approved_by": "Jóváhagyta",
+        "description": "Leírás",
+        "no_description": "Nincs rögzített leírás.",
+        "items": "Módosítási tételek",
+        "item_description": "Leírás",
+        "item_change": "Módosítás",
+        "item_unit": "Egység",
+        "item_original_quantity": "Eredeti menny.",
+        "item_new_quantity": "Új menny.",
+        "item_original_rate": "Eredeti egységár",
+        "item_new_rate": "Új egységár",
+        "item_cost_delta": "Költségkülönbözet",
+        "register_filename": "modositasi-megbizasok-nyilvantartasa"
+      },
+      "labels": {
+        "status": {
+          "draft": "Piszkozat",
+          "submitted": "Benyújtva",
+          "approved": "Jóváhagyva",
+          "rejected": "Elutasítva",
+          "executed": "Végrehajtva"
+        },
+        "reason": {
+          "client_request": "Megrendelői kérés",
+          "design_change": "Tervmódosítás",
+          "unforeseen": "Előre nem látható körülmények",
+          "regulatory": "Jogszabályi ok",
+          "error": "Hiba vagy kihagyás",
+          "non_conformance": "Nem megfelelőség",
+          "value_engineering": "Értékmérnöki optimalizálás"
+        },
+        "instrument": {
+          "works_change": "Elrendelt módosítás",
+          "site_confirmation": "Helyszíni megerősítés",
+          "claim": "Igény"
+        },
+        "change": {
+          "added": "Hozzáadva",
+          "removed": "Elhagyva",
+          "modified": "Módosítva"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Bizonyítékcsomag",
+        "subject": "Tárgy",
+        "basis": "Alap",
+        "period_from": "Legkorábbi rekord",
+        "period_to": "Legkésőbbi rekord",
+        "digest": "Integritási kód (SHA-256, első 16 karakter)",
+        "col_row": "Sz.",
+        "col_record_id": "Rekordazonosító",
+        "col_section": "Szakasz",
+        "col_date": "Dátum",
+        "col_kind": "Rekord típusa",
+        "col_title": "Megnevezés",
+        "col_summary": "Összefoglaló",
+        "col_reference": "Hivatkozás",
+        "register_filename": "bizonyitekcsomag"
+      },
+      "labels": {
+        "section": {
+          "notices": "Értesítések",
+          "correspondence": "Levelezés",
+          "rfis": "Információkérések (RFI)",
+          "variations": "Módosítások",
+          "approvals": "Jóváhagyások",
+          "delay": "Késedelem",
+          "timeline": "Idővonal",
+          "other": "Egyéb"
+        },
+        "kind": {
+          "notice": "Értesítés",
+          "variation_notice": "Módosítási értesítés",
+          "variation_request": "Módosítási kérelem",
+          "variation_order": "Módosítási utasítás",
+          "change_order": "Módosítási megbízás",
+          "moc_entry": "Változáskezelési rekord",
+          "correspondence": "Levelezés"
+        },
+        "basis": {
+          "dispute": "Vita",
+          "valuation": "Értékelés",
+          "delay": "Késedelem / határidő-hosszabbítás",
+          "general": "Általános nyilvántartás"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Levelezési napló",
+        "doc_title": "Levelezés",
+        "col_reference": "Iktatószám",
+        "col_direction": "Irány",
+        "col_type": "Típus",
+        "col_subject": "Tárgy",
+        "col_from": "Feladó",
+        "col_to": "Címzett",
+        "col_date_sent": "Küldés dátuma",
+        "col_date_received": "Érkezés dátuma",
+        "col_response_due": "Válasz határideje",
+        "col_clause": "Szerződéses pont",
+        "notes": "Megjegyzések",
+        "no_notes": "Nincs rögzített megjegyzés.",
+        "attachments": "Csatolt fájlok",
+        "linked_documents": "Kapcsolt dokumentumok",
+        "sig_prepared": "Készítette",
+        "sig_received": "Átvette",
+        "register_filename": "levelezesi-naplo"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Bejövő",
+          "outgoing": "Kimenő"
+        },
+        "type": {
+          "letter": "Levél",
+          "email": "E-mail",
+          "notice": "Értesítés",
+          "memo": "Feljegyzés",
+          "report": "Jelentés"
+        },
+        "status": {
+          "open": "Nyitott",
+          "awaiting_response": "Válaszra vár",
+          "responded": "Megválaszolva",
+          "closed": "Lezárva"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Dokumentumátadások nyilvántartása",
+        "doc_title": "Dokumentumátadó lap",
+        "col_number": "Átadó lap száma",
+        "col_subject": "Tárgy",
+        "col_purpose": "Cél",
+        "col_issued": "Kiállítás dátuma",
+        "col_response_due": "Válasz határideje",
+        "col_recipients": "Címzettek",
+        "col_item_count": "Tételek",
+        "sender": "Feladó",
+        "cover_note": "Kísérőlevél",
+        "no_cover_note": "Nincs kísérőlevél.",
+        "recipients": "Címzettek",
+        "recipient": "Címzett",
+        "action_required": "Szükséges intézkedés",
+        "acknowledged": "Átvétel visszaigazolva",
+        "responded": "Válasz dátuma",
+        "items": "Átadott dokumentumok",
+        "item_no": "Sz.",
+        "item_description": "Leírás",
+        "item_notes": "Megjegyzések",
+        "sig_issued": "Kiállította",
+        "sig_received": "Átvette",
+        "register_filename": "dokumentumatadasok-nyilvantartasa"
+      },
+      "labels": {
+        "status": {
+          "draft": "Piszkozat",
+          "issued": "Kiállítva",
+          "responded": "Megválaszolva"
+        },
+        "purpose": {
+          "for_approval": "Jóváhagyásra",
+          "for_review": "Felülvizsgálatra",
+          "for_information": "Tájékoztatásul",
+          "for_construction": "Kivitelezésre",
+          "for_tender": "Ajánlatadásra",
+          "for_record": "Nyilvántartásra"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Módosítások nyilvántartása",
+        "claim_register_title": "Igények nyilvántartása",
+        "notice_register_title": "Értesítések nyilvántartása",
+        "doc_title": "Módosítási kérelem",
+        "doc_title_credit": "Módosítási kérelem (elmaradó munka)",
+        "time_impact": "Időhatás",
+        "col_code": "Kód",
+        "col_title": "Megnevezés",
+        "col_classification": "Típus",
+        "col_urgency": "Sürgősség",
+        "col_requested": "Kérelem dátuma",
+        "col_claimed_amount": "Igényelt összeg",
+        "col_agreed_amount": "Egyeztetett összeg",
+        "col_time_impact": "Időhatás (nap)",
+        "col_response_due": "Válasz határideje",
+        "col_clause": "Szerződéses pont",
+        "col_row": "Sz.",
+        "col_claim_type": "Igény típusa",
+        "col_raised": "Bejelentés dátuma",
+        "col_period_start": "Időszak kezdete",
+        "col_period_end": "Időszak vége",
+        "col_description": "Leírás",
+        "col_decided_amount": "Megítélt összeg",
+        "col_days_requested": "Igényelt napok",
+        "col_days_granted": "Megadott napok",
+        "col_recipient_type": "Címzett típusa",
+        "col_recipient": "Címzett",
+        "col_target_response": "Várt válasz",
+        "col_response_received": "Válasz beérkezett",
+        "requested_by": "Kérelmezte",
+        "decided_by": "Döntött",
+        "date_submitted": "Benyújtás dátuma",
+        "date_decided": "Döntés dátuma",
+        "description": "Leírás",
+        "no_description": "Nincs rögzített leírás.",
+        "decision_notes": "A döntés indokolása",
+        "no_decision_notes": "Döntés még nem került rögzítésre.",
+        "variation_register_filename": "modositasok-nyilvantartasa",
+        "claim_register_filename": "igenyek-nyilvantartasa",
+        "notice_register_filename": "ertesitesek-nyilvantartasa"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Piszkozat",
+          "submitted": "Benyújtva",
+          "under_review": "Elbírálás alatt",
+          "approved": "Jóváhagyva",
+          "rejected": "Elutasítva",
+          "converted_to_vo": "Megbízássá alakítva"
+        },
+        "claim_status": {
+          "draft": "Piszkozat",
+          "submitted": "Benyújtva",
+          "under_review": "Elbírálás alatt",
+          "agreed": "Megegyezés született",
+          "granted": "Megadva",
+          "rejected": "Elutasítva"
+        },
+        "notice_status": {
+          "issued": "Kiállítva",
+          "acknowledged": "Átvétel visszaigazolva",
+          "responded": "Megválaszolva",
+          "closed": "Lezárva"
+        },
+        "classification": {
+          "scope_change": "Hatókör módosítása",
+          "unforeseen": "Előre nem látható körülmény",
+          "owner_change": "Megrendelői módosítás",
+          "design_dev": "Tervkidolgozás",
+          "regulatory": "Jogszabályi ok",
+          "other": "Egyéb"
+        },
+        "urgency": {
+          "low": "Alacsony",
+          "med": "Közepes",
+          "high": "Magas"
+        },
+        "claim_type": {
+          "disruption": "Munkavégzés zavarása",
+          "eot": "Határidő-hosszabbítás"
+        },
+        "recipient_type": {
+          "owner": "Megrendelő",
+          "contractor": "Vállalkozó",
+          "architect": "Építész",
+          "engineer": "Mérnök",
+          "consultant": "Tanácsadó"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Napi helyszíni jelentés",
+        "overview": "Áttekintés",
+        "site_supervisor": "Építésvezető",
+        "not_recorded": "Nincs rögzítve",
+        "labour_on_site": "Munkaerő a helyszínen",
+        "equipment_on_site": "Gépek a helyszínen",
+        "completeness": "Teljesség",
+        "weather": "Időjárás",
+        "weather_time": "Idő",
+        "weather_source": "Forrás",
+        "weather_temp": "Hőm. (°C)",
+        "weather_wind": "Szél (km/h)",
+        "weather_precip": "Csapadék (mm)",
+        "weather_conditions": "Időjárási viszonyok",
+        "weather_empty": "Erre a napra nincs rögzített időjárás.",
+        "site_record": "Helyszíni feljegyzés",
+        "entries_empty": "Ehhez a naplóhoz nincs rögzített bejegyzés.",
+        "notes": "Megjegyzések",
+        "notes_empty": "Nincs további megjegyzés.",
+        "footer_supervisor": "Építésvezető: {name}",
+        "footer_supervisor_missing": "Építésvezető: nincs rögzítve",
+        "footer_generated": "Létrehozva: {timestamp}",
+        "footer_page": "{page}. oldal / {total}",
+        "workforce": "Létszám cégenként",
+        "workforce_company": "Cég",
+        "workforce_count": "Fő",
+        "workforce_unassigned": "Céghez nem rendelt",
+        "workforce_total": "Összesen",
+        "signatures": "Aláírások",
+        "sig_prepared": "Készítette (építésvezető)",
+        "sig_approved": "Jóváhagyta (megrendelő képviselője)",
+        "sig_name": "Név",
+        "sig_title": "Beosztás",
+        "sig_date": "Dátum",
+        "sig_signature": "Aláírás",
+        "signed_note": "A rendszerben aláírta: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "napi-jelentes",
+        "summary_wind": "szél {value} km/h",
+        "summary_precipitation": "csapadék {value} mm",
+        "summary_humidity": "páratartalom {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Látogatók",
+          "event": "Események",
+          "delivery": "Beszállított anyagok",
+          "completion": "Elvégzett munkák",
+          "incident_summary": "Munkavédelem és események",
+          "inspection_summary": "Ellenőrzések",
+          "photo_note": "Fotójegyzetek",
+          "general": "Általános megjegyzések"
+        },
+        "status": {
+          "open": "Nyitott",
+          "closed": "Lezárt",
+          "signed": "Aláírt",
+          "archived": "Archivált"
+        },
+        "condition": {
+          "clear": "derült",
+          "mainly_clear": "túlnyomóan derült",
+          "partly_cloudy": "részben felhős",
+          "cloudy": "felhős",
+          "overcast": "borult",
+          "fog": "köd",
+          "fog_rime": "zúzmarás köd",
+          "drizzle_light": "gyenge szitálás",
+          "drizzle_moderate": "mérsékelt szitálás",
+          "drizzle_dense": "erős szitálás",
+          "rain": "eső",
+          "rain_light": "gyenge eső",
+          "rain_moderate": "mérsékelt eső",
+          "rain_heavy": "erős eső",
+          "freezing_rain_light": "gyenge ónos eső",
+          "freezing_rain_heavy": "erős ónos eső",
+          "snow": "havazás",
+          "snow_light": "gyenge havazás",
+          "snow_moderate": "mérsékelt havazás",
+          "snow_heavy": "erős havazás",
+          "rain_showers_light": "gyenge zápor",
+          "rain_showers_moderate": "mérsékelt zápor",
+          "rain_showers_violent": "heves zápor",
+          "snow_showers_light": "gyenge hózápor",
+          "snow_showers_heavy": "erős hózápor",
+          "thunderstorm": "zivatar",
+          "thunderstorm_hail_light": "zivatar enyhe jégesővel",
+          "thunderstorm_hail_heavy": "zivatar erős jégesővel"
+        },
+        "source": {
+          "manual": "Kézi bevitel",
+          "open_meteo": "Időjárás-szolgáltatás",
+          "sensor": "Helyszíni érzékelő"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Információkérések nyilvántartása (RFI)",
+        "col_number": "RFI száma",
+        "col_subject": "Tárgy",
+        "col_raised_by": "Kezdeményezte",
+        "col_assigned_to": "Felelős",
+        "col_ball_in_court": "Soron következő fél",
+        "col_date_required": "Szükséges ekkorra",
+        "col_response_due": "Válasz határideje",
+        "col_days_open": "Nyitva töltött napok",
+        "col_cost_impact": "Költséghatás",
+        "col_schedule_impact": "Ütemezési hatás",
+        "col_response": "Válasz",
+        "yes_with": "Igen ({detail})",
+        "register_filename": "rfi-nyilvantartas"
+      },
+      "labels": {
+        "status": {
+          "draft": "Piszkozat",
+          "open": "Nyitott",
+          "answered": "Megválaszolva",
+          "closed": "Lezárva",
+          "void": "Érvénytelen"
+        }
+      }
+    }
   }
 }

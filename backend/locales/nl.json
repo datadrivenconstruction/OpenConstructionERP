@@ -618,5 +618,539 @@
       "draft": "Concept",
       "frozen": "Bevroren"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Project",
+      "project_no": "Projectnr.",
+      "generated_on": "Aangemaakt op",
+      "records": "Records",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Naam",
+      "signature": "Handtekening",
+      "date": "Datum",
+      "signatures": "Handtekeningen",
+      "yes": "Ja",
+      "no": "Nee",
+      "days_one": "{n} dag",
+      "days_other": "{n} dagen",
+      "empty_register": "Geen records.",
+      "total": "Totaal",
+      "signer_title": "Functie",
+      "sig_prepared_by": "Opgesteld door",
+      "sig_checked_by": "Gecontroleerd door",
+      "sig_approved_by": "Goedgekeurd door",
+      "footer_generated": "Aangemaakt {timestamp}",
+      "footer_page": "Pagina {page} van {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Submittalregister",
+        "doc_title": "Submittal",
+        "doc_title_product_data": "Materiaalgoedkeuringsformulier",
+        "col_number": "Submittalnr.",
+        "col_title": "Titel",
+        "col_type": "Type",
+        "col_spec": "Bestekonderdeel",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Datum ingediend",
+        "col_date_required": "Benodigd op",
+        "col_date_returned": "Datum geretourneerd",
+        "col_reviewer": "Beoordelaar",
+        "col_approver": "Goedkeurder",
+        "col_ball_in_court": "Actie bij",
+        "submitted_by_org": "Indienend bedrijf",
+        "review_notes": "Opmerkingen beoordelaar",
+        "no_review_notes": "Geen opmerkingen van de beoordelaar vastgelegd.",
+        "sig_submitted": "Ingediend door",
+        "sig_reviewed": "Beoordeeld door",
+        "sig_approved": "Goedgekeurd door",
+        "register_filename": "submittalregister",
+        "register_title_shop_drawing": "Werktekeningenregister",
+        "register_title_product_data": "Materiaalgoedkeuringsregister",
+        "register_title_method_statement": "Werkmethodenregister",
+        "register_filename_shop_drawing": "werktekeningenregister",
+        "register_filename_product_data": "materiaalgoedkeuringsregister",
+        "register_filename_method_statement": "werkmethodenregister",
+        "col_discipline": "Discipline",
+        "col_manufacturer": "Fabrikant / merk",
+        "col_model": "Model / referentie",
+        "col_origin": "Land van herkomst",
+        "col_supplier": "Leverancier",
+        "col_product": "Fabrikant / model / herkomst",
+        "col_review_code": "Beoordelingscode",
+        "col_outcome": "Beoordelingsresultaat",
+        "col_review_period": "Beoordelingstermijn (dagen)",
+        "col_review_due": "Beoordeling uiterlijk",
+        "col_days_in_review": "Dagen in beoordeling",
+        "col_days_in_review_print": "Dagen in beoordeling",
+        "col_review_overdue": "Dagen te laat",
+        "col_required_on_site": "Benodigd op locatie",
+        "col_long_lead": "Lange levertijd",
+        "col_lead_time": "Levertijd (weken)",
+        "col_needed_by": "Goedkeuring nodig uiterlijk",
+        "col_approval_late": "Dagen na uiterste datum",
+        "col_drawings": "Gekoppelde tekeningen",
+        "col_submitted_returned": "Ingediend / geretourneerd",
+        "col_on_site_needed_by": "Op locatie / goedkeuring uiterlijk",
+        "resubmit_for_record": "Gecorrigeerd exemplaar opnieuw indienen voor het dossier",
+        "review_history": "Beoordelingshistorie",
+        "hist_submitted": "Ingediend",
+        "hist_returned": "Geretourneerd",
+        "drawings_missing_one": "{n} gekoppelde tekening is niet meer beschikbaar",
+        "drawings_missing_other": "{n} gekoppelde tekeningen zijn niet meer beschikbaar",
+        "weeks_one": "{n} week",
+        "weeks_other": "{n} weken"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "under_review": "In beoordeling",
+          "approved": "Goedgekeurd",
+          "approved_as_noted": "Goedgekeurd met opmerkingen",
+          "revise_and_resubmit": "Herzien en opnieuw indienen",
+          "rejected": "Afgekeurd",
+          "closed": "Gesloten"
+        },
+        "type": {
+          "shop_drawing": "Werktekening",
+          "product_data": "Productdata",
+          "sample": "Monster",
+          "mock_up": "Mock-up",
+          "test_report": "Testrapport",
+          "calculation": "Berekening",
+          "method_statement": "Werkmethode",
+          "certificate": "Certificaat",
+          "warranty": "Garantie"
+        },
+        "discipline": {
+          "mechanical": "Werktuigbouw",
+          "hvac": "HVAC",
+          "plumbing": "Sanitair en riolering",
+          "fire_protection": "Brandveiligheid",
+          "electrical": "Elektrotechniek",
+          "lighting": "Verlichting",
+          "elv": "Zwakstroom",
+          "bms": "Gebouwbeheer",
+          "architectural": "Architectuur",
+          "structural": "Constructie",
+          "civil": "Civiele techniek"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Register wijzigingsopdrachten",
+        "doc_title": "Wijzigingsopdracht",
+        "col_code": "Code",
+        "col_title": "Titel",
+        "col_reason": "Reden",
+        "col_instrument": "Instrument",
+        "col_submitted": "Datum ingediend",
+        "col_contractor_amount": "Bedrag aannemer",
+        "col_engineer_amount": "Bedrag ingenieur",
+        "col_approved_amount": "Goedgekeurd bedrag",
+        "col_cost_impact": "Kostengevolg",
+        "col_time_impact": "Tijdsgevolg (dagen)",
+        "col_approved_time": "Goedgekeurde tijd (dagen)",
+        "time_impact": "Tijdsgevolg",
+        "approved_time": "Goedgekeurde tijd",
+        "col_approved": "Datum goedgekeurd",
+        "submitted_by": "Ingediend door",
+        "approved_by": "Goedgekeurd door",
+        "description": "Omschrijving",
+        "no_description": "Geen omschrijving vastgelegd.",
+        "items": "Wijzigingsposten",
+        "item_description": "Omschrijving",
+        "item_change": "Wijziging",
+        "item_unit": "Eenheid",
+        "item_original_quantity": "Oorspr. hoeveelh.",
+        "item_new_quantity": "Nieuwe hoeveelh.",
+        "item_original_rate": "Oorspr. tarief",
+        "item_new_rate": "Nieuw tarief",
+        "item_cost_delta": "Kostenverschil",
+        "register_filename": "register-wijzigingsopdrachten"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "approved": "Goedgekeurd",
+          "rejected": "Afgewezen",
+          "executed": "Uitgevoerd"
+        },
+        "reason": {
+          "client_request": "Verzoek opdrachtgever",
+          "design_change": "Ontwerpwijziging",
+          "unforeseen": "Onvoorziene omstandigheden",
+          "regulatory": "Wet- en regelgeving",
+          "error": "Fout of omissie",
+          "non_conformance": "Afwijking",
+          "value_engineering": "Value engineering"
+        },
+        "instrument": {
+          "works_change": "Opgedragen wijziging",
+          "site_confirmation": "Bevestiging op locatie",
+          "claim": "Claim"
+        },
+        "change": {
+          "added": "Toegevoegd",
+          "removed": "Vervallen",
+          "modified": "Gewijzigd"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Bewijsdossier",
+        "subject": "Onderwerp",
+        "basis": "Grondslag",
+        "period_from": "Oudste registratie",
+        "period_to": "Nieuwste registratie",
+        "digest": "Integriteitscode (SHA-256, eerste 16 tekens)",
+        "col_row": "Nr.",
+        "col_record_id": "Registratie-ID",
+        "col_section": "Onderdeel",
+        "col_date": "Datum",
+        "col_kind": "Soort registratie",
+        "col_title": "Titel",
+        "col_summary": "Samenvatting",
+        "col_reference": "Referentie",
+        "register_filename": "bewijsdossier"
+      },
+      "labels": {
+        "section": {
+          "notices": "Kennisgevingen",
+          "correspondence": "Correspondentie",
+          "rfis": "Informatieverzoeken (RFI's)",
+          "variations": "Wijzigingen",
+          "approvals": "Goedkeuringen",
+          "delay": "Vertraging",
+          "timeline": "Tijdlijn",
+          "other": "Overig"
+        },
+        "kind": {
+          "notice": "Kennisgeving",
+          "variation_notice": "Melding wijziging",
+          "variation_request": "Wijzigingsverzoek",
+          "variation_order": "Wijzigingsopdracht (meer-/minderwerk)",
+          "change_order": "Wijzigingsopdracht",
+          "moc_entry": "Wijzigingsregistratie",
+          "correspondence": "Correspondentie"
+        },
+        "basis": {
+          "dispute": "Geschil",
+          "valuation": "Waardering",
+          "delay": "Vertraging / termijnverlenging",
+          "general": "Algemene registratie"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Correspondentielogboek",
+        "doc_title": "Correspondentie",
+        "col_reference": "Kenmerk",
+        "col_direction": "Richting",
+        "col_type": "Type",
+        "col_subject": "Onderwerp",
+        "col_from": "Van",
+        "col_to": "Aan",
+        "col_date_sent": "Verzenddatum",
+        "col_date_received": "Ontvangstdatum",
+        "col_response_due": "Reactie uiterlijk",
+        "col_clause": "Contractartikel",
+        "notes": "Opmerkingen",
+        "no_notes": "Geen opmerkingen vastgelegd.",
+        "attachments": "Bijgevoegde bestanden",
+        "linked_documents": "Gekoppelde documenten",
+        "sig_prepared": "Opgesteld door",
+        "sig_received": "Ontvangen door",
+        "register_filename": "correspondentielogboek"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Inkomend",
+          "outgoing": "Uitgaand"
+        },
+        "type": {
+          "letter": "Brief",
+          "email": "E-mail",
+          "notice": "Kennisgeving",
+          "memo": "Memo",
+          "report": "Rapport"
+        },
+        "status": {
+          "open": "Open",
+          "awaiting_response": "Wacht op reactie",
+          "responded": "Beantwoord",
+          "closed": "Gesloten"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Verzendregister",
+        "doc_title": "Verzendformulier",
+        "col_number": "Verzendnr.",
+        "col_subject": "Onderwerp",
+        "col_purpose": "Doel",
+        "col_issued": "Verzenddatum",
+        "col_response_due": "Reactie uiterlijk",
+        "col_recipients": "Ontvangers",
+        "col_item_count": "Stukken",
+        "sender": "Afzender",
+        "cover_note": "Begeleidend schrijven",
+        "no_cover_note": "Geen begeleidend schrijven.",
+        "recipients": "Ontvangers",
+        "recipient": "Ontvanger",
+        "action_required": "Actie vereist",
+        "acknowledged": "Ontvangst bevestigd",
+        "responded": "Datum reactie",
+        "items": "Verzonden stukken",
+        "item_no": "Nr.",
+        "item_description": "Omschrijving",
+        "item_notes": "Opmerkingen",
+        "sig_issued": "Verzonden door",
+        "sig_received": "Ontvangen door",
+        "register_filename": "verzendregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "issued": "Verzonden",
+          "responded": "Beantwoord"
+        },
+        "purpose": {
+          "for_approval": "Ter goedkeuring",
+          "for_review": "Ter beoordeling",
+          "for_information": "Ter informatie",
+          "for_construction": "Voor uitvoering",
+          "for_tender": "Voor aanbesteding",
+          "for_record": "Ter archivering"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Wijzigingenregister",
+        "claim_register_title": "Claimregister",
+        "notice_register_title": "Kennisgevingenregister",
+        "doc_title": "Wijzigingsverzoek",
+        "doc_title_credit": "Wijzigingsverzoek (minderwerk)",
+        "time_impact": "Tijdsgevolg",
+        "col_code": "Code",
+        "col_title": "Titel",
+        "col_classification": "Type",
+        "col_urgency": "Urgentie",
+        "col_requested": "Datum aangevraagd",
+        "col_claimed_amount": "Geclaimd bedrag",
+        "col_agreed_amount": "Overeengekomen bedrag",
+        "col_time_impact": "Tijdsgevolg (dagen)",
+        "col_response_due": "Reactie uiterlijk",
+        "col_clause": "Contractartikel",
+        "col_row": "Nr.",
+        "col_claim_type": "Soort claim",
+        "col_raised": "Datum ingediend",
+        "col_period_start": "Periode van",
+        "col_period_end": "Periode tot",
+        "col_description": "Omschrijving",
+        "col_decided_amount": "Vastgesteld bedrag",
+        "col_days_requested": "Gevraagde dagen",
+        "col_days_granted": "Toegekende dagen",
+        "col_recipient_type": "Gericht aan",
+        "col_recipient": "Ontvanger",
+        "col_target_response": "Verwachte reactie",
+        "col_response_received": "Reactie ontvangen",
+        "requested_by": "Aangevraagd door",
+        "decided_by": "Besloten door",
+        "date_submitted": "Datum ingediend",
+        "date_decided": "Datum besluit",
+        "description": "Omschrijving",
+        "no_description": "Geen omschrijving vastgelegd.",
+        "decision_notes": "Toelichting op besluit",
+        "no_decision_notes": "Nog geen besluit vastgelegd.",
+        "variation_register_filename": "wijzigingenregister",
+        "claim_register_filename": "claimregister",
+        "notice_register_filename": "kennisgevingenregister"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "under_review": "In beoordeling",
+          "approved": "Goedgekeurd",
+          "rejected": "Afgewezen",
+          "converted_to_vo": "Omgezet in opdracht"
+        },
+        "claim_status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "under_review": "In beoordeling",
+          "agreed": "Overeengekomen",
+          "granted": "Toegekend",
+          "rejected": "Afgewezen"
+        },
+        "notice_status": {
+          "issued": "Verzonden",
+          "acknowledged": "Ontvangst bevestigd",
+          "responded": "Beantwoord",
+          "closed": "Gesloten"
+        },
+        "classification": {
+          "scope_change": "Wijziging werkomvang",
+          "unforeseen": "Onvoorziene omstandigheid",
+          "owner_change": "Wijziging door opdrachtgever",
+          "design_dev": "Ontwerpuitwerking",
+          "regulatory": "Wet- en regelgeving",
+          "other": "Overig"
+        },
+        "urgency": {
+          "low": "Laag",
+          "med": "Gemiddeld",
+          "high": "Hoog"
+        },
+        "claim_type": {
+          "disruption": "Verstoring",
+          "eot": "Termijnverlenging"
+        },
+        "recipient_type": {
+          "owner": "Opdrachtgever",
+          "contractor": "Aannemer",
+          "architect": "Architect",
+          "engineer": "Ingenieur",
+          "consultant": "Adviseur"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Dagrapport bouwplaats",
+        "overview": "Overzicht",
+        "site_supervisor": "Uitvoerder",
+        "not_recorded": "Niet vastgelegd",
+        "labour_on_site": "Personeel op locatie",
+        "equipment_on_site": "Materieel op locatie",
+        "completeness": "Volledigheid",
+        "weather": "Weer",
+        "weather_time": "Tijd",
+        "weather_source": "Bron",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Wind (km/u)",
+        "weather_precip": "Neerslag (mm)",
+        "weather_conditions": "Weersgesteldheid",
+        "weather_empty": "Geen weergegevens vastgelegd voor deze dag.",
+        "site_record": "Bouwplaatsregistratie",
+        "entries_empty": "Geen aantekeningen vastgelegd voor dit dagrapport.",
+        "notes": "Opmerkingen",
+        "notes_empty": "Geen aanvullende opmerkingen.",
+        "footer_supervisor": "Uitvoerder: {name}",
+        "footer_supervisor_missing": "Uitvoerder: niet vastgelegd",
+        "footer_generated": "Aangemaakt: {timestamp}",
+        "footer_page": "Pagina {page} van {total}",
+        "workforce": "Personeel per bedrijf",
+        "workforce_company": "Bedrijf",
+        "workforce_count": "Personen",
+        "workforce_unassigned": "Niet aan een bedrijf toegewezen",
+        "workforce_total": "Totaal",
+        "signatures": "Handtekeningen",
+        "sig_prepared": "Opgesteld door (uitvoerder)",
+        "sig_approved": "Goedgekeurd door (vertegenwoordiger opdrachtgever)",
+        "sig_name": "Naam",
+        "sig_title": "Functie",
+        "sig_date": "Datum",
+        "sig_signature": "Handtekening",
+        "signed_note": "Digitaal ondertekend in het systeem: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "dagrapport",
+        "summary_wind": "wind {value} km/u",
+        "summary_precipitation": "neerslag {value} mm",
+        "summary_humidity": "luchtvochtigheid {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Bezoekers",
+          "event": "Gebeurtenissen",
+          "delivery": "Geleverde materialen",
+          "completion": "Uitgevoerde werkzaamheden",
+          "incident_summary": "Veiligheid en incidenten",
+          "inspection_summary": "Keuringen",
+          "photo_note": "Fotonotities",
+          "general": "Algemene opmerkingen"
+        },
+        "status": {
+          "open": "Open",
+          "closed": "Gesloten",
+          "signed": "Ondertekend",
+          "archived": "Gearchiveerd"
+        },
+        "condition": {
+          "clear": "helder",
+          "mainly_clear": "overwegend helder",
+          "partly_cloudy": "half bewolkt",
+          "cloudy": "bewolkt",
+          "overcast": "zwaar bewolkt",
+          "fog": "mist",
+          "fog_rime": "aanvriezende mist",
+          "drizzle_light": "lichte motregen",
+          "drizzle_moderate": "matige motregen",
+          "drizzle_dense": "zware motregen",
+          "rain": "regen",
+          "rain_light": "lichte regen",
+          "rain_moderate": "matige regen",
+          "rain_heavy": "zware regen",
+          "freezing_rain_light": "lichte ijzel",
+          "freezing_rain_heavy": "zware ijzel",
+          "snow": "sneeuw",
+          "snow_light": "lichte sneeuw",
+          "snow_moderate": "matige sneeuw",
+          "snow_heavy": "zware sneeuw",
+          "rain_showers_light": "lichte regenbuien",
+          "rain_showers_moderate": "matige regenbuien",
+          "rain_showers_violent": "hevige regenbuien",
+          "snow_showers_light": "lichte sneeuwbuien",
+          "snow_showers_heavy": "zware sneeuwbuien",
+          "thunderstorm": "onweer",
+          "thunderstorm_hail_light": "onweer met lichte hagel",
+          "thunderstorm_hail_heavy": "onweer met zware hagel"
+        },
+        "source": {
+          "manual": "Handmatige invoer",
+          "open_meteo": "Weerdienst",
+          "sensor": "Sensor op locatie"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Informatieverzoeken (RFI-logboek)",
+        "col_number": "RFI-nr.",
+        "col_subject": "Onderwerp",
+        "col_raised_by": "Ingediend door",
+        "col_assigned_to": "Toegewezen aan",
+        "col_ball_in_court": "Actie bij",
+        "col_date_required": "Benodigd op",
+        "col_response_due": "Reactie uiterlijk",
+        "col_days_open": "Dagen open",
+        "col_cost_impact": "Kostengevolg",
+        "col_schedule_impact": "Planningsgevolg",
+        "col_response": "Reactie",
+        "yes_with": "Ja ({detail})",
+        "register_filename": "rfi-logboek"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "open": "Open",
+          "answered": "Beantwoord",
+          "closed": "Gesloten",
+          "void": "Ongeldig"
+        }
+      }
+    }
   }
 }

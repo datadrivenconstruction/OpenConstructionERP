@@ -624,6 +624,514 @@
           "refunded": "Возвращён"
         }
       }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Реестр документации на согласование",
+        "doc_title": "Документация на согласование",
+        "doc_title_product_data": "Лист согласования материала",
+        "col_number": "№ документа",
+        "col_title": "Наименование",
+        "col_type": "Тип",
+        "col_spec": "Раздел спецификации",
+        "col_rev": "Рев.",
+        "col_date_submitted": "Дата подачи",
+        "col_date_required": "Требуемая дата",
+        "col_date_returned": "Дата возврата",
+        "col_reviewer": "Проверяющий",
+        "col_approver": "Согласующий",
+        "col_ball_in_court": "Ход за",
+        "submitted_by_org": "Подающая организация",
+        "review_notes": "Замечания проверяющего",
+        "no_review_notes": "Замечания проверяющего не внесены.",
+        "sig_submitted": "Подано",
+        "sig_reviewed": "Проверено",
+        "sig_approved": "Согласовано",
+        "register_filename": "reestr-dokumentacii-na-soglasovanie",
+        "register_title_shop_drawing": "Реестр рабочих чертежей",
+        "register_title_product_data": "Реестр согласования материалов",
+        "register_title_method_statement": "Реестр описаний методов работ",
+        "register_filename_shop_drawing": "reestr-rabochih-chertezhej",
+        "register_filename_product_data": "reestr-soglasovaniya-materialov",
+        "register_filename_method_statement": "reestr-opisanij-metodov-rabot",
+        "col_discipline": "Раздел",
+        "col_manufacturer": "Производитель / марка",
+        "col_model": "Модель / артикул",
+        "col_origin": "Страна происхождения",
+        "col_supplier": "Поставщик",
+        "col_product": "Изготовитель / модель / страна",
+        "col_review_code": "Код проверки",
+        "col_outcome": "Результат проверки",
+        "col_review_period": "Срок проверки (дн.)",
+        "col_review_due": "Проверить до",
+        "col_days_in_review": "Дней на проверке",
+        "col_days_in_review_print": "Дней на проверке",
+        "col_review_overdue": "Дней просрочки",
+        "col_required_on_site": "Нужно на объекте",
+        "col_long_lead": "Длит. поставка",
+        "col_lead_time": "Срок поставки (нед.)",
+        "col_needed_by": "Согласовать до",
+        "col_approval_late": "Дней после срока",
+        "col_drawings": "Связанные чертежи",
+        "col_submitted_returned": "Подан / возвращён",
+        "col_on_site_needed_by": "На объекте / согласовать до",
+        "resubmit_for_record": "Исправленный экземпляр подать повторно для архива",
+        "review_history": "История проверки",
+        "hist_submitted": "Подан",
+        "hist_returned": "Возвращён",
+        "drawings_missing_one": "{n} связанный чертёж больше недоступен",
+        "drawings_missing_other": "Недоступно связанных чертежей: {n}",
+        "weeks_one": "{n} нед.",
+        "weeks_other": "{n} нед."
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "submitted": "Подан",
+          "under_review": "На проверке",
+          "approved": "Согласован",
+          "approved_as_noted": "Согласован с замечаниями",
+          "revise_and_resubmit": "Доработать и подать повторно",
+          "rejected": "Отклонён",
+          "closed": "Закрыт"
+        },
+        "type": {
+          "shop_drawing": "Рабочие чертежи",
+          "product_data": "Технические данные изделия",
+          "sample": "Образец",
+          "mock_up": "Макет",
+          "test_report": "Протокол испытаний",
+          "calculation": "Расчёт",
+          "method_statement": "Описание метода работ",
+          "certificate": "Сертификат",
+          "warranty": "Гарантия"
+        },
+        "discipline": {
+          "mechanical": "Механическое оборудование",
+          "hvac": "ОВиК",
+          "plumbing": "Водоснабжение и канализация",
+          "fire_protection": "Пожарная защита",
+          "electrical": "Электроснабжение",
+          "lighting": "Освещение",
+          "elv": "Слаботочные системы",
+          "bms": "Автоматизация здания",
+          "architectural": "Архитектурные решения",
+          "structural": "Конструктивные решения",
+          "civil": "Общестроительные работы"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Реестр приказов об изменении",
+        "doc_title": "Приказ об изменении",
+        "col_code": "Код",
+        "col_title": "Наименование",
+        "col_reason": "Причина",
+        "col_instrument": "Основание",
+        "col_submitted": "Дата подачи",
+        "col_contractor_amount": "Сумма подрядчика",
+        "col_engineer_amount": "Сумма инженера",
+        "col_approved_amount": "Утверждённая сумма",
+        "col_cost_impact": "Влияние на стоимость",
+        "col_time_impact": "Влияние на срок (дн.)",
+        "col_approved_time": "Утверждённый срок (дн.)",
+        "time_impact": "Влияние на срок",
+        "approved_time": "Утверждённый срок",
+        "col_approved": "Дата утверждения",
+        "submitted_by": "Подано",
+        "approved_by": "Утверждено",
+        "description": "Описание",
+        "no_description": "Описание не внесено.",
+        "items": "Позиции изменения",
+        "item_description": "Описание",
+        "item_change": "Изменение",
+        "item_unit": "Ед. изм.",
+        "item_original_quantity": "Кол-во (было)",
+        "item_new_quantity": "Кол-во (стало)",
+        "item_original_rate": "Расценка (была)",
+        "item_new_rate": "Расценка (стала)",
+        "item_cost_delta": "Разница в стоимости",
+        "register_filename": "reestr-prikazov-ob-izmenenii"
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "submitted": "Подан",
+          "approved": "Утверждён",
+          "rejected": "Отклонён",
+          "executed": "Исполнен"
+        },
+        "reason": {
+          "client_request": "Запрос заказчика",
+          "design_change": "Изменение проекта",
+          "unforeseen": "Непредвиденные условия",
+          "regulatory": "Требования регулирующих органов",
+          "error": "Ошибка или упущение",
+          "non_conformance": "Несоответствие",
+          "value_engineering": "Оптимизация стоимости"
+        },
+        "instrument": {
+          "works_change": "Письменное распоряжение",
+          "site_confirmation": "Подтверждение на объекте",
+          "claim": "Претензия"
+        },
+        "change": {
+          "added": "Добавлено",
+          "removed": "Исключено",
+          "modified": "Изменено"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Доказательный пакет",
+        "subject": "Предмет",
+        "basis": "Основание",
+        "period_from": "Самая ранняя запись",
+        "period_to": "Самая поздняя запись",
+        "digest": "Контрольный код (SHA-256, первые 16 символов)",
+        "col_row": "№",
+        "col_record_id": "ID записи",
+        "col_section": "Раздел",
+        "col_date": "Дата",
+        "col_kind": "Тип записи",
+        "col_title": "Наименование",
+        "col_summary": "Краткое содержание",
+        "col_reference": "Ссылка",
+        "register_filename": "dokazatelnyj-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Уведомления",
+          "correspondence": "Переписка",
+          "rfis": "Запросы (RFI)",
+          "variations": "Изменения",
+          "approvals": "Согласования",
+          "delay": "Задержка",
+          "timeline": "Хронология",
+          "other": "Прочее"
+        },
+        "kind": {
+          "notice": "Уведомление",
+          "variation_notice": "Уведомление об изменении",
+          "variation_request": "Запрос на изменение",
+          "variation_order": "Распоряжение об изменении",
+          "change_order": "Приказ об изменении",
+          "moc_entry": "Запись об изменении",
+          "correspondence": "Переписка"
+        },
+        "basis": {
+          "dispute": "Спор",
+          "valuation": "Оценка стоимости",
+          "delay": "Задержка / продление срока",
+          "general": "Общая запись"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Журнал переписки",
+        "doc_title": "Переписка",
+        "col_reference": "Исх./вх. №",
+        "col_direction": "Направление",
+        "col_type": "Тип",
+        "col_subject": "Тема",
+        "col_from": "От кого",
+        "col_to": "Кому",
+        "col_date_sent": "Дата отправки",
+        "col_date_received": "Дата получения",
+        "col_response_due": "Ответ требуется до",
+        "col_clause": "Пункт договора",
+        "notes": "Примечания",
+        "no_notes": "Примечания не внесены.",
+        "attachments": "Вложенные файлы",
+        "linked_documents": "Связанные документы",
+        "sig_prepared": "Составлено",
+        "sig_received": "Получено",
+        "register_filename": "zhurnal-perepiski"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Входящее",
+          "outgoing": "Исходящее"
+        },
+        "type": {
+          "letter": "Письмо",
+          "email": "Эл. письмо",
+          "notice": "Уведомление",
+          "memo": "Служебная записка",
+          "report": "Отчёт"
+        },
+        "status": {
+          "open": "Открыто",
+          "awaiting_response": "Ожидает ответа",
+          "responded": "Отвечено",
+          "closed": "Закрыто"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Реестр передаточных ведомостей",
+        "doc_title": "Передаточная ведомость",
+        "col_number": "№ ведомости",
+        "col_subject": "Тема",
+        "col_purpose": "Назначение",
+        "col_issued": "Дата выдачи",
+        "col_response_due": "Ответ до",
+        "col_recipients": "Получатели",
+        "col_item_count": "Позиций",
+        "sender": "Отправитель",
+        "cover_note": "Сопроводительное письмо",
+        "no_cover_note": "Сопроводительного письма нет.",
+        "recipients": "Получатели",
+        "recipient": "Получатель",
+        "action_required": "Требуемое действие",
+        "acknowledged": "Получение подтверждено",
+        "responded": "Дата ответа",
+        "items": "Передаваемые документы",
+        "item_no": "№",
+        "item_description": "Описание",
+        "item_notes": "Примечания",
+        "sig_issued": "Выдано",
+        "sig_received": "Получено",
+        "register_filename": "reestr-peredatochnyh-vedomostej"
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "issued": "Выдана",
+          "responded": "Отвечено"
+        },
+        "purpose": {
+          "for_approval": "На согласование",
+          "for_review": "На рассмотрение",
+          "for_information": "К сведению",
+          "for_construction": "В производство работ",
+          "for_tender": "Для тендера",
+          "for_record": "Для архива"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Реестр изменений",
+        "claim_register_title": "Реестр претензий",
+        "notice_register_title": "Реестр уведомлений",
+        "doc_title": "Запрос на изменение",
+        "doc_title_credit": "Запрос на изменение (исключение работ)",
+        "time_impact": "Влияние на срок",
+        "col_code": "Код",
+        "col_title": "Наименование",
+        "col_classification": "Тип",
+        "col_urgency": "Срочность",
+        "col_requested": "Дата запроса",
+        "col_claimed_amount": "Заявленная сумма",
+        "col_agreed_amount": "Согласованная сумма",
+        "col_time_impact": "Влияние на срок (дн.)",
+        "col_response_due": "Ответ до",
+        "col_clause": "Пункт договора",
+        "col_row": "№",
+        "col_claim_type": "Тип претензии",
+        "col_raised": "Дата подачи",
+        "col_period_start": "Период с",
+        "col_period_end": "Период по",
+        "col_description": "Описание",
+        "col_decided_amount": "Присуждённая сумма",
+        "col_days_requested": "Запрошено дней",
+        "col_days_granted": "Предоставлено дней",
+        "col_recipient_type": "Адресат",
+        "col_recipient": "Получатель",
+        "col_target_response": "Ожидаемый ответ",
+        "col_response_received": "Ответ получен",
+        "requested_by": "Запрошено",
+        "decided_by": "Решение принято",
+        "date_submitted": "Дата подачи",
+        "date_decided": "Дата решения",
+        "description": "Описание",
+        "no_description": "Описание не внесено.",
+        "decision_notes": "Примечания к решению",
+        "no_decision_notes": "Решение пока не внесено.",
+        "variation_register_filename": "reestr-izmenenij",
+        "claim_register_filename": "reestr-pretenzij",
+        "notice_register_filename": "reestr-uvedomlenij"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Черновик",
+          "submitted": "Подан",
+          "under_review": "На рассмотрении",
+          "approved": "Одобрен",
+          "rejected": "Отклонён",
+          "converted_to_vo": "Преобразован в распоряжение"
+        },
+        "claim_status": {
+          "draft": "Черновик",
+          "submitted": "Подана",
+          "under_review": "На рассмотрении",
+          "agreed": "Согласована",
+          "granted": "Удовлетворена",
+          "rejected": "Отклонена"
+        },
+        "notice_status": {
+          "issued": "Направлено",
+          "acknowledged": "Получение подтверждено",
+          "responded": "Отвечено",
+          "closed": "Закрыто"
+        },
+        "classification": {
+          "scope_change": "Изменение объёма работ",
+          "unforeseen": "Непредвиденное условие",
+          "owner_change": "Изменение по инициативе заказчика",
+          "design_dev": "Развитие проектных решений",
+          "regulatory": "Требования регулирующих органов",
+          "other": "Прочее"
+        },
+        "urgency": {
+          "low": "Низкая",
+          "med": "Средняя",
+          "high": "Высокая"
+        },
+        "claim_type": {
+          "disruption": "Нарушение хода работ",
+          "eot": "Продление срока"
+        },
+        "recipient_type": {
+          "owner": "Заказчик",
+          "contractor": "Подрядчик",
+          "architect": "Архитектор",
+          "engineer": "Инженер",
+          "consultant": "Консультант"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Журнал ежедневных работ на объекте",
+        "overview": "Обзор",
+        "site_supervisor": "Руководитель работ на объекте",
+        "not_recorded": "Не внесено",
+        "labour_on_site": "Рабочая сила на объекте",
+        "equipment_on_site": "Техника на объекте",
+        "completeness": "Полнота заполнения",
+        "weather": "Погода",
+        "weather_time": "Время",
+        "weather_source": "Источник",
+        "weather_temp": "Темп. (°C)",
+        "weather_wind": "Ветер (км/ч)",
+        "weather_precip": "Осадки (мм)",
+        "weather_conditions": "Условия",
+        "weather_empty": "Погода за этот день не внесена.",
+        "site_record": "Запись по объекту",
+        "entries_empty": "В журнале нет записей.",
+        "notes": "Примечания",
+        "notes_empty": "Дополнительных примечаний нет.",
+        "footer_supervisor": "Руководитель работ: {name}",
+        "footer_supervisor_missing": "Руководитель работ: не внесён",
+        "footer_generated": "Сформировано: {timestamp}",
+        "footer_page": "Страница {page} из {total}",
+        "workforce": "Персонал по организациям",
+        "workforce_company": "Организация",
+        "workforce_count": "Человек",
+        "workforce_unassigned": "Без привязки к организации",
+        "workforce_total": "Итого",
+        "signatures": "Подписи",
+        "sig_prepared": "Составлено (руководитель работ)",
+        "sig_approved": "Утверждено (представитель заказчика)",
+        "sig_name": "ФИО",
+        "sig_title": "Должность",
+        "sig_date": "Дата",
+        "sig_signature": "Подпись",
+        "signed_note": "Подписано в системе: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "zhurnal",
+        "summary_wind": "ветер {value} км/ч",
+        "summary_precipitation": "осадки {value} мм",
+        "summary_humidity": "влажность {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Посетители",
+          "event": "События",
+          "delivery": "Поставленные материалы",
+          "completion": "Выполненные работы",
+          "incident_summary": "Охрана труда и происшествия",
+          "inspection_summary": "Проверки",
+          "photo_note": "Фотозаметки",
+          "general": "Общие примечания"
+        },
+        "status": {
+          "open": "Открыт",
+          "closed": "Закрыт",
+          "signed": "Подписан",
+          "archived": "В архиве"
+        },
+        "condition": {
+          "clear": "ясно",
+          "mainly_clear": "преимущественно ясно",
+          "partly_cloudy": "переменная облачность",
+          "cloudy": "облачно",
+          "overcast": "пасмурно",
+          "fog": "туман",
+          "fog_rime": "изморозь",
+          "drizzle_light": "слабая морось",
+          "drizzle_moderate": "умеренная морось",
+          "drizzle_dense": "сильная морось",
+          "rain": "дождь",
+          "rain_light": "слабый дождь",
+          "rain_moderate": "умеренный дождь",
+          "rain_heavy": "сильный дождь",
+          "freezing_rain_light": "слабый ледяной дождь",
+          "freezing_rain_heavy": "сильный ледяной дождь",
+          "snow": "снег",
+          "snow_light": "слабый снег",
+          "snow_moderate": "умеренный снег",
+          "snow_heavy": "сильный снег",
+          "rain_showers_light": "слабый ливневый дождь",
+          "rain_showers_moderate": "умеренный ливневый дождь",
+          "rain_showers_violent": "сильный ливень",
+          "snow_showers_light": "слабый снегопад",
+          "snow_showers_heavy": "сильный снегопад",
+          "thunderstorm": "гроза",
+          "thunderstorm_hail_light": "гроза со слабым градом",
+          "thunderstorm_hail_heavy": "гроза с сильным градом"
+        },
+        "source": {
+          "manual": "Ввод вручную",
+          "open_meteo": "Метеослужба",
+          "sensor": "Датчик на объекте"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Журнал запросов информации (RFI)",
+        "col_number": "№ RFI",
+        "col_subject": "Тема",
+        "col_raised_by": "Автор запроса",
+        "col_assigned_to": "Исполнитель",
+        "col_ball_in_court": "Ход за",
+        "col_date_required": "Требуемая дата",
+        "col_response_due": "Ответ до",
+        "col_days_open": "Дней открыт",
+        "col_cost_impact": "Влияние на стоимость",
+        "col_schedule_impact": "Влияние на сроки",
+        "col_response": "Ответ",
+        "yes_with": "Да ({detail})",
+        "register_filename": "zhurnal-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "open": "Открыт",
+          "answered": "Отвечен",
+          "closed": "Закрыт",
+          "void": "Аннулирован"
+        }
+      }
     }
   },
   "cost_control": {

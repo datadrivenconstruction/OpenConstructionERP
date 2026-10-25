@@ -648,6 +648,514 @@
           "refunded": "واپس کی گئی"
         }
       }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "منظوری کے لیے جمع کردہ دستاویزات کا رجسٹر",
+        "doc_title": "منظوری کے لیے جمع کردہ دستاویز",
+        "doc_title_product_data": "مواد کی منظوری کا فارم",
+        "col_number": "دستاویز نمبر",
+        "col_title": "عنوان",
+        "col_type": "قسم",
+        "col_spec": "تصریحات کا حصہ",
+        "col_rev": "ترمیم",
+        "col_date_submitted": "جمع کرانے کی تاریخ",
+        "col_date_required": "درکار تاریخ",
+        "col_date_returned": "واپسی کی تاریخ",
+        "col_reviewer": "جائزہ کار",
+        "col_approver": "منظوری دہندہ",
+        "col_ball_in_court": "اگلی کارروائی کا ذمہ دار",
+        "submitted_by_org": "جمع کرانے والی کمپنی",
+        "review_notes": "جائزہ کار کے تبصرے",
+        "no_review_notes": "جائزہ کار کے کوئی تبصرے درج نہیں۔",
+        "sig_submitted": "جمع کنندہ",
+        "sig_reviewed": "جائزہ",
+        "sig_approved": "منظوری",
+        "register_filename": "register-manzoori-dastavezat",
+        "register_title_shop_drawing": "شاپ ڈرائنگز کا رجسٹر",
+        "register_title_product_data": "مواد کی منظوری کا رجسٹر",
+        "register_title_method_statement": "طریقۂ کار کے بیانات کا رجسٹر",
+        "register_filename_shop_drawing": "register-shop-drawings",
+        "register_filename_product_data": "register-manzoori-mawad",
+        "register_filename_method_statement": "register-tariqa-kar",
+        "col_discipline": "شعبہ",
+        "col_manufacturer": "ساز / برانڈ",
+        "col_model": "ماڈل / حوالہ",
+        "col_origin": "ملکِ پیداوار",
+        "col_supplier": "سپلائر",
+        "col_product": "ساز / ماڈل / پیداوار",
+        "col_review_code": "جائزہ کوڈ",
+        "col_outcome": "جائزے کا نتیجہ",
+        "col_review_period": "جائزے کی مدت (دن)",
+        "col_review_due": "جائزے کی آخری تاریخ",
+        "col_days_in_review": "زیرِ جائزہ دن",
+        "col_days_in_review_print": "زیرِ جائزہ دن",
+        "col_review_overdue": "تاخیر کے دن",
+        "col_required_on_site": "سائٹ پر درکار",
+        "col_long_lead": "طویل ترسیلی مدت",
+        "col_lead_time": "ترسیلی مدت (ہفتے)",
+        "col_needed_by": "منظوری درکار بتاریخ",
+        "col_approval_late": "مقررہ تاریخ کے بعد دن",
+        "col_drawings": "منسلک ڈرائنگز",
+        "col_submitted_returned": "جمع / واپسی",
+        "col_on_site_needed_by": "سائٹ پر / منظوری تک",
+        "resubmit_for_record": "ریکارڈ کے لیے درست شدہ نقل دوبارہ جمع کرائی جائے",
+        "review_history": "جائزے کی تاریخ",
+        "hist_submitted": "جمع کی گئی",
+        "hist_returned": "واپس کی گئی",
+        "drawings_missing_one": "{n} منسلک ڈرائنگ اب دستیاب نہیں",
+        "drawings_missing_other": "{n} منسلک ڈرائنگز اب دستیاب نہیں",
+        "weeks_one": "{n} ہفتہ",
+        "weeks_other": "{n} ہفتے"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودہ",
+          "submitted": "جمع شدہ",
+          "under_review": "زیرِ جائزہ",
+          "approved": "منظور شدہ",
+          "approved_as_noted": "تبصروں کے ساتھ منظور",
+          "revise_and_resubmit": "ترمیم کر کے دوبارہ جمع کریں",
+          "rejected": "مسترد",
+          "closed": "بند"
+        },
+        "type": {
+          "shop_drawing": "شاپ ڈرائنگ",
+          "product_data": "پروڈکٹ ڈیٹا",
+          "sample": "نمونہ",
+          "mock_up": "ماک اپ",
+          "test_report": "ٹیسٹ رپورٹ",
+          "calculation": "حسابات",
+          "method_statement": "طریقۂ کار کا بیان",
+          "certificate": "سرٹیفکیٹ",
+          "warranty": "وارنٹی"
+        },
+        "discipline": {
+          "mechanical": "میکانیکل",
+          "hvac": "ایچ وی اے سی",
+          "plumbing": "پلمبنگ اور نکاسی",
+          "fire_protection": "آتشزدگی سے تحفظ",
+          "electrical": "برقی",
+          "lighting": "روشنی",
+          "elv": "کم کرنٹ",
+          "bms": "بلڈنگ آٹومیشن",
+          "architectural": "تعمیراتی نقشہ سازی",
+          "structural": "ساختی",
+          "civil": "سول"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "تبدیلی کے احکامات کا رجسٹر",
+        "doc_title": "تبدیلی کا حکم",
+        "col_code": "کوڈ",
+        "col_title": "عنوان",
+        "col_reason": "وجہ",
+        "col_instrument": "دستاویز کی نوعیت",
+        "col_submitted": "جمع کرانے کی تاریخ",
+        "col_contractor_amount": "ٹھیکیدار کی رقم",
+        "col_engineer_amount": "انجینئر کی رقم",
+        "col_approved_amount": "منظور شدہ رقم",
+        "col_cost_impact": "لاگت پر اثر",
+        "col_time_impact": "وقت پر اثر (دن)",
+        "col_approved_time": "منظور شدہ مدت (دن)",
+        "time_impact": "وقت پر اثر",
+        "approved_time": "منظور شدہ مدت",
+        "col_approved": "منظوری کی تاریخ",
+        "submitted_by": "جمع کنندہ",
+        "approved_by": "منظوری",
+        "description": "تفصیل",
+        "no_description": "کوئی تفصیل درج نہیں۔",
+        "items": "تبدیلی کے آئٹمز",
+        "item_description": "تفصیل",
+        "item_change": "تبدیلی",
+        "item_unit": "اکائی",
+        "item_original_quantity": "اصل مقدار",
+        "item_new_quantity": "نئی مقدار",
+        "item_original_rate": "اصل نرخ",
+        "item_new_rate": "نیا نرخ",
+        "item_cost_delta": "لاگت کا فرق",
+        "register_filename": "register-tabdeeli-ahkamat"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودہ",
+          "submitted": "جمع شدہ",
+          "approved": "منظور شدہ",
+          "rejected": "مسترد",
+          "executed": "تکمیل شدہ"
+        },
+        "reason": {
+          "client_request": "کلائنٹ کی درخواست",
+          "design_change": "ڈیزائن میں تبدیلی",
+          "unforeseen": "غیر متوقع حالات",
+          "regulatory": "قانونی تقاضا",
+          "error": "غلطی یا کوتاہی",
+          "non_conformance": "عدم مطابقت",
+          "value_engineering": "ویلیو انجینئرنگ"
+        },
+        "instrument": {
+          "works_change": "ہدایت شدہ تبدیلی",
+          "site_confirmation": "سائٹ پر تصدیق",
+          "claim": "دعویٰ"
+        },
+        "change": {
+          "added": "شامل کیا گیا",
+          "removed": "ہٹایا گیا",
+          "modified": "ترمیم شدہ"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "ثبوتوں کا مجموعہ",
+        "subject": "موضوع",
+        "basis": "بنیاد",
+        "period_from": "قدیم ترین ریکارڈ",
+        "period_to": "تازہ ترین ریکارڈ",
+        "digest": "سالمیت کوڈ (SHA-256، پہلے 16 حروف)",
+        "col_row": "نمبر",
+        "col_record_id": "ریکارڈ آئی ڈی",
+        "col_section": "حصہ",
+        "col_date": "تاریخ",
+        "col_kind": "ریکارڈ کی قسم",
+        "col_title": "عنوان",
+        "col_summary": "خلاصہ",
+        "col_reference": "حوالہ",
+        "register_filename": "majmua-subut"
+      },
+      "labels": {
+        "section": {
+          "notices": "نوٹسز",
+          "correspondence": "خط و کتابت",
+          "rfis": "معلومات کی درخواستیں (RFI)",
+          "variations": "تبدیلی کے احکامات",
+          "approvals": "منظوریاں",
+          "delay": "تاخیر",
+          "timeline": "وقت کا خاکہ",
+          "other": "دیگر"
+        },
+        "kind": {
+          "notice": "نوٹس",
+          "variation_notice": "تبدیلی کا نوٹس",
+          "variation_request": "تبدیلی کی درخواست",
+          "variation_order": "تبدیلی کا حکم",
+          "change_order": "تبدیلی کا حکم",
+          "moc_entry": "تبدیلی کا ریکارڈ",
+          "correspondence": "مراسلت"
+        },
+        "basis": {
+          "dispute": "تنازع",
+          "valuation": "تخمینہ",
+          "delay": "تاخیر / مدت میں توسیع",
+          "general": "عمومی ریکارڈ"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "خط و کتابت کا رجسٹر",
+        "doc_title": "مراسلت",
+        "col_reference": "حوالہ نمبر",
+        "col_direction": "سمت",
+        "col_type": "قسم",
+        "col_subject": "موضوع",
+        "col_from": "از",
+        "col_to": "بنام",
+        "col_date_sent": "ارسال کی تاریخ",
+        "col_date_received": "وصولی کی تاریخ",
+        "col_response_due": "جواب درکار بتاریخ",
+        "col_clause": "معاہدے کی شق",
+        "notes": "نوٹس",
+        "no_notes": "کوئی نوٹ درج نہیں۔",
+        "attachments": "منسلک فائلیں",
+        "linked_documents": "منسلک دستاویزات",
+        "sig_prepared": "تیار کنندہ",
+        "sig_received": "وصول کنندہ",
+        "register_filename": "register-khat-o-kitabat"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "موصولہ",
+          "outgoing": "ارسال شدہ"
+        },
+        "type": {
+          "letter": "خط",
+          "email": "ای میل",
+          "notice": "نوٹس",
+          "memo": "میمو",
+          "report": "رپورٹ"
+        },
+        "status": {
+          "open": "کھلا",
+          "awaiting_response": "جواب کا منتظر",
+          "responded": "جواب دیا گیا",
+          "closed": "بند"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "ٹرانسمیٹل رجسٹر",
+        "doc_title": "ٹرانسمیٹل",
+        "col_number": "ٹرانسمیٹل نمبر",
+        "col_subject": "موضوع",
+        "col_purpose": "مقصد",
+        "col_issued": "اجرا کی تاریخ",
+        "col_response_due": "جواب کی آخری تاریخ",
+        "col_recipients": "وصول کنندگان",
+        "col_item_count": "آئٹمز",
+        "sender": "ارسال کنندہ",
+        "cover_note": "کور نوٹ",
+        "no_cover_note": "کوئی کور نوٹ نہیں۔",
+        "recipients": "وصول کنندگان",
+        "recipient": "وصول کنندہ",
+        "action_required": "کارروائی درکار",
+        "acknowledged": "وصولی کی تصدیق",
+        "responded": "جواب کی تاریخ",
+        "items": "ارسال کردہ آئٹمز",
+        "item_no": "نمبر",
+        "item_description": "تفصیل",
+        "item_notes": "نوٹس",
+        "sig_issued": "اجرا",
+        "sig_received": "وصولی",
+        "register_filename": "register-transmittal"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودہ",
+          "issued": "جاری شدہ",
+          "responded": "جواب دیا گیا"
+        },
+        "purpose": {
+          "for_approval": "منظوری کے لیے",
+          "for_review": "جائزے کے لیے",
+          "for_information": "اطلاع کے لیے",
+          "for_construction": "تعمیر کے لیے",
+          "for_tender": "ٹینڈر کے لیے",
+          "for_record": "ریکارڈ کے لیے"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "تبدیلی کے احکامات کا رجسٹر",
+        "claim_register_title": "دعووں کا رجسٹر",
+        "notice_register_title": "نوٹسز کا رجسٹر",
+        "doc_title": "تبدیلی کی درخواست",
+        "doc_title_credit": "تبدیلی کی درخواست (کمی)",
+        "time_impact": "وقت پر اثر",
+        "col_code": "کوڈ",
+        "col_title": "عنوان",
+        "col_classification": "قسم",
+        "col_urgency": "فوری ضرورت",
+        "col_requested": "درخواست کی تاریخ",
+        "col_claimed_amount": "دعویٰ کردہ رقم",
+        "col_agreed_amount": "طے شدہ رقم",
+        "col_time_impact": "وقت پر اثر (دن)",
+        "col_response_due": "جواب کی آخری تاریخ",
+        "col_clause": "معاہدے کی شق",
+        "col_row": "نمبر",
+        "col_claim_type": "دعوے کی قسم",
+        "col_raised": "پیش کرنے کی تاریخ",
+        "col_period_start": "مدت از",
+        "col_period_end": "مدت تا",
+        "col_description": "تفصیل",
+        "col_decided_amount": "فیصلہ شدہ رقم",
+        "col_days_requested": "مطلوبہ دن",
+        "col_days_granted": "منظور شدہ دن",
+        "col_recipient_type": "مخاطب",
+        "col_recipient": "وصول کنندہ",
+        "col_target_response": "متوقع جواب",
+        "col_response_received": "موصولہ جواب",
+        "requested_by": "درخواست کنندہ",
+        "decided_by": "فیصلہ ساز",
+        "date_submitted": "جمع کرانے کی تاریخ",
+        "date_decided": "فیصلے کی تاریخ",
+        "description": "تفصیل",
+        "no_description": "کوئی تفصیل درج نہیں۔",
+        "decision_notes": "فیصلے کے نوٹس",
+        "no_decision_notes": "ابھی تک کوئی فیصلہ درج نہیں ہوا۔",
+        "variation_register_filename": "register-tabdeeli-ahkamat",
+        "claim_register_filename": "register-daawe",
+        "notice_register_filename": "register-notice"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "مسودہ",
+          "submitted": "جمع شدہ",
+          "under_review": "زیرِ جائزہ",
+          "approved": "منظور شدہ",
+          "rejected": "مسترد",
+          "converted_to_vo": "حکم میں تبدیل"
+        },
+        "claim_status": {
+          "draft": "مسودہ",
+          "submitted": "جمع شدہ",
+          "under_review": "زیرِ جائزہ",
+          "agreed": "طے شدہ",
+          "granted": "منظور شدہ",
+          "rejected": "مسترد"
+        },
+        "notice_status": {
+          "issued": "جاری شدہ",
+          "acknowledged": "وصولی کی تصدیق شدہ",
+          "responded": "جواب دیا گیا",
+          "closed": "بند"
+        },
+        "classification": {
+          "scope_change": "دائرۂ کار میں تبدیلی",
+          "unforeseen": "غیر متوقع صورتِ حال",
+          "owner_change": "مالک کی طرف سے تبدیلی",
+          "design_dev": "ڈیزائن کی تکمیل",
+          "regulatory": "قانونی تقاضا",
+          "other": "دیگر"
+        },
+        "urgency": {
+          "low": "کم",
+          "med": "درمیانی",
+          "high": "زیادہ"
+        },
+        "claim_type": {
+          "disruption": "کام میں خلل",
+          "eot": "مدت میں توسیع"
+        },
+        "recipient_type": {
+          "owner": "مالک",
+          "contractor": "ٹھیکیدار",
+          "architect": "آرکیٹیکٹ",
+          "engineer": "انجینئر",
+          "consultant": "کنسلٹنٹ"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "روزانہ سائٹ ڈائری",
+        "overview": "جائزہ",
+        "site_supervisor": "سائٹ سپروائزر",
+        "not_recorded": "درج نہیں",
+        "labour_on_site": "سائٹ پر مزدور",
+        "equipment_on_site": "سائٹ پر سازوسامان",
+        "completeness": "تکمیل کی سطح",
+        "weather": "موسم",
+        "weather_time": "وقت",
+        "weather_source": "ماخذ",
+        "weather_temp": "درجۂ حرارت (°C)",
+        "weather_wind": "ہوا (km/h)",
+        "weather_precip": "بارش (mm)",
+        "weather_conditions": "کیفیت",
+        "weather_empty": "اس دن کے لیے موسم درج نہیں۔",
+        "site_record": "سائٹ کا ریکارڈ",
+        "entries_empty": "اس ڈائری کے لیے کوئی اندراج نہیں۔",
+        "notes": "نوٹس",
+        "notes_empty": "کوئی اضافی نوٹ نہیں۔",
+        "footer_supervisor": "سپروائزر: {name}",
+        "footer_supervisor_missing": "سائٹ سپروائزر: درج نہیں",
+        "footer_generated": "تیار کردہ: {timestamp}",
+        "footer_page": "صفحہ {page} از {total}",
+        "workforce": "کمپنی کے لحاظ سے افرادی قوت",
+        "workforce_company": "کمپنی",
+        "workforce_count": "افراد",
+        "workforce_unassigned": "کسی کمپنی سے منسلک نہیں",
+        "workforce_total": "کل",
+        "signatures": "دستخط",
+        "sig_prepared": "تیار کنندہ (سائٹ مینیجر)",
+        "sig_approved": "منظوری (آجر کا نمائندہ)",
+        "sig_name": "نام",
+        "sig_title": "عہدہ",
+        "sig_date": "تاریخ",
+        "sig_signature": "دستخط",
+        "signed_note": "سسٹم میں دستخط شدہ: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "roznama-site",
+        "summary_wind": "ہوا {value} km/h",
+        "summary_precipitation": "بارش {value} mm",
+        "summary_humidity": "نمی {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "ملاقاتی",
+          "event": "واقعات",
+          "delivery": "موصولہ مواد",
+          "completion": "انجام شدہ کام",
+          "incident_summary": "حفاظت اور حادثات",
+          "inspection_summary": "معائنے",
+          "photo_note": "تصویری نوٹس",
+          "general": "عمومی نوٹس"
+        },
+        "status": {
+          "open": "کھلی",
+          "closed": "بند",
+          "signed": "دستخط شدہ",
+          "archived": "محفوظ شدہ"
+        },
+        "condition": {
+          "clear": "صاف",
+          "mainly_clear": "زیادہ تر صاف",
+          "partly_cloudy": "جزوی ابر آلود",
+          "cloudy": "ابر آلود",
+          "overcast": "گھنے بادل",
+          "fog": "دھند",
+          "fog_rime": "یخ بستہ دھند",
+          "drizzle_light": "ہلکی پھوار",
+          "drizzle_moderate": "درمیانی پھوار",
+          "drizzle_dense": "تیز پھوار",
+          "rain": "بارش",
+          "rain_light": "ہلکی بارش",
+          "rain_moderate": "درمیانی بارش",
+          "rain_heavy": "تیز بارش",
+          "freezing_rain_light": "ہلکی یخ بستہ بارش",
+          "freezing_rain_heavy": "تیز یخ بستہ بارش",
+          "snow": "برفباری",
+          "snow_light": "ہلکی برفباری",
+          "snow_moderate": "درمیانی برفباری",
+          "snow_heavy": "شدید برفباری",
+          "rain_showers_light": "بارش کی ہلکی بوچھاڑیں",
+          "rain_showers_moderate": "بارش کی درمیانی بوچھاڑیں",
+          "rain_showers_violent": "بارش کی شدید بوچھاڑیں",
+          "snow_showers_light": "برف کی ہلکی بوچھاڑیں",
+          "snow_showers_heavy": "برف کی شدید بوچھاڑیں",
+          "thunderstorm": "گرج چمک کا طوفان",
+          "thunderstorm_hail_light": "ہلکے اولوں کے ساتھ گرج چمک کا طوفان",
+          "thunderstorm_hail_heavy": "تیز اولوں کے ساتھ گرج چمک کا طوفان"
+        },
+        "source": {
+          "manual": "دستی اندراج",
+          "open_meteo": "موسمی سروس",
+          "sensor": "سائٹ سینسر"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "معلومات کی درخواستوں کا رجسٹر (RFI)",
+        "col_number": "RFI نمبر",
+        "col_subject": "موضوع",
+        "col_raised_by": "درخواست کنندہ",
+        "col_assigned_to": "تفویض کردہ",
+        "col_ball_in_court": "اگلی کارروائی کا ذمہ دار",
+        "col_date_required": "درکار تاریخ",
+        "col_response_due": "جواب کی آخری تاریخ",
+        "col_days_open": "کھلے دن",
+        "col_cost_impact": "لاگت پر اثر",
+        "col_schedule_impact": "شیڈول پر اثر",
+        "col_response": "جواب",
+        "yes_with": "جی ہاں ({detail})",
+        "register_filename": "register-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودہ",
+          "open": "کھلا",
+          "answered": "جواب دیا گیا",
+          "closed": "بند",
+          "void": "کالعدم"
+        }
+      }
     }
   },
   "cost_control": {

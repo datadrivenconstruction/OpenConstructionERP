@@ -618,5 +618,539 @@
       "draft": "Wersja robocza",
       "frozen": "Zamrożony"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Nr projektu",
+      "generated_on": "Data wygenerowania",
+      "records": "Rekordy",
+      "currency": "Waluta",
+      "status": "Status",
+      "name": "Imię i nazwisko",
+      "signature": "Podpis",
+      "date": "Data",
+      "signatures": "Podpisy",
+      "yes": "Tak",
+      "no": "Nie",
+      "days_one": "{n} dzień",
+      "days_other": "{n} dni",
+      "empty_register": "Brak rekordów.",
+      "total": "Razem",
+      "signer_title": "Stanowisko",
+      "sig_prepared_by": "Sporządzono przez",
+      "sig_checked_by": "Sprawdzono przez",
+      "sig_approved_by": "Zatwierdzono przez",
+      "footer_generated": "Wygenerowano {timestamp}",
+      "footer_page": "Strona {page} z {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Rejestr dokumentów do zatwierdzenia",
+        "doc_title": "Dokument do zatwierdzenia",
+        "doc_title_product_data": "Karta zatwierdzenia materiału",
+        "col_number": "Nr dokumentu",
+        "col_title": "Tytuł",
+        "col_type": "Typ",
+        "col_spec": "Rozdział specyfikacji",
+        "col_rev": "Rew.",
+        "col_date_submitted": "Data złożenia",
+        "col_date_required": "Wymagane do",
+        "col_date_returned": "Data zwrotu",
+        "col_reviewer": "Weryfikujący",
+        "col_approver": "Zatwierdzający",
+        "col_ball_in_court": "Po stronie",
+        "submitted_by_org": "Firma składająca",
+        "review_notes": "Uwagi weryfikującego",
+        "no_review_notes": "Brak uwag weryfikującego.",
+        "sig_submitted": "Złożone przez",
+        "sig_reviewed": "Zweryfikowano przez",
+        "sig_approved": "Zatwierdzono przez",
+        "register_filename": "rejestr-dokumentow-do-zatwierdzenia",
+        "register_title_shop_drawing": "Rejestr rysunków warsztatowych",
+        "register_title_product_data": "Rejestr zatwierdzeń materiałów",
+        "register_title_method_statement": "Rejestr metod wykonania robót",
+        "register_filename_shop_drawing": "rejestr-rysunkow-warsztatowych",
+        "register_filename_product_data": "rejestr-zatwierdzen-materialow",
+        "register_filename_method_statement": "rejestr-metod-wykonania-robot",
+        "col_discipline": "Branża",
+        "col_manufacturer": "Producent / marka",
+        "col_model": "Model / symbol",
+        "col_origin": "Kraj pochodzenia",
+        "col_supplier": "Dostawca",
+        "col_product": "Producent / model / pochodzenie",
+        "col_review_code": "Kod weryfikacji",
+        "col_outcome": "Wynik weryfikacji",
+        "col_review_period": "Czas weryfikacji (dni)",
+        "col_review_due": "Weryfikacja do",
+        "col_days_in_review": "Dni w weryfikacji",
+        "col_days_in_review_print": "Dni w weryfikacji",
+        "col_review_overdue": "Dni opóźnienia",
+        "col_required_on_site": "Wymagane na budowie",
+        "col_long_lead": "Długi czas dostawy",
+        "col_lead_time": "Czas dostawy (tyg.)",
+        "col_needed_by": "Zatwierdzenie potrzebne do",
+        "col_approval_late": "Dni po terminie",
+        "col_drawings": "Powiązane rysunki",
+        "col_submitted_returned": "Złożono / zwrócono",
+        "col_on_site_needed_by": "Na budowie / zatwierdzenie do",
+        "resubmit_for_record": "Poprawiony egzemplarz do ponownego złożenia do akt",
+        "review_history": "Historia weryfikacji",
+        "hist_submitted": "Złożono",
+        "hist_returned": "Zwrócono",
+        "drawings_missing_one": "{n} powiązany rysunek nie jest już dostępny",
+        "drawings_missing_other": "Niedostępne powiązane rysunki: {n}",
+        "weeks_one": "{n} tydzień",
+        "weeks_other": "{n} tyg."
+      },
+      "labels": {
+        "status": {
+          "draft": "Wersja robocza",
+          "submitted": "Złożone",
+          "under_review": "W weryfikacji",
+          "approved": "Zatwierdzone",
+          "approved_as_noted": "Zatwierdzone z uwagami",
+          "revise_and_resubmit": "Do poprawy i ponownego złożenia",
+          "rejected": "Odrzucone",
+          "closed": "Zamknięte"
+        },
+        "type": {
+          "shop_drawing": "Rysunek warsztatowy",
+          "product_data": "Karta techniczna wyrobu",
+          "sample": "Próbka",
+          "mock_up": "Wzorzec (mock-up)",
+          "test_report": "Sprawozdanie z badań",
+          "calculation": "Obliczenia",
+          "method_statement": "Metoda wykonania robót",
+          "certificate": "Certyfikat",
+          "warranty": "Gwarancja"
+        },
+        "discipline": {
+          "mechanical": "Mechaniczna",
+          "hvac": "HVAC",
+          "plumbing": "Instalacje wodno-kanalizacyjne",
+          "fire_protection": "Ochrona przeciwpożarowa",
+          "electrical": "Elektryczna",
+          "lighting": "Oświetlenie",
+          "elv": "Słaboprądowa",
+          "bms": "Automatyka budynkowa",
+          "architectural": "Architektoniczna",
+          "structural": "Konstrukcyjna",
+          "civil": "Ogólnobudowlana"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Rejestr zleceń zmian",
+        "doc_title": "Zlecenie zmiany",
+        "col_code": "Kod",
+        "col_title": "Tytuł",
+        "col_reason": "Powód",
+        "col_instrument": "Instrument",
+        "col_submitted": "Data złożenia",
+        "col_contractor_amount": "Kwota wykonawcy",
+        "col_engineer_amount": "Kwota inżyniera",
+        "col_approved_amount": "Kwota zatwierdzona",
+        "col_cost_impact": "Wpływ na koszt",
+        "col_time_impact": "Wpływ na czas (dni)",
+        "col_approved_time": "Czas zatwierdzony (dni)",
+        "time_impact": "Wpływ na czas",
+        "approved_time": "Czas zatwierdzony",
+        "col_approved": "Data zatwierdzenia",
+        "submitted_by": "Złożone przez",
+        "approved_by": "Zatwierdzono przez",
+        "description": "Opis",
+        "no_description": "Brak opisu.",
+        "items": "Pozycje zmiany",
+        "item_description": "Opis",
+        "item_change": "Zmiana",
+        "item_unit": "Jedn.",
+        "item_original_quantity": "Ilość pierwotna",
+        "item_new_quantity": "Ilość nowa",
+        "item_original_rate": "Stawka pierwotna",
+        "item_new_rate": "Stawka nowa",
+        "item_cost_delta": "Różnica kosztu",
+        "register_filename": "rejestr-zlecen-zmian"
+      },
+      "labels": {
+        "status": {
+          "draft": "Wersja robocza",
+          "submitted": "Złożone",
+          "approved": "Zatwierdzone",
+          "rejected": "Odrzucone",
+          "executed": "Zrealizowane"
+        },
+        "reason": {
+          "client_request": "Wniosek zamawiającego",
+          "design_change": "Zmiana projektu",
+          "unforeseen": "Nieprzewidziane warunki",
+          "regulatory": "Wymogi prawne",
+          "error": "Błąd lub pominięcie",
+          "non_conformance": "Niezgodność",
+          "value_engineering": "Optymalizacja kosztowa (VE)"
+        },
+        "instrument": {
+          "works_change": "Polecona zmiana",
+          "site_confirmation": "Potwierdzenie na budowie",
+          "claim": "Roszczenie"
+        },
+        "change": {
+          "added": "Dodano",
+          "removed": "Usunięto",
+          "modified": "Zmieniono"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Zestaw dowodowy",
+        "subject": "Przedmiot",
+        "basis": "Podstawa",
+        "period_from": "Najstarszy zapis",
+        "period_to": "Najnowszy zapis",
+        "digest": "Kod integralności (SHA-256, pierwsze 16 znaków)",
+        "col_row": "Lp.",
+        "col_record_id": "ID zapisu",
+        "col_section": "Sekcja",
+        "col_date": "Data",
+        "col_kind": "Rodzaj zapisu",
+        "col_title": "Tytuł",
+        "col_summary": "Streszczenie",
+        "col_reference": "Znak",
+        "register_filename": "zestaw-dowodowy"
+      },
+      "labels": {
+        "section": {
+          "notices": "Zawiadomienia",
+          "correspondence": "Korespondencja",
+          "rfis": "Zapytania (RFI)",
+          "variations": "Zmiany",
+          "approvals": "Zatwierdzenia",
+          "delay": "Opóźnienie",
+          "timeline": "Oś czasu",
+          "other": "Inne"
+        },
+        "kind": {
+          "notice": "Zawiadomienie",
+          "variation_notice": "Zawiadomienie o zmianie",
+          "variation_request": "Wniosek o zmianę",
+          "variation_order": "Polecenie zmiany",
+          "change_order": "Zlecenie zmiany",
+          "moc_entry": "Zapis zmiany",
+          "correspondence": "Korespondencja"
+        },
+        "basis": {
+          "dispute": "Spór",
+          "valuation": "Wycena",
+          "delay": "Opóźnienie / przedłużenie terminu",
+          "general": "Zapis ogólny"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Rejestr korespondencji",
+        "doc_title": "Korespondencja",
+        "col_reference": "Nr referencyjny",
+        "col_direction": "Kierunek",
+        "col_type": "Typ",
+        "col_subject": "Temat",
+        "col_from": "Od",
+        "col_to": "Do",
+        "col_date_sent": "Data wysłania",
+        "col_date_received": "Data otrzymania",
+        "col_response_due": "Odpowiedź do",
+        "col_clause": "Klauzula umowy",
+        "notes": "Uwagi",
+        "no_notes": "Brak uwag.",
+        "attachments": "Załączone pliki",
+        "linked_documents": "Powiązane dokumenty",
+        "sig_prepared": "Sporządzono przez",
+        "sig_received": "Odebrano przez",
+        "register_filename": "rejestr-korespondencji"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Przychodzące",
+          "outgoing": "Wychodzące"
+        },
+        "type": {
+          "letter": "Pismo",
+          "email": "E-mail",
+          "notice": "Zawiadomienie",
+          "memo": "Notatka",
+          "report": "Raport"
+        },
+        "status": {
+          "open": "Otwarte",
+          "awaiting_response": "Oczekuje na odpowiedź",
+          "responded": "Udzielono odpowiedzi",
+          "closed": "Zamknięte"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Rejestr przekazań dokumentów",
+        "doc_title": "Przekazanie dokumentów",
+        "col_number": "Nr przekazania",
+        "col_subject": "Temat",
+        "col_purpose": "Cel",
+        "col_issued": "Data wystawienia",
+        "col_response_due": "Odpowiedź do",
+        "col_recipients": "Odbiorcy",
+        "col_item_count": "Pozycje",
+        "sender": "Nadawca",
+        "cover_note": "Pismo przewodnie",
+        "no_cover_note": "Brak pisma przewodniego.",
+        "recipients": "Odbiorcy",
+        "recipient": "Odbiorca",
+        "action_required": "Wymagane działanie",
+        "acknowledged": "Potwierdzenie odbioru",
+        "responded": "Data odpowiedzi",
+        "items": "Przekazane dokumenty",
+        "item_no": "Lp.",
+        "item_description": "Opis",
+        "item_notes": "Uwagi",
+        "sig_issued": "Wystawiono przez",
+        "sig_received": "Odebrano przez",
+        "register_filename": "rejestr-przekazan-dokumentow"
+      },
+      "labels": {
+        "status": {
+          "draft": "Wersja robocza",
+          "issued": "Wystawione",
+          "responded": "Udzielono odpowiedzi"
+        },
+        "purpose": {
+          "for_approval": "Do zatwierdzenia",
+          "for_review": "Do weryfikacji",
+          "for_information": "Do wiadomości",
+          "for_construction": "Do realizacji",
+          "for_tender": "Do przetargu",
+          "for_record": "Do akt"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Rejestr zmian",
+        "claim_register_title": "Rejestr roszczeń",
+        "notice_register_title": "Rejestr zawiadomień",
+        "doc_title": "Wniosek o zmianę",
+        "doc_title_credit": "Wniosek o zmianę (zaniechanie)",
+        "time_impact": "Wpływ na czas",
+        "col_code": "Kod",
+        "col_title": "Tytuł",
+        "col_classification": "Typ",
+        "col_urgency": "Pilność",
+        "col_requested": "Data wniosku",
+        "col_claimed_amount": "Kwota roszczenia",
+        "col_agreed_amount": "Kwota uzgodniona",
+        "col_time_impact": "Wpływ na czas (dni)",
+        "col_response_due": "Odpowiedź do",
+        "col_clause": "Klauzula umowy",
+        "col_row": "Lp.",
+        "col_claim_type": "Rodzaj roszczenia",
+        "col_raised": "Data zgłoszenia",
+        "col_period_start": "Okres od",
+        "col_period_end": "Okres do",
+        "col_description": "Opis",
+        "col_decided_amount": "Kwota rozstrzygnięta",
+        "col_days_requested": "Dni wnioskowane",
+        "col_days_granted": "Dni przyznane",
+        "col_recipient_type": "Adresat (rodzaj)",
+        "col_recipient": "Adresat",
+        "col_target_response": "Oczekiwana odpowiedź",
+        "col_response_received": "Odpowiedź otrzymana",
+        "requested_by": "Wnioskujący",
+        "decided_by": "Decyzja podjęta przez",
+        "date_submitted": "Data złożenia",
+        "date_decided": "Data decyzji",
+        "description": "Opis",
+        "no_description": "Brak opisu.",
+        "decision_notes": "Uzasadnienie decyzji",
+        "no_decision_notes": "Decyzja nie została jeszcze zapisana.",
+        "variation_register_filename": "rejestr-zmian",
+        "claim_register_filename": "rejestr-roszczen",
+        "notice_register_filename": "rejestr-zawiadomien"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Wersja robocza",
+          "submitted": "Złożone",
+          "under_review": "W weryfikacji",
+          "approved": "Zatwierdzone",
+          "rejected": "Odrzucone",
+          "converted_to_vo": "Przekształcone w zlecenie"
+        },
+        "claim_status": {
+          "draft": "Wersja robocza",
+          "submitted": "Złożone",
+          "under_review": "W weryfikacji",
+          "agreed": "Uzgodnione",
+          "granted": "Uznane",
+          "rejected": "Odrzucone"
+        },
+        "notice_status": {
+          "issued": "Wystawione",
+          "acknowledged": "Potwierdzono odbiór",
+          "responded": "Udzielono odpowiedzi",
+          "closed": "Zamknięte"
+        },
+        "classification": {
+          "scope_change": "Zmiana zakresu",
+          "unforeseen": "Nieprzewidziane warunki",
+          "owner_change": "Zmiana zamawiającego",
+          "design_dev": "Rozwinięcie projektu",
+          "regulatory": "Wymogi prawne",
+          "other": "Inne"
+        },
+        "urgency": {
+          "low": "Niska",
+          "med": "Średnia",
+          "high": "Wysoka"
+        },
+        "claim_type": {
+          "disruption": "Zakłócenia",
+          "eot": "Przedłużenie terminu"
+        },
+        "recipient_type": {
+          "owner": "Zamawiający",
+          "contractor": "Wykonawca",
+          "architect": "Architekt",
+          "engineer": "Inżynier",
+          "consultant": "Konsultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Dzienny raport z budowy",
+        "overview": "Przegląd",
+        "site_supervisor": "Kierownik robót",
+        "not_recorded": "Nie zapisano",
+        "labour_on_site": "Siła robocza na budowie",
+        "equipment_on_site": "Sprzęt na budowie",
+        "completeness": "Kompletność",
+        "weather": "Pogoda",
+        "weather_time": "Godzina",
+        "weather_source": "Źródło",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Wiatr (km/h)",
+        "weather_precip": "Opady (mm)",
+        "weather_conditions": "Warunki",
+        "weather_empty": "Brak zapisanych danych pogodowych dla tego dnia.",
+        "site_record": "Zapis z budowy",
+        "entries_empty": "Brak wpisów w tym raporcie.",
+        "notes": "Uwagi",
+        "notes_empty": "Brak dodatkowych uwag.",
+        "footer_supervisor": "Kierownik robót: {name}",
+        "footer_supervisor_missing": "Kierownik robót: nie zapisano",
+        "footer_generated": "Wygenerowano: {timestamp}",
+        "footer_page": "Strona {page} z {total}",
+        "workforce": "Załoga według firm",
+        "workforce_company": "Firma",
+        "workforce_count": "Osoby",
+        "workforce_unassigned": "Nieprzypisani do firmy",
+        "workforce_total": "Razem",
+        "signatures": "Podpisy",
+        "sig_prepared": "Sporządzono przez (kierownik budowy)",
+        "sig_approved": "Zatwierdzono przez (przedstawiciel zamawiającego)",
+        "sig_name": "Imię i nazwisko",
+        "sig_title": "Stanowisko",
+        "sig_date": "Data",
+        "sig_signature": "Podpis",
+        "signed_note": "Podpisano w systemie: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "raport-dzienny",
+        "summary_wind": "wiatr {value} km/h",
+        "summary_precipitation": "opady {value} mm",
+        "summary_humidity": "wilgotność {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Odwiedzający",
+          "event": "Zdarzenia",
+          "delivery": "Dostawy materiałów",
+          "completion": "Wykonane roboty",
+          "incident_summary": "BHP i wypadki",
+          "inspection_summary": "Kontrole i odbiory",
+          "photo_note": "Notatki fotograficzne",
+          "general": "Uwagi ogólne"
+        },
+        "status": {
+          "open": "Otwarty",
+          "closed": "Zamknięty",
+          "signed": "Podpisany",
+          "archived": "Zarchiwizowany"
+        },
+        "condition": {
+          "clear": "bezchmurnie",
+          "mainly_clear": "przeważnie bezchmurnie",
+          "partly_cloudy": "częściowe zachmurzenie",
+          "cloudy": "pochmurno",
+          "overcast": "całkowite zachmurzenie",
+          "fog": "mgła",
+          "fog_rime": "mgła osadzająca szron",
+          "drizzle_light": "słaba mżawka",
+          "drizzle_moderate": "umiarkowana mżawka",
+          "drizzle_dense": "silna mżawka",
+          "rain": "deszcz",
+          "rain_light": "słaby deszcz",
+          "rain_moderate": "umiarkowany deszcz",
+          "rain_heavy": "silny deszcz",
+          "freezing_rain_light": "słaby marznący deszcz",
+          "freezing_rain_heavy": "silny marznący deszcz",
+          "snow": "śnieg",
+          "snow_light": "słaby śnieg",
+          "snow_moderate": "umiarkowany śnieg",
+          "snow_heavy": "silny śnieg",
+          "rain_showers_light": "słabe przelotne opady deszczu",
+          "rain_showers_moderate": "umiarkowane przelotne opady deszczu",
+          "rain_showers_violent": "gwałtowne przelotne opady deszczu",
+          "snow_showers_light": "słabe przelotne opady śniegu",
+          "snow_showers_heavy": "silne przelotne opady śniegu",
+          "thunderstorm": "burza",
+          "thunderstorm_hail_light": "burza z lekkim gradem",
+          "thunderstorm_hail_heavy": "burza z silnym gradem"
+        },
+        "source": {
+          "manual": "Wpis ręczny",
+          "open_meteo": "Serwis pogodowy",
+          "sensor": "Czujnik na budowie"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Rejestr zapytań (RFI)",
+        "col_number": "Nr RFI",
+        "col_subject": "Temat",
+        "col_raised_by": "Zgłaszający",
+        "col_assigned_to": "Przypisano do",
+        "col_ball_in_court": "Po stronie",
+        "col_date_required": "Wymagane do",
+        "col_response_due": "Odpowiedź do",
+        "col_days_open": "Dni otwarcia",
+        "col_cost_impact": "Wpływ na koszt",
+        "col_schedule_impact": "Wpływ na harmonogram",
+        "col_response": "Odpowiedź",
+        "yes_with": "Tak ({detail})",
+        "register_filename": "rejestr-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Wersja robocza",
+          "open": "Otwarte",
+          "answered": "Udzielono odpowiedzi",
+          "closed": "Zamknięte",
+          "void": "Nieważne"
+        }
+      }
+    }
   }
 }

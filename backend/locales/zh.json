@@ -618,5 +618,539 @@
       "draft": "草稿",
       "frozen": "已冻结"
     }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "给排水",
+          "fire_protection": "消防",
+          "civil": "土建",
+          "bms": "楼宇自控",
+          "hvac": "暖通空调",
+          "lighting": "照明",
+          "mechanical": "机械",
+          "architectural": "建筑",
+          "electrical": "电气",
+          "structural": "结构",
+          "elv": "弱电"
+        },
+        "type": {
+          "sample": "样品",
+          "method_statement": "施工方案",
+          "shop_drawing": "深化图纸",
+          "mock_up": "样板",
+          "certificate": "证书",
+          "test_report": "检测报告",
+          "calculation": "计算书",
+          "product_data": "产品资料",
+          "warranty": "质保书"
+        },
+        "status": {
+          "draft": "草稿",
+          "approved_as_noted": "带意见批准",
+          "revise_and_resubmit": "修改后重报",
+          "rejected": "退回",
+          "under_review": "审核中",
+          "closed": "已关闭",
+          "submitted": "已报审",
+          "approved": "已批准"
+        }
+      },
+      "strings": {
+        "review_history": "审核记录",
+        "submitted_by_org": "报审单位",
+        "doc_title": "报审单",
+        "col_on_site_needed_by": "进场 / 批复期限",
+        "col_drawings": "关联图纸",
+        "col_approval_late": "超期天数",
+        "col_needed_by": "批复期限",
+        "col_lead_time": "供货周期(周)",
+        "sig_reviewed": "审核人",
+        "col_model": "型号 / 参考",
+        "col_discipline": "专业",
+        "col_date_submitted": "报审日期",
+        "col_reviewer": "审核人",
+        "col_required_on_site": "进场需求日",
+        "register_title_method_statement": "施工方案台账",
+        "col_supplier": "供应商",
+        "hist_returned": "退回",
+        "col_review_code": "审核代码",
+        "col_origin": "原产国",
+        "register_filename_method_statement": "shigong-fangan-taizhang",
+        "sig_submitted": "报审人",
+        "col_long_lead": "长周期",
+        "drawings_missing_other": "{n}份关联图纸已不可用",
+        "col_product": "厂家 / 型号 / 产地",
+        "col_outcome": "审核结论",
+        "col_number": "报审编号",
+        "register_filename_product_data": "cailiao-baoyan-taizhang",
+        "col_manufacturer": "厂家 / 品牌",
+        "col_rev": "版次",
+        "register_filename_shop_drawing": "shenhua-tuzhi-taizhang",
+        "col_type": "类型",
+        "col_review_overdue": "逾期天数",
+        "weeks_other": "{n}周",
+        "hist_submitted": "报审",
+        "doc_title_product_data": "材料报验单",
+        "col_approver": "批准人",
+        "col_date_required": "需求日期",
+        "col_title": "标题",
+        "col_ball_in_court": "待办方",
+        "no_review_notes": "暂无审核意见记录。",
+        "sig_approved": "批准人",
+        "register_title": "报审台账",
+        "register_filename": "baoshen-taizhang",
+        "col_submitted_returned": "报审 / 退回",
+        "col_date_returned": "退回日期",
+        "col_review_due": "审核期限",
+        "col_spec": "规范章节",
+        "col_days_in_review_print": "审核天数",
+        "drawings_missing_one": "{n}份关联图纸已不可用",
+        "register_title_product_data": "材料报验台账",
+        "review_notes": "审核意见",
+        "resubmit_for_record": "修正后的文件须重新提交备案",
+        "col_days_in_review": "审核天数",
+        "weeks_one": "{n}周",
+        "register_title_shop_drawing": "深化图纸台账",
+        "col_review_period": "审核周期(天)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "供施工",
+          "for_approval": "供批准",
+          "for_review": "供审阅",
+          "for_information": "供参考",
+          "for_record": "供备案",
+          "for_tender": "供投标"
+        },
+        "status": {
+          "draft": "草稿",
+          "responded": "已回复",
+          "issued": "已发出"
+        }
+      },
+      "strings": {
+        "col_purpose": "用途",
+        "col_subject": "主题",
+        "doc_title": "文件传送单",
+        "cover_note": "说明",
+        "acknowledged": "已确认收到",
+        "sig_issued": "发出人",
+        "col_response_due": "回复期限",
+        "col_recipients": "收件方",
+        "col_item_count": "份数",
+        "item_description": "说明",
+        "col_issued": "发出日期",
+        "sender": "发件方",
+        "register_title": "文件传送台账",
+        "recipients": "收件方",
+        "responded": "回复日期",
+        "items": "传送文件",
+        "item_no": "序号",
+        "item_notes": "备注",
+        "col_number": "传送单编号",
+        "recipient": "收件方",
+        "action_required": "需采取的行动",
+        "no_cover_note": "无说明。",
+        "register_filename": "wenjian-chuansong-taizhang",
+        "sig_received": "接收人"
+      }
+    },
+    "furniture": {
+      "records": "记录",
+      "project_no": "项目编号",
+      "sig_prepared_by": "编制",
+      "signer_title": "职务",
+      "total": "合计",
+      "date": "日期",
+      "footer_generated": "生成于 {timestamp}",
+      "sig_checked_by": "复核",
+      "project": "项目",
+      "status": "状态",
+      "currency": "币种",
+      "yes": "是",
+      "signature": "签名",
+      "signatures": "签署",
+      "days_one": "{n}天",
+      "footer_page": "第 {page} 页,共 {total} 页",
+      "sig_approved_by": "批准",
+      "no": "否",
+      "days_other": "{n}天",
+      "empty_register": "暂无记录。",
+      "name": "姓名",
+      "generated_on": "生成日期"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "错误或遗漏",
+          "regulatory": "法规要求",
+          "unforeseen": "不可预见条件",
+          "non_conformance": "不合格",
+          "design_change": "设计变更",
+          "client_request": "业主要求",
+          "value_engineering": "价值工程"
+        },
+        "instrument": {
+          "claim": "索赔",
+          "works_change": "变更指令",
+          "site_confirmation": "现场签证"
+        },
+        "change": {
+          "modified": "修改",
+          "added": "新增",
+          "removed": "删除"
+        },
+        "status": {
+          "draft": "草稿",
+          "executed": "已执行",
+          "rejected": "已驳回",
+          "submitted": "已提交",
+          "approved": "已批准"
+        }
+      },
+      "strings": {
+        "time_impact": "工期影响",
+        "item_original_rate": "原单价",
+        "doc_title": "变更令",
+        "col_code": "编码",
+        "approved_by": "批准人",
+        "col_approved_time": "批准工期(天)",
+        "item_new_rate": "新单价",
+        "col_approved": "批准日期",
+        "col_contractor_amount": "承包商金额",
+        "col_engineer_amount": "监理金额",
+        "no_description": "暂无说明记录。",
+        "col_submitted": "提交日期",
+        "approved_time": "批准工期",
+        "col_cost_impact": "费用影响",
+        "item_description": "说明",
+        "item_cost_delta": "费用差额",
+        "col_title": "标题",
+        "submitted_by": "提交人",
+        "register_title": "变更令台账",
+        "item_original_quantity": "原数量",
+        "items": "变更项目",
+        "col_instrument": "文件类型",
+        "col_time_impact": "工期影响(天)",
+        "col_reason": "原因",
+        "item_change": "变更",
+        "col_approved_amount": "批准金额",
+        "item_new_quantity": "新数量",
+        "register_filename": "biangeng-ling-taizhang",
+        "description": "说明",
+        "item_unit": "单位"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "已回复",
+          "acknowledged": "已确认收到",
+          "closed": "已关闭",
+          "issued": "已发出"
+        },
+        "request_status": {
+          "draft": "草稿",
+          "rejected": "已驳回",
+          "converted_to_vo": "已转为变更令",
+          "under_review": "审核中",
+          "submitted": "已提交",
+          "approved": "已批准"
+        },
+        "claim_type": {
+          "eot": "工期延长",
+          "disruption": "施工干扰"
+        },
+        "recipient_type": {
+          "owner": "业主",
+          "consultant": "咨询方",
+          "contractor": "承包商",
+          "architect": "建筑师",
+          "engineer": "工程师"
+        },
+        "urgency": {
+          "low": "低",
+          "med": "中",
+          "high": "高"
+        },
+        "classification": {
+          "other": "其他",
+          "regulatory": "法规要求",
+          "unforeseen": "不可预见条件",
+          "owner_change": "业主变更",
+          "design_dev": "设计深化",
+          "scope_change": "范围变更"
+        },
+        "claim_status": {
+          "draft": "草稿",
+          "granted": "已准许",
+          "rejected": "已驳回",
+          "agreed": "已达成一致",
+          "under_review": "审核中",
+          "submitted": "已提交"
+        }
+      },
+      "strings": {
+        "col_row": "序号",
+        "time_impact": "工期影响",
+        "doc_title": "变更申请",
+        "col_code": "编码",
+        "date_decided": "决定日期",
+        "col_decided_amount": "核定金额",
+        "variation_register_title": "变更台账",
+        "notice_register_title": "通知台账",
+        "decision_notes": "决定说明",
+        "col_classification": "类别",
+        "requested_by": "申请人",
+        "col_agreed_amount": "协商金额",
+        "col_recipient": "收件方",
+        "col_response_due": "回复期限",
+        "no_description": "暂无说明记录。",
+        "decided_by": "决定人",
+        "variation_register_filename": "biangeng-taizhang",
+        "claim_register_title": "索赔台账",
+        "col_days_granted": "准许天数",
+        "col_title": "标题",
+        "date_submitted": "提交日期",
+        "col_clause": "合同条款",
+        "col_raised": "提出日期",
+        "col_description": "说明",
+        "col_period_end": "期间止",
+        "col_requested": "申请日期",
+        "claim_register_filename": "suopei-taizhang",
+        "col_response_received": "收到回复",
+        "doc_title_credit": "变更申请(减项)",
+        "col_time_impact": "工期影响(天)",
+        "col_claimed_amount": "索赔金额",
+        "col_period_start": "期间起",
+        "notice_register_filename": "tongzhi-taizhang",
+        "description": "说明",
+        "no_decision_notes": "尚无决定记录。",
+        "col_recipient_type": "收件对象",
+        "col_target_response": "预期回复",
+        "col_days_requested": "申请天数",
+        "col_claim_type": "索赔类型",
+        "col_urgency": "紧急程度"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "发出",
+          "incoming": "收到"
+        },
+        "type": {
+          "letter": "函件",
+          "notice": "通知",
+          "memo": "备忘录",
+          "report": "报告",
+          "email": "邮件"
+        },
+        "status": {
+          "awaiting_response": "待回复",
+          "closed": "已关闭",
+          "responded": "已回复",
+          "open": "未结"
+        }
+      },
+      "strings": {
+        "col_to": "收件方",
+        "no_notes": "暂无备注记录。",
+        "col_subject": "主题",
+        "doc_title": "往来函件",
+        "register_title": "往来函件台账",
+        "col_clause": "合同条款",
+        "linked_documents": "关联文件",
+        "col_reference": "文号",
+        "col_date_received": "收文日期",
+        "notes": "备注",
+        "col_response_due": "回复期限",
+        "sig_prepared": "编制",
+        "attachments": "附件",
+        "col_date_sent": "发文日期",
+        "col_direction": "方向",
+        "register_filename": "wanglai-hanjian-taizhang",
+        "col_from": "发件方",
+        "col_type": "类型",
+        "sig_received": "接收人"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "延误 / 工期延长",
+          "valuation": "估价",
+          "dispute": "争议",
+          "general": "一般记录"
+        },
+        "section": {
+          "delay": "延误",
+          "rfis": "RFI",
+          "variations": "变更",
+          "other": "其他",
+          "notices": "通知",
+          "approvals": "批复",
+          "correspondence": "往来函件",
+          "timeline": "时间线"
+        },
+        "kind": {
+          "notice": "通知",
+          "variation_notice": "变更通知",
+          "correspondence": "往来函件",
+          "variation_order": "变更令",
+          "moc_entry": "变更记录",
+          "change_order": "变更令",
+          "variation_request": "变更申请"
+        }
+      },
+      "strings": {
+        "col_row": "序号",
+        "col_date": "日期",
+        "basis": "依据",
+        "col_summary": "摘要",
+        "register_title": "证据汇编",
+        "period_to": "最新记录",
+        "period_from": "最早记录",
+        "col_kind": "记录类型",
+        "subject": "主题",
+        "col_title": "标题",
+        "register_filename": "zhengju-huibian",
+        "col_reference": "编号",
+        "col_section": "分类",
+        "col_record_id": "记录编号",
+        "digest": "完整性校验码(SHA-256,前16位)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "主题",
+        "register_title": "RFI 台账",
+        "yes_with": "是 ({detail})",
+        "col_raised_by": "提出人",
+        "col_schedule_impact": "进度影响",
+        "col_date_required": "需求日期",
+        "col_assigned_to": "责任人",
+        "col_ball_in_court": "待办方",
+        "col_response_due": "回复期限",
+        "col_number": "RFI 编号",
+        "col_days_open": "未结天数",
+        "col_cost_impact": "费用影响",
+        "register_filename": "rfi-taizhang",
+        "col_response": "回复"
+      },
+      "labels": {
+        "status": {
+          "draft": "草稿",
+          "open": "未关闭",
+          "answered": "已回答",
+          "closed": "已关闭",
+          "void": "已作废"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "强阵雨",
+          "drizzle_moderate": "中毛毛雨",
+          "fog": "雾",
+          "overcast": "阴天",
+          "snow_moderate": "中雪",
+          "snow_heavy": "大雪",
+          "rain_showers_moderate": "中阵雨",
+          "snow_showers_light": "小阵雪",
+          "rain_showers_light": "小阵雨",
+          "snow": "雪",
+          "fog_rime": "冻雾",
+          "partly_cloudy": "局部多云",
+          "thunderstorm": "雷暴",
+          "snow_light": "小雪",
+          "freezing_rain_heavy": "强冻雨",
+          "drizzle_light": "小毛毛雨",
+          "rain_light": "小雨",
+          "thunderstorm_hail_heavy": "雷暴伴大冰雹",
+          "drizzle_dense": "浓毛毛雨",
+          "rain": "雨",
+          "mainly_clear": "大部晴朗",
+          "clear": "晴",
+          "rain_heavy": "大雨",
+          "rain_moderate": "中雨",
+          "thunderstorm_hail_light": "雷暴伴小冰雹",
+          "cloudy": "多云",
+          "snow_showers_heavy": "大阵雪",
+          "freezing_rain_light": "小冻雨"
+        },
+        "source": {
+          "open_meteo": "气象服务",
+          "sensor": "现场传感器",
+          "manual": "手动录入"
+        },
+        "entry_type": {
+          "incident_summary": "安全与事故",
+          "event": "事件",
+          "visitor": "来访人员",
+          "inspection_summary": "检查验收",
+          "completion": "完成工作",
+          "delivery": "到场材料",
+          "photo_note": "照片备注",
+          "general": "一般事项"
+        },
+        "status": {
+          "closed": "已关闭",
+          "archived": "已归档",
+          "signed": "已签署",
+          "open": "填写中"
+        }
+      },
+      "strings": {
+        "summary_wind": "风速 {value} km/h",
+        "weather_temp": "气温(°C)",
+        "doc_title": "施工日志",
+        "summary_precipitation": "降水量 {value} mm",
+        "site_supervisor": "现场负责人",
+        "weather_precip": "降水量(mm)",
+        "summary_humidity": "湿度 {value} %",
+        "footer_supervisor": "现场负责人:{name}",
+        "sig_name": "姓名",
+        "footer_supervisor_missing": "现场负责人:未记录",
+        "footer_generated": "生成于:{timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "合计",
+        "overview": "概况",
+        "workforce": "各单位出勤人数",
+        "workforce_count": "人数",
+        "not_recorded": "未记录",
+        "sig_prepared": "编制(现场负责人)",
+        "decimal_mark": ".",
+        "sig_approved": "批准(业主代表)",
+        "completeness": "完整度",
+        "sig_signature": "签名",
+        "signatures": "签署",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "单位",
+        "notes_empty": "无其他备注。",
+        "sig_title": "职务",
+        "weather": "天气",
+        "weather_wind": "风速(km/h)",
+        "weather_time": "时间",
+        "weather_empty": "当天未记录天气。",
+        "footer_page": "第 {page} 页,共 {total} 页",
+        "equipment_on_site": "现场设备",
+        "weather_source": "来源",
+        "workforce_unassigned": "未归属单位",
+        "sig_date": "日期",
+        "filename_prefix": "shigong-rizhi",
+        "labour_on_site": "现场劳务",
+        "weather_conditions": "天气状况",
+        "signed_note": "已在系统中签署:{signers}",
+        "notes": "备注",
+        "entries_empty": "本日志暂无记录条目。",
+        "site_record": "现场记录"
+      }
+    }
   }
 }
