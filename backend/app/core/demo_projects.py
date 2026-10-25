@@ -2768,6 +2768,8 @@ _DEMO_COST_LEVEL: dict[str, tuple[float, float]] = {
     "CZK": (25.00, 10.00),
     "IDR": (17000.00, 3500.00),
     "NGN": (1700.00, 250.00),
+    # Egypt: about 58 pounds to the euro in 2026; labour is roughly a tenth of a German wage.
+    "EGP": (50.00, 6.00),
     # Nordic currencies. All three are high-cost construction markets.
     # Material tracks the conversion, labour sits close because Nordic
     # construction wages are at or above the German level, like Japan.

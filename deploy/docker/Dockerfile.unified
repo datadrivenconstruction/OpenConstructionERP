@@ -132,6 +132,7 @@ COPY packs/china-gbt50500/src/ packs/china-gbt50500/src/
 COPY packs/croatia-hr/src/ packs/croatia-hr/src/
 COPY packs/czechia-cz/src/ packs/czechia-cz/src/
 COPY packs/denmark-dk/src/ packs/denmark-dk/src/
+COPY packs/egypt-eg/src/ packs/egypt-eg/src/
 COPY packs/eleven-areas-framework/src/ packs/eleven-areas-framework/src/
 COPY packs/france-fr/src/ packs/france-fr/src/
 COPY packs/germany-de/src/ packs/germany-de/src/

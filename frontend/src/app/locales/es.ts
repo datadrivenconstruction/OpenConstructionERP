@@ -52624,6 +52624,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Paquete de Construcción de Grecia",
     "modules.pp_name_denmark_dk": "Paquete de Construcción de Dinamarca",
     "modules.pp_name_eleven_areas_framework": "Control de proyecto del propietario",
+    "modules.pp_name_egypt_eg": "Paquete de Construcción de Egipto",
     "modules.pp_name_france_fr": "Paquete de Construcción de Francia",
     "modules.pp_name_germany_de": "Paquete de Construcción de Alemania",
     "modules.pp_name_hungary_hu": "Paquete de Construcción de Hungría",

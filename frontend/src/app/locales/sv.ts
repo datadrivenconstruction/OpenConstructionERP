@@ -50386,6 +50386,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Byggpaket Grekland",
     "modules.pp_name_denmark_dk": "Byggpaket Danmark",
     "modules.pp_name_eleven_areas_framework": "Byggherrens projektstyrning",
+    "modules.pp_name_egypt_eg": "Byggpaket Egypten",
     "modules.pp_name_france_fr": "Byggpaket Frankrike",
     "modules.pp_name_germany_de": "Byggpaket Tyskland",
     "modules.pp_name_hungary_hu": "Byggpaket Ungern",

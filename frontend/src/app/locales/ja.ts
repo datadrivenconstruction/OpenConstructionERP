@@ -50946,6 +50946,7 @@ const resource = {
     "modules.pp_name_greece_gr": "ギリシャ建設パック",
     "modules.pp_name_denmark_dk": "デンマーク建設パック",
     "modules.pp_name_eleven_areas_framework": "発注者側プロジェクトコントロール",
+    "modules.pp_name_egypt_eg": "エジプト建設パック",
     "modules.pp_name_france_fr": "フランス建設パック",
     "modules.pp_name_germany_de": "ドイツ建設パック",
     "modules.pp_name_hungary_hu": "ハンガリー建設パック",

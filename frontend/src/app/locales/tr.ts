@@ -50646,6 +50646,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Yunanistan İnşaat Paketi",
     "modules.pp_name_denmark_dk": "Danimarka İnşaat Paketi",
     "modules.pp_name_eleven_areas_framework": "İşveren tarafı proje kontrolü",
+    "modules.pp_name_egypt_eg": "Mısır İnşaat Paketi",
     "modules.pp_name_france_fr": "Fransa İnşaat Paketi",
     "modules.pp_name_germany_de": "Almanya İnşaat Paketi",
     "modules.pp_name_hungary_hu": "Macaristan İnşaat Paketi",

@@ -50564,6 +50564,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Bouwpakket Griekenland",
     "modules.pp_name_denmark_dk": "Bouwpakket Denemarken",
     "modules.pp_name_eleven_areas_framework": "Projectbeheersing door de opdrachtgever",
+    "modules.pp_name_egypt_eg": "Bouwpakket Egypte",
     "modules.pp_name_france_fr": "Bouwpakket Frankrijk",
     "modules.pp_name_germany_de": "Bouwpakket Duitsland",
     "modules.pp_name_hungary_hu": "Bouwpakket Hongarije",

@@ -52611,6 +52611,7 @@ const resource = {
     "modules.pp_name_greece_gr": "حزمة إنشاءات اليونان",
     "modules.pp_name_denmark_dk": "حزمة إنشاءات الدانمرك",
     "modules.pp_name_eleven_areas_framework": "إدارة المشروع من جانب المالك",
+    "modules.pp_name_egypt_eg": "حزمة إنشاءات مصر",
     "modules.pp_name_france_fr": "حزمة إنشاءات فرنسا",
     "modules.pp_name_germany_de": "حزمة إنشاءات ألمانيا",
     "modules.pp_name_hungary_hu": "حزمة إنشاءات هنغاريا",

@@ -49769,6 +49769,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Строителен пакет Гърция",
     "modules.pp_name_denmark_dk": "Строителен пакет Дания",
     "modules.pp_name_eleven_areas_framework": "Управление на проекта от страна на възложителя",
+    "modules.pp_name_egypt_eg": "Строителен пакет Египет",
     "modules.pp_name_france_fr": "Строителен пакет Франция",
     "modules.pp_name_germany_de": "Строителен пакет Германия",
     "modules.pp_name_hungary_hu": "Строителен пакет Унгария",

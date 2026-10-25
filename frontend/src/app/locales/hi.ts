@@ -49699,6 +49699,7 @@ const resource = {
     "modules.pp_name_greece_gr": "ग्रीस निर्माण पैक",
     "modules.pp_name_denmark_dk": "डेनमार्क निर्माण पैक",
     "modules.pp_name_eleven_areas_framework": "मालिक पक्ष की परियोजना नियंत्रण",
+    "modules.pp_name_egypt_eg": "मिस्र निर्माण पैक",
     "modules.pp_name_france_fr": "फ़्रांस निर्माण पैक",
     "modules.pp_name_germany_de": "जर्मनी निर्माण पैक",
     "modules.pp_name_hungary_hu": "हंगरी निर्माण पैक",

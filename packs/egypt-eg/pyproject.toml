@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "openconstructionerp-egypt-eg"
 version = "0.1.0"
-description = "Country pack for the Egyptian market: MasterFormat classification, EGP currency, construction VAT by date, Public Contracts Law 182/2018 limits, FIDIC for private works, Egyptian Tax Authority e-invoicing and the Sunday to Thursday work week."
+description = "Country pack for the Egyptian market: division-based classification, EGP currency, construction VAT by date, Public Contracts Law 182/2018 limits, FIDIC for private works, Egyptian Tax Authority e-invoicing and the Sunday to Thursday work week."
 readme = "README.md"
 license = { text = "AGPL-3.0-or-later" }
 requires-python = ">=3.11"

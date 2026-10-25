@@ -52253,6 +52253,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Pack Construction Grèce",
     "modules.pp_name_denmark_dk": "Pack Construction Danemark",
     "modules.pp_name_eleven_areas_framework": "Pilotage de projet du maître d'ouvrage",
+    "modules.pp_name_egypt_eg": "Pack Construction Égypte",
     "modules.pp_name_france_fr": "Pack Construction France",
     "modules.pp_name_germany_de": "Pack Construction Allemagne",
     "modules.pp_name_hungary_hu": "Pack Construction Hongrie",

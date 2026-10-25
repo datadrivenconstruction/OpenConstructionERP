@@ -49970,6 +49970,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Građevinski paket Grčka",
     "modules.pp_name_denmark_dk": "Građevinski paket Danska",
     "modules.pp_name_eleven_areas_framework": "Upravljanje projektom na strani investitora",
+    "modules.pp_name_egypt_eg": "Građevinski paket Egipat",
     "modules.pp_name_france_fr": "Građevinski paket Francuska",
     "modules.pp_name_germany_de": "Građevinski paket Njemačka",
     "modules.pp_name_hungary_hu": "Građevinski paket Mađarska",

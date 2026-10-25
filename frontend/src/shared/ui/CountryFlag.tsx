@@ -243,6 +243,9 @@ const FLAGS: Record<string, string> = {
   // NG — Nigeria (green-white-green vertical)
   ng: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 3"><rect width="2" height="3" fill="#008753"/><rect x="2" width="2" height="3" fill="#fff"/><rect x="4" width="2" height="3" fill="#008753"/></svg>`,
 
+  // EG — Egypt (red-white-black horizontal, gold eagle emblem simplified)
+  eg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 6"><rect width="9" height="2" fill="#CE1126"/><rect y="2" width="9" height="2" fill="#fff"/><rect y="4" width="9" height="2" fill="#000"/><ellipse cx="4.5" cy="3" rx="0.6" ry="0.75" fill="#C09300"/></svg>`,
+
   // NA — Namibia (blue top-left, red bottom-right, green diagonal, white fimbriation, sun)
   na: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><polygon points="0,0 30,0 0,20" fill="#003580"/><polygon points="30,0 30,20 0,20" fill="#009543"/><path d="M0,16 L24,0" stroke="#fff" stroke-width="3.5"/><path d="M0,16 L24,0" stroke="#D21034" stroke-width="2"/><circle cx="7" cy="5" r="3" fill="#FFE700"/><circle cx="7.8" cy="5" r="2.4" fill="#003580"/></svg>`,
 

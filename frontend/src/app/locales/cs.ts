@@ -50929,6 +50929,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Stavební balíček Řecko",
     "modules.pp_name_denmark_dk": "Stavební balíček Dánsko",
     "modules.pp_name_eleven_areas_framework": "Řízení projektu na straně investora",
+    "modules.pp_name_egypt_eg": "Stavební balíček Egypta",
     "modules.pp_name_france_fr": "Stavební balíček Francie",
     "modules.pp_name_germany_de": "Stavební balíček Německo",
     "modules.pp_name_hungary_hu": "Stavební balíček Maďarsko",

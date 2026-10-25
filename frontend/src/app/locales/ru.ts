@@ -52264,6 +52264,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Строительный пакет: Греция",
     "modules.pp_name_denmark_dk": "Строительный пакет: Дания",
     "modules.pp_name_eleven_areas_framework": "Управление проектом заказчика",
+    "modules.pp_name_egypt_eg": "Строительный пакет: Египет",
     "modules.pp_name_france_fr": "Строительный пакет: Франция",
     "modules.pp_name_germany_de": "Строительный пакет: Германия",
     "modules.pp_name_hungary_hu": "Строительный пакет: Венгрия",

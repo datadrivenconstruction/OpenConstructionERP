@@ -49794,6 +49794,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Греция курулуш пакети",
     "modules.pp_name_denmark_dk": "Дания курулуш пакети",
     "modules.pp_name_eleven_areas_framework": "Буйрутмачынын долбоорду башкаруусу",
+    "modules.pp_name_egypt_eg": "Египет курулуш пакети",
     "modules.pp_name_france_fr": "Франция курулуш пакети",
     "modules.pp_name_germany_de": "Германия курулуш пакети",
     "modules.pp_name_hungary_hu": "Венгрия курулуш пакети",

@@ -49604,6 +49604,7 @@ const resource = {
     "modules.pp_name_greece_gr": "بسته ساخت‌وساز یونان",
     "modules.pp_name_denmark_dk": "بسته ساخت‌وساز دانمارک",
     "modules.pp_name_eleven_areas_framework": "کنترل پروژه از سوی کارفرما",
+    "modules.pp_name_egypt_eg": "بسته ساخت‌وساز مصر",
     "modules.pp_name_france_fr": "بسته ساخت‌وساز فرانسه",
     "modules.pp_name_germany_de": "بسته ساخت‌وساز آلمان",
     "modules.pp_name_hungary_hu": "بسته ساخت‌وساز مجارستان",

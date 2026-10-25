@@ -49596,6 +49596,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Kreikan rakennuspaketti",
     "modules.pp_name_denmark_dk": "Rakennuspaketti: Tanska",
     "modules.pp_name_eleven_areas_framework": "Tilaajan projektinohjaus",
+    "modules.pp_name_egypt_eg": "Rakennuspaketti: Egypti",
     "modules.pp_name_france_fr": "Rakennuspaketti: Ranska",
     "modules.pp_name_germany_de": "Rakennuspaketti: Saksa",
     "modules.pp_name_hungary_hu": "Rakennuspaketti: Unkari",

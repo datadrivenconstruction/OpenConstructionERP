@@ -49580,6 +49580,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Construction Pack ng Greece",
     "modules.pp_name_denmark_dk": "Construction Pack ng Denmark",
     "modules.pp_name_eleven_areas_framework": "Pagkontrol ng Proyekto ng May-ari",
+    "modules.pp_name_egypt_eg": "Construction Pack ng Egypt",
     "modules.pp_name_france_fr": "Construction Pack ng France",
     "modules.pp_name_germany_de": "Construction Pack ng Germany",
     "modules.pp_name_hungary_hu": "Construction Pack ng Hungary",

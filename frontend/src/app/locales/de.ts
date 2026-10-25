@@ -52215,6 +52215,7 @@ const resource = {
     "modules.pp_name_denmark_dk": "Dänemark-Baupaket",
     "modules.pp_name_eleven_areas_framework": "Bauherren-Projektsteuerung",
     "modules.pp_desc_eleven_areas_framework": "Bauherrenseitiges Projektmanagement in elf Steuerungsbereichen über zwei Phasen, Projektentwicklung und Bauabwicklung, mit einem Gate dazwischen und einem freigegebenen Rahmendokument je Bereich.",
+    "modules.pp_name_egypt_eg": "Ägypten-Baupaket",
     "modules.pp_name_france_fr": "Frankreich-Baupaket",
     "modules.pp_name_germany_de": "Deutschland-Baupaket",
     "modules.pp_name_hungary_hu": "Ungarn-Baupaket",

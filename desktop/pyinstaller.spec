@@ -302,6 +302,7 @@ _COMMUNITY_PACKS = (
     "croatia-hr",
     "czechia-cz",
     "denmark-dk",
+    "egypt-eg",
     "eleven-areas-framework",
     "france-fr",
     "germany-de",

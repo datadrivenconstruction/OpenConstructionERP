@@ -51992,6 +51992,7 @@ const resource = {
     "modules.pp_name_greece_gr": "希腊建筑数据包",
     "modules.pp_name_denmark_dk": "丹麦建筑数据包",
     "modules.pp_name_eleven_areas_framework": "业主方项目管控",
+    "modules.pp_name_egypt_eg": "埃及建筑数据包",
     "modules.pp_name_france_fr": "法国建筑数据包",
     "modules.pp_name_germany_de": "德国建筑数据包",
     "modules.pp_name_hungary_hu": "匈牙利建筑数据包",

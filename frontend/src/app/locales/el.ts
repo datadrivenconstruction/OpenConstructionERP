@@ -49725,6 +49725,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Πακέτο Κατασκευών Ελλάδας",
     "modules.pp_name_denmark_dk": "Πακέτο Κατασκευών: Δανία",
     "modules.pp_name_eleven_areas_framework": "Διαχείριση έργου από την πλευρά του κυρίου του έργου",
+    "modules.pp_name_egypt_eg": "Πακέτο Κατασκευών: Αίγυπτος",
     "modules.pp_name_france_fr": "Πακέτο Κατασκευών: Γαλλία",
     "modules.pp_name_germany_de": "Πακέτο Κατασκευών: Γερμανία",
     "modules.pp_name_hungary_hu": "Πακέτο Κατασκευών: Ουγγαρία",

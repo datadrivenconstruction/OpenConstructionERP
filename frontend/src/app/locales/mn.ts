@@ -49393,6 +49393,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Грекийн барилгын багц",
     "modules.pp_name_denmark_dk": "Барилгын багц: Дани",
     "modules.pp_name_eleven_areas_framework": "Захиалагчийн талын төслийн удирдлага",
+    "modules.pp_name_egypt_eg": "Барилгын багц: Египет",
     "modules.pp_name_france_fr": "Барилгын багц: Франц",
     "modules.pp_name_germany_de": "Барилгын багц: Герман",
     "modules.pp_name_hungary_hu": "Барилгын багц: Унгар",

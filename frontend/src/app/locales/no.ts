@@ -49771,6 +49771,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Byggepakke Hellas",
     "modules.pp_name_denmark_dk": "Byggepakke Danmark",
     "modules.pp_name_eleven_areas_framework": "Byggherrens prosjektstyring",
+    "modules.pp_name_egypt_eg": "Byggepakke Egypt",
     "modules.pp_name_france_fr": "Byggepakke Frankrike",
     "modules.pp_name_germany_de": "Byggepakke Tyskland",
     "modules.pp_name_hungary_hu": "Byggepakke Ungarn",

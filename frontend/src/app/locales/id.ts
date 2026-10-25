@@ -49428,6 +49428,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Paket Konstruksi Yunani",
     "modules.pp_name_denmark_dk": "Paket Konstruksi Denmark",
     "modules.pp_name_eleven_areas_framework": "Pengendalian Proyek Pemilik",
+    "modules.pp_name_egypt_eg": "Paket Konstruksi Mesir",
     "modules.pp_name_france_fr": "Paket Konstruksi Prancis",
     "modules.pp_name_germany_de": "Paket Konstruksi Jerman",
     "modules.pp_name_hungary_hu": "Paket Konstruksi Hungaria",

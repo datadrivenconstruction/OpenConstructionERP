@@ -49531,6 +49531,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Gói Xây dựng Hy Lạp",
     "modules.pp_name_denmark_dk": "Gói Xây dựng Đan Mạch",
     "modules.pp_name_eleven_areas_framework": "Kiểm soát dự án phía chủ đầu tư",
+    "modules.pp_name_egypt_eg": "Gói Xây dựng Ai Cập",
     "modules.pp_name_france_fr": "Gói Xây dựng Pháp",
     "modules.pp_name_germany_de": "Gói Xây dựng Đức",
     "modules.pp_name_hungary_hu": "Gói Xây dựng Hungary",

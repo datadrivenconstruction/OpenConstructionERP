@@ -50043,6 +50043,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Pachet de construcții Grecia",
     "modules.pp_name_denmark_dk": "Pachet de construcții Danemarca",
     "modules.pp_name_eleven_areas_framework": "Controlul proiectului din partea beneficiarului",
+    "modules.pp_name_egypt_eg": "Pachet de construcții Egipt",
     "modules.pp_name_france_fr": "Pachet de construcții Franța",
     "modules.pp_name_germany_de": "Pachet de construcții Germania",
     "modules.pp_name_hungary_hu": "Pachet de construcții Ungaria",

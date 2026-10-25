@@ -49733,6 +49733,7 @@ const resource = {
     "modules.pp_name_greece_gr": "یونان تعمیراتی پیکج",
     "modules.pp_name_denmark_dk": "ڈنمارک تعمیراتی پیکج",
     "modules.pp_name_eleven_areas_framework": "مالک کی جانب سے منصوبے کا کنٹرول",
+    "modules.pp_name_egypt_eg": "مصر تعمیراتی پیکج",
     "modules.pp_name_france_fr": "فرانس تعمیراتی پیکج",
     "modules.pp_name_germany_de": "جرمنی تعمیراتی پیکج",
     "modules.pp_name_hungary_hu": "ہنگری تعمیراتی پیکج",

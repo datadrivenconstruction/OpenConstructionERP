@@ -51731,6 +51731,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Будівельний пакет Греція",
     "modules.pp_name_denmark_dk": "Будівельний пакет Данія",
     "modules.pp_name_eleven_areas_framework": "Управління проєктом замовника",
+    "modules.pp_name_egypt_eg": "Будівельний пакет Єгипет",
     "modules.pp_name_france_fr": "Будівельний пакет Франція",
     "modules.pp_name_germany_de": "Будівельний пакет Німеччина",
     "modules.pp_name_hungary_hu": "Будівельний пакет Угорщина",

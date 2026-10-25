@@ -51190,6 +51190,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Pakiet budowlany Grecja",
     "modules.pp_name_denmark_dk": "Pakiet budowlany Dania",
     "modules.pp_name_eleven_areas_framework": "Nadzór nad projektem po stronie inwestora",
+    "modules.pp_name_egypt_eg": "Pakiet budowlany Egipt",
     "modules.pp_name_france_fr": "Pakiet budowlany Francja",
     "modules.pp_name_germany_de": "Pakiet budowlany Niemcy",
     "modules.pp_name_hungary_hu": "Pakiet budowlany Węgry",

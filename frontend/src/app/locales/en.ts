@@ -32305,6 +32305,7 @@ const resource = {
     "modules.pp_name_denmark_dk": "Denmark Construction Pack",
     "modules.pp_name_eleven_areas_framework": "Owner's Project Control",
     "modules.pp_desc_eleven_areas_framework": "Owner-side project management in eleven management areas over two phases, project development and construction execution, with one gate between them and one approved frame document per area.",
+    "modules.pp_name_egypt_eg": "Egypt Construction Pack",
     "modules.pp_name_france_fr": "France Construction Pack",
     "modules.pp_name_germany_de": "Germany Construction Pack",
     "modules.pp_name_hungary_hu": "Hungary Construction Pack",

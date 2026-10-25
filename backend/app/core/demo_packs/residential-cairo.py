@@ -46,7 +46,7 @@ TEMPLATE = DemoTemplate(
         "Illustrative Cairo 2026 rates in EGP excluding VAT at 14%."
     ),
     boq_metadata={
-        "standard": "MasterFormat",
+        "standard": "Division-based work-results classification",
         "phase": "Tender BQ",
         "base_date": "2026-Q1",
         "price_level": "Cairo 2026 (EGP, excl VAT, illustrative)",
@@ -54,7 +54,7 @@ TEMPLATE = DemoTemplate(
     sections=[
         (
             "31",
-            "31 - Earthwork",
+            "31 - Earthworks",
             {"masterformat": "31"},
             [
                 ("31.01", "Site clearance and topsoil strip", "m2", 16000, 35, {"masterformat": "31 10 00"}),
@@ -67,7 +67,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "03",
-            "03 - Concrete",
+            "03 - Structural concrete",
             {"masterformat": "03"},
             [
                 ("03.01", "Blinding concrete 100 mm", "m2", 9500, 260, {"masterformat": "03 30 00"}),
@@ -86,7 +86,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "04",
-            "04 - Masonry",
+            "04 - Blockwork",
             {"masterformat": "04"},
             [
                 ("04.01", "Red brick external walls 250 mm", "m2", 21500, 760, {"masterformat": "04 21 00"}),
@@ -97,7 +97,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "07",
-            "07 - Thermal and Moisture Protection",
+            "07 - Roofing and waterproofing",
             {"masterformat": "07"},
             [
                 (
@@ -124,7 +124,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "08",
-            "08 - Openings",
+            "08 - Joinery and glazing",
             {"masterformat": "08"},
             [
                 ("08.01", "Aluminium windows, double glazed", "m2", 5400, 6800, {"masterformat": "08 51 13"}),
@@ -137,7 +137,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "09",
-            "09 - Finishes",
+            "09 - Internal finishes",
             {"masterformat": "09"},
             [
                 ("09.01", "Cement plaster to external walls", "m2", 21500, 290, {"masterformat": "09 24 00"}),
@@ -161,7 +161,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "13",
-            "13 - Special Construction",
+            "13 - Special structures",
             {"masterformat": "13"},
             [
                 ("13.01", "Swimming pool with plant room", "lsum", 1, 5200000, {"masterformat": "13 11 00"}),
@@ -169,7 +169,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "14",
-            "14 - Conveying Equipment",
+            "14 - Lifts",
             {"masterformat": "14"},
             [
                 ("14.01", "Passenger lifts, 8 persons, 10 stops", "pcs", 6, 1650000, {"masterformat": "14 21 00"}),
@@ -178,7 +178,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "21",
-            "21 - Fire Suppression",
+            "21 - Fire fighting systems",
             {"masterformat": "21"},
             [
                 ("21.01", "Sprinkler system to basement car park", "m2", 9500, 540, {"masterformat": "21 13 00"}),
@@ -188,7 +188,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "22",
-            "22 - Plumbing",
+            "22 - Water supply and drainage",
             {"masterformat": "22"},
             [
                 ("22.01", "Plumbing and sanitary per apartment", "pcs", 180, 52000, {"masterformat": "22 10 00"}),
@@ -199,7 +199,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "23",
-            "23 - Heating, Ventilating and Air Conditioning",
+            "23 - Ventilation and cooling",
             {"masterformat": "23"},
             [
                 (
@@ -217,7 +217,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "26",
-            "26 - Electrical",
+            "26 - Power and lighting",
             {"masterformat": "26"},
             [
                 ("26.01", "Electrical installation per apartment", "pcs", 180, 64000, {"masterformat": "26 05 00"}),
@@ -238,7 +238,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "27",
-            "27 - Communications",
+            "27 - Data and telecom cabling",
             {"masterformat": "27"},
             [
                 (
@@ -253,7 +253,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "28",
-            "28 - Electronic Safety and Security",
+            "28 - Security and alarm systems",
             {"masterformat": "28"},
             [
                 ("28.01", "Fire detection and alarm system", "m2", 28000, 135, {"masterformat": "28 31 00"}),
@@ -262,7 +262,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "32",
-            "32 - Exterior Improvements",
+            "32 - External works",
             {"masterformat": "32"},
             [
                 ("32.01", "Asphalt paving to internal roads", "m2", 7800, 640, {"masterformat": "32 12 00"}),

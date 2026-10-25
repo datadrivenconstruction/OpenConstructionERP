@@ -49638,6 +49638,7 @@ const resource = {
     "modules.pp_name_greece_gr": "Грекия құрылыс пакеті",
     "modules.pp_name_denmark_dk": "Дания құрылыс пакеті",
     "modules.pp_name_eleven_areas_framework": "Тапсырыс беруші жағының жобаны басқаруы",
+    "modules.pp_name_egypt_eg": "Мысыр құрылыс пакеті",
     "modules.pp_name_france_fr": "Франция құрылыс пакеті",
     "modules.pp_name_germany_de": "Германия құрылыс пакеті",
     "modules.pp_name_hungary_hu": "Венгрия құрылыс пакеті",
